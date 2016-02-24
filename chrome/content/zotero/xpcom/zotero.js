@@ -2625,6 +2625,9 @@ Zotero.DragDrop = {
 			var files = [];
 			for (var i=0; i<len; i++) {
 				var file = dt.mozGetDataAt("application/x-moz-file", i);
+				if (!file) {
+					continue;
+				}
 				file.QueryInterface(Components.interfaces.nsIFile);
 				// Don't allow folder drag
 				if (file.isDirectory()) {
