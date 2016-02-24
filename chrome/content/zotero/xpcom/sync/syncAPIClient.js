@@ -587,7 +587,7 @@ Zotero.Sync.APIClient.prototype = {
 									this.failureDelayIntervals, 60 * 60 * 1000
 								);
 							}
-							let keepGoing = yield failureDelayGenerator.next();
+							let keepGoing = yield failureDelayGenerator.next().value;
 							if (!keepGoing) {
 								Zotero.logError("Failed too many times");
 								throw lastError;

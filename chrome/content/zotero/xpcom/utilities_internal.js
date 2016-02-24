@@ -461,25 +461,23 @@ Zotero.Utilities.Internal = {
 	 *                              promise will return false. Before maxTime has elapsed, or if
 	 *                              maxTime isn't specified, the promises will yield true.
 	 */
-	"delayGenerator": function (intervals, maxTime) {
+	"delayGenerator": function* (intervals, maxTime) {
 		var totalTime = 0;
-		var lastInterval = intervals[intervals.length - 1];
+		var last = false;
 		while (true) {
 			let interval = intervals.shift();
 			if (interval) {
-				delay = lastInterval = interval;
+				delay = interval;
 			}
-			else if (infinite) {
-				delay = lastInterval;
-			}
-			else {
-				break;
+			
+			if (maxTime && (totalTime + delay) > maxTime) {
+				yield Zotero.Promise.resolve(false);
 			}
 			
 			totalTime += delay;
 			
 			Zotero.debug("Delaying " + delay + " ms");
-			yield Zotero.Promise.delay(delay).return(!maxTime || totalTime <= maxTime);
+			yield Zotero.Promise.delay(delay).return(true);
 		}
 	},
 	
