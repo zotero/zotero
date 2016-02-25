@@ -46,7 +46,10 @@ Zotero.Sync.APIClient.prototype = {
 	
 	getKeyInfo: Zotero.Promise.coroutine(function* (options={}) {
 		var uri = this.baseURL + "keys/" + this.apiKey;
-		var xmlhttp = yield this.makeRequest("GET", uri, Object.assign(options, { successCodes: [200, 404] }));
+		let opts = {};
+		Object.assign(opts, options);
+		opts.successCodes = [200, 404];
+		var xmlhttp = yield this.makeRequest("GET", uri, opts);
 		if (xmlhttp.status == 404) {
 			return false;
 		}
@@ -548,11 +551,13 @@ Zotero.Sync.APIClient.prototype = {
 	
 	
 	getHeaders: function (headers = {}) {
-		headers["Zotero-API-Version"] = this.apiVersion;
+		let newHeaders = {};
+		newHeaders = Object.assign(newHeaders, headers);
+		newHeaders["Zotero-API-Version"] = this.apiVersion;
 		if (this.apiKey) {
-			headers["Zotero-API-Key"] = this.apiKey;
+			newHeaders["Zotero-API-Key"] = this.apiKey;
 		}
-		return headers;
+		return newHeaders;
 	},
 	
 	
@@ -560,16 +565,18 @@ Zotero.Sync.APIClient.prototype = {
 		if (!this.apiKey && !options.noAPIKey) {
 			throw new Error('API key not set');
 		}
-		options.headers = this.getHeaders(options.headers);
-		options.dontCache = true;
-		options.foreground = !options.background;
-		options.responseType = options.responseType || 'text';
+		let opts = {}
+		Object.assign(opts, options);
+		opts.headers = this.getHeaders(options.headers);
+		opts.dontCache = true;
+		opts.foreground = !options.background;
+		opts.responseType = options.responseType || 'text';
 		var tries = 0;
 		var failureDelayGenerator = null;
 		while (true) {
 			var result = yield this.caller.start(Zotero.Promise.coroutine(function* () {
 				try {
-					var xmlhttp = yield Zotero.HTTP.request(method, uri, options);
+					var xmlhttp = yield Zotero.HTTP.request(method, uri, opts);
 					this._checkBackoff(xmlhttp);
 					return xmlhttp;
 				}
