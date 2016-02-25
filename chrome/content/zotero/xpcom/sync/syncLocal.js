@@ -453,8 +453,7 @@ Zotero.Sync.Data.Local = {
 						let jsonData = json.data;
 						let objectKey = json.key;
 						
-						Zotero.debug(`Processing ${objectType} ${libraryID}/${objectKey} `
-							+ "from sync cache");
+						Zotero.debug(`Processing ${objectType} ${libraryID}/${objectKey}`);
 						Zotero.debug(json);
 						
 						if (!jsonData) {
@@ -555,7 +554,10 @@ Zotero.Sync.Data.Local = {
 									if (objectType != 'item') {
 										throw new Error(`Unexpected conflict on ${objectType} object`);
 									}
-									Zotero.debug("Conflict!");
+									Zotero.debug("Conflict!", 2);
+									Zotero.debug(jsonDataLocal);
+									Zotero.debug(jsonData);
+									Zotero.debug(result);
 									conflicts.push({
 										left: jsonDataLocal,
 										right: jsonData,

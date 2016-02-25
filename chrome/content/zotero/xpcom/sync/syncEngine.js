@@ -437,7 +437,8 @@ Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.corou
 	var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 	
 	// Get versions of all objects updated remotely since the current local library version
-	Zotero.debug("Checking for updated " + objectTypePlural + " in " + this.library.name);
+	Zotero.debug(`Checking for updated ${options.top ? 'top-level ' : ''}`
+		+ `${objectTypePlural} in ${this.library.name}`);
 	var queryParams = {};
 	if (libraryVersion) {
 		queryParams.since = libraryVersion;
@@ -1305,7 +1306,7 @@ Zotero.Sync.Data.Engine.prototype._processCache = function (objectType) {
 
 Zotero.Sync.Data.Engine.prototype._failedCheck = function () {
 	if (this.stopOnError && this.failed) {
-		Zotero.debug("STOPPING ON ERROR 1");
+		Zotero.logError("Stopping on error");
 		throw this.failed;
 	}
 };

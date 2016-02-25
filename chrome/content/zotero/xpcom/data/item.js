@@ -4010,7 +4010,7 @@ Zotero.Item.prototype.fromJSON = function (json) {
 		default:
 			let fieldID = Zotero.ItemFields.getID(field);
 			if (!fieldID) {
-				Zotero.logError("Discarding unknown JSON field " + field + " for item "
+				Zotero.logError("Discarding unknown JSON field '" + field + "' for item "
 					+ this.libraryKey);
 				continue;
 			}
@@ -4019,7 +4019,7 @@ Zotero.Item.prototype.fromJSON = function (json) {
 				this.itemTypeID
 			);
 			if (!isValidForType[field]) {
-				Zotero.logError("Discarding invalid field " + field + " for type " + itemTypeID
+				Zotero.logError("Discarding invalid field '" + field + "' for type " + itemTypeID
 					+ " for item " + this.libraryKey);
 				continue;
 			}

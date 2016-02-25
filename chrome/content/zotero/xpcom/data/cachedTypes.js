@@ -87,7 +87,7 @@ Zotero.CachedTypes = function() {
 		}
 		
 		if (!this._types['_' + idOrName]) {
-			Zotero.debug('Unknown ' + this._typeDesc + ' ' + idOrName, 1);
+			Zotero.debug(`Unknown ${this._typeDesc} '${idOrName}'`, 1);
 			return '';
 		}
 		
@@ -108,7 +108,7 @@ Zotero.CachedTypes = function() {
 		}
 		
 		if (!this._types['_' + idOrName]) {
-			Zotero.debug('Unknown ' + this._typeDesc + ' ' + idOrName, 1);
+			Zotero.debug(`Unknown ${this._typeDesc} '${idOrName}'`, 1);
 			return false;
 		}
 		
