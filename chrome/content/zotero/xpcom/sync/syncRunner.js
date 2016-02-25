@@ -160,7 +160,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 						options.onError(e);
 					}
 					else {
-						this.addError.bind(this);
+						this.addError(e);
 					}
 				}.bind(this),
 				background: _background,
@@ -488,12 +488,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				Zotero.debug("Sync failed for library " + libraryID);
 				Zotero.logError(e);
 				this.checkError(e);
-				if (options.onError) {
-					options.onError(e);
-				}
-				else {
-					this.addError(e);
-				}
+				options.onError(e);
 				if (stopOnError || e.fatal) {
 					Zotero.debug("Stopping on error", 1);
 					options.caller.stop();
@@ -548,12 +543,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				Zotero.debug("File sync failed for library " + libraryID);
 				Zotero.logError(e);
 				this.checkError(e);
-				if (options.onError) {
-					options.onError(e);
-				}
-				else {
-					this.addError(e);
-				}
+				options.onError(e);
 				if (stopOnError || e.fatal) {
 					options.caller.stop();
 					break;
@@ -583,12 +573,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				Zotero.debug("Full-text sync failed for library " + libraryID);
 				Zotero.logError(e);
 				this.checkError(e);
-				if (options.onError) {
-					options.onError(e);
-				}
-				else {
-					this.addError(e);
-				}
+				options.onError(e);
 				if (stopOnError || e.fatal) {
 					options.caller.stop();
 					break;

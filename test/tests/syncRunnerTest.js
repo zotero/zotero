@@ -137,11 +137,9 @@ describe("Zotero.Sync.Runner", function () {
 	//
 	// Tests
 	//
-	let win;
 	before(function* () {
 		userLibraryID = Zotero.Libraries.userLibraryID;
 		publicationsLibraryID = Zotero.Libraries.publicationsLibraryID;
-		win = yield loadBrowserWindow();
 	})
 	beforeEach(function* () {
 		Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
@@ -160,9 +158,6 @@ describe("Zotero.Sync.Runner", function () {
 	})
 	after(function () {
 		Zotero.HTTP.mock = null;
-		if (win) {
-			win.close();
-		}
 	})
 	
 	describe("#checkAccess()", function () {
@@ -409,6 +404,8 @@ describe("Zotero.Sync.Runner", function () {
 	})
 
 	describe("#sync()", function () {
+		var spy;
+		
 		before(function* () {
 			yield resetDB({
 				thisArg: this,
@@ -417,6 +414,12 @@ describe("Zotero.Sync.Runner", function () {
 			
 			yield Zotero.Libraries.init();
 		})
+		
+		afterEach(function () {
+			if (spy) {
+				spy.restore();
+			}
+		});
 		
 		it("should perform a sync across all libraries and update library versions", function* () {
 			yield Zotero.Users.setCurrentUserID(1);
@@ -693,6 +696,36 @@ describe("Zotero.Sync.Runner", function () {
 			assert.isAbove(lastSyncTime, new Date().getTime() - 1000);
 			assert.isBelow(lastSyncTime, new Date().getTime());
 		})
+		
+		
+		it("should show the sync error icon on error", function* () {
+			yield Zotero.Users.setCurrentUserID(1);
+			yield Zotero.Users.setCurrentUsername("A");
+			
+			setResponse('keyInfo.fullAccess');
+			setResponse('userGroups.groupVersionsEmpty');
+			// My Library
+			setResponse({
+				method: "GET",
+				url: "users/1/settings",
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 5
+				},
+				json: {
+					INVALID: true // TODO: Find a cleaner error
+				}
+			});
+			
+			spy = sinon.spy(runner, "updateIcons");
+			yield runner.sync();
+			assert.isTrue(spy.calledTwice);
+			assert.isArray(spy.args[1][0]);
+			assert.lengthOf(spy.args[1][0], 1);
+			// Not an instance of Error for some reason
+			var error = spy.args[1][0][0];
+			assert.equal(Object.getPrototypeOf(error).constructor.name, "Error");
+		});
 	})
 	
 	describe("#createAPIKeyFromCredentials()", function() {
