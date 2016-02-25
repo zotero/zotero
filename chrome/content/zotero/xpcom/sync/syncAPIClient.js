@@ -626,7 +626,7 @@ Zotero.Sync.APIClient.prototype = {
 	_checkConnection: function (xmlhttp, channel) {
 		const Ci = Components.interfaces;
 		
-		if (!xmlhttp.responseText) {
+		if (!xmlhttp.responseText && (xmlhttp.status == 0 || xmlhttp.status == 200)) {
 			let msg = null;
 			let dialogButtonText = null;
 			let dialogButtonCallback = null;
