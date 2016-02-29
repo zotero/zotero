@@ -178,6 +178,9 @@ Zotero.Schema = new function(){
 			}
 		}
 		
+		// Reset sync queue tries if new version
+		yield _checkClientVersion();
+		
 		Zotero.initializationPromise
 		.then(1000)
 		.then(function () {
@@ -1383,6 +1386,8 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync(sql, [welcomeMsg, welcomeTitle]);
 			}*/
 			
+			yield _updateLastClientVersion();
+			
 			self.dbInitialized = true;
 		})
 		.catch(function (e) {
@@ -1434,11 +1439,44 @@ Zotero.Schema = new function(){
 		}
 		
 		yield Zotero.DB.queryAsync(
-			"REPLACE INTO settings VALUES (?, ?, ?)",
-			['client', 'lastCompatibleVersion', Zotero.version]
+			"REPLACE INTO settings VALUES ('client', 'lastCompatibleVersion', ?)", [Zotero.version]
 		);
 		yield _updateDBVersion('compatibility', version);
 	});
+	
+	
+	function _checkClientVersion() {
+		return Zotero.DB.executeTransaction(function* () {
+			var lastVersion = yield _getLastClientVersion();
+			var currentVersion = Zotero.version;
+			
+			if (currentVersion == lastVersion) {
+				return false;
+			}
+			
+			Zotero.debug(`Client version has changed from ${lastVersion} to ${currentVersion}`);
+			
+			// Retry all queued objects immediately on upgrade
+			yield Zotero.Sync.Data.Local.resetSyncQueueTries();
+			
+			// Update version
+			yield _updateLastClientVersion();
+			
+			return true;
+		}.bind(this));
+	}
+	
+	
+	function _getLastClientVersion() {
+		var sql = "SELECT value FROM settings WHERE setting='client' AND key='lastVersion'";
+		return Zotero.DB.valueQueryAsync(sql);
+	}
+	
+	
+	function _updateLastClientVersion() {
+		var sql = "REPLACE INTO settings (setting, key, value) VALUES ('client', 'lastVersion', ?)";
+		return Zotero.DB.queryAsync(sql, Zotero.version);
+	}
 	
 	
 	/**
@@ -2168,7 +2206,7 @@ Zotero.Schema = new function(){
 				
 			}
 			
-			if (i == 81) {
+			else if (i == 81) {
 				yield _updateCompatibility(2);
 				
 				yield Zotero.DB.queryAsync("ALTER TABLE libraries RENAME TO librariesOld");
@@ -2179,7 +2217,7 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("DELETE FROM version WHERE schema LIKE ?", "storage_%");
 			}
 			
-			if (i == 82) {
+			else if (i == 82) {
 				yield Zotero.DB.queryAsync("DELETE FROM itemTypeFields WHERE itemTypeID=17 AND orderIndex BETWEEN 3 AND 9");
 				yield Zotero.DB.queryAsync("INSERT INTO itemTypeFields VALUES (17, 44, NULL, 3)");
 				yield Zotero.DB.queryAsync("INSERT INTO itemTypeFields VALUES (17, 96, NULL, 4)");
@@ -2190,12 +2228,16 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("INSERT INTO itemTypeFields VALUES (17, 42, NULL, 9)");
 			}
 			
-			if (i == 83) {
+			else if (i == 83) {
 				// Feeds
 				yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS feeds");
 				yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS feedItems");
 				yield Zotero.DB.queryAsync("CREATE TABLE feeds (\n    libraryID INTEGER PRIMARY KEY,\n    name TEXT NOT NULL,\n    url TEXT NOT NULL UNIQUE,\n    lastUpdate TIMESTAMP,\n    lastCheck TIMESTAMP,\n    lastCheckError TEXT,\n    cleanupAfter INT,\n    refreshInterval INT,\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
 				yield Zotero.DB.queryAsync("CREATE TABLE feedItems (\n    itemID INTEGER PRIMARY KEY,\n    guid TEXT NOT NULL UNIQUE,\n    readTime TIMESTAMP,\n    translatedTime TIMESTAMP,\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n)");
+			}
+			
+			else if (i == 84) {
+				yield Zotero.DB.queryAsync("CREATE TABLE syncQueue (\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    syncObjectTypeID INT NOT NULL,\n    lastCheck TIMESTAMP,\n    tries INT,\n    PRIMARY KEY (libraryID, key, syncObjectTypeID),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE,\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID) ON DELETE CASCADE\n)");
 			}
 		}
 		

@@ -31,7 +31,7 @@ if (!Zotero.Sync) {
 
 // Initialized as Zotero.Sync.Runner in zotero.js
 Zotero.Sync.Runner_Module = function (options = {}) {
-	const stopOnError = true;
+	const stopOnError = false;
 	
 	Zotero.defineProperty(this, 'background', { get: () => _background });
 	Zotero.defineProperty(this, 'lastSyncStatus', { get: () => _lastSyncStatus });

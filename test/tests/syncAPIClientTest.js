@@ -12,6 +12,10 @@ describe("Zotero.Sync.APIClient", function () {
 	}
 	
 	before(function () {
+		Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
+	});
+	
+	beforeEach(function () {
 		Components.utils.import("resource://zotero/concurrentCaller.js");
 		var caller = new ConcurrentCaller(1);
 		caller.setLogger(msg => Zotero.debug(msg));
@@ -24,17 +28,13 @@ describe("Zotero.Sync.APIClient", function () {
 			}
 		};
 		
-		Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
-		
 		client = new Zotero.Sync.APIClient({
 			baseURL,
 			apiVersion: ZOTERO_CONFIG.API_VERSION,
 			apiKey,
 			caller
 		})
-	})
-	
-	beforeEach(function () {
+		
 		server = sinon.fakeServer.create();
 		server.autoRespond = true;
 	})
@@ -44,16 +44,29 @@ describe("Zotero.Sync.APIClient", function () {
 	})
 	
 	describe("#_checkConnection()", function () {
-		it("should catch an error with an empty response", function* () {
+		var spy;
+		
+		beforeEach(function () {
+			client.failureDelayIntervals = [10];
+			client.failureDelayMax = 15;
+		});
+		afterEach(function () {
+			if (spy) {
+				spy.restore();
+			}
+		});
+		
+		it("should retry on 500 error", function* () {
 			setResponse({
 				method: "GET",
 				url: "error",
 				status: 500,
 				text: ""
 			})
+			var spy = sinon.spy(Zotero.HTTP, "request");
 			var e = yield getPromiseError(client.makeRequest("GET", baseURL + "error"));
-			assert.ok(e);
-			assert.isTrue(e.message.startsWith(Zotero.getString('sync.error.emptyResponseServer')));
+			assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+			assert.isTrue(spy.calledTwice);
 		})
 		
 		it("should catch an interrupted connection", function* () {

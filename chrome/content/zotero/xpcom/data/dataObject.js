@@ -671,22 +671,20 @@ Zotero.DataObject.prototype._requireData = function (dataType) {
  * Loads data for a given data type
  * @param {String} dataType
  * @param {Boolean} reload
+ * @param {Promise}
  */
 Zotero.DataObject.prototype._loadDataType = function (dataType, reload) {
 	return this._ObjectsClass._loadDataType(dataType, this.libraryID, [this.id]);
 }
 
-Zotero.DataObject.prototype.loadAllData = function (reload) {
-	let loadPromises = new Array(this._dataTypes.length);
+Zotero.DataObject.prototype.loadAllData = Zotero.Promise.coroutine(function* (reload) {
 	for (let i=0; i<this._dataTypes.length; i++) {
 		let type = this._dataTypes[i];
 		if (!this._skipDataTypeLoad[type]) {
-			loadPromises[i] = this._loadDataType(type, reload);
+			yield this._loadDataType(type, reload);
 		}
 	}
-	
-	return Zotero.Promise.all(loadPromises);
-}
+});
 
 Zotero.DataObject.prototype._markAllDataTypeLoadStates = function (loaded) {
 	for (let i = 0; i < this._dataTypes.length; i++) {
@@ -865,7 +863,7 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) 
 				env.options.errorHandler(e);
 			}
 			else {
-				Zotero.debug(e, 1);
+				Zotero.logError(e);
 			}
 			throw e;
 		})

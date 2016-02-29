@@ -164,12 +164,9 @@ var Zotero_Merge_Window = new function () {
 		_merged.forEach(function (x, i, a) {
 			// Add key
 			x.data.key = _conflicts[i].left.key || _conflicts[i].right.key;
-			// If selecting right item, add back version
-			if (x.data && x.selected == 'right') {
-				x.data.version = _conflicts[i].right.version;
-			}
-			else {
-				delete x.data.version;
+			// Add back version
+			if (x.data) {
+				x.data.version = _conflicts[i][x.selected].version;
 			}
 			a[i] = x.data;
 		})

@@ -3914,6 +3914,11 @@ Zotero.Item.prototype.fromJSON = function (json) {
 	}
 	
 	let itemTypeID = Zotero.ItemTypes.getID(json.itemType);
+	if (!itemTypeID) {
+		let e = new Error(`Invalid item type '${json.itemType}'`);
+		e.name = "ZoteroUnknownTypeError";
+		throw e;
+	}
 	this.setType(itemTypeID);
 	
 	var isValidForType = {};

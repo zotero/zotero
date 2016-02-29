@@ -279,7 +279,9 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 	this._requireData('conditions');
 	
 	if (!Zotero.SearchConditions.hasOperator(condition, operator)){
-		throw new Error("Invalid operator '" + operator + "' for condition " + condition);
+		let e = new Error("Invalid operator '" + operator + "' for condition " + condition);
+		e.name = "ZoteroUnknownFieldError";
+		throw e;
 	}
 	
 	// Shortcut to add a condition on every table -- does not return an id
@@ -412,7 +414,9 @@ Zotero.Search.prototype.updateCondition = function (searchConditionID, condition
 	}
 	
 	if (!Zotero.SearchConditions.hasOperator(condition, operator)){
-		throw new Error("Invalid operator '" + operator + "' for condition " + condition);
+		let e = new Error("Invalid operator '" + operator + "' for condition " + condition);
+		e.name = "ZoteroUnknownFieldError";
+		throw e;
 	}
 	
 	var [condition, mode] = Zotero.SearchConditions.parseCondition(condition);
@@ -2323,7 +2327,7 @@ Zotero.SearchConditions = new function(){
 		}
 		
 		if (!_conditions[condition]){
-			var e = new Error("Invalid condition '" + condition + "' in hasOperator()");
+			let e = new Error("Invalid condition '" + condition + "' in hasOperator()");
 			e.name = "ZoteroUnknownFieldError";
 			throw e;
 		}

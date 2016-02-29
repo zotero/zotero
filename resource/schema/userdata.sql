@@ -1,4 +1,4 @@
--- 83
+-- 84
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -326,6 +326,17 @@ CREATE TABLE syncDeleteLog (
     UNIQUE (syncObjectTypeID, libraryID, key),
     FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID),
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
+);
+
+CREATE TABLE syncQueue (
+    libraryID INT NOT NULL,
+    key TEXT NOT NULL,
+    syncObjectTypeID INT NOT NULL,
+    lastCheck TIMESTAMP,
+    tries INT,
+    PRIMARY KEY (libraryID, key, syncObjectTypeID),
+    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE,
+    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID) ON DELETE CASCADE
 );
 
 CREATE TABLE storageDeleteLog (

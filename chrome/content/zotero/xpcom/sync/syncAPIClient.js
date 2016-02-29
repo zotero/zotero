@@ -38,6 +38,7 @@ Zotero.Sync.APIClient = function (options) {
 	this.caller = options.caller;
 	
 	this.failureDelayIntervals = [2500, 5000, 10000, 20000, 40000, 60000, 120000, 240000, 300000];
+	this.failureDelayMax = 60 * 60 * 1000; // 1 hour
 }
 
 Zotero.Sync.APIClient.prototype = {
@@ -270,11 +271,10 @@ Zotero.Sync.APIClient.prototype = {
 			}.bind(this))
 			// Return the error without failing the whole chain
 			.catch(function (e) {
+				Zotero.logError(e);
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.is4xx()) {
-					Zotero.logError(e);
 					throw e;
 				}
-				Zotero.logError(e);
 				return e;
 			})
 		];
@@ -591,13 +591,13 @@ Zotero.Sync.APIClient.prototype = {
 							if (!failureDelayGenerator) {
 								// Keep trying for up to an hour
 								failureDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
-									this.failureDelayIntervals, 60 * 60 * 1000
+									this.failureDelayIntervals, this.failureDelayMax
 								);
 							}
 							let keepGoing = yield failureDelayGenerator.next().value;
 							if (!keepGoing) {
 								Zotero.logError("Failed too many times");
-								throw lastError;
+								throw e;
 							}
 							return false;
 						}

@@ -105,14 +105,31 @@ describe("Zotero.Sync.Runner", function () {
 	//
 	// Helper functions
 	//
-	var setup = Zotero.Promise.coroutine(function* (options = {}) {
-		yield Zotero.DB.queryAsync("DELETE FROM settings WHERE setting='account'");
-		yield Zotero.Users.init();
+	function setResponse(response) {
+		setHTTPResponse(server, baseURL, response, responses);
+	}
+	
+	
+	//
+	// Tests
+	//
+	beforeEach(function* () {
+		yield resetDB({
+			thisArg: this,
+			skipBundledFiles: true
+		});
 		
-		var runner = new Zotero.Sync.Runner_Module({ baseURL, apiKey });
+		userLibraryID = Zotero.Libraries.userLibraryID;
+		publicationsLibraryID = Zotero.Libraries.publicationsLibraryID;
+		
+		Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
+		server = sinon.fakeServer.create();
+		server.autoRespond = true;
+		
+		runner = new Zotero.Sync.Runner_Module({ baseURL, apiKey });
 		
 		Components.utils.import("resource://zotero/concurrentCaller.js");
-		var caller = new ConcurrentCaller(1);
+		caller = new ConcurrentCaller(1);
 		caller.setLogger(msg => Zotero.debug(msg));
 		caller.stopOnError = true;
 		caller.onError = function (e) {
@@ -125,29 +142,6 @@ describe("Zotero.Sync.Runner", function () {
 				throw e;
 			}
 		};
-		
-		return { runner, caller };
-	})
-	
-	function setResponse(response) {
-		setHTTPResponse(server, baseURL, response, responses);
-	}
-	
-	
-	//
-	// Tests
-	//
-	before(function* () {
-		userLibraryID = Zotero.Libraries.userLibraryID;
-		publicationsLibraryID = Zotero.Libraries.publicationsLibraryID;
-	})
-	beforeEach(function* () {
-		Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
-		
-		server = sinon.fakeServer.create();
-		server.autoRespond = true;
-		
-		({ runner, caller } = yield setup());
 		
 		yield Zotero.Users.setCurrentUserID(1);
 		yield Zotero.Users.setCurrentUsername("A");
@@ -404,27 +398,7 @@ describe("Zotero.Sync.Runner", function () {
 	})
 
 	describe("#sync()", function () {
-		var spy;
-		
-		before(function* () {
-			yield resetDB({
-				thisArg: this,
-				skipBundledFiles: true
-			});
-			
-			yield Zotero.Libraries.init();
-		})
-		
-		afterEach(function () {
-			if (spy) {
-				spy.restore();
-			}
-		});
-		
 		it("should perform a sync across all libraries and update library versions", function* () {
-			yield Zotero.Users.setCurrentUserID(1);
-			yield Zotero.Users.setCurrentUsername("A");
-			
 			setResponse('keyInfo.fullAccess');
 			setResponse('userGroups.groupVersions');
 			setResponse('groups.ownerGroup');
@@ -675,11 +649,11 @@ describe("Zotero.Sync.Runner", function () {
 			
 			// Check local library versions
 			assert.equal(
-				Zotero.Libraries.getVersion(Zotero.Libraries.userLibraryID),
+				Zotero.Libraries.getVersion(userLibraryID),
 				5
 			);
 			assert.equal(
-				Zotero.Libraries.getVersion(Zotero.Libraries.publicationsLibraryID),
+				Zotero.Libraries.getVersion(publicationsLibraryID),
 				10
 			);
 			assert.equal(
@@ -699,8 +673,9 @@ describe("Zotero.Sync.Runner", function () {
 		
 		
 		it("should show the sync error icon on error", function* () {
-			yield Zotero.Users.setCurrentUserID(1);
-			yield Zotero.Users.setCurrentUsername("A");
+			let pubLib = Zotero.Libraries.get(publicationsLibraryID);
+			pubLib.libraryVersion = 5;
+			yield pubLib.save();
 			
 			setResponse('keyInfo.fullAccess');
 			setResponse('userGroups.groupVersionsEmpty');
@@ -715,6 +690,25 @@ describe("Zotero.Sync.Runner", function () {
 				json: {
 					INVALID: true // TODO: Find a cleaner error
 				}
+			});
+			// No publications changes
+			setResponse({
+				method: "GET",
+				url: "users/1/publications/settings?since=5",
+				status: 304,
+				headers: {
+					"Last-Modified-Version": 5
+				},
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/publications/fulltext",
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 5
+				},
+				json: {}
 			});
 			
 			spy = sinon.spy(runner, "updateIcons");

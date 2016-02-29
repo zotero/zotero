@@ -341,6 +341,43 @@ Zotero.DataObjects.prototype.getNewer = Zotero.Promise.method(function (libraryI
 
 
 /**
+ * Gets the latest version for each object of a given type in the given library
+ *
+ * @return {Promise<Object>} - A promise for an object with object keys as keys and versions
+ *                             as properties
+ */
+Zotero.DataObjects.prototype.getObjectVersions = Zotero.Promise.coroutine(function* (libraryID, keys = null) {
+	var versions = {};
+	
+	if (keys) {
+		yield Zotero.Utilities.Internal.forEachChunkAsync(
+			keys,
+			Zotero.DB.MAX_BOUND_PARAMETERS - 1,
+			Zotero.Promise.coroutine(function* (chunk) {
+				var sql = "SELECT key, version FROM " + this._ZDO_table
+					+ " WHERE libraryID=? AND key IN (" + chunk.map(key => '?').join(', ') + ")";
+				var rows = yield Zotero.DB.queryAsync(sql, [libraryID].concat(chunk));
+				for (let i = 0; i < rows.length; i++) {
+					let row = rows[i];
+					versions[row.key] = row.version;
+				}
+			}.bind(this))
+		);
+	}
+	else {
+		let sql = "SELECT key, version FROM " + this._ZDO_table + " WHERE libraryID=?";
+		let rows = yield Zotero.DB.queryAsync(sql, [libraryID]);
+		for (let i = 0; i < rows.length; i++) {
+			let row = rows[i];
+			versions[row.key] = row.version;
+		}
+	}
+	
+	return versions;
+});
+
+
+/**
  * Loads data for a given data type
  * @param {String} dataType
  * @param {Integer} libraryID

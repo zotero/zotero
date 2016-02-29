@@ -144,12 +144,8 @@ describe("Zotero.Sync.Storage.Local", function () {
 				md5,
 				mtime
 			};
-			yield Zotero.Sync.Data.Local.saveCacheObjects(
-				'item', libraryID, [json]
-			);
-			yield Zotero.Sync.Data.Local.processSyncCacheForObjectType(
-				libraryID, 'item', { stopOnError: true }
-			);
+			yield Zotero.Sync.Data.Local.processObjectsFromJSON('item', libraryID, [json]);
+			
 			var item = yield Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
 			yield Zotero.Sync.Storage.Local.processDownload({
 				item,

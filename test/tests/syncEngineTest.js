@@ -46,7 +46,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 			data: {
 				key: options.key,
 				version: options.version,
-				name: options.name
+				name: options.name,
+				parentCollection: options.parentCollection
 			}
 		};
 	}
@@ -92,6 +93,14 @@ describe("Zotero.Sync.Data.Engine", function () {
 		search: makeSearchJSON,
 		item: makeItemJSON
 	};
+	
+	var assertInCache = Zotero.Promise.coroutine(function* (obj) {
+		var cacheObject = yield Zotero.Sync.Data.Local.getCacheObject(
+			obj.objectType, obj.libraryID, obj.key, obj.version
+		);
+		assert.isObject(cacheObject);
+		assert.propertyVal(cacheObject, 'key', obj.key);
+	});
 	
 	//
 	// Tests
@@ -250,23 +259,27 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.equal(obj.name, 'A');
 			assert.equal(obj.version, 1);
 			assert.isTrue(obj.synced);
+			yield assertInCache(obj);
 			
 			obj = yield Zotero.Searches.getByLibraryAndKeyAsync(userLibraryID, "AAAAAAAA");
 			assert.equal(obj.name, 'A');
 			assert.equal(obj.version, 2);
 			assert.isTrue(obj.synced);
+			yield assertInCache(obj);
 			
 			obj = yield Zotero.Items.getByLibraryAndKeyAsync(userLibraryID, "AAAAAAAA");
 			assert.equal(obj.getField('title'), 'A');
 			assert.equal(obj.version, 3);
 			assert.isTrue(obj.synced);
 			var parentItemID = obj.id;
+			yield assertInCache(obj);
 			
 			obj = yield Zotero.Items.getByLibraryAndKeyAsync(userLibraryID, "BBBBBBBB");
 			assert.equal(obj.getNote(), 'This is a note.');
 			assert.equal(obj.parentItemID, parentItemID);
 			assert.equal(obj.version, 3);
 			assert.isTrue(obj.synced);
+			yield assertInCache(obj);
 		})
 		
 		it("should upload new full items and subsequent patches", function* () {
@@ -651,10 +664,211 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			yield engine.start();
 		})
+		
+		it("should ignore errors when saving downloaded objects", function* () {
+			({ engine, client, caller } = yield setup());
+			engine.stopOnError = false;
+			
+			var headers = {
+				"Last-Modified-Version": 3
+			};
+			setResponse({
+				method: "GET",
+				url: "users/1/settings",
+				status: 200,
+				headers: headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/collections?format=versions",
+				status: 200,
+				headers: headers,
+				json: {
+					"AAAAAAAA": 1,
+					"BBBBBBBB": 1,
+					"CCCCCCCC": 1
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/searches?format=versions",
+				status: 200,
+				headers: headers,
+				json: {
+					"DDDDDDDD": 2,
+					"EEEEEEEE": 2,
+					"FFFFFFFF": 2
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/items/top?format=versions&includeTrashed=1",
+				status: 200,
+				headers: headers,
+				json: {
+					"GGGGGGGG": 3,
+					"HHHHHHHH": 3
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/items?format=versions&includeTrashed=1",
+				status: 200,
+				headers: headers,
+				json: {
+					"GGGGGGGG": 3,
+					"HHHHHHHH": 3,
+					"JJJJJJJJ": 3
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/collections?format=json&collectionKey=AAAAAAAA%2CBBBBBBBB%2CCCCCCCCC",
+				status: 200,
+				headers: headers,
+				json: [
+					makeCollectionJSON({
+						key: "AAAAAAAA",
+						version: 1,
+						name: "A"
+					}),
+					makeCollectionJSON({
+						key: "BBBBBBBB",
+						version: 1,
+						name: "B",
+						// Missing parent -- collection should be queued
+						parentCollection: "ZZZZZZZZ"
+					}),
+					makeCollectionJSON({
+						key: "CCCCCCCC",
+						version: 1,
+						name: "C",
+						// Unknown field -- should be ignored
+						unknownField: 5
+					})
+				]
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/searches?format=json&searchKey=DDDDDDDD%2CEEEEEEEE%2CFFFFFFFF",
+				status: 200,
+				headers: headers,
+				json: [
+					makeSearchJSON({
+						key: "DDDDDDDD",
+						version: 2,
+						name: "D",
+						conditions: [
+							{
+								condition: "title",
+								operator: "is",
+								value: "a"
+							}
+						]
+					}),
+					makeSearchJSON({
+						key: "EEEEEEEE",
+						version: 2,
+						name: "E",
+						conditions: [
+							{
+								// Unknown search condition -- search should be queued
+								condition: "unknownCondition",
+								operator: "is",
+								value: "a"
+							}
+						]
+					}),
+					makeSearchJSON({
+						key: "FFFFFFFF",
+						version: 2,
+						name: "F",
+						conditions: [
+							{
+								condition: "title",
+								// Unknown search operator -- search should be queued
+								operator: "unknownOperator",
+								value: "a"
+							}
+						]
+					})
+				]
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/items?format=json&itemKey=GGGGGGGG%2CHHHHHHHH&includeTrashed=1",
+				status: 200,
+				headers: headers,
+				json: [
+					makeItemJSON({
+						key: "GGGGGGGG",
+						version: 3,
+						itemType: "book",
+						title: "G",
+						// Unknown item field -- should be ignored
+						unknownField: "B"
+					}),
+					makeItemJSON({
+						key: "HHHHHHHH",
+						version: 3,
+						// Unknown item type -- item should be queued
+						itemType: "unknownItemType",
+						title: "H"
+					})
+				]
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/items?format=json&itemKey=JJJJJJJJ&includeTrashed=1",
+				status: 200,
+				headers: headers,
+				json: [
+					makeItemJSON({
+						key: "JJJJJJJJ",
+						version: 3,
+						itemType: "note",
+						// Parent that couldn't be saved -- item should be queued
+						parentItem: "HHHHHHHH",
+						note: "This is a note."
+					})
+				]
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/deleted?since=0",
+				status: 200,
+				headers: headers,
+				json: {}
+			});
+			var spy = sinon.spy(engine, "onError");
+			yield engine.start();
+			
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			
+			// Library version should have been updated
+			assert.equal(Zotero.Libraries.getVersion(userLibraryID), 3);
+			
+			// Check for saved objects
+			yield assert.eventually.ok(Zotero.Collections.getByLibraryAndKeyAsync(userLibraryID, "AAAAAAAA"));
+			yield assert.eventually.ok(Zotero.Searches.getByLibraryAndKeyAsync(userLibraryID, "DDDDDDDD"));
+			yield assert.eventually.ok(Zotero.Items.getByLibraryAndKeyAsync(userLibraryID, "GGGGGGGG"));
+			
+			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('collection', userLibraryID);
+			assert.sameMembers(keys, ['BBBBBBBB']);
+			
+			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('search', userLibraryID);
+			assert.sameMembers(keys, ['EEEEEEEE', 'FFFFFFFF']);
+			
+			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', userLibraryID);
+			assert.sameMembers(keys, ['HHHHHHHH', 'JJJJJJJJ']);
+			
+			assert.equal(spy.callCount, 3);
+		});
 	})
 	
 	describe("#_startDownload()", function () {
-		it("shouldn't redownload objects already in the cache", function* () {
+		it("shouldn't redownload objects that are already up to date", function* () {
 			var userLibraryID = Zotero.Libraries.userLibraryID;
 			//yield Zotero.Libraries.setVersion(userLibraryID, 5);
 			({ engine, client, caller } = yield setup());
@@ -1230,6 +1444,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 				let obj = objectsClass.getByLibraryAndKey(userLibraryID, objectJSON[type][0].key);
 				assert.equal(obj.version, 20);
 				assert.isTrue(obj.synced);
+				yield assertInCache(obj);
 				
 				// JSON objects 2 should be marked as unsynced, with their version reset to 0
 				assert.equal(objects[type][1].version, 0);

@@ -50,27 +50,24 @@ Zotero.Sync.Data.Engine = function (options) {
 	this.libraryID = options.libraryID;
 	this.library = Zotero.Libraries.get(options.libraryID);
 	this.libraryTypeID = this.library.libraryTypeID;
-	this.setStatus = options.setStatus || function () {};
-	this.onError = options.onError || function (e) {};
-	this.stopOnError = options.stopOnError;
 	this.requests = [];
 	this.uploadBatchSize = 25;
 	this.uploadDeletionBatchSize = 50;
 	
 	this.failed = false;
+	this.failedItems = [];
 	
-	this.options = {
-		setStatus: this.setStatus,
-		stopOnError: this.stopOnError,
-		onError: this.onError
-	}
-	
-	Components.utils.import("resource://zotero/concurrentCaller.js");
-	this.syncCacheProcessor = new ConcurrentCaller({
-		id: "Sync Cache Processor",
-		numConcurrent: 1,
-		logger: Zotero.debug,
-		stopOnError: this.stopOnError
+	// Options to pass through to processing functions
+	this.optionNames = ['setStatus', 'onError', 'stopOnError', 'background', 'firstInSession'];
+	this.options = {};
+	this.optionNames.forEach(x => {
+		// Create dummy functions if not set
+		if (x == 'setStatus' || x == 'onError') {
+			this[x] = options[x] || function () {};
+		}
+		else {
+			this[x] = options[x];
+		}
 	});
 };
 
@@ -162,9 +159,6 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 		}
 	}
 	
-	Zotero.debug("Waiting for sync cache to be processed");
-	yield this.syncCacheProcessor.wait();
-	
 	yield Zotero.Libraries.updateLastSyncTime(this.libraryID);
 	
 	Zotero.debug("Done syncing " + this.library.name);
@@ -213,7 +207,6 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 		//
 		for (let objectType of Zotero.DataObjectUtilities.getTypesForLibrary(this.libraryID)) {
 			this._failedCheck();
-			this._processCache(objectType);
 			
 			// For items, fetch top-level items first
 			//
@@ -244,9 +237,6 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 				continue loop;
 			}
 		}
-		
-		// Wait for sync process to clear
-		yield this.syncCacheProcessor.wait();
 		
 		//
 		// Get deleted objects
@@ -435,6 +425,7 @@ Zotero.Sync.Data.Engine.prototype._downloadSettings = Zotero.Promise.coroutine(f
  */
 Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.coroutine(function* (objectType, libraryVersion, lastLibraryVersion, delayGenerator, options = {}) {
 	var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
+	var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 	
 	// Get versions of all objects updated remotely since the current local library version
 	Zotero.debug(`Checking for updated ${options.top ? 'top-level ' : ''}`
@@ -468,30 +459,58 @@ Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.corou
 		return -1;
 	}
 	
+	
 	var numObjects = Object.keys(results.versions).length;
-	if (!numObjects) {
+	if (numObjects) {
+		Zotero.debug(numObjects + " " + (numObjects == 1 ? objectType : objectTypePlural)
+			+ " modified since last check");
+	}
+	else {
 		Zotero.debug("No " + objectTypePlural + " modified remotely since last check");
+	}
+	
+	// Get objects that should be retried based on the current time, unless it's top-level items mode.
+	// (We don't know if the queued items are top-level or not, so we do them with child items.)
+	let queuedKeys = [];
+	if (objectType != 'item' || !options.top) {
+		queuedKeys = yield Zotero.Sync.Data.Local.getObjectsToTryFromSyncQueue(
+			objectType, this.libraryID
+		);
+		if (queuedKeys.length) {
+			Zotero.debug(`Refetching ${queuedKeys.length} queued `
+				+ (queuedKeys.length == 1 ? objectType : objectTypePlural))
+		}
+	}
+	
+	if (!numObjects && !queuedKeys.length) {
 		return false;
 	}
-	Zotero.debug(numObjects + " " + (numObjects == 1 ? objectType : objectTypePlural)
-		+ " modified since last check");
 	
 	let keys = [];
-	let versions = yield Zotero.Sync.Data.Local.getLatestCacheObjectVersions(
-		objectType, this.libraryID, Object.keys(results.versions)
+	let versions = yield objectsClass.getObjectVersions(
+		this.libraryID, Object.keys(results.versions)
 	);
 	for (let key in results.versions) {
-		// Skip objects that are already up-to-date in the sync cache. Generally all returned
-		// objects should have newer version numbers, but there are some situations, such as
-		// full syncs or interrupted syncs, where we may get versions for objects that are
-		// already up-to-date locally.
+		// Skip objects that are already up-to-date. Generally all returned objects should have
+		// newer version numbers, but there are some situations, such as full syncs or
+		// interrupted syncs, where we may get versions for objects that are already up-to-date
+		// locally.
 		if (versions[key] == results.versions[key]) {
 			Zotero.debug("Skipping up-to-date " + objectType + " " + this.libraryID + "/" + key);
 			continue;
 		}
 		keys.push(key);
 	}
+	
+	// In child-items mode, remove top-level items that just failed
+	if (objectType == 'item' && !options.top && this.failedItems.length) {
+		keys = Zotero.Utilities.arrayDiff(keys, this.failedItems);
+	}
+	
+	keys.push(...queuedKeys);
+	
 	if (!keys.length) {
+		Zotero.debug(`No ${objectTypePlural} to download`);
 		return false;
 	}
 	
@@ -502,19 +521,42 @@ Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.corou
 
 Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(function* (objectType, keys) {
 	var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
-	var failureDelayGenerator = null;
 	
 	var lastLength = keys.length;
+	var objectData = {};
+	keys.forEach(key => objectData[key] = null);
 	
 	while (true) {
 		this._failedCheck();
 		
 		let lastError = false;
 		
+		// Get data we've downloaded in a previous loop but failed to process
+		var json = [];
+		let keysToDownload = [];
+		for (let key in objectData) {
+			if (objectData[key] === null) {
+				keysToDownload.push(key);
+			}
+			else {
+				json.push(objectData[key]);
+			}
+		}
+		if (json.length) {
+			json = [json];
+		}
+		// Add promises for batches of downloaded data for remaining keys
+		json.push(...this.apiClient.downloadObjects(
+			this.library.libraryType,
+			this.libraryTypeID,
+			objectType,
+			keysToDownload
+		));
+		
 		// TODO: localize
 		this.setStatus(
 			"Downloading "
-			+ (keys.length == 1
+			+ (keysToDownload.length == 1
 				? "1 " + objectType
 				: Zotero.Utilities.numberFormat(keys.length, 0) + " " + objectTypePlural)
 			+ " in " + this.library.name
@@ -522,65 +564,79 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 		
 		// Process batches as soon as they're available
 		yield Zotero.Promise.map(
-			this.apiClient.downloadObjects(
-				this.library.libraryType,
-				this.libraryTypeID,
-				objectType,
-				keys
-			),
+			json,
 			function (batch) {
 				this._failedCheck();
 				
-				Zotero.debug("MAPPING");
+				Zotero.debug(`Processing batch of downloaded ${objectTypePlural} in `
+					+ this.library.name);
+				
+				
 				if (!Array.isArray(batch)) {
-					Zotero.debug("WE GOT AN ERROR");
-					Components.utils.reportError(batch);
-					Zotero.debug(batch, 1);
 					this.failed = batch;
 					lastError = batch;
 					return;
 				}
 				
-				// Save objects to sync cache
-				return Zotero.Sync.Data.Local.saveCacheObjects(
-					objectType, this.libraryID, batch
+				// Save downloaded JSON for later attempts
+				batch.forEach(obj => {
+					objectData[obj.key] = obj;
+				});
+				
+				// Process objects
+				return Zotero.Sync.Data.Local.processObjectsFromJSON(
+					objectType,
+					this.libraryID,
+					batch,
+					this._getOptions()
 				)
-				.then(function () {
-					let processedKeys = batch.map(item => item.key);
+				.then(function (results) {
+					let processedKeys = [];
+					results.forEach(x => {
+						// If data was processed, remove JSON
+						if (x.processed) {
+							delete objectData[x.key];
+						}
+						// If object shouldn't be retried, mark as processed
+						if (x.processed || !x.retry) {
+							processedKeys.push(x.key);
+						}
+					});
 					keys = Zotero.Utilities.arrayDiff(keys, processedKeys);
-					
-					// Create/update objects as they come in
-					this._processCache(objectType);
 				}.bind(this));
 			}.bind(this)
 		);
 		
-		if (!keys.length) {
-			Zotero.debug("All " + objectTypePlural + " for library "
-				+ this.libraryID + " saved to sync cache");
-			break;
-		}
-		
-		// If we're not making process, delay for increasing amounts of time
-		// and then keep going
-		if (keys.length == lastLength) {
-			if (!failureDelayGenerator) {
-				// Keep trying for up to an hour
-				failureDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
-					Zotero.Sync.Data.failureDelayIntervals, 60 * 60 * 1000
+		if (!keys.length || keys.length == lastLength) {
+			// Add failed objects to sync queue
+			let failedKeys = Object.keys(objectData).filter(key => objectData[key])
+			if (failedKeys.length) {
+				let objDesc = `${failedKeys.length == 1 ? objectType : objectTypePlural}`;
+				Zotero.debug(`Queueing ${failedKeys.length} failed ${objDesc} for later`, 2);
+				yield Zotero.Sync.Data.Local.addObjectsToSyncQueue(
+					objectType, this.libraryID, failedKeys
 				);
+				
+				// Note failed item keys so child items step (if this isn't it) can skip them
+				if (objectType == 'item') {
+					this.failedItems = failedKeys;
+				}
 			}
-			let keepGoing = yield failureDelayGenerator.next();
-			if (!keepGoing) {
-				Zotero.logError("Failed too many times");
-				throw lastError;
+			else {
+				Zotero.debug("All " + objectTypePlural + " for "
+					+ this.library.name + " saved to database");
+				
+				if (objectType == 'item') {
+					this.failedItems = [];
+				}
 			}
-		}
-		else {
-			failureDelayGenerator = null;
+			return;
 		}
 		
 		lastLength = keys.length;
+		
+		var remainingObjectDesc = `${keys.length == 1 ? objectType : objectTypePlural}`;
+		Zotero.debug(`Retrying ${keys.length} remaining ${remainingObjectDesc}`);
 	}
 });
 
@@ -1107,7 +1163,7 @@ Zotero.Sync.Data.Engine.prototype._upgradeCheck = Zotero.Promise.coroutine(funct
  * missing or outdated and not up-to-date in the sync cache, download them. If any local objects
  * are marked as synced but aren't available remotely, mark them as unsynced for later uploading.
  *
- * (Technically this isn't a full sync on its own, because objects are only flagged for later
+ * (Technically this isn't a full sync on its own, because local objects are only flagged for later
  * upload.)
  *
  * @param {Object[]} [versionResults] - Objects returned from getVersions(), keyed by objectType
@@ -1134,9 +1190,6 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 			
 			// TODO: localize
 			this.setStatus("Updating " + objectTypePlural + " in " + this.library.name);
-			
-			// Start processing cached objects while waiting for API
-			this._processCache(objectType);
 			
 			let results = {};
 			// Use provided versions
@@ -1174,9 +1227,7 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 			
 			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 			let toDownload = [];
-			let cacheVersions = yield Zotero.Sync.Data.Local.getLatestCacheObjectVersions(
-				objectType, this.libraryID
-			);
+			let localVersions = yield objectsClass.getObjectVersions(this.libraryID);
 			// Queue objects that are out of date or don't exist locally
 			for (let key in results.versions) {
 				let version = results.versions[key];
@@ -1184,31 +1235,26 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 					noCache: true
 				});
 				// If object already at latest version, skip
-				if (obj && obj.version === version) {
+				let localVersion = localVersions[key];
+				if (localVersion && localVersion === version) {
 					continue;
 				}
-				let cacheVersion = cacheVersions[key];
-				// If cache already has latest version, skip
-				if (cacheVersion == version) {
-					continue;
-				}
-				// This should never happen, but recover if it does
-				if (cacheVersion > version) {
-					Zotero.logError("Sync cache had later version than remote for "
-						+ objectType + " " + this.libraryID + "/" + key
-						+ " (" + cacheVersion + " > " + version + ") -- deleting");
+				
+				// This should never happen
+				if (localVersion > version) {
+					Zotero.logError(`Local version of ${objectType} ${this.libraryID}/${key} `
+						+ `is later than remote! (${localVersion} > ${version})`);
+					// Delete cache version if it's there
 					yield Zotero.Sync.Data.Local.deleteCacheObjectVersions(
-						objectType, this.libraryID, key, cacheVersion, cacheVersion
+						objectType, this.libraryID, key, localVersion, localVersion
 					);
 				}
 				
 				if (obj) {
-					Zotero.debug(ObjectType + " " + obj.libraryKey
-						+ " is older than version in sync cache");
+					Zotero.debug(`${ObjectType} ${obj.libraryKey} is older than remote version`);
 				}
 				else {
-					Zotero.debug(ObjectType + " " + this.libraryID + "/" + key
-						+ " in sync cache not found locally");
+					Zotero.debug(`${ObjectType} ${this.libraryID}/${key} does not exist locally`);
 				}
 				
 				toDownload.push(key);
@@ -1263,14 +1309,9 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 					yield objectsClass.updateSynced(toUpload, false);
 				}
 			}
-			
-			// Process newly cached objects
-			this._processCache(objectType);
 		}
 		break;
 	}
-	
-	yield this.syncCacheProcessor.wait();
 	
 	yield Zotero.Libraries.setVersion(this.libraryID, lastLibraryVersion);
 	
@@ -1280,27 +1321,10 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 });
 
 
-/**
- * Chain sync cache processing for a given object type
- *
- * On error, check if errors should be fatal and set the .failed flag
- *
- * @param {String} objectType
- */
-Zotero.Sync.Data.Engine.prototype._processCache = function (objectType) {
-	this.syncCacheProcessor.start(function () {
-		this._failedCheck();
-		return Zotero.Sync.Data.Local.processSyncCacheForObjectType(
-			this.libraryID, objectType, this.options
-		)
-		.catch(function (e) {
-			Zotero.logError(e);
-			if (this.stopOnError) {
-				Zotero.debug("WE FAILED!!!");
-				this.failed = e;
-			}
-		}.bind(this));
-	}.bind(this))
+Zotero.Sync.Data.Engine.prototype._getOptions = function () {
+	var options = {};
+	this.optionNames.forEach(x => options[x] = this[x]);
+	return options;
 }
 
 
