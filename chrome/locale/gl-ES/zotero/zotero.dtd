@@ -6,8 +6,8 @@
 <!ENTITY zotero.general.delete "Borrar">
 <!ENTITY zotero.general.ok "Aceptar">
 <!ENTITY zotero.general.cancel "Cancelar">
-<!ENTITY zotero.general.refresh "Refresh">
-<!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.refresh "Actualizar">
+<!ENTITY zotero.general.saveAs "Gardar como...">
 
 <!ENTITY zotero.errorReport.title "Informe de erros de Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Isto pode conter mensaxes que non estean relacionadas con Zotero.">
@@ -125,9 +125,9 @@
 <!ENTITY zotero.item.textTransform "Transformar o texto">
 <!ENTITY zotero.item.textTransform.titlecase "Maiúsculas comezando cada palabra">
 <!ENTITY zotero.item.textTransform.sentencecase "Maiúsculas comezando cada oración">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Intercambiar Nome/Apelidos">
+<!ENTITY zotero.item.viewOnline "Ver en liña">
+<!ENTITY zotero.item.copyAsURL "Gardar como URL">
 
 <!ENTITY zotero.toolbar.newNote "Nota nova">
 <!ENTITY zotero.toolbar.note.standalone "Nova nota independente">
@@ -165,7 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Crear a bibliografía">
 <!ENTITY zotero.bibliography.style.label "Estilo de cita:">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "Lingua:">
 <!ENTITY zotero.bibliography.outputMode "Modo de saída:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografía:">
 <!ENTITY zotero.bibliography.outputMethod "Método de saída:">
