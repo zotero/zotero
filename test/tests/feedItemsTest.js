@@ -144,7 +144,7 @@ describe("Zotero.FeedItems", function () {
 			yield items[0].saveTx();
 			yield Zotero.FeedItems.toggleReadByID(ids);
 			
-			let syncedFeeds = yield Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
 			let markedAsRead = Object.keys(syncedFeeds[feed.url].markedAsRead);
 			assert.deepEqual(markedAsRead, Object.keys(items).map((k) => items[k].guid));
 		});

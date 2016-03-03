@@ -1381,9 +1381,10 @@ var ZoteroPane = new function()
 					}
 					
 					if (item.isFeedItem) {
-						if (!item.isTranslated) {
-							item.translate();
-						}
+						// Too slow for now
+						// if (!item.isTranslated) {
+						// 	item.translate();
+						// }
 						this.startItemReadTimeout(item.id);
 					}
 				}

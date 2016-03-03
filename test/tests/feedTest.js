@@ -137,27 +137,27 @@ describe("Zotero.Feed", function() {
 		it("should add a new synced setting after creation", function* () {
 			let url = 'http://' + Zotero.Utilities.randomString(10, 'abcde') + '.com/feed.rss';
 			
-			let syncedFeeds = yield Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
-			assert.isNotOk(syncedFeeds[url]);
+			let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			assert.notOk(syncedFeeds[url]);
 			
 			yield createFeed({url});
 			
-			syncedFeeds = yield Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
-			assert.isOk(syncedFeeds[url]);
+			syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			assert.ok(syncedFeeds[url]);
 		});
 		it("should remove previous feed and add a new one if url changed", function* () {
 			let feed = yield createFeed();
 			
-			let syncedFeeds = yield Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
-			assert.isOk(syncedFeeds[feed.url]);
+			let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			assert.ok(syncedFeeds[feed.url]);
 
 			let oldUrl = feed.url;
 			feed.url = 'http://' + Zotero.Utilities.randomString(10, 'abcde') + '.com/feed.rss';
 			yield feed.saveTx();
 
-			syncedFeeds = yield Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
-			assert.isNotOk(syncedFeeds[oldUrl]);
-			assert.isOk(syncedFeeds[feed.url]);
+			syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			assert.notOk(syncedFeeds[oldUrl]);
+			assert.ok(syncedFeeds[feed.url]);
 		});
 	});
 	describe("#erase()", function() {
@@ -188,13 +188,13 @@ describe("Zotero.Feed", function() {
 			let url = 'http://' + Zotero.Utilities.randomString(10, 'abcde') + '.com/feed.rss';
 			let feed = yield createFeed({url});
 			
-			let syncedFeeds = yield Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
-			assert.isOk(syncedFeeds[feed.url]);
+			let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			assert.ok(syncedFeeds[feed.url]);
 			
 			yield feed.eraseTx();
 			
-			syncedFeeds = yield Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
-			assert.isNotOk(syncedFeeds[url]);
+			syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			assert.notOk(syncedFeeds[url]);
 
 		});
 	});
@@ -202,15 +202,15 @@ describe("Zotero.Feed", function() {
 	describe("#getSyncedSettings", function() {
 		it("should return correct synced settings for the feed", function* () {
 			let url = 'http://' + Zotero.Utilities.randomString(10, 'abcde') + '.com/feed.rss';
-			let syncedFeeds = yield Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
-			assert.isNotOk(syncedFeeds[url]);
+			let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			assert.notOk(syncedFeeds[url]);
 			
 			let feed = yield createFeed({url});
 
-			syncedFeeds = yield Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
-			assert.isOk(syncedFeeds[url]);
+			syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			assert.ok(syncedFeeds[url]);
 			
-			let syncedData = yield feed.getSyncedSettings();
+			let syncedData = feed.getSyncedSettings();
 			
 			assert.deepEqual(syncedData, syncedFeeds[url]);
 		});
@@ -221,22 +221,22 @@ describe("Zotero.Feed", function() {
 			let guid = Zotero.Utilities.randomString();
 			let feed = yield createFeed();
 			
-			let syncedFeeds = yield Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
-			assert.isNotOk(syncedFeeds[feed.url].markedAsRead[guid]);
+			let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			assert.notOk(syncedFeeds[feed.url].markedAsRead[guid]);
 
-			let syncedData = yield feed.getSyncedSettings();
+			let syncedData = feed.getSyncedSettings();
 			syncedData.markedAsRead[guid] = true;
 			yield feed.setSyncedSettings(syncedData);
 			yield feed.storeSyncedSettings();
 			
-			syncedFeeds = yield Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
 
 			assert.isTrue(syncedFeeds[feed.url].markedAsRead[guid]);
 		});
 	});
 	
 	describe("#clearExpiredItems()", function() {
-		var feed, expiredFeedItem, readFeedItem, feedItem, feedItemIDs;
+		var feed, expiredFeedItem, readFeedItem, feedItem, readStillInFeed, feedItemIDs;
 		
 		before(function* (){
 			feed = yield createFeed({cleanupAfter: 1});
@@ -247,6 +247,13 @@ describe("Zotero.Feed", function() {
 			expiredFeedItem._feedItemReadTime = Zotero.Date.dateToSQL(
 					new Date(Date.now() - 2 * 24*60*60*1000), true);
 			yield expiredFeedItem.saveTx();
+			
+			readStillInFeed = yield createDataObject('feedItem', { libraryID: feed.libraryID });
+			// Read 2 days ago
+			readStillInFeed.isRead = true;
+			readStillInFeed._feedItemReadTime = Zotero.Date.dateToSQL(
+					new Date(Date.now() - 2 * 24*60*60*1000), true);
+			yield readStillInFeed.saveTx();
 			
 			readFeedItem = yield createDataObject('feedItem', { libraryID: feed.libraryID });
 			readFeedItem.isRead = true;
@@ -259,8 +266,9 @@ describe("Zotero.Feed", function() {
 			assert.include(feedItemIDs, feedItem.id, "feed contains unread feed item");
 			assert.include(feedItemIDs, readFeedItem.id, "feed contains read feed item");
 			assert.include(feedItemIDs, expiredFeedItem.id, "feed contains expired feed item");
+			assert.include(feedItemIDs, readStillInFeed.id, "feed contains expired but still in rss feed item");
 			
-			yield feed.clearExpiredItems();
+			yield feed.clearExpiredItems(new Set([readStillInFeed.id]));
 			
 			feedItemIDs = yield Zotero.FeedItems.getAll(feed.libraryID).map((row) => row.id);
 		});
@@ -271,7 +279,11 @@ describe("Zotero.Feed", function() {
 		
 		it('should not clear read items that have not expired yet', function() {
 			assert.include(feedItemIDs, readFeedItem.id, "feed still contains new feed item");
-		})
+		});
+		
+		it('should not clear read items that are still in rss', function() {
+			assert.include(feedItemIDs, readStillInFeed.id, "feed still contains read still in rss feed item");
+		});
 		
 		it('should not clear unread items', function() {
 			assert.include(feedItemIDs, feedItem.id, "feed still contains new feed item");
@@ -309,7 +321,7 @@ describe("Zotero.Feed", function() {
 			assert.equal(feedItems.length, 3);
 		});
 		
-		it('should set lastCheck, lastUpdated and lastGUID values', function* () {
+		it('should set lastCheck and lastUpdated values', function* () {
 			yield clearFeeds();
 			let feed = yield createFeed();
 			feed._feedUrl = feedUrl;
@@ -319,9 +331,8 @@ describe("Zotero.Feed", function() {
 			
 			yield feed.updateFeed();
 			
-			assert.isAtLeast(feed.lastCheck, Zotero.Date.dateToSQL(new Date(Date.now() - 1000*60), true));
-			assert.isAtLeast(feed.lastUpdate, Zotero.Date.dateToSQL(new Date(Date.now() - 1000*60), true));
-			assert.equal(feed.lastGUID, 'http://liftoff.msfc.nasa.gov/2003/06/03.html#item573');
+			assert.isTrue(feed.lastCheck > Zotero.Date.dateToSQL(new Date(Date.now() - 1000*60), true), 'feed.lastCheck updated');
+			assert.isTrue(feed.lastUpdate > Zotero.Date.dateToSQL(new Date(Date.now() - 1000*60), true), 'feed.lastUpdate updated');
 		});
 		it('should update modified items and set unread', function* () {
 			let feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/06/03.html#item573");
@@ -362,21 +373,6 @@ describe("Zotero.Feed", function() {
 			yield feed.updateFeed();
 			
 			assert.equal(feed.unreadCount, 2);
-		});
-		it('should not re-add deleted items, but add new ones', function* () {
-			let feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/05/20.html#item570");
-			yield feedItem.eraseTx();
-			
-			let feedItems = yield Zotero.FeedItems.getAll(feed.id);
-			for (let feedItem of feedItems) {
-				feedItem.isRead = true;
-				yield feedItem.saveTx();
-			}
-			
-			feed._feedUrl = modifiedFeedUrl;
-			yield feed.updateFeed();
-			
-			assert.equal(feed.unreadCount, 2);	
 		});
 		it('should add a link to enclosed pdfs from <enclosure/> elements', function* () {
 			let feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/06/03.html#item573");

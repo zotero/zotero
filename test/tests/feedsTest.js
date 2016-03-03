@@ -117,7 +117,7 @@ describe("Zotero.Feeds", function () {
 			let url = 'http://' + Zotero.Utilities.randomString(10, 'abcdefg') + '.com/feed.rss';
 			yield createFeed({url});
 			let feed = Zotero.Feeds.getByURL(url);
-			assert.isOk(feed);
+			assert.ok(feed);
 			assert.equal(feed.url, url);
 		});
 		it("should return undefined if feed does not exist", function* () {
@@ -185,7 +185,7 @@ describe("Zotero.Feeds", function () {
 					break;
 				}
 				// should never reach
-				assert.isOk(null, "does not update feed that did not need updating")
+				assert.ok(null, "does not update feed that did not need updating")
 			}
 		});
 	});

@@ -121,8 +121,8 @@ Zotero.FeedItem.prototype.fromJSON = function(json) {
 				d = new Date(d.year, d.month, d.day);
 				Zotero.debug(dateField + " " + JSON.stringify(d), 1);
 			}
-			if (!d) {
-				Zotero.logError("Discarding invalid " + field + " '" + val
+			if (isNaN(d.getTime())) {
+				Zotero.logError("Discarding invalid " + dateField + " '" + json[dateField]
 					+ "' for item " + this.libraryKey);
 				delete json[dateField];
 				continue;
@@ -174,7 +174,7 @@ Zotero.FeedItem.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 Zotero.FeedItem.prototype._finalizeErase = Zotero.Promise.coroutine(function* () {
 	// Set for syncing
 	let feed = Zotero.Feeds.get(this.libraryID);
-	let syncedSettings = yield feed.getSyncedSettings();
+	let syncedSettings = feed.getSyncedSettings();
 	delete syncedSettings.markedAsRead[this.guid];
 	yield feed.setSyncedSettings(syncedSettings);
 	
@@ -189,7 +189,7 @@ Zotero.FeedItem.prototype.toggleRead = Zotero.Promise.coroutine(function* (state
 		
 		// Set for syncing
 		let feed = Zotero.Feeds.get(this.libraryID);
-		let syncedSettings = yield feed.getSyncedSettings();
+		let syncedSettings = feed.getSyncedSettings();
 		if (state) {
 			syncedSettings.markedAsRead[this.guid] = true;
 		} else {

@@ -1266,7 +1266,6 @@ Zotero.ItemTreeView.prototype.isSorted = function()
 }
 
 Zotero.ItemTreeView.prototype.cycleHeader = function (column) {
-{
 	if (this.collectionTreeRow.isFeed()) {
 		return;
 	}

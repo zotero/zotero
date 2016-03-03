@@ -184,13 +184,13 @@ describe("Zotero.FeedItem", function () {
 			let item = yield createDataObject('feedItem', { libraryID });
 			
 			yield item.toggleRead();
-			let syncedSettings = yield feed.getSyncedSettings();
-			assert.isOk(syncedSettings.markedAsRead[item.guid]);
+			let syncedSettings = feed.getSyncedSettings();
+			assert.ok(syncedSettings.markedAsRead[item.guid]);
 			
 			yield item.eraseTx();
 			
-			syncedSettings = yield feed.getSyncedSettings();
-			assert.isNotOk(syncedSettings.markedAsRead[item.guid]);
+			syncedSettings = feed.getSyncedSettings();
+			assert.notOk(syncedSettings.markedAsRead[item.guid]);
 		});
 	});
 	
@@ -225,8 +225,8 @@ describe("Zotero.FeedItem", function () {
 			yield item.toggleRead();
 			
 			let feed = Zotero.Feeds.get(item.libraryID);
-			let syncedSettings = yield feed.getSyncedSettings();
-			assert.isOk(syncedSettings.markedAsRead[item.guid], "item marked as read stored in synced settings");	
+			let syncedSettings = feed.getSyncedSettings();
+			assert.ok(syncedSettings.markedAsRead[item.guid], "item marked as read stored in synced settings");	
 		});
 	});
 	

@@ -154,7 +154,7 @@ Zotero.FeedItems = new Proxy(function() {
 				
 				// Set for syncing
 				let feed = Zotero.Feeds.get(items[i].libraryID);
-				let syncedSettings = yield feed.getSyncedSettings();
+				let syncedSettings = feed.getSyncedSettings();
 				if (state) {
 					syncedSettings.markedAsRead[items[i].guid] = true;
 				} else {

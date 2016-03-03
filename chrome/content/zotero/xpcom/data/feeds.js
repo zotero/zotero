@@ -77,7 +77,7 @@ Zotero.Feeds = new function() {
 		Zotero.debug("Restoring feeds from remote JSON");
 		Zotero.debug(json);
 		if (merge) {
-			let syncedFeeds = yield Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
 			for (let url in json) {
 				if (syncedFeeds[url]) {
 					syncedFeeds[url].name = json[url].name;
