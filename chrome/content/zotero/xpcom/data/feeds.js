@@ -54,10 +54,6 @@ Zotero.Feeds = new function() {
 		cache.urlByLibraryID[feed.libraryID] = feed.url;
 	}
 	
-	this.init = function () {
-		return this.scheduleNextFeedCheck();
-	}
-	
 	this.unregister = function (libraryID) {
 		if (!this._cache) throw new Error("Zotero.Feeds cache is not initialized");
 		
@@ -72,6 +68,51 @@ Zotero.Feeds = new function() {
 		delete this._cache.urlByLibraryID[libraryID];
 		delete this._cache.libraryIDByURL[url];
 	}
+
+	this.init = function () {
+		return this.scheduleNextFeedCheck();
+	}
+	
+	this.restoreFromJSON = Zotero.Promise.coroutine(function* (json, merge=false) {
+		Zotero.debug("Restoring feeds from remote JSON");
+		Zotero.debug(json);
+		if (merge) {
+			let syncedFeeds = yield Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			for (let url in json) {
+				if (syncedFeeds[url]) {
+					syncedFeeds[url].name = json[url].name;
+					syncedFeeds[url].cleanupAfter = json[url].cleanupAfter;
+					syncedFeeds[url].refreshInterval = json[url].refreshInterval;
+					for (let guid in json[url].markedAsRead) {
+						syncedFeeds[url].markedAsRead[guid] = true;
+					}
+				} else {
+					syncedFeeds[url] = json[url];
+				}
+			}
+			json = syncedFeeds;
+		}
+		yield Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'feeds', json);
+		//
+		let feeds = Zotero.Feeds.getAll();
+		for (let feed of feeds) {
+			if (json[feed.url]) {
+				Zotero.debug("Feed " + feed.url + " is being updated from remote JSON");
+				yield feed.updateFromJSON(json[feed.url]);
+				delete json[feed.url];
+			} else {
+				Zotero.debug("Feed " + feed.url + " does not exist in remote JSON. Deleting");
+				yield feed.eraseTx();
+			}
+		}
+		// Because existing json[feed.url] got deleted, `json` now only contains new feeds
+		for (let url in json) {
+			Zotero.debug("Feed " + url + " is being created from remote JSON");
+			let feed = new Zotero.Feed(json[url]);
+			yield feed.saveTx();
+			yield feed.updateFromJSON(json[url]);
+		}
+	});
 	
 	this.getByURL = function(urls) {
 		if (!this._cache) throw new Error("Zotero.Feeds cache is not initialized");
@@ -82,17 +123,16 @@ Zotero.Feeds = new function() {
 			asArray = false;
 		}
 		
-		let libraryIDs = Array(urls.length);
+		let feeds = new Array(urls.length);
 		for (let i=0; i<urls.length; i++) {
 			let libraryID = this._cache.libraryIDByURL[urls[i]];
 			if (!libraryID) {
-				throw new Error('Feed with url ' + urls[i] + ' not registered in feed cache');
+				return
 			}
 			
-			libraryIDs[i] = libraryID;
+			feeds[i] = Zotero.Libraries.get(libraryID);
 		}
 		
-		let feeds = Zotero.Libraries.get(libraryIDs);
 		return asArray ? feeds : feeds[0];
 	}
 	

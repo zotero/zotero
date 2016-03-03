@@ -171,14 +171,34 @@ Zotero.FeedItem.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	}
 });
 
+Zotero.FeedItem.prototype._finalizeErase = Zotero.Promise.coroutine(function* () {
+	// Set for syncing
+	let feed = Zotero.Feeds.get(this.libraryID);
+	let syncedSettings = yield feed.getSyncedSettings();
+	delete syncedSettings.markedAsRead[this.guid];
+	yield feed.setSyncedSettings(syncedSettings);
+	
+	return Zotero.FeedItem._super.prototype._finalizeErase.apply(this, arguments);
+});
+
 Zotero.FeedItem.prototype.toggleRead = Zotero.Promise.coroutine(function* (state) {
 	state = state !== undefined ? !!state : !this.isRead;
 	let changed = this.isRead != state;
 	if (changed) {
 		this.isRead = state;
-		yield this.saveTx({skipEditCheck: true, skipDateModifiedUpdate: true});
 		
+		// Set for syncing
 		let feed = Zotero.Feeds.get(this.libraryID);
+		let syncedSettings = yield feed.getSyncedSettings();
+		if (state) {
+			syncedSettings.markedAsRead[this.guid] = true;
+		} else {
+			delete syncedSettings.markedAsRead[this.guid];
+		}
+		yield feed.setSyncedSettings(syncedSettings, true);
+		
+		yield this.saveTx();
+		
 		yield feed.updateUnreadCount();
 	}
 });

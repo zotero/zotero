@@ -3,6 +3,77 @@ describe("Zotero.Feeds", function () {
 	after(function* () {
 		yield clearFeeds();
 	});
+	
+	describe("#restoreFromJSON", function() {
+		var json = {};
+		var expiredFeedURL, existingFeedURL;
+		
+		before(function() {
+			sinon.stub(Zotero.Feed.prototype, 'updateFeed').resolves();
+		});
+		
+		after(function() {
+			Zotero.Feed.prototype.updateFeed.restore();
+		});
+		
+		beforeEach(function* () {
+			yield clearFeeds();
+		
+			for (let i = 0; i < 2; i++) {
+				let url = "http://" + Zotero.Utilities.randomString(10, 'abcdefgh') + ".com/feed.rss";
+				json[url] = {
+					url,
+					name: Zotero.Utilities.randomString(),
+					refreshInterval: 5,
+					cleanupAfter: 3,
+					markedAsRead: []
+				};
+				if (i == 0) {
+					existingFeedURL = url;
+					yield createFeed({url});
+				}
+			}
+			expiredFeedURL = (yield createFeed()).url;
+		});
+		
+		it("restores correctly when merge is true", function* () {
+			let feeds = Zotero.Feeds.getAll();
+			assert.equal(feeds.length, 2);
+			
+			yield Zotero.Feeds.restoreFromJSON(json, true);
+			feeds = Zotero.Feeds.getAll();
+			
+			for (let url in json) {
+				let feed = Zotero.Feeds.getByURL(url);
+				assert.ok(feed, "new feed created");
+			}	
+			
+			let expiredFeed = Zotero.Feeds.getByURL(expiredFeedURL);
+			assert.ok(expiredFeed, "does not remove feeds not in JSON");
+
+			let existingFeed = Zotero.Feeds.getByURL(existingFeedURL);
+			assert.ok(existingFeed, "does not remove feeds in database and JSON");
+		});
+		
+		it("restores correctly when merge is false", function* () {
+			let feeds = Zotero.Feeds.getAll();
+			assert.equal(feeds.length, 2);
+			
+			yield Zotero.Feeds.restoreFromJSON(json);
+			feeds = Zotero.Feeds.getAll();
+			
+			for (let url in json) {
+				let feed = Zotero.Feeds.getByURL(url);
+				assert.ok(feed, "new feed created");
+			}	
+			
+			let expiredFeed = Zotero.Feeds.getByURL(expiredFeedURL);
+			assert.notOk(expiredFeed, "removes feeds not in JSON");
+
+			let existingFeed = Zotero.Feeds.getByURL(existingFeedURL);
+			assert.ok(existingFeed, "does not remove feeds in database and JSON");
+		});
+	});
 
 	describe("#haveFeeds()", function() {
 		it("should return false for a DB without feeds", function* () {
@@ -38,6 +109,23 @@ describe("Zotero.Feeds", function () {
 			let feeds = Zotero.Feeds.getAll();
 			assert.lengthOf(feeds, 2);
 			assert.sameMembers(feeds, [feed1, feed2]);
+		});
+	});
+	
+	describe('#getByURL', function() {
+		it("should return a feed by url", function* () {
+			let url = 'http://' + Zotero.Utilities.randomString(10, 'abcdefg') + '.com/feed.rss';
+			yield createFeed({url});
+			let feed = Zotero.Feeds.getByURL(url);
+			assert.isOk(feed);
+			assert.equal(feed.url, url);
+		});
+		it("should return undefined if feed does not exist", function* () {
+			var feed;
+			assert.doesNotThrow(function() {
+				feed = Zotero.Feeds.getByURL('doesnotexist');
+			});
+			assert.isUndefined(feed);
 		});
 	});
 	describe('#updateFeeds', function() {

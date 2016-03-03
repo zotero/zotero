@@ -7,6 +7,51 @@ describe("Zotero.FeedItems", function () {
 		return clearFeeds();
 	});
 	
+	describe("#getMarkedAsRead", function() {
+		var items = [];
+		var result;
+		before(function* () {
+			for (let i = 0; i < 4; i++) {
+				let f = yield createDataObject('feedItem', {libraryID: feed.libraryID, guid: 'http://www.example.com/' + i});
+				items.push(f);
+			}
+			yield items[0].toggleRead();
+			yield items[2].toggleRead();
+			result = yield Zotero.FeedItems.getMarkedAsRead(feed.libraryID);
+		});
+		it('should get all marked as read items', function() {
+			assert.include(result, items[0]);
+			assert.include(result, items[2]);
+		});
+		it('should not include items that were not marked', function() {
+			assert.notInclude(result, items[1]);
+			assert.notInclude(result, items[3]);
+		});
+	});
+	
+	describe("#markAsReadByGUID", function() {
+		var items = [];
+		var result;
+		before(function* () {
+			for (let i = 0; i < 4; i++) {
+				let f = yield createDataObject('feedItem', {
+					libraryID: feed.libraryID, 
+					guid: 'http://' + Zotero.Utilities.randomString() + '.com/feed.rss'
+				});
+				items.push(f);
+			}
+			yield Zotero.FeedItems.markAsReadByGUID([items[0].guid, items[2].guid]);
+		});
+		it('should mark as read only specified guids', function() {
+			assert.isTrue(items[0].isRead);
+			assert.isTrue(items[2].isRead);
+		});
+		it('should leave other items marked unread', function() {
+			assert.isFalse(items[1].isRead);
+			assert.isFalse(items[3].isRead);
+		});
+	});
+	
 	describe("#getIDFromGUID()", function() {
 		it("should return false for non-existent GUID", function* () {
 			let id = yield Zotero.FeedItems.getIDFromGUID(Zotero.randomString());
@@ -92,6 +137,16 @@ describe("Zotero.FeedItems", function () {
 			for(let i = 0; i < 10; i++) {
 				assert.isFalse(save.thisValues[i].isRead, "#toggleRead called with true");
 			}
+		});
+		
+		it('should set relevant sync settings', function* () {
+			items[0].isRead = false;
+			yield items[0].saveTx();
+			yield Zotero.FeedItems.toggleReadByID(ids);
+			
+			let syncedFeeds = yield Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			let markedAsRead = Object.keys(syncedFeeds[feed.url].markedAsRead);
+			assert.deepEqual(markedAsRead, Object.keys(items).map((k) => items[k].guid));
 		});
 	});
 });

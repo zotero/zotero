@@ -58,7 +58,7 @@ Zotero.FeedItems = new Proxy(function() {
 	this.getIDFromGUID = Zotero.Promise.coroutine(function* (guid) {
 		if (_idCache[guid] !== undefined) return _idCache[guid];
 		
-		id = yield Zotero.DB.valueQueryAsync('SELECT itemID FROM feedItems WHERE guid=?', [guid]);
+		let id = yield Zotero.DB.valueQueryAsync('SELECT itemID FROM feedItems WHERE guid=?', [guid]);
 		if (!id) return false;
 		
 		this._setGUIDMapping(guid, id);
@@ -95,6 +95,38 @@ Zotero.FeedItems = new Proxy(function() {
 		return this.getAsync(id);
 	});
 	
+	this.getMarkedAsRead = Zotero.Promise.coroutine(function* (libraryID, onlyGUIDs=false) {
+		let sql = "SELECT " + (onlyGUIDs ? "guid " : "itemID ") + 
+			"FROM feedItems FI " +
+			"JOIN items I USING (itemID) " +
+			"WHERE libraryID=? AND readTime IS NOT NULL";
+		let ids = yield Zotero.DB.columnQueryAsync(sql, [libraryID]);
+		if (onlyGUIDs) {
+			return ids;
+		}
+		return Zotero.FeedItems.getAsync(ids);
+		
+	});
+
+	/**
+	 * Used on restore from sync
+	 */
+	this.markAsReadByGUID = Zotero.Promise.coroutine(function* (guids) {
+		if (! Array.isArray(guids)) {
+			throw new Error('guids must be an array in Zotero.FeedItems.toggleReadByID');
+		}
+		let ids = [];
+		Zotero.debug("Marking items as read");
+		Zotero.debug(guids);
+		for (let guid of guids) {
+			let id = yield this.getIDFromGUID(guid);
+			if (id) {
+				ids.push(id);
+			}
+		}
+		return this.toggleReadByID(ids, true);
+	});
+	
 	this.toggleReadByID = Zotero.Promise.coroutine(function* (ids, state) {
 		var feedsToUpdate = new Set();
 		if (!Array.isArray(ids)) {
@@ -115,23 +147,30 @@ Zotero.FeedItems = new Proxy(function() {
 			}
 		}
 		
+		
 		yield Zotero.DB.executeTransaction(function() {
 			for (let i=0; i<items.length; i++) {
 				items[i].isRead = state;
+				
+				// Set for syncing
+				let feed = Zotero.Feeds.get(items[i].libraryID);
+				let syncedSettings = yield feed.getSyncedSettings();
+				if (state) {
+					syncedSettings.markedAsRead[items[i].guid] = true;
+				} else {
+					delete syncedSettings.markedAsRead[items[i].guid];
+				}
+				yield feed.setSyncedSettings(syncedSettings);
+			
 				yield items[i].save({skipEditCheck: true});
-				feedsToUpdate.add(items[i].libraryID);
+				feedsToUpdate.add(feed);
 			}
 		});
-		for (let feedID of feedsToUpdate) {
-			let feed = Zotero.Feeds.get(feedID);
-			yield feed.updateUnreadCount();
+
+		for (let feed of feedsToUpdate) {
+			yield Zotero.Promise.all([feed.updateUnreadCount(), feed.storeSyncedSettings()]);
 		}
 	});
-	
-	this.forceErase = function(ids, options = {}) {
-		options.skipEditCheck = true;
-		return this.erase(ids, options);
-	};
 	
 	return this;
 }.call({}),
