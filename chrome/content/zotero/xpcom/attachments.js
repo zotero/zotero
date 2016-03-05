@@ -311,7 +311,11 @@ Zotero.Attachments = new function(){
 							Zotero.Attachments.getPath(
 								file, Zotero.Attachments.LINK_MODE_IMPORTED_URL
 							);
+						var disabled = Zotero.Notifier.disable();
 						attachmentItem.save();
+						if (disabled) {
+							Zotero.Notifier.enable();
+						}
 						
 						Zotero.Notifier.trigger('add', 'item', itemID);
 						Zotero.Notifier.trigger('modify', 'item', sourceItemID);
