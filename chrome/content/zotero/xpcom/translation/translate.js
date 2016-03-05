@@ -91,9 +91,8 @@ Zotero.Translate.Sandbox = {
 			const allowedObjects = ["complete", "attachments", "seeAlso", "creators", "tags", "notes"];
 			
 			// Create a new object here, so that we strip the "complete" property
-			// (But don't create a new object if we're in a child translator, since that
-			// would be a problem for the sandbox)
-			var newItem = translate._parentTranslator ? item : {};
+			var newItem = {};
+			var oldItem = item;
 			for(var i in item) {
 				var val = item[i];
 				if(i === "complete" || (!val && val !== 0)) continue;
@@ -135,6 +134,11 @@ Zotero.Translate.Sandbox = {
 			// just return the item array
 			if(translate._libraryID === false || translate._parentTranslator) {
 				translate.newItems.push(item);
+				if(translate._parentTranslator && Zotero.isFx && !Zotero.isBookmarklet) {
+					// Copy object so it is accessible to child translator
+					item = translate._sandboxManager.copyObject(item);
+					item.complete = oldItem.complete;
+				}
 				translate._runHandler("itemDone", item, item);
 				return;
 			}
