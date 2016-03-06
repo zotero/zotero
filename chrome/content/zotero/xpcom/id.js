@@ -70,8 +70,9 @@ Zotero.ID_Tracker = function () {
 			
 			// Non-autoincrement tables
 			//
-			// TODO: use autoincrement instead where available in 1.5
+			// TODO: Use for everything
 			case 'itemDataValues':
+			case 'proxies':
 				var id = yield _getNextAvailable(table);
 				if (!id) {
 					// If we can't find an empty id quickly, just use MAX() + 1
@@ -144,6 +145,7 @@ Zotero.ID_Tracker = function () {
 			case 'tags':
 			case 'customItemTypes':
 			case 'customFields':
+			case 'proxies':
 				return table;
 				
 			default:
@@ -248,6 +250,7 @@ Zotero.ID_Tracker = function () {
 			case 'savedSearches':
 			case 'customItemTypes':
 			case 'customFields':
+			case 'proxies':
 				var maxToFind = 100;
 				break;
 			
@@ -340,6 +343,9 @@ Zotero.ID_Tracker = function () {
 			
 			case 'creatorData':
 				return 'creatorDataID';
+			
+			case 'proxies':
+				return 'proxyID';
 			
 			default:
 				return table.substr(0, table.length - 1) + 'ID';

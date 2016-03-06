@@ -92,7 +92,7 @@ Zotero.Proxies = new function() {
 	 *
 	 * @param {nsIChannel} channel
 	 */
-	this.observe = function(channel) {
+	this.observe = Zotero.Promise.coroutine(function* (channel) {
 		// try to detect a proxy
 		channel.QueryInterface(Components.interfaces.nsIHttpChannel);
 		var url = channel.URI.spec;
@@ -117,7 +117,7 @@ Zotero.Proxies = new function() {
 				&& !_isBlacklisted(host)					// and host is not blacklisted
 			) {	
 				proxy.hosts.push(host);
-				proxy.save(true);
+				yield proxy.save(true);
 				
 				var bw = _getBrowserAndWindow(channel.notificationCallbacks);
 				if(!bw) return;
@@ -151,7 +151,7 @@ Zotero.Proxies = new function() {
 						[{ label: "proxies.notification.enable.button", callback: function() { _showDialog(proxy.hosts[0], channel.URI.hostPort, proxy); } }]);
 				}
 				
-				proxy.save();
+				yield proxy.save();
 				
 				break;
 			}
@@ -200,7 +200,7 @@ Zotero.Proxies = new function() {
 		}
 		
 		_maybeRedirect(channel, channel.notificationCallbacks, proxied);
-	}
+	});
 
 	function _maybeRedirect(channel, notificationCallbacks, proxied) {
 		// try to find a corresponding browser object
@@ -409,7 +409,7 @@ Zotero.Proxies = new function() {
 	  * @param {String} proxyHost The host through which the given site would be redirected.
 	  * @returns {Boolean} True if proxy should be added; false if it should not be.
 	  */
-	 function _showDialog(proxiedHost, proxyHost, proxy) {
+	 var _showDialog = Zotero.Promise.coroutine(function* (proxiedHost, proxyHost, proxy) {
 		// ask user whether to add this proxy
 		var io = {site:proxiedHost, proxy:proxyHost};
 		var window = Components.classes["@mozilla.org/appshell/window-mediator;1"]
@@ -424,10 +424,10 @@ Zotero.Proxies = new function() {
 		}
 		
 		if(io.add) {
-			proxy.erase();
-			proxy.save(true);
+			yield proxy.erase();
+			yield proxy.save(true);
 		}
-	 }
+	 });
 	 
 	 /**
 	  * Get browser and window from notificationCallbacks
@@ -606,7 +606,7 @@ Zotero.Proxy.prototype.validate = function() {
  *
  * @param {Boolean} transparent True if proxy should be saved as a persisting, transparent proxy
  */
-Zotero.Proxy.prototype.save = function(transparent) {
+Zotero.Proxy.prototype.save = Zotero.Promise.coroutine(function* (transparent) {
 	// ensure this proxy is valid
 	var hasErrors = this.validate();
 	if(hasErrors) throw "Proxy: could not be saved because it is invalid: error "+hasErrors[0];
@@ -618,31 +618,32 @@ Zotero.Proxy.prototype.save = function(transparent) {
 	this.compileRegexp();
 	
 	if(transparent) {
-		try {
-			Zotero.DB.beginTransaction();
-			
+		yield Zotero.DB.executeTransaction(function* () {
 			if(this.proxyID) {
-				Zotero.DB.query("UPDATE proxies SET multiHost = ?, autoAssociate = ?, scheme = ? WHERE proxyID = ?",
-					[this.multiHost ? 1 : 0, this.autoAssociate ? 1 : 0, this.scheme, this.proxyID]);
-				Zotero.DB.query("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
+				yield Zotero.DB.queryAsync(
+					"UPDATE proxies SET multiHost = ?, autoAssociate = ?, scheme = ? WHERE proxyID = ?",
+					[this.multiHost ? 1 : 0, this.autoAssociate ? 1 : 0, this.scheme, this.proxyID]
+				);
+				yield Zotero.DB.queryAsync("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
 			} else {
-				this.proxyID = Zotero.DB.query("INSERT INTO proxies (multiHost, autoAssociate, scheme) VALUES (?, ?, ?)",
-					[this.multiHost ? 1 : 0, this.autoAssociate ? 1 : 0, this.scheme]);
+				let id = yield Zotero.ID.get('proxies');
+				yield Zotero.DB.queryAsync(
+					"INSERT INTO proxies (proxyID, multiHost, autoAssociate, scheme) VALUES (?, ?, ?, ?)",
+					[id, this.multiHost ? 1 : 0, this.autoAssociate ? 1 : 0, this.scheme]
+				);
+				this.proxyID = id;
 			}
 			
 			this.hosts = this.hosts.sort();
 			var host;
 			for(var i in this.hosts) {
 				host = this.hosts[i] = this.hosts[i].toLowerCase();
-				Zotero.DB.query("INSERT INTO proxyHosts (proxyID, hostname) VALUES (?, ?)",
-					[this.proxyID, host]);
+				yield Zotero.DB.queryAsync(
+					"INSERT INTO proxyHosts (proxyID, hostname) VALUES (?, ?)",
+					[this.proxyID, host]
+				);
 			}
-			
-			Zotero.DB.commitTransaction();
-		} catch(e) {
-			Zotero.DB.rollbackTransaction();
-			throw(e);
-		}
+		}.bind(this));
 	}
 	
 	if(newProxy) {
@@ -651,7 +652,7 @@ Zotero.Proxy.prototype.save = function(transparent) {
 		Zotero.Proxies.refreshHostMap(this);
 		if(!transparent) throw "Proxy: cannot save transparent proxy without transparent param";
 	}
-}
+});
 
 /**
  * Reverts to the previously saved version of this proxy
@@ -665,21 +666,16 @@ Zotero.Proxy.prototype.revert = Zotero.Promise.coroutine(function* () {
 /**
  * Deletes this proxy
  */
-Zotero.Proxy.prototype.erase = function() {
+Zotero.Proxy.prototype.erase = Zotero.Promise.coroutine(function* () {
 	Zotero.Proxies.remove(this);
 	
 	if(this.proxyID) {
-		try {
-			Zotero.DB.beginTransaction();
-			Zotero.DB.query("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
-			Zotero.DB.query("DELETE FROM proxies WHERE proxyID = ?", [this.proxyID]);
-			Zotero.DB.commitTransaction();
-		} catch(e) {
-			Zotero.DB.rollbackTransaction();
-			throw(e);
-		}
+		yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.queryAsync("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
+			yield Zotero.DB.queryAsync("DELETE FROM proxies WHERE proxyID = ?", [this.proxyID]);
+		}.bind(this));
 	}
-}
+});
 
 /**
  * Converts a proxied URL to an unproxied URL using this proxy
@@ -869,7 +865,7 @@ Zotero.Proxies.Detectors.EZProxy.Observer = function(newChannel) {
 	Services.obs.addObserver(this, "http-on-modify-request", false);
 	Services.obs.addObserver(this, "http-on-examine-response", false);
 }
-Zotero.Proxies.Detectors.EZProxy.Observer.prototype.observe = function(aSubject, aTopic, aData) {
+Zotero.Proxies.Detectors.EZProxy.Observer.prototype.observe = Zotero.Promise.coroutine(function* (aSubject, aTopic, aData) {
 	if (aSubject == this.channel) {
 		if(aTopic === "http-on-modify-request") {
 			try {
@@ -893,7 +889,7 @@ Zotero.Proxies.Detectors.EZProxy.Observer.prototype.observe = function(aSubject,
 				var proxy = Zotero.Proxies.Detectors.EZProxy.learn(Services.io.newURI(loginURL, null, null), aSubject.URI);
 				if(proxy) {
 					Zotero.debug("Proxies: Proxy-by-port EZProxy "+aSubject.URI.hostPort+" corresponds to "+proxy.hosts[0]);
-					proxy.save();
+					yield proxy.save();
 				}
 			} catch(e) {
 				Zotero.logError(e);
@@ -903,7 +899,7 @@ Zotero.Proxies.Detectors.EZProxy.Observer.prototype.observe = function(aSubject,
 			}
 		}
 	}
-}
+});
 Zotero.Proxies.Detectors.EZProxy.Observer.prototype.QueryInterface = function(aIID) {
 	if (aIID.equals(Components.interfaces.nsISupports) ||
 		aIID.equals(Components.interfaces.nsIObserver)) return this;
