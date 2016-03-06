@@ -71,9 +71,9 @@ Zotero.Cite = {
 	 * @param {String} format The format of the output (html, text, or rtf)
 	 * @return {String} Bibliography or item list in specified format
 	 */
-	"makeFormattedBibliographyOrCitationList":function(cslEngine, items, format, asCitationList) {
+	"makeFormattedBibliographyOrCitationList":Zotero.Promise.coroutine(function* (cslEngine, items, format, asCitationList) {
 		cslEngine.setOutputFormat(format);
-		cslEngine.updateItems(items.map(item => item.id));
+		yield cslEngine.updateItems(items.map(item => item.id));
 		 		
 		if(!asCitationList) {
 			var bibliography = Zotero.Cite.makeFormattedBibliography(cslEngine, format);
@@ -84,7 +84,7 @@ Zotero.Cite = {
 		var citations=[];
 		for (var i=0, ilen=items.length; i<ilen; i++) {
 			var item = items[i];
-			var outList = cslEngine.appendCitationCluster({"citationItems":[{"id":item.id}], "properties":{}}, true);
+			var outList = yield cslEngine.appendCitationCluster({"citationItems":[{"id":item.id}], "properties":{}}, true);
 			for (var j=0, jlen=outList.length; j<jlen; j++) {
 				var citationPos = outList[j][0];
 				citations[citationPos] = outList[j][1];
@@ -124,7 +124,7 @@ Zotero.Cite = {
 				return "<\\rtf \n"+citations.join("\\\n")+"\n}";
 			}
 		}
-	},
+	}),
 	
 	/**
 	 * Makes a formatted bibliography
@@ -492,9 +492,45 @@ Zotero.Cite.System = function(automaticJournalAbbreviations) {
 	if(automaticJournalAbbreviations) {
 		this.getAbbreviation = Zotero.Cite.getAbbreviation;
 	}
+	this.items = {};
 }
 
 Zotero.Cite.System.prototype = {
+	/**
+	 * Asynchronously fetch item and convert to CSL JSON
+	 */
+	"addItem":Zotero.Promise.coroutine(function* (zoteroItem) {
+		if (typeof(zoteroItem) != "object") {
+			if (this.items.hasOwnProperty(zoteroItem)) return;
+			zoteroItem = yield Zotero.Items.getAsync(zoteroItem);
+		}
+		if (this.items.hasOwnProperty(zoteroItem.id)) return;
+		let item = yield Zotero.Utilities.itemToCSLJSON(zoteroItem);
+		item.id = zoteroItem.id;
+
+		if (!Zotero.Prefs.get("export.citePaperJournalArticleURL")) {
+			var itemType = Zotero.ItemTypes.getName(zoteroItem.itemTypeID);
+			// don't return URL or accessed information for journal articles if a
+			// pages field exists
+			if (["journalArticle", "newspaperArticle", "magazineArticle"].indexOf(itemType) !== -1
+				&& item.pages
+			) {
+				delete item.URL;
+				delete item.accessed;
+			}
+		}
+		this.items[item.id] = item;
+	}),
+
+	/**
+	 * Asynchronously fetch items and convert them to CSL JSON
+	 */
+	"addItems":Zotero.Promise.coroutine(function* (items) {
+		for (let item of items) {
+			yield this.addItem(item);
+		}
+	}),
+
 	/**
 	 * citeproc-js system function for getting items
 	 * See http://gsl-nagoya-u.net/http/pub/citeproc-doc.html#retrieveitem
@@ -502,11 +538,8 @@ Zotero.Cite.System.prototype = {
 	 * @return {Object} citeproc-js item
 	 */
 	"retrieveItem":function retrieveItem(item) {
-		var zoteroItem, slashIndex;
-		if(typeof item === "object" && item !== null &&  item instanceof Zotero.Item) {
-			//if(this._cache[item.id]) return this._cache[item.id];
-			zoteroItem = item;
-		} else if(typeof item === "string" && (slashIndex = item.indexOf("/")) !== -1) {
+		let slashIndex;
+		if(typeof item === "string" && (slashIndex = item.indexOf("/")) !== -1) {
 			// is an embedded item
 			var sessionID = item.substr(0, slashIndex);
 			var session = Zotero.Integration.sessions[sessionID]
@@ -517,37 +550,8 @@ Zotero.Cite.System.prototype = {
 					return embeddedCitation;
 				}
 			}
-		} else {
-			// is an item ID
-			//if(this._cache[item]) return this._cache[item];
-			try {
-				zoteroItem = Zotero.Items.get(item);
-			} catch(e) {}
 		}
-
-		if(!zoteroItem) {
-			throw "Zotero.Cite.System.retrieveItem called on non-item "+item;
-		}
-		
-		throw new Error("Unimplemented");
-		var cslItem = Zotero.Utilities.itemToCSLJSON(zoteroItem);
-		
-		// TEMP: citeproc-js currently expects the id property to be the item DB id
-		cslItem.id = zoteroItem.id;
-		
-		if (!Zotero.Prefs.get("export.citePaperJournalArticleURL")) {
-			var itemType = Zotero.ItemTypes.getName(zoteroItem.itemTypeID);
-			// don't return URL or accessed information for journal articles if a
-			// pages field exists
-			if (["journalArticle", "newspaperArticle", "magazineArticle"].indexOf(itemType) !== -1
-				&& zoteroItem.getField("pages")
-			) {
-				delete cslItem.URL;
-				delete cslItem.accessed;
-			}
-		}
-		
-		return cslItem;
+		return this.items[item];
 	},
 
 	/**
@@ -575,3 +579,20 @@ Zotero.Cite.System.prototype = {
 		return str.value;
 	}
 };
+
+Zotero.Cite.AsyncCiteProc = function() {
+	Zotero.CiteProc.CSL.Engine.apply(this, arguments);
+}
+Zotero.Cite.AsyncCiteProc.prototype = Object.create(Zotero.CiteProc.CSL.Engine.prototype);
+Zotero.Cite.AsyncCiteProc.prototype.updateItems = Zotero.Promise.coroutine(function*(items) {
+	yield this.sys.addItems(items);
+	Zotero.CiteProc.CSL.Engine.prototype.updateItems.call(this, items);
+});
+Zotero.Cite.AsyncCiteProc.prototype.appendCitationCluster = Zotero.Promise.coroutine(function*(citation, isRegistered) {
+	if (!isRegistered) {
+		for (let citationItem of citation.citationItems) {
+			yield this.sys.addItem(citationItem.id);
+		}
+	}
+	return Zotero.CiteProc.CSL.Engine.prototype.appendCitationCluster.call(this, citation, isRegistered);
+});

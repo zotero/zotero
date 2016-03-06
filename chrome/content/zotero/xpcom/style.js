@@ -437,7 +437,7 @@ Zotero.Styles = new function() {
 		yield Zotero.File.putContentsAsync(destFile, style);
 		
 		yield Zotero.Styles.reinit();
-		
+
 		// Refresh preferences windows
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"].
 			getService(Components.interfaces.nsIWindowMediator);
@@ -691,7 +691,7 @@ Zotero.Style.prototype.getCiteProc = function(locale, automaticJournalAbbreviati
 	}
 	
 	try {
-		var citeproc = new Zotero.CiteProc.CSL.Engine(
+		var citeproc = new Zotero.Cite.AsyncCiteProc(
 			new Zotero.Cite.System(automaticJournalAbbreviations),
 			xml,
 			locale,
