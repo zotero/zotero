@@ -3,12 +3,12 @@
 <!ENTITY zotero.search.searchInLibrary "Pesquisar na biblioteca:">
 
 <!ENTITY zotero.search.joinMode.prefix "Corresponder a">
-<!ENTITY zotero.search.joinMode.any "qualquer">
-<!ENTITY zotero.search.joinMode.all "tudo">
-<!ENTITY zotero.search.joinMode.suffix "o seguinte:">
+<!ENTITY zotero.search.joinMode.any "qualquer um dos">
+<!ENTITY zotero.search.joinMode.all "todos os">
+<!ENTITY zotero.search.joinMode.suffix "seguintes:">
 
 <!ENTITY zotero.search.recursive.label "Pesquisar subcoleções">
-<!ENTITY zotero.search.noChildren "Exibir apenas itens no nível mais alto">
+<!ENTITY zotero.search.noChildren "Exibir apenas itens do nível mais alto">
 <!ENTITY zotero.search.includeParentsAndChildren "Incluir itens dos níveis acima e abaixo aos itens correspondentes">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">

@@ -410,55 +410,84 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 	 */
 	"init":function(url, data, sendResponseCallback) {
 		Zotero.Server.Connector.Data[data["url"]] = "<html>"+data["html"]+"</html>";
-		Zotero.HTTP.processDocuments(["zotero://connector/"+encodeURIComponent(data["url"])],
-			function(doc) {
-				delete Zotero.Server.Connector.Data[data["url"]];
-				
-				// figure out where to save
-				var libraryID = null;
-				var collectionID = null;
-				var zp = Zotero.getActiveZoteroPane();
-				try {
-					var libraryID = zp.getSelectedLibraryID();
-					var collection = zp.getSelectedCollection();
-				} catch(e) {}
-				
-				try {
-					// create new webpage item
-					var item = new Zotero.Item("webpage");
-					item.libraryID = libraryID;
-					item.setField("title", doc.title);
-					item.setField("url", data.url);
-					item.setField("accessDate", "CURRENT_TIMESTAMP");
-					var itemID = item.save();
-					if(collection) collection.addItem(itemID);
+		
+		// figure out where to save
+		var libraryID = null;
+		var collectionID = null;
+		var zp = Zotero.getActiveZoteroPane();
+		try {
+			var libraryID = zp.getSelectedLibraryID();
+			var collection = zp.getSelectedCollection();
+		} catch(e) {}
+		
+		// determine whether snapshot can be saved
+		var filesEditable;
+		if (libraryID) {
+			let group = Zotero.Groups.getByLibraryID(libraryID);
+			filesEditable = group.filesEditable;
+		}
+		else {
+			filesEditable = true;
+		}
+		
+		var cookieSandbox = new Zotero.CookieSandbox(null, data["url"], data["cookie"], url.userAgent);
+		
+		if (data.pdf && filesEditable) {
+			delete Zotero.Server.Connector.Data[data.url];
+			
+			try {
+				// TODO: Async
+				Zotero.Attachments.importFromURL(
+					data.url,
+					null,
+					null,
+					null,
+					collection ? [collection.id] : null,
+					"application/pdf",
+					libraryID,
+					function () {
+						sendResponseCallback(201);
+					},
+					cookieSandbox
+				);
+			}
+			catch (e) {
+				sendResponseCallback(500);
+				throw e;
+			}
+		}
+		else {
+			Zotero.HTTP.processDocuments(["zotero://connector/"+encodeURIComponent(data["url"])],
+				function(doc) {
+					delete Zotero.Server.Connector.Data[data["url"]];
 					
-					// determine whether snapshot can be saved
-					var filesEditable;
-					if (libraryID) {
-						var group = Zotero.Groups.getByLibraryID(libraryID);
-						filesEditable = group.filesEditable;
-					} else {
-						filesEditable = true;
+					try {
+						// create new webpage item
+						var item = new Zotero.Item("webpage");
+						item.libraryID = libraryID;
+						item.setField("title", doc.title);
+						item.setField("url", data.url);
+						item.setField("accessDate", "CURRENT_TIMESTAMP");
+						var itemID = item.save();
+						if(collection) collection.addItem(itemID);
+						
+						// save snapshot
+						if (filesEditable && !data.skipSnapshot) {
+							// TODO: async
+							Zotero.Attachments.importFromDocument({
+								document: doc,
+								parentItemID: itemID
+							});
+						}
+						
+						sendResponseCallback(201);
+					} catch(e) {
+						sendResponseCallback(500);
+						throw e;
 					}
-					
-					// save snapshot
-					if (filesEditable && !data.skipSnapshot) {
-						// TODO: async
-						Zotero.Attachments.importFromDocument({
-							document: doc,
-							parentItemID: itemID
-						});
-					}
-					
-					sendResponseCallback(201);
-				} catch(e) {
-					sendResponseCallback(500);
-					throw e;
-				}
-			},
-			null, null, false,
-			new Zotero.CookieSandbox(null, data["url"], data["cookie"], url.userAgent));
+				},
+				null, null, false, cookieSandbox);
+		}
 	}
 }
 

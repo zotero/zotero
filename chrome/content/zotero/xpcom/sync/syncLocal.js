@@ -89,9 +89,9 @@ Zotero.Sync.Data.Local = {
 	 * @return {nsILoginInfo|false}
 	 */
 	_getAPIKeyLoginInfo: function () {
-		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
-			.getService(Components.interfaces.nsILoginManager);
 		try {
+			var loginManager = Components.classes["@mozilla.org/login-manager;1"]
+				.getService(Components.interfaces.nsILoginManager);
 			var logins = loginManager.findLogins(
 				{},
 				this._loginManagerHost,

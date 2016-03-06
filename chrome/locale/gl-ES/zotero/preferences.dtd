@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Dominio/Ruta">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(p. ex. gl.wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Formato de saída">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Lingua">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Desactivar a copia rápida cando se arrastran máis de">
 
 <!ENTITY zotero.preferences.prefpane.cite "Cita">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "para máis información.">
 <!ENTITY zotero.preferences.proxies.transparent "Activar o redireccionamento por proxy">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Recoñecer automaticamente os recursos en proxy">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Mostrar unha notificación cando se redirixa cara a unha proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Desactivar as redireccións proxy cando o meu dominio conteña">
 <!ENTITY zotero.preferences.proxies.configured "Proxies configurados">
 <!ENTITY zotero.preferences.proxies.hostname "Hostname">
@@ -162,7 +162,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avanzado">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Ficheiros e cartafoles">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "Atallos">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localizador">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Xestor do motor de busca de artigos">
@@ -203,6 +203,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Enviar ao servidor de Zotero">
 
 <!ENTITY zotero.preferences.openAboutConfig "Abrir about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
+<!ENTITY zotero.preferences.openCSLEdit "Abrir o editor de estilos">
+<!ENTITY zotero.preferences.openCSLPreview "Abrir o visor de estilos">
 <!ENTITY zotero.preferences.openAboutMemory "Abrir about:memory">

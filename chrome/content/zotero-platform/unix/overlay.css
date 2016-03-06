@@ -154,6 +154,21 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 /* End toolbar buttons */
 
 
+/*
+ Override selected, unfocused tree row highlight color, which is too similar to the alternating
+ row color by default
+*/
+#zotero-collections-tree treechildren::-moz-tree-row(selected),
+#zotero-items-tree treechildren::-moz-tree-row(selected) {
+	background-color: #D4D4D4;
+}
+
+#zotero-collections-tree treechildren::-moz-tree-row(selected, focus),
+#zotero-items-tree treechildren::-moz-tree-row(selected, focus) {
+	background-color: Highlight;
+}
+
+
 @media (min-resolution: 1.5dppx) {
 	#zotero-tb-sync > .toolbarbutton-icon {
 		width: 20px;

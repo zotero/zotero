@@ -140,13 +140,13 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Opções de proxy">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero redirecionará requisições através dos proxies informados de forma transparente. Veja a">
-<!ENTITY zotero.preferences.proxies.desc_link "documentação relativa a proxies">
+<!ENTITY zotero.preferences.proxies.desc_before_link "O Zotero redirecionará as requisições através dos proxies informados, de forma transparente. Veja">
+<!ENTITY zotero.preferences.proxies.desc_link "a documentação sobre proxy">
 <!ENTITY zotero.preferences.proxies.desc_after_link "para maiores informações.">
-<!ENTITY zotero.preferences.proxies.transparent "Habilitar redirecionamento de proxy">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Reconhecer automaticamente as fontes com proxy">
+<!ENTITY zotero.preferences.proxies.transparent "Habilitar o redirecionamento por proxy">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Reconhecer automaticamente os recursos com proxy">
 <!ENTITY zotero.preferences.proxies.showRedirectNotification "Exibir notificação quando redirecionar através de um proxy">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Desabilitar redirecionamento por proxy quando meu nome de domínio conter">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Desabilitar o redirecionamento por proxy quando meu nome de domínio contiver">
 <!ENTITY zotero.preferences.proxies.configured "Proxies configurados">
 <!ENTITY zotero.preferences.proxies.hostname "Nome do host">
 <!ENTITY zotero.preferences.proxies.scheme "Esquema">
@@ -154,10 +154,10 @@
 <!ENTITY zotero.preferences.proxies.multiSite "Multi-site">
 <!ENTITY zotero.preferences.proxies.autoAssociate "Associar novos hosts automaticamente">
 <!ENTITY zotero.preferences.proxies.variables "Você pode usar as seguintes variáveis em seu esquema de proxy:">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - O nome do hostname do site a ser acessado (p. ex., www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - O caminho da página a ser acessada, excluindo a barra inicial (p.ex., about/index.html)">
-<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - O caminho do diretório (p.ex., about/)">
-<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - O nome do arquivo (p. ex., index.html)">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - O nome de host do site a ser acessado (ex. www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - O caminho da página a ser acessada, excluindo a barra inicial (ex. about/index.html)">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - O caminho do diretório (ex. about/)">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - O nome do arquivo (ex. index.html)">
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Qualquer texto">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avançado">
@@ -165,12 +165,12 @@
 <!ENTITY zotero.preferences.advanced.keys "Atalhos">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localizar">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Gerenciador dos mecanismos de procura de artigos">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Gerenciador dos Mecanismos de Pesquisa de artigos">
 <!ENTITY zotero.preferences.locate.description "Descrição">
 <!ENTITY zotero.preferences.locate.name "Nome">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Um Mecanismo de Procura amplia as capacidades do menu Localizar do Painel de Informações. Ativando os mecanismos de busca na lista abaixo, eles serão adicionados ao menu e podem ser utilizados para localizar recursos da sua biblioteca na web.">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "Um Mecanismo de Pesquisa amplia as capacidades do menu Localizar no Painel de Informações. Ativando os Mecanismos de Pesquisa na lista abaixo, eles serão adicionados ao menu e podem ser utilizados para localizar recursos da sua biblioteca na web.">
 <!ENTITY zotero.preferences.locate.addDescription "Para adicionar um Mecanismo de Procura que não esteja na lista, visite o mecanismo de pesquisa desejado no seu navegador web e selecione &#34;Adicionar&#34; no menu Localizar do Zotero.">
-<!ENTITY zotero.preferences.locate.restoreDefaults "Restabelecer padrões">
+<!ENTITY zotero.preferences.locate.restoreDefaults "Restaurar os padrões">
 
 <!ENTITY zotero.preferences.charset "Codificação de caracteres">
 <!ENTITY zotero.preferences.charset.importCharset "Importar codificação de caracteres">
@@ -180,26 +180,26 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Usar o diretório do perfil">
 <!ENTITY zotero.preferences.dataDir.custom "Personalizar:">
 <!ENTITY zotero.preferences.dataDir.choose "Escolha...">
-<!ENTITY zotero.preferences.dataDir.reveal "Exibir diretório de dados">
+<!ENTITY zotero.preferences.dataDir.reveal "Exibir o diretório de dados">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Anexo Relacionado Diretório Base">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero utilizará caminhos relativos para anexos de arquivos a partir do diretório base, permitindo o acesso a esses arquivos em diferentes computadores, desde que a estrutura dos arquivos dentro do diretório base permaneça a mesma">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Diretório base dos anexos associados">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "O Zotero utilizará caminhos relativos para os anexos associados à referência a partir desse diretório base. Isso permite o acesso a esses arquivos em diferentes computadores, desde que a estrutura dos arquivos dentro do diretório base permaneça a mesma.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Diretório base:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Escolha...">
-<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Reverter para Caminhos Absolutos...">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Reverter para caminhos absolutos...">
 
 <!ENTITY zotero.preferences.dbMaintenance "Manutenção do banco de dados">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Verificar integridade do banco de dados">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Verificar a integridade do banco de dados">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reconfigurar tradutores e estilos...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reconfigurar tradutores...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reconfigurar estilos...">
 
-<!ENTITY zotero.preferences.debugOutputLogging "Registro de saída de depuração">
-<!ENTITY zotero.preferences.debugOutputLogging.message "A saída de depuração pode ajudar os desenvolvedores Zotero a diagnosticar problemas no Zotero. O processo de depuração tornará o Zotero mais lento, de modo que essa opção deve geralmente permanecer desmarcada, a não ser que um desenvolvedor Zotero solicite a saída de depuração.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "Linhas registradas">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Habilitar após reiniciar">
+<!ENTITY zotero.preferences.debugOutputLogging "Registro da saída de depuração">
+<!ENTITY zotero.preferences.debugOutputLogging.message "A saída de depuração pode ajudar os desenvolvedores do Zotero a diagnosticar problemas. O registro de depuração tornará o Zotero mais lento, por isso essa opção geralmente deve permanecer desmarcada, a não ser que um desenvolvedor Zotero solicite a saída de depuração.">
+<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "linhas registradas">
+<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Habilitar após o reinício">
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Exibir saída">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Limpar saída">
+<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Limpar a saída">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Enviar ao servidor Zotero">
 
 <!ENTITY zotero.preferences.openAboutConfig "Abrir about:config">

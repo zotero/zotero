@@ -1810,6 +1810,18 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 								if (!addItems[parentID]) {
 									addItems[parentID] = [];
 								}
+								
+								// If source item is a top-level non-regular item (which can exist in a
+								// collection) but target item is a child item (which can't), add
+								// target item's parent to collection instead
+								if (!item.isRegularItem()) {
+									let targetItem = yield Zotero.Items.getAsync(id);
+									let targetItemParentID = targetItem.parentItemID;
+									if (targetItemParentID) {
+										id = targetItemParentID;
+									}
+								}
+								
 								addItems[parentID].push(id);
 							}
 						}
