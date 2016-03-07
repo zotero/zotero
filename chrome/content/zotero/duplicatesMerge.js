@@ -131,9 +131,9 @@ var Zotero_Duplicates_Pane = new function () {
 		// alternative values so that they're still available if the item box
 		// modifies the item
 		Zotero.spawn(function* () {
-			var diff = yield item.multiDiff(_otherItems, _ignoreFields);
+			var diff = item.multiDiff(_otherItems, _ignoreFields);
 			if (diff) {
-				let itemValues = yield item.toJSON();
+				let itemValues = item.toJSON();
 				for (let i in diff) {
 					diff[i].unshift(itemValues[i] !== undefined ? itemValues[i] : '');
 				}
@@ -141,8 +141,6 @@ var Zotero_Duplicates_Pane = new function () {
 			}
 			
 			var newItem = yield item.copy();
-			yield newItem.loadItemData();
-			yield newItem.loadCreators();
 			itembox.item = newItem;
 		});
 	}

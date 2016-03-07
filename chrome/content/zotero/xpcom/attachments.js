@@ -1090,8 +1090,7 @@ Zotero.Attachments = new function(){
 		
 		Zotero.DB.requireTransaction();
 		
-		attachment.loadItemData();
-		var newAttachment = yield attachment.clone(libraryID);
+		var newAttachment = attachment.clone(libraryID);
 		if (attachment.isImportedAttachment()) {
 			// Attachment path isn't copied over by clone() if libraryID is different
 			newAttachment.attachmentPath = attachment.attachmentPath;

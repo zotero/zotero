@@ -529,7 +529,6 @@ Zotero.Cite.System.prototype = {
 			throw "Zotero.Cite.System.retrieveItem called on non-item "+item;
 		}
 		
-		throw new Error("Unimplemented");
 		var cslItem = Zotero.Utilities.itemToCSLJSON(zoteroItem);
 		
 		// TEMP: citeproc-js currently expects the id property to be the item DB id

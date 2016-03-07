@@ -1591,8 +1591,9 @@ Zotero.Utilities = {
 	 */
 	"itemToCSLJSON":function(zoteroItem) {
 		if (zoteroItem instanceof Zotero.Item) {
-			return Zotero.Utilities.Internal.itemToExportFormat(zoteroItem).
-			       then(Zotero.Utilities.itemToCSLJSON);
+			return this.itemToCSLJSON(
+				Zotero.Utilities.Internal.itemToExportFormat(zoteroItem)
+			);
 		}
 		
 		var cslType = CSL_TYPE_MAPPINGS[zoteroItem.itemType];

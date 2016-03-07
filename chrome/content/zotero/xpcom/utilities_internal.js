@@ -610,44 +610,7 @@ Zotero.Utilities.Internal = {
 	 * @param {Boolean} legacy Add mappings for legacy (pre-4.0.27) translators
 	 * @return {Promise<Object>}
 	 */
-	"itemToExportFormat": new function() {
-		return Zotero.Promise.coroutine(function* (zoteroItem, legacy) {
-			var item = yield zoteroItem.toJSON();
-			
-			item.uri = Zotero.URI.getItemURI(zoteroItem);
-			delete item.key;
-			
-			if (!zoteroItem.isAttachment() && !zoteroItem.isNote()) {
-				yield zoteroItem.loadChildItems();
-				
-				// Include attachments
-				item.attachments = [];
-				let attachments = zoteroItem.getAttachments();
-				for (let i=0; i<attachments.length; i++) {
-					let zoteroAttachment = yield Zotero.Items.getAsync(attachments[i]),
-						attachment = yield zoteroAttachment.toJSON();
-					if (legacy) addCompatibilityMappings(attachment, zoteroAttachment);
-					
-					item.attachments.push(attachment);
-				}
-				
-				// Include notes
-				item.notes = [];
-				let notes = zoteroItem.getNotes();
-				for (let i=0; i<notes.length; i++) {
-					let zoteroNote = yield Zotero.Items.getAsync(notes[i]),
-						note = yield zoteroNote.toJSON();
-					if (legacy) addCompatibilityMappings(note, zoteroNote);
-					
-					item.notes.push(note);
-				}
-			}
-			
-			if (legacy) addCompatibilityMappings(item, zoteroItem);
-			
-			return item;
-		});
-		
+	itemToExportFormat: function (zoteroItem, legacy) {
 		function addCompatibilityMappings(item, zoteroItem) {
 			item.uniqueFields = {};
 			
@@ -735,6 +698,39 @@ Zotero.Utilities.Internal = {
 			
 			return item;
 		}
+		
+		var item = zoteroItem.toJSON();
+		
+		item.uri = Zotero.URI.getItemURI(zoteroItem);
+		delete item.key;
+		
+		if (!zoteroItem.isAttachment() && !zoteroItem.isNote()) {
+			// Include attachments
+			item.attachments = [];
+			let attachments = zoteroItem.getAttachments();
+			for (let i=0; i<attachments.length; i++) {
+				let zoteroAttachment = Zotero.Items.get(attachments[i]),
+					attachment = zoteroAttachment.toJSON();
+				if (legacy) addCompatibilityMappings(attachment, zoteroAttachment);
+				
+				item.attachments.push(attachment);
+			}
+			
+			// Include notes
+			item.notes = [];
+			let notes = zoteroItem.getNotes();
+			for (let i=0; i<notes.length; i++) {
+				let zoteroNote = Zotero.Items.get(notes[i]),
+					note = zoteroNote.toJSON();
+				if (legacy) addCompatibilityMappings(note, zoteroNote);
+				
+				item.notes.push(note);
+			}
+		}
+		
+		if (legacy) addCompatibilityMappings(item, zoteroItem);
+		
+		return item;
 	},
 	
 	/**

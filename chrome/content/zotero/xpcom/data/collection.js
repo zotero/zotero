@@ -28,11 +28,8 @@ Zotero.Collection = function(params = {}) {
 	
 	this._name = null;
 	
-	this._hasChildCollections = null;
-	this._childCollections = [];
-	
-	this._hasChildItems = false;
-	this._childItems = [];
+	this._childCollections = new Set();
+	this._childItems = new Set();
 	
 	Zotero.Utilities.assignProps(this, params, ['name', 'libraryID', 'parentID',
 		'parentKey', 'lastSync']);
@@ -162,19 +159,13 @@ Zotero.Collection.prototype.loadFromRow = function(row) {
 
 
 Zotero.Collection.prototype.hasChildCollections = function() {
-	if (this._hasChildCollections !== null) {
-		return this._hasChildCollections;
-	}
-	this._requireData('primaryData');
-	return false;
+	this._requireData('childCollections');
+	return this._childCollections.size > 0;
 }
 
 Zotero.Collection.prototype.hasChildItems = function() {
-	if (this._hasChildItems !== null) {
-		return this._hasChildItems;
-	}
-	this._requireData('primaryData');
-	return false;
+	this._requireData('childItems');
+	return this._childItems.size > 0;
 }
 
 
@@ -189,19 +180,11 @@ Zotero.Collection.prototype.getChildCollections = function (asIDs) {
 	
 	// Return collectionIDs
 	if (asIDs) {
-		var ids = [];
-		for each(var col in this._childCollections) {
-			ids.push(col.id);
-		}
-		return ids;
+		return this._childCollections.values();
 	}
 	
 	// Return Zotero.Collection objects
-	var objs = [];
-	for each(var col in this._childCollections) {
-		objs.push(col);
-	}
-	return objs;
+	return Array.from(this._childCollections).map(id => this.ObjectsClass.get(id));
 }
 
 
@@ -215,13 +198,14 @@ Zotero.Collection.prototype.getChildCollections = function (asIDs) {
 Zotero.Collection.prototype.getChildItems = function (asIDs, includeDeleted) {
 	this._requireData('childItems');
 	
-	if (this._childItems.length == 0) {
+	if (this._childItems.size == 0) {
 		return [];
 	}
 	
 	// Remove deleted items if necessary
 	var childItems = [];
-	for each(var item in this._childItems) {
+	for (let itemID of this._childItems) {
+		let item = this.ChildObjects.get(itemID);
 		if (includeDeleted || !item.deleted) {
 			childItems.push(item);
 		}
@@ -229,19 +213,11 @@ Zotero.Collection.prototype.getChildItems = function (asIDs, includeDeleted) {
 	
 	// Return itemIDs
 	if (asIDs) {
-		var ids = [];
-		for each(var item in childItems) {
-			ids.push(item.id);
-		}
-		return ids;
+		return childItems.map(item => item.id);
 	}
 	
 	// Return Zotero.Item objects
-	var objs = [];
-	for each(var item in childItems) {
-		objs.push(item);
-	}
-	return objs;
+	return childItems.slice();
 }
 
 Zotero.Collection.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
@@ -388,7 +364,6 @@ Zotero.Collection.prototype.addItems = Zotero.Promise.coroutine(function* (itemI
 		return;
 	}
 	
-	yield this.loadChildItems();
 	var current = this.getChildItems(true);
 	
 	Zotero.DB.requireTransaction();
@@ -400,15 +375,14 @@ Zotero.Collection.prototype.addItems = Zotero.Promise.coroutine(function* (itemI
 			continue;
 		}
 		
-		let item = yield this.ChildObjects.getAsync(itemID);
-		yield item.loadCollections();
+		let item = this.ChildObjects.get(itemID);
 		item.addToCollection(this.id);
 		yield item.save({
 			skipDateModifiedUpdate: true
 		});
 	}
 	
-	yield this.loadChildItems(true);
+	yield this._loadDataType('childItems');
 });
 
 /**
@@ -434,7 +408,6 @@ Zotero.Collection.prototype.removeItems = Zotero.Promise.coroutine(function* (it
 		return;
 	}
 	
-	yield this.loadChildItems();
 	var current = this.getChildItems(true);
 	
 	return Zotero.DB.executeTransaction(function* () {
@@ -447,7 +420,6 @@ Zotero.Collection.prototype.removeItems = Zotero.Promise.coroutine(function* (it
 			}
 			
 			let item = yield this.ChildObjects.getAsync(itemID);
-			yield item.loadCollections();
 			item.removeFromCollection(this.id);
 			yield item.save({
 				skipDateModifiedUpdate: true
@@ -455,7 +427,7 @@ Zotero.Collection.prototype.removeItems = Zotero.Promise.coroutine(function* (it
 		}
 	}.bind(this));
 	
-	yield this.loadChildItems(true);
+	yield this._loadDataType('childItems');
 });
 
 
@@ -464,13 +436,7 @@ Zotero.Collection.prototype.removeItems = Zotero.Promise.coroutine(function* (it
 **/
 Zotero.Collection.prototype.hasItem = function(itemID) {
 	this._requireData('childItems');
-	
-	for (let i=0; i<this._childItems.length; i++) {
-		if (this._childItems[i].id == itemID) {
-			return true;
-		}
-	}
-	return false;
+	return this._childItems.has(itemID);
 }
 
 
@@ -692,8 +658,8 @@ Zotero.Collection.prototype.fromJSON = function (json) {
 }
 
 
-Zotero.Collection.prototype.toResponseJSON = Zotero.Promise.coroutine(function* (options = {}) {
-	var json = yield this.constructor._super.prototype.toResponseJSON.apply(this, options);
+Zotero.Collection.prototype.toResponseJSON = function (options = {}) {
+	var json = this.constructor._super.prototype.toResponseJSON.apply(this, options);
 	
 	// TODO: library block?
 	
@@ -713,10 +679,10 @@ Zotero.Collection.prototype.toResponseJSON = Zotero.Promise.coroutine(function* 
 		json.meta.numChildren = this.numChildren();
 	}
 	return json;
-})
+};
 
 
-Zotero.Collection.prototype.toJSON = Zotero.Promise.coroutine(function* (options = {}) {
+Zotero.Collection.prototype.toJSON = function (options = {}) {
 	var env = this._preToJSON(options);
 	var mode = env.mode;
 	
@@ -729,7 +695,7 @@ Zotero.Collection.prototype.toJSON = Zotero.Promise.coroutine(function* (options
 	obj.relations = {}; // TEMP
 	
 	return this._postToJSON(env);
-});
+}
 
 
 /**
@@ -865,75 +831,6 @@ Zotero.Collection.prototype.addLinkedCollection = Zotero.Promise.coroutine(funct
 //
 // Private methods
 //
-Zotero.Collection.prototype.reloadHasChildCollections = Zotero.Promise.coroutine(function* () {
-	var sql = "SELECT COUNT(*) FROM collections WHERE parentCollectionID=?";
-	this._hasChildCollections = !!(yield Zotero.DB.valueQueryAsync(sql, this.id));
-});
-
-
-Zotero.Collection.prototype.loadChildCollections = Zotero.Promise.coroutine(function* (reload) {
-	if (this._loaded.childCollections && !reload) {
-		return;
-	}
-	
-	var sql = "SELECT collectionID FROM collections WHERE parentCollectionID=?";
-	var ids = yield Zotero.DB.columnQueryAsync(sql, this.id);
-	
-	this._childCollections = [];
-	
-	if (ids.length) {
-		for each(var id in ids) {
-			var col = yield this.ObjectsClass.getAsync(id);
-			if (!col) {
-				throw new Error('Collection ' + id + ' not found');
-			}
-			this._childCollections.push(col);
-		}
-		this._hasChildCollections = true;
-	}
-	else {
-		this._hasChildCollections = false;
-	}
-	
-	this._loaded.childCollections = true;
-	this._clearChanged('childCollections');
-});
-
-
-Zotero.Collection.prototype.reloadHasChildItems = Zotero.Promise.coroutine(function* () {
-	var sql = "SELECT COUNT(*) FROM collectionItems WHERE collectionID=?";
-	this._hasChildItems = !!(yield Zotero.DB.valueQueryAsync(sql, this.id));
-});
-
-
-Zotero.Collection.prototype.loadChildItems = Zotero.Promise.coroutine(function* (reload) {
-	if (this._loaded.childItems && !reload) {
-		return;
-	}
-	
-	var sql = "SELECT itemID FROM collectionItems WHERE collectionID=? "
-		// DEBUG: Fix for child items created via context menu on parent within
-		// a collection being added to the current collection
-		+ "AND itemID NOT IN "
-			+ "(SELECT itemID FROM itemNotes WHERE parentItemID IS NOT NULL) "
-		+ "AND itemID NOT IN "
-			+ "(SELECT itemID FROM itemAttachments WHERE parentItemID IS NOT NULL)";
-	var ids = yield Zotero.DB.columnQueryAsync(sql, this.id);
-	
-	this._childItems = [];
-	
-	if (ids.length) {
-		var items = yield this.ChildObjects.getAsync(ids);
-		if (items) {
-			this._childItems = items;
-		}
-	}
-	
-	this._loaded.childItems = true;
-	this._clearChanged('childItems');
-});
-
-
 /**
  * Add a collection to the cached child collections list if loaded
  */
@@ -941,8 +838,7 @@ Zotero.Collection.prototype._registerChildCollection = function (collectionID) {
 	if (this._loaded.childCollections) {
 		let collection = this.ObjectsClass.get(collectionID);
 		if (collection) {
-			this._hasChildCollections = true;
-			this._childCollections.push(collection);
+			this._childCollections.add(collectionID);
 		}
 	}
 }
@@ -953,13 +849,7 @@ Zotero.Collection.prototype._registerChildCollection = function (collectionID) {
  */
 Zotero.Collection.prototype._unregisterChildCollection = function (collectionID) {
 	if (this._loaded.childCollections) {
-		for (let i = 0; i < this._childCollections.length; i++) {
-			if (this._childCollections[i].id == collectionID) {
-				this._childCollections.splice(i, 1);
-				break;
-			}
-		}
-		this._hasChildCollections = this._childCollections.length > 0;
+		this._childCollections.delete(collectionID);
 	}
 }
 
@@ -971,8 +861,7 @@ Zotero.Collection.prototype._registerChildItem = function (itemID) {
 	if (this._loaded.childItems) {
 		let item = this.ChildObjects.get(itemID);
 		if (item) {
-			this._hasChildItems = true;
-			this._childItems.push(item);
+			this._childItems.add(itemID);
 		}
 	}
 }
@@ -983,12 +872,6 @@ Zotero.Collection.prototype._registerChildItem = function (itemID) {
  */
 Zotero.Collection.prototype._unregisterChildItem = function (itemID) {
 	if (this._loaded.childItems) {
-		for (let i = 0; i < this._childItems.length; i++) {
-			if (this._childItems[i].id == itemID) {
-				this._childItems.splice(i, 1);
-				break;
-			}
-		}
-		this._hasChildItems = this._childItems.length > 0;
+		this._childItems.delete(itemID);
 	}
 }

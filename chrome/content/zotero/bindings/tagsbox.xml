@@ -91,24 +91,20 @@
 			
 			<property name="summary">
 				<getter><![CDATA[
-					return Zotero.spawn(function* () {
-						var r = "";
-						
-						if (this.item) {
-							yield this.item.loadTags()
-								.tap(() => Zotero.Promise.check(this.mode));
-							var tags = this.item.getTags();
-							if (tags) {
-								for(var i = 0; i < tags.length; i++)
-								{
-									r = r + tags[i].tag + ", ";
-								}
-								r = r.substr(0,r.length-2);
-							}
-						}
+					var r = "";
 					
-						return r;
-					}, this);
+					if (this.item) {
+						var tags = this.item.getTags();
+						if (tags) {
+							for(var i = 0; i < tags.length; i++)
+							{
+								r = r + tags[i].tag + ", ";
+							}
+							r = r.substr(0,r.length-2);
+						}
+					}
+				
+					return r;
 				]]></getter>
 			</property>
 			
@@ -210,9 +206,6 @@
 				<body><![CDATA[
 					return Zotero.spawn(function* () {
 						Zotero.debug('Reloading tags box');
-						
-						yield this.item.loadTags()
-							.tap(() => Zotero.Promise.check(this.mode));
 						
 						// Cancel field focusing while we're updating
 						this._reloading = true;

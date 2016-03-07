@@ -214,7 +214,7 @@ function ZoteroProtocolHandler() {
 					else if (combineChildItems || !results[i].isRegularItem()
 							|| results[i].numChildren() == 0) {
 						itemsHash[results[i].id] = [items.length];
-						items.push(yield results[i].toJSON({ mode: 'full' }));
+						items.push(results[i].toJSON({ mode: 'full' }));
 						// Flag item as a search match
 						items[items.length - 1].reportSearchMatch = true;
 					}
@@ -241,7 +241,6 @@ function ZoteroProtocolHandler() {
 									}
 								}
 							};
-							yield item.loadChildItems();
 							func(item.getNotes());
 							func(item.getAttachments());
 						}
@@ -252,7 +251,7 @@ function ZoteroProtocolHandler() {
 				else {
 					for (var i in unhandledParents) {
 						itemsHash[results[i].id] = [items.length];
-						items.push(yield results[i].toJSON({ mode: 'full' }));
+						items.push(results[i].toJSON({ mode: 'full' }));
 						// Flag item as a search match
 						items[items.length - 1].reportSearchMatch = true;
 					}
@@ -264,7 +263,7 @@ function ZoteroProtocolHandler() {
 						if (!searchItemIDs[id] && !itemsHash[id]) {
 							var item = yield Zotero.Items.getAsync(id);
 							itemsHash[id] = items.length;
-							items.push(yield item.toJSON({ mode: 'full' }));
+							items.push(item.toJSON({ mode: 'full' }));
 						}
 					}
 					
@@ -279,10 +278,10 @@ function ZoteroProtocolHandler() {
 							};
 						}
 						if (item.isNote()) {
-							items[itemsHash[parentID]].reportChildren.notes.push(yield item.toJSON({ mode: 'full' }));
+							items[itemsHash[parentID]].reportChildren.notes.push(item.toJSON({ mode: 'full' }));
 						}
 						if (item.isAttachment()) {
-							items[itemsHash[parentID]].reportChildren.attachments.push(yield item.toJSON({ mode: 'full' }));
+							items[itemsHash[parentID]].reportChildren.attachments.push(item.toJSON({ mode: 'full' }));
 						}
 					}
 				}
@@ -299,7 +298,7 @@ function ZoteroProtocolHandler() {
 							// add on its own
 							if (searchItemIDs[parentID]) {
 								itemsHash[parentID] = [items.length];
-								items.push(yield parentItem.toJSON({ mode: 'full' }));
+								items.push(parentItem.toJSON({ mode: 'full' }));
 								items[items.length - 1].reportSearchMatch = true;
 							}
 							else {
@@ -312,14 +311,14 @@ function ZoteroProtocolHandler() {
 						items.push(parentItem.toJSON({ mode: 'full' }));
 						if (item.isNote()) {
 							items[items.length - 1].reportChildren = {
-								notes: [yield item.toJSON({ mode: 'full' })],
+								notes: [item.toJSON({ mode: 'full' })],
 								attachments: []
 							};
 						}
 						else if (item.isAttachment()) {
 							items[items.length - 1].reportChildren = {
 								notes: [],
-								attachments: [yield item.toJSON({ mode: 'full' })]
+								attachments: [item.toJSON({ mode: 'full' })]
 							};
 						}
 					}
@@ -609,7 +608,6 @@ function ZoteroProtocolHandler() {
 				if (params.controller == 'data') {
 					switch (params.scopeObject) {
 						case 'collections':
-							yield collection.loadChildItems();
 							var results = collection.getChildItems();
 							break;
 						

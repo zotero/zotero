@@ -630,7 +630,13 @@ Zotero.DBConnection.prototype.queryAsync = Zotero.Promise.coroutine(function* (s
 				}
 			}
 		}
-		let rows = yield conn.executeCached(sql, params, onRow);
+		let rows;
+		if (options && options.noCache) {
+			rows = yield conn.execute(sql, params, onRow);
+		}
+		else {
+			rows = yield conn.executeCached(sql, params, onRow);
+		}
 		// Parse out the SQL command being used
 		let op = sql.match(/^[^a-z]*[^ ]+/i);
 		if (op) {

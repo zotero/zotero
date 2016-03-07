@@ -71,12 +71,10 @@ describe("Related Box", function () {
 			var item1 = yield createDataObject('item');
 			var item2 = yield createDataObject('item');
 			
-			yield item1.loadRelations();
 			item1.addRelatedItem(item2);
-			yield item1.save();
-			yield item2.loadRelations();
+			yield item1.saveTx();
 			item2.addRelatedItem(item1);
-			yield item2.save();
+			yield item2.saveTx();
 			
 			// Select the Related pane
 			var tabbox = doc.getElementById('zotero-view-tabbox');

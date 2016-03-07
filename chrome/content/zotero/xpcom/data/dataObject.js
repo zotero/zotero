@@ -401,7 +401,7 @@ Zotero.DataObject.prototype.setRelations = function (newRelations) {
 	
 	// Relations are stored internally as a flat array with individual predicate-object pairs,
 	// so convert the incoming relations to that
-	var newRelationsFlat = this._flattenRelations(newRelations);
+	var newRelationsFlat = this.ObjectsClass.flattenRelations(newRelations);
 	
 	var changed = false;
 	if (oldRelations.length != newRelationsFlat.length) {
@@ -456,8 +456,6 @@ Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function
 	if (libraryID == this._libraryID) {
 		throw new Error(this._ObjectType + " is already in library " + libraryID);
 	}
-	
-	yield this.loadRelations();
 	
 	var predicate = Zotero.Relations.linkedObjectPredicate;
 	var libraryObjectPrefix = Zotero.URI.getLibraryURI(libraryID)
@@ -514,8 +512,6 @@ Zotero.DataObject.prototype._addLinkedObject = Zotero.Promise.coroutine(function
 		throw new Error("Can't add linked " + this._objectType + " in same library");
 	}
 	
-	yield this.loadRelations();
-	
 	var predicate = Zotero.Relations.linkedObjectPredicate;
 	var thisURI = Zotero.URI['get' + this._ObjectType + 'URI'](this);
 	var objectURI = Zotero.URI['get' + this._ObjectType + 'URI'](object);
@@ -539,7 +535,6 @@ Zotero.DataObject.prototype._addLinkedObject = Zotero.Promise.coroutine(function
 		});
 	}
 	else {
-		yield object.loadRelations();
 		object.addRelation(predicate, thisURI);
 		yield object.save({
 			skipDateModifiedUpdate: true,
@@ -551,9 +546,11 @@ Zotero.DataObject.prototype._addLinkedObject = Zotero.Promise.coroutine(function
 });
 
 
-/*
- * Build object from database
- */
+//
+// Bulk data loading functions
+//
+// These are called by Zotero.DataObjects.prototype._loadDataType().
+//
 Zotero.DataObject.prototype.loadPrimaryData = Zotero.Promise.coroutine(function* (reload, failOnMissing) {
 	if (this._loaded.primaryData && !reload) return;
 	
@@ -607,65 +604,6 @@ Zotero.DataObject.prototype.loadPrimaryData = Zotero.Promise.coroutine(function*
 	}
 	
 	this.loadFromRow(row, reload);
-});
-
-
-Zotero.DataObject.prototype.loadRelations = Zotero.Promise.coroutine(function* (reload) {
-	if (!this.ObjectsClass._relationsTable) {
-		throw new Error("Relations not supported for " + this._objectTypePlural);
-	}
-	
-	if (this._loaded.relations && !reload) {
-		return;
-	}
-	
-	Zotero.debug("Loading relations for " + this._objectType + " " + this.libraryKey);
-	
-	this._requireData('primaryData');
-	
-	var sql = "SELECT predicate, object FROM " + this.ObjectsClass._relationsTable + " "
-		+ "JOIN relationPredicates USING (predicateID) "
-		+ "WHERE " + this.ObjectsClass.idColumn + "=?";
-	var rows = yield Zotero.DB.queryAsync(sql, this.id);
-	
-	var relations = {};
-	function addRel(predicate, object) {
-		if (!relations[predicate]) {
-			relations[predicate] = [];
-		}
-		relations[predicate].push(object);
-	}
-	
-	for (let i = 0; i < rows.length; i++) {
-		let row = rows[i];
-		addRel(row.predicate, row.object);
-	}
-	
-	/*if (this._objectType == 'item') {
-		let getURI = Zotero.URI["get" + this._ObjectType + "URI"].bind(Zotero.URI);
-		let objectURI = getURI(this);
-		
-		// Related items are bidirectional, so include any pointing to this object
-		let objects = yield Zotero.Relations.getByPredicateAndObject(
-			Zotero.Relations.relatedItemPredicate, objectURI
-		);
-		for (let i = 0; i < objects.length; i++) {
-			addRel(Zotero.Relations.relatedItemPredicate, getURI(objects[i]));
-		}
-		
-		// Also include any owl:sameAs relations pointing to this object
-		objects = yield Zotero.Relations.getByPredicateAndObject(
-			Zotero.Relations.linkedObjectPredicate, objectURI
-		);
-		for (let i = 0; i < objects.length; i++) {
-			addRel(Zotero.Relations.linkedObjectPredicate, getURI(objects[i]));
-		}
-	}*/
-	
-	// Relations are stored as predicate-object pairs
-	this._relations = this._flattenRelations(relations);
-	this._loaded.relations = true;
-	this._clearChanged('relations');
 });
 
 
@@ -735,7 +673,7 @@ Zotero.DataObject.prototype._requireData = function (dataType) {
  * @param {Boolean} reload
  */
 Zotero.DataObject.prototype._loadDataType = function (dataType, reload) {
-	return this["load" + dataType[0].toUpperCase() + dataType.substr(1)](reload);
+	return this._ObjectsClass._loadDataType(dataType, this.libraryID, [this.id]);
 }
 
 Zotero.DataObject.prototype.loadAllData = function (reload) {
@@ -866,6 +804,16 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) 
 	}
 	else {
 		Zotero.debug('Updating database with new ' + this._objectType + ' data', 4);
+	}
+	
+	if (env.options.skipAll) {
+		[
+			'skipDateModifiedUpdate',
+			'skipClientDateModifiedUpdate',
+			'skipSyncedUpdate',
+			'skipEditCheck',
+			'skipSelect'
+		].forEach(x => env.options[x] = true);
 	}
 	
 	try {
@@ -1214,16 +1162,16 @@ Zotero.DataObject.prototype._finalizeErase = Zotero.Promise.coroutine(function* 
 });
 
 
-Zotero.DataObject.prototype.toResponseJSON = Zotero.Promise.coroutine(function* (options) {
+Zotero.DataObject.prototype.toResponseJSON = function (options) {
 	// TODO: library block?
 	
 	return {
 		key: this.key,
 		version: this.version,
 		meta: {},
-		data: yield this.toJSON(options)
+		data: this.toJSON(options)
 	};
-});
+}
 
 
 Zotero.DataObject.prototype._preToJSON = function (options) {
@@ -1271,33 +1219,4 @@ Zotero.DataObject.prototype._disabledCheck = function () {
 		Zotero.logError(this._ObjectType + " is disabled -- "
 			+ "use Zotero." + this._ObjectTypePlural  + ".getAsync()");
 	}
-}
-
-
-/**
- * Flatten API JSON relations object into an array of unique predicate-object pairs
- *
- * @param {Object} relations - Relations object in API JSON format, with predicates as keys
- *                             and arrays of URIs as objects
- * @return {Array[]} - Predicate-object pairs
- */
-Zotero.DataObject.prototype._flattenRelations = function (relations) {
-	var relationsFlat = [];
-	for (let predicate in relations) {
-		let object = relations[predicate];
-		if (Array.isArray(object)) {
-			object = Zotero.Utilities.arrayUnique(object);
-			for (let i = 0; i < object.length; i++) {
-				relationsFlat.push([predicate, object[i]]);
-			}
-		}
-		else if (typeof object == 'string') {
-			relationsFlat.push([predicate, object]);
-		}
-		else {
-			Zotero.debug(object, 1);
-			throw new Error("Invalid relation value");
-		}
-	}
-	return relationsFlat;
 }

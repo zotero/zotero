@@ -316,7 +316,7 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 					// Conflict resolution
 					else if (objectType == 'item') {
 						conflicts.push({
-							left: yield obj.toJSON(),
+							left: obj.toJSON(),
 							right: {
 								deleted: true
 							}

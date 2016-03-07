@@ -84,7 +84,10 @@ Zotero.Items = function() {
 				attachmentCharset: "CS.charset AS attachmentCharset",
 				attachmentLinkMode: "IA.linkMode AS attachmentLinkMode",
 				attachmentContentType: "IA.contentType AS attachmentContentType",
-				attachmentPath: "IA.path AS attachmentPath"
+				attachmentPath: "IA.path AS attachmentPath",
+				attachmentSyncState: "IA.syncState AS attachmentSyncState",
+				attachmentSyncedModificationTime: "IA.storageModTime AS attachmentSyncedModificationTime",
+				attachmentSyncedHash: "IA.storageHash AS attachmentSyncedHash"
 			};
 		}
 	}, {lazy: true});
@@ -204,7 +207,7 @@ Zotero.Items = function() {
 		for (let i=0; i<ids.length; i++) {
 			let prefix = i > 0 ? ',\n' : '';
 			let item = yield this.getAsync(ids[i], { noCache: true });
-			var json = yield item.toResponseJSON();
+			var json = item.toResponseJSON();
 			yield prefix + JSON.stringify(json, null, 4);
 		}
 		
@@ -212,105 +215,24 @@ Zotero.Items = function() {
 	};
 	
 	
-	this._cachedFields = {};
-	this.cacheFields = Zotero.Promise.coroutine(function* (libraryID, fields, items) {
-		if (items && items.length == 0) {
-			return;
-		}
-		
-		var t = new Date;
-		
-		fields = fields.concat();
-		
-		// Needed for display titles for some item types
-		if (fields.indexOf('title') != -1) {
-			fields.push('reporter', 'court');
-		}
-		
-		Zotero.debug("Caching fields [" + fields.join() + "]"
-			+ (items ? " for " + items.length + " items" : '')
-			+ " in library " + libraryID);
-		
-		if (items && items.length > 0) {
-			yield this._load(libraryID, items);
-		}
-		else {
-			yield this._load(libraryID);
-		}
-		
-		var primaryFields = [];
-		var fieldIDs = [];
-		for each(var field in fields) {
-			// Check if field already cached
-			if (this._cachedFields[libraryID] && this._cachedFields[libraryID].indexOf(field) != -1) {
-				continue;
-			}
-			
-			if (!this._cachedFields[libraryID]) {
-				this._cachedFields[libraryID] = [];
-			}
-			this._cachedFields[libraryID].push(field);
-			
-			if (this.isPrimaryField(field)) {
-				primaryFields.push(field);
-			}
-			else {
-				fieldIDs.push(Zotero.ItemFields.getID(field));
-				if (Zotero.ItemFields.isBaseField(field)) {
-					fieldIDs = fieldIDs.concat(Zotero.ItemFields.getTypeFieldsFromBase(field));
-				}
-			}
-		}
-		
-		if (primaryFields.length) {
-			var sql = "SELECT O.itemID, "
-				+ primaryFields.map((val) => this.getPrimaryDataSQLPart(val)).join(', ')
-				+ this.primaryDataSQLFrom + " AND O.libraryID=?";
-			var params = [libraryID];
-			if (items) {
-				sql += " AND O.itemID IN (" + items.join() + ")";
-			}
-			yield Zotero.DB.queryAsync(
-				sql,
-				params,
-				{
-					onRow: function (row) {
-						let obj = {
-							itemID: row.getResultByIndex(0)
-						};
-						for (let i=0; i<primaryFields.length; i++) {
-							obj[primaryFields[i]] = row.getResultByIndex(i);
-						}
-						Zotero.debug(obj.itemID);
-						Zotero.debug(Object.keys(this._objectCache));
-						this._objectCache[obj.itemID].loadFromRow(obj);
-					}.bind(this)
-				}
-			);
-		}
-		
-		// All fields already cached
-		if (!fieldIDs.length) {
-			Zotero.debug('All fields already cached');
-			return;
-		}
-		
-		var sql = "SELECT itemID FROM items WHERE libraryID=?";
-		var params = [libraryID];
-		var allItemIDs = yield Zotero.DB.columnQueryAsync(sql, params);
+	//
+	// Bulk data loading functions
+	//
+	// These are called by Zotero.DataObjects.prototype._loadDataType().
+	//
+	this._loadItemData = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+		var missingItems = {};
 		var itemFieldsCached = {};
 		
-		var sql = "SELECT itemID, fieldID, value FROM items JOIN itemData USING (itemID) "
-			+ "JOIN itemDataValues USING (valueID) WHERE libraryID=?";
-		var params = [libraryID];
-		if (items) {
-			sql += " AND itemID IN (" + items.join() + ")";
-		}
-		sql += " AND fieldID IN (" + fieldIDs.join() + ")";
+		var sql = "SELECT itemID, fieldID, value FROM items "
+			+ "JOIN itemData USING (itemID) "
+			+ "JOIN itemDataValues USING (valueID) WHERE libraryID=? AND itemTypeID!=?" + idSQL;
+		var params = [libraryID, Zotero.ItemTypes.getID('note')];
 		yield Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
+				noCache: ids.length != 1,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					let fieldID = row.getResultByIndex(1);
@@ -318,19 +240,17 @@ Zotero.Items = function() {
 					
 					//Zotero.debug('Setting field ' + fieldID + ' for item ' + itemID);
 					if (this._objectCache[itemID]) {
+						if (value === null) {
+							value = false;
+						}
 						this._objectCache[itemID].setField(fieldID, value, true);
 					}
 					else {
-						if (!missingItems) {
-							var missingItems = {};
-						}
 						if (!missingItems[itemID]) {
 							missingItems[itemID] = true;
-							Zotero.debug("itemData row references nonexistent item " + itemID);
-							Components.utils.reportError("itemData row references nonexistent item " + itemID);
+							Zotero.logError("itemData row references nonexistent item " + itemID);
 						}
 					}
-					
 					if (!itemFieldsCached[itemID]) {
 						itemFieldsCached[itemID] = {};
 					}
@@ -339,68 +259,464 @@ Zotero.Items = function() {
 			}
 		);
 		
-		// Set nonexistent fields in the cache list to false (instead of null)
-		for (let i=0; i<allItemIDs.length; i++) {
-			let itemID = allItemIDs[i];
-			for (let j=0; j<fieldIDs.length; j++) {
-				let fieldID = fieldIDs[j];
-				if (Zotero.ItemFields.isValidForType(fieldID, this._objectCache[itemID].itemTypeID)) {
-					if (!itemFieldsCached[itemID] || !itemFieldsCached[itemID][fieldID]) {
-						//Zotero.debug('Setting field ' + fieldID + ' to false for item ' + itemID);
-						this._objectCache[itemID].setField(fieldID, false, true);
+		var sql = "SELECT itemID FROM items WHERE libraryID=?" + idSQL;
+		var params = [libraryID];
+		var allItemIDs = [];
+		yield Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				noCache: ids.length != 1,
+				onRow: function (row) {
+					let itemID = row.getResultByIndex(0);
+					let item = this._objectCache[itemID];
+					
+					// Set nonexistent fields in the cache list to false (instead of null)
+					let fieldIDs = Zotero.ItemFields.getItemTypeFields(item.itemTypeID);
+					for (let j=0; j<fieldIDs.length; j++) {
+						let fieldID = fieldIDs[j];
+						if (!itemFieldsCached[itemID] || !itemFieldsCached[itemID][fieldID]) {
+							//Zotero.debug('Setting field ' + fieldID + ' to false for item ' + itemID);
+							item.setField(fieldID, false, true);
+						}
 					}
-				}
+					
+					allItemIDs.push(itemID);
+				}.bind(this)
 			}
-		}
+		);
+		
 		
 		// If 'title' is one of the fields, load in display titles (note titles, letter titles...)
-		if (fields.indexOf('title') != -1) {
-			var titleFieldID = Zotero.ItemFields.getID('title');
-			
-			// Note titles
-			var sql = "SELECT itemID, title FROM items JOIN itemNotes USING (itemID) "
-				+ "WHERE libraryID=? AND itemID NOT IN (SELECT itemID FROM itemAttachments)";
-			var params = [libraryID];
-			if (items) {
-				sql += " AND itemID IN (" + items.join() + ")";
+		var titleFieldID = Zotero.ItemFields.getID('title');
+		
+		// Note titles
+		var sql = "SELECT itemID, title FROM items JOIN itemNotes USING (itemID) "
+			+ "WHERE libraryID=? AND itemID NOT IN (SELECT itemID FROM itemAttachments)" + idSQL;
+		var params = [libraryID];
+		
+		yield Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				onRow: function (row) {
+					let itemID = row.getResultByIndex(0);
+					let title = row.getResultByIndex(1);
+					
+					//Zotero.debug('Setting title for note ' + row.itemID);
+					if (this._objectCache[itemID]) {
+						this._objectCache[itemID].setField(titleFieldID, title, true);
+					}
+					else {
+						if (!missingItems[itemID]) {
+							missingItems[itemID] = true;
+							Zotero.logError("itemData row references nonexistent item " + itemID);
+						}
+					}
+				}.bind(this)
 			}
+		);
+		
+		for (let i=0; i<allItemIDs.length; i++) {
+			let itemID = allItemIDs[i];
+			let item = this._objectCache[itemID];
 			
-			yield Zotero.DB.queryAsync(
-				sql,
-				params,
-				{
-					onRow: function (row) {
-						let itemID = row.getResultByIndex(0);
-						let title = row.getResultByIndex(1);
-						
-						//Zotero.debug('Setting title for note ' + row.itemID);
-						if (this._objectCache[itemID]) {
-							this._objectCache[itemID].setField(titleFieldID, title, true);
-						}
-						else {
-							if (!missingItems) {
-								var missingItems = {};
-							}
-							if (!missingItems[itemID]) {
-								missingItems[itemID] = true;
-								Components.utils.reportError(
-									"itemData row references nonexistent item " + itemID
-								);
-							}
-						}
-					}.bind(this)
-				}
-			);
+			// Mark as loaded
+			item._loaded.itemData = true;
+			item._clearChanged('itemData');
 			
 			// Display titles
-			for (let i=0; i<allItemIDs.length; i++) {
-				let itemID = allItemIDs[i];
-				let item = this._objectCache[itemID];
-				yield item.loadDisplayTitle()
+			yield item.loadDisplayTitle()
+		}
+	});
+	
+	
+	this._loadCreators = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+		var sql = 'SELECT itemID, creatorID, creatorTypeID, orderIndex '
+			+ 'FROM items LEFT JOIN itemCreators USING (itemID) '
+			+ 'WHERE libraryID=?' + idSQL + " ORDER BY itemID, orderIndex";
+		var params = [libraryID];
+		var rows = yield Zotero.DB.queryAsync(sql, params);
+		
+		// Mark creator indexes above the number of creators as changed,
+		// so that they're cleared if the item is saved
+		var fixIncorrectIndexes = function (item, numCreators, maxOrderIndex) {
+			Zotero.debug("Fixing incorrect creator indexes for item " + item.libraryKey
+				+ " (" + numCreators + ", " + maxOrderIndex + ")", 2);
+			var i = numCreators;
+			while (i <= maxOrderIndex) {
+				item._changed.creators[i] = true;
+				i++;
 			}
+		};
+		
+		var lastItemID;
+		var item;
+		var index = 0;
+		var maxOrderIndex = -1;
+		for (let i = 0; i < rows.length; i++) {
+			let row = rows[i];
+			let itemID = row.itemID;
+			
+			if (itemID != lastItemID) {
+				if (!this._objectCache[itemID]) {
+					throw new Error("Item " + itemID + " not loaded");
+				}
+				item = this._objectCache[itemID];
+				
+				item._creators = [];
+				item._creatorIDs = [];
+				item._loaded.creators = true;
+				item._clearChanged('creators');
+				
+				if (!row.creatorID) {
+					lastItemID = row.itemID;
+					continue;
+				}
+				
+				if (index <= maxOrderIndex) {
+					fixIncorrectIndexes(item, index, maxOrderIndex);
+				}
+				
+				index = 0;
+				maxOrderIndex = -1;
+			}
+			
+			lastItemID = row.itemID;
+			
+			if (row.orderIndex > maxOrderIndex) {
+				maxOrderIndex = row.orderIndex;
+			}
+			
+			let creatorData = Zotero.Creators.get(row.creatorID);
+			creatorData.creatorTypeID = row.creatorTypeID;
+			item._creators[index] = creatorData;
+			item._creatorIDs[index] = row.creatorID;
+			index++;
 		}
 		
-		Zotero.debug("Cached fields in " + ((new Date) - t) + "ms");
+		if (index <= maxOrderIndex) {
+			fixIncorrectIndexes(item, index, maxOrderIndex);
+		}
+	});
+	
+	
+	this._loadNotes = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+		var notesToUpdate = [];
+		
+		var sql = "SELECT itemID, note FROM items "
+			+ "JOIN itemNotes USING (itemID) "
+			+ "WHERE libraryID=?" + idSQL;
+		var params = [libraryID];
+		yield Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				noCache: ids.length != 1,
+				onRow: function (row) {
+					let itemID = row.getResultByIndex(0);
+					let item = this._objectCache[itemID];
+					if (!item) {
+						throw new Error("Item " + itemID + " not found");
+					}
+					let note = row.getResultByIndex(1);
+					
+					// Convert non-HTML notes on-the-fly
+					if (note !== "") {
+						if (!note.substr(0, 36).match(/^<div class="zotero-note znv[0-9]+">/)) {
+							note = Zotero.Utilities.htmlSpecialChars(note);
+							note = Zotero.Notes.notePrefix + '<p>'
+								+ note.replace(/\n/g, '</p><p>')
+								.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+								.replace(/  /g, '&nbsp;&nbsp;')
+								+ '</p>' + Zotero.Notes.noteSuffix;
+							note = note.replace(/<p>\s*<\/p>/g, '<p>&nbsp;</p>');
+							notesToUpdate.push([item.id, note]);
+						}
+						
+						// Don't include <div> wrapper when returning value
+						let startLen = note.substr(0, 36).match(/^<div class="zotero-note znv[0-9]+">/)[0].length;
+						let endLen = 6; // "</div>".length
+						note = note.substr(startLen, note.length - startLen - endLen);
+					}
+					
+					item._noteText = note ? note : '';
+					item._loaded.note = true;
+					item._clearChanged('note');
+				}.bind(this)
+			}
+		);
+		
+		if (notesToUpdate.length) {
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let i = 0; i < notesToUpdate.length; i++) {
+					let row = notesToUpdate[i];
+					let sql = "UPDATE itemNotes SET note=? WHERE itemID=?";
+					yield Zotero.DB.queryAsync(sql, [row[1], row[0]]);
+				}
+			}.bind(this));
+		}
+		
+		// Mark notes and attachments without notes as loaded
+		sql = "SELECT itemID FROM items WHERE libraryID=?" + idSQL
+			+ " AND itemTypeID IN (?, ?) AND itemID NOT IN (SELECT itemID FROM itemNotes)";
+		params = [libraryID, Zotero.ItemTypes.getID('note'), Zotero.ItemTypes.getID('attachment')];
+		yield Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				noCache: ids.length != 1,
+				onRow: function (row) {
+					let itemID = row.getResultByIndex(0);
+					let item = this._objectCache[itemID];
+					if (!item) {
+						throw new Error("Item " + itemID + " not loaded");
+					}
+					
+					item._noteText = '';
+					item._loaded.note = true;
+					item._clearChanged('note');
+				}.bind(this)
+			}
+		);
+	});
+	
+	
+	this._loadChildItems = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+		var params = [libraryID];
+		var rows = [];
+		var onRow = function (row, setFunc) {
+			var itemID = row.getResultByIndex(0);
+			
+			if (lastItemID && itemID !== lastItemID) {
+				setFunc(lastItemID, rows);
+				rows = [];
+			}
+			
+			lastItemID = itemID;
+			rows.push({
+				itemID: row.getResultByIndex(1),
+				title: row.getResultByIndex(2),
+				trashed: row.getResultByIndex(3)
+			});
+		};
+		
+		var sql = "SELECT parentItemID, A.itemID, value AS title, "
+			+ "CASE WHEN DI.itemID IS NULL THEN 0 ELSE 1 END AS trashed "
+			+ "FROM itemAttachments A "
+			+ "JOIN items I ON (A.parentItemID=I.itemID) "
+			+ "LEFT JOIN itemData ID ON (fieldID=110 AND A.itemID=ID.itemID) "
+			+ "LEFT JOIN itemDataValues IDV USING (valueID) "
+			+ "LEFT JOIN deletedItems DI USING (itemID) "
+			+ "WHERE libraryID=?"
+			+ (ids.length ? " AND parentItemID IN (" + ids.map(id => parseInt(id)).join(", ") + ")" : "");
+		// Since we do the sort here and cache these results, a restart will be required
+		// if this pref (off by default) is turned on, but that's OK
+		if (Zotero.Prefs.get('sortAttachmentsChronologically')) {
+			sql +=  " ORDER BY parentItemID, dateAdded";
+		}
+		var setAttachmentItem = function (itemID, rows) {
+			var item = this._objectCache[itemID];
+			if (!item) {
+				throw new Error("Item " + itemID + " not loaded");
+			}
+			
+			item._attachments = {
+				rows,
+				chronologicalWithTrashed: null,
+				chronologicalWithoutTrashed: null,
+				alphabeticalWithTrashed: null,
+				alphabeticalWithoutTrashed: null
+			};
+		}.bind(this);
+		var lastItemID = null;
+		yield Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				noCache: ids.length != 1,
+				onRow: function (row) {
+					onRow(row, setAttachmentItem);
+				}
+			}
+		);
+		if (lastItemID) {
+			setAttachmentItem(lastItemID, rows);
+		}
+		
+		//
+		// Notes
+		//
+		sql = "SELECT parentItemID, N.itemID, title, "
+			+ "CASE WHEN DI.itemID IS NULL THEN 0 ELSE 1 END AS trashed "
+			+ "FROM itemNotes N "
+			+ "JOIN items I ON (N.parentItemID=I.itemID) "
+			+ "LEFT JOIN deletedItems DI USING (itemID) "
+			+ "WHERE libraryID=?"
+			+ (ids.length ? " AND parentItemID IN (" + ids.map(id => parseInt(id)).join(", ") + ")" : "");
+		if (Zotero.Prefs.get('sortNotesChronologically')) {
+			sql +=  " ORDER BY parentItemID, dateAdded";
+		}
+		var setNoteItem = function (itemID, rows) {
+			var item = this._objectCache[itemID];
+			if (!item) {
+				throw new Error("Item " + itemID + " not loaded");
+			}
+			
+			item._notes = {
+				rows,
+				rowsEmbedded: null,
+				chronologicalWithTrashed: null,
+				chronologicalWithoutTrashed: null,
+				alphabeticalWithTrashed: null,
+				alphabeticalWithoutTrashed: null,
+				numWithTrashed: null,
+				numWithoutTrashed: null,
+				numWithTrashedWithEmbedded: null,
+				numWithoutTrashedWithoutEmbedded: null
+			};
+		}.bind(this);
+		lastItemID = null;
+		rows = [];
+		yield Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				noCache: ids.length != 1,
+				onRow: function (row) {
+					onRow(row, setNoteItem);
+				}
+			}
+		);
+		if (lastItemID) {
+			setNoteItem(lastItemID, rows);
+		}
+		
+		// Mark all top-level items as having child items loaded
+		sql = "SELECT itemID FROM items I WHERE libraryID=?" + idSQL + " AND itemID NOT IN "
+			+ "(SELECT itemID FROM itemAttachments UNION SELECT itemID FROM itemNotes)";
+		yield Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				noCache: ids.length != 1,
+				onRow: function (row) {
+					var itemID = row.getResultByIndex(0);
+					var item = this._objectCache[itemID];
+					if (!item) {
+						throw new Error("Item " + itemID + " not loaded");
+					}
+					item._loaded.childItems = true;
+					item._clearChanged('childItems');
+				}.bind(this)
+			}
+		);
+	});
+	
+	
+	this._loadTags = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+		var sql = "SELECT itemID, name, type FROM items "
+			+ "LEFT JOIN itemTags USING (itemID) "
+			+ "LEFT JOIN tags USING (tagID) WHERE libraryID=?" + idSQL;
+		var params = [libraryID];
+		
+		var lastItemID;
+		var rows = [];
+		var setRows = function (itemID, rows) {
+			var item = this._objectCache[itemID];
+			if (!item) {
+				throw new Error("Item " + itemID + " not found");
+			}
+			
+			item._tags = [];
+			for (let i = 0; i < rows.length; i++) {
+				let row = rows[i];
+				item._tags.push(Zotero.Tags.cleanData(row));
+			}
+			
+			item._loaded.tags = true;
+			item._clearChanged('tags');
+		}.bind(this);
+		
+		yield Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				noCache: ids.length != 1,
+				onRow: function (row) {
+					let itemID = row.getResultByIndex(0);
+					
+					if (lastItemID && itemID !== lastItemID) {
+						setRows(lastItemID, rows);
+						rows = [];
+					}
+					
+					lastItemID = itemID;
+					
+					// Item has no tags
+					let tag = row.getResultByIndex(1);
+					if (tag === null) {
+						return;
+					}
+					
+					rows.push({
+						tag: tag,
+						type: row.getResultByIndex(2)
+					});
+				}.bind(this)
+			}
+		);
+		if (lastItemID) {
+			setRows(lastItemID, rows);
+		}
+	});
+	
+	
+	this._loadCollections = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+		var sql = "SELECT itemID, collectionID FROM items "
+			+ "LEFT JOIN collectionItems USING (itemID) "
+			+ "WHERE libraryID=?" + idSQL;
+		var params = [libraryID];
+		
+		var lastItemID;
+		var rows = [];
+		var setRows = function (itemID, rows) {
+			var item = this._objectCache[itemID];
+			if (!item) {
+				throw new Error("Item " + itemID + " not found");
+			}
+			
+			item._collections = rows;
+			item._loaded.collections = true;
+			item._clearChanged('collections');
+		}.bind(this);
+		
+		yield Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				noCache: ids.length != 1,
+				onRow: function (row) {
+					let itemID = row.getResultByIndex(0);
+					
+					if (lastItemID && itemID !== lastItemID) {
+						setRows(lastItemID, rows);
+						rows = [];
+					}
+					
+					lastItemID = itemID;
+					let collectionID = row.getResultByIndex(1);
+					// No collections
+					if (collectionID === null) {
+						return;
+					}
+					rows.push(collectionID);
+				}.bind(this)
+			}
+		);
+		if (lastItemID) {
+			setRows(lastItemID, rows);
+		}
 	});
 	
 	
@@ -409,17 +725,11 @@ Zotero.Items = function() {
 			var otherItemIDs = [];
 			var itemURI = Zotero.URI.getItemURI(item);
 			
-			yield item.loadTags();
-			yield item.loadRelations();
 			var replPred = Zotero.Relations.replacedItemPredicate;
 			var toSave = {};
 			toSave[this.id];
 			
 			for each(var otherItem in otherItems) {
-				yield otherItem.loadChildItems();
-				yield otherItem.loadCollections();
-				yield otherItem.loadTags();
-				yield otherItem.loadRelations();
 				let otherItemURI = Zotero.URI.getItemURI(otherItem);
 				
 				// Move child items to master
@@ -630,16 +940,6 @@ Zotero.Items = function() {
 		
 		Zotero.Prefs.set('purge.items', false)
 	});
-	
-	
-	this._postLoad = function (libraryID, ids) {
-		if (!ids) {
-			if (!this._cachedFields[libraryID]) {
-				this._cachedFields[libraryID] = [];
-			}
-			this._cachedFields[libraryID] = this.primaryFields.concat();
-		}
-	}
 	
 	
 	/*

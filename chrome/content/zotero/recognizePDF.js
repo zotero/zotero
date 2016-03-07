@@ -395,7 +395,6 @@ var Zotero_RecognizePDF = new function() {
 					}
 					
 					// put new item in same collections as the old one
-					yield item.loadCollections();
 					let itemCollections = item.getCollections();
 					for (let i = 0; i < itemCollections.length; i++) {
 						let collection = yield Zotero.Collections.getAsync(itemCollections[i]);

@@ -621,10 +621,18 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				// Initialize Locate Manager
 				Zotero.LocateManager.init();
 				
-				Zotero.Collections.init();
-				Zotero.Items.init();
+				yield Zotero.Collections.init();
+				yield Zotero.Items.init();
 				yield Zotero.Searches.init();
+				yield Zotero.Creators.init();
 				yield Zotero.Groups.init();
+				
+				let libraryIDs = Zotero.Libraries.getAll().map(x => x.libraryID);
+				for (let libraryID of libraryIDs) {
+					yield Zotero.Collections.loadAllData(libraryID);
+					yield Zotero.Searches.loadAllData(libraryID);
+					yield Zotero.Items.loadAllData(libraryID);
+				}
 				
 				yield Zotero.QuickCopy.init();
 				

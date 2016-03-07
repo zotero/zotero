@@ -352,10 +352,9 @@ function getNameProperty(objectType) {
 	return objectType == 'item' ? 'title' : 'name';
 }
 
-var modifyDataObject = Zotero.Promise.coroutine(function* (obj, params = {}, saveOptions) {
+var modifyDataObject = function (obj, params = {}, saveOptions) {
 	switch (obj.objectType) {
 	case 'item':
-		yield obj.loadItemData();
 		obj.setField(
 			'title',
 			params.title !== undefined ? params.title : Zotero.Utilities.randomString()
@@ -366,7 +365,7 @@ var modifyDataObject = Zotero.Promise.coroutine(function* (obj, params = {}, sav
 		obj.name = params.name !== undefined ? params.name : Zotero.Utilities.randomString();
 	}
 	return obj.saveTx(saveOptions);
-});
+};
 
 /**
  * Return a promise for the error thrown by a promise, or false if none
@@ -584,7 +583,7 @@ var generateItemJSONData = Zotero.Promise.coroutine(function* generateItemJSONDa
 	
 	for (let itemName in items) {
 		let zItem = yield Zotero.Items.getAsync(items[itemName].id);
-		jsonData[itemName] = yield zItem.toJSON(options);
+		jsonData[itemName] = zItem.toJSON(options);
 
 		// Don't replace some fields that _always_ change (e.g. item keys)
 		// as long as it follows expected format

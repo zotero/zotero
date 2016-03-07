@@ -512,7 +512,7 @@ Zotero.Sync.Data.Local = {
 									objectType, obj.libraryID, obj.key, obj.version
 								);
 								
-								let jsonDataLocal = yield obj.toJSON();
+								let jsonDataLocal = obj.toJSON();
 								
 								// For items, check if mtime or file hash changed in metadata,
 								// which would indicate that a remote storage sync took place and
@@ -780,7 +780,8 @@ Zotero.Sync.Data.Local = {
 			markToDownload = true;
 		}
 		if (markToDownload) {
-			yield Zotero.Sync.Storage.Local.setSyncState(item.id, "to_download");
+			item.attachmentSyncState = "to_download";
+			yield item.save({ skipAll: true });
 		}
 	}),
 	
@@ -870,7 +871,6 @@ Zotero.Sync.Data.Local = {
 	
 	_saveObjectFromJSON: Zotero.Promise.coroutine(function* (obj, json, options) {
 		try {
-			yield obj.loadAllData();
 			obj.fromJSON(json);
 			if (!options.saveAsChanged) {
 				obj.version = json.version;

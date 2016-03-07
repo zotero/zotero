@@ -179,7 +179,7 @@ describe("Zotero.Utilities", function() {
 			
 			let fromZoteroItem;
 			try {
-				fromZoteroItem = yield Zotero.Utilities.itemToCSLJSON(item);
+				fromZoteroItem = Zotero.Utilities.itemToCSLJSON(item);
 			} catch(e) {
 				assert.fail(e, null, 'accepts Zotero Item');
 			}
@@ -190,7 +190,7 @@ describe("Zotero.Utilities", function() {
 			let fromExportItem;
 			try {
 				fromExportItem = Zotero.Utilities.itemToCSLJSON(
-					yield Zotero.Utilities.Internal.itemToExportFormat(item)
+					Zotero.Utilities.Internal.itemToExportFormat(item)
 				);
 			} catch(e) {
 				assert.fail(e, null, 'accepts Zotero export item');
@@ -205,7 +205,7 @@ describe("Zotero.Utilities", function() {
 			note.setNote('Some note longer than 50 characters, which will become the title.');
 			yield note.saveTx();
 			
-			let cslJSONNote = yield Zotero.Utilities.itemToCSLJSON(note);
+			let cslJSONNote = Zotero.Utilities.itemToCSLJSON(note);
 			assert.equal(cslJSONNote.type, 'article', 'note is exported as "article"');
 			assert.equal(cslJSONNote.title, note.getNoteTitle(), 'note title is set to Zotero pseudo-title');
 		}));
@@ -221,7 +221,7 @@ describe("Zotero.Utilities", function() {
 			
 			yield attachment.saveTx();
 			
-			let cslJSONAttachment = yield Zotero.Utilities.itemToCSLJSON(attachment);
+			let cslJSONAttachment = Zotero.Utilities.itemToCSLJSON(attachment);
 			assert.equal(cslJSONAttachment.type, 'article', 'attachment is exported as "article"');
 			assert.equal(cslJSONAttachment.title, 'Empty', 'attachment title is correct');
 			assert.deepEqual(cslJSONAttachment.accessed, {"date-parts":[["2001",2,3]]}, 'attachment access date is mapped correctly');
@@ -240,27 +240,27 @@ describe("Zotero.Utilities", function() {
 			item.setField('extra', 'PMID: 12345\nPMCID:123456');
 			yield item.saveTx();
 			
-			let cslJSON = yield Zotero.Utilities.itemToCSLJSON(item);
+			let cslJSON = Zotero.Utilities.itemToCSLJSON(item);
 			
 			assert.equal(cslJSON.PMID, '12345', 'PMID from Extra is mapped to PMID');
 			assert.equal(cslJSON.PMCID, '123456', 'PMCID from Extra is mapped to PMCID');
 			
 			item.setField('extra', 'PMID: 12345');
 			yield item.saveTx();
-			cslJSON = yield Zotero.Utilities.itemToCSLJSON(item);
+			cslJSON = Zotero.Utilities.itemToCSLJSON(item);
 			
 			assert.equal(cslJSON.PMID, '12345', 'single-line entry is extracted correctly');
 			
 			item.setField('extra', 'some junk: note\nPMID: 12345\nstuff in-between\nPMCID: 123456\nlast bit of junk!');
 			yield item.saveTx();
-			cslJSON = yield Zotero.Utilities.itemToCSLJSON(item);
+			cslJSON = Zotero.Utilities.itemToCSLJSON(item);
 			
 			assert.equal(cslJSON.PMID, '12345', 'PMID from mixed Extra field is mapped to PMID');
 			assert.equal(cslJSON.PMCID, '123456', 'PMCID from mixed Extra field is mapped to PMCID');
 			
 			item.setField('extra', 'a\n PMID: 12345\nfoo PMCID: 123456');
 			yield item.saveTx();
-			cslJSON = yield Zotero.Utilities.itemToCSLJSON(item);
+			cslJSON = Zotero.Utilities.itemToCSLJSON(item);
 			
 			assert.isUndefined(cslJSON.PMCID, 'field label must not be preceded by other text');
 			assert.isUndefined(cslJSON.PMID, 'field label must not be preceded by a space');
@@ -268,7 +268,7 @@ describe("Zotero.Utilities", function() {
 			
 			item.setField('extra', 'something\npmid: 12345\n');
 			yield item.saveTx();
-			cslJSON = yield Zotero.Utilities.itemToCSLJSON(item);
+			cslJSON = Zotero.Utilities.itemToCSLJSON(item);
 			
 			assert.isUndefined(cslJSON.PMID, 'field labels are case-sensitive');
 		}));
@@ -347,7 +347,7 @@ describe("Zotero.Utilities", function() {
 			});
 				
 			let item = Zotero.Items.get(data.item.id);
-			let cslCreators = (yield Zotero.Utilities.itemToCSLJSON(item)).author;
+			let cslCreators = Zotero.Utilities.itemToCSLJSON(item).author;
 			
 			assert.deepEqual(cslCreators[0], creators[0].expect, 'simple name is not parsed');
 			assert.deepEqual(cslCreators[1], creators[1].expect, 'name with dropping and non-dropping particles is parsed');
@@ -368,7 +368,7 @@ describe("Zotero.Utilities", function() {
 				Zotero.Utilities.itemFromCSLJSON(item, json);
 				yield item.saveTx();
 				
-				let newJSON = yield Zotero.Utilities.itemToCSLJSON(item);
+				let newJSON = Zotero.Utilities.itemToCSLJSON(item);
 				
 				delete newJSON.id;
 				delete json.id;
@@ -382,7 +382,7 @@ describe("Zotero.Utilities", function() {
 			note.setNote('Some note longer than 50 characters, which will become the title.');
 			yield note.saveTx();
 			
-			let jsonNote = yield Zotero.Utilities.itemToCSLJSON(note);
+			let jsonNote = Zotero.Utilities.itemToCSLJSON(note);
 			
 			let item = new Zotero.Item();
 			Zotero.Utilities.itemFromCSLJSON(item, jsonNote);
@@ -397,7 +397,7 @@ describe("Zotero.Utilities", function() {
 			attachment.setNote('Note');
 			yield attachment.saveTx();
 			
-			let jsonAttachment = yield Zotero.Utilities.itemToCSLJSON(attachment);
+			let jsonAttachment = Zotero.Utilities.itemToCSLJSON(attachment);
 			
 			let item = new Zotero.Item();
 			Zotero.Utilities.itemFromCSLJSON(item, jsonAttachment);

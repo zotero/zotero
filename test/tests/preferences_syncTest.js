@@ -148,7 +148,7 @@ describe("Sync Preferences", function () {
 			var cont = yield win.Zotero_Preferences.Sync.checkUser(1, "A");
 			assert.isTrue(cont);
 
-			var json = yield item1.toJSON();
+			var json = item1.toJSON();
 			var uri = json.relations[Zotero.Relations.linkedObjectPredicate][0];
 			assert.notInclude(uri, 'users/local');
 			assert.include(uri, 'users/1/publications');

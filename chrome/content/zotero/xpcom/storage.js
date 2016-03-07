@@ -65,9 +65,9 @@ Zotero.Sync.Storage = new function () {
 			return false;
 		}
 		
-		var syncModTime = Zotero.Sync.Storage.getSyncedModificationTime(itemID);
+		var syncModTime = item.attachmentSyncedModificationTime;
 		if (fileModTime != syncModTime) {
-			var syncHash = Zotero.Sync.Storage.getSyncedHash(itemID);
+			var syncHash = item.attachmentSyncedHash;
 			if (syncHash) {
 				var fileHash = item.attachmentHash;
 				if (fileHash && fileHash == syncHash) {

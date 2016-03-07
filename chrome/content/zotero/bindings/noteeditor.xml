@@ -417,48 +417,41 @@
 			</method>
 			<method name="updateTagsSummary">
 				<body><![CDATA[
-					Zotero.spawn(function* () {
-						var v = yield this.id('tags').summary;
-						
-						if (!v || v == "") {
-							v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
-						}
-						
-						this.id('tagsLabel').value = Zotero.getString('itemFields.tags')
-							+ Zotero.getString('punctuation.colon');
-						this.id('tagsClick').value = v;
-					}, this);
+					var v = this.id('tags').summary;
+					
+					if (!v || v == "") {
+						v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
+					}
+					
+					this.id('tagsLabel').value = Zotero.getString('itemFields.tags')
+						+ Zotero.getString('punctuation.colon');
+					this.id('tagsClick').value = v;
 				]]></body>
 			</method>
 			<method name="relatedClick">
 				<body><![CDATA[
-					Zotero.spawn(function* () {
-						yield this.item.loadRelations();
-						var relatedList = this.item.relatedItems;
-						if (relatedList.length > 0) {
-							var x = this.boxObject.screenX;
-							var y = this.boxObject.screenY;
-							this.id('relatedPopup').openPopupAtScreen(x, y, false);
-						}
-						else {
-							this.id('related').add();
-						}
-					}, this);
+					var relatedList = this.item.relatedItems;
+					if (relatedList.length > 0) {
+						var x = this.boxObject.screenX;
+						var y = this.boxObject.screenY;
+						this.id('relatedPopup').openPopupAtScreen(x, y, false);
+					}
+					else {
+						this.id('related').add();
+					}
 				]]></body>
 			</method>
 			<method name="updateRelatedSummary">
 				<body><![CDATA[
-					Zotero.spawn(function* () {
-						var v = yield this.id('related').summary;
-						
-						if (!v || v == "") {
-							v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
-						}
-						
-						this.id('relatedLabel').value = Zotero.getString('itemFields.related')
-							+ Zotero.getString('punctuation.colon');
-						this.id('relatedClick').value = v;
-					}, this)
+					var v = this.id('related').summary;
+					
+					if (!v || v == "") {
+						v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
+					}
+					
+					this.id('relatedLabel').value = Zotero.getString('itemFields.related')
+						+ Zotero.getString('punctuation.colon');
+					this.id('relatedClick').value = v;
 				]]></body>
 			</method>
 			<method name="parentClick">

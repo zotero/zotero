@@ -239,7 +239,8 @@ Zotero.Sync.Storage.Local = {
 			// TODO: Catch error?
 			let state = yield this._checkForUpdatedFile(item, attachmentData[item.id]);
 			if (state !== false) {
-				yield Zotero.Sync.Storage.Local.setSyncState(item.id, state);
+				item.attachmentSyncState = state;
+				yield item.saveTx({ skipAll: true });
 				changed = true;
 			}
 		}
@@ -282,7 +283,7 @@ Zotero.Sync.Storage.Local = {
 			// If file is already marked for upload, skip check. Even if the file was changed
 			// both locally and remotely, conflicts are checked at upload time, so we don't need
 			// to worry about it here.
-			if ((yield this.getSyncState(item.id)) == this.SYNC_STATE_TO_UPLOAD) {
+			if (item.attachmentSyncState == this.SYNC_STATE_TO_UPLOAD) {
 				Zotero.debug("File is already marked for upload");
 				return false;
 			}
@@ -298,7 +299,7 @@ Zotero.Sync.Storage.Local = {
 				Zotero.debug(`Remote mod time for item ${lk} is ${remoteModTime}`);
 				
 				// Ignore attachments whose stored mod times haven't changed
-				mtime = mtime !== false ? mtime : (yield this.getSyncedModificationTime(item.id));
+				mtime = mtime !== false ? mtime : item.attachmentSyncedModificationTime;
 				if (mtime == remoteModTime) {
 					Zotero.debug(`Synced mod time (${mtime}) hasn't changed for item ${lk}`);
 					return false;
@@ -474,125 +475,23 @@ Zotero.Sync.Storage.Local = {
 	},
 	
 	
-	/**
-	 * @param	{Integer}		itemID
-	 */
-	getSyncState: function (itemID) {
-		var sql = "SELECT syncState FROM itemAttachments WHERE itemID=?";
-		return Zotero.DB.valueQueryAsync(sql, itemID);
-	},
-	
-	
-	/**
-	 * @param {Integer} itemID
-	 * @param {Integer|String} syncState - Zotero.Sync.Storage.Local.SYNC_STATE_* or last part
-	 *     as string (e.g., "TO_UPLOAD")
-	 */
-	setSyncState: Zotero.Promise.method(function (itemID, syncState) {
-		if (typeof syncState == 'string') {
-			syncState = this["SYNC_STATE_" + syncState.toUpperCase()];
+	resetModeSyncStates: Zotero.Promise.coroutine(function* () {
+		var sql = "SELECT itemID FROM items JOIN itemAttachments USING (itemID) "
+			+ "WHERE libraryID=? AND itemTypeID=? AND linkMode IN (?, ?)";
+		var params = [
+			Zotero.Libraries.userLibraryID,
+			Zotero.ItemTypes.getID('attachment'),
+			Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
+			Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+		];
+		var itemIDs = yield Zotero.DB.columnQueryAsync(sql, params);
+		for (let itemID of items) {
+			let item = Zotero.Items.get(itemID);
+			item._attachmentSyncState = this.SYNC_STATE_TO_UPLOAD;
 		}
 		
-		switch (syncState) {
-			case this.SYNC_STATE_TO_UPLOAD:
-			case this.SYNC_STATE_TO_DOWNLOAD:
-			case this.SYNC_STATE_IN_SYNC:
-			case this.SYNC_STATE_FORCE_UPLOAD:
-			case this.SYNC_STATE_FORCE_DOWNLOAD:
-			case this.SYNC_STATE_IN_CONFLICT:
-				break;
-			
-			default:
-				throw new Error("Invalid sync state " + syncState);
-		}
-		
-		var sql = "UPDATE itemAttachments SET syncState=? WHERE itemID=?";
-		return Zotero.DB.valueQueryAsync(sql, [syncState, itemID]);
-	}),
-	
-	
-	resetModeSyncStates: Zotero.Promise.coroutine(function* (mode) {
-		var sql = "UPDATE itemAttachments SET syncState=? "
-			+ "WHERE itemID IN (SELECT itemID FROM items WHERE libraryID=?)";
-		var params = [this.SYNC_STATE_TO_UPLOAD, Zotero.Libraries.userLibraryID];
-		yield Zotero.DB.queryAsync(sql, params);
-	}),
-	
-	
-	/**
-	 * @param	{Integer}			itemID
-	 * @return	{Integer|NULL}					Mod time as timestamp in ms,
-	 *												or NULL if never synced
-	 */
-	getSyncedModificationTime: Zotero.Promise.coroutine(function* (itemID) {
-		var sql = "SELECT storageModTime FROM itemAttachments WHERE itemID=?";
-		var mtime = yield Zotero.DB.valueQueryAsync(sql, itemID);
-		if (mtime === false) {
-			throw new Error("Item " + itemID + " not found")
-		}
-		return mtime;
-	}),
-	
-	
-	/**
-	 * @param {Integer} itemID
-	 * @param {Integer} mtime - File modification time as timestamp in ms
-	 * @param {Boolean} [updateItem=FALSE] - Mark attachment item as unsynced
-	 */
-	setSyncedModificationTime: Zotero.Promise.coroutine(function* (itemID, mtime, updateItem) {
-		mtime = parseInt(mtime)
-		if (isNaN(mtime) || mtime < 0) {
-			Components.utils.reportError("Invalid file mod time " + mtime
-				+ " in Zotero.Storage.setSyncedModificationTime()");
-			mtime = 0;
-		}
-		
-		Zotero.DB.requireTransaction();
-		
-		var sql = "UPDATE itemAttachments SET storageModTime=? WHERE itemID=?";
-		yield Zotero.DB.queryAsync(sql, [mtime, itemID]);
-		
-		if (updateItem) {
-			let item = yield Zotero.Items.getAsync(itemID);
-			yield item.updateSynced(false);
-		}
-	}),
-	
-	
-	/**
-	 * @param {Integer} itemID
-	 * @return {Promise<String|null|false>} - File hash, null if never synced, if false if
-	 *     file doesn't exist
-	 */
-	getSyncedHash: Zotero.Promise.coroutine(function* (itemID) {
-		var sql = "SELECT storageHash FROM itemAttachments WHERE itemID=?";
-		var hash = yield Zotero.DB.valueQueryAsync(sql, itemID);
-		if (hash === false) {
-			throw new Error("Item " + itemID + " not found");
-		}
-		return hash;
-	}),
-	
-	
-	/**
-	 * @param	{Integer}	itemID
-	 * @param	{String}	hash				File hash
-	 * @param {Boolean} [updateItem=FALSE] - Mark attachment item as unsynced
-	 */
-	setSyncedHash: Zotero.Promise.coroutine(function* (itemID, hash, updateItem) {
-		if (hash !== null && hash.length != 32) {
-			throw new Error("Invalid file hash '" + hash + "'");
-		}
-		
-		Zotero.DB.requireTransaction();
-		
-		var sql = "UPDATE itemAttachments SET storageHash=? WHERE itemID=?";
-		yield Zotero.DB.queryAsync(sql, [hash, itemID]);
-		
-		if (updateItem) {
-			let item = yield Zotero.Items.getAsync(itemID);
-			yield item.updateSynced(false);
-		}
+		sql = "UPDATE itemAttachments SET syncState=? WHERE itemID IN (" + sql + ")";
+		yield Zotero.DB.queryAsync(sql, [this.SYNC_STATE_TO_UPLOAD].concat(params));
 	}),
 	
 	
@@ -678,11 +577,10 @@ Zotero.Sync.Storage.Local = {
 		// Set the file mtime to the time from the server
 		yield OS.File.setDates(path, null, new Date(parseInt(mtime)));
 		
-		yield Zotero.DB.executeTransaction(function* () {
-			yield this.setSyncedHash(item.id, md5);
-			yield this.setSyncState(item.id, this.SYNC_STATE_IN_SYNC);
-			yield this.setSyncedModificationTime(item.id, mtime);
-		}.bind(this));
+		item.attachmentSyncState = this.SYNC_STATE_IN_SYNC;
+		item.attachmentSyncedModificationTime = mtime;
+		item.attachmentSyncedHash = md5;
+		yield item.saveTx();
 		
 		return new Zotero.Sync.Storage.Result({
 			localChanges: true
@@ -1040,7 +938,7 @@ Zotero.Sync.Storage.Local = {
 		for (let localItem of localItems) {
 			// Use the mtime for the dateModified field, since that's all that's shown in the
 			// CR window at the moment
-			let localItemJSON = yield localItem.toJSON();
+			let localItemJSON = localItem.toJSON();
 			localItemJSON.dateModified = Zotero.Date.dateToISO(
 				new Date(yield localItem.attachmentModificationTime)
 			);
@@ -1101,8 +999,9 @@ Zotero.Sync.Storage.Local = {
 				else {
 					syncState = this.SYNC_STATE_FORCE_DOWNLOAD;
 				}
-				let itemID = Zotero.Items.getIDFromLibraryAndKey(libraryID, conflict.left.key);
-				yield Zotero.Sync.Storage.Local.setSyncState(itemID, syncState);
+				let item = Zotero.Items.getByLibraryAndKey(libraryID, conflict.left.key);
+				item.attachmentSyncState = syncState;
+				yield item.save({ skipAll: true });
 			}
 		}.bind(this));
 		return true;

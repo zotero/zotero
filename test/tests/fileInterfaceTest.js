@@ -21,7 +21,7 @@ describe("Zotero_File_Interface", function() {
         let childItems = importedCollection[0].getChildItems();
         let savedItems = {};
         for (let i=0; i<childItems.length; i++) {
-            let savedItem = yield childItems[i].toJSON();
+            let savedItem = childItems[i].toJSON();
             delete savedItem.dateAdded;
             delete savedItem.dateModified;
             delete savedItem.key;

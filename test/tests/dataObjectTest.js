@@ -56,7 +56,6 @@ describe("Zotero.DataObject", function() {
 				yield obj.saveTx();
 				
 				if (type == 'item') {
-					yield obj.loadItemData();
 					obj.setField('title', Zotero.Utilities.randomString());
 				}
 				else {
@@ -131,7 +130,6 @@ describe("Zotero.DataObject", function() {
 				yield obj.saveTx();
 				
 				if (type == 'item') {
-					yield obj.loadItemData();
 					obj.setField('title', Zotero.Utilities.randomString());
 				}
 				else {
@@ -294,7 +292,7 @@ describe("Zotero.DataObject", function() {
 				let obj = yield createDataObject(type);
 				let libraryID = obj.libraryID;
 				let key = obj.key;
-				let json = yield obj.toJSON();
+				let json = obj.toJSON();
 				yield Zotero.Sync.Data.Local.saveCacheObjects(type, libraryID, [json]);
 				yield obj.eraseTx();
 				let versions = yield Zotero.Sync.Data.Local.getCacheObjectVersions(

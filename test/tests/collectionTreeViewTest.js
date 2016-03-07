@@ -390,12 +390,6 @@ describe("Zotero.CollectionTreeView", function() {
 					parentItemID: item.id
 				});
 				
-				// Hack to unload relations to test proper loading
-				//
-				// Probably need a better method for this
-				item._loaded.relations = false;
-				attachment._loaded.relations = false;
-				
 				var ids = (yield drop('item', 'L' + group.libraryID, [item.id])).ids;
 				
 				yield cv.selectLibrary(group.libraryID);
@@ -413,7 +407,7 @@ describe("Zotero.CollectionTreeView", function() {
 				
 				// Check attachment
 				assert.isTrue(itemsView.isContainer(0));
-				yield itemsView.toggleOpenState(0);
+				itemsView.toggleOpenState(0);
 				assert.equal(itemsView.rowCount, 2);
 				treeRow = itemsView.getRow(1);
 				assert.equal(treeRow.ref.id, ids[1]);

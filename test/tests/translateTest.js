@@ -175,7 +175,7 @@ describe("Zotero.Translate", function() {
 			let newItems = yield saveItemsThroughTranslator("import", saveItems);
 			let savedItems = {};
 			for (let i=0; i<newItems.length; i++) {
-				let savedItem = yield newItems[i].toJSON();
+				let savedItem = newItems[i].toJSON();
 				savedItems[Zotero.ItemTypes.getName(newItems[i].itemTypeID)] = savedItem;
 				delete savedItem.dateAdded;
 				delete savedItem.dateModified;
