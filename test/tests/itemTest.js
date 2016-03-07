@@ -609,11 +609,8 @@ describe("Zotero.Item", function () {
 			
 			// File should be flagged for upload
 			// DEBUG: Is this necessary?
-			assert.equal(
-				(yield Zotero.Sync.Storage.Local.getSyncState(item.id)),
-				Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD
-			);
-			assert.isNull(yield Zotero.Sync.Storage.Local.getSyncedHash(item.id));
+			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD);
+			assert.isNull(item.attachmentSyncedHash);
 		})
 	})
 	
@@ -897,10 +894,9 @@ describe("Zotero.Item", function () {
 				var mtime = new Date().getTime();
 				var md5 = 'b32e33f529942d73bea4ed112310f804';
 				
-				yield Zotero.DB.executeTransaction(function* () {
-					yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, mtime);
-					yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, md5);
-				});
+				item.attachmentSyncedModificationTime = mtime;
+				item.attachmentSyncedHash = md5;
+				yield item.saveTx({ skipAll: true });
 				
 				var json = item.toJSON({
 					syncedStorageProperties: true

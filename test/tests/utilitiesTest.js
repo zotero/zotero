@@ -359,6 +359,7 @@ describe("Zotero.Utilities", function() {
 	});
 	describe("itemFromCSLJSON", function () {
 		it("should stably perform itemToCSLJSON -> itemFromCSLJSON -> itemToCSLJSON", function* () {
+			this.timeout(10000);
 			let data = loadSampleData('citeProcJSExport');
 			
 			for (let i in data) {
