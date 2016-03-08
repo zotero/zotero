@@ -395,7 +395,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 				// Upload single file to S3
 				else if (req.method == "POST" && req.url == baseURL + "pretend-s3/1") {
 					assert.equal(req.requestHeaders["Content-Type"], contentType1 + fixSinonBug);
-					assert.equal(req.requestBody.size, (new Blob([prefix1, File(file1), suffix1]).size));
+					assert.equal(req.requestBody.size, (new Blob([prefix1, new File(file1), suffix1]).size));
 					req.respond(201, {}, "");
 				}
 				// Upload multi-file ZIP to S3
