@@ -87,6 +87,10 @@ Zotero.Date = new function(){
 	**/
 	function sqlToDate(sqldate, isUTC){
 		try {
+			if (!this.isSQLDate(sqldate) && !this.isSQLDateTime(sqldate)) {
+				throw new Error("Invalid date");
+			}
+			
 			var datetime = sqldate.split(' ');
 			var dateparts = datetime[0].split('-');
 			if (datetime[1]){
@@ -98,7 +102,7 @@ Zotero.Date = new function(){
 			
 			// Invalid date part
 			if (dateparts.length==1){
-				return false;
+				throw new Error("Invalid date part");
 			}
 			
 			if (isUTC){
@@ -699,7 +703,7 @@ Zotero.Date = new function(){
 	function toUnixTimestamp(date) {
 		if (date === null || typeof date != 'object' ||
 				date.constructor.name != 'Date') {
-			throw ('Not a valid date in Zotero.Date.toUnixTimestamp()');
+			throw new Error(`'${date}' is not a valid date`);
 		}
 		return Math.round(date.getTime() / 1000);
 	}
