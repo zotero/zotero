@@ -135,6 +135,45 @@ describe("Zotero.Item", function () {
 			item = yield Zotero.Items.getAsync(id);
 			assert.equal(item.getField("versionNumber"), "1.0");
 		});
+		
+		it("should accept ISO 8601 dates", function* () {
+			var fields = {
+				accessDate: "2015-06-07T20:56:00Z",
+				dateAdded: "2015-06-07T20:57:00Z",
+				dateModified: "2015-06-07T20:58:00Z",
+			};
+			var item = createUnsavedDataObject('item');
+			for (let i in fields) {
+				item.setField(i, fields[i]);
+			}
+			assert.equal(item.getField('accessDate'), '2015-06-07 20:56:00');
+			assert.equal(item.dateAdded, '2015-06-07 20:57:00');
+			assert.equal(item.dateModified, '2015-06-07 20:58:00');
+		})
+		
+		it("should accept SQL dates", function* () {
+			var fields = {
+				accessDate: "2015-06-07 20:56:00",
+				dateAdded: "2015-06-07 20:57:00",
+				dateModified: "2015-06-07 20:58:00",
+			};
+			var item = createUnsavedDataObject('item');
+			for (let i in fields) {
+				item.setField(i, fields[i]);
+				item.getField(i, fields[i]);
+			}
+		})
+		
+		it("should ignore unknown accessDate values", function* () {
+			var fields = {
+				accessDate: "foo"
+			};
+			var item = createUnsavedDataObject('item');
+			for (let i in fields) {
+				item.setField(i, fields[i]);
+			}
+			assert.strictEqual(item.getField('accessDate'), '');
+		})
 	})
 	
 	describe("#dateAdded", function () {

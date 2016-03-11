@@ -663,10 +663,16 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		
 		switch (field) {
 			case 'itemTypeID':
-			case 'dateAdded':
 				break;
 			
+			case 'dateAdded':
 			case 'dateModified':
+				// Accept ISO dates
+				if (Zotero.Date.isISODate(value)) {
+					let d = Zotero.Date.isoToDate(value);
+					value = Zotero.Date.dateToSQL(d, true);
+				}
+				
 				// Make sure it's valid
 				let date = Zotero.Date.sqlToDate(value, true);
 				if (!date) throw new Error("Invalid SQL date: " + value);
@@ -790,11 +796,18 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		}
 		// Validate access date
 		else if (fieldID == Zotero.ItemFields.getID('accessDate')) {
-			if (value && (!Zotero.Date.isSQLDate(value) &&
-					!Zotero.Date.isSQLDateTime(value) &&
-					value != 'CURRENT_TIMESTAMP')) {
-				Zotero.debug("Discarding invalid accessDate '" + value + "' in Item.setField()");
-				return false;
+			if (value && value != 'CURRENT_TIMESTAMP') {
+				// Accept ISO dates
+				if (Zotero.Date.isISODate(value)) {
+					let d = Zotero.Date.isoToDate(value);
+					value = Zotero.Date.dateToSQL(d, true);
+				}
+				
+				if (!Zotero.Date.isSQLDate(value) && !Zotero.Date.isSQLDateTime(value)) {
+					Zotero.logError(`Discarding invalid ${field} '${value}' for `
+						+ `item ${this.libraryKey} in setField()`);
+					return false;
+				}
 			}
 		}
 		
