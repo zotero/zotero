@@ -303,13 +303,13 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 					itemCreators = [];
 				}
 			}
-			else {
-				itemCreators.push({
-					lastName: normalizeString(row.lastName),
-					firstInitial: row.fieldMode == 0 ? normalizeString(row.firstName).charAt(0) : false
-				});
-			}
+			
 			lastItemID = row.itemID;
+			
+			itemCreators.push({
+				lastName: normalizeString(row.lastName),
+				firstInitial: row.fieldMode == 0 ? normalizeString(row.firstName).charAt(0) : false
+			});
 		}
 		// Add final item creators
 		if (itemCreators.length) {
