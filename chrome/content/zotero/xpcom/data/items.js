@@ -287,7 +287,6 @@ Zotero.Items = function() {
 		);
 		
 		
-		// If 'title' is one of the fields, load in display titles (note titles, letter titles...)
 		var titleFieldID = Zotero.ItemFields.getID('title');
 		
 		// Note titles
@@ -326,7 +325,7 @@ Zotero.Items = function() {
 			item._clearChanged('itemData');
 			
 			// Display titles
-			yield item.loadDisplayTitle()
+			item.updateDisplayTitle()
 		}
 	});
 	

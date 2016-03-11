@@ -849,6 +849,105 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 }
 
 
+/**
+ * Update the generated display title from the loaded data
+ */
+Zotero.Item.prototype.updateDisplayTitle = function () {
+	var title = this.getField('title', false, true);
+	var itemTypeID = this.itemTypeID;
+	var itemTypeName = Zotero.ItemTypes.getName(itemTypeID);
+	
+	if (title === "" && (itemTypeID == 8 || itemTypeID == 10)) { // 'letter' and 'interview' itemTypeIDs
+		var creatorsData = this.getCreators();
+		var authors = [];
+		var participants = [];
+		for (let i=0; i<creatorsData.length; i++) {
+			let creatorData = creatorsData[i];
+			let creatorTypeID = creatorsData[i].creatorTypeID;
+			if ((itemTypeID == 8 && creatorTypeID == 16) || // 'letter'
+					(itemTypeID == 10 && creatorTypeID == 7)) { // 'interview'
+				participants.push(creatorData);
+			}
+			else if ((itemTypeID == 8 && creatorTypeID == 1) ||   // 'letter'/'author'
+					(itemTypeID == 10 && creatorTypeID == 6)) { // 'interview'/'interviewee'
+				authors.push(creatorData);
+			}
+		}
+		
+		var strParts = [];
+		if (participants.length > 0) {
+			let names = [];
+			let max = Math.min(4, participants.length);
+			for (let i=0; i<max; i++) {
+				names.push(
+					participants[i].name !== undefined
+						? participants[i].name
+						: participants[i].lastName
+				);
+			}
+			switch (names.length) {
+				case 1:
+					var str = 'oneParticipant';
+					break;
+					
+				case 2:
+					var str = 'twoParticipants';
+					break;
+					
+				case 3:
+					var str = 'threeParticipants';
+					break;
+					
+				default:
+					var str = 'manyParticipants';
+			}
+			strParts.push(Zotero.getString('pane.items.' + itemTypeName + '.' + str, names));
+		}
+		else {
+			strParts.push(Zotero.ItemTypes.getLocalizedString(itemTypeID));
+		}
+		
+		title = '[' + strParts.join('; ') + ']';
+	}
+	else if (itemTypeID == 17) { // 'case' itemTypeID
+		if (title) { // common law cases always have case names
+			var reporter = this.getField('reporter');
+			if (reporter) {
+				title = title + ' (' + reporter + ')';
+			} else {
+				var court = this.getField('court');
+				if (court) {
+					title = title + ' (' + court + ')';
+				}
+			}
+		}
+		else { // civil law cases have only shortTitle as case name
+			var strParts = [];
+			var caseinfo = "";
+			
+			var part = this.getField('court');
+			if (part) {
+				strParts.push(part);
+			}
+			
+			part = Zotero.Date.multipartToSQL(this.getField('date', true, true));
+			if (part) {
+				strParts.push(part);
+			}
+			
+			var creatorData = this.getCreator(0);
+			if (creatorData && creatorData.creatorTypeID === 1) { // author
+				strParts.push(creatorData.lastName);
+			}
+			
+			title = '[' + strParts.join(', ') + ']';
+		}
+	}
+	
+	this._displayTitle = title;
+};
+
+
 /*
  * Returns the number of creators for this item
  */
@@ -1836,7 +1935,9 @@ Zotero.Item.prototype.setNote = function(text) {
 	this._hasNote = text !== '';
 	this._noteText = text;
 	this._noteTitle = Zotero.Notes.noteToTitle(text);
-	this._displayTitle = this._noteTitle;
+	if (this.isNote()) {
+		this._displayTitle = this._noteTitle;
+	}
 	
 	this._markFieldChange('note', oldText);
 	this._changed.note = true;
@@ -4071,108 +4172,6 @@ Zotero.Item.prototype.toResponseJSON = function (options = {}) {
 // Asynchronous load methods
 //
 //////////////////////////////////////////////////////////////////////////////
-
-/*
- * Load in the field data from the database
- */
-Zotero.Item.prototype.loadDisplayTitle = Zotero.Promise.coroutine(function* (reload) {
-	if (this._displayTitle !== null && !reload) {
-		return;
-	}
-	
-	var title = this.getField('title', false, true);
-	var itemTypeID = this.itemTypeID;
-	var itemTypeName = Zotero.ItemTypes.getName(itemTypeID);
-	
-	if (title === "" && (itemTypeID == 8 || itemTypeID == 10)) { // 'letter' and 'interview' itemTypeIDs
-		var creatorsData = this.getCreators();
-		var authors = [];
-		var participants = [];
-		for (let i=0; i<creatorsData.length; i++) {
-			let creatorData = creatorsData[i];
-			let creatorTypeID = creatorsData[i].creatorTypeID;
-			if ((itemTypeID == 8 && creatorTypeID == 16) || // 'letter'
-					(itemTypeID == 10 && creatorTypeID == 7)) { // 'interview'
-				participants.push(creatorData);
-			}
-			else if ((itemTypeID == 8 && creatorTypeID == 1) ||   // 'letter'/'author'
-					(itemTypeID == 10 && creatorTypeID == 6)) { // 'interview'/'interviewee'
-				authors.push(creatorData);
-			}
-		}
-		
-		var strParts = [];
-		if (participants.length > 0) {
-			let names = [];
-			let max = Math.min(4, participants.length);
-			for (let i=0; i<max; i++) {
-				names.push(
-					participants[i].name !== undefined
-						? participants[i].name
-						: participants[i].lastName
-				);
-			}
-			switch (names.length) {
-				case 1:
-					var str = 'oneParticipant';
-					break;
-					
-				case 2:
-					var str = 'twoParticipants';
-					break;
-					
-				case 3:
-					var str = 'threeParticipants';
-					break;
-					
-				default:
-					var str = 'manyParticipants';
-			}
-			strParts.push(Zotero.getString('pane.items.' + itemTypeName + '.' + str, names));
-		}
-		else {
-			strParts.push(Zotero.ItemTypes.getLocalizedString(itemTypeID));
-		}
-		
-		title = '[' + strParts.join('; ') + ']';
-	}
-	else if (itemTypeID == 17) { // 'case' itemTypeID
-		if (title) { // common law cases always have case names
-			var reporter = this.getField('reporter');
-			if (reporter) { 
-				title = title + ' (' + reporter + ')';
-			} else {
-				var court = this.getField('court');
-				if (court) {
-					title = title + ' (' + court + ')';
-				}
-			}
-		}
-		else { // civil law cases have only shortTitle as case name
-			var strParts = [];
-			var caseinfo = "";
-			
-			var part = this.getField('court');
-			if (part) {
-				strParts.push(part);
-			}
-			
-			part = Zotero.Date.multipartToSQL(this.getField('date', true, true));
-			if (part) {
-				strParts.push(part);
-			}
-			
-			var creatorData = this.getCreator(0);
-			if (creatorData && creatorData.creatorTypeID === 1) { // author
-				strParts.push(creatorData.lastName);
-			}
-			
-			title = '[' + strParts.join(', ') + ']';
-		}
-	}
-	
-	return this._displayTitle = title;
-});
 
 
 /**

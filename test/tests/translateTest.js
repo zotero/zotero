@@ -64,13 +64,13 @@ function saveItemsThroughTranslator(translatorType, items) {
  * Convert an array of items to an object in which they are indexed by
  * their display titles
  */
-var itemsArrayToObject = Zotero.Promise.coroutine(function* itemsArrayToObject(items) {
+function itemsArrayToObject(items) {
 	var obj = {};
 	for (let item of items) {
-		obj[yield item.loadDisplayTitle(true)] = item;
+		obj[item.getDisplayTitle()] = item;
 	}
 	return obj;
-});
+}
 
 const TEST_TAGS = [
 	"manual tag as string",
@@ -223,7 +223,7 @@ describe("Zotero.Translate", function() {
 				}
 			];
 
-			let newItems = yield itemsArrayToObject(yield saveItemsThroughTranslator("import", myItems));
+			let newItems = itemsArrayToObject(yield saveItemsThroughTranslator("import", myItems));
 			let noteIDs = newItems["Test Item"].getNotes();
 			let note1 = yield Zotero.Items.getAsync(noteIDs[0]);
 			assert.equal(Zotero.ItemTypes.getName(note1.itemTypeID), "note");
@@ -261,7 +261,7 @@ describe("Zotero.Translate", function() {
 				'}'));
 			let newItems = yield translate.translate();
 			assert.equal(newItems.length, 3);
-			newItems = yield itemsArrayToObject(newItems);
+			newItems = itemsArrayToObject(newItems);
 			assert.equal(newItems["Not in Collection"].getCollections().length, 0);
 
 			let parentCollection = newItems["In Parent Collection"].getCollections();
@@ -313,7 +313,7 @@ describe("Zotero.Translate", function() {
 				"attachments":childAttachments
 			});
 
-			let newItems = yield itemsArrayToObject(yield saveItemsThroughTranslator("import", myItems));
+			let newItems = itemsArrayToObject(yield saveItemsThroughTranslator("import", myItems));
 			let containedAttachments = yield Zotero.Items.getAsync(newItems["Container Item"].getAttachments());
 			assert.equal(containedAttachments.length, 3);
 
@@ -447,7 +447,7 @@ describe("Zotero.Translate", function() {
 
 			let newItems = yield saveItemsThroughTranslator("web", myItems);
 			assert.equal(newItems.length, 1);
-			let containedAttachments = yield itemsArrayToObject(yield Zotero.Items.getAsync(newItems[0].getAttachments()));
+			let containedAttachments = itemsArrayToObject(yield Zotero.Items.getAsync(newItems[0].getAttachments()));
 
 			let link = containedAttachments["Link to zotero.org"];
 			assert.equal(link.getField("url"), "http://www.zotero.org/");

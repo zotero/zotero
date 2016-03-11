@@ -45,6 +45,17 @@ describe("Zotero.ItemTreeView", function() {
 		});
 	})
 	
+	describe("#getCellText()", function () {
+		it("should return new value after edit", function* () {
+			var str = Zotero.Utilities.randomString();
+			var item = yield createDataObject('item', { title: str });
+			var row = itemsView.getRowIndexByID(item.id);
+			assert.equal(itemsView.getCellText(row, { id: 'zotero-items-column-title' }), str);
+			yield modifyDataObject(item);
+			assert.notEqual(itemsView.getCellText(row, { id: 'zotero-items-column-title' }), str);
+		})
+	})
+	
 	describe("#notify()", function () {
 		beforeEach(function () {
 			sinon.spy(win.ZoteroPane, "itemSelected");
