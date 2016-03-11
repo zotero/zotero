@@ -1,12 +1,13 @@
 "use strict";
 
 describe("Zotero.CollectionTreeView", function() {
-	var win, zp, cv;
+	var win, zp, cv, userLibraryID;
 	
 	before(function* () {
 		win = yield loadZoteroPane();
 		zp = win.ZoteroPane;
 		cv = zp.collectionsView;
+		userLibraryID = Zotero.Libraries.userLibraryID;
 	});
 	beforeEach(function () {
 		// TODO: Add a selectCollection() function and select a collection instead?
@@ -40,29 +41,28 @@ describe("Zotero.CollectionTreeView", function() {
 	
 	describe("collapse/expand", function () {
 		it("should close and open My Library repeatedly", function* () {
-			var libraryID = Zotero.Libraries.userLibraryID;
-			yield cv.selectLibrary(libraryID);
+			yield cv.selectLibrary(userLibraryID);
 			var row = cv.selection.currentIndex;
 			
-			cv.collapseLibrary(libraryID);
+			cv.collapseLibrary(userLibraryID);
 			var nextRow = cv.getRow(row + 1);
 			assert.equal(cv.selection.currentIndex, row);
 			assert.ok(nextRow.isSeparator());
 			assert.isFalse(cv.isContainerOpen(row));
 			
-			yield cv.expandLibrary(libraryID);
+			yield cv.expandLibrary(userLibraryID);
 			nextRow = cv.getRow(row + 1);
 			assert.equal(cv.selection.currentIndex, row);
 			assert.ok(!nextRow.isSeparator());
 			assert.ok(cv.isContainerOpen(row));
 			
-			cv.collapseLibrary(libraryID);
+			cv.collapseLibrary(userLibraryID);
 			nextRow = cv.getRow(row + 1);
 			assert.equal(cv.selection.currentIndex, row);
 			assert.ok(nextRow.isSeparator());
 			assert.isFalse(cv.isContainerOpen(row));
 			
-			yield cv.expandLibrary(libraryID);
+			yield cv.expandLibrary(userLibraryID);
 			nextRow = cv.getRow(row + 1);
 			assert.equal(cv.selection.currentIndex, row);
 			assert.ok(!nextRow.isSeparator());
@@ -96,13 +96,13 @@ describe("Zotero.CollectionTreeView", function() {
 			var row = cv.selection.currentIndex;
 			var treeRow = cv.getRow(row);
 			assert.ok(treeRow.isTrash());
-			assert.equal(treeRow.ref.libraryID, Zotero.Libraries.userLibraryID);
+			assert.equal(treeRow.ref.libraryID, userLibraryID);
 		})
 	})
 	
 	describe("#selectWait()", function () {
 		it("shouldn't hang if row is already selected", function* () {
-			var row = cv.getRowIndexByID("T" + Zotero.Libraries.userLibraryID);
+			var row = cv.getRowIndexByID("T" + userLibraryID);
 			cv.selection.select(row);
 			yield Zotero.Promise.delay(50);
 			yield cv.selectWait(row);
@@ -130,7 +130,7 @@ describe("Zotero.CollectionTreeView", function() {
 			});
 			
 			// Library should still be selected
-			assert.equal(cv.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
+			assert.equal(cv.getSelectedLibraryID(), userLibraryID);
 		});
 		
 		it("shouldn't select a new collection if skipSelect is passed", function* () {
@@ -142,7 +142,7 @@ describe("Zotero.CollectionTreeView", function() {
 			});
 			
 			// Library should still be selected
-			assert.equal(cv.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
+			assert.equal(cv.getSelectedLibraryID(), userLibraryID);
 		});
 		
 		it("shouldn't select a modified collection", function* () {
@@ -157,7 +157,7 @@ describe("Zotero.CollectionTreeView", function() {
 			yield collection.saveTx();
 			
 			// Modified collection should not be selected
-			assert.equal(cv.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
+			assert.equal(cv.getSelectedLibraryID(), userLibraryID);
 		});
 		
 		it("should maintain selection on a selected modified collection", function* () {
@@ -239,8 +239,8 @@ describe("Zotero.CollectionTreeView", function() {
 			
 			var collectionRow = cv._rowMap["C" + collectionID];
 			var searchRow = cv._rowMap["S" + searchID];
-			var duplicatesRow = cv._rowMap["D" + Zotero.Libraries.userLibraryID];
-			var unfiledRow = cv._rowMap["U" + Zotero.Libraries.userLibraryID];
+			var duplicatesRow = cv._rowMap["D" + userLibraryID];
+			var unfiledRow = cv._rowMap["U" + userLibraryID];
 			
 			assert.isAbove(searchRow, collectionRow);
 			// If there's a duplicates row or an unfiled row, add before those.
@@ -252,7 +252,7 @@ describe("Zotero.CollectionTreeView", function() {
 				assert.isBelow(searchRow, unfiledRow);
 			}
 			else {
-				var trashRow = cv._rowMap["T" + Zotero.Libraries.userLibraryID];
+				var trashRow = cv._rowMap["T" + userLibraryID];
 				assert.isBelow(searchRow, trashRow);
 			}
 		})
@@ -260,7 +260,7 @@ describe("Zotero.CollectionTreeView", function() {
 		it("shouldn't select a new group", function* () {
 			var group = yield createGroup();
 			// Library should still be selected
-			assert.equal(cv.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
+			assert.equal(cv.getSelectedLibraryID(), userLibraryID);
 		})
 		
 		it("should remove a group and all children", function* () {
