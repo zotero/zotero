@@ -4046,9 +4046,14 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 		obj.deleted = deleted ? 1 : 0;
 	}
 	
-	obj.dateAdded = Zotero.Date.sqlToISO8601(this.dateAdded);
-	obj.dateModified = Zotero.Date.sqlToISO8601(this.dateModified);
 	if (obj.accessDate) obj.accessDate = Zotero.Date.sqlToISO8601(obj.accessDate);
+	
+	if (this.dateAdded) {
+		obj.dateAdded = Zotero.Date.sqlToISO8601(this.dateAdded);
+	}
+	if (this.dateModified) {
+		obj.dateModified = Zotero.Date.sqlToISO8601(this.dateModified);
+	}
 	
 	return this._postToJSON(env);
 }
