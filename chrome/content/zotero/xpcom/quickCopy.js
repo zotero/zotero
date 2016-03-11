@@ -369,7 +369,7 @@ Zotero.QuickCopy = new function() {
 				var csl = Zotero.Styles.get(format.id).getCiteProc(locale);
 				csl.updateItems(items.map(item => item.id));
 				var citation = {
-					citationItems: items.map(item => item.id),
+					citationItems: items.map(item => ({ id: item.id })),
 					properties: {}
 				};
 				var html = csl.previewCitationCluster(citation, [], [], "html"); 
