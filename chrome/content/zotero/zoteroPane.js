@@ -926,8 +926,7 @@ var ZoteroPane = new function()
 		// Select new row
 		if (show) {
 			Zotero.Prefs.set('lastViewedFolder', lastViewedFolderID);
-			var row = this.collectionsView.getLastViewedRow();
-			this.collectionsView.selection.select(row);
+			this.collectionsView.selectByID(lastViewedFolderID); // async
 		}
 	}
 	
