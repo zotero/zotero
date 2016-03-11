@@ -860,7 +860,7 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.setVirtual = function (libraryID, mode, show) {
+	this.setVirtual = Zotero.Promise.coroutine(function* (libraryID, mode, show) {
 		switch (mode) {
 			case 'duplicates':
 				var prefKey = 'duplicateLibraries';
@@ -873,7 +873,7 @@ var ZoteroPane = new function()
 				break;
 			
 			default:
-				throw ("Invalid virtual mode '" + mode + "' in ZoteroPane.setVirtual()");
+				throw new Error("Invalid virtual mode '" + mode + "'");
 		}
 		
 		try {
@@ -881,10 +881,6 @@ var ZoteroPane = new function()
 		}
 		catch (e) {
 			var ids = [];
-		}
-		
-		if (!libraryID) {
-			libraryID = Zotero.Libraries.userLibraryID;
 		}
 		
 		var newids = [];
@@ -898,8 +894,8 @@ var ZoteroPane = new function()
 			if (id == libraryID && !show) {
 				continue;
 			}
-			// Remove libraryIDs that no longer exist
-			if (id != 0 && !Zotero.Libraries.exists(id)) {
+			// Remove libraries that no longer exist
+			if (!Zotero.Libraries.exists(id)) {
 				continue;
 			}
 			newids.push(id);
@@ -914,10 +910,10 @@ var ZoteroPane = new function()
 		
 		Zotero.Prefs.set(prefKey, newids.join());
 		
-		this.collectionsView.refresh();
+		yield this.collectionsView.refresh();
 		
 		// If group is closed, open it
-		this.collectionsView.selectLibrary(libraryID);
+		yield this.collectionsView.selectLibrary(libraryID);
 		row = this.collectionsView.selection.currentIndex;
 		if (!this.collectionsView.isContainerOpen(row)) {
 			this.collectionsView.toggleOpenState(row);
@@ -925,10 +921,9 @@ var ZoteroPane = new function()
 		
 		// Select new row
 		if (show) {
-			Zotero.Prefs.set('lastViewedFolder', lastViewedFolderID);
-			this.collectionsView.selectByID(lastViewedFolderID); // async
+			yield this.collectionsView.selectByID(lastViewedFolderID);
 		}
-	}
+	});
 	
 	
 	this.openLookupWindow = Zotero.Promise.coroutine(function* () {

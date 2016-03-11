@@ -16,6 +16,28 @@ describe("Zotero.CollectionTreeView", function() {
 		win.close();
 	});
 	
+	describe("#refresh()", function () {
+		it("should show Duplicate Items and Unfiled Items in My Library by default", function* () {
+			Zotero.Prefs.clear('duplicateLibraries');
+			Zotero.Prefs.clear('unfiledLibraries');
+			yield cv.refresh();
+			yield assert.eventually.ok(cv.selectByID("D" + userLibraryID));
+			yield assert.eventually.ok(cv.selectByID("U" + userLibraryID));
+			assert.equal(Zotero.Prefs.get('duplicateLibraries'), "" + userLibraryID);
+			assert.equal(Zotero.Prefs.get('unfiledLibraries'), "" + userLibraryID);
+		});
+		
+		it("shouldn't show Duplicate Items and Unfiled Items if hidden", function* () {
+			Zotero.Prefs.set('duplicateLibraries', "");
+			Zotero.Prefs.set('unfiledLibraries', "");
+			yield cv.refresh();
+			yield assert.eventually.notOk(cv.selectByID("D" + userLibraryID));
+			yield assert.eventually.notOk(cv.selectByID("U" + userLibraryID));
+			assert.strictEqual(Zotero.Prefs.get('duplicateLibraries'), "");
+			assert.strictEqual(Zotero.Prefs.get('unfiledLibraries'), "");
+		});
+	});
+	
 	describe("collapse/expand", function () {
 		it("should close and open My Library repeatedly", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;

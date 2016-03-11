@@ -156,25 +156,28 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 		this._containerState = {};
 	}
 	
-	if (this.hideSources.indexOf('duplicates') == -1) {
-		try {
-			this._duplicateLibraries = Zotero.Prefs.get('duplicateLibraries').split(',').map(function (val) parseInt(val));
-		}
-		catch (e) {
-			// Add to personal library by default
-			Zotero.Prefs.set('duplicateLibraries', '0');
-			this._duplicateLibraries = [0];
-		}
-	}
+	var userLibraryID = Zotero.Libraries.userLibraryID;
 	
-	try {
-		this._unfiledLibraries = Zotero.Prefs.get('unfiledLibraries').split(',').map(function (val) parseInt(val));
+	var readPref = function (pref) {
+		let ids = Zotero.Prefs.get(pref);
+		if (ids === "") {
+			this["_" + pref] = [];
+		}
+		else {
+			if (ids === undefined || typeof ids != 'string') {
+				ids = "" + userLibraryID;
+				Zotero.Prefs.set(pref, "" + userLibraryID);
+			}
+			this["_" + pref] = ids.split(',')
+				// Convert old id and convert to int
+				.map(id => id === "0" ? userLibraryID : parseInt(id));
+		}
+	}.bind(this);
+	
+	if (this.hideSources.indexOf('duplicates') == -1) {
+		readPref('duplicateLibraries');
 	}
-	catch (e) {
-		// Add to personal library by default
-		Zotero.Prefs.set('unfiledLibraries', '0');
-		this._unfiledLibraries = [0];
-	}
+	readPref('unfiledLibraries');
 	
 	var oldCount = this.rowCount || 0;
 	var newRows = [];
@@ -916,10 +919,10 @@ Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(functi
 		break;
 	}
 	
-	if (!found) {
+	var row = this._rowMap[type + id];
+	if (!row) {
 		return false;
 	}
-	var row = this._rowMap[type + id];
 	this._treebox.ensureRowIsVisible(row);
 	yield this.selectWait(row);
 	
