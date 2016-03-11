@@ -3623,27 +3623,23 @@ Zotero.Item.prototype.multiDiff = function (otherItems, ignoreFields) {
 	var hasDiffs = false;
 	
 	for (let i = 0; i < otherItems.length; i++) {
-		let otherItem = otherItems[i];
-		let diff = [];
-		let otherData = otherItem.toJSON();
-		let numDiffs = this.ObjectsClass.diff(thisData, otherData, diff);
+		let otherData = otherItems[i].toJSON();
+		let changeset = Zotero.DataObjectUtilities.diff(thisData, otherData, ignoreFields);
 		
-		if (numDiffs) {
-			for (let field in diff[1]) {
-				if (ignoreFields && ignoreFields.indexOf(field) != -1) {
-					continue;
-				}
-				
-				var value = diff[1][field];
-				
-				if (!alternatives[field]) {
-					hasDiffs = true;
-					alternatives[field] = [value];
-				}
-				else if (alternatives[field].indexOf(value) == -1) {
-					hasDiffs = true;
-					alternatives[field].push(value);
-				}
+		for (let i = 0; i < changeset.length; i++) {
+			let change = changeset[i];
+			
+			if (change.op == 'delete') {
+				continue;
+			}
+			
+			if (!alternatives[change.field]) {
+				hasDiffs = true;
+				alternatives[change.field] = [change.value];
+			}
+			else if (alternatives[change.field].indexOf(change.value) == -1) {
+				hasDiffs = true;
+				alternatives[change.field].push(change.value);
 			}
 		}
 	}

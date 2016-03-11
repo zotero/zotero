@@ -853,6 +853,38 @@ describe("Zotero.Item", function () {
 		})
 	})
 	
+	
+	describe("#multiDiff", function () {
+		it("should return set of alternatives for differing fields in other items", function* () {
+			var type = 'item';
+			
+			var dates = ['2016-03-08 17:44:45'];
+			var accessDates = ['2016-03-08T18:44:45Z'];
+			var urls = ['http://www.example.com', 'http://example.net'];
+			
+			var obj1 = createUnsavedDataObject(type);
+			obj1.setField('date', '2016-03-07 12:34:56'); // different in 1 and 3, not in 2
+			obj1.setField('url', 'http://example.com'); // different in all three
+			obj1.setField('title', 'Test'); // only in 1
+			
+			var obj2 = createUnsavedDataObject(type);
+			obj2.setField('url', urls[0]);
+			obj2.setField('accessDate', accessDates[0]); // only in 2
+			
+			var obj3 = createUnsavedDataObject(type);
+			obj3.setField('date', dates[0]);
+			obj3.setField('url', urls[1]);
+			
+			var alternatives = obj1.multiDiff([obj2, obj3]);
+			
+			assert.sameMembers(Object.keys(alternatives), ['url', 'date', 'accessDate']);
+			assert.sameMembers(alternatives.url, urls);
+			assert.sameMembers(alternatives.date, dates);
+			assert.sameMembers(alternatives.accessDate, accessDates);
+		});
+	});
+	
+	
 	describe("#clone()", function () {
 		// TODO: Expand to other data
 		it("should copy creators", function* () {
