@@ -3721,17 +3721,6 @@ Zotero.Item.prototype.clone = function (libraryID, skipTags) {
 }
 
 
-/**
- * @return {Promise<Zotero.Item>} - A copy of the item with primary data loaded
- */
-Zotero.Item.prototype.copy = Zotero.Promise.coroutine(function* () {
-	var newItem = new Zotero.Item;
-	newItem.id = this.id;
-	yield newItem.loadPrimaryData();
-	return newItem;
-});;
-
-
 Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	Zotero.DB.requireTransaction();
 	
