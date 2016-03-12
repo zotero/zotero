@@ -919,6 +919,10 @@ Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(functi
 		break;
 	}
 	
+	if (found) {
+		return true;
+	}
+	
 	var row = this._rowMap[type + id];
 	if (!row) {
 		return false;
