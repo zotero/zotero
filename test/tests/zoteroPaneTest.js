@@ -1,13 +1,14 @@
 "use strict";
 
 describe("ZoteroPane", function() {
-	var win, doc, zp;
+	var win, doc, zp, userLibraryID;
 	
 	// Load Zotero pane and select library
 	before(function* () {
 		win = yield loadZoteroPane();
 		doc = win.document;
 		zp = win.ZoteroPane;
+		userLibraryID = Zotero.Libraries.userLibraryID;
 	});
 	
 	after(function () {
@@ -201,4 +202,72 @@ describe("ZoteroPane", function() {
 			assert.equal((yield Zotero.File.getContentsAsync(path)), text);
 		})
 	})
+	
+	
+	describe("#setVirtual()", function () {
+		var cv;
+		
+		before(function* () {
+			cv = zp.collectionsView;
+		});
+		beforeEach(function () {
+			Zotero.Prefs.clear('duplicateLibraries');
+			Zotero.Prefs.clear('unfiledLibraries');
+			return selectLibrary(win);
+		})
+		
+		it("should show a hidden virtual folder", function* () {
+			// Start hidden
+			Zotero.Prefs.set('duplicateLibraries', "");
+			Zotero.Prefs.set('unfiledLibraries', "");
+			yield cv.refresh();
+			
+			// Show Duplicate Items
+			var id = "D" + userLibraryID;
+			assert.isFalse(cv.getRowIndexByID(id));
+			yield zp.setVirtual(userLibraryID, 'duplicates', true);
+			assert.ok(cv.getRowIndexByID(id));
+			
+			// Show Unfiled Items
+			id = "U" + userLibraryID;
+			assert.isFalse(cv.getRowIndexByID(id));
+			yield zp.setVirtual(userLibraryID, 'unfiled', true);
+			assert.ok(cv.getRowIndexByID(id));
+		});
+		
+		it("should hide a virtual folder shown by default", function* () {
+			yield cv.refresh();
+			
+			// Hide Duplicate Items
+			var id = "D" + userLibraryID;
+			assert.ok(yield cv.selectByID(id));
+			yield zp.setVirtual(userLibraryID, 'duplicates', false);
+			assert.isFalse(cv.getRowIndexByID(id));
+			
+			// Hide Unfiled Items
+			id = "U" + userLibraryID;
+			assert.ok(yield cv.selectByID(id));
+			yield zp.setVirtual(userLibraryID, 'unfiled', false);
+			assert.isFalse(cv.getRowIndexByID(id));
+		});
+		
+		it("should hide an explicitly shown virtual folder", function* () {
+			// Start shown
+			Zotero.Prefs.set('duplicateLibraries', "" + userLibraryID);
+			Zotero.Prefs.set('unfiledLibraries' "" + userLibraryID);
+			yield cv.refresh();
+			
+			// Hide Duplicate Items
+			var id = "D" + userLibraryID;
+			assert.ok(yield cv.selectByID(id));
+			yield zp.setVirtual(userLibraryID, 'duplicates', false);
+			assert.isFalse(cv.getRowIndexByID(id));
+			
+			// Hide Unfiled Items
+			id = "U" + userLibraryID;
+			assert.ok(yield cv.selectByID(id));
+			yield zp.setVirtual(userLibraryID, 'unfiled', false);
+			assert.isFalse(cv.getRowIndexByID(id));
+		});
+	});
 })

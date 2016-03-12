@@ -22,8 +22,8 @@ describe("Zotero.CollectionTreeView", function() {
 			Zotero.Prefs.clear('duplicateLibraries');
 			Zotero.Prefs.clear('unfiledLibraries');
 			yield cv.refresh();
-			yield assert.eventually.ok(cv.selectByID("D" + userLibraryID));
-			yield assert.eventually.ok(cv.selectByID("U" + userLibraryID));
+			assert.isTrue(cv.getRowIndexByID("D" + userLibraryID));
+			assert.isTrue(cv.getRowIndexByID("U" + userLibraryID));
 			assert.equal(Zotero.Prefs.get('duplicateLibraries'), "" + userLibraryID);
 			assert.equal(Zotero.Prefs.get('unfiledLibraries'), "" + userLibraryID);
 		});
@@ -32,8 +32,8 @@ describe("Zotero.CollectionTreeView", function() {
 			Zotero.Prefs.set('duplicateLibraries', "");
 			Zotero.Prefs.set('unfiledLibraries', "");
 			yield cv.refresh();
-			yield assert.eventually.notOk(cv.selectByID("D" + userLibraryID));
-			yield assert.eventually.notOk(cv.selectByID("U" + userLibraryID));
+			assert.isFalse(cv.getRowIndexByID("D" + userLibraryID));
+			assert.isFalse(cv.getRowIndexByID("U" + userLibraryID));
 			assert.strictEqual(Zotero.Prefs.get('duplicateLibraries'), "");
 			assert.strictEqual(Zotero.Prefs.get('unfiledLibraries'), "");
 		});
