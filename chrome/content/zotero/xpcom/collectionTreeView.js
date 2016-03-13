@@ -902,8 +902,7 @@ Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(functi
 	
 	switch (type) {
 	case 'L':
-		var found = yield this.selectLibrary(id);
-		break;
+		return yield this.selectLibrary(id);
 	
 	case 'C':
 		var found = yield this.expandToCollection(id);
@@ -915,12 +914,7 @@ Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(functi
 		break;
 	
 	case 'T':
-		var found = yield this.selectTrash(id);
-		break;
-	}
-	
-	if (found) {
-		return true;
+		return yield this.selectTrash(id);
 	}
 	
 	var row = this._rowMap[type + id];
