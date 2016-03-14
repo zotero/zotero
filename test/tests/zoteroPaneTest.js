@@ -217,6 +217,11 @@ describe("ZoteroPane", function() {
 		})
 		
 		it("should show a hidden virtual folder", function* () {
+			// Create unfiled, duplicate items
+			var title = Zotero.Utilities.randomString();
+			var item1 = yield createDataObject('item', { title });
+			var item2 = yield createDataObject('item', { title });
+			
 			// Start hidden
 			Zotero.Prefs.set('duplicateLibraries', "");
 			Zotero.Prefs.set('unfiledLibraries', "");
@@ -226,7 +231,17 @@ describe("ZoteroPane", function() {
 			var id = "D" + userLibraryID;
 			assert.isFalse(cv.getRowIndexByID(id));
 			yield zp.setVirtual(userLibraryID, 'duplicates', true);
-			assert.ok(cv.getRowIndexByID(id));
+			
+			// Clicking should select both items
+			var row = cv.getRowIndexByID(id);
+			assert.ok(row);
+			assert.equal(cv.selection.currentIndex, row);
+			yield waitForItemsLoad(win);
+			var iv = zp.itemsView;
+			row = iv.getRowIndexByID(item1.id);
+			assert.isNumber(row);
+			clickOnItemsRow(iv, row);
+			assert.equal(iv.selection.count, 2);
 			
 			// Show Unfiled Items
 			id = "U" + userLibraryID;
@@ -254,20 +269,25 @@ describe("ZoteroPane", function() {
 		it("should hide an explicitly shown virtual folder", function* () {
 			// Start shown
 			Zotero.Prefs.set('duplicateLibraries', "" + userLibraryID);
-			Zotero.Prefs.set('unfiledLibraries' "" + userLibraryID);
+			Zotero.Prefs.set('unfiledLibraries', "" + userLibraryID);
 			yield cv.refresh();
 			
 			// Hide Duplicate Items
 			var id = "D" + userLibraryID;
 			assert.ok(yield cv.selectByID(id));
+			yield waitForItemsLoad(win);
 			yield zp.setVirtual(userLibraryID, 'duplicates', false);
 			assert.isFalse(cv.getRowIndexByID(id));
+			assert.equal(cv.getSelectedLibraryID(), userLibraryID);
+			
 			
 			// Hide Unfiled Items
 			id = "U" + userLibraryID;
 			assert.ok(yield cv.selectByID(id));
+			yield waitForItemsLoad(win);
 			yield zp.setVirtual(userLibraryID, 'unfiled', false);
 			assert.isFalse(cv.getRowIndexByID(id));
+			assert.equal(cv.getSelectedLibraryID(), userLibraryID);
 		});
 	});
 })

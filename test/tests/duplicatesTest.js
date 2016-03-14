@@ -32,31 +32,9 @@ describe("Duplicate Items", function () {
 			
 			// Select the first item, which should select both
 			var iv = zp.itemsView;
-			var index = iv.getRowIndexByID(item1.id);
-			assert.isNumber(index);
-			
-			var x = {};
-			var y = {};
-			var width = {};
-			var height = {};
-			iv._treebox.getCoordsForCellItem(
-				index,
-				iv._treebox.columns.getNamedColumn('zotero-items-column-title'),
-				'text',
-				x, y, width, height
-			);
-			
-			// Select row to trigger multi-select
-			var tree = iv._treebox.treeBody;
-			var rect = tree.getBoundingClientRect();
-			var x = rect.left + x.value;
-			var y = rect.top + y.value;
-			tree.dispatchEvent(new MouseEvent("mousedown", {
-				clientX: x,
-				clientY: y,
-				detail: 1
-			}));
-			
+			var row = iv.getRowIndexByID(item1.id);
+			assert.isNumber(row);
+			clickOnItemsRow(iv, row);
 			assert.equal(iv.selection.count, 2);
 			
 			// Click merge button

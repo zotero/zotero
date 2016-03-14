@@ -912,17 +912,16 @@ var ZoteroPane = new function()
 		
 		yield this.collectionsView.refresh();
 		
-		// If group is closed, open it
-		yield this.collectionsView.selectLibrary(libraryID);
-		row = this.collectionsView.selection.currentIndex;
-		if (!this.collectionsView.isContainerOpen(row)) {
-			this.collectionsView.toggleOpenState(row);
-		}
-		
 		// Select new row
 		if (show) {
 			yield this.collectionsView.selectByID(lastViewedFolderID);
 		}
+		// Select library root when hiding
+		else {
+			yield this.collectionsView.selectLibrary(libraryID);
+		}
+		
+		this.collectionsView.selection.selectEventsSuppressed = false;
 	});
 	
 	
