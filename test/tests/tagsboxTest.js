@@ -14,17 +14,6 @@ describe("Item Tags Box", function () {
 		win.close();
 	});
 	
-	function waitForTagsBox() {
-		var deferred = Zotero.Promise.defer();
-		var tagsbox = doc.getElementById('zotero-editpane-tags');
-		var onRefresh = function (event) {
-			tagsbox.removeEventListener('refresh', onRefresh);
-			deferred.resolve();
-		}
-		tagsbox.addEventListener('refresh', onRefresh);
-		return deferred.promise;
-	}
-	
 	describe("#notify()", function () {
 		it("should update an existing tag on rename", function* () {
 			var tag = Zotero.Utilities.randomString();
@@ -43,7 +32,6 @@ describe("Item Tags Box", function () {
 			
 			var tabbox = doc.getElementById('zotero-view-tabbox');
 			tabbox.selectedIndex = 2;
-			yield waitForTagsBox();
 			var tagsbox = doc.getElementById('zotero-editpane-tags');
 			var rows = tagsbox.id('tagRows').getElementsByTagName('row');
 			assert.equal(rows.length, 1);
@@ -77,7 +65,6 @@ describe("Item Tags Box", function () {
 			
 			var tabbox = doc.getElementById('zotero-view-tabbox');
 			tabbox.selectedIndex = 2;
-			yield waitForTagsBox();
 			var tagsbox = doc.getElementById('zotero-editpane-tags');
 			var rows = tagsbox.id('tagRows').getElementsByTagName('row');
 			
@@ -108,7 +95,6 @@ describe("Item Tags Box", function () {
 			
 			var tabbox = doc.getElementById('zotero-view-tabbox');
 			tabbox.selectedIndex = 2;
-			yield waitForTagsBox();
 			var tagsbox = doc.getElementById('zotero-editpane-tags');
 			var rows = tagsbox.id('tagRows').getElementsByTagName('row');
 			assert.equal(rows.length, 1);

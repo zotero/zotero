@@ -373,12 +373,13 @@ Zotero.DataObjects.prototype._loadDataType = Zotero.Promise.coroutine(function* 
 	Zotero.debug(`Loaded ${dataType} in ${libraryName} in ${new Date() - t} ms`);
 });
 
-Zotero.DataObjects.prototype.loadAllData = Zotero.Promise.coroutine(function* (libraryID, ids) {
+Zotero.DataObjects.prototype.loadAll = Zotero.Promise.coroutine(function* (libraryID, ids) {
 	var t = new Date();
 	var libraryName = Zotero.Libraries.get(libraryID).name;
 	
-	Zotero.debug("Loading all data"
-		+ (ids ? " for " + ids.length + " " + this._ZDO_objects : '')
+	Zotero.debug("Loading "
+		+ (ids ? ids.length : "all") + " "
+		+ (ids && ids.length == 1 ? this._ZDO_object : this._ZDO_objects)
 		+ " in " + libraryName);
 	
 	let dataTypes = this.ObjectClass.prototype._dataTypes;

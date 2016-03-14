@@ -4,7 +4,7 @@ describe("Tag Selector", function () {
 	var win, doc, collectionsView;
 	
 	var clearTagColors = Zotero.Promise.coroutine(function* (libraryID) {
-		var tagColors = yield Zotero.Tags.getColors(libraryID);
+		var tagColors = Zotero.Tags.getColors(libraryID);
 		for (let name of tagColors.keys()) {
 			yield Zotero.Tags.setColor(libraryID, name, false);
 		}

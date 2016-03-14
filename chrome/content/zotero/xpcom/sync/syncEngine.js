@@ -290,7 +290,7 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 					}
 					
 					if (objectType == 'setting') {
-						let meta = yield Zotero.SyncedSettings.getMetadata(this.libraryID, key);
+						let meta = Zotero.SyncedSettings.getMetadata(this.libraryID, key);
 						if (!meta) {
 							continue;
 						}

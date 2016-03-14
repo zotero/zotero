@@ -137,7 +137,8 @@
 					return Zotero.spawn(function* () {
 						if (type == 'setting') {
 							if (ids.some(function (val) val.split("/")[1] == 'tagColors') && this.item) {
-								return this.reload();
+								this.reload();
+								return;
 							}
 						}
 						else if (type == 'item-tag') {
@@ -194,7 +195,8 @@
 						}
 						else if (type == 'tag') {
 							if (event == 'modify') {
-								return this.reload();
+								this.reload();
+								return;
 							}
 						}
 					}.bind(this));
@@ -204,38 +206,32 @@
 			
 			<method name="reload">
 				<body><![CDATA[
-					return Zotero.spawn(function* () {
-						Zotero.debug('Reloading tags box');
-						
-						// Cancel field focusing while we're updating
-						this._reloading = true;
-						
-						this.id('addButton').hidden = !this.editable;
-						
-						this._tagColors = yield Zotero.Tags.getColors(this.item.libraryID)
-							.tap(() => Zotero.Promise.check(this.mode));
-						
-						var rows = this.id('tagRows');
-						while(rows.hasChildNodes()) {
-							rows.removeChild(rows.firstChild);
-						}
-						var tags = this.item.getTags();
-						
-						// Sort tags alphabetically
-						var collation = Zotero.getLocaleCollation();
-						tags.sort(function (a, b) collation.compareString(1, a.tag, b.tag));
-						
-						for (let i=0; i<tags.length; i++) {
-							this.addDynamicRow(tags[i], i+1);
-						}
-						this.updateCount(tags.length);
-						
-						this._reloading = false;
-						this._focusField();
-						
-						var event = new Event('refresh');
-						this.dispatchEvent(event);
-					}, this);
+					Zotero.debug('Reloading tags box');
+					
+					// Cancel field focusing while we're updating
+					this._reloading = true;
+					
+					this.id('addButton').hidden = !this.editable;
+					
+					this._tagColors = Zotero.Tags.getColors(this.item.libraryID);
+					
+					var rows = this.id('tagRows');
+					while(rows.hasChildNodes()) {
+						rows.removeChild(rows.firstChild);
+					}
+					var tags = this.item.getTags();
+					
+					// Sort tags alphabetically
+					var collation = Zotero.getLocaleCollation();
+					tags.sort(function (a, b) collation.compareString(1, a.tag, b.tag));
+					
+					for (let i=0; i<tags.length; i++) {
+						this.addDynamicRow(tags[i], i+1);
+					}
+					this.updateCount(tags.length);
+					
+					this._reloading = false;
+					this._focusField();
 				]]></body>
 			</method>
 			
@@ -711,7 +707,7 @@
 								this._lastTabIndex = this.item.getTags().length;
 							}
 							
-							yield this.reload();
+							this.reload();
 						}
 						// Single tag at end
 						else {

@@ -315,6 +315,16 @@ Zotero.Library.prototype._reloadFromDB = Zotero.Promise.coroutine(function* () {
 	this._loadDataFromRow(row);
 });
 
+/**
+ * Load object data in this library
+ */
+Zotero.Library.prototype.loadAllDataTypes = Zotero.Promise.coroutine(function* () {
+	yield Zotero.SyncedSettings.loadAll(this.libraryID);
+	yield Zotero.Collections.loadAll(this.libraryID);
+	yield Zotero.Searches.loadAll(this.libraryID);
+	yield Zotero.Items.loadAll(this.libraryID);
+});
+
 Zotero.Library.prototype.isChildObjectAllowed = function(type) {
 	return this._childObjectTypes.indexOf(type) != -1;
 };
@@ -461,6 +471,8 @@ Zotero.Library.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env
 		yield this._reloadFromDB();
 		
 		Zotero.Libraries.register(this);
+		
+		yield this.loadAllDataTypes();
 	}
 });
 

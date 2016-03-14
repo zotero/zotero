@@ -170,12 +170,11 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 				if (coloredTagsRE.test(key)) {
 					let libraryID = self.collectionTreeRow.ref.libraryID;
 					let position = parseInt(key) - 1;
-					let colorData = yield Zotero.Tags.getColorByPosition(libraryID, position);
+					let colorData = Zotero.Tags.getColorByPosition(libraryID, position);
 					// If a color isn't assigned to this number or any
 					// other numbers, allow key navigation
 					if (!colorData) {
-						let colors = yield Zotero.Tags.getColors(libraryID);
-						return !colors.size;
+						return !Zotero.Tags.getColors(libraryID).size;
 					}
 					
 					var items = self.getSelectedItems();

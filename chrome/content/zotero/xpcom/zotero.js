@@ -629,9 +629,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				
 				let libraryIDs = Zotero.Libraries.getAll().map(x => x.libraryID);
 				for (let libraryID of libraryIDs) {
-					yield Zotero.Collections.loadAllData(libraryID);
-					yield Zotero.Searches.loadAllData(libraryID);
-					yield Zotero.Items.loadAllData(libraryID);
+					let library = Zotero.Libraries.get(libraryID);
+					yield library.loadAllDataTypes();
 				}
 				
 				yield Zotero.QuickCopy.init();

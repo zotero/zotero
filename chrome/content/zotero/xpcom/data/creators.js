@@ -30,7 +30,7 @@ Zotero.Creators = new function() {
 	
 	var _cache = {};
 	
-	this.init = Zotero.Promise.coroutine(function* (libraryID) {
+	this.init = Zotero.Promise.coroutine(function* () {
 		var sql = "SELECT * FROM creators";
 		var rows = yield Zotero.DB.queryAsync(sql);
 		for (let i = 0; i < rows.length; i++) {

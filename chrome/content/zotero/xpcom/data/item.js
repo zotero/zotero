@@ -3548,7 +3548,7 @@ Zotero.Item.prototype.getImageSrcWithTags = Zotero.Promise.coroutine(function* (
 		return uri;
 	}
 	
-	var tagColors = yield Zotero.Tags.getColors(this.libraryID);
+	var tagColors = Zotero.Tags.getColors(this.libraryID);
 	var colorData = [];
 	for (let i=0; i<tags.length; i++) {
 		let tag = tags[i];

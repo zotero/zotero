@@ -815,7 +815,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 /**
  * Populate the object's data from an API JSON data object
  *
- * If this object is identified (has an id or library/key), loadAllData() must have been called.
+ * If this object is identified (has an id or library/key), loadAll() must have been called.
  */
 Zotero.Search.prototype.fromJSON = function (json) {
 	if (!json.name) {
