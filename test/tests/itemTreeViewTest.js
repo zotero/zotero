@@ -1,31 +1,31 @@
 "use strict";
 
 describe("Zotero.ItemTreeView", function() {
-	var win, zp, itemsView, existingItemID;
+	var win, zp, cv, itemsView, existingItemID;
 	
 	// Load Zotero pane and select library
 	before(function* () {
 		win = yield loadZoteroPane();
 		zp = win.ZoteroPane;
+		cv = zp.collectionsView;
 		
 		var item = new Zotero.Item('book');
 		existingItemID = yield item.saveTx();
 	});
 	beforeEach(function* () {
-		yield zp.collectionsView.selectLibrary();
-		yield waitForItemsLoad(win)
+		yield selectLibrary(win);
 		itemsView = zp.itemsView;
 	})
 	after(function () {
 		win.close();
 	});
 	
-	it("shouldn't show items in trash", function* () {
+	it("shouldn't show items in trash in library root", function* () {
 		var item = yield createDataObject('item', { title: "foo" });
 		var itemID = item.id;
 		item.deleted = true;
 		yield item.saveTx();
-		assert.notOk(itemsView.getRowIndexByID(itemID));
+		assert.isFalse(itemsView.getRowIndexByID(itemID));
 	})
 	
 	describe("#selectItem()", function () {
@@ -231,6 +231,19 @@ describe("Zotero.ItemTreeView", function() {
 			
 			yield Zotero.Items.erase(items.map(item => item.id));
 		})
+		
+		
+		it("should remove items from Unfiled Items when added to a collection", function* () {
+			var collection = yield createDataObject('collection');
+			var item = yield createDataObject('item', { title: "Unfiled Item" });
+			yield cv.selectByID("U" + Zotero.Libraries.userLibraryID);
+			yield waitForItemsLoad(win);
+			assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+			yield Zotero.DB.executeTransaction(function* () {
+				yield collection.addItem(item.id);
+			});
+			assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
+		});
 	})
 	
 	describe("#drop()", function () {

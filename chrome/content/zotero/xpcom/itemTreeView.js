@@ -590,7 +590,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		// If no quicksearch, process modifications manually
 		else if (!quicksearch || quicksearch.value == '')
 		{
-			var items = yield Zotero.Items.getAsync(ids);
+			var items = Zotero.Items.get(ids);
 			
 			for (let i = 0; i < items.length; i++) {
 				let item = items[i];
@@ -609,9 +609,16 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 					let parentItemID = this.getRow(row).ref.parentItemID;
 					let parentIndex = this.getParentIndex(row);
 					
-					// Top-level items just have to be resorted
+					// Top-level item
 					if (this.isContainer(row)) {
-						sort = id;
+						// If Unfiled Items and itm was added to a collection, remove from view
+						if (collectionTreeRow.isUnfiled() && item.getCollections().length) {
+							this._removeRow(row);
+						}
+						// Otherwise just resort
+						else {
+							sort = id;
+						}
 					}
 					// If item moved from top-level to under another item, remove the old row.
 					else if (parentIndex == -1 && parentItemID) {
@@ -1585,7 +1592,7 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 			// Clear the quicksearch and tag selection and try again (once)
 			if (!noRecurse && this._ownerDocument.defaultView.ZoteroPane_Local) {
 				let cleared1 = yield this._ownerDocument.defaultView.ZoteroPane_Local.clearQuicksearch();
-				let cleared2 = yield this._ownerDocument.defaultView.ZoteroPane_Local.clearTagSelection();
+				let cleared2 = this._ownerDocument.defaultView.ZoteroPane_Local.clearTagSelection();
 				if (cleared1 || cleared2) {
 					return this.selectItem(id, expand, true);
 				}
