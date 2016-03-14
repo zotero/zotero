@@ -1,10 +1,24 @@
 describe("Zotero.Date", function() {
 	describe("#sqlToDate()", function () {
 		it("should convert an SQL local date into a JS Date object", function* () {
-			var date = "2016-02-27 22:00:00";
-			var offset = new Date().getTimezoneOffset() * 60 * 1000;
-			date = Zotero.Date.sqlToDate(date);
-			assert.equal(date.getTime(), 1456610400000 + offset);
+			var d1 = new Date();
+			var sqlDate = d1.getFullYear()
+				+ '-'
+				+ Zotero.Utilities.lpad(d1.getMonth() + 1, '0', 2)
+				+ '-'
+				+ Zotero.Utilities.lpad(d1.getDate(), '0', 2)
+				+ ' '
+				+ Zotero.Utilities.lpad(d1.getHours(), '0', 2)
+				+ ':'
+				+ Zotero.Utilities.lpad(d1.getMinutes(), '0', 2)
+				+ ':'
+				+ Zotero.Utilities.lpad(d1.getSeconds(), '0', 2);
+			var offset = d1.getTimezoneOffset() * 60 * 1000;
+			var d2 = Zotero.Date.sqlToDate(sqlDate);
+			assert.equal(
+				Zotero.Date.sqlToDate(sqlDate).getTime(),
+				Math.floor(new Date().getTime() / 1000) * 1000
+			);
 		})
 		
 		it("should convert an SQL UTC date into a JS Date object", function* () {
