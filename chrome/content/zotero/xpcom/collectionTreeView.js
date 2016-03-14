@@ -67,6 +67,9 @@ Zotero.CollectionTreeView.prototype.type = 'collection';
 
 Object.defineProperty(Zotero.CollectionTreeView.prototype, "selectedTreeRow", {
 	get: function () {
+		if (!this.selection || !this.selection.count) {
+			return false;
+		}
 		return this.getRow(this.selection.currentIndex);
 	}
 });
@@ -940,7 +943,7 @@ Zotero.CollectionTreeView.prototype.selectLibrary = Zotero.Promise.coroutine(fun
 	}
 	
 	// Check if library is already selected
-	if (this.selection.currentIndex != -1) {
+	if (this.selection && this.selection.count && this.selection.currentIndex != -1) {
 		var treeRow = this.getRow(this.selection.currentIndex);
 		if (treeRow.isLibrary(true) && treeRow.ref.libraryID == libraryID) {
 			this._treebox.ensureRowIsVisible(this.selection.currentIndex);
@@ -972,7 +975,7 @@ Zotero.CollectionTreeView.prototype.selectSearch = function (id) {
 
 Zotero.CollectionTreeView.prototype.selectTrash = Zotero.Promise.coroutine(function* (libraryID) {
 	// Check if trash is already selected
-	if (this.selection.currentIndex != -1) {
+	if (this.selection && this.selection.count && this.selection.currentIndex != -1) {
 		let itemGroup = this.getRow(this.selection.currentIndex);
 		if (itemGroup.isTrash() && itemGroup.ref.libraryID == libraryID) {
 			this._treebox.ensureRowIsVisible(this.selection.currentIndex);
@@ -1196,6 +1199,8 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
  * Returns libraryID or FALSE if not a library
  */
 Zotero.CollectionTreeView.prototype.getSelectedLibraryID = function() {
+	if (!this.selection || !this.selection.count || this.selection.currentIndex == -1) return false;
+	
 	var treeRow = this.getRow(this.selection.currentIndex);
 	return treeRow && treeRow.ref && treeRow.ref.libraryID !== undefined
 			&& treeRow.ref.libraryID;
