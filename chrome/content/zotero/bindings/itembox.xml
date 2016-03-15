@@ -1569,7 +1569,7 @@
 							this._lastTabIndex = parseInt(textbox.getAttribute('ztabindex')) - 1;
 							this._tabDirection = 1;
 							
-							var creator = yield Zotero.Creators.getAsync(creatorID);
+							var creator = Zotero.Creators.get(creatorID);
 							
 							var otherField = creatorField == 'lastName' ? 'firstName' : 'lastName';
 							
