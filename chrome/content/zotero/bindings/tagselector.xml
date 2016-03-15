@@ -244,6 +244,13 @@
 								.tap(() => Zotero.Promise.check(this.mode));
 							tagsBox.textContent = "";
 							
+							// Add colored tags that aren't already real tags
+							let regularTags = new Set(this._tags.map(tag => tag.tag));
+							let coloredTags = new Set(tagColors.keys());
+							[for (x of coloredTags) if (!regularTags.has(x)) x].forEach(x =>
+								this._tags.push(Zotero.Tags.cleanData({ tag: x }))
+							);
+							
 							// Sort by name
 							let collation = Zotero.getLocaleCollation();
 							this._tags.sort(function (a, b) {

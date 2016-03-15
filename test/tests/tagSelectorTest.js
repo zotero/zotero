@@ -155,6 +155,18 @@ describe("Tag Selector", function () {
 			assert.equal(getRegularTags().length, 1);
 		})
 		
+		it("should show a colored tag at the top of the list even when linked to no items", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			var tagSelector = doc.getElementById('zotero-tag-selector');
+			var tagElems = tagSelector.id('tags-box').childNodes;
+			var count = tagElems.length;
+			
+			yield Zotero.Tags.setColor(libraryID, "Top", '#AAAAAA');
+			
+			assert.equal(tagElems.length, count + 1);
+		});
+		
 		it("shouldn't re-insert a new tag that matches an existing color", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
