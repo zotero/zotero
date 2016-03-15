@@ -137,6 +137,8 @@ function Reporter(runner) {
 		dump("\r" + indentStr
 			// Dark red X for errors
 			+ "\033[31;40m" + Mocha.reporters.Base.symbols.err + " [FAIL]\033[0m"
+			// Trigger bell if interactive
+			+ (Zotero.noUserInput ? "" : "\007")
 			+ " " + test.title + "\n"
 			+ indentStr + "  " + err.toString() + " at\n"
 			+ err.stack.replace(/^/gm, indentStr + "    "));
