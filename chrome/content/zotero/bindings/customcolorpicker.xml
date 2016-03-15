@@ -15,7 +15,7 @@
 		<content>
 			<vbox anonid="tiles" flex="1" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 				<hbox>
-					<spacer class="colorpickertile" style="background-color: #000000" color="#000000"/>
+					<image class="colorpickertile" color="#000000"/>
 				</hbox>
 			</vbox>
 		</content>
@@ -90,17 +90,21 @@
 							let light = color.charAt(0) == 'L';
 							color = light ? color.substr(1) : color;
 							
-							var spacer = document.createElement('spacer');
-							spacer.className = 'colorpickertile' + (light ? ' cp-light' : '');
-							spacer.setAttribute('style', 'background-color: ' + color);
-							spacer.setAttribute('color', color);
+							let image = document.createElement('image');
+							image.className = 'colorpickertile' + (light ? ' cp-light' : '');
+							image.setAttribute('color', color);
+							
+							let dataURI = "data:image/svg+xml,<svg style='background-color: "
+								+ encodeURIComponent(color) + "' xmlns='http://www.w3.org/2000/svg' />";
+							image.setAttribute('src', dataURI);
+							
 							if (tileWidth) {
-								spacer.width = tileWidth;
+								image.width = tileWidth;
 							}
 							if (tileHeight) {
-								spacer.height = tileHeight;
+								image.height = tileHeight;
 							}
-							hbox.appendChild(spacer);
+							hbox.appendChild(image);
 						}
 						tiles.appendChild(hbox);
 					}
@@ -117,7 +121,7 @@
 			<stylesheet src="chrome://zotero/skin/bindings/customcolorpicker.css"/>
 		</resources>
 		<content>
-			<xul:hbox class="colorpicker-button-colorbox" anonid="colorbox" flex="1" xbl:inherits="disabled"/>
+			<xul:image class="colorpicker-button-colorbox" anonid="colorbox" flex="1" xbl:inherits="disabled"/>
 			
 			<xul:panel class="colorpicker-button-menupopup"
 					anonid="colorpopup" noautofocus="true" level="top"
