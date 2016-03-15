@@ -234,9 +234,12 @@ describe("Zotero.ItemTreeView", function() {
 		
 		
 		it("should remove items from Unfiled Items when added to a collection", function* () {
+			var userLibraryID = Zotero.Libraries.userLibraryID;
 			var collection = yield createDataObject('collection');
 			var item = yield createDataObject('item', { title: "Unfiled Item" });
-			yield cv.selectByID("U" + Zotero.Libraries.userLibraryID);
+			yield zp.setVirtual(userLibraryID, 'unfiled', true);
+			var selected = yield cv.selectByID("U" + userLibraryID);
+			assert.ok(selected);
 			yield waitForItemsLoad(win);
 			assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
 			yield Zotero.DB.executeTransaction(function* () {
