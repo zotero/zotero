@@ -580,7 +580,10 @@ Zotero.Sync.Storage.Local = {
 		item.attachmentSyncState = this.SYNC_STATE_IN_SYNC;
 		item.attachmentSyncedModificationTime = mtime;
 		item.attachmentSyncedHash = md5;
-		yield item.saveTx();
+		yield item.saveTx({
+			skipDateModifiedUpdate: true,
+			skipSelect: true
+		});
 		
 		return new Zotero.Sync.Storage.Result({
 			localChanges: true
