@@ -99,7 +99,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					var header;
 					try {
 						header = "Zotero-File-Modification-Time";
-						requestData.mtime = oldChannel.getResponseHeader(header);
+						requestData.mtime = parseInt(oldChannel.getResponseHeader(header));
 						header = "Zotero-File-MD5";
 						requestData.md5 = oldChannel.getResponseHeader(header);
 						header = "Zotero-File-Compressed";
@@ -131,12 +131,17 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					}
 					
 					// Update local metadata and stop request, skipping file download
+					yield OS.File.setDates(path, null, new Date(requestData.mtime));
 					item.attachmentSyncedModificationTime = requestData.mtime;
 					if (updateHash) {
 						item.attachmentSyncedHash = requestData.md5;
 					}
 					item.attachmentSyncState = "in_sync";
 					yield item.saveTx({ skipAll: true });
+					
+					deferred.resolve(new Zotero.Sync.Storage.Result({
+						localChanges: true
+					}));
 					
 					return false;
 				}),

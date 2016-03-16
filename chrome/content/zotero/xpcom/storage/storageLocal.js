@@ -577,13 +577,10 @@ Zotero.Sync.Storage.Local = {
 		// Set the file mtime to the time from the server
 		yield OS.File.setDates(path, null, new Date(parseInt(mtime)));
 		
-		item.attachmentSyncState = this.SYNC_STATE_IN_SYNC;
 		item.attachmentSyncedModificationTime = mtime;
 		item.attachmentSyncedHash = md5;
-		yield item.saveTx({
-			skipDateModifiedUpdate: true,
-			skipSelect: true
-		});
+		item.attachmentSyncState = "in_sync";
+		yield item.saveTx({ skipAll: true });
 		
 		return new Zotero.Sync.Storage.Result({
 			localChanges: true

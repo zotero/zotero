@@ -561,6 +561,60 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.equal(item2.version, 15);
 		})
 		
+		it("should update local info for remotely updated file that matches local file", function* () {
+			var { engine, client, caller } = yield setup();
+			
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 5;
+			yield library.saveTx();
+			library.storageDownloadNeeded = true;
+			
+			var file = getTestDataDirectory();
+			file.append('test.txt');
+			var item = yield Zotero.Attachments.importFromFile({ file });
+			item.version = 5;
+			item.attachmentSyncState = "to_download";
+			yield item.saveTx();
+			var path = yield item.getFilePathAsync();
+			yield OS.File.setDates(path, null, new Date() - 100000);
+			
+			var json = item.toJSON();
+			yield Zotero.Sync.Data.Local.saveCacheObject('item', item.libraryID, json);
+			
+			var mtime = (Math.floor(new Date().getTime() / 1000) * 1000) + "";
+			var md5 = Zotero.Utilities.Internal.md5(file)
+			
+			var s3Path = `pretend-s3/${item.key}`;
+			this.httpd.registerPathHandler(
+				`/users/1/items/${item.key}/file`,
+				{
+					handle: function (request, response) {
+						if (!request.hasHeader('Zotero-API-Key')) {
+							response.setStatusLine(null, 403, "Forbidden");
+							return;
+						}
+						var key = request.getHeader('Zotero-API-Key');
+						if (key != apiKey) {
+							response.setStatusLine(null, 403, "Invalid key");
+							return;
+						}
+						response.setStatusLine(null, 302, "Found");
+						response.setHeader("Zotero-File-Modification-Time", mtime, false);
+						response.setHeader("Zotero-File-MD5", md5, false);
+						response.setHeader("Zotero-File-Compressed", "No", false);
+						response.setHeader("Location", baseURL + s3Path, false);
+					}
+				}
+			);
+			var result = yield engine.start();
+			
+			assert.equal(item.attachmentSyncedModificationTime, mtime);
+			yield assert.eventually.equal(item.attachmentModificationTime, mtime);
+			assert.isTrue(result.localChanges);
+			assert.isFalse(result.remoteChanges);
+			assert.isFalse(result.syncRequired);
+		})
+		
 		it("should update local info for file that already exists on the server", function* () {
 			var { engine, client, caller } = yield setup();
 			

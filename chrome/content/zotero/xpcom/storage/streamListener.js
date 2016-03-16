@@ -156,6 +156,8 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 			if (!result) {
 				oldChannel.cancel(Components.results.NS_BINDING_ABORTED);
 				newChannel.cancel(Components.results.NS_BINDING_ABORTED);
+				Zotero.debug("Cancelling redirect");
+				// TODO: Prevent onStateChange error
 				return false;
 			}
 		}
