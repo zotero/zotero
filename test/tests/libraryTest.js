@@ -150,6 +150,11 @@ describe("Zotero.Library", function() {
 			yield library.saveTx();
 			assert.isFalse(Zotero.Libraries.isEditable(library.libraryID));
 		});
+		
+		it("should initialize library after creation", function* () {
+			let library = yield createGroup({});
+			Zotero.SyncedSettings.get(library.libraryID, "tagColors");
+		});
 	});
 	describe("#erase()", function() {
 		it("should erase a group library", function* () {

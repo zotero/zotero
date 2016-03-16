@@ -4,7 +4,7 @@ describe("Tag Selector", function () {
 	var win, doc, collectionsView;
 	
 	var clearTagColors = Zotero.Promise.coroutine(function* (libraryID) {
-		var tagColors = yield Zotero.Tags.getColors(libraryID);
+		var tagColors = Zotero.Tags.getColors(libraryID);
 		for (let name of tagColors.keys()) {
 			yield Zotero.Tags.setColor(libraryID, name, false);
 		}
@@ -154,6 +154,18 @@ describe("Tag Selector", function () {
 			tagSelector = doc.getElementById('zotero-tag-selector');
 			assert.equal(getRegularTags().length, 1);
 		})
+		
+		it("should show a colored tag at the top of the list even when linked to no items", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			var tagSelector = doc.getElementById('zotero-tag-selector');
+			var tagElems = tagSelector.id('tags-box').childNodes;
+			var count = tagElems.length;
+			
+			yield Zotero.Tags.setColor(libraryID, "Top", '#AAAAAA');
+			
+			assert.equal(tagElems.length, count + 1);
+		});
 		
 		it("shouldn't re-insert a new tag that matches an existing color", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;

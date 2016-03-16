@@ -273,7 +273,7 @@ Zotero.Sync.Storage.Engine.prototype.stop = function () {
 }
 
 Zotero.Sync.Storage.Engine.prototype.queueItem = Zotero.Promise.coroutine(function* (item) {
-	switch (yield this.local.getSyncState(item.id)) {
+	switch (item.attachmentSyncState) {
 		case Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD:
 		case Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_DOWNLOAD:
 			var type = 'download';
@@ -295,7 +295,7 @@ Zotero.Sync.Storage.Engine.prototype.queueItem = Zotero.Promise.coroutine(functi
 			return;
 		
 		default:
-			throw new Error("Invalid sync state " + (yield this.local.getSyncState(item.id)));
+			throw new Error("Invalid sync state " + item.attachmentSyncState);
 	}
 	
 	var request = new Zotero.Sync.Storage.Request({

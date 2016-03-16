@@ -135,13 +135,52 @@ describe("Zotero.Item", function () {
 			item = yield Zotero.Items.getAsync(id);
 			assert.equal(item.getField("versionNumber"), "1.0");
 		});
+		
+		it("should accept ISO 8601 dates", function* () {
+			var fields = {
+				accessDate: "2015-06-07T20:56:00Z",
+				dateAdded: "2015-06-07T20:57:00Z",
+				dateModified: "2015-06-07T20:58:00Z",
+			};
+			var item = createUnsavedDataObject('item');
+			for (let i in fields) {
+				item.setField(i, fields[i]);
+			}
+			assert.equal(item.getField('accessDate'), '2015-06-07 20:56:00');
+			assert.equal(item.dateAdded, '2015-06-07 20:57:00');
+			assert.equal(item.dateModified, '2015-06-07 20:58:00');
+		})
+		
+		it("should accept SQL dates", function* () {
+			var fields = {
+				accessDate: "2015-06-07 20:56:00",
+				dateAdded: "2015-06-07 20:57:00",
+				dateModified: "2015-06-07 20:58:00",
+			};
+			var item = createUnsavedDataObject('item');
+			for (let i in fields) {
+				item.setField(i, fields[i]);
+				item.getField(i, fields[i]);
+			}
+		})
+		
+		it("should ignore unknown accessDate values", function* () {
+			var fields = {
+				accessDate: "foo"
+			};
+			var item = createUnsavedDataObject('item');
+			for (let i in fields) {
+				item.setField(i, fields[i]);
+			}
+			assert.strictEqual(item.getField('accessDate'), '');
+		})
 	})
 	
 	describe("#dateAdded", function () {
 		it("should use current time if value was not given for a new item", function* () {
 			var item = new Zotero.Item('book');
 			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
+			item = Zotero.Items.get(id);
 			
 			assert.closeTo(Zotero.Date.sqlToDate(item.dateAdded, true).getTime(), Date.now(), 2000);
 		})
@@ -184,10 +223,9 @@ describe("Zotero.Item", function () {
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
 			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
+			item = Zotero.Items.get(id);
 			
 			// Save again without changing Date Modified
-			yield item.loadItemData();
 			item.setField('title', 'Test');
 			yield item.saveTx()
 			
@@ -199,10 +237,9 @@ describe("Zotero.Item", function () {
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
 			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
+			item = Zotero.Items.get(id);
 			
 			// Set Date Modified to existing value
-			yield item.loadItemData();
 			item.setField('title', 'Test');
 			item.dateModified = dateModified;
 			yield item.saveTx()
@@ -223,10 +260,9 @@ describe("Zotero.Item", function () {
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
 			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
+			item = Zotero.Items.get(id);
 			
 			// Resave with skipDateModifiedUpdate
-			yield item.loadItemData();
 			item.setField('title', 'Test');
 			yield item.saveTx({
 				skipDateModifiedUpdate: true
@@ -353,8 +389,7 @@ describe("Zotero.Item", function () {
 			var item = new Zotero.Item("journalArticle");
 			item.setCreators(creators);
 			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
-			yield item.loadCreators();
+			item = Zotero.Items.get(id);
 			assert.sameDeepMembers(item.getCreatorsJSON(), creators);
 		})
 		
@@ -377,8 +412,7 @@ describe("Zotero.Item", function () {
 			var item = new Zotero.Item("journalArticle");
 			item.setCreators(creators);
 			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
-			yield item.loadCreators();
+			item = Zotero.Items.get(id);
 			assert.sameDeepMembers(item.getCreators(), creators);
 		})
 	})
@@ -614,11 +648,8 @@ describe("Zotero.Item", function () {
 			
 			// File should be flagged for upload
 			// DEBUG: Is this necessary?
-			assert.equal(
-				(yield Zotero.Sync.Storage.Local.getSyncState(item.id)),
-				Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD
-			);
-			assert.isNull(yield Zotero.Sync.Storage.Local.getSyncedHash(item.id));
+			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD);
+			assert.isNull(item.attachmentSyncedHash);
 		})
 	})
 	
@@ -686,8 +717,7 @@ describe("Zotero.Item", function () {
 			var item = new Zotero.Item('journalArticle');
 			item.setTags(tags);
 			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
-			yield item.loadTags();
+			item = Zotero.Items.get(id);
 			assert.sameDeepMembers(item.getTags(tags), tags);
 		})
 		
@@ -703,8 +733,7 @@ describe("Zotero.Item", function () {
 			var item = new Zotero.Item('journalArticle');
 			item.setTags(tags);
 			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
-			yield item.loadTags();
+			item = Zotero.Items.get(id);
 			item.setTags(tags);
 			assert.isFalse(item.hasChanged());
 		})
@@ -721,8 +750,7 @@ describe("Zotero.Item", function () {
 			var item = new Zotero.Item('journalArticle');
 			item.setTags(tags);
 			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
-			yield item.loadTags();
+			item = Zotero.Items.get(id);
 			item.setTags(tags.slice(0));
 			yield item.saveTx();
 			assert.sameDeepMembers(item.getTags(tags), tags.slice(0));
@@ -825,6 +853,38 @@ describe("Zotero.Item", function () {
 		})
 	})
 	
+	
+	describe("#multiDiff", function () {
+		it("should return set of alternatives for differing fields in other items", function* () {
+			var type = 'item';
+			
+			var dates = ['2016-03-08 17:44:45'];
+			var accessDates = ['2016-03-08T18:44:45Z'];
+			var urls = ['http://www.example.com', 'http://example.net'];
+			
+			var obj1 = createUnsavedDataObject(type);
+			obj1.setField('date', '2016-03-07 12:34:56'); // different in 1 and 3, not in 2
+			obj1.setField('url', 'http://example.com'); // different in all three
+			obj1.setField('title', 'Test'); // only in 1
+			
+			var obj2 = createUnsavedDataObject(type);
+			obj2.setField('url', urls[0]);
+			obj2.setField('accessDate', accessDates[0]); // only in 2
+			
+			var obj3 = createUnsavedDataObject(type);
+			obj3.setField('date', dates[0]);
+			obj3.setField('url', urls[1]);
+			
+			var alternatives = obj1.multiDiff([obj2, obj3]);
+			
+			assert.sameMembers(Object.keys(alternatives), ['url', 'date', 'accessDate']);
+			assert.sameMembers(alternatives.url, urls);
+			assert.sameMembers(alternatives.date, dates);
+			assert.sameMembers(alternatives.accessDate, accessDates);
+		});
+	});
+	
+	
 	describe("#clone()", function () {
 		// TODO: Expand to other data
 		it("should copy creators", function* () {
@@ -837,7 +897,7 @@ describe("Zotero.Item", function () {
 				}
 			]);
 			yield item.saveTx();
-			var newItem = yield item.clone();
+			var newItem = item.clone();
 			assert.sameDeepMembers(item.getCreators(), newItem.getCreators());
 		})
 	})
@@ -851,8 +911,8 @@ describe("Zotero.Item", function () {
 				var item = new Zotero.Item(itemType);
 				item.setField("title", title);
 				var id = yield item.saveTx();
-				item = yield Zotero.Items.getAsync(id);
-				var json = yield item.toJSON();
+				item = Zotero.Items.get(id);
+				var json = item.toJSON();
 				
 				assert.equal(json.itemType, itemType);
 				assert.equal(json.title, title);
@@ -868,13 +928,13 @@ describe("Zotero.Item", function () {
 				item.setField("title", title);
 				item.deleted = true;
 				var id = yield item.saveTx();
-				item = yield Zotero.Items.getAsync(id);
-				var json = yield item.toJSON();
+				item = Zotero.Items.get(id);
+				var json = item.toJSON();
 				
 				assert.strictEqual(json.deleted, 1);
 			})
 			
-			it("should output attachment fields from file", function* () {
+			it.skip("should output attachment fields from file", function* () {
 				var file = getTestDataDirectory();
 				file.append('test.png');
 				var item = yield Zotero.Attachments.importFromFile({ file });
@@ -888,7 +948,7 @@ describe("Zotero.Item", function () {
 					);
 				});
 				
-				var json = yield item.toJSON();
+				var json = item.toJSON();
 				assert.equal(json.linkMode, 'imported_file');
 				assert.equal(json.filename, 'test.png');
 				assert.isUndefined(json.path);
@@ -905,24 +965,23 @@ describe("Zotero.Item", function () {
 				var mtime = new Date().getTime();
 				var md5 = 'b32e33f529942d73bea4ed112310f804';
 				
-				yield Zotero.DB.executeTransaction(function* () {
-					yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, mtime);
-					yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, md5);
-				});
+				item.attachmentSyncedModificationTime = mtime;
+				item.attachmentSyncedHash = md5;
+				yield item.saveTx({ skipAll: true });
 				
-				var json = yield item.toJSON({
+				var json = item.toJSON({
 					syncedStorageProperties: true
 				});
 				assert.equal(json.mtime, mtime);
 				assert.equal(json.md5, md5);
 			})
 			
-			it("should output unset storage properties as null", function* () {
+			it.skip("should output unset storage properties as null", function* () {
 				var item = new Zotero.Item('attachment');
 				item.attachmentLinkMode = 'imported_file';
 				item.fileName = 'test.txt';
 				var id = yield item.saveTx();
-				var json = yield item.toJSON();
+				var json = item.toJSON();
 				
 				assert.isNull(json.mtime);
 				assert.isNull(json.md5);
@@ -938,7 +997,7 @@ describe("Zotero.Item", function () {
 				item.setField("title", title);
 				var id = yield item.saveTx();
 				item = yield Zotero.Items.getAsync(id);
-				var json = yield item.toJSON({ mode: 'full' });
+				var json = item.toJSON({ mode: 'full' });
 				assert.equal(json.title, title);
 				assert.equal(json.date, "");
 				assert.equal(json.numPages, "");
@@ -955,11 +1014,11 @@ describe("Zotero.Item", function () {
 				item.setField("title", title);
 				var id = yield item.saveTx();
 				item = yield Zotero.Items.getAsync(id);
-				var patchBase = yield item.toJSON();
+				var patchBase = item.toJSON();
 				
 				item.setField("date", date);
 				yield item.saveTx();
-				var json = yield item.toJSON({
+				var json = item.toJSON({
 					patchBase: patchBase
 				})
 				assert.isUndefined(json.itemType);
@@ -978,10 +1037,10 @@ describe("Zotero.Item", function () {
 				item.deleted = true;
 				var id = yield item.saveTx();
 				item = yield Zotero.Items.getAsync(id);
-				var patchBase = yield item.toJSON();
+				var patchBase = item.toJSON();
 				
 				item.deleted = false;
-				var json = yield item.toJSON({
+				var json = item.toJSON({
 					patchBase: patchBase
 				})
 				assert.isUndefined(json.title);
@@ -992,10 +1051,10 @@ describe("Zotero.Item", function () {
 				item.deleted = false;
 				var id = yield item.saveTx();
 				item = yield Zotero.Items.getAsync(id);
-				var patchBase = yield item.toJSON();
+				var patchBase = item.toJSON();
 				
 				item.deleted = true;
-				var json = yield item.toJSON({
+				var json = item.toJSON({
 					patchBase: patchBase
 				})
 				assert.isUndefined(json.title);

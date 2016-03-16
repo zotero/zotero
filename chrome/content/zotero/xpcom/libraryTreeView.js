@@ -79,7 +79,7 @@ Zotero.LibraryTreeView.prototype = {
 	 * Return the index of the row with a given ID (e.g., "C123" for collection 123)
 	 *
 	 * @param {String} - Row id
-	 * @return {Integer}
+	 * @return {Integer|false}
 	 */
 	getRowIndexByID: function (id) {
 		var type = "";
@@ -87,7 +87,7 @@ Zotero.LibraryTreeView.prototype = {
 			var type = id[0];
 			id = ('' + id).substr(1);
 		}
-		return this._rowMap[type + id];
+		return this._rowMap[type + id] !== undefined ? this._rowMap[type + id] : false;
 	},
 	
 	

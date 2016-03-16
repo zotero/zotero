@@ -28,11 +28,10 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield OS.File.setDates((yield item.getFilePathAsync()), null, mtime);
 			
 			// Mark as synced, so it will be checked
-			yield Zotero.DB.executeTransaction(function* () {
-				yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, hash);
-				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, mtime);
-				yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
-			});
+			item.attachmentSyncedModificationTime = mtime;
+			item.attachmentSyncedHash = hash;
+			item.attachmentSyncState = "in_sync";
+			yield item.saveTx({ skipAll: true });
 			
 			// Update mtime and contents
 			var path = yield item.getFilePathAsync();
@@ -46,10 +45,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield item.eraseTx();
 			
 			assert.equal(changed, true);
-			assert.equal(
-				(yield Zotero.Sync.Storage.Local.getSyncState(item.id)),
-				Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD
-			);
+			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD);
 		})
 		
 		it("should skip a file if mod time hasn't changed", function* () {
@@ -59,15 +55,14 @@ describe("Zotero.Sync.Storage.Local", function () {
 			var mtime = yield item.attachmentModificationTime;
 			
 			// Mark as synced, so it will be checked
-			yield Zotero.DB.executeTransaction(function* () {
-				yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, hash);
-				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, mtime);
-				yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
-			});
+			item.attachmentSyncedModificationTime = mtime;
+			item.attachmentSyncedHash = hash;
+			item.attachmentSyncState = "in_sync";
+			yield item.saveTx({ skipAll: true });
 			
 			var libraryID = Zotero.Libraries.userLibraryID;
 			var changed = yield Zotero.Sync.Storage.Local.checkForUpdatedFiles(libraryID);
-			var syncState = yield Zotero.Sync.Storage.Local.getSyncState(item.id);
+			var syncState = item.attachmentSyncState;
 			
 			yield item.eraseTx();
 			
@@ -84,11 +79,10 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield OS.File.setDates((yield item.getFilePathAsync()), null, mtime);
 			
 			// Mark as synced, so it will be checked
-			yield Zotero.DB.executeTransaction(function* () {
-				yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, hash);
-				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, mtime);
-				yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
-			});
+			item.attachmentSyncedModificationTime = mtime;
+			item.attachmentSyncedHash = hash;
+			item.attachmentSyncState = "in_sync";
+			yield item.saveTx({ skipAll: true });
 			
 			// Update mtime, but not contents
 			var path = yield item.getFilePathAsync();
@@ -96,8 +90,8 @@ describe("Zotero.Sync.Storage.Local", function () {
 			
 			var libraryID = Zotero.Libraries.userLibraryID;
 			var changed = yield Zotero.Sync.Storage.Local.checkForUpdatedFiles(libraryID);
-			var syncState = yield Zotero.Sync.Storage.Local.getSyncState(item.id);
-			var syncedModTime = yield Zotero.Sync.Storage.Local.getSyncedModificationTime(item.id);
+			var syncState = item.attachmentSyncState;
+			var syncedModTime = item.attachmentSyncedModificationTime;
 			var newModTime = yield item.attachmentModificationTime;
 			
 			yield item.eraseTx();
@@ -202,8 +196,8 @@ describe("Zotero.Sync.Storage.Local", function () {
 			item3.version = 11;
 			yield item3.saveTx();
 			
-			var json1 = yield item1.toJSON();
-			var json3 = yield item3.toJSON();
+			var json1 = item1.toJSON();
+			var json3 = item3.toJSON();
 			// Change remote mtimes
 			// Round to nearest second because OS X doesn't support ms resolution
 			var now = Math.round(new Date().getTime() / 1000) * 1000;
@@ -211,8 +205,10 @@ describe("Zotero.Sync.Storage.Local", function () {
 			json3.mtime = now - 20000;
 			yield Zotero.Sync.Data.Local.saveCacheObjects('item', libraryID, [json1, json3]);
 			
-			yield Zotero.Sync.Storage.Local.setSyncState(item1.id, "in_conflict");
-			yield Zotero.Sync.Storage.Local.setSyncState(item3.id, "in_conflict");
+			item1.attachmentSyncState = "in_conflict";
+			yield item1.saveTx({ skipAll: true });
+			item3.attachmentSyncState = "in_conflict";
+			yield item3.saveTx({ skipAll: true });
 			
 			var conflicts = yield Zotero.Sync.Storage.Local.getConflicts(libraryID);
 			assert.lengthOf(conflicts, 2);
@@ -251,19 +247,17 @@ describe("Zotero.Sync.Storage.Local", function () {
 			item3.version = 11;
 			yield item3.saveTx();
 			
-			var json1 = yield item1.toJSON();
-			var json3 = yield item3.toJSON();
+			var json1 = item1.toJSON();
+			var json3 = item3.toJSON();
 			// Change remote mtimes
 			json1.mtime = new Date().getTime() + 10000;
 			json3.mtime = new Date().getTime() - 10000;
 			yield Zotero.Sync.Data.Local.saveCacheObjects('item', libraryID, [json1, json3]);
 			
-			yield Zotero.Sync.Storage.Local.setSyncState(
-				item1.id, "in_conflict"
-			);
-			yield Zotero.Sync.Storage.Local.setSyncState(
-				item3.id, "in_conflict"
-			);
+			item1.attachmentSyncState = "in_conflict";
+			yield item1.saveTx({ skipAll: true });
+			item3.attachmentSyncState = "in_conflict";
+			yield item3.saveTx({ skipAll: true });
 			
 			var promise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
 				var doc = dialog.document;
@@ -305,14 +299,8 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield Zotero.Sync.Storage.Local.resolveConflicts(libraryID);
 			yield promise;
 			
-			yield assert.eventually.equal(
-				Zotero.Sync.Storage.Local.getSyncState(item1.id),
-				Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_UPLOAD
-			);
-			yield assert.eventually.equal(
-				Zotero.Sync.Storage.Local.getSyncState(item3.id),
-				Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_DOWNLOAD
-			);
+			assert.equal(item1.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_UPLOAD);
+			assert.equal(item3.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_DOWNLOAD);
 		})
 	})
 	

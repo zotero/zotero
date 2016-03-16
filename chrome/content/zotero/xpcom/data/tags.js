@@ -77,7 +77,7 @@ Zotero.Tags = new function() {
 	
 	
 	/**
-	 * Get all tags indexed by tagID
+	 * Get all tags in library
 	 *
 	 * @param {Number} libraryID
 	 * @param {Array}  [types]    Tag types to fetch
@@ -181,7 +181,7 @@ Zotero.Tags = new function() {
 		
 		// We need to know if the old tag has a color assigned so that
 		// we can assign it to the new name
-		var oldColorData = yield this.getColor(libraryID, oldName);
+		var oldColorData = this.getColor(libraryID, oldName);
 		
 		yield Zotero.DB.executeTransaction(function* () {
 			var oldItemIDs = yield this.getTagItems(libraryID, oldTagID);
@@ -393,13 +393,13 @@ Zotero.Tags = new function() {
 	 *
 	 * @param {Integer} libraryID
 	 * @param {String} name Tag name
-	 * @return {Promise} A Q promise for the tag color as a hex string (e.g., '#990000')
+	 * @return {Object|false} An object containing 'color' as a hex string (e.g., '#990000') and
+	 *     'position', or false if no colored tag with that name
 	 */
 	this.getColor = function (libraryID, name) {
-		return this.getColors(libraryID)
-		.then(function () {
-			return _libraryColorsByName[libraryID].get(name) || false;
-		});
+		// Cache colors
+		this.getColors(libraryID);
+		return _libraryColorsByName[libraryID].get(name) || false;
 	}
 	
 	
@@ -408,14 +408,12 @@ Zotero.Tags = new function() {
 	 *
 	 * @param {Integer} libraryID
 	 * @param {Integer} position The position of the tag, starting at 0
-	 * @return {Promise} A promise for an object containing 'name' and 'color'
+	 * @return {Object|false} An object containing 'name' and 'color', or false if no color at
+	 *     the given position
 	 */
 	this.getColorByPosition = function (libraryID, position) {
-		return this.getColors(libraryID)
-		.then(function () {
-			return _libraryColors[libraryID][position]
-				? _libraryColors[libraryID][position] : false;
-		});
+		this.getColors(libraryID);
+		return _libraryColors[libraryID][position] ? _libraryColors[libraryID][position] : false;
 	}
 	
 	
@@ -423,20 +421,19 @@ Zotero.Tags = new function() {
 	 * Get colored tags within a given library
 	 *
 	 * @param {Integer} libraryID
-	 * @return {Promise<Map>} - A promise for a Map with tag names as keys and
-	 *                          objects containing 'color' and 'position' as values
+	 * @return {Map} - A Map with tag names as keys and objects containing 'color' and 'position'
+	 *     as values
 	 */
-	this.getColors = Zotero.Promise.coroutine(function* (libraryID) {
+	this.getColors = function (libraryID) {
+		if (!libraryID) {
+			throw new Error("libraryID not provided");
+		}
+		
 		if (_libraryColorsByName[libraryID]) {
 			return _libraryColorsByName[libraryID];
 		}
 		
-		var tagColors = yield Zotero.SyncedSettings.get(libraryID, 'tagColors');
-		
-		// If the colors became available from another run
-		if (_libraryColorsByName[libraryID]) {
-			return _libraryColorsByName[libraryID];
-		}
+		var tagColors = Zotero.SyncedSettings.get(libraryID, 'tagColors');
 		
 		tagColors = tagColors || [];
 		
@@ -452,7 +449,7 @@ Zotero.Tags = new function() {
 		}
 		
 		return _libraryColorsByName[libraryID];
-	});
+	};
 	
 	
 	/**
@@ -465,7 +462,7 @@ Zotero.Tags = new function() {
 			throw new Error("libraryID must be an integer");
 		}
 		
-		yield this.getColors(libraryID);
+		this.getColors(libraryID);
 		
 		var tagColors = _libraryColors[libraryID];
 		
@@ -541,7 +538,7 @@ Zotero.Tags = new function() {
 			delete _libraryColorsByName[libraryID];
 			
 			// Get the tag colors for each library in which they were modified
-			let tagColors = yield Zotero.SyncedSettings.get(libraryID, 'tagColors');
+			let tagColors = Zotero.SyncedSettings.get(libraryID, 'tagColors');
 			if (!tagColors) {
 				tagColors = [];
 			}

@@ -23,10 +23,13 @@
     ***** END LICENSE BLOCK *****
 */
 
+"use strict";
+
 var Zotero_Duplicates_Pane = new function () {
-	_items = [];
-	_otherItems = [];
-	_ignoreFields = ['dateAdded', 'dateModified', 'accessDate'];
+	var _masterItem;
+	var _items = [];
+	var _otherItems = [];
+	var _ignoreFields = ['dateAdded', 'dateModified', 'accessDate'];
 	
 	this.setItems = function (items, displayNumItemsOnTypeError) {
 		var itemTypeID, oldestItem, otherItems = [];
@@ -77,15 +80,13 @@ var Zotero_Duplicates_Pane = new function () {
 		// Update the UI
 		//
 		
-		var diff = oldestItem.multiDiff(otherItems, _ignoreFields);
-		
 		var button = document.getElementById('zotero-duplicates-merge-button');
 		var versionSelect = document.getElementById('zotero-duplicates-merge-version-select');
 		var itembox = document.getElementById('zotero-duplicates-merge-item-box');
 		var fieldSelect = document.getElementById('zotero-duplicates-merge-field-select');
 		
-		versionSelect.hidden = !diff;
-		if (diff) {
+		var alternatives = oldestItem.multiDiff(otherItems, _ignoreFields);
+		if (alternatives) {
 			// Populate menulist with Date Added values from all items
 			var dateList = document.getElementById('zotero-duplicates-merge-original-date');
 			
@@ -111,8 +112,8 @@ var Zotero_Duplicates_Pane = new function () {
 		}
 		
 		button.label = Zotero.getString('pane.item.duplicates.mergeItems', (otherItems.length + 1));
-		itembox.hiddenFields = diff ? [] : ['dateAdded', 'dateModified'];
-		fieldSelect.hidden = !diff;
+		versionSelect.hidden = fieldSelect.hidden = !alternatives;
+		itembox.hiddenFields = alternatives ? [] : ['dateAdded', 'dateModified'];
 		
 		this.setMaster(0);
 		
@@ -130,27 +131,25 @@ var Zotero_Duplicates_Pane = new function () {
 		// Add master item's values to the beginning of each set of
 		// alternative values so that they're still available if the item box
 		// modifies the item
-		Zotero.spawn(function* () {
-			var diff = yield item.multiDiff(_otherItems, _ignoreFields);
-			if (diff) {
-				let itemValues = yield item.toJSON();
-				for (let i in diff) {
-					diff[i].unshift(itemValues[i] !== undefined ? itemValues[i] : '');
-				}
-				itembox.fieldAlternatives = diff;
+		var alternatives = item.multiDiff(_otherItems, _ignoreFields);
+		if (alternatives) {
+			let itemValues = item.toJSON();
+			for (let i in alternatives) {
+				alternatives[i].unshift(itemValues[i] !== undefined ? itemValues[i] : '');
 			}
-			
-			var newItem = yield item.copy();
-			yield newItem.loadItemData();
-			yield newItem.loadCreators();
-			itembox.item = newItem;
-		});
+			itembox.fieldAlternatives = alternatives;
+		}
+		
+		_masterItem = item;
+		itembox.item = item.clone();
 	}
 	
 	
-	this.merge = function () {
+	this.merge = Zotero.Promise.coroutine(function* () {
 		var itembox = document.getElementById('zotero-duplicates-merge-item-box');
 		Zotero.CollectionTreeCache.clear();
-		Zotero.Items.merge(itembox.item, _otherItems);
-	}
+		// Update master item with any field alternatives from the item box
+		_masterItem.fromJSON(itembox.item.toJSON());
+		Zotero.Items.merge(_masterItem, _otherItems);
+	});
 }

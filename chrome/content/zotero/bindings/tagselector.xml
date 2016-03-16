@@ -236,14 +236,20 @@
 						var emptyRegular = true;
 						var tagsBox = this.id('tags-box');
 						
-						var tagColors = yield Zotero.Tags.getColors(this.libraryID)
-							.tap(() => Zotero.Promise.check(this.mode));
+						var tagColors = Zotero.Tags.getColors(this.libraryID);
 						
 						// If new data, rebuild boxes
 						if (fetch || this._dirty) {
 							this._tags = yield Zotero.Tags.getAll(this.libraryID, this._types)
 								.tap(() => Zotero.Promise.check(this.mode));
 							tagsBox.textContent = "";
+							
+							// Add colored tags that aren't already real tags
+							let regularTags = new Set(this._tags.map(tag => tag.tag));
+							let coloredTags = new Set(tagColors.keys());
+							[for (x of coloredTags) if (!regularTags.has(x)) x].forEach(x =>
+								this._tags.push(Zotero.Tags.cleanData({ tag: x }))
+							);
 							
 							// Sort by name
 							let collation = Zotero.getLocaleCollation();
@@ -375,45 +381,43 @@
 			<method name="insertSorted">
 				<parameter name="tagObjs"/>
 				<body><![CDATA[
-					return Zotero.spawn(function* () {
-						var tagColors = yield Zotero.Tags.getColors(this._libraryID);
-						
-						var collation = Zotero.getLocaleCollation();
-						tagObjs.sort(function (a, b) {
-							return collation.compareString(1, a.tag, b.tag);
-						});
-						
-						// Create tag elements in sorted order
-						var tagsBox = this.id('tags-box');
-						var tagElems = tagsBox.childNodes;
-						var j = 0;
-						loop:
-						for (let i = 0; i < tagObjs.length; i++) {
-							let tagObj = tagObjs[i];
-							while (j < tagElems.length) {
-								let elem = tagElems[j];
-								let comp = collation.compareString(
-									1, tagObj.tag, elem.textContent
-								);
-								// If tag already exists, update type if new one is lower
-								if (comp == 0) {
-									let tagType = elem.getAttribute('tagType');
-									if (parseInt(tagObj.type) < parseInt(tagType)) {
-										elem.setAttribute('tagType', tagObj.type);
-									}
-									continue loop;
-								}
-								if (comp < 0) {
-									break;
-								}
-								j++;
-							}
-							this._insertClickableTag(tagsBox, tagObj, tagElems[j]);
-							this._updateClickableTag(
-								tagElems[j], tagElems[j].textContent, tagColors
+					var tagColors = Zotero.Tags.getColors(this._libraryID);
+					
+					var collation = Zotero.getLocaleCollation();
+					tagObjs.sort(function (a, b) {
+						return collation.compareString(1, a.tag, b.tag);
+					});
+					
+					// Create tag elements in sorted order
+					var tagsBox = this.id('tags-box');
+					var tagElems = tagsBox.childNodes;
+					var j = 0;
+					loop:
+					for (let i = 0; i < tagObjs.length; i++) {
+						let tagObj = tagObjs[i];
+						while (j < tagElems.length) {
+							let elem = tagElems[j];
+							let comp = collation.compareString(
+								1, tagObj.tag, elem.textContent
 							);
+							// If tag already exists, update type if new one is lower
+							if (comp == 0) {
+								let tagType = elem.getAttribute('tagType');
+								if (parseInt(tagObj.type) < parseInt(tagType)) {
+									elem.setAttribute('tagType', tagObj.type);
+								}
+								continue loop;
+							}
+							if (comp < 0) {
+								break;
+							}
+							j++;
 						}
-					}, this);
+						this._insertClickableTag(tagsBox, tagObj, tagElems[j]);
+						this._updateClickableTag(
+							tagElems[j], tagElems[j].textContent, tagColors
+						);
+					}
 				]]></body>
 			</method>
 			
@@ -512,7 +516,7 @@
 								}.bind(this));
 								
 								if (tagObjs.length) {
-									yield this.insertSorted(tagObjs);
+									this.insertSorted(tagObjs);
 								}
 							}
 							// Don't add anything for item or collection-item; just update scope
@@ -671,7 +675,7 @@
 						// Colored tags don't need to exist, so in that case
 						// just rename the color setting
 						else {
-							let color = yield Zotero.Tags.getColor(this.libraryID, oldName);
+							let color = Zotero.Tags.getColor(this.libraryID, oldName);
 							if (!color) {
 								throw new Error("Can't rename missing tag");
 							}
@@ -711,18 +715,6 @@
 						else {
 							yield Zotero.Tags.setColor(this.libraryID, name, false);
 						}
-					}.bind(this));
-				]]></body>
-			</method>
-			
-			<method name="getColor">
-				<parameter name="tagIDs"/>
-				<body><![CDATA[
-					return Zotero.spawn(function* () {
-						tagIDs = tagIDs.split('-');
-						var name = yield Zotero.Tags.getName(tagIDs[0]);
-						var colorData = yield Zotero.Tags.getColor(this.libraryID, name);
-						return colorData ? colorData.color : '#000000';
 					}.bind(this));
 				]]></body>
 			</method>
@@ -877,7 +869,7 @@
 							name: name
 						};
 						
-						var tagColors = yield Zotero.Tags.getColors(this.libraryID);
+						var tagColors = Zotero.Tags.getColors(this.libraryID);
 						if (tagColors.size >= Zotero.Tags.MAX_COLORED_TAGS && !tagColors.has(io.name)) {
 							var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);

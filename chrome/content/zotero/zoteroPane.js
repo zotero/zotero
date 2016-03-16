@@ -860,7 +860,7 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.setVirtual = function (libraryID, mode, show) {
+	this.setVirtual = Zotero.Promise.coroutine(function* (libraryID, mode, show) {
 		switch (mode) {
 			case 'duplicates':
 				var prefKey = 'duplicateLibraries';
@@ -873,7 +873,7 @@ var ZoteroPane = new function()
 				break;
 			
 			default:
-				throw ("Invalid virtual mode '" + mode + "' in ZoteroPane.setVirtual()");
+				throw new Error("Invalid virtual mode '" + mode + "'");
 		}
 		
 		try {
@@ -881,10 +881,6 @@ var ZoteroPane = new function()
 		}
 		catch (e) {
 			var ids = [];
-		}
-		
-		if (!libraryID) {
-			libraryID = Zotero.Libraries.userLibraryID;
 		}
 		
 		var newids = [];
@@ -898,8 +894,8 @@ var ZoteroPane = new function()
 			if (id == libraryID && !show) {
 				continue;
 			}
-			// Remove libraryIDs that no longer exist
-			if (id != 0 && !Zotero.Libraries.exists(id)) {
+			// Remove libraries that no longer exist
+			if (!Zotero.Libraries.exists(id)) {
 				continue;
 			}
 			newids.push(id);
@@ -914,22 +910,19 @@ var ZoteroPane = new function()
 		
 		Zotero.Prefs.set(prefKey, newids.join());
 		
-		this.collectionsView.refresh();
-		
-		// If group is closed, open it
-		this.collectionsView.selectLibrary(libraryID);
-		row = this.collectionsView.selection.currentIndex;
-		if (!this.collectionsView.isContainerOpen(row)) {
-			this.collectionsView.toggleOpenState(row);
-		}
+		yield this.collectionsView.refresh();
 		
 		// Select new row
 		if (show) {
-			Zotero.Prefs.set('lastViewedFolder', lastViewedFolderID);
-			var row = this.collectionsView.getLastViewedRow();
-			this.collectionsView.selection.select(row);
+			yield this.collectionsView.selectByID(lastViewedFolderID);
 		}
-	}
+		// Select library root when hiding
+		else {
+			yield this.collectionsView.selectLibrary(libraryID);
+		}
+		
+		this.collectionsView.selection.selectEventsSuppressed = false;
+	});
 	
 	
 	this.openLookupWindow = Zotero.Promise.coroutine(function* () {
@@ -1294,7 +1287,6 @@ var ZoteroPane = new function()
 					var clearUndo = noteEditor.item ? noteEditor.item.id != item.id : false;
 					
 					noteEditor.parent = null;
-					yield item.loadNote();
 					noteEditor.item = item;
 					
 					// If loading new or different note, disable undo while we repopulate the text field
@@ -1325,8 +1317,6 @@ var ZoteroPane = new function()
 				else if (item.isAttachment()) {
 					var attachmentBox = document.getElementById('zotero-attachment-box');
 					attachmentBox.mode = this.collectionsView.editable ? 'edit' : 'view';
-					yield item.loadItemData();
-					yield item.loadNote();
 					attachmentBox.item = item;
 					
 					document.getElementById('zotero-item-pane-content').selectedIndex = 3;
@@ -1588,7 +1578,7 @@ var ZoteroPane = new function()
 		var newItem;
 		
 		yield Zotero.DB.executeTransaction(function* () {
-			newItem = yield item.clone(null, !Zotero.Prefs.get('groups.copyTags'));
+			newItem = item.clone(null, !Zotero.Prefs.get('groups.copyTags'));
 			yield newItem.save();
 			
 			if (self.collectionsView.selectedTreeRow.isCollection() && newItem.isTopLevelItem()) {
@@ -3641,7 +3631,6 @@ var ZoteroPane = new function()
 				
 				// Fall back to first attachment link
 				if (!uri) {
-					yield item.loadChildItems();
 					let attachmentID = item.getAttachments()[0];
 					if (attachmentID) {
 						let attachment = yield Zotero.Items.getAsync(attachmentID);
@@ -3851,7 +3840,7 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.showPublicationsWizard = Zotero.Promise.coroutine(function* (items) {
+	this.showPublicationsWizard = function (items) {
 		var io = {
 			hasFiles: false,
 			hasNotes: false,
@@ -3863,14 +3852,12 @@ var ZoteroPane = new function()
 		for (let i = 0; i < items.length; i++) {
 			let item = items[i];
 			
-			yield item.loadItemData();
-			yield item.loadChildItems();
-			
 			// Files
 			if (!io.hasFiles && item.numAttachments()) {
-				let attachments = item.getAttachments();
-				attachments = yield Zotero.Items.getAsync(attachments);
-				io.hasFiles = attachments.some(attachment => attachment.isFileAttachment());
+				let attachmentIDs = item.getAttachments();
+				io.hasFiles = Zotero.Items.get(attachmentIDs).some(
+					attachment => attachment.isFileAttachment()
+				);
 			}
 			// Notes
 			if (!io.hasNotes && item.numNotes()) {
@@ -3887,7 +3874,7 @@ var ZoteroPane = new function()
 		io.hasRights = allItemsHaveRights ? 'all' : (noItemsHaveRights ? 'none' : 'some');
 		window.openDialog('chrome://zotero/content/publicationsDialog.xul','','chrome,modal', io);
 		return io.license ? io : false;
-	});
+	};
 	
 	
 	/**

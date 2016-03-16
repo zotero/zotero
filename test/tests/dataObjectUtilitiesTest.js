@@ -25,11 +25,11 @@ describe("Zotero.DataObjectUtilities", function() {
 					yield Zotero.DB.executeTransaction(function* () {
 						var item = new Zotero.Item('book');
 						id1 = yield item.save();
-						json1 = yield item.toJSON();
+						json1 = item.toJSON();
 						
 						var item = new Zotero.Item('book');
 						id2 = yield item.save();
-						json2 = yield item.toJSON();
+						json2 = item.toJSON();
 					});
 					
 					var changes = Zotero.DataObjectUtilities.diff(json1, json2);

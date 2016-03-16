@@ -30,29 +30,35 @@ Zotero.Creators = new function() {
 	
 	var _cache = {};
 	
+	this.init = Zotero.Promise.coroutine(function* () {
+		var sql = "SELECT * FROM creators";
+		var rows = yield Zotero.DB.queryAsync(sql);
+		for (let i = 0; i < rows.length; i++) {
+			let row = rows[i];
+			_cache[row.creatorID] = this.cleanData({
+				// Avoid "DB column 'name' not found" warnings from the DB row Proxy
+				firstName: row.firstName,
+				lastName: row.lastName,
+				fieldMode: row.fieldMode
+			});
+		}
+	});
+	
 	/*
 	 * Returns creator data in internal format for a given creatorID
 	 */
-	this.getAsync = Zotero.Promise.coroutine(function* (creatorID) {
+	this.get = function (creatorID) {
 		if (!creatorID) {
 			throw new Error("creatorID not provided");
 		}
 		
-		if (_cache[creatorID]) {
-			return this.cleanData(_cache[creatorID]);
-		}
-		
-		var sql = "SELECT * FROM creators WHERE creatorID=?";
-		var row = yield Zotero.DB.rowQueryAsync(sql, creatorID);
-		if (!row) {
+		if (!_cache[creatorID]) {
 			throw new Error("Creator " + creatorID + " not found");
 		}
-		return _cache[creatorID] = this.cleanData({
-			firstName: row.firstName, // avoid "DB column 'name' not found" warnings from the DB row Proxy
-			lastName: row.lastName,
-			fieldMode: row.fieldMode
-		});
-	});
+		
+		// Return copy of data
+		return this.cleanData(_cache[creatorID]);
+	};
 	
 	
 	this.getItemsWithCreator = function (creatorID) {
@@ -87,12 +93,10 @@ Zotero.Creators = new function() {
 			id = yield Zotero.ID.get('creators');
 			let sql = "INSERT INTO creators (creatorID, firstName, lastName, fieldMode) "
 				+ "VALUES (?, ?, ?, ?)";
-			let insertID = yield Zotero.DB.queryAsync(
+			yield Zotero.DB.queryAsync(
 				sql, [id, data.firstName, data.lastName, data.fieldMode]
 			);
-			if (!id) {
-				id = insertID;
-			}
+			_cache[id] = data;
 		}
 		return id;
 	});

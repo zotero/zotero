@@ -288,15 +288,14 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			Zotero.debug("File mod time matches remote file -- skipping download of "
 				+ item.libraryKey);
 			
-			yield Zotero.DB.executeTransaction(function* () {
-				var syncState = Zotero.Sync.Storage.Local.getSyncState(item.id);
-				// DEBUG: Necessary to update item?
-				var updateItem = syncState != 1;
-				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(
-					item.id, metadata.mtime, updateItem
-				);
-				yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
-			});
+			var updateItem = item.attachmentSyncState != 1
+			item.attachmentSyncedModificationTime = metadata.mtime;
+			item.attachmentSyncState = "in_sync";
+			yield item.saveTx({ skipAll: true });
+			// DEBUG: Necessary?
+			if (updateItem) {
+				yield item.updateSynced(false);
+			}
 			
 			return new Zotero.Sync.Storage.Result({
 				localChanges: true, // ?
@@ -416,7 +415,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		}
 		
 		// Check if file already exists on WebDAV server
-		if ((yield Zotero.Sync.Storage.Local.getSyncState(item.id))
+		if (item.attachmentSyncState
 				!= Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_UPLOAD) {
 			if (metadata.mtime) {
 				// Local file time
@@ -438,15 +437,14 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					
 					// If WebDAV server already has file, update synced properties
 					if (!changed) {
-						yield Zotero.DB.executeTransaction(function* () {
-							yield Zotero.Sync.Storage.Local.setSyncedModificationTime(
-								item.id, fmtime, true
-							);
-							if (hash) {
-								yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, hash);
-							}
-							yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
-						});
+						item.attachmentSyncedModificationTime = fmtime;
+						if (hash) {
+							item.attachmentSyncedHash = hash;
+						}
+						item.attachmentSyncState = "in_sync";
+						yield item.saveTx({ skipAll: true });
+						// skipAll doesn't mark as unsynced, so do that separately
+						yield item.updateSynced(false);
 						return new Zotero.Sync.Storage.Result;
 					}
 				}
@@ -460,9 +458,9 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				// API would ever be updated with the correct values, so we can't just wait for
 				// the API to change.) If a conflict is found, we flag the item as in conflict
 				// and require another file sync, which will trigger conflict resolution.
-				let smtime = yield Zotero.Sync.Storage.Local.getSyncedModificationTime(item.id);
+				let smtime = item.attachmentSyncedModificationTime;
 				if (smtime != mtime) {
-					let shash = yield Zotero.Sync.Storage.Local.getSyncedHash(item.id);
+					let shash = item.attachmentSyncedHash;
 					if (shash && metadata.md5 && shash == metadata.md5) {
 						Zotero.debug("Last synced mod time for item " + item.libraryKey
 							+ " doesn't match time on storage server but hash does -- ignoring");
@@ -472,12 +470,13 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					Zotero.logError("Conflict -- last synced file mod time for item "
 						+ item.libraryKey + " does not match time on storage server"
 						+ " (" + smtime + " != " + mtime + ")");
-					yield Zotero.DB.executeTransaction(function* () {
-						// Conflict resolution uses the synced mtime as the remote value, so set
-						// that to the WebDAV value, since that's the one in conflict.
-						yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, mtime);
-						yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_conflict");
-					});
+					
+					// Conflict resolution uses the synced mtime as the remote value, so set
+					// that to the WebDAV value, since that's the one in conflict.
+					item.attachmentSyncedModificationTime = mtime;
+					item.attachmentSyncState = "in_conflict";
+					yield item.saveTx({ skipAll: true });
+					
 					return new Zotero.Sync.Storage.Result({
 						fileSyncRequired: true
 					});
@@ -1073,7 +1072,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				response, ".//D:getlastmodified", { D: 'DAV:' }
 			);
 			lastModified = Zotero.Date.strToISO(lastModified);
-			lastModified = Zotero.Date.sqlToDate(lastModified);
+			lastModified = Zotero.Date.sqlToDate(lastModified, true);
 			
 			// Delete files older than a day before last sync time
 			var days = (lastSyncDate - lastModified) / 1000 / 60 / 60 / 24;
@@ -1191,7 +1190,10 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			throw new Error(Zotero.Sync.Storage.Mode.WebDAV.defaultError);
 		}
 		
-		return { mtime, md5 };
+		return {
+			mtime: parseInt(mtime),
+			md5
+		};
 	}),
 	
 	
@@ -1243,11 +1245,12 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		// Update .prop file on WebDAV server
 		yield this._setStorageFileMetadata(item);
 		
-		yield Zotero.DB.executeTransaction(function* () {
-			yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
-			yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, params.mtime, true);
-			yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, params.md5);
-		});
+		item.attachmentSyncedModificationTime = params.mtime;
+		item.attachmentSyncedHash = params.md5;
+		item.attachmentSyncState = "in_sync";
+		yield item.saveTx({ skipAll: true });
+		// skipAll doesn't mark as unsynced, so do that separately
+		yield item.updateSynced(false);
 		
 		try {
 			yield OS.File.remove(

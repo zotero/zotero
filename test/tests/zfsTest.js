@@ -143,8 +143,8 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = 'imported_file';
 			item.attachmentPath = 'storage:test.txt';
+			item.attachmentSyncState = "to_download";
 			yield item.saveTx();
-			yield Zotero.Sync.Storage.Local.setSyncState(item.id, "to_download");
 			
 			this.httpd.registerPathHandler(
 				`/users/1/items/${item.key}/file`,
@@ -175,8 +175,8 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = 'imported_file';
 			item.attachmentPath = 'storage:test.txt';
+			item.attachmentSyncState = "to_download";
 			yield item.saveTx();
-			yield Zotero.Sync.Storage.Local.setSyncState(item.id, "to_download");
 			
 			this.httpd.registerPathHandler(
 				`/users/1/items/${item.key}/file`,
@@ -208,8 +208,8 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			item.attachmentPath = 'storage:test.txt';
 			// TODO: Test binary data
 			var text = Zotero.Utilities.randomString();
+			item.attachmentSyncState = "to_download";
 			yield item.saveTx();
-			yield Zotero.Sync.Storage.Local.setSyncState(item.id, "to_download");
 			
 			var mtime = "1441252524905";
 			var md5 = Zotero.Utilities.Internal.md5(text)
@@ -553,12 +553,66 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.isFalse(result.syncRequired);
 			
 			// Check local objects
-			assert.equal((yield Zotero.Sync.Storage.Local.getSyncedModificationTime(item1.id)), mtime1);
-			assert.equal((yield Zotero.Sync.Storage.Local.getSyncedHash(item1.id)), hash1);
+			assert.equal(item1.attachmentSyncedModificationTime, mtime1);
+			assert.equal(item1.attachmentSyncedHash, hash1);
 			assert.equal(item1.version, 10);
-			assert.equal((yield Zotero.Sync.Storage.Local.getSyncedModificationTime(item2.id)), mtime2);
-			assert.equal((yield Zotero.Sync.Storage.Local.getSyncedHash(item2.id)), hash2);
+			assert.equal(item2.attachmentSyncedModificationTime, mtime2);
+			assert.equal(item2.attachmentSyncedHash, hash2);
 			assert.equal(item2.version, 15);
+		})
+		
+		it("should update local info for remotely updated file that matches local file", function* () {
+			var { engine, client, caller } = yield setup();
+			
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 5;
+			yield library.saveTx();
+			library.storageDownloadNeeded = true;
+			
+			var file = getTestDataDirectory();
+			file.append('test.txt');
+			var item = yield Zotero.Attachments.importFromFile({ file });
+			item.version = 5;
+			item.attachmentSyncState = "to_download";
+			yield item.saveTx();
+			var path = yield item.getFilePathAsync();
+			yield OS.File.setDates(path, null, new Date() - 100000);
+			
+			var json = item.toJSON();
+			yield Zotero.Sync.Data.Local.saveCacheObject('item', item.libraryID, json);
+			
+			var mtime = (Math.floor(new Date().getTime() / 1000) * 1000) + "";
+			var md5 = Zotero.Utilities.Internal.md5(file)
+			
+			var s3Path = `pretend-s3/${item.key}`;
+			this.httpd.registerPathHandler(
+				`/users/1/items/${item.key}/file`,
+				{
+					handle: function (request, response) {
+						if (!request.hasHeader('Zotero-API-Key')) {
+							response.setStatusLine(null, 403, "Forbidden");
+							return;
+						}
+						var key = request.getHeader('Zotero-API-Key');
+						if (key != apiKey) {
+							response.setStatusLine(null, 403, "Invalid key");
+							return;
+						}
+						response.setStatusLine(null, 302, "Found");
+						response.setHeader("Zotero-File-Modification-Time", mtime, false);
+						response.setHeader("Zotero-File-MD5", md5, false);
+						response.setHeader("Zotero-File-Compressed", "No", false);
+						response.setHeader("Location", baseURL + s3Path, false);
+					}
+				}
+			);
+			var result = yield engine.start();
+			
+			assert.equal(item.attachmentSyncedModificationTime, mtime);
+			yield assert.eventually.equal(item.attachmentModificationTime, mtime);
+			assert.isTrue(result.localChanges);
+			assert.isFalse(result.remoteChanges);
+			assert.isFalse(result.syncRequired);
 		})
 		
 		it("should update local info for file that already exists on the server", function* () {
@@ -569,7 +623,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			var item = yield Zotero.Attachments.importFromFile({ file: file });
 			item.version = 5;
 			yield item.saveTx();
-			var json = yield item.toJSON();
+			var json = item.toJSON();
 			yield Zotero.Sync.Data.Local.saveCacheObject('item', item.libraryID, json);
 			
 			var mtime = yield item.attachmentModificationTime;
@@ -615,8 +669,8 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.isFalse(result.syncRequired);
 			
 			// Check local objects
-			assert.equal((yield Zotero.Sync.Storage.Local.getSyncedModificationTime(item.id)), mtime);
-			assert.equal((yield Zotero.Sync.Storage.Local.getSyncedHash(item.id)), hash);
+			assert.equal(item.attachmentSyncedModificationTime, mtime);
+			assert.equal(item.attachmentSyncedHash, hash);
 			assert.equal(item.version, newVersion);
 		})
 	})
@@ -635,7 +689,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			item.synced = true;
 			yield item.saveTx();
 			
-			var itemJSON = yield item.toResponseJSON();
+			var itemJSON = item.toResponseJSON();
 			itemJSON.data.mtime = yield item.attachmentModificationTime;
 			itemJSON.data.md5 = yield item.attachmentHash;
 			
@@ -645,9 +699,8 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			// storage directory was transferred, the mtime doesn't match, but the file was
 			// never downloaded), but there's no difference in behavior
 			var dbHash = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-			yield Zotero.DB.executeTransaction(function* () {
-				yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, dbHash)
-			});
+			item.attachmentSyncedHash = dbHash;
+			yield item.saveTx({ skipAll: true });
 			
 			server.respond(function (req) {
 				if (req.method == "POST"
@@ -674,10 +727,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			var result = yield zfs._processUploadFile({
 				name: item.libraryKey
 			});
-			yield assert.eventually.equal(
-				Zotero.Sync.Storage.Local.getSyncedHash(item.id),
-				(yield item.attachmentHash)
-			);
+			assert.equal(item.attachmentSyncedHash, (yield item.attachmentHash));
 			assert.isFalse(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isFalse(result.syncRequired);
@@ -697,7 +747,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			yield item.saveTx();
 			
 			var fileHash = yield item.attachmentHash;
-			var itemJSON = yield item.toResponseJSON();
+			var itemJSON = item.toResponseJSON();
 			itemJSON.data.md5 = 'aaaaaaaaaaaaaaaaaaaaaaaa'
 			
 			server.respond(function (req) {
@@ -725,11 +775,8 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			var result = yield zfs._processUploadFile({
 				name: item.libraryKey
 			});
-			yield assert.eventually.isNull(Zotero.Sync.Storage.Local.getSyncedHash(item.id));
-			yield assert.eventually.equal(
-				Zotero.Sync.Storage.Local.getSyncState(item.id),
-				Zotero.Sync.Storage.Local.SYNC_STATE_IN_CONFLICT
-			);
+			assert.isNull(item.attachmentSyncedHash);
+			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_IN_CONFLICT);
 			assert.isFalse(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isFalse(result.syncRequired);

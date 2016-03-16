@@ -67,6 +67,9 @@ Zotero.CollectionTreeView.prototype.type = 'collection';
 
 Object.defineProperty(Zotero.CollectionTreeView.prototype, "selectedTreeRow", {
 	get: function () {
+		if (!this.selection || !this.selection.count) {
+			return false;
+		}
 		return this.getRow(this.selection.currentIndex);
 	}
 });
@@ -156,25 +159,28 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 		this._containerState = {};
 	}
 	
-	if (this.hideSources.indexOf('duplicates') == -1) {
-		try {
-			this._duplicateLibraries = Zotero.Prefs.get('duplicateLibraries').split(',').map(function (val) parseInt(val));
-		}
-		catch (e) {
-			// Add to personal library by default
-			Zotero.Prefs.set('duplicateLibraries', '0');
-			this._duplicateLibraries = [0];
-		}
-	}
+	var userLibraryID = Zotero.Libraries.userLibraryID;
 	
-	try {
-		this._unfiledLibraries = Zotero.Prefs.get('unfiledLibraries').split(',').map(function (val) parseInt(val));
+	var readPref = function (pref) {
+		let ids = Zotero.Prefs.get(pref);
+		if (ids === "") {
+			this["_" + pref] = [];
+		}
+		else {
+			if (ids === undefined || typeof ids != 'string') {
+				ids = "" + userLibraryID;
+				Zotero.Prefs.set(pref, "" + userLibraryID);
+			}
+			this["_" + pref] = ids.split(',')
+				// Convert old id and convert to int
+				.map(id => id === "0" ? userLibraryID : parseInt(id));
+		}
+	}.bind(this);
+	
+	if (this.hideSources.indexOf('duplicates') == -1) {
+		readPref('duplicateLibraries');
 	}
-	catch (e) {
-		// Add to personal library by default
-		Zotero.Prefs.set('unfiledLibraries', '0');
-		this._unfiledLibraries = [0];
-	}
+	readPref('unfiledLibraries');
 	
 	var oldCount = this.rowCount || 0;
 	var newRows = [];
@@ -526,7 +532,7 @@ Zotero.CollectionTreeView.prototype._addSortedRow = Zotero.Promise.coroutine(fun
 		);
 	}
 	else if (objectType == 'search') {
-		let search = yield Zotero.Searches.getAsync(id);
+		let search = Zotero.Searches.get(id);
 		let libraryID = search.libraryID;
 		let startRow = this._rowMap['L' + libraryID];
 		
@@ -545,7 +551,6 @@ Zotero.CollectionTreeView.prototype._addSortedRow = Zotero.Promise.coroutine(fun
 			var inSearches = false;
 			for (let i = startRow; i < this.rowCount; i++) {
 				let treeRow = this.getRow(i);
-				Zotero.debug(treeRow.id);
 				beforeRow = i;
 				
 				// If we've reached something other than collections, stop
@@ -900,8 +905,7 @@ Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(functi
 	
 	switch (type) {
 	case 'L':
-		var found = yield this.selectLibrary(id);
-		break;
+		return yield this.selectLibrary(id);
 	
 	case 'C':
 		var found = yield this.expandToCollection(id);
@@ -913,14 +917,13 @@ Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(functi
 		break;
 	
 	case 'T':
-		var found = yield this.selectTrash(id);
-		break;
+		return yield this.selectTrash(id);
 	}
 	
-	if (!found) {
+	var row = this._rowMap[type + id];
+	if (!row) {
 		return false;
 	}
-	var row = this._rowMap[type + id];
 	this._treebox.ensureRowIsVisible(row);
 	yield this.selectWait(row);
 	
@@ -940,7 +943,7 @@ Zotero.CollectionTreeView.prototype.selectLibrary = Zotero.Promise.coroutine(fun
 	}
 	
 	// Check if library is already selected
-	if (this.selection.currentIndex != -1) {
+	if (this.selection && this.selection.count && this.selection.currentIndex != -1) {
 		var treeRow = this.getRow(this.selection.currentIndex);
 		if (treeRow.isLibrary(true) && treeRow.ref.libraryID == libraryID) {
 			this._treebox.ensureRowIsVisible(this.selection.currentIndex);
@@ -972,7 +975,7 @@ Zotero.CollectionTreeView.prototype.selectSearch = function (id) {
 
 Zotero.CollectionTreeView.prototype.selectTrash = Zotero.Promise.coroutine(function* (libraryID) {
 	// Check if trash is already selected
-	if (this.selection.currentIndex != -1) {
+	if (this.selection && this.selection.count && this.selection.currentIndex != -1) {
 		let itemGroup = this.getRow(this.selection.currentIndex);
 		if (itemGroup.isTrash() && itemGroup.ref.libraryID == libraryID) {
 			this._treebox.ensureRowIsVisible(this.selection.currentIndex);
@@ -1196,6 +1199,8 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
  * Returns libraryID or FALSE if not a library
  */
 Zotero.CollectionTreeView.prototype.getSelectedLibraryID = function() {
+	if (!this.selection || !this.selection.count || this.selection.currentIndex == -1) return false;
+	
 	var treeRow = this.getRow(this.selection.currentIndex);
 	return treeRow && treeRow.ref && treeRow.ref.libraryID !== undefined
 			&& treeRow.ref.libraryID;
@@ -1504,10 +1509,6 @@ Zotero.CollectionTreeView.prototype.canDropCheckAsync = Zotero.Promise.coroutine
 		}
 		
 		if (dataType == 'zotero/item') {
-			if (treeRow.isCollection()) {
-				yield treeRow.ref.loadChildItems();
-			}
-			
 			var ids = data;
 			var items = Zotero.Items.get(ids);
 			var skip = true;
@@ -1627,7 +1628,6 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			// If linked item is in the trash, undelete it and remove it from collections
 			// (since it shouldn't be restored to previous collections)
 			if (linkedItem.deleted) {
-				yield linkedItem.loadCollections();
 				linkedItem.setCollections();
 				linkedItem.deleted = false;
 				yield linkedItem.save({
@@ -1693,7 +1693,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		}
 		
 		// Create new clone item in target library
-		var newItem = yield item.clone(targetLibraryID, false, !options.tags);
+		var newItem = item.clone(targetLibraryID, false, !options.tags);
 		
 		// Set Rights field for My Publications
 		if (options.license) {
@@ -1717,11 +1717,10 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		
 		// Child notes
 		if (options.childNotes) {
-			yield item.loadChildItems();
 			var noteIDs = item.getNotes();
-			var notes = yield Zotero.Items.getAsync(noteIDs);
+			var notes = Zotero.Items.get(noteIDs);
 			for each(var note in notes) {
-				let newNote = yield note.clone(targetLibraryID);
+				let newNote = note.clone(targetLibraryID);
 				newNote.parentID = newItemID;
 				yield newNote.save({
 					skipSelect: true
@@ -1733,9 +1732,8 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		
 		// Child attachments
 		if (options.childLinks || options.childFileAttachments) {
-			yield item.loadChildItems();
 			var attachmentIDs = item.getAttachments();
-			var attachments = yield Zotero.Items.getAsync(attachmentIDs);
+			var attachments = Zotero.Items.get(attachmentIDs);
 			for each(var attachment in attachments) {
 				var linkMode = attachment.attachmentLinkMode;
 				
@@ -1864,8 +1862,8 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		
 		if (targetTreeRow.isPublications()) {
 			let items = yield Zotero.Items.getAsync(ids);
-			let io = yield this._treebox.treeBody.ownerDocument.defaultView.ZoteroPane
-				.showPublicationsWizard(items);
+			let io = this._treebox.treeBody.ownerDocument.defaultView
+				.ZoteroPane.showPublicationsWizard(items);
 			if (!io) {
 				return;
 			}

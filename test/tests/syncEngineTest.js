@@ -239,10 +239,10 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.equal(Zotero.Libraries.getVersion(userLibraryID), 3);
 			
 			// Make sure local objects exist
-			var setting = yield Zotero.SyncedSettings.get(userLibraryID, "tagColors");
+			var setting = Zotero.SyncedSettings.get(userLibraryID, "tagColors");
 			assert.lengthOf(setting, 1);
 			assert.equal(setting[0].name, 'A');
-			var settingMetadata = yield Zotero.SyncedSettings.getMetadata(userLibraryID, "tagColors");
+			var settingMetadata = Zotero.SyncedSettings.getMetadata(userLibraryID, "tagColors");
 			assert.equal(settingMetadata.version, 2);
 			assert.isTrue(settingMetadata.synced);
 			
@@ -283,7 +283,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			for (let type of types) {
 				objects[type] = [yield createDataObject(type, { setTitle: true })];
 				objectVersions[type] = {};
-				objectResponseJSON[type] = yield Zotero.Promise.all(objects[type].map(o => o.toResponseJSON()));
+				objectResponseJSON[type] = objects[type].map(o => o.toResponseJSON());
 			}
 			
 			server.respond(function (req) {
@@ -457,12 +457,11 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var mtime = new Date().getTime();
 			var md5 = '57f8a4fda823187b91e1191487b87fe6';
 			
-			yield Zotero.DB.executeTransaction(function* () {
-				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, mtime);
-				yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, md5);
-			});
+			item.attachmentSyncedModificationTime = mtime;
+			item.attachmentSyncedHash = md5;
+			yield item.saveTx({ skipAll: true });
 			
-			var itemResponseJSON = yield item.toResponseJSON();
+			var itemResponseJSON = item.toResponseJSON();
 			itemResponseJSON.version = itemResponseJSON.data.version = lastLibraryVersion;
 			itemResponseJSON.data.mtime = mtime;
 			itemResponseJSON.data.md5 = md5;
@@ -520,7 +519,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			for (let type of types) {
 				objects[type] = [yield createDataObject(type, { setTitle: true })];
 				objectNames[type] = {};
-				objectResponseJSON[type] = yield Zotero.Promise.all(objects[type].map(o => o.toResponseJSON()));
+				objectResponseJSON[type] = objects[type].map(o => o.toResponseJSON());
 			}
 			
 			server.respond(function (req) {
@@ -569,7 +568,6 @@ describe("Zotero.Sync.Data.Engine", function () {
 				let version = o.version;
 				let name = objectNames[type][key];
 				if (type == 'item') {
-					yield o.loadItemData();
 					assert.equal(name, o.getField('title'));
 				}
 				else {
@@ -675,7 +673,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 						{
 							key: obj.key,
 							version: obj.version,
-							data: (yield obj.toJSON())
+							data: obj.toJSON()
 						}
 					]
 				);
@@ -814,7 +812,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			yield engine._startDownload();
 			
 			// Make sure objects were deleted
-			assert.isFalse(yield Zotero.SyncedSettings.get(userLibraryID, 'tagColors'));
+			assert.isNull(Zotero.SyncedSettings.get(userLibraryID, 'tagColors'));
 			assert.isFalse(Zotero.Collections.exists(collectionID));
 			assert.isFalse(Zotero.Searches.exists(searchID));
 			assert.isFalse(Zotero.Items.exists(itemID));
@@ -903,7 +901,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			yield engine._startDownload();
 			
 			// Make sure objects weren't deleted
-			assert.ok(yield Zotero.SyncedSettings.get(userLibraryID, 'tagColors'));
+			assert.ok(Zotero.SyncedSettings.get(userLibraryID, 'tagColors'));
 			assert.ok(Zotero.Collections.exists(collectionID));
 			assert.ok(Zotero.Searches.exists(searchID));
 		})
@@ -1214,10 +1212,10 @@ describe("Zotero.Sync.Data.Engine", function () {
 			yield engine._fullSync();
 			
 			// Check settings
-			var setting = yield Zotero.SyncedSettings.get(userLibraryID, "tagColors");
+			var setting = Zotero.SyncedSettings.get(userLibraryID, "tagColors");
 			assert.lengthOf(setting, 1);
 			assert.equal(setting[0].name, 'A');
-			var settingMetadata = yield Zotero.SyncedSettings.getMetadata(userLibraryID, "tagColors");
+			var settingMetadata = Zotero.SyncedSettings.getMetadata(userLibraryID, "tagColors");
 			assert.equal(settingMetadata.version, 2);
 			assert.isTrue(settingMetadata.synced);
 			

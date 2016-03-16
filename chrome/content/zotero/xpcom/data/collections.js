@@ -85,8 +85,7 @@ Zotero.Collections = function() {
 		let children;
 		
 		if (parentID) {
-			let parent = yield Zotero.Collections.getAsync(parentID);
-			yield parent.loadChildCollections();
+			let parent = Zotero.Collections.get(parentID);
 			children = parent.getChildCollections();
 		} else if (libraryID) {
 			let sql = "SELECT collectionID AS id FROM collections "
@@ -154,6 +153,103 @@ Zotero.Collections = function() {
 		});
 		
 	}
+	
+	
+	this._loadChildCollections = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+		var sql = "SELECT C1.collectionID, C2.collectionID AS childCollectionID "
+			+ "FROM collections C1 LEFT JOIN collections C2 ON (C1.collectionID=C2.parentCollectionID) "
+			+ "WHERE C1.libraryID=?"
+			+ (ids.length ? " AND C1.collectionID IN (" + ids.map(id => parseInt(id)).join(", ") + ")" : "");
+		var params = [libraryID];
+		var lastID;
+		var rows = [];
+		var setRows = function (collectionID, rows) {
+			var collection = this._objectCache[collectionID];
+			if (!collection) {
+				throw new Error("Collection " + collectionID + " not found");
+			}
+			
+			collection._childCollections = new Set(rows);
+			collection._loaded.childCollections = true;
+			collection._clearChanged('childCollections');
+		}.bind(this);
+		
+		yield Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				noCache: ids.length != 1,
+				onRow: function (row) {
+					let collectionID = row.getResultByIndex(0);
+					
+					if (lastID && collectionID !== lastID) {
+						setRows(lastID, rows);
+						rows = [];
+					}
+					
+					lastID = collectionID;
+					
+					let childCollectionID = row.getResultByIndex(1);
+					// No child collections
+					if (childCollectionID === null) {
+						return;
+					}
+					rows.push(childCollectionID);
+				}
+			}
+		);
+		if (lastID) {
+			setRows(lastID, rows);
+		}
+	});
+	
+	
+	this._loadChildItems = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+		var sql = "SELECT collectionID, itemID FROM collections "
+			+ "LEFT JOIN collectionItems USING (collectionID) "
+			+ "WHERE libraryID=?" + idSQL;
+		var params = [libraryID];
+		var lastID;
+		var rows = [];
+		var setRows = function (collectionID, rows) {
+			var collection = this._objectCache[collectionID];
+			if (!collection) {
+				throw new Error("Collection " + collectionID + " not found");
+			}
+			
+			collection._childItems = new Set(rows);
+			collection._loaded.childItems = true;
+			collection._clearChanged('childItems');
+		}.bind(this);
+		
+		yield Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				noCache: ids.length != 1,
+				onRow: function (row) {
+					let collectionID = row.getResultByIndex(0);
+					
+					if (lastID && collectionID !== lastID) {
+						setRows(lastID, rows);
+						rows = [];
+					}
+					
+					lastID = collectionID;
+					
+					let itemID = row.getResultByIndex(1);
+					// No child items
+					if (itemID === null) {
+						return;
+					}
+					rows.push(itemID);
+				}
+			}
+		);
+		if (lastID) {
+			setRows(lastID, rows);
+		}
+	});
 	
 	
 	this.registerChildCollection = function (collectionID, childCollectionID) {

@@ -152,7 +152,6 @@ describe("Zotero.Collection", function() {
 			var collection2 = yield createDataObject('collection', { parentID: collection1.id });
 			yield collection1.saveTx();
 			
-			yield collection1.loadChildCollections();
 			var childCollections = collection1.getChildCollections();
 			assert.lengthOf(childCollections, 1);
 			assert.equal(childCollections[0].id, collection2.id);
@@ -162,8 +161,6 @@ describe("Zotero.Collection", function() {
 			var collection1 = yield createDataObject('collection');
 			var collection2 = yield createDataObject('collection', { parentID: collection1.id });
 			yield collection1.saveTx();
-			
-			yield collection1.loadChildCollections();
 			
 			collection2.parentID = false;
 			yield collection2.save()
@@ -180,7 +177,6 @@ describe("Zotero.Collection", function() {
 			item.addToCollection(collection.key);
 			yield item.saveTx();
 			
-			yield collection.loadChildItems();
 			assert.lengthOf(collection.getChildItems(), 1);
 		})
 		
@@ -191,7 +187,6 @@ describe("Zotero.Collection", function() {
 			item.addToCollection(collection.key);
 			yield item.saveTx();
 			
-			yield collection.loadChildItems();
 			assert.lengthOf(collection.getChildItems(), 0);
 		})
 		
@@ -202,7 +197,6 @@ describe("Zotero.Collection", function() {
 			item.addToCollection(collection.key);
 			yield item.saveTx();
 			
-			yield collection.loadChildItems();
 			assert.lengthOf(collection.getChildItems(false, true), 1);
 		})
 	})

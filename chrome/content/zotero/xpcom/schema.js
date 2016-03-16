@@ -542,7 +542,7 @@ Zotero.Schema = new function(){
 		var Mode = Zotero.Utilities.capitalize(mode);
 		
 		var repotime = yield Zotero.File.getContentsFromURLAsync("resource://zotero/schema/repotime.txt");
-		var date = Zotero.Date.sqlToDate(repotime, true);
+		var date = Zotero.Date.sqlToDate(repotime.trim(), true);
 		repotime = Zotero.Date.toUnixTimestamp(date);
 		
 		var fileNameRE = new RegExp("^[^\.].+\\" + fileExt + "$");

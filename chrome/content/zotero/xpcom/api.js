@@ -56,7 +56,6 @@ Zotero.API = {
 					if (!col) {
 						throw new Error('Invalid collection ID or key');
 					}
-					yield col.loadChildItems();
 					results = col.getChildItems();
 					break;
 				

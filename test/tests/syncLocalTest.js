@@ -105,7 +105,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			for (let type of types) {
 				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
 				let obj = yield createDataObject(type);
-				let data = yield obj.toJSON();
+				let data = obj.toJSON();
 				data.key = obj.key;
 				data.version = 10;
 				let json = {
@@ -130,7 +130,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			
 			var type = 'item';
 			let obj = yield createDataObject(type, { version: 5 });
-			let data = yield obj.toJSON();
+			let data = obj.toJSON();
 			yield Zotero.Sync.Data.Local.saveCacheObjects(
 				type, libraryID, [data]
 			);
@@ -165,7 +165,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			
 			for (let type of types) {
 				let obj = yield createDataObject(type, { version: 5 });
-				let data = yield obj.toJSON();
+				let data = obj.toJSON();
 				yield Zotero.Sync.Data.Local.saveCacheObjects(
 					type, libraryID, [data]
 				);
@@ -175,7 +175,7 @@ describe("Zotero.Sync.Data.Local", function() {
 				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
 				
 				let obj = yield createDataObject(type, { version: 10 });
-				let data = yield obj.toJSON();
+				let data = obj.toJSON();
 				yield Zotero.Sync.Data.Local.saveCacheObjects(
 					type, libraryID, [data]
 				);
@@ -222,11 +222,8 @@ describe("Zotero.Sync.Data.Local", function() {
 			yield Zotero.Sync.Data.Local.processSyncCacheForObjectType(
 				libraryID, 'item', { stopOnError: true }
 			);
-			var id = Zotero.Items.getIDFromLibraryAndKey(libraryID, key);
-			assert.equal(
-				(yield Zotero.Sync.Storage.Local.getSyncState(id)),
-				Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
-			);
+			var item = Zotero.Items.getByLibraryAndKey(libraryID, key);
+			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD);
 		})
 		
 		it("should mark updated attachment items for download", function* () {
@@ -239,18 +236,13 @@ describe("Zotero.Sync.Data.Local", function() {
 			yield item.saveTx();
 			
 			// Set file as synced
-			yield Zotero.DB.executeTransaction(function* () {
-				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(
-					item.id, (yield item.attachmentModificationTime)
-				);
-				yield Zotero.Sync.Storage.Local.setSyncedHash(
-					item.id, (yield item.attachmentHash)
-				);
-				yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
-			});
+			item.attachmentSyncedModificationTime = yield item.attachmentModificationTime;
+			item.attachmentSyncedHash = yield item.attachmentHash;
+			item.attachmentSyncState = "in_sync";
+			yield item.saveTx({ skipAll: true });
 			
 			// Simulate download of version with updated attachment
-			var json = yield item.toResponseJSON();
+			var json = item.toResponseJSON();
 			json.version = 10;
 			json.data.version = 10;
 			json.data.md5 = '57f8a4fda823187b91e1191487b87fe6';
@@ -263,10 +255,7 @@ describe("Zotero.Sync.Data.Local", function() {
 				libraryID, 'item', { stopOnError: true }
 			);
 			
-			assert.equal(
-				(yield Zotero.Sync.Storage.Local.getSyncState(item.id)),
-				Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
-			);
+			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD);
 		})
 		
 		it("should ignore attachment metadata when resolving metadata conflict", function* () {
@@ -276,19 +265,14 @@ describe("Zotero.Sync.Data.Local", function() {
 			var item = yield importFileAttachment('test.png');
 			item.version = 5;
 			yield item.saveTx();
-			var json = yield item.toResponseJSON();
+			var json = item.toResponseJSON();
 			yield Zotero.Sync.Data.Local.saveCacheObjects('item', libraryID, [json]);
 			
 			// Set file as synced
-			yield Zotero.DB.executeTransaction(function* () {
-				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(
-					item.id, (yield item.attachmentModificationTime)
-				);
-				yield Zotero.Sync.Storage.Local.setSyncedHash(
-					item.id, (yield item.attachmentHash)
-				);
-				yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
-			});
+			item.attachmentSyncedModificationTime = yield item.attachmentModificationTime;
+			item.attachmentSyncedHash = yield item.attachmentHash;
+			item.attachmentSyncState = "in_sync";
+			yield item.saveTx({ skipAll: true });
 			
 			// Modify title locally, leaving item unsynced
 			var newTitle = Zotero.Utilities.randomString();
@@ -307,10 +291,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			);
 			
 			assert.equal(item.getField('title'), newTitle);
-			assert.equal(
-				(yield Zotero.Sync.Storage.Local.getSyncState(item.id)),
-				Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
-			);
+			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD);
 		})
 	})
 	
@@ -348,7 +329,7 @@ describe("Zotero.Sync.Data.Local", function() {
 						)
 					}
 				);
-				let jsonData = yield obj.toJSON();
+				let jsonData = obj.toJSON();
 				jsonData.key = obj.key;
 				jsonData.version = 10;
 				let json = {
@@ -426,7 +407,7 @@ describe("Zotero.Sync.Data.Local", function() {
 						)
 					}
 				);
-				let jsonData = yield obj.toJSON();
+				let jsonData = obj.toJSON();
 				jsonData.key = obj.key;
 				jsonData.version = 10;
 				let json = {
@@ -496,7 +477,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			
 			// Create object, generate JSON, and delete
 			var obj = yield createDataObject(type, { version: 10 });
-			var jsonData = yield obj.toJSON();
+			var jsonData = obj.toJSON();
 			var key = jsonData.key = obj.key;
 			jsonData.version = 10;
 			let json = {
@@ -544,7 +525,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			
 			// Create object, generate JSON, and delete
 			var obj = yield createDataObject(type, { version: 10 });
-			var jsonData = yield obj.toJSON();
+			var jsonData = obj.toJSON();
 			var key = jsonData.key = obj.key;
 			jsonData.version = 10;
 			let json = {
@@ -576,7 +557,6 @@ describe("Zotero.Sync.Data.Local", function() {
 			
 			obj = objectsClass.getByLibraryAndKey(libraryID, key);
 			assert.ok(obj);
-			yield obj.loadItemData();
 			assert.equal(obj.getField('title'), jsonData.title);
 		})
 		
@@ -594,7 +574,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			obj.setNote("");
 			obj.version = 10;
 			yield obj.saveTx();
-			var jsonData = yield obj.toJSON();
+			var jsonData = obj.toJSON();
 			var key = jsonData.key = obj.key;
 			let json = {
 				key: obj.key,
@@ -626,7 +606,6 @@ describe("Zotero.Sync.Data.Local", function() {
 			
 			obj = objectsClass.getByLibraryAndKey(libraryID, key);
 			assert.ok(obj);
-			yield obj.loadNote();
 			assert.equal(obj.getNote(), noteText2);
 		})
 	})

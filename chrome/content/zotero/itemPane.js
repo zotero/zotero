@@ -94,13 +94,11 @@ var ZoteroItemPane = new function() {
 				_notesList.removeChild(_notesList.firstChild);
 			}
 			
-			yield item.loadChildItems();
 			let notes = yield Zotero.Items.getAsync(item.getNotes());
 			if (notes.length) {
 				for (var i = 0; i < notes.length; i++) {
 					let note = notes[i];
 					let id = notes[i].id;
-					yield note.loadItemData();
 					
 					var icon = document.createElement('image');
 					icon.className = "zotero-box-icon";
@@ -148,7 +146,6 @@ var ZoteroItemPane = new function() {
 			box.mode = 'edit';
 		}
 		
-		yield Zotero.Promise.all([item.loadItemData(), item.loadCreators()]);
 		box.item = item;
 	});
 	

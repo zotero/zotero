@@ -74,25 +74,20 @@
 			<property name="summary">
 				<getter>
 				<![CDATA[
-					return Zotero.spawn(function* () {
-						var r = "";
-						
-						if (this.item) {
-							yield this.item.loadRelations()
-								.tap(() => Zotero.Promise.check(this.item));
-							var keys = this.item.relatedItems;
-							if (keys.length) {
-								let items = yield Zotero.Items.getAsync(keys)
-									.tap(() => Zotero.Promise.check(this.item));
-								for (let item of items) {
-									r = r + item.getDisplayTitle() + ", ";
-								}
-								r = r.substr(0,r.length-2);
+					var r = "";
+					
+					if (this.item) {
+						var keys = this.item.relatedItems;
+						if (keys.length) {
+							for (let key of keys) {
+								let item = Zotero.Items.getByLibraryAndKey(this.item.libraryID, key);
+								r = r + item.getDisplayTitle() + ", ";
 							}
+							r = r.substr(0,r.length-2);
 						}
-						
-						return r;
-					}, this);
+					}
+					
+					return r;
 				]]>
 				</getter>
 			</property>
@@ -129,89 +124,79 @@
 			</method>
 			
 			<method name="refresh">
-				<body>
-				<![CDATA[
-					return Zotero.spawn(function* () {
-						var addButton = this.id('addButton');
-						addButton.hidden = !this.editable;
-						
-						var rows = this.id('relatedRows');
-						while(rows.hasChildNodes())
-							rows.removeChild(rows.firstChild);
-						
-						if (this.item) {
-							yield this.item.loadRelations()
-								.tap(() => Zotero.Promise.check(this.item));
-							var relatedKeys = this.item.relatedItems;
-							for (var i = 0; i < relatedKeys.length; i++) {
-								let key = relatedKeys[i];
-								let relatedItem =
-									yield Zotero.Items.getByLibraryAndKeyAsync(
-										this.item.libraryID, key
-									)
-									.tap(() => Zotero.Promise.check(this.item));
-								let id = relatedItem.id;
-								yield relatedItem.loadItemData()
-									.tap(() => Zotero.Promise.check(this.item));
-								let icon = document.createElement("image");
-								icon.className = "zotero-box-icon";
-								let type = Zotero.ItemTypes.getName(relatedItem.itemTypeID);
-								if (type=='attachment')
-								{
-									switch (relatedItem.attaachmentLinkMode) {
-										case Zotero.Attachments.LINK_MODE_LINKED_URL:
-											type += '-web-link';
-											break;
-										
-										case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
-											type += '-snapshot';
-											break;
-										
-										case Zotero.Attachments.LINK_MODE_LINKED_FILE:
-											type += '-link';
-											break;
-										
-										case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
-											type += '-file';
-											break;
-									}
+				<body><![CDATA[
+					var addButton = this.id('addButton');
+					addButton.hidden = !this.editable;
+					
+					var rows = this.id('relatedRows');
+					while(rows.hasChildNodes())
+						rows.removeChild(rows.firstChild);
+					
+					if (this.item) {
+						var relatedKeys = this.item.relatedItems;
+						for (var i = 0; i < relatedKeys.length; i++) {
+							let key = relatedKeys[i];
+							let relatedItem = Zotero.Items.getByLibraryAndKey(
+								this.item.libraryID, key
+							);
+							let id = relatedItem.id;
+							let icon = document.createElement("image");
+							icon.className = "zotero-box-icon";
+							let type = Zotero.ItemTypes.getName(relatedItem.itemTypeID);
+							if (type=='attachment')
+							{
+								switch (relatedItem.attaachmentLinkMode) {
+									case Zotero.Attachments.LINK_MODE_LINKED_URL:
+										type += '-web-link';
+										break;
+									
+									case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
+										type += '-snapshot';
+										break;
+									
+									case Zotero.Attachments.LINK_MODE_LINKED_FILE:
+										type += '-link';
+										break;
+									
+									case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
+										type += '-file';
+										break;
 								}
-								icon.setAttribute('src','chrome://zotero/skin/treeitem-' + type + '.png');
-						
-								var label = document.createElement("label");
-								label.className = "zotero-box-label";
-								label.setAttribute('value', relatedItem.getDisplayTitle());
-								label.setAttribute('crop','end');
-								label.setAttribute('flex','1');
-								
-								var box = document.createElement('box');
-								box.setAttribute('onclick',
-									"document.getBindingParent(this).showItem('" + id + "')");
-								box.setAttribute('class','zotero-clicky');
-								box.setAttribute('flex','1');
-								box.appendChild(icon);
-								box.appendChild(label);
-								
-								if (this.editable) {
-									var remove = document.createElement("label");
-									remove.setAttribute('value','-');
-									remove.setAttribute('onclick',
-										"document.getBindingParent(this).remove('" + id + "');");
-									remove.setAttribute('class','zotero-clicky zotero-clicky-minus');
-								}
-								
-								var row = document.createElement("row");
-								row.appendChild(box);
-								if (this.editable) {
-									row.appendChild(remove);
-								}
-								rows.appendChild(row);
 							}
-							this.updateCount(relatedKeys.length);
+							icon.setAttribute('src','chrome://zotero/skin/treeitem-' + type + '.png');
+					
+							var label = document.createElement("label");
+							label.className = "zotero-box-label";
+							label.setAttribute('value', relatedItem.getDisplayTitle());
+							label.setAttribute('crop','end');
+							label.setAttribute('flex','1');
+							
+							var box = document.createElement('box');
+							box.setAttribute('onclick',
+								"document.getBindingParent(this).showItem('" + id + "')");
+							box.setAttribute('class','zotero-clicky');
+							box.setAttribute('flex','1');
+							box.appendChild(icon);
+							box.appendChild(label);
+							
+							if (this.editable) {
+								var remove = document.createElement("label");
+								remove.setAttribute('value','-');
+								remove.setAttribute('onclick',
+									"document.getBindingParent(this).remove('" + id + "');");
+								remove.setAttribute('class','zotero-clicky zotero-clicky-minus');
+							}
+							
+							var row = document.createElement("row");
+							row.appendChild(box);
+							if (this.editable) {
+								row.appendChild(remove);
+							}
+							rows.appendChild(row);
 						}
-					}, this);
-				]]>
-				</body>
+						this.updateCount(relatedKeys.length);
+					}
+				]]></body>
 			</method>
 			<method name="add">
 				<body><![CDATA[
@@ -238,13 +223,11 @@
 						}
 						yield Zotero.DB.executeTransaction(function* () {
 							for (let relItem of relItems) {
-								yield this.item.loadRelations();
 								if (this.item.addRelatedItem(relItem)) {
 									yield this.item.save({
 										skipDateModifiedUpdate: true
 									});
 								}
-								yield relItem.loadRelations();
 								if (relItem.addRelatedItem(this.item)) {
 									yield relItem.save({
 										skipDateModifiedUpdate: true
@@ -267,7 +250,6 @@
 										skipDateModifiedUpdate: true
 									});
 								}
-								yield item.loadRelations();
 								if (item.removeRelatedItem(this.item)) {
 									yield item.save({
 										skipDateModifiedUpdate: true

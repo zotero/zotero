@@ -186,8 +186,8 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = 'imported_file';
 			item.attachmentPath = 'storage:test.txt';
+			item.attachmentSyncState = "to_download";
 			yield item.saveTx();
-			yield Zotero.Sync.Storage.Local.setSyncState(item.id, "to_download");
 			
 			setResponse({
 				method: "GET",
@@ -217,8 +217,8 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = 'imported_file';
 			item.attachmentPath = 'storage:test.txt';
+			item.attachmentSyncState = "to_download";
 			yield item.saveTx();
-			yield Zotero.Sync.Storage.Local.setSyncState(item.id, "to_download");
 			
 			setResponse({
 				method: "GET",
@@ -251,8 +251,8 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = 'imported_file';
 			item.attachmentPath = 'storage:test.txt';
+			item.attachmentSyncState = "to_download";
 			yield item.saveTx();
-			yield Zotero.Sync.Storage.Local.setSyncState(item.id, "to_download");
 			
 			setResponse({
 				method: "GET",
@@ -298,8 +298,8 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			item.attachmentPath = 'storage:' + fileName;
 			// TODO: Test binary data
 			var text = Zotero.Utilities.randomString();
+			item.attachmentSyncState = "to_download";
 			yield item.saveTx();
-			yield Zotero.Sync.Storage.Local.setSyncState(item.id, "to_download");
 			
 			// Create ZIP file containing above text file
 			var tmpPath = Zotero.getTempDirectory().path;
@@ -447,8 +447,8 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assert.isTrue(result.syncRequired);
 			
 			// Check local objects
-			assert.equal((yield Zotero.Sync.Storage.Local.getSyncedModificationTime(item.id)), mtime);
-			assert.equal((yield Zotero.Sync.Storage.Local.getSyncedHash(item.id)), hash);
+			assert.equal(item.attachmentSyncedModificationTime, mtime);
+			assert.equal(item.attachmentSyncedHash, hash);
 			assert.isFalse(item.synced);
 		})
 		
@@ -464,12 +464,9 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			var syncedModTime = Date.now() - 10000;
 			var syncedHash = "3a2f092dd62178eb8bbfda42e07e64da";
 			
-			yield Zotero.DB.executeTransaction(function* () {
-				// Set an mtime in the past
-				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, syncedModTime);
-				// And a different hash
-				yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, syncedHash);
-			});
+			item.attachmentSyncedModificationTime = syncedModTime;
+			item.attachmentSyncedHash = syncedHash;
+			yield item.saveTx({ skipAll: true });
 			
 			var mtime = yield item.attachmentModificationTime;
 			var hash = yield item.attachmentHash;
@@ -507,8 +504,8 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assert.isFalse(result.fileSyncRequired);
 			
 			// Check local objects
-			assert.equal((yield Zotero.Sync.Storage.Local.getSyncedModificationTime(item.id)), mtime);
-			assert.equal((yield Zotero.Sync.Storage.Local.getSyncedHash(item.id)), hash);
+			assert.equal(item.attachmentSyncedModificationTime, mtime);
+			assert.equal(item.attachmentSyncedHash, hash);
 			assert.isFalse(item.synced);
 		})
 		
@@ -547,8 +544,8 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assert.isFalse(result.syncRequired);
 			
 			// Check local object
-			assert.equal((yield Zotero.Sync.Storage.Local.getSyncedModificationTime(item.id)), mtime);
-			assert.equal((yield Zotero.Sync.Storage.Local.getSyncedHash(item.id)), hash);
+			assert.equal(item.attachmentSyncedModificationTime, mtime);
+			assert.equal(item.attachmentSyncedHash, hash);
 			assert.isFalse(item.synced);
 		})
 		
@@ -593,15 +590,10 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			// Check local object
 			//
 			// Item should be marked as in conflict
-			assert.equal(
-				(yield Zotero.Sync.Storage.Local.getSyncState(item.id)),
-				Zotero.Sync.Storage.Local.SYNC_STATE_IN_CONFLICT
-			);
+			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_IN_CONFLICT);
 			// Synced mod time should have been changed, because that's what's shown in the
 			// conflict dialog
-			assert.equal(
-				(yield Zotero.Sync.Storage.Local.getSyncedModificationTime(item.id)), newModTime
-			);
+			assert.equal(item.attachmentSyncedModificationTime, newModTime);
 			assert.isTrue(item.synced);
 		})
 	})

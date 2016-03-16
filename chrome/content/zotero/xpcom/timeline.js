@@ -31,7 +31,6 @@ Zotero.Timeline = {
 		yield '<data>\n';
 		for (let i=0; i<items.length; i++) {
 			let item = items[i];
-			yield item.loadItemData();
 			var date = item.getField(dateType, true, true);
 			if (date) {
 				let sqlDate = (dateType == 'date') ? Zotero.Date.multipartToSQL(date) : date;

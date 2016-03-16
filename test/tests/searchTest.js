@@ -14,16 +14,20 @@ describe("Zotero.Search", function() {
 			var s = new Zotero.Search;
 			s.name = "Test";
 			s.addCondition('title', 'is', 'test');
+			Zotero.debug("BEFORE SAVING");
+			Zotero.debug(s._conditions);
 			var id = yield s.saveTx();
+			Zotero.debug("DONE SAVING");
+			Zotero.debug(s._conditions);
 			assert.typeOf(id, 'number');
 			
 			// Check saved search
-			s = yield Zotero.Searches.getAsync(id);
+			s = Zotero.Searches.get(id);
 			assert.ok(s);
 			assert.instanceOf(s, Zotero.Search);
 			assert.equal(s.libraryID, Zotero.Libraries.userLibraryID);
 			assert.equal(s.name, "Test");
-			yield s.loadConditions();
+			Zotero.debug("GETTING CONDITIONS");
 			var conditions = s.getConditions();
 			assert.lengthOf(Object.keys(conditions), 1);
 			assert.property(conditions, "0");
@@ -45,14 +49,12 @@ describe("Zotero.Search", function() {
 			
 			// Add condition
 			s = yield Zotero.Searches.getAsync(id);
-			yield s.loadConditions();
 			s.addCondition('title', 'contains', 'foo');
 			var saved = yield s.saveTx();
 			assert.isTrue(saved);
 			
 			// Check saved search
 			s = yield Zotero.Searches.getAsync(id);
-			yield s.loadConditions();
 			var conditions = s.getConditions();
 			assert.lengthOf(Object.keys(conditions), 2);
 		});
@@ -69,14 +71,12 @@ describe("Zotero.Search", function() {
 			
 			// Remove condition
 			s = yield Zotero.Searches.getAsync(id);
-			yield s.loadConditions();
 			s.removeCondition(0);
 			var saved = yield s.saveTx();
 			assert.isTrue(saved);
 			
 			// Check saved search
 			s = yield Zotero.Searches.getAsync(id);
-			yield s.loadConditions();
 			var conditions = s.getConditions();
 			assert.lengthOf(Object.keys(conditions), 1);
 			assert.property(conditions, "0");

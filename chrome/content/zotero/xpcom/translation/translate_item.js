@@ -659,7 +659,6 @@ Zotero.Translate.ItemGetter.prototype = {
 	
 	"setCollection": Zotero.Promise.coroutine(function* (collection, getChildCollections) {
 		// get items in this collection
-		yield collection.loadChildItems();
 		var items = new Set(collection.getChildItems());
 		
 		if(getChildCollections) {
@@ -668,7 +667,6 @@ Zotero.Translate.ItemGetter.prototype = {
 			
 			// get items in child collections
 			for (let collection of this._collectionsLeft) {
-				yield collection.loadChildItems();
 				var childItems = collection.getChildItems();
 				childItems.forEach(item => items.add(item));
 			}
@@ -720,7 +718,7 @@ Zotero.Translate.ItemGetter.prototype = {
 	 * Converts an attachment to array format and copies it to the export folder if desired
 	 */
 	"_attachmentToArray":Zotero.Promise.coroutine(function* (attachment) {
-		var attachmentArray = yield Zotero.Utilities.Internal.itemToExportFormat(attachment, this.legacy);
+		var attachmentArray = Zotero.Utilities.Internal.itemToExportFormat(attachment, this.legacy);
 		var linkMode = attachment.attachmentLinkMode;
 		if(linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
 			var attachFile = attachment.getFile();
@@ -864,13 +862,13 @@ Zotero.Translate.ItemGetter.prototype = {
 				var returnItemArray = yield this._attachmentToArray(returnItem);
 				if(returnItemArray) return returnItemArray;
 			} else {
-				var returnItemArray = yield Zotero.Utilities.Internal.itemToExportFormat(returnItem, this.legacy);
+				var returnItemArray = Zotero.Utilities.Internal.itemToExportFormat(returnItem, this.legacy);
 				
 				// get attachments, although only urls will be passed if exportFileData is off
 				returnItemArray.attachments = [];
 				var attachments = returnItem.getAttachments();
 				for each(var attachmentID in attachments) {
-					var attachment = yield Zotero.Items.getAsync(attachmentID);
+					var attachment = Zotero.Items.get(attachmentID);
 					var attachmentInfo = yield this._attachmentToArray(attachment);
 					
 					if(attachmentInfo) {

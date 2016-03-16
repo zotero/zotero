@@ -126,6 +126,7 @@ var Zotero_File_Interface = new function() {
 	this.exportItems = exportItems;
 	this.bibliographyFromCollection = bibliographyFromCollection;
 	this.bibliographyFromItems = bibliographyFromItems;
+	this.copyItemsToClipboard = copyItemsToClipboard;
 	this.copyCitationToClipboard = copyCitationToClipboard;
 	
 	/**
@@ -407,7 +408,7 @@ var Zotero_File_Interface = new function() {
 	 *
 	 * Does not check that items are actual references (and not notes or attachments)
 	 */
-	this.copyItemsToClipboard = Zotero.Promise.coroutine(function* (items, style, locale, asHTML, asCitations) {
+	function copyItemsToClipboard(items, style, locale, asHTML, asCitations) {
 		// copy to clipboard
 		var transferable = Components.classes["@mozilla.org/widget/transferable;1"].
 						   createInstance(Components.interfaces.nsITransferable);
@@ -417,7 +418,7 @@ var Zotero_File_Interface = new function() {
 		var cslEngine = style.getCiteProc(locale);
 	
 		// add HTML
-		var bibliography = yield Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html", asCitations);
+ 		var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html", asCitations);
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -427,7 +428,7 @@ var Zotero_File_Interface = new function() {
 		// add text (or HTML source)
 		if(!asHTML) {
 			cslEngine = style.getCiteProc(locale);
-			var bibliography = yield Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text", asCitations);
+			var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text", asCitations);
 		}
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
@@ -436,7 +437,7 @@ var Zotero_File_Interface = new function() {
 		transferable.setTransferData("text/unicode", str, bibliography.length*2);
 		
 		clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
-	});
+	}
 	
 	
 	/*
@@ -483,7 +484,7 @@ var Zotero_File_Interface = new function() {
 	/*
 	 * Shows bibliography options and creates a bibliography
 	 */
-	let _doBibliographyOptions = Zotero.Promise.coroutine(function* (name, items) {
+	function _doBibliographyOptions(name, items) {
 		// make sure at least one item is not a standalone note or attachment
 		var haveRegularItem = false;
 		for each(var item in items) {
@@ -515,12 +516,12 @@ var Zotero_File_Interface = new function() {
 		// generate bibliography
 		try {
 			if(io.method == 'copy-to-clipboard') {
-				yield Zotero_File_Interface.copyItemsToClipboard(items, io.style, locale, false, io.mode === "citations");
+				Zotero_File_Interface.copyItemsToClipboard(items, io.style, locale, false, io.mode === "citations");
 			}
 			else {
 				var style = Zotero.Styles.get(io.style);
 				var cslEngine = style.getCiteProc(locale);
-				var bibliography = yield Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine,
+				var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine,
 					items, format, io.mode === "citations");
 			}
 		} catch(e) {
@@ -598,7 +599,7 @@ var Zotero_File_Interface = new function() {
 				fStream.close();
 			}
 		}
-	});
+	}
 	
 	
 	function _saveBibliography(name, format) {	

@@ -99,7 +99,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					var header;
 					try {
 						header = "Zotero-File-Modification-Time";
-						requestData.mtime = oldChannel.getResponseHeader(header);
+						requestData.mtime = parseInt(oldChannel.getResponseHeader(header));
 						header = "Zotero-File-MD5";
 						requestData.md5 = oldChannel.getResponseHeader(header);
 						header = "Zotero-File-Compressed";
@@ -131,15 +131,18 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					}
 					
 					// Update local metadata and stop request, skipping file download
-					yield Zotero.DB.executeTransaction(function* () {
-						if (updateHash) {
-							yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, requestData.md5);
-						}
-						yield Zotero.Sync.Storage.Local.setSyncedModificationTime(
-							item.id, requestData.mtime
-						);
-						yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
-					});
+					yield OS.File.setDates(path, null, new Date(requestData.mtime));
+					item.attachmentSyncedModificationTime = requestData.mtime;
+					if (updateHash) {
+						item.attachmentSyncedHash = requestData.md5;
+					}
+					item.attachmentSyncState = "in_sync";
+					yield item.saveTx({ skipAll: true });
+					
+					deferred.resolve(new Zotero.Sync.Storage.Result({
+						localChanges: true
+					}));
+					
 					return false;
 				}),
 				onProgress: function (a, b, c) {
@@ -261,7 +264,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		
 		var sql = "SELECT value FROM settings WHERE setting=? AND key=?";
 		var values = yield Zotero.DB.columnQueryAsync(sql, ['storage', 'zfsPurge']);
-		if (!values) {
+		if (!values.length) {
 			return false;
 		}
 		
@@ -353,7 +356,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		var headers = {
 			"Content-Type": "application/x-www-form-urlencoded"
 		};
-		var storedHash = yield Zotero.Sync.Storage.Local.getSyncedHash(item.id);
+		var storedHash = item.attachmentSyncedHash;
 		//var storedModTime = yield Zotero.Sync.Storage.getSyncedModificationTime(item.id);
 		if (storedHash) {
 			headers["If-Match"] = storedHash;
@@ -538,17 +541,17 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			Zotero.debug(fileHash);
 			
 			if (json.data.md5 == fileHash) {
-				yield Zotero.DB.executeTransaction(function* () {
-					yield Zotero.Sync.Storage.Local.setSyncedModificationTime(
-						item.id, fileModTime
-					);
-					yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, fileHash);
-					yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
-				});
+				item.attachmentSyncedModificationTime = fileModTime;
+				item.attachmentSyncedHash = fileHash;
+				item.attachmentSyncState = "in_sync";
+				yield item.saveTx({ skipAll: true });
+				
 				return new Zotero.Sync.Storage.Result;
 			}
 			
-			yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_conflict");
+			item.attachmentSyncState = "in_conflict";
+			yield item.saveTx({ skipAll: true });
+			
 			return new Zotero.Sync.Storage.Result({
 				fileSyncRequired: true
 			});
@@ -767,11 +770,12 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 	_updateItemFileInfo: Zotero.Promise.coroutine(function* (item, params) {
 		// Mark as in-sync
 		yield Zotero.DB.executeTransaction(function* () {
-			yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
+				// Store file mod time and hash
+			item.attachmentSyncedModificationTime = params.mtime;
+			item.attachmentSyncedHash = params.md5;
+			item.attachmentSyncState = "in_sync";
+			yield item.save({ skipAll: true });
 			
-			// Store file mod time and hash
-			yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, params.mtime);
-			yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, params.md5);
 			// Update sync cache with new file metadata and version from server
 			var json = yield Zotero.Sync.Data.Local.getCacheObject(
 				'item', item.libraryID, item.key, item.version
@@ -933,7 +937,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		}
 		
 		// Check for conflict
-		if ((yield Zotero.Sync.Storage.Local.getSyncState(item.id))
+		if (item.attachmentSyncState
 				!= Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_UPLOAD) {
 			if (info) {
 				// Local file time

@@ -400,7 +400,6 @@ var Zotero_LocateMenu = new function() {
 			}
 			
 			if(item.isRegularItem()) {
-				yield item.loadChildItems();
 				var attachments = item.getAttachments();
 				if(attachments) {
 					// look through url fields for non-file:/// attachments

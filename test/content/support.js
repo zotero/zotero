@@ -251,6 +251,33 @@ function waitForCallback(cb, interval, timeout) {
 }
 
 
+function clickOnItemsRow(itemsView, row, button = 0) {
+	var x = {};
+	var y = {};
+	var width = {};
+	var height = {};
+	itemsView._treebox.getCoordsForCellItem(
+		row,
+		itemsView._treebox.columns.getNamedColumn('zotero-items-column-title'),
+		'text',
+		x, y, width, height
+	);
+	
+	// Select row to trigger multi-select
+	var tree = itemsView._treebox.treeBody;
+	var rect = tree.getBoundingClientRect();
+	var x = rect.left + x.value;
+	var y = rect.top + y.value;
+	tree.dispatchEvent(new MouseEvent("mousedown", {
+		clientX: x,
+		clientY: y,
+		button,
+		detail: 1
+	}));
+}
+
+
+
 /**
  * Get a default group used by all tests that want one, creating one if necessary
  */
@@ -352,10 +379,9 @@ function getNameProperty(objectType) {
 	return objectType == 'item' ? 'title' : 'name';
 }
 
-var modifyDataObject = Zotero.Promise.coroutine(function* (obj, params = {}, saveOptions) {
+var modifyDataObject = function (obj, params = {}, saveOptions) {
 	switch (obj.objectType) {
 	case 'item':
-		yield obj.loadItemData();
 		obj.setField(
 			'title',
 			params.title !== undefined ? params.title : Zotero.Utilities.randomString()
@@ -366,7 +392,7 @@ var modifyDataObject = Zotero.Promise.coroutine(function* (obj, params = {}, sav
 		obj.name = params.name !== undefined ? params.name : Zotero.Utilities.randomString();
 	}
 	return obj.saveTx(saveOptions);
-});
+};
 
 /**
  * Return a promise for the error thrown by a promise, or false if none
@@ -584,7 +610,7 @@ var generateItemJSONData = Zotero.Promise.coroutine(function* generateItemJSONDa
 	
 	for (let itemName in items) {
 		let zItem = yield Zotero.Items.getAsync(items[itemName].id);
-		jsonData[itemName] = yield zItem.toJSON(options);
+		jsonData[itemName] = zItem.toJSON(options);
 
 		// Don't replace some fields that _always_ change (e.g. item keys)
 		// as long as it follows expected format

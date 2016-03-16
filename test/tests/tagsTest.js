@@ -64,4 +64,38 @@ describe("Zotero.Tags", function () {
 			assert.isFalse(yield Zotero.Tags.getName(tagID));
 		})
 	})
+	
+	
+	describe("#setColor()", function () {
+		var libraryID;
+		
+		before(function* () {
+			libraryID = Zotero.Libraries.userLibraryID;
+			
+			// Clear library tag colors
+			var colors = Zotero.Tags.getColors(libraryID);
+			for (let color of colors.keys()) {
+				yield Zotero.Tags.setColor(libraryID, color);
+			}
+		});
+		
+		it("should set color for a tag", function* () {
+			var aColor = '#ABCDEF';
+			var bColor = '#BCDEF0';
+			yield Zotero.Tags.setColor(libraryID, "A", aColor);
+			yield Zotero.Tags.setColor(libraryID, "B", bColor);
+			
+			var o = Zotero.Tags.getColor(libraryID, "A")
+			assert.equal(o.color, aColor);
+			assert.equal(o.position, 0);
+			var o = Zotero.Tags.getColor(libraryID, "B")
+			assert.equal(o.color, bColor);
+			assert.equal(o.position, 1);
+			
+			var o = Zotero.SyncedSettings.get(libraryID, 'tagColors');
+			assert.isArray(o);
+			assert.lengthOf(o, 2);
+			assert.sameMembers(o.map(c => c.color), [aColor, bColor]);
+		});
+	});
 })
