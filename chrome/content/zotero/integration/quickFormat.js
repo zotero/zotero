@@ -305,9 +305,7 @@ var Zotero_QuickFormat = new function () {
 						// Generate a string to search for each item
 						let item = citedItems[i];
 						let itemStr = item.getCreators()
-							.map(creator => {
-								creator.ref.firstName + " " + creator.ref.lastName
-							})
+							.map(creator => creator.ref.firstName + " " + creator.ref.lastName)
 							.concat([item.getField("title"), item.getField("date", true, true).substr(0, 4)])
 							.join(" ");
 						
