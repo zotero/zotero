@@ -286,7 +286,8 @@ Zotero.Integration = new function() {
 						Zotero.logError(e);
 					}
 				}
-			}).fin(function() {
+			})
+			.finally(function() {
 				if(document) {
 					try {
 						document.cleanup();
@@ -309,7 +310,7 @@ Zotero.Integration = new function() {
 				}
 				
 				inProgress = Zotero.Integration.currentWindow = false;
-			}).done();
+			});
 		};
 	};
 	
@@ -1831,7 +1832,7 @@ Zotero.Integration.CitationEditInterface = function(citation, field, fieldGetter
 	});
 	
 	var me = this;
-	this.promise = this._fieldIndexZotero.Promise.then(function(fieldIndex) {
+	this.promise = this._fieldIndexPromise.then(function(fieldIndex) {
 		me._fieldIndex = fieldIndex;
 		return me._acceptDeferred.promise;
 	}).then(function(progressCallback) {
@@ -1872,7 +1873,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 	 */
 	"_updateSession":function _updateSession(resolveErrors) {
 		var me = this;
-		if(this._sessionUpdatePromise && this._sessionUpdateZotero.Promise.isFulfilled()) {
+		if(this._sessionUpdatePromise && this._sessionUpdatePromise.isFulfilled()) {
 			// Session has already been updated. If we were deferring resolving an error,
 			// and we are supposed to resolve it now, then do that
 			if(this._sessionUpdateError) {
@@ -1966,7 +1967,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 	 * @return {Promise} A promise resolved by the items
 	 */
 	"getItems":function() {
-		if(this._fieldIndexZotero.Promise.isFulfilled()
+		if(this._fieldIndexPromise.isFulfilled()
 				|| Zotero.Utilities.isEmpty(this._session.citationsByItemID)) {
 			// Either we already have field data for this run or we have no item data at all.
 			// Update session before continuing.

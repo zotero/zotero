@@ -206,7 +206,7 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Does the dirty work of figuring out what the user meant to type
 	 */
-	function _quickFormat() {
+	var _quickFormat = Zotero.Promise.coroutine(function* () {
 		var str = _getEditorContent();
 		var haveConditions = false;
 		
@@ -277,7 +277,7 @@ var Zotero_QuickFormat = new function () {
 		}
 		
 		if(haveConditions) {		
-			var searchResultIDs = (haveConditions ? s.search() : []);
+			var searchResultIDs = (haveConditions ? (yield s.search()) : []);
 			
 			// Check to see which search results match items already in the document
 			var citedItems, completed = false, isAsync = false;
@@ -305,7 +305,7 @@ var Zotero_QuickFormat = new function () {
 						// Generate a string to search for each item
 						let item = citedItems[i];
 						let itemStr = item.getCreators()
-							.map(creator => creator.ref.firstName + " " + creator.ref.lastName)
+							.map(creator => creator.firstName + " " + creator.lastName)
 							.concat([item.getField("title"), item.getField("date", true, true).substr(0, 4)])
 							.join(" ");
 						
@@ -337,7 +337,7 @@ var Zotero_QuickFormat = new function () {
 			// No search conditions, so just clear the box
 			_updateItemList([], [], "", []);
 		}
-	}
+	});
 	
 	/**
 	 * Updates currentLocator based on a string
