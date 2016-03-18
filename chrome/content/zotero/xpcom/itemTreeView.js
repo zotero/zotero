@@ -274,16 +274,16 @@ Zotero.ItemTreeView.prototype.setSortColumn = function() {
 		}
 	}
 	
-	let colId = Zotero.Prefs.get('itemTree.sortColumnId');
+	let colID = Zotero.Prefs.get('itemTree.sortColumnID');
 	// Restore previous sort setting (feed -> non-feed)
-	if (! this.collectionTreeRow.isFeed() && colId) {
-		col = this._treebox.columns.getNamedColumn(colId);
+	if (! this.collectionTreeRow.isFeed() && colID) {
+		col = this._treebox.columns.getNamedColumn(colID);
 		dir = Zotero.Prefs.get('itemTree.sortDirection');
-		Zotero.Prefs.clear('itemTree.sortColumnId');
+		Zotero.Prefs.clear('itemTree.sortColumnID');
 		Zotero.Prefs.clear('itemTree.sortDirection');
 	// No previous sort setting stored, so store it (non-feed -> feed)
-	} else if (this.collectionTreeRow.isFeed() && !colId && currentCol) {
-		Zotero.Prefs.set('itemTree.sortColumnId', currentCol.id);
+	} else if (this.collectionTreeRow.isFeed() && !colID && currentCol) {
+		Zotero.Prefs.set('itemTree.sortColumnID', currentCol.id);
 		Zotero.Prefs.set('itemTree.sortDirection', currentDir);
 	// Retain current sort setting (non-feed -> non-feed)
 	} else {

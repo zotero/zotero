@@ -1875,7 +1875,7 @@ var ZoteroPane = new function()
 		}
 		
 		if (this.collectionsView.selection.count > 0) {
-			var row = this.collectionsView.getRow(this.collectionsView.selection.currentIndex);
+			var row = this.collectionsView.selectedTreeRow;
 			
 			if (row.isCollection()) {
 				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
@@ -1925,7 +1925,7 @@ var ZoteroPane = new function()
 	this.markFeedRead = Zotero.Promise.coroutine(function* () {
 		if (!this.collectionsView.selection.count) return;
 
-		let feed = this.collectionsView.getRow(this.collectionsView.selection.currentIndex).ref;
+		let feed = this.collectionsView.selectedTreeRow.ref;
 		let feedItemIDs = yield Zotero.FeedItems.getAll(feed.libraryID, true, false, true);
 		yield Zotero.FeedItems.toggleReadByID(feedItemIDs, true);
 	});
@@ -1934,7 +1934,7 @@ var ZoteroPane = new function()
 	this.editSelectedFeed = Zotero.Promise.coroutine(function* () {
 		if (!this.collectionsView.selection.count) return;
 		
-		let feed = this.collectionsView.getRow(this.collectionsView.selection.currentIndex).ref;
+		let feed = this.collectionsView.selectedTreeRow.ref;
 		let data = {
 			url: feed.url,
 			title: feed.name,
@@ -1955,7 +1955,7 @@ var ZoteroPane = new function()
 	this.refreshFeed = function() {
 		if (!this.collectionsView.selection.count) return;
 		
-		let feed = this.collectionsView.getRow(this.collectionsView.selection.currentIndex).ref;
+		let feed = this.collectionsView.selectedTreeRow.ref;
 		
 		return feed.updateFeed();
 	}
@@ -2298,29 +2298,15 @@ var ZoteroPane = new function()
 				m.sep1,
 				m.markReadFeed,
 				m.editSelectedFeed,
-				m.deleteCollectionAndItems,
-				m.sep2,
-				m.exportCollection,
-				m.createBibCollection,
-				m.loadReport
+				m.deleteCollectionAndItems
 			];
 			
-			if (!this.itemsView.rowCount) {
-				disable = [m.createBibCollection, m.loadReport]
-				if (this.collectionsView.isContainerEmpty(this.collectionsView.selection.currentIndex)) {
-					disable.push(m.exportCollection);
-				}
-			}
-
 			if (collectionTreeRow.ref.unreadCount == 0) {
 				disable.push(m.markReadFeed);
 			}
 			
 			// Adjust labels
 			menu.childNodes[m.deleteCollectionAndItems].setAttribute('label', Zotero.getString('pane.collections.menu.delete.feedAndItems'));
-			menu.childNodes[m.exportCollection].setAttribute('label', Zotero.getString('pane.collections.menu.export.feed'));
-			menu.childNodes[m.createBibCollection].setAttribute('label', Zotero.getString('pane.collections.menu.createBib.feed'));
-			menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.collections.menu.generateReport.feed'));
 		}
 		else if (collectionTreeRow.isSearch()) {
 			show = [
@@ -2468,8 +2454,10 @@ var ZoteroPane = new function()
 		else if (!collectionTreeRow.isFeed()) {
 			show.push(m.moveToTrash);
 		}
-		
-		show.push(m.sep3, m.exportItems, m.createBib, m.loadReport);
+
+		if(!collectionTreeRow.isFeed()) {
+			show.push(m.sep3, m.exportItems, m.createBib, m.loadReport);
+		}
 		
 		if (this.itemsView.selection.count > 0) {
 			// Multiple items selected
@@ -2653,7 +2641,7 @@ var ZoteroPane = new function()
 				m.moveToTrash, m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
 		}
 		
-		if (!collectionTreeRow.editable || collectionTreeRow.isPublications()) {
+		if ((!collectionTreeRow.editable || collectionTreeRow.isPublications()) && !collectionTreeRow.isFeed()) {
 			for (let i in m) {
 				// Still allow export/bib/report/read for non-editable views
 				switch (i) {
