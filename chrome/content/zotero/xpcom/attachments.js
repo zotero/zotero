@@ -672,7 +672,7 @@ Zotero.Attachments = new function(){
 		// We'll index it later if it fails. (This may not be necessary.)
 		if (contentType == 'application/pdf') {
 			setTimeout(function () {
-				Zotero.Fulltext.indexPDF(file.path, attachmentItem.id);
+				Zotero.Fulltext.indexPDF(attachmentItem.getFilePath(), attachmentItem.id);
 			}, 1000);
 		}
 		else if (Zotero.MIME.isTextType(contentType)) {
