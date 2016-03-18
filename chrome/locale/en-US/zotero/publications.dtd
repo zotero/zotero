@@ -1,6 +1,6 @@
 <!ENTITY zotero.publications.my_publications "My Publications">
 
-<!ENTITY zotero.publications.intro "Items you add to My Publications will be made publicly available on zotero.org, along with any attached files and notes. Only add work you yourself have created, and only include files and notes if you have the rights to distribute them and wish to do so.">
+<!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files and notes, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files and notes if you have the rights to distribute them and wish to do so.">
 <!ENTITY zotero.publications.include.checkbox.files "Include files">
 <!ENTITY zotero.publications.include.checkbox.notes "Include notes">
 <!ENTITY zotero.publications.authorship.checkbox "I created this work and have the rights to distribute included files and notes.">
