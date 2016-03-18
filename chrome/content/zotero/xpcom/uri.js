@@ -191,13 +191,13 @@ Zotero.URI = new function () {
 	 * Convert an item URI into an item
 	 *
 	 * @param	{String}				itemURI
-	 * @return {Promise<Zotero.Item|FALSE>}
+	 * @return {Zotero.Item|false}
 	 */
-	this.getURIItem = Zotero.Promise.method(function (itemURI) {
+	this.getURIItem = function (itemURI) {
 		var obj = this._getURIObject(itemURI, 'item');
 		if (!obj) return false;
-		return Zotero.Items.getByLibraryAndKeyAsync(obj.libraryID, obj.key);
-	});
+		return Zotero.Items.getByLibraryAndKey(obj.libraryID, obj.key);
+	};
 	
 	
 	/**
@@ -225,13 +225,13 @@ Zotero.URI = new function () {
 	 *
 	 * @param	{String}				collectionURI
 	 * @param	{Zotero.Collection|FALSE}
-	 * @return {Promise<Zotero.Collection|FALSE>}
+	 * @return {Zotero.Collection|false}
 	 */
-	this.getURICollection = Zotero.Promise.method(function (collectionURI) {
+	this.getURICollection = function (collectionURI) {
 		var obj = this._getURIObject(collectionURI, 'collection');
 		if (!obj) return false;
-		return Zotero.Collections.getByLibraryAndKeyAsync(obj.libraryID, obj.key);
-	});
+		return Zotero.Collections.getByLibraryAndKey(obj.libraryID, obj.key);
+	};
 	
 	
 	/**

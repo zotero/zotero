@@ -411,7 +411,7 @@ describe("Zotero.DataObject", function() {
 				var item2URI = Zotero.URI.getItemURI(item2);
 				
 				yield item2.addLinkedItem(item1);
-				var linkedItem = yield item1.getLinkedItem(item2.libraryID);
+				var linkedItem = item1.getLinkedItem(item2.libraryID);
 				assert.equal(linkedItem.id, item2.id);
 			})
 			
@@ -422,7 +422,7 @@ describe("Zotero.DataObject", function() {
 				var item2 = yield createDataObject('item', { libraryID: group.libraryID });
 				
 				yield item2.addLinkedItem(item1);
-				var linkedItem = yield item2.getLinkedItem(item1.libraryID);
+				var linkedItem = item2.getLinkedItem(item1.libraryID);
 				assert.isFalse(linkedItem);
 			})
 			
@@ -433,7 +433,7 @@ describe("Zotero.DataObject", function() {
 				var item2 = yield createDataObject('item', { libraryID: group.libraryID });
 				
 				yield item2.addLinkedItem(item1);
-				var linkedItem = yield item2.getLinkedItem(item1.libraryID, true);
+				var linkedItem = item2.getLinkedItem(item1.libraryID, true);
 				assert.equal(linkedItem.id, item1.id);
 			})
 		})

@@ -3139,8 +3139,6 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = function(uris) {
 		
 		// Next try getting URI directly
 		try {
-			// TEMP
-			throw new Error("getURIItem() is now async");
 			zoteroItem = Zotero.URI.getURIItem(uri);
 			if(zoteroItem) {
 				// Ignore items in the trash
@@ -3152,42 +3150,14 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = function(uris) {
 			}
 		} catch(e) {}
 		
-		// Try merged item mappings
-		var seen = [];
-		
-		// Follow merged item relations until we find an item or hit a dead end
-		while (!zoteroItem) {
-			var relations = Zotero.Relations.getByURIs(uri, Zotero.Relations.replacedItemPredicate);
-			// No merged items found
-			if(!relations.length) {
-				break;
-			}
-			
-			uri = relations[0].object;
-			
-			// Keep track of mapped URIs in case there's a circular relation
-			if(seen.indexOf(uri) != -1) {
-				var msg = "Circular relation for '" + uri + "' in merged item mapping resolution";
-				Zotero.debug(msg, 2);
-				Components.utils.reportError(msg);
-				break;
-			}
-			seen.push(uri);
-			
-			try {
-				// TEMP
-				throw new Error("getURIItem() is now async");
-				zoteroItem = Zotero.URI.getURIItem(uri);
-				if(zoteroItem) {
-					// Ignore items in the trash
-					if(zoteroItem.deleted) {
-						zoteroItem = false;
-					} else {
-						break;
-					}
-				}
-			} catch(e) {}
+		// Try merged item mapping
+		var replacer = Zotero.Relations.getByPredicateAndObject(
+			'item', Zotero.Relations.replacedItemPredicate, uri
+		);
+		if (replacer.length && !replacer[0].deleted) {
+			zoteroItem = replacer;
 		}
+		
 		if(zoteroItem) break;
 	}
 	

@@ -36,6 +36,82 @@ Zotero.Relations = new function () {
 	};
 	
 	var _types = ['collection', 'item'];
+	var _subjectsByPredicateIDAndObject = {};
+	var _subjectPredicatesByObject = {};
+	
+	
+	this.init = Zotero.Promise.coroutine(function* () {
+		// Load relations for different types
+		for (let type of _types) {
+			let t = new Date();
+			Zotero.debug(`Loading ${type} relations`);
+			
+			let sql = "SELECT * FROM " + type + "Relations "
+				+ "JOIN relationPredicates USING (predicateID)";
+			yield Zotero.DB.queryAsync(
+				sql,
+				false,
+				{
+					onRow: function (row) {
+						this.register(
+							type,
+							row.getResultByIndex(0),
+							row.getResultByIndex(1),
+							row.getResultByIndex(2)
+						);
+					}.bind(this)
+				}
+			);
+			
+			Zotero.debug(`Loaded ${type} relations in ${new Date() - t} ms`);
+		}
+	});
+	
+	
+	this.register = function (objectType, subjectID, predicate, object) {
+		var predicateID = Zotero.RelationPredicates.getID(predicate);
+		
+		if (!_subjectsByPredicateIDAndObject[objectType]) {
+			_subjectsByPredicateIDAndObject[objectType] = {};
+		}
+		if (!_subjectPredicatesByObject[objectType]) {
+			_subjectPredicatesByObject[objectType] = {};
+		}
+		
+		// _subjectsByPredicateIDAndObject
+		var o = _subjectsByPredicateIDAndObject[objectType];
+		if (!o[predicateID]) {
+			o[predicateID] = {};
+		}
+		if (!o[predicateID][object]) {
+			o[predicateID][object] = new Set();
+		}
+		o[predicateID][object].add(subjectID);
+		
+		// _subjectPredicatesByObject
+		o = _subjectPredicatesByObject[objectType];
+		if (!o[object]) {
+			o[object] = {};
+		}
+		if (!o[object][predicateID]) {
+			o[object][predicateID] = new Set();
+		}
+		o[object][predicateID].add(subjectID);
+	};
+	
+	
+	this.unregister = function (objectType, subjectID, predicate, object) {
+		var predicateID = Zotero.RelationPredicates.getID(predicate);
+		
+		if (!_subjectsByPredicateIDAndObject[objectType]
+				|| !_subjectsByPredicateIDAndObject[objectType][predicateID]
+				|| !_subjectsByPredicateIDAndObject[objectType][predicateID][object]) {
+			return;
+		}
+		
+		_subjectsByPredicateIDAndObject[objectType][predicateID][object].delete(subjectID)
+		_subjectPredicatesByObject[objectType][object][predicateID].delete(subjectID)
+	};
 	
 	
 	/**
@@ -44,18 +120,22 @@ Zotero.Relations = new function () {
 	 * @param {String} objectType - Type of relation to search for (e.g., 'item')
 	 * @param {String} predicate
 	 * @param {String} object
-	 * @return {Promise<Zotero.DataObject[]>}
+	 * @return {Zotero.DataObject[]}
 	 */
-	this.getByPredicateAndObject = Zotero.Promise.coroutine(function* (objectType, predicate, object) {
+	this.getByPredicateAndObject = function (objectType, predicate, object) {
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		if (predicate) {
 			predicate = this._getPrefixAndValue(predicate).join(':');
 		}
-		var sql = "SELECT " + objectsClass.idColumn + " FROM " + objectType + "Relations "
-			+ "JOIN relationPredicates USING (predicateID) WHERE predicate=? AND object=?";
-		var ids = yield Zotero.DB.columnQueryAsync(sql, [predicate, object]);
-		return yield objectsClass.getAsync(ids, { noCache: true });
-	});
+		
+		var predicateID = Zotero.RelationPredicates.getID(predicate);
+		
+		var o = _subjectsByPredicateIDAndObject[objectType];
+		if (!o || !o[predicateID] || !o[predicateID][object]) {
+			return [];
+		}
+		return objectsClass.get(Array.from(o[predicateID][object].values()));
+	};
 	
 	
 	/**
@@ -63,24 +143,25 @@ Zotero.Relations = new function () {
 	 *
 	 * @param {String} objectType - Type of relation to search for (e.g., 'item')
 	 * @param {String} object
-	 * @return {Promise<Object[]>} - Promise for an object with a Zotero.DataObject as 'subject'
-	 *                               and a predicate string as 'predicate'
+	 * @return {Object[]} - An array of objects with a Zotero.DataObject as 'subject'
+	 *     and a predicate string as 'predicate'
 	 */
-	this.getByObject = Zotero.Promise.coroutine(function* (objectType, object) {
+	this.getByObject = function (objectType, object) {
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
-		var sql = "SELECT " + objectsClass.idColumn + " AS id, predicate "
-			+ "FROM " + objectType + "Relations JOIN relationPredicates USING (predicateID) "
-			+ "WHERE object=?";
+		var predicateIDs = [];
+		var o = _subjectPredicatesByObject[objectType][object];
+		if (!o) {
+			return [];
+		}
 		var toReturn = [];
-		var rows = yield Zotero.DB.queryAsync(sql, object);
-		for (let i = 0; i < rows.length; i++) {
-			toReturn.push({
-				subject: yield objectsClass.getAsync(rows[i].id, { noCache: true }),
-				predicate: rows[i].predicate
-			});
+		for (let predicateID in o) {
+			o[predicateID].forEach(subjectID => toReturn.push({
+				subject: objectsClass.get(subjectID),
+				predicate: Zotero.RelationPredicates.getName(predicateID)
+			}));
 		}
 		return toReturn;
-	});
+	};
 	
 	
 	this.updateUser = Zotero.Promise.coroutine(function* (toUserID) {
@@ -93,14 +174,32 @@ Zotero.Relations = new function () {
 		}
 		Zotero.DB.requireTransaction();
 		for (let type of _types) {
-			var sql = "UPDATE " + type + "Relations SET "
-				+ "object=REPLACE(object, 'zotero.org/users/" + fromUserID + "', "
-				+ "'zotero.org/users/" + toUserID + "')";
+			let sql = `SELECT DISTINCT object FROM ${type}Relations WHERE object LIKE ?`;
+			let objects = yield Zotero.DB.columnQueryAsync(
+				sql, 'http://zotero.org/users/' + fromUserID + '/%'
+			);
+			Zotero.DB.addCurrentCallback("commit", function () {
+				for (let object of objects) {
+					let subPrefs = this.getByObject(type, object);
+					let newObject = object.replace(
+						new RegExp("^http://zotero.org/users/" + fromUserID + "/(.*)"),
+						"http://zotero.org/users/" + toUserID + "/$1"
+					);
+					for (let subPref of subPrefs) {
+						this.unregister(type, subPref.subject.id, subPref.predicate, object);
+						this.register(type, subPref.subject.id, subPref.predicate, newObject);
+					}
+				}
+			}.bind(this));
+			
+			sql = "UPDATE " + type + "Relations SET "
+				+ "object=REPLACE(object, 'zotero.org/users/" + fromUserID + "/', "
+				+ "'zotero.org/users/" + toUserID + "/')";
 			yield Zotero.DB.queryAsync(sql);
 			
 			var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
-			var objects = objectsClass.getLoaded();
-			for (let object of objects) {
+			let loadedObjects = objectsClass.getLoaded();
+			for (let object of loadedObjects) {
 				yield object.reload(['relations'], true);
 			}
 		}

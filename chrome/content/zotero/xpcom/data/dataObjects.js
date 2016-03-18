@@ -500,7 +500,7 @@ Zotero.DataObjects.prototype._loadRelations = Zotero.Promise.coroutine(function*
 			let objectURI = getURI(this);
 			
 			// Related items are bidirectional, so include any pointing to this object
-			let objects = yield Zotero.Relations.getByPredicateAndObject(
+			let objects = Zotero.Relations.getByPredicateAndObject(
 				Zotero.Relations.relatedItemPredicate, objectURI
 			);
 			for (let i = 0; i < objects.length; i++) {
@@ -508,7 +508,7 @@ Zotero.DataObjects.prototype._loadRelations = Zotero.Promise.coroutine(function*
 			}
 			
 			// Also include any owl:sameAs relations pointing to this object
-			objects = yield Zotero.Relations.getByPredicateAndObject(
+			objects = Zotero.Relations.getByPredicateAndObject(
 				Zotero.Relations.linkedObjectPredicate, objectURI
 			);
 			for (let i = 0; i < objects.length; i++) {

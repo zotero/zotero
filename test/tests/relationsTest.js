@@ -14,7 +14,7 @@ describe("Zotero.Relations", function () {
 				]
 			})
 			yield item.saveTx();
-			var objects = yield Zotero.Relations.getByPredicateAndObject(
+			var objects = Zotero.Relations.getByPredicateAndObject(
 				'item', 'owl:sameAs', 'http://zotero.org/groups/1/items/SRRMGSRM'
 			);
 			assert.lengthOf(objects, 1);

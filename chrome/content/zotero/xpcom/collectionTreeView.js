@@ -1517,7 +1517,7 @@ Zotero.CollectionTreeView.prototype.canDropCheckAsync = Zotero.Promise.coroutine
 				
 				// Cross-library drag
 				if (treeRow.ref.libraryID != item.libraryID) {
-					let linkedItem = yield item.getLinkedItem(treeRow.ref.libraryID, true);
+					let linkedItem = item.getLinkedItem(treeRow.ref.libraryID, true);
 					if (linkedItem && !linkedItem.deleted) {
 						// For drag to root, skip if linked item exists
 						if (treeRow.isLibrary(true)) {
@@ -1623,7 +1623,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		var targetLibraryType = Zotero.Libraries.get(targetLibraryID).libraryType;
 		
 		// Check if there's already a copy of this item in the library
-		var linkedItem = yield item.getLinkedItem(targetLibraryID, true);
+		var linkedItem = item.getLinkedItem(targetLibraryID, true);
 		if (linkedItem) {
 			// If linked item is in the trash, undelete it and remove it from collections
 			// (since it shouldn't be restored to previous collections)
