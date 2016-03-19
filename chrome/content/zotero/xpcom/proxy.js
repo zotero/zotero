@@ -82,7 +82,17 @@ Zotero.Proxies = new function() {
 		// try to detect a proxy
 		channel.QueryInterface(Components.interfaces.nsIHttpChannel);
 		var url = channel.URI.spec;
-
+		
+		try {
+			var { browser, window } = _getBrowserAndWindow(channel);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		if (!browser) {
+			Zotero.debug("Couldn't get browser from channel", 2);
+		}
+		
 		// see if there is a proxy we already know
 		var m = false;
 		var proxy;
@@ -105,13 +115,16 @@ Zotero.Proxies = new function() {
 				proxy.hosts.push(host);
 				proxy.save(true);
 				
-				var bw = _getBrowserAndWindow(channel.notificationCallbacks);
-				if(!bw) return;
-				_showNotification(bw,
+				if (!browser) return;
+				_showNotification(
+					browser,
+					window,
 					Zotero.getString('proxies.notification.associated.label', [host, channel.URI.hostPort]),
 					[{ label: "proxies.notification.settings.button", callback: function() { _prefsOpenCallback(bw[1]); } }]);
 			}
 		} else {
+			if (!browser) return;
+			
 			// otherwise, try to detect a proxy
 			var proxy = false;
 			for(var detectorName in Zotero.Proxies.Detectors) {
@@ -126,13 +139,12 @@ Zotero.Proxies = new function() {
 				Zotero.debug("Proxies: Detected "+detectorName+" proxy "+proxy.scheme+
 					(proxy.multiHost ? " (multi-host)" : " for "+proxy.hosts[0]));
 				
-				var bw = _getBrowserAndWindow(channel.notificationCallbacks);
-				if(!bw) return;
-				
 				var savedTransparent = false;
 				if(Zotero.Proxies.autoRecognize) {
 					// Ask to save only if automatic proxy recognition is on
-					savedTransparent = _showNotification(bw,
+					savedTransparent = _showNotification(
+						browser,
+						window,
 						Zotero.getString('proxies.notification.recognized.label', [proxy.hosts[0], channel.URI.hostPort]),
 						[{ label: "proxies.notification.enable.button", callback: function() { _showDialog(proxy.hosts[0], channel.URI.hostPort, proxy); } }]);
 				}
@@ -144,16 +156,13 @@ Zotero.Proxies = new function() {
 		}
 		
 		// try to get an applicable proxy
-		var webNav = null;
-		var docShell = null;
-		try {
-			webNav = channel.notificationCallbacks.QueryInterface(Components.interfaces.nsIWebNavigation);
-			docShell = channel.notificationCallbacks.QueryInterface(Components.interfaces.nsIDocShell);
-		} catch(e) {
+		var docShell = browser.docShell;
+		if (!docShell) {
+			Zotero.logError("Couldn't get docshell");
 			return;
 		}
 		
-		if(!docShell.allowMetaRedirects) return;
+		if (!docShell || !docShell.allowMetaRedirects) return;
 		
 		// check that proxy redirection is actually enabled
 		if(!Zotero.Proxies.transparent) return;
@@ -166,7 +175,6 @@ Zotero.Proxies = new function() {
 			
 			// IP update interval is every 15 minutes
 			if((now - Zotero.Proxies.lastIPCheck) > 900000) {
-				var notificationCallbacks = channel.notificationCallbacks;
 				Zotero.Proxies.DNS.getHostnames().then(function (hosts) {
 					// if domains necessitate disabling, disable them
 					Zotero.Proxies.disabledByDomain = false;
@@ -174,9 +182,9 @@ Zotero.Proxies = new function() {
 						Zotero.Proxies.disabledByDomain = host.toLowerCase().indexOf(Zotero.Proxies.disableByDomain) != -1;
 						if (Zotero.Proxies.disabledByDomain) return;
 					}
-					_maybeRedirect(channel, notificationCallbacks, proxied);
+					_maybeRedirect(channel, browser, window, proxied);
 				}, function(e) {
-					_maybeRedirect(channel, notificationCallbacks, proxied);
+					_maybeRedirect(channel, browser, window, proxied);
 				});
 				Zotero.Proxies.lastIPCheck = now;
 				return;
@@ -185,16 +193,10 @@ Zotero.Proxies = new function() {
 			if(Zotero.Proxies.disabledByDomain) return;
 		}
 		
-		_maybeRedirect(channel, channel.notificationCallbacks, proxied);
+		_maybeRedirect(channel, browser, window, proxied);
 	}
 
-	function _maybeRedirect(channel, notificationCallbacks, proxied) {
-		// try to find a corresponding browser object
-		var bw = _getBrowserAndWindow(notificationCallbacks);
-		if(!bw) return;
-		var browser = bw[0];
-		var window = bw[1];
-	
+	function _maybeRedirect(channel, browser, window, proxied) {
 		channel.QueryInterface(Components.interfaces.nsIHttpChannel);				
 		var proxiedURI = Components.classes["@mozilla.org/network/io-service;1"]
 								  .getService(Components.interfaces.nsIIOService)
@@ -242,7 +244,9 @@ Zotero.Proxies = new function() {
 		// Otherwise, redirect. Note that we save the URI we're redirecting from as the
 		// referrer, since we can't make a proper redirect
 		if(Zotero.Proxies.showRedirectNotification) {
-			_showNotification(bw,
+			_showNotification(
+				browser,
+				window,
 				Zotero.getString('proxies.notification.redirected.label', [channel.URI.hostPort, proxiedURI.hostPort]),
 				[
 					{ label: "general.dontShowAgain", callback: function() { _disableRedirectNotification(); } },
@@ -416,15 +420,33 @@ Zotero.Proxies = new function() {
 	 }
 	 
 	 /**
-	  * Get browser and window from notificationCallbacks
-	  * @return	{Array} Array containing a browser object and a DOM window object
+	  * Get browser and window from a channel
+	  * @return	{Object} Object containing the content browser as 'browser' and a ChromeWindow as 'window'
 	  */
-	 function _getBrowserAndWindow(notificationCallbacks) {
-		var browser = notificationCallbacks.getInterface(Ci.nsIWebNavigation)
-			.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
-		var window = browser.ownerDocument.defaultView;
-		return [browser, window];
-	 }
+	function _getBrowserAndWindow(channel) {
+		// Firefox 45 and earlier
+		if (Zotero.platformMajorVersion < 46) {
+			var browser = channel.notificationCallbacks.getInterface(Ci.nsIWebNavigation)
+				.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
+		}
+		// Firefox 46 and up (non-e10s)
+		else {
+			let outerWindowID = channel.loadInfo.outerWindowID;
+			var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+				.getService(Ci.nsIWindowMediator);
+			let outerContentWin = wm.getOuterWindowWithId(outerWindowID);
+			if (!outerContentWin) {
+				return { browser: null, window: null };
+			}
+			var browser = outerContentWin.QueryInterface(Ci.nsIInterfaceRequestor)
+				.getInterface(Ci.nsIWebNavigation)
+				.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
+		}
+		return {
+			browser,
+			window: browser.ownerDocument.defaultView
+		};
+	}
 	 
 	 /**
 	  * Show a proxy-related notification
@@ -432,10 +454,7 @@ Zotero.Proxies = new function() {
 	  * @param	{String}	label		notification text
 	  * @param	{Array}	  buttons		dicts of button label resource string and associated callback
 	  */
-	 function _showNotification(bw, label, buttons) {
-	 	var browser = bw[0];
-	 	var window = bw[1];
-
+	 function _showNotification(browser, window, label, buttons) {
 		buttons = buttons.map(function(button) {
 			return {
 				label: Zotero.getString(button.label),
