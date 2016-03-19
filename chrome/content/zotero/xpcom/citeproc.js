@@ -1,26 +1,3 @@
-	Copyright (c) 2009-2016 Frank Bennett
-
-	This program is free software: you can redistribute it and/or
-	modify it under EITHER
-
-      * the terms of the Common Public Attribution License (CPAL) as
-	    published by the Open Source Initiative, either version 1 of
-	    the CPAL, or (at your option) any later version; OR
-
-      * the terms of the GNU Affero General Public License (AGPL)
-        as published by the Free Software Foundation, either version
-        3 of the AGPL, or (at your option) any later version.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-	Affero General Public License for more details.
-
-	You should have received copies of the Common Public Attribution
-    License and of the GNU Affero General Public License along with
-    this program.  If not, see <https://opensource.org/licenses/> or
-    <http://www.gnu.org/licenses/> respectively.
-
 /*
  * Copyright (c) 2009-2016 Frank Bennett
  * 
