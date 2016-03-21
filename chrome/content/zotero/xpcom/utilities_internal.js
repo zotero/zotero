@@ -497,10 +497,13 @@ Zotero.Utilities.Internal = {
 			// Zotero RDF translator pretended to use it
 			item.seeAlso = [];
 			
-			// Fix linkMode
 			if (zoteroItem.isAttachment()) {
-				item.linkMode = zoteroItem.attachmentLinkMode;
-				item.mimeType = item.contentType;
+				item.linkMode = item.uniqueFields.linkMode = zoteroItem.attachmentLinkMode;
+				item.mimeType = item.uniqueFields.mimeType = item.contentType;
+			}
+			
+			if (item.note) {
+				item.uniqueFields.note = item.note;
 			}
 			
 			return item;
