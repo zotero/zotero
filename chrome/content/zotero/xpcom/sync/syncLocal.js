@@ -177,7 +177,7 @@ Zotero.Sync.Data.Local = {
 			loginManager.removeLogin(login);
 		}
 		// Remove the legacy pref
-		Zotero.Pref.clear('sync.server.username');
+		Zotero.Prefs.clear('sync.server.username');
 	},
 	
 	
