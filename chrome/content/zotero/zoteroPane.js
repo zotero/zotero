@@ -3405,7 +3405,7 @@ var ZoteroPane = new function()
 				let item = yield Zotero.Attachments.importFromDocument({
 					libraryID: libraryID,
 					document: doc,
-					collections: [collectionID]
+					collections: collectionID ? [collectionID] : []
 				});
 				
 				yield this.selectItem(item.id);

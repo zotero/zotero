@@ -634,7 +634,7 @@ Zotero.Attachments = new function(){
 			attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
 			attachmentItem.attachmentCharset = 'utf-8'; // WPD will output UTF-8
 			attachmentItem.attachmentContentType = contentType;
-			if (collections) {
+			if (collections && collections.length) {
 				attachmentItem.setCollections(collections);
 			}
 			var itemID = yield attachmentItem.save();
@@ -861,11 +861,9 @@ Zotero.Attachments = new function(){
 	this.createTemporaryStorageDirectory = Zotero.Promise.coroutine(function* () {
 		var tmpDir = Zotero.getStorageDirectory();
 		tmpDir.append("tmp-" + Zotero.Utilities.randomString(6));
-		Zotero.debug("RANDOM IS " + tmpDir.leafName);
 		yield OS.File.makeDir(tmpDir.path, {
 			unixMode: 0755
 		});
-		Zotero.debug("MADE DIRECTORY at " + tmpDir.path);
 		return tmpDir;
 	});
 	

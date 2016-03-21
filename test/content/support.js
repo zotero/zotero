@@ -42,7 +42,9 @@ function loadBrowserWindow() {
 }
 
 /**
- * Loads a Zotero pane in a new window and selects My Library. Returns the containing window.
+ * Opens the Zotero pane and selects My Library. Returns the containing window.
+ *
+ * @param {Window} [win] - Existing window to use; if not specified, a new window is opened
  */
 var loadZoteroPane = Zotero.Promise.coroutine(function* (win) {
 	if (!win) {
