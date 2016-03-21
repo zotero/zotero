@@ -674,7 +674,7 @@ var generateTranslatorExportData = Zotero.Promise.coroutine(function* generateTr
 	for (let itemName in items) {
 		let zItem = yield Zotero.Items.getAsync(items[itemName].id);
 		itemGetter._itemsLeft = [zItem];
-		translatorExportData[itemName] = yield itemGetter.nextItem();
+		translatorExportData[itemName] = itemGetter.nextItem();
 		
 		// Don't replace some fields that _always_ change (e.g. item keys)
 		if (!currentData || !currentData[itemName]) continue;
