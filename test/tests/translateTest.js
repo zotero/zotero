@@ -574,7 +574,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 	describe("nextItem", function() {
 		it('should return false for an empty database', Zotero.Promise.coroutine(function* () {
 			let getter = new Zotero.Translate.ItemGetter();
-			assert.isFalse(yield getter.nextItem());
+			assert.isFalse(getter.nextItem());
 		}));
 		it('should return items in order they are supplied', Zotero.Promise.coroutine(function* () {
 			let getter = new Zotero.Translate.ItemGetter();
@@ -592,9 +592,9 @@ describe("Zotero.Translate.ItemGetter", function() {
 			
 			getter._itemsLeft = items;
 			
-			assert.equal((yield getter.nextItem()).uri, itemURIs[0], 'first item comes out first');
-			assert.equal((yield getter.nextItem()).uri, itemURIs[1], 'second item comes out second');
-			assert.isFalse((yield getter.nextItem()), 'end of item queue');
+			assert.equal((getter.nextItem()).uri, itemURIs[0], 'first item comes out first');
+			assert.equal((getter.nextItem()).uri, itemURIs[1], 'second item comes out second');
+			assert.isFalse((getter.nextItem()), 'end of item queue');
 		}));
 		it('should return items with tags in expected format', Zotero.Promise.coroutine(function* () {
 			let getter = new Zotero.Translate.ItemGetter();
@@ -622,7 +622,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 				let suffix = legacyMode[i] ? ' in legacy mode' : '';
 				
 				// itemWithAutomaticTag
-				let translatorItem = yield getter.nextItem();
+				let translatorItem = getter.nextItem();
 				assert.isArray(translatorItem.tags, 'item contains automatic tags in an array' + suffix);
 				assert.isObject(translatorItem.tags[0], 'automatic tag is an object' + suffix);
 				assert.equal(translatorItem.tags[0].tag, 'automatic tag', 'automatic tag name provided as "tag" property' + suffix);
@@ -633,14 +633,14 @@ describe("Zotero.Translate.ItemGetter", function() {
 				}
 				
 				// itemWithManualTag
-				translatorItem = yield getter.nextItem();
+				translatorItem = getter.nextItem();
 				assert.isArray(translatorItem.tags, 'item contains manual tags in an array' + suffix);
 				assert.isObject(translatorItem.tags[0], 'manual tag is an object' + suffix);
 				assert.equal(translatorItem.tags[0].tag, 'manual tag', 'manual tag name provided as "tag" property' + suffix);
 				assert.equal(translatorItem.tags[0].type, 1, 'manual tag "type" is 1' + suffix);
 				
 				// itemWithMultipleTags
-				translatorItem = yield getter.nextItem();
+				translatorItem = getter.nextItem();
 				assert.isArray(translatorItem.tags, 'item contains multiple tags in an array' + suffix);
 				assert.lengthOf(translatorItem.tags, 2, 'expected number of tags returned' + suffix);
 			}
@@ -680,16 +680,16 @@ describe("Zotero.Translate.ItemGetter", function() {
 				yield collections[2].addItem(items[3].id);
 			});
 			
-			let translatorItem = yield getter.nextItem();
+			let translatorItem = getter.nextItem();
 			assert.isArray(translatorItem.collections, 'item in library root has a collections array');
 			assert.equal(translatorItem.collections.length, 0, 'item in library root does not list any collections');
 			
-			translatorItem = yield getter.nextItem();
+			translatorItem = getter.nextItem();
 			assert.isArray(translatorItem.collections, 'item in a single collection has a collections array');
 			assert.equal(translatorItem.collections.length, 1, 'item in a single collection lists one collection');
 			assert.equal(translatorItem.collections[0], collections[0].key, 'item in a single collection identifies correct collection');
 			
-			translatorItem = yield getter.nextItem();
+			translatorItem = getter.nextItem();
 			assert.isArray(translatorItem.collections, 'item in two collections has a collections array');
 			assert.equal(translatorItem.collections.length, 2, 'item in two collections lists two collections');
 			assert.deepEqual(
@@ -698,7 +698,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 				'item in two collections identifies correct collections'
 			);
 			
-			translatorItem = yield getter.nextItem();
+			translatorItem = getter.nextItem();
 			assert.isArray(translatorItem.collections, 'item in a nested collection has a collections array');
 			assert.equal(translatorItem.collections.length, 1, 'item in a single nested collection lists one collection');
 			assert.equal(translatorItem.collections[0], collections[2].key, 'item in a single collection identifies correct collection');
@@ -728,25 +728,25 @@ describe("Zotero.Translate.ItemGetter", function() {
 			
 		// 	getter._itemsLeft = items.slice();
 			
-		// 	let translatorItem = yield getter.nextItem();
+		// 	let translatorItem = getter.nextItem();
 		// 	assert.isObject(translatorItem.relations, 'item with no relations has a relations object');
 		// 	assert.equal(Object.keys(translatorItem.relations).length, 0, 'item with no relations does not list any relations');
 			
-		// 	translatorItem = yield getter.nextItem();
+		// 	translatorItem = getter.nextItem();
 		// 	assert.isObject(translatorItem.relations, 'item that is the subject of a single relation has a relations object');
 		// 	assert.equal(Object.keys(translatorItem.relations).length, 1, 'item that is the subject of a single relation list one relations predicate');
 		// 	assert.isDefined(translatorItem.relations['dc:relation'], 'item that is the subject of a single relation uses "dc:relation" as the predicate');
 		// 	assert.isString(translatorItem.relations['dc:relation'], 'item that is the subject of a single relation lists "dc:relation" object as a string');
 		// 	assert.equal(translatorItem.relations['dc:relation'], Zotero.URI.getItemURI(items[2]), 'item that is the subject of a single relation identifies correct object URI');
 			
-		// 	translatorItem = yield getter.nextItem();
+		// 	translatorItem = getter.nextItem();
 		// 	assert.isObject(translatorItem.relations, 'item that is the object of a single relation has a relations object');
 		// 	assert.equal(Object.keys(translatorItem.relations).length, 1, 'item that is the object of a single relation list one relations predicate');
 		// 	assert.isDefined(translatorItem.relations['dc:relation'], 'item that is the object of a single relation uses "dc:relation" as the predicate');
 		// 	assert.isString(translatorItem.relations['dc:relation'], 'item that is the object of a single relation lists "dc:relation" object as a string');
 		// 	assert.equal(translatorItem.relations['dc:relation'], Zotero.URI.getItemURI(items[1]), 'item that is the object of a single relation identifies correct subject URI');
 			
-		// 	translatorItem = yield getter.nextItem();
+		// 	translatorItem = getter.nextItem();
 		// 	assert.isObject(translatorItem.relations, 'item that is the subject of two relations has a relations object');
 		// 	assert.equal(Object.keys(translatorItem.relations).length, 1, 'item that is the subject of two relations list one relations predicate');
 		// 	assert.isDefined(translatorItem.relations['dc:relation'], 'item that is the subject of two relations uses "dc:relation" as the predicate');
@@ -757,7 +757,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 		// 		'item that is the subject of two relations identifies correct object URIs'
 		// 	);
 			
-		// 	translatorItem = yield getter.nextItem();
+		// 	translatorItem = getter.nextItem();
 		// 	assert.isObject(translatorItem.relations, 'item that is the object of one relation from item with two relations has a relations object');
 		// 	assert.equal(Object.keys(translatorItem.relations).length, 1, 'item that is the object of one relation from item with two relations list one relations predicate');
 		// 	assert.isDefined(translatorItem.relations['dc:relation'], 'item that is the object of one relation from item with two relations uses "dc:relation" as the predicate');
@@ -791,7 +791,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 				let legacy = getter.legacy = legacyMode[i];
 				let suffix = legacy ? ' in legacy mode' : '';
 				
-				let translatorNote = yield getter.nextItem();
+				let translatorNote = getter.nextItem();
 				assert.isDefined(translatorNote, 'returns standalone note' + suffix);
 				assert.equal(translatorNote.itemType, 'note', 'itemType is correct' + suffix);
 				assert.equal(translatorNote.note, 'Note', 'note is correct' + suffix);
@@ -881,7 +881,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 				let legacy = getter.legacy = legacyMode[i];
 				let suffix = legacy ? ' in legacy mode' : '';
 				
-				let translatorItem = yield getter.nextItem();
+				let translatorItem = getter.nextItem();
 				assert.isArray(translatorItem.notes, 'item with no notes contains notes array' + suffix);
 				assert.equal(translatorItem.notes.length, 0, 'item with no notes contains empty notes array' + suffix);
 				
@@ -892,7 +892,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 				getter._itemsLeft = [item];
 				getter.legacy = legacy;
 				
-				translatorItem = yield getter.nextItem();
+				translatorItem = getter.nextItem();
 				assert.isArray(translatorItem.notes, 'item with no notes contains notes array' + suffix);
 				assert.equal(translatorItem.notes.length, 1, 'item with one note contains array with one note' + suffix);
 				
@@ -1007,7 +1007,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 				// since tests are mostly the same
 				let translatorAttachments = [], translatorItem;
 				let itemsLeft = items.length, attachmentsLeft = attachments.length;
-				while (translatorItem = yield getter.nextItem()) {
+				while (translatorItem = getter.nextItem()) {
 					assert.isString(translatorItem.itemType, 'itemType is set' + suffix);
 					
 					// Standalone attachments

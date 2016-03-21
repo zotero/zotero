@@ -717,7 +717,7 @@ Zotero.Translate.ItemGetter.prototype = {
 	/**
 	 * Converts an attachment to array format and copies it to the export folder if desired
 	 */
-	"_attachmentToArray":Zotero.Promise.coroutine(function* (attachment) {
+	"_attachmentToArray": function (attachment) {
 		var attachmentArray = Zotero.Utilities.Internal.itemToExportFormat(attachment, this.legacy);
 		var linkMode = attachment.attachmentLinkMode;
 		if(linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
@@ -849,17 +849,17 @@ Zotero.Translate.ItemGetter.prototype = {
 		}
 		
 		return attachmentArray;
-	}),
+	},
 	
 	/**
 	 * Retrieves the next available item
 	 */
-	"nextItem":Zotero.Promise.coroutine(function* () {
+	"nextItem": function () {
 		while(this._itemsLeft.length != 0) {
 			var returnItem = this._itemsLeft.shift();
 			// export file data for single files
 			if(returnItem.isAttachment()) {		// an independent attachment
-				var returnItemArray = yield this._attachmentToArray(returnItem);
+				var returnItemArray = this._attachmentToArray(returnItem);
 				if(returnItemArray) return returnItemArray;
 			} else {
 				var returnItemArray = Zotero.Utilities.Internal.itemToExportFormat(returnItem, this.legacy);
@@ -869,7 +869,7 @@ Zotero.Translate.ItemGetter.prototype = {
 				var attachments = returnItem.getAttachments();
 				for each(var attachmentID in attachments) {
 					var attachment = Zotero.Items.get(attachmentID);
-					var attachmentInfo = yield this._attachmentToArray(attachment);
+					var attachmentInfo = this._attachmentToArray(attachment);
 					
 					if(attachmentInfo) {
 						returnItemArray.attachments.push(attachmentInfo);
@@ -880,7 +880,7 @@ Zotero.Translate.ItemGetter.prototype = {
 			}
 		}
 		return false;
-	}),
+	},
 	
 	"nextCollection":function() {
 		if(!this._collectionsLeft || this._collectionsLeft.length == 0) return false;
