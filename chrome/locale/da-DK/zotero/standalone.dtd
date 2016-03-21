@@ -43,7 +43,7 @@
 <!ENTITY copyCmd.label "Kopier">
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.accesskey "C">
-<!ENTITY copyCitationCmd.label "Kopier henvisning">
+<!ENTITY copyCitationCmd.label "Kopier reference">
 <!ENTITY copyBibliographyCmd.label "Kopier referenceliste">
 <!ENTITY pasteCmd.label "Indsæt">
 <!ENTITY pasteCmd.key "V">
