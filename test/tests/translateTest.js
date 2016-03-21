@@ -1156,5 +1156,19 @@ describe("Zotero.Translate.ItemGetter", function() {
 			}
 		}));
 	});
+	
+	describe("#setCollection()", function () {
+		it("should add collection items", function* () {
+			var col = yield createDataObject('collection');
+			var item1 = yield createDataObject('item', { collections: [col.id] });
+			var item2 = yield createDataObject('item', { collections: [col.id] });
+			var item3 = yield createDataObject('item');
+			
+			let getter = new Zotero.Translate.ItemGetter();
+			getter.setCollection(col);
+			
+			assert.equal(getter.numItems, 2);
+		});
+	});
 });
 }

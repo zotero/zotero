@@ -672,7 +672,7 @@ Zotero.Translate.ItemGetter.prototype = {
 			}
 		}
 		
-		this._itemsLeft = Array.from(items.values);
+		this._itemsLeft = Array.from(items.values());
 		this.numItems = this._itemsLeft.length;
 	}),
 	
