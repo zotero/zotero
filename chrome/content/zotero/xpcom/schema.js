@@ -514,9 +514,6 @@ Zotero.Schema = new function(){
 					xpiZipReader.close();
 				}
 			}
-			else {
-				var zipFileName = OS.Path.basename(installLocation);
-			}
 		}
 		
 		switch (mode) {
@@ -683,40 +680,25 @@ Zotero.Schema = new function(){
 			);
 			
 			if (!forceReinstall && lastModTime && modTime <= lastModTime) {
-				Zotero.debug("Installed " + mode + " are up-to-date with " + zipFileName);
+				Zotero.debug("Installed " + mode + " are up-to-date with XPI");
 				return false;
 			}
 			
-			Zotero.debug("Updating installed " + mode + " from " + zipFileName);
+			Zotero.debug("Updating installed " + mode + " from XPI");
 			
 			let tmpDir = Zotero.getTempDirectory().path;
 			
 			if (mode == 'translators') {
-				// Parse translators.index
-				if (!xpiZipReader.hasEntry("translators.index")) {
-					Components.utils.reportError("translators.index not found");
+				// Parse translators.json
+				if (!xpiZipReader.hasEntry("translators.json")) {
+					Zotero.logError("translators.json not found");
 					return false;
 				}
-				let indexFile = xpiZipReader.getInputStream("translators.index");
-				
-				indexFile = yield Zotero.File.getContentsAsync(indexFile);
-				indexFile = indexFile.split("\n");
-				let index = {};
-				for (let i = 0; i < indexFile.length; i++) {
-					let line = indexFile[i];
-					if (!line) {
-						continue;
-					}
-					let [translatorID, label, lastUpdated] = line.split(',');
-					if (!translatorID) {
-						Components.utils.reportError("Invalid translatorID '" + translatorID + "'");
-						return false;
-					}
-					index[translatorID] = {
-						label: label,
-						lastUpdated: lastUpdated,
-						extract: true
-					};
+				let index = JSON.parse(yield Zotero.File.getContentsAsync(
+					xpiZipReader.getInputStream("translators.json"))
+				);
+				for (let id in index) {
+					index[id].extract = true;
 				}
 				
 				let sql = "SELECT metadataJSON FROM translatorCache";
@@ -754,11 +736,7 @@ Zotero.Schema = new function(){
 						yield Zotero.File.removeIfExists(existingObj.path);
 					}
 					
-					let fileName = Zotero.Translators.getFileNameFromLabel(
-						entry.label, translatorID
-					);
-					
-					let destFile = OS.Path.join(destDir, fileName);
+					let destFile = OS.Path.join(destDir, entry.fileName);
 					try {
 						yield OS.File.move(tmpFile, destFile, {
 							noOverwrite: true
@@ -780,14 +758,14 @@ Zotero.Schema = new function(){
 			}
 			// Styles
 			else {
-				let entries = zipReader.findEntries('styles/*.csl');
+				let entries = xpiZipReader.findEntries('styles/*.csl');
 				while (entries.hasMore()) {
 					let entry = entries.getNext();
 					let fileName = entry.substr(7); // strip 'styles/'
 					
 					let tmpFile = OS.Path.join(tmpDir, fileName);
 					yield Zotero.File.removeIfExists(tmpFile);
-					zipReader.extract(entry, new FileUtils.File(tmpFile));
+					xpiZipReader.extract(entry, new FileUtils.File(tmpFile));
 					let code = yield Zotero.File.getContentsAsync(tmpFile);
 					let newObj = new Zotero.Style(code);
 					
