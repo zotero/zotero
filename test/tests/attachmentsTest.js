@@ -93,7 +93,7 @@ describe("Zotero.Attachments", function() {
 		});
 	})
 	
-	describe("#linkToFile()", function () {
+	describe("#linkFromFile()", function () {
 		it("should link to a file in My Library", function* () {
 			var item = yield createDataObject('item');
 			
@@ -111,6 +111,45 @@ describe("Zotero.Attachments", function() {
 			// Should create a group library for use by all tests
 		})
 	})
+	
+	describe("#importSnapshotFromFile()", function () {
+		it("should import an HTML file", function* () {
+			var item = yield createDataObject('item');
+			var file = getTestDataDirectory();
+			file.append('test.html');
+			var attachment = yield Zotero.Attachments.importSnapshotFromFile({
+				title: 'Snapshot',
+				url: 'http://example.com',
+				file,
+				parentItemID: item.id,
+				contentType: 'text/html',
+				charset: 'utf-8'
+			});
+			
+			var matches = yield Zotero.Fulltext.findTextInItems([attachment.id], 'test');
+			assert.lengthOf(matches, 1);
+			assert.propertyVal(matches[0], 'id', attachment.id);
+		});
+		
+		it("should detect charset for an HTML file", function* () {
+			var item = yield createDataObject('item');
+			var file = getTestDataDirectory();
+			file.append('test.html');
+			var attachment = yield Zotero.Attachments.importSnapshotFromFile({
+				title: 'Snapshot',
+				url: 'http://example.com',
+				file,
+				parentItemID: item.id,
+				contentType: 'text/html'
+			});
+			
+			assert.equal(attachment.attachmentCharset, 'utf-8');
+			
+			var matches = yield Zotero.Fulltext.findTextInItems([attachment.id], 'test');
+			assert.lengthOf(matches, 1);
+			assert.propertyVal(matches[0], 'id', attachment.id);
+		});
+	});
 	
 	describe("#linkFromDocument", function () {
 		it("should add a link attachment for the current webpage", function* () {

@@ -1342,35 +1342,30 @@ Zotero.Attachments = new function(){
 			browser.addEventListener("pageshow", onpageshow, false);
 		}
 		else {
-			let callback = function(charset, args) {
+			let callback = Zotero.Promise.coroutine(function* (charset, args) {
 				// ignore spurious about:blank loads
 				if(browser.contentDocument.location.href == "about:blank") return;
 				
-				// Since the callback can be called during an import process that uses
-				// Zotero.wait(), wait until we're unlocked
-				Zotero.unlockPromise
-				.then(function () {
-					return Zotero.spawn(function* () {
+				try {
+					if (charset) {
+						charset = Zotero.CharacterSets.toCanonical(charset);
 						if (charset) {
-							charset = Zotero.CharacterSets.toCanonical(charset);
-							if (charset) {
-								item.attachmentCharset = charset;
-								yield item.saveTx({
-									skipNotifier: true
-								});
-							}
+							item.attachmentCharset = charset;
+							yield item.saveTx({
+								skipNotifier: true
+							});
 						}
-						
-						yield Zotero.Fulltext.indexDocument(browser.contentDocument, item.id);
-						Zotero.Browser.deleteHiddenBrowser(browser);
-						
-						deferred.resolve();
-					});
-				})
-				.catch(function (e) {
+					}
+					
+					yield Zotero.Fulltext.indexDocument(browser.contentDocument, item.id);
+					Zotero.Browser.deleteHiddenBrowser(browser);
+					
+					deferred.resolve();
+				}
+				catch (e) {
 					deferred.reject(e);
-				});
-			};
+				}
+			});
 			Zotero.File.addCharsetListener(browser, callback, item.id);
 		}
 		

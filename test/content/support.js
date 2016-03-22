@@ -200,6 +200,8 @@ function waitForItemEvent(event) {
  * Wait for a single notifier event and return a promise for the data
  */
 function waitForNotifierEvent(event, type) {
+	if (!event) throw new Error("event not provided");
+	
 	var deferred = Zotero.Promise.defer();
 	var notifierID = Zotero.Notifier.registerObserver({notify:function(ev, type, ids, extraData) {
 		if(ev == event) {
