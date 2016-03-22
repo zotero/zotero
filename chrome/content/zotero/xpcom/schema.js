@@ -1352,7 +1352,7 @@ Zotero.Schema = new function(){
 				+ "(?, 'user', 1, 1), "
 				+ "(4, 'publications', 1, 1)"
 			yield Zotero.DB.queryAsync(sql, userLibraryID);
-			
+
 			/*if (!Zotero.Schema.skipDefaultData) {
 				// Quick Start Guide web page item
 				var sql = "INSERT INTO items VALUES(1, 13, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 'ABCD2345', 0, 0)";
