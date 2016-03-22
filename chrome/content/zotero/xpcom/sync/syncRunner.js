@@ -242,11 +242,12 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	// Prompt if library empty and there is no userID stored
 	this.checkEmptyLibrary = Zotero.Promise.coroutine(function* (keyInfo) {
 		let library = Zotero.Libraries.userLibrary;
+		let feeds = Zotero.Feeds.getAll();
 		let userID = Zotero.Users.getCurrentUserID();
 
 		if (!userID) {
 			let hasItems = yield library.hasItems();
-			if (!hasItems) {
+			if (!hasItems && feeds.length <= 0) {
 				let ps = Services.prompt;
 				let index = ps.confirmEx(
 					null,

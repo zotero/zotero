@@ -292,6 +292,13 @@ describe("Zotero.CollectionTreeView", function() {
 				spy.restore();
 			}
 		})
+		
+		it("should select a new feed", function* () {
+			var feed = yield createFeed();
+			// Library should still be selected
+			assert.equal(cv.getSelectedLibraryID(), feed.id);
+		})
+		
 	})
 	
 	describe("#drop()", function () {
@@ -602,72 +609,106 @@ describe("Zotero.CollectionTreeView", function() {
 				
 				// TODO: Check deeper subcollection open states
 			})
-		})
-		
-		it("should move a subcollection and its subcollection up under another collection", function* () {
-			var collectionA = yield createDataObject('collection', { name: "A" }, { skipSelect: true });
-			var collectionB = yield createDataObject('collection', { name: "B", parentKey: collectionA.key });
-			var collectionC = yield createDataObject('collection', { name: "C", parentKey: collectionB.key });
-			var collectionD = yield createDataObject('collection', { name: "D" }, { skipSelect: true });
-			var collectionE = yield createDataObject('collection', { name: "E" }, { skipSelect: true });
-			var collectionF = yield createDataObject('collection', { name: "F" }, { skipSelect: true });
-			var collectionG = yield createDataObject('collection', { name: "G", parentKey: collectionE.key });
-			var collectionH = yield createDataObject('collection', { name: "H", parentKey: collectionG.key });
-			
-			var colIndexA = cv.getRowIndexByID('C' + collectionA.id);
-			var colIndexB = cv.getRowIndexByID('C' + collectionB.id);
-			var colIndexC = cv.getRowIndexByID('C' + collectionC.id);
-			var colIndexD = cv.getRowIndexByID('C' + collectionD.id);
-			var colIndexE = cv.getRowIndexByID('C' + collectionE.id);
-			var colIndexF = cv.getRowIndexByID('C' + collectionF.id);
-			var colIndexG = cv.getRowIndexByID('C' + collectionG.id);
-			var colIndexH = cv.getRowIndexByID('C' + collectionH.id);
-			
-			yield cv.selectCollection(collectionG.id);
-			
-			// Add observer to wait for collection add
-			var deferred = Zotero.Promise.defer();
-			var observerID = Zotero.Notifier.registerObserver({
-				notify: function (event, type, ids, extraData) {
-					if (type == 'collection' && event == 'modify' && ids[0] == collectionG.id) {
-						setTimeout(function () {
-							deferred.resolve();
-						}, 50);
+				
+			it("should move a subcollection and its subcollection up under another collection", function* () {
+				var collectionA = yield createDataObject('collection', { name: "A" }, { skipSelect: true });
+				var collectionB = yield createDataObject('collection', { name: "B", parentKey: collectionA.key });
+				var collectionC = yield createDataObject('collection', { name: "C", parentKey: collectionB.key });
+				var collectionD = yield createDataObject('collection', { name: "D" }, { skipSelect: true });
+				var collectionE = yield createDataObject('collection', { name: "E" }, { skipSelect: true });
+				var collectionF = yield createDataObject('collection', { name: "F" }, { skipSelect: true });
+				var collectionG = yield createDataObject('collection', { name: "G", parentKey: collectionE.key });
+				var collectionH = yield createDataObject('collection', { name: "H", parentKey: collectionG.key });
+				
+				var colIndexA = cv.getRowIndexByID('C' + collectionA.id);
+				var colIndexB = cv.getRowIndexByID('C' + collectionB.id);
+				var colIndexC = cv.getRowIndexByID('C' + collectionC.id);
+				var colIndexD = cv.getRowIndexByID('C' + collectionD.id);
+				var colIndexE = cv.getRowIndexByID('C' + collectionE.id);
+				var colIndexF = cv.getRowIndexByID('C' + collectionF.id);
+				var colIndexG = cv.getRowIndexByID('C' + collectionG.id);
+				var colIndexH = cv.getRowIndexByID('C' + collectionH.id);
+				
+				yield cv.selectCollection(collectionG.id);
+				
+				// Add observer to wait for collection add
+				var deferred = Zotero.Promise.defer();
+				var observerID = Zotero.Notifier.registerObserver({
+					notify: function (event, type, ids, extraData) {
+						if (type == 'collection' && event == 'modify' && ids[0] == collectionG.id) {
+							setTimeout(function () {
+								deferred.resolve();
+							}, 50);
+						}
 					}
-				}
-			}, 'collection', 'test');
-			
-			yield Zotero.Promise.delay(2000);
-			
-			yield drop(
-				'collection',
-				{
-					row: colIndexD,
-					orient: 0
-				},
-				[collectionG.id],
-				deferred.promise
-			);
-			
-			Zotero.Notifier.unregisterObserver(observerID);
-			
-			var newColIndexA = cv.getRowIndexByID('C' + collectionA.id);
-			var newColIndexB = cv.getRowIndexByID('C' + collectionB.id);
-			var newColIndexC = cv.getRowIndexByID('C' + collectionC.id);
-			var newColIndexD = cv.getRowIndexByID('C' + collectionD.id);
-			var newColIndexE = cv.getRowIndexByID('C' + collectionE.id);
-			var newColIndexF = cv.getRowIndexByID('C' + collectionF.id);
-			var newColIndexG = cv.getRowIndexByID('C' + collectionG.id);
-			var newColIndexH = cv.getRowIndexByID('C' + collectionH.id);
-			
-			assert.isFalse(cv.isContainerOpen(newColIndexE));
-			assert.isTrue(cv.isContainerEmpty(newColIndexE));
-			assert.isTrue(cv.isContainerOpen(newColIndexD));
-			assert.isFalse(cv.isContainerEmpty(newColIndexD));
-			assert.equal(newColIndexD, newColIndexG - 1);
-			assert.equal(newColIndexG, newColIndexH - 1);
-			
-			// TODO: Check deeper subcollection open states
+				}, 'collection', 'test');
+				
+				yield Zotero.Promise.delay(2000);
+				
+				yield drop(
+					'collection',
+					{
+						row: colIndexD,
+						orient: 0
+					},
+					[collectionG.id],
+					deferred.promise
+				);
+				
+				Zotero.Notifier.unregisterObserver(observerID);
+				
+				var newColIndexA = cv.getRowIndexByID('C' + collectionA.id);
+				var newColIndexB = cv.getRowIndexByID('C' + collectionB.id);
+				var newColIndexC = cv.getRowIndexByID('C' + collectionC.id);
+				var newColIndexD = cv.getRowIndexByID('C' + collectionD.id);
+				var newColIndexE = cv.getRowIndexByID('C' + collectionE.id);
+				var newColIndexF = cv.getRowIndexByID('C' + collectionF.id);
+				var newColIndexG = cv.getRowIndexByID('C' + collectionG.id);
+				var newColIndexH = cv.getRowIndexByID('C' + collectionH.id);
+				
+				assert.isFalse(cv.isContainerOpen(newColIndexE));
+				assert.isTrue(cv.isContainerEmpty(newColIndexE));
+				assert.isTrue(cv.isContainerOpen(newColIndexD));
+				assert.isFalse(cv.isContainerEmpty(newColIndexD));
+				assert.equal(newColIndexD, newColIndexG - 1);
+				assert.equal(newColIndexG, newColIndexH - 1);
+				
+				// TODO: Check deeper subcollection open states
+			})
+		})
+
+
+		describe("with feed items", function () {
+			it('should add a translated feed item recovered from an URL', function* (){
+				var feed = yield createFeed();
+				var collection = yield createDataObject('collection', false, { skipSelect: true });
+				var url = getTestDataUrl('metadata/journalArticle-single.html');
+				var feedItem = yield createDataObject('feedItem', {libraryID: feed.libraryID}, { skipSelect: true });
+				feedItem.setField('url', url);
+				yield feedItem.saveTx();
+				var translateFn = sinon.spy(feedItem, 'translate');
+				
+				// Add observer to wait for collection add
+				var deferred = Zotero.Promise.defer();
+				var itemIds;
+
+				var ids = (yield drop('item', 'C' + collection.id, [feedItem.id])).ids;
+				
+				// Check that the translated item was the one that was created after drag
+				var item;
+				yield translateFn.returnValues[0].then(function(i) {
+					item = i;
+					assert.equal(item.id, ids[0]);
+				});
+				
+				yield cv.selectCollection(collection.id);
+				yield waitForItemsLoad(win);
+				
+				var itemsView = win.ZoteroPane.itemsView;
+				assert.equal(itemsView.rowCount, 1);
+				var treeRow = itemsView.getRow(0);
+				assert.equal(treeRow.ref.id, item.id);
+			})
 		})
 	})
 })

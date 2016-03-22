@@ -23,7 +23,12 @@
     
     ***** END LICENSE BLOCK *****
 -->
-<!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
+<!DOCTYPE window [
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd">
+	%zoteroDTD;
+	<!ENTITY % preferencesDTD SYSTEM "chrome://zotero/locale/preferences.dtd">
+	%preferencesDTD;
+]>
 
 <overlay id="zotero-prefpane-advanced-overlay"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -46,16 +51,22 @@
 			<preference id="pref-keys-toggleTagSelector" name="extensions.zotero.keys.toggleTagSelector" type="string"/>
 			<preference id="pref-keys-newItem" name="extensions.zotero.keys.newItem" type="string"/>
 			<preference id="pref-keys-newNote" name="extensions.zotero.keys.newNote" type="string"/>
+			<preference id="pref-keys-toggleRead" name="extensions.zotero.keys.toggleRead" type="string"/>
 			<preference id="pref-keys-importFromClipboard" name="extensions.zotero.keys.importFromClipboard" type="string"/>
 			<preference id="pref-keys-copySelectedItemCitationsToClipboard" name="extensions.zotero.keys.copySelectedItemCitationsToClipboard" type="string"/>
 			<preference id="pref-keys-copySelectedItemsToClipboard" name="extensions.zotero.keys.copySelectedItemsToClipboard" type="string"/>
+
+			<preference id="pref-feeds-sortAscending" name="extensions.zotero.feeds.sortAscending" type="bool"/>
+			<preference id="pref-feeds-defaultTTL" name="extensions.zotero.feeds.defaultTTL" type="int"/>
+			<preference id="pref-feeds-defaultCleanupAfter" name="extensions.zotero.feeds.defaultCleanupAfter" type="int"/>
 		</preferences>
 		
 		<tabbox id="zotero-prefpane-advanced-tabs">
 			<tabs>
 				<tab label="&zotero.preferences.prefpane.general;"/>
 				<tab label="&zotero.preferences.advanced.filesAndFolders;"/>
-				<tab label="&zotero.preferences.advanced.keys;"/> 
+				<tab label="&zotero.preferences.advanced.keys;"/>
+				<tab label="&zotero.preferences.feeds;"/> 
 			</tabs>
 			
 			<tabpanels id="zotero-prefpane-advanced-tabpanels">
@@ -217,37 +228,37 @@
 						<rows id="zotero-keys-rows">
 							<row id="zotero-keys-new-item">
 								<label value="&zotero.preferences.keys.newItem;" control="textbox-newItem"/>
-								<label/>
+								<label class="modifier"/>
 								<textbox id="textbox-newItem" maxlength="1" size="1" preference="pref-keys-newItem"/>
 							</row>
 				
 							<row>
 								<label value="&zotero.preferences.keys.newNote;" control="textbox-newNote"/>
-								<label/>
+								<label class="modifier"/>
 								<textbox id="textbox-newNote" maxlength="1" size="1" preference="pref-keys-newNote"/>
 							</row>
 				
 							<row>
 								<label value="&zotero.preferences.keys.importFromClipboard;" control="textbox-importFromClipboard"/>
-								<label/>
+								<label class="modifier"/>
 								<textbox id="textbox-importFromClipboard" maxlength="1" size="1" preference="pref-keys-importFromClipboard"/>
 							</row>
 				
 							<row id="zotero-keys-focus-libraries-pane">
 								<label value="&zotero.preferences.keys.focusLibrariesPane;" control="textbox-library"/>
-								<label/>
+								<label class="modifier"/>
 								<textbox id="textbox-library" maxlength="1" size="1" preference="pref-keys-library"/>
 							</row>
 				
 							<row>
 								<label value="&zotero.preferences.keys.quicksearch;" control="textbox-quicksearch"/>
-								<label/>
+								<label class="modifier"/>
 								<textbox id="textbox-quicksearch" maxlength="1" size="1" preference="pref-keys-quicksearch"/>
 							</row>
 				
 							<row>
 								<label value="&zotero.preferences.keys.copySelectedItemCitationsToClipboard;" control="textbox-copySelectedItemCitationsToClipboard"/>
-								<label/>
+								<label class="modifier"/>
 								<textbox id="textbox-copySelectedItemCitationsToClipboard" maxlength="1" size="1"
 										preference="pref-keys-copySelectedItemCitationsToClipboard"
 										onchange="if (Zotero_Preferences.Export) { Zotero_Preferences.Export.updateQuickCopyInstructions(); }"/>
@@ -255,7 +266,7 @@
 							
 							<row>
 								<label value="&zotero.preferences.keys.copySelectedItemsToClipboard;" control="textbox-copySelectedItemsToClipboard"/>
-								<label/>
+								<label class="modifier"/>
 								<textbox id="textbox-copySelectedItemsToClipboard" maxlength="1" size="1"
 										preference="pref-keys-copySelectedItemsToClipboard"
 										onchange="if (Zotero_Preferences.Export) { Zotero_Preferences.Export.updateQuickCopyInstructions(); }"/>
@@ -263,8 +274,14 @@
 							
 							<row>
 								<label value="&zotero.preferences.keys.toggleTagSelector;" control="textbox-toggleTagSelector"/>
-								<label/>
+								<label class="modifier"/>
 								<textbox id="textbox-toggleTagSelector" maxlength="1" size="1" preference="pref-keys-toggleTagSelector"/>
+							</row>
+							
+							<row>
+								<label value="&zotero.preferences.keys.toggleRead;" control="textbox-toggleRead"/>
+								<label/>
+								<textbox id="textbox-toggleRead" maxlength="1" size="1" preference="pref-keys-toggleRead"/>
 							</row>
 						</rows>
 					</grid>
@@ -272,6 +289,40 @@
 					<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
 					
 					<separator/>				
+				</tabpanel>
+				<tabpanel id="zotero-prefpane-advanced-feeds-tab" orient="vertical">
+					<groupbox>
+						<hbox>
+							<hbox align="center">
+								<label value="&zotero.preferences.feeds.sorting.label1;"/>
+								<menulist id="feed-sort" preference="pref-feeds-sortAscending">
+									<menupopup>
+										<menuitem label="&zotero.preferences.feeds.sorting.newest;" value="false"/>
+										<menuitem label="&zotero.preferences.feeds.sorting.oldest;" value="true"/>
+									</menupopup>
+								</menulist>
+								<label value="&zotero.preferences.feeds.sorting.label2;"/>
+							</hbox>
+						</hbox>
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.preferences.feeds.feedDefaults;"/>
+						<hbox>
+							<hbox align="center">
+								<label value="&zotero.feedSettings.refresh.label1;"/>
+								<textbox maxlength="2" size="2" preference="pref-feeds-defaultTTL"/>
+								<label value="&zotero.feedSettings.refresh.label2;"/>
+							</hbox>
+						</hbox>
+						<hbox>
+							<hbox align="center">
+								<label value="&zotero.feedSettings.cleanupAfter.label1;"/>
+								<textbox maxlength="3" size="3" preference="pref-feeds-defaultCleanupAfter"/>
+								<label value="&zotero.feedSettings.cleanupAfter.label2;"/>
+							</hbox>
+						</hbox>
+					</groupbox>
 				</tabpanel>
 			</tabpanels>
 		</tabbox>

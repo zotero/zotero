@@ -309,6 +309,24 @@ var createGroup = Zotero.Promise.coroutine(function* (props = {}) {
 	return group;
 });
 
+var createFeed = Zotero.Promise.coroutine(function* (props = {}) {
+	var feed = new Zotero.Feed;
+	feed.name = props.name || "Test " + Zotero.Utilities.randomString();
+	feed.description = props.description || "";
+	feed.url = props.url || 'http://www.' + Zotero.Utilities.randomString() + '.com/feed.rss';
+	feed.refreshInterval = props.refreshInterval || 12;
+	feed.cleanupAfter = props.cleanupAfter || 2;
+	yield feed.saveTx();
+	return feed;
+});
+
+var clearFeeds = Zotero.Promise.coroutine(function* () {
+	let feeds = Zotero.Feeds.getAll();
+	for (let i=0; i<feeds.length; i++) {
+		yield feeds[i].eraseTx();
+	}
+});
+
 //
 // Data objects
 //
@@ -371,11 +389,7 @@ function createUnsavedDataObject(objectType, params = {}) {
 
 var createDataObject = Zotero.Promise.coroutine(function* (objectType, params = {}, saveOptions) {
 	var obj = createUnsavedDataObject(objectType, params);
-	if (objectType == 'feedItem') {
-		yield obj.forceSaveTx(saveOptions);
-	} else {
-		yield obj.saveTx(saveOptions);
-	}
+	yield obj.saveTx(saveOptions);
 	return obj;
 });
 
@@ -437,6 +451,14 @@ function getTestDataDirectory() {
 	    resURI = Services.io.newURI("resource://zotero-unit-tests/data", null, null);
 	return Services.io.newURI(resource.resolveURI(resURI), null, null).
 	       QueryInterface(Components.interfaces.nsIFileURL).file;
+}
+
+function getTestDataUrl(path) {
+	path = path.split('/');
+	if (path[0].length == 0) {
+		path.splice(0, 1);
+	}
+	return "resource://zotero-unit-tests/data/" + path.join('/');
 }
 
 /**

@@ -52,6 +52,10 @@ pref("extensions.zotero.groups.copyChildFileAttachments", true);
 pref("extensions.zotero.groups.copyChildNotes", true);
 pref("extensions.zotero.groups.copyTags", true);
 
+pref("extensions.zotero.feeds.sortAscending", false);
+pref("extensions.zotero.feeds.defaultTTL", 1);
+pref("extensions.zotero.feeds.defaultCleanupAfter", 2);
+
 pref("extensions.zotero.backup.numBackups", 2);
 pref("extensions.zotero.backup.interval", 1440);
 
@@ -80,6 +84,7 @@ pref("extensions.zotero.keys.copySelectedItemCitationsToClipboard", 'A');
 pref("extensions.zotero.keys.copySelectedItemsToClipboard", 'C');
 pref("extensions.zotero.keys.toggleTagSelector", 'T');
 pref("extensions.zotero.keys.sync", 'Y');
+pref("extensions.zotero.keys.toggleRead", '`');
 
 // Fulltext indexing
 pref("extensions.zotero.fulltext.textMaxLength", 500000);

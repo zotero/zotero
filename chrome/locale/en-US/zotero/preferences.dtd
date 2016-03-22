@@ -39,6 +39,13 @@
 <!ENTITY zotero.preferences.groups.childLinks			"child links">
 <!ENTITY zotero.preferences.groups.tags				"tags">
 
+<!ENTITY zotero.preferences.feeds						"Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1		"Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2		"Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest		"Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest		"Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults			"Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption				"OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search				"Search for resolvers">
@@ -133,6 +140,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch				"Quick Search">
 <!ENTITY zotero.preferences.keys.newItem					"Create a New Item">
 <!ENTITY zotero.preferences.keys.newNote					"Create a New Note">
+<!ENTITY zotero.preferences.keys.toggleRead					"Mark Item Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector		"Toggle Tag Selector">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard		"Copy Selected Item Citations to Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard		"Copy Selected Items to Clipboard">

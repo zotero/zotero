@@ -1,4 +1,4 @@
--- 82
+-- 83
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -212,6 +212,7 @@ CREATE TABLE feedItems (
     itemID INTEGER PRIMARY KEY,
     guid TEXT NOT NULL UNIQUE,
     readTime TIMESTAMP,
+    translatedTime TIMESTAMP,
     FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE
 );
 

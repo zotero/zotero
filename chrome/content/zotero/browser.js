@@ -596,14 +596,7 @@ var Zotero_Browser = new function() {
 	 */
 	this.performTranslation = Zotero.Promise.coroutine(function* (translate, libraryID, collection) {
 		if (Zotero.locked) {
-			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-			var desc = Zotero.localeJoin([
-				Zotero.getString('general.operationInProgress'),
-				Zotero.getString('general.operationInProgress.waitUntilFinishedAndTryAgain')
-			]);
-			Zotero_Browser.progress.addDescription(desc);
-			Zotero_Browser.progress.show();
-			Zotero_Browser.progress.startCloseTimer(8000);
+			Zotero_Browser.progress.Translation.operationInProgress();
 			return;
 		}
 		
@@ -616,11 +609,7 @@ var Zotero_Browser = new function() {
 		if(libraryID === undefined && ZoteroPane && !Zotero.isConnector) {
 			try {
 				if (!ZoteroPane.collectionsView.editable) {
-					Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-					var desc = Zotero.getString('save.error.cannotMakeChangesToCollection');
-					Zotero_Browser.progress.addDescription(desc);
-					Zotero_Browser.progress.show();
-					Zotero_Browser.progress.startCloseTimer(8000);
+					Zotero_Browser.progress.cannotEditCollection();
 					return;
 				}
 				
@@ -632,38 +621,16 @@ var Zotero_Browser = new function() {
 		}
 		
 		if (libraryID === Zotero.Libraries.publicationsLibraryID) {
-			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-			var desc = Zotero.getString('save.error.cannotAddToMyPublications');
-			Zotero_Browser.progress.addDescription(desc);
-			Zotero_Browser.progress.show();
-			Zotero_Browser.progress.startCloseTimer(8000);
+			Zotero_Browser.progress.Translation.cannotAddToPublications();
 			return;
 		}
 		
-		if(Zotero.isConnector) {
-			Zotero.Connector.callMethod("getSelectedCollection", {}, function(response, status) {
-				if(status !== 200) {
-					Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scraping"));
-				} else {
-					Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapingTo"),
-						"chrome://zotero/skin/treesource-"+(response.id ? "collection" : "library")+".png",
-						response.name+"\u2026");
-				}
-			});
-		} else {
-			var name;
-			if(collection) {
-				name = collection.name;
-			} else if(libraryID) {
-				name = Zotero.Libraries.getName(libraryID);
-			} else {
-				name = Zotero.getString("pane.collections.library");
-			}
-			
-			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapingTo"),
-				"chrome://zotero/skin/treesource-"+(collection ? "collection" : "library")+".png",
-				name+"\u2026");
+		if (Zotero.Feeds.get(libraryID)) {
+			Zotero_Browser.progress.Translation.cannotAddToFeed();
+			return;
 		}
+		
+		Zotero_Browser.progress.Translation.scrapingTo(libraryID, collection);
 		
 		translate.clearHandlers("done");
 		translate.clearHandlers("itemDone");
@@ -671,48 +638,20 @@ var Zotero_Browser = new function() {
 		
 		var deferred = Zotero.Promise.defer();
 		
-		translate.setHandler("done", function(obj, returnValue) {		
-			if(!returnValue) {
-				Zotero_Browser.progress.show();
-				Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-				// Include link to translator troubleshooting page
-				var url = "https://www.zotero.org/support/troubleshooting_translator_issues";
-				var linkText = '<a href="' + url + '" tooltiptext="' + url + '">'
-					+ Zotero.getString('ingester.scrapeErrorDescription.linkText') + '</a>';
-				Zotero_Browser.progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription", linkText));
-				Zotero_Browser.progress.startCloseTimer(8000);
-			} else {
-				Zotero_Browser.progress.startCloseTimer();
-			}
+		translate.setHandler("done", function() {
+			Zotero_Browser.progress.Translation.doneHandler.apply(Zotero_Browser.progress.Translation, arguments);
 			Zotero_Browser.isScraping = false;
-			
 			deferred.resolve();
 		});
 		
-		translate.setHandler("itemDone", function(obj, dbItem, item) {
-			Zotero_Browser.progress.show();
-			var itemProgress = new Zotero_Browser.progress.ItemProgress(Zotero.ItemTypes.getImageSrc(item.itemType),
-				item.title);
-			itemProgress.setProgress(100);
-			for(var i=0; i<item.attachments.length; i++) {
-				var attachment = item.attachments[i];
-				_attachmentsMap.set(attachment,
-					new Zotero_Browser.progress.ItemProgress(
-						Zotero.Utilities.determineAttachmentIcon(attachment),
-						attachment.title, itemProgress));
-			}
+		translate.setHandler("itemDone", function() {
+			let handler = Zotero_Browser.progress.Translation.itemDoneHandler(_attachmentsMap);
+			handler.apply(Zotero_Browser.progress.Translation, arguments);
 		});
 		
-		translate.setHandler("attachmentProgress", function(obj, attachment, progress, error) {
-			var itemProgress = _attachmentsMap.get(attachment);
-			if(progress === false) {
-				itemProgress.setError();
-			} else {
-				itemProgress.setProgress(progress);
-				if(progress === 100) {
-					itemProgress.setIcon(Zotero.Utilities.determineAttachmentIcon(attachment));
-				}
-			}
+		translate.setHandler("attachmentProgress", function() {
+			let handler = Zotero_Browser.progress.Translation.attachmentProgressHandler(_attachmentsMap);
+			handler.apply(Zotero_Browser.progress.Translation, arguments);
 		});
 		
 		translate.translate({

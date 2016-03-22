@@ -38,12 +38,13 @@ Zotero.FeedItems = new Proxy(function() {
 	Zotero.defineProperty(Zotero.Items, '_primaryDataSQLParts', {
 		get: function() {
 			let obj = zi_primaryDataSQLParts.call(this);
-			obj.feedItemGUID = "FeI.guid AS feedItemGUID";
-			obj.feedItemReadTime = "FeI.readTime AS feedItemReadTime";
+			obj.feedItemGUID = "FI.guid AS feedItemGUID";
+			obj.feedItemReadTime = "FI.readTime AS feedItemReadTime";
+			obj.feedItemTranslatedTime = "FI.translatedTime AS feedItemTranslatedTime";
 			return obj;
 		}
 	}, {lazy: true});
-	Zotero.Items._primaryDataSQLFrom += " LEFT JOIN feedItems FeI ON (FeI.itemID=O.itemID)";
+	Zotero.Items._primaryDataSQLFrom += " LEFT JOIN feedItems FI ON (FI.itemID=O.itemID)";
 	
 	let zi_getObjectForRow = Zotero.Items._getObjectForRow;
 	Zotero.Items._getObjectForRow = function(row) {
@@ -57,7 +58,7 @@ Zotero.FeedItems = new Proxy(function() {
 	this.getIDFromGUID = Zotero.Promise.coroutine(function* (guid) {
 		if (_idCache[guid] !== undefined) return _idCache[guid];
 		
-		id = yield Zotero.DB.valueQueryAsync('SELECT itemID FROM feedItems WHERE guid=?', [guid]);
+		let id = yield Zotero.DB.valueQueryAsync('SELECT itemID FROM feedItems WHERE guid=?', [guid]);
 		if (!id) return false;
 		
 		this._setGUIDMapping(guid, id);
@@ -92,6 +93,83 @@ Zotero.FeedItems = new Proxy(function() {
 		if (id === false) return false;
 		
 		return this.getAsync(id);
+	});
+	
+	this.getMarkedAsRead = Zotero.Promise.coroutine(function* (libraryID, onlyGUIDs=false) {
+		let sql = "SELECT " + (onlyGUIDs ? "guid " : "itemID ") + 
+			"FROM feedItems FI " +
+			"JOIN items I USING (itemID) " +
+			"WHERE libraryID=? AND readTime IS NOT NULL";
+		let ids = yield Zotero.DB.columnQueryAsync(sql, [libraryID]);
+		if (onlyGUIDs) {
+			return ids;
+		}
+		return Zotero.FeedItems.getAsync(ids);
+		
+	});
+
+	/**
+	 * Used on restore from sync
+	 */
+	this.markAsReadByGUID = Zotero.Promise.coroutine(function* (guids) {
+		if (! Array.isArray(guids)) {
+			throw new Error('guids must be an array in Zotero.FeedItems.toggleReadByID');
+		}
+		let ids = [];
+		Zotero.debug("Marking items as read");
+		Zotero.debug(guids);
+		for (let guid of guids) {
+			let id = yield this.getIDFromGUID(guid);
+			if (id) {
+				ids.push(id);
+			}
+		}
+		return this.toggleReadByID(ids, true);
+	});
+	
+	this.toggleReadByID = Zotero.Promise.coroutine(function* (ids, state) {
+		var feedsToUpdate = new Set();
+		if (!Array.isArray(ids)) {
+			if (typeof ids != 'string') throw new Error('ids must be a string or array in Zotero.FeedItems.toggleReadByID');
+			
+			ids = [ids];
+		}
+		let items = yield this.getAsync(ids);
+		
+		if (state == undefined) {
+			// If state undefined, toggle read if at least one unread
+			state = false;
+			for (let item of items) {
+				if (!item.isRead) {
+					state = true;
+					break;
+				}
+			}
+		}
+		
+		
+		yield Zotero.DB.executeTransaction(function() {
+			for (let i=0; i<items.length; i++) {
+				items[i].isRead = state;
+				
+				// Set for syncing
+				let feed = Zotero.Feeds.get(items[i].libraryID);
+				let syncedSettings = feed.getSyncedSettings();
+				if (state) {
+					syncedSettings.markedAsRead[items[i].guid] = true;
+				} else {
+					delete syncedSettings.markedAsRead[items[i].guid];
+				}
+				yield feed.setSyncedSettings(syncedSettings);
+			
+				yield items[i].save({skipEditCheck: true});
+				feedsToUpdate.add(feed);
+			}
+		});
+
+		for (let feed of feedsToUpdate) {
+			yield Zotero.Promise.all([feed.updateUnreadCount(), feed.storeSyncedSettings()]);
+		}
 	});
 	
 	return this;

@@ -31,11 +31,12 @@ Zotero.FeedItem = function(itemTypeOrID, params = {}) {
 	Zotero.FeedItem._super.call(this, itemTypeOrID);
 	
 	this._feedItemReadTime = null;
+	this._feedItemTranslatedTime = null;
 	
 	Zotero.Utilities.assignProps(this, params, ['guid']);
-}
+};
 
-Zotero.extendClass(Zotero.Item, Zotero.FeedItem)
+Zotero.extendClass(Zotero.Item, Zotero.FeedItem);
 
 Zotero.FeedItem.prototype._objectType = 'feedItem';
 Zotero.FeedItem.prototype._containerObject = 'feed';
@@ -69,6 +70,22 @@ Zotero.defineProperty(Zotero.FeedItem.prototype, 'isRead', {
 		}
 	}
 });
+//
+Zotero.defineProperty(Zotero.FeedItem.prototype, 'isTranslated', {
+	get: function() {
+		return !!this._feedItemTranslatedTime;
+	}, 
+	set: function(state) {
+		if (state != !!this._feedItemTranslatedTime) {
+			if (state) {
+				this._feedItemTranslatedTime = Zotero.Date.dateToSQL(new Date(), true);
+			} else {
+				this._feedItemTranslatedTime = null;
+			}
+			this._changed.feedItemData = true;
+		}
+	}
+});
 
 Zotero.FeedItem.prototype.loadPrimaryData = Zotero.Promise.coroutine(function* (reload, failOnMissing) {
 	if (this.guid && !this.id) {
@@ -89,6 +106,32 @@ Zotero.FeedItem.prototype.setField = function(field, value) {
 	return Zotero.FeedItem._super.prototype.setField.apply(this, arguments);
 }
 
+Zotero.FeedItem.prototype.fromJSON = function(json) {
+	// Handle weird formats in feedItems
+	let dateFields = ['accessDate', 'dateAdded', 'dateModified'];
+	for (let dateField of dateFields) {
+		let val = json[dateField];
+		if (val) {
+			let d = new Date(val);
+			if (isNaN(d.getTime())) {
+				d = Zotero.Date.sqlToDate(val, true);
+			}
+			if (!d || isNaN(d.getTime())) {
+				d = Zotero.Date.strToDate(val);
+				d = new Date(d.year, d.month, d.day);
+				Zotero.debug(dateField + " " + JSON.stringify(d), 1);
+			}
+			if (isNaN(d.getTime())) {
+				Zotero.logError("Discarding invalid " + dateField + " '" + json[dateField]
+					+ "' for item " + this.libraryKey);
+				delete json[dateField];
+				continue;
+			}
+			json[dateField] = d.toISOString();
+		}
+	}
+	Zotero.FeedItem._super.prototype.fromJSON.apply(this, arguments);
+}
 
 Zotero.FeedItem.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 	if (!this.guid) {
@@ -117,27 +160,133 @@ Zotero.FeedItem.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 	return proceed;
 });
 
-Zotero.FeedItem.prototype.forceSaveTx = function(options) {
-	let newOptions = {};
-	Object.assign(newOptions, options || {});
-	newOptions.skipEditCheck = true;
-	return this.saveTx(newOptions);
-}
-
 Zotero.FeedItem.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	yield Zotero.FeedItem._super.prototype._saveData.apply(this, arguments);
 	
 	if (this._changed.feedItemData || env.isNew) {
-		var sql = "REPLACE INTO feedItems VALUES (?,?,?)";
-		yield Zotero.DB.queryAsync(sql, [env.id, this.guid, this._feedItemReadTime]);
+		var sql = "REPLACE INTO feedItems VALUES (?,?,?,?)";
+		yield Zotero.DB.queryAsync(sql, [env.id, this.guid, this._feedItemReadTime, this._feedItemTranslatedTime]);
 		
 		this._clearChanged('feedItemData');
 	}
 });
 
-Zotero.FeedItem.prototype.forceEraseTx = function(options) {
-	let newOptions = {};
-	Object.assign(newOptions, options || {});
-	newOptions.skipEditCheck = true;
-	return this.eraseTx(newOptions);
-}
+Zotero.FeedItem.prototype._finalizeErase = Zotero.Promise.coroutine(function* () {
+	// Set for syncing
+	let feed = Zotero.Feeds.get(this.libraryID);
+	let syncedSettings = feed.getSyncedSettings();
+	delete syncedSettings.markedAsRead[this.guid];
+	yield feed.setSyncedSettings(syncedSettings);
+	
+	return Zotero.FeedItem._super.prototype._finalizeErase.apply(this, arguments);
+});
+
+Zotero.FeedItem.prototype.toggleRead = Zotero.Promise.coroutine(function* (state) {
+	state = state !== undefined ? !!state : !this.isRead;
+	let changed = this.isRead != state;
+	if (changed) {
+		this.isRead = state;
+		
+		// Set for syncing
+		let feed = Zotero.Feeds.get(this.libraryID);
+		let syncedSettings = feed.getSyncedSettings();
+		if (state) {
+			syncedSettings.markedAsRead[this.guid] = true;
+		} else {
+			delete syncedSettings.markedAsRead[this.guid];
+		}
+		yield feed.setSyncedSettings(syncedSettings, true);
+		
+		yield this.saveTx();
+		
+		yield feed.updateUnreadCount();
+	}
+});
+
+/**
+ * Uses the item url to translate an existing feed item.
+ * If libraryID empty, overwrites feed item, otherwise saves
+ * in the library
+ * @param libraryID {int} save item in library
+ * @param collectionID {int} add item to collection
+ * @return {Promise<FeedItem|Item>} translated feed item
+ */
+Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (libraryID, collectionID) {
+	if (Zotero.locked) {
+		Zotero.debug('Zotero locked, skipping feed item translation');
+		return;
+	}
+
+	let deferred = Zotero.Promise.defer();
+	let error = function(e) { Zotero.debug(e, 1); deferred.reject(e); };
+	let translate = new Zotero.Translate.Web();
+	
+	if (libraryID) {
+		// Show progress notifications when scraping to a library
+		var win = Services.wm.getMostRecentWindow("navigator:browser");
+		translate.clearHandlers("done");
+		translate.clearHandlers("itemDone");
+		translate.setHandler("done", win.Zotero_Browser.progress.Translation.doneHandler);
+		translate.setHandler("itemDone", win.Zotero_Browser.progress.Translation.itemDoneHandler());
+		let collection;
+		if (collectionID) {
+			collection = yield Zotero.Collections.getAsync(collectionID);
+		}
+		win.Zotero_Browser.progress.show();
+		win.Zotero_Browser.progress.Translation.scrapingTo(libraryID, collection);
+	}
+	
+	// Load document
+	let hiddenBrowser = Zotero.HTTP.processDocuments(
+		this.getField('url'), 
+		item => deferred.resolve(item),
+		()=>{}, error, true
+	);
+	let doc = yield deferred.promise;
+
+	// Set translate document
+	translate.setDocument(doc);
+	
+	// Load translators
+	deferred = Zotero.Promise.defer();
+	translate.setHandler('translators', (me, translators) => deferred.resolve(translators));
+	translate.getTranslators();
+	let translators = yield deferred.promise;
+	if (!translators || !translators.length) {
+		Zotero.debug("No translators detected for feed item " + this.id + " with URL " + this.getField('url'), 2);
+		throw new Zotero.Error("No translators detected for feed item " + this.id + " with URL " + this.getField('url'))
+	}
+	translate.setTranslator(translators[0]);
+
+	deferred = Zotero.Promise.defer();
+	
+	if (libraryID) {
+		let result = yield translate.translate({libraryID, collections: collectionID ? [collectionID] : false})
+			.then(items => items ? items[0] : false);
+		Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+		return result;
+	}
+	
+	// Clear these to prevent saving
+	translate.clearHandlers('itemDone');
+	translate.clearHandlers('itemsDone');
+	translate.setHandler('error', error);
+	translate.setHandler('itemDone', (_, items) => deferred.resolve(items));
+	
+	translate.translate({libraryID: false, saveAttachments: false});
+	
+	let itemData = yield deferred.promise;
+	Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+	
+	// clean itemData
+	const deleteFields = ['attachments', 'notes', 'id', 'itemID', 'path', 'seeAlso', 'version', 'dateAdded', 'dateModified'];
+	for (let field of deleteFields) {
+		delete itemData[field];
+	}	
+	
+	this.fromJSON(itemData);
+	this.isTranslated = true;
+	yield this.saveTx();
+	
+	return this;
+});

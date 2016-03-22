@@ -39,6 +39,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('id', function () {
 		case 'library':
 		case 'publications':
 		case 'group':
+		case 'feed':
 			return 'L' + this.ref.libraryID;
 		
 		case 'collection':
@@ -57,8 +58,11 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('id', function () {
 			return 'T' + this.ref.libraryID;
 		
 		case 'header':
-			if (this.ref.id == 'group-libraries-header') {
-				return 'HG';
+			switch (this.ref.id) {
+				case 'group-libraries-header':
+					return "HG";
+				case 'feed-libraries-header':
+					return "HF";
 			}
 			break;
 	}
@@ -69,7 +73,8 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('id', function () {
 Zotero.CollectionTreeRow.prototype.isLibrary = function (includeGlobal)
 {
 	if (includeGlobal) {
-		return this.type == 'library' || this.type == 'publications' || this.type == 'group';
+		var global = ['library', 'publications', 'group', 'feed'];
+		return global.indexOf(this.type) != -1;
 	}
 	return this.type == 'library';
 }
@@ -109,6 +114,10 @@ Zotero.CollectionTreeRow.prototype.isGroup = function() {
 	return this.type == 'group';
 }
 
+Zotero.CollectionTreeRow.prototype.isFeed = function() {
+	return this.type == 'feed';
+}
+
 Zotero.CollectionTreeRow.prototype.isSeparator = function () {
 	return this.type == 'separator';
 }
@@ -143,13 +152,13 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('editable', function () {
 	if (this.isTrash() || this.isShare() || this.isBucket()) {
 		return false;
 	}
+	if (this.isGroup() || this.isFeed()) {
+		return this.ref.editable;
+	}
 	if (!this.isWithinGroup() || this.isPublications()) {
 		return true;
 	}
 	var libraryID = this.ref.libraryID;
-	if (this.isGroup()) {
-		return this.ref.editable;
-	}
 	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled()) {
 		var type = Zotero.Libraries.get(libraryID).libraryType;
 		if (type == 'group') {
@@ -163,7 +172,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('editable', function () {
 });
 
 Zotero.CollectionTreeRow.prototype.__defineGetter__('filesEditable', function () {
-	if (this.isTrash() || this.isShare()) {
+	if (this.isTrash() || this.isShare() || this.isFeed()) {
 		return false;
 	}
 	if (!this.isWithinGroup() || this.isPublications()) {

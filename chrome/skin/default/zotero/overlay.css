@@ -215,6 +215,12 @@
 	color: inherit;
 }
 
+/* Style unread items/collections in bold */
+#zotero-items-tree treechildren::-moz-tree-cell-text(unread),
+#zotero-collections-tree treechildren::-moz-tree-cell-text(unread) {
+	font-weight: bold;
+}
+
 #zotero-items-pane
 {
 	min-width: 290px;
@@ -278,7 +284,12 @@
 	list-style-image: url('chrome://zotero/skin/toolbar-collection-add.png');
 }
 
-#zotero-tb-group-add
+.zotero-menuitem-new-feed
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-feed-add.png');
+}
+
+#zotero-tb-library-add-menu
 {
 	list-style-image: url('chrome://zotero/skin/group_add.png');
 }
@@ -366,6 +377,16 @@
 .zotero-menuitem-edit-collection
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-collection-edit.png');
+}
+
+.zotero-menuitem-edit-feed
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-feed-edit.png');
+}
+
+.zotero-menuitem-refresh-feed
+{
+	list-style-image: url('chrome://zotero/skin/arrow_refresh.png');
 }
 
 .zotero-menuitem-delete-collection

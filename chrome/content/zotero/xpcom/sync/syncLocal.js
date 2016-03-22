@@ -879,6 +879,7 @@ Zotero.Sync.Data.Local = {
 			Zotero.debug("SAVING " + json.key + " WITH SYNCED");
 			Zotero.debug(obj.version);
 			yield obj.save({
+				skipEditCheck: true,
 				skipDateModifiedUpdate: true,
 				skipSelect: true,
 				errorHandler: function (e) {

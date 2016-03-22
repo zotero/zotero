@@ -21,6 +21,7 @@ Zotero.Sync.Storage.Local = {
 		switch (libraryType) {
 		case 'user':
 		case 'publications':
+		case 'feed':
 			return Zotero.Prefs.get("sync.storage.protocol") == 'webdav' ? 'webdav' : 'zfs';
 		
 		case 'group':
