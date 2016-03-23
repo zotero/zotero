@@ -3940,8 +3940,9 @@ var ZoteroPane = new function()
 	this.showAttachmentInFilesystem = Zotero.Promise.coroutine(function* (itemID, noLocateOnMissing) {
 		var attachment = yield Zotero.Items.getAsync(itemID)
 		if (attachment.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
-			var file = attachment.getFile();
-			if (file) {
+			var path = yield attachment.getFilePathAsync();
+			if (path) {
+				let file = Zotero.File.pathToFile(path);
 				try {
 					file.reveal();
 				}
