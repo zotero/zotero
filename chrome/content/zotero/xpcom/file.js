@@ -779,6 +779,9 @@ Zotero.File = new function(){
 		if (!skipXML) {
 			// Strip characters not valid in XML, since they won't sync and they're probably unwanted
 			fileName = fileName.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/g, '');
+			
+			// Normalize to NFC
+			fileName = fileName.normalize();
 		}
 		// Don't allow hidden files
 		fileName = fileName.replace(/^\./, '');
