@@ -76,7 +76,7 @@ describe("ZoteroPane", function() {
 			
 			// Unselected, with no items in view
 			assert.equal(
-				doc.getElementById('zotero-item-pane-message').value,
+				doc.getElementById('zotero-item-pane-message-box').textContent,
 				Zotero.getString('pane.item.unselected.zero', 0)
 			);
 			
@@ -87,7 +87,7 @@ describe("ZoteroPane", function() {
 				skipSelect: true
 			});
 			assert.equal(
-				doc.getElementById('zotero-item-pane-message').value,
+				doc.getElementById('zotero-item-pane-message-box').textContent,
 				Zotero.getString('pane.item.unselected.singular', 1)
 			);
 			
@@ -98,7 +98,7 @@ describe("ZoteroPane", function() {
 				skipSelect: true
 			});
 			assert.equal(
-				doc.getElementById('zotero-item-pane-message').value,
+				doc.getElementById('zotero-item-pane-message-box').textContent,
 				Zotero.getString('pane.item.unselected.plural', 2)
 			);
 			
@@ -107,7 +107,7 @@ describe("ZoteroPane", function() {
 			zp.itemsView.rememberSelection([itemID1, itemID2]);
 			yield promise;
 			assert.equal(
-				doc.getElementById('zotero-item-pane-message').value,
+				doc.getElementById('zotero-item-pane-message-box').textContent,
 				Zotero.getString('pane.item.selected.multiple', 2)
 			);
 		})

@@ -234,10 +234,38 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 		this.expandMatchParents();
 		
 		if (this._ownerDocument.defaultView.ZoteroPane_Local) {
-			this._ownerDocument.defaultView.ZoteroPane_Local.clearItemsPaneMessage();
+			// For My Publications, show intro text in middle pane if no items
+			if (this.collectionTreeRow && this.collectionTreeRow.isPublications() && !this.rowCount) {
+				let doc = this._ownerDocument;
+				let ns = 'http://www.w3.org/1999/xhtml'
+				let div = doc.createElementNS(ns, 'div');
+				let p = doc.createElementNS(ns, 'p');
+				p.textContent = Zotero.getString('publications.intro.text1', ZOTERO_CONFIG.DOMAIN_NAME);
+				div.appendChild(p);
+				
+				p = doc.createElementNS(ns, 'p');
+				p.textContent = Zotero.getString('publications.intro.text2');
+				div.appendChild(p);
+				
+				p = doc.createElementNS(ns, 'p');
+				let html = Zotero.getString('publications.intro.text3');
+				// Convert <b> tags to placeholders
+				html = html.replace('<b>', ':b:').replace('</b>', ':/b:');
+				// Encode any other special chars, which shouldn't exist
+				html = Zotero.Utilities.htmlSpecialChars(html);
+				// Restore bold text
+				html = html.replace(':b:', '<strong>').replace(':/b:', '</strong>');
+				p.innerHTML = html; // AMO note: markup from hard-coded strings and filtered above
+				div.appendChild(p);
+				
+				content = div;
+				doc.defaultView.ZoteroPane_Local.setItemsPaneMessage(content);
+			}
+			else {
+				this._ownerDocument.defaultView.ZoteroPane_Local.clearItemsPaneMessage();
+			}
 		}
 		
-		// Select a queued item from selectItem()
 		if (this.collectionTreeRow && this.collectionTreeRow.itemToSelect) {
 			var item = this.collectionTreeRow.itemToSelect;
 			yield this.selectItem(item['id'], item['expand']);

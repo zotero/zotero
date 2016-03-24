@@ -47,7 +47,7 @@
 		<deck id="zotero-item-pane-content" selectedIndex="0" flex="1">
 			<!-- Center label (for zero or multiple item selection) -->
 			<groupbox id="zotero-item-pane-groupbox" pack="center" align="center">
-				<label id="zotero-item-pane-message"/>
+				<vbox id="zotero-item-pane-message-box"/>
 			</groupbox>
 			
 			<!-- Regular item -->

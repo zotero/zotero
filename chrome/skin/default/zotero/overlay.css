@@ -226,6 +226,23 @@
 	min-width: 290px;
 }
 
+/* Used for intro text for My Publications */
+#zotero-items-pane-message-box {
+	overflow-y: auto;
+	cursor: default;
+}
+
+#zotero-items-pane-message-box div {
+	padding: 0 35px;
+}
+
+#zotero-items-pane-message-box p {
+	max-width: 800px;
+	font-size: 1.2em;
+	line-height: 1.7em;
+	text-align: left;
+}
+
 #zotero-item-pane
 {
 	width: 338px;

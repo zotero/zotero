@@ -3047,21 +3047,24 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function setItemsPaneMessage(msg, lock) {
+	function setItemsPaneMessage(content, lock) {
 		var elem = document.getElementById('zotero-items-pane-message-box');
 		
 		if (elem.getAttribute('locked') == 'true') {
 			return;
 		}
 		
-		while (elem.hasChildNodes()) {
-			elem.removeChild(elem.firstChild);
+		elem.textContent = '';
+		if (typeof content == 'string') {
+			let contentParts = content.split("\n\n");
+			for (let part of contentParts) {
+				var desc = document.createElement('description');
+				desc.appendChild(document.createTextNode(part));
+				elem.appendChild(desc);
+			}
 		}
-		var msgParts = msg.split("\n\n");
-		for (var i=0; i<msgParts.length; i++) {
-			var desc = document.createElement('description');
-			desc.appendChild(document.createTextNode(msgParts[i]));
-			elem.appendChild(desc);
+		else {
+			elem.appendChild(content);
 		}
 		
 		// Make message permanent
@@ -3084,11 +3087,22 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.setItemPaneMessage = function (msg) {
+	this.setItemPaneMessage = function (content) {
 		document.getElementById('zotero-item-pane-content').selectedIndex = 0;
 		
-		var label = document.getElementById('zotero-item-pane-message');
-		label.value = msg;
+		var elem = document.getElementById('zotero-item-pane-message-box');
+		elem.textContent = '';
+		if (typeof content == 'string') {
+			let contentParts = content.split("\n\n");
+			for (let part of contentParts) {
+				let desc = document.createElement('description');
+				desc.appendChild(document.createTextNode(part));
+				elem.appendChild(desc);
+			}
+		}
+		else {
+			elem.appendChild(content);
+		}
 	}
 	
 	
