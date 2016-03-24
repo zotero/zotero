@@ -70,6 +70,7 @@ var ZoteroAdvancedSearch = new function() {
 			isLibrary: function () { return false; },
 			isCollection: function () { return false; },
 			isSearch: function () { return true; },
+			isFeed: () => false,
 			isShare: function () { return false; },
 			isTrash: function () { return false; }
 		}
@@ -93,10 +94,8 @@ var ZoteroAdvancedSearch = new function() {
 		// Don't clear the selected library
 		s.libraryID = _searchBox.search.libraryID;
 		s.addCondition('title', 'contains', '')
-		.then(function () {
-			_searchBox.search = s;
-			_searchBox.active = false;
-		});
+		_searchBox.search = s;
+		_searchBox.active = false;
 	}
 	
 	
