@@ -55,6 +55,29 @@ describe("Zotero_Browser", function () {
 		assert.isTrue(collection.hasItem(items[0].id));
 	})
 	
+	it("should save book with child note to current collection", function* () {
+		var uri = OS.Path.join(
+			getTestDataDirectory().path, "book_and_child_note.ris"
+		);
+		var deferred = Zotero.Promise.defer();
+		win.addEventListener('pageshow', () => deferred.resolve());
+		win.loadURI(uri);
+		yield deferred.promise;
+		
+		yield loadZoteroPane(win);
+		var collection = yield createDataObject('collection');
+		
+		var promise = waitForItemEvent('add');
+		yield win.Zotero_Browser.scrapeThisPage();
+		
+		var ids = yield promise;
+		var items = Zotero.Items.get(ids);
+		assert.lengthOf(items, 2);
+		assert.equal(Zotero.ItemTypes.getName(items[0].itemTypeID), 'book');
+		assert.isTrue(collection.hasItem(items[0].id));
+		assert.equal(Zotero.ItemTypes.getName(items[1].itemTypeID), 'note');
+	});
+	
 	it("should save PDF to library root", function* () {
 		var uri = OS.Path.join(getTestDataDirectory().path, "test.pdf");
 		var deferred = Zotero.Promise.defer();

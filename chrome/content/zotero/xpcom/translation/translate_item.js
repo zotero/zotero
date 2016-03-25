@@ -600,7 +600,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		} else {
 			myNote.setNote(note);
 		}
-		if (this._collections) {
+		if (!parentID && this._collections) {
 			myNote.setCollections(this._collections);
 		}
 		yield myNote.save();
