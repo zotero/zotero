@@ -38,5 +38,7 @@ describe("Advanced Search", function () {
 		assert.equal(iv.rowCount, 1);
 		var index = iv.getRowIndexByID(item.id);
 		assert.isNumber(index);
+		
+		searchWin.close();
 	});
 });
