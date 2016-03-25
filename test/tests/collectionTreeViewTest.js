@@ -177,6 +177,25 @@ describe("Zotero.CollectionTreeView", function() {
 			assert.equal(selected, id);
 		});
 		
+		it("should update the editability of the current view", function* () {
+			var group = yield createGroup({
+				editable: false,
+				filesEditable: false
+			});
+			yield cv.selectLibrary(group.libraryID);
+			yield waitForItemsLoad(win);
+			
+			assert.isFalse(cv.selectedTreeRow.editable);
+			var cmd = win.document.getElementById('cmd_zotero_newStandaloneNote');
+			assert.isTrue(cmd.getAttribute('disabled') == 'true');
+			
+			group.editable = true;
+			yield group.saveTx();
+			
+			assert.isTrue(cv.selectedTreeRow.editable);
+			assert.isFalse(cmd.getAttribute('disabled') == 'true');
+		});
+		
 		it("should re-sort a modified collection", function* () {
 			var prefix = Zotero.Utilities.randomString() + " ";
 			var collectionA = yield createDataObject('collection', { name: prefix + "A" });

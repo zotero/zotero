@@ -1128,6 +1128,9 @@ var ZoteroPane = new function()
 			
 			if (this.itemsView && this.itemsView.collectionTreeRow.id == collectionTreeRow.id) {
 				Zotero.debug("Collection selection hasn't changed");
+				
+				// Update toolbar, in case editability has changed
+				this._updateToolbarIconsForRow(collectionTreeRow);
 				return;
 			}
 			
@@ -1168,42 +1171,7 @@ var ZoteroPane = new function()
 			collectionTreeRow.setSearch('');
 			collectionTreeRow.setTags(getTagSelection());
 			
-			// Enable or disable toolbar icons and menu options as necessary
-			const disableIfNoEdit = [
-				"cmd_zotero_newCollection",
-				"cmd_zotero_newSavedSearch",
-				"zotero-tb-add",
-				"cmd_zotero_newItemFromCurrentPage",
-				"zotero-tb-lookup",
-				"cmd_zotero_newStandaloneNote",
-				"zotero-tb-note-add",
-				"zotero-tb-attachment-add"
-			];
-			for(var i=0; i<disableIfNoEdit.length; i++) {
-				let command = disableIfNoEdit[i];
-				var el = document.getElementById(command);
-				
-				// If a trash is selected, new collection depends on the
-				// editability of the library
-				if (collectionTreeRow.isTrash() &&
-						command == 'cmd_zotero_newCollection') {
-					var overrideEditable = Zotero.Libraries.isEditable(collectionTreeRow.ref.libraryID);
-				}
-				else {
-					var overrideEditable = false;
-				}
-				
-				// Don't allow normal buttons in My Pubications, because things need to
-				// be dragged and go through the wizard
-				let forceDisable = collectionTreeRow.isPublications()
-					&& command != 'zotero-tb-note-add';
-				
-				if ((collectionTreeRow.editable || overrideEditable) && !forceDisable) {
-					if(el.hasAttribute("disabled")) el.removeAttribute("disabled");
-				} else {
-					el.setAttribute("disabled", "true");
-				}
-			}
+			this._updateToolbarIconsForRow(collectionTreeRow);
 			
 			this.itemsView = new Zotero.ItemTreeView(collectionTreeRow);
 			this.itemsView.onError = function () {
@@ -1236,6 +1204,46 @@ var ZoteroPane = new function()
 		.finally(function () {
 			return this.collectionsView.onSelect();
 		}.bind(this));
+	};
+	
+	
+	/**
+	 * Enable or disable toolbar icons and menu options as necessary
+	 */
+	this._updateToolbarIconsForRow = function (collectionTreeRow) {
+		const disableIfNoEdit = [
+			"cmd_zotero_newCollection",
+			"cmd_zotero_newSavedSearch",
+			"zotero-tb-add",
+			"cmd_zotero_newItemFromCurrentPage",
+			"zotero-tb-lookup",
+			"cmd_zotero_newStandaloneNote",
+			"zotero-tb-note-add",
+			"zotero-tb-attachment-add"
+		];
+		for (let i = 0; i < disableIfNoEdit.length; i++) {
+			let command = disableIfNoEdit[i];
+			let el = document.getElementById(command);
+			
+			// If a trash is selected, new collection depends on the
+			// editability of the library
+			if (collectionTreeRow.isTrash() && command == 'cmd_zotero_newCollection') {
+				var overrideEditable = Zotero.Libraries.isEditable(collectionTreeRow.ref.libraryID);
+			}
+			else {
+				var overrideEditable = false;
+			}
+			
+			// Don't allow normal buttons in My Publications, because things need to
+			// be dragged and go through the wizard
+			let forceDisable = collectionTreeRow.isPublications() && command != 'zotero-tb-note-add';
+			
+			if ((collectionTreeRow.editable || overrideEditable) && !forceDisable) {
+				if(el.hasAttribute("disabled")) el.removeAttribute("disabled");
+			} else {
+				el.setAttribute("disabled", "true");
+			}
+		}
 	};
 	
 	
