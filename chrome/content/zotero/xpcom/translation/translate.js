@@ -2315,7 +2315,7 @@ Zotero.Translate.Export.prototype._prepareTranslation = Zotero.Promise.coroutine
 		getCollections = configOptions.getCollections || false;
 	switch (this._export.type) {
 		case 'collection':
-			yield this._itemGetter.setCollection(this._export.collection, getCollections);
+			this._itemGetter.setCollection(this._export.collection, getCollections);
 			break;
 		case 'items':
 			this._itemGetter.setItems(this._export.items);

@@ -657,13 +657,13 @@ Zotero.Translate.ItemGetter.prototype = {
 		this.numItems = this._itemsLeft.length;
 	},
 	
-	"setCollection": Zotero.Promise.coroutine(function* (collection, getChildCollections) {
+	"setCollection": function (collection, getChildCollections) {
 		// get items in this collection
 		var items = new Set(collection.getChildItems());
 		
 		if(getChildCollections) {
 			// get child collections
-			this._collectionsLeft = yield Zotero.Collections.getByParent(collection.id, true);
+			this._collectionsLeft = Zotero.Collections.getByParent(collection.id, true);
 			
 			// get items in child collections
 			for (let collection of this._collectionsLeft) {
@@ -674,13 +674,13 @@ Zotero.Translate.ItemGetter.prototype = {
 		
 		this._itemsLeft = Array.from(items.values());
 		this.numItems = this._itemsLeft.length;
-	}),
+	},
 	
 	"setAll": Zotero.Promise.coroutine(function* (libraryID, getChildCollections) {
 		this._itemsLeft = yield Zotero.Items.getAll(libraryID, true);
 		
 		if(getChildCollections) {
-			this._collectionsLeft = yield Zotero.Collections.getByLibrary(libraryID, true);
+			this._collectionsLeft = Zotero.Collections.getByLibrary(libraryID, true);
 		}
 		
 		this.numItems = this._itemsLeft.length;

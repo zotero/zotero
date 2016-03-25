@@ -200,4 +200,57 @@ describe("Zotero.Collection", function() {
 			assert.lengthOf(collection.getChildItems(false, true), 1);
 		})
 	})
+	
+	describe("#getDescendents()", function () {
+		var collection0, collection1, collection2, collection3, item1, item2, item3;
+		
+		before(function* () {
+			collection0 = yield createDataObject('collection');
+			item1 = yield createDataObject('item', { collections: [collection0.id] });
+			collection1 = yield createDataObject('collection', { parentKey: collection0.key });
+			item2 = yield createDataObject('item', { collections: [collection1.id] });
+			collection2 = yield createDataObject('collection', { parentKey: collection1.key });
+			collection3 = yield createDataObject('collection', { parentKey: collection1.key });
+			item3 = yield createDataObject('item', { collections: [collection2.id] });
+			item3.deleted = true;
+			yield item3.saveTx();
+		});
+		
+		it("should return a flat array of collections and items", function* () {
+			var desc = collection0.getDescendents();
+			assert.lengthOf(desc, 5);
+			assert.sameMembers(
+				desc.map(x => x.type + ':' + x.id + ':' + (x.name || '') + ':' + x.parent),
+				[
+					'item:' + item1.id + '::' + collection0.id,
+					'item:' + item2.id + '::' + collection1.id,
+					'collection:' + collection1.id + ':' + collection1.name + ':' + collection0.id,
+					'collection:' + collection2.id + ':' + collection2.name + ':' + collection1.id,
+					'collection:' + collection3.id + ':' + collection3.name + ':' + collection1.id
+				]
+			);
+		});
+		
+		it("should return nested arrays of collections and items", function* () {
+			var desc = collection0.getDescendents(true);
+			assert.lengthOf(desc, 2);
+			assert.sameMembers(
+				desc.map(x => x.type + ':' + x.id + ':' + (x.name || '') + ':' + x.parent),
+				[
+					'item:' + item1.id + '::' + collection0.id,
+					'collection:' + collection1.id + ':' + collection1.name + ':' + collection0.id,
+				]
+			);
+			var c = desc[0].type == 'collection' ? desc[0] : desc[1];
+			assert.lengthOf(c.children, 3);
+			assert.sameMembers(
+				c.children.map(x => x.type + ':' + x.id + ':' + (x.name || '') + ':' + x.parent),
+				[
+					'item:' + item2.id + '::' + collection1.id,
+					'collection:' + collection2.id + ':' + collection2.name + ':' + collection1.id,
+					'collection:' + collection3.id + ':' + collection3.name + ':' + collection1.id
+				]
+			);
+		});
+	});
 })

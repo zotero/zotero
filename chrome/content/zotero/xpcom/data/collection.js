@@ -242,7 +242,7 @@ Zotero.Collection.prototype._initSave = Zotero.Promise.coroutine(function* (env)
 			throw new Error('Cannot move collection into itself!');
 		}
 		
-		if (this.id && (yield this.hasDescendent('collection', newParent.id))) {
+		if (this.id && this.hasDescendent('collection', newParent.id)) {
 			throw ('Cannot move collection "' + this.name + '" into one of its own descendents');
 		}
 		
@@ -440,15 +440,15 @@ Zotero.Collection.prototype.hasItem = function(itemID) {
 }
 
 
-Zotero.Collection.prototype.hasDescendent = Zotero.Promise.coroutine(function* (type, id) {
-	var descendents = yield this.getDescendents();
+Zotero.Collection.prototype.hasDescendent = function (type, id) {
+	var descendents = this.getDescendents();
 	for (var i=0, len=descendents.length; i<len; i++) {
 		if (descendents[i].type == type && descendents[i].id == id) {
 			return true;
 		}
 	}
 	return false;
-});
+};
 
 
 /**
@@ -551,7 +551,7 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 	
 	var collections = [this.id];
 	
-	var descendents = yield this.getDescendents(false, null, true);
+	var descendents = this.getDescendents(false, null, true);
 	var items = [];
 	
 	var del = [];
@@ -701,7 +701,6 @@ Zotero.Collection.prototype.toJSON = function (options = {}) {
 /**
  * Returns an array of descendent collections and items
  *
- * @param	{Boolean}	[recursive=false]	Descend into subcollections
  * @param	{Boolean}	[nested=false]		Return multidimensional array with 'children'
  *											nodes instead of flat array
  * @param	{String}	[type]				'item', 'collection', or NULL for both
@@ -709,12 +708,10 @@ Zotero.Collection.prototype.toJSON = function (options = {}) {
  * @return	{Promise<Object[]>} - A promise for an array of objects with 'id', 'key',
  *   'type' ('item' or 'collection'), 'parent', and, if collection, 'name' and the nesting 'level'
  */
-Zotero.Collection.prototype.getChildren = Zotero.Promise.coroutine(function* (recursive, nested, type, includeDeletedItems, level) {
+Zotero.Collection.prototype.getDescendents = function (nested, type, includeDeletedItems, level) {
 	if (!this.id) {
 		throw new Error('Cannot be called on an unsaved item');
 	}
-	
-	var toReturn = [];
 	
 	if (!level) {
 		level = 1;
@@ -726,39 +723,40 @@ Zotero.Collection.prototype.getChildren = Zotero.Promise.coroutine(function* (re
 			case 'collection':
 				break;
 			default:
-				throw ("Invalid type '" + type + "' in Collection.getChildren()");
+				throw new (`Invalid type '${type}'`);
 		}
 	}
 	
-	// 0 == collection
-	// 1 == item
-	var sql = 'SELECT collectionID AS id, collectionName AS name, '
-		+ "0 AS type, collectionName AS collectionName, key "
-		+ 'FROM collections WHERE parentCollectionID=?1';
+	var collections = Zotero.Collections.getByParent(this.id);
+	var children = collections.map(c => ({
+		id: c.id,
+		name: c.name,
+		type: 0,
+		key: c.key
+	}));
 	if (!type || type == 'item') {
-		sql += ' UNION SELECT itemID AS id, NULL AS name, 1 AS type, NULL AS collectionName, key '
-				+ 'FROM collectionItems JOIN items USING (itemID) WHERE collectionID=?1';
-		if (!includeDeletedItems) {
-			sql += " AND itemID NOT IN (SELECT itemID FROM deletedItems)";
-		}
+		let items = this.getChildItems(false, includeDeletedItems);
+		children = children.concat(items.map(i => ({
+			id: i.id,
+			name: null,
+			type: 1,
+			key: i.key
+		})));
 	}
-	var children = yield Zotero.DB.queryAsync(sql, this.id);
+	
 	children.sort(function (a, b) {
 		if (a.name === null || b.name === null) return 0;
 		return Zotero.localeCompare(a.name, b.name)
 	});
 	
+	var toReturn = [];
 	for(var i=0, len=children.length; i<len; i++) {
-		// This seems to not work without parseInt() even though
-		// typeof children[i]['type'] == 'number' and
-		// children[i]['type'] === parseInt(children[i]['type']),
-		// which sure seems like a bug to me
-		switch (parseInt(children[i].type)) {
+		switch (children[i].type) {
 			case 0:
 				if (!type || type=='collection') {
 					toReturn.push({
 						id: children[i].id,
-						name: children[i].collectionName,
+						name: children[i].name,
 						key: children[i].key,
 						type: 'collection',
 						level: level,
@@ -766,19 +764,17 @@ Zotero.Collection.prototype.getChildren = Zotero.Promise.coroutine(function* (re
 					});
 				}
 				
-				if (recursive) {
-					let child = yield this.ObjectsClass.getAsync(children[i].id);
-					let descendents = yield child.getChildren(
-						true, nested, type, includeDeletedItems, level+1
-					);
-					
-					if (nested) {
-						toReturn[toReturn.length-1].children = descendents;
-					}
-					else {
-						for (var j=0, len2=descendents.length; j<len2; j++) {
-							toReturn.push(descendents[j]);
-						}
+				let child = this.ObjectsClass.get(children[i].id);
+				let descendents = child.getDescendents(
+					nested, type, includeDeletedItems, level + 1
+				);
+				
+				if (nested) {
+					toReturn[toReturn.length-1].children = descendents;
+				}
+				else {
+					for (var j=0, len2=descendents.length; j<len2; j++) {
+						toReturn.push(descendents[j]);
 					}
 				}
 			break;
@@ -797,17 +793,7 @@ Zotero.Collection.prototype.getChildren = Zotero.Promise.coroutine(function* (re
 	}
 	
 	return toReturn;
-});
-
-
-/**
- * Alias for the recursive mode of getChildren()
- *
- * @return {Promise}
- */
-Zotero.Collection.prototype.getDescendents = function (nested, type, includeDeletedItems) {
-	return this.getChildren(true, nested, type, includeDeletedItems);
-}
+};
 
 
 /**

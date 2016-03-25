@@ -62,7 +62,7 @@ Zotero.Collections = function() {
 	 *
 	 * @param {Integer} libraryID
 	 * @param {Boolean} [recursive=false]
-	 * @return {Promise<Zotero.Collection[]>}
+	 * @return {Zotero.Collection[]}
 	 */
 	this.getByLibrary = function (libraryID, recursive) {
 		return _getByContainer(libraryID, null, recursive);
@@ -74,24 +74,26 @@ Zotero.Collections = function() {
 	 *
 	 * @param {Integer} parentCollectionID
 	 * @param {Boolean} [recursive=false]
-	 * @return {Promise<Zotero.Collection[]>}
+	 * @return {Zotero.Collection[]}
 	 */
 	this.getByParent = function (parentCollectionID, recursive) {
 		return _getByContainer(null, parentCollectionID, recursive);
 	}
 	
 	
-	var _getByContainer = Zotero.Promise.coroutine(function* (libraryID, parentID, recursive) {
-		let children;
+	var _getByContainer = function (libraryID, parentID, recursive) {
+		let children = [];
 		
 		if (parentID) {
 			let parent = Zotero.Collections.get(parentID);
 			children = parent.getChildCollections();
 		} else if (libraryID) {
-			let sql = "SELECT collectionID AS id FROM collections "
-				+ "WHERE libraryID=? AND parentCollectionID IS NULL";
-			let ids = yield Zotero.DB.columnQueryAsync(sql, [libraryID]);
-			children = yield this.getAsync(ids);
+			for (let id in this._objectCache) {
+				let c = this._objectCache[id];
+				if (c.libraryID == libraryID && !c.parentKey) {
+					children.push(c);
+				}
+			}
 		} else {
 			throw new Error("Either library ID or parent collection ID must be provided");
 		}
@@ -110,9 +112,9 @@ Zotero.Collections = function() {
 			var obj = children[i];
 			toReturn.push(obj);
 			
-			var desc = yield obj.getDescendents(false, 'collection');
+			var desc = obj.getDescendents(false, 'collection');
 			for (var j in desc) {
-				var obj2 = yield this.getAsync(desc[j]['id']);
+				var obj2 = this.get(desc[j].id);
 				if (!obj2) {
 					throw new Error('Collection ' + desc[j] + ' not found');
 				}
@@ -130,7 +132,7 @@ Zotero.Collections = function() {
 		}
 		
 		return toReturn;
-	}.bind(this));
+	}.bind(this);
 	
 	
 	this.getCollectionsContainingItems = function (itemIDs, asIDs) {

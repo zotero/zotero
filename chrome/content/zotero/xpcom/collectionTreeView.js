@@ -1153,10 +1153,10 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 	}
 	
 	if (isLibrary) {
-		var collections = yield Zotero.Collections.getByLibrary(libraryID, treeRow.ref.id);
+		var collections = Zotero.Collections.getByLibrary(libraryID, treeRow.ref.id);
 	}
 	else if (isCollection) {
-		var collections = yield Zotero.Collections.getByParent(treeRow.ref.id);
+		var collections = Zotero.Collections.getByParent(treeRow.ref.id);
 	}
 	
 	if (isLibrary) {
@@ -1549,10 +1549,9 @@ Zotero.CollectionTreeView.prototype.canDropCheck = function (row, orient, dataTr
 				}
 				
 				// Nor in their children
-				// TODO: figure out synchronously from tree
-				/*if (yield col.hasDescendent('collection', treeRow.ref.id)) {
+				if (col.hasDescendent('collection', treeRow.ref.id)) {
 					return false;
-				}*/
+				}
 			}
 			// Dragging a collection to a different library
 			else {
@@ -1657,9 +1656,9 @@ Zotero.CollectionTreeView.prototype.canDropCheckAsync = Zotero.Promise.coroutine
 					return false;
 				}
 				
-				var descendents = yield col.getDescendents(false, 'collection');
+				var descendents = col.getDescendents(false, 'collection');
 				for each(var descendent in descendents) {
-					descendent = yield Zotero.Collections.getAsync(descendent.id);
+					descendent = Zotero.Collections.get(descendent.id);
 					// Disallow if linked collection already exists for any subcollections
 					//
 					// If this is allowed in the future for the root collection,

@@ -46,12 +46,12 @@ Zotero.API = {
 			switch (params.scopeObject) {
 				case 'collections':
 					if (params.scopeObjectKey) {
-						var col = yield Zotero.Collections.getByLibraryAndKeyAsync(
+						var col = Zotero.Collections.getByLibraryAndKeyAsync(
 							params.libraryID, params.scopeObjectKey
 						);
 					}
 					else {
-						var col = yield Zotero.Collections.getAsync(params.scopeObjectID);
+						var col = Zotero.Collections.get(params.scopeObjectID);
 					}
 					if (!col) {
 						throw new Error('Invalid collection ID or key');

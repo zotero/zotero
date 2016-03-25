@@ -304,7 +304,7 @@ var Zotero_File_Interface = new function() {
 				let leafName = translation.location.leafName;
 				collectionName = (translation.location.isDirectory() || leafName.indexOf(".") === -1 ? leafName
 					: leafName.substr(0, leafName.lastIndexOf(".")));
-				let allCollections = yield Zotero.Collections.getByLibrary(libraryID);
+				let allCollections = Zotero.Collections.getByLibrary(libraryID);
 				for(var i=0; i<allCollections.length; i++) {
 					if(allCollections[i].name == collectionName) {
 						collectionName += " "+(new Date()).toLocaleString();

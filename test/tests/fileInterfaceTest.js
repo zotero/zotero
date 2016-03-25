@@ -16,7 +16,9 @@ describe("Zotero_File_Interface", function() {
         testFile.append("allTypesAndFields.js");
         yield win.Zotero_File_Interface.importFile(testFile);
 
-        let importedCollection = yield Zotero.Collections.getByLibrary(Zotero.Libraries.userLibraryID).filter(x => x.name == 'allTypesAndFields');
+        let importedCollection = Zotero.Collections.getByLibrary(
+			Zotero.Libraries.userLibraryID
+		).filter(x => x.name == 'allTypesAndFields');
         assert.equal(importedCollection.length, 1);
         let childItems = importedCollection[0].getChildItems();
         let savedItems = {};

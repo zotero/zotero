@@ -4,7 +4,7 @@ describe("Zotero.Collections", function () {
 			var col1 = yield createDataObject('collection');
 			var col2 = yield createDataObject('collection');
 			var col3 = yield createDataObject('collection', { parentID: col2.id });
-			var cols = yield Zotero.Collections.getByLibrary(Zotero.Libraries.userLibraryID);
+			var cols = Zotero.Collections.getByLibrary(Zotero.Libraries.userLibraryID);
 			assert.isAbove(cols.length, 1);
 			assert.includeMembers(cols.map(col => col.id), [col1.id, col2.id]);
 			assert.ok(cols.every(col =>
@@ -23,7 +23,7 @@ describe("Zotero.Collections", function () {
 			var col5 = yield createDataObject('collection', { name: "E", parentID: col2.id });
 			var col6 = yield createDataObject('collection', { name: "G", parentID: col3.id });
 			var col7 = yield createDataObject('collection', { name: "F", parentID: col3.id });
-			var cols = yield Zotero.Collections.getByLibrary(libraryID, true);
+			var cols = Zotero.Collections.getByLibrary(libraryID, true);
 			assert.isAbove(cols.length, 6);
 			var ids = cols.map(col => col.id);
 			assert.includeMembers(
@@ -44,8 +44,8 @@ describe("Zotero.Collections", function () {
 			var col1 = yield createDataObject('collection');
 			var col2 = yield createDataObject('collection');
 			var col3 = yield createDataObject('collection', { parentID: col2.id });
-			assert.lengthOf((yield Zotero.Collections.getByParent(col1.id)), 0);
-			var cols = yield Zotero.Collections.getByParent(col2.id);
+			assert.lengthOf(Zotero.Collections.getByParent(col1.id), 0);
+			var cols = Zotero.Collections.getByParent(col2.id);
 			assert.lengthOf(cols, 1);
 			assert.sameMembers(cols.map(col => col.id), [col3.id]);
 		})
@@ -55,8 +55,8 @@ describe("Zotero.Collections", function () {
 			var col2 = yield createDataObject('collection');
 			var col3 = yield createDataObject('collection', { parentID: col2.id });
 			var col4 = yield createDataObject('collection', { parentID: col3.id });
-			assert.lengthOf((yield Zotero.Collections.getByParent(col1.id)), 0);
-			var cols = yield Zotero.Collections.getByParent(col2.id, true);
+			assert.lengthOf(Zotero.Collections.getByParent(col1.id), 0);
+			var cols = Zotero.Collections.getByParent(col2.id, true);
 			assert.lengthOf(cols, 2);
 			assert.includeMembers(cols.map(col => col.id), [col3.id, col4.id]);
 		})
