@@ -681,8 +681,6 @@ describe("Zotero.CollectionTreeView", function() {
 					}
 				}, 'collection', 'test');
 				
-				yield Zotero.Promise.delay(2000);
-				
 				yield drop(
 					'collection',
 					{
