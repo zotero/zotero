@@ -986,6 +986,15 @@ describe("Zotero.Item", function () {
 				assert.isNull(json.mtime);
 				assert.isNull(json.md5);
 			})
+			
+			it("shouldn't include filename or path for linked_url attachments", function* () {
+				var item = new Zotero.Item('attachment');
+				item.attachmentLinkMode = 'linked_url';
+				item.url = "https://www.zotero.org/";
+				var json = item.toJSON();
+				assert.notProperty(json, "filename");
+				assert.notProperty(json, "path");
+			});
 		})
 		
 		describe("'full' mode", function () {

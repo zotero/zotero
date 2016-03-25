@@ -4093,7 +4093,7 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 				obj.path = this.attachmentPath;
 			}
-			else {
+			else if (linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
 				obj.filename = this.attachmentFilename;
 			}
 			
