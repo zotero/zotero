@@ -138,7 +138,7 @@ var Zotero_File_Interface_Export = new function() {
 			}
 			
 			var optionName = node.id.substr(OPTION_PREFIX.length);
-			if(translatorOptions[optionName] != undefined) {
+			if (translatorOptions && translatorOptions[optionName] != undefined) {
 				// option should be enabled
 				optionsBox.hidden = undefined;
 				node.hidden = undefined;
