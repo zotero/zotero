@@ -42,13 +42,13 @@
 }
 
 /* Restore/Delete buttons in trash view */
-#zotero-item-top-buttons-holder {
+.zotero-item-pane-top-buttons {
 	-moz-appearance: toolbar;
 	-moz-box-pack: center;
 	min-height: 3em;
 }
 
-#zotero-item-top-buttons-holder > button {
+.zotero-item-pane-top-buttons > button {
 	-moz-box-flex: 1
 }
 
@@ -66,4 +66,24 @@
 #zotero-duplicates-merge-item-box row
 {
 	min-height: 20px;
+}
+
+#zotero-feed-item-toggleRead-button {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 150px;
+}
+
+#zotero-feed-item-addTo-button {
+	max-width: 250px;
+}
+
+#zotero-feed-item-addTo-button button {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#zotero-feed-item-addTo-button .button-icon {
+	margin-right: 5px
+	height: 16px;
 }

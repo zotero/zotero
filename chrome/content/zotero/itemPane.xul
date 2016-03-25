@@ -24,6 +24,7 @@
     ***** END LICENSE BLOCK *****
 -->
 <?xml-stylesheet href="chrome://zotero/skin/itemPane.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/itemPane.css" type="text/css"?>
 
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
@@ -33,11 +34,21 @@
 	
 	<vbox id="zotero-item-pane" zotero-persist="width">
 		<!-- Trash -->
-		<hbox id="zotero-item-top-buttons-holder" hidden="true">
+		<hbox id="zotero-item-pane-top-buttons-trash" class="zotero-item-pane-top-buttons" hidden="true">
 			<button id="zotero-item-restore-button" label="&zotero.items.menu.restoreToLibrary;"
 				oncommand="ZoteroPane_Local.restoreSelectedItems()"/>
 			<button id="zotero-item-delete-button" label="&zotero.item.deletePermanently;"
 				oncommand="ZoteroPane_Local.deleteSelectedItems()"/>
+		</hbox>
+		
+		<!-- Feed -->
+		<hbox id="zotero-item-pane-top-buttons-feed" class="zotero-item-pane-top-buttons" hidden="true">
+			<button id="zotero-feed-item-toggleRead-button" flex="1"
+				oncommand="ZoteroPane_Local.toggleSelectedItemsRead();"/>
+			<button id="zotero-feed-item-addTo-button" type="menu-button" flex="1"
+				oncommand="ZoteroItemPane.translateSelectedItems()">
+				<menupopup id="zotero-item-addTo-menu" onpopupshowing="ZoteroItemPane.buildTranslateSelectContextMenu(event);"/>
+			</button>
 		</hbox>
 		
 		<!-- Commons -->

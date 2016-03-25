@@ -925,6 +925,81 @@ Zotero.Utilities.Internal = {
 		parts.push(isbn.charAt(isbn.length-1)); // Check digit
 		
 		return parts.join('-');
+	},
+	
+
+	/**
+	 * Create a libraryOrCollection DOM tree to place in <menupopup> element.
+	 * If has no children, returns a <menuitem> element, otherwise <menu>.
+	 * 
+	 * @param {Library/Collection} libraryOrCollection
+	 * @param {Node<menupopup>} elem parent element
+	 * @param {function} clickAction function to execute on clicking the menuitem.
+	 * 		Receives the event and libraryOrCollection for given item.
+	 * 
+	 * @return {Node<menuitem>/Node<menu>} appended node
+	 */
+	createMenuForTarget: function(libraryOrCollection, elem, clickAction) {
+		var doc = elem.ownerDocument;
+		function _createMenuitem(label, value, icon, command) {
+			let menuitem = doc.createElement('menuitem');
+			menuitem.setAttribute("label", label);
+			menuitem.setAttribute("value", value);
+			menuitem.setAttribute("image", icon);
+			menuitem.addEventListener('command', command);
+			menuitem.classList.add('menuitem-iconic');
+			return menuitem
+		}	
+		
+		function _createMenu(label, icon) {
+			let menu = doc.createElement('menu');
+			menu.setAttribute("label", label);
+			menu.setAttribute("image", icon);
+			menu.classList.add('menu-iconic');
+			let menupopup = doc.createElement('menupopup');
+			menu.appendChild(menupopup);
+			return menu;
+		}
+		
+		var imageSrc = this.getCollectionImageSrc(libraryOrCollection._objectType);
+		var menuitem = _createMenuitem(
+			libraryOrCollection.name, 
+			libraryOrCollection.id, 
+			imageSrc,
+			function (event) {
+				clickAction(event, libraryOrCollection);
+			}
+		);
+			
+				
+		var collections;
+		if (libraryOrCollection.objectType == 'collection') {
+			collections = Zotero.Collections.getByParent(libraryOrCollection.id);
+		} else {
+			collections = Zotero.Collections.getByLibrary(libraryOrCollection.id);
+		}
+		
+		if (collections.length == 0) {
+			elem.appendChild(menuitem);
+			return menuitem
+		}
+		
+		var menu = _createMenu(libraryOrCollection.name, imageSrc);
+		var menupopup = menu.firstChild;
+		menupopup.appendChild(menuitem);
+		menupopup.appendChild(doc.createElement('menuseparator'));
+		for (let collection of collections) {
+			let collectionMenu = this.createMenuForTarget(collection, elem, clickAction);
+			menupopup.appendChild(collectionMenu);
+		}
+		elem.appendChild(menu);
+		return menu;
+	},
+		
+	getCollectionImageSrc: function(objectType) {
+		var suffix = Zotero.hiDPI ? "@2x" : "";
+		var collectionType = objectType == 'group' ? 'library' : objectType;
+		return "chrome://zotero/skin/treesource-" + collectionType + suffix + ".png";	
 	}
 }
 
