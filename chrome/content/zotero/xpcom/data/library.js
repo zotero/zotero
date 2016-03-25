@@ -461,7 +461,9 @@ Zotero.Library.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		
 		// Since these are Zotero.Library properties, the 'modify' for the inheriting object may not
 		// get triggered, so call it here too
-		Zotero.Notifier.queue('modify', this.libraryType, this.libraryTypeID);
+		if (this.libraryType != 'user') {
+			Zotero.Notifier.queue('modify', this.libraryType, this.libraryTypeID);
+		}
 	} else {
 		Zotero.debug("Library data did not change for " + this._objectType + " " + this.id, 5);
 	}
