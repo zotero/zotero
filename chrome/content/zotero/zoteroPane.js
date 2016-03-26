@@ -1175,6 +1175,8 @@ var ZoteroPane = new function()
 			
 			this.itemsView = new Zotero.ItemTreeView(collectionTreeRow);
 			this.itemsView.onError = function () {
+				// Don't reload last folder, in case that's the problem
+				Zotero.Prefs.clear('lastViewedFolder');
 				ZoteroPane_Local.displayErrorMessage();
 			};
 			this.itemsView.addEventListener('load', this.setTagScope);
