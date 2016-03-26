@@ -154,7 +154,7 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 				return;
 			}
 			else if (key == '-' && !(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)) {
-				self.collapseAllRows().done();
+				self.collapseAllRows();
 				event.preventDefault();
 				return;
 			}
@@ -348,11 +348,12 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 	});
 	
 	try {
+		var newItems = yield this.collectionTreeRow.getItems();
 		Zotero.CollectionTreeCache.clear();
 		
 		if (!this.selection.selectEventsSuppressed) {
 			var unsuppress = this.selection.selectEventsSuppressed = true;
-			//this._treebox.beginUpdateBatch();
+			this._treebox.beginUpdateBatch();
 		}
 		var savedSelection = this.getSelectedItems(true);
 		var savedOpenState = this._saveOpenState();
@@ -363,7 +364,6 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 		var newCellTextCache = {};
 		var newSearchMode = this.collectionTreeRow.isSearchMode();
 		var newRows = [];
-		var newItems = yield this.collectionTreeRow.getItems();
 		
 		var added = 0;
 		
@@ -395,7 +395,7 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 		// Add parents of matches if not matches themselves
 		for (let id in newSearchParentIDs) {
 			if (!newSearchItemIDs[id]) {
-				let item = yield Zotero.Items.getAsync(id);
+				let item = Zotero.Items.get(id);
 				this._addRowToArray(
 					newRows,
 					new Zotero.ItemTreeRow(item, 0, false),
@@ -421,8 +421,7 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 		this.rememberSelection(savedSelection);
 		this.expandMatchParents();
 		if (unsuppress) {
-			// This causes a problem with the row count being wrong between views
-			//this._treebox.endUpdateBatch();
+			this._treebox.endUpdateBatch();
 			this.selection.selectEventsSuppressed = false;
 		}
 		
@@ -1191,7 +1190,7 @@ Zotero.ItemTreeView.prototype.hasNextSibling = function(row,afterIndex)
 	}
 }
 
-Zotero.ItemTreeView.prototype.toggleOpenState = function (row, skipItemMapRefresh) {
+Zotero.ItemTreeView.prototype.toggleOpenState = function (row, skipRowMapRefresh) {
 	// Shouldn't happen but does if an item is dragged over a closed
 	// container until it opens and then released, since the container
 	// is no longer in the same place when the spring-load closes
@@ -1200,7 +1199,7 @@ Zotero.ItemTreeView.prototype.toggleOpenState = function (row, skipItemMapRefres
 	}
 	
 	if (this.isContainerOpen(row)) {
-		return this._closeContainer(row, skipItemMapRefresh);
+		return this._closeContainer(row, skipRowMapRefresh);
 	}
 	
 	var count = 0;
@@ -1234,7 +1233,8 @@ Zotero.ItemTreeView.prototype.toggleOpenState = function (row, skipItemMapRefres
 			count++;
 			this._addRow(
 				new Zotero.ItemTreeRow(newRows[i], level + 1, false),
-				row + i + 1
+				row + i + 1,
+				true
 			);
 		}
 	}
@@ -1247,14 +1247,14 @@ Zotero.ItemTreeView.prototype.toggleOpenState = function (row, skipItemMapRefres
 	
 	this._treebox.invalidateRow(row);
 	
-	if (!skipItemMapRefresh) {
+	if (!skipRowMapRefresh) {
 		Zotero.debug('Refreshing hash map');
 		this._refreshItemRowMap();
 	}
 }
 
 
-Zotero.ItemTreeView.prototype._closeContainer = function (row, skipItemMapRefresh) {
+Zotero.ItemTreeView.prototype._closeContainer = function (row, skipRowMapRefresh) {
 	// isContainer == false shouldn't happen but does if an item is dragged over a closed
 	// container until it opens and then released, since the container is no longer in the same
 	// place when the spring-load closes
@@ -1280,7 +1280,7 @@ Zotero.ItemTreeView.prototype._closeContainer = function (row, skipItemMapRefres
 	
 	this._treebox.invalidateRow(row);
 	
-	if (!skipItemMapRefresh) {
+	if (!skipRowMapRefresh) {
 		Zotero.debug('Refreshing hash map');
 		this._refreshItemRowMap();
 	}
@@ -1555,7 +1555,7 @@ Zotero.ItemTreeView.prototype.sort = function (itemID) {
 	// Need to close all containers before sorting
 	if (!this.selection.selectEventsSuppressed) {
 		var unsuppress = this.selection.selectEventsSuppressed = true;
-		//this._treebox.beginUpdateBatch();
+		this._treebox.beginUpdateBatch();
 	}
 	var savedSelection = this.getSelectedItems(true);
 	var openItemIDs = this._saveOpenState(true);
@@ -1602,8 +1602,8 @@ Zotero.ItemTreeView.prototype.sort = function (itemID) {
 	this.rememberSelection(savedSelection);
 	
 	if (unsuppress) {
+		this._treebox.endUpdateBatch();
 		this.selection.selectEventsSuppressed = false;
-		//this._treebox.endUpdateBatch();
 	}
 	
 	Zotero.debug("Sorted items list in " + (new Date - t) + " ms");
@@ -1910,7 +1910,7 @@ Zotero.ItemTreeView.prototype.rememberSelection = function (selection) {
 	
 	if (!this.selection.selectEventsSuppressed) {
 		var unsuppress = this.selection.selectEventsSuppressed = true;
-		//this._treebox.beginUpdateBatch();
+		this._treebox.beginUpdateBatch();
 	}
 	for(var i=0; i < selection.length; i++)
 	{
@@ -1937,7 +1937,7 @@ Zotero.ItemTreeView.prototype.rememberSelection = function (selection) {
 		}
 	}
 	if (unsuppress) {
-		//this._treebox.endUpdateBatch();
+		this._treebox.endUpdateBatch();
 		this.selection.selectEventsSuppressed = false;
 	}
 }
@@ -1962,7 +1962,7 @@ Zotero.ItemTreeView.prototype._saveOpenState = function (close) {
 	if (close) {
 		if (!this.selection.selectEventsSuppressed) {
 			var unsuppress = this.selection.selectEventsSuppressed = true;
-			//this._treebox.beginUpdateBatch();
+			this._treebox.beginUpdateBatch();
 		}
 	}
 	for (var i=0; i<this._rows.length; i++) {
@@ -1976,7 +1976,7 @@ Zotero.ItemTreeView.prototype._saveOpenState = function (close) {
 	if (close) {
 		this._refreshItemRowMap();
 		if (unsuppress) {
-			//this._treebox.endUpdateBatch();
+			this._treebox.endUpdateBatch();
 			this.selection.selectEventsSuppressed = false;
 		}
 	}
@@ -2000,7 +2000,7 @@ Zotero.ItemTreeView.prototype.rememberOpenState = function (itemIDs) {
 	
 	if (!this.selection.selectEventsSuppressed) {
 		var unsuppress = this.selection.selectEventsSuppressed = true;
-		//this._treebox.beginUpdateBatch();
+		this._treebox.beginUpdateBatch();
 	}
 	// Reopen from bottom up
 	for (var i=rowsToOpen.length-1; i>=0; i--) {
@@ -2008,36 +2008,40 @@ Zotero.ItemTreeView.prototype.rememberOpenState = function (itemIDs) {
 	}
 	this._refreshItemRowMap();
 	if (unsuppress) {
-		//this._treebox.endUpdateBatch();
+		this._treebox.endUpdateBatch();
 		this.selection.selectEventsSuppressed = false;
 	}
 }
 
 
 Zotero.ItemTreeView.prototype.expandMatchParents = function () {
+	var t = new Date();
+	var time = 0;
 	// Expand parents of child matches
 	if (!this._searchMode) {
 		return;
 	}
 	
-	var hash = {};
-	for (var id in this._searchParentIDs) {
-		hash[id] = true;
+	var parentIDs = new Set();
+	for (let id in this._searchParentIDs) {
+		parentIDs.add(parseInt(id));
 	}
 	
 	if (!this.selection.selectEventsSuppressed) {
 		var unsuppress = this.selection.selectEventsSuppressed = true;
-		//this._treebox.beginUpdateBatch();
+		this._treebox.beginUpdateBatch();
 	}
 	for (var i=0; i<this.rowCount; i++) {
 		var id = this.getRow(i).ref.id;
-		if (hash[id] && this.isContainer(i) && !this.isContainerOpen(i)) {
+		if (parentIDs.has(id) && this.isContainer(i) && !this.isContainerOpen(i)) {
+			var t2 = new Date();
 			this.toggleOpenState(i, true);
+			time += (new Date() - t2);
 		}
 	}
 	this._refreshItemRowMap();
 	if (unsuppress) {
-		//this._treebox.endUpdateBatch();
+		this._treebox.endUpdateBatch();
 		this.selection.selectEventsSuppressed = false;
 	}
 }
@@ -2061,36 +2065,36 @@ Zotero.ItemTreeView.prototype.rememberFirstRow = function(firstRow) {
 
 Zotero.ItemTreeView.prototype.expandAllRows = function () {
 	var unsuppress = this.selection.selectEventsSuppressed = true;
-	//this._treebox.beginUpdateBatch();
+	this._treebox.beginUpdateBatch();
 	for (var i=0; i<this.rowCount; i++) {
 		if (this.isContainer(i) && !this.isContainerOpen(i)) {
 			this.toggleOpenState(i, true);
 		}
 	}
 	this._refreshItemRowMap();
-	//this._treebox.endUpdateBatch();
+	this._treebox.endUpdateBatch();
 	this.selection.selectEventsSuppressed = false;
 }
 
 
-Zotero.ItemTreeView.prototype.collapseAllRows = Zotero.Promise.coroutine(function* () {
+Zotero.ItemTreeView.prototype.collapseAllRows = function () {
 	var unsuppress = this.selection.selectEventsSuppressed = true;
-	//this._treebox.beginUpdateBatch();
+	this._treebox.beginUpdateBatch();
 	for (var i=0; i<this.rowCount; i++) {
 		if (this.isContainer(i)) {
 			this._closeContainer(i, true);
 		}
 	}
 	this._refreshItemRowMap();
-	//this._treebox.endUpdateBatch();
+	this._treebox.endUpdateBatch();
 	this.selection.selectEventsSuppressed = false;
-});
+};
 
 
 Zotero.ItemTreeView.prototype.expandSelectedRows = function () {
 	var start = {}, end = {};
 	this.selection.selectEventsSuppressed = true;
-	//this._treebox.beginUpdateBatch();
+	this._treebox.beginUpdateBatch();
 	for (var i = 0, len = this.selection.getRangeCount(); i<len; i++) {
 		this.selection.getRangeAt(i, start, end);
 		for (var j = start.value; j <= end.value; j++) {
@@ -2100,7 +2104,7 @@ Zotero.ItemTreeView.prototype.expandSelectedRows = function () {
 		}
 	}
 	this._refreshItemRowMap();
-	//this._treebox.endUpdateBatch();
+	this._treebox.endUpdateBatch();
 	this.selection.selectEventsSuppressed = false;
 }
 
@@ -2108,7 +2112,7 @@ Zotero.ItemTreeView.prototype.expandSelectedRows = function () {
 Zotero.ItemTreeView.prototype.collapseSelectedRows = function () {
 	var start = {}, end = {};
 	this.selection.selectEventsSuppressed = true;
-	//this._treebox.beginUpdateBatch();
+	this._treebox.beginUpdateBatch();
 	for (var i = 0, len = this.selection.getRangeCount(); i<len; i++) {
 		this.selection.getRangeAt(i, start, end);
 		for (var j = start.value; j <= end.value; j++) {
@@ -2118,7 +2122,7 @@ Zotero.ItemTreeView.prototype.collapseSelectedRows = function () {
 		}
 	}
 	this._refreshItemRowMap();
-	//this._treebox.endUpdateBatch();
+	this._treebox.endUpdateBatch();
 	this.selection.selectEventsSuppressed = false;
 }
 

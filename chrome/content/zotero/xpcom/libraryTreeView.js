@@ -104,18 +104,20 @@ Zotero.LibraryTreeView.prototype = {
 	 * @param {Zotero.ItemTreeRow} itemTreeRow
 	 * @param {Number} [beforeRow] - Row index to insert new row before
 	 */
-	_addRow: function (treeRow, beforeRow) {
+	_addRow: function (treeRow, beforeRow, skipRowMapRefresh) {
 		this._addRowToArray(this._rows, treeRow, beforeRow);
 		this.rowCount++;
 		this._treebox.rowCountChanged(beforeRow, 1);
-		// Increment all rows in map at or above insertion point
-		for (let i in this._rowMap) {
-			if (this._rowMap[i] >= beforeRow) {
-				this._rowMap[i]++
+		if (!skipRowMapRefresh) {
+			// Increment all rows in map at or above insertion point
+			for (let i in this._rowMap) {
+				if (this._rowMap[i] >= beforeRow) {
+					this._rowMap[i]++
+				}
 			}
+			// Add new row to map
+			this._rowMap[treeRow.id] = beforeRow;
 		}
-		// Add new row to map
-		this._rowMap[treeRow.id] = beforeRow;
 	},
 	
 	
