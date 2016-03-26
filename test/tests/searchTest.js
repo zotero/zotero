@@ -147,4 +147,53 @@ describe("Zotero.Search", function() {
 			assert.deepEqual(matches, [foobarItem.id]);
 		});
 	});
+	
+	describe("#toJSON()", function () {
+		it("should output all data", function* () {
+			let s = new Zotero.Search();
+			s.name = "Test";
+			s.addCondition('joinMode', 'any');
+			s.addCondition('fulltextWord', 'contains', 'afsgagsdg');
+			let json = s.toJSON();
+			assert.equal(json.name, "Test");
+			assert.lengthOf(json.conditions, 2);
+			assert.equal(json.conditions[0].condition, 'joinMode');
+			assert.equal(json.conditions[0].operator, 'any');
+			assert.equal(json.conditions[1].condition, 'fulltextWord');
+			assert.equal(json.conditions[1].operator, 'contains');
+			assert.equal(json.conditions[1].value, 'afsgagsdg');
+		});
+	});
+	
+	describe("#fromJSON()", function () {
+		it("should update all data", function* () {
+			let s = new Zotero.Search();
+			s.name = "Test";
+			s.addCondition('joinMode', 'any');
+			let json = s.toJSON();
+			json.name = "Test 2";
+			json.conditions = [
+				{
+					condition: 'title',
+					operator: 'contains',
+					value: 'foo'
+				},
+				{
+					condition: 'year',
+					operator: 'is',
+					value: '2016'
+				}
+			];
+			s.fromJSON(json);
+			assert.equal(s.name, "Test 2");
+			var conditions = s.getConditions();
+			assert.lengthOf(Object.keys(conditions), 2);
+			assert.equal(conditions["0"].condition, 'title');
+			assert.equal(conditions["0"].operator, 'contains');
+			assert.equal(conditions["0"].value, 'foo');
+			assert.equal(conditions["1"].condition, 'year');
+			assert.equal(conditions["1"].operator, 'is');
+			assert.equal(conditions["1"].value, '2016');
+		});
+	});
 });

@@ -290,4 +290,24 @@ describe("ZoteroPane", function() {
 			assert.equal(cv.getSelectedLibraryID(), userLibraryID);
 		});
 	});
+	
+	describe("#editSelectedCollection()", function () {
+		it("should edit a saved search", function* () {
+			var search = yield createDataObject('search');
+			var promise = waitForWindow('chrome://zotero/content/searchDialog.xul', function (win) {
+				let searchBox = win.document.getElementById('search-box');
+				var c = searchBox.search.getCondition(
+					searchBox.search.addCondition("title", "contains", "foo")
+				);
+				searchBox.addCondition(c);
+				Zotero.debug("ACCEPTING");
+				win.document.documentElement.acceptDialog();
+			});
+			yield zp.editSelectedCollection();
+			yield promise;
+			var conditions = search.getConditions();
+			Zotero.debug(conditions);
+			assert.lengthOf(Object.keys(conditions), 2);
+		});
+	});
 })

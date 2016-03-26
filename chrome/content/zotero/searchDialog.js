@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+"use strict";
+
 var itemsView;
 var collectionsView;
 var io;
@@ -50,7 +52,11 @@ function doAccept()
 {
 	document.getElementById('search-box').search.name = document.getElementById('search-name').value;
 	try {
-		io.dataOut = document.getElementById('search-box').save();
+		let searchBox = document.getElementById('search-box');
+		searchBox.updateSearch();
+		io.dataOut = {
+			json: searchBox.search.toJSON()
+		};
 	}
 	catch (e) {
 		Zotero.debug(e, 1);

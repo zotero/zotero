@@ -55,7 +55,7 @@ Zotero.ItemTreeView = function (collectionTreeRow, sourcesOnly) {
 	
 	this._unregisterID = Zotero.Notifier.registerObserver( 
 		this,
-		['item', 'collection-item', 'item-tag', 'share-items', 'bucket', 'feedItem'],
+		['item', 'collection-item', 'item-tag', 'share-items', 'bucket', 'feedItem', 'search'],
 		'itemTreeView',
 		50
 	);
@@ -348,8 +348,8 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 	});
 	
 	try {
-		var newItems = yield this.collectionTreeRow.getItems();
 		Zotero.CollectionTreeCache.clear();
+		var newItems = yield this.collectionTreeRow.getItems();
 		
 		if (!this.selection.selectEventsSuppressed) {
 			var unsuppress = this.selection.selectEventsSuppressed = true;
@@ -461,6 +461,14 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		for (let i=0; i<ids.length; i++) {
 			this._treebox.invalidateRow(this._itemRowMap[ids[i]]);
 		}
+		return;
+	}
+	
+	if (type == 'search' && action == 'modify') {
+		// TODO: Only refresh on condition change (not currently available in extraData)
+		yield this.refresh();
+		this.sort();
+		this._treebox.invalidate();
 		return;
 	}
 	
@@ -757,7 +765,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	}
 	else if(type == 'item' && action == 'add')
 	{
-		let items = yield Zotero.Items.getAsync(ids);
+		let items = Zotero.Items.get(ids);
 		
 		// In some modes, just re-run search
 		if (collectionTreeRow.isSearch() || collectionTreeRow.isTrash() || collectionTreeRow.isUnfiled()) {

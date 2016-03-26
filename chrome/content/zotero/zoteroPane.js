@@ -1899,10 +1899,7 @@ var ZoteroPane = new function()
 				}
 			}
 			else {
-				let s = new Zotero.Search();
-				s.id = row.ref.id;
-				yield s.loadPrimaryData();
-				yield s.loadConditions();
+				let s = row.ref.clone();
 				let groups = [];
 				// Promises don't work in the modal dialog, so get the group name here, if
 				// applicable, and pass it in. We only need the group that this search belongs
@@ -1920,7 +1917,8 @@ var ZoteroPane = new function()
 				};
 				window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
 				if (io.dataOut) {
-					this.onCollectionSelected(); //reload itemsView
+					row.ref.fromJSON(io.dataOut.json);
+					yield row.ref.saveTx();
 				}
 			}
 		}

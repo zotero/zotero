@@ -222,15 +222,6 @@
 				</body>
 			</method>
 			
-			<method name="save">
-				<body>
-					<![CDATA[
-						this.updateSearch();
-						return this.search.save();
-					]]>
-				</body>
-			</method>
-			
 			<method name="handleKeyPress">
 				<parameter name="event"/>
 				<body>

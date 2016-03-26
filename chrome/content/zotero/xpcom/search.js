@@ -447,6 +447,7 @@ Zotero.Search.prototype.removeCondition = function (searchConditionID) {
 	}
 	
 	delete this._conditions[searchConditionID];
+	this._maxSearchConditionID--;
 	this._markFieldChange('conditions', this._conditions);
 	this._changed.conditions = true;
 }
@@ -827,6 +828,7 @@ Zotero.Search.prototype.fromJSON = function (json) {
 	}
 	this.name = json.name;
 	
+	Object.keys(this.getConditions()).forEach(id => this.removeCondition(0));
 	for (let i = 0; i < json.conditions.length; i++) {
 		let condition = json.conditions[i];
 		this.addCondition(
@@ -851,7 +853,8 @@ Zotero.Search.prototype.toJSON = function (options = {}) {
 	obj.key = this.key;
 	obj.version = this.version;
 	obj.name = this.name;
-	obj.conditions = this.getConditions();
+	var conditions = this.getConditions();
+	obj.conditions = Object.keys(conditions).map(x => conditions[x]);
 	
 	return this._postToJSON(env);
 }

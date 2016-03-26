@@ -232,6 +232,64 @@ describe("Zotero.ItemTreeView", function() {
 			yield Zotero.Items.erase(items.map(item => item.id));
 		})
 		
+		it("should update search results when items are added", function* () {
+			var search = createUnsavedDataObject('search');
+			var title = Zotero.Utilities.randomString();
+			search.fromJSON({
+				name: "Test",
+				conditions: [
+					{
+						condition: "title",
+						operator: "is",
+						value: title
+					}
+				]
+			});
+			yield search.saveTx();
+			
+			yield waitForItemsLoad(win);
+			assert.equal(zp.itemsView.rowCount, 0);
+			
+			// Add an item matching search
+			var item = yield createDataObject('item', { title });
+			
+			yield waitForItemsLoad(win);
+			assert.equal(zp.itemsView.rowCount, 1);
+			assert.equal(zp.itemsView.getRowIndexByID(item.id), 0);
+		});
+		
+		it("should update search results when search conditions are changed", function* () {
+			var search = createUnsavedDataObject('search');
+			var title1 = Zotero.Utilities.randomString();
+			var title2 = Zotero.Utilities.randomString();
+			search.fromJSON({
+				name: "Test",
+				conditions: [
+					{
+						condition: "title",
+						operator: "is",
+						value: title1
+					}
+				]
+			});
+			yield search.saveTx();
+			
+			yield waitForItemsLoad(win);
+			
+			// Add an item that doesn't match search
+			var item = yield createDataObject('item', { title: title2 });
+			yield waitForItemsLoad(win);
+			assert.equal(zp.itemsView.rowCount, 0);
+			
+			// Modify conditions to match item
+			search.removeCondition(0);
+			search.addCondition("title", "is", title2);
+			yield search.saveTx();
+			
+			yield waitForItemsLoad(win);
+			
+			assert.equal(zp.itemsView.rowCount, 1);
+		});
 		
 		it("should remove items from Unfiled Items when added to a collection", function* () {
 			var userLibraryID = Zotero.Libraries.userLibraryID;

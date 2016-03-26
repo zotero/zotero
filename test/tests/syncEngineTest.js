@@ -449,7 +449,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 					break;
 				
 				case 'search':
-					assert.typeOf(cached.data.conditions, 'object');
+					assert.isArray(cached.data.conditions);
 					break;
 				}
 			}
