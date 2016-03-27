@@ -119,7 +119,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	
 	
 	this.clearLibraryVersion = function (libraryID) {
-		return Zotero.DB.queryAsync("DELETE FROM version WHERE schema=?", "fulltext" + libraryID);
+		return Zotero.DB.queryAsync("DELETE FROM version WHERE schema=?", "fulltext_" + libraryID);
 	};
 	
 	
