@@ -69,14 +69,8 @@ function onCollectionSelected()
 		var collection = collectionsView.getRow(collectionsView.selection.currentIndex);
 		collection.setSearch('');
 		
-		try {
-			Zotero.UnresponsiveScriptIndicator.disable();
-			itemsView = new Zotero.ItemTreeView(collection, (window.arguments[1] ? true : false));
-			document.getElementById('zotero-items-tree').view = itemsView;
-		}
-		finally {
-			Zotero.UnresponsiveScriptIndicator.enable();
-		}
+		itemsView = new Zotero.ItemTreeView(collection, (window.arguments[1] ? true : false));
+		document.getElementById('zotero-items-tree').view = itemsView;
 		
 		if (collection.isLibrary()) {
 			Zotero.Prefs.set('lastViewedFolder', 'L');

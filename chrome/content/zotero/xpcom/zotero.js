@@ -2793,43 +2793,6 @@ Zotero.Browser = new function() {
 	}
 }
 
-/**
- * Functions for disabling and enabling the unresponsive script indicator
- **/
-Zotero.UnresponsiveScriptIndicator = new function() {
-	this.disable = disable;
-	this.enable = enable;
-	
-	// stores the state of the unresponsive script preference prior to disabling
-	var _unresponsiveScriptPreference, _isDisabled;
-	
-	/**
-	 * disables the "unresponsive script" warning; necessary for import and
-	 * export, which can take quite a while to execute
-	 **/
-	function disable() {
-		// don't do anything if already disabled
-		if (_isDisabled) {
-			return false;
-		}
-		
-		_unresponsiveScriptPreference = Services.prefs.getIntPref("dom.max_chrome_script_run_time");
-		Services.prefs.setIntPref("dom.max_chrome_script_run_time", 0);
-		
-		_isDisabled = true;
-		return true;
-	}
-	 
-	/**
-	 * restores the "unresponsive script" warning
-	 **/
-	function enable() {
-		Services.prefs.setIntPref("dom.max_chrome_script_run_time", _unresponsiveScriptPreference);
-		
-		_isDisabled = false;
-	}
-}
-
 
 /*
  * Implements nsIWebProgressListener

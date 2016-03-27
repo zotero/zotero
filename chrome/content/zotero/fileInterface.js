@@ -94,7 +94,6 @@ Zotero_File_Exporter.prototype.save = Zotero.Promise.coroutine(function* () {
 		Zotero.updateZoteroPaneProgressMeter(translation.getProgress());
 	});
 	translation.setHandler("done", this._exportDone);
-	Zotero.UnresponsiveScriptIndicator.disable();
 	Zotero_File_Interface.Progress.show(
 		Zotero.getString("fileInterface.itemsExported")
 	);
@@ -106,7 +105,6 @@ Zotero_File_Exporter.prototype.save = Zotero.Promise.coroutine(function* () {
  */
 Zotero_File_Exporter.prototype._exportDone = function(obj, worked) {
 	Zotero_File_Interface.Progress.close();
-	Zotero.UnresponsiveScriptIndicator.enable();
 	
 	if(!worked) {
 		window.alert(Zotero.getString("fileInterface.exportError"));
@@ -332,7 +330,6 @@ var Zotero_File_Interface = new function() {
 
 		yield Zotero.Promise.delay(0);
 
-		Zotero.UnresponsiveScriptIndicator.disable();
 		let failed = false;
 		try {
 			yield translation.translate(libraryID);
@@ -340,7 +337,6 @@ var Zotero_File_Interface = new function() {
 			Zotero.logError(e);
 			failed = true;
 		}
-		Zotero.UnresponsiveScriptIndicator.enable();
 		Zotero_File_Interface.Progress.close();
 
 		// Add items to import collection
