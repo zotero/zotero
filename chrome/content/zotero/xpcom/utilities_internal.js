@@ -225,6 +225,125 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
+	gzip: Zotero.Promise.coroutine(function* (data) {
+		var deferred = Zotero.Promise.defer();
+		
+		// Get input stream from POST data
+		var unicodeConverter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+			.createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+		unicodeConverter.charset = "UTF-8";
+		var is = unicodeConverter.convertToInputStream(data);
+		
+		// Initialize stream converter
+		var converter = Components.classes["@mozilla.org/streamconv;1?from=uncompressed&to=gzip"]
+			.createInstance(Components.interfaces.nsIStreamConverter);
+		converter.asyncConvertData(
+			"uncompressed",
+			"gzip",
+			{
+				binaryInputStream: null,
+				size: 0,
+				data: '',
+				
+				onStartRequest: function (request, context) {},
+				
+				onStopRequest: function (request, context, status) {
+					this.binaryInputStream.close();
+					delete this.binaryInputStream;
+					
+					deferred.resolve(this.data);
+				},
+				
+				onDataAvailable: function (request, context, inputStream, offset, count) {
+					this.size += count;
+					
+					this.binaryInputStream = Components.classes["@mozilla.org/binaryinputstream;1"]
+						.createInstance(Components.interfaces.nsIBinaryInputStream)
+					this.binaryInputStream.setInputStream(inputStream);
+					this.data += this.binaryInputStream.readBytes(this.binaryInputStream.available());
+				},
+				
+				QueryInterface: function (iid) {
+					if (iid.equals(Components.interfaces.nsISupports)
+						   || iid.equals(Components.interfaces.nsIStreamListener)) {
+						return this;
+					}
+					throw Components.results.NS_ERROR_NO_INTERFACE;
+				}
+			},
+			null
+		);
+		
+		// Send input stream to stream converter
+		var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"]
+			.createInstance(Components.interfaces.nsIInputStreamPump);
+		pump.init(is, -1, -1, 0, 0, true);
+		pump.asyncRead(converter, null);
+		
+		return deferred.promise;
+	}),
+	
+	
+	gunzip: Zotero.Promise.coroutine(function* (data) {
+		var deferred = Zotero.Promise.defer();
+		
+		Components.utils.import("resource://gre/modules/NetUtil.jsm");
+		
+		var is = Components.classes["@mozilla.org/io/string-input-stream;1"]
+			.createInstance(Ci.nsIStringInputStream);
+		is.setData(data, data.length);
+		
+		var bis = Components.classes["@mozilla.org/binaryinputstream;1"]
+			.createInstance(Components.interfaces.nsIBinaryInputStream);
+		bis.setInputStream(is);
+		
+		// Initialize stream converter
+		var converter = Components.classes["@mozilla.org/streamconv;1?from=gzip&to=uncompressed"]
+			.createInstance(Components.interfaces.nsIStreamConverter);
+		converter.asyncConvertData(
+			"gzip",
+			"uncompressed",
+			{
+				data: '',
+				
+				onStartRequest: function (request, context) {},
+				
+				onStopRequest: function (request, context, status) {
+					deferred.resolve(this.data);
+				},
+				
+				onDataAvailable: function (request, context, inputStream, offset, count) {
+					this.data += NetUtil.readInputStreamToString(
+						inputStream,
+						inputStream.available(),
+						{
+							charset: 'UTF-8',
+							replacement: 65533
+						}
+					)
+				},
+				
+				QueryInterface: function (iid) {
+					if (iid.equals(Components.interfaces.nsISupports)
+						   || iid.equals(Components.interfaces.nsIStreamListener)) {
+						return this;
+					}
+					throw Components.results.NS_ERROR_NO_INTERFACE;
+				}
+			},
+			null
+		);
+		
+		// Send input stream to stream converter
+		var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"]
+			.createInstance(Components.interfaces.nsIInputStreamPump);
+		pump.init(bis, -1, -1, 0, 0, true);
+		pump.asyncRead(converter, null);
+		
+		return deferred.promise;
+	}),
+	
+	
 	/**
 	 * Unicode normalization
 	 */

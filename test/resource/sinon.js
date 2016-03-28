@@ -5278,6 +5278,11 @@ if (typeof sinon === "undefined") {
                         this.requestHeaders["Content-Type"] = "text/plain;charset=utf-8";
                     }
 
+                    // Added by Zotero
+                    if (this.requestHeaders['Content-Encoding'] == 'gzip') {
+                        data = gunzip(data, true);
+                    }
+
                     this.requestBody = data;
                 }
 

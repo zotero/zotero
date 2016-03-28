@@ -12,6 +12,18 @@ describe("Zotero.Utilities.Internal", function () {
 	})
 	
 	
+	describe("#gzip()/gunzip()", function () {
+		it("should compress and decompress a Unicode text string", function* () {
+			var text = "Voilà! \u1F429";
+			var compstr = yield Zotero.Utilities.Internal.gzip(text);
+			assert.isAbove(compstr.length, 0);
+			assert.notEqual(compstr.length, text.length);
+			var str = yield Zotero.Utilities.Internal.gunzip(compstr);
+			assert.equal(str, text);
+		});
+	});
+	
+	
 	describe("#delayGenerator", function () {
 		var spy;
 		

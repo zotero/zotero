@@ -181,9 +181,25 @@ Zotero.HTTP = new function() {
 		}
 		
 		// Send headers
-		var headers = (options && options.headers) || {};
-		if (options.body && !headers["Content-Type"]) {
-			headers["Content-Type"] = "application/x-www-form-urlencoded";
+		var headers = {};
+		if (options && options.headers) {
+			Object.assign(headers, options.headers);
+		}
+		var compressedBody = false;
+		if (options.body) {
+			if (!headers["Content-Type"]) {
+				headers["Content-Type"] = "application/x-www-form-urlencoded";
+			}
+			
+			if (options.compressBody && this.isWriteMethod(method)) {
+				headers['Content-Encoding'] = 'gzip';
+				compressedBody = yield Zotero.Utilities.Internal.gzip(options.body);
+				
+				let oldLen = options.body.length;
+				let newLen = compressedBody.length;
+				Zotero.debug(`${method} body gzipped from ${oldLen} to ${newLen}; `
+					+ Math.round(((oldLen - newLen) / oldLen) * 100) + "% savings");
+			}
 		}
 		if (options.debug) {
 			if (headers["Zotero-API-Key"]) {
@@ -248,7 +264,19 @@ Zotero.HTTP = new function() {
 			options.cookieSandbox.attachToInterfaceRequestor(xmlhttp);
 		}
 		
-		xmlhttp.send(options.body || null);
+		// Send binary data
+		if (compressedBody) {
+			let numBytes = compressedBody.length;
+			let ui8Data = new Uint8Array(numBytes);
+			for (let i = 0; i < numBytes; i++) {
+				ui8Data[i] = compressedBody.charCodeAt(i) & 0xff;
+			}
+			xmlhttp.send(ui8Data);
+		}
+		// Send regular request
+		else {
+			xmlhttp.send(options.body || null);
+		}
 		
 		return deferred.promise;
 	});
@@ -703,6 +731,11 @@ Zotero.HTTP = new function() {
 		xmlhttp.send(null);
 		return xmlhttp;
 	}
+	
+	
+	this.isWriteMethod = function (method) {
+		return method == 'POST' || method == 'PUT' || method == 'PATCH';
+	};
 	
 	
 	this.getDisplayURI = function (uri) {

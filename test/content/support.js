@@ -281,6 +281,13 @@ function clickOnItemsRow(itemsView, row, button = 0) {
 }
 
 
+/**
+ * Synchronous inflate
+ */
+function gunzip(gzdata) {
+	return pako.inflate(gzdata, { to: 'string' });
+}
+
 
 /**
  * Get a default group used by all tests that want one, creating one if necessary

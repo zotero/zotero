@@ -43,6 +43,7 @@ Zotero.Sync.APIClient = function (options) {
 
 Zotero.Sync.APIClient.prototype = {
 	MAX_OBJECTS_PER_REQUEST: 100,
+	MIN_GZIP_SIZE: 1000,
 	
 	
 	getKeyInfo: Zotero.Promise.coroutine(function* (options={}) {
@@ -571,6 +572,10 @@ Zotero.Sync.APIClient.prototype = {
 		opts.dontCache = true;
 		opts.foreground = !options.background;
 		opts.responseType = options.responseType || 'text';
+		if (options.body && options.body.length >= this.MIN_GZIP_SIZE) {
+			opts.compressBody = true;
+		}
+		
 		var tries = 0;
 		var failureDelayGenerator = null;
 		while (true) {
