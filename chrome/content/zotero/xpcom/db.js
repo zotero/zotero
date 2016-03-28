@@ -719,7 +719,7 @@ Zotero.DBConnection.prototype.valueQueryAsync = Zotero.Promise.coroutine(functio
 		let conn = this._getConnection(options) || (yield this._getConnectionAsync(options));
 		[sql, params] = this.parseQueryAndParams(sql, params);
 		if (Zotero.Debug.enabled) {
-			this.logQuery(sql, params);
+			this.logQuery(sql, params, options);
 		}
 		let rows = yield conn.executeCached(sql, params);
 		return rows.length ? rows[0].getResultByIndex(0) : false;
@@ -762,7 +762,7 @@ Zotero.DBConnection.prototype.columnQueryAsync = Zotero.Promise.coroutine(functi
 		let conn = this._getConnection(options) || (yield this._getConnectionAsync(options));
 		[sql, params] = this.parseQueryAndParams(sql, params);
 		if (Zotero.Debug.enabled) {
-			this.logQuery(sql, params);
+			this.logQuery(sql, params, options);
 		}
 		let rows = yield conn.executeCached(sql, params);
 		var column = [];
