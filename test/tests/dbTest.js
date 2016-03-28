@@ -131,6 +131,44 @@ describe("Zotero.DB", function() {
 			assert.equal(rows[0].a, 1);
 			assert.equal(rows[1].a, 2);
 		})
+		
+		it("should throw an error if onRow throws an error", function* () {
+			var i = 0;
+			var e = Zotero.DB.queryAsync(
+				"SELECT * FROM " + tmpTable,
+				false,
+				{
+					onRow: function (row) {
+						if (i > 0) {
+							throw new Error("Failed");
+						}
+						i++;
+					}
+				}
+			);
+			e = yield getPromiseError(e)
+			assert.ok(e);
+			assert.equal(e.message, "Failed");
+		});
+		
+		it("should stop gracefully if onRow throws a StopIteration", function* () {
+			var i = 0;
+			var rows = [];
+			yield Zotero.DB.queryAsync(
+				"SELECT * FROM " + tmpTable,
+				false,
+				{
+					onRow: function (row) {
+						if (i > 0) {
+							throw StopIteration;
+						}
+						rows.push(row.getResultByIndex(0));
+						i++;
+					}
+				}
+			);
+			assert.lengthOf(rows, 1);
+		});
 	})
 	
 	
