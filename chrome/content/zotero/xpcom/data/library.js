@@ -444,7 +444,7 @@ Zotero.Library.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	}
 	
 	if (env.isNew) {
-		let id = yield Zotero.ID.get('libraries'); // Cannot retrieve auto-incremented ID with async queries
+		let id = Zotero.ID.get('libraries');
 		changedCols.unshift('libraryID');
 		params.unshift(id);
 		

@@ -148,7 +148,7 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	var isNew = env.isNew;
 	var options = env.options;
 	
-	var searchID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('savedSearches');
+	var searchID = this._id = this.id ? this.id : Zotero.ID.get('savedSearches');
 	
 	env.sqlColumns.push(
 		'savedSearchName'
@@ -164,10 +164,7 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let placeholders = env.sqlColumns.map(function () '?').join();
 		let sql = "INSERT INTO savedSearches (" + env.sqlColumns.join(', ') + ") "
 			+ "VALUES (" + placeholders + ")";
-		var insertID = yield Zotero.DB.queryAsync(sql, env.sqlValues);
-		if (!searchID) {
-			searchID = env.id = insertID;
-		}
+		yield Zotero.DB.queryAsync(sql, env.sqlValues);
 	}
 	else {
 		let sql = 'UPDATE savedSearches SET '

@@ -621,6 +621,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				// Initialize Locate Manager
 				Zotero.LocateManager.init();
 				
+				yield Zotero.ID.init();
 				yield Zotero.Collections.init();
 				yield Zotero.Items.init();
 				yield Zotero.Searches.init();

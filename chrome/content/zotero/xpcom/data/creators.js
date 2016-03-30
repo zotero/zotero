@@ -90,7 +90,7 @@ Zotero.Creators = new function() {
 			sql, [data.firstName, data.lastName, data.fieldMode]
 		);
 		if (!id && create) {
-			id = yield Zotero.ID.get('creators');
+			id = Zotero.ID.get('creators');
 			let sql = "INSERT INTO creators (creatorID, firstName, lastName, fieldMode) "
 				+ "VALUES (?, ?, ?, ?)";
 			yield Zotero.DB.queryAsync(

@@ -259,7 +259,7 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 	var isNew = env.isNew;
 	var options = env.options;
 
-	var collectionID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('collections');
+	var collectionID = this._id = this.id ? this.id : Zotero.ID.get('collections');
 	
 	Zotero.debug("Saving collection " + this.id);
 	
@@ -279,10 +279,7 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 		let placeholders = env.sqlColumns.map(function () '?').join();
 		let sql = "INSERT INTO collections (" + env.sqlColumns.join(', ') + ") "
 			+ "VALUES (" + placeholders + ")";
-		var insertID = yield Zotero.DB.queryAsync(sql, env.sqlValues);
-		if (!collectionID) {
-			collectionID = env.id = insertID;
-		}
+		yield Zotero.DB.queryAsync(sql, env.sqlValues);
 	}
 	else {
 		let sql = 'UPDATE collections SET '

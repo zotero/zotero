@@ -65,12 +65,9 @@ Zotero.Tags = new function() {
 		var sql = "SELECT tagID FROM tags WHERE name=?";
 		var id = yield Zotero.DB.valueQueryAsync(sql, data.tag);
 		if (!id && create) {
-			id = yield Zotero.ID.get('tags');
+			id = Zotero.ID.get('tags');
 			let sql = "INSERT INTO tags (tagID, name) VALUES (?, ?)";
-			let insertID = yield Zotero.DB.queryAsync(sql, [id, data.tag]);
-			if (!id) {
-				id = insertID;
-			}
+			yield Zotero.DB.queryAsync(sql, [id, data.tag]);
 		}
 		return id;
 	});

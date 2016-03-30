@@ -153,7 +153,7 @@ Zotero.FeedItem.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 		var superOnCommit = env.transactionOptions.onCommit;
 		env.transactionOptions.onCommit = () => {
 			if (superOnCommit) superOnCommit();
-			this.ObjectsClass._setGUIDMapping(this.guid, env.id);
+			this.ObjectsClass._setGUIDMapping(this.guid, this._id);
 		};
 	}
 	
@@ -165,7 +165,15 @@ Zotero.FeedItem.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	
 	if (this._changed.feedItemData || env.isNew) {
 		var sql = "REPLACE INTO feedItems VALUES (?,?,?,?)";
-		yield Zotero.DB.queryAsync(sql, [env.id, this.guid, this._feedItemReadTime, this._feedItemTranslatedTime]);
+		yield Zotero.DB.queryAsync(
+			sql,
+			[
+				this.id,
+				this.guid,
+				this._feedItemReadTime,
+				this._feedItemTranslatedTime
+			]
+		);
 		
 		this._clearChanged('feedItemData');
 	}

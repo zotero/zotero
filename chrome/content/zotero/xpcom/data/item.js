@@ -1225,7 +1225,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	// Primary fields
 	//
 	// If available id value, use it -- otherwise we'll use autoincrement
-	var itemID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('items');
+	var itemID = this._id = this.id ? this.id : Zotero.ID.get('items');
 	
 	env.sqlColumns.push(
 		'itemTypeID',
@@ -1259,10 +1259,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		
 		let sql = "INSERT INTO items (" + env.sqlColumns.join(", ") + ") "
 			+ "VALUES (" + env.sqlValues.map(function () "?").join() + ")";
-		var insertID = yield Zotero.DB.queryAsync(sql, env.sqlValues);
-		if (!itemID) {
-			itemID = env.id = insertID;
-		}
+		yield Zotero.DB.queryAsync(sql, env.sqlValues);
 		
 		if (!env.options.skipNotifier) {
 			Zotero.Notifier.queue('add', 'item', itemID, env.notifierData);
@@ -1305,7 +1302,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			
 			let valueID = yield Zotero.DB.valueQueryAsync(valueSQL, [value], { debug: true })
 			if (!valueID) {
-				valueID = yield Zotero.ID.get('itemDataValues');
+				valueID = Zotero.ID.get('itemDataValues');
 				yield Zotero.DB.queryAsync(insertValueSQL, [valueID, value], { debug: false });
 			}
 			

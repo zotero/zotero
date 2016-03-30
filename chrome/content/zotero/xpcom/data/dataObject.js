@@ -902,7 +902,7 @@ Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env)
 	
 	// Undo registerObject() on failure
 	var func = function () {
-		this.ObjectsClass.unload(env.id);
+		this.ObjectsClass.unload(this._id);
 	}.bind(this);
 	if (env.options.tx) {
 		env.transactionOptions.onRollback = func;

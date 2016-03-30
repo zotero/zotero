@@ -645,7 +645,7 @@ Zotero.Proxy.prototype.save = Zotero.Promise.coroutine(function* (transparent) {
 				);
 				yield Zotero.DB.queryAsync("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
 			} else {
-				let id = yield Zotero.ID.get('proxies');
+				let id = Zotero.ID.get('proxies');
 				yield Zotero.DB.queryAsync(
 					"INSERT INTO proxies (proxyID, multiHost, autoAssociate, scheme) VALUES (?, ?, ?, ?)",
 					[id, this.multiHost ? 1 : 0, this.autoAssociate ? 1 : 0, this.scheme]
