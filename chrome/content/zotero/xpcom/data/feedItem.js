@@ -182,9 +182,6 @@ Zotero.FeedItem.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 Zotero.FeedItem.prototype._finalizeErase = Zotero.Promise.coroutine(function* () {
 	// Set for syncing
 	let feed = Zotero.Feeds.get(this.libraryID);
-	let syncedSettings = feed.getSyncedSettings();
-	delete syncedSettings.markedAsRead[this.guid];
-	yield feed.setSyncedSettings(syncedSettings);
 	
 	return Zotero.FeedItem._super.prototype._finalizeErase.apply(this, arguments);
 });
@@ -195,18 +192,9 @@ Zotero.FeedItem.prototype.toggleRead = Zotero.Promise.coroutine(function* (state
 	if (changed) {
 		this.isRead = state;
 		
-		// Set for syncing
-		let feed = Zotero.Feeds.get(this.libraryID);
-		let syncedSettings = feed.getSyncedSettings();
-		if (state) {
-			syncedSettings.markedAsRead[this.guid] = true;
-		} else {
-			delete syncedSettings.markedAsRead[this.guid];
-		}
-		yield feed.setSyncedSettings(syncedSettings, true);
-		
 		yield this.saveTx();
-		
+
+		let feed = Zotero.Feeds.get(this.libraryID);
 		yield feed.updateUnreadCount();
 	}
 });

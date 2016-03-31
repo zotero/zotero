@@ -331,33 +331,14 @@ Zotero.Feed.prototype.erase = Zotero.Promise.coroutine(function* (options = {}) 
 	yield Zotero.Feed._super.prototype.erase.call(this, options);
 });
 
-Zotero.Feed.prototype.getSyncedSettings = function () {
-	if (!this._syncedSettings) {
-		let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds') || {};
-		this._syncedSettings = syncedFeeds[this.url];
-	}
-	if (!this._syncedSettings) {
-		this._syncedSettings = {
-			url: this.url,
-			name: this.name,
-			cleanupAfter: this.cleanupAfter,
-			refreshInterval: this.refreshInterval,
-			markedAsRead: {}
-		};
-	}
-	return this._syncedSettings;
-};
-
-Zotero.Feed.prototype.setSyncedSettings = Zotero.Promise.coroutine(function* (syncedSettings, store=false) {
-	this._syncedSettings = syncedSettings;
-	if (store) {
-		return this.storeSyncedSettings();
-	}
-});
-
 Zotero.Feed.prototype.storeSyncedSettings = Zotero.Promise.coroutine(function* () {
 	let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds') || {};
-	syncedFeeds[this.url] = this.getSyncedSettings();
+	syncedFeeds[this.url] = {
+		url: this.url,
+		name: this.name,
+		cleanupAfter: this.cleanupAfter,
+		refreshInterval: this.refreshInterval
+	};
 	return Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'feeds', syncedFeeds);
 });
 
@@ -405,7 +386,6 @@ Zotero.Feed.prototype.clearExpiredItems = Zotero.Promise.coroutine(function* (it
 		Zotero.debug("Error clearing expired feed items");
 		Zotero.debug(e);
 	}
-	return this.storeSyncedSettings();
 });
 
 Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
@@ -533,10 +513,4 @@ Zotero.Feed.prototype.updateUnreadCount = Zotero.Promise.coroutine(function* () 
 		this._feedUnreadCount = newCount;
 		Zotero.Notifier.trigger('unreadCountUpdated', 'feed', this.id);
 	}
-});
-
-Zotero.Feed.prototype.updateFromJSON = Zotero.Promise.coroutine(function* (json) {
-	yield this.updateFeed();
-	yield Zotero.FeedItems.markAsReadByGUID(Object.keys(json.markedAsRead));
-	yield this.updateUnreadCount();
 });

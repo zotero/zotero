@@ -109,7 +109,7 @@ Zotero.FeedItems = new Proxy(function() {
 	});
 
 	/**
-	 * Used on restore from sync
+	 * Currently not used
 	 */
 	this.markAsReadByGUID = Zotero.Promise.coroutine(function* (guids) {
 		if (! Array.isArray(guids)) {
@@ -151,18 +151,9 @@ Zotero.FeedItems = new Proxy(function() {
 		yield Zotero.DB.executeTransaction(function() {
 			for (let i=0; i<items.length; i++) {
 				items[i].isRead = state;
-				
-				// Set for syncing
+
+				yield items[i].save();
 				let feed = Zotero.Feeds.get(items[i].libraryID);
-				let syncedSettings = feed.getSyncedSettings();
-				if (state) {
-					syncedSettings.markedAsRead[items[i].guid] = true;
-				} else {
-					delete syncedSettings.markedAsRead[items[i].guid];
-				}
-				yield feed.setSyncedSettings(syncedSettings);
-			
-				yield items[i].save({skipEditCheck: true});
 				feedsToUpdate.add(feed);
 			}
 		});
