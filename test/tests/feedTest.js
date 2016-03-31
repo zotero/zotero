@@ -199,39 +199,18 @@ describe("Zotero.Feed", function() {
 		});
 	});
 	
-	describe("#getSyncedSettings", function() {
-		it("should return correct synced settings for the feed", function* () {
-			let url = 'http://' + Zotero.Utilities.randomString(10, 'abcde') + '.com/feed.rss';
-			let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
-			assert.notOk(syncedFeeds[url]);
-			
-			let feed = yield createFeed({url});
-
-			syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
-			assert.ok(syncedFeeds[url]);
-			
-			let syncedData = feed.getSyncedSettings();
-			
-			assert.deepEqual(syncedData, syncedFeeds[url]);
-		});
-	});
-	
 	describe("#storeSyncedSettings", function() {
 		it("should store updated settings for the feed", function* () {
-			let guid = Zotero.Utilities.randomString();
-			let feed = yield createFeed();
+			let settings = { 
+				name: Zotero.Utilities.randomString(), 
+				url: 'http://' + Zotero.Utilities.randomString().toLowerCase() + '.com/feed.rss', 
+				refreshInterval: 1,
+				cleanupAfter: 1
+			};
+			let feed = yield createFeed(settings);
 			
 			let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
-			assert.notOk(syncedFeeds[feed.url].markedAsRead[guid]);
-
-			let syncedData = feed.getSyncedSettings();
-			syncedData.markedAsRead[guid] = true;
-			yield feed.setSyncedSettings(syncedData);
-			yield feed.storeSyncedSettings();
-			
-			syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
-
-			assert.isTrue(syncedFeeds[feed.url].markedAsRead[guid]);
+			assert.deepEqual(syncedFeeds[feed.url], settings);
 		});
 	});
 	

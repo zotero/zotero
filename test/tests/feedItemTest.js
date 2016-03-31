@@ -180,18 +180,6 @@ describe("Zotero.FeedItem", function () {
 			
 			//yield assert.isRejected(feedItem.EraseTx(), "does not allow erasing twice");
 		});
-		it("should remove synced setting if exists", function* () {
-			let item = yield createDataObject('feedItem', { libraryID });
-			
-			yield item.toggleRead();
-			let syncedSettings = feed.getSyncedSettings();
-			assert.ok(syncedSettings.markedAsRead[item.guid]);
-			
-			yield item.eraseTx();
-			
-			syncedSettings = feed.getSyncedSettings();
-			assert.notOk(syncedSettings.markedAsRead[item.guid]);
-		});
 	});
 	
 	describe("#toggleRead()", function() {
@@ -216,17 +204,6 @@ describe("Zotero.FeedItem", function () {
 			
 			yield item.toggleRead(true);
 			assert.isFalse(item.save.called, "item was not saved on toggle read to same state");
-		});
-		it('should set relevant synced settings', function* () {
-			let item = yield createDataObject('feedItem', { libraryID });
-			item.isRead = false;
-			yield item.saveTx();
-			
-			yield item.toggleRead();
-			
-			let feed = Zotero.Feeds.get(item.libraryID);
-			let syncedSettings = feed.getSyncedSettings();
-			assert.ok(syncedSettings.markedAsRead[item.guid], "item marked as read stored in synced settings");	
 		});
 	});
 	

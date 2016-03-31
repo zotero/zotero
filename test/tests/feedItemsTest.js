@@ -138,15 +138,5 @@ describe("Zotero.FeedItems", function () {
 				assert.isFalse(save.thisValues[i].isRead, "#toggleRead called with true");
 			}
 		});
-		
-		it('should set relevant sync settings', function* () {
-			items[0].isRead = false;
-			yield items[0].saveTx();
-			yield Zotero.FeedItems.toggleReadByID(ids);
-			
-			let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
-			let markedAsRead = Object.keys(syncedFeeds[feed.url].markedAsRead);
-			assert.deepEqual(markedAsRead, Object.keys(items).map((k) => items[k].guid));
-		});
 	});
 });

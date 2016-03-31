@@ -93,12 +93,10 @@ Zotero.Feeds = new function() {
 			json = syncedFeeds;
 		}
 		yield Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'feeds', json);
-		//
 		let feeds = Zotero.Feeds.getAll();
 		for (let feed of feeds) {
 			if (json[feed.url]) {
-				Zotero.debug("Feed " + feed.url + " is being updated from remote JSON");
-				yield feed.updateFromJSON(json[feed.url]);
+				Zotero.debug("Feed " + feed.url + " exists remotely and locally");
 				delete json[feed.url];
 			} else {
 				Zotero.debug("Feed " + feed.url + " does not exist in remote JSON. Deleting");
@@ -107,10 +105,10 @@ Zotero.Feeds = new function() {
 		}
 		// Because existing json[feed.url] got deleted, `json` now only contains new feeds
 		for (let url in json) {
-			Zotero.debug("Feed " + url + " is being created from remote JSON");
+			Zotero.debug("Feed " + url + " exists remotely but not locally. Creating");
 			let feed = new Zotero.Feed(json[url]);
 			yield feed.saveTx();
-			yield feed.updateFromJSON(json[url]);
+			yield feed.updateFeed();
 		}
 	});
 	
