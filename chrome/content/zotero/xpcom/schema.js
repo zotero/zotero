@@ -2239,6 +2239,10 @@ Zotero.Schema = new function(){
 			else if (i == 84) {
 				yield Zotero.DB.queryAsync("CREATE TABLE syncQueue (\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    syncObjectTypeID INT NOT NULL,\n    lastCheck TIMESTAMP,\n    tries INT,\n    PRIMARY KEY (libraryID, key, syncObjectTypeID),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE,\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID) ON DELETE CASCADE\n)");
 			}
+			
+			else if (i == 85) {
+				yield Zotero.DB.queryAsync("DELETE FROM version WHERE schema IN ('sync', 'syncdeletelog')");
+			}
 		}
 		
 		yield _updateDBVersion('userdata', toVersion);
