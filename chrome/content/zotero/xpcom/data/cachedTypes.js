@@ -467,6 +467,7 @@ Zotero.ItemTypes = new function() {
 			case 'bookSection':
 			case 'computerProgram':
 			case 'film':
+			case 'forumPost':
 			case 'instantMessage':
 			case 'interview':
 			case 'journalArticle':
@@ -487,7 +488,6 @@ Zotero.ItemTypes = new function() {
 			case 'dictionaryEntry':
 			case 'email':
 			case 'encyclopediaArticle':
-			case 'forumPost':
 			case 'hearing':
 			case 'manuscript':
 			case 'map':

@@ -732,10 +732,9 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 			/*
 			if (treeRow.ref.updating) {
 				collectionType += '-updating';
-			} else if (treeRow.ref.lastCheckError) {
+			} else */if (treeRow.ref.lastCheckError) {
 				collectionType += '-error';
 			}
-			*/
 			break;
 		
 		case 'trash':
