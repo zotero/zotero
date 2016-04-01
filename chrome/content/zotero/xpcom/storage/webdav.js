@@ -190,9 +190,6 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		var username = this.username;
 		var password = this.password;
 		
-		Zotero.debug('=-=-=-=');
-		Zotero.debug(password);
-		
 		if (!username) {
 			throw new this.VerificationError("NO_USERNAME");
 		}
@@ -999,7 +996,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			var href = Zotero.Utilities.xpathText(
 				response, "D:href", { D: 'DAV:' }
 			) || "";
-			Zotero.debug(href);
+			Zotero.debug("Checking response entry " + href);
 			
 			// Strip trailing slash if there isn't one on the root path
 			if (!trailingSlash) {

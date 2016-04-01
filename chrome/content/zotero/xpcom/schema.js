@@ -424,6 +424,8 @@ Zotero.Schema = new function(){
 		try {
 			yield Zotero.proxyAuthComplete.delay(1000);
 			
+			Zotero.debug("Updating bundled " + (mode || "files"));
+			
 			// Get path to add-on
 			
 			// Synchronous in Standalone
