@@ -60,9 +60,9 @@ Zotero.Item = function(itemTypeOrID) {
 	
 	// loadItemData
 	this._itemData = null;
-	this._noteTitle = null; // also loaded by Items.cacheFields()
-	this._noteText = null; // also loaded by Items.cacheFields()
-	this._displayTitle = null; // also loaded by Items.cacheFields()
+	this._noteTitle = null;
+	this._noteText = null;
+	this._displayTitle = null;
 	
 	// loadChildItems
 	this._attachments = null;
@@ -264,8 +264,7 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 		return '';
 	}
 	
-	// If the item is identified (has an id or key), this field has to be populated (e.g., by
-	// Zotero.Items.cacheFields()) or item data has to be loaded
+	// If the item is identified (has an id or key), this field has to be populated
 	if (this._identified && value === null && !this._loaded.itemData) {
 		throw new Zotero.Exception.UnloadedDataException(
 			"Item data not loaded and field '" + field + "' not set for item " +  this.libraryKey,
@@ -1848,8 +1847,6 @@ Zotero.Item.prototype.numNotes = function(includeTrashed, includeEmbedded) {
 
 /**
  * Get the first line of the note for display in the items list
- *
- * Note titles are loaded in loadItemData(), but can also come from Zotero.Items.cacheFields()
  *
  * @return	{String}
  */
@@ -3542,7 +3539,6 @@ Zotero.Item.prototype.getImageSrcWithTags = Zotero.Promise.coroutine(function* (
 	
 	var uri = this.getImageSrc();
 	
-	// TODO: Optimize this. Maybe load color/item associations in batch in cacheFields?
 	var tags = this.getTags();
 	if (!tags.length) {
 		return uri;
