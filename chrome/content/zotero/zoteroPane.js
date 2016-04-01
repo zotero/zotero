@@ -1614,7 +1614,7 @@ var ZoteroPane = new function()
 	
 	
 	/**
-	 * @return {Promise}
+	 * @return {Promise<Zotero.Item>} - The new Zotero.Item
 	 */
 	this.duplicateSelectedItem = Zotero.Promise.coroutine(function* () {
 		var self = this;
@@ -1636,6 +1636,8 @@ var ZoteroPane = new function()
 		});
 		
 		yield self.selectItem(newItem.id);
+		
+		return newItem;
 	});
 	
 	
