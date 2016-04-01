@@ -113,6 +113,11 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-pane-stack').setAttribute('oldsearchfield', 'true')
 		}
 		
+		if (Zotero.isStandalone) {
+			document.getElementById('zotero-tb-feed-add-fromPage').hidden = true;
+			document.getElementById('zotero-tb-feed-add-fromPage-menu').hidden = true;
+		}
+		
 		// register an observer for Zotero reload
 		observerService = Components.classes["@mozilla.org/observer-service;1"]
 					  .getService(Components.interfaces.nsIObserverService);
@@ -861,7 +866,27 @@ var ZoteroPane = new function()
 		return collection.saveTx();
 	});
 	
-	this.newFeed = Zotero.Promise.coroutine(function* () {
+	this.newFeedFromPage = Zotero.Promise.coroutine(function* (event) {
+		let data = {unsaved: true};
+		if (event) {
+			data.url = event.target.getAttribute('feed');
+		} else {
+			data.url = gBrowser.selectedBrowser.feeds[0].href;
+		}
+		window.openDialog('chrome://zotero/content/feedSettings.xul', 
+			null, 'centerscreen, modal', data);
+		if (!data.cancelled) {
+			let feed = new Zotero.Feed();
+			feed.url = data.url;
+			feed.name = data.title;
+			feed.refreshInterval = data.ttl;
+			feed.cleanupAfter = data.cleanupAfter;
+			yield feed.saveTx();
+			yield feed.updateFeed();
+		}
+	});
+	
+	this.newFeedFromURL = Zotero.Promise.coroutine(function* () {
 		let data = {};
 		window.openDialog('chrome://zotero/content/feedSettings.xul', 
 			null, 'centerscreen, modal', data);
@@ -2255,7 +2280,6 @@ var ZoteroPane = new function()
 			"newCollection",
 			"newSavedSearch",
 			"newSubcollection",
-			"newFeed",
 			"refreshFeed",
 			"sep1",
 			"showDuplicates",
