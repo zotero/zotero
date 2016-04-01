@@ -2332,69 +2332,73 @@ Zotero.ItemTreeView.prototype.onColumnPickerShowing = function (event) {
 		Zotero.debug(e, 1);
 	}
 	
+	//
 	// Secondary Sort menu
-	try {
-		let id = prefix + 'sort-menu';
-		let primaryField = this.getSortField();
-		let sortFields = this.getSortFields();
-		let secondaryField = false;
-		if (sortFields[1]) {
-			secondaryField = sortFields[1];
-		}
-		
-		// Get localized names from treecols, since the names are currently done via .dtd
-		let treecols = menupopup.parentNode.parentNode;
-		let primaryFieldLabel = treecols.getElementsByAttribute('id',
-			'zotero-items-column-' + primaryField)[0].getAttribute('label');
-		
-		let sortMenu = doc.createElementNS(ns, 'menu');
-		sortMenu.setAttribute('label',
-			Zotero.getString('pane.items.columnChooser.secondarySort', primaryFieldLabel));
-		sortMenu.setAttribute('anonid', id);
-		
-		let sortMenuPopup = doc.createElementNS(ns, 'menupopup');
-		sortMenuPopup.setAttribute('anonid', id + '-popup');
-		
-		// Generate menuitems
-		let sortOptions = [
-			'title',
-			'firstCreator',
-			'itemType',
-			'date',
-			'year',
-			'publisher',
-			'publicationTitle',
-			'dateAdded',
-			'dateModified'
-		];
-		for (let i=0; i<sortOptions.length; i++) {
-			let field = sortOptions[i];
-			// Hide current primary field, and don't show Year for Date, since it would be a no-op
-			if (field == primaryField || (primaryField == 'date' && field == 'year')) {
-				continue;
+	//
+	if (!this.collectionTreeRow.isFeed()) {
+		try {
+			let id = prefix + 'sort-menu';
+			let primaryField = this.getSortField();
+			let sortFields = this.getSortFields();
+			let secondaryField = false;
+			if (sortFields[1]) {
+				secondaryField = sortFields[1];
 			}
-			let label = treecols.getElementsByAttribute('id',
-				'zotero-items-column-' + field)[0].getAttribute('label');
 			
-			let sortMenuItem = doc.createElementNS(ns, 'menuitem');
-			sortMenuItem.setAttribute('fieldName', field);
-			sortMenuItem.setAttribute('label', label);
-			sortMenuItem.setAttribute('type', 'checkbox');
-			if (field == secondaryField) {
-				sortMenuItem.setAttribute('checked', 'true');
+			// Get localized names from treecols, since the names are currently done via .dtd
+			let treecols = menupopup.parentNode.parentNode;
+			let primaryFieldLabel = treecols.getElementsByAttribute('id',
+				'zotero-items-column-' + primaryField)[0].getAttribute('label');
+			
+			let sortMenu = doc.createElementNS(ns, 'menu');
+			sortMenu.setAttribute('label',
+				Zotero.getString('pane.items.columnChooser.secondarySort', primaryFieldLabel));
+			sortMenu.setAttribute('anonid', id);
+			
+			let sortMenuPopup = doc.createElementNS(ns, 'menupopup');
+			sortMenuPopup.setAttribute('anonid', id + '-popup');
+			
+			// Generate menuitems
+			let sortOptions = [
+				'title',
+				'firstCreator',
+				'itemType',
+				'date',
+				'year',
+				'publisher',
+				'publicationTitle',
+				'dateAdded',
+				'dateModified'
+			];
+			for (let i=0; i<sortOptions.length; i++) {
+				let field = sortOptions[i];
+				// Hide current primary field, and don't show Year for Date, since it would be a no-op
+				if (field == primaryField || (primaryField == 'date' && field == 'year')) {
+					continue;
+				}
+				let label = treecols.getElementsByAttribute('id',
+					'zotero-items-column-' + field)[0].getAttribute('label');
+				
+				let sortMenuItem = doc.createElementNS(ns, 'menuitem');
+				sortMenuItem.setAttribute('fieldName', field);
+				sortMenuItem.setAttribute('label', label);
+				sortMenuItem.setAttribute('type', 'checkbox');
+				if (field == secondaryField) {
+					sortMenuItem.setAttribute('checked', 'true');
+				}
+				sortMenuItem.setAttribute('oncommand',
+					'var view = ZoteroPane.itemsView; '
+					+ 'if (view.setSecondarySortField(this.getAttribute("fieldName"))) { view.sort(); }');
+				sortMenuPopup.appendChild(sortMenuItem);
 			}
-			sortMenuItem.setAttribute('oncommand',
-				'var view = ZoteroPane.itemsView; '
-				+ 'if (view.setSecondarySortField(this.getAttribute("fieldName"))) { view.sort(); }');
-			sortMenuPopup.appendChild(sortMenuItem);
+			
+			sortMenu.appendChild(sortMenuPopup);
+			menupopup.insertBefore(sortMenu, lastChild);
 		}
-		
-		sortMenu.appendChild(sortMenuPopup);
-		menupopup.insertBefore(sortMenu, lastChild);
-	}
-	catch (e) {
-		Components.utils.reportError(e);
-		Zotero.debug(e, 1);
+		catch (e) {
+			Components.utils.reportError(e);
+			Zotero.debug(e, 1);
+		}
 	}
 	
 	sep = doc.createElementNS(ns, 'menuseparator');
