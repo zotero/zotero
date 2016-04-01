@@ -134,10 +134,14 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
 			ids.forEach(id => {
 				let lk = objectsClass.getLibraryAndKeyFromID(id);
-				if (lk) {
+				if (lk && Zotero.Libraries.get(lk.libraryID).syncable) {
 					libraryIDs.add(lk.libraryID);
 				}
 			});
+		}
+		
+		if (!libraryIDs.size) {
+			return;
 		}
 		
 		Zotero.Sync.Runner.setSyncTimeout(

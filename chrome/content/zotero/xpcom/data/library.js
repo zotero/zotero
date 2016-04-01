@@ -148,6 +148,12 @@ Zotero.defineProperty(Zotero.Library.prototype, 'libraryVersion', {
 	set: function(v) this._set('_libraryVersion', v)
 });
 
+
+Zotero.defineProperty(Zotero.Library.prototype, 'syncable', {
+	get: function () { return this._libraryType != 'feed'; }
+});
+
+
 Zotero.defineProperty(Zotero.Library.prototype, 'lastSync', {
 	get: function() this._get('_libraryLastSync')
 });
