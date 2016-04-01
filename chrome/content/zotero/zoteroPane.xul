@@ -36,7 +36,8 @@
 
 <overlay id="zotero"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	
+
+	<script src="feedSettings.js"/>
 	<script src="include.js"/>
 	<script src="zoteroPane.js" type="application/javascript;version=1.8"/>
 	<script src="fileInterface.js"/>
@@ -58,7 +59,7 @@
 		<command id="cmd_zotero_createTimeline" oncommand="Zotero_Timeline_Interface.loadTimeline();"/>
 		<command id="cmd_zotero_rtfScan" oncommand="window.openDialog('chrome://zotero/content/rtfScan.xul', 'rtfScan', 'chrome,centerscreen')"/>
 		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane_Local.newCollection()"/>
-		<command id="cmd_zotero_newFeed" oncommand="ZoteroPane_Local.newFeed()"/>
+		<command id="cmd_zotero_newFeed_fromURL" oncommand="ZoteroPane_Local.newFeedFromURL()"/>
 		<command id="cmd_zotero_newSavedSearch" oncommand="ZoteroPane_Local.newSearch()"/>
 		<command id="cmd_zotero_newStandaloneNote" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
 		<command id="cmd_zotero_newChildNote" oncommand="ZoteroPane_Local.newChildNote(event.shiftKey);"/>
@@ -106,7 +107,19 @@
 					<toolbarbutton id="zotero-tb-library-add-menu" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newLibrary.label;" type="menu">
 						<menupopup id="zotero-tb-library-add-popup">
 							<menuitem id="zotero-tb-group-add" label="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
-							<menuitem id="zotero-tb-feed-add" label="&zotero.toolbar.newFeed.label;" command="cmd_zotero_newFeed"/>
+							<menu label="&zotero.toolbar.feeds.new;">
+								<menupopup id="zotero-tb-feed-add-more">
+									<menuitem id="zotero-tb-feed-add-fromURL" label="&zotero.toolbar.feeds.new.fromURL;" 
+										command="cmd_zotero_newFeed_fromURL"/>
+									<menuitem id="zotero-tb-feed-add-fromPage" label="&zotero.toolbar.feeds.new.fromPage.menu;"
+										oncommand="ZoteroPane_Local.newFeedFromPage()" observes="singleFeedMenuitemState"/>
+									<menu id="zotero-tb-feed-add-fromPage-menu" label="&zotero.toolbar.feeds.new.fromPage.menu;"
+										observes="multipleFeedsMenuState">
+											<menupopup oncommand="ZoteroPane_Local.newFeedFromPage(event)" 
+												onpopupshowing="FeedHandler.buildFeedList(event.target)"/>
+									</menu>
+								</menupopup>
+							</menu>
 						</menupopup>
 					</toolbarbutton>
 					<spacer flex="1"/>
@@ -245,14 +258,14 @@
 					<menuitem class="menuitem-iconic zotero-menuitem-new-collection" label="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-new-saved-search" label="&zotero.toolbar.newSavedSearch.label;" command="cmd_zotero_newSavedSearch"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-new-collection" label="&zotero.toolbar.newSubcollection.label;" oncommand="ZoteroPane_Local.newCollection(ZoteroPane_Local.getSelectedCollection().key)"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-new-feed" label="&zotero.toolbar.newFeed.label;" command="cmd_zotero_newFeed"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-refresh-feed" label="&zotero.toolbar.refreshFeed.label;" oncommand="ZoteroPane_Local.refreshFeed();"/>
+					<menuitem class="menuitem-iconic zotero-menuitem-new-feed" label="&zotero.toolbar.feeds.new;" command="cmd_zotero_newFeed_fromURL"/>
+					<menuitem class="menuitem-iconic zotero-menuitem-refresh-feed" label="&zotero.toolbar.feeds.refresh;" oncommand="ZoteroPane_Local.refreshFeed();"/>
 					<menuseparator/>
 					<menuitem class="menuitem-iconic zotero-menuitem-show-duplicates" label="&zotero.toolbar.duplicate.label;" oncommand="ZoteroPane_Local.setVirtual(ZoteroPane_Local.getSelectedLibraryID(), 'duplicates', true)"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-show-unfiled" label="&zotero.collections.showUnfiledItems;" oncommand="ZoteroPane_Local.setVirtual(ZoteroPane_Local.getSelectedLibraryID(), 'unfiled', true)"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-edit-collection" oncommand="ZoteroPane_Local.editSelectedCollection();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-mark-read-feed" label="&zotero.toolbar.markFeedRead.label;" oncommand="ZoteroPane_Local.markFeedRead();"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-edit-feed" label="&zotero.toolbar.editFeed.label;" oncommand="ZoteroPane_Local.editSelectedFeed();"/>
+					<menuitem class="menuitem-iconic zotero-menuitem-edit-feed" label="&zotero.toolbar.feeds.edit;" oncommand="ZoteroPane_Local.editSelectedFeed();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-delete-collection" oncommand="ZoteroPane_Local.deleteSelectedCollection();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-move-to-trash" oncommand="ZoteroPane_Local.deleteSelectedCollection(true);"/>
 					<menuseparator/>
