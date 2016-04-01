@@ -33,7 +33,8 @@ if (!Zotero.Sync) {
 Zotero.Sync.Runner_Module = function (options = {}) {
 	const stopOnError = false;
 	
-	Zotero.defineProperty(this, 'background', { get: () => _background });
+	Zotero.defineProperty(this, 'enabled', { get: () => _apiKey || Zotero.Sync.Data.Local.getAPIKey() });
+	Zotero.defineProperty(this, 'syncInProgress', { get: () => _syncInProgress });
 	Zotero.defineProperty(this, 'lastSyncStatus', { get: () => _lastSyncStatus });
 	
 	this.baseURL = options.baseURL || ZOTERO_CONFIG.API_URL;
@@ -55,10 +56,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		}
 	}.bind(this);
 	
+	var _enabled = false;
 	var _autoSyncTimer;
-	var _background;
 	var _firstInSession = true;
 	var _syncInProgress = false;
+	var _manualSyncRequired = false; // TODO: make public?
 	
 	var _syncEngines = [];
 	var _storageEngines = [];
@@ -130,7 +132,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			_firstInSession = false;
 		}
 		
-		_background = !!options.background;
 		_syncInProgress = true;
 		this.updateIcons('animate');
 		
@@ -163,12 +164,15 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 						this.addError(e);
 					}
 				}.bind(this),
-				background: _background,
+				background: !!options.background,
 				firstInSession: _firstInSession
 			};
 			
 			let librariesToSync = yield this.checkLibraries(
-				client, options, keyInfo, options.libraries
+				client,
+				options,
+				keyInfo,
+				options.libraries ? Array.from(options.libraries) : []
 			);
 			// Sync data and files, and then repeat if necessary
 			let attempt = 1;
@@ -290,15 +294,13 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		];
 */
 		
-		var syncAllLibraries = !libraries.length;
+		var syncAllLibraries = !libraries || !libraries.length;
 		
 		// TODO: Ability to remove or disable editing of user library?
 		
 		if (syncAllLibraries) {
 			if (access.user && access.user.library) {
-				libraries.push(
-					Zotero.Libraries.userLibraryID, Zotero.Libraries.publicationsLibraryID
-				);
+				libraries = [Zotero.Libraries.userLibraryID, Zotero.Libraries.publicationsLibraryID];
 			}
 		}
 		else {
@@ -698,15 +700,17 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	
 	
 	/**
-	 * @param	{Integer}	[timeout=15]		Timeout in seconds
-	 * @param	{Boolean}	[recurring=false]
-	 * @param	{Boolean}	[background]		Triggered sync is a background sync
+	 * @param {Integer} timeout - Timeout in seconds
+	 * @param {Boolean} [recurring=false]
+	 * @param {Object} [options] - Sync options
 	 */
-	this.setSyncTimeout = function (timeout, recurring, background) {
-		// check if server/auto-sync are enabled?
+	this.setSyncTimeout = function (timeout, recurring, options = {}) {
+		if (!Zotero.Prefs.get('sync.autoSync') || !this.enabled) {
+			return;
+		}
 		
 		if (!timeout) {
-			var timeout = 15;
+			throw new Error("Timeout not provided");
 		}
 		
 		if (_autoSyncTimer) {
@@ -718,10 +722,15 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				createInstance(Components.interfaces.nsITimer);
 		}
 		
+		var mergedOpts = {
+			background: true
+		};
+		Object.assign(mergedOpts, options);
+		
 		// Implements nsITimerCallback
 		var callback = {
 			notify: function (timer) {
-				if (!Zotero.Sync.Server.enabled) {
+				if (!_getAPIKey()) {
 					return;
 				}
 				
@@ -730,25 +739,18 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					return;
 				}
 				
-				if (Zotero.Sync.Storage.syncInProgress) {
-					Zotero.debug('Storage sync already in progress -- skipping auto-sync', 4);
-					return;
-				}
-				
-				if (Zotero.Sync.Server.syncInProgress) {
+				if (_syncInProgress) {
 					Zotero.debug('Sync already in progress -- skipping auto-sync', 4);
 					return;
 				}
 				
-				if (Zotero.Sync.Server.manualSyncRequired) {
+				if (_manualSyncRequired) {
 					Zotero.debug('Manual sync required -- skipping auto-sync', 4);
 					return;
 				}
 				
-				this.sync({
-					background: background
-				});
-			}
+				this.sync(mergedOpts);
+			}.bind(this)
 		}
 		
 		if (recurring) {
@@ -758,12 +760,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			);
 		}
 		else {
-			if (Zotero.Sync.Storage.syncInProgress) {
-				Zotero.debug('Storage sync in progress -- not setting auto-sync timeout', 4);
-				return;
-			}
-			
-			if (Zotero.Sync.Server.syncInProgress) {
+			if (_syncInProgress) {
 				Zotero.debug('Sync in progress -- not setting auto-sync timeout', 4);
 				return;
 			}

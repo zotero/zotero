@@ -800,13 +800,6 @@ Zotero.DataObjects.prototype.isEditable = function (obj) {
 	return true;
 }
 
-
-Zotero.DataObjects.prototype.editCheck = function (obj) {
-	if (!Zotero.Sync.Server.updatesInProgress && !Zotero.Sync.Storage.updatesInProgress && !this.isEditable(obj)) {
-		throw ("Cannot edit " + this._ZDO_object + " in read-only Zotero library");
-	}
-}
-
 Zotero.defineProperty(Zotero.DataObjects.prototype, "primaryDataSQL", {
 	get: function () {
 		return "SELECT "

@@ -498,7 +498,7 @@ Zotero_Preferences.Sync = {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
 		
-		if (!Zotero.Sync.Server.enabled) {
+		if (!Zotero.Sync.Runner.enabled) {
 			ps.alert(
 				null,
 				Zotero.getString('general.error'),

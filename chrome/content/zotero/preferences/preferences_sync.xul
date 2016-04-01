@@ -127,13 +127,13 @@
 										<row>
 											<box/>
 											<checkbox label="&zotero.preferences.sync.syncAutomatically;"
-													  disabled="true"/>
+													preference="pref-sync-autosync"/>
 										</row>
 										<row>
 											<box/>
 											<checkbox label="&zotero.preferences.sync.syncFullTextContent;"
-													  tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"
-													  disabled="true"/>
+													preference="pref-sync-fulltext-enabled"
+													tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"/>
 										</row>
 									</rows>
 								</grid>

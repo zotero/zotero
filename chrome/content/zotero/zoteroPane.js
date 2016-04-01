@@ -406,30 +406,26 @@ var ZoteroPane = new function()
 		if (Zotero.Prefs.get('sync.autoSync')) {
 			yield Zotero.proxyAuthComplete.delay(1000);
 			
-			if (!Zotero.Sync.Server.enabled) {
+			if (!Zotero.Sync.Runner.enabled) {
 				Zotero.debug('Sync not enabled -- skipping auto-sync', 4);
-				return;
 			}
-			
-			if (Zotero.Sync.Server.syncInProgress || Zotero.Sync.Storage.syncInProgress) {
+			else if (Zotero.Sync.Runner.syncInProgress) {
 				Zotero.debug('Sync already running -- skipping auto-sync', 4);
-				return;
 			}
-			
-			if (Zotero.Sync.Server.manualSyncRequired) {
+			else if (Zotero.Sync.Server.manualSyncRequired) {
 				Zotero.debug('Manual sync required -- skipping auto-sync', 4);
-				return;
 			}
-			
-			Zotero.Sync.Runner.sync({
-				background: true
-			});
+			else {
+				Zotero.Sync.Runner.sync({
+					background: true
+				});
+			}
 		}
 		
-		// Set sync icon to spinning or not
+		// Set sync icon to spinning if there's an existing sync
 		//
-		// We don't bother setting an error state at open
-		if (Zotero.Sync.Server.syncInProgress || Zotero.Sync.Storage.syncInProgress) {
+		// We don't bother setting an existing error state at open
+		if (Zotero.Sync.Runner.syncInProgress) {
 			Zotero.Sync.Runner.updateIcons('animate');
 		}
 		

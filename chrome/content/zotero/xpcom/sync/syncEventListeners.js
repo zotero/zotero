@@ -97,9 +97,18 @@ Zotero.Sync.EventListeners.ChangeListener = new function () {
 
 
 Zotero.Sync.EventListeners.AutoSyncListener = {
+	_editTimeout: 15,
+	_observerID: null,
+	
 	init: function () {
-		// Initialize save observer
-		Zotero.Notifier.registerObserver(this);
+		// If auto-sync is enabled, initialize the save observer
+		if (Zotero.Prefs.get('sync.autoSync')) {
+			this.register();
+		}
+	},
+	
+	register: function () {
+		_observerID = Zotero.Notifier.registerObserver(this, false, 'autosync');
 	},
 	
 	notify: function (event, type, ids, extraData) {
@@ -108,8 +117,41 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 			return;
 		}
 		
-		if (Zotero.Prefs.get('sync.autoSync') && Zotero.Sync.Server.enabled) {
-			Zotero.Sync.Runner.setSyncTimeout(false, false, true);
+		if (Zotero.Sync.Runner.syncInProgress) {
+			return;
+		}
+		
+		// Only trigger sync for certain types
+		//
+		// TODO: settings, full text
+		if (Zotero.DataObjectUtilities.getTypes().indexOf(type) == -1) {
+			return;
+		}
+		
+		// Determine affected libraries so only those can be synced
+		let libraryIDs = new Set();
+		if (Zotero.DataObjectUtilities.getTypes().indexOf(type) != -1) {
+			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+			ids.forEach(id => {
+				let lk = objectsClass.getLibraryAndKeyFromID(id);
+				if (lk) {
+					libraryIDs.add(lk.libraryID);
+				}
+			});
+		}
+		
+		Zotero.Sync.Runner.setSyncTimeout(
+			this._editTimeout,
+			false,
+			{
+				libraries: libraryIDs.values()
+			}
+		);
+	},
+	
+	unregister: function () {
+		if (_observerID) {
+			Zotero.Notifier.unregisterObserver(_observerID);
 		}
 	}
 }
@@ -136,7 +178,7 @@ Zotero.Sync.EventListeners.IdleListener = {
 	},
 	
 	register: function () {
-		Zotero.debug("Initializing sync idle observer");
+		Zotero.debug("Registering auto-sync idle observer");
 		var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
 				.getService(Components.interfaces.nsIIdleService);
 		idleService.addIdleObserver(this, this._idleTimeout);
@@ -148,9 +190,7 @@ Zotero.Sync.EventListeners.IdleListener = {
 			return;
 		}
 		
-		if (!Zotero.Sync.Server.enabled
-				|| Zotero.Sync.Server.syncInProgress
-				|| Zotero.Sync.Storage.syncInProgress) {
+		if (!Zotero.Sync.Runner.enabled || Zotero.Sync.Runner.syncInProgress) {
 			return;
 		}
 		
@@ -167,10 +207,11 @@ Zotero.Sync.EventListeners.IdleListener = {
 		
 		Zotero.debug("Beginning idle sync");
 		
+		Zotero.Sync.Runner.setSyncTimeout(this._idleTimeout, true);
+		
 		Zotero.Sync.Runner.sync({
 			background: true
 		});
-		Zotero.Sync.Runner.setSyncTimeout(this._idleTimeout, true, true);
 	},
 	
 	_backObserver: {
@@ -180,9 +221,7 @@ Zotero.Sync.EventListeners.IdleListener = {
 			}
 			
 			Zotero.Sync.Runner.clearSyncTimeout();
-			if (!Zotero.Sync.Server.enabled
-					|| Zotero.Sync.Server.syncInProgress
-					|| Zotero.Sync.Storage.syncInProgress) {
+			if (!Zotero.Sync.Runner.enabled || Zotero.Sync.Runner.syncInProgress) {
 				return;
 			}
 			Zotero.debug("Beginning return-from-idle sync");
@@ -193,7 +232,7 @@ Zotero.Sync.EventListeners.IdleListener = {
 	},
 	
 	unregister: function () {
-		Zotero.debug("Stopping sync idle observer");
+		Zotero.debug("Unregistering auto-sync idle observer");
 		var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
 				.getService(Components.interfaces.nsIIdleService);
 		idleService.removeIdleObserver(this, this._idleTimeout);

@@ -2431,20 +2431,14 @@ Zotero.Prefs = new function(){
 				Zotero.VersionHeader.unregister();
 			}
 		}],
-		[ "zoteroDotOrgVersionHeader", function(val) {
-			if (val) {
-				Zotero.VersionHeader.register();
-			}
-			else {
-				Zotero.VersionHeader.unregister();
-			}
-		}],
 		[ "sync.autoSync", function(val) {
 			if (val) {
-				Zotero.Sync.Runner.IdleListener.register();
+				Zotero.Sync.EventListeners.AutoSyncListener.register();
+				Zotero.Sync.EventListeners.IdleListener.register();
 			}
 			else {
-				Zotero.Sync.Runner.IdleListener.unregister();
+				Zotero.Sync.EventListeners.AutoSyncListener.unregister();
+				Zotero.Sync.EventListeners.IdleListener.unregister();
 			}
 		}],
 		[ "search.quicksearch-mode", function(val) {

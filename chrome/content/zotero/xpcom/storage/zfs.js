@@ -481,12 +481,6 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		else if (req.status == 404) {
 			Components.utils.reportError("Unexpected status code 404 in upload authorization "
 				+ "request (" + item.libraryKey + ")");
-			if (Zotero.Prefs.get('sync.debugNoAutoResetClient')) {
-				Components.utils.reportError("Skipping automatic client reset due to debug pref");
-			}
-			if (!Zotero.Sync.Server.canAutoResetClient) {
-				Components.utils.reportError("Client has already been auto-reset -- manual sync required");
-			}
 			
 			// TODO: Make an API request to fix this
 			
