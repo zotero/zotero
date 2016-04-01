@@ -456,14 +456,6 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		return;
 	}
 	
-	// FeedItem may have changed read/unread state
-	if (type == 'feedItem' && action == 'modify') {
-		for (let i=0; i<ids.length; i++) {
-			this._treebox.invalidateRow(this._itemRowMap[ids[i]]);
-		}
-		return;
-	}
-	
 	if (type == 'search' && action == 'modify') {
 		// TODO: Only refresh on condition change (not currently available in extraData)
 		yield this.refresh();
@@ -482,6 +474,12 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	}
 	
 	var collectionTreeRow = this.collectionTreeRow;
+
+	if (collectionTreeRow.isFeed() && action == 'modify') {
+		for (let i=0; i<ids.length; i++) {
+			this._treebox.invalidateRow(this._rowMap[ids[i]]);
+		}
+	}
 	
 	var madeChanges = false;
 	var refreshed = false;
@@ -662,6 +660,10 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			refreshed = true;
 			madeChanges = true;
 			sort = true;
+		}
+		
+		if (collectionTreeRow.isFeed()) {
+			this._ownerDocument.defaultView.ZoteroItemPane.setToggleReadLabel();
 		}
 		
 		// If no quicksearch, process modifications manually

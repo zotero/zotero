@@ -126,6 +126,8 @@ var ZoteroPane = new function()
 		});
 		this.addReloadListener(_loadPane);
 		
+		ZoteroItemPane.init();
+		
 		// continue loading pane
 		_loadPane();
 	}
@@ -601,14 +603,7 @@ var ZoteroPane = new function()
 				// Toggle read/unread
 				let row = this.collectionsView.getRow(this.collectionsView.selection.currentIndex);
 				if (!row || !row.isFeed()) return;
-				if(itemReadTimeout) {
-					itemReadTimeout.cancel();
-					itemReadTimeout = null;
-				}
-
-				let itemIDs = this.getSelectedItems(true);
-				Zotero.FeedItems.toggleReadByID(itemIDs);
-				return;
+				this.toggleSelectedItemsRead();
 			}
 		}
 		
@@ -626,7 +621,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		Zotero.debug('Keyboard shortcut: ', command);
+		Zotero.debug('Keyboard shortcut: ' + command);
 		
 		// Errors don't seem to make it out otherwise
 		try {
@@ -725,6 +720,20 @@ var ZoteroPane = new function()
 					break;
 				case 'sync':
 					Zotero.Sync.Runner.sync();
+					break;
+				case 'saveToZotero':
+					var collectionTreeRow = this.collectionsView.selectedTreeRow;
+					if (collectionTreeRow.isFeed()) {
+						ZoteroItemPane.translateSelectedItems();
+					} else {
+						Zotero.debug(command + ' does not do anything in non-feed views')
+					}
+					break;
+				case 'toggleAllRead':
+					var collectionTreeRow = this.collectionsView.selectedTreeRow;
+					if (collectionTreeRow.isFeed()) {
+						this.markFeedRead();
+					}
 					break;
 				default:
 					throw ('Command "' + command + '" not found in ZoteroPane_Local.handleKeyDown()');
@@ -1288,14 +1297,18 @@ var ZoteroPane = new function()
 				return false;
 			}
 			
-			// Display restore/delete buttons if items selected in Trash
+			// Display restore/delete buttons depending on context
 			if (this.itemsView.selection.count) {
-				document.getElementById('zotero-item-top-buttons-holder').hidden
+				document.getElementById('zotero-item-pane-top-buttons-trash').hidden
 					= !this.getCollectionTreeRow().isTrash()
 						|| _nonDeletedItemsSelected(this.itemsView);
+
+				document.getElementById('zotero-item-pane-top-buttons-feed').hidden
+					= !this.getCollectionTreeRow().isFeed()
 			}
 			else {
-				document.getElementById('zotero-item-top-buttons-holder').hidden = true;
+				document.getElementById('zotero-item-pane-top-buttons-trash').hidden = true;
+				document.getElementById('zotero-item-pane-top-buttons-feed').hidden = true;
 			}
 			
 			var tabs = document.getElementById('zotero-view-tabbox');
@@ -1391,12 +1404,19 @@ var ZoteroPane = new function()
 						// if (!item.isTranslated) {
 						// 	item.translate();
 						// }
-						this.startItemReadTimeout(item.id);
+						item.isRead = true;
+						ZoteroItemPane.setToggleReadLabel();
+						yield item.saveTx();
+						// this.startItemReadTimeout(item.id);
 					}
 				}
 			}
 			// Zero or multiple items selected
 			else {
+				if (collectionTreeRow.isFeed()) {
+					ZoteroItemPane.setToggleReadLabel();
+				}
+				
 				var count = this.itemsView.selection.count;
 				
 				// Display duplicates merge interface in item pane
@@ -1924,9 +1944,9 @@ var ZoteroPane = new function()
 		}
 	});
 
-	this.toggleSelectedItemsRead = function() {
-		return Zotero.FeedItems.toggleReadByID(this.getSelectedItems(true));
-	};
+	this.toggleSelectedItemsRead = Zotero.Promise.coroutine(function* () {
+		yield Zotero.FeedItems.toggleReadByID(this.getSelectedItems(true));
+	});
 
 	this.markFeedRead = Zotero.Promise.coroutine(function* () {
 		if (!this.collectionsView.selection.count) return;

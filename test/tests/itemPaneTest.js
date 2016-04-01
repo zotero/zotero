@@ -69,4 +69,20 @@ describe("Item pane", function () {
 			assert.equal(noteBox.noteField.value, '<p>Test</p>');
 		})
 	})
+	
+	describe("Feed buttons", function() {
+		describe("Mark as Read/Unread", function() {
+			it("Updates label when state of an item changes", function* () {
+				let feed = yield createFeed();
+				yield selectLibrary(win, feed.libraryID);
+				let item = yield createDataObject('feedItem', {libraryID: feed.libraryID});
+				yield itemsView.selectItem(item.id);
+				let button = doc.getElementById('zotero-feed-item-toggleRead-button');
+				
+				assert.equal(button.getAttribute('label'), Zotero.getString('pane.item.markAsUnread'));
+				yield item.toggleRead(false);
+				assert.equal(button.getAttribute('label'), Zotero.getString('pane.item.markAsRead'));
+			});
+		});
+	});
 })
