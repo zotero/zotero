@@ -113,6 +113,11 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-pane-stack').setAttribute('oldsearchfield', 'true')
 		}
 		
+		if (Zotero.isStandalone) {
+			document.getElementById('zotero-tb-feed-add-fromPage').hidden = true;
+			document.getElementById('zotero-tb-feed-add-fromPage-menu').hidden = true;
+		}
+		
 		// register an observer for Zotero reload
 		observerService = Components.classes["@mozilla.org/observer-service;1"]
 					  .getService(Components.interfaces.nsIObserverService);
