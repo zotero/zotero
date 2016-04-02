@@ -1521,7 +1521,7 @@
 			-->
 			<method name="handleCreatorAutoCompleteSelect">
 				<parameter name="textbox"/>
-				<parameter name="noAdvance"/>
+				<parameter name="stayFocused"/>
 				<body>
 				<![CDATA[
 					var comment = false;
@@ -1549,8 +1549,7 @@
 						var [field, creatorIndex, creatorField] =
 							textbox.getAttribute('fieldname').split('-');
 						
-						// Stay focused
-						if (noAdvance) {
+						if (stayFocused) {
 							this._lastTabIndex = parseInt(textbox.getAttribute('ztabindex')) - 1;
 							this._tabDirection = 1;
 						}
