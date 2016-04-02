@@ -52,19 +52,11 @@
 				this._htmlRTFmap = [
 					// Atomic units, HTML -> RTF (cleanup)
 					[/<br \/>/g, "\x0B"],
-					[/<span class=\"tab\">&nbsp;<\/span>/g, "\\tab{}"],
-					[/&lsquo;/g, "‘"],
-					[/&rsquo;/g, "’"],
-					[/&ldquo;/g, "“"],
-					[/&rdquo;/g, "”"],
-					[/&nbsp;/g, "\u00A0"],
 					[/"(\w)/g, "“$1"],
 					[/([\w,.?!])"/g, "$1”"],
 					[/<p>/g, ""],
 					//[/<\/p>(?!\s*$)/g, "\\par{}"],
 					[/<\/?div[^>]*>/g, ""],
-					//[/ /g, "&nbsp;"],
-					//[/\u00A0/g, " "],
 					[/[\x7F-\uFFFF]/g, function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+"{}"}]
 				];
 				
@@ -343,12 +335,14 @@
 				}
 				
 				this.htmlToRTF = function(txt) {
-					txt = this.convert("htmlRTF", txt);
+					// Catch this one before &nbsp; is clobbered by unescape
+					txt = txt.replace(/<span class=\"tab\">&nbsp;<\/span>/g, "\\tab{}");
+					txt = Zotero.Utilities.unescapeHTML(txt);
 					for (var i=0,ilen=this._htmlRTFmap.length; i < ilen; i++) {
 						var entry = this._htmlRTFmap[i];
 						txt = txt.replace(entry[0], entry[1]);
 					}
-					txt = Zotero.Utilities.unescapeHTML(txt);
+					txt = this.convert("htmlRTF", txt);
 					return txt.trim();
 				}
 				
@@ -358,7 +352,7 @@
 						txt = txt.replace(entry[0], entry[1]);
 					}
 					txt = this.convert("rtfHTML", txt);
-					return txt;
+					return txt.trim();
 				}
 
 				this._constructed = true;
@@ -473,12 +467,12 @@
 			<!-- Sets or returns contents of rich text box -->
 			<property name="value">
 				<getter><![CDATA[
-					var output = this._editor.getContent();
+					var output = this._editor.getContent().trim();
 					
 					if(this._format == "RTF") {
 						// strip divs
 						if(output.substr(0, 5) == "<div>" && output.substr(-6) == "</div>") {
-							output = output.substr(5, output.length-6);
+							output = output.slice(0, output.length-6).slice(5).trim();
 						}
 						output = this.htmlToRTF(output)
 					}
