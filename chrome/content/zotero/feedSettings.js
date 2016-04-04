@@ -116,12 +116,12 @@ var Zotero_Feed_Settings = new function() {
 			if (feedReader !== fr || urlTainted) return;
 			
 			let title = document.getElementById('feed-title');
-			if (!data.url && feed.title) {
+			if (feed.title && (!data.url || data.unsaved)) {
 				title.value = feed.title;
 			}
 			
 			let ttl = document.getElementById('feed-ttl');
-			if (!data.url && feed.ttl) {
+			if (feed.ttl && (!data.url || data.unsaved)) {
 				ttl.value = Math.floor(feed.ttl / 60) || 1;
 			}
 			
