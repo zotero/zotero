@@ -294,7 +294,7 @@ var Zotero_Browser = new function() {
 	 * object, and updates the status of the capture icon
 	 */
 	var contentLoad = Zotero.Promise.coroutine(function* (event) {
-		if (Zotero.Schema.schemaUpdatePromise.isPending()) {
+		if (Zotero.Schema && Zotero.Schema.schemaUpdatePromise.isPending()) {
 			yield Zotero.Schema.schemaUpdatePromise;
 		}
 		
@@ -448,7 +448,7 @@ var Zotero_Browser = new function() {
 	 * thereof of the current page
 	 */
 	this.updateStatus = Zotero.Promise.coroutine(function* () {
-		if (Zotero.Schema.schemaUpdatePromise.isPending()) {
+		if (Zotero.Schema && Zotero.Schema.schemaUpdatePromise.isPending()) {
 			yield Zotero.Schema.schemaUpdatePromise;
 		}
 		

@@ -372,7 +372,7 @@ var ZoteroPane = new function()
 		}
 		_madeVisible = true;
 		
-		yield this.unserializePersist();
+		this.unserializePersist();
 		this.updateToolbarPosition();
 		this.updateTagSelectorSize();
 		
@@ -4508,7 +4508,7 @@ var ZoteroPane = new function()
 	/**
 	 * Unserializes zotero-persist elements from preferences
 	 */
-	this.unserializePersist = Zotero.Promise.coroutine(function* () {
+	this.unserializePersist = function () {
 		_unserialized = true;
 		var serializedValues = Zotero.Prefs.get("pane.persist");
 		if(!serializedValues) return;
@@ -4533,10 +4533,10 @@ var ZoteroPane = new function()
 		if(this.itemsView) {
 			// may not yet be initialized
 			try {
-				yield this.itemsView.sort();
+				this.itemsView.sort();
 			} catch(e) {};
 		}
-	});
+	};
 
 	/**
 	 * Serializes zotero-persist elements to preferences

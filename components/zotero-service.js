@@ -286,6 +286,8 @@ function makeZoteroContext(isConnector) {
 			subscriptLoader.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFile + ".js", zContext);
 		}
 		catch (e) {
+			dump("Error loading " + xpcomFile + ".js\n\n");
+			dump(e + "\n\n");
 			Components.utils.reportError("Error loading " + xpcomFile + ".js", zContext);
 			throw (e);
 		}

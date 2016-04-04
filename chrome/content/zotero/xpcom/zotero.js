@@ -789,7 +789,9 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 					Zotero.getString('startupError.checkPermissions')
 				]);
 				Zotero.startupError = msg;
-			} else if(e.name == "NS_ERROR_STORAGE_BUSY" || e.result == 2153971713) {
+			}
+			// Storage busy
+			else if (e.message.endsWith('2153971713')) {
 				if(Zotero.isStandalone) {
 					// Standalone should force Fx to release lock 
 					if(!haveReleasedLock && Zotero.IPC.broadcast("releaseLock")) {
