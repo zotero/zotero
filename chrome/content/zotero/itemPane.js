@@ -238,7 +238,7 @@ var ZoteroItemPane = new function() {
 	
 	
 	this.setTranslateButton = function() {
-		var label = Zotero.getString('general.addTo', _translationTarget.name);
+		var label = Zotero.getString('pane.item.addTo', _translationTarget.name);
 		var elem = document.getElementById('zotero-feed-item-addTo-button');
 		elem.setAttribute('label', label);
 
