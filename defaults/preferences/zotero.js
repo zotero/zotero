@@ -55,7 +55,6 @@ pref("extensions.zotero.groups.copyTags", true);
 pref("extensions.zotero.feeds.sortAscending", false);
 pref("extensions.zotero.feeds.defaultTTL", 1);
 pref("extensions.zotero.feeds.defaultCleanupAfter", 2);
-pref("extensions.zotero.feeds.lastTranslationTarget", false);
 
 pref("extensions.zotero.backup.numBackups", 2);
 pref("extensions.zotero.backup.interval", 1440);

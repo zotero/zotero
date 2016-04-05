@@ -939,11 +939,15 @@ Zotero.Utilities.Internal = {
 	 * 
 	 * @return {Node<menuitem>/Node<menu>} appended node
 	 */
-	createMenuForTarget: function(libraryOrCollection, elem, clickAction) {
+	createMenuForTarget: function(libraryOrCollection, elem, currentTarget, clickAction) {
 		var doc = elem.ownerDocument;
 		function _createMenuitem(label, value, icon, command) {
 			let menuitem = doc.createElement('menuitem');
 			menuitem.setAttribute("label", label);
+			menuitem.setAttribute("type", "checkbox");
+			if (value == currentTarget) {
+				menuitem.setAttribute("checked", "true");
+			}
 			menuitem.setAttribute("value", value);
 			menuitem.setAttribute("image", icon);
 			menuitem.addEventListener('command', command);
@@ -961,17 +965,19 @@ Zotero.Utilities.Internal = {
 			return menu;
 		}
 		
-		var imageSrc = this.getCollectionImageSrc(libraryOrCollection._objectType);
+		var imageSrc = libraryOrCollection.collectionTreeViewImage;
+		
+		// Create menuitem for library or collection itself, to be placed either directly in the
+		// containing menu or as the top item in a submenu
 		var menuitem = _createMenuitem(
 			libraryOrCollection.name, 
-			libraryOrCollection.id, 
+			libraryOrCollection.collectionTreeViewID,
 			imageSrc,
 			function (event) {
 				clickAction(event, libraryOrCollection);
 			}
 		);
-			
-				
+		
 		var collections;
 		if (libraryOrCollection.objectType == 'collection') {
 			collections = Zotero.Collections.getByParent(libraryOrCollection.id);
@@ -989,17 +995,13 @@ Zotero.Utilities.Internal = {
 		menupopup.appendChild(menuitem);
 		menupopup.appendChild(doc.createElement('menuseparator'));
 		for (let collection of collections) {
-			let collectionMenu = this.createMenuForTarget(collection, elem, clickAction);
+			let collectionMenu = this.createMenuForTarget(
+				collection, elem, currentTarget, clickAction
+			);
 			menupopup.appendChild(collectionMenu);
 		}
 		elem.appendChild(menu);
 		return menu;
-	},
-		
-	getCollectionImageSrc: function(objectType) {
-		var suffix = Zotero.hiDPI ? "@2x" : "";
-		var collectionType = objectType == 'group' ? 'library' : objectType;
-		return "chrome://zotero/skin/treesource-" + collectionType + suffix + ".png";	
 	}
 }
 

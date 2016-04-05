@@ -43,9 +43,9 @@
 		
 		<!-- Feed -->
 		<hbox id="zotero-item-pane-top-buttons-feed" class="zotero-item-pane-top-buttons" hidden="true">
-			<button id="zotero-feed-item-toggleRead-button" flex="1"
+			<button id="zotero-feed-item-toggleRead-button"
 				oncommand="ZoteroPane_Local.toggleSelectedItemsRead();"/>
-			<button id="zotero-feed-item-addTo-button" type="menu-button" flex="1"
+			<button id="zotero-feed-item-addTo-button" type="menu-button"
 				oncommand="ZoteroItemPane.translateSelectedItems()">
 				<menupopup id="zotero-item-addTo-menu" onpopupshowing="ZoteroItemPane.buildTranslateSelectContextMenu(event);"/>
 			</button>

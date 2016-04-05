@@ -224,15 +224,25 @@ var ZoteroItemPane = new function() {
 			menu.removeChild(menu.firstChild);
 		}
 		
+		let target = Zotero.Prefs.get('feeds.lastTranslationTarget');
+		if (!target) {
+			target = "L" + Zotero.Libraries.userLibraryID;
+		}
+		
 		var libraries = Zotero.Libraries.getAll();
 		for (let library of libraries) {
 			if (!library.editable || library.libraryType == 'publications') {
 				continue;
 			}
-			Zotero.Utilities.Internal.createMenuForTarget(library, menu, function(event, libraryOrCollection) {
-				ZoteroItemPane.setTranslationTarget(libraryOrCollection);
-				event.stopPropagation();
-			});
+			Zotero.Utilities.Internal.createMenuForTarget(
+				library,
+				menu,
+				target,
+				function(event, libraryOrCollection) {
+					ZoteroItemPane.setTranslationTarget(libraryOrCollection);
+					event.stopPropagation();
+				}
+			);
 		}
 	};
 	
@@ -249,20 +259,13 @@ var ZoteroItemPane = new function() {
 			+ (Zotero.isMac ? '⇧⌘' : Zotero.getString('general.keys.ctrlShift'))
 			+ key + ')';
 		elem.setAttribute('tooltiptext', tooltip);
-
-		var objectType = _translationTarget._objectType;
-		var imageSrc = Zotero.Utilities.Internal.getCollectionImageSrc(objectType);
-		elem.setAttribute('image', imageSrc);
+		elem.setAttribute('image', _translationTarget.collectionTreeViewImage);
 	};
 	
 
 	this.setTranslationTarget = function(translationTarget) {
 		_translationTarget = translationTarget;
-		if (translationTarget.objectType == 'collection') {
-			Zotero.Prefs.set('feeds.translationTarget', "C" + translationTarget.id);
-		} else {
-			Zotero.Prefs.set('feeds.translationTarget', "L" + translationTarget.libraryID);
-		}
+		Zotero.Prefs.set('feeds.lastTranslationTarget', translationTarget.collectionTreeViewID);
 		ZoteroItemPane.setTranslateButton();
 	};
 	

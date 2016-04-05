@@ -83,6 +83,18 @@ Zotero.defineProperty(Zotero.Collection.prototype, 'parent', {
 	}
 });
 
+Zotero.defineProperty(Zotero.Collection.prototype, 'collectionTreeViewID', {
+	get: function () {
+		return "C" + this.id
+	}
+});
+
+Zotero.defineProperty(Zotero.Collection.prototype, 'collectionTreeViewImage', {
+	get: function () {
+		var suffix = Zotero.hiDPI ? "@2x" : "";
+		return "chrome://zotero/skin/treesource-collection" + suffix + ".png";
+	}
+});
 
 Zotero.Collection.prototype.getID = function() {
 	Zotero.debug('Collection.getID() deprecated -- use Collection.id');

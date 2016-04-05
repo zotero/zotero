@@ -116,6 +116,7 @@ Zotero.defineProperty(Zotero.Library.prototype, 'id', {
 	get: function() this.libraryID,
 	set: function(val) this.libraryID = val
 });
+
 Zotero.defineProperty(Zotero.Library.prototype, 'libraryType', {
 	get: function() this._get('_libraryType'),
 	set: function(v) this._set('_libraryType', v)
@@ -170,6 +171,19 @@ Zotero.defineProperty(Zotero.Library.prototype, 'name', {
 		}
 		
 		throw new Error('Unhandled library type "' + this._libraryType + '"');
+	}
+});
+
+Zotero.defineProperty(Zotero.Library.prototype, 'collectionTreeViewID', {
+	get: function () {
+		return "L" + this._libraryID
+	}
+});
+
+Zotero.defineProperty(Zotero.Library.prototype, 'collectionTreeViewImage', {
+	get: function () {
+		var suffix = Zotero.hiDPI ? "@2x" : "";
+		return "chrome://zotero/skin/treesource-library" + suffix + ".png";
 	}
 });
 
