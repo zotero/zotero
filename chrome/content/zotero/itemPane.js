@@ -90,6 +90,11 @@ var ZoteroItemPane = new function() {
 		var viewBox = document.getElementById('zotero-view-item');
 		viewBox.classList.remove('no-tabs');
 		
+		// Switch to info pane for feed items
+		if (item.isFeedItem) {
+			index = viewBox.selectedIndex = 0;
+		}
+		
 		if (index == 0) {
 			document.getElementById('zotero-editpane-tabs').setAttribute('hidden', item.isFeedItem);
 			
