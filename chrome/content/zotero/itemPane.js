@@ -87,12 +87,15 @@ var ZoteroItemPane = new function() {
 		
 		_lastItem = item;
 		
-		// Hide for feed items
-		document.getElementById('zotero-editpane-tabs').setAttribute('hidden', item.isFeedItem);
-		document.getElementById('zotero-view-item').classList.add('no-tabs');
+		var viewBox = document.getElementById('zotero-view-item');
+		viewBox.classList.remove('no-tabs');
 		
 		if (index == 0) {
+			document.getElementById('zotero-editpane-tabs').setAttribute('hidden', item.isFeedItem);
+			
 			if (item.isFeedItem) {
+				viewBox.classList.add('no-tabs');
+				
 				let lastTranslationTarget = Zotero.Prefs.get('feeds.lastTranslationTarget');
 				if (lastTranslationTarget) {
 					let id = parseInt(lastTranslationTarget.substr(1));

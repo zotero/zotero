@@ -22,17 +22,21 @@
 
 #zotero-view-item
 {
-	padding: 1.5em .25em .25em;
+	padding: 0;
 }
 
 #zotero-view-item.no-tabs
 {
-	padding: .25em .25em .25em;
+	margin-top: 0;
 }
 
 #zotero-view-item > tabpanel > *
 {
 	overflow: auto;
+}
+
+#zotero-view-item:not([selectedIndex="0"]) > tabpanel > * {
+	padding-top: .25em;
 }
 
 #zotero-view-item > vbox
@@ -41,7 +45,7 @@
 	margin-left: 5px;
 }
 
-/* Restore/Delete buttons in trash view */
+/* Buttons in trash and feed views */
 .zotero-item-pane-top-buttons {
 	-moz-appearance: toolbar;
 	-moz-box-pack: center;
