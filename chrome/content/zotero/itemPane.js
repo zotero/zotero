@@ -48,22 +48,6 @@ var ZoteroItemPane = new function() {
 	}
 	
 	
-	this.init = function() {
-		Zotero.debug("Initializing ZoteroItemPane");
-		let lastTranslationTarget = Zotero.Prefs.get('feeds.lastTranslationTarget');
-		if (lastTranslationTarget) {
-			if (lastTranslationTarget[0] == "C") {
-				_translationTarget = Zotero.Collections.get(parseInt(lastTranslationTarget.substr(1)));
-			} else if (lastTranslationTarget[0] == "L") {
-				_translationTarget = Zotero.Libraries.get(parseInt(lastTranslationTarget.substr(1)));
-			}
-		}
-		if (!_translationTarget) {
-			_translationTarget = Zotero.Libraries.userLibrary;
-		}	
-		this.setTranslateButton();
-	}
-	
 	/*
 	 * Load a top-level item
 	 */
@@ -107,7 +91,25 @@ var ZoteroItemPane = new function() {
 		document.getElementById('zotero-editpane-tabs').setAttribute('hidden', item.isFeedItem);
 		document.getElementById('zotero-view-item').classList.add('no-tabs');
 		
-		if (index == 1) {
+		if (index == 0) {
+			if (item.isFeedItem) {
+				let lastTranslationTarget = Zotero.Prefs.get('feeds.lastTranslationTarget');
+				if (lastTranslationTarget) {
+					let id = parseInt(lastTranslationTarget.substr(1));
+					if (lastTranslationTarget[0] == "L") {
+						_translationTarget = Zotero.Libraries.get(id);
+					}
+					else if (lastTranslationTarget[0] == "C") {
+						_translationTarget = Zotero.Collections.get(id);
+					}
+				}
+				if (!_translationTarget) {
+					_translationTarget = Zotero.Libraries.userLibrary;
+				}	
+				this.setTranslateButton();
+			}
+		}
+		else if (index == 1) {
 			var editable = ZoteroPane_Local.canEdit();
 			_notesButton.hidden = !editable;
 			

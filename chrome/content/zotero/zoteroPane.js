@@ -131,8 +131,6 @@ var ZoteroPane = new function()
 		});
 		this.addReloadListener(_loadPane);
 		
-		ZoteroItemPane.init();
-		
 		// continue loading pane
 		_loadPane();
 	}
