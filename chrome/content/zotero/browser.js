@@ -874,13 +874,11 @@ Zotero_Browser.Tab.prototype.getCaptureState = function () {
  * current page, or false if the page cannot be scraped
  */
 Zotero_Browser.Tab.prototype.getCaptureIcon = function (hiDPI) {
-	var suffix = hiDPI ? "@2x" : "";
-	
 	switch (this.getCaptureState()) {
 	case this.CAPTURE_STATE_TRANSLATABLE:
 		var itemType = this.getPageObject().translators[0].itemType;
 		return (itemType === "multiple"
-				? "chrome://zotero/skin/treesource-collection" + suffix + ".png"
+				? "chrome://zotero/skin/treesource-collection" + Zotero.hiDPISuffix + ".png"
 				: Zotero.ItemTypes.getImageSrc(itemType));
 	
 	default:
@@ -890,8 +888,7 @@ Zotero_Browser.Tab.prototype.getCaptureIcon = function (hiDPI) {
 
 // TODO: Show icons for images, PDFs, etc.?
 Zotero_Browser.Tab.prototype.getWebPageCaptureIcon = function (hiDPI) {
-	var suffix = hiDPI ? "@2x" : "";
-	return "chrome://zotero/skin/treeitem-webpage" + suffix + ".png";
+	return "chrome://zotero/skin/treeitem-webpage" + Zotero.hiDPISuffix + ".png";
 }
 
 Zotero_Browser.Tab.prototype.getCaptureTooltip = function() {

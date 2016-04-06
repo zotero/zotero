@@ -87,8 +87,9 @@ var ZoteroOverlay = new function()
 			
 			observerService.addObserver(zoteroObserver, "browser-delayed-startup-finished", false);
 			
-			// Set a flag for hi-res displays
+			// Set flags for hi-res displays
 			Zotero.hiDPI = window.devicePixelRatio > 1;
+			Zotero.hiDPISuffix = Zotero.hiDPI ? "@2x" : "";
 			
 			// Clear old Zotero icon pref
 			var prefBranch = Components.classes["@mozilla.org/preferences-service;1"]

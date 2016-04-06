@@ -441,7 +441,7 @@ Zotero.ItemTypes = new function() {
 	}
 	
 	this.getImageSrc = function (itemType) {
-		var suffix = Zotero.hiDPI ? "@2x" : "";
+		var suffix = Zotero.hiDPISuffix;
 		
 		if (this.isCustom(itemType)) {
 			var id = this.getID(itemType) - this.customIDOffset;

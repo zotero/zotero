@@ -711,7 +711,7 @@ Zotero.CollectionTreeView.prototype.getCellText = function(row, column)
 
 Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 {
-	var suffix = Zotero.hiDPI ? "@2x" : "";
+	var suffix = Zotero.hiDPISuffix;
 	
 	var treeRow = this.getRow(row);
 	var collectionType = treeRow.type;

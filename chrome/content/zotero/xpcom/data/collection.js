@@ -91,8 +91,7 @@ Zotero.defineProperty(Zotero.Collection.prototype, 'collectionTreeViewID', {
 
 Zotero.defineProperty(Zotero.Collection.prototype, 'collectionTreeViewImage', {
 	get: function () {
-		var suffix = Zotero.hiDPI ? "@2x" : "";
-		return "chrome://zotero/skin/treesource-collection" + suffix + ".png";
+		return "chrome://zotero/skin/treesource-collection" + Zotero.hiDPISuffix + ".png";
 	}
 });
 
