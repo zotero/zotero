@@ -1267,13 +1267,13 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 				}
 				else {
 					// If that doesn't exist, check for the actual file
-					let file = item.getFile();
-					if (!file) {
+					let path = yield item.getFilePathAsync();
+					if (!path) {
 						continue;
 					}
 					
-					Zotero.debug("Searching for text '" + searchText + "' in " + file.path);
-					content = yield Zotero.File.getContentsAsync(file, item.attachmentCharset);
+					Zotero.debug("Searching for text '" + searchText + "' in " + path);
+					content = yield Zotero.File.getContentsAsync(path, item.attachmentCharset);
 					
 					// If HTML and not binary mode, convert to text
 					if (mimeType == 'text/html' && !binaryMode) {
