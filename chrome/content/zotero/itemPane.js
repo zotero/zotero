@@ -172,6 +172,10 @@ var ZoteroItemPane = new function() {
 		
 		if (mode) {
 			box.mode = mode;
+			
+			if (box.mode == 'view') {
+				box.hideEmptyFields = true;
+			}
 		}
 		else {
 			box.mode = 'edit';
