@@ -396,18 +396,18 @@
 							}
 						}
 						
-						var valueElement = this.createValueElement(
+						let label = document.createElement("label");
+						label.setAttribute('fieldname', fieldName);
+						
+						let valueElement = this.createValueElement(
 							val, fieldName, tabindex
 						);
-						
-						var label = document.createElement("label");
-						label.setAttribute('fieldname', fieldName);
 						
 						var prefix = '';
 						// Add '(...)' before 'Abstract:' for collapsed abstracts
 						if (fieldName == 'abstractNote') {
 							if (val && !Zotero.Prefs.get('lastAbstractExpand')) {
-								prefix = '(...) ';
+								prefix = '(\u2026) ';
 							}
 						}
 						
@@ -418,7 +418,7 @@
 						
 						// TEMP - NSF (homepage)
 						if ((fieldName == 'url' || fieldName == 'homepage') && val) {
-							label.setAttribute("isButton", true);
+							label.classList.add("pointer");
 							// TODO: make getFieldValue non-private and use below instead
 							label.setAttribute("onclick", "ZoteroPane_Local.loadURI(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value, event)");
 							label.setAttribute("tooltiptext", Zotero.getString('locate.online.tooltip'));
@@ -428,7 +428,7 @@
 							var doi = Zotero.Utilities.cleanDOI(val);
 							if (doi) {
 								doi = "http://dx.doi.org/" + encodeURIComponent(doi);
-								label.setAttribute("isButton", true);
+								label.classList.add("pointer");
 								label.setAttribute("onclick", "ZoteroPane_Local.loadURI('" + doi + "', event)");
 								label.setAttribute("tooltiptext", Zotero.getString('locate.online.tooltip'));
 								valueElement.setAttribute('contextmenu', 'zotero-doi-menu');
@@ -441,9 +441,19 @@
 							}
 						}
 						else if (fieldName == 'abstractNote') {
-							label.setAttribute("onclick",
-								"if (this.nextSibling.inputField) { this.nextSibling.inputField.blur(); } "
-								+ "else { document.getBindingParent(this).toggleAbstractExpand(this); }");
+							if (val.length) {
+								label.classList.add("pointer");
+							}
+							label.addEventListener('click', function () {
+								if (this.nextSibling.inputField) {
+									this.nextSibling.inputField.blur();
+								}
+								else {
+									document.getBindingParent(this).toggleAbstractExpand(
+										this, this.nextSibling
+									);
+								}
+							});
 						}
 						else {
 							label.setAttribute("onclick",
@@ -1161,25 +1171,25 @@
 			
 			<method name="toggleAbstractExpand">
 				<parameter name="label"/>
+				<parameter name="valueElement"/>
 				<body>
 				<![CDATA[
 					var cur = Zotero.Prefs.get('lastAbstractExpand');
 					Zotero.Prefs.set('lastAbstractExpand', !cur);
 					
-					var ab = label.nextSibling;
 					var valueText = this.item.getField('abstractNote');
-					var tabindex = ab.getAttribute('ztabindex');
-					var elem = this.createValueElement(
+					var tabindex = valueElement.getAttribute('ztabindex');
+					var newValueElement = this.createValueElement(
 						valueText,
 						'abstractNote',
 						tabindex
 					);
-					ab.parentNode.replaceChild(elem, ab);
+					valueElement.parentNode.replaceChild(newValueElement, valueElement);
 					
 					var text = Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, 'abstractNote') + ':';
 					// Add '(...)' before "Abstract:" for collapsed abstracts
 					if (valueText && cur) {
-						text = '(...) ' + text;
+						text = '(\u2026) ' + text;
 					}
 					label.setAttribute('value', text);
 				]]>
@@ -1355,6 +1365,14 @@
 					else {
 						// Wrap to multiple lines
 						valueElement.appendChild(document.createTextNode(valueText));
+					}
+					
+					// Allow toggling non-editable Abstract open and closed with click
+					if (fieldName == 'abstractNote' && !this.editable) {
+						valueElement.classList.add("pointer");
+						valueElement.addEventListener('click', function () {
+							this.toggleAbstractExpand(valueElement.previousSibling, valueElement);
+						}.bind(this));
 					}
 					
 					return valueElement;

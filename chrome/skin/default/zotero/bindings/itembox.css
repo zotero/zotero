@@ -40,14 +40,13 @@ row > label
 	border: 1px solid transparent;
 }
 
-row label:first-child[isButton=true]:hover
-{
-	cursor: pointer !important;
-}
-
 row label
 {
 	-moz-user-focus: ignore;
+}
+
+row .pointer:hover {
+	cursor: pointer !important;
 }
 
 /* creator type menu */
