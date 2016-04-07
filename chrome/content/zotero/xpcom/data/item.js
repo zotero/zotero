@@ -1078,6 +1078,14 @@ Zotero.Item.prototype.setCreator = function (orderIndex, data) {
  * @param {Object[]} data - An array of creator data in internal or API JSON format
  */
 Zotero.Item.prototype.setCreators = function (data) {
+	// If empty array, clear all existing creators
+	if (!data.length) {
+		while (this.hasCreatorAt(0)) {
+			this.removeCreator(0);
+		}
+		return;
+	}
+	
 	for (let i = 0; i < data.length; i++) {
 		this.setCreator(i, data[i]);
 	}

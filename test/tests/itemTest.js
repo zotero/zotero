@@ -435,6 +435,21 @@ describe("Zotero.Item", function () {
 			item = Zotero.Items.get(id);
 			assert.sameDeepMembers(item.getCreators(), creators);
 		})
+		
+		it("should clear creators if empty array passed", function () {
+			var item = createUnsavedDataObject('item');
+			item.setCreators([
+				{
+					firstName: "First",
+					lastName: "Last",
+					fieldMode: 0,
+					creatorTypeID: 1
+				}
+			]);
+			assert.lengthOf(item.getCreators(), 1);
+			item.setCreators([]);
+			assert.lengthOf(item.getCreators(), 0);
+		});
 	})
 	
 	describe("#getAttachments()", function () {
