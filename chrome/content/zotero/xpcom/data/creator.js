@@ -536,7 +536,7 @@ Zotero.Creator.prototype._checkValue = function (field, value) {
 			break;
 			
 		case 'key':
-			if (!Zotero.ID.isValidKey(value)) {
+			if (!this._isValidKey(value)) {
 				this._invalidValueError(field, value);
 			}
 			break;
@@ -558,4 +558,9 @@ Zotero.Creator.prototype._generateKey = function () {
 
 Zotero.Creator.prototype._invalidValueError = function (field, value) {
 	throw ("Invalid '" + field + "' value '" + value + "' in Zotero.Creator._invalidValueError()");
+}
+
+Zotero.Creator.prototype._isValidKey = function (value) {
+	var re = /^[23456789ABCDEFGHIJKLMNPQRSTUVWXYZ]{8}$/
+	return re.test(value);
 }
