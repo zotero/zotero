@@ -955,10 +955,13 @@ Zotero.Utilities.Internal = {
 			return menuitem
 		}	
 		
-		function _createMenu(label, icon) {
+		function _createMenu(label, value, icon, command) {
 			let menu = doc.createElement('menu');
 			menu.setAttribute("label", label);
+			menu.setAttribute("value", value);
 			menu.setAttribute("image", icon);
+			// Allow click on menu itself to select a target
+			menu.addEventListener('click', command);
 			menu.classList.add('menu-iconic');
 			let menupopup = doc.createElement('menupopup');
 			menu.appendChild(menupopup);
@@ -985,12 +988,21 @@ Zotero.Utilities.Internal = {
 			collections = Zotero.Collections.getByLibrary(libraryOrCollection.id);
 		}
 		
+		// If no subcollections, place menuitem for target directly in containing men
 		if (collections.length == 0) {
 			elem.appendChild(menuitem);
 			return menuitem
 		}
 		
-		var menu = _createMenu(libraryOrCollection.name, imageSrc);
+		// Otherwise create a submenu for the target's subcollections
+		var menu = _createMenu(
+			libraryOrCollection.name,
+			libraryOrCollection.collectionTreeViewID,
+			imageSrc,
+			function (event) {
+				clickAction(event, libraryOrCollection);
+			}
+		);
 		var menupopup = menu.firstChild;
 		menupopup.appendChild(menuitem);
 		menupopup.appendChild(doc.createElement('menuseparator'));

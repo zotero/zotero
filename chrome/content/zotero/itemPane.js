@@ -251,8 +251,28 @@ var ZoteroItemPane = new function() {
 				menu,
 				target,
 				function(event, libraryOrCollection) {
-					ZoteroItemPane.setTranslationTarget(libraryOrCollection);
-					event.stopPropagation();
+					if (event.target.tagName == 'menu') {
+						Zotero.Promise.coroutine(function* () {
+							// Simulate menuitem flash on OS X
+							if (Zotero.isMac) {
+								event.target.setAttribute('_moz-menuactive', false);
+								yield Zotero.Promise.delay(50);
+								event.target.setAttribute('_moz-menuactive', true);
+								yield Zotero.Promise.delay(50);
+								event.target.setAttribute('_moz-menuactive', false);
+								yield Zotero.Promise.delay(50);
+								event.target.setAttribute('_moz-menuactive', true);
+							}
+							menu.hidePopup();
+							
+							ZoteroItemPane.setTranslationTarget(libraryOrCollection);
+							event.stopPropagation();
+						})();
+					}
+					else {
+						ZoteroItemPane.setTranslationTarget(libraryOrCollection);
+						event.stopPropagation();
+					}
 				}
 			);
 		}
