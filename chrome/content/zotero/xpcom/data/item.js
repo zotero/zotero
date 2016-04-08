@@ -2172,7 +2172,7 @@ Zotero.Item.prototype.getFilePath = function () {
 
 
 /**
- * Get the absolute path for the attachment, if it exists
+ * Get the absolute path for the attachment, if the file exists
  *
  * @return {Promise<String|false>} - A promise for either the absolute path of the attachment
  *                                   or false for invalid paths or if the file doesn't exist
@@ -2291,7 +2291,6 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 });
 
 
-
 /**
  * Update file existence state of this item and best attachment state of parent item
  */
@@ -2354,8 +2353,6 @@ Zotero.Item.prototype.getFilename = function () {
 
 /**
  * Asynchronous cached check for file existence, used for items view
- *
- * This is updated only initially and on subsequent getFilePathAsync() calls.
  */
 Zotero.Item.prototype.fileExists = Zotero.Promise.coroutine(function* () {
 	if (!this.isAttachment()) {
