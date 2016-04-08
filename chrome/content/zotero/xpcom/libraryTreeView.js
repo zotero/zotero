@@ -175,8 +175,7 @@ Zotero.LibraryTreeView.prototype = {
 		// Update isOpen if parent and no siblings
 		if (row != 0
 				&& this.getLevel(row - 1) < level
-				&& this._rows[row]
-				&& this.getLevel(row) != level) {
+				&& (!this._rows[row] || this.getLevel(row) != level)) {
 			this._rows[row - 1].isOpen = false;
 			this._treebox.invalidateRow(row - 1);
 		}
