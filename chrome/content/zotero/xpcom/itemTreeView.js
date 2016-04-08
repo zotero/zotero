@@ -712,9 +712,13 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 						
 						sort = id;
 					}
+					// If item was moved from one parent to another, remove from old parent
+					else if (parentItemID && parentIndex != -1 && this._rowMap[parentItemID] != parentIndex) {
+						this._removeRow(row);
+					}
 					// If not moved from under one item to another, just resort the row,
 					// which also invalidates it and refreshes it
-					else if (!(parentItemID && parentIndex != -1 && this._rowMap[parentItemID] != parentIndex)) {
+					else {
 						sort = id;
 					}
 					
@@ -870,6 +874,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		else {
 			this._refreshItemRowMap();
 		}
+		this._refreshItemRowMap();
 		
 		if (singleSelect) {
 			if (!extraData[singleSelect] || !extraData[singleSelect].skipSelect) {

@@ -491,6 +491,7 @@ Zotero.Items = function() {
 		var onRow = function (row, setFunc) {
 			var itemID = row.getResultByIndex(0);
 			
+			// If we've finished a set of rows for an item, process them
 			if (lastItemID && itemID !== lastItemID) {
 				setFunc(lastItemID, rows);
 				rows = [];
@@ -543,8 +544,13 @@ Zotero.Items = function() {
 				}
 			}
 		);
+		// Process unprocessed rows
 		if (lastItemID) {
 			setAttachmentItem(lastItemID, rows);
+		}
+		// Otherwise clear existing entries for passed items
+		else if (ids.length) {
+			ids.forEach(id => setAttachmentItem(id, []));
 		}
 		
 		//
@@ -591,8 +597,13 @@ Zotero.Items = function() {
 				}
 			}
 		);
+		// Process unprocessed rows
 		if (lastItemID) {
 			setNoteItem(lastItemID, rows);
+		}
+		// Otherwise clear existing entries for passed items
+		else if (ids.length) {
+			ids.forEach(id => setNoteItem(id, []));
 		}
 		
 		// Mark all top-level items as having child items loaded

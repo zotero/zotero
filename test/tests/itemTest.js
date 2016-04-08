@@ -372,6 +372,26 @@ describe("Zotero.Item", function () {
 		})
 	});
 	
+	describe("#getCreators()", function () {
+		it("should update after creators are removed", function* () {
+			var item = createUnsavedDataObject('item');
+			item.setCreators([
+				{
+					creatorType: "author",
+					name: "A"
+				}
+			]);
+			yield item.saveTx();
+			
+			assert.lengthOf(item.getCreators(), 1);
+			
+			item.setCreators([]);
+			yield item.saveTx();
+			
+			assert.lengthOf(item.getCreators(), 0);
+		});
+	});
+	
 	describe("#setCreators", function () {
 		it("should accept an array of creators in API JSON format", function* () {
 			var creators = [
@@ -459,6 +479,25 @@ describe("Zotero.Item", function () {
 			var item = yield createDataObject('item');
 			assert.lengthOf(item.getAttachments(), 0);
 		})
+		
+		it("should update after an attachment is moved to another item", function* () {
+			var item1 = yield createDataObject('item');
+			var item2 = yield createDataObject('item');
+			var item3 = new Zotero.Item('attachment');
+			item3.parentID = item1.id;
+			item3.attachmentLinkMode = 'linked_url';
+			item3.setField('url', 'http://example.com');
+			yield item3.saveTx();
+			
+			assert.lengthOf(item1.getAttachments(), 1);
+			assert.lengthOf(item2.getAttachments(), 0);
+			
+			item3.parentID = item2.id;
+			yield item3.saveTx();
+			
+			assert.lengthOf(item1.getAttachments(), 0);
+			assert.lengthOf(item2.getAttachments(), 1);
+		});
 	})
 	
 	describe("#getNotes()", function () {
@@ -499,7 +538,22 @@ describe("Zotero.Item", function () {
 		it("#should return an empty array for an item with no notes", function* () {
 			var item = yield createDataObject('item');
 			assert.lengthOf(item.getNotes(), 0);
-		})
+		});
+		
+		it("should update after a note is moved to another item", function* () {
+			var item1 = yield createDataObject('item');
+			var item2 = yield createDataObject('item');
+			var item3 = yield createDataObject('item', { itemType: 'note', parentID: item1.id });
+			
+			assert.lengthOf(item1.getNotes(), 1);
+			assert.lengthOf(item2.getNotes(), 0);
+			
+			item3.parentID = item2.id;
+			yield item3.saveTx();
+			
+			assert.lengthOf(item1.getNotes(), 0);
+			assert.lengthOf(item2.getNotes(), 1);
+		});
 	})
 	
 	describe("#attachmentCharset", function () {

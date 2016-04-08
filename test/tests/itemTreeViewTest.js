@@ -308,6 +308,86 @@ describe("Zotero.ItemTreeView", function() {
 	})
 	
 	describe("#drop()", function () {
+		it("should move a child item from one item to another", function* () {
+			var collection = yield createDataObject('collection');
+			yield waitForItemsLoad(win);
+			var item1 = yield createDataObject('item', { title: "A", collections: [collection.id] });
+			var item2 = yield createDataObject('item', { title: "B", collections: [collection.id] });
+			var item3 = yield createDataObject('item', { itemType: 'note', parentID: item1.id });
+			
+			let view = zp.itemsView;
+			yield view.selectItem(item3.id, true);
+			
+			var deferred = Zotero.Promise.defer();
+			view.addEventListener('select', () => deferred.resolve());
+			
+			view.drop(view.getRowIndexByID(item2.id), 0, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: {
+					contains: function (type) {
+						return type == 'zotero/item';
+					}
+				},
+				getData: function (type) {
+					if (type == 'zotero/item') {
+						return item3.id + "";
+					}
+				},
+				mozItemCount: 1
+			})
+			
+			yield deferred.promise;
+			
+			// Old parent should be empty
+			assert.isFalse(view.isContainerOpen(view.getRowIndexByID(item1.id)));
+			assert.isTrue(view.isContainerEmpty(view.getRowIndexByID(item1.id)));
+			
+			// New parent should be open
+			assert.isTrue(view.isContainerOpen(view.getRowIndexByID(item2.id)));
+			assert.isFalse(view.isContainerEmpty(view.getRowIndexByID(item2.id)));
+		});
+		
+		it("should move a child item from last item in list to another", function* () {
+			var collection = yield createDataObject('collection');
+			yield waitForItemsLoad(win);
+			var item1 = yield createDataObject('item', { title: "A", collections: [collection.id] });
+			var item2 = yield createDataObject('item', { title: "B", collections: [collection.id] });
+			var item3 = yield createDataObject('item', { itemType: 'note', parentID: item2.id });
+			
+			let view = zp.itemsView;
+			yield view.selectItem(item3.id, true);
+			
+			var deferred = Zotero.Promise.defer();
+			view.addEventListener('select', () => deferred.resolve());
+			
+			view.drop(view.getRowIndexByID(item1.id), 0, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: {
+					contains: function (type) {
+						return type == 'zotero/item';
+					}
+				},
+				getData: function (type) {
+					if (type == 'zotero/item') {
+						return item3.id + "";
+					}
+				},
+				mozItemCount: 1
+			})
+			
+			yield deferred.promise;
+			
+			// Old parent should be empty
+			assert.isFalse(view.isContainerOpen(view.getRowIndexByID(item2.id)));
+			assert.isTrue(view.isContainerEmpty(view.getRowIndexByID(item2.id)));
+			
+			// New parent should be open
+			assert.isTrue(view.isContainerOpen(view.getRowIndexByID(item1.id)));
+			assert.isFalse(view.isContainerEmpty(view.getRowIndexByID(item1.id)));
+		});
+		
 		it("should create a top-level attachment when a file is dragged", function* () {
 			var file = getTestDataDirectory();
 			file.append('test.png');
