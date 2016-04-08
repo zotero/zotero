@@ -966,7 +966,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			
 			// Update sync error icon
 			var icon = doc.getElementById('zotero-tb-sync-error');
-			Zotero.debug(icon + "");
 			this.updateErrorIcon(icon, state, errors);
 			
 			// Update sync icon
@@ -1119,15 +1118,21 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	
 	
 	/**
-	 * Register label in sync icon tooltip to receive updates
+	 * Register labels in sync icon tooltip to receive updates
 	 *
 	 * If no label passed, unregister current label
 	 *
-	 * @param	{Tooltip}	[label]
+	 * @param {Tooltip} [tooltip]
 	 */
-	this.registerSyncStatusLabel = function (statusLabel, lastSyncLabel) {
-		_currentSyncStatusLabel = statusLabel;
-		_currentLastSyncLabel = lastSyncLabel;
+	this.registerSyncStatus = function (tooltip) {
+		if (tooltip) {
+			_currentSyncStatusLabel = tooltip.firstChild.nextSibling;
+			_currentLastSyncLabel = tooltip.firstChild.nextSibling.nextSibling;
+		}
+		else {
+			_currentSyncStatusLabel = null;
+			_currentLastSyncLabel = null;
+		}
 		if (_currentSyncStatusLabel) {
 			_updateSyncStatusLabel();
 		}

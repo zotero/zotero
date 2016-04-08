@@ -237,7 +237,6 @@
 
 <!ENTITY zotero.integration.references.label			"References in Bibliography">
 
-<!ENTITY zotero.sync.button							"Sync with Zotero Server">
 <!ENTITY zotero.sync.error							"Sync Error">
 <!ENTITY zotero.sync.storage.progress				"Progress:">
 <!ENTITY zotero.sync.storage.downloads				"Downloads:">

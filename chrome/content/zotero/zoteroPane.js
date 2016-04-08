@@ -113,6 +113,12 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-pane-stack').setAttribute('oldsearchfield', 'true')
 		}
 		
+		// Set the sync tooltip label
+		Components.utils.import("resource://zotero/config.js");
+		document.getElementById('zotero-tb-sync-label').value = Zotero.getString(
+			'sync.syncWith', ZOTERO_CONFIG.DOMAIN_NAME
+		);
+		
 		if (Zotero.isStandalone) {
 			document.getElementById('zotero-tb-feed-add-fromPage').hidden = true;
 			document.getElementById('zotero-tb-feed-add-fromPage-menu').hidden = true;
