@@ -332,6 +332,11 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 		return;
 	}
 	
+	if (!this.selection) {
+		Zotero.debug("Selection didn't exist in collectionTreeView.notify()");
+		return;
+	}
+	
 	//
 	// Actions that don't change the selection
 	//
