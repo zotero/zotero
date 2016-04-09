@@ -54,6 +54,7 @@ var Zotero_Browser = new function() {
 	
 	var _browserData = new WeakMap();
 	var _attachmentsMap = new WeakMap();
+	var _detectCallbacks = [];
 	
 	var _blacklist = [
 		"googlesyndication.com",
@@ -481,6 +482,20 @@ var Zotero_Browser = new function() {
 			toggleMode();
 		} else {
 			document.getElementById('zotero-annotate-tb').hidden = true;
+		}
+	});
+	
+	this.addDetectCallback = function (func) {
+		_detectCallbacks.push(func);
+	};
+	
+	this.resolveDetectCallbacks = Zotero.Promise.coroutine(function* () {
+		while (_detectCallbacks.length) {
+			let cb = _detectCallbacks.shift();
+			var res = cb();
+			if (res && res.then) {
+				yield res.then;
+			}
 		}
 	});
 	
@@ -957,7 +972,7 @@ Zotero_Browser.Tab.prototype._selectItems = function(obj, itemList, callback) {
 /*
  * called when translators are available
  */
-Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, translators) {
+Zotero_Browser.Tab.prototype._translatorsAvailable = Zotero.Promise.coroutine(function* (translate, translators) {
 	var page = this.getPageObject();
 	page.saveEnabled = true;
 	
@@ -1004,8 +1019,8 @@ Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, transla
 	
 	if(!translators || !translators.length) Zotero.debug("Translate: No translators found");
 	
-	// Note: async
-	Zotero_Browser.updateStatus();
-}
+	yield Zotero_Browser.updateStatus();
+	yield Zotero_Browser.resolveDetectCallbacks();
+});
 
 Zotero_Browser.init();

@@ -18,7 +18,7 @@ describe("Zotero_Browser", function () {
 	it("should save webpage to current collection", function* () {
 		var uri = OS.Path.join(getTestDataDirectory().path, "snapshot", "index.html");
 		var deferred = Zotero.Promise.defer();
-		win.addEventListener('pageshow', () => deferred.resolve());
+		win.Zotero_Browser.addDetectCallback(() => deferred.resolve());
 		win.loadURI(uri);
 		yield deferred.promise;
 		
@@ -39,7 +39,7 @@ describe("Zotero_Browser", function () {
 			getTestDataDirectory().path, "metadata", "journalArticle-single.html"
 		);
 		var deferred = Zotero.Promise.defer();
-		win.addEventListener('pageshow', () => deferred.resolve());
+		win.Zotero_Browser.addDetectCallback(() => deferred.resolve());
 		win.loadURI(uri);
 		yield deferred.promise;
 		
@@ -60,7 +60,7 @@ describe("Zotero_Browser", function () {
 			getTestDataDirectory().path, "book_and_child_note.ris"
 		);
 		var deferred = Zotero.Promise.defer();
-		win.addEventListener('pageshow', () => deferred.resolve());
+		win.Zotero_Browser.addDetectCallback(() => deferred.resolve());
 		win.loadURI(uri);
 		yield deferred.promise;
 		
@@ -81,7 +81,7 @@ describe("Zotero_Browser", function () {
 	it("should save PDF to library root", function* () {
 		var uri = OS.Path.join(getTestDataDirectory().path, "test.pdf");
 		var deferred = Zotero.Promise.defer();
-		win.addEventListener('pageshow', () => deferred.resolve());
+		win.Zotero_Browser.addDetectCallback(() => deferred.resolve());
 		win.loadURI(uri);
 		yield deferred.promise;
 		
@@ -101,7 +101,7 @@ describe("Zotero_Browser", function () {
 	it("should save PDF to current collection", function* () {
 		var uri = OS.Path.join(getTestDataDirectory().path, "test.pdf");
 		var deferred = Zotero.Promise.defer();
-		win.addEventListener('pageshow', () => deferred.resolve());
+		win.Zotero_Browser.addDetectCallback(() => deferred.resolve());
 		win.loadURI(uri);
 		yield deferred.promise;
 		
@@ -120,7 +120,7 @@ describe("Zotero_Browser", function () {
 	it("shouldn't save webpage to My Publications", function* () {
 		var uri = OS.Path.join(getTestDataDirectory().path, "snapshot", "index.html");
 		var deferred = Zotero.Promise.defer();
-		win.addEventListener('pageshow', () => deferred.resolve());
+		win.Zotero_Browser.addDetectCallback(() => deferred.resolve());
 		win.loadURI(uri);
 		yield deferred.promise;
 		
@@ -142,7 +142,7 @@ describe("Zotero_Browser", function () {
 			getTestDataDirectory().path, "metadata", "journalArticle-single.html"
 		);
 		var deferred = Zotero.Promise.defer();
-		win.addEventListener('pageshow', () => deferred.resolve());
+		win.Zotero_Browser.addDetectCallback(() => deferred.resolve());
 		win.loadURI(uri);
 		yield deferred.promise;
 		
