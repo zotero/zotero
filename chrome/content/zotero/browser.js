@@ -622,17 +622,19 @@ var Zotero_Browser = new function() {
 		
 		// Get libraryID and collectionID
 		if(libraryID === undefined && ZoteroPane && !Zotero.isConnector) {
-			try {
-				if (!ZoteroPane.collectionsView.editable) {
-					Zotero_Browser.progress.cannotEditCollection();
-					return;
-				}
-				
-				libraryID = ZoteroPane.getSelectedLibraryID();
-				collection = ZoteroPane.getSelectedCollection();
-			} catch(e) {
-				Zotero.debug(e, 1);
+			// Save to My Library by default if pane hasn't been opened
+			if (!ZoteroPane.collectionsView || !ZoteroPane.collectionsView.selectedTreeRow) {
+				libraryID = Zotero.Libraries.userLibraryID;
 			}
+			else if (!ZoteroPane.collectionsView.editable) {
+				Zotero_Browser.progress.Translation.cannotEditCollection();
+				return;
+			}
+			else {
+				libraryID = ZoteroPane.getSelectedLibraryID();
+			}
+			
+			collection = ZoteroPane.getSelectedCollection();
 		}
 		
 		if (libraryID === Zotero.Libraries.publicationsLibraryID) {

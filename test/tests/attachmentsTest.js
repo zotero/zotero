@@ -171,7 +171,7 @@ describe("Zotero.Attachments", function() {
 			assert.equal(attachment.getField('url'), "file://" + uri);
 			
 			// Check indexing
-			var matches = yield Zotero.Fulltext.findTextInItems([attachment.id], 'works');
+			var matches = yield Zotero.Fulltext.findTextInItems([attachment.id], 'share your research');
 			assert.lengthOf(matches, 1);
 			assert.propertyVal(matches[0], 'id', attachment.id);
 		})

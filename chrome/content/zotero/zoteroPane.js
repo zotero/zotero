@@ -3484,19 +3484,21 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
-		if (!row && this.collectionsView && this.collectionsView.selection) {
+		if (row == undefined && this.collectionsView && this.collectionsView.selection) {
 			row = this.collectionsView.selection.currentIndex;
 		}
 		
-		if (!this.canEdit(row)) {
-			this.displayCannotEditLibraryMessage();
-			return false;
-		}
-		
-		var collectionTreeRow = this.collectionsView.getRow(row);
-		if (collectionTreeRow.isPublications()) {
-			this.displayCannotAddToMyPublicationsMessage();
-			return false;
+		if (row !== undefined) {
+			if (!this.canEdit(row)) {
+				this.displayCannotEditLibraryMessage();
+				return false;
+			}
+			
+			var collectionTreeRow = this.collectionsView.getRow(row);
+			if (collectionTreeRow.isPublications()) {
+				this.displayCannotAddToMyPublicationsMessage();
+				return false;
+			}
 		}
 		
 		return this.addItemFromDocument(window.content.document, itemType, saveSnapshot, row);
