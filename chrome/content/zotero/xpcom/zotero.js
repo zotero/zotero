@@ -630,11 +630,15 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				yield Zotero.Relations.init();
 				yield Zotero.Feeds.init();
 				
-				let libraryIDs = Zotero.Libraries.getAll().map(x => x.libraryID);
-				for (let libraryID of libraryIDs) {
-					let library = Zotero.Libraries.get(libraryID);
-					yield library.loadAllDataTypes();
-				}
+				// Load all library data except for items
+				yield Zotero.Promise.each(
+					Zotero.Libraries.getAll(),
+					library => Zotero.Promise.coroutine(function* () {
+						yield Zotero.SyncedSettings.loadAll(library.libraryID);
+						yield Zotero.Collections.loadAll(library.libraryID);
+						yield Zotero.Searches.loadAll(library.libraryID);
+					})()
+				);
 				
 				yield Zotero.QuickCopy.init();
 				
@@ -2120,22 +2124,21 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	/*
 	 * Clear entries that no longer exist from various tables
 	 */
-	this.purgeDataObjects = Zotero.Promise.coroutine(function* (skipStoragePurge) {
+	this.purgeDataObjects = Zotero.Promise.coroutine(function* () {
 		yield Zotero.DB.executeTransaction(function* () {
 			return Zotero.Creators.purge();
 		});
 		yield Zotero.DB.executeTransaction(function* () {
 			return Zotero.Tags.purge();
 		});
-		// TEMP: Disabled until we have async DB (and maybe SQLite FTS)
-		//Zotero.Fulltext.purgeUnusedWords();
+		Zotero.Fulltext.purgeUnusedWords();
 		yield Zotero.DB.executeTransaction(function* () {
 			return Zotero.Items.purge();
 		});
 		// DEBUG: this might not need to be permanent
-		yield Zotero.DB.executeTransaction(function* () {
-			return Zotero.Relations.purge();
-		});
+		//yield Zotero.DB.executeTransaction(function* () {
+		//	return Zotero.Relations.purge();
+		//});
 	});
 	
 	

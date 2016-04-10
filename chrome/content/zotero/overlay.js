@@ -59,7 +59,6 @@ var ZoteroOverlay = new function()
 			}
 			
 			ZoteroPane_Overlay = ZoteroPane;
-			ZoteroPane.init();
 			
 			// Open Zotero app tab, if in Fx 4 and requested by pref
 			showInPref = Components.classes["@mozilla.org/preferences-service;1"]
@@ -105,6 +104,8 @@ var ZoteroOverlay = new function()
 			catch (e) {
 				Zotero.logError(e);
 			}
+			
+			ZoteroPane.init();
 			
 			// TODO: Add only when progress window is open
 			document.getElementById('appcontent').addEventListener('mousemove', Zotero.ProgressWindowSet.updateTimers, false);

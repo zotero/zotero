@@ -174,6 +174,15 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				keyInfo,
 				options.libraries ? Array.from(options.libraries) : []
 			);
+			
+			// If items not yet loaded for libraries we need, load them now
+			for (let libraryID of librariesToSync) {
+				let library = Zotero.Libraries.get(libraryID);
+				if (!library.getDataLoaded('item')) {
+					yield library.waitForDataLoad('item');
+				}
+			}
+			
 			// Sync data and files, and then repeat if necessary
 			let attempt = 1;
 			let nextLibraries = librariesToSync.concat();
@@ -283,6 +292,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	});
 	
 	
+	/**
+	 * @return {Promise<Integer[]> - IDs of libraries to sync
+	 */
 	this.checkLibraries = Zotero.Promise.coroutine(function* (client, options, keyInfo, libraries = []) {
 		var access = keyInfo.access;
 		

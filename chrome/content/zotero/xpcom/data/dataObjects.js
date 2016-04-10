@@ -416,19 +416,23 @@ Zotero.DataObjects.prototype._loadDataType = Zotero.Promise.coroutine(function* 
 
 Zotero.DataObjects.prototype.loadAll = Zotero.Promise.coroutine(function* (libraryID, ids) {
 	var t = new Date();
-	var libraryName = Zotero.Libraries.get(libraryID).name;
+	var library = Zotero.Libraries.get(libraryID)
 	
 	Zotero.debug("Loading "
 		+ (ids ? ids.length : "all") + " "
 		+ (ids && ids.length == 1 ? this._ZDO_object : this._ZDO_objects)
-		+ " in " + libraryName);
+		+ " in " + library.name);
+	
+	library.setDataLoading(this._ZDO_object);
 	
 	let dataTypes = this.ObjectClass.prototype._dataTypes;
 	for (let i = 0; i < dataTypes.length; i++) {
 		yield this._loadDataType(dataTypes[i], libraryID, ids);
 	}
 	
-	Zotero.debug(`Loaded all data in ${libraryName} in ${new Date() - t} ms`);
+	Zotero.debug(`Loaded all ${this._ZDO_objects} in ${library.name} in ${new Date() - t} ms`);
+	
+	library.setDataLoaded(this._ZDO_object);
 });
 
 

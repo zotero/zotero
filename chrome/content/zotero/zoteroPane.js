@@ -1214,6 +1214,15 @@ var ZoteroPane = new function()
 				ZoteroPane_Local.displayErrorMessage();
 			};
 			this.itemsView.addEventListener('load', this.setTagScope);
+			
+			// If item data not yet loaded for library, load it now.
+			// Other data types are loaded at startup
+			var library = Zotero.Libraries.get(collectionTreeRow.ref.libraryID);
+			if (!library.getDataLoaded('item')) {
+				Zotero.debug("Waiting for items to load for library " + library.libraryID);
+				yield library.waitForDataLoad('item');
+			}
+			
 			document.getElementById('zotero-items-tree').view = this.itemsView;
 			
 			// Add events to treecolpicker to update menu before showing/hiding
@@ -1920,7 +1929,7 @@ var ZoteroPane = new function()
 		);
 		if (result) {
 			let deleted = yield Zotero.Items.emptyTrash(libraryID);
-			yield Zotero.purgeDataObjects(true);
+			yield Zotero.purgeDataObjects();
 		}
 	});
 	

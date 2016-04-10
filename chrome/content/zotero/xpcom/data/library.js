@@ -31,6 +31,9 @@ Zotero.Library = function(params = {}) {
 	
 	this._changed = {};
 	
+	this._dataLoaded = {};
+	this._dataLoadedDeferreds = {};
+	
 	this._hasCollections = null;
 	this._hasSearches = null;
 	this._storageDownloadNeeded = false;
@@ -342,6 +345,45 @@ Zotero.Library.prototype.loadAllDataTypes = Zotero.Promise.coroutine(function* (
 	yield Zotero.Collections.loadAll(this.libraryID);
 	yield Zotero.Searches.loadAll(this.libraryID);
 	yield Zotero.Items.loadAll(this.libraryID);
+});
+
+//
+// Methods to handle promises that are resolved when object data is loaded for the library
+//
+Zotero.Library.prototype.getDataLoaded = function (objectType) {
+	return this._dataLoaded[objectType] || null;
+};
+
+Zotero.Library.prototype.setDataLoading = function (objectType) {
+	if (this._dataLoadedDeferreds[objectType]) {
+		throw new Error("Items already loading for library " + this.libraryID);
+	}
+	this._dataLoadedDeferreds[objectType] = Zotero.Promise.defer();
+};
+
+Zotero.Library.prototype.getDataLoadedPromise = function (objectType) {
+	return this._dataLoadedDeferreds[objectType]
+		? this._dataLoadedDeferreds[objectType].promise : null;
+};
+
+Zotero.Library.prototype.setDataLoaded = function (objectType) {
+	this._dataLoaded[objectType] = true;
+	this._dataLoadedDeferreds[objectType].resolve();
+};
+
+Zotero.Library.prototype.waitForDataLoad = Zotero.Promise.coroutine(function* (objectType) {
+	if (this.getDataLoaded(objectType)) return;
+	
+	let promise = this.getDataLoadedPromise(objectType);
+	// If items are already being loaded, wait for them
+	if (promise) {
+		yield promise;
+	}
+	// Otherwise load them now
+	else {
+		let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
+		yield objectsClass.loadAll(this.libraryID);
+	}
 });
 
 Zotero.Library.prototype.isChildObjectAllowed = function(type) {

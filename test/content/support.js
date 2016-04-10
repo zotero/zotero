@@ -53,11 +53,6 @@ var loadZoteroPane = Zotero.Promise.coroutine(function* (win) {
 	Zotero.Prefs.clear('lastViewedFolder');
 	win.ZoteroOverlay.toggleDisplay(true);
 	
-	// Hack to wait for pane load to finish. This is the same hack
-	// we use in ZoteroPane.js, so either it's not good enough
-	// there or it should be good enough here.
-	yield Zotero.Promise.delay(52);
-	
 	yield waitForItemsLoad(win, 0);
 	
 	return win;
