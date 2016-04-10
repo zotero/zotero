@@ -77,8 +77,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1						"The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2						"Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3						" for more information.">
-<!ENTITY zotero.preferences.sync.reset.fullSync					"Full Sync with Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc				"Merge local Zotero data with data from the sync server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.fullSync					"Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc				"Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer			"Restore from Zotero Server">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc		"Erase all local Zotero data and restore from the sync server.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer				"Restore to Zotero Server">

@@ -282,6 +282,7 @@
 								</columns>
 								
 								<rows>
+									<!--
 									<row id="zotero-restore-from-server" selected="true">
 										<radio/>
 										<vbox onclick="this.previousSibling.click()">
@@ -295,6 +296,14 @@
 										<vbox onclick="this.previousSibling.click()">
 											<label value="&zotero.preferences.sync.reset.restoreToServer;"/>
 											<description>&zotero.preferences.sync.reset.restoreToServer.desc;</description>
+										</vbox>
+									</row>
+									-->
+									<row id="zotero-full-sync">
+										<radio/>
+										<vbox onclick="this.previousSibling.click()">
+											<label value="&zotero.preferences.sync.reset.fullSync;"/>
+											<description>&zotero.preferences.sync.reset.fullSync.desc;</description>
 										</vbox>
 									</row>
 								</rows>

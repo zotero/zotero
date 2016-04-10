@@ -1160,8 +1160,8 @@ Zotero.Sync.Data.Engine.prototype._upgradeCheck = Zotero.Promise.coroutine(funct
  * Perform a full sync
  *
  * Get all object versions from the API and compare to the local database. If any objects are
- * missing or outdated and not up-to-date in the sync cache, download them. If any local objects
- * are marked as synced but aren't available remotely, mark them as unsynced for later uploading.
+ * missing or outdated, download them. If any local objects are marked as synced but aren't available
+ * remotely, mark them as unsynced for later uploading.
  *
  * (Technically this isn't a full sync on its own, because local objects are only flagged for later
  * upload.)

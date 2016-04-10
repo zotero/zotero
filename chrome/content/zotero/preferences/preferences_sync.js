@@ -494,7 +494,7 @@ Zotero_Preferences.Sync = {
 	},
 	
 	
-	handleSyncReset: function (action) {
+	handleSyncReset: Zotero.Promise.coroutine(function* (action) {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
 		
@@ -509,9 +509,44 @@ Zotero_Preferences.Sync = {
 			return;
 		}
 		
-		var account = Zotero.Sync.Server.username;
-		
 		switch (action) {
+			case 'full-sync':
+				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+					+ ps.BUTTON_POS_1_DEFAULT;
+				var index = ps.confirmEx(
+					null,
+					// TODO: localize
+					Zotero.getString('general.warning'),
+					"Zotero will compare all local and remote data and merge any data that does not "
+						+ "exist in both locations.\n\n"
+						+ "This option is not necessary during normal usage and should "
+						+ "generally be used only to troubleshoot specific issues as recommended "
+						+ "by Zotero support staff.",
+					buttonFlags,
+					"Sync",
+					null, null, null, {}
+				);
+				
+				switch (index) {
+				case 0:
+					let libraries = Zotero.Libraries.getAll().filter(library => library.syncable);
+					yield Zotero.DB.executeTransaction(function* () {
+						for (let library of libraries) {
+							library.libraryVersion = -1;
+							yield library.save();
+						}
+					});
+					yield Zotero.Sync.Runner.sync();
+					break;
+					
+					// Cancel
+				case 1:
+					return;
+				}
+				
+				break;
+			
 			case 'restore-from-server':
 				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 									+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
@@ -659,5 +694,5 @@ Zotero_Preferences.Sync = {
 			default:
 				throw ("Invalid action '" + action + "' in handleSyncReset()");
 		}
-	}
+	})
 };
