@@ -2376,7 +2376,7 @@ Zotero.Schema = new function(){
 						let subjectMatch = row.subject.match(objectRE);
 						let objectMatch = row.object.match(objectRE);
 						if (!subjectMatch && !objectMatch) {
-							Zotero.logError("No match for relation subject or object: " + concat);
+							Zotero.debug("No match for relation subject or object: " + concat, 2);
 							report += concat + "\n";
 							continue;
 						}
@@ -2433,7 +2433,7 @@ Zotero.Schema = new function(){
 									continue;
 								}
 							}
-							Zotero.logError("Neither subject nor object found: " + concat);
+							Zotero.debug("Neither subject nor object found: " + concat, 2);
 							report += concat + "\n";
 						}
 						break;
@@ -2441,7 +2441,7 @@ Zotero.Schema = new function(){
 					case 'dc:replaces':
 						let match = row.subject.match(itemRE);
 						if (!match) {
-							Zotero.logError("Unrecognized subject: " + concat);
+							Zotero.debug("Unrecognized subject: " + concat, 2);
 							report += concat + "\n";
 							continue;
 						}
@@ -2452,7 +2452,7 @@ Zotero.Schema = new function(){
 						if (match[1] == 'users') {
 							let itemID = yield Zotero.DB.valueQueryAsync("SELECT itemID FROM items WHERE libraryID=? AND key=?", [1, match[3]]);
 							if (!itemID) {
-								Zotero.logError("Subject not found: " + concat);
+								Zotero.debug("Subject not found: " + concat, 2);
 								report += concat + "\n";
 								continue;
 							}
@@ -2462,7 +2462,7 @@ Zotero.Schema = new function(){
 						else {
 							let itemID = yield Zotero.DB.valueQueryAsync("SELECT itemID FROM items JOIN groups USING (libraryID) WHERE groupID=? AND key=?", [match[2], match[3]]);
 							if (!itemID) {
-								Zotero.logError("Subject not found: " + concat);
+								Zotero.debug("Subject not found: " + concat, 2);
 								report += concat + "\n";
 								continue;
 							}
@@ -2471,7 +2471,7 @@ Zotero.Schema = new function(){
 						break;
 					
 					default:
-						Zotero.logError("Unknown predicate '" + row.predicate + "': " + concat);
+						Zotero.debug("Unknown predicate '" + row.predicate + "': " + concat, 2);
 						report += concat + "\n";
 						continue;
 					}
