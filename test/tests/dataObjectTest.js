@@ -3,6 +3,21 @@
 describe("Zotero.DataObject", function() {
 	var types = ['collection', 'item', 'search'];
 	
+	describe("#library", function () {
+		it("should return a Zotero.Library", function* () {
+			var item = yield createDataObject('item');
+			assert.equal(item.library, Zotero.Libraries.userLibrary);
+		});
+	});
+	
+	describe("#libraryID", function () {
+		it("should return a libraryID", function* () {
+			var item = yield createDataObject('item');
+			assert.isNumber(item.libraryID);
+			assert.equal(item.libraryID, Zotero.Libraries.userLibraryID);
+		});
+	});
+	
 	describe("#key", function () {
 		it("shouldn't update .loaded on get if unset", function* () {
 			for (let type of types) {
