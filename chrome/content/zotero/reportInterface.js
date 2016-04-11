@@ -67,12 +67,7 @@ var Zotero_Report_Interface = new function() {
 		var items = ZoteroPane_Local.getSelectedItems();
 		
 		if (!items || !items.length) {
-			throw ('No items currently selected');
-		}
-		
-		var keyHashes = [];
-		for each(var item in items) {
-			keyHashes.push(Zotero.Items.getLibraryKeyHash(item));
+			throw new Error('No items currently selected');
 		}
 		
 		var url = 'zotero://report/' + Zotero.API.getLibraryPrefix(libraryID) + '/items/report.html'

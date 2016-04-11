@@ -46,7 +46,7 @@ Zotero.API = {
 			switch (params.scopeObject) {
 				case 'collections':
 					if (params.scopeObjectKey) {
-						var col = Zotero.Collections.getByLibraryAndKeyAsync(
+						var col = Zotero.Collections.getByLibraryAndKey(
 							params.libraryID, params.scopeObjectKey
 						);
 					}
@@ -61,12 +61,12 @@ Zotero.API = {
 				
 				case 'searches':
 					if (params.scopeObjectKey) {
-						var s = yield Zotero.Searches.getByLibraryAndKeyAsync(
+						var s = Zotero.Searches.getByLibraryAndKey(
 							params.libraryID, params.scopeObjectKey
 						);
 					}
 					else {
-						var s = yield Zotero.Searches.getAsync(params.scopeObjectID);
+						var s = Zotero.Searches.get(params.scopeObjectID);
 					}
 					if (!s) {
 						throw new Error('Invalid search ID or key');
@@ -145,15 +145,19 @@ Zotero.API = {
 	
 	
 	getLibraryPrefix: function (libraryID) {
-		switch (Zotero.Libraries.getType(libraryID)) {
+		var type = Zotero.Libraries.get(libraryID).libraryType;
+		switch (type) {
 		case 'user':
 			return 'library';
 		
 		case 'publications':
 			return 'publications';
 		
-		case 'groups':
+		case 'group':
 			return 'groups/' + Zotero.Groups.getGroupIDFromLibraryID(libraryID);
+		
+		default:
+			throw new Error(`Invalid type '${type}`);
 		}
 	}
 };

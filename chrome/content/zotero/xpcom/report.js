@@ -213,8 +213,8 @@ Zotero.Report.HTML = new function () {
 				case 'reportSearchMatch':
 				case 'reportChildren':
 				
-				case 'itemKey':
-				case 'itemVersion':
+				case 'key':
+				case 'version':
 				case 'itemType':
 				case 'title':
 				case 'creators':
