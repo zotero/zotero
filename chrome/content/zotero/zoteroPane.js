@@ -1220,6 +1220,7 @@ var ZoteroPane = new function()
 			var library = Zotero.Libraries.get(collectionTreeRow.ref.libraryID);
 			if (!library.getDataLoaded('item')) {
 				Zotero.debug("Waiting for items to load for library " + library.libraryID);
+				ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 				yield library.waitForDataLoad('item');
 			}
 			
