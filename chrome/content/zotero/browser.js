@@ -294,11 +294,7 @@ var Zotero_Browser = new function() {
 	 * An event handler called when a new document is loaded. Creates a new document
 	 * object, and updates the status of the capture icon
 	 */
-	var contentLoad = Zotero.Promise.coroutine(function* (event) {
-		if (Zotero.Schema && Zotero.Schema.schemaUpdatePromise.isPending()) {
-			yield Zotero.Schema.schemaUpdatePromise;
-		}
-		
+	var contentLoad = function (event) {
 		var doc = event.originalTarget;
 		var isHTML = doc instanceof HTMLDocument;
 		var rootDoc = (doc instanceof HTMLDocument ? doc.defaultView.top.document : doc);
@@ -369,7 +365,7 @@ var Zotero_Browser = new function() {
 				contentWin.haveZoteroEventListener = true;
 			}
 		}
-	});
+	};
 
 	/*
 	 * called to unregister Zotero icon, etc.
@@ -449,6 +445,8 @@ var Zotero_Browser = new function() {
 	 * thereof of the current page
 	 */
 	this.updateStatus = Zotero.Promise.coroutine(function* () {
+		// Wait for translator initialization. This allows detection to still run on a page at startup
+		// once translators have finished loading.
 		if (Zotero.Schema && Zotero.Schema.schemaUpdatePromise.isPending()) {
 			yield Zotero.Schema.schemaUpdatePromise;
 		}
@@ -801,7 +799,17 @@ Zotero_Browser.Tab.prototype.clear = function() {
 /*
  * detects translators for this browser object
  */
-Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
+Zotero_Browser.Tab.prototype.detectTranslators = Zotero.Promise.coroutine(function* (rootDoc, doc) {
+	if (Zotero.Schema && Zotero.Schema.schemaUpdatePromise.isPending()) {
+		yield Zotero.Schema.schemaUpdatePromise;
+	}
+	
+	// If document no longer exists after waiting for schema updates (probably because another page has
+	// been loaded), bail
+	if (Components.utils.isDeadWrapper(doc)) {
+		return;
+	}
+	
 	if (doc instanceof HTMLDocument) {
 		if (doc.documentURI.startsWith("about:")) {
 			return;
@@ -818,7 +826,7 @@ Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
 	} else if(doc.documentURI.substr(0, 7) == "file://") {
 		this._attemptLocalFileImport(doc);
 	}
-}
+});
 
 
 /*
