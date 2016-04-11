@@ -14,3 +14,7 @@ a {
 	color: -moz-nativehyperlinktext;
 	text-decoration: underline;
 }
+
+#confirm-authorship-checkbox {
+	-moz-box-align: baseline;
+}

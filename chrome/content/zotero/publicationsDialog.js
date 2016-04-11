@@ -67,6 +67,7 @@ var Zotero_Publications_Dialog = new function () {
 	this.updatePage = function () {
 		if (!_initialized) {
 			_init();
+			this.updateInclude();
 		}
 		
 		var wizard = document.getElementById('zotero-publications-wizard');
@@ -138,12 +139,14 @@ var Zotero_Publications_Dialog = new function () {
 			return;
 		}
 		
-		if (currentPage.pageid == 'intro' ||
+		if (_hasFiles
+				&& _includeFiles
+				&& (currentPage.pageid == 'intro' ||
 				// If CC selected on sharing page and we're not using existing rights for all
 				// items, go to license chooser next
 				(currentPage.pageid == 'choose-sharing'
 					&& _shareSettings.sharing == 'cc'
-					&& !(_hasRights == 'all' && _keepRights))) {
+					&& !(_hasRights == 'all' && _keepRights)))) {
 			this.lastPage = false;
 			nextButton.label = Zotero.getString(
 				'publications.buttons.next',
@@ -167,8 +170,13 @@ var Zotero_Publications_Dialog = new function () {
 	this.updateInclude = function () {
 		var filesCheckbox = document.getElementById('include-files');
 		var notesCheckbox = document.getElementById('include-notes')
+		var authorshipCheckbox = document.getElementById('confirm-authorship-checkbox');
 		_includeFiles = filesCheckbox.checked;
 		_includeNotes = notesCheckbox.checked;
+		authorshipCheckbox.label = Zotero.getString(
+			'publications.intro.authorship' + (_includeFiles ? '.files' : '')
+		);
+		this.updateNextButton();
 	}
 	
 	

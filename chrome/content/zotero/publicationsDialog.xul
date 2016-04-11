@@ -55,7 +55,6 @@
 				oncommand="Zotero_Publications_Dialog.updateInclude()"/>
 		<separator/>
 		<checkbox id="confirm-authorship-checkbox"
-				label="&zotero.publications.authorship.checkbox;"
 				oncommand="Zotero_Publications_Dialog.updateNextButton()"/>
 	</wizardpage>
 	
