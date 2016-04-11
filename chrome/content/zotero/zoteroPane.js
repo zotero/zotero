@@ -1319,22 +1319,21 @@ var ZoteroPane = new function()
 			});
 			yield deferred.promise;
 			
-			var selectedItems = this.itemsView.getSelectedItems();
+			if (!this.itemsView || !this.itemsView.selection) {
+				Zotero.debug("Items view not available in itemSelected", 2);
+				return false;
+			}
 			
 			// Check if selection has actually changed. The onselect event that calls this
 			// can be called in various situations where the selection didn't actually change,
 			// such as whenever selectEventsSuppressed is set to false.
+			var selectedItems = this.itemsView.getSelectedItems();
 			var ids = selectedItems.map(item => item.id);
 			ids.sort();
 			if (ids.length && Zotero.Utilities.arrayEquals(_lastSelectedItems, ids)) {
 				return false;
 			}
 			_lastSelectedItems = ids;
-			
-			if (!this.itemsView) {
-				Zotero.debug("Items view not available in itemSelected", 2);
-				return false;
-			}
 			
 			// Display restore/delete buttons depending on context
 			if (this.itemsView.selection.count) {
