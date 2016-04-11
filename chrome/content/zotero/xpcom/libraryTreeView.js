@@ -37,6 +37,10 @@ Zotero.LibraryTreeView = function () {
 };
 
 Zotero.LibraryTreeView.prototype = {
+	get initialized() {
+		return this._initialized;
+	},
+	
 	addEventListener: function(event, listener) {
 		if (event == 'load') {
 			// If already initialized run now

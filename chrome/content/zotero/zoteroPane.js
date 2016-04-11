@@ -2338,13 +2338,18 @@ var ZoteroPane = new function()
 				m.loadReport
 			];
 			var s = [m.exportCollection, m.createBibCollection, m.loadReport];
+			
 			if (!this.itemsView.rowCount) {
-				if (!this.collectionsView.isContainerEmpty(this.collectionsView.selection.currentIndex)) {
-					disable = [m.createBibCollection, m.loadReport];
+				// If no items, it might be because this was a right-click on a different collection
+				// and the new collection's items are still loading, so update the menu after loading.
+				// This causes export/createBib/loadReport to appear gray in the menu at first and then
+				// turn black once there are items.
+				if (!this.itemsView.initialized) {
+					this.itemsView.addEventListener('load', function () {
+						this.buildCollectionContextMenu();
+					}.bind(this));
 				}
-				else {
-					disable = s;
-				}
+				disable = s;
 			}
 			
 			// Adjust labels
