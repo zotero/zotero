@@ -119,16 +119,16 @@ function ZoteroProtocolHandler() {
 				var router = new Zotero.Router(params);
 				
 				// Items within a collection or search
-				router.add('library/:scopeObject/:scopeObjectKey/items/report.html', function () {
+				router.add('library/:scopeObject/:scopeObjectKey/items', function () {
 					params.libraryID = userLibraryID;
 				});
-				router.add('groups/:groupID/:scopeObject/:scopeObjectKey/items/report.html');
+				router.add('groups/:groupID/:scopeObject/:scopeObjectKey/items');
 				
 				// All items
-				router.add('library/items/report.html', function () {
+				router.add('library/items', function () {
 					params.libraryID = userLibraryID;
 				});
-				router.add('groups/:groupID/items/report.html');
+				router.add('groups/:groupID/items');
 				
 				// Old-style URLs
 				router.add('collection/:id/html/report.html', function () {

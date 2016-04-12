@@ -53,7 +53,7 @@ var Zotero_Report_Interface = new function() {
 			url += 'searches/' + source.key;
 		}
 		
-		url += '/items/report.html' + queryString;
+		url += '/items' + queryString;
 		
 		ZoteroPane_Local.loadURI(url, event);
 	}
@@ -70,7 +70,7 @@ var Zotero_Report_Interface = new function() {
 			throw new Error('No items currently selected');
 		}
 		
-		var url = 'zotero://report/' + Zotero.API.getLibraryPrefix(libraryID) + '/items/report.html'
+		var url = 'zotero://report/' + Zotero.API.getLibraryPrefix(libraryID) + '/items'
 			+ '?itemKey=' + items.map(item => item.key).join(',');
 		ZoteroPane_Local.loadURI(url, event);
 	}
