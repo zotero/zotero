@@ -34,7 +34,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.1.81",
+    PROCESSOR_VERSION: "1.1.91",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -456,7 +456,7 @@ var CSL = {
     ],
     LANGS: {
         "af-ZA":"Afrikaans",
-        "ar-AR":"Arabic",
+        "ar":"Arabic",
         "bg-BG":"Bulgarian",
         "ca-AD":"Catalan",
         "cs-CZ":"Czech",
@@ -506,7 +506,7 @@ var CSL = {
     },
     LANG_BASES: {
         af: "af_ZA",
-        ar: "ar_AR",
+        ar: "ar",
         bg: "bg_BG",
         ca: "ca_AD",
         cs: "cs_CZ",
@@ -655,14 +655,31 @@ var CSL = {
         "\u06E6": "\u064A"
     },
     SUPERSCRIPTS_REGEXP: new RegExp("[\u00AA\u00B2\u00B3\u00B9\u00BA\u02B0\u02B1\u02B2\u02B3\u02B4\u02B5\u02B6\u02B7\u02B8\u02E0\u02E1\u02E2\u02E3\u02E4\u1D2C\u1D2D\u1D2E\u1D30\u1D31\u1D32\u1D33\u1D34\u1D35\u1D36\u1D37\u1D38\u1D39\u1D3A\u1D3C\u1D3D\u1D3E\u1D3F\u1D40\u1D41\u1D42\u1D43\u1D44\u1D45\u1D46\u1D47\u1D48\u1D49\u1D4A\u1D4B\u1D4C\u1D4D\u1D4F\u1D50\u1D51\u1D52\u1D53\u1D54\u1D55\u1D56\u1D57\u1D58\u1D59\u1D5A\u1D5B\u1D5C\u1D5D\u1D5E\u1D5F\u1D60\u1D61\u2070\u2071\u2074\u2075\u2076\u2077\u2078\u2079\u207A\u207B\u207C\u207D\u207E\u207F\u2120\u2122\u3192\u3193\u3194\u3195\u3196\u3197\u3198\u3199\u319A\u319B\u319C\u319D\u319E\u319F\u02C0\u02C1\u06E5\u06E6]", "g"),
-    UPDATE_GROUP_CONTEXT_CONDITION: function (state, termtxt) {
+    UPDATE_GROUP_CONTEXT_CONDITION: function (state, termtxt, valueTerm) {
         if (state.tmp.group_context.tip.condition) {
             if (state.tmp.group_context.tip.condition.test) {
                 var testres;
-                if (state.tmp.group_context.tip.condition.test === "label-empty-or-alpha") {
-                    testres = !termtxt || termtxt.slice(0,1).match(CSL.ALL_ROMANESQUE_REGEXP);
-                } else if (state.tmp.group_context.tip.condition.test === "label-empty") {
+                if (state.tmp.group_context.tip.condition.test === "empty-label") {
                     testres = !termtxt;
+                } else if (state.tmp.group_context.tip.condition.test === "comma-safe") {
+                    var empty = !termtxt;
+                    var alpha = termtxt.slice(0,1).match(CSL.ALL_ROMANESQUE_REGEXP);
+                    var num = state.tmp.just_did_number;
+                    if (empty) {
+                        testres = true;
+                    } else if (num) {
+                        if (alpha && !valueTerm) {
+                            testres = true;
+                        } else {
+                            testres = false;
+                        }
+                    } else {
+                        if (alpha && !valueTerm) {
+                            testres = true;
+                        } else {
+                            testres = false;
+                        }
+                    }
                 }
                 if (testres) {
                     state.tmp.group_context.tip.force_suppress = false;
@@ -672,6 +689,12 @@ var CSL = {
                 if (state.tmp.group_context.tip.condition.not) {
                     state.tmp.group_context.tip.force_suppress = !state.tmp.group_context.tip.force_suppress;
                 }
+            }
+        } else {
+            if (termtxt.slice(-1).match(/[0-9]/)) {
+                state.tmp.just_did_number = true;
+            } else {
+                state.tmp.just_did_number = false;
             }
         }
     },
@@ -1729,7 +1752,7 @@ CSL.getMinVal = function () {
 };
 CSL.tokenExec = function (token, Item, item) {
     var next, maybenext, exec, debug;
-    debug = true;
+    debug = false;
     next = token.next;
     maybenext = false;
     var record = function (result) {
@@ -1756,7 +1779,6 @@ CSL.tokenExec = function (token, Item, item) {
 CSL.expandMacro = function (macro_key_token, target) {
     var mkey, start_token, key, end_token, navi, macro_nodes, newoutput, mergeoutput, end_of_macro, func;
     mkey = macro_key_token.postponed_macro;
-    var alt_macro = macro_key_token.alt_macro;
     macro_key_token = new CSL.Token("group", CSL.START);
     var hasDate = false;
     var macroid = false;
@@ -1782,10 +1804,9 @@ CSL.expandMacro = function (macro_key_token, target) {
     macro_key_token.cslid = macroid;
     if (CSL.MODULE_MACROS[mkey]) {
         macro_key_token.juris = mkey;
-        macro_key_token.alt_macro = alt_macro;
         this.opt.update_mode = CSL.POSITION;
     }
-    CSL.Node.group.build.call(macro_key_token, this, target);
+    CSL.Node.group.build.call(macro_key_token, this, target, true);
     if (!this.cslXml.getNodeValue(macro_nodes)) {
         throw "CSL style error: undefined macro \"" + mkey + "\"";
     }
@@ -1795,15 +1816,14 @@ CSL.expandMacro = function (macro_key_token, target) {
         CSL.configureMacro.call(this, mytarget);
     }
     if (!this.build.extension) {
-        var func = function(macro_name, alt_macro) {
+        var func = function(macro_name) {
             return function (state, Item, item) {
                 var next = 0;
                 while (next < state.macros[macro_name].length) {
                     next = CSL.tokenExec.call(state, state.macros[macro_name][next], Item, item);
                 }
-                CSL.runAltMacro(state, alt_macro, Item, item);
             }
-        }(mkey, alt_macro);
+        }(mkey);
         var text_node = new CSL.Token("text", CSL.SINGLETON);
         text_node.execs.push(func);
         target.push(text_node);
@@ -1819,11 +1839,8 @@ CSL.expandMacro = function (macro_key_token, target) {
     }
     if (macro_key_token.juris) {
         end_of_macro.juris = mkey;
-        if (alt_macro) {
-            end_of_macro.alt_macro = alt_macro;
-        }
-    }
-    CSL.Node.group.build.call(end_of_macro, this, target);
+     }
+    CSL.Node.group.build.call(end_of_macro, this, target, true);
     this.build.macro_stack.pop();
 };
 CSL.getMacroTarget = function (mkey) {
@@ -1835,22 +1852,6 @@ CSL.getMacroTarget = function (mkey) {
         this.macros[mkey] = mytarget;
     }
     return mytarget;
-}
-CSL.runAltMacro = function (state, alt_macro, Item, item) {
-    var flags = state.tmp.group_context.tip;
-    if (((flags.variable_attempt && !flags.variable_success) || (!flags.term_intended && !flags.variable_attempt)) && alt_macro) {
-        flags.variable_attempt = false;
-        var mytarget = CSL.getMacroTarget.call(state, alt_macro);
-        if (mytarget) {
-            var macro_nodes = state.cslXml.getNodesByName(state.cslXml.dataObj, 'macro', alt_macro);
-            CSL.buildMacro.call(state, mytarget, macro_nodes);
-            CSL.configureMacro.call(state, mytarget);
-        }
-        var next = 0;
-        while (next < state.macros[alt_macro].length) {
-            next = CSL.tokenExec.call(state, state.macros[alt_macro][next], Item, item);
-        }
-    }
 }
 CSL.buildMacro = function (mytarget, macro_nodes) {
     var builder = CSL.makeBuilder(this, mytarget);
@@ -1916,7 +1917,7 @@ CSL.XmlToToken = function (state, tokentype, explicitTarget) {
     } else {
         target = state[state.build.area].tokens;
     }
-    CSL.Node[name].build.call(token, state, target);
+    CSL.Node[name].build.call(token, state, target, true);
 };
 CSL.DateParser = new function () {
     var epochPairs = [
@@ -5736,7 +5737,7 @@ CSL.getBibliographyEntries = function (bibsection) {
             this.output.adjust.downward(this.output.queue[j],true);
             this.output.adjust.fix(this.output.queue[j]);
         }
-        res = this.output.string(this, this.output.queue);
+        res = this.output.string(this, this.output.queue)[0];
         if (!res) {
             res = "\n[CSL STYLE ERROR: reference with no printed form.]\n";
         }
@@ -6677,8 +6678,9 @@ CSL.Node["et-al"] = {
     }
 };
 CSL.Node.group = {
-    build: function (state, target) {
+    build: function (state, target, realGroup) {
         var func, execs;
+        this.realGroup = realGroup;
         if (this.tokentype === CSL.START) {
             CSL.Util.substituteStart.call(this, state, target);
             if (state.build.substitute_level.value()) {
@@ -6689,43 +6691,51 @@ CSL.Node.group = {
             }
             func = function (state, Item) {
                 state.output.startTag("group", this);
-                if (state.tmp.group_context.mystack.length) {
-                    state.output.current.value().parent = state.tmp.group_context.tip.output_tip;
-                }
-                var label_form = state.tmp.group_context.tip.label_form;
-                if (!label_form && this.strings.label_form_override) {
-                    label_form = this.strings.label_form_override;
-                }
-                var condition = false;
-                var force_suppress = false;
-                if (state.tmp.group_context.tip.condition) {
-                    condition = state.tmp.group_context.tip.condition;
-                    force_suppress = false;
-                } else if (this.strings.reject) {
-                    condition = {
-                        test: this.strings.reject,
-                        not: true
+                if (this.strings.label_form_override) {
+                    if (!state.tmp.group_context.tip.label_form) {
+                        state.tmp.group_context.tip.label_form = this.strings.label_form_override;
                     }
-                    force_suppress = true;
-                    done_vars = [];
-                } else if (this.strings.require) {
-                    condition = {
-                        test: this.strings.require,
-                        not: false
-                    }
-                    done_vars = [];
                 }
-                state.tmp.group_context.push({
-                    term_intended: false,
-                    variable_attempt: false,
-                    variable_success: false,
-                    output_tip: state.output.current.tip,
-                    label_form: label_form,
-                    parallel_conditions: this.strings.set_parallel_condition,
-                    condition: condition,
-                    force_suppress: force_suppress,
-                    done_vars: state.tmp.group_context.tip.done_vars.slice()
-                });
+                if (this.realGroup) {
+                    var condition = false;
+                    var force_suppress = false;
+                    if (state.tmp.group_context.mystack.length) {
+                        state.output.current.value().parent = state.tmp.group_context.tip.output_tip;
+                    }
+                    var label_form = state.tmp.group_context.tip.label_form;
+                    if (!label_form) {
+                        label_form = this.strings.label_form_override;
+                    }
+                    if (state.tmp.group_context.tip.condition) {
+                        condition = state.tmp.group_context.tip.condition;
+                        force_suppress = state.tmp.group_context.tip.force_suppress;
+                    } else if (this.strings.reject) {
+                        condition = {
+                            test: this.strings.reject,
+                            not: true
+                        }
+                        force_suppress = true;
+                        done_vars = [];
+                    } else if (this.strings.require) {
+                        condition = {
+                            test: this.strings.require,
+                            not: false
+                        }
+                        done_vars = [];
+                    }
+                    state.tmp.group_context.push({
+                        term_intended: false,
+                        variable_attempt: false,
+                        variable_success: false,
+                        variable_success_parent: state.tmp.group_context.tip.variable_success,
+                        output_tip: state.output.current.tip,
+                        label_form: label_form,
+                        parallel_conditions: this.strings.set_parallel_condition,
+                        condition: condition,
+                        force_suppress: force_suppress,
+                        done_vars: state.tmp.group_context.tip.done_vars.slice()
+                    });
+                }
             };
             execs = [];
             execs.push(func);
@@ -6815,11 +6825,9 @@ CSL.Node.group = {
                         while (next < state.juris[Item["best-jurisdiction"]][this.juris].length) {
                             next = CSL.tokenExec.call(state, state.juris[Item["best-jurisdiction"]][this.juris][next], Item, item);
                         }
-                        CSL.runAltMacro(state, this.alt_macro, Item, item);
                     }
                 }
                 text_node.juris = this.juris;
-                text_node.alt_macro = this.alt_macro;
                 text_node.execs.push(func);
                 target.push(text_node);
                 var if_end = new CSL.Token("if", CSL.END);
@@ -6842,39 +6850,41 @@ CSL.Node.group = {
                 }
             }
             func = function (state, Item) {
-                var flags = state.tmp.group_context.pop();
                 state.output.endTag();
-                if (flags.variable_attempt) {
-                    state.tmp.group_context.tip.variable_attempt = true;
-                }
-                if (state.tmp.group_context.tip.condition) {
-                    state.tmp.group_context.tip.force_suppress = flags.force_suppress;
-                }
-                if (!flags.force_suppress && (flags.variable_success || (flags.term_intended && !flags.variable_attempt))) {
-                    if (!this.isJurisLocatorLabel) {
-                        state.tmp.group_context.tip.variable_success = true;
+                if (this.realGroup) {
+                    var flags = state.tmp.group_context.pop();
+                    if (state.tmp.group_context.tip.condition) {
+                        state.tmp.group_context.tip.force_suppress = flags.force_suppress;
                     }
-                    var blobs = state.output.current.value().blobs;
-                    var pos = state.output.current.value().blobs.length - 1;
-                    if (!state.tmp.just_looking && "undefined" !== typeof flags.parallel_conditions) {
-                        var parallel_condition_object = {
-                            blobs: blobs,
-                            conditions: flags.parallel_conditions,
-                            id: Item.id,
-                            pos: pos
-                        };
-                        state.parallel.parallel_conditional_blobs_list.push(parallel_condition_object);
-                    }
-                } else {
-                    if (flags.force_suppress) {
-                        for (var i=0,ilen=flags.done_vars.length;i<ilen;i++) {
-                            if (state.tmp.done_vars.indexOf(flags.done_vars[i]) > -1) {
-                                state.tmp.done_vars = state.tmp.done_vars.slice(0, i).concat(state.tmp.done_vars.slice(i+1));
+                    if (!flags.force_suppress && (flags.variable_success || (flags.term_intended && !flags.variable_attempt))) {
+                        if (!this.isJurisLocatorLabel) {
+                            state.tmp.group_context.tip.variable_success = true;
+                        }
+                        var blobs = state.output.current.value().blobs;
+                        var pos = state.output.current.value().blobs.length - 1;
+                        if (!state.tmp.just_looking && "undefined" !== typeof flags.parallel_conditions) {
+                            var parallel_condition_object = {
+                                blobs: blobs,
+                                conditions: flags.parallel_conditions,
+                                id: Item.id,
+                                pos: pos
+                            };
+                            state.parallel.parallel_conditional_blobs_list.push(parallel_condition_object);
+                        }
+                    } else {
+                        state.tmp.group_context.tip.variable_attempt = flags.variable_attempt;
+                        if (flags.force_suppress && !state.tmp.group_context.tip.condition) {
+                            state.tmp.group_context.tip.variable_attempt = true;
+                            state.tmp.group_context.tip.variable_success = flags.variable_success_parent;
+                            for (var i=0,ilen=flags.done_vars.length;i<ilen;i++) {
+                                if (state.tmp.done_vars.indexOf(flags.done_vars[i]) > -1) {
+                                    state.tmp.done_vars = state.tmp.done_vars.slice(0, i).concat(state.tmp.done_vars.slice(i+1));
+                                }
                             }
                         }
-                    }
-                    if (state.output.current.value().blobs) {
-                        state.output.current.value().blobs.pop();
+                        if (state.output.current.value().blobs) {
+                            state.output.current.value().blobs.pop();
+                        }
                     }
                 }
             };
@@ -7306,13 +7316,11 @@ CSL.Node.layout = {
                     } else {
                         suffix = state.bibliography.opt.layout_suffix;
                     }
-                    var chr = suffix.slice(0, 1);
-                    var topblobs = state.output.current.value().blobs;
-                    if (topblobs.length) {
-                        if (chr && topblobs[topblobs.length-1].strings.suffix.slice(-1) === chr) {
-                            topblobs[topblobs.length-1].strings.suffix = topblobs[topblobs.length-1].strings.suffix.slice(0, -1);
-                        }
-                        topblobs[topblobs.length-1].strings.suffix += suffix;
+                    var topblob = state.output.current.value();
+                    if (state.opt.using_display) {
+                        topblob.blobs[topblob.blobs.length-1].strings.suffix = suffix;
+                    } else {
+                        topblob.strings.suffix = suffix;
                     }
                     if (state.bibliography.opt["second-field-align"]) {
                         state.output.endTag("bib_other");
@@ -7365,7 +7373,7 @@ CSL.Node.layout = {
             };
             this.execs.push(func);
             func = function (state, Item) {
-                var tok = "empty";
+                var tok = new CSL.Token();
                 if (state.opt.development_extensions.rtl_support) {
                     if (["ar", "he", "fa", "ur", "yi", "ps", "syr"].indexOf(Item.language) > -1) {
                         tok = new CSL.Token();
@@ -7501,7 +7509,7 @@ CSL.Node.layout = {
                     target.push(suffix_token);
                 }
                 func = function (state, Item) {
-                    state.output.closeLevel("empty");
+                    state.output.closeLevel();
                 };
                 this.execs.push(func);
                 func = function (state, Item) {
@@ -8500,6 +8508,11 @@ CSL.NameOutput.prototype.renderAllNames = function () {
     var pos;
     for (var i = 0, ilen = this.variables.length; i < ilen; i += 1) {
         var v = this.variables[i];
+        if (this.freeters[v].length || this.institutions[v].length) {
+            if (!this.state.tmp.group_context.tip.condition) {
+                this.state.tmp.just_did_number = false;
+            }
+        }
         pos = this.nameset_base + i;
         if (this.freeters[v].length) {
             this.freeters[v] = this._renderNames(v, this.freeters[v], pos);
@@ -9788,6 +9801,9 @@ CSL.Node.number = {
             if (varname === "locator") {
                 state.processNumber(node, item, varname, Item.type);
             } else {
+                if (!state.tmp.group_context.tip.condition && Item[varname]) {
+                    state.tmp.just_did_number = true;
+                }
                 state.processNumber(node, Item, varname, Item.type);
             }
             CSL.Util.outputNumericField(state, varname, Item.id);
@@ -10033,6 +10049,9 @@ CSL.Node.text = {
                         }
                         state.parallel.StartVariable(parallel_variable);
                         state.parallel.AppendToVariable(Item[parallel_variable],parallel_variable);
+                        if (!state.tmp.group_context.tip.condition && Item[this.variables[0]]) {
+                            state.tmp.just_did_number = false;
+                        }
                     };
                     this.execs.push(func);
                     if (CSL.MULTI_FIELDS.indexOf(this.variables_real[0]) > -1
@@ -10107,7 +10126,6 @@ CSL.Node.text = {
                                 var value = state.transform.abbrevs["default"]["hereinafter"][Item.id];
                                 if (value) {
                                     state.output.append(value, this);
-                                    print("  -- node_text.js --> true");
                                     state.tmp.group_context.tip.variable_success = true;
                                 }
                             }
@@ -10133,7 +10151,7 @@ CSL.Node.text = {
                 } else if (this.strings.value) {
                     func = function (state, Item) {
                         state.tmp.group_context.tip.term_intended = true;
-                        CSL.UPDATE_GROUP_CONTEXT_CONDITION(state, this.strings.value);
+                        CSL.UPDATE_GROUP_CONTEXT_CONDITION(state, this.strings.value, true);
                         state.output.append(this.strings.value, this);
                     };
                     this.execs.push(func);
@@ -10849,9 +10867,6 @@ CSL.Attributes["@value"] = function (state, arg) {
 CSL.Attributes["@name"] = function (state, arg) {
     this.strings.name = arg;
 };
-CSL.Attributes["@alternative-macro"] = function (state, arg) {
-    this.alt_macro = arg;
-};
 CSL.Attributes["@form"] = function (state, arg) {
     this.strings.form = arg;
 };
@@ -11172,6 +11187,7 @@ CSL.Attributes["@reverse-order"] = function (state, arg) {
     }
 };
 CSL.Attributes["@display"] = function (state, arg) {
+    state.opt.using_display = true;
     this.strings.cls = arg;
 };
 CSL.Stack = function (val, literal) {
@@ -13923,16 +13939,12 @@ CSL.Util.FlipFlopper.prototype._normalizeString = function (str) {
         }
     }
     if (str.indexOf(this.quotechars[1]) > -1) {
-        var oldStr = null;
-        while (str !== oldStr) {
-            oldStr = str;
-            for (i = 0, ilen = 2; i < ilen; i += 1) {
-                if (this.quotechars[i + 4]) {
-                    if (i === 0) {
-                        str = str.split(this.quotechars[i + 4]).join(" " + this.quotechars[1]);
-                    } else {
-                        str = str.split(this.quotechars[i + 4]).join(this.quotechars[1]);
-                    }
+        for (i = 0, ilen = 2; i < ilen; i += 1) {
+            if (this.quotechars[i + 4]) {
+                if (i === 0 && this.quotechars[i + 4] !== this.quotechars[1]) {
+                    str = str.split(this.quotechars[i + 4]).join(" " + this.quotechars[1]);
+                } else {
+                    str = str.split(this.quotechars[i + 4]).join(this.quotechars[1]);
                 }
             }
         }

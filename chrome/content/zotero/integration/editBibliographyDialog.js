@@ -253,8 +253,8 @@ var Zotero_Bibliography_Dialog = new function () {
 	 * Gets selected item IDs from list box on right
 	 */
 	function _getSelectedListItemIDs() {
-		return [bibEditInterface.bibliography[0].entry_ids[item.value][0]
-		        for each(item in _itemList.selectedItems)];
+		return Array.from(_itemList.selectedItems)
+			.map(item => bibEditInterface.bibliography[0].entry_ids[item.value][0]);
 	}
 	
 	/**
@@ -305,7 +305,7 @@ var Zotero_Bibliography_Dialog = new function () {
 	 */
 	function _loadItems() {
 		var itemIDs = bibEditInterface.bibliography[0].entry_ids;
-		var items = [Zotero.Cite.getItem(itemID[0]) for each(itemID in itemIDs)];
+		var items = itemIDs.map(itemID => Zotero.Cite.getItem(itemID[0]));
 		
 		// delete all existing items from list
 		var itemList = document.getElementById("item-list");

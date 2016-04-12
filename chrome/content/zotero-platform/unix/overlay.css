@@ -170,6 +170,10 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 
 
 @media (min-resolution: 1.5dppx) {
+	#zotero-pane .toolbarbutton-icon {
+		width: 16px;
+	}
+	
 	#zotero-tb-sync > .toolbarbutton-icon {
 		width: 20px;
 	}

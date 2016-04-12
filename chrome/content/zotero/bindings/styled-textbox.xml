@@ -49,57 +49,311 @@
 				
 				this._iframe = document.getAnonymousElementByAttribute(this, "anonid", "rt-view");
 				
-				this._rtfMap = {
-					"\\":"\\\\",
-					"<em>":"\\i ",
-					"</em>":"\\i0{}",
-					"<i>":"\\i ",
-					"</i>":"\\i0{}",
-					"<strong>":"\\b ",
-					"</strong>":"\\b0{}",
-					"<b>":"\\b ",
-					"</b>":"\\b0{}",
-					"<br />":"\x0B",
-					// there's no way to mimic a tab stop in CSS without
-					// tables, which wouldn't work here.
-					'<span class="tab">&nbsp;</span>':"\\tab{}"
-				};
-				
-				this._rtfToHtmlMap = [
-					[/\\uc0\{?\\u([0-9]+)\}?(?:{}| )?/g, function(wholeStr, aCode) { return String.fromCharCode(aCode) }],
-					[/\\tab(?:\{\}| )/g, '<span class="tab">&nbsp;</span>'],
-					[/(?:\\par{}|\\\r?\n)/g, "</p><p>"],
-					[/\\super (.*?)\\nosupersub{}/g, "<sup>$1</sup>"],
-					[/\\sub (.*?)\\nosupersub{}/g, "<sub>$1</sub>"],
-					// for backwards compatibility with Zotero < 2.1
-					["\\i0 ", "</em>"],
-					["\\b0 ", "</strong>"]
-				];
-				
-				this._htmlToRtfMap = [
-					[/"(\w)/, "“$1"],
-					[/([\w,.?!])"/, "$1”"],
-					["<p>", ""],
+				this._htmlRTFmap = [
+					// Atomic units, HTML -> RTF (cleanup)
+					[/<br \/>/g, "\x0B"],
+					[/"(\w)/g, "“$1"],
+					[/([\w,.?!])"/g, "$1”"],
+					[/<p>/g, ""],
 					//[/<\/p>(?!\s*$)/g, "\\par{}"],
 					[/<\/?div[^>]*>/g, ""],
-					["<sup>", "\\super "],
-					["</sup>", "\\nosupersub{}"],
-					["<sub>", "\\sub "],
-					["</sub>", "\\nosupersub{}"]
+					[/[\x7F-\uFFFF]/g, function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+"{}"}]
 				];
 				
-				this._rtfRexMap = [
-					["<span style=\"font-variant:small-caps;\">",
-					 /small-caps/,
-					 "\\scaps ",
-					 "\\scaps0{}"
-					],
-					["<span style=\"text-decoration:underline;\">",
-					 /underline/,
-					 "\\ul ",
-					 "\\ul0{}"
-					]
-				]
+				this._rtfHTMLmap = [
+					// Atomic units, RTF -> HTML (cleanup)
+					[/\\uc0\{?\\u([0-9]+)\}?(?:{}| )?/g, function(wholeStr, aCode) { return String.fromCharCode(aCode) }],
+					[/\\tab(?:\{\}| )/g, '<span class="tab">&nbsp;</span>'],
+					[/(?:\\par{}|\\\r?\n)/g, "</p><p>"]
+				];
+				
+				this.init = function() {
+					if (this.initialized) return;
+					// Tag data
+					var _rexData = [
+						[
+							[
+								["<span style=\"font-variant:small-caps;\">"],
+								["{\\scaps ", "{\\scaps{}"]
+							],
+							[
+								["<\/span>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<span style=\"text-decoration:underline;\">"],
+								["{\\ul{}", "{\\ul "]
+							],
+							[
+								["<\/span>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<sup>"],
+								["\\super ", "\\super{}"]
+							],
+							[
+								["</sup>"],
+								["\\nosupersub{}", "\\nosupersub "]
+							]
+						],
+						[
+							[
+								["<sub>"],
+								["\\sub ", "\\sub{}"]
+							],
+							[
+								["</sub>"],
+								["\\nosupersub{}", "\\nosupersub "]
+							]
+						],
+						[
+							[
+								["<em>"],
+								["{\\i{}", "{\\i "]
+							],
+							[
+								["</em>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<i>"],
+								["{\\i{}", "{\\i "]
+							],
+							[
+								["</i>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<b>"],
+								["{\\b{}", "{\\b "]
+							],
+							[
+								["</b>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<strong>"],
+								["{\\b{}", "{\\b "]
+							],
+							[
+								["</strong>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<span style=\"font-variant:normal;\">"],
+								["{\\scaps0{}", "{\\scaps0 "]
+							],
+							[
+								["</span>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<span style=\"font-style:normal;\">"],
+								["{\\i0{}", "{\\i0 "]
+							],
+							[
+								["</span>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<span style=\"font-weight:normal;\">"],
+								["{\\b0{}", "{\\b0 "]
+							],
+							[
+								["</span>"],
+								["}"]
+							]
+						]
+					];
+					
+					function longestFirst(a, b) {
+						if (a.length < b.length) {
+							return 1;
+						} else if (a.length > b.length) {
+							return -1;
+						} else {
+							return 0;
+						}
+					}
+					
+					function composeRex(rexes, noGlobal) {
+						var lst = [];
+						for (var rex in rexes) {
+							lst.push(rex);
+						}
+						lst.sort(longestFirst);
+						var rexStr = "(?:" + lst.join("|") + ")";
+						return new RegExp(rexStr, "g");
+					}
+					
+					// Create splitting regexps
+					function splitRexMaker(segment) {
+						var rexes = {};
+						for (var i=0,ilen=_rexData.length; i < ilen; i++) {
+							for (var j=0,jlen=_rexData[i].length; j < jlen; j++) {
+								for (var k=0,klen=_rexData[i][j][segment].length; k < klen; k++) {
+									rexes[_rexData[i][j][segment][k].replace("\\", "\\\\")] = true;
+								}
+							}
+						}
+						var ret = composeRex(rexes, true);
+						return ret;
+					}
+					this.rtfHTMLsplitRex = splitRexMaker(1);
+					this.htmlRTFsplitRex = splitRexMaker(0);
+					
+					// Create open-tag sniffing regexp
+					function openSniffRexMaker(segment) {
+						var rexes = {};
+						for (var i=0,ilen=_rexData.length; i < ilen; i++) {
+							for (var j=0,jlen=_rexData[i][0][segment].length; j < jlen; j++) {
+								rexes[_rexData[i][0][segment][j].replace("\\", "\\\\")] = true;
+							}
+						}
+						return composeRex(rexes);
+					}
+					this.rtfHTMLopenSniffRex = openSniffRexMaker(1);
+					this.htmlRTFopenSniffRex = openSniffRexMaker(0);
+					
+					// Create open-tag remapper
+					function openTagRemapMaker(segment) {
+						var ret = {};
+						for (var i=0,ilen=_rexData.length; i < ilen; i++) {
+							var master = _rexData[i][0][segment][0];
+							for (var j=0,jlen=_rexData[i][0][segment].length; j < jlen; j++) {
+								ret[_rexData[i][0][segment][j]] = master;
+							}
+						}
+						return ret;
+					}
+					this.rtfHTMLopenTagRemap = openTagRemapMaker(1);
+					this.htmlRTFopenTagRemap = openTagRemapMaker(0);
+					
+					// Create open-tag-keyed close-tag sniffing regexps
+					function closeTagRexMaker(segment) {
+						var ret = {};
+						var rexes = {};
+						for (var i=0,ilen=_rexData.length; i < ilen; i++) {
+							var master = _rexData[i][0][segment][0];
+							for (var j=0,jlen=_rexData[i][1][segment].length; j < jlen; j++) {
+								rexes[_rexData[i][1][segment][j]] = true;
+							}
+							ret[master] = composeRex(rexes);
+						}
+						return ret;
+					}
+					this.rtfHTMLcloseTagRex = closeTagRexMaker(1);
+					this.htmlRTFcloseTagRex = closeTagRexMaker(0);
+					
+					// Create open-tag-keyed open/close tag registry
+					function tagRegistryMaker(segment) {
+						var antisegment = 1;
+						if (segment == 1) {
+							antisegment = 0;
+						}
+						var ret = {};
+						for (var i=0,ilen=_rexData.length; i < ilen; i++) {
+							var master = _rexData[i][0][segment][0];
+							ret[master] = {
+								open: _rexData[i][0][antisegment][0],
+								close: _rexData[i][1][antisegment][0]
+							}
+						}
+						return ret;
+					}
+					this.rtfHTMLtagRegistry = tagRegistryMaker(1);
+					this.htmlRTFtagRegistry = tagRegistryMaker(0);
+
+                    this.initialized = true;
+				}
+				this.init();
+				
+				this.getSplit = function(mode, txt) {
+					if (!txt) return [];
+					var splt = txt.split(this[mode + "splitRex"]);
+					var mtch = txt.match(this[mode + "splitRex"]);
+					var lst = [splt[0]];
+					for (var i=1,ilen=splt.length; i < ilen; i++) {
+						lst.push(mtch[i-1]);
+						lst.push(splt[i]);
+					}
+					return lst;
+				}
+				
+				this.getOpenTag = function(mode, str) {
+					var m = str.match(this[mode + "openSniffRex"]);
+					if (m) {
+						m = this[mode + "openTagRemap"][m[0]];
+					}
+					return m;
+				}
+				
+				this.convert = function(mode, txt) {
+					var lst = this.getSplit(mode, txt);
+					var sdepth = 0;
+					var depth = 0;
+					for (var i=1,ilen=lst.length; i < ilen; i += 2) {
+						var openTag = this.getOpenTag(mode, lst[i]);
+						if (openTag) {
+							sdepth++;
+							depth = sdepth;
+							for (var j=(i+2),jlen=lst.length; j < jlen; j += 2) {
+								var closeTag = !this.getOpenTag(mode, lst[j]);
+								if (closeTag) {
+									if (depth === sdepth && lst[j].match(this[mode + "closeTagRex"][openTag])) {
+										lst[i] = this[mode + "tagRegistry"][openTag].open;
+										lst[j] = this[mode + "tagRegistry"][openTag].close;
+										break;
+									}
+									depth--;
+								} else {
+									depth++;
+								}
+							}
+						} else {
+							sdepth--;
+						}
+					}
+					return lst.join("");
+				}
+				
+				this.htmlToRTF = function(txt) {
+					// Catch this one before &nbsp; is clobbered by unescape
+					txt = txt.replace(/<span class=\"tab\">&nbsp;<\/span>/g, "\\tab{}");
+					txt = Zotero.Utilities.unescapeHTML(txt);
+					for (var i=0,ilen=this._htmlRTFmap.length; i < ilen; i++) {
+						var entry = this._htmlRTFmap[i];
+						txt = txt.replace(entry[0], entry[1]);
+					}
+					txt = this.convert("htmlRTF", txt);
+					return txt.trim();
+				}
+				
+				this.rtfToHTML = function(txt) {
+					for (var i=0,ilen=this._rtfHTMLmap.length; i < ilen; i++) {
+						var entry = this._rtfHTMLmap[i];
+						txt = txt.replace(entry[0], entry[1]);
+					}
+					txt = this.convert("rtfHTML", txt);
+					return txt.trim();
+				}
 
 				this._constructed = true;
 				
@@ -213,52 +467,14 @@
 			<!-- Sets or returns contents of rich text box -->
 			<property name="value">
 				<getter><![CDATA[
-					const highcharRe = /[\x7F-\uFFFF]/g;
-					var output = this._editor.getContent();
+					var output = this._editor.getContent().trim();
 					
 					if(this._format == "RTF") {
 						// strip divs
 						if(output.substr(0, 5) == "<div>" && output.substr(-6) == "</div>") {
-							output = output.substr(5, output.length-6);
+							output = output.slice(0, output.length-6).slice(5).trim();
 						}
-						
-						// do appropriate replacement operations
-						for(var needle in this._rtfMap) {
-							output = output.replace(needle, this._rtfMap[needle], "g"); 
-						}
-						
-						// Preserve small caps and underlining
-						for each (var tagspec in this._rtfRexMap){
-							var l = output.split(/(<\/?span[^>]*>)/);
-							var current_level = 0;
-							var tag_level = [];
-							for (var pos=1; pos<l.length; pos+=2) {
-								var tag = l[pos];
-								if (tag[1] == "/") {
-									current_level--;
-									if (current_level == tag_level[tag_level.length-1]) {
-										tag_level.pop();
-										l[pos] = tagspec[3];
-									}
-								} else {
-									if (l[pos].match(tagspec[1])) {
-										l[pos] = tagspec[2];
-										tag_level.push(current_level);
-									}
-									current_level++;
-								};
-							};
-							output = l.join("");
-						}
-						
-						for each(var entry in this._htmlToRtfMap) {
-							output = output.replace(entry[0], entry[1], "g");
-						}
-						
-						output = Zotero.Utilities.unescapeHTML(output.replace(" ", "&nbsp;", "g"))
-							.replace("\u00A0", " ", "g")
-							.replace(highcharRe, function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+"{}" });
-						output = Zotero.Utilities.trim(output);
+						output = this.htmlToRTF(output)
 					}
 					
 					return output;
@@ -313,19 +529,8 @@
 							bodyStyle = "margin-left:"+(li/20+6)+"pt;text-indent:"+(fi/20)+"pt;";
 						}
 						
-						// do appropriate replacement operations
-						for(var needle in this._rtfMap) {
-							if(this._rtfMap[needle]) {
-								html = html.replace(this._rtfMap[needle], needle, "g");
-							}
-						}
-						for each (var tagspec in this._rtfRexMap){
-							html = html.replace(tagspec[2], tagspec[0], "g");
-							html = html.replace(tagspec[3], "</span>", "g");
-						}
-						for each(var entry in this._rtfToHtmlMap) {
-							html = html.replace(entry[0], entry[1], "g");
-						}
+						html = this.rtfToHTML(html);
+						
 						html = '<div style="'+bodyStyle+'"><p>'+html+"</p></div>";
 					}
 					
