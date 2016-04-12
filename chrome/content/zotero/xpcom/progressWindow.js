@@ -332,6 +332,7 @@ Zotero.ProgressWindow = function(_window = null) {
 	this.ItemProgress.prototype.setProgress = _deferUntilWindowLoad(function(percent) {
 		if(percent != 0 && percent != 100) {
 			// Indication of partial progress, so we will use the circular indicator
+			var nArcs = 20;			
 			this._image.style.backgroundImage = "url('chrome://zotero/skin/progress_arcs.png')";
 			this._image.style.backgroundPosition = "-"+(Math.round(percent/100*nArcs)*16)+"px 0";
 			this._hbox.style.opacity = percent/200+.5;
