@@ -1565,76 +1565,79 @@
 				<parameter name="textbox"/>
 				<parameter name="stayFocused"/>
 				<body><![CDATA[
-					return Zotero.spawn(function* () {
-						var comment = false;
-						var controller = textbox.controller;
-						if (!controller.matchCount) return;
-						
-						for (var i=0; i<controller.matchCount; i++)
+					var comment = false;
+					var controller = textbox.controller;
+					if (!controller.matchCount) return;
+					
+					for (var i=0; i<controller.matchCount; i++)
+					{
+						if (controller.getValueAt(i) == textbox.value)
 						{
-							if (controller.getValueAt(i) == textbox.value)
-							{
-								comment = controller.getCommentAt(i);
-								break;
-							}
+							comment = controller.getCommentAt(i);
+							break;
+						}
+					}
+					
+					// No result selected
+					if (!comment) {
+						return;
+					}
+					
+					var [creatorID, numFields] = comment.split('-');
+					
+					// If result uses two fields, save both
+					if (numFields==2)
+					{
+						// Manually clear autocomplete controller's reference to
+						// textbox to prevent error next time around
+						textbox.mController.input = null;
+						
+						var [field, creatorIndex, creatorField] =
+							textbox.getAttribute('fieldname').split('-');
+						
+						if (stayFocused) {
+							this._lastTabIndex = parseInt(textbox.getAttribute('ztabindex')) - 1;
+							this._tabDirection = 1;
 						}
 						
-						// No result selected
-						if (!comment) {
-							return;
+						var creator = Zotero.Creators.get(creatorID);
+						
+						var otherField = creatorField == 'lastName' ? 'firstName' : 'lastName';
+						
+						// Update this textbox
+						textbox.setAttribute('value', creator[creatorField]);
+						textbox.value = creator[creatorField];
+						
+						// Update the other label
+						if (otherField=='firstName'){
+							var label = textbox.nextSibling.nextSibling;
+						}
+						else if (otherField=='lastName'){
+							var label = textbox.previousSibling.previousSibling;
 						}
 						
-						var [creatorID, numFields] = comment.split('-');
-						
-						// If result uses two fields, save both
-						if (numFields==2)
-						{
-							// Manually clear autocomplete controller's reference to
-							// textbox to prevent error next time around
-							textbox.mController.input = null;
-							
-							var [field, creatorIndex, creatorField] =
-								textbox.getAttribute('fieldname').split('-');
-							
-							if (stayFocused) {
-								this._lastTabIndex = parseInt(textbox.getAttribute('ztabindex')) - 1;
-								this._tabDirection = 1;
-							}
-							
-							var creator = Zotero.Creators.get(creatorID);
-							
-							var otherField = creatorField == 'lastName' ? 'firstName' : 'lastName';
-							
-							// Update this textbox
-							textbox.setAttribute('value', creator[creatorField]);
-							textbox.value = creator[creatorField];
-							
-							// Update the other label
-							if (otherField=='firstName'){
-								var label = textbox.nextSibling.nextSibling;
-							}
-							else if (otherField=='lastName'){
-								var label = textbox.previousSibling.previousSibling;
-							}
-							
-							//this._setFieldValue(label, creator[otherField]);
-							if (label.firstChild){
-								label.firstChild.nodeValue = creator[otherField];
-							}
-							else {
-								label.value = creator[otherField];
-							}
-							
-							var row = Zotero.getAncestorByTagName(textbox, 'row');
-							
-							var fields = this.getCreatorFields(row);
-							fields[creatorField] = creator[creatorField];
-							fields[otherField] = creator[otherField];
-							yield this.modifyCreator(creatorIndex, fields);
+						//this._setFieldValue(label, creator[otherField]);
+						if (label.firstChild){
+							label.firstChild.nodeValue = creator[otherField];
+						}
+						else {
+							label.value = creator[otherField];
 						}
 						
-						// Otherwise let the autocomplete popup handle matters
-					}, this);
+						var row = Zotero.getAncestorByTagName(textbox, 'row');
+						
+						var fields = this.getCreatorFields(row);
+						fields[creatorField] = creator[creatorField];
+						fields[otherField] = creator[otherField];
+						
+						this.ignoreBlur = true;
+						this.modifyCreator(creatorIndex, fields)
+						.then(function () {
+							this.ignoreBlur = false;
+						}.bind(this));
+					}
+					
+					// Otherwise let the autocomplete popup handle matters
 				]]></body>
 			</method>
 			
@@ -1916,7 +1919,7 @@
 					// a refresh), close it manually
 					if (textbox && textbox.parentNode) {
 						elem = this.createValueElement(
-							this.item.getField(fieldName),
+							newVal,
 							fieldName,
 							tabindex
 						);
