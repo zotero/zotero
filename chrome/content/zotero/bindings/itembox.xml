@@ -422,6 +422,17 @@
 							// TODO: make getFieldValue non-private and use below instead
 							label.setAttribute("onclick", "ZoteroPane_Local.loadURI(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value, event)");
 							label.setAttribute("tooltiptext", Zotero.getString('locate.online.tooltip'));
+
+							// right-click menu
+							var url = Zotero.Utilities.cleanURL(val);
+							if (url) {
+								label.classList.add("pointer");
+								label.setAttribute("onclick", "Zotero.Translators.getPdfFromURL('" + url + "', ZoteroPane.getSelectedItems()[0])");
+								valueElement.setAttribute('contextmenu', 'zotero-url-menu');
+
+								var retrievePDFMenuItem = document.getElementById('zotero-url-menu-retrieve-pdf');
+								retrievePDFMenuItem.setAttribute("oncommand", "Zotero.Translators.getPdfFromURL('" + url + "', ZoteroPane.getSelectedItems()[0])");
+							}
 						}
 						else if (fieldName == 'DOI' && val && typeof val == 'string') {
 							// Pull out DOI, in case there's a prefix
@@ -2398,6 +2409,9 @@
 					<menupopup id="zotero-doi-menu">
 						<menuitem id="zotero-doi-menu-view-online" label="&zotero.item.viewOnline;"/>
 						<menuitem id="zotero-doi-menu-copy" label="&zotero.item.copyAsURL;"/>
+					</menupopup>
+					<menupopup id="zotero-url-menu">
+						<menuitem id="zotero-url-menu-retrieve-pdf" label="Retrieve associated PDFs"/>
 					</menupopup>
 					<zoteroguidancepanel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
 				</popupset>
