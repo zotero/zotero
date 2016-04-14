@@ -469,6 +469,12 @@ Zotero.Translators = new function() {
 		);
 	}
 
+	/**
+	 * [* description]
+	 * @param {string}   url Url used to retrieve PDF
+	 * @param {zitem} parent Zotero item to which the pdf is attached
+	 * @yield {Promise}      Promise that resolves with output from itemSaver._saveAttachment.
+	 */
 	this.getPdfFromURL = Zotero.Promise.coroutine(function* (url, parent) {
 		if (!parent.isRegularItem()) throw new Error("No regular item.");
 		// load url in hidden browser
