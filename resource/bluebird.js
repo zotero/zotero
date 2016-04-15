@@ -103,7 +103,7 @@
 		// Ignore some errors during tests
 		if (e.message && e.message.indexOf(' -- ignore') != -1) return;
 		
-        self.debug('Possibly unhandled rejection:\n\n' + e.stack);
+        self.debug('Possibly unhandled rejection:\n\n' + e.message);
         throw e;
     });
     return;
