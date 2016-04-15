@@ -274,7 +274,7 @@ Zotero_Preferences.Sync = {
 			sep.hidden = true;
 		}
 		
-		var menulists = document.querySelectorAll('#storage-settings menulist.storage-personal');
+		var menulists = document.querySelectorAll('#storage-settings menulist.storage-mode');
 		for (let menulist of menulists) {
 			menulist.disabled = !enabled;
 		}

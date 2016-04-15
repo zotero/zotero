@@ -228,7 +228,7 @@
 
 							<hbox class="storage-settings-download-options" align="center">
 								<label value="&zotero.preferences.sync.fileSyncing.download;"/>
-								<menulist class="storage-personal" preference="pref-storage-downloadMode-personal" style="margin-left: 0">
+								<menulist class="storage-mode" preference="pref-storage-downloadMode-personal" style="margin-left: 0">
 									<menupopup>
 										<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
 										<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
@@ -245,7 +245,7 @@
 
 							<hbox class="storage-settings-download-options" align="center">
 								<label value="&zotero.preferences.sync.fileSyncing.download;"/>
-								<menulist class="storage-groups" preference="pref-storage-downloadMode-groups" style="margin-left: 0">
+								<menulist class="storage-mode" preference="pref-storage-downloadMode-groups" style="margin-left: 0">
 									<menupopup>
 										<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
 										<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
