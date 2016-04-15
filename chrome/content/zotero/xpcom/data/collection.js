@@ -390,7 +390,7 @@ Zotero.Collection.prototype.addItems = Zotero.Promise.coroutine(function* (itemI
 		});
 	}
 	
-	yield this._loadDataType('childItems');
+	yield this.loadDataType('childItems');
 });
 
 /**
@@ -435,7 +435,7 @@ Zotero.Collection.prototype.removeItems = Zotero.Promise.coroutine(function* (it
 		}
 	}.bind(this));
 	
-	yield this._loadDataType('childItems');
+	yield this.loadDataType('childItems');
 });
 
 

@@ -554,7 +554,7 @@ Zotero.DataObject.prototype._addLinkedObject = Zotero.Promise.coroutine(function
 //
 // Bulk data loading functions
 //
-// These are called by Zotero.DataObjects.prototype._loadDataType().
+// These are called by Zotero.DataObjects.prototype.loadDataType().
 //
 Zotero.DataObject.prototype.loadPrimaryData = Zotero.Promise.coroutine(function* (reload, failOnMissing) {
 	if (this._loaded.primaryData && !reload) return;
@@ -638,7 +638,7 @@ Zotero.DataObject.prototype.reload = Zotero.Promise.coroutine(function* (dataTyp
 					|| (!reloadUnchanged && !this._changed[dataType])) {
 				continue;
 			}
-			yield this._loadDataType(dataType, true);
+			yield this.loadDataType(dataType, true);
 		}
 	}
 });
@@ -678,7 +678,7 @@ Zotero.DataObject.prototype._requireData = function (dataType) {
  * @param {Boolean} reload
  * @param {Promise}
  */
-Zotero.DataObject.prototype._loadDataType = function (dataType, reload) {
+Zotero.DataObject.prototype.loadDataType = function (dataType, reload) {
 	return this._ObjectsClass._loadDataType(dataType, this.libraryID, [this.id]);
 }
 
@@ -686,7 +686,7 @@ Zotero.DataObject.prototype.loadAllData = Zotero.Promise.coroutine(function* (re
 	for (let i=0; i<this._dataTypes.length; i++) {
 		let type = this._dataTypes[i];
 		if (!this._skipDataTypeLoad[type]) {
-			yield this._loadDataType(type, reload);
+			yield this.loadDataType(type, reload);
 		}
 	}
 });
