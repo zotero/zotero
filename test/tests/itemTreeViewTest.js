@@ -211,14 +211,13 @@ describe("Zotero.ItemTreeView", function() {
 			itemsView = zp.itemsView;
 			
 			var items = [];
-			var num = 10;
+			var num = 6;
 			for (let i = 0; i < num; i++) {
 				let item = createUnsavedDataObject('item');
 				item.addToCollection(collection.id);
 				yield item.saveTx();
 				items.push(item);
 			}
-			yield Zotero.Promise.delay(2000);
 			assert.equal(itemsView.rowCount, num);
 			
 			// Select the third item in the list
