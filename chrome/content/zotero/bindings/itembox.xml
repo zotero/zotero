@@ -2068,9 +2068,6 @@
 						fields.lastName = '';
 					}
 					
-					Zotero.debug("RETURNING FIELDS");
-					Zotero.debug(fields);
-					
 					return fields;
 				]]>
 				</body>
