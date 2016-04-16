@@ -2752,7 +2752,6 @@ Zotero.Browser = new function() {
 	
 	this.createHiddenBrowser = createHiddenBrowser;
 	this.deleteHiddenBrowser = deleteHiddenBrowser;
-	this.createHiddenBrowserWithURL = createHiddenBrowserWithURL;
 	
 	function createHiddenBrowser(win) {
 	 	if (!win) {
@@ -2793,7 +2792,7 @@ Zotero.Browser = new function() {
 		}
 	}
 
-	function createHiddenBrowserWithURL(url) {
+	this.createHiddenBrowserWithURL = function(url) {
 		return new Zotero.Promise(function(resolve, reject) {
 			var browser = Zotero.Browser.createHiddenBrowser();
 			browser.addEventListener("DOMContentLoaded", () => resolve(browser), false);

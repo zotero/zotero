@@ -468,36 +468,4 @@ Zotero.Translators = new function() {
 			[fileName, JSON.stringify(metadataJSON), lastModifiedTime]
 		);
 	}
-
-	/**
-	 * [* description]
-	 * @param {string}   url Url used to retrieve PDF
-	 * @param {zitem} parent Zotero item to which the pdf is attached
-	 * @yield {Promise}      Promise that resolves with output from itemSaver._saveAttachment.
-	 */
-	this.getPdfFromURL = Zotero.Promise.coroutine(function* (url, parent) {
-		if (!parent.isRegularItem()) throw new Error("No regular item.");
-		// load url in hidden browser
-		var browser = yield Zotero.Browser.createHiddenBrowserWithURL(url);
-		var doc = browser.contentDocument;
-		// translator...
-		let translate = new Zotero.Translate.Web();
-		translate.setDocument(doc);
-		var translators = yield translate.getTranslators();
-		translate.setTranslator(translators[0]);
-		var options = {libraryID: false, saveAttachments: true};
-		let zitem = yield translate.translate(options);
-		if (!zitem.length) throw new Error("No items found");
-		// save attachment
-		var atts = zitem[0].attachments.filter(att => att.mimeType == "application/pdf");
-		if (atts.length == 0) throw new Error("No attachments on page");
-		var itemSaver = new Zotero.Translate.ItemSaver({
-			"libraryID": parent.libraryID,
-			"attachmentMode": Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD,
-			"forceTagType": 1,
-			"cookieSandbox": new Zotero.CookieSandbox(browser, url),
-			"baseURI": url
-		});
-		return itemSaver._saveAttachment(atts[0], parent.getID(), (translator, progress) => {return;});
-	});
 }

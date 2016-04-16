@@ -427,11 +427,11 @@
 							var url = Zotero.Utilities.cleanURL(val);
 							if (url) {
 								label.classList.add("pointer");
-								label.setAttribute("onclick", "Zotero.Translators.getPdfFromURL('" + url + "', ZoteroPane.getSelectedItems()[0])");
+								label.setAttribute("onclick", "Zotero.Utilities.Internal.getPDFFromURL('" + url + "', ZoteroPane.getSelectedItems()[0])");
 								valueElement.setAttribute('contextmenu', 'zotero-url-menu');
 
 								var retrievePDFMenuItem = document.getElementById('zotero-url-menu-retrieve-pdf');
-								retrievePDFMenuItem.setAttribute("oncommand", "Zotero.Translators.getPdfFromURL('" + url + "', ZoteroPane.getSelectedItems()[0])");
+								retrievePDFMenuItem.setAttribute("oncommand", "Zotero.Utilities.Internal.getPDFFromURL('" + url + "', ZoteroPane.getSelectedItems()[0])");
 							}
 						}
 						else if (fieldName == 'DOI' && val && typeof val == 'string') {
@@ -449,6 +449,9 @@
 								
 								var copyMenuItem = document.getElementById('zotero-doi-menu-copy');
 								copyMenuItem.setAttribute("oncommand", "Zotero.Utilities.Internal.copyTextToClipboard('" + doi + "')");
+								
+								var retrievePDFMenuItem = document.getElementById('zotero-doi-retrieve-pdf');
+								retrievePDFMenuItem.setAttribute("oncommand", "Zotero.Utilities.Internal.getPDFFromURL('" + doi + "', ZoteroPane.getSelectedItems()[0])");
 							}
 						}
 						else if (fieldName == 'abstractNote') {
@@ -2409,6 +2412,7 @@
 					<menupopup id="zotero-doi-menu">
 						<menuitem id="zotero-doi-menu-view-online" label="&zotero.item.viewOnline;"/>
 						<menuitem id="zotero-doi-menu-copy" label="&zotero.item.copyAsURL;"/>
+						<menuitem id="zotero-doi-retrieve-pdf" label="Retrieve associated PDFs"/>
 					</menupopup>
 					<menupopup id="zotero-url-menu">
 						<menuitem id="zotero-url-menu-retrieve-pdf" label="Retrieve associated PDFs"/>
