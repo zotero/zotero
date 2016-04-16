@@ -753,14 +753,14 @@ function ZoteroProtocolHandler() {
 						if (!item) {
 							return self._errorChannel("Item not found");
 						}
-						var file = item.getFile();
-						if (!file) {
+						var path = yield item.getFilePathAsync();
+						if (!path) {
 							return self._errorChannel("File not found");
 						}
 						if (fileName) {
-							file = file.parent;
-							file.append(fileName);
-							if (!file.exists()) {
+							Components.utils.import("resource://gre/modules/osfile.jsm");
+							path = OS.Path.join(OS.Path.dirname(path), fileName)
+							if (!(yield OS.File.exists(path))) {
 								return self._errorChannel("File not found");
 							}
 						}
@@ -771,7 +771,7 @@ function ZoteroProtocolHandler() {
 					//otherwise they try to link to files on the file:// protocol, which is not allowed
 					this.originalURI = uri;
 					
-					return file;
+					return Zotero.File.pathToFile(path);
 				}
 				catch (e) {
 					Zotero.debug(e);
