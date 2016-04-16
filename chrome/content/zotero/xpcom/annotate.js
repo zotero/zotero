@@ -751,16 +751,16 @@ Zotero.Annotations.prototype.save = function() {
 /**
  * Loads annotations from DB
  */
-Zotero.Annotations.prototype.load = function() {
+Zotero.Annotations.prototype.load = Zotero.Promise.coroutine(function* () {
 	// load annotations
-	var rows = Zotero.DB.query("SELECT * FROM annotations WHERE itemID = ?", [this.itemID]);
+	var rows = yield Zotero.DB.queryAsync("SELECT * FROM annotations WHERE itemID = ?", [this.itemID]);
 	for each(var row in rows) {
 		var annotation = this.createAnnotation();
 		annotation.initWithDBRow(row);
 	}
 	
 	// load highlights
-	var rows = Zotero.DB.query("SELECT * FROM highlights WHERE itemID = ?", [this.itemID]);
+	var rows = yield Zotero.DB.queryAsync("SELECT * FROM highlights WHERE itemID = ?", [this.itemID]);
 	for each(var row in rows) {
 		try {
 			var highlight = new Zotero.Highlight(this);
@@ -770,7 +770,7 @@ Zotero.Annotations.prototype.load = function() {
 			Zotero.debug("Annotate: could not load highlight");
 		}
 	}
-}
+});
 
 /**
  * Expands annotations if any are collapsed, or collapses highlights if all are expanded
