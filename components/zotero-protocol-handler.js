@@ -1160,7 +1160,7 @@ AsyncChannel.prototype = {
 		
 		var listenerWrapper = {
 			onStartRequest: function (request, context) {
-				Zotero.debug("Starting request");
+				//Zotero.debug("Starting request");
 				streamListener.onStartRequest(channel, context);
 			},
 			onDataAvailable: function (request, context, inputStream, offset, count) {
@@ -1168,7 +1168,7 @@ AsyncChannel.prototype = {
 				streamListener.onDataAvailable(channel, context, inputStream, offset, count);
 			},
 			onStopRequest: function (request, context, status) {
-				Zotero.debug("Stopping request");
+				//Zotero.debug("Stopping request");
 				streamListener.onStopRequest(channel, context, status);
 				channel._isPending = false;
 				if (status == 0) {
@@ -1180,7 +1180,7 @@ AsyncChannel.prototype = {
 			}
 		};
 		
-		Zotero.debug("AsyncChannel's asyncOpen called");
+		//Zotero.debug("AsyncChannel's asyncOpen called");
 		var t = new Date;
 		
 		// Proxy requests to other zotero:// URIs
@@ -1196,7 +1196,7 @@ AsyncChannel.prototype = {
 				data = yield Zotero.spawn(channel._generator, channel)
 			}
 			if (typeof data == 'string') {
-				Zotero.debug("AsyncChannel: Got string from generator");
+				//Zotero.debug("AsyncChannel: Got string from generator");
 				
 				listenerWrapper.onStartRequest(this, context);
 				
@@ -1210,7 +1210,7 @@ AsyncChannel.prototype = {
 			}
 			// If an async input stream is given, pass the data asynchronously to the stream listener
 			else if (data instanceof Ci.nsIAsyncInputStream) {
-				Zotero.debug("AsyncChannel: Got input stream from generator");
+				//Zotero.debug("AsyncChannel: Got input stream from generator");
 				
 				var pump = Cc["@mozilla.org/network/input-stream-pump;1"].createInstance(Ci.nsIInputStreamPump);
 				pump.init(data, -1, -1, 0, 0, true);
@@ -1218,11 +1218,11 @@ AsyncChannel.prototype = {
 			}
 			else if (data instanceof Ci.nsIFile || data instanceof Ci.nsIURI) {
 				if (data instanceof Ci.nsIFile) {
-					Zotero.debug("AsyncChannel: Got file from generator");
+					//Zotero.debug("AsyncChannel: Got file from generator");
 					data = ioService.newFileURI(data);
 				}
 				else {
-					Zotero.debug("AsyncChannel: Got URI from generator");
+					//Zotero.debug("AsyncChannel: Got URI from generator");
 				}
 
 				let uri = data;
@@ -1258,7 +1258,7 @@ AsyncChannel.prototype = {
 			}
 			
 			if (this._isPending) {
-				Zotero.debug("AsyncChannel request succeeded in " + (new Date - t) + " ms");
+				//Zotero.debug("AsyncChannel request succeeded in " + (new Date - t) + " ms");
 				channel._isPending = false;
 			}
 			
