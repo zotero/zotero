@@ -282,6 +282,45 @@ Zotero.Sync.APIClient.prototype = {
 	},
 	
 	
+	uploadSettings: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, libraryVersion, settings) {
+		var method = "POST";
+		var objectType = "setting";
+		var objectTypePlural = "settings";
+		var numSettings = Object.keys(settings).length;
+		
+		Zotero.debug(`Uploading ${numSettings} ${numSettings == 1 ? objectType : objectTypePlural}`);
+		
+		Zotero.debug("Sending If-Unmodified-Since-Version: " + libraryVersion);
+		
+		var json = JSON.stringify(settings);
+		var params = {
+			target: objectTypePlural,
+			libraryType: libraryType,
+			libraryTypeID: libraryTypeID
+		};
+		var uri = this.buildRequestURI(params);
+		
+		var xmlhttp = yield this.makeRequest(method, uri, {
+			headers: {
+				"Content-Type": "application/json",
+				"If-Unmodified-Since-Version": libraryVersion
+			},
+			body: json,
+			successCodes: [204, 412]
+		});
+		// Avoid logging error from Zotero.HTTP.request() in ConcurrentCaller
+		if (xmlhttp.status == 412) {
+			Zotero.debug("Server returned 412: " + xmlhttp.responseText, 2);
+			throw new Zotero.HTTP.UnexpectedStatusException(xmlhttp);
+		}
+		libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
+		if (!libraryVersion) {
+			throw new Error("Last-Modified-Version not provided");
+		}
+		return libraryVersion;
+	}),
+	
+	
 	uploadObjects: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, method, libraryVersion, objectType, objects) {
 		if (method != 'POST' && method != 'PATCH') {
 			throw new Error("Invalid method '" + method + "'");

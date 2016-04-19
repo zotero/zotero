@@ -401,7 +401,6 @@ Zotero.Sync.Data.Engine.prototype._downloadSettings = Zotero.Promise.coroutine(f
 	var numObjects = Object.keys(results.settings).length;
 	if (numObjects) {
 		Zotero.debug(numObjects + " settings modified since last check");
-		// Settings we process immediately rather than caching
 		for (let setting in results.settings) {
 			yield Zotero.SyncedSettings.set(
 				this.libraryID,
@@ -650,9 +649,28 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(function* () {
 	var libraryVersion = this.library.libraryVersion;
 	
+	var settingsUploaded = false;
 	var uploadNeeded = false;
 	var objectIDs = {};
 	var objectDeletions = {};
+	
+	// Upload synced settings
+	try {
+		let settings = yield Zotero.SyncedSettings.getUnsynced(this.libraryID);
+		if (Object.keys(settings).length) {
+			libraryVersion = yield this._uploadSettings(settings, libraryVersion);
+			settingsUploaded = true;
+		}
+		else {
+			Zotero.debug("No settings to upload in " + this.library.name);
+		}
+	}
+	catch (e) {
+		if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status == 412) {
+			return this.UPLOAD_RESULT_LIBRARY_CONFLICT;
+		}
+		throw e;
+	}
 	
 	// Get unsynced local objects for each object type
 	for (let objectType of Zotero.DataObjectUtilities.getTypesForLibrary(this.libraryID)) {
@@ -688,7 +706,7 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 	}
 	
 	if (!uploadNeeded) {
-		return this.UPLOAD_RESULT_NOTHING_TO_UPLOAD;
+		return settingsUploaded ? this.UPLOAD_RESULT_SUCCESS : this.UPLOAD_RESULT_NOTHING_TO_UPLOAD;
 	}
 	
 	try {
@@ -714,6 +732,60 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 	}
 	
 	return this.UPLOAD_RESULT_SUCCESS;
+});
+
+
+Zotero.Sync.Data.Engine.prototype._uploadSettings = Zotero.Promise.coroutine(function* (settings, libraryVersion) {
+	while (true) {
+		try {
+			let json = {};
+			for (let key in settings) {
+				json[key] = {
+					value: settings[key]
+				};
+			}
+			libraryVersion = yield this.apiClient.uploadSettings(
+				this.library.libraryType,
+				this.libraryTypeID,
+				libraryVersion,
+				json
+			);
+			yield Zotero.SyncedSettings.markAsSynced(
+				this.libraryID,
+				Object.keys(settings),
+				libraryVersion
+			);
+			break;
+		}
+		catch (e) {
+			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+				if (e.status == 412) {
+					throw e;
+				}
+				
+				// On 5xx, delay and retry
+				if (e.status >= 500 && e.status <= 600) {
+					if (!failureDelayGenerator) {
+						// Keep trying for up to an hour
+						failureDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
+							Zotero.Sync.Data.failureDelayIntervals, 60 * 60 * 1000
+						);
+					}
+					let keepGoing = yield failureDelayGenerator.next();
+					if (!keepGoing) {
+						Zotero.logError("Failed too many times");
+						throw e;
+					}
+					continue;
+				}
+			}
+			throw e;
+		}
+	}
+	
+	Zotero.debug("Done uploading settings in " + this.library.name);
+	
+	return libraryVersion;
 });
 
 

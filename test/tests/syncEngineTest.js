@@ -289,6 +289,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var lastLibraryVersion = 5;
 			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
 			
+			yield Zotero.SyncedSettings.set(libraryID, "testSetting1", { foo: "bar" });
+			yield Zotero.SyncedSettings.set(libraryID, "testSetting2", { bar: "foo" });
+			
 			var types = Zotero.DataObjectUtilities.getTypes();
 			var objects = {};
 			var objectResponseJSON = {};
@@ -304,6 +307,26 @@ describe("Zotero.Sync.Data.Engine", function () {
 					assert.equal(
 						req.requestHeaders["If-Unmodified-Since-Version"], lastLibraryVersion
 					);
+					
+					// Both settings should be uploaded
+					if (req.url == baseURL + "users/1/settings") {
+						let json = JSON.parse(req.requestBody);
+						assert.lengthOf(Object.keys(json), 2);
+						assert.property(json, "testSetting1");
+						assert.property(json, "testSetting2");
+						assert.property(json.testSetting1, "value");
+						assert.property(json.testSetting2, "value");
+						assert.propertyVal(json.testSetting1.value, "foo", "bar");
+						assert.propertyVal(json.testSetting2.value, "bar", "foo");
+						req.respond(
+							204,
+							{
+								"Last-Modified-Version": ++lastLibraryVersion
+							},
+							""
+						);
+						return;
+					}
 					
 					for (let type of types) {
 						let typePlural = Zotero.DataObjectUtilities.getObjectTypePlural(type);
@@ -344,6 +367,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			yield engine.start();
 			
+			yield Zotero.SyncedSettings.set(libraryID, "testSetting2", { bar: "bar" });
+			
 			assert.equal(Zotero.Libraries.getVersion(libraryID), lastLibraryVersion);
 			for (let type of types) {
 				// Make sure objects were set to the correct version and marked as synced
@@ -367,6 +392,23 @@ describe("Zotero.Sync.Data.Engine", function () {
 					assert.equal(
 						req.requestHeaders["If-Unmodified-Since-Version"], lastLibraryVersion
 					);
+					
+					// Modified setting should be uploaded
+					if (req.url == baseURL + "users/1/settings") {
+						let json = JSON.parse(req.requestBody);
+						assert.lengthOf(Object.keys(json), 1);
+						assert.property(json, "testSetting2");
+						assert.property(json.testSetting2, "value");
+						assert.propertyVal(json.testSetting2.value, "bar", "bar");
+						req.respond(
+							204,
+							{
+								"Last-Modified-Version": ++lastLibraryVersion
+							},
+							""
+						);
+						return;
+					}
 					
 					for (let type of types) {
 						let typePlural = Zotero.DataObjectUtilities.getObjectTypePlural(type);
