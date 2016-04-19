@@ -252,10 +252,11 @@ Zotero.HTTP = new function() {
 				}
 				deferred.resolve(xmlhttp);
 			} else {
-				var msg = "HTTP " + method + " " + dispURL + " failed: "
-					+ "Unexpected status code " + xmlhttp.status;
+				let msg = "HTTP " + method + " " + dispURL + " failed with status code " + xmlhttp.status;
+				if (xmlhttp.status == 400 || options.debug) {
+					msg += ":\n\n" + xmlhttp.responseText;
+				}
 				Zotero.debug(msg, 1);
-				Zotero.debug(xmlhttp.responseText, 1);
 				deferred.reject(new Zotero.HTTP.UnexpectedStatusException(xmlhttp, msg));
 			}
 		};
