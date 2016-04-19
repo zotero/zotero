@@ -87,11 +87,11 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 	}
 	
 	// Check if we've synced this library with the current architecture yet
-	var libraryVersion = Zotero.Libraries.getVersion(this.libraryID);
+	var libraryVersion = this.library.libraryVersion;
 	if (!libraryVersion || libraryVersion == -1) {
 		let versionResults = yield this._upgradeCheck();
 		if (versionResults) {
-			libraryVersion = Zotero.Libraries.getVersion(this.libraryID)
+			libraryVersion = this.library.libraryVersion;
 		}
 		
 		// Perform a full sync if necessary, passing the getVersions() results if available.
@@ -187,7 +187,7 @@ Zotero.Sync.Data.Engine.prototype.stop = function () {
  */
 Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(function* () {
 	var localChanges = false;
-	var libraryVersion = Zotero.Libraries.getVersion(this.libraryID);
+	var libraryVersion = this.library.libraryVersion;
 	var lastLibraryVersion;
 	
 	var gen = Zotero.Utilities.Internal.delayGenerator(
@@ -648,7 +648,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
  * @return {Promise<Integer>} - An upload result code (this.UPLOAD_RESULT_*)
  */
 Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(function* () {
-	var libraryVersion = Zotero.Libraries.getVersion(this.libraryID);
+	var libraryVersion = this.library.libraryVersion;
 	
 	var uploadNeeded = false;
 	var objectIDs = {};
@@ -1014,7 +1014,7 @@ Zotero.Sync.Data.Engine.prototype._getJSONForObject = function (objectType, id) 
  *                      by _fullSync()
  */
 Zotero.Sync.Data.Engine.prototype._upgradeCheck = Zotero.Promise.coroutine(function* () {
-	var libraryVersion = Zotero.Libraries.getVersion(this.libraryID);
+	var libraryVersion = this.library.libraryVersion;
 	if (libraryVersion) return;
 	
 	var lastLocalSyncTime = yield Zotero.DB.valueQueryAsync(
