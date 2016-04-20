@@ -870,6 +870,27 @@ var ZoteroPane = new function()
 		return collection.saveTx();
 	});
 	
+	this.importFeedsFromOPML = Zotero.Promise.coroutine(function* (event) {
+		var nsIFilePicker = Components.interfaces.nsIFilePicker;
+		while (true) {
+			var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+			fp.init(window, Zotero.getString('fileInterface.importOPML'), nsIFilePicker.modeOpen);
+			fp.appendFilter(Zotero.getString('fileInterface.OPMLFeedFilter'), '*.opml; *.xml');
+			fp.appendFilters(nsIFilePicker.filterAll);
+			if (fp.show() == nsIFilePicker.returnOK) {
+				var contents = yield Zotero.File.getContentsAsync(fp.file.path);
+				var success = yield Zotero.Feeds.importFromOPML(contents);
+				if (success) {
+					return true;
+				}
+				// Try again
+				Zotero.alert(window, Zotero.getString('general.error'), Zotero.getString('fileInterface.unsupportedFormat'));
+			} else {
+				return false;
+			}
+		}
+	});
+	
 	this.newFeedFromPage = Zotero.Promise.coroutine(function* (event) {
 		let data = {unsaved: true};
 		if (event) {

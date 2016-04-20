@@ -73,6 +73,44 @@ Zotero.Feeds = new function() {
 		return this.scheduleNextFeedCheck();
 	}
 	
+	this.importFromOPML = Zotero.Promise.coroutine(function* (opmlString) {
+		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser);
+		var doc = parser.parseFromString(opmlString, "application/xml");
+		// Per some random spec (https://developer.mozilla.org/en-US/docs/Web/API/DOMParser), 
+		// DOMParser returns a special type of xml document on error, so we do some magic checking here.
+		if (doc.documentElement.tagName == 'parseerror') {
+			return false;
+		}
+		var body = doc.getElementsByTagName('body')[0];
+		var feedElems = doc.querySelectorAll('[type=rss][url], [xmlUrl]');
+		var newFeeds = [];
+		var registeredUrls = new Set();
+		for (let feedElem of feedElems) {
+			let url = feedElem.getAttribute('xmlUrl');
+			if (!url) url = feedElem.getAttribute('url');
+			let name = feedElem.getAttribute('title');
+			if (!name) name = feedElem.getAttribute('text');
+			if (Zotero.Feeds.existsByURL(url) || registeredUrls.has(url)) {
+				Zotero.debug("Feed Import from OPML: Feed " + name + " : " + url + " already exists. Skipping");
+				continue;
+			}
+			// Prevent duplicates from the same OPML file
+			registeredUrls.add(url);
+			let feed = new Zotero.Feed({url, name});
+			newFeeds.push(feed);
+		}
+		// This could potentially be a massive list, so we save in a transaction.
+		yield Zotero.DB.executeTransaction(function* () {
+			for (let feed of newFeeds) {
+				yield feed.save();
+			}
+		});
+		// Finally, update
+		yield Zotero.Feeds.updateFeeds();
+		return true;
+	});
+	
 	this.restoreFromJSON = Zotero.Promise.coroutine(function* (json, merge=false) {
 		Zotero.debug("Restoring feeds from remote JSON");
 		Zotero.debug(json);

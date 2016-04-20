@@ -236,6 +236,8 @@ Zotero.Feed.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 	
 	if (!this._feedName) throw new Error("Feed name not set");
 	if (!this._feedUrl) throw new Error("Feed URL not set");
+	if (!this.refreshInterval) this.refreshInterval = Zotero.Prefs.get('feeds.defaultTTL') * 60;
+	if (!this.cleanupAfter) this.cleanupAfter = Zotero.Prefs.get('feeds.defaultCleanupAfter');
 	
 	if (env.isNew) {
 		// Make sure URL is unique
