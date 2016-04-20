@@ -906,10 +906,11 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 			// Handle failed objects
 			for (let index in json.results.failed) {
 				let { code, message } = json.results.failed[index];
-				e = new Error(message);
+				let e = new Error(message);
 				e.name = "ZoteroUploadObjectError";
 				e.code = code;
-				Zotero.logError(e);
+				Zotero.logError("Error for " + objectType + " " + batch[index].key + " in "
+					+ this.library.name + ":\n\n" + e);
 				
 				// This shouldn't happen, because the upload request includes a library
 				// version and should prevent an outdated upload before the object version is

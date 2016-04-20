@@ -1088,7 +1088,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			// For unexpected ones, just show a generic message
 			else {
 				// TODO: improve and localize
-				var msg = "An error occurred during syncing:\n\n" + e;
+				var msg = "An error occurred during syncing:\n\n" + e.message;
 			}
 			
 			var desc = doc.createElement('description');
