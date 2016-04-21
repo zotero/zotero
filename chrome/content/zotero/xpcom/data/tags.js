@@ -242,7 +242,7 @@ Zotero.Tags = new function() {
 		
 		yield Zotero.DB.executeTransaction(function* () {
 			var oldItemIDs = yield this.getTagItems(libraryID, oldTagID);
-			var newTagID = this.getID(newName, true);
+			var newTagID = yield this.create(newName);
 			
 			yield Zotero.Utilities.Internal.forEachChunkAsync(
 				oldItemIDs,
