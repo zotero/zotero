@@ -669,7 +669,7 @@
 							this.selection.delete(oldName);
 						}
 						
-						if (yield Zotero.Tags.getID(oldName)) {
+						if (Zotero.Tags.getID(oldName)) {
 							yield Zotero.Tags.rename(this.libraryID, oldName, newName.value);
 						}
 						// Colored tags don't need to exist, so in that case
@@ -707,7 +707,7 @@
 							return;
 						}
 						
-						var tagID = yield Zotero.Tags.getID(name);
+						var tagID = Zotero.Tags.getID(name);
 						if (tagID) {
 							yield Zotero.Tags.removeFromLibrary(this.libraryID, tagID);
 						}

@@ -1621,7 +1621,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		
 		for (let i=0; i<toAdd.length; i++) {
 			let tag = toAdd[i];
-			let tagID = yield Zotero.Tags.getID(tag.tag, true);
+			let tagID = yield Zotero.Tags.create(tag.tag);
 			let tagType = tag.type ? tag.type : 0;
 			// "OR REPLACE" allows changing type
 			let sql = "INSERT OR REPLACE INTO itemTags (itemID, tagID, type) VALUES (?, ?, ?)";
@@ -1639,7 +1639,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		if (toRemove.length) {
 			for (let i=0; i<toRemove.length; i++) {
 				let tag = toRemove[i];
-				let tagID = yield Zotero.Tags.getID(tag.tag);
+				let tagID = Zotero.Tags.getID(tag.tag);
 				let sql = "DELETE FROM itemTags WHERE itemID=? AND tagID=? AND type=?";
 				yield Zotero.DB.queryAsync(sql, [this.id, tagID, tag.type ? tag.type : 0]);
 				let notifierData = {};
@@ -3319,6 +3319,8 @@ Zotero.Item.prototype.addTag = function (name, type) {
 /**
  * Replace an existing tag with a new manual tag
  *
+ * A separate save() is required to update the database.
+ *
  * @param {String} oldTag
  * @param {String} newTag
  */
@@ -3358,13 +3360,11 @@ Zotero.Item.prototype.replaceTag = function (oldTag, newTag) {
  */
 Zotero.Item.prototype.removeTag = function(tagName) {
 	this._requireData('tags');
-	Zotero.debug(this._tags);
 	var newTags = this._tags.filter(function (tagData) tagData.tag !== tagName);
 	if (newTags.length == this._tags.length) {
 		Zotero.debug('Cannot remove missing tag ' + tagName + ' from item ' + this.libraryKey);
 		return;
 	}
-	Zotero.debug(newTags);
 	this.setTags(newTags);
 }
 

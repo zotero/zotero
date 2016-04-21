@@ -30,10 +30,30 @@
 Zotero.Tags = new function() {
 	this.MAX_COLORED_TAGS = 6;
 	
+	var _initialized = false;
+	var _tagsByID = new Map();
+	var _idsByTag = new Map();
 	var _libraryColors = {};
 	var _libraryColorsByName = {};
 	var _itemsListImagePromises = {};
 	var _itemsListExtraImagePromises = {};
+	
+	
+	this.init = Zotero.Promise.coroutine(function* () {
+		yield Zotero.DB.queryAsync(
+			"SELECT tagID, name FROM tags",
+			false,
+			{
+				onRow: function (row) {
+					var tagID = row.getResultByIndex(0);
+					var name = row.getResultByIndex(1);
+					_tagsByID.set(tagID, name);
+					_idsByTag.set(name, tagID);
+				}
+			}
+		);
+		_initialized = true;
+	});
 	
 	
 	/**
@@ -43,31 +63,61 @@ Zotero.Tags = new function() {
 	 * @return {Promise<String|false>} - A tag name, or false if tag with id not found
 	 */
 	this.getName = function (tagID) {
-		return Zotero.DB.valueQueryAsync("SELECT name FROM tags WHERE tagID=?", tagID);
-	}
+		if (!_initialized) {
+			throw new Zotero.Exception.UnloadedDataException("Tags not yet loaded");
+		}
+		
+		var name = _tagsByID.get(tagID);
+		return name !== undefined ? name : false;
+	};
 	
 	
 	/**
-	 * Returns the tagID matching given fields, or creates a new tag and returns its id
+	 * Returns the tagID matching given fields, or false if none
 	 *
 	 * @param {String} name - Tag data in API JSON format
-	 * @param {Boolean} [create=false] - If no matching tag, create one;
-	 *                                   requires a wrapping transaction
-	 * @return {Promise<Integer>} tagID
+	 * @return {Integer} tagID
 	 */
-	this.getID = Zotero.Promise.coroutine(function* (name, create) {
-		if (create) {
-			Zotero.DB.requireTransaction();
+	this.getID = function (name) {
+		if (!_initialized) {
+			throw new Zotero.Exception.UnloadedDataException("Tags not yet loaded");
 		}
+		if (arguments.length > 1) {
+			throw new Error("Zotero.Tags.getID() no longer takes a second parameter -- use Zotero.Tags.create()");
+		}
+		
 		data = this.cleanData({
 			tag: name
 		});
-		var sql = "SELECT tagID FROM tags WHERE name=?";
-		var id = yield Zotero.DB.valueQueryAsync(sql, data.tag);
-		if (!id && create) {
+		var id = _idsByTag.get(data.tag);
+		return id !== undefined ? id : false;
+	};
+	
+	
+	/**
+	 * Returns the tagID matching given fields, or creates one and returns its id
+	 *
+	 * Requires a wrapping transaction
+	 *
+	 * @param {String} name - Tag data in API JSON format
+	 * @return {Promise<Integer>} tagID
+	 */
+	this.create = Zotero.Promise.coroutine(function* (name) {
+		if (!_initialized) {
+			throw new Zotero.Exception.UnloadedDataException("Tags not yet loaded");
+		}
+		
+		Zotero.DB.requireTransaction();
+		data = this.cleanData({
+			tag: name
+		});
+		var id = this.getID(data.tag);
+		if (!id) {
 			id = Zotero.ID.get('tags');
 			let sql = "INSERT INTO tags (tagID, name) VALUES (?, ?)";
 			yield Zotero.DB.queryAsync(sql, [id, data.tag]);
+			_tagsByID.set(id, data.tag);
+			_idsByTag.set(data.tag, id);
 		}
 		return id;
 	});
@@ -252,7 +302,7 @@ Zotero.Tags = new function() {
 			var notifierData = {};
 			for (let i=0; i<tagIDs.length; i++) {
 				let tagID = tagIDs[i];
-				let name = yield this.getName(tagID);
+				let name = this.getName(tagID);
 				if (name === false) {
 					continue;
 				}
@@ -314,11 +364,14 @@ Zotero.Tags = new function() {
 	/**
 	 * Delete obsolete tags from database
 	 *
-	 * @param {Number} libraryID
 	 * @param {Number|Number[]} [tagIDs] - tagID or array of tagIDs to purge
 	 * @return {Promise}
 	 */
 	this.purge = Zotero.Promise.coroutine(function* (tagIDs) {
+		if (!_initialized) {
+			throw new Zotero.Exception.UnloadedDataException("Tags not yet loaded");
+		}
+		
 		if (!tagIDs && !Zotero.Prefs.get('purge.tags')) {
 			return;
 		}
@@ -363,6 +416,12 @@ Zotero.Tags = new function() {
 		notifierData = {};
 		for (let i=0; i<toDelete.length; i++) {
 			let row = toDelete[i];
+			
+			Zotero.DB.addCurrentCallback('commit', () => {
+				_tagsByID.delete(row.id);
+				_idsByTag.delete(row.name);
+			});
+			
 			ids.push(row.id);
 			notifierData[row.id] = {
 				old: {

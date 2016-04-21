@@ -625,6 +625,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				yield Zotero.Collections.init();
 				yield Zotero.Items.init();
 				yield Zotero.Searches.init();
+				yield Zotero.Tags.init();
 				yield Zotero.Creators.init();
 				yield Zotero.Groups.init();
 				yield Zotero.Relations.init();
