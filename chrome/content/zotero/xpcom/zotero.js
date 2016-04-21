@@ -605,7 +605,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				
 				yield Zotero.Fulltext.init();
 				
-				Zotero.Notifier.registerObserver(Zotero.Tags, 'setting');
+				Zotero.Notifier.registerObserver(Zotero.Tags, 'setting', 'tags');
 				
 				yield Zotero.Sync.Data.Local.init();
 				yield Zotero.Sync.Data.Utilities.init();
