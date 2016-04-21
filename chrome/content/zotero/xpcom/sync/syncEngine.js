@@ -905,10 +905,13 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 			
 			// Handle failed objects
 			for (let index in json.results.failed) {
-				let { code, message } = json.results.failed[index];
+				let { code, message, data } = json.results.failed[index];
 				let e = new Error(message);
-				e.name = "ZoteroUploadObjectError";
+				e.name = "ZoteroObjectUploadError";
 				e.code = code;
+				if (data) {
+					e.data = data;
+				}
 				Zotero.logError("Error for " + objectType + " " + batch[index].key + " in "
 					+ this.library.name + ":\n\n" + e);
 				

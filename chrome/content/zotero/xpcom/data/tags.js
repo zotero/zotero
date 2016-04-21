@@ -29,6 +29,7 @@
  */
 Zotero.Tags = new function() {
 	this.MAX_COLORED_TAGS = 6;
+	this.MAX_SYNC_LENGTH = 255;
 	
 	var _initialized = false;
 	var _tagsByID = new Map();
@@ -120,6 +121,15 @@ Zotero.Tags = new function() {
 			_idsByTag.set(data.tag, id);
 		}
 		return id;
+	});
+	
+	
+	this.getLongTagsInLibrary = Zotero.Promise.coroutine(function* (libraryID) {
+		var sql = "SELECT DISTINCT tagID FROM tags "
+			+ "JOIN itemTags USING (tagID) "
+			+ "JOIN items USING (itemID) "
+			+ "WHERE libraryID=? AND LENGTH(name)>?"
+		return yield Zotero.DB.columnQueryAsync(sql, [libraryID, this.MAX_SYNC_LENGTH]);
 	});
 	
 	

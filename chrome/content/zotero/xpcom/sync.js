@@ -339,36 +339,6 @@ Zotero.Sync.Server = new function () {
 					}
 					break;
 				
-				case 'TAG_TOO_LONG':
-					if (!Zotero.Sync.Runner.background) {
-						var tag = xmlhttp.responseXML.firstChild.getElementsByTagName('tag');
-						if (tag.length) {
-							var tag = tag[0].firstChild.nodeValue;
-							setTimeout(function () {
-								var callback = function () {
-									var sql = "SELECT DISTINCT name FROM tags WHERE LENGTH(name)>255 LIMIT 1";
-									var tag = Zotero.DB.valueQuery(sql);
-									if (tag) {
-										var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-												   .getService(Components.interfaces.nsIWindowMediator);
-										var lastWin = wm.getMostRecentWindow("navigator:browser");
-										var dataOut = { result: null };
-										lastWin.openDialog('chrome://zotero/content/longTagFixer.xul', '', 'chrome,modal,centerscreen', tag, dataOut);
-										if (dataOut.result) {
-											callback();
-										}
-									}
-									else {
-										Zotero.Sync.Runner.sync();
-									}
-								};
-								
-								callback();
-							}, 1);
-						}
-					}
-					break;
-				
 				// We can't reproduce it, but we can fix it
 				case 'WRONG_LIBRARY_TAG_ITEM':
 					var background = Zotero.Sync.Runner.background;
