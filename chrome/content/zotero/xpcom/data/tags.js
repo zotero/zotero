@@ -234,7 +234,7 @@ Zotero.Tags = new function() {
 			return;
 		}
 		
-		var oldTagID = yield this.getID(oldName);
+		var oldTagID = this.getID(oldName);
 		
 		// We need to know if the old tag has a color assigned so that
 		// we can assign it to the new name
@@ -242,7 +242,7 @@ Zotero.Tags = new function() {
 		
 		yield Zotero.DB.executeTransaction(function* () {
 			var oldItemIDs = yield this.getTagItems(libraryID, oldTagID);
-			var newTagID = yield this.getID(newName, true);
+			var newTagID = this.getID(newName, true);
 			
 			yield Zotero.Utilities.Internal.forEachChunkAsync(
 				oldItemIDs,
@@ -624,7 +624,7 @@ Zotero.Tags = new function() {
 			tagNames = Zotero.Utilities.arrayUnique(tagNames);
 			if (tagNames.length) {
 				for (let i=0; i<tagNames.length; i++) {
-					let tagID = yield this.getID(tagNames[i]);
+					let tagID = this.getID(tagNames[i]);
 					// Colored tags may not exist
 					if (tagID) {
 						affectedItems = affectedItems.concat(
@@ -646,7 +646,7 @@ Zotero.Tags = new function() {
 			return;
 		}
 		
-		var tagID = yield this.getID(tagName);
+		var tagID = this.getID(tagName);
 		
 		// If there's a color setting but no matching tag, don't throw
 		// an error (though ideally this wouldn't be possible).
