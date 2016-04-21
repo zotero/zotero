@@ -436,6 +436,11 @@
 	list-style-image: url('chrome://zotero/skin/attach.png');
 }
 
+.zotero-menuitem-retrieve-pdf
+{
+	list-style-image: url('chrome://zotero/skin/treeitem-attachment-pdf.png');
+}
+
 .zotero-menuitem-attachments-file
 {
 	list-style-image: url('chrome://zotero/skin/treeitem.png');
@@ -722,6 +727,7 @@
 	.zotero-menuitem-move-to-trash { list-style-image: url('chrome://zotero/skin/treesource-trash-full@2x.png'); }
 	.zotero-menuitem-attach-note { list-style-image: url('chrome://zotero/skin/toolbar-note-add@2x.png'); }
 	.zotero-menuitem-attach { list-style-image: url('chrome://zotero/skin/attach@2x.png'); }
+	.zotero-menuitem-retrieve-pdf { list-style-image: url('chrome://zotero/skin/treeitem-attachment-pdf@2x.png'); }
 	.zotero-menuitem-attachments-file { list-style-image: url('chrome://zotero/skin/treeitem@2x.png'); }
 	.zotero-menuitem-attachments-link { list-style-image: url('chrome://zotero/skin/treeitem-attachment-link@2x.png'); }
 	.zotero-menuitem-attachments-web-link { list-style-image: url('chrome://zotero/skin/treeitem-attachment-web-link@2x.png'); }

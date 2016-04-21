@@ -290,6 +290,7 @@
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="&zotero.items.menu.attach.fileLink;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromDialog(true, itemID);"/>
 						</menupopup>
 					</menu>
+					<menuitem class="menuitem-iconic zotero-menuitem-retrieve-pdf" label="Retrieve associated PDF" oncommand="ZoteroPane_Local.retrievePDFSelectedItem();"/>
 					<menuseparator/>
 					<menuitem class="menuitem-iconic zotero-menuitem-toggle-read-item" oncommand="ZoteroPane_Local.toggleSelectedItemsRead();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-duplicate-item" label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane_Local.duplicateSelectedItem().done();"/>
