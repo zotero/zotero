@@ -34,7 +34,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.1.98",
+    PROCESSOR_VERSION: "1.1.99",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -13370,7 +13370,7 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
             isCollapsible = true;
         }
         for (var j=currentLabelInfo.pos,jlen=values.length; j<jlen; j++) {
-            if (currentLabelInfo.count > 1 && isCollapsible) {
+            if (currentLabelInfo.label === values[j].label && currentLabelInfo.count > 1 && isCollapsible) {
                 values[j].plural = 1;
             }
             values[j].numeric = currentLabelInfo.numeric;
