@@ -874,7 +874,6 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		else {
 			this._refreshItemRowMap();
 		}
-		this._refreshItemRowMap();
 		
 		if (singleSelect) {
 			if (!extraData[singleSelect] || !extraData[singleSelect].skipSelect) {
