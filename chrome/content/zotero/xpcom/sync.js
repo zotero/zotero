@@ -161,23 +161,6 @@ Zotero.Sync.Server = new function () {
 		
 		var firstChild = xmlhttp.responseXML.firstChild.firstChild;
 		
-		// Temporarily disable auto-sync if instructed by server
-		if (firstChild.localName == 'throttle') {
-			Zotero.debug(xmlhttp.responseText);
-			var delay = first.getAttribute('delay');
-			var time = new Date();
-			time = time.getTime() + (delay * 1000);
-			time = new Date(time);
-			_throttleTimeout = time;
-			if (delay < 86400000) {
-				var timeStr = time.toLocaleTimeString();
-			}
-			else {
-				var timeStr = time.toLocaleString();
-			}
-			_error("Auto-syncing disabled until " + timeStr, false, noReloadOnFailure);
-		}
-		
 		if (firstChild.localName == 'error') {
 			// Don't automatically retry 400 errors
 			if (xmlhttp.status >= 400 && xmlhttp.status < 500 && !_invalidSession(xmlhttp)) {
