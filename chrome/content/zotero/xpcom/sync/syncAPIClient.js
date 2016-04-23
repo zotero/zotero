@@ -647,6 +647,9 @@ Zotero.Sync.APIClient.prototype = {
 							return false;
 						}
 					}
+					else if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+						e.fatal = true;
+					}
 					throw e;
 				}
 			}.bind(this)));
