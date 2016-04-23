@@ -40,6 +40,7 @@ Zotero.DBConnection = function(dbName) {
 	
 	Components.utils.import("resource://gre/modules/Sqlite.jsm", this);
 	
+	this.closed = false;
 	this.skipBackup = false;
 	this.transactionVacuum = false;
 	
@@ -913,6 +914,7 @@ Zotero.DBConnection.prototype.checkException = function (e) {
 Zotero.DBConnection.prototype.closeDatabase = Zotero.Promise.coroutine(function* (permanent) {
 	if (this._connection) {
 		Zotero.debug("Closing database");
+		this.closed = true;
 		yield this._connection.close();
 		this._connection = undefined;
 		this._connection = permanent ? false : null;

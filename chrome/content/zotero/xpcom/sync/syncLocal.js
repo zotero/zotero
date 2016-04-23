@@ -670,6 +670,9 @@ Zotero.Sync.Data.Local = {
 						options.onError(e);
 					}
 					
+					if (Zotero.DB.closed) {
+						e.fatal = true;
+					}
 					if (options.stopOnError || e.fatal) {
 						throw e;
 					}
