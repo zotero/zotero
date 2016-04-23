@@ -326,10 +326,14 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 Zotero.Collection.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
 	if (!env.options.skipNotifier) {
 		if (env.isNew) {
-			Zotero.Notifier.queue('add', 'collection', this.id, env.notifierData);
+			Zotero.Notifier.queue(
+				'add', 'collection', this.id, env.notifierData, env.options.notifierQueue
+			);
 		}
-		else  {
-			Zotero.Notifier.queue('modify', 'collection', this.id, env.notifierData);
+		else {
+			Zotero.Notifier.queue(
+				'modify', 'collection', this.id, env.notifierData, env.options.notifierQueue
+			);
 		}
 	}
 	

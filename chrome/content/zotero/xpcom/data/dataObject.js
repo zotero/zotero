@@ -1189,7 +1189,8 @@ Zotero.DataObject.prototype._finalizeErase = Zotero.Promise.coroutine(function* 
 			'delete',
 			this._objectType,
 			Object.keys(env.notifierData).map(id => parseInt(id)),
-			env.notifierData
+			env.notifierData,
+			env.options.notifierQueue
 		);
 	}
 });

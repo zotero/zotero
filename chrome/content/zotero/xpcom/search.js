@@ -210,10 +210,10 @@ Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env)
 		// Update library searches status
 		yield Zotero.Libraries.get(this.libraryID).updateSearches();
 		
-		Zotero.Notifier.queue('add', 'search', this.id, env.notifierData);
+		Zotero.Notifier.queue('add', 'search', this.id, env.notifierData, env.options.notifierQueue);
 	}
 	else if (!env.options.skipNotifier) {
-		Zotero.Notifier.queue('modify', 'search', this.id, env.notifierData);
+		Zotero.Notifier.queue('modify', 'search', this.id, env.notifierData, env.options.notifierQueue);
 	}
 	
 	if (env.isNew && Zotero.Libraries.isGroupLibrary(this.libraryID)) {

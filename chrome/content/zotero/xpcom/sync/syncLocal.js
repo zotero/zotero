@@ -433,17 +433,15 @@ Zotero.Sync.Data.Local = {
 		}
 		
 		var batchSize = 10;
-		var batchCounter = 0;
+		var notifierQueues = [];
 		try {
 			for (let i = 0; i < json.length; i++) {
 				// Batch notifier updates
-				if (batchCounter == 0) {
-					Zotero.Notifier.begin();
+				if (notifierQueues.length == batchSize) {
+					yield Zotero.Notifier.commit(notifierQueues);
+					notifierQueues = [];
 				}
-				else if (batchCounter == batchSize || i == json.length - 1) {
-					Zotero.Notifier.commit();
-					Zotero.Notifier.begin();
-				}
+				let notifierQueue = new Zotero.Notifier.Queue;
 				
 				let jsonObject = json[i];
 				let jsonData = jsonObject.data;
@@ -454,6 +452,7 @@ Zotero.Sync.Data.Local = {
 				saveOptions.isNewObject = false;
 				saveOptions.skipCache = false;
 				saveOptions.storageDetailsChanged = false;
+				saveOptions.notifierQueue = notifierQueue;
 				
 				Zotero.debug(`Processing ${objectType} ${libraryID}/${objectKey}`);
 				Zotero.debug(jsonObject);
@@ -542,14 +541,14 @@ Zotero.Sync.Data.Local = {
 										obj,
 										jsonObject,
 										{
-											skipData: true
+											skipData: true,
+											notifierQueue
 										}
 									);
 									results.push(saveResults);
 									if (!saveResults.processed) {
 										throw saveResults.error;
 									}
-									batchCounter++;
 									return;
 								}
 								
@@ -643,8 +642,11 @@ Zotero.Sync.Data.Local = {
 						if (!saveResults.processed) {
 							throw saveResults.error;
 						}
-						batchCounter++;
 					}.bind(this));
+					
+					if (notifierQueue.size) {
+						notifierQueues.push(notifierQueue);
+					}
 				}
 				catch (e) {
 					// Display nicer debug line for known errors
@@ -668,19 +670,18 @@ Zotero.Sync.Data.Local = {
 						options.onError(e);
 					}
 					
-					if (options.stopOnError) {
+					if (options.stopOnError || e.fatal) {
 						throw e;
 					}
 				}
 			}
 		}
-		catch (e) {
-			Zotero.Notifier.reset();
-			throw e;
-		}
 		finally {
-			Zotero.Notifier.commit();
+			if (notifierQueues.length) {
+				yield Zotero.Notifier.commit(notifierQueues);
+			}
 		}
+		
 		
 		//
 		// Conflict resolution
@@ -704,17 +705,15 @@ Zotero.Sync.Data.Local = {
 				Zotero.debug("Processing resolved conflicts");
 				
 				let batchSize = 50;
-				let batchCounter = 0;
+				let notifierQueues = [];
 				try {
 					for (let i = 0; i < mergeData.length; i++) {
 						// Batch notifier updates
-						if (batchCounter == 0) {
-							Zotero.Notifier.begin();
+						if (notifierQueues.length == batchSize) {
+							yield Zotero.Notifier.commit(notifierQueues);
+							notifierQueues = [];
 						}
-						else if (batchCounter == batchSize || i == json.length - 1) {
-							Zotero.Notifier.commit();
-							Zotero.Notifier.begin();
-						}
+						let notifierQueue = new Zotero.Notifier.Queue;
 						
 						let json = mergeData[i];
 						
@@ -722,6 +721,7 @@ Zotero.Sync.Data.Local = {
 						Object.assign(saveOptions, options);
 						// Tell _saveObjectFromJSON to save as unsynced
 						saveOptions.saveAsChanged = true;
+						saveOptions.notifierQueue = notifierQueue;
 						
 						// Errors have to be thrown in order to roll back the transaction, so catch
 						// those here and continue
@@ -735,7 +735,9 @@ Zotero.Sync.Data.Local = {
 									// Delete local object
 									if (json.deleted) {
 										try {
-											yield obj.erase();
+											yield obj.erase({
+												notifierQueue
+											});
 										}
 										catch (e) {
 											results.push({
@@ -784,6 +786,10 @@ Zotero.Sync.Data.Local = {
 								}
 
 							}.bind(this));
+							
+							if (notifierQueue.size) {
+								notifierQueues.push(notifierQueue);
+							}
 						}
 						catch (e) {
 							Zotero.logError(e);
@@ -798,11 +804,10 @@ Zotero.Sync.Data.Local = {
 						}
 					}
 				}
-				catch (e) {
-					Zotero.Notifier.reset();
-				}
 				finally {
-					Zotero.Notifier.commit();
+					if (notifierQueues.length) {
+						yield Zotero.Notifier.commit(notifierQueues);
+					}
 				}
 			}
 		}
@@ -1001,6 +1006,7 @@ Zotero.Sync.Data.Local = {
 				skipDateModifiedUpdate: true,
 				skipSelect: true,
 				skipCache: options.skipCache || false,
+				notifierQueue: options.notifierQueue,
 				// Errors are logged elsewhere, so skip in DataObject.save()
 				errorHandler: function (e) {
 					return;

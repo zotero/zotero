@@ -2087,7 +2087,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			var parentCollectionID = false;
 		}
 		
-		var unlock = Zotero.Notifier.begin(true);
+		var commitNotifier = Zotero.Notifier.begin();
 		try {
 			for (var i=0; i<data.length; i++) {
 				var file = data[i];
