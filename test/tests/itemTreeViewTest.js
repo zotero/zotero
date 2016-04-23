@@ -307,6 +307,30 @@ describe("Zotero.ItemTreeView", function() {
 	})
 	
 	describe("#drop()", function () {
+		var httpd;
+		var port = 16213;
+		var baseURL = `http://localhost:${port}/`;
+		var pdfFilename = "test.pdf";
+		var pdfURL = baseURL + pdfFilename;
+		var pdfPath;
+		
+		// Serve a PDF to test URL dragging
+		before(function () {
+			Components.utils.import("resource://zotero-unit/httpd.js");
+			httpd = new HttpServer();
+			httpd.start(port);
+			var file = getTestDataDirectory();
+			file.append(pdfFilename);
+			pdfPath = file.path;
+			httpd.registerFile("/" + pdfFilename, file);
+		});
+		
+		after(function* () {
+			var defer = new Zotero.Promise.defer();
+			httpd.stop(() => defer.resolve());
+			yield defer.promise;
+		});
+		
 		it("should move a child item from one item to another", function* () {
 			var collection = yield createDataObject('collection');
 			yield waitForItemsLoad(win);
@@ -417,6 +441,68 @@ describe("Zotero.ItemTreeView", function() {
 				(yield Zotero.File.getBinaryContentsAsync(path)),
 				(yield Zotero.File.getBinaryContentsAsync(file))
 			);
-		})
+		});
+		
+		it("should create a top-level attachment when a URL is dragged", function* () {
+			var deferred = Zotero.Promise.defer();
+			itemsView.addEventListener('select', () => deferred.resolve());
+			
+			itemsView.drop(0, -1, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: {
+					contains: function (type) {
+						return type == 'text/x-moz-url';
+					}
+				},
+				getData: function (type) {
+					if (type == 'text/x-moz-url') {
+						return pdfURL;
+					}
+				},
+				mozItemCount: 1,
+			})
+			
+			yield deferred.promise;
+			var item = itemsView.getSelectedItems()[0];
+			assert.equal(item.getField('url'), pdfURL);
+			assert.equal(
+				(yield Zotero.File.getBinaryContentsAsync(yield item.getFilePathAsync())),
+				(yield Zotero.File.getBinaryContentsAsync(pdfPath))
+			);
+		});
+		
+		it("should create a child attachment when a URL is dragged", function* () {
+			var view = zp.itemsView;
+			var parentItem = yield createDataObject('item');
+			var parentRow = view.getRowIndexByID(parentItem.id);
+			
+			var promise = waitForItemEvent('add');
+			
+			itemsView.drop(parentRow, 0, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: {
+					contains: function (type) {
+						return type == 'text/x-moz-url';
+					}
+				},
+				getData: function (type) {
+					if (type == 'text/x-moz-url') {
+						return pdfURL;
+					}
+				},
+				mozItemCount: 1,
+			})
+			
+			var itemIDs = yield promise;
+			var item = Zotero.Items.get(itemIDs[0]);
+			assert.equal(item.parentItemID, parentItem.id);
+			assert.equal(item.getField('url'), pdfURL);
+			assert.equal(
+				(yield Zotero.File.getBinaryContentsAsync(yield item.getFilePathAsync())),
+				(yield Zotero.File.getBinaryContentsAsync(pdfPath))
+			);
+		});
 	});
 })

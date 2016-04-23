@@ -3048,14 +3048,13 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 			var parentCollectionID = collectionTreeRow.ref.id;
 		}
 		
-		var unlock = Zotero.Notifier.begin(true);
+		var notifierQueue = new Zotero.Notifier.Queue;
 		try {
 			for (var i=0; i<data.length; i++) {
 				var file = data[i];
 				
 				if (dataType == 'text/x-moz-url') {
 					var url = data[i];
-					
 					if (url.indexOf('file:///') == 0) {
 						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 								   .getService(Components.interfaces.nsIWindowMediator);
@@ -3085,7 +3084,14 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 								win.ZoteroPane.displayCannotEditLibraryFilesMessage();
 								return;
 							}
-							Zotero.Attachments.importFromURL(url, parentItemID, false, false, null, null, targetLibraryID);
+							yield Zotero.Attachments.importFromURL({
+								libraryID: targetLibraryID,
+								url,
+								parentItemID,
+								saveOptions: {
+									notifierQueue
+								}
+							});
 						}
 						else {
 							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
@@ -3101,9 +3107,12 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 				
 				if (dropEffect == 'link') {
 					yield Zotero.Attachments.linkFromFile({
-						file: file,
-						parentItemID: parentItemID,
-						collections: parentCollectionID ? [parentCollectionID] : undefined
+						file,
+						parentItemID,
+						collections: parentCollectionID ? [parentCollectionID] : undefined,
+						saveOptions: {
+							notifierQueue
+						}
 					});
 				}
 				else {
@@ -3115,10 +3124,13 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 						continue;
 					}
 					yield Zotero.Attachments.importFromFile({
-						file: file,
+						file,
 						libraryID: targetLibraryID,
-						parentItemID: parentItemID,
-						collections: parentCollectionID ? [parentCollectionID] : undefined
+						parentItemID,
+						collections: parentCollectionID ? [parentCollectionID] : undefined,
+						saveOptions: {
+							notifierQueue
+						}
 					});
 					// If moving, delete original file
 					if (dragData.dropEffect == 'move') {
@@ -3133,7 +3145,7 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 			}
 		}
 		finally {
-			Zotero.Notifier.commit(unlock);
+			yield Zotero.Notifier.commit(notifierQueue);
 		}
 	}
 });

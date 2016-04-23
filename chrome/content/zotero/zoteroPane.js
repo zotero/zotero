@@ -3726,13 +3726,13 @@ var ZoteroPane = new function()
 						var collectionID = false;
 					}
 					
-					// TODO: Update for async DB
-					var attachmentItem = Zotero.Attachments.importFromURL(url, false,
-						false, false, collectionID, mimeType, libraryID,
-						function(attachmentItem) {
-							self.selectItem(attachmentItem.id);
-						});
-					
+					let attachmentItem = yield Zotero.Attachments.importFromURL({
+						libraryID,
+						url,
+						collections: collectionID ? [collectionID] : undefined,
+						contentType: mimeType
+					});
+					this.selectItem(attachmentItem.id)
 					return;
 				}
 			}
@@ -3752,7 +3752,11 @@ var ZoteroPane = new function()
 					//Zotero.Attachments.linkFromURL(doc, item.id);
 				}
 				else if (filesEditable) {
-					var attachmentItem = Zotero.Attachments.importFromURL(url, item.id, false, false, false, mimeType);
+					var attachmentItem = yield Zotero.Attachments.importFromURL({
+						url,
+						parentItemID: item.id,
+						contentType: mimeType
+					});
 					if (attachmentItem) {
 						item.setField('title', attachmentItem.getField('title'));
 						item.setField('url', attachmentItem.getField('url'));

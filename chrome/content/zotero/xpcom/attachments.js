@@ -39,6 +39,7 @@ Zotero.Attachments = new function(){
 	 * @param {Integer} [options.libraryID]
 	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
 	 * @param {Integer[]} [options.collections] - Collection keys or ids to add new item to
+	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>}
 	 */
 	this.importFromFile = Zotero.Promise.coroutine(function* (options) {
@@ -48,6 +49,7 @@ Zotero.Attachments = new function(){
 		var file = Zotero.File.pathToFile(options.file);
 		var parentItemID = options.parentItemID;
 		var collections = options.collections;
+		var saveOptions = options.saveOptions;
 		
 		var newName = Zotero.File.getValidFileName(file.leafName);
 		
@@ -76,7 +78,7 @@ Zotero.Attachments = new function(){
 			if (collections) {
 				attachmentItem.setCollections(collections);
 			}
-			yield attachmentItem.save();
+			yield attachmentItem.save(saveOptions);
 			
 			// Create directory for attachment files within storage directory
 			destDir = yield this.createDirectoryForItem(attachmentItem);
@@ -92,7 +94,7 @@ Zotero.Attachments = new function(){
 			
 			attachmentItem.attachmentContentType = contentType;
 			attachmentItem.attachmentPath = newFile.path;
-			yield attachmentItem.save();
+			yield attachmentItem.save(saveOptions);
 		}.bind(this))
 		.then(function () {
 			return _postProcessFile(attachmentItem, newFile, contentType);
@@ -122,6 +124,7 @@ Zotero.Attachments = new function(){
 	 * @param {nsIFile} [options.file] - File to link to
 	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
 	 * @param {Integer[]} [options.collections] - Collection keys or ids to add new item to
+	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>}
 	 */
 	this.linkFromFile = Zotero.Promise.coroutine(function* (options) {
@@ -130,6 +133,7 @@ Zotero.Attachments = new function(){
 		var file = options.file;
 		var parentItemID = options.parentItemID;
 		var collections = options.collections;
+		var saveOptions = options.saveOptions;
 		
 		if (parentItemID && collections) {
 			throw new Error("parentItemID and collections cannot both be provided");
@@ -138,12 +142,13 @@ Zotero.Attachments = new function(){
 		var title = file.leafName;
 		var contentType = yield Zotero.MIME.getMIMETypeFromFile(file);
 		var item = yield _addToDB({
-			file: file,
-			title: title,
+			file,
+			title,
 			linkMode: this.LINK_MODE_LINKED_FILE,
-			contentType: contentType,
-			parentItemID: parentItemID,
-			collections: collections
+			contentType,
+			parentItemID,
+			collections,
+			saveOptions
 		});
 		yield _postProcessFile(item, file, contentType);
 		return item;
@@ -222,7 +227,7 @@ Zotero.Attachments = new function(){
 	
 	/**
 	 * @param {Object} options - 'libraryID', 'url', 'parentItemID', 'collections', 'title',
-	 *                           'fileBaseName', 'contentType', 'cookieSandbox'
+	 *                           'fileBaseName', 'contentType', 'cookieSandbox', 'saveOptions'
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
 	this.importFromURL = Zotero.Promise.coroutine(function* (options) {
@@ -234,6 +239,7 @@ Zotero.Attachments = new function(){
 		var fileBaseName = options.fileBaseName;
 		var contentType = options.contentType;
 		var cookieSandbox = options.cookieSandbox;
+		var saveOptions = options.saveOptions;
 		
 		Zotero.debug('Importing attachment from URL ' + url);
 		
@@ -264,11 +270,12 @@ Zotero.Attachments = new function(){
 						}
 					}
 					return Zotero.Attachments.importFromDocument({
-						libraryID: libraryID,
+						libraryID,
 						document: browser.contentDocument,
-						parentItemID: parentItemID,
-						title: title,
-						collections: collections
+						parentItemID,
+						title,
+						collections,
+						saveOptions
 					})
 					.then(function (attachmentItem) {
 						Zotero.Browser.deleteHiddenBrowser(browser);
@@ -352,7 +359,7 @@ Zotero.Attachments = new function(){
 				if (collections) {
 					attachmentItem.setCollections(collections);
 				}
-				var itemID = yield attachmentItem.save();
+				var itemID = yield attachmentItem.save(saveOptions);
 				
 				// Create a new folder for this item in the storage directory
 				destDir = this.getStorageDirectory(attachmentItem);
@@ -362,7 +369,7 @@ Zotero.Attachments = new function(){
 				
 				// Refetch item to update path
 				attachmentItem.attachmentPath = destFile.path;
-				yield attachmentItem.save();
+				yield attachmentItem.save(saveOptions);
 			}.bind(this))
 			.catch(function (e) {
 				Zotero.debug(e, 1);
@@ -1223,7 +1230,8 @@ Zotero.Attachments = new function(){
 	/**
 	 * Create a new item of type 'attachment' and add to the itemAttachments table
 	 *
-	 * @param {Object} options - 'file', 'url', 'title', 'linkMode', 'contentType', 'charsetID', 'parentItemID'
+	 * @param {Object} options - 'file', 'url', 'title', 'linkMode', 'contentType', 'charsetID',
+	 *     'parentItemID', 'saveOptions'
 	 * @return {Promise<Zotero.Item>} - A promise for the new attachment
 	 */
 	function _addToDB(options) {
@@ -1235,6 +1243,7 @@ Zotero.Attachments = new function(){
 		var charset = options.charset;
 		var parentItemID = options.parentItemID;
 		var collections = options.collections;
+		var saveOptions = options.saveOptions;
 		
 		return Zotero.DB.executeTransaction(function* () {
 			var attachmentItem = new Zotero.Item('attachment');
@@ -1264,7 +1273,7 @@ Zotero.Attachments = new function(){
 			if (collections) {
 				attachmentItem.setCollections(collections);
 			}
-			yield attachmentItem.save();
+			yield attachmentItem.save(saveOptions);
 			
 			return attachmentItem;
 		}.bind(this));
