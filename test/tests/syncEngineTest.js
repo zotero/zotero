@@ -896,6 +896,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			yield assert.eventually.ok(Zotero.Searches.getByLibraryAndKeyAsync(userLibraryID, "DDDDDDDD"));
 			yield assert.eventually.ok(Zotero.Items.getByLibraryAndKeyAsync(userLibraryID, "GGGGGGGG"));
 			
+			// Check for queued objects
 			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('collection', userLibraryID);
 			assert.sameMembers(keys, ['BBBBBBBB']);
 			

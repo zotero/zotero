@@ -1382,7 +1382,8 @@ Zotero.ItemTreeView.prototype.sort = function (itemID) {
 	var collation = Zotero.getLocaleCollation();
 	var sortCreatorAsString = Zotero.Prefs.get('sortCreatorAsString');
 	
-	Zotero.debug("Sorting items list by " + sortFields.join(", ") + " " + dir);
+	Zotero.debug("Sorting items list by " + sortFields.join(", ") + " " + dir
+		+ (itemID ? " for 1 item" : ""));
 	
 	// Set whether rows with empty values should be displayed last,
 	// which may be different for primary and secondary sorting.

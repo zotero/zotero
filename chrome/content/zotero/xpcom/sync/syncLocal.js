@@ -419,7 +419,7 @@ Zotero.Sync.Data.Local = {
 		json = json.map(o => this._checkCacheJSON(o));
 		
 		if (options.setStatus) {
-			options.setStatus("Processing " + objectTypePlural); // TODO: localize
+			options.setStatus("Downloading " + objectTypePlural + " in " + libraryName); // TODO: localize
 		}
 		
 		// Sort parent objects first, to avoid retries due to unmet dependencies

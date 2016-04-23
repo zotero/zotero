@@ -531,7 +531,7 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 		}
 		else {
 			Zotero.debug(`Rolled back DB transaction ${id}`, 1);
-			Zotero.debug(e, 1);
+			Zotero.debug(e.message, 1);
 		}
 		if (startedTransaction) {
 			this._transactionID = null;
