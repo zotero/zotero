@@ -1336,6 +1336,14 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	}
 	
 	
+	this.warn = function (err) {
+		Zotero.debug(err, 2);
+		log(err.message ? err.message : err.toString(), "warning",
+			err.fileName ? err.fileName : (err.filename ? err.filename : null), null,
+			err.lineNumber ? err.lineNumber : null, null);
+	}
+	
+	
 	/**
 	 * Display an alert in a given window
 	 *
