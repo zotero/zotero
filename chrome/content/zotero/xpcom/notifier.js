@@ -338,22 +338,33 @@ Zotero.Notifier = new function(){
 		
 		var runQueue = [];
 		
-		function sorter(a, b) {
-			return order.indexOf(b) - order.indexOf(a);
-		}
-		var order = ['collection', 'search', 'item', 'collection-item', 'item-tag', 'tag'];
-		_queue.sort();
+		// Sort using order from array, unless missing, in which case sort after
+		var getSorter = function (orderArray) {
+			return function (a, b) {
+				var posA = orderArray.indexOf(a);
+				var posB = orderArray.indexOf(b);
+				if (posA == -1) posA = 100;
+				if (posB == -1) posB = 100;
+				return posA - posB;
+			}
+		};
 		
-		var order = ['add', 'modify', 'remove', 'move', 'delete', 'trash'];
+		var typeOrder = ['collection', 'search', 'item', 'collection-item', 'item-tag', 'tag'];
+		var eventOrder = ['add', 'modify', 'remove', 'move', 'delete', 'trash'];
+		
+		var queueTypes = Object.keys(_queue);
+		queueTypes.sort(getSorter(typeOrder));
+		
 		var totals = '';
-		for (var type in _queue) {
+		for (let type of queueTypes) {
 			if (!runQueue[type]) {
 				runQueue[type] = [];
 			}
 			
-			_queue[type].sort();
+			let typeEvents = Object.keys(_queue[type]);
+			typeEvents.sort(getSorter(eventOrder));
 			
-			for (var event in _queue[type]) {
+			for (let event of typeEvents) {
 				runQueue[type][event] = {
 					ids: [],
 					data: _queue[type][event].data
