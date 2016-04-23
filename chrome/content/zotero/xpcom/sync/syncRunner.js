@@ -118,23 +118,19 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		// Purge deleted objects so they don't cause sync errors (e.g., long tags)
 		yield Zotero.purgeDataObjects(true);
 		
-		var apiKey = yield _getAPIKey();
-		if (!apiKey) {
-			let msg = "API key not set";
-			let e = new Zotero.Error(msg, 0, { dialogButtonText: null })
-			this.updateIcons(e);
-			_syncInProgress = false;
-			return false;
-		}
-		if (_firstInSession) {
-			options.firstInSession = true;
-			_firstInSession = false;
-		}
-		
-		_syncInProgress = true;
-		this.updateIcons('animate');
-		
 		try {
+			let apiKey = yield _getAPIKey();
+			if (!apiKey) {
+				throw new Zotero.Error("API key not set", Zotero.Error.ERROR_API_KEY_NOT_SET)
+			}
+			
+			if (_firstInSession) {
+				options.firstInSession = true;
+				_firstInSession = false;
+			}
+			
+			this.updateIcons('animate');
+		
 			let client = this.getAPIClient({ apiKey });
 			let keyInfo = yield this.checkAccess(client, options);
 			
@@ -846,7 +842,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	this.checkError = Zotero.Promise.coroutine(function* (e, options = {}) {
 		if (e.name && e.name == 'Zotero Error') {
 			switch (e.error) {
-				case Zotero.Error.ERROR_SYNC_USERNAME_NOT_SET:
+				case Zotero.Error.ERROR_API_KEY_NOT_SET:
 				case Zotero.Error.ERROR_INVALID_SYNC_LOGIN:
 					// TODO: the setTimeout() call below should just simulate a click on the sync error icon
 					// instead of creating its own dialog, but updateIcons() doesn't yet provide full control
@@ -855,7 +851,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					// TODO: localize (=>done) and combine with below (=>?)
 					var msg = Zotero.getString('sync.error.invalidLogin.text');
 					e.message = msg;
-					e.data = {};
 					e.dialogText = msg;
 					e.dialogButtonText = Zotero.getString('sync.openSyncPreferences');
 					e.dialogButtonCallback = function () {
@@ -866,7 +861,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					};
 					
 					// Manual click
-					if (!background) {
+					if (!options.background) {
 						setTimeout(function () {
 							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 										.getService(Components.interfaces.nsIWindowMediator);
@@ -876,7 +871,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 										.getService(Components.interfaces.nsIPromptService);
 							var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 												+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
-							if (e.error == Zotero.Error.ERROR_SYNC_USERNAME_NOT_SET) {
+							if (e.error == Zotero.Error.ERROR_API_KEY_NOT_SET) {
 								var title = Zotero.getString('sync.error.usernameNotSet');
 								var msg = Zotero.getString('sync.error.usernameNotSet.text');
 							}
