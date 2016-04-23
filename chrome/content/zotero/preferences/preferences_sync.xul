@@ -67,6 +67,7 @@
 											<label value="&zotero.preferences.sync.username;"/>
 											<textbox id="sync-username-textbox"
 												preference="pref-sync-username"
+												onblur="Zotero_Preferences.Sync.trimUsername()"
 												onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event);"/>
 										</row>
 										<row>

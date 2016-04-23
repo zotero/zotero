@@ -85,7 +85,6 @@ Zotero_Preferences.Sync = {
 
 	credentialsKeyPress: function (event) {
 		var username = document.getElementById('sync-username-textbox');
-		username.value = username.value.trim();
 		var password = document.getElementById('sync-password');
 
 		var syncAuthButton = document.getElementById('sync-auth-button');
@@ -103,9 +102,22 @@ Zotero_Preferences.Sync = {
 			Zotero_Preferences.Sync.linkAccount(event);
 		}
 	},
-
-
+	
+	
+	trimUsername: function () {
+		var tb = document.getElementById('sync-username-textbox');
+		var username = tb.value;
+		var trimmed = username.trim();
+		if (username != trimmed) {
+			tb.value = trimmed;
+			// Setting .value alone doesn't seem to cause the pref to sync, so set it manually
+			Zotero.Prefs.set('sync.server.username', trimmed);
+		}
+	},
+	
+	
 	linkAccount: Zotero.Promise.coroutine(function* (event) {
+		this.trimUsername();
 		var username = document.getElementById('sync-username-textbox').value;
 		var password = document.getElementById('sync-password').value;
 
