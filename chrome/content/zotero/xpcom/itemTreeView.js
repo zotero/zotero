@@ -551,58 +551,48 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	this._treebox.beginUpdateBatch();
 	
 	if ((action == 'remove' && !itemGroup.isLibrary(true))
-			|| action == 'delete' || action == 'trash') {
-		
-		// On a delete in duplicates mode, just refresh rather than figuring
-		// out what to remove
-		if (itemGroup.isDuplicates()) {
-			previousRow = this._itemRowMap[ids[0]];
-			this.refresh();
-			madeChanges = true;
-			sort = true;
+			|| action == 'delete' || action == 'trash'
+			|| (action == 'removeDuplicatesMaster' && itemGroup.isDuplicates())) {
+		// Since a remove involves shifting of rows, we have to do it in order,
+		// so sort the ids by row
+		var rows = [];
+		for (var i=0, len=ids.length; i<len; i++) {
+			if (action == 'delete' || action == 'trash' || action == 'removeDuplicatesMaster' ||
+					!itemGroup.ref.hasItem(ids[i])) {
+				let row = this._itemRowMap[ids[i]];
+				
+				// Row might already be gone (e.g. if this is a child and
+				// 'modify' was sent to parent)
+				if (row == undefined) {
+					continue;
+				}
+				
+				rows.push(row);
+				
+				// Remove child items of removed parents
+				if (this.isContainer(row) && this.isContainerOpen(row)) {
+					while (++row < this.rowCount && this.getLevel(row) > 0) {
+						rows.push(row);
+					}
+				}
+			}
 		}
-		else {
-			// Since a remove involves shifting of rows, we have to do it in order,
-			// so sort the ids by row
-			var rows = [];
-			for (var i=0, len=ids.length; i<len; i++) {
-				if (action == 'delete' || action == 'trash' ||
-						!itemGroup.ref.hasItem(ids[i])) {
-					let row = this._itemRowMap[ids[i]];
-					
-					// Row might already be gone (e.g. if this is a child and
-					// 'modify' was sent to parent)
-					if (row == undefined) {
-						continue;
-					}
-					
-					rows.push(row);
-					
-					// Remove child items of removed parents
-					if (this.isContainer(row) && this.isContainerOpen(row)) {
-						while (++row < this.rowCount && this.getLevel(row) > 0) {
-							rows.push(row);
-						}
-					}
+		
+		if (rows.length > 0) {
+			rows.sort(function(a,b) { return a-b });
+			
+			for(var i=0, len=rows.length; i<len; i++)
+			{
+				var row = rows[i];
+				if(row != null)
+				{
+					this._hideItem(row-i);
+					this._treebox.rowCountChanged(row-i,-1);
 				}
 			}
 			
-			if (rows.length > 0) {
-				rows.sort(function(a,b) { return a-b });
-				
-				for(var i=0, len=rows.length; i<len; i++)
-				{
-					var row = rows[i];
-					if(row != null)
-					{
-						this._hideItem(row-i);
-						this._treebox.rowCountChanged(row-i,-1);
-					}
-				}
-				
-				madeChanges = true;
-				sort = true;
-			}
+			madeChanges = true;
+			sort = true;
 		}
 	}
 	else if (action == 'modify')
