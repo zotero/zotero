@@ -3,6 +3,12 @@
 describe("Duplicate Items", function () {
 	var win, zp, cv;
 	
+	before(function* () {
+		yield resetDB({
+			thisArg: this,
+			skipBundledFiles: true
+		});
+	});
 	beforeEach(function* () {
 		Zotero.Prefs.clear('duplicateLibraries');
 		win = yield loadZoteroPane();
