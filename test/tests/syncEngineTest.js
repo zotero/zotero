@@ -117,6 +117,10 @@ describe("Zotero.Sync.Data.Engine", function () {
 		yield Zotero.Users.setCurrentUsername("testuser");
 	})
 	
+	after(function () {
+		Zotero.HTTP.mock = null;
+	});
+	
 	describe("Syncing", function () {
 		it("should download items into a new library", function* () {
 			({ engine, client, caller } = yield setup());
