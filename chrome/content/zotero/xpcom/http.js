@@ -82,6 +82,7 @@ Zotero.HTTP = new function() {
 	 *         <li>dontCache - If set, specifies that the request should not be fulfilled from the cache</li>
 	 *         <li>foreground - Make a foreground request, showing certificate/authentication dialogs if necessary</li>
 	 *         <li>headers - HTTP headers to include in the request</li>
+	 *         <li>logBodyLength - Length of request body to log (defaults to 1024)</li>
 	 *         <li>timeout - Request timeout specified in milliseconds
 	 *         <li>requestObserver - Callback to receive XMLHttpRequest after open()</li>
 	 *         <li>responseType - The type of the response. See XHR 2 documentation for legal values</li>
@@ -107,15 +108,16 @@ Zotero.HTTP = new function() {
 		dispURL = dispURL.replace(/key=[^&]+&?/, "").replace(/\?$/, "");
 		
 		if (options.body && typeof options.body == 'string') {
-			var bodyStart = options.body.substr(0, 1024);
+			let len = options.logBodyLength !== undefined ? options.logBodyLength : 1024;
+			var bodyStart = options.body.substr(0, len);
 			// Don't display sync password or session id in console
 			bodyStart = bodyStart.replace(/password":"[^"]+/, 'password":"********');
 			bodyStart = bodyStart.replace(/password=[^&]+/, 'password=********');
 			bodyStart = bodyStart.replace(/sessionid=[^&]+/, 'sessionid=********');
 			
-			Zotero.debug("HTTP "+method+" "
-				+ (options.body.length > 1024 ?
-					bodyStart + '... (' + options.body.length + ' chars)' : bodyStart)
+			Zotero.debug("HTTP " + method + ' "'
+				+ (options.body.length > len
+					? bodyStart + '\u2026" (' + options.body.length + ' chars)' : bodyStart + '"')
 				+ " to " + dispURL);
 		} else {
 			Zotero.debug("HTTP " + method + " " + dispURL);
