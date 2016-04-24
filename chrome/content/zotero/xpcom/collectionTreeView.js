@@ -1553,7 +1553,7 @@ Zotero.CollectionTreeView.prototype.canDropCheck = function (row, orient, dataTr
 				}
 				
 				// Nor in their children
-				if (col.hasDescendent('collection', treeRow.ref.id)) {
+				if (draggedCollection.hasDescendent('collection', treeRow.ref.id)) {
 					return false;
 				}
 			}
