@@ -47,7 +47,7 @@ Zotero.Sync.APIClient.prototype = {
 	
 	
 	getKeyInfo: Zotero.Promise.coroutine(function* (options={}) {
-		var uri = this.baseURL + "keys/" + this.apiKey;
+		var uri = this.baseURL + "keys/current";
 		let opts = {};
 		Object.assign(opts, options);
 		opts.successCodes = [200, 404];
@@ -518,7 +518,7 @@ Zotero.Sync.APIClient.prototype = {
 
 	// Deletes current API key
 	deleteAPIKey: Zotero.Promise.coroutine(function* () {
-		yield this.makeRequest("DELETE", this.baseURL + "keys/" + this.apiKey);
+		yield this.makeRequest("DELETE", this.baseURL + "keys/current");
 	}),
 	
 	

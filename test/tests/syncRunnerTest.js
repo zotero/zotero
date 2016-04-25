@@ -11,7 +11,7 @@ describe("Zotero.Sync.Runner", function () {
 		keyInfo: {
 			fullAccess: {
 				method: "GET",
-				url: "keys/" + apiKey,
+				url: "keys/current",
 				status: 200,
 				json: {
 					key: apiKey,
@@ -729,7 +729,8 @@ describe("Zotero.Sync.Runner", function () {
 
 			server.respond(function (req) {
 				if (req.method == "DELETE") {
-					assert.equal(req.url, baseURL + "keys/" + apiKey);
+					assert.propertyVal(req.requestHeaders, 'Zotero-API-Key', apiKey);
+					assert.equal(req.url, baseURL + "keys/current");
 				}
 				req.respond(204);
 			});
