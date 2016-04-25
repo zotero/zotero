@@ -121,7 +121,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		try {
 			let apiKey = yield _getAPIKey();
 			if (!apiKey) {
-				throw new Zotero.Error("API key not set", Zotero.Error.ERROR_API_KEY_NOT_SET)
+				throw new Zotero.Error("API key not set", Zotero.Error.ERROR_API_KEY_NOT_SET);
 			}
 			
 			if (_firstInSession) {
@@ -241,8 +241,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		var json = yield client.getKeyInfo(options);
 		Zotero.debug(json);
 		if (!json) {
-			// TODO: Nicer error message
-			throw new Error("Invalid API key");
+			throw new Zotero.Error("API key not set", Zotero.Error.ERROR_API_KEY_NOT_SET);
 		}
 		
 		// Sanity check
@@ -843,7 +842,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		if (e.name && e.name == 'Zotero Error') {
 			switch (e.error) {
 				case Zotero.Error.ERROR_API_KEY_NOT_SET:
-				case Zotero.Error.ERROR_INVALID_SYNC_LOGIN:
+				case Zotero.Error.ERROR_API_KEY_INVALID:
 					// TODO: the setTimeout() call below should just simulate a click on the sync error icon
 					// instead of creating its own dialog, but updateIcons() doesn't yet provide full control
 					// over dialog title and primary button text/action, which is why this version of the

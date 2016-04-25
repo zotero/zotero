@@ -50,9 +50,9 @@ Zotero.Sync.APIClient.prototype = {
 		var uri = this.baseURL + "keys/current";
 		let opts = {};
 		Object.assign(opts, options);
-		opts.successCodes = [200, 404];
+		opts.successCodes = [200, 403, 404];
 		var xmlhttp = yield this.makeRequest("GET", uri, opts);
-		if (xmlhttp.status == 404) {
+		if (xmlhttp.status == 403 || xmlhttp.status == 404) {
 			return false;
 		}
 		var json = this._parseJSON(xmlhttp.responseText);
