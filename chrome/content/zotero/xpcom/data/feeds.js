@@ -163,7 +163,7 @@ Zotero.Feeds = new function() {
 		Zotero.debug("Scheduling next feed update");
 		let sql = "SELECT ( CASE "
 			+ "WHEN lastCheck IS NULL THEN 0 "
-			+ "ELSE strftime('%s', lastCheck) + refreshInterval*3600 - strftime('%s', 'now') "
+			+ "ELSE strftime('%s', lastCheck) + refreshInterval * 60 - strftime('%s', 'now') "
 			+ "END ) AS nextCheck "
 			+ "FROM feeds WHERE refreshInterval IS NOT NULL "
 			+ "ORDER BY nextCheck ASC LIMIT 1";
@@ -176,7 +176,7 @@ Zotero.Feeds = new function() {
 
 		if (nextCheck !== false) {
 			nextCheck = nextCheck > 0 ? nextCheck * 1000 : 0;
-			Zotero.debug("Next feed check in " + nextCheck / 60000 + " minutes");
+			Zotero.debug("Next feed check in " + (nextCheck / 1000) + " seconds");
 			this._nextFeedCheck = Zotero.Promise.delay(nextCheck);
 			Zotero.Promise.all([this._nextFeedCheck, globalFeedCheckDelay])
 			.then(() => {
