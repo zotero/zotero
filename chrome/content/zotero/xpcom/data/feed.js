@@ -463,8 +463,7 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 	}
 	catch (e) {
 		if (e.message) {
-			Zotero.debug("Error processing feed from " + this.url);
-			Zotero.debug(e);
+			Zotero.logError("Error processing feed from " + this.url + ":\n\n" + e);
 		}
 		this._set('_feedLastCheckError', e.message || 'Error processing feed');
 	}
