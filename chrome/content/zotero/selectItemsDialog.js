@@ -45,7 +45,7 @@ function doLoad()
 	
 	collectionsView = new Zotero.CollectionTreeView();
 	// Don't show Commons when citing
-	collectionsView.hideSources = ['duplicates', 'trash', 'commons'];
+	collectionsView.hideSources = ['duplicates', 'trash', 'feeds'];
 	document.getElementById('zotero-collections-tree').view = collectionsView;
 	if(io.select) itemsView.selectItem(io.select);
 	

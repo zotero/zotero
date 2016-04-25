@@ -211,28 +211,30 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 
 	// TODO: Unify feed and group adding code
 	// Add feeds
-	var feeds = Zotero.Feeds.getAll();
-	if (feeds.length) {
-		this._addRowToArray(
-			newRows,
-			new Zotero.CollectionTreeRow('separator', false),
-			added++
-		);
-		this._addRowToArray(
-			newRows,
-			new Zotero.CollectionTreeRow('header', {
-				id: "feed-libraries-header",
-				label: Zotero.getString('pane.collections.feedLibraries'),
-				libraryID: -1
-			}, 0),
-			added++
-		);
-		for (let feed of feeds) {
+	if (this.hideSources.indexOf('feeds') == -1) {
+		var feeds = Zotero.Feeds.getAll();
+		if (feeds.length) {
 			this._addRowToArray(
 				newRows,
-				new Zotero.CollectionTreeRow('feed', feed),
+				new Zotero.CollectionTreeRow('separator', false),
 				added++
 			);
+			this._addRowToArray(
+				newRows,
+				new Zotero.CollectionTreeRow('header', {
+					id: "feed-libraries-header",
+					label: Zotero.getString('pane.collections.feedLibraries'),
+					libraryID: -1
+				}, 0),
+				added++
+			);
+			for (let feed of feeds) {
+				this._addRowToArray(
+					newRows,
+					new Zotero.CollectionTreeRow('feed', feed),
+					added++
+				);
+			}
 		}
 	}
 
