@@ -1230,7 +1230,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						var patterns = yield Zotero.DB.columnQueryAsync(ftSQL, { int: condition.value });
 						if (patterns) {
 							for each(str in patterns) {
-								condSQL += 'mimeType LIKE ? OR ';
+								condSQL += 'contentType LIKE ? OR ';
 								condSQLParams.push(str + '%');
 							}
 							condSQL = condSQL.substring(0, condSQL.length - 4);

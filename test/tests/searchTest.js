@@ -146,6 +146,13 @@ describe("Zotero.Search", function() {
 			let matches = yield s.search();
 			assert.deepEqual(matches, [foobarItem.id]);
 		});
+		
+		it("should search by attachment file type", function* () {
+			let s = new Zotero.Search();
+			s.addCondition('fileTypeID', 'is', Zotero.FileTypes.getID('webpage'));
+			let matches = yield s.search();
+			assert.sameMembers(matches, [fooItem.id, foobarItem.id]);
+		});
 	});
 	
 	describe("#toJSON()", function () {
