@@ -127,7 +127,8 @@ Zotero.DBConnection.prototype.getAsyncStatement = Zotero.Promise.coroutine(funct
 Zotero.DBConnection.prototype.parseQueryAndParams = function (sql, params) {
 	// If single scalar value, wrap in an array
 	if (!Array.isArray(params)) {
-		if (typeof params == 'string' || typeof params == 'number' || params === null) {
+		if (typeof params == 'string' || typeof params == 'number' || typeof params == 'object'
+				|| params === null) {
 			params = [params];
 		}
 		else {
