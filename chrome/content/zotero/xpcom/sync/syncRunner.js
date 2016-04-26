@@ -140,12 +140,16 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				Zotero.debug("Syncing cancelled because user library is empty");
 				return false;
 			}
-
-			if (!Zotero.Users.getCurrentUserID()) {
-				Zotero.Users.setCurrentUserID(keyInfo.userID);
-				Zotero.Users.setCurrentUsername(keyInfo.username);
+			
+			let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+				.getService(Components.interfaces.nsIWindowMediator);
+			let lastWin = wm.getMostRecentWindow("navigator:browser");
+			if (!(yield Zotero.Sync.Data.Local.checkUser(lastWin, keyInfo.userID, keyInfo.username))) {
+				yield this.end(options);
+				Zotero.debug("User cancelled sync on username mismatch");
+				return false;
 			}
-
+			
 			let engineOptions = {
 				apiClient: client,
 				caller: this.caller,

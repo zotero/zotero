@@ -140,7 +140,7 @@ Zotero_Preferences.Sync = {
 			return;
 		}
 
-		if (!(yield this.checkUser(json.userID, json.username))) {
+		if (!(yield Zotero.Sync.Data.Local.checkUser(window, json.userID, json.username))) {
 			// createAPIKeyFromCredentials will have created an API key,
 			// but user decided not to use it, so we remove it here.
 			Zotero.Sync.Runner.deleteAPIKey();
@@ -179,93 +179,6 @@ Zotero_Preferences.Sync = {
 	}),
 
 
-	/**
-	 * Make sure we're syncing with the same account we used last time, and prompt if not.
-	 * If user accepts, change the current user, delete existing groups, and update relation
-	 * URIs to point to the new user's library.
-	 *
-	 * @param	{Integer}	userID			New userID
-	 * @param	{Integer}	libraryID		New libraryID
-	 * @return {Boolean} - True to continue, false to cancel
-	 */
-	checkUser: Zotero.Promise.coroutine(function* (userID, username) {
-		var lastUserID = Zotero.Users.getCurrentUserID();
-		var lastUsername = Zotero.Users.getCurrentUsername();
-
-		if (lastUserID && lastUserID != userID) {
-			var groups = Zotero.Groups.getAll();
-
-			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-				.getService(Components.interfaces.nsIPromptService);
-			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
-				+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
-				+ ps.BUTTON_POS_1_DEFAULT
-				+ ps.BUTTON_DELAY_ENABLE;
-
-			var msg = Zotero.getString('sync.lastSyncWithDifferentAccount', [lastUsername, username]);
-			var syncButtonText = Zotero.getString('sync.sync');
-
-			msg += " " + Zotero.getString('sync.localDataWillBeCombined', username);
-			// If there are local groups belonging to the previous user,
-			// we need to remove them
-			if (groups.length) {
-				msg += " " + Zotero.getString('sync.localGroupsWillBeRemoved1');
-				var syncButtonText = Zotero.getString('sync.removeGroupsAndSync');
-			}
-			msg += "\n\n" + Zotero.getString('sync.avoidCombiningData', lastUsername);
-
-			var index = ps.confirmEx(
-				null,
-				Zotero.getString('general.warning'),
-				msg,
-				buttonFlags,
-				syncButtonText,
-				null,
-				Zotero.getString('sync.openSyncPreferences'),
-				null, {}
-			);
-
-			if (index > 0) {
-				if (index == 2) {
-					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-							   .getService(Components.interfaces.nsIWindowMediator);
-					var lastWin = wm.getMostRecentWindow("navigator:browser");
-					lastWin.ZoteroPane.openPreferences('zotero-prefpane-sync');
-				}
-				return false;
-			}
-		}
-
-		yield Zotero.DB.executeTransaction(function* () {
-			if (lastUserID != userID) {
-				if (lastUserID) {
-					// Delete all local groups if changing users
-					for (let group of groups) {
-						yield group.erase();
-					}
-
-					// Update relations pointing to the old library to point to this one
-					yield Zotero.Relations.updateUser(userID);
-				}
-				// Replace local user key with libraryID, in case duplicates were
-				// merged before the first sync
-				else {
-					yield Zotero.Relations.updateUser(userID);
-				}
-
-				yield Zotero.Users.setCurrentUserID(userID);
-			}
-
-			if (lastUsername != username) {
-				yield Zotero.Users.setCurrentUsername(username);
-			}
-		})
-
-		return true;
-	}),
-	
-	
 	updateStorageSettingsUI: Zotero.Promise.coroutine(function* () {
 		this.unverifyStorageServer();
 		
