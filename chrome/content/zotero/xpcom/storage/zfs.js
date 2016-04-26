@@ -583,13 +583,15 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				}
 			}
 			
-			text += "\n\n" + filename + " (" + Math.round(file.fileSize / 1024) + "KB)";
+			var filename = item.attachmentFilename;
+			var fileSize = (yield OS.File.stat(item.getFilePath())).size;
+			
+			text += "\n\n" + filename + " (" + Math.round(fileSize / 1024) + "KB)";
 			
 			let e = new Zotero.Error(
-				Zotero.getString('sync.storage.error.zfs.fileWouldExceedQuota', filename),
+				text,
 				"ZFS_OVER_QUOTA",
 				{
-					dialogText: text,
 					dialogButtonText: buttonText,
 					dialogButtonCallback: buttonCallback
 				}

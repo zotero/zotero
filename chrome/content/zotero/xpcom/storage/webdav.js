@@ -1506,7 +1506,6 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					msg,
 					0,
 					{
-						dialogText: msg,
 						dialogButtonText: buttonText,
 						dialogButtonCallback: func
 					}
@@ -1520,7 +1519,6 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					msg,
 					0,
 					{
-						dialogText: msg,
 						dialogButtonText: Zotero.getString('sync.storage.error.webdav.loadURL'),
 						dialogButtonCallback: function () {
 							var zp = Zotero.getActiveZoteroPane();

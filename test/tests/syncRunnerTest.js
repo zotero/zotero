@@ -799,6 +799,25 @@ describe("Zotero.Sync.Runner", function () {
 		});
 		
 		
+		it("should show a custom button in the error panel", function* () {
+			win = yield loadZoteroPane();
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			yield runner.sync({
+				background: true
+			});
+			
+			var doc = win.document;
+			var errorIcon = doc.getElementById('zotero-tb-sync-error');
+			assert.isFalse(errorIcon.hidden);
+			errorIcon.click();
+			var panel = win.document.getElementById('zotero-sync-error-panel');
+			var buttons = panel.getElementsByTagName('button');
+			assert.lengthOf(buttons, 1);
+			assert.equal(buttons[0].label, Zotero.getString('sync.openSyncPreferences'));
+		});
+		
+		
 		// TODO: Test multiple long tags and tags across libraries
 		describe("Long Tag Fixer", function () {
 			it("should split a tag", function* () {

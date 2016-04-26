@@ -301,7 +301,6 @@ Zotero.Sync.Server = new function () {
 									msg,
 									0,
 									{
-										dialogText: msg,
 										dialogButtonText: Zotero.getString('pane.items.showItemInLibrary'),
 										dialogButtonCallback: function () {
 											var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]

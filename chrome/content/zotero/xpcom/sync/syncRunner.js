@@ -854,7 +854,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					// TODO: localize (=>done) and combine with below (=>?)
 					var msg = Zotero.getString('sync.error.invalidLogin.text');
 					e.message = msg;
-					e.dialogText = msg;
 					e.dialogButtonText = Zotero.getString('sync.openSyncPreferences');
 					e.dialogButtonCallback = function () {
 						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
@@ -1079,9 +1078,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		
 		e.parsed = true;
 		e.errorType = e.errorType ? e.errorType : 'error';
-		if (!e.data) {
-			e.data = {};
-		}
 		
 		return e;
 	}
@@ -1159,7 +1155,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				e.dialogButtonText = null;
 			}*/
 			
-			if (e.data && e.dialogButtonText !== null) {
+			if (e.dialogButtonText !== null) {
 				if (e.dialogButtonText === undefined) {
 					var buttonText = Zotero.getString('errorReport.reportError');
 					var buttonCallback = function () {

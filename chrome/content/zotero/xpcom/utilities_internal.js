@@ -380,22 +380,15 @@ Zotero.Utilities.Internal = {
 					.getService(Components.interfaces.nsIPromptService);
 		var message, buttonText, buttonCallback;
 		
-		if (e.data) {
-			if (e.data.dialogText) {
-				message = e.data.dialogText;
-			}
-			if (typeof e.data.dialogButtonText != 'undefined') {
-				buttonText = e.data.dialogButtonText;
-				buttonCallback = e.data.dialogButtonCallback;
-			}
+		if (e.dialogButtonText !== undefined) {
+			buttonText = e.dialogButtonText;
+			buttonCallback = e.dialogButtonCallback;
 		}
-		if (!message) {
-			if (e.message) {
-				message = e.message;
-			}
-			else {
-				message = e;
-			}
+		if (e.message) {
+			message = e.message;
+		}
+		else {
+			message = e;
 		}
 		
 		if (typeof buttonText == 'undefined') {

@@ -26,7 +26,11 @@
 
 Zotero.Error = function (message, error, data) {
 	this.message = message;
-	this.data = data;
+	if (data) {
+		for (let prop in data) {
+			this[prop] = data[prop];
+		}
+	}
 	if (parseInt(error) == error) {
 		this.error = error;
 	}
