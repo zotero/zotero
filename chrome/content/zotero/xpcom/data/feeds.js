@@ -204,6 +204,7 @@ Zotero.Feeds = new function() {
 		Zotero.debug("Running update for feeds: " + needUpdate.join(', '));
 		for (let i=0; i<needUpdate.length; i++) {
 			let feed = Zotero.Feeds.get(needUpdate[i]);
+			yield feed.waitForDataLoad('item');
 			yield feed._updateFeed();
 		}
 		

@@ -631,7 +631,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				yield Zotero.Relations.init();
 				yield Zotero.Feeds.init();
 				
-				// Load all library data except for items
+				// Load all library data except for items, which are loaded when libraries are first
+				// clicked on or if otherwise necessary
 				yield Zotero.Promise.each(
 					Zotero.Libraries.getAll(),
 					library => Zotero.Promise.coroutine(function* () {

@@ -371,6 +371,9 @@ Zotero.Library.prototype.setDataLoaded = function (objectType) {
 	this._dataLoadedDeferreds[objectType].resolve();
 };
 
+/**
+ * Wait for a given data type to load, loading it now if necessary
+ */
 Zotero.Library.prototype.waitForDataLoad = Zotero.Promise.coroutine(function* (objectType) {
 	if (this.getDataLoaded(objectType)) return;
 	
