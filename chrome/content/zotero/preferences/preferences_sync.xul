@@ -75,7 +75,8 @@
 											<textbox id="sync-password" type="password"
 												onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event);"/>
 										</row>
-										<vbox align="center">
+										<row>
+											<box/>
 											<hbox align="baseline">
 												<button id="sync-auth-button"
 													label="&zotero.preferences.sync.setUpSync;"
@@ -83,7 +84,7 @@
 													disabled="true"/>
 												<label id="sync-status-indicator"/>
 											</hbox>
-										</vbox>
+										</row>
 									</rows>
 								</grid>
 								<vbox style="width:2em"/>
