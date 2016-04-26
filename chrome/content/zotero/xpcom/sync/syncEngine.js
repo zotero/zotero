@@ -715,6 +715,7 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 			libraryVersion = yield this._uploadObjects(
 				objectType, objectIDs[objectType], libraryVersion
 			);
+			Zotero.debug("Library version is " + libraryVersion);
 		}
 		
 		Zotero.debug(JSON.stringify(objectDeletions));
@@ -792,6 +793,8 @@ Zotero.Sync.Data.Engine.prototype._uploadSettings = Zotero.Promise.coroutine(fun
 Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(function* (objectType, ids, libraryVersion) {
 	let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 	let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
+	Zotero.debug("Uploading " + objectTypePlural);
+	Zotero.debug(ids);
 	
 	let queue = [];
 	for (let id of ids) {
@@ -802,6 +805,8 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 			failed: false
 		});
 	}
+	
+	Zotero.debug(queue);
 	
 	let failureDelayGenerator = null;
 	
