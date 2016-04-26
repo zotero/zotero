@@ -715,7 +715,6 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 			libraryVersion = yield this._uploadObjects(
 				objectType, objectIDs[objectType], libraryVersion
 			);
-			Zotero.debug("Library version is " + libraryVersion);
 		}
 		
 		Zotero.debug(JSON.stringify(objectDeletions));
@@ -793,8 +792,6 @@ Zotero.Sync.Data.Engine.prototype._uploadSettings = Zotero.Promise.coroutine(fun
 Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(function* (objectType, ids, libraryVersion) {
 	let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 	let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
-	Zotero.debug("Uploading " + objectTypePlural);
-	Zotero.debug(ids);
 	
 	let queue = [];
 	for (let id of ids) {
@@ -806,15 +803,13 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 		});
 	}
 	
-	Zotero.debug(queue);
-	
 	let failureDelayGenerator = null;
 	
 	while (queue.length) {
 		// Get a slice of the queue and generate JSON for objects if necessary
 		let batch = [];
 		let numSkipped = 0;
-		for (let i = 0; i < queue.length && queue.length < this.uploadBatchSize; i++) {
+		for (let i = 0; i < queue.length && i < this.uploadBatchSize; i++) {
 			let o = queue[i];
 			// Skip requests that failed with 4xx
 			if (o.failed) {
