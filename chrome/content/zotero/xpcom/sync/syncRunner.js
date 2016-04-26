@@ -973,21 +973,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				}
 			}
 		}
-		
-		// TEMP
-		return;
-		
-		if (extraInfo) {
-			// Server errors will generally be HTML
-			extraInfo = Zotero.Utilities.unescapeHTML(extraInfo);
-			Components.utils.reportError(extraInfo);
-		}
-		
-		Zotero.debug(e, 1);
-		
-		if (!skipReload) {
-			Zotero.reloadDataObjects();
-		}
 	});
 	
 	

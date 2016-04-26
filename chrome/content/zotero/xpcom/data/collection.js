@@ -438,8 +438,6 @@ Zotero.Collection.prototype.removeItems = Zotero.Promise.coroutine(function* (it
 			})
 		}
 	}.bind(this));
-	
-	yield this.loadDataType('childItems');
 });
 
 

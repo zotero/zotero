@@ -2367,19 +2367,6 @@ Zotero.Item.prototype._updateAttachmentStates = function (exists) {
 Zotero.Item.prototype.getFilename = function () {
 	Zotero.debug("getFilename() deprecated -- use .attachmentFilename");
 	return this.attachmentFilename;
-	if (!this.isAttachment()) {
-		throw new Error("getFileName() can only be called on attachment items");
-	}
-	
-	if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-		throw new Error("getFilename() cannot be called on link attachments");
-	}
-	
-	var file = this.getFile();
-	if (!file) {
-		return '';
-	}
-	return file.leafName;
 }
 
 
