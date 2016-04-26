@@ -501,6 +501,110 @@ describe("Zotero.Sync.Data.Engine", function () {
 			}
 		})
 		
+		
+		it("should upload child item after parent item", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var lastLibraryVersion = 5;
+			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
+			
+			// Create top-level note, book, and child note
+			var item1 = new Zotero.Item('note');
+			item1.setNote('A');
+			yield item1.saveTx();
+			var item2 = yield createDataObject('item');
+			var item3 = new Zotero.Item('note');
+			item3.parentItemID = item2.id;
+			item3.setNote('B');
+			yield item3.saveTx();
+			// Move note under parent
+			item1.parentItemID = item2.id;
+			yield item1.saveTx();
+			var handled = false;
+			
+			server.respond(function (req) {
+				if (req.method == "POST" && req.url == baseURL + "users/1/items") {
+					let json = JSON.parse(req.requestBody);
+					assert.lengthOf(json, 3);
+					assert.equal(json[0].key, item2.key);
+					assert.equal(json[1].key, item1.key);
+					assert.equal(json[2].key, item3.key);
+					handled = true;
+					req.respond(
+						200,
+						{
+							"Content-Type": "application/json",
+							"Last-Modified-Version": ++lastLibraryVersion
+						},
+						JSON.stringify({
+							successful: {
+								"0": item2.toResponseJSON(),
+								"1": item1.toResponseJSON(),
+								"2": item3.toResponseJSON()
+							},
+							unchanged: {},
+							failed: {}
+						})
+					);
+					return;
+				}
+			});
+			
+			yield engine.start();
+			assert.isTrue(handled);
+		});
+		
+		
+		it("should upload child collection after parent collection", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var lastLibraryVersion = 5;
+			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
+			
+			var collection1 = yield createDataObject('collection');
+			var collection2 = yield createDataObject('collection');
+			var collection3 = yield createDataObject('collection', { parentID: collection2.id });
+			// Move collection under the other
+			collection1.parentID = collection2.id;
+			yield collection1.saveTx();
+			
+			var handled = false;
+			
+			server.respond(function (req) {
+				if (req.method == "POST" && req.url == baseURL + "users/1/collections") {
+					let json = JSON.parse(req.requestBody);
+					assert.lengthOf(json, 3);
+					assert.equal(json[0].key, collection2.key);
+					assert.equal(json[1].key, collection1.key);
+					assert.equal(json[2].key, collection3.key);
+					handled = true;
+					req.respond(
+						200,
+						{
+							"Content-Type": "application/json",
+							"Last-Modified-Version": ++lastLibraryVersion
+						},
+						JSON.stringify({
+							successful: {
+								"0": collection2.toResponseJSON(),
+								"1": collection1.toResponseJSON(),
+								"2": collection3.toResponseJSON()
+							},
+							unchanged: {},
+							failed: {}
+						})
+					);
+					return;
+				}
+			});
+			
+			yield engine.start();
+			assert.isTrue(handled);
+		});
+		
+		
 		it("should upload synced storage properties", function* () {
 			({ engine, client, caller } = yield setup());
 			

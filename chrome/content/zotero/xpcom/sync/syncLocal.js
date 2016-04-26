@@ -228,14 +228,25 @@ Zotero.Sync.Data.Local = {
 	 */
 	getUnsynced: Zotero.Promise.coroutine(function* (objectType, libraryID) {
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
-		var sql = "SELECT " + objectsClass.idColumn + " FROM " + objectsClass.table
-			+ " WHERE libraryID=? AND synced=0";
+		var sql = "SELECT O." + objectsClass.idColumn + " FROM " + objectsClass.table + " O";
+		if (objectType == 'item') {
+			sql += " LEFT JOIN itemAttachments IA USING (itemID) "
+				+ "LEFT JOIN itemNotes INo ON (O.itemID=INo.itemID) ";
+		}
+		sql += " WHERE libraryID=? AND synced=0";
+		// Sort child items last
+		if (objectType == 'item') {
+			sql += " ORDER BY COALESCE(IA.parentItemID, INo.parentItemID)";
+		}
 		
-		// TODO: RETRIEVE PARENT DOWN? EVEN POSSIBLE?
-		// items via parent
-		// collections via getDescendents?
+		var ids = yield Zotero.DB.columnQueryAsync(sql, [libraryID]);
 		
-		return Zotero.DB.columnQueryAsync(sql, [libraryID]);
+		// Sort descendent collections last
+		if (objectType == 'collection') {
+			ids = Zotero.Collections.sortByLevel(ids);
+		}
+		
+		return ids;
 	}),
 	
 	

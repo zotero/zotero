@@ -717,8 +717,8 @@ Zotero.Collection.prototype.toJSON = function (options = {}) {
  *											nodes instead of flat array
  * @param	{String}	[type]				'item', 'collection', or NULL for both
  * @param	{Boolean}	[includeDeletedItems=false]		Include items in Trash
- * @return	{Promise<Object[]>} - A promise for an array of objects with 'id', 'key',
- *   'type' ('item' or 'collection'), 'parent', and, if collection, 'name' and the nesting 'level'
+ * @return	{Object[]} - An array of objects with 'id', 'key', 'type' ('item' or 'collection'),
+ *     'parent', and, if collection, 'name' and the nesting 'level'
  */
 Zotero.Collection.prototype.getDescendents = function (nested, type, includeDeletedItems, level) {
 	if (!this.id) {
