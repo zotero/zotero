@@ -945,7 +945,7 @@ Zotero.Integration.Document.prototype._getSession = function _getSession(require
 		
 		if(require) {
 			// check to see if fields already exist
-			for each(var fieldType in [this._app.primaryFieldType, this._app.secondaryFieldType]) {
+			for (var fieldType of [this._app.primaryFieldType, this._app.secondaryFieldType]) {
 				var fields = this._doc.getFields(this._app.primaryFieldType);
 				if(fields.hasMoreElements()) {
 					data.prefs.fieldType = this._app.primaryFieldType;
@@ -1318,7 +1318,7 @@ Zotero.Integration.Fields.prototype.addField = function(note) {
  * Gets the type and content of a field object
  */
 Zotero.Integration.Fields.prototype.getCodeTypeAndContent = function(rawCode) {
-	for each(var code in ["ITEM", "CITATION"]) {
+	for (var code of ["ITEM", "CITATION"]) {
 		if(rawCode.substr(0, code.length) === code) {
 			return [INTEGRATION_TYPE_ITEM, rawCode.substr(code.length+1)];
 		}
@@ -2672,7 +2672,7 @@ Zotero.Integration.Session.prototype._updateCitations = function() {
 	}
 	
 	
-	for each(var indexList in [this.newIndices, this.updateIndices]) {
+	for (var indexList of [this.newIndices, this.updateIndices]) {
 		for(var index in indexList) {
 			index = parseInt(index);
 			

@@ -332,7 +332,7 @@ Zotero.LocateManager = new function() {
 		if(obj) for(var prop in obj) this[prop] = obj[prop];
 		
 		// Queue deferred serialization whenever a property is modified
-		for each(var prop in ["alias", "name", "description", "icon", "hidden"]) {
+		for (var prop of ["alias", "name", "description", "icon", "hidden"]) {
 			this.watch(prop, _watchLocateEngineProperties);
 		}
 	}

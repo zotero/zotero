@@ -108,7 +108,7 @@ Zotero.Server.Connector.GetTranslators.prototype = {
 		var responseData = [];
 		for each(var translator in translators) {
 			let serializableTranslator = {};
-			for each(var key in ["translatorID", "translatorType", "label", "creator", "target",
+			for (var key of ["translatorID", "translatorType", "label", "creator", "target",
 					"minVersion", "maxVersion", "priority", "browserSupport", "inRepository", "lastUpdated"]) {
 				serializableTranslator[key] = translator[key];
 			}
