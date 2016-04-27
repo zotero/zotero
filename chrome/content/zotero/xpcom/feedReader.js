@@ -159,6 +159,7 @@ Zotero.FeedReader = function(url) {
 	this._channel = Services.io.newChannelFromURI2(feedUrl, null, 
 		Services.scriptSecurityManager.getSystemPrincipal(), null, 
 		Ci.nsILoadInfo.SEC_NORMAL, Ci.nsIContentPolicy.TYPE_OTHER);
+	this._channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
 	this._channel.asyncOpen(feedProcessor, null); // Sends an HTTP request
 }
 
@@ -189,7 +190,7 @@ Zotero.FeedReader.prototype.terminate = function(status) {
 	}
 	
 	// Close feed connection
-	if (this._channel.isPending) {
+	if (this._channel.isPending()) {
 		this._channel.cancel(Components.results.NS_BINDING_ABORTED);
 	}
 };
