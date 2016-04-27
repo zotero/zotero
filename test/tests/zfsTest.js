@@ -857,6 +857,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.ok(e);
 			assert.equal(e.errorType, 'warning');
 			assert.include(e.message, 'test.png');
+			assert.equal(e.dialogButtonText, Zotero.getString('sync.storage.openAccountSettings'));
 		})
 	})
 })

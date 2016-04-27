@@ -561,9 +561,10 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			}
 			
 			let text, buttonText = null, buttonCallback;
+			let libraryType = item.library.libraryType;
 			
 			// Group file
-			if (item.libraryID) {
+			if (libraryType == 'group') {
 				var group = Zotero.Groups.getByLibraryID(item.libraryID);
 				text = Zotero.getString('sync.storage.error.zfs.groupQuotaReached1', group.name) + "\n\n"
 						+ Zotero.getString('sync.storage.error.zfs.groupQuotaReached2');
