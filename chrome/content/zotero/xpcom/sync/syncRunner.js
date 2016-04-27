@@ -1169,7 +1169,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				
 				var button = doc.createElement('button');
 				button.setAttribute('label', buttonText);
-				button.onclick = buttonCallback;
+				button.onclick = function () {
+					buttonCallback();
+					panel.hidePopup();
+				};
 				buttons.appendChild(button);
 			}
 			
