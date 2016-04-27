@@ -856,7 +856,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			}));
 			assert.ok(e);
 			assert.equal(e.errorType, 'warning');
-			assert.include(e.message, 'would exceed your');
+			assert.include(e.message, 'test.png');
 		})
 	})
 })

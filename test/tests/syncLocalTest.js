@@ -22,20 +22,33 @@ describe("Zotero.Sync.Data.Local", function() {
 	
 	
 	describe("#checkUser()", function () {
+		var win;
+		
+		beforeEach(function* () {
+			win = yield loadBrowserWindow();
+		});
+		
+		afterEach(function () {
+			win.close();
+		});
+		
 		it("should prompt for user update and perform on accept", function* () {
 			yield Zotero.Users.setCurrentUserID(1);
 			yield Zotero.Users.setCurrentUsername("A");
 			
+			var handled = false;
 			waitForDialog(function (dialog) {
 				var text = dialog.document.documentElement.textContent;
-				var matches = text.match(/'[^']*'/g);
+				var matches = text.match(/‘[^’]*’/g);
 				assert.equal(matches.length, 4);
-				assert.equal(matches[0], "'A'");
-				assert.equal(matches[1], "'B'");
-				assert.equal(matches[2], "'B'");
-				assert.equal(matches[3], "'A'");
+				assert.equal(matches[0], "‘A’");
+				assert.equal(matches[1], "‘B’");
+				assert.equal(matches[2], "‘B’");
+				assert.equal(matches[3], "‘A’");
+				handled = true;
 			});
 			var cont = yield Zotero.Sync.Data.Local.checkUser(win, 2, "B");
+			assert.isTrue(handled);
 			assert.isTrue(cont);
 			
 			assert.equal(Zotero.Users.getCurrentUserID(), 2);
