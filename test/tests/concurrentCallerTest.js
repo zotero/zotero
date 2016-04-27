@@ -206,8 +206,10 @@ describe("ConcurrentCaller", function () {
 						Zotero.debug("Throwing " + id);
 						// This causes an erroneous "possibly unhandled rejection" message in
 						// Bluebird 2.10.2 that I can't seem to get rid of (and the rejection
-						// is later handled), so pass " -- ignore" to tell Bluebird to ignore it
-						throw new Error("Fail -- ignore");
+						// is later handled), so tell Bluebird to ignore it
+						let e = new Error("Fail");
+						e.handledRejection = true;
+						throw e;
 					}
 					if (running > numConcurrent) {
 						failed = true;
@@ -279,8 +281,10 @@ describe("ConcurrentCaller", function () {
 						Zotero.debug("Throwing " + id);
 						// This causes an erroneous "possibly unhandled rejection" message in
 						// Bluebird 2.10.2 that I can't seem to get rid of (and the rejection
-						// is later handled), so pass " -- ignore" to tell Bluebird to ignore it
-						throw new Error("Fail -- ignore");
+						// is later handled), so tell Bluebird to ignore it
+						let e = new Error("Fail");
+						e.handledRejection = true;
+						throw e;
 					}
 					if (running > numConcurrent) {
 						failed = true;

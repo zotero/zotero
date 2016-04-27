@@ -246,6 +246,7 @@ ConcurrentCaller.prototype._processNext = function () {
 			this._processNext();
 		});
 		
+		e.handledRejection = true;
 		f.deferred.reject(e);
 	});
 	return true;
