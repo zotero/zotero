@@ -178,7 +178,7 @@ Mocha.Runner.prototype.fail = function(test, err){
 mocha.setup({
 	ui: "bdd",
 	reporter: Reporter,
-	timeout: ZoteroUnit.timeout || 5000,
+	timeout: ZoteroUnit.timeout || 10000,
 	grep: ZoteroUnit.grep
 });
 
