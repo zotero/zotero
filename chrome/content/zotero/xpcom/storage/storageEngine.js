@@ -212,17 +212,25 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	var changes = new Zotero.Sync.Storage.Result;
 	for (let type of ['download', 'upload']) {
 		let results = yield promises[type];
+		let succeeded = 0;
+		let failed = 0;
 		
-		if (this.stopOnError) {
-			for (let p of results) {
-				if (p.isRejected()) {
+		for (let p of results) {
+			if (p.isFulfilled()) {
+				succeeded++;
+			}
+			else {
+				if (this.stopOnError) {
 					let e = p.reason();
 					Zotero.debug(`File ${type} sync failed for ${this.library.name}`);
 					throw e;
 				}
+				failed++;
 			}
 		}
-		Zotero.debug(`File ${type} sync finished for ${this.library.name}`);
+		
+		Zotero.debug(`File ${type} sync finished for ${this.library.name} `
+			+ `(${succeeded} succeeded, ${failed} failed)`);
 		
 		changes.updateFromResults(results.filter(p => p.isFulfilled()).map(p => p.value()));
 		
