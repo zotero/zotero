@@ -266,7 +266,7 @@
 <!ENTITY zotero.feedSettings.saveButton.label           "Save">
 <!ENTITY zotero.feedSettings.url.label                  "URL:">
 <!ENTITY zotero.feedSettings.title.label                "Title:">
-<!ENTITY zotero.feedSettings.refresh.label1             "Refresh Interval:">
+<!ENTITY zotero.feedSettings.refresh.label1             "Update feed every">
 <!ENTITY zotero.feedSettings.refresh.label2             "hour(s)">
 <!ENTITY zotero.feedSettings.cleanupAfter.label1         "Remove read articles after ">
 <!ENTITY zotero.feedSettings.cleanupAfter.label2         "day(s)">
