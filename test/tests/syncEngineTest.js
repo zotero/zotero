@@ -1359,6 +1359,105 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.isFalse(Zotero.Items.exists(itemID1));
 			assert.isTrue(Zotero.Items.exists(itemID2));
 		})
+		
+		it("should handle cancellation of conflict resolution window", function* () {
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			yield Zotero.Libraries.setVersion(userLibraryID, 5);
+			({ engine, client, caller } = yield setup());
+			
+			var item = yield createDataObject('item');
+			var itemID = yield item.saveTx();
+			var itemKey = item.key;
+			
+			var headers = {
+				"Last-Modified-Version": 6
+			};
+			setResponse({
+				method: "GET",
+				url: "users/1/settings?since=5",
+				status: 200,
+				headers: headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/collections?format=versions&since=5",
+				status: 200,
+				headers: headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/searches?format=versions&since=5",
+				status: 200,
+				headers: headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/items/top?format=versions&since=5&includeTrashed=1",
+				status: 200,
+				headers: headers,
+				json: {
+					AAAAAAAA: 6,
+					[itemKey]: 6
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: `users/1/items?format=json&itemKey=AAAAAAAA%2C${itemKey}&includeTrashed=1`,
+				status: 200,
+				headers: headers,
+				json: [
+					makeItemJSON({
+						key: "AAAAAAAA",
+						version: 6,
+						itemType: "book",
+						title: "B"
+					}),
+					makeItemJSON({
+						key: itemKey,
+						version: 6,
+						itemType: "book",
+						title: "B"
+					})
+				]
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/items?format=versions&since=5&includeTrashed=1",
+				status: 200,
+				headers: headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/deleted?since=5",
+				status: 200,
+				headers: headers,
+				json: {
+					settings: [],
+					collections: [],
+					searches: [],
+					items: []
+				}
+			});
+			
+			waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+				var doc = dialog.document;
+				var wizard = doc.documentElement;
+				wizard.getButton('cancel').click();
+			})
+			yield engine._startDownload();
+			
+			// Non-conflicted item should be saved
+			assert.ok(Zotero.Items.getIDFromLibraryAndKey(userLibraryID, "AAAAAAAA"));
+			
+			// Conflicted item should be skipped and in queue
+			assert.isFalse(Zotero.Items.exists(itemID));
+			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', userLibraryID);
+			assert.sameMembers(keys, [itemKey]);
+		});
 	})
 	
 	describe("#_upgradeCheck()", function () {

@@ -911,6 +911,17 @@ Zotero.Sync.Data.Local = {
 					}
 				}
 			}
+			else {
+				Zotero.debug("Conflict resolution was cancelled", 2);
+				for (let conflict of conflicts) {
+					results.push({
+						// Use key from either, in case one side is deleted
+						key: conflict.left.key || conflict.right.key,
+						processed: false,
+						retry: false
+					});
+				}
+			}
 		}
 		
 		let processed = 0;

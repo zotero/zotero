@@ -854,7 +854,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			json.data.note = noteText2;
 			downloadedJSON.push(json);
 			
-			// Delete object locally
+			// Modify local version
 			obj.setNote(noteText1);
 			
 			waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
