@@ -2003,7 +2003,7 @@ var ZoteroPane = new function()
 			url: feed.url,
 			title: feed.name,
 			ttl: feed.refreshInterval,
-			cleanAfter: feed.cleanupAfter
+			cleanupAfter: feed.cleanupAfter
 		};
 		
 		window.openDialog('chrome://zotero/content/feedSettings.xul', 
@@ -2012,7 +2012,7 @@ var ZoteroPane = new function()
 		
 		feed.name = data.title;
 		feed.refreshInterval = data.ttl;
-		feed.cleanupAfter = data.cleanAfter;
+		feed.cleanupAfter = data.cleanupAfter;
 		yield feed.saveTx();
 	});
 	

@@ -312,14 +312,14 @@
 						<hbox>
 							<hbox align="center">
 								<label value="&zotero.feedSettings.refresh.label1;"/>
-								<textbox maxlength="2" size="2" preference="pref-feeds-defaultTTL"/>
+								<textbox type="number" min="1" increment="1" size="3" preference="pref-feeds-defaultTTL"/>
 								<label value="&zotero.feedSettings.refresh.label2;"/>
 							</hbox>
 						</hbox>
 						<hbox>
 							<hbox align="center">
 								<label value="&zotero.feedSettings.cleanupAfter.label1;"/>
-								<textbox maxlength="3" size="3" preference="pref-feeds-defaultCleanupAfter"/>
+								<textbox type="number" min="0" increment="1" size="2" preference="pref-feeds-defaultCleanupAfter"/>
 								<label value="&zotero.feedSettings.cleanupAfter.label2;"/>
 							</hbox>
 						</hbox>

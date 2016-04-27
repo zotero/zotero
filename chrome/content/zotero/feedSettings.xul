@@ -7,8 +7,8 @@
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	title="&zotero.feedSettings.title;" buttons="cancel,accept"
 	buttonlabelaccept="&zotero.feedSettings.saveButton.label;"
-	ondialogaccept="Zotero_Feed_Settings.accept()"
-	ondialogcancel="Zotero_Feed_Settings.cancel()"
+	ondialogaccept="return Zotero_Feed_Settings.accept()"
+	ondialogcancel="return Zotero_Feed_Settings.cancel()"
 	id="zotero-feed-settings"
 	onload="Zotero_Feed_Settings.init()">
 	
@@ -49,7 +49,7 @@
 		<vbox id="advanced-options-togglable">
 			<hbox align="center">
 				<label value="&zotero.feedSettings.refresh.label1;" control="feed-ttl"/>
-				<textbox id="feed-ttl" type="number" min="0" increment="1" size="3"/>
+				<textbox id="feed-ttl" type="number" min="1" increment="1" size="3"/>
 				<label value="&zotero.feedSettings.refresh.label2;" control="feed-ttl"/>
 			</hbox>
 			<hbox align="center">
