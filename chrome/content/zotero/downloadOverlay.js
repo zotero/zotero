@@ -182,7 +182,7 @@ var Zotero_DownloadOverlay = new function() {
 		// Disable for filetypes people probably don't want to save
 		var show = false;
 		var mimeType = dialog.mLauncher.MIMEInfo.MIMEType.toLowerCase();
-		for (var elem of ALLOW_LIST) {
+		for (let elem of ALLOW_LIST) {
 			if(typeof elem === "string") {
 				if(elem === mimeType) {
 					document.getElementById('zotero-container').hidden = false;
