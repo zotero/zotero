@@ -1278,12 +1278,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			// Set in login manager
 			|| Zotero.Sync.Data.Local.getAPIKey()
 			// Fallback to old username/password
-			|| (yield _getAPIKeyFromLogin());
+			|| _getAPIKeyFromLogin();
 	})
 	
 	
 	var _getAPIKeyFromLogin = Zotero.Promise.coroutine(function* () {
-		var apiKey;
 		let username = Zotero.Prefs.get('sync.server.username');
 		if (username) {
 			// Check for legacy password if no password set in current session
@@ -1293,9 +1292,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				return "";
 			}
 
-			apiKey = yield Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
+			let json = yield Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
 			Zotero.Sync.Data.Local.removeLegacyLogins();
-			return apiKey;
+			return json.key;
 		}
 		return "";
 	})
