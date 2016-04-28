@@ -374,7 +374,7 @@ Zotero.Sync.Server = new function () {
 						Zotero.DB.beginTransaction();
 						
 						var types = ['collections', 'creators', 'items', 'savedSearches', 'tags'];
-						for each (var type in types) {
+						for (let type of types) {
 							var sql = "UPDATE " + type + " SET dateAdded=CURRENT_TIMESTAMP "
 									+ "WHERE dateAdded NOT BETWEEN '1970-01-01 00:00:01' AND '2038-01-19 03:14:07'";
 							Zotero.DB.query(sql);

@@ -771,7 +771,7 @@ Zotero.Integration.MissingItemException.prototype = {
 		if(result == 0) {			// Cancel
 			return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("document update"));
 		} else if(result == 1) {	// No
-			for each(var reselectKey in this.reselectKeys) {
+			for (let reselectKey of this.reselectKeys) {
 				this.fieldGetter._removeCodeKeys[reselectKey] = true;
 			}
 			this.fieldGetter._removeCodeFields[this.fieldIndex] = true;
@@ -1646,7 +1646,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 		
 		if(forceBibliography || this._session.bibliographyDataHasChanged) {
 			var bibliographyData = this._session.getBibliographyData();
-			for each(var field in bibliographyFields) {
+			for (let field of bibliographyFields) {
 				field.setCode("BIBL "+bibliographyData
 					+(this._session.data.prefs.storeReferences ? " CSL_BIBLIOGRAPHY" : ""));
 			}
@@ -1674,7 +1674,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 		}
 		
 		// set bibliography text
-		for each(var field in bibliographyFields) {
+		for (let field of bibliographyFields) {
 			if(this.progressCallback) {
 				try {
 					this.progressCallback(75+(nUpdated/nFieldUpdates)*25);

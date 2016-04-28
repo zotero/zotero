@@ -2779,7 +2779,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 				// would interrupt the dragging process, so we just log a
 				// warning to the console
 				if (useTemp) {
-					for each(var name in notFoundNames) {
+					for (let name of notFoundNames) {
 						var msg = "Attachment file for dragged item '" + name + "' not found";
 						Zotero.log(msg, 'warning',
 							'chrome://zotero/content/xpcom/itemTreeView.js');

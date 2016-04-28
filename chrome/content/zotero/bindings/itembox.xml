@@ -325,7 +325,7 @@
 					
 					// Manual field order
 					if (this._fieldOrder.length) {
-						for each(var field in this._fieldOrder) {
+						for (let field of this._fieldOrder) {
 							fieldNames.push(field);
 						}
 					}
@@ -1800,7 +1800,7 @@
 							}
 							
 							//Add the creators in lastNameArray one at a time
-							for each(var tempName in nameArray) {
+							for (let tempName of nameArray) {
 								// Check for tab to determine creator name format
 								otherFields.fieldMode = (tempName.indexOf('\t') == -1) ? 1 : 0;
 								if (otherFields.fieldMode == 0) {
