@@ -117,6 +117,8 @@
 											<menupopup oncommand="ZoteroPane_Local.newFeedFromPage(event)" 
 												onpopupshowing="FeedHandler.buildFeedList(event.target)"/>
 									</menu>
+									<menuitem id="zotero-tb-feed-add-fromOPML" label="&zotero.toolbar.feeds.new.fromOPML;" 
+										oncommand="ZoteroPane_Local.importFeedsFromOPML()"/>
 								</menupopup>
 							</menu>
 						</menupopup>
