@@ -3037,7 +3037,7 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 		"hasBibliography":(Zotero.Utilities.xpathText(doc, '/data/style[1]/@hasBibliography') == 1),
 		"bibliographyStyleHasBeenSet":(Zotero.Utilities.xpathText(doc, '/data/style[1]/@bibliographyStyleHasBeenSet') == 1)};
 	this.prefs = {};
-	for each(var pref in Zotero.Utilities.xpath(doc, '/data/prefs[1]/pref')) {
+	for (let pref of Zotero.Utilities.xpath(doc, '/data/prefs[1]/pref')) {
 		var name = pref.getAttribute("name");
 		var value = pref.getAttribute("value");
 		if(value === "true") {

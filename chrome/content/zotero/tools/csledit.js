@@ -55,7 +55,7 @@ var Zotero_CSL_Editor = new function() {
 		
 		var pageList = document.getElementById('zotero-csl-page-type');
 		var locators = Zotero.Cite.labels;
-		for each(var type in locators) {
+		for (let type of locators) {
 			var locator = type;
 			locator = Zotero.getString('citation.locator.'+locator.replace(/\s/g,''));
 			pageList.appendItem(locator, type);

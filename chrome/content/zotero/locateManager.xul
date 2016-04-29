@@ -151,7 +151,7 @@ To add a new preference:
 			// repopulate tree with available engines
 			var engines = Zotero.LocateManager.getEngines();
 			var i = 0;
-			for each(var engine in engines) {
+			for (let engine of engines) {
 				var treeitem = document.createElement('treeitem');
 				var treerow = document.createElement('treerow');
 				var checkboxCell = document.createElement('treecell');

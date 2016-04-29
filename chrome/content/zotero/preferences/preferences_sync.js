@@ -213,9 +213,9 @@ Zotero_Preferences.Sync = {
 	updateStorageSettingsGroups: function (enabled) {
 		var storageSettings = document.getElementById('storage-settings');
 		var menulists = storageSettings.getElementsByTagName('menulist');
-		for each(var menulist in menulists) {
-			if (menulist.className == 'storage-groups') {
-				menulist.disabled = !enabled;
+		for (let i=0; i<menulists.length; i++) {
+			if (menulists[i].className == 'storage-groups') {
+				menulists[i].disabled = !enabled;
 			}
 		}
 		

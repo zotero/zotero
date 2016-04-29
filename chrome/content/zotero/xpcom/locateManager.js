@@ -142,7 +142,7 @@ Zotero.LocateManager = new function() {
 		this.init();
 		
 		// reload icons for default locate engines
-		for each(var engine in this.getEngines()) engine._updateIcon();
+		for (let engine of this.getEngines()) engine._updateIcon();
 	}
 	
 	/**
