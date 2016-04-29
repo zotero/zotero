@@ -1803,8 +1803,7 @@ Zotero.Sync.Server = new function () {
 						
 						var compress = Zotero.Prefs.get('sync.server.compressData');
 						// Compress upload data
-						// TEMP: Disabled in case it fixes sync error in Firefox 46
-						if (false && compress) {
+						if (compress) {
 							// Callback when compressed data is available
 							var bufferUploader = function (data) {
 								var gzurl = url + '?gzip=1';
