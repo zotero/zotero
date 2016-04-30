@@ -180,13 +180,13 @@ Zotero.FeedReader.prototype.terminate = function(status) {
 	
 	// Reject feed promise if not resolved yet
 	if (this._feedProcessed.promise.isPending()) {
-		this._feedProcessed.reject(status);
+		this._feedProcessed.reject(new Error(status));
 	}
 	
 	// Reject feed item promise if not resolved yet
 	let lastItem = this._feedItems[this._feedItems.length - 1];
 	if (lastItem.promise.isPending()) {
-		lastItem.reject(status);
+		lastItem.reject(new Error(status));
 	}
 	
 	// Close feed connection
