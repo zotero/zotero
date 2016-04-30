@@ -39,6 +39,10 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 		setHTTPResponse(server, baseURL, response, responses);
 	}
 	
+	function generateContent() {
+		return new Array(10).fill("").map(x => Zotero.Utilities.randomString()).join(" ");
+	}
+	
 	//
 	// Tests
 	//
@@ -66,7 +70,7 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			attachment.attachmentFilename = 'test.pdf';
 			yield attachment.saveTx();
 			
-			var content = [Zotero.Utilities.randomString() for (x of new Array(10))].join(" ");
+			var content = generateContent()
 			var spy = sinon.spy(Zotero.Fulltext, "startContentProcessor")
 			
 			var itemFullTextVersion = 10;
@@ -126,7 +130,7 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			attachment.attachmentFilename = 'test.pdf';
 			yield attachment.saveTx();
 			
-			content = [Zotero.Utilities.randomString() for (x of new Array(10))].join(" ");
+			content = generateContent()
 			spy = sinon.spy(Zotero.Fulltext, "startContentProcessor")
 			
 			itemFullTextVersion = 17;
@@ -175,6 +179,42 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			spy.restore();
 		})
 		
+		it("should handle remotely missing full-text content", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var item = yield createDataObject('item');
+			var attachment = new Zotero.Item('attachment');
+			attachment.parentItemID = item.id;
+			attachment.attachmentLinkMode = 'imported_file';
+			attachment.attachmentContentType = 'application/pdf';
+			attachment.attachmentFilename = 'test.pdf';
+			yield attachment.saveTx();
+			
+			var itemFullTextVersion = 10;
+			var libraryFullTextVersion = 15;
+			setResponse({
+				method: "GET",
+				url: "users/1/fulltext",
+				status: 200,
+				headers: {
+					"Last-Modified-Version": libraryFullTextVersion
+				},
+				json: {
+					[attachment.key]: itemFullTextVersion
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: `users/1/items/${attachment.key}/fulltext`,
+				status: 404,
+				headers: {
+					"Last-Modified-Version": itemFullTextVersion
+				},
+				text: ""
+			});
+			yield engine.start();
+		})
+		
 		it("should upload new full-text content and subsequent updates", function* () {
 			// https://github.com/cjohansen/Sinon.JS/issues/607
 			var fixSinonBug = ";charset=utf-8";
@@ -196,7 +236,7 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			yield Zotero.Attachments.createDirectoryForItem(attachment);
 			
 			var path = attachment.getFilePath();
-			var content = [Zotero.Utilities.randomString() for (x of new Array(10))].join(" ");
+			var content = generateContent()
 			var htmlContent = "<html><body>" + content + "</body></html>";
 			yield Zotero.File.putContentsAsync(path, content);
 			yield Zotero.Fulltext.indexItems([attachment.id]);
@@ -268,7 +308,7 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			yield Zotero.Attachments.createDirectoryForItem(attachment);
 			
 			path = attachment.getFilePath();
-			content = [Zotero.Utilities.randomString() for (x of new Array(10))].join(" ");
+			content = generateContent()
 			htmlContent = "<html><body>" + content + "</body></html>";
 			yield Zotero.File.putContentsAsync(path, content);
 			yield Zotero.Fulltext.indexItems([attachment.id]);

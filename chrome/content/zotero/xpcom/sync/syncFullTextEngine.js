@@ -71,7 +71,7 @@ Zotero.Sync.Data.FullTextEngine.prototype._download = Zotero.Promise.coroutine(f
 	for (let key in results.versions) {
 		let id = Zotero.Items.getIDFromLibraryAndKey(this.libraryID, key);
 		if (!id) {
-			Zotero.debug(`Skipping full-text for missing item ${this.libraryID}/${key}`);
+			Zotero.debug(`Skipping full-text for missing item ${this.library.name}`);
 			continue;
 		}
 		
@@ -79,7 +79,7 @@ Zotero.Sync.Data.FullTextEngine.prototype._download = Zotero.Promise.coroutine(f
 		// interrupted sync
 		let version = yield Zotero.Fulltext.getItemVersion(id);
 		if (version == results.versions[key]) {
-			Zotero.debug(`Skipping up-to-date full text for ${this.libraryKey}`);
+			Zotero.debug(`Skipping up-to-date full text for ${this.library.name}`);
 			continue;
 		}
 		keys.push(key);
@@ -94,6 +94,7 @@ Zotero.Sync.Data.FullTextEngine.prototype._download = Zotero.Promise.coroutine(f
 				this.library.libraryType, this.library.libraryTypeID, key
 			)
 			.then(function (results) {
+				if (!results) return;
 				return Zotero.Fulltext.setItemContent(
 					this.libraryID, tmpKey, results.data, results.version
 				)

@@ -437,7 +437,10 @@ Zotero.Sync.APIClient.prototype = {
 			target: `items/${itemKey}/fulltext`
 		};
 		var uri = this.buildRequestURI(params);
-		var xmlhttp = yield this.makeRequest("GET", uri);
+		var xmlhttp = yield this.makeRequest("GET", uri, { successCodes: [200, 404] });
+		if (xmlhttp.status == 404) {
+			return false;
+		}
 		var version = xmlhttp.getResponseHeader('Last-Modified-Version');
 		if (!version) {
 			throw new Error("Last-Modified-Version not provided");
