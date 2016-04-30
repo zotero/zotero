@@ -100,7 +100,7 @@
 			return;
 		}
 	
-		self.debug('Possibly unhandled rejection:\n\n' + e.message);
+		self.debug('Possibly unhandled rejection:\n\n' + (e.message || e));
 		throw e;
 	});
 	return;
