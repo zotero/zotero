@@ -91,6 +91,8 @@ Zotero.Duplicates.prototype._getObjectFromID = function (id) {
 
 
 Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function* () {
+	Zotero.debug("Finding duplicates");
+	
 	var start = Date.now();
 	
 	var self = this;

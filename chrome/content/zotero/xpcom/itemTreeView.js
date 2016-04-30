@@ -591,56 +591,46 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	//this._treebox.beginUpdateBatch();
 	
 	if ((action == 'remove' && !collectionTreeRow.isLibrary(true))
-			|| action == 'delete' || action == 'trash') {
-		
-		// On a delete in duplicates mode, just refresh rather than figuring
-		// out what to remove
-		if (collectionTreeRow.isDuplicates()) {
-			yield this.refresh();
-			refreshed = true;
-			madeChanges = true;
-			sort = true;
+			|| action == 'delete' || action == 'trash'
+			|| (action == 'removeDuplicatesMaster' && collectionTreeRow.isDuplicates())) {
+		// Since a remove involves shifting of rows, we have to do it in order,
+		// so sort the ids by row
+		var rows = [];
+		let push = action == 'delete' || action == 'trash' || action == 'removeDuplicatesMaster';
+		for (var i=0, len=ids.length; i<len; i++) {
+			if (!push) {
+				push = !collectionTreeRow.ref.hasItem(ids[i]);
+			}
+			// Row might already be gone (e.g. if this is a child and
+			// 'modify' was sent to parent)
+			let row = this._rowMap[ids[i]];
+			if (push && row !== undefined) {
+				// Don't remove child items from collections, because it's handled by 'modify'
+				if (action == 'remove' && this.getParentIndex(row) != -1) {
+					continue;
+				}
+				rows.push(row);
+				
+				// Remove child items of removed parents
+				if (this.isContainer(row) && this.isContainerOpen(row)) {
+					while (++row < this.rowCount && this.getLevel(row) > 0) {
+						rows.push(row);
+					}
+				}
+			}
 		}
-		else {
-			// Since a remove involves shifting of rows, we have to do it in order,
-			// so sort the ids by row
-			var rows = [];
-			let push = action == 'delete' || action == 'trash';
-			for (var i=0, len=ids.length; i<len; i++) {
-				if (!push) {
-					push = !collectionTreeRow.ref.hasItem(ids[i]);
-				}
-				// Row might already be gone (e.g. if this is a child and
-				// 'modify' was sent to parent)
-				let row = this._rowMap[ids[i]];
-				if (push && row !== undefined) {
-					// Don't remove child items from collections, because it's handled by 'modify'
-					if (action == 'remove' && this.getParentIndex(row) != -1) {
-						continue;
-					}
-					rows.push(row);
-					
-					// Remove child items of removed parents
-					if (this.isContainer(row) && this.isContainerOpen(row)) {
-						while (++row < this.rowCount && this.getLevel(row) > 0) {
-							rows.push(row);
-						}
-					}
-				}
+		
+		if (rows.length > 0) {
+			// Child items might have been added more than once
+			rows = Zotero.Utilities.arrayUnique(rows);
+			rows.sort(function(a,b) { return a-b });
+			
+			for (let i = rows.length - 1; i >= 0; i--) {
+				this._removeRow(rows[i]);
 			}
 			
-			if (rows.length > 0) {
-				// Child items might have been added more than once
-				rows = Zotero.Utilities.arrayUnique(rows);
-				rows.sort(function(a,b) { return a-b });
-				
-				for (let i = rows.length - 1; i >= 0; i--) {
-					this._removeRow(rows[i]);
-				}
-				
-				madeChanges = true;
-				sort = true;
-			}
+			madeChanges = true;
+			sort = true;
 		}
 	}
 	else if (type == 'item' && action == 'modify')

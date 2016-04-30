@@ -152,15 +152,13 @@ Zotero.Translate.DOMWrapper = new function() {
 		var _permit = { value: 'rw', writable: false, configurable: false, enumerable: true };
 		return {
 			getOwnPropertyDescriptor: function(name) { return _permit; },
-			getPropertyDescriptor: function(name) { return _permit; },
-			getOwnPropertyNames: function() { throw Error("Can't enumerate ExposedPropsWaiver"); },
-			getPropertyNames: function() { throw Error("Can't enumerate ExposedPropsWaiver"); },
+			ownKeys: function() { throw Error("Can't enumerate ExposedPropsWaiver"); },
 			enumerate: function() { throw Error("Can't enumerate ExposedPropsWaiver"); },
 			defineProperty: function(name) { throw Error("Can't define props on ExposedPropsWaiver"); },
-			delete: function(name) { throw Error("Can't delete props from ExposedPropsWaiver"); }
+			deleteProperty: function(name) { throw Error("Can't delete props from ExposedPropsWaiver"); }
 		};
 	};
-	ExposedPropsWaiver = Proxy.create(ExposedPropsWaiverHandler());
+	ExposedPropsWaiver = new Proxy({}, ExposedPropsWaiverHandler());
 	
 	function SpecialPowersHandler(obj, overrides) {
 		this.wrappedObject = obj;
