@@ -741,7 +741,7 @@ Zotero.Items = function() {
 			
 			var replPred = Zotero.Relations.replacedItemPredicate;
 			var toSave = {};
-			toSave[this.id];
+			toSave[item.id] = item;
 			
 			for each(var otherItem in otherItems) {
 				let otherItemURI = Zotero.URI.getItemURI(otherItem);
