@@ -1432,6 +1432,11 @@ Zotero.CollectionTreeView.prototype.canDropCheck = function (row, orient, dataTr
 	var dataType = dragData.dataType;
 	var data = dragData.data;
 	
+	// Empty space below rows
+	if (row == -1) {
+		return false;
+	}
+	
 	// For dropping collections onto root level
 	if (orient == 1 && row == 0 && dataType == 'zotero/collection') {
 		return true;
