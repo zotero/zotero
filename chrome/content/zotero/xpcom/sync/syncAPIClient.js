@@ -113,12 +113,8 @@ Zotero.Sync.APIClient.prototype = {
 		if (xmlhttp.status == 304) {
 			return false;
 		}
-		var libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
-		if (!libraryVersion) {
-			throw new Error("Last-Modified-Version not provided");
-		}
 		return {
-			libraryVersion: libraryVersion,
+			libraryVersion: this._getLastModifiedVersion(xmlhttp),
 			settings: this._parseJSON(xmlhttp.responseText)
 		};
 	}),
@@ -141,12 +137,8 @@ Zotero.Sync.APIClient.prototype = {
 			Zotero.debug(`'since' value '${since}' is earlier than the beginning of the delete log`);
 			return false;
 		}
-		var libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
-		if (!libraryVersion) {
-			throw new Error("Last-Modified-Version not provided");
-		}
 		return {
-			libraryVersion: libraryVersion,
+			libraryVersion: this._getLastModifiedVersion(xmlhttp),
 			deleted: this._parseJSON(xmlhttp.responseText)
 		};
 	}),
@@ -308,16 +300,8 @@ Zotero.Sync.APIClient.prototype = {
 			body: json,
 			successCodes: [204, 412]
 		});
-		// Avoid logging error from Zotero.HTTP.request() in ConcurrentCaller
-		if (xmlhttp.status == 412) {
-			Zotero.debug("Server returned 412: " + xmlhttp.responseText, 2);
-			throw new Zotero.HTTP.UnexpectedStatusException(xmlhttp);
-		}
-		libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
-		if (!libraryVersion) {
-			throw new Error("Last-Modified-Version not provided");
-		}
-		return libraryVersion;
+		this._check412(xmlhttp);
+		return this._getLastModifiedVersion(xmlhttp);
 	}),
 	
 	
@@ -349,17 +333,9 @@ Zotero.Sync.APIClient.prototype = {
 			body: json,
 			successCodes: [200, 412]
 		});
-		// Avoid logging error from Zotero.HTTP.request() in ConcurrentCaller
-		if (xmlhttp.status == 412) {
-			Zotero.debug("Server returned 412: " + xmlhttp.responseText, 2);
-			throw new Zotero.HTTP.UnexpectedStatusException(xmlhttp);
-		}
-		libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
-		if (!libraryVersion) {
-			throw new Error("Last-Modified-Version not provided");
-		}
+		this._check412(xmlhttp);
 		return {
-			libraryVersion,
+			libraryVersion: this._getLastModifiedVersion(xmlhttp),
 			results: this._parseJSON(xmlhttp.responseText)
 		};
 	}),
@@ -385,23 +361,14 @@ Zotero.Sync.APIClient.prototype = {
 			params[objectType + "Key"] = keys.join(",");
 		}
 		var uri = this.buildRequestURI(params);
-		
 		var xmlhttp = yield this.makeRequest("DELETE", uri, {
 			headers: {
 				"If-Unmodified-Since-Version": libraryVersion
 			},
 			successCodes: [204, 412]
 		});
-		// Avoid logging error from Zotero.HTTP.request() in ConcurrentCaller
-		if (xmlhttp.status == 412) {
-			Zotero.debug("Server returned 412: " + xmlhttp.responseText, 2);
-			throw new Zotero.HTTP.UnexpectedStatusException(xmlhttp);
-		}
-		libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
-		if (!libraryVersion) {
-			throw new Error("Last-Modified-Version not provided");
-		}
-		return libraryVersion;
+		this._check412(xmlhttp);
+		return this._getLastModifiedVersion(xmlhttp);
 	}),
 	
 	
@@ -419,12 +386,8 @@ Zotero.Sync.APIClient.prototype = {
 		var uri = this.buildRequestURI(params);
 		
 		var xmlhttp = yield this.makeRequest("GET", uri);
-		var libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
-		if (!libraryVersion) {
-			throw new Error("Last-Modified-Version not provided");
-		}
 		return {
-			libraryVersion: libraryVersion,
+			libraryVersion: this._getLastModifiedVersion(xmlhttp),
 			versions: this._parseJSON(xmlhttp.responseText)
 		};
 	}),
@@ -446,7 +409,7 @@ Zotero.Sync.APIClient.prototype = {
 			throw new Error("Last-Modified-Version not provided");
 		}
 		return {
-			version,
+			version: this._getLastModifiedVersion(xmlhttp),
 			data: this._parseJSON(xmlhttp.responseText)
 		};
 	}),
@@ -471,11 +434,7 @@ Zotero.Sync.APIClient.prototype = {
 				debug: true
 			}
 		);
-		var libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
-		if (!libraryVersion) {
-			throw new Error("Last-Modified-Version not provided");
-		}
-		return libraryVersion;
+		return this._getLastModifiedVersion(xmlhttp);
 	}),
 	
 	
@@ -750,6 +709,23 @@ Zotero.Sync.APIClient.prototype = {
 				
 				this.caller.pause(backoff * 1000);
 			}
+		}
+	},
+	
+	
+	_check412: function (xmlhttp) {
+		// Avoid logging error from Zotero.HTTP.request() in ConcurrentCaller
+		if (xmlhttp.status == 412) {
+			Zotero.debug("Server returned 412: " + xmlhttp.responseText, 2);
+			throw new Zotero.HTTP.UnexpectedStatusException(xmlhttp);
+		}
+	},
+	
+	
+	_getLastModifiedVersion: function (xmlhttp) {
+		libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
+		if (!libraryVersion) {
+			throw new Error("Last-Modified-Version not provided");
 		}
 	}
 }
