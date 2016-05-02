@@ -833,21 +833,20 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 		Zotero.debug("UPLOAD BATCH:");
 		Zotero.debug(batch);
 		
+		let results;
 		let numSuccessful = 0;
 		try {
-			let json = yield this.apiClient.uploadObjects(
+			({ libraryVersion, results } = yield this.apiClient.uploadObjects(
 				this.library.libraryType,
 				this.libraryTypeID,
 				"POST",
 				libraryVersion,
 				objectType,
 				batch
-			);
+			));
 			
-			Zotero.debug('======');
-			Zotero.debug(json);
-			
-			libraryVersion = json.libraryVersion;
+			Zotero.debug("===");
+			Zotero.debug(results);
 			
 			// Mark successful and unchanged objects as synced with new version,
 			// and save uploaded JSON to cache
@@ -855,8 +854,8 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 			let toSave = [];
 			let toCache = [];
 			for (let state of ['successful', 'unchanged']) {
-				for (let index in json.results[state]) {
-					let current = json.results[state][index];
+				for (let index in results[state]) {
+					let current = results[state][index];
 					// 'successful' includes objects, not keys
 					let key = state == 'successful' ? current.key : current;
 					
@@ -881,7 +880,7 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 						// it will guarantee that the item won't be redownloaded unnecessarily
 						// in the case of a full sync, because the version will be higher than
 						// whatever version is on the server.
-						batch[index].version = json.libraryVersion
+						batch[index].version = libraryVersion
 						toCache.push(batch[index]);
 					}
 					
@@ -897,15 +896,15 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 				for (let i = 0; i < toSave.length; i++) {
 					yield toSave[i].save();
 				}
-				this.library.libraryVersion = json.libraryVersion;
+				this.library.libraryVersion = libraryVersion;
 				yield this.library.save();
-				objectsClass.updateVersion(ids, json.libraryVersion);
+				objectsClass.updateVersion(ids, libraryVersion);
 				objectsClass.updateSynced(ids, true);
 			}.bind(this));
 			
 			// Handle failed objects
-			for (let index in json.results.failed) {
-				let { code, message, data } = json.results.failed[index];
+			for (let index in results.failed) {
+				let { code, message, data } = results.failed[index];
 				let e = new Error(message);
 				e.name = "ZoteroObjectUploadError";
 				e.code = code;
