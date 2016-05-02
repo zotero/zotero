@@ -184,27 +184,32 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			
 			// Sync data and files, and then repeat if necessary
 			let attempt = 1;
-			let nextLibraries = librariesToSync.concat();
-			let resyncLibraries = [];
-			while (nextLibraries.length) {
+			let successfulLibraries = new Set(librariesToSync);
+			while (librariesToSync.length) {
 				if (attempt > 3) {
+					// TODO: Back off and/or nicer error
 					throw new Error("Too many sync attempts -- stopping");
 				}
-				nextLibraries = yield _doDataSync(
-					resyncLibraries.length ? resyncLibraries : nextLibraries,
-					engineOptions
-				);
-				resyncLibraries = yield _doFileSync(nextLibraries, engineOptions);
-				if (!resyncLibraries.length) {
-					break;
+				let nextLibraries = yield _doDataSync(librariesToSync, engineOptions);
+				// Remove failed libraries from the successful set
+				Zotero.Utilities.arrayDiff(librariesToSync, nextLibraries).forEach(libraryID => {
+					successfulLibraries.delete(libraryID);
+				});
+				
+				// Run file sync on all libraries that passed the last data sync
+				librariesToSync = yield _doFileSync(nextLibraries, engineOptions);
+				if (librariesToSync.length) {
+					attempt++;
+					continue;
 				}
-				attempt++;
-			}
-			
-			// Sync full-text content in libraries with successful data sync. Full-text syncing
-			// still happens for libraries with failed file syncs.
-			if (nextLibraries.length) {
-				yield _doFullTextSync(nextLibraries, engineOptions);
+				
+				// Run full-text sync on all libraries that haven't failed a data sync
+				librariesToSync = yield _doFullTextSync([...successfulLibraries], engineOptions);
+				if (librariesToSync.length) {
+					attempt++;
+					continue;
+				}
+				break;
 			}
 		}
 		catch (e) {
@@ -570,15 +575,22 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 		}
 		Zotero.debug("Done with file syncing");
+		if (resyncLibraries.length) {
+			Zotero.debug("Libraries to resync: " + resyncLibraries.join(", "));
+		}
 		return resyncLibraries;
 	}.bind(this));
 	
 	
+	/**
+	 * @return {Integer[]} - Array of libraries that need data syncing again
+	 */
 	var _doFullTextSync = Zotero.Promise.coroutine(function* (libraries, options) {
 		if (!Zotero.Prefs.get("sync.fulltext.enabled")) return;
 		
 		Zotero.debug("Starting full-text syncing");
 		this.setSyncStatus(Zotero.getString('sync.status.syncingFullText'));
+		var resyncLibraries = [];
 		for (let libraryID of libraries) {
 			try {
 				let opts = {};
@@ -589,6 +601,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				yield engine.start();
 			}
 			catch (e) {
+				if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status == 412) {
+					resyncLibraries.push(libraryID);
+					continue;
+				}
 				Zotero.debug("Full-text sync failed for library " + libraryID);
 				Zotero.logError(e);
 				this.checkError(e);
@@ -600,6 +616,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 		}
 		Zotero.debug("Done with full-text syncing");
+		if (resyncLibraries.length) {
+			Zotero.debug("Libraries to resync: " + resyncLibraries.join(", "));
+		}
+		return resyncLibraries;
 	}.bind(this));
 	
 	

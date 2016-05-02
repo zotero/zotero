@@ -74,13 +74,13 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			var spy = sinon.spy(Zotero.Fulltext, "startContentProcessor")
 			
 			var itemFullTextVersion = 10;
-			var libraryFullTextVersion = 15;
+			var libraryVersion = 15;
 			setResponse({
 				method: "GET",
-				url: "users/1/fulltext",
+				url: "users/1/fulltext?format=versions",
 				status: 200,
 				headers: {
-					"Last-Modified-Version": libraryFullTextVersion
+					"Last-Modified-Version": libraryVersion
 				},
 				json: {
 					[attachment.key]: itemFullTextVersion
@@ -111,7 +111,7 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			assert.propertyVal(data, 'version', itemFullTextVersion);
 			yield assert.eventually.equal(
 				Zotero.FullText.getLibraryVersion(item.libraryID),
-				libraryFullTextVersion
+				libraryVersion
 			);
 			
 			sinon.assert.calledOnce(spy);
@@ -134,14 +134,14 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			spy = sinon.spy(Zotero.Fulltext, "startContentProcessor")
 			
 			itemFullTextVersion = 17;
-			var lastLibraryFullTextVersion = libraryFullTextVersion;
-			libraryFullTextVersion = 20;
+			var lastLibraryVersion = libraryVersion;
+			libraryVersion = 20;
 			setResponse({
 				method: "GET",
-				url: "users/1/fulltext?since=" + lastLibraryFullTextVersion,
+				url: "users/1/fulltext?format=versions&since=" + lastLibraryVersion,
 				status: 200,
 				headers: {
-					"Last-Modified-Version": libraryFullTextVersion
+					"Last-Modified-Version": libraryVersion
 				},
 				json: {
 					[attachment.key]: itemFullTextVersion
@@ -172,7 +172,7 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			assert.propertyVal(data, 'version', itemFullTextVersion);
 			yield assert.eventually.equal(
 				Zotero.FullText.getLibraryVersion(item.libraryID),
-				libraryFullTextVersion
+				libraryVersion
 			);
 			
 			sinon.assert.calledOnce(spy);
@@ -191,13 +191,13 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			yield attachment.saveTx();
 			
 			var itemFullTextVersion = 10;
-			var libraryFullTextVersion = 15;
+			var libraryVersion = 15;
 			setResponse({
 				method: "GET",
-				url: "users/1/fulltext",
+				url: "users/1/fulltext?format=versions",
 				status: 200,
 				headers: {
-					"Last-Modified-Version": libraryFullTextVersion
+					"Last-Modified-Version": libraryVersion
 				},
 				json: {
 					[attachment.key]: itemFullTextVersion
@@ -225,29 +225,41 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			({ engine, client, caller } = yield setup());
 			
 			var item = yield createDataObject('item');
-			var attachment = new Zotero.Item('attachment');
-			attachment.parentItemID = item.id;
-			attachment.attachmentLinkMode = 'imported_file';
-			attachment.attachmentContentType = 'text/html';
-			attachment.attachmentFilename = 'test.html';
-			attachment.attachmentCharset = 'utf-8';
-			attachment.synced = true;
-			yield attachment.saveTx();
-			yield Zotero.Attachments.createDirectoryForItem(attachment);
 			
-			var path = attachment.getFilePath();
-			var content = generateContent()
-			var htmlContent = "<html><body>" + content + "</body></html>";
-			yield Zotero.File.putContentsAsync(path, content);
-			yield Zotero.Fulltext.indexItems([attachment.id]);
+			var attachment1 = new Zotero.Item('attachment');
+			attachment1.parentItemID = item.id;
+			attachment1.attachmentLinkMode = 'imported_file';
+			attachment1.attachmentContentType = 'text/html';
+			attachment1.attachmentFilename = 'test.html';
+			attachment1.attachmentCharset = 'utf-8';
+			attachment1.synced = true;
+			yield attachment1.saveTx();
+			yield Zotero.Attachments.createDirectoryForItem(attachment1);
+			var path = attachment1.getFilePath();
+			var content1 = "A" + generateContent()
+			yield Zotero.File.putContentsAsync(path, content1);
+			
+			var attachment2 = new Zotero.Item('attachment');
+			attachment2.parentItemID = item.id;
+			attachment2.attachmentLinkMode = 'imported_file';
+			attachment2.attachmentContentType = 'text/html';
+			attachment2.attachmentFilename = 'test.html';
+			attachment2.attachmentCharset = 'utf-8';
+			attachment2.synced = true;
+			yield attachment2.saveTx();
+			yield Zotero.Attachments.createDirectoryForItem(attachment2);
+			path = attachment2.getFilePath();
+			var content2 = "B" + generateContent()
+			yield Zotero.File.putContentsAsync(path, content2);
+			
+			yield Zotero.Fulltext.indexItems([attachment1.id, attachment2.id]);
 			
 			var libraryVersion = 15;
-			var previousLibraryVersion = libraryVersion;
 			
 			var count = 1;
 			setResponse({
 				method: "GET",
-				url: "users/1/fulltext",
+				url: "users/1/fulltext?format=versions",
 				status: 200,
 				headers: {
 					"Last-Modified-Version": libraryVersion
@@ -255,8 +267,8 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 				json: {}
 			});
 			server.respond(function (req) {
-				if (req.method == "PUT") {
-					if (req.url == `${baseURL}users/1/items/${attachment.key}/fulltext`) {
+				if (req.method == "POST") {
+					if (req.url == `${baseURL}users/1/fulltext`) {
 						assert.propertyVal(
 							req.requestHeaders,
 							'Content-Type',
@@ -264,19 +276,40 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 						);
 						
 						let json = JSON.parse(req.requestBody);
-						assert.propertyVal(json, 'content', content);
-						assert.propertyVal(json, 'indexedChars', content.length);
-						assert.propertyVal(json, 'totalChars', content.length);
-						assert.propertyVal(json, 'indexedPages', 0);
-						assert.propertyVal(json, 'totalPages', 0);
+						assert.lengthOf(json, 2);
+						
+						json.sort((a, b) => a.content < b.content ? -1 : 1);
+						assert.propertyVal(json[0], 'key', attachment1.key);
+						assert.propertyVal(json[0], 'content', content1);
+						assert.propertyVal(json[0], 'indexedChars', content1.length);
+						assert.propertyVal(json[0], 'totalChars', content1.length);
+						assert.propertyVal(json[0], 'indexedPages', 0);
+						assert.propertyVal(json[0], 'totalPages', 0);
+						assert.propertyVal(json[1], 'key', attachment2.key);
+						assert.propertyVal(json[1], 'content', content2);
+						assert.propertyVal(json[1], 'indexedChars', content2.length);
+						assert.propertyVal(json[1], 'totalChars', content2.length);
+						assert.propertyVal(json[1], 'indexedPages', 0);
+						assert.propertyVal(json[1], 'totalPages', 0);
 						
 						req.respond(
-							204,
+							200,
 							{
 								"Content-Type": "application/json",
 								"Last-Modified-Version": ++libraryVersion
 							},
-							""
+							JSON.stringify({
+								"successful": {
+									"0": {
+										key: attachment1.key
+									},
+									"1": {
+										key: attachment2.key
+									}
+								},
+								"unchanged": {},
+								"failed": {}
+							})
 						);
 						count--;
 					}
@@ -285,10 +318,10 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			
 			yield engine.start();
 			assert.equal(count, 0);
-			yield assert.eventually.equal(
-				Zotero.FullText.getItemVersion(attachment.id),
-				libraryVersion
-			);
+			yield assert.eventually.equal(Zotero.FullText.getItemVersion(attachment1.id), libraryVersion);
+			yield assert.eventually.equal(Zotero.FullText.getItemVersion(attachment2.id), libraryVersion);
+			yield assert.eventually.equal(Zotero.Fulltext.getLibraryVersion(libraryID), libraryVersion);
+			assert.equal(Zotero.Libraries.userLibrary.libraryVersion, libraryVersion);
 			
 			//
 			// Upload new content
@@ -296,27 +329,25 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			({ engine, client, caller } = yield setup());
 			yield Zotero.Libraries.setVersion(libraryID, libraryVersion);
 			
-			item = yield createDataObject('item');
-			attachment = new Zotero.Item('attachment');
-			attachment.parentItemID = item.id;
-			attachment.attachmentLinkMode = 'imported_file';
-			attachment.attachmentContentType = 'text/html';
-			attachment.attachmentFilename = 'test.html';
-			attachment.attachmentCharset = 'utf-8';
-			attachment.synced = true;
-			yield attachment.saveTx();
-			yield Zotero.Attachments.createDirectoryForItem(attachment);
+			var attachment3 = new Zotero.Item('attachment');
+			attachment3.parentItemID = item.id;
+			attachment3.attachmentLinkMode = 'imported_file';
+			attachment3.attachmentContentType = 'text/html';
+			attachment3.attachmentFilename = 'test.html';
+			attachment3.attachmentCharset = 'utf-8';
+			attachment3.synced = true;
+			yield attachment3.saveTx();
+			yield Zotero.Attachments.createDirectoryForItem(attachment3);
 			
-			path = attachment.getFilePath();
-			content = generateContent()
-			htmlContent = "<html><body>" + content + "</body></html>";
-			yield Zotero.File.putContentsAsync(path, content);
-			yield Zotero.Fulltext.indexItems([attachment.id]);
+			path = attachment3.getFilePath();
+			var content3 = generateContent()
+			yield Zotero.File.putContentsAsync(path, content3);
+			yield Zotero.Fulltext.indexItems([attachment3.id]);
 			
 			count = 1;
 			setResponse({
 				method: "GET",
-				url: "users/1/fulltext?since=" + previousLibraryVersion,
+				url: "users/1/fulltext?format=versions&since=" + libraryVersion,
 				status: 200,
 				headers: {
 					"Last-Modified-Version": libraryVersion
@@ -324,8 +355,8 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 				json: {}
 			});
 			server.respond(function (req) {
-				if (req.method == "PUT") {
-					if (req.url == `${baseURL}users/1/items/${attachment.key}/fulltext`) {
+				if (req.method == "POST") {
+					if (req.url == `${baseURL}users/1/fulltext`) {
 						assert.propertyVal(req.requestHeaders, 'Zotero-API-Key', apiKey);
 						assert.propertyVal(
 							req.requestHeaders,
@@ -334,19 +365,30 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 						);
 						
 						let json = JSON.parse(req.requestBody);
-						assert.propertyVal(json, 'content', content);
-						assert.propertyVal(json, 'indexedChars', content.length);
-						assert.propertyVal(json, 'totalChars', content.length);
+						assert.lengthOf(json, 1);
+						json = json[0];
+						assert.propertyVal(json, 'key', attachment3.key);
+						assert.propertyVal(json, 'content', content3);
+						assert.propertyVal(json, 'indexedChars', content3.length);
+						assert.propertyVal(json, 'totalChars', content3.length);
 						assert.propertyVal(json, 'indexedPages', 0);
 						assert.propertyVal(json, 'totalPages', 0);
 						
 						req.respond(
-							204,
+							200,
 							{
 								"Content-Type": "application/json",
 								"Last-Modified-Version": ++libraryVersion
 							},
-							""
+							JSON.stringify({
+								"successful": {
+									"0": {
+										key: attachment3.key
+									}
+								},
+								"unchanged": {},
+								"failed": {}
+							})
 						);
 						count--;
 					}
@@ -355,10 +397,9 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			
 			yield engine.start();
 			assert.equal(count, 0);
-			yield assert.eventually.equal(
-				Zotero.FullText.getItemVersion(attachment.id),
-				libraryVersion
-			);
+			yield assert.eventually.equal(Zotero.FullText.getItemVersion(attachment3.id), libraryVersion);
+			yield assert.eventually.equal(Zotero.Fulltext.getLibraryVersion(libraryID), libraryVersion);
+			assert.equal(Zotero.Libraries.userLibrary.libraryVersion, libraryVersion);
 		})
-	})
+	});
 })

@@ -376,7 +376,8 @@ Zotero.Sync.APIClient.prototype = {
 		var params = {
 			libraryType: libraryType,
 			libraryTypeID: libraryTypeID,
-			target: "fulltext"
+			target: "fulltext",
+			format: "versions"
 		};
 		if (since) {
 			params.since = since;
@@ -415,26 +416,31 @@ Zotero.Sync.APIClient.prototype = {
 	}),
 	
 	
-	setFullTextForItem: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, itemKey, data) {
+	setFullTextForItems: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, libraryVersion, data) {
 		var params = {
 			libraryType: libraryType,
 			libraryTypeID: libraryTypeID,
-			target: `items/${itemKey}/fulltext`
+			target: "fulltext"
 		};
 		var uri = this.buildRequestURI(params);
 		var xmlhttp = yield this.makeRequest(
-			"PUT",
+			"POST",
 			uri,
 			{
 				headers: {
-					"Content-Type": "application/json"
+					"Content-Type": "application/json",
+					"If-Unmodified-Since-Version": libraryVersion
 				},
 				body: JSON.stringify(data),
-				successCodes: [204],
+				successCodes: [200, 412],
 				debug: true
 			}
 		);
-		return this._getLastModifiedVersion(xmlhttp);
+		this._check412(xmlhttp);
+		return {
+			libraryVersion: this._getLastModifiedVersion(xmlhttp),
+			results: this._parseJSON(xmlhttp.responseText)
+		};
 	}),
 	
 	
@@ -727,5 +733,6 @@ Zotero.Sync.APIClient.prototype = {
 		if (!libraryVersion) {
 			throw new Error("Last-Modified-Version not provided");
 		}
+		return libraryVersion;
 	}
 }

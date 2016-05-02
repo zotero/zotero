@@ -608,7 +608,7 @@ describe("Zotero.Sync.Runner", function () {
 			// Full-text syncing
 			setResponse({
 				method: "GET",
-				url: "users/1/fulltext",
+				url: "users/1/fulltext?format=versions",
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 5
@@ -617,7 +617,7 @@ describe("Zotero.Sync.Runner", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "users/1/publications/fulltext",
+				url: "users/1/publications/fulltext?format=versions",
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 10
@@ -626,7 +626,7 @@ describe("Zotero.Sync.Runner", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "groups/1623562/fulltext",
+				url: "groups/1623562/fulltext?format=versions",
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 15
@@ -635,7 +635,7 @@ describe("Zotero.Sync.Runner", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "groups/2694172/fulltext",
+				url: "groups/2694172/fulltext?format=versions",
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 20
@@ -780,7 +780,7 @@ describe("Zotero.Sync.Runner", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "users/1/publications/fulltext",
+				url: "users/1/publications/fulltext?format=versions",
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 5

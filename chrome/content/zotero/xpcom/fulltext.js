@@ -105,6 +105,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	
 	
 	this.getLibraryVersion = function (libraryID) {
+		if (!libraryID) throw new Error("libraryID not provided");
 		return Zotero.DB.valueQueryAsync(
 			"SELECT version FROM version WHERE schema=?", "fulltext_" + libraryID
 		)
@@ -112,6 +113,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	
 	
 	this.setLibraryVersion = Zotero.Promise.coroutine(function* (libraryID, version) {
+		if (!libraryID) throw new Error("libraryID not provided");
 		yield Zotero.DB.queryAsync(
 			"REPLACE INTO version VALUES (?, ?)", ["fulltext_" + libraryID, version]
 		);
@@ -130,12 +132,12 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	});
 	
 	
-	this.setItemSynced = Zotero.Promise.coroutine(function* (itemID, version) {
+	this.setItemSynced = function (itemID, version) {
 		return Zotero.DB.queryAsync(
 			"UPDATE fulltextItems SET synced=?, version=? WHERE itemID=?",
 			[SYNC_STATE_IN_SYNC, version, itemID]
 		);
-	});
+	};
 	
 	
 	// this is a port from http://mxr.mozilla.org/mozilla-central/source/intl/lwbrk/src/nsSampleWordBreaker.cpp to
@@ -787,22 +789,25 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	 * Get content and stats that haven't yet been synced
 	 *
 	 * @param {Integer} libraryID
-	 * @param {Integer} numItems
+	 * @param {Integer} [options]
+	 * @param {Integer} [options.maxSize]
+	 * @param {Integer} [options.maxItems]
+	 * @param {Integer} [options.lastItemID] - Only return content for items above this id
 	 * @return {Promise<Array<Object>>}
 	 */
-	this.getUnsyncedContent = Zotero.Promise.coroutine(function* (libraryID, numItems) {
-		var maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
-		
+	this.getUnsyncedContent = Zotero.Promise.coroutine(function* (libraryID, options = {}) {
 		var contentItems = [];
 		var sql = "SELECT itemID, indexedChars, totalChars, indexedPages, totalPages "
 			+ "FROM fulltextItems FI JOIN items I USING (itemID) WHERE libraryID=? AND "
-			+ "FI.synced=? AND I.synced=1 ORDER BY clientDateModified DESC";
+			+ "FI.synced=? AND I.synced=1 ";
 		var params = [libraryID, SYNC_STATE_UNSYNCED];
-		if (numItems) {
-			sql += " LIMIT ?";
-			params.push(numItems);
+		if (options.lastItemID) {
+			sql += "AND itemID>?";
+			params.push(options.lastItemID);
 		}
+		sql += "ORDER BY itemID DESC";
 		var rows = yield Zotero.DB.queryAsync(sql, params);
+		var contentSize = 0;
 		for (let i = 0; i < rows.length; i++) {
 			let row = rows[i];
 			let content;
@@ -868,8 +873,13 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 				continue;
 			}
 			
+			// If this isn't the first item and it would put us over the size limit, stop
+			if (contentItems.length && options.maxSize && contentSize + content.length > options.maxSize) {
+				break;
+			}
+			
 			contentItems.push({
-				libraryID: item.libraryID,
+				itemID: item.id,
 				key: item.key,
 				content,
 				indexedChars: row.indexedChars ? row.indexedChars : 0,
@@ -877,6 +887,11 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 				indexedPages: row.indexedPages ? row.indexedPages : 0,
 				totalPages: row.totalPages ? row.totalPages : 0
 			});
+			
+			if (options.maxItems && contentItems.length >= options.maxItems) {
+				break;
+			}
+			contentSize += content.length;
 		}
 		return contentItems;
 	});
