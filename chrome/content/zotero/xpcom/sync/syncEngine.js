@@ -294,9 +294,7 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 						continue;
 					}
 					
-					let obj = yield objectsClass.getByLibraryAndKeyAsync(
-						this.libraryID, key, { noCache: true }
-					);
+					let obj = objectsClass.getByLibraryAndKey(this.libraryID, key);
 					if (!obj) {
 						continue;
 					}
@@ -338,8 +336,8 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 								return Zotero.DB.executeTransaction(function* () {
 									for (let json of chunk) {
 										if (!json.deleted) continue;
-										let obj = yield objectsClass.getByLibraryAndKeyAsync(
-											this.libraryID, json.key, { noCache: true }
+										let obj = objectsClass.getByLibraryAndKey(
+											this.libraryID, json.key
 										);
 										if (!obj) {
 											Zotero.logError("Remotely deleted " + objectType
@@ -865,9 +863,7 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 					throw new Error("Key mismatch (" + key + " != " + batch[index].key + ")");
 				}
 				
-				let obj = yield objectsClass.getByLibraryAndKeyAsync(
-					this.libraryID, key, { noCache: true }
-				)
+				let obj = objectsClass.getByLibraryAndKey(this.libraryID, key);
 				ids.push(obj.id);
 				
 				if (state == 'successful') {
@@ -1027,7 +1023,7 @@ Zotero.Sync.Data.Engine.prototype._uploadDeletions = Zotero.Promise.coroutine(fu
 Zotero.Sync.Data.Engine.prototype._getJSONForObject = function (objectType, id) {
 	return Zotero.DB.executeTransaction(function* () {
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
-		var obj = yield objectsClass.getAsync(id, { noCache: true });
+		var obj = objectsClass.get(id);
 		var cacheObj = false;
 		if (obj.version) {
 			cacheObj = yield Zotero.Sync.Data.Local.getCacheObject(
@@ -1284,9 +1280,7 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 			// Queue objects that are out of date or don't exist locally
 			for (let key in results.versions) {
 				let version = results.versions[key];
-				let obj = yield objectsClass.getByLibraryAndKeyAsync(this.libraryID, key, {
-					noCache: true
-				});
+				let obj = objectsClass.getByLibraryAndKey(this.libraryID, key);
 				// If object already at latest version, skip
 				let localVersion = localVersions[key];
 				if (localVersion && localVersion === version) {

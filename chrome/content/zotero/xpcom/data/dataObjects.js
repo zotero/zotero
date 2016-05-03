@@ -281,7 +281,7 @@ Zotero.DataObjects.prototype.getByLibraryAndKey = function (libraryID, key, opti
  * @param {Boolean} [options.noCache=false] - Don't add object to cache after loading
  * @return {Promise<Zotero.DataObject>} - Promise for a data object, or FALSE if not found
  */
-Zotero.DataObjects.prototype.getByLibraryAndKeyAsync = Zotero.Promise.coroutine(function* (libraryID, key, options) {
+Zotero.DataObjects.prototype.getByLibraryAndKeyAsync = Zotero.Promise.method(function (libraryID, key, options) {
 	var id = this.getIDFromLibraryAndKey(libraryID, key);
 	if (!id) {
 		return false;
