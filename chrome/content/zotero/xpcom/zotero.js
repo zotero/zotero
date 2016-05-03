@@ -902,7 +902,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		var curSection = null;
 		var defaultSection = null;
 		var nSections = 0;
-		for each(var line in iniContents.split(/(?:\r?\n|\r)/)) {
+		for (let line of iniContents.split(/(?:\r?\n|\r)/)) {
 			let tline = line.trim();
 			if(tline[0] == "[" && tline[tline.length-1] == "]") {
 				curSection = {};
@@ -1970,7 +1970,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		if (percentage === _lastPercentage) {
 			return;
 		}
-		for each(var pm in _progressMeters) {
+		for (let pm of _progressMeters) {
 			if (percentage !== null) {
 				if (pm.mode == 'undetermined') {
 					pm.max = 1000;

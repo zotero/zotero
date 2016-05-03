@@ -961,7 +961,7 @@ Zotero.CollectionTreeView.prototype.expandToCollection = Zotero.Promise.coroutin
 		path.unshift(parentID);
 		col = yield Zotero.Collections.getAsync(parentID);
 	}
-	for each(var id in path) {
+	for (let id of path) {
 		row = this._rowMap["C" + id];
 		if (!this.isContainerOpen(row)) {
 			yield this.toggleOpenState(row);
@@ -2017,7 +2017,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 				var toReconcile = [];
 				
 				var newIDs = [];
-				for each(var item in newItems) {
+				for (let item of newItems) {
 					var id = yield copyItem(item, targetLibraryID, copyOptions)
 					// Standalone attachments might not get copied
 					if (!id) {

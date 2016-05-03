@@ -281,7 +281,7 @@ function makeZoteroContext(isConnector) {
 	}
 	
 	// Load xpcomFiles for specific mode
-	for each(var xpcomFile in (isConnector ? xpcomFilesConnector : xpcomFilesLocal)) {
+	for (let xpcomFile of (isConnector ? xpcomFilesConnector : xpcomFilesLocal)) {
 		try {
 			subscriptLoader.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFile + ".js", zContext);
 		}

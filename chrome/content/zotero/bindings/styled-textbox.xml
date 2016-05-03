@@ -609,7 +609,7 @@
 						
 						if (!SJOW.tinyMCE) {
 							var exts = Zotero.getInstalledExtensions(function(exts) {
-								for each(var ext in exts) {
+								for (let ext of exts) {
 									if (ext.indexOf('NoScript') != -1 && ext.indexOf('disabled') == -1) {
 										var doc = win.document;
 										var div = doc.getElementById('tinymce');

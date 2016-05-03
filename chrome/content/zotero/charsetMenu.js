@@ -47,7 +47,7 @@ var Zotero_Charset_Menu = new function() {
 		if(Zotero.platformMajorVersion >= 32) {
 			Components.utils.import("resource://gre/modules/CharsetMenu.jsm");
 			var cmData = CharsetMenu.getData();
-			for each(var charsetList in [cmData.pinnedCharsets, cmData.otherCharsets]) {
+			for (let charsetList of [cmData.pinnedCharsets, cmData.otherCharsets]) {
 				for each(var charsetInfo in charsetList) {
 					if(charsetInfo.value == "UTF-8") {
 						charsets.push({

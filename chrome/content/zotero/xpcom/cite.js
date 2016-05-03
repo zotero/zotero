@@ -235,7 +235,7 @@ Zotero.Cite = {
 			var rightPadding = .5;
 			
 			// div.csl-left-margin
-			for each(var div in leftMarginDivs) {
+			for (let div of leftMarginDivs) {
 				var divStyle = div.getAttribute("style");
 				if(!divStyle) divStyle = "";
 				
@@ -252,7 +252,7 @@ Zotero.Cite = {
 			}
 			
 			// div.csl-right-inline
-			for each(var div in Zotero.Utilities.xpath(doc, '//div[@class="csl-right-inline"]')) {
+			for (let div of Zotero.Utilities.xpath(doc, '//div[@class="csl-right-inline"]')) {
 				var divStyle = div.getAttribute("style");
 				if(!divStyle) divStyle = "";
 				
@@ -266,7 +266,7 @@ Zotero.Cite = {
 			}
 			
 			// div.csl-indent
-			for each(var div in Zotero.Utilities.xpath(doc, '//div[@class="csl-indent"]')) {
+			for (let div of Zotero.Utilities.xpath(doc, '//div[@class="csl-indent"]')) {
 				div.setAttribute("style", "margin: .5em 0 0 2em; padding: 0 0 .2em .5em; border-left: 5px solid #ccc;");
 			}
 			

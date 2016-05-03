@@ -92,7 +92,7 @@
 					else {
 						// Get ordered list of library names
 						var libraryNames = [];
-						for each(var libraryID in newLibraries) {
+						for (let libraryID of newLibraries) {
 							libraryNames.push({
 								libraryID: libraryID,
 								name: Zotero.Libraries.getName(libraryID)

@@ -247,7 +247,7 @@ Zotero_Preferences.Advanced = {
 		
 		this._openURLResolvers = Zotero.OpenURL.discoverResolvers();
 		var i = 0;
-		for each(var r in this._openURLResolvers) {
+		for (let r of this._openURLResolvers) {
 			openURLMenu.insertItemAt(i, r.name);
 			if (r.url == Zotero.Prefs.get('openURL.resolver') && r.version == Zotero.Prefs.get('openURL.version')) {
 				openURLMenu.selectedIndex = i;

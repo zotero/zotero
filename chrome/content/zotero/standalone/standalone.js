@@ -52,7 +52,7 @@ const ZoteroStandalone = new function() {
 					.getService(Components.interfaces.nsIExternalProtocolService);
 			var hs = Components.classes["@mozilla.org/uriloader/handler-service;1"]
 					.getService(Components.interfaces.nsIHandlerService);
-			for each(var scheme in ["http", "https"]) {
+			for (let scheme of ["http", "https"]) {
 				var handlerInfo = eps.getProtocolHandlerInfo(scheme);
 				handlerInfo.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
 				handlerInfo.alwaysAskBeforeHandling = false;

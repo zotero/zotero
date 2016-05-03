@@ -87,7 +87,7 @@ Zotero.Server = new function() {
 	this.decodeQueryString = function(queryString) {
 		var splitData = queryString.split("&");
 		var decodedData = {};
-		for each(var variable in splitData) {
+		for (let variable of splitData) {
 			var splitIndex = variable.indexOf("=");
 			decodedData[decodeURIComponent(variable.substr(0, splitIndex))] = decodeURIComponent(variable.substr(splitIndex+1));
 		}

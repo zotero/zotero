@@ -168,7 +168,7 @@ Zotero.Schema = new function(){
 						toDelete.push(file);
 					}
 				}
-				for each(var file in toDelete) {
+				for (let file of toDelete) {
 					Zotero.debug('Removing previous backup file ' + file.leafName);
 					file.remove(false);
 				}

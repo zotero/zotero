@@ -142,7 +142,7 @@ Zotero.LocateManager = new function() {
 		this.init();
 		
 		// reload icons for default locate engines
-		for each(var engine in this.getEngines()) engine._updateIcon();
+		for (let engine of this.getEngines()) engine._updateIcon();
 	}
 	
 	/**
@@ -332,7 +332,7 @@ Zotero.LocateManager = new function() {
 		if(obj) for(var prop in obj) this[prop] = obj[prop];
 		
 		// Queue deferred serialization whenever a property is modified
-		for each(var prop in ["alias", "name", "description", "icon", "hidden"]) {
+		for (let prop of ["alias", "name", "description", "icon", "hidden"]) {
 			this.watch(prop, _watchLocateEngineProperties);
 		}
 	}
