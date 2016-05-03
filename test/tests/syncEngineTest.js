@@ -286,6 +286,182 @@ describe("Zotero.Sync.Data.Engine", function () {
 			yield assertInCache(obj);
 		})
 		
+		it("should download items into a new read-only group", function* () {
+			var group = yield createGroup({
+				editable: false,
+				filesEditable: false
+			});
+			var libraryID = group.libraryID;
+			var itemToDelete = yield createDataObject(
+				'item', { libraryID, synced: true }, { skipEditCheck: true }
+			)
+			var itemToDeleteID = itemToDelete.id;
+			
+			({ engine, client, caller } = yield setup({ libraryID }));
+			
+			var headers = {
+				"Last-Modified-Version": 3
+			};
+			setResponse({
+				method: "GET",
+				url: `groups/${group.id}/settings`,
+				status: 200,
+				headers: headers,
+				json: {
+					tagColors: {
+						value: [
+							{
+								name: "A",
+								color: "#CC66CC"
+							}
+						],
+						version: 2
+					}
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: `groups/${group.id}/collections?format=versions`,
+				status: 200,
+				headers: headers,
+				json: {
+					"AAAAAAAA": 1
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: `groups/${group.id}/searches?format=versions`,
+				status: 200,
+				headers: headers,
+				json: {
+					"AAAAAAAA": 2
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: `groups/${group.id}/items/top?format=versions&includeTrashed=1`,
+				status: 200,
+				headers: headers,
+				json: {
+					"AAAAAAAA": 3
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: `groups/${group.id}/items?format=versions&includeTrashed=1`,
+				status: 200,
+				headers: headers,
+				json: {
+					"AAAAAAAA": 3,
+					"BBBBBBBB": 3
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: `groups/${group.id}/collections?format=json&collectionKey=AAAAAAAA`,
+				status: 200,
+				headers: headers,
+				json: [
+					makeCollectionJSON({
+						key: "AAAAAAAA",
+						version: 1,
+						name: "A"
+					})
+				]
+			});
+			setResponse({
+				method: "GET",
+				url: `groups/${group.id}/searches?format=json&searchKey=AAAAAAAA`,
+				status: 200,
+				headers: headers,
+				json: [
+					makeSearchJSON({
+						key: "AAAAAAAA",
+						version: 2,
+						name: "A"
+					})
+				]
+			});
+			setResponse({
+				method: "GET",
+				url: `groups/${group.id}/items?format=json&itemKey=AAAAAAAA&includeTrashed=1`,
+				status: 200,
+				headers: headers,
+				json: [
+					makeItemJSON({
+						key: "AAAAAAAA",
+						version: 3,
+						itemType: "book",
+						title: "A"
+					})
+				]
+			});
+			setResponse({
+				method: "GET",
+				url: `groups/${group.id}/items?format=json&itemKey=BBBBBBBB&includeTrashed=1`,
+				status: 200,
+				headers: headers,
+				json: [
+					makeItemJSON({
+						key: "BBBBBBBB",
+						version: 3,
+						itemType: "note",
+						parentItem: "AAAAAAAA",
+						note: "This is a note."
+					})
+				]
+			});
+			setResponse({
+				method: "GET",
+				url: `groups/${group.id}/deleted?since=0`,
+				status: 200,
+				headers: headers,
+				json: {
+					"items": [itemToDelete.key]
+				}
+			});
+			yield engine.start();
+			
+			// Check local library version
+			assert.equal(group.libraryVersion, 3);
+			
+			// Make sure local objects exist
+			var setting = Zotero.SyncedSettings.get(libraryID, "tagColors");
+			assert.lengthOf(setting, 1);
+			assert.equal(setting[0].name, 'A');
+			var settingMetadata = Zotero.SyncedSettings.getMetadata(libraryID, "tagColors");
+			assert.equal(settingMetadata.version, 2);
+			assert.isTrue(settingMetadata.synced);
+			
+			var obj = Zotero.Collections.getByLibraryAndKey(libraryID, "AAAAAAAA");
+			assert.equal(obj.name, 'A');
+			assert.equal(obj.version, 1);
+			assert.isTrue(obj.synced);
+			yield assertInCache(obj);
+			
+			obj = Zotero.Searches.getByLibraryAndKey(libraryID, "AAAAAAAA");
+			assert.equal(obj.name, 'A');
+			assert.equal(obj.version, 2);
+			assert.isTrue(obj.synced);
+			yield assertInCache(obj);
+			
+			obj = Zotero.Items.getByLibraryAndKey(libraryID, "AAAAAAAA");
+			assert.equal(obj.getField('title'), 'A');
+			assert.equal(obj.version, 3);
+			assert.isTrue(obj.synced);
+			var parentItemID = obj.id;
+			yield assertInCache(obj);
+			
+			obj = Zotero.Items.getByLibraryAndKey(libraryID, "BBBBBBBB");
+			assert.equal(obj.getNote(), 'This is a note.');
+			assert.equal(obj.parentItemID, parentItemID);
+			assert.equal(obj.version, 3);
+			assert.isTrue(obj.synced);
+			yield assertInCache(obj);
+			
+			assert.isFalse(Zotero.Items.exists(itemToDeleteID));
+		});
+		
 		it("should upload new full items and subsequent patches", function* () {
 			({ engine, client, caller } = yield setup());
 			

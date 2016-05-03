@@ -346,7 +346,9 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 												+ " didn't exist after conflict resolution");
 											continue;
 										}
-										yield obj.erase();
+										yield obj.erase({
+											skipEditCheck: true
+										});
 									}
 								}.bind(this));
 							}.bind(this)
@@ -358,6 +360,7 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 					yield Zotero.DB.executeTransaction(function* () {
 						for (let obj of toDelete) {
 							yield obj.erase({
+								skipEditCheck: true,
 								skipDeleteLog: true
 							});
 						}
@@ -1348,7 +1351,13 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 				// Delete local objects that were deleted remotely
 				if (toDelete.length) {
 					Zotero.debug("Deleting remotely deleted synced " + objectTypePlural);
-					yield objectsClass.erase(toDelete, { skipDeleteLog: true });
+					yield objectsClass.erase(
+						toDelete,
+						{
+							skipEditCheck: true,
+							skipDeleteLog: true
+						}
+					);
 				}
 				// For remotely missing objects that exist locally, reset version, since old
 				// version will no longer match remote, and mark for upload

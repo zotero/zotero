@@ -1320,23 +1320,13 @@ Zotero.Sync.Data.Local = {
 	
 	markObjectAsSynced: Zotero.Promise.method(function (obj) {
 		obj.synced = true;
-		return obj.saveTx({
-			skipSyncedUpdate: true,
-			skipDateModifiedUpdate: true,
-			skipClientDateModifiedUpdate: true,
-			skipNotifier: true
-		});
+		return obj.saveTx({ skipAll: true });
 	}),
 	
 	
 	markObjectAsUnsynced: Zotero.Promise.method(function (obj) {
 		obj.synced = false;
-		return obj.saveTx({
-			skipSyncedUpdate: true,
-			skipDateModifiedUpdate: true,
-			skipClientDateModifiedUpdate: true,
-			skipNotifier: true
-		});
+		return obj.saveTx({ skipAll: true });
 	}),
 	
 	
