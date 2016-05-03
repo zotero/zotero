@@ -1396,23 +1396,14 @@ Zotero.Utilities = {
 		//Special handling for Error or Exception
 		var isException = Zotero.isFx && !Zotero.isBookmarklet && obj instanceof Components.interfaces.nsIException;
 		var isError = obj instanceof Error;
-		if (!isException && !isError && constructor in obj && stack in obj) {
-			switch (obj.constructor.name) {
-				case 'Error':
-				case 'EvalError':
-				case 'RangeError':
-				case 'ReferenceError':
-				case 'SyntaxError':
-				case 'TypeError':
-				case 'URIError':
-					isError = true;
-			}
+		if (!isException && !isError && obj.message !== undefined && obj.stack !== undefined) {
+			isError = true;
 		}
 		
 		if (isError || isException) {
 			var header = '';
 			if (isError) {
-				header = obj.constructor.name ? obj.constructor.name : 'Error';
+				header = (obj.constructor && obj.constructor.name) ? obj.constructor.name : 'Error';
 			} else {
 				header = (obj.name ? obj.name + ' ' : '') + 'Exception';
 			}
