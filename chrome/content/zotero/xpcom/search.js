@@ -1123,7 +1123,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						let objectTypeClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 						
 						// Old-style library-key hash
-						if (objKey.contains('_')) {
+						if (objKey.indexOf('_') != -1) {
 							[objLibraryID, objKey] = objKey.split('_');
 						}
 						// libraryID assigned on search

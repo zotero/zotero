@@ -172,7 +172,7 @@ function ZoteroProtocolHandler() {
 				// search
 				// items
 				// item
-				if (params.sort.contains('/')) {
+				if (params.sort.indexOf('/') != -1) {
 					let parts = params.sort.split('/');
 					params.sort = parts[0];
 					params.direction = parts[1] == 'd' ? 'desc' : 'asc';
