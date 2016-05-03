@@ -59,6 +59,15 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 	})
 	
 	describe("Full-Text Syncing", function () {
+		it("should skip full-text download if main library version is the same", function* () {
+			({ engine, client, caller } = yield setup());
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 10;
+			yield library.saveTx();
+			yield Zotero.Fulltext.setLibraryVersion(library.id, 10);
+			yield engine.start();
+		});
+		
 		it("should download full-text into a new library and subsequent updates", function* () {
 			({ engine, client, caller } = yield setup());
 			
@@ -75,6 +84,12 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			
 			var itemFullTextVersion = 10;
 			var libraryVersion = 15;
+			
+			// Set main library version to new version
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = libraryVersion;
+			yield library.saveTx();
+			
 			setResponse({
 				method: "GET",
 				url: "users/1/fulltext?format=versions",
@@ -136,6 +151,11 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			itemFullTextVersion = 17;
 			var lastLibraryVersion = libraryVersion;
 			libraryVersion = 20;
+			
+			// Set main library version to new version
+			library.libraryVersion = libraryVersion;
+			yield library.saveTx();
+			
 			setResponse({
 				method: "GET",
 				url: "users/1/fulltext?format=versions&since=" + lastLibraryVersion,

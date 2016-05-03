@@ -53,7 +53,13 @@ Zotero.Sync.Data.FullTextEngine.prototype.start = Zotero.Promise.coroutine(funct
 	
 	// Get last full-text version in settings
 	var libraryVersion = yield Zotero.FullText.getLibraryVersion(this.libraryID);
-	yield this._download(libraryVersion);
+	// If main library version has changed, check to see if there's no full-text content
+	if (this.library.libraryVersion > libraryVersion) {
+		yield this._download(libraryVersion);
+	}
+	else {
+		Zotero.debug("Library version hasn't changed -- skipping full-text download");
+	}
 	
 	yield this._upload();
 })
