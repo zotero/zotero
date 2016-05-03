@@ -1266,7 +1266,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		if (!lastSyncTime) {
 			try {
 				lastSyncTime = Zotero.Sync.Data.Local.getLastClassicSyncTime();
-				Zotero.debug(lastSyncTime);
 			}
 			catch (e) {
 				Zotero.debug(e, 2);
