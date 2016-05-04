@@ -1543,8 +1543,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 		})
 		
 		it("should handle cancellation of conflict resolution window", function* () {
-			var userLibraryID = Zotero.Libraries.userLibraryID;
-			yield Zotero.Libraries.setVersion(userLibraryID, 5);
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 5;
+			yield library.saveTx();
 			({ engine, client, caller } = yield setup());
 			
 			var item = yield createDataObject('item');
@@ -1630,17 +1631,124 @@ describe("Zotero.Sync.Data.Engine", function () {
 				var wizard = doc.documentElement;
 				wizard.getButton('cancel').click();
 			})
-			yield engine._startDownload();
+			var downloadResult = yield engine._startDownload();
+			assert.equal(downloadResult, engine.DOWNLOAD_RESULT_CANCEL);
 			
 			// Non-conflicted item should be saved
-			assert.ok(Zotero.Items.getIDFromLibraryAndKey(userLibraryID, "AAAAAAAA"));
+			assert.ok(Zotero.Items.getIDFromLibraryAndKey(library.id, "AAAAAAAA"));
 			
 			// Conflicted item should be skipped and in queue
 			assert.isFalse(Zotero.Items.exists(itemID));
-			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', userLibraryID);
+			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', library.id);
 			assert.sameMembers(keys, [itemKey]);
+			
+			// Library version should not have advanced
+			assert.equal(library.libraryVersion, 5);
 		});
-	})
+		
+		
+		/**
+		 * The CR window for remote deletions is triggered separately, so test separately
+		 */
+		it("should handle cancellation of remote deletion conflict resolution window", function* () {
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 5;
+			yield library.saveTx();
+			({ engine, client, caller } = yield setup());
+			
+			// Create local unsynced items
+			var item = createUnsavedDataObject('item');
+			item.setField('title', 'A');
+			item.synced = false;
+			var itemID1 = yield item.saveTx();
+			var itemKey1 = item.key;
+			
+			item = createUnsavedDataObject('item');
+			item.setField('title', 'B');
+			item.synced = false;
+			var itemID2 = yield item.saveTx();
+			var itemKey2 = item.key;
+			
+			var headers = {
+				"Last-Modified-Version": 6
+			};
+			setResponse({
+				method: "GET",
+				url: "users/1/settings?since=5",
+				status: 200,
+				headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/collections?format=versions&since=5",
+				status: 200,
+				headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/searches?format=versions&since=5",
+				status: 200,
+				headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/items/top?format=versions&since=5&includeTrashed=1",
+				status: 200,
+				headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/items?format=versions&since=5&includeTrashed=1",
+				status: 200,
+				headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/deleted?since=5",
+				status: 200,
+				headers,
+				json: {
+					settings: [],
+					collections: [],
+					searches: [],
+					items: [itemKey1, itemKey2]
+				}
+			});
+			
+			waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+				var doc = dialog.document;
+				var wizard = doc.documentElement;
+				wizard.getButton('cancel').click();
+			})
+			var downloadResult = yield engine._startDownload();
+			assert.equal(downloadResult, engine.DOWNLOAD_RESULT_CANCEL);
+			
+			// Conflicted items should still exists
+			assert.isTrue(Zotero.Items.exists(itemID1));
+			assert.isTrue(Zotero.Items.exists(itemID2));
+			
+			// Library version should not have advanced
+			assert.equal(library.libraryVersion, 5);
+		});
+	});
+	
+	
+	describe("#_startUpload()", function () {
+		it("shouldn't upload unsynced objects if present in sync queue", function* () {
+			({ engine, client, caller } = yield setup());
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var objectType = 'item';
+			var obj = yield createDataObject(objectType);
+			yield Zotero.Sync.Data.Local.addObjectsToSyncQueue(objectType, libraryID, [obj.key]);
+			var result = yield engine._startUpload();
+			assert.equal(result, engine.UPLOAD_RESULT_NOTHING_TO_UPLOAD);
+		});
+	});
 	
 	
 	describe("Conflict Resolution", function () {
@@ -1852,6 +1960,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.lengthOf(keys, 0);
 		})
 		
+		// Note: Conflicts with remote deletions are handled in _startDownload()
 		it("should handle local item deletion, keeping deletion", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			({ engine, client, caller } = yield setup());
