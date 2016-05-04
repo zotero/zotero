@@ -485,11 +485,17 @@ Zotero.Sync.Data.Local = {
 	/**
 	 * Process downloaded JSON and update local objects
 	 *
-	 * @return {Promise<Array<Object>>} - Promise for an array of objects with the following properties:
-	 *     {String} key
-	 *     {Boolean} processed
-	 *     {Object} [error]
-	 *     {Boolean} [retry]
+	 * @return {Promise<Object[]>} - Promise for an array of objects with the following properties:
+	 *         {String} key
+	 *         {Boolean} processed
+	 *         {Object} [error]
+	 *         {Boolean} [retry]
+	 *         {Boolean} [conflict=false]
+	 *         {Object} [left] - Local JSON data for conflict (or .deleted and .dateDeleted)
+	 *         {Object} [right] - Remote JSON data for conflict
+	 *         {Object[]} [changes] - An array of operations to apply locally to resolve conflicts,
+	 *             as returned by _reconcileChanges()
+	 *         {Object[]} [conflicts] - An array of conflicting fields that can't be resolved automatically
 	 */
 	processObjectsFromJSON: Zotero.Promise.coroutine(function* (objectType, libraryID, json, options = {}) {
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
@@ -508,7 +514,6 @@ Zotero.Sync.Data.Local = {
 			+ " for " + libraryName);
 		
 		var results = [];
-		var conflicts = [];
 		
 		if (!json.length) {
 			return results;
@@ -658,7 +663,10 @@ Zotero.Sync.Data.Local = {
 									Zotero.debug(jsonDataLocal);
 									Zotero.debug(jsonData);
 									Zotero.debug(result);
-									conflicts.push({
+									results.push({
+										key: objectKey,
+										processed: false,
+										conflict: true,
 										left: jsonDataLocal,
 										right: jsonData,
 										changes: result.changes,
@@ -699,7 +707,10 @@ Zotero.Sync.Data.Local = {
 								
 								switch (objectType) {
 								case 'item':
-									conflicts.push({
+									results.push({
+										key: objectKey,
+										processed: false,
+										conflict: true,
 										left: {
 											deleted: true,
 											dateDeleted: Zotero.Date.dateToSQL(dateDeleted, true)
@@ -780,147 +791,6 @@ Zotero.Sync.Data.Local = {
 		finally {
 			if (notifierQueues.length) {
 				yield Zotero.Notifier.commit(notifierQueues);
-			}
-		}
-		
-		
-		//
-		// Conflict resolution
-		//
-		if (conflicts.length) {
-			// Sort conflicts by local Date Modified/Deleted
-			conflicts.sort(function (a, b) {
-				var d1 = a.left.dateDeleted || a.left.dateModified;
-				var d2 = b.left.dateDeleted || b.left.dateModified;
-				if (d1 > d2) {
-					return 1
-				}
-				if (d1 < d2) {
-					return -1;
-				}
-				return 0;
-			})
-			
-			var mergeData = this.resolveConflicts(conflicts);
-			if (mergeData) {
-				Zotero.debug("Processing resolved conflicts");
-				
-				let batchSize = 50;
-				let notifierQueues = [];
-				try {
-					for (let i = 0; i < mergeData.length; i++) {
-						// Batch notifier updates
-						if (notifierQueues.length == batchSize) {
-							yield Zotero.Notifier.commit(notifierQueues);
-							notifierQueues = [];
-						}
-						let notifierQueue = new Zotero.Notifier.Queue;
-						
-						let json = mergeData[i];
-						
-						let saveOptions = {};
-						Object.assign(saveOptions, options);
-						// Tell _saveObjectFromJSON to save as unsynced
-						saveOptions.saveAsChanged = true;
-						saveOptions.notifierQueue = notifierQueue;
-						
-						// Errors have to be thrown in order to roll back the transaction, so catch
-						// those here and continue
-						try {
-							yield Zotero.DB.executeTransaction(function* () {
-								let obj = yield objectsClass.getByLibraryAndKeyAsync(
-									libraryID, json.key, { noCache: true }
-								);
-								// Update object with merge data
-								if (obj) {
-									// Delete local object
-									if (json.deleted) {
-										try {
-											yield obj.erase({
-												notifierQueue
-											});
-										}
-										catch (e) {
-											results.push({
-												key: json.key,
-												processed: false,
-												error: e,
-												retry: false
-											});
-											throw e;
-										}
-										results.push({
-											key: json.key,
-											processed: true
-										});
-										return;
-									}
-									
-									// Save merged changes below
-								}
-								// If no local object and merge wanted a delete, we're good
-								else if (json.deleted) {
-									results.push({
-										key: json.key,
-										processed: true
-									});
-									return;
-								}
-								// Recreate locally deleted object
-								else {
-									obj = new Zotero[ObjectType];
-									obj.libraryID = libraryID;
-									obj.key = json.key;
-									yield obj.loadPrimaryData();
-									
-									// Don't cache new items immediately,
-									// which skips reloading after save
-									saveOptions.skipCache = true;
-								}
-								
-								let saveResults = yield this._saveObjectFromJSON(
-									obj, json, saveOptions
-								);
-								results.push(saveResults);
-								if (!saveResults.processed) {
-									throw saveResults.error;
-								}
-
-							}.bind(this));
-							
-							if (notifierQueue.size) {
-								notifierQueues.push(notifierQueue);
-							}
-						}
-						catch (e) {
-							Zotero.logError(e);
-							
-							if (options.onError) {
-								options.onError(e);
-							}
-							
-							if (options.stopOnError) {
-								throw e;
-							}
-						}
-					}
-				}
-				finally {
-					if (notifierQueues.length) {
-						yield Zotero.Notifier.commit(notifierQueues);
-					}
-				}
-			}
-			else {
-				Zotero.debug("Conflict resolution was cancelled", 2);
-				for (let conflict of conflicts) {
-					results.push({
-						// Use key from either, in case one side is deleted
-						key: conflict.left.key || conflict.right.key,
-						processed: false,
-						retry: false
-					});
-				}
 			}
 		}
 		
@@ -1049,7 +919,153 @@ Zotero.Sync.Data.Local = {
 	},
 	
 	
-	resolveConflicts: function (conflicts) {
+	processConflicts: Zotero.Promise.coroutine(function* (objectType, libraryID, conflicts, options = {}) {
+		if (!conflicts.length) return [];
+		
+		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
+		var ObjectType = Zotero.Utilities.capitalize(objectType);
+		
+		// Sort conflicts by local Date Modified/Deleted
+		conflicts.sort(function (a, b) {
+			var d1 = a.left.dateDeleted || a.left.dateModified;
+			var d2 = b.left.dateDeleted || b.left.dateModified;
+			if (d1 > d2) {
+				return 1
+			}
+			if (d1 < d2) {
+				return -1;
+			}
+			return 0;
+		})
+		
+		var results = [];
+		
+		var mergeData = this.showConflictResolutionWindow(conflicts);
+		if (!mergeData) {
+			Zotero.debug("Conflict resolution was cancelled", 2);
+			for (let conflict of conflicts) {
+				results.push({
+					// Use key from either, in case one side is deleted
+					key: conflict.left.key || conflict.right.key,
+					processed: false,
+					retry: false
+				});
+			}
+			return results;
+		}
+		
+		Zotero.debug("Processing resolved conflicts");
+		
+		let batchSize = 50;
+		let notifierQueues = [];
+		try {
+			for (let i = 0; i < mergeData.length; i++) {
+				// Batch notifier updates
+				if (notifierQueues.length == batchSize) {
+					yield Zotero.Notifier.commit(notifierQueues);
+					notifierQueues = [];
+				}
+				let notifierQueue = new Zotero.Notifier.Queue;
+				
+				let json = mergeData[i];
+				
+				let saveOptions = {};
+				Object.assign(saveOptions, options);
+				// Tell _saveObjectFromJSON to save as unsynced
+				saveOptions.saveAsChanged = true;
+				saveOptions.notifierQueue = notifierQueue;
+				
+				// Errors have to be thrown in order to roll back the transaction, so catch
+				// those here and continue
+				try {
+					yield Zotero.DB.executeTransaction(function* () {
+						let obj = yield objectsClass.getByLibraryAndKeyAsync(
+							libraryID, json.key, { noCache: true }
+						);
+						// Update object with merge data
+						if (obj) {
+							// Delete local object
+							if (json.deleted) {
+								try {
+									yield obj.erase({
+										notifierQueue
+									});
+								}
+								catch (e) {
+									results.push({
+										key: json.key,
+										processed: false,
+										error: e,
+										retry: false
+									});
+									throw e;
+								}
+								results.push({
+									key: json.key,
+									processed: true
+								});
+								return;
+							}
+							
+							// Save merged changes below
+						}
+						// If no local object and merge wanted a delete, we're good
+						else if (json.deleted) {
+							results.push({
+								key: json.key,
+								processed: true
+							});
+							return;
+						}
+						// Recreate locally deleted object
+						else {
+							obj = new Zotero[ObjectType];
+							obj.libraryID = libraryID;
+							obj.key = json.key;
+							yield obj.loadPrimaryData();
+							
+							// Don't cache new items immediately,
+							// which skips reloading after save
+							saveOptions.skipCache = true;
+						}
+						
+						let saveResults = yield this._saveObjectFromJSON(
+							obj, json, saveOptions
+						);
+						results.push(saveResults);
+						if (!saveResults.processed) {
+							throw saveResults.error;
+						}
+					}.bind(this));
+					
+					if (notifierQueue.size) {
+						notifierQueues.push(notifierQueue);
+					}
+				}
+				catch (e) {
+					Zotero.logError(e);
+					
+					if (options.onError) {
+						options.onError(e);
+					}
+					
+					if (options.stopOnError) {
+						throw e;
+					}
+				}
+			}
+		}
+		finally {
+			if (notifierQueues.length) {
+				yield Zotero.Notifier.commit(notifierQueues);
+			}
+		}
+		
+		return results;
+	}),
+	
+	
+	showConflictResolutionWindow: function (conflicts) {
 		Zotero.debug("Showing conflict resolution window");
 		
 		var io = {

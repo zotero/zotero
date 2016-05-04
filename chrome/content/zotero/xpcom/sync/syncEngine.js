@@ -326,7 +326,7 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 						}
 						return 0;
 					});
-					var mergeData = Zotero.Sync.Data.Local.resolveConflicts(conflicts);
+					var mergeData = Zotero.Sync.Data.Local.showConflictResolutionWindow(conflicts);
 					if (mergeData) {
 						let concurrentObjects = 50;
 						yield Zotero.Utilities.Internal.forEachChunkAsync(
@@ -562,6 +562,8 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 			+ " in " + this.library.name
 		);
 		
+		var conflicts = [];
+		
 		// Process batches as soon as they're available
 		yield Zotero.Promise.map(
 			json,
@@ -592,6 +594,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 				)
 				.then(function (results) {
 					let processedKeys = [];
+					let conflictResults = [];
 					results.forEach(x => {
 						// If data was processed, remove JSON
 						if (x.processed) {
@@ -601,8 +604,12 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 						if (x.processed || !x.retry) {
 							processedKeys.push(x.key);
 						}
+						if (x.conflict) {
+							conflictResults.push(x);
+						}
 					});
 					keys = Zotero.Utilities.arrayDiff(keys, processedKeys);
+					conflicts.push(...conflictResults);
 				}.bind(this));
 			}.bind(this)
 		);
@@ -630,13 +637,23 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 					this.failedItems = [];
 				}
 			}
-			return;
+			break;
 		}
 		
 		lastLength = keys.length;
 		
 		var remainingObjectDesc = `${keys.length == 1 ? objectType : objectTypePlural}`;
 		Zotero.debug(`Retrying ${keys.length} remaining ${remainingObjectDesc}`);
+	}
+	
+	// Show conflict resolution window
+	if (conflicts.length) {
+		let results = yield Zotero.Sync.Data.Local.processConflicts(
+			objectType, this.libraryID, conflicts, this._getOptions()
+		);
+		// Keys can be unprocessed if conflict resolution is cancelled
+		let keys = results.filter(x => x.processed).map(x => x.key);
+		yield Zotero.Sync.Data.Local.removeObjectsFromSyncQueue(objectType, this.libraryID, keys);
 	}
 });
 
