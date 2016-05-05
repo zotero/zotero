@@ -636,7 +636,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	else if (type == 'item' && action == 'modify')
 	{
 		// Clear row caches
-		var items = yield Zotero.Items.getAsync(ids);
+		var items = Zotero.Items.get(ids);
 		for (let i=0; i<items.length; i++) {
 			let id = items[i].id;
 			delete this._itemImages[id];
@@ -744,7 +744,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		{
 			var allDeleted = true;
 			var isTrash = collectionTreeRow.isTrash();
-			var items = yield Zotero.Items.getAsync(ids);
+			var items = Zotero.Items.get(ids);
 			for each(var item in items) {
 				// If not viewing trash and all items were deleted, ignore modify
 				if (allDeleted && !isTrash && !item.deleted) {
@@ -835,7 +835,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			// Only bother checking for single parent item if 1-5 total items,
 			// since a translator is unlikely to save more than 4 child items
 			else if (ids.length <= 5) {
-				var items = yield Zotero.Items.getAsync(ids);
+				var items = Zotero.Items.get(ids);
 				if (items) {
 					var found = false;
 					for each(var item in items) {
@@ -908,7 +908,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 					// position is a top-level item, move selection one row
 					// up to select a sibling or parent
 					if (ids.length == 1 && previousFirstRow > 0) {
-						let previousItem = yield Zotero.Items.getAsync(ids[0]);
+						let previousItem = Zotero.Items.get(ids[0]);
 						if (previousItem && !previousItem.isTopLevelItem()) {
 							if (this._rows[previousFirstRow] && this.getLevel(previousFirstRow) == 0) {
 								previousFirstRow--;
