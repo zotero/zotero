@@ -535,14 +535,19 @@ Zotero.Sync.Data.Local = {
 			});
 		}
 		
-		var batchSize = 10;
+		var batchSize = options.getNotifierBatchSize ? options.getNotifierBatchSize() : json.length;
 		var notifierQueues = [];
+		
 		try {
 			for (let i = 0; i < json.length; i++) {
 				// Batch notifier updates
 				if (notifierQueues.length == batchSize) {
 					yield Zotero.Notifier.commit(notifierQueues);
 					notifierQueues = [];
+					// Get the current batch size, which might have increased
+					if (options.getNotifierBatchSize) {
+						batchSize = options.getNotifierBatchSize()
+					}
 				}
 				let notifierQueue = new Zotero.Notifier.Queue;
 				
@@ -786,6 +791,13 @@ Zotero.Sync.Data.Local = {
 						throw e;
 					}
 				}
+				finally {
+					if (options.onObjectProcessed) {
+						options.onObjectProcessed();
+					}
+				}
+				
+				yield Zotero.Promise.delay(10);
 			}
 		}
 		finally {
@@ -825,32 +837,10 @@ Zotero.Sync.Data.Local = {
 	},
 	
 	
-	_onObjectProcessed: Zotero.Promise.coroutine(function* (obj, jsonObject, isNewObject, storageDetailsChanged) {
-		var jsonData = jsonObject.data;
-		
-		// Delete older versions of the object in the cache
-		yield this.deleteCacheObjectVersions(
-			obj.objectType, obj.libraryID, jsonData.key, null, jsonData.version - 1
-		);
-		
-		// Delete from sync queue
-		yield this._removeObjectFromSyncQueue(obj.objectType, obj.libraryID, jsonData.key);
-		
-		// Mark updated attachments for download
-		if (obj.objectType == 'item' && obj.isImportedAttachment()) {
-			// If storage changes were made (attachment mtime or hash), mark
-			// library as requiring download
-			if (isNewObject || storageDetailsChanged) {
-				Zotero.Libraries.get(obj.libraryID).storageDownloadNeeded = true;
-			}
-			
-			yield this._checkAttachmentForDownload(
-				obj, jsonData.mtime, isNewObject
-			);
-		}
-	}),
-	
-	
+	/**
+	 * Check whether an attachment's file mod time matches the given mod time, and mark the file
+	 * for download if not (or if this is a new attachment)
+	 */
 	_checkAttachmentForDownload: Zotero.Promise.coroutine(function* (item, mtime, isNewObject) {
 		var markToDownload = false;
 		if (!isNewObject) {
@@ -882,7 +872,6 @@ Zotero.Sync.Data.Local = {
 		}
 		if (markToDownload) {
 			item.attachmentSyncState = "to_download";
-			yield item.save({ skipAll: true });
 		}
 	}),
 	
@@ -956,7 +945,7 @@ Zotero.Sync.Data.Local = {
 		
 		Zotero.debug("Processing resolved conflicts");
 		
-		let batchSize = 50;
+		let batchSize = mergeData.length;
 		let notifierQueues = [];
 		try {
 			for (let i = 0; i < mergeData.length; i++) {
@@ -1125,6 +1114,9 @@ Zotero.Sync.Data.Local = {
 			if (!options.skipData) {
 				obj.fromJSON(json.data);
 			}
+			if (obj.objectType == 'item' && obj.isImportedAttachment()) {
+				this._checkAttachmentForDownload(obj, json.data.mtime, options.isNewObject);
+			}
 			obj.version = json.data.version;
 			if (!options.saveAsChanged) {
 				obj.synced = true;
@@ -1143,12 +1135,22 @@ Zotero.Sync.Data.Local = {
 			yield this.saveCacheObject(obj.objectType, obj.libraryID, json.data);
 			results.processed = true;
 			
-			yield this._onObjectProcessed(
-				obj,
-				json,
-				options.isNewObject,
-				options.storageDetailsChanged
+			// Delete older versions of the object in the cache
+			yield this.deleteCacheObjectVersions(
+				obj.objectType, obj.libraryID, json.key, null, json.version - 1
 			);
+			
+			// Delete from sync queue
+			yield this._removeObjectFromSyncQueue(obj.objectType, obj.libraryID, json.key);
+			
+			// Mark updated attachments for download
+			if (obj.objectType == 'item' && obj.isImportedAttachment()) {
+				// If storage changes were made (attachment mtime or hash), mark
+				// library as requiring download
+				if (options.isNewObject || options.storageDetailsChanged) {
+					Zotero.Libraries.get(obj.libraryID).storageDownloadNeeded = true;
+				}
+			}
 		}
 		catch (e) {
 			// For now, allow sync to proceed after all errors

@@ -591,8 +591,9 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 		);
 		
 		var conflicts = [];
+		var num = 0;
 		
-		// Process batches as soon as they're available
+		// Process batches when they're available, one at a time
 		yield Zotero.Promise.map(
 			json,
 			function (batch) {
@@ -618,9 +619,31 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 					objectType,
 					this.libraryID,
 					batch,
-					this._getOptions()
+					this._getOptions({
+						onObjectProcessed: () => {
+							num++;
+						},
+						// Increase the notifier batch size as we go
+						getNotifierBatchSize: () => {
+							var size;
+							if (num < 10) {
+								size = 1;
+							}
+							else if (num < 50) {
+								size = 5;
+							}
+							else if (num < 150) {
+								size = 25;
+							}
+							else {
+								size = 50;
+							}
+							return Math.min(size, batch.length);
+						}
+					})
 				)
 				.then(function (results) {
+					num += results.length;
 					let processedKeys = [];
 					let conflictResults = [];
 					results.forEach(x => {
@@ -639,7 +662,10 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 					keys = Zotero.Utilities.arrayDiff(keys, processedKeys);
 					conflicts.push(...conflictResults);
 				}.bind(this));
-			}.bind(this)
+			}.bind(this),
+			{
+				concurrency: 1
+			}
 		);
 		
 		if (!keys.length || keys.length == lastLength) {
@@ -1433,9 +1459,12 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 });
 
 
-Zotero.Sync.Data.Engine.prototype._getOptions = function () {
+Zotero.Sync.Data.Engine.prototype._getOptions = function (additionalOpts = {}) {
 	var options = {};
 	this.optionNames.forEach(x => options[x] = this[x]);
+	for (let opt in additionalOpts) {
+		options[opt] = additionalOpts[opt];
+	}
 	return options;
 }
 
