@@ -796,12 +796,12 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		// Otherwise re-run the quick search, which refreshes the item list
 		else
 		{
-			// For item adds, clear the quicksearch, unless all the new items
-			// are child items
+			// For item adds, clear the quicksearch, unless all the new items have skipSelect or are
+			// child items
 			if (activeWindow && type == 'item') {
 				let clear = false;
 				for (let i=0; i<items.length; i++) {
-					if (items[i].isTopLevelItem()) {
+					if (!extraData[items[i].id].skipSelect && items[i].isTopLevelItem()) {
 						clear = true;
 						break;
 					}

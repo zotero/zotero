@@ -9,8 +9,8 @@ describe("Zotero.ItemTreeView", function() {
 		zp = win.ZoteroPane;
 		cv = zp.collectionsView;
 		
-		var item = new Zotero.Item('book');
-		existingItemID = yield item.saveTx();
+		var item = yield createDataObject('item', { setTitle: true });
+		existingItemID = item.id;
 	});
 	beforeEach(function* () {
 		yield selectLibrary(win);
@@ -135,6 +135,30 @@ describe("Zotero.ItemTreeView", function() {
 			selected = itemsView.getSelectedItems(true);
 			assert.lengthOf(selected, 1);
 			assert.equal(selected[0], existingItemID);
+		});
+		
+		it("shouldn't clear quicksearch if skipSelect is passed", function* () {
+			var searchString = Zotero.Items.get(existingItemID).getField('title');
+			
+			yield createDataObject('item');
+			
+			var quicksearch = win.document.getElementById('zotero-tb-search');
+			quicksearch.value = searchString;
+			quicksearch.doCommand();
+			yield itemsView._refreshPromise;
+			
+			assert.equal(itemsView.rowCount, 1);
+			
+			// Create item with skipSelect flag
+			var item = new Zotero.Item('book');
+			var ran = Zotero.Utilities.randomString();
+			item.setField('title', ran);
+			var id = yield item.saveTx({
+				skipSelect: true
+			});
+			
+			assert.equal(itemsView.rowCount, 1);
+			assert.equal(quicksearch.value, searchString);
 		});
 		
 		it("shouldn't change selection outside of trash if new trashed item is created with skipSelect", function* () {
