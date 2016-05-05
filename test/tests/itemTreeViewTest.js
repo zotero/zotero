@@ -159,6 +159,11 @@ describe("Zotero.ItemTreeView", function() {
 			
 			assert.equal(itemsView.rowCount, 1);
 			assert.equal(quicksearch.value, searchString);
+			
+			// Clear search
+			quicksearch.value = "";
+			quicksearch.doCommand();
+			yield itemsView._refreshPromise;
 		});
 		
 		it("shouldn't change selection outside of trash if new trashed item is created with skipSelect", function* () {

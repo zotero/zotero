@@ -1115,7 +1115,7 @@ Zotero.Sync.Data.Local = {
 				obj.fromJSON(json.data);
 			}
 			if (obj.objectType == 'item' && obj.isImportedAttachment()) {
-				this._checkAttachmentForDownload(obj, json.data.mtime, options.isNewObject);
+				yield this._checkAttachmentForDownload(obj, json.data.mtime, options.isNewObject);
 			}
 			obj.version = json.data.version;
 			if (!options.saveAsChanged) {
