@@ -118,7 +118,16 @@ Zotero.DataObjects.prototype.get = function (ids) {
 		let id = ids[i];
 		// Check if already loaded
 		if (!this._objectCache[id]) {
-			throw new Zotero.Exception.UnloadedDataException(this._ZDO_Object + " " + id + " not yet loaded");
+			// If unloaded id is registered, throw an error
+			if (this._objectKeys[id]) {
+				throw new Zotero.Exception.UnloadedDataException(
+					this._ZDO_Object + " " + id + " not yet loaded"
+				);
+			}
+			// Otherwise ignore (which means returning false for a single id)
+			else {
+				continue;
+			}
 		}
 		toReturn.push(this._objectCache[id]);
 	}

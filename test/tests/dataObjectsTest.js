@@ -3,6 +3,12 @@
 describe("Zotero.DataObjects", function () {
 	var types = ['collection', 'item', 'search'];
 	
+	describe("#get()", function () {
+		it("should return false for nonexistent objects", function* () {
+			assert.isFalse(Zotero.Items.get(3464363));
+		});
+	});
+	
 	describe("#getLibraryAndKeyFromID()", function () {
 		it("should return a libraryID and key within a transaction", function* () {
 			for (let type of types) {
