@@ -2205,7 +2205,7 @@
 					tabindex = parseInt(tabindex);
 					
 					// Get all fields with ztabindex attributes
-					var tabbableFields = box.querySelectorAll('label[ztabindex]');
+					var tabbableFields = box.querySelectorAll('*[ztabindex]');
 					
 					if (!tabbableFields.length) {
 						Zotero.debug("No tabbable fields found");
@@ -2223,7 +2223,7 @@
 						}
 					}
 					else {
-					Zotero.debug('Looking for next tabindex after ' + tabindex, 4);
+						Zotero.debug('Looking for next tabindex after ' + tabindex, 4);
 						for (var pos = 0; pos < tabbableFields.length; pos++) {
 							if (parseInt(tabbableFields[pos].getAttribute('ztabindex')) > tabindex) {
 								next = tabbableFields[pos];
