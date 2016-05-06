@@ -670,6 +670,51 @@ describe("Zotero.Sync.Runner", function () {
 			assert.isAbove(lastSyncTime, new Date().getTime() - 1000);
 			assert.isBelow(lastSyncTime, new Date().getTime());
 		})
+		
+		
+		it("should handle user-initiated cancellation", function* () {
+			setResponse('keyInfo.fullAccess');
+			setResponse('userGroups.groupVersions');
+			setResponse('groups.ownerGroup');
+			setResponse('groups.memberGroup');
+			
+			var stub = sinon.stub(Zotero.Sync.Data.Engine.prototype, "start");
+			
+			stub.onCall(0).returns(Zotero.Promise.resolve());
+			var e = new Zotero.Sync.UserCancelledException();
+			e.handledRejection = true;
+			stub.onCall(1).returns(Zotero.Promise.reject(e));
+			// Shouldn't be reached
+			stub.onCall(2).throws();
+			
+			yield runner.sync({
+				onError: e => { throw e },
+			});
+			
+			stub.restore();
+		});
+		
+		
+		it("should handle user-initiated cancellation for current library", function* () {
+			setResponse('keyInfo.fullAccess');
+			setResponse('userGroups.groupVersions');
+			setResponse('groups.ownerGroup');
+			setResponse('groups.memberGroup');
+			
+			var stub = sinon.stub(Zotero.Sync.Data.Engine.prototype, "start");
+			
+			stub.returns(Zotero.Promise.resolve());
+			var e = new Zotero.Sync.UserCancelledException(true);
+			e.handledRejection = true;
+			stub.onCall(1).returns(Zotero.Promise.reject(e));
+			
+			yield runner.sync({
+				onError: e => { throw e },
+			});
+			
+			assert.equal(stub.callCount, 4);
+			stub.restore();
+		});
 	})
 	
 	

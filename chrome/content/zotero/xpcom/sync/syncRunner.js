@@ -213,7 +213,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 		}
 		catch (e) {
-			if (options.onError) {
+			if (e instanceof Zotero.Sync.UserCancelledException) {
+				Zotero.debug("Sync was cancelled");
+			}
+			else if (options.onError) {
 				options.onError(e);
 			}
 			else {
@@ -509,6 +512,15 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				successfulLibraries.push(libraryID);
 			}
 			catch (e) {
+				if (e instanceof Zotero.Sync.UserCancelledException) {
+					if (e.advanceToNextLibrary) {
+						Zotero.debug("Sync cancelled for library " + libraryID + " -- "
+							+ "advancing to next library");
+						continue;
+					}
+					throw e;
+				}
+				
 				Zotero.debug("Sync failed for library " + libraryID);
 				Zotero.logError(e);
 				this.checkError(e);

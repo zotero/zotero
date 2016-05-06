@@ -1631,8 +1631,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 				var wizard = doc.documentElement;
 				wizard.getButton('cancel').click();
 			})
-			var downloadResult = yield engine._startDownload();
-			assert.equal(downloadResult, engine.DOWNLOAD_RESULT_CANCEL);
+			var e = yield getPromiseError(engine._startDownload());
+			assert.isTrue(e instanceof Zotero.Sync.UserCancelledException);
 			
 			// Non-conflicted item should be saved
 			assert.ok(Zotero.Items.getIDFromLibraryAndKey(library.id, "AAAAAAAA"));
@@ -1725,8 +1725,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 				var wizard = doc.documentElement;
 				wizard.getButton('cancel').click();
 			})
-			var downloadResult = yield engine._startDownload();
-			assert.equal(downloadResult, engine.DOWNLOAD_RESULT_CANCEL);
+			var e = yield getPromiseError(engine._startDownload());
+			assert.isTrue(e instanceof Zotero.Sync.UserCancelledException);
 			
 			// Conflicted items should still exists
 			assert.isTrue(Zotero.Items.exists(itemID1));
