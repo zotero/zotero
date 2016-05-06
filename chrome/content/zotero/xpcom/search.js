@@ -1152,7 +1152,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							}
 						}
 						else {
-							col = yield objectTypeClass.getByLibraryAndKeyAsync(
+							obj = yield objectTypeClass.getByLibraryAndKeyAsync(
 								objLibraryID, objKey
 							);
 						}
@@ -1175,12 +1175,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							
 							// Search descendent collections if recursive search
 							if (recursive){
-								var descendents = col.getDescendents(false, 'collection');
-								if (descendents){
-									for (var k in descendents){
-										q.push('?');
-										p.push({int:descendents[k]['id']});
-									}
+								var descendents = obj.getDescendents(false, 'collection');
+								for (let d of descendents) {
+									q.push('?');
+									p.push(d.id);
 								}
 							}
 							
