@@ -225,14 +225,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			
 			Zotero.debug("Done syncing");
 		}
-		
-		/*if (results.changesMade) {
-			Zotero.debug("Changes made during file sync "
-				+ "-- performing additional data sync");
-			this.sync(options);
-		}*/
-		
-		return;
 	});
 	
 	
