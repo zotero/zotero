@@ -29,7 +29,6 @@ if (!Zotero.Sync.Data) {
 
 // TODO: move?
 Zotero.Sync.Data.conflictDelayIntervals = [10000, 20000, 40000, 60000, 120000, 240000, 300000];
-Zotero.Sync.Data.failureDelayIntervals = [2500, 5000, 10000, 20000, 40000, 60000, 120000, 240000, 300000];
 
 /**
  * An Engine manages sync processes for a given library
@@ -827,55 +826,24 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 
 
 Zotero.Sync.Data.Engine.prototype._uploadSettings = Zotero.Promise.coroutine(function* (settings, libraryVersion) {
-	while (true) {
-		try {
-			let json = {};
-			for (let key in settings) {
-				json[key] = {
-					value: settings[key]
-				};
-			}
-			libraryVersion = yield this.apiClient.uploadSettings(
-				this.library.libraryType,
-				this.libraryTypeID,
-				libraryVersion,
-				json
-			);
-			yield Zotero.SyncedSettings.markAsSynced(
-				this.libraryID,
-				Object.keys(settings),
-				libraryVersion
-			);
-			break;
-		}
-		catch (e) {
-			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-				if (e.status == 412) {
-					throw e;
-				}
-				
-				// On 5xx, delay and retry
-				if (e.status >= 500 && e.status <= 600) {
-					if (!failureDelayGenerator) {
-						// Keep trying for up to an hour
-						failureDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
-							Zotero.Sync.Data.failureDelayIntervals, 60 * 60 * 1000
-						);
-					}
-					let keepGoing = yield failureDelayGenerator.next();
-					if (!keepGoing) {
-						Zotero.logError("Failed too many times");
-						throw e;
-					}
-					continue;
-				}
-			}
-			throw e;
-		}
+	let json = {};
+	for (let key in settings) {
+		json[key] = {
+			value: settings[key]
+		};
 	}
-	
+	libraryVersion = yield this.apiClient.uploadSettings(
+		this.library.libraryType,
+		this.libraryTypeID,
+		libraryVersion,
+		json
+	);
+	yield Zotero.SyncedSettings.markAsSynced(
+		this.libraryID,
+		Object.keys(settings),
+		libraryVersion
+	);
 	Zotero.debug("Done uploading settings in " + this.library.name);
-	
 	return libraryVersion;
 });
 
@@ -893,8 +861,6 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 			failed: false
 		});
 	}
-	
-	let failureDelayGenerator = null;
 	
 	while (queue.length) {
 		// Get a slice of the queue and generate JSON for objects if necessary
@@ -1049,60 +1015,25 @@ Zotero.Sync.Data.Engine.prototype._uploadDeletions = Zotero.Promise.coroutine(fu
 	let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 	let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 	
-	let failureDelayGenerator = null;
-	
 	while (keys.length) {
-		try {
-			let batch = keys.slice(0, this.uploadDeletionBatchSize);
-			libraryVersion = yield this.apiClient.uploadDeletions(
-				this.library.libraryType,
-				this.libraryTypeID,
-				libraryVersion,
-				objectType,
-				batch
-			);
-			keys.splice(0, batch.length);
-			
-			// Update library version
-			this.library.libraryVersion = libraryVersion;
-			yield this.library.saveTx();
-			
-			// Remove successful deletions from delete log
-			yield Zotero.Sync.Data.Local.removeObjectsFromDeleteLog(
-				objectType, this.libraryID, batch
-			);
-		}
-		catch (e) {
-			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-				if (e.status == 412) {
-					throw e;
-				}
-				
-				// On 5xx, delay and retry
-				if (e.status >= 500 && e.status <= 600) {
-					if (this.onError) {
-						this.onError(e);
-					}
-					if (this.stopOnError) {
-						throw new Error(e);
-					}
-					
-					if (!failureDelayGenerator) {
-						// Keep trying for up to an hour
-						failureDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
-							Zotero.Sync.Data.failureDelayIntervals, 60 * 60 * 1000
-						);
-					}
-					let keepGoing = yield failureDelayGenerator.next();
-					if (!keepGoing) {
-						Zotero.logError("Failed too many times");
-						throw e;
-					}
-					continue;
-				}
-			}
-			throw e;
-		}
+		let batch = keys.slice(0, this.uploadDeletionBatchSize);
+		libraryVersion = yield this.apiClient.uploadDeletions(
+			this.library.libraryType,
+			this.libraryTypeID,
+			libraryVersion,
+			objectType,
+			batch
+		);
+		keys.splice(0, batch.length);
+		
+		// Update library version
+		this.library.libraryVersion = libraryVersion;
+		yield this.library.saveTx();
+		
+		// Remove successful deletions from delete log
+		yield Zotero.Sync.Data.Local.removeObjectsFromDeleteLog(
+			objectType, this.libraryID, batch
+		);
 	}
 	Zotero.debug(`Done uploading ${objectType} deletions in ${this.library.name}`);
 	
