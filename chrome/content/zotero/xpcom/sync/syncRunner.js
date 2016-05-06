@@ -48,13 +48,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	this.caller = new ConcurrentCaller(4);
 	this.caller.setLogger(msg => Zotero.debug(msg));
 	this.caller.stopOnError = stopOnError;
-	this.caller.onError = function (e) {
-		this.addError(e);
-		if (e.fatal) {
-			this.caller.stop();
-			throw e;
-		}
-	}.bind(this);
 	
 	var _enabled = false;
 	var _autoSyncTimer;
@@ -95,16 +88,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	this.sync = Zotero.Promise.coroutine(function* (options = {}) {
 		// Clear message list
 		_errors = [];
-		
-		if (Zotero.HTTP.browserIsOffline()){
-			this.clearSyncTimeout(); // DEBUG: necessary?
-			var msg = Zotero.getString('general.browserIsOffline', Zotero.appName);
-			var e = new Zotero.Error(msg, 0, { dialogButtonText: null })
-			Components.utils.reportError(e);
-			Zotero.debug(e, 1);
-			this.updateIcons(e);
-			return false;
-		}
 		
 		// Shouldn't be possible
 		if (_syncInProgress) {
@@ -213,6 +196,13 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 		}
 		catch (e) {
+			if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+				let msg = Zotero.getString('general.browserIsOffline', Zotero.appName);
+				e = new Zotero.Error(msg, 0, { dialogButtonText: null })
+				Zotero.logError(e);
+				_errors = [];
+			}
+			
 			if (e instanceof Zotero.Sync.UserCancelledException) {
 				Zotero.debug("Sync was cancelled");
 			}
