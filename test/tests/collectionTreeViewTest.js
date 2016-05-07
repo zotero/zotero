@@ -70,6 +70,52 @@ describe("Zotero.CollectionTreeView", function() {
 		})
 	})
 	
+	describe("#expandLibrary()", function () {
+		var libraryRow, col1, col2, col3;
+		
+		before(function* () {
+			yield cv.selectLibrary(userLibraryID);
+			libraryRow = cv.selection.currentIndex;
+		});
+		
+		beforeEach(function* () {
+			// My Library
+			//   - A
+			//     - B
+			//       - C
+			col1 = yield createDataObject('collection');
+			col2 = yield createDataObject('collection', { parentID: col1.id });
+			col3 = yield createDataObject('collection', { parentID: col2.id });
+		});
+		
+		it("should open a library and respect stored container state", function* () {
+			// Collapse B
+			yield cv.toggleOpenState(cv.getRowIndexByID(col2.collectionTreeViewID));
+			yield cv._rememberOpenStates();
+			
+			// Close and reopen library
+			yield cv.toggleOpenState(libraryRow);
+			yield cv.expandLibrary(userLibraryID);
+			
+			assert.ok(cv.getRowIndexByID(col1.collectionTreeViewID))
+			assert.ok(cv.getRowIndexByID(col2.collectionTreeViewID))
+			assert.isFalse(cv.getRowIndexByID(col3.collectionTreeViewID))
+		});
+		
+		it("should open a library and all subcollections in recursive mode", function* () {
+			yield cv.toggleOpenState(cv.getRowIndexByID(col2.collectionTreeViewID));
+			yield cv._rememberOpenStates();
+			
+			// Close and reopen library
+			yield cv.toggleOpenState(libraryRow);
+			yield cv.expandLibrary(userLibraryID, true);
+			
+			assert.ok(cv.getRowIndexByID(col1.collectionTreeViewID))
+			assert.ok(cv.getRowIndexByID(col2.collectionTreeViewID))
+			assert.ok(cv.getRowIndexByID(col3.collectionTreeViewID))
+		});
+	});
+	
 	describe("#expandToCollection()", function () {
 		it("should expand a collection to a subcollection", function* () {
 			var collection1 = yield createDataObject('collection');
