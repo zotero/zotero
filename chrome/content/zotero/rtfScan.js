@@ -341,7 +341,9 @@ var Zotero_RTFScan = new function() {
 				var m = initialRe.exec(firstName);
 				if(m) {
 					var initials = firstName.replace(/[^A-Z]/g, "");
-					var itemInitials = [name[0].toUpperCase() for each (name in itemCreator.ref.firstName.split(/ +/g))].join("");
+					var itemInitials = itemCreator.firstName.split(/ +/g)
+						.map(name => name[0].toUpperCase())
+						.join("");
 					if(initials != itemInitials) return false;
 				} else {
 					// not all initials; verify that the first name matches
