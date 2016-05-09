@@ -486,7 +486,8 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	var sort = false;
 	
 	var savedSelection = this.getSelectedItems(true);
-	var previousFirstRow = this._rowMap[ids[0]];
+	var previousFirstSelectedRow = this._rowMap[ids[0]];
+	var scrollPosition = this._saveScrollPosition();
 	
 	// Redraw the tree (for tag color and progress changes)
 	if (action == 'redraw') {
@@ -896,9 +897,9 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			if (action == 'remove' || action == 'trash' || action == 'delete') {
 				// In duplicates view, select the next set on delete
 				if (collectionTreeRow.isDuplicates()) {
-					if (this._rows[previousFirstRow]) {
+					if (this._rows[previousFirstSelectedRow]) {
 						// Mirror ZoteroPane.onTreeMouseDown behavior
-						var itemID = this._rows[previousFirstRow].ref.id;
+						var itemID = this._rows[previousFirstSelectedRow].ref.id;
 						var setItemIDs = collectionTreeRow.ref.getSetItemsByItemID(itemID);
 						this.selectItems(setItemIDs);
 					}
@@ -907,17 +908,18 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 					// If this was a child item and the next item at this
 					// position is a top-level item, move selection one row
 					// up to select a sibling or parent
-					if (ids.length == 1 && previousFirstRow > 0) {
+					if (ids.length == 1 && previousFirstSelectedRow > 0) {
 						let previousItem = Zotero.Items.get(ids[0]);
 						if (previousItem && !previousItem.isTopLevelItem()) {
-							if (this._rows[previousFirstRow] && this.getLevel(previousFirstRow) == 0) {
-								previousFirstRow--;
+							if (this._rows[previousFirstSelectedRow]
+									&& this.getLevel(previousFirstSelectedRow) == 0) {
+								previousFirstSelectedRow--;
 							}
 						}
 					}
 					
-					if (previousFirstRow !== undefined && this._rows[previousFirstRow]) {
-						this.selection.select(previousFirstRow);
+					if (previousFirstSelectedRow !== undefined && this._rows[previousFirstSelectedRow]) {
+						this.selection.select(previousFirstSelectedRow);
 					}
 					// If no item at previous position, select last item in list
 					else if (this._rows[this._rows.length - 1]) {
@@ -930,6 +932,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			}
 		}
 		
+		this._rememberScrollPosition(scrollPosition);
 		this._treebox.invalidate();
 	}
 	// For special case in which an item needs to be selected without changes
@@ -2049,22 +2052,6 @@ Zotero.ItemTreeView.prototype.expandMatchParents = function () {
 	if (unsuppress) {
 		this._treebox.endUpdateBatch();
 		this.selection.selectEventsSuppressed = false;
-	}
-}
-
-
-Zotero.ItemTreeView.prototype.saveFirstRow = function() {
-	var row = this._treebox.getFirstVisibleRow();
-	if (row) {
-		return this.getRow(row).ref.id;
-	}
-	return false;
-}
-
-
-Zotero.ItemTreeView.prototype.rememberFirstRow = function(firstRow) {
-	if (firstRow && this._rowMap[firstRow]) {
-		this._treebox.scrollToRow(this._rowMap[firstRow]);
 	}
 }
 

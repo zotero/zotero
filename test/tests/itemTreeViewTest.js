@@ -260,6 +260,163 @@ describe("Zotero.ItemTreeView", function() {
 			yield Zotero.Items.erase(items.map(item => item.id));
 		})
 		
+		it("should keep first visible item in view when other items are added or removed with skipSelect and nothing in view is selected", function* () {
+			var collection = yield createDataObject('collection');
+			yield waitForItemsLoad(win);
+			itemsView = zp.itemsView;
+			
+			var treebox = itemsView._treebox;
+			var numVisibleRows = treebox.getPageLength();
+			
+			// Get a numeric string left-padded with zeroes
+			function getTitle(i, max) {
+				return new String(new Array(max + 1).join(0) + i).slice(-1 * max);
+			}
+			
+			var num = numVisibleRows + 10;
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let i = 0; i < num; i++) {
+					let title = getTitle(i, num);
+					let item = createUnsavedDataObject('item', { title });
+					item.addToCollection(collection.id);
+					yield item.save();
+				}
+			}.bind(this));
+			
+			// Scroll halfway
+			treebox.scrollToRow(Math.round(num / 2) - Math.round(numVisibleRows / 2));
+			
+			var firstVisibleItemID = itemsView.getRow(treebox.getFirstVisibleRow()).ref.id;
+			
+			// Add one item at the beginning
+			var item = createUnsavedDataObject(
+				'item', { title: getTitle(0, num), collections: [collection.id] }
+			);
+			yield item.saveTx({
+				skipSelect: true
+			});
+			// Then add a few more in a transaction
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let i = 0; i < 3; i++) {
+					var item = createUnsavedDataObject(
+						'item', { title: getTitle(0, num), collections: [collection.id] }
+					);
+					yield item.save({
+						skipSelect: true
+					});
+				}
+			}.bind(this));
+			
+			// Make sure the same item is still in the first visible row
+			assert.equal(itemsView.getRow(treebox.getFirstVisibleRow()).ref.id, firstVisibleItemID);
+		});
+		
+		it("should keep first visible selected item in position when other items are added or removed with skipSelect", function* () {
+			var collection = yield createDataObject('collection');
+			yield waitForItemsLoad(win);
+			itemsView = zp.itemsView;
+			
+			var treebox = itemsView._treebox;
+			var numVisibleRows = treebox.getPageLength();
+			
+			// Get a numeric string left-padded with zeroes
+			function getTitle(i, max) {
+				return new String(new Array(max + 1).join(0) + i).slice(-1 * max);
+			}
+			
+			var num = numVisibleRows + 10;
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let i = 0; i < num; i++) {
+					let title = getTitle(i, num);
+					let item = createUnsavedDataObject('item', { title });
+					item.addToCollection(collection.id);
+					yield item.save();
+				}
+			}.bind(this));
+			
+			// Scroll halfway
+			treebox.scrollToRow(Math.round(num / 2) - Math.round(numVisibleRows / 2));
+			
+			// Select an item
+			itemsView.selection.select(Math.round(num / 2));
+			var selectedItem = itemsView.getSelectedItems()[0];
+			var offset = itemsView.getRowIndexByID(selectedItem.treeViewID) - treebox.getFirstVisibleRow();
+			
+			// Add one item at the beginning
+			var item = createUnsavedDataObject(
+				'item', { title: getTitle(0, num), collections: [collection.id] }
+			);
+			yield item.saveTx({
+				skipSelect: true
+			});
+			// Then add a few more in a transaction
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let i = 0; i < 3; i++) {
+					var item = createUnsavedDataObject(
+						'item', { title: getTitle(0, num), collections: [collection.id] }
+					);
+					yield item.save({
+						skipSelect: true
+					});
+				}
+			}.bind(this));
+			
+			// Make sure the selected item is still at the same position
+			assert.equal(itemsView.getSelectedItems()[0], selectedItem);
+			var newOffset = itemsView.getRowIndexByID(selectedItem.treeViewID) - treebox.getFirstVisibleRow();
+			assert.equal(newOffset, offset);
+		});
+		
+		it("shouldn't scroll items list if at top when other items are added or removed with skipSelect", function* () {
+			var collection = yield createDataObject('collection');
+			yield waitForItemsLoad(win);
+			itemsView = zp.itemsView;
+			
+			var treebox = itemsView._treebox;
+			var numVisibleRows = treebox.getPageLength();
+			
+			// Get a numeric string left-padded with zeroes
+			function getTitle(i, max) {
+				return new String(new Array(max + 1).join(0) + i).slice(-1 * max);
+			}
+			
+			var num = numVisibleRows + 10;
+			yield Zotero.DB.executeTransaction(function* () {
+				// Start at "*1" so we can add items before
+				for (let i = 1; i < num; i++) {
+					let title = getTitle(i, num);
+					let item = createUnsavedDataObject('item', { title });
+					item.addToCollection(collection.id);
+					yield item.save();
+				}
+			}.bind(this));
+			
+			// Scroll to top
+			treebox.scrollToRow(0);
+			
+			// Add one item at the beginning
+			var item = createUnsavedDataObject(
+				'item', { title: getTitle(0, num), collections: [collection.id] }
+			);
+			yield item.saveTx({
+				skipSelect: true
+			});
+			// Then add a few more in a transaction
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let i = 0; i < 3; i++) {
+					var item = createUnsavedDataObject(
+						'item', { title: getTitle(0, num), collections: [collection.id] }
+					);
+					yield item.save({
+						skipSelect: true
+					});
+				}
+			}.bind(this));
+			
+			// Make sure the first row is still at the top
+			assert.equal(treebox.getFirstVisibleRow(), 0);
+		});
+		
 		it("should update search results when items are added", function* () {
 			var search = createUnsavedDataObject('search');
 			var title = Zotero.Utilities.randomString();
