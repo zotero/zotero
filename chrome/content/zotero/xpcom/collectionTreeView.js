@@ -364,6 +364,12 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 	var currentTreeRow = this.getRow(this.selection.currentIndex);
 	this.selection.selectEventsSuppressed = true;
 	
+	// If there's not at least one new collection to be selected, get a scroll position to restore later
+	var scrollPosition = false;
+	if (action != 'add' || ids.every(id => extraData[id] && extraData[id].skipSelect)) {
+		scrollPosition = this._saveScrollPosition();
+	}
+	
 	if (action == 'delete') {
 		var selectedIndex = this.selection.count ? this.selection.currentIndex : 0;
 		
@@ -512,6 +518,8 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 			}
 		}
 	}
+	
+	this._rememberScrollPosition(scrollPosition);
 	
 	var deferred = Zotero.Promise.defer();
 	this.addEventListener('select', () => deferred.resolve());
