@@ -260,7 +260,7 @@ describe("Zotero.ItemTreeView", function() {
 			yield Zotero.Items.erase(items.map(item => item.id));
 		})
 		
-		it("should keep first visible item in view when other items are added or removed with skipSelect and nothing in view is selected", function* () {
+		it("should keep first visible item in view when other items are added with skipSelect and nothing in view is selected", function* () {
 			var collection = yield createDataObject('collection');
 			yield waitForItemsLoad(win);
 			itemsView = zp.itemsView;
@@ -311,7 +311,7 @@ describe("Zotero.ItemTreeView", function() {
 			assert.equal(itemsView.getRow(treebox.getFirstVisibleRow()).ref.id, firstVisibleItemID);
 		});
 		
-		it("should keep first visible selected item in position when other items are added or removed with skipSelect", function* () {
+		it("should keep first visible selected item in position when other items are added with skipSelect", function* () {
 			var collection = yield createDataObject('collection');
 			yield waitForItemsLoad(win);
 			itemsView = zp.itemsView;
@@ -367,7 +367,7 @@ describe("Zotero.ItemTreeView", function() {
 			assert.equal(newOffset, offset);
 		});
 		
-		it("shouldn't scroll items list if at top when other items are added or removed with skipSelect", function* () {
+		it("shouldn't scroll items list if at top when other items are added with skipSelect", function* () {
 			var collection = yield createDataObject('collection');
 			yield waitForItemsLoad(win);
 			itemsView = zp.itemsView;

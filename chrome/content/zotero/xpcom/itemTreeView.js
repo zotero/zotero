@@ -487,7 +487,12 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	
 	var savedSelection = this.getSelectedItems(true);
 	var previousFirstSelectedRow = this._rowMap[ids[0]];
-	var scrollPosition = this._saveScrollPosition();
+	
+	// If there's not at least one new item to be selected, get a scroll position to restore later
+	var scrollPosition = false;
+	if (action != 'add' || ids.every(id => extraData[id] && extraData[id].skipSelect)) {
+		scrollPosition = this._saveScrollPosition();
+	}
 	
 	// Redraw the tree (for tag color and progress changes)
 	if (action == 'redraw') {
