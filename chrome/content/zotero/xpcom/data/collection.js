@@ -83,13 +83,13 @@ Zotero.defineProperty(Zotero.Collection.prototype, 'parent', {
 	}
 });
 
-Zotero.defineProperty(Zotero.Collection.prototype, 'collectionTreeViewID', {
+Zotero.defineProperty(Zotero.Collection.prototype, 'treeViewID', {
 	get: function () {
 		return "C" + this.id
 	}
 });
 
-Zotero.defineProperty(Zotero.Collection.prototype, 'collectionTreeViewImage', {
+Zotero.defineProperty(Zotero.Collection.prototype, 'treeViewImage', {
 	get: function () {
 		return "chrome://zotero/skin/treesource-collection" + Zotero.hiDPISuffix + ".png";
 	}

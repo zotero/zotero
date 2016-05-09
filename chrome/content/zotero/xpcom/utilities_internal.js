@@ -961,13 +961,13 @@ Zotero.Utilities.Internal = {
 			return menu;
 		}
 		
-		var imageSrc = libraryOrCollection.collectionTreeViewImage;
+		var imageSrc = libraryOrCollection.treeViewImage;
 		
 		// Create menuitem for library or collection itself, to be placed either directly in the
 		// containing menu or as the top item in a submenu
 		var menuitem = _createMenuitem(
 			libraryOrCollection.name, 
-			libraryOrCollection.collectionTreeViewID,
+			libraryOrCollection.treeViewID,
 			imageSrc,
 			function (event) {
 				clickAction(event, libraryOrCollection);
@@ -990,7 +990,7 @@ Zotero.Utilities.Internal = {
 		// Otherwise create a submenu for the target's subcollections
 		var menu = _createMenu(
 			libraryOrCollection.name,
-			libraryOrCollection.collectionTreeViewID,
+			libraryOrCollection.treeViewID,
 			imageSrc,
 			function (event) {
 				clickAction(event, libraryOrCollection);

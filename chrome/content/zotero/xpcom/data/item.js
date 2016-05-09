@@ -162,6 +162,12 @@ Zotero.defineProperty(Zotero.Item.prototype, 'relatedItems', {
 	get: function() this._getRelatedItems()
 });
 
+Zotero.defineProperty(Zotero.Item.prototype, 'treeViewID', {
+	get: function () {
+		return this.id
+	}
+});
+
 Zotero.Item.prototype.getID = function() {
 	Zotero.debug('Item.getID() is deprecated -- use Item.id');
 	return this._id;

@@ -90,29 +90,29 @@ describe("Zotero.CollectionTreeView", function() {
 		
 		it("should open a library and respect stored container state", function* () {
 			// Collapse B
-			yield cv.toggleOpenState(cv.getRowIndexByID(col2.collectionTreeViewID));
+			yield cv.toggleOpenState(cv.getRowIndexByID(col2.treeViewID));
 			yield cv._rememberOpenStates();
 			
 			// Close and reopen library
 			yield cv.toggleOpenState(libraryRow);
 			yield cv.expandLibrary(userLibraryID);
 			
-			assert.ok(cv.getRowIndexByID(col1.collectionTreeViewID))
-			assert.ok(cv.getRowIndexByID(col2.collectionTreeViewID))
-			assert.isFalse(cv.getRowIndexByID(col3.collectionTreeViewID))
+			assert.ok(cv.getRowIndexByID(col1.treeViewID))
+			assert.ok(cv.getRowIndexByID(col2.treeViewID))
+			assert.isFalse(cv.getRowIndexByID(col3.treeViewID))
 		});
 		
 		it("should open a library and all subcollections in recursive mode", function* () {
-			yield cv.toggleOpenState(cv.getRowIndexByID(col2.collectionTreeViewID));
+			yield cv.toggleOpenState(cv.getRowIndexByID(col2.treeViewID));
 			yield cv._rememberOpenStates();
 			
 			// Close and reopen library
 			yield cv.toggleOpenState(libraryRow);
 			yield cv.expandLibrary(userLibraryID, true);
 			
-			assert.ok(cv.getRowIndexByID(col1.collectionTreeViewID))
-			assert.ok(cv.getRowIndexByID(col2.collectionTreeViewID))
-			assert.ok(cv.getRowIndexByID(col3.collectionTreeViewID))
+			assert.ok(cv.getRowIndexByID(col1.treeViewID))
+			assert.ok(cv.getRowIndexByID(col2.treeViewID))
+			assert.ok(cv.getRowIndexByID(col3.treeViewID))
 		});
 	});
 	

@@ -51,7 +51,7 @@ describe("Zotero_Browser", function () {
 	});
 	
 	it("should save journal article to My Library if the Zotero pane hasn't been opened yet in a Firefox window", function* () {
-		Zotero.Prefs.set('lastViewedFolder', collection.collectionTreeViewID);
+		Zotero.Prefs.set('lastViewedFolder', collection.treeViewID);
 		
 		var win = yield loadBrowserWindow();
 		
