@@ -2274,7 +2274,10 @@ Zotero.Schema = new function(){
 	var _migrateUserData_80_filePaths = Zotero.Promise.coroutine(function* () {
 		var rows = yield Zotero.DB.queryAsync("SELECT itemID, libraryID, key, linkMode, path FROM items JOIN itemAttachments USING (itemID) WHERE path != ''");
 		var tmpDirFile = Zotero.getTempDirectory();
-		var tmpFilePath = OS.Path.normalize(tmpDirFile.path);
+		var tmpFilePath = OS.Path.normalize(tmpDirFile.path)
+			// Since relative paths can be applied on different platforms,
+			// just use "/" everywhere for oonsistency, and convert on use
+			.replace(/\\/g, '/');
 		
 		for (let i = 0; i < rows.length; i++) {
 			let row = rows[i];
@@ -2286,7 +2289,7 @@ Zotero.Schema = new function(){
 				let relPath = path.substr(prefix.length)
 				let file = tmpDirFile.clone();
 				file.setRelativeDescriptor(file, relPath);
-				path = OS.Path.normalize(file.path);
+				path = OS.Path.normalize(file.path).replace(/\\/g, '/');
 				
 				// setRelativeDescriptor() silently uses the parent directory on Windows
 				// if the filename contains certain characters, so strip them —
@@ -2308,12 +2311,9 @@ Zotero.Schema = new function(){
 					}
 				}
 				
-				// Normalize path, and then convert '\' to '/'. As long as normalize() is run on the
-				// path before use, it doesn't matter which separator it uses, but we might as well
-				// be consistent.
-				path = path.replace(/\\/g, '/');
 				if (!path.startsWith(tmpFilePath)) {
-					Zotero.logError(path + " does not start with temp path -- not converting relative path for item " + libraryKey);
+					Zotero.logError(path + " does not start with " + tmpFilePath
+						+ " -- not converting relative path for item " + libraryKey);
 					continue;
 				}
 				path = prefix + path.substr(tmpFilePath.length + 1);

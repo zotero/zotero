@@ -874,7 +874,12 @@ Zotero.Attachments = new function(){
 		if (Zotero.File.directoryContains(basePath, path)) {
 			basePath = OS.Path.normalize(basePath);
 			path = OS.Path.normalize(path);
-			path = this.BASE_PATH_PLACEHOLDER + path.substr(basePath.length + 1)
+			path = this.BASE_PATH_PLACEHOLDER
+				+ path.substr(basePath.length + 1)
+				// Since stored paths can be synced to other platforms, use
+				// forward slashes for consistency. resolveRelativePath() will
+				// convert to the appropriate platform-specific slash on use.
+				.replace(/\\/g, "/");
 		}
 		
 		return path;
@@ -898,10 +903,15 @@ Zotero.Attachments = new function(){
 			return false;
 		}
 		
-		return OS.Path.join(
+		return this.fixPathSlashes(OS.Path.join(
 			OS.Path.normalize(basePath),
 			path.substr(Zotero.Attachments.BASE_PATH_PLACEHOLDER.length)
-		);
+		));
+	}
+	
+	
+	this.fixPathSlashes = function (path) {
+		return path.replace(Zotero.isWin ? /\//g : /\\/g, Zotero.isWin ? "\\" : "/");
 	}
 	
 	
