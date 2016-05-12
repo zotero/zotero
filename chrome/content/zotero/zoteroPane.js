@@ -2303,7 +2303,18 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.buildCollectionContextMenu = function () {
+	this.buildCollectionContextMenu = function (noRepeat) {
+		var collectionTreeRow = this.collectionsView.selectedTreeRow;
+		// If the items view isn't initialized, this was a right-click on a different collection and
+		// the new collection's items are still loading, so update the menu after loading. This causes
+		// some menu items (e.g., export/createBib/loadReport) to appear gray in the menu at first and
+		// then turn black once there are items. Pass a flag to prevent an accidental infinite loop.
+		if (!collectionTreeRow.isHeader() && !this.itemsView.initialized && !noRepeat) {
+			this.itemsView.addEventListener('load', function () {
+				this.buildCollectionContextMenu(true);
+			}.bind(this));
+		}
+		
 		var options = [
 			"newCollection",
 			"newSavedSearch",
@@ -2334,8 +2345,6 @@ var ZoteroPane = new function()
 		
 		var menu = document.getElementById('zotero-collectionmenu');
 		
-		var collectionTreeRow = this.collectionsView.selectedTreeRow;
-		
 		// By default things are hidden and visible, so we only need to record
 		// when things are visible and when they're visible but disabled
 		var show = [], disable = [];
@@ -2355,15 +2364,6 @@ var ZoteroPane = new function()
 			var s = [m.exportCollection, m.createBibCollection, m.loadReport];
 			
 			if (!this.itemsView.rowCount) {
-				// If no items, it might be because this was a right-click on a different collection
-				// and the new collection's items are still loading, so update the menu after loading.
-				// This causes export/createBib/loadReport to appear gray in the menu at first and then
-				// turn black once there are items.
-				if (!this.itemsView.initialized) {
-					this.itemsView.addEventListener('load', function () {
-						this.buildCollectionContextMenu();
-					}.bind(this));
-				}
 				disable = s;
 			}
 			
