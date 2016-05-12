@@ -1329,8 +1329,11 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 			}
 			
 			if (toDownload.length) {
-				Zotero.debug("Downloading missing/outdated " + objectTypePlural + " in " + this.library.name);
+				Zotero.debug("Downloading missing/outdated " + objectTypePlural);
 				yield this._downloadObjects(objectType, toDownload);
+			}
+			else {
+				Zotero.debug(`No missing/outdated ${objectTypePlural} to download`);
 			}
 			
 			// Mark synced objects that don't exist remotely as unsynced
@@ -1353,8 +1356,7 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 				for (let key of remoteMissing) {
 					let id = objectsClass.getIDFromLibraryAndKey(this.libraryID, key);
 					if (!id) {
-						Zotero.logError(ObjectType + " " + this.libraryID + "/" + key
-							+ " not found to mark as unsynced");
+						Zotero.logError(`ObjectType ${key} not found to mark as unsynced`);
 						continue;
 					}
 					if (remoteDeleted[objectTypePlural].indexOf(key) != -1) {
@@ -1377,11 +1379,13 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 				// For remotely missing objects that exist locally, reset version, since old
 				// version will no longer match remote, and mark for upload
 				if (toUpload.length) {
-					Zotero.debug("Marking remotely missing synced " + objectTypePlural
-						+ " as unsynced");
+					Zotero.debug(`Marking remotely missing synced ${objectTypePlural} as unsynced`);
 					yield objectsClass.updateVersion(toUpload, 0);
 					yield objectsClass.updateSynced(toUpload, false);
 				}
+			}
+			else {
+				Zotero.debug(`No remotely missing synced ${objectTypePlural}`);
 			}
 		}
 		break;
