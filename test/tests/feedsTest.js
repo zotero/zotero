@@ -9,11 +9,16 @@ describe("Zotero.Feeds", function () {
 		var opmlString;
 		
 		before(function* (){
-			opmlString = yield Zotero.File.getContentsFromURLAsync(opmlUrl)
+			opmlString = yield Zotero.File.getContentsFromURLAsync(opmlUrl);
+			sinon.stub(Zotero.Feeds, 'updateFeeds').resolves();
 		});
 		
 		beforeEach(function* () {
 			yield clearFeeds();
+		});
+		
+		after(function() {
+			Zotero.Feeds.updateFeeds.restore();
 		});
 		
 		it('imports feeds correctly', function* (){
@@ -22,7 +27,8 @@ describe("Zotero.Feeds", function () {
 				"http://example.com/feed2.rss": "A title 2",
 				"http://example.com/feed3.rss": "A title 3",
 				"http://example.com/feed4.rss": "A title 4"
-			};	yield Zotero.Feeds.importFromOPML(opmlString);
+			};
+			yield Zotero.Feeds.importFromOPML(opmlString);
 			let feeds = Zotero.Feeds.getAll();
 			for (let feed of feeds) {
 				assert.equal(shouldExist[feed.url], feed.name, "Feed exists and title matches");
