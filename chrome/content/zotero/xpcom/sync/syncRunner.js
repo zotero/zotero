@@ -64,7 +64,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	var _currentLastSyncLabel;
 	var _errors = [];
 	
-
 	this.getAPIClient = function (options = {}) {
 		return new Zotero.Sync.APIClient({
 			baseURL: this.baseURL,
@@ -113,7 +112,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 			
 			this.updateIcons('animate');
-		
+			
 			let client = this.getAPIClient({ apiKey });
 			let keyInfo = yield this.checkAccess(client, options);
 			

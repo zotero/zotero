@@ -36,6 +36,7 @@ Zotero.Sync.APIClient = function (options) {
 	this.apiVersion = options.apiVersion;
 	this.apiKey = options.apiKey;
 	this.caller = options.caller;
+	this.debugUploadPolicy = Zotero.Prefs.get('sync.debugUploadPolicy');
 	
 	this.failureDelayIntervals = [2500, 5000, 10000, 20000, 40000, 60000, 120000, 240000, 300000];
 	this.failureDelayMax = 60 * 60 * 1000; // 1 hour
@@ -573,6 +574,23 @@ Zotero.Sync.APIClient.prototype = {
 		if (!this.apiKey && !options.noAPIKey) {
 			throw new Error('API key not set');
 		}
+		
+		if (Zotero.HTTP.isWriteMethod(method) && this.debugUploadPolicy) {
+			// Confirm uploads when extensions.zotero.sync.debugUploadPolicy is 1
+			if (this.debugUploadPolicy === 1) {
+				if (options.body) {
+					Zotero.debug(options.body);
+				}
+				if (!Services.prompt.confirm(null, "Allow Upload?", `Allow ${method} to ${uri}?`)) {
+					throw new Error(method + " request denied");
+				}
+			}
+			// Deny uploads when extensions.zotero.sync.debugUploadPolicy is 2
+			else if (this.debugUploadPolicy === 2) {
+				throw new Error(`Can't make ${method} request in read-only mode`);
+			}
+		}
+		
 		let opts = {}
 		Object.assign(opts, options);
 		opts.headers = this.getHeaders(options.headers);
