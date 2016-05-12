@@ -737,7 +737,7 @@ Zotero.HTTP = new function() {
 	
 	
 	this.isWriteMethod = function (method) {
-		return method == 'POST' || method == 'PUT' || method == 'PATCH';
+		return method == 'POST' || method == 'PUT' || method == 'PATCH' || method == 'DELETE';
 	};
 	
 	
