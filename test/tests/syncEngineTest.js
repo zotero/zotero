@@ -787,6 +787,113 @@ describe("Zotero.Sync.Data.Engine", function () {
 		});
 		
 		
+		it("shouldn't include file properties for attachments in ZFS libraries", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var lastLibraryVersion = 2;
+			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
+			
+			var item = new Zotero.Item('attachment');
+			item.attachmentLinkMode = 'imported_file';
+			item.attachmentFilename = 'test.txt';
+			item.attachmentContentType = 'text/plain';
+			item.attachmentCharset = 'utf-8';
+			yield item.saveTx();
+			
+			var itemResponseJSON = item.toResponseJSON();
+			itemResponseJSON.version = itemResponseJSON.data.version = lastLibraryVersion;
+			
+			server.respond(function (req) {
+				if (req.method == "POST") {
+					if (req.url == baseURL + "users/1/items") {
+						let json = JSON.parse(req.requestBody);
+						assert.lengthOf(json, 1);
+						let itemJSON = json[0];
+						assert.equal(itemJSON.key, item.key);
+						assert.equal(itemJSON.version, 0);
+						assert.notProperty(itemJSON, "contentType");
+						assert.notProperty(itemJSON, "charset");
+						assert.notProperty(itemJSON, "filename");
+						assert.notProperty(itemJSON, "mtime");
+						assert.notProperty(itemJSON, "md5");
+						req.respond(
+							200,
+							{
+								"Content-Type": "application/json",
+								"Last-Modified-Version": lastLibraryVersion
+							},
+							JSON.stringify({
+								successful: {
+									"0": itemResponseJSON
+								},
+								unchanged: {},
+								failed: {}
+							})
+						);
+						return;
+					}
+				}
+			})
+			
+			yield engine.start();
+		});
+		
+		
+		it("should include file properties for attachments in WebDAV libraries", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var lastLibraryVersion = 2;
+			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
+			Zotero.Sync.Storage.Local.setModeForLibrary(libraryID, 'webdav');
+			
+			var item = new Zotero.Item('attachment');
+			item.attachmentLinkMode = 'imported_file';
+			item.attachmentFilename = 'test.txt';
+			item.attachmentContentType = 'text/plain';
+			item.attachmentCharset = 'utf-8';
+			yield item.saveTx();
+			
+			var itemResponseJSON = item.toResponseJSON();
+			itemResponseJSON.version = itemResponseJSON.data.version = lastLibraryVersion;
+			
+			server.respond(function (req) {
+				if (req.method == "POST") {
+					if (req.url == baseURL + "users/1/items") {
+						let json = JSON.parse(req.requestBody);
+						assert.lengthOf(json, 1);
+						let itemJSON = json[0];
+						assert.equal(itemJSON.key, item.key);
+						assert.equal(itemJSON.version, 0);
+						assert.propertyVal(itemJSON, "contentType", item.attachmentContentType);
+						assert.propertyVal(itemJSON, "charset", item.attachmentCharset);
+						assert.propertyVal(itemJSON, "filename", item.attachmentFilename);
+						assert.propertyVal(itemJSON, "mtime", null);
+						assert.propertyVal(itemJSON, "md5", null);
+						req.respond(
+							200,
+							{
+								"Content-Type": "application/json",
+								"Last-Modified-Version": lastLibraryVersion
+							},
+							JSON.stringify({
+								successful: {
+									"0": itemResponseJSON
+								},
+								unchanged: {},
+								failed: {}
+							})
+						);
+						return;
+					}
+				}
+			})
+			
+			yield engine.start();
+		});
+		
+		
 		it("should upload synced storage properties", function* () {
 			({ engine, client, caller } = yield setup());
 			

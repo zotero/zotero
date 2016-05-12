@@ -874,7 +874,18 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 				continue;
 			}
 			if (!o.json) {
-				o.json = yield this._getJSONForObject(objectType, o.id);
+				o.json = yield this._getJSONForObject(
+					objectType,
+					o.id,
+					{
+						// Only include file properties ('contentType', etc.) for WebDAV files
+						skipImportedFileProperties:
+							objectType == 'item'
+								? Zotero.Sync.Storage.Local.getModeForLibrary(this.library.libraryID)
+									!= 'webdav'
+								: undefined
+					}
+				);
 			}
 			batch.push(o.json);
 		}
@@ -1041,11 +1052,13 @@ Zotero.Sync.Data.Engine.prototype._uploadDeletions = Zotero.Promise.coroutine(fu
 });
 
 
-Zotero.Sync.Data.Engine.prototype._getJSONForObject = function (objectType, id) {
+Zotero.Sync.Data.Engine.prototype._getJSONForObject = function (objectType, id, options = {}) {
 	return Zotero.DB.executeTransaction(function* () {
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		var obj = objectsClass.get(id);
 		var cacheObj = false;
+		// If the object has been synced before, get the pristine version from the cache so we can
+		// use PATCH mode and include only fields that have changed
 		if (obj.version) {
 			cacheObj = yield Zotero.Sync.Data.Local.getCacheObject(
 				objectType, obj.libraryID, obj.key, obj.version
@@ -1060,6 +1073,9 @@ Zotero.Sync.Data.Engine.prototype._getJSONForObject = function (objectType, id) 
 			includeKey: true,
 			includeVersion: true, // DEBUG: remove?
 			includeDate: true,
+			// Whether to skip 'contentType', 'filename', 'mtime', and 'md5'
+			skipImportedFileProperties: options.skipImportedFileProperties,
+			// Use last-synced mtime/md5 instead of current values from the file itself
 			syncedStorageProperties: true,
 			patchBase: cacheObj ? cacheObj.data : false
 		});

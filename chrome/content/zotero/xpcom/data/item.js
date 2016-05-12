@@ -4110,17 +4110,23 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 		if (this.isAttachment()) {
 			let linkMode = this.attachmentLinkMode;
 			obj.linkMode = Zotero.Attachments.linkModeToName(linkMode);
-			obj.contentType = this.attachmentContentType;
-			obj.charset = this.attachmentCharset;
+			
+			let imported = this.isImportedAttachment();
+			let skipFileProps = options.skipImportedFileProperties;
+			
+			if (!imported || !skipFileProps) {
+				obj.contentType = this.attachmentContentType;
+				obj.charset = this.attachmentCharset;
+			}
 			
 			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 				obj.path = this.attachmentPath;
 			}
-			else if (linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
+			else if (linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL && !skipFileProps) {
 				obj.filename = this.attachmentFilename;
 			}
 			
-			if (this.isFileAttachment()) {
+			if (imported && !skipFileProps) {
 				if (options.syncedStorageProperties) {
 					obj.mtime = this.attachmentSyncedModificationTime;
 					obj.md5 = this.attachmentSyncedHash;
