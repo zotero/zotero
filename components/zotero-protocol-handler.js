@@ -1094,14 +1094,14 @@ ZoteroProtocolHandler.prototype = {
 				}
 			}
 			
-			// pass request through to ZoteroProtocolHandler::newChannel
-			if (uriString.indexOf("chrome") != 0) {
-				uriString = uri.spec;
-				uriString = "chrome" + uriString.substring(uriString.indexOf(":"));
-				uri = chromeService.newURI(uriString, null, null);
-			}
-			
-			newChannel = chromeService.newChannel(uri);
+			// Return cancelled channel for unknown paths
+			//
+			// These can be in the form zotero://example.com/... -- maybe for "//example.com" URLs?
+			var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
+			var extChannel = chromeService.newChannel(chromeURI);
+			var chromeRequest = extChannel.QueryInterface(Components.interfaces.nsIRequest);
+			chromeRequest.cancel(0x804b0002); // BINDING_ABORTED
+			return extChannel;
 		}
 		catch (e) {
 			Components.utils.reportError(e);
