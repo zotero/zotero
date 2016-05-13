@@ -354,8 +354,13 @@ Zotero.Server.Connector.SaveItem.prototype = {
 		}
 		
 		// save items
-		var itemSaver = new Zotero.Translate.ItemSaver(libraryID,
-			Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD, 1, undefined, cookieSandbox);
+		var itemSaver = new Zotero.Translate.ItemSaver({
+			libraryID,
+			collections: collection ? [collection.id] : undefined,
+			attachmentMode: Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD,
+			forceTagType: 1,
+			cookieSandbox
+		});
 		itemSaver.saveItems(data.items, function(returnValue, items) {
 			if(returnValue) {
 				try {
@@ -367,10 +372,6 @@ Zotero.Server.Connector.SaveItem.prototype = {
 								item.attachments.splice(j--, 1);
 							}
 						}
-					}
-					
-					for(var i=0; i<items.length; i++) {
-						if(collection) collection.addItem(items[i].id);
 					}
 					
 					sendResponseCallback(201, "application/json", JSON.stringify({"items":data.items}));

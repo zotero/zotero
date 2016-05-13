@@ -619,6 +619,10 @@ Zotero.Translate.ItemSaver.prototype = {
 		let newTags = [];
 		for(let i=0; i<tags.length; i++) {
 			let tag = tags[i];
+			// Convert raw string to object with 'tag' property
+			if (typeof tag == 'string') {
+				tag = { tag };
+			}
 			tag.type = this._forceTagType || tag.type || 0;
 			newTags.push(tag);
 		}
