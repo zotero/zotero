@@ -25,6 +25,10 @@
 
 // Mimics Zotero.Libraries
 Zotero.Feeds = new function() {
+	this.init = function () {
+		setTimeout(() => this.scheduleNextFeedCheck(), 5000);
+	}
+	
 	this._cache = null;
 	
 	this._makeCache = function() {
@@ -69,10 +73,6 @@ Zotero.Feeds = new function() {
 		delete this._cache.libraryIDByURL[url];
 	}
 
-	this.init = function () {
-		return this.scheduleNextFeedCheck();
-	}
-	
 	this.importFromOPML = Zotero.Promise.coroutine(function* (opmlString) {
 		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 			.createInstance(Components.interfaces.nsIDOMParser);

@@ -629,7 +629,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				yield Zotero.Creators.init();
 				yield Zotero.Groups.init();
 				yield Zotero.Relations.init();
-				yield Zotero.Feeds.init();
 				
 				// Load all library data except for items, which are loaded when libraries are first
 				// clicked on or if otherwise necessary
@@ -643,8 +642,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				);
 				
 				yield Zotero.QuickCopy.init();
-				
-				Zotero.Items.startEmptyTrashTimer();
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -743,6 +740,9 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError') + "\n\n" + e;
 				throw e;
 			};
+			
+			Zotero.Items.startEmptyTrashTimer();
+			Zotero.Feeds.init();
 			
 			return true;
 		}
