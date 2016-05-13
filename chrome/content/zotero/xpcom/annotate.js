@@ -64,10 +64,10 @@ Zotero.Annotate = new function() {
 		if (m) {
 			var id = m[1];
 			var item = Zotero.Items.get(id);
-			var mimeType = item.attachmentMIMEType;
-			var file = item.getFile();
+			var contentType = item.attachmentContentType;
+			var file = item.getFilePath();
 			var ext = Zotero.File.getExtension(file);
-			if (mimeType == 'text/plain' || !Zotero.MIME.hasNativeHandler(mimeType, ext)) {
+			if (contentType == 'text/plain' || !Zotero.MIME.hasNativeHandler(contentType, ext)) {
 				return false;
 			}
 			return id;
