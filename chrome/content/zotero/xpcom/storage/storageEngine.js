@@ -77,7 +77,7 @@ Zotero.Sync.Storage.Engine = function (options) {
 
 Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* () {
 	var libraryID = this.libraryID;
-	if (!Zotero.Prefs.get("sync.storage.enabled")) {
+	if (!Zotero.Sync.Storage.Local.getEnabledForLibrary(libraryID)) {
 		Zotero.debug("File sync is not enabled for " + this.library.name);
 		return false;
 	}

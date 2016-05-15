@@ -3936,7 +3936,8 @@ var ZoteroPane = new function()
 			}
 			else {
 				if (!item.isImportedAttachment()
-						|| !Zotero.Sync.Storage.Local.downloadAsNeeded(item.libraryID)) {
+						|| (!Zotero.Sync.Storage.Local.getEnabledForLibrary(item.libraryID)
+							|| !Zotero.Sync.Storage.Local.downloadAsNeeded(item.libraryID))) {
 					this.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
 					return;
 				}
