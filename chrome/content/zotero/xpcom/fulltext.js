@@ -1038,6 +1038,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	}
 	
 	/**
+	 * Find items marked as having unprocessed cache files, run cache file processing on one item, and
+	 * after a short delay call self again with the remaining items
 	 *
 	 * @param {Array<Integer>} itemIDs  An array of itemIDs to process; if this
 	 *                                  is omitted, a database query is made
@@ -1076,6 +1078,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		
 		yield Zotero.Fulltext.indexFromProcessorCache(itemID);
 		
+		// If there are remaining items, call self again after a short delay. The delay allows for
+		// processing to be interrupted if the user returns from idle
 		if (itemIDs.length) {
 			if (!_processorTimer) {
 				_processorTimer = Components.classes["@mozilla.org/timer;1"]
@@ -1119,6 +1123,9 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			var cacheFile = this.getItemProcessorCacheFile(item);
 			if (!cacheFile.exists())  {
 				Zotero.debug("Full-text content processor cache file doesn't exist for item " + itemID);
+				yield Zotero.DB.queryAsync(
+					"UPDATE fulltextItems SET synced=? WHERE itemID=?", [SYNC_STATE_UNSYNCED, itemID]
+				);
 				return false;
 			}
 			
