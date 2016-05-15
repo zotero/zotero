@@ -1138,6 +1138,18 @@ describe("Zotero.Item", function () {
 				assert.isUndefined(json.title);
 				assert.strictEqual(json.deleted, 1);
 			})
+			
+			it("should set 'parentItem' to false when cleared", function* () {
+				var item = yield createDataObject('item');
+				var note = new Zotero.Item('note');
+				note.parentID = item.id;
+				// Create initial JSON with parentItem
+				var patchBase = note.toJSON();
+				// Clear parent item and regenerate JSON
+				note.parentID = false;
+				var json = note.toJSON({ patchBase });
+				assert.isFalse(json.parentItem);
+			});
 		})
 	})
 
