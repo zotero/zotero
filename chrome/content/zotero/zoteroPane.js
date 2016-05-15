@@ -57,7 +57,6 @@ var ZoteroPane = new function()
 	this.contextPopupShowing = contextPopupShowing;
 	this.openNoteWindow = openNoteWindow;
 	this.viewSelectedAttachment = viewSelectedAttachment;
-	this.showAttachmentNotFoundDialog = showAttachmentNotFoundDialog;
 	this.reportErrors = reportErrors;
 	this.displayErrorMessage = displayErrorMessage;
 	
@@ -3959,7 +3958,9 @@ var ZoteroPane = new function()
 				}
 				
 				if (!(yield downloadedItem.getFilePathAsync())) {
-					ZoteroPane_Local.showAttachmentNotFoundDialog(downloadedItem.id, noLocateOnMissing);
+					ZoteroPane_Local.showAttachmentNotFoundDialog(
+						downloadedItem.id, noLocateOnMissing, true
+					);
 					return;
 				}
 				
@@ -4186,30 +4187,53 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function showAttachmentNotFoundDialog(itemID, noLocate) {
+	this.showAttachmentNotFoundDialog = function (itemID, noLocate, notOnServer) {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
 		
+		var title = Zotero.getString('pane.item.attachments.fileNotFound.title');
+		var text = Zotero.getString('pane.item.attachments.fileNotFound.text1') + "\n\n"
+			+ Zotero.getString(
+				'pane.item.attachments.fileNotFound.text2' + (notOnServer ? '.notOnServer' : ''),
+				[ZOTERO_CONFIG.CLIENT_NAME, ZOTERO_CONFIG.DOMAIN_NAME]
+			);
+		var supportURL = Zotero.getString('pane.item.attachments.fileNotFound.supportURL');
 		
 		// Don't show Locate button
 		if (noLocate) {
-			var index = ps.alert(null,
-				Zotero.getString('pane.item.attachments.fileNotFound.title'),
-				Zotero.getString('pane.item.attachments.fileNotFound.text')
+			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
+				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
+			let index = ps.confirmEx(null,
+				title,
+				text,
+				buttonFlags,
+				null,
+				Zotero.getString('general.moreInformation'),
+				null, null, {}
 			);
+			if (index == 1) {
+				this.loadURI(supportURL, { metaKey: true, shiftKey: true });
+			}
 			return;
 		}
 		
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+			+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
 		var index = ps.confirmEx(null,
-			Zotero.getString('pane.item.attachments.fileNotFound.title'),
-			Zotero.getString('pane.item.attachments.fileNotFound.text'),
-			buttonFlags, Zotero.getString('general.locate'), null,
-			null, null, {});
+			title,
+			text,
+			buttonFlags,
+			Zotero.getString('general.locate'),
+			null,
+			Zotero.getString('general.moreInformation'), null, {}
+		);
 		
 		if (index == 0) {
 			this.relinkAttachment(itemID);
+		}
+		else if (index == 2) {
+			this.loadURI(supportURL, { metaKey: true, shiftKey: true });
 		}
 	}
 	
