@@ -654,9 +654,32 @@ Zotero.DataObjects.prototype.reload = Zotero.Promise.coroutine(function* (ids, d
 	Zotero.debug('Reloading ' + (dataTypes ? '[' + dataTypes.join(', ') + '] for ' : '')
 		+ this._ZDO_objects + ' ' + ids);
 	
-	for (let i=0; i<ids.length; i++) {
-		if (this._objectCache[ids[i]]) {
-			yield this._objectCache[ids[i]].reload(dataTypes, reloadUnchanged);
+	// If data types not specified, reload loaded data for each object individually.
+	// TODO: optimize
+	if (!dataTypes) {
+		for (let i=0; i<ids.length; i++) {
+			if (this._objectCache[ids[i]]) {
+				yield this._objectCache[ids[i]].reload(dataTypes, reloadUnchanged);
+			}
+		}
+		return;
+	}
+	
+	for (let dataType of dataTypes) {
+		let typeIDsByLibrary = {};
+		for (let id of ids) {
+			let obj = this._objectCache[id];
+			if (!obj || !obj._loaded[dataType] || obj._skipDataTypeLoad[dataType]
+					|| (!reloadUnchanged && !obj._changed[dataType])) {
+				continue;
+			}
+			if (!typeIDsByLibrary[obj.libraryID]) {
+				typeIDsByLibrary[obj.libraryID] = [];
+			}
+			typeIDsByLibrary[obj.libraryID].push(id);
+		}
+		for (let libraryID in typeIDsByLibrary) {
+			yield this._loadDataType(dataType, parseInt(libraryID), typeIDsByLibrary[libraryID]);
 		}
 	}
 	
