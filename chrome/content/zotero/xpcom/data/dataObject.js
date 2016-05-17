@@ -679,7 +679,7 @@ Zotero.DataObject.prototype._requireData = function (dataType) {
  * @param {Promise}
  */
 Zotero.DataObject.prototype.loadDataType = function (dataType, reload) {
-	return this._ObjectsClass._loadDataType(dataType, this.libraryID, [this.id]);
+	return this._ObjectsClass._loadDataTypeInLibrary(dataType, this.libraryID, [this.id]);
 }
 
 Zotero.DataObject.prototype.loadAllData = Zotero.Promise.coroutine(function* (reload) {
