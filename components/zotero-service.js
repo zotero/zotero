@@ -178,7 +178,11 @@ ZoteroContext.prototype = {
 	 * Convenience method to replicate window.setTimeout()
 	 **/
 	"setTimeout":function setTimeout(func, ms){
-		this.Zotero.setTimeout(func, ms);
+		return this.Zotero.setTimeout(func, ms);
+	},
+	
+	"clearTimeout":function setTimeout(id) {
+		this.Zotero.clearTimeout(id);
 	},
 	
 	/**

@@ -74,12 +74,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	};
 	
 	/**
-	 * @property	{Boolean}	waiting		Whether Zotero is waiting for other
-	 *										main thread events to be processed
-	 */
-	this.__defineGetter__('waiting', function () _waiting);
-	
-	/**
 	 * @property	{Boolean}	locked		Whether all Zotero panes are locked
 	 *										with an overlay
 	 */
@@ -112,7 +106,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	var _startupErrorHandler;
 	var _zoteroDirectory = false;
 	var _localizedStringBundle;
-	var _waiting = 0;
 	
 	var _locked = false;
 	var _shutdownListeners = [];
@@ -137,7 +130,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	/**
 	 * Maintains running nsITimers in global scope, so that they don't disappear randomly
 	 */
-	var _runningTimers = [];
+	var _runningTimers = new Map();
 	
 	// Errors that were in the console at startup
 	var _startupErrors = [];
@@ -1722,41 +1715,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	
 	/**
-	 * Allow other events (e.g., UI updates) on main thread to be processed if necessary
-	 *
-	 * @param	{Integer}	[timeout=50]		Maximum number of milliseconds to wait
-	 */
-	this.wait = function (timeout) {
-		if (timeout === undefined) {
-			timeout = 50;
-		}
-		var mainThread = Zotero.mainThread;
-		var endTime = Date.now() + timeout;
-		var more;
-		//var cycles = 0;
-		
-		_waiting++;
-		
-		Zotero.debug("Spinning event loop ("+_waiting+")", 5);
-		do {
-			more = mainThread.processNextEvent(false);
-			//cycles++;
-		} while (more && Date.now() < endTime);
-		
-		_waiting--;
-		
-		// requeue nsITimerCallbacks that came up during Zotero.wait() but couldn't execute
-		for(var i in _waitTimers) {
-			_waitTimers[i].initWithCallback(_waitTimerCallbacks[i], 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-		}
-		_waitTimers = [];
-		_waitTimerCallbacks = [];
-		
-		//Zotero.debug("Waited " + cycles + " cycles");
-		return;
-	};
-	
-	/**
 	 * Generate a function that produces a static output
 	 *
 	 * Zotero.lazy(fn) returns a function. The first time this function
@@ -1798,38 +1756,38 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	
 	/**
-	 * Emulates the behavior of window.setTimeout, but ensures that callbacks do not get called
-	 * during Zotero.wait()
+	 * Emulates the behavior of window.setTimeout
 	 *
 	 * @param {Function} func			The function to be called
 	 * @param {Integer} ms				The number of milliseconds to wait before calling func
-	 * @param {Boolean} runWhenWaiting	True if the callback should be run even if Zotero.wait()
-	 *                                  is executing
+	 * @return {Integer} - ID of timer to be passed to clearTimeout()
 	 */
-	this.setTimeout = function(func, ms, runWhenWaiting) {
-		var timer = Components.classes["@mozilla.org/timer;1"].
-			createInstance(Components.interfaces.nsITimer),
-			useJIT = Components.utils.methodjit;
-		var timerCallback = {"notify":function() {
-			// XXX Remove when we drop support for Fx <24
-			if(useJIT !== undefined) Components.utils.methodjit = useJIT;
-			
-			if(_waiting && !runWhenWaiting) {
-				// if our callback gets called during Zotero.wait(), queue it to be set again
-				// when Zotero.wait() completes
-				_waitTimers.push(timer);
-				_waitTimerCallbacks.push(timerCallback);
-			} else {
-				// execute callback function
+	var _lastTimeoutID = 0;
+	this.setTimeout = function (func, ms) {
+		var id = ++_lastTimeoutID;
+		
+		var timer = Components.classes["@mozilla.org/timer;1"]
+			.createInstance(Components.interfaces.nsITimer);
+		var timerCallback = {
+			"notify": function () {
 				func();
-				// remove timer from global scope, so it can be garbage collected
-				_runningTimers.splice(_runningTimers.indexOf(timer), 1);
+				_runningTimers.delete(id);
 			}
-		}}
+		};
 		timer.initWithCallback(timerCallback, ms, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-		// add timer to global scope so that it doesn't get garbage collected before it completes
-		_runningTimers.push(timer);
-	}
+		_runningTimers.set(id, timer);
+		return id;
+	};
+	
+	
+	this.clearTimeout = function (id) {
+		var timer = _runningTimers.get(id);
+		if (timer) {
+			timer.cancel();
+			_runningTimers.delete(id);
+		}
+	};
+	
 	
 	/**
 	 * Show Zotero pane overlay and progress bar in all windows
