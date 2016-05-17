@@ -321,6 +321,13 @@ Zotero.DataObjectUtilities = {
 				}
 				break;
 			
+			case 'note':
+				let change = this._htmlDiff(field, val1, val2);
+				if (change) {
+					changeset.push(change);
+				}
+				break;
+			
 			default:
 				var changed = val1 !== val2;
 				if (changed) {
@@ -447,6 +454,45 @@ Zotero.DataObjectUtilities = {
 			});
 		}
 		return changeset;
+	},
+	
+	_htmlDiff: function (field, html1, html2 = "") {
+		if (html1 == "" && html2 != "") {
+			return {
+				field,
+				op: "add",
+				value: html2
+			};
+		}
+		if (html1 != "" && html2 == "") {
+			return {
+				field,
+				op: "delete"
+			};
+		}
+		
+		// Until we have a consistent way of sanitizing HTML on client and server, account for differences
+		var mods = [
+			['<p>&nbsp;</p>', '<p>\u00a0</p>']
+		];
+		var a = html1;
+		var b = html2;
+		for (let mod of mods) {
+			a = a.replace(new RegExp(mod[0], 'g'), mod[1]);
+			b = b.replace(new RegExp(mod[0], 'g'), mod[1]);
+		}
+		if (a != b) {
+			Zotero.debug("HTML diff:");
+			Zotero.debug(a);
+			Zotero.debug(b);
+			return {
+				field,
+				op: "modify",
+				value: html2
+			};
+		}
+		
+		return false;
 	},
 	
 	_tagsDiff: function (data1, data2 = []) {
