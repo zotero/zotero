@@ -1455,7 +1455,8 @@ Zotero.Integration.Fields.prototype.updateSession = function() {
 		if(me._session.reload) {
 			//this._session.restoreProcessorState(); TODO doesn't appear to be working properly
 			me._session.updateUpdateIndices();
-			return Zotero.promiseGenerator(me._session._updateCitations())
+			// Iterate through citations, yielding for UI updates
+			return Zotero.Promise.each(me._session._updateCitations(), () => {})
 			.then(function() {
 				me._session.updateIndices = {};
 				me._session.updateItemIDs = {};
@@ -1539,9 +1540,14 @@ Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, fo
 	// Update citations
 	this._session.updateUpdateIndices(forceCitations);
 	var me = this;
-	return Zotero.promiseGenerator(this._session._updateCitations()).then(function() {
-		return Zotero.promiseGenerator(me._updateDocument(forceCitations, forceBibliography,
-			ignoreCitationChanges));
+	// Iterate through citations, yielding for UI updates
+	return Zotero.Promise.each(this._session._updateCitations(), () => {}).then(function() {
+		return Zotero.Promise.each(
+			me._updateDocument(
+				forceCitations, forceBibliography, ignoreCitationChanges
+			),
+			() => {}
+		);
 	});
 }
 
@@ -1552,7 +1558,7 @@ Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, fo
  * @param {Boolean} [ignoreCitationChanges] Whether to ignore changes to citations that have been 
  *	modified since they were created, instead of showing a warning
  */
-Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, forceBibliography,
+Zotero.Integration.Fields.prototype._updateDocument = function* (forceCitations, forceBibliography,
 		ignoreCitationChanges) {
 	if(this.progressCallback) {
 		var nFieldUpdates = Object.keys(this._session.updateIndices).length;
@@ -1569,7 +1575,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 			} catch(e) {
 				Zotero.logError(e);
 			}
-			yield undefined;
+			yield;
 		}
 		
 		var citation = this._session.citationsByIndex[i];
@@ -1681,7 +1687,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 				} catch(e) {
 					Zotero.logError(e);
 				}
-				yield undefined;
+				yield;
 			}
 			
 			if(bibliographyText) {
@@ -2639,7 +2645,7 @@ Zotero.Integration.Session.prototype.formatCitation = function(index, citation) 
 /**
  * Updates the list of citations to be serialized to the document
  */
-Zotero.Integration.Session.prototype._updateCitations = function() {
+Zotero.Integration.Session.prototype._updateCitations = function* () {
 	/*var allUpdatesForced = false;
 	var forcedUpdates = {};
 	if(force) {
@@ -2683,7 +2689,7 @@ Zotero.Integration.Session.prototype._updateCitations = function() {
 			}
 			this.citeprocCitationIDs[citation.citationID] = true;
 			delete this.newIndices[index];
-			yield undefined;
+			yield;
 		}
 	}
 	
