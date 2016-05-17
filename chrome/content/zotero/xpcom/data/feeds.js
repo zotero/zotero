@@ -26,8 +26,18 @@
 // Mimics Zotero.Libraries
 Zotero.Feeds = new function() {
 	this.init = function () {
-		setTimeout(() => this.scheduleNextFeedCheck(), 5000);
-	}
+		this._timeoutID = setTimeout(() => {
+			this.scheduleNextFeedCheck();
+			this._timeoutID = null;
+		}, 5000);
+	};
+	
+	this.uninit = function () {
+		if (this._timeoutID) {
+			clearTimeout(this._timeoutID);
+			this._timeoutID = null
+		}
+	};
 	
 	this._cache = null;
 	

@@ -736,6 +736,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			
 			Zotero.Items.startEmptyTrashTimer();
 			Zotero.Feeds.init();
+			Zotero.addShutdownListener(() => Zotero.Feeds.uninit());
 			
 			return true;
 		}
