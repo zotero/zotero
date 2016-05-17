@@ -107,7 +107,7 @@ describe("Zotero.DataObjectUtilities", function() {
 			describe("notes", function () {
 				it("should ignore sanitization changes", function* () {
 					var json1 = {
-						note: "<p> </p>"
+						note: "<p>\u00a0</p>"
 					};
 					var json2 = {
 						note: "<p>&nbsp;</p>"
