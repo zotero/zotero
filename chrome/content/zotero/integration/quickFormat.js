@@ -279,11 +279,15 @@ var Zotero_QuickFormat = new function () {
 		if(haveConditions) {		
 			var searchResultIDs = (haveConditions ? (yield s.search()) : []);
 			
+			// Show items list without cited items to start
+			yield _updateItemList(false, false, str, searchResultIDs);
+			
 			// Check to see which search results match items already in the document
 			var citedItems, completed = false, isAsync = false;
-			// Save current search so that when we get items, we know whether it's too late to
+			// Save current search time so that when we get items, we know whether it's too late to
 			// process them or not
 			var lastSearchTime = currentSearchTime = Date.now();
+			// This may or may not be synchronous
 			io.getItems().then(function(citedItems) {
 				// Don't do anything if panel is already closed
 				if(isAsync &&
@@ -322,13 +326,11 @@ var Zotero_QuickFormat = new function () {
 				}
 				
 				_updateItemList(citedItems, citedItemsMatchingSearch, str, searchResultIDs, isAsync);
-			}).done();
+			});
 			
 			if(!completed) {
 				// We are going to have to wait until items have been retrieved from the document.
-				// Until then, show item list without cited items.
 				Zotero.debug("Getting cited items asynchronously");
-				_updateItemList(false, false, str, searchResultIDs);
 				isAsync = true;
 			} else {
 				Zotero.debug("Got cited items synchronously");
@@ -356,7 +358,8 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Updates the item list
 	 */
-	function _updateItemList(citedItems, citedItemsMatchingSearch, searchString, searchResultIDs, preserveSelection) {
+	var _updateItemList = Zotero.Promise.coroutine(function* (citedItems, citedItemsMatchingSearch,
+			searchString, searchResultIDs, preserveSelection) {
 		var selectedIndex = 1, previousItemID;
 		
 		// Do this so we can preserve the selected item after cited items have been loaded
@@ -412,7 +415,10 @@ var Zotero_QuickFormat = new function () {
 		}
 
 		if(searchResultIDs.length && (!citedItemsMatchingSearch || citedItemsMatchingSearch.length < 50)) {
-			var items = Zotero.Items.get(searchResultIDs);
+			// Search results might be in an unloaded library, so get items asynchronously and load
+			// necessary data
+			var items = yield Zotero.Items.getAsync(searchResultIDs);
+			yield Zotero.Items.loadDataTypes(items, ['itemData', 'creators']);
 			
 			searchString = searchString.toLowerCase();
 			var collation = Zotero.getLocaleCollation();
@@ -489,7 +495,7 @@ var Zotero_QuickFormat = new function () {
 			referenceBox.selectedIndex = selectedIndex;
 			referenceBox.ensureIndexIsVisible(selectedIndex);
 		}
-	}
+	});
 	
 	/**
 	 * Builds a string describing an item. We avoid CSL here for speed.
