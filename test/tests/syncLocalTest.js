@@ -22,16 +22,6 @@ describe("Zotero.Sync.Data.Local", function() {
 	
 	
 	describe("#checkUser()", function () {
-		var win;
-		
-		beforeEach(function* () {
-			win = yield loadBrowserWindow();
-		});
-		
-		afterEach(function () {
-			win.close();
-		});
-		
 		it("should prompt for user update and perform on accept", function* () {
 			yield Zotero.Users.setCurrentUserID(1);
 			yield Zotero.Users.setCurrentUsername("A");
@@ -47,7 +37,7 @@ describe("Zotero.Sync.Data.Local", function() {
 				assert.equal(matches[3], "‘A’");
 				handled = true;
 			});
-			var cont = yield Zotero.Sync.Data.Local.checkUser(win, 2, "B");
+			var cont = yield Zotero.Sync.Data.Local.checkUser(null, 2, "B");
 			assert.isTrue(handled);
 			assert.isTrue(cont);
 			
@@ -60,7 +50,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			yield Zotero.Users.setCurrentUsername("A");
 			
 			waitForDialog(false, 'cancel');
-			var cont = yield Zotero.Sync.Data.Local.checkUser(win, 2, "B");
+			var cont = yield Zotero.Sync.Data.Local.checkUser(null, 2, "B");
 			assert.isFalse(cont);
 			
 			assert.equal(Zotero.Users.getCurrentUserID(), 1);
@@ -80,7 +70,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			
 			yield item1.addLinkedItem(item2);
 			
-			var cont = yield Zotero.Sync.Data.Local.checkUser(win, 1, "A");
+			var cont = yield Zotero.Sync.Data.Local.checkUser(null, 1, "A");
 			assert.isTrue(cont);
 			
 			var json = item1.toJSON();

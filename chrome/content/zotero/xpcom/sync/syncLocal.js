@@ -91,7 +91,7 @@ Zotero.Sync.Data.Local = {
 	 * If user accepts, change the current user, delete existing groups, and update relation
 	 * URIs to point to the new user's library.
 	 *
-	 * @param {Window}
+	 * @param {Window|null}
 	 * @param {Integer} userID - New userID
 	 * @param {Integer} libraryID - New libraryID
 	 * @return {Boolean} - True to continue, false to cancel
