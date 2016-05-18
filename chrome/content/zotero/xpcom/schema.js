@@ -33,7 +33,8 @@ Zotero.Schema = new function(){
 	
 	var _dbVersions = [];
 	var _schemaVersions = [];
-	var _maxCompatibility = 2;
+	// Update when adding _updateCompatibility() line to schema update step
+	var _maxCompatibility = 3;
 	var _repositoryTimer;
 	var _remoteUpdateInProgress = false, _localUpdateInProgress = false;
 	
@@ -2254,6 +2255,22 @@ Zotero.Schema = new function(){
 					// http://zotero.org/groups/12341/8QZ36WQ3 -> http://zotero.org/groups/12341/items/8QZ36WQ3
 					let newObject = rows[i].object.replace(/^(http:\/\/zotero.org\/(?:(?:users|groups)\/\d+|users\/local\/[^\/]+))\/([A-Z0-9]{8})$/, '$1/items/$2');
 					yield Zotero.DB.queryAsync("UPDATE itemRelations SET object=? WHERE ROWID=?", [newObject, rows[i].id]);
+				}
+			}
+			
+			else if (i == 87) {
+				yield _updateCompatibility(3);
+				let rows = yield Zotero.DB.queryAsync("SELECT valueID, value FROM itemDataValues WHERE TYPEOF(value) = 'integer'");
+				for (let i = 0; i < rows.length; i++) {
+					let row = rows[i];
+					let valueID = yield Zotero.DB.valueQueryAsync("SELECT valueID FROM itemDataValues WHERE value=?", "" + row.value);
+					if (valueID) {
+						yield Zotero.DB.queryAsync("UPDATE itemData SET valueID=? WHERE valueID=?", [valueID, row.valueID]);
+						yield Zotero.DB.queryAsync("DELETE FROM itemDataValues WHERE valueID=?", row.valueID);
+					}
+					else {
+						yield Zotero.DB.queryAsync("UPDATE itemDataValues SET value=? WHERE valueID=?", ["" + row.value, row.valueID]);
+					}
 				}
 			}
 		}

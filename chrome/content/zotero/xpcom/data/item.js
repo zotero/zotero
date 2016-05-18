@@ -644,8 +644,15 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		throw new Error(`'${field}' value cannot be undefined`);
 	}
 	
-	if (typeof value == 'string') {
+	// Normalize values
+	if (typeof value == 'number') {
+		value = "" + value;
+	}
+	else if (typeof value == 'string') {
 		value = value.trim().normalize();
+	}
+	if (value === "" || value === null || value === false) {
+		value = false;
 	}
 	
 	//Zotero.debug("Setting field '" + field + "' to '" + value + "' (loadIn: " + (loadIn ? 'true' : 'false') + ") for item " + this.id + " ");
@@ -747,10 +754,6 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	if (loadIn && this.isNote() && field == 110) { // title
 		this._noteTitle = value;
 		return true;
-	}
-	
-	if (value === "" || value === null || value === false) {
-		value = false;
 	}
 	
 	// Make sure to use type-specific field ID if available
