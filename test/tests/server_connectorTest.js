@@ -30,7 +30,7 @@ describe("Connector Server", function () {
 	
 	describe("/connector/saveItems", function () {
 		// TODO: Test cookies
-		it("should save an item to the current selected collection", function* () {
+		it("should save a translated item to the current selected collection", function* () {
 			var collection = yield createDataObject('collection');
 			yield waitForItemsLoad(win);
 			
@@ -96,6 +96,50 @@ describe("Connector Server", function () {
 			
 			// Wait until indexing is done
 			yield waitForItemEvent('refresh');
+		});
+	});
+	
+	describe("/connector/saveSnapshot", function () {
+		it("should save a webpage item and snapshot to the current selected collection", function* () {
+			var collection = yield createDataObject('collection');
+			yield waitForItemsLoad(win);
+			
+			// saveSnapshot saves parent and child before returning
+			var ids1, ids2;
+			var promise = waitForItemEvent('add').then(function (ids) {
+				ids1 = ids;
+				return waitForItemEvent('add').then(function (ids) {
+					ids2 = ids;
+				});
+			});
+			yield Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSnapshot",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						url: "http://example.com",
+						html: "<html><head><title>Title</title><body>Body</body></html>"
+					})
+				}
+			);
+			
+			assert.isTrue(promise.isFulfilled());
+			
+			// Check parent item
+			assert.lengthOf(ids1, 1);
+			var item = Zotero.Items.get(ids1[0]);
+			assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'webpage');
+			assert.isTrue(collection.hasItem(item.id));
+			assert.equal(item.getField('title'), 'Title');
+			
+			// Check attachment
+			assert.lengthOf(ids2, 1);
+			item = Zotero.Items.get(ids2[0]);
+			assert.isTrue(item.isImportedAttachment());
+			assert.equal(item.getField('title'), 'Title');
 		});
 	});
 });

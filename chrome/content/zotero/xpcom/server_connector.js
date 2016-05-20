@@ -458,9 +458,10 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			}
 		}
 		else {
-			Zotero.HTTP.processDocuments(["zotero://connector/"+encodeURIComponent(data["url"])],
-				function(doc) {
-					delete Zotero.Server.Connector.Data[data["url"]];
+			Zotero.HTTP.processDocuments(
+				["zotero://connector/" + encodeURIComponent(data.url)],
+				Zotero.Promise.coroutine(function* (doc) {
+					delete Zotero.Server.Connector.Data[data.url];
 					
 					try {
 						// create new webpage item
@@ -469,13 +470,14 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 						item.setField("title", doc.title);
 						item.setField("url", data.url);
 						item.setField("accessDate", "CURRENT_TIMESTAMP");
-						var itemID = item.save();
-						if(collection) collection.addItem(itemID);
+						if (collection) {
+							item.setCollections([collection.id]);
+						}
+						var itemID = yield item.saveTx();
 						
 						// save snapshot
 						if (filesEditable && !data.skipSnapshot) {
-							// TODO: async
-							Zotero.Attachments.importFromDocument({
+							yield Zotero.Attachments.importFromDocument({
 								document: doc,
 								parentItemID: itemID
 							});
@@ -483,11 +485,14 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 						
 						sendResponseCallback(201);
 					} catch(e) {
+						Zotero.debug("ERROR");
+						Zotero.debug(e);
 						sendResponseCallback(500);
 						throw e;
 					}
-				},
-				null, null, false, cookieSandbox);
+				}),
+				null, null, false, cookieSandbox
+			);
 		}
 	}
 }
