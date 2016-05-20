@@ -412,14 +412,16 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 	"init":function(url, data, sendResponseCallback) {
 		Zotero.Server.Connector.Data[data["url"]] = "<html>"+data["html"]+"</html>";
 		
-		// figure out where to save
-		var libraryID = null;
-		var collectionID = null;
 		var zp = Zotero.getActiveZoteroPane();
 		try {
 			var libraryID = zp.getSelectedLibraryID();
 			var collection = zp.getSelectedCollection();
 		} catch(e) {}
+		
+		// Default to personal library if pane not yet opened
+		if (!libraryID) {
+			libraryID = Zotero.Libraries.userLibraryID
+		}
 		
 		// determine whether snapshot can be saved
 		var filesEditable;
