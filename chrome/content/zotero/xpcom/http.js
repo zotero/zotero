@@ -790,7 +790,8 @@ Zotero.HTTP = new function() {
 	 * Load one or more documents in a hidden browser
 	 *
 	 * @param {String|String[]} urls URL(s) of documents to load
-	 * @param {Function} processor Callback to be executed for each document loaded
+	 * @param {Function} processor - Callback to be executed for each document loaded; if function returns
+	 *     a promise, it's waited for before continuing
 	 * @param {Function} done Callback to be executed after all documents have been loaded
 	 * @param {Function} exception Callback to be executed if an exception occurs
 	 * @param {Boolean} dontDelete Don't delete the hidden browser upon completion; calling function
@@ -853,16 +854,40 @@ Zotero.HTTP = new function() {
 			hiddenBrowser.removeEventListener("pageshow", onLoad, true);
 			hiddenBrowser.zotero_loaded = true;
 			
+			var maybePromise;
+			var error;
 			try {
-				processor(doc);
-			} catch(e) {
-				if(exception) {
-					exception(e);
-					return;
-				} else {
-					throw(e);
+				maybePromise = processor(doc);
+			}
+			catch (e) {
+				error = e;
+			}
+			
+			// If processor returns a promise, wait for it
+			if (maybePromise.then) {
+				maybePromise.then(() => doLoad())
+				.catch(e => {
+					if (exception) {
+						exception(e);
+					}
+					else {
+						throw e;
+					}
+				});
+				return;
+			}
+			
+			try {
+				if (error) {
+					if (exception) {
+						exception(error);
+					}
+					else {
+						throw error;
+					}
 				}
-			} finally {
+			}
+			finally {
 				doLoad();
 			}
 		};
