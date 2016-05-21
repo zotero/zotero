@@ -935,7 +935,6 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 				
 				if (state == 'successful') {
 					// Update local object with saved data if necessary
-					yield obj.loadAllData();
 					obj.fromJSON(current.data);
 					toSave.push(obj);
 					toCache.push(current);
