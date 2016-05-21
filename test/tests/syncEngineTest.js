@@ -787,7 +787,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 		});
 		
 		
-		it("shouldn't include file properties for attachments in ZFS libraries", function* () {
+		it("shouldn't include storage properties for attachments in ZFS libraries", function* () {
 			({ engine, client, caller } = yield setup());
 			
 			var libraryID = Zotero.Libraries.userLibraryID;
@@ -812,9 +812,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 						let itemJSON = json[0];
 						assert.equal(itemJSON.key, item.key);
 						assert.equal(itemJSON.version, 0);
-						assert.notProperty(itemJSON, "contentType");
-						assert.notProperty(itemJSON, "charset");
-						assert.notProperty(itemJSON, "filename");
+						assert.property(itemJSON, "contentType");
+						assert.property(itemJSON, "charset");
+						assert.property(itemJSON, "filename");
 						assert.notProperty(itemJSON, "mtime");
 						assert.notProperty(itemJSON, "md5");
 						req.respond(
@@ -840,7 +840,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 		});
 		
 		
-		it("should include file properties for attachments in WebDAV libraries", function* () {
+		it("should include storage properties for attachments in WebDAV libraries", function* () {
 			({ engine, client, caller } = yield setup());
 			
 			var libraryID = Zotero.Libraries.userLibraryID;

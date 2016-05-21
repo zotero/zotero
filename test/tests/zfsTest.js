@@ -323,7 +323,6 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 					assert.equal(params.mtime, mtime1);
 					assert.equal(params.filename, filename1);
 					assert.equal(params.filesize, size1);
-					assert.equal(params.contentType, contentType1);
 					
 					req.respond(
 						200,
@@ -375,8 +374,6 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 					assert.equal(params.filename, filename2);
 					assert.equal(params.zipFilename, item2.key + ".zip");
 					assert.isTrue(parseInt(params.filesize) == params.filesize);
-					assert.equal(params.contentType, contentType2);
-					assert.equal(params.charset, charset2);
 					
 					req.respond(
 						200,

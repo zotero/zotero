@@ -1051,6 +1051,22 @@ describe("Zotero.Item", function () {
 				assert.equal(json.md5, (yield item.attachmentHash));
 			})
 			
+			it("should omit storage values with .skipStorageProperties", function* () {
+				var file = getTestDataDirectory();
+				file.append('test.png');
+				var item = yield Zotero.Attachments.importFromFile({ file });
+				
+				item.attachmentSyncedModificationTime = new Date().getTime();
+				item.attachmentSyncedHash = 'b32e33f529942d73bea4ed112310f804';
+				yield item.saveTx({ skipAll: true });
+				
+				var json = item.toJSON({
+					skipStorageProperties: true
+				});
+				assert.isUndefined(json.mtime);
+				assert.isUndefined(json.md5);
+			});
+			
 			it("should output synced storage values with .syncedStorageProperties", function* () {
 				var item = new Zotero.Item('attachment');
 				item.attachmentLinkMode = 'imported_file';

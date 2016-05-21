@@ -335,14 +335,6 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			filename,
 			size: file.fileSize
 		};
-		var charset = item.attachmentCharset;
-		var contentType = item.attachmentContentType;
-		if (charset) {
-			json.charset = charset;
-		}
-		if (contentType) {
-			json.contentType = contentType;
-		}
 		if (zip) {
 			json.zip = true;
 		}
@@ -372,14 +364,6 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			filename,
 			filesize: (yield OS.File.stat(uploadPath)).size
 		};
-		var charset = item.attachmentCharset;
-		var contentType = item.attachmentContentType;
-		if (charset) {
-			params.charset = charset;
-		}
-		if (contentType) {
-			params.contentType = contentType;
-		}
 		if (zip) {
 			params.zipMD5 = yield Zotero.Utilities.Internal.md5Async(uploadPath);
 			params.zipFilename = OS.Path.basename(uploadPath);

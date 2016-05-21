@@ -878,8 +878,8 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 					objectType,
 					o.id,
 					{
-						// Only include file properties ('contentType', etc.) for WebDAV files
-						skipImportedFileProperties:
+						// Only storage properties ('mtime', 'md5') for WebDAV files
+						skipStorageProperties:
 							objectType == 'item'
 								? Zotero.Sync.Storage.Local.getModeForLibrary(this.library.libraryID)
 									!= 'webdav'
@@ -1073,8 +1073,8 @@ Zotero.Sync.Data.Engine.prototype._getJSONForObject = function (objectType, id, 
 			includeKey: true,
 			includeVersion: true, // DEBUG: remove?
 			includeDate: true,
-			// Whether to skip 'contentType', 'filename', 'mtime', and 'md5'
-			skipImportedFileProperties: options.skipImportedFileProperties,
+			// Whether to skip 'mtime' and 'md5'
+			skipStorageProperties: options.skipStorageProperties,
 			// Use last-synced mtime/md5 instead of current values from the file itself
 			syncedStorageProperties: true,
 			patchBase: cacheObj ? cacheObj.data : false
