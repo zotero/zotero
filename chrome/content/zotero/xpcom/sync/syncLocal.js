@@ -611,6 +611,18 @@ Zotero.Sync.Data.Local = {
 						if (obj) {
 							Zotero.debug("Matching local " + objectType + " exists", 4);
 							
+							let jsonDataLocal = obj.toJSON();
+							
+							// For items, check if mtime or file hash changed in metadata,
+							// which would indicate that a remote storage sync took place and
+							// a download is needed
+							if (objectType == 'item' && obj.isImportedAttachment()) {
+								if (jsonDataLocal.mtime != jsonData.mtime
+										|| jsonDataLocal.md5 != jsonData.md5) {
+									saveOptions.storageDetailsChanged = true;
+								}
+							}
+							
 							// Local object has been modified since last sync
 							if (!obj.synced) {
 								Zotero.debug("Local " + objectType + " " + obj.libraryKey
@@ -619,18 +631,6 @@ Zotero.Sync.Data.Local = {
 								let cachedJSON = yield this.getCacheObject(
 									objectType, obj.libraryID, obj.key, obj.version
 								);
-								
-								let jsonDataLocal = obj.toJSON();
-								
-								// For items, check if mtime or file hash changed in metadata,
-								// which would indicate that a remote storage sync took place and
-								// a download is needed
-								if (objectType == 'item' && obj.isImportedAttachment()) {
-									if (jsonDataLocal.mtime != jsonData.mtime
-											|| jsonDataLocal.md5 != jsonData.md5) {
-										saveOptions.storageDetailsChanged = true;
-									}
-								}
 								
 								let result = this._reconcileChanges(
 									objectType,
@@ -701,7 +701,7 @@ Zotero.Sync.Data.Local = {
 						else {
 							Zotero.debug(ObjectType + " doesn't exist locally");
 							
-							isNewObject = true;
+							saveOptions.isNewObject = true;
 							
 							// Check if object has been deleted locally
 							let dateDeleted = yield this.getDateDeleted(

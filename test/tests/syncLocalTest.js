@@ -275,8 +275,9 @@ describe("Zotero.Sync.Data.Local", function() {
 			assert.notInclude(versions, key);
 		});
 		
-		it("should mark new attachment items for download", function* () {
-			var libraryID = Zotero.Libraries.userLibraryID;
+		it("should mark new attachment items and library for download", function* () {
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
 			Zotero.Sync.Storage.Local.setModeForLibrary(libraryID, 'zfs');
 			
 			var key = Zotero.DataObjectUtilities.generateKey();
@@ -299,10 +300,12 @@ describe("Zotero.Sync.Data.Local", function() {
 			);
 			var item = Zotero.Items.getByLibraryAndKey(libraryID, key);
 			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD);
+			assert.isTrue(library.storageDownloadNeeded);
 		})
 		
 		it("should mark updated attachment items for download", function* () {
-			var libraryID = Zotero.Libraries.userLibraryID;
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
 			Zotero.Sync.Storage.Local.setModeForLibrary(libraryID, 'zfs');
 			
 			var item = yield importFileAttachment('test.png');
@@ -327,6 +330,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			);
 			
 			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD);
+			assert.isTrue(library.storageDownloadNeeded);
 		})
 		
 		it("should ignore attachment metadata when resolving metadata conflict", function* () {
