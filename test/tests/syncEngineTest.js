@@ -960,18 +960,29 @@ describe("Zotero.Sync.Data.Engine", function () {
 		it("should update local objects with remotely saved version after uploading if necessary", function* () {
 			({ engine, client, caller } = yield setup());
 			
-			var libraryID = Zotero.Libraries.userLibraryID;
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
 			var lastLibraryVersion = 5;
-			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
+			library.libraryVersion = lastLibraryVersion;
+			yield library.saveTx();
 			
 			var types = Zotero.DataObjectUtilities.getTypes();
 			var objects = {};
 			var objectResponseJSON = {};
 			var objectNames = {};
+			var itemDateModified = {};
 			for (let type of types) {
-				objects[type] = [yield createDataObject(type, { setTitle: true })];
+				objects[type] = [
+					yield createDataObject(
+						type, { setTitle: true, dateModified: '2016-05-21 01:00:00' }
+					)
+				];
 				objectNames[type] = {};
 				objectResponseJSON[type] = objects[type].map(o => o.toResponseJSON());
+				if (type == 'item') {
+					let item = objects[type][0];
+					itemDateModified[item.key] = item.dateModified;
+				}
 			}
 			
 			server.respond(function (req) {
@@ -1011,7 +1022,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			yield engine.start();
 			
-			assert.equal(Zotero.Libraries.getVersion(libraryID), lastLibraryVersion);
+			assert.equal(library.libraryVersion, lastLibraryVersion);
 			for (let type of types) {
 				// Make sure local objects were updated with new metadata and marked as synced
 				assert.lengthOf((yield Zotero.Sync.Data.Local.getUnsynced(type, libraryID)), 0);
@@ -1021,6 +1032,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 				let name = objectNames[type][key];
 				if (type == 'item') {
 					assert.equal(name, o.getField('title'));
+					
+					// But Date Modified shouldn't have changed for items
+					assert.equal(itemDateModified[key], o.dateModified);
 				}
 				else {
 					assert.equal(name, o.name);

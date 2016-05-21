@@ -959,7 +959,12 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 		);
 		yield Zotero.DB.executeTransaction(function* () {
 			for (let i = 0; i < toSave.length; i++) {
-				yield toSave[i].save();
+				yield toSave[i].save({
+					skipSyncedUpdate: true,
+					// We want to minimize the times when server writes actually result in local
+					// updates, but when they do, don't update the user-visible timestamp
+					skipDateModifiedUpdate: true
+				});
 			}
 			this.library.libraryVersion = libraryVersion;
 			yield this.library.save();
