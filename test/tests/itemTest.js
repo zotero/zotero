@@ -95,7 +95,7 @@ describe("Zotero.Item", function () {
 			assert.equal(item.getField(field), "");
 		})
 		
-		it('should clear a field set to '0' when a ""/null/false is passed', function* () {
+		it('should clear a field set to "0" when a ""/null/false is passed', function* () {
 			var field = 'title';
 			var val = "0";
 			var fieldID = Zotero.ItemFields.getID(field);
