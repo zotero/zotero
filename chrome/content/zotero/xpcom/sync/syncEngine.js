@@ -940,10 +940,11 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 					toCache.push(current);
 				}
 				else {
-					// This won't reflect the actual version of the item on the server, but
-					// it will guarantee that the item won't be redownloaded unnecessarily
-					// in the case of a full sync, because the version will be higher than
-					// whatever version is on the server.
+					// This won't necessarily reflect the actual version of the object on the server,
+					// since objects are uploaded in batches and we only get the final version, but it
+					// will guarantee that the item won't be redownloaded unnecessarily in the case of
+					// a full sync, because the version will be higher than whatever version is on the
+					// server.
 					batch[index].version = libraryVersion
 					toCache.push(batch[index]);
 				}
