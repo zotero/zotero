@@ -2792,10 +2792,16 @@ Zotero.Browser = new function() {
 		}
 	}
 
-	this.createHiddenBrowserWithURL = function(url) {
-		return new Zotero.Promise(function(resolve, reject) {
-			var browser = Zotero.Browser.createHiddenBrowser();
-			browser.addEventListener("DOMContentLoaded", () => resolve(browser), false);
+	this.createHiddenBrowserWithURL = function(url, timeout) {
+		timeout = typeof timeout !== 'undefined' ? timeout : 5000;
+		return new Promise(function(resolve, reject) {
+			var browser = Zotero.Browser.createHiddenBrowser(),
+				callback = () => {clearTimeout(interrupter); resolve(browser)};
+			var interrupter = setTimeout(function() {
+				browser.removeEventListener('DOMContentLoaded', callback, false);
+				resolve(false);
+			}, timeout);
+			browser.addEventListener('DOMContentLoaded', callback, false);
 			browser.loadURI(url)
 		});
 	}
