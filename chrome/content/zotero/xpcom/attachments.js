@@ -121,7 +121,7 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * @param {nsIFile} [options.file] - File to link to
+	 * @param {nsIFile|String} [options.file] - File to add
 	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
 	 * @param {Integer[]} [options.collections] - Collection keys or ids to add new item to
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
@@ -130,7 +130,7 @@ Zotero.Attachments = new function(){
 	this.linkFromFile = Zotero.Promise.coroutine(function* (options) {
 		Zotero.debug('Linking attachment from file');
 		
-		var file = options.file;
+		var file = Zotero.File.pathToFile(options.file);
 		var parentItemID = options.parentItemID;
 		var collections = options.collections;
 		var saveOptions = options.saveOptions;
