@@ -105,16 +105,17 @@ ConcurrentCaller.prototype.pause = function (ms) {
  * Add a task to the queue without starting it
  *
  * @param {Function|Function[]} - One or more functions to run
- * @return {Promise[]} - An array of promises for passed functions, resolved once they have all
- *     finished (even if other functions are still running)
+ * @return {Promise|Promise<PromiseInspection[]>} - If one function is passed, a promise for the return
+ *     value of the passed function; if multiple, a promise for an array of PromiseInspection objects
+ *     for those functions, resolved once they have all finished, even if other functions are still running
  */
 ConcurrentCaller.prototype.add = function (func) {
 	if (Array.isArray(func)) {
 		let promises = [];
 		for (let i = 0; i < func.length; i++) {
-			promises.push(this.start(func[i]));
+			promises.push(this.start(func[i]).reflect());
 		}
-		return Promise.settle(promises);
+		return Promise.all(promises);
 	}
 	
 	if (!this._deferred || !this._deferred.promise.isPending()) {
@@ -246,6 +247,7 @@ ConcurrentCaller.prototype._processNext = function () {
 			this._processNext();
 		});
 		
+		e.handledRejection = true;
 		f.deferred.reject(e);
 	});
 	return true;

@@ -159,6 +159,7 @@ Zotero.FeedReader = function(url) {
 	this._channel = Services.io.newChannelFromURI2(feedUrl, null, 
 		Services.scriptSecurityManager.getSystemPrincipal(), null, 
 		Ci.nsILoadInfo.SEC_NORMAL, Ci.nsIContentPolicy.TYPE_OTHER);
+	this._channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
 	this._channel.asyncOpen(feedProcessor, null); // Sends an HTTP request
 }
 
@@ -179,17 +180,24 @@ Zotero.FeedReader.prototype.terminate = function(status) {
 	
 	// Reject feed promise if not resolved yet
 	if (this._feedProcessed.promise.isPending()) {
-		this._feedProcessed.reject(status);
+		this._feedProcessed.reject(new Error(status));
 	}
 	
 	// Reject feed item promise if not resolved yet
 	let lastItem = this._feedItems[this._feedItems.length - 1];
 	if (lastItem.promise.isPending()) {
-		lastItem.reject(status);
+		// It seemed like a good idea to reject the last item but
+		// it's not really been useful yet, aside from bluebird
+		// throwing errors about unhandled rejections in tests
+		// so we suppress them here. TODO: We should probably
+		// rethink whether this code makes sense and make it better.
+		let er = new Error(status);
+		er.handledRejection = true;
+		lastItem.reject(er);
 	}
 	
 	// Close feed connection
-	if (this._channel.isPending) {
+	if (this._channel.isPending()) {
 		this._channel.cancel(Components.results.NS_BINDING_ABORTED);
 	}
 };

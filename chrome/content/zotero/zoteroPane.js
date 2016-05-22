@@ -57,7 +57,6 @@ var ZoteroPane = new function()
 	this.contextPopupShowing = contextPopupShowing;
 	this.openNoteWindow = openNoteWindow;
 	this.viewSelectedAttachment = viewSelectedAttachment;
-	this.showAttachmentNotFoundDialog = showAttachmentNotFoundDialog;
 	this.reportErrors = reportErrors;
 	this.displayErrorMessage = displayErrorMessage;
 	
@@ -105,12 +104,6 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-pane-stack').setAttribute('platform', 'mac');
 		} else if(Zotero.isWin) {
 			document.getElementById('zotero-pane-stack').setAttribute('platform', 'win');
-		}
-		
-		// Use pre-Yosemite search fields before Fx34
-		// See note in chrome/content/zotero-platform/mac/overlay.css
-		if (Zotero.isMac && Zotero.platformMajorVersion < 34 && Zotero.oscpu.contains(' 10.10')) {
-			document.getElementById('zotero-pane-stack').setAttribute('oldsearchfield', 'true')
 		}
 		
 		// Set the sync tooltip label
@@ -868,6 +861,27 @@ var ZoteroPane = new function()
 		collection.name = newName.value;
 		collection.parentKey = parentKey;
 		return collection.saveTx();
+	});
+	
+	this.importFeedsFromOPML = Zotero.Promise.coroutine(function* (event) {
+		var nsIFilePicker = Components.interfaces.nsIFilePicker;
+		while (true) {
+			var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+			fp.init(window, Zotero.getString('fileInterface.importOPML'), nsIFilePicker.modeOpen);
+			fp.appendFilter(Zotero.getString('fileInterface.OPMLFeedFilter'), '*.opml; *.xml');
+			fp.appendFilters(nsIFilePicker.filterAll);
+			if (fp.show() == nsIFilePicker.returnOK) {
+				var contents = yield Zotero.File.getContentsAsync(fp.file.path);
+				var success = yield Zotero.Feeds.importFromOPML(contents);
+				if (success) {
+					return true;
+				}
+				// Try again
+				Zotero.alert(window, Zotero.getString('general.error'), Zotero.getString('fileInterface.unsupportedFormat'));
+			} else {
+				return false;
+			}
+		}
 	});
 	
 	this.newFeedFromPage = Zotero.Promise.coroutine(function* (event) {
@@ -2003,7 +2017,7 @@ var ZoteroPane = new function()
 			url: feed.url,
 			title: feed.name,
 			ttl: feed.refreshInterval,
-			cleanAfter: feed.cleanupAfter
+			cleanupAfter: feed.cleanupAfter
 		};
 		
 		window.openDialog('chrome://zotero/content/feedSettings.xul', 
@@ -2012,7 +2026,7 @@ var ZoteroPane = new function()
 		
 		feed.name = data.title;
 		feed.refreshInterval = data.ttl;
-		feed.cleanupAfter = data.cleanAfter;
+		feed.cleanupAfter = data.cleanupAfter;
 		yield feed.saveTx();
 	});
 	
@@ -2288,7 +2302,18 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.buildCollectionContextMenu = function () {
+	this.buildCollectionContextMenu = function (noRepeat) {
+		var collectionTreeRow = this.collectionsView.selectedTreeRow;
+		// If the items view isn't initialized, this was a right-click on a different collection and
+		// the new collection's items are still loading, so update the menu after loading. This causes
+		// some menu items (e.g., export/createBib/loadReport) to appear gray in the menu at first and
+		// then turn black once there are items. Pass a flag to prevent an accidental infinite loop.
+		if (!collectionTreeRow.isHeader() && !this.itemsView.initialized && !noRepeat) {
+			this.itemsView.addEventListener('load', function () {
+				this.buildCollectionContextMenu(true);
+			}.bind(this));
+		}
+		
 		var options = [
 			"newCollection",
 			"newSavedSearch",
@@ -2319,8 +2344,6 @@ var ZoteroPane = new function()
 		
 		var menu = document.getElementById('zotero-collectionmenu');
 		
-		var collectionTreeRow = this.collectionsView.selectedTreeRow;
-		
 		// By default things are hidden and visible, so we only need to record
 		// when things are visible and when they're visible but disabled
 		var show = [], disable = [];
@@ -2340,15 +2363,6 @@ var ZoteroPane = new function()
 			var s = [m.exportCollection, m.createBibCollection, m.loadReport];
 			
 			if (!this.itemsView.rowCount) {
-				// If no items, it might be because this was a right-click on a different collection
-				// and the new collection's items are still loading, so update the menu after loading.
-				// This causes export/createBib/loadReport to appear gray in the menu at first and then
-				// turn black once there are items.
-				if (!this.itemsView.initialized) {
-					this.itemsView.addEventListener('load', function () {
-						this.buildCollectionContextMenu();
-					}.bind(this));
-				}
 				disable = s;
 			}
 			
@@ -3726,13 +3740,13 @@ var ZoteroPane = new function()
 						var collectionID = false;
 					}
 					
-					// TODO: Update for async DB
-					var attachmentItem = Zotero.Attachments.importFromURL(url, false,
-						false, false, collectionID, mimeType, libraryID,
-						function(attachmentItem) {
-							self.selectItem(attachmentItem.id);
-						});
-					
+					let attachmentItem = yield Zotero.Attachments.importFromURL({
+						libraryID,
+						url,
+						collections: collectionID ? [collectionID] : undefined,
+						contentType: mimeType
+					});
+					this.selectItem(attachmentItem.id)
 					return;
 				}
 			}
@@ -3752,7 +3766,11 @@ var ZoteroPane = new function()
 					//Zotero.Attachments.linkFromURL(doc, item.id);
 				}
 				else if (filesEditable) {
-					var attachmentItem = Zotero.Attachments.importFromURL(url, item.id, false, false, false, mimeType);
+					var attachmentItem = yield Zotero.Attachments.importFromURL({
+						url,
+						parentItemID: item.id,
+						contentType: mimeType
+					});
 					if (attachmentItem) {
 						item.setField('title', attachmentItem.getField('title'));
 						item.setField('url', attachmentItem.getField('url'));
@@ -3917,7 +3935,8 @@ var ZoteroPane = new function()
 			}
 			else {
 				if (!item.isImportedAttachment()
-						|| !Zotero.Sync.Storage.Local.downloadAsNeeded(item.libraryID)) {
+						|| (!Zotero.Sync.Storage.Local.getEnabledForLibrary(item.libraryID)
+							|| !Zotero.Sync.Storage.Local.downloadAsNeeded(item.libraryID))) {
 					this.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
 					return;
 				}
@@ -3939,7 +3958,9 @@ var ZoteroPane = new function()
 				}
 				
 				if (!(yield downloadedItem.getFilePathAsync())) {
-					ZoteroPane_Local.showAttachmentNotFoundDialog(downloadedItem.id, noLocateOnMissing);
+					ZoteroPane_Local.showAttachmentNotFoundDialog(
+						downloadedItem.id, noLocateOnMissing, true
+					);
 					return;
 				}
 				
@@ -4166,30 +4187,53 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function showAttachmentNotFoundDialog(itemID, noLocate) {
+	this.showAttachmentNotFoundDialog = function (itemID, noLocate, notOnServer) {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
 		
+		var title = Zotero.getString('pane.item.attachments.fileNotFound.title');
+		var text = Zotero.getString('pane.item.attachments.fileNotFound.text1') + "\n\n"
+			+ Zotero.getString(
+				'pane.item.attachments.fileNotFound.text2' + (notOnServer ? '.notOnServer' : ''),
+				[ZOTERO_CONFIG.CLIENT_NAME, ZOTERO_CONFIG.DOMAIN_NAME]
+			);
+		var supportURL = Zotero.getString('pane.item.attachments.fileNotFound.supportURL');
 		
 		// Don't show Locate button
 		if (noLocate) {
-			var index = ps.alert(null,
-				Zotero.getString('pane.item.attachments.fileNotFound.title'),
-				Zotero.getString('pane.item.attachments.fileNotFound.text')
+			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
+				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
+			let index = ps.confirmEx(null,
+				title,
+				text,
+				buttonFlags,
+				null,
+				Zotero.getString('general.moreInformation'),
+				null, null, {}
 			);
+			if (index == 1) {
+				this.loadURI(supportURL, { metaKey: true, shiftKey: true });
+			}
 			return;
 		}
 		
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+			+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
 		var index = ps.confirmEx(null,
-			Zotero.getString('pane.item.attachments.fileNotFound.title'),
-			Zotero.getString('pane.item.attachments.fileNotFound.text'),
-			buttonFlags, Zotero.getString('general.locate'), null,
-			null, null, {});
+			title,
+			text,
+			buttonFlags,
+			Zotero.getString('general.locate'),
+			null,
+			Zotero.getString('general.moreInformation'), null, {}
+		);
 		
 		if (index == 0) {
 			this.relinkAttachment(itemID);
+		}
+		else if (index == 2) {
+			this.loadURI(supportURL, { metaKey: true, shiftKey: true });
 		}
 	}
 	

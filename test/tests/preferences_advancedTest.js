@@ -1,4 +1,64 @@
 describe("Advanced Preferences", function () {
+	describe("General", function () {
+		var server;
+		
+		before(function () {
+			server = sinon.fakeServer.create();
+			server.autoRespond = true;
+			Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
+		});
+		
+		after(function () {
+			Zotero.HTTP.mock = null;
+		})
+		
+		describe("Debug Output", function () {
+			it("should log output and submit to server", function* () {
+				var win = yield loadWindow("chrome://zotero/content/preferences/preferences.xul", {
+					pane: 'zotero-prefpane-advanced',
+					tabIndex: 0
+				});
+				
+				// Wait for tab to load
+				var doc = win.document;
+				var prefwindow = doc.documentElement;
+				var defer = Zotero.Promise.defer();
+				var pane = doc.getElementById('zotero-prefpane-advanced');
+				if (!pane.loaded) {
+					pane.addEventListener('paneload', function () {
+						defer.resolve();
+					})
+					yield defer.promise;
+				}
+				
+				var enableButton = doc.getElementById('debug-output-enable');
+				enableButton.click();
+				yield createDataObject('item');
+				enableButton.click();
+				
+				server.respond(function (req) {
+					if (req.method == "POST") {
+						req.respond(
+							200,
+							{},
+							'<?xml version="1.0" encoding="UTF-8"?>\n'
+								+ '<xml><reported reportID="1234567890"/></xml>'
+						);
+					}
+				});
+				
+				// Make sure Debug ID is shown in dialog
+				var promise = waitForDialog(function (dialog) {
+					assert.match(dialog.document.documentElement.textContent, /D1234567890/);
+				});
+				doc.getElementById('debug-output-submit').click();
+				yield promise;
+				
+				win.close();
+			});
+		});
+	});
+	
 	describe("Files & Folders", function () {
 		describe("Linked Attachment Base Directory", function () {
 			var setBaseDirectory = Zotero.Promise.coroutine(function* (basePath) {

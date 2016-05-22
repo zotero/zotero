@@ -72,7 +72,7 @@ describe("Support Functions for Unit Testing", function() {
 
 			let tags = data.itemWithTags.tags;
 			for (let i=0; i<tags.length; i++) {
-				let tagID = yield Zotero.Tags.getID(tags[i].tag);
+				let tagID = Zotero.Tags.getID(tags[i].tag);
 				assert.ok(tagID, '"' + tags[i].tag + '" tag was inserted into the database');
 				assert.ok(zItem.hasTag(tags[i].tag), '"' + tags[i].tag + '" tag was assigned to item');
 			}

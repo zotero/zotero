@@ -16,6 +16,18 @@ describe("Zotero_Browser", function () {
 		Zotero.ProgressWindowSet.closeAll();
 	})
 	
+	var waitForTranslateIcon = Zotero.Promise.coroutine(function* () {
+		var button = win.document.getElementById('zotero-toolbar-save-button');
+		if (button.classList.contains('translate')) {
+			return;
+		}
+		Zotero.debug("Waiting for translator icon");
+		do {
+			yield Zotero.Promise.delay(50);
+		}
+		while (!button.classList.contains('translate'));
+	});
+	
 	
 	it("should save webpage to My Library if the Zotero pane hasn't been opened yet in a Firefox window", function* () {
 		var win = yield loadBrowserWindow();
@@ -39,7 +51,7 @@ describe("Zotero_Browser", function () {
 	});
 	
 	it("should save journal article to My Library if the Zotero pane hasn't been opened yet in a Firefox window", function* () {
-		Zotero.Prefs.set('lastViewedFolder', collection.collectionTreeViewID);
+		Zotero.Prefs.set('lastViewedFolder', collection.treeViewID);
 		
 		var win = yield loadBrowserWindow();
 		
@@ -113,6 +125,9 @@ describe("Zotero_Browser", function () {
 		win.Zotero_Browser.addDetectCallback(() => deferred.resolve());
 		win.loadURI(uri);
 		yield deferred.promise;
+		
+		// Detection runs twice for local files, so wait for the icon to actually appear
+		yield waitForTranslateIcon();
 		
 		yield loadZoteroPane(win);
 		var collection = yield createDataObject('collection');

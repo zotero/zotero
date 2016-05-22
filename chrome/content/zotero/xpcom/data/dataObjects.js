@@ -118,7 +118,16 @@ Zotero.DataObjects.prototype.get = function (ids) {
 		let id = ids[i];
 		// Check if already loaded
 		if (!this._objectCache[id]) {
-			throw new Zotero.Exception.UnloadedDataException(this._ZDO_Object + " " + id + " not yet loaded");
+			// If unloaded id is registered, throw an error
+			if (this._objectKeys[id]) {
+				throw new Zotero.Exception.UnloadedDataException(
+					this._ZDO_Object + " " + id + " not yet loaded"
+				);
+			}
+			// Otherwise ignore (which means returning false for a single id)
+			else {
+				continue;
+			}
 		}
 		toReturn.push(this._objectCache[id]);
 	}
@@ -281,7 +290,7 @@ Zotero.DataObjects.prototype.getByLibraryAndKey = function (libraryID, key, opti
  * @param {Boolean} [options.noCache=false] - Don't add object to cache after loading
  * @return {Promise<Zotero.DataObject>} - Promise for a data object, or FALSE if not found
  */
-Zotero.DataObjects.prototype.getByLibraryAndKeyAsync = Zotero.Promise.coroutine(function* (libraryID, key, options) {
+Zotero.DataObjects.prototype.getByLibraryAndKeyAsync = Zotero.Promise.method(function (libraryID, key, options) {
 	var id = this.getIDFromLibraryAndKey(libraryID, key);
 	if (!id) {
 		return false;
@@ -378,12 +387,41 @@ Zotero.DataObjects.prototype.getObjectVersions = Zotero.Promise.coroutine(functi
 
 
 /**
+ * Bulk-load data type(s) of given objects if not loaded
+ *
+ * This would generally be used to load necessary data for cross-library search results, since those
+ * results might include objects in libraries that haven't yet been loaded.
+ *
+ * @param {Zotero.DataObject[]} objects
+ * @param {String[]} dataTypes
+ * @return {Promise}
+ */
+Zotero.DataObjects.prototype.loadDataTypes = Zotero.Promise.coroutine(function* (objects, dataTypes) {
+	for (let dataType of dataTypes) {
+		let typeIDsByLibrary = {};
+		for (let obj of objects) {
+			if (obj._loaded[dataType]) {
+				continue;
+			}
+			if (!typeIDsByLibrary[obj.libraryID]) {
+				typeIDsByLibrary[obj.libraryID] = [];
+			}
+			typeIDsByLibrary[obj.libraryID].push(obj.id);
+		}
+		for (let libraryID in typeIDsByLibrary) {
+			yield this._loadDataTypeInLibrary(dataType, parseInt(libraryID), typeIDsByLibrary[libraryID]);
+		}
+	}
+});
+
+
+/**
  * Loads data for a given data type
  * @param {String} dataType
  * @param {Integer} libraryID
  * @param {Integer[]} [ids]
  */
-Zotero.DataObjects.prototype._loadDataType = Zotero.Promise.coroutine(function* (dataType, libraryID, ids) {
+Zotero.DataObjects.prototype._loadDataTypeInLibrary = Zotero.Promise.coroutine(function* (dataType, libraryID, ids) {
 	var funcName = "_load" + dataType[0].toUpperCase() + dataType.substr(1)
 		// Single data types need an 's' (e.g., 'note' -> 'loadNotes()')
 		+ ((dataType.endsWith('s') || dataType.endsWith('Data') ? '' : 's'));
@@ -427,7 +465,7 @@ Zotero.DataObjects.prototype.loadAll = Zotero.Promise.coroutine(function* (libra
 	
 	let dataTypes = this.ObjectClass.prototype._dataTypes;
 	for (let i = 0; i < dataTypes.length; i++) {
-		yield this._loadDataType(dataTypes[i], libraryID, ids);
+		yield this._loadDataTypeInLibrary(dataTypes[i], libraryID, ids);
 	}
 	
 	Zotero.debug(`Loaded all ${this._ZDO_objects} in ${library.name} in ${new Date() - t} ms`);
@@ -645,9 +683,32 @@ Zotero.DataObjects.prototype.reload = Zotero.Promise.coroutine(function* (ids, d
 	Zotero.debug('Reloading ' + (dataTypes ? '[' + dataTypes.join(', ') + '] for ' : '')
 		+ this._ZDO_objects + ' ' + ids);
 	
-	for (let i=0; i<ids.length; i++) {
-		if (this._objectCache[ids[i]]) {
-			yield this._objectCache[ids[i]].reload(dataTypes, reloadUnchanged);
+	// If data types not specified, reload loaded data for each object individually.
+	// TODO: optimize
+	if (!dataTypes) {
+		for (let i=0; i<ids.length; i++) {
+			if (this._objectCache[ids[i]]) {
+				yield this._objectCache[ids[i]].reload(dataTypes, reloadUnchanged);
+			}
+		}
+		return;
+	}
+	
+	for (let dataType of dataTypes) {
+		let typeIDsByLibrary = {};
+		for (let id of ids) {
+			let obj = this._objectCache[id];
+			if (!obj || !obj._loaded[dataType] || obj._skipDataTypeLoad[dataType]
+					|| (!reloadUnchanged && !obj._changed[dataType])) {
+				continue;
+			}
+			if (!typeIDsByLibrary[obj.libraryID]) {
+				typeIDsByLibrary[obj.libraryID] = [];
+			}
+			typeIDsByLibrary[obj.libraryID].push(id);
+		}
+		for (let libraryID in typeIDsByLibrary) {
+			yield this._loadDataTypeInLibrary(dataType, parseInt(libraryID), typeIDsByLibrary[libraryID]);
 		}
 	}
 	

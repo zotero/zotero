@@ -177,6 +177,14 @@ describe("Zotero.Attachments", function() {
 		})
 	})
 	
+	describe("#getBaseDirectoryRelativePath()", function () {
+		it("should convert backslashes to forward slashes", function () {
+			Zotero.Prefs.set('baseAttachmentPath', "C:\\foo\\bar");
+			var path = Zotero.Attachments.getBaseDirectoryRelativePath("C:\\foo\\bar\\test\\file.txt");
+			assert.equal(path, Zotero.Attachments.BASE_PATH_PLACEHOLDER + "test/file.txt");
+		});
+	});
+	
 	describe("#getTotalFileSize", function () {
 		it("should return the size for a single-file attachment", function* () {
 			var file = getTestDataDirectory();

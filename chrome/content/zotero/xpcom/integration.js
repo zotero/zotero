@@ -771,7 +771,7 @@ Zotero.Integration.MissingItemException.prototype = {
 		if(result == 0) {			// Cancel
 			return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("document update"));
 		} else if(result == 1) {	// No
-			for each(var reselectKey in this.reselectKeys) {
+			for (let reselectKey of this.reselectKeys) {
 				this.fieldGetter._removeCodeKeys[reselectKey] = true;
 			}
 			this.fieldGetter._removeCodeFields[this.fieldIndex] = true;
@@ -945,7 +945,7 @@ Zotero.Integration.Document.prototype._getSession = function _getSession(require
 		
 		if(require) {
 			// check to see if fields already exist
-			for each(var fieldType in [this._app.primaryFieldType, this._app.secondaryFieldType]) {
+			for (let fieldType of [this._app.primaryFieldType, this._app.secondaryFieldType]) {
 				var fields = this._doc.getFields(this._app.primaryFieldType);
 				if(fields.hasMoreElements()) {
 					data.prefs.fieldType = this._app.primaryFieldType;
@@ -1318,7 +1318,7 @@ Zotero.Integration.Fields.prototype.addField = function(note) {
  * Gets the type and content of a field object
  */
 Zotero.Integration.Fields.prototype.getCodeTypeAndContent = function(rawCode) {
-	for each(var code in ["ITEM", "CITATION"]) {
+	for (let code of ["ITEM", "CITATION"]) {
 		if(rawCode.substr(0, code.length) === code) {
 			return [INTEGRATION_TYPE_ITEM, rawCode.substr(code.length+1)];
 		}
@@ -1455,7 +1455,8 @@ Zotero.Integration.Fields.prototype.updateSession = function() {
 		if(me._session.reload) {
 			//this._session.restoreProcessorState(); TODO doesn't appear to be working properly
 			me._session.updateUpdateIndices();
-			return Zotero.promiseGenerator(me._session._updateCitations())
+			// Iterate through citations, yielding for UI updates
+			return Zotero.Promise.each(me._session._updateCitations(), () => {})
 			.then(function() {
 				me._session.updateIndices = {};
 				me._session.updateItemIDs = {};
@@ -1539,9 +1540,14 @@ Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, fo
 	// Update citations
 	this._session.updateUpdateIndices(forceCitations);
 	var me = this;
-	return Zotero.promiseGenerator(this._session._updateCitations()).then(function() {
-		return Zotero.promiseGenerator(me._updateDocument(forceCitations, forceBibliography,
-			ignoreCitationChanges));
+	// Iterate through citations, yielding for UI updates
+	return Zotero.Promise.each(this._session._updateCitations(), () => {}).then(function() {
+		return Zotero.Promise.each(
+			me._updateDocument(
+				forceCitations, forceBibliography, ignoreCitationChanges
+			),
+			() => {}
+		);
 	});
 }
 
@@ -1552,7 +1558,7 @@ Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, fo
  * @param {Boolean} [ignoreCitationChanges] Whether to ignore changes to citations that have been 
  *	modified since they were created, instead of showing a warning
  */
-Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, forceBibliography,
+Zotero.Integration.Fields.prototype._updateDocument = function* (forceCitations, forceBibliography,
 		ignoreCitationChanges) {
 	if(this.progressCallback) {
 		var nFieldUpdates = Object.keys(this._session.updateIndices).length;
@@ -1569,7 +1575,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 			} catch(e) {
 				Zotero.logError(e);
 			}
-			yield undefined;
+			yield;
 		}
 		
 		var citation = this._session.citationsByIndex[i];
@@ -1646,7 +1652,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 		
 		if(forceBibliography || this._session.bibliographyDataHasChanged) {
 			var bibliographyData = this._session.getBibliographyData();
-			for each(var field in bibliographyFields) {
+			for (let field of bibliographyFields) {
 				field.setCode("BIBL "+bibliographyData
 					+(this._session.data.prefs.storeReferences ? " CSL_BIBLIOGRAPHY" : ""));
 			}
@@ -1674,14 +1680,14 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 		}
 		
 		// set bibliography text
-		for each(var field in bibliographyFields) {
+		for (let field of bibliographyFields) {
 			if(this.progressCallback) {
 				try {
 					this.progressCallback(75+(nUpdated/nFieldUpdates)*25);
 				} catch(e) {
 					Zotero.logError(e);
 				}
-				yield undefined;
+				yield;
 			}
 			
 			if(bibliographyText) {
@@ -2639,7 +2645,7 @@ Zotero.Integration.Session.prototype.formatCitation = function(index, citation) 
 /**
  * Updates the list of citations to be serialized to the document
  */
-Zotero.Integration.Session.prototype._updateCitations = function() {
+Zotero.Integration.Session.prototype._updateCitations = function* () {
 	/*var allUpdatesForced = false;
 	var forcedUpdates = {};
 	if(force) {
@@ -2672,7 +2678,7 @@ Zotero.Integration.Session.prototype._updateCitations = function() {
 	}
 	
 	
-	for each(var indexList in [this.newIndices, this.updateIndices]) {
+	for (let indexList of [this.newIndices, this.updateIndices]) {
 		for(var index in indexList) {
 			index = parseInt(index);
 			
@@ -2683,7 +2689,7 @@ Zotero.Integration.Session.prototype._updateCitations = function() {
 			}
 			this.citeprocCitationIDs[citation.citationID] = true;
 			delete this.newIndices[index];
-			yield undefined;
+			yield;
 		}
 	}
 	
@@ -3037,7 +3043,7 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 		"hasBibliography":(Zotero.Utilities.xpathText(doc, '/data/style[1]/@hasBibliography') == 1),
 		"bibliographyStyleHasBeenSet":(Zotero.Utilities.xpathText(doc, '/data/style[1]/@bibliographyStyleHasBeenSet') == 1)};
 	this.prefs = {};
-	for each(var pref in Zotero.Utilities.xpath(doc, '/data/prefs[1]/pref')) {
+	for (let pref of Zotero.Utilities.xpath(doc, '/data/prefs[1]/pref')) {
 		var name = pref.getAttribute("name");
 		var value = pref.getAttribute("value");
 		if(value === "true") {

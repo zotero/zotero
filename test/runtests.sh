@@ -14,7 +14,6 @@ function makePath {
 	eval $__assignTo="'$__path'"
 }
 
-DEBUG=false
 if [ -z "$FX_EXECUTABLE" ]; then
 	if [ "`uname`" == "Darwin" ]; then
 		FX_EXECUTABLE="/Applications/Firefox.app/Contents/MacOS/firefox"
@@ -42,7 +41,8 @@ DONE
 	exit 1
 }
 
-DEBUG_LEVEL=0
+DEBUG=false
+DEBUG_LEVEL=5
 while getopts "bcd:fg:htx:" opt; do
 	case $opt in
         b)
@@ -132,7 +132,7 @@ fi
 
 
 if [ "$TRAVIS" = true ]; then
-	FX_ARGS="$FX_ARGS -ZoteroNoUserInput"
+	FX_ARGS="$FX_ARGS -ZoteroNoUserInput -ZoteroTestTimeout 10000"
 fi
 
 # Clean up on exit

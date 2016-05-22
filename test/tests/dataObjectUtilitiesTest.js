@@ -104,6 +104,19 @@ describe("Zotero.DataObjectUtilities", function() {
 				})
 			})
 			
+			describe("notes", function () {
+				it("should ignore sanitization changes", function* () {
+					var json1 = {
+						note: "<p>\u00a0</p>"
+					};
+					var json2 = {
+						note: "<p>&nbsp;</p>"
+					};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					assert.lengthOf(changes, 0);
+				});
+			});
+			
 			//
 			// Relations
 			//

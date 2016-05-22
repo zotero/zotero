@@ -9,8 +9,8 @@ describe("Zotero.ItemTreeView", function() {
 		zp = win.ZoteroPane;
 		cv = zp.collectionsView;
 		
-		var item = new Zotero.Item('book');
-		existingItemID = yield item.saveTx();
+		var item = yield createDataObject('item', { setTitle: true });
+		existingItemID = item.id;
 	});
 	beforeEach(function* () {
 		yield selectLibrary(win);
@@ -137,6 +137,35 @@ describe("Zotero.ItemTreeView", function() {
 			assert.equal(selected[0], existingItemID);
 		});
 		
+		it("shouldn't clear quicksearch if skipSelect is passed", function* () {
+			var searchString = Zotero.Items.get(existingItemID).getField('title');
+			
+			yield createDataObject('item');
+			
+			var quicksearch = win.document.getElementById('zotero-tb-search');
+			quicksearch.value = searchString;
+			quicksearch.doCommand();
+			yield itemsView._refreshPromise;
+			
+			assert.equal(itemsView.rowCount, 1);
+			
+			// Create item with skipSelect flag
+			var item = new Zotero.Item('book');
+			var ran = Zotero.Utilities.randomString();
+			item.setField('title', ran);
+			var id = yield item.saveTx({
+				skipSelect: true
+			});
+			
+			assert.equal(itemsView.rowCount, 1);
+			assert.equal(quicksearch.value, searchString);
+			
+			// Clear search
+			quicksearch.value = "";
+			quicksearch.doCommand();
+			yield itemsView._refreshPromise;
+		});
+		
 		it("shouldn't change selection outside of trash if new trashed item is created with skipSelect", function* () {
 			yield selectLibrary(win);
 			yield waitForItemsLoad(win);
@@ -211,14 +240,13 @@ describe("Zotero.ItemTreeView", function() {
 			itemsView = zp.itemsView;
 			
 			var items = [];
-			var num = 10;
+			var num = 6;
 			for (let i = 0; i < num; i++) {
 				let item = createUnsavedDataObject('item');
 				item.addToCollection(collection.id);
 				yield item.saveTx();
 				items.push(item);
 			}
-			yield Zotero.Promise.delay(2000);
 			assert.equal(itemsView.rowCount, num);
 			
 			// Select the third item in the list
@@ -231,6 +259,163 @@ describe("Zotero.ItemTreeView", function() {
 			
 			yield Zotero.Items.erase(items.map(item => item.id));
 		})
+		
+		it("should keep first visible item in view when other items are added with skipSelect and nothing in view is selected", function* () {
+			var collection = yield createDataObject('collection');
+			yield waitForItemsLoad(win);
+			itemsView = zp.itemsView;
+			
+			var treebox = itemsView._treebox;
+			var numVisibleRows = treebox.getPageLength();
+			
+			// Get a numeric string left-padded with zeroes
+			function getTitle(i, max) {
+				return new String(new Array(max + 1).join(0) + i).slice(-1 * max);
+			}
+			
+			var num = numVisibleRows + 10;
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let i = 0; i < num; i++) {
+					let title = getTitle(i, num);
+					let item = createUnsavedDataObject('item', { title });
+					item.addToCollection(collection.id);
+					yield item.save();
+				}
+			}.bind(this));
+			
+			// Scroll halfway
+			treebox.scrollToRow(Math.round(num / 2) - Math.round(numVisibleRows / 2));
+			
+			var firstVisibleItemID = itemsView.getRow(treebox.getFirstVisibleRow()).ref.id;
+			
+			// Add one item at the beginning
+			var item = createUnsavedDataObject(
+				'item', { title: getTitle(0, num), collections: [collection.id] }
+			);
+			yield item.saveTx({
+				skipSelect: true
+			});
+			// Then add a few more in a transaction
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let i = 0; i < 3; i++) {
+					var item = createUnsavedDataObject(
+						'item', { title: getTitle(0, num), collections: [collection.id] }
+					);
+					yield item.save({
+						skipSelect: true
+					});
+				}
+			}.bind(this));
+			
+			// Make sure the same item is still in the first visible row
+			assert.equal(itemsView.getRow(treebox.getFirstVisibleRow()).ref.id, firstVisibleItemID);
+		});
+		
+		it("should keep first visible selected item in position when other items are added with skipSelect", function* () {
+			var collection = yield createDataObject('collection');
+			yield waitForItemsLoad(win);
+			itemsView = zp.itemsView;
+			
+			var treebox = itemsView._treebox;
+			var numVisibleRows = treebox.getPageLength();
+			
+			// Get a numeric string left-padded with zeroes
+			function getTitle(i, max) {
+				return new String(new Array(max + 1).join(0) + i).slice(-1 * max);
+			}
+			
+			var num = numVisibleRows + 10;
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let i = 0; i < num; i++) {
+					let title = getTitle(i, num);
+					let item = createUnsavedDataObject('item', { title });
+					item.addToCollection(collection.id);
+					yield item.save();
+				}
+			}.bind(this));
+			
+			// Scroll halfway
+			treebox.scrollToRow(Math.round(num / 2) - Math.round(numVisibleRows / 2));
+			
+			// Select an item
+			itemsView.selection.select(Math.round(num / 2));
+			var selectedItem = itemsView.getSelectedItems()[0];
+			var offset = itemsView.getRowIndexByID(selectedItem.treeViewID) - treebox.getFirstVisibleRow();
+			
+			// Add one item at the beginning
+			var item = createUnsavedDataObject(
+				'item', { title: getTitle(0, num), collections: [collection.id] }
+			);
+			yield item.saveTx({
+				skipSelect: true
+			});
+			// Then add a few more in a transaction
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let i = 0; i < 3; i++) {
+					var item = createUnsavedDataObject(
+						'item', { title: getTitle(0, num), collections: [collection.id] }
+					);
+					yield item.save({
+						skipSelect: true
+					});
+				}
+			}.bind(this));
+			
+			// Make sure the selected item is still at the same position
+			assert.equal(itemsView.getSelectedItems()[0], selectedItem);
+			var newOffset = itemsView.getRowIndexByID(selectedItem.treeViewID) - treebox.getFirstVisibleRow();
+			assert.equal(newOffset, offset);
+		});
+		
+		it("shouldn't scroll items list if at top when other items are added with skipSelect", function* () {
+			var collection = yield createDataObject('collection');
+			yield waitForItemsLoad(win);
+			itemsView = zp.itemsView;
+			
+			var treebox = itemsView._treebox;
+			var numVisibleRows = treebox.getPageLength();
+			
+			// Get a numeric string left-padded with zeroes
+			function getTitle(i, max) {
+				return new String(new Array(max + 1).join(0) + i).slice(-1 * max);
+			}
+			
+			var num = numVisibleRows + 10;
+			yield Zotero.DB.executeTransaction(function* () {
+				// Start at "*1" so we can add items before
+				for (let i = 1; i < num; i++) {
+					let title = getTitle(i, num);
+					let item = createUnsavedDataObject('item', { title });
+					item.addToCollection(collection.id);
+					yield item.save();
+				}
+			}.bind(this));
+			
+			// Scroll to top
+			treebox.scrollToRow(0);
+			
+			// Add one item at the beginning
+			var item = createUnsavedDataObject(
+				'item', { title: getTitle(0, num), collections: [collection.id] }
+			);
+			yield item.saveTx({
+				skipSelect: true
+			});
+			// Then add a few more in a transaction
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let i = 0; i < 3; i++) {
+					var item = createUnsavedDataObject(
+						'item', { title: getTitle(0, num), collections: [collection.id] }
+					);
+					yield item.save({
+						skipSelect: true
+					});
+				}
+			}.bind(this));
+			
+			// Make sure the first row is still at the top
+			assert.equal(treebox.getFirstVisibleRow(), 0);
+		});
 		
 		it("should update search results when items are added", function* () {
 			var search = createUnsavedDataObject('search');
@@ -308,6 +493,30 @@ describe("Zotero.ItemTreeView", function() {
 	})
 	
 	describe("#drop()", function () {
+		var httpd;
+		var port = 16213;
+		var baseURL = `http://localhost:${port}/`;
+		var pdfFilename = "test.pdf";
+		var pdfURL = baseURL + pdfFilename;
+		var pdfPath;
+		
+		// Serve a PDF to test URL dragging
+		before(function () {
+			Components.utils.import("resource://zotero-unit/httpd.js");
+			httpd = new HttpServer();
+			httpd.start(port);
+			var file = getTestDataDirectory();
+			file.append(pdfFilename);
+			pdfPath = file.path;
+			httpd.registerFile("/" + pdfFilename, file);
+		});
+		
+		after(function* () {
+			var defer = new Zotero.Promise.defer();
+			httpd.stop(() => defer.resolve());
+			yield defer.promise;
+		});
+		
 		it("should move a child item from one item to another", function* () {
 			var collection = yield createDataObject('collection');
 			yield waitForItemsLoad(win);
@@ -418,6 +627,68 @@ describe("Zotero.ItemTreeView", function() {
 				(yield Zotero.File.getBinaryContentsAsync(path)),
 				(yield Zotero.File.getBinaryContentsAsync(file))
 			);
-		})
+		});
+		
+		it("should create a top-level attachment when a URL is dragged", function* () {
+			var deferred = Zotero.Promise.defer();
+			itemsView.addEventListener('select', () => deferred.resolve());
+			
+			itemsView.drop(0, -1, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: {
+					contains: function (type) {
+						return type == 'text/x-moz-url';
+					}
+				},
+				getData: function (type) {
+					if (type == 'text/x-moz-url') {
+						return pdfURL;
+					}
+				},
+				mozItemCount: 1,
+			})
+			
+			yield deferred.promise;
+			var item = itemsView.getSelectedItems()[0];
+			assert.equal(item.getField('url'), pdfURL);
+			assert.equal(
+				(yield Zotero.File.getBinaryContentsAsync(yield item.getFilePathAsync())),
+				(yield Zotero.File.getBinaryContentsAsync(pdfPath))
+			);
+		});
+		
+		it("should create a child attachment when a URL is dragged", function* () {
+			var view = zp.itemsView;
+			var parentItem = yield createDataObject('item');
+			var parentRow = view.getRowIndexByID(parentItem.id);
+			
+			var promise = waitForItemEvent('add');
+			
+			itemsView.drop(parentRow, 0, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: {
+					contains: function (type) {
+						return type == 'text/x-moz-url';
+					}
+				},
+				getData: function (type) {
+					if (type == 'text/x-moz-url') {
+						return pdfURL;
+					}
+				},
+				mozItemCount: 1,
+			})
+			
+			var itemIDs = yield promise;
+			var item = Zotero.Items.get(itemIDs[0]);
+			assert.equal(item.parentItemID, parentItem.id);
+			assert.equal(item.getField('url'), pdfURL);
+			assert.equal(
+				(yield Zotero.File.getBinaryContentsAsync(yield item.getFilePathAsync())),
+				(yield Zotero.File.getBinaryContentsAsync(pdfPath))
+			);
+		});
 	});
 })

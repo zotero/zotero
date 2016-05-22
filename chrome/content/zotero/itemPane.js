@@ -291,13 +291,13 @@ var ZoteroItemPane = new function() {
 			+ (Zotero.isMac ? '⇧⌘' : Zotero.getString('general.keys.ctrlShift'))
 			+ key + ')';
 		elem.setAttribute('tooltiptext', tooltip);
-		elem.setAttribute('image', _translationTarget.collectionTreeViewImage);
+		elem.setAttribute('image', _translationTarget.treeViewImage);
 	};
 	
 
 	this.setTranslationTarget = function(translationTarget) {
 		_translationTarget = translationTarget;
-		Zotero.Prefs.set('feeds.lastTranslationTarget', translationTarget.collectionTreeViewID);
+		Zotero.Prefs.set('feeds.lastTranslationTarget', translationTarget.treeViewID);
 		ZoteroItemPane.setTranslateButton();
 	};
 	

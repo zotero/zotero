@@ -507,9 +507,9 @@ var Zotero_LocateMenu = new function() {
 					var path = yield attachment.getFilePathAsync();
 					if (path) {
 						var ext = Zotero.File.getExtension(Zotero.File.pathToFile(path));
-						if(!attachment.attachmentMIMEType || 
-							Zotero.MIME.hasNativeHandler(attachment.attachmentMIMEType, ext) ||
-							!Zotero.MIME.hasInternalHandler(attachment.attachmentMIMEType, ext)) {
+						if(!attachment.attachmentContentType ||
+							Zotero.MIME.hasNativeHandler(attachment.attachmentContentType, ext) ||
+							!Zotero.MIME.hasInternalHandler(attachment.attachmentContentType, ext)) {
 							return false;
 						}
 						return attachment;

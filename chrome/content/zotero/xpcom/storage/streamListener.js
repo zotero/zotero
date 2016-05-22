@@ -227,7 +227,7 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 		}
 		
 		if (this._data.streams) {
-			for each(var stream in this._data.streams) {
+			for (let stream of this._data.streams) {
 				stream.close();
 			}
 		}

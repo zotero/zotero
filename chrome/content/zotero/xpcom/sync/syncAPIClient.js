@@ -36,6 +36,7 @@ Zotero.Sync.APIClient = function (options) {
 	this.apiVersion = options.apiVersion;
 	this.apiKey = options.apiKey;
 	this.caller = options.caller;
+	this.debugUploadPolicy = Zotero.Prefs.get('sync.debugUploadPolicy');
 	
 	this.failureDelayIntervals = [2500, 5000, 10000, 20000, 40000, 60000, 120000, 240000, 300000];
 	this.failureDelayMax = 60 * 60 * 1000; // 1 hour
@@ -47,12 +48,12 @@ Zotero.Sync.APIClient.prototype = {
 	
 	
 	getKeyInfo: Zotero.Promise.coroutine(function* (options={}) {
-		var uri = this.baseURL + "keys/" + this.apiKey;
+		var uri = this.baseURL + "keys/current";
 		let opts = {};
 		Object.assign(opts, options);
-		opts.successCodes = [200, 404];
+		opts.successCodes = [200, 403, 404];
 		var xmlhttp = yield this.makeRequest("GET", uri, opts);
-		if (xmlhttp.status == 404) {
+		if (xmlhttp.status == 403 || xmlhttp.status == 404) {
 			return false;
 		}
 		var json = this._parseJSON(xmlhttp.responseText);
@@ -113,12 +114,8 @@ Zotero.Sync.APIClient.prototype = {
 		if (xmlhttp.status == 304) {
 			return false;
 		}
-		var libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
-		if (!libraryVersion) {
-			throw new Error("Last-Modified-Version not provided");
-		}
 		return {
-			libraryVersion: libraryVersion,
+			libraryVersion: this._getLastModifiedVersion(xmlhttp),
 			settings: this._parseJSON(xmlhttp.responseText)
 		};
 	}),
@@ -141,12 +138,8 @@ Zotero.Sync.APIClient.prototype = {
 			Zotero.debug(`'since' value '${since}' is earlier than the beginning of the delete log`);
 			return false;
 		}
-		var libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
-		if (!libraryVersion) {
-			throw new Error("Last-Modified-Version not provided");
-		}
 		return {
-			libraryVersion: libraryVersion,
+			libraryVersion: this._getLastModifiedVersion(xmlhttp),
 			deleted: this._parseJSON(xmlhttp.responseText)
 		};
 	}),
@@ -282,6 +275,37 @@ Zotero.Sync.APIClient.prototype = {
 	},
 	
 	
+	uploadSettings: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, libraryVersion, settings) {
+		var method = "POST";
+		var objectType = "setting";
+		var objectTypePlural = "settings";
+		var numSettings = Object.keys(settings).length;
+		
+		Zotero.debug(`Uploading ${numSettings} ${numSettings == 1 ? objectType : objectTypePlural}`);
+		
+		Zotero.debug("Sending If-Unmodified-Since-Version: " + libraryVersion);
+		
+		var json = JSON.stringify(settings);
+		var params = {
+			target: objectTypePlural,
+			libraryType: libraryType,
+			libraryTypeID: libraryTypeID
+		};
+		var uri = this.buildRequestURI(params);
+		
+		var xmlhttp = yield this.makeRequest(method, uri, {
+			headers: {
+				"Content-Type": "application/json",
+				"If-Unmodified-Since-Version": libraryVersion
+			},
+			body: json,
+			successCodes: [204, 412]
+		});
+		this._check412(xmlhttp);
+		return this._getLastModifiedVersion(xmlhttp);
+	}),
+	
+	
 	uploadObjects: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, method, libraryVersion, objectType, objects) {
 		if (method != 'POST' && method != 'PATCH') {
 			throw new Error("Invalid method '" + method + "'");
@@ -310,17 +334,9 @@ Zotero.Sync.APIClient.prototype = {
 			body: json,
 			successCodes: [200, 412]
 		});
-		// Avoid logging error from Zotero.HTTP.request() in ConcurrentCaller
-		if (xmlhttp.status == 412) {
-			Zotero.debug("Server returned 412: " + xmlhttp.responseText, 2);
-			throw new Zotero.HTTP.UnexpectedStatusException(xmlhttp);
-		}
-		libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
-		if (!libraryVersion) {
-			throw new Error("Last-Modified-Version not provided");
-		}
+		this._check412(xmlhttp);
 		return {
-			libraryVersion,
+			libraryVersion: this._getLastModifiedVersion(xmlhttp),
 			results: this._parseJSON(xmlhttp.responseText)
 		};
 	}),
@@ -346,23 +362,14 @@ Zotero.Sync.APIClient.prototype = {
 			params[objectType + "Key"] = keys.join(",");
 		}
 		var uri = this.buildRequestURI(params);
-		
 		var xmlhttp = yield this.makeRequest("DELETE", uri, {
 			headers: {
 				"If-Unmodified-Since-Version": libraryVersion
 			},
 			successCodes: [204, 412]
 		});
-		// Avoid logging error from Zotero.HTTP.request() in ConcurrentCaller
-		if (xmlhttp.status == 412) {
-			Zotero.debug("Server returned 412: " + xmlhttp.responseText, 2);
-			throw new Zotero.HTTP.UnexpectedStatusException(xmlhttp);
-		}
-		libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
-		if (!libraryVersion) {
-			throw new Error("Last-Modified-Version not provided");
-		}
-		return libraryVersion;
+		this._check412(xmlhttp);
+		return this._getLastModifiedVersion(xmlhttp);
 	}),
 	
 	
@@ -370,7 +377,8 @@ Zotero.Sync.APIClient.prototype = {
 		var params = {
 			libraryType: libraryType,
 			libraryTypeID: libraryTypeID,
-			target: "fulltext"
+			target: "fulltext",
+			format: "versions"
 		};
 		if (since) {
 			params.since = since;
@@ -380,12 +388,8 @@ Zotero.Sync.APIClient.prototype = {
 		var uri = this.buildRequestURI(params);
 		
 		var xmlhttp = yield this.makeRequest("GET", uri);
-		var libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
-		if (!libraryVersion) {
-			throw new Error("Last-Modified-Version not provided");
-		}
 		return {
-			libraryVersion: libraryVersion,
+			libraryVersion: this._getLastModifiedVersion(xmlhttp),
 			versions: this._parseJSON(xmlhttp.responseText)
 		};
 	}),
@@ -398,42 +402,46 @@ Zotero.Sync.APIClient.prototype = {
 			target: `items/${itemKey}/fulltext`
 		};
 		var uri = this.buildRequestURI(params);
-		var xmlhttp = yield this.makeRequest("GET", uri);
+		var xmlhttp = yield this.makeRequest("GET", uri, { successCodes: [200, 404] });
+		if (xmlhttp.status == 404) {
+			return false;
+		}
 		var version = xmlhttp.getResponseHeader('Last-Modified-Version');
 		if (!version) {
 			throw new Error("Last-Modified-Version not provided");
 		}
 		return {
-			version,
+			version: this._getLastModifiedVersion(xmlhttp),
 			data: this._parseJSON(xmlhttp.responseText)
 		};
 	}),
 	
 	
-	setFullTextForItem: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, itemKey, data) {
+	setFullTextForItems: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, libraryVersion, data) {
 		var params = {
 			libraryType: libraryType,
 			libraryTypeID: libraryTypeID,
-			target: `items/${itemKey}/fulltext`
+			target: "fulltext"
 		};
 		var uri = this.buildRequestURI(params);
 		var xmlhttp = yield this.makeRequest(
-			"PUT",
+			"POST",
 			uri,
 			{
 				headers: {
-					"Content-Type": "application/json"
+					"Content-Type": "application/json",
+					"If-Unmodified-Since-Version": libraryVersion
 				},
 				body: JSON.stringify(data),
-				successCodes: [204],
+				successCodes: [200, 412],
 				debug: true
 			}
 		);
-		var libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
-		if (!libraryVersion) {
-			throw new Error("Last-Modified-Version not provided");
-		}
-		return libraryVersion;
+		this._check412(xmlhttp);
+		return {
+			libraryVersion: this._getLastModifiedVersion(xmlhttp),
+			results: this._parseJSON(xmlhttp.responseText)
+		};
 	}),
 	
 	
@@ -479,7 +487,7 @@ Zotero.Sync.APIClient.prototype = {
 
 	// Deletes current API key
 	deleteAPIKey: Zotero.Promise.coroutine(function* () {
-		yield this.makeRequest("DELETE", this.baseURL + "keys/" + this.apiKey);
+		yield this.makeRequest("DELETE", this.baseURL + "keys/current");
 	}),
 	
 	
@@ -566,6 +574,23 @@ Zotero.Sync.APIClient.prototype = {
 		if (!this.apiKey && !options.noAPIKey) {
 			throw new Error('API key not set');
 		}
+		
+		if (Zotero.HTTP.isWriteMethod(method) && this.debugUploadPolicy) {
+			// Confirm uploads when extensions.zotero.sync.debugUploadPolicy is 1
+			if (this.debugUploadPolicy === 1) {
+				if (options.body) {
+					Zotero.debug(options.body);
+				}
+				if (!Services.prompt.confirm(null, "Allow Upload?", `Allow ${method} to ${uri}?`)) {
+					throw new Error(method + " request denied");
+				}
+			}
+			// Deny uploads when extensions.zotero.sync.debugUploadPolicy is 2
+			else if (this.debugUploadPolicy === 2) {
+				throw new Error(`Can't make ${method} request in read-only mode`);
+			}
+		}
+		
 		let opts = {}
 		Object.assign(opts, options);
 		opts.headers = this.getHeaders(options.headers);
@@ -607,6 +632,9 @@ Zotero.Sync.APIClient.prototype = {
 							}
 							return false;
 						}
+					}
+					else if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+						e.fatal = true;
 					}
 					throw e;
 				}
@@ -706,5 +734,23 @@ Zotero.Sync.APIClient.prototype = {
 				this.caller.pause(backoff * 1000);
 			}
 		}
+	},
+	
+	
+	_check412: function (xmlhttp) {
+		// Avoid logging error from Zotero.HTTP.request() in ConcurrentCaller
+		if (xmlhttp.status == 412) {
+			Zotero.debug("Server returned 412: " + xmlhttp.responseText, 2);
+			throw new Zotero.HTTP.UnexpectedStatusException(xmlhttp);
+		}
+	},
+	
+	
+	_getLastModifiedVersion: function (xmlhttp) {
+		libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
+		if (!libraryVersion) {
+			throw new Error("Last-Modified-Version not provided");
+		}
+		return libraryVersion;
 	}
 }

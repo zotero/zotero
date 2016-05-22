@@ -206,7 +206,7 @@ Zotero.MIMETypeHandler = new function () {
 				try {
 					// remove content-disposition headers for EndNote, etc.
 					var contentType = channel.getResponseHeader("Content-Type").toLowerCase();
-					for each(var handledType in _ignoreContentDispositionTypes) {
+					for (let handledType of _ignoreContentDispositionTypes) {
 						if(contentType.length < handledType.length) {
 							break;
 						} else {
@@ -218,7 +218,7 @@ Zotero.MIMETypeHandler = new function () {
 					}
 				} catch(e) {}
 				
-				for each(var observer in _observers) {
+				for (let observer of _observers) {
 					observer(channel);
 				}
 			}

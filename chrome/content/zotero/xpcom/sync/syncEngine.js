@@ -29,7 +29,6 @@ if (!Zotero.Sync.Data) {
 
 // TODO: move?
 Zotero.Sync.Data.conflictDelayIntervals = [10000, 20000, 40000, 60000, 120000, 240000, 300000];
-Zotero.Sync.Data.failureDelayIntervals = [2500, 5000, 10000, 20000, 40000, 60000, 120000, 240000, 300000];
 
 /**
  * An Engine manages sync processes for a given library
@@ -71,6 +70,11 @@ Zotero.Sync.Data.Engine = function (options) {
 	});
 };
 
+Zotero.Sync.Data.Engine.prototype.DOWNLOAD_RESULT_CONTINUE = 1;
+Zotero.Sync.Data.Engine.prototype.DOWNLOAD_RESULT_CHANGES_TO_UPLOAD = 2;
+Zotero.Sync.Data.Engine.prototype.DOWNLOAD_RESULT_NO_CHANGES_TO_UPLOAD = 3;
+Zotero.Sync.Data.Engine.prototype.DOWNLOAD_RESULT_RESTART = 4;
+
 Zotero.Sync.Data.Engine.prototype.UPLOAD_RESULT_SUCCESS = 1;
 Zotero.Sync.Data.Engine.prototype.UPLOAD_RESULT_NOTHING_TO_UPLOAD = 2;
 Zotero.Sync.Data.Engine.prototype.UPLOAD_RESULT_LIBRARY_CONFLICT = 3;
@@ -87,11 +91,11 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 	}
 	
 	// Check if we've synced this library with the current architecture yet
-	var libraryVersion = Zotero.Libraries.getVersion(this.libraryID);
+	var libraryVersion = this.library.libraryVersion;
 	if (!libraryVersion || libraryVersion == -1) {
 		let versionResults = yield this._upgradeCheck();
 		if (versionResults) {
-			libraryVersion = Zotero.Libraries.getVersion(this.libraryID)
+			libraryVersion = this.library.libraryVersion;
 		}
 		
 		// Perform a full sync if necessary, passing the getVersions() results if available.
@@ -113,7 +117,8 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 	sync:
 	while (true) {
 		let uploadResult = yield this._startUpload();
-		Zotero.debug("UPLOAD RESULT WITH " + uploadResult);
+		let downloadResult;
+		Zotero.debug("Upload result is " + uploadResult, 4);
 		
 		switch (uploadResult) {
 		// If upload succeeded, we're done
@@ -132,16 +137,18 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 			yield this._fullSync();
 			break;
 		
-		// If conflict, start at beginning with downloads
 		case this.UPLOAD_RESULT_NOTHING_TO_UPLOAD:
-			let localChanges = yield this._startDownload();
-			if (!localChanges) {
-				break sync;
+			downloadResult = yield this._startDownload();
+			Zotero.debug("Download result is " + downloadResult, 4);
+			if (downloadResult == this.DOWNLOAD_RESULT_CHANGES_TO_UPLOAD) {
+				break;
 			}
-			break;
-			
+			break sync;
+		
+		// If conflict, start at beginning with downloads
 		case this.UPLOAD_RESULT_LIBRARY_CONFLICT:
-			yield this._startDownload();
+			downloadResult = yield this._startDownload();
+			Zotero.debug("Download result is " + downloadResult, 4);
 			
 			if (!gen) {
 				var gen = Zotero.Utilities.Internal.delayGenerator(
@@ -183,22 +190,22 @@ Zotero.Sync.Data.Engine.prototype.stop = function () {
 /**
  * Download updated objects from API and save to local cache
  *
- * @return {Boolean} True if an upload is needed, false otherwise
+ * @return {Promise<Integer>} - A download result code (this.DOWNLOAD_RESULT_*)
  */
 Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(function* () {
 	var localChanges = false;
-	var libraryVersion = Zotero.Libraries.getVersion(this.libraryID);
-	var lastLibraryVersion;
+	var libraryVersion = this.library.libraryVersion;
+	var newLibraryVersion;
 	
-	var gen = Zotero.Utilities.Internal.delayGenerator(
+	this.downloadDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
 		Zotero.Sync.Data.delayIntervals, 60 * 60 * 1000
 	);
 	
 	loop:
 	while (true) {
 		// Get synced settings first, since they affect how other data is displayed
-		lastLibraryVersion = yield this._downloadSettings(libraryVersion);
-		if (lastLibraryVersion === false) {
+		newLibraryVersion = yield this._downloadSettings(libraryVersion);
+		if (newLibraryVersion === false) {
 			break;
 		}
 		
@@ -210,19 +217,18 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 			
 			// For items, fetch top-level items first
 			//
-			// The next run will then see the same items in the non-top versions request,
+			// The next run below will then see the same items in the non-top versions request,
 			// but they'll have been downloaded already and will be skipped.
 			if (objectType == 'item') {
 				let result = yield this._downloadUpdatedObjects(
 					objectType,
 					libraryVersion,
-					lastLibraryVersion,
-					gen,
+					newLibraryVersion,
 					{
 						top: true
 					}
 				);
-				if (result == -1) {
+				if (result == this.DOWNLOAD_RESULT_RESTART) {
 					continue loop;
 				}
 			}
@@ -230,166 +236,41 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 			let result = yield this._downloadUpdatedObjects(
 				objectType,
 				libraryVersion,
-				lastLibraryVersion,
-				gen
+				newLibraryVersion
 			);
-			if (result == -1) {
+			if (result == this.DOWNLOAD_RESULT_RESTART) {
 				continue loop;
 			}
 		}
 		
-		//
-		// Get deleted objects
-		//
-		results = yield this.apiClient.getDeleted(
-			this.library.libraryType,
-			this.libraryTypeID,
-			libraryVersion
-		);
-		if (lastLibraryVersion) {
-			// If something else modified the remote library while we were getting updates,
-			// wait for increasing amounts of time before trying again, and then start from
-			// the beginning
-			if (lastLibraryVersion != results.libraryVersion) {
-				Zotero.logError("Library version changed since last download -- restarting sync");
-				let keepGoing = yield gen.next();
-				if (!keepGoing) {
-					throw new Error("Could not update " + this.library.name + " -- library in use");
-				}
-				continue loop;
-			}
-		}
-		else {
-			lastLibraryVersion = results.libraryVersion;
-		}
-		
-		var numObjects = Object.keys(results.deleted).reduce((n, k) => n + results.deleted[k].length, 0);
-		if (numObjects) {
-			Zotero.debug(numObjects + " objects deleted remotely since last check");
-			
-			// Process deletions
-			for (let objectTypePlural in results.deleted) {
-				let objectType = Zotero.DataObjectUtilities.getObjectTypeSingular(objectTypePlural);
-				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
-				let toDelete = [];
-				let conflicts = [];
-				for (let key of results.deleted[objectTypePlural]) {
-					// TODO: Remove from request?
-					if (objectType == 'tag') {
-						continue;
-					}
-					
-					if (objectType == 'setting') {
-						let meta = Zotero.SyncedSettings.getMetadata(this.libraryID, key);
-						if (!meta) {
-							continue;
-						}
-						if (meta.synced) {
-							yield Zotero.SyncedSettings.clear(this.libraryID, key, {
-								skipDeleteLog: true
-							});
-						}
-						
-						// Ignore setting if changed locally
-						continue;
-					}
-					
-					let obj = yield objectsClass.getByLibraryAndKeyAsync(
-						this.libraryID, key, { noCache: true }
-					);
-					if (!obj) {
-						continue;
-					}
-					if (obj.synced) {
-						toDelete.push(obj);
-					}
-					// Conflict resolution
-					else if (objectType == 'item') {
-						conflicts.push({
-							left: obj.toJSON(),
-							right: {
-								deleted: true
-							}
-						});
-					}
-					
-					// Ignore deletion if collection/search changed locally
-				}
-				
-				if (conflicts.length) {
-					conflicts.sort(function (a, b) {
-						var d1 = a.left.dateModified;
-						var d2 = b.left.dateModified;
-						if (d1 > d2) {
-							return 1
-						}
-						if (d1 < d2) {
-							return -1;
-						}
-						return 0;
-					});
-					var mergeData = Zotero.Sync.Data.Local.resolveConflicts(conflicts);
-					if (mergeData) {
-						let concurrentObjects = 50;
-						yield Zotero.Utilities.Internal.forEachChunkAsync(
-							mergeData,
-							concurrentObjects,
-							function (chunk) {
-								return Zotero.DB.executeTransaction(function* () {
-									for (let json of chunk) {
-										if (!json.deleted) continue;
-										let obj = yield objectsClass.getByLibraryAndKeyAsync(
-											this.libraryID, json.key, { noCache: true }
-										);
-										if (!obj) {
-											Zotero.logError("Remotely deleted " + objectType
-												+ " didn't exist after conflict resolution");
-											continue;
-										}
-										yield obj.erase();
-									}
-								}.bind(this));
-							}.bind(this)
-						);
-					}
-				}
-				
-				if (toDelete.length) {
-					yield Zotero.DB.executeTransaction(function* () {
-						for (let obj of toDelete) {
-							yield obj.erase({
-								skipDeleteLog: true
-							});
-						}
-					});
-				}
-			}
-		}
-		else {
-			Zotero.debug("No objects deleted remotely since last check");
+		let deletionsResult = yield this._downloadDeletions(libraryVersion, newLibraryVersion);
+		if (deletionsResult == this.DOWNLOAD_RESULT_RESTART) {
+			continue loop;
 		}
 		
 		break;
 	}
 	
-	if (lastLibraryVersion) {
-		yield Zotero.Libraries.setVersion(this.libraryID, lastLibraryVersion);
+	if (newLibraryVersion) {
+		yield Zotero.Libraries.setVersion(this.libraryID, newLibraryVersion);
 	}
 	
-	return localChanges;
+	return localChanges
+		? this.DOWNLOAD_RESULT_CHANGES_TO_UPLOAD
+		: this.DOWNLOAD_RESULT_NO_CHANGES_TO_UPLOAD;
 });
 
 
 /**
- * @param {Integer} libraryVersion - Last library version
+ * @param {Integer} since - Last-known library version; get changes since this version
  * @return {Integer|Boolean} - Library version returned from server, or false if no changes since
  *                             specified version
  */
-Zotero.Sync.Data.Engine.prototype._downloadSettings = Zotero.Promise.coroutine(function* (libraryVersion) {
+Zotero.Sync.Data.Engine.prototype._downloadSettings = Zotero.Promise.coroutine(function* (since) {
 	let results = yield this.apiClient.getSettings(
 		this.library.libraryType,
 		this.libraryTypeID,
-		libraryVersion
+		since
 	);
 	// If library version hasn't changed remotely, the local library is up-to-date and we
 	// can skip all remaining downloads
@@ -401,7 +282,6 @@ Zotero.Sync.Data.Engine.prototype._downloadSettings = Zotero.Promise.coroutine(f
 	var numObjects = Object.keys(results.settings).length;
 	if (numObjects) {
 		Zotero.debug(numObjects + " settings modified since last check");
-		// Settings we process immediately rather than caching
 		for (let setting in results.settings) {
 			yield Zotero.SyncedSettings.set(
 				this.libraryID,
@@ -420,10 +300,16 @@ Zotero.Sync.Data.Engine.prototype._downloadSettings = Zotero.Promise.coroutine(f
 
 
 /**
- * @return {Boolean|Integer} - True if objects downloaded, false if none, or -1 to restart sync
- *     if library version has changed
+ * Get versions of objects updated remotely since the last sync time and kick off object downloading
+ *
+ * @param {String} objectType
+ * @param {Integer} since - Last-known library version; get changes sinces this version
+ * @param {Integer} newLibraryVersion - Last library version seen in this sync process; if newer version
+ *     is seen, restart the sync
+ * @param {Object} [options]
+ * @return {Promise<Integer>} - A download result code (this.DOWNLOAD_RESULT_*)
  */
-Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.coroutine(function* (objectType, libraryVersion, lastLibraryVersion, delayGenerator, options = {}) {
+Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.coroutine(function* (objectType, since, newLibraryVersion, options = {}) {
 	var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 	var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 	
@@ -431,8 +317,8 @@ Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.corou
 	Zotero.debug(`Checking for updated ${options.top ? 'top-level ' : ''}`
 		+ `${objectTypePlural} in ${this.library.name}`);
 	var queryParams = {};
-	if (libraryVersion) {
-		queryParams.since = libraryVersion;
+	if (since) {
+		queryParams.since = since;
 	}
 	if (options.top) {
 		queryParams.top = true;
@@ -450,13 +336,8 @@ Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.corou
 	// If something else modified the remote library while we were getting updates,
 	// wait for increasing amounts of time before trying again, and then start from
 	// the beginning
-	if (lastLibraryVersion != results.libraryVersion) {
-		Zotero.logError("Library version changed since last download -- restarting sync");
-		let keepGoing = yield delayGenerator.next();
-		if (!keepGoing) {
-			throw new Error("Could not update " + this.library.name + " -- library in use");
-		}
-		return -1;
+	if (newLibraryVersion != results.libraryVersion) {
+		return this._onLibraryVersionChange();
 	}
 	
 	
@@ -511,14 +392,19 @@ Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.corou
 	
 	if (!keys.length) {
 		Zotero.debug(`No ${objectTypePlural} to download`);
-		return false;
+		return this.DOWNLOAD_RESULT_CONTINUE;
 	}
 	
-	yield this._downloadObjects(objectType, keys);
-	return true;
+	return this._downloadObjects(objectType, keys);
 });
 
 
+/**
+ * Download data for specified objects from the API and run processing on them, and show the conflict
+ * resolution window if necessary
+ *
+ * @return {Promise<Integer>} - A download result code (this.DOWNLOAD_RESULT_*)
+ */
 Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(function* (objectType, keys) {
 	var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 	
@@ -562,7 +448,10 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 			+ " in " + this.library.name
 		);
 		
-		// Process batches as soon as they're available
+		var conflicts = [];
+		var num = 0;
+		
+		// Process batches when they're available, one at a time
 		yield Zotero.Promise.map(
 			json,
 			function (batch) {
@@ -588,10 +477,33 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 					objectType,
 					this.libraryID,
 					batch,
-					this._getOptions()
+					this._getOptions({
+						onObjectProcessed: () => {
+							num++;
+						},
+						// Increase the notifier batch size as we go
+						getNotifierBatchSize: () => {
+							var size;
+							if (num < 10) {
+								size = 1;
+							}
+							else if (num < 50) {
+								size = 5;
+							}
+							else if (num < 150) {
+								size = 25;
+							}
+							else {
+								size = 50;
+							}
+							return Math.min(size, batch.length);
+						}
+					})
 				)
 				.then(function (results) {
+					num += results.length;
 					let processedKeys = [];
+					let conflictResults = [];
 					results.forEach(x => {
 						// If data was processed, remove JSON
 						if (x.processed) {
@@ -601,10 +513,17 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 						if (x.processed || !x.retry) {
 							processedKeys.push(x.key);
 						}
+						if (x.conflict) {
+							conflictResults.push(x);
+						}
 					});
 					keys = Zotero.Utilities.arrayDiff(keys, processedKeys);
+					conflicts.push(...conflictResults);
 				}.bind(this));
-			}.bind(this)
+			}.bind(this),
+			{
+				concurrency: 1
+			}
 		);
 		
 		if (!keys.length || keys.length == lastLength) {
@@ -630,7 +549,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 					this.failedItems = [];
 				}
 			}
-			return;
+			break;
 		}
 		
 		lastLength = keys.length;
@@ -638,6 +557,167 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 		var remainingObjectDesc = `${keys.length == 1 ? objectType : objectTypePlural}`;
 		Zotero.debug(`Retrying ${keys.length} remaining ${remainingObjectDesc}`);
 	}
+	
+	// Show conflict resolution window
+	if (conflicts.length) {
+		let results = yield Zotero.Sync.Data.Local.processConflicts(
+			objectType, this.libraryID, conflicts, this._getOptions()
+		);
+		// Keys can be unprocessed if conflict resolution is cancelled
+		let keys = results.filter(x => x.processed).map(x => x.key);
+		if (!keys.length) {
+			throw new Zotero.Sync.UserCancelledException();
+		}
+		yield Zotero.Sync.Data.Local.removeObjectsFromSyncQueue(objectType, this.libraryID, keys);
+	}
+	
+	return this.DOWNLOAD_RESULT_CONTINUE;
+});
+
+
+/**
+ * Get deleted objects from the API and process them
+ *
+ * @param {Integer} since - Last-known library version; get changes sinces this version
+ * @param {Integer} newLibraryVersion - Newest library version seen in this sync process; if newer version
+ *     is seen, restart the sync
+ * @return {Promise<Integer>} - A download result code (this.DOWNLOAD_RESULT_*)
+ */
+Zotero.Sync.Data.Engine.prototype._downloadDeletions = Zotero.Promise.coroutine(function* (since, newLibraryVersion) {
+	let results = yield this.apiClient.getDeleted(
+		this.library.libraryType,
+		this.libraryTypeID,
+		since
+	);
+	if (newLibraryVersion != results.libraryVersion) {
+		return this._onLibraryVersionChange();
+	}
+	
+	var numObjects = Object.keys(results.deleted).reduce((n, k) => n + results.deleted[k].length, 0);
+	if (!numObjects) {
+		Zotero.debug("No objects deleted remotely since last check");
+		return this.DOWNLOAD_RESULT_CONTINUE;
+	}
+	
+	Zotero.debug(numObjects + " objects deleted remotely since last check");
+	
+	// Process deletions
+	for (let objectTypePlural in results.deleted) {
+		let objectType = Zotero.DataObjectUtilities.getObjectTypeSingular(objectTypePlural);
+		let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
+		let toDelete = [];
+		let conflicts = [];
+		for (let key of results.deleted[objectTypePlural]) {
+			// TODO: Remove from request?
+			if (objectType == 'tag') {
+				continue;
+			}
+			
+			if (objectType == 'setting') {
+				let meta = Zotero.SyncedSettings.getMetadata(this.libraryID, key);
+				if (!meta) {
+					continue;
+				}
+				if (meta.synced) {
+					yield Zotero.SyncedSettings.clear(this.libraryID, key, {
+						skipDeleteLog: true
+					});
+				}
+				
+				// Ignore setting if changed locally
+				continue;
+			}
+			
+			let obj = objectsClass.getByLibraryAndKey(this.libraryID, key);
+			if (!obj) {
+				continue;
+			}
+			if (obj.synced) {
+				toDelete.push(obj);
+			}
+			// Conflict resolution
+			else if (objectType == 'item') {
+				conflicts.push({
+					left: obj.toJSON(),
+					right: {
+						deleted: true
+					}
+				});
+			}
+			
+			// Ignore deletion if collection/search changed locally
+		}
+		
+		if (conflicts.length) {
+			// Sort conflicts by Date Modified
+			conflicts.sort(function (a, b) {
+				var d1 = a.left.dateModified;
+				var d2 = b.left.dateModified;
+				if (d1 > d2) {
+					return 1
+				}
+				if (d1 < d2) {
+					return -1;
+				}
+				return 0;
+			});
+			var mergeData = Zotero.Sync.Data.Local.showConflictResolutionWindow(conflicts);
+			if (!mergeData) {
+				Zotero.debug("Cancelling sync");
+				throw new Zotero.Sync.UserCancelledException();
+			}
+			let concurrentObjects = 50;
+			yield Zotero.Utilities.Internal.forEachChunkAsync(
+				mergeData,
+				concurrentObjects,
+				function (chunk) {
+					return Zotero.DB.executeTransaction(function* () {
+						for (let json of chunk) {
+							if (!json.deleted) continue;
+							let obj = objectsClass.getByLibraryAndKey(
+								this.libraryID, json.key
+							);
+							if (!obj) {
+								Zotero.logError("Remotely deleted " + objectType
+									+ " didn't exist after conflict resolution");
+								continue;
+							}
+							yield obj.erase({
+								skipEditCheck: true
+							});
+						}
+					}.bind(this));
+				}.bind(this)
+			);
+		}
+		
+		if (toDelete.length) {
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let obj of toDelete) {
+					yield obj.erase({
+						skipEditCheck: true,
+						skipDeleteLog: true
+					});
+				}
+			});
+		}
+	}
+	
+	return this.DOWNLOAD_RESULT_CONTINUE;
+});
+
+
+/**
+ * If something else modified the remote library while we were getting updates, wait for increasing
+ * amounts of time before trying again, and then start from the beginning
+ */
+Zotero.Sync.Data.Engine.prototype._onLibraryVersionChange = Zotero.Promise.coroutine(function* (mode) {
+	Zotero.logError("Library version changed since last download -- restarting sync");
+	let keepGoing = yield this.downloadDelayGenerator.next();
+	if (!keepGoing) {
+		throw new Error("Could not update " + this.library.name + " -- library in use");
+	}
+	return this.DOWNLOAD_RESULT_RESTART;
 });
 
 
@@ -648,18 +728,46 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
  * @return {Promise<Integer>} - An upload result code (this.UPLOAD_RESULT_*)
  */
 Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(function* () {
-	var libraryVersion = Zotero.Libraries.getVersion(this.libraryID);
+	var libraryVersion = this.library.libraryVersion;
 	
+	var settingsUploaded = false;
 	var uploadNeeded = false;
 	var objectIDs = {};
 	var objectDeletions = {};
 	
+	// Upload synced settings
+	try {
+		let settings = yield Zotero.SyncedSettings.getUnsynced(this.libraryID);
+		if (Object.keys(settings).length) {
+			libraryVersion = yield this._uploadSettings(settings, libraryVersion);
+			settingsUploaded = true;
+		}
+		else {
+			Zotero.debug("No settings to upload in " + this.library.name);
+		}
+	}
+	catch (e) {
+		if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status == 412) {
+			return this.UPLOAD_RESULT_LIBRARY_CONFLICT;
+		}
+		throw e;
+	}
+	
 	// Get unsynced local objects for each object type
 	for (let objectType of Zotero.DataObjectUtilities.getTypesForLibrary(this.libraryID)) {
 		let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
+		let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		
 		// New/modified objects
 		let ids = yield Zotero.Sync.Data.Local.getUnsynced(objectType, this.libraryID);
+		
+		// Skip objects in sync queue, because they might have unresolved conflicts.
+		// The queue only has keys, so we have to convert to keys and back.
+		let unsyncedKeys = ids.map(id => objectsClass.getLibraryAndKeyFromID(id).key);
+		let queueKeys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue(objectType, this.libraryID);
+		unsyncedKeys = Zotero.Utilities.arrayDiff(unsyncedKeys, queueKeys);
+		ids = unsyncedKeys.map(key => objectsClass.getIDFromLibraryAndKey(this.libraryID, key));
+		
 		if (ids.length) {
 			Zotero.debug(ids.length + " "
 				+ (ids.length == 1 ? objectType : objectTypePlural)
@@ -688,7 +796,7 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 	}
 	
 	if (!uploadNeeded) {
-		return this.UPLOAD_RESULT_NOTHING_TO_UPLOAD;
+		return settingsUploaded ? this.UPLOAD_RESULT_SUCCESS : this.UPLOAD_RESULT_NOTHING_TO_UPLOAD;
 	}
 	
 	try {
@@ -717,6 +825,29 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 });
 
 
+Zotero.Sync.Data.Engine.prototype._uploadSettings = Zotero.Promise.coroutine(function* (settings, libraryVersion) {
+	let json = {};
+	for (let key in settings) {
+		json[key] = {
+			value: settings[key]
+		};
+	}
+	libraryVersion = yield this.apiClient.uploadSettings(
+		this.library.libraryType,
+		this.libraryTypeID,
+		libraryVersion,
+		json
+	);
+	yield Zotero.SyncedSettings.markAsSynced(
+		this.libraryID,
+		Object.keys(settings),
+		libraryVersion
+	);
+	Zotero.debug("Done uploading settings in " + this.library.name);
+	return libraryVersion;
+});
+
+
 Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(function* (objectType, ids, libraryVersion) {
 	let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 	let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
@@ -731,13 +862,11 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 		});
 	}
 	
-	let failureDelayGenerator = null;
-	
 	while (queue.length) {
 		// Get a slice of the queue and generate JSON for objects if necessary
 		let batch = [];
 		let numSkipped = 0;
-		for (let i = 0; i < queue.length && queue.length < this.uploadBatchSize; i++) {
+		for (let i = 0; i < queue.length && i < this.uploadBatchSize; i++) {
 			let o = queue[i];
 			// Skip requests that failed with 4xx
 			if (o.failed) {
@@ -745,7 +874,18 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 				continue;
 			}
 			if (!o.json) {
-				o.json = yield this._getJSONForObject(objectType, o.id);
+				o.json = yield this._getJSONForObject(
+					objectType,
+					o.id,
+					{
+						// Only storage properties ('mtime', 'md5') for WebDAV files
+						skipStorageProperties:
+							objectType == 'item'
+								? Zotero.Sync.Storage.Local.getModeForLibrary(this.library.libraryID)
+									!= 'webdav'
+								: undefined
+					}
+				);
 			}
 			batch.push(o.json);
 		}
@@ -761,140 +901,121 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 		Zotero.debug("UPLOAD BATCH:");
 		Zotero.debug(batch);
 		
+		let results;
 		let numSuccessful = 0;
-		try {
-			let json = yield this.apiClient.uploadObjects(
-				this.library.libraryType,
-				this.libraryTypeID,
-				"POST",
-				libraryVersion,
-				objectType,
-				batch
-			);
-			
-			Zotero.debug('======');
-			Zotero.debug(json);
-			
-			libraryVersion = json.libraryVersion;
-			
-			// Mark successful and unchanged objects as synced with new version,
-			// and save uploaded JSON to cache
-			let ids = [];
-			let toSave = [];
-			let toCache = [];
-			for (let state of ['successful', 'unchanged']) {
-				for (let index in json.results[state]) {
-					let current = json.results[state][index];
-					// 'successful' includes objects, not keys
-					let key = state == 'successful' ? current.key : current;
-					
-					if (key != batch[index].key) {
-						throw new Error("Key mismatch (" + key + " != " + batch[index].key + ")");
-					}
-					
-					let obj = yield objectsClass.getByLibraryAndKeyAsync(
-						this.libraryID, key, { noCache: true }
-					)
-					ids.push(obj.id);
-					
-					if (state == 'successful') {
-						// Update local object with saved data if necessary
-						yield obj.loadAllData();
-						obj.fromJSON(current.data);
-						toSave.push(obj);
-						toCache.push(current);
-					}
-					else {
-						// This won't reflect the actual version of the item on the server, but
-						// it will guarantee that the item won't be redownloaded unnecessarily
-						// in the case of a full sync, because the version will be higher than
-						// whatever version is on the server.
-						batch[index].version = json.libraryVersion
-						toCache.push(batch[index]);
-					}
-					
-					numSuccessful++;
-					// Remove from batch to mark as successful
-					delete batch[index];
-				}
-			}
-			yield Zotero.Sync.Data.Local.saveCacheObjects(
-				objectType, this.libraryID, toCache
-			);
-			yield Zotero.DB.executeTransaction(function* () {
-				for (let i = 0; i < toSave.length; i++) {
-					yield toSave[i].save();
-				}
-				this.library.libraryVersion = json.libraryVersion;
-				yield this.library.save();
-				objectsClass.updateVersion(ids, json.libraryVersion);
-				objectsClass.updateSynced(ids, true);
-			}.bind(this));
-			
-			// Handle failed objects
-			for (let index in json.results.failed) {
-				let { code, message } = json.results.failed[index];
-				e = new Error(message);
-				e.name = "ZoteroUploadObjectError";
-				e.code = code;
-				Zotero.logError(e);
+		({ libraryVersion, results } = yield this.apiClient.uploadObjects(
+			this.library.libraryType,
+			this.libraryTypeID,
+			"POST",
+			libraryVersion,
+			objectType,
+			batch
+		));
+		
+		Zotero.debug("===");
+		Zotero.debug(results);
+		
+		// Mark successful and unchanged objects as synced with new version,
+		// and save uploaded JSON to cache
+		let ids = [];
+		let toSave = [];
+		let toCache = [];
+		for (let state of ['successful', 'unchanged']) {
+			for (let index in results[state]) {
+				let current = results[state][index];
+				// 'successful' includes objects, not keys
+				let key = state == 'successful' ? current.key : current;
 				
-				// This shouldn't happen, because the upload request includes a library
-				// version and should prevent an outdated upload before the object version is
-				// checked. If it does, we need to do a full sync.
-				if (e.code == 412) {
-					return this.UPLOAD_RESULT_OBJECT_CONFLICT;
+				if (key != batch[index].key) {
+					throw new Error("Key mismatch (" + key + " != " + batch[index].key + ")");
 				}
 				
-				if (this.onError) {
-					this.onError(e);
+				let obj = objectsClass.getByLibraryAndKey(this.libraryID, key);
+				ids.push(obj.id);
+				
+				if (state == 'successful') {
+					// Update local object with saved data if necessary
+					obj.fromJSON(current.data);
+					toSave.push(obj);
+					toCache.push(current);
 				}
-				if (this.stopOnError) {
-					throw new Error(e);
+				else {
+					// This won't necessarily reflect the actual version of the object on the server,
+					// since objects are uploaded in batches and we only get the final version, but it
+					// will guarantee that the item won't be redownloaded unnecessarily in the case of
+					// a full sync, because the version will be higher than whatever version is on the
+					// server.
+					batch[index].version = libraryVersion
+					toCache.push(batch[index]);
 				}
-				batch[index].tries++;
-				// Mark 400 errors as permanently failed
-				if (e.code >= 400 && e.code < 500) {
-					batch[index].failed = true;
-				}
-				// 500 errors should stay in queue and be retried
+				
+				numSuccessful++;
+				// Remove from batch to mark as successful
+				delete batch[index];
 			}
-			
-			// Add failed objects back to end of queue
-			var numFailed = 0;
-			for (let o of batch) {
-				if (o !== undefined) {
-					queue.push(o);
-					// TODO: Clear JSON?
-					numFailed++;
-				}
-			}
-			Zotero.debug("Failed: " + numFailed, 2);
 		}
-		catch (e) {
-			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-				if (e.status == 412) {
-					throw e;
-				}
-				
-				// On 5xx, delay and retry
-				if (e.status >= 500 && e.status <= 600) {
-					if (!failureDelayGenerator) {
-						// Keep trying for up to an hour
-						failureDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
-							Zotero.Sync.Data.failureDelayIntervals, 60 * 60 * 1000
-						);
-					}
-					let keepGoing = yield failureDelayGenerator.next();
-					if (!keepGoing) {
-						Zotero.logError("Failed too many times");
-						throw e;
-					}
-					continue;
-				}
+		yield Zotero.Sync.Data.Local.saveCacheObjects(
+			objectType, this.libraryID, toCache
+		);
+		yield Zotero.DB.executeTransaction(function* () {
+			for (let i = 0; i < toSave.length; i++) {
+				yield toSave[i].save({
+					skipSyncedUpdate: true,
+					// We want to minimize the times when server writes actually result in local
+					// updates, but when they do, don't update the user-visible timestamp
+					skipDateModifiedUpdate: true
+				});
 			}
-			throw e;
+			this.library.libraryVersion = libraryVersion;
+			yield this.library.save();
+			objectsClass.updateVersion(ids, libraryVersion);
+			objectsClass.updateSynced(ids, true);
+		}.bind(this));
+		
+		// Handle failed objects
+		for (let index in results.failed) {
+			let { code, message, data } = results.failed[index];
+			let e = new Error(message);
+			e.name = "ZoteroObjectUploadError";
+			e.code = code;
+			if (data) {
+				e.data = data;
+			}
+			Zotero.logError("Error for " + objectType + " " + batch[index].key + " in "
+				+ this.library.name + ":\n\n" + e);
+			
+			// This shouldn't happen, because the upload request includes a library
+			// version and should prevent an outdated upload before the object version is
+			// checked. If it does, we need to do a full sync.
+			if (e.code == 412) {
+				return this.UPLOAD_RESULT_OBJECT_CONFLICT;
+			}
+			
+			if (this.onError) {
+				this.onError(e);
+			}
+			if (this.stopOnError) {
+				throw new Error(e);
+			}
+			batch[index].tries++;
+			// Mark 400 errors as permanently failed
+			if (e.code >= 400 && e.code < 500) {
+				batch[index].failed = true;
+			}
+			// 500 errors should stay in queue and be retried
 		}
+		
+		// Add failed objects back to end of queue
+		var numFailed = 0;
+		for (let o of batch) {
+			if (o !== undefined) {
+				queue.push(o);
+				// TODO: Clear JSON?
+				numFailed++;
+			}
+		}
+		Zotero.debug("Failed: " + numFailed, 2);
+		
 		// If we didn't make any progress, bail
 		if (!numSuccessful) {
 			throw new Error("Made no progress during upload -- stopping");
@@ -910,60 +1031,25 @@ Zotero.Sync.Data.Engine.prototype._uploadDeletions = Zotero.Promise.coroutine(fu
 	let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 	let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 	
-	let failureDelayGenerator = null;
-	
 	while (keys.length) {
-		try {
-			let batch = keys.slice(0, this.uploadDeletionBatchSize);
-			libraryVersion = yield this.apiClient.uploadDeletions(
-				this.library.libraryType,
-				this.libraryTypeID,
-				libraryVersion,
-				objectType,
-				batch
-			);
-			keys.splice(0, batch.length);
-			
-			// Update library version
-			this.library.libraryVersion = libraryVersion;
-			yield this.library.saveTx();
-			
-			// Remove successful deletions from delete log
-			yield Zotero.Sync.Data.Local.removeObjectsFromDeleteLog(
-				objectType, this.libraryID, batch
-			);
-		}
-		catch (e) {
-			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-				if (e.status == 412) {
-					throw e;
-				}
-				
-				// On 5xx, delay and retry
-				if (e.status >= 500 && e.status <= 600) {
-					if (this.onError) {
-						this.onError(e);
-					}
-					if (this.stopOnError) {
-						throw new Error(e);
-					}
-					
-					if (!failureDelayGenerator) {
-						// Keep trying for up to an hour
-						failureDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
-							Zotero.Sync.Data.failureDelayIntervals, 60 * 60 * 1000
-						);
-					}
-					let keepGoing = yield failureDelayGenerator.next();
-					if (!keepGoing) {
-						Zotero.logError("Failed too many times");
-						throw e;
-					}
-					continue;
-				}
-			}
-			throw e;
-		}
+		let batch = keys.slice(0, this.uploadDeletionBatchSize);
+		libraryVersion = yield this.apiClient.uploadDeletions(
+			this.library.libraryType,
+			this.libraryTypeID,
+			libraryVersion,
+			objectType,
+			batch
+		);
+		keys.splice(0, batch.length);
+		
+		// Update library version
+		this.library.libraryVersion = libraryVersion;
+		yield this.library.saveTx();
+		
+		// Remove successful deletions from delete log
+		yield Zotero.Sync.Data.Local.removeObjectsFromDeleteLog(
+			objectType, this.libraryID, batch
+		);
 	}
 	Zotero.debug(`Done uploading ${objectType} deletions in ${this.library.name}`);
 	
@@ -971,11 +1057,13 @@ Zotero.Sync.Data.Engine.prototype._uploadDeletions = Zotero.Promise.coroutine(fu
 });
 
 
-Zotero.Sync.Data.Engine.prototype._getJSONForObject = function (objectType, id) {
+Zotero.Sync.Data.Engine.prototype._getJSONForObject = function (objectType, id, options = {}) {
 	return Zotero.DB.executeTransaction(function* () {
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
-		var obj = yield objectsClass.getAsync(id, { noCache: true });
+		var obj = objectsClass.get(id);
 		var cacheObj = false;
+		// If the object has been synced before, get the pristine version from the cache so we can
+		// use PATCH mode and include only fields that have changed
 		if (obj.version) {
 			cacheObj = yield Zotero.Sync.Data.Local.getCacheObject(
 				objectType, obj.libraryID, obj.key, obj.version
@@ -990,6 +1078,9 @@ Zotero.Sync.Data.Engine.prototype._getJSONForObject = function (objectType, id) 
 			includeKey: true,
 			includeVersion: true, // DEBUG: remove?
 			includeDate: true,
+			// Whether to skip 'mtime' and 'md5'
+			skipStorageProperties: options.skipStorageProperties,
+			// Use last-synced mtime/md5 instead of current values from the file itself
 			syncedStorageProperties: true,
 			patchBase: cacheObj ? cacheObj.data : false
 		});
@@ -1014,7 +1105,7 @@ Zotero.Sync.Data.Engine.prototype._getJSONForObject = function (objectType, id) 
  *                      by _fullSync()
  */
 Zotero.Sync.Data.Engine.prototype._upgradeCheck = Zotero.Promise.coroutine(function* () {
-	var libraryVersion = Zotero.Libraries.getVersion(this.libraryID);
+	var libraryVersion = this.library.libraryVersion;
 	if (libraryVersion) return;
 	
 	var lastLocalSyncTime = yield Zotero.DB.valueQueryAsync(
@@ -1231,9 +1322,7 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 			// Queue objects that are out of date or don't exist locally
 			for (let key in results.versions) {
 				let version = results.versions[key];
-				let obj = yield objectsClass.getByLibraryAndKeyAsync(this.libraryID, key, {
-					noCache: true
-				});
+				let obj = objectsClass.getByLibraryAndKey(this.libraryID, key);
 				// If object already at latest version, skip
 				let localVersion = localVersions[key];
 				if (localVersion && localVersion === version) {
@@ -1261,8 +1350,11 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 			}
 			
 			if (toDownload.length) {
-				Zotero.debug("Downloading missing/outdated " + objectTypePlural + " in " + this.library.name);
+				Zotero.debug("Downloading missing/outdated " + objectTypePlural);
 				yield this._downloadObjects(objectType, toDownload);
+			}
+			else {
+				Zotero.debug(`No missing/outdated ${objectTypePlural} to download`);
 			}
 			
 			// Mark synced objects that don't exist remotely as unsynced
@@ -1285,8 +1377,7 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 				for (let key of remoteMissing) {
 					let id = objectsClass.getIDFromLibraryAndKey(this.libraryID, key);
 					if (!id) {
-						Zotero.logError(ObjectType + " " + this.libraryID + "/" + key
-							+ " not found to mark as unsynced");
+						Zotero.logError(`ObjectType ${key} not found to mark as unsynced`);
 						continue;
 					}
 					if (remoteDeleted[objectTypePlural].indexOf(key) != -1) {
@@ -1298,16 +1389,24 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 				// Delete local objects that were deleted remotely
 				if (toDelete.length) {
 					Zotero.debug("Deleting remotely deleted synced " + objectTypePlural);
-					yield objectsClass.erase(toDelete, { skipDeleteLog: true });
+					yield objectsClass.erase(
+						toDelete,
+						{
+							skipEditCheck: true,
+							skipDeleteLog: true
+						}
+					);
 				}
 				// For remotely missing objects that exist locally, reset version, since old
 				// version will no longer match remote, and mark for upload
 				if (toUpload.length) {
-					Zotero.debug("Marking remotely missing synced " + objectTypePlural
-						+ " as unsynced");
+					Zotero.debug(`Marking remotely missing synced ${objectTypePlural} as unsynced`);
 					yield objectsClass.updateVersion(toUpload, 0);
 					yield objectsClass.updateSynced(toUpload, false);
 				}
+			}
+			else {
+				Zotero.debug(`No remotely missing synced ${objectTypePlural}`);
 			}
 		}
 		break;
@@ -1321,9 +1420,12 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 });
 
 
-Zotero.Sync.Data.Engine.prototype._getOptions = function () {
+Zotero.Sync.Data.Engine.prototype._getOptions = function (additionalOpts = {}) {
 	var options = {};
 	this.optionNames.forEach(x => options[x] = this[x]);
+	for (let opt in additionalOpts) {
+		options[opt] = additionalOpts[opt];
+	}
 	return options;
 }
 

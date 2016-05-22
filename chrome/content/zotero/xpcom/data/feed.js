@@ -236,6 +236,8 @@ Zotero.Feed.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 	
 	if (!this._feedName) throw new Error("Feed name not set");
 	if (!this._feedUrl) throw new Error("Feed URL not set");
+	if (!this.refreshInterval) this.refreshInterval = Zotero.Prefs.get('feeds.defaultTTL') * 60;
+	if (!this.cleanupAfter) this.cleanupAfter = Zotero.Prefs.get('feeds.defaultCleanupAfter');
 	
 	if (env.isNew) {
 		// Make sure URL is unique
@@ -271,7 +273,7 @@ Zotero.Feed.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			+ "VALUES (" + Array(params.length).fill('?').join(', ') + ")";
 		yield Zotero.DB.queryAsync(sql, params);
 		
-		Zotero.Notifier.queue('add', 'feed', this.libraryID);
+		Zotero.Notifier.queue('add', 'feed', this.libraryID, env.options.notifierQueue);
 	}
 	else if (changedCols.length) {
 		let sql = "UPDATE feeds SET " + changedCols.map(v => v + '=?').join(', ')
@@ -279,7 +281,7 @@ Zotero.Feed.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		params.push(this.libraryID);
 		yield Zotero.DB.queryAsync(sql, params);
 		
-		Zotero.Notifier.queue('modify', 'feed', this.libraryID);
+		Zotero.Notifier.queue('modify', 'feed', this.libraryID, env.options.notifierQueue);
 	}
 	else {
 		Zotero.debug("Feed data did not change for feed " + this.libraryID, 5);
@@ -305,12 +307,12 @@ Zotero.Feed.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
 	
 });
 
-Zotero.Feed.prototype._finalizeErase = Zotero.Promise.coroutine(function* (){
+Zotero.Feed.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env) {
 	let notifierData = {};
 	notifierData[this.libraryID] = {
 		libraryID: this.libraryID
 	};
-	Zotero.Notifier.trigger('delete', 'feed', this.id, notifierData);
+	Zotero.Notifier.queue('delete', 'feed', this.id, notifierData, env.options.notifierQueue);
 	Zotero.Feeds.unregister(this.libraryID);
 
 	let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds') || {};
@@ -395,7 +397,7 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 	}
 	let deferred = Zotero.Promise.defer();
 	this._updating = deferred.promise;
-	Zotero.Notifier.trigger('statusChanged', 'feed', this.id);
+	yield Zotero.Notifier.trigger('statusChanged', 'feed', this.id);
 	this._set('_feedLastCheckError', null);
 	
 	try {
@@ -463,8 +465,7 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 	}
 	catch (e) {
 		if (e.message) {
-			Zotero.debug("Error processing feed from " + this.url);
-			Zotero.debug(e);
+			Zotero.logError("Error processing feed from " + this.url + ":\n\n" + e);
 		}
 		this._set('_feedLastCheckError', e.message || 'Error processing feed');
 	}
@@ -491,7 +492,7 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 	yield this.updateUnreadCount();
 	deferred.resolve();
 	this._updating = false;
-	Zotero.Notifier.trigger('statusChanged', 'feed', this.id);
+	yield Zotero.Notifier.trigger('statusChanged', 'feed', this.id);
 });
 
 Zotero.Feed.prototype.updateFeed = Zotero.Promise.coroutine(function* () {
@@ -511,6 +512,6 @@ Zotero.Feed.prototype.updateUnreadCount = Zotero.Promise.coroutine(function* () 
 	
 	if (newCount != this._feedUnreadCount) {
 		this._feedUnreadCount = newCount;
-		Zotero.Notifier.trigger('unreadCountUpdated', 'feed', this.id);
+		yield Zotero.Notifier.trigger('unreadCountUpdated', 'feed', this.id);
 	}
 });

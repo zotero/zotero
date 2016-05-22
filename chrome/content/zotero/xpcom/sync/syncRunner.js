@@ -48,13 +48,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	this.caller = new ConcurrentCaller(4);
 	this.caller.setLogger(msg => Zotero.debug(msg));
 	this.caller.stopOnError = stopOnError;
-	this.caller.onError = function (e) {
-		this.addError(e);
-		if (e.fatal) {
-			this.caller.stop();
-			throw e;
-		}
-	}.bind(this);
 	
 	var _enabled = false;
 	var _autoSyncTimer;
@@ -71,9 +64,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	var _currentLastSyncLabel;
 	var _errors = [];
 	
-
 	this.getAPIClient = function (options = {}) {
-
 		return new Zotero.Sync.APIClient({
 			baseURL: this.baseURL,
 			apiVersion: this.apiVersion,
@@ -97,16 +88,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		// Clear message list
 		_errors = [];
 		
-		if (Zotero.HTTP.browserIsOffline()){
-			this.clearSyncTimeout(); // DEBUG: necessary?
-			var msg = Zotero.getString('general.browserIsOffline', Zotero.appName);
-			var e = new Zotero.Error(msg, 0, { dialogButtonText: null })
-			Components.utils.reportError(e);
-			Zotero.debug(e, 1);
-			this.updateIcons(e);
-			return false;
-		}
-		
 		// Shouldn't be possible
 		if (_syncInProgress) {
 			let msg = Zotero.getString('sync.error.syncInProgress');
@@ -119,38 +100,38 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		// Purge deleted objects so they don't cause sync errors (e.g., long tags)
 		yield Zotero.purgeDataObjects(true);
 		
-		var apiKey = yield _getAPIKey();
-		if (!apiKey) {
-			let msg = "API key not set";
-			let e = new Zotero.Error(msg, 0, { dialogButtonText: null })
-			this.updateIcons(e);
-			_syncInProgress = false;
-			return false;
-		}
-		if (_firstInSession) {
-			options.firstInSession = true;
-			_firstInSession = false;
-		}
-		
-		_syncInProgress = true;
-		this.updateIcons('animate');
-		
 		try {
+			let apiKey = yield _getAPIKey();
+			if (!apiKey) {
+				throw new Zotero.Error("API key not set", Zotero.Error.ERROR_API_KEY_NOT_SET);
+			}
+			
+			if (_firstInSession) {
+				options.firstInSession = true;
+				_firstInSession = false;
+			}
+			
+			this.updateIcons('animate');
+			
 			let client = this.getAPIClient({ apiKey });
 			let keyInfo = yield this.checkAccess(client, options);
 			
 			let emptyLibraryContinue = yield this.checkEmptyLibrary(keyInfo);
 			if (!emptyLibraryContinue) {
-				this.end();
+				yield this.end(options);
 				Zotero.debug("Syncing cancelled because user library is empty");
 				return false;
 			}
-
-			if (!Zotero.Users.getCurrentUserID()) {
-				Zotero.Users.setCurrentUserID(keyInfo.userID);
-				Zotero.Users.setCurrentUsername(keyInfo.username);
+			
+			let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+				.getService(Components.interfaces.nsIWindowMediator);
+			let lastWin = wm.getMostRecentWindow("navigator:browser");
+			if (!(yield Zotero.Sync.Data.Local.checkUser(lastWin, keyInfo.userID, keyInfo.username))) {
+				yield this.end(options);
+				Zotero.debug("User cancelled sync on username mismatch");
+				return false;
 			}
-
+			
 			let engineOptions = {
 				apiClient: client,
 				caller: this.caller,
@@ -168,7 +149,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				firstInSession: _firstInSession
 			};
 			
-			let librariesToSync = yield this.checkLibraries(
+			let librariesToSync = options.libraries = yield this.checkLibraries(
 				client,
 				options,
 				keyInfo,
@@ -185,31 +166,46 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			
 			// Sync data and files, and then repeat if necessary
 			let attempt = 1;
-			let nextLibraries = librariesToSync.concat();
-			let resyncLibraries = [];
-			while (nextLibraries.length) {
+			let successfulLibraries = new Set(librariesToSync);
+			while (librariesToSync.length) {
 				if (attempt > 3) {
+					// TODO: Back off and/or nicer error
 					throw new Error("Too many sync attempts -- stopping");
 				}
-				nextLibraries = yield _doDataSync(
-					resyncLibraries.length ? resyncLibraries : nextLibraries,
-					engineOptions
-				);
-				resyncLibraries = yield _doFileSync(nextLibraries, engineOptions);
-				if (!resyncLibraries.length) {
-					break;
+				let nextLibraries = yield _doDataSync(librariesToSync, engineOptions);
+				// Remove failed libraries from the successful set
+				Zotero.Utilities.arrayDiff(librariesToSync, nextLibraries).forEach(libraryID => {
+					successfulLibraries.delete(libraryID);
+				});
+				
+				// Run file sync on all libraries that passed the last data sync
+				librariesToSync = yield _doFileSync(nextLibraries, engineOptions);
+				if (librariesToSync.length) {
+					attempt++;
+					continue;
 				}
-				attempt++;
-			}
-			
-			// Sync full-text content in libraries with successful data sync. Full-text syncing
-			// still happens for libraries with failed file syncs.
-			if (nextLibraries.length) {
-				yield _doFullTextSync(nextLibraries, engineOptions);
+				
+				// Run full-text sync on all libraries that haven't failed a data sync
+				librariesToSync = yield _doFullTextSync([...successfulLibraries], engineOptions);
+				if (librariesToSync.length) {
+					attempt++;
+					continue;
+				}
+				break;
 			}
 		}
 		catch (e) {
-			if (options.onError) {
+			if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+				let msg = Zotero.getString('general.browserIsOffline', Zotero.appName);
+				e = new Zotero.Error(msg, 0, { dialogButtonText: null })
+				Zotero.logError(e);
+				_errors = [];
+			}
+			
+			if (e instanceof Zotero.Sync.UserCancelledException) {
+				Zotero.debug("Sync was cancelled");
+			}
+			else if (options.onError) {
 				options.onError(e);
 			}
 			else {
@@ -217,18 +213,17 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 		}
 		finally {
-			this.end();
+			yield this.end(options);
+			
+			if (options.restartSync) {
+				delete options.restartSync;
+				Zotero.debug("Restarting sync");
+				yield this.sync(options);
+				return;
+			}
+			
+			Zotero.debug("Done syncing");
 		}
-		
-		Zotero.debug("Done syncing");
-		
-		/*if (results.changesMade) {
-			Zotero.debug("Changes made during file sync "
-				+ "-- performing additional data sync");
-			this.sync(options);
-		}*/
-		
-		return;
 	});
 	
 	
@@ -239,8 +234,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		var json = yield client.getKeyInfo(options);
 		Zotero.debug(json);
 		if (!json) {
-			// TODO: Nicer error message
-			throw new Error("Invalid API key");
+			throw new Zotero.Error("API key not set", Zotero.Error.ERROR_API_KEY_NOT_SET);
 		}
 		
 		// Sanity check
@@ -499,6 +493,15 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				successfulLibraries.push(libraryID);
 			}
 			catch (e) {
+				if (e instanceof Zotero.Sync.UserCancelledException) {
+					if (e.advanceToNextLibrary) {
+						Zotero.debug("Sync cancelled for library " + libraryID + " -- "
+							+ "advancing to next library");
+						continue;
+					}
+					throw e;
+				}
+				
 				Zotero.debug("Sync failed for library " + libraryID);
 				Zotero.logError(e);
 				this.checkError(e);
@@ -565,15 +568,22 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 		}
 		Zotero.debug("Done with file syncing");
+		if (resyncLibraries.length) {
+			Zotero.debug("Libraries to resync: " + resyncLibraries.join(", "));
+		}
 		return resyncLibraries;
 	}.bind(this));
 	
 	
+	/**
+	 * @return {Integer[]} - Array of libraries that need data syncing again
+	 */
 	var _doFullTextSync = Zotero.Promise.coroutine(function* (libraries, options) {
 		if (!Zotero.Prefs.get("sync.fulltext.enabled")) return;
 		
 		Zotero.debug("Starting full-text syncing");
 		this.setSyncStatus(Zotero.getString('sync.status.syncingFullText'));
+		var resyncLibraries = [];
 		for (let libraryID of libraries) {
 			try {
 				let opts = {};
@@ -584,6 +594,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				yield engine.start();
 			}
 			catch (e) {
+				if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status == 412) {
+					resyncLibraries.push(libraryID);
+					continue;
+				}
 				Zotero.debug("Full-text sync failed for library " + libraryID);
 				Zotero.logError(e);
 				this.checkError(e);
@@ -595,6 +609,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 		}
 		Zotero.debug("Done with full-text syncing");
+		if (resyncLibraries.length) {
+			Zotero.debug("Libraries to resync: " + resyncLibraries.join(", "));
+		}
+		return resyncLibraries;
 	}.bind(this));
 	
 	
@@ -682,33 +700,14 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	}
 	
 	
-	this.end = function () {
-		this.updateIcons(_errors);
+	this.end = Zotero.Promise.coroutine(function* (options) {
+		yield this.checkErrors(_errors, options);
+		if (!options.restartSync) {
+			this.updateIcons(_errors);
+		}
 		_errors = [];
 		_syncInProgress = false;
-	}
-	
-	
-	/**
-	 * Log a warning, but don't throw an error
-	 */
-	this.warning = function (e) {
-		Zotero.debug(e, 2);
-		Components.utils.reportError(e);
-		e.errorType = 'warning';
-		_warning = e;
-	}
-	
-	
-	this.error = function (e) {
-		if (typeof e == 'string') {
-			e = new Error(e);
-			e.errorType = 'error';
-		}
-		Zotero.debug(e, 1);
-		this.updateIcons(e);
-		throw (e);
-	}
+	});
 	
 	
 	/**
@@ -846,11 +845,21 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	}
 	
 	
-	this.checkError = function (e, background) {
+	this.checkErrors = Zotero.Promise.coroutine(function* (errors, options = {}) {
+		for (let e of errors) {
+			let handled = yield this.checkError(e, options);
+			if (handled) {
+				break;
+			}
+		}
+	});
+	
+	
+	this.checkError = Zotero.Promise.coroutine(function* (e, options = {}) {
 		if (e.name && e.name == 'Zotero Error') {
 			switch (e.error) {
-				case Zotero.Error.ERROR_SYNC_USERNAME_NOT_SET:
-				case Zotero.Error.ERROR_INVALID_SYNC_LOGIN:
+				case Zotero.Error.ERROR_API_KEY_NOT_SET:
+				case Zotero.Error.ERROR_API_KEY_INVALID:
 					// TODO: the setTimeout() call below should just simulate a click on the sync error icon
 					// instead of creating its own dialog, but updateIcons() doesn't yet provide full control
 					// over dialog title and primary button text/action, which is why this version of the
@@ -858,10 +867,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					// TODO: localize (=>done) and combine with below (=>?)
 					var msg = Zotero.getString('sync.error.invalidLogin.text');
 					e.message = msg;
-					e.data = {};
-					e.data.dialogText = msg;
-					e.data.dialogButtonText = Zotero.getString('sync.openSyncPreferences');
-					e.data.dialogButtonCallback = function () {
+					e.dialogButtonText = Zotero.getString('sync.openSyncPreferences');
+					e.dialogButtonCallback = function () {
 						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 								.getService(Components.interfaces.nsIWindowMediator);
 						var win = wm.getMostRecentWindow("navigator:browser");
@@ -869,7 +876,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					};
 					
 					// Manual click
-					if (!background) {
+					if (!options.background) {
 						setTimeout(function () {
 							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 										.getService(Components.interfaces.nsIWindowMediator);
@@ -879,7 +886,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 										.getService(Components.interfaces.nsIPromptService);
 							var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 												+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
-							if (e.error == Zotero.Error.ERROR_SYNC_USERNAME_NOT_SET) {
+							if (e.error == Zotero.Error.ERROR_API_KEY_NOT_SET) {
 								var title = Zotero.getString('sync.error.usernameNotSet');
 								var msg = Zotero.getString('sync.error.usernameNotSet.text');
 							}
@@ -905,23 +912,84 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					break;
 			}
 		}
-		
-		// TEMP
-		return;
-		
-		if (extraInfo) {
-			// Server errors will generally be HTML
-			extraInfo = Zotero.Utilities.unescapeHTML(extraInfo);
-			Components.utils.reportError(extraInfo);
+		else if (e.name && e.name == 'ZoteroObjectUploadError') {
+			// Tag too long
+			if (e.code == 413 && e.data && e.data.tag !== undefined) {
+				// Show long tag fixer and handle result
+				e.dialogButtonText = Zotero.getString('general.fix');
+				e.dialogButtonCallback = Zotero.Promise.coroutine(function* () {
+					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					   .getService(Components.interfaces.nsIWindowMediator);
+					var lastWin = wm.getMostRecentWindow("navigator:browser");
+					
+					// Open long tag fixer for every long tag in every editable library we're syncing
+					var editableLibraries = options.libraries
+						.filter(x => Zotero.Libraries.get(x).editable);
+					for (let libraryID of editableLibraries) {
+						let oldTagIDs = yield Zotero.Tags.getLongTagsInLibrary(libraryID);
+						for (let oldTagID of oldTagIDs) {
+							let oldTag = Zotero.Tags.getName(oldTagID);
+							let dataOut = { result: null };
+							lastWin.openDialog(
+								'chrome://zotero/content/longTagFixer.xul',
+								'',
+								'chrome,modal,centerscreen',
+								oldTag,
+								dataOut
+							);
+							// If dialog was cancelled, stop
+							if (!dataOut.result) {
+								return;
+							}
+							switch (dataOut.result.op) {
+							case 'split':
+								for (let libraryID of editableLibraries) {
+									let itemIDs = yield Zotero.Tags.getTagItems(libraryID, oldTagID);
+									yield Zotero.DB.executeTransaction(function* () {
+										for (let itemID of itemIDs) {
+											let item = yield Zotero.Items.getAsync(itemID);
+											for (let tag of dataOut.result.tags) {
+												item.addTag(tag);
+											}
+											item.removeTag(oldTag);
+											yield item.save();
+										}
+										yield Zotero.Tags.purge(oldTagID);
+									});
+								}
+								break;
+							
+							case 'edit':
+								for (let libraryID of editableLibraries) {
+									let itemIDs = yield Zotero.Tags.getTagItems(libraryID, oldTagID);
+									yield Zotero.DB.executeTransaction(function* () {
+										for (let itemID of itemIDs) {
+											let item = yield Zotero.Items.getAsync(itemID);
+											item.replaceTag(oldTag, dataOut.result.tag);
+											yield item.save();
+										}
+									});
+								}
+								break;
+							
+							case 'delete':
+								for (let libraryID of editableLibraries) {
+									yield Zotero.Tags.removeFromLibrary(libraryID, oldTagID);
+								}
+								break;
+							}
+						}
+					}
+					
+					options.restartSync = true;
+				});
+				// If not a background sync, show fixer dialog immediately
+				if (!options.background) {
+					yield e.dialogButtonCallback();
+				}
+			}
 		}
-		
-		Zotero.debug(e, 1);
-		
-		if (!skipReload) {
-			Zotero.reloadDataObjects();
-		}
-		Zotero.Sync.EventListener.resetIgnored();
-	}
+	});
 	
 	
 	/**
@@ -1023,9 +1091,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		
 		e.parsed = true;
 		e.errorType = e.errorType ? e.errorType : 'error';
-		if (!e.data) {
-			e.data = {};
-		}
 		
 		return e;
 	}
@@ -1088,7 +1153,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			// For unexpected ones, just show a generic message
 			else {
 				// TODO: improve and localize
-				var msg = "An error occurred during syncing:\n\n" + e;
+				var msg = "An error occurred during syncing:\n\n" + e.message;
 			}
 			
 			var desc = doc.createElement('description');
@@ -1099,25 +1164,28 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			
 			/*// If not an error and there's no explicit button text, don't show
 			// button to report errors
-			if (e.errorType != 'error' && e.data.dialogButtonText === undefined) {
-				e.data.dialogButtonText = null;
+			if (e.errorType != 'error' && e.dialogButtonText === undefined) {
+				e.dialogButtonText = null;
 			}*/
 			
-			if (e.data && e.data.dialogButtonText !== null) {
-				if (e.data.dialogButtonText === undefined) {
+			if (e.dialogButtonText !== null) {
+				if (e.dialogButtonText === undefined) {
 					var buttonText = Zotero.getString('errorReport.reportError');
 					var buttonCallback = function () {
 						doc.defaultView.ZoteroPane.reportErrors();
 					};
 				}
 				else {
-					var buttonText = e.data.dialogButtonText;
-					var buttonCallback = e.data.dialogButtonCallback;
+					var buttonText = e.dialogButtonText;
+					var buttonCallback = e.dialogButtonCallback;
 				}
 				
 				var button = doc.createElement('button');
 				button.setAttribute('label', buttonText);
-				button.onclick = buttonCallback;
+				button.onclick = function () {
+					buttonCallback();
+					panel.hidePopup();
+				};
 				buttons.appendChild(button);
 			}
 			
@@ -1191,7 +1259,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		if (!lastSyncTime) {
 			try {
 				lastSyncTime = Zotero.Sync.Data.Local.getLastClassicSyncTime();
-				Zotero.debug(lastSyncTime);
 			}
 			catch (e) {
 				Zotero.debug(e, 2);
@@ -1223,12 +1290,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			// Set in login manager
 			|| Zotero.Sync.Data.Local.getAPIKey()
 			// Fallback to old username/password
-			|| (yield _getAPIKeyFromLogin());
+			|| _getAPIKeyFromLogin();
 	})
 	
 	
 	var _getAPIKeyFromLogin = Zotero.Promise.coroutine(function* () {
-		var apiKey;
 		let username = Zotero.Prefs.get('sync.server.username');
 		if (username) {
 			// Check for legacy password if no password set in current session
@@ -1238,9 +1304,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				return "";
 			}
 
-			apiKey = yield Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
+			let json = yield Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
 			Zotero.Sync.Data.Local.removeLegacyLogins();
-			return apiKey;
+			return json.key;
 		}
 		return "";
 	})

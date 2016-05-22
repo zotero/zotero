@@ -118,6 +118,26 @@ Zotero.SyncedSettings = (function () {
 			};
 		},
 		
+		getUnsynced: Zotero.Promise.coroutine(function* (libraryID) {
+			var sql = "SELECT setting, value FROM syncedSettings WHERE synced=0 AND libraryID=?";
+			var rows = yield Zotero.DB.queryAsync(sql, libraryID);
+			var obj = {};
+			rows.forEach(row => obj[row.setting] = JSON.parse(row.value));
+			return obj;
+		}),
+		
+		markAsSynced: Zotero.Promise.coroutine(function* (libraryID, settings, version) {
+				Zotero.debug(settings);
+			var sql = "UPDATE syncedSettings SET synced=1, version=? WHERE libraryID=? AND setting IN "
+				+ "(" + settings.map(x => '?').join(', ') + ")";
+			yield Zotero.DB.queryAsync(sql, [version, libraryID].concat(settings));
+			for (let key of settings) {
+				let setting = _cache[libraryID][key];
+				setting.synced = true;
+				setting.version = version;
+			}
+		}),
+		
 		set: Zotero.Promise.coroutine(function* (libraryID, setting, value, version = 0, synced) {
 			if (typeof value == undefined) {
 				throw new Error("Value not provided");

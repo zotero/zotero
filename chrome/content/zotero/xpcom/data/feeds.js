@@ -25,6 +25,20 @@
 
 // Mimics Zotero.Libraries
 Zotero.Feeds = new function() {
+	this.init = function () {
+		this._timeoutID = setTimeout(() => {
+			this.scheduleNextFeedCheck();
+			this._timeoutID = null;
+		}, 5000);
+	};
+	
+	this.uninit = function () {
+		if (this._timeoutID) {
+			clearTimeout(this._timeoutID);
+			this._timeoutID = null
+		}
+	};
+	
 	this._cache = null;
 	
 	this._makeCache = function() {
@@ -69,9 +83,43 @@ Zotero.Feeds = new function() {
 		delete this._cache.libraryIDByURL[url];
 	}
 
-	this.init = function () {
-		return this.scheduleNextFeedCheck();
-	}
+	this.importFromOPML = Zotero.Promise.coroutine(function* (opmlString) {
+		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser);
+		var doc = parser.parseFromString(opmlString, "application/xml");
+		// Per some random spec (https://developer.mozilla.org/en-US/docs/Web/API/DOMParser), 
+		// DOMParser returns a special type of xml document on error, so we do some magic checking here.
+		if (doc.documentElement.tagName == 'parseerror') {
+			return false;
+		}
+		var body = doc.getElementsByTagName('body')[0];
+		var feedElems = doc.querySelectorAll('[type=rss][url], [xmlUrl]');
+		var newFeeds = [];
+		var registeredUrls = new Set();
+		for (let feedElem of feedElems) {
+			let url = feedElem.getAttribute('xmlUrl');
+			if (!url) url = feedElem.getAttribute('url');
+			let name = feedElem.getAttribute('title');
+			if (!name) name = feedElem.getAttribute('text');
+			if (Zotero.Feeds.existsByURL(url) || registeredUrls.has(url)) {
+				Zotero.debug("Feed Import from OPML: Feed " + name + " : " + url + " already exists. Skipping");
+				continue;
+			}
+			// Prevent duplicates from the same OPML file
+			registeredUrls.add(url);
+			let feed = new Zotero.Feed({url, name});
+			newFeeds.push(feed);
+		}
+		// This could potentially be a massive list, so we save in a transaction.
+		yield Zotero.DB.executeTransaction(function* () {
+			for (let feed of newFeeds) {
+				yield feed.save();
+			}
+		});
+		// Finally, update
+		yield Zotero.Feeds.updateFeeds();
+		return true;
+	});
 	
 	this.restoreFromJSON = Zotero.Promise.coroutine(function* (json, merge=false) {
 		Zotero.debug("Restoring feeds from remote JSON");
@@ -163,7 +211,7 @@ Zotero.Feeds = new function() {
 		Zotero.debug("Scheduling next feed update");
 		let sql = "SELECT ( CASE "
 			+ "WHEN lastCheck IS NULL THEN 0 "
-			+ "ELSE strftime('%s', lastCheck) + refreshInterval*3600 - strftime('%s', 'now') "
+			+ "ELSE strftime('%s', lastCheck) + refreshInterval * 60 - strftime('%s', 'now') "
 			+ "END ) AS nextCheck "
 			+ "FROM feeds WHERE refreshInterval IS NOT NULL "
 			+ "ORDER BY nextCheck ASC LIMIT 1";
@@ -176,7 +224,7 @@ Zotero.Feeds = new function() {
 
 		if (nextCheck !== false) {
 			nextCheck = nextCheck > 0 ? nextCheck * 1000 : 0;
-			Zotero.debug("Next feed check in " + nextCheck / 60000 + " minutes");
+			Zotero.debug("Next feed check in " + (nextCheck / 1000) + " seconds");
 			this._nextFeedCheck = Zotero.Promise.delay(nextCheck);
 			Zotero.Promise.all([this._nextFeedCheck, globalFeedCheckDelay])
 			.then(() => {
@@ -204,6 +252,7 @@ Zotero.Feeds = new function() {
 		Zotero.debug("Running update for feeds: " + needUpdate.join(', '));
 		for (let i=0; i<needUpdate.length; i++) {
 			let feed = Zotero.Feeds.get(needUpdate[i]);
+			yield feed.waitForDataLoad('item');
 			yield feed._updateFeed();
 		}
 		

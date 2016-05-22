@@ -83,13 +83,13 @@ Zotero.defineProperty(Zotero.Collection.prototype, 'parent', {
 	}
 });
 
-Zotero.defineProperty(Zotero.Collection.prototype, 'collectionTreeViewID', {
+Zotero.defineProperty(Zotero.Collection.prototype, 'treeViewID', {
 	get: function () {
 		return "C" + this.id
 	}
 });
 
-Zotero.defineProperty(Zotero.Collection.prototype, 'collectionTreeViewImage', {
+Zotero.defineProperty(Zotero.Collection.prototype, 'treeViewImage', {
 	get: function () {
 		return "chrome://zotero/skin/treesource-collection" + Zotero.hiDPISuffix + ".png";
 	}
@@ -326,10 +326,14 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 Zotero.Collection.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
 	if (!env.options.skipNotifier) {
 		if (env.isNew) {
-			Zotero.Notifier.queue('add', 'collection', this.id, env.notifierData);
+			Zotero.Notifier.queue(
+				'add', 'collection', this.id, env.notifierData, env.options.notifierQueue
+			);
 		}
-		else  {
-			Zotero.Notifier.queue('modify', 'collection', this.id, env.notifierData);
+		else {
+			Zotero.Notifier.queue(
+				'modify', 'collection', this.id, env.notifierData, env.options.notifierQueue
+			);
 		}
 	}
 	
@@ -390,7 +394,7 @@ Zotero.Collection.prototype.addItems = Zotero.Promise.coroutine(function* (itemI
 		});
 	}
 	
-	yield this._loadDataType('childItems');
+	yield this.loadDataType('childItems');
 });
 
 /**
@@ -434,8 +438,6 @@ Zotero.Collection.prototype.removeItems = Zotero.Promise.coroutine(function* (it
 			})
 		}
 	}.bind(this));
-	
-	yield this._loadDataType('childItems');
 });
 
 
@@ -713,8 +715,8 @@ Zotero.Collection.prototype.toJSON = function (options = {}) {
  *											nodes instead of flat array
  * @param	{String}	[type]				'item', 'collection', or NULL for both
  * @param	{Boolean}	[includeDeletedItems=false]		Include items in Trash
- * @return	{Promise<Object[]>} - A promise for an array of objects with 'id', 'key',
- *   'type' ('item' or 'collection'), 'parent', and, if collection, 'name' and the nesting 'level'
+ * @return	{Object[]} - An array of objects with 'id', 'key', 'type' ('item' or 'collection'),
+ *     'parent', and, if collection, 'name' and the nesting 'level'
  */
 Zotero.Collection.prototype.getDescendents = function (nested, type, includeDeletedItems, level) {
 	if (!this.id) {

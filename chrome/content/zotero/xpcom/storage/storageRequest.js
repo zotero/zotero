@@ -75,7 +75,7 @@ Zotero.Sync.Storage.Request.prototype.setMaxSize = function (size) {
  * Add callbacks from another request to this request
  */
 Zotero.Sync.Storage.Request.prototype.importCallbacks = function (request) {
-	for each(var name in this.callbacks) {
+	for (let name of this.callbacks) {
 		name = '_' + name;
 		if (request[name]) {
 			// If no handlers for this event, add them all

@@ -77,7 +77,7 @@ Zotero.Sync.Storage.Engine = function (options) {
 
 Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* () {
 	var libraryID = this.libraryID;
-	if (!Zotero.Prefs.get("sync.storage.enabled")) {
+	if (!Zotero.Sync.Storage.Local.getEnabledForLibrary(libraryID)) {
 		Zotero.debug("File sync is not enabled for " + this.library.name);
 		return false;
 	}
@@ -120,14 +120,19 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 		yield this.controller.cacheCredentials();
 	}
 	
-	// Get library last-sync time for download-on-sync libraries.
 	var lastSyncTime = null;
 	var downloadAll = this.local.downloadOnSync(libraryID);
-	if (downloadAll) {
-		if (!this.library.storageDownloadNeeded) {
-			this.library.storageVersion = this.library.libraryVersion;
-			yield this.library.saveTx();
-		}
+	// After all library data is downloaded during a data sync, the library version is updated to match
+	// the server version. We track a library version for file syncing separately, so that even if Zotero
+	// is closed or interrupted between a data sync and a file sync, we know that file syncing has to be
+	// performed for any files marked for download during data sync (based on outdated mtime/md5). Files
+	// may be missing remotely, though, so it's only necessary to try to download them once every time
+	// there are remote storage changes, which we indicate with a flag set in syncLocal.
+	//
+	// TODO: If files are persistently missing, don't try to download them each time
+	if (downloadAll && !this.library.storageDownloadNeeded) {
+		this.library.storageVersion = this.library.libraryVersion;
+		yield this.library.saveTx();
 	}
 	
 	// Check for updated files to upload
@@ -212,17 +217,25 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	var changes = new Zotero.Sync.Storage.Result;
 	for (let type of ['download', 'upload']) {
 		let results = yield promises[type];
+		let succeeded = 0;
+		let failed = 0;
 		
-		if (this.stopOnError) {
-			for (let p of results) {
-				if (p.isRejected()) {
+		for (let p of results) {
+			if (p.isFulfilled()) {
+				succeeded++;
+			}
+			else {
+				if (this.stopOnError) {
 					let e = p.reason();
 					Zotero.debug(`File ${type} sync failed for ${this.library.name}`);
 					throw e;
 				}
+				failed++;
 			}
 		}
-		Zotero.debug(`File ${type} sync finished for ${this.library.name}`);
+		
+		Zotero.debug(`File ${type} sync finished for ${this.library.name} `
+			+ `(${succeeded} succeeded, ${failed} failed)`);
 		
 		changes.updateFromResults(results.filter(p => p.isFulfilled()).map(p => p.value()));
 		

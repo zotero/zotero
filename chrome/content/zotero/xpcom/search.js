@@ -210,10 +210,10 @@ Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env)
 		// Update library searches status
 		yield Zotero.Libraries.get(this.libraryID).updateSearches();
 		
-		Zotero.Notifier.queue('add', 'search', this.id, env.notifierData);
+		Zotero.Notifier.queue('add', 'search', this.id, env.notifierData, env.options.notifierQueue);
 	}
 	else if (!env.options.skipNotifier) {
-		Zotero.Notifier.queue('modify', 'search', this.id, env.notifierData);
+		Zotero.Notifier.queue('modify', 'search', this.id, env.notifierData, env.options.notifierQueue);
 	}
 	
 	if (env.isNew && Zotero.Libraries.isGroupLibrary(this.libraryID)) {
@@ -1123,7 +1123,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						let objectTypeClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 						
 						// Old-style library-key hash
-						if (objKey.contains('_')) {
+						if (objKey.indexOf('_') != -1) {
 							[objLibraryID, objKey] = objKey.split('_');
 						}
 						// libraryID assigned on search
@@ -1152,7 +1152,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							}
 						}
 						else {
-							col = yield objectTypeClass.getByLibraryAndKeyAsync(
+							obj = yield objectTypeClass.getByLibraryAndKeyAsync(
 								objLibraryID, objKey
 							);
 						}
@@ -1175,12 +1175,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							
 							// Search descendent collections if recursive search
 							if (recursive){
-								var descendents = col.getDescendents(false, 'collection');
-								if (descendents){
-									for (var k in descendents){
-										q.push('?');
-										p.push({int:descendents[k]['id']});
-									}
+								var descendents = obj.getDescendents(false, 'collection');
+								for (let d of descendents) {
+									q.push('?');
+									p.push(d.id);
 								}
 							}
 							
@@ -1230,7 +1228,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						var patterns = yield Zotero.DB.columnQueryAsync(ftSQL, { int: condition.value });
 						if (patterns) {
 							for each(str in patterns) {
-								condSQL += 'mimeType LIKE ? OR ';
+								condSQL += 'contentType LIKE ? OR ';
 								condSQLParams.push(str + '%');
 							}
 							condSQL = condSQL.substring(0, condSQL.length - 4);

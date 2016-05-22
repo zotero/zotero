@@ -101,10 +101,45 @@ describe("Zotero.Search", function() {
 			if (win) {
 				win.close();
 			}
-			yield fooItem.erase();
-			yield foobarItem.erase();
+			yield fooItem.eraseTx();
+			yield foobarItem.eraseTx();
 		});
-
+		
+		it("should find item in collection", function* () {
+			var col = yield createDataObject('collection');
+			var item = yield createDataObject('item', { collections: [col.id] });
+			
+			var s = new Zotero.Search();
+			s.libraryID = item.libraryID;
+			s.addCondition('collection', 'is', col.key);
+			var matches = yield s.search();
+			assert.sameMembers(matches, [item.id]);
+		});
+		
+		it("shouldn't find item in collection with no items", function* () {
+			var col = yield createDataObject('collection');
+			var item = yield createDataObject('item');
+			
+			var s = new Zotero.Search();
+			s.libraryID = item.libraryID;
+			s.addCondition('collection', 'is', col.key);
+			var matches = yield s.search();
+			assert.lengthOf(matches, 0);
+		});
+		
+		it("should find item in subcollection in recursive mode", function* () {
+			var col1 = yield createDataObject('collection');
+			var col2 = yield createDataObject('collection', { parentID: col1.id });
+			var item = yield createDataObject('item', { collections: [col2.id] });
+			
+			var s = new Zotero.Search();
+			s.libraryID = item.libraryID;
+			s.addCondition('collection', 'is', col1.key);
+			s.addCondition('recursive', 'true');
+			var matches = yield s.search();
+			assert.sameMembers(matches, [item.id]);
+		});
+		
 		it("should return matches with full-text conditions", function* () {
 			let s = new Zotero.Search();
 			s.addCondition('fulltextWord', 'contains', 'foo');
@@ -145,6 +180,13 @@ describe("Zotero.Search", function() {
 			s.addCondition('fulltextWord', 'contains', 'baz');
 			let matches = yield s.search();
 			assert.deepEqual(matches, [foobarItem.id]);
+		});
+		
+		it("should search by attachment file type", function* () {
+			let s = new Zotero.Search();
+			s.addCondition('fileTypeID', 'is', Zotero.FileTypes.getID('webpage'));
+			let matches = yield s.search();
+			assert.sameMembers(matches, [fooItem.id, foobarItem.id]);
 		});
 	});
 	

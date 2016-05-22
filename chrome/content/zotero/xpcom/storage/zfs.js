@@ -335,14 +335,6 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			filename,
 			size: file.fileSize
 		};
-		var charset = item.attachmentCharset;
-		var contentType = item.attachmentContentType;
-		if (charset) {
-			json.charset = charset;
-		}
-		if (contentType) {
-			json.contentType = contentType;
-		}
 		if (zip) {
 			json.zip = true;
 		}
@@ -372,14 +364,6 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			filename,
 			filesize: (yield OS.File.stat(uploadPath)).size
 		};
-		var charset = item.attachmentCharset;
-		var contentType = item.attachmentContentType;
-		if (charset) {
-			params.charset = charset;
-		}
-		if (contentType) {
-			params.contentType = contentType;
-		}
 		if (zip) {
 			params.zipMD5 = yield Zotero.Utilities.Internal.md5Async(uploadPath);
 			params.zipFilename = OS.Path.basename(uploadPath);
@@ -561,9 +545,10 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			}
 			
 			let text, buttonText = null, buttonCallback;
+			let libraryType = item.library.libraryType;
 			
 			// Group file
-			if (item.libraryID) {
+			if (libraryType == 'group') {
 				var group = Zotero.Groups.getByLibraryID(item.libraryID);
 				text = Zotero.getString('sync.storage.error.zfs.groupQuotaReached1', group.name) + "\n\n"
 						+ Zotero.getString('sync.storage.error.zfs.groupQuotaReached2');
@@ -579,17 +564,19 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 								.getService(Components.interfaces.nsIWindowMediator);
 					var win = wm.getMostRecentWindow("navigator:browser");
-					win.ZoteroPane.loadURI(url);
+					win.ZoteroPane.loadURI(url, { metaKey: true, ctrlKey: true, shiftKey: true });
 				}
 			}
 			
-			text += "\n\n" + filename + " (" + Math.round(file.fileSize / 1024) + "KB)";
+			var filename = item.attachmentFilename;
+			var fileSize = (yield OS.File.stat(item.getFilePath())).size;
+			
+			text += "\n\n" + filename + " (" + Math.round(fileSize / 1024) + "KB)";
 			
 			let e = new Zotero.Error(
-				Zotero.getString('sync.storage.error.zfs.fileWouldExceedQuota', filename),
+				text,
 				"ZFS_OVER_QUOTA",
 				{
-					dialogText: text,
 					dialogButtonText: buttonText,
 					dialogButtonCallback: buttonCallback
 				}

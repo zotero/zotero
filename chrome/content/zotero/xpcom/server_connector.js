@@ -108,7 +108,7 @@ Zotero.Server.Connector.GetTranslators.prototype = {
 		var responseData = [];
 		for each(var translator in translators) {
 			let serializableTranslator = {};
-			for each(var key in ["translatorID", "translatorType", "label", "creator", "target",
+			for (let key of ["translatorID", "translatorType", "label", "creator", "target",
 					"minVersion", "maxVersion", "priority", "browserSupport", "inRepository", "lastUpdated"]) {
 				serializableTranslator[key] = translator[key];
 			}
@@ -354,8 +354,13 @@ Zotero.Server.Connector.SaveItem.prototype = {
 		}
 		
 		// save items
-		var itemSaver = new Zotero.Translate.ItemSaver(libraryID,
-			Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD, 1, undefined, cookieSandbox);
+		var itemSaver = new Zotero.Translate.ItemSaver({
+			libraryID,
+			collections: collection ? [collection.id] : undefined,
+			attachmentMode: Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD,
+			forceTagType: 1,
+			cookieSandbox
+		});
 		itemSaver.saveItems(data.items, function(returnValue, items) {
 			if(returnValue) {
 				try {
@@ -367,10 +372,6 @@ Zotero.Server.Connector.SaveItem.prototype = {
 								item.attachments.splice(j--, 1);
 							}
 						}
-					}
-					
-					for(var i=0; i<items.length; i++) {
-						if(collection) collection.addItem(items[i].id);
 					}
 					
 					sendResponseCallback(201, "application/json", JSON.stringify({"items":data.items}));
@@ -411,14 +412,16 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 	"init":function(url, data, sendResponseCallback) {
 		Zotero.Server.Connector.Data[data["url"]] = "<html>"+data["html"]+"</html>";
 		
-		// figure out where to save
-		var libraryID = null;
-		var collectionID = null;
 		var zp = Zotero.getActiveZoteroPane();
 		try {
 			var libraryID = zp.getSelectedLibraryID();
 			var collection = zp.getSelectedCollection();
 		} catch(e) {}
+		
+		// Default to personal library if pane not yet opened
+		if (!libraryID) {
+			libraryID = Zotero.Libraries.userLibraryID
+		}
 		
 		// determine whether snapshot can be saved
 		var filesEditable;
@@ -457,9 +460,10 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			}
 		}
 		else {
-			Zotero.HTTP.processDocuments(["zotero://connector/"+encodeURIComponent(data["url"])],
-				function(doc) {
-					delete Zotero.Server.Connector.Data[data["url"]];
+			Zotero.HTTP.processDocuments(
+				["zotero://connector/" + encodeURIComponent(data.url)],
+				Zotero.Promise.coroutine(function* (doc) {
+					delete Zotero.Server.Connector.Data[data.url];
 					
 					try {
 						// create new webpage item
@@ -468,13 +472,14 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 						item.setField("title", doc.title);
 						item.setField("url", data.url);
 						item.setField("accessDate", "CURRENT_TIMESTAMP");
-						var itemID = item.save();
-						if(collection) collection.addItem(itemID);
+						if (collection) {
+							item.setCollections([collection.id]);
+						}
+						var itemID = yield item.saveTx();
 						
 						// save snapshot
 						if (filesEditable && !data.skipSnapshot) {
-							// TODO: async
-							Zotero.Attachments.importFromDocument({
+							yield Zotero.Attachments.importFromDocument({
 								document: doc,
 								parentItemID: itemID
 							});
@@ -482,11 +487,14 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 						
 						sendResponseCallback(201);
 					} catch(e) {
+						Zotero.debug("ERROR");
+						Zotero.debug(e);
 						sendResponseCallback(500);
 						throw e;
 					}
-				},
-				null, null, false, cookieSandbox);
+				}),
+				null, null, false, cookieSandbox
+			);
 		}
 	}
 }

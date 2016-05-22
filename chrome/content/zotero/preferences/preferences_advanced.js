@@ -247,7 +247,7 @@ Zotero_Preferences.Advanced = {
 		
 		this._openURLResolvers = Zotero.OpenURL.discoverResolvers();
 		var i = 0;
-		for each(var r in this._openURLResolvers) {
+		for (let r of this._openURLResolvers) {
 			openURLMenu.insertItemAt(i, r.name);
 			if (r.url == Zotero.Prefs.get('openURL.resolver') && r.version == Zotero.Prefs.get('openURL.version')) {
 				openURLMenu.selectedIndex = i;
@@ -610,9 +610,10 @@ Zotero_Preferences.Debug_Output = {
 	},
 	
 	
-	submit: function () {
+	submit: Zotero.Promise.coroutine(function* () {
 		document.getElementById('debug-output-submit').disabled = true;
-		document.getElementById('debug-output-submit-progress').hidden = false;
+		var pm = document.getElementById('debug-output-submit-progress');
+		pm.hidden = false;
 		
 		Components.utils.import("resource://zotero/config.js");
 		
@@ -623,142 +624,98 @@ Zotero_Preferences.Debug_Output = {
 		);
 		Zotero_Preferences.Debug_Output.setStore(false);
 		
-		var uploadCallback = function (xmlhttp) {
-			document.getElementById('debug-output-submit').disabled = false;
-			document.getElementById('debug-output-submit-progress').hidden = true;
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
+		try {
+			var xmlhttp = yield Zotero.HTTP.request(
+				"POST",
+				url,
+				{
+					compressBody: true,
+					body: output,
+					logBodyLength: 30,
+					timeout: 30000,
+					requestObserver: function (req) {
+						// Don't fail during tests, with fake XHR
+						if (!req.channel) {
+							return;
+						}
+						req.channel.notificationCallbacks = {
+							onProgress: function (request, context, progress, progressMax) {
+								pm.mode = 'determined';
+								if (!pm.value || progress > pm.value) {
+									pm.value = progress;
+								}
+								if (!pm.max || progressMax > pm.max) {
+									pm.max = progressMax;
+								}
+							},
+							
+							// nsIInterfaceRequestor
+							getInterface: function (iid) {
+								try {
+									return this.QueryInterface(iid);
+								}
+								catch (e) {
+									throw Components.results.NS_NOINTERFACE;
+								}
+							},
+							
+							QueryInterface: function(iid) {
+								if (iid.equals(Components.interfaces.nsISupports) ||
+										iid.equals(Components.interfaces.nsIInterfaceRequestor) ||
+										iid.equals(Components.interfaces.nsIProgressEventSink)) {
+									return this;
+								}
+								throw Components.results.NS_NOINTERFACE;
+							},
 			
-			Zotero.debug(xmlhttp.responseText);
-			
-			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-									.getService(Components.interfaces.nsIPromptService);
-			
-			if (!xmlhttp.responseXML) {
-				ps.alert(
-					null,
-					Zotero.getString('general.error'),
-					Zotero.getString('general.invalidResponseServer')
-				);
-				return;
-			}
-			var reported = xmlhttp.responseXML.getElementsByTagName('reported');
-			if (reported.length != 1) {
-				ps.alert(
-					null,
-					Zotero.getString('general.error'),
-					Zotero.getString('general.serverError')
-				);
-				return;
-			}
-			
-			var reportID = reported[0].getAttribute('reportID');
-			ps.alert(
-				null,
-				Zotero.getString('zotero.preferences.advanced.debug.title'),
-				Zotero.getString('zotero.preferences.advanced.debug.sent', reportID)
+						}
+					}
+				}
 			);
 		}
-		
-		var bufferUploader = function (data) {
-			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-									.getService(Components.interfaces.nsIPromptService);
-			
-			var oldLen = output.length;
-			var newLen = data.length;
-			var savings = Math.round(((oldLen - newLen) / oldLen) * 100)
-			Zotero.debug("HTTP POST " + newLen + " bytes to " + url
-				+ " (gzipped from " + oldLen + " bytes; "
-				+ savings + "% savings)");
-			
-			if (Zotero.HTTP.browserIsOffline()) {
-				ps.alert(
-					null,
-					Zotero.getString('general.error'),
-					Zotero.getString('general.browserIsOffline', Zotero.appName)
-				);
-				return false;
+		catch (e) {
+			Zotero.logError(e);
+			let title = Zotero.getString('general.error');
+			let msg;
+			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+				msg = Zotero.getString('general.invalidResponseServer');
 			}
-			
-			var req =
-				Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
-					createInstance();
-			req.open('POST', url, true);
-			req.setRequestHeader('Content-Type', "text/plain");
-			req.setRequestHeader('Content-Encoding', 'gzip');
-			
-			req.channel.notificationCallbacks = {
-				onProgress: function (request, context, progress, progressMax) {
-					var pm = document.getElementById('debug-output-submit-progress');
-					pm.mode = 'determined'
-					pm.value = progress;
-					pm.max = progressMax;
-				},
-				
-				// nsIInterfaceRequestor
-				getInterface: function (iid) {
-					try {
-						return this.QueryInterface(iid);
-					}
-					catch (e) {
-						throw Components.results.NS_NOINTERFACE;
-					}
-				},
-				
-				QueryInterface: function(iid) {
-					if (iid.equals(Components.interfaces.nsISupports) ||
-							iid.equals(Components.interfaces.nsIInterfaceRequestor) ||
-							iid.equals(Components.interfaces.nsIProgressEventSink)) {
-						return this;
-					}
-					throw Components.results.NS_NOINTERFACE;
-				},
-
+			else if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+				msg = Zotero.getString('general.browserIsOffline', Zotero.appName);
 			}
-			req.onreadystatechange = function () {
-				if (req.readyState == 4) {
-					uploadCallback(req);
-				}
-			};
-			try {
-				// Send binary data
-				let numBytes = data.length, ui8Data = new Uint8Array(numBytes);
-				for (let i = 0; i < numBytes; i++) {
-					ui8Data[i] = data.charCodeAt(i) & 0xff;
-				}
-				req.send(ui8Data);
+			else {
+				msg = Zotero.getString('zotero.preferences.advanced.debug.error');
 			}
-			catch (e) {
-				Zotero.debug(e, 1);
-				Components.utils.reportError(e);
-				ps.alert(
-					null,
-					Zotero.getString('general.error'),
-					Zotero.getString('zotero.preferences.advanced.debug.error')
-				);
-			}
+			ps.alert(null, title, msg);
+			return false;
 		}
 		
-		// Get input stream from debug output data
-		var unicodeConverter =
-			Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
-				.createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-		unicodeConverter.charset = "UTF-8";
-		var bodyStream = unicodeConverter.convertToInputStream(output);
+		document.getElementById('debug-output-submit').disabled = false;
+		document.getElementById('debug-output-submit-progress').hidden = true;
 		
-		// Get listener for when compression is done
-		var listener = new Zotero.BufferedInputListener(bufferUploader);
+		Zotero.debug(xmlhttp.responseText);
 		
-		// Initialize stream converter
-		var converter =
-			Components.classes["@mozilla.org/streamconv;1?from=uncompressed&to=gzip"]
-				.createInstance(Components.interfaces.nsIStreamConverter);
-		converter.asyncConvertData("uncompressed", "gzip", listener, null);
+		var reported = xmlhttp.responseXML.getElementsByTagName('reported');
+		if (reported.length != 1) {
+			ps.alert(
+				null,
+				Zotero.getString('general.error'),
+				Zotero.getString('general.serverError')
+			);
+			return false;
+		}
 		
-		// Send input stream to stream converter
-		var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"].
-				createInstance(Components.interfaces.nsIInputStreamPump);
-		pump.init(bodyStream, -1, -1, 0, 0, true);
-		pump.asyncRead(converter, null);
-	},
+		var reportID = reported[0].getAttribute('reportID');
+		ps.alert(
+			null,
+			Zotero.getString('zotero.preferences.advanced.debug.title'),
+			Zotero.getString('zotero.preferences.advanced.debug.sent', reportID)
+		);
+		
+		return true;
+	}),
 	
 	
 	clear: function () {

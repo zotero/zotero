@@ -30,6 +30,9 @@ Zotero.IPC = new function() {
 	 * Initialize pipe for communication with connector
 	 */
 	this.init = function() {
+		// TEMP: Disabled for 5.0 Beta
+		return;
+		
 		if(!Zotero.isWin) {	// no pipe support on Fx 3.6
 			_instancePipe = _getPipeDirectory();
 			if(!_instancePipe.exists()) {
@@ -45,7 +48,7 @@ Zotero.IPC = new function() {
 	 * Parses input received via instance pipe
 	 */
 	this.parsePipeInput = function(msgs) {
-		for each(var msg in msgs.split("\n")) {
+		for (let msg of msgs.split("\n")) {
 			if(!msg) continue;
 			Zotero.debug('IPC: Received "'+msg+'"');
 			
@@ -189,7 +192,7 @@ Zotero.IPC = new function() {
 			// name in application.ini
 			const myAppName = Services.appinfo.name;
 
-			for each(var appName in appNames) {
+			for (let appName of appNames) {
 				// don't send messages to ourself
 				if(appName === myAppName) continue;
 				
@@ -233,7 +236,7 @@ Zotero.IPC = new function() {
 			
 			if(!pipes.length) return false;
 			var success = false;
-			for each(var pipe in pipes) {
+			for (let pipe of pipes) {
 				Zotero.debug('IPC: Trying to broadcast "'+msg+'" to instance '+pipe.leafName);
 				
 				var defunct = false;

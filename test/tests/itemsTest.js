@@ -27,6 +27,7 @@ describe("Zotero.Items", function () {
 			assert.isTrue(item2.deleted);
 			
 			// Check for merge-tracking relation
+			assert.isFalse(item1.hasChanged());
 			var rels = item1.getRelationsByPredicate(Zotero.Relations.replacedItemPredicate);
 			assert.lengthOf(rels, 1);
 			assert.equal(rels[0], item2URI);

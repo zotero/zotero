@@ -105,8 +105,8 @@ Zotero.OpenURL = new function() {
 			}
 		}
 		
-		if(item.toArray) {
-			item = item.toArray();
+		if (item.toJSON) {
+			item = item.toJSON();
 		}
 		
 		// find pmid

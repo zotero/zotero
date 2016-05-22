@@ -118,6 +118,10 @@ grid row hbox:first-child
 	margin-right: 10px;
 }
 
+#zotero-prefpane-sync #sync-auth-button {
+	margin-left: 0;
+}
+
 #zotero-prefpane-sync #sync-status-indicator
 {
 	width: 1.5em;

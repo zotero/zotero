@@ -95,6 +95,53 @@ Zotero.LibraryTreeView.prototype = {
 	},
 	
 	
+	/**
+	 * Return an object describing the current scroll position to restore after changes
+	 *
+	 * @return {Object|Boolean} - Object with .id (a treeViewID) and .offset, or false if no rows
+	 */
+	_saveScrollPosition: function() {
+		var treebox = this._treebox;
+		var first = treebox.getFirstVisibleRow();
+		if (!first) {
+			return false;
+		}
+		var last = treebox.getLastVisibleRow();
+		var firstSelected = null;
+		for (let i = first; i <= last; i++) {
+			// If an object is selected, keep the first selected one in position
+			if (this.selection.isSelected(i)) {
+				return {
+					id: this.getRow(i).ref.treeViewID,
+					offset: i - first
+				};
+			}
+		}
+		
+		// Otherwise keep the first visible row in position
+		return {
+			id: this.getRow(first).ref.treeViewID,
+			offset: 0
+		};
+	},
+	
+	
+	/**
+	 * Restore a scroll position returned from _saveScrollPosition()
+	 */
+	_rememberScrollPosition: function (scrollPosition) {
+		if (!scrollPosition) {
+			return;
+		}
+		var row = this.getRowIndexByID(scrollPosition.id);
+		Zotero.debug(scrollPosition.id);
+		if (row === false) {
+			return;
+		}
+		this._treebox.scrollToRow(Math.max(row - scrollPosition.offset, 0));
+	},
+	
+	
 	onSelect: function () {
 		return this._runListeners('select');
 	},

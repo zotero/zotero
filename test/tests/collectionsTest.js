@@ -72,4 +72,48 @@ describe("Zotero.Collections", function () {
 			assert.notInstanceOf(collection, Zotero.Feed);
 		});
 	});
+	
+	
+	describe("#sortByLevel()", function () {
+		it("should return collections sorted from top-level to deepest", function* () {
+			// - A
+			//   - B
+			//     - C
+			//   - D
+			// - E
+			//   - F
+			//     - G
+			//       - H
+			//     - I
+			
+			// Leave out B and G
+			// Order should be {A, E}, {D, F}, {C, I}, {H} (internal order is undefined)
+			
+			var check = function (arr) {
+				assert.sameMembers(arr.slice(0, 2), [c1.id, c5.id]);
+				assert.sameMembers(arr.slice(2, 4), [c4.id, c6.id]);
+				assert.sameMembers(arr.slice(4, 6), [c3.id, c9.id]);
+				assert.equal(arr[6], c8.id);
+			};
+			
+			var c1 = yield createDataObject('collection', { "name": "A" });
+			var c2 = yield createDataObject('collection', { "name": "B", parentID: c1.id });
+			var c3 = yield createDataObject('collection', { "name": "C", parentID: c2.id });
+			var c4 = yield createDataObject('collection', { "name": "D", parentID: c1.id });
+			var c5 = yield createDataObject('collection', { "name": "E" });
+			var c6 = yield createDataObject('collection', { "name": "F", parentID: c5.id });
+			var c7 = yield createDataObject('collection', { "name": "G", parentID: c6.id });
+			var c8 = yield createDataObject('collection', { "name": "H", parentID: c7.id });
+			var c9 = yield createDataObject('collection', { "name": "I", parentID: c6.id });
+			
+			var arr = Zotero.Collections.sortByLevel([c1, c3, c4, c5, c6, c8, c9].map(c => c.id));
+			//Zotero.debug(arr.map(id => Zotero.Collections.get(id).name));
+			check(arr);
+			
+			// Check reverse order
+			arr = Zotero.Collections.sortByLevel([c1, c3, c4, c5, c6, c8, c9].reverse().map(c => c.id));
+			//Zotero.debug(arr.map(id => Zotero.Collections.get(id).name));
+			check(arr);
+		});
+	});
 })

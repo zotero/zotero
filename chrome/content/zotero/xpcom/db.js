@@ -40,6 +40,7 @@ Zotero.DBConnection = function(dbName) {
 	
 	Components.utils.import("resource://gre/modules/Sqlite.jsm", this);
 	
+	this.closed = false;
 	this.skipBackup = false;
 	this.transactionVacuum = false;
 	
@@ -126,7 +127,8 @@ Zotero.DBConnection.prototype.getAsyncStatement = Zotero.Promise.coroutine(funct
 Zotero.DBConnection.prototype.parseQueryAndParams = function (sql, params) {
 	// If single scalar value, wrap in an array
 	if (!Array.isArray(params)) {
-		if (typeof params == 'string' || typeof params == 'number' || params === null) {
+		if (typeof params == 'string' || typeof params == 'number' || typeof params == 'object'
+				|| params === null) {
 			params = [params];
 		}
 		else {
@@ -530,7 +532,7 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 		}
 		else {
 			Zotero.debug(`Rolled back DB transaction ${id}`, 1);
-			Zotero.debug(e, 1);
+			Zotero.debug(e.message, 1);
 		}
 		if (startedTransaction) {
 			this._transactionID = null;
@@ -913,6 +915,7 @@ Zotero.DBConnection.prototype.checkException = function (e) {
 Zotero.DBConnection.prototype.closeDatabase = Zotero.Promise.coroutine(function* (permanent) {
 	if (this._connection) {
 		Zotero.debug("Closing database");
+		this.closed = true;
 		yield this._connection.close();
 		this._connection = undefined;
 		this._connection = permanent ? false : null;
@@ -1096,30 +1099,6 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 });
 
 
-/**
- * Determine the necessary data type for SQLite parameter binding
- *
- * @return	int		0 for string, 32 for int32, 64 for int64
- */
-Zotero.DBConnection.prototype.getSQLDataType = function(value) {
-	var strVal = value + '';
-	if (strVal.match(/^[1-9]+[0-9]*$/)) {
-		// These upper bounds also specified in Zotero.DB
-		//
-		// Store as 32-bit signed integer
-		if (value <= 2147483647) {
-			return 32;
-		}
-		// Store as 64-bit signed integer
-		// 2^53 is JS's upper-bound for decimal integers
-		else if (value < 9007199254740992) {
-			return 64;
-		}
-	}
-	return 0;
-}
-
-
 /////////////////////////////////////////////////////////////////
 //
 // Private methods
@@ -1294,24 +1273,6 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 Zotero.DBConnection.prototype._debug = function (str, level) {
 	var prefix = this._dbName == 'zotero' ? '' : '[' + this._dbName + '] ';
 	Zotero.debug(prefix + str, level);
-}
-
-
-Zotero.DBConnection.prototype._getTypedValue = function (statement, i) {
-	var type = statement.getTypeOfIndex(i);
-	// For performance, we hard-code these constants
-	switch (type) {
-		case 1: //VALUE_TYPE_INTEGER
-			return statement.getInt64(i);
-		case 3: //VALUE_TYPE_TEXT
-			return statement.getUTF8String(i);
-		case 0: //VALUE_TYPE_NULL
-			return null;
-		case 2: //VALUE_TYPE_FLOAT
-			return statement.getDouble(i);
-		case 4: //VALUE_TYPE_BLOB
-			return statement.getBlob(i, {});
-	}
 }
 
 

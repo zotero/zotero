@@ -26,7 +26,11 @@
 
 Zotero.Error = function (message, error, data) {
 	this.message = message;
-	this.data = data;
+	if (data) {
+		for (let prop in data) {
+			this[prop] = data[prop];
+		}
+	}
 	if (parseInt(error) == error) {
 		this.error = error;
 	}
@@ -40,8 +44,8 @@ Zotero.Error.prototype.name = "Zotero Error";
 Zotero.Error.ERROR_UNKNOWN = 0;
 Zotero.Error.ERROR_MISSING_OBJECT = 1;
 Zotero.Error.ERROR_FULL_SYNC_REQUIRED = 2;
-Zotero.Error.ERROR_SYNC_USERNAME_NOT_SET = 3;
-Zotero.Error.ERROR_INVALID_SYNC_LOGIN = 4;
+Zotero.Error.ERROR_API_KEY_NOT_SET = 3;
+Zotero.Error.ERROR_API_KEY_INVALID = 4;
 Zotero.Error.ERROR_ZFS_OVER_QUOTA = 5;
 Zotero.Error.ERROR_ZFS_UPLOAD_QUEUE_LIMIT = 6;
 Zotero.Error.ERROR_ZFS_FILE_EDITING_DENIED = 7;

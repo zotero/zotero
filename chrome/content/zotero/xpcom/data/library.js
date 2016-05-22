@@ -177,13 +177,13 @@ Zotero.defineProperty(Zotero.Library.prototype, 'name', {
 	}
 });
 
-Zotero.defineProperty(Zotero.Library.prototype, 'collectionTreeViewID', {
+Zotero.defineProperty(Zotero.Library.prototype, 'treeViewID', {
 	get: function () {
 		return "L" + this._libraryID
 	}
 });
 
-Zotero.defineProperty(Zotero.Library.prototype, 'collectionTreeViewImage', {
+Zotero.defineProperty(Zotero.Library.prototype, 'treeViewImage', {
 	get: function () {
 		return "chrome://zotero/skin/treesource-library" + Zotero.hiDPISuffix + ".png";
 	}
@@ -371,6 +371,9 @@ Zotero.Library.prototype.setDataLoaded = function (objectType) {
 	this._dataLoadedDeferreds[objectType].resolve();
 };
 
+/**
+ * Wait for a given data type to load, loading it now if necessary
+ */
 Zotero.Library.prototype.waitForDataLoad = Zotero.Promise.coroutine(function* (objectType) {
 	if (this.getDataLoaded(objectType)) return;
 	

@@ -74,12 +74,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	};
 	
 	/**
-	 * @property	{Boolean}	waiting		Whether Zotero is waiting for other
-	 *										main thread events to be processed
-	 */
-	this.__defineGetter__('waiting', function () _waiting);
-	
-	/**
 	 * @property	{Boolean}	locked		Whether all Zotero panes are locked
 	 *										with an overlay
 	 */
@@ -112,7 +106,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	var _startupErrorHandler;
 	var _zoteroDirectory = false;
 	var _localizedStringBundle;
-	var _waiting = 0;
 	
 	var _locked = false;
 	var _shutdownListeners = [];
@@ -137,7 +130,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	/**
 	 * Maintains running nsITimers in global scope, so that they don't disappear randomly
 	 */
-	var _runningTimers = [];
+	var _runningTimers = new Map();
 	
 	// Errors that were in the console at startup
 	var _startupErrors = [];
@@ -605,7 +598,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				
 				yield Zotero.Fulltext.init();
 				
-				Zotero.Notifier.registerObserver(Zotero.Tags, 'setting');
+				Zotero.Notifier.registerObserver(Zotero.Tags, 'setting', 'tags');
 				
 				yield Zotero.Sync.Data.Local.init();
 				yield Zotero.Sync.Data.Utilities.init();
@@ -625,12 +618,13 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				yield Zotero.Collections.init();
 				yield Zotero.Items.init();
 				yield Zotero.Searches.init();
+				yield Zotero.Tags.init();
 				yield Zotero.Creators.init();
 				yield Zotero.Groups.init();
 				yield Zotero.Relations.init();
-				yield Zotero.Feeds.init();
 				
-				// Load all library data except for items
+				// Load all library data except for items, which are loaded when libraries are first
+				// clicked on or if otherwise necessary
 				yield Zotero.Promise.each(
 					Zotero.Libraries.getAll(),
 					library => Zotero.Promise.coroutine(function* () {
@@ -641,8 +635,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				);
 				
 				yield Zotero.QuickCopy.init();
-				
-				Zotero.Items.startEmptyTrashTimer();
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -742,6 +734,10 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				throw e;
 			};
 			
+			Zotero.Items.startEmptyTrashTimer();
+			Zotero.Feeds.init();
+			Zotero.addShutdownListener(() => Zotero.Feeds.uninit());
+			
 			return true;
 		}
 		catch (e) {
@@ -796,6 +792,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			}
 			// Storage busy
 			else if (e.message.endsWith('2153971713')) {
+				// TEMP: Disabled for 5.0 Beta
+				/*
 				if(Zotero.isStandalone) {
 					// Standalone should force Fx to release lock 
 					if(!haveReleasedLock && Zotero.IPC.broadcast("releaseLock")) {
@@ -819,6 +817,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 						throw "ZOTERO_SHOULD_START_AS_CONNECTOR";
 					}
 				}
+				*/
 				
 				var msg = Zotero.localeJoin([
 					Zotero.getString('startupError.databaseInUse'),
@@ -900,7 +899,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		var curSection = null;
 		var defaultSection = null;
 		var nSections = 0;
-		for each(var line in iniContents.split(/(?:\r?\n|\r)/)) {
+		for (let line of iniContents.split(/(?:\r?\n|\r)/)) {
 			let tline = line.trim();
 			if(tline[0] == "[" && tline[tline.length-1] == "]") {
 				curSection = {};
@@ -1335,6 +1334,14 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	}
 	
 	
+	this.warn = function (err) {
+		Zotero.debug(err, 2);
+		log(err.message ? err.message : err.toString(), "warning",
+			err.fileName ? err.fileName : (err.filename ? err.filename : null), null,
+			err.lineNumber ? err.lineNumber : null, null);
+	}
+	
+	
 	/**
 	 * Display an alert in a given window
 	 *
@@ -1709,41 +1716,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	
 	/**
-	 * Allow other events (e.g., UI updates) on main thread to be processed if necessary
-	 *
-	 * @param	{Integer}	[timeout=50]		Maximum number of milliseconds to wait
-	 */
-	this.wait = function (timeout) {
-		if (timeout === undefined) {
-			timeout = 50;
-		}
-		var mainThread = Zotero.mainThread;
-		var endTime = Date.now() + timeout;
-		var more;
-		//var cycles = 0;
-		
-		_waiting++;
-		
-		Zotero.debug("Spinning event loop ("+_waiting+")", 5);
-		do {
-			more = mainThread.processNextEvent(false);
-			//cycles++;
-		} while (more && Date.now() < endTime);
-		
-		_waiting--;
-		
-		// requeue nsITimerCallbacks that came up during Zotero.wait() but couldn't execute
-		for(var i in _waitTimers) {
-			_waitTimers[i].initWithCallback(_waitTimerCallbacks[i], 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-		}
-		_waitTimers = [];
-		_waitTimerCallbacks = [];
-		
-		//Zotero.debug("Waited " + cycles + " cycles");
-		return;
-	};
-	
-	/**
 	 * Generate a function that produces a static output
 	 *
 	 * Zotero.lazy(fn) returns a function. The first time this function
@@ -1776,73 +1748,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	}
 	
 	
-	/**
-	 * Pumps a generator until it yields false. See itemTreeView.js for an example.
-	 *
-	 * If errorHandler is specified, exceptions in the generator will be caught
-	 * and passed to the callback
-	 */
-	this.pumpGenerator = function(generator, ms, errorHandler, doneHandler) {
-		_waiting++;
-		
-		var timer = Components.classes["@mozilla.org/timer;1"].
-			createInstance(Components.interfaces.nsITimer),
-			yielded,
-			useJIT = Components.utils.methodjit;
-		var timerCallback = {"notify":function() {
-			// XXX Remove when we drop support for Fx <24
-			if(useJIT !== undefined) Components.utils.methodjit = useJIT;
-			
-			var err = false;
-			_waiting--;
-			try {
-				if((yielded = generator.next()) !== false) {
-					_waiting++;
-					return;
-				}
-			} catch(e if e.toString() === "[object StopIteration]") {
-				// There must be a better way to perform this check
-			} catch(e) {
-				err = e;
-			}
-			
-			timer.cancel();
-			_runningTimers.splice(_runningTimers.indexOf(timer), 1);
-			
-			// requeue nsITimerCallbacks that came up during generator pumping but couldn't execute
-			for(var i in _waitTimers) {
-				_waitTimers[i].initWithCallback(_waitTimerCallbacks[i], 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-			}
-			_waitTimers = [];
-			_waitTimerCallbacks = [];
-			
-			if(err) {
-				if(errorHandler) {
-					errorHandler(err);
-				} else {
-					throw err;
-				}
-			} else if(doneHandler) {
-				doneHandler(yielded);
-			}
-		}}
-		timer.initWithCallback(timerCallback, ms ? ms : 0, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
-		// add timer to global scope so that it doesn't get garbage collected before it completes
-		_runningTimers.push(timer);
-	};
-	
-	/**
-	 * Pumps a generator until it yields false. Unlike the above, this returns a promise.
-	 */
-	this.promiseGenerator = function(generator, ms) {
-		var deferred = Zotero.Promise.defer();
-		this.pumpGenerator(generator, ms,
-			function(e) { deferred.reject(e); },
-			function(data) { deferred.resolve(data) });
-		return deferred.promise;
-	};
-	
-	
 	this.spawn = function (generator, thisObject) {
 		if (thisObject) {
 			return Zotero.Promise.coroutine(generator.bind(thisObject))();
@@ -1852,38 +1757,38 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	
 	/**
-	 * Emulates the behavior of window.setTimeout, but ensures that callbacks do not get called
-	 * during Zotero.wait()
+	 * Emulates the behavior of window.setTimeout
 	 *
 	 * @param {Function} func			The function to be called
 	 * @param {Integer} ms				The number of milliseconds to wait before calling func
-	 * @param {Boolean} runWhenWaiting	True if the callback should be run even if Zotero.wait()
-	 *                                  is executing
+	 * @return {Integer} - ID of timer to be passed to clearTimeout()
 	 */
-	this.setTimeout = function(func, ms, runWhenWaiting) {
-		var timer = Components.classes["@mozilla.org/timer;1"].
-			createInstance(Components.interfaces.nsITimer),
-			useJIT = Components.utils.methodjit;
-		var timerCallback = {"notify":function() {
-			// XXX Remove when we drop support for Fx <24
-			if(useJIT !== undefined) Components.utils.methodjit = useJIT;
-			
-			if(_waiting && !runWhenWaiting) {
-				// if our callback gets called during Zotero.wait(), queue it to be set again
-				// when Zotero.wait() completes
-				_waitTimers.push(timer);
-				_waitTimerCallbacks.push(timerCallback);
-			} else {
-				// execute callback function
+	var _lastTimeoutID = 0;
+	this.setTimeout = function (func, ms) {
+		var id = ++_lastTimeoutID;
+		
+		var timer = Components.classes["@mozilla.org/timer;1"]
+			.createInstance(Components.interfaces.nsITimer);
+		var timerCallback = {
+			"notify": function () {
 				func();
-				// remove timer from global scope, so it can be garbage collected
-				_runningTimers.splice(_runningTimers.indexOf(timer), 1);
+				_runningTimers.delete(id);
 			}
-		}}
+		};
 		timer.initWithCallback(timerCallback, ms, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-		// add timer to global scope so that it doesn't get garbage collected before it completes
-		_runningTimers.push(timer);
-	}
+		_runningTimers.set(id, timer);
+		return id;
+	};
+	
+	
+	this.clearTimeout = function (id) {
+		var timer = _runningTimers.get(id);
+		if (timer) {
+			timer.cancel();
+			_runningTimers.delete(id);
+		}
+	};
+	
 	
 	/**
 	 * Show Zotero pane overlay and progress bar in all windows
@@ -1960,7 +1865,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		if (percentage === _lastPercentage) {
 			return;
 		}
-		for each(var pm in _progressMeters) {
+		for (let pm of _progressMeters) {
 			if (percentage !== null) {
 				if (pm.mode == 'undetermined') {
 					pm.max = 1000;

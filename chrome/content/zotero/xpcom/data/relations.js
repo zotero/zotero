@@ -149,7 +149,8 @@ Zotero.Relations = new function () {
 	this.getByObject = function (objectType, object) {
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		var predicateIDs = [];
-		var o = _subjectPredicatesByObject[objectType][object];
+		var o = _subjectPredicatesByObject[objectType]
+			? _subjectPredicatesByObject[objectType][object] : false;
 		if (!o) {
 			return [];
 		}

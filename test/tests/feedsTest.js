@@ -4,6 +4,45 @@ describe("Zotero.Feeds", function () {
 		yield clearFeeds();
 	});
 	
+	describe('#importFromOPML', function() {
+		var opmlUrl = getTestDataUrl("feeds.opml");
+		var opmlString;
+		
+		before(function* (){
+			opmlString = yield Zotero.File.getContentsFromURLAsync(opmlUrl);
+			sinon.stub(Zotero.Feeds, 'updateFeeds').resolves();
+		});
+		
+		beforeEach(function* () {
+			yield clearFeeds();
+		});
+		
+		after(function() {
+			Zotero.Feeds.updateFeeds.restore();
+		});
+		
+		it('imports feeds correctly', function* (){
+			let shouldExist = {
+				"http://example.com/feed1.rss": "A title 1",
+				"http://example.com/feed2.rss": "A title 2",
+				"http://example.com/feed3.rss": "A title 3",
+				"http://example.com/feed4.rss": "A title 4"
+			};
+			yield Zotero.Feeds.importFromOPML(opmlString);
+			let feeds = Zotero.Feeds.getAll();
+			for (let feed of feeds) {
+				assert.equal(shouldExist[feed.url], feed.name, "Feed exists and title matches");
+				delete shouldExist[feed.url];
+			}
+			assert.equal(Object.keys(shouldExist).length, 0, "All feeds from opml have been created");
+		});
+		
+		it("doesn't fail if some feeds already exist", function* (){
+			yield createFeed({url: "http://example.com/feed1.rss"});
+			yield Zotero.Feeds.importFromOPML(opmlString)
+		});
+	});
+	
 	describe("#restoreFromJSON", function() {
 		var json = {};
 		var expiredFeedURL, existingFeedURL;

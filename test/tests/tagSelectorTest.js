@@ -173,7 +173,7 @@ describe("Tag Selector", function () {
 			/*// Remove all tags in library
 			var tags = yield Zotero.Tags.getAll(libraryID);
 			tags.forEach(function (tag) {
-				var tagID = yield Zotero.Tags.getID(tag);
+				var tagID = Zotero.Tags.getID(tag);
 				yield Zotero.Tags.removeFromLibrary(libraryID, tagID);
 			});*/
 			

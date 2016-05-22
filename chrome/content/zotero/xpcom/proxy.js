@@ -134,7 +134,13 @@ Zotero.Proxies = new function() {
 					browser,
 					window,
 					Zotero.getString('proxies.notification.associated.label', [host, channel.URI.hostPort]),
-					[{ label: "proxies.notification.settings.button", callback: function() { _prefsOpenCallback(bw[1]); } }]);
+					[
+						{
+							label: "proxies.notification.settings.button",
+							callback: () => _prefsOpenCallback(window)
+						}
+					]
+				);
 			}
 		} else {
 			if (!browser) return;
@@ -263,9 +269,16 @@ Zotero.Proxies = new function() {
 				window,
 				Zotero.getString('proxies.notification.redirected.label', [channel.URI.hostPort, proxiedURI.hostPort]),
 				[
-					{ label: "general.dontShowAgain", callback: function() { _disableRedirectNotification(); } },
-					{ label: "proxies.notification.settings.button", callback: function() { _prefsOpenCallback(bw[1]); } }
-				]);
+					{
+						label: "general.dontShowAgain",
+						callback: () => _disableRedirectNotification()
+					},
+					{
+						label: "proxies.notification.settings.button",
+						callback: () => _prefsOpenCallback(window)
+					}
+				]
+			);
 		}
 
 		browser.loadURIWithFlags(proxied, 0, channel.URI, null, null);
@@ -464,11 +477,13 @@ Zotero.Proxies = new function() {
 	 
 	 /**
 	  * Show a proxy-related notification
-	  * @param	{Array}		bw			output of _getBrowserWindow
-	  * @param	{String}	label		notification text
-	  * @param	{Array}	  buttons		dicts of button label resource string and associated callback
+	  * @param {Browser} browser
+	  * @param {Window} window
+	  * @param {String} label - notification text
+	  * @param {Object[]} buttons - Array of objects with 'label' (for getString()) and 'callback'
 	  */
 	 function _showNotification(browser, window, label, buttons) {
+		// Get localized button labels
 		buttons = buttons.map(function(button) {
 			return {
 				label: Zotero.getString(button.label),

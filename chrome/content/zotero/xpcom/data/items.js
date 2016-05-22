@@ -741,7 +741,7 @@ Zotero.Items = function() {
 			
 			var replPred = Zotero.Relations.replacedItemPredicate;
 			var toSave = {};
-			toSave[this.id];
+			toSave[item.id] = item;
 			
 			for each(var otherItem in otherItems) {
 				let otherItemURI = Zotero.URI.getItemURI(otherItem);
@@ -812,6 +812,9 @@ Zotero.Items = function() {
 			for (let i in toSave) {
 				yield toSave[i].save();
 			}
+			
+			// Hack to remove master item from duplicates view without recalculating duplicates
+			Zotero.Notifier.trigger('removeDuplicatesMaster', 'item', item.id);
 		}.bind(this));
 	};
 	

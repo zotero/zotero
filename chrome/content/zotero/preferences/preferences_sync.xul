@@ -67,6 +67,7 @@
 											<label value="&zotero.preferences.sync.username;"/>
 											<textbox id="sync-username-textbox"
 												preference="pref-sync-username"
+												onblur="Zotero_Preferences.Sync.trimUsername()"
 												onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event);"/>
 										</row>
 										<row>
@@ -74,7 +75,8 @@
 											<textbox id="sync-password" type="password"
 												onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event);"/>
 										</row>
-										<vbox align="center">
+										<row>
+											<box/>
 											<hbox align="baseline">
 												<button id="sync-auth-button"
 													label="&zotero.preferences.sync.setUpSync;"
@@ -82,7 +84,7 @@
 													disabled="true"/>
 												<label id="sync-status-indicator"/>
 											</hbox>
-										</vbox>
+										</row>
 									</rows>
 								</grid>
 								<vbox style="width:2em"/>
@@ -228,7 +230,7 @@
 
 							<hbox class="storage-settings-download-options" align="center">
 								<label value="&zotero.preferences.sync.fileSyncing.download;"/>
-								<menulist class="storage-personal" preference="pref-storage-downloadMode-personal" style="margin-left: 0">
+								<menulist class="storage-mode" preference="pref-storage-downloadMode-personal" style="margin-left: 0">
 									<menupopup>
 										<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
 										<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
@@ -245,7 +247,7 @@
 
 							<hbox class="storage-settings-download-options" align="center">
 								<label value="&zotero.preferences.sync.fileSyncing.download;"/>
-								<menulist class="storage-groups" preference="pref-storage-downloadMode-groups" style="margin-left: 0">
+								<menulist class="storage-mode" preference="pref-storage-downloadMode-groups" style="margin-left: 0">
 									<menupopup>
 										<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
 										<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>

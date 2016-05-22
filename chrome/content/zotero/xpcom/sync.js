@@ -161,23 +161,6 @@ Zotero.Sync.Server = new function () {
 		
 		var firstChild = xmlhttp.responseXML.firstChild.firstChild;
 		
-		// Temporarily disable auto-sync if instructed by server
-		if (firstChild.localName == 'throttle') {
-			Zotero.debug(xmlhttp.responseText);
-			var delay = first.getAttribute('delay');
-			var time = new Date();
-			time = time.getTime() + (delay * 1000);
-			time = new Date(time);
-			_throttleTimeout = time;
-			if (delay < 86400000) {
-				var timeStr = time.toLocaleTimeString();
-			}
-			else {
-				var timeStr = time.toLocaleString();
-			}
-			_error("Auto-syncing disabled until " + timeStr, false, noReloadOnFailure);
-		}
-		
 		if (firstChild.localName == 'error') {
 			// Don't automatically retry 400 errors
 			if (xmlhttp.status >= 400 && xmlhttp.status < 500 && !_invalidSession(xmlhttp)) {
@@ -318,7 +301,6 @@ Zotero.Sync.Server = new function () {
 									msg,
 									0,
 									{
-										dialogText: msg,
 										dialogButtonText: Zotero.getString('pane.items.showItemInLibrary'),
 										dialogButtonCallback: function () {
 											var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
@@ -335,36 +317,6 @@ Zotero.Sync.Server = new function () {
 								Zotero.debug(msg, 1);
 								Components.utils.reportError(msg);
 							}
-						}
-					}
-					break;
-				
-				case 'TAG_TOO_LONG':
-					if (!Zotero.Sync.Runner.background) {
-						var tag = xmlhttp.responseXML.firstChild.getElementsByTagName('tag');
-						if (tag.length) {
-							var tag = tag[0].firstChild.nodeValue;
-							setTimeout(function () {
-								var callback = function () {
-									var sql = "SELECT DISTINCT name FROM tags WHERE LENGTH(name)>255 LIMIT 1";
-									var tag = Zotero.DB.valueQuery(sql);
-									if (tag) {
-										var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-												   .getService(Components.interfaces.nsIWindowMediator);
-										var lastWin = wm.getMostRecentWindow("navigator:browser");
-										var dataOut = { result: null };
-										lastWin.openDialog('chrome://zotero/content/longTagFixer.xul', '', 'chrome,modal,centerscreen', tag, dataOut);
-										if (dataOut.result) {
-											callback();
-										}
-									}
-									else {
-										Zotero.Sync.Runner.sync();
-									}
-								};
-								
-								callback();
-							}, 1);
 						}
 					}
 					break;
@@ -422,7 +374,7 @@ Zotero.Sync.Server = new function () {
 						Zotero.DB.beginTransaction();
 						
 						var types = ['collections', 'creators', 'items', 'savedSearches', 'tags'];
-						for each (var type in types) {
+						for (let type of types) {
 							var sql = "UPDATE " + type + " SET dateAdded=CURRENT_TIMESTAMP "
 									+ "WHERE dateAdded NOT BETWEEN '1970-01-01 00:00:01' AND '2038-01-19 03:14:07'";
 							Zotero.DB.query(sql);

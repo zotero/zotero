@@ -12,6 +12,24 @@ Zotero.Sync.Storage.Local = {
 	lastFullFileCheck: {},
 	uploadCheckFiles: [],
 	
+	getEnabledForLibrary: function (libraryID) {
+		var libraryType = Zotero.Libraries.get(libraryID).libraryType;
+		switch (libraryType) {
+		case 'user':
+		case 'publications':
+			return Zotero.Prefs.get("sync.storage.enabled");
+		
+		case 'group':
+			return Zotero.Prefs.get("sync.storage.groups.enabled");
+		
+		case 'feed':
+			return false;
+		
+		default:
+			throw new Error(`Unexpected library type '${libraryType}'`);
+		}
+	},
+	
 	getClassForLibrary: function (libraryID) {
 		return Zotero.Sync.Storage.Utilities.getClassForMode(this.getModeForLibrary(libraryID));
 	},

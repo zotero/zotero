@@ -98,7 +98,7 @@ Zotero.CollectionTreeView.prototype.setTree = Zotero.Promise.coroutine(function*
 			
 			var key = String.fromCharCode(event.which);
 			if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
-				this.expandLibrary(libraryID);
+				this.expandLibrary(libraryID, true);
 			}
 			else if (key == '-' && !(event.shiftKey || event.ctrlKey ||
 					event.altKey || event.metaKey)) {
@@ -211,28 +211,30 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 
 	// TODO: Unify feed and group adding code
 	// Add feeds
-	var feeds = Zotero.Feeds.getAll();
-	if (feeds.length) {
-		this._addRowToArray(
-			newRows,
-			new Zotero.CollectionTreeRow('separator', false),
-			added++
-		);
-		this._addRowToArray(
-			newRows,
-			new Zotero.CollectionTreeRow('header', {
-				id: "feed-libraries-header",
-				label: Zotero.getString('pane.collections.feedLibraries'),
-				libraryID: -1
-			}, 0),
-			added++
-		);
-		for (let feed of feeds) {
+	if (this.hideSources.indexOf('feeds') == -1) {
+		var feeds = Zotero.Feeds.getAll();
+		if (feeds.length) {
 			this._addRowToArray(
 				newRows,
-				new Zotero.CollectionTreeRow('feed', feed),
+				new Zotero.CollectionTreeRow('separator', false),
 				added++
 			);
+			this._addRowToArray(
+				newRows,
+				new Zotero.CollectionTreeRow('header', {
+					id: "feed-libraries-header",
+					label: Zotero.getString('pane.collections.feedLibraries'),
+					libraryID: -1
+				}, 0),
+				added++
+			);
+			for (let feed of feeds) {
+				this._addRowToArray(
+					newRows,
+					new Zotero.CollectionTreeRow('feed', feed),
+					added++
+				);
+			}
 		}
 	}
 
@@ -361,6 +363,12 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 	//
 	var currentTreeRow = this.getRow(this.selection.currentIndex);
 	this.selection.selectEventsSuppressed = true;
+	
+	// If there's not at least one new collection to be selected, get a scroll position to restore later
+	var scrollPosition = false;
+	if (action != 'add' || ids.every(id => extraData[id] && extraData[id].skipSelect)) {
+		scrollPosition = this._saveScrollPosition();
+	}
 	
 	if (action == 'delete') {
 		var selectedIndex = this.selection.count ? this.selection.currentIndex : 0;
@@ -510,6 +518,8 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 			}
 		}
 	}
+	
+	this._rememberScrollPosition(scrollPosition);
 	
 	var deferred = Zotero.Promise.defer();
 	this.addEventListener('select', () => deferred.resolve());
@@ -852,6 +862,7 @@ Zotero.CollectionTreeView.prototype.toggleOpenState = Zotero.Promise.coroutine(f
 	this._rows[row].isOpen = true;
 	this._treebox.invalidateRow(row);
 	this._refreshRowMap();
+	this._startRememberOpenStatesTimer();
 });
 
 
@@ -871,7 +882,23 @@ Zotero.CollectionTreeView.prototype._closeContainer = function (row) {
 	this._rows[row].isOpen = false;
 	this._treebox.invalidateRow(row);
 	this._refreshRowMap();
+	this._startRememberOpenStatesTimer();
 }
+
+
+/**
+ * After a short delay, persist the open states of the tree, or if already queued, cancel and requeue.
+ * This avoids repeated saving while opening or closing multiple rows.
+ */
+Zotero.CollectionTreeView.prototype._startRememberOpenStatesTimer = function () {
+	if (this._rememberOpenStatesTimeoutID) {
+		clearTimeout(this._rememberOpenStatesTimeoutID);
+	}
+	this._rememberOpenStatesTimeoutID = setTimeout(() => {
+		this._rememberOpenStates();
+		this._rememberOpenStatesTimeoutID = null;
+	}, 250)
+};
 
 
 Zotero.CollectionTreeView.prototype.isSelectable = function (row, col) {
@@ -913,7 +940,11 @@ Zotero.CollectionTreeView.prototype.__defineGetter__('editable', function () {
 });
 
 
-Zotero.CollectionTreeView.prototype.expandLibrary = Zotero.Promise.coroutine(function* (libraryID) {
+/**
+ * @param {Integer} libraryID
+ * @param {Boolean} [recursive=false] - Expand all collections and subcollections
+ */
+Zotero.CollectionTreeView.prototype.expandLibrary = Zotero.Promise.coroutine(function* (libraryID, recursive) {
 	var row = this._rowMap['L' + libraryID]
 	if (row === undefined) {
 		return false;
@@ -921,6 +952,15 @@ Zotero.CollectionTreeView.prototype.expandLibrary = Zotero.Promise.coroutine(fun
 	if (!this.isContainerOpen(row)) {
 		yield this.toggleOpenState(row);
 	}
+	
+	if (recursive) {
+		for (let i = row; i < this.rowCount && this.getRow(i).ref.libraryID == libraryID; i++) {
+			if (this.isContainer(i) && !this.isContainerOpen(i)) {
+				yield this.toggleOpenState(i);
+			}
+		}
+	}
+	
 	return true;
 });
 
@@ -930,8 +970,35 @@ Zotero.CollectionTreeView.prototype.collapseLibrary = function (libraryID) {
 	if (row === undefined) {
 		return false;
 	}
-	this._closeContainer(row);
+	
+	var closed = [];
+	var found = false;
+	for (let i = this.rowCount - 1; i >= row; i--) {
+		let treeRow = this.getRow(i);
+		if (treeRow.ref.libraryID !== libraryID) {
+			// Once we've moved beyond the original library, stop looking
+			if (found) {
+				break;
+			}
+			continue;
+		}
+		found = true;
+		
+		if (this.isContainer(i) && this.isContainerOpen(i)) {
+			closed.push(treeRow.id);
+			this._closeContainer(i);
+		}
+	}
+	
+	// Select the collapsed library
 	this.selection.select(row);
+	
+	// We have to manually delete closed rows from the container state object, because otherwise
+	// _rememberOpenStates() wouldn't see any of the rows under the library (since the library is now
+	// collapsed) and they'd remain as open in the persisted object.
+	closed.forEach(id => { delete this._containerState[id]; });
+	this._rememberOpenStates();
+	
 	return true;
 };
 
@@ -959,7 +1026,7 @@ Zotero.CollectionTreeView.prototype.expandToCollection = Zotero.Promise.coroutin
 		path.unshift(parentID);
 		col = yield Zotero.Collections.getAsync(parentID);
 	}
-	for each(var id in path) {
+	for (let id of path) {
 		row = this._rowMap["C" + id];
 		if (!this.isContainerOpen(row)) {
 			yield this.toggleOpenState(row);
@@ -1143,7 +1210,7 @@ Zotero.CollectionTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(f
 
 
 /**
- * Expand row based on last state, or manually from toggleOpenState()
+ * Expand row based on last state
  */
 Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(function* (rows, row, forceOpen) {
 	var treeRow = rows[row];
@@ -1177,8 +1244,7 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 		var showTrash = false;
 	}
 	
-	// If not a manual open and either the library is set to be hidden
-	// or this is a collection that isn't explicitly opened,
+	// If not a manual open and either the library is set to be collapsed or this is a collection that isn't explicitly opened,
 	// set the initial state to closed
 	if (!forceOpen &&
 			(this._containerState[treeRow.id] === false
@@ -1310,6 +1376,9 @@ Zotero.CollectionTreeView.prototype._refreshRowMap = function() {
 }
 
 
+/**
+ * Persist the current open/closed state of rows to a pref
+ */
 Zotero.CollectionTreeView.prototype._rememberOpenStates = Zotero.Promise.coroutine(function* () {
 	var state = this._containerState;
 	
@@ -1429,6 +1498,11 @@ Zotero.CollectionTreeView.prototype.canDropCheck = function (row, orient, dataTr
 	}
 	var dataType = dragData.dataType;
 	var data = dragData.data;
+	
+	// Empty space below rows
+	if (row == -1) {
+		return false;
+	}
 	
 	// For dropping collections onto root level
 	if (orient == 1 && row == 0 && dataType == 'zotero/collection') {
@@ -1553,7 +1627,7 @@ Zotero.CollectionTreeView.prototype.canDropCheck = function (row, orient, dataTr
 				}
 				
 				// Nor in their children
-				if (col.hasDescendent('collection', treeRow.ref.id)) {
+				if (draggedCollection.hasDescendent('collection', treeRow.ref.id)) {
 					return false;
 				}
 			}
@@ -2010,7 +2084,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 				var toReconcile = [];
 				
 				var newIDs = [];
-				for each(var item in newItems) {
+				for (let item of newItems) {
 					var id = yield copyItem(item, targetLibraryID, copyOptions)
 					// Standalone attachments might not get copied
 					if (!id) {
@@ -2087,7 +2161,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			var parentCollectionID = false;
 		}
 		
-		var unlock = Zotero.Notifier.begin(true);
+		var commitNotifier = Zotero.Notifier.begin();
 		try {
 			for (var i=0; i<data.length; i++) {
 				var file = data[i];

@@ -167,7 +167,7 @@ describe("Zotero.Fulltext", function () {
 				yield Zotero.Attachments.createDirectoryForItem(attachment);
 				
 				let path = attachment.getFilePath();
-				let content = [Zotero.Utilities.randomString() for (x of new Array(10))].join(" ");
+				let content = new Array(10).fill("").map(x => Zotero.Utilities.randomString()).join(" ");
 				yield Zotero.File.putContentsAsync(path, content);
 				
 				if (!options.skip) {

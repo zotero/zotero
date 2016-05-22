@@ -82,6 +82,7 @@ Zotero.HTTP = new function() {
 	 *         <li>dontCache - If set, specifies that the request should not be fulfilled from the cache</li>
 	 *         <li>foreground - Make a foreground request, showing certificate/authentication dialogs if necessary</li>
 	 *         <li>headers - HTTP headers to include in the request</li>
+	 *         <li>logBodyLength - Length of request body to log (defaults to 1024)</li>
 	 *         <li>timeout - Request timeout specified in milliseconds
 	 *         <li>requestObserver - Callback to receive XMLHttpRequest after open()</li>
 	 *         <li>responseType - The type of the response. See XHR 2 documentation for legal values</li>
@@ -107,15 +108,16 @@ Zotero.HTTP = new function() {
 		dispURL = dispURL.replace(/key=[^&]+&?/, "").replace(/\?$/, "");
 		
 		if (options.body && typeof options.body == 'string') {
-			var bodyStart = options.body.substr(0, 1024);
+			let len = options.logBodyLength !== undefined ? options.logBodyLength : 1024;
+			var bodyStart = options.body.substr(0, len);
 			// Don't display sync password or session id in console
 			bodyStart = bodyStart.replace(/password":"[^"]+/, 'password":"********');
 			bodyStart = bodyStart.replace(/password=[^&]+/, 'password=********');
 			bodyStart = bodyStart.replace(/sessionid=[^&]+/, 'sessionid=********');
 			
-			Zotero.debug("HTTP "+method+" "
-				+ (options.body.length > 1024 ?
-					bodyStart + '... (' + options.body.length + ' chars)' : bodyStart)
+			Zotero.debug("HTTP " + method + ' "'
+				+ (options.body.length > len
+					? bodyStart + '\u2026" (' + options.body.length + ' chars)' : bodyStart + '"')
 				+ " to " + dispURL);
 		} else {
 			Zotero.debug("HTTP " + method + " " + dispURL);
@@ -252,10 +254,11 @@ Zotero.HTTP = new function() {
 				}
 				deferred.resolve(xmlhttp);
 			} else {
-				var msg = "HTTP " + method + " " + dispURL + " failed: "
-					+ "Unexpected status code " + xmlhttp.status;
+				let msg = "HTTP " + method + " " + dispURL + " failed with status code " + xmlhttp.status;
+				if (xmlhttp.status == 400 || options.debug) {
+					msg += ":\n\n" + xmlhttp.responseText;
+				}
 				Zotero.debug(msg, 1);
-				Zotero.debug(xmlhttp.responseText, 1);
 				deferred.reject(new Zotero.HTTP.UnexpectedStatusException(xmlhttp, msg));
 			}
 		};
@@ -734,7 +737,7 @@ Zotero.HTTP = new function() {
 	
 	
 	this.isWriteMethod = function (method) {
-		return method == 'POST' || method == 'PUT' || method == 'PATCH';
+		return method == 'POST' || method == 'PUT' || method == 'PATCH' || method == 'DELETE';
 	};
 	
 	
@@ -787,7 +790,8 @@ Zotero.HTTP = new function() {
 	 * Load one or more documents in a hidden browser
 	 *
 	 * @param {String|String[]} urls URL(s) of documents to load
-	 * @param {Function} processor Callback to be executed for each document loaded
+	 * @param {Function} processor - Callback to be executed for each document loaded; if function returns
+	 *     a promise, it's waited for before continuing
 	 * @param {Function} done Callback to be executed after all documents have been loaded
 	 * @param {Function} exception Callback to be executed if an exception occurs
 	 * @param {Boolean} dontDelete Don't delete the hidden browser upon completion; calling function
@@ -850,16 +854,40 @@ Zotero.HTTP = new function() {
 			hiddenBrowser.removeEventListener("pageshow", onLoad, true);
 			hiddenBrowser.zotero_loaded = true;
 			
+			var maybePromise;
+			var error;
 			try {
-				processor(doc);
-			} catch(e) {
-				if(exception) {
-					exception(e);
-					return;
-				} else {
-					throw(e);
+				maybePromise = processor(doc);
+			}
+			catch (e) {
+				error = e;
+			}
+			
+			// If processor returns a promise, wait for it
+			if (maybePromise.then) {
+				maybePromise.then(() => doLoad())
+				.catch(e => {
+					if (exception) {
+						exception(e);
+					}
+					else {
+						throw e;
+					}
+				});
+				return;
+			}
+			
+			try {
+				if (error) {
+					if (exception) {
+						exception(error);
+					}
+					else {
+						throw error;
+					}
 				}
-			} finally {
+			}
+			finally {
 				doLoad();
 			}
 		};

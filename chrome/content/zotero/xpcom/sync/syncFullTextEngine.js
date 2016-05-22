@@ -35,6 +35,9 @@ Zotero.Sync.Data.FullTextEngine = function (options) {
 		throw new Error("options.libraryID not set");
 	}
 	
+	this.MAX_BATCH_SIZE = 500000;
+	this.MAX_BATCH_ITEMS = 10;
+	
 	this.apiClient = options.apiClient;
 	this.libraryID = options.libraryID;
 	this.library = Zotero.Libraries.get(options.libraryID);
@@ -50,7 +53,13 @@ Zotero.Sync.Data.FullTextEngine.prototype.start = Zotero.Promise.coroutine(funct
 	
 	// Get last full-text version in settings
 	var libraryVersion = yield Zotero.FullText.getLibraryVersion(this.libraryID);
-	yield this._download(libraryVersion);
+	// If main library version has changed, check to see if there's no full-text content
+	if (this.library.libraryVersion > libraryVersion) {
+		yield this._download(libraryVersion);
+	}
+	else {
+		Zotero.debug("Library version hasn't changed -- skipping full-text download");
+	}
 	
 	yield this._upload();
 })
@@ -71,7 +80,7 @@ Zotero.Sync.Data.FullTextEngine.prototype._download = Zotero.Promise.coroutine(f
 	for (let key in results.versions) {
 		let id = Zotero.Items.getIDFromLibraryAndKey(this.libraryID, key);
 		if (!id) {
-			Zotero.debug(`Skipping full-text for missing item ${this.libraryID}/${key}`);
+			Zotero.debug(`Skipping full-text for missing item ${this.library.name}`);
 			continue;
 		}
 		
@@ -79,7 +88,7 @@ Zotero.Sync.Data.FullTextEngine.prototype._download = Zotero.Promise.coroutine(f
 		// interrupted sync
 		let version = yield Zotero.Fulltext.getItemVersion(id);
 		if (version == results.versions[key]) {
-			Zotero.debug(`Skipping up-to-date full text for ${this.libraryKey}`);
+			Zotero.debug(`Skipping up-to-date full text for ${this.library.name}`);
 			continue;
 		}
 		keys.push(key);
@@ -94,6 +103,7 @@ Zotero.Sync.Data.FullTextEngine.prototype._download = Zotero.Promise.coroutine(f
 				this.library.libraryType, this.library.libraryTypeID, key
 			)
 			.then(function (results) {
+				if (!results) return;
 				return Zotero.Fulltext.setItemContent(
 					this.libraryID, tmpKey, results.data, results.version
 				)
@@ -110,33 +120,71 @@ Zotero.Sync.Data.FullTextEngine.prototype._upload = Zotero.Promise.coroutine(fun
 	
 	Zotero.debug("Uploading full-text content for " + this.library.name);
 	
-	var props = ['content', 'indexedChars', 'totalChars', 'indexedPages', 'totalPages'];
+	var libraryVersion = this.library.libraryVersion;
+	var props = ['key', 'content', 'indexedChars', 'totalChars', 'indexedPages', 'totalPages'];
 	
+	let lastItemID = 0;
 	while (true) {
-		let numSuccessful = 0;
-		let objs = yield Zotero.FullText.getUnsyncedContent(this.libraryID, 10);
+		let objs = yield Zotero.FullText.getUnsyncedContent(this.libraryID, {
+			maxSize: this.MAX_BATCH_SIZE,
+			maxItems: this.MAX_BATCH_ITEMS,
+			lastItemID
+		});
 		if (!objs.length) {
 			break;
 		}
-		let promises = [];
+		
+		let jsonArray = [];
+		let results;
+		
 		for (let obj of objs) {
 			let json = {};
 			for (let prop of props) {
 				json[prop] = obj[prop];
 			}
-			promises.push(this.apiClient.setFullTextForItem(
-				this.library.libraryType, this.library.libraryTypeID, obj.key, json
-			));
+			jsonArray.push(json);
+			lastItemID = obj.itemID;
 		}
-		var results = yield Zotero.Promise.all(promises);
+		({ libraryVersion, results } = yield this.apiClient.setFullTextForItems(
+			this.library.libraryType,
+			this.library.libraryTypeID,
+			libraryVersion,
+			jsonArray
+		));
 		yield Zotero.DB.executeTransaction(function* () {
-			for (let i = 0; i < results.length; i++) {
-				let itemID = yield Zotero.Items.getIDFromLibraryAndKey(
-					this.libraryID, objs[i].key
-				);
-				yield Zotero.FullText.setItemSynced(itemID, results[i]);
+			for (let state of ['successful', 'unchanged']) {
+				for (let index in results[state]) {
+					let key = results[state][index].key;
+					let itemID = Zotero.Items.getIDFromLibraryAndKey(this.libraryID, key);
+					yield Zotero.FullText.setItemSynced(itemID, libraryVersion);
+				}
 			}
+			// Set both the library version and the full-text library version. The latter is necessary
+			// because full-text sync can be turned off at any time, so we have to keep track of the
+			// last version we've seen for full-text in case the main library version has advanced since.
+			yield Zotero.FullText.setLibraryVersion(this.libraryID, libraryVersion);
+			this.library.libraryVersion = libraryVersion;
+			yield this.library.save();
 		}.bind(this));
+		
+		for (let index in results.failed) {
+			let { code, message, data } = results.failed[index];
+			let e = new Error(message);
+			e.name = "ZoteroObjectUploadError";
+			e.code = code;
+			if (data) {
+				e.data = data;
+			}
+			Zotero.logError("Error uploading full text for item " + jsonArray[index].key + " in "
+				+ this.library.name + ":\n\n" + e);
+			
+			if (this.onError) {
+				this.onError(e);
+			}
+			if (this.stopOnError) {
+				throw new Error(e);
+			}
+		}
 	}
 });
 

@@ -90,14 +90,14 @@
 		<label value="&zotero.publications.chooseLicense.adaptations.prompt;" control="choose-adaptations"/>
 		<radiogroup id="choose-adaptations" oncommand="Zotero_Publications_Dialog.updateSharing(this.selectedItem.id)">
 			<radio id="adaptations-no" label="&zotero.general.no;" accesskey="N"/>
-			<radio id="adaptations-yes" label="&zotero.general.yes;" accesskey="Y"/>
 			<radio id="adaptations-sharealike" label="&zotero.publications.chooseLicense.adaptations.sharealike;" accesskey="S"/>
+			<radio id="adaptations-yes" label="&zotero.general.yes;" accesskey="Y"/>
 		</radiogroup>
 		<separator/>
 		<label value="&zotero.publications.chooseLicense.commercial.prompt;" control="choose-commercial"/>
 		<radiogroup id="choose-commercial" oncommand="Zotero_Publications_Dialog.updateSharing(this.selectedItem.id)">
-			<radio id="commercial-yes" label="&zotero.general.yes;" accesskey="Y"/>
 			<radio id="commercial-no" label="&zotero.general.no;" accesskey="N"/>
+			<radio id="commercial-yes" label="&zotero.general.yes;" accesskey="Y"/>
 		</radiogroup>
 		
 		<groupbox class="license-info"/>

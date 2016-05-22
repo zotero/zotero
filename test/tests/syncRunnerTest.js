@@ -11,7 +11,7 @@ describe("Zotero.Sync.Runner", function () {
 		keyInfo: {
 			fullAccess: {
 				method: "GET",
-				url: "keys/" + apiKey,
+				url: "keys/current",
 				status: 200,
 				json: {
 					key: apiKey,
@@ -608,7 +608,7 @@ describe("Zotero.Sync.Runner", function () {
 			// Full-text syncing
 			setResponse({
 				method: "GET",
-				url: "users/1/fulltext",
+				url: "users/1/fulltext?format=versions",
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 5
@@ -617,7 +617,7 @@ describe("Zotero.Sync.Runner", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "users/1/publications/fulltext",
+				url: "users/1/publications/fulltext?format=versions",
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 10
@@ -626,7 +626,7 @@ describe("Zotero.Sync.Runner", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "groups/1623562/fulltext",
+				url: "groups/1623562/fulltext?format=versions",
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 15
@@ -635,7 +635,7 @@ describe("Zotero.Sync.Runner", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "groups/2694172/fulltext",
+				url: "groups/2694172/fulltext?format=versions",
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 20
@@ -672,55 +672,51 @@ describe("Zotero.Sync.Runner", function () {
 		})
 		
 		
-		it("should show the sync error icon on error", function* () {
-			let pubLib = Zotero.Libraries.get(publicationsLibraryID);
-			pubLib.libraryVersion = 5;
-			yield pubLib.save();
-			
+		it("should handle user-initiated cancellation", function* () {
 			setResponse('keyInfo.fullAccess');
-			setResponse('userGroups.groupVersionsEmpty');
-			// My Library
-			setResponse({
-				method: "GET",
-				url: "users/1/settings",
-				status: 200,
-				headers: {
-					"Last-Modified-Version": 5
-				},
-				json: {
-					INVALID: true // TODO: Find a cleaner error
-				}
-			});
-			// No publications changes
-			setResponse({
-				method: "GET",
-				url: "users/1/publications/settings?since=5",
-				status: 304,
-				headers: {
-					"Last-Modified-Version": 5
-				},
-				json: {}
-			});
-			setResponse({
-				method: "GET",
-				url: "users/1/publications/fulltext",
-				status: 200,
-				headers: {
-					"Last-Modified-Version": 5
-				},
-				json: {}
+			setResponse('userGroups.groupVersions');
+			setResponse('groups.ownerGroup');
+			setResponse('groups.memberGroup');
+			
+			var stub = sinon.stub(Zotero.Sync.Data.Engine.prototype, "start");
+			
+			stub.onCall(0).returns(Zotero.Promise.resolve());
+			var e = new Zotero.Sync.UserCancelledException();
+			e.handledRejection = true;
+			stub.onCall(1).returns(Zotero.Promise.reject(e));
+			// Shouldn't be reached
+			stub.onCall(2).throws();
+			
+			yield runner.sync({
+				onError: e => { throw e },
 			});
 			
-			spy = sinon.spy(runner, "updateIcons");
-			yield runner.sync();
-			assert.isTrue(spy.calledTwice);
-			assert.isArray(spy.args[1][0]);
-			assert.lengthOf(spy.args[1][0], 1);
-			// Not an instance of Error for some reason
-			var error = spy.args[1][0][0];
-			assert.equal(Object.getPrototypeOf(error).constructor.name, "Error");
+			stub.restore();
+		});
+		
+		
+		it("should handle user-initiated cancellation for current library", function* () {
+			setResponse('keyInfo.fullAccess');
+			setResponse('userGroups.groupVersions');
+			setResponse('groups.ownerGroup');
+			setResponse('groups.memberGroup');
+			
+			var stub = sinon.stub(Zotero.Sync.Data.Engine.prototype, "start");
+			
+			stub.returns(Zotero.Promise.resolve());
+			var e = new Zotero.Sync.UserCancelledException(true);
+			e.handledRejection = true;
+			stub.onCall(1).returns(Zotero.Promise.reject(e));
+			
+			yield runner.sync({
+				onError: e => { throw e },
+			});
+			
+			assert.equal(stub.callCount, 4);
+			stub.restore();
 		});
 	})
+	
 	
 	describe("#createAPIKeyFromCredentials()", function() {
 		var data = {
@@ -778,12 +774,238 @@ describe("Zotero.Sync.Runner", function () {
 
 			server.respond(function (req) {
 				if (req.method == "DELETE") {
-					assert.equal(req.url, baseURL + "keys/" + apiKey);
+					assert.propertyVal(req.requestHeaders, 'Zotero-API-Key', apiKey);
+					assert.equal(req.url, baseURL + "keys/current");
 				}
 				req.respond(204);
 			});
 
 			yield runner.deleteAPIKey();
 		});
-	})
+	});
+	
+	
+	describe("Error Handling", function () {
+		var win;
+		
+		afterEach(function () {
+			if (win) {
+				win.close();
+			}
+		});
+		
+		it("should show the sync error icon on error", function* () {
+			let pubLib = Zotero.Libraries.get(publicationsLibraryID);
+			pubLib.libraryVersion = 5;
+			yield pubLib.save();
+			
+			setResponse('keyInfo.fullAccess');
+			setResponse('userGroups.groupVersionsEmpty');
+			// My Library
+			setResponse({
+				method: "GET",
+				url: "users/1/settings",
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 5
+				},
+				json: {
+					INVALID: true // TODO: Find a cleaner error
+				}
+			});
+			// No publications changes
+			setResponse({
+				method: "GET",
+				url: "users/1/publications/settings?since=5",
+				status: 304,
+				headers: {
+					"Last-Modified-Version": 5
+				},
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/publications/fulltext?format=versions",
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 5
+				},
+				json: {}
+			});
+			
+			spy = sinon.spy(runner, "updateIcons");
+			yield runner.sync();
+			assert.isTrue(spy.calledTwice);
+			assert.isArray(spy.args[1][0]);
+			assert.lengthOf(spy.args[1][0], 1);
+			// Not an instance of Error for some reason
+			var error = spy.args[1][0][0];
+			assert.equal(Object.getPrototypeOf(error).constructor.name, "Error");
+		});
+		
+		
+		it("should show a custom button in the error panel", function* () {
+			win = yield loadZoteroPane();
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			yield runner.sync({
+				background: true
+			});
+			
+			var doc = win.document;
+			var errorIcon = doc.getElementById('zotero-tb-sync-error');
+			assert.isFalse(errorIcon.hidden);
+			errorIcon.click();
+			var panel = win.document.getElementById('zotero-sync-error-panel');
+			var buttons = panel.getElementsByTagName('button');
+			assert.lengthOf(buttons, 1);
+			assert.equal(buttons[0].label, Zotero.getString('sync.openSyncPreferences'));
+		});
+		
+		
+		// TODO: Test multiple long tags and tags across libraries
+		describe("Long Tag Fixer", function () {
+			it("should split a tag", function* () {
+				win = yield loadZoteroPane();
+				
+				var item = yield createDataObject('item');
+				var tag = "title;feeling;matter;drum;treatment;caring;earthy;shrill;unit;obedient;hover;healthy;cheap;clever;wren;wicked;clip;shoe;jittery;shape;clear;dime;increase;complete;level;milk;false;infamous;lamentable;measure;cuddly;tasteless;peace;top;pencil;caption;unusual;depressed;frantic";
+				item.addTag(tag, 1);
+				yield item.saveTx();
+				
+				setResponse('keyInfo.fullAccess');
+				setResponse('userGroups.groupVersions');
+				setResponse('groups.ownerGroup');
+				setResponse('groups.memberGroup');
+				
+				server.respond(function (req) {
+					if (req.method == "POST" && req.url == baseURL + "users/1/items") {
+						var json = JSON.parse(req.requestBody);
+						if (json[0].tags.length == 1) {
+							req.respond(
+								200,
+								{
+									"Last-Modified-Version": 5
+								},
+								JSON.stringify({
+									successful: {},
+									success: {},
+									unchanged: {},
+									failed: {
+										"0": {
+											code: 413,
+											message: "Tag 'title;feeling;matter;drum;treatment;caring;earthy;shrill;unit;obedient;hover…' is too long to sync",
+											data: {
+												tag
+											}
+										}
+									}
+								})
+							);
+						}
+						else {
+							let itemJSON = item.toResponseJSON();
+							itemJSON.version = 6;
+							itemJSON.data.version = 6;
+							
+							req.respond(
+								200,
+								{
+									"Last-Modified-Version": 6
+								},
+								JSON.stringify({
+									successful: {
+										"0": itemJSON
+									},
+									success: {
+										"0": json[0].key
+									},
+									unchanged: {},
+									failed: {}
+								})
+							);
+						}
+					}
+				});
+				
+				waitForDialog(null, 'accept', 'chrome://zotero/content/longTagFixer.xul');
+				yield runner.sync({ libraries: [Zotero.Libraries.userLibraryID] });
+				
+				assert.isFalse(Zotero.Tags.getID(tag));
+				assert.isNumber(Zotero.Tags.getID('feeling'));
+			});
+			
+			it("should delete a tag", function* () {
+				win = yield loadZoteroPane();
+				
+				var item = yield createDataObject('item');
+				var tag = "title;feeling;matter;drum;treatment;caring;earthy;shrill;unit;obedient;hover;healthy;cheap;clever;wren;wicked;clip;shoe;jittery;shape;clear;dime;increase;complete;level;milk;false;infamous;lamentable;measure;cuddly;tasteless;peace;top;pencil;caption;unusual;depressed;frantic";
+				item.addTag(tag, 1);
+				yield item.saveTx();
+				
+				setResponse('keyInfo.fullAccess');
+				setResponse('userGroups.groupVersions');
+				setResponse('groups.ownerGroup');
+				setResponse('groups.memberGroup');
+				
+				server.respond(function (req) {
+					if (req.method == "POST" && req.url == baseURL + "users/1/items") {
+						var json = JSON.parse(req.requestBody);
+						if (json[0].tags.length == 1) {
+							req.respond(
+								200,
+								{
+									"Last-Modified-Version": 5
+								},
+								JSON.stringify({
+									successful: {},
+									success: {},
+									unchanged: {},
+									failed: {
+										"0": {
+											code: 413,
+											message: "Tag 'title;feeling;matter;drum;treatment;caring;earthy;shrill;unit;obedient;hover…' is too long to sync",
+											data: {
+												tag
+											}
+										}
+									}
+								})
+							);
+						}
+						else {
+							let itemJSON = item.toResponseJSON();
+							itemJSON.version = 6;
+							itemJSON.data.version = 6;
+							
+							req.respond(
+								200,
+								{
+									"Last-Modified-Version": 6
+								},
+								JSON.stringify({
+									successful: {
+										"0": itemJSON
+									},
+									success: {
+										"0": json[0].key
+									},
+									unchanged: {},
+									failed: {}
+								})
+							);
+						}
+					}
+				});
+				
+				waitForDialog(function (dialog) {
+					dialog.Zotero_Long_Tag_Fixer.switchMode(2);
+				}, 'accept', 'chrome://zotero/content/longTagFixer.xul');
+				yield runner.sync({ libraries: [Zotero.Libraries.userLibraryID] });
+				
+				assert.isFalse(Zotero.Tags.getID(tag));
+				assert.isFalse(Zotero.Tags.getID('feeling'));
+			});
+		});
+	});
 })

@@ -33,6 +33,32 @@ describe("Zotero.Item", function () {
 			assert.isTrue(item.hasChanged());
 		})
 		
+		it("should save an integer as a string", function* () {
+			var val = 1234;
+			var item = new Zotero.Item('book');
+			item.setField('numPages', val);
+			yield item.saveTx();
+			assert.strictEqual(item.getField('numPages'), "" + val);
+			// Setting again as string shouldn't register a change
+			assert.isFalse(item.setField('numPages', "" + val));
+			
+			// Value should be TEXT in the DB
+			var sql = "SELECT TYPEOF(value) FROM itemData JOIN itemDataValues USING (valueID) "
+				+ "WHERE itemID=? AND fieldID=?";
+			var type = yield Zotero.DB.valueQueryAsync(sql, [item.id, Zotero.ItemFields.getID('numPages')]);
+			assert.equal(type, 'text');
+		});
+		
+		it("should save integer 0 as a string", function* () {
+			var val = 0;
+			var item = new Zotero.Item('book');
+			item.setField('numPages', val);
+			yield item.saveTx();
+			assert.strictEqual(item.getField('numPages'), "" + val);
+			// Setting again as string shouldn't register a change
+			assert.isFalse(item.setField('numPages', "" + val));
+		});
+		
 		it('should clear an existing field when ""/null/false is passed', function* () {
 			var field = 'title';
 			var val = 'foo';
@@ -69,9 +95,9 @@ describe("Zotero.Item", function () {
 			assert.equal(item.getField(field), "");
 		})
 		
-		it('should clear a field set to 0 when a ""/null/false is passed', function* () {
+		it('should clear a field set to "0" when a ""/null/false is passed', function* () {
 			var field = 'title';
-			var val = 0;
+			var val = "0";
 			var fieldID = Zotero.ItemFields.getID(field);
 			var item = new Zotero.Item('book');
 			item.setField(field, val);
@@ -1025,6 +1051,22 @@ describe("Zotero.Item", function () {
 				assert.equal(json.md5, (yield item.attachmentHash));
 			})
 			
+			it("should omit storage values with .skipStorageProperties", function* () {
+				var file = getTestDataDirectory();
+				file.append('test.png');
+				var item = yield Zotero.Attachments.importFromFile({ file });
+				
+				item.attachmentSyncedModificationTime = new Date().getTime();
+				item.attachmentSyncedHash = 'b32e33f529942d73bea4ed112310f804';
+				yield item.saveTx({ skipAll: true });
+				
+				var json = item.toJSON({
+					skipStorageProperties: true
+				});
+				assert.isUndefined(json.mtime);
+				assert.isUndefined(json.md5);
+			});
+			
 			it("should output synced storage values with .syncedStorageProperties", function* () {
 				var item = new Zotero.Item('attachment');
 				item.attachmentLinkMode = 'imported_file';
@@ -1138,6 +1180,18 @@ describe("Zotero.Item", function () {
 				assert.isUndefined(json.title);
 				assert.strictEqual(json.deleted, 1);
 			})
+			
+			it("should set 'parentItem' to false when cleared", function* () {
+				var item = yield createDataObject('item');
+				var note = new Zotero.Item('note');
+				note.parentID = item.id;
+				// Create initial JSON with parentItem
+				var patchBase = note.toJSON();
+				// Clear parent item and regenerate JSON
+				note.parentID = false;
+				var json = note.toJSON({ patchBase });
+				assert.isFalse(json.parentItem);
+			});
 		})
 	})
 

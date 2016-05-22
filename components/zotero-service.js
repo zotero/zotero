@@ -104,6 +104,7 @@ const xpcomFilesLocal = [
 	'sync',
 	'sync/syncAPIClient',
 	'sync/syncEngine',
+	'sync/syncExceptions',
 	'sync/syncEventListeners',
 	'sync/syncFullTextEngine',
 	'sync/syncLocal',
@@ -177,7 +178,11 @@ ZoteroContext.prototype = {
 	 * Convenience method to replicate window.setTimeout()
 	 **/
 	"setTimeout":function setTimeout(func, ms){
-		this.Zotero.setTimeout(func, ms);
+		return this.Zotero.setTimeout(func, ms);
+	},
+	
+	"clearTimeout":function setTimeout(id) {
+		this.Zotero.clearTimeout(id);
 	},
 	
 	/**
@@ -281,7 +286,7 @@ function makeZoteroContext(isConnector) {
 	}
 	
 	// Load xpcomFiles for specific mode
-	for each(var xpcomFile in (isConnector ? xpcomFilesConnector : xpcomFilesLocal)) {
+	for (let xpcomFile of (isConnector ? xpcomFilesConnector : xpcomFilesLocal)) {
 		try {
 			subscriptLoader.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFile + ".js", zContext);
 		}
@@ -422,6 +427,8 @@ ZoteroCommandLineHandler.prototype = {
 		}
 		
 		// handler for Windows IPC commands
+		// TEMP: Disabled for 5.0 Beta
+		/*
 		var ipcParam = cmdLine.handleFlagWithParam("ZoteroIPC", false);
 		if(ipcParam) {
 			// Don't open a new window
@@ -429,6 +436,7 @@ ZoteroCommandLineHandler.prototype = {
 			var Zotero = this.Zotero;
 			Zotero.setTimeout(function() { Zotero.IPC.parsePipeInput(ipcParam) }, 0);
 		}
+		*/
 		
 		// special handler for "zotero" URIs at the command line to prevent them from opening a new
 		// window

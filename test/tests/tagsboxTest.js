@@ -100,9 +100,7 @@ describe("Item Tags Box", function () {
 			assert.equal(rows.length, 1);
 			assert.equal(rows[0].textContent, tag);
 			
-			yield Zotero.Tags.removeFromLibrary(
-				Zotero.Libraries.userLibraryID, (yield Zotero.Tags.getID(tag))
-			);
+			yield Zotero.Tags.removeFromLibrary(Zotero.Libraries.userLibraryID, Zotero.Tags.getID(tag));
 			
 			var rows = tagsbox.id('tagRows').getElementsByTagName('row');
 			assert.equal(rows.length, 0);

@@ -35,7 +35,7 @@ var Zotero_Publications_Dialog = new function () {
 	var _shareSettings = {
 		sharing: 'reserved', // 'reserved', 'cc', 'cc0'
 		adaptations: 'no',
-		commercial: 'yes'
+		commercial: 'no'
 	};
 	var _license = null;
 	

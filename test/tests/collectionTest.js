@@ -201,6 +201,19 @@ describe("Zotero.Collection", function() {
 		})
 	})
 	
+	describe("#toJSON()", function () {
+		it("should set 'parentCollection' to false when cleared", function* () {
+			var col1 = yield createDataObject('collection');
+			var col2 = yield createDataObject('collection', { parentID: col1.id });
+			// Create initial JSON with parentCollection
+			var patchBase = col2.toJSON();
+			// Clear parent collection and regenerate JSON
+			col2.parentID = false;
+			var json = col2.toJSON({ patchBase });
+			assert.isFalse(json.parentCollection);
+		});
+	});
+	
 	describe("#getDescendents()", function () {
 		var collection0, collection1, collection2, collection3, item1, item2, item3;
 		

@@ -323,7 +323,6 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 					assert.equal(params.mtime, mtime1);
 					assert.equal(params.filename, filename1);
 					assert.equal(params.filesize, size1);
-					assert.equal(params.contentType, contentType1);
 					
 					req.respond(
 						200,
@@ -375,8 +374,6 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 					assert.equal(params.filename, filename2);
 					assert.equal(params.zipFilename, item2.key + ".zip");
 					assert.isTrue(parseInt(params.filesize) == params.filesize);
-					assert.equal(params.contentType, contentType2);
-					assert.equal(params.charset, charset2);
 					
 					req.respond(
 						200,
@@ -820,6 +817,44 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.isFalse(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isTrue(result.syncRequired);
+		})
+		
+		it("should handle 413 on quota limit", function* () {
+			var { engine, client, caller } = yield setup();
+			var zfs = new Zotero.Sync.Storage.Mode.ZFS({
+				apiClient: client
+			})
+			
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var item = yield Zotero.Attachments.importFromFile({ file });
+			item.version = 5;
+			item.synced = true;
+			yield item.saveTx();
+			
+			server.respond(function (req) {
+				if (req.method == "POST"
+						&& req.url == `${baseURL}users/1/items/${item.key}/file`
+						&& req.requestBody.indexOf('upload=') == -1
+						&& req.requestHeaders["If-None-Match"] == "*") {
+					req.respond(
+						413,
+						{
+							"Content-Type": "application/json",
+							"Last-Modified-Version": 10
+						},
+						"File would exceed quota (299.7 + 0.5 &gt; 300)"
+					);
+				}
+			})
+			
+			var e = yield getPromiseError(zfs._processUploadFile({
+				name: item.libraryKey
+			}));
+			assert.ok(e);
+			assert.equal(e.errorType, 'warning');
+			assert.include(e.message, 'test.png');
+			assert.equal(e.dialogButtonText, Zotero.getString('sync.storage.openAccountSettings'));
 		})
 	})
 })

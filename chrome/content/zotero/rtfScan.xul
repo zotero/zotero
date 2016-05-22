@@ -45,7 +45,7 @@
 	<wizardpage id="scan-page" label="&zotero.rtfScan.scanPage.label;"
 	onpageshow="Zotero_RTFScan.scanPageShowing()">
 		<description width="700">&zotero.rtfScan.scanPage.description;</description>
-		<progressmeter id="progress-indicator" mode="undetermined" flex="1"/>
+		<progressmeter id="progress-indicator" mode="undetermined"/>
 	</wizardpage>
 	
 	<wizardpage id="citations-page" label="&zotero.rtfScan.citationsPage.label;"
@@ -107,7 +107,7 @@
 	<wizardpage id="format-page" label="&zotero.rtfScan.formatPage.label;"
 	onpageshow="Zotero_RTFScan.formatPageShowing()">
 		<description width="700">&zotero.rtfScan.formatPage.description;</description>
-		<progressmeter id="progress-indicator" mode="undetermined" flex="1"/>
+		<progressmeter id="progress-indicator" mode="undetermined"/>
 	</wizardpage>
 	
 	<wizardpage id="complete-page" label="&zotero.rtfScan.completePage.label;">

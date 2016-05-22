@@ -664,7 +664,9 @@ var Zotero_Citation_Dialog = new function () {
 				_multipleSourceButton.disabled = false;
 			}
 		} else {
-			_acceptButton.disabled = !itemsView.getSelectedItems().length; // treeview from xpcom/itemTreeView.js
+			collectionsView.addEventListener('load', () => {
+				_acceptButton.disabled = !itemsView.getSelectedItems().length;
+			});
 		}
 	}
 	

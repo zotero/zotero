@@ -145,7 +145,7 @@ Zotero.QuickCopy = new function() {
 			
 			// Only concern ourselves with entries containing the current domain
 			// or paths that apply to all domains
-			if (!row.domainPath.contains(urlDomain[0]) && !row.domainPath.startsWith('/')) {
+			if (!row.domainPath.indexOf(urlDomain[0]) != -1 && !row.domainPath.startsWith('/')) {
 				continue;
 			}
 			

@@ -619,6 +619,10 @@ Zotero.Translate.ItemSaver.prototype = {
 		let newTags = [];
 		for(let i=0; i<tags.length; i++) {
 			let tag = tags[i];
+			// Convert raw string to object with 'tag' property
+			if (typeof tag == 'string') {
+				tag = { tag };
+			}
 			tag.type = this._forceTagType || tag.type || 0;
 			newTags.push(tag);
 		}
@@ -760,7 +764,7 @@ Zotero.Translate.ItemGetter.prototype = {
 						var targetFile = Components.classes["@mozilla.org/file/local;1"].
 								createInstance(Components.interfaces.nsILocalFile);
 						targetFile.initWithFile(exportDir);
-						for each(var dir in attachPath.split("/")) targetFile.append(dir);
+						for (let dir of attachPath.split("/")) targetFile.append(dir);
 						
 						// First, check that we have not gone lower than exportDir in the hierarchy
 						var parent = targetFile, inExportFileDirectory;

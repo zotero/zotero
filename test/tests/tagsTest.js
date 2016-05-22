@@ -8,7 +8,7 @@ describe("Zotero.Tags", function () {
 			item.addTag(tagName);
 			yield item.saveTx();
 			
-			assert.typeOf((yield Zotero.Tags.getID(tagName)), "number");
+			assert.typeOf(Zotero.Tags.getID(tagName), "number");
 		})
 	})
 	
@@ -20,8 +20,8 @@ describe("Zotero.Tags", function () {
 			yield item.saveTx();
 			
 			var libraryID = Zotero.Libraries.userLibraryID;
-			var tagID = yield Zotero.Tags.getID(tagName);
-			assert.equal((yield Zotero.Tags.getName(tagID)), tagName);
+			var tagID = Zotero.Tags.getID(tagName);
+			assert.equal(Zotero.Tags.getName(tagID), tagName);
 		})
 	})
 	
@@ -35,7 +35,7 @@ describe("Zotero.Tags", function () {
 			yield item.saveTx();
 			assert.lengthOf(item.getTags(), 1);
 			
-			var tagID = yield Zotero.Tags.getID(tagName);
+			var tagID = Zotero.Tags.getID(tagName);
 			yield Zotero.Tags.removeFromLibrary(libraryID, tagID);
 			assert.lengthOf(item.getTags(), 0);
 		})
@@ -50,18 +50,18 @@ describe("Zotero.Tags", function () {
 			item.addTag(tagName);
 			yield item.saveTx();
 			
-			var tagID = yield Zotero.Tags.getID(tagName);
+			var tagID = Zotero.Tags.getID(tagName);
 			assert.typeOf(tagID, "number");
 			
 			yield item.eraseTx();
 			
-			assert.equal((yield Zotero.Tags.getName(tagID)), tagName);
+			assert.equal(Zotero.Tags.getName(tagID), tagName);
 			
 			yield Zotero.DB.executeTransaction(function* () {
 				yield Zotero.Tags.purge();
 			});
 			
-			assert.isFalse(yield Zotero.Tags.getName(tagID));
+			assert.isFalse(Zotero.Tags.getName(tagID));
 		})
 	})
 	
