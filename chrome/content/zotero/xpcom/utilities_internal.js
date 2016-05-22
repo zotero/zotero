@@ -1027,6 +1027,7 @@ Zotero.Utilities.Internal = {
 		if (!parent.isRegularItem()) throw new Error("No regular item.");
 		// load url in hidden browser
 		var browser = yield Zotero.Browser.createHiddenBrowserWithURL(url);
+		if (browser === false) return false;
 		var doc = browser.contentDocument;
 		// translator...
 		let translate = new Zotero.Translate.Web();
