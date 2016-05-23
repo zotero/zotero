@@ -240,6 +240,11 @@
 							// Update note
 							var noteField = this._id('noteField');
 							if (this.item) {
+								if (!noteField.changed) {
+									Zotero.debug("Note hasn't been modified -- not saving");
+									return;
+								}
+								
 								let changed = this.item.setNote(noteField.value);
 								if (changed && this.saveOnEdit) {
 									yield this.item.saveTx();

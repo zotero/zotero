@@ -34,6 +34,7 @@
 			<field name="_editable"/>
 			<field name="_mode"/>
 			<field name="_format"/>
+			<field name="_changed"/>
 			<field name="_loadHandler"/>
 			<field name="_commandString"/>
 			<field name="_eventHandler"/>
@@ -425,6 +426,10 @@
 									clearTimeout(self._timer);
 								}
 								
+								if (event.type == 'change') {
+									self._changed = true;
+								}
+								
 								// Get the command event
 								self._timer = self.timeout && setTimeout(function () {
 									var attr = self.getAttribute('oncommand');
@@ -534,9 +539,10 @@
 						html = '<div style="'+bodyStyle+'"><p>'+html+"</p></div>";
 					}
 					
-					Zotero.debug("SETTING CONTENT TO " + html);
+					Zotero.debug("Setting content to " + html);
 					
 					this._editor.setContent(html);
+					this._changed = false;
 					return val;
 				]]></setter>
 			</property>
@@ -544,6 +550,8 @@
 			<property name="timeout"
 					onset="this.setAttribute('timeout', val); return val;"
 					onget="return parseInt(this.getAttribute('timeout')) || 0;"/>
+			
+			<property name="changed" onget="return this._changed;"/>
 			
 			<method name="focus">
 				<body>
