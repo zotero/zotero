@@ -497,6 +497,8 @@ var getTempDirectory = Zotero.Promise.coroutine(function* getTempDirectory() {
  *                             any that were set at startup
  */
 function resetDB(options = {}) {
+	Zotero.Prefs.clear('lastViewedFolder')
+	
 	if (options.thisArg) {
 		options.thisArg.timeout(60000);
 	}
