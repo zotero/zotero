@@ -471,9 +471,11 @@ describe("Zotero.Sync.Data.Engine", function () {
 		it("should upload new full items and subsequent patches", function* () {
 			({ engine, client, caller } = yield setup());
 			
-			var libraryID = Zotero.Libraries.userLibraryID;
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
 			var lastLibraryVersion = 5;
-			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
+			library.libraryVersion = lastLibraryVersion;
+			yield library.saveTx();
 			
 			yield Zotero.SyncedSettings.set(libraryID, "testSetting1", { foo: "bar" });
 			yield Zotero.SyncedSettings.set(libraryID, "testSetting2", { bar: "foo" });
@@ -687,9 +689,10 @@ describe("Zotero.Sync.Data.Engine", function () {
 		it("should upload child item after parent item", function* () {
 			({ engine, client, caller } = yield setup());
 			
-			var libraryID = Zotero.Libraries.userLibraryID;
+			var library = Zotero.Libraries.userLibrary;
 			var lastLibraryVersion = 5;
-			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
+			library.libraryVersion = lastLibraryVersion;
+			yield library.saveTx();
 			
 			// Create top-level note, book, and child note
 			var item1 = new Zotero.Item('note');
@@ -741,9 +744,10 @@ describe("Zotero.Sync.Data.Engine", function () {
 		it("should upload child collection after parent collection", function* () {
 			({ engine, client, caller } = yield setup());
 			
-			var libraryID = Zotero.Libraries.userLibraryID;
+			var library = Zotero.Libraries.userLibrary;
 			var lastLibraryVersion = 5;
-			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
+			library.libraryVersion = lastLibraryVersion;
+			yield library.saveTx();
 			
 			var collection1 = yield createDataObject('collection');
 			var collection2 = yield createDataObject('collection');
@@ -790,9 +794,10 @@ describe("Zotero.Sync.Data.Engine", function () {
 		it("shouldn't include storage properties for attachments in ZFS libraries", function* () {
 			({ engine, client, caller } = yield setup());
 			
-			var libraryID = Zotero.Libraries.userLibraryID;
+			var library = Zotero.Libraries.userLibrary;
 			var lastLibraryVersion = 2;
-			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
+			library.libraryVersion = lastLibraryVersion;
+			yield library.saveTx();
 			
 			var item = new Zotero.Item('attachment');
 			item.attachmentLinkMode = 'imported_file';
@@ -843,10 +848,11 @@ describe("Zotero.Sync.Data.Engine", function () {
 		it("should include storage properties for attachments in WebDAV libraries", function* () {
 			({ engine, client, caller } = yield setup());
 			
-			var libraryID = Zotero.Libraries.userLibraryID;
+			var library = Zotero.Libraries.userLibrary;
 			var lastLibraryVersion = 2;
-			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
-			Zotero.Sync.Storage.Local.setModeForLibrary(libraryID, 'webdav');
+			library.libraryVersion = lastLibraryVersion;
+			yield library.saveTx();
+			Zotero.Sync.Storage.Local.setModeForLibrary(library.id, 'webdav');
 			
 			var item = new Zotero.Item('attachment');
 			item.attachmentLinkMode = 'imported_file';
@@ -897,9 +903,10 @@ describe("Zotero.Sync.Data.Engine", function () {
 		it("should upload synced storage properties", function* () {
 			({ engine, client, caller } = yield setup());
 			
-			var libraryID = Zotero.Libraries.userLibraryID;
+			var library = Zotero.Libraries.userLibrary;
 			var lastLibraryVersion = 2;
-			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
+			library.libraryVersion = lastLibraryVersion;
+			yield library.saveTx();
 			
 			var item = new Zotero.Item('attachment');
 			item.attachmentLinkMode = 'imported_file';
@@ -951,7 +958,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			// Check data in cache
 			var json = yield Zotero.Sync.Data.Local.getCacheObject(
-				'item', libraryID, item.key, lastLibraryVersion
+				'item', library.id, item.key, lastLibraryVersion
 			);
 			assert.equal(json.data.mtime, mtime);
 			assert.equal(json.data.md5, md5);
@@ -1044,9 +1051,11 @@ describe("Zotero.Sync.Data.Engine", function () {
 		
 		it("should upload local deletions", function* () {
 			var { engine, client, caller } = yield setup();
-			var libraryID = Zotero.Libraries.userLibraryID;
+			var library = Zotero.Libraries.userLibrary;
 			var lastLibraryVersion = 5;
-			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
+			library.libraryVersion = lastLibraryVersion;
+			yield library.saveTx();
+			
 			
 			var types = Zotero.DataObjectUtilities.getTypes();
 			var objects = {};
@@ -1093,17 +1102,16 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.equal(count, 0);
 			for (let type of types) {
 				yield assert.eventually.lengthOf(
-					Zotero.Sync.Data.Local.getDeleted(type, libraryID), 0
+					Zotero.Sync.Data.Local.getDeleted(type, library.id), 0
 				);
 			}
-			assert.equal(
-				Zotero.Libraries.get(libraryID).libraryVersion,
-				lastLibraryVersion
-			);
+			assert.equal(library.libraryVersion, lastLibraryVersion);
 		})
 		
 		it("should make only one request if in sync", function* () {
-			yield Zotero.Libraries.setVersion(Zotero.Libraries.userLibraryID, 5);
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 5;
+			yield library.saveTx();
 			({ engine, client, caller } = yield setup());
 			
 			server.respond(function (req) {
@@ -1406,13 +1414,14 @@ describe("Zotero.Sync.Data.Engine", function () {
 		})
 		
 		it("should apply remote deletions", function* () {
-			var userLibraryID = Zotero.Libraries.userLibraryID;
-			yield Zotero.Libraries.setVersion(userLibraryID, 5);
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 5;
+			yield library.saveTx();
 			({ engine, client, caller } = yield setup());
 			
 			// Create objects and mark them as synced
 			yield Zotero.SyncedSettings.set(
-				userLibraryID, 'tagColors', [{name: 'A', color: '#CC66CC'}], 1, true
+				library.id, 'tagColors', [{name: 'A', color: '#CC66CC'}], 1, true
 			);
 			var collection = createUnsavedDataObject('collection');
 			collection.synced = true;
@@ -1480,34 +1489,35 @@ describe("Zotero.Sync.Data.Engine", function () {
 			yield engine._startDownload();
 			
 			// Make sure objects were deleted
-			assert.isNull(Zotero.SyncedSettings.get(userLibraryID, 'tagColors'));
+			assert.isNull(Zotero.SyncedSettings.get(library.id, 'tagColors'));
 			assert.isFalse(Zotero.Collections.exists(collectionID));
 			assert.isFalse(Zotero.Searches.exists(searchID));
 			assert.isFalse(Zotero.Items.exists(itemID));
 			
 			// Make sure objects weren't added to sync delete log
 			assert.isFalse(yield Zotero.Sync.Data.Local.getDateDeleted(
-				'setting', userLibraryID, 'tagColors'
+				'setting', library.id, 'tagColors'
 			));
 			assert.isFalse(yield Zotero.Sync.Data.Local.getDateDeleted(
-				'collection', userLibraryID, collectionKey
+				'collection', library.id, collectionKey
 			));
 			assert.isFalse(yield Zotero.Sync.Data.Local.getDateDeleted(
-				'search', userLibraryID, searchKey
+				'search', library.id, searchKey
 			));
 			assert.isFalse(yield Zotero.Sync.Data.Local.getDateDeleted(
-				'item', userLibraryID, itemKey
+				'item', library.id, itemKey
 			));
 		})
 		
 		it("should ignore remote deletions for non-item objects if local objects changed", function* () {
-			var userLibraryID = Zotero.Libraries.userLibraryID;
-			yield Zotero.Libraries.setVersion(userLibraryID, 5);
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 5;
+			yield library.saveTx();
 			({ engine, client, caller } = yield setup());
 			
 			// Create objects marked as unsynced
 			yield Zotero.SyncedSettings.set(
-				userLibraryID, 'tagColors', [{name: 'A', color: '#CC66CC'}]
+				library.id, 'tagColors', [{name: 'A', color: '#CC66CC'}]
 			);
 			var collection = createUnsavedDataObject('collection');
 			var collectionID = yield collection.saveTx();
@@ -1569,14 +1579,15 @@ describe("Zotero.Sync.Data.Engine", function () {
 			yield engine._startDownload();
 			
 			// Make sure objects weren't deleted
-			assert.ok(Zotero.SyncedSettings.get(userLibraryID, 'tagColors'));
+			assert.ok(Zotero.SyncedSettings.get(library.id, 'tagColors'));
 			assert.ok(Zotero.Collections.exists(collectionID));
 			assert.ok(Zotero.Searches.exists(searchID));
 		})
 		
 		it("should show conflict resolution window for conflicting remote deletions", function* () {
-			var userLibraryID = Zotero.Libraries.userLibraryID;
-			yield Zotero.Libraries.setVersion(userLibraryID, 5);
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 5;
+			yield library.saveTx();
 			({ engine, client, caller } = yield setup());
 			
 			// Create local unsynced items
