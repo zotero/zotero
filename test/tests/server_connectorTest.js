@@ -28,6 +28,10 @@ describe("Connector Server", function () {
 		yield defer.promise;
 	});
 	
+	after(function () {
+		win.close();
+	});
+	
 	describe("/connector/saveItems", function () {
 		// TODO: Test cookies
 		it("should save a translated item to the current selected collection", function* () {
