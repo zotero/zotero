@@ -376,6 +376,7 @@ var ZoteroPane = new function()
 		_madeVisible = true;
 		
 		this.unserializePersist();
+		this.updateLayout();
 		this.updateToolbarPosition();
 		this.updateTagSelectorSize();
 		
