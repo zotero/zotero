@@ -32,6 +32,7 @@
 		
 		<preferences id="zotero-prefpane-general-preferences">
 			<preference id="pref-fontSize" name="extensions.zotero.fontSize" type="string"/>
+			<preference id="pref-layout" name="extensions.zotero.layout" type="string" onchange="Zotero.getActiveZoteroPane().updateLayout();"/>
 			<preference id="pref-automaticScraperUpdates" name="extensions.zotero.automaticScraperUpdates" type="bool"/>
 			<preference id="pref-reportTranslationFailure" name="extensions.zotero.reportTranslationFailure" type="bool"/>
 			<preference id="pref-automaticSnapshots" name="extensions.zotero.automaticSnapshots" type="bool"/>
@@ -56,6 +57,16 @@
 				</columns>
 			
 				<rows id="zotero-prefpane-general-rows">
+					<row>
+						<hbox align="center">
+							<label value="&zotero.preferences.layout;" control="layout"/>
+						</hbox>
+						<radiogroup id="layout" orient="horizontal" align="center" preference="pref-layout">
+							<radio id="horizontal" label="&zotero.preferences.layout.horizontal;" value="horizontal"/>
+							<radio id="vertical" label="&zotero.preferences.layout.vertical;" value="vertical"/>
+						</radiogroup>
+					</row>
+
 					<row>
 						<hbox align="center">
 							<label value="&zotero.preferences.fontSize;" control="fontSize"/>

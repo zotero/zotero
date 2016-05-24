@@ -32,7 +32,7 @@
 	<script src="include.js"/>
 	<script src="itemPane.js" type="application/javascript;version=1.8"/>
 	
-	<vbox id="zotero-item-pane" zotero-persist="width">
+	<vbox id="zotero-item-pane" zotero-persist="width height">
 		<!-- Trash -->
 		<hbox id="zotero-item-pane-top-buttons-trash" class="zotero-item-pane-top-buttons" hidden="true">
 			<button id="zotero-item-restore-button" label="&zotero.items.menu.restoreToLibrary;"
