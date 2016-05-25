@@ -2328,6 +2328,9 @@ Zotero.Prefs = new function(){
 				Zotero.Schema.stopRepositoryTimer();
 			}
 		}],
+		[ "layout", function(val) {
+			Zotero.getActiveZoteroPane().updateLayout();
+		}],
 		[ "note.fontSize", function(val) {
 			if (val < 6) {
 				Zotero.Prefs.set('note.fontSize', 11);
