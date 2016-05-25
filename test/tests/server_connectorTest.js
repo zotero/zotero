@@ -145,5 +145,38 @@ describe("Connector Server", function () {
 			assert.isTrue(item.isImportedAttachment());
 			assert.equal(item.getField('title'), 'Title');
 		});
+		
+		it("should save a PDF to the current selected collection", function* () {
+			var collection = yield createDataObject('collection');
+			yield waitForItemsLoad(win);
+			
+			var file = getTestDataDirectory();
+			file.append('test.pdf');
+			httpd.registerFile("/test.pdf", file);
+			
+			var ids;
+			var promise = waitForItemEvent('add');
+			yield Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSnapshot",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						url: testServerPath + "/test.pdf",
+						pdf: true
+					})
+				}
+			);
+			
+			var ids = yield promise;
+			
+			assert.lengthOf(ids, 1);
+			var item = Zotero.Items.get(ids[0]);
+			assert.isTrue(item.isImportedAttachment());
+			assert.equal(item.attachmentContentType, 'application/pdf');
+			assert.isTrue(collection.hasItem(item.id));
+		});
 	});
 });

@@ -409,7 +409,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 	 * @param {String} data POST data or GET query string
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
-	"init":function(url, data, sendResponseCallback) {
+	init: Zotero.Promise.coroutine(function* (url, data, sendResponseCallback) {
 		Zotero.Server.Connector.Data[data["url"]] = "<html>"+data["html"]+"</html>";
 		
 		var zp = Zotero.getActiveZoteroPane();
@@ -439,20 +439,14 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			delete Zotero.Server.Connector.Data[data.url];
 			
 			try {
-				// TODO: Async
-				Zotero.Attachments.importFromURL(
-					data.url,
-					null,
-					null,
-					null,
-					collection ? [collection.id] : null,
-					"application/pdf",
+				yield Zotero.Attachments.importFromURL({
 					libraryID,
-					function () {
-						sendResponseCallback(201);
-					},
+					url: data.url,
+					collections: collection ? [collection.id] : undefined,
+					contentType: "application/pdf",
 					cookieSandbox
-				);
+				});
+				sendResponseCallback(201)
 			}
 			catch (e) {
 				sendResponseCallback(500);
@@ -496,7 +490,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 				null, null, false, cookieSandbox
 			);
 		}
-	}
+	})
 }
 
 /**

@@ -400,7 +400,10 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 		}
 		
 		// pass to endpoint
-		if((endpoint.init.length ? endpoint.init.length : endpoint.init.arity) === 3) {
+		if (endpoint.init.length === 2) {
+			endpoint.init(decodedData, sendResponseCallback);
+		}
+		else {
 			const uaRe = /[\r\n]User-Agent: +([^\r\n]+)/i;
 			var m = uaRe.exec(this.header);
 			var url = {
@@ -408,10 +411,7 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 				"query":this.query ? Zotero.Server.decodeQueryString(this.query.substr(1)) : {},
 				"userAgent":m && m[1]
 			};
-			
 			endpoint.init(url, decodedData, sendResponseCallback);
-		} else {
-			endpoint.init(decodedData, sendResponseCallback);
 		}
 	} catch(e) {
 		Zotero.debug(e);
