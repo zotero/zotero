@@ -36,7 +36,7 @@ pref("extensions.zotero.downloadAssociatedFiles",true);
 pref("extensions.zotero.reportTranslationFailure",true);
 pref("extensions.zotero.automaticTags",true);
 pref("extensions.zotero.fontSize", "1.0");
-pref("extensions.zotero.layout", "vertical");
+pref("extensions.zotero.layout", "Standard");
 pref("extensions.zotero.recursiveCollections", false);
 pref("extensions.zotero.attachmentRenameFormatString", '{%c - }{%y - }{%t{50}}');
 pref("extensions.zotero.capitalizeTitles", false);

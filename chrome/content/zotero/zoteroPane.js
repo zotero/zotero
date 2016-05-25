@@ -4588,7 +4588,7 @@ var ZoteroPane = new function()
 		var layoutSwitcher = document.getElementById("zotero-layout-switcher");
 		var itemsSplitter = document.getElementById("zotero-items-splitter");
 
-		if(Zotero.Prefs.get("layout") === "horizontal") { // itemsPane above itemPane
+		if(Zotero.Prefs.get("layout") === "Stacked") { // itemsPane above itemPane
 			layoutSwitcher.setAttribute("orient", "vertical");
 			itemsSplitter.setAttribute("orient", "vertical");
 		} else {  // three-vertical-pane
@@ -4672,7 +4672,7 @@ var ZoteroPane = new function()
 		var paneStack = document.getElementById("zotero-pane-stack");
 		if(paneStack.hidden) return;
 
-		var horizontalLayout = Zotero.Prefs.get("layout") === "horizontal";
+		var stackedLayout = Zotero.Prefs.get("layout") === "Stacked";
 
 		var collectionsPane = document.getElementById("zotero-collections-pane");
 		var collectionsToolbar = document.getElementById("zotero-collections-toolbar");
@@ -4683,7 +4683,7 @@ var ZoteroPane = new function()
 		
 		collectionsToolbar.style.width = collectionsPane.boxObject.width + 'px';
 		
-		if (horizontalLayout || itemPane.collapsed) {
+		if (stackedLayout || itemPane.collapsed) {
 		// The itemsToolbar and itemToolbar share the same space, and it seems best to use some flex attribute from right (because there might be other icons appearing or vanishing).
 			itemsToolbar.setAttribute("flex", "1");
 			itemToolbar.setAttribute("flex", "0");

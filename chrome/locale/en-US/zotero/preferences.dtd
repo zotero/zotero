@@ -13,8 +13,8 @@
 <!ENTITY zotero.preferences.showIn.separateTab					"Separate tab">
 <!ENTITY zotero.preferences.showIn.appTab					"App tab">
 <!ENTITY zotero.preferences.layout							"Layout:">
-<!ENTITY zotero.preferences.layout.horizontal		"Horizontal">
-<!ENTITY zotero.preferences.layout.vertical			"Vertical">
+<!ENTITY zotero.preferences.layout.standard		"Standard">
+<!ENTITY zotero.preferences.layout.stacked			"Stacked">
 <!ENTITY zotero.preferences.fontSize						"Font size:">
 <!ENTITY zotero.preferences.fontSize.small				"Small">
 <!ENTITY zotero.preferences.fontSize.medium				"Medium">
