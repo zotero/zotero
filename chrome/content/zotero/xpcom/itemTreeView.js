@@ -2276,8 +2276,8 @@ Zotero.ItemTreeView.prototype.onColumnPickerShowing = function (event) {
 	
 	var lastChild = menupopup.lastChild;
 	
-	// More Columns menu
 	try {
+		// More Columns menu
 		let id = prefix + 'more-menu';
 		
 		let moreMenu = doc.createElementNS(ns, 'menu');
@@ -2314,6 +2314,16 @@ Zotero.ItemTreeView.prototype.onColumnPickerShowing = function (event) {
 		
 		moreMenu.appendChild(moreMenuPopup);
 		menupopup.insertBefore(moreMenu, lastChild);
+
+		// Disable certain entries for feeds
+		let elems = Array.from(treecols.getElementsByAttribute('hidden-in', '*'))
+		let labels = Array.from(elems)
+			.filter(e => e.getAttribute('hidden-in').split(' ').indexOf(this.collectionTreeRow.type) != -1)
+			.map(e => e.getAttribute('label'));
+		for (let i = 0; i < menupopup.childNodes.length; i++) {
+			let elem = menupopup.childNodes[i];
+			elem.setAttribute('disabled', labels.indexOf(elem.getAttribute('label')) != -1);
+		}
 	}
 	catch (e) {
 		Components.utils.reportError(e);

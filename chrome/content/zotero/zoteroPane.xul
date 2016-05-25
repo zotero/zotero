@@ -444,14 +444,14 @@
 										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 									<splitter class="tree-splitter"/>
 									<treecol
-										id="zotero-items-column-dateAdded" hidden="true"
+										id="zotero-items-column-dateAdded" hidden="true" hidden-in="feed"
 										label="&zotero.items.dateAdded_column;"
-										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection user-hidden"/>
 									<splitter class="tree-splitter"/>
 									<treecol
-										id="zotero-items-column-dateModified" hidden="true"
+										id="zotero-items-column-dateModified" hidden="true" hidden-in="feed"
 										label="&zotero.items.dateModified_column;"
-										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection user-hidden"/>
 									<splitter class="tree-splitter"/>
 									<treecol
 										id="zotero-items-column-archive" hidden="true"
@@ -537,19 +537,19 @@
 										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 									<splitter class="tree-splitter"/>
 									<treecol
-										id="zotero-items-column-hasAttachment"
+										id="zotero-items-column-hasAttachment" hidden-in="feed"
 										class="treecol-image"
 										label="&zotero.tabs.attachments.label;"
 										src="chrome://zotero/skin/attach-small.png"
 										fixed="true"
-										zotero-persist="ordinal hidden sortActive sortDirection"/>
+										zotero-persist="ordinal hidden sortActive sortDirection user-hidden"/>
 									<splitter class="tree-splitter"/>
 									<treecol
-										id="zotero-items-column-numNotes" hidden="true"
+										id="zotero-items-column-numNotes" hidden="true" hidden-in="feed"
 										class="treecol-image"
 										label="&zotero.tabs.notes.label;"
 										src="chrome://zotero/skin/treeitem-note-small.png"
-										zotero-persist="width ordinal hidden sortActive sortDirection"/>
+										zotero-persist="width ordinal hidden sortActive sortDirection user-hidden"/>
 								</treecols>
 								<treechildren ondragstart="ZoteroPane_Local.itemsView.onDragStart(event)"
 									ondragenter="return ZoteroPane_Local.itemsView.onDragEnter(event)"
