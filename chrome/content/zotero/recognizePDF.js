@@ -396,14 +396,16 @@ var Zotero_RecognizePDF = new function() {
 					
 					// put new item in same collections as the old one
 					let itemCollections = item.getCollections();
-					for (let i = 0; i < itemCollections.length; i++) {
-						let collection = yield Zotero.Collections.getAsync(itemCollections[i]);
-						yield collection.addItem(newItem.id);
-					}
-					
-					// put old item as a child of the new item
-					item.parentID = newItem.id;
-					yield item.saveTx();
+					yield Zotero.DB.executeTransaction(function* () {
+						for (let i = 0; i < itemCollections.length; i++) {
+							let collection = Zotero.Collections.get(itemCollections[i]);
+							yield collection.addItem(newItem.id);
+						}
+
+						// put old item as a child of the new item
+						item.parentID = newItem.id;
+						yield item.save();
+					});
 					
 					itemTitle.setAttribute("label", newItem.getField("title"));
 					itemIcon.setAttribute("src", SUCCESS_IMAGE);
