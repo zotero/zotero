@@ -378,23 +378,24 @@ Zotero.Collection.prototype.addItems = Zotero.Promise.coroutine(function* (itemI
 	
 	var current = this.getChildItems(true);
 	
-	Zotero.DB.requireTransaction();
-	for (let i = 0; i < itemIDs.length; i++) {
-		let itemID = itemIDs[i];
-		
-		if (current && current.indexOf(itemID) != -1) {
-			Zotero.debug("Item " + itemID + " already a child of collection " + this.id);
-			continue;
+	yield Zotero.DB.executeTransaction(function* () {
+		for (let i = 0; i < itemIDs.length; i++) {
+			let itemID = itemIDs[i];
+
+			if (current && current.indexOf(itemID) != -1) {
+				Zotero.debug("Item " + itemID + " already a child of collection " + this.id);
+				continue;
+			}
+
+			let item = this.ChildObjects.get(itemID);
+			item.addToCollection(this.id);
+			yield item.save({
+				skipDateModifiedUpdate: true
+			});
 		}
-		
-		let item = this.ChildObjects.get(itemID);
-		item.addToCollection(this.id);
-		yield item.save({
-			skipDateModifiedUpdate: true
-		});
-	}
+	}.bind(this));
 	
-	yield this.loadDataType('childItems');
+	return this.loadDataType('childItems');
 });
 
 /**
