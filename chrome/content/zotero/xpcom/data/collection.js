@@ -393,9 +393,8 @@ Zotero.Collection.prototype.addItems = Zotero.Promise.coroutine(function* (itemI
 				skipDateModifiedUpdate: true
 			});
 		}
-	}.bind(this));
-	
-	return this.loadDataType('childItems');
+	}.bind(this))
+	.then(this.loadDataType('childItems'));
 });
 
 /**
