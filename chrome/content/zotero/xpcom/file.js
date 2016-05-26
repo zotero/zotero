@@ -77,6 +77,7 @@ Zotero.File = new function(){
 	}
 	
 	function getExtension(file){
+		file = this.pathToFile(file);
 		var pos = file.leafName.lastIndexOf('.');
 		return pos==-1 ? '' : file.leafName.substr(pos+1);
 	}
