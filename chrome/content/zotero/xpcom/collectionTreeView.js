@@ -318,13 +318,6 @@ Zotero.CollectionTreeView.prototype.selectWait = Zotero.Promise.method(function 
  *  Called by Zotero.Notifier on any changes to collections in the data layer
  */
 Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* (action, type, ids, extraData) {
-	if (type == 'feed' && (action == 'unreadCountUpdated' || action == 'statusChanged')) {
-		for (let i=0; i<ids.length; i++) {
-			this._treebox.invalidateRow(this._rowMap['L' + ids[i]]);
-		}
-		return;
-	}
-	
 	if ((!ids || ids.length == 0) && action != 'refresh' && action != 'redraw') {
 		return;
 	}
@@ -354,6 +347,12 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 			this._trashNotEmpty[ids[0]] = !!deleted.length;
 			let row = this.getRowIndexByID("T" + ids[0]);
 			this._treebox.invalidateRow(row);
+		}
+		return;
+	}
+	if (type == 'feed' && (action == 'unreadCountUpdated' || action == 'statusChanged')) {
+		for (let i=0; i<ids.length; i++) {
+			this._treebox.invalidateRow(this._rowMap['L' + ids[i]]);
 		}
 		return;
 	}
