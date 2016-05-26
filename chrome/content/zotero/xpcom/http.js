@@ -864,7 +864,7 @@ Zotero.HTTP = new function() {
 			}
 			
 			// If processor returns a promise, wait for it
-			if (maybePromise.then) {
+			if (maybePromise && maybePromise.then) {
 				maybePromise.then(() => doLoad())
 				.catch(e => {
 					if (exception) {
