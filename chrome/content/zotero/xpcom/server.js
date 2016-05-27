@@ -62,8 +62,12 @@ Zotero.Server = new function() {
 			
 			Zotero.debug("HTTP server listening on "+(bindAllAddr ? "*": " 127.0.0.1")+":"+serv.port);
 			
-			Zotero.addShutdownListener(this.close.bind(this));
+			// Close port on Zotero shutdown (doesn't apply to translation-server)
+			if (Zotero.addShutdownListener) {
+				Zotero.addShutdownListener(this.close.bind(this));
+			}
 		} catch(e) {
+			Zotero.logError(e);
 			Zotero.debug("Not initializing HTTP server");
 			serv = undefined;
 		}
