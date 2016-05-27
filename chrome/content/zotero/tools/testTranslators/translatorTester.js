@@ -397,7 +397,10 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
 		true
 	);
 	
-	hiddenBrowser.docShell.allowMetaRedirects = true;
+	// No hidden browser returned from translation-server processDocuments()
+	if (hiddenBrowser) {
+		hiddenBrowser.docShell.allowMetaRedirects = true;
+	}
 };
 
 /**
