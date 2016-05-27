@@ -358,8 +358,8 @@ Zotero.Collection.prototype._finalizeSave = Zotero.Promise.coroutine(function* (
  * @param {Number} itemID
  * @return {Promise}
  */
-Zotero.Collection.prototype.addItem = function (itemID) {
-	return this.addItems([itemID]);
+Zotero.Collection.prototype.addItem = function (itemID, options) {
+	return this.addItems([itemID], options);
 }
 
 
@@ -371,7 +371,9 @@ Zotero.Collection.prototype.addItem = function (itemID) {
  * @param {Number[]} itemIDs
  * @return {Promise}
  */
-Zotero.Collection.prototype.addItems = Zotero.Promise.coroutine(function* (itemIDs) {
+Zotero.Collection.prototype.addItems = Zotero.Promise.coroutine(function* (itemIDs, options = {}) {
+	options.skipDateModifiedUpdate = true;
+
 	if (!itemIDs || !itemIDs.length) {
 		return;
 	}
@@ -389,9 +391,7 @@ Zotero.Collection.prototype.addItems = Zotero.Promise.coroutine(function* (itemI
 		
 		let item = this.ChildObjects.get(itemID);
 		item.addToCollection(this.id);
-		yield item.save({
-			skipDateModifiedUpdate: true
-		});
+		yield item.save(options);
 	}
 	
 	yield this.loadDataType('childItems');
