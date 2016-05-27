@@ -62,8 +62,8 @@
 							<label value="&zotero.preferences.layout;" control="layout"/>
 						</hbox>
 						<radiogroup id="layout" orient="horizontal" align="center" preference="pref-layout">
-							<radio id="horizontal" label="&zotero.preferences.layout.standard;" value="Standard"/>
-							<radio id="vertical" label="&zotero.preferences.layout.stacked;" value="Stacked"/>
+							<radio id="horizontal" label="&zotero.preferences.layout.standard;" value="standard"/>
+							<radio id="vertical" label="&zotero.preferences.layout.stacked;" value="stacked"/>
 						</radiogroup>
 					</row>
 

@@ -4588,7 +4588,7 @@ var ZoteroPane = new function()
 		var layoutSwitcher = document.getElementById("zotero-layout-switcher");
 		var itemsSplitter = document.getElementById("zotero-items-splitter");
 
-		if(Zotero.Prefs.get("layout") === "Stacked") { // itemsPane above itemPane
+		if(Zotero.Prefs.get("layout") === "stacked") { // itemsPane above itemPane
 			layoutSwitcher.setAttribute("orient", "vertical");
 			itemsSplitter.setAttribute("orient", "vertical");
 		} else {  // three-vertical-pane
@@ -4672,7 +4672,7 @@ var ZoteroPane = new function()
 		var paneStack = document.getElementById("zotero-pane-stack");
 		if(paneStack.hidden) return;
 
-		var stackedLayout = Zotero.Prefs.get("layout") === "Stacked";
+		var stackedLayout = Zotero.Prefs.get("layout") === "stacked";
 
 		var collectionsPane = document.getElementById("zotero-collections-pane");
 		var collectionsToolbar = document.getElementById("zotero-collections-toolbar");
