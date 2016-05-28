@@ -302,20 +302,44 @@
 	-moz-appearance: none;
 	-moz-border-start: none !important;
 	-moz-border-end: none !important;
+	background-color: #8b8b8b !important;
+}
+
+#zotero-collections-splitter, #zotero-items-splitter[orient=horizontal]
+{
 	max-width: 1px !important;
 	min-width: 1px !important;
 	width: 1px !important;
-	background-color: #8b8b8b !important;
+}
+
+#zotero-items-splitter[orient=vertical]
+{
+	max-height: 1px !important;
+	min-height: 1px !important;
+	height: 1px !important;
 }
 
 #zotero-collections-splitter[state=collapsed], #zotero-items-splitter[state=collapsed] {
 	border: 0 solid #d6d6d6 !important;
+	padding: 0;
+}
+
+#zotero-collections-splitter[state=collapsed], #zotero-items-splitter[state=collapsed][orient=horizontal]
+{
+	background-image: url("chrome://zotero/skin/mac/vsplitter.png");
+	background-repeat: repeat-y;
 	max-width: 8px !important;
 	min-width: 8px !important;
 	width: 8px !important;
-	background-image: url("chrome://zotero/skin/mac/vsplitter.png");
-	background-repeat: repeat-y;
-	padding: 0;
+}
+
+#zotero-items-splitter[state=collapsed][orient=vertical]
+{
+	background-image: url("chrome://zotero/skin/mac/hsplitter.png");
+	background-repeat: repeat-x;
+	max-height: 8px !important;
+	min-height: 8px !important;
+	height: 8px !important;
 }
 
 #zotero-collections-splitter[state=collapsed] {

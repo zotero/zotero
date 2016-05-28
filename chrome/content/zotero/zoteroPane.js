@@ -93,6 +93,7 @@ var ZoteroPane = new function()
 		
 		var zp = document.getElementById('zotero-pane');
 		Zotero.setFontSize(zp);
+		ZoteroPane_Local.updateLayout();
 		ZoteroPane_Local.updateToolbarPosition();
 		window.addEventListener("resize", ZoteroPane_Local.updateToolbarPosition, false);
 		window.setTimeout(ZoteroPane_Local.updateToolbarPosition, 0);
@@ -375,6 +376,7 @@ var ZoteroPane = new function()
 		_madeVisible = true;
 		
 		this.unserializePersist();
+		this.updateLayout();
 		this.updateToolbarPosition();
 		this.updateTagSelectorSize();
 		
@@ -4578,7 +4580,24 @@ var ZoteroPane = new function()
 		var browserWindow = wm.getMostRecentWindow("navigator:browser");
 		if(browserWindow.ZoteroOverlay) browserWindow.ZoteroOverlay.toggleTab();
 	}
-	
+
+	/**
+	 * Sets the layout to either a three-vertical-pane layout and a layout where itemsPane is above itemPane
+	 */
+	this.updateLayout = function() {
+		var layoutSwitcher = document.getElementById("zotero-layout-switcher");
+		var itemsSplitter = document.getElementById("zotero-items-splitter");
+
+		if(Zotero.Prefs.get("layout") === "stacked") { // itemsPane above itemPane
+			layoutSwitcher.setAttribute("orient", "vertical");
+			itemsSplitter.setAttribute("orient", "vertical");
+		} else {  // three-vertical-pane
+			layoutSwitcher.setAttribute("orient", "horizontal");
+			itemsSplitter.setAttribute("orient", "horizontal");
+		}
+
+		this.updateToolbarPosition();
+	}
 	/**
 	 * Shows the Zotero pane, making it visible if it is not and switching to the appropriate tab
 	 * if necessary.
@@ -4607,7 +4626,7 @@ var ZoteroPane = new function()
 			var elValues = serializedValues[id];
 			for(var attr in elValues) {
 				// TEMP: For now, ignore persisted collapsed state for item pane splitter
-				if (el.id == 'zotero-items-splitter') continue;
+				if (el.id == 'zotero-items-splitter' && attr == 'state') continue;
 				// And don't restore to min-width if splitter was collapsed
 				if (el.id == 'zotero-item-pane' && attr == 'width' && elValues[attr] == 250
 						&& 'zotero-items-splitter' in serializedValues
@@ -4650,48 +4669,32 @@ var ZoteroPane = new function()
 	 * Moves around the toolbar when the user moves around the pane
 	 */
 	this.updateToolbarPosition = function() {
-		if(document.getElementById("zotero-pane-stack").hidden) return;
-		
+		var paneStack = document.getElementById("zotero-pane-stack");
+		if(paneStack.hidden) return;
+
+		var stackedLayout = Zotero.Prefs.get("layout") === "stacked";
+
 		var collectionsPane = document.getElementById("zotero-collections-pane");
 		var collectionsToolbar = document.getElementById("zotero-collections-toolbar");
-		var collectionsSplitter = document.getElementById("zotero-collections-splitter");
 		var itemsPane = document.getElementById("zotero-items-pane");
 		var itemsToolbar = document.getElementById("zotero-items-toolbar");
-		var itemsSplitter = document.getElementById("zotero-items-splitter");
 		var itemPane = document.getElementById("zotero-item-pane");
 		var itemToolbar = document.getElementById("zotero-item-toolbar");
 		
-		var collectionsPaneComputedStyle = window.getComputedStyle(collectionsPane, null);
-		var collectionsSplitterComputedStyle = window.getComputedStyle(collectionsSplitter, null);
-		var itemsPaneComputedStyle = window.getComputedStyle(itemsPane, null);
-		var itemsSplitterComputedStyle = window.getComputedStyle(itemsSplitter, null);
-		var itemPaneComputedStyle = window.getComputedStyle(itemPane, null);
+		collectionsToolbar.style.width = collectionsPane.boxObject.width + 'px';
 		
-		var collectionsPaneWidth = collectionsPaneComputedStyle.getPropertyValue("width");
-		var collectionsSplitterWidth = collectionsSplitterComputedStyle.getPropertyValue("width");
-		var itemsPaneWidth = itemsPaneComputedStyle.getPropertyValue("width");
-		var itemsSplitterWidth = itemsSplitterComputedStyle.getPropertyValue("width");
-		var itemPaneWidth = itemPaneComputedStyle.getPropertyValue("width");
-		
-		collectionsToolbar.style.width = collectionsPaneWidth;
-		collectionsToolbar.style.marginRight = collectionsSplitterWidth;
-		itemsToolbar.style.marginRight = itemsSplitterWidth;
-		
-		var itemsToolbarWidthNumber = parseInt(itemsPaneWidth, 10);
-
-		if (collectionsPane.collapsed) {
-			var collectionsToolbarComputedStyle = window.getComputedStyle(collectionsToolbar, null);
-			var collectionsToolbarWidth = collectionsToolbarComputedStyle.getPropertyValue("width");// real width (nonzero) after the new definition
-			itemsToolbarWidthNumber = itemsToolbarWidthNumber-parseInt(collectionsToolbarWidth, 10);
-		}
-
-		if (itemPane.collapsed) {
-		// Then the itemsToolbar and itemToolbar share the same space, and it seems best to use some flex attribute from right (because there might be other icons appearing or vanishing).
-			itemsToolbar.style.removeProperty('width');
+		if (stackedLayout || itemPane.collapsed) {
+		// The itemsToolbar and itemToolbar share the same space, and it seems best to use some flex attribute from right (because there might be other icons appearing or vanishing).
 			itemsToolbar.setAttribute("flex", "1");
 			itemToolbar.setAttribute("flex", "0");
 		} else {
- 			itemsToolbar.style.width = itemsToolbarWidthNumber + "px";
+			var itemsToolbarWidth = itemsPane.boxObject.width;
+
+			if (collectionsPane.collapsed) {
+				itemsToolbarWidth -= collectionsToolbar.boxObject.width;
+			}
+
+			itemsToolbar.style.width = itemsToolbarWidth + "px";
 			itemsToolbar.setAttribute("flex", "0");
 			itemToolbar.setAttribute("flex", "1");
 		}
