@@ -1223,6 +1223,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	 * Launch a file, the best way we can
 	 */
 	this.launchFile = function (file) {
+		file = Zotero.File.pathToFile(file);
 		try {
 			file.launch();
 		}
