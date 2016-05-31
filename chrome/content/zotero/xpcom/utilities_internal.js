@@ -446,6 +446,51 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
+	saveDocument: function (document, destFile) {
+		const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
+		let wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+			.createInstance(nsIWBP);
+		wbp.persistFlags = nsIWBP.PERSIST_FLAGS_REPLACE_EXISTING_FILES
+			| nsIWBP.PERSIST_FLAGS_FORCE_ALLOW_COOKIES
+			| nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION
+			| nsIWBP.PERSIST_FLAGS_FROM_CACHE
+			// Mostly ads
+			| nsIWBP.PERSIST_FLAGS_IGNORE_IFRAMES
+			| nsIWBP.PERSIST_FLAGS_IGNORE_REDIRECTED_DATA;
+		
+		let encodingFlags = 0;
+		let filesFolder = null;
+		if (document.contentType == "text/plain") {
+			encodingFlags |= nsIWBP.ENCODE_FLAGS_FORMATTED;
+			encodingFlags |= nsIWBP.ENCODE_FLAGS_ABSOLUTE_LINKS;
+			encodingFlags |= nsIWBP.ENCODE_FLAGS_NOFRAMES_CONTENT;
+		}
+		else {
+			encodingFlags |= nsIWBP.ENCODE_FLAGS_ENCODE_BASIC_ENTITIES;
+			
+			// Save auxiliary files to the same folder
+			filesFolder = OS.Path.dirname(destFile);
+		}
+		const wrapColumn = 80;
+		
+		var deferred = Zotero.Promise.defer();
+		wbp.progressListener = new Zotero.WebProgressFinishListener(function () {
+			deferred.resolve();
+		});
+		
+		wbp.saveDocument(
+			document,
+			Zotero.File.pathToFile(destFile),
+			Zotero.File.pathToFile(filesFolder),
+			null,
+			encodingFlags,
+			wrapColumn
+		);
+		
+		return deferred.promise;
+	},
+	
+	
 	/**
 	 * Launch a process
 	 * @param {nsIFile|String} cmd Path to command to launch

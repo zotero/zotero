@@ -540,7 +540,7 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * Save a snapshot -- uses synchronous WebPageDump or asynchronous saveURI()
+	 * Save a snapshot from a Document
 	 *
 	 * @param {Object} options - 'libraryID', 'document', 'parentItemID', 'forceTitle', 'collections'
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
@@ -567,10 +567,7 @@ Zotero.Attachments = new function(){
 		
 		var tmpDir = yield this.createTemporaryStorageDirectory();
 		var tmpFile = tmpDir.clone();
-		var fileName = Zotero.File.truncateFileName(
-			_getFileNameFromURL(url, contentType),
-			100 //make sure this matches WPD settings in webpagedump/common.js
-		);
+		var fileName = Zotero.File.truncateFileName(_getFileNameFromURL(url, contentType), 100);
 		tmpFile.append(fileName);
 		
 		// If we're using the title from the document, make some adjustments
@@ -587,20 +584,11 @@ Zotero.Attachments = new function(){
 		}
 		
 		if (contentType === 'text/html' || contentType === 'application/xhtml+xml') {
-			// Load WebPageDump code
-			var wpd = {"Zotero":Zotero};
-			Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-				.getService(Components.interfaces.mozIJSSubScriptLoader)
-				.loadSubScript("chrome://zotero/content/webpagedump/common.js", wpd);
-			Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-				.getService(Components.interfaces.mozIJSSubScriptLoader)
-				.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js", wpd);
-			
-			wpd.wpdDOMSaver.init(tmpFile.path, document);
-			wpd.wpdDOMSaver.saveHTMLDocument();
+			Zotero.debug('Saving document with saveURI()');
+			yield Zotero.Utilities.Internal.saveDocument(document, tmpFile.path);
 		}
 		else {
-			Zotero.debug('Saving with saveURI()');
+			Zotero.debug("Saving file with saveURI()");
 			const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
 			var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
 				.createInstance(nsIWBP);

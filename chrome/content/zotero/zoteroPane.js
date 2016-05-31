@@ -3927,7 +3927,7 @@ var ZoteroPane = new function()
 				}
 				
 				if (!externalViewer) {
-					var url = 'zotero://attachment/' + itemID + '/';
+					let url = Services.io.newFileURI(file).spec;
 					this.loadURI(url, event);
 				}
 				else {

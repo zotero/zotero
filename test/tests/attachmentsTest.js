@@ -177,6 +177,39 @@ describe("Zotero.Attachments", function() {
 		})
 	})
 	
+	describe("#importFromDocument()", function () {
+		it("should save a document with embedded files", function* () {
+			var item = yield createDataObject('item');
+			
+			var uri = OS.Path.join(getTestDataDirectory().path, "snapshot", "index.html");
+			var deferred = Zotero.Promise.defer();
+			win.addEventListener('pageshow', () => deferred.resolve());
+			win.loadURI(uri);
+			yield deferred.promise;
+			
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var attachment = yield Zotero.Attachments.importFromDocument({
+				document: win.content.document,
+				parentItemID: item.id
+			});
+			
+			assert.equal(attachment.getField('url'), "file://" + uri);
+			
+			// Check indexing
+			var matches = yield Zotero.Fulltext.findTextInItems([attachment.id], 'share your research');
+			assert.lengthOf(matches, 1);
+			assert.propertyVal(matches[0], 'id', attachment.id);
+			
+			// Check for embedded files
+			var storageDir = Zotero.Attachments.getStorageDirectory(attachment).path;
+			var file = yield attachment.getFilePathAsync();
+			assert.equal(OS.Path.basename(file), 'index.html');
+			var filesFolder = OS.Path.join(storageDir, 'index_files');
+			assert.isTrue(yield OS.File.exists(filesFolder, 'img.gif'));
+		});
+	});
+	
 	describe("#getBaseDirectoryRelativePath()", function () {
 		it("should convert backslashes to forward slashes", function () {
 			Zotero.Prefs.set('baseAttachmentPath', "C:\\foo\\bar");
