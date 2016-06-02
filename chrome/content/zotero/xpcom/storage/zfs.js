@@ -426,9 +426,6 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			json.version = version;
 		}
 		
-		Zotero.debug('=-=-=--=');
-		Zotero.debug(json);
-		
 		// TEMP
 		//
 		// Passed through to _updateItemFileInfo()
