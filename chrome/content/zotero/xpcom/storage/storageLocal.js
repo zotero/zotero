@@ -728,8 +728,8 @@ Zotero.Sync.Storage.Local = {
 			return false;
 		}
 		
-		var parentDir = Zotero.Attachments.getStorageDirectory(item);
-		if (!parentDir.exists()) {
+		var parentDir = Zotero.Attachments.getStorageDirectory(item).path;
+		if (!(yield OS.File.exists(parentDir))) {
 			yield Zotero.Attachments.createDirectoryForItem(item);
 		}
 		
@@ -748,95 +748,95 @@ Zotero.Sync.Storage.Local = {
 		
 		var entries = zipReader.findEntries(null);
 		while (entries.hasMore()) {
-			count++;
 			var entryName = entries.getNext();
+			var entry = zipReader.getEntry(entryName);
 			var b64re = /%ZB64$/;
 			if (entryName.match(b64re)) {
-				var fileName = Zotero.Utilities.Internal.Base64.decode(
+				var filePath = Zotero.Utilities.Internal.Base64.decode(
 					entryName.replace(b64re, '')
 				);
 			}
 			else {
-				var fileName = entryName;
+				var filePath = entryName;
 			}
 			
-			if (fileName.startsWith('.zotero')) {
-				Zotero.debug("Skipping " + fileName);
+			if (filePath.startsWith('.zotero')) {
+				Zotero.debug("Skipping " + filePath);
 				continue;
 			}
 			
-			Zotero.debug("Extracting " + fileName);
+			if (entry.isDirectory) {
+				Zotero.debug("Skipping directory " + filePath);
+				continue;
+			}
+			
+			count++;
+			
+			Zotero.debug("Extracting " + filePath);
 			
 			var primaryFile = false;
 			var filtered = false;
 			var renamed = false;
 			
-			// Make sure the new filename is valid, in case an invalid character
-			// somehow make it into the ZIP (e.g., from before we checked for them)
-			//
-			// Do this before trying to use the relative descriptor, since otherwise
-			// it might fail silently and select the parent directory
-			var filteredName = Zotero.File.getValidFileName(fileName);
-			if (filteredName != fileName) {
-				Zotero.debug("Filtering filename '" + fileName + "' to '" + filteredName + "'");
-				fileName = filteredName;
+			// Make sure all components of the path are valid, in case an invalid character somehow made
+			// it into the ZIP (e.g., from before we checked for them)
+			var filteredPath = filePath.split('/').map(part => Zotero.File.getValidFileName(part)).join('/');
+			if (filteredPath != filePath) {
+				Zotero.debug("Filtering filename '" + filePath + "' to '" + filteredPath + "'");
+				filePath = filteredPath;
 				filtered = true;
 			}
 			
-			// Name in ZIP is a relative descriptor, so file has to be reconstructed
-			// using setRelativeDescriptor()
-			var destFile = parentDir.clone();
-			destFile.QueryInterface(Components.interfaces.nsILocalFile);
-			destFile.setRelativeDescriptor(parentDir, fileName);
-			
-			fileName = destFile.leafName;
+			var destPath = OS.Path.join(parentDir, ...filePath.split('/'));
 			
 			// If only one file in zip and it doesn't match the known filename,
 			// take our chances and use that name
 			if (count == 1 && !entries.hasMore() && itemFileName) {
 				// May not be necessary, but let's be safe
 				itemFileName = Zotero.File.getValidFileName(itemFileName);
-				if (itemFileName != fileName) {
-					Zotero.debug("Renaming single file '" + fileName + "' in ZIP to known filename '" + itemFileName + "'", 2);
-					Components.utils.reportError("Renaming single file '" + fileName + "' in ZIP to known filename '" + itemFileName + "'");
-					fileName = itemFileName;
-					destFile.leafName = fileName;
+				if (itemFileName != filePath) {
+					let msg = "Renaming single file '" + filePath + "' in ZIP to known filename '" + itemFileName + "'";
+					Zotero.debug(msg, 2);
+					Components.utils.reportError(msg);
+					filePath = itemFileName;
+					destPath = OS.Path.join(OS.Path.dirname(destPath), itemFileName);
 					renamed = true;
 				}
 			}
 			
-			var primaryFile = itemFileName == fileName;
+			var primaryFile = itemFileName == filePath;
 			if (primaryFile && filtered) {
 				renamed = true;
 			}
 			
-			if (destFile.exists()) {
-				var msg = "ZIP entry '" + fileName + "' " + "already exists";
-				Zotero.debug(msg, 2);
-				Components.utils.reportError(msg + " in " + funcName);
-				Zotero.debug(destFile.path);
+			if (yield OS.File.exists(destPath)) {
+				var msg = "ZIP entry '" + filePath + "' already exists";
+				Zotero.logError(msg);
+				Zotero.debug(destPath);
 				continue;
 			}
 			
+			let shortened;
 			try {
-				Zotero.File.createShortened(destFile, Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+				shortened = Zotero.File.createShortened(
+					destPath, Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644
+				);
 			}
 			catch (e) {
-				Zotero.debug(e, 1);
-				Components.utils.reportError(e);
+				Zotero.logError(e);
 				
 				zipReader.close();
 				
-				Zotero.File.checkFileAccessError(e, destFile, 'create');
+				Zotero.File.checkFileAccessError(e, destPath, 'create');
 			}
 			
-			if (destFile.leafName != fileName) {
-				Zotero.debug("Changed filename '" + fileName + "' to '" + destFile.leafName + "'");
+			if (OS.Path.basename(destPath) != shortened) {
+				Zotero.debug(`Changed filename '${OS.Path.basename(destPath)}' to '${shortened}'`);
 				
 				// Abort if Windows path limitation would cause filenames to be overly truncated
-				if (Zotero.isWin && destFile.leafName.length < 40) {
+				if (Zotero.isWin && shortened < 40) {
 					try {
-						destFile.remove(false);
+						yield OS.File.remove(destPath);
 					}
 					catch (e) {}
 					zipReader.close();
@@ -848,17 +848,19 @@ Zotero.Sync.Storage.Local = {
 					throw new Error(msg);
 				}
 				
+				destPath = OS.Path.join(OS.Path.dirname(destPath, shortened));
+				
 				if (primaryFile) {
 					renamed = true;
 				}
 			}
 			
 			try {
-				zipReader.extract(entryName, destFile);
+				zipReader.extract(entryName, Zotero.File.pathToFile(destPath));
 			}
 			catch (e) {
 				try {
-					destFile.remove(false);
+					yield OS.File.remove(destPath);
 				}
 				catch (e) {}
 				
@@ -866,7 +868,7 @@ Zotero.Sync.Storage.Local = {
 				// destFile.create() works but zipReader.extract() doesn't
 				// when the path length is close to 255.
 				if (destFile.leafName.match(/[a-zA-Z0-9+=]{130,}/)) {
-					var msg = "Ignoring error extracting '" + destFile.path + "'";
+					var msg = "Ignoring error extracting '" + destPath + "'";
 					Zotero.debug(msg, 2);
 					Zotero.debug(e, 2);
 					Components.utils.reportError(msg + " in " + funcName);
@@ -875,14 +877,14 @@ Zotero.Sync.Storage.Local = {
 				
 				zipReader.close();
 				
-				Zotero.File.checkFileAccessError(e, destFile, 'create');
+				Zotero.File.checkFileAccessError(e, destPath, 'create');
 			}
 			
-			destFile.permissions = 0644;
+			yield OS.File.setPermissions(destPath, { unixMode: 0o644 });
 			
 			// If we're renaming the main file, processDownload() needs to know
 			if (renamed) {
-				returnFile = destFile.path;
+				returnFile = destPath;
 			}
 		}
 		zipReader.close();

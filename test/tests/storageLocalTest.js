@@ -105,16 +105,23 @@ describe("Zotero.Sync.Storage.Local", function () {
 	describe("#processDownload()", function () {
 		var file1Name = 'index.html';
 		var file1Contents = '<html><body>Test</body></html>';
-		var file2Name = 'test.txt';
-		var file2Contents = 'Test';
+		var file2Name = 'aux1.txt';
+		var file2Contents = 'Test 1';
+		var subDirName = 'sub';
+		var file3Name = 'aux2';
+		var file3Contents = 'Test 2';
 		
 		var createZIP = Zotero.Promise.coroutine(function* (zipFile) {
 			var tmpDir = Zotero.getTempDirectory().path;
 			var zipDir = OS.Path.join(tmpDir, Zotero.Utilities.randomString());
 			yield OS.File.makeDir(zipDir);
-			
 			yield Zotero.File.putContentsAsync(OS.Path.join(zipDir, file1Name), file1Contents);
 			yield Zotero.File.putContentsAsync(OS.Path.join(zipDir, file2Name), file2Contents);
+			
+			// Subdirectory
+			var subDir = OS.Path.join(zipDir, subDirName);
+			yield OS.File.makeDir(subDir);
+			yield Zotero.File.putContentsAsync(OS.Path.join(subDir, file3Name), file3Contents);
 			
 			yield Zotero.File.zipDirectory(zipDir, zipFile);
 			yield OS.File.removeDir(zipDir);
@@ -128,6 +135,15 @@ describe("Zotero.Sync.Storage.Local", function () {
 			var tmpDir = Zotero.getTempDirectory().path;
 			var zipFile = OS.Path.join(tmpDir, key + '.tmp');
 			yield createZIP(zipFile);
+			
+			// Create an existing attachment directory (and subdirectory) to replace
+			var dir = Zotero.Attachments.getStorageDirectoryByLibraryAndKey(libraryID, key).path;
+			yield OS.File.makeDir(
+				OS.Path.join(dir, 'subdir'),
+				{ from: Zotero.getZoteroDirectory().path }
+			);
+			yield Zotero.File.putContentsAsync(OS.Path.join(dir, 'A'), '');
+			yield Zotero.File.putContentsAsync(OS.Path.join(dir, 'subdir', 'B'), '');
 			
 			var md5 = Zotero.Utilities.Internal.md5(Zotero.File.pathToFile(zipFile));
 			var mtime = 1445667239000;
@@ -155,10 +171,31 @@ describe("Zotero.Sync.Storage.Local", function () {
 			});
 			yield OS.File.remove(zipFile);
 			
+			var storageDir = Zotero.Attachments.getStorageDirectory(item).path;
+			
+			// Make sure previous files don't exist
+			assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, 'A')));
+			assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, 'subdir')));
+			assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, 'subdir', 'B')));
+			
+			// Make sure main file matches attachment hash and mtime
 			yield assert.eventually.equal(
 				item.attachmentHash, Zotero.Utilities.Internal.md5(file1Contents)
 			);
 			yield assert.eventually.equal(item.attachmentModificationTime, mtime);
+			
+			// Check second file
+			yield assert.eventually.equal(
+				Zotero.File.getContentsAsync(OS.Path.join(storageDir, file2Name)),
+				file2Contents
+			);
+			
+			// Check subdirectory and file
+			assert.isTrue((yield OS.File.stat(OS.Path.join(storageDir, subDirName))).isDir);
+			yield assert.eventually.equal(
+				Zotero.File.getContentsAsync(OS.Path.join(storageDir, subDirName, file3Name)),
+				file3Contents
+			);
 		})
 	})
 	

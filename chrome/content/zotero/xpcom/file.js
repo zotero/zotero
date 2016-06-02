@@ -912,6 +912,8 @@ Zotero.File = new function(){
 	
 	
 	this.checkFileAccessError = function (e, file, operation) {
+		file = this.pathToFile(file);
+		
 		var str = 'file.accessError.';
 		if (file) {
 			str += 'theFile'
