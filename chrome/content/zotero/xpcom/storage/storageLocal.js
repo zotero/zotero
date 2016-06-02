@@ -894,38 +894,9 @@ Zotero.Sync.Storage.Local = {
 	}),
 	
 	
-	_deleteExistingAttachmentFiles: Zotero.Promise.coroutine(function* (item) {
+	_deleteExistingAttachmentFiles: Zotero.Promise.method(function (item) {
 		var parentDir = Zotero.Attachments.getStorageDirectory(item).path;
-		return this._deleteExistingFilesInDirectory(parentDir);
-	}),
-	
-	
-	_deleteExistingFilesInDirectory: Zotero.Promise.coroutine(function* (dir) {
-		var dirsToDelete = [];
-		var iterator = new OS.File.DirectoryIterator(dir);
-		try {
-			yield iterator.forEach(function (entry) {
-				return Zotero.Promise.coroutine(function* () {
-					if (entry.isDir) {
-						dirsToDelete.push(entry.path);
-					}
-					else {
-						try {
-							yield OS.File.remove(entry.path);
-						}
-						catch (e) {
-							Zotero.File.checkFileAccessError(e, entry.path, 'delete');
-						}
-					}
-				})();
-			});
-		}
-		finally {
-			iterator.close();
-		}
-		for (let path of dirsToDelete) {
-			yield this._deleteExistingFilesInDirectory(path);
-		}
+		return OS.File.removeDir(parentDir);
 	}),
 	
 	
