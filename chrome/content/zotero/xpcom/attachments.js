@@ -393,6 +393,9 @@ Zotero.Attachments = new function(){
 			// We don't have any way of knowing that the file is flushed to disk,
 			// so we just wait a second before indexing and hope for the best.
 			// We'll index it later if it fails. (This may not be necessary.)
+			//
+			// If this is removed, the afterEach() delay in the server_connector /connector/saveSnapshot
+			// tests can also be removed.
 			setTimeout(function () {
 				Zotero.Fulltext.indexItems([attachmentItem.id]);
 			}, 1000);

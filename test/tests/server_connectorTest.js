@@ -104,6 +104,12 @@ describe("Connector Server", function () {
 	});
 	
 	describe("/connector/saveSnapshot", function () {
+		// TEMP: Wait for indexing to complete, which happens after a 1-second delay, after a 201 has
+		// been returned to the connector. Would be better to make sure indexing has completed.
+		afterEach(function* () {
+			yield Zotero.Promise.delay(1050);
+		});
+		
 		it("should save a webpage item and snapshot to the current selected collection", function* () {
 			var collection = yield createDataObject('collection');
 			yield waitForItemsLoad(win);
