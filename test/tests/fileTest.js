@@ -69,4 +69,41 @@ describe("Zotero.File", function () {
 			);
 		})
 	})
+	
+	describe("#zipDirectory()", function () {
+		it("should compress a directory recursively", function* () {
+			var tmpPath = Zotero.getTempDirectory().path;
+			var path = OS.Path.join(tmpPath, Zotero.Utilities.randomString());
+			yield OS.File.makeDir(path);
+			yield Zotero.File.putContentsAsync(OS.Path.join(path, '.zotero-ft-cache'), '');
+			yield Zotero.File.putContentsAsync(OS.Path.join(path, 'a.txt'), 'A');
+			// Create subdirectory
+			var subPath = OS.Path.join(path, 'sub');
+			yield OS.File.makeDir(subPath);
+			yield Zotero.File.putContentsAsync(OS.Path.join(subPath, 'b.txt'), 'B');
+			
+			var zipFile = OS.Path.join(tmpPath, 'test.zip');
+			yield Zotero.File.zipDirectory(path, zipFile);
+			
+			var zr = Components.classes["@mozilla.org/libjar/zip-reader;1"]
+				.createInstance(Components.interfaces.nsIZipReader);
+			zr.open(Zotero.File.pathToFile(zipFile));
+			var entries = zr.findEntries('*');
+			var files = {};
+			var is = Components.classes['@mozilla.org/scriptableinputstream;1']
+				.createInstance(Components.interfaces.nsIScriptableInputStream);
+			while (entries.hasMore()) {
+				let entryPointer = entries.getNext();
+				let entry = zr.getEntry(entryPointer);
+				let inputStream = zr.getInputStream(entryPointer);
+				is.init(inputStream);
+				files[entryPointer] = is.read(entry.realSize);
+			}
+			zr.close();
+			
+			assert.notProperty(files, '.zotero-ft-cache');
+			assert.propertyVal(files, 'a.txt', 'A');
+			assert.propertyVal(files, 'sub/b.txt', 'B');
+		});
+	});
 })

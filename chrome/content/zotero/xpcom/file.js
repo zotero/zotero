@@ -731,7 +731,7 @@ Zotero.File = new function(){
 					return;
 				}
 				if (entry.isDir) {
-					entries.concat(yield _addZipEntries(rootPath, path, zipWriter));
+					entries.concat(yield _addZipEntries(rootPath, entry.path, zipWriter));
 					return;
 				}
 				if (entry.name.startsWith('.')) {
