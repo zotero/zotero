@@ -441,10 +441,10 @@ Zotero.DataObjects.prototype._loadDataTypeInLibrary = Zotero.Promise.coroutine(f
 		idSQL = " AND " + this.idColumn + " IN (" + ids.map(id => parseInt(id)).join(", ") + ")";
 	}
 	
-	Zotero.debug("Loading " + dataType
+	Zotero.debug("Loading " + dataType + " for "
 		+ (ids
-			? " for " + ids.length + " " + (ids.length == 1 ? this._ZDO_object : this._ZDO_objects)
-			: '')
+			? ids.length + " " + (ids.length == 1 ? this._ZDO_object : this._ZDO_objects)
+			: this._ZDO_objects)
 		+ " in " + libraryName);
 	
 	yield this[funcName](libraryID, ids ? ids : [], idSQL);
