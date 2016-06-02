@@ -205,8 +205,7 @@ describe("Zotero.Attachments", function() {
 			var storageDir = Zotero.Attachments.getStorageDirectory(attachment).path;
 			var file = yield attachment.getFilePathAsync();
 			assert.equal(OS.Path.basename(file), 'index.html');
-			var filesFolder = OS.Path.join(storageDir, 'index_files');
-			assert.isTrue(yield OS.File.exists(filesFolder, 'img.gif'));
+			assert.isTrue(yield OS.File.exists(OS.Path.join(storageDir, 'img.gif')));
 		});
 	});
 	
