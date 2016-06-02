@@ -566,84 +566,82 @@ Zotero.Attachments = new function(){
 		}
 		
 		var tmpDir = yield this.createTemporaryStorageDirectory();
-		var tmpFile = tmpDir.clone();
-		var fileName = Zotero.File.truncateFileName(_getFileNameFromURL(url, contentType), 100);
-		tmpFile.append(fileName);
-		
-		// If we're using the title from the document, make some adjustments
-		if (!options.title) {
-			// Remove e.g. " - Scaled (-17%)" from end of images saved from links,
-			// though I'm not sure why it's getting added to begin with
-			if (contentType.indexOf('image/') === 0) {
-				title = title.replace(/(.+ \([^,]+, [0-9]+x[0-9]+[^\)]+\)) - .+/, "$1" );
-			}
-			// If not native type, strip mime type data in parens
-			else if (!Zotero.MIME.hasNativeHandler(contentType, _getExtensionFromURL(url))) {
-				title = title.replace(/(.+) \([a-z]+\/[^\)]+\)/, "$1" );
-			}
-		}
-		
-		if (contentType === 'text/html' || contentType === 'application/xhtml+xml') {
-			Zotero.debug('Saving document with saveURI()');
-			yield Zotero.Utilities.Internal.saveDocument(document, tmpFile.path);
-		}
-		else {
-			Zotero.debug("Saving file with saveURI()");
-			const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-			var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
-				.createInstance(nsIWBP);
-			wbp.persistFlags = nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION
-				| nsIWBP.PERSIST_FLAGS_FROM_CACHE;
-			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-				.getService(Components.interfaces.nsIIOService);
-			var nsIURL = ioService.newURI(url, null, null);
-			var deferred = Zotero.Promise.defer();
-			wbp.progressListener = new Zotero.WebProgressFinishListener(function () {
-				deferred.resolve();
-			});
-			Zotero.Utilities.Internal.saveURI(wbp, nsIURL, tmpFile);
-			yield deferred.promise;
-		}
-		
-		var attachmentItem;
-		var destDir;
-		yield Zotero.DB.executeTransaction(function* () {
-			// Create a new attachment
-			attachmentItem = new Zotero.Item('attachment');
-			if (libraryID) {
-				attachmentItem.libraryID = libraryID;
-			}
-			else if (parentItemID) {
-				let {libraryID: parentLibraryID, key: parentKey} =
-					Zotero.Items.getLibraryAndKeyFromID(parentItemID);
-				Zotero.debug('==-=');
-				Zotero.debug(parentItemID);
-				Zotero.debug(parentLibraryID);
-				Zotero.debug(parentKey);
-				attachmentItem.libraryID = parentLibraryID;
-			}
-			attachmentItem.setField('title', title);
-			attachmentItem.setField('url', url);
-			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
-			attachmentItem.parentID = parentItemID;
-			attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
-			attachmentItem.attachmentCharset = 'utf-8'; // WPD will output UTF-8
-			attachmentItem.attachmentContentType = contentType;
-			if (collections && collections.length) {
-				attachmentItem.setCollections(collections);
-			}
-			var itemID = yield attachmentItem.save();
+		try {
+			var tmpFile = tmpDir.clone();
+			var fileName = Zotero.File.truncateFileName(_getFileNameFromURL(url, contentType), 100);
+			tmpFile.append(fileName);
 			
-			// Create a new folder for this item in the storage directory
-			destDir = this.getStorageDirectory(attachmentItem);
-			yield OS.File.move(tmpDir.path, destDir.path);
-			var destFile = destDir.clone();
-			destFile.append(fileName);
+			// If we're using the title from the document, make some adjustments
+			if (!options.title) {
+				// Remove e.g. " - Scaled (-17%)" from end of images saved from links,
+				// though I'm not sure why it's getting added to begin with
+				if (contentType.indexOf('image/') === 0) {
+					title = title.replace(/(.+ \([^,]+, [0-9]+x[0-9]+[^\)]+\)) - .+/, "$1" );
+				}
+				// If not native type, strip mime type data in parens
+				else if (!Zotero.MIME.hasNativeHandler(contentType, _getExtensionFromURL(url))) {
+					title = title.replace(/(.+) \([a-z]+\/[^\)]+\)/, "$1" );
+				}
+			}
 			
-			attachmentItem.attachmentPath = destFile.path;
-			yield attachmentItem.save();
-		}.bind(this))
-		.catch(function (e) {
+			if (contentType === 'text/html' || contentType === 'application/xhtml+xml') {
+				Zotero.debug('Saving document with saveURI()');
+				yield Zotero.Utilities.Internal.saveDocument(document, tmpFile.path);
+			}
+			else {
+				Zotero.debug("Saving file with saveURI()");
+				const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
+				var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+					.createInstance(nsIWBP);
+				wbp.persistFlags = nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION
+					| nsIWBP.PERSIST_FLAGS_FROM_CACHE;
+				var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+					.getService(Components.interfaces.nsIIOService);
+				var nsIURL = ioService.newURI(url, null, null);
+				var deferred = Zotero.Promise.defer();
+				wbp.progressListener = new Zotero.WebProgressFinishListener(function () {
+					deferred.resolve();
+				});
+				Zotero.Utilities.Internal.saveURI(wbp, nsIURL, tmpFile);
+				yield deferred.promise;
+			}
+			
+			var attachmentItem;
+			var destDir;
+			yield Zotero.DB.executeTransaction(function* () {
+				// Create a new attachment
+				attachmentItem = new Zotero.Item('attachment');
+				if (libraryID) {
+					attachmentItem.libraryID = libraryID;
+				}
+				else if (parentItemID) {
+					let {libraryID: parentLibraryID, key: parentKey} =
+						Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+					attachmentItem.libraryID = parentLibraryID;
+				}
+				attachmentItem.setField('title', title);
+				attachmentItem.setField('url', url);
+				attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
+				attachmentItem.parentID = parentItemID;
+				attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+				attachmentItem.attachmentCharset = 'utf-8'; // WPD will output UTF-8
+				attachmentItem.attachmentContentType = contentType;
+				if (collections && collections.length) {
+					attachmentItem.setCollections(collections);
+				}
+				var itemID = yield attachmentItem.save();
+				
+				// Create a new folder for this item in the storage directory
+				destDir = this.getStorageDirectory(attachmentItem);
+				yield OS.File.move(tmpDir.path, destDir.path);
+				var destFile = destDir.clone();
+				destFile.append(fileName);
+				
+				attachmentItem.attachmentPath = destFile.path;
+				yield attachmentItem.save();
+			}.bind(this));
+		}
+		catch (e) {
 			Zotero.debug(e, 1);
 			
 			// Clean up
@@ -660,7 +658,7 @@ Zotero.Attachments = new function(){
 			}
 			
 			throw e;
-		});
+		}
 		
 		// We don't have any way of knowing that the file is flushed to disk,
 		// so we just wait a second before indexing and hope for the best.
