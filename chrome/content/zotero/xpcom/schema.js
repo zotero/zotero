@@ -1052,15 +1052,16 @@ Zotero.Schema = new function(){
 				return _updateFromRepositoryCallback(xmlhttp, !!force);
 			}
 			catch (e) {
-				if (e instanceof Zotero.HTTP.BrowserOfflineException || e.xmlhttp) {
+				if (e instanceof Zotero.HTTP.UnexpectedStatusException
+						|| e instanceof Zotero.HTTP.BrowserOfflineException) {
 					let msg = " -- retrying in " + ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL
 					if (e instanceof Zotero.HTTP.BrowserOfflineException) {
 						Zotero.debug("Browser is offline" + msg, 2);
 					}
 					else {
-						Components.utils.reportError(e);
-						Zotero.debug(xmlhttp.status, 1);
-						Zotero.debug(xmlhttp.responseText, 1);
+						Zotero.logError(e);
+						Zotero.debug(e.status, 1);
+						Zotero.debug(e.xmlhttp.responseText, 1);
 						Zotero.debug("Error updating from repository " + msg, 1);
 					}
 					// TODO: instead, add an observer to start and stop timer on online state change
