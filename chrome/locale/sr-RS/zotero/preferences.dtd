@@ -3,28 +3,28 @@
 <!ENTITY zotero.preferences.default "Подразумевано:">
 <!ENTITY zotero.preferences.items "ставке">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Settings">
+<!ENTITY zotero.preferences.settings "Подешавања">
 
 <!ENTITY zotero.preferences.prefpane.general "Опште">
 
 <!ENTITY zotero.preferences.userInterface "Корисничко сучеље">
-<!ENTITY zotero.preferences.showIn "Load Zotero in:">
-<!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
-<!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.showIn "Учитај Зотеро у:">
+<!ENTITY zotero.preferences.showIn.browserPane "Површ за разгледање">
+<!ENTITY zotero.preferences.showIn.separateTab "Засебна површ">
+<!ENTITY zotero.preferences.showIn.appTab "Површ програма">
 <!ENTITY zotero.preferences.fontSize "Величина фонта:">
 <!ENTITY zotero.preferences.fontSize.small "Мали">
 <!ENTITY zotero.preferences.fontSize.medium "Средњи">
 <!ENTITY zotero.preferences.fontSize.large "Велики">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
-<!ENTITY zotero.preferences.fontSize.notes "Величина фонта:">
+<!ENTITY zotero.preferences.fontSize.xlarge "Веома велики">
+<!ENTITY zotero.preferences.fontSize.notes "Величина фонта за белешке:">
 
-<!ENTITY zotero.preferences.miscellaneous "Разне поставке">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
+<!ENTITY zotero.preferences.miscellaneous "Остале поставке">
+<!ENTITY zotero.preferences.autoUpdate "Аутоматски потражи нова ажурирања превода и стилова">
 <!ENTITY zotero.preferences.updateNow "Ажурирај сада">
 <!ENTITY zotero.preferences.reportTranslationFailure "Извести о грешкама у „преводиоцу странице“">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Дозволи страници zotero.org да доставља прилагођен садржај на основу ваше верзији Зотера">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Уколико је омогућено, тренутна верзија Зотера ће бити укључена у ХТТП захтев који се шаље страници zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "Самостално узми снимак када се прави ставка са веб странице">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Самостално приложи повезане PDF и друге датотека када чуваш ставке">
@@ -107,11 +107,11 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Домен/путања">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(нпр. sr.wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Излазни формат">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Језик">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Disable Quick Copy when dragging more than">
 
-<!ENTITY zotero.preferences.prefpane.cite "Cite">
-<!ENTITY zotero.preferences.cite.styles "Styles">
+<!ENTITY zotero.preferences.prefpane.cite "Цитат">
+<!ENTITY zotero.preferences.cite.styles "Стилови">
 <!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
@@ -172,7 +172,7 @@
 <!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
 
-<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset "Кодирање знакова">
 <!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
 <!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
 
