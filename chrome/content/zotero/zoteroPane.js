@@ -1242,11 +1242,11 @@ var ZoteroPane = new function()
 			
 			document.getElementById('zotero-items-tree').view = this.itemsView;
 			
-			// Add events to treecolpicker to update menu before showing/hiding
 			try {
 				let treecols = document.getElementById('zotero-items-columns-header');
 				let treecolpicker = treecols.boxObject.firstChild.nextSibling;
 				let menupopup = treecolpicker.boxObject.firstChild.nextSibling;
+				// Add events to treecolpicker to update menu before showing/hiding
 				let attr = menupopup.getAttribute('onpopupshowing');
 				if (attr.indexOf('Zotero') == -1) {
 					menupopup.setAttribute('onpopupshowing', 'ZoteroPane.itemsView.onColumnPickerShowing(event);')
@@ -1255,6 +1255,28 @@ var ZoteroPane = new function()
 					menupopup.setAttribute('onpopuphidden', 'ZoteroPane.itemsView.onColumnPickerHidden(event);')
 						// Keep whatever else is there
 						+ ' ' + menupopup.getAttribute('onpopuphidden');
+				}
+				
+				// Hide certain columns for feeds
+				let elems = treecols.getElementsByAttribute('hidden-in', '*');
+				for (let i = 0; i < elems.length; i++) {
+					let shouldHide = elems[i].getAttribute('hidden-in').split(' ')
+						.indexOf(collectionTreeRow.type) != -1;
+					let userHidden = elems[i].hasAttribute('user-hidden');
+					// The slightly convoluted logic here is such:
+					// If the current tree being displayed is in the list of types 'hidden-in'
+					// specifies and it's not already been hidden by another 'hidden-in' rule
+					// (i.e. its normal state of being displayed has not been suppressed yet),
+					// then hide it
+					if (shouldHide && !userHidden) {
+						// Store old value on entry to feed view
+						elems[i].setAttribute('user-hidden', elems[i].getAttribute('hidden'));
+						elems[i].setAttribute('hidden', 'true');
+					} else if (!shouldHide && userHidden) {
+						// Restore old value on exit from feed view
+						elems[i].setAttribute('hidden', elems[i].getAttribute('user-hidden'));
+						elems[i].removeAttribute('user-hidden');
+					}
 				}
 			}
 			catch (e) {
