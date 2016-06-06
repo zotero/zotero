@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Böngésző ablak">
 <!ENTITY zotero.preferences.showIn.separateTab "Új lap">
 <!ENTITY zotero.preferences.showIn.appTab "Lap rögzítése">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Betűméret">
 <!ENTITY zotero.preferences.fontSize.small "Kicsi">
 <!ENTITY zotero.preferences.fontSize.medium "Közepes">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "kapcsolódó hivatkozások">
 <!ENTITY zotero.preferences.groups.tags "címkék">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Linkfeloldók keresése">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Szinkronizálás">
 <!ENTITY zotero.preferences.sync.username "Felhasználónév:">
 <!ENTITY zotero.preferences.sync.password "Jelszó:">
-<!ENTITY zotero.preferences.sync.syncServer "Szinkronizációs szerver">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Új felhasználói fiók">
 <!ENTITY zotero.preferences.sync.lostPassword "Elveszett jelszó?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatikus szinkronizálás">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Az alábbi műveletek kizárólag ritka, egyedi esetekre valók, alkalmazásuk nem javasolt általános hibaelhárításra. A visszaállítás sok esetben további problémákat okoz. Lásd ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 " további információért.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Teljes szinkornizáció a Zotero szerverrel">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "A helyi adatok összefésülése a szerveren található adatokkal, a szinkronizációs előzmények figyelmen kívül hagyása.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Visszaállítás a Zotero szerverről">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "A helyi adatok törlése és frissítés a szerveren található adatokkal.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Helyreállítás a Zotero szerverre">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Gyorskeresés">
 <!ENTITY zotero.preferences.keys.newItem "Új elem létrehozása">
 <!ENTITY zotero.preferences.keys.newNote "Új jegyzet létrehozása">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Címkeválasztó mutatása/elrejtése">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kiválasztott hivatkozás másolása a vágólapra">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kiválasztott elemek másolása a vágólapra">

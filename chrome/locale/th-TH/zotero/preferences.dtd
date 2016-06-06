@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "ช่องเบราเซอร์">
 <!ENTITY zotero.preferences.showIn.separateTab "แยกแท็บ">
 <!ENTITY zotero.preferences.showIn.appTab "แท็บโปรแกรม">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "ขนาดตัวอักษร:">
 <!ENTITY zotero.preferences.fontSize.small "เล็ก">
 <!ENTITY zotero.preferences.fontSize.medium "กลาง">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "ลิงค์ลูก">
 <!ENTITY zotero.preferences.groups.tags "แท็ก">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "ค้นหาตัวแก้ปัญหา">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "ประสานข้อมูล">
 <!ENTITY zotero.preferences.sync.username "ชื่อผู้ใช้: ">
 <!ENTITY zotero.preferences.sync.password "รหัสผ่าน: ">
-<!ENTITY zotero.preferences.sync.syncServer "ประสานข้อมูลกับเครื่องบริการของ Zotero">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "สร้างบัญชีผู้ใช้">
 <!ENTITY zotero.preferences.sync.lostPassword "รหัสผ่านหาย?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "ประสานข้อมูลโดยอัตโนมัติ">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "การดำเนินการต่อไปนี้ใช้ในบางกรณีเท่านั้น สถานการณ์เฉพาะและไม่ควรใช้สำหรับแก้ปัญหาทั่วไป ในหลายกรณีการเริ่มต้นใหม่จะก่อให้เกิดปัญหามากขึ้น ดูที่">
 <!ENTITY zotero.preferences.sync.reset.warning2 "ตัวเลือกตั้งค่าประสานข้อมูลใหม่">
 <!ENTITY zotero.preferences.sync.reset.warning3 "สำหรับข้อมูลเพิ่มเติม">
-<!ENTITY zotero.preferences.sync.reset.fullSync "ประสานข้อมูลทั้งหมดกับเครื่องบริการของ Zotero">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "ผนวกข้อมูลในเครื่องด้วยข้อมูลจากเครื่องบริการโดยไม่สนใจประวัติการประสาน">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "เรียกคืนจากเครื่องบริการของ Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "ล้างข้อมูลในเครื่องนี้แล้วเรียกคืนจากเครื่องบริการของ Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "ส่งข้อมูลคืนเครื่องบริการของ Zotero">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "ค้นหาแบบเร็ว">
 <!ENTITY zotero.preferences.keys.newItem "Create a New Item">
 <!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "เปลี่ยนตัวเลือกแท็ก">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "ทำสำเนารายการอ้างอิงที่เลือกไว้ไปยังคลิปบอร์ด">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "ทำสำเนารายการที่เลือกไปยังคลิปบอร์ด">

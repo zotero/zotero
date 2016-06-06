@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Panou browser">
 <!ENTITY zotero.preferences.showIn.separateTab "Filă separată">
 <!ENTITY zotero.preferences.showIn.appTab "Filă aplicație">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Mărime caractere:">
 <!ENTITY zotero.preferences.fontSize.small "Mici">
 <!ENTITY zotero.preferences.fontSize.medium "Medii">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "legături copil">
 <!ENTITY zotero.preferences.groups.tags "etichete">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "Deschide URL">
 
 <!ENTITY zotero.preferences.openurl.search "Caută rezolvatori">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sincronizare">
 <!ENTITY zotero.preferences.sync.username "Nume de utilizator:">
 <!ENTITY zotero.preferences.sync.password "Parolă:">
-<!ENTITY zotero.preferences.sync.syncServer "Server pentru sincronizare Zotero">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Creează cont">
 <!ENTITY zotero.preferences.sync.lostPassword "Ai uitat parola?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronizare automată">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Următoarele operații sunt pentru a fi folosite în situații rare și specifice și nu ar trebui folosite pentru probleme generale. În multe cazuri, resetarea va cauza probleme în plus. Vezi ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Opțiuni de resetare sincronizare">
 <!ENTITY zotero.preferences.sync.reset.warning3 "pentru mai multe informații.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Sincronizare completă cu serverul Zotero">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Unește datele locale din Zotero cu datele de pe serverul de sincronizare, ignorând istoria sincronizărilor.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurare de pe serverul Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Șterge toate datele locale din Zotero și restaurează din serverul de sincronizare.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaurare în serverul Zotero">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Căutare rapidă">
 <!ENTITY zotero.preferences.keys.newItem "Creează o nouă înregistrare">
 <!ENTITY zotero.preferences.keys.newNote "Creează o notă nouă">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Afișează/ascunde selectorul de etichete">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiază citările înregistrărilor selectate în memoria Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiază înregistrările selectate în memoria Clipboard">

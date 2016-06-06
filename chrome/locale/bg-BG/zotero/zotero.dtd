@@ -1,3 +1,5 @@
+<!ENTITY zotero.general.yes "Yes">
+<!ENTITY zotero.general.no "No">
 <!ENTITY zotero.general.optional "(По желание)">
 <!ENTITY zotero.general.note "Бележка:">
 <!ENTITY zotero.general.selectAll "Избор на всички">
@@ -8,6 +10,7 @@
 <!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.refresh "Refresh">
 <!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
@@ -100,7 +103,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Създава нов запис от настоящата страница">
 <!ENTITY zotero.toolbar.lookup.label "Добавя запис чрез идентификатор">
 <!ENTITY zotero.toolbar.removeItem.label "Остранява запис...">
+<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Нова колекция...">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
 <!ENTITY zotero.toolbar.newGroup "Нова група...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Нова подколекция...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Ново запазено търсене...">
@@ -120,6 +125,13 @@
 <!ENTITY zotero.toolbar.openURL.label "Открива">
 <!ENTITY zotero.toolbar.openURL.tooltip "Открива чрез вашата локална библиотека">
 
+<!ENTITY zotero.toolbar.feeds.new "New Feed…">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
+<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
+<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+
 <!ENTITY zotero.item.add "Добавя">
 <!ENTITY zotero.item.attachment.file.show "Показва Файл">
 <!ENTITY zotero.item.textTransform "Преобразува текст">
@@ -128,6 +140,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 <!ENTITY zotero.item.viewOnline "View Online">
 <!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
 <!ENTITY zotero.toolbar.newNote "New Note">
 <!ENTITY zotero.toolbar.note.standalone "Нова самостоятелна бележка">
@@ -139,11 +152,9 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Снимка на настоящата страница">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Няма отметки, които да бъдат показани">
-<!ENTITY zotero.tagSelector.filter "Филтър:">
+<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "Показва автоматично">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Показва всички отметки в тази библиотека">
-<!ENTITY zotero.tagSelector.selectVisible "Избор на видимите">
-<!ENTITY zotero.tagSelector.clearVisible "Отказ на видимите">
 <!ENTITY zotero.tagSelector.clearAll "Отказ на всички">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "Преименува отметката...">
@@ -227,7 +238,6 @@
 
 <!ENTITY zotero.integration.references.label "Препратки в библиографията">
 
-<!ENTITY zotero.sync.button "Синхронизира със сървъра на Зотеро">
 <!ENTITY zotero.sync.error "Грешка в синхронизирането">
 <!ENTITY zotero.sync.storage.progress "Прогрес:">
 <!ENTITY zotero.sync.storage.downloads "Изтегля:">
@@ -252,6 +262,16 @@
 <!ENTITY zotero.proxy.recognized.warning.secondary "Добавянето на други проксита може да позволи злонамерени интернет страници да се маскират като страници на които се доверявате.">
 <!ENTITY zotero.proxy.recognized.disable.label "Поискванията не се пренасочват автоматично през вече разпознатите проксита">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ингнорира">
+
+<!ENTITY zotero.feedSettings.title "Feed Settings">
+<!ENTITY zotero.feedSettings.saveButton.label "Save">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "Title:">
+<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
+<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
+<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Remove read articles after ">
+<!ENTITY zotero.feedSettings.cleanupAfter.label2 "day(s)">
+
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Извлича на метаданите...">
 <!ENTITY zotero.recognizePDF.cancel.label "Отказ">

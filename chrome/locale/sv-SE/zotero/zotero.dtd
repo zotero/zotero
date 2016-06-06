@@ -1,3 +1,5 @@
+<!ENTITY zotero.general.yes "Yes">
+<!ENTITY zotero.general.no "No">
 <!ENTITY zotero.general.optional "(Valfritt)">
 <!ENTITY zotero.general.note "Anteckning:">
 <!ENTITY zotero.general.selectAll "Markera allt">
@@ -8,6 +10,7 @@
 <!ENTITY zotero.general.cancel "Avbryt">
 <!ENTITY zotero.general.refresh "Uppdatera">
 <!ENTITY zotero.general.saveAs "Spara som…">
+<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 
 <!ENTITY zotero.errorReport.title "Zotero-felrapporting">
 <!ENTITY zotero.errorReport.unrelatedMessages "Det kan innehålla meddelanden som inte har med Zotero att göra.">
@@ -100,7 +103,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Skapa ny webbsidekälla från aktuell sida">
 <!ENTITY zotero.toolbar.lookup.label "Lägg till källa via referensnummer">
 <!ENTITY zotero.toolbar.removeItem.label "Radera källa...">
+<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Ny samling...">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
 <!ENTITY zotero.toolbar.newGroup "Ny grupp...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Ny undersamling...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Ny sparad sökning...">
@@ -120,6 +125,13 @@
 <!ENTITY zotero.toolbar.openURL.label "Hitta">
 <!ENTITY zotero.toolbar.openURL.tooltip "Hitta på ditt lokala bibliotek">
 
+<!ENTITY zotero.toolbar.feeds.new "New Feed…">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
+<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
+<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+
 <!ENTITY zotero.item.add "Lägg till">
 <!ENTITY zotero.item.attachment.file.show "Visa fil">
 <!ENTITY zotero.item.textTransform "Omvandla text">
@@ -128,6 +140,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Skifta för-/efternamn">
 <!ENTITY zotero.item.viewOnline "Visa online">
 <!ENTITY zotero.item.copyAsURL "Kopiera som URL">
+<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
 <!ENTITY zotero.toolbar.newNote "Ny anteckning">
 <!ENTITY zotero.toolbar.note.standalone "Ny fristående anteckning">
@@ -139,11 +152,9 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Ta lokal kopia av aktuell sida">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Inga etiketter att visa">
-<!ENTITY zotero.tagSelector.filter "Filter:">
+<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "Visa automatiskt">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Visa alla etiketter i detta bibliotek">
-<!ENTITY zotero.tagSelector.selectVisible "Markera synliga">
-<!ENTITY zotero.tagSelector.clearVisible "Avmarkera synliga">
 <!ENTITY zotero.tagSelector.clearAll "Avmarkera alla">
 <!ENTITY zotero.tagSelector.assignColor "Ange färg…">
 <!ENTITY zotero.tagSelector.renameTag "Ändra namn på etikett...">
@@ -227,7 +238,6 @@
 
 <!ENTITY zotero.integration.references.label "Referenser i källförteckningen">
 
-<!ENTITY zotero.sync.button "Synkronisera med Zoteros server">
 <!ENTITY zotero.sync.error "Synkroniseringsfel">
 <!ENTITY zotero.sync.storage.progress "Förlopp:">
 <!ENTITY zotero.sync.storage.downloads "Nedladdningar:">
@@ -252,6 +262,16 @@
 <!ENTITY zotero.proxy.recognized.warning.secondary "Andra proxyservrar kan innehålla elakartad kod som kan låtsas vara hemsidor du litar på.">
 <!ENTITY zotero.proxy.recognized.disable.label "Skicka inte automatiskt vidare frågor genom tidigare funna proxies">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorera">
+
+<!ENTITY zotero.feedSettings.title "Feed Settings">
+<!ENTITY zotero.feedSettings.saveButton.label "Save">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "Title:">
+<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
+<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
+<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Remove read articles after ">
+<!ENTITY zotero.feedSettings.cleanupAfter.label2 "day(s)">
+
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Läser av metadata...">
 <!ENTITY zotero.recognizePDF.cancel.label "Ångra">

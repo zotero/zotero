@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Jendela peramban">
 <!ENTITY zotero.preferences.showIn.separateTab "Tab terpisah">
 <!ENTITY zotero.preferences.showIn.appTab "Tab App">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Ukuran font:">
 <!ENTITY zotero.preferences.fontSize.small "Kecil">
 <!ENTITY zotero.preferences.fontSize.medium "Sedang">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "tautan anak">
 <!ENTITY zotero.preferences.groups.tags "tags">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Cari resolver">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sinkronisasi">
 <!ENTITY zotero.preferences.sync.username "Nama pengguna:">
 <!ENTITY zotero.preferences.sync.password "Password:">
-<!ENTITY zotero.preferences.sync.syncServer "Server Sinkronisasi Zotero">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Buat Akun">
 <!ENTITY zotero.preferences.sync.lostPassword "Kehilangan Password?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "SInkronisasikan secara automatis">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Sinkronisasi Penuh dengan Server Zotero">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Gabungkan data Zotero lokal dengan data dari server sinkronisasi, abaikan riwayat sinkronisasi.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Kembalikan dari Server Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Hapus semua data Zotero lokal dan kembalikan dari server sinkronisasi.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Kembalikan kepada Server Zotero">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Pencarian Cepat">
 <!ENTITY zotero.preferences.keys.newItem "Create a New Item">
 <!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Munculkan/Sembunyikan Selektor Tag">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Salin Sitasi Item Terpilih ke Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Salin Item Terpilih ke Clipboard">

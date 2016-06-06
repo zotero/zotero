@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Selainikkuna">
 <!ENTITY zotero.preferences.showIn.separateTab "Erillinen välilehti">
 <!ENTITY zotero.preferences.showIn.appTab "Sovellusvälilehti">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Kirjasinkoko:">
 <!ENTITY zotero.preferences.fontSize.small "Pieni">
 <!ENTITY zotero.preferences.fontSize.medium "Keskikokoinen">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "niiden alaiset linkit">
 <!ENTITY zotero.preferences.groups.tags "avainsanat">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Etsi linkkipalvelimia">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Synkronoi">
 <!ENTITY zotero.preferences.sync.username "Käyttäjätunnus:">
 <!ENTITY zotero.preferences.sync.password "Salasana:">
-<!ENTITY zotero.preferences.sync.syncServer "Zoteron synkronointipalvelin">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Luo käyttäjätili">
 <!ENTITY zotero.preferences.sync.lostPassword "Unohditko salasanan?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkronoi automaattisesti">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Seuraavat toiminnot ovat tarpeen vain äärimmäisen harvinaisissa tilanteissa, eikä niitä tulisi käyttää tavalliseen virheenetsintään. Monissa tapauksissa asetusten nollaus voi aiheuttaa lisää ongelmia. Katso ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Synkroinnin nollauksen asetukset">
 <!ENTITY zotero.preferences.sync.reset.warning3 "saadaksesi lisätietoja.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Täydellinen synkronointi Zotero-palvelimen kanssa">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Yhdistä paikallinen Zotero-aineisto synkronointipalvelimen aineiston kanssa jättäen synkronointihistoria huomioimatta">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Palauta aineisto Zotero-palvelimelta">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Poista kaikki paikallinen aineisto ja palauta aineisto synkronointipalvelimelta">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Palauta aineisto Zotero-palvelimelle">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Pikahaku">
 <!ENTITY zotero.preferences.keys.newItem "Luo uusi nimike">
 <!ENTITY zotero.preferences.keys.newNote "Luo uusi muistiinpanot">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Aiheenvalitsin päälle/pois">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopioi valittujen nimikkeiden sitaatit leikepöydälle">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopioi valitut nimikkeet leikepöydälle">

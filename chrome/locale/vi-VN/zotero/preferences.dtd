@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Khung trình duyệt">
 <!ENTITY zotero.preferences.showIn.separateTab "Phân cách">
 <!ENTITY zotero.preferences.showIn.appTab "Ứng dụng">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Cỡ chữ:">
 <!ENTITY zotero.preferences.fontSize.small "Nhỏ">
 <!ENTITY zotero.preferences.fontSize.medium "Trung bình">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "các liên kết con">
 <!ENTITY zotero.preferences.groups.tags "các tag">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Tìm kiếm các bộ phân giải">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Đồng bộ">
 <!ENTITY zotero.preferences.sync.username "Tên người dùng:">
 <!ENTITY zotero.preferences.sync.password "Mật khẩu:">
-<!ENTITY zotero.preferences.sync.syncServer "Máy chủ đồng bộ Zotero">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Tạo tài khoản">
 <!ENTITY zotero.preferences.sync.lostPassword "Quên mật khẩu?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Tự động đồng bộ">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Các hoạt động sau chỉ dùng trong vài tình huống đặc biệt và nói chung không nên thường dùng để khắc phục lỗi. Trong nhiều trường hợp, việc thiết lập lại sẽ sinh thêm các vấn đề khác. Hãy xem">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Các chọn lựa thiết lập lại đồng bộ">
 <!ENTITY zotero.preferences.sync.reset.warning3 "để có thêm thông tin.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Đồng bộ toàn bộ với máy chủ Zotero">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Trộn dữ liệu Zotero cục bộ với dữ liệu từ máy chủ đồng bộ, bỏ qua lịch sử đồng bộ.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Phục hồi từ máy chủ Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Xóa toàn bộ dữ liệu Zotero cục bộ và phục hồi từ máy chủ đồng bộ.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Lưu lên máy chủ Zotero">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Tìm kiếm nhanh">
 <!ENTITY zotero.preferences.keys.newItem "Tạo tài liệu mới">
 <!ENTITY zotero.preferences.keys.newNote "Tạo ghi chú mới">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Bật/Tắt Bộ-chọn-thẻ">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Sao chép các trích dẫn đã chọn vào clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Sao chép các tài liệu đã chọn vào clipboard">

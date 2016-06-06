@@ -1,3 +1,5 @@
+<!ENTITY zotero.general.yes "Yes">
+<!ENTITY zotero.general.no "No">
 <!ENTITY zotero.general.optional "(Neprivalomas)">
 <!ENTITY zotero.general.note "Pastaba:">
 <!ENTITY zotero.general.selectAll "Pažymėti viską">
@@ -8,6 +10,7 @@
 <!ENTITY zotero.general.cancel "Atšaukti">
 <!ENTITY zotero.general.refresh "Atnaujinti">
 <!ENTITY zotero.general.saveAs "Įrašyti kaip...">
+<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 
 <!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Zotero programoje">
 <!ENTITY zotero.errorReport.unrelatedMessages "Čia gali būti pranešimų, visai nesusijusių su Zotero.">
@@ -100,7 +103,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Iš dabartinio puslapio sukurti interneto puslapį">
 <!ENTITY zotero.toolbar.lookup.label "Įrašą(-us) pridėti pagal identifikatorių">
 <!ENTITY zotero.toolbar.removeItem.label "Pašalinti įrašą...">
+<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Naujas rinkinys...">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
 <!ENTITY zotero.toolbar.newGroup "Nauja grupė...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Naujas poaplankis...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nauja įsiminta paieška...">
@@ -120,6 +125,13 @@
 <!ENTITY zotero.toolbar.openURL.label "Rasti vietą">
 <!ENTITY zotero.toolbar.openURL.tooltip "Ieškoti vietinėje bibliotekoje">
 
+<!ENTITY zotero.toolbar.feeds.new "New Feed…">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
+<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
+<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+
 <!ENTITY zotero.item.add "Pridėti">
 <!ENTITY zotero.item.attachment.file.show "Atverti failo aplanką">
 <!ENTITY zotero.item.textTransform "Teksto trasformavimas">
@@ -128,6 +140,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Sukeisti vardus ir pavardes">
 <!ENTITY zotero.item.viewOnline "Rodyti Internete">
 <!ENTITY zotero.item.copyAsURL "Kopijuoti URL">
+<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
 <!ENTITY zotero.toolbar.newNote "Nauja pastaba">
 <!ENTITY zotero.toolbar.note.standalone "Nauja nesusieta pastaba">
@@ -139,11 +152,9 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Sukurti šio puslapio nuotrauką">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Nėra rodytinų gairių">
-<!ENTITY zotero.tagSelector.filter "Filtras:">
+<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "Rodyti automatiškai">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Rodyti visas šios bibliotekos gaires">
-<!ENTITY zotero.tagSelector.selectVisible "Pasirinkti matomas">
-<!ENTITY zotero.tagSelector.clearVisible "Nesirinkti matomų">
 <!ENTITY zotero.tagSelector.clearAll "Panaikinti pažymėjimą">
 <!ENTITY zotero.tagSelector.assignColor "Priskirti spalvą:">
 <!ENTITY zotero.tagSelector.renameTag "Pervadinti gairę...">
@@ -227,7 +238,6 @@
 
 <!ENTITY zotero.integration.references.label "Nuorodos bibliogafijoje">
 
-<!ENTITY zotero.sync.button "Sinchronizavimas su Zotero serveriu">
 <!ENTITY zotero.sync.error "Sinchronizavimo klaida">
 <!ENTITY zotero.sync.storage.progress "Eiga:">
 <!ENTITY zotero.sync.storage.downloads "Siuntiniai:">
@@ -252,6 +262,16 @@
 <!ENTITY zotero.proxy.recognized.warning.secondary "Įtraukdami kitus įgaliotuosius serverius, sudarote sąlygas kenksmingoms svetainėms apsimesti patikimomis svetainėmis.">
 <!ENTITY zotero.proxy.recognized.disable.label "Automatiškai nenukreipinėti užklausų per anksčiau aptiktus įgaliotuosius serverius">
 <!ENTITY zotero.proxy.recognized.ignore.label "Nepaisyti">
+
+<!ENTITY zotero.feedSettings.title "Feed Settings">
+<!ENTITY zotero.feedSettings.saveButton.label "Save">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "Title:">
+<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
+<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
+<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Remove read articles after ">
+<!ENTITY zotero.feedSettings.cleanupAfter.label2 "day(s)">
+
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Gaunami meta duomenys...">
 <!ENTITY zotero.recognizePDF.cancel.label "Atšaukti">

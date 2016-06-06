@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Browser Ausschnitt">
 <!ENTITY zotero.preferences.showIn.separateTab "Eigenem Tab">
 <!ENTITY zotero.preferences.showIn.appTab "App Tab">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Schriftgröße">
 <!ENTITY zotero.preferences.fontSize.small "Klein">
 <!ENTITY zotero.preferences.fontSize.medium "Mittel">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "zugehörige Links">
 <!ENTITY zotero.preferences.groups.tags "Tags">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Nach Resolvern suchen">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sync">
 <!ENTITY zotero.preferences.sync.username "Benutzername:">
 <!ENTITY zotero.preferences.sync.password "Passwort:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero Sync Server">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Account erstellen">
 <!ENTITY zotero.preferences.sync.lostPassword "Passwort vergessen?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatisch synchronisieren">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Diese Optionen sind nur für spezifische und sehr seltene Probleme geeignet und  sollten nicht als normale Methode zur Problemlösung dienen. Die Reset Option kann oft sogar zusätzliche Probleme verursachen. Siehe:">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Optionene">
 <!ENTITY zotero.preferences.sync.reset.warning3 "für weitere Informationen.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Komplette Synchronisierung mit Zotero-Server">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Lokale Zotero-Daten mit Daten vom Sync-Server zusammenführen, ohne die Sync-History zu beachten.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Vom Zotero-Server wiederherstellen">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Alle lokalen Zotero-Daten löschen und vom Sync-Server wiederherstellen.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zum Zotero-Server wiederherstellen">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Schnellsuche">
 <!ENTITY zotero.preferences.keys.newItem "Neuen Eintrag erstellen">
 <!ENTITY zotero.preferences.keys.newNote "Neue Notiz erstellen">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Tag-Selector an/aus">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Ausgewählte Eintragszitationen in die Zwischenablage kopieren">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Ausgewählte Einträge in die Zwischenablage kopieren">

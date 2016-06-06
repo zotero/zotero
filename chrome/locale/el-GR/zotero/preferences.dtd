@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Πλαίσιο περιηγητή">
 <!ENTITY zotero.preferences.showIn.separateTab "Διαχωρισμός καρτέλας">
 <!ENTITY zotero.preferences.showIn.appTab "Καρτέλα εφαρμογών">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Μέγεθος γραμματοσειράς:">
 <!ENTITY zotero.preferences.fontSize.small "Μικρό">
 <!ENTITY zotero.preferences.fontSize.medium "Μέσο">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "θυγατρικοί σύνδεσμοι">
 <!ENTITY zotero.preferences.groups.tags "ετικέτες">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Αναζήτηση διακομιστών resolver">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sync">
 <!ENTITY zotero.preferences.sync.username "Όνομα χρήστη:">
 <!ENTITY zotero.preferences.sync.password "Κωδικού:">
-<!ENTITY zotero.preferences.sync.syncServer "Διακομιστής συγχρονισμού Zotero">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Δημιουργία λογαριασμού">
 <!ENTITY zotero.preferences.sync.lostPassword "Χάσατε τον κωδικό;">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Αυτόματος συγχρονισμός">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Οι λειτουργίες που ακολουθούν προορίζονται για χρήση μόνον σε σπάνιες, ειδικές συνθήκες και θα πρέπει να χρησιμοποιούνται για λόγους γενικής επίλυσης προβλημάτων. Σε πολλές περιπτώσεις η επαναφορά των ρυθμίσεων προκαλεί επιπρόσθετα προβλήματα. Δείτε">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Συγχρονισμός ρυθμίσεων επαναφοράς">
 <!ENTITY zotero.preferences.sync.reset.warning3 "για περισσότερες πληροφορίες.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Πλήρης συγχρονισμός με τους διακομιστές του Zotero">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Συνένωση των τοπικών δεδομένων Zotero με εκείνα του διακομιστή συγχρονισμού, αγνοώντας το ιστορικό συγχρονισμού.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Αποκατάσταση από τον διακομιστή του Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Διαγραφή όλων των τοπικών δεδομένων Zotero και αποκατάστασή τους από τον διακομιστή συγχρονισμού.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Αποκατάσταση στον διακομιστή Zotero">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Γρήγορη αναζήτηση">
 <!ENTITY zotero.preferences.keys.newItem "Δημιουργία Νέου στοιχείου">
 <!ENTITY zotero.preferences.keys.newNote "Δημιουργία Νέας σημείωσης">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Εναλλαγή Επιλογέα ετικετών">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Αντιγραφή των επιλεγμένων παραπομπών στοιχείου στην προσωρινή μνήμη">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Αντιγραφή των επιλεγμένων στοιχείων στην προσωρινή μνήμη">

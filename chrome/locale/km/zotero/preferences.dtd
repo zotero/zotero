@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "ផ្ទាំងកម្មវិធីរុករក">
 <!ENTITY zotero.preferences.showIn.separateTab "ផ្ទាំងកម្មវិធីដោយឡែក">
 <!ENTITY zotero.preferences.showIn.appTab "ផ្ទាំងបន្ទាត់ថេប">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "ទំហំអក្សរៈ">
 <!ENTITY zotero.preferences.fontSize.small "តូច">
 <!ENTITY zotero.preferences.fontSize.medium "មធ្យម">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "កម្ជាប់រណប">
 <!ENTITY zotero.preferences.groups.tags "ស្លាក">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "បើកគេហទំព័រ">
 
 <!ENTITY zotero.preferences.openurl.search "ស្វែងរកដំណោះស្រាយ">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "សមកាលកម្ម">
 <!ENTITY zotero.preferences.sync.username "ឈ្មោះអ្នកប្រើ:">
 <!ENTITY zotero.preferences.sync.password "លេខសម្ងាត់:">
-<!ENTITY zotero.preferences.sync.syncServer "ម៉ាស៊ីនបម្រើសមកាលកម្មហ្ស៊ូតេរ៉ូ">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "បង្កើតគណនី">
 <!ENTITY zotero.preferences.sync.lostPassword "ភ្លេចលេខសម្ងាត់?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "ធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 "សម្រាប់ព័ត៌មានបន្ថែម។">
-<!ENTITY zotero.preferences.sync.reset.fullSync "ធ្វើសមកាលកម្មពេញលេញជាមួយម៉ាស៊ីនបម្រើហ្ស៊ូតេរ៉ូ">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "បញ្ចូលទិន្នន័យហ្ស៊ូតេរ៉ូមូលដ្ឋានជាមួយនិងម៉ាស៊ីនបម្រើសមកាលកម្មដោយមិនគិតអំពីប្រវត្តិសមកាលកម្ម។">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "ស្តារឡើងវិញពីម៉ាស៊ីនបម្រើហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "លុបចោលទិន្នន័យហ្ស៊ូតេរ៉ូមូលដ្ឋានទាំងអស់ និង ស្តារឡើងវិញពីម៉ាស៊ីន បម្រើសមកាលកម្ម">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "ស្តារទៅកាន់ម៉ាស៊ីនបម្រើហ្ស៊ូតេរ៉ូ">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "ស្វែងរកលឿន">
 <!ENTITY zotero.preferences.keys.newItem "Create a New Item">
 <!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "បើកជម្រើសស្លាក">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "ចម្លងអាគតដ្ឋានឯកសារដែលបានជ្រើសរើសទៅកាន់កន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "ចម្លងឯកសារដែលបានជ្រើសរើសកន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">

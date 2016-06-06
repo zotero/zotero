@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Ramme i nettlesaren">
 <!ENTITY zotero.preferences.showIn.separateTab "Eiga fane">
 <!ENTITY zotero.preferences.showIn.appTab "App-fane">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Skriftstorleik">
 <!ENTITY zotero.preferences.fontSize.small "Liten">
 <!ENTITY zotero.preferences.fontSize.medium "Middels">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "underlenkjer">
 <!ENTITY zotero.preferences.groups.tags "tags">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "Opne URL">
 
 <!ENTITY zotero.preferences.openurl.search "Leit etter &quot;resolvers&quot;">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Synkroniser">
 <!ENTITY zotero.preferences.sync.username "Brukarnamn:">
 <!ENTITY zotero.preferences.sync.password "Passord:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero synkroniseringstenar">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Lag konto">
 <!ENTITY zotero.preferences.sync.lostPassword "Mista passordet?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkroniser automatisk">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Dei følgjande handlingane er berre meint å brukast i sjeldne, spesifikke situasjonar og bør ikkje brukast i alminneleg feilsøking. I mange tilfelle vil tilbakestilling skapa nye problem. Sjå">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Nullstill synkronisering">
 <!ENTITY zotero.preferences.sync.reset.warning3 "for meir informasjon.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full synkronisering med Zotero-tenaren">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Slå ihop Zotero-data med data frå synkroniseringstenaren, og ignorer synkroniseringshistorikken.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Gjenopprett frå Zotero-tenaren">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Slett alle lokale Zotero-data og gjenopprett frå synkroniseringstenaren.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Gjenopprett til Zotero-tenaren">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøk">
 <!ENTITY zotero.preferences.keys.newItem "Create a New Item">
 <!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Slå merkeveljaren av/på">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopier dei valde siteringane til utklipptavla.">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopier dei valde elementa til utklipptavla.">

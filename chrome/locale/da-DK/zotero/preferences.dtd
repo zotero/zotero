@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Browser-vindue">
 <!ENTITY zotero.preferences.showIn.separateTab "Separat faneblad">
 <!ENTITY zotero.preferences.showIn.appTab "Applikationsfaneblad">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Skriftstørrelse:">
 <!ENTITY zotero.preferences.fontSize.small "Lille">
 <!ENTITY zotero.preferences.fontSize.medium "Medium">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "underliggende links">
 <!ENTITY zotero.preferences.groups.tags "etiketter">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Søg efter &quot;resolvers&quot;">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Synkroniser">
 <!ENTITY zotero.preferences.sync.username "Brugernavn:">
 <!ENTITY zotero.preferences.sync.password "Adgangskode:">
-<!ENTITY zotero.preferences.sync.syncServer "Zoteros synkroniseringsserver">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Opret konto">
 <!ENTITY zotero.preferences.sync.lostPassword "Mistet adgangskode?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkroniser automatisk">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Følgende operationer er bruges normalt kun i sjældne og meget specielle situationer og bør ikke bruges ved normal problemløsning. I mange tilfælde vil nulstilling føre til yderligere problemer. Se">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Synkroniser nulstillingsindstillinger">
 <!ENTITY zotero.preferences.sync.reset.warning3 "for mere information">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Fuld synkronisering med Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Flet de lokale Zotero-data med data fra synkroniserings-serveren uanset deres synkroniserings-historik.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Gendan fra Zotero Server">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Slet alle lokale Zotero-data og gendan fra synkroniserings-serveren.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Gendan på Zotero Server">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøgning">
 <!ENTITY zotero.preferences.keys.newItem "Opret nyt element">
 <!ENTITY zotero.preferences.keys.newNote "Opret en ny note">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Slå Tag selector til/fra">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopier valgte henvisninger til udklipsholder">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopier valgte Elementer til udklipsholder">

@@ -1,3 +1,5 @@
+<!ENTITY zotero.general.yes "Yes">
+<!ENTITY zotero.general.no "No">
 <!ENTITY zotero.general.optional "(Opcional)">
 <!ENTITY zotero.general.note "Nota:">
 <!ENTITY zotero.general.selectAll "Marcar todo">
@@ -8,6 +10,7 @@
 <!ENTITY zotero.general.cancel "Cancelar">
 <!ENTITY zotero.general.refresh "Actualizar">
 <!ENTITY zotero.general.saveAs "Gardar como...">
+<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 
 <!ENTITY zotero.errorReport.title "Informe de erros de Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Isto pode conter mensaxes que non estean relacionadas con Zotero.">
@@ -100,7 +103,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Crear un novo elemento a partir da páxina actual">
 <!ENTITY zotero.toolbar.lookup.label "Engadir un elemento polo identificador">
 <!ENTITY zotero.toolbar.removeItem.label "Eliminar...">
+<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Colección nova">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
 <!ENTITY zotero.toolbar.newGroup "Grupo novo...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Subcolección nova">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nova busca gardada...">
@@ -120,6 +125,13 @@
 <!ENTITY zotero.toolbar.openURL.label "Localizar">
 <!ENTITY zotero.toolbar.openURL.tooltip "Atopar na súa biblioteca local">
 
+<!ENTITY zotero.toolbar.feeds.new "New Feed…">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
+<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
+<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+
 <!ENTITY zotero.item.add "Engadir">
 <!ENTITY zotero.item.attachment.file.show "Mostrar o ficheiro">
 <!ENTITY zotero.item.textTransform "Transformar o texto">
@@ -128,6 +140,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Intercambiar Nome/Apelidos">
 <!ENTITY zotero.item.viewOnline "Ver en liña">
 <!ENTITY zotero.item.copyAsURL "Gardar como URL">
+<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
 <!ENTITY zotero.toolbar.newNote "Nota nova">
 <!ENTITY zotero.toolbar.note.standalone "Nova nota independente">
@@ -139,11 +152,9 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Tomar unha imaxe instantánea da páxina actual">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Non hai etiquetas que mostrar">
-<!ENTITY zotero.tagSelector.filter "Filtro:">
+<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "Mostrar automaticamente">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Mostrar todas as etiquetas nesta librería">
-<!ENTITY zotero.tagSelector.selectVisible "Seleccionar o visible">
-<!ENTITY zotero.tagSelector.clearVisible "Desmarcar o visible">
 <!ENTITY zotero.tagSelector.clearAll "Desmarcar todo">
 <!ENTITY zotero.tagSelector.assignColor "Asignarlle cor...">
 <!ENTITY zotero.tagSelector.renameTag "Renomear a etiqueta...">
@@ -227,7 +238,6 @@
 
 <!ENTITY zotero.integration.references.label "Referencias en bibliografía">
 
-<!ENTITY zotero.sync.button "Sincronizar co servidor de Zotero">
 <!ENTITY zotero.sync.error "Erro de sincronización">
 <!ENTITY zotero.sync.storage.progress "Progreso:">
 <!ENTITY zotero.sync.storage.downloads "Descargas:">
@@ -252,6 +262,16 @@
 <!ENTITY zotero.proxy.recognized.warning.secondary "Engadir outros proxies permítelle a sitios maliciosos que se pasen por sitios nos cales confías.">
 <!ENTITY zotero.proxy.recognized.disable.label "Non redireccionar automaticamente as solicitudes a través de proxies previamente recoñecidos">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorar">
+
+<!ENTITY zotero.feedSettings.title "Feed Settings">
+<!ENTITY zotero.feedSettings.saveButton.label "Save">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "Title:">
+<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
+<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
+<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Remove read articles after ">
+<!ENTITY zotero.feedSettings.cleanupAfter.label2 "day(s)">
+
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Recuperando metadatos ...">
 <!ENTITY zotero.recognizePDF.cancel.label "Cancelar">

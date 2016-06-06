@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Zotero-venster">
 <!ENTITY zotero.preferences.showIn.separateTab "Eigen tabblad">
 <!ENTITY zotero.preferences.showIn.appTab "App-tabblad">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Lettergrootte:">
 <!ENTITY zotero.preferences.fontSize.small "Klein">
 <!ENTITY zotero.preferences.fontSize.medium "Middelgroot">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "bijbehorende koppelingen">
 <!ENTITY zotero.preferences.groups.tags "labels">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Resolvers opzoeken">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Synchroniseren">
 <!ENTITY zotero.preferences.sync.username "Gebruikersnaam:">
 <!ENTITY zotero.preferences.sync.password "Wachtwoord:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero-Synchronisatieserver">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Account aanmaken">
 <!ENTITY zotero.preferences.sync.lostPassword "Wachtwoord vergeten?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatisch synchroniseren">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "De volgende handelingen moeten alleen uitgevoerd worden in uitzonderlijke, specifieke situaties en zijn niet geschikt voor het oplossen van algemene problemen. In veel gevallen zal herstellen leiden tot aanvullende problemen. Bekijk">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Synchronisatie-herstelopties">
 <!ENTITY zotero.preferences.sync.reset.warning3 "voor meer informatie.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Volledige synchronisatie met de Zotero-server">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Lokale Zotero-gegevens samenvoegen met de gegevens op de Zotero-server (houdt geen rekening met synchronisatiegeschiedenis).">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Herstellen vanaf Zotero-server">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Alle lokale Zotero-gegevens wissen en herstellen door de gegevens van de synchronisatieserver.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Herstellen naar Zotero-server">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Snelzoeken">
 <!ENTITY zotero.preferences.keys.newItem "Maak een Nieuw item">
 <!ENTITY zotero.preferences.keys.newNote "Maak een Nieuwe aantekening">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Labelkiezer tonen">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Verwijzingen van geselecteerde items naar klembord kopiëren">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Geselecteerde items naar klembord kopiëren">

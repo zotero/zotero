@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Текущей панели">
 <!ENTITY zotero.preferences.showIn.separateTab "Отдельной вкладке">
 <!ENTITY zotero.preferences.showIn.appTab "Вкладке приложения">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Размер шрифта:">
 <!ENTITY zotero.preferences.fontSize.small "Маленький">
 <!ENTITY zotero.preferences.fontSize.medium "Средний">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "дочерние ссылки">
 <!ENTITY zotero.preferences.groups.tags "теги">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Поиск ресолверов">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Синхронизация">
 <!ENTITY zotero.preferences.sync.username "Имя пользователя:">
 <!ENTITY zotero.preferences.sync.password "Пароль:">
-<!ENTITY zotero.preferences.sync.syncServer "Сервер синхронизации Zotero">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Создать учётную запись">
 <!ENTITY zotero.preferences.sync.lostPassword "Забыли пароль?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Синхронизировать автоматически">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Следующие операции используются только в редких особых случаях и не должны использоваться при решении проблем общего характера. Во многих случаях, сброс настроек приводит к возникновению дополнительных сложностей. См. ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Параметры сброса настроек синхронизации">
 <!ENTITY zotero.preferences.sync.reset.warning3 " для дополнительных сведений.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Полная синхронизация с сервером Zotero">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Объединить локальные данные Zotero c данными с сервера, игнорируя историю синхронизации">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Восстановить с сервера Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Удалить все локальные данные Zotero и восстановить с сервера">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Восстановить на сервере Zotero">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Быстрый поиск">
 <!ENTITY zotero.preferences.keys.newItem "Создать новый документ">
 <!ENTITY zotero.preferences.keys.newNote "Создать новую заметку">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Переключить панель выбора тэгов">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Скопировать цитаты из выбранного документа в буфер обмена">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Копировать выбранные документы в буфер обмена">

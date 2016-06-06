@@ -1,3 +1,5 @@
+<!ENTITY zotero.general.yes "Yes">
+<!ENTITY zotero.general.no "No">
 <!ENTITY zotero.general.optional "(neobvezno)">
 <!ENTITY zotero.general.note "Opomba:">
 <!ENTITY zotero.general.selectAll "Izberi vse">
@@ -8,6 +10,7 @@
 <!ENTITY zotero.general.cancel "Prekliči">
 <!ENTITY zotero.general.refresh "Osveži">
 <!ENTITY zotero.general.saveAs "Shrani kot ...">
+<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 
 <!ENTITY zotero.errorReport.title "Poročilo o napaki Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Vključuje lahko sporočila, ki se ne nanašajo na Zotero.">
@@ -100,7 +103,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Ustvari nov vnos iz trenutne strani">
 <!ENTITY zotero.toolbar.lookup.label "Dodaj vnos po identifikatorju">
 <!ENTITY zotero.toolbar.removeItem.label "Odstrani vnos ...">
+<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Nova zbirka ...">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
 <!ENTITY zotero.toolbar.newGroup "Nova skupina ...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nova podzbirka ...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Novo shranjeno iskanje ...">
@@ -120,6 +125,13 @@
 <!ENTITY zotero.toolbar.openURL.label "Najdi">
 <!ENTITY zotero.toolbar.openURL.tooltip "Poišči v krajevni knjižnici">
 
+<!ENTITY zotero.toolbar.feeds.new "New Feed…">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
+<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
+<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+
 <!ENTITY zotero.item.add "Dodaj">
 <!ENTITY zotero.item.attachment.file.show "Pokaži datoteko">
 <!ENTITY zotero.item.textTransform "Preoblikuj besedilo">
@@ -128,6 +140,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Zamenjaj ime/priimek">
 <!ENTITY zotero.item.viewOnline "Pokaži na spletu">
 <!ENTITY zotero.item.copyAsURL "Kopiraj kot URL">
+<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
 <!ENTITY zotero.toolbar.newNote "Nova opomba">
 <!ENTITY zotero.toolbar.note.standalone "Nova samostojna opomba">
@@ -139,11 +152,9 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Naredi posnetek trenutne strani">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Brez značk za prikaz">
-<!ENTITY zotero.tagSelector.filter "Filter:">
+<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "Pokaži samodejno">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Prikaži vse značke v tej knjižnici">
-<!ENTITY zotero.tagSelector.selectVisible "Izberi vidno">
-<!ENTITY zotero.tagSelector.clearVisible "Ne izberi vidno">
 <!ENTITY zotero.tagSelector.clearAll "Ne izberi ničesar">
 <!ENTITY zotero.tagSelector.assignColor "Dodeli barvo ...">
 <!ENTITY zotero.tagSelector.renameTag "Preimenuj značko ...">
@@ -227,7 +238,6 @@
 
 <!ENTITY zotero.integration.references.label "Sklici v bibliografiji">
 
-<!ENTITY zotero.sync.button "Uskladi s strežnikom Zotero">
 <!ENTITY zotero.sync.error "Napaka usklajevanja">
 <!ENTITY zotero.sync.storage.progress "Napredek:">
 <!ENTITY zotero.sync.storage.downloads "Prenosi s strežnika:">
@@ -252,6 +262,16 @@
 <!ENTITY zotero.proxy.recognized.warning.secondary "Dodajanje drugih posredovalnih strežnikov omogoča, da se škodoželjna spletna mesta pretvarjajo kot zaupanja vredna spletna mesta.">
 <!ENTITY zotero.proxy.recognized.disable.label "Samodejno ne preusmeri zahtev po poprej prepoznanih posredovalnih strežnikih">
 <!ENTITY zotero.proxy.recognized.ignore.label "Prezri">
+
+<!ENTITY zotero.feedSettings.title "Feed Settings">
+<!ENTITY zotero.feedSettings.saveButton.label "Save">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "Title:">
+<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
+<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
+<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Remove read articles after ">
+<!ENTITY zotero.feedSettings.cleanupAfter.label2 "day(s)">
+
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Pridobivanje metapodatkov ...">
 <!ENTITY zotero.recognizePDF.cancel.label "Prekliči">

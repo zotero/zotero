@@ -1,3 +1,5 @@
+<!ENTITY zotero.general.yes "Yes">
+<!ENTITY zotero.general.no "No">
 <!ENTITY zotero.general.optional "(aukerakoa)">
 <!ENTITY zotero.general.note "Oharra:">
 <!ENTITY zotero.general.selectAll "Hautatu guztiak">
@@ -8,6 +10,7 @@
 <!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.refresh "Refresh">
 <!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
@@ -100,7 +103,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Item berria sortu, oraingo orrialdetik abiatuta">
 <!ENTITY zotero.toolbar.lookup.label "Item bat identifikatzaile baten bidez gehitu">
 <!ENTITY zotero.toolbar.removeItem.label "Itema bildumatik kendu">
+<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Bilduma berria...">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
 <!ENTITY zotero.toolbar.newGroup "Talde berria...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Azpi-bilduma berria...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Gordetako bilaketa berria...">
@@ -120,6 +125,13 @@
 <!ENTITY zotero.toolbar.openURL.label "Aurkitu">
 <!ENTITY zotero.toolbar.openURL.tooltip "Liburutegi publikoan bilatu">
 
+<!ENTITY zotero.toolbar.feeds.new "New Feed…">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
+<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
+<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+
 <!ENTITY zotero.item.add "Gehitu">
 <!ENTITY zotero.item.attachment.file.show "Fitxategia erakutsi">
 <!ENTITY zotero.item.textTransform "Testua bihurtu">
@@ -128,6 +140,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 <!ENTITY zotero.item.viewOnline "View Online">
 <!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
 <!ENTITY zotero.toolbar.newNote "New Note">
 <!ENTITY zotero.toolbar.note.standalone "Ohar solte berria...">
@@ -139,11 +152,9 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Oraingo orrialdearen irudia gorde">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Eztekarik ez">
-<!ENTITY zotero.tagSelector.filter "Filtroa:">
+<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "Erakutsi beti">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
-<!ENTITY zotero.tagSelector.selectVisible "Agerikoak hautatu">
-<!ENTITY zotero.tagSelector.clearVisible "Agerikoak desautatu">
 <!ENTITY zotero.tagSelector.clearAll "Guztiak desautatu">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "Esteka izenaz aldatu...">
@@ -227,7 +238,6 @@
 
 <!ENTITY zotero.integration.references.label "Erreferentziak bibliografian">
 
-<!ENTITY zotero.sync.button "Zotero serbidorearekin sinkronizatu">
 <!ENTITY zotero.sync.error "Errorea sinkronizatzean">
 <!ENTITY zotero.sync.storage.progress "Aurrerapena:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
@@ -252,6 +262,16 @@
 <!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
 <!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ezikusi">
+
+<!ENTITY zotero.feedSettings.title "Feed Settings">
+<!ENTITY zotero.feedSettings.saveButton.label "Save">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "Title:">
+<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
+<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
+<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Remove read articles after ">
+<!ENTITY zotero.feedSettings.cleanupAfter.label2 "day(s)">
+
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Retrieving Metadata...">
 <!ENTITY zotero.recognizePDF.cancel.label "Baztertu">

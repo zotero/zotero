@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "قاب مرورگر">
 <!ENTITY zotero.preferences.showIn.separateTab "برگه جداگانه">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "اندازه قلم:">
 <!ENTITY zotero.preferences.fontSize.small "کوچک">
 <!ENTITY zotero.preferences.fontSize.medium "متوسط">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "پیوندهای وابسته">
 <!ENTITY zotero.preferences.groups.tags "برچسب‌ها">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "متد OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "گشتن به دنبال تشخیص‌دهنده‌ها (resolvers)">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "همزمان‌‌سازی">
 <!ENTITY zotero.preferences.sync.username "نام کاربری:">
 <!ENTITY zotero.preferences.sync.password "گذرواژه:">
-<!ENTITY zotero.preferences.sync.syncServer "کارگزار همزمان‌‌سازی زوترو">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "ساخت حساب کاربری">
 <!ENTITY zotero.preferences.sync.lostPassword "گذرواژه را فراموش کرده‌اید؟">
 <!ENTITY zotero.preferences.sync.syncAutomatically "همزمان‌‌سازی خودکار">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 "جهت کسب اطلاعات بیشتر">
-<!ENTITY zotero.preferences.sync.reset.fullSync "همزمان‌‌سازی کامل با کارگزار زوترو">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "تلفیق اطلاعات محلی زوترو با اطلاعات کارگزار همزمان‌‌سازی و نادیده گرفتن تاریخچه همزمان‌‌سازی.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "بازیابی از کارگزار زوترو">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "پاک کردن همه اطلاعات محلی زوترو و دریافت اطلاعات از کارگزار همزمان‌‌سازی">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "بازنشانی اطلاعات در کارگزار زوترو">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "جستجوی سریع">
 <!ENTITY zotero.preferences.keys.newItem "ایجاد آیتم جدید">
 <!ENTITY zotero.preferences.keys.newNote "ایجاد یادداشت جدید">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "روشن/خاموش کردن انتخاب برچسب">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "رونوشت یادکرد آیتم‌های انتخاب شده به حافظه موقت">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "رونوشت آیتم‌های انتخاب شده به حافظه موقت">

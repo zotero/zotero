@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Subfinestra del navegador">
 <!ENTITY zotero.preferences.showIn.separateTab "Pestanya separada">
 <!ENTITY zotero.preferences.showIn.appTab "Pestanya d'aplicacions">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Mida de lletra:">
 <!ENTITY zotero.preferences.fontSize.small "Petita">
 <!ENTITY zotero.preferences.fontSize.medium "Mitjana">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "enllaços descendents">
 <!ENTITY zotero.preferences.groups.tags "etiquetes">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "Obre la URL">
 
 <!ENTITY zotero.preferences.openurl.search "Cerca resolutors">
@@ -50,6 +60,8 @@
 <!ENTITY zotero.preferences.sync.username "Nom d'usuari">
 <!ENTITY zotero.preferences.sync.password "Contrasenya">
 <!ENTITY zotero.preferences.sync.syncServer "Servidor de sincronització del Zotero">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Crea un compte">
 <!ENTITY zotero.preferences.sync.lostPassword "Has oblidat la contrasenya?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronitza automàticament">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Cerca ràpida">
 <!ENTITY zotero.preferences.keys.newItem "Crea un element nou">
 <!ENTITY zotero.preferences.keys.newNote "Crea una nota nova">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Canvia el selector d&apos;etiquetes">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copia les cites dels elements seleccionats al porta-retalls">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copia els elements seleccionats al porta-retalls">

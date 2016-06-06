@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "un panneau du navigateur">
 <!ENTITY zotero.preferences.showIn.separateTab "un onglet séparé">
 <!ENTITY zotero.preferences.showIn.appTab "un onglet applicatif">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Taille des caractères :">
 <!ENTITY zotero.preferences.fontSize.small "Petite">
 <!ENTITY zotero.preferences.fontSize.medium "Moyenne">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "les liens enfants">
 <!ENTITY zotero.preferences.groups.tags "les marqueurs">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Chercher des résolveurs de liens">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Synchronisation">
 <!ENTITY zotero.preferences.sync.username "Nom d'utilisateur :">
 <!ENTITY zotero.preferences.sync.password "Mot de passe :">
-<!ENTITY zotero.preferences.sync.syncServer "Serveur de synchronisation Zotero">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Créer un compte">
 <!ENTITY zotero.preferences.sync.lostPassword "Mot de passe oublié ?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchroniser automatiquement">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Les opérations suivantes ne sont à utiliser que dans de rares et spécifiques situations et ne doivent pas être utilisées pour un dépannage général. Dans la plupart des cas, la réinitialisation ne fera que causer des problèmes supplémentaires. Consultez ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "les options de réinitialisation du serveur de synchronisation">
 <!ENTITY zotero.preferences.sync.reset.warning3 " pour plus d'informations.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Synchronisation complète avec le serveur Zotero">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Fusionner les données locales de Zotero avec les données du serveur de synchronisation, ignorant ainsi l'historique de synchronisation.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurer à partir du serveur Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Effacer toutes les données locales de Zotero et restaurer à partir du serveur de synchronisation.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaurer vers le serveur Zotero">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Recherche rapide">
 <!ENTITY zotero.preferences.keys.newItem "Créer un nouveau document">
 <!ENTITY zotero.preferences.keys.newNote "Créer une nouvelle note">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Afficher / Cacher le sélecteur de marqueurs">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copier dans le presse-papiers les documents sélectionnés, comme des citations">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copier dans le presse-papiers les documents sélectionnés, comme une bibliographie">

@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "جزء التصفح">
 <!ENTITY zotero.preferences.showIn.separateTab "تبويب منفصل">
 <!ENTITY zotero.preferences.showIn.appTab "تبويب التطبيقات">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "حجم الخط:">
 <!ENTITY zotero.preferences.fontSize.small "صغير">
 <!ENTITY zotero.preferences.fontSize.medium "متوسط">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "الروابط الفرعية">
 <!ENTITY zotero.preferences.groups.tags "سمات">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "الرابط المفتوح">
 
 <!ENTITY zotero.preferences.openurl.search "البحث عن مقرر">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "التزامن">
 <!ENTITY zotero.preferences.sync.username "اسم المستخدم:">
 <!ENTITY zotero.preferences.sync.password "كلمة المرور:">
-<!ENTITY zotero.preferences.sync.syncServer "خادم زوتيرو للتزامن">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "تسجيل اشتراك جديد">
 <!ENTITY zotero.preferences.sync.lostPassword "نسيت كلمة المرور؟">
 <!ENTITY zotero.preferences.sync.syncAutomatically "التزامن التلقائي">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "خيارات اعادة ضبط التزامن">
 <!ENTITY zotero.preferences.sync.reset.warning3 "لمزيد من المعلومات.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "التزامن الكامل مع خادم زوتيرو">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "دمج بيانات زوتيرو المحلية مع البيانات من خادم التزامن، مع تجاهل سجل التزامن.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "الاسترجاع من خادم زوتيرو">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "حذف جميع بيانات زوتيرو المحلية والاسترجاع من خادم التزامن.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "الاسترجاع إلى خادم زوتيرو">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "البحث السريع">
 <!ENTITY zotero.preferences.keys.newItem "انشئ عنصر جديد">
 <!ENTITY zotero.preferences.keys.newNote "انشئ ملاحظة جديدة">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "تنشيط محدد الأوسمة">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "نسخ استشهادات العنصر المختار للحافظة">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "انسخ العناصر المحددة للحافظة">

@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "ブラウザ画面下">
 <!ENTITY zotero.preferences.showIn.separateTab "新しいタブ">
 <!ENTITY zotero.preferences.showIn.appTab "アプリタブ">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "文字サイズ:">
 <!ENTITY zotero.preferences.fontSize.small "小">
 <!ENTITY zotero.preferences.fontSize.medium "中">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "子リンク">
 <!ENTITY zotero.preferences.groups.tags "タグ">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "リンク・リゾルバを検索">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "同期">
 <!ENTITY zotero.preferences.sync.username "ユーザー名:">
 <!ENTITY zotero.preferences.sync.password "パスワード:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero 同期サーバー">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "アカウントを作成">
 <!ENTITY zotero.preferences.sync.lostPassword "パスワードを忘れましたか？">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自動的に同期">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "次の操作は、稀に起こる特別な状況のためだけのもので、一般的な問題解決に用いられるべきではありません。多くの場合、リセットすることで更なる問題を引き起こします。以下をご参照ください。">
 <!ENTITY zotero.preferences.sync.reset.warning2 "同期リセットの設定">
 <!ENTITY zotero.preferences.sync.reset.warning3 "により詳しい情報があります。">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Zotero サーバと完全に同期（シンク）させる">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "同期の履歴を無視し、ローカル（手元）の Zotero データと同期サーバのデータを融合する。">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zotero サーバーから復元（リストア）する">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "ローカル（手元）の Zotero データを全て消去して、同期サーバのデータで復元する。">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zotero サーバのデータに復元する。">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "簡易検索">
 <!ENTITY zotero.preferences.keys.newItem "新しいアイテムを作成する">
 <!ENTITY zotero.preferences.keys.newNote "新しいメモを作成する">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "タグ選択ボックスを表示する／隠す">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "選択されたアイテムの出典表記をクリップボードにコピー">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "選択されたアイテムの参考文献目録をクリップボードにコピー">

@@ -1,3 +1,5 @@
+<!ENTITY zotero.general.yes "Yes">
+<!ENTITY zotero.general.no "No">
 <!ENTITY zotero.general.optional "(선택항목)">
 <!ENTITY zotero.general.note "노트:">
 <!ENTITY zotero.general.selectAll "모두 선택">
@@ -8,6 +10,7 @@
 <!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.refresh "Refresh">
 <!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
@@ -100,7 +103,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "현재 페이지로부터 새 항목 생성">
 <!ENTITY zotero.toolbar.lookup.label "식별자로 항목 추가">
 <!ENTITY zotero.toolbar.removeItem.label "항목 삭제...">
+<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "새 컬렉션...">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
 <!ENTITY zotero.toolbar.newGroup "새 그룹...">
 <!ENTITY zotero.toolbar.newSubcollection.label "새 하위 컬렉션...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "새 저장된 검색...">
@@ -120,6 +125,13 @@
 <!ENTITY zotero.toolbar.openURL.label "위치">
 <!ENTITY zotero.toolbar.openURL.tooltip "로컬 라이브러리에서 검색">
 
+<!ENTITY zotero.toolbar.feeds.new "New Feed…">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
+<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
+<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+
 <!ENTITY zotero.item.add "추가">
 <!ENTITY zotero.item.attachment.file.show "파일 보이기">
 <!ENTITY zotero.item.textTransform "글자 변형">
@@ -128,6 +140,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 <!ENTITY zotero.item.viewOnline "View Online">
 <!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
 <!ENTITY zotero.toolbar.newNote "새 노트">
 <!ENTITY zotero.toolbar.note.standalone "새로운 독립 노트">
@@ -139,11 +152,9 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "현재 페이지의 스냅샷을 촬영">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "표시할 태그가 없음">
-<!ENTITY zotero.tagSelector.filter "필터:">
+<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "자동 표시">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "이 라이브러리 내 모든 태그 표시">
-<!ENTITY zotero.tagSelector.selectVisible "보이는 것들 선택">
-<!ENTITY zotero.tagSelector.clearVisible "보이는 것들 선택 해제">
 <!ENTITY zotero.tagSelector.clearAll "선택 모두 해제">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "태그 이름 변경...">
@@ -227,7 +238,6 @@
 
 <!ENTITY zotero.integration.references.label "참고문헌 목록 내 참조">
 
-<!ENTITY zotero.sync.button "Zotero 서버와 동기화">
 <!ENTITY zotero.sync.error "동기화 오류">
 <!ENTITY zotero.sync.storage.progress "진행률:">
 <!ENTITY zotero.sync.storage.downloads "다운로드:">
@@ -252,6 +262,16 @@
 <!ENTITY zotero.proxy.recognized.warning.secondary "다른 프록시들을 연결하면, 악성 사이트들이 신뢰가능 사이트처럼 보이게 됩니다.">
 <!ENTITY zotero.proxy.recognized.disable.label "이전에 인식된 프록시를 통해 요청을 자동으로 재송신하지 마십시오.">
 <!ENTITY zotero.proxy.recognized.ignore.label "무시">
+
+<!ENTITY zotero.feedSettings.title "Feed Settings">
+<!ENTITY zotero.feedSettings.saveButton.label "Save">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "Title:">
+<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
+<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
+<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Remove read articles after ">
+<!ENTITY zotero.feedSettings.cleanupAfter.label2 "day(s)">
+
 
 <!ENTITY zotero.recognizePDF.recognizing.label "메타데이터 검색...">
 <!ENTITY zotero.recognizePDF.cancel.label "취소">

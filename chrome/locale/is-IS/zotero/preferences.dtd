@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Nýjum vafraglugga">
 <!ENTITY zotero.preferences.showIn.separateTab "Nýjum flipa">
 <!ENTITY zotero.preferences.showIn.appTab "Flipa í smáforriti">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Stærð leturs:">
 <!ENTITY zotero.preferences.fontSize.small "Smátt">
 <!ENTITY zotero.preferences.fontSize.medium "Meðalstórt">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "undirslóðir">
 <!ENTITY zotero.preferences.groups.tags "tög">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "Opna slóð">
 
 <!ENTITY zotero.preferences.openurl.search "Leita að auðkennum netþjóna">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Samhæfa">
 <!ENTITY zotero.preferences.sync.username "Notandanafn:">
 <!ENTITY zotero.preferences.sync.password "Lykilorð:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero samhæfingarþjónn">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Nýr notandi">
 <!ENTITY zotero.preferences.sync.lostPassword "Týnt lykilorð?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Samhæfa sjálfkrafa">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Aðgerðir hér fyrir neðan eru einungis notaðar í sjaldgæfum og sérhæfðum tilvikum og ætti ekki að beita almennt. Í mörgum tilvikum mun endurræsing valda viðbótar vandræðum. Sjá ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Stillingar vegna endurræsingar á samhæfingu">
 <!ENTITY zotero.preferences.sync.reset.warning3 "til frekari upplýsinga">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Alger samhæfing við Zotero netþjón">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Sameina staðbundin Zotero gögn með gögnum á samhæfingarþjóni, án tillit til fyrri samhæfingaraðgerða.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Endurheimta frá Zotero netþjóni">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Eyða öllum staðbundnum Zotero gögnum og endurheimta frá samhæfingar netþjóni.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Endurheimta í Zotero netþjón">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Flýtileit">
 <!ENTITY zotero.preferences.keys.newItem "Ný færsla">
 <!ENTITY zotero.preferences.keys.newNote "Ný athugasemd">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Víxla úr og í Tagavali">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Afrita valdar tilvísunarfærslur í klemmuspjald">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Afrita valdar færslur í klemmuspjald">

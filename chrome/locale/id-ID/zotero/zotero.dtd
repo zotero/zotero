@@ -1,3 +1,5 @@
+<!ENTITY zotero.general.yes "Yes">
+<!ENTITY zotero.general.no "No">
 <!ENTITY zotero.general.optional "(Opsional)">
 <!ENTITY zotero.general.note "Catatan:">
 <!ENTITY zotero.general.selectAll "Pilih Semua">
@@ -8,6 +10,7 @@
 <!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.refresh "Refresh">
 <!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
@@ -100,7 +103,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Buat Item Baru dari Laman Saat Ini">
 <!ENTITY zotero.toolbar.lookup.label "Tambahkan Item dengan Nomor Pengenal ">
 <!ENTITY zotero.toolbar.removeItem.label "Buang Item...">
+<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Koleksi Baru...">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
 <!ENTITY zotero.toolbar.newGroup "Grup Baru...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Subkoleksi Baru...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Pencarian Tersimpan Baru...">
@@ -120,6 +125,13 @@
 <!ENTITY zotero.toolbar.openURL.label "Temukan">
 <!ENTITY zotero.toolbar.openURL.tooltip "Temukan melalui perpustakaan lokal Anda">
 
+<!ENTITY zotero.toolbar.feeds.new "New Feed…">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
+<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
+<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+
 <!ENTITY zotero.item.add "Tambahkan">
 <!ENTITY zotero.item.attachment.file.show "Tunjukkan Berkas">
 <!ENTITY zotero.item.textTransform "Transformasi Teks">
@@ -128,6 +140,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 <!ENTITY zotero.item.viewOnline "View Online">
 <!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
 <!ENTITY zotero.toolbar.newNote "Catatan Baru">
 <!ENTITY zotero.toolbar.note.standalone "Catatan Mandiri Baru">
@@ -139,11 +152,9 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Ambil Snapshot Laman Ini">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Tidak ada tag untuk ditampilkan">
-<!ENTITY zotero.tagSelector.filter "Saring:">
+<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "Tunjukkan Automatis">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Tampilkan Semua Tag di Perpustakaan Ini">
-<!ENTITY zotero.tagSelector.selectVisible "Pilih yang Terlihat">
-<!ENTITY zotero.tagSelector.clearVisible "Hilangkan Pilihan pada yang Terlihat">
 <!ENTITY zotero.tagSelector.clearAll "Hilangkan Semua Pilihan">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "Namai Ulang Tag...">
@@ -227,7 +238,6 @@
 
 <!ENTITY zotero.integration.references.label "Referensi dalam Bibliografi">
 
-<!ENTITY zotero.sync.button "Sinkronisasikan dengan Server Zotero">
 <!ENTITY zotero.sync.error "Kesalahan Sinkronisasi">
 <!ENTITY zotero.sync.storage.progress "Progres:">
 <!ENTITY zotero.sync.storage.downloads "Unduh:">
@@ -252,6 +262,16 @@
 <!ENTITY zotero.proxy.recognized.warning.secondary "Menambahkan proksi lainnya memungkinkan situs-situs yang berbahaya menyamarkan diri menjadi situs yang terpercaya.">
 <!ENTITY zotero.proxy.recognized.disable.label "Jangan alihkan permintaan melalui proksi yang telah dikenali sebelumnya secara automatis">
 <!ENTITY zotero.proxy.recognized.ignore.label "Abaikan">
+
+<!ENTITY zotero.feedSettings.title "Feed Settings">
+<!ENTITY zotero.feedSettings.saveButton.label "Save">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "Title:">
+<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
+<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
+<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Remove read articles after ">
+<!ENTITY zotero.feedSettings.cleanupAfter.label2 "day(s)">
+
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Menerima Metadata...">
 <!ENTITY zotero.recognizePDF.cancel.label "Batalkan">

@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Поточній панелі">
 <!ENTITY zotero.preferences.showIn.separateTab "Окремій вкладці">
 <!ENTITY zotero.preferences.showIn.appTab "Вкладці додатку">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Розмір шрифту:">
 <!ENTITY zotero.preferences.fontSize.small "Маленький">
 <!ENTITY zotero.preferences.fontSize.medium "Середній">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "дочірні посилання">
 <!ENTITY zotero.preferences.groups.tags "теги">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Пошук ресолверів">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Синхронізація">
 <!ENTITY zotero.preferences.sync.username "Ім'я користувача:">
 <!ENTITY zotero.preferences.sync.password "Пароль:">
-<!ENTITY zotero.preferences.sync.syncServer "Сервер синхронізації Zotero:">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Створити обліковий запис">
 <!ENTITY zotero.preferences.sync.lostPassword "Забули пароль?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Синхронізувати автоматично">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Наступні операції призначені для використання тільки в рідкісних, специфічних ситуаціях і не повинні використовуватися для загального пошуку та усунення несправностей. У багатьох випадках скидання буде викликати додаткові проблеми. Подивитися">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Параметри скидання налаштувань синхронізаії">
 <!ENTITY zotero.preferences.sync.reset.warning3 "для додаткової інформації.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Повна синхронізація з сервером Zotero">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Об'єднати локальні дані Zotero з даними серверу, ігноруючи історію синхронізації">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Відновити з серверу Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Видалити всі локальні дані Zotero та відновити з серверу">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Віднвити на сервері Zotero">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Швидкий пошук">
 <!ENTITY zotero.preferences.keys.newItem "Створити новий документ">
 <!ENTITY zotero.preferences.keys.newNote "Створити нову закладку">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Переключити панель вибору тегів">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Скопіювати цитати з вибраного докмента в буфер обміну">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Копіювати вибрані документи в буфер обміну">

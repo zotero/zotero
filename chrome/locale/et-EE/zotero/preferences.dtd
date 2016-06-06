@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Brauseri paanil">
 <!ENTITY zotero.preferences.showIn.separateTab "Eraldi">
 <!ENTITY zotero.preferences.showIn.appTab "Rakenduse tab">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Fondi suurus:">
 <!ENTITY zotero.preferences.fontSize.small "Väike">
 <!ENTITY zotero.preferences.fontSize.medium "Keskmine">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "seotud lingid">
 <!ENTITY zotero.preferences.groups.tags "lipikud">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Otsida lahendajaid">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sünkroonimine">
 <!ENTITY zotero.preferences.sync.username "Kasutajanimi:">
 <!ENTITY zotero.preferences.sync.password "Salasõna:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero sünkroon-server">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Loo kasutaja">
 <!ENTITY zotero.preferences.sync.lostPassword "Salasõna kadunud?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sünkroonida automaatselt">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Järgnevad toimingud on mõeldud vaid erakordseteks ja spetsiifilisteks olukordadeks ja neid ei tohiks kasutada üldiseks probleemide lahendamiseks. Paljudel juhtudel võib algseadistamine lisaprobleeme põhjustada. Vt ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sünkroniseerimise alglaadimise seaded">
 <!ENTITY zotero.preferences.sync.reset.warning3 "edasine info.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Zotero serveriga täissünkroonimine">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Liita kohalikele Zotero andmetele sünkroon-serveris olevad andmed, jättes tähelepanuta sünkroonimise ajaloo">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Taastada Zotero serverist">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Kustutada kõik kohalikud andmed ja taastada need sünkroon-serverist">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Taastada sünkroon-serveri andmed kohalikust hoidlast">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Kiirotsing">
 <!ENTITY zotero.preferences.keys.newItem "Uue kirje loomine">
 <!ENTITY zotero.preferences.keys.newNote "Uue märkuse loomine">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Lipikuvalija olek">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopeerida valitud kirje tsiteeringud lõikepuhvrisse">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopeerida valitud kirjed lõikepuhvrisse">

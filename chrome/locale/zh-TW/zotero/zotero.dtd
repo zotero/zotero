@@ -1,3 +1,5 @@
+<!ENTITY zotero.general.yes "Yes">
+<!ENTITY zotero.general.no "No">
 <!ENTITY zotero.general.optional "(選用)">
 <!ENTITY zotero.general.note "注意：">
 <!ENTITY zotero.general.selectAll "全選">
@@ -8,6 +10,7 @@
 <!ENTITY zotero.general.cancel "取消">
 <!ENTITY zotero.general.refresh "重新整理">
 <!ENTITY zotero.general.saveAs "另存新檔...">
+<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 
 <!ENTITY zotero.errorReport.title "Zotero 錯誤報告">
 <!ENTITY zotero.errorReport.unrelatedMessages "這可能包括無關於 Zotero 的訊息。">
@@ -100,7 +103,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "從目前頁面建立網頁項目">
 <!ENTITY zotero.toolbar.lookup.label "依識別碼加入項目">
 <!ENTITY zotero.toolbar.removeItem.label "移除項目…">
+<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "新增文獻庫">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
 <!ENTITY zotero.toolbar.newGroup "新增群組…">
 <!ENTITY zotero.toolbar.newSubcollection.label "新增子文獻庫…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "新增搜尋結果…">
@@ -120,6 +125,13 @@
 <!ENTITY zotero.toolbar.openURL.label "查詢">
 <!ENTITY zotero.toolbar.openURL.tooltip "於本機文獻庫尋找">
 
+<!ENTITY zotero.toolbar.feeds.new "New Feed…">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
+<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
+<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+
 <!ENTITY zotero.item.add "加入">
 <!ENTITY zotero.item.attachment.file.show "顯示檔案">
 <!ENTITY zotero.item.textTransform "轉換文字">
@@ -128,6 +140,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "互換西方語言方式的名/姓">
 <!ENTITY zotero.item.viewOnline "線上檢視">
 <!ENTITY zotero.item.copyAsURL "複製成 URL">
+<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
 <!ENTITY zotero.toolbar.newNote "新增筆記">
 <!ENTITY zotero.toolbar.note.standalone "新增獨立筆記">
@@ -139,11 +152,9 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "製作目前網頁快照">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "沒有標籤可顯示">
-<!ENTITY zotero.tagSelector.filter "篩選器：">
+<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "顯示自動的">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "顯示此文獻庫中的所有標籤">
-<!ENTITY zotero.tagSelector.selectVisible "選取可見的">
-<!ENTITY zotero.tagSelector.clearVisible "不選可見的">
 <!ENTITY zotero.tagSelector.clearAll "全不選">
 <!ENTITY zotero.tagSelector.assignColor "配上顏色…">
 <!ENTITY zotero.tagSelector.renameTag "重新命名標籤…">
@@ -227,7 +238,6 @@
 
 <!ENTITY zotero.integration.references.label "參考文獻表中的參考文獻條">
 
-<!ENTITY zotero.sync.button "與 Zotero 伺服器同步">
 <!ENTITY zotero.sync.error "同步錯誤">
 <!ENTITY zotero.sync.storage.progress "進度：">
 <!ENTITY zotero.sync.storage.downloads "下載：">
@@ -252,6 +262,16 @@
 <!ENTITY zotero.proxy.recognized.warning.secondary "加入其他的代理伺服器會讓惡意網站偽裝成您所信任的網站。">
 <!ENTITY zotero.proxy.recognized.disable.label "不要由過去識別接受的代理伺服器自動改導請求。">
 <!ENTITY zotero.proxy.recognized.ignore.label "忽略">
+
+<!ENTITY zotero.feedSettings.title "Feed Settings">
+<!ENTITY zotero.feedSettings.saveButton.label "Save">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "Title:">
+<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
+<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
+<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Remove read articles after ">
+<!ENTITY zotero.feedSettings.cleanupAfter.label2 "day(s)">
+
 
 <!ENTITY zotero.recognizePDF.recognizing.label "取回屬性資料中…">
 <!ENTITY zotero.recognizePDF.cancel.label "取消">

@@ -1,3 +1,5 @@
+<!ENTITY zotero.general.yes "Yes">
+<!ENTITY zotero.general.no "No">
 <!ENTITY zotero.general.optional "(İsteğe bağlı)">
 <!ENTITY zotero.general.note "Not:">
 <!ENTITY zotero.general.selectAll "Hepsini Seç">
@@ -8,6 +10,7 @@
 <!ENTITY zotero.general.cancel "İptal Et">
 <!ENTITY zotero.general.refresh "Yenile">
 <!ENTITY zotero.general.saveAs "Farklı Kaydet...">
+<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 
 <!ENTITY zotero.errorReport.title "Zotero Hata Raporu">
 <!ENTITY zotero.errorReport.unrelatedMessages "Bu, Zotero ile ilgili olmayan mesajlar içerebilir.">
@@ -100,7 +103,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Geçerli Sayfadan Yeni Bir Eser Oluştur">
 <!ENTITY zotero.toolbar.lookup.label "Eser(ler)i Tanımlayıcılarını Kullanarak Ekle">
 <!ENTITY zotero.toolbar.removeItem.label "Eseri Kaldır...">
+<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Yeni Derme...">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
 <!ENTITY zotero.toolbar.newGroup "Yeni Grup...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Yeni Alt Derme...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Yeni Kaydedilen Arama...">
@@ -120,6 +125,13 @@
 <!ENTITY zotero.toolbar.openURL.label "Yerini Belirle">
 <!ENTITY zotero.toolbar.openURL.tooltip "Yerel Kitaplığınızda Bul">
 
+<!ENTITY zotero.toolbar.feeds.new "New Feed…">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
+<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
+<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+
 <!ENTITY zotero.item.add "Ekle">
 <!ENTITY zotero.item.attachment.file.show "Dosyayı Göster">
 <!ENTITY zotero.item.textTransform "Metni Dönüştür">
@@ -128,6 +140,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "İlk ve Soyadları Takas Et">
 <!ENTITY zotero.item.viewOnline "Çevrimiçi Göster">
 <!ENTITY zotero.item.copyAsURL "URL'i Kopyala">
+<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
 <!ENTITY zotero.toolbar.newNote "Yeni Not">
 <!ENTITY zotero.toolbar.note.standalone "Yeni Bağımsız Not">
@@ -139,11 +152,9 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Geçerli Sayfanın Görünümünü Al">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Gösterilecek etiket yok">
-<!ENTITY zotero.tagSelector.filter "Süzgeç:">
+<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "Otomatik göster">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Bu kitaplık içindeki tüm etiketleri göster">
-<!ENTITY zotero.tagSelector.selectVisible "Görülebileni Seç">
-<!ENTITY zotero.tagSelector.clearVisible "Gürülebileni Seçme">
 <!ENTITY zotero.tagSelector.clearAll "Hiçbirini Seçme">
 <!ENTITY zotero.tagSelector.assignColor "Renk Belirle...">
 <!ENTITY zotero.tagSelector.renameTag "Etiketi Yeniden Adlandır...">
@@ -227,7 +238,6 @@
 
 <!ENTITY zotero.integration.references.label "Kaynakçadaki Kaynaklar">
 
-<!ENTITY zotero.sync.button "Zotero Sunucusu ile Eşitle">
 <!ENTITY zotero.sync.error "Eşitleme Hatası">
 <!ENTITY zotero.sync.storage.progress "İşlem:">
 <!ENTITY zotero.sync.storage.downloads "İndirilenler:">
@@ -252,6 +262,16 @@
 <!ENTITY zotero.proxy.recognized.warning.secondary "Başka vekil sunucuların eklenmesi kötü niyetli sitelere onaylanan site izni verebilir.">
 <!ENTITY zotero.proxy.recognized.disable.label "İsteği otomatik olarak bir önce onaylanan vekil sunucu üzerinden yönlendirme.">
 <!ENTITY zotero.proxy.recognized.ignore.label "Yoksay">
+
+<!ENTITY zotero.feedSettings.title "Feed Settings">
+<!ENTITY zotero.feedSettings.saveButton.label "Save">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "Title:">
+<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
+<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
+<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Remove read articles after ">
+<!ENTITY zotero.feedSettings.cleanupAfter.label2 "day(s)">
+
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Üst Veriyi Alıyor...">
 <!ENTITY zotero.recognizePDF.cancel.label "İptal et">

@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Naršyklės skydelyje">
 <!ENTITY zotero.preferences.showIn.separateTab "Atskiroje kortelėje">
 <!ENTITY zotero.preferences.showIn.appTab "Programos kortelėje">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Šrifto dydis:">
 <!ENTITY zotero.preferences.fontSize.small "Mažas">
 <!ENTITY zotero.preferences.fontSize.medium "Vidutinis">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "įrašams priklausančias nuorodas">
 <!ENTITY zotero.preferences.groups.tags "gaires">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Sprendiklių paieška">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sinchronizavimas">
 <!ENTITY zotero.preferences.sync.username "Naudotojo vardas:">
 <!ENTITY zotero.preferences.sync.password "Slaptažodis:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero sinchronizavimo serveris">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "Sukurti paskyrą">
 <!ENTITY zotero.preferences.sync.lostPassword "Pamiršote slaptažodį?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sinchronizuoti automatiškai">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Tolaiu pateiktos funkcijos skirtos retiems specifiniams atvejams - jų nereikėtų naudoti įprastų nesklandumų sprendimui. Dažniausiai atkūrimas sukelia dar daugiau problemų. Daugiau informacijos rasite ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "atkūrimo sinchronizuojant parinkčių">
 <!ENTITY zotero.preferences.sync.reset.warning3 " puslapyje.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Visiškas sinchronizavimas su Zotero serveriu">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Apjungti vietinius Zotero duomenis ir esančiuosius sinchronizavimo serveryje, nepaisant sinchronizavimo istorijos.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Atkurti parsiunčiant iš Zotero serverio">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Išvalyti visus vietinius Zotero duomenis ir parsiųsti duomenis iš sinchronizavimo serverio.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Atkurti perrašant Zotero serverio duomenis">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Greita paieška">
 <!ENTITY zotero.preferences.keys.newItem "Sukurti naują įrašą">
 <!ENTITY zotero.preferences.keys.newNote "Sukurti naują pastabą">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Rodyti/slėpti gairių parinkiklį">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopijuoti pasirinktų įrašų citavimą į iškarpinę">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopijuoti pasirinktus įrašus į iškarpinę">

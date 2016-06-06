@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "瀏覽器窗格">
 <!ENTITY zotero.preferences.showIn.separateTab "不同的頁籤">
 <!ENTITY zotero.preferences.showIn.appTab "App 頁籤">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "字型大小：">
 <!ENTITY zotero.preferences.fontSize.small "小">
 <!ENTITY zotero.preferences.fontSize.medium "中">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "子連結">
 <!ENTITY zotero.preferences.groups.tags "標籤">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "開啟 URL">
 
 <!ENTITY zotero.preferences.openurl.search "搜尋解析器">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "同步">
 <!ENTITY zotero.preferences.sync.username "使用者名稱：">
 <!ENTITY zotero.preferences.sync.password "密碼：">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero 同步伺服器">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "建立帳號">
 <!ENTITY zotero.preferences.sync.lostPassword "遺失密碼？">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自動同步">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "後面操作只在極少與特定情況可用，不該作為解決問題的一般方法。於許多情況，回復預設值會導致更多問題。請參見 ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "同步回復預設值選項">
 <!ENTITY zotero.preferences.sync.reset.warning3 " 以得更多資訊。">
-<!ENTITY zotero.preferences.sync.reset.fullSync "與 Zotero 伺服器完全同步">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "將本機的 Zotero 資料與來自同步伺服器的資料合併，忽略同步歷史。">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "從 Zotero 伺服器回復">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "刪除本機的所有 Zotero 資料，並從同步伺服器回復。">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "回復到 Zotero 伺服器">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "快速搜尋">
 <!ENTITY zotero.preferences.keys.newItem "新增項目">
 <!ENTITY zotero.preferences.keys.newNote "新增筆記">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "切換標籤選擇器">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "複製所選項目的引用部分到剪貼簿">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "複製所選項目到剪貼簿">

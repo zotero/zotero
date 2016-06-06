@@ -12,6 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "브라우저 창">
 <!ENTITY zotero.preferences.showIn.separateTab "분리 탭">
 <!ENTITY zotero.preferences.showIn.appTab "어플리케이션 탭">
+<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "글꼴 크기:">
 <!ENTITY zotero.preferences.fontSize.small "작게">
 <!ENTITY zotero.preferences.fontSize.medium "중간">
@@ -39,6 +42,13 @@
 <!ENTITY zotero.preferences.groups.childLinks "하위 링크들">
 <!ENTITY zotero.preferences.groups.tags "tags">
 
+<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "해석기로 검색">
@@ -49,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "동기화">
 <!ENTITY zotero.preferences.sync.username "사용자명:">
 <!ENTITY zotero.preferences.sync.password "비밀번호:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero 동기화 서버">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount "계정 생성">
 <!ENTITY zotero.preferences.sync.lostPassword "비밀번호를 분실하셨나요?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "자동 동기화">
@@ -68,8 +80,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Zotero 서버와 전체 동기화">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Zotero의 로컬 데이터와 동기화 서버 데이터 병합. 동기화 히스토리 무시함.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zotero 서버로부터 복원">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "모든 지역 Zotero 자료를 지우고 동기화 서버로부터 복원">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zotero Server로 복원">
@@ -131,6 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "빠른 검색">
 <!ENTITY zotero.preferences.keys.newItem "Create a New Item">
 <!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "태그 선택기 끄기/켜기">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "선택된 항목 인용을 클립보드에 복사">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "선택된 항목을 클립보드에 복사">
