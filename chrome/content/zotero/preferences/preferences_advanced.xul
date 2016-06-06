@@ -295,14 +295,13 @@
 					<groupbox>
 						<hbox>
 							<hbox align="center">
-								<label value="&zotero.preferences.feeds.sorting.label1;"/>
+								<label value="&zotero.preferences.feeds.sorting.label;"/>
 								<menulist id="feed-sort" preference="pref-feeds-sortAscending">
 									<menupopup>
 										<menuitem label="&zotero.preferences.feeds.sorting.newest;" value="false"/>
 										<menuitem label="&zotero.preferences.feeds.sorting.oldest;" value="true"/>
 									</menupopup>
 								</menulist>
-								<label value="&zotero.preferences.feeds.sorting.label2;"/>
 							</hbox>
 						</hbox>
 					</groupbox>
