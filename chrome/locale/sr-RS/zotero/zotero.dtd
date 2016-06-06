@@ -1,38 +1,38 @@
-<!ENTITY zotero.general.optional "(произвољно)">
+<!ENTITY zotero.general.optional "(необавезно)">
 <!ENTITY zotero.general.note "Белешка:">
 <!ENTITY zotero.general.selectAll "Изабери све">
 <!ENTITY zotero.general.deselectAll "Поништи изабрано">
 <!ENTITY zotero.general.edit "Уреди">
 <!ENTITY zotero.general.delete "Обриши">
-<!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
-<!ENTITY zotero.general.refresh "Refresh">
-<!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.ok "У реду">
+<!ENTITY zotero.general.cancel "Откажи">
+<!ENTITY zotero.general.refresh "Освежи">
+<!ENTITY zotero.general.saveAs "Сачувај као…">
 
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
-<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
-<!ENTITY zotero.errorReport.submissionInProgress "Сачекајте док се извештај о грешци шаље.">
+<!ENTITY zotero.errorReport.title "Пријављивање грешака у Зотеру">
+<!ENTITY zotero.errorReport.unrelatedMessages "Ово може да обухвати поруке које немају везе са Зотером.">
+<!ENTITY zotero.errorReport.submissionInProgress "Сачекајте док пошаљемо извештај о грешци.">
 <!ENTITY zotero.errorReport.submitted "Извештај о грешци је послат.">
 <!ENTITY zotero.errorReport.reportID "Број извештаја:">
-<!ENTITY zotero.errorReport.postToForums "Оставите поруку на форуму за Зотеро (forums.zotero.org) са овим бројем извештаја, описом проблема и свим корацима потребним да се понови грешка.">
-<!ENTITY zotero.errorReport.notReviewed "Извештаји о грешкама се обично не прегледају, осим ако се не помињу у форумима.">
+<!ENTITY zotero.errorReport.postToForums "Оставите поруку на Зотеровом форуму (forums.zotero.org) са овим бројем извештаја, описом проблема и свим корацима потребним да се понови грешка.">
+<!ENTITY zotero.errorReport.notReviewed "Извештаји о грешкама се обично не прегледају, осим ако се не помињу на форумима.">
 
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
+<!ENTITY zotero.upgrade.title "Зотеров чаробњак за ажурирање">
 <!ENTITY zotero.upgrade.newVersionInstalled "Инсталирали сте нову верзију Зотера.">
-<!ENTITY zotero.upgrade.upgradeRequired "Ваша Зотеро база података мора бити надограђена да би радила са новом верзијом.">
-<!ENTITY zotero.upgrade.autoBackup "Резерва за вашу постојећу базу података ће бити аутоматски направљена пре било које измене.">
-<!ENTITY zotero.upgrade.majorUpgrade "Ово је главна доградња.">
+<!ENTITY zotero.upgrade.upgradeRequired "Зотерова база података мора бити ажурирана да би радила са новом верзијом.">
+<!ENTITY zotero.upgrade.autoBackup "Пре даљих измена, направићемо резервну копију ваше постојеће базе података.">
+<!ENTITY zotero.upgrade.majorUpgrade "Ово је веће ажурирање">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Проверите">
-<!ENTITY zotero.upgrade.majorUpgradeLink "упутства за дограђивање">
+<!ENTITY zotero.upgrade.majorUpgradeLink "упутства за ажурирање">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "пре него што наставите.">
-<!ENTITY zotero.upgrade.upgradeInProgress "Сачекајте док се процес надоградње извршава. Ово може потрајати неколико минута.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Зотеро база података је успешно надограђена.">
+<!ENTITY zotero.upgrade.upgradeInProgress "Сачекајте док се програм не ажурира. Ово може потрајати неколико минута.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Зотеро база података је успешно ажурирана.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Погледајте">
-<!ENTITY zotero.upgrade.changeLogLink "дневник промена">
+<!ENTITY zotero.upgrade.changeLogLink "записник промена">
 <!ENTITY zotero.upgrade.changeLogAfterLink "да би видели шта је ново.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Додај назначено у Зотеро белешке">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Направи Зотеро ставку и белешку из назначеног">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "Додајте означено у Зотерову белешку">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Направите Зотерову ставку и белешку из изабраног">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "Сачувај везу као Зотеро ставку">
 <!ENTITY zotero.contextMenu.saveImageAsItem "Сачувај слику као Зотеро ставку">
 
@@ -44,186 +44,186 @@
 <!ENTITY zotero.notes.separate "Уреди у одвојеном прозору">
 
 <!ENTITY zotero.toolbar.duplicate.label "Прикажи дупликате">
-<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+<!ENTITY zotero.collections.showUnfiledItems "Прикажи неразврстане">
 
-<!ENTITY zotero.items.itemType "Тип ставке">
-<!ENTITY zotero.items.type_column "Item Type">
+<!ENTITY zotero.items.itemType "Врста ставке">
+<!ENTITY zotero.items.type_column "Врста ставке">
 <!ENTITY zotero.items.title_column "Наслов">
 <!ENTITY zotero.items.creator_column "Аутор">
 <!ENTITY zotero.items.date_column "Датум">
 <!ENTITY zotero.items.year_column "Година">
 <!ENTITY zotero.items.publisher_column "Издавач">
 <!ENTITY zotero.items.publication_column "Издање">
-<!ENTITY zotero.items.journalAbbr_column "Скраћеница за журнал">
+<!ENTITY zotero.items.journalAbbr_column "Скраћеница часописа">
 <!ENTITY zotero.items.language_column "Језик">
 <!ENTITY zotero.items.accessDate_column "Приступљено">
-<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.libraryCatalog_column "Каталог библиотеке">
 <!ENTITY zotero.items.callNumber_column "Сигнатура">
 <!ENTITY zotero.items.rights_column "Права">
 <!ENTITY zotero.items.dateAdded_column "Датум додавања">
 <!ENTITY zotero.items.dateModified_column "Датум промене">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archive">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.place_column "Place">
-<!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Edition">
-<!ENTITY zotero.items.pages_column "Pages">
-<!ENTITY zotero.items.issue_column "Issue">
-<!ENTITY zotero.items.series_column "Series">
-<!ENTITY zotero.items.seriesTitle_column "Series Title">
-<!ENTITY zotero.items.court_column "Court">
-<!ENTITY zotero.items.medium_column "Medium/Format">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "System">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.extra_column "Додатно">
+<!ENTITY zotero.items.archive_column "Архива">
+<!ENTITY zotero.items.archiveLocation_column "Место у архиви">
+<!ENTITY zotero.items.place_column "Место">
+<!ENTITY zotero.items.volume_column "Том">
+<!ENTITY zotero.items.edition_column "Едиција">
+<!ENTITY zotero.items.pages_column "Странице">
+<!ENTITY zotero.items.issue_column "Бр. издања">
+<!ENTITY zotero.items.series_column "Серија">
+<!ENTITY zotero.items.seriesTitle_column "Наслов серије">
+<!ENTITY zotero.items.court_column "Суд">
+<!ENTITY zotero.items.medium_column "Медијум/формат">
+<!ENTITY zotero.items.genre_column "Жанр">
+<!ENTITY zotero.items.system_column "Систем">
+<!ENTITY zotero.items.moreColumns.label "Још колона">
+<!ENTITY zotero.items.restoreColumnOrder.label "Врати редослед колона">
 
 <!ENTITY zotero.items.menu.showInLibrary "Прикажи у библиотеци">
 <!ENTITY zotero.items.menu.attach.note "Додај белешку">
 <!ENTITY zotero.items.menu.attach "Додај прилог">
-<!ENTITY zotero.items.menu.attach.snapshot "Додај снимак тренутне странице">
-<!ENTITY zotero.items.menu.attach.link "Додај везу до тренутне странице">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
-<!ENTITY zotero.items.menu.attach.file "Додај сачувану копију датотеке...">
-<!ENTITY zotero.items.menu.attach.fileLink "Приложи везу датотеци...">
+<!ENTITY zotero.items.menu.attach.snapshot "Приложо снимак тренутне странице">
+<!ENTITY zotero.items.menu.attach.link "Приложи везу до тренутне странице">
+<!ENTITY zotero.items.menu.attach.link.uri "Приложи везу до адресе…">
+<!ENTITY zotero.items.menu.attach.file "Приложи сачувану копију датотеке…">
+<!ENTITY zotero.items.menu.attach.fileLink "Приложи везу до датотеке…">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
-<!ENTITY zotero.items.menu.duplicateItem "Умножи изабрану ставку">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+<!ENTITY zotero.items.menu.restoreToLibrary "Врати у библиотеку">
+<!ENTITY zotero.items.menu.duplicateItem "Умножи ставку">
+<!ENTITY zotero.items.menu.mergeItems "Споји ставке…">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Изаберите верзију ставке која ће постати главна ставка:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Изаберите поља која желите да преузмете из друге верзије ставке:">
 
 <!ENTITY zotero.toolbar.newItem.label "Нова ставка">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Више">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Направи нову ставку од тренутне странице">
-<!ENTITY zotero.toolbar.lookup.label "Add Item(s) by Identifier">
-<!ENTITY zotero.toolbar.removeItem.label "Избаци ставку...">
-<!ENTITY zotero.toolbar.newCollection.label "Нова збирка...">
-<!ENTITY zotero.toolbar.newGroup "Нова група...">
-<!ENTITY zotero.toolbar.newSubcollection.label "Нова подзбирка...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Нова сачувана претрага...">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Направите веб страницу од тренутне странице">
+<!ENTITY zotero.toolbar.lookup.label "Додај ставку(е) на основу идентификатора">
+<!ENTITY zotero.toolbar.removeItem.label "Уклони ставку…">
+<!ENTITY zotero.toolbar.newCollection.label "Нова збирка…">
+<!ENTITY zotero.toolbar.newGroup "Нова група…">
+<!ENTITY zotero.toolbar.newSubcollection.label "Нова подзбирка…">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Нова сачувана претрага…">
 <!ENTITY zotero.toolbar.emptyTrash.label "Испразни корпу за отпатке">
 <!ENTITY zotero.toolbar.tagSelector.label "Покажи/сакриј изборника ознаке">
 <!ENTITY zotero.toolbar.actions.label "Радње">
-<!ENTITY zotero.toolbar.import.label "Увези...">
+<!ENTITY zotero.toolbar.import.label "Увези…">
 <!ENTITY zotero.toolbar.importFromClipboard "Увези из оставе">
-<!ENTITY zotero.toolbar.export.label "Извези библиотеку...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF скенирање...">
+<!ENTITY zotero.toolbar.export.label "Извези библиотеку…">
+<!ENTITY zotero.toolbar.rtfScan.label "РТФ скенирање…">
 <!ENTITY zotero.toolbar.timeline.label "Направите временски ток">
-<!ENTITY zotero.toolbar.preferences.label "Поставке...">
+<!ENTITY zotero.toolbar.preferences.label "Поставке…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Подршка и документација">
 <!ENTITY zotero.toolbar.about.label "О програму Зотеро">
 <!ENTITY zotero.toolbar.advancedSearch "Напредна претрага">
-<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
+<!ENTITY zotero.toolbar.tab.tooltip "Пређи у режим језичка">
 <!ENTITY zotero.toolbar.openURL.label "Пронађи">
-<!ENTITY zotero.toolbar.openURL.tooltip "Нађи кроз вашу локалну библиотеку">
+<!ENTITY zotero.toolbar.openURL.tooltip "Налази ставу у вашој локалној библиотеци">
 
 <!ENTITY zotero.item.add "Додај">
 <!ENTITY zotero.item.attachment.file.show "Прикажи датотеку">
-<!ENTITY zotero.item.textTransform "Преиначи текст">
+<!ENTITY zotero.item.textTransform "Преобликуј текст">
 <!ENTITY zotero.item.textTransform.titlecase "Величина слова у наслову">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.textTransform.sentencecase "Величина слова у реченици">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Замени прва/последња имена">
+<!ENTITY zotero.item.viewOnline "Погледај на мрежи">
+<!ENTITY zotero.item.copyAsURL "Копирај као адресу">
 
-<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newNote "Нова белешка">
 <!ENTITY zotero.toolbar.note.standalone "Нова самостална белешка">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
-<!ENTITY zotero.toolbar.lookup "Потражи по идентификатору...">
-<!ENTITY zotero.toolbar.attachment.linked "Повежи са датотеком...">
-<!ENTITY zotero.toolbar.attachment.add "Сачувај копију датотеке...">
+<!ENTITY zotero.toolbar.note.child "Додај подбелешку">
+<!ENTITY zotero.toolbar.lookup "Потражи на основу идентификатора…">
+<!ENTITY zotero.toolbar.attachment.linked "Повежи са датотеком…">
+<!ENTITY zotero.toolbar.attachment.add "Сачувај копију датотеке…">
 <!ENTITY zotero.toolbar.attachment.weblink "Сачувај везу на тренутну страницу">
-<!ENTITY zotero.toolbar.attachment.snapshot "Сними тренутну страницу">
+<!ENTITY zotero.toolbar.attachment.snapshot "Сачувај слику тренутне странице">
 
-<!ENTITY zotero.tagSelector.noTagsToDisplay "Нема ознаке за приказ">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "Нема ознака за приказ">
 <!ENTITY zotero.tagSelector.filter "Филтер:">
 <!ENTITY zotero.tagSelector.showAutomatic "Аутоматски прикажи">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Прикажи све ознаке у овој библиотеци">
 <!ENTITY zotero.tagSelector.selectVisible "Изабери видљиве">
-<!ENTITY zotero.tagSelector.clearVisible "Избаци из избора видљиве">
-<!ENTITY zotero.tagSelector.clearAll "Избаци из избора све">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
-<!ENTITY zotero.tagSelector.renameTag "Преименуј ознаку...">
-<!ENTITY zotero.tagSelector.deleteTag "Избриши ознаку...">
+<!ENTITY zotero.tagSelector.clearVisible "Уклони видљиве из избора">
+<!ENTITY zotero.tagSelector.clearAll "Поништи избор">
+<!ENTITY zotero.tagSelector.assignColor "Додели боју…">
+<!ENTITY zotero.tagSelector.renameTag "Преименуј ознаку…">
+<!ENTITY zotero.tagSelector.deleteTag "Избриши ознаку…">
 
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
-<!ENTITY zotero.tagColorChooser.color "Color:">
-<!ENTITY zotero.tagColorChooser.position "Position:">
-<!ENTITY zotero.tagColorChooser.setColor "Set Color">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.title "Одаберите боју и место ознаке">
+<!ENTITY zotero.tagColorChooser.color "Боја:">
+<!ENTITY zotero.tagColorChooser.position "Место:">
+<!ENTITY zotero.tagColorChooser.setColor "Постави боју">
+<!ENTITY zotero.tagColorChooser.removeColor "Уклони боју">
 
-<!ENTITY zotero.lookup.description "Enter one or more ISBNs, DOIs, or PMIDs to look up in the box below.">
-<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.description "Унесите ISBN, DOI или PMID за тражење у приложеним пољима.">
+<!ENTITY zotero.lookup.button.search "Претрага">
 
 <!ENTITY zotero.selectitems.title "Изабери ставке">
-<!ENTITY zotero.selectitems.intro.label "Изабери које ставке бисте желели додати у вашу библиотеку">
+<!ENTITY zotero.selectitems.intro.label "Изабери које ставке желите да додате у вашу библиотеку">
 <!ENTITY zotero.selectitems.cancel.label "Откажи">
 <!ENTITY zotero.selectitems.select.label "У реду">
 
-<!ENTITY zotero.bibliography.title "Направи библиографију">
+<!ENTITY zotero.bibliography.title "Направи цитат/библиографију">
 <!ENTITY zotero.bibliography.style.label "Стил цитата:">
-<!ENTITY zotero.bibliography.locale.label "Language:">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
-<!ENTITY zotero.bibliography.outputMethod "Output Method:">
-<!ENTITY zotero.bibliography.saveAsRTF.label "Сними као RTF">
-<!ENTITY zotero.bibliography.saveAsHTML.label "Сними као HTML">
+<!ENTITY zotero.bibliography.locale.label "Језик:">
+<!ENTITY zotero.bibliography.outputMode "Извези као:">
+<!ENTITY zotero.bibliography.bibliography "Библиографију">
+<!ENTITY zotero.bibliography.outputMethod "Начин извоза:">
+<!ENTITY zotero.bibliography.saveAsRTF.label "Сними као РТФ">
+<!ENTITY zotero.bibliography.saveAsHTML.label "Сними као ХТМЛ">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Умножи">
 <!ENTITY zotero.bibliography.print.label "Штампај">
 
 <!ENTITY zotero.integration.docPrefs.title "Поставке документа">
-<!ENTITY zotero.integration.addEditCitation.title "Додај/уреди цитације">
+<!ENTITY zotero.integration.addEditCitation.title "Додај/уреди цитат">
 <!ENTITY zotero.integration.editBibliography.title "Уреди библиографију">
-<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Брзо форматирање цитата">
 
 <!ENTITY zotero.progress.title "Напредак">
 
-<!ENTITY zotero.exportOptions.title "Извоз...">
+<!ENTITY zotero.exportOptions.title "Извоз…">
 <!ENTITY zotero.exportOptions.format.label "Формат:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Опције преводиоца">
 
-<!ENTITY zotero.charset.label "Character Encoding">
-<!ENTITY zotero.moreEncodings.label "More Encodings">
+<!ENTITY zotero.charset.label "Кодирање знакова">
+<!ENTITY zotero.moreEncodings.label "Додатна кодирања">
 
-<!ENTITY zotero.citation.keepSorted.label "Држи изворе поредане">
+<!ENTITY zotero.citation.keepSorted.label "Држи изворе поређане">
 
 <!ENTITY zotero.citation.suppressAuthor.label "Потисни аутора">
 <!ENTITY zotero.citation.prefix.label "Префикс:">
 <!ENTITY zotero.citation.suffix.label "Суфикс:">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.editorWarning.label "Упозорење: Цитат неће пратити измене које направите у вашој бази података уколико га директно измените у програму за уређивање текста.">
 
 <!ENTITY zotero.richText.italic.label "Курзив">
-<!ENTITY zotero.richText.bold.label "Подебљана">
-<!ENTITY zotero.richText.underline.label "Подвучена">
-<!ENTITY zotero.richText.superscript.label "Суперскрипт">
-<!ENTITY zotero.richText.subscript.label "Супскрипт">
+<!ENTITY zotero.richText.bold.label "Подебљано">
+<!ENTITY zotero.richText.underline.label "Подвучено">
+<!ENTITY zotero.richText.superscript.label "Експонент">
+<!ENTITY zotero.richText.subscript.label "Индекс">
 
 <!ENTITY zotero.annotate.toolbar.add.label "Додај напомену">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Скупи све напомене">
 <!ENTITY zotero.annotate.toolbar.expand.label "Рашири све напомене">
-<!ENTITY zotero.annotate.toolbar.highlight.label "Назначи текст">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "Склони назнаку текста">
+<!ENTITY zotero.annotate.toolbar.highlight.label "Истакни текст">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "Уклони истицање">
 
 <!ENTITY zotero.integration.prefs.displayAs.label "Прикажи цитате као:">
 <!ENTITY zotero.integration.prefs.footnotes.label "Фуснота">
 <!ENTITY zotero.integration.prefs.endnotes.label "Енднота">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Форматирај користећи:">
-<!ENTITY zotero.integration.prefs.bookmarks.label "Пречице">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Пречице су сачуване кроз Microsoft Word и OpenOffice, али могу бити нехотично промењене.">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Форматирај помоћу:">
+<!ENTITY zotero.integration.prefs.bookmarks.label "Обележивачи">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Обележивачи ће остати сачувани кроз Microsoft Word и ЛибреОфис, али могу бити нехотично промењени. Због сагласности са свим програмима, цитате не можете уметнути у фусноте или ендноте у овом режиму.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Аутоматски скрати наслове часописа">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Аутоматски преузима МЕДЛАЈН скраћенице часописа на основу наслова часописа. Поље „Скраћеница часописа“ ће бити занемарено.">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Сачувај референце у документу">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Чување референци унутар документа мало повећава величину датотеке, али ће вам омогућити да делите документ са колегама без потребе да правите Зотеро групу. Зотеро 3.0 и новије верзије ће захтевати да ажурирате документе.">
 
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.showEditor.label "Прикажи уређивача">
+<!ENTITY zotero.integration.classicView.label "Класични приказ">
 
 <!ENTITY zotero.integration.references.label "Референце у библиографији">
 
@@ -233,60 +233,60 @@
 <!ENTITY zotero.sync.storage.downloads "Преузимања:">
 <!ENTITY zotero.sync.storage.uploads "Слања:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Следећа обелешка у вашој Зотеровој библиотеци је предугачка да би била усклађена са сервером:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Следећа обелешка у Зотеровој библиотеци је предугачка да би била усклађена са сервером:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Усклађене ознаке морају бити краће од 256 знакова.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Можете поделити ознаку на више мањих, скратити је или обрисати.">
 <!ENTITY zotero.sync.longTagFixer.split "Подели">
-<!ENTITY zotero.sync.longTagFixer.splitAtThe "Подели ан">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Подели на">
 <!ENTITY zotero.sync.longTagFixer.character "знак">
 <!ENTITY zotero.sync.longTagFixer.characters "знакова">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Необележене ознаке неће бити сачуване.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Ознака ће бити избрисана ис свих ставки">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Ознака ће бити избрисана из свих ставки.">
 
-<!ENTITY zotero.merge.title "Conflict Resolution">
-<!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.title "Решавање конфликта">
+<!ENTITY zotero.merge.of "од">
+<!ENTITY zotero.merge.deleted "Обрисано">
 
 <!ENTITY zotero.proxy.recognized.title "Прокси је препознат">
-<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
-<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
-<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
+<!ENTITY zotero.proxy.recognized.warning "Додајте само прокције који су повезани са вашом библиотеком, школом или веб страницом фирме">
+<!ENTITY zotero.proxy.recognized.warning.secondary "Додавање других проксија омогућава злонамерним страницама да се прикажу као странице од поверења.">
+<!ENTITY zotero.proxy.recognized.disable.label "Немој аутоматски да преусмераваш захтеве кроз претходно препознат прокси">
+<!ENTITY zotero.proxy.recognized.ignore.label "Занемари">
 
-<!ENTITY zotero.recognizePDF.recognizing.label "Retrieving Metadata...">
-<!ENTITY zotero.recognizePDF.cancel.label "Cancel">
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
-<!ENTITY zotero.recognizePDF.itemName.label "Item Name">
+<!ENTITY zotero.recognizePDF.recognizing.label "Преузимам метаподатке…">
+<!ENTITY zotero.recognizePDF.cancel.label "Откажи">
+<!ENTITY zotero.recognizePDF.pdfName.label "Назив ПДФ-а">
+<!ENTITY zotero.recognizePDF.itemName.label "Назив ставке">
 
-<!ENTITY zotero.rtfScan.title "RTF Scan">
-<!ENTITY zotero.rtfScan.cancel.label "Cancel">
-<!ENTITY zotero.rtfScan.citation.label "Citation">
-<!ENTITY zotero.rtfScan.itemName.label "Item Name">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
-<!ENTITY zotero.rtfScan.introPage.label "Introduction">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
-<!ENTITY zotero.rtfScan.introPage.description2 "To get started, select an RTF input file and an output file below:">
-<!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
-<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
-<!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
-<!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
-<!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
-<!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
-<!ENTITY zotero.rtfScan.inputFile.label "Input File">
-<!ENTITY zotero.rtfScan.outputFile.label "Output File">
+<!ENTITY zotero.rtfScan.title "РТФ скенирање">
+<!ENTITY zotero.rtfScan.cancel.label "Откажи">
+<!ENTITY zotero.rtfScan.citation.label "Цитат">
+<!ENTITY zotero.rtfScan.itemName.label "Назив ставке">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "Немапирани цитати">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "Двосмислени цитати">
+<!ENTITY zotero.rtfScan.mappedCitations.label "Мапирани цитати">
+<!ENTITY zotero.rtfScan.introPage.label "Увод">
+<!ENTITY zotero.rtfScan.introPage.description "Зотеро може аутоматски да извуче и форматира цитате и да уметне библиографију у РТФ датотеке. РТФ скенирање тренутно подржава цитирање у неколико доступних формата:">
+<!ENTITY zotero.rtfScan.introPage.description2 "За початак отворите РТФ датотеку и изаберите излазну датотеку:">
+<!ENTITY zotero.rtfScan.scanPage.label "Тражим цитате">
+<!ENTITY zotero.rtfScan.scanPage.description "Зотеро скенира документ у потрази за цитатима. Будите стрпљиви.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Верификуј цитиране ставке">
+<!ENTITY zotero.rtfScan.citationsPage.description "Прегледајте приложену листу препознатих цитата како би потврдили да је Зотеро изабрао праву ставку. Било који немапиран или двосмислен цитат мора бити потврђен пре него што пређете на наредни корак.">
+<!ENTITY zotero.rtfScan.stylePage.label "Форматирање документа">
+<!ENTITY zotero.rtfScan.formatPage.label "Форамтирање цитата">
+<!ENTITY zotero.rtfScan.formatPage.description "Зотеро обрађује и форматира РТГ датотеку. Будите стрпљиви.">
+<!ENTITY zotero.rtfScan.completePage.label "РТФ скенирање је завршено">
+<!ENTITY zotero.rtfScan.completePage.description "Ваш документ је скениран и обрађен. Проверите да ли је исправно форматиран.">
+<!ENTITY zotero.rtfScan.inputFile.label "Улазна датотека">
+<!ENTITY zotero.rtfScan.outputFile.label "Излазна датотека">
 
-<!ENTITY zotero.file.choose.label "Choose File...">
-<!ENTITY zotero.file.noneSelected.label "No file selected">
+<!ENTITY zotero.file.choose.label "Изабери датотеку…">
+<!ENTITY zotero.file.noneSelected.label "Није изабрана датотека">
 
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Search pane of the Zotero preferences.">
+<!ENTITY zotero.downloadManager.label "Сачувај у Зотеро">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Не можете да сачувате прилоге унутар изабране библиотеке. Ова ставка ће зато бити сачувана у вашу личну библиотеку.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "За употребу ових могућности морате најпре инсталирати ПДФ алате из поставки претраге Зотера.">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
+<!ENTITY zotero.attachLink.title "Додај везу до адресе">
+<!ENTITY zotero.attachLink.label.link "Веза:">
+<!ENTITY zotero.attachLink.label.title "Наслов:">
