@@ -1340,7 +1340,7 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 
 
 /**
- * Returns libraryID or FALSE if not a library
+ * Return libraryID of selected row (which could be a collection, etc.)
  */
 Zotero.CollectionTreeView.prototype.getSelectedLibraryID = function() {
 	if (!this.selection || !this.selection.count || this.selection.currentIndex == -1) return false;

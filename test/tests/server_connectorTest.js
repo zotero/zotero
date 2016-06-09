@@ -101,6 +101,58 @@ describe("Connector Server", function () {
 			// Wait until indexing is done
 			yield waitForItemEvent('refresh');
 		});
+		
+		
+		it("should save to My Library if read-only library is selected", function* () {
+			var group = yield createGroup({
+				editable: false
+			});
+			yield selectLibrary(win, group.libraryID);
+			yield waitForItemsLoad(win);
+			
+			var body = {
+				items: [
+					{
+						itemType: "newspaperArticle",
+						title: "Title",
+						creators: [
+							{
+								firstName: "First",
+								lastName: "Last",
+								creatorType: "author"
+							}
+						],
+						attachments: []
+					}
+				],
+				uri: "http://example.com"
+			};
+			
+			var promise = waitForItemEvent('add');
+			var req = yield Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(body)
+				}
+			);
+			
+			// Check item
+			var ids = yield promise;
+			assert.lengthOf(ids, 1);
+			var item = Zotero.Items.get(ids[0]);
+			assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'newspaperArticle');
+			// Item should've been saved to My Library
+			assert.equal(item.libraryID, Zotero.Libraries.userLibraryID);
+			
+			// My Library should've been selected
+			assert.equal(
+				win.ZoteroPane.collectionsView.getSelectedLibraryID(), Zotero.Libraries.userLibraryID
+			);
+		});
 	});
 	
 	describe("/connector/saveSnapshot", function () {
@@ -183,6 +235,52 @@ describe("Connector Server", function () {
 			assert.isTrue(item.isImportedAttachment());
 			assert.equal(item.attachmentContentType, 'application/pdf');
 			assert.isTrue(collection.hasItem(item.id));
+		});
+		
+		it("should save a webpage item to My Library if a read-only library is selected", function* () {
+			var group = yield createGroup({
+				editable: false
+			});
+			yield selectLibrary(win, group.libraryID);
+			yield waitForItemsLoad(win);
+			
+			// saveSnapshot saves parent and child before returning
+			var ids1, ids2;
+			var promise = waitForItemEvent('add').then(function (ids) {
+				ids1 = ids;
+				return waitForItemEvent('add').then(function (ids) {
+					ids2 = ids;
+				});
+			});
+			yield Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSnapshot",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						url: "http://example.com",
+						html: "<html><head><title>Title</title><body>Body</body></html>"
+					})
+				}
+			);
+			
+			assert.isTrue(promise.isFulfilled());
+			
+			// Check parent item
+			assert.lengthOf(ids1, 1);
+			var item = Zotero.Items.get(ids1[0]);
+			assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'webpage');
+			assert.equal(item.getField('title'), 'Title');
+			assert.equal(item.libraryID, Zotero.Libraries.userLibraryID);
+			// Item should've been saved to My Library
+			assert.equal(item.libraryID, Zotero.Libraries.userLibraryID);
+			
+			// My Library should've been selected
+			assert.equal(
+				win.ZoteroPane.collectionsView.getSelectedLibraryID(), Zotero.Libraries.userLibraryID
+			);
 		});
 	});
 });

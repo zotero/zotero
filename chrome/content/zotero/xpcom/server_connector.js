@@ -333,15 +333,38 @@ Zotero.Server.Connector.SaveItem.prototype = {
 	 * @param {Object} data POST data or GET query string
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
-	"init":function(url, data, sendResponseCallback) {
+	"init": Zotero.Promise.coroutine(function* (url, data, sendResponseCallback) {
 		// figure out where to save
-		var libraryID = null;
-		var collectionID = null;
 		var zp = Zotero.getActiveZoteroPane();
 		try {
 			var libraryID = zp.getSelectedLibraryID();
 			var collection = zp.getSelectedCollection();
 		} catch(e) {}
+		
+		// Default to My Library if present if pane not yet opened
+		if (!libraryID) {
+			let userLibrary = Zotero.Libraries.userLibrary;
+			if (userLibrary) {
+				libraryID = userLibrary.id;
+			}
+		}
+		
+		// If library isn't editable (or directly editable, in the case of My Publications), switch to
+		// My Library if present and editable, and otherwise fail
+		var library = Zotero.Libraries.get(libraryID);
+		if (!library.editable || library.libraryType == 'publications') {
+			let userLibrary = Zotero.Libraries.userLibrary;
+			if (userLibrary && userLibrary.editable) {
+				yield zp.collectionsView.selectLibrary(userLibrary.id);
+				libraryID = userLibrary.id;
+				collection = null;
+			}
+			else {
+				Zotero.logError("Can't add item to read-only library " + library.name);
+				sendResponseCallback(500);
+				return;
+			}
+		}
 		
 		var cookieSandbox = data["uri"] ? new Zotero.CookieSandbox(null, data["uri"],
 			data["detailedCookies"] ? "" : data["cookie"] || "", url.userAgent) : null;
@@ -384,7 +407,7 @@ Zotero.Server.Connector.SaveItem.prototype = {
 				sendResponseCallback(500);
 			}
 		}, Zotero.Server.Connector.AttachmentProgressManager.onProgress);
-	}
+	})
 }
 
 /**
@@ -418,9 +441,29 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			var collection = zp.getSelectedCollection();
 		} catch(e) {}
 		
-		// Default to personal library if pane not yet opened
+		// Default to My Library if present if pane not yet opened
 		if (!libraryID) {
-			libraryID = Zotero.Libraries.userLibraryID
+			let userLibrary = Zotero.Libraries.userLibrary;
+			if (userLibrary) {
+				libraryID = userLibrary.id;
+			}
+		}
+		
+		// If library isn't editable (or directly editable, in the case of My Publications), switch to
+		// My Library if present and editable, and otherwise fail
+		var library = Zotero.Libraries.get(libraryID);
+		if (!library.editable || library.libraryType == 'publications') {
+			let userLibrary = Zotero.Libraries.userLibrary;
+			if (userLibrary && userLibrary.editable) {
+				yield zp.collectionsView.selectLibrary(userLibrary.id);
+				libraryID = userLibrary.id;
+				collection = null;
+			}
+			else {
+				Zotero.logError("Can't add item to read-only library " + library.name);
+				sendResponseCallback(500);
+				return;
+			}
 		}
 		
 		// determine whether snapshot can be saved
