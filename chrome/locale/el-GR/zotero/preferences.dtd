@@ -43,10 +43,9 @@
 <!ENTITY zotero.preferences.groups.tags "ετικέτες">
 
 <!ENTITY zotero.preferences.feeds "Feeds">
-<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
-<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
-<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
-<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
+<!ENTITY zotero.preferences.feeds.sorting.label "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Newest items first">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">

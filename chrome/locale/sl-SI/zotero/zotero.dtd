@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.removeItem.label "Odstrani vnos ...">
 <!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Nova zbirka ...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "Nova skupina ...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nova podzbirka ...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Novo shranjeno iskanje ...">

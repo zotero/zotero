@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "Nome:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Cerca nella libreria:">
 
 <!ENTITY zotero.search.joinMode.prefix "Trova">
 <!ENTITY zotero.search.joinMode.any "le corrispondenze parziali con i criteri">

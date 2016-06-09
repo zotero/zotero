@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.removeItem.label "Remover item...">
 <!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Nova coleção...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "Novo grupo...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nova subcoleção...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nova pesquisa salva...">

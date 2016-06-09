@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.removeItem.label "Itema bildumatik kendu">
 <!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Bilduma berria...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "Talde berria...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Azpi-bilduma berria...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Gordetako bilaketa berria...">

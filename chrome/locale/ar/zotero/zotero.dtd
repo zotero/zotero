@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.removeItem.label "ازالة العنصر...">
 <!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "مجموعة عناصر جديدة...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "مجموعة مشاركة جديدة...">
 <!ENTITY zotero.toolbar.newSubcollection.label "مجموعة عناصر فرعية جديدة...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "بحث محفوظ جديد...">

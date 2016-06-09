@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.removeItem.label "Pašalinti įrašą...">
 <!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Naujas rinkinys...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "Nauja grupė...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Naujas poaplankis...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nauja įsiminta paieška...">

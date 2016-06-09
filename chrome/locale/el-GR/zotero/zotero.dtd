@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.removeItem.label "Απομάκρυνση στοιχείου...">
 <!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Νέα συλλογή...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "Νέα ομάδα...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Νέα δευτερεύουσα συλλογή...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Νέα αποθηκευμένη αναζήτηση...">

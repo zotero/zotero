@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.removeItem.label "移除項目…">
 <!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "新增文獻庫">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "新增群組…">
 <!ENTITY zotero.toolbar.newSubcollection.label "新增子文獻庫…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "新增搜尋結果…">

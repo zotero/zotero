@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.removeItem.label "Видалити документ...">
 <!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Нова колекція...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "Нова група...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Нова підколекція...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Новий збережений пошук...">

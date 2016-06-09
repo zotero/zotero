@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.removeItem.label "Xóa mục...">
 <!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Bộ sưu tập mới...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "Nhóm mới...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Bô sưu tập con mới...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Tìm kiếm mới...">

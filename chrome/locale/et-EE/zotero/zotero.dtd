@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.removeItem.label "Kirje eemaldamine...">
 <!ENTITY zotero.toolbar.newLibrary.label "New Library…">
 <!ENTITY zotero.toolbar.newCollection.label "Uus teema...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
+<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "Uus grupp...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Uus alamteema...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Uus salvestatud otsing...">

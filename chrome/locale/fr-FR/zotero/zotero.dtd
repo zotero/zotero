@@ -1,5 +1,5 @@
-<!ENTITY zotero.general.yes "Yes">
-<!ENTITY zotero.general.no "No">
+<!ENTITY zotero.general.yes "Oui">
+<!ENTITY zotero.general.no "Non">
 <!ENTITY zotero.general.optional "(Optionnel)">
 <!ENTITY zotero.general.note "Note :">
 <!ENTITY zotero.general.selectAll "Tout sélectionner">
@@ -10,7 +10,7 @@
 <!ENTITY zotero.general.cancel "Annuler">
 <!ENTITY zotero.general.refresh "Actualiser">
 <!ENTITY zotero.general.saveAs "Enregistrer sous…">
-<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
+<!ENTITY zotero.general.advancedOptions.label "Options avancées">
 
 <!ENTITY zotero.errorReport.title "Rapport d'erreur Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Il peut y avoir des messages sans lien avec Zotero.">
@@ -103,9 +103,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Créer un document Page Web à partir de la page courante">
 <!ENTITY zotero.toolbar.lookup.label "Ajouter un document par son identifiant">
 <!ENTITY zotero.toolbar.removeItem.label "Supprimer le document…">
-<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
+<!ENTITY zotero.toolbar.newLibrary.label "Nouvelle bibliothèque…">
 <!ENTITY zotero.toolbar.newCollection.label "Nouvelle collection…">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed As Read">
+<!ENTITY zotero.toolbar.markFeedRead.label "Marquer le flux comme lu">
 <!ENTITY zotero.toolbar.newGroup "Nouveau groupe…">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nouvelle sous-collection…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nouvelle recherche enregistrée…">
@@ -125,12 +125,12 @@
 <!ENTITY zotero.toolbar.openURL.label "Localiser">
 <!ENTITY zotero.toolbar.openURL.tooltip "Chercher dans votre bibliothèque locale">
 
-<!ENTITY zotero.toolbar.feeds.new "New Feed…">
-<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
-<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
-<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
-<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+<!ENTITY zotero.toolbar.feeds.new "Nouveau flux…">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "À partir de l'URI…">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "À partir de la page courante…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "À partir d'un fichier OPML…">
+<!ENTITY zotero.toolbar.feeds.refresh "Actualiser le flux">
+<!ENTITY zotero.toolbar.feeds.edit "Modifier le flux…">
 
 <!ENTITY zotero.item.add "Ajouter">
 <!ENTITY zotero.item.attachment.file.show "Localiser le fichier">
@@ -140,7 +140,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Inverser prénom/nom">
 <!ENTITY zotero.item.viewOnline "Afficher en ligne">
 <!ENTITY zotero.item.copyAsURL "Copier comme un lien">
-<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
+<!ENTITY zotero.item.deletePermanently "Supprimer définitivement…">
 
 <!ENTITY zotero.toolbar.newNote "Nouvelle note">
 <!ENTITY zotero.toolbar.note.standalone "Nouvelle note indépendante">
@@ -152,7 +152,7 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Capturer la page courante">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Aucun marqueur à afficher">
-<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
+<!ENTITY zotero.tagSelector.loadingTags "Chargement des marqueurs…">
 <!ENTITY zotero.tagSelector.showAutomatic "Afficher les marqueurs ajoutés automatiquement">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Afficher tous les marqueurs de cette bibliothèque">
 <!ENTITY zotero.tagSelector.clearAll "Tout désélectionner">
@@ -263,14 +263,14 @@
 <!ENTITY zotero.proxy.recognized.disable.label "Ne pas rediriger automatiquement les requêtes via des serveurs mandataires déjà identifiés auparavant">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorer">
 
-<!ENTITY zotero.feedSettings.title "Feed Settings">
-<!ENTITY zotero.feedSettings.saveButton.label "Save">
-<!ENTITY zotero.feedSettings.url.label "URL:">
-<!ENTITY zotero.feedSettings.title.label "Title:">
-<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
-<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
-<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Remove read articles after ">
-<!ENTITY zotero.feedSettings.cleanupAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.title "Paramètres du flux">
+<!ENTITY zotero.feedSettings.saveButton.label "Enregistrer">
+<!ENTITY zotero.feedSettings.url.label "URL :">
+<!ENTITY zotero.feedSettings.title.label "Titre :">
+<!ENTITY zotero.feedSettings.refresh.label1 "Mettre à jour le flux toutes les">
+<!ENTITY zotero.feedSettings.refresh.label2 "heure(s)">
+<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Supprimer les articles lus au bout de">
+<!ENTITY zotero.feedSettings.cleanupAfter.label2 "jour(s)">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Récupération des métadonnées…">

@@ -12,9 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "webbläsarfönstret">
 <!ENTITY zotero.preferences.showIn.separateTab "ny flik">
 <!ENTITY zotero.preferences.showIn.appTab "programflik">
-<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout "Utseende:">
 <!ENTITY zotero.preferences.layout.standard "Standard">
-<!ENTITY zotero.preferences.layout.stacked "Stacked">
+<!ENTITY zotero.preferences.layout.stacked "Staplad">
 <!ENTITY zotero.preferences.fontSize "Teckenstorlek:">
 <!ENTITY zotero.preferences.fontSize.small "Liten">
 <!ENTITY zotero.preferences.fontSize.medium "Mellan">
@@ -42,12 +42,11 @@
 <!ENTITY zotero.preferences.groups.childLinks "tillhörande länkar">
 <!ENTITY zotero.preferences.groups.tags "etiketter">
 
-<!ENTITY zotero.preferences.feeds "Feeds">
-<!ENTITY zotero.preferences.feeds.sorting.label1 "Sorting:">
-<!ENTITY zotero.preferences.feeds.sorting.label2 "Item First">
-<!ENTITY zotero.preferences.feeds.sorting.newest "Newest">
-<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
-<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+<!ENTITY zotero.preferences.feeds "Matningar">
+<!ENTITY zotero.preferences.feeds.sorting.label "Sortering">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Nyast först">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Äldst först">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Matningens standardvärden">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -60,8 +59,8 @@
 <!ENTITY zotero.preferences.sync.username "Användarnamn:">
 <!ENTITY zotero.preferences.sync.password "Lösenord:">
 <!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
-<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
+<!ENTITY zotero.preferences.sync.setUpSync "Ställ in synkronisering">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Koppla från konto...">
 <!ENTITY zotero.preferences.sync.createAccount "Skapa konto">
 <!ENTITY zotero.preferences.sync.lostPassword "Glömt lösenord?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkronisera automatiskt">
@@ -80,8 +79,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Följande åtgärder är endast till för sällsynta, särskilda situationer och ska inte användas för vanlig felsökning. I många fall kan en återställning istället orsaka nya problem. Se">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Återställningsalternativ för synkronisering">
 <!ENTITY zotero.preferences.sync.reset.warning3 "för mer information.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Fullständig synkronsering">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Slå ihop lokala data med data från servern, strunta i synkronseringshistrorik">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Återställ från Zotero Server">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Radera alla lokala Zoterodata och återställ från synkroniseringsservern.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Återställ till Zotero Server">
@@ -143,7 +142,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Snabbsökning">
 <!ENTITY zotero.preferences.keys.newItem "Lagra en ny källa">
 <!ENTITY zotero.preferences.keys.newNote "Skapa en ny anteckning">
-<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Markera alla matningsobjekt som lästa">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Växla etikettväljare">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiera markerade källor som noter till urklipp">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiera markerade källor till urklipp">
