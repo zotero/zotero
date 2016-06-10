@@ -83,7 +83,7 @@
 					
 					this._mode = val;
 					document.getAnonymousNodes(this)[0].setAttribute('mode', val);
-					this._id('links').mode = val;
+					this._id('links-box').mode = val;
 				]]>
 				</setter>
 			</property>
@@ -92,7 +92,7 @@
 			<property name="parentItem" onget="return this._parentItem;">
 				<setter>
 					<![CDATA[
-						this._parentItem = this._id('links').parentItem = val;
+						this._parentItem = this._id('links-box').parentItem = val;
 					]]>
 				</setter>
 			</property>
@@ -111,7 +111,7 @@
 						this.parentItem = Zotero.Items.getByLibraryAndKey(this.item.libraryID, parentKey);
 					}
 					
-					this._id('links').item = this.item;
+					this._id('links-box').item = this.item;
 					
 					this.refresh();
 				]]></setter>
@@ -121,10 +121,10 @@
 				<setter>
 					<![CDATA[
 						if(val) {
-							var links = this._id('linksbox');
-							var parent = links.parentNode;
-							var sib = links.nextSibling;
-							while(parent.firstChild !== links) {
+							var container = this._id('links-container');
+							var parent = container.parentNode;
+							var sib = container.nextSibling;
+							while (parent.firstChild !== container) {
 								parent.insertBefore(parent.removeChild(parent.firstChild), sib);
 							}
 						}
@@ -198,7 +198,8 @@
 					}
 					//textbox.inputField.scrollTop = scrollPos;
 					
-					this._id('linksbox').hidden = !(this.displayTags && this.displayRelated);
+					this._id('links-container').hidden = !(this.displayTags && this.displayRelated);
+					this._id('links-box').refresh();
 					
 					if (this.keyDownHandler) {
 						textbox.setAttribute('onkeydown',
@@ -359,8 +360,8 @@
 					timeout="1000" flex="1" hidden="true"/>
 				<xul:textbox id="noteFieldReadOnly" type="styled" mode="note"
 					readonly="true" flex="1" hidden="true"/>
-				<xul:hbox id="linksbox" hidden="true">
-					<xul:linksbox id="links" flex="1" xbl:inherits="notitle"/>
+				<xul:hbox id="links-container" hidden="true">
+					<xul:linksbox id="links-box" flex="1" xbl:inherits="notitle"/>
 				</xul:hbox>
 				<xul:button id="goButton" hidden="true"/>
 			</xul:vbox>
@@ -377,9 +378,8 @@
 						this.itemRef = val;
 						
 						this.id('tags').item = this.item;
-						this.updateTagsSummary();
 						this.id('related').item = this.item;
-						this.updateRelatedSummary();
+						this.refresh();
 					]]>
 				</setter>
 			</property>
@@ -412,14 +412,20 @@
 			</property>
 			<method name="tagsClick">
 				<body><![CDATA[
-					Zotero.spawn(function* () {
-						yield this.id('tags').reload();
-						var x = this.boxObject.screenX;
-						var y = this.boxObject.screenY;
-						this.id('tagsPopup').openPopupAtScreen(x, y, false);
-					}, this);
+					this.id('tags').reload();
+					var x = this.boxObject.screenX;
+					var y = this.boxObject.screenY;
+					this.id('tagsPopup').openPopupAtScreen(x, y, false);
 				]]></body>
 			</method>
+			
+			<method name="refresh">
+				<body><![CDATA[
+					this.updateTagsSummary();
+					this.updateRelatedSummary();
+				]]></body>
+			</method>
+			
 			<method name="updateTagsSummary">
 				<body><![CDATA[
 					var v = this.id('tags').summary;
