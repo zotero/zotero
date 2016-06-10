@@ -752,7 +752,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	}
 	
 	if (loadIn && this.isNote() && field == 110) { // title
-		this._noteTitle = value;
+		this._noteTitle = value ? value : "";
 		return true;
 	}
 	
