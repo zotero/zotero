@@ -194,7 +194,7 @@ Zotero.Date = new function(){
 	}
 	
 	/**
-	 * Convert an ISO 8601–formatted UTC date/time to a JS Date
+	 * Convert an ISO 8601–formatted date/time to a JS Date
 	 *
 	 * Adapted from http://delete.me.uk/2005/03/iso8601.html (AFL-licensed)
 	 *
