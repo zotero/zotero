@@ -208,10 +208,17 @@ describe("Zotero.FeedItem", function () {
 	});
 	
 	describe('#translate()', function() {
+		var win;
+		
 		before(function* () {
 			// Needs an open window to be able to create a hidden window for translation
-			yield loadBrowserWindow();
+			win = yield loadBrowserWindow();
 		});
+		
+		after(function () {
+			win.close()
+		});
+		
 		it('translates and saves items', function* () {
 			var feedItem = yield createDataObject('feedItem', {libraryID});
 			var url = getTestDataUrl('metadata/journalArticle-single.html');

@@ -8,19 +8,17 @@ describe("Duplicate Items", function () {
 			thisArg: this,
 			skipBundledFiles: true
 		});
-	});
-	beforeEach(function* () {
+		
 		Zotero.Prefs.clear('duplicateLibraries');
 		win = yield loadZoteroPane();
 		zp = win.ZoteroPane;
 		cv = zp.collectionsView;
-		
+	});
+	beforeEach(function* () {
 		return selectLibrary(win);
 	})
 	after(function () {
-		if (win) {
-			win.close();
-		}
+		win.close();
 	});
 	
 	describe("Merging", function () {
