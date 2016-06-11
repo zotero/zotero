@@ -56,9 +56,16 @@ describe.skip("Add Item by Identifier", function() {
 		var col = yield createDataObject('collection');
 		yield waitForItemsLoad(win);
 		
+		// Initial translator
 		var ids = yield lookupIdentifier(win, "10.4103/0976-500X.85940");
 		var item = Zotero.Items.get(ids[0]);
 		assert.equal(item.getField("title"), "Zotero: A bibliographic assistant to researcher");
+		assert.isTrue(item.inCollection(col.id));
+		
+		// Fallback translator
+		var ids = yield lookupIdentifier(win, "10.5281/zenodo.55073");
+		var item = Zotero.Items.get(ids[0]);
+		assert.equal(item.getField("title"), "Comparison of Spectral Methods Through the Adjacency Matrix and the Laplacian of a Graph");
 		assert.isTrue(item.inCollection(col.id));
 	});
 });

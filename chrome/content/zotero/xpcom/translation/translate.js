@@ -1225,6 +1225,7 @@ Zotero.Translate.Base.prototype = {
 		this._libraryID = options.libraryID;
 		this._collections = options.collections;
 		this._saveAttachments = options.saveAttachments === undefined || options.saveAttachments;
+		
 		this._savingAttachments = [];
 		this._savingItems = 0;
 		this._waitingForSave = false;
@@ -2446,7 +2447,8 @@ Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
 			this.translator.shift();
 			this.translate({
 				libraryID: this._libraryID,
-				saveAttachments: this._saveAttachments
+				saveAttachments: this._saveAttachments,
+				collections: this._collections
 			});
 			return;
 		} else {
