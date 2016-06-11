@@ -416,6 +416,12 @@
 					var x = this.boxObject.screenX;
 					var y = this.boxObject.screenY;
 					this.id('tagsPopup').openPopupAtScreen(x, y, false);
+					
+					// If editable and no existing tags, open new empty row
+					var tagsBox = this.id('tags');
+					if (tagsBox.mode == 'edit' && tagsBox.count == 0) {
+						this.id('tags').new();
+					}
 				]]></body>
 			</method>
 			

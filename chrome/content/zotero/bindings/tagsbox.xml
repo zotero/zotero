@@ -82,6 +82,7 @@
 							return;
 						}
 						this._item = val;
+						this._lastTabIndex = false;
 						this.reload();
 					]]>
 				</setter>
@@ -95,13 +96,15 @@
 					
 					if (this.item) {
 						var tags = this.item.getTags();
-						if (tags) {
-							for(var i = 0; i < tags.length; i++)
-							{
-								r = r + tags[i].tag + ", ";
-							}
-							r = r.substr(0,r.length-2);
+						
+						// Sort tags alphabetically
+						var collation = Zotero.getLocaleCollation();
+						tags.sort((a, b) => collation.compareString(1, a.tag, b.tag));
+						
+						for (let i = 0; i < tags.length; i++) {
+							r = r + tags[i].tag + ", ";
 						}
+						r = r.substr(0,r.length-2);
 					}
 				
 					return r;
@@ -725,6 +728,14 @@
 			<method name="new">
 				<body>
 					<![CDATA[
+						var rowsElement = this.id('tagRows');
+						var rows = rowsElement.childNodes;
+						
+						// Don't add new row if there already is one
+						if (rows.length > this.count) {
+							return;
+						}
+						
 						var row = this.addDynamicRow();
 						row.firstChild.nextSibling.click();
 						return row;
