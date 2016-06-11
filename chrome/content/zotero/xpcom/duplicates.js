@@ -473,7 +473,8 @@ Zotero.DisjointSetForest.prototype.sameSet = function (x, y) {
 
 Zotero.DisjointSetForest.prototype.findAll = function (asIDs) {
 	var objects = [];
-	for each(var obj in this._objects) {
+	for (let i in this._objects) {
+		let obj = this._objects[i];
 		objects.push(asIDs ? obj.id : obj);
 	}
 	return objects;
@@ -483,7 +484,8 @@ Zotero.DisjointSetForest.prototype.findAll = function (asIDs) {
 Zotero.DisjointSetForest.prototype.findAllInSet = function (x, asIDs) {
 	var xRoot = this.find(x);
 	var objects = [];
-	for each(var obj in this._objects) {
+	for (let i in this._objects) {
+		let obj = this._objects[i];
 		if (this.find(obj) == xRoot) {
 			objects.push(asIDs ? obj.id : obj);
 		}
