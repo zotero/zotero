@@ -1853,7 +1853,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		}
 		
 		// Create new clone item in target library
-		var newItem = item.clone(targetLibraryID, false, !options.tags);
+		var newItem = item.clone(targetLibraryID, { skipTags: !options.tags });
 		
 		// Set Rights field for My Publications
 		if (options.license) {
@@ -1880,7 +1880,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			var noteIDs = item.getNotes();
 			var notes = Zotero.Items.get(noteIDs);
 			for each(var note in notes) {
-				let newNote = note.clone(targetLibraryID);
+				let newNote = note.clone(targetLibraryID, { skipTags: !options.tags });
 				newNote.parentID = newItemID;
 				yield newNote.save({
 					skipSelect: true

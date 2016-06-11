@@ -3802,15 +3802,16 @@ Zotero.Item.prototype.multiDiff = function (otherItems, ignoreFields) {
 
 
 /**
- * Returns an unsaved copy of the item without an itemID or key
+ * Returns an unsaved copy of the item without itemID and key
  *
  * This is used to duplicate items and copy them between libraries.
  *
  * @param {Number} [libraryID] - libraryID of the new item, or the same as original if omitted
- * @param {Boolean} [skipTags=false] - Skip tags
+ * @param {Boolean} [options.skipTags=false] - Skip tags
+ * @param {Boolean} [options.includeCollections=false] - Add new item to all collections
  * @return {Promise<Zotero.Item>}
  */
-Zotero.Item.prototype.clone = function (libraryID, skipTags) {
+Zotero.Item.prototype.clone = function (libraryID, options = {}) {
 	Zotero.debug('Cloning item ' + this.id);
 	
 	if (libraryID !== undefined && libraryID !== null && typeof libraryID !== 'number') {
@@ -3857,8 +3858,15 @@ Zotero.Item.prototype.clone = function (libraryID, skipTags) {
 		}
 	}
 	
-	if (!skipTags) {
+	if (!options.skipTags) {
 		newItem.setTags(this.getTags());
+	}
+	
+	if (options.includeCollections) {
+		if (!sameLibrary) {
+			throw new Error("Can't include collections when cloning to different library");
+		}
+		newItem.setCollections(this.getCollections());
 	}
 	
 	if (sameLibrary) {

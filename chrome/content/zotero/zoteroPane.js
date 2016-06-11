@@ -1719,12 +1719,12 @@ var ZoteroPane = new function()
 		var newItem;
 		
 		yield Zotero.DB.executeTransaction(function* () {
-			newItem = item.clone(null, !Zotero.Prefs.get('groups.copyTags'));
-			yield newItem.save();
-			
+			newItem = item.clone();
+			// If in a collection, add new item to it
 			if (self.collectionsView.selectedTreeRow.isCollection() && newItem.isTopLevelItem()) {
-				yield self.collectionsView.selectedTreeRow.ref.addItem(newItem.id);
+				newItem.setCollections([self.collectionsView.selectedTreeRow.ref.id]);
 			}
+			yield newItem.save();
 		});
 		
 		yield self.selectItem(newItem.id);

@@ -141,7 +141,7 @@ var Zotero_Duplicates_Pane = new function () {
 		}
 		
 		_masterItem = item;
-		itembox.item = item.clone();
+		itembox.item = item.clone(null, { includeCollections: true });
 	}
 	
 	

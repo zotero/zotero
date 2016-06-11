@@ -789,11 +789,7 @@ Zotero.Items = function() {
 				// old item, which will be put in the trash
 				
 				// Add collections to master
-				var collectionIDs = otherItem.getCollections();
-				for each(var collectionID in collectionIDs) {
-					let collection = yield Zotero.Collections.getAsync(collectionID);
-					yield collection.addItem(item.id);
-				}
+				otherItem.getCollections().forEach(id => item.addToCollection(id));
 				
 				// Add tags to master
 				var tags = otherItem.getTags();
