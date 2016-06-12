@@ -33,7 +33,7 @@ var Zotero_Duplicates_Pane = new function () {
 	
 	this.setItems = function (items, displayNumItemsOnTypeError) {
 		var itemTypeID, oldestItem, otherItems = [];
-		for each(var item in items) {
+		for (let item of items) {
 			// Find the oldest item
 			if (!oldestItem) {
 				oldestItem = item;
@@ -95,7 +95,7 @@ var Zotero_Duplicates_Pane = new function () {
 			}
 			
 			var numRows = 0;
-			for each(var item in _items) {
+			for (let item of items) {
 				var date = Zotero.Date.sqlToDate(item.dateAdded, true);
 				dateList.appendItem(date.toLocaleString());
 				numRows++;

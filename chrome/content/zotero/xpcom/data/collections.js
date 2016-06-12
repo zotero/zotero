@@ -143,7 +143,7 @@ Zotero.Collections = function() {
 		
 		var sql = "SELECT collectionID FROM collections WHERE ";
 		var sqlParams = [];
-		for each(var id in itemIDs) {
+		for (let id of itemIDs) {
 			sql += "collectionID IN (SELECT collectionID FROM collectionItems "
 				+ "WHERE itemID=?) AND "
 			sqlParams.push(id);

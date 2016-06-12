@@ -871,7 +871,7 @@ Zotero.Translate.ItemGetter.prototype = {
 				// get attachments, although only urls will be passed if exportFileData is off
 				returnItemArray.attachments = [];
 				var attachments = returnItem.getAttachments();
-				for each(var attachmentID in attachments) {
+				for (let attachmentID of attachments) {
 					var attachment = Zotero.Items.get(attachmentID);
 					var attachmentInfo = this._attachmentToArray(attachment);
 					
