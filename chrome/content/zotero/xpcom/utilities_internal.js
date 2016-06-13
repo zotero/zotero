@@ -763,7 +763,7 @@ Zotero.Utilities.Internal = {
 	 * 
 	 * @param {Zotero.Item} zoteroItem
 	 * @param {Boolean} legacy Add mappings for legacy (pre-4.0.27) translators
-	 * @return {Promise<Object>}
+	 * @return {Object}
 	 */
 	itemToExportFormat: function (zoteroItem, legacy) {
 		function addCompatibilityMappings(item, zoteroItem) {
