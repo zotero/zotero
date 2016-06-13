@@ -4679,8 +4679,9 @@ var ZoteroPane = new function()
 			if(!id) continue;
 			var elValues = {};
 			for (let attr of el.getAttribute("zotero-persist").split(/[\s,]+/)) {
-				var attrValue = el.getAttribute(attr);
-				elValues[attr] = attrValue;
+				if (el.hasAttribute(attr)) {
+					elValues[attr] = el.getAttribute(attr);
+				}
 			}
 			serializedValues[id] = elValues;
 		}
