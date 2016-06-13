@@ -1031,6 +1031,10 @@ Zotero.ItemTreeView.prototype.getCellText = function (row, column)
 		case 'zotero-items-column-dateAdded':
 		case 'zotero-items-column-dateModified':
 		case 'zotero-items-column-accessDate':
+		case 'zotero-items-column-date':
+			if (column.id == 'zotero-items-column-date' && !this.collectionTreeRow.isFeed()) {
+				break;
+			}
 			if (val) {
 				var order = Zotero.Date.getLocaleDateOrder();
 				if (order == 'mdy') {
@@ -1039,7 +1043,7 @@ Zotero.ItemTreeView.prototype.getCellText = function (row, column)
 				}
 				else if (order == 'dmy') {
 					order = 'dmy';
-					var join = '.';
+					var join = '/';
 				}
 				else if (order == 'ymd') {
 					order = 'YMD';

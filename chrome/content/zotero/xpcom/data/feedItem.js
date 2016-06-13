@@ -107,27 +107,27 @@ Zotero.FeedItem.prototype.setField = function(field, value) {
 }
 
 Zotero.FeedItem.prototype.fromJSON = function(json) {
-	// Handle weird formats in feedItems
-	let dateFields = ['accessDate', 'dateAdded', 'dateModified'];
-	for (let dateField of dateFields) {
-		let val = json[dateField];
-		if (val) {
-			let d = new Date(val);
-			if (isNaN(d.getTime())) {
-				d = Zotero.Date.sqlToDate(val, true);
-			}
-			if (!d || isNaN(d.getTime())) {
-				d = Zotero.Date.strToDate(val);
-				d = new Date(d.year, d.month, d.day);
-				Zotero.debug(dateField + " " + JSON.stringify(d), 1);
-			}
-			if (isNaN(d.getTime())) {
-				Zotero.logError("Discarding invalid " + dateField + " '" + json[dateField]
+	// Spaghetti to handle weird date formats in feedItems
+	let val = json.date;
+	if (val) {
+		let d = Zotero.Date.sqlToDate(val, true);
+		if (!d || isNaN(d.getTime())) {
+			d = Zotero.Date.isoToDate(val);
+		}
+		if ((!d || isNaN(d.getTime())) && Zotero.Date.isHTTPDate(val)) {
+			d = new Date(val);
+		}
+		if (!d || isNaN(d.getTime())) {
+			d = Zotero.Date.strToDate(val);
+			if (d) {
+				json.date = [d.year, Zotero.Utilities.lpad(d.month+1, '0', 2), Zotero.Utilities.lpad(d.day, '0', 2)].join('-');
+			} else {
+				Zotero.logError("Discarding invalid date '" + json.date
 					+ "' for item " + this.libraryKey);
-				delete json[dateField];
-				continue;
+				delete json.date;
 			}
-			json[dateField] = d.toISOString();
+		} else {
+			json.date = Zotero.Date.dateToSQL(d, true);
 		}
 	}
 	Zotero.FeedItem._super.prototype.fromJSON.apply(this, arguments);

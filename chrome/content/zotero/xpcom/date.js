@@ -477,6 +477,49 @@ Zotero.Date = new function(){
 		return date;
 	}
 	
+	this.isHTTPDate = function(str) {
+		var dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+		var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
+					"Oct", "Nov", "Dec"];
+		str = str.trim();
+		var temp = str.split(',');
+		if (temp.length > 1) {
+			var dayOfWeek = temp[0];
+			if(dayNames.indexOf(dayOfWeek) == -1) {
+				return false;
+			}
+
+			str = temp[1].trim();
+		}
+		temp = str.split(' ');
+		temp = temp.filter((t) => ! t.match(/^\s*$/));
+		if (temp.length < 5) {
+			return false;
+		}
+		if (!temp[0].trim().match(/[0-3]\d/)) {
+			return false;
+		}
+		if (monthNames.indexOf(temp[1].trim()) == -1) {
+			return false;
+		}
+		if (!temp[2].trim().match(/\d\d\d\d/)) {
+			return false;
+		}
+		temp.splice(0, 3);
+		var time = temp[0].trim().split(':');
+		if (time.length < 2) {
+			return false;
+		}
+		for (let t of time) {
+			if (!t.match(/\d\d/)) {
+				return false;
+			}
+		}
+		temp.splice(0, 1);
+		var zone = temp.join(' ').trim();
+		return !!zone.match(/([+-]\d\d\d\d|UTC?|GMT|EST|EDT|CST|CDT|MST|MDT|PST|PDT)/)
+	};
+	
 	
 	function _insertDateOrderPart(dateOrder, part, partOrder) {
 		if (!dateOrder) {

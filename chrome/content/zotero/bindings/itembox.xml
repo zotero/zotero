@@ -1289,11 +1289,15 @@
 						case 'dateAdded':
 						case 'dateModified':
 						case 'accessDate':
+						case 'date':
 						
 						// TEMP - NSF
 						case 'dateSent':
 						case 'dateDue':
 						case 'accepted':
+							if (fieldName == 'date' && this.item._objectType != 'feedItem') {
+								break;
+							}
 							if (valueText) {
 								var date = Zotero.Date.sqlToDate(valueText, true);
 								if (date) {
