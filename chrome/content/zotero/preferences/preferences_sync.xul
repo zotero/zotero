@@ -46,6 +46,7 @@
 		<tabbox>
 			<tabs>
 				<tab label="&zotero.preferences.settings;"/>
+				<tab id="sync-libraries-tab" label="&zotero.preferences.sync.syncedLibraries;" disabled="true"/>
 				<tab id="sync-reset-tab" label="&zotero.preferences.sync.reset;" disabled="true"/>
 			</tabs>
 			
@@ -120,12 +121,6 @@
 											<button label="&zotero.preferences.sync.unlinkAccount;"
 													oncommand="Zotero_Preferences.Sync.unlinkAccount()"/>
 										</row>
-										<!--
-										<row>
-											<box/>
-											<button label="Access Control" oncommand="Zotero.alert('Not implemented');"/>
-										</row>
-										-->
 										<row>
 											<box/>
 											<checkbox label="&zotero.preferences.sync.syncAutomatically;"
@@ -266,6 +261,23 @@
 							</vbox>
 						</groupbox>
 					</vbox>
+				</tabpanel>
+
+				<tabpanel id="sync-libraries" orient="vertical">
+					<groupbox>
+						<caption label="&zotero.preferences.sync.syncedLibraries;"/>
+						
+						<tree id="synced-libraries-tree" flex="1" hidecolumnpicker="true" rows="10" seltype="single" editable="true"
+							ondblclick="Zotero_Preferences.Sync.dblClickSyncedLibrary(this.currentIndex);"
+							onclick="Zotero_Preferences.Sync.clickSyncedLibrary(event)"
+							onkeyup="if (event.keyCode == event.DOM_VK_SPACE) { Zotero_Preferences.Sync.dblClickSyncedLibrary(this.currentIndex); }">
+							<treecols>
+								<treecol editable="true" type="checkbox" id="synced-libraries-checked" label="&zotero.preferences.sync.syncedLibraries.sync;"/>
+								<treecol editable="false" id="synced-libraries-name" flex="1" label="&zotero.preferences.sync.syncedLibraries.sync;"/>
+							</treecols>
+							<treechildren id="synced-libraries-rows"/>
+						</tree>
+					</groupbox>
 				</tabpanel>
 				
 				<tabpanel id="zotero-reset" orient="vertical">

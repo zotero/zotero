@@ -47,6 +47,8 @@ Zotero_Preferences.Sync = {
 				);
 				this.displayFields(keyInfo.username);
 				Zotero.Users.setCurrentUsername(keyInfo.username);
+
+				yield this.initSyncedLibraries(keyInfo);
 			}
 			catch (e) {
 				// API key wrong/invalid
@@ -70,6 +72,7 @@ Zotero_Preferences.Sync = {
 	displayFields: function (username) {
 		document.getElementById('sync-unauthorized').hidden = !!username;
 		document.getElementById('sync-authorized').hidden = !username;
+		document.getElementById('sync-libraries-tab').disabled = !username;
 		document.getElementById('sync-reset-tab').disabled = !username;
 		document.getElementById('sync-username').value = username;
 		document.getElementById('sync-password').value = '';
@@ -176,6 +179,99 @@ Zotero_Preferences.Sync = {
 
 		this.displayFields();
 		yield Zotero.Sync.Runner.deleteAPIKey();
+	}),
+	
+	
+	dblClickSyncedLibrary: function (index) {
+		if (index < 3) {
+			return;
+		}
+		var treechildren = document.getElementById('synced-libraries-rows');
+		if (index >= treechildren.childNodes.length) {
+			return;
+		}
+		var row = treechildren.childNodes[index];
+		var cell = row.firstChild.firstChild;
+		cell.setAttribute('value', cell.getAttribute('value') != 'true');
+
+		return this.toggleSyncedLibrary(index);
+	},
+
+
+	clickSyncedLibrary: function (event) {
+		var tree = document.getElementById("synced-libraries-tree");
+		var row = {}, col = {}, child = {};
+		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, child);
+		
+		if (col.value.element.id != 'synced-libraries-checked') {
+			return;
+		}
+		// if clicked on checkbox update pref
+		return this.toggleSyncedLibrary(row.value);
+	},
+	
+	
+	toggleSyncedLibrary: function (index) {
+		var treechildren = document.getElementById('synced-libraries-rows');
+		if (index >= treechildren.childNodes.length) {
+			return;
+		}
+		var row = treechildren.childNodes[index];
+		var id = parseInt(row.firstChild.childNodes[1].getAttribute('value'));
+		if (isNaN(id)) {
+			return;
+		}
+		
+		var syncedLibraries = JSON.parse(Zotero.Prefs.get('sync.syncedLibraries') || '[]');
+		var indexOfId = syncedLibraries.indexOf(id);
+		if (indexOfId != -1) {
+			syncedLibraries.splice(indexOfId, 1);
+		} else {
+			syncedLibraries.push(id);
+		}
+		return Zotero.Prefs.set('sync.syncedLibraries', JSON.stringify(syncedLibraries));
+	},
+	
+	
+	initSyncedLibraries: Zotero.Promise.coroutine(function* (keyInfo) {
+		var treechildren = document.getElementById('synced-libraries-rows');
+		while (treechildren.hasChildNodes()) {
+			treechildren.removeChild(treechildren.firstChild);
+		}
+		
+		function addRow(libraryName, id, checked=false, editable=true) {
+			var treeitem = document.createElement('treeitem');
+			var treerow = document.createElement('treerow');
+			var checkboxCell = document.createElement('treecell');
+			var nameCell = document.createElement('treecell');
+			
+			nameCell.setAttribute('label', libraryName);
+			nameCell.setAttribute('value', id);
+			nameCell.setAttribute('editable', false);
+			checkboxCell.setAttribute('value', checked);
+			checkboxCell.setAttribute('editable', editable);
+			
+			treerow.appendChild(checkboxCell);
+			treerow.appendChild(nameCell);
+			treeitem.appendChild(treerow);
+			treechildren.appendChild(treeitem);
+		}
+		
+		// Add default rows
+		addRow(Zotero.getString("pane.collections.library"), null, true, false);
+		addRow(Zotero.getString("pane.collections.publications"), null, true, false);
+		addRow(Zotero.getString("pane.collections.feeds"), null, true, false);
+
+		var syncedLibraries = JSON.parse(Zotero.Prefs.get('sync.syncedLibraries') || '[]');
+		
+		// Load up remote groups
+		var apiKey = Zotero.Sync.Data.Local.getAPIKey();
+		var client = Zotero.Sync.Runner.getAPIClient({apiKey});
+		var groupIDs = yield client.getGroupVersions(keyInfo.userID);
+		for (let groupID in groupIDs) {
+			let group = yield client.getGroupInfo(groupID);
+			addRow(group.data.name, group.id, syncedLibraries.indexOf(group.id) != -1);
+		}
 	}),
 
 
