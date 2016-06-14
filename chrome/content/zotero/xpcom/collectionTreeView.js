@@ -204,7 +204,8 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 	this._addRowToArray(
 		newRows,
 		new Zotero.CollectionTreeRow('publications', {
-			libraryID: Zotero.Libraries.publicationsLibraryID
+			libraryID: Zotero.Libraries.publicationsLibraryID,
+			treeViewID: "L" + Zotero.Libraries.publicationsLibraryID
 		}),
 		added++
 	);
