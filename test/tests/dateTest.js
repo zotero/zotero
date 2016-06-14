@@ -37,4 +37,13 @@ describe("Zotero.Date", function() {
 			assert.isFalse(Zotero.Date.isISODate("2015-04-29 17:28"));
 		})
 	})
+	
+	describe("#isHTTPDate()", function() {
+		it("should determine whether a date is an RFC 2822 compliant date", function() {
+			assert.ok(Zotero.Date.isHTTPDate("Mon, 13 Jun 2016 02:09:08   +4000"));
+			assert.ok(Zotero.Date.isHTTPDate("13 Jun 2016 02:09:08 +4000"));
+			assert.ok(Zotero.Date.isHTTPDate("13 Jun 2016   02:09 +4000"));
+			assert.ok(Zotero.Date.isHTTPDate("13  Jun  2016 02:09 EDT"));
+		})
+	})
 })

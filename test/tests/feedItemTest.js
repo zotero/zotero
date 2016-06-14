@@ -92,18 +92,36 @@ describe("Zotero.FeedItem", function () {
 	});
 	describe("#fromJSON()", function() {
 		it("should attempt to parse non ISO-8601 dates", function* () {
-			var json = {
-				itemType: "journalArticle",
-				accessDate: "2015-06-07 20:56:00",
-				dateAdded: "18-20 June 2015", // magically parsed by `new Date()`
-				dateModified: "07/06/2015", // US
-			};
-			var item = new Zotero.FeedItem;
-			item.fromJSON(json);
-			assert.strictEqual(item.getField('accessDate'), '2015-06-07 20:56:00');
-			assert.strictEqual(item.getField('dateAdded'), '2015-06-18 20:00:00');
-			// sets a timezone specific hour when new Date parses from strings without hour specified.
-			assert.strictEqual(item.getField('dateModified'), Zotero.Date.dateToSQL(new Date(2015, 6, 6), true)); 
+			Zotero.locale = 'en-US';
+			var data = [
+				{
+					itemType: "journalArticle",
+					date: "2015-06-07 20:56:00" // sql
+				},
+				{
+					itemType: "journalArticle",
+					date: "Mon, 13 Jun 2016 06:25:57 EDT" // HTTP
+				},
+				{
+					itemType: "journalArticle",
+					date: "18-20 June 2015" // parsed by `strToDate`
+				},
+				{
+					itemType: "journalArticle",
+					date: "06/07/2015" // american format also parsed by `strToDate`
+				}
+			];
+			var expectedDates = [
+				'2015-06-07 20:56:00',
+				'2016-06-13 10:25:57',
+				'2015-06-18',
+				'2015-06-07'
+			];
+			for (let i = 0; i < data.length; i++) {
+				var item = new Zotero.FeedItem;
+				item.fromJSON(data[i]);
+				assert.strictEqual(item.getField('date'), expectedDates[i]);
+			}
 		})
 	});
 	describe("#save()", function() {
