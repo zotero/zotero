@@ -2510,6 +2510,7 @@ var ZoteroPane = new function()
 			'sep1',
 			'addNote',
 			'addAttachments',
+			'retrievePDF',
 			'sep2',
 			'toggleRead',
 			'duplicateItem',
@@ -2676,7 +2677,10 @@ var ZoteroPane = new function()
 					}
 					
 					if (item.isRegularItem() && !item.isFeedItem) {
-						show.push(m.addNote, m.addAttachments, m.sep2);
+						show.push(m.addNote, m.addAttachments, m.retrievePDF, m.sep2);
+						if(!item.getField('url') && !item.getField('doi')) {
+							disable.push(m.retrievePDF);
+						}
 					}
 					
 					if (item.isAttachment()) {
@@ -3518,7 +3522,43 @@ var ZoteroPane = new function()
 			}
 		}
 	});
-	
+
+	this.retrievePDFSelectedItem = Zotero.Promise.coroutine(function* () {
+		var item = ZoteroPane_Local.getSelectedItems()[0];
+		if (!item) return;
+		// progress window
+		var icon = 'chrome://zotero/skin/treeitem-attachment-pdf.png';
+		var progressWin = new Zotero.ProgressWindow();
+		progressWin.changeHeadline('Retrieving PDF...');
+		var itemProgress = new progressWin.ItemProgress(item.getImageSrc(), item.getField('title'));
+		var attProgress = new progressWin.ItemProgress(icon, 'Full Text PDF', itemProgress);
+		itemProgress.setProgress(100);
+		progressWin.show();
+		// retrieve pdf (doi, url)
+		var doi = Zotero.Utilities.cleanDOI(item.getField('DOI')),
+			url = Zotero.Utilities.cleanURL(item.getField('url'));
+		if(doi) {
+			var doiURL = 'http://dx.doi.org/' + encodeURIComponent(doi);
+			var att = yield Zotero.Utilities.Internal.getPDFFromURL(doiURL, item);
+			if (att) {
+				attProgress.setProgress(100);
+				progressWin.startCloseTimer();
+				return att;
+			}
+		}
+		if(url) {
+			var att = yield Zotero.Utilities.Internal.getPDFFromURL(url, item);
+			if (att) {
+				attProgress.setProgress(100);
+				progressWin.startCloseTimer();
+				return att;
+			}
+		}
+		// failed
+		attProgress.setError();
+		progressWin.startCloseTimer();
+		return;
+	});
 	
 	/**
 	 * @return {Promise<Zotero.Item>|false}
