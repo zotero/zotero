@@ -47,8 +47,6 @@ Zotero_Preferences.Sync = {
 				);
 				this.displayFields(keyInfo.username);
 				Zotero.Users.setCurrentUsername(keyInfo.username);
-
-				yield this.initSyncedLibraries(keyInfo);
 			}
 			catch (e) {
 				// API key wrong/invalid
@@ -72,7 +70,6 @@ Zotero_Preferences.Sync = {
 	displayFields: function (username) {
 		document.getElementById('sync-unauthorized').hidden = !!username;
 		document.getElementById('sync-authorized').hidden = !username;
-		document.getElementById('sync-libraries-tab').disabled = !username;
 		document.getElementById('sync-reset-tab').disabled = !username;
 		document.getElementById('sync-username').value = username;
 		document.getElementById('sync-password').value = '';
@@ -182,6 +179,13 @@ Zotero_Preferences.Sync = {
 	}),
 	
 	
+	showSyncedLibrariesDialog: function() {
+		var io = {};
+		window.openDialog('chrome://zotero/content/preferences/syncedLibraries.xul',
+			"zotero-preferences-syncedLibrariesDialog", "chrome,modal,centerscreen", io);
+	},
+	
+	
 	dblClickSyncedLibrary: function (index) {
 		if (index < 3) {
 			return;
@@ -229,11 +233,18 @@ Zotero_Preferences.Sync = {
 		} else {
 			syncedLibraries.push(id);
 		}
-		return Zotero.Prefs.set('sync.syncedLibraries', JSON.stringify(syncedLibraries));
+		Zotero.Prefs.set('sync.syncedLibraries', JSON.stringify(syncedLibraries));
+		 
+		var cell = row.firstChild.firstChild;
+		cell.setAttribute('value', indexOfId != -1);
 	},
 	
 	
-	initSyncedLibraries: Zotero.Promise.coroutine(function* (keyInfo) {
+	initSyncedLibraries: Zotero.Promise.coroutine(function* () {
+		var apiKey = Zotero.Sync.Data.Local.getAPIKey();
+		var client = Zotero.Sync.Runner.getAPIClient({apiKey});
+		var keyInfo = yield Zotero.Sync.Runner.checkAccess(client, {timeout: 5000});
+		var tree = document.getElementById("synced-libraries-tree");
 		var treechildren = document.getElementById('synced-libraries-rows');
 		while (treechildren.hasChildNodes()) {
 			treechildren.removeChild(treechildren.firstChild);
@@ -257,6 +268,20 @@ Zotero_Preferences.Sync = {
 			treechildren.appendChild(treeitem);
 		}
 		
+		// Add an animated row for while we're loading a group list
+		var loadingLabel = Zotero.getString("zotero.preferences.sync.syncedLibraries.loadingLibraries");
+		addRow(loadingLabel, "loading", false, false);
+		var cell = treechildren.firstChild.getElementsByAttribute("value", "loading")[0];
+		function animateLoadingLabel() {
+			if (cell.getAttribute('label').length < loadingLabel.length + 3) {
+				cell.setAttribute('label', cell.getAttribute('label') + '.');
+			} else {
+				cell.setAttribute('label', loadingLabel);
+			}
+			loadTimeout = setTimeout(animateLoadingLabel, 1000.0/3.0);
+		}
+		var loadTimeout = setTimeout(animateLoadingLabel, 1000.0/3.0);
+
 		// Add default rows
 		addRow(Zotero.getString("pane.collections.library"), null, true, false);
 		addRow(Zotero.getString("pane.collections.publications"), null, true, false);
@@ -265,13 +290,15 @@ Zotero_Preferences.Sync = {
 		var syncedLibraries = JSON.parse(Zotero.Prefs.get('sync.syncedLibraries') || '[]');
 		
 		// Load up remote groups
-		var apiKey = Zotero.Sync.Data.Local.getAPIKey();
-		var client = Zotero.Sync.Runner.getAPIClient({apiKey});
 		var groupIDs = yield client.getGroupVersions(keyInfo.userID);
 		for (let groupID in groupIDs) {
 			let group = yield client.getGroupInfo(groupID);
 			addRow(group.data.name, group.id, syncedLibraries.indexOf(group.id) != -1);
 		}
+		
+		// Remove the animated row
+		clearTimeout(loadTimeout);
+		treechildren.removeChild(treechildren.firstChild);
 	}),
 
 

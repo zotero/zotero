@@ -46,7 +46,6 @@
 		<tabbox>
 			<tabs>
 				<tab label="&zotero.preferences.settings;"/>
-				<tab id="sync-libraries-tab" label="&zotero.preferences.sync.syncedLibraries;" disabled="true"/>
 				<tab id="sync-reset-tab" label="&zotero.preferences.sync.reset;" disabled="true"/>
 			</tabs>
 			
@@ -104,40 +103,42 @@
 						<groupbox>
 							<caption label="&zotero.preferences.sync.syncServer;"/>
 
-							<hbox>
-								<grid>
-									<columns>
-										<column/>
-										<column/>
-									</columns>
+							<grid>
+								<columns>
+									<column/>
+									<column/>
+								</columns>
 
-									<rows>
-										<row>
-											<label value="&zotero.preferences.sync.username;"/>
+								<rows>
+									<row>
+										<label value="&zotero.preferences.sync.username;"/>
+										<hbox>
 											<label id="sync-username" value="Username"/>
-										</row>
-										<row>
-											<box/>
 											<button label="&zotero.preferences.sync.unlinkAccount;"
 													oncommand="Zotero_Preferences.Sync.unlinkAccount()"/>
-										</row>
-										<row>
-											<box/>
+										</hbox>
+									</row>
+									<row>
+										<box/>
+										<hbox>
 											<checkbox label="&zotero.preferences.sync.syncAutomatically;"
-													preference="pref-sync-autosync"/>
-										</row>
-										<row>
-											<box/>
-											<checkbox label="&zotero.preferences.sync.syncFullTextContent;"
-													preference="pref-sync-fulltext-enabled"
-													tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"/>
-										</row>
-									</rows>
-								</grid>
-								<vbox>
-									<label class="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
-								</vbox>
-							</hbox>
+													  preference="pref-sync-autosync"/>
+											<button label="&zotero.preferences.sync.syncedLibraries.button;"
+													oncommand="Zotero_Preferences.Sync.showSyncedLibrariesDialog()"/>
+										</hbox>
+									</row>
+									<row>
+										<box/>
+										<checkbox label="&zotero.preferences.sync.syncFullTextContent;"
+												preference="pref-sync-fulltext-enabled"
+												tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"/>
+									</row>
+									<row>
+										<box/>
+										<label class="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
+									</row>
+								</rows>
+							</grid>
 
 						</groupbox>
 
@@ -263,23 +264,6 @@
 					</vbox>
 				</tabpanel>
 
-				<tabpanel id="sync-libraries" orient="vertical">
-					<groupbox>
-						<caption label="&zotero.preferences.sync.syncedLibraries;"/>
-						
-						<tree id="synced-libraries-tree" flex="1" hidecolumnpicker="true" rows="10" seltype="single" editable="true"
-							ondblclick="Zotero_Preferences.Sync.dblClickSyncedLibrary(this.currentIndex);"
-							onclick="Zotero_Preferences.Sync.clickSyncedLibrary(event)"
-							onkeyup="if (event.keyCode == event.DOM_VK_SPACE) { Zotero_Preferences.Sync.dblClickSyncedLibrary(this.currentIndex); }">
-							<treecols>
-								<treecol editable="true" type="checkbox" id="synced-libraries-checked" label="&zotero.preferences.sync.syncedLibraries.sync;"/>
-								<treecol editable="false" id="synced-libraries-name" flex="1" label="&zotero.preferences.sync.syncedLibraries.sync;"/>
-							</treecols>
-							<treechildren id="synced-libraries-rows"/>
-						</tree>
-					</groupbox>
-				</tabpanel>
-				
 				<tabpanel id="zotero-reset" orient="vertical">
 					<!-- This doesn't wrap without an explicit width, for some reason -->
 					<description width="45em">&zotero.preferences.sync.reset.warning1;<label style="margin-left: 0; margin-right: 0" class="zotero-text-link" href="http://zotero.org/support/kb/sync_reset_options">&zotero.preferences.sync.reset.warning2;</label>&zotero.preferences.sync.reset.warning3;</description>

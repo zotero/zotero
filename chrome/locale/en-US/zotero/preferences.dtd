@@ -77,6 +77,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1					"By using Zotero storage, you agree to become bound by its">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2					"terms and conditions">
 <!ENTITY zotero.preferences.sync.syncedLibraries					"Synced Libraries">
+<!ENTITY zotero.preferences.sync.syncedLibraries.button				"Choose Libraries...">
 <!ENTITY zotero.preferences.sync.syncedLibraries.sync				"Sync">
 <!ENTITY zotero.preferences.sync.syncedLibraries.library			"Library">
 <!ENTITY zotero.preferences.sync.reset.warning1						"The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
