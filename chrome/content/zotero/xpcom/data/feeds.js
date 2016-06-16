@@ -30,6 +30,18 @@ Zotero.Feeds = new function() {
 			this.scheduleNextFeedCheck();
 			this._timeoutID = null;
 		}, 5000);
+		
+		Zotero.SyncedSettings.onSyncDownload.addListener(Zotero.Libraries.userLibraryID, 'feeds', 
+			(oldValue, newValue, conflict) => { 
+				Zotero.Feeds.restoreFromJSON(newValue, conflict);
+			}
+		);
+		
+		Zotero.Notifier.registerObserver({notify: function(event) {
+			if (event == 'finish') {
+				Zotero.Feeds.updateFeeds();
+			}
+		}}, ['sync']);
 	};
 	
 	this.uninit = function () {
@@ -126,18 +138,11 @@ Zotero.Feeds = new function() {
 		Zotero.debug(json);
 		if (merge) {
 			let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			// Overwrite with remote values for names, etc.
 			for (let url in json) {
-				if (syncedFeeds[url]) {
-					syncedFeeds[url].name = json[url].name;
-					syncedFeeds[url].cleanupAfter = json[url].cleanupAfter;
-					syncedFeeds[url].refreshInterval = json[url].refreshInterval;
-					for (let guid in json[url].markedAsRead) {
-						syncedFeeds[url].markedAsRead[guid] = true;
-					}
-				} else {
-					syncedFeeds[url] = json[url];
-				}
+				syncedFeeds[url] = json[url];
 			}
+			// But keep all local feeds
 			json = syncedFeeds;
 		}
 		yield Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'feeds', json);
@@ -148,15 +153,14 @@ Zotero.Feeds = new function() {
 				delete json[feed.url];
 			} else {
 				Zotero.debug("Feed " + feed.url + " does not exist in remote JSON. Deleting");
-				yield feed.eraseTx();
+				yield feed.erase();
 			}
 		}
 		// Because existing json[feed.url] got deleted, `json` now only contains new feeds
 		for (let url in json) {
 			Zotero.debug("Feed " + url + " exists remotely but not locally. Creating");
 			let feed = new Zotero.Feed(json[url]);
-			yield feed.saveTx();
-			yield feed.updateFeed();
+			yield feed.save();
 		}
 	});
 	

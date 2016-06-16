@@ -70,7 +70,6 @@ Zotero.Feed = function(params = {}) {
 	this._feedUnreadCount = null;
 	
 	this._updating = false;
-	this._syncedSettings = null;
 	this._previousURL = null;
 }
 
@@ -301,8 +300,8 @@ Zotero.Feed.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
 	}
 	if (env.isNew || this._previousURL) {
 		Zotero.Feeds.register(this);
-		yield this.storeSyncedSettings();
 	}
+	yield this.storeSyncedSettings();
 	this._previousURL = null;
 	
 });

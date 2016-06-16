@@ -47,14 +47,6 @@ describe("Zotero.Feeds", function () {
 		var json = {};
 		var expiredFeedURL, existingFeedURL;
 		
-		before(function() {
-			sinon.stub(Zotero.Feed.prototype, 'updateFeed').resolves();
-		});
-		
-		after(function() {
-			Zotero.Feed.prototype.updateFeed.restore();
-		});
-		
 		beforeEach(function* () {
 			yield clearFeeds();
 		
@@ -65,7 +57,6 @@ describe("Zotero.Feeds", function () {
 					name: Zotero.Utilities.randomString(),
 					refreshInterval: 5,
 					cleanupAfter: 3,
-					markedAsRead: []
 				};
 				if (i == 0) {
 					existingFeedURL = url;
