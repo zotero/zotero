@@ -236,14 +236,11 @@ Zotero_Preferences.Sync = {
 		Zotero.Prefs.set('sync.syncedLibraries', JSON.stringify(syncedLibraries));
 		 
 		var cell = row.firstChild.firstChild;
-		cell.setAttribute('value', indexOfId != -1);
+		cell.setAttribute('value', indexOfId == -1);
 	},
 	
 	
 	initSyncedLibraries: Zotero.Promise.coroutine(function* () {
-		var apiKey = Zotero.Sync.Data.Local.getAPIKey();
-		var client = Zotero.Sync.Runner.getAPIClient({apiKey});
-		var keyInfo = yield Zotero.Sync.Runner.checkAccess(client, {timeout: 5000});
 		var tree = document.getElementById("synced-libraries-tree");
 		var treechildren = document.getElementById('synced-libraries-rows');
 		while (treechildren.hasChildNodes()) {
@@ -282,23 +279,44 @@ Zotero_Preferences.Sync = {
 		}
 		var loadTimeout = setTimeout(animateLoadingLabel, 1000.0/3.0);
 
+		var apiKey = Zotero.Sync.Data.Local.getAPIKey();
+		var client = Zotero.Sync.Runner.getAPIClient({apiKey});
+		try {
+			// Load up remote groups
+			var keyInfo = yield Zotero.Sync.Runner.checkAccess(client, {timeout: 5000});
+			var groups = yield client.getGroups(keyInfo.userID);
+		}
+		catch (e) {
+			// Connection problems
+			if ((e instanceof Zotero.HTTP.UnexpectedStatusException)
+					|| (e instanceof Zotero.HTTP.TimeoutException)
+					|| (e instanceof Zotero.HTTP.BrowserOfflineException)) {
+				Zotero.alert(
+					window,
+					Zotero.getString('general.error'),
+					Zotero.getString('sync.error.checkConnection', Zotero.clientName)
+				);
+			}
+			else {
+				throw e;
+			}
+			document.getElementsByTagName('dialog')[0].acceptDialog();
+		}
+
+		// Remove the animated row
+		clearTimeout(loadTimeout);
+		treechildren.removeChild(treechildren.firstChild);
+		
 		// Add default rows
 		addRow(Zotero.getString("pane.collections.library"), null, true, false);
 		addRow(Zotero.getString("pane.collections.publications"), null, true, false);
 		addRow(Zotero.getString("pane.collections.feeds"), null, true, false);
-
-		var syncedLibraries = JSON.parse(Zotero.Prefs.get('sync.syncedLibraries') || '[]');
 		
-		// Load up remote groups
-		var groupIDs = yield client.getGroupVersions(keyInfo.userID);
-		for (let groupID in groupIDs) {
-			let group = yield client.getGroupInfo(groupID);
+		// Add group rows
+		var syncedLibraries = JSON.parse(Zotero.Prefs.get('sync.syncedLibraries') || '[]');
+		for (let group in groups) {
 			addRow(group.data.name, group.id, syncedLibraries.indexOf(group.id) != -1);
 		}
-		
-		// Remove the animated row
-		clearTimeout(loadTimeout);
-		treechildren.removeChild(treechildren.firstChild);
 	}),
 
 

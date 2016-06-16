@@ -37,7 +37,7 @@
 
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	title="" buttons="accept"
-	id="zotero-quickCopySiteEditor"
+	id="zotero-autoSyncLibraries"
 	onload="Zotero_Preferences.Sync.initSyncedLibraries(); sizeToContent()" >
 	
 	<script src="chrome://zotero/content/include.js"/>
@@ -47,7 +47,7 @@
 	<groupbox>
 		<caption label="&zotero.preferences.sync.syncedLibraries;"/>
 		
-		<tree id="synced-libraries-tree" flex="1" width="600px" hidecolumnpicker="true" rows="10" seltype="single" editable="true"
+		<tree id="synced-libraries-tree" flex="1" width="415" hidecolumnpicker="true" rows="10" seltype="single" editable="true"
 			ondblclick="Zotero_Preferences.Sync.dblClickSyncedLibrary(this.currentIndex);"
 			onclick="Zotero_Preferences.Sync.clickSyncedLibrary(event)"
 			onkeyup="if (event.keyCode == event.DOM_VK_SPACE) { Zotero_Preferences.Sync.dblClickSyncedLibrary(this.currentIndex); }">

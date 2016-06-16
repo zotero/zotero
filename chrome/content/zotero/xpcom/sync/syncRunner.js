@@ -451,7 +451,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		
 		// Update metadata and permissions on missing or outdated groups
 		for (let groupID of groupsToDownload) {
-			let info = yield client.getGroupInfo(groupID);
+			let info = yield client.getGroup(groupID);
 			if (!info) {
 				throw new Error("Group " + groupID + " not found");
 			}

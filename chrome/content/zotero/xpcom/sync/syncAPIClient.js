@@ -75,12 +75,26 @@ Zotero.Sync.APIClient.prototype = {
 		return this._parseJSON(xmlhttp.responseText);
 	}),
 	
+	/**
+	 * Get group metadata for userID
+	 *
+	 * @param {Integer} userID
+	 * @return {Object} - Group metadata response
+	 */	
+	getGroups: Zotero.Promise.coroutine(function* (userID) {
+		if (!userID) throw new Error("User ID not provided");
+
+		var uri = this.baseURL + "users/" + userID + "/groups";
+		var xmlhttp = yield this.makeRequest("GET", uri);
+		return this._parseJSON(xmlhttp.responseText);
+	}),
+	
 	
 	/**
 	 * @param {Integer} groupID
 	 * @return {Object|false} - Group metadata response, or false if group not found
 	 */
-	getGroupInfo: Zotero.Promise.coroutine(function* (groupID) {
+	getGroup: Zotero.Promise.coroutine(function* (groupID) {
 		if (!groupID) throw new Error("Group ID not provided");
 		
 		var uri = this.baseURL + "groups/" + groupID;
