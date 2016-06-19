@@ -714,7 +714,14 @@ Zotero.Style.prototype.__defineGetter__("class",
  * @type String
  */
 function() {
-	if(!this._class) this.getXML();
+	if(this.source) {
+		// use class from source style
+		var parentStyle = Zotero.Styles.get(this.source);
+		if(!parentStyle) {
+			throw new Error('Style references missing parent ' + this.source);
+		}
+		return parentStyle.class;
+	}
 	return this._class;
 });
 
