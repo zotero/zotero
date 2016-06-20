@@ -668,30 +668,6 @@ Zotero.Collection.prototype.fromJSON = function (json) {
 }
 
 
-Zotero.Collection.prototype.toResponseJSON = function (options = {}) {
-	var json = this.constructor._super.prototype.toResponseJSON.apply(this, options);
-	
-	// TODO: library block?
-	
-	// creatorSummary
-	var firstCreator = this.getField('firstCreator');
-	if (firstCreator) {
-		json.meta.creatorSummary = firstCreator;
-	}
-	// parsedDate
-	var parsedDate = Zotero.Date.multipartToSQL(this.getField('date', true, true));
-	if (parsedDate) {
-		// 0000?
-		json.meta.parsedDate = parsedDate;
-	}
-	// numChildren
-	if (this.isRegularItem()) {
-		json.meta.numChildren = this.numChildren();
-	}
-	return json;
-};
-
-
 Zotero.Collection.prototype.toJSON = function (options = {}) {
 	var env = this._preToJSON(options);
 	var mode = env.mode;

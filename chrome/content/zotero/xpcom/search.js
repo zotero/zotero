@@ -836,11 +836,6 @@ Zotero.Search.prototype.fromJSON = function (json) {
 	}
 }
 
-Zotero.Search.prototype.toResponseJSON = function (options = {}) {
-	var json = this.constructor._super.prototype.toResponseJSON.apply(this, options);
-	return json;
-};
-
 
 Zotero.Search.prototype.toJSON = function (options = {}) {
 	var env = this._preToJSON(options);
