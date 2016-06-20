@@ -195,15 +195,24 @@ describe("Zotero.Search", function() {
 			let s = new Zotero.Search();
 			s.name = "Test";
 			s.addCondition('joinMode', 'any');
-			s.addCondition('fulltextWord', 'contains', 'afsgagsdg');
+			s.addCondition('fulltextContent/regexp', 'contains', 's.+');
 			let json = s.toJSON();
 			assert.equal(json.name, "Test");
+			
 			assert.lengthOf(json.conditions, 2);
+			
 			assert.equal(json.conditions[0].condition, 'joinMode');
 			assert.equal(json.conditions[0].operator, 'any');
-			assert.equal(json.conditions[1].condition, 'fulltextWord');
+			// TODO: Change to 'is' + 'any'?
+			assert.strictEqual(json.conditions[0].value, '');
+			assert.notProperty(json.conditions[0], 'id');
+			assert.notProperty(json.conditions[0], 'required');
+			assert.notProperty(json.conditions[0], 'mode');
+			
+			assert.equal(json.conditions[1].condition, 'fulltextContent/regexp');
 			assert.equal(json.conditions[1].operator, 'contains');
-			assert.equal(json.conditions[1].value, 'afsgagsdg');
+			assert.equal(json.conditions[1].value, 's.+');
+			assert.notProperty(json.conditions[1], 'mode');
 		});
 	});
 	

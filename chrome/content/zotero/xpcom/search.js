@@ -836,7 +836,7 @@ Zotero.Search.prototype.fromJSON = function (json) {
 	}
 }
 
-Zotero.Collection.prototype.toResponseJSON = function (options = {}) {
+Zotero.Search.prototype.toResponseJSON = function (options = {}) {
 	var json = this.constructor._super.prototype.toResponseJSON.apply(this, options);
 	return json;
 };
@@ -851,8 +851,14 @@ Zotero.Search.prototype.toJSON = function (options = {}) {
 	obj.version = this.version;
 	obj.name = this.name;
 	var conditions = this.getConditions();
-	obj.conditions = Object.keys(conditions).map(x => conditions[x]);
-	
+	obj.conditions = Object.keys(conditions)
+		.map(x => ({
+			condition: conditions[x].condition
+				+ (conditions[x].mode !== false ? "/" + conditions[x].mode : ""),
+			operator: conditions[x].operator,
+			// TODO: Change joinMode to use 'is' + 'any' instead of operator 'any'?
+			value: conditions[x].value ? conditions[x].value : ""
+		}));
 	return this._postToJSON(env);
 }
 
