@@ -2320,9 +2320,9 @@ Zotero.ItemTreeView.prototype.onColumnPickerShowing = function (event) {
 		menupopup.insertBefore(moreMenu, lastChild);
 
 		// Disable certain entries for feeds
-		let elems = Array.from(treecols.getElementsByAttribute('hidden-in', '*'))
+		let elems = Array.from(treecols.getElementsByAttribute('disabled-in', '*'));
 		let labels = Array.from(elems)
-			.filter(e => e.getAttribute('hidden-in').split(' ').indexOf(this.collectionTreeRow.type) != -1)
+			.filter(e => e.getAttribute('disabled-in').split(' ').indexOf(this.collectionTreeRow.type) != -1)
 			.map(e => e.getAttribute('label'));
 		for (let i = 0; i < menupopup.childNodes.length; i++) {
 			let elem = menupopup.childNodes[i];
