@@ -230,7 +230,7 @@ Zotero.SyncedSettings = (function () {
 			_cache[libraryID][setting] = {
 				value,
 				synced: !!synced,
-				version
+				version: version > 0 ? version : metadata.version
 			};
 			
 			var conflict = metadata && !metadata.synced && metadata.version < version;

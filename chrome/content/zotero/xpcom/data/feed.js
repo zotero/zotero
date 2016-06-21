@@ -334,12 +334,7 @@ Zotero.Feed.prototype.erase = Zotero.Promise.coroutine(function* (options = {}) 
 
 Zotero.Feed.prototype.storeSyncedSettings = Zotero.Promise.coroutine(function* () {
 	let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds') || {};
-	syncedFeeds[this.url] = {
-		url: this.url,
-		name: this.name,
-		cleanupAfter: this.cleanupAfter,
-		refreshInterval: this.refreshInterval
-	};
+	syncedFeeds[this.url] = [this.name, this.cleanupAfter, this.refreshInterval];
 	return Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'feeds', syncedFeeds);
 });
 

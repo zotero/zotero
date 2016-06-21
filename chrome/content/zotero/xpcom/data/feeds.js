@@ -145,12 +145,15 @@ Zotero.Feeds = new function() {
 			// But keep all local feeds
 			json = syncedFeeds;
 		}
+		json = this._compactifyFeedJSON(json);
 		yield Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'feeds', json);
 		let feeds = Zotero.Feeds.getAll();
 		for (let feed of feeds) {
 			if (json[feed.url]) {
 				Zotero.debug("Feed " + feed.url + " exists remotely and locally");
-				delete json[feed.url];
+				feed.name = json[feed.url][0];
+				feed.cleanupAfter = json[feed.url][1];
+				feed.refreshInterval = json[feed.url][2];
 			} else {
 				Zotero.debug("Feed " + feed.url + " does not exist in remote JSON. Deleting");
 				yield feed.erase();
@@ -159,7 +162,12 @@ Zotero.Feeds = new function() {
 		// Because existing json[feed.url] got deleted, `json` now only contains new feeds
 		for (let url in json) {
 			Zotero.debug("Feed " + url + " exists remotely but not locally. Creating");
-			let feed = new Zotero.Feed(json[url]);
+			let feed = new Zotero.Feed({
+				url, 
+				name: json[url][0], 
+				cleanupAfter: json[url][1], 
+				refreshInterval: json[url[2]]
+			});
 			yield feed.save();
 		}
 	});
@@ -263,4 +271,16 @@ Zotero.Feeds = new function() {
 		Zotero.debug("All feed updates done");
 		this.scheduleNextFeedCheck();
 	});
+	
+	// Conversion from expansive to compact format sync json
+	// TODO: Remove after beta
+	this._compactifyFeedJSON = function(json) {
+		for (let url in json) {
+			if( Object.prototype.toString.call(json[url]) === '[object Array]' ) {
+				continue;
+			}
+			json[url] = [json[url].name, json[url].cleanupAfter, json[url].refreshInterval];
+		}
+		return json;
+	};
 }
