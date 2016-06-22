@@ -227,11 +227,6 @@ Zotero.Library.prototype._get = function(prop) {
 		throw new Error('Unknown property "' + prop + '"');
 	}
 	
-	if (this._changed[prop]) {
-		// Catch attempts to retrieve unsaved property?
-		Zotero.debug('Warning: Attempting to retrieve unsaved ' + this._objectType + ' property "' + prop + '"', 2, true);
-	}
-	
 	return this[prop];
 }
 
