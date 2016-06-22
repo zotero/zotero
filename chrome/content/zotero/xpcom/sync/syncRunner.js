@@ -149,7 +149,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				firstInSession: _firstInSession
 			};
 			
-			let librariesToSync = options.libraries = yield this.checkLibraries(
+			var librariesToSync = options.libraries = yield this.checkLibraries(
 				client,
 				options,
 				keyInfo,
@@ -223,6 +223,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 			
 			Zotero.debug("Done syncing");
+			Zotero.Notifier.trigger('finish', 'sync', librariesToSync);
 		}
 	});
 	

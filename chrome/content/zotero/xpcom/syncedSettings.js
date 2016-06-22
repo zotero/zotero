@@ -35,6 +35,40 @@ Zotero.SyncedSettings = (function () {
 	var module = {
 		idColumn: "setting",
 		table: "syncedSettings",
+
+		/**
+		 * An event which allows to tap into the sync transaction and update
+		 * parts of the client which rely on synced settings.
+		 */
+		onSyncDownload: {
+			listeners: {},
+			addListener: function(libraryID, setting, fn, bindTarget=null) {
+				if (!this.listeners[libraryID]) {
+					this.listeners[libraryID] = {};
+				}
+				if (!this.listeners[libraryID][setting]) {
+					this.listeners[libraryID][setting] = [];
+				}
+				this.listeners[libraryID][setting].push([fn, bindTarget]);
+			},
+			/**
+			 * @param {Integer} libraryID
+			 * @param {String} setting - name of the setting
+			 * @param {Object} oldValue
+			 * @param {Object} newValue
+			 * @param {Boolean} conflict - true if both client and remote values had changed before sync
+			 */
+			trigger: Zotero.Promise.coroutine(function* (libraryID, setting, oldValue, newValue, conflict) {
+				var libListeners = this.listeners[libraryID] || {};
+				var settingListeners = libListeners[setting] || [];
+				Array.prototype.splice.call(arguments, 0, 2);
+				if (settingListeners) {
+					for (let listener of settingListeners) {
+						yield Zotero.Promise.resolve(listener[0].apply(listener[1], arguments));
+					}
+				}
+			})
+		},
 		
 		loadAll: Zotero.Promise.coroutine(function* (libraryID) {
 			Zotero.debug("Loading synced settings for library " + libraryID);
@@ -175,11 +209,13 @@ Zotero.SyncedSettings = (function () {
 			version = parseInt(version);
 			
 			if (hasCurrentValue) {
-				var sql = "UPDATE syncedSettings SET value=?, version=?, synced=? "
-					+ "WHERE setting=? AND libraryID=?";
-				yield Zotero.DB.queryAsync(
-					sql, [JSON.stringify(value), version, synced, setting, libraryID]
-				);
+				var sql = "UPDATE syncedSettings SET " + (version > 0 ? "version=?, " : "") + 
+					"value=?, synced=? WHERE setting=? AND libraryID=?";
+				var args = [JSON.stringify(value), synced, setting, libraryID];
+				if (version > 0) {
+					args.unshift(version)
+				}
+				yield Zotero.DB.queryAsync(sql, args);
 			}
 			else {
 				var sql = "INSERT INTO syncedSettings "
@@ -188,13 +224,19 @@ Zotero.SyncedSettings = (function () {
 					sql, [setting, libraryID, JSON.stringify(value), version, synced]
 				);
 			}
+
+			var metadata = this.getMetadata(libraryID, setting);
 			
 			_cache[libraryID][setting] = {
 				value,
 				synced: !!synced,
-				version
-			}
+				version: version > 0 ? version : metadata.version
+			};
 			
+			var conflict = metadata && !metadata.synced && metadata.version < version;
+			if (version > 0) {
+				yield this.onSyncDownload.trigger(libraryID, setting, currentValue, value, conflict);
+			}
 			yield Zotero.Notifier.trigger(event, 'setting', [id], extraData);
 			return true;
 		}),
