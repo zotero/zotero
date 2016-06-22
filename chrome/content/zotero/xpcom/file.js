@@ -733,6 +733,8 @@ Zotero.File = new function(){
 		try {
 			iterator = new OS.File.DirectoryIterator(path);
 			yield iterator.forEach(Zotero.Promise.coroutine(function* (entry) {
+				Zotero.debug(entry);
+				
 				if (entry.isSymLink) {
 					Zotero.debug("Skipping symlink " + entry.name);
 					return;
