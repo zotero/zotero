@@ -154,6 +154,7 @@ Zotero.Feeds = new function() {
 				feed.name = json[feed.url][0];
 				feed.cleanupAfter = json[feed.url][1];
 				feed.refreshInterval = json[feed.url][2];
+				delete json[feed.url];
 			} else {
 				Zotero.debug("Feed " + feed.url + " does not exist in remote JSON. Deleting");
 				yield feed.erase();

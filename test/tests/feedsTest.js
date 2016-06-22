@@ -44,12 +44,12 @@ describe("Zotero.Feeds", function () {
 	});
 	
 	describe("#restoreFromJSON", function() {
-		var json = {};
-		var expiredFeedURL, existingFeedURL;
+		var json, expiredFeedURL, existingFeedURL;
 		
 		beforeEach(function* () {
 			yield clearFeeds();
 		
+			json = {};
 			for (let i = 0; i < 2; i++) {
 				let url = "http://" + Zotero.Utilities.randomString(10, 'abcdefgh') + ".com/feed.rss";
 				json[url] = {
