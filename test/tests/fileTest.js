@@ -71,7 +71,15 @@ describe("Zotero.File", function () {
 	})
 	
 	describe("#zipDirectory()", function () {
+		afterEach(function () {
+			Zotero.Prefs.set('debug.log', false);
+			Zotero.Debug.init();
+		});
+		
 		it("should compress a directory recursively", function* () {
+			Zotero.Prefs.set('debug.log', true);
+			Zotero.Debug.init();
+			
 			var tmpPath = Zotero.getTempDirectory().path;
 			var path = OS.Path.join(tmpPath, Zotero.Utilities.randomString());
 			yield OS.File.makeDir(path);

@@ -746,6 +746,7 @@ Zotero.File = new function(){
 					return;
 				}
 				
+				Zotero.debug("Adding ZIP entry " + entry.path);
 				zipWriter.addEntryFile(
 					// Add relative path
 					entry.path.substr(rootPath.length + 1),
