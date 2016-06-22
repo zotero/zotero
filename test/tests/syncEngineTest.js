@@ -791,6 +791,44 @@ describe("Zotero.Sync.Data.Engine", function () {
 		});
 		
 		
+		it("should update library version after settings upload", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			var lastLibraryVersion = 5;
+			library.libraryVersion = lastLibraryVersion;
+			yield library.saveTx();
+			
+			yield Zotero.SyncedSettings.set(libraryID, "testSetting", { foo: "bar" });
+			
+			server.respond(function (req) {
+				if (req.method == "POST") {
+					assert.equal(
+						req.requestHeaders["If-Unmodified-Since-Version"], lastLibraryVersion
+					);
+					
+					if (req.url == baseURL + "users/1/settings") {
+						let json = JSON.parse(req.requestBody);
+						req.respond(
+							204,
+							{
+								"Last-Modified-Version": ++lastLibraryVersion
+							},
+							""
+						);
+						return;
+					}
+				}
+			})
+			
+			yield engine.start();
+			
+			assert.isAbove(library.libraryVersion, 5);
+			assert.equal(library.libraryVersion, lastLibraryVersion);
+		})
+		
+		
 		it("shouldn't include storage properties for attachments in ZFS libraries", function* () {
 			({ engine, client, caller } = yield setup());
 			

@@ -843,6 +843,9 @@ Zotero.Sync.Data.Engine.prototype._uploadSettings = Zotero.Promise.coroutine(fun
 		Object.keys(settings),
 		libraryVersion
 	);
+	this.library.libraryVersion = libraryVersion;
+	yield this.library.save();
+	
 	Zotero.debug("Done uploading settings in " + this.library.name);
 	return libraryVersion;
 });
