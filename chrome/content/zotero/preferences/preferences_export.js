@@ -49,6 +49,10 @@ Zotero_Preferences.Export = {
 		yield Zotero.Styles.init();
 		var translation = new Zotero.Translate("export");
 		var translators = yield translation.getTranslators();
+		translators.sort((a, b) => {
+			var collation = Zotero.getLocaleCollation();
+			return collation.compareString(1, a.label, b.label);
+		});
 		this.buildQuickCopyFormatDropDown(
 			menulist, format.contentType, format, translators
 		);
