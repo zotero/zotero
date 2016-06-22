@@ -74,7 +74,7 @@ function waitForWindow(uri, callback) {
 				.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
 				.getInterface(Components.interfaces.nsIDOMWindow);
 			// Give window code time to run on load
-			setTimeout(function () {
+			win.setTimeout(function () {
 				if (callback) {
 					try {
 						// If callback is a promise, wait for it
