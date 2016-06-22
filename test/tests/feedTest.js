@@ -200,31 +200,18 @@ describe("Zotero.Feed", function() {
 	});
 	
 	describe("#storeSyncedSettings", function() {
-		it("should store settings for feed with compact format", function* () {
+		it("should store settings for feed in compact format", function* () {
 			let url = 'http://' + Zotero.Utilities.randomString().toLowerCase() + '.com/feed.rss';
 			let settings = [Zotero.Utilities.randomString(), 1, 1];
 			let feed = yield createFeed({
-				url, 
-				name: settings[0], 
-				cleanupAfter: settings[1], 
+				url,
+				name: settings[0],
+				cleanupAfter: settings[1],
 				refreshInterval: settings[2]
 			});
 			
 			let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
 			assert.deepEqual(syncedFeeds[url], settings);
-		});	
-		
-		it("should not store settings for feed with the old format", function* () {
-			let settings = { 
-				name: Zotero.Utilities.randomString(), 
-				url: 'http://' + Zotero.Utilities.randomString().toLowerCase() + '.com/feed.rss', 
-				refreshInterval: 1,
-				cleanupAfter: 1
-			};
-			let feed = yield createFeed(settings);
-			
-			let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
-			assert.notDeepEqual(syncedFeeds[feed.url], settings);
 		});
 	});
 	

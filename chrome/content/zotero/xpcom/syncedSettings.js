@@ -213,7 +213,7 @@ Zotero.SyncedSettings = (function () {
 					"value=?, synced=? WHERE setting=? AND libraryID=?";
 				var args = [JSON.stringify(value), synced, setting, libraryID];
 				if (version > 0) {
-					args.splice(0, 0, version)
+					args.unshift(version)
 				}
 				yield Zotero.DB.queryAsync(sql, args);
 			}

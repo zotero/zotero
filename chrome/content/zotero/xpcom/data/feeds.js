@@ -41,7 +41,7 @@ Zotero.Feeds = new function() {
 			if (event == 'finish') {
 				Zotero.Feeds.updateFeeds();
 			}
-		}}, ['sync']);
+		}}, ['sync'], 'feedsUpdate');
 	};
 	
 	this.uninit = function () {
@@ -276,7 +276,7 @@ Zotero.Feeds = new function() {
 	// TODO: Remove after beta
 	this._compactifyFeedJSON = function(json) {
 		for (let url in json) {
-			if( Object.prototype.toString.call(json[url]) === '[object Array]' ) {
+			if(Array.isArray(json[url])) {
 				continue;
 			}
 			json[url] = [json[url].name, json[url].cleanupAfter, json[url].refreshInterval];
