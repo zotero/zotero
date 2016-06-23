@@ -580,7 +580,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	 * @return {Integer[]} - Array of libraries that need data syncing again
 	 */
 	var _doFullTextSync = Zotero.Promise.coroutine(function* (libraries, options) {
-		if (!Zotero.Prefs.get("sync.fulltext.enabled")) return;
+		if (!Zotero.Prefs.get("sync.fulltext.enabled")) return [];
 		
 		Zotero.debug("Starting full-text syncing");
 		this.setSyncStatus(Zotero.getString('sync.status.syncingFullText'));
