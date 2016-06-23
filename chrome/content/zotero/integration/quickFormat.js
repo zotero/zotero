@@ -419,15 +419,6 @@ var Zotero_QuickFormat = new function () {
 			// necessary data
 			var items = yield Zotero.Items.getAsync(searchResultIDs);
 			yield Zotero.Items.loadDataTypes(items);
-			// Load child items of search matches
-			// TODO: exclude child items from itemToExportFormat() so this isn't necessary?
-			for (let item of items) {
-				let ids = item.getAttachments().concat(item.getNotes());
-				if (ids.length) {
-					let childItems = yield Zotero.Items.getAsync(ids);
-					yield Zotero.Items.loadDataTypes(childItems)
-				}
-			}
 			
 			searchString = searchString.toLowerCase();
 			var collation = Zotero.getLocaleCollation();

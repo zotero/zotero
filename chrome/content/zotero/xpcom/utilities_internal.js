@@ -765,7 +765,7 @@ Zotero.Utilities.Internal = {
 	 * @param {Boolean} legacy Add mappings for legacy (pre-4.0.27) translators
 	 * @return {Object}
 	 */
-	itemToExportFormat: function (zoteroItem, legacy) {
+	itemToExportFormat: function (zoteroItem, legacy, skipChildItems) {
 		function addCompatibilityMappings(item, zoteroItem) {
 			item.uniqueFields = {};
 			
@@ -862,7 +862,7 @@ Zotero.Utilities.Internal = {
 		item.uri = Zotero.URI.getItemURI(zoteroItem);
 		delete item.key;
 		
-		if (!zoteroItem.isAttachment() && !zoteroItem.isNote()) {
+		if (!skipChildItems && !zoteroItem.isAttachment() && !zoteroItem.isNote()) {
 			// Include attachments
 			item.attachments = [];
 			let attachments = zoteroItem.getAttachments();

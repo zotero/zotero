@@ -1613,9 +1613,11 @@ Zotero.Utilities = {
 	 *     is passed
 	 */
 	"itemToCSLJSON":function(zoteroItem) {
+		// If a Zotero.Item was passed, convert it to the proper format (skipping child items) and
+		// call this function again with that object
 		if (zoteroItem instanceof Zotero.Item) {
 			return this.itemToCSLJSON(
-				Zotero.Utilities.Internal.itemToExportFormat(zoteroItem)
+				Zotero.Utilities.Internal.itemToExportFormat(zoteroItem, false, true)
 			);
 		}
 		
