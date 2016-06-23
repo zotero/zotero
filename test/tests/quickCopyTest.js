@@ -33,4 +33,28 @@ describe("Zotero.QuickCopy", function() {
 			assert.deepEqual(Zotero.QuickCopy.getFormatFromURL('chrome://zotero/content/tab.xul'), quickCopyPref);
 		})
 	})
+	
+	describe("#getContentFromItems()", function () {
+		it("should generate BibTeX", function* () {
+			var item = yield createDataObject('item');
+			var content = "";
+			var worked = false;
+			
+			var format = 'export=9cb70025-a888-4a29-a210-93ec52da40d4'; // BibTeX
+			Zotero.Prefs.set('export.quickCopy.setting', format);
+			// The translator code is loaded automatically on pref change, but let's not wait for it
+			yield Zotero.QuickCopy.init();
+			
+			Zotero.QuickCopy.getContentFromItems(
+				[item],
+				format,
+				(obj, w) => {
+					content = obj.string;
+					worked = w;
+				}
+			);
+			assert.isTrue(worked);
+			assert.isTrue(content.trim().startsWith('@'));
+		});
+	});
 })

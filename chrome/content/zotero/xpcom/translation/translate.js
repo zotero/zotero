@@ -1245,15 +1245,22 @@ Zotero.Translate.Base.prototype = {
 		this.setHandler("done", doneHandler);
 		this.setHandler("error", errorHandler);
 		
-		if(typeof this.translator[0] === "object") {
-			// already have a translator object, so use it
-			this._loadTranslator(this.translator[0]).then(function() { me._translateTranslatorLoaded() });
-		} else {
-			// need to get translator first
-			let translator = Zotero.Translators.get(this.translator[0]);
-			this.translator[0] = translator;
-			this._loadTranslator(translator).then(function() { me._translateTranslatorLoaded() });
+		// need to get translator first
+		if (typeof this.translator[0] !== "object") {
+			this.translator[0] = Zotero.Translators.get(this.translator[0]);
 		}
+		
+		var loadPromise = this._loadTranslator(this.translator[0]);
+		if (this.noWait) {
+			if (!loadPromise.isResolved()) {
+				return Zotero.Promise.reject(new Error("Load promise is not resolved in noWait mode"));
+			}
+			this._translateTranslatorLoaded();
+		}
+		else {
+			loadPromise.then(() => this._translateTranslatorLoaded());
+		}
+			
 		return deferred.promise;
 	},
 	
@@ -1633,7 +1640,7 @@ Zotero.Translate.Base.prototype = {
 	 * @param {Zotero.Translator} translator
 	 * @return {Boolean} Whether the translator could be successfully loaded
 	 */
-	"_loadTranslator":function(translator) {
+	"_loadTranslator": Zotero.Promise.method(function (translator) {
 		var sandboxLocation = this._getSandboxLocation();
 		if(!this._sandboxLocation || sandboxLocation !== this._sandboxLocation) {
 			this._sandboxLocation = sandboxLocation;
@@ -1646,19 +1653,42 @@ Zotero.Translate.Base.prototype = {
 		this._aborted = false;
 		this.saveQueue = [];
 		
-		var me = this;
-		return translator.getCode().then(function(code) {
+		var parse = function(code) {
 			Zotero.debug("Translate: Parsing code for " + translator.label + " "
 				+ "(" + translator.translatorID + ", " + translator.lastUpdated + ")", 4);
-			me._sandboxManager.eval("var exports = {}, ZOTERO_TRANSLATOR_INFO = "+code,
-				["detect"+me._entryFunctionSuffix, "do"+me._entryFunctionSuffix, "exports",
-					"ZOTERO_TRANSLATOR_INFO"],
-				(translator.file ? translator.file.path : translator.label));
-			me._translatorInfo = me._sandboxManager.sandbox.ZOTERO_TRANSLATOR_INFO;
-		}).catch(function(e) {
-			me.complete(false, e);
-		});
-	},
+			this._sandboxManager.eval(
+				"var exports = {}, ZOTERO_TRANSLATOR_INFO = " + code,
+				[
+					"detect" + this._entryFunctionSuffix,
+					"do" + this._entryFunctionSuffix,
+					"exports",
+					"ZOTERO_TRANSLATOR_INFO"
+				],
+				(translator.file ? translator.file.path : translator.label)
+			);
+			this._translatorInfo = this._sandboxManager.sandbox.ZOTERO_TRANSLATOR_INFO;
+		}.bind(this);
+		
+		if (this.noWait) {
+			try {
+				let codePromise = translator.getCode();
+				if (!codePromise.isResolved()) {
+					throw new Error("Code promise is not resolved in noWait mode");
+				}
+				parse(codePromise.value());
+			}
+			catch (e) {
+				this.complete(false, e);
+			}
+		}
+		else {
+			return translator.getCode()
+			.then(parse)
+			.catch(function(e) {
+				this.complete(false, e);
+			}.bind(this));
+		}
+	}),
 	
 	/**
 	 * Generates a sandbox for scraping/scraper detection

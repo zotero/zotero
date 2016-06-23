@@ -27,9 +27,18 @@
 Zotero.QuickCopy = new function() {
 	var _siteSettings;
 	var _formattedNames;
+	var _initialized = false;
 	
 	this.init = Zotero.Promise.coroutine(function* () {
 		yield this.loadSiteSettings();
+		
+		// Load code for selected export translator ahead of time
+		// (in the background, because it requires translator initialization)
+		setTimeout(_loadOutputFormat, 5000);
+		if (!_initialized) {
+			Zotero.Prefs.registerObserver("export.quickCopy.setting", () => _loadOutputFormat());
+			_initialized = true;
+		}
 	});
 	
 	
@@ -403,6 +412,22 @@ Zotero.QuickCopy = new function() {
 		
 		throw ("Invalid mode '" + format.mode + "' in Zotero.QuickCopy.getContentFromItems()");
 	};
+	
+	
+	/**
+	 * If an export translator is the selected output format, load its code (which must be done
+	 * asynchronously) ahead of time, since drag-and-drop requires synchronous operation
+	 */
+	var _loadOutputFormat = Zotero.Promise.coroutine(function* () {
+		var format = Zotero.Prefs.get("export.quickCopy.setting");
+		format = Zotero.QuickCopy.unserializeSetting(format);
+		if (format.mode == 'export') {
+			yield Zotero.Translators.init();
+			let translator = Zotero.Translators.get(format.id);
+			translator.cacheCode = true;
+			yield translator.getCode();
+		}
+	});
 	
 	
 	var _loadFormattedNames = Zotero.Promise.coroutine(function* () {
