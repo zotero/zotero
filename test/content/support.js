@@ -137,7 +137,7 @@ function waitForDialog(onOpen, button='accept', url) {
 			function acceptWhenEnabled() {
 				// Handle delayed buttons
 				if (dialog.document.documentElement.getButton(button).disabled) {
-					setTimeout(function () {
+					dialog.setTimeout(function () {
 						acceptWhenEnabled();
 					}, 250);
 				}
