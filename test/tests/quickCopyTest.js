@@ -40,10 +40,16 @@ describe("Zotero.QuickCopy", function() {
 			var content = "";
 			var worked = false;
 			
-			var format = 'export=9cb70025-a888-4a29-a210-93ec52da40d4'; // BibTeX
+			yield Zotero.Translators.init();
+			
+			var translatorID = '9cb70025-a888-4a29-a210-93ec52da40d4'; // BibTeX
+			var format = 'export=' + translatorID;
 			Zotero.Prefs.set('export.quickCopy.setting', format);
-			// The translator code is loaded automatically on pref change, but let's not wait for it
-			yield Zotero.QuickCopy.init();
+			// Translator code for selected format is loaded automatically, so wait for it
+			var translator = Zotero.Translators.get(translatorID);
+			while (!translator.code) {
+				yield Zotero.Promise.delay(50);
+			}
 			
 			Zotero.QuickCopy.getContentFromItems(
 				[item],

@@ -633,8 +633,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 						yield Zotero.Searches.loadAll(library.libraryID);
 					})()
 				);
-				
-				yield Zotero.QuickCopy.init();
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -735,6 +733,10 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			};
 			
 			Zotero.Items.startEmptyTrashTimer();
+			
+			yield Zotero.QuickCopy.init();
+			Zotero.addShutdownListener(() => Zotero.QuickCopy.uninit());
+			
 			Zotero.Feeds.init();
 			Zotero.addShutdownListener(() => Zotero.Feeds.uninit());
 			

@@ -23,12 +23,17 @@
     ***** END LICENSE BLOCK *****
 */
 
+"use strict";
+
 // Mimics Zotero.Libraries
 Zotero.Feeds = new function() {
+	var _initTimeoutID;
+	var _initPromise;
+	
 	this.init = function () {
-		this._timeoutID = setTimeout(() => {
-			this.scheduleNextFeedCheck();
-			this._timeoutID = null;
+		_initTimeoutID = setTimeout(() => {
+			_initTimeoutID = null;
+			_initPromise = this.scheduleNextFeedCheck().then(() => _initPromise = null);
 		}, 5000);
 		
 		Zotero.SyncedSettings.onSyncDownload.addListener(Zotero.Libraries.userLibraryID, 'feeds', 
@@ -45,9 +50,14 @@ Zotero.Feeds = new function() {
 	};
 	
 	this.uninit = function () {
-		if (this._timeoutID) {
-			clearTimeout(this._timeoutID);
-			this._timeoutID = null
+		// Cancel feed check if not yet run
+		if (_initTimeoutID) {
+			clearTimeout(_initTimeoutID);
+			_initTimeoutID = null
+		}
+		// Cancel feed check if in progress
+		if (_initPromise) {
+			_initPromise.cancel();
 		}
 	};
 	
