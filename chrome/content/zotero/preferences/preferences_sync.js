@@ -100,6 +100,7 @@ Zotero_Preferences.Sync = {
 
 		if (event.keyCode == 13) {
 			Zotero_Preferences.Sync.linkAccount(event);
+			event.preventDefault();
 		}
 	},
 	
@@ -168,7 +169,7 @@ Zotero_Preferences.Sync = {
 			if (!Services.prompt.confirm(
 				null,
 				Zotero.getString('general.warning'),
-				Zotero.getString('sync.unlinkWarning', Zotero.clientName)
+				Zotero.getString('account.unlinkWarning', Zotero.clientName)
 			)) {
 				return;
 			}

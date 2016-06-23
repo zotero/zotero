@@ -1052,6 +1052,15 @@ Zotero.Utilities.Internal = {
 		}
 		elem.appendChild(menu);
 		return menu;
+	},
+
+	/**
+	 * Quits zotero, optionally restarting. Mostly useful for stubbing in tests.
+	 * @param restart {Boolean}
+	 */
+	quitZotero: function(restart=false) {
+		var startup = Services.startup;
+		startup.quit(startup.eAttemptQuit | (restart ? startup.eRestart : 0) );
 	}
 }
 

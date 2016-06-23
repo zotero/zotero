@@ -255,13 +255,13 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 
 		if (!userID) {
 			let hasItems = yield library.hasItems();
-			if (!hasItems && feeds.length <= 0) {
+			if (!hasItems && feeds.length <= 0 && !Zotero.newAccount) {
 				let ps = Services.prompt;
 				let index = ps.confirmEx(
 					null,
 					Zotero.getString('general.warning'),
-					Zotero.getString('sync.warning.emptyLibrary', [keyInfo.username, Zotero.clientName]) + "\n\n"
-						+ Zotero.getString('sync.warning.existingDataElsewhere', Zotero.clientName),
+					Zotero.getString('account.warning.emptyLibrary', [keyInfo.username, Zotero.clientName]) + "\n\n"
+						+ Zotero.getString('account.warning.existingDataElsewhere', Zotero.clientName),
 					(ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING) 
 						+ (ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL)
 						+ (ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING),
