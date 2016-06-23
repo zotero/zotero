@@ -4,8 +4,8 @@ compiler:
     - gcc
 env:
     - FX_CHANNEL=""
-    - FX_CHANNEL="-esr"
-    # Disabled until unbranded build is available
+    # Disabled during beta
+    #- FX_CHANNEL="-esr"
     #- FX_CHANNEL="-beta"
 matrix:
     fast_finish: true
