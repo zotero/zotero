@@ -393,10 +393,13 @@ Zotero.DataObjects.prototype.getObjectVersions = Zotero.Promise.coroutine(functi
  * results might include objects in libraries that haven't yet been loaded.
  *
  * @param {Zotero.DataObject[]} objects
- * @param {String[]} dataTypes
+ * @param {String[]} [dataTypes] - Data types to load, defaulting to all types
  * @return {Promise}
  */
 Zotero.DataObjects.prototype.loadDataTypes = Zotero.Promise.coroutine(function* (objects, dataTypes) {
+	if (!dataTypes) {
+		dataTypes = this.ObjectClass.prototype._dataTypes;
+	}
 	for (let dataType of dataTypes) {
 		let typeIDsByLibrary = {};
 		for (let obj of objects) {
