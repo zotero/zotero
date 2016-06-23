@@ -802,6 +802,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		if (libraryID) {
 			e.libraryID = libraryID;
 		}
+		Zotero.logError(e);
 		_errors.push(this.parseError(e));
 	}
 	
