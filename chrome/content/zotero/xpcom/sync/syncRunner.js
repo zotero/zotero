@@ -223,7 +223,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 			
 			Zotero.debug("Done syncing");
-			Zotero.Notifier.trigger('finish', 'sync', librariesToSync);
+			Zotero.Notifier.trigger('finish', 'sync', librariesToSync || []);
 		}
 	});
 	
