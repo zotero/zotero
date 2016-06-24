@@ -125,7 +125,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 			
 			yield Zotero.File.zipDirectory(zipDir, zipFile);
 			// OS.File.DirectoryIterator, used by OS.File.removeDir(), isn't reliable on Travis,
-			// returning entry.isDir == false for directories, so use nsIFile instead
+			// returning entry.isDir == false for subdirectories, so use nsIFile instead
 			//yield OS.File.removeDir(zipDir);
 			Zotero.File.pathToFile(zipDir).remove(true);
 		});
@@ -143,7 +143,10 @@ describe("Zotero.Sync.Storage.Local", function () {
 			var dir = Zotero.Attachments.getStorageDirectoryByLibraryAndKey(libraryID, key).path;
 			yield OS.File.makeDir(
 				OS.Path.join(dir, 'subdir'),
-				{ from: Zotero.getZoteroDirectory().path }
+				{
+					from: Zotero.getZoteroDirectory().path,
+					unixMode: 0o755
+				}
 			);
 			yield Zotero.File.putContentsAsync(OS.Path.join(dir, 'A'), '');
 			yield Zotero.File.putContentsAsync(OS.Path.join(dir, 'subdir', 'B'), '');

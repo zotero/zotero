@@ -896,6 +896,11 @@ Zotero.Sync.Storage.Local = {
 	
 	_deleteExistingAttachmentFiles: Zotero.Promise.method(function (item) {
 		var parentDir = Zotero.Attachments.getStorageDirectory(item).path;
+		// OS.File.DirectoryIterator, used by OS.File.removeDir(), isn't reliable on Travis,
+		// returning entry.isDir == false for subdirectories, so use nsIFile instead
+		if (Zotero.automatedTest) {
+			Zotero.File.pathToFile(parentDir).remove(true);
+		}
 		return OS.File.removeDir(parentDir);
 	}),
 	

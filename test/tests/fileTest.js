@@ -74,12 +74,12 @@ describe("Zotero.File", function () {
 		it("should compress a directory recursively", function* () {
 			var tmpPath = Zotero.getTempDirectory().path;
 			var path = OS.Path.join(tmpPath, Zotero.Utilities.randomString());
-			yield OS.File.makeDir(path);
+			yield OS.File.makeDir(path, { unixMode: 0o755 });
 			yield Zotero.File.putContentsAsync(OS.Path.join(path, '.zotero-ft-cache'), '');
 			yield Zotero.File.putContentsAsync(OS.Path.join(path, 'a.txt'), 'A');
 			// Create subdirectory
 			var subPath = OS.Path.join(path, 'sub');
-			yield OS.File.makeDir(subPath);
+			yield OS.File.makeDir(subPath, { unixMode: 0o755 });
 			yield Zotero.File.putContentsAsync(OS.Path.join(subPath, 'b.txt'), 'B');
 			
 			var zipFile = OS.Path.join(tmpPath, 'test.zip');
