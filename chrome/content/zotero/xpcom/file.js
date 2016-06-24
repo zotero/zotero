@@ -733,8 +733,11 @@ Zotero.File = new function(){
 		try {
 			iterator = new OS.File.DirectoryIterator(path);
 			yield iterator.forEach(Zotero.Promise.coroutine(function* (entry) {
-				Zotero.debug(entry);
-				Zotero.debug((yield OS.File.stat(entry.path)).isDir);
+				// entry.isDir can be false for some reason on Travis, causing spurious test failures
+				if (Zotero.isLinux && !entry.isDir && (yield OS.File.stat(entry.path)).isDir) {
+					Zotero.debug("Overriding isDir for " + entry.path);
+					entry.isDir = true;
+				}
 				
 				if (entry.isSymLink) {
 					Zotero.debug("Skipping symlink " + entry.name);
