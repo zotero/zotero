@@ -734,7 +734,7 @@ Zotero.File = new function(){
 			iterator = new OS.File.DirectoryIterator(path);
 			yield iterator.forEach(Zotero.Promise.coroutine(function* (entry) {
 				// entry.isDir can be false for some reason on Travis, causing spurious test failures
-				if (Zotero.isLinux && !entry.isDir && (yield OS.File.stat(entry.path)).isDir) {
+				if (Zotero.automatedTest && !entry.isDir && (yield OS.File.stat(entry.path)).isDir) {
 					Zotero.debug("Overriding isDir for " + entry.path);
 					entry.isDir = true;
 				}
