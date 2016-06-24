@@ -52,7 +52,7 @@ describe.skip("PDF Recognition", function() {
 	});
 
 	it("should recognize a PDF without a DOI", function* () {
-		if (Zotero.noUserInput) this.skip(); // CAPTCHAs make this fail
+		if (Zotero.automatedTest) this.skip(); // CAPTCHAs make this fail
 		
 		this.timeout(30000);
 		// Import the PDF

@@ -489,8 +489,8 @@ ZoteroCommandLineHandler.prototype = {
 			}
 		}
 		
-		if (cmdLine.handleFlag("ZoteroNoUserInput", false)) {
-			zInitOptions.noUserInput = true;
+		if (cmdLine.handleFlag("ZoteroAutomatedTest", false)) {
+			zInitOptions.automatedTest = true;
 		}
 		if (cmdLine.handleFlag("ZoteroSkipBundledFiles", false)) {
 			zInitOptions.skipBundledFiles = true;

@@ -132,7 +132,7 @@ fi
 
 
 if [ "$TRAVIS" = true ]; then
-	FX_ARGS="$FX_ARGS -ZoteroNoUserInput -ZoteroTestTimeout 10000"
+	FX_ARGS="$FX_ARGS -ZoteroAutomatedTest -ZoteroTestTimeout 10000"
 fi
 
 # Clean up on exit
