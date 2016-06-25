@@ -14,10 +14,12 @@ describe("Connector Server", function () {
 		
 		win = yield loadZoteroPane();
 		connectorServerPath = 'http://127.0.0.1:' + Zotero.Prefs.get('httpServer.port');
-		testServerPath = 'http://127.0.0.1:' + testServerPort;
 	});
 	
 	beforeEach(function () {
+		// Alternate ports to prevent exceptions not catchable in JS
+		testServerPort += (testServerPort & 1) ? 1 : -1;
+		testServerPath = 'http://127.0.0.1:' + testServerPort;
 		httpd = new HttpServer();
 		httpd.start(testServerPort);
 	});
