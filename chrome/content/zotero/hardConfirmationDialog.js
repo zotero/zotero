@@ -41,17 +41,22 @@ Zotero.HardConfirmationDialog = {
 		if (this.io.extra1Label) {
 			document.documentElement.buttons = document.documentElement.buttons + ',extra1';
 			document.documentElement.getButton('extra1').label = this.io.extra1Label
+		} if (this.io.acceptLabel) {
+			document.documentElement.getButton('accept').label = this.io.acceptLabel
 		}
+		
+		this.onKeyup();
 		
 		document.documentElement.title = this.io.title;
 	},
 	
+	onKeyup: function(event) {
+		document.documentElement.getButton('accept').disabled = 
+			document.getElementById('zotero-hardConfirmationDialog-textbox').value != this.io.confirmationText;
+	},
+	
 	onAccept: function() {
 		this.io.accept = true;
-
-		if (document.getElementById('zotero-hardConfirmationDialog-textbox').value == this.io.confirmationText) {
-			this.io.correctConfirmation = true;
-		}
 	},
 	
 	onExtra1: function() {

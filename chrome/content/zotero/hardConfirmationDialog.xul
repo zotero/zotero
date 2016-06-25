@@ -45,6 +45,6 @@
 		<separator class="thin"/>
 		
 		<label id="zotero-hardConfirmationDialog-textboxLabel" control="zotero-hardConfirmationDialog-textbox"/>
-		<textbox id="zotero-hardConfirmationDialog-textbox"/>
+		<textbox id="zotero-hardConfirmationDialog-textbox" onkeyup="Zotero.HardConfirmationDialog.onKeyup(event)"/>
 	</vbox>
 </dialog>

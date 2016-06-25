@@ -37,10 +37,10 @@ Zotero.Notifier = new function(){
 
 
 	/**
-	 * @param ref {Object} - signature {notify: function(event, type, ids, extraData) {}}
-	 * @param types {Array} - a list of types of events observer should be triggered on
-	 * @param id {String} - an id of the observer used in debug output
-	 * @param priority {Integer} - lower numbers correspond to higher priority of observer execution
+	 * @param {Object} [ref] signature {notify: function(event, type, ids, extraData) {}}
+	 * @param {Array} [types] a list of types of events observer should be triggered on
+	 * @param {String} [id] an id of the observer used in debug output
+	 * @param {Integer} [priority] lower numbers correspond to higher priority of observer execution
 	 * @returns {string}
 	 */
 	this.registerObserver = function (ref, types, id, priority) {

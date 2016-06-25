@@ -255,7 +255,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 
 		if (!userID) {
 			let hasItems = yield library.hasItems();
-			if (!hasItems && feeds.length <= 0 && !Zotero.newAccount) {
+			if (!hasItems && feeds.length <= 0 && !Zotero.initAutoSync) {
 				let ps = Services.prompt;
 				let index = ps.confirmEx(
 					null,

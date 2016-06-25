@@ -22,16 +22,14 @@ describe("Zotero.Sync.Data.Local", function() {
 	
 	
 	describe("#checkUser()", function () {
+		var resetDataDirFile = OS.Path.join(Zotero.getZoteroDirectory().path, 'reset-data-directory');
+		
 		before(function() {
 			sinon.stub(Zotero.Utilities.Internal, 'quitZotero');
 		});	
 		
-		beforeEach(function() {
-			var newAccountFile = Zotero.getZoteroDirectory().clone();
-			newAccountFile.append('new-account');
-			if(newAccountFile.exists()) {
-				newAccountFile.remove(false);
-			}
+		beforeEach(function* () {
+			yield OS.File.remove(resetDataDirFile, {ignoreAbsent: true});
 			Zotero.Utilities.Internal.quitZotero.reset();
 		});
 		
@@ -39,7 +37,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			Zotero.Utilities.Internal.quitZotero.restore();
 		});
 	
-		it("should prompt for data reset and create a temp 'new-account' file on accept", function* (){
+		it("should prompt for data reset and create a temp 'reset-data-directory' file on accept", function* (){
 			yield Zotero.Users.setCurrentUserID(1);
 			yield Zotero.Users.setCurrentUsername("A");
 			
@@ -47,51 +45,28 @@ describe("Zotero.Sync.Data.Local", function() {
 			waitForDialog(function (dialog) {
 				var text = dialog.document.documentElement.textContent;
 				var matches = text.match(/‘[^’]*’/g);
-				assert.equal(matches.length, 7);
+				assert.equal(matches.length, 6);
 				assert.equal(matches[0], "‘A’");
 				assert.equal(matches[1], "‘B’");
 				assert.equal(matches[2], "‘A’");
-				assert.equal(matches[3], "‘" + Zotero.getString('dataDir.pickNewDataDirectory') + "’");
-				assert.equal(matches[4], "‘B’");
-				assert.equal(matches[5], "‘A’");
-				assert.equal(matches[6], "‘A’");
+				assert.equal(matches[3], "‘B’");
+				assert.equal(matches[4], "‘A’");
+				assert.equal(matches[5], "‘" + Zotero.getString('account.confirmDelete.delete') + "’");
 				
-				dialog.document.getElementById('zotero-hardConfirmationDialog-textbox').value = 'A';
+				dialog.document.getElementById('zotero-hardConfirmationDialog-textbox').value = 
+					Zotero.getString('account.confirmDelete.delete');
+				
+				dialog.document.getElementById('zotero-hardConfirmationDialog-textbox')
+					.dispatchEvent(new Event('keyup'));
 				
 				handled = true;
 			}, 'accept', 'chrome://zotero/content/hardConfirmationDialog.xul');
 			var cont = yield Zotero.Sync.Data.Local.checkUser(window, 2, "B");
-			var newAccountFile = Zotero.getZoteroDirectory().clone();
-			newAccountFile.append('new-account');
+			var resetDataDirFileExists = yield OS.File.exists(resetDataDirFile);
 			assert.isTrue(handled);
 			assert.isTrue(cont);
-			assert.isTrue(newAccountFile.exists());
+			assert.isTrue(resetDataDirFileExists);
 		});
-		
-		it("should prompt for data reset and alert if wrong confirmation text entered", function* (){
-			yield Zotero.Users.setCurrentUserID(1);
-			yield Zotero.Users.setCurrentUsername("A");
-			
-			var handled = false;
-			waitForDialog(function (dialog) {
-				dialog.document.getElementById('zotero-hardConfirmationDialog-textbox').value = 'B';
-				
-				waitForDialog(function (dialog) {
-					dialog.document.getElementById('zotero-hardConfirmationDialog-textbox').value = 'A';
-					
-					handled = true;
-				}, 'accept', 'chrome://zotero/content/hardConfirmationDialog.xul');
-				
-			}, 'accept', 'chrome://zotero/content/hardConfirmationDialog.xul');
-			waitForDialog();
-			var cont = yield Zotero.Sync.Data.Local.checkUser(window, 2, "B");
-			var newAccountFile = Zotero.getZoteroDirectory().clone();
-			newAccountFile.append('new-account');
-			assert.isTrue(handled);
-			assert.isTrue(cont);
-			assert.isTrue(newAccountFile.exists());
-		});
-
 		
 		it("should prompt for data reset and cancel", function* () {
 			yield Zotero.Users.setCurrentUserID(1);
@@ -99,10 +74,9 @@ describe("Zotero.Sync.Data.Local", function() {
 			
 			waitForDialog(false, 'cancel', 'chrome://zotero/content/hardConfirmationDialog.xul');
 			var cont = yield Zotero.Sync.Data.Local.checkUser(window, 2, "B");
-			var newAccountFile = Zotero.getZoteroDirectory().clone();
-			newAccountFile.append('new-account');
+			var resetDataDirFileExists = yield OS.File.exists(resetDataDirFile);
 			assert.isFalse(cont);
-			assert.isFalse(newAccountFile.exists());
+			assert.isFalse(resetDataDirFileExists);
 			
 			assert.equal(Zotero.Users.getCurrentUserID(), 1);
 			assert.equal(Zotero.Users.getCurrentUsername(), "A");
@@ -116,11 +90,10 @@ describe("Zotero.Sync.Data.Local", function() {
 			waitForDialog(null, 'extra1', 'chrome://zotero/content/hardConfirmationDialog.xul');
 			waitForDialog();
 			var cont = yield Zotero.Sync.Data.Local.checkUser(window, 2, "B");
-			var newAccountFile = Zotero.getZoteroDirectory().clone();
-			newAccountFile.append('new-account');
+			var resetDataDirFileExists = yield OS.File.exists(resetDataDirFile);
 			assert.isTrue(cont);
 			assert.isTrue(Zotero.forceNewDataDirectory.called);
-			assert.isFalse(newAccountFile.exists());
+			assert.isFalse(resetDataDirFileExists);
 			
 			Zotero.forceNewDataDirectory.restore();
 		});

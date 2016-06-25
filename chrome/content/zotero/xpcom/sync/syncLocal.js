@@ -101,43 +101,45 @@ Zotero.Sync.Data.Local = {
 		var lastUsername = Zotero.Users.getCurrentUsername();
 		
 		if (lastUserID && lastUserID != userID) {
-			var accept = true;
-			while(accept) {
-				var io = {
-					title: Zotero.getString('general.warning'),
-					text: [Zotero.getString('account.lastSyncWithDifferentAccount', [ZOTERO_CONFIG.CLIENT_NAME, lastUsername, username]),
-						Zotero.getString('account.alternativePickNewDataDir', [Zotero.getString('dataDir.pickNewDataDirectory'), username])],
-					textboxLabel: Zotero.getString('account.confirmLastUsername', lastUsername),
-					confirmationText: lastUsername,
-					extra1Label: Zotero.getString('dataDir.pickNewDataDirectory')
-				};
-				win.openDialog("chrome://zotero/content/hardConfirmationDialog.xul", "",
-					"chrome, dialog, modal, centerscreen", io);
-				var ps = Services.prompt;
+			var io = {
+				title: Zotero.getString('general.warning'),
+				text: [Zotero.getString('account.lastSyncWithDifferentAccount', [ZOTERO_CONFIG.CLIENT_NAME, lastUsername, username]),
+					Zotero.getString('account.alternativeChooseNewDataDir', username)],
+				textboxLabel: Zotero.getString('account.confirmDelete', [lastUsername, Zotero.getString('account.confirmDelete.delete')]),
+				confirmationText: Zotero.getString('account.confirmDelete.delete'),
+				acceptLabel: Zotero.getString('account.confirmDelete.button'),
+				extra1Label: Zotero.getString('dataDir.chooseNewDataDirectory')
+			};
+			win.openDialog("chrome://zotero/content/hardConfirmationDialog.xul", "",
+				"chrome, dialog, modal, centerscreen", io);
+			var ps = Services.prompt;
 					
-				accept = io.accept;
-				if (accept && io.correctConfirmation) {
-					var file = Zotero.getZoteroDirectory();
-					file.append('new-account');
-					Zotero.File.putContents(file, '');
+			var accept = false;
+			if (io.accept) {
+				var resetDataDirFile = OS.Path.join(Zotero.getZoteroDirectory().path, 'reset-data-directory');
+				yield OS.File.writeAtomic(resetDataDirFile, '');
 
-					Zotero.Utilities.Internal.quitZotero(true);
-					return true;
-				} else if (accept) {
+				Zotero.Utilities.Internal.quitZotero(true);
+				accept = true;
+			} else if (io.extra1) {
+				if (Zotero.forceNewDataDirectory(win)) {
 					ps.alert(null,
-						Zotero.getString('general.warning'),
-						Zotero.getString('account.badConfirmation', lastUsername)
-					);	
-				} else if (io.extra1) {
-					if (Zotero.forceNewDataDirectory()) {
-						ps.alert(null,
-							Zotero.getString('general.restartRequired'),
-							Zotero.getString('general.restartRequiredForChange', Zotero.appName)
-						);
-						Zotero.Utilities.Internal.quitZotero(true);
-						return true;
-					} 
-				}
+						Zotero.getString('general.restartRequired'),
+						Zotero.getString('general.restartRequiredForChange', Zotero.appName)
+					);
+					Zotero.Utilities.Internal.quitZotero(true);
+					accept = true;
+				} 
+			}
+			if (accept) {
+				Zotero.Prefs.clear('sync.storage.downloadMode.groups');
+				Zotero.Prefs.clear('sync.storage.groups.enabled');
+				Zotero.Prefs.clear('sync.storage.downloadMode.personal');
+				Zotero.Prefs.clear('sync.storage.username');
+				Zotero.Prefs.clear('sync.storage.url');
+				Zotero.Prefs.clear('sync.storage.scheme');
+				Zotero.Prefs.clear('sync.storage.protocol');
+				Zotero.Prefs.clear('sync.storage.enabled');
 			}
 			return false;
 		}

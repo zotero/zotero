@@ -1055,8 +1055,8 @@ Zotero.Utilities.Internal = {
 	},
 
 	/**
-	 * Quits zotero, optionally restarting. Mostly useful for stubbing in tests.
-	 * @param restart {Boolean}
+	 * Quits Zotero, optionally restarting.
+	 * @param {Boolean} [restart=false]
 	 */
 	quitZotero: function(restart=false) {
 		var startup = Services.startup;
