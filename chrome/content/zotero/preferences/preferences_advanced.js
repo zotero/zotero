@@ -335,7 +335,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 			return false;
 		}
 		
-		return changePath(newPath);
+		return this.changePath(newPath);
 	}),
 	
 	
