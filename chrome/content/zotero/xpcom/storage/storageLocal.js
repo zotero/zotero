@@ -494,6 +494,12 @@ Zotero.Sync.Storage.Local = {
 	},
 	
 	
+	/**
+	 * Mark all stored files for upload checking
+	 *
+	 * This is used when switching between storage modes in the preferences so that all existing files
+	 * are uploaded via the new mode if necessary.
+	 */
 	resetModeSyncStates: Zotero.Promise.coroutine(function* () {
 		var sql = "SELECT itemID FROM items JOIN itemAttachments USING (itemID) "
 			+ "WHERE libraryID=? AND itemTypeID=? AND linkMode IN (?, ?)";
@@ -504,7 +510,7 @@ Zotero.Sync.Storage.Local = {
 			Zotero.Attachments.LINK_MODE_IMPORTED_URL,
 		];
 		var itemIDs = yield Zotero.DB.columnQueryAsync(sql, params);
-		for (let itemID of items) {
+		for (let itemID of itemIDs) {
 			let item = Zotero.Items.get(itemID);
 			item._attachmentSyncState = this.SYNC_STATE_TO_UPLOAD;
 		}
