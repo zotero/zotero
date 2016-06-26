@@ -28,7 +28,7 @@ Zotero.HardConfirmationDialog = {
 		var label, content;
 		this.io = window.arguments[0];
 		
-		var vbox = document.getElementById('zotero-hardConfirmationDialog-vbox');
+		var vbox = document.getElementById('infoContainer');
 		var sep = vbox.firstChild;
 		for (let text of this.io.text) {
 			label = document.createElement('label');
@@ -47,10 +47,10 @@ Zotero.HardConfirmationDialog = {
 		
 		this.onKeyup();
 		
-		document.documentElement.title = this.io.title;
+		document.documentElement.setAttribute('title', this.io.title);
 	},
 	
-	onKeyup: function(event) {
+	onKeyUp: function(event) {
 		document.documentElement.getButton('accept').disabled = 
 			document.getElementById('zotero-hardConfirmationDialog-textbox').value != this.io.confirmationText;
 	},
