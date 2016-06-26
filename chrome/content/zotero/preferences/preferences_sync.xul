@@ -120,12 +120,15 @@
 									</row>
 									<row>
 										<box/>
-										<hbox style="margin-left: 0">
-											<checkbox label="&zotero.preferences.sync.syncAutomatically;"
-													  preference="pref-sync-autosync"/>
-											<button id="sync-libraries-button" label="&zotero.preferences.sync.syncedLibraries.button;"
-													oncommand="Zotero_Preferences.Sync.showSyncedLibrariesDialog()"/>
-										</hbox>
+										<box>
+											<button id="sync-libraries-button" label="&zotero.preferences.sync.librariesToSync.button;"
+													oncommand="Zotero_Preferences.Sync.showLibrariesToSyncDialog()"/>
+										</box>
+									</row>
+									<row>
+										<box/>
+										<checkbox label="&zotero.preferences.sync.syncAutomatically;"
+												  preference="pref-sync-autosync"/>
 									</row>
 									<row>
 										<box/>

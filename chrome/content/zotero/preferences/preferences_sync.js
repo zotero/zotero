@@ -179,18 +179,18 @@ Zotero_Preferences.Sync = {
 	}),
 	
 	
-	showSyncedLibrariesDialog: function() {
+	showLibrariesToSyncDialog: function() {
 		var io = {};
-		window.openDialog('chrome://zotero/content/preferences/syncedLibraries.xul',
-			"zotero-preferences-syncedLibrariesDialog", "chrome,modal,centerscreen", io);
+		window.openDialog('chrome://zotero/content/preferences/librariesToSync.xul',
+			"zotero-preferences-librariesToSyncDialog", "chrome,modal,centerscreen", io);
 	},
 	
 	
-	dblClickSyncedLibrary: function (index) {
+	dblClickLibraryToSync: function (index) {
 		if (index < 3) {
 			return;
 		}
-		var treechildren = document.getElementById('synced-libraries-rows');
+		var treechildren = document.getElementById('libraries-to-sync-rows');
 		if (index >= treechildren.childNodes.length) {
 			return;
 		}
@@ -198,25 +198,25 @@ Zotero_Preferences.Sync = {
 		var cell = row.firstChild.firstChild;
 		cell.setAttribute('value', cell.getAttribute('value') != 'true');
 
-		return this.toggleSyncedLibrary(index);
+		return this.toggleLibraryToSync(index);
 	},
 
 
-	clickSyncedLibrary: function (event) {
-		var tree = document.getElementById("synced-libraries-tree");
+	clickLibraryToSync: function (event) {
+		var tree = document.getElementById("libraries-to-sync-tree");
 		var row = {}, col = {}, child = {};
 		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, child);
 		
-		if (col.value.element.id != 'synced-libraries-checked') {
+		if (col.value.element.id != 'libraries-to-sync-checked') {
 			return;
 		}
 		// if clicked on checkbox update pref
-		return this.toggleSyncedLibrary(row.value);
+		return this.toggleLibraryToSync(row.value);
 	},
 	
 	
-	toggleSyncedLibrary: function (index) {
-		var treechildren = document.getElementById('synced-libraries-rows');
+	toggleLibraryToSync: function (index) {
+		var treechildren = document.getElementById('libraries-to-sync-rows');
 		if (index >= treechildren.childNodes.length) {
 			return;
 		}
@@ -226,23 +226,23 @@ Zotero_Preferences.Sync = {
 			return;
 		}
 		
-		var syncedLibraries = JSON.parse(Zotero.Prefs.get('sync.syncedLibraries') || '[]');
-		var indexOfId = syncedLibraries.indexOf(id);
+		var librariesToSync = JSON.parse(Zotero.Prefs.get('sync.librariesToSync') || '[]');
+		var indexOfId = librariesToSync.indexOf(id);
 		if (indexOfId != -1) {
-			syncedLibraries.splice(indexOfId, 1);
+			librariesToSync.splice(indexOfId, 1);
 		} else {
-			syncedLibraries.push(id);
+			librariesToSync.push(id);
 		}
-		Zotero.Prefs.set('sync.syncedLibraries', JSON.stringify(syncedLibraries));
+		Zotero.Prefs.set('sync.librariesToSync', JSON.stringify(librariesToSync));
 		 
 		var cell = row.firstChild.firstChild;
 		cell.setAttribute('value', indexOfId == -1);
 	},
 	
 	
-	initSyncedLibraries: Zotero.Promise.coroutine(function* () {
-		var tree = document.getElementById("synced-libraries-tree");
-		var treechildren = document.getElementById('synced-libraries-rows');
+	initLibrariesToSync: Zotero.Promise.coroutine(function* () {
+		var tree = document.getElementById("libraries-to-sync-tree");
+		var treechildren = document.getElementById('libraries-to-sync-rows');
 		while (treechildren.hasChildNodes()) {
 			treechildren.removeChild(treechildren.firstChild);
 		}
@@ -266,7 +266,7 @@ Zotero_Preferences.Sync = {
 		}
 		
 		// Add an animated row for while we're loading a group list
-		var loadingLabel = Zotero.getString("zotero.preferences.sync.syncedLibraries.loadingLibraries");
+		var loadingLabel = Zotero.getString("zotero.preferences.sync.librariesToSync.loadingLibraries");
 		addRow(loadingLabel, "loading", false, false);
 		var cell = treechildren.firstChild.getElementsByAttribute("value", "loading")[0];
 		function animateLoadingLabel() {
@@ -281,10 +281,11 @@ Zotero_Preferences.Sync = {
 
 		var apiKey = Zotero.Sync.Data.Local.getAPIKey();
 		var client = Zotero.Sync.Runner.getAPIClient({apiKey});
+		var groups = {};
 		try {
 			// Load up remote groups
 			var keyInfo = yield Zotero.Sync.Runner.checkAccess(client, {timeout: 5000});
-			var groups = yield client.getGroups(keyInfo.userID);
+			groups = yield client.getGroups(keyInfo.userID);
 		}
 		catch (e) {
 			// Connection problems
@@ -313,9 +314,9 @@ Zotero_Preferences.Sync = {
 		addRow(Zotero.getString("pane.collections.feeds"), null, true, false);
 		
 		// Add group rows
-		var syncedLibraries = JSON.parse(Zotero.Prefs.get('sync.syncedLibraries') || '[]');
+		var librariesToSync = JSON.parse(Zotero.Prefs.get('sync.librariesToSync') || '[]');
 		for (let group in groups) {
-			addRow(group.data.name, group.id, syncedLibraries.indexOf(group.id) != -1);
+			addRow(group.data.name, group.id, librariesToSync.indexOf(group.id) != -1);
 		}
 	}),
 

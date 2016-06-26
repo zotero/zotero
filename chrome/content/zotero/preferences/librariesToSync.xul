@@ -37,25 +37,25 @@
 
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	title="" buttons="accept"
-	id="zotero-autoSyncLibraries"
-	onload="Zotero_Preferences.Sync.initSyncedLibraries(); sizeToContent()" >
+	id="zotero-librariesToSync"
+	onload="Zotero_Preferences.Sync.initLibrariesToSync(); sizeToContent()" >
 	
 	<script src="chrome://zotero/content/include.js"/>
 	<script src="preferences.js"/>
 	<script src="preferences_sync.js"/>
 	
 	<groupbox>
-		<caption label="&zotero.preferences.sync.syncedLibraries;"/>
+		<caption label="&zotero.preferences.sync.librariesToSync;"/>
 		
-		<tree id="synced-libraries-tree" flex="1" width="415" hidecolumnpicker="true" rows="10" seltype="single" editable="true"
-			ondblclick="Zotero_Preferences.Sync.dblClickSyncedLibrary(this.currentIndex);"
-			onclick="Zotero_Preferences.Sync.clickSyncedLibrary(event)"
-			onkeyup="if (event.keyCode == event.DOM_VK_SPACE) { Zotero_Preferences.Sync.dblClickSyncedLibrary(this.currentIndex); }">
+		<tree id="libraries-to-sync-tree" flex="1" width="415" hidecolumnpicker="true" rows="10" seltype="single" editable="true"
+			ondblclick="Zotero_Preferences.Sync.dblClickLibraryToSync(this.currentIndex);"
+			onclick="Zotero_Preferences.Sync.clickLibraryToSync(event)"
+			onkeyup="if (event.keyCode == event.DOM_VK_SPACE) { Zotero_Preferences.Sync.dblClickLibraryToSync(this.currentIndex); }">
 			<treecols>
-				<treecol editable="true" type="checkbox" id="synced-libraries-checked" label="&zotero.preferences.sync.syncedLibraries.sync;"/>
-				<treecol editable="false" id="synced-libraries-name" flex="1" label="&zotero.preferences.sync.syncedLibraries.library;"/>
+				<treecol editable="true" type="checkbox" id="libraries-to-sync-checked" label="&zotero.preferences.sync.librariesToSync.sync;"/>
+				<treecol editable="false" id="libraries-to-sync-name" flex="1" label="&zotero.preferences.sync.librariesToSync.library;"/>
 			</treecols>
-			<treechildren id="synced-libraries-rows"/>
+			<treechildren id="libraries-to-sync-rows"/>
 		</tree>
 	</groupbox>
 	
