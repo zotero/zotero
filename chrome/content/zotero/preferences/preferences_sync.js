@@ -25,6 +25,7 @@
 
 "use strict";
 Components.utils.import("resource://gre/modules/Services.jsm");
+Components.utils.import("resource://gre/modules/osfile.jsm");
 
 Zotero_Preferences.Sync = {
 	init: Zotero.Promise.coroutine(function* () {
@@ -166,11 +167,21 @@ Zotero_Preferences.Sync = {
 
 	unlinkAccount: Zotero.Promise.coroutine(function* (showAlert=true) {
 		if (showAlert) {
-			if (!Services.prompt.confirm(
+			var check = {value: false};
+			if (Services.prompt.confirmCheck(
 				null,
 				Zotero.getString('general.warning'),
-				Zotero.getString('account.unlinkWarning', Zotero.clientName)
+				Zotero.getString('account.unlinkWarning', Zotero.clientName),
+				Zotero.getString('account.unlinkWarning.removeData', Zotero.Users.getCurrentUsername()),
+				check
 			)) {
+				if (check.value) {
+					var resetDataDirFile = OS.Path.join(Zotero.getZoteroDirectory().path, 'reset-data-directory');
+					yield OS.File.writeAtomic(resetDataDirFile, '');
+
+					Zotero.Utilities.Internal.quitZotero(true);
+				}
+			} else {
 				return;
 			}
 		}

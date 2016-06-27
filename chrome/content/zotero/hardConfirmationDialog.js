@@ -36,8 +36,17 @@ Zotero.HardConfirmationDialog = {
 			label.appendChild(content);
 			vbox.insertBefore(label, sep);
 		}
-		content = document.createTextNode(this.io.textboxLabel);
-		document.getElementById('zotero-hardConfirmationDialog-textboxLabel').appendChild(content);
+		if (this.io.checkboxLabel) {
+			var checkbox = document.getElementById('zotero-hardConfirmationDialog-checkbox');
+			checkbox.hidden = false;
+			checkbox.setAttribute('label', this.io.checkboxLabel);
+			this.onCheckbox();
+		}
+		if (this.io.confirmationText) {
+			document.getElementById('zotero-hardConfirmationDialog-textbox').hidden = false;
+			this.onKeyUp();
+		}
+		
 		if (this.io.extra1Label) {
 			document.documentElement.buttons = document.documentElement.buttons + ',extra1';
 			document.documentElement.getButton('extra1').label = this.io.extra1Label
@@ -45,9 +54,12 @@ Zotero.HardConfirmationDialog = {
 			document.documentElement.getButton('accept').label = this.io.acceptLabel
 		}
 		
-		this.onKeyUp();
-		
 		document.documentElement.setAttribute('title', this.io.title);
+	},
+	
+	onCheckbox: function(event) {
+		document.documentElement.getButton('accept').disabled = 
+			!document.getElementById('zotero-hardConfirmationDialog-checkbox').checked;
 	},
 	
 	onKeyUp: function(event) {

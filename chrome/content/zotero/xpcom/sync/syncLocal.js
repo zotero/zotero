@@ -103,16 +103,12 @@ Zotero.Sync.Data.Local = {
 		if (lastUserID && lastUserID != userID) {
 			var io = {
 				title: Zotero.getString('general.warning'),
-				text: [Zotero.getString('account.lastSyncWithDifferentAccount', [ZOTERO_CONFIG.CLIENT_NAME, lastUsername, username]),
-					Zotero.getString('account.alternativelyChooseNewDataDir', username)],
-				textboxLabel: Zotero.getString('account.confirmDelete', [lastUsername, Zotero.getString('account.confirmDelete.delete')]),
-				confirmationText: Zotero.getString('account.confirmDelete.delete'),
-				acceptLabel: Zotero.getString('account.confirmDelete.button'),
-				extra1Label: Zotero.getString('dataDir.chooseNewDataDirectory')
+				text: [Zotero.getString('account.lastSyncWithDifferentAccount', [ZOTERO_CONFIG.CLIENT_NAME, lastUsername, username])],
+				checkboxLabel: Zotero.getString('account.confirmDelete', lastUsername),
+				acceptLabel: Zotero.getString('account.confirmDelete.button')
 			};
 			win.openDialog("chrome://zotero/content/hardConfirmationDialog.xul", "",
 				"chrome, dialog, modal, centerscreen", io);
-			var ps = Services.prompt;
 					
 			var accept = false;
 			if (io.accept) {
@@ -121,16 +117,18 @@ Zotero.Sync.Data.Local = {
 
 				Zotero.Utilities.Internal.quitZotero(true);
 				accept = true;
-			} else if (io.extra1) {
-				if (Zotero.forceNewDataDirectory(win)) {
-					ps.alert(null,
-						Zotero.getString('general.restartRequired'),
-						Zotero.getString('general.restartRequiredForChange', Zotero.appName)
-					);
-					Zotero.Utilities.Internal.quitZotero(true);
-					accept = true;
-				} 
 			}
+			// else if (io.extra1) {
+			// 	if (Zotero.forceNewDataDirectory(win)) {
+			// 		var ps = Services.prompt;
+			// 		ps.alert(null,
+			// 			Zotero.getString('general.restartRequired'),
+			// 			Zotero.getString('general.restartRequiredForChange', Zotero.appName)
+			// 		);
+			// 		Zotero.Utilities.Internal.quitZotero(true);
+			// 		accept = true;
+			// 	} 
+			// }
 			if (accept) {
 				Zotero.Prefs.clear('sync.storage.downloadMode.groups');
 				Zotero.Prefs.clear('sync.storage.groups.enabled');
@@ -141,7 +139,7 @@ Zotero.Sync.Data.Local = {
 				Zotero.Prefs.clear('sync.storage.protocol');
 				Zotero.Prefs.clear('sync.storage.enabled');
 			}
-			return false;
+			return accept;
 		}
 		
 		yield Zotero.DB.executeTransaction(function* () {

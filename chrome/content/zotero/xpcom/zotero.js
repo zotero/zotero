@@ -494,8 +494,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				// TODO: Back up database
 				
 				
-				restoreFile.remove(false);
-				
 				var dbfile = Zotero.getZoteroDatabase().path;
 				yield OS.File.remove(dbfile, {ignoreAbsent: true});
 				

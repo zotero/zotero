@@ -51,9 +51,9 @@
 				<hbox id="iconContainer" align="start"><image id="info.icon" class="spaced alert-icon"/></hbox>
 				<vbox id="infoContainer">
 					<separator class="thin"/>
-					
-					<label id="zotero-hardConfirmationDialog-textboxLabel" control="zotero-hardConfirmationDialog-textbox"/>
-					<textbox id="zotero-hardConfirmationDialog-textbox" onkeyup="Zotero.HardConfirmationDialog.onKeyUp(event)"/>
+
+					<checkbox id="zotero-hardConfirmationDialog-checkbox" hidden="true" oncommand="Zotero.HardConfirmationDialog.onCheckbox(event)"/>
+					<textbox id="zotero-hardConfirmationDialog-textbox" hidden="true" onkeyup="Zotero.HardConfirmationDialog.onKeyUp(event)"/>
 				</vbox>
 			</row>
 		</rows>
