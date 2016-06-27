@@ -479,27 +479,40 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	var _initFull = Zotero.Promise.coroutine(function* () {
 		Zotero.VersionHeader.init();
 		
-		// Check for DB restore
+		// Check for data reset/restore
 		var dataDir = Zotero.getZoteroDirectory();
-		var restoreFile = dataDir.clone();
-		restoreFile.append('restore-from-server');
-		if (restoreFile.exists()) {
+		var restoreFile = OS.Path.join(dataDir.path, 'restore-from-server');
+		var resetDataDirFile = OS.Path.join(dataDir.path, 'reset-data-directory');
+		
+		var result = yield Zotero.Promise.all([OS.File.exists(restoreFile), OS.File.exists(resetDataDirFile)]);
+		if (result.some(r => r)) {
+			[Zotero.restoreFromServer, Zotero.resetDataDir] = result;
 			try {
 				// TODO: better error handling
 				
 				// TODO: prompt for location
 				// TODO: Back up database
 				
-				restoreFile.remove(false);
 				
-				var dbfile = Zotero.getZoteroDatabase();
-				dbfile.remove(false);
+				var dbfile = Zotero.getZoteroDatabase().path;
+				yield OS.File.remove(dbfile, {ignoreAbsent: true});
+				
+				if (Zotero.restoreFromServer) {
+					yield OS.File.remove(restoreFile);
+					Zotero.restoreFromServer = true;
+				} else if (Zotero.resetDataDir) {
+					Zotero.initAutoSync = true;
+					var storageDir = OS.Path.join(dataDir.path, 'storage');
+					yield Zotero.Promise.all([
+						OS.File.removeDir(storageDir, {ignoreAbsent: true}), 
+						OS.File.remove(resetDataDirFile)
+					]);
+				}
 				
 				// Recreate database with no quick start guide
 				Zotero.Schema.skipDefaultData = true;
 				yield Zotero.Schema.updateSchema();
 				
-				Zotero.restoreFromServer = true;
 			}
 			catch (e) {
 				// Restore from backup?
@@ -1190,6 +1203,42 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		
 		return useProfileDir ? true : file;
 	}
+	
+	
+	this.forceNewDataDirectory = function(win) {
+		if (!win) {
+			win = Services.wm.getMostRecentWindow('navigator:browser');
+		}
+		var ps = Services.prompt;
+		
+		var nsIFilePicker = Components.interfaces.nsIFilePicker;
+		while (true) {
+			var fp = Components.classes["@mozilla.org/filepicker;1"]
+						.createInstance(nsIFilePicker);
+			fp.init(win, Zotero.getString('dataDir.selectNewDir', Zotero.clientName), nsIFilePicker.modeGetFolder);
+			fp.displayDirectory = Zotero.getZoteroDirectory();
+			fp.appendFilters(nsIFilePicker.filterAll);
+			if (fp.show() == nsIFilePicker.returnOK) {
+				var file = fp.file;
+				
+				if (file.directoryEntries.hasMoreElements()) {
+					ps.alert(null,
+						Zotero.getString('dataDir.mustSelectEmpty.title'),
+						Zotero.getString('dataDir.mustSelectEmpty.text')
+					);
+					continue;
+				}
+				
+				// Set new data directory
+				Zotero.Prefs.set('dataDir', file.persistentDescriptor);
+				Zotero.Prefs.set('lastDataDir', file.path);
+				Zotero.Prefs.set('useDataDir', true);
+				return file;
+			} else {
+				return false;
+			}
+		}
+	};
 
 
 	this.warnOnUnsafeDataDir = true;

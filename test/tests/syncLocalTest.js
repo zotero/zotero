@@ -22,7 +22,22 @@ describe("Zotero.Sync.Data.Local", function() {
 	
 	
 	describe("#checkUser()", function () {
-		it("should prompt for user update and perform on accept", function* () {
+		var resetDataDirFile = OS.Path.join(Zotero.getZoteroDirectory().path, 'reset-data-directory');
+		
+		before(function() {
+			sinon.stub(Zotero.Utilities.Internal, 'quitZotero');
+		});	
+		
+		beforeEach(function* () {
+			yield OS.File.remove(resetDataDirFile, {ignoreAbsent: true});
+			Zotero.Utilities.Internal.quitZotero.reset();
+		});
+		
+		after(function() {
+			Zotero.Utilities.Internal.quitZotero.restore();
+		});
+	
+		it("should prompt for data reset and create a temp 'reset-data-directory' file on accept", function* (){
 			yield Zotero.Users.setCurrentUserID(1);
 			yield Zotero.Users.setCurrentUsername("A");
 			
@@ -30,54 +45,54 @@ describe("Zotero.Sync.Data.Local", function() {
 			waitForDialog(function (dialog) {
 				var text = dialog.document.documentElement.textContent;
 				var matches = text.match(/‘[^’]*’/g);
-				assert.equal(matches.length, 4);
+				assert.equal(matches.length, 3);
 				assert.equal(matches[0], "‘A’");
 				assert.equal(matches[1], "‘B’");
-				assert.equal(matches[2], "‘B’");
-				assert.equal(matches[3], "‘A’");
+				assert.equal(matches[2], "‘A’");
+				
+				dialog.document.getElementById('zotero-hardConfirmationDialog-checkbox').checked = true;
+				dialog.document.getElementById('zotero-hardConfirmationDialog-checkbox')
+					.dispatchEvent(new Event('command'));
+				
 				handled = true;
-			});
-			var cont = yield Zotero.Sync.Data.Local.checkUser(null, 2, "B");
+			}, 'accept', 'chrome://zotero/content/hardConfirmationDialog.xul');
+			var cont = yield Zotero.Sync.Data.Local.checkUser(window, 2, "B");
+			var resetDataDirFileExists = yield OS.File.exists(resetDataDirFile);
 			assert.isTrue(handled);
 			assert.isTrue(cont);
-			
-			assert.equal(Zotero.Users.getCurrentUserID(), 2);
-			assert.equal(Zotero.Users.getCurrentUsername(), "B");
-		})
+			assert.isTrue(resetDataDirFileExists);
+		});
 		
-		it("should prompt for user update and cancel", function* () {
+		it("should prompt for data reset and cancel", function* () {
 			yield Zotero.Users.setCurrentUserID(1);
 			yield Zotero.Users.setCurrentUsername("A");
 			
-			waitForDialog(false, 'cancel');
-			var cont = yield Zotero.Sync.Data.Local.checkUser(null, 2, "B");
+			waitForDialog(false, 'cancel', 'chrome://zotero/content/hardConfirmationDialog.xul');
+			var cont = yield Zotero.Sync.Data.Local.checkUser(window, 2, "B");
+			var resetDataDirFileExists = yield OS.File.exists(resetDataDirFile);
 			assert.isFalse(cont);
+			assert.isFalse(resetDataDirFileExists);
 			
 			assert.equal(Zotero.Users.getCurrentUserID(), 1);
 			assert.equal(Zotero.Users.getCurrentUsername(), "A");
-		})
+		});
 		
-		it("should update local relations when syncing for the first time", function* () {
-			yield resetDB({
-				thisArg: this,
-				skipBundledFiles: true
-			});
+		// extra1 functionality not used at the moment
+		it.skip("should prompt for data reset and allow to choose a new data directory", function* (){
+			sinon.stub(Zotero, 'forceNewDataDirectory').returns(true);
+			yield Zotero.Users.setCurrentUserID(1);
+			yield Zotero.Users.setCurrentUsername("A");
 			
-			var item1 = yield createDataObject('item');
-			var item2 = yield createDataObject(
-				'item', { libraryID: Zotero.Libraries.publicationsLibraryID }
-			);
-			
-			yield item1.addLinkedItem(item2);
-			
-			var cont = yield Zotero.Sync.Data.Local.checkUser(null, 1, "A");
+			waitForDialog(null, 'extra1', 'chrome://zotero/content/hardConfirmationDialog.xul');
+			waitForDialog();
+			var cont = yield Zotero.Sync.Data.Local.checkUser(window, 2, "B");
+			var resetDataDirFileExists = yield OS.File.exists(resetDataDirFile);
 			assert.isTrue(cont);
+			assert.isTrue(Zotero.forceNewDataDirectory.called);
+			assert.isFalse(resetDataDirFileExists);
 			
-			var json = item1.toJSON();
-			var uri = json.relations[Zotero.Relations.linkedObjectPredicate][0];
-			assert.notInclude(uri, 'users/local');
-			assert.include(uri, 'users/1/publications');
-		})
+			Zotero.forceNewDataDirectory.restore();
+		});
 	});
 	
 	

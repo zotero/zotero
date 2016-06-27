@@ -25,6 +25,7 @@
 
 "use strict";
 Components.utils.import("resource://gre/modules/Services.jsm");
+Components.utils.import("resource://gre/modules/osfile.jsm");
 
 Zotero_Preferences.Sync = {
 	init: Zotero.Promise.coroutine(function* () {
@@ -100,6 +101,7 @@ Zotero_Preferences.Sync = {
 
 		if (event.keyCode == 13) {
 			Zotero_Preferences.Sync.linkAccount(event);
+			event.preventDefault();
 		}
 	},
 	
@@ -165,11 +167,29 @@ Zotero_Preferences.Sync = {
 
 	unlinkAccount: Zotero.Promise.coroutine(function* (showAlert=true) {
 		if (showAlert) {
-			if (!Services.prompt.confirm(
+			var check = {value: false};
+			var ps = Services.prompt;
+			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING) +
+				(ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+			var index = ps.confirmEx(
 				null,
 				Zotero.getString('general.warning'),
-				Zotero.getString('sync.unlinkWarning', Zotero.clientName)
-			)) {
+				Zotero.getString('account.unlinkWarning', Zotero.clientName),
+				buttonFlags,
+				Zotero.getString('account.unlinkWarning.button'), null, null,
+				Zotero.getString('account.unlinkWarning.removeData', Zotero.clientName),
+				check
+			);
+			if (index == 0) {
+				if (check.value) {
+					var resetDataDirFile = OS.Path.join(Zotero.getZoteroDirectory().path, 'reset-data-directory');
+					yield Zotero.File.putContentsAsync(resetDataDirFile, '');
+
+					yield Zotero.Sync.Runner.deleteAPIKey();
+					Zotero.Prefs.clear('sync.server.username');
+					return Zotero.Utilities.Internal.quitZotero(true);
+				}
+			} else {
 				return;
 			}
 		}

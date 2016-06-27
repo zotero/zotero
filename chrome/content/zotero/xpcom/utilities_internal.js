@@ -1052,6 +1052,15 @@ Zotero.Utilities.Internal = {
 		}
 		elem.appendChild(menu);
 		return menu;
+	},
+
+	/**
+	 * Quits Zotero, optionally restarting.
+	 * @param {Boolean} [restart=false]
+	 */
+	quitZotero: function(restart=false) {
+		var startup = Services.startup;
+		startup.quit(startup.eAttemptQuit | (restart ? startup.eRestart : 0) );
 	}
 }
 

@@ -95,6 +95,17 @@ describe("Sync Preferences", function () {
 				assert.equal(Zotero.Sync.Data.Local.getAPIKey(), "");
 				assert.equal(doc.getElementById('sync-authorized').getAttribute('hidden'), 'true');
 			});
+			
+			it("should not unlink on pressing cancel", function* () {
+				getAPIKeyFromCredentialsStub.resolves(apiResponse);
+				yield setCredentials("Username", "correctPassword");
+				
+				waitForDialog(null, 'cancel');
+				
+				yield win.Zotero_Preferences.Sync.unlinkAccount();
+				assert.equal(Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+				assert.equal(doc.getElementById('sync-unauthorized').getAttribute('hidden'), 'true');
+			});
 
 		})
 	})

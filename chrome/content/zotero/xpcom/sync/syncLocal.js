@@ -88,12 +88,12 @@ Zotero.Sync.Data.Local = {
 	
 	/**
 	 * Make sure we're syncing with the same account we used last time, and prompt if not.
-	 * If user accepts, change the current user, delete existing groups, and update relation
-	 * URIs to point to the new user's library.
+	 * If user accepts, change the current user and initiate deletion of all user data after a
+	 * restart.
 	 *
 	 * @param {Window|null}
 	 * @param {Integer} userID - New userID
-	 * @param {Integer} libraryID - New libraryID
+	 * @param {Integer} username - New username
 	 * @return {Boolean} - True to continue, false to cancel
 	 */
 	checkUser: Zotero.Promise.coroutine(function* (win, userID, username) {
@@ -101,73 +101,55 @@ Zotero.Sync.Data.Local = {
 		var lastUsername = Zotero.Users.getCurrentUsername();
 		
 		if (lastUserID && lastUserID != userID) {
-			var groups = Zotero.Groups.getAll();
-			
-			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-				.getService(Components.interfaces.nsIPromptService);
-			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
-				+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
-				+ ps.BUTTON_POS_1_DEFAULT
-				+ ps.BUTTON_DELAY_ENABLE;
-				
-			var msg = Zotero.getString(
-				'sync.lastSyncWithDifferentAccount', [ZOTERO_CONFIG.CLIENT_NAME, lastUsername, username]
-			);
-			var syncButtonText = Zotero.getString('sync.sync');
-			
-			msg += " " + Zotero.getString('sync.localDataWillBeCombined', [username, ZOTERO_CONFIG.DOMAIN_NAME]);
-			// If there are local groups belonging to the previous user,
-			// we need to remove them
-			if (groups.length) {
-				msg += " " + Zotero.getString('sync.localGroupsWillBeRemoved1');
-				var syncButtonText = Zotero.getString('sync.removeGroupsAndSync');
+			var io = {
+				title: Zotero.getString('general.warning'),
+				text: [Zotero.getString('account.lastSyncWithDifferentAccount', [ZOTERO_CONFIG.CLIENT_NAME, lastUsername, username])],
+				checkboxLabel: Zotero.getString('account.confirmDelete', lastUsername),
+				acceptLabel: Zotero.getString('account.confirmDelete.button')
+			};
+			win.openDialog("chrome://zotero/content/hardConfirmationDialog.xul", "",
+				"chrome, dialog, modal, centerscreen", io);
+					
+			var accept = false;
+			if (io.accept) {
+				var resetDataDirFile = OS.Path.join(Zotero.getZoteroDirectory().path, 'reset-data-directory');
+				yield Zotero.File.putContentsAsync(resetDataDirFile, '');
+
+				Zotero.Utilities.Internal.quitZotero(true);
+				accept = true;
 			}
-			msg += "\n\n" + Zotero.getString('sync.avoidCombiningData', lastUsername);
-			
-			var index = ps.confirmEx(
-				win,
-				Zotero.getString('general.warning'),
-				msg,
-				buttonFlags,
-				syncButtonText,
-				null,
-				Zotero.getString('sync.openSyncPreferences'),
-				null, {}
-			);
-			
-			if (index > 0) {
-				if (index == 2) {
-					win.ZoteroPane.openPreferences('zotero-prefpane-sync');
-				}
-				return false;
+			// else if (io.extra1) {
+			// 	if (Zotero.forceNewDataDirectory(win)) {
+			// 		var ps = Services.prompt;
+			// 		ps.alert(null,
+			// 			Zotero.getString('general.restartRequired'),
+			// 			Zotero.getString('general.restartRequiredForChange', Zotero.appName)
+			// 		);
+			// 		Zotero.Utilities.Internal.quitZotero(true);
+			// 		accept = true;
+			// 	} 
+			// }
+			if (accept) {
+				Zotero.Prefs.clear('sync.storage.downloadMode.groups');
+				Zotero.Prefs.clear('sync.storage.groups.enabled');
+				Zotero.Prefs.clear('sync.storage.downloadMode.personal');
+				Zotero.Prefs.clear('sync.storage.username');
+				Zotero.Prefs.clear('sync.storage.url');
+				Zotero.Prefs.clear('sync.storage.scheme');
+				Zotero.Prefs.clear('sync.storage.protocol');
+				Zotero.Prefs.clear('sync.storage.enabled');
 			}
+			return accept;
 		}
 		
 		yield Zotero.DB.executeTransaction(function* () {
-			if (lastUserID != userID) {
-				if (lastUserID) {
-					// Delete all local groups if changing users
-					for (let group of groups) {
-						yield group.erase();
-					}
-					
-					// Update relations pointing to the old library to point to this one
-					yield Zotero.Relations.updateUser(userID);
-				}
-				// Replace local user key with libraryID, in case duplicates were
-				// merged before the first sync
-				else {
-					yield Zotero.Relations.updateUser(userID);
-				}
-				
-				yield Zotero.Users.setCurrentUserID(userID);
-			}
-			
 			if (lastUsername != username) {
 				yield Zotero.Users.setCurrentUsername(username);
+			} 
+			if (!lastUserID) {
+				yield Zotero.Users.setCurrentUserID(userID);
 			}
-		})
+		});
 		
 		return true;
 	}),

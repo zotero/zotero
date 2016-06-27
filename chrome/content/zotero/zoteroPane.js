@@ -408,8 +408,8 @@ var ZoteroPane = new function()
 		var d2 = new Date();
 		Zotero.debug("Purged data tables in " + (d2 - d) + " ms");
 		
-		// Auto-sync on pane open
-		if (Zotero.Prefs.get('sync.autoSync')) {
+		// Auto-sync on pane open or if new account
+		if (Zotero.Prefs.get('sync.autoSync') || Zotero.initAutoSync) {
 			yield Zotero.proxyAuthComplete.delay(1000);
 			
 			if (!Zotero.Sync.Runner.enabled) {
@@ -424,7 +424,7 @@ var ZoteroPane = new function()
 			else {
 				Zotero.Sync.Runner.sync({
 					background: true
-				});
+				}).then(() => Zotero.initAutoSync = false);
 			}
 		}
 		
