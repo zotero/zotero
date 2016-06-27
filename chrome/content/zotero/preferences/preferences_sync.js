@@ -146,7 +146,8 @@ Zotero_Preferences.Sync = {
 			Zotero.Sync.Runner.deleteAPIKey();
 			return;
 		}
-
+		Zotero.Prefs.set('sync.librariesToSync', JSON.stringify(
+			[Zotero.Libraries.userLibraryID, Zotero.Libraries.publicationsLibraryID ] ));
 		this.displayFields(json.username);
 	}),
 
@@ -175,6 +176,7 @@ Zotero_Preferences.Sync = {
 		}
 
 		this.displayFields();
+		Zotero.Prefs.clear('sync.librariesToSync');
 		yield Zotero.Sync.Runner.deleteAPIKey();
 	}),
 	
@@ -265,19 +267,9 @@ Zotero_Preferences.Sync = {
 			treechildren.appendChild(treeitem);
 		}
 		
-		// Add an animated row for while we're loading a group list
+		// Add loading row while we're loading a group list
 		var loadingLabel = Zotero.getString("zotero.preferences.sync.librariesToSync.loadingLibraries");
 		addRow(loadingLabel, "loading", false, false);
-		var cell = treechildren.firstChild.getElementsByAttribute("value", "loading")[0];
-		function animateLoadingLabel() {
-			if (cell.getAttribute('label').length < loadingLabel.length + 3) {
-				cell.setAttribute('label', cell.getAttribute('label') + '.');
-			} else {
-				cell.setAttribute('label', loadingLabel);
-			}
-			loadTimeout = setTimeout(animateLoadingLabel, 1000.0/3.0);
-		}
-		var loadTimeout = setTimeout(animateLoadingLabel, 1000.0/3.0);
 
 		var apiKey = Zotero.Sync.Data.Local.getAPIKey();
 		var client = Zotero.Sync.Runner.getAPIClient({apiKey});
@@ -304,17 +296,17 @@ Zotero_Preferences.Sync = {
 			document.getElementsByTagName('dialog')[0].acceptDialog();
 		}
 
-		// Remove the animated row
-		clearTimeout(loadTimeout);
+		// Remove the loading row
 		treechildren.removeChild(treechildren.firstChild);
-		
+
+		var librariesToSync = JSON.parse(Zotero.Prefs.get('sync.librariesToSync'));
 		// Add default rows
-		addRow(Zotero.getString("pane.collections.library"), null, true, false);
-		addRow(Zotero.getString("pane.collections.publications"), null, true, false);
-		addRow(Zotero.getString("pane.collections.feeds"), null, true, false);
+		addRow(Zotero.getString("pane.collections.libraryAndFeeds"), Zotero.Libraries.userLibraryID, 
+			librariesToSync.indexOf(Zotero.Libraries.userLibraryID) != -1);
+		addRow(Zotero.getString("pane.collections.publications"), Zotero.Libraries.publicationsLibraryID, 
+			librariesToSync.indexOf(Zotero.Libraries.publicationsLibraryID) != -1);
 		
 		// Add group rows
-		var librariesToSync = JSON.parse(Zotero.Prefs.get('sync.librariesToSync') || '[]');
 		for (let group of groups) {
 			addRow(group.data.name, group.id, librariesToSync.indexOf(group.id) != -1);
 		}
