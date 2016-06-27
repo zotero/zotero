@@ -166,7 +166,13 @@ describe("Zotero.Sync.Runner", function () {
 	})
 	
 	describe("#checkLibraries()", function () {
+		beforeEach(function* () {
+			Zotero.Prefs.clear('sync.librariesToSkip');
+		});
+		
 		afterEach(function* () {
+			Zotero.Prefs.clear('sync.librariesToSkip');
+			
 			var group = Zotero.Groups.get(responses.groups.ownerGroup.json.id);
 			if (group) {
 				yield group.eraseTx();
@@ -242,6 +248,48 @@ describe("Zotero.Sync.Runner", function () {
 			assert.lengthOf(libraries, 1);
 			assert.sameMembers(libraries, [group1.libraryID]);
 		})
+		
+		it("should filter out skipped libraries if library list not provided", function* () {
+			var unskippedGroupID = responses.groups.ownerGroup.json.id;
+			var skippedGroupID = responses.groups.memberGroup.json.id;
+			Zotero.Prefs.set('sync.librariesToSkip', `["L4", "G${skippedGroupID}"]`);
+			
+			setResponse('userGroups.groupVersions');
+			setResponse('groups.ownerGroup');
+			setResponse('groups.memberGroup');
+			var libraries = yield runner.checkLibraries(
+				runner.getAPIClient({ apiKey }),
+				false,
+				responses.keyInfo.fullAccess.json
+			);
+			
+			var group = Zotero.Groups.get(unskippedGroupID);
+			assert.lengthOf(libraries, 2);
+			assert.sameMembers(libraries, [userLibraryID, group.libraryID]);
+		});
+		
+		it("shouldn't filter out skipped libraries if library list is provided", function* () {
+			var groupData = responses.groups.memberGroup;
+			var group = yield createGroup({
+				id: groupData.json.id,
+				version: groupData.json.version
+			});
+			
+			Zotero.Prefs.set('sync.librariesToSkip', `["L4", "G${group.id}"]`);
+			
+			setResponse('userGroups.groupVersions');
+			setResponse('groups.ownerGroup');
+			setResponse('groups.memberGroup');
+			var libraries = yield runner.checkLibraries(
+				runner.getAPIClient({ apiKey }),
+				false,
+				responses.keyInfo.fullAccess.json,
+				[userLibraryID, publicationsLibraryID, group.libraryID]
+			);
+			
+			assert.lengthOf(libraries, 3);
+			assert.sameMembers(libraries, [userLibraryID, publicationsLibraryID, group.libraryID]);
+		});
 		
 		it("should update outdated group metadata", function* () {
 			// Create groups with same id as groups response but earlier versions

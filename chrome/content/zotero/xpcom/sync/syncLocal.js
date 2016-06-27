@@ -155,6 +155,32 @@ Zotero.Sync.Data.Local = {
 	}),
 	
 	
+	getSkippedLibraries: function () {
+		return this._getSkippedLibrariesByPrefix("L");
+	},
+	
+	
+	getSkippedGroups: function () {
+		return this._getSkippedLibrariesByPrefix("G");
+	},
+	
+	
+	_getSkippedLibrariesByPrefix: function (prefix) {
+		var pref = 'sync.librariesToSkip';
+		try {
+			var librariesToSkip = JSON.parse(Zotero.Prefs.get(pref) || '[]');
+			return librariesToSkip
+				.filter(id => id.startsWith(prefix))
+				.map(id => parseInt(id.substr(1)));
+		}
+		catch (e) {
+			Zotero.logError(e);
+			Zotero.Prefs.clear(pref);
+			return [];
+		}
+	},
+	
+	
 	/**
 	 * @return {nsILoginInfo|false}
 	 */

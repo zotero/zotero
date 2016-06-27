@@ -80,7 +80,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	 * @param {Object}    [options]
 	 * @param {Boolean}   [options.background=false]  Whether this is a background request, which
 	 *                                                prevents some alerts from being shown
-	 * @param {Integer[]} [options.libraries]         IDs of libraries to sync
+	 * @param {Integer[]} [options.libraries]         IDs of libraries to sync; skipped libraries must
+	 *     be removed if unwanted
 	 * @param {Function}  [options.onError]           Function to pass errors to instead of
 	 *                                                handling internally (used for testing)
 	 */
@@ -308,6 +309,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		if (syncAllLibraries) {
 			if (access.user && access.user.library) {
 				libraries = [Zotero.Libraries.userLibraryID, Zotero.Libraries.publicationsLibraryID];
+				// Remove skipped libraries
+				libraries = Zotero.Utilities.arrayDiff(
+					libraries, Zotero.Sync.Data.Local.getSkippedLibraries()
+				);
 			}
 		}
 		else {
@@ -341,6 +346,16 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			let remoteGroupVersions = yield client.getGroupVersions(keyInfo.userID);
 			let remoteGroupIDs = Object.keys(remoteGroupVersions).map(id => parseInt(id));
 			Zotero.debug(remoteGroupVersions);
+			
+			// Remove skipped groups
+			if (syncAllLibraries) {
+				let newGroups = Zotero.Utilities.arrayDiff(
+					remoteGroupIDs, Zotero.Sync.Data.Local.getSkippedGroups()
+				);
+				Zotero.Utilities.arrayDiff(remoteGroupIDs, newGroups)
+					.forEach(id => { delete remoteGroupVersions[id] });
+				remoteGroupIDs = newGroups;
+			}
 			
 			for (let id in remoteGroupVersions) {
 				id = parseInt(id);
