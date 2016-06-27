@@ -311,7 +311,7 @@ Zotero_Preferences.Sync = {
 		
 		// Add group rows
 		for (let group of groups) {
-			addRow(group.data.name, group.id, librariesToSync === true || librariesToSync.indexOf(group.id) != -1);
+			addRow(group.data.name, group.id, librariesToSync.indexOf(group.id) != -1);
 		}
 	}),
 
