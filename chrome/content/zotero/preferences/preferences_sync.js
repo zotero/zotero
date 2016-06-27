@@ -181,12 +181,12 @@ Zotero_Preferences.Sync = {
 				check
 			);
 			if (index == 0) {
-				yield Zotero.Sync.Runner.deleteAPIKey();
 				if (check.value) {
 					var resetDataDirFile = OS.Path.join(Zotero.getZoteroDirectory().path, 'reset-data-directory');
 					yield Zotero.File.putContentsAsync(resetDataDirFile, '');
 
-					Zotero.Utilities.Internal.quitZotero(true);
+					yield Zotero.Sync.Runner.deleteAPIKey();
+					return Zotero.Utilities.Internal.quitZotero(true);
 				}
 			} else {
 				return;
