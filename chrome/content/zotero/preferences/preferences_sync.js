@@ -187,9 +187,6 @@ Zotero_Preferences.Sync = {
 	
 	
 	dblClickLibraryToSync: function (index) {
-		if (index < 3) {
-			return;
-		}
 		var treechildren = document.getElementById('libraries-to-sync-rows');
 		if (index >= treechildren.childNodes.length) {
 			return;
@@ -226,17 +223,17 @@ Zotero_Preferences.Sync = {
 			return;
 		}
 		
-		var librariesToSync = JSON.parse(Zotero.Prefs.get('sync.librariesToSync') || '[]');
-		var indexOfId = librariesToSync.indexOf(id);
-		if (indexOfId != -1) {
-			librariesToSync.splice(indexOfId, 1);
+		var librariesToSkip = JSON.parse(Zotero.Prefs.get('sync.librariesToSkip') || '[]');
+		var indexOfId = librariesToSkip.indexOf(id);
+		if (indexOfId == -1) {
+			librariesToSkip.push(id);
 		} else {
-			librariesToSync.push(id);
+			librariesToSkip.splice(indexOfId, 1);
 		}
-		Zotero.Prefs.set('sync.librariesToSync', JSON.stringify(librariesToSync));
+		Zotero.Prefs.set('sync.librariesToSkip', JSON.stringify(librariesToSkip));
 		 
 		var cell = row.firstChild.firstChild;
-		cell.setAttribute('value', indexOfId == -1);
+		cell.setAttribute('value', indexOfId != -1);
 	},
 	
 	
@@ -297,21 +294,16 @@ Zotero_Preferences.Sync = {
 		// Remove the loading row
 		treechildren.removeChild(treechildren.firstChild);
 
-		var librariesToSync = JSON.parse(Zotero.Prefs.get('sync.librariesToSync') || '[]');
-		if (! librariesToSync.length) {
-			librariesToSync = [Zotero.Libraries.userLibraryID, Zotero.Libraries.publicationsLibraryID]
-				.concat(groups.map(g => g.id));
-			Zotero.Prefs.set('sync.librariesToSync', JSON.stringify(librariesToSync));
-		}
+		var librariesToSkip = JSON.parse(Zotero.Prefs.get('sync.librariesToSkip') || '[]');
 		// Add default rows
 		addRow(Zotero.getString("pane.collections.libraryAndFeeds"), Zotero.Libraries.userLibraryID, 
-			librariesToSync.indexOf(Zotero.Libraries.userLibraryID) != -1);
+			librariesToSkip.indexOf(Zotero.Libraries.userLibraryID) == -1);
 		addRow(Zotero.getString("pane.collections.publications"), Zotero.Libraries.publicationsLibraryID, 
-			librariesToSync.indexOf(Zotero.Libraries.publicationsLibraryID) != -1);
+			librariesToSkip.indexOf(Zotero.Libraries.publicationsLibraryID) == -1);
 		
 		// Add group rows
 		for (let group of groups) {
-			addRow(group.data.name, group.id, librariesToSync.indexOf(group.id) != -1);
+			addRow(group.data.name, group.id, librariesToSkip.indexOf(group.id) == -1);
 		}
 	}),
 
