@@ -658,6 +658,7 @@ Zotero.Translate.ItemGetter = function() {
 Zotero.Translate.ItemGetter.prototype = {
 	"setItems":function(items) {
 		this._itemsLeft = items;
+		this._itemsLeft.sort(function(a, b) { return a.id - b.id; });
 		this.numItems = this._itemsLeft.length;
 	},
 	
@@ -677,6 +678,7 @@ Zotero.Translate.ItemGetter.prototype = {
 		}
 		
 		this._itemsLeft = Array.from(items.values());
+		this._itemsLeft.sort(function(a, b) { return a.id - b.id; });
 		this.numItems = this._itemsLeft.length;
 	},
 	
@@ -687,6 +689,7 @@ Zotero.Translate.ItemGetter.prototype = {
 			this._collectionsLeft = Zotero.Collections.getByLibrary(libraryID, true);
 		}
 		
+		this._itemsLeft.sort(function(a, b) { return a.id - b.id; });
 		this.numItems = this._itemsLeft.length;
 	}),
 	
