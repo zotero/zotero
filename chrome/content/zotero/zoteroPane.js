@@ -1263,15 +1263,25 @@ var ZoteroPane = new function()
 				let curViewGroup = collectionTreeRow.visibilityGroup;
 				tree.setAttribute('current-view-group', curViewGroup);
 				if (curViewGroup != prevViewGroup) {
-					let cols = Array.prototype.slice.call(treecols.querySelectorAll('treecol'));
+					let cols = Array.from(treecols.getElementsByTagName('treecol'));
 					let settings = JSON.parse(Zotero.Prefs.get('itemsView.columnVisibility') || '{}');
-					// Store previous view settings
-					settings[prevViewGroup] = cols.map((col) => col.getAttribute('hidden') == 'true' ? 0 : 1);
-					Zotero.Prefs.set('itemsView.columnVisibility', JSON.stringify(settings));
+					if (prevViewGroup) {
+						// Store previous view settings
+						let setting = {};
+						for (let col of cols) {
+							let colType = col.id.substring('zotero-items-column-'.length);
+							setting[colType] = col.getAttribute('hidden') == 'true' ? 0 : 1
+						}
+						settings[prevViewGroup] = setting;
+						Zotero.Prefs.set('itemsView.columnVisibility', JSON.stringify(settings));
+					}
 					
 					// Recover current view settings
 					if (settings[curViewGroup]) {
-						cols.forEach((col, idx) => col.setAttribute('hidden', !settings[curViewGroup][idx]));
+						for (let col of cols) {
+							let colType = col.id.substring('zotero-items-column-'.length);
+							col.setAttribute('hidden', !settings[curViewGroup][colType]);
+						}
 					} else {
 						cols.forEach((col) => {
 							col.setAttribute('hidden', !(col.hasAttribute('default-in') &&

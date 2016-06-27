@@ -379,7 +379,7 @@
 										flex="4" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 									<splitter class="tree-splitter"/>
 									<treecol
-										id="zotero-items-column-firstCreator" default-in="default"
+										id="zotero-items-column-firstCreator" default-in="default feed"
 										label="&zotero.items.creator_column;"
 										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 									<splitter class="tree-splitter"/>
