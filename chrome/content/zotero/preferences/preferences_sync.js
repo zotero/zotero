@@ -177,7 +177,7 @@ Zotero_Preferences.Sync = {
 			)) {
 				if (check.value) {
 					var resetDataDirFile = OS.Path.join(Zotero.getZoteroDirectory().path, 'reset-data-directory');
-					yield OS.File.writeAtomic(resetDataDirFile, '');
+					yield Zotero.File.putContentsAsync(resetDataDirFile, '');
 
 					Zotero.Utilities.Internal.quitZotero(true);
 				}

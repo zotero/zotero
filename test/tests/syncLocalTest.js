@@ -45,19 +45,14 @@ describe("Zotero.Sync.Data.Local", function() {
 			waitForDialog(function (dialog) {
 				var text = dialog.document.documentElement.textContent;
 				var matches = text.match(/‘[^’]*’/g);
-				assert.equal(matches.length, 6);
+				assert.equal(matches.length, 3);
 				assert.equal(matches[0], "‘A’");
 				assert.equal(matches[1], "‘B’");
 				assert.equal(matches[2], "‘A’");
-				assert.equal(matches[3], "‘B’");
-				assert.equal(matches[4], "‘A’");
-				assert.equal(matches[5], "‘" + Zotero.getString('account.confirmDelete.delete') + "’");
 				
-				dialog.document.getElementById('zotero-hardConfirmationDialog-textbox').value = 
-					Zotero.getString('account.confirmDelete.delete');
-				
-				dialog.document.getElementById('zotero-hardConfirmationDialog-textbox')
-					.dispatchEvent(new Event('keyup'));
+				dialog.document.getElementById('zotero-hardConfirmationDialog-checkbox').checked = true;
+				dialog.document.getElementById('zotero-hardConfirmationDialog-checkbox')
+					.dispatchEvent(new Event('command'));
 				
 				handled = true;
 			}, 'accept', 'chrome://zotero/content/hardConfirmationDialog.xul');
@@ -82,7 +77,8 @@ describe("Zotero.Sync.Data.Local", function() {
 			assert.equal(Zotero.Users.getCurrentUsername(), "A");
 		});
 		
-		it("should prompt for data reset and allow to choose a new data directory", function* (){
+		// extra1 functionality not used at the moment
+		it.skip("should prompt for data reset and allow to choose a new data directory", function* (){
 			sinon.stub(Zotero, 'forceNewDataDirectory').returns(true);
 			yield Zotero.Users.setCurrentUserID(1);
 			yield Zotero.Users.setCurrentUsername("A");
