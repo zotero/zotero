@@ -186,16 +186,16 @@ Zotero_Preferences.Sync = {
 	},
 	
 	
-	dblClickLibraryToSync: function (index) {
-		var treechildren = document.getElementById('libraries-to-sync-rows');
-		if (index >= treechildren.childNodes.length) {
+	dblClickLibraryToSync: function (event) {
+		var tree = document.getElementById("libraries-to-sync-tree");
+		var row = {}, col = {}, child = {};
+		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, child);
+		
+		if (col.value.element.id == 'libraries-to-sync-checked') {
 			return;
 		}
-		var row = treechildren.childNodes[index];
-		var cell = row.firstChild.firstChild;
-		cell.setAttribute('value', cell.getAttribute('value') != 'true');
-
-		return this.toggleLibraryToSync(index);
+		// if dblclicked anywhere but the checkbox update pref
+		return this.toggleLibraryToSync(row.value);
 	},
 
 
@@ -218,15 +218,15 @@ Zotero_Preferences.Sync = {
 			return;
 		}
 		var row = treechildren.childNodes[index];
-		var id = parseInt(row.firstChild.childNodes[1].getAttribute('value'));
-		if (isNaN(id)) {
-			return;
+		var val = row.firstChild.childNodes[1].getAttribute('value');
+		if (!val) {
+			return
 		}
 		
 		var librariesToSkip = JSON.parse(Zotero.Prefs.get('sync.librariesToSkip') || '[]');
-		var indexOfId = librariesToSkip.indexOf(id);
+		var indexOfId = librariesToSkip.indexOf(val);
 		if (indexOfId == -1) {
-			librariesToSkip.push(id);
+			librariesToSkip.push(val);
 		} else {
 			librariesToSkip.splice(indexOfId, 1);
 		}
@@ -296,14 +296,14 @@ Zotero_Preferences.Sync = {
 
 		var librariesToSkip = JSON.parse(Zotero.Prefs.get('sync.librariesToSkip') || '[]');
 		// Add default rows
-		addRow(Zotero.getString("pane.collections.libraryAndFeeds"), Zotero.Libraries.userLibraryID, 
-			librariesToSkip.indexOf(Zotero.Libraries.userLibraryID) == -1);
-		addRow(Zotero.getString("pane.collections.publications"), Zotero.Libraries.publicationsLibraryID, 
-			librariesToSkip.indexOf(Zotero.Libraries.publicationsLibraryID) == -1);
+		addRow(Zotero.getString("pane.collections.libraryAndFeeds"), "L" + Zotero.Libraries.userLibraryID, 
+			librariesToSkip.indexOf("L" + Zotero.Libraries.userLibraryID) == -1);
+		addRow(Zotero.getString("pane.collections.publications"), "L" + Zotero.Libraries.publicationsLibraryID, 
+			librariesToSkip.indexOf("L" + Zotero.Libraries.publicationsLibraryID) == -1);
 		
 		// Add group rows
 		for (let group of groups) {
-			addRow(group.data.name, group.id, librariesToSkip.indexOf(group.id) == -1);
+			addRow(group.data.name, "G" + group.id, librariesToSkip.indexOf("G" + group.id) == -1);
 		}
 	}),
 
