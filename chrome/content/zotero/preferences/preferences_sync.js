@@ -168,13 +168,20 @@ Zotero_Preferences.Sync = {
 	unlinkAccount: Zotero.Promise.coroutine(function* (showAlert=true) {
 		if (showAlert) {
 			var check = {value: false};
-			if (Services.prompt.confirmCheck(
+			var ps = Services.prompt;
+			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING) +
+				(ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+			var index = ps.confirmEx(
 				null,
 				Zotero.getString('general.warning'),
 				Zotero.getString('account.unlinkWarning', Zotero.clientName),
-				Zotero.getString('account.unlinkWarning.removeData', Zotero.Users.getCurrentUsername()),
+				buttonFlags,
+				Zotero.getString('account.unlinkWarning.button'), null, null,
+				Zotero.getString('account.unlinkWarning.removeData', Zotero.clientName),
 				check
-			)) {
+			);
+			if (index == 0) {
+				yield Zotero.Sync.Runner.deleteAPIKey();
 				if (check.value) {
 					var resetDataDirFile = OS.Path.join(Zotero.getZoteroDirectory().path, 'reset-data-directory');
 					yield Zotero.File.putContentsAsync(resetDataDirFile, '');
@@ -187,7 +194,6 @@ Zotero_Preferences.Sync = {
 		}
 
 		this.displayFields();
-		yield Zotero.Sync.Runner.deleteAPIKey();
 	}),
 
 
