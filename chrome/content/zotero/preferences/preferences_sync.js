@@ -299,7 +299,7 @@ Zotero_Preferences.Sync = {
 		// Remove the loading row
 		treechildren.removeChild(treechildren.firstChild);
 
-		var librariesToSync = JSON.parse(Zotero.Prefs.get('sync.librariesToSync'));
+		var librariesToSync = JSON.parse(Zotero.Prefs.get('sync.librariesToSync') || '[]');
 		// Add default rows
 		addRow(Zotero.getString("pane.collections.libraryAndFeeds"), Zotero.Libraries.userLibraryID, 
 			librariesToSync.indexOf(Zotero.Libraries.userLibraryID) != -1);
