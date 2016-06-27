@@ -146,8 +146,6 @@ Zotero_Preferences.Sync = {
 			Zotero.Sync.Runner.deleteAPIKey();
 			return;
 		}
-		Zotero.Prefs.set('sync.librariesToSync', JSON.stringify(
-			[Zotero.Libraries.userLibraryID, Zotero.Libraries.publicationsLibraryID ] ));
 		this.displayFields(json.username);
 	}),
 
@@ -300,6 +298,11 @@ Zotero_Preferences.Sync = {
 		treechildren.removeChild(treechildren.firstChild);
 
 		var librariesToSync = JSON.parse(Zotero.Prefs.get('sync.librariesToSync') || '[]');
+		if (! librariesToSync.length) {
+			librariesToSync = [Zotero.Libraries.userLibraryID, Zotero.Libraries.publicationsLibraryID]
+				.concat(groups.map(g => g.id));
+			Zotero.Prefs.set('sync.librariesToSync', JSON.stringify(librariesToSync));
+		}
 		// Add default rows
 		addRow(Zotero.getString("pane.collections.libraryAndFeeds"), Zotero.Libraries.userLibraryID, 
 			librariesToSync.indexOf(Zotero.Libraries.userLibraryID) != -1);
@@ -308,7 +311,7 @@ Zotero_Preferences.Sync = {
 		
 		// Add group rows
 		for (let group of groups) {
-			addRow(group.data.name, group.id, librariesToSync.indexOf(group.id) != -1);
+			addRow(group.data.name, group.id, librariesToSync === true || librariesToSync.indexOf(group.id) != -1);
 		}
 	}),
 
