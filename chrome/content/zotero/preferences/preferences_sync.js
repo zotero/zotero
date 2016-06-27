@@ -186,6 +186,7 @@ Zotero_Preferences.Sync = {
 					yield Zotero.File.putContentsAsync(resetDataDirFile, '');
 
 					yield Zotero.Sync.Runner.deleteAPIKey();
+					Zotero.Prefs.clear('sync.server.username');
 					return Zotero.Utilities.Internal.quitZotero(true);
 				}
 			} else {
