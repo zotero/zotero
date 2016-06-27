@@ -188,12 +188,11 @@ Zotero_Preferences.Sync = {
 
 					Zotero.Utilities.Internal.quitZotero(true);
 				}
-			} else {
-				return;
 			}
 		}
 
 		this.displayFields();
+		yield Zotero.Sync.Runner.deleteAPIKey();
 	}),
 
 
