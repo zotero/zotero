@@ -188,6 +188,8 @@ Zotero_Preferences.Sync = {
 
 					Zotero.Utilities.Internal.quitZotero(true);
 				}
+			} else {
+				return;
 			}
 		}
 
