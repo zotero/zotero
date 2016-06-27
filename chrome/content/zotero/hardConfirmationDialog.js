@@ -45,7 +45,7 @@ Zotero.HardConfirmationDialog = {
 			document.documentElement.getButton('accept').label = this.io.acceptLabel
 		}
 		
-		this.onKeyup();
+		this.onKeyUp();
 		
 		document.documentElement.setAttribute('title', this.io.title);
 	},

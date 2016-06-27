@@ -104,7 +104,7 @@ Zotero.Sync.Data.Local = {
 			var io = {
 				title: Zotero.getString('general.warning'),
 				text: [Zotero.getString('account.lastSyncWithDifferentAccount', [ZOTERO_CONFIG.CLIENT_NAME, lastUsername, username]),
-					Zotero.getString('account.alternativeChooseNewDataDir', username)],
+					Zotero.getString('account.alternativelyChooseNewDataDir', username)],
 				textboxLabel: Zotero.getString('account.confirmDelete', [lastUsername, Zotero.getString('account.confirmDelete.delete')]),
 				confirmationText: Zotero.getString('account.confirmDelete.delete'),
 				acceptLabel: Zotero.getString('account.confirmDelete.button'),
