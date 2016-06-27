@@ -281,7 +281,7 @@ Zotero_Preferences.Sync = {
 
 		var apiKey = Zotero.Sync.Data.Local.getAPIKey();
 		var client = Zotero.Sync.Runner.getAPIClient({apiKey});
-		var groups = {};
+		var groups = [];
 		try {
 			// Load up remote groups
 			var keyInfo = yield Zotero.Sync.Runner.checkAccess(client, {timeout: 5000});
@@ -315,7 +315,7 @@ Zotero_Preferences.Sync = {
 		
 		// Add group rows
 		var librariesToSync = JSON.parse(Zotero.Prefs.get('sync.librariesToSync') || '[]');
-		for (let group in groups) {
+		for (let group of groups) {
 			addRow(group.data.name, group.id, librariesToSync.indexOf(group.id) != -1);
 		}
 	}),
