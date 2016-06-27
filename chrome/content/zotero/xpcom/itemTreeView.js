@@ -2308,8 +2308,7 @@ Zotero.ItemTreeView.prototype.onColumnPickerShowing = function (event) {
 		}
 
 		// Disable certain fields for feeds
-		let elems = Array.from(treecols.getElementsByAttribute('disabled-in', '*'));
-		let labels = Array.from(elems)
+		let labels = Array.from(treecols.getElementsByAttribute('disabled-in', '*'))
 			.filter(e => e.getAttribute('disabled-in').split(' ').indexOf(this.collectionTreeRow.type) != -1)
 			.map(e => e.getAttribute('label'));
 		for (let i = 0; i < menupopup.childNodes.length; i++) {
