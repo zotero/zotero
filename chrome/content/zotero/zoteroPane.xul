@@ -371,7 +371,7 @@
 								onselect="ZoteroPane_Local.itemSelected(event)"
 								oncommand="ZoteroPane_Local.serializePersist()"
 								flex="1"
-								zotero-persists="current-view-group">
+								zotero-persist="current-view-group">
 								<treecols id="zotero-items-columns-header">
 									<treecol
 										id="zotero-items-column-title" primary="true" default-in="default feed"
