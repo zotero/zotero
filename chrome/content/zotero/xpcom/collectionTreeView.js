@@ -372,6 +372,7 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 	
 	if (action == 'delete') {
 		var selectedIndex = this.selection.count ? this.selection.currentIndex : 0;
+		let refreshFeeds = false;
 		
 		// Since a delete involves shifting of rows, we have to do it in reverse order
 		let rows = [];
@@ -399,6 +400,10 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 						row++;
 					}
 					while (row < this.rowCount && this.getLevel(row) > level);
+					
+					if (type == 'feed') {
+						refreshFeeds = true;
+					}
 					break;
 			}
 		}
@@ -409,6 +414,18 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 			for (let i = rows.length - 1; i >= 0; i--) {
 				let row = rows[i];
 				this._removeRow(row);
+			}
+			
+			// If a feed was removed and there are no more, remove Feeds header
+			if (refreshFeeds && !Zotero.Feeds.haveFeeds()) {
+				for (let i = 0; i < this._rows.length; i++) {
+					let row = this._rows[i];
+					if (row.ref.id == 'feed-libraries-header') {
+						this._removeRow(i);
+						this._removeRow(i - 1);
+						break;
+					}
+				}
 			}
 			
 			this._refreshRowMap();
@@ -1186,26 +1203,15 @@ Zotero.CollectionTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(f
 			yield treeRow.ref.eraseTx({
 				deleteItems: true
 			});
-		}
-		if (treeRow.isCollection() || treeRow.isFeed()) {
-			yield treeRow.ref.erase(deleteItems);
+			if (treeRow.isFeed()) {
+				refreshFeeds = true;
+			}
 		}
 		else if (treeRow.isSearch()) {
 			yield Zotero.Searches.erase(treeRow.ref.id);
 		}
 	}
 	//this._treebox.endUpdateBatch();
-	
-	if (end.value < this.rowCount) {
-		var row = this.getRow(end.value);
-		if (row.isSeparator()) {
-			return;
-		}
-		this.selection.select(end.value);
-	}
-	else {
-		this.selection.select(this.rowCount-1);
-	}
 });
 
 

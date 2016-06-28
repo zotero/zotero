@@ -1905,7 +1905,7 @@ var ZoteroPane = new function()
 				"", "", "", {}
 			);
 			if (index == 0) {
-				this.collectionsView.deleteSelection(deleteItems);
+				return this.collectionsView.deleteSelection(deleteItems);
 			}
 		}
 	}

@@ -383,6 +383,15 @@ describe("Zotero.CollectionTreeView", function() {
 			assert.equal(cv.getSelectedLibraryID(), feed.id);
 		})
 		
+		it("should remove deleted feed", function* () {
+			var feed = yield createFeed();
+			yield cv.selectLibrary(feed.libraryID);
+			waitForDialog();
+			var id = feed.treeViewID;
+			yield win.ZoteroPane.deleteSelectedCollection();
+			assert.isFalse(cv.getRowIndexByID(id))
+		})
+		
 	})
 	
 	describe("#drop()", function () {
