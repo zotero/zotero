@@ -314,11 +314,8 @@ describe("ZoteroPane", function() {
 	describe("#onCollectionSelected()", function() {
 		var cv;
 		
-		before(function* () {
-			cv = zp.collectionsView;
-		});
-		
 		beforeEach(function* () {
+			cv = zp.collectionsView;
 			yield cv.selectLibrary(Zotero.Libraries.userLibraryID);
 			Zotero.Prefs.clear('itemsView.columnVisibility');
 			yield clearFeeds();
