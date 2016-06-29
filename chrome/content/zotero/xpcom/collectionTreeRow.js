@@ -194,6 +194,15 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('filesEditable', function ()
 	return false;
 });
 
+
+Zotero.CollectionTreeRow.visibilityGroups = {'feed': 'feed'};
+
+
+Zotero.CollectionTreeRow.prototype.__defineGetter__('visibilityGroup', function() {
+	return Zotero.CollectionTreeRow.visibilityGroups[this.type] || 'default';
+});
+
+
 Zotero.CollectionTreeRow.prototype.getName = function()
 {
 	switch (this.type) {

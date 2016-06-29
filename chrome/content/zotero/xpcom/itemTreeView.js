@@ -2306,6 +2306,15 @@ Zotero.ItemTreeView.prototype.onColumnPickerShowing = function (event) {
 				moreItems.push(elem);
 			}
 		}
+
+		// Disable certain fields for feeds
+		let labels = Array.from(treecols.getElementsByAttribute('disabled-in', '*'))
+			.filter(e => e.getAttribute('disabled-in').split(' ').indexOf(this.collectionTreeRow.type) != -1)
+			.map(e => e.getAttribute('label'));
+		for (let i = 0; i < menupopup.childNodes.length; i++) {
+			let elem = menupopup.childNodes[i];
+			elem.setAttribute('disabled', labels.indexOf(elem.getAttribute('label')) != -1);
+		}
 		
 		// Sort fields and move to submenu
 		var collation = Zotero.getLocaleCollation();
@@ -2318,16 +2327,6 @@ Zotero.ItemTreeView.prototype.onColumnPickerShowing = function (event) {
 		
 		moreMenu.appendChild(moreMenuPopup);
 		menupopup.insertBefore(moreMenu, lastChild);
-
-		// Disable certain entries for feeds
-		let elems = Array.from(treecols.getElementsByAttribute('hidden-in', '*'))
-		let labels = Array.from(elems)
-			.filter(e => e.getAttribute('hidden-in').split(' ').indexOf(this.collectionTreeRow.type) != -1)
-			.map(e => e.getAttribute('label'));
-		for (let i = 0; i < menupopup.childNodes.length; i++) {
-			let elem = menupopup.childNodes[i];
-			elem.setAttribute('disabled', labels.indexOf(elem.getAttribute('label')) != -1);
-		}
 	}
 	catch (e) {
 		Components.utils.reportError(e);

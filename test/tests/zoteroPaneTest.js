@@ -310,4 +310,47 @@ describe("ZoteroPane", function() {
 			assert.lengthOf(Object.keys(conditions), 2);
 		});
 	});
+	
+	describe("#onCollectionSelected()", function() {
+		var cv;
+		
+		beforeEach(function* () {
+			cv = zp.collectionsView;
+			yield cv.selectLibrary(Zotero.Libraries.userLibraryID);
+			Zotero.Prefs.clear('itemsView.columnVisibility');
+			yield clearFeeds();
+		});
+		
+		it("should store column visibility settings when switching from default to feeds", function* () {
+			doc.getElementById('zotero-items-column-dateAdded').setAttribute('hidden', false);
+			var feed = yield createFeed();
+			yield cv.selectLibrary(feed.libraryID);
+			var settings = JSON.parse(Zotero.Prefs.get('itemsView.columnVisibility'));
+			assert.isOk(settings.default.dateAdded);
+		});
+		
+		it("should restore column visiblity when switching between default and feeds", function* () {
+			doc.getElementById('zotero-items-column-dateAdded').setAttribute('hidden', false);
+			var feed = yield createFeed();
+			yield cv.selectLibrary(feed.libraryID);
+			assert.equal(doc.getElementById('zotero-items-column-dateAdded').getAttribute('hidden'), 'true');
+			doc.getElementById('zotero-items-column-firstCreator').setAttribute('hidden', true);
+			yield cv.selectLibrary(Zotero.Libraries.userLibraryID);
+			assert.equal(doc.getElementById('zotero-items-column-dateAdded').getAttribute('hidden'), 'false');
+			yield cv.selectLibrary(feed.libraryID);
+			assert.equal(doc.getElementById('zotero-items-column-firstCreator').getAttribute('hidden'), 'true');
+		});
+		
+		it("should restore column visibility settings on restart", function* () {
+			doc.getElementById('zotero-items-column-dateAdded').setAttribute('hidden', false);
+			assert.equal(doc.getElementById('zotero-items-column-dateAdded').getAttribute('hidden'), 'false');
+			
+			win.close();
+			win = yield loadZoteroPane();
+			doc = win.document;
+			zp = win.ZoteroPane;
+			
+			assert.equal(doc.getElementById('zotero-items-column-dateAdded').getAttribute('hidden'), 'false');
+		});
+	});
 })
