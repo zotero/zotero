@@ -27,6 +27,89 @@ describe("Item pane", function () {
 			
 			yield Zotero.Items.erase(id);
 		})
+		
+		
+		it.skip("should swap creator names", function* () {
+			var item = new Zotero.Item('book');
+			item.setCreators([
+				{
+					firstName: "First",
+					lastName: "Last",
+					creatorType: "author"
+				}
+			]);
+			yield item.saveTx();
+			
+			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			var label = doc.getAnonymousNodes(itemBox)[0].getElementsByAttribute('fieldname', 'creator-0-lastName')[0];
+			var parent = label.parentNode;
+			assert.isTrue(parent.hasAttribute('contextmenu'));
+			
+			var menupopup = doc.getAnonymousNodes(itemBox)[0]
+				.getElementsByAttribute('id', 'zotero-creator-transform-menu')[0];
+			// Fake a right-click
+			doc.popupNode = parent;
+			menupopup.openPopup(
+				parent, "after_start", 0, 0, true, false, new MouseEvent('click', { button: 2 })
+			);
+			var menuitem = menupopup.getElementsByTagName('menuitem')[0];
+			menuitem.click();
+			yield waitForItemEvent('modify');
+			
+			var creator = item.getCreators()[0];
+			assert.propertyVal(creator, 'firstName', 'Last');
+			assert.propertyVal(creator, 'lastName', 'First');
+		});
+		
+		
+		it("shouldn't show Swap Names menu for single-field mode", function* () {
+			var item = new Zotero.Item('book');
+			item.setCreators([
+				{
+					name: "Name",
+					creatorType: "author"
+				}
+			]);
+			yield item.saveTx();
+			
+			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			var label = doc.getAnonymousNodes(itemBox)[0].getElementsByAttribute('fieldname', 'creator-0-lastName')[0];
+			assert.isFalse(label.parentNode.hasAttribute('contextmenu'));
+		});
+		
+		
+		// Note: This issue applies to all context menus in the item box (text transform, name swap),
+		// though the others aren't tested. This might go away with the XUL->HTML transition.
+		it.skip("should save open field after changing creator type", function* () {
+			var item = new Zotero.Item('book');
+			item.setCreators([
+				{
+					firstName: "First",
+					lastName: "Last",
+					creatorType: "author"
+				}
+			]);
+			var id = yield item.saveTx();
+			
+			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			var label = doc.getAnonymousNodes(itemBox)[0].getElementsByAttribute('fieldname', 'place')[1];
+			label.click();
+			var textbox = doc.getAnonymousNodes(itemBox)[0].getElementsByAttribute('fieldname', 'place')[1];
+			textbox.value = "Place";
+			
+			var menuLabel = doc.getAnonymousNodes(itemBox)[0].getElementsByAttribute('fieldname', 'creator-0-typeID')[0];
+			menuLabel.click();
+			var menupopup = itemBox._creatorTypeMenu;
+			var menuItems = menupopup.getElementsByTagName('menuitem');
+			menuItems[1].click();
+			yield waitForItemEvent('modify');
+			
+			assert.equal(item.getField('place'), 'Place');
+			assert.equal(Zotero.CreatorTypes.getName(item.getCreators()[0].creatorTypeID), 'contributor');
+			
+			// Wait for no-op saveTx()
+			yield Zotero.Promise.delay(1);
+		});
 	})
 	
 	describe("Attachment pane", function () {

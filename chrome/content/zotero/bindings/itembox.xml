@@ -786,7 +786,7 @@
 						firstlast.lastChild.setAttribute('hidden', true);
 					}
 					
-					if (this.editable) {
+					if (this.editable && fieldMode == 0) {
 						firstlast.setAttribute('contextmenu', 'zotero-creator-transform-menu');
 					}
 					
@@ -2021,28 +2021,32 @@
 			<method name="textTransform">
 				<parameter name="label"/>
 				<parameter name="mode"/>
-				<body>
-				<![CDATA[
-					var val = this._getFieldValue(label);
-					switch (mode) {
-						case 'title':
-							var newVal = Zotero.Utilities.capitalizeTitle(val.toLowerCase(), true);
-							break;
-						case 'sentence':
-							// capitalize the first letter, including after beginning punctuation
-							// capitalize after ?, ! and remove space(s) before those as well as colon analogous to capitalizeTitle function
-							// also deal with initial punctuation here - open quotes and Spanish beginning punctuation marks
-							newVal = val.toLowerCase().replace(/\s*:/, ":");
-							newVal = newVal.replace(/(([\?!]\s*|^)([\'\"¡¿“‘„«\s]+)?[^\s])/g, function (x) {
-								return x.replace(/\s+/m, " ").toUpperCase();});
-							break;
-						default:
-							throw ("Invalid transform mode '" + mode + "' in zoteroitembox.textTransform()");
-					}
-					this._setFieldValue(label, newVal);
-					this._modifyField(label.getAttribute('fieldname'), newVal, this.saveOnEdit).done();
-				]]>
-				</body>
+				<body><![CDATA[
+					return Zotero.spawn(function* () {
+						var val = this._getFieldValue(label);
+						switch (mode) {
+							case 'title':
+								var newVal = Zotero.Utilities.capitalizeTitle(val.toLowerCase(), true);
+								break;
+							case 'sentence':
+								// capitalize the first letter, including after beginning punctuation
+								// capitalize after ?, ! and remove space(s) before those as well as colon analogous to capitalizeTitle function
+								// also deal with initial punctuation here - open quotes and Spanish beginning punctuation marks
+								newVal = val.toLowerCase().replace(/\s*:/, ":");
+								newVal = newVal.replace(/(([\?!]\s*|^)([\'\"¡¿“‘„«\s]+)?[^\s])/g, function (x) {
+									return x.replace(/\s+/m, " ").toUpperCase();});
+								break;
+							default:
+								throw ("Invalid transform mode '" + mode + "' in zoteroitembox.textTransform()");
+						}
+						this._setFieldValue(label, newVal);
+						if (this.saveOnEdit) {
+							// See note in modifyCreator()
+							yield this.blurOpenField();
+						}
+						return this._modifyField(label.getAttribute('fieldname'), newVal, this.saveOnEdit);
+					}, this);
+				]]></body>
 			</method>
 			
 			
@@ -2083,7 +2087,7 @@
 				<parameter name="fields"/>
 				<parameter name="skipSave"/>
 				<body><![CDATA[
-				return Zotero.Promise.try(function () {
+				return Zotero.spawn(function* () {
 					var libraryID = this.item.libraryID;
 					var firstName = fields.firstName;
 					var lastName = fields.lastName;
@@ -2099,6 +2103,11 @@
 						}
 						this.item.removeCreator(index);
 						if (this.saveOnEdit && !skipSave) {
+							// Make sure any open field is saved, since a blur() isn't otherwise
+							// triggered clicking directly to a popup menu. (If a field is open, the
+							// saveTx() below will become a no-op.)
+							yield this.blurOpenField();
+							
 							return this.item.saveTx();
 						}
 						return;
@@ -2106,9 +2115,12 @@
 					
 					var changed = this.item.setCreator(index, fields);
 					if (changed && this.saveOnEdit && !skipSave) {
+						// See note above
+						yield this.blurOpenField();
+						
 						return this.item.saveTx();
 					}
-				}.bind(this));
+				}, this);
 				]]></body>
 			</method>
 			
@@ -2117,6 +2129,7 @@
 			  @return {Promise}
 			-->
 			<method name="swapNames">
+				<parameter name="event"/>
 				<body><![CDATA[
 				return Zotero.Promise.try(function () {
 					var row = Zotero.getAncestorByTagName(document.popupNode, 'row');
@@ -2138,9 +2151,8 @@
 			<method name="moveCreator">
 				<parameter name="index"/>
 				<parameter name="moveUp"/>
-				<body>
-				<![CDATA[
-				return Zotero.Promise.try(function () {
+				<body><![CDATA[
+				return Zotero.spawn(function* () {
 					if (index == 0 && moveUp) {
 						Zotero.debug("Can't move up creator 0");
 						return;
@@ -2156,11 +2168,13 @@
 					this.item.setCreator(newIndex, a);
 					this.item.setCreator(index, b);
 					if (this.saveOnEdit) {
+						// See note in modifyCreator()
+						yield this.blurOpenField();
+						
 						return this.item.saveTx();
 					}
-				}.bind(this));
-				]]>
-				</body>
+				}, this);
+				]]></body>
 			</method>
 			
 			
@@ -2394,7 +2408,7 @@
 							var hideTransforms = !exists || !!fieldMode;
 							return !hideTransforms;">
 						<menuitem label="&zotero.item.creatorTransform.nameSwap;"
-							oncommand="document.getBindingParent(this).swapNames();"/>
+							oncommand="document.getBindingParent(this).swapNames(event);"/>
 					</menupopup>
 					<menupopup id="zotero-doi-menu">
 						<menuitem id="zotero-doi-menu-view-online" label="&zotero.item.viewOnline;"/>
