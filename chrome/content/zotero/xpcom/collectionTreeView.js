@@ -879,7 +879,7 @@ Zotero.CollectionTreeView.prototype.toggleOpenState = Zotero.Promise.coroutine(f
 	this._rows[row].isOpen = true;
 	this._treebox.invalidateRow(row);
 	this._refreshRowMap();
-	this._startRememberOpenStatesTimer();
+	this._startSaveOpenStatesTimer();
 });
 
 
@@ -899,7 +899,7 @@ Zotero.CollectionTreeView.prototype._closeContainer = function (row) {
 	this._rows[row].isOpen = false;
 	this._treebox.invalidateRow(row);
 	this._refreshRowMap();
-	this._startRememberOpenStatesTimer();
+	this._startSaveOpenStatesTimer();
 }
 
 
@@ -907,13 +907,13 @@ Zotero.CollectionTreeView.prototype._closeContainer = function (row) {
  * After a short delay, persist the open states of the tree, or if already queued, cancel and requeue.
  * This avoids repeated saving while opening or closing multiple rows.
  */
-Zotero.CollectionTreeView.prototype._startRememberOpenStatesTimer = function () {
-	if (this._rememberOpenStatesTimeoutID) {
-		clearTimeout(this._rememberOpenStatesTimeoutID);
+Zotero.CollectionTreeView.prototype._startSaveOpenStatesTimer = function () {
+	if (this._saveOpenStatesTimeoutID) {
+		clearTimeout(this._saveOpenStatesTimeoutID);
 	}
-	this._rememberOpenStatesTimeoutID = setTimeout(() => {
-		this._rememberOpenStates();
-		this._rememberOpenStatesTimeoutID = null;
+	this._saveOpenStatesTimeoutID = setTimeout(() => {
+		this._saveOpenStates();
+		this._saveOpenStatesTimeoutID = null;
 	}, 250)
 };
 
@@ -1011,10 +1011,10 @@ Zotero.CollectionTreeView.prototype.collapseLibrary = function (libraryID) {
 	this.selection.select(row);
 	
 	// We have to manually delete closed rows from the container state object, because otherwise
-	// _rememberOpenStates() wouldn't see any of the rows under the library (since the library is now
+	// _saveOpenStates() wouldn't see any of the rows under the library (since the library is now
 	// collapsed) and they'd remain as open in the persisted object.
 	closed.forEach(id => { delete this._containerState[id]; });
-	this._rememberOpenStates();
+	this._saveOpenStates();
 	
 	return true;
 };
@@ -1385,7 +1385,7 @@ Zotero.CollectionTreeView.prototype._refreshRowMap = function() {
 /**
  * Persist the current open/closed state of rows to a pref
  */
-Zotero.CollectionTreeView.prototype._rememberOpenStates = Zotero.Promise.coroutine(function* () {
+Zotero.CollectionTreeView.prototype._saveOpenStates = Zotero.Promise.coroutine(function* () {
 	var state = this._containerState;
 	
 	// Every so often, remove obsolete rows

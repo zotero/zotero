@@ -91,7 +91,7 @@ describe("Zotero.CollectionTreeView", function() {
 		it("should open a library and respect stored container state", function* () {
 			// Collapse B
 			yield cv.toggleOpenState(cv.getRowIndexByID(col2.treeViewID));
-			yield cv._rememberOpenStates();
+			yield cv._saveOpenStates();
 			
 			// Close and reopen library
 			yield cv.toggleOpenState(libraryRow);
@@ -104,7 +104,7 @@ describe("Zotero.CollectionTreeView", function() {
 		
 		it("should open a library and all subcollections in recursive mode", function* () {
 			yield cv.toggleOpenState(cv.getRowIndexByID(col2.treeViewID));
-			yield cv._rememberOpenStates();
+			yield cv._saveOpenStates();
 			
 			// Close and reopen library
 			yield cv.toggleOpenState(libraryRow);
