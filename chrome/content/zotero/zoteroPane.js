@@ -941,68 +941,42 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.setVirtual = Zotero.Promise.coroutine(function* (libraryID, mode, show) {
-		switch (mode) {
+	this.setVirtual = Zotero.Promise.coroutine(function* (libraryID, type, show) {
+		switch (type) {
 			case 'duplicates':
-				var prefKey = 'duplicateLibraries';
-				var lastViewedFolderID = 'D' + libraryID;
+				var treeViewID = 'D' + libraryID;
 				break;
 			
 			case 'unfiled':
-				var prefKey = 'unfiledLibraries';
-				var lastViewedFolderID = 'U' + libraryID;
+				var treeViewID = 'U' + libraryID;
 				break;
 			
 			default:
-				throw new Error("Invalid virtual mode '" + mode + "'");
+				throw new Error("Invalid virtual collection type '" + type + "'");
 		}
 		
-		try {
-			var ids = Zotero.Prefs.get(prefKey).split(',');
-		}
-		catch (e) {
-			var ids = [];
-		}
+		Zotero.Utilities.Internal.setVirtualCollectionStateForLibrary(libraryID, type, show);
 		
-		var newids = [];
-		for (let i = 0; i < ids.length; i++) {
-			let id = ids[i];
-			id = parseInt(id);
-			if (isNaN(id)) {
-				continue;
-			}
-			// Remove current library if hiding
-			if (id == libraryID && !show) {
-				continue;
-			}
-			// Remove libraries that no longer exist
-			if (!Zotero.Libraries.exists(id)) {
-				continue;
-			}
-			newids.push(id);
-		}
+		var cv = this.collectionsView;
 		
-		// Add the current library if it's not already set
-		if (show && newids.indexOf(libraryID) == -1) {
-			newids.push(libraryID);
-		}
+		var deferred = Zotero.Promise.defer();
+		cv.addEventListener('select', () => deferred.resolve());
+		var selectedRow = cv.selection.currentIndex;
 		
-		newids.sort();
-		
-		Zotero.Prefs.set(prefKey, newids.join());
-		
-		yield this.collectionsView.refresh();
+		yield cv.refresh();
 		
 		// Select new row
 		if (show) {
-			yield this.collectionsView.selectByID(lastViewedFolderID);
+			yield this.collectionsView.selectByID(treeViewID);
 		}
-		// Select library root when hiding
+		// Select next appropriate row after removal
 		else {
-			yield this.collectionsView.selectLibrary(libraryID);
+			this.collectionsView.selectAfterRowRemoval(selectedRow);
 		}
 		
 		this.collectionsView.selection.selectEventsSuppressed = false;
+		
+		return deferred.promise;
 	});
 	
 	

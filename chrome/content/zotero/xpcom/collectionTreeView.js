@@ -59,8 +59,7 @@ Zotero.CollectionTreeView = function()
 		25
 	);
 	this._containerState = {};
-	this._duplicateLibraries = [];
-	this._unfiledLibraries = [];
+	this._virtualCollectionLibraries = {};
 	this._trashNotEmpty = {};
 }
 
@@ -163,26 +162,12 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 	
 	var userLibraryID = Zotero.Libraries.userLibraryID;
 	
-	var readPref = function (pref) {
-		let ids = Zotero.Prefs.get(pref);
-		if (ids === "") {
-			this["_" + pref] = [];
-		}
-		else {
-			if (ids === undefined || typeof ids != 'string') {
-				ids = "" + userLibraryID;
-				Zotero.Prefs.set(pref, "" + userLibraryID);
-			}
-			this["_" + pref] = ids.split(',')
-				// Convert old id and convert to int
-				.map(id => id === "0" ? userLibraryID : parseInt(id));
-		}
-	}.bind(this);
-	
 	if (this.hideSources.indexOf('duplicates') == -1) {
-		readPref('duplicateLibraries');
+		this._virtualCollectionLibraries.duplicates =
+			Zotero.Utilities.Internal.getVirtualCollectionState('duplicates')
 	}
-	readPref('unfiledLibraries');
+	this._virtualCollectionLibraries.unfiled =
+			Zotero.Utilities.Internal.getVirtualCollectionState('unfiled')
 	
 	var oldCount = this.rowCount || 0;
 	var newRows = [];
@@ -372,7 +357,7 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 	}
 	
 	if (action == 'delete') {
-		var selectedIndex = this.selection.count ? this.selection.currentIndex : 0;
+		let selectedIndex = this.selection.count ? this.selection.currentIndex : 0;
 		let refreshFeeds = false;
 		
 		// Since a delete involves shifting of rows, we have to do it in reverse order
@@ -432,27 +417,7 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 			this._refreshRowMap();
 		}
 		
-		if (!this.selection.count) {
-			// If last row was selected, stay on the last row
-			if (selectedIndex >= this.rowCount) {
-				selectedIndex = this.rowCount - 1;
-			};
-			this.selection.select(selectedIndex)
-		}
-		
-		// Make sure the selection doesn't land on a separator (e.g. deleting last feed)
-		let index = this.selection.currentIndex;
-		while (index >= 0 && !this.isSelectable(index)) {
-			// move up, since we got shifted down
-			index--;
-		}
-		
-		if (index >= 0) {
-			this.selection.select(index);
-		} else {
-			this.selection.clearSelection();
-		}
-		
+		this.selectAfterRowRemoval(selectedIndex);
 	}
 	else if (action == 'modify') {
 		let row;
@@ -829,8 +794,11 @@ Zotero.CollectionTreeView.prototype.isContainerEmpty = function(row)
 		
 		return !treeRow.ref.hasCollections()
 				&& !treeRow.ref.hasSearches()
-				&& this._duplicateLibraries.indexOf(libraryID) == -1
-				&& this._unfiledLibraries.indexOf(libraryID) == -1
+				// Duplicate Items not shown
+				&& (this.hideSources.indexOf('duplicates') != -1
+					|| this._virtualCollectionLibraries.duplicates[libraryID] === false)
+				// Unfiled Items not shown
+				&& this._virtualCollectionLibraries.unfiled[libraryID] === false
 				&& this.hideSources.indexOf('trash') != -1;
 	}
 	if (treeRow.isCollection()) {
@@ -1062,19 +1030,24 @@ Zotero.CollectionTreeView.prototype.expandToCollection = Zotero.Promise.coroutin
 ////////////////////////////////////////////////////////////////////////////////
 Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(function* (id) {
 	var type = id[0];
-	id = ('' + id).substr(1);
+	id = parseInt(('' + id).substr(1));
 	
 	switch (type) {
 	case 'L':
 		return yield this.selectLibrary(id);
 	
 	case 'C':
-		var found = yield this.expandToCollection(id);
+		yield this.expandToCollection(id);
 		break;
-		
+	
 	case 'S':
 		var search = yield Zotero.Searches.getAsync(id);
-		var found = yield this.expandLibrary(search.libraryID);
+		yield this.expandLibrary(search.libraryID);
+		break;
+	
+	case 'D':
+	case 'U':
+		yield this.expandLibrary(id);
 		break;
 	
 	case 'T':
@@ -1216,6 +1189,22 @@ Zotero.CollectionTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(f
 });
 
 
+Zotero.CollectionTreeView.prototype.selectAfterRowRemoval = function (row) {
+	// If last row was selected, stay on the last row
+	if (row >= this.rowCount) {
+		row = this.rowCount - 1;
+	};
+	
+	// Make sure the selection doesn't land on a separator (e.g. deleting last feed)
+	while (row >= 0 && !this.isSelectable(row)) {
+		// move up, since we got shifted down
+		row--;
+	}
+	
+	this.selection.select(row);
+};
+
+
 /**
  * Expand row based on last state
  */
@@ -1239,9 +1228,10 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 	
 	if (isLibrary) {
 		var savedSearches = yield Zotero.Searches.getAll(libraryID);
-		var showDuplicates = (this.hideSources.indexOf('duplicates') == -1
-				&& this._duplicateLibraries.indexOf(libraryID) != -1);
-		var showUnfiled = this._unfiledLibraries.indexOf(libraryID) != -1;
+		// Virtual collections default to showing if not explicitly hidden
+		var showDuplicates = this.hideSources.indexOf('duplicates') == -1
+				&& this._virtualCollectionLibraries.duplicates[libraryID] !== false;
+		var showUnfiled = this._virtualCollectionLibraries.unfiled[libraryID] !== false;
 		var showTrash = this.hideSources.indexOf('trash') == -1;
 	}
 	else {

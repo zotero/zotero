@@ -134,7 +134,6 @@ Zotero.LibraryTreeView.prototype = {
 			return;
 		}
 		var row = this.getRowIndexByID(scrollPosition.id);
-		Zotero.debug(scrollPosition.id);
 		if (row === false) {
 			return;
 		}

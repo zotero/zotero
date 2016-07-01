@@ -1053,7 +1053,70 @@ Zotero.Utilities.Internal = {
 		elem.appendChild(menu);
 		return menu;
 	},
-
+	
+	
+	// TODO: Move somewhere better
+	getVirtualCollectionState: function (type) {
+		switch (type) {
+			case 'duplicates':
+				var prefKey = 'duplicateLibraries';
+				break;
+			
+			case 'unfiled':
+				var prefKey = 'unfiledLibraries';
+				break;
+			
+			default:
+				throw new Error("Invalid virtual collection type '" + type + "'");
+		}
+		var libraries;
+		try {
+			libraries = JSON.parse(Zotero.Prefs.get(prefKey) || '{}');
+			if (typeof libraries != 'object') {
+				throw true;
+			}
+		}
+		// Ignore old/incorrect formats
+		catch (e) {
+			Zotero.Prefs.clear(prefKey);
+			libraries = {};
+		}
+		
+		return libraries;
+	},
+	
+	
+	getVirtualCollectionStateForLibrary: function (libraryID, type) {
+		return this.getVirtualCollectionState(type)[libraryID] !== false;
+	},
+	
+	
+	setVirtualCollectionStateForLibrary: function (libraryID, type, show) {
+		switch (type) {
+			case 'duplicates':
+				var prefKey = 'duplicateLibraries';
+				break;
+			
+			case 'unfiled':
+				var prefKey = 'unfiledLibraries';
+				break;
+			
+			default:
+				throw new Error("Invalid virtual collection type '" + type + "'");
+		}
+		
+		var libraries = this.getVirtualCollectionState(type);
+		
+		// Update current library
+		libraries[libraryID] = !!show;
+		// Remove libraries that don't exist or that are set to true
+		for (let id of Object.keys(libraries).filter(id => libraries[id] || !Zotero.Libraries.exists(id))) {
+			delete libraries[id];
+		}
+		Zotero.Prefs.set(prefKey, JSON.stringify(libraries));
+	},
+	
+	
 	/**
 	 * Quits Zotero, optionally restarting.
 	 * @param {Boolean} [restart=false]

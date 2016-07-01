@@ -18,24 +18,20 @@ describe("Zotero.CollectionTreeView", function() {
 	});
 	
 	describe("#refresh()", function () {
-		it("should show Duplicate Items and Unfiled Items in My Library by default", function* () {
+		it("should show Duplicate Items and Unfiled Items by default", function* () {
 			Zotero.Prefs.clear('duplicateLibraries');
 			Zotero.Prefs.clear('unfiledLibraries');
 			yield cv.refresh();
 			assert.ok(cv.getRowIndexByID("D" + userLibraryID));
 			assert.ok(cv.getRowIndexByID("U" + userLibraryID));
-			assert.equal(Zotero.Prefs.get('duplicateLibraries'), "" + userLibraryID);
-			assert.equal(Zotero.Prefs.get('unfiledLibraries'), "" + userLibraryID);
 		});
 		
 		it("shouldn't show Duplicate Items and Unfiled Items if hidden", function* () {
-			Zotero.Prefs.set('duplicateLibraries', "");
-			Zotero.Prefs.set('unfiledLibraries', "");
+			Zotero.Prefs.set('duplicateLibraries', `{"${userLibraryID}": false}`);
+			Zotero.Prefs.set('unfiledLibraries', `{"${userLibraryID}": false}`);
 			yield cv.refresh();
 			assert.isFalse(cv.getRowIndexByID("D" + userLibraryID));
 			assert.isFalse(cv.getRowIndexByID("U" + userLibraryID));
-			assert.strictEqual(Zotero.Prefs.get('duplicateLibraries'), "");
-			assert.strictEqual(Zotero.Prefs.get('unfiledLibraries'), "");
 		});
 		
 		it("should maintain open state of group", function* () {
@@ -390,8 +386,8 @@ describe("Zotero.CollectionTreeView", function() {
 			yield createDataObject('collection', { libraryID: group.libraryID });
 			yield createDataObject('collection', { libraryID: group.libraryID });
 			
-			// Group, collections, and trash
-			assert.equal(cv.rowCount, originalRowCount + 7);
+			// Group, collections, Duplicates, Unfiled, and trash
+			assert.equal(cv.rowCount, originalRowCount + 9);
 			
 			var spy = sinon.spy(cv, "refresh");
 			try {
