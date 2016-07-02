@@ -397,6 +397,10 @@
 	list-style-image: url('chrome://zotero/skin/treesource-unfiled.png');
 }
 
+.zotero-menuitem-sync {
+	list-style-image: url(chrome://zotero/skin/arrow_rotate_static.png);
+}
+
 .zotero-menuitem-new-collection
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-collection-add.png');

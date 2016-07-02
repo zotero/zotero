@@ -256,27 +256,27 @@
 			
 			<popupset>
 				<menupopup id="zotero-collectionmenu" onpopupshowing="ZoteroPane_Local.buildCollectionContextMenu();">
-					<!-- Keep order in sync with buildCollectionContextMenu -->
-					<menuitem class="menuitem-iconic zotero-menuitem-new-collection" label="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-new-saved-search" label="&zotero.toolbar.newSavedSearch.label;" command="cmd_zotero_newSavedSearch"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-new-collection" label="&zotero.toolbar.newSubcollection.label;" oncommand="ZoteroPane_Local.newCollection(ZoteroPane_Local.getSelectedCollection().key)"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-refresh-feed" label="&zotero.toolbar.feeds.refresh;" oncommand="ZoteroPane_Local.refreshFeed();"/>
+					<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->
+					<menuitem class="zotero-menuitem-sync"/>
 					<menuseparator/>
-					<menuitem class="menuitem-iconic zotero-menuitem-show-duplicates" label="&zotero.toolbar.duplicate.label;" oncommand="ZoteroPane_Local.setVirtual(ZoteroPane_Local.getSelectedLibraryID(), 'duplicates', true)"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-show-unfiled" label="&zotero.collections.showUnfiledItems;" oncommand="ZoteroPane_Local.setVirtual(ZoteroPane_Local.getSelectedLibraryID(), 'unfiled', true)"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-edit-collection" oncommand="ZoteroPane_Local.editSelectedCollection();"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-mark-read-feed" label="&zotero.toolbar.markFeedRead.label;" oncommand="ZoteroPane_Local.markFeedRead();"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-edit-feed" label="&zotero.toolbar.feeds.edit;" oncommand="ZoteroPane_Local.editSelectedFeed();"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-delete-collection" oncommand="ZoteroPane_Local.deleteSelectedCollection();"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-move-to-trash" oncommand="ZoteroPane_Local.deleteSelectedCollection(true);"/>
+					<menuitem class="zotero-menuitem-new-collection" label="&zotero.toolbar.newCollection.label;"/>
+					<menuitem class="zotero-menuitem-new-saved-search" label="&zotero.toolbar.newSavedSearch.label;"/>
+					<menuitem class="zotero-menuitem-new-collection" label="&zotero.toolbar.newSubcollection.label;"/>
+					<menuitem class="zotero-menuitem-refresh-feed" label="&zotero.toolbar.feeds.refresh;"/>
 					<menuseparator/>
-					<menuitem class="menuitem-iconic zotero-menuitem-export" oncommand="Zotero_File_Interface.exportCollection();"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-create-bibliography" oncommand="Zotero_File_Interface.bibliographyFromCollection();"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-export" label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile()"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-create-report" oncommand="Zotero_Report_Interface.loadCollectionReport(event)"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-delete-from-lib" label="&zotero.toolbar.emptyTrash.label;" oncommand="ZoteroPane_Local.emptyTrash();"/>
-					<menuitem label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.createCommonsBucket();"/><!--TODO localize -->
-					<menuitem label="Refresh" oncommand="ZoteroPane_Local.refreshCommonsBucket();"/><!--TODO localize -->
+					<menuitem class="zotero-menuitem-show-duplicates" label="&zotero.toolbar.duplicate.label;"/>
+					<menuitem class="zotero-menuitem-show-unfiled" label="&zotero.collections.showUnfiledItems;"/>
+					<menuitem class="zotero-menuitem-edit-collection"/>
+					<menuitem class="zotero-menuitem-mark-read-feed" label="&zotero.toolbar.markFeedRead.label;"/>
+					<menuitem class="zotero-menuitem-edit-feed" label="&zotero.toolbar.feeds.edit;"/>
+					<menuitem class="zotero-menuitem-delete-collection"/>
+					<menuitem class="zotero-menuitem-move-to-trash"/>
+					<menuseparator/>
+					<menuitem class="zotero-menuitem-export"/>
+					<menuitem class="zotero-menuitem-create-bibliography"/>
+					<menuitem class="zotero-menuitem-export" label="&zotero.toolbar.export.label;"/>
+					<menuitem class="zotero-menuitem-create-report"/>
+					<menuitem class="zotero-menuitem-delete-from-lib" label="&zotero.toolbar.emptyTrash.label;"/>
 				</menupopup>
 				<menupopup id="zotero-itemmenu">
 					<!-- Keep order in sync with buildItemContextMenu -->
