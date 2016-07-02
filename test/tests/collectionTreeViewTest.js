@@ -37,6 +37,35 @@ describe("Zotero.CollectionTreeView", function() {
 			assert.strictEqual(Zotero.Prefs.get('duplicateLibraries'), "");
 			assert.strictEqual(Zotero.Prefs.get('unfiledLibraries'), "");
 		});
+		
+		it("should maintain open state of group", function* () {
+			var group1 = yield createGroup();
+			var group2 = yield createGroup();
+			var group1Row = cv.getRowIndexByID(group1.treeViewID);
+			var group2Row = cv.getRowIndexByID(group2.treeViewID);
+			
+			// Open group 1 and close group 2
+			if (!cv.isContainerOpen(group1Row)) {
+				yield cv.toggleOpenState(group1Row);
+			}
+			if (cv.isContainerOpen(group2Row)) {
+				yield cv.toggleOpenState(group2Row);
+			}
+			// Don't wait for delayed save
+			cv._saveOpenStates();
+			
+			group1Row = cv.getRowIndexByID(group1.treeViewID);
+			group2Row = cv.getRowIndexByID(group2.treeViewID);
+			
+			yield cv.refresh();
+			
+			// Group rows shouldn't have changed
+			assert.equal(cv.getRowIndexByID(group1.treeViewID), group1Row);
+			assert.equal(cv.getRowIndexByID(group2.treeViewID), group2Row);
+			// Group open states shouldn't have changed
+			assert.isTrue(cv.isContainerOpen(group1Row));
+			assert.isFalse(cv.isContainerOpen(group2Row));
+		});
 	});
 	
 	describe("collapse/expand", function () {

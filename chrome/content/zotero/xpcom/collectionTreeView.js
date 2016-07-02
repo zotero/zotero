@@ -262,6 +262,7 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 				new Zotero.CollectionTreeRow('group', group),
 				added++
 			);
+			added += yield this._expandRow(newRows, added - 1);
 		}
 	}
 	
