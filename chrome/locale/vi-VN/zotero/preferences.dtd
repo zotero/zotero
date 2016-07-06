@@ -76,6 +76,10 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "khi cần thiết">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Bằng cách dùng vùng lưu trữ của Zotero, bạn chấp nhận ràng buộc bởi">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "các điều khoản và điều kiện">
+<!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Các hoạt động sau chỉ dùng trong vài tình huống đặc biệt và nói chung không nên thường dùng để khắc phục lỗi. Trong nhiều trường hợp, việc thiết lập lại sẽ sinh thêm các vấn đề khác. Hãy xem">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Các chọn lựa thiết lập lại đồng bộ">
 <!ENTITY zotero.preferences.sync.reset.warning3 "để có thêm thông tin.">
