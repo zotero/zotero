@@ -658,7 +658,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			sort = true;
 		}
 		
-		if (collectionTreeRow.isFeed()) {
+		else if (collectionTreeRow.isFeed()) {
 			this._ownerDocument.defaultView.ZoteroItemPane.setToggleReadLabel();
 		}
 		

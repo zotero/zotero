@@ -432,6 +432,35 @@ describe("Zotero.ItemTreeView", function() {
 			assert.equal(zp.itemsView.getRowIndexByID(item.id), 0);
 		});
 		
+		it("should re-sort search results when an item is modified", function* () {
+			var search = yield createDataObject('search');
+			itemsView = zp.itemsView;
+			var title = search.getConditions()[0].value;
+			
+			var item1 = yield createDataObject('item', { title: title + " 1" });
+			var item2 = yield createDataObject('item', { title: title + " 3" });
+			var item3 = yield createDataObject('item', { title: title + " 5" });
+			var item4 = yield createDataObject('item', { title: title + " 7" });
+			
+			var col = itemsView._treebox.columns.getNamedColumn('zotero-items-column-title');
+			col.element.click();
+			if (col.element.getAttribute('sortDirection') == 'ascending') {
+				col.element.click();
+			}
+			
+			// Check initial sort order
+			assert.equal(itemsView.getRow(0).ref.getField('title'), title + " 7");
+			assert.equal(itemsView.getRow(3).ref.getField('title'), title + " 1");
+			
+			// Set first row to title that should be sorted in the middle
+			itemsView.getRow(0).ref.setField('title', title + " 4");
+			yield itemsView.getRow(0).ref.saveTx();
+			
+			assert.equal(itemsView.getRow(0).ref.getField('title'), title + " 5");
+			assert.equal(itemsView.getRow(1).ref.getField('title'), title + " 4");
+			assert.equal(itemsView.getRow(3).ref.getField('title'), title + " 1");
+		});
+		
 		it("should update search results when search conditions are changed", function* () {
 			var search = createUnsavedDataObject('search');
 			var title1 = Zotero.Utilities.randomString();
