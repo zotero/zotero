@@ -1064,6 +1064,7 @@ Zotero.Sync.Data.Local = {
 	
 	showConflictResolutionWindow: function (conflicts) {
 		Zotero.debug("Showing conflict resolution window");
+		Zotero.debug(conflicts);
 		
 		var io = {
 			dataIn: {
