@@ -418,19 +418,8 @@ describe("Zotero.ItemTreeView", function() {
 		});
 		
 		it("should update search results when items are added", function* () {
-			var search = createUnsavedDataObject('search');
-			var title = Zotero.Utilities.randomString();
-			search.fromJSON({
-				name: "Test",
-				conditions: [
-					{
-						condition: "title",
-						operator: "is",
-						value: title
-					}
-				]
-			});
-			yield search.saveTx();
+			var search = yield createDataObject('search');
+			var title = search.getConditions()[0].value;
 			
 			yield waitForItemsLoad(win);
 			assert.equal(zp.itemsView.rowCount, 0);
