@@ -371,16 +371,21 @@ Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.corou
 	let versions = yield objectsClass.getObjectVersions(
 		this.libraryID, Object.keys(results.versions)
 	);
+	let upToDate = [];
 	for (let key in results.versions) {
 		// Skip objects that are already up-to-date. Generally all returned objects should have
 		// newer version numbers, but there are some situations, such as full syncs or
 		// interrupted syncs, where we may get versions for objects that are already up-to-date
 		// locally.
 		if (versions[key] == results.versions[key]) {
-			Zotero.debug("Skipping up-to-date " + objectType + " " + this.libraryID + "/" + key);
+			upToDate.push(key);
 			continue;
 		}
 		keys.push(key);
+	}
+	if (upToDate.length) {
+		Zotero.debug(`Skipping up-to-date ${objectTypePlural} in library ${this.libraryID}: `
+			+ upToDate.sort().join(", "));
 	}
 	
 	// In child-items mode, remove top-level items that just failed
