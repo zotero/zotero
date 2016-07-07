@@ -353,14 +353,12 @@ describe("ZoteroPane", function() {
 					searchBox.search.addCondition("title", "contains", "foo")
 				);
 				searchBox.addCondition(c);
-				Zotero.debug("ACCEPTING");
 				win.document.documentElement.acceptDialog();
 			});
 			yield zp.editSelectedCollection();
 			yield promise;
 			var conditions = search.getConditions();
-			Zotero.debug(conditions);
-			assert.lengthOf(Object.keys(conditions), 2);
+			assert.lengthOf(Object.keys(conditions), 3);
 		});
 	});
 	
