@@ -386,6 +386,7 @@ function createUnsavedDataObject(objectType, params = {}) {
 	
 	if (objectType == 'search') {
 		obj.addCondition('title', 'contains', Zotero.Utilities.randomString());
+		obj.addCondition('title', 'isNot', Zotero.Utilities.randomString());
 	}
 	
 	Zotero.Utilities.assignProps(obj, params, allowedParams);

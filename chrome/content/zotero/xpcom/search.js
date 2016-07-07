@@ -440,7 +440,7 @@ Zotero.Search.prototype.removeCondition = function (searchConditionID) {
 	this._requireData('conditions');
 	
 	if (typeof this._conditions[searchConditionID] == 'undefined'){
-		throw ('Invalid searchConditionID ' + searchConditionID + ' in removeCondition()');
+		throw new Error('Invalid searchConditionID ' + searchConditionID + ' in removeCondition()');
 	}
 	
 	delete this._conditions[searchConditionID];
@@ -825,7 +825,7 @@ Zotero.Search.prototype.fromJSON = function (json) {
 	}
 	this.name = json.name;
 	
-	Object.keys(this.getConditions()).forEach(id => this.removeCondition(0));
+	Object.keys(this.getConditions()).forEach(id => this.removeCondition(id));
 	for (let i = 0; i < json.conditions.length; i++) {
 		let condition = json.conditions[i];
 		this.addCondition(

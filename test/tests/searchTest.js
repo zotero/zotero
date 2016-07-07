@@ -221,6 +221,7 @@ describe("Zotero.Search", function() {
 			let s = new Zotero.Search();
 			s.name = "Test";
 			s.addCondition('joinMode', 'any');
+			s.addCondition('title', 'isNot', 'foo');
 			let json = s.toJSON();
 			json.name = "Test 2";
 			json.conditions = [
