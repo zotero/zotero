@@ -954,6 +954,7 @@ Zotero.Sync.Storage.Local = {
 			remoteItemJSON = remoteItemJSON.data;
 			remoteItemJSON.dateModified = Zotero.Date.dateToISO(new Date(remoteItemJSON.mtime));
 			items.push({
+				libraryID,
 				left: localItemJSON,
 				right: remoteItemJSON,
 				changes: [],
