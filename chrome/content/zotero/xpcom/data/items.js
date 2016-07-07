@@ -955,6 +955,30 @@ Zotero.Items = function() {
 	});
 	
 	
+	/**
+	 * Given API JSON for an item, return the best first creator, regardless of creator order
+	 *
+	 * @return {Object|false} - Creator in API JSON format, or false
+	 */
+	this.getFirstCreatorFromJSON = function (json) {
+		var primaryCreatorType = Zotero.CreatorTypes.getName(
+			Zotero.CreatorTypes.getPrimaryIDForType(
+				Zotero.ItemTypes.getID(json.itemType)
+			)
+		);
+		let firstCreator = json.creators.find(creator => {
+			return creator.creatorType == primaryCreatorType || creator.creatorType == 'author';
+		});
+		if (!firstCreator) {
+			firstCreator = json.creators.find(creator => creator.creatorType == 'editor');
+		}
+		if (!firstCreator) {
+			return false;
+		}
+		return firstCreator;
+	};
+	
+	
 	/*
 	 * Generate SQL to retrieve firstCreator field
 	 *
