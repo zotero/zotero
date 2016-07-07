@@ -402,7 +402,7 @@
 						parentText.removeChild(parentText.firstChild);
 					}
 					
-					if (this._parent && this.getAttribute('notitle') != '1') {
+					if (this._parentItem && this.getAttribute('notitle') != '1') {
 						this.id('parent-row').hidden = undefined;
 						this.id('parentLabel').value = Zotero.getString('pane.item.parentItem');
 						parentText.appendChild(document.createTextNode(this._parentItem.getDisplayTitle(true)));
