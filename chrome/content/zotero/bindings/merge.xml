@@ -299,6 +299,16 @@
 				<![CDATA[
 					this._data = val;
 					
+					var button = this._id('choose-button');
+					if (this.showButton) {
+						button.label = Zotero.getString('sync.conflict.chooseThisVersion');
+						button.onclick = () => this.parent.choosePane(this);
+						button.hidden = false;
+					}
+					else {
+						button.hidden = true;
+					}
+					
 					if (val.deleted) {
 						this.deleted = true;
 						return;
@@ -340,18 +350,6 @@
 					objbox.setAttribute("anonid", "objectbox");
 					objbox.setAttribute("flex", "1");
 					objbox.mode = this.type == 'file' ? 'filemerge' : 'merge';
-					
-					var button = this._id('choose-button');
-					if (this.showButton) {
-						button.label = Zotero.getString('sync.conflict.chooseThisVersion');
-						button.onclick = function () {
-							this.parent.choosePane(this);
-						}.bind(this);
-						button.hidden = false;
-					}
-					else {
-						button.hidden = true;
-					}
 					
 					// Store JSON
 					this._data = val;
