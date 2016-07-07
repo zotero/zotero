@@ -643,6 +643,7 @@ Zotero.Sync.Data.Engine.prototype._downloadDeletions = Zotero.Promise.coroutine(
 			// Conflict resolution
 			else if (objectType == 'item') {
 				conflicts.push({
+					libraryID: this.libraryID,
 					left: obj.toJSON(),
 					right: {
 						deleted: true

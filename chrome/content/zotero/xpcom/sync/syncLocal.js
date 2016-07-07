@@ -677,6 +677,7 @@ Zotero.Sync.Data.Local = {
 									Zotero.debug(jsonData);
 									Zotero.debug(result);
 									results.push({
+										libraryID,
 										key: objectKey,
 										processed: false,
 										conflict: true,
@@ -721,6 +722,7 @@ Zotero.Sync.Data.Local = {
 								switch (objectType) {
 								case 'item':
 									results.push({
+										libraryID,
 										key: objectKey,
 										processed: false,
 										conflict: true,

@@ -88,3 +88,11 @@ hbox:not([mergetype=note]) zoteromergepane:active[id=rightpane] groupbox caption
 zoteromergepane {
 	min-width: 28em;
 }
+
+zoteromergepane div[anonid=parent-row] {
+	margin-bottom: 5px;
+}
+
+zoteromergepane div[anonid=parent-row] span {
+	font-weight: bold;
+}

@@ -2025,6 +2025,103 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.lengthOf(keys, 0);
 		});
 		
+		it("should show conflict resolution window on note conflicts", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			({ engine, client, caller } = yield setup());
+			var type = 'item';
+			var objects = [];
+			var values = [];
+			var dateAdded = Date.now() - 86400000;
+			var responseJSON = [];
+			
+			for (let i = 0; i < 2; i++) {
+				values.push({
+					left: {},
+					right: {}
+				});
+				
+				// Create local object
+				let obj = objects[i] = new Zotero.Item('note');
+				obj.setNote(Zotero.Utilities.randomString());
+				obj.version = 10;
+				obj.dateAdded = Zotero.Date.dateToSQL(new Date(dateAdded), true);
+				// Set Date Modified values one minute apart to enforce order
+				obj.dateModified = Zotero.Date.dateToSQL(
+					new Date(dateAdded + (i * 60000)), true
+				);
+				yield obj.saveTx();
+				
+				let jsonData = obj.toJSON();
+				jsonData.key = obj.key;
+				jsonData.version = 10;
+				let json = {
+					key: obj.key,
+					version: jsonData.version,
+					data: jsonData
+				};
+				// Save original version in cache
+				yield Zotero.Sync.Data.Local.saveCacheObjects(type, libraryID, [json]);
+				
+				// Create updated JSON for download
+				values[i].right.note = jsonData.note = Zotero.Utilities.randomString();
+				values[i].right.version = json.version = jsonData.version = 15;
+				responseJSON.push(json);
+				
+				// Modify object locally
+				obj.setNote(Zotero.Utilities.randomString());
+				yield obj.saveTx({
+					skipDateModifiedUpdate: true
+				});
+				values[i].left.note = obj.getNote();
+				values[i].left.version = obj.getField('version');
+			}
+			
+			setResponse({
+				method: "GET",
+				url: `users/1/items?format=json&itemKey=${objects.map(o => o.key).join('%2C')}`
+					+ `&includeTrashed=1`,
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 15
+				},
+				json: responseJSON
+			});
+			
+			waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+				var doc = dialog.document;
+				var wizard = doc.documentElement;
+				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				
+				// 1 (remote)
+				// Remote version should be selected by default
+				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				wizard.getButton('next').click();
+				
+				// 2 (local)
+				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				// Select local object
+				mergeGroup.leftpane.click();
+				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
+				if (Zotero.isMac) {
+					assert.isTrue(wizard.getButton('next').hidden);
+					assert.isFalse(wizard.getButton('finish').hidden);
+				}
+				else {
+					// TODO
+				}
+				wizard.getButton('finish').click();
+			});
+			yield engine._downloadObjects('item', objects.map(o => o.key));
+			
+			assert.equal(objects[0].getNote(), values[0].right.note);
+			assert.equal(objects[1].getNote(), values[1].left.note);
+			assert.equal(objects[0].getField('version'), values[0].right.version);
+			assert.equal(objects[1].getField('version'), values[1].left.version);
+			
+			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', libraryID);
+			assert.lengthOf(keys, 0);
+		});
+		
 		it("should resolve all remaining conflicts with one side", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			({ engine, client, caller } = yield setup());
@@ -2189,6 +2286,69 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', libraryID);
 			assert.lengthOf(keys, 0);
 		})
+		
+		it("should handle local child note deletion, keeping deletion", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			({ engine, client, caller } = yield setup());
+			var responseJSON = [];
+			
+			var parent = yield createDataObject('item');
+			
+			// Create object, generate JSON, and delete
+			var obj = new Zotero.Item('note');
+			obj.parentItemID = parent.id;
+			obj.setNote(Zotero.Utilities.randomString());
+			obj.version = 10;
+			yield obj.saveTx();
+			var jsonData = obj.toJSON();
+			var key = jsonData.key = obj.key;
+			jsonData.version = 10;
+			let json = {
+				key: obj.key,
+				version: jsonData.version,
+				data: jsonData
+			};
+			// Delete object locally
+			yield obj.eraseTx();
+			
+			json.version = jsonData.version = 15;
+			jsonData.note = Zotero.Utilities.randomString();
+			responseJSON.push(json);
+			
+			setResponse({
+				method: "GET",
+				url: `users/1/items?format=json&itemKey=${obj.key}&includeTrashed=1`,
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 15
+				},
+				json: responseJSON
+			});
+			
+			var windowOpened = false;
+			waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+				windowOpened = true;
+				
+				var doc = dialog.document;
+				var wizard = doc.documentElement;
+				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				
+				// Remote version should be selected by default
+				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				assert.ok(mergeGroup.leftpane.pane.onclick);
+				// Select local deleted version
+				mergeGroup.leftpane.pane.click();
+				wizard.getButton('finish').click();
+			});
+			yield engine._downloadObjects('item', [obj.key]);
+			assert.isTrue(windowOpened);
+			
+			obj = Zotero.Items.getByLibraryAndKey(libraryID, key);
+			assert.isFalse(obj);
+			
+			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', libraryID);
+			assert.lengthOf(keys, 0);
+		});
 		
 		it("should restore locally deleted item", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;

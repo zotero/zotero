@@ -28,7 +28,8 @@
 
 <bindings xmlns="http://www.mozilla.org/xbl"
 		  xmlns:xbl="http://www.mozilla.org/xbl"
-		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		  xmlns:html="http://www.w3.org/1999/xhtml">
 	
 	<binding id="merge-group">
 		<resources>
@@ -43,6 +44,8 @@
 				this._mergepane = this._id('mergepane');
 			]]>
 			</constructor>
+			
+			<field name="libraryID"/>
 			
 			<field name="_data"/>
 			<property name="data" onget="return this._data;">
@@ -109,6 +112,9 @@
 					
 					this._leftpane.showButton = showButton;
 					this._rightpane.showButton = showButton;
+					this._leftpane.libraryID = this.libraryID;
+					this._rightpane.libraryID = this.libraryID;
+					this._mergepane.libraryID = this.libraryID;
 					this._leftpane.data = this._data.left;
 					this._rightpane.data = this._data.right;
 					this._mergepane.data = this._data.merge;
@@ -293,6 +299,8 @@
 				</setter>
 			</property>
 			
+			<field name="libraryID"/>
+			
 			<field name="_data"/>
 			<property name="data" onget="return this._data">
 				<setter>
@@ -338,6 +346,24 @@
 					
 					var objbox = document.createElement(elementName);
 					
+					var parentRow = this._id('parent-row');
+					if (val.parentItem) {
+						parentRow.textContent = '';
+						
+						let label = document.createElement('span');
+						label.textContent = Zotero.getString('pane.item.parentItem');
+						parentRow.appendChild(label);
+						
+						let parentItem = Zotero.Items.getByLibraryAndKey(this.libraryID, val.parentItem);
+						let text = document.createTextNode(" " + parentItem.getDisplayTitle(true));
+						parentRow.appendChild(text);
+						
+						parentRow.hidden = false;
+					}
+					else {
+						parentRow.hidden = true;
+					}
+					
 					if (this._id('object-placeholder')) {
 						var placeholder = this._id('object-placeholder');
 						placeholder.parentNode.replaceChild(objbox, placeholder);
@@ -356,6 +382,7 @@
 					
 					// Create item from JSON for metadata box
 					var item = new Zotero.Item(val.itemType);
+					item.libraryID = this.libraryID;
 					item.fromJSON(val);
 					objbox.item = item;
 				]]>
@@ -385,6 +412,7 @@
 			<xul:vbox flex="1">
 				<xul:groupbox anonid="merge-pane" flex="1">
 					<xul:caption anonid="caption"/>
+					<html:div anonid="parent-row" hidden="true"/>
 					<xul:box anonid="object-placeholder"/>
 					<xul:hbox anonid="delete-box" hidden="true" flex="1">
 						<xul:label value="&zotero.merge.deleted;"/>

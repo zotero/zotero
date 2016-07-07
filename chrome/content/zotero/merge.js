@@ -200,6 +200,10 @@ var Zotero_Merge_Window = new function () {
 		var mergeInfo = _getMergeInfo(_pos);
 		data.merge = mergeInfo.data;
 		data.selected = mergeInfo.selected;
+		if (!_conflicts[_pos].libraryID) {
+			throw new Error("libraryID not provided in conflict object");
+		}
+		_mergeGroup.libraryID = _conflicts[_pos].libraryID;
 		_mergeGroup.data = data;
 		
 		_updateResolveAllCheckbox();

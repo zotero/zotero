@@ -557,6 +557,47 @@ describe("Zotero.Sync.Data.Local", function() {
 	});
 	
 	
+	describe("#showConflictResolutionWindow()", function () {
+		it("should show title of note parent", function* () {
+			var parentItem = yield createDataObject('item', { title: "Parent" });
+			var note = new Zotero.Item('note');
+			note.parentKey = parentItem.key;
+			note.setNote("Test");
+			yield note.saveTx();
+			
+			var promise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+				var doc = dialog.document;
+				var wizard = doc.documentElement;
+				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				
+				// Show title for middle and right panes
+				var parentText = Zotero.getString('pane.item.parentItem') + " Parent";
+				assert.equal(mergeGroup.leftpane._id('parent-row').textContent, "");
+				assert.equal(mergeGroup.rightpane._id('parent-row').textContent, parentText);
+				assert.equal(mergeGroup.mergepane._id('parent-row').textContent, parentText);
+				
+				wizard.getButton('finish').click();
+			});
+			
+			Zotero.Sync.Data.Local.showConflictResolutionWindow([
+				{
+					libraryID: note.libraryID,
+					key: note.key,
+					processed: false,
+					conflict: true,
+					left: {
+						deleted: true,
+						dateDeleted: "2016-07-07 12:34:56"
+					},
+					right: note.toJSON()
+				}
+			]);
+			
+			yield promise;
+		});
+	});
+	
+	
 	describe("#_reconcileChanges()", function () {
 		describe("items", function () {
 			it("should ignore non-conflicting local changes and return remote changes", function () {
