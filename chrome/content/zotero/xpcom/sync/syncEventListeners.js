@@ -140,7 +140,11 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 			});
 		}
 		
-		if (!libraryIDs.size) {
+		// Don't include skipped libraries
+		var skipped = new Set(Zotero.Sync.Data.Local.getSkippedLibraries());
+		libraryIDs = Array.from(libraryIDs.values()).filter(id => !skipped.has(id));
+		
+		if (!libraryIDs.length) {
 			return;
 		}
 		
@@ -148,7 +152,7 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 			this._editTimeout,
 			false,
 			{
-				libraries: libraryIDs.values()
+				libraries: libraryIDs
 			}
 		);
 	},
