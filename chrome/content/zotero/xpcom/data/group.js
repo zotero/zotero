@@ -204,7 +204,9 @@ Zotero.Group.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		params.push(this.groupID);
 		yield Zotero.DB.queryAsync(sql, params);
 		
-		Zotero.Notifier.queue('modify', 'group', this.groupID);
+		if (!env.options.skipNotifier) {
+			Zotero.Notifier.queue('modify', 'group', this.groupID);
+		}
 	}
 	else {
 		Zotero.debug("Group data did not change for group " + this.groupID, 5);

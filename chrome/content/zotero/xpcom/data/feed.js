@@ -280,7 +280,9 @@ Zotero.Feed.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		params.push(this.libraryID);
 		yield Zotero.DB.queryAsync(sql, params);
 		
-		Zotero.Notifier.queue('modify', 'feed', this.libraryID, env.options.notifierQueue);
+		if (!env.options.skipNotifier) {
+			Zotero.Notifier.queue('modify', 'feed', this.libraryID, env.options.notifierQueue);
+		}
 	}
 	else {
 		Zotero.debug("Feed data did not change for feed " + this.libraryID, 5);

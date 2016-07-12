@@ -166,7 +166,10 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 		}
 	}
 	
-	yield Zotero.Libraries.updateLastSyncTime(this.libraryID);
+	this.library.updateLastSyncTime();
+	yield this.library.saveTx({
+		skipNotifier: true
+	});
 	
 	Zotero.debug("Done syncing " + this.library.name);
 });
@@ -850,7 +853,9 @@ Zotero.Sync.Data.Engine.prototype._uploadSettings = Zotero.Promise.coroutine(fun
 		libraryVersion
 	);
 	this.library.libraryVersion = libraryVersion;
-	yield this.library.saveTx();
+	yield this.library.saveTx({
+		skipNotifier: true
+	});
 	
 	Zotero.debug("Done uploading settings in " + this.library.name);
 	return libraryVersion;
@@ -1053,7 +1058,9 @@ Zotero.Sync.Data.Engine.prototype._uploadDeletions = Zotero.Promise.coroutine(fu
 		
 		// Update library version
 		this.library.libraryVersion = libraryVersion;
-		yield this.library.saveTx();
+		yield this.library.saveTx({
+			skipNotifier: true
+		});
 		
 		// Remove successful deletions from delete log
 		yield Zotero.Sync.Data.Local.removeObjectsFromDeleteLog(
