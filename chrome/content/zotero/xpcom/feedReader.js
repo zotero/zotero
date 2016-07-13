@@ -360,13 +360,14 @@ Zotero.FeedReader._processCreators = function(feedEntry, field, role) {
 Zotero.FeedReader._getFeedItem = function(feedEntry, feedInfo) {
 	// ID is not required, but most feeds have these and we have to rely on them
 	// to handle updating properly
-	if (!feedEntry.id) {
-		Zotero.debug("FeedReader: Feed item missing an ID");
+	// Can probably fall back to links on missing id - unlikely to change
+	if (!feedEntry.id && !feedEntry.link) {
+		Zotero.debug("FeedReader: Feed item missing an ID or link - discarding");
 		return;
 	}
 	
 	let item = {
-		guid: feedEntry.id
+		guid: feedEntry.id || feedEntry.link.spec
 	};
 			
 	if (feedEntry.title) item.title = Zotero.FeedReader._getRichText(feedEntry.title, 'title');
