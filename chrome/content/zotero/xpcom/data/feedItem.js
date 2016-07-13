@@ -249,12 +249,12 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	translate.getTranslators();
 	let translators = yield deferred.promise;
 	if (!translators || !translators.length) {
-		Zotero.debug("No translators detected for feed item " + this.id + " with URL " + this.getField('url'), 2);
-		Zotero.debug("Cloning item instead", 2);
+		Zotero.debug("No translators detected for feed item " + this.id + " with URL " + this.getField('url') + 
+			'\nCloning item instead', 2);
 		let dbItem = this.clone(libraryID);
 		yield dbItem.saveTx();
-		if (collection) {
-			yield collection.addItem(dbItem);
+		if (collectionID) {
+			dbItem.setCollections(collectionID);
 		}
 		
 		let item = {title: dbItem.getField('title'), itemType: dbItem.itemType};
