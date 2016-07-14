@@ -208,6 +208,7 @@ Zotero.FeedItem.prototype.toggleRead = Zotero.Promise.coroutine(function* (state
  * @return {Promise<FeedItem|Item>} translated feed item
  */
 Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (libraryID, collectionID) {
+	Zotero.debug("Translating feed item " + this.id + " with URL " + this.getField('url'), 2);
 	if (Zotero.locked) {
 		Zotero.debug('Zotero locked, skipping feed item translation');
 		return;
@@ -224,9 +225,8 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 		translate.clearHandlers("itemDone");
 		translate.setHandler("done", win.Zotero_Browser.progress.Translation.doneHandler);
 		translate.setHandler("itemDone", win.Zotero_Browser.progress.Translation.itemDoneHandler());
-		let collection;
 		if (collectionID) {
-			collection = yield Zotero.Collections.getAsync(collectionID);
+			var collection = yield Zotero.Collections.getAsync(collectionID);
 		}
 		win.Zotero_Browser.progress.show();
 		win.Zotero_Browser.progress.Translation.scrapingTo(libraryID, collection);
@@ -249,8 +249,28 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	translate.getTranslators();
 	let translators = yield deferred.promise;
 	if (!translators || !translators.length) {
-		Zotero.debug("No translators detected for feed item " + this.id + " with URL " + this.getField('url'), 2);
-		throw new Zotero.Error("No translators detected for feed item " + this.id + " with URL " + this.getField('url'))
+		Zotero.debug("No translators detected for feed item " + this.id + " with URL " + this.getField('url') + 
+			' -- cloning item instead', 2);
+		let dbItem = this.clone(libraryID);
+		if (collectionID) {
+			dbItem.addToCollection(collectionID);
+		}
+		yield dbItem.saveTx();
+		
+		let item = {title: dbItem.getField('title'), itemType: dbItem.itemType};
+		
+		// Add snapshot
+		if (Zotero.Libraries.get(libraryID).filesEditable) {
+			item.attachments = [{title: "Snapshot"}];
+			yield Zotero.Attachments.importFromDocument({
+				document: doc,
+				parentItemID: dbItem.id
+			});
+		}
+		
+		win.Zotero_Browser.progress.Translation.itemDoneHandler()(null, null, item);
+		win.Zotero_Browser.progress.Translation.doneHandler(null, true);
+		return;
 	}
 	translate.setTranslator(translators[0]);
 
