@@ -250,12 +250,12 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	let translators = yield deferred.promise;
 	if (!translators || !translators.length) {
 		Zotero.debug("No translators detected for feed item " + this.id + " with URL " + this.getField('url') + 
-			'\nCloning item instead', 2);
+			' -- cloning item instead', 2);
 		let dbItem = this.clone(libraryID);
-		yield dbItem.saveTx();
 		if (collectionID) {
 			dbItem.setCollections(collectionID);
 		}
+		yield dbItem.saveTx();
 		
 		let item = {title: dbItem.getField('title'), itemType: dbItem.itemType};
 		
