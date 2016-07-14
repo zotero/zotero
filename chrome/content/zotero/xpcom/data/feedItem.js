@@ -253,7 +253,7 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 			' -- cloning item instead', 2);
 		let dbItem = this.clone(libraryID);
 		if (collectionID) {
-			dbItem.setCollections(collectionID);
+			dbItem.addToCollection(collectionID);
 		}
 		yield dbItem.saveTx();
 		
