@@ -2209,7 +2209,7 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'itemData',
 				field: 'value',
-				aliases: ['pages', 'section', 'seriesNumber','issue'],
+				aliases: ['pages', 'numPages', 'numberOfVolumes', 'section', 'seriesNumber','issue'],
 				template: true // mark for special handling
 			},
 			
