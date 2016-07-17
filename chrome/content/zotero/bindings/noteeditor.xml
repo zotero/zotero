@@ -144,6 +144,7 @@
 			
 			<constructor>
 			<![CDATA[
+				this._instanceID = Zotero.Utilities.randomString();
 				this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'noteeditor');
 			]]>
 			</constructor>
@@ -158,11 +159,16 @@
 				<parameter name="event"/>
 				<parameter name="type"/>
 				<parameter name="ids"/>
+				<parameter name="extraData"/>
 				<body><![CDATA[
 					if (event != 'modify' || !this.item || !this.item.id) return;
 					for (let i = 0; i < ids.length; i++) {
 						let id = ids[i];
 						if (id != this.item.id) {
+							continue;
+						}
+						if (extraData && extraData[id] && extraData[id].noteEditorID == this._instanceID) {
+							//Zotero.debug("Skipping notification from current note field");
 							continue;
 						}
 						this.refresh();
@@ -243,7 +249,11 @@
 							if (this.item) {
 								let changed = this.item.setNote(noteField.value);
 								if (changed && this.saveOnEdit) {
-									yield this.item.saveTx();
+									yield this.item.saveTx({
+										notifierData: {
+											noteEditorID: this._instanceID
+										}
+									});
 								}
 								return;
 							}
