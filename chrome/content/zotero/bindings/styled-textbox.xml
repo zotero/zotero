@@ -400,6 +400,7 @@
 									case 'keypress':
 										// Ignore keypresses that don't change
 										// any text
+										//Zotero.debug(event.which);
 										if (!event.which &&
 												event.keyCode != event.DOM_VK_DELETE &&
 												event.keyCode != event.DOM_VK_BACK_SPACE) {
@@ -426,17 +427,15 @@
 									clearTimeout(self._timer);
 								}
 								
-								if (event.type == 'change') {
-									self._changed = true;
+								// Trigger command event on change
+								if (event.type == 'keypress' || event.type == 'change') {
+									self._timer = self.timeout && setTimeout(function () {
+										var attr = self.getAttribute('oncommand');
+										attr = attr.replace('this', 'thisObj');
+										var func = new Function('thisObj', 'event', attr);
+										func(self, event);
+									}, self.timeout);
 								}
-								
-								// Get the command event
-								self._timer = self.timeout && setTimeout(function () {
-									var attr = self.getAttribute('oncommand');
-									attr = attr.replace('this', 'thisObj');
-									var func = new Function('thisObj', 'event', attr);
-									func(self, event);
-								}, self.timeout);
 								
 								return true;
 							};
