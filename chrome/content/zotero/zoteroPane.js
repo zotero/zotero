@@ -4253,7 +4253,7 @@ var ZoteroPane = new function()
 		}
 		
 		var collectionTreeRow = this.collectionsView.getRow(row);
-		return Zotero.Libraries.isEditable(collectionTreeRow.ref.libraryID);
+		return Zotero.Libraries.get(collectionTreeRow.ref.libraryID).editable;
 	}
 	
 	
