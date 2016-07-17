@@ -830,6 +830,10 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) 
 		}
 		
 		env.notifierData = {};
+		// Pass along any 'notifierData' values
+		if (env.options.notifierData) {
+			Object.assign(env.notifierData, env.options.notifierData);
+		}
 		if (env.options.skipSelect) {
 			env.notifierData.skipSelect = true;
 		}
