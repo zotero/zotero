@@ -4006,6 +4006,7 @@ Zotero.Item.prototype.fromJSON = function (json) {
 			}
 			if (field == 'accessDate') {
 				this.setField(field, val);
+				setFields[field] = true;
 			}
 			else {
 				this[field] = val;
@@ -4072,16 +4073,21 @@ Zotero.Item.prototype.fromJSON = function (json) {
 					+ this.libraryKey);
 				continue;
 			}
-			isValidForType[field] = Zotero.ItemFields.isValidForType(
-				Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID) || fieldID,
-				this.itemTypeID
-			);
+			// Convert to base-mapped field if necessary, so that setFields has the base-mapped field
+			// when it's checked for values from getUsedFields() below
+			let origFieldID = fieldID;
+			let origField = field;
+			fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID) || fieldID;
+			if (origFieldID != fieldID) {
+				field = Zotero.ItemFields.getName(fieldID);
+			}
+			isValidForType[field] = Zotero.ItemFields.isValidForType(fieldID, this.itemTypeID);
 			if (!isValidForType[field]) {
-				Zotero.logError("Discarding invalid field '" + field + "' for type " + itemTypeID
+				Zotero.logError("Discarding invalid field '" + origField + "' for type " + itemTypeID
 					+ " for item " + this.libraryKey);
 				continue;
 			}
-			this.setField(field, json[field]);
+			this.setField(field, json[origField]);
 			setFields[field] = true;
 		}
 	}
@@ -4089,8 +4095,7 @@ Zotero.Item.prototype.fromJSON = function (json) {
 	// Clear existing fields not specified
 	var previousFields = this.getUsedFields(true);
 	for (let field of previousFields) {
-		// Invalid fields will already have been cleared by the type change
-		if (!setFields[field] && isValidForType[field]) {
+		if (!setFields[field] && isValidForType[field] !== false) {
 			this.setField(field, false);
 		}
 	}
