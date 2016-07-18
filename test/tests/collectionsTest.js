@@ -1,32 +1,35 @@
 describe("Zotero.Collections", function () {
 	describe("#getByLibrary()", function () {
 		it("should get all root collections in a library", function* () {
-			var col1 = yield createDataObject('collection');
-			var col2 = yield createDataObject('collection');
-			var col3 = yield createDataObject('collection', { parentID: col2.id });
-			var cols = Zotero.Collections.getByLibrary(Zotero.Libraries.userLibraryID);
-			assert.isAbove(cols.length, 1);
-			assert.includeMembers(cols.map(col => col.id), [col1.id, col2.id]);
-			assert.ok(cols.every(col =>
-				col.libraryID == Zotero.Libraries.userLibraryID && !col.parentID
-			));
+			var group = yield createGroup();
+			var libraryID = group.libraryID;
+			
+			var col1 = yield createDataObject('collection', { libraryID });
+			var col2 = yield createDataObject('collection', { libraryID });
+			var col3 = yield createDataObject('collection', { libraryID, parentID: col2.id });
+			var cols = Zotero.Collections.getByLibrary(libraryID);
+			assert.lengthOf(cols, 2);
+			assert.sameMembers(cols.map(col => col.id), [col1.id, col2.id]);
 		})
 		
 		it("should get all collections in a library in recursive mode", function* () {
-			yield createDataObject('collection', { libraryID: (yield getGroup()).libraryID });
+			var group = yield createGroup();
+			var libraryID = group.libraryID;
 			
-			var libraryID = Zotero.Libraries.userLibraryID;
-			var col1 = yield createDataObject('collection', { name: "C" });
-			var col2 = yield createDataObject('collection', { name: "A" });
-			var col3 = yield createDataObject('collection', { name: "D", parentID: col2.id });
-			var col4 = yield createDataObject('collection', { name: "B", parentID: col2.id });
-			var col5 = yield createDataObject('collection', { name: "E", parentID: col2.id });
-			var col6 = yield createDataObject('collection', { name: "G", parentID: col3.id });
-			var col7 = yield createDataObject('collection', { name: "F", parentID: col3.id });
+			// Create collection in another library
+			yield createDataObject('collection');
+			
+			var col1 = yield createDataObject('collection', { libraryID, name: "C" });
+			var col2 = yield createDataObject('collection', { libraryID, name: "A" });
+			var col3 = yield createDataObject('collection', { libraryID, name: "D", parentID: col2.id });
+			var col4 = yield createDataObject('collection', { libraryID, name: "B", parentID: col2.id });
+			var col5 = yield createDataObject('collection', { libraryID, name: "E", parentID: col2.id });
+			var col6 = yield createDataObject('collection', { libraryID, name: "G", parentID: col3.id });
+			var col7 = yield createDataObject('collection', { libraryID, name: "F", parentID: col3.id });
 			var cols = Zotero.Collections.getByLibrary(libraryID, true);
-			assert.isAbove(cols.length, 6);
+			assert.lengthOf(cols, 7);
 			var ids = cols.map(col => col.id);
-			assert.includeMembers(
+			assert.sameMembers(
 				ids, [col1.id, col2.id, col3.id, col4.id, col5.id, col6.id, col7.id]
 			);
 			assert.isBelow(ids.indexOf(col2.id), ids.indexOf(col4.id), "A before child B");
@@ -35,7 +38,6 @@ describe("Zotero.Collections", function () {
 			assert.isBelow(ids.indexOf(col7.id), ids.indexOf(col6.id), "F before G");
 			assert.isBelow(ids.indexOf(col6.id), ids.indexOf(col5.id), "G before D sibling E");
 			assert.isBelow(ids.indexOf(col5.id), ids.indexOf(col1.id), "E before A sibling C");
-			assert.ok(cols.every(col => col.libraryID == libraryID));
 		})
 	})
 	
