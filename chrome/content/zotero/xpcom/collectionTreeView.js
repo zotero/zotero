@@ -1220,7 +1220,7 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 	}
 	
 	if (isLibrary) {
-		var collections = Zotero.Collections.getByLibrary(libraryID, treeRow.ref.id);
+		var collections = Zotero.Collections.getByLibrary(libraryID);
 	}
 	else if (isCollection) {
 		var collections = Zotero.Collections.getByParent(treeRow.ref.id);

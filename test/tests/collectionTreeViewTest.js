@@ -139,6 +139,26 @@ describe("Zotero.CollectionTreeView", function() {
 			assert.ok(cv.getRowIndexByID(col2.treeViewID))
 			assert.ok(cv.getRowIndexByID(col3.treeViewID))
 		});
+		
+		it("should open a group and show top-level collections", function* () {
+			var group = yield createGroup();
+			var libraryID = group.libraryID;
+			var col1 = yield createDataObject('collection', { libraryID });
+			var col2 = yield createDataObject('collection', { libraryID });
+			var col3 = yield createDataObject('collection', { libraryID });
+			var col4 = yield createDataObject('collection', { libraryID, parentID: col1.id });
+			var col5 = yield createDataObject('collection', { libraryID, parentID: col4.id });
+			
+			// Close everything
+			[col4, col1, group].forEach(o => cv._closeContainer(cv.getRowIndexByID(o.treeViewID)));
+			
+			yield cv.expandLibrary(libraryID);
+			assert.isNumber(cv.getRowIndexByID(col1.treeViewID));
+			assert.isNumber(cv.getRowIndexByID(col2.treeViewID));
+			assert.isNumber(cv.getRowIndexByID(col3.treeViewID));
+			assert.isFalse(cv.getRowIndexByID(col4.treeViewID));
+			assert.isFalse(cv.getRowIndexByID(col5.treeViewID));
+		});
 	});
 	
 	describe("#expandToCollection()", function () {
