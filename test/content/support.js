@@ -307,6 +307,9 @@ var createGroup = Zotero.Promise.coroutine(function* (props = {}) {
 	group.editable = props.editable === undefined ? true : props.editable;
 	group.filesEditable = props.filesEditable === undefined ? true : props.filesEditable;
 	group.version = props.version === undefined ? Zotero.Utilities.rand(1000, 10000) : props.version;
+	if (props.libraryVersion) {
+		group.libraryVersion = props.libraryVersion;
+	}
 	yield group.saveTx();
 	return group;
 });
@@ -754,10 +757,14 @@ var generateTranslatorExportData = Zotero.Promise.coroutine(function* generateTr
  * @param {string} filename - The filename to import (in data directory)
  * @return {Promise<Zotero.Item>}
  */
-function importFileAttachment(filename) {
-	let testfile = getTestDataDirectory();
-	filename.split('/').forEach((part) => testfile.append(part));
-	return Zotero.Attachments.importFromFile({file: testfile});
+function importFileAttachment(filename, options = {}) {
+	let file = getTestDataDirectory();
+	filename.split('/').forEach((part) => file.append(part));
+	let importOptions = {
+		file
+	};
+	Object.assign(importOptions, options);
+	return Zotero.Attachments.importFromFile(importOptions);
 }
 
 
