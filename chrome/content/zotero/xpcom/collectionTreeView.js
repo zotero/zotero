@@ -199,6 +199,13 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 	// Add feeds
 	if (this.hideSources.indexOf('feeds') == -1) {
 		var feeds = Zotero.Feeds.getAll();
+		
+		// Alphabetize
+		var collation = Zotero.getLocaleCollation();
+		feeds.sort(function(a, b) {
+			return collation.compareString(1, a.name, b.name);
+		});
+		
 		if (feeds.length) {
 			this._addRowToArray(
 				newRows,
