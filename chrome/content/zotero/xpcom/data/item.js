@@ -2947,6 +2947,10 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentSyncedModificationTime',
 		if (parseInt(val) != val || val < 0) {
 			throw new Error("attachmentSyncedModificationTime must be a timestamp in milliseconds");
 		}
+		if (val < 10000000000) {
+			Zotero.logError("attachmentSyncedModificationTime should be a timestamp in milliseconds "
+				+ "-- " + val + " given");
+		}
 		
 		if (val == this._attachmentSyncedModificationTime) {
 			return;
