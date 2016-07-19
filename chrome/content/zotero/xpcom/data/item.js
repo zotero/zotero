@@ -2399,7 +2399,7 @@ Zotero.Item.prototype.getFilename = function () {
 
 
 /**
- * Asynchronous cached check for file existence, used for items view
+ * Asynchronous check for file existence
  */
 Zotero.Item.prototype.fileExists = Zotero.Promise.coroutine(function* () {
 	if (!this.isAttachment()) {

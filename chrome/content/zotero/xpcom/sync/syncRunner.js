@@ -293,15 +293,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	 */
 	this.checkLibraries = Zotero.Promise.coroutine(function* (client, options, keyInfo, libraries = []) {
 		var access = keyInfo.access;
-		
-/*				var libraries = [
-			Zotero.Libraries.userLibraryID,
-			Zotero.Libraries.publicationsLibraryID,
-			// Groups sorted by name
-			...(Zotero.Groups.getAll().map(x => x.libraryID))
-		];
-*/
-		
 		var syncAllLibraries = !libraries || !libraries.length;
 		
 		// TODO: Ability to remove or disable editing of user library?
@@ -309,7 +300,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		if (syncAllLibraries) {
 			if (access.user && access.user.library) {
 				libraries = [Zotero.Libraries.userLibraryID, Zotero.Libraries.publicationsLibraryID];
-				// Remove skipped libraries
+				// If syncing all libraries, remove skipped libraries
 				libraries = Zotero.Utilities.arrayDiff(
 					libraries, Zotero.Sync.Data.Local.getSkippedLibraries()
 				);
@@ -472,7 +463,22 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				throw new Error("Group " + groupID + " not found");
 			}
 			let group = Zotero.Groups.get(groupID);
-			if (!group) {
+			if (group) {
+				// Check if the user's permissions for the group have changed, and prompt to reset
+				// data if so
+				let { editable, filesEditable } = Zotero.Groups.getPermissionsFromJSON(
+					info.data, keyInfo.userID
+				);
+				let keepGoing = yield Zotero.Sync.Data.Local.checkLibraryForAccess(
+					null, group.libraryID, editable, filesEditable
+				);
+				// User chose to skip library
+				if (!keepGoing) {
+					Zotero.debug("Skipping sync of group " + group.id);
+					continue;
+				}
+			}
+			else {
 				group = new Zotero.Group;
 				group.id = groupID;
 			}

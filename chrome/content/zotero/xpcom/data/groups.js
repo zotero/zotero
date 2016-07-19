@@ -116,4 +116,31 @@ Zotero.Groups = new function () {
 		
 		return this._cache.libraryIDByGroupID[groupID] || false;
 	}
+	
+	
+	this.getPermissionsFromJSON = function (json, userID) {
+		if (!json.owner) throw new Error("Invalid JSON provided for group data");
+		if (!userID) throw new Error("userID not provided");
+		
+		var editable = false;
+		var filesEditable = false;
+		// If user is owner or admin, make library editable, and make files editable unless they're
+		// disabled altogether
+		if (json.owner == userID || (json.admins && json.admins.indexOf(userID) != -1)) {
+			editable = true;
+			if (json.fileEditing != 'none') {
+				filesEditable = true;
+			}
+		}
+		// If user is member, make library and files editable if they're editable by all members
+		else if (json.members && json.members.indexOf(userID) != -1) {
+			if (json.libraryEditing == 'members') {
+				editable = true;
+				if (json.fileEditing == 'members') {
+					filesEditable = true;
+				}
+			}
+		}
+		return { editable, filesEditable };
+	};
 }

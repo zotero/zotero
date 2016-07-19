@@ -96,6 +96,216 @@ describe("Zotero.Sync.Data.Local", function() {
 	});
 	
 	
+	describe("#checkLibraryForAccess()", function () {
+		//
+		// editable
+		//
+		it("should prompt if library is changing from editable to non-editable and reset library on accept", function* () {
+			var group = yield createGroup();
+			var libraryID = group.libraryID;
+			var promise = waitForDialog(function (dialog) {
+				var text = dialog.document.documentElement.textContent;
+				assert.include(text, group.name);
+			});
+			
+			var mock = sinon.mock(Zotero.Sync.Data.Local);
+			mock.expects("_resetUnsyncedLibraryData").once().returns(Zotero.Promise.resolve());
+			mock.expects("_resetUnsyncedLibraryFiles").never();
+			
+			assert.isTrue(
+				yield Zotero.Sync.Data.Local.checkLibraryForAccess(null, libraryID, false, false)
+			);
+			yield promise;
+			
+			mock.verify();
+		});
+		
+		it("should prompt if library is changing from editable to non-editable but not reset library on cancel", function* () {
+			var group = yield createGroup();
+			var libraryID = group.libraryID;
+			var promise = waitForDialog(function (dialog) {
+				var text = dialog.document.documentElement.textContent;
+				assert.include(text, group.name);
+			}, "cancel");
+			
+			var mock = sinon.mock(Zotero.Sync.Data.Local);
+			mock.expects("_resetUnsyncedLibraryData").never();
+			mock.expects("_resetUnsyncedLibraryFiles").never();
+			
+			assert.isFalse(
+				yield Zotero.Sync.Data.Local.checkLibraryForAccess(null, libraryID, false, false)
+			);
+			yield promise;
+			
+			mock.verify();
+		});
+		
+		it("should not prompt if library is changing from editable to non-editable", function* () {
+			var group = yield createGroup({ editable: false, filesEditable: false });
+			var libraryID = group.libraryID;
+			yield Zotero.Sync.Data.Local.checkLibraryForAccess(null, libraryID, true, true);
+		});
+		
+		//
+		// filesEditable
+		//
+		it("should prompt if library is changing from filesEditable to non-filesEditable and reset library files on accept", function* () {
+			var group = yield createGroup();
+			var libraryID = group.libraryID;
+			var promise = waitForDialog(function (dialog) {
+				var text = dialog.document.documentElement.textContent;
+				assert.include(text, group.name);
+			});
+			
+			var mock = sinon.mock(Zotero.Sync.Data.Local);
+			mock.expects("_resetUnsyncedLibraryData").never();
+			mock.expects("_resetUnsyncedLibraryFiles").once().returns(Zotero.Promise.resolve());
+			
+			assert.isTrue(
+				yield Zotero.Sync.Data.Local.checkLibraryForAccess(null, libraryID, true, false)
+			);
+			yield promise;
+			
+			mock.verify();
+		});
+		
+		it("should prompt if library is changing from filesEditable to non-filesEditable but not reset library files on cancel", function* () {
+			var group = yield createGroup();
+			var libraryID = group.libraryID;
+			var promise = waitForDialog(function (dialog) {
+				var text = dialog.document.documentElement.textContent;
+				assert.include(text, group.name);
+			}, "cancel");
+			
+			var mock = sinon.mock(Zotero.Sync.Data.Local);
+			mock.expects("_resetUnsyncedLibraryData").never();
+			mock.expects("_resetUnsyncedLibraryFiles").never();
+			
+			assert.isFalse(
+				yield Zotero.Sync.Data.Local.checkLibraryForAccess(null, libraryID, true, false)
+			);
+			yield promise;
+			
+			mock.verify();
+		});
+	});
+	
+	
+	describe("#_libraryHasUnsyncedData()", function () {
+		it("should return true for unsynced setting", function* () {
+			var group = yield createGroup();
+			var libraryID = group.libraryID;
+			yield Zotero.SyncedSettings.set(libraryID, "testSetting", { foo: "bar" });
+			assert.isTrue(yield Zotero.Sync.Data.Local._libraryHasUnsyncedData(libraryID));
+		});
+		
+		it("should return true for unsynced item", function* () {
+			var group = yield createGroup();
+			var libraryID = group.libraryID;
+			yield createDataObject('item', { libraryID });
+			assert.isTrue(yield Zotero.Sync.Data.Local._libraryHasUnsyncedData(libraryID));
+		});
+		
+		it("should return false if no changes", function* () {
+			var group = yield createGroup();
+			var libraryID = group.libraryID;
+			assert.isFalse(yield Zotero.Sync.Data.Local._libraryHasUnsyncedData(libraryID));
+		});
+	});
+	
+	
+	describe("#_resetUnsyncedLibraryData()", function () {
+		it("should revert group and mark for full sync", function* () {
+			var group = yield createGroup({
+				version: 1,
+				libraryVersion: 2
+			});
+			var libraryID = group.libraryID;
+			
+			// New setting
+			yield Zotero.SyncedSettings.set(libraryID, "testSetting", { foo: "bar" });
+			
+			// Changed collection
+			var changedCollection = yield createDataObject('collection', { libraryID, version: 1 });
+			var originalCollectionName = changedCollection.name;
+			yield Zotero.Sync.Data.Local.saveCacheObject(
+				'collection', libraryID, changedCollection.toJSON()
+			);
+			yield modifyDataObject(changedCollection);
+			
+			// Unchanged item
+			var unchangedItem = yield createDataObject('item', { libraryID, version: 1, synced: true });
+			yield Zotero.Sync.Data.Local.saveCacheObject(
+				'item', libraryID, unchangedItem.toJSON()
+			);
+			
+			// Changed item
+			var changedItem = yield createDataObject('item', { libraryID, version: 1 });
+			var originalChangedItemTitle = changedItem.getField('title');
+			yield Zotero.Sync.Data.Local.saveCacheObject('item', libraryID, changedItem.toJSON());
+			yield modifyDataObject(changedItem);
+			
+			// New item
+			var newItem = yield createDataObject('item', { libraryID, version: 1 });
+			var newItemKey = newItem.key;
+			
+			// Delete item
+			var deletedItem = yield createDataObject('item', { libraryID });
+			var deletedItemKey = deletedItem.key;
+			yield deletedItem.eraseTx();
+			
+			yield Zotero.Sync.Data.Local._resetUnsyncedLibraryData(libraryID);
+			
+			assert.isNull(Zotero.SyncedSettings.get(group.libraryID, "testSetting"));
+			
+			assert.equal(changedCollection.name, originalCollectionName);
+			assert.isTrue(changedCollection.synced);
+			
+			assert.isTrue(unchangedItem.synced);
+			
+			assert.equal(changedItem.getField('title'), originalChangedItemTitle);
+			assert.isTrue(changedItem.synced);
+			
+			assert.isFalse(Zotero.Items.get(newItemKey));
+			
+			assert.isFalse(yield Zotero.Sync.Data.Local.getDateDeleted('item', libraryID, deletedItemKey));
+			
+			assert.equal(group.libraryVersion, -1);
+		});
+		
+		
+		describe("#_resetUnsyncedLibraryFiles", function () {
+			it("should delete unsynced files", function* () {
+				var group = yield createGroup({
+					version: 1,
+					libraryVersion: 2
+				});
+				var libraryID = group.libraryID;
+				
+				var attachment1 = yield importFileAttachment('test.png', { libraryID });
+				attachment1.attachmentSyncState = "in_sync";
+				attachment1.attachmentSyncedModificationTime = 1234567890000;
+				attachment1.attachmentSyncedHash = "8caf2ee22919d6725eb0648b98ef6bad";
+				var attachment2 = yield importFileAttachment('test.pdf', { libraryID });
+				
+				// Has to be called before _resetUnsyncedLibraryFiles()
+				assert.isTrue(yield Zotero.Sync.Data.Local._libraryHasUnsyncedFiles(libraryID));
+				
+				yield Zotero.Sync.Data.Local._resetUnsyncedLibraryFiles(libraryID);
+				
+				assert.isFalse(yield attachment1.fileExists());
+				assert.isFalse(yield attachment2.fileExists());
+				assert.equal(
+					attachment1.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
+				);
+				assert.equal(
+					attachment2.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
+				);
+			});
+		});
+	});
+	
+	
 	describe("#getLatestCacheObjectVersions", function () {
 		before(function* () {
 			yield resetDB({

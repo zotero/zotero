@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+"use strict";
+
 Zotero.Group = function (params = {}) {
 	params.libraryType = 'group';
 	Zotero.Group._super.call(this, params);
@@ -240,23 +242,7 @@ Zotero.Group.prototype.fromJSON = function (json, userID) {
 	var editable = false;
 	var filesEditable = false;
 	if (userID) {
-		// If user is owner or admin, make library editable, and make files editable unless they're
-		// disabled altogether
-		if (json.owner == userID || (json.admins && json.admins.indexOf(userID) != -1)) {
-			editable = true;
-			if (json.fileEditing != 'none') {
-				filesEditable = true;
-			}
-		}
-		// If user is member, make library and files editable if they're editable by all members
-		else if (json.members && json.members.indexOf(userID) != -1) {
-			if (json.libraryEditing == 'members') {
-				editable = true;
-				if (json.fileEditing == 'members') {
-					filesEditable = true;
-				}
-			}
-		}
+		({ editable, filesEditable } = Zotero.Groups.getPermissionsFromJSON(json, userID));
 	}
 	this.editable = editable;
 	this.filesEditable = filesEditable;
