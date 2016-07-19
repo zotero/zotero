@@ -54,7 +54,7 @@ describe("ConcurrentCaller", function () {
 			assert.isFalse(failed);
 		})
 		
-		it("should add functions to existing queue and resolve when all are complete (waiting for earlier)", function* () {
+		it("should add functions to existing queue and resolve when all are complete (waiting for earlier set)", function* () {
 			var numConcurrent = 2;
 			var running = 0;
 			var finished = 0;
@@ -98,6 +98,7 @@ describe("ConcurrentCaller", function () {
 			yield Zotero.Promise.delay(1);
 			var promise2 = caller.start(funcs2);
 			
+			// Wait for first set
 			var results1 = yield promise1;
 			
 			// Second set shouldn't be done yet
@@ -108,13 +109,13 @@ describe("ConcurrentCaller", function () {
 			assert.isFalse(failed);
 		})
 		
-		it("should add functions to existing queue and resolve when all are complete (waiting for later)", function* () {
+		it("should add functions to existing queue and resolve when all are complete (waiting for later set)", function* () {
 			var numConcurrent = 2;
 			var running = 0;
 			var finished = 0;
 			var failed = false;
 			
-			var ids1 = {"1": 50, "2": 15, "3": 60};
+			var ids1 = {"1": 100, "2": 45, "3": 80};
 			var ids2 = {"4": 1, "5": 1};
 			var makeFunc = function (id, delay) {
 				return Zotero.Promise.coroutine(function* () {
@@ -152,6 +153,7 @@ describe("ConcurrentCaller", function () {
 			yield Zotero.Promise.delay(10);
 			var promise2 = caller.start(funcs2);
 			
+			// Wait for second set
 			var results2 = yield promise2;
 			
 			// The second set should finish before the first
