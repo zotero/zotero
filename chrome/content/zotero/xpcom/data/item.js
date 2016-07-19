@@ -2564,6 +2564,31 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 });
 
 
+Zotero.Item.prototype.deleteAttachmentFile = Zotero.Promise.coroutine(function* () {
+	if (!this.isImportedAttachment()) {
+		throw new Error("deleteAttachmentFile() can only be called on imported attachment items");
+	}
+	
+	var path = yield this.getFilePathAsync();
+	if (!path) {
+		Zotero.debug(`File not found for item ${this.libraryKey} in deleteAttachmentFile()`, 2);
+		return false;
+	}
+	
+	Zotero.debug("Deleting attachment file for item " + this.libraryKey);
+	try {
+		yield Zotero.File.removeIfExists(path);
+		this.attachmentSyncState = "to_download";
+		yield this.saveTx({ skipAll: true });
+		return true;
+	}
+	catch (e) {
+		Zotero.logError(e);
+		return false;
+	}
+});
+
+
 
 /*
  * Return a file:/// URL path to files and snapshots
