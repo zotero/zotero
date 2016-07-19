@@ -703,7 +703,7 @@ Zotero.Sync.Data.Local = {
 									}
 									jsonDataLocal[x] = jsonData[x];
 								})
-								jsonData = jsonDataLocal;
+								jsonObject.data = jsonDataLocal;
 							}
 						}
 						// Object doesn't exist locally
