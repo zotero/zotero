@@ -249,7 +249,7 @@ describe("Zotero.Sync.Runner", function () {
 			assert.sameMembers(libraries, [group1.libraryID]);
 		})
 		
-		it("should filter out skipped libraries if library list not provided", function* () {
+		it("should filter out nonexistent skipped libraries if library list not provided", function* () {
 			var unskippedGroupID = responses.groups.ownerGroup.json.id;
 			var skippedGroupID = responses.groups.memberGroup.json.id;
 			Zotero.Prefs.set('sync.librariesToSkip', `["L4", "G${skippedGroupID}"]`);
@@ -266,6 +266,34 @@ describe("Zotero.Sync.Runner", function () {
 			var group = Zotero.Groups.get(unskippedGroupID);
 			assert.lengthOf(libraries, 2);
 			assert.sameMembers(libraries, [userLibraryID, group.libraryID]);
+			
+			assert.isFalse(Zotero.Groups.get(skippedGroupID));
+		});
+		
+		it("should filter out existing skipped libraries if library list not provided", function* () {
+			var unskippedGroupID = responses.groups.ownerGroup.json.id;
+			var skippedGroupID = responses.groups.memberGroup.json.id;
+			Zotero.Prefs.set('sync.librariesToSkip', `["L4", "G${skippedGroupID}"]`);
+			
+			var skippedGroup = yield createGroup({
+				id: skippedGroupID,
+				version: responses.groups.memberGroup.json.version - 1
+			});
+			
+			setResponse('userGroups.groupVersions');
+			setResponse('groups.ownerGroup');
+			setResponse('groups.memberGroup');
+			var libraries = yield runner.checkLibraries(
+				runner.getAPIClient({ apiKey }),
+				false,
+				responses.keyInfo.fullAccess.json
+			);
+			
+			var group = Zotero.Groups.get(unskippedGroupID);
+			assert.lengthOf(libraries, 2);
+			assert.sameMembers(libraries, [userLibraryID, group.libraryID]);
+			
+			assert.equal(skippedGroup.version, responses.groups.memberGroup.json.version - 1);
 		});
 		
 		it("shouldn't filter out skipped libraries if library list is provided", function* () {

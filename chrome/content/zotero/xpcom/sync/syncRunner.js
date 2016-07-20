@@ -293,6 +293,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	 */
 	this.checkLibraries = Zotero.Promise.coroutine(function* (client, options, keyInfo, libraries = []) {
 		var access = keyInfo.access;
+		
 		var syncAllLibraries = !libraries || !libraries.length;
 		
 		// TODO: Ability to remove or disable editing of user library?
@@ -336,13 +337,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			
 			let remoteGroupVersions = yield client.getGroupVersions(keyInfo.userID);
 			let remoteGroupIDs = Object.keys(remoteGroupVersions).map(id => parseInt(id));
-			Zotero.debug(remoteGroupVersions);
+			let skippedGroups = Zotero.Sync.Data.Local.getSkippedGroups();
 			
 			// Remove skipped groups
 			if (syncAllLibraries) {
-				let newGroups = Zotero.Utilities.arrayDiff(
-					remoteGroupIDs, Zotero.Sync.Data.Local.getSkippedGroups()
-				);
+				let newGroups = Zotero.Utilities.arrayDiff(remoteGroupIDs, skippedGroups);
 				Zotero.Utilities.arrayDiff(remoteGroupIDs, newGroups)
 					.forEach(id => { delete remoteGroupVersions[id] });
 				remoteGroupIDs = newGroups;
@@ -379,13 +378,20 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			// Get local groups (all if syncing all libraries or just selected ones) that don't
 			// exist remotely
 			// TODO: Use explicit removals?
-			remotelyMissingGroups = Zotero.Utilities.arrayDiff(
-				syncAllLibraries
-					? Zotero.Groups.getAll().map(g => g.id)
-					: libraries.filter(id => Zotero.Libraries.get(id).libraryType == 'group')
-						.map(id => Zotero.Groups.getGroupIDFromLibraryID(id)),
-				remoteGroupIDs
-			).map(id => Zotero.Groups.get(id));
+			let localGroups;
+			if (syncAllLibraries) {
+				localGroups = Zotero.Groups.getAll()
+					.map(g => g.id)
+					// Don't include skipped groups
+					.filter(id => skippedGroups.indexOf(id) == -1);
+			}
+			else {
+				localGroups = libraries
+					.filter(id => Zotero.Libraries.get(id).libraryType == 'group')
+					.map(id => Zotero.Groups.getGroupIDFromLibraryID(id))
+			}
+			remotelyMissingGroups = Zotero.Utilities.arrayDiff(localGroups, remoteGroupIDs)
+				.map(id => Zotero.Groups.get(id));
 		}
 		// No group access
 		else {
