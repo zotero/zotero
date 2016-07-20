@@ -1918,6 +1918,84 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var result = yield engine._startUpload();
 			assert.equal(result, engine.UPLOAD_RESULT_NOTHING_TO_UPLOAD);
 		});
+		
+		
+		it("should prompt to reset library on 403 write response and reset on accept", function* () {
+			var group = yield createGroup({
+				libraryVersion: 5
+			});
+			var libraryID = group.libraryID;
+			({ engine, client, caller } = yield setup({ libraryID }));
+			
+			var item = createUnsavedDataObject('item');
+			item.libraryID = libraryID;
+			item.setField('title', 'A');
+			item.synced = false;
+			var itemID = yield item.saveTx();
+			
+			var headers = {
+				"Last-Modified-Version": 5
+			};
+			setResponse({
+				method: "POST",
+				url: `groups/${group.id}/items`,
+				status: 403,
+				headers,
+				text: ""
+			})
+			
+			var promise = waitForDialog(function (dialog) {
+				var text = dialog.document.documentElement.textContent;
+				assert.include(text, group.name);
+			});
+			
+			var result = yield engine._startUpload();
+			assert.equal(result, engine.UPLOAD_RESULT_RESTART);
+			
+			assert.isFalse(Zotero.Items.exists(itemID));
+			
+			// Library version should have been reset to trigger full sync
+			assert.equal(group.libraryVersion, -1);
+		});
+		
+		
+		it("should prompt to reset library on 403 write response and skip on cancel", function* () {
+			var group = yield createGroup({
+				libraryVersion: 5
+			});
+			var libraryID = group.libraryID;
+			({ engine, client, caller } = yield setup({ libraryID }));
+			
+			var item = createUnsavedDataObject('item');
+			item.libraryID = libraryID;
+			item.setField('title', 'A');
+			item.synced = false;
+			var itemID = yield item.saveTx();
+			
+			var headers = {
+				"Last-Modified-Version": 5
+			};
+			setResponse({
+				method: "POST",
+				url: `groups/${group.id}/items`,
+				status: 403,
+				headers,
+				text: ""
+			})
+			
+			var promise = waitForDialog(function (dialog) {
+				var text = dialog.document.documentElement.textContent;
+				assert.include(text, group.name);
+			}, "cancel");
+			
+			var result = yield engine._startUpload();
+			assert.equal(result, engine.UPLOAD_RESULT_CANCEL);
+			
+			assert.isTrue(Zotero.Items.exists(itemID));
+			
+			// Library version shouldn't have changed
+			assert.equal(group.libraryVersion, 5);
+		});
 	});
 	
 	

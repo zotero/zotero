@@ -46,4 +46,47 @@ Zotero.Sync.Data.Utilities = {
 		}
 		return this._syncObjectTypeIDs[objectType];
 	},
+	
+	
+	/**
+	 * Prompt whether to reset unsynced local data in a library
+	 *
+	 * Keep in sync with Sync.Storage.Utilities.showFileWriteAccessLostPrompt()
+	 * @param {Window|null} win
+	 * @param {Zotero.Library} library
+	 * @return {Integer} - 0 to reset, 1 to skip
+	 */
+	showWriteAccessLostPrompt: function (win, library) {
+		var libraryType = library.libraryType;
+		switch (libraryType) {
+		case 'group':
+			var msg = Zotero.getString('sync.error.groupWriteAccessLost',
+					[library.name, ZOTERO_CONFIG.DOMAIN_NAME])
+				+ "\n\n"
+				+ Zotero.getString('sync.error.groupCopyChangedItems')
+			var button1Text = Zotero.getString('sync.resetGroupAndSync');
+			var button2Text = Zotero.getString('sync.skipGroup');
+			break;
+		
+		default:
+			throw new Error("Unsupported library type " + libraryType);
+		}
+		
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
+		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
+			+ ps.BUTTON_DELAY_ENABLE;
+		
+		return ps.confirmEx(
+			win,
+			Zotero.getString('general.permissionDenied'),
+			msg,
+			buttonFlags,
+			button1Text,
+			button2Text,
+			null,
+			null, {}
+		);
+	}
 };

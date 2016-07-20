@@ -109,8 +109,8 @@ describe("Zotero.Sync.Data.Local", function() {
 			});
 			
 			var mock = sinon.mock(Zotero.Sync.Data.Local);
-			mock.expects("_resetUnsyncedLibraryData").once().returns(Zotero.Promise.resolve());
-			mock.expects("_resetUnsyncedLibraryFiles").never();
+			mock.expects("resetUnsyncedLibraryData").once().returns(Zotero.Promise.resolve());
+			mock.expects("resetUnsyncedLibraryFiles").never();
 			
 			assert.isTrue(
 				yield Zotero.Sync.Data.Local.checkLibraryForAccess(null, libraryID, false, false)
@@ -129,8 +129,8 @@ describe("Zotero.Sync.Data.Local", function() {
 			}, "cancel");
 			
 			var mock = sinon.mock(Zotero.Sync.Data.Local);
-			mock.expects("_resetUnsyncedLibraryData").never();
-			mock.expects("_resetUnsyncedLibraryFiles").never();
+			mock.expects("resetUnsyncedLibraryData").never();
+			mock.expects("resetUnsyncedLibraryFiles").never();
 			
 			assert.isFalse(
 				yield Zotero.Sync.Data.Local.checkLibraryForAccess(null, libraryID, false, false)
@@ -158,8 +158,8 @@ describe("Zotero.Sync.Data.Local", function() {
 			});
 			
 			var mock = sinon.mock(Zotero.Sync.Data.Local);
-			mock.expects("_resetUnsyncedLibraryData").never();
-			mock.expects("_resetUnsyncedLibraryFiles").once().returns(Zotero.Promise.resolve());
+			mock.expects("resetUnsyncedLibraryData").never();
+			mock.expects("resetUnsyncedLibraryFiles").once().returns(Zotero.Promise.resolve());
 			
 			assert.isTrue(
 				yield Zotero.Sync.Data.Local.checkLibraryForAccess(null, libraryID, true, false)
@@ -178,8 +178,8 @@ describe("Zotero.Sync.Data.Local", function() {
 			}, "cancel");
 			
 			var mock = sinon.mock(Zotero.Sync.Data.Local);
-			mock.expects("_resetUnsyncedLibraryData").never();
-			mock.expects("_resetUnsyncedLibraryFiles").never();
+			mock.expects("resetUnsyncedLibraryData").never();
+			mock.expects("resetUnsyncedLibraryFiles").never();
 			
 			assert.isFalse(
 				yield Zotero.Sync.Data.Local.checkLibraryForAccess(null, libraryID, true, false)
@@ -214,7 +214,7 @@ describe("Zotero.Sync.Data.Local", function() {
 	});
 	
 	
-	describe("#_resetUnsyncedLibraryData()", function () {
+	describe("#resetUnsyncedLibraryData()", function () {
 		it("should revert group and mark for full sync", function* () {
 			var group = yield createGroup({
 				version: 1,
@@ -254,7 +254,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			var deletedItemKey = deletedItem.key;
 			yield deletedItem.eraseTx();
 			
-			yield Zotero.Sync.Data.Local._resetUnsyncedLibraryData(libraryID);
+			yield Zotero.Sync.Data.Local.resetUnsyncedLibraryData(libraryID);
 			
 			assert.isNull(Zotero.SyncedSettings.get(group.libraryID, "testSetting"));
 			
@@ -274,7 +274,7 @@ describe("Zotero.Sync.Data.Local", function() {
 		});
 		
 		
-		describe("#_resetUnsyncedLibraryFiles", function () {
+		describe("#resetUnsyncedLibraryFiles", function () {
 			it("should delete unsynced files", function* () {
 				var group = yield createGroup({
 					version: 1,
@@ -288,10 +288,10 @@ describe("Zotero.Sync.Data.Local", function() {
 				attachment1.attachmentSyncedHash = "8caf2ee22919d6725eb0648b98ef6bad";
 				var attachment2 = yield importFileAttachment('test.pdf', { libraryID });
 				
-				// Has to be called before _resetUnsyncedLibraryFiles()
+				// Has to be called before resetUnsyncedLibraryFiles()
 				assert.isTrue(yield Zotero.Sync.Data.Local._libraryHasUnsyncedFiles(libraryID));
 				
-				yield Zotero.Sync.Data.Local._resetUnsyncedLibraryFiles(libraryID);
+				yield Zotero.Sync.Data.Local.resetUnsyncedLibraryFiles(libraryID);
 				
 				assert.isFalse(yield attachment1.fileExists());
 				assert.isFalse(yield attachment2.fileExists());

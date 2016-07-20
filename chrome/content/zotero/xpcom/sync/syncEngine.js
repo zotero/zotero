@@ -79,6 +79,8 @@ Zotero.Sync.Data.Engine.prototype.UPLOAD_RESULT_SUCCESS = 1;
 Zotero.Sync.Data.Engine.prototype.UPLOAD_RESULT_NOTHING_TO_UPLOAD = 2;
 Zotero.Sync.Data.Engine.prototype.UPLOAD_RESULT_LIBRARY_CONFLICT = 3;
 Zotero.Sync.Data.Engine.prototype.UPLOAD_RESULT_OBJECT_CONFLICT = 4;
+Zotero.Sync.Data.Engine.prototype.UPLOAD_RESULT_RESTART = 5;
+Zotero.Sync.Data.Engine.prototype.UPLOAD_RESULT_CANCEL = 6;
 
 Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () {
 	Zotero.debug("Starting data sync for " + this.library.name);
@@ -163,6 +165,14 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 					throw new Error("Could not sync " + this.library.name + " -- too many retries");
 				}
 			}
+		
+		case this.UPLOAD_RESULT_RESTART:
+			Zotero.debug("Restarting sync for " + this.library.name);
+			break;
+		
+		case this.UPLOAD_RESULT_CANCEL:
+			Zotero.debug("Cancelling sync for " + this.library.name);
+			return;
 		}
 	}
 	
@@ -756,10 +766,7 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 		}
 	}
 	catch (e) {
-		if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status == 412) {
-			return this.UPLOAD_RESULT_LIBRARY_CONFLICT;
-		}
-		throw e;
+		return this._handleUploadError(e);
 	}
 	
 	// Get unsynced local objects for each object type
@@ -824,10 +831,7 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 		}
 	}
 	catch (e) {
-		if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status == 412) {
-			return this.UPLOAD_RESULT_LIBRARY_CONFLICT;
-		}
-		throw e;
+		return this._handleUploadError(e);
 	}
 	
 	return this.UPLOAD_RESULT_SUCCESS;
@@ -1445,6 +1449,30 @@ Zotero.Sync.Data.Engine.prototype._getOptions = function (additionalOpts = {}) {
 	return options;
 }
 
+
+Zotero.Sync.Data.Engine.prototype._handleUploadError = Zotero.Promise.coroutine(function* (e) {
+	if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+		switch (e.status) {
+		// This should only happen if library permissions were changed between the group check at
+		// sync start and now, or to people who upgraded from <5.0-beta.r25+66ca2cf with unsynced local
+		// changes.
+		case 403:
+			let index = Zotero.Sync.Data.Utilities.showWriteAccessLostPrompt(null, this.library);
+			if (index === 0) {
+				yield Zotero.Sync.Data.Local.resetUnsyncedLibraryData(this.libraryID);
+				return this.UPLOAD_RESULT_RESTART;
+			}
+			if (index == 1) {
+				return this.UPLOAD_RESULT_CANCEL;
+			}
+			throw new Error(`Unexpected index value ${index}`);
+			
+		case 412:
+			return this.UPLOAD_RESULT_LIBRARY_CONFLICT;
+		}
+	}
+	throw e;
+});
 
 Zotero.Sync.Data.Engine.prototype._failedCheck = function () {
 	if (this.stopOnError && this.failed) {

@@ -165,11 +165,11 @@ Zotero.Sync.Data.Local = {
 		if (library.editable && !editable
 				&& ((yield this._libraryHasUnsyncedData(libraryID))
 					|| (yield this._libraryHasUnsyncedFiles(libraryID)))) {
-			let index = this._showWriteAccessLostPrompt(win, library);
+			let index = Zotero.Sync.Data.Utilities.showWriteAccessLostPrompt(win, library);
 			
 			// Reset library
 			if (index == 0) {
-				yield this._resetUnsyncedLibraryData(libraryID);
+				yield this.resetUnsyncedLibraryData(libraryID);
 				return true;
 			}
 			
@@ -178,11 +178,11 @@ Zotero.Sync.Data.Local = {
 		}
 		
 		if (library.filesEditable && !filesEditable && (yield this._libraryHasUnsyncedFiles(libraryID))) {
-			let index = this._showFileWriteAccessLostPrompt(win, library);
+			let index = Zotero.Sync.Storage.Utilities.showFileWriteAccessLostPrompt(win, library);
 			
 			// Reset library files
 			if (index == 0) {
-				yield this._resetUnsyncedLibraryFiles(libraryID);
+				yield this.resetUnsyncedLibraryFiles(libraryID);
 				return true;
 			}
 			
@@ -222,77 +222,7 @@ Zotero.Sync.Data.Local = {
 	}),
 	
 	
-	_showWriteAccessLostPrompt: function (win, library) {
-		var libraryType = library.libraryType;
-		switch (libraryType) {
-		case 'group':
-			var msg = Zotero.getString('sync.error.groupWriteAccessLost',
-					[library.name, ZOTERO_CONFIG.DOMAIN_NAME])
-				+ "\n\n"
-				+ Zotero.getString('sync.error.groupCopyChangedItems')
-			var button1Text = Zotero.getString('sync.resetGroupAndSync');
-			var button2Text = Zotero.getString('sync.skipGroup');
-			break;
-		
-		default:
-			throw new Error("Unsupported library type " + libraryType);
-		}
-		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
-		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
-			+ ps.BUTTON_DELAY_ENABLE;
-		
-		return ps.confirmEx(
-			win,
-			Zotero.getString('general.permissionDenied'),
-			msg,
-			buttonFlags,
-			button1Text,
-			button2Text,
-			null,
-			null, {}
-		);
-	},
-	
-	
-	_showFileWriteAccessLostPrompt: function (win, library) {
-		var libraryType = library.libraryType;
-		switch (libraryType) {
-		case 'group':
-			var msg = Zotero.getString('sync.error.groupFileWriteAccessLost',
-					[library.name, ZOTERO_CONFIG.DOMAIN_NAME])
-				+ "\n\n"
-				+ Zotero.getString('sync.error.groupCopyChangedFiles')
-			var button1Text = Zotero.getString('sync.resetGroupFilesAndSync');
-			var button2Text = Zotero.getString('sync.skipGroup');
-			break;
-		
-		default:
-			throw new Error("Unsupported library type " + libraryType);
-		}
-		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
-		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
-			+ ps.BUTTON_DELAY_ENABLE;
-		
-		return ps.confirmEx(
-			win,
-			Zotero.getString('general.permissionDenied'),
-			msg,
-			buttonFlags,
-			button1Text,
-			button2Text,
-			null,
-			null, {}
-		);
-	},
-	
-	
-	_resetUnsyncedLibraryData: Zotero.Promise.coroutine(function* (libraryID) {
+	resetUnsyncedLibraryData: Zotero.Promise.coroutine(function* (libraryID) {
 		let settings = yield Zotero.SyncedSettings.getUnsynced(libraryID);
 		if (Object.keys(settings).length) {
 			yield Zotero.Promise.each(Object.keys(settings), function (key) {
@@ -338,7 +268,7 @@ Zotero.Sync.Data.Local = {
 		library.libraryVersion = -1;
 		yield library.saveTx();
 		
-		yield this._resetUnsyncedLibraryFiles(libraryID);
+		yield this.resetUnsyncedLibraryFiles(libraryID);
 	}),
 	
 	
@@ -347,7 +277,7 @@ Zotero.Sync.Data.Local = {
 	 *
 	 * _libraryHasUnsyncedFiles(), which checks for updated files, must be called first.
 	 */
-	_resetUnsyncedLibraryFiles: Zotero.Promise.coroutine(function* (libraryID) {
+	resetUnsyncedLibraryFiles: Zotero.Promise.coroutine(function* (libraryID) {
 		var itemIDs = yield Zotero.Sync.Storage.Local.getFilesToUpload(libraryID);
 		for (let itemID of itemIDs) {
 			let item = Zotero.Items.get(itemID);
