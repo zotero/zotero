@@ -71,7 +71,7 @@
 							break;
 						
 						default:
-							throw new Exception(`Unsupported merge object type '${type}'`);
+							throw new Error(`Unsupported merge object type '${type}'`);
 					}
 					
 					this._type = val;
@@ -98,7 +98,7 @@
 				<body>
 				<![CDATA[
 					if (this._data.left.deleted && this._data.right.deleted) {
-						throw new Exception("'left' and 'right' cannot both be deleted");
+						throw new Error("'left' and 'right' cannot both be deleted");
 					}
 					
 					// Check for note or attachment
