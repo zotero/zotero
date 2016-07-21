@@ -28,7 +28,7 @@
  * Same structure as Zotero.Creators -- make changes in both places if possible
  */
 Zotero.Tags = new function() {
-	this.MAX_COLORED_TAGS = 6;
+	this.MAX_COLORED_TAGS = 9;
 	this.MAX_SYNC_LENGTH = 255;
 	
 	var _initialized = false;

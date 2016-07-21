@@ -184,7 +184,7 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 				}
 				
 				// We have to disable key navigation on the tree in order to
-				// keep it from acting on the 1-6 keys used for colored tags.
+				// keep it from acting on the 1-9 keys used for colored tags.
 				// To allow navigation with other keys, we temporarily enable
 				// key navigation and recreate the keyboard event. Since
 				// that will trigger this listener again, we set a flag to
