@@ -82,6 +82,10 @@ var ZoteroPane = new function()
 			window.document.documentElement.setAttribute('sizemode', 'normal');
 		}
 		
+		// Set flags for hi-res displays
+		Zotero.hiDPI = window.devicePixelRatio > 1;
+		Zotero.hiDPISuffix = Zotero.hiDPI ? "@2x" : "";
+		
 		// Set "Report Errors..." label via property rather than DTD entity,
 		// since we need to reference it in script elsewhere
 		document.getElementById('zotero-tb-actions-reportErrors').setAttribute('label',

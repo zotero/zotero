@@ -103,6 +103,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	this.unlockDeferred;
 	this.unlockPromise;
 	
+	this.hiDPISuffix = "";
+	
 	var _startupErrorHandler;
 	var _zoteroDirectory = false;
 	var _localizedStringBundle;

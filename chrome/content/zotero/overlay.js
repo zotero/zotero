@@ -86,9 +86,7 @@ var ZoteroOverlay = new function()
 			
 			observerService.addObserver(zoteroObserver, "browser-delayed-startup-finished", false);
 			
-			// Set flags for hi-res displays
-			Zotero.hiDPI = window.devicePixelRatio > 1;
-			Zotero.hiDPISuffix = Zotero.hiDPI ? "@2x" : "";
+			ZoteroPane.init();
 			
 			// Clear old Zotero icon pref
 			var prefBranch = Components.classes["@mozilla.org/preferences-service;1"]
@@ -104,8 +102,6 @@ var ZoteroOverlay = new function()
 			catch (e) {
 				Zotero.logError(e);
 			}
-			
-			ZoteroPane.init();
 			
 			// TODO: Add only when progress window is open
 			document.getElementById('appcontent').addEventListener('mousemove', Zotero.ProgressWindowSet.updateTimers, false);
