@@ -168,7 +168,7 @@
 									command="cmd_zotero_rtfScan"/>
 							<menuseparator/>
 							<menuitem id="menu_addons" label="&addons.label;"
-									oncommand="ZoteroStandalone.openInViewer('chrome://mozapps/content/extensions/extensions.xul')"/>
+									oncommand="ZoteroStandalone.openInViewer('chrome://mozapps/content/extensions/extensions.xul', ZoteroStandalone.updateAddonsPane)"/>
 						</menupopup>
 					</menu>
 					

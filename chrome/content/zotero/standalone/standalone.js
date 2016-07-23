@@ -106,18 +106,62 @@ const ZoteroStandalone = new function() {
 	}
 	
 	/**
-	 * Opens a URL in the basic viewer
+	 * Opens a URL in the basic viewer, and optionally run a callback on load
+	 *
+	 * @param {String} uri
+	 * @param {Function} [onLoad] - Function to run once URI is loaded; passed the loaded document
 	 */
-	this.openInViewer = function(uri) {
+	this.openInViewer = function(uri, onLoad) {
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 			.getService(Components.interfaces.nsIWindowMediator);
 		var win = wm.getMostRecentWindow("zotero:basicViewer");
 		if(win) {
 			win.loadURI(uri);
 		} else {
-			window.openDialog("chrome://zotero/content/standalone/basicViewer.xul",
+			win = window.openDialog("chrome://zotero/content/standalone/basicViewer.xul",
 				"basicViewer", "chrome,resizable,centerscreen,menubar,scrollbars", uri);
 		}
+		if (onLoad) {
+			let browser
+			let func = function () {
+				win.removeEventListener("load", func);
+				browser = win.document.documentElement.getElementsByTagName('browser')[0];
+				browser.addEventListener("pageshow", innerFunc);
+			};
+			let innerFunc = function () {
+				browser.removeEventListener("pageshow", innerFunc);
+				onLoad(browser.contentDocument);
+			};
+			win.addEventListener("load", func);
+			
+		}
+	}
+	
+	this.updateAddonsPane = function (doc) {
+		// Hide unsigned add-on verification warnings
+		//
+		// This only works for the initial load of the window. If the user switches to Appearance
+		// or Plugins and then back to Extensions, the warnings will appear again. A better way to
+		// disable this might be discoverable by studying
+		// https://dxr.mozilla.org/mozilla-central/source/toolkit/mozapps/extensions/content/extensions.js
+		var addonList = doc.getElementById('addon-list');
+		setTimeout(function () {
+			for (let i = 0; i < addonList.itemCount; i++) {
+				let richListItem = addonList.getItemAtIndex(i);
+				let container = doc.getAnonymousElementByAttribute(
+					richListItem, 'anonid', 'warning-container'
+				);
+				if (container) {
+					let link = doc.getAnonymousElementByAttribute(
+						richListItem, 'anonid', 'warning-link'
+					);
+					if (link && link.href.indexOf('unsigned-addons') != -1) {
+						richListItem.removeAttribute('notification');
+						container.hidden = true;
+					}
+				}
+			}
+		});
 	}
 	
 	/**
