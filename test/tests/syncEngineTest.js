@@ -2480,7 +2480,89 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', libraryID);
 			assert.lengthOf(keys, 0);
-		})
+		});
+		
+		it("should handle local deletion and remote move to trash", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			({ engine, client, caller } = yield setup());
+			var type = 'item';
+			var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+			var responseJSON = [];
+			
+			// Create object, generate JSON, and delete
+			var obj = yield createDataObject(type, { version: 10 });
+			var jsonData = obj.toJSON();
+			var key = jsonData.key = obj.key;
+			jsonData.version = 10;
+			let json = {
+				key: obj.key,
+				version: jsonData.version,
+				data: jsonData
+			};
+			yield obj.eraseTx();
+			
+			json.version = jsonData.version = 15;
+			jsonData.deleted = true;
+			responseJSON.push(json);
+			
+			setResponse({
+				method: "GET",
+				url: `users/1/items?format=json&itemKey=${key}&includeTrashed=1`,
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 15
+				},
+				json: responseJSON
+			});
+			
+			yield engine._downloadObjects('item', [key]);
+			
+			assert.isFalse(objectsClass.exists(libraryID, key));
+			
+			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', libraryID);
+			assert.lengthOf(keys, 0);
+			
+			// Deletion should still be in sync delete log for uploading
+			assert.ok(yield Zotero.Sync.Data.Local.getDateDeleted('item', libraryID, key));
+		});
+		
+		it("should handle remote move to trash and local deletion", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			({ engine, client, caller } = yield setup());
+			var type = 'item';
+			var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+			var responseJSON = [];
+			
+			// Create trashed object
+			var obj = createUnsavedDataObject(type);
+			obj.deleted = true;
+			yield obj.saveTx();
+			
+			setResponse({
+				method: "GET",
+				url: `users/1/deleted?since=10`,
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 15
+				},
+				json: {
+					collections: [],
+					searches: [],
+					items: [obj.key],
+				}
+			});
+			
+			yield engine._downloadDeletions(10, 15);
+			
+			// Local object should have been deleted
+			assert.isFalse(objectsClass.exists(libraryID, obj.key));
+			
+			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', libraryID);
+			assert.lengthOf(keys, 0);
+			
+			// Deletion shouldn't be in sync delete log
+			assert.isFalse(yield Zotero.Sync.Data.Local.getDateDeleted('item', libraryID, obj.key));
+		});
 		
 		it("should handle note conflict", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;

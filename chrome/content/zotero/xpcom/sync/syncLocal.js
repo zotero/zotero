@@ -852,6 +852,16 @@ Zotero.Sync.Data.Local = {
 								
 								switch (objectType) {
 								case 'item':
+									if (jsonData.deleted) {
+										Zotero.debug("Remote item is in trash -- allowing local deletion to propagate");
+										results.push({
+											libraryID,
+											key: objectKey,
+											processed: true
+										});
+										return;
+									}
+									
 									results.push({
 										libraryID,
 										key: objectKey,
