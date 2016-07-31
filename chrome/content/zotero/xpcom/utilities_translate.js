@@ -298,9 +298,10 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 * @param {Function} processor Callback to be executed for each document loaded
 * @param {Function} done Callback to be executed after all documents have been loaded
 * @param {String} responseCharset Character set to force on the response
+* @param {Object} requestHeaders HTTP headers to include with request
 * @return {Boolean} True if the request was sent, or false if the browser is offline
 */
-Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, responseCharset) {
+Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, responseCharset, requestHeaders) {
 	var callAgain = false,
 		me = this,
 		translate = this._translate;
@@ -332,7 +333,7 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 		} catch(e) {
 			translate.complete(false, e);
 		}
-	}, responseCharset, this._translate.cookieSandbox);
+	}, responseCharset, this._translate.cookieSandbox, requestHeaders);
 }
 
 /**
