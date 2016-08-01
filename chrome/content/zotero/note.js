@@ -86,8 +86,6 @@ function onUnload()
 var NotifyCallback = {
 	notify: function(action, type, ids){
 		if (noteEditor.item && ids.indexOf(noteEditor.item.id) != -1) {
-			noteEditor.item = noteEditor.item;
-			
 			// If the document title hasn't yet been set, reset undo so
 			// undoing to empty isn't possible
 			var noteTitle = noteEditor.note.getNoteTitle();
