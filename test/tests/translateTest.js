@@ -14,7 +14,7 @@ function buildDummyTranslator(translatorType, code) {
 		"priority":100,
 		"browserSupport":"g",
 		"inRepository":false,
-		"lastUpdated":"0000-00-00 00:00:00",
+		"lastUpdated":"0000-00-00 00:00:00"
 	};
 	let translator = new Zotero.Translator(info);
 	translator.code = code;
