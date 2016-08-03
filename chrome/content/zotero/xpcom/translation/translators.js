@@ -446,10 +446,9 @@ Zotero.Translators = new function() {
 		
 		var translator = Zotero.Translators.get(metadata.translatorID);
 		var sameFile = translator && destFile == translator.path;
-		if (sameFile) return;
 		
 		var exists = yield OS.File.exists(destFile);
-		if (exists) {
+		if (!sameFile && exists) {
 			var msg = "Overwriting translator with same filename '"
 				+ fileName + "'";
 			Zotero.debug(msg, 1);
