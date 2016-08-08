@@ -21,7 +21,7 @@ install:
       fi
     # Use official build for 'esr'
     - if [ $FX_CHANNEL == "esr" ]; then
-        wget -O tarball "https://download.mozilla.org/?product=firefox${FX_CHANNEL}-latest&os=linux64&lang=en-US";
+        wget -O tarball "https://download.mozilla.org/?product=firefox-${FX_CHANNEL}-latest&os=linux64&lang=en-US";
       fi
     - tar xf tarball
 before_script:
