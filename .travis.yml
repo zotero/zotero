@@ -10,7 +10,7 @@ env:
 matrix:
     fast_finish: true
     allow_failures:
-        - env: FX_CHANNEL="-beta"
+        - env: FX_CHANNEL="beta"
 notifications:
     email: false
 install:
