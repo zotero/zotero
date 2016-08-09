@@ -3,10 +3,10 @@ language: cpp
 compiler:
     - gcc
 env:
-    - FX_CHANNEL=""
+    - FX_CHANNEL="release"
     # Disabled during beta
-    #- FX_CHANNEL="-esr"
-    #- FX_CHANNEL="-beta"
+    #- FX_CHANNEL="esr"
+    #- FX_CHANNEL="beta"
 matrix:
     fast_finish: true
     allow_failures:
@@ -14,7 +14,16 @@ matrix:
 notifications:
     email: false
 install:
-    - wget -O tarball "https://download.mozilla.org/?product=firefox${FX_CHANNEL}-latest&os=linux64&lang=en-US"
+    # Use unbranded builds for 'release' and 'beta'
+    - if [ $FX_CHANNEL != "esr" ]; then
+        TS="`curl -s https://archive.mozilla.org/pub/firefox/tinderbox-builds/mozilla-${FX_CHANNEL}-linux64-add-on-devel/ | grep mozilla-$FX_CHANNEL | tail -n 1 | sed -r 's/.+add-on-devel\/([0-9]+).+/\1/'`";
+        FN="`curl -s https://archive.mozilla.org/pub/firefox/tinderbox-builds/mozilla-${FX_CHANNEL}-linux64-add-on-devel/$TS/ | grep add-on-devel.tar.bz2 | head -n 1 | sed -r 's/.+>(firefox-[^<]+).+/\1/g'`";
+        wget -O tarball "https://archive.mozilla.org/pub/firefox/tinderbox-builds/mozilla-${FX_CHANNEL}-linux64-add-on-devel/$TS/$FN";
+      fi
+    # Use official build for 'esr'
+    - if [ $FX_CHANNEL == "esr" ]; then
+        wget -O tarball "https://download.mozilla.org/?product=firefox-${FX_CHANNEL}-latest&os=linux64&lang=en-US";
+      fi
     - tar xf tarball
 before_script:
     - export DISPLAY=:99.0

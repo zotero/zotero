@@ -10,7 +10,7 @@ var zoteroObjectKeyRe = /^[23456789ABCDEFGHIJKLMNPQRSTUVWXYZ]{8}$/; // based on 
 function waitForDOMEvent(target, event, capture) {
 	var deferred = Zotero.Promise.defer();
 	var func = function(ev) {
-		target.removeEventListener("event", func, capture);
+		target.removeEventListener(event, func, capture);
 		deferred.resolve(ev);
 	}
 	target.addEventListener(event, func, capture);
