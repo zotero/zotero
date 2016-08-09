@@ -1122,6 +1122,9 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 					if(e.name == "ZOTERO_DIR_MAY_EXIST") {
 						fp.displayDirectory = e.dir;
 					}
+					else {
+						throw e;
+					}
 				}
 				fp.appendFilters(nsIFilePicker.filterAll);
 				if (fp.show() == nsIFilePicker.returnOK) {
