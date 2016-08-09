@@ -1116,7 +1116,13 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				var fp = Components.classes["@mozilla.org/filepicker;1"]
 							.createInstance(nsIFilePicker);
 				fp.init(win, Zotero.getString('dataDir.selectDir'), nsIFilePicker.modeGetFolder);
-				fp.displayDirectory = Zotero.getZoteroDirectory();
+				try {
+					fp.displayDirectory = Zotero.getZoteroDirectory();
+				} catch (e) {
+					if(e.name == "ZOTERO_DIR_MAY_EXIST") {
+						fp.displayDirectory = e.dir;
+					}
+				}
 				fp.appendFilters(nsIFilePicker.filterAll);
 				if (fp.show() == nsIFilePicker.returnOK) {
 					var file = fp.file;
