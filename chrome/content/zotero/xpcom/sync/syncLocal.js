@@ -1580,7 +1580,7 @@ Zotero.Sync.Data.Local = {
 				+ "(libraryID, key, syncObjectTypeID, lastCheck, tries) VALUES ";
 			return Zotero.Utilities.Internal.forEachChunkAsync(
 				keys,
-				Math.floor(Zotero.DB.MAX_BOUND_PARAMETERS / 3),
+				Math.floor(Zotero.DB.MAX_BOUND_PARAMETERS / 5),
 				function (chunk) {
 					var params = chunk.reduce(
 						(arr, key) => arr.concat(
