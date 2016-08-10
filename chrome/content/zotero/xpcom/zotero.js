@@ -643,9 +643,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				yield Zotero.Promise.each(
 					Zotero.Libraries.getAll(),
 					library => Zotero.Promise.coroutine(function* () {
-						yield Zotero.SyncedSettings.loadAll(library.libraryID);
-						yield Zotero.Collections.loadAll(library.libraryID);
-						yield Zotero.Searches.loadAll(library.libraryID);
+						if (library.libraryType != 'feed') {
+							yield Zotero.SyncedSettings.loadAll(library.libraryID);
+							yield Zotero.Collections.loadAll(library.libraryID);
+							yield Zotero.Searches.loadAll(library.libraryID);
+						}
 					})()
 				);
 			}

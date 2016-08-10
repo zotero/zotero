@@ -177,6 +177,11 @@ Zotero.SyncedSettings = (function () {
 				throw new Error("Value not provided");
 			}
 			
+			// Prevents a whole bunch of headache if you continue modifying the object after calling #set()
+			if (typeof value == 'object') {
+				value = Object.assign({}, value);
+			}
+			
 			var currentValue = this.get(libraryID, setting);
 			var hasCurrentValue = currentValue !== null;
 			
