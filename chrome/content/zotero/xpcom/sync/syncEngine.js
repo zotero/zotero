@@ -1013,7 +1013,9 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 			// This shouldn't happen, because the upload request includes a library
 			// version and should prevent an outdated upload before the object version is
 			// checked. If it does, we need to do a full sync.
-			if (e.code == 412) {
+			// TEMP - Revert after 2016-08-19
+			//if (e.code == 412) {
+			if (e.code == 404 || e.code == 412) {
 				return this.UPLOAD_RESULT_OBJECT_CONFLICT;
 			}
 			
