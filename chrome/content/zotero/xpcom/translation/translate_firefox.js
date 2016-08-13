@@ -51,7 +51,7 @@ Zotero.Translate.DOMWrapper = new function() {
 	};
 	
 	function isWrapper(x) {
-		return isWrappable(x) && (typeof x.SpecialPowers_wrappedObject !== "undefined");
+		return isWrappable(x) && (typeof x.__wrappedObject !== "undefined");
 	};
 	
 	function unwrapIfWrapped(x) {
@@ -119,7 +119,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		return Reflect.apply(fun, invocant, args);
 	}
 	
-	function wrapPrivileged(obj) {
+	function wrapPrivileged(obj, overrides) {
 	
 		// Primitives pass straight through.
 		if (!isWrappable(obj))
@@ -135,7 +135,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		else
 			dummy = Object.create(null);
 	
-		return new Proxy(dummy, new SpecialPowersHandler(obj));
+		return new Proxy(dummy, new SpecialPowersHandler(obj, overrides));
 	};
 	
 	function unwrapPrivileged(x) {
@@ -151,13 +151,33 @@ Zotero.Translate.DOMWrapper = new function() {
 		if (!isWrapper(x))
 			throw "Trying to unwrap a non-wrapped object!";
 	
-		var obj = x.SpecialPowers_wrappedObject;
+		var obj = x.__wrappedObject;
 		// unwrapped.
 		return obj;
 	};
 	
-	function SpecialPowersHandler(wrappedObject) {
+	/*
+	 * We want to waive the __exposedProps__ security check for SpecialPowers-wrapped
+	 * objects. We do this by creating a proxy singleton that just always returns 'rw'
+	 * for any property name.
+	 */
+	function ExposedPropsWaiverHandler() {
+		// NB: XPConnect denies access if the relevant member of __exposedProps__ is not
+		// enumerable.
+		var _permit = { value: 'rw', writable: false, configurable: false, enumerable: true };
+		return {
+			getOwnPropertyDescriptor: function(name) { return _permit; },
+			ownKeys: function() { throw Error("Can't enumerate ExposedPropsWaiver"); },
+			enumerate: function() { throw Error("Can't enumerate ExposedPropsWaiver"); },
+			defineProperty: function(name) { throw Error("Can't define props on ExposedPropsWaiver"); },
+			deleteProperty: function(name) { throw Error("Can't delete props from ExposedPropsWaiver"); }
+		};
+	};
+	ExposedPropsWaiver = new Proxy({}, ExposedPropsWaiverHandler());
+	
+	function SpecialPowersHandler(wrappedObject, overrides) {
 		this.wrappedObject = wrappedObject;
+		this.overrides = overrides ? overrides: {};
 	}
 	
 	SpecialPowersHandler.prototype = {
@@ -189,22 +209,30 @@ Zotero.Translate.DOMWrapper = new function() {
 		},
 	
 		has(target, prop) {
-			if (prop === "SpecialPowers_wrappedObject")
+			if (prop === "__wrappedObject")
 				return true;
 	
+			if (this.overrides[prop] !== undefined) {
+				return true;
+			}
+			
 			return Reflect.has(this.wrappedObject, prop);
 		},
 	
 		get(target, prop, receiver) {
-			if (prop === "SpecialPowers_wrappedObject")
+			if (prop === "__wrappedObject")
 				return this.wrappedObject;
 	
+			if (prop in this.overrides) {
+				return this.overrides[prop];
+			}
+			
 			let obj = waiveXraysIfAppropriate(this.wrappedObject, prop);
 			return wrapIfUnwrapped(Reflect.get(obj, prop));
 		},
 	
 		set(target, prop, val, receiver) {
-			if (prop === "SpecialPowers_wrappedObject")
+			if (prop === "__wrappedObject")
 				return false;
 	
 			let obj = waiveXraysIfAppropriate(this.wrappedObject, prop);
@@ -212,7 +240,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		},
 	
 		delete(target, prop) {
-			if (prop === "SpecialPowers_wrappedObject")
+			if (prop === "__wrappedObject")
 				return false;
 	
 			return Reflect.deleteProperty(this.wrappedObject, prop);
@@ -224,11 +252,22 @@ Zotero.Translate.DOMWrapper = new function() {
 	
 		getOwnPropertyDescriptor(target, prop) {
 			// Handle our special API.
-			if (prop === "SpecialPowers_wrappedObject") {
+			if (prop === "__wrappedObject") {
 				return { value: this.wrappedObject, writeable: true,
 								 configurable: true, enumerable: false };
 			}
+			if (name == "__wrapperOverrides") {
+				return { value: this.overrides, writeable: false, configurable: false, enumerable: false };
+			}
+			// Handle __exposedProps__.
+			if (name == "__exposedProps__") {
+				return { value: ExposedPropsWaiver, writable: false, configurable: false, enumerable: false };
+			}
 	
+			if (prop in this.overrides) {
+				return this.overrides[prop];
+			}
+			
 			let obj = waiveXraysIfAppropriate(this.wrappedObject, prop);
 			let desc = Reflect.getOwnPropertyDescriptor(obj, prop);
 	
@@ -255,10 +294,11 @@ Zotero.Translate.DOMWrapper = new function() {
 		ownKeys(target) {
 			// Insert our special API. It's not enumerable, but ownKeys()
 			// includes non-enumerable properties.
-			let props = ['SpecialPowers_wrappedObject'];
+			let props = ['__wrappedObject'];
 	
 			// Do the normal thing.
 			let flt = (a) => !props.includes(a);
+			props = props.concat(Object.keys(this.overrides).filter(flt));
 			props = props.concat(Reflect.ownKeys(this.wrappedObject).filter(flt));
 	
 			// If we've got an Xray wrapper, include the expandos as well.
