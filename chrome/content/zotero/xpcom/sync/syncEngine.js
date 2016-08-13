@@ -154,7 +154,7 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 			
 			if (!gen) {
 				var gen = Zotero.Utilities.Internal.delayGenerator(
-					Zotero.Sync.Data.delayIntervals, 60 * 1000
+					Zotero.Sync.Data.conflictDelayIntervals, 60 * 1000
 				);
 			}
 			// After the first upload version conflict (which is expected after remote changes),
@@ -211,7 +211,7 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 	var newLibraryVersion;
 	
 	this.downloadDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
-		Zotero.Sync.Data.delayIntervals, 60 * 60 * 1000
+		Zotero.Sync.Data.conflictDelayIntervals, 60 * 60 * 1000
 	);
 	
 	loop:
@@ -740,7 +740,7 @@ Zotero.Sync.Data.Engine.prototype._downloadDeletions = Zotero.Promise.coroutine(
  */
 Zotero.Sync.Data.Engine.prototype._onLibraryVersionChange = Zotero.Promise.coroutine(function* (mode) {
 	Zotero.logError("Library version changed since last download -- restarting sync");
-	let keepGoing = yield this.downloadDelayGenerator.next();
+	let keepGoing = yield this.downloadDelayGenerator.next().value;
 	if (!keepGoing) {
 		throw new Error("Could not update " + this.library.name + " -- library in use");
 	}

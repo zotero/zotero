@@ -1905,6 +1905,68 @@ describe("Zotero.Sync.Data.Engine", function () {
 			// Library version should not have advanced
 			assert.equal(library.libraryVersion, 5);
 		});
+		
+		it("should restart if remote library version changes", function* () {
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 5;
+			yield library.saveTx();
+			({ engine, client, caller } = yield setup());
+			
+			var lastLibraryVersion = 5;
+			var calls = 0;
+			var t;
+			server.respond(function (req) {
+				if (req.url.startsWith(baseURL + "users/1/settings")) {
+					calls++;
+					if (calls == 2) {
+						assert.isAbove(new Date() - t, 50);
+					}
+					t = new Date();
+					req.respond(
+						200,
+						{
+							"Last-Modified-Version": ++lastLibraryVersion
+						},
+						JSON.stringify({})
+					);
+					return;
+				}
+				else if (req.url.startsWith(baseURL + "users/1/searches")) {
+					if (calls == 1) {
+						t = new Date();
+						req.respond(
+							200,
+							{
+								// On the first pass, return a later library version to simulate data
+								// being updated by a concurrent upload
+								"Last-Modified-Version": lastLibraryVersion + 1
+							},
+							JSON.stringify([])
+						);
+						return;
+					}
+				}
+				else if (req.url.startsWith(baseURL + "users/1/items")) {
+					// Since /searches is called before /items and it should cause a reset,
+					// /items shouldn't be called until the second pass
+					if (calls < 1) {
+						throw new Error("/users/1/items called in first pass");
+					}
+				}
+				
+				t = new Date();
+				req.respond(
+					200,
+					{
+						"Last-Modified-Version": lastLibraryVersion
+					},
+					JSON.stringify([])
+				);
+			});
+			
+			Zotero.Sync.Data.conflictDelayIntervals = [50, 70000];
+			yield engine._startDownload();
+		});
 	});
 	
 	
