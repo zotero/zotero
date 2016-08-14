@@ -1210,7 +1210,7 @@ Zotero.Sync.Data.Engine.prototype._upgradeCheck = Zotero.Promise.coroutine(funct
 					+ allResults.libraryVersion + " != "
 					+ sinceResults.libraryVersion + " != "
 					+ lastLibraryVersion + ") -- waiting");
-				let keepGoing = yield gen.next();
+				let keepGoing = yield gen.next().value;
 				if (!keepGoing) {
 					throw new Error("Could not update " + this.library.name + " -- library in use");
 				}
@@ -1336,7 +1336,7 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 							Zotero.Sync.Data.conflictDelayIntervals, 60 * 60 * 1000
 						);
 					}
-					let keepGoing = yield gen.next();
+					let keepGoing = yield gen.next().value;
 					if (!keepGoing) {
 						throw new Error("Could not update " + this.library.name + " -- library in use");
 					}
