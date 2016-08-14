@@ -149,9 +149,6 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 		
 		// If conflict, start at beginning with downloads
 		case this.UPLOAD_RESULT_LIBRARY_CONFLICT:
-			downloadResult = yield this._startDownload();
-			Zotero.debug("Download result is " + downloadResult, 4);
-			
 			if (!gen) {
 				var gen = Zotero.Utilities.Internal.delayGenerator(
 					Zotero.Sync.Data.conflictDelayIntervals, 60 * 1000
@@ -160,11 +157,15 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 			// After the first upload version conflict (which is expected after remote changes),
 			// start delaying to give other sync sessions time to complete
 			else {
-				let keepGoing = yield gen.next();
+				let keepGoing = yield gen.next().value;
 				if (!keepGoing) {
 					throw new Error("Could not sync " + this.library.name + " -- too many retries");
 				}
 			}
+			
+			downloadResult = yield this._startDownload();
+			Zotero.debug("Download result is " + downloadResult, 4);
+			break;
 		
 		case this.UPLOAD_RESULT_RESTART:
 			Zotero.debug("Restarting sync for " + this.library.name);

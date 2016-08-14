@@ -1365,6 +1365,81 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			assert.equal(spy.callCount, 3);
 		});
+		
+		it("should delay on second upload conflict", function* () {
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 5;
+			yield library.saveTx();
+			({ engine, client, caller } = yield setup());
+			
+			// Try to upload, get 412
+			// Download, get new version number
+			// Try to upload again, get 412
+			// Delay
+			// Download, get new version number
+			// Upload, get 200
+			
+			var item = yield createDataObject('item');
+			
+			var lastLibraryVersion = 5;
+			var calls = 0;
+			var t;
+			server.respond(function (req) {
+				if (req.method == "POST") {
+					calls++;
+				}
+				
+				// On first and second upload attempts, return 412
+				if (req.method == "POST" && req.url.startsWith(baseURL + "users/1/items")) {
+					if (calls == 1 || calls == 2) {
+						if (calls == 2) {
+							assert.isAbove(new Date() - t, 50);
+						}
+						t = new Date();
+						req.respond(
+							412,
+							{
+								"Last-Modified-Version": ++lastLibraryVersion
+							},
+							""
+						);
+					}
+					else {
+						req.respond(
+							200,
+							{
+								"Last-Modified-Version": ++lastLibraryVersion
+							},
+							JSON.stringify({
+								successful: {
+									"0": item.toResponseJSON()
+								},
+								unchanged: {},
+								failed: {}
+							})
+						);
+					}
+					return;
+				}
+				if (req.method == "GET") {
+					req.respond(
+						200,
+						{
+							"Last-Modified-Version": lastLibraryVersion
+						},
+						JSON.stringify({})
+					);
+					return;
+				}
+			});
+			
+			Zotero.Sync.Data.conflictDelayIntervals = [50, 70000];
+			yield engine.start();
+			
+			assert.equal(calls, 3);
+			assert.isTrue(item.synced);
+			assert.equal(library.libraryVersion, lastLibraryVersion);
+		});
 	})
 	
 	describe("#_startDownload()", function () {
@@ -1966,6 +2041,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			Zotero.Sync.Data.conflictDelayIntervals = [50, 70000];
 			yield engine._startDownload();
+			
+			assert.equal(calls, 2);
+			assert.equal(library.libraryVersion, lastLibraryVersion);
 		});
 	});
 	
