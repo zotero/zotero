@@ -319,9 +319,6 @@ function makeZoteroContext(isConnector) {
 		subscriptLoader.loadSubScript("chrome://zotero/content/xpcom/standalone.js", zContext);
 	}
 	
-	// load nsTransferable (query: do we still use this?)
-	subscriptLoader.loadSubScript("chrome://global/content/nsTransferable.js", zContext);
-	
 	// add connector-related properties
 	zContext.Zotero.isConnector = isConnector;
 	zContext.Zotero.instanceID = instanceID;
