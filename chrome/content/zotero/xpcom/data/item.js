@@ -4247,7 +4247,13 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 
 
 Zotero.Item.prototype.toResponseJSON = function (options = {}) {
-	var json = this.constructor._super.prototype.toResponseJSON.apply(this, options);
+	// Default to showing synced storage properties, since that's what the API does, and this function
+	// is generally used to emulate the API
+	if (options.syncedStorageProperties === undefined) {
+		options.syncedStorageProperties = true;
+	}
+	
+	var json = this.constructor._super.prototype.toResponseJSON.call(this, options);
 	
 	// creatorSummary
 	var firstCreator = this.getField('firstCreator');
