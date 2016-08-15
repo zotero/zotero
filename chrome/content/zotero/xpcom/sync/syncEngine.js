@@ -1011,20 +1011,20 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 			Zotero.logError("Error for " + objectType + " " + batch[index].key + " in "
 				+ this.library.name + ":\n\n" + e);
 			
-			// This shouldn't happen, because the upload request includes a library
-			// version and should prevent an outdated upload before the object version is
-			// checked. If it does, we need to do a full sync.
+			// This shouldn't happen, because the upload request includes a library version and should
+			// prevent an outdated upload before the object version is checked. If it does, we need to
+			// do a full sync. This error is checked in handleUploadError().
 			// TEMP - Revert after 2016-08-19
 			//if (e.code == 412) {
 			if (e.code == 404 || e.code == 412) {
-				return this.UPLOAD_RESULT_OBJECT_CONFLICT;
+				throw e;
 			}
 			
 			if (this.onError) {
 				this.onError(e);
 			}
 			if (this.stopOnError) {
-				throw new Error(e);
+				throw e;
 			}
 			batch[index].tries++;
 			// Mark 400 errors as permanently failed
@@ -1477,9 +1477,17 @@ Zotero.Sync.Data.Engine.prototype._handleUploadError = Zotero.Promise.coroutine(
 				return this.UPLOAD_RESULT_CANCEL;
 			}
 			throw new Error(`Unexpected index value ${index}`);
-			
+		
 		case 412:
 			return this.UPLOAD_RESULT_LIBRARY_CONFLICT;
+		}
+	}
+	else if (e.name == "ZoteroObjectUploadError") {
+		switch (e.code) {
+		// TEMP - Revert after 2016-08-19
+		case 404:
+		case 412:
+			return this.UPLOAD_RESULT_OBJECT_CONFLICT;
 		}
 	}
 	throw e;

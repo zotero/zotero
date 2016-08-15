@@ -2136,6 +2136,44 @@ describe("Zotero.Sync.Data.Engine", function () {
 			// Library version shouldn't have changed
 			assert.equal(group.libraryVersion, 5);
 		});
+		
+		
+		it("should trigger full sync on object conflict", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			var lastLibraryVersion = 5;
+			library.libraryVersion = lastLibraryVersion;
+			yield library.saveTx();
+			
+			var item = createUnsavedDataObject('item');
+			item.version = lastLibraryVersion;
+			yield item.saveTx();
+			
+			setResponse({
+				method: "POST",
+				url: "users/1/items",
+				status: 200,
+				headers: {
+					"Last-Modified-Version": lastLibraryVersion
+				},
+				json: {
+					successful: {},
+					unchanged: {},
+					failed: {
+						"0": {
+							"code": 412,
+							"message": `Item doesn't exist (expected version ${lastLibraryVersion}; `
+								+ "use 0 instead)"
+						}
+					}
+				}
+			});
+			
+			var result = yield engine._startUpload();
+			assert.equal(result, engine.UPLOAD_RESULT_OBJECT_CONFLICT);
+		});
 	});
 	
 	
