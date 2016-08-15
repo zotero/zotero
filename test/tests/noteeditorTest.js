@@ -8,6 +8,11 @@ describe("Note Editor", function () {
 		zp = win.ZoteroPane;
 	});
 	
+	beforeEach(function* () {
+		// Avoid "this._editor is undefined" error between tests
+		yield Zotero.Promise.delay(1);
+	});
+	
 	after(function () {
 		win.close();
 	});
