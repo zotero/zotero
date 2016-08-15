@@ -1192,6 +1192,28 @@ describe("Zotero.Item", function () {
 				var json = note.toJSON({ patchBase });
 				assert.isFalse(json.parentItem);
 			});
+			
+			it("shouldn't clear storage properties from original in .skipStorageProperties mode", function* () {
+				var item = new Zotero.Item('attachment');
+				item.attachmentLinkMode = 'imported_file';
+				item.attachmentFilename = 'test.txt';
+				item.attachmentContentType = 'text/plain';
+				item.attachmentCharset = 'utf-8';
+				item.attachmentSyncedModificationTime = 1234567890000;
+				item.attachmentSyncedHash = '18d21750c8abd5e3afa8ea89e3dfa570';
+				var patchBase = item.toJSON({
+					syncedStorageProperties: true
+				});
+				item.setNote("Test");
+				var json = item.toJSON({
+					patchBase,
+					skipStorageProperties: true
+				});
+				Zotero.debug(json);
+				assert.equal(json.note, "Test");
+				assert.notProperty(json, "md5");
+				assert.notProperty(json, "mtime");
+			});
 		})
 	})
 	

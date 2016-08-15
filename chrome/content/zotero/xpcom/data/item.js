@@ -4237,7 +4237,12 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 		obj.dateModified = Zotero.Date.sqlToISO8601(this.dateModified);
 	}
 	
-	return this._postToJSON(env);
+	var json = this._postToJSON(env);
+	if (options.skipStorageProperties) {
+		delete json.md5;
+		delete json.mtime;
+	}
+	return json;
 }
 
 
