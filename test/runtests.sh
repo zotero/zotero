@@ -22,7 +22,11 @@ if [ -z "$FX_EXECUTABLE" ]; then
 	fi
 fi
 
-FX_ARGS=""
+if [ -z "$DISPLAY" ]; then
+	FX_ARGS=""
+else
+	FX_ARGS="--class=ZTestFirefox"
+fi
 
 function usage {
 	cat >&2 <<DONE
