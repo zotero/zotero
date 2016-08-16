@@ -1,5 +1,5 @@
 describe('Zotero.SyncedSettings', function() {
-	it('modifying object after setting does not affect cached value', function* () {
+	it('should not affect cached value when modifying the setting after #set() call', function* () {
 		let setting = {athing: 1};
 		yield Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'setting', setting);
 		

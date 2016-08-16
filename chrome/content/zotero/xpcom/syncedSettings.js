@@ -178,7 +178,10 @@ Zotero.SyncedSettings = (function () {
 			}
 			
 			// Prevents a whole bunch of headache if you continue modifying the object after calling #set()
-			if (typeof value == 'object') {
+			if (value instanceof Array) {
+				value = Array.from(value);
+			}
+			else if (typeof value == 'object') {
 				value = Object.assign({}, value);
 			}
 			
