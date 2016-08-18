@@ -42,7 +42,7 @@ Zotero.Translators = new function() {
 	this.init = function(translators) {
 		if(!translators) {
 			translators = [];
-			if((Zotero.isChrome || Zotero.isSafari) && localStorage["translatorMetadata"]) {
+			if(((Zotero.isWebExtension || Zotero.isChrome) && !Zotero.isFx || Zotero.isSafari) && localStorage["translatorMetadata"]) {
 				try {
 					translators = JSON.parse(localStorage["translatorMetadata"]);
 					if(typeof translators !== "object") {
@@ -196,7 +196,7 @@ Zotero.Translators = new function() {
 					
 					if(j === 0) {
 						converterFunctions.push(null);
-					} else if(Zotero.isChrome || Zotero.isSafari) {
+					} else if((Zotero.isWebExtension || Zotero.isChrome) && !Zotero.isFx || Zotero.isSafari) {
 						// in Chrome/Safari, the converterFunction needs to be passed as JSON, so
 						// just push an array with the proper and proxyHosts
 						converterFunctions.push([properHosts[j-1], proxyHosts[j-1]]);
@@ -303,7 +303,7 @@ Zotero.Translators = new function() {
 		}
 		
 		// Store
-		if(Zotero.isChrome || Zotero.isSafari) {
+		if((Zotero.isWebExtension || Zotero.isChrome) && !Zotero.isFx || Zotero.isSafari) {
 			var serialized = JSON.stringify(serializedTranslators);
 			localStorage["translatorMetadata"] = serialized;
 			Zotero.debug("Translators: Saved updated translator list ("+serialized.length+" characters)");

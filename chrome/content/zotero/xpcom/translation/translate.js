@@ -374,7 +374,10 @@ Zotero.Translate.Sandbox = {
 				
 				var translator = translation.translator[0];
 				translator = typeof translator === "object" ? translator : Zotero.Translators.get(translator);
-				translation._loadTranslator(translator)
+				Zotero.Promise.resolve(translator)
+				.then(function(translator) {
+					return translation._loadTranslator(translator)
+				})
 				.then(function() {
 					if(Zotero.isFx && !Zotero.isBookmarklet) {
 						// do same origin check
