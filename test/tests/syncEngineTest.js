@@ -3051,6 +3051,104 @@ describe("Zotero.Sync.Data.Engine", function () {
 					type, userLibraryID, objects[type][2].key
 				));
 			}
-		})
+		});
+		
+		it("should reprocess remote deletions", function* () {
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			({ engine, client, caller } = yield setup());
+			
+			var types = Zotero.DataObjectUtilities.getTypes();
+			var objects = {};
+			var objectIDs = {};
+			
+			for (let type of types) {
+				// Create object marked as synced that's in the remote delete log, which should be
+				// deleted locally
+				let obj = createUnsavedDataObject(type);
+				obj.synced = true;
+				obj.version = 5;
+				yield obj.saveTx();
+				objects[type] = [obj];
+				objectIDs[type] = [obj.id];
+				
+				// Create object marked as unsynced that's in the remote delete log, which should
+				// trigger a conflict in the case of items and otherwise reset version to 0
+				obj = createUnsavedDataObject(type);
+				obj.synced = false;
+				obj.version = 5;
+				yield obj.saveTx();
+				objects[type].push(obj);
+				objectIDs[type].push(obj.id);
+			}
+			
+			var headers = {
+				"Last-Modified-Version": 20
+			}
+			setResponse({
+				method: "GET",
+				url: "users/1/settings",
+				status: 200,
+				headers,
+				json: {}
+			});
+			let deletedJSON = {};
+			for (let type of types) {
+				let suffix = type == 'item' ? '&includeTrashed=1' : '';
+				let plural = Zotero.DataObjectUtilities.getObjectTypePlural(type);
+				setResponse({
+					method: "GET",
+					url: "users/1/" + plural + "?format=versions" + suffix,
+					status: 200,
+					headers,
+					json: {}
+				});
+				deletedJSON[plural] = objects[type].map(o => o.key);
+			}
+			setResponse({
+				method: "GET",
+				url: "users/1/deleted?since=0",
+				status: 200,
+				headers: headers,
+				json: deletedJSON
+			});
+			
+			// Apply remote deletions
+			var shown = false;
+			waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+				shown = true;
+				var doc = dialog.document;
+				var wizard = doc.documentElement;
+				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				
+				// Should be one conflict for each object type; select local
+				var numConflicts = Object.keys(objects).length;
+				for (let i = 0; i < numConflicts; i++) {
+					assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
+					
+					if (i < numConflicts - 1) {
+						wizard.getButton('next').click();
+					}
+					else {
+						wizard.getButton('finish').click();
+					}
+				}
+			});
+			
+			yield engine._fullSync();
+			assert.ok(shown);
+			
+			// Check objects
+			for (let type of types) {
+				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+				
+				// Objects 0 should be deleted
+				assert.isFalse(objectsClass.exists(objectIDs[type][0]));
+				
+				// Objects 1 should be marked for reupload
+				assert.isTrue(objectsClass.exists(objectIDs[type][1]));
+				assert.strictEqual(objects[type][1].version, 0);
+				assert.strictEqual(objects[type][1].synced, false);
+			}
+		});
 	})
 })

@@ -222,6 +222,12 @@ Zotero.DataObjects.prototype.getLoaded = function () {
 }
 
 
+Zotero.DataObjects.prototype.getAllKeys = function (libraryID) {
+	var sql = "SELECT key FROM " + this._ZDO_table + " WHERE libraryID=?";
+	return Zotero.DB.columnQueryAsync(sql, [libraryID]);
+};
+
+
 /**
  * @deprecated - use .libraryKey
  */
@@ -794,7 +800,7 @@ Zotero.DataObjects.prototype.unload = function () {
  * Set the version of objects, efficiently
  *
  * @param {Integer[]} ids - Ids of objects to update
- * @param {Boolean} synced
+ * @param {Boolean} version
  */
 Zotero.DataObjects.prototype.updateVersion = Zotero.Promise.method(function (ids, version) {
 	if (version != parseInt(version)) {
