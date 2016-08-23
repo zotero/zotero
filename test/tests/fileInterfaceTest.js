@@ -73,4 +73,17 @@ describe("Zotero_File_Interface", function() {
 		assert.lengthOf(matches, 1);
 		assert.propertyVal(matches[0], 'id', attachment.id);
 	});
+	
+	it('should import a MODS file', function* () {
+		var modsFile = OS.Path.join(getTestDataDirectory().path, "mods.xml");
+		
+		var promise = waitForItemEvent('add');
+		yield win.Zotero_File_Interface.importFile(Zotero.File.pathToFile(modsFile));
+		var ids = yield promise;
+		assert.lengthOf(ids, 1);
+		
+		var item = Zotero.Items.get(ids[0]);
+		assert.equal(item.itemTypeID, Zotero.ItemTypes.getID('journalArticle'));
+		assert.equal(item.getField('title'), "Test");
+	});
 });

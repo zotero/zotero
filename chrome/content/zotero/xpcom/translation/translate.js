@@ -1595,9 +1595,15 @@ Zotero.Translate.Base.prototype = {
 			return;
 		}
 		
-		var me = this;
-		this._loadTranslator(this._potentialTranslators[0]).
-		then(function() { me._detectTranslatorLoaded() });
+		let lab = this._potentialTranslators[0].label;
+		this._loadTranslator(this._potentialTranslators[0])
+		.bind(this)
+		.then(function() {
+			return this._detectTranslatorLoaded();
+		})
+		.catch(function (e) {
+			this.complete(false, e);
+		});
 	},
 	
 	/**
@@ -2146,64 +2152,31 @@ Zotero.Translate.Import.prototype.getTranslators = function() {
 /**
  * Overload {@link Zotero.Translate.Base#_loadTranslator} to prepare translator IO
  */
-Zotero.Translate.Import.prototype._loadTranslator = function(translator, callback) {
-	// call super
-	var me = this;
-	return Zotero.Translate.Base.prototype._loadTranslator.call(this, translator).
-	then(function() {
-		me._loadTranslatorPrepareIO(translator, callback);
-	});
+Zotero.Translate.Import.prototype._loadTranslator = function(translator) {
+	return Zotero.Translate.Base.prototype._loadTranslator.call(this, translator)
+	.then(function() {
+		return this._loadTranslatorPrepareIO(translator);
+	}.bind(this));
 }
 	
 /**
  * Prepare translator IO
  */
-Zotero.Translate.Import.prototype._loadTranslatorPrepareIO = function(translator, callback) {
+Zotero.Translate.Import.prototype._loadTranslatorPrepareIO = Zotero.Promise.method(function (translator) {
 	var configOptions = this._translatorInfo.configOptions;
 	var dataMode = configOptions ? configOptions["dataMode"] : "";
 	
-	var me = this;
-	var initCallback = function(status, err) {
-		if(!status) {
-			me.complete(false, err);
-		} else {
-			me._sandboxManager.importObject(me._io);
-			if(callback) callback();
-		}
-	};
-	
-	var err = false;
 	if(!this._io) {
 		if(Zotero.Translate.IO.Read && this.location && this.location instanceof Components.interfaces.nsIFile) {
-			try {
-				this._io = new Zotero.Translate.IO.Read(this.location, this._sandboxManager);
-			} catch(e) {
-				err = e;
-			}
+			this._io = new Zotero.Translate.IO.Read(this.location, this._sandboxManager);
 		} else {
-			try {
-				this._io = new Zotero.Translate.IO.String(this._string, this.path ? this.path : "", this._sandboxManager);
-			} catch(e) {
-				err = e;
-			}
-		}
-	
-		if(err) {
-			this.complete(false, err);
-			return;
+			this._io = new Zotero.Translate.IO.String(this._string, this.path ? this.path : "", this._sandboxManager);
 		}
 	}
 	
-	try {
-		this._io.init(dataMode, initCallback);
-	} catch(e) {
-		err = e;
-	}
-	if(err) {
-		this.complete(false, err);
-		return;
-	}
-}
+	this._io.init(dataMode);
+	this._sandboxManager.importObject(this._io);
+});
 
 /**
  * Prepare translation
@@ -2585,7 +2558,7 @@ Zotero.Translate.IO.String.prototype = {
 		"getXML":"r"
 	},
 	
-	"_initRDF":function(callback) {
+	"_initRDF": function () {
 		Zotero.debug("Translate: Initializing RDF data store");
 		this._dataStore = new Zotero.RDF.AJAW.IndexedFormula();
 		this.RDF = new Zotero.Translate.IO._RDFSandbox(this._dataStore);
@@ -2600,7 +2573,6 @@ Zotero.Translate.IO.String.prototype = {
 			var parser = new Zotero.RDF.AJAW.RDFParser(this._dataStore);
 			parser.parse(xml, this._uri);
 		}
-		callback(true);
 	},
 	
 	"setCharacterSet":function(charset) {},
@@ -2666,20 +2638,18 @@ Zotero.Translate.IO.String.prototype = {
 		return (Zotero.isFx && !Zotero.isBookmarklet ? this._sandboxManager.wrap(xml) : xml);
 	},
 	
-	"init":function(newMode, callback) {
+	init: function (newMode) {
 		this.bytesRead = 0;
 		this._noCR = undefined;
 		
 		this._mode = newMode;
 		if(newMode === "xml/e4x") {
-			throw "E4X is not supported";
+			throw new Error("E4X is not supported");
 		} else if(newMode && (Zotero.Translate.IO.rdfDataModes.indexOf(newMode) !== -1
 				|| newMode.substr(0, 3) === "xml/dom") && this._xmlInvalid) {
-			throw "XML known invalid";
+			throw new Error("XML known invalid");
 		} else if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1) {
-			this._initRDF(callback);
-		} else {
-			callback(true);
+			this._initRDF();
 		}
 	},
 	

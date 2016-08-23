@@ -342,8 +342,9 @@ Zotero.Translators = new function() {
 	 * Gets import translators for a specific location
 	 * @param {String} location The location for which to look for translators
 	 * @param {Function} [callback] An optional callback to be executed when translators have been
-	 *                              retrieved. If no callback is specified, translators are
-	 *                              returned.
+	 *                              retrieved
+	 * @return {Promise<Zotero.Translator[]|true>} - An array of translators if no callback is specified;
+	 *     otherwise true
 	 */
 	this.getImportTranslatorsForLocation = function(location, callback) {	
 		return Zotero.Translators.getAllForType("import").then(function(allTranslators) {

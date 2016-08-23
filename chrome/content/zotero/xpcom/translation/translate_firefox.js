@@ -845,7 +845,7 @@ Zotero.Translate.IO.Read.prototype = {
 			this.RDF = new Zotero.Translate.IO._RDFSandbox(this._dataStore);
 		} catch(e) {
 			this.close();
-			throw "Translate: No RDF found";
+			throw new Error("Translate: No RDF found");
 		}
 	},
 	
@@ -893,7 +893,7 @@ Zotero.Translate.IO.Read.prototype = {
 		return (Zotero.isFx ? this._sandboxManager.wrap(xml) : xml);
 	},
 	
-	"init":function(newMode, callback) {
+	init: function (newMode) {
 		if(Zotero.Translate.IO.maintainedInstances.indexOf(this) === -1) {
 			Zotero.Translate.IO.maintainedInstances.push(this);
 		}
@@ -901,12 +901,10 @@ Zotero.Translate.IO.Read.prototype = {
 		
 		this._mode = newMode;
 		if(newMode === "xml/e4x") {
-			throw "E4X is not supported";
+			throw new Error("E4X is not supported");
 		} else if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1 && !this.RDF) {
 			this._initRDF();
 		}
-		
-		callback(true);
 	},
 	
 	"close":function() {
@@ -988,7 +986,7 @@ Zotero.Translate.IO.Write.prototype = {
 		this._writtenToStream = true;
 	},
 	
-	"init":function(newMode, charset, callback) {
+	init: function (newMode, charset) {
 		this._mode = newMode;
 		if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1) {
 			this._initRDF();
