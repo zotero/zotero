@@ -229,6 +229,10 @@ describe("Zotero.FeedItem", function () {
 		var win;
 		
 		before(function* () {
+			// TEMP: Fix for slow translator initialization on Linux/Travis
+			this.timeout(20000);
+			yield Zotero.Translators.init();
+			
 			// Needs an open window to be able to create a hidden window for translation
 			win = yield loadBrowserWindow();
 		});
