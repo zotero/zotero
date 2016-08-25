@@ -151,6 +151,10 @@ function setupAttachmentEndpoints() {
 describe("Zotero.Translate", function() {
 	let win;
 	before(function* () {
+		// TEMP: Fix for slow translator initialization on Linux/Travis
+		this.timeout(20000);
+		yield Zotero.Translators.init();
+		
 		setupAttachmentEndpoints();
 		win = yield loadBrowserWindow();
 	});
