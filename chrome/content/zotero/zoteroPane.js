@@ -2090,12 +2090,9 @@ var ZoteroPane = new function()
 		var locale = format.locale ? format.locale : Zotero.Prefs.get('export.quickCopy.locale');
 		
 		if (format.mode == 'bibliography') {
-			if (asCitations) {
-				Zotero_File_Interface.copyCitationToClipboard(items, format.id, locale, format.contentType == 'html');
-			}
-			else {
-				Zotero_File_Interface.copyItemsToClipboard(items, format.id, locale, format.contentType == 'html');
-			}
+			Zotero_File_Interface.copyItemsToClipboard(
+				items, format.id, locale, format.contentType == 'html', asCitations
+			);
 		}
 		else if (format.mode == 'export') {
 			// Copy citations doesn't work in export mode

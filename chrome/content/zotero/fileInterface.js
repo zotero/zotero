@@ -124,8 +124,6 @@ var Zotero_File_Interface = new function() {
 	this.exportItems = exportItems;
 	this.bibliographyFromCollection = bibliographyFromCollection;
 	this.bibliographyFromItems = bibliographyFromItems;
-	this.copyItemsToClipboard = copyItemsToClipboard;
-	this.copyCitationToClipboard = copyCitationToClipboard;
 	
 	/**
 	 * Creates Zotero.Translate instance and shows file picker for file export
@@ -399,83 +397,67 @@ var Zotero_File_Interface = new function() {
 	}
 	
 	
-	/*
-	 * Copies HTML and text bibliography entries for passed items in given style
+	/**
+	 * Copies HTML and text citations or bibliography entries for passed items in given style
 	 *
 	 * Does not check that items are actual references (and not notes or attachments)
+	 *
+	 * @param {Zotero.Item[]} items
+	 * @param {String} style - Style id string (e.g., 'http://www.zotero.org/styles/apa')
+	 * @param {String} locale - Locale (e.g., 'en-US')
+	 * @param {Boolean} [asHTML=false] - Use HTML source for plain-text data
+	 * @param {Boolean} [asCitations=false] - Copy citation cluster instead of bibliography
 	 */
-	function copyItemsToClipboard(items, style, locale, asHTML, asCitations) {
+	this.copyItemsToClipboard = function (items, style, locale, asHTML, asCitations) {
 		// copy to clipboard
 		var transferable = Components.classes["@mozilla.org/widget/transferable;1"].
 						   createInstance(Components.interfaces.nsITransferable);
 		var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
 							   getService(Components.interfaces.nsIClipboard);
-		var style = Zotero.Styles.get(style);
+		style = Zotero.Styles.get(style);
 		var cslEngine = style.getCiteProc(locale);
-	
-		// add HTML
- 		var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html", asCitations);
-		var str = Components.classes["@mozilla.org/supports-string;1"].
-				  createInstance(Components.interfaces.nsISupportsString);
-		str.data = bibliography;
-		transferable.addDataFlavor("text/html");
-		transferable.setTransferData("text/html", str, bibliography.length*2);
 		
-		// add text (or HTML source)
-		if(!asHTML) {
-			cslEngine = style.getCiteProc(locale);
-			var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text", asCitations);
+		if (asCitations) {
+			cslEngine.updateItems(items.map(item => item.id));
+			var citation = {
+				citationItems: items.map(item => ({ id: item.id })),
+				properties: {}
+			};
+			var output = cslEngine.previewCitationCluster(citation, [], [], "html");
 		}
+		else {
+			var output = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html");
+		}
+		
+		// add HTML
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
-		str.data = bibliography;
+		str.data = output;
+		transferable.addDataFlavor("text/html");
+		transferable.setTransferData("text/html", str, output.length * 2);
+		
+		// If not "Copy as HTML", add plaintext; otherwise use HTML from above and just mark as text
+		if(!asHTML) {
+			if (asCitations) {
+				output = cslEngine.previewCitationCluster(citation, [], [], "text");
+			}
+			else {
+				// Generate engine again to work around citeproc-js problem:
+				// https://github.com/zotero/zotero/commit/4a475ff3
+				cslEngine = style.getCiteProc(locale);
+				output = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text");
+			}
+		}
+		
+		var str = Components.classes["@mozilla.org/supports-string;1"].
+				  createInstance(Components.interfaces.nsISupportsString);
+		str.data = output;
 		transferable.addDataFlavor("text/unicode");
-		transferable.setTransferData("text/unicode", str, bibliography.length*2);
+		transferable.setTransferData("text/unicode", str, output.length * 2);
 		
 		clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
 	}
 	
-	
-	/*
-	 * Copies HTML and text citations for passed items in given style
-	 *
-	 * Does not check that items are actual references (and not notes or attachments)
-	 *
-	 * if |asHTML| is true, copy HTML source as text
-	 */
-	function copyCitationToClipboard(items, style, locale, asHTML) {
-		// copy to clipboard
-		var transferable = Components.classes["@mozilla.org/widget/transferable;1"].
-						   createInstance(Components.interfaces.nsITransferable);
-		var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
-							   getService(Components.interfaces.nsIClipboard);
-		
-		var style = Zotero.Styles.get(style).getCiteProc(locale);
-		var citation = {
-			citationItems: items.map(item => ({ id: item.id })),
-			properties: {}
-		};
-		
-		// add HTML
-		var bibliography = style.previewCitationCluster(citation, [], [], "html");
-		var str = Components.classes["@mozilla.org/supports-string;1"].
-				  createInstance(Components.interfaces.nsISupportsString);
-		str.data = bibliography;
-		transferable.addDataFlavor("text/html");
-		transferable.setTransferData("text/html", str, bibliography.length*2);
-		
-		// add text (or HTML source)
-		if(!asHTML) {
-			var bibliography = style.previewCitationCluster(citation, [], [], "text");
-		}
-		var str = Components.classes["@mozilla.org/supports-string;1"].
-				  createInstance(Components.interfaces.nsISupportsString);
-		str.data = bibliography;
-		transferable.addDataFlavor("text/unicode");
-		transferable.setTransferData("text/unicode", str, bibliography.length*2);
-		
-		clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
-	}
 	
 	/*
 	 * Shows bibliography options and creates a bibliography
