@@ -222,7 +222,11 @@ Zotero.Translate.DOMWrapper = new function() {
 		get(target, prop, receiver) {
 			if (prop === "__wrappedObject")
 				return this.wrappedObject;
-	
+			
+			if (prop == "__wrapperOverrides") {
+				return this.overrides;
+			}
+			
 			if (prop in this.overrides) {
 				return this.overrides[prop];
 			}
@@ -256,11 +260,11 @@ Zotero.Translate.DOMWrapper = new function() {
 				return { value: this.wrappedObject, writeable: true,
 								 configurable: true, enumerable: false };
 			}
-			if (name == "__wrapperOverrides") {
+			if (prop == "__wrapperOverrides") {
 				return { value: this.overrides, writeable: false, configurable: false, enumerable: false };
 			}
 			// Handle __exposedProps__.
-			if (name == "__exposedProps__") {
+			if (prop == "__exposedProps__") {
 				return { value: ExposedPropsWaiver, writable: false, configurable: false, enumerable: false };
 			}
 	
@@ -426,6 +430,7 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 			};
 			wrappedRet.get = function(x, prop, receiver) {
 				if (prop === "__wrappedObject") return target;
+				if (prop === "__wrapperOverrides") return overrides;
 				if (prop === "__wrappingManager") return me;
 				var y = overrides.hasOwnProperty(prop) ? overrides[prop] : target[prop];
 				if (y === null || (typeof y !== "object" && typeof y !== "function")) return y;
@@ -607,8 +612,8 @@ Zotero.Translate.ChildSandboxManager.prototype = {
 	"_makeContentForwarder":function(f) {
 		return this._parent._makeContentForwarder(f);
 	},
-	"wrap":function(x) {
-		return this._parent.wrap(x);
+	"wrap": function (target, x, overrides) {
+		return this._parent.wrap(target, x, overrides);
 	}
 }
 

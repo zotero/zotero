@@ -294,10 +294,9 @@ Zotero.Translate.Sandbox = {
 			};
 			safeTranslator.setDocument = function(arg) {
 				if (Zotero.isFx && !Zotero.isBookmarklet) {
-					if (arg.wrappedJSObject && arg.wrappedJSObject.__wrappedObject) {
-						arg = arg.wrappedJSObject.__wrappedObject;
-					}
-					return translation.setDocument(new XPCNativeWrapper(arg));
+					return translation.setDocument(
+						Zotero.Translate.DOMWrapper.wrap(arg, arg.__wrapperOverrides)
+					);
 				} else {
 					return translation.setDocument(arg);
 				}
@@ -1890,11 +1889,15 @@ Zotero.Translate.Web.prototype._getSandboxLocation = function() {
  * Pass document and location to detect* and do* functions
  */
 Zotero.Translate.Web.prototype._getParameters = function() {
-	if (Zotero.Translate.DOMWrapper &&
-		Zotero.Translate.DOMWrapper.isWrapped(this.document) &&
-		Zotero.platformMajorVersion >= 35) {
-		return [this._sandboxManager.wrap(Zotero.Translate.DOMWrapper.unwrap(this.document), null,
-			                              this.document.__wrapperOverrides), this.location];
+	if (Zotero.Translate.DOMWrapper && Zotero.Translate.DOMWrapper.isWrapped(this.document)) {
+		return [
+			this._sandboxManager.wrap(
+				Zotero.Translate.DOMWrapper.unwrap(this.document),
+				null,
+				this.document.__wrapperOverrides
+			),
+			this.location
+		];
 	} else {
 		return [this.document, this.location];
 	}
