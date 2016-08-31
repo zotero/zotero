@@ -27,6 +27,9 @@
 var TEST_RUN_TIMEOUT = 600000;
 var EXPORTED_SYMBOLS = ["Zotero_TranslatorTesters"];
 
+// For debugging specific translators by label
+var includeTranslators = [];
+
 try {
 	Zotero;
 } catch(e) {
@@ -55,9 +58,10 @@ Zotero_TranslatorTesters = new function() {
 				return function(translators) {
 					try {
 						for(var i=0; i<translators.length; i++) {
-							if(skipTranslators && !skipTranslators[translators[i].translatorID]) {
-								testers.push(new Zotero_TranslatorTester(translators[i], type));
-							}
+							if (includeTranslators.length
+									&& !includeTranslators.includes(translators[i].label)) continue;
+							if (skipTranslators && skipTranslators[translators[i].translatorID]) continue;
+							testers.push(new Zotero_TranslatorTester(translators[i], type));
 						};
 						
 						if(!(--waitingForTranslators)) {
