@@ -39,7 +39,7 @@ Zotero_TranslatorTesters = new function() {
 	/**
 	 * Runs all tests
 	 */
-	this.runAllTests = function(numConcurrentTests, skipTranslators, doneCallback) {
+	this.runAllTests = function (numConcurrentTests, skipTranslators, resultsCallback) {
 		if(!Zotero) {
 			Zotero = Components.classes["@zotero.org/Zotero;1"]
 				.getService(Components.interfaces.nsISupports).wrappedJSObject;
@@ -59,7 +59,7 @@ Zotero_TranslatorTesters = new function() {
 						};
 						
 						if(!(--waitingForTranslators)) {
-							runTesters(testers, numConcurrentTests, doneCallback);
+							runTesters(testers, numConcurrentTests, resultsCallback);
 						}
 					} catch(e) {
 						Zotero.debug(e);
@@ -73,20 +73,9 @@ Zotero_TranslatorTesters = new function() {
 	/**
 	 * Runs a specific set of tests
 	 */
-	function runTesters(testers, numConcurrentTests, doneCallback) {
+	function runTesters(testers, numConcurrentTests, resultsCallback) {
 		var testersRunning = 0;
 		var results = []
-		
-		if("getLocaleCollation" in Zotero) {
-			var collation = Zotero.getLocaleCollation();
-			var strcmp = function(a, b) {
-				return collation.compareString(1, a, b);
-			};
-		} else {
-			var strcmp = function (a, b) {
-				return a.toLowerCase().localeCompare(b.toLowerCase());
-			};
-		}
 		
 		var testerDoneCallback = function(tester) {
 			try {
@@ -96,26 +85,13 @@ Zotero_TranslatorTesters = new function() {
 				
 				// Done translating, so serialize test results
 				testersRunning--;
-				results.push(tester.serialize());
+				let results = tester.serialize();
+				let last = !testers.length && !testersRunning;
+				resultsCallback(results, last);
 				
 				if(testers.length) {
 					// Run next tester if one is available
 					runNextTester();
-				} else if(testersRunning === 0) {
-					// Testing is done, so sort results
-					results = results.sort(function(a, b) {
-						if(a.type !== b.type) {
-							return TEST_TYPES.indexOf(a.type) - TEST_TYPES.indexOf(b.type);
-						}
-						return strcmp(a.label, b.label);
-					});
-					
-					// Call done callback
-					doneCallback({
-						"browser":Zotero.browser,
-						"version":Zotero.version,
-						"results":results
-					});
 				}
 			} catch(e) {
 				Zotero.debug(e);
