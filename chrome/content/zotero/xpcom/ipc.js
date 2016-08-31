@@ -30,9 +30,6 @@ Zotero.IPC = new function() {
 	 * Initialize pipe for communication with connector
 	 */
 	this.init = function() {
-		// TEMP: Disabled for 5.0 Beta
-		return;
-		
 		if(!Zotero.isWin) {	// no pipe support on Fx 3.6
 			_instancePipe = _getPipeDirectory();
 			if(!_instancePipe.exists()) {

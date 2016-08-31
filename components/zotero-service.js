@@ -424,8 +424,6 @@ ZoteroCommandLineHandler.prototype = {
 		}
 		
 		// handler for Windows IPC commands
-		// TEMP: Disabled for 5.0 Beta
-		/*
 		var ipcParam = cmdLine.handleFlagWithParam("ZoteroIPC", false);
 		if(ipcParam) {
 			// Don't open a new window
@@ -433,7 +431,6 @@ ZoteroCommandLineHandler.prototype = {
 			var Zotero = this.Zotero;
 			Zotero.setTimeout(function() { Zotero.IPC.parsePipeInput(ipcParam) }, 0);
 		}
-		*/
 		
 		// special handler for "zotero" URIs at the command line to prevent them from opening a new
 		// window
