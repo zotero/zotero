@@ -40,6 +40,8 @@ Zotero_TranslatorTesters = new function() {
 	 * Runs all tests
 	 */
 	this.runAllTests = function (numConcurrentTests, skipTranslators, resultsCallback) {
+		waitForDialog();
+		
 		if(!Zotero) {
 			Zotero = Components.classes["@zotero.org/Zotero;1"]
 				.getService(Components.interfaces.nsISupports).wrappedJSObject;
@@ -108,6 +110,27 @@ Zotero_TranslatorTesters = new function() {
 		for(var i=0; i<numConcurrentTests; i++) {
 			runNextTester();
 		};
+	}
+	
+	function waitForDialog() {
+		Components.utils.import("resource://gre/modules/Services.jsm");
+		var loadobserver = function (ev) {
+			ev.originalTarget.removeEventListener("load", loadobserver, false);
+			if (ev.target.location == "chrome://global/content/commonDialog.xul") {
+				let win = ev.target.docShell.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+					.getInterface(Components.interfaces.nsIDOMWindow);
+				Zotero.debug("Closing rogue dialog box!\n\n" + win.document.documentElement.textContent, 2);
+				win.document.documentElement.getButton('accept').click();
+			}
+		};
+		var winobserver = {
+			observe: function (subject, topic, data) {
+				if (topic != "domwindowopened") return;
+				var win = subject.QueryInterface(Components.interfaces.nsIDOMWindow);
+				win.addEventListener("load", loadobserver, false);
+			}
+		};
+		Services.ww.registerNotification(winobserver);
 	}
 }
 
