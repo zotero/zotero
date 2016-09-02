@@ -106,6 +106,9 @@ Zotero_TranslatorTesters = new function() {
 		};
 		
 		var runNextTester = function() {
+			if (!testers.length) {
+				return;
+			}
 			testersRunning++;
 			Zotero.debug("Testing "+testers[0].translator.label);
 			testers.shift().runTests(testerDoneCallback);
