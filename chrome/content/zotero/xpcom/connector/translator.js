@@ -42,7 +42,7 @@ Zotero.Translators = new function() {
 	this.init = function(translators) {
 		if(!translators) {
 			translators = [];
-			if(((Zotero.isWebExtension || Zotero.isChrome) && !Zotero.isFx || Zotero.isSafari) && localStorage["translatorMetadata"]) {
+			if(((Zotero.isBrowserExt || Zotero.isChrome) || Zotero.isSafari) && localStorage["translatorMetadata"]) {
 				try {
 					translators = JSON.parse(localStorage["translatorMetadata"]);
 					if(typeof translators !== "object") {
@@ -196,7 +196,7 @@ Zotero.Translators = new function() {
 					
 					if(j === 0) {
 						converterFunctions.push(null);
-					} else if((Zotero.isWebExtension || Zotero.isChrome) && !Zotero.isFx || Zotero.isSafari) {
+					} else if((Zotero.isBrowserExt || Zotero.isChrome) || Zotero.isSafari) {
 						// in Chrome/Safari, the converterFunction needs to be passed as JSON, so
 						// just push an array with the proper and proxyHosts
 						converterFunctions.push([properHosts[j-1], proxyHosts[j-1]]);
@@ -303,7 +303,7 @@ Zotero.Translators = new function() {
 		}
 		
 		// Store
-		if((Zotero.isWebExtension || Zotero.isChrome) && !Zotero.isFx || Zotero.isSafari) {
+		if ((Zotero.isBrowserExt || Zotero.isChrome) || Zotero.isSafari) {
 			var serialized = JSON.stringify(serializedTranslators);
 			localStorage["translatorMetadata"] = serialized;
 			Zotero.debug("Translators: Saved updated translator list ("+serialized.length+" characters)");
@@ -374,7 +374,8 @@ Zotero.Translators.CodeGetter.prototype.getCodeFor = function(i) {
 
 const TRANSLATOR_REQUIRED_PROPERTIES = ["translatorID", "translatorType", "label", "creator", "target",
 		"priority", "lastUpdated"];
-var TRANSLATOR_PASSING_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browserSupport", "code", "runMode"]);
+var TRANSLATOR_PASSING_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES
+		.concat(["browserSupport", "code", "runMode", "itemType"]);
 var TRANSLATOR_SAVE_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browserSupport"]);
 /**
  * @class Represents an individual translator

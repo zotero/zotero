@@ -29,10 +29,10 @@ var TRANSLATOR_REQUIRED_PROPERTIES = ["translatorID", "translatorType", "label",
 // Properties that are preserved if present
 var TRANSLATOR_OPTIONAL_PROPERTIES = ["browserSupport", "minVersion", "maxVersion",
                                       "inRepository", "configOptions", "displayOptions",
-                                      "hiddenPrefs"];
+                                      "hiddenPrefs", "itemType"];
 // Properties that are passed from background to inject page in connector
 var TRANSLATOR_PASSING_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.
-                                    concat(["browserSupport", "code", "runMode"]);
+                                    concat(["browserSupport", "code", "runMode", "itemType"]);
 // Properties that are saved in connector if set but not required
 var TRANSLATOR_SAVE_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browserSupport"]);
 

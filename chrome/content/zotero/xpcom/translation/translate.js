@@ -374,6 +374,8 @@ Zotero.Translate.Sandbox = {
 				
 				var translator = translation.translator[0];
 				translator = typeof translator === "object" ? translator : Zotero.Translators.get(translator);
+				// Zotero.Translators.get returns a value in the client and a promise in connectors
+				// so we normalize the value to a promise here
 				Zotero.Promise.resolve(translator)
 				.then(function(translator) {
 					return translation._loadTranslator(translator)
@@ -404,7 +406,7 @@ Zotero.Translate.Sandbox = {
 				})
 				.then(function () {
 					setDefaultHandlers(translate, translation);
-					sandbox = translation._sandboxManager.sandbox;
+					var sandbox = translation._sandboxManager.sandbox;
 					if(!Zotero.Utilities.isEmpty(sandbox.exports)) {
 						sandbox.exports.Zotero = sandbox.Zotero;
 						sandbox = sandbox.exports;
@@ -683,7 +685,7 @@ Zotero.Translate.Sandbox = {
 				// refuse to save very long tags
 				if(item.tags) {
 					for(var i=0; i<item.tags.length; i++) {
-						var tag = item.tags[i];
+						var tag = item.tags[i],
 							tagString = typeof tag === "string" ? tag :
 								typeof tag === "object" ? (tag.tag || tag.name) : null;
 						if(tagString && tagString.length > 255) {
@@ -1115,7 +1117,9 @@ Zotero.Translate.Base.prototype = {
 
 		// if detection returns immediately, return found translators
 		var me = this;
-		return potentialTranslators.spread(function(allPotentialTranslators, properToProxyFunctions) {
+		return potentialTranslators.then(function(result) {
+			var allPotentialTranslators = result[0];
+			var properToProxyFunctions = result[1];
 			me._potentialTranslators = [];
 			me._foundTranslators = [];
 			
@@ -1270,26 +1274,26 @@ Zotero.Translate.Base.prototype = {
 	/**
 	 * Called when translator has been retrieved and loaded
 	 */
-	"_translateTranslatorLoaded": Zotero.Promise.coroutine(function* () {
+	"_translateTranslatorLoaded": function () {
 		// set display options to default if they don't exist
 		if(!this._displayOptions) this._displayOptions = this._translatorInfo.displayOptions || {};
 		
-		yield this._prepareTranslation();
-		
-		Zotero.debug("Translate: Beginning translation with "+this.translator[0].label);
-		
-		this.incrementAsyncProcesses("Zotero.Translate#translate()");
-		
-		// translate
-		try {
-			Function.prototype.apply.call(this._sandboxManager.sandbox["do"+this._entryFunctionSuffix], null, this._getParameters());
-		} catch(e) {
-			this.complete(false, e);
-			return false;
-		}
-		
-		this.decrementAsyncProcesses("Zotero.Translate#translate()");
-	}),
+		return this._prepareTranslation().then(function() {
+            Zotero.debug("Translate: Beginning translation with "+this.translator[0].label);
+
+            this.incrementAsyncProcesses("Zotero.Translate#translate()");
+
+            // translate
+            try {
+                Function.prototype.apply.call(this._sandboxManager.sandbox["do"+this._entryFunctionSuffix], null, this._getParameters());
+            } catch(e) {
+                this.complete(false, e);
+                return false;
+            }
+
+            this.decrementAsyncProcesses("Zotero.Translate#translate()");
+		}.bind(this));
+	},
 	
 	/**
 	 * Return the progress of the import operation, or null if progress cannot be determined
@@ -1600,10 +1604,9 @@ Zotero.Translate.Base.prototype = {
 		
 		let lab = this._potentialTranslators[0].label;
 		this._loadTranslator(this._potentialTranslators[0])
-		.bind(this)
 		.then(function() {
 			return this._detectTranslatorLoaded();
-		})
+		}.bind(this))
 		.catch(function (e) {
 			this.complete(false, e);
 		});
@@ -2309,7 +2312,7 @@ Zotero.Translate.Export.prototype.getTranslators = function() {
 /**
  * Does the actual export, after code has been loaded and parsed
  */
-Zotero.Translate.Export.prototype._prepareTranslation = Zotero.Promise.coroutine(function* () {
+Zotero.Translate.Export.prototype._prepareTranslation = function () {
 	this._progress = undefined;
 	
 	// initialize ItemGetter
@@ -2320,6 +2323,7 @@ Zotero.Translate.Export.prototype._prepareTranslation = Zotero.Promise.coroutine
 	
 	var configOptions = this._translatorInfo.configOptions || {},
 		getCollections = configOptions.getCollections || false;
+	var promise = Zotero.Promise.resolve(null);
 	switch (this._export.type) {
 		case 'collection':
 			this._itemGetter.setCollection(this._export.collection, getCollections);
@@ -2328,36 +2332,38 @@ Zotero.Translate.Export.prototype._prepareTranslation = Zotero.Promise.coroutine
 			this._itemGetter.setItems(this._export.items);
 			break;
 		case 'library':
-			yield this._itemGetter.setAll(this._export.id, getCollections);
+			promise = this._itemGetter.setAll(this._export.id, getCollections);
 			break;
 		default:
 			throw new Error('No export set up');
 			break;
 	}
 	delete this._export;
-	
-	// export file data, if requested
-	if(this._displayOptions["exportFileData"]) {
-		this.location = this._itemGetter.exportFiles(this.location, this.translator[0].target);
-	}
-	
-	// initialize IO
-	// this is currently hackish since we pass null callbacks to the init function (they have
-	// callbacks to be consistent with import, but they are synchronous, so we ignore them)
-	if(!this.location) {
-		this._io = new Zotero.Translate.IO.String(null, this.path ? this.path : "", this._sandboxManager);
-		this._io.init(configOptions["dataMode"], function() {});
-	} else if(!Zotero.Translate.IO.Write) {
-		throw new Error("Writing to files is not supported in this build of Zotero.");
-	} else {
-		this._io = new Zotero.Translate.IO.Write(this.location);
-		this._io.init(configOptions["dataMode"],
-			this._displayOptions["exportCharset"] ? this._displayOptions["exportCharset"] : null,
-			function() {});
-	}
-	
-	this._sandboxManager.importObject(this._io);
-});
+
+	return promise.then(function() {
+		// export file data, if requested
+		if(this._displayOptions["exportFileData"]) {
+			this.location = this._itemGetter.exportFiles(this.location, this.translator[0].target);
+		}
+
+		// initialize IO
+		// this is currently hackish since we pass null callbacks to the init function (they have
+		// callbacks to be consistent with import, but they are synchronous, so we ignore them)
+		if(!this.location) {
+			this._io = new Zotero.Translate.IO.String(null, this.path ? this.path : "", this._sandboxManager);
+			this._io.init(configOptions["dataMode"], function() {});
+		} else if(!Zotero.Translate.IO.Write) {
+			throw new Error("Writing to files is not supported in this build of Zotero.");
+		} else {
+			this._io = new Zotero.Translate.IO.Write(this.location);
+			this._io.init(configOptions["dataMode"],
+				this._displayOptions["exportCharset"] ? this._displayOptions["exportCharset"] : null,
+				function() {});
+		}
+
+		this._sandboxManager.importObject(this._io);
+	}.bind(this));
+};
 
 /**
  * Overload Zotero.Translate.Base#translate to make sure that
