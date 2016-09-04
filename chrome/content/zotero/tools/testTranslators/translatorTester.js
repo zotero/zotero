@@ -38,11 +38,14 @@ try {
 
 Zotero_TranslatorTesters = new function() {
 	const TEST_TYPES = ["web", "import", "export", "search"];
+	var collectedResults = {};
 	
 	/**
 	 * Runs all tests
 	 */
-	this.runAllTests = function (numConcurrentTests, skipTranslators, resultsCallback) {
+	this.runAllTests = function (numConcurrentTests, skipTranslators, writeDataCallback) {
+		var id = Math.random() * (100000000 - 1) + 1;
+		
 		waitForDialog();
 		
 		if(!Zotero) {
@@ -65,7 +68,7 @@ Zotero_TranslatorTesters = new function() {
 						};
 						
 						if(!(--waitingForTranslators)) {
-							runTesters(testers, numConcurrentTests, resultsCallback);
+							runTesters(testers, numConcurrentTests, id, writeDataCallback);
 						}
 					} catch(e) {
 						Zotero.debug(e);
@@ -79,7 +82,7 @@ Zotero_TranslatorTesters = new function() {
 	/**
 	 * Runs a specific set of tests
 	 */
-	function runTesters(testers, numConcurrentTests, resultsCallback) {
+	function runTesters(testers, numConcurrentTests, id, writeDataCallback) {
 		var testersRunning = 0;
 		var results = []
 		
@@ -93,7 +96,7 @@ Zotero_TranslatorTesters = new function() {
 				testersRunning--;
 				let results = tester.serialize();
 				let last = !testers.length && !testersRunning;
-				resultsCallback(results, last);
+				collectData(id, results, last, writeDataCallback);
 				
 				if(testers.length) {
 					// Run next tester if one is available
@@ -138,6 +141,37 @@ Zotero_TranslatorTesters = new function() {
 			}
 		};
 		Services.ww.registerNotification(winobserver);
+	}
+	
+	function collectData(id, results, last, writeDataCallback) {
+		if (!collectedResults[id]) {
+			collectedResults[id] = [];
+		}
+		collectedResults[id].push(results);
+		
+		//
+		// TODO: Only do the below every x collections, or if last == true
+		//
+		// Sort results
+		if ("getLocaleCollation" in Zotero) {
+			let collation = Zotero.getLocaleCollation();
+			var strcmp = function (a, b) {
+				return collation.compareString(1, a, b);
+			};
+		}
+		else {
+			var strcmp = function (a, b) {
+				return a.toLowerCase().localeCompare(b.toLowerCase());
+			};
+		}
+		collectedResults[id].sort(function (a, b) {
+			if (a.type !== b.type) {
+				return TEST_TYPES.indexOf(a.type) - TEST_TYPES.indexOf(b.type);
+			}
+			return strcmp(a.label, b.label);
+		});
+		
+		writeDataCallback(collectedResults[id], last);
 	}
 }
 
