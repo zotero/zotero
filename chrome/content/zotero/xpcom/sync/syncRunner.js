@@ -1314,29 +1314,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	
 	
 	var _getAPIKey = Zotero.Promise.coroutine(function* () {
-		// Set as .apiKey on Runner in tests
-		return _apiKey
-			// Set in login manager
-			|| Zotero.Sync.Data.Local.getAPIKey()
-			// Fallback to old username/password
-			|| _getAPIKeyFromLogin();
-	})
-	
-	
-	var _getAPIKeyFromLogin = Zotero.Promise.coroutine(function* () {
-		let username = Zotero.Prefs.get('sync.server.username');
-		if (username) {
-			// Check for legacy password if no password set in current session
-			// and no API keys stored yet
-			let password = Zotero.Sync.Data.Local.getLegacyPassword(username);
-			if (!password) {
-				return "";
-			}
-
-			let json = yield Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
-			Zotero.Sync.Data.Local.removeLegacyLogins();
-			return json.key;
-		}
-		return "";
+		// Set as .apiKey on Runner in tests or set in login manager
+		return _apiKey || Zotero.Sync.Data.Local.getAPIKey()
 	})
 }

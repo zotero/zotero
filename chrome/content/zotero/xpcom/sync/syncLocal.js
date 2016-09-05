@@ -43,9 +43,11 @@ Zotero.Sync.Data.Local = {
 	
 	
 	getAPIKey: function () {
-		Zotero.debug("Getting API key");
 		var login = this._getAPIKeyLoginInfo();
-		return login ? login.password : "";
+		return login
+			? login.password
+			// Fallback to old username/password
+			: this._getAPIKeyFromLogin();
 	},
 	
 	
@@ -346,6 +348,24 @@ Zotero.Sync.Data.Local = {
 		// Get API from returned array of nsILoginInfo objects
 		return logins.length ? logins[0] : false;
 	},
+	
+	
+	_getAPIKeyFromLogin: Zotero.Promise.coroutine(function* () {
+		let username = Zotero.Prefs.get('sync.server.username');
+		if (username) {
+			// Check for legacy password if no password set in current session
+			// and no API keys stored yet
+			let password = this.getLegacyPassword(username);
+			if (!password) {
+				return "";
+			}
+			
+			let json = yield Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
+			this.removeLegacyLogins();
+			return json.key;
+		}
+		return "";
+	}),
 	
 	
 	getLegacyPassword: function (username) {
