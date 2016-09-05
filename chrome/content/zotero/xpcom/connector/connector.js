@@ -240,7 +240,7 @@ Zotero.Connector = new function() {
 			
 			this.callMethod("saveItems", data, callback, tab);
 			return;
-		} else if(Zotero.isChrome && !Zotero.isBookmarklet) {
+		} else if(Zotero.isBrowserExt && !Zotero.isBookmarklet) {
 			var self = this;
 			chrome.cookies.getAll({url: tab.url}, function(cookies) {
 				var cookieHeader = '';

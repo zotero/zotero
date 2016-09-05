@@ -544,7 +544,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		}
 		attachment.md5 = hash;
 		
-		if(Zotero.isChrome && !Zotero.isBookmarklet) {
+		if(Zotero.isBrowserExt && !Zotero.isBookmarklet) {
 			// In Chrome, we don't use messaging for Zotero.API.uploadAttachment, since
 			// we can't pass ArrayBuffers to the background page
 			Zotero.API.uploadAttachment(attachment, attachmentCallback.bind(this, attachment));
