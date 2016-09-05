@@ -1289,19 +1289,19 @@ Zotero.Translate.Base.prototype = {
 		}
 		
 		function rest() {
-            Zotero.debug("Translate: Beginning translation with "+this.translator[0].label);
+			Zotero.debug("Translate: Beginning translation with " + this.translator[0].label);
 
-            this.incrementAsyncProcesses("Zotero.Translate#translate()");
+			this.incrementAsyncProcesses("Zotero.Translate#translate()");
 
-            // translate
-            try {
-                Function.prototype.apply.call(this._sandboxManager.sandbox["do"+this._entryFunctionSuffix], null, this._getParameters());
-            } catch(e) {
-                this.complete(false, e);
-                return false;
-            }
+			// translate
+			try {
+				Function.prototype.apply.call(this._sandboxManager.sandbox["do" + this._entryFunctionSuffix], null, this._getParameters());
+			} catch (e) {
+				this.complete(false, e);
+				return false;
+			}
 
-            this.decrementAsyncProcesses("Zotero.Translate#translate()");
+			this.decrementAsyncProcesses("Zotero.Translate#translate()");
 		}
 	}),
 	
