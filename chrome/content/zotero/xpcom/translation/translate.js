@@ -1274,11 +1274,21 @@ Zotero.Translate.Base.prototype = {
 	/**
 	 * Called when translator has been retrieved and loaded
 	 */
-	"_translateTranslatorLoaded": function () {
+	"_translateTranslatorLoaded": Zotero.Promise.method(function() {
 		// set display options to default if they don't exist
 		if(!this._displayOptions) this._displayOptions = this._translatorInfo.displayOptions || {};
 		
-		return this._prepareTranslation().then(function() {
+		var loadPromise = this._prepareTranslation();
+		if (this.noWait) {
+			if (!loadPromise.isResolved()) {
+				throw new Error("Load promise is not resolved in noWait mode");
+			}
+			rest.apply(this, arguments);
+		} else {
+			return loadPromise.then(() => rest.apply(this, arguments))
+		}
+		
+		function rest() {
             Zotero.debug("Translate: Beginning translation with "+this.translator[0].label);
 
             this.incrementAsyncProcesses("Zotero.Translate#translate()");
@@ -1292,8 +1302,8 @@ Zotero.Translate.Base.prototype = {
             }
 
             this.decrementAsyncProcesses("Zotero.Translate#translate()");
-		}.bind(this));
-	},
+		}
+	}),
 	
 	/**
 	 * Return the progress of the import operation, or null if progress cannot be determined
@@ -1609,7 +1619,7 @@ Zotero.Translate.Base.prototype = {
 		}.bind(this))
 		.catch(function (e) {
 			this.complete(false, e);
-		});
+		}.bind(this));
 	},
 	
 	/**
@@ -2312,7 +2322,7 @@ Zotero.Translate.Export.prototype.getTranslators = function() {
 /**
  * Does the actual export, after code has been loaded and parsed
  */
-Zotero.Translate.Export.prototype._prepareTranslation = function () {
+Zotero.Translate.Export.prototype._prepareTranslation = Zotero.Promise.method(function () {
 	this._progress = undefined;
 	
 	// initialize ItemGetter
@@ -2323,7 +2333,7 @@ Zotero.Translate.Export.prototype._prepareTranslation = function () {
 	
 	var configOptions = this._translatorInfo.configOptions || {},
 		getCollections = configOptions.getCollections || false;
-	var promise = Zotero.Promise.resolve(null);
+	var loadPromise = Zotero.Promise.resolve();
 	switch (this._export.type) {
 		case 'collection':
 			this._itemGetter.setCollection(this._export.collection, getCollections);
@@ -2332,15 +2342,24 @@ Zotero.Translate.Export.prototype._prepareTranslation = function () {
 			this._itemGetter.setItems(this._export.items);
 			break;
 		case 'library':
-			promise = this._itemGetter.setAll(this._export.id, getCollections);
+			loadPromise = this._itemGetter.setAll(this._export.id, getCollections);
 			break;
 		default:
 			throw new Error('No export set up');
 			break;
 	}
 	delete this._export;
-
-	return promise.then(function() {
+	
+	if (this.noWait) {
+		if (!loadPromise.isResolved()) {
+			throw new Error("Load promise is not resolved in noWait mode");
+		}
+		rest.apply(this, arguments);
+	} else {
+		return loadPromise.then(() => rest.apply(this, arguments))
+	}
+	
+	function rest() {
 		// export file data, if requested
 		if(this._displayOptions["exportFileData"]) {
 			this.location = this._itemGetter.exportFiles(this.location, this.translator[0].target);
@@ -2362,8 +2381,8 @@ Zotero.Translate.Export.prototype._prepareTranslation = function () {
 		}
 
 		this._sandboxManager.importObject(this._io);
-	}.bind(this));
-};
+	}
+});
 
 /**
  * Overload Zotero.Translate.Base#translate to make sure that
