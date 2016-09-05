@@ -6,9 +6,9 @@ describe("Zotero.Sync.Data.Local", function() {
 			var apiKey1 = Zotero.Utilities.randomString(24);
 			var apiKey2 = Zotero.Utilities.randomString(24);
 			Zotero.Sync.Data.Local.setAPIKey(apiKey1);
-			assert.equal(Zotero.Sync.Data.Local.getAPIKey(apiKey1), apiKey1);
+			yield assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(apiKey1), apiKey1);
 			Zotero.Sync.Data.Local.setAPIKey(apiKey2);
-			assert.equal(Zotero.Sync.Data.Local.getAPIKey(apiKey2), apiKey2);
+			yield assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(apiKey2), apiKey2);
 		})
 		
 		
@@ -16,7 +16,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			var apiKey = Zotero.Utilities.randomString(24);
 			Zotero.Sync.Data.Local.setAPIKey(apiKey);
 			Zotero.Sync.Data.Local.setAPIKey("");
-			assert.strictEqual(Zotero.Sync.Data.Local.getAPIKey(apiKey), "");
+			yield assert.eventually.strictEqual(Zotero.Sync.Data.Local.getAPIKey(apiKey), "");
 		})
 	})
 	

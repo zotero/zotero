@@ -33,7 +33,13 @@ if (!Zotero.Sync) {
 Zotero.Sync.Runner_Module = function (options = {}) {
 	const stopOnError = false;
 	
-	Zotero.defineProperty(this, 'enabled', { get: () => _apiKey || Zotero.Sync.Data.Local.getAPIKey() });
+	Zotero.defineProperty(this, 'enabled', {
+		get: () => {
+			if (_apiKey) return true;
+			var username = Zotero.Prefs.get('sync.server.username');
+			return username && Zotero.Sync.Data.Local.getLegacyPassword(username);
+		}
+	});
 	Zotero.defineProperty(this, 'syncInProgress', { get: () => _syncInProgress });
 	Zotero.defineProperty(this, 'lastSyncStatus', { get: () => _lastSyncStatus });
 	
@@ -1267,7 +1273,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 
 
 	this.deleteAPIKey = Zotero.Promise.coroutine(function* (){
-		var apiKey = Zotero.Sync.Data.Local.getAPIKey();
+		var apiKey = yield Zotero.Sync.Data.Local.getAPIKey();
 		var client = this.getAPIClient({apiKey});
 		Zotero.Sync.Data.Local.setAPIKey();
 		yield client.deleteAPIKey();
@@ -1313,7 +1319,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	}
 	
 	
-	var _getAPIKey = Zotero.Promise.coroutine(function* () {
+	var _getAPIKey = Zotero.Promise.method(function () {
 		// Set as .apiKey on Runner in tests or set in login manager
 		return _apiKey || Zotero.Sync.Data.Local.getAPIKey()
 	})

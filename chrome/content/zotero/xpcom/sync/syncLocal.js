@@ -42,13 +42,16 @@ Zotero.Sync.Data.Local = {
 	}),
 	
 	
-	getAPIKey: function () {
+	/**
+	 * @return {Promise}
+	 */
+	getAPIKey: Zotero.Promise.method(function () {
 		var login = this._getAPIKeyLoginInfo();
 		return login
 			? login.password
 			// Fallback to old username/password
 			: this._getAPIKeyFromLogin();
-	},
+	}),
 	
 	
 	setAPIKey: function (apiKey) {

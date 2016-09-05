@@ -69,7 +69,7 @@ describe("Sync Preferences", function () {
 				getAPIKeyFromCredentialsStub.resolves(apiResponse);
 				yield setCredentials("Username", "correctPassword");
 				
-				assert.equal(Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+				yield assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), apiKey);
 				assert.equal(doc.getElementById('sync-unauthorized').getAttribute('hidden'), 'true');
 			});
 
@@ -79,7 +79,7 @@ describe("Sync Preferences", function () {
 				yield setCredentials("Username", "incorrectPassword");
 
 				assert.isTrue(Zotero.alert.called);
-				assert.equal(Zotero.Sync.Data.Local.getAPIKey(), "");
+				yield assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), "");
 				assert.equal(doc.getElementById('sync-authorized').getAttribute('hidden'), 'true');
 			});
 
@@ -87,12 +87,12 @@ describe("Sync Preferences", function () {
 			it("should delete API key and display auth form when 'Unlink Account' clicked", function* () {
 				getAPIKeyFromCredentialsStub.resolves(apiResponse);
 				yield setCredentials("Username", "correctPassword");
-				assert.equal(Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+				yield assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), apiKey);
 
 				yield win.Zotero_Preferences.Sync.unlinkAccount(false);
 
 				assert.isTrue(deleteAPIKey.called);
-				assert.equal(Zotero.Sync.Data.Local.getAPIKey(), "");
+				yield assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), "");
 				assert.equal(doc.getElementById('sync-authorized').getAttribute('hidden'), 'true');
 			});
 			
@@ -103,7 +103,7 @@ describe("Sync Preferences", function () {
 				waitForDialog(null, 'cancel');
 				
 				yield win.Zotero_Preferences.Sync.unlinkAccount();
-				assert.equal(Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+				yield assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), apiKey);
 				assert.equal(doc.getElementById('sync-unauthorized').getAttribute('hidden'), 'true');
 			});
 

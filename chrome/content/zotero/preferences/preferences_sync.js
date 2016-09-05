@@ -32,7 +32,7 @@ Zotero_Preferences.Sync = {
 		this.updateStorageSettingsUI();
 
 		var username = Zotero.Users.getCurrentUsername() || Zotero.Prefs.get('sync.server.username') || " ";
-		var apiKey = Zotero.Sync.Data.Local.getAPIKey();
+		var apiKey = yield Zotero.Sync.Data.Local.getAPIKey();
 		this.displayFields(apiKey ? username : "");
 		
 		var pass = Zotero.Sync.Runner.getStorageController('webdav').password;
@@ -286,7 +286,7 @@ Zotero_Preferences.Sync = {
 		var loadingLabel = Zotero.getString("zotero.preferences.sync.librariesToSync.loadingLibraries");
 		addRow(loadingLabel, "loading", false, false);
 
-		var apiKey = Zotero.Sync.Data.Local.getAPIKey();
+		var apiKey = yield Zotero.Sync.Data.Local.getAPIKey();
 		var client = Zotero.Sync.Runner.getAPIClient({apiKey});
 		var groups = [];
 		try {
