@@ -39,8 +39,8 @@
 		
 		<tabbox>
 			<tabs>
-				<tab label="&zotero.preferences.cite.wordProcessors;"/>
-				<tab label="&zotero.preferences.cite.styles;"/>
+				<tab id="wordProcessors-tab" label="&zotero.preferences.cite.wordProcessors;"/>
+				<tab id="styles-tab" label="&zotero.preferences.cite.styles;"/>
 			</tabs>
 			<tabpanels>
 				<tabpanel orient="vertical" id="wordProcessors">

@@ -15,6 +15,10 @@
 		<groupbox>
 			<caption label="&zotero.bibliography.style.label;"/>
 			<listbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()"/>
+			<hbox align="right">
+				<label id="manage-styles" class="text-link"
+					onclick="Zotero_File_Interface_Bibliography.manageStyles()">&zotero.bibliography.manageStyles;</label>
+			</hbox>
 		</groupbox>
 		<groupbox>
 			<hbox align="center">

@@ -39,6 +39,7 @@ var Zotero_Preferences = {
 		
 		if(window.arguments) {
 			var io = window.arguments[0];
+			io = io.wrappedJSObject || io;
 			
 			if(io.pane) {
 				let tabID = io.tab;

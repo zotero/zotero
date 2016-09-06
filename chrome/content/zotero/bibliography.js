@@ -39,6 +39,8 @@ var Zotero_File_Interface_Bibliography = new function() {
 	var lastSelectedStyle,
 		lastSelectedLocale;
 	
+	var isDocPrefs = false;
+	
 	/*
 	 * Initialize some variables and prepare event listeners for when chrome is done
 	 * loading
@@ -104,6 +106,11 @@ var Zotero_File_Interface_Bibliography = new function() {
 		window.setTimeout(function () {
 			listbox.ensureIndexIsVisible(selectIndex);
 			listbox.selectedIndex = selectIndex;
+			if (listbox.selectedIndex == -1) {
+				// This can happen in tests if styles aren't loaded
+				Zotero.debug("No styles to select", 2);
+				return;
+			}
 			Zotero_File_Interface_Bibliography.styleChanged();
 		}, 0);
 		
@@ -131,6 +138,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		
 		// ONLY FOR integrationDocPrefs.xul: update status of displayAs, set
 		// bookmarks text
+		isDocPrefs = !!document.getElementById("displayAs");
 		if(document.getElementById("displayAs")) {
 			if(_io.useEndnotes && _io.useEndnotes == 1) document.getElementById("displayAs").selectedIndex = 1;
 		}
@@ -269,6 +277,16 @@ var Zotero_File_Interface_Bibliography = new function() {
 		
 		if (lastSelectedLocale) {
 			Zotero.Prefs.set("export.lastLocale", lastSelectedLocale);
+		}
+	};
+	
+	
+	this.manageStyles = function () {
+		document.documentElement.getButton('cancel').click();
+		var win = Zotero.Utilities.Internal.openPreferences('zotero-prefpane-cite', { tab: 'styles-tab' });
+		if (isDocPrefs) {
+			// TODO: Move activate() code elsewhere
+			Zotero.Integration.activate(win);
 		}
 	};
 }
