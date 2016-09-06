@@ -235,7 +235,7 @@ Zotero_TranslatorTester = function(translator, type, debugCallback) {
 	}
 };
 
-Zotero_TranslatorTester.DEFER_DELAY = 30000; // Delay for deferred tests
+Zotero_TranslatorTester.DEFER_DELAY = 20000; // Delay for deferred tests
 
 /**
  * Removes document objects, which contain cyclic references, and other fields to be ignored from items
@@ -401,7 +401,7 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
 		createInstance(Components.interfaces.nsITimer);
 	timer.initWithCallback({"notify":function() {
 		try {
-			Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+			if (hiddenBrowser) Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
 		} catch(e) {}
 	}}, TEST_RUN_TIMEOUT, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
 	
@@ -422,10 +422,7 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
 					+ (Zotero_TranslatorTester.DEFER_DELAY/1000)
 					+ " second(s) for page content to settle"
 				);
-				Zotero.setTimeout(
-					function() {runTest(hiddenBrowser.contentDocument) },
-					Zotero_TranslatorTester.DEFER_DELAY, true
-				);
+				Zotero.setTimeout(() => runTest(doc), Zotero_TranslatorTester.DEFER_DELAY);
 			} else {
 				runTest(doc);
 			}
