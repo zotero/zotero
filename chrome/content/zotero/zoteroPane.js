@@ -1660,7 +1660,7 @@ var ZoteroPane = new function()
 			null, null, null, {}
 		);
 		if (index == 0) {
-			ZoteroPane_Local.openPreferences('zotero-prefpane-search', 'pdftools-install');
+			ZoteroPane_Local.openPreferences('zotero-prefpane-search', { action: 'pdftools-install' });
 		}
 		return false;
 	}
@@ -3164,34 +3164,9 @@ var ZoteroPane = new function()
 	
 	
 	this.openPreferences = function (paneID, action) {
-		var io = {
-			pane: paneID,
-			action: action
-		};
-		
-		var win = null;
-		// If window is already open, just focus it
-		if (!action) {
-			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-				.getService(Components.interfaces.nsIWindowMediator);
-			var enumerator = wm.getEnumerator("zotero:pref");
-			if (enumerator.hasMoreElements()) {
-				var win = enumerator.getNext();
-				win.focus();
-				if (paneID) {
-					var pane = win.document.getElementsByAttribute('id', paneID)[0];
-					pane.parentElement.showPane(pane);
-				}
-			}
-		}
-		if (!win) {
-			window.openDialog('chrome://zotero/content/preferences/preferences.xul',
-				'zotero-prefs',
-				'chrome,titlebar,toolbar,centerscreen,'
-					+ Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal',
-				io
-			);
-		}
+		Zotero.warn("ZoteroPane.openPreferences() is deprecated"
+			+ " -- use Zotero.Utilities.Internal.openPreferences() instead");
+		Zotero.Utilities.Internal.openPreferences(paneID, { action });
 	}
 	
 	
