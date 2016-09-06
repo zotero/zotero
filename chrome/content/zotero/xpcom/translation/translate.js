@@ -1082,7 +1082,7 @@ Zotero.Translate.Base.prototype = {
 	 *     getAllTranslators parameter is meaningless in this context.
 	 * @return {Promise} Promise for an array of {@link Zotero.Translator} objects
 	 */
-	"getTranslators":function(getAllTranslators, checkSetTranslator) {
+	getTranslators: Zotero.Promise.method(function (getAllTranslators, checkSetTranslator) {
 		var potentialTranslators;
 
 		// do not allow simultaneous instances of getTranslators
@@ -1115,68 +1115,74 @@ Zotero.Translate.Base.prototype = {
 		}
 
 		// if detection returns immediately, return found translators
-		var me = this;
 		return potentialTranslators.then(function(result) {
 			var allPotentialTranslators = result[0];
 			var properToProxyFunctions = result[1];
-			me._potentialTranslators = [];
-			me._foundTranslators = [];
+			this._potentialTranslators = [];
+			this._foundTranslators = [];
 			
 			// this gets passed out by Zotero.Translators.getWebTranslatorsForLocation() because it is
 			// specific for each translator, but we want to avoid making a copy of a translator whenever
 			// possible.
-			me._properToProxyFunctions = properToProxyFunctions ? properToProxyFunctions : null;
-			me._waitingForRPC = false;
+			this._properToProxyFunctions = properToProxyFunctions ? properToProxyFunctions : null;
+			this._waitingForRPC = false;
 			
 			for(var i=0, n=allPotentialTranslators.length; i<n; i++) {
 				var translator = allPotentialTranslators[i];
 				if(translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER) {
-					me._potentialTranslators.push(translator);
-				} else if(me instanceof Zotero.Translate.Web && Zotero.Connector) {
-					me._waitingForRPC = true;
+					this._potentialTranslators.push(translator);
+				} else if (this instanceof Zotero.Translate.Web && Zotero.Connector) {
+					this._waitingForRPC = true;
 				}
 			}
 			
 			// Attach handler for translators, so that we can return a
 			// promise that provides them.
-			// TODO make me._detect() return a promise
-			var deferred = Zotero.Promise.defer(),
-				translatorsHandler = function(obj, translators) {
-					me.removeHandler("translators", translatorsHandler);
-					deferred.resolve(translators);
-				}
-			me.setHandler("translators", translatorsHandler);
-			me._detect();
+			// TODO make this._detect() return a promise
+			var deferred = Zotero.Promise.defer();
+			var translatorsHandler = function(obj, translators) {
+				this.removeHandler("translators", translatorsHandler);
+				deferred.resolve(translators);
+			}.bind(this);
+			this.setHandler("translators", translatorsHandler);
+			this._detect();
 
-			if(me._waitingForRPC) {
+			if(this._waitingForRPC) {
 				// Try detect in Zotero Standalone. If this fails, it fails; we shouldn't
 				// get hung up about it.
-				Zotero.Connector.callMethod("detect", {"uri":me.location.toString(),
-					"cookie":me.document.cookie,
-					"html":me.document.documentElement.innerHTML}).then(function(rpcTranslators) {
-						me._waitingForRPC = false;
+				Zotero.Connector.callMethod(
+					"detect",
+					{
+						uri: this.location.toString(),
+						cookie: this.document.cookie,
+						html: this.document.documentElement.innerHTML
+					},
+					function (rpcTranslators) {
+						this._waitingForRPC = false;
 						
 						// if there are translators, add them to the list of found translators
 						if(rpcTranslators) {
 							for(var i=0, n=rpcTranslators.length; i<n; i++) {
 								rpcTranslators[i].runMode = Zotero.Translator.RUN_MODE_ZOTERO_STANDALONE;
 							}
-							me._foundTranslators = me._foundTranslators.concat(rpcTranslators);
+							this._foundTranslators = this._foundTranslators.concat(rpcTranslators);
 						}
 						
 						// call _detectTranslatorsCollected to return detected translators
-						if(me._currentState === null) {
-							me._detectTranslatorsCollected();
+						if (this._currentState === null) {
+							this._detectTranslatorsCollected();
 						}
-					});
+					}.bind(this)
+				);
 			}
 
 			return deferred.promise;
-		}).catch(function(e) {
+		}.bind(this))
+		.catch(function(e) {
 			Zotero.logError(e);
-			me.complete(false, e);
-		});
-	},
+			this.complete(false, e);
+		}.bind(this));
+	}),
 
 	/**
 	 * Get all potential translators (without running detect)
@@ -1199,7 +1205,7 @@ Zotero.Translate.Base.prototype = {
 	 * @returns {Promise}                                       Promise resolved with saved items
 	 *                                                          when translation complete
 	 */
-	"translate": function (options = {}, ...args) {		// initialize properties specific to each translation
+	translate: Zotero.Promise.method(function (options = {}, ...args) {		// initialize properties specific to each translation
 		if (typeof options == 'number') {
 			Zotero.debug("Translate: translate() now takes an object -- update your code", 2);
 			options = {
@@ -1256,19 +1262,28 @@ Zotero.Translate.Base.prototype = {
 			this.translator[0] = Zotero.Translators.get(this.translator[0]);
 		}
 		
-		var loadPromise = this._loadTranslator(this.translator[0]);
-		if (this.noWait) {
-			if (!loadPromise.isResolved()) {
-				return Zotero.Promise.reject(new Error("Load promise is not resolved in noWait mode"));
+		// Zotero.Translators.get() returns a promise in the connectors
+		if (this.noWait && this.translator[0].then && !this.translator[0].isResolved()) {
+			throw new Error("Translator promise is not resolved in noWait mode");
+		}
+		
+		Zotero.Promise.resolve(this.translator[0])
+		.then(function (translator) {
+			this.translator[0] = translator;
+			var loadPromise = this._loadTranslator(translator);
+			if (this.noWait) {
+				if (!loadPromise.isResolved()) {
+					return Zotero.Promise.reject(new Error("Load promise is not resolved in noWait mode"));
+				}
+				this._translateTranslatorLoaded();
 			}
-			this._translateTranslatorLoaded();
-		}
-		else {
-			loadPromise.then(() => this._translateTranslatorLoaded());
-		}
-			
+			else {
+				loadPromise.then(() => this._translateTranslatorLoaded());
+			}
+		}.bind(this));
+		
 		return deferred.promise;
-	},
+	}),
 	
 	/**
 	 * Called when translator has been retrieved and loaded
@@ -1586,7 +1601,7 @@ Zotero.Translate.Base.prototype = {
 	 */
 	"_checkIfDone":function() {
 		if(!this._savingItems && !this._savingAttachments.length && (!this._currentState || this._waitingForSave)) {
-			if(this.newCollections) {
+			if(this.newCollections && this._itemSaver.saveCollections) {
 				var me = this;
 				this._itemSaver.saveCollections(this.newCollections).then(function (newCollections) {
 					me.newCollections = newCollections;
@@ -1659,7 +1674,7 @@ Zotero.Translate.Base.prototype = {
 	/**
 	 * Loads the translator into its sandbox
 	 * @param {Zotero.Translator} translator
-	 * @return {Boolean} Whether the translator could be successfully loaded
+	 * @return {Promise<Boolean>} Whether the translator could be successfully loaded
 	 */
 	"_loadTranslator": Zotero.Promise.method(function (translator) {
 		var sandboxLocation = this._getSandboxLocation();

@@ -140,7 +140,7 @@ var ZoteroPane = new function()
 	}
 	
 	/**
-	 * Called on window load or when has been reloaded after switching into or out of connector
+	 * Called on window load or when pane has been reloaded after switching into or out of connector
 	 * mode
 	 */
 	function _loadPane() {
@@ -159,6 +159,10 @@ var ZoteroPane = new function()
 		collectionsTree.controllers.appendController(new Zotero.CollectionTreeCommandController(collectionsTree));
 		collectionsTree.addEventListener("mousedown", ZoteroPane_Local.onTreeMouseDown, true);
 		collectionsTree.addEventListener("click", ZoteroPane_Local.onTreeClick, true);
+		
+		// Clear items view, so that the load registers as a new selected collection when switching
+		// between modes
+		ZoteroPane_Local.itemsView = null;
 		
 		var itemsTree = document.getElementById('zotero-items-tree');
 		itemsTree.controllers.appendController(new Zotero.ItemTreeCommandController(itemsTree));

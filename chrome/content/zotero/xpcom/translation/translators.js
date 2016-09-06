@@ -260,7 +260,7 @@ Zotero.Translators = new function() {
 	 */
 	this.getAll = function() {
 		return this.init().then(function () {
-			return Object.keys(_translators);
+			return Object.keys(_translators).map(id => _translators[id]);
 		});
 	}
 	

@@ -336,9 +336,6 @@ function ZoteroService() {
 			makeZoteroContext(false);
 			zContext.Zotero.init(zInitOptions)
 			.catch(function (e) {
-				dump(e + "\n\n");
-				Components.utils.reportError(e);
-				
 				if (e === "ZOTERO_SHOULD_START_AS_CONNECTOR") {
 					// if Zotero should start as a connector, reload it
 					return zContext.Zotero.shutdown()
@@ -347,9 +344,10 @@ function ZoteroService() {
 						return zContext.Zotero.init(zInitOptions);
 					})
 				}
-				else {
-					throw e;
-				}
+				
+				dump(e + "\n\n");
+				Components.utils.reportError(e);
+				throw e;
 			})
 			.then(function () {
 				zContext.Zotero.debug("Initialized in "+(Date.now() - start)+" ms");

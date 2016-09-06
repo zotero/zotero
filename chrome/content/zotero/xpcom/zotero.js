@@ -460,7 +460,16 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		this.initializationDeferred.resolve();
 		
 		if(Zotero.isConnector) {
+			// Add toolbar icon
+			try {
+				Services.scriptloader.loadSubScript("chrome://zotero/content/icon.js", {}, "UTF-8");
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			
 			Zotero.Repo.init();
+			Zotero.locked = false;
 		}
 		
 		if(!Zotero.isFirstLoadThisSession) {

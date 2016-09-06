@@ -42,6 +42,10 @@ var ZoteroOverlay = new function()
 		var self = this;
 		var iconLoaded = false;
 		
+		if (Zotero.isConnector) {
+			return;
+		}
+		
 		Zotero.Promise.try(function () {
 			if (!Zotero) {
 				throw new Error("No Zotero object");

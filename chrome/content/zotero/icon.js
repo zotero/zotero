@@ -28,6 +28,11 @@
 Components.utils.import("resource://zotero/config.js");
 Components.utils.import("resource:///modules/CustomizableUI.jsm");
 
+// Necessary for connector mode, for some reason
+var Zotero = Components.classes["@zotero.org/Zotero;1"]
+	.getService(Components.interfaces.nsISupports)
+	.wrappedJSObject;
+
 var comboButtonsID = 'zotero-toolbar-buttons';
 
 CustomizableUI.addListener({

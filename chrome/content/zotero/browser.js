@@ -613,7 +613,9 @@ var Zotero_Browser = new function() {
 			return;
 		}
 		
-		yield Zotero.DB.waitForTransaction();
+		if (!Zotero.isConnector) {
+			yield Zotero.DB.waitForTransaction();
+		}
 		
 		Zotero_Browser.progress.show();
 		Zotero_Browser.isScraping = true;
@@ -635,14 +637,16 @@ var Zotero_Browser = new function() {
 			collection = ZoteroPane.getSelectedCollection();
 		}
 		
-		if (libraryID === Zotero.Libraries.publicationsLibraryID) {
-			Zotero_Browser.progress.Translation.cannotAddToPublications();
-			return;
-		}
-		
-		if (Zotero.Feeds.get(libraryID)) {
-			Zotero_Browser.progress.Translation.cannotAddToFeed();
-			return;
+		if (!Zotero.isConnector) {
+			if (libraryID === Zotero.Libraries.publicationsLibraryID) {
+				Zotero_Browser.progress.Translation.cannotAddToPublications();
+				return;
+			}
+			
+			if (Zotero.Feeds.get(libraryID)) {
+				Zotero_Browser.progress.Translation.cannotAddToFeed();
+				return;
+			}
 		}
 		
 		Zotero_Browser.progress.Translation.scrapingTo(libraryID, collection);
