@@ -68,6 +68,7 @@ function waitForWindow(uri, callback) {
 	Components.utils.import("resource://gre/modules/Services.jsm");
 	var loadobserver = function(ev) {
 		ev.originalTarget.removeEventListener("load", loadobserver, false);
+		Zotero.debug("Window opened: " + ev.target.location.href);
 		if(ev.target.location.href == uri) {
 			Services.ww.unregisterNotification(winobserver);
 			var win = ev.target.docShell
