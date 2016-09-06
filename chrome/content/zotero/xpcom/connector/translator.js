@@ -388,7 +388,6 @@ Zotero.Translator.prototype.init = function(info) {
 		var property = TRANSLATOR_REQUIRED_PROPERTIES[i];
 		if(info[property] === undefined) {
 			Zotero.logError(new Error('Missing property "'+property+'" in translator metadata JSON object in ' + info.label));
-			haveMetadata = false;
 			break;
 		} else {
 			this[property] = info[property];
