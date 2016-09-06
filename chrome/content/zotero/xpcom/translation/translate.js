@@ -1262,25 +1262,29 @@ Zotero.Translate.Base.prototype = {
 			this.translator[0] = Zotero.Translators.get(this.translator[0]);
 		}
 		
-		// Zotero.Translators.get() returns a promise in the connectors
-		if (this.noWait && this.translator[0].then && !this.translator[0].isResolved()) {
-			throw new Error("Translator promise is not resolved in noWait mode");
+		// Zotero.Translators.get() returns a promise in the connectors, but we don't expect it to
+		// otherwise
+		if (!this.isConnector && this.translator[0].then) {
+			throw new Error("Translator should not be a promise in non-connector mode");
 		}
 		
-		Zotero.Promise.resolve(this.translator[0])
-		.then(function (translator) {
-			this.translator[0] = translator;
-			var loadPromise = this._loadTranslator(translator);
-			if (this.noWait) {
-				if (!loadPromise.isResolved()) {
-					return Zotero.Promise.reject(new Error("Load promise is not resolved in noWait mode"));
-				}
-				this._translateTranslatorLoaded();
+		if (this.noWait) {
+			var loadPromise = this._loadTranslator(this.translator[0]);
+			if (!loadPromise.isResolved()) {
+				return Zotero.Promise.reject(new Error("Load promise is not resolved in noWait mode"));
 			}
-			else {
-				loadPromise.then(() => this._translateTranslatorLoaded());
-			}
-		}.bind(this));
+			this._translateTranslatorLoaded();
+		}
+		else if (this.translator[0].then) {
+			Zotero.Promise.resolve(this.translator[0])
+			.then(function (translator) {
+				this.translator[0] = translator;
+				this._loadTranslator(translator).then(() => this._translateTranslatorLoaded());
+			}.bind(this));
+		}
+		else {
+			this._loadTranslator(this.translator[0]).then(() => this._translateTranslatorLoaded());
+		}
 		
 		return deferred.promise;
 	}),
