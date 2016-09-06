@@ -176,6 +176,7 @@
 
 <!ENTITY zotero.bibliography.title "Skapa referens/källförteckning">
 <!ENTITY zotero.bibliography.style.label "Referensstil">
+<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
 <!ENTITY zotero.bibliography.locale.label "Språk:">
 <!ENTITY zotero.bibliography.outputMode "Utmatningsläge">
 <!ENTITY zotero.bibliography.bibliography "Källförteckning">

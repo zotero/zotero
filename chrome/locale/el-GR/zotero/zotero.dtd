@@ -176,6 +176,7 @@
 
 <!ENTITY zotero.bibliography.title "Δημιουργία Παραπομπής/Βιβλιογραφίας">
 <!ENTITY zotero.bibliography.style.label "Στυλ παραπομπής:">
+<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
 <!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Λειτουργία αποτελέσματος:">
 <!ENTITY zotero.bibliography.bibliography "Βιβλιογραφία">

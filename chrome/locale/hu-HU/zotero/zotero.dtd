@@ -176,6 +176,7 @@
 
 <!ENTITY zotero.bibliography.title "Bibliográfia létrehozása">
 <!ENTITY zotero.bibliography.style.label "Hivatkozási stílus:">
+<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
 <!ENTITY zotero.bibliography.locale.label "Nyelv:">
 <!ENTITY zotero.bibliography.outputMode "Kimeneti mód:">
 <!ENTITY zotero.bibliography.bibliography "Bibliográfia">

@@ -176,6 +176,7 @@
 
 <!ENTITY zotero.bibliography.title "Creează citare/bibliografie">
 <!ENTITY zotero.bibliography.style.label "Stil de citare:">
+<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
 <!ENTITY zotero.bibliography.locale.label "Limbă:">
 <!ENTITY zotero.bibliography.outputMode "Mod de ieșire:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografie">

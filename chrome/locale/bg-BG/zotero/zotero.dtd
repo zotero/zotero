@@ -176,6 +176,7 @@
 
 <!ENTITY zotero.bibliography.title "Създава библиография">
 <!ENTITY zotero.bibliography.style.label "Стил на цитиране:">
+<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
 <!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Output Mode:">
 <!ENTITY zotero.bibliography.bibliography "Bibliography">

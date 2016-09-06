@@ -176,6 +176,7 @@
 
 <!ENTITY zotero.bibliography.title "Bibliograafia loomine">
 <!ENTITY zotero.bibliography.style.label "Viite stiil:">
+<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
 <!ENTITY zotero.bibliography.locale.label "Keel">
 <!ENTITY zotero.bibliography.outputMode "Väljundi tüüp:">
 <!ENTITY zotero.bibliography.bibliography "Biblograafia">

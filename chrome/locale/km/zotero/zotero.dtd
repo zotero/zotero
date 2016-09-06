@@ -176,6 +176,7 @@
 
 <!ENTITY zotero.bibliography.title "បង្កើតគន្ថនិទេ្ទស">
 <!ENTITY zotero.bibliography.style.label "រចនាបថអាគតដ្ឋាន:">
+<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
 <!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Output Mode:">
 <!ENTITY zotero.bibliography.bibliography "Bibliography">

@@ -176,6 +176,7 @@
 
 <!ENTITY zotero.bibliography.title "ساخت کتابنامه">
 <!ENTITY zotero.bibliography.style.label "شیوه‌نامه">
+<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
 <!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "حالت خروجی:">
 <!ENTITY zotero.bibliography.bibliography "کتابنامه">

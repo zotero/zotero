@@ -176,6 +176,7 @@
 
 <!ENTITY zotero.bibliography.title "出典表記／参考文献目録を作成">
 <!ENTITY zotero.bibliography.style.label "引用スタイル:">
+<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
 <!ENTITY zotero.bibliography.locale.label "言語:">
 <!ENTITY zotero.bibliography.outputMode "出力モード:">
 <!ENTITY zotero.bibliography.bibliography "参考文献目録">

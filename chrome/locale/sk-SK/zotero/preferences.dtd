@@ -12,9 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Panel prehliadača">
 <!ENTITY zotero.preferences.showIn.separateTab "Osobitná záložka">
 <!ENTITY zotero.preferences.showIn.appTab "Záložka aplikácií">
-<!ENTITY zotero.preferences.layout "Layout:">
-<!ENTITY zotero.preferences.layout.standard "Standard">
-<!ENTITY zotero.preferences.layout.stacked "Stacked">
+<!ENTITY zotero.preferences.layout "Rozloženie:">
+<!ENTITY zotero.preferences.layout.standard "Štandard">
+<!ENTITY zotero.preferences.layout.stacked "V zásobníku">
 <!ENTITY zotero.preferences.fontSize "Veľkosť písma:">
 <!ENTITY zotero.preferences.fontSize.small "malé">
 <!ENTITY zotero.preferences.fontSize.medium "stredné">
@@ -42,11 +42,11 @@
 <!ENTITY zotero.preferences.groups.childLinks "vložené odkazy">
 <!ENTITY zotero.preferences.groups.tags "značky">
 
-<!ENTITY zotero.preferences.feeds "Feeds">
-<!ENTITY zotero.preferences.feeds.sorting.label "Sorting:">
-<!ENTITY zotero.preferences.feeds.sorting.newest "Newest items first">
-<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
-<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+<!ENTITY zotero.preferences.feeds "RSS správy">
+<!ENTITY zotero.preferences.feeds.sorting.label "Triedenie:">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Najnovšie položky ako prvé">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Najstaršie položky ako prvé">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Predvolené RSS správy">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -58,9 +58,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Synchronizácia">
 <!ENTITY zotero.preferences.sync.username "Meno používateľa:">
 <!ENTITY zotero.preferences.sync.password "Heslo:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
-<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
+<!ENTITY zotero.preferences.sync.syncServer "Synchronizácia dát Zotera">
+<!ENTITY zotero.preferences.sync.setUpSync "Nastaviť synchronizáciu">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Odpojiť účet...">
 <!ENTITY zotero.preferences.sync.createAccount "Vytvoriť nový účet">
 <!ENTITY zotero.preferences.sync.lostPassword "Stratené heslo?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchronizovať automaticky">
@@ -83,8 +83,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Nasledujúce operácie treba použiť iba v zriedkavých, špecifických situáciách a nie pre všeobecné odstraňovanie chýb. V mnohých prípadoch obnova zapríčiní dodatočné problémy. Pozri ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Možnosti obnovy synchronizácie">
 <!ENTITY zotero.preferences.sync.reset.warning3 "pre viac informácií.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Úplná synchronizácia">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Zlúčiť lokálne dáta s dátami na serveri bez ohľadu na predchádzajúce synchronizácie.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Obnoviť dáta zo servera Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Vymazať všetky lokálne dáta a nahradiť ich dátami na serveri.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Nahradiť dáta na serveri Zotero">
@@ -146,7 +146,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Rýchle vyhľadávanie">
 <!ENTITY zotero.preferences.keys.newItem "Vytvoriť novú položku">
 <!ENTITY zotero.preferences.keys.newNote "Vytvoriť novú poznámku">
-<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Označiť všetky RSS správy ako prečítané/neprečítané">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Zobraziť/skryť značky">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopírovať vybrané citácie do schránky">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopírovať vybrané položky do schránky">

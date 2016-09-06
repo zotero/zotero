@@ -14,8 +14,8 @@
 <!ENTITY zotero.preferences.showIn.appTab "App Tab">
 <!ENTITY zotero.preferences.layout "Layout:">
 <!ENTITY zotero.preferences.layout.standard "Standard">
-<!ENTITY zotero.preferences.layout.stacked "Stacked">
-<!ENTITY zotero.preferences.fontSize "Schriftgröße">
+<!ENTITY zotero.preferences.layout.stacked "Gestapelt">
+<!ENTITY zotero.preferences.fontSize "Schriftgröße:">
 <!ENTITY zotero.preferences.fontSize.small "Klein">
 <!ENTITY zotero.preferences.fontSize.medium "Mittel">
 <!ENTITY zotero.preferences.fontSize.large "Groß">
@@ -25,28 +25,28 @@
 <!ENTITY zotero.preferences.miscellaneous "Verschiedenes">
 <!ENTITY zotero.preferences.autoUpdate "Automatisch auf Übersetzer- und Style-Updates überprüfen">
 <!ENTITY zotero.preferences.updateNow "Jetzt aktualisieren">
-<!ENTITY zotero.preferences.reportTranslationFailure "Fehlerhafte Übersetzer melden">
+<!ENTITY zotero.preferences.reportTranslationFailure "Fehlerhafte Übersetzungen melden">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Zotero.org erlauben, Inhalte auf Basis der aktuellen Zotero-Version anzupassen">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Wenn aktiv, wird die aktuelle Zotero-Version bei HTTP-Anfragen zu zotero.org mit übertragen">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Wenn aktiv, wird die aktuelle Zotero-Version bei HTTP-Anfragen zu zotero.org mit übertragen.">
 <!ENTITY zotero.preferences.parseRISRefer "Zotero für heruntergeladene BibTeX/RIS/Refer-Dateien verwenden">
 <!ENTITY zotero.preferences.automaticSnapshots "Automatisch einen Schnappschuss erstellen, sobald ein Eintrag aus einer Webseite erstellt wird">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatisch zugehörige PDFs und andere Dateien beim Speichern von Einträgen anhängen">
 <!ENTITY zotero.preferences.automaticTags "Automatisch Tags aus Schlüsselwörtern und Schlagwörtern erstellen">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Einträge im Papierkorb automatisch nach">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "Tagen löschen">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Einträge im Papierkorb automatisch löschen nach mehr als">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "Tagen">
 
 <!ENTITY zotero.preferences.groups "Gruppen">
-<!ENTITY zotero.preferences.groups.whenCopyingInclude "Beim Kopieren von Einträgen zwischen Bibliotheken übernehmen:">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "Beim Kopieren von Einträgen zwischen Bibliotheken, übernehmen:">
 <!ENTITY zotero.preferences.groups.childNotes "zugehörige Notizen">
 <!ENTITY zotero.preferences.groups.childFiles "zugehörige Schnappschüsse und importierte Dateien">
 <!ENTITY zotero.preferences.groups.childLinks "zugehörige Links">
 <!ENTITY zotero.preferences.groups.tags "Tags">
 
 <!ENTITY zotero.preferences.feeds "Feeds">
-<!ENTITY zotero.preferences.feeds.sorting.label "Sorting:">
-<!ENTITY zotero.preferences.feeds.sorting.newest "Newest items first">
-<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
-<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+<!ENTITY zotero.preferences.feeds.sorting.label "Sortierung:">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Neue Einträge zuerst">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Alte Einträge zuerst">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Standards">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -58,9 +58,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sync">
 <!ENTITY zotero.preferences.sync.username "Benutzername:">
 <!ENTITY zotero.preferences.sync.password "Passwort:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
-<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Daten Synchronisierung">
+<!ENTITY zotero.preferences.sync.setUpSync "Synchronisierung Konfigurieren">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Account entkoppeln...">
 <!ENTITY zotero.preferences.sync.createAccount "Account erstellen">
 <!ENTITY zotero.preferences.sync.lostPassword "Passwort vergessen?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatisch synchronisieren">
@@ -83,8 +83,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Diese Optionen sind nur für spezifische und sehr seltene Probleme geeignet und  sollten nicht als normale Methode zur Problemlösung dienen. Die Reset Option kann oft sogar zusätzliche Probleme verursachen. Siehe:">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Optionene">
 <!ENTITY zotero.preferences.sync.reset.warning3 "für weitere Informationen.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Komplette Synchronisierung">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Lokale Daten mit Daten vom Server zusammenführen, ohne die Sync-History zu beachten.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Vom Zotero-Server wiederherstellen">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Alle lokalen Zotero-Daten löschen und vom Sync-Server wiederherstellen.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zum Zotero-Server wiederherstellen">
@@ -146,7 +146,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Schnellsuche">
 <!ENTITY zotero.preferences.keys.newItem "Neuen Eintrag erstellen">
 <!ENTITY zotero.preferences.keys.newNote "Neue Notiz erstellen">
-<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Alle Feed-Einträge alls Gelesen/Ungelesen markieren">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Tag-Selector an/aus">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Ausgewählte Eintragszitationen in die Zwischenablage kopieren">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Ausgewählte Einträge in die Zwischenablage kopieren">

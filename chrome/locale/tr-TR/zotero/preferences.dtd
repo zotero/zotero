@@ -12,9 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Tarayıcı bölmesi">
 <!ENTITY zotero.preferences.showIn.separateTab "Ayrı sekme">
 <!ENTITY zotero.preferences.showIn.appTab "Uygulama sekmesi">
-<!ENTITY zotero.preferences.layout "Layout:">
-<!ENTITY zotero.preferences.layout.standard "Standard">
-<!ENTITY zotero.preferences.layout.stacked "Stacked">
+<!ENTITY zotero.preferences.layout "Düzen:">
+<!ENTITY zotero.preferences.layout.standard "Standart">
+<!ENTITY zotero.preferences.layout.stacked "Üst üste yığılmış">
 <!ENTITY zotero.preferences.fontSize "Yazıtipi boyutu:">
 <!ENTITY zotero.preferences.fontSize.small "Küçük">
 <!ENTITY zotero.preferences.fontSize.medium "Orta">
@@ -42,11 +42,11 @@
 <!ENTITY zotero.preferences.groups.childLinks "alt bağlantılar">
 <!ENTITY zotero.preferences.groups.tags "Etiketler">
 
-<!ENTITY zotero.preferences.feeds "Feeds">
-<!ENTITY zotero.preferences.feeds.sorting.label "Sorting:">
-<!ENTITY zotero.preferences.feeds.sorting.newest "Newest items first">
-<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
-<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+<!ENTITY zotero.preferences.feeds "Beslemeler">
+<!ENTITY zotero.preferences.feeds.sorting.label "Sıralama:">
+<!ENTITY zotero.preferences.feeds.sorting.newest "En yeni eserler ilk">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "En eski eserler ilk">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Besleme Varsayılanları">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -58,9 +58,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Eşitle">
 <!ENTITY zotero.preferences.sync.username "Kullanıcı:">
 <!ENTITY zotero.preferences.sync.password "Şifre:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
-<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Veri Eşitlemesi">
+<!ENTITY zotero.preferences.sync.setUpSync "Eşitlemeyi Kur">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Hesabı İlişkisizlendir...">
 <!ENTITY zotero.preferences.sync.createAccount "Hesap Oluştur">
 <!ENTITY zotero.preferences.sync.lostPassword "Unutulan Şifre?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Kendiliğinden eşitle">
@@ -83,8 +83,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Aşağıdaki işlemler, yalnızca ender ve özel durumlar altında kullanılmalı, ve genel sorun giderme amaçlı kullanılmamalıdırlar. Birçok durumda, sıfırlama ek sorunlara neden olacaktır. Bakınız:">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Eşitlemeyi Sıfırlama Seçenekleri">
 <!ENTITY zotero.preferences.sync.reset.warning3 "Daha fazla bilgi için">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Tam Eşitleme">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Eşitleme geçmişini gözetmeksinizin, yerel Zotero verilerini sunucudaki veri ile birleştir.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zotero Sunucusundan Geri Yükle">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Bütün yerel Zotero verilerini sil ve eşitleme sunucusundaki verileri yükle.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zotero Sunucusuna Yükle">
@@ -146,7 +146,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Çabuk Arama">
 <!ENTITY zotero.preferences.keys.newItem "Yeni Eser Oluştur">
 <!ENTITY zotero.preferences.keys.newNote "Yeni Not Oluştur">
-<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Tüm Besleme Eserlerini Okunmuş/Okunmamış İşaretle">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Konu Seçiciyi Aç">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Seçili Eserin Göndermelerini Panoya Kopyala">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Seçilen Eserleri Panoya Kopyala">

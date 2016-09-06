@@ -1,5 +1,5 @@
-<!ENTITY zotero.general.yes "Yes">
-<!ENTITY zotero.general.no "No">
+<!ENTITY zotero.general.yes "Da">
+<!ENTITY zotero.general.no "Ne">
 <!ENTITY zotero.general.optional "(neobvezno)">
 <!ENTITY zotero.general.note "Opomba:">
 <!ENTITY zotero.general.selectAll "Izberi vse">
@@ -10,7 +10,7 @@
 <!ENTITY zotero.general.cancel "Prekliči">
 <!ENTITY zotero.general.refresh "Osveži">
 <!ENTITY zotero.general.saveAs "Shrani kot ...">
-<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
+<!ENTITY zotero.general.advancedOptions.label "Napredne možnosti">
 
 <!ENTITY zotero.errorReport.title "Poročilo o napaki Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Vključuje lahko sporočila, ki se ne nanašajo na Zotero.">
@@ -26,7 +26,7 @@
 <!ENTITY zotero.upgrade.autoBackup "Vaša obstoječa zbirka podatkov bo samodejno varnostno kopirana, preden se opravijo spremembe.">
 <!ENTITY zotero.upgrade.majorUpgrade "To je ključna posodobitev.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Prepričajte se, da ste pregledali">
-<!ENTITY zotero.upgrade.majorUpgradeLink "navodila za posodabljanje">
+<!ENTITY zotero.upgrade.majorUpgradeLink "navodila za posodabljanje,">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "preden nadaljujete.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Počakajte, da se postopek nadgradnje dokonča. To lahko znese nekaj minut.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Vaša zbirka podatkov Zotero je bila uspešno nadgrajena.">
@@ -103,9 +103,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Ustvari nov vnos iz trenutne strani">
 <!ENTITY zotero.toolbar.lookup.label "Dodaj vnos po identifikatorju">
 <!ENTITY zotero.toolbar.removeItem.label "Odstrani vnos ...">
-<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
+<!ENTITY zotero.toolbar.newLibrary.label "Nova knjižnica ...">
 <!ENTITY zotero.toolbar.newCollection.label "Nova zbirka ...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
+<!ENTITY zotero.toolbar.markFeedRead.label "Označi vir kot prebran">
 <!ENTITY zotero.toolbar.newGroup "Nova skupina ...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nova podzbirka ...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Novo shranjeno iskanje ...">
@@ -125,12 +125,12 @@
 <!ENTITY zotero.toolbar.openURL.label "Najdi">
 <!ENTITY zotero.toolbar.openURL.tooltip "Poišči v krajevni knjižnici">
 
-<!ENTITY zotero.toolbar.feeds.new "New Feed…">
-<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
-<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
-<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
-<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+<!ENTITY zotero.toolbar.feeds.new "Nov vir ...">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "Z URL ...">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "S strani ...">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "Iz OPML ...">
+<!ENTITY zotero.toolbar.feeds.refresh "Osveži vir">
+<!ENTITY zotero.toolbar.feeds.edit "Uredi vir ...">
 
 <!ENTITY zotero.item.add "Dodaj">
 <!ENTITY zotero.item.attachment.file.show "Pokaži datoteko">
@@ -140,7 +140,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Zamenjaj ime/priimek">
 <!ENTITY zotero.item.viewOnline "Pokaži na spletu">
 <!ENTITY zotero.item.copyAsURL "Kopiraj kot URL">
-<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
+<!ENTITY zotero.item.deletePermanently "Izbriši trajno ...">
 
 <!ENTITY zotero.toolbar.newNote "Nova opomba">
 <!ENTITY zotero.toolbar.note.standalone "Nova samostojna opomba">
@@ -152,7 +152,7 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Naredi posnetek trenutne strani">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Brez značk za prikaz">
-<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
+<!ENTITY zotero.tagSelector.loadingTags "Nalaganje značk ...">
 <!ENTITY zotero.tagSelector.showAutomatic "Pokaži samodejno">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Prikaži vse značke v tej knjižnici">
 <!ENTITY zotero.tagSelector.clearAll "Ne izberi ničesar">
@@ -176,6 +176,7 @@
 
 <!ENTITY zotero.bibliography.title "Ustvari bibliografijo">
 <!ENTITY zotero.bibliography.style.label "Slog navajanja:">
+<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
 <!ENTITY zotero.bibliography.locale.label "Jezik:">
 <!ENTITY zotero.bibliography.outputMode "Izhodni način:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografija">
@@ -263,14 +264,14 @@
 <!ENTITY zotero.proxy.recognized.disable.label "Samodejno ne preusmeri zahtev po poprej prepoznanih posredovalnih strežnikih">
 <!ENTITY zotero.proxy.recognized.ignore.label "Prezri">
 
-<!ENTITY zotero.feedSettings.title "Feed Settings">
-<!ENTITY zotero.feedSettings.saveButton.label "Save">
+<!ENTITY zotero.feedSettings.title "Nastavitve vira">
+<!ENTITY zotero.feedSettings.saveButton.label "Shrani">
 <!ENTITY zotero.feedSettings.url.label "URL:">
-<!ENTITY zotero.feedSettings.title.label "Title:">
-<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
-<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
-<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Remove read articles after ">
-<!ENTITY zotero.feedSettings.cleanupAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.title.label "Naslov:">
+<!ENTITY zotero.feedSettings.refresh.label1 "Vir posodobi vsakih">
+<!ENTITY zotero.feedSettings.refresh.label2 "ur">
+<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Odstrani prebrane članke po">
+<!ENTITY zotero.feedSettings.cleanupAfter.label2 "dneh">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Pridobivanje metapodatkov ...">

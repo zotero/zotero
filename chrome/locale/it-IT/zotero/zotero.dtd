@@ -176,6 +176,7 @@
 
 <!ENTITY zotero.bibliography.title "Crea bibliografia">
 <!ENTITY zotero.bibliography.style.label "Stile citazione:">
+<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
 <!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Modalità di output:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografia">
