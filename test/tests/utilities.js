@@ -237,13 +237,14 @@ describe("Zotero.Utilities", function() {
 		});
 		it("should map additional fields from Extra field", function() {
 			let item = new Zotero.Item('journalArticle');
-			item.setField('extra', 'PMID: 12345\nPMCID:123456');
+			item.setField('extra', 'PMID: 12345\nPMCID:123456\nDOI:10.5064/F6PN93H4');
 			item = Zotero.Items.get(item.save());
 			
 			let cslJSON = Zotero.Utilities.itemToCSLJSON(item);
 			
 			assert.equal(cslJSON.PMID, '12345', 'PMID from Extra is mapped to PMID');
 			assert.equal(cslJSON.PMCID, '123456', 'PMCID from Extra is mapped to PMCID');
+			assert.equal(cslJSON.DOI, '10.5064/F6PN93H4', 'DOI from Extra field is mapped to DOI');
 			
 			item.setField('extra', 'PMID: 12345');
 			item.save();
@@ -251,20 +252,23 @@ describe("Zotero.Utilities", function() {
 			
 			assert.equal(cslJSON.PMID, '12345', 'single-line entry is extracted correctly');
 			
-			item.setField('extra', 'some junk: note\nPMID: 12345\nstuff in-between\nPMCID: 123456\nlast bit of junk!');
+			item.setField('extra', 'some junk: note\nPMID: 12345\nstuff in-between\nPMCID: 123456\nDOI: 10.5064/F6PN93H4\nlast bit of junk!');
 			item.save();
 			cslJSON = Zotero.Utilities.itemToCSLJSON(item);
 			
 			assert.equal(cslJSON.PMID, '12345', 'PMID from mixed Extra field is mapped to PMID');
 			assert.equal(cslJSON.PMCID, '123456', 'PMCID from mixed Extra field is mapped to PMCID');
+			assert.equal(cslJSON.DOI, '10.5064/F6PN93H4', 'DOI from mixed Extra field is mapped to DOI');
 			
-			item.setField('extra', 'a\n PMID: 12345\nfoo PMCID: 123456');
+			item.setField('extra', 'a\n PMID: 12345\nfoo PMCID: 123456\n10.5064/F6PN93H4');
 			item.save();
 			cslJSON = Zotero.Utilities.itemToCSLJSON(item);
 			
 			assert.isUndefined(cslJSON.PMCID, 'field label must not be preceded by other text');
 			assert.isUndefined(cslJSON.PMID, 'field label must not be preceded by a space');
-			assert.equal(cslJSON.note, 'a\n PMID: 12345\nfoo PMCID: 123456', 'note is left untouched if nothing is extracted');
+			assert.isUndefined(cslJSON.DOI, 'DOI must be preceded by label');
+			assert.equal(cslJSON.note, 'a\n PMID: 12345\nfoo PMCID: 123456\n10.5064/F6PN93H4', 'note is left untouched if nothing is extracted');
+
 			
 			item.setField('extra', 'something\npmid: 12345\n');
 			item.save();
