@@ -260,7 +260,7 @@ describe("Zotero.Utilities", function() {
 			assert.equal(cslJSON.PMCID, '123456', 'PMCID from mixed Extra field is mapped to PMCID');
 			assert.equal(cslJSON.DOI, '10.5064/F6PN93H4', 'DOI from mixed Extra field is mapped to DOI');
 			
-			item.setField('extra', 'a\n PMID: 12345\nfoo PMCID: 123456\n 10.5064/F6PN93H4');
+			item.setField('extra', 'a\n PMID: 12345\nfoo PMCID: 123456\n10.5064/F6PN93H4');
 			item.save();
 			cslJSON = Zotero.Utilities.itemToCSLJSON(item);
 			
