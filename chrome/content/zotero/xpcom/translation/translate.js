@@ -1741,9 +1741,12 @@ Zotero.Translate.Base.prototype = {
 			this._sandboxManager = new Zotero.Translate.SandboxManager(this._sandboxLocation);
 		}
 		const createArrays = "['creators', 'notes', 'tags', 'seeAlso', 'attachments']";
-		var src = "var Zotero = {};"+
-		"Zotero.Item = function (itemType) {"+
-				"const createArrays = "+createArrays+";"+
+		var src = "";
+		if (Zotero.isFx && !Zotero.isBookmarklet) {
+			src = "var Zotero = {};";
+		}
+		src += "Zotero.Item = function (itemType) {"+
+				"var createArrays = "+createArrays+";"+
 				"this.itemType = itemType;"+
 				"for(var i=0, n=createArrays.length; i<n; i++) {"+
 					"this[createArrays[i]] = [];"+

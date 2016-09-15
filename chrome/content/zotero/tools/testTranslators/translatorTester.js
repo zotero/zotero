@@ -36,7 +36,7 @@ try {
 	var Zotero;
 }
 
-Zotero_TranslatorTesters = new function() {
+var Zotero_TranslatorTesters = new function() {
 	const TEST_TYPES = ["web", "import", "export", "search"];
 	var collectedResults = {};
 	
@@ -190,7 +190,7 @@ Zotero_TranslatorTesters = new function() {
  * @param {Function} [debugCallback] A function to call to write debug output. If not present,
  *     Zotero.debug will be used.
  */
-Zotero_TranslatorTester = function(translator, type, debugCallback) {
+var Zotero_TranslatorTester = function(translator, type, debugCallback) {
 	this.type = type;
 	this.translator = translator;
 	this.output = "";
