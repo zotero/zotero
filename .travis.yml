@@ -15,8 +15,8 @@ notifications:
 install:
     # Use unbranded builds for 'release' and 'beta'
     - if [ $FX_CHANNEL != "esr" ]; then
-        URL="`curl -s https://wiki.mozilla.org/Addons/Extension_Signing | sed -n -r \"s/.+https?(:\/\/archive.mozilla.org[^ ]+\/mozilla-${FX_CHANNEL}-linux64-add-on-devel\/[0-9]+\/.+.bz2).+/https\1/p\"`"
-        wget -O tarball "$URL"
+        URL="`curl -s https://wiki.mozilla.org/Addons/Extension_Signing | sed -n -r \"s/.+https?(:\/\/archive.mozilla.org[^ ]+\/mozilla-${FX_CHANNEL}-linux64-add-on-devel\/[0-9]+\/.+.bz2).+/https\1/p\"`";
+        wget -O tarball "$URL";
       fi
     # Use official build for 'esr'
     - if [ $FX_CHANNEL == "esr" ]; then
