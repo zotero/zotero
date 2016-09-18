@@ -24,8 +24,9 @@
 */
 
 const NUM_CONCURRENT_TESTS = 6;
-const TRANSLATOR_TYPES = ["Web", "Import", "Export", "Search"];
 const TABLE_COLUMNS = ["Translator", "Supported", "Status", "Pending", "Succeeded", "Failed", "Mismatch", "Issues"];
+// Not using const to prevent const collisions in connectors
+var TRANSLATOR_TYPES = ["Web", "Import", "Export", "Search"];
 var translatorTables = {},
 	translatorTestViews = {},
 	translatorTestViewsToRun = {},

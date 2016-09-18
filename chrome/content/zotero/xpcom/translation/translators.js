@@ -26,7 +26,7 @@
 "use strict";
 
 // Enumeration of types of translators
-const TRANSLATOR_TYPES = {"import":1, "export":2, "web":4, "search":8};
+var TRANSLATOR_TYPES = {"import":1, "export":2, "web":4, "search":8};
 
 /**
  * Singleton to handle loading and caching of translators

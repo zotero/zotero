@@ -753,6 +753,28 @@ var generateTranslatorExportData = Zotero.Promise.coroutine(function* generateTr
 	return translatorExportData;
 });
 
+
+/**
+ * Build a dummy translator that can be passed to Zotero.Translate
+ */
+function buildDummyTranslator(translatorType, code) {
+	let info = {
+		"translatorID":"dummy-translator",
+		"translatorType":1, // import
+		"label":"Dummy Translator",
+		"creator":"Simon Kornblith",
+		"target":"",
+		"priority":100,
+		"browserSupport":"g",
+		"inRepository":false,
+		"lastUpdated":"0000-00-00 00:00:00",
+	};
+	let translator = new Zotero.Translator(info);
+	translator.code = code;
+	return translator;
+}
+
+
 /**
  * Imports an attachment from a test file.
  * @param {string} filename - The filename to import (in data directory)

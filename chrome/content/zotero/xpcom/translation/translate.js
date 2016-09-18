@@ -1264,7 +1264,7 @@ Zotero.Translate.Base.prototype = {
 		
 		// Zotero.Translators.get() returns a promise in the connectors, but we don't expect it to
 		// otherwise
-		if (!this.isConnector && this.translator[0].then) {
+		if (!Zotero.isConnector && this.translator[0].then) {
 			throw new Error("Translator should not be a promise in non-connector mode");
 		}
 		

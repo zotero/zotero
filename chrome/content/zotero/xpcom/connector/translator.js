@@ -130,7 +130,9 @@ Zotero.Translators = new function() {
 		if(!_initialized) Zotero.Translators.init()
 		var translators = _cache[type].slice(0);
 		var codeGetter = new Zotero.Translators.CodeGetter(translators, debugMode);
-		return codeGetter.getAll();
+		return codeGetter.getAll().then(function() {
+			return translators;
+		});;
 	});
 	
 	/**
@@ -326,24 +328,36 @@ Zotero.Translators = new function() {
 Zotero.Translators.CodeGetter = function(translators, debugMode) {
 	this._translators = translators;
 	this._debugMode = debugMode;
-}
+	this._concurrency = 1;
+};
 
-Zotero.Translators.CodeGetter.prototype.getAll = Zotero.Promise.method(function () {
-	var translators = [];
-	for (let translator of this._translators) {
-		// retrieve code if no code and translator is supported locally
-		if((translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER && !translator.hasOwnProperty("code"))
-				// or if debug mode is enabled (even if unsupported locally)
-				|| (this._debugMode && (!translator.hasOwnProperty("code")
-				// or if in debug mode and the code we have came from the repo (which doesn't
-				// include test cases)
-				|| (Zotero.Repo && translator.codeSource === Zotero.Repo.SOURCE_REPO)))) {
-				// get next translator
-			translators.push(translator.getCode());
+Zotero.Translators.CodeGetter.prototype.getCodeFor = Zotero.Promise.method(function(i) {
+	let translator = this._translators[i];
+	// retrieve code if no code and translator is supported locally
+	if((translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER && !translator.hasOwnProperty("code"))
+			// or if debug mode is enabled (even if unsupported locally)
+			|| (this._debugMode && (!translator.hasOwnProperty("code")
+			// or if in debug mode and the code we have came from the repo (which doesn't
+			// include test cases)
+			|| (Zotero.Repo && translator.codeSource === Zotero.Repo.SOURCE_REPO)))) {
+		// get code
+		return translator.getCode();
+	}
+});
+
+Zotero.Translators.CodeGetter.prototype.getAll = function () {
+	var codes = [];
+	// Chain promises with some level of concurrency. If unchained, fires 
+	// off hundreds of xhttprequests on connectors and crashes the extension
+	for (let i = 0; i < this._translators.length; i++) {
+		if (i < this._concurrency) {
+			codes.push(this.getCodeFor(i));
+		} else {
+			codes.push(codes[i-this._concurrency].then(() => this.getCodeFor(i)));
 		}
 	}
-	return Zotero.Promise.all(translators);
-});
+	return Promise.all(codes);
+};
 
 var TRANSLATOR_REQUIRED_PROPERTIES = ["translatorID", "translatorType", "label", "creator", "target",
 		"priority", "lastUpdated"];
@@ -428,8 +442,8 @@ Zotero.Translator.prototype.init = function(info) {
  *
  * @return {Promise<String|false>} - Promise for translator code or false if none
  */
-Zotero.Translator.prototype.getCode = function () {
-	return Zotero.Repo.getTranslatorCode(this.translatorID)
+Zotero.Translator.prototype.getCode = function (debugMode) {
+	return Zotero.Repo.getTranslatorCode(this.translatorID, debugMode)
 	.then(function (args) {
 		var code = args[0];
 		var source = args[1];

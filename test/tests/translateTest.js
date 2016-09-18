@@ -2,26 +2,6 @@ new function() {
 Components.utils.import("resource://gre/modules/osfile.jsm");
 
 /**
- * Build a dummy translator that can be passed to Zotero.Translate
- */
-function buildDummyTranslator(translatorType, code) {
-	let info = {
-		"translatorID":"dummy-translator",
-		"translatorType":1, // import
-		"label":"Dummy Translator",
-		"creator":"Simon Kornblith",
-		"target":"",
-		"priority":100,
-		"browserSupport":"g",
-		"inRepository":false,
-		"lastUpdated":"0000-00-00 00:00:00",
-	};
-	let translator = new Zotero.Translator(info);
-	translator.code = code;
-	return translator;
-}
-
-/**
  * Create a new translator that saves the specified items
  * @param {String} translatorType - "import" or "web"
  * @param {Object} items - items as translator JSON
