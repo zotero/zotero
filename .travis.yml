@@ -16,9 +16,8 @@ notifications:
 install:
     # Use unbranded builds for 'release' and 'beta'
     - if [ $FX_CHANNEL != "esr" ]; then
-        TS="`curl -s https://archive.mozilla.org/pub/firefox/tinderbox-builds/mozilla-${FX_CHANNEL}-linux64-add-on-devel/ | grep mozilla-$FX_CHANNEL | tail -n 1 | sed -r 's/.+add-on-devel\/([0-9]+).+/\1/'`";
-        FN="`curl -s https://archive.mozilla.org/pub/firefox/tinderbox-builds/mozilla-${FX_CHANNEL}-linux64-add-on-devel/$TS/ | grep add-on-devel.tar.bz2 | head -n 1 | sed -r 's/.+>(firefox-[^<]+).+/\1/g'`";
-        wget -O tarball "https://archive.mozilla.org/pub/firefox/tinderbox-builds/mozilla-${FX_CHANNEL}-linux64-add-on-devel/$TS/$FN";
+        URL="`curl -s https://wiki.mozilla.org/Addons/Extension_Signing | sed -n -r \"s/.+https?(:\/\/archive.mozilla.org[^ ]+\/mozilla-${FX_CHANNEL}-linux64-add-on-devel\/[0-9]+\/.+.bz2).+/https\1/p\"`";
+        wget -O tarball "$URL";
       fi
     # Use official build for 'esr'
     - if [ $FX_CHANNEL == "esr" ]; then
