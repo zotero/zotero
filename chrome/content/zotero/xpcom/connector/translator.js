@@ -362,7 +362,7 @@ Zotero.Translators.CodeGetter.prototype.getAll = function () {
 var TRANSLATOR_REQUIRED_PROPERTIES = ["translatorID", "translatorType", "label", "creator", "target",
 		"priority", "lastUpdated"];
 var TRANSLATOR_PASSING_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES
-		.concat(["browserSupport", "code", "runMode", "itemType"]);
+		.concat(["targetAll", "browserSupport", "code", "runMode", "itemType"]);
 var TRANSLATOR_SAVE_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browserSupport"]);
 /**
  * @class Represents an individual translator
