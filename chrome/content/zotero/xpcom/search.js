@@ -664,9 +664,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 							inQS = false;
 							continue;
 						}
-						else if (c.condition == 'fulltextContent' ||
-								c.condition == 'fulltextContent' ||
-									inQS) {
+						else if (c.condition == 'fulltextContent' || inQS) {
 							continue;
 						}
 						else if (joinMode == 'any' && !c.required) {
