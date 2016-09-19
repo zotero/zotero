@@ -155,10 +155,12 @@ Zotero.DataObjectUtilities = {
 	/**
 	 * Determine whether two API JSON objects are equivalent
 	 *
+	 * Note: Currently unused
+	 *
 	 * @param {Object} data1 - API JSON of first object
 	 * @param {Object} data2 - API JSON of second object
 	 * @param {Array} [ignoreFields] - Fields to ignore
-	 * @param {Boolean} - True if objects are the same, false if not
+	 * @return {Boolean} - True if objects are the same, false if not
 	 */
 	equals: function (data1, data2, ignoreFields) {
 		var skipFields = {};
@@ -182,7 +184,7 @@ Zotero.DataObjectUtilities = {
 			
 			let changed = this._fieldChanged(field, val1, val2);
 			if (changed) {
-				return true;
+				return false;
 			}
 			
 			skipFields[field] = true;
@@ -200,10 +202,10 @@ Zotero.DataObjectUtilities = {
 				continue;
 			}
 			
-			return true;
+			return false;
 		}
 		
-		return false;
+		return true;
 	},
 	
 	_fieldChanged: function (fieldName, field1, field2) {
