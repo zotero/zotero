@@ -33,6 +33,34 @@ describe("Connector Server", function () {
 	after(function () {
 		win.close();
 	});
+
+
+	describe('/connector/getTranslatorCode', function() {
+		it('should respond with translator code', function* () {
+			var code = 'function detectWeb() {}\nfunction doImport() {}';
+			var translator = buildDummyTranslator(4, code);
+			sinon.stub(Zotero.Translators, 'get').returns(translator);
+
+			var response = yield Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/getTranslatorCode",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						translatorID: "dummy-translator",
+					})
+				}
+			);
+
+			assert.isTrue(Zotero.Translators.get.calledWith('dummy-translator'));
+			assert.equal(response.response, code);
+
+			Zotero.Translators.get.restore();
+		})
+	});
+	
 	
 	describe("/connector/saveItems", function () {
 		// TODO: Test cookies

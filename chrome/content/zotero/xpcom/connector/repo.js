@@ -56,7 +56,7 @@ Zotero.Repo = new function() {
 	 * Get translator code from repository
 	 * @param {String} translatorID ID of the translator to retrieve code for
 	 */
-	this.getTranslatorCode = Zotero.Promise.method(function (translatorID) {
+	this.getTranslatorCode = Zotero.Promise.method(function (translatorID, debugMode) {
 		var deferred = Zotero.Promise.defer();
 		
 		// try standalone
@@ -70,6 +70,11 @@ Zotero.Repo = new function() {
 						]
 					)
 				);
+				return;
+			}
+			// Don't fetch from repo in debug mode
+			if (debugMode) {
+				deferred.resolve([false, Zotero.Repo.SOURCE_ZOTERO_STANDALONE]);
 				return;
 			}
 			

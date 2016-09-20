@@ -618,7 +618,9 @@ Zotero.Server.Connector.GetTranslatorCode.prototype = {
 	 */
 	"init":function(postData, sendResponseCallback) {
 		var translator = Zotero.Translators.get(postData.translatorID);
-		sendResponseCallback(200, "application/javascript", translator.code);
+		translator.getCode().then(function(code) {
+			sendResponseCallback(200, "application/javascript", code);
+		});
 	}
 }
 
