@@ -1,3 +1,5 @@
+"use strict";
+
 Zotero.Sync.EventListeners = {
 	/**
 	 * Start all listeners
@@ -108,7 +110,7 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 	},
 	
 	register: function () {
-		_observerID = Zotero.Notifier.registerObserver(this, false, 'autosync');
+		this._observerID = Zotero.Notifier.registerObserver(this, false, 'autosync');
 	},
 	
 	notify: function (event, type, ids, extraData) {
@@ -158,7 +160,7 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 	},
 	
 	unregister: function () {
-		if (_observerID) {
+		if (this._observerID) {
 			Zotero.Notifier.unregisterObserver(_observerID);
 		}
 	}
