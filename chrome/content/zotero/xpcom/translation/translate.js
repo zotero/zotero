@@ -127,8 +127,10 @@ Zotero.Translate.Sandbox = {
 				}
 			}
 
-			// Canonicalize tags
-			if(item.tags) item.tags = translate._cleanTags(item.tags);
+			// If we're not in a child translator, canonicalize tags
+			if (!translate._parentTranslator) {
+				if(item.tags) item.tags = translate._cleanTags(item.tags);
+			}
 			
 			// if we're not supposed to save the item or we're in a child translator,
 			// just return the item array
@@ -158,8 +160,10 @@ Zotero.Translate.Sandbox = {
 						delete attachment.document;
 					}
 
-					// Canonicalize tags
-					if(attachment.tags !== undefined) attachment.tags = translate._cleanTags(attachment.tags);
+					// If we're not in a child translator, canonicalize tags
+					if (!translate._parentTranslator) {
+						if(attachment.tags !== undefined) attachment.tags = translate._cleanTags(attachment.tags);
+					}
 				}
 			}
 
@@ -169,12 +173,13 @@ Zotero.Translate.Sandbox = {
 					var note = notes[j];
 					if(!note) {
 						notes.splice(j--, 1);
-					} else if(typeof(note) == "object") {
-						// Canonicalize tags
-						if(note.tags !== undefined) note.tags = translate._cleanTags(note.tags);
-					} else {
+					} else if(typeof(note) != "object") {
 						// Convert to object
 						notes[j] = {"note":note.toString()}
+					}
+					// If we're not in a child translator, canonicalize tags
+					if (!translate._parentTranslator) {
+						if(note.tags !== undefined) note.tags = translate._cleanTags(note.tags);
 					}
 				}
 			}
