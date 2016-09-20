@@ -23,7 +23,7 @@
  *     <http://www.gnu.org/licenses/> respectively.
  */
 var CSL = {
-    PROCESSOR_VERSION: "1.1.130",
+    PROCESSOR_VERSION: "1.1.131",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -4657,7 +4657,6 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
     var c, i, ilen, j, jlen, k, klen, n, nlen, key, Item, item, noteCitations, textCitations, m, citationsInNote;
     this.debug = false;
     this.tmp.loadedItemIDs = {};
-    citation = JSON.parse(JSON.stringify(citation));
     this.tmp.citation_errors = [];
     var return_data = {"bibchange": false};
     this.setCitationId(citation);
