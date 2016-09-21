@@ -290,6 +290,10 @@ Zotero.Feed.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 });
 
 Zotero.Feed.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
+	let criticalDataChanged = ['_feedName', '_feedCleanupAfter', '_feedRefreshInterval'].reduce(function(prev, cur) {
+		return prev || this._changed[cur];
+	}.bind(this), false);
+
 	yield Zotero.Feed._super.prototype._finalizeSave.apply(this, arguments);
 	
 	if (!env.isNew && this._previousURL) {
@@ -300,10 +304,12 @@ Zotero.Feed.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
 		delete syncedFeeds[this._previousURL];
 		yield Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'feeds', syncedFeeds);
 	}
-	if (env.isNew || this._previousURL) {
-		Zotero.Feeds.register(this);
+	if (criticalDataChanged || env.isNew || this._previousURL) {
+		yield this.storeSyncedSettings();
+		if (env.isNew || this._previousURL) {
+			Zotero.Feeds.register(this);
+		}
 	}
-	yield this.storeSyncedSettings();
 	this._previousURL = null;
 	
 });
