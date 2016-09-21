@@ -35,9 +35,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	
 	Zotero.defineProperty(this, 'enabled', {
 		get: () => {
-			if (_apiKey) return true;
-			var username = Zotero.Prefs.get('sync.server.username');
-			return username && Zotero.Sync.Data.Local.getLegacyPassword(username);
+			return _apiKey || Zotero.Sync.Data.Local.hasCredentials();
 		}
 	});
 	Zotero.defineProperty(this, 'syncInProgress', { get: () => _syncInProgress });
