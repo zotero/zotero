@@ -290,9 +290,8 @@ Zotero.Feed.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 });
 
 Zotero.Feed.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
-	let criticalDataChanged = ['_feedName', '_feedCleanupAfter', '_feedRefreshInterval'].reduce(function(prev, cur) {
-		return prev || this._changed[cur];
-	}.bind(this), false);
+	let syncedDataChanged = 
+		['_feedName', '_feedCleanupAfter', '_feedRefreshInterval'].some((val) => this._changed[val]);
 
 	yield Zotero.Feed._super.prototype._finalizeSave.apply(this, arguments);
 	
@@ -304,7 +303,7 @@ Zotero.Feed.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
 		delete syncedFeeds[this._previousURL];
 		yield Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'feeds', syncedFeeds);
 	}
-	if (criticalDataChanged || env.isNew || this._previousURL) {
+	if (syncedDataChanged || env.isNew || this._previousURL) {
 		yield this.storeSyncedSettings();
 		if (env.isNew || this._previousURL) {
 			Zotero.Feeds.register(this);
