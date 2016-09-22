@@ -159,6 +159,24 @@ describe("Zotero.Feed", function() {
 			assert.notOk(syncedFeeds[oldUrl]);
 			assert.ok(syncedFeeds[feed.url]);
 		});
+		it('should update syncedSettings if `name`, `url`, `refreshInterval` or `cleanupAfter` was modified', function* () {
+			let feed = yield createFeed();
+			let syncedSetting = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			yield Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'feeds', syncedSetting, 0, true);
+			
+			feed.name = "New name";
+			yield feed.saveTx();
+			assert.isFalse(Zotero.SyncedSettings.getMetadata(Zotero.Libraries.userLibraryID, 'feeds').synced)
+		});
+		it('should not update syncedSettings if `name`, `url`, `refreshInterval` or `cleanupAfter` were not modified', function* () {
+			let feed = yield createFeed();
+			let syncedSetting = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds');
+			yield Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'feeds', syncedSetting, 0, true);
+
+			feed._set('_feedLastCheck', Zotero.Date.dateToSQL(new Date(), true));
+			yield feed.saveTx();
+			assert.isTrue(Zotero.SyncedSettings.getMetadata(Zotero.Libraries.userLibraryID, 'feeds').synced)
+		});
 	});
 	describe("#erase()", function() {
 		it("should erase a saved feed", function* () {
@@ -271,11 +289,19 @@ describe("Zotero.Feed", function() {
 	});
 	
 	describe('#updateFeed()', function() {
-		var feed;
+		var feed, scheduleNextFeedCheck;
 		var feedUrl = getTestDataUrl("feed.rss");
 		var modifiedFeedUrl = getTestDataUrl("feedModified.rss");
 		
+		before(function() {
+			scheduleNextFeedCheck = sinon.stub(Zotero.Feeds, 'scheduleNextFeedCheck');
+		});
+		after(function() {
+			scheduleNextFeedCheck.restore();
+		});
+		
 		beforeEach(function* (){
+			scheduleNextFeedCheck.reset();
 			feed = yield createFeed();
 			feed._feedUrl = feedUrl;
 			yield feed.updateFeed();
@@ -286,14 +312,12 @@ describe("Zotero.Feed", function() {
 		});
 		
 		it('should schedule next feed check', function* () {
-			let scheduleNextFeedCheck = sinon.stub(Zotero.Feeds, 'scheduleNextFeedCheck');
 			
 			let feed = yield createFeed();
 			feed._feedUrl = feedUrl;
 			yield feed.updateFeed();
 			assert.equal(scheduleNextFeedCheck.called, true);
 			
-			scheduleNextFeedCheck.restore();
 		});
 		
 		it('should add new feed items', function* () {
