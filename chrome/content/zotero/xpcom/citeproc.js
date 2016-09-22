@@ -23,7 +23,7 @@
  *     <http://www.gnu.org/licenses/> respectively.
  */
 var CSL = {
-    PROCESSOR_VERSION: "1.1.130",
+    PROCESSOR_VERSION: "1.1.133",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -238,42 +238,47 @@ var CSL = {
                 elems.push(m[i]);
             }
             elems.push(splt[splt.length-1])
-            var names = {};
-            for (var i=1,ilen=elems.length;i<ilen;i+=2) {
-                var mm = elems[i].match(CSL.NOTE_FIELD_REGEXP);
-                var key = mm[1];
-                var val = mm[2].replace(/^\s+/, "").replace(/\s+$/, "");
-                if (!Item[key]) {
-                    if (!validFieldsForType || validFieldsForType[key]) {
-                        if (CSL.DATE_VARIABLES.indexOf(key) > -1) {
-                            Item[key] = {raw: val};
-                            elems[i] = "";
-                        } else {
-                            Item[key] = val;
-                        }
-                    } else if (CSL.NAME_VARIABLES.indexOf(key) > -1) {
-                        if (!names[key]) {
-                            names[key] = [];
-                        }
-                        var lst = val.split(/\s*\|\|\s*/);
-                        if (lst.length === 1) {
-                            names[key].push({literal:lst[0]});
-                        } else if (lst.length === 2) {
-                            var name = {family:lst[0],given:lst[1]};
-                            CSL.parseParticles(name);
-                            names[key].push(name);
-                        }
-                        elems[i] = "";
+            for (var i=1,ilen=elems.length;i<ilen;i += 2) {
+                elems[i] = '\n' + elems[i].slice(2,-1).trim() + '\n';
+            }
+            elems = elems.join('').split('\n');
+        } else {
+            elems = Item.note.split('\n');
+        }
+        var names = {};
+        for (var i=0,ilen=elems.length;i<ilen;i++) {
+            var line = elems[i];
+            var mm = line.match(CSL.NOTE_FIELD_REGEXP);
+            if (!mm) continue;
+            var key = mm[1];
+            var val = mm[2].replace(/^\s+/, "").replace(/\s+$/, "");
+            if (!Item[key]) {
+                if (CSL.DATE_VARIABLES.indexOf(key) > -1) {
+                    Item[key] = {raw: val};
+                } else if (CSL.NAME_VARIABLES.indexOf(key) > -1) {
+                    if (!names[key]) {
+                        names[key] = [];
                     }
+                    var lst = val.split(/\s*\|\|\s*/);
+                    if (lst.length === 1) {
+                        names[key].push({literal:lst[0]});
+                    } else if (lst.length === 2) {
+                        var name = {family:lst[0],given:lst[1]};
+                        CSL.parseParticles(name);
+                        names[key].push(name);
+                    }
+                } else {
+                    Item[key] = val;
                 }
-                if (name === "type") {
-                    Item.type = val;
-                }
-                Item.note = elems.join("");
+                elems[i] = "";
             }
-            for (var key in names) {
-                Item[key] = names[key];
+            if (name === "type") {
+                Item.type = val;
             }
+            Item.note = elems.join("");
+        }
+        for (var key in names) {
+            Item[key] = names[key];
         }
     },
     GENDERS: ["masculine", "feminine"],
@@ -365,7 +370,7 @@ var CSL = {
     VIETNAMESE_SPECIALS: /[\u00c0-\u00c3\u00c8-\u00ca\u00cc\u00cd\u00d2-\u00d5\u00d9\u00da\u00dd\u00e0-\u00e3\u00e8-\u00ea\u00ec\u00ed\u00f2-\u00f5\u00f9\u00fa\u00fd\u0101\u0103\u0110\u0111\u0128\u0129\u0168\u0169\u01a0\u01a1\u01af\u01b0\u1ea0-\u1ef9]/,
     VIETNAMESE_NAMES: /^(?:(?:[.AaBbCcDdEeGgHhIiKkLlMmNnOoPpQqRrSsTtUuVvXxYy \u00c0-\u00c3\u00c8-\u00ca\u00cc\u00cd\u00d2-\u00d5\u00d9\u00da\u00dd\u00e0-\u00e3\u00e8-\u00ea\u00ec\u00ed\u00f2-\u00f5\u00f9\u00fa\u00fd\u0101\u0103\u0110\u0111\u0128\u0129\u0168\u0169\u01a0\u01a1\u01af\u01b0\u1ea0-\u1ef9]{2,6})(\s+|$))+$/,
     NOTE_FIELDS_REGEXP: /\{:(?:[\-_a-z]+|[A-Z]+):[^\}]+\}/g,
-    NOTE_FIELD_REGEXP: /\{:([\-_a-z]+|[A-Z]+):\s*([^\}]+)\}/,
+    NOTE_FIELD_REGEXP: /^([\-_a-z]+|[A-Z]+):\s*([^\}]+)$/,
     DISPLAY_CLASSES: ["block", "left-margin", "right-inline", "indent"],
     NAME_VARIABLES: [
         "author",
@@ -4657,7 +4662,6 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
     var c, i, ilen, j, jlen, k, klen, n, nlen, key, Item, item, noteCitations, textCitations, m, citationsInNote;
     this.debug = false;
     this.tmp.loadedItemIDs = {};
-    citation = JSON.parse(JSON.stringify(citation));
     this.tmp.citation_errors = [];
     var return_data = {"bibchange": false};
     this.setCitationId(citation);
