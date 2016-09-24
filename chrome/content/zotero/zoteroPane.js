@@ -4796,7 +4796,10 @@ var ZoteroPane = new function()
 			itemsToolbar.setAttribute("flex", "0");
 			itemToolbar.setAttribute("flex", "1");
 		}
-
+		
+		// Allow item pane to shrink to available height in stacked mode, but don't expand to be too
+		// wide when there's no persisted width in non-stacked mode
+		itemPane.setAttribute("flex", stackedLayout ? 1 : 0);
 	}
 	
 	/**
