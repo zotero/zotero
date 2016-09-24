@@ -22,7 +22,7 @@ describe("Sync Preferences", function () {
 	});
 
 	describe("Settings", function () {
-		describe("Zotero Data Sync", function () {
+		describe("Data Syncing", function () {
 			var getAPIKeyFromCredentialsStub, deleteAPIKey, indicatorElem;
 
 			var setCredentials = Zotero.Promise.coroutine(function* (username, password) {
