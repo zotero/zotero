@@ -161,7 +161,7 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 	
 	unregister: function () {
 		if (this._observerID) {
-			Zotero.Notifier.unregisterObserver(_observerID);
+			Zotero.Notifier.unregisterObserver(this._observerID);
 		}
 	}
 }
