@@ -109,14 +109,7 @@ Zotero.File = new function(){
 	 */
 	this.getSample = function (file) {
 		var bytes = 200;
-		return this.getContentsAsync(file, null, bytes)
-		.catch(function (e) {
-			if (e.name == 'NS_ERROR_ILLEGAL_INPUT') {
-				Zotero.debug("Falling back to raw bytes");
-				return this.getBinaryContentsAsync(file, bytes);
-			}
-			throw e;
-		}.bind(this));
+		return this.getContentsAsync(file, null, bytes);
 	}
 	
 	
@@ -199,110 +192,119 @@ Zotero.File = new function(){
 	/**
 	 * Get the contents of a text source asynchronously
 	 *
-	 * @param {nsIURI|nsIFile|string spec|string path|nsIChannel|nsIInputStream} source The source to read
+	 * @param {string path|nsIFile|file URI|nsIChannel|nsIInputStream} source The source to read
 	 * @param {String} [charset] The character set; defaults to UTF-8
 	 * @param {Integer} [maxLength] Maximum length to fetch, in bytes
 	 * @return {Promise} A promise that is resolved with the contents of the file
 	 */
-	this.getContentsAsync = function (source, charset, maxLength) {
+	this.getContentsAsync = Zotero.Promise.coroutine(function* (source, charset, maxLength) {
 		Zotero.debug("Getting contents of "
 			+ (source instanceof Components.interfaces.nsIFile
 				? source.path
 				: (source instanceof Components.interfaces.nsIInputStream ? "input stream" : source)));
 		
-		// If path is given, convert to file:// URL
-		if (typeof source == 'string' && !source.match(/^file:/)) {
-			source = 'file://' + source;
+		// Send URIs to Zotero.HTTP.request()
+		if (source instanceof Components.interfaces.nsIURI
+				|| typeof source == 'string' && !source.startsWith('file:') && source.match(/^[a-z]{3,}:/)) {
+			Zotero.logError("Passing a URI to Zotero.File.getContentsAsync() is deprecated "
+				+ "-- use Zotero.HTTP.request() instead");
+			return Zotero.HTTP.request("GET", source);
 		}
 		
-		var options = {
-			charset: charset ? charset : "UTF-8",
-			replacement: 65533
-		};
-		
-		var deferred = Zotero.Promise.defer();
-		try {
-			NetUtil.asyncFetch(source, function(inputStream, status) {
-				if (!Components.isSuccessCode(status)) {
-					deferred.reject(new Components.Exception("File read operation failed", status));
-					return;
-				}
-				
-				try {
-					try {
-						var bytesToFetch = inputStream.available();
-					}
-					catch (e) {
-						// The stream is closed automatically when end-of-file is reached,
-						// so this throws for empty files
-						if (e.name == "NS_BASE_STREAM_CLOSED") {
-							Zotero.debug("RESOLVING2");
-							deferred.resolve("");
-						}
-						deferred.reject(e);
-					}
-					
-					if (maxLength && maxLength < bytesToFetch) {
-						bytesToFetch = maxLength;
-					}
-					
-					if (bytesToFetch == 0) {
-						deferred.resolve("");
+		// Use NetUtil.asyncFetch() for input streams and channels
+		if (source instanceof Components.interfaces.nsIInputStream
+				|| source instanceof Components.interfaces.nsIChannel) {
+			var deferred = Zotero.Promise.defer();
+			try {
+				NetUtil.asyncFetch(source, function(inputStream, status) {
+					if (!Components.isSuccessCode(status)) {
+						deferred.reject(new Components.Exception("File read operation failed", status));
 						return;
 					}
 					
-					deferred.resolve(NetUtil.readInputStreamToString(
-						inputStream,
-						bytesToFetch,
-						options
-					));
-				}
-				catch (e) {
-					deferred.reject(e);
-				}
-			});
+					try {
+						try {
+							var bytesToFetch = inputStream.available();
+						}
+						catch (e) {
+							// The stream is closed automatically when end-of-file is reached,
+							// so this throws for empty files
+							if (e.name == "NS_BASE_STREAM_CLOSED") {
+								Zotero.debug("RESOLVING2");
+								deferred.resolve("");
+							}
+							deferred.reject(e);
+						}
+						
+						if (maxLength && maxLength < bytesToFetch) {
+							bytesToFetch = maxLength;
+						}
+						
+						if (bytesToFetch == 0) {
+							deferred.resolve("");
+							return;
+						}
+						
+						deferred.resolve(NetUtil.readInputStreamToString(
+							inputStream,
+							bytesToFetch,
+							options
+						));
+					}
+					catch (e) {
+						deferred.reject(e);
+					}
+				});
+			}
+			catch(e) {
+				// Make sure this get logged correctly
+				Zotero.logError(e);
+				throw e;
+			}
+			return deferred.promise;
 		}
-		catch(e) {
-			// Make sure this get logged correctly
-			Zotero.logError(e);
-			throw e;
+		
+		// Use OS.File for files
+		if (source instanceof Components.interfaces.nsIFile) {
+			source = source.path;
 		}
-		return deferred.promise;
-	}
+		else if (source.startsWith('^file:')) {
+			source = OS.Path.fromFileURI(source);
+		}
+		var options = {
+			encoding: charset ? charset : "utf-8"
+		};
+		if (maxLength) {
+			options.bytes = maxLength;
+		}
+		return OS.File.read(source, options);
+	});
 	
 	
 	/**
 	 * Get the contents of a binary source asynchronously
 	 *
-	 * @param {nsIURI|nsIFile|string spec|nsIChannel|nsIInputStream} source The source to read
-	 * @param {Integer} [maxLength] Maximum length to fetch, in bytes (unimplemented)
-	 * @return {Promise} A promise that is resolved with the contents of the source
+	 * This is quite slow and should only be used in tests.
+	 *
+	 * @param {string path|nsIFile|file URI} source The source to read
+	 * @param {Integer} [maxLength] Maximum length to fetch, in bytes
+	 * @return {Promise<String>} A promise for the contents of the source as a binary string
 	 */
-	this.getBinaryContentsAsync = function (source, maxLength) {
-		if (typeof source == 'string') {
-			source = this.pathToFile(source);
+	this.getBinaryContentsAsync = Zotero.Promise.coroutine(function* (source, maxLength) {
+		// Use OS.File for files
+		if (source instanceof Components.interfaces.nsIFile) {
+			source = source.path;
 		}
-		var deferred = Zotero.Promise.defer();
-		NetUtil.asyncFetch(source, function(inputStream, status) {
-			if (!Components.isSuccessCode(status)) {
-				deferred.reject(new Components.Exception("Source read operation failed", status));
-				return;
-			}
-			try {
-				var availableBytes = inputStream.available();
-				deferred.resolve(
-					NetUtil.readInputStreamToString(
-						inputStream,
-						maxLength ? Math.min(maxLength, availableBytes) : availableBytes
-					)
-				);
-			}
-			catch (e) {
-				deferred.reject(e);
-			}
-		});
-		return deferred.promise;
-	}
+		else if (source.startsWith('^file:')) {
+			source = OS.Path.fromFileURI(source);
+		}
+		var options = {};
+		if (maxLength) {
+			options.bytes = maxLength;
+		}
+		var buf = yield OS.File.read(source, options);
+		return [...buf].map(x => String.fromCharCode(x)).join("");
+	});
 	
 	
 	/*

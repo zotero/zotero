@@ -109,10 +109,12 @@ describe("Zotero.Fulltext", function () {
 			yield Zotero.Fulltext.downloadPDFTool('info', pdfToolsVersion);
 			
 			assert.ok(Zotero.Fulltext.pdfInfoIsRegistered());
+			
 			assert.equal(
-				(yield Zotero.File.getBinaryContentsAsync(cacheExecPath)),
-				(yield Zotero.File.getBinaryContentsAsync(execPath))
+				(yield Zotero.Utilities.Internal.md5Async(cacheExecPath, false)),
+				(yield Zotero.Utilities.Internal.md5Async(execPath, false))
 			);
+			
 			if (!Zotero.isWin) {
 				assert.equal((yield OS.File.stat(execPath)).unixMode, 0o755);
 			}

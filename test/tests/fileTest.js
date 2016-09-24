@@ -38,7 +38,42 @@ describe("Zotero.File", function () {
 			assert.lengthOf(contents, 3);
 			assert.equal(contents, "A\uFFFDB");
 		})
+		
+		it("should respect maxLength", function* () {
+			var contents = yield Zotero.File.getContentsAsync(
+				OS.Path.join(getTestDataDirectory().path, "test.txt"),
+				false,
+				6
+			);
+			assert.lengthOf(contents, 6);
+			assert.equal(contents, "Zotero");
+		});
 	})
+	
+	describe("#getBinaryContentsAsync()", function () {
+		var magicPNG = ["89", "50", "4e", "47", "0d", "0a", "1a", "0a"].map(x => parseInt(x, 16));
+		
+		it("should return a binary string", function* () {
+			var contents = yield Zotero.File.getBinaryContentsAsync(
+				OS.Path.join(getTestDataDirectory().path, "test.png")
+			);
+			assert.isAbove(contents.length, magicPNG.length);
+			for (let i = 0; i < magicPNG.length; i++) {
+				assert.equal(magicPNG[i], contents.charCodeAt(i));
+			}
+		});
+		
+		it("should respect maxLength", function* () {
+			var contents = yield Zotero.File.getBinaryContentsAsync(
+				OS.Path.join(getTestDataDirectory().path, "test.png"),
+				magicPNG.length
+			);
+			assert.lengthOf(contents, magicPNG.length)
+			for (let i = 0; i < contents.length; i++) {
+				assert.equal(magicPNG[i], contents.charCodeAt(i));
+			}
+		});
+	});
 	
 	describe("#copyDirectory()", function () {
 		it("should copy all files within a directory", function* () {
