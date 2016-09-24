@@ -67,6 +67,33 @@ describe("ZoteroPane", function() {
 		});
 	});
 	
+	describe("#newSearch()", function () {
+		it("should create a saved search", function* () {
+			var promise = waitForDialog(
+				// TODO: Test changing a condition
+				function (dialog) {},
+				'accept',
+				'chrome://zotero/content/searchDialog.xul'
+			);
+			var id = yield zp.newSearch();
+			yield promise;
+			var search = Zotero.Searches.get(id);
+			assert.ok(search);
+			assert.isTrue(search.name.startsWith(Zotero.getString('pane.collections.untitled')));
+		});
+		
+		it("should handle clicking Cancel in the search window", function* () {
+			var promise = waitForDialog(
+				function (dialog) {},
+				'cancel',
+				'chrome://zotero/content/searchDialog.xul'
+			);
+			var id = yield zp.newSearch();
+			yield promise;
+			assert.isFalse(id);
+		});
+	});
+	
 	describe("#itemSelected()", function () {
 		it.skip("should update the item count", function* () {
 			var collection = new Zotero.Collection;

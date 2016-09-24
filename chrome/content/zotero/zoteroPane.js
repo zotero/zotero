@@ -946,6 +946,12 @@ var ZoteroPane = new function()
 			Zotero.getString('pane.collections.untitled'));
 		var io = {dataIn: {search: s, name: untitled}, dataOut: null};
 		window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
+		if (!io.dataOut) {
+			return false;
+		}
+		s.fromJSON(io.dataOut.json);
+		yield s.saveTx();
+		return s.id;
 	});
 	
 	
