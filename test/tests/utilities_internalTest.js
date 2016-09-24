@@ -1,6 +1,17 @@
 "use strict";
 
 describe("Zotero.Utilities.Internal", function () {
+	describe("#md5()", function () {
+		it("should generate hex string given file path", function* () {
+			var file = OS.Path.join(getTestDataDirectory().path, 'test.png');
+			assert.equal(
+				Zotero.Utilities.Internal.md5(Zotero.File.pathToFile(file)),
+				'93da8f1e5774c599f0942dcecf64b11c'
+			);
+		})
+	})
+	
+	
 	describe("#md5Async()", function () {
 		it("should generate hex string given file path", function* () {
 			var file = OS.Path.join(getTestDataDirectory().path, 'test.png');
