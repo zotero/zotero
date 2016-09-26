@@ -23,7 +23,7 @@
  *     <http://www.gnu.org/licenses/> respectively.
  */
 var CSL = {
-    PROCESSOR_VERSION: "1.1.133",
+    PROCESSOR_VERSION: "1.1.136",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -227,35 +227,58 @@ var CSL = {
         }
         return lst.join("-");
     },
-    parseNoteFieldHacks: function(Item, validFieldsForType) {
+    parseNoteFieldHacks: function(Item, allowDateOverride) {
         if ("string" !== typeof Item.note) return;
         var elems = [];
-        var m = Item.note.match(CSL.NOTE_FIELDS_REGEXP);
-        if (m) {
-            var splt = Item.note.split(CSL.NOTE_FIELDS_REGEXP);
-            for (var i=0,ilen=(splt.length-1);i<ilen;i++) {
-                elems.push(splt[i]);
-                elems.push(m[i]);
+        var lines = Item.note.split('\n');
+        var lastline = "";
+        for (var i=0, ilen=lines.length; i<ilen; i++) {
+            var line = lines[i];
+            var elems = [];
+            var m = line.match(CSL.NOTE_FIELDS_REGEXP);
+            if (m) {
+                var splt = line.split(CSL.NOTE_FIELDS_REGEXP);
+                for (var j=0,jlen=(splt.length-1);j<jlen;j++) {
+                    elems.push(splt[j]);
+                    elems.push(m[j]);
+                }
+                elems.push(splt[splt.length-1])
+                for (var j=1,jlen=elems.length;j<jlen;j += 2) {
+                    if (elems[j-1].trim() && (i>0 || j>1) && !elems[j-1].match(CSL.NOTE_FIELD_REGEXP)) {
+                        break
+                    } else {
+                        elems[j] = '\n' + elems[j].slice(2,-1).trim() + '\n';
+                    }
+                }
+                lines[i] = elems.join('');
             }
-            elems.push(splt[splt.length-1])
-            for (var i=1,ilen=elems.length;i<ilen;i += 2) {
-                elems[i] = '\n' + elems[i].slice(2,-1).trim() + '\n';
-            }
-            elems = elems.join('').split('\n');
-        } else {
-            elems = Item.note.split('\n');
         }
+        lines = lines.join('\n').split('\n');
         var names = {};
-        for (var i=0,ilen=elems.length;i<ilen;i++) {
-            var line = elems[i];
+        for (var i=0,ilen=lines.length;i<ilen;i++) {
+            var line = lines[i];
             var mm = line.match(CSL.NOTE_FIELD_REGEXP);
-            if (!mm) continue;
+            if (!line.trim()) {
+                continue;
+            } else if (!mm) {
+                if (i === 0) {
+                    continue;
+                } else {
+                    break;
+                }
+            }
             var key = mm[1];
             var val = mm[2].replace(/^\s+/, "").replace(/\s+$/, "");
-            if (!Item[key]) {
-                if (CSL.DATE_VARIABLES.indexOf(key) > -1) {
+            if (key === "type") {
+                Item.type = val;
+                lines[i] = "";
+            } else if (CSL.DATE_VARIABLES.indexOf(key) > -1) {
+                if (allowDateOverride) {
                     Item[key] = {raw: val};
-                } else if (CSL.NAME_VARIABLES.indexOf(key) > -1) {
+                    lines[i] = "";
+                }
+            } else if (!Item[key]) {
+                if (CSL.NAME_VARIABLES.indexOf(key) > -1) {
                     if (!names[key]) {
                         names[key] = [];
                     }
@@ -270,16 +293,13 @@ var CSL = {
                 } else {
                     Item[key] = val;
                 }
-                elems[i] = "";
+                lines[i] = "";
             }
-            if (name === "type") {
-                Item.type = val;
-            }
-            Item.note = elems.join("");
         }
         for (var key in names) {
             Item[key] = names[key];
         }
+        Item.note = lines.join("").trim();
     },
     GENDERS: ["masculine", "feminine"],
     ERROR_NO_RENDERED_FORM: 1,
@@ -2820,7 +2840,7 @@ CSL.Engine.prototype.retrieveItem = function (id) {
         }
     }
     if (this.opt.development_extensions.field_hack && Item.note) {
-        CSL.parseNoteFieldHacks(Item);
+        CSL.parseNoteFieldHacks(Item, this.opt.development_extensions.allow_field_hack_date_override);
     }
     for (var i = 1, ilen = CSL.DATE_VARIABLES.length; i < ilen; i += 1) {
         var dateobj = Item[CSL.DATE_VARIABLES[i]];
@@ -4471,6 +4491,7 @@ CSL.Engine.Opt = function () {
     this.has_layout_locale = false;
     this.development_extensions = {};
     this.development_extensions.field_hack = true;
+    this.development_extensions.allow_field_hack_date_override = true;
     this.development_extensions.locator_date_and_revision = true;
     this.development_extensions.locator_parsing_for_plurals = true;
     this.development_extensions.locator_label_parse = true;
@@ -13914,11 +13935,21 @@ CSL.Util.outputNumericField = function(state, varname, itemID) {
     var lastLabelName = null;
     for (var i=0,ilen=nums.length;i<ilen;i++) {
         var num = nums[i];
-        var labelName = CSL.STATUTE_SUBDIV_STRINGS[num.label];
-        if (num.label === masterLabel) {
-            label = state.getTerm(labelName, labelForm, num.plural);
-        } else {
-            label = state.getTerm(labelName, embeddedLabelForm, num.plural);
+        var label = "";
+        if (num.label) {
+            var labelName;
+            if ('var:' === num.label.slice(0,4)) {
+                labelName = num.label.slice(4);
+            } else {
+                labelName = CSL.STATUTE_SUBDIV_STRINGS[num.label];
+            }
+            if (labelName) {
+                if (num.label === masterLabel) {
+                    label = state.getTerm(labelName, labelForm, num.plural);
+                } else {
+                    label = state.getTerm(labelName, embeddedLabelForm, num.plural);
+                }
+            }
         }
         var labelPlaceholderPos = -1;
         if (label) {
