@@ -115,7 +115,10 @@ Zotero.Translator.prototype.init = function(info) {
 	if(this.translatorType & TRANSLATOR_TYPES["web"]) {
 		// compile web regexp
 		this.cacheCode |= !this.target;
-		this.webRegexp = this.target ? new RegExp(this.target, "i") : null;
+		this.webRegexp = {
+			root: this.target ? new RegExp(this.target, "i") : null,
+			all: this.targetAll ? new RegExp(this.targetAll, "i") : null
+		};
 	} else if(this.hasOwnProperty("webRegexp")) {
 		delete this.webRegexp;
 	}

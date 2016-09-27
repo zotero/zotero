@@ -1883,7 +1883,8 @@ Zotero.Translate.Web.prototype.Sandbox = Zotero.Translate.Sandbox._inheritFromBa
  */
 Zotero.Translate.Web.prototype.setDocument = function(doc) {
 	this.document = doc;
-	this.setLocation(doc.location.href);
+	this.rootDocument = doc.defaultView.top.document || doc;
+	this.setLocation(doc.location.href, this.rootDocument.location.href);
 }
 
 /**
@@ -1900,9 +1901,11 @@ Zotero.Translate.Web.prototype.setCookieSandbox = function(cookieSandbox) {
  * Sets the location to operate upon
  *
  * @param {String} location The URL of the page to translate
+ * @param {String} rootLocation The URL of the root page, within which `location` is embedded
  */
-Zotero.Translate.Web.prototype.setLocation = function(location) {
+Zotero.Translate.Web.prototype.setLocation = function(location, rootLocation) {
 	this.location = location;
+	this.rootLocation = rootLocation || location;
 	this.path = this.location;
 }
 
@@ -1910,7 +1913,7 @@ Zotero.Translate.Web.prototype.setLocation = function(location) {
  * Get potential web translators
  */
 Zotero.Translate.Web.prototype._getTranslatorsGetPotentialTranslators = function() {
-	return Zotero.Translators.getWebTranslatorsForLocation(this.location);
+	return Zotero.Translators.getWebTranslatorsForLocation(this.location, this.rootLocation);
 }
 
 /**
