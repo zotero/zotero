@@ -230,6 +230,28 @@ describe("ZoteroPane", function() {
 		})
 	})
 	
+	describe("#deleteSelectedCollection()", function () {
+		it("should delete collection but not descendant items by default", function* () {
+			var collection = yield createDataObject('collection');
+			var item = yield createDataObject('item', { collections: [collection.id] });
+			var promise = waitForDialog();
+			yield zp.deleteSelectedCollection();
+			assert.isFalse(Zotero.Collections.exists(collection.id));
+			assert.isTrue(Zotero.Items.exists(item.id));
+			assert.isFalse(item.deleted);
+		});
+		
+		it("should delete collection and descendant items when deleteItems=true", function* () {
+			var collection = yield createDataObject('collection');
+			var item = yield createDataObject('item', { collections: [collection.id] });
+			var promise = waitForDialog();
+			yield zp.deleteSelectedCollection(true);
+			assert.isFalse(Zotero.Collections.exists(collection.id));
+			assert.isTrue(Zotero.Items.exists(item.id));
+			assert.isTrue(item.deleted);
+		});
+	});
+	
 	
 	describe("#setVirtual()", function () {
 		var cv;

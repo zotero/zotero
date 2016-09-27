@@ -1181,9 +1181,7 @@ Zotero.CollectionTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(f
 		//erase collection from DB:
 		var treeRow = this.getRow(rows[i]-i);
 		if (treeRow.isCollection() || treeRow.isFeed()) {
-			yield treeRow.ref.eraseTx({
-				deleteItems: true
-			});
+			yield treeRow.ref.eraseTx({ deleteItems });
 			if (treeRow.isFeed()) {
 				refreshFeeds = true;
 			}
