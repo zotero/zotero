@@ -362,7 +362,7 @@ Zotero.Translators.CodeGetter.prototype.getAll = function () {
 var TRANSLATOR_REQUIRED_PROPERTIES = ["translatorID", "translatorType", "label", "creator", "target",
 		"priority", "lastUpdated"];
 var TRANSLATOR_PASSING_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES
-		.concat(["browserSupport", "code", "runMode", "itemType"]);
+		.concat(["targetAll", "browserSupport", "code", "runMode", "itemType"]);
 var TRANSLATOR_SAVE_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browserSupport"]);
 /**
  * @class Represents an individual translator
@@ -425,7 +425,10 @@ Zotero.Translator.prototype.init = function(info) {
 	 
 	if(this.translatorType & TRANSLATOR_TYPES["web"]) {
 		// compile web regexp
-		this.webRegexp = this.target ? new RegExp(this.target, "i") : null;
+		this.webRegexp = {
+			root: this.target ? new RegExp(this.target, "i") : null,
+			all: this.targetAll ? new RegExp(this.targetAll, "i") : null
+		};
 	} else if(this.hasOwnProperty("webRegexp")) {
 		delete this.webRegexp;
 	}

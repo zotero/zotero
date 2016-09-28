@@ -550,18 +550,27 @@ function haveTranslators(translators, type) {
 		return a.label.localeCompare(b.label);
 	});
 	
+	var promises = [];
 	for(var i in translators) {
-		var translatorTestView = new TranslatorTestView();
-		translatorTestView.initWithTranslatorAndType(translators[i], type);
-		if(translatorTestView.canRun) {
-			translatorTestViewsToRun[type].push(translatorTestView);
-		}
+		promises.push(translators[i].getCode());
 	}
 	
-	translatorTestStats[type].update();
-	var ev = document.createEvent('HTMLEvents');
-	ev.initEvent('ZoteroHaveTranslators-'+type, true, true);
-	document.dispatchEvent(ev);
+	return Promise.all(promises).then(function(codes) {
+		for(var i in translators) {
+			// Make sure translator code is cached on the object
+			translators[i].code = codes[i];
+			var translatorTestView = new TranslatorTestView();
+			translatorTestView.initWithTranslatorAndType(translators[i], type);
+			if(translatorTestView.canRun) {
+				translatorTestViewsToRun[type].push(translatorTestView);
+			}
+		}
+		
+		translatorTestStats[type].update();
+		var ev = document.createEvent('HTMLEvents');
+		ev.initEvent('ZoteroHaveTranslators-'+type, true, true);
+		document.dispatchEvent(ev);	
+	});
 }
 
 /**

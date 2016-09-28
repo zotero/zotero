@@ -561,7 +561,7 @@ describe("Zotero.Translate", function() {
 					item.title = "The Definitive Guide of Owls";
 					item.tags = ['owl', 'tag'];
 					item.complete();
-				}`, 'child-dummy-translator'
+				}`, {translatorID: 'child-dummy-translator'}
 			);
 			sinon.stub(Zotero.Translators, 'get').withArgs('child-dummy-translator').returns(childTranslator);
 			

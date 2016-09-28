@@ -27,12 +27,12 @@
 var TRANSLATOR_REQUIRED_PROPERTIES = ["translatorID", "translatorType", "label", "creator",
                                       "target", "priority", "lastUpdated"];
 // Properties that are preserved if present
-var TRANSLATOR_OPTIONAL_PROPERTIES = ["browserSupport", "minVersion", "maxVersion",
+var TRANSLATOR_OPTIONAL_PROPERTIES = ["targetAll", "browserSupport", "minVersion", "maxVersion",
                                       "inRepository", "configOptions", "displayOptions",
                                       "hiddenPrefs", "itemType"];
 // Properties that are passed from background to inject page in connector
 var TRANSLATOR_PASSING_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.
-                                    concat(["browserSupport", "code", "runMode", "itemType"]);
+                                    concat(["targetAll", "browserSupport", "code", "runMode", "itemType"]);
 // Properties that are saved in connector if set but not required
 var TRANSLATOR_SAVE_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browserSupport"]);
 
@@ -115,7 +115,10 @@ Zotero.Translator.prototype.init = function(info) {
 	if(this.translatorType & TRANSLATOR_TYPES["web"]) {
 		// compile web regexp
 		this.cacheCode |= !this.target;
-		this.webRegexp = this.target ? new RegExp(this.target, "i") : null;
+		this.webRegexp = {
+			root: this.target ? new RegExp(this.target, "i") : null,
+			all: this.targetAll ? new RegExp(this.targetAll, "i") : null
+		};
 	} else if(this.hasOwnProperty("webRegexp")) {
 		delete this.webRegexp;
 	}
