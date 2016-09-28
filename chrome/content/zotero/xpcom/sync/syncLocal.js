@@ -123,7 +123,7 @@ Zotero.Sync.Data.Local = {
 			var io = {
 				title: Zotero.getString('general.warning'),
 				text: [Zotero.getString('account.lastSyncWithDifferentAccount', [ZOTERO_CONFIG.CLIENT_NAME, lastUsername, username])],
-				checkboxLabel: Zotero.getString('account.confirmDelete', lastUsername),
+				checkboxLabel: Zotero.getString('account.confirmDelete'),
 				acceptLabel: Zotero.getString('account.confirmDelete.button')
 			};
 			win.openDialog("chrome://zotero/content/hardConfirmationDialog.xul", "",
