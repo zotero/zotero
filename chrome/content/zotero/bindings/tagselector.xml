@@ -165,6 +165,41 @@
 					this.id('show-automatic').setAttribute('checked', this.showAutomatic);
 					this.id('display-all-tags').setAttribute('checked', !this.filterToScope);
 					this.dragObserver = new this._dragObserverConstructor;
+					
+					//
+					// Event listeners
+					//
+					var tagsBox = this.id('tags-box');
+					
+					tagsBox.addEventListener('click', function (event) {
+						this.handleTagClick(event);
+					}.bind(this));
+					
+					tagsBox.addEventListener('mousedown', function (event) {
+						if (!this.editable) return;
+						
+						if (event.button == 2) {
+							// Without the setTimeout, the popup gets immediately hidden
+							// for some reason
+							setTimeout(function () {
+								_popupNode = event.target;
+								self.id('tag-menu').openPopup(
+									null,
+									'after_pointer',
+									event.clientX + 2,
+									event.clientY + 2,
+									true,
+									event
+								);
+								event.stopPropagation();
+								event.preventDefault();
+							});
+						}
+					}.bind(this));
+					
+					tagsBox.addEventListener('dragover', this.dragObserver.onDragOver);
+					tagsBox.addEventListener('dragexit', this.dragObserver.onDragExit);
+					tagsBox.addEventListener('drop', this.dragObserver.onDrop, true);
 				]]>
 			</constructor>
 			
@@ -257,6 +292,7 @@
 								return collation.compareString(1, a.tag, b.tag);
 							});
 							
+							var fragment = document.createDocumentFragment();
 							let lastTag;
 							for (let i = 0; i < this._tags.length; i++) {
 								let tagData = this._tags[i];
@@ -267,7 +303,7 @@
 								}
 								lastTag = tagData.tag;
 								
-								let elem = this._insertClickableTag(tagsBox, tagData);
+								let elem = this._insertClickableTag(fragment, tagData);
 								let visible = this._updateClickableTag(
 									elem, tagData.tag, tagColors
 								);
@@ -275,6 +311,7 @@
 									emptyRegular = false;
 								}
 							}
+							tagsBox.appendChild(fragment);
 							this._dirty = false;
 						}
 						// Otherwise just update based on visibility
@@ -614,12 +651,13 @@
 			
 			<method name="handleTagClick">
 				<parameter name="event"/>
-				<parameter name="elem"/>
 				<body>
 					<![CDATA[
 						if (event.button != 0) {
 							return;
 						}
+						
+						var elem = event.target;
 						
 						// Ignore clicks on tags not in scope
 						if (elem.getAttribute('inScope') == 'false') {
@@ -642,6 +680,8 @@
 						if (this.onchange) {
 							this.onchange();
 						}
+						
+						event.stopPropagation();
 					]]>
 				</body>
 			</method>
@@ -745,34 +785,6 @@
 					elem.textContent = tagObj.tag;
 					if (tagObj.type) {
 						elem.setAttribute('tagType', tagObj.type);
-					}
-					var self = this;
-					elem.addEventListener('click', function(event) {
-						self.handleTagClick(event, this);
-					});
-					if (this.editable) {
-						elem.addEventListener('mousedown', function (event) {
-							if (event.button == 2) {
-								// Without the setTimeout, the popup gets immediately hidden
-								// for some reason
-								setTimeout(function () {
-									_popupNode = elem;
-									self.id('tag-menu').openPopup(
-										null,
-										'after_pointer',
-										event.clientX + 2,
-										event.clientY + 2,
-										true,
-										event
-									);
-									event.stopPropagation();
-									event.preventDefault();
-								});
-							}
-						}, true);
-						elem.addEventListener('dragover', this.dragObserver.onDragOver);
-						elem.addEventListener('dragexit', this.dragObserver.onDragExit);
-						elem.addEventListener('drop', this.dragObserver.onDrop, true);
 					}
 					return elem;
 				]]></body>
