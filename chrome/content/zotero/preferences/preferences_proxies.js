@@ -31,6 +31,7 @@ Zotero_Preferences.Proxies = {
 	
 	init: function () {
 		this.refreshProxyList();
+		this.updateCheckboxState();
 	},
 	
 	/**
@@ -47,14 +48,21 @@ Zotero_Preferences.Proxies = {
 		
 		Zotero.Proxies.init();
 		
+		this.updateCheckboxState();
+	},
+	
+	
+	updateCheckboxState: function() {
+		var transparent = document.getElementById('zotero-proxies-transparent').checked;
+
 		document.getElementById('proxyTree-add').disabled =
 			document.getElementById('proxyTree-delete').disabled =
-			document.getElementById('proxyTree').disabled = 
-			document.getElementById('zotero-proxies-autoRecognize').disabled = 
-			document.getElementById('zotero-proxies-showRedirectNotification').disabled = 
-			document.getElementById('zotero-proxies-disableByDomain-checkbox').disabled = 
-			document.getElementById('zotero-proxies-disableByDomain-textbox').disabled = 
-			!transparent;
+			document.getElementById('proxyTree').disabled =
+			document.getElementById('zotero-proxies-autoRecognize').disabled =
+			document.getElementById('zotero-proxies-showRedirectNotification').disabled =
+			document.getElementById('zotero-proxies-disableByDomain-checkbox').disabled =
+			document.getElementById('zotero-proxies-disableByDomain-textbox').disabled =
+				!transparent;
 	},
 	
 	
