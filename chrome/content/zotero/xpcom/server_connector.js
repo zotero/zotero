@@ -89,7 +89,7 @@ Zotero.Server.Connector.GetTranslators.prototype = {
 		// Translator data
 		var me = this;
 		if(data.url) {
-			Zotero.Translators.getWebTranslatorsForLocation(data.url).then(function(data) {				
+			Zotero.Translators.getWebTranslatorsForLocation(data.url, data.rootUrl).then(function(data) {				
 				sendResponseCallback(200, "application/json",
 						JSON.stringify(me._serializeTranslators(data[0])));
 			});
