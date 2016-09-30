@@ -2612,7 +2612,7 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 				Zotero.debug("Adding file via x-moz-file-promise");
 				event.dataTransfer.mozSetDataAt(
 					"application/x-moz-file-promise",
-					new Zotero.ItemTreeView.fileDragDataProvider(),
+					new Zotero.ItemTreeView.fileDragDataProvider(itemIDs),
 					0
 				);
 				break;
@@ -2688,7 +2688,9 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 // Implements nsIFlavorDataProvider for dragging attachment files to OS
 //
 // Not used on Windows in Firefox 3 or higher
-Zotero.ItemTreeView.fileDragDataProvider = function() { };
+Zotero.ItemTreeView.fileDragDataProvider = function (itemIDs) {
+	this._itemIDs = itemIDs;
+};
 
 Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 	QueryInterface : function(iid) {
@@ -2712,13 +2714,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 			transferable.getTransferData("application/x-moz-file-promise-dir", dirPrimitive, dataSize);
 			var destDir = dirPrimitive.value.QueryInterface(Components.interfaces.nsILocalFile);
 			
-			// Get the items we're dragging
-			var items = {};
-			transferable.getTransferData("zotero/item", items, dataSize);
-			items.value.QueryInterface(Components.interfaces.nsISupportsString);
-			
-			var draggedItems = Zotero.Items.get(items.value.data.split(','));
-			
+			var draggedItems = Zotero.Items.get(this._itemIDs);
 			var items = [];
 			
 			// Make sure files exist
