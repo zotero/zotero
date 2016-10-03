@@ -141,66 +141,47 @@ Zotero.Translators = new function() {
 	 * @return {Promise<Array[]>} - A promise for a 2-item array containing an array of translators and
 	 *     an array of functions for converting URLs from proper to proxied forms
 	 */
-	this.getWebTranslatorsForLocation = Zotero.Promise.method(function (uri) {
+	this.getWebTranslatorsForLocation = Zotero.Promise.method(function (URI, rootURI) {
+		var isFrame = URI !== rootURI;
 		if(!_initialized) Zotero.Translators.init();
 		var allTranslators = _cache["web"];
 		var potentialTranslators = [];
-		var searchURIs = [uri];
-		
-		Zotero.debug("Translators: Looking for translators for "+uri);
-		
-		// if there is a subdomain that is also a TLD, also test against URI with the domain
-		// dropped after the TLD
-		// (i.e., www.nature.com.mutex.gmu.edu => www.nature.com)
-		var m = /^(https?:\/\/)([^\/]+)/i.exec(uri);
-		var properHosts = [];
-		var proxyHosts = [];
-		if(m) {
-			// First, drop the 0- if it exists (this is an III invention)
-			var host = m[2];
-			if(host.substr(0, 2) === "0-") host = host.substr(2);
-			var hostnames = host.split(".");
-			for(var i=1; i<hostnames.length-2; i++) {
-				if(TLDS[hostnames[i].toLowerCase()]) {
-					var properHost = hostnames.slice(0, i+1).join(".");
-					searchURIs.push(m[1]+properHost+uri.substr(m[0].length));
-					properHosts.push(properHost);
-					proxyHosts.push(hostnames.slice(i+1).join("."));
-				}
-			}
-		}
-		
 		var converterFunctions = [];
+		
+		var rootSearchURIs = this.getSearchURIs(rootURI);
+		var frameSearchURIs = isFrame ? this.getSearchURIs(URI) : rootSearchURIs;
+
+		Zotero.debug("Translators: Looking for translators for "+Object.keys(frameSearchURIs).join(', '));
+
 		for(var i=0; i<allTranslators.length; i++) {
-			for(var j=0; j<searchURIs.length; j++) {
-				// don't attempt to use translators with no target that can't be run in this browser
+			var translator = allTranslators[i];
+			if (isFrame && !translator.webRegexp.all) {
+				continue;
+			}
+			rootURIsLoop:
+			for(var rootSearchURI in rootSearchURIs) {
+				var isGeneric = !allTranslators[i].webRegexp.root;
+				// don't attempt to use generic translators that can't be run in this browser
 				// since that would require transmitting every page to Zotero host
-				if(!allTranslators[i].webRegexp
-						&& allTranslators[i].runMode !== Zotero.Translator.RUN_MODE_IN_BROWSER) {
+				if(isGeneric && allTranslators[i].runMode !== Zotero.Translator.RUN_MODE_IN_BROWSER) {
 					continue;
 				}
-				
-				if(!allTranslators[i].webRegexp
-						|| (uri.length < 8192 && allTranslators[i].webRegexp.test(searchURIs[j]))) {
-					// add translator to list
-					potentialTranslators.push(allTranslators[i]);
-					
-					if(j === 0) {
-						converterFunctions.push(null);
-					} else if(Zotero.isBrowserExt || Zotero.isSafari) {
-						// in Chrome/Safari, the converterFunction needs to be passed as JSON, so
-						// just push an array with the proper and proxyHosts
-						converterFunctions.push([properHosts[j-1], proxyHosts[j-1]]);
-					} else {
-						// in Firefox, push the converterFunction
-						converterFunctions.push(new function() {
-							var re = new RegExp('^https?://(?:[^/]\\.)?'+Zotero.Utilities.quotemeta(properHosts[j-1])+'(?=/)', "gi");
-							var proxyHost = proxyHosts[j-1].replace(/\$/g, "$$$$");
-							return function(uri) { return uri.replace(re, "$&."+proxyHost) };
-						});
+
+				var rootURIMatches = isGeneric || rootSearchURI.length < 8192 && translator.webRegexp.root.test(rootSearchURI);
+				if (translator.webRegexp.all && rootURIMatches) {
+					for (var frameSearchURI in frameSearchURIs) {
+						var frameURIMatches = frameSearchURI.length < 8192 && translator.webRegexp.all.test(frameSearchURI);
+							
+						if (frameURIMatches) {
+							potentialTranslators.push(translator);
+							converterFunctions.push(frameSearchURIs[frameSearchURI]);
+							// prevent adding the translator multiple times
+							break rootURIsLoop;
+						}
 					}
-					
-					// don't add translator more than once
+				} else if(!isFrame && (isGeneric || rootURIMatches)) {
+					potentialTranslators.push(translator);
+					converterFunctions.push(rootSearchURIs[rootSearchURI]);
 					break;
 				}
 			}
@@ -211,6 +192,47 @@ Zotero.Translators = new function() {
 			return [potentialTranslators, converterFunctions];
 		});
 	});
+	
+	/**
+	 * Get the array of searchURIs and related proxy converter functions
+	 * 
+	 * @param {String} URI to get searchURIs and converterFunctions for
+	 */
+	this.getSearchURIs = function(URI) {
+		var searchURIs = {};
+		searchURIs[URI] = null;
+		
+		// if there is a subdomain that is also a TLD, also test against URI with the domain
+		// dropped after the TLD
+		// (i.e., www.nature.com.mutex.gmu.edu => www.nature.com)
+		var m = /^(https?:\/\/)([^\/]+)/i.exec(URI);
+		if (m) {
+			// First, drop the 0- if it exists (this is an III invention)
+			var host = m[2];
+			if(host.substr(0, 2) === "0-") host = host.substr(2);
+			var hostnames = host.split(".");
+			for (var i=1; i<hostnames.length-2; i++) {
+				if (TLDS[hostnames[i].toLowerCase()]) {
+					var properHost = hostnames.slice(0, i+1).join(".");
+					var proxyHost = hostnames.slice(i+1).join(".");
+					var searchURI = m[1]+properHost+URI.substr(m[0].length);
+					if(Zotero.isBrowserExt || Zotero.isSafari) {
+						// in Chrome/Safari, the converterFunction needs to be passed as JSON, so
+						// just push an array with the proper and proxyHosts
+						searchURIs[searchURI] = [properHost, proxyHost];
+					} else {
+						// in Firefox, add a converterFunction
+						searchURIs[searchURI] = new function() {
+							var re = new RegExp('^https?://(?:[^/]+\\.)?'+Zotero.Utilities.quotemeta(properHost)+'(?=/)', "gi");
+							var _proxyHost = proxyHost.replace(/\$/g, "$$$$");
+							return function(uri) { return uri.replace(re, "$&."+_proxyHost) };
+						};
+					}
+				}
+			}
+		}
+		return searchURIs;
+	};
 	
 	/**
 	 * Converts translators to JSON-serializable objects
@@ -361,9 +383,12 @@ Zotero.Translators.CodeGetter.prototype.getAll = function () {
 
 var TRANSLATOR_REQUIRED_PROPERTIES = ["translatorID", "translatorType", "label", "creator", "target",
 		"priority", "lastUpdated"];
+var TRANSLATOR_OPTIONAL_PROPERTIES = ["targetAll", "browserSupport", "minVersion", "maxVersion",
+		"inRepository", "configOptions", "displayOptions",
+		"hiddenPrefs", "itemType"];
 var TRANSLATOR_PASSING_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES
 		.concat(["targetAll", "browserSupport", "code", "runMode", "itemType"]);
-var TRANSLATOR_SAVE_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browserSupport"]);
+var TRANSLATOR_SAVE_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browserSupport", "targetAll"]);
 /**
  * @class Represents an individual translator
  * @constructor
@@ -404,6 +429,12 @@ Zotero.Translator.prototype.init = function(info) {
 			Zotero.logError(new Error('Missing property "'+property+'" in translator metadata JSON object in ' + info.label));
 			break;
 		} else {
+			this[property] = info[property];
+		}
+	}
+	for(var i=0; i<TRANSLATOR_OPTIONAL_PROPERTIES.length; i++) {
+		var property = TRANSLATOR_OPTIONAL_PROPERTIES[i];
+		if(info[property] !== undefined) {
 			this[property] = info[property];
 		}
 	}

@@ -106,13 +106,10 @@ Zotero.Server.Connector.GetTranslators.prototype = {
 	
 	"_serializeTranslators":function(translators) {
 		var responseData = [];
-		for each(var translator in translators) {
-			let serializableTranslator = {};
-			for (let key of ["translatorID", "translatorType", "label", "creator", "target",
-					"minVersion", "maxVersion", "priority", "browserSupport", "inRepository", "lastUpdated"]) {
-				serializableTranslator[key] = translator[key];
-			}
-			responseData.push(serializableTranslator);
+		let properties = ["translatorID", "translatorType", "label", "creator", "target", "targetAll",
+			"minVersion", "maxVersion", "priority", "browserSupport", "inRepository", "lastUpdated"];
+		for (var translator of translators) {
+			responseData.push(translator.serialize(properties));
 		}
 		return responseData;
 	}
