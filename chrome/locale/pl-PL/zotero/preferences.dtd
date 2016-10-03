@@ -42,7 +42,7 @@
 <!ENTITY zotero.preferences.groups.childLinks "potomne linki">
 <!ENTITY zotero.preferences.groups.tags "znaczniki">
 
-<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds "Kanały">
 <!ENTITY zotero.preferences.feeds.sorting.label "Sortowanie:">
 <!ENTITY zotero.preferences.feeds.sorting.newest "Od najnowszych elementów">
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Od najstarszych elementów">
@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.prefpane.sync "Synchronizacja">
 <!ENTITY zotero.preferences.sync.username "Użytkownik:">
 <!ENTITY zotero.preferences.sync.password "Hasło:">
-<!ENTITY zotero.preferences.sync.syncServer "Synchronizacja danych Zotero">
+<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
 <!ENTITY zotero.preferences.sync.unlinkAccount "Usuń powiązane konto...">
 <!ENTITY zotero.preferences.sync.createAccount "Utwórz konto">
@@ -76,10 +76,10 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "w razie potrzeby">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Używając usługi przechowywania w Zotero, zgadzasz się na jej">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "warunki i postanowienia">
-<!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
+<!ENTITY zotero.preferences.sync.librariesToSync "Biblioteki do synchronizacji">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Wybierz biblioteki...">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "Synchronizacja">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "Biblioteka">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Poniższe operacje są używane tylko w rzadkich i określonych sytuacjach i nie powinny być używane do rozwiązywania ogólnych problemów z synchronizacją. W wielu przypadkach przywracanie może spowodować dodatkowe problemy. Zobacz">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Opcje przywracania synchronizacji">
 <!ENTITY zotero.preferences.sync.reset.warning3 "aby uzyskać więcej informacji.">
@@ -146,7 +146,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Szybkie wyszukiwanie">
 <!ENTITY zotero.preferences.keys.newItem "Utwórz nowy element">
 <!ENTITY zotero.preferences.keys.newNote "Utwórz nową notatkę">
-<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Oznacz wszystkie elementy kanału jako przeczytane/nieprzeczytane">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Wyświetl/Ukryj wybór etykiet">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiuje wybrane odnośniki bibliograficzne do schowka">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiuj zaznaczone elementy do schowka">

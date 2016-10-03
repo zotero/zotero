@@ -42,11 +42,11 @@
 <!ENTITY zotero.preferences.groups.childLinks "links associados">
 <!ENTITY zotero.preferences.groups.tags "etiquetas">
 
-<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds "Fontes">
 <!ENTITY zotero.preferences.feeds.sorting.label "Ordenação:">
 <!ENTITY zotero.preferences.feeds.sorting.newest "Itens mais recentes primeiro">
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Itens mais antigos primeiro">
-<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Padrões das fontes">
 
 <!ENTITY zotero.preferences.openurl.caption "Abrir URL">
 
@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sincronização">
 <!ENTITY zotero.preferences.sync.username "Usuário:">
 <!ENTITY zotero.preferences.sync.password "Senha:">
-<!ENTITY zotero.preferences.sync.syncServer "Sincronização de dados do Zotero">
+<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "Configurar a sincronização">
 <!ENTITY zotero.preferences.sync.unlinkAccount "Desvincular conta...">
 <!ENTITY zotero.preferences.sync.createAccount "Criar conta">
@@ -76,10 +76,10 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "quando necessário">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Ao utilizar o armazenamento Zotero, você concorda em aderir a seus">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "termos e condições">
-<!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
+<!ENTITY zotero.preferences.sync.librariesToSync "Bibliotecas para sincronizar">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Selecione as bibliotecas...">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sincronizar">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "Biblioteca">
 <!ENTITY zotero.preferences.sync.reset.warning1 "As seguintes operações devem ser usadas em situações específicas e raras e não em resoluções de problemas rotineiros. Em muitos casos, reconfigurar causará problemas adicionais. Veja as">
 <!ENTITY zotero.preferences.sync.reset.warning2 " opções de reconfiguração da sincronização ">
 <!ENTITY zotero.preferences.sync.reset.warning3 "para maiores informações.">
@@ -146,7 +146,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Pesquisa rápida">
 <!ENTITY zotero.preferences.keys.newItem "Criar um novo item">
 <!ENTITY zotero.preferences.keys.newNote "Criar uma nova nota">
-<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Marcar todos os itens da fonte como lidos/não lidos">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Alternar o seletor de etiquetas">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar as citações do item selecionado para a área de transferência">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiar os itens selecionados para a área de transferência">

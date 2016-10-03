@@ -29,7 +29,7 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Leisti zotero.org derinti turinį pagal dabartinę Zotero versiją">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Jei parinktis įgalinta, dabartinė Zotero versija bus automatiškai įtraukta į zotero.org HTTP užklausas.">
 <!ENTITY zotero.preferences.parseRISRefer "Zotero naudoti BibTeX/RIS/Refer failų parsiuntimui">
-<!ENTITY zotero.preferences.automaticSnapshots "Kuriamiems naujiems įrašams automatiškai sukurti nuotraukas">
+<!ENTITY zotero.preferences.automaticSnapshots "Kuriamiems naujiems įrašams automatiškai sukurti tinklalapių momentines kopijas">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Įrašant įrašus, automatiškai prisegti susijusius PDF dokumentus ir kitus failus">
 <!ENTITY zotero.preferences.automaticTags "Įrašams automatiškai priskirti gaires su raktažodžiais ir temomis">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatiškai šiukšlinės šalinti įrašus, senesnius nei">
@@ -38,7 +38,7 @@
 <!ENTITY zotero.preferences.groups "Grupės">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Kopijuojant elementus tarp bibliotekų, įtraukti:">
 <!ENTITY zotero.preferences.groups.childNotes "įrašams priklausančias pastabas">
-<!ENTITY zotero.preferences.groups.childFiles "įrašams priklausančias nuotraukas ir importuotus failus">
+<!ENTITY zotero.preferences.groups.childFiles "įrašams priklausančias tinklalapių momentines kopijas ir importuotus failus">
 <!ENTITY zotero.preferences.groups.childLinks "įrašams priklausančias nuorodas">
 <!ENTITY zotero.preferences.groups.tags "gaires">
 
@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sinchronizavimas">
 <!ENTITY zotero.preferences.sync.username "Naudotojo vardas:">
 <!ENTITY zotero.preferences.sync.password "Slaptažodis:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero duomenų sinchronizavimas">
+<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "Konfigūruoti sinchronizavimą">
 <!ENTITY zotero.preferences.sync.unlinkAccount "Nebesieti su paskyra...">
 <!ENTITY zotero.preferences.sync.createAccount "Sukurti paskyrą">
@@ -76,10 +76,10 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "pagal poreikį">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Naudodamiesi Zotero saugykla Jūs savaime sutinkate su jos">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "naudojimosi taisyklėmis ir sąlygomis">
-<!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
+<!ENTITY zotero.preferences.sync.librariesToSync "Sinchronizuotinos bibliotekos">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Pasirinkti bibliotekas...">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sinchronizuoti">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "Biblioteka">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Tolaiu pateiktos funkcijos skirtos retiems specifiniams atvejams - jų nereikėtų naudoti įprastų nesklandumų sprendimui. Dažniausiai atkūrimas sukelia dar daugiau problemų. Daugiau informacijos rasite ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "atkūrimo sinchronizuojant parinkčių">
 <!ENTITY zotero.preferences.sync.reset.warning3 " puslapyje.">

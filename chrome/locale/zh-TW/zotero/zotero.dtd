@@ -1,5 +1,5 @@
-<!ENTITY zotero.general.yes "Yes">
-<!ENTITY zotero.general.no "No">
+<!ENTITY zotero.general.yes "要">
+<!ENTITY zotero.general.no "不要">
 <!ENTITY zotero.general.optional "(選用)">
 <!ENTITY zotero.general.note "注意：">
 <!ENTITY zotero.general.selectAll "全選">
@@ -10,7 +10,7 @@
 <!ENTITY zotero.general.cancel "取消">
 <!ENTITY zotero.general.refresh "重新整理">
 <!ENTITY zotero.general.saveAs "另存新檔...">
-<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
+<!ENTITY zotero.general.advancedOptions.label "進階選項">
 
 <!ENTITY zotero.errorReport.title "Zotero 錯誤報告">
 <!ENTITY zotero.errorReport.unrelatedMessages "這可能包括無關於 Zotero 的訊息。">
@@ -103,9 +103,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "從目前頁面建立網頁項目">
 <!ENTITY zotero.toolbar.lookup.label "依識別碼加入項目">
 <!ENTITY zotero.toolbar.removeItem.label "移除項目…">
-<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
+<!ENTITY zotero.toolbar.newLibrary.label "新圖書館...">
 <!ENTITY zotero.toolbar.newCollection.label "新增文獻庫">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
+<!ENTITY zotero.toolbar.markFeedRead.label "標示來源為已讀">
 <!ENTITY zotero.toolbar.newGroup "新增群組…">
 <!ENTITY zotero.toolbar.newSubcollection.label "新增子文獻庫…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "新增搜尋結果…">
@@ -125,12 +125,12 @@
 <!ENTITY zotero.toolbar.openURL.label "查詢">
 <!ENTITY zotero.toolbar.openURL.tooltip "於本機文獻庫尋找">
 
-<!ENTITY zotero.toolbar.feeds.new "New Feed…">
-<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
-<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
-<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
-<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+<!ENTITY zotero.toolbar.feeds.new "新來源...">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "從 URL...">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "從頁...">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "從 OPML...">
+<!ENTITY zotero.toolbar.feeds.refresh "重新整理來源">
+<!ENTITY zotero.toolbar.feeds.edit "編輯來源">
 
 <!ENTITY zotero.item.add "加入">
 <!ENTITY zotero.item.attachment.file.show "顯示檔案">
@@ -140,7 +140,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "互換西方語言方式的名/姓">
 <!ENTITY zotero.item.viewOnline "線上檢視">
 <!ENTITY zotero.item.copyAsURL "複製成 URL">
-<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
+<!ENTITY zotero.item.deletePermanently "刪除授權...">
 
 <!ENTITY zotero.toolbar.newNote "新增筆記">
 <!ENTITY zotero.toolbar.note.standalone "新增獨立筆記">

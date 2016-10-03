@@ -12,9 +12,9 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Panel de navegador">
 <!ENTITY zotero.preferences.showIn.separateTab "Pestaña de separación">
 <!ENTITY zotero.preferences.showIn.appTab "Pestaña de aplicación">
-<!ENTITY zotero.preferences.layout "Layout:">
-<!ENTITY zotero.preferences.layout.standard "Standard">
-<!ENTITY zotero.preferences.layout.stacked "Stacked">
+<!ENTITY zotero.preferences.layout "Diseño:">
+<!ENTITY zotero.preferences.layout.standard "Estándar">
+<!ENTITY zotero.preferences.layout.stacked "Acumulados">
 <!ENTITY zotero.preferences.fontSize "Tamaño de letra:">
 <!ENTITY zotero.preferences.fontSize.small "Pequeña">
 <!ENTITY zotero.preferences.fontSize.medium "Mediana">
@@ -42,11 +42,11 @@
 <!ENTITY zotero.preferences.groups.childLinks "enlaces subordinados">
 <!ENTITY zotero.preferences.groups.tags "etiquetas">
 
-<!ENTITY zotero.preferences.feeds "Feeds">
-<!ENTITY zotero.preferences.feeds.sorting.label "Sorting:">
-<!ENTITY zotero.preferences.feeds.sorting.newest "Newest items first">
-<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
-<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+<!ENTITY zotero.preferences.feeds "Fuentes">
+<!ENTITY zotero.preferences.feeds.sorting.label "Ordenando:">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Elementos más nuevos primeros">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Elementos más longevos primeros">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Predeterminados de las Fuentes">
 
 <!ENTITY zotero.preferences.openurl.caption "AbrirURL">
 
@@ -58,9 +58,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sincronizar">
 <!ENTITY zotero.preferences.sync.username "Usuario:">
 <!ENTITY zotero.preferences.sync.password "Contraseña:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero Data Sync">
-<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
+<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
+<!ENTITY zotero.preferences.sync.setUpSync "Configurar sincronización">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Desvincular cuenta...">
 <!ENTITY zotero.preferences.sync.createAccount "Crear cuenta">
 <!ENTITY zotero.preferences.sync.lostPassword "¿Olvidó su contraseña?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronizar automáticamente">
@@ -76,15 +76,15 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "según se necesite">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Mediante el uso de almacenamiento provisto por Zotero, acepta quedar obligado por su">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "términos y condiciones">
-<!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
+<!ENTITY zotero.preferences.sync.librariesToSync "Bibliotecas a sincronizar">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Elegir Bibliotecas...">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sincronizar">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "Biblioteca">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Las siguientes operaciones son para utilizar sólo en situaciones raras, específicas, y no deberían usarse para una gestión de problemas generales. En muchos casos, reestablecer causará problemas adicionales. Vea">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Opciones para reestablecer la sincronización">
 <!ENTITY zotero.preferences.sync.reset.warning3 "para más información.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Sincronización total">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Fusionar información local con la proveniente del servidor, ignorando el historial de sincronización.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurar desde el servidor Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Eliminar toda la información local Zotero y restaurar del servidor de sincronización.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaurar al servidor Zotero">
@@ -146,7 +146,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Búsqueda rápida">
 <!ENTITY zotero.preferences.keys.newItem "Crear un nuevo elemento">
 <!ENTITY zotero.preferences.keys.newNote "Crear una Nueva nota">
-<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Marcar todos los elementos de las Fuentes como leídos/no leídos">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Conmutar el selector de etiquetas">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar las citas para los elementos seleccionados al portapapeles">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiar los elementos seleccionados al portapapeles">

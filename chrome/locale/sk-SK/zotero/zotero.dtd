@@ -176,7 +176,7 @@
 
 <!ENTITY zotero.bibliography.title "Vytvoriť bibliografiu">
 <!ENTITY zotero.bibliography.style.label "Citačný štýl:">
-<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
+<!ENTITY zotero.bibliography.manageStyles "Spravovať štýly...">
 <!ENTITY zotero.bibliography.locale.label "Jazyk:">
 <!ENTITY zotero.bibliography.outputMode "Výstupný režim:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografia">

@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.prefpane.sync "Uskladi">
 <!ENTITY zotero.preferences.sync.username "Uporabniško ime:">
 <!ENTITY zotero.preferences.sync.password "Geslo:">
-<!ENTITY zotero.preferences.sync.syncServer "Usklajevanje podatkov Zotero">
+<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "Nastavi usklajevanje">
 <!ENTITY zotero.preferences.sync.unlinkAccount "Razveži račun ...">
 <!ENTITY zotero.preferences.sync.createAccount "Ustvari račun">

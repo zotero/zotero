@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.prefpane.sync "同期">
 <!ENTITY zotero.preferences.sync.username "ユーザー名:">
 <!ENTITY zotero.preferences.sync.password "パスワード:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero データの同期">
+<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "同期の設定">
 <!ENTITY zotero.preferences.sync.unlinkAccount "アカウントを切断する">
 <!ENTITY zotero.preferences.sync.createAccount "アカウントを作成">

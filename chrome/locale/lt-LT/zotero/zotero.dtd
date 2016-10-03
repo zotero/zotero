@@ -63,14 +63,14 @@
 <!ENTITY zotero.items.libraryCatalog_column "Išteklius">
 <!ENTITY zotero.items.callNumber_column "Šifras">
 <!ENTITY zotero.items.rights_column "Teisės">
-<!ENTITY zotero.items.dateAdded_column "Pridėjimo laikas">
+<!ENTITY zotero.items.dateAdded_column "Pridėta">
 <!ENTITY zotero.items.dateModified_column "Keitimo laikas">
 <!ENTITY zotero.items.extra_column "Papildoma">
 <!ENTITY zotero.items.archive_column "Archyvas">
 <!ENTITY zotero.items.archiveLocation_column "Vieta archyve">
 <!ENTITY zotero.items.place_column "Vieta">
 <!ENTITY zotero.items.volume_column "Tomas">
-<!ENTITY zotero.items.edition_column "Leidimas/numeris">
+<!ENTITY zotero.items.edition_column "Leidimas, Nr.">
 <!ENTITY zotero.items.pages_column "Puslapiai">
 <!ENTITY zotero.items.issue_column "Numeris">
 <!ENTITY zotero.items.series_column "Serija">
@@ -85,7 +85,7 @@
 <!ENTITY zotero.items.menu.showInLibrary "Rodyti bibliotekoje">
 <!ENTITY zotero.items.menu.attach.note "Įtraukti pastabą">
 <!ENTITY zotero.items.menu.attach "Įtraukti priedą">
-<!ENTITY zotero.items.menu.attach.snapshot "Pridėti šio puslapio nuotrauką">
+<!ENTITY zotero.items.menu.attach.snapshot "Pridėti šio tinklalapio momentinę kopiją">
 <!ENTITY zotero.items.menu.attach.link "Pridėti nuorodą į šį puslapį">
 <!ENTITY zotero.items.menu.attach.link.uri "Pridėti URI nuorodą...">
 <!ENTITY zotero.items.menu.attach.file "Pridėti turimą failo kopiją...">
@@ -149,7 +149,7 @@
 <!ENTITY zotero.toolbar.attachment.linked "Nuoroda iki failo...">
 <!ENTITY zotero.toolbar.attachment.add "Patalpinti failo kopiją...">
 <!ENTITY zotero.toolbar.attachment.weblink "Įrašyti nuorodą į šį puslapį">
-<!ENTITY zotero.toolbar.attachment.snapshot "Sukurti šio puslapio nuotrauką">
+<!ENTITY zotero.toolbar.attachment.snapshot "Sukurti šio tinklalapio momentinę kopiją">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Nėra rodytinų gairių">
 <!ENTITY zotero.tagSelector.loadingTags "Įkeliamos gairės...">
@@ -176,7 +176,7 @@
 
 <!ENTITY zotero.bibliography.title "Sukurti citavimą/bibliografiją">
 <!ENTITY zotero.bibliography.style.label "Citavimo stilius:">
-<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
+<!ENTITY zotero.bibliography.manageStyles "Tvarkyti stilius...">
 <!ENTITY zotero.bibliography.locale.label "Kalba:">
 <!ENTITY zotero.bibliography.outputMode "Išvedimo veiksena:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografija">

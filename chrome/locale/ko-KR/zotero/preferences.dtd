@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.prefpane.sync "동기화">
 <!ENTITY zotero.preferences.sync.username "사용자명:">
 <!ENTITY zotero.preferences.sync.password "비밀번호:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero 데이터 동기화">
+<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "동기화 설정">
 <!ENTITY zotero.preferences.sync.unlinkAccount "계정 연결 끊기...">
 <!ENTITY zotero.preferences.sync.createAccount "계정 생성">

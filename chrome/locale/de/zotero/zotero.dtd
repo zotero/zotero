@@ -176,7 +176,7 @@
 
 <!ENTITY zotero.bibliography.title "Literaturverzeichnis erstellen">
 <!ENTITY zotero.bibliography.style.label "Zitierstil:">
-<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
+<!ENTITY zotero.bibliography.manageStyles "Stile verwalten...">
 <!ENTITY zotero.bibliography.locale.label "Sprache:">
 <!ENTITY zotero.bibliography.outputMode "Ausgabemodus:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografie">
