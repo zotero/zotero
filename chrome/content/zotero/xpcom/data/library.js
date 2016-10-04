@@ -649,6 +649,10 @@ Zotero.Library.prototype.hasItems = Zotero.Promise.coroutine(function* () {
 		throw new Error("Library is not saved yet");
 	}
 	let sql = 'SELECT COUNT(*)>0 FROM items WHERE libraryID=?';
+	// Don't count old <=4.0 Quick Start Guide items
+	if (this.libraryID == Zotero.Libraries.userLibraryID) {
+		sql += "AND key NOT IN ('ABCD2345', 'ABCD3456')";
+	}
 	return !!(yield Zotero.DB.valueQueryAsync(sql, this.libraryID));
 });
 
