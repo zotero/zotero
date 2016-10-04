@@ -278,7 +278,7 @@ Zotero.Translators = new function() {
 		
 		return this.getAllForType(type).then(function(allTranslators) {
 			var potentialTranslators = [];
-			var translatorConverterFunctions = [];
+			var converterFunctions = [];
 			
 			var rootSearchURIs = this.getSearchURIs(rootURI);
 			var frameSearchURIs = isFrame ? this.getSearchURIs(URI) : rootSearchURIs;
@@ -286,12 +286,10 @@ Zotero.Translators = new function() {
 			Zotero.debug("Translators: Looking for translators for "+Object.keys(frameSearchURIs).join(', '));
 			
 			for (let translator of allTranslators) {
-				translatorLoop:
+				rootURIsLoop:
 				for (let rootSearchURI in rootSearchURIs) {
-					let isGeneric = (!translator.webRegexp.root && translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER);
-					if (!isGeneric && !translator.webRegexp.root) {
-						continue;
-					}
+					let isGeneric = !translator.webRegexp.root;
+					
 					let rootURIMatches = isGeneric || rootSearchURI.length < 8192 && translator.webRegexp.root.test(rootSearchURI);
 					if (translator.webRegexp.all && rootURIMatches) {
 						for (let frameSearchURI in frameSearchURIs) {
@@ -299,21 +297,21 @@ Zotero.Translators = new function() {
 								
 							if (frameURIMatches) {
 								potentialTranslators.push(translator);
-								translatorConverterFunctions.push(frameSearchURIs[frameSearchURI]);
+								converterFunctions.push(frameSearchURIs[frameSearchURI]);
 								// prevent adding the translator multiple times
-								break translatorLoop;
+								break rootURIsLoop;
 							}
 						}
 					}
 					else if(!isFrame && (isGeneric || rootURIMatches)) {
 						potentialTranslators.push(translator);
-						translatorConverterFunctions.push(rootSearchURIs[rootSearchURI]);
+						converterFunctions.push(rootSearchURIs[rootSearchURI]);
 						break;
 					}
 				}
 			}
 			
-			return [potentialTranslators, translatorConverterFunctions];
+			return [potentialTranslators, converterFunctions];
 		}.bind(this));
 	},
 
