@@ -23,7 +23,7 @@
  *     <http://www.gnu.org/licenses/> respectively.
  */
 var CSL = {
-    PROCESSOR_VERSION: "1.1.136",
+    PROCESSOR_VERSION: "1.1.137",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -126,7 +126,8 @@ var CSL = {
         "hearing": true,
         "gazette": true,
         "report": true,
-        "regulation": true
+        "regulation": true,
+        "standard": true
     },
     NestedBraces: [
         ["(", "["],
@@ -227,7 +228,7 @@ var CSL = {
         }
         return lst.join("-");
     },
-    parseNoteFieldHacks: function(Item, allowDateOverride) {
+    parseNoteFieldHacks: function(Item, validFieldsForType, allowDateOverride) {
         if ("string" !== typeof Item.note) return;
         var elems = [];
         var lines = Item.note.split('\n');
@@ -254,6 +255,7 @@ var CSL = {
             }
         }
         lines = lines.join('\n').split('\n');
+        var offset = 0;
         var names = {};
         for (var i=0,ilen=lines.length;i<ilen;i++) {
             var line = lines[i];
@@ -264,6 +266,7 @@ var CSL = {
                 if (i === 0) {
                     continue;
                 } else {
+                    offset = i;
                     break;
                 }
             }
@@ -275,7 +278,9 @@ var CSL = {
             } else if (CSL.DATE_VARIABLES.indexOf(key) > -1) {
                 if (allowDateOverride) {
                     Item[key] = {raw: val};
-                    lines[i] = "";
+                    if (!validFieldsForType || (validFieldsForType[key] && val.match(/^[0-9]{4}(?:-[0-9]{1,2}(?:-[0-9]{1,2})*)*$/))) {
+                        lines[i] = "";
+                    }
                 }
             } else if (!Item[key]) {
                 if (CSL.NAME_VARIABLES.indexOf(key) > -1) {
@@ -293,13 +298,25 @@ var CSL = {
                 } else {
                     Item[key] = val;
                 }
-                lines[i] = "";
+                if (!validFieldsForType || validFieldsForType[key]) {
+                    lines[i] = "";
+                }
             }
         }
         for (var key in names) {
             Item[key] = names[key];
         }
-        Item.note = lines.join("").trim();
+        if (validFieldsForType) {
+            if (lines[offset].trim()) {
+                lines[offset] = '\n' + lines[offset]
+            }
+            for (var i=offset-1;i>-1;i--) {
+                if (!lines[i].trim()) {
+                    lines = lines.slice(0, i).concat(lines.slice(i + 1));
+                }
+            }
+        }
+        Item.note = lines.join("\n").trim();
     },
     GENDERS: ["masculine", "feminine"],
     ERROR_NO_RENDERED_FORM: 1,
@@ -2840,7 +2857,7 @@ CSL.Engine.prototype.retrieveItem = function (id) {
         }
     }
     if (this.opt.development_extensions.field_hack && Item.note) {
-        CSL.parseNoteFieldHacks(Item, this.opt.development_extensions.allow_field_hack_date_override);
+        CSL.parseNoteFieldHacks(Item, false, this.opt.development_extensions.allow_field_hack_date_override);
     }
     for (var i = 1, ilen = CSL.DATE_VARIABLES.length; i < ilen; i += 1) {
         var dateobj = Item[CSL.DATE_VARIABLES[i]];
@@ -6977,9 +6994,6 @@ CSL.Node.group = {
                                     state.juris[jurisdiction][myName] = [];
                                     state.buildTokenLists(myNodes[i], state.juris[jurisdiction][myName]);
                                     state.configureTokenList(state.juris[jurisdiction][myName]);
-                                }
-                                if (macroCount < Object.keys(state.juris[jurisdiction].types).length) {
-                                    throw "CSL ERROR: Incomplete jurisdiction style module for: " + jurisdiction;
                                 }
                             }
                         }
