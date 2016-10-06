@@ -239,7 +239,7 @@ Zotero.SearchConditions = new function(){
 					is: true,
 					isNot: true
 				},
-				special: false
+				special: true
 			},
 			
 			{

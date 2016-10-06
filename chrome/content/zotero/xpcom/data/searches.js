@@ -47,6 +47,24 @@ Zotero.Searches = function() {
 	});
 	
 	
+	this.getByLibrary = function (libraryID) {
+		var searches = [];
+		for (let id in this._objectCache) {
+			let s = this._objectCache[id];
+			if (s.libraryID == libraryID) {
+				searches.push(s);
+			}
+		}
+		
+		// Do proper collation sort
+		var collation = Zotero.getLocaleCollation();
+		searches.sort(function (a, b) {
+			return collation.compareString(1, a.name, b.name);
+		});
+		return searches;
+	};
+	
+	
 	/**
 	 * Returns an array of Zotero.Search objects, ordered by name
 	 *

@@ -425,68 +425,63 @@
 							var rows = [];
 							
 							var libraryID = this.parent.search.libraryID;
-							var cols = Zotero.Collections.getByLibrary(libraryID, true);
-							for (var i in cols) {
+							
+							// Add collections
+							let cols = Zotero.Collections.getByLibrary(libraryID, true);
+							for (let col of cols) {
 								// Indent subcollections
 								var indent = '';
-								if (cols[i].level) {
-									for (var j=1; j<cols[i].level; j++) {
+								if (col.level) {
+									for (let j = 1; j < col.level; j++) {
 										indent += '    ';
 									}
 									indent += '- ';
 								}
-								rows.push([indent + cols[i].name, 'C' + cols[i].key]);
+								rows.push({
+									name: indent + col.name,
+									value: 'C' + col.key,
+									image: Zotero.Collection.prototype.treeViewImage
+								});
 							}
-							this.createValueMenu(rows);
-							break;
-						
-						case 'savedSearch':
-							var rows = [];
-							var libraryID = this.parent.search.libraryID;
-							var searches = Zotero.Searches.getAll(libraryID);
-							for (var i in searches) {
-								if (searches[i].id != this.parent.search.id) {
-									rows.push([searches[i].name, 'S' + searches[i].key]);
+							
+							// Add saved searches
+							let searches = Zotero.Searches.getByLibrary(libraryID);
+							for (let search of searches) {
+								if (search.id != this.parent.search.id) {
+									rows.push({
+										name: search.name,
+										value: 'S' + search.key,
+										image: Zotero.Search.prototype.treeViewImage
+									});
 								}
 							}
 							this.createValueMenu(rows);
 							break;
 						
 						case 'itemType':
-							var t = Zotero.ItemTypes.getTypes();
+							var rows = Zotero.ItemTypes.getTypes().map(type => ({
+								name: Zotero.ItemTypes.getLocalizedString(type.id),
+								value: type.name
+							}));
 							
 							// Sort by localized name
-							var types = [];
-							for (var i=0; i<t.length; i++) {
-								types.push({
-									id: t[i].id,
-									name: t[i].name,
-									localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
-								});
-							}
 							var collation = Zotero.getLocaleCollation();
-							types.sort(function(a, b) {
-								return collation.compareString(1, a.localized, b.localized);
-							});
+							rows.sort((a, b) => collation.compareString(1, a.name, b.name));
 							
-							for (var i in types) {
-								types[i][0] = types[i].localized;
-								types[i][1] = types[i].name;
-								delete types[i]['name'];
-								delete types[i]['id'];
-							}
-							this.createValueMenu(types);
+							this.createValueMenu(rows);
 							break;
 						
 						case 'fileTypeID':
-							var types = Zotero.FileTypes.getTypes();
-							for (var i in types) {
-								types[i][0] = Zotero.getString('fileTypes.' + types[i]['name']);
-								types[i][1] = types[i]['id'];
-								delete types[i]['name'];
-								delete types[i]['id'];
-							}
-							this.createValueMenu(types);
+							var rows = Zotero.FileTypes.getTypes().map(type => ({
+								name: Zotero.getString('fileTypes.' + type.name),
+								value: type.id
+							}));
+							
+							// Sort by localized name
+							var collation = Zotero.getLocaleCollation();
+							rows.sort((a, b) => collation.compareString(1, a.name, b.name));
+							
+							this.createValueMenu(rows);
 							break;
 						
 						default:
@@ -522,7 +517,6 @@
 					
 					// Drop-down menu
 					if (conditionsMenu.value == 'collection'
-							|| conditionsMenu.value == 'savedSearch'
 							|| conditionsMenu.value == 'itemType'
 							|| conditionsMenu.value == 'fileTypeID') {
 						this.id('valuefield').hidden = true;
@@ -557,19 +551,21 @@
 				</body>
 			</method>
 			<method name="createValueMenu">
-				<parameter name="values"/>
+				<parameter name="rows"/>
 				<body>
 					<![CDATA[
 						while (this.id('valuemenu').hasChildNodes()){
 							this.id('valuemenu').removeChild(this.id('valuemenu').firstChild);
 						}
 						
-						if (values.length){
-							for (var i in values){
-								this.id('valuemenu').appendItem(values[i][0], values[i][1]);
+						for (let row of rows) {
+							let menuitem = this.id('valuemenu').appendItem(row.name, row.value);
+							if (row.image) {
+								menuitem.className = 'menuitem-iconic';
+								menuitem.setAttribute('image', row.image);
 							}
-							this.id('valuemenu').selectedIndex = 0;
 						}
+						this.id('valuemenu').selectedIndex = 0;
 						
 						if (this.value)
 						{
@@ -601,7 +597,15 @@
 								break;
 						}
 						
-						this.id('conditionsmenu').value = condition.condition;
+						// Map certain conditions to other menu items
+						var uiCondition = condition.condition;
+						switch (condition.condition) {
+							case 'savedSearch':
+								uiCondition = 'collection';
+								break;
+						}
+						
+						this.id('conditionsmenu').value = uiCondition;
 						
 						// Convert datetimes from UTC to localtime
 						if ((condition['condition']=='accessDate' ||
@@ -664,8 +668,7 @@
 							
 							// Handle special C1234 and S5678 form for
 							// collections and searches
-							else if (this.id('conditionsmenu').value == 'collection' || this.id('conditionsmenu').value == 'savedSearch')
-							{
+							else if (condition == 'collection') {
 								var letter = this.id('valuemenu').value.substr(0,1);
 								if (letter=='C')
 								{

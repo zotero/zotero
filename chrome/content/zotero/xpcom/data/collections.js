@@ -91,6 +91,7 @@ Zotero.Collections = function() {
 			for (let id in this._objectCache) {
 				let c = this._objectCache[id];
 				if (c.libraryID == libraryID && !c.parentKey) {
+					c.level = 0;
 					children.push(c);
 				}
 			}
@@ -112,11 +113,11 @@ Zotero.Collections = function() {
 			var obj = children[i];
 			toReturn.push(obj);
 			
-			var desc = obj.getDescendents(false, 'collection');
-			for (var j in desc) {
-				var obj2 = this.get(desc[j].id);
+			var descendants = obj.getDescendents(false, 'collection');
+			for (let d of descendants) {
+				var obj2 = this.get(d.id);
 				if (!obj2) {
-					throw new Error('Collection ' + desc[j] + ' not found');
+					throw new Error('Collection ' + d.id + ' not found');
 				}
 				
 				// TODO: This is a quick hack so that we can indent subcollections
@@ -125,7 +126,7 @@ Zotero.Collections = function() {
 				// of calculating that without either storing it in the DB or
 				// changing the schema to Modified Preorder Tree Traversal,
 				// and I don't know if we'll actually need it anywhere else.
-				obj2.level = desc[j].level;
+				obj2.level = d.level;
 				
 				toReturn.push(obj2);
 			}

@@ -92,6 +92,20 @@ Zotero.defineProperty(Zotero.Search.prototype, '_canHaveParent', {
 	value: false
 });
 
+Zotero.defineProperty(Zotero.Search.prototype, 'treeViewID', {
+	get: function () {
+		return "S" + this.id
+	}
+});
+
+Zotero.defineProperty(Zotero.Search.prototype, 'treeViewImage', {
+	get: function () {
+		if (Zotero.isMac) {
+			return "chrome://zotero-platform/content/treesource-search.png";
+		}
+		return "chrome://zotero/skin/treesource-search" + Zotero.hiDPISuffix + ".png";
+	}
+});
 
 Zotero.Search.prototype.loadFromRow = function (row) {
 	var primaryFields = this._ObjectsClass.primaryFields;
@@ -1184,9 +1198,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							condSQL += "collectionID IN (" + q.join() + ")";
 							condSQLParams = condSQLParams.concat(p);
 						}
+						// Saved search
 						else {
-								// Check if there are any post-search filters
-							var hasFilter = search.hasPostSearchFilter();
+							// Check if there are any post-search filters
+							var hasFilter = obj.hasPostSearchFilter();
 							
 							// This is an ugly and inefficient way of doing a
 							// subsearch, but it's necessary if there are any
@@ -1197,13 +1212,18 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							// or that this slows things down with large libraries
 							// -- should probably use a temporary table instead
 							if (hasFilter){
-								let subids = yield search.search();
+								let subids = yield obj.search();
 								condSQL += subids.join();
 							}
 							// Otherwise just put the SQL in a subquery
 							else {
-								condSQL += yield search.getSQL();
-								let subpar = yield search.getSQLParams();
+								condSQL += "itemID ";
+								if (condition.operator == 'isNot') {
+									condSQL += "NOT ";
+								}
+								condSQL += "IN (";
+								condSQL += yield obj.getSQL();
+								let subpar = yield obj.getSQLParams();
 								for (let k in subpar){
 									condSQLParams.push(subpar[k]);
 								}

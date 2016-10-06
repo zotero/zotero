@@ -38,6 +38,15 @@ describe("Zotero.Collections", function () {
 			assert.isBelow(ids.indexOf(col7.id), ids.indexOf(col6.id), "F before G");
 			assert.isBelow(ids.indexOf(col6.id), ids.indexOf(col5.id), "G before D sibling E");
 			assert.isBelow(ids.indexOf(col5.id), ids.indexOf(col1.id), "E before A sibling C");
+			
+			// 'level' property, which is a hack for indenting in the advanced search window
+			assert.equal(cols[0].level, 0);
+			assert.equal(cols[1].level, 1);
+			assert.equal(cols[2].level, 1);
+			assert.equal(cols[3].level, 2);
+			assert.equal(cols[4].level, 2);
+			assert.equal(cols[5].level, 1);
+			assert.equal(cols[6].level, 0);
 		})
 	})
 	

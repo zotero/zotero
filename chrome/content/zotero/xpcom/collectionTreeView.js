@@ -766,6 +766,7 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 		
 		case 'collection':
 		case 'search':
+			// Keep in sync with Zotero.(Collection|Search).prototype.treeViewImage
 			if (Zotero.isMac) {
 				return "chrome://zotero-platform/content/treesource-" + collectionType + ".png";
 			}
