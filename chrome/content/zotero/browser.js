@@ -268,18 +268,9 @@ var Zotero_Browser = new function() {
 			function(e) { Zotero_Browser.resize(e) }, false);
 		// Resize on text zoom changes
 		
-		// Fx2
-		var reduce = document.getElementById('cmd_textZoomReduce');
-		if (reduce) {
-			var enlarge = document.getElementById('cmd_textZoomEnlarge');
-			var reset = document.getElementById('cmd_textZoomReset');
-		}
-		// Fx3
-		else {
-			var reduce = document.getElementById('cmd_fullZoomReduce');
-			var enlarge = document.getElementById('cmd_fullZoomEnlarge');
-			var reset = document.getElementById('cmd_fullZoomReset');
-		}
+		var reduce = document.getElementById('cmd_fullZoomReduce');
+		var enlarge = document.getElementById('cmd_fullZoomEnlarge');
+		var reset = document.getElementById('cmd_fullZoomReset');
 		
 		if(reduce) reduce.addEventListener("command",
 			function(e) { Zotero_Browser.resize(e) }, false);

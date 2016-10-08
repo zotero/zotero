@@ -1871,7 +1871,7 @@ Zotero.Utilities = {
 						item.setCreator(item.getCreators().length, creator);
 					} else {
 						creator.creatorType = Zotero.CreatorTypes.getName(creatorTypeID);
-						if(Zotero.isFx && !Zotero.isBookmarklet && Zotero.platformMajorVersion >= 32) {
+						if (Zotero.isFx && !Zotero.isBookmarklet) {
 							creator = Components.utils.cloneInto(creator, item);
 						}
 						item.creators.push(creator);

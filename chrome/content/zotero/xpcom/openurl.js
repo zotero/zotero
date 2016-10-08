@@ -245,7 +245,7 @@ Zotero.OpenURL = new function() {
 	}
 
 	function _cloneIfNecessary(obj1, obj2) {
-		if(Zotero.isFx && !Zotero.isBookmarklet && Zotero.platformMajorVersion >= 32) {
+		if (Zotero.isFx && !Zotero.isBookmarklet) {
 			return Components.utils.cloneInto(obj1, obj2);
 		}
 		return obj1;

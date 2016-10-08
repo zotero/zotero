@@ -1618,15 +1618,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				.getService(Components.interfaces.nsILocaleService);
 		var appLocale = localeService.getApplicationLocale();
 		
-		// Use nsICollation before Fx30
-		if (Zotero.platformMajorVersion < 30) {
-			var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
-				.getService(Components.interfaces.nsILocaleService);
-			var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
-				.getService(Components.interfaces.nsICollationFactory);
-			return this.collation = collationFactory.CreateCollation(appLocale);
-		}
-		
 		try {
 			var locale = appLocale.getCategory('NSILOCALE_COLLATE');
 			// Extract a valid language tag

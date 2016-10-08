@@ -429,7 +429,7 @@ Zotero.Translate.Sandbox = {
 				});
 			};
 
-			if(Zotero.isFx && Zotero.platformMajorVersion >= 33) {
+			if (Zotero.isFx) {
 				for(var i in safeTranslator) {
 					if (typeof(safeTranslator[i]) === "function") {
 						safeTranslator[i] = translate._sandboxManager._makeContentForwarder(function(func) {

@@ -407,56 +407,52 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 	var expr = "(function(x) { return function() { this.args = arguments; return Function.prototype.apply.call(x, this); }.bind({}); })";
 	this._makeContentForwarder = Components.utils.evalInSandbox(expr, sandbox);
 
-	if (Zotero.platformMajorVersion >= 35) {
-		var _proxy = Components.utils.evalInSandbox('(function (target, x, overrides) {'+
-		'	return new Proxy(x, ProxyHandler(target, overrides));'+
-		'})', sandbox);
-		var wrap = this.wrap = function(target, x, overrides) {
-			if (target === null || (typeof target !== "object" && typeof target !== "function")) return target;
-			if (!x) x = new sandbox.Object();
-			return _proxy(target, x, overrides);
+	var _proxy = Components.utils.evalInSandbox('(function (target, x, overrides) {'+
+	'	return new Proxy(x, ProxyHandler(target, overrides));'+
+	'})', sandbox);
+	var wrap = this.wrap = function(target, x, overrides) {
+		if (target === null || (typeof target !== "object" && typeof target !== "function")) return target;
+		if (!x) x = new sandbox.Object();
+		return _proxy(target, x, overrides);
+	};
+	var me = this;
+	sandbox.ProxyHandler = this._makeContentForwarder(function() {
+		var target = (this.args.wrappedJSObject || this.args)[0];
+		var overrides = (this.args.wrappedJSObject || this.args)[1] || {};
+		if(target instanceof Components.interfaces.nsISupports) {
+			target = new XPCNativeWrapper(target);
+		}
+		var ret = new sandbox.Object();
+		var wrappedRet = ret.wrappedJSObject || ret;
+		wrappedRet.has = function(x, prop) {
+			return overrides.hasOwnProperty(prop) || prop in target;
 		};
-		var me = this;
-		sandbox.ProxyHandler = this._makeContentForwarder(function() {
-			var target = (this.args.wrappedJSObject || this.args)[0];
-			var overrides = (this.args.wrappedJSObject || this.args)[1] || {};
-			if(target instanceof Components.interfaces.nsISupports) {
-				target = new XPCNativeWrapper(target);
-			}
-			var ret = new sandbox.Object();
-			var wrappedRet = ret.wrappedJSObject || ret;
-			wrappedRet.has = function(x, prop) {
-				return overrides.hasOwnProperty(prop) || prop in target;
-			};
-			wrappedRet.get = function(x, prop, receiver) {
-				if (prop === "__wrappedObject") return target;
-				if (prop === "__wrapperOverrides") return overrides;
-				if (prop === "__wrappingManager") return me;
-				var y = overrides.hasOwnProperty(prop) ? overrides[prop] : target[prop];
-				if (y === null || (typeof y !== "object" && typeof y !== "function")) return y;
-				return wrap(y, typeof y === "function" ? function() {
-					var args = Array.prototype.slice.apply(arguments);
-					for (var i = 0; i < args.length; i++) {
-						if (typeof args[i] === "object" && args[i] !== null &&
-							args[i].wrappedJSObject && args[i].wrappedJSObject.__wrappedObject)
-							args[i] = new XPCNativeWrapper(args[i].wrappedJSObject.__wrappedObject);
-					}
-					return wrap(y.apply(target, args));
-				} : new sandbox.Object());
-			};
-			wrappedRet.ownKeys = function(x) {
-				return Components.utils.cloneInto(target.getOwnPropertyNames(), sandbox);
-			};
-			wrappedRet.enumerate = function(x) {
-				var y = new sandbox.Array();
-				for (var i in target) y.wrappedJSObject.push(i);
-				return y;
-			};
-			return ret;
-		});
-	} else {
-		this.wrap = Zotero.Translate.DOMWrapper.wrap;
-	}
+		wrappedRet.get = function(x, prop, receiver) {
+			if (prop === "__wrappedObject") return target;
+			if (prop === "__wrapperOverrides") return overrides;
+			if (prop === "__wrappingManager") return me;
+			var y = overrides.hasOwnProperty(prop) ? overrides[prop] : target[prop];
+			if (y === null || (typeof y !== "object" && typeof y !== "function")) return y;
+			return wrap(y, typeof y === "function" ? function() {
+				var args = Array.prototype.slice.apply(arguments);
+				for (var i = 0; i < args.length; i++) {
+					if (typeof args[i] === "object" && args[i] !== null &&
+						args[i].wrappedJSObject && args[i].wrappedJSObject.__wrappedObject)
+						args[i] = new XPCNativeWrapper(args[i].wrappedJSObject.__wrappedObject);
+				}
+				return wrap(y.apply(target, args));
+			} : new sandbox.Object());
+		};
+		wrappedRet.ownKeys = function(x) {
+			return Components.utils.cloneInto(target.getOwnPropertyNames(), sandbox);
+		};
+		wrappedRet.enumerate = function(x) {
+			var y = new sandbox.Array();
+			for (var i in target) y.wrappedJSObject.push(i);
+			return y;
+		};
+		return ret;
+	});
 }
 
 Zotero.Translate.SandboxManager.prototype = {
@@ -490,25 +486,17 @@ Zotero.Translate.SandboxManager.prototype = {
 			var isObject = typeof object[localKey] === "object";
 			if(isFunction || isObject) {
 				if(isFunction) {
-					if (Zotero.platformMajorVersion >= 33) {
-						attachTo[localKey] = this._makeContentForwarder(function() {
-							var args = Array.prototype.slice.apply(this.args.wrappedJSObject || this.args);
-							for(var i = 0; i<args.length; i++) {
-								// Make sure we keep XPCNativeWrappers
-								if(args[i] instanceof Components.interfaces.nsISupports) {
-									args[i] = new XPCNativeWrapper(args[i]);
-								}
+					attachTo[localKey] = this._makeContentForwarder(function() {
+						var args = Array.prototype.slice.apply(this.args.wrappedJSObject || this.args);
+						for(var i = 0; i<args.length; i++) {
+							// Make sure we keep XPCNativeWrappers
+							if(args[i] instanceof Components.interfaces.nsISupports) {
+								args[i] = new XPCNativeWrapper(args[i]);
 							}
-							if(passAsFirstArgument) args.unshift(passAsFirstArgument);
-							return me.copyObject(object[localKey].apply(object, args));
-						});
-					} else {
-						attachTo[localKey] = function() {
-							var args = Array.prototype.slice.apply(arguments);
-							if(passAsFirstArgument) args.unshift(passAsFirstArgument);
-							return me.copyObject(object[localKey].apply(object, args));
-						};
-					}
+						}
+						if(passAsFirstArgument) args.unshift(passAsFirstArgument);
+						return me.copyObject(object[localKey].apply(object, args));
+					});
 				} else {
 					attachTo[localKey] = new sandbox.Object();
 				}
