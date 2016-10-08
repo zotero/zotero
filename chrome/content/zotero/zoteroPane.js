@@ -1334,7 +1334,7 @@ var ZoteroPane = new function()
 	
 	
 	this.getCollectionTreeRow = function () {
-		if (!this.collectionsView.selection.count) {
+		if (!this.collectionsView || !this.collectionsView.selection.count) {
 			return false;
 		}
 		return this.collectionsView.getRow(this.collectionsView.selection.currentIndex);
