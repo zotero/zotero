@@ -365,6 +365,8 @@ var ZoteroPane = new function()
 		
 		yield Zotero.unlockPromise;
 		
+		// The items pane is hidden initially to avoid showing column lines
+		document.getElementById('zotero-items-tree').hidden = false;
 		Zotero.hideZoteroPaneOverlays();
 		
 		// If pane not loaded, load it or display an error message
