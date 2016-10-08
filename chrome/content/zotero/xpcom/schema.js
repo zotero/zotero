@@ -195,9 +195,10 @@ Zotero.Schema = new function(){
 	});
 	
 	
+	// https://www.zotero.org/support/nsf
+	//
 	// This is mostly temporary
 	// TEMP - NSF
-	// TODO: async
 	this.importSchema = Zotero.Promise.coroutine(function* (str, uri) {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
@@ -207,7 +208,7 @@ Zotero.Schema = new function(){
 			return;
 		}
 		
-		str = Zotero.Utilities.trim(str);
+		str = str.trim();
 		
 		Zotero.debug(str);
 		
@@ -223,67 +224,65 @@ Zotero.Schema = new function(){
 			
 			var itemTypeID = Zotero.ID.get('customItemTypes');
 			
-			Zotero.DB.beginTransaction();
-			
-			Zotero.DB.query("INSERT INTO customItemTypes VALUES (?, 'nsfReviewer', 'NSF Reviewer', 1, 'chrome://zotero/skin/report_user.png')", itemTypeID);
-			
-			var fields = [
-				['name', 'Name'],
-				['institution', 'Institution'],
-				['address', 'Address'],
-				['telephone', 'Telephone'],
-				['email', 'Email'],
-				['homepage', 'Webpage'],
-				['discipline', 'Discipline'],
-				['nsfID', 'NSF ID'],
-				['dateSent', 'Date Sent'],
-				['dateDue', 'Date Due'],
-				['accepted', 'Accepted'],
-				['programDirector', 'Program Director']
-			];
-			for (var i=0; i<fields.length; i++) {
-				var fieldID = Zotero.ItemFields.getID(fields[i][0]);
-				if (!fieldID) {
-					var fieldID = Zotero.ID.get('customFields');
-					Zotero.DB.query("INSERT INTO customFields VALUES (?, ?, ?)", [fieldID, fields[i][0], fields[i][1]]);
-					Zotero.DB.query("INSERT INTO customItemTypeFields VALUES (?, NULL, ?, 1, ?)", [itemTypeID, fieldID, i+1]);
-				}
-				else {
-					Zotero.DB.query("INSERT INTO customItemTypeFields VALUES (?, ?, NULL, 1, ?)", [itemTypeID, fieldID, i+1]);
+			yield Zotero.DB.executeTransaction(function* () {
+				yield Zotero.DB.queryAsync("INSERT INTO customItemTypes VALUES (?, 'nsfReviewer', 'NSF Reviewer', 1, 'chrome://zotero/skin/report_user.png')", itemTypeID);
+				
+				var fields = [
+					['name', 'Name'],
+					['institution', 'Institution'],
+					['address', 'Address'],
+					['telephone', 'Telephone'],
+					['email', 'Email'],
+					['homepage', 'Webpage'],
+					['discipline', 'Discipline'],
+					['nsfID', 'NSF ID'],
+					['dateSent', 'Date Sent'],
+					['dateDue', 'Date Due'],
+					['accepted', 'Accepted'],
+					['programDirector', 'Program Director']
+				];
+				for (var i=0; i<fields.length; i++) {
+					var fieldID = Zotero.ItemFields.getID(fields[i][0]);
+					if (!fieldID) {
+						var fieldID = Zotero.ID.get('customFields');
+						yield Zotero.DB.queryAsync("INSERT INTO customFields VALUES (?, ?, ?)", [fieldID, fields[i][0], fields[i][1]]);
+						yield Zotero.DB.queryAsync("INSERT INTO customItemTypeFields VALUES (?, NULL, ?, 1, ?)", [itemTypeID, fieldID, i+1]);
+					}
+					else {
+						yield Zotero.DB.queryAsync("INSERT INTO customItemTypeFields VALUES (?, ?, NULL, 1, ?)", [itemTypeID, fieldID, i+1]);
+					}
+					
+					switch (fields[i][0]) {
+						case 'name':
+							var baseFieldID = 110; // title
+							break;
+						
+						case 'dateSent':
+							var baseFieldID = 14; // date
+							break;
+						
+						case 'homepage':
+							var baseFieldID = 1; // URL
+							break;
+						
+						default:
+							var baseFieldID = null;
+					}
+					
+					if (baseFieldID) {
+						yield Zotero.DB.queryAsync("INSERT INTO customBaseFieldMappings VALUES (?, ?, ?)", [itemTypeID, baseFieldID, fieldID]);
+					}
 				}
 				
-				switch (fields[i][0]) {
-					case 'name':
-						var baseFieldID = 110; // title
-						break;
-					
-					case 'dateSent':
-						var baseFieldID = 14; // date
-						break;
-					
-					case 'homepage':
-						var baseFieldID = 1; // URL
-						break;
-					
-					default:
-						var baseFieldID = null;
-				}
-				
-				if (baseFieldID) {
-					Zotero.DB.query("INSERT INTO customBaseFieldMappings VALUES (?, ?, ?)", [itemTypeID, baseFieldID, fieldID]);
-				}
-			}
-			
-			Zotero.DB.commitTransaction();
-			
-			_reloadSchema();
+				yield _reloadSchema();
+			});
 			
 			var s = new Zotero.Search;
 			s.name = "Overdue NSF Reviewers";
 			s.addCondition('itemType', 'is', 'nsfReviewer');
 			s.addCondition('dateDue', 'isBefore', 'today');
 			s.addCondition('tag', 'isNot', 'Completed');
-			s.save();
+			yield s.saveTx();
 			
 			ps.alert(null, "Zotero Item Type Added", "The 'NSF Reviewer' item type and 'Overdue NSF Reviewers' saved search have been installed.");
 		}
@@ -300,31 +299,32 @@ Zotero.Schema = new function(){
 			var s2 = new Zotero.Search;
 			s2.addCondition('itemType', 'is', 'nsfReviewer');
 			s2.addCondition('deleted', 'true');
-			if (s.search() || s2.search()) {
+			if ((yield s.search()).length || (yield s2.search()).length) {
 				ps.alert(null, "Error", "All 'NSF Reviewer' items must be deleted before the item type can be removed from Zotero.");
 				return;
 			}
 			
 			Zotero.debug("Uninstalling nsfReviewer item type");
-			Zotero.DB.beginTransaction();
-			Zotero.DB.query("DELETE FROM customItemTypes WHERE customItemTypeID=?", itemTypeID - Zotero.ItemTypes.customIDOffset);
-			var fields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
-			for each(var fieldID in fields) {
-				if (Zotero.ItemFields.isCustom(fieldID)) {
-					Zotero.DB.query("DELETE FROM customFields WHERE customFieldID=?", fieldID - Zotero.ItemTypes.customIDOffset);
+			yield Zotero.DB.executeTransaction(function* () {
+				yield Zotero.DB.queryAsync("DELETE FROM customItemTypeFields WHERE customItemTypeID=?", itemTypeID - Zotero.ItemTypes.customIDOffset);
+				yield Zotero.DB.queryAsync("DELETE FROM customBaseFieldMappings WHERE customItemTypeID=?", itemTypeID - Zotero.ItemTypes.customIDOffset);
+				var fields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
+				for (let fieldID of fields) {
+					if (Zotero.ItemFields.isCustom(fieldID)) {
+						yield Zotero.DB.queryAsync("DELETE FROM customFields WHERE customFieldID=?", fieldID - Zotero.ItemTypes.customIDOffset);
+					}
 				}
-			}
-			Zotero.DB.commitTransaction();
-			
-			var searches = Zotero.Searches.getAll();
-			for each(var search in searches) {
-				if (search.name == 'Overdue NSF Reviewers') {
-					var id = search.id;
-					yield Zotero.Searches.erase(id);
+				yield Zotero.DB.queryAsync("DELETE FROM customItemTypes WHERE customItemTypeID=?", itemTypeID - Zotero.ItemTypes.customIDOffset);
+				
+				var searches = Zotero.Searches.getByLibrary(Zotero.Libraries.userLibraryID);
+				for (let search of searches) {
+					if (search.name == 'Overdue NSF Reviewers') {
+						yield search.erase();
+					}
 				}
-			}
-			
-			_reloadSchema();
+				
+				yield _reloadSchema();
+			}.bind(this));
 			
 			ps.alert(null, "Zotero Item Type Removed", "The 'NSF Reviewer' item type has been uninstalled.");
 		}
@@ -332,8 +332,8 @@ Zotero.Schema = new function(){
 	
 	var _reloadSchema = Zotero.Promise.coroutine(function* () {
 		yield _updateCustomTables();
-		yield Zotero.ItemTypes.load();
-		yield Zotero.ItemFields.load();
+		yield Zotero.ItemTypes.init();
+		yield Zotero.ItemFields.init();
 		yield Zotero.SearchConditions.init();
 		
 		// Update item type menus in every open window
