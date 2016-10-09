@@ -302,34 +302,47 @@
 			<field name="dontupdate"/>
 			<constructor>
 				<![CDATA[
-					var operators = new Array('is', 'isNot', 'beginsWith', 'contains', 'doesNotContain', 'isLessThan', 'isGreaterThan', 'isBefore', 'isAfter', 'isInTheLast');
+					var operators = [
+						'is',
+						'isNot',
+						'beginsWith',
+						'contains',
+						'doesNotContain',
+						'isLessThan',
+						'isGreaterThan',
+						'isBefore',
+						'isAfter',
+						'isInTheLast'
+					];
 					var operatorsList = this.id('operatorsmenu');
 					
 					// Build operator menu
-					for(var i in operators)
-					{
-						operatorsList.appendItem(Zotero.getString('searchOperator.'+operators[i]),operators[i]);
+					for (let operator of operators) {
+						operatorsList.appendItem(
+							Zotero.getString('searchOperator.' + operator),
+							operator
+						);
 					}
 					
 					// Build conditions menu
 					var conditionsList = this.id('conditionsmenu');
 					var conditions = Zotero.SearchConditions.getStandardConditions();
 					
-					for (var i=0, len=conditions.length; i<len; i++) {
-						var menuitem = conditionsList.appendItem(conditions[i]['localized'], conditions[i]['name']);
+					for (let condition of conditions) {
+						var menuitem = conditionsList.appendItem(condition.localized, condition.name);
 						
 						var baseFields = null;
 						try {
-							baseFields = Zotero.ItemFields.getTypeFieldsFromBase(conditions[i]['name']);
+							baseFields = Zotero.ItemFields.getTypeFieldsFromBase(condition.name);
 						}
 						catch (e) {}
 						
 						// Add tooltip, building it if it doesn't exist
 						if (baseFields) {
-							if (!this.id(conditions[i]['name'] + '-tooltip')) {
+							if (!this.id(condition.name + '-tooltip')) {
 								var fieldName = null;
 								try {
-									fieldName = Zotero.ItemFields.getLocalizedString(null, conditions[i].name);
+									fieldName = Zotero.ItemFields.getLocalizedString(null, condition.name);
 								}
 								catch (e) {}
 								
@@ -340,8 +353,10 @@
 									var localized = [];
 								}
 								
-								for (var j in baseFields) {
-									var str = Zotero.SearchConditions.getLocalizedName(Zotero.ItemFields.getName(baseFields[j]));
+								for (let baseField of baseFields) {
+									var str = Zotero.SearchConditions.getLocalizedName(
+										Zotero.ItemFields.getName(baseField)
+									);
 									
 									if (localized.indexOf(str) == -1) {
 										localized.push(str);
@@ -350,7 +365,7 @@
 								localized.sort();
 								
 								var tt = document.createElement('tooltip');
-								tt.setAttribute('id', conditions[i]['name'] + '-tooltip');
+								tt.setAttribute('id', condition.name + '-tooltip');
 								tt.setAttribute('orient', 'vertical');
 								tt.setAttribute('noautohide', true);
 								
@@ -384,7 +399,7 @@
 								this.id('condition-tooltips').appendChild(tt);
 							}
 							
-							menuitem.setAttribute('tooltip', conditions[i]['name'] + '-tooltip');
+							menuitem.setAttribute('tooltip', condition.name + '-tooltip');
 						}
 					}
 					conditionsList.selectedIndex = 0;
