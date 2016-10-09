@@ -44,7 +44,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	this.log = log;
 	this.logError = logError;
 	this.getErrors = getErrors;
-	this.getSystemInfo = getSystemInfo;
 	this.getString = getString;
 	this.localeJoin = localeJoin;
 	this.setFontSize = setFontSize;
@@ -1453,11 +1452,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	/**
 	 * Get versions, platform, etc.
-	 *
-	 * Can be used synchronously or asynchronously; info on other add-ons
-	 * is available only in async mode
 	 */
-	function getSystemInfo(callback) {
+	this.getSystemInfo = Zotero.Promise.coroutine(function* () {
 		var info = {
 			version: Zotero.version,
 			platform: Zotero.platform,
@@ -1467,18 +1463,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			appVersion: Services.appinfo.version
 		};
 		
-		if (callback) {
-			Zotero.getInstalledExtensions(function(extensions) {
-				info.extensions = extensions.join(', ');
-					
-				var str = '';
-				for (var key in info) {
-					str += key + ' => ' + info[key] + ', ';
-				}
-				str = str.substr(0, str.length - 2);
-				callback(str);
-			});
-		}
+		var extensions = yield Zotero.getInstalledExtensions();
+		info.extensions = extensions.join(', ');
 		
 		var str = '';
 		for (var key in info) {
@@ -1486,20 +1472,21 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		}
 		str = str.substr(0, str.length - 2);
 		return str;
-	}
+	});
 	
 	
 	/**
-	 * @return	{String[]}		Array of extension names and versions
+	 * @return {Promise<String[]>} - Promise for an array of extension names and versions
 	 */
-	this.getInstalledExtensions = function(callback) {
+	this.getInstalledExtensions = Zotero.Promise.method(function () {
+		var deferred = Zotero.Promise.defer();
 		function onHaveInstalledAddons(installed) {
 			installed.sort(function(a, b) {
 				return ((a.appDisabled || a.userDisabled) ? 1 : 0) -
 					((b.appDisabled || b.userDisabled) ? 1 : 0);
 			});
 			var addons = [];
-			for each(var addon in installed) {
+			for (let addon of installed) {
 				switch (addon.id) {
 					case "zotero@chnm.gmu.edu":
 					case "{972ce4c6-7e08-4474-a285-3208198ce6fd}": // Default theme
@@ -1511,12 +1498,13 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 					+ ((addon.appDisabled || addon.userDisabled) ? ", disabled" : "")
 					+ ")");
 			}
-			callback(addons);
+			deferred.resolve(addons);
 		}
 		
 		Components.utils.import("resource://gre/modules/AddonManager.jsm");
 		AddonManager.getAllAddons(onHaveInstalledAddons);
-	}
+		return deferred.promise;
+	});
 	
 	function getString(name, params){
 		try {

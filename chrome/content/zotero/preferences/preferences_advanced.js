@@ -618,7 +618,7 @@ Zotero_Preferences.Debug_Output = {
 		Components.utils.import("resource://zotero/config.js");
 		
 		var url = ZOTERO_CONFIG.REPOSITORY_URL + "report?debug=1";
-		var output = Zotero.Debug.get(
+		var output = yield Zotero.Debug.get(
 			Zotero.Prefs.get('debug.store.submitSize'),
 			Zotero.Prefs.get('debug.store.submitLineLength')
 		);

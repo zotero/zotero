@@ -615,7 +615,7 @@
 							&& (!SJOW._zoteroMatchTo || SJOW._zoteroMatchTo !== matchTo)) return;
 						
 						if (!SJOW.tinyMCE) {
-							var exts = Zotero.getInstalledExtensions(function(exts) {
+							Zotero.getInstalledExtensions().then(function(exts) {
 								for (let ext of exts) {
 									if (ext.indexOf('NoScript') != -1 && ext.indexOf('disabled') == -1) {
 										var doc = win.document;
