@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Actualiser">
 <!ENTITY zotero.general.saveAs "Enregistrer sous…">
 <!ENTITY zotero.general.advancedOptions.label "Options avancées">
+<!ENTITY zotero.general.more "More">
 
 <!ENTITY zotero.errorReport.title "Rapport d'erreur Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Il peut y avoir des messages sans lien avec Zotero.">

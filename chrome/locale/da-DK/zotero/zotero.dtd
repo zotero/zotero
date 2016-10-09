@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Opdatér">
 <!ENTITY zotero.general.saveAs "Gem som...">
 <!ENTITY zotero.general.advancedOptions.label "Avancerede indstillinger">
+<!ENTITY zotero.general.more "More">
 
 <!ENTITY zotero.errorReport.title "Zotero fejlrapport">
 <!ENTITY zotero.errorReport.unrelatedMessages "Dette kan inkludere beskeder, som ikke har noget med Zotero at gøre.">

@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Vernieuwen">
 <!ENTITY zotero.general.saveAs "Opslaan als...">
 <!ENTITY zotero.general.advancedOptions.label "Advanced Options">
+<!ENTITY zotero.general.more "More">
 
 <!ENTITY zotero.errorReport.title "Zotero-foutrapportage">
 <!ENTITY zotero.errorReport.unrelatedMessages "Dit bevat mogelijk berichten die niet gerelateerd zijn aan Zotero.">

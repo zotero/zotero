@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "重新整理">
 <!ENTITY zotero.general.saveAs "另存新檔...">
 <!ENTITY zotero.general.advancedOptions.label "進階選項">
+<!ENTITY zotero.general.more "More">
 
 <!ENTITY zotero.errorReport.title "Zotero 錯誤報告">
 <!ENTITY zotero.errorReport.unrelatedMessages "這可能包括無關於 Zotero 的訊息。">

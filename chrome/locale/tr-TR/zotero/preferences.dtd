@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.prefpane.sync "Eşitle">
 <!ENTITY zotero.preferences.sync.username "Kullanıcı:">
 <!ENTITY zotero.preferences.sync.password "Şifre:">
-<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
+<!ENTITY zotero.preferences.sync.syncServer "Veri Eşitleme">
 <!ENTITY zotero.preferences.sync.setUpSync "Eşitlemeyi Kur">
 <!ENTITY zotero.preferences.sync.unlinkAccount "Hesabı İlişkisizlendir...">
 <!ENTITY zotero.preferences.sync.createAccount "Hesap Oluştur">

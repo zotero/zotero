@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Refresh">
 <!ENTITY zotero.general.saveAs "다른 이름으로 저장...">
 <!ENTITY zotero.general.advancedOptions.label "고급 ">
+<!ENTITY zotero.general.more "More">
 
 <!ENTITY zotero.errorReport.title "Zotero 오류 보고">
 <!ENTITY zotero.errorReport.unrelatedMessages "Zotero와 관련 없는 메시지가 포함될 수 있습니다.">

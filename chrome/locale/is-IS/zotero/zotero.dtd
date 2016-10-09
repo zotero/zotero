@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Endurnýja">
 <!ENTITY zotero.general.saveAs "Vista sem...">
 <!ENTITY zotero.general.advancedOptions.label "Advanced Options">
+<!ENTITY zotero.general.more "More">
 
 <!ENTITY zotero.errorReport.title "Zotero villutilkynning">
 <!ENTITY zotero.errorReport.unrelatedMessages "Hér gætu einnig verið skilaboð ótengd Zotero.">

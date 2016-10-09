@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Refresh">
 <!ENTITY zotero.general.saveAs "Save As…">
 <!ENTITY zotero.general.advancedOptions.label "Advanced Options">
+<!ENTITY zotero.general.more "More">
 
 <!ENTITY zotero.errorReport.title "گزارش خطا در زوترو">
 <!ENTITY zotero.errorReport.unrelatedMessages "این ممکن است شامل پیام‌هایی غیرمرتبط با زوترو باشد.">

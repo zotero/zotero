@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "اعادة تحميل">
 <!ENTITY zotero.general.saveAs "حفظ باسم...">
 <!ENTITY zotero.general.advancedOptions.label "Advanced Options">
+<!ENTITY zotero.general.more "More">
 
 <!ENTITY zotero.errorReport.title "تقرير خطأ لزوتيرو">
 <!ENTITY zotero.errorReport.unrelatedMessages "قد يتضمن هذا على رسائل ليس لها علاقة بزوتيرو.">

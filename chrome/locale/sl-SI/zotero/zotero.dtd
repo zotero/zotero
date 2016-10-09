@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Osveži">
 <!ENTITY zotero.general.saveAs "Shrani kot ...">
 <!ENTITY zotero.general.advancedOptions.label "Napredne možnosti">
+<!ENTITY zotero.general.more "More">
 
 <!ENTITY zotero.errorReport.title "Poročilo o napaki Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Vključuje lahko sporočila, ki se ne nanašajo na Zotero.">

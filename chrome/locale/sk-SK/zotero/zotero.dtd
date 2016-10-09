@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Obnoviť">
 <!ENTITY zotero.general.saveAs "Uložiť ako...">
 <!ENTITY zotero.general.advancedOptions.label "Rozšírené možnosti">
+<!ENTITY zotero.general.more "More">
 
 <!ENTITY zotero.errorReport.title "Výkaz chýb Zotera">
 <!ENTITY zotero.errorReport.unrelatedMessages "Toto môže obsahovať hlásenia nesúvisiace so Zoterom.">

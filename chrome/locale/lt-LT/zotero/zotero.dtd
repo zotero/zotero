@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Atnaujinti">
 <!ENTITY zotero.general.saveAs "Įrašyti kaip...">
 <!ENTITY zotero.general.advancedOptions.label "Sudėtingesnės parinktys">
+<!ENTITY zotero.general.more "More">
 
 <!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Zotero programoje">
 <!ENTITY zotero.errorReport.unrelatedMessages "Čia gali būti pranešimų, visai nesusijusių su Zotero.">
