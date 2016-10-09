@@ -24,7 +24,12 @@
     ***** END LICENSE BLOCK *****
 -->
 
-<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/searchbox.dtd">
+<!DOCTYPE window [
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd">
+	%zoteroDTD;
+	<!ENTITY % searchboxDTD SYSTEM "chrome://zotero/locale/searchbox.dtd">
+	%searchboxDTD;
+]>
 
 <bindings xmlns="http://www.mozilla.org/xbl"
 		  xmlns:xbl="http://www.mozilla.org/xbl"
@@ -325,11 +330,23 @@
 					}
 					
 					// Build conditions menu
-					var conditionsList = this.id('conditionsmenu');
+					var conditionsMenu = this.id('conditionsmenu');
+					var moreConditionsMenu = this.id('more-conditions-menu');
 					var conditions = Zotero.SearchConditions.getStandardConditions();
 					
+					var lastInsertPos = 0;
+					
 					for (let condition of conditions) {
-						var menuitem = conditionsList.appendItem(condition.localized, condition.name);
+						if (this.isPrimaryCondition(condition.name)) {
+							var menuitem = conditionsMenu.insertItemAt(
+								lastInsertPos++, condition.localized, condition.name
+							);
+						}
+						else {
+							var menuitem = moreConditionsMenu.appendItem(
+								condition.localized, condition.name
+							);
+						}
 						
 						var baseFields = null;
 						try {
@@ -402,23 +419,62 @@
 							menuitem.setAttribute('tooltip', condition.name + '-tooltip');
 						}
 					}
-					conditionsList.selectedIndex = 0;
+					conditionsMenu.selectedIndex = 0;
 				]]>
 			</constructor>
-			<method name="onConditionSelected">
+			
+			<method name="isPrimaryCondition">
+				<parameter name="condition"/>
 				<body><![CDATA[
-					// Skip if correct condition already selected
-					if (this.id('conditionsmenu').value==this.selectedCondition){
-						return;
-					}
+				switch (condition) {
+				case 'collection':
+				case 'creator':
+				case 'title':
+				case 'date':
+				case 'dateAdded':
+				case 'dateModified':
+				case 'itemType':
+				case 'fileTypeID':
+				case 'tag':
+				case 'note':
+				case 'childNote':
+				case 'fulltextContent':
+					return true;
+				}
+				
+				return false;
+				]]></body>
+			</method>
+			
+			<method name="onConditionSelected">
+				<parameter name="conditionName"/>
+				<body><![CDATA[
 					var conditionsMenu = this.id('conditionsmenu');
 					var operatorsList = this.id('operatorsmenu');
 					
-					this.selectedCondition = conditionsMenu.value;
+					// Skip if no condition or correct condition already selected
+					if (!conditionName || conditionName == this.selectedCondition) {
+						return;
+					}
+					
+					this.selectedCondition = conditionName;
 					this.selectedOperator = operatorsList.value;
 					
-					var condition = Zotero.SearchConditions.get(conditionsMenu.value);
-					var operators = condition['operators'];
+					var condition = Zotero.SearchConditions.get(conditionName);
+					var operators = condition.operators;
+					
+					conditionsMenu.value = conditionName;
+					
+					// Parent state isn't set automatically for submenu selections
+					if (!this.isPrimaryCondition(conditionName)) {
+						conditionsMenu.selectedIndex = -1;
+						conditionsMenu.setAttribute(
+							'label',
+							Zotero.SearchConditions.getLocalizedName(conditionName)
+						);
+					}
+					
+					this.updateSubmenuCheckboxes(conditionsMenu);
 					
 					// Display appropriate operators for condition
 					var selectThis;
@@ -435,7 +491,7 @@
 					operatorsList.selectedIndex = selectThis;
 					
 					// Generate drop-down menu instead of textbox for certain conditions
-					switch (conditionsMenu.value){
+					switch (conditionName) {
 						case 'collection':
 							var rows = [];
 							
@@ -517,7 +573,7 @@
 								}
 								
 								// Update field drop-down if applicable
-								this.id('valuefield').update(conditionsMenu.value, this.mode);
+								this.id('valuefield').update(conditionName, this.mode);
 							}
 					}
 					
@@ -527,13 +583,12 @@
 			<method name="onOperatorSelected">
 				<body>
 					<![CDATA[
-					var conditionsMenu = this.id('conditionsmenu');
 					var operatorsList = this.id('operatorsmenu');
 					
 					// Drop-down menu
-					if (conditionsMenu.value == 'collection'
-							|| conditionsMenu.value == 'itemType'
-							|| conditionsMenu.value == 'fileTypeID') {
+					if (this.selectedCondition == 'collection'
+							|| this.selectedCondition == 'itemType'
+							|| this.selectedCondition == 'fileTypeID') {
 						this.id('valuefield').hidden = true;
 						this.id('valuemenu').hidden = false;
 						this.id('value-date-age').hidden = true;
@@ -595,6 +650,7 @@
 				<body><![CDATA[
 					this.parent = parent;
 					this.conditionID = condition['id'];
+					var menu = this.id('conditionsmenu');
 					
 					if(this.parent.search)
 					{
@@ -613,14 +669,14 @@
 						}
 						
 						// Map certain conditions to other menu items
-						var uiCondition = condition.condition;
+						let uiCondition = condition.condition;
 						switch (condition.condition) {
 							case 'savedSearch':
 								uiCondition = 'collection';
 								break;
 						}
 						
-						this.id('conditionsmenu').value = uiCondition;
+						menu.setAttribute('value', uiCondition);
 						
 						// Convert datetimes from UTC to localtime
 						if ((condition['condition']=='accessDate' ||
@@ -640,7 +696,7 @@
 						this.dontupdate = false;
 					}
 					
-					this.onConditionSelected();
+					this.onConditionSelected(menu.value);
 					
 					this.id('conditionsmenu').focus();
 				]]></body>
@@ -651,7 +707,7 @@
 					<![CDATA[
 						if(this.parent && this.parent.search && !this.dontupdate)
 						{
-							var condition = this.id('conditionsmenu').value;
+							var condition = this.selectedCondition;
 							var operator = this.id('operatorsmenu').value;
 							
 							// Regular text field
@@ -660,7 +716,7 @@
 								var value = this.id('valuefield').value;
 								
 								// Convert datetimes to UTC before saving
-								switch (this.id('conditionsmenu').value) {
+								switch (condition) {
 									case 'accessDate':
 									case 'dateAdded':
 									case 'dateModified':
@@ -706,6 +762,56 @@
 					]]>
 				</body>
 			</method>
+			
+			<method name="updateSubmenuCheckboxes">
+			<parameter name="menu"/>
+			<body><![CDATA[
+				for (let i = 0; i < menu.itemCount; i++) {
+					let item = menu.getItemAtIndex(i);
+					if (item.localName == 'menuitem') {
+						if (item.getAttribute('value') == this.selectedCondition) {
+							item.setAttribute('checked', true);
+						}
+						else {
+							item.removeAttribute('checked');
+						}
+					}
+					else {
+						this.updateSubmenuCheckboxes(item);
+					}
+				}
+			]]></body>
+			</method>
+			
+			<method name="revealSelectedCondition">
+			<parameter name="menu"/>
+			<body><![CDATA[
+				if (!this.selectedCondition || this.isPrimaryCondition(this.selectedCondition)) {
+					return;
+				}
+				
+				if (!menu) {
+					menu = this.id('conditionsmenu');
+				}
+				for (let i = 0; i < menu.itemCount; i++) {
+					let item = menu.getItemAtIndex(i);
+					if (item.localName == 'menuitem') {
+						if (item.getAttribute('value') == this.selectedCondition) {
+							menu.open = true;
+							return true;
+						}
+					}
+					else {
+						var opened = this.revealSelectedCondition(item);
+						if (opened) {
+							return true;
+						}
+					}
+				}
+				
+				return false;
+			]]></body></method>
+			
 			<method name="onRemoveClicked">
 				<body>
 					<![CDATA[
@@ -759,8 +865,12 @@
 			<xul:hbox id="search-condition" xbl:inherits="flex">
 				<xul:popupset id="condition-tooltips"/>
 				
-				<xul:menulist id="conditionsmenu" oncommand="document.getBindingParent(this).onConditionSelected(); event.stopPropagation()">
-					<xul:menupopup/>
+				<xul:menulist id="conditionsmenu" oncommand="document.getBindingParent(this).onConditionSelected(event.target.value); event.stopPropagation()">
+					<xul:menupopup onpopupshown="document.getBindingParent(this).revealSelectedCondition()">
+						<xul:menu id="more-conditions-menu" label="&zotero.general.more;">
+							<xul:menupopup/>
+						</xul:menu>
+					</xul:menupopup>
 				</xul:menulist>
 				<xul:menulist id="operatorsmenu" oncommand="document.getBindingParent(this).onOperatorSelected(); event.stopPropagation()">
 					<xul:menupopup/>
