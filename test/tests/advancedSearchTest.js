@@ -164,6 +164,66 @@ describe("Advanced Search", function () {
 				yield collection.eraseTx();
 				yield search.eraseTx();
 			});
+			
+			it("should update when the library is changed", function* () {
+				var group = yield getGroup();
+				var groupLibraryID = group.libraryID;
+				
+				var collection1 = yield createDataObject('collection', { name: "A" });
+				var search1 = yield createDataObject('search', { name: "B" });
+				var collection2 = yield createDataObject('collection', { name: "C", libraryID: groupLibraryID });
+				var search2 = yield createDataObject('search', { name: "D", libraryID: groupLibraryID });
+				
+				var s = new Zotero.Search();
+				s.addCondition('title', 'is', '');
+				searchBox.search = s;
+				
+				var searchCondition = conditions.firstChild;
+				var conditionsMenu = searchCondition.id('conditionsmenu');
+				var valueMenu = searchCondition.id('valuemenu');
+				
+				// Select 'Collection' condition
+				for (let i = 0; i < conditionsMenu.itemCount; i++) {
+					let menuitem = conditionsMenu.getItemAtIndex(i);
+					if (menuitem.value == 'collection') {
+						menuitem.click();
+						break;
+					}
+				}
+				for (let i = 0; i < valueMenu.itemCount; i++) {
+					let menuitem = valueMenu.getItemAtIndex(i);
+					if (menuitem.getAttribute('value') == "S" + search1.key) {
+						menuitem.click();
+						break;
+					}
+				}
+				assert.equal(valueMenu.value, "S" + search1.key);
+				
+				var libraryMenu = searchWin.document.getElementById('libraryMenu');
+				for (let i = 0; i < libraryMenu.itemCount; i++) {
+					let menuitem = libraryMenu.getItemAtIndex(i);
+					// Switch to group library
+					if (menuitem.getAttribute('libraryID') == groupLibraryID) {
+						menuitem.click();
+						break;
+					}
+				}
+				
+				var values = [];
+				valueMenu = searchCondition.id('valuemenu')
+				assert.equal(valueMenu.value, "C" + collection2.key);
+				for (let i = 0; i < valueMenu.itemCount; i++) {
+					let menuitem = valueMenu.getItemAtIndex(i);
+					values.push(menuitem.getAttribute('value'));
+				}
+				assert.notInclude(values, "C" + collection1.key);
+				assert.notInclude(values, "S" + search1.key);
+				assert.include(values, "C" + collection2.key);
+				assert.include(values, "S" + search2.key);
+				
+				yield Zotero.Collections.erase([collection1.id, collection2.id]);
+				yield Zotero.Searches.erase([search1.id, search2.id]);
+			});
 		});
 		
 		describe("Saved Search", function () {

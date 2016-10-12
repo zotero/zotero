@@ -178,6 +178,8 @@
 					if (!this.searchRef.id) {
 						this.searchRef.libraryID = libraryID;
 					}
+					
+					[...this.id('conditions').childNodes].forEach(x => x.onLibraryChange());
 				]]></body>
 			</method>
 			
@@ -448,12 +450,13 @@
 			
 			<method name="onConditionSelected">
 				<parameter name="conditionName"/>
+				<parameter name="reload"/>
 				<body><![CDATA[
 					var conditionsMenu = this.id('conditionsmenu');
 					var operatorsList = this.id('operatorsmenu');
 					
 					// Skip if no condition or correct condition already selected
-					if (!conditionName || conditionName == this.selectedCondition) {
+					if (!conditionName || (conditionName == this.selectedCondition && !reload)) {
 						return;
 					}
 					
@@ -701,7 +704,7 @@
 					this.id('conditionsmenu').focus();
 				]]></body>
 			</method>
-			<!-- Gets the value from the field and updates the associated search condition -->
+			<!-- Gets the value from the UI and updates the associated condition on the Zotero.Search object -->
 			<method name="updateSearch">
 				<body>
 					<![CDATA[
@@ -811,6 +814,16 @@
 				
 				return false;
 			]]></body></method>
+			
+			<method name="onLibraryChange">
+				<body><![CDATA[
+					switch (this.selectedCondition) {
+					case 'collection':
+						this.onConditionSelected(this.selectedCondition, true);
+						break;
+					}
+				]]></body>
+			</method>
 			
 			<method name="onRemoveClicked">
 				<body>
