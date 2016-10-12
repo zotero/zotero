@@ -23,7 +23,7 @@
  *     <http://www.gnu.org/licenses/> respectively.
  */
 var CSL = {
-    PROCESSOR_VERSION: "1.1.137",
+    PROCESSOR_VERSION: "1.1.138",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -13549,7 +13549,7 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
             info.plural = 0;
             info.labelVisibility = false;
         }
-        var m = val.match(/^([a-zA-Z]0*)([0-9]+(?:[a-zA-Z]*|[-,a-zA-Z]+))$/);
+        var m = val.match(/^([a-zA-Z0]*)([0-9]+(?:[a-zA-Z]*|[-,a-zA-Z]+))$/);
         if (m) {
             info.particle = m[1];
             info.value = m[2];
