@@ -237,7 +237,7 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 	Zotero.debug(this.header, 5);
 	
 	const methodRe = /^([A-Z]+) ([^ \r\n?]+)(\?[^ \r\n]+)?/;
-	const hostRe = /[\r\n]Host: *127\.0\.0\.1(:[0-9]+)?([^ \r\n]+)/i;
+	const hostRe = /[\r\n]Host: *127\.0\.0\.1(:[0-9]+)?[\r\n]/i;
 	const contentTypeRe = /[\r\n]Content-Type: *([^ \r\n]+)/i;
 	
 	if(!Zotero.isServer) {
