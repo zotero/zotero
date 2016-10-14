@@ -217,7 +217,8 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	let deferred = Zotero.Promise.defer();
 	let error = function(e) { Zotero.debug(e, 1); deferred.reject(e); };
 	let translate = new Zotero.Translate.Web();
-	let progressWindow = new Zotero.ProgressWindow();
+	var win = Services.wm.getMostRecentWindow("navigator:browser");
+	let progressWindow = win.ZoteroPane.progressWindow;
 	
 	if (libraryID) {
 		// Show progress notifications when scraping to a library.

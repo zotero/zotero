@@ -32,6 +32,7 @@ var ZoteroPane = new function()
 	var _unserialized = false;
 	this.collectionsView = false;
 	this.itemsView = false;
+	this.progressWindow = false;
 	this._listeners = {};
 	this.__defineGetter__('loaded', function () _loaded);
 	var _lastSelectedItems = [];
@@ -147,6 +148,9 @@ var ZoteroPane = new function()
 		Zotero.hiDPISuffix = Zotero.hiDPI ? "@2x" : "";
 		
 		ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
+		
+		// Add a default progress window
+		ZoteroPane_Local.progressWindow = new Zotero.ProgressWindow(window);
 		
 		//Initialize collections view
 		ZoteroPane_Local.collectionsView = new Zotero.CollectionTreeView();
