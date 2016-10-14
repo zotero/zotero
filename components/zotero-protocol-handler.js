@@ -74,8 +74,10 @@ function ZoteroProtocolHandler() {
 						Zotero.API.Data.getGenerator(path)
 					);
 				}
-				catch (e if e instanceof Zotero.Router.InvalidPathException) {
-					return "URL could not be parsed";
+				catch (e) {
+					if (e instanceof Zotero.Router.InvalidPathException) {
+						return "URL could not be parsed";	
+					}
 				}
 			});
 		}
