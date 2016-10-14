@@ -100,8 +100,6 @@ var Zotero_Browser = new function() {
 	function init() {
 		// No gBrowser - running in standalone
 		if (!window.hasOwnProperty("gBrowser")) {
-			// We can still have a progress window in this though
-			reload();
 			return;
 		}
 		

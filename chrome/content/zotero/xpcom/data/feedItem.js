@@ -217,20 +217,19 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	let deferred = Zotero.Promise.defer();
 	let error = function(e) { Zotero.debug(e, 1); deferred.reject(e); };
 	let translate = new Zotero.Translate.Web();
+	let progressWindow = new Zotero.ProgressWindow();
 	
 	if (libraryID) {
-		// Show progress notifications when scraping to a library. Shown under the most recent
-		// window (Zotero Pane). Browser window not available in standalone.
-		var win = Services.wm.getMostRecentWindow(null);
+		// Show progress notifications when scraping to a library.
 		translate.clearHandlers("done");
 		translate.clearHandlers("itemDone");
-		translate.setHandler("done", win.Zotero_Browser.progress.Translation.doneHandler);
-		translate.setHandler("itemDone", win.Zotero_Browser.progress.Translation.itemDoneHandler());
+		translate.setHandler("done", progressWindow.Translation.doneHandler);
+		translate.setHandler("itemDone", progressWindow.Translation.itemDoneHandler());
 		if (collectionID) {
 			var collection = yield Zotero.Collections.getAsync(collectionID);
 		}
-		win.Zotero_Browser.progress.show();
-		win.Zotero_Browser.progress.Translation.scrapingTo(libraryID, collection);
+		progressWindow.show();
+		progressWindow.Translation.scrapingTo(libraryID, collection);
 	}
 	
 	// Load document
@@ -269,8 +268,8 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 			});
 		}
 		
-		win.Zotero_Browser.progress.Translation.itemDoneHandler()(null, null, item);
-		win.Zotero_Browser.progress.Translation.doneHandler(null, true);
+		progressWindow.Translation.itemDoneHandler()(null, null, item);
+		progressWindow.Translation.doneHandler(null, true);
 		return;
 	}
 	translate.setTranslator(translators[0]);
