@@ -219,8 +219,9 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	let translate = new Zotero.Translate.Web();
 	
 	if (libraryID) {
-		// Show progress notifications when scraping to a library
-		var win = Services.wm.getMostRecentWindow("navigator:browser");
+		// Show progress notifications when scraping to a library. Shown under the most recent
+		// window (Zotero Pane). Browser window not available in standalone.
+		var win = Services.wm.getMostRecentWindow(null);
 		translate.clearHandlers("done");
 		translate.clearHandlers("itemDone");
 		translate.setHandler("done", win.Zotero_Browser.progress.Translation.doneHandler);
