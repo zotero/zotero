@@ -11,7 +11,7 @@
 <!ENTITY zotero.general.refresh "Uppdatera">
 <!ENTITY zotero.general.saveAs "Spara som…">
 <!ENTITY zotero.general.advancedOptions.label "Avancerade alternativ">
-<!ENTITY zotero.general.more "More">
+<!ENTITY zotero.general.more "Mera">
 
 <!ENTITY zotero.errorReport.title "Zotero-felrapporting">
 <!ENTITY zotero.errorReport.unrelatedMessages "Det kan innehålla meddelanden som inte har med Zotero att göra.">

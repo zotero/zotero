@@ -11,11 +11,11 @@
 <!ENTITY zotero.general.refresh "Obnoviť">
 <!ENTITY zotero.general.saveAs "Uložiť ako...">
 <!ENTITY zotero.general.advancedOptions.label "Rozšírené možnosti">
-<!ENTITY zotero.general.more "More">
+<!ENTITY zotero.general.more "Viac">
 
 <!ENTITY zotero.errorReport.title "Výkaz chýb Zotera">
 <!ENTITY zotero.errorReport.unrelatedMessages "Toto môže obsahovať hlásenia nesúvisiace so Zoterom.">
-<!ENTITY zotero.errorReport.submissionInProgress "Prosím počkajte, kým sa hlásenie o chybe neodošle.">
+<!ENTITY zotero.errorReport.submissionInProgress "Počkajte, prosím, kým sa neodošle hlásenie o chybe.">
 <!ENTITY zotero.errorReport.submitted "Hlásenie o chybe bolo odoslané.">
 <!ENTITY zotero.errorReport.reportID "ID hlásenia:">
 <!ENTITY zotero.errorReport.postToForums "Prosím napíšte správu do diskusného fóra Zotero (forums.zotero.org) obsahujúcu toto ID, popis problému a kroky, ktoré sú potrebné k jeho reprodukovaniu.">
@@ -29,7 +29,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Pred tým, než budete pokračovať si prečítajte">
 <!ENTITY zotero.upgrade.majorUpgradeLink "pokyny k aktualizácii">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink ".">
-<!ENTITY zotero.upgrade.upgradeInProgress "Prosím počkajte kým sa dokončí aktualizácia. Môže to trvať niekoľko minút.">
+<!ENTITY zotero.upgrade.upgradeInProgress "Počkajte, prosím, kým sa dokončí aktualizácia. Môže to trvať niekoľko minút.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Vaša Zotero databáza bola úspešne aktualizovaná.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Prosím prezrite si">
 <!ENTITY zotero.upgrade.changeLogLink "protokol o zmenách">

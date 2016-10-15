@@ -11,7 +11,7 @@
 <!ENTITY zotero.general.refresh "Odśwież">
 <!ENTITY zotero.general.saveAs "Zapisz jako...">
 <!ENTITY zotero.general.advancedOptions.label "Zaawansowane ustawienia">
-<!ENTITY zotero.general.more "More">
+<!ENTITY zotero.general.more "Więcej">
 
 <!ENTITY zotero.errorReport.title "Raport błędów Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Może zawierać informacje niezwiązane z Zotero.">
@@ -255,7 +255,7 @@
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Niezaznaczone etykiety nie będą zachowane.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Etykieta zostanie usunięta ze wszystkich elementów.">
 
-<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.title "Rozwiązanie konfliktu">
 <!ENTITY zotero.merge.of "z">
 <!ENTITY zotero.merge.deleted "Usunięty">
 

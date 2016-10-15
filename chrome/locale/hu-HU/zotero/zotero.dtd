@@ -1,5 +1,5 @@
-<!ENTITY zotero.general.yes "Yes">
-<!ENTITY zotero.general.no "No">
+<!ENTITY zotero.general.yes "Igen">
+<!ENTITY zotero.general.no "Nem">
 <!ENTITY zotero.general.optional "(Nem kötelező)">
 <!ENTITY zotero.general.note "Jegyzet:">
 <!ENTITY zotero.general.selectAll "Minden kijelölése">
@@ -267,12 +267,12 @@
 
 <!ENTITY zotero.feedSettings.title "Feed Settings">
 <!ENTITY zotero.feedSettings.saveButton.label "Save">
-<!ENTITY zotero.feedSettings.url.label "URL:">
-<!ENTITY zotero.feedSettings.title.label "Title:">
+<!ENTITY zotero.feedSettings.url.label "URL">
+<!ENTITY zotero.feedSettings.title.label "Cím:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
 <!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
 <!ENTITY zotero.feedSettings.cleanupAfter.label1 "Remove read articles after ">
-<!ENTITY zotero.feedSettings.cleanupAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupAfter.label2 "nap(ok)">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Metaadatok kigyűjtése...">

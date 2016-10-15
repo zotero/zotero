@@ -11,7 +11,7 @@
 <!ENTITY zotero.general.refresh "Yenile">
 <!ENTITY zotero.general.saveAs "Farklı Kaydet...">
 <!ENTITY zotero.general.advancedOptions.label "Gelişmiş Seçenekler">
-<!ENTITY zotero.general.more "More">
+<!ENTITY zotero.general.more "Daha Başka">
 
 <!ENTITY zotero.errorReport.title "Zotero Hata Raporu">
 <!ENTITY zotero.errorReport.unrelatedMessages "Bu, Zotero ile ilgili olmayan mesajlar içerebilir.">
@@ -80,7 +80,7 @@
 <!ENTITY zotero.items.medium_column "Ortam/Biçim">
 <!ENTITY zotero.items.genre_column "Tür">
 <!ENTITY zotero.items.system_column "Sistem">
-<!ENTITY zotero.items.moreColumns.label "Başka Sütunlar">
+<!ENTITY zotero.items.moreColumns.label "Diğer Sütunlar">
 <!ENTITY zotero.items.restoreColumnOrder.label "Sütun Sırasını Geri Yükle">
 
 <!ENTITY zotero.items.menu.showInLibrary "Kitaplıkta Göster">
@@ -100,7 +100,7 @@
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Eserin diğer versiyonlarından hangi alanların tutulacağını seç:">
 
 <!ENTITY zotero.toolbar.newItem.label "Yeni Eser">
-<!ENTITY zotero.toolbar.moreItemTypes.label "Başka türler">
+<!ENTITY zotero.toolbar.moreItemTypes.label "Diğer türler">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Geçerli Sayfadan Yeni Bir Eser Oluştur">
 <!ENTITY zotero.toolbar.lookup.label "Eser(ler)i Tanımlayıcılarını Kullanarak Ekle">
 <!ENTITY zotero.toolbar.removeItem.label "Eseri Kaldır...">
@@ -199,7 +199,7 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Çevirmen Seçenekleri">
 
 <!ENTITY zotero.charset.label "Karakter Kodlaması">
-<!ENTITY zotero.moreEncodings.label "Başka Kodlamalar">
+<!ENTITY zotero.moreEncodings.label "Diğer Kodlamalar">
 
 <!ENTITY zotero.citation.keepSorted.label "Kaynakları Sıralı Tut">
 

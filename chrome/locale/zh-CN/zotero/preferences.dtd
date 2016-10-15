@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.prefpane.sync "同步">
 <!ENTITY zotero.preferences.sync.username "用户名:">
 <!ENTITY zotero.preferences.sync.password "密码:">
-<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
+<!ENTITY zotero.preferences.sync.syncServer "数据同步">
 <!ENTITY zotero.preferences.sync.setUpSync "设置同步">
 <!ENTITY zotero.preferences.sync.unlinkAccount "取消帐户...">
 <!ENTITY zotero.preferences.sync.createAccount "创建账户">
