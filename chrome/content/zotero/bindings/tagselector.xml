@@ -183,7 +183,7 @@
 							// for some reason
 							setTimeout(function () {
 								_popupNode = event.target;
-								self.id('tag-menu').openPopup(
+								this.id('tag-menu').openPopup(
 									null,
 									'after_pointer',
 									event.clientX + 2,
@@ -193,7 +193,7 @@
 								);
 								event.stopPropagation();
 								event.preventDefault();
-							});
+							}.bind(this));
 						}
 					}.bind(this));
 					
