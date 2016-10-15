@@ -89,7 +89,7 @@ Zotero.extendClass(Zotero.DataObject, Zotero.Item);
 
 Zotero.Item.prototype._objectType = 'item';
 Zotero.defineProperty(Zotero.Item.prototype, 'ContainerObjectsClass', {
-	get: function() Zotero.Collections
+	get: function() { return Zotero.Collections; }
 });
 
 Zotero.Item.prototype._dataTypes = Zotero.Item._super.prototype._dataTypes.concat([
@@ -104,8 +104,8 @@ Zotero.Item.prototype._dataTypes = Zotero.Item._super.prototype._dataTypes.conca
 ]);
 
 Zotero.defineProperty(Zotero.Item.prototype, 'id', {
-	get: function() this._id,
-	set: function(val) this.setField('id', val)
+	get: function() { return this._id; },
+	set: function(val) { return this.setField('id', val); }
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'itemID', {
 	get: function() {
@@ -114,52 +114,52 @@ Zotero.defineProperty(Zotero.Item.prototype, 'itemID', {
 	}
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'libraryID', {
-	get: function() this._libraryID,
-	set: function(val) this.setField('libraryID', val)
+	get: function() { return this._libraryID; },
+	set: function(val) { return this.setField('libraryID', val); }
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'key', {
-	get: function() this._key,
-	set: function(val) this.setField('key', val)
+	get: function() { return this._key; },
+	set: function(val) { return this.setField('key', val); }
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'itemTypeID', {
-	get: function() this._itemTypeID
+	get: function() { return this._itemTypeID; }
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'dateAdded', {
-	get: function() this._dateAdded,
-	set: function(val) this.setField('dateAdded', val)
+	get: function() { return this._dateAdded; },
+	set: function(val) { return this.setField('dateAdded', val); }
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'dateModified', {
-	get: function() this._dateModified,
-	set: function(val) this.setField('dateModified', val)
+	get: function() { return this._dateModified; },
+	set: function(val) { return this.setField('dateModified', val); }
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'version', {
-	get: function() this._version,
-	set: function(val) this.setField('version', val)
+	get: function() { return this._version; },
+	set: function(val) { return this.setField('version', val); }
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'synced', {
-	get: function() this._synced,
-	set: function(val) this.setField('synced', val)
+	get: function() { return this._synced; },
+	set: function(val) { return this.setField('synced', val); }
 });
 
 // .parentKey and .parentID defined in dataObject.js, but create aliases
 Zotero.defineProperty(Zotero.Item.prototype, 'parentItemID', {
-	get: function() this.parentID,
-	set: function(val) this.parentID = val
+	get: function() { return this.parentID; },
+	set: function(val) { return this.parentID = val; }
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'parentItemKey', {
-	get: function() this.parentKey,
-	set: function(val) this.parentKey = val
+	get: function() { return this.parentKey; },
+	set: function(val) { return this.parentKey = val; }
 });
 
 
 Zotero.defineProperty(Zotero.Item.prototype, 'firstCreator', {
-	get: function() this._firstCreator
+	get: function() { return this._firstCreator; }
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'sortCreator', {
-	get: function() this._sortCreator
+	get: function() { return this._sortCreator; }
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'relatedItems', {
-	get: function() this._getRelatedItems()
+	get: function() { return this._getRelatedItems(); }
 });
 
 Zotero.defineProperty(Zotero.Item.prototype, 'treeViewID', {
@@ -1023,7 +1023,7 @@ Zotero.Item.prototype.getCreators = function () {
  */
 Zotero.Item.prototype.getCreatorsJSON = function () {
 	this._requireData('creators');
-	return this._creators.map(function (data) Zotero.Creators.internalToJSON(data));
+	return this._creators.map(data => Zotero.Creators.internalToJSON(data));
 }
 
 
@@ -1274,7 +1274,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		env.sqlValues.unshift(parseInt(itemID));
 		
 		let sql = "INSERT INTO items (" + env.sqlColumns.join(", ") + ") "
-			+ "VALUES (" + env.sqlValues.map(function () "?").join() + ")";
+			+ "VALUES (" + env.sqlValues.map(() => "?").join() + ")";
 		yield Zotero.DB.queryAsync(sql, env.sqlValues);
 		
 		if (!env.options.skipNotifier) {
@@ -1328,7 +1328,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		// Delete blank fields
 		if (del.length) {
 			sql = 'DELETE from itemData WHERE itemID=? AND '
-				+ 'fieldID IN (' + del.map(function () '?').join() + ')';
+				+ 'fieldID IN (' + del.map(() => '?').join() + ')';
 			yield Zotero.DB.queryAsync(sql, [itemID].concat(del));
 		}
 	}
@@ -2040,7 +2040,7 @@ Zotero.Item.prototype.getNotes = function(includeTrashed) {
 	var rows = this._notes.rows.concat();
 	// Remove trashed items if necessary
 	if (!includeTrashed) {
-		rows = rows.filter(function (row) !row.trashed);
+		rows = rows.filter(row => !row.trashed);
 	}
 	// Sort by title if necessary
 	if (!sortChronologically) {
@@ -3187,12 +3187,12 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 	var rows = this._attachments.rows.concat();
 	// Remove trashed items if necessary
 	if (!includeTrashed) {
-		rows = rows.filter(function (row) !row.trashed);
+		rows = rows.filter(row => !row.trashed);
 	}
 	// Sort by title if necessary
 	if (!Zotero.Prefs.get('sortAttachmentsChronologically')) {
 		var collation = Zotero.getLocaleCollation();
-		rows.sort(function (a, b) collation.compareString(1, a.title, b.title));
+		rows.sort((a, b) => collation.compareString(1, a.title, b.title));
 	}
 	var ids = rows.map(row => row.itemID);
 	this._attachments[cacheKey] = ids;
@@ -3299,7 +3299,7 @@ Zotero.Item.prototype.getTags = function () {
  */
 Zotero.Item.prototype.hasTag = function (tagName) {
 	this._requireData('tags');
-	return this._tags.some(function (tagData) tagData.tag == tagName);
+	return this._tags.some(tagData => tagData.tag == tagName);
 }
 
 
@@ -3436,7 +3436,7 @@ Zotero.Item.prototype.replaceTag = function (oldTag, newTag) {
  */
 Zotero.Item.prototype.removeTag = function(tagName) {
 	this._requireData('tags');
-	var newTags = this._tags.filter(function (tagData) tagData.tag !== tagName);
+	var newTags = this._tags.filter(tagData => tagData.tag !== tagName);
 	if (newTags.length == this._tags.length) {
 		Zotero.debug('Cannot remove missing tag ' + tagName + ' from item ' + this.libraryKey);
 		return;
@@ -3640,7 +3640,7 @@ Zotero.Item.prototype.getImageSrcWithTags = Zotero.Promise.coroutine(function* (
 	colorData.sort(function (a, b) {
 		return a.position - b.position;
 	});
-	var colors = colorData.map(function (val) val.color);
+	var colors = colorData.map(val => val.color);
 	return Zotero.Tags.generateItemsListImage(colors, uri);
 });
 

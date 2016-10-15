@@ -544,7 +544,7 @@ var Zotero_LocateMenu = new function() {
 		this.useExternalViewer = true;
 		
 		this.canHandleItem = function (item) {
-			return _getBestFile(item).then(function (item) !!item);
+			return _getBestFile(item).then(item => !!item);
 		}
 		
 		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
@@ -573,7 +573,7 @@ var Zotero_LocateMenu = new function() {
 	 */
 	ViewOptions._libraryLookup = new function() {
 		this.icon = "chrome://zotero/skin/locate-library-lookup.png";
-		this.canHandleItem = function (item) Zotero.Promise.resolve(item.isRegularItem());
+		this.canHandleItem = function (item) { return Zotero.Promise.resolve(item.isRegularItem()); };
 		this.handleItems = Zotero.Promise.method(function (items, event) {
 			var urls = [];
 			for (let item of items) {

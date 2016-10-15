@@ -371,9 +371,9 @@ Zotero.ItemTypes = new function() {
 			}
 			if (params.length) {
 				sql += 'OR id IN '
-						+ '(' + params.map(function () '?').join() + ') '
+						+ '(' + params.map(() => '?').join() + ') '
 						+ 'ORDER BY id NOT IN '
-						+ '(' + params.map(function () '?').join() + ') ';
+						+ '(' + params.map(() => '?').join() + ') ';
 				params = params.concat(params);
 			}
 			else {

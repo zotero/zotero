@@ -46,7 +46,7 @@ Zotero.defineProperty(Zotero.FeedItem.prototype, 'isFeedItem', {
 });
 
 Zotero.defineProperty(Zotero.FeedItem.prototype, 'guid', {
-	get: function() this._feedItemGUID,
+	get: function() { return this._feedItemGUID; },
 	set: function(val) {
 		if (this.id) throw new Error('Cannot set GUID after item ID is already set');
 		if (typeof val != 'string') throw new Error('GUID must be a non-empty string');

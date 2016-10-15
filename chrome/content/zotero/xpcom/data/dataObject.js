@@ -66,13 +66,13 @@ Zotero.DataObject.prototype._objectType = 'dataObject';
 Zotero.DataObject.prototype._dataTypes = ['primaryData'];
 
 Zotero.defineProperty(Zotero.DataObject.prototype, 'objectType', {
-	get: function() this._objectType
+	get: function() { return this._objectType; }
 });
 Zotero.defineProperty(Zotero.DataObject.prototype, 'id', {
-	get: function() this._id
+	get: function() { return this._id; }
 });
 Zotero.defineProperty(Zotero.DataObject.prototype, 'libraryID', {
-	get: function() this._libraryID
+	get: function() { return this._libraryID; }
 });
 Zotero.defineProperty(Zotero.DataObject.prototype, 'library', {
 	get: function () {
@@ -80,18 +80,18 @@ Zotero.defineProperty(Zotero.DataObject.prototype, 'library', {
 	}
 });
 Zotero.defineProperty(Zotero.DataObject.prototype, 'key', {
-	get: function() this._key
+	get: function() { return this._key; }
 });
 Zotero.defineProperty(Zotero.DataObject.prototype, 'libraryKey', {
-	get: function() this._libraryID + "/" + this._key
+	get: function() { return this._libraryID + "/" + this._key; }
 });
 Zotero.defineProperty(Zotero.DataObject.prototype, 'parentKey', {
-	get: function () this._getParentKey(),
-	set: function(v) this._setParentKey(v)
+	get: function () { return this._getParentKey(); },
+	set: function(v) { return this._setParentKey(v); }
 });
 Zotero.defineProperty(Zotero.DataObject.prototype, 'parentID', {
-	get: function() this._getParentID(),
-	set: function(v) this._setParentID(v)
+	get: function() { return this._getParentID(); },
+	set: function(v) { return this._setParentID(v); }
 });
 
 Zotero.defineProperty(Zotero.DataObject.prototype, '_canHaveParent', {
@@ -99,7 +99,7 @@ Zotero.defineProperty(Zotero.DataObject.prototype, '_canHaveParent', {
 });
 
 Zotero.defineProperty(Zotero.DataObject.prototype, 'ObjectsClass', {
-	get: function() this._ObjectsClass
+	get: function() { return this._ObjectsClass; }
 });
 
 

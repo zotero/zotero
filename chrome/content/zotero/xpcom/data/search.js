@@ -62,31 +62,31 @@ Zotero.Search.prototype.setName = function(val) {
 }
 
 Zotero.defineProperty(Zotero.Search.prototype, 'id', {
-	get: function() this._get('id'),
-	set: function(val) this._set('id', val)
+	get: function() { return this._get('id'); },
+	set: function(val) { return this._set('id', val); }
 });
 Zotero.defineProperty(Zotero.Search.prototype, 'libraryID', {
-	get: function() this._get('libraryID'),
-	set: function(val) this._set('libraryID', val)
+	get: function() { return this._get('libraryID'); },
+	set: function(val) { return this._set('libraryID', val); }
 });
 Zotero.defineProperty(Zotero.Search.prototype, 'key', {
-	get: function() this._get('key'),
-	set: function(val) this._set('key', val)
+	get: function() { return this._get('key'); },
+	set: function(val) { return this._set('key', val); }
 });
 Zotero.defineProperty(Zotero.Search.prototype, 'name', {
-	get: function() this._get('name'),
-	set: function(val) this._set('name', val)
+	get: function() { return this._get('name'); },
+	set: function(val) { return this._set('name', val); }
 });
 Zotero.defineProperty(Zotero.Search.prototype, 'version', {
-	get: function() this._get('version'),
-	set: function(val) this._set('version', val)
+	get: function() { return this._get('version'); },
+	set: function(val) { return this._set('version', val); }
 });
 Zotero.defineProperty(Zotero.Search.prototype, 'synced', {
-	get: function() this._get('synced'),
-	set: function(val) this._set('synced', val)
+	get: function() { return this._get('synced'); },
+	set: function(val) { return this._set('synced', val); }
 });
 Zotero.defineProperty(Zotero.Search.prototype, 'conditions', {
-	get: function() this.getConditions()
+	get: function() { return this.getConditions(); }
 });
 Zotero.defineProperty(Zotero.Search.prototype, '_canHaveParent', {
 	value: false
@@ -175,14 +175,14 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		env.sqlColumns.unshift('savedSearchID');
 		env.sqlValues.unshift(searchID ? { int: searchID } : null);
 		
-		let placeholders = env.sqlColumns.map(function () '?').join();
+		let placeholders = env.sqlColumns.map(() => '?').join();
 		let sql = "INSERT INTO savedSearches (" + env.sqlColumns.join(', ') + ") "
 			+ "VALUES (" + placeholders + ")";
 		yield Zotero.DB.queryAsync(sql, env.sqlValues);
 	}
 	else {
 		let sql = 'UPDATE savedSearches SET '
-			+ env.sqlColumns.map(function (x) x + '=?').join(', ') + ' WHERE savedSearchID=?';
+			+ env.sqlColumns.map(x => x + '=?').join(', ') + ' WHERE savedSearchID=?';
 		env.sqlValues.push(searchID ? { int: searchID } : null);
 		yield Zotero.DB.queryAsync(sql, env.sqlValues);
 	}
@@ -634,7 +634,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 		// (a separate fulltext word search filtered by fulltext content)
 		for (let condition of Object.values(this._conditions)){
 			if (condition['condition']=='fulltextContent'){
-				var fulltextWordIntersectionFilter = function (val, index, array) !!hash[val];
+				var fulltextWordIntersectionFilter = (val, index, array) => !!hash[val];
 				var fulltextWordIntersectionConditionFilter = function(val, index, array) {
 					return hash[val] ?
 						(condition.operator == 'contains') :

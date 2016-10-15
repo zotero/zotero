@@ -76,7 +76,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	 * @property	{Boolean}	locked		Whether all Zotero panes are locked
 	 *										with an overlay
 	 */
-	this.__defineGetter__('locked', function () _locked);
+	this.__defineGetter__('locked', function () { return _locked; });
 	this.__defineSetter__('locked', function (lock) {
 		var wasLocked = _locked;
 		_locked = lock;
@@ -804,7 +804,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				var e = {
 					name: 'NS_ERROR_FILE_ACCESS_DENIED',
 					message: msg,
-					toString: function () this.message
+					toString: function () { return this.message; }
 				};
 				throw (e);
 			}
