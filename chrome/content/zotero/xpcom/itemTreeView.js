@@ -480,7 +480,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	// Clear item type icon and tag colors when a tag is added to or removed from an item
 	if (type == 'item-tag') {
 		// TODO: Only update if colored tag changed?
-		ids.map(function (val) val.split("-")[0]).forEach(function (val) {
+		ids.map(val => val.split("-")[0]).forEach(function (val) {
 			delete this._itemImages[val];
 		}.bind(this));
 		return;
@@ -1432,7 +1432,7 @@ Zotero.ItemTreeView.prototype.sort = function (itemID) {
 	// Cache primary values while sorting, since base-field-mapped getField()
 	// calls are relatively expensive
 	var cache = {};
-	sortFields.forEach(function (x) cache[x] = {})
+	sortFields.forEach(x => cache[x] = {})
 	
 	// Get the display field for a row (which might be a placeholder title)
 	function getField(field, row) {

@@ -75,7 +75,7 @@ Zotero.LocateManager = new function() {
 	/**
 	 * Returns an array of all search engines
 	 */
-	this.getEngines = function() _locateEngines.slice(0);
+	this.getEngines = function() { return _locateEngines.slice(0); }
 	
 	/**
 	 * Returns an array of all search engines visible that should be visible in the dropdown

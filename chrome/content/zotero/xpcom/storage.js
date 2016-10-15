@@ -27,8 +27,8 @@
 Zotero.Sync.Storage = new function () {
 	
 	// TEMP
-	this.__defineGetter__("defaultError", function () Zotero.getString('sync.storage.error.default', Zotero.appName));
-	this.__defineGetter__("defaultErrorRestart", function () Zotero.getString('sync.storage.error.defaultRestart', Zotero.appName));
+	this.__defineGetter__("defaultError", function () { return Zotero.getString('sync.storage.error.default', Zotero.appName); });
+	this.__defineGetter__("defaultErrorRestart", function () { return Zotero.getString('sync.storage.error.defaultRestart', Zotero.appName); });
 	
 	var _itemDownloadPercentages = {};
 	

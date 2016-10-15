@@ -327,7 +327,7 @@ function makeZoteroContext(isConnector) {
 	// add connector-related properties
 	zContext.Zotero.isConnector = isConnector;
 	zContext.Zotero.instanceID = instanceID;
-	zContext.Zotero.__defineGetter__("isFirstLoadThisSession", function() isFirstLoadThisSession);
+	zContext.Zotero.__defineGetter__("isFirstLoadThisSession", function() { return isFirstLoadThisSession; });
 };
 
 /**
