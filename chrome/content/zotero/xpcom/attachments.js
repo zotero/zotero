@@ -797,7 +797,7 @@ Zotero.Attachments = new function(){
 		var dir = this.getStorageDirectory(item);
 		yield _moveOrphanedDirectory(dir);
 		if (!dir.exists()) {
-			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0o755);
 		}
 		return dir;
 	});
@@ -840,7 +840,7 @@ Zotero.Attachments = new function(){
 		var tmpDir = Zotero.getStorageDirectory();
 		tmpDir.append("tmp-" + Zotero.Utilities.randomString(6));
 		yield OS.File.makeDir(tmpDir.path, {
-			unixMode: 0755
+			unixMode: 0o755
 		});
 		return tmpDir;
 	});
@@ -1192,7 +1192,7 @@ Zotero.Attachments = new function(){
 		var orphaned = Zotero.getZoteroDirectory();
 		orphaned.append('orphaned-files');
 		if (!orphaned.exists()) {
-			orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+			orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0o755);
 		}
 		
 		// Find unique filename for orphaned file
@@ -1201,7 +1201,7 @@ Zotero.Attachments = new function(){
 		var newName = null;
 		if (orphanTarget.exists()) {
 			try {
-				orphanTarget.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+				orphanTarget.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0o644);
 				newName = orphanTarget.leafName;
 			}
 			catch (e) {

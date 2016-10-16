@@ -709,7 +709,7 @@ Zotero.Translate.ItemGetter.prototype = {
 		this._exportFileDirectory.append(name);
 		
 		// create directory
-		this._exportFileDirectory.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
+		this._exportFileDirectory.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0o700);
 		
 		// generate a new location for the exported file, with the appropriate
 		// extension
@@ -786,7 +786,7 @@ Zotero.Translate.ItemGetter.prototype = {
 						// Create intermediate directories if they don't exist
 						parent = targetFile;
 						while((parent = parent.parent) && !parent.exists()) {
-							parent.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
+							parent.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0o700);
 						}
 						
 						// Delete any existing file if overwriteExisting is set, or throw an exception

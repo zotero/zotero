@@ -2629,7 +2629,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 				if (destDir.exists()) {
 					destDir.remove(true);
 				}
-				destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+				destDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0o755);
 			}
 			
 			var copiedFiles = [];
@@ -2677,7 +2677,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 								// directory, it's a duplicate, so give this one
 								// a different name
 								else {
-									copiedFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+									copiedFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0o644);
 									var newName = copiedFile.leafName;
 									copiedFile.remove(null);
 								}
@@ -2718,7 +2718,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 								// it's a duplicate, so give this one a different
 								// name
 								else {
-									copiedFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+									copiedFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0o644);
 									var newName = copiedFile.leafName;
 									copiedFile.remove(null);
 								}

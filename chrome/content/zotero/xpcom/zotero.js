@@ -1747,7 +1747,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	
 	function moveToUnique(file, newFile){
-		newFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+		newFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0o644);
 		var newName = newFile.leafName;
 		newFile.remove(null);
 		

@@ -786,7 +786,7 @@ Zotero.Translate.IO.Read.prototype = {
 		if(this._rawStream) this._rawStream.close();
 		this._rawStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
 								  .createInstance(Components.interfaces.nsIFileInputStream);
-		this._rawStream.init(this.file, 0x01, 0664, 0);
+		this._rawStream.init(this.file, 0x01, 0o664, 0);
 	},
 	
 	"_rewind":function() {
@@ -921,7 +921,7 @@ Zotero.Translate.IO.Write = function(file) {
 	Zotero.Translate.IO.maintainedInstances.push(this);
 	this._rawStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
 		.createInstance(Components.interfaces.nsIFileOutputStream);
-	this._rawStream.init(file, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
+	this._rawStream.init(file, 0x02 | 0x08 | 0x20, 0o664, 0); // write, create, truncate
 	this._writtenToStream = false;
 }
 
