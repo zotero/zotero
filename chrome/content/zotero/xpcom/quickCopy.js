@@ -67,7 +67,12 @@ Zotero.QuickCopy = new function() {
 			+ "WHERE setting='quickCopySite'";
 		var rows = yield Zotero.DB.queryAsync(sql);
 		// Unproxify storage row
-		_siteSettings = [for (row of rows) { domainPath: row.domainPath, format: row.format }];
+		_siteSettings = rows.map(row => {
+			return {
+				domainPath: row.domainPath,
+				format: row.format 
+			};
+		});
 	});
 	
 	
