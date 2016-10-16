@@ -124,7 +124,7 @@ Zotero.File = new function(){
 	this.getBinaryContents = function(file) {
 		var iStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
 					 .createInstance(Components.interfaces.nsIFileInputStream);
-		iStream.init(file, 0x01, 0664, 0);
+		iStream.init(file, 0x01, 0o664, 0);
 		var bStream = Components.classes["@mozilla.org/binaryinputstream;1"]
 					 .createInstance(Components.interfaces.nsIBinaryInputStream);
 		bStream.setInputStream(iStream);
@@ -154,7 +154,7 @@ Zotero.File = new function(){
 		} else if(file instanceof Components.interfaces.nsIFile) {
 			fis = Components.classes["@mozilla.org/network/file-input-stream;1"].
 				createInstance(Components.interfaces.nsIFileInputStream);
-			fis.init(file, 0x01, 0664, 0);
+			fis.init(file, 0x01, 0o664, 0);
 		} else {
 			throw new Error("File is not an nsIInputStream or nsIFile");
 		}
@@ -347,7 +347,7 @@ Zotero.File = new function(){
 		}
 		var fos = Components.classes["@mozilla.org/network/file-output-stream;1"].
 				createInstance(Components.interfaces.nsIFileOutputStream);
-		fos.init(file, 0x02 | 0x08 | 0x20, 0664, 0);  // write, create, truncate
+		fos.init(file, 0x02 | 0x08 | 0x20, 0o664, 0);  // write, create, truncate
 		
 		var os = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
 						   .createInstance(Components.interfaces.nsIConverterOutputStream);
@@ -642,7 +642,7 @@ Zotero.File = new function(){
 			.getTypeFromFile(file);
 		var inputStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
 			.createInstance(Components.interfaces.nsIFileInputStream);
-		inputStream.init(file, 0x01, 0600, 0);
+		inputStream.init(file, 0x01, 0o600, 0);
 		var stream = Components.classes["@mozilla.org/binaryinputstream;1"]
 			.createInstance(Components.interfaces.nsIBinaryInputStream);
 		stream.setInputStream(inputStream);
@@ -768,7 +768,7 @@ Zotero.File = new function(){
 		file = this.pathToFile(file);
 		newFile = this.pathToFile(newFile);
 		
-		newFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+		newFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0o644);
 		var newName = newFile.leafName;
 		newFile.remove(null);
 		
@@ -807,7 +807,7 @@ Zotero.File = new function(){
 			if (dir.exists() && !dir.isDirectory()) {
 				dir.remove(null);
 			}
-			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0o755);
 		}
 	}
 	
@@ -818,7 +818,7 @@ Zotero.File = new function(){
 				path,
 				{
 					ignoreExisting: true,
-					unixMode: 0755
+					unixMode: 0o755
 				}
 			)
 		);

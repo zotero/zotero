@@ -160,7 +160,7 @@ var Zotero_RecognizePDF = new function() {
 			try {
 				var inputStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
 					.createInstance(Components.interfaces.nsIFileInputStream);
-				inputStream.init(cacheFile, 0x01, 0664, 0);
+				inputStream.init(cacheFile, 0x01, 0o664, 0);
 				try {
 					var intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 						.createInstance(Components.interfaces.nsIConverterInputStream);

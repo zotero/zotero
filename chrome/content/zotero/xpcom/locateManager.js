@@ -132,7 +132,7 @@ Zotero.LocateManager = new function() {
 		if(locateDir.exists()) locateDir.remove(true);
 		
 		// create new locate dir
-		locateDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
+		locateDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0o700);
 		
 		// copy default file to new locate dir
 		Zotero.File.putContents(_jsonFile,
@@ -233,7 +233,7 @@ Zotero.LocateManager = new function() {
 		// write the icon to the file
 		var fos = Components.classes["@mozilla.org/network/file-output-stream;1"].
 				createInstance(Components.interfaces.nsIFileOutputStream);
-		fos.init(iconFile, 0x02 | 0x08 | 0x20, 0664, 0);  // write, create, truncate
+		fos.init(iconFile, 0x02 | 0x08 | 0x20, 0o664, 0);  // write, create, truncate
 		var bos = Components.classes["@mozilla.org/binaryoutputstream;1"].
 				createInstance(Components.interfaces.nsIBinaryOutputStream);
 		bos.setOutputStream(fos);
