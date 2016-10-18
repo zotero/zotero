@@ -947,7 +947,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		if(defaultSection.IsRelative === "1") {
 			var defaultProfile = prefDir.clone().QueryInterface(Components.interfaces.nsILocalFile);
 			try {
-				for each(var dir in defaultSection.Path.split("/")) defaultProfile.append(dir);
+				for (let dir of defaultSection.Path.split("/")) defaultProfile.append(dir);
 			} catch(e) {
 				Zotero.logError("Could not find profile at "+defaultSection.Path);
 				throw e;
@@ -1429,7 +1429,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	function getErrors(asStrings) {
 		var errors = [];
 		
-		for each(var msg in _startupErrors.concat(_recentErrors)) {
+		for (let msg of _startupErrors.concat(_recentErrors)) {
 			// Remove password in malformed XML messages
 			if (msg.category == 'malformed-xml') {
 				try {
@@ -2012,7 +2012,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			Zotero.debug("already initialized search menu");
 			button = button[0];
 			var menupopup = button.firstChild;
-			for each(var menuitem in menupopup.childNodes) {
+			for (let menuitem of menupopup.childNodes) {
 				if (menuitem.id.substr(prefixLen) == mode) {
 					menuitem.setAttribute('checked', true);
 					searchBox.placeholder = modes[mode].label;
@@ -2502,7 +2502,7 @@ Zotero.Keys = new function() {
 		var cmds = Zotero.Prefs.prefBranch.getChildList('keys', {}, {});
 		
 		// Get the key=>command mappings from the prefs
-		for each(var cmd in cmds) {
+		for (let cmd of cmds) {
 			cmd = cmd.substr(5); // strips 'keys.'
 			// Remove old pref
 			if (cmd == 'overrideGlobal') {

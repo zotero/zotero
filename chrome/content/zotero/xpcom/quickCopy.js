@@ -460,7 +460,7 @@ Zotero.QuickCopy = new function() {
 		// add styles to list
 		_formattedNames = {};
 		var styles = Zotero.Styles.getVisible();
-		for each(var style in styles) {
+		for (let style of styles) {
 			_formattedNames['bibliography=' + style.styleID] = style.title;
 		}
 		

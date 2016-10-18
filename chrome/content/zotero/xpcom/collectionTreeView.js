@@ -1533,7 +1533,7 @@ Zotero.CollectionTreeView.prototype.canDropCheck = function (row, orient, dataTr
 			var ids = data;
 			var items = Zotero.Items.get(ids);
 			var skip = true;
-			for each(var item in items) {
+			for (let item of items) {
 				// Can only drag top-level items
 				if (!item.isTopLevelItem()) {
 					Zotero.debug("Can't drag child item");
@@ -1738,7 +1738,7 @@ Zotero.CollectionTreeView.prototype.canDropCheckAsync = Zotero.Promise.coroutine
 				}
 				
 				var descendents = col.getDescendents(false, 'collection');
-				for each(var descendent in descendents) {
+				for (let descendent of descendents) {
 					descendent = Zotero.Collections.get(descendent.id);
 					// Disallow if linked collection already exists for any subcollections
 					//
@@ -1883,7 +1883,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		if (options.childNotes) {
 			var noteIDs = item.getNotes();
 			var notes = Zotero.Items.get(noteIDs);
-			for each(var note in notes) {
+			for (let note of notes) {
 				let newNote = note.clone(targetLibraryID, { skipTags: !options.tags });
 				newNote.parentID = newItemID;
 				yield newNote.save({
@@ -1898,7 +1898,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		if (options.childLinks || options.childFileAttachments) {
 			var attachmentIDs = item.getAttachments();
 			var attachments = Zotero.Items.get(attachmentIDs);
-			for each(var attachment in attachments) {
+			for (let attachment of attachments) {
 				var linkMode = attachment.attachmentLinkMode;
 				
 				// Skip linked files
@@ -2069,7 +2069,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 				var sameLibrary = false;
 			}
 			
-			for each(var item in items) {
+			for (let item of items) {
 				if (!item.isTopLevelItem()) {
 					continue;
 				}
@@ -2126,7 +2126,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 					var lastWin = wm.getMostRecentWindow("navigator:browser");
 					lastWin.openDialog('chrome://zotero/content/merge.xul', '', 'chrome,modal,centerscreen', io);
 					
-					for each(var obj in io.dataOut) {
+					for (let obj of io.dataOut) {
 						yield obj.ref.save();
 					}
 				}

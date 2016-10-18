@@ -98,7 +98,7 @@ Zotero.Report.HTML = new function () {
 						content += '\t\t\t\t<h3 class="notes">' + escapeXML(Zotero.getString('report.notes')) + '</h3>\n';
 					}
 					content += '\t\t\t\t<ul class="notes">\n';
-					for each(var note in obj.reportChildren.notes) {
+					for (let note of obj.reportChildren.notes) {
 						content += '\t\t\t\t\t<li id="item_' + note.itemKey + '">\n';
 						
 						// If not valid XML, display notes with entities encoded
@@ -180,7 +180,7 @@ Zotero.Report.HTML = new function () {
 			table = true;
 			var displayText;
 			
-			for each(var creator in obj['creators']) {
+			for (let creator of obj['creators']) {
 				// One field
 				if (creator.name !== undefined) {
 					displayText = creator.name;

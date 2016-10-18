@@ -255,7 +255,7 @@ Zotero.Search.prototype.clone = function (libraryID) {
 	
 	var conditions = this.getConditions();
 	
-	for each(var condition in conditions) {
+	for (let condition of Object.values(conditions)) {
 		var name = condition.mode ?
 			condition.condition + '/' + condition.mode :
 			condition.condition
@@ -299,7 +299,7 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 	if (condition.match(/^quicksearch/)) {
 		var parts = Zotero.SearchConditions.parseSearchString(value);
 		
-		for each(var part in parts) {
+		for (let part of parts) {
 			this.addCondition('blockStart');
 			
 			// If search string is 8 characters, see if this is a item key
@@ -329,7 +329,7 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 				}
 				else {
 					var splits = Zotero.Fulltext.semanticSplitter(part.text);
-					for each(var split in splits) {
+					for (let split of splits) {
 						this.addCondition('fulltextWord', operator, split, false);
 					}
 				}
@@ -498,7 +498,7 @@ Zotero.Search.prototype.getConditions = function(){
 
 Zotero.Search.prototype.hasPostSearchFilter = function() {
 	this._requireData('conditions');
-	for each(var i in this._conditions){
+	for (let i of Object.values(this._conditions)) {
 		if (i.condition == 'fulltextContent'){
 			return true;
 		}
@@ -530,7 +530,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 		var joinMode = 'all';
 		
 		// Set some variables for conditions to avoid further lookups
-		for each(var condition in this._conditions) {
+		for (let condition of Object.values(this._conditions)) {
 			switch (condition.condition) {
 				case 'joinMode':
 					if (condition.operator == 'any') {
@@ -632,7 +632,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 		// If join mode ANY or there's a quicksearch (which we assume
 		// fulltextContent is part of), return the union of the main search and
 		// (a separate fulltext word search filtered by fulltext content)
-		for each(var condition in this._conditions){
+		for (let condition of Object.values(this._conditions)){
 			if (condition['condition']=='fulltextContent'){
 				var fulltextWordIntersectionFilter = function (val, index, array) !!hash[val];
 				var fulltextWordIntersectionConditionFilter = function(val, index, array) {
@@ -669,7 +669,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 					// Add any necessary conditions to the fulltext word search --
 					// those that are required in an ANY search and any outside the
 					// quicksearch in an ALL search
-					for each(var c in this._conditions) {
+					for (let c of Object.values(this._conditions)) {
 						if (c.condition == 'blockStart') {
 							var inQS = true;
 							continue;
@@ -688,7 +688,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 					}
 					
 					var splits = Zotero.Fulltext.semanticSplitter(condition.value);
-					for each(var split in splits){
+					for (let split of splits){
 						s.addCondition('fulltextWord', condition.operator, split);
 					}
 					var fulltextWordIDs = yield s.search();
@@ -1043,7 +1043,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	if (this._hasPrimaryConditions) {
 		sql += " AND ";
 		
-		for each(var condition in conditions){
+		for (let condition of Object.values(conditions)){
 				var skipOperators = false;
 				var openParens = 0;
 				var condSQL = '';
@@ -1088,7 +1088,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							if (typeFields) {
 								condSQL += 'fieldID IN (?,';
 								// Add type-specific fields
-								for each(var fieldID in typeFields) {
+								for (let fieldID of typeFields) {
 									condSQL += '?,';
 									condSQLParams.push(fieldID);
 								}
@@ -1113,7 +1113,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						if (dateFields) {
 							condSQL += 'fieldID IN (?,';																
 							// Add type-specific date fields (dateEnacted, dateDecided, issueDate)
-							for each(var fieldID in dateFields) {
+							for (let fieldID of dateFields) {
 								condSQL += '?,';
 								condSQLParams.push(fieldID);
 							}
@@ -1148,7 +1148,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						// for the collection/search
 						if (objLibraryID === undefined) {
 							let foundLibraryID = false;
-							for each (let c in this._conditions) {
+							for (let c of Object.values(this._conditions)) {
 								if (c.condition == 'libraryID' && c.operator == 'is') {
 									foundLibraryID = true;
 									obj = yield objectTypeClass.getByLibraryAndKeyAsync(
@@ -1246,7 +1246,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							+ 'fileTypeID=?)';
 						var patterns = yield Zotero.DB.columnQueryAsync(ftSQL, { int: condition.value });
 						if (patterns) {
-							for each(str in patterns) {
+							for (let str of patterns) {
 								condSQL += 'contentType LIKE ? OR ';
 								condSQLParams.push(str + '%');
 							}
@@ -1402,7 +1402,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							if (useFreeform && dateparts['part']){
 								go = true;
 								var parts = dateparts['part'].split(' ');
-								for each (var part in parts){
+								for (let part of parts) {
 									condSQL += " AND SUBSTR(" + condition['field'] + ", 12, 100)";
 									condSQL += " LIKE ?";
 									condSQLParams.push('%' + part  + '%');

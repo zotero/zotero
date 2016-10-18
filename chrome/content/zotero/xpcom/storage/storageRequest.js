@@ -85,8 +85,8 @@ Zotero.Sync.Storage.Request.prototype.importCallbacks = function (request) {
 			}
 			// Otherwise add functions that don't already exist
 			var add = true;
-			for each(var newFunc in request[name]) {
-				for each(var currentFunc in this[name]) {
+			for (let newFunc of request[name]) {
+				for (let currentFunc of this[name]) {
 					if (newFunc.toString() === currentFunc.toString()) {
 						Zotero.debug("Callback already exists in request -- not importing");
 						add = false;
@@ -266,8 +266,8 @@ Zotero.Sync.Storage.Request.prototype.onProgress = function (progress, progressM
 		Zotero.Sync.Storage.setItemDownloadPercentage(this.name, this.percentage);
 	}
 	
-	if (this.onProgress) {
-		for each(var f in this._onProgress) {
+	if (this.onProgress && this._onProgress) {
+		for (let f of this._onProgress) {
 			f(progress, progressMax);
 		}
 	}

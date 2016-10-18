@@ -503,7 +503,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				var col = this._treebox.columns.getNamedColumn(
 					'zotero-items-column-' + extraData.column
 				);
-				for each(var id in ids) {
+				for (let id of ids) {
 					if (extraData.column == 'title') {
 						delete this._itemImages[id];
 					}
@@ -511,7 +511,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				}
 			}
 			else {
-				for each(var id in ids) {
+				for (let id of ids) {
 					delete this._itemImages[id];
 					this._treebox.invalidateRow(this._rowMap[id]);
 				}
@@ -576,7 +576,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		}
 		
 		var splitIDs = [];
-		for each(var id in ids) {
+		for (let id of ids) {
 			var split = id.split('-');
 			// Skip if not an item in this collection
 			if (split[0] != collectionTreeRow.ref.id) {
@@ -751,7 +751,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			var allDeleted = true;
 			var isTrash = collectionTreeRow.isTrash();
 			var items = Zotero.Items.get(ids);
-			for each(var item in items) {
+			for (let item of items) {
 				// If not viewing trash and all items were deleted, ignore modify
 				if (allDeleted && !isTrash && !item.deleted) {
 					allDeleted = false;
@@ -844,7 +844,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				var items = Zotero.Items.get(ids);
 				if (items) {
 					var found = false;
-					for each(var item in items) {
+					for (let item of items) {
 						// Check for note and attachment type, since it's quicker
 						// than checking for parent item
 						if (item.itemTypeID == 1 || item.itemTypeID == 14) {
@@ -1760,7 +1760,7 @@ Zotero.ItemTreeView.prototype.selectItems = function(ids) {
 	}
 	
 	var rows = [];
-	for each(var id in ids) {
+	for (let id of ids) {
 		if(this._rowMap[id] !== undefined) rows.push(this._rowMap[id]);
 	}
 	rows.sort(function (a, b) {
@@ -2004,7 +2004,7 @@ Zotero.ItemTreeView.prototype._saveOpenState = function (close) {
 
 Zotero.ItemTreeView.prototype.rememberOpenState = function (itemIDs) {
 	var rowsToOpen = [];
-	for each(var id in itemIDs) {
+	for (let id of itemIDs) {
 		var row = this._rowMap[id];
 		// Item may not still exist
 		if (row == undefined) {
@@ -2149,7 +2149,7 @@ Zotero.ItemTreeView.prototype.getVisibleFields = function() {
  */
 Zotero.ItemTreeView.prototype.getSortedItems = function(asIDs) {
 	var items = [];
-	for each(var item in this._rows) {
+	for (let item of this._rows) {
 		if (asIDs) {
 			items.push(item.ref.id);
 		}
@@ -2819,7 +2819,7 @@ Zotero.ItemTreeView.prototype.canDropCheck = function (row, orient, dataTransfer
 		if (rowItem) {
 			var canDrop = false;
 			
-			for each(var item in items) {
+			for (let item of items) {
 				// If any regular items, disallow drop
 				if (item.isRegularItem()) {
 					return false;
@@ -2841,7 +2841,7 @@ Zotero.ItemTreeView.prototype.canDropCheck = function (row, orient, dataTransfer
 		
 		// In library, allow children to be dragged out of parent
 		else if (collectionTreeRow.isLibrary(true) || collectionTreeRow.isCollection()) {
-			for each(var item in items) {
+			for (let item of items) {
 				// Don't allow drag if any top-level items
 				if (item.isTopLevelItem()) {
 					return false;

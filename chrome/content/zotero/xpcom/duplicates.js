@@ -392,7 +392,7 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 	
 	// Match on exact fields
 	/*var fields = [''];
-	for each(var field in fields) {
+	for (let field of fields) {
 		var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
 					+ "JOIN itemDataValues USING (valueID) "
 					+ "WHERE libraryID=? AND fieldID=? "
