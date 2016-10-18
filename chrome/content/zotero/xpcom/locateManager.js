@@ -89,7 +89,7 @@ Zotero.LocateManager = new function() {
 	 */
 	this.getEngineByName = function(engineName) {
 		engineName = engineName.toLowerCase();
-		for each(var engine in _locateEngines) if(engine.name.toLowerCase() == engineName) return engine;
+		for (let engine of _locateEngines) if(engine.name.toLowerCase() == engineName) return engine;
 		return null;
 	}
 	
@@ -98,7 +98,7 @@ Zotero.LocateManager = new function() {
 	 */
 	this.getEngineByAlias = function(engineAlias) {
 		engineAlias = engineAlias.toLowerCase();
-		for each(var engine in _locateEngines) if(engine.alias.toLowerCase() == engineAlias) return engine;
+		for (let engine of _locateEngines) if(engine.alias.toLowerCase() == engineAlias) return engine;
 		return null;
 	}
 	

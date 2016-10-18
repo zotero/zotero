@@ -143,7 +143,7 @@ Zotero.Cite = {
 				output.push(bib[1][i]);
 				
 				// add COinS
-				for each(var itemID in bib[0].entry_ids[i]) {
+				for (let itemID of bib[0].entry_ids[i]) {
 					try {
 						var co = Zotero.OpenURL.createContextObject(Zotero.Items.get(itemID), "1.0");
 						if(!co) continue;

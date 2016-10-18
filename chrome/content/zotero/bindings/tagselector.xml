@@ -528,7 +528,7 @@
 							this._tags = yield Zotero.Tags.getAll(this.libraryID, this._types);
 							
 							for (let tag of this.selection) {
-								for each(var tag2 in this._tags) {
+								for (let tag2 of this._tags) {
 									if (tag == tag2) {
 										var found = true;
 										break;

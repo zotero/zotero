@@ -56,7 +56,7 @@ var Zotero_CSL_Preview = new function() {
 			var styles = Zotero.Styles.getAll();
 			// XXX needs its own string really for the title!
 			var str = '<html><head><title></title></head><body>';
-			for each(var style in styles) {
+			for (let style of styles) {
 				if (style.source) {
 					continue;
 				}

@@ -447,7 +447,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 				}
 			}
 			
-			for each(var oldFieldID in obsoleteFields) {
+			for (let oldFieldID of obsoleteFields) {
 				// Try to get a base type for this field
 				var baseFieldID =
 					Zotero.ItemFields.getBaseIDFromTypeAndField(oldItemTypeID, oldFieldID);
@@ -532,14 +532,14 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 	// Initialize this._itemData with type-specific fields
 	this._itemData = {};
 	var fields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
-	for each(var fieldID in fields) {
+	for (let fieldID of fields) {
 		this._itemData[fieldID] = null;
 	}
 	
 	// DEBUG: clear change item data?
 	
 	if (copiedFields) {
-		for each(var f in copiedFields) {
+		for (let f of copiedFields) {
 			// For fields that we moved to different fields in the new type
 			// (e.g., book -> bookTitle), mark the old value as explicitly
 			// false in previousData (since otherwise it would be null)
@@ -3793,7 +3793,7 @@ Zotero.Item.prototype.diff = function (item, includeMatches, ignoreFields) {
 			throw ("ignoreFields cannot be used if includeMatches is set");
 		}
 		var realDiffs = numDiffs;
-		for each(var field in ignoreFields) {
+		for (let field of ignoreFields) {
 			if (diff[0].primary[field] != undefined) {
 				realDiffs--;
 				if (realDiffs == 0) {

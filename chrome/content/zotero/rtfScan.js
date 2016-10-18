@@ -460,7 +460,7 @@ var Zotero_RTFScan = new function() {
 	 */
 	function _refreshCanAdvance() {
 		var canAdvance = true;
-		for each(var itemList in citationItemIDs) {
+		for (let itemList of citationItemIDs) {
 			if(itemList.length != 1) {
 				canAdvance = false;
 				break;

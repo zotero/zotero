@@ -37,7 +37,7 @@ var Zotero_CSL_Editor = new function() {
 		
 		var styles = Zotero.Styles.getAll();
 		var currentStyle = null;
-		for each(var style in styles) {
+		for (let style of styles) {
 			if (style.source) {
 				continue;
 			}

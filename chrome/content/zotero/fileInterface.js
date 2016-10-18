@@ -474,7 +474,7 @@ var Zotero_File_Interface = new function() {
 	function _doBibliographyOptions(name, items) {
 		// make sure at least one item is not a standalone note or attachment
 		var haveRegularItem = false;
-		for each(var item in items) {
+		for (let item of items) {
 			if (item.isRegularItem()) {
 				haveRegularItem = true;
 				break;
