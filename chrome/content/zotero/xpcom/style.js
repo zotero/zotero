@@ -246,17 +246,17 @@ Zotero.Styles = new function() {
 	this.install = Zotero.Promise.coroutine(function* (style, origin) {
 		var styleInstalled;
 		
-		if(style instanceof Components.interfaces.nsIFile) {
-			// handle nsIFiles
-			var url = Services.io.newFileURI(style);
-			styleInstalled = Zotero.HTTP.promise("GET", url.spec).when(function(xmlhttp) {
-				return _install(xmlhttp.responseText, style.leafName);
-			});
-		} else {
-			styleInstalled = _install(style, origin);
+		try {
+			if (style instanceof Components.interfaces.nsIFile) {
+				// handle nsIFiles
+				var url = Services.io.newFileURI(style);
+				var xmlhttp = yield Zotero.HTTP.request("GET", url.spec);
+				styleInstalled = yield _install(xmlhttp.responseText, style.leafName);
+			} else {
+				styleInstalled = yield _install(style, origin);
+			}
 		}
-		
-		styleInstalled.catch(function(error) {
+		catch (e) {
 			// Unless user cancelled, show an alert with the error
 			if(typeof error === "object" && error instanceof Zotero.Exception.UserCancelled) return;
 			if(typeof error === "object" && error instanceof Zotero.Exception.Alert) {
@@ -267,7 +267,7 @@ Zotero.Styles = new function() {
 				(new Zotero.Exception.Alert("styles.install.unexpectedError",
 					origin, "styles.install.title", error)).present();
 			}
-		}).done();
+		}
 	});
 	
 	/**
