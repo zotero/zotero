@@ -2281,7 +2281,7 @@ Zotero.Schema = new function(){
 				}
 			}
 			
-			else if (i == 88) {
+			else if (i == 89) {
 				let groupLibraryMap = {};
 				let libraryGroupMap = {};
 				let resolveLibrary = Zotero.Promise.coroutine(function* (usersOrGroups, id) {
@@ -2319,7 +2319,7 @@ Zotero.Schema = new function(){
 					
 					// Add missing bidirectional from 80
 					if (object.startsWith('users')) {
-						matches = object.match(/^users\/(local\/\w+\/|\d+)items\/([A-Z0-9]{8})$/);
+						matches = object.match(/^users\/(local\/\w+|\d+)\/items\/([A-Z0-9]{8})$/);
 						if (!matches) continue;
 						newSubjectlibraryID = 1;
 						newSubjectKey = matches[2];
