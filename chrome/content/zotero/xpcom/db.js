@@ -375,7 +375,7 @@ Zotero.DBConnection.prototype.getNextName = Zotero.Promise.coroutine(function* (
 		+ " WHERE libraryID=? AND " + field + " LIKE ? ORDER BY " + field;
 	var params = [libraryID, name + "%"];
 	var suffixes = yield this.columnQueryAsync(sql, params);
-	suffixes.filter(function (x) x.match(/^( [0-9]+)?$/));
+	suffixes.filter(x => x.match(/^( [0-9]+)?$/));
 	
 	// If none found or first one has a suffix, use default name
 	if (!suffixes.length || suffixes[0]) {
@@ -834,15 +834,15 @@ Zotero.DBConnection.prototype.executeSQLFile = Zotero.Promise.coroutine(function
 		// Ugly hack to parse triggers with embedded semicolons
 		.replace(/;---/g, "TEMPSEMI")
 		.split("\n")
-		.filter(function (x) nonCommentRE.test(x))
-		.map(function (x) x.match(trailingCommentRE)[1])
+		.filter(x => nonCommentRE.test(x))
+		.map(x => x.match(trailingCommentRE)[1])
 		.join("");
 	if (sql.substr(-1) == ";") {
 		sql = sql.substr(0, sql.length - 1);
 	}
 	
 	var statements = sql.split(";")
-		.map(function (x) x.replace(/TEMPSEMI/g, ";"));
+		.map(x => x.replace(/TEMPSEMI/g, ";"));
 	
 	this.requireTransaction();
 	

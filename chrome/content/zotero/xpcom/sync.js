@@ -181,7 +181,7 @@ Zotero.Sync.Server = new function () {
 					if (ids) {
 						var items = Zotero.Items.get(ids);
 						var rolledBack = false;
-						for each(var item in items) {
+						for (let item of items) {
 							var file = item.getFile();
 							if (!file) {
 								continue;
@@ -563,7 +563,7 @@ Zotero.Sync.Server.Data = new function() {
 			introMsg += Zotero.getString('sync.conflict.tag.addedToLocal');
 		}
 		var itemText = [];
-		for each(var id in addedItemIDs) {
+		for (let id of addedItemIDs) {
 			var item = Zotero.Items.get(id);
 			var title = item.getField('title');
 			var text = " - " + title;

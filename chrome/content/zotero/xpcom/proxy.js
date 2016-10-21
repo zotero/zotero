@@ -55,8 +55,8 @@ Zotero.Proxies = new function() {
 				rows.map(row => this.newProxyFromRow(row))
 			);
 			
-			for each(var proxy in Zotero.Proxies.proxies) {
-				for each(var host in proxy.hosts) {
+			for (let proxy of Zotero.Proxies.proxies) {
+				for (let host of proxy.hosts) {
 					Zotero.Proxies.hosts[host] = proxy;
 				}
 			}
@@ -110,7 +110,7 @@ Zotero.Proxies = new function() {
 		// see if there is a proxy we already know
 		var m = false;
 		var proxy;
-		for each(proxy in Zotero.Proxies.proxies) {
+		for (proxy of Zotero.Proxies.proxies) {
 			if(proxy.proxyID && proxy.regexp && proxy.multiHost) {
 				m = proxy.regexp.exec(url);
 				if(m) break;
@@ -312,7 +312,7 @@ Zotero.Proxies = new function() {
 		// if there is a proxy ID (i.e., if this is a persisting, transparent proxy), add to host
 		// list to do reverse mapping
 		if(proxy.proxyID) {
-			for each(var host in proxy.hosts) {
+			for (let host of proxy.hosts) {
 				Zotero.Proxies.hosts[host] = proxy;
 			}
 		}
@@ -344,7 +344,7 @@ Zotero.Proxies = new function() {
 	 * @type String
 	 */
 	this.proxyToProper = function(url, onlyReturnIfProxied) {
-		for each(var proxy in Zotero.Proxies.proxies) {
+		for (let proxy of Zotero.Proxies.proxies) {
 			if(proxy.regexp) {
 				var m = proxy.regexp.exec(url);
 				if(m) {
@@ -405,9 +405,9 @@ Zotero.Proxies = new function() {
 			/^muse\.jhu\.edu$/
 		]
 		
-		for each(var blackPattern in hostBlacklist) {
+		for (let blackPattern of hostBlacklist) {
 			if(blackPattern.test(host)) {
-				for each(var whitePattern in hostWhitelist) {
+				for (let whitePattern of hostWhitelist) {
 					if(whitePattern.test(host)) {
 						return false;
 					}
@@ -625,7 +625,7 @@ Zotero.Proxy.prototype.validate = function() {
 		return ["scheme.invalid"];
 	}
 	
-	for each(var host in this.hosts) {
+	for (let host of this.hosts) {
 		var oldHost = Zotero.Proxies.hosts[host];
 		if(oldHost && oldHost.proxyID && oldHost != this) {
 			return ["host.proxyExists", host];
@@ -810,7 +810,7 @@ Zotero.Proxies.Detectors.EZProxy = function(channel) {
 		if(fromProxy && toProxy && fromProxy.host == toProxy.host && fromProxy.port != toProxy.port
 				&& [80, 443, -1].indexOf(toProxy.port) == -1) {
 			var proxy;
-			for each(proxy in Zotero.Proxies.proxies) {
+			for (proxy of Zotero.Proxies.proxies) {
 				if(proxy.regexp) {
 					var m = proxy.regexp.exec(fromProxy.spec);
 					if(m) break;

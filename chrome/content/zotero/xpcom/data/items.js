@@ -743,12 +743,12 @@ Zotero.Items = function() {
 			var toSave = {};
 			toSave[item.id] = item;
 			
-			for each(var otherItem in otherItems) {
+			for (let otherItem of otherItems) {
 				let otherItemURI = Zotero.URI.getItemURI(otherItem);
 				
 				// Move child items to master
 				var ids = otherItem.getAttachments(true).concat(otherItem.getNotes(true));
-				for each(var id in ids) {
+				for (let id of ids) {
 					var attachment = yield this.getAsync(id);
 					
 					// TODO: Skip identical children?

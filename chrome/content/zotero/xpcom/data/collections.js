@@ -104,7 +104,7 @@ Zotero.Collections = function() {
 		}
 		
 		// Do proper collation sort
-		children.sort(function (a, b) Zotero.localeCompare(a.name, b.name));
+		children.sort((a, b) => Zotero.localeCompare(a.name, b.name));
 		
 		if (!recursive) return children;
 		

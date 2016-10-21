@@ -183,7 +183,7 @@ Zotero.Server.Connector.Detect.prototype = {
 	 */
 	"_translatorsAvailable":function(obj, translators) {
 		var jsons = [];
-		for each(var translator in translators) {
+		for (let translator of translators) {
 			if(translator.itemType == "multiple") {
 				var icon = "treesource-collection.png"
 			} else {

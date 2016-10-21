@@ -79,7 +79,7 @@ Zotero.Library._colToProp = function(c) {
 
 // Select all columns in a unique manner, so we can JOIN tables with same column names (e.g. version)
 Zotero.defineProperty(Zotero.Library, '_rowSQLSelect', {
-	value: "L.libraryID, " + Zotero.Library._dbColumns.map(function(c) "L." + c + " AS " + Zotero.Library._colToProp(c)).join(", ")
+	value: "L.libraryID, " + Zotero.Library._dbColumns.map(c => "L." + c + " AS " + Zotero.Library._colToProp(c)).join(", ")
 		+ ", (SELECT COUNT(*)>0 FROM collections C WHERE C.libraryID=L.libraryID) AS hasCollections"
 		+ ", (SELECT COUNT(*)>0 FROM savedSearches S WHERE S.libraryID=L.libraryID) AS hasSearches"
 });
@@ -111,18 +111,18 @@ Zotero.defineProperty(Zotero.Library.prototype, 'fixedLibraries', {
 });
 
 Zotero.defineProperty(Zotero.Library.prototype, 'libraryID', {
-	get: function() this._libraryID,
-	set: function(id) { throw new Error("Cannot change library ID") }
+	get: function() { return this._libraryID; },
+	set: function(id) { throw new Error("Cannot change library ID"); }
 });
 
 Zotero.defineProperty(Zotero.Library.prototype, 'id', {
-	get: function() this.libraryID,
-	set: function(val) this.libraryID = val
+	get: function() { return this.libraryID; },
+	set: function(val) { return this.libraryID = val; }
 });
 
 Zotero.defineProperty(Zotero.Library.prototype, 'libraryType', {
-	get: function() this._get('_libraryType'),
-	set: function(v) this._set('_libraryType', v)
+	get: function() { return this._get('_libraryType'); },
+	set: function(v) { return this._set('_libraryType', v); }
 });
 
 /**
@@ -148,8 +148,8 @@ Zotero.defineProperty(Zotero.Library.prototype, 'libraryTypeID', {
 });
 
 Zotero.defineProperty(Zotero.Library.prototype, 'libraryVersion', {
-	get: function() this._get('_libraryVersion'),
-	set: function(v) this._set('_libraryVersion', v)
+	get: function() { return this._get('_libraryVersion'); },
+	set: function(v) { return this._set('_libraryVersion', v); }
 });
 
 
@@ -159,7 +159,7 @@ Zotero.defineProperty(Zotero.Library.prototype, 'syncable', {
 
 
 Zotero.defineProperty(Zotero.Library.prototype, 'lastSync', {
-	get: function() this._get('_libraryLastSync')
+	get: function() { return this._get('_libraryLastSync'); }
 });
 
 
@@ -199,8 +199,8 @@ Zotero.defineProperty(Zotero.Library.prototype, 'hasTrash', {
 	for (let i=0; i<accessors.length; i++) {
 		let prop = Zotero.Library._colToProp(accessors[i]);
 		Zotero.defineProperty(Zotero.Library.prototype, accessors[i], {
-			get: function() this._get(prop),
-			set: function(v) this._set(prop, v)
+			get: function() { return this._get(prop); },
+			set: function(v) { return this._set(prop, v); }
 		})
 	}
 })()
@@ -514,7 +514,7 @@ Zotero.Library.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		this._libraryID = id;
 	} else if (changedCols.length) {
 		params.push(this.libraryID);
-		let sql = "UPDATE libraries SET " + changedCols.map(function(v) v + "=?").join(", ")
+		let sql = "UPDATE libraries SET " + changedCols.map(v => v + "=?").join(", ")
 			+ " WHERE libraryID=?";
 		yield Zotero.DB.queryAsync(sql, params);
 		

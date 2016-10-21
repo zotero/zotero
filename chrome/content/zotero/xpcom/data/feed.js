@@ -46,13 +46,13 @@ Zotero.Feed = function(params = {}) {
 	// Feeds are not editable by the user. Remove the setter
 	this.editable = false;
 	Zotero.defineProperty(this, 'editable', {
-		get: function() this._get('_libraryEditable')
+		get: function() { return this._get('_libraryEditable'); }
 	});
 
 	// Feeds are not filesEditable by the user. Remove the setter
 	this.filesEditable = false;
 	Zotero.defineProperty(this, 'filesEditable', {
-		get: function() this._get('_libraryFilesEditable')
+		get: function() { return this._get('_libraryFilesEditable'); }
 	});
 	
 	Zotero.Utilities.assignProps(this, params, 
@@ -114,10 +114,10 @@ Zotero.defineProperty(Zotero.Feed.prototype, 'libraryTypes', {
 	value: Object.freeze(Zotero.Feed._super.prototype.libraryTypes.concat(['feed']))
 });
 Zotero.defineProperty(Zotero.Feed.prototype, 'unreadCount', {
-	get: function() this._feedUnreadCount
+	get: function() { return this._feedUnreadCount; }
 });
 Zotero.defineProperty(Zotero.Feed.prototype, 'updating', {
-	get: function() !!this._updating,
+	get: function() { return !!this._updating; }
 });
 
 (function() {
@@ -127,8 +127,8 @@ for (let i=0; i<accessors.length; i++) {
 	let name = accessors[i];
 	let prop = Zotero.Feed._colToProp(name);
 	Zotero.defineProperty(Zotero.Feed.prototype, name, {
-		get: function() this._get(prop),
-		set: function(v) this._set(prop, v)
+		get: function() { return this._get(prop); },
+		set: function(v) { return this._set(prop, v); }
 	})
 }
 let getters = ['lastCheck', 'lastUpdate', 'lastCheckError'];
@@ -136,7 +136,7 @@ for (let i=0; i<getters.length; i++) {
 	let name = getters[i];
 	let prop = Zotero.Feed._colToProp(name);
 	Zotero.defineProperty(Zotero.Feed.prototype, name, {
-		get: function() this._get(prop),
+		get: function() { return this._get(prop); }
 	})
 }
 })()

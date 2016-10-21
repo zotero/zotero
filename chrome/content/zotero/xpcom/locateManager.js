@@ -75,7 +75,7 @@ Zotero.LocateManager = new function() {
 	/**
 	 * Returns an array of all search engines
 	 */
-	this.getEngines = function() _locateEngines.slice(0);
+	this.getEngines = function() { return _locateEngines.slice(0); }
 	
 	/**
 	 * Returns an array of all search engines visible that should be visible in the dropdown
@@ -89,7 +89,7 @@ Zotero.LocateManager = new function() {
 	 */
 	this.getEngineByName = function(engineName) {
 		engineName = engineName.toLowerCase();
-		for each(var engine in _locateEngines) if(engine.name.toLowerCase() == engineName) return engine;
+		for (let engine of _locateEngines) if(engine.name.toLowerCase() == engineName) return engine;
 		return null;
 	}
 	
@@ -98,7 +98,7 @@ Zotero.LocateManager = new function() {
 	 */
 	this.getEngineByAlias = function(engineAlias) {
 		engineAlias = engineAlias.toLowerCase();
-		for each(var engine in _locateEngines) if(engine.alias.toLowerCase() == engineAlias) return engine;
+		for (let engine of _locateEngines) if(engine.alias.toLowerCase() == engineAlias) return engine;
 		return null;
 	}
 	
@@ -132,7 +132,7 @@ Zotero.LocateManager = new function() {
 		if(locateDir.exists()) locateDir.remove(true);
 		
 		// create new locate dir
-		locateDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
+		locateDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0o700);
 		
 		// copy default file to new locate dir
 		Zotero.File.putContents(_jsonFile,
@@ -233,7 +233,7 @@ Zotero.LocateManager = new function() {
 		// write the icon to the file
 		var fos = Components.classes["@mozilla.org/network/file-output-stream;1"].
 				createInstance(Components.interfaces.nsIFileOutputStream);
-		fos.init(iconFile, 0x02 | 0x08 | 0x20, 0664, 0);  // write, create, truncate
+		fos.init(iconFile, 0x02 | 0x08 | 0x20, 0o664, 0);  // write, create, truncate
 		var bos = Components.classes["@mozilla.org/binaryoutputstream;1"].
 				createInstance(Components.interfaces.nsIBinaryOutputStream);
 		bos.setOutputStream(fos);

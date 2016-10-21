@@ -141,7 +141,7 @@ Zotero.Annotate = new function() {
 			} else {
 				var browsers = win.document.getElementsByTagNameNS(XUL_NAMESPACE, "browser");
 			}
-			for each(var browser in browsers) {
+			for (let browser of browsers) {
 				if(browser.currentURI) {
 					if(browser.currentURI.spec == annotationURL) {
 						if(haveBrowser) {
@@ -364,7 +364,7 @@ Zotero.Annotate.Path.prototype.fromNode = function(node, offset) {
 					// is still part of the first text node
 					if(sibling.getAttribute) {
 						// get offset of all child nodes
-						for each(var child in sibling.childNodes) {
+						for (let child of sibling.childNodes) {
 							if(child && child.nodeType == TEXT_TYPE) {
 								this.offset += child.nodeValue.length;
 							}
@@ -754,14 +754,14 @@ Zotero.Annotations.prototype.save = function() {
 Zotero.Annotations.prototype.load = Zotero.Promise.coroutine(function* () {
 	// load annotations
 	var rows = yield Zotero.DB.queryAsync("SELECT * FROM annotations WHERE itemID = ?", [this.itemID]);
-	for each(var row in rows) {
+	for (let row of rows) {
 		var annotation = this.createAnnotation();
 		annotation.initWithDBRow(row);
 	}
 	
 	// load highlights
 	var rows = yield Zotero.DB.queryAsync("SELECT * FROM highlights WHERE itemID = ?", [this.itemID]);
-	for each(var row in rows) {
+	for (let row of rows) {
 		try {
 			var highlight = new Zotero.Highlight(this);
 			highlight.initWithDBRow(row);

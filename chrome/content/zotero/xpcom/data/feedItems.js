@@ -148,7 +148,7 @@ Zotero.FeedItems = new Proxy(function() {
 		}
 		
 		
-		yield Zotero.DB.executeTransaction(function() {
+		yield Zotero.DB.executeTransaction(function* () {
 			for (let i=0; i<items.length; i++) {
 				items[i].isRead = state;
 

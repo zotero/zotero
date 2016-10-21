@@ -36,8 +36,8 @@ Zotero.Duplicates = function (libraryID) {
 }
 
 
-Zotero.Duplicates.prototype.__defineGetter__('name', function () Zotero.getString('pane.collections.duplicate'));
-Zotero.Duplicates.prototype.__defineGetter__('libraryID', function () this._libraryID);
+Zotero.Duplicates.prototype.__defineGetter__('name', function () { return Zotero.getString('pane.collections.duplicate'); });
+Zotero.Duplicates.prototype.__defineGetter__('libraryID', function () { return this._libraryID; });
 
 /**
  * Get duplicates, populate a temporary table, and return a search based
@@ -251,7 +251,7 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 				+ "JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
 				+ "WHERE libraryID=? AND fieldID IN ("
-				+ dateFields.map(function () '?').join() + ") "
+				+ dateFields.map(() => '?').join() + ") "
 				+ "AND SUBSTR(value, 1, 4) != '0000' "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
 				+ "ORDER BY value";
@@ -392,7 +392,7 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 	
 	// Match on exact fields
 	/*var fields = [''];
-	for each(var field in fields) {
+	for (let field of fields) {
 		var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
 					+ "JOIN itemDataValues USING (valueID) "
 					+ "WHERE libraryID=? AND fieldID=? "

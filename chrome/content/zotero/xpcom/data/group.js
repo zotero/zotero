@@ -58,7 +58,7 @@ Zotero.Group._colToProp = function(c) {
 
 Zotero.defineProperty(Zotero.Group, '_rowSQLSelect', {
 	value: Zotero.Library._rowSQLSelect + ", G.groupID, "
-		+ Zotero.Group._dbColumns.map(function(c) "G." + c + " AS " + Zotero.Group._colToProp(c)).join(", ")
+		+ Zotero.Group._dbColumns.map(c => "G." + c + " AS " + Zotero.Group._colToProp(c)).join(", ")
 });
 
 Zotero.defineProperty(Zotero.Group, '_rowSQL', {
@@ -77,13 +77,13 @@ Zotero.defineProperty(Zotero.Group.prototype, 'libraryTypes', {
 });
 
 Zotero.defineProperty(Zotero.Group.prototype, 'groupID', {
-	get: function() this._groupID,
-	set: function(v) this._groupID = v
+	get: function() { return this._groupID; },
+	set: function(v) { return this._groupID = v; }
 });
 
 Zotero.defineProperty(Zotero.Group.prototype, 'id', {
-	get: function() this.groupID,
-	set: function(v) this.groupID = v
+	get: function() { return this.groupID; },
+	set: function(v) { return this.groupID = v; }
 });
 
 // Create accessors
@@ -93,8 +93,8 @@ for (let i=0; i<accessors.length; i++) {
 	let name = accessors[i];
 	let prop = Zotero.Group._colToProp(name);
 	Zotero.defineProperty(Zotero.Group.prototype, name, {
-		get: function() this._get(prop),
-		set: function(v) this._set(prop, v)
+		get: function() { return this._get(prop); },
+		set: function(v) { return this._set(prop, v); }
 	})
 }
 })();
@@ -201,7 +201,7 @@ Zotero.Group.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		Zotero.Notifier.queue('add', 'group', this.groupID);
 	}
 	else if (changedCols.length) {
-		let sql = "UPDATE groups SET " + changedCols.map(function (v) v + '=?').join(', ')
+		let sql = "UPDATE groups SET " + changedCols.map(v => v + '=?').join(', ')
 			+ " WHERE groupID=?";
 		params.push(this.groupID);
 		yield Zotero.DB.queryAsync(sql, params);

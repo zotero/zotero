@@ -45,32 +45,32 @@ Zotero.Collection.prototype._dataTypes = Zotero.Collection._super.prototype._dat
 ]);
 
 Zotero.defineProperty(Zotero.Collection.prototype, 'ChildObjects', {
-	get: function() Zotero.Items
+	get: function() { return Zotero.Items; }
 });
 
 Zotero.defineProperty(Zotero.Collection.prototype, 'id', {
-	get: function() this._get('id'),
-	set: function(val) this._set('id', val)
+	get: function() { return this._get('id'); },
+	set: function(val) { return this._set('id', val); }
 });
 Zotero.defineProperty(Zotero.Collection.prototype, 'libraryID', {
-	get: function() this._get('libraryID'),
-	set: function(val) this._set('libraryID', val)
+	get: function() { return this._get('libraryID'); },
+	set: function(val) { return this._set('libraryID', val); }
 });
 Zotero.defineProperty(Zotero.Collection.prototype, 'key', {
-	get: function() this._get('key'),
-	set: function(val) this._set('key', val)
+	get: function() { return this._get('key'); },
+	set: function(val) { return this._set('key', val); }
 });
 Zotero.defineProperty(Zotero.Collection.prototype, 'name', {
-	get: function() this._get('name'),
-	set: function(val) this._set('name', val)
+	get: function() { return this._get('name'); },
+	set: function(val) { return this._set('name', val); }
 });
 Zotero.defineProperty(Zotero.Collection.prototype, 'version', {
-	get: function() this._get('version'),
-	set: function(val) this._set('version', val)
+	get: function() { return this._get('version'); },
+	set: function(val) { return this._set('version', val); }
 });
 Zotero.defineProperty(Zotero.Collection.prototype, 'synced', {
-	get: function() this._get('synced'),
-	set: function(val) this._set('synced', val)
+	get: function() { return this._get('synced'); },
+	set: function(val) { return this._set('synced', val); }
 });
 Zotero.defineProperty(Zotero.Collection.prototype, 'parent', {
 	get: function() {
@@ -290,14 +290,14 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 		env.sqlColumns.unshift('collectionID');
 		env.sqlValues.unshift(collectionID ? { int: collectionID } : null);
 		
-		let placeholders = env.sqlColumns.map(function () '?').join();
+		let placeholders = env.sqlColumns.map(() => '?').join();
 		let sql = "INSERT INTO collections (" + env.sqlColumns.join(', ') + ") "
 			+ "VALUES (" + placeholders + ")";
 		yield Zotero.DB.queryAsync(sql, env.sqlValues);
 	}
 	else {
 		let sql = 'UPDATE collections SET '
-			+ env.sqlColumns.map(function (x) x + '=?').join(', ') + ' WHERE collectionID=?';
+			+ env.sqlColumns.map(x => x + '=?').join(', ') + ' WHERE collectionID=?';
 		env.sqlValues.push(collectionID ? { int: collectionID } : null);
 		yield Zotero.DB.queryAsync(sql, env.sqlValues);
 	}
@@ -604,7 +604,7 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 		}
 	}
 	
-	var placeholders = collections.map(function () '?').join();
+	var placeholders = collections.map(() => '?').join();
 	
 	// Remove item associations for all descendent collections
 	yield Zotero.DB.queryAsync('DELETE FROM collectionItems WHERE collectionID IN '

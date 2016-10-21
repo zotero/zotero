@@ -384,8 +384,8 @@ var Zotero_LocateMenu = new function() {
 			return _getURL(item).then((val) => val !== false);
 		}
 		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
-			var urls = yield Zotero.Promise.all([for (item of items) _getURL(item)]);
-			ZoteroPane_Local.loadURI([for (url of urls) if (url) url], event);
+			var urls = yield Zotero.Promise.all(items.map(item => _getURL(item)));
+			ZoteroPane_Local.loadURI(urls.filter(url => !!url), event);
 		});
 		
 		var _getURL = Zotero.Promise.coroutine(function* (item) {
@@ -544,7 +544,7 @@ var Zotero_LocateMenu = new function() {
 		this.useExternalViewer = true;
 		
 		this.canHandleItem = function (item) {
-			return _getBestFile(item).then(function (item) !!item);
+			return _getBestFile(item).then(item => !!item);
 		}
 		
 		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
@@ -573,7 +573,7 @@ var Zotero_LocateMenu = new function() {
 	 */
 	ViewOptions._libraryLookup = new function() {
 		this.icon = "chrome://zotero/skin/locate-library-lookup.png";
-		this.canHandleItem = function (item) Zotero.Promise.resolve(item.isRegularItem());
+		this.canHandleItem = function (item) { return Zotero.Promise.resolve(item.isRegularItem()); };
 		this.handleItems = Zotero.Promise.method(function (items, event) {
 			var urls = [];
 			for (let item of items) {

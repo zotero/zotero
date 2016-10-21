@@ -1,6 +1,6 @@
 var tmp = Zotero.getTempDirectory();
 tmp.append(Zotero.randomString());
-tmp.create(Components.interfaces.nsIFile.FILE_TYPE, 0644);
+tmp.create(Components.interfaces.nsIFile.FILE_TYPE, 0o644);
 
 var date = new Date();
 var nowTS = Zotero.Date.toUnixTimestamp(date) * 1000;

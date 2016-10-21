@@ -654,7 +654,7 @@ Zotero.Sync.Storage.Local = {
 			+ " into attachment directory as '" + fileName + "'");
 		try {
 			var finalFileName = Zotero.File.createShortened(
-				path, Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644
+				path, Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0o644
 			);
 		}
 		catch (e) {
@@ -825,7 +825,7 @@ Zotero.Sync.Storage.Local = {
 			let shortened;
 			try {
 				shortened = Zotero.File.createShortened(
-					destPath, Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644
+					destPath, Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0o644
 				);
 			}
 			catch (e) {

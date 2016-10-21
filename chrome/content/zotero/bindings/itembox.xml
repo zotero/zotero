@@ -475,7 +475,7 @@
 							
 							var popup = button.appendChild(document.createElement("menupopup"));
 							
-							for each(var v in this._fieldAlternatives[fieldName]) {
+							for (let v of this._fieldAlternatives[fieldName]) {
 								var menuitem = document.createElement("menuitem");
 								var sv = Zotero.Utilities.ellipsize(v, 60);
 								menuitem.setAttribute('label', sv);

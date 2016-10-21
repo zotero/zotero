@@ -74,8 +74,10 @@ function ZoteroProtocolHandler() {
 						Zotero.API.Data.getGenerator(path)
 					);
 				}
-				catch (e if e instanceof Zotero.Router.InvalidPathException) {
-					return "URL could not be parsed";
+				catch (e) {
+					if (e instanceof Zotero.Router.InvalidPathException) {
+						return "URL could not be parsed";	
+					}
 				}
 			});
 		}
@@ -596,7 +598,7 @@ function ZoteroProtocolHandler() {
 						var search = new Zotero.Search();
 						search.setScope(s);
 						var groups = Zotero.Groups.getAll();
-						for each(var group in groups) {
+						for (let group of groups) {
 							search.addCondition('libraryID', 'isNot', group.libraryID);
 						}
 						break;
