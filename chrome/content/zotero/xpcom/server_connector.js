@@ -679,6 +679,37 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 	}
 }
 
+/**
+ * Get a list of client hostnames (reverse local IP DNS)
+ *
+ * Accepts:
+ *		Nothing
+ * Returns:
+ * 		{Array} hostnames
+ */
+Zotero.Server.Connector.GetClientHostnames = {};
+Zotero.Server.Connector.GetClientHostnames = function() {};
+Zotero.Server.Endpoints["/connector/getClientHostnames"] = Zotero.Server.Connector.GetClientHostnames;
+Zotero.Server.Connector.GetClientHostnames.prototype = {
+	"supportedMethods":["POST"],
+	"supportedDataTypes":["application/json"],
+	"permitBookmarklet":false,
+	
+	/**
+	 * Returns a 200 response to say the server is alive
+	 * @param {String} data POST data or GET query string
+	 * @param {Function} sendResponseCallback function to send HTTP response
+	 */
+	"init":Zotero.Promise.coroutine(function* (url, postData, sendResponseCallback) {
+		try {
+			var hostnames = yield Zotero.Proxies.DNS.getHostnames();
+		} catch(e) {
+			sendResponseCallback(500);
+		}
+		sendResponseCallback(200, "application/json", JSON.stringify(hostnames));
+	})
+};
+
 
 /**
  * Test connection

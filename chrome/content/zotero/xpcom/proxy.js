@@ -35,12 +35,6 @@ Zotero.Proxies = new function() {
 	this.transparent = false;
 	this.hosts = {};
 	
-	var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-							  .getService(Components.interfaces.nsIIOService);
-	var windowMediator = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-							       .getService(Components.interfaces.nsIWindowMediator);
-	var myHostName = null;
-	var myCanonicalHostName = null;
 	
 	/**
 	 * Initializes http-on-examine-response observer to intercept page loads and gets preferences
@@ -218,9 +212,7 @@ Zotero.Proxies = new function() {
 
 	function _maybeRedirect(channel, browser, window, proxied) {
 		channel.QueryInterface(Components.interfaces.nsIHttpChannel);				
-		var proxiedURI = Components.classes["@mozilla.org/network/io-service;1"]
-								  .getService(Components.interfaces.nsIIOService)
-								  .newURI(proxied, null, null);
+		var proxiedURI = Services.io.newURI(proxied, null, null);
 		if(channel.referrer) {
 			// If the referrer is a proxiable host, we already have access (e.g., we're
 			// on-campus) and shouldn't redirect
@@ -366,7 +358,7 @@ Zotero.Proxies = new function() {
 	 * @type String
 	 */
 	this.properToProxy = function(url, onlyReturnIfProxied) {
-		var uri = ioService.newURI(url, null, null);
+		var uri = Services.io.newURI(url, null, null);
 		if(Zotero.Proxies.hosts[uri.hostPort] && Zotero.Proxies.hosts[uri.hostPort].proxyID) {
 			var toProxy = Zotero.Proxies.hosts[uri.hostPort].toProxy(uri);
 			Zotero.debug("Proxies.properToProxy: "+url+" to "+toProxy);
@@ -964,16 +956,14 @@ Zotero.Proxies.Detectors.Juniper = function(channel) {
 }
 
 Zotero.Proxies.DNS = new function() {
-	var _callbacks = [];
-	
 	this.getHostnames = function() {
-		if (!Zotero.isWin && !Zotero.isMac && !Zotero.isLinux) return Q([]);
-		var deferred = Q.defer();
+		if (!Zotero.isWin && !Zotero.isMac && !Zotero.isLinux) return Zotero.Promise.resolve([]);
+		var deferred = Zotero.Promise.defer();
 		var worker = new ChromeWorker("chrome://zotero/content/xpcom/dns_worker.js");
 		Zotero.debug("Proxies.DNS: Performing reverse lookup");
 		worker.onmessage = function(e) {
 			Zotero.debug("Proxies.DNS: Got hostnames "+e.data);
-		    deferred.resolve(e.data);
+			deferred.resolve(e.data);
 		};
 		worker.onerror = function(e) {
 			Zotero.debug("Proxies.DNS: Reverse lookup failed");
