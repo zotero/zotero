@@ -2485,47 +2485,49 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 	
 	var items = Zotero.Items.get(itemIDs);
 	
-	// Multi-file drag
-	//  - Doesn't work on Windows
-	if (!Zotero.isWin) {
-		// If at least one file is a non-web-link attachment and can be found,
-		// enable dragging to file system
-		for (var i=0; i<items.length; i++) {
-			if (items[i].isAttachment()
-					&& items[i].attachmentLinkMode
-						!= Zotero.Attachments.LINK_MODE_LINKED_URL
-					&& items[i].getFile()) {
-				Zotero.debug("Adding file via x-moz-file-promise");
-				event.dataTransfer.mozSetDataAt(
-					"application/x-moz-file-promise",
-					new Zotero.ItemTreeView.fileDragDataProvider(itemIDs),
-					0
-				);
-				break;
-			}
+	// If at least one file is a non-web-link attachment and can be found,
+	// enable dragging to file system
+	var files = items
+		.filter(item => item.isAttachment())
+		.map(item => item.getFilePath())
+		.filter(path => path);
+	
+	if (files.length) {
+		// Advanced multi-file drag (with unique filenames, which otherwise happen automatically on
+		// Windows but not Linux) and auxiliary snapshot file copying on macOS
+		let dataProvider;
+		if (Zotero.isMac) {
+			dataProvider = new Zotero.ItemTreeView.fileDragDataProvider(itemIDs);
 		}
-	}
-	// Copy first file on Windows
-	else {
-		var index = 0;
-		for (var i=0; i<items.length; i++) {
-			if (items[i].isAttachment() &&
-					items[i].getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_URL) {
-				var file = items[i].getFile();
-				if (!file) {
-					continue;
-				}
-				
-				var fph = Components.classes["@mozilla.org/network/protocol;1?name=file"]
-							.createInstance(Components.interfaces.nsIFileProtocolHandler);
-				var uri = fph.getURLSpecFromFile(file);
-				
-				event.dataTransfer.mozSetDataAt("text/x-moz-url", uri + "\n" + file.leafName, index);
-				event.dataTransfer.mozSetDataAt("application/x-moz-file", file, index);
-				event.dataTransfer.mozSetDataAt("application/x-moz-file-promise-url", uri, index);
-				// DEBUG: possible to drag multiple files without x-moz-file-promise?
-				break;
-				index++
+		
+		for (let i = 0; i < files.length; i++) {
+			let file = Zotero.File.pathToFile(files[i]);
+			
+			if (dataProvider) {
+				Zotero.debug("Adding application/x-moz-file-promise");
+				event.dataTransfer.mozSetDataAt("application/x-moz-file-promise", dataProvider, i);
+			}
+			
+			// Allow dragging to filesystem on Linux and Windows
+			let uri;
+			if (!Zotero.isMac) {
+				Zotero.debug("Adding text/x-moz-url " + i);
+				let fph = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+					.createInstance(Components.interfaces.nsIFileProtocolHandler);
+				uri = fph.getURLSpecFromFile(file);
+				event.dataTransfer.mozSetDataAt("text/x-moz-url", uri + '\n' + file.leafName, i);
+			}
+			
+			// Allow dragging to web targets (e.g., Gmail)
+			Zotero.debug("Adding application/x-moz-file " + i);
+			event.dataTransfer.mozSetDataAt("application/x-moz-file", file, i);
+			
+			if (Zotero.isWin) {
+				event.dataTransfer.mozSetDataAt("application/x-moz-file-promise-url", uri, i);
+			}
+			else if (Zotero.isLinux) {
+				// Don't create a symlink for an unmodified drag
+				event.dataTransfer.effectAllowed = 'copy';
 			}
 		}
 	}
@@ -2589,6 +2591,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 	},
 	
 	getFlavorData : function(transferable, flavor, data, dataLen) {
+		Zotero.debug("Getting flavor data for " + flavor);
 		if (flavor == "application/x-moz-file-promise") {
 			// On platforms other than OS X, the only directory we know of here
 			// is the system temp directory, and we pass the nsIFile of the file
