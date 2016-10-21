@@ -409,6 +409,23 @@ describe("ZoteroPane", function() {
 			var conditions = search.getConditions();
 			assert.lengthOf(Object.keys(conditions), 3);
 		});
+		
+		it("should edit a saved search in a group", function* () {
+			var group = yield getGroup();
+			var search = yield createDataObject('search', { libraryID: group.libraryID });
+			var promise = waitForWindow('chrome://zotero/content/searchDialog.xul', function (win) {
+				let searchBox = win.document.getElementById('search-box');
+				var c = searchBox.search.getCondition(
+					searchBox.search.addCondition("title", "contains", "foo")
+				);
+				searchBox.addCondition(c);
+				win.document.documentElement.acceptDialog();
+			});
+			yield zp.editSelectedCollection();
+			yield promise;
+			var conditions = search.getConditions();
+			assert.lengthOf(Object.keys(conditions), 3);
+		});
 	});
 	
 	describe("#onCollectionSelected()", function() {

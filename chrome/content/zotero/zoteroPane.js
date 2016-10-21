@@ -2007,7 +2007,7 @@ var ZoteroPane = new function()
 				// applicable, and pass it in. We only need the group that this search belongs
 				// to, if any, since the library drop-down is disabled for saved searches.
 				if (Zotero.Libraries.get(s.libraryID).libraryType == 'group') {
-					groups.push(yield Zotero.Groups.getByLibraryID(s.libraryID));
+					groups.push(Zotero.Groups.getByLibraryID(s.libraryID));
 				}
 				var io = {
 					dataIn: {
