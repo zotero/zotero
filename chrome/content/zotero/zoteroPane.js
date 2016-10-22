@@ -4512,9 +4512,9 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		var item = yield Zotero.Items.getAsync(itemID);
+		var item = Zotero.Items.get(itemID);
 		if (!item) {
-			throw('Item ' + itemID + ' not found in ZoteroPane_Local.relinkAttachment()');
+			throw new Error('Item ' + itemID + ' not found in ZoteroPane_Local.relinkAttachment()');
 		}
 		
 		while (true) {
@@ -4523,8 +4523,11 @@ var ZoteroPane = new function()
 						.createInstance(nsIFilePicker);
 			fp.init(window, Zotero.getString('pane.item.attachments.select'), nsIFilePicker.modeOpen);
 			
-			
-			var file = item.getFile(false, true);
+			var file = item.getFilePath();
+			if (!file) {
+				Zotero.debug("Invalid path", 2);
+				break;
+			}
 			var dir = Zotero.File.getClosestDirectory(file);
 			if (dir) {
 				dir.QueryInterface(Components.interfaces.nsILocalFile);
@@ -4549,7 +4552,7 @@ var ZoteroPane = new function()
 					continue;
 				}
 				
-				item.relinkAttachmentFile(file);
+				yield item.relinkAttachmentFile(file.path);
 				break;
 			}
 			

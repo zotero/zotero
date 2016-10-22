@@ -799,6 +799,30 @@ describe("Zotero.Item", function () {
 	})
 	
 	
+	describe("#relinkAttachmentFile", function () {
+		it("should copy a file elsewhere into the storage directory", function* () {
+			var filename = 'test.png';
+			var file = getTestDataDirectory();
+			file.append(filename);
+			var tmpDir = yield getTempDirectory();
+			var tmpFile = OS.Path.join(tmpDir, filename);
+			yield OS.File.copy(file.path, tmpFile);
+			file = OS.Path.join(tmpDir, filename);
+			
+			var item = yield Zotero.Attachments.importFromFile({ file });
+			let path = yield item.getFilePathAsync();
+			yield OS.File.remove(path);
+			yield OS.File.removeEmptyDir(OS.Path.dirname(path));
+			
+			assert.isFalse(yield item.fileExists());
+			yield item.relinkAttachmentFile(file);
+			assert.isTrue(yield item.fileExists());
+			
+			assert.isTrue(yield OS.File.exists(tmpFile));
+		});
+	});
+	
+	
 	describe("#setTags", function () {
 		it("should save an array of tags in API JSON format", function* () {
 			var tags = [

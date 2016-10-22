@@ -2513,43 +2513,53 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 	if (fileName.endsWith(".lnk")) {
 		throw new Error("Cannot relink to Windows shortcut");
 	}
+	var newPath;
 	var newName = Zotero.File.getValidFileName(fileName);
 	if (!newName) {
 		throw new Error("No valid characters in filename after filtering");
 	}
 	
-	var newPath = OS.Path.join(OS.Path.dirname(path), newName);
-	
-	try {
-		// If selected file isn't in the attachment's storage directory,
-		// copy it in and use that one instead
-		var storageDir = Zotero.Attachments.getStorageDirectory(this).path;
-		if (this.isImportedAttachment() && OS.Path.dirname(path) != storageDir) {
-			// If file with same name already exists in the storage directory,
-			// move it out of the way
-			let deleteBackup = false;;
-			if (yield OS.File.exists(newPath)) {
-				deleteBackup = true;
-				yield OS.File.move(newPath, newPath + ".bak");
-			}
-			
-			let newFile = Zotero.File.copyToUnique(path, newPath);
-			newPath = newFile.path;
-			
-			// Delete backup file
-			if (deleteBackup) {
-				yield OS.File.remove(newPath + ".bak");
-			}
+	// If selected file isn't in the attachment's storage directory,
+	// copy it in and use that one instead
+	var storageDir = Zotero.Attachments.getStorageDirectory(this).path;
+	if (this.isImportedAttachment() && OS.Path.dirname(path) != storageDir) {
+		newPath = OS.Path.join(storageDir, newName);
+		
+		// If file with same name already exists in the storage directory,
+		// move it out of the way
+		let backupCreated = false;
+		if (yield OS.File.exists(newPath)) {
+			backupCreated = true;
+			yield OS.File.move(newPath, newPath + ".bak");
 		}
-		// Rename file to filtered name if necessary
-		else if (fileName != newName) {
-			Zotero.debug("Renaming file '" + fileName + "' to '" + newName + "'");
-			OS.File.move(path, newPath, { noOverwrite: true });
+		// Create storage directory if necessary
+		else if (!(yield OS.File.exists(storageDir))) {
+			Zotero.Attachments.createDirectoryForItem(this);
+		}
+		
+		let newFile;
+		try {
+			newFile = Zotero.File.copyToUnique(path, newPath);
+		}
+		catch (e) {
+			// Restore backup file if copying failed
+			if (backupCreated) {
+				yield OS.File.move(newPath + ".bak", newPath);
+			}
+			throw e;
+		}
+		newPath = newFile.path;
+		
+		// Delete backup file
+		if (backupCreated) {
+			yield OS.File.remove(newPath + ".bak");
 		}
 	}
-	catch (e) {
-		Zotero.logError(e);
-		return false;
+	// Rename file to filtered name if necessary
+	else if (fileName != newName) {
+		newPath = OS.Path.join(OS.Path.dirname(path), newName);
+		Zotero.debug("Renaming file '" + fileName + "' to '" + newName + "'");
+		OS.File.move(path, newPath, { noOverwrite: true });
 	}
 	
 	this.attachmentPath = newPath;
@@ -2559,6 +2569,9 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 		skipClientDateModifiedUpdate: skipItemUpdate,
 		skipEditCheck: skipItemUpdate
 	});
+	
+	this._updateAttachmentStates(true);
+	yield Zotero.Notifier.trigger('refresh', 'item', this.id);
 	
 	return true;
 });

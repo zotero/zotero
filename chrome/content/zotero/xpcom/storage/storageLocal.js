@@ -566,13 +566,18 @@ Zotero.Sync.Storage.Local = {
 			// If library isn't editable but filename was changed, update
 			// database without updating the item's mod time, which would result
 			// in a library access error
-			if (!Zotero.Items.isEditable(item)) {
-				Zotero.debug("File renamed without library access -- "
-					+ "updating itemAttachments path", 3);
-				yield item.relinkAttachmentFile(newPath, true);
+			try {
+				if (!Zotero.Items.isEditable(item)) {
+					Zotero.debug("File renamed without library access -- "
+						+ "updating itemAttachments path", 3);
+					yield item.relinkAttachmentFile(newPath, true);
+				}
+				else {
+					yield item.relinkAttachmentFile(newPath);
+				}
 			}
-			else {
-				yield item.relinkAttachmentFile(newPath);
+			catch (e) {
+				Zotero.File.checkFileAccessError(e, path, 'update');
 			}
 			
 			path = newPath;

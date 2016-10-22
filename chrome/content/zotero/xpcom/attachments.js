@@ -797,6 +797,7 @@ Zotero.Attachments = new function(){
 		var dir = this.getStorageDirectory(item);
 		yield _moveOrphanedDirectory(dir);
 		if (!dir.exists()) {
+			Zotero.debug("Creating directory " + dir.path);
 			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
 		}
 		return dir;
