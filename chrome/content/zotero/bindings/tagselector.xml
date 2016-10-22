@@ -182,7 +182,7 @@
 							// Without the setTimeout, the popup gets immediately hidden
 							// for some reason
 							setTimeout(function () {
-								_popupNode = event.target;
+								_popupNode = event.originalTarget;
 								this.id('tag-menu').openPopup(
 									null,
 									'after_pointer',
