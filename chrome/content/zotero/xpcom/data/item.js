@@ -2555,11 +2555,14 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 			yield OS.File.remove(newPath + ".bak");
 		}
 	}
-	// Rename file to filtered name if necessary
-	else if (fileName != newName) {
+	else {
 		newPath = OS.Path.join(OS.Path.dirname(path), newName);
-		Zotero.debug("Renaming file '" + fileName + "' to '" + newName + "'");
-		OS.File.move(path, newPath, { noOverwrite: true });
+		
+		// Rename file to filtered name if necessary
+		if (fileName != newName) {
+			Zotero.debug("Renaming file '" + fileName + "' to '" + newName + "'");
+			yield OS.File.move(path, newPath, { noOverwrite: true });
+		}
 	}
 	
 	this.attachmentPath = newPath;
