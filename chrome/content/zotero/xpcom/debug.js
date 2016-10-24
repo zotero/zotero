@@ -129,7 +129,7 @@ Zotero.Debug = new function () {
 	}
 	
 	
-	this.get = Zotero.Promise.coroutine(function* (maxChars, maxLineLength) {
+	this.get = Zotero.Promise.method(function(maxChars, maxLineLength) {
 		var output = _output;
 		var total = output.length;
 		
@@ -158,11 +158,13 @@ Zotero.Debug = new function () {
 			}
 		}
 		
-		if(Zotero.getErrors) {
-			return Zotero.getErrors(true).join('\n\n') +
-					"\n\n" + (yield Zotero.getSystemInfo()) + "\n\n" +
+		if (Zotero.getErrors) {
+			return Zotero.getSystemInfo().then(function(sysInfo) {
+				return Zotero.getErrors(true).join('\n\n') +
+					"\n\n" + sysInfo + "\n\n" +
 					"=========================================================\n\n" +
 					output;
+			});
 		} else {
 			return output;
 		}

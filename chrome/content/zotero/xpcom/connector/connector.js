@@ -276,8 +276,8 @@ Zotero.Connector_Debug = new function() {
 	/**
 	 * Call a callback with the lines themselves
 	 */
-	this.get = Zotero.Promise.coroutine(function* (callback) {
-		callback(yield Zotero.Debug.get());
+	this.get = function(callback) {
+		Zotero.Debug.get().then(callback);
 	});
 		
 	/**
@@ -290,29 +290,31 @@ Zotero.Connector_Debug = new function() {
 	/**
 	 * Submit data to the server
 	 */
-	this.submitReport = Zotero.Promise.coroutine(function* (callback) {
-		var output = yield Zotero.Debug.get();
-		var req = yield Zotero.HTTP.request(
-			ZOTERO_CONFIG.REPOSITORY_URL + "report?debug=1",
-			{
-				headers: {
-					"Content-Type": "text/plain"
-				},
-				body: output,
-				successCodes: false
+	this.submitReport = function(callback) {
+		Zotero.Debug.get().then(function(output){
+			return Zotero.HTTP.request(
+				ZOTERO_CONFIG.REPOSITORY_URL + "report?debug=1",
+				{
+					headers: {
+						"Content-Type": "text/plain"
+					},
+					body: output,
+					successCodes: false
+				}
+			);
+		}).then(function(xmlhttp){
+			if (!xmlhttp.responseXML) {
+				callback(false, 'Invalid response from server');
+				return;
 			}
-		);
-		if (!xmlhttp.responseXML) {
-			callback(false, 'Invalid response from server');
-			return;
-		}
-		var reported = xmlhttp.responseXML.getElementsByTagName('reported');
-		if (reported.length != 1) {
-			callback(false, 'The server returned an error. Please try again.');
-			return;
-		}
-		
-		var reportID = reported[0].getAttribute('reportID');
-		callback(true, reportID);
+			var reported = xmlhttp.responseXML.getElementsByTagName('reported');
+			if (reported.length != 1) {
+				callback(false, 'The server returned an error. Please try again.');
+				return;
+			}
+			
+			var reportID = reported[0].getAttribute('reportID');
+			callback(true, reportID);
+		});
 	});
 }
