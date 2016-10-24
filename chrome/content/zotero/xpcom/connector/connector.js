@@ -278,7 +278,7 @@ Zotero.Connector_Debug = new function() {
 	 */
 	this.get = function(callback) {
 		Zotero.Debug.get().then(callback);
-	});
+	};
 		
 	/**
 	 * Call a callback with the number of lines of output
@@ -316,5 +316,5 @@ Zotero.Connector_Debug = new function() {
 			var reportID = reported[0].getAttribute('reportID');
 			callback(true, reportID);
 		});
-	});
+	};
 }
