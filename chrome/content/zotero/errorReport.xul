@@ -28,7 +28,7 @@
 				var continueButton = wizard.getButton('next');
 				continueButton.disabled = true;
 				
-				var diagnosticInfo = yield Zotero.getSystemInfo();
+				diagnosticInfo = yield Zotero.getSystemInfo();
 				var errorDataText = errorData.length
 					? data.errorData.join('\n\n')
 					: Zotero.getString('errorReport.noErrorsLogged', Zotero.appName);
