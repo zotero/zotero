@@ -728,15 +728,15 @@ Zotero.Translate.ItemGetter.prototype = {
 		var attachmentArray = Zotero.Utilities.Internal.itemToExportFormat(attachment, this.legacy);
 		var linkMode = attachment.attachmentLinkMode;
 		if(linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
-			var attachFile = attachment.getFile();
-			attachmentArray.localPath = attachFile.path;
+			attachmentArray.localPath = attachment.getFilePath();
 			
 			if(this._exportFileDirectory) {
 				var exportDir = this._exportFileDirectory;
 				
 				// Add path and filename if not an internet link
-				var attachFile = attachment.getFile();
-				if(attachFile) {
+				var attachFile = Zotero.File.pathToFile(attachmentArray.localPath);
+				// TODO: Make async, but that will require translator changes
+				if (attachFile.exists()) {
 					attachmentArray.defaultPath = "files/" + attachment.id + "/" + attachFile.leafName;
 					attachmentArray.filename = attachFile.leafName;
 					

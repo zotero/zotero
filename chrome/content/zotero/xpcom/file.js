@@ -42,11 +42,16 @@ Zotero.File = new function(){
 	
 	
 	this.pathToFile = function (pathOrFile) {
-		if (typeof pathOrFile == 'string') {
-			return new FileUtils.File(pathOrFile);
+		try {
+			if (typeof pathOrFile == 'string') {
+				return new FileUtils.File(pathOrFile);
+			}
+			else if (pathOrFile instanceof Ci.nsIFile) {
+				return pathOrFile;
+			}
 		}
-		else if (pathOrFile instanceof Ci.nsIFile) {
-			return pathOrFile;
+		catch (e) {
+			Zotero.logError(e);
 		}
 		throw new Error("Unexpected value '" + pathOrFile + "'");
 	}
