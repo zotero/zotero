@@ -677,7 +677,7 @@ Zotero.Sync.Data.Local = {
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 		var ObjectType = Zotero.Utilities.capitalize(objectType);
-		var libraryName = Zotero.Libraries.getName(libraryID);
+		var libraryName = Zotero.Libraries.get(libraryID).name;
 		
 		var knownErrors = [
 			'ZoteroUnknownTypeError',

@@ -135,8 +135,10 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 		yield this.library.saveTx();
 	}
 	
+	var filesEditable = Zotero.Libraries.get(libraryID).filesEditable;
+	
 	// Check for updated files to upload
-	if (!Zotero.Libraries.isFilesEditable(libraryID)) {
+	if (!filesEditable) {
 		Zotero.debug("No file editing access -- skipping file modification check for "
 			+ this.library.name);
 	}
@@ -189,7 +191,7 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	}
 	
 	// Get files to upload
-	if (Zotero.Libraries.isFilesEditable(libraryID)) {
+	if (filesEditable) {
 		let itemIDs = yield this.local.getFilesToUpload(libraryID);
 		if (itemIDs.length) {
 			Zotero.debug(itemIDs.length + " file" + (itemIDs.length == 1 ? '' : 's') + " to "

@@ -755,7 +755,7 @@ Zotero.DataObject.prototype._clearFieldChange = function (field) {
 
 
 Zotero.DataObject.prototype.isEditable = function () {
-	return Zotero.Libraries.isEditable(this.libraryID);
+	return Zotero.Libraries.get(this.libraryID).editable;
 }
 
 
@@ -772,7 +772,7 @@ Zotero.DataObject.prototype.editCheck = function () {
 	
 	if (!this.isEditable()) {
 		throw new Error("Cannot edit " + this._objectType + " in read-only library "
-			+ Zotero.Libraries.getName(this.libraryID));
+			+ Zotero.Libraries.get(this.libraryID).name);
 	}
 }
 

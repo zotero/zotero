@@ -861,12 +861,12 @@ Zotero.DataObjects.prototype.isEditable = function (obj) {
 		return true;
 	}
 	
-	if (!Zotero.Libraries.isEditable(libraryID)) return false;
+	if (!Zotero.Libraries.get(libraryID).editable) return false;
 	
 	if (obj.objectType == 'item' && obj.isAttachment()
 		&& (obj.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
 			obj.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE)
-		&& !Zotero.Libraries.isFilesEditable(libraryID)
+		&& !Zotero.Libraries.get(libraryID).filesEditable(libraryID)
 	) {
 		return false;
 	}

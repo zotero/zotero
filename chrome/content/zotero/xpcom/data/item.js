@@ -1211,7 +1211,7 @@ Zotero.Item.prototype.isEditable = function() {
 	if (this.isAttachment()
 		&& (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
 			this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE)
-		&& !Zotero.Libraries.isFilesEditable(this.libraryID)
+		&& !Zotero.Libraries.get(this.libraryID).filesEditable
 	) {
 		return false;
 	}

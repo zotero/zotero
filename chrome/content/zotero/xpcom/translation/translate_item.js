@@ -48,7 +48,7 @@ Zotero.Translate.ItemSaver = function(options) {
 	this._collections = options.collections || false;
 	
 	// If group filesEditable==false, don't save attachments
-	this.attachmentMode = Zotero.Libraries.isFilesEditable(this._libraryID) ? options.attachmentMode :
+	this.attachmentMode = Zotero.Libraries.get(this._libraryID).filesEditable ? options.attachmentMode :
 	                      Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE;
 	this._forceTagType = options.forceTagType;
 	this._cookieSandbox = options.cookieSandbox;
