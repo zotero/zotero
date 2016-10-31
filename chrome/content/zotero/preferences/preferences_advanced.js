@@ -225,20 +225,9 @@ Zotero_Preferences.Advanced = {
 	
 	
 	getDataDirPath: function () {
-		var desc = Zotero.Prefs.get('dataDir');
-		if (desc == '') {
-			return '';
-		}
-		
-		var file = Components.classes["@mozilla.org/file/local;1"].
-			createInstance(Components.interfaces.nsILocalFile);
-		try {
-			file.persistentDescriptor = desc;
-		}
-		catch (e) {
-			return '';
-		}
-		return file.path;
+		// TEMP: lastDataDir can be removed once old persistent descriptors have been
+		// converted, which they are in getZoteroDirectory() in 5.0
+		return Zotero.Prefs.get('lastDataDir') || Zotero.Prefs.get('dataDir') || '';
 	},
 	
 	

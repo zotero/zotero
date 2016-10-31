@@ -282,11 +282,13 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
 							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
 							+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
+						// TEMP: lastDataDir can be removed once old persistent descriptors have been
+						// converted, which they are in getZoteroDirectory() in 5.0
+						var previousDir = Zotero.Prefs.get('lastDataDir') || Zotero.Prefs.get('dataDir');
 						var index = ps.confirmEx(null,
 							Zotero.getString('general.error'),
 							Zotero.startupError + '\n\n' +
-							Zotero.getString('dataDir.previousDir') + ' '
-								+ Zotero.Prefs.get('lastDataDir'),
+							Zotero.getString('dataDir.previousDir') + ' ' + previousDir,
 							buttonFlags, null,
 							Zotero.getString('dataDir.useProfileDir', Zotero.appName),
 							Zotero.getString('general.locate'),
@@ -922,17 +924,39 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		if (Zotero.Prefs.get('useDataDir')) {
 			var file = Components.classes["@mozilla.org/file/local;1"].
 				createInstance(Components.interfaces.nsILocalFile);
-			try {
-				file.persistentDescriptor = Zotero.Prefs.get('dataDir');
+			let prefVal = Zotero.Prefs.get('dataDir');
+			// Convert old persistent descriptor pref to string path and clear obsolete lastDataDir pref
+			//
+			// persistentDescriptor now appears to return (and parse) a string path anyway on macOS,
+			// which is the only place where it didn't use a string path to begin with, but be explicit
+			// just in case there's some difference.
+			//
+			// A post-Mozilla prefs migration should do this same check, and then this conditional can
+			// be removed.
+			if (Zotero.Prefs.get('lastDataDir')) {
+				try {
+					file.persistentDescriptor = prefVal;
+				}
+				catch (e) {
+					Zotero.debug("Persistent descriptor in extensions.zotero.dataDir did not resolve", 1);
+					e = { name: "NS_ERROR_FILE_NOT_FOUND" };
+					throw (e);
+				}
+				this.setDataDirectory(file.path);
+				if (!file.exists()) {
+					var e = { name: "NS_ERROR_FILE_NOT_FOUND" };
+					throw (e);
+				}
 			}
-			catch (e) {
-				Zotero.debug("Persistent descriptor in extensions.zotero.dataDir did not resolve", 1);
-				e = { name: "NS_ERROR_FILE_NOT_FOUND" };
-				throw (e);
-			}
-			if (!file.exists()) {
-				var e = { name: "NS_ERROR_FILE_NOT_FOUND" };
-				throw (e);
+			else {
+				try {
+					file = Zotero.File.pathToFile(prefVal);
+				}
+				catch (e) {
+					Zotero.debug(`Invalid path '${prefVal}' in dataDir pref`, 1);
+					e = { name: "NS_ERROR_FILE_NOT_FOUND" };
+					throw e;
+				}
 			}
 		}
 		else {
@@ -1286,9 +1310,9 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	
 	this.setDataDirectory = function (path) {
-		let dir = Zotero.File.pathToFile(path);
-		Zotero.Prefs.set('dataDir', dir.persistentDescriptor);
-		Zotero.Prefs.set('lastDataDir', dir.path);
+		Zotero.Prefs.set('dataDir', path);
+		// Clear legacy pref
+		Zotero.Prefs.clear('lastDataDir');
 		Zotero.Prefs.set('useDataDir', true);
 	};
 	

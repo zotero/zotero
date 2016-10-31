@@ -10,7 +10,6 @@ pref("extensions.zotero.saveRelativeAttachmentPath", false);
 pref("extensions.zotero.baseAttachmentPath", '');
 pref("extensions.zotero.useDataDir", false);
 pref("extensions.zotero.dataDir", '');
-pref("extensions.zotero.lastDataDir", '');
 pref("extensions.zotero.warnOnUnsafeDataDir", true);
 pref("extensions.zotero.debug.log",false);
 pref("extensions.zotero.debug.stackTrace", false);
