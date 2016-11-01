@@ -32,6 +32,8 @@ Zotero_Preferences.Advanced = {
 	init: function () {
 		Zotero_Preferences.Debug_Output.init();
 		Zotero_Preferences.Keys.init();
+		
+		this.onDataDirLoad();
 	},
 	
 	revealDataDirectory: function () {
@@ -190,9 +192,25 @@ Zotero_Preferences.Advanced = {
 	
 	
 	onDataDirLoad: function () {
-		var path = document.getElementById('dataDirPath');
 		var useDataDir = Zotero.Prefs.get('useDataDir');
-		path.setAttribute('disabled', !useDataDir);
+		var dataDir = Zotero.Prefs.get('lastDataDir') || Zotero.Prefs.get('dataDir');
+		var defaultDataDir = Zotero.getDefaultDataDir();
+		
+		// Change "Use profile directory" label to home directory location unless using profile dir
+		if (useDataDir || Zotero.getZoteroDirectory().path == defaultDataDir) {
+			document.getElementById('defaultDataDir').setAttribute(
+				'label', Zotero.getString('dataDir.default', Zotero.getDefaultDataDir())
+			);
+		}
+		
+		// Don't show custom data dir as in-use if set to the default
+		if (dataDir == defaultDataDir) {
+			useDataDir = false;
+		}
+		
+		document.getElementById('dataDirPath').setAttribute('disabled', !useDataDir);
+		
+		return useDataDir;
 	},
 	
 	
@@ -201,20 +219,16 @@ Zotero_Preferences.Advanced = {
 		var useDataDir = Zotero.Prefs.get('useDataDir');
 		var newUseDataDir = radiogroup.selectedIndex == 1;
 		
-		if (newUseDataDir == useDataDir && !useDataDir) {
+		if (newUseDataDir && !this._usingDefaultDataDir()) {
 			return;
 		}
-
-		// This call shows a filepicker if needed,
-		// forces a restart if required
-		// and does nothing if cancel was pressed
+		
+		// This call shows a filepicker if needed, forces a restart if required, and does nothing if
+		// cancel was pressed or value hasn't changed
 		Zotero.chooseZoteroDirectory(true, !newUseDataDir, function () {
 			Zotero_Preferences.openURL('http://zotero.org/support/zotero_data');
 		});
-		useDataDir = Zotero.Prefs.get('useDataDir');
-		radiogroup.selectedIndex = useDataDir ? 1 : 0;
-		
-		return useDataDir;
+		radiogroup.selectedIndex = this._usingDefaultDataDir() ? 0 : 1;
 	},
 	
 	
@@ -227,7 +241,30 @@ Zotero_Preferences.Advanced = {
 	getDataDirPath: function () {
 		// TEMP: lastDataDir can be removed once old persistent descriptors have been
 		// converted, which they are in getZoteroDirectory() in 5.0
-		return Zotero.Prefs.get('lastDataDir') || Zotero.Prefs.get('dataDir') || '';
+		var prefValue = Zotero.Prefs.get('lastDataDir') || Zotero.Prefs.get('dataDir');
+		
+		// Don't show path if the default
+		if (prefValue == Zotero.getDefaultDataDir()) {
+			return '';
+		}
+		
+		return prefValue || '';
+	},
+	
+	
+	_usingDefaultDataDir: function () {
+		// Legacy profile directory location
+		if (!Zotero.Prefs.get('useDataDir')) {
+			return true;
+		}
+		
+		var dataDir = Zotero.Prefs.get('lastDataDir') || Zotero.Prefs.get('dataDir');
+		// Default home directory location
+		if (dataDir == Zotero.getDefaultDataDir()) {
+			return true;
+		}
+		
+		return false;
 	},
 	
 	

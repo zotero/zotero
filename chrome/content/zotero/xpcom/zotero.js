@@ -290,11 +290,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 							Zotero.startupError + '\n\n' +
 							Zotero.getString('dataDir.previousDir') + ' ' + previousDir,
 							buttonFlags, null,
-							Zotero.getString('dataDir.useProfileDir', Zotero.appName),
+							Zotero.getString('dataDir.useDefaultLocation'),
 							Zotero.getString('general.locate'),
 							null, {});
 						
-						// Revert to profile directory
+						// Revert to home directory
 						if (index == 1) {
 							Zotero.chooseZoteroDirectory(false, true);
 						}
@@ -921,9 +921,9 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			return _zoteroDirectory.clone();
 		}
 		
+		var file = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
 		if (Zotero.Prefs.get('useDataDir')) {
-			var file = Components.classes["@mozilla.org/file/local;1"].
-				createInstance(Components.interfaces.nsILocalFile);
 			let prefVal = Zotero.Prefs.get('dataDir');
 			// Convert old persistent descriptor pref to string path and clear obsolete lastDataDir pref
 			//
@@ -960,8 +960,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			}
 		}
 		else {
-			let homeDir = OS.Constants.Path.homeDir;
-			let dataDir = OS.Path.join(homeDir, ZOTERO_CONFIG.CLIENT_NAME);
+			let dataDir = this.getDefaultDataDir();
 			
 			//
 			// TODO: asyncify
@@ -1088,6 +1087,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	}
 	
 	
+	this.getDefaultDataDir = function () {
+		return OS.Path.join(OS.Constants.Path.homeDir, ZOTERO_CONFIG.CLIENT_NAME);
+	};
+	
+	
 	function getStorageDirectory(){
 		var file = Zotero.getZoteroDirectory();
 		
@@ -1145,12 +1149,15 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	}
 	
 	
-	function chooseZoteroDirectory(forceQuitNow, useProfileDir, moreInfoCallback) {
+	function chooseZoteroDirectory(forceQuitNow, useHomeDir, moreInfoCallback) {
 		var win = Services.wm.getMostRecentWindow('navigator:browser');
 		var ps = Services.prompt;
 		
-		if (useProfileDir) {
-			Zotero.Prefs.set('useDataDir', false);
+		if (useHomeDir) {
+			let changed = this.setDataDirectory(this.getDefaultDataDir());
+			if (!changed) {
+				return false;
+			}
 		}
 		else {
 			var nsIFilePicker = Components.interfaces.nsIFilePicker;
@@ -1164,7 +1171,12 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 					var file = fp.file;
 					let dialogText = '';
 					let dialogTitle = '';
-
+					
+					if (file.path == (Zotero.Prefs.get('lastDataDir') || Zotero.Prefs.get('dataDir'))) {
+						Zotero.debug("Data directory hasn't changed");
+						return false;
+					}
+					
 					// In dropbox folder
 					if (Zotero.File.isDropboxDirectory(file.path)) {
 						dialogTitle = Zotero.getString('general.warning');
@@ -1242,7 +1254,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			Services.startup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
 		}
 		
-		return useProfileDir ? true : file;
+		return useHomeDir ? true : file;
 	}
 	
 	
@@ -1309,11 +1321,18 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	}
 	
 	
+	/**
+	 * @return {Boolean} - True if the directory changed; false otherwise
+	 */
 	this.setDataDirectory = function (path) {
+		var origPath = Zotero.Prefs.get('dataDir');
+		
 		Zotero.Prefs.set('dataDir', path);
 		// Clear legacy pref
 		Zotero.Prefs.clear('lastDataDir');
 		Zotero.Prefs.set('useDataDir', true);
+		
+		return path != origPath;
 	};
 	
 	

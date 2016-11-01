@@ -184,9 +184,9 @@
 						
 						<radiogroup id="dataDir"
 								preference="pref-useDataDir"
-								onsyncfrompreference="Zotero_Preferences.Advanced.onDataDirLoad();"
+								onsyncfrompreference="return Zotero_Preferences.Advanced.onDataDirLoad()"
 								onsynctopreference="return Zotero_Preferences.Advanced.onDataDirUpdate(event);">
-							<radio label="&zotero.preferences.dataDir.useProfile;" value="false"/>
+							<radio id="defaultDataDir" label="&zotero.preferences.dataDir.useProfile;" value="false"/>
 							<hbox>
 								<radio label="&zotero.preferences.dataDir.custom;" value="true"/>
 								<textbox id="dataDirPath" preference="pref-dataDir"
