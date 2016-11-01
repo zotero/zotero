@@ -34,7 +34,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
  */
  (function(){
 	// Privileged (public) methods
-	this.init = init;
 	this.getProfileDirectory = getProfileDirectory;
 	this.getStorageDirectory = getStorageDirectory;
 	this.getZoteroDatabase = getZoteroDatabase;
@@ -142,9 +141,9 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	/**
 	 * Initialize the extension
 	 *
-	 * @return {Boolean|Promise:Boolean}
+	 * @return {Promise<Boolean>}
 	 */
-	function init(options) {
+	this.init = Zotero.Promise.coroutine(function* (options) {
 		if (this.initialized || this.skipLoading) {
 			return false;
 		}
@@ -192,200 +191,199 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		this.platformMajorVersion = parseInt(appInfo.platformVersion.match(/^[0-9]+/)[0]);
 		this.isFx = true;
 		this.isStandalone = Services.appinfo.ID == ZOTERO_CONFIG['GUID'];
-		return Zotero.Promise.try(function () {
-			if(Zotero.isStandalone) {
-				return Services.appinfo.version;
-			} else {
-				var deferred = Zotero.Promise.defer();
-				Components.utils.import("resource://gre/modules/AddonManager.jsm");
-				AddonManager.getAddonByID(
-					ZOTERO_CONFIG.GUID,
-					function (addon) {
-						deferred.resolve(addon.version);
-					}
-				);
-				return deferred.promise;
-			}
-		})
-		.then(function (version) {
-			Zotero.version = version;
-			
-			// OS platform
-			var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
-				   .getService(Components.interfaces.nsIAppShellService)
-				   .hiddenDOMWindow;
-			this.platform = win.navigator.platform;
-			this.isMac = (this.platform.substr(0, 3) == "Mac");
-			this.isWin = (this.platform.substr(0, 3) == "Win");
-			this.isLinux = (this.platform.substr(0, 5) == "Linux");
-			this.oscpu = win.navigator.oscpu;
-			
-			// Browser
-			Zotero.browser = "g";
-			
-			// Locale
-			var uaPrefs = Services.prefs.getBranch("general.useragent.");
-			try {
-				this.locale = uaPrefs.getComplexValue("locale", Components.interfaces.nsIPrefLocalizedString);
-			} catch (e) {}
-			
-			if(this.locale) {
-				this.locale = this.locale.toString();
-			} else {
-				this.locale = uaPrefs.getCharPref("locale");
-			}
-			
-			if (this.locale.length == 2) {
-				this.locale = this.locale + '-' + this.locale.toUpperCase();
-			}
-			
-			// Load in the localization stringbundle for use by getString(name)
-			var appLocale = Services.locale.getApplicationLocale();
-			
-			_localizedStringBundle = Services.strings.createBundle(
-				"chrome://zotero/locale/zotero.properties", appLocale);
-			
-			// Also load the brand as appName
-			var brandBundle = Services.strings.createBundle(
-				"chrome://branding/locale/brand.properties", appLocale);
-			this.appName = brandBundle.GetStringFromName("brandShortName");
-			
-			// Set the locale direction to Zotero.dir
-			// DEBUG: is there a better way to get the entity from JS?
-			var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-							.createInstance();
-			xmlhttp.open('GET', 'chrome://global/locale/global.dtd', false);
-			xmlhttp.overrideMimeType('text/plain');
-			xmlhttp.send(null);
-			var matches = xmlhttp.responseText.match(/(ltr|rtl)/);
-			if (matches && matches[0] == 'rtl') {
-				Zotero.dir = 'rtl';
-			}
-			else {
-				Zotero.dir = 'ltr';
-			}
-			Zotero.rtl = Zotero.dir == 'rtl';
-			
-			// Make sure that Zotero Standalone is not running as root
-			if(Zotero.isStandalone && !Zotero.isWin) _checkRoot();
-			
-			try {
-				var dataDir = Zotero.getZoteroDirectory();
-			}
-			catch (e) {
-				// Zotero dir not found
-				if (e.name == 'NS_ERROR_FILE_NOT_FOUND') {
-					Zotero.startupError = Zotero.getString('dataDir.notFound');
-					_startupErrorHandler = function() {
-						var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
-								createInstance(Components.interfaces.nsIPromptService);
-						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
-							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
-							+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
-						// TEMP: lastDataDir can be removed once old persistent descriptors have been
-						// converted, which they are in getZoteroDirectory() in 5.0
-						var previousDir = Zotero.Prefs.get('lastDataDir') || Zotero.Prefs.get('dataDir');
-						var index = ps.confirmEx(null,
-							Zotero.getString('general.error'),
-							Zotero.startupError + '\n\n' +
-							Zotero.getString('dataDir.previousDir') + ' ' + previousDir,
-							buttonFlags, null,
-							Zotero.getString('dataDir.useDefaultLocation'),
-							Zotero.getString('general.locate'),
-							null, {});
-						
-						// Revert to home directory
-						if (index == 1) {
-							Zotero.chooseZoteroDirectory(false, true);
-						}
-						// Locate data directory
-						else if (index == 2) {
-							Zotero.chooseZoteroDirectory();
-						}
-					}
-					_addToolbarIcon();
-					return;
+		
+		if (Zotero.isStandalone) {
+			var version = Services.appinfo.version;
+		}
+		else {
+			let deferred = Zotero.Promise.defer();
+			Components.utils.import("resource://gre/modules/AddonManager.jsm");
+			AddonManager.getAddonByID(
+				ZOTERO_CONFIG.GUID,
+				function (addon) {
+					deferred.resolve(addon.version);
 				}
-				// DEBUG: handle more startup errors
-				else {
-					throw (e);
-					return false;
-				}
-			}
-			if(Zotero.isStandalone) {
-				Zotero.checkForUnsafeDataDirectory(dataDir.path);
-			}
-			// Register shutdown handler to call Zotero.shutdown()
-			var _shutdownObserver = {observe:function() { Zotero.shutdown().done() }};
-			Services.obs.addObserver(_shutdownObserver, "quit-application", false);
-			
-			try {
-				Zotero.IPC.init();
-			}
-			catch (e) {
-				if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
-					var msg = Zotero.localeJoin([
-						Zotero.getString('startupError.databaseCannotBeOpened'),
-						Zotero.getString('startupError.checkPermissions')
-					]);
-					Zotero.startupError = msg;
-					Zotero.logError(e);
-					_addToolbarIcon();
-					return false;
-				}
-				throw (e);
-			}
-			
-			// Get startup errors
-			try {
-				var messages = {};
-				Services.console.getMessageArray(messages, {});
-				_startupErrors = Object.keys(messages.value).map(i => messages[i])
-					.filter(msg => _shouldKeepError(msg));
-			} catch(e) {
-				Zotero.logError(e);
-			}
-			// Register error observer
-			Services.console.registerListener(ConsoleListener);
-			
-			// Add shutdown listener to remove quit-application observer and console listener
-			this.addShutdownListener(function() {
-				Services.obs.removeObserver(_shutdownObserver, "quit-application", false);
-				Services.console.unregisterListener(ConsoleListener);
-			});
-			
-			// Load additional info for connector or not
-			if(Zotero.isConnector) {
-				Zotero.debug("Loading in connector mode");
-				Zotero.Connector_Types.init();
-				
-				// Store a startupError until we get information from Zotero Standalone
-				Zotero.startupError = Zotero.getString("connector.loadInProgress")
-				
-				if(!Zotero.isFirstLoadThisSession) {
-					// We want to get a checkInitComplete message before initializing if we switched to
-					// connector mode because Standalone was launched
-					Zotero.IPC.broadcast("checkInitComplete");
-				} else {
-					Zotero.initComplete();
-				}
-			} else {
-				Zotero.debug("Loading in full mode");
-				return _initFull()
-				.then(function (success) {
-					if (!success) {
-						_addToolbarIcon();
-						return false;
-					}
+			);
+			var version = yield deferred.promise;
+		}
+		Zotero.version = version;
+		
+		// OS platform
+		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
+			   .getService(Components.interfaces.nsIAppShellService)
+			   .hiddenDOMWindow;
+		this.platform = win.navigator.platform;
+		this.isMac = (this.platform.substr(0, 3) == "Mac");
+		this.isWin = (this.platform.substr(0, 3) == "Win");
+		this.isLinux = (this.platform.substr(0, 5) == "Linux");
+		this.oscpu = win.navigator.oscpu;
+		
+		// Browser
+		Zotero.browser = "g";
+		
+		// Locale
+		var uaPrefs = Services.prefs.getBranch("general.useragent.");
+		try {
+			this.locale = uaPrefs.getComplexValue("locale", Components.interfaces.nsIPrefLocalizedString);
+		} catch (e) {}
+		
+		if(this.locale) {
+			this.locale = this.locale.toString();
+		} else {
+			this.locale = uaPrefs.getCharPref("locale");
+		}
+		
+		if (this.locale.length == 2) {
+			this.locale = this.locale + '-' + this.locale.toUpperCase();
+		}
+		
+		// Load in the localization stringbundle for use by getString(name)
+		var appLocale = Services.locale.getApplicationLocale();
+		
+		_localizedStringBundle = Services.strings.createBundle(
+			"chrome://zotero/locale/zotero.properties", appLocale);
+		
+		// Also load the brand as appName
+		var brandBundle = Services.strings.createBundle(
+			"chrome://branding/locale/brand.properties", appLocale);
+		this.appName = brandBundle.GetStringFromName("brandShortName");
+		
+		// Set the locale direction to Zotero.dir
+		// DEBUG: is there a better way to get the entity from JS?
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+						.createInstance();
+		xmlhttp.open('GET', 'chrome://global/locale/global.dtd', false);
+		xmlhttp.overrideMimeType('text/plain');
+		xmlhttp.send(null);
+		var matches = xmlhttp.responseText.match(/(ltr|rtl)/);
+		if (matches && matches[0] == 'rtl') {
+			Zotero.dir = 'rtl';
+		}
+		else {
+			Zotero.dir = 'ltr';
+		}
+		Zotero.rtl = Zotero.dir == 'rtl';
+		
+		// Make sure that Zotero Standalone is not running as root
+		if(Zotero.isStandalone && !Zotero.isWin) _checkRoot();
+		
+		try {
+			var dataDir = Zotero.getZoteroDirectory();
+		}
+		catch (e) {
+			// Zotero dir not found
+			if (e.name == 'NS_ERROR_FILE_NOT_FOUND') {
+				Zotero.startupError = Zotero.getString('dataDir.notFound');
+				_startupErrorHandler = function() {
+					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
+							createInstance(Components.interfaces.nsIPromptService);
+					var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
+						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
+						+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
+					// TEMP: lastDataDir can be removed once old persistent descriptors have been
+					// converted, which they are in getZoteroDirectory() in 5.0
+					var previousDir = Zotero.Prefs.get('lastDataDir') || Zotero.Prefs.get('dataDir');
+					var index = ps.confirmEx(null,
+						Zotero.getString('general.error'),
+						Zotero.startupError + '\n\n' +
+						Zotero.getString('dataDir.previousDir') + ' ' + previousDir,
+						buttonFlags, null,
+						Zotero.getString('dataDir.useDefaultLocation'),
+						Zotero.getString('general.locate'),
+						null, {});
 					
-					if(Zotero.isStandalone) Zotero.Standalone.init();
-					Zotero.initComplete();
-				})
+					// Revert to home directory
+					if (index == 1) {
+						Zotero.chooseZoteroDirectory(false, true);
+					}
+					// Locate data directory
+					else if (index == 2) {
+						Zotero.chooseZoteroDirectory();
+					}
+				}
+				_addToolbarIcon();
+				return;
 			}
+			// DEBUG: handle more startup errors
+			else {
+				throw (e);
+				return false;
+			}
+		}
+		
+		if(Zotero.isStandalone) {
+			Zotero.checkForUnsafeDataDirectory(dataDir.path);
+		}
+		// Register shutdown handler to call Zotero.shutdown()
+		var _shutdownObserver = {observe:function() { Zotero.shutdown().done() }};
+		Services.obs.addObserver(_shutdownObserver, "quit-application", false);
+		
+		try {
+			Zotero.IPC.init();
+		}
+		catch (e) {
+			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+				var msg = Zotero.localeJoin([
+					Zotero.getString('startupError.databaseCannotBeOpened'),
+					Zotero.getString('startupError.checkPermissions')
+				]);
+				Zotero.startupError = msg;
+				Zotero.logError(e);
+				_addToolbarIcon();
+				return false;
+			}
+			throw (e);
+		}
+		
+		// Get startup errors
+		try {
+			var messages = {};
+			Services.console.getMessageArray(messages, {});
+			_startupErrors = Object.keys(messages.value).map(i => messages[i])
+				.filter(msg => _shouldKeepError(msg));
+		} catch(e) {
+			Zotero.logError(e);
+		}
+		// Register error observer
+		Services.console.registerListener(ConsoleListener);
+		
+		// Add shutdown listener to remove quit-application observer and console listener
+		this.addShutdownListener(function() {
+			Services.obs.removeObserver(_shutdownObserver, "quit-application", false);
+			Services.console.unregisterListener(ConsoleListener);
+		});
+		
+		// Load additional info for connector or not
+		if(Zotero.isConnector) {
+			Zotero.debug("Loading in connector mode");
+			Zotero.Connector_Types.init();
 			
-			return true;
-		}.bind(this));
-	}
+			// Store a startupError until we get information from Zotero Standalone
+			Zotero.startupError = Zotero.getString("connector.loadInProgress")
+			
+			if(!Zotero.isFirstLoadThisSession) {
+				// We want to get a checkInitComplete message before initializing if we switched to
+				// connector mode because Standalone was launched
+				Zotero.IPC.broadcast("checkInitComplete");
+			} else {
+				Zotero.initComplete();
+			}
+		} else {
+			Zotero.debug("Loading in full mode");
+			return _initFull()
+			.then(function (success) {
+				if (!success) {
+					_addToolbarIcon();
+					return false;
+				}
+				
+				if(Zotero.isStandalone) Zotero.Standalone.init();
+				Zotero.initComplete();
+			})
+		}
+		
+		return true;
+	});
 	
 	/**
 	 * Triggers events when initialization finishes
