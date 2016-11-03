@@ -428,9 +428,9 @@ Zotero.LocateManager = new function() {
 			if(responseType && responseType !== "text/html") {
 				throw "LocateManager supports only responseType text/html";
 			}
-		
-			if(item.toArray) {
-				item = item.toArray();
+			
+			if (item.toJSON) {
+				item = item.toJSON();
 			}
 			
 			var itemAsOpenURL = Zotero.OpenURL.createContextObject(item, "1.0", true);
