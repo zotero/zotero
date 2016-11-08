@@ -594,6 +594,44 @@ Zotero.Server.Connector.Progress.prototype = {
 };
 
 /**
+ * Install a csl style or import a file using import translation
+ * 
+ * Accepts:
+ * 	[resourceURL, resourceType, resourceText]
+ * 	
+ * Returns:
+ * 	- {name: styleName} for CSL styles
+ * 	- Array{item} for importable resources
+ */
+ 
+Zotero.Server.Connector.ImportFile = function() {};
+Zotero.Server.Endpoints["/connector/importFile"] = Zotero.Server.Connector.ImportFile;
+Zotero.Server.Connector.ImportFile.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["application/json"],
+	permitBookmarklet: false,
+	
+	init: Zotero.Promise.coroutine(function* (url, data, sendResponseCallback){
+		if (data[1] == 'csl') {
+			let styleName = yield Zotero.Styles.install(data[2], data[0], true);
+			sendResponseCallback(201, "application/json", JSON.stringify({name: styleName}));
+		} else {
+			let translate = new Zotero.Translate.Import();
+			translate.setLocation(data[0]);
+			translate.setString(data[2]);
+			let translators = yield translate.getTranslators();
+			if (!translators || !translators.length) {
+				Zotero.debug(`Server Connector: no translators found for ${data[0]}`);
+				return sendResponseCallback(500)
+			}
+			translate.setTranslator(translators[0]);
+			let items = yield translate.translate();
+			return sendResponseCallback(201, "application/json", JSON.stringify(items));
+		}
+	})
+}
+
+/**
  * Get code for a translator
  *
  * Accepts:

@@ -242,21 +242,22 @@ Zotero.Styles = new function() {
 	 *     containing the style data
 	 * @param {String} origin The origin of the style, either a filename or URL, to be
 	 *     displayed in dialogs referencing the style
+	 * @param {Boolean} [noPrompt=false] Skip the confirmation prompt
 	 */
-	this.install = Zotero.Promise.coroutine(function* (style, origin) {
-		var styleInstalled;
+	this.install = Zotero.Promise.coroutine(function* (style, origin, noPrompt=false) {
+		var styleTitle;
 		
 		try {
 			if (style instanceof Components.interfaces.nsIFile) {
 				// handle nsIFiles
 				var url = Services.io.newFileURI(style);
 				var xmlhttp = yield Zotero.HTTP.request("GET", url.spec);
-				styleInstalled = yield _install(xmlhttp.responseText, style.leafName);
+				styleTitle = yield _install(xmlhttp.responseText, style.leafName, false, noPrompt);
 			} else {
-				styleInstalled = yield _install(style, origin);
+				styleTitle = yield _install(style, origin, false, noPrompt);
 			}
 		}
-		catch (e) {
+		catch (error) {
 			// Unless user cancelled, show an alert with the error
 			if(typeof error === "object" && error instanceof Zotero.Exception.UserCancelled) return;
 			if(typeof error === "object" && error instanceof Zotero.Exception.Alert) {
@@ -268,6 +269,7 @@ Zotero.Styles = new function() {
 					origin, "styles.install.title", error)).present();
 			}
 		}
+		return styleTitle;
 	});
 	
 	/**
@@ -276,19 +278,20 @@ Zotero.Styles = new function() {
 	 * @param {String} origin The origin of the style, either a filename or URL, to be
 	 *     displayed in dialogs referencing the style
 	 * @param {Boolean} [hidden] Whether style is to be hidden.
+	 * @param {Boolean} [noPrompt=false] Skip the confirmation prompt
 	 * @return {Promise}
 	 */
-	var _install = Zotero.Promise.coroutine(function* (style, origin, hidden) {
+	var _install = Zotero.Promise.coroutine(function* (style, origin, hidden, noPrompt=false) {
 		if (!_initialized) yield Zotero.Styles.init();
 		
-		var existingFile, destFile, source, styleID
+		var existingFile, destFile, source;
 		
 		// First, parse style and make sure it's valid XML
 		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 				.createInstance(Components.interfaces.nsIDOMParser),
 			doc = parser.parseFromString(style, "application/xml");
 		
-		styleID = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:id[1]',
+		var styleID = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:id[1]',
 				Zotero.Styles.ns),
 			// Get file name from URL
 			m = /[^\/]+$/.exec(styleID),
@@ -361,7 +364,7 @@ Zotero.Styles = new function() {
 		// display a dialog to tell the user we're about to install the style
 		if(hidden) {
 			destFile = destFileHidden;
-		} else {
+		} else if (!noPrompt) {
 			if(existingTitle) {
 				var text = Zotero.getString('styles.updateStyle', [existingTitle, title, origin]);
 			} else {
@@ -448,6 +451,7 @@ Zotero.Styles = new function() {
 				yield win.Zotero_Preferences.Cite.refreshStylesList(styleID);
 			}
 		}
+		return existingTitle ? existingTitle : title;
 	});
 	
 	/**
