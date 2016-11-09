@@ -256,6 +256,9 @@ Zotero.Connector = new function() {
 					data.detailedCookies = cookieHeader.substr(1);
 				}
 				
+				// Cookie URI needed to set up the cookie sandbox on standalone
+				data.uri = tab.url;
+				
 				self.callMethod("saveItems", data, callback, tab);
 			});
 			return;
