@@ -176,7 +176,7 @@ var ZoteroOverlay = new function()
 	 */
 	this.toggleDisplay = function(makeVisible, dontRefocus)
 	{
-		if (!Zotero || Zotero.skipLoading) {
+		if (!Zotero || Zotero.startupError || Zotero.skipLoading) {
 			ZoteroPane.displayStartupError();
 			return;
 		}

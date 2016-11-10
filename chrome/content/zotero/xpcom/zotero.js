@@ -302,6 +302,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 							Zotero.chooseZoteroDirectory();
 						}
 					}
+					_addToolbarIcon();
 					return;
 				} else if(e.name == "ZOTERO_DIR_MAY_EXIST") {
 					var app = Zotero.isStandalone ? Zotero.getString('app.standalone') : Zotero.getString('app.firefox');
@@ -392,8 +393,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 						Zotero.getString('startupError.checkPermissions')
 					]);
 					Zotero.startupError = msg;
-					Zotero.debug(e, 1);
-					Components.utils.reportError(e);
+					Zotero.logError(e);
+					_addToolbarIcon();
 					return false;
 				}
 				throw (e);
@@ -434,13 +435,16 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				}
 			} else {
 				Zotero.debug("Loading in full mode");
-				return Zotero.Promise.try(_initFull)
+				return _initFull()
 				.then(function (success) {
-					if(!success) return false;
+					if (!success) {
+						_addToolbarIcon();
+						return false;
+					}
 					
 					if(Zotero.isStandalone) Zotero.Standalone.init();
 					Zotero.initComplete();
-				});
+				})
 			}
 			
 			return true;
@@ -459,13 +463,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		this.initializationDeferred.resolve();
 		
 		if(Zotero.isConnector) {
-			// Add toolbar icon
-			try {
-				Services.scriptloader.loadSubScript("chrome://zotero/content/icon.js", {}, "UTF-8");
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
+			_addToolbarIcon();
 			
 			Zotero.Repo.init();
 			Zotero.locked = false;
@@ -480,6 +478,21 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		Zotero.debug('Triggering "zotero-loaded" event');
 		Services.obs.notifyObservers(Zotero, "zotero-loaded", null);
 	}
+	
+	
+	var _addToolbarIcon = function () {
+		// Add toolbar icon
+		try {
+			Services.scriptloader.loadSubScript("chrome://zotero/content/icon.js", {}, "UTF-8");
+		}
+		catch (e) {
+			if (Zotero) {
+				Zotero.debug(e, 1);
+			}
+			Components.utils.reportError(e);
+		}
+	};
+	
 	
 	/**
 	 * Initialization function to be called only if Zotero is in full mode
@@ -527,6 +540,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			catch (e) {
 				// Restore from backup?
 				alert(e);
+				return false;
 			}
 		}
 		
@@ -599,65 +613,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			
 			try {
 				var updated = yield Zotero.Schema.updateSchema();
-				
-				yield Zotero.Users.init();
-				yield Zotero.Libraries.init();
-				
-				yield Zotero.ItemTypes.init();
-				yield Zotero.ItemFields.init();
-				yield Zotero.CreatorTypes.init();
-				yield Zotero.FileTypes.init();
-				yield Zotero.CharacterSets.init();
-				yield Zotero.RelationPredicates.init();
-				
-				Zotero.locked = false;
-				
-				// Initialize various services
-				Zotero.Integration.init();
-				
-				if(Zotero.Prefs.get("httpServer.enabled")) {
-					Zotero.Server.init();
-				}
-				
-				yield Zotero.Fulltext.init();
-				
-				Zotero.Notifier.registerObserver(Zotero.Tags, 'setting', 'tags');
-				
-				yield Zotero.Sync.Data.Local.init();
-				yield Zotero.Sync.Data.Utilities.init();
-				Zotero.Sync.EventListeners.init();
-				Zotero.Sync.Runner = new Zotero.Sync.Runner_Module;
-				
-				Zotero.MIMETypeHandler.init();
-				yield Zotero.Proxies.init();
-				
-				// Initialize keyboard shortcuts
-				Zotero.Keys.init();
-				
-				// Initialize Locate Manager
-				Zotero.LocateManager.init();
-				
-				yield Zotero.ID.init();
-				yield Zotero.Collections.init();
-				yield Zotero.Items.init();
-				yield Zotero.Searches.init();
-				yield Zotero.Tags.init();
-				yield Zotero.Creators.init();
-				yield Zotero.Groups.init();
-				yield Zotero.Relations.init();
-				
-				// Load all library data except for items, which are loaded when libraries are first
-				// clicked on or if otherwise necessary
-				yield Zotero.Promise.each(
-					Zotero.Libraries.getAll(),
-					library => Zotero.Promise.coroutine(function* () {
-						yield Zotero.SyncedSettings.loadAll(library.libraryID);
-						if (library.libraryType != 'feed') {
-							yield Zotero.Collections.loadAll(library.libraryID);
-							yield Zotero.Searches.loadAll(library.libraryID);
-						}
-					})()
-				);
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -755,7 +710,66 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				
 				Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError') + "\n\n" + e;
 				throw e;
-			};
+			}
+			
+			yield Zotero.Users.init();
+			yield Zotero.Libraries.init();
+			
+			yield Zotero.ItemTypes.init();
+			yield Zotero.ItemFields.init();
+			yield Zotero.CreatorTypes.init();
+			yield Zotero.FileTypes.init();
+			yield Zotero.CharacterSets.init();
+			yield Zotero.RelationPredicates.init();
+			
+			Zotero.locked = false;
+			
+			// Initialize various services
+			Zotero.Integration.init();
+			
+			if(Zotero.Prefs.get("httpServer.enabled")) {
+				Zotero.Server.init();
+			}
+			
+			yield Zotero.Fulltext.init();
+			
+			Zotero.Notifier.registerObserver(Zotero.Tags, 'setting', 'tags');
+			
+			yield Zotero.Sync.Data.Local.init();
+			yield Zotero.Sync.Data.Utilities.init();
+			Zotero.Sync.EventListeners.init();
+			Zotero.Sync.Runner = new Zotero.Sync.Runner_Module;
+			
+			Zotero.MIMETypeHandler.init();
+			yield Zotero.Proxies.init();
+			
+			// Initialize keyboard shortcuts
+			Zotero.Keys.init();
+			
+			// Initialize Locate Manager
+			Zotero.LocateManager.init();
+			yield Zotero.ID.init();
+			yield Zotero.Collections.init();
+			yield Zotero.Items.init();
+			yield Zotero.Searches.init();
+			yield Zotero.Tags.init();
+			yield Zotero.Creators.init();
+			yield Zotero.Groups.init();
+			yield Zotero.Relations.init();
+			
+			// Load all library data except for items, which are loaded when libraries are first
+			// clicked on or if otherwise necessary
+			yield Zotero.Promise.each(
+				Zotero.Libraries.getAll(),
+				library => Zotero.Promise.coroutine(function* () {
+					yield Zotero.SyncedSettings.loadAll(library.libraryID);
+					if (library.libraryType != 'feed') {
+						yield Zotero.Collections.loadAll(library.libraryID);
+						yield Zotero.Searches.loadAll(library.libraryID);
+					}
+				})()
+			);
+
 			
 			Zotero.Items.startEmptyTrashTimer();
 			
@@ -768,7 +782,10 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			return true;
 		}
 		catch (e) {
-			Zotero.skipLoading = true;
+			Zotero.logError(e);
+			if (!Zotero.startupError) {
+				Zotero.startupError = Zotero.getString('startupError') + "\n\n" + e;
+			}
 			return false;
 		}
 	});
