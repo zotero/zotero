@@ -182,14 +182,14 @@
 					<groupbox>
 						<caption label="&zotero.preferences.dataDir;"/>
 						
-						<radiogroup id="dataDir"
+						<radiogroup id="data-dir"
 								preference="pref-useDataDir"
 								onsyncfrompreference="return Zotero_Preferences.Advanced.onDataDirLoad()"
 								onsynctopreference="return Zotero_Preferences.Advanced.onDataDirUpdate(event);">
-							<radio id="defaultDataDir" label="&zotero.preferences.dataDir.useProfile;" value="false"/>
+							<radio id="default-data-dir" label="&zotero.preferences.dataDir.useProfile;" value="false"/>
 							<hbox>
 								<radio label="&zotero.preferences.dataDir.custom;" value="true"/>
-								<textbox id="dataDirPath" preference="pref-dataDir"
+								<textbox id="data-dir-path" preference="pref-dataDir"
 									onsyncfrompreference="return Zotero_Preferences.Advanced.getDataDirPath();"
 									readonly="true" flex="1"/>
 								<button label="&zotero.preferences.dataDir.choose;"
@@ -199,7 +199,9 @@
 						
 						<hbox>
 							<button label="&zotero.preferences.dataDir.reveal;"
-								oncommand="Zotero_Preferences.Advanced.revealDataDirectory()"/>
+								oncommand="Zotero.revealDataDirectory()"/>
+							<button id="migrate-data-dir" label="&zotero.preferences.dataDir.migrate;"
+								oncommand="Zotero_Preferences.Advanced.migrateDataDirectory()" hidden="true"/>
 						</hbox>
 					</groupbox>
 					
