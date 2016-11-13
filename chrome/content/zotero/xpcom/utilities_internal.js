@@ -1179,6 +1179,9 @@ Zotero.Utilities.Internal = {
 	 */
 	quitZotero: function(restart=false) {
 		var startup = Services.startup;
+		if (restart) {
+			Zotero.restarting = true;
+		}
 		startup.quit(startup.eAttemptQuit | (restart ? startup.eRestart : 0) );
 	}
 }

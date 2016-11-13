@@ -861,8 +861,10 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				// close DB
 				yield Zotero.DB.closeDatabase(true)
 				
-				// broadcast that DB lock has been released
-				Zotero.IPC.broadcast("lockReleased");
+				if (!Zotero.restarting) {
+					// broadcast that DB lock has been released
+					Zotero.IPC.broadcast("lockReleased");
+				}
 			}
 		} catch(e) {
 			Zotero.logError(e);
