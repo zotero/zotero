@@ -197,6 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Personalizada:">
 <!ENTITY zotero.preferences.dataDir.choose "Escolher...">
 <!ENTITY zotero.preferences.dataDir.reveal "Mostrar Pasta de Dados">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Pasta Base dos Anexos Ligados">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "O Zotero usará caminhos relativos para arquivos anexos ligados que se encontrem na pasta base, permitindo-lhe aceder a esses arquivos em diferentes computadores, desde que a estrutura de arquivos dentro da pasta base se mantenha.">

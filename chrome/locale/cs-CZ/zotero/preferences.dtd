@@ -197,6 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Vlastní:">
 <!ENTITY zotero.preferences.dataDir.choose "Vybrat...">
 <!ENTITY zotero.preferences.dataDir.reveal "Ukázat Datový adresář">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Připojený základní adresář pro přílohy">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero použije relativní cesty pro propojené souborové přílohy v základním adresáři, což umožňuje přístup k souborům na různých počítačích, pokud bude zachována stejná struktura souborů v základním adresáři.">

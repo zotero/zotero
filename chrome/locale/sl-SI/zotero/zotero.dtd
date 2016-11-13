@@ -11,7 +11,7 @@
 <!ENTITY zotero.general.refresh "Osveži">
 <!ENTITY zotero.general.saveAs "Shrani kot ...">
 <!ENTITY zotero.general.advancedOptions.label "Napredne možnosti">
-<!ENTITY zotero.general.more "More">
+<!ENTITY zotero.general.more "Dodatno">
 
 <!ENTITY zotero.errorReport.title "Poročilo o napaki Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Vključuje lahko sporočila, ki se ne nanašajo na Zotero.">
@@ -177,7 +177,7 @@
 
 <!ENTITY zotero.bibliography.title "Ustvari bibliografijo">
 <!ENTITY zotero.bibliography.style.label "Slog navajanja:">
-<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
+<!ENTITY zotero.bibliography.manageStyles "Upravljaj s slogi ...">
 <!ENTITY zotero.bibliography.locale.label "Jezik:">
 <!ENTITY zotero.bibliography.outputMode "Izhodni način:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografija">

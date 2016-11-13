@@ -197,6 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Користувацька:">
 <!ENTITY zotero.preferences.dataDir.choose "Вибрати...">
 <!ENTITY zotero.preferences.dataDir.reveal "Показати каталог з даними">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Базовий каталог пов'язаних вкладень">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero буде використовувати відносні шляхи для пов'язаних вкладених файлів всередині каталогу даних, що дозволяє отримати доступ до файлів на різних комп'ютерах, поки файлова структура базового каталогу залишається без змін.">

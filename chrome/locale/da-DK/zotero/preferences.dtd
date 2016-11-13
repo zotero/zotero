@@ -197,6 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Tilpas:">
 <!ENTITY zotero.preferences.dataDir.choose "Vælg...">
 <!ENTITY zotero.preferences.dataDir.reveal "Vis data-mappen">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Tilknyttet databasefolder for vedhæftninger">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero vil benytte relative stier for tilknyttede vedhæftede filer i databasefolderen, hvilket giver dig mulighed for at tilgå filerne med forskellige computere så længe filstrukturen i databasefolderen forbliver den samme">

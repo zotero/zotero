@@ -197,6 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "تخصيص:">
 <!ENTITY zotero.preferences.dataDir.choose "اختر...">
 <!ENTITY zotero.preferences.dataDir.reveal "عرض مجلد البيانات">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "المجلد الرئيسي للمرفقات المرتبطة">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">

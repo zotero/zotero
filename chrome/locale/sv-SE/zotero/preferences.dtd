@@ -197,6 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Egen:">
 <!ENTITY zotero.preferences.dataDir.choose "Välj...">
 <!ENTITY zotero.preferences.dataDir.reveal "Visa datakatalog">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Baskatalog för länkande bilagor">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero använder relativa sökvägar för länkade filbilagor inom baskatalogen, vilket gör att du kan använda nå filerna på olika datorer så länge filstrukturen inom baskatalogen är densamma.">

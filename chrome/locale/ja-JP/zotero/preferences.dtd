@@ -197,6 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "個人設定:">
 <!ENTITY zotero.preferences.dataDir.choose "選択する...">
 <!ENTITY zotero.preferences.dataDir.reveal "データ・ディレクトリを表示する">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "リンク付き添付ファイルの基本ディレクトリ">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero は、基本ディレクトリの中のリンク付き添付ファイルについて相対パスを使用します。これにより、基本ディレクトリのファイル構造が同じである限り、異なるコンピューター上のファイルへのアクセスが可能になります。">

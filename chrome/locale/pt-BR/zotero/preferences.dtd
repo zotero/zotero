@@ -197,6 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Personalizar:">
 <!ENTITY zotero.preferences.dataDir.choose "Escolha...">
 <!ENTITY zotero.preferences.dataDir.reveal "Exibir o diretório de dados">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Diretório base dos anexos associados">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "O Zotero utilizará caminhos relativos para os anexos associados à referência a partir desse diretório base. Isso permite o acesso a esses arquivos em diferentes computadores, desde que a estrutura dos arquivos dentro do diretório base permaneça a mesma.">

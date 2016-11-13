@@ -10,8 +10,8 @@
 <!ENTITY zotero.general.cancel "Atšaukti">
 <!ENTITY zotero.general.refresh "Atnaujinti">
 <!ENTITY zotero.general.saveAs "Įrašyti kaip...">
-<!ENTITY zotero.general.advancedOptions.label "Sudėtingesnės parinktys">
-<!ENTITY zotero.general.more "More">
+<!ENTITY zotero.general.advancedOptions.label "Kitos parinktys">
+<!ENTITY zotero.general.more "Daugiau">
 
 <!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Zotero programoje">
 <!ENTITY zotero.errorReport.unrelatedMessages "Čia gali būti pranešimų, visai nesusijusių su Zotero.">
@@ -89,7 +89,7 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Pridėti šio tinklalapio momentinę kopiją">
 <!ENTITY zotero.items.menu.attach.link "Pridėti nuorodą į šį puslapį">
 <!ENTITY zotero.items.menu.attach.link.uri "Pridėti URI nuorodą...">
-<!ENTITY zotero.items.menu.attach.file "Pridėti turimą failo kopiją...">
+<!ENTITY zotero.items.menu.attach.file "Pridėti turimo failo kopiją...">
 <!ENTITY zotero.items.menu.attach.fileLink "Pridėti failo nuorodą...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Atkurti į biblioteką">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.toolbar.preferences.label "Nuostatos...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Palaikymas ir dokumentacija">
 <!ENTITY zotero.toolbar.about.label "Apie Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Sudėtingesnė paieška">
+<!ENTITY zotero.toolbar.advancedSearch "Išplėstinė paieška">
 <!ENTITY zotero.toolbar.tab.tooltip "Keisti kortelių veikseną">
 <!ENTITY zotero.toolbar.openURL.label "Rasti vietą">
 <!ENTITY zotero.toolbar.openURL.tooltip "Ieškoti vietinėje bibliotekoje">

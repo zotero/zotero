@@ -68,7 +68,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY toolsMenu.label "T">
+<!ENTITY toolsMenu.label "Strumenti">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY addons.label "Estensioni">
 

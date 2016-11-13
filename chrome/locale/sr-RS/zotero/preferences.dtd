@@ -197,6 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Прилагођено:">
 <!ENTITY zotero.preferences.dataDir.choose "Изабери...">
 <!ENTITY zotero.preferences.dataDir.reveal "Прикажи директоријум података">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Основни директоријум за повезание прилоге">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Зотеро ће користити релативне путање за приложене датотеке унутар основног директоријума, што омогућава приступ датотекама на различитим рачунарима док год је структура основног директоријума иста.">

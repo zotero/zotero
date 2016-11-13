@@ -197,6 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Egyéni:">
 <!ENTITY zotero.preferences.dataDir.choose "Tallózás...">
 <!ENTITY zotero.preferences.dataDir.reveal "Az adatkönyvtár mutatása">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "A Zotero relatív útvonalakat használ a csatolt fájlokhoz az alap könyvtáron belül , ezzel elérhetővé teszi a fájlokat különböző számítógépeken, amennyiben a fájlszerkezet az alap könyvtárban változatlan.">

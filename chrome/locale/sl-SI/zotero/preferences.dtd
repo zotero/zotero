@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.prefpane.sync "Uskladi">
 <!ENTITY zotero.preferences.sync.username "Uporabniško ime:">
 <!ENTITY zotero.preferences.sync.password "Geslo:">
-<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
+<!ENTITY zotero.preferences.sync.syncServer "Usklajevanje podatkov">
 <!ENTITY zotero.preferences.sync.setUpSync "Nastavi usklajevanje">
 <!ENTITY zotero.preferences.sync.unlinkAccount "Razveži račun ...">
 <!ENTITY zotero.preferences.sync.createAccount "Ustvari račun">
@@ -76,10 +76,10 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "po potrebi">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Če uporabljate shrambo Zotero, se strinjate z njenimi">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "pravili, omejitvami in pogoji">
-<!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
+<!ENTITY zotero.preferences.sync.librariesToSync "Knjižnice za usklajevanje">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Izberi knjižnice ...">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "Uskladi">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "Knjižnica">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Naslednje operacije so uporabne samo v redkih, posebnih primerih in jih ni pametno uporabiti za splošno reševanje težav. V mnogih primerih bo ponastavljanje porodilo nove težave. Za dodatne informacije si oglejte">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Možnosti ponastavitve uskladitve">
 <!ENTITY zotero.preferences.sync.reset.warning3 ".">
@@ -197,6 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Po meri:">
 <!ENTITY zotero.preferences.dataDir.choose "Izberi ...">
 <!ENTITY zotero.preferences.dataDir.reveal "Pokaži mapo s podatki">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Osnovna mapa za povezane priponke">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero bo uporabil relativne poti za povezane datotečne priponke v osnovni mapi, kar omogoča dostop do datotek na različnih računalnikih, vse dokler ostaja datotečna struktura v osnovni mapi enaka.">

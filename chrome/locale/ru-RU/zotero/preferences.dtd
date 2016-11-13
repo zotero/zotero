@@ -197,6 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Пользовательская:">
 <!ENTITY zotero.preferences.dataDir.choose "Выбрать…">
 <!ENTITY zotero.preferences.dataDir.reveal "Показать папку с данными">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Базовый каталог связанных вложений">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Приложением Zotero будут использоваться значения относительных путей для связанных файловых вложений в базовом каталоге, обеспечивая пользователю доступ к файлам на других компьютерах до тех пор, пока структура базового каталога остается без изменений.">

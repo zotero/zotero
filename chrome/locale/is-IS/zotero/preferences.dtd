@@ -197,6 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Egin stillingar:">
 <!ENTITY zotero.preferences.dataDir.choose "Veldu...">
 <!ENTITY zotero.preferences.dataDir.reveal "Sýna gagnamöppu">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Grunn mappa fyrir tengd viðhengi">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero mun nota afstæðar slóðir fyrir tengd viðhengi innan grunnmöppu, sem leyfir þér að nálgast skrár á mismunandi tölvum svo framarlega sem skráauppbygging í grunnmöppu er ávallt hin sama.">

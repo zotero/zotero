@@ -197,6 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Oma valik:">
 <!ENTITY zotero.preferences.dataDir.choose "Valida...">
 <!ENTITY zotero.preferences.dataDir.reveal "Andmete kataloogi näitamine">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Lingitud manuse baaskataloog">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero kasutab lingitud manuste puhul suhtelisi radasid baaskataloogis. Selliseilt on võimalik failidele ligipääs erinevates arvutites, tingimusel, et failistruktuur baaskataloogis on sama.">
