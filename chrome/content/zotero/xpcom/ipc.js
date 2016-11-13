@@ -93,6 +93,11 @@ Zotero.IPC = new function() {
 				// translators
 				Zotero.initComplete();
 			}
+			else if (msg == "reinit") {
+				if (Zotero.isConnector) {
+					reinit(false, true);
+				}
+			}
 		}
 	}
 	

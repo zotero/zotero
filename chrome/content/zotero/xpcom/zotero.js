@@ -1495,6 +1495,10 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		// Set data directory again
 		Zotero.debug("Using new data directory " + newDir);
 		this._cacheDataDirectory(newDir);
+		// Tell Zotero for Firefox in connector mode to reload and find the new data directory
+		if (this.isStandalone) {
+			Zotero.IPC.broadcast('reinit');
+		}
 		
 		// At least the database was copied, but other things failed
 		if (errors.length) {
