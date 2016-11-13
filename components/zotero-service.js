@@ -483,6 +483,9 @@ ZoteroCommandLineHandler.prototype = {
 			}
 		}
 		
+		if (cmdLine.handleFlag("ZoteroTest", false)) {
+			zInitOptions.test = true;
+		}
 		if (cmdLine.handleFlag("ZoteroAutomatedTest", false)) {
 			zInitOptions.automatedTest = true;
 		}

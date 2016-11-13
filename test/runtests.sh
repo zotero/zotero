@@ -134,7 +134,6 @@ if [ -z $IS_CYGWIN ]; then
 	echo "`MOZ_NO_REMOTE=1 NO_EM_RESTART=1 \"$FX_EXECUTABLE\" -v`"
 fi
 
-
 if [ "$TRAVIS" = true ]; then
 	FX_ARGS="$FX_ARGS -ZoteroAutomatedTest -ZoteroTestTimeout 10000"
 fi
@@ -144,7 +143,7 @@ trap "{ rm -rf \"$PROFILE\"; }" EXIT
 
 makePath FX_PROFILE "$PROFILE"
 MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$FX_EXECUTABLE" -profile "$FX_PROFILE" \
-    -chrome chrome://zotero-unit/content/runtests.html -test "$TESTS" -grep "$GREP" $FX_ARGS
+    -chrome chrome://zotero-unit/content/runtests.html -test "$TESTS" -grep "$GREP" -ZoteroTest $FX_ARGS
 
 # Check for success
 test -e "$PROFILE/success"

@@ -178,6 +178,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		if (options) {
 			let opts = [
 				'openPane',
+				'test',
 				'automatedTest',
 				'skipBundledFiles'
 			];
