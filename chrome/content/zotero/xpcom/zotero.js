@@ -176,9 +176,12 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		Zotero.Debug.init(options && options.forceDebugLog);
 		
 		if (options) {
-			if (options.openPane) this.openPane = true;
-			if (options.automatedTest) this.automatedTest = true;
-			if (options.skipBundledFiles) this.skipBundledFiles = true;
+			let opts = [
+				'openPane',
+				'automatedTest',
+				'skipBundledFiles'
+			];
+			opts.filter(opt => options[opt]).forEach(opt => this[opt] = true);
 		}
 		
 		this.mainThread = Services.tm.mainThread;
