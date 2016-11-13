@@ -446,6 +446,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	 * @return {Promise:Boolean}
 	 */
 	var _initFull = Zotero.Promise.coroutine(function* () {
+		if (!(yield _initDB())) return false;
+		
 		Zotero.VersionHeader.init();
 		
 		// Check for data reset/restore
@@ -489,8 +491,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				return false;
 			}
 		}
-		
-		if(!(yield _initDB())) return false;
 		
 		Zotero.HTTP.triggerProxyAuth();
 		
