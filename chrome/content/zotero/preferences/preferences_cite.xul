@@ -39,17 +39,10 @@
 		
 		<tabbox>
 			<tabs>
-				<tab id="wordProcessors-tab" label="&zotero.preferences.cite.wordProcessors;"/>
 				<tab id="styles-tab" label="&zotero.preferences.cite.styles;"/>
+				<tab id="wordProcessors-tab" label="&zotero.preferences.cite.wordProcessors;"/>
 			</tabs>
 			<tabpanels>
-				<tabpanel orient="vertical" id="wordProcessors">
-					<label id="wordProcessors-noWordProcessorPluginsInstalled" width="45em" hidden="true">
-							&zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled;
-					</label>
-					<checkbox label="&zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog;" preference="pref-cite-useClassicAddCitationDialog"/>
-					<label id="wordProcessors-getWordProcessorPlugins" class="zotero-text-link" href="&zotero.preferences.cite.wordProcessors.getPlugins.url;" value="&zotero.preferences.cite.wordProcessors.getPlugins;"/>
-				</tabpanel>
 				<tabpanel orient="vertical" id="styles">
 					<groupbox flex="1">
 						<caption label="&zotero.preferences.cite.styles.styleManager;"/>
@@ -80,6 +73,13 @@
 							&zotero.preferences.export.citePaperJournalArticleURL.description;
 						</label>
 					</groupbox>
+				</tabpanel>
+				<tabpanel orient="vertical" id="wordProcessors">
+					<label id="wordProcessors-noWordProcessorPluginsInstalled" width="45em" hidden="true">
+							&zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled;
+					</label>
+					<checkbox label="&zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog;" preference="pref-cite-useClassicAddCitationDialog"/>
+					<label id="wordProcessors-getWordProcessorPlugins" class="zotero-text-link" href="&zotero.preferences.cite.wordProcessors.getPlugins.url;" value="&zotero.preferences.cite.wordProcessors.getPlugins;"/>
 				</tabpanel>
 			</tabpanels>
 		</tabbox>
