@@ -1116,6 +1116,7 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 		}
 		
 		var itemID = item.id;
+		let suffix = Zotero.hiDPISuffix;
 		
 		if (treerow.level === 0) {
 			if (item.isRegularItem()) {
@@ -1123,10 +1124,10 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 				if (state !== null) {
 					switch (state) {
 						case 1:
-							return "chrome://zotero/skin/bullet_blue.png";
+							return `chrome://zotero/skin/bullet_blue${suffix}.png`;
 						
 						case -1:
-							return "chrome://zotero/skin/bullet_blue_empty.png";
+							return `chrome://zotero/skin/bullet_blue_empty${suffix}.png`;
 						
 						default:
 							return "";
@@ -1145,7 +1146,6 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 		if (item.isFileAttachment()) {
 			let exists = item.fileExistsCached();
 			if (exists !== null) {
-				let suffix = Zotero.hiDPISuffix;
 				return exists
 					? `chrome://zotero/skin/bullet_blue${suffix}.png`
 					: `chrome://zotero/skin/bullet_blue_empty${suffix}.png`;
@@ -1310,9 +1310,23 @@ Zotero.ItemTreeView.prototype.isSorted = function()
 	return true;
 }
 
-Zotero.ItemTreeView.prototype.cycleHeader = function (column) {
+Zotero.ItemTreeView.prototype.cycleHeader = Zotero.Promise.coroutine(function* (column) {
 	if (this.collectionTreeRow.isFeed()) {
 		return;
+	}
+	if (column.id == 'zotero-items-column-hasAttachment') {
+		Zotero.debug("Caching best attachment states");
+		if (!this._cachedBestAttachmentStates) {
+			let t = new Date();
+			for (let i = 0; i < this._rows.length; i++) {
+				let item = this.getRow(i).ref;
+				if (item.isRegularItem()) {
+					yield item.getBestAttachmentState();
+				}
+			}
+			Zotero.debug("Cached best attachment states in " + (new Date - t) + " ms");
+			this._cachedBestAttachmentStates = true;
+		}
 	}
 	for(var i=0, len=this._treebox.columns.count; i<len; i++)
 	{
@@ -1353,7 +1367,7 @@ Zotero.ItemTreeView.prototype.cycleHeader = function (column) {
 	}
 	this._treebox.invalidate();
 	this.selection.selectEventsSuppressed = false;
-}
+});
 
 /*
  *  Sort the items by the currently sorted column.
@@ -1416,20 +1430,23 @@ Zotero.ItemTreeView.prototype.sort = function (itemID) {
 				return Zotero.Items.getSortTitle(item.getDisplayTitle());
 			
 			case 'hasAttachment':
-				if (item.isAttachment()) {
+				if (item.isFileAttachment()) {
 					var state = item.fileExistsCached() ? 1 : -1;
 				}
 				else if (item.isRegularItem()) {
-					var state = item.getBestAttachmentState();
+					var state = item.getBestAttachmentStateCached();
 				}
 				else {
 					return 0;
 				}
 				// Make sort order present, missing, empty when ascending
-				if (state === -1) {
+				if (state === 1) {
 					state = 2;
 				}
-				return state * -1;
+				else if (state === -1) {
+					state = 1;
+				}
+				return state;
 			
 			case 'numNotes':
 				return row.numNotes(false, true) || 0;
@@ -1490,6 +1507,10 @@ Zotero.ItemTreeView.prototype.sort = function (itemID) {
 				if (!emptyFirst[sortField]) {
 					if(fieldA === '' && fieldB !== '') return 1;
 					if(fieldA !== '' && fieldB === '') return -1;
+				}
+				
+				if (sortField == 'hasAttachment') {
+					return fieldB - fieldA;
 				}
 				
 				return collation.compareString(1, fieldA, fieldB);
