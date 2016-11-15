@@ -43,6 +43,18 @@ Zotero.Translators = new function() {
 	 *     available (e.g., in updateBundledFiles()), to avoid unnecesary file reads
 	 */
 	this.reinit = Zotero.Promise.coroutine(function* (options = {}) {
+		// Wait until bundled files have been updated, except when this is called by the schema update
+		// code itself
+		if (!options.fromSchemaUpdate) {
+			yield Zotero.Schema.schemaUpdatePromise;
+		}
+		// Before bundled files can be updated, any existing translators need to be loaded, but other
+		// init() calls from elsewhere should still wait on schemaUpdatePromise, so init()/lazy()
+		// can't be used. Instead, the schema update code calls reinit() with noReinit.
+		else if (options.noReinit && _initialized) {
+			return;
+		}
+		
 		Zotero.debug("Initializing translators");
 		var start = new Date;
 		
