@@ -430,6 +430,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	
 	var _addToolbarIcon = function () {
+		if (Zotero.isStandalone) return;
+		
 		// Add toolbar icon
 		try {
 			Services.scriptloader.loadSubScript("chrome://zotero/content/icon.js", {}, "UTF-8");
