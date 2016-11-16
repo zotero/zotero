@@ -108,6 +108,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	var _locked = false;
 	var _shutdownListeners = [];
+	var _progressMessage;
 	var _progressMeters;
 	var _progressPopup;
 	var _lastPercentage;
@@ -2257,7 +2258,9 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	 * @return	void
 	 */
 	this.showZoteroPaneProgressMeter = function (msg, determinate, icon) {
-		if (!msg) msg = "";
+		// If msg is undefined, keep any existing message. If false/null/"", clear.
+		// The message is also cleared when the meters are hidden.
+		_progressMessage = msg = (msg === undefined ? _progressMessage : msg) || "";
 		var currentWindow = Services.wm.getMostRecentWindow("navigator:browser");
 		var enumerator = Services.wm.getEnumerator("navigator:browser");
 		var progressMeters = [];
@@ -2357,6 +2360,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			_progressPopup.close();
 		}
 		
+		_progressMessage = null;
 		_progressMeters = [];
 		_progressPopup = null;
 		_lastPercentage = null;
