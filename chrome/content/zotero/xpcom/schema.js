@@ -462,20 +462,22 @@ Zotero.Schema = new function(){
 			}
 			installLocation = installLocation.path;
 			
+			let reinitOptions = { fromSchemaUpdate: true, noReinit: true };
+			
 			// Update files
 			switch (mode) {
 			case 'styles':
-				yield Zotero.Styles.reinit({ fromSchemaUpdate: true, noReinit: true });
+				yield Zotero.Styles.reinit(reinitOptions);
 				var updated = yield _updateBundledFilesAtLocation(installLocation, mode);
 			
 			case 'translators':
-				yield Zotero.Translators.reinit({ fromSchemaUpdate: true, noReinit: true });
+				yield Zotero.Translators.reinit(reinitOptions);
 				var updated = yield _updateBundledFilesAtLocation(installLocation, mode);
 			
 			default:
-				yield Zotero.Translators.reinit({ fromSchemaUpdate: true, noReinit: true });
+				yield Zotero.Translators.reinit(reinitOptions);
 				let up1 = yield _updateBundledFilesAtLocation(installLocation, 'translators', true);
-				yield Zotero.Styles.reinit({ fromSchemaUpdate: true, noReinit: true });
+				yield Zotero.Styles.reinit(reinitOptions);
 				let up2 = yield _updateBundledFilesAtLocation(installLocation, 'styles');
 				var updated = up1 || up2;
 			}
@@ -1660,8 +1662,8 @@ Zotero.Schema = new function(){
 				}
 				
 				// Rebuild caches
-				yield Zotero.Translators.reinit();
-				yield Zotero.Styles.reinit();
+				yield Zotero.Translators.reinit({ fromSchemaUpdate: true });
+				yield Zotero.Styles.reinit({ fromSchemaUpdate: true });
 			}
 			catch (e) {
 				Zotero.debug(e, 1);
