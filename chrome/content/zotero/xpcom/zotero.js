@@ -271,6 +271,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		// Make sure that Zotero Standalone is not running as root
 		if(Zotero.isStandalone && !Zotero.isWin) _checkRoot();
 		
+		_addToolbarIcon();
+		
 		try {
 			var dataDir = Zotero.getZoteroDirectory();
 		}
@@ -955,10 +957,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 					throw (e);
 				}
 				this.setDataDirectory(file.path);
-				if (!file.exists()) {
-					var e = { name: "NS_ERROR_FILE_NOT_FOUND" };
-					throw (e);
-				}
 			}
 			else {
 				// If there's a migration marker in this directory and no database, migration was
@@ -989,6 +987,17 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 						e = { name: "NS_ERROR_FILE_NOT_FOUND" };
 						throw e;
 					}
+				}
+			}
+			
+			if (!file.exists()) {
+				// If useDataDir is set to ~/Zotero and it doesn't exist, create it
+				if (file.path == this.getDefaultDataDir()) {
+					Zotero.File.createDirectoryIfMissing(file);
+				}
+				else {
+					let e = { name: "NS_ERROR_FILE_NOT_FOUND" };
+					throw e;
 				}
 			}
 		}
