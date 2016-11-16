@@ -1466,9 +1466,15 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			partial = true;
 		}
 		
+		// Not yet used
+		let progressHandler = function (progress, progressMax) {
+			this.updateZoteroPaneProgressMeter(Math.round(progress / progressMax));
+		}.bind(this);
+		
 		let errors;
 		try {
-			errors = yield Zotero.migrateDataDirectory(oldDir, newDir, partial);
+			this.showZoteroPaneProgressMeter(Zotero.getString("dataDir.migration.inProgress"));
+			errors = yield Zotero.migrateDataDirectory(oldDir, newDir, partial, progressHandler);
 		}
 		catch (e) {
 			// Complete failure (failed to create new directory, copy marker, or move database)
