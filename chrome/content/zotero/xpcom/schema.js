@@ -72,7 +72,7 @@ Zotero.Schema = new function(){
 	/*
 	 * Checks if the DB schema exists and is up-to-date, updating if necessary
 	 */
-	this.updateSchema = Zotero.Promise.coroutine(function* () {
+	this.updateSchema = Zotero.Promise.coroutine(function* (options = {}) {
 		// TODO: Check database integrity first with Zotero.DB.integrityCheck()
 		
 		// 'userdata' is the last upgrade step run in _migrateUserDataSchema() based on the
@@ -133,7 +133,7 @@ Zotero.Schema = new function(){
 				if (Zotero.DB.tableExists('customItemTypes')) {
 					yield _updateCustomTables(updated);
 				}
-				updated = yield _migrateUserDataSchema(userdata);
+				updated = yield _migrateUserDataSchema(userdata, options);
 				yield _updateSchema('triggers');
 				
 				// Populate combined tables for custom types and fields -- this is likely temporary
@@ -1859,7 +1859,7 @@ Zotero.Schema = new function(){
 	//
 	// If libraryID set, make sure no relations still use a local user key, and then remove on-error code in sync.js
 	
-	var _migrateUserDataSchema = Zotero.Promise.coroutine(function* (fromVersion) {
+	var _migrateUserDataSchema = Zotero.Promise.coroutine(function* (fromVersion, options = {}) {
 		var toVersion = yield _getSchemaSQLVersion('userdata');
 		
 		if (fromVersion >= toVersion) {
@@ -1867,6 +1867,13 @@ Zotero.Schema = new function(){
 		}
 		
 		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
+		
+		if (options.onBeforeUpdate) {
+			let maybePromise = options.onBeforeUpdate()
+			if (maybePromise && maybePromise.then) {
+				yield maybePromise;
+			}
+		}
 		
 		Zotero.DB.requireTransaction();
 		

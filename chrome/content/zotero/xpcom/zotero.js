@@ -561,7 +561,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			}
 			
 			try {
-				var updated = yield Zotero.Schema.updateSchema();
+				var updated = yield Zotero.Schema.updateSchema({
+					onBeforeUpdate: () => Zotero.showZoteroPaneProgressMeter(
+						Zotero.getString('upgrade.status')
+					)
+				});
 			}
 			catch (e) {
 				Zotero.logError(e);
