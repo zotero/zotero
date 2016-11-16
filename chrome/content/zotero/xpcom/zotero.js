@@ -1080,46 +1080,47 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			if(defProfile) {
 				// get Zotero directory
 				let profileDir = defProfile[0].path;
-				let zoteroDir = OS.Path.join(profileDir, ZOTERO_CONFIG.ID);
+				Zotero.debug("Found default profile at " + profileDir);
 				
-				// if Zotero directory exists in default profile for alternative app, use it
-				if (Zotero.File.pathToFile(zoteroDir).exists()) {
-					let multipleProfiles = defProfile[1];
+				// copy prefs
+				let prefsFile = OS.Path.join(profileDir, "prefs.js");
+				if (Zotero.File.pathToFile(prefsFile).exists()) {
+					// build sandbox
+					var sandbox = new Components.utils.Sandbox("http://www.example.com/");
+					Components.utils.evalInSandbox(
+						"var prefs = {};"+
+						"function user_pref(key, val) {"+
+							"prefs[key] = val;"+
+						"}"
+					, sandbox);
 					
-					// copy prefs
-					let prefsFile = OS.Path.join(profileDir, "prefs.js");
-					if (Zotero.File.pathToFile(prefsFile).exists()) {
-						// build sandbox
-						var sandbox = new Components.utils.Sandbox("http://www.example.com/");
-						Components.utils.evalInSandbox(
-							"var prefs = {};"+
-							"function user_pref(key, val) {"+
-								"prefs[key] = val;"+
-							"}"
-						, sandbox);
-						
-						// remove comments
-						var prefsJs = Zotero.File.getContents(prefsFile);
-						prefsJs = prefsJs.replace(/^#[^\r\n]*$/mg, "");
-						
-						// evaluate
-						Components.utils.evalInSandbox(prefsJs, sandbox);
-						var prefs = sandbox.prefs;
-						for(var key in prefs) {
-							if(key.substr(0, ZOTERO_CONFIG.PREF_BRANCH.length) === ZOTERO_CONFIG.PREF_BRANCH
-									&& key !== "extensions.zotero.firstRun2") {
-								Zotero.Prefs.set(key.substr(ZOTERO_CONFIG.PREF_BRANCH.length), prefs[key]);
-							}
+					// remove comments
+					var prefsJs = Zotero.File.getContents(prefsFile);
+					prefsJs = prefsJs.replace(/^#[^\r\n]*$/mg, "");
+					
+					// evaluate
+					Components.utils.evalInSandbox(prefsJs, sandbox);
+					var prefs = sandbox.prefs;
+					for(var key in prefs) {
+						if(key.substr(0, ZOTERO_CONFIG.PREF_BRANCH.length) === ZOTERO_CONFIG.PREF_BRANCH
+								&& key !== "extensions.zotero.firstRun2") {
+							Zotero.Prefs.set(key.substr(ZOTERO_CONFIG.PREF_BRANCH.length), prefs[key]);
 						}
 					}
 					
-					// also set data dir if no custom data dir is now defined
-					if(!Zotero.Prefs.get("useDataDir")) {
-						this.setDataDirectory(zoteroDir);
+					// If data directory setting was transferred, use that
+					if (Zotero.Prefs.get('useDataDir')) {
+						return this.getZoteroDirectory();
 					}
-					
-					file = Zotero.File.pathToFile(zoteroDir);
 				}
+				
+				// If a custom data directory isn't now defined and there's a data directory in the
+				// default profile for the alternative app, use that
+				let zoteroDir = OS.Path.join(profileDir, ZOTERO_CONFIG.ID);
+				if (!Zotero.Prefs.get("useDataDir") && Zotero.File.pathToFile(profileDir).exists()) {
+					this.setDataDirectory(zoteroDir);
+				}
+				file = Zotero.File.pathToFile(zoteroDir);
 			}
 			
 			Zotero.File.createDirectoryIfMissing(file);
