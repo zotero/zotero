@@ -197,7 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Vlastné umiestnenie:">
 <!ENTITY zotero.preferences.dataDir.choose "Prehľadávať...">
 <!ENTITY zotero.preferences.dataDir.reveal "Zobraziť priečinok s dátami">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Základný adresár prepojených príloh">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero použije relatívne cesty pre prepojené súbory príloh vo vnútri základného adresára, čím vám sprístupní súbory na rôznych počítačoch pokiaľ štruktúra súborov vo vnútri základného adresára zostáva rovnaká.">

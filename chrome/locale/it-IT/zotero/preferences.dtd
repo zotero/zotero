@@ -197,7 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Personalizza:">
 <!ENTITY zotero.preferences.dataDir.choose "Sfoglia...">
 <!ENTITY zotero.preferences.dataDir.reveal "Visualizza la cartella dati">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Directory principale per gli allegati">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero userà percorsi relativi per i file allegati collegati all'interno della directory principale, permettendo di accedere ai file su diversi computer, se la struttura dei file all'interno della directory rimane uguale.">

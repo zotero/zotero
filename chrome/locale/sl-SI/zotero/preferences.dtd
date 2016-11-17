@@ -197,7 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Po meri:">
 <!ENTITY zotero.preferences.dataDir.choose "Izberi ...">
 <!ENTITY zotero.preferences.dataDir.reveal "Pokaži mapo s podatki">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Osnovna mapa za povezane priponke">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero bo uporabil relativne poti za povezane datotečne priponke v osnovni mapi, kar omogoča dostop do datotek na različnih računalnikih, vse dokler ostaja datotečna struktura v osnovni mapi enaka.">

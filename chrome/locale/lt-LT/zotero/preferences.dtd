@@ -197,7 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Savitas:">
 <!ENTITY zotero.preferences.dataDir.choose "Pasirinkti...">
 <!ENTITY zotero.preferences.dataDir.reveal "Parodyti duomenų katalogą">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Susietų priedų pagrindinis katalogas">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero failams, kurie prisegti prie įrašų, naudos santykinius kelius pagrindinio katalogo atžvilgiu, tad failus galėsite pasiekti bet kuriame savo kompiuteryje, žinoma, jei failų struktūra pagrindiniuose kataloguose bus tokia pati.">

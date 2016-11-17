@@ -197,7 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Oma asetus:">
 <!ENTITY zotero.preferences.dataDir.choose "Valitse...">
 <!ENTITY zotero.preferences.dataDir.reveal "Näytä datahakemisto">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Linkattujen liitteiden juurikansio">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero käyttää suhteellisia polkuja viitatakseen tiedostoliitteisiin juurikansiossa, joten voit käyttää tiedostoja eri tietokoneilla, kunhan tiedostorakenne juurikansion sisällä pysyy samana.">

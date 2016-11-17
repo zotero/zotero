@@ -197,7 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Özel:">
 <!ENTITY zotero.preferences.dataDir.choose "Seç...">
 <!ENTITY zotero.preferences.dataDir.reveal "Veri Dizinini Göster">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Bağlantılanmış Eklenti Temel Dizini">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero, bağlantılanmış dosya eklentileri için göreceli yollar kullanacaktır. Bu, temel dizininizdeki dosya yapınız aynı kaldığı sürece, dosyalarınıza değişik bilgisayarlarda ulaşımınızı sağlamaktadır.">

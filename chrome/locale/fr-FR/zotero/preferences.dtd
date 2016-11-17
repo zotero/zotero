@@ -197,7 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Personnalisé :">
 <!ENTITY zotero.preferences.dataDir.choose "Sélectionner…">
 <!ENTITY zotero.preferences.dataDir.reveal "Afficher le répertoire contenant les données">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Répertoire de base pour les pièces jointes liées">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero utilisera un chemin relatif pour l'emplacement des pièces jointes liées - uniquement celles-ci - à l'intérieur du répertoire de base. Cela vous permet d'accéder à ces fichiers depuis différents ordinateurs dès lors que la structure des dossiers et fichiers dans ce répertoire de base reste la même.">

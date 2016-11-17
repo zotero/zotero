@@ -197,7 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Aangepast:">
 <!ENTITY zotero.preferences.dataDir.choose "Kiezen…">
 <!ENTITY zotero.preferences.dataDir.reveal "Opslagmap tonen">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Gekoppelde Bijlage-Bestandsmap">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero gebruik relatieve paden voor gekoppelde bijlagebestanden binnen de standaard bestandsmap, waardoor u toegang heeft tot al uw bestanden op verschillende computers zolang de bestandsstructuur in de standaard bestandsmap hetzelfde blijft.">

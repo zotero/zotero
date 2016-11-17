@@ -197,7 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Προσαρμοσμένος:">
 <!ENTITY zotero.preferences.dataDir.choose "Επιλέξτε...">
 <!ENTITY zotero.preferences.dataDir.reveal "Εμφάνιση του Καταλόγου δεδομένων">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Το Zotero θα χρησιμοποιήσει σχετικές διαδρομές για τα συνδεδεμένα προσαρτήματα αρχείων εντός του καταλόγου βάσης του, επιτρέποντας την πρόσβαση προς αρχείων σε διαφορετικούς υπολογιστές, εφόσον η δομή των αρχείων μέσα στον κατάλογο βάσης παραμένει η ίδια.">

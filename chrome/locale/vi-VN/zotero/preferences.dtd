@@ -197,7 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Tùy biến:">
 <!ENTITY zotero.preferences.dataDir.choose "Chọn...">
 <!ENTITY zotero.preferences.dataDir.reveal "Hiển thị Thư mục dữ liệu">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Thư mục cơ sở cho các tập tin đính kèm theo dạng liên kết">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero sẽ dùng các đường dẫn tương đối từ thư mục cơ sở cho các tập tin đính kèm theo dạng liên kết cho phép bạn truy cập các tập tin trên các máy tính khác miễn là cấu trúc bên trong thư mục cơ sở không đổi.">

@@ -197,7 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "กำหนดเอง:">
 <!ENTITY zotero.preferences.dataDir.choose "เลือก...">
 <!ENTITY zotero.preferences.dataDir.reveal "แสดงไดเรคทอรีข้อมูล">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate Data Directory…">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "เชื่อมโยงสารบบแฟ้มแนบแล้ว">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero จะใช้เส้นทางซึ่งสัมพันธ์กันสำหรับเชื่อมโยงแฟ้มแนบในสารบบฐาน ช่วยให้คุณเข้าถึงแฟ้มจากคอมพิวเตอร์เครื่องอื่นได้ตราบที่โครงสร้างแฟ้มในสารบบฐานยังคงเหมือนเดิม">
