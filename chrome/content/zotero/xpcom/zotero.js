@@ -942,9 +942,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			return Zotero.File.pathToFile(_dataDirectory);
 		}
 		
-		var file = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
+		var file;
 		if (Zotero.Prefs.get('useDataDir')) {
+			file = Components.classes["@mozilla.org/file/local;1"]
+				.createInstance(Components.interfaces.nsILocalFile);
+			
 			let prefVal = Zotero.Prefs.get('dataDir');
 			// Convert old persistent descriptor pref to string path and clear obsolete lastDataDir pref
 			//
@@ -997,15 +999,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				}
 			}
 			
-			if (!file.exists()) {
-				// If useDataDir is set to ~/Zotero and it doesn't exist, create it
-				if (file.path == this.getDefaultDataDir()) {
-					Zotero.File.createDirectoryIfMissing(file);
-				}
-				else {
-					let e = { name: "NS_ERROR_FILE_NOT_FOUND" };
-					throw e;
-				}
+			// If data directory from pref doesn't exist and it's not the default, throw to trigger
+			// not-found dialog
+			if (!file.exists() && file.path != this.getDefaultDataDir()) {
+				let e = { name: "NS_ERROR_FILE_NOT_FOUND" };
+				throw e;
 			}
 		}
 		else {
@@ -1120,18 +1118,21 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 					}
 				}
 				
-				// If a custom data directory isn't now defined and there's a data directory in the
-				// default profile for the alternative app, use that
+				// If there's a data directory in the default profile for the alternative app, use that
 				let zoteroDir = OS.Path.join(profileDir, ZOTERO_CONFIG.ID);
-				if (!Zotero.Prefs.get("useDataDir") && Zotero.File.pathToFile(profileDir).exists()) {
+				if (Zotero.File.pathToFile(zoteroDir).exists()) {
 					this.setDataDirectory(zoteroDir);
+					file = Zotero.File.pathToFile(zoteroDir);
 				}
-				file = Zotero.File.pathToFile(zoteroDir);
 			}
 			
-			Zotero.File.createDirectoryIfMissing(file);
+			if (!file) {
+				file = dataDir;
+			}
 		}
+		
 		Zotero.debug("Using data directory " + file.path);
+		Zotero.File.createDirectoryIfMissing(file);
 		this._cacheDataDirectory(file.path);
 		return file.clone();
 	}
