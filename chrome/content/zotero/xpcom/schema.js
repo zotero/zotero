@@ -753,7 +753,7 @@ Zotero.Schema = new function(){
 					catch (e) {
 						if (e instanceof OS.File.Error && e.becauseExists) {
 							// Could overwrite automatically, but we want to log this
-							let msg = "Overwriting translator with same filename '" + fileName + "'";
+							let msg = "Overwriting translator with same filename '" + entry.fileName + "'";
 							Zotero.debug(msg, 1);
 							Components.utils.reportError(msg);
 							yield OS.File.move(tmpFile, destFile);
