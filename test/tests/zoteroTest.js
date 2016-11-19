@@ -42,8 +42,8 @@ describe("Zotero Core Functions", function () {
 	});
 	
 	afterEach(function* () {
-		yield OS.File.removeDir(oldDir);
-		yield OS.File.removeDir(newDir);
+		yield removeDir(oldDir);
+		yield removeDir(newDir);
 		Zotero._cacheDataDirectory(false);
 		
 		stub1.restore();
@@ -245,9 +245,9 @@ describe("Zotero Core Functions", function () {
 			// Not moved: one storage dir, translators dir
 			yield OS.File.remove(oldDBFile);
 			yield OS.File.remove(oldDBFile + '.bak');
-			yield OS.File.removeDir(oldStorageDir1);
-			yield OS.File.removeDir(newTranslatorsDir);
-			yield OS.File.removeDir(newStorageDir2);
+			yield removeDir(oldStorageDir1);
+			yield removeDir(newTranslatorsDir);
+			yield removeDir(newStorageDir2);
 			
 			yield Zotero.migrateDataDirectory(oldDir, newDir, true);
 			yield checkMigration();
@@ -262,7 +262,7 @@ describe("Zotero Core Functions", function () {
 			yield checkMigration();
 			
 			assert.isTrue(yield OS.File.exists(OS.Path.join(newDir + "-1", 'existing')));
-			yield OS.File.removeDir(newDir + "-1");
+			yield removeDir(newDir + "-1");
 		});
 		
 		// Run all tests again without using mv

@@ -140,10 +140,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield Zotero.File.putContentsAsync(OS.Path.join(subDir, file3Name), file3Contents);
 			
 			yield Zotero.File.zipDirectory(zipDir, zipFile);
-			// OS.File.DirectoryIterator, used by OS.File.removeDir(), isn't reliable on Travis,
-			// returning entry.isDir == false for subdirectories, so use nsIFile instead
-			//yield OS.File.removeDir(zipDir);
-			Zotero.File.pathToFile(zipDir).remove(true);
+			yield removeDir(zipDir);
 		});
 		
 		it("should download and extract a ZIP file into the attachment directory", function* () {

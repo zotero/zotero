@@ -494,6 +494,16 @@ var getTempDirectory = Zotero.Promise.coroutine(function* getTempDirectory() {
 	return path;
 });
 
+var removeDir = Zotero.Promise.coroutine(function* (dir) {
+	// OS.File.DirectoryIterator, used by OS.File.removeDir(), isn't reliable on Travis,
+	// returning entry.isDir == false for subdirectories, so use nsIFile instead
+	//yield OS.File.removeDir(zipDir);
+	dir = Zotero.File.pathToFile(dir);
+	if (dir.exists()) {
+		dir.remove(true);
+	}
+});
+
 /**
  * Resets the Zotero DB and restarts Zotero. Returns a promise resolved
  * when this finishes.
