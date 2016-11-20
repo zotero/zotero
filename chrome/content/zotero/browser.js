@@ -980,6 +980,7 @@ Zotero_Browser.Tab.prototype._selectItems = function(obj, itemList, callback) {
  */
 Zotero_Browser.Tab.prototype._translatorsAvailable = Zotero.Promise.coroutine(function* (translate, translators) {
 	var page = this.getPageObject();
+	if (!page) return;
 	page.saveEnabled = true;
 	
 	if(translators && translators.length) {
