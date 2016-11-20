@@ -136,6 +136,7 @@ describe("Zotero Core Functions", function () {
 		});
 		
 		it("should show error on partial failure", function* () {
+			Zotero.Debug.init(true);
 			yield populateDataDirectory(oldDir);
 			
 			let origFunc = OS.File.move;
@@ -149,10 +150,12 @@ describe("Zotero Core Functions", function () {
 			});
 			let stub4 = sinon.stub(Zotero.File, "reveal").returns(Zotero.Promise.resolve());
 			let stub5 = sinon.stub(Zotero.Utilities.Internal, "quitZotero");
-			                                                                                     
+			
 			var promise = waitForDialog();
 			yield Zotero.checkForDataDirectoryMigration(oldDir, newDir);
+			Zotero.debug("Waiting for dialog");
 			yield promise;
+			Zotero.debug("Done waiting for dialog");
 			
 			assert.isTrue(stub4.calledTwice);
 			assert.isTrue(stub4.getCall(0).calledWith(oldStorageDir));
