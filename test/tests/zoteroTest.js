@@ -145,7 +145,14 @@ describe("Zotero Core Functions", function () {
 					return Zotero.Promise.reject(new Error("Error"));
 				}
 				else {
-					return origFunc(...arguments);
+					let args;
+					if (Zotero.platformMajorVersion < 46) {
+						args = Array.from(arguments);
+					}
+					else {
+						args = arguments;
+					}
+					return origFunc(...args);
 				}
 			});
 			let stub4 = sinon.stub(Zotero.File, "reveal").returns(Zotero.Promise.resolve());
@@ -293,7 +300,14 @@ describe("Zotero Core Functions", function () {
 						return Zotero.Promise.reject(new Error("Error"));
 					}
 					else {
-						return origFunc(...arguments);
+						let args;
+						if (Zotero.platformMajorVersion < 46) {
+							args = Array.from(arguments);
+						}
+						else {
+							args = arguments;
+						}
+						return origFunc(...args);
 					}
 				});
 				
