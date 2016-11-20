@@ -200,7 +200,7 @@ function addIcon() {
 			const kNSXUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 			button.setAttribute('disabled', 'true');
 			button.setAttribute('type', 'menu-button');
-			let menupopup = document.createElementNS(kNSXUL, "menupopup");
+			let menupopup = button.ownerDocument.createElementNS(kNSXUL, "menupopup");
 			menupopup.setAttribute('onpopupshowing', "Zotero_Browser.onStatusPopupShowing(event)");
 			button.appendChild(menupopup);
 		}
