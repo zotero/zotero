@@ -221,7 +221,14 @@ describe("ZoteroPane", function() {
 				}
 			);
 			
+			// Disable loadURI() so viewAttachment() doesn't trigger translator loading
+			var stub = sinon.stub(zp, "loadURI");
+			
 			yield zp.viewAttachment(item.id);
+			
+			assert.ok(stub.calledOnce);
+			assert.ok(stub.calledWith(OS.Path.toFileURI(item.getFilePath())));
+			stub.restore();
 			
 			assert.equal((yield item.attachmentHash), md5);
 			assert.equal((yield item.attachmentModificationTime), mtime);
