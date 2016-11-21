@@ -2165,10 +2165,14 @@ var ZoteroPane = new function()
 		if (!runAdvanced && search.value.indexOf('"') != -1) {
 			return;
 		}
-		this.setItemsPaneMessage(Zotero.getString('searchInProgress'));
+		var spinner = document.getElementById('zotero-tb-search-spinner');
+		spinner.style.visibility = 'visible';
 		var searchVal = search.value;
 		yield this.itemsView.setFilter('search', searchVal);
-		this.clearItemsPaneMessage();
+		spinner.style.visibility = 'hidden';
+		if (runAdvanced) {
+			this.clearItemsPaneMessage();
+		}
 	});
 	
 	
