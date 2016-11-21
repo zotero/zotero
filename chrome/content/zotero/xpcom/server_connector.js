@@ -594,42 +594,60 @@ Zotero.Server.Connector.Progress.prototype = {
 };
 
 /**
- * Install a csl style or import a file using import translation
- * 
- * Accepts:
- * 	[resourceURL, resourceType, resourceText]
+ * Translates resources using import translators
  * 	
  * Returns:
- * 	- {name: styleName} for CSL styles
- * 	- Array{item} for importable resources
+ * 	- Object[Object[Item]] an array of arrays of imported items from each file
  */
  
-Zotero.Server.Connector.ImportFile = function() {};
-Zotero.Server.Endpoints["/connector/importFile"] = Zotero.Server.Connector.ImportFile;
-Zotero.Server.Connector.ImportFile.prototype = {
+Zotero.Server.Connector.ImportTranslate = function() {};
+Zotero.Server.Endpoints["/connector/importTranslate"] = Zotero.Server.Connector.ImportTranslate;
+Zotero.Server.Connector.ImportTranslate.prototype = {
 	supportedMethods: ["POST"],
-	supportedDataTypes: ["application/json"],
+	supportedDataTypes: ["multipart/form-data"],
 	permitBookmarklet: false,
 	
 	init: Zotero.Promise.coroutine(function* (url, data, sendResponseCallback){
-		if (data[1] == 'csl') {
-			let styleName = yield Zotero.Styles.install(data[2], data[0], true);
-			sendResponseCallback(201, "application/json", JSON.stringify({name: styleName}));
-		} else {
+		var results = [];
+		for (let file of data) {
 			let translate = new Zotero.Translate.Import();
-			translate.setLocation(data[0]);
-			translate.setString(data[2]);
+			translate.setString(file.body);
 			let translators = yield translate.getTranslators();
 			if (!translators || !translators.length) {
-				Zotero.debug(`Server Connector: no translators found for ${data[0]}`);
-				return sendResponseCallback(500)
+				results.push(null);
+				continue;
 			}
 			translate.setTranslator(translators[0]);
 			let items = yield translate.translate();
-			return sendResponseCallback(201, "application/json", JSON.stringify(items));
+			results.push(items);
 		}
+		return sendResponseCallback(201, "application/json", JSON.stringify(results));
 	})
 }
+
+/**
+ * Install CSL styles
+ * 	
+ * Returns:
+ * 	- Object[] an array of installed style names
+ */
+ 
+Zotero.Server.Connector.InstallStyle = function() {};
+Zotero.Server.Endpoints["/connector/installStyles"] = Zotero.Server.Connector.InstallStyle;
+Zotero.Server.Connector.InstallStyle.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["multipart/form-data"],
+	permitBookmarklet: false,
+	
+	init: Zotero.Promise.coroutine(function* (url, data, sendResponseCallback){
+		var installedStyles = [];
+		for (let style of data) {
+			let styleName = yield Zotero.Styles.install(style.body, style.filename || style.name, true);
+			installedStyles.push(styleName);
+		}
+		sendResponseCallback(201, "application/json", JSON.stringify(installedStyles));
+	})
+};
 
 /**
  * Get code for a translator

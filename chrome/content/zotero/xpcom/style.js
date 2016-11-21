@@ -451,7 +451,7 @@ Zotero.Styles = new function() {
 				yield win.Zotero_Preferences.Cite.refreshStylesList(styleID);
 			}
 		}
-		return existingTitle ? existingTitle : title;
+		return existingTitle || title;
 	});
 	
 	/**

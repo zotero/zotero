@@ -204,12 +204,21 @@ Zotero.Connector = new function() {
 			}
 		} else {							// Other browsers can use plain doPost
 			var uri = CONNECTOR_URI+"connector/"+method;
-			Zotero.HTTP.doPost(uri, JSON.stringify(data),
-				newCallback, {
-					"Content-Type":"application/json",
-					"X-Zotero-Version":Zotero.version,
-					"X-Zotero-Connector-API-Version":CONNECTOR_API_VERSION
-				});
+			if (typeof data == 'object') {
+				Zotero.HTTP.doPost(uri, data,
+					newCallback, {
+						"Content-Type":"multipart/form-data",
+						"X-Zotero-Version":Zotero.version,
+						"X-Zotero-Connector-API-Version":CONNECTOR_API_VERSION
+					});
+			} else {
+				Zotero.HTTP.doPost(uri, JSON.stringify(data),
+					newCallback, {
+						"Content-Type":"application/json",
+						"X-Zotero-Version":Zotero.version,
+						"X-Zotero-Connector-API-Version":CONNECTOR_API_VERSION
+					});
+			}
 		}
 	},
 	

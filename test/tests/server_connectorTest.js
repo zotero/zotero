@@ -313,4 +313,72 @@ describe("Connector Server", function () {
 			);
 		});
 	});
+	
+	describe('/connector/installStyles', function() {
+		var endpoint;
+		
+		before(function() {
+			endpoint = connectorServerPath + "/connector/installStyles";
+		});
+		
+		it('should reject application/json requests', function* () {
+			try {
+				var response = yield Zotero.HTTP.request(
+					'POST',
+					endpoint,
+					{
+						headers: { "Content-Type": "application/json" },
+						body: '{}'
+					}
+				);	
+			} catch(e) {
+				assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+				assert.equal(e.xmlhttp.status, 400);
+			}
+		});
+		
+		it('should import multiple styles posted as multipart/form-data', function* () {
+			sinon.stub(Zotero.Styles, 'install', function(style) {
+				var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+					.createInstance(Components.interfaces.nsIDOMParser),
+				doc = parser.parseFromString(style, "application/xml");
+				
+				return Zotero.Promise.resolve(
+					Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:title[1]',
+						Zotero.Styles.ns)
+				);
+			});
+			
+			let formData = new FormData;
+			formData.append('style1', `<?xml version="1.0" encoding="utf-8"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" version="1.0" default-locale="de-DE">
+  <info>
+    <title>Test1</title>
+    <id>http://www.example.com/test1</id>
+    <link href="http://www.zotero.org/styles/cell" rel="independent-parent"/>
+  </info>
+</style>
+`);
+			formData.append('style2', `<?xml version="1.0" encoding="utf-8"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" version="1.0" default-locale="de-DE">
+  <info>
+    <title>Test2</title>
+    <id>http://www.example.com/test2</id>
+    <link href="http://www.zotero.org/styles/cell" rel="independent-parent"/>
+  </info>
+</style>
+`);
+			var response = yield Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: { "Content-Type": "multipart/form-data" },
+					body: formData
+				}
+			);	
+			assert.equal(response.status, 201);
+			assert.equal(response.response, JSON.stringify(['Test1', 'Test2']));
+			Zotero.Styles.install.restore();
+		});
+	});
 });
