@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing "Synchronizacja plików">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synchronizuj załączniki w Mojej bibliotece za pomocą">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Synchronizuj pliki załączników w grupach bibliotek za pomocą usługi przechowywania Zotero">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Synchronizuj pliki załączników w bibliotekach grupowych za pomocą usługi przechowywania Zotero">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Pobierz pliki">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "podczas synchronizacji">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "w razie potrzeby">

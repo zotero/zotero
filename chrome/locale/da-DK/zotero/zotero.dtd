@@ -11,7 +11,7 @@
 <!ENTITY zotero.general.refresh "Opdatér">
 <!ENTITY zotero.general.saveAs "Gem som...">
 <!ENTITY zotero.general.advancedOptions.label "Avancerede indstillinger">
-<!ENTITY zotero.general.more "More">
+<!ENTITY zotero.general.more "Mere">
 
 <!ENTITY zotero.errorReport.title "Zotero fejlrapport">
 <!ENTITY zotero.errorReport.unrelatedMessages "Dette kan inkludere beskeder, som ikke har noget med Zotero at gøre.">
@@ -177,7 +177,7 @@
 
 <!ENTITY zotero.bibliography.title "Opret reference/referenceliste">
 <!ENTITY zotero.bibliography.style.label "Reference-stil:">
-<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
+<!ENTITY zotero.bibliography.manageStyles "Håndtér formater...">
 <!ENTITY zotero.bibliography.locale.label "Sprog:">
 <!ENTITY zotero.bibliography.outputMode "Output-tilstand:">
 <!ENTITY zotero.bibliography.bibliography "Referenceliste">

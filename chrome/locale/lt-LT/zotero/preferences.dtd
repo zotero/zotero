@@ -58,14 +58,14 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sinchronizavimas">
 <!ENTITY zotero.preferences.sync.username "Naudotojo vardas:">
 <!ENTITY zotero.preferences.sync.password "Slaptažodis:">
-<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
+<!ENTITY zotero.preferences.sync.syncServer "Duomenų sinchronizavimas">
 <!ENTITY zotero.preferences.sync.setUpSync "Konfigūruoti sinchronizavimą">
 <!ENTITY zotero.preferences.sync.unlinkAccount "Nebesieti su paskyra...">
 <!ENTITY zotero.preferences.sync.createAccount "Sukurti paskyrą">
 <!ENTITY zotero.preferences.sync.lostPassword "Pamiršote slaptažodį?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sinchronizuoti automatiškai">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Viso tekstinio turinio sinchronizavimas">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero gali sinchronizuoti visą jūsiškės bibliotekos failų tekstinį turinį su zotero.org ir kitais susietais įrenginiais. Tai Jums leistų greitai pasiekti savus failus kad ir kur bebūtumėte. Jūsų tekstinis turinys nebus viešinamas.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Visatekstinio turinio sinchronizavimas">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero gali sinchronizuoti visą jūsiškės bibliotekos failų visatekstinį turinį su zotero.org ir kitais susietais įrenginiais. Tai Jums leistų greitai pasiekti savus failus kad ir kur bebūtumėte. Jūsų visatekstinis turinys nebus viešinamas.">
 <!ENTITY zotero.preferences.sync.about "Apie sinchronizavimą">
 <!ENTITY zotero.preferences.sync.fileSyncing "Failų sinchronizavimas">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -96,7 +96,7 @@
 
 
 <!ENTITY zotero.preferences.prefpane.search "Paieška">
-<!ENTITY zotero.preferences.search.fulltextCache "Viso teksto podėlis">
+<!ENTITY zotero.preferences.search.fulltextCache "Visatekstinis podėlis">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF indeksavimas">
 <!ENTITY zotero.preferences.search.indexStats "Indeksavimo statistika">
 
@@ -176,7 +176,7 @@
 <!ENTITY zotero.preferences.proxies.f_variable "&#37;f - failo vardas (pvz., index.html)">
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - bet kas">
 
-<!ENTITY zotero.preferences.prefpane.advanced "Sudėtingiau">
+<!ENTITY zotero.preferences.prefpane.advanced "Kita">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Failai ir katalogai">
 <!ENTITY zotero.preferences.advanced.keys "Spartieji klavišai">
 

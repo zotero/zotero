@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.prefpane.sync "Synkroniser">
 <!ENTITY zotero.preferences.sync.username "Brugernavn:">
 <!ENTITY zotero.preferences.sync.password "Adgangskode:">
-<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
+<!ENTITY zotero.preferences.sync.syncServer "Datasynkronisering">
 <!ENTITY zotero.preferences.sync.setUpSync "Indstil synkronisering">
 <!ENTITY zotero.preferences.sync.unlinkAccount "Frakobl konto...">
 <!ENTITY zotero.preferences.sync.createAccount "Opret konto">
@@ -76,10 +76,10 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "efter behov">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Når du anvender Zoteros online-lager, er du forpligtet på dets">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "betingelser">
-<!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
+<!ENTITY zotero.preferences.sync.librariesToSync "Biblioteker der skal synkroniseres">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Vælg biblioteker">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "Synkronisér">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "Bibliotek">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Følgende operationer er bruges normalt kun i sjældne og meget specielle situationer og bør ikke bruges ved normal problemløsning. I mange tilfælde vil nulstilling føre til yderligere problemer. Se">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Synkroniser nulstillingsindstillinger">
 <!ENTITY zotero.preferences.sync.reset.warning3 "for mere information">
@@ -199,9 +199,9 @@
 <!ENTITY zotero.preferences.dataDir.reveal "Vis data-mappen">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Tilknyttet databasefolder for vedhæftninger">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero vil benytte relative stier for tilknyttede vedhæftede filer i databasefolderen, hvilket giver dig mulighed for at tilgå filerne med forskellige computere så længe filstrukturen i databasefolderen forbliver den samme">
-<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Databasefolder:">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Tilknyttet databasemappe for vedhæftninger">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero vil benytte relative stier for tilknyttede vedhæftede filer i databasemappe, hvilket giver dig mulighed for at tilgå filerne med forskellige computere så længe filstrukturen i databasemappen forbliver den samme">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Databasemappe:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Vælg...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Gendan til absolutte stier...">
 

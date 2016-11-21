@@ -1,5 +1,5 @@
-<!ENTITY zotero.general.yes "Yes">
-<!ENTITY zotero.general.no "No">
+<!ENTITY zotero.general.yes "Já">
+<!ENTITY zotero.general.no "Nei">
 <!ENTITY zotero.general.optional "(Valfrjálst)">
 <!ENTITY zotero.general.note "Athugasemd:">
 <!ENTITY zotero.general.selectAll "Velja allt">
@@ -10,16 +10,16 @@
 <!ENTITY zotero.general.cancel "Hætta við">
 <!ENTITY zotero.general.refresh "Endurnýja">
 <!ENTITY zotero.general.saveAs "Vista sem...">
-<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
-<!ENTITY zotero.general.more "More">
+<!ENTITY zotero.general.advancedOptions.label "Ítarlegir valkostir">
+<!ENTITY zotero.general.more "Meira">
 
 <!ENTITY zotero.errorReport.title "Zotero villutilkynning">
 <!ENTITY zotero.errorReport.unrelatedMessages "Hér gætu einnig verið skilaboð ótengd Zotero.">
-<!ENTITY zotero.errorReport.submissionInProgress "Vinsamlegast bíðið á meðan villuskýrsla er send.">
+<!ENTITY zotero.errorReport.submissionInProgress "Bíddu aðeins á meðan villuskýrsla er send.">
 <!ENTITY zotero.errorReport.submitted "Villuskýrsla þín hefur verið send.">
 <!ENTITY zotero.errorReport.reportID "Auðkennisnúmer (ID) skýrslu:">
-<!ENTITY zotero.errorReport.postToForums "Vinsamlegast sendið skilaboð til Zotero samskiptasvæðis (forums.zotero.org) með þessu auðkenni (Report ID), með lýsingu á vandamálinu og hvað þarf að gera til að kalla aftur fram villuna. ">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.postToForums "Sendu skilaboð á Zotero samskiptasvæðið (forums.zotero.org) með þessu auðkenni (Report ID), með lýsingu á vandamálinu og hvað þarf að gera til að kalla aftur fram villuna. ">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.title "Zotero uppfærslutól">
 <!ENTITY zotero.upgrade.newVersionInstalled "Þú hefur sett inn nýja útgáfu af Zotero.">
@@ -29,7 +29,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Vertu viss um að hafa farið yfir">
 <!ENTITY zotero.upgrade.majorUpgradeLink "leiðbeiningar um uppfærslu">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "áður en haldið er áfram.">
-<!ENTITY zotero.upgrade.upgradeInProgress "Vinsamlegast hinkraðu þar til uppfærsluferlinu lýkur. Það gæti tekið nokkrar mínútur.">
+<!ENTITY zotero.upgrade.upgradeInProgress "Hinkraðu þar til uppfærsluferlinu lýkur. Það gæti tekið nokkrar mínútur.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Vel tókst að uppfæra Zotero gagnagrunninn þinn.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Hægt er að skoða">
 <!ENTITY zotero.upgrade.changeLogLink "breytingafærsluskrána">
@@ -43,9 +43,9 @@
 <!ENTITY zotero.tabs.info.label "Upplýsingar">
 <!ENTITY zotero.tabs.notes.label "Minnisblað">
 <!ENTITY zotero.tabs.attachments.label "Viðhengi">
-<!ENTITY zotero.tabs.tags.label "Tög">
+<!ENTITY zotero.tabs.tags.label "Merki">
 <!ENTITY zotero.tabs.related.label "Tengt">
-<!ENTITY zotero.notes.separate "Yfirfara í sér glugga">
+<!ENTITY zotero.notes.separate "Yfirfara í sérstökum glugga">
 
 <!ENTITY zotero.toolbar.duplicate.label "Sýna eins færslur">
 <!ENTITY zotero.collections.showUnfiledItems "Sýna sameinaðar færslur">
@@ -89,10 +89,10 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Hengja við flýtimynd af síðunni sem nú er opin">
 <!ENTITY zotero.items.menu.attach.link "Hengja slóð við síðuna sem nú er opin">
 <!ENTITY zotero.items.menu.attach.link.uri "Hengja slóð á URI...">
-<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
-<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+<!ENTITY zotero.items.menu.attach.file "Hengja við geymt afrit af skrá...">
+<!ENTITY zotero.items.menu.attach.fileLink "Hengja slóð á skrá...">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Snúa aftur til safns">
+<!ENTITY zotero.items.menu.restoreToLibrary "Snúa aftur í safn">
 <!ENTITY zotero.items.menu.duplicateItem "Endurtekin færsla">
 <!ENTITY zotero.items.menu.mergeItems "Sameina færslur...">
 
@@ -104,21 +104,21 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Skapa vefsíðufærslu úr síðunni sem nú er opin">
 <!ENTITY zotero.toolbar.lookup.label "Bæta við færslu(m) samkvæmt auðkenni">
 <!ENTITY zotero.toolbar.removeItem.label "Remove Item...">
-<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
-<!ENTITY zotero.toolbar.newCollection.label "New Collection...">
+<!ENTITY zotero.toolbar.newLibrary.label "Nýtt safn…">
+<!ENTITY zotero.toolbar.newCollection.label "Ný safnsería">
 <!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
-<!ENTITY zotero.toolbar.newGroup "New Group...">
-<!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "New Saved Search...">
-<!ENTITY zotero.toolbar.emptyTrash.label "Tæma ruslatunnu">
-<!ENTITY zotero.toolbar.tagSelector.label "Sýna/fela tagaveljara">
+<!ENTITY zotero.toolbar.newGroup "Nýr hópur...">
+<!ENTITY zotero.toolbar.newSubcollection.label "Ný undirsería...">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Ný vistuð leit...">
+<!ENTITY zotero.toolbar.emptyTrash.label "Tæma ruslið">
+<!ENTITY zotero.toolbar.tagSelector.label "Birta/fela merkjaveljara">
 <!ENTITY zotero.toolbar.actions.label "Aðgerðir">
-<!ENTITY zotero.toolbar.import.label "Import...">
-<!ENTITY zotero.toolbar.importFromClipboard "Færa inn frá klemmuspjaldi">
-<!ENTITY zotero.toolbar.export.label "Export Library...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
-<!ENTITY zotero.toolbar.timeline.label "Skapa tímalínu">
-<!ENTITY zotero.toolbar.preferences.label "Preferences...">
+<!ENTITY zotero.toolbar.import.label "Flytja inn...">
+<!ENTITY zotero.toolbar.importFromClipboard "Flytja inn frá klippispjaldi">
+<!ENTITY zotero.toolbar.export.label "Flytja út safn...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF skönnun...">
+<!ENTITY zotero.toolbar.timeline.label "Búa til tímalínu">
+<!ENTITY zotero.toolbar.preferences.label "Kjörstillingar...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Stuðningur og leiðbeiningar">
 <!ENTITY zotero.toolbar.about.label "Um Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Ítarleg leit">
@@ -140,28 +140,28 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Stafagerð setninga">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Skipta á for-/eftirnafni">
 <!ENTITY zotero.item.viewOnline "Skoða nettengt">
-<!ENTITY zotero.item.copyAsURL "Afrita sem URL">
-<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
+<!ENTITY zotero.item.copyAsURL "Afrita sem URL-slóð">
+<!ENTITY zotero.item.deletePermanently "Eyða endanlega...">
 
 <!ENTITY zotero.toolbar.newNote "Ný athugasemd">
 <!ENTITY zotero.toolbar.note.standalone "Ný sjálfstæð athugasemd">
 <!ENTITY zotero.toolbar.note.child "Bæta við undirathugasemd">
-<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
-<!ENTITY zotero.toolbar.attachment.linked "Link to File...">
-<!ENTITY zotero.toolbar.attachment.add "Store Copy of File...">
+<!ENTITY zotero.toolbar.lookup "Fletta upp eftir auðkenni...">
+<!ENTITY zotero.toolbar.attachment.linked "Tengja við skrá...">
+<!ENTITY zotero.toolbar.attachment.add "Geyma afrit af skrá...">
 <!ENTITY zotero.toolbar.attachment.weblink "Vista slóð til þessarar síðu">
 <!ENTITY zotero.toolbar.attachment.snapshot "Taka flýtimynd af þessari síðu">
 
-<!ENTITY zotero.tagSelector.noTagsToDisplay "Engin tög sýnd">
-<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
-<!ENTITY zotero.tagSelector.showAutomatic "Show automatic">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
-<!ENTITY zotero.tagSelector.clearAll "Deselect all">
-<!ENTITY zotero.tagSelector.assignColor "Velja lit...">
-<!ENTITY zotero.tagSelector.renameTag "Rename Tag...">
-<!ENTITY zotero.tagSelector.deleteTag "Delete Tag...">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "Engin merki til að sýna">
+<!ENTITY zotero.tagSelector.loadingTags "Hleð inn merkjum...">
+<!ENTITY zotero.tagSelector.showAutomatic "Birta sjálfvirkt">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Birta öll merki í þessu safni">
+<!ENTITY zotero.tagSelector.clearAll "Velja ekkert">
+<!ENTITY zotero.tagSelector.assignColor "Úthluta lit...">
+<!ENTITY zotero.tagSelector.renameTag "Endurnefna merki...">
+<!ENTITY zotero.tagSelector.deleteTag "Eyða merki...">
 
-<!ENTITY zotero.tagColorChooser.title "Velja lit á tagi og staðsetningu">
+<!ENTITY zotero.tagColorChooser.title "Velja lit á merki og staðsetningu">
 <!ENTITY zotero.tagColorChooser.color "Litur:">
 <!ENTITY zotero.tagColorChooser.position "Staðsetning:">
 <!ENTITY zotero.tagColorChooser.setColor "Velja lit">
@@ -177,13 +177,13 @@
 
 <!ENTITY zotero.bibliography.title "Skapa tilvísun/heimildaskrá">
 <!ENTITY zotero.bibliography.style.label "Tegund tilvísunar:">
-<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
+<!ENTITY zotero.bibliography.manageStyles "Sýsla með stíla...">
 <!ENTITY zotero.bibliography.locale.label "Tungumál:">
 <!ENTITY zotero.bibliography.outputMode "Útskriftarhamur:">
 <!ENTITY zotero.bibliography.bibliography "Heimildaskrá">
 <!ENTITY zotero.bibliography.outputMethod "Útskriftaraðferð:">
-<!ENTITY zotero.bibliography.saveAsRTF.label "Spara sem RTF">
-<!ENTITY zotero.bibliography.saveAsHTML.label "Spara sem HTML">
+<!ENTITY zotero.bibliography.saveAsRTF.label "Vista sem RTF">
+<!ENTITY zotero.bibliography.saveAsHTML.label "Vista sem HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Afrita á klemmuspjald">
 <!ENTITY zotero.bibliography.print.label "Prenta">
 
@@ -192,7 +192,7 @@
 <!ENTITY zotero.integration.editBibliography.title "Breyta heimildaskrá">
 <!ENTITY zotero.integration.quickFormatDialog.title "Flýtiformun tilvitnana">
 
-<!ENTITY zotero.progress.title "Staða">
+<!ENTITY zotero.progress.title "Framvinda">
 
 <!ENTITY zotero.exportOptions.title "Flytja út...">
 <!ENTITY zotero.exportOptions.format.label "Snið:">
@@ -226,7 +226,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Forsnið samkvæmt:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bókamerki">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentally modified.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and LibreOffice, but may be accidentally modified. For &#xA;compatibility reasons, citations cannot be inserted into footnotes or endnotes when this option is selected.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Skammstafa sjálfvirkt nöfn á tímaritum">
@@ -245,15 +245,15 @@
 <!ENTITY zotero.sync.storage.downloads "Niðurhal:">
 <!ENTITY zotero.sync.storage.uploads "Uppflutningur:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Efitrfarandi tag í Zotero safninu þínu er of langt til þess að það verði samhæft þjóni:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Samhæft tag verður að vera styttra en 256 bókstafir.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Þú getur ýmist skipt up taginu í fleiri tög, stytt tagið handvirkt eða eytt því.">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Efitrfarandi merki í Zotero safninu þínu er of langt til þess að það verði samhæft þjóni:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Samhæft merki verður að vera styttra en 256 bókstafir.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Þú getur ýmist skipt upp merkinu í fleiri merki, stytt merkið handvirkt eða eytt því.">
 <!ENTITY zotero.sync.longTagFixer.split "Skipta">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Skipta við">
 <!ENTITY zotero.sync.longTagFixer.character "bókstaf">
 <!ENTITY zotero.sync.longTagFixer.characters "bókstafi">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Ómerkt tög verða ekki vistuð.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Taginu verður eitt úr öllum færslum.">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Óvalin merki verða ekki vistuð.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Merkinu verður eytt úr öllum færslum.">
 
 <!ENTITY zotero.merge.title "Leysa árekstra">
 <!ENTITY zotero.merge.of "af">
@@ -266,18 +266,18 @@
 <!ENTITY zotero.proxy.recognized.ignore.label "Hunsa">
 
 <!ENTITY zotero.feedSettings.title "Feed Settings">
-<!ENTITY zotero.feedSettings.saveButton.label "Save">
-<!ENTITY zotero.feedSettings.url.label "URL:">
-<!ENTITY zotero.feedSettings.title.label "Title:">
+<!ENTITY zotero.feedSettings.saveButton.label "Vista">
+<!ENTITY zotero.feedSettings.url.label "Slóð:">
+<!ENTITY zotero.feedSettings.title.label "Titill:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
 <!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
-<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Remove read articles after ">
-<!ENTITY zotero.feedSettings.cleanupAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Fjarlægja lesnar greinar eftir">
+<!ENTITY zotero.feedSettings.cleanupAfter.label2 "dag(a)">
 
 
-<!ENTITY zotero.recognizePDF.recognizing.label "Retrieving Metadata...">
+<!ENTITY zotero.recognizePDF.recognizing.label "Sæki lýsigögn...">
 <!ENTITY zotero.recognizePDF.cancel.label "Hætta við">
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF nafn">
+<!ENTITY zotero.recognizePDF.pdfName.label "Heiti PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Nafn færslu">
 
 <!ENTITY zotero.rtfScan.title "RTF skönnun">
@@ -285,7 +285,7 @@
 <!ENTITY zotero.rtfScan.citation.label "Tilvitnun">
 <!ENTITY zotero.rtfScan.itemName.label "Nafn færslu">
 <!ENTITY zotero.rtfScan.unmappedCitations.label "Ótengdar tilvitnanir">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Margræðar tilvitnanir">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "Óræðar tilvitnanir">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Kortlagðar tilvitnanir">
 <!ENTITY zotero.rtfScan.introPage.label "Inngangur">
 <!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
@@ -293,22 +293,22 @@
 <!ENTITY zotero.rtfScan.scanPage.label "Leita að tilvitnunum">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero er að leita að tilvitnunum í skjalinu þínu. Vinsamlegast haldið ró á meðan.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Yfirfara tilvitnaðar færslur">
-<!ENTITY zotero.rtfScan.citationsPage.description "Vinsamlegast yfirfarið listann yfir þær tilvitnanir sem kannast var við til að tryggja að Zotero hafi valið tilsvarandi færslur með réttum hætti. Allar ókortlagðar eða vafasamar tilvitnanir verður að auðkenna áður en haldið er áfram.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Yfirfarðu listann yfir þær tilvitnanir sem kannast var við til að tryggja að Zotero hafi valið tilsvarandi færslur með réttum hætti. Allar ókortlagðar eða vafasamar tilvitnanir verður að auðkenna áður en haldið er áfram.">
 <!ENTITY zotero.rtfScan.stylePage.label "Snið skjals">
 <!ENTITY zotero.rtfScan.formatPage.label "Snið tilvitnana">
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero er að vinna úr og sníða RTF skrána þína. Vinsamlegast haldið ró á meðan.">
 <!ENTITY zotero.rtfScan.completePage.label "RTF skönnun lokið">
-<!ENTITY zotero.rtfScan.completePage.description "Skjalið þitt hefur nú verið skannað og unnið. Vinsamlegast tryggið að það hafi rétt snið.">
+<!ENTITY zotero.rtfScan.completePage.description "Skjalið þitt hefur nú verið skannað og unnið. Gakktu úr skugga um að það sé með rétt snið.">
 <!ENTITY zotero.rtfScan.inputFile.label "Innlestrarskrá">
 <!ENTITY zotero.rtfScan.outputFile.label "Útskriftarskrá">
 
-<!ENTITY zotero.file.choose.label "Choose File...">
+<!ENTITY zotero.file.choose.label "Veldu skrá...">
 <!ENTITY zotero.file.noneSelected.label "Engin skrá valin">
 
 <!ENTITY zotero.downloadManager.label "Vista í Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Ekki er hægt að vista viðhengi í því safni sem nú er valið. Þessi færsla verður vistuð í þínu safni í staðinn.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Til að nota þessa aðgerð verður þú fyrst að setja upp PDF verkfæri í leitarrúðunni í Zotero kjörstillingum.">
 
-<!ENTITY zotero.attachLink.title "Hengja slóð á URI">
+<!ENTITY zotero.attachLink.title "Hengja tengil við URI-slóð">
 <!ENTITY zotero.attachLink.label.link "Slóð:">
 <!ENTITY zotero.attachLink.label.title "Titill:">

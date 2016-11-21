@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sincronizare">
 <!ENTITY zotero.preferences.sync.username "Nume de utilizator:">
 <!ENTITY zotero.preferences.sync.password "Parolă:">
-<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
+<!ENTITY zotero.preferences.sync.syncServer "Sincronizare date">
 <!ENTITY zotero.preferences.sync.setUpSync "Configurare sincronizare">
 <!ENTITY zotero.preferences.sync.unlinkAccount "Dezleagă contul...">
 <!ENTITY zotero.preferences.sync.createAccount "Creează cont">

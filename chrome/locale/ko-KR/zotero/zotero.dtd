@@ -8,10 +8,10 @@
 <!ENTITY zotero.general.delete "삭제">
 <!ENTITY zotero.general.ok "확인">
 <!ENTITY zotero.general.cancel "취소">
-<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.refresh "새로고침">
 <!ENTITY zotero.general.saveAs "다른 이름으로 저장...">
 <!ENTITY zotero.general.advancedOptions.label "고급 ">
-<!ENTITY zotero.general.more "More">
+<!ENTITY zotero.general.more "더 보기">
 
 <!ENTITY zotero.errorReport.title "Zotero 오류 보고">
 <!ENTITY zotero.errorReport.unrelatedMessages "Zotero와 관련 없는 메시지가 포함될 수 있습니다.">
@@ -177,7 +177,7 @@
 
 <!ENTITY zotero.bibliography.title "참조 문헌 목록 생성">
 <!ENTITY zotero.bibliography.style.label "인용 형식:">
-<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
+<!ENTITY zotero.bibliography.manageStyles "스타일 관리...">
 <!ENTITY zotero.bibliography.locale.label "언어:">
 <!ENTITY zotero.bibliography.outputMode "Output Mode:">
 <!ENTITY zotero.bibliography.bibliography "참고 문헌 목록">
@@ -257,7 +257,7 @@
 
 <!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.deleted "삭제됨">
 
 <!ENTITY zotero.proxy.recognized.title "프록시 인식완료">
 <!ENTITY zotero.proxy.recognized.warning "귀하의 도서관 · 학교 · 회사의 웹사이트에 연결된 프록시만 추가하십시오.">
@@ -265,14 +265,14 @@
 <!ENTITY zotero.proxy.recognized.disable.label "이전에 인식된 프록시를 통해 요청을 자동으로 재송신하지 마십시오.">
 <!ENTITY zotero.proxy.recognized.ignore.label "무시">
 
-<!ENTITY zotero.feedSettings.title "Feed Settings">
-<!ENTITY zotero.feedSettings.saveButton.label "Save">
+<!ENTITY zotero.feedSettings.title "피드 설정">
+<!ENTITY zotero.feedSettings.saveButton.label "저장">
 <!ENTITY zotero.feedSettings.url.label "URL:">
-<!ENTITY zotero.feedSettings.title.label "Title:">
-<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
-<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
-<!ENTITY zotero.feedSettings.cleanupAfter.label1 "Remove read articles after ">
-<!ENTITY zotero.feedSettings.cleanupAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.title.label "제목:">
+<!ENTITY zotero.feedSettings.refresh.label1 "다음 간격으로 피드 업데이트: ">
+<!ENTITY zotero.feedSettings.refresh.label2 "시간">
+<!ENTITY zotero.feedSettings.cleanupAfter.label1 "다음 이후 읽은 항목 제거: ">
+<!ENTITY zotero.feedSettings.cleanupAfter.label2 "일">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "메타데이터 검색...">
@@ -310,5 +310,5 @@
 <!ENTITY zotero.downloadManager.noPDFTools.description "이 기능을 사용하려면, 먼저 Zotero 환경설정에서 PDF 도구를 인스톨해야 합니다.">
 
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
+<!ENTITY zotero.attachLink.label.link "링크:">
+<!ENTITY zotero.attachLink.label.title "제목:">

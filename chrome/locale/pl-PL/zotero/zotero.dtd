@@ -167,7 +167,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Ustaw kolor">
 <!ENTITY zotero.tagColorChooser.removeColor "Usuń kolor">
 
-<!ENTITY zotero.lookup.description "Aby wyszukać, wprowadź w oknie poniżej ISBN, DOI lub PMID.">
+<!ENTITY zotero.lookup.description "Aby wyszukać, wprowadź w oknie poniżej jeden lub więcej ISBN, DOI lub PMID.">
 <!ENTITY zotero.lookup.button.search "Wyszukiwanie">
 
 <!ENTITY zotero.selectitems.title "Zaznacz elementy">
