@@ -29,6 +29,7 @@
  * @constructor
  * @param {Object} options
  *         <li>libraryID - ID of library in which items should be saved</li>
+ *         <li>collections - New collections to create (used during Import translation</li>
  *         <li>attachmentMode - One of Zotero.Translate.ItemSaver.ATTACHMENT_* specifying how attachments should be saved</li>
  *         <li>forceTagType - Force tags to specified tag type</li>
  *         <li>cookieSandbox - Cookie sandbox for attachment requests</li>

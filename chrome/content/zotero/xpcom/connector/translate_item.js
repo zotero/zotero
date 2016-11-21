@@ -23,15 +23,24 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType, document,
-		cookieSandbox) {
+/**
+ * Save translator items. 
+ * 
+ * In the connector these options are actually irrelevent. We're just passing the items to standalone or
+ * saving to server.
+ * 
+ * @constructor
+ * @param {Object} options
+ *         <li>libraryID - ID of library in which items should be saved</li>
+ *         <li>collections - New collections to create (used during Import translation</li>
+ *         <li>attachmentMode - One of Zotero.Translate.ItemSaver.ATTACHMENT_* specifying how attachments should be saved</li>
+ *         <li>forceTagType - Force tags to specified tag type</li>
+ *         <li>cookieSandbox - Cookie sandbox for attachment requests</li>
+ *         <li>baseURI - URI to which attachment paths should be relative</li>
+ *         
+ */
+Zotero.Translate.ItemSaver = function(options) {
 	this.newItems = [];
-	this._timeoutID = null;
-	
-	if(document) {
-		this._uri = document.location.toString();
-		this._cookie = document.cookie;
-	}
 	
 	// Add listener for callbacks, but only for Safari or the bookmarklet. In Chrome, we
 	// (have to) save attachments from the inject page.
@@ -76,10 +85,6 @@ Zotero.Translate.ItemSaver.prototype = {
 		var me = this;
 		// first try to save items via connector
 		var payload = {"items":items};
-		if(this._uri && this._cookie) {
-			payload.uri = this._uri;
-			payload.cookie = this._cookie;
-		}
 		Zotero.Connector.setCookiesThenSaveItems(payload, function(data, status) {
 			if(data !== false) {
 				Zotero.debug("Translate: Save via Standalone succeeded");
