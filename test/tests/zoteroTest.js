@@ -158,11 +158,14 @@ describe("Zotero Core Functions", function () {
 			let stub4 = sinon.stub(Zotero.File, "reveal").returns(Zotero.Promise.resolve());
 			let stub5 = sinon.stub(Zotero.Utilities.Internal, "quitZotero");
 			
-			var promise = waitForDialog();
+			var promise2;
+			// Click "Try Again" the first time, and then "Show Directories and Quit Zotero"
+			var promise = waitForDialog(function () {
+				promise2 = waitForDialog(null, 'extra1');
+			});
 			yield Zotero.checkForDataDirectoryMigration(oldDir, newDir);
-			Zotero.debug("Waiting for dialog");
 			yield promise;
-			Zotero.debug("Done waiting for dialog");
+			yield promise2;
 			
 			assert.isTrue(stub4.calledTwice);
 			assert.isTrue(stub4.getCall(0).calledWith(oldStorageDir));

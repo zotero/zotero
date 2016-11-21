@@ -1528,7 +1528,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		if (errors.length) {
 			let ps = Services.prompt;
 			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
+				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
+				+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
 			let index = ps.confirmEx(null,
 				Zotero.getString('dataDir.migration.failure.title'),
 				Zotero.getString('dataDir.migration.failure.partial.text',
@@ -1538,13 +1539,17 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 					+ "\n\n"
 					+ Zotero.getString('dataDir.migration.failure.partial.new', newDir),
 				buttonFlags,
+				Zotero.getString('general.tryAgain'),
+				Zotero.getString('general.tryLater'),
 				Zotero.getString('dataDir.migration.failure.partial.showDirectoriesAndQuit', Zotero.appName),
-				Zotero.getString('general.notNow'),
-				null, null, {}
+				null, {}
 			);
 			
-			// Focus the first file/folder in the old directory
 			if (index == 0) {
+				return this.checkForDataDirectoryMigration(newDir, newDir);
+			}
+			// Focus the first file/folder in the old directory
+			else if (index == 2) {
 				try {
 					let it = new OS.File.DirectoryIterator(oldDir);
 					let entry;
