@@ -352,6 +352,18 @@ function ZoteroService() {
 				throw e;
 			})
 			.then(function () {
+				if (isStandalone) {
+					if (zContext.Zotero.startupErrorHandler || zContext.Zotero.startupError) {
+						if (zContext.Zotero.startupErrorHandler) {
+							zContext.Zotero.startupErrorHandler();
+						}
+						else if (zContext.Zotero.startupError) {
+							zContext.alert(zContext.Zotero.startupError);
+						}
+						zContext.Zotero.Utilities.Internal.quitZotero();
+					}
+					return;
+				}
 				zContext.Zotero.debug("Initialized in "+(Date.now() - start)+" ms");
 				isFirstLoadThisSession = false;
 			});
