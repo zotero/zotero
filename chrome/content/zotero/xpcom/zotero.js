@@ -1507,8 +1507,15 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		
 		let errors;
 		let mode = automatic ? 'automatic' : 'manual';
+		// This can seemingly fail due to a race condition building the Standalone window,
+		// so just ignore it if it does
 		try {
 			this.showZoteroPaneProgressMeter(Zotero.getString("dataDir.migration.inProgress"));
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		try {
 			errors = yield Zotero.migrateDataDirectory(oldDir, newDir, partial, progressHandler);
 		}
 		catch (e) {
