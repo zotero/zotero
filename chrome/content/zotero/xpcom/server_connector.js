@@ -597,31 +597,35 @@ Zotero.Server.Connector.Progress.prototype = {
  * Translates resources using import translators
  * 	
  * Returns:
- * 	- Object[Object[Item]] an array of arrays of imported items from each file
+ * 	- Object[Item] an array of imported items
  */
  
 Zotero.Server.Connector.ImportTranslate = function() {};
-Zotero.Server.Endpoints["/connector/importTranslate"] = Zotero.Server.Connector.ImportTranslate;
+Zotero.Server.Endpoints["/connector/importFile"] = Zotero.Server.Connector.ImportTranslate;
 Zotero.Server.Connector.ImportTranslate.prototype = {
 	supportedMethods: ["POST"],
-	supportedDataTypes: ["multipart/form-data"],
+	supportedDataTypes: [
+		"application/x-endnote-refer", "application/x-research-info-systems",
+		"application/x-inst-for-scientific-info",
+		"text/x-bibtex", "application/x-bibtex",
+		// Non-standard
+		"text/x-research-info-systems",
+		"text/application/x-research-info-systems", // Nature serves this
+		"text/ris", // Cell serves this
+		"ris" // Not even trying
+	],
 	permitBookmarklet: false,
 	
 	init: Zotero.Promise.coroutine(function* (url, data, sendResponseCallback){
-		var results = [];
-		for (let file of data) {
-			let translate = new Zotero.Translate.Import();
-			translate.setString(file.body);
-			let translators = yield translate.getTranslators();
-			if (!translators || !translators.length) {
-				results.push(null);
-				continue;
-			}
-			translate.setTranslator(translators[0]);
-			let items = yield translate.translate();
-			results.push(items);
+		let translate = new Zotero.Translate.Import();
+		translate.setString(data);
+		let translators = yield translate.getTranslators();
+		if (!translators || !translators.length) {
+			return sendResponseCallback(404);
 		}
-		return sendResponseCallback(201, "application/json", JSON.stringify(results));
+		translate.setTranslator(translators[0]);
+		let items = yield translate.translate();
+		return sendResponseCallback(201, "application/json", JSON.stringify(items));
 	})
 }
 
@@ -629,23 +633,19 @@ Zotero.Server.Connector.ImportTranslate.prototype = {
  * Install CSL styles
  * 	
  * Returns:
- * 	- Object[] an array of installed style names
+ * 	- {name: styleName}
  */
  
 Zotero.Server.Connector.InstallStyle = function() {};
-Zotero.Server.Endpoints["/connector/installStyles"] = Zotero.Server.Connector.InstallStyle;
+Zotero.Server.Endpoints["/connector/importStyle"] = Zotero.Server.Connector.InstallStyle;
 Zotero.Server.Connector.InstallStyle.prototype = {
 	supportedMethods: ["POST"],
-	supportedDataTypes: ["multipart/form-data"],
+	supportedDataTypes: ["text/x-csl", "application/vnd.citationstyles.style+xml"],
 	permitBookmarklet: false,
 	
 	init: Zotero.Promise.coroutine(function* (url, data, sendResponseCallback){
-		var installedStyles = [];
-		for (let style of data) {
-			let styleName = yield Zotero.Styles.install(style.body, style.filename || style.name, true);
-			installedStyles.push(styleName);
-		}
-		sendResponseCallback(201, "application/json", JSON.stringify(installedStyles));
+		let styleName = yield Zotero.Styles.install(data, null, true);
+		sendResponseCallback(201, "application/json", JSON.stringify({name: styleName}));
 	})
 };
 

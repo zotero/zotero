@@ -139,16 +139,30 @@ Zotero.Connector = new function() {
 	/**
 	 * Sends the XHR to execute an RPC call.
 	 *
-	 * @param	{String}		method			RPC method. See documentation above.
+	 * @param	{Object}		options
+	 * 		method - method name
+	 * 		httpMethod - GET|POST
+	 * 		httpHeaders - an object of HTTP headers to send	
 	 * @param	{Object}		data			RPC data. See documentation above.
 	 * @param	{Function}		callback		Function to be called when requests complete.
 	 */
-	this.callMethod = function(method, data, callback, tab) {
+	this.callMethod = function(options, data, callback, tab) {
 		// Don't bother trying if not online in bookmarklet
 		if(Zotero.isBookmarklet && this.isOnline === false) {
 			callback(false, 0);
 			return;
 		}
+		if (typeof options == 'string') {
+			Zotero.debug('Zotero.Connector.callMethod() now takes an object instead of a string for method. Update your code.');
+			options = {method: options};
+		}
+		var method = options.method;
+		var sendRequest = options.httpMethod == 'GET' ? Zotero.HTTP.doGet : Zotero.HTTP.doPost;
+		var httpHeaders = Object.assign({
+				"Content-Type":"application/json",
+				"X-Zotero-Version":Zotero.version,
+				"X-Zotero-Connector-API-Version":CONNECTOR_API_VERSION
+			}, options.httpHeaders);
 		
 		var newCallback = function(req) {
 			try {
@@ -204,21 +218,10 @@ Zotero.Connector = new function() {
 			}
 		} else {							// Other browsers can use plain doPost
 			var uri = CONNECTOR_URI+"connector/"+method;
-			if (typeof data == 'object') {
-				Zotero.HTTP.doPost(uri, data,
-					newCallback, {
-						"Content-Type":"multipart/form-data",
-						"X-Zotero-Version":Zotero.version,
-						"X-Zotero-Connector-API-Version":CONNECTOR_API_VERSION
-					});
-			} else {
-				Zotero.HTTP.doPost(uri, JSON.stringify(data),
-					newCallback, {
-						"Content-Type":"application/json",
-						"X-Zotero-Version":Zotero.version,
-						"X-Zotero-Connector-API-Version":CONNECTOR_API_VERSION
-					});
+			if (httpHeaders["Content-Type"] == 'application/json') {
+				data = JSON.stringify(data);
 			}
+			sendRequest(uri, data, newCallback, httpHeaders);
 		}
 	},
 	

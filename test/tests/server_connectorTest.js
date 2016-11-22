@@ -314,11 +314,11 @@ describe("Connector Server", function () {
 		});
 	});
 	
-	describe('/connector/installStyles', function() {
+	describe('/connector/importStyle', function() {
 		var endpoint;
 		
 		before(function() {
-			endpoint = connectorServerPath + "/connector/installStyles";
+			endpoint = connectorServerPath + "/connector/importStyle";
 		});
 		
 		it('should reject application/json requests', function* () {
@@ -337,7 +337,7 @@ describe("Connector Server", function () {
 			}
 		});
 		
-		it('should import multiple styles posted as multipart/form-data', function* () {
+		it('should import a style with text/x-csl content-type', function* () {
 			sinon.stub(Zotero.Styles, 'install', function(style) {
 				var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 					.createInstance(Components.interfaces.nsIDOMParser),
@@ -349,35 +349,25 @@ describe("Connector Server", function () {
 				);
 			});
 			
-			let formData = new FormData;
-			formData.append('style1', `<?xml version="1.0" encoding="utf-8"?>
+			var style = `<?xml version="1.0" encoding="utf-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" version="1.0" default-locale="de-DE">
   <info>
     <title>Test1</title>
-    <id>http://www.example.com/test1</id>
-    <link href="http://www.zotero.org/styles/cell" rel="independent-parent"/>
-  </info>
-</style>
-`);
-			formData.append('style2', `<?xml version="1.0" encoding="utf-8"?>
-<style xmlns="http://purl.org/net/xbiblio/csl" version="1.0" default-locale="de-DE">
-  <info>
-    <title>Test2</title>
     <id>http://www.example.com/test2</id>
     <link href="http://www.zotero.org/styles/cell" rel="independent-parent"/>
   </info>
 </style>
-`);
+`;
 			var response = yield Zotero.HTTP.request(
 				'POST',
 				endpoint,
 				{
-					headers: { "Content-Type": "multipart/form-data" },
-					body: formData
+					headers: { "Content-Type": "text/x-csl" },
+					body: style
 				}
 			);	
 			assert.equal(response.status, 201);
-			assert.equal(response.response, JSON.stringify(['Test1', 'Test2']));
+			assert.equal(response.response, JSON.stringify({name: 'Test1'}));
 			Zotero.Styles.install.restore();
 		});
 	});
