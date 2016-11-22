@@ -978,6 +978,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 					e = { name: "NS_ERROR_FILE_NOT_FOUND" };
 					throw (e);
 				}
+				// This removes lastDataDir
 				this.setDataDirectory(file.path);
 			}
 			else {
@@ -1013,11 +1014,22 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				}
 			}
 			
-			// If data directory from pref doesn't exist and it's not the default, throw to trigger
-			// not-found dialog
 			if (!file.exists() && file.path != this.getDefaultDataDir()) {
-				let e = { name: "NS_ERROR_FILE_NOT_FOUND" };
-				throw e;
+				// If set to a legacy directory that doesn't exist, forget about it and just use the
+				// new default location, which will either exist or be created below. The most likely
+				// cause of this is a migration, so don't bother looking in other-app profiles.
+				if (this.isLegacyDataDirectory(file.path)) {
+					let newDefault = this.getDefaultDataDir();
+					Zotero.debug(`Legacy data directory ${file.path} from pref not found `
+						+ `-- reverting to ${newDefault}`, 1);
+					file = Zotero.File.pathToFile(newDefault);
+					this.setDataDirectory(newDefault);
+				}
+				// For other custom directories that don't exist, show not-found dialog
+				else {
+					Zotero.debug("Custom data directory ${file.path} not found", 1);
+					throw { name: "NS_ERROR_FILE_NOT_FOUND" };
+				}
 			}
 		}
 		else {
