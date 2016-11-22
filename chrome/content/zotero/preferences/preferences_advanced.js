@@ -65,9 +65,7 @@ Zotero_Preferences.Advanced = {
 		);
 		
 		if (index == 0) {
-			yield Zotero.File.putContentsAsync(
-				OS.Path.join(currentDir, Zotero.DATA_DIR_MIGRATION_MARKER), currentDir
-			);
+			yield Zotero.markDataDirectoryForMigration(currentDir);
 			Zotero.Utilities.Internal.quitZotero(true);
 		}
 	}),

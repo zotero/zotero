@@ -318,6 +318,12 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		}
 		
 		if (!Zotero.isConnector) {
+			// On macOS and Linux, migrate the data directory automatically
+			if (this.canMigrateDataDirectory(dataDir.path)
+					// Should match check in Zotero.File.moveDirectory()
+					&& !Zotero.isWin && (yield OS.File.exists("/bin/mv"))) {
+				yield this.markDataDirectoryForMigration(dataDir.path, true);
+			}
 			yield Zotero.checkForDataDirectoryMigration(dataDir.path, this.getDefaultDataDir());
 			if (this.skipLoading) {
 				return;
@@ -975,13 +981,14 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				let dbFile = OS.Path.join(prefVal, this.getDatabaseFilename());
 				if (Zotero.File.pathToFile(migrationMarker).exists()
 						&& !(Zotero.File.pathToFile(dbFile).exists())) {
-					let fileStr = Zotero.File.getContents(migrationMarker);
+					let contents = Zotero.File.getContents(migrationMarker);
 					try {
-						file = Zotero.File.pathToFile(fileStr);
+						let { sourceDir } = JSON.parse(contents);
+						file = Zotero.File.pathToFile(sourceDir);
 					}
 					catch (e) {
 						Zotero.logError(e);
-						Zotero.debug(`Invalid path '${fileStr}' in marker file`, 1);
+						Zotero.debug(`Invalid marker file:\n\n${contents}`, 1);
 						e = { name: "NS_ERROR_FILE_NOT_FOUND" };
 						throw e;
 					}
@@ -1435,6 +1442,17 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	this.DATA_DIR_MIGRATION_MARKER = 'migrate-dir';
 	
 	
+	this.markDataDirectoryForMigration = function (dir, automatic = false) {
+		return Zotero.File.putContentsAsync(
+			OS.Path.join(dir, this.DATA_DIR_MIGRATION_MARKER),
+			JSON.stringify({
+				sourceDir: dir,
+				automatic
+			})
+		);
+	};
+	
+	
 	/**
 	 * Migrate data directory if necessary and show any errors
 	 *
@@ -1443,7 +1461,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	 *     the default data directory
 	 */
 	this.checkForDataDirectoryMigration = Zotero.Promise.coroutine(function* (dataDir, newDir) {
-		let migrationMarker = OS.Path.join(dataDir, Zotero.DATA_DIR_MIGRATION_MARKER);
+		let migrationMarker = OS.Path.join(dataDir, this.DATA_DIR_MIGRATION_MARKER);
 		try {
 			var exists = yield OS.File.exists(migrationMarker)
 		}
@@ -1457,6 +1475,20 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		let oldDir;
 		let partial = false;
 		
+		// Check whether this is an automatic or manual migration
+		let contents;
+		try {
+			contents = yield Zotero.File.getContentsAsync(migrationMarker);
+			var { sourceDir, automatic } = JSON.parse(contents);
+		}
+		catch (e) {
+			if (contents !== undefined) {
+				Zotero.debug(contents, 1);
+			}
+			Zotero.logError(e);
+			return false;
+		}
+		
 		// Not set to the default directory, so use current as old directory
 		if (dataDir != newDir) {
 			oldDir = dataDir;
@@ -1464,13 +1496,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		// Unfinished migration -- already using new directory, so get path to previous
 		// directory from the migration marker
 		else {
-			try {
-				oldDir = yield Zotero.File.getContentsAsync(migrationMarker);
-			}
-			catch (e) {
-				Zotero.logError(e);
-				return false;
-			}
+			oldDir = sourceDir;
 			partial = true;
 		}
 		
@@ -1480,6 +1506,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		}.bind(this);
 		
 		let errors;
+		let mode = automatic ? 'automatic' : 'manual';
 		try {
 			this.showZoteroPaneProgressMeter(Zotero.getString("dataDir.migration.inProgress"));
 			errors = yield Zotero.migrateDataDirectory(oldDir, newDir, partial, progressHandler);
@@ -1494,11 +1521,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
 			let index = ps.confirmEx(null,
 				Zotero.getString('dataDir.migration.failure.title'),
-				Zotero.getString('dataDir.migration.failure.full.text1')
+				Zotero.getString(`dataDir.migration.failure.full.${mode}.text1`, ZOTERO_CONFIG.CLIENT_NAME)
 					+ "\n\n"
 					+ e
 					+ "\n\n"
-					+ Zotero.getString('dataDir.migration.failure.full.text2', Zotero.appName)
+					+ Zotero.getString(`dataDir.migration.failure.full.${mode}.text2`, Zotero.appName)
 					+ "\n\n"
 					+ Zotero.getString('dataDir.migration.failure.full.current', oldDir)
 					+ "\n\n"
@@ -1532,7 +1559,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
 			let index = ps.confirmEx(null,
 				Zotero.getString('dataDir.migration.failure.title'),
-				Zotero.getString('dataDir.migration.failure.partial.text',
+				Zotero.getString(`dataDir.migration.failure.partial.${mode}.text`,
 						[ZOTERO_CONFIG.CLIENT_NAME, Zotero.appName])
 					+ "\n\n"
 					+ Zotero.getString('dataDir.migration.failure.partial.old', oldDir)
@@ -1714,6 +1741,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				let newMigrationMarker = OS.Path.join(newDir, Zotero.DATA_DIR_MIGRATION_MARKER);
 				Zotero.debug("Removing " + newMigrationMarker);
 				yield OS.File.remove(newMigrationMarker);
+				
+				Zotero.debug("Migration successful");
 			}
 			catch (e) {
 				addError(e);

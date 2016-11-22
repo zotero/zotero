@@ -461,8 +461,9 @@ var ZoteroPane = new function()
 	
 	function isShowing() {
 		var zoteroPane = document.getElementById('zotero-pane-stack');
-		return zoteroPane.getAttribute('hidden') != 'true' &&
-				zoteroPane.getAttribute('collapsed') != 'true';
+		return zoteroPane
+			&& zoteroPane.getAttribute('hidden') != 'true'
+			&& zoteroPane.getAttribute('collapsed') != 'true';
 	}
 	
 	function isFullScreen() {
