@@ -1139,9 +1139,9 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	
 	this.getDefaultDataDir = function () {
-		// Keep data directory siloed within profile directory for tests
+		// Use special data directory for tests
 		if (Zotero.test) {
-			return OS.Path.join(OS.Constants.Path.profileDir, "test-data-dir");
+			return OS.Path.join(OS.Path.dirname(OS.Constants.Path.profileDir), "Zotero");
 		}
 		return OS.Path.join(OS.Constants.Path.homeDir, ZOTERO_CONFIG.CLIENT_NAME);
 	};

@@ -98,8 +98,9 @@ fi
 ulimit -n 4096
 
 # Set up profile directory
-PROFILE="`mktemp -d 2>/dev/null || mktemp -d -t 'zotero-unit'`"
-mkdir "$PROFILE/extensions"
+TEMPDIR="`mktemp -d 2>/dev/null || mktemp -d -t 'zotero-unit'`"
+PROFILE="$TEMPDIR/profile"
+mkdir -p "$PROFILE/extensions"
 
 makePath ZOTERO_UNIT_PATH "$CWD"
 echo "$ZOTERO_UNIT_PATH" > "$PROFILE/extensions/zotero-unit@zotero.org"
@@ -108,7 +109,7 @@ makePath ZOTERO_PATH "`dirname "$CWD"`"
 echo "$ZOTERO_PATH" > "$PROFILE/extensions/zotero@chnm.gmu.edu"
 
 # Create data directory
-mkdir "$PROFILE/zotero"
+mkdir "$TEMPDIR/Zotero"
 
 cat <<EOF > "$PROFILE/prefs.js"
 user_pref("extensions.autoDisableScopes", 0);
@@ -139,7 +140,7 @@ if [ "$TRAVIS" = true ]; then
 fi
 
 # Clean up on exit
-trap "{ rm -rf \"$PROFILE\"; }" EXIT
+trap "{ rm -rf \"$TEMPDIR\"; }" EXIT
 
 makePath FX_PROFILE "$PROFILE"
 MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$FX_EXECUTABLE" -profile "$FX_PROFILE" \

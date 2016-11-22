@@ -38,6 +38,8 @@ describe("Zotero Core Functions", function () {
 	});
 	
 	beforeEach(function* () {
+		// Trigger a call to setDataDirectory() now to avoid affecting the stub call count
+		Zotero.getZoteroDirectory();
 		stub1 = sinon.stub(Zotero, "setDataDirectory");
 	});
 	
