@@ -140,9 +140,10 @@ Zotero.Connector = new function() {
 	 * Sends the XHR to execute an RPC call.
 	 *
 	 * @param	{Object}		options
-	 * 		method - method name
-	 * 		httpMethod - GET|POST
-	 * 		httpHeaders - an object of HTTP headers to send	
+	 *		method - method name
+	 *		queryString - a querystring to pass on the HTTP call
+	 *		httpMethod - GET|POST
+	 *		httpHeaders - an object of HTTP headers to send	
 	 * @param	{Object}		data			RPC data. See documentation above.
 	 * @param	{Function}		callback		Function to be called when requests complete.
 	 */
@@ -163,6 +164,7 @@ Zotero.Connector = new function() {
 				"X-Zotero-Version":Zotero.version,
 				"X-Zotero-Connector-API-Version":CONNECTOR_API_VERSION
 			}, options.httpHeaders);
+		var queryString = options.queryString;
 		
 		var newCallback = function(req) {
 			try {
@@ -217,7 +219,7 @@ Zotero.Connector = new function() {
 				callback(false, 0);
 			}
 		} else {							// Other browsers can use plain doPost
-			var uri = CONNECTOR_URI+"connector/"+method;
+			var uri = CONNECTOR_URI+"connector/" + method + '?' + queryString;
 			if (httpHeaders["Content-Type"] == 'application/json') {
 				data = JSON.stringify(data);
 			}

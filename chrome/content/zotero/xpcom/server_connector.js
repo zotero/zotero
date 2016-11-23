@@ -604,16 +604,7 @@ Zotero.Server.Connector.ImportTranslate = function() {};
 Zotero.Server.Endpoints["/connector/importFile"] = Zotero.Server.Connector.ImportTranslate;
 Zotero.Server.Connector.ImportTranslate.prototype = {
 	supportedMethods: ["POST"],
-	supportedDataTypes: [
-		"application/x-endnote-refer", "application/x-research-info-systems",
-		"application/x-inst-for-scientific-info",
-		"text/x-bibtex", "application/x-bibtex",
-		// Non-standard
-		"text/x-research-info-systems",
-		"text/application/x-research-info-systems", // Nature serves this
-		"text/ris", // Cell serves this
-		"ris" // Not even trying
-	],
+	supportedDataTypes: '*',
 	permitBookmarklet: false,
 	
 	init: Zotero.Promise.coroutine(function* (url, data, sendResponseCallback){
@@ -640,11 +631,11 @@ Zotero.Server.Connector.InstallStyle = function() {};
 Zotero.Server.Endpoints["/connector/importStyle"] = Zotero.Server.Connector.InstallStyle;
 Zotero.Server.Connector.InstallStyle.prototype = {
 	supportedMethods: ["POST"],
-	supportedDataTypes: ["text/x-csl", "application/vnd.citationstyles.style+xml"],
+	supportedDataTypes: '*',
 	permitBookmarklet: false,
 	
 	init: Zotero.Promise.coroutine(function* (url, data, sendResponseCallback){
-		let styleName = yield Zotero.Styles.install(data, null, true);
+		let styleName = yield Zotero.Styles.install(data, url.query.origin || null, true);
 		sendResponseCallback(201, "application/json", JSON.stringify({name: styleName}));
 	})
 };
