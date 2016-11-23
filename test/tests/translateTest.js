@@ -24,7 +24,8 @@ function saveItemsThroughTranslator(translatorType, items) {
 	} else if (translatorType == "import") {
 		translate.setString("");
 	}
-	translate.setTranslator(buildDummyTranslator(translatorType == "web" ? 4 : 1,
+	translate.setTranslator(buildDummyTranslator(
+		translatorType,
 		"function detectWeb() {}\n"+
 		"function do"+tyname+"() {\n"+
 		"	var json = JSON.parse('"+JSON.stringify(items).replace(/['\\]/g, "\\$&")+"');\n"+
