@@ -150,7 +150,6 @@ describe("Zotero Core Functions", function () {
 		
 		add("should show error on partial failure", function (automatic) {
 			return function* () {
-				Zotero.Debug.init(true);
 				yield populateDataDirectory(oldDir, null, automatic);
 				
 				let origFunc = OS.File.move;
