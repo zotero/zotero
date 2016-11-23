@@ -137,6 +137,9 @@ describe("Zotero Core Functions", function () {
 		
 		before(function () {
 			disableCommandMode();
+			
+			// Travis debugging
+			Zotero.Debug.init(true);
 		});
 		
 		after(function () {
