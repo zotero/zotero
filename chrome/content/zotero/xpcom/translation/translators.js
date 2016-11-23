@@ -43,6 +43,11 @@ Zotero.Translators = new function() {
 	 *     available (e.g., in updateBundledFiles()), to avoid unnecesary file reads
 	 */
 	this.reinit = Zotero.Promise.coroutine(function* (options = {}) {
+		// Travis debugging
+		Zotero.Debug.init(true);
+		Zotero.debug(new Error().stack);
+		Zotero.Debug.init();
+		
 		// Wait until bundled files have been updated, except when this is called by the schema update
 		// code itself
 		if (!options.fromSchemaUpdate) {
