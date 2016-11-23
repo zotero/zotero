@@ -35,7 +35,8 @@ var comboButtonsID = 'zotero-toolbar-buttons';
 addIcon();
 
 function addIcon() {
-	if (Zotero.toolbarIconAdded) {
+	// Don't try to add icons more than once, and avoid warnings in tests
+	if (Zotero.toolbarIconAdded || CustomizableUI.getPlacementOfWidget(comboButtonsID)) {
 		return;
 	}
 	
