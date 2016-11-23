@@ -38,6 +38,10 @@ Zotero.QuickCopy = new function() {
 		// Load code for selected export translator ahead of time
 		// (in the background, because it requires translator initialization)
 		_initTimeoutID = setTimeout(() => {
+			// Avoid random translator initialization during tests, which can result in timeouts,
+			// if an export format is selected
+			if (Zotero.test) return;
+			
 			_initTimeoutID = null;
 			_initPromise = _loadOutputFormat().then(() => _initPromise = null);
 		}, 5000);
