@@ -1497,6 +1497,20 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			}
 		}
 		
+		// Check for an existing pipe from other running versions of Zotero pointing at the same data
+		// directory, and skip migration if found
+		try {
+			let foundPipe = yield Zotero.IPC.pipeExists();
+			if (foundPipe) {
+				Zotero.debug("Found existing pipe -- skipping migration");
+				return false;
+			}
+		}
+		catch (e) {
+			Zotero.logError("Error checking for pipe -- skipping migration:\n\n" + e);
+			return false;
+		}
+		
 		if (automatic) {
 			yield this.markDataDirectoryForMigration(dataDir, true);
 		}

@@ -289,6 +289,11 @@ Zotero.IPC = new function() {
 		return dir;
 	}
 	
+	this.pipeExists = Zotero.Promise.coroutine(function* () {
+		var dir = _getPipeDirectory().path;
+		return (yield OS.File.exists(dir)) && !(yield Zotero.File.directoryIsEmpty(dir));
+	});
+	
 	/**
 	 * Gets the path to libc as a string
 	 */

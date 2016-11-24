@@ -6,7 +6,7 @@ describe("Zotero Core Functions", function () {
 		oldStorageDir1, newStorageDir1, storageFile1, oldStorageDir2, newStorageDir2, storageFile2,
 		str1, str2, str3, str4, str5, str6,
 		oldMigrationMarker, newMigrationMarker,
-		stub1, stub2, stub3;
+		stubs = {};
 	
 	before(function* () {
 		tmpDir = yield getTempDirectory();
@@ -35,12 +35,16 @@ describe("Zotero Core Functions", function () {
 		str6 = '6';
 		oldMigrationMarker = OS.Path.join(oldDir, Zotero.DATA_DIR_MIGRATION_MARKER);
 		newMigrationMarker = OS.Path.join(newDir, Zotero.DATA_DIR_MIGRATION_MARKER);
+		
+		stubs.canMigrate = sinon.stub(Zotero, "canMigrateDataDirectory").returns(true);
+		// A pipe always exists during tests, since Zotero is running
+		stubs.pipeExists = sinon.stub(Zotero.IPC, "pipeExists").returns(Zotero.Promise.resolve(false));
 	});
 	
 	beforeEach(function* () {
 		// Trigger a call to setDataDirectory() now to avoid affecting the stub call count
 		Zotero.getZoteroDirectory();
-		stub1 = sinon.stub(Zotero, "setDataDirectory");
+		stubs.setDataDir = sinon.stub(Zotero, "setDataDirectory");
 	});
 	
 	afterEach(function* () {
@@ -48,13 +52,18 @@ describe("Zotero Core Functions", function () {
 		yield removeDir(newDir);
 		Zotero._cacheDataDirectory(false);
 		
-		stub1.restore();
+		stubs.setDataDir.restore();
+	});
+	
+	after(function* () {
+		stubs.canMigrate.restore();
+		stubs.pipeExists.restore();
 	});
 	
 	var disableCommandMode = function () {
 		// Force non-mv mode
 		var origFunc = OS.File.exists;
-		stub2 = sinon.stub(OS.File, "exists", function (path) {
+		stubs.fileExists = sinon.stub(OS.File, "exists", function (path) {
 			if (path == '/bin/mv') {
 				return Zotero.Promise.resolve(false);
 			}
@@ -65,7 +74,7 @@ describe("Zotero Core Functions", function () {
 	};
 	
 	var resetCommandMode = function () {
-		stub2.restore();
+		stubs.fileExists.restore();
 	};
 	
 	var populateDataDirectory = Zotero.Promise.coroutine(function* (dir, srcDir, automatic = false) {
@@ -126,14 +135,14 @@ describe("Zotero Core Functions", function () {
 		}
 		
 		if (!options.skipSetDataDirectory) {
-			assert.ok(stub1.calledOnce);
-			assert.ok(stub1.calledWith(newDir));
+			assert.ok(stubs.setDataDir.calledOnce);
+			assert.ok(stubs.setDataDir.calledWith(newDir));
 		}
 	});
 	
 	
 	describe("#checkForDataDirectoryMigration()", function () {
-		let stub3;
+		let fileMoveStub;
 		
 		before(function () {
 			disableCommandMode();
@@ -156,7 +165,7 @@ describe("Zotero Core Functions", function () {
 				yield populateDataDirectory(oldDir, null, automatic);
 				
 				let origFunc = OS.File.move;
-				let stub3 = sinon.stub(OS.File, "move", function () {
+				let fileMoveStub = sinon.stub(OS.File, "move", function () {
 					if (OS.Path.basename(arguments[0]) == storageFile1) {
 						return Zotero.Promise.reject(new Error("Error"));
 					}
@@ -171,8 +180,8 @@ describe("Zotero Core Functions", function () {
 						return origFunc(...args);
 					}
 				});
-				let stub4 = sinon.stub(Zotero.File, "reveal").returns(Zotero.Promise.resolve());
-				let stub5 = sinon.stub(Zotero.Utilities.Internal, "quitZotero");
+				let stub1 = sinon.stub(Zotero.File, "reveal").returns(Zotero.Promise.resolve());
+				let stub2 = sinon.stub(Zotero.Utilities.Internal, "quitZotero");
 				
 				var promise2;
 				// Click "Try Again" the first time, and then "Show Directories and Quit Zotero"
@@ -193,14 +202,14 @@ describe("Zotero Core Functions", function () {
 				yield promise;
 				yield promise2;
 				
-				assert.isTrue(stub4.calledTwice);
-				assert.isTrue(stub4.getCall(0).calledWith(oldStorageDir));
-				assert.isTrue(stub4.getCall(1).calledWith(newDBFile));
-				assert.isTrue(stub5.called);
+				assert.isTrue(stub1.calledTwice);
+				assert.isTrue(stub1.getCall(0).calledWith(oldStorageDir));
+				assert.isTrue(stub1.getCall(1).calledWith(newDBFile));
+				assert.isTrue(stub2.called);
 				
-				stub3.restore();
-				stub4.restore();
-				stub5.restore();
+				fileMoveStub.restore();
+				stub1.restore();
+				stub2.restore();
 			};
 		});
 		
@@ -209,7 +218,7 @@ describe("Zotero Core Functions", function () {
 				yield populateDataDirectory(oldDir, null, automatic);
 				
 				let origFunc = OS.File.move;
-				let stub3 = sinon.stub(OS.File, "move", function () {
+				let stub1 = sinon.stub(OS.File, "move", function () {
 					if (OS.Path.basename(arguments[0]) == dbFilename) {
 						return Zotero.Promise.reject(new Error("Error"));
 					}
@@ -217,8 +226,8 @@ describe("Zotero Core Functions", function () {
 						return origFunc(...arguments);
 					}
 				});
-				let stub4 = sinon.stub(Zotero.File, "reveal").returns(Zotero.Promise.resolve());
-				let stub5 = sinon.stub(Zotero.Utilities.Internal, "quitZotero");
+				let stub2 = sinon.stub(Zotero.File, "reveal").returns(Zotero.Promise.resolve());
+				let stub3 = sinon.stub(Zotero.Utilities.Internal, "quitZotero");
 				
 				var promise = waitForDialog(function (dialog) {
 					// Make sure we're displaying the right message for this mode (automatic or manual)
@@ -234,13 +243,13 @@ describe("Zotero Core Functions", function () {
 				yield Zotero.checkForDataDirectoryMigration(oldDir, newDir);
 				yield promise;
 				
-				assert.isTrue(stub4.calledOnce);
-				assert.isTrue(stub4.calledWith(oldDir));
-				assert.isTrue(stub5.called);
+				assert.isTrue(stub2.calledOnce);
+				assert.isTrue(stub2.calledWith(oldDir));
+				assert.isTrue(stub3.called);
 				
+				stub1.restore();
+				stub2.restore();
 				stub3.restore();
-				stub4.restore();
-				stub5.restore();
 			};
 		});
 		
@@ -349,7 +358,7 @@ describe("Zotero Core Functions", function () {
 				yield populateDataDirectory(oldDir);
 				
 				let origFunc = OS.File.move;
-				let stub3 = sinon.stub(OS.File, "move", function () {
+				let stub1 = sinon.stub(OS.File, "move", function () {
 					if (OS.Path.basename(arguments[0]) == storageFile1) {
 						return Zotero.Promise.reject(new Error("Error"));
 					}
@@ -367,7 +376,7 @@ describe("Zotero Core Functions", function () {
 				
 				yield Zotero.migrateDataDirectory(oldDir, newDir);
 				
-				stub3.restore();
+				stub1.restore();
 				
 				yield checkMigration({
 					skipOldDir: true,
