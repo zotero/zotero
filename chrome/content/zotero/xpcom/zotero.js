@@ -318,12 +318,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		}
 		
 		if (!Zotero.isConnector) {
-			// On macOS and Linux, migrate the data directory automatically
-			if (this.canMigrateDataDirectory(dataDir.path)
-					// Should match check in Zotero.File.moveDirectory()
-					&& !Zotero.isWin && (yield OS.File.exists("/bin/mv"))) {
-				yield this.markDataDirectoryForMigration(dataDir.path, true);
-			}
 			yield Zotero.checkForDataDirectoryMigration(dataDir.path, this.getDefaultDataDir());
 			if (this.skipLoading) {
 				return;
@@ -1480,6 +1474,10 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	 *     the default data directory
 	 */
 	this.checkForDataDirectoryMigration = Zotero.Promise.coroutine(function* (dataDir, newDir) {
+		if (!this.canMigrateDataDirectory(dataDir)) {
+			return false;
+		}
+		
 		let migrationMarker = OS.Path.join(dataDir, this.DATA_DIR_MIGRATION_MARKER);
 		try {
 			var exists = yield OS.File.exists(migrationMarker)
@@ -1487,10 +1485,23 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		catch (e) {
 			Zotero.logError(e);
 		}
+		let automatic = false;
 		if (!exists) {
-			return false;
+			// Migrate automatically on macOS and Linux -- this should match the check in
+			// Zotero.File.moveDirectory()
+			if (!Zotero.isWin && (yield OS.File.exists("/bin/mv"))) {
+				automatic = true;
+			}
+			else {
+				return false;
+			}
 		}
 		
+		if (automatic) {
+			yield this.markDataDirectoryForMigration(dataDir, true);
+		}
+		
+		let sourceDir;
 		let oldDir;
 		let partial = false;
 		
@@ -1498,7 +1509,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		let contents;
 		try {
 			contents = yield Zotero.File.getContentsAsync(migrationMarker);
-			var { sourceDir, automatic } = JSON.parse(contents);
+			({ sourceDir, automatic } = JSON.parse(contents));
 		}
 		catch (e) {
 			if (contents !== undefined) {
