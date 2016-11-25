@@ -352,7 +352,7 @@ function ZoteroService() {
 				throw e;
 			})
 			.then(function () {
-				if (isStandalone) {
+				if (isStandalone()) {
 					if (zContext.Zotero.startupErrorHandler || zContext.Zotero.startupError) {
 						if (zContext.Zotero.startupErrorHandler) {
 							zContext.Zotero.startupErrorHandler();
