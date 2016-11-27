@@ -39,7 +39,6 @@
 			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
 			<preference id="pref-quickCopy-dragLimit" name="extensions.zotero.export.quickCopy.dragLimit" type="int"/>
 			<preference id="pref-quickCopy-locale" name="extensions.zotero.export.quickCopy.locale" type="string"/>
-			<preference id="pref-export-displayCharsetOption" name="extensions.zotero.export.displayCharsetOption" type="bool"/>
 			<preference id="pref-import-charset" name="extensions.zotero.import.charset" type="string"/>
 		</preferences>
 		
@@ -76,9 +75,6 @@
 		
 		<groupbox>
 			<caption label="&zotero.preferences.charset;"/>
-			
-			<checkbox id="zotero-export-displayCharsetOption" label="&zotero.preferences.charset.displayExportOption;"
-				preference="pref-export-displayCharsetOption"/>
 			
 			<hbox align="center">
 				<label value="&zotero.preferences.charset.importCharset;:" control="zotero-import-charsetMenu"/>
