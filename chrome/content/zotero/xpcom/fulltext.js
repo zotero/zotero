@@ -261,7 +261,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			}
 		}
 		
-		var destDir = Zotero.getZoteroDirectory()
+		var destDir = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 		// Move redirect script and executable into data dir
 		if (tmpScriptFile) {
 			yield OS.File.move(
@@ -292,7 +292,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	 */
 	this.registerPDFTool = Zotero.Promise.coroutine(function* (tool) {
 		var errMsg = false;
-		var exec = Zotero.getZoteroDirectory();
+		var exec = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 		
 		switch (tool) {
 			case 'converter':
@@ -342,7 +342,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		case 'converter':
 			// TEMP: disabled
 			if (false && Zotero.isWin) {
-				var script = Zotero.getZoteroDirectory();
+				var script = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 				script.append('pdftotext.' + _getScriptExtension())
 				if (script.exists()) {
 					Zotero.debug(script.leafName + " registered");
@@ -355,7 +355,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			// Modified 3.02 version doesn't use redirection script
 			if (version.startsWith('3.02')) break;
 			
-			var script = Zotero.getZoteroDirectory();
+			var script = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 			// TEMP: disabled on Win
 			if (!Zotero.isWin) {
 				script.append('pdfinfo.' + _getScriptExtension())
@@ -396,7 +396,6 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	this.uninstallPDFTools = Zotero.Promise.coroutine(function* () {
 		Zotero.debug("Uninstalling PDF tools");
 		
-		var dataDir = Zotero.getZoteroDirectory().path;
 		if (_pdfConverter) {
 			yield Zotero.File.removeIfExists(_pdfConverter.path);
 			yield Zotero.File.removeIfExists(_pdfConverter.path + ".version");

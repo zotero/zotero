@@ -181,7 +181,7 @@ Zotero_Preferences.Sync = {
 			);
 			if (index == 0) {
 				if (check.value) {
-					var resetDataDirFile = OS.Path.join(Zotero.getZoteroDirectory().path, 'reset-data-directory');
+					var resetDataDirFile = OS.Path.join(Zotero.DataDirectory.dir, 'reset-data-directory');
 					yield Zotero.File.putContentsAsync(resetDataDirFile, '');
 
 					yield Zotero.Sync.Runner.deleteAPIKey();
@@ -645,9 +645,10 @@ Zotero_Preferences.Sync = {
 							
 							Zotero.DB.skipBackup = true;
 							
-							var file = Zotero.getZoteroDirectory();
-							file.append('restore-from-server');
-							Zotero.File.putContents(file, '');
+							yield Zotero.File.putContentsAsync(
+								OS.Path.join(Zotero.DataDirectory.dir, 'restore-from-server'),
+								''
+							);
 							
 							var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING);
 							var index = ps.confirmEx(

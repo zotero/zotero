@@ -66,7 +66,7 @@ Zotero.IPC = new function() {
 				// Standalone sends this to the Firefox extension to tell the Firefox extension to
 				// release its lock on the Zotero database
 				if(!Zotero.isConnector && (msg.length === 11 ||
-					                       msg.substr(12) === Zotero.getZoteroDatabase().persistentDescriptor)) {
+						msg.substr(12) === Zotero.DataDirectory.getDatabase())) {
 					switchConnectorMode(true);
 				}
 			} else if(msg === "lockReleased") {
@@ -284,7 +284,7 @@ Zotero.IPC = new function() {
 	 * Get directory containing Zotero pipes
 	 */
 	function _getPipeDirectory() {
-		var dir = Zotero.getZoteroDirectory();
+		var dir = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 		dir.append("pipes");
 		return dir;
 	}

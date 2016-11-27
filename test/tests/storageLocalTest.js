@@ -157,7 +157,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield OS.File.makeDir(
 				OS.Path.join(dir, 'subdir'),
 				{
-					from: Zotero.getZoteroDirectory().path,
+					from: Zotero.DataDirectory.dir,
 					unixMode: 0o755
 				}
 			);

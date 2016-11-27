@@ -151,7 +151,7 @@ Zotero.Schema = new function(){
 		if (updated) {
 			// Upgrade seems to have been a success -- delete any previous backups
 			var maxPrevious = userdata - 1;
-			var file = Zotero.getZoteroDirectory();
+			var file = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 			var toDelete = [];
 			try {
 				var files = file.directoryEntries;

@@ -131,7 +131,7 @@ Zotero.Sync.Data.Local = {
 					
 			var accept = false;
 			if (io.accept) {
-				var resetDataDirFile = OS.Path.join(Zotero.getZoteroDirectory().path, 'reset-data-directory');
+				var resetDataDirFile = OS.Path.join(Zotero.DataDirectory.dir, 'reset-data-directory');
 				yield Zotero.File.putContentsAsync(resetDataDirFile, '');
 
 				Zotero.Utilities.Internal.quitZotero(true);

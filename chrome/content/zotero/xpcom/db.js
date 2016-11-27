@@ -874,7 +874,7 @@ Zotero.DBConnection.prototype.integrityCheck = Zotero.Promise.coroutine(function
 Zotero.DBConnection.prototype.checkException = function (e) {
 	if (e.name && e.name == 'NS_ERROR_FILE_CORRUPTED') {
 		// Write corrupt marker to data directory
-		var file = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt');
+		var file = Zotero.File.pathToFile(Zotero.DataDirectory.getDatabase(this._dbName, 'is.corrupt'));
 		Zotero.File.putContents(file, '');
 		
 		this._dbIsCorrupt = true;
@@ -956,7 +956,9 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 	});
 	
 	try {
-		var corruptMarker = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt');
+		var corruptMarker = Zotero.File.pathToFile(
+			Zotero.DataDirectory.getDatabase(this._dbName, 'is.corrupt')
+		);
 		
 		if (this.skipBackup || Zotero.skipLoading) {
 			this._debug("Skipping backup of database '" + this._dbName + "'", 1);
@@ -967,11 +969,11 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 			return false;
 		}
 		
-		var file = Zotero.getZoteroDatabase(this._dbName);
+		var file = Zotero.File.pathToFile(Zotero.DataDirectory.getDatabase(this._dbName));
 		
 		// For standard backup, make sure last backup is old enough to replace
 		if (!suffix && !force) {
-			var backupFile = Zotero.getZoteroDatabase(this._dbName, 'bak');
+			var backupFile = Zotero.File.pathToFile(Zotero.DataDirectory.getDatabase(this._dbName, 'bak'));
 			if (yield OS.File.exists(backupFile.path)) {
 				var currentDBTime = (yield OS.File.stat(file.path)).lastModificationDate;
 				var lastBackupTime = (yield OS.File.stat(backupFile.path)).lastModificationDate;
@@ -995,14 +997,14 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 		
 		// Copy via a temporary file so we don't run into disk space issues
 		// after deleting the old backup file
-		var tmpFile = Zotero.getZoteroDatabase(this._dbName, 'tmp');
-		if (yield OS.File.exists(tmpFile.path)) {
+		var tmpFile = Zotero.DataDirectory.getDatabase(this._dbName, 'tmp');
+		if (yield OS.File.exists(tmpFile)) {
 			try {
-				yield OS.File.remove(tmpFile.path);
+				yield OS.File.remove(tmpFile);
 			}
 			catch (e) {
 				if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
-					alert("Cannot delete " + tmpFile.leafName);
+					alert("Cannot delete " + OS.Path.basename(tmpFile));
 				}
 				throw (e);
 			}
@@ -1053,9 +1055,9 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 		// Special backup
 		if (!suffix && numBackups > 1) {
 			// Remove oldest backup file
-			var targetFile = Zotero.getZoteroDatabase(this._dbName, (numBackups - 1) + '.bak')
-			if (yield OS.File.exists(targetFile.path)) {
-				yield OS.File.remove(targetFile.path);
+			var targetFile = Zotero.DataDirectory.getDatabase(this._dbName, (numBackups - 1) + '.bak');
+			if (yield OS.File.exists(targetFile)) {
+				yield OS.File.remove(targetFile);
 			}
 			
 			// Shift old versions up
@@ -1063,33 +1065,34 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 				var targetNum = i;
 				var sourceNum = targetNum - 1;
 				
-				var targetFile = Zotero.getZoteroDatabase(
+				var targetFile = Zotero.DataDirectory.getDatabase(
 					this._dbName, targetNum + '.bak'
 				);
-				var sourceFile = Zotero.getZoteroDatabase(
+				var sourceFile = Zotero.DataDirectory.getDatabase(
 					this._dbName, sourceNum ? sourceNum + '.bak' : 'bak'
 				);
 				
-				if (!(yield OS.File.exists(sourceFile.path))) {
+				if (!(yield OS.File.exists(sourceFile))) {
 					continue;
 				}
 				
-				Zotero.debug("Moving " + sourceFile.leafName + " to " + targetFile.leafName);
-				yield OS.File.move(sourceFile.path, targetFile.path);
+				Zotero.debug("Moving " + OS.Path.basename(sourceFile)
+					+ " to " + OS.Path.basename(targetFile));
+				yield OS.File.move(sourceFile, targetFile);
 			}
 		}
 		
-		var backupFile = Zotero.getZoteroDatabase(
+		var backupFile = Zotero.DataDirectory.getDatabase(
 			this._dbName, (suffix ? suffix + '.' : '') + 'bak'
 		);
 		
 		// Remove old backup file
-		if (yield OS.File.exists(backupFile.path)) {
-			OS.File.remove(backupFile.path);
+		if (yield OS.File.exists(backupFile)) {
+			OS.File.remove(backupFile);
 		}
 		
-		yield OS.File.move(tmpFile.path, backupFile.path);
-		Zotero.debug("Backed up to " + backupFile.leafName);
+		yield OS.File.move(tmpFile.path, backupFile);
+		Zotero.debug("Backed up to " + OS.Path.basename(backupFile));
 		
 		return true;
 	}
@@ -1138,13 +1141,13 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 	var store = Components.classes["@mozilla.org/storage/service;1"].
 		getService(Components.interfaces.mozIStorageService);
 	
-	var file = Zotero.getZoteroDatabase(this._dbName);
-	var backupFile = Zotero.getZoteroDatabase(this._dbName, 'bak');
+	var file = Zotero.File.pathToFile(Zotero.DataDirectory.getDatabase(this._dbName));
+	var backupFile = Zotero.File.pathToFile(Zotero.DataDirectory.getDatabase(this._dbName, 'bak'));
 	
 	var fileName = this._dbName + '.sqlite';
 	
 	catchBlock: try {
-		var corruptMarker = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt');
+		var corruptMarker = Zotero.File.pathToFile(Zotero.DataDirectory.getDatabase(this._dbName, 'is.corrupt'));
 		if (corruptMarker.exists()) {
 			throw {
 				name: 'NS_ERROR_FILE_CORRUPTED'
@@ -1164,11 +1167,13 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 				
 				// Save damaged filed
 				this._debug('Saving damaged DB file with .damaged extension', 1);
-				var damagedFile = Zotero.getZoteroDatabase(this._dbName, 'damaged');
+				var damagedFile = Zotero.File.pathToFile(
+					Zotero.DataDirectory.getDatabase(this._dbName, 'damaged')
+				);
 				Zotero.moveToUnique(file, damagedFile);
 				
 				// Create new main database
-				var file = Zotero.getZoteroDatabase(this._dbName);
+				var file = Zotero.File.pathToFile(Zotero.DataDirectory.getDatabase(this._dbName));
 				this._connection = store.openDatabase(file);
 				
 				if (corruptMarker.exists()) {
@@ -1181,7 +1186,9 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 			
 			// Save damaged file
 			this._debug('Saving damaged DB file with .damaged extension', 1);
-			var damagedFile = Zotero.getZoteroDatabase(this._dbName, 'damaged');
+			var damagedFile = Zotero.File.pathToFile(
+				Zotero.DataDirectory.getDatabase(this._dbName, 'damaged')
+			);
 			Zotero.moveToUnique(file, damagedFile);
 			
 			// Test the backup file
@@ -1194,7 +1201,7 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 			// Can't open backup either
 			catch (e) {
 				// Create new main database
-				var file = Zotero.getZoteroDatabase(this._dbName);
+				var file = Zotero.File.pathToFile(Zotero.DataDirectory.getDatabase(this._dbName));
 				this._connection = yield Zotero.Promise.resolve(this.Sqlite.openConnection({
 					path: file.path
 				}));
@@ -1221,10 +1228,9 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 			}
 			
 			// Open restored database
-			var file = Zotero.getZoteroDirectory();
-			file.append(fileName);
+			var file = OS.Path.join(Zotero.DataDirectory.dir, fileName);
 			this._connection = yield Zotero.Promise.resolve(this.Sqlite.openConnection({
-				path: file.path
+				path: file
 			}));
 			this._debug('Database restored', 1);
 			var msg = Zotero.getString('db.dbRestored', [

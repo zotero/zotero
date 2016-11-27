@@ -516,13 +516,16 @@ function resetDB(options = {}) {
 	if (options.thisArg) {
 		options.thisArg.timeout(60000);
 	}
-	var db = Zotero.getZoteroDatabase();
-	return Zotero.reinit(function() {
-		db.remove(false);
-		_defaultGroup = null;
-	}, false, options).then(function() {
-		return Zotero.Schema.schemaUpdatePromise;
-	});
+	var db = Zotero.DataDirectory.getDatabase();
+	return Zotero.reinit(
+		Zotero.Promise.coroutine(function* () {
+			yield OS.File.remove(db);
+			_defaultGroup = null;
+		}),
+		false,
+		options
+	)
+	.then(() => Zotero.Schema.schemaUpdatePromise);
 }
 
 /**

@@ -78,7 +78,7 @@ describe("Zotero.Fulltext", function () {
 			yield Zotero.Fulltext.uninstallPDFTools();
 			assert.isFalse(Zotero.Fulltext.pdfInfoIsRegistered());
 			
-			var dataDir = Zotero.getZoteroDirectory().path;
+			var dataDir = Zotero.DataDirectory.dir;
 			var execFileName = Zotero.Fulltext.pdfInfoFileName;
 			var execPath = OS.Path.join(dataDir, execFileName);
 			var versionFileName = execFileName + '.version';

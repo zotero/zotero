@@ -470,7 +470,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				// TODO: Back up database
 				
 				
-				var dbfile = Zotero.getZoteroDatabase().path;
+				var dbfile = Zotero.DataDirectory.getDatabase();
 				yield OS.File.remove(dbfile, {ignoreAbsent: true});
 				
 				if (Zotero.restoreFromServer) {
@@ -755,20 +755,20 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			// Test read access
 			yield Zotero.DB.test();
 			
-			var dbfile = Zotero.getZoteroDatabase();
+			let dbfile = Zotero.DataDirectory.getDatabase();
 
 			// Tell any other Zotero instances to release their lock,
 			// in case we lost the lock on the database (how?) and it's
 			// now open in two places at once
-			Zotero.IPC.broadcast("releaseLock "+dbfile.persistentDescriptor);
+			Zotero.IPC.broadcast("releaseLock " + dbfile);
 			
 			// Test write access on Zotero data directory
-			if (!dbfile.parent.isWritable()) {
-				var msg = 'Cannot write to ' + dbfile.parent.path + '/';
+			if (!Zotero.File.pathToFile(OS.Path.dirname(dbfile)).isWritable()) {
+				var msg = 'Cannot write to ' + OS.Path.dirname(dbfile) + '/';
 			}
 			// Test write access on Zotero database
-			else if (!dbfile.isWritable()) {
-				var msg = 'Cannot write to ' + dbfile.path;
+			else if (!Zotero.File.pathToFile(dbfile).isWritable()) {
+				var msg = 'Cannot write to ' + dbfile;
 			}
 			else {
 				var msg = false;
@@ -897,9 +897,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	
 	function getStorageDirectory(){
-		var file = Zotero.getZoteroDirectory();
-		
-		file.append('storage');
+		var file = OS.Path.join(Zotero.DataDirectory.dir, 'storage');
+		file = Zotero.File.pathToFile(file);
 		Zotero.File.createDirectoryIfMissing(file);
 		return file;
 	}
@@ -915,7 +914,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	 * @return	{nsIFile}
 	 */
 	this.getTempDirectory = function () {
-		var tmp = this.getZoteroDirectory();
+		var tmp = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 		tmp.append('tmp');
 		Zotero.File.createDirectoryIfMissing(tmp);
 		return tmp;
@@ -923,7 +922,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	
 	this.removeTempDirectory = function () {
-		var tmp = this.getZoteroDirectory();
+		var tmp = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 		tmp.append('tmp');
 		if (tmp.exists()) {
 			try {
@@ -935,7 +934,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	
 	this.getStylesDirectory = function () {
-		var dir = this.getZoteroDirectory();
+		var dir = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 		dir.append('styles');
 		Zotero.File.createDirectoryIfMissing(dir);
 		return dir;
@@ -943,7 +942,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	
 	this.getTranslatorsDirectory = function () {
-		var dir = this.getZoteroDirectory();
+		var dir = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 		dir.append('translators');
 		Zotero.File.createDirectoryIfMissing(dir);
 		return dir;

@@ -166,7 +166,7 @@ Zotero.LocateManager = new function() {
 	 * Gets the dir containing the JSON file and engine icons
 	 */
 	function _getLocateDirectory() {
-		var locateDir = Zotero.getZoteroDirectory();
+		var locateDir = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 		locateDir.append(LOCATE_DIR_NAME);
 		return locateDir;
 	}

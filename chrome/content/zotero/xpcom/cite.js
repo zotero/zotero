@@ -333,7 +333,7 @@ Zotero.Cite.getAbbreviation = new function() {
 	}
 
 	function loadAbbreviations() {
-		var file = Zotero.getZoteroDirectory();
+		var file = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 		file.append("abbreviations.json");
 
 		var json, origin;

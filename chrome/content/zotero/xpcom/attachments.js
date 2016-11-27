@@ -1190,40 +1190,20 @@ Zotero.Attachments = new function(){
 		}
 		
 		// Create orphaned-files directory if it doesn't exist
-		var orphaned = Zotero.getZoteroDirectory();
-		orphaned.append('orphaned-files');
-		if (!orphaned.exists()) {
-			orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
-		}
+		var orphaned = OS.Path.join(Zotero.DataDirectory.dir, 'orphaned-files');
+		yield Zotero.File.createDirectoryIfMissingAsync(orphaned);
 		
 		// Find unique filename for orphaned file
-		var orphanTarget = orphaned.clone();
-		orphanTarget.append(dir.leafName);
+		var orphanTarget = OS.Path.join(orphaned, dir.leafName);
 		var newName = null;
-		if (orphanTarget.exists()) {
-			try {
-				orphanTarget.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
-				newName = orphanTarget.leafName;
-			}
-			catch (e) {
-				// DEBUG: Work around createUnique() brokenness on Windows
-				// as of Fx3.0.3 (https://bugzilla.mozilla.org/show_bug.cgi?id=452217)
-				//
-				// We just delete the conflicting file
-				if (Zotero.isWin && e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
-					orphanTarget.remove(true);
-				}
-				else {
-					throw (e);
-				}
-			}
-			if (newName) {
-				orphanTarget.remove(false);
-			}
+		if (yield OS.File.exists(orphanTarget)) {
+			let newFile = yield OS.File.openUnique(orphanTarget, { humanReadable: true })
+			newName = OS.Path.basename(newFile.path);
+			newFile.file.close();
 		}
 		
 		// Move target to orphaned files directory
-		dir.moveTo(orphaned, newName);
+		dir.moveTo(Zotero.File.pathToFile(orphaned), newName);
 	});
 	
 	
