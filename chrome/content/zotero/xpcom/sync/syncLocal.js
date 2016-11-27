@@ -138,7 +138,7 @@ Zotero.Sync.Data.Local = {
 				accept = true;
 			}
 			// else if (io.extra1) {
-			// 	if (Zotero.forceNewDataDirectory(win)) {
+			// 	if (Zotero.DataDirectory.forceChange(win)) {
 			// 		var ps = Services.prompt;
 			// 		ps.alert(null,
 			// 			Zotero.getString('general.restartRequired'),

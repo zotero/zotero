@@ -33,6 +33,7 @@ const Ci = Components.interfaces;
 /** XPCOM files to be loaded for all modes **/
 const xpcomFilesAll = [
 	'zotero',
+	'dataDirectory',
 	'date',
 	'debug',
 	'error',
@@ -41,6 +42,7 @@ const xpcomFilesAll = [
 	'mimeTypeHandler',
 	'openurl',
 	'ipc',
+	'profile',
 	'progressWindow',
 	'translation/translate',
 	'translation/translate_firefox',

@@ -185,7 +185,7 @@
 						<radiogroup id="data-dir"
 								preference="pref-useDataDir"
 								onsyncfrompreference="return Zotero_Preferences.Advanced.onDataDirLoad()"
-								onsynctopreference="return Zotero_Preferences.Advanced.onDataDirUpdate(event);">
+								onsynctopreference="Zotero_Preferences.Advanced.onDataDirUpdate(event);">
 							<radio id="default-data-dir" label="&zotero.preferences.dataDir.useProfile;" value="false"/>
 							<hbox>
 								<radio label="&zotero.preferences.dataDir.custom;" value="true"/>
@@ -199,7 +199,7 @@
 						
 						<hbox>
 							<button label="&zotero.preferences.dataDir.reveal;"
-								oncommand="Zotero.revealDataDirectory()"/>
+								oncommand="Zotero.DataDirectory.reveal()"/>
 							<button id="migrate-data-dir" label="&zotero.preferences.dataDir.migrate;"
 								oncommand="Zotero_Preferences.Advanced.migrateDataDirectory()" hidden="true"/>
 						</hbox>

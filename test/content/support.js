@@ -474,7 +474,6 @@ function getTestDataUrl(path) {
 
 /**
  * Returns an absolute path to an empty temporary directory
- * (i.e., test/tests/data)
  */
 var getTempDirectory = Zotero.Promise.coroutine(function* getTempDirectory() {
 	Components.utils.import("resource://gre/modules/osfile.jsm");

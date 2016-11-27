@@ -230,7 +230,7 @@ var ZoteroOverlay = new function()
 			
 			// Warn about unsafe data directory on first display
 			let dataDir = Zotero.getZoteroDirectory();
-			Zotero.checkForUnsafeDataDirectory(dataDir.path);
+			Zotero.DataDirectory.checkForUnsafeLocation(dataDir.path); // async
 
 			// Make sure tags splitter isn't missing for people upgrading from <2.0b7
 			document.getElementById('zotero-tags-splitter').collapsed = false;

@@ -444,7 +444,6 @@ Zotero.File = new function(){
 		var it = new OS.File.DirectoryIterator(path);
 		try {
 			let entry = yield it.next();
-			Zotero.debug(entry);
 			return false;
 		}
 		catch (e) {
