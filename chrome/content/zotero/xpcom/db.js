@@ -1016,7 +1016,7 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 			if (DB_LOCK_EXCLUSIVE) {
 				yield this.queryAsync("PRAGMA locking_mode=NORMAL", false, { inBackup: true });
 			}
-			storageService.backupDatabaseFile(file, tmpFile.leafName, file.parent);
+			storageService.backupDatabaseFile(file, OS.Path.basename(tmpFile), file.parent);
 		}
 		catch (e) {
 			Zotero.debug(e);
@@ -1031,12 +1031,12 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 		
 		// Open the backup to check for corruption
 		try {
-			var connection = storageService.openDatabase(tmpFile);
+			var connection = storageService.openDatabase(Zotero.File.pathToFile(tmpFile));
 		}
 		catch (e) {
-			this._debug("Database file '" + tmpFile.leafName + "' is corrupt -- skipping backup");
-			if (yield OS.File.exists(tmpFile.path)) {
-				yield OS.File.remove(tmpFile.path);
+			this._debug("Database file '" + OS.Path.basename(tmpFile) + "' is corrupt -- skipping backup");
+			if (yield OS.File.exists(tmpFile)) {
+				yield OS.File.remove(tmpFile);
 			}
 			return false;
 		}
@@ -1091,7 +1091,7 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 			OS.File.remove(backupFile);
 		}
 		
-		yield OS.File.move(tmpFile.path, backupFile);
+		yield OS.File.move(tmpFile, backupFile);
 		Zotero.debug("Backed up to " + OS.Path.basename(backupFile));
 		
 		return true;
