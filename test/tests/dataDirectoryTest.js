@@ -199,6 +199,7 @@ describe("Zotero.DataDirectory", function () {
 					);
 				});
 				yield Zotero.DataDirectory.checkForMigration(oldDir, newDir);
+				Zotero.debug("Before promise 1");
 				yield promise;
 				yield promise2;
 				

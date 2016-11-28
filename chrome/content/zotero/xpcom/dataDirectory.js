@@ -616,6 +616,8 @@ Zotero.DataDirectory = {
 		}
 		
 		// At least the database was copied, but other things failed
+		Zotero.debug(1);
+		Zotero.debug(errors);
 		if (errors.length) {
 			let ps = Services.prompt;
 			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
@@ -670,6 +672,7 @@ Zotero.DataDirectory = {
 				return;
 			}
 		}
+		Zotero.debug(2);
 	}),
 	
 	
