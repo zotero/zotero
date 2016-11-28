@@ -544,6 +544,12 @@ Zotero.File = new function(){
 					let entry = yield iterator.next();
 					let dest = newDir + entry.path.substr(rootDir.length);
 					
+					// entry.isDir can be false for some reason on Travis, causing spurious test failures
+					if (Zotero.automatedTest && !entry.isDir && (yield OS.File.stat(entry.path)).isDir) {
+						Zotero.debug("Overriding isDir for " + entry.path);
+						entry.isDir = true;
+					}
+					
 					// Move files in directory
 					if (!entry.isDir) {
 						try {
