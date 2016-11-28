@@ -145,9 +145,6 @@ describe("Zotero.DataDirectory", function () {
 		
 		before(function () {
 			disableCommandMode();
-			
-			// Travis debugging
-			Zotero.Debug.init(true);
 		});
 		
 		after(function () {
@@ -185,7 +182,6 @@ describe("Zotero.DataDirectory", function () {
 				var promise2;
 				// Click "Try Again" the first time, and then "Show Directories and Quit Zotero"
 				var promise = waitForDialog(function (dialog) {
-					Zotero.debug("In first dialog");
 					promise2 = waitForDialog(null, 'extra1');
 					
 					// Make sure we're displaying the right message for this mode (automatic or manual)
@@ -199,7 +195,6 @@ describe("Zotero.DataDirectory", function () {
 					);
 				});
 				yield Zotero.DataDirectory.checkForMigration(oldDir, newDir);
-				Zotero.debug("Before promise 1");
 				yield promise;
 				yield promise2;
 				
