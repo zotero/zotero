@@ -136,6 +136,10 @@ function waitForDialog(onOpen, button='accept', url) {
 		else if (button != 'cancel') {
 			let deferred = Zotero.Promise.defer();
 			function acceptWhenEnabled() {
+				Zotero.debug('=====');
+				Zotero.debug(button);
+				Zotero.debug(dialog.document.documentElement.getButton(button));
+				
 				// Handle delayed buttons
 				if (dialog.document.documentElement.getButton(button).disabled) {
 					dialog.setTimeout(function () {

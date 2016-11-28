@@ -185,6 +185,7 @@ describe("Zotero.DataDirectory", function () {
 				var promise2;
 				// Click "Try Again" the first time, and then "Show Directories and Quit Zotero"
 				var promise = waitForDialog(function (dialog) {
+					Zotero.debug("In first dialog");
 					promise2 = waitForDialog(null, 'extra1');
 					
 					// Make sure we're displaying the right message for this mode (automatic or manual)
