@@ -165,6 +165,7 @@ Zotero.Server.Connector.Detect.prototype = {
 				
 				// get translators
 				me._translate.setDocument(me._browser.contentDocument);
+				me._translate.setLocation(me._parsedPostData["uri"], me._parsedPostData["uri"]);
 				me._translate.getTranslators();
 			} catch(e) {
 				sendResponseCallback(500);
@@ -183,16 +184,8 @@ Zotero.Server.Connector.Detect.prototype = {
 	 */
 	_translatorsAvailable: function(obj, translators) {
 		var jsons = [];
-		for each(var translator in translators) {
-			if(translator.itemType == "multiple") {
-				var icon = "treesource-collection.png"
-			} else {
-				var icon = Zotero.ItemTypes.getImageSrc(translator.itemType);
-				icon = icon.substr(icon.lastIndexOf("/")+1);
-			}
-			var json = {itemType: translator.itemType, translatorID: translator.translatorID,
-				label: translator.label, priority: translator.priority}
-			jsons.push(json);
+		for (let translator of translators) {
+			jsons.push(translator.serialize(TRANSLATOR_PASSING_PROPERTIES));
 		}
 		this.sendResponse(200, "application/json", JSON.stringify(jsons));
 		
@@ -294,7 +287,7 @@ Zotero.Server.Connector.SavePage.prototype = {
 		translate.setHandler("attachmentProgress", function(obj, attachment, progress, error) {
 			Zotero.Server.Connector.AttachmentProgressManager.onProgress(attachment, progress, error);
 		});
-		translate.setHandler("itemsDone", function(obj, item) {
+		translate.setHandler("done", function(obj, item) {
 			Zotero.Browser.deleteHiddenBrowser(me._browser);
 			if(jsonItems.length || me.selectedItems === false) {
 				me.sendResponse(201, "application/json", JSON.stringify({items: jsonItems}));
