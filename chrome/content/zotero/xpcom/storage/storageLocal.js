@@ -40,7 +40,6 @@ Zotero.Sync.Storage.Local = {
 		case 'user':
 		case 'publications':
 		case 'feed':
-			Zotero.debug("Storage Mode: " + Zotero.Prefs.get("sync.storage.protocol"));
 			return Zotero.Prefs.get("sync.storage.protocol") == 'webdav' ? 'webdav' : 'zfs';
 		
 		case 'group':

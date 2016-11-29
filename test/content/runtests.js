@@ -198,6 +198,7 @@ mocha.setup({
 
 before(function () {
 	// Store all prefs set in runtests.sh
+	Components.utils.import("resource://zotero/config.js");
 	var prefBranch = Services.prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
 	ZoteroUnit.customPrefs = {};
 	prefBranch.getChildList("", {})
@@ -209,6 +210,7 @@ before(function () {
  * Clear all prefs, and reset those set in runtests.sh to original values
  */
 function resetPrefs() {
+	Components.utils.import("resource://zotero/config.js");
 	var prefBranch = Services.prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
 	prefBranch.getChildList("", {}).forEach(key => {
 		var origVal = ZoteroUnit.customPrefs[key];

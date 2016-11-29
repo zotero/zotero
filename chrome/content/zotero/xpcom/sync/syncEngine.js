@@ -936,7 +936,7 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 					objectType,
 					o.id,
 					{
-						// Only storage properties ('mtime', 'md5') for WebDAV files
+						// Only include storage properties ('mtime', 'md5') for WebDAV files
 						skipStorageProperties:
 							objectType == 'item'
 								? Zotero.Sync.Storage.Local.getModeForLibrary(this.library.libraryID)

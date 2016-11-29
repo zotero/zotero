@@ -54,14 +54,6 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		assert.equal(request.requestHeaders["Zotero-API-Key"], apiKey);
 	}
 	
-	before(function* () {
-		controller = new Zotero.Sync.Storage.Mode.WebDAV;
-		Zotero.Prefs.set("sync.storage.scheme", davScheme);
-		Zotero.Prefs.set("sync.storage.url", davHostPath);
-		Zotero.Prefs.set("sync.storage.username", davUsername);
-		controller.password = davPassword;
-	})
-	
 	beforeEach(function* () {
 		yield resetDB({
 			thisArg: this,
@@ -79,6 +71,11 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		yield Zotero.Users.setCurrentUsername("testuser");
 		
 		Zotero.Sync.Storage.Local.setModeForLibrary(Zotero.Libraries.userLibraryID, 'webdav');
+		controller = new Zotero.Sync.Storage.Mode.WebDAV;
+		Zotero.Prefs.set("sync.storage.scheme", davScheme);
+		Zotero.Prefs.set("sync.storage.url", davHostPath);
+		Zotero.Prefs.set("sync.storage.username", davUsername);
+		controller.password = davPassword;
 		
 		// Set download-on-sync by default
 		Zotero.Sync.Storage.Local.downloadOnSync(

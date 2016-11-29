@@ -829,7 +829,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 		})
 		
 		
-		it("shouldn't include storage properties for attachments in ZFS libraries", function* () {
+		it("shouldn't include mtime and md5 for attachments in ZFS libraries", function* () {
 			({ engine, client, caller } = yield setup());
 			
 			var library = Zotero.Libraries.userLibrary;
@@ -938,13 +938,14 @@ describe("Zotero.Sync.Data.Engine", function () {
 		});
 		
 		
-		it("should upload synced storage properties", function* () {
+		it("should include mtime and md5 synced to WebDAV in WebDAV libraries", function* () {
 			({ engine, client, caller } = yield setup());
 			
 			var library = Zotero.Libraries.userLibrary;
 			var lastLibraryVersion = 2;
 			library.libraryVersion = lastLibraryVersion;
 			yield library.saveTx();
+			Zotero.Sync.Storage.Local.setModeForLibrary(library.id, 'webdav');
 			
 			var item = new Zotero.Item('attachment');
 			item.attachmentLinkMode = 'imported_file';
