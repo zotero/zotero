@@ -22,9 +22,10 @@ describe("Zotero.Sync.Data.Local", function() {
 	
 	
 	describe("#checkUser()", function () {
-		var resetDataDirFile = OS.Path.join(Zotero.DataDirectory.dir, 'reset-data-directory');
+		var resetDataDirFile;
 		
 		before(function() {
+			resetDataDirFile = OS.Path.join(Zotero.DataDirectory.dir, 'reset-data-directory');
 			sinon.stub(Zotero.Utilities.Internal, 'quitZotero');
 		});	
 		
