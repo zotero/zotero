@@ -413,7 +413,7 @@ Zotero.Sync.Storage.Local = {
 		else if (Math.floor(mtime / 1000) * 1000 == fmtime
 				|| Math.floor(fmtime / 1000) * 1000 == mtime) {
 			Zotero.debug(`File mod times for ${libraryKey} are within one-second precision `
-				+ "(" + fmtime + " ≅ " + mtime + ") -- skipping");
+				+ "(" + fmtime + " \u2248 " + mtime + ") -- skipping");
 		}
 		// Allow timestamp to be exactly one hour off to get around time zone issues
 		// -- there may be a proper way to fix this
