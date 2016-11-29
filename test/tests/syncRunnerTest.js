@@ -114,9 +114,6 @@ describe("Zotero.Sync.Runner", function () {
 	// Tests
 	//
 	beforeEach(function* () {
-		// TEMP: Travis debugging
-		Zotero.Debug.init(true);
-		
 		yield resetDB({
 			thisArg: this,
 			skipBundledFiles: true

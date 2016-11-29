@@ -143,7 +143,7 @@ fi
 trap "{ rm -rf \"$TEMPDIR\"; }" EXIT
 
 makePath FX_PROFILE "$PROFILE"
-MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$FX_EXECUTABLE" -profile "$FX_PROFILE" -bail \
+MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$FX_EXECUTABLE" -profile "$FX_PROFILE" \
     -chrome chrome://zotero-unit/content/runtests.html -test "$TESTS" -grep "$GREP" -ZoteroTest $FX_ARGS
 
 # Check for success
