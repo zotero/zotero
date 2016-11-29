@@ -9,8 +9,9 @@ describe("Note Editor", function () {
 	});
 	
 	beforeEach(function* () {
-		// Avoid "this._editor is undefined" error between tests
-		yield Zotero.Promise.delay(1);
+		// Avoid "this._editor is undefined" error between tests,
+		// though there's definitely a better way to fix this
+		yield Zotero.Promise.delay(50);
 	});
 	
 	after(function () {
@@ -26,6 +27,8 @@ describe("Note Editor", function () {
 			var tagsBox = linksBox.id('tagsPopup').firstChild;
 			var tagRows = tagsBox.id('tagRows');
 			assert.equal(tagRows.childNodes.length, 1);
+			
+			linksBox.id('tagsPopup').hidePopup();
 		});
 		
 		it("should only open one new row for editing", function* () {
@@ -41,6 +44,8 @@ describe("Note Editor", function () {
 			var tagsBox = linksBox.id('tagsPopup').firstChild;
 			var tagRows = tagsBox.id('tagRows');
 			assert.equal(tagRows.childNodes.length, 1);
+			
+			linksBox.id('tagsPopup').hidePopup();
 		});
 		
 		it("should show tags in alphabetical order", function* () {
