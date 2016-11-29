@@ -192,6 +192,10 @@ Zotero.HTTP = new function() {
 			if (!headers["Content-Type"]) {
 				headers["Content-Type"] = "application/x-www-form-urlencoded";
 			}
+			else if (headers["Content-Type"] == 'multipart/form-data') {
+				// Allow XHR to set Content-Type with boundary for multipart/form-data
+				delete headers["Content-Type"];
+			}
 			
 			if (options.compressBody && this.isWriteMethod(method)) {
 				headers['Content-Encoding'] = 'gzip';

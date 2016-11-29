@@ -313,4 +313,62 @@ describe("Connector Server", function () {
 			);
 		});
 	});
+	
+	describe('/connector/importStyle', function() {
+		var endpoint;
+		
+		before(function() {
+			endpoint = connectorServerPath + "/connector/importStyle";
+		});
+		
+		it('should reject application/json requests', function* () {
+			try {
+				var response = yield Zotero.HTTP.request(
+					'POST',
+					endpoint,
+					{
+						headers: { "Content-Type": "application/json" },
+						body: '{}'
+					}
+				);	
+			} catch(e) {
+				assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+				assert.equal(e.xmlhttp.status, 400);
+			}
+		});
+		
+		it('should import a style with text/x-csl content-type', function* () {
+			sinon.stub(Zotero.Styles, 'install', function(style) {
+				var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+					.createInstance(Components.interfaces.nsIDOMParser),
+				doc = parser.parseFromString(style, "application/xml");
+				
+				return Zotero.Promise.resolve(
+					Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:title[1]',
+						Zotero.Styles.ns)
+				);
+			});
+			
+			var style = `<?xml version="1.0" encoding="utf-8"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" version="1.0" default-locale="de-DE">
+  <info>
+    <title>Test1</title>
+    <id>http://www.example.com/test2</id>
+    <link href="http://www.zotero.org/styles/cell" rel="independent-parent"/>
+  </info>
+</style>
+`;
+			var response = yield Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: { "Content-Type": "text/x-csl" },
+					body: style
+				}
+			);	
+			assert.equal(response.status, 201);
+			assert.equal(response.response, JSON.stringify({name: 'Test1'}));
+			Zotero.Styles.install.restore();
+		});
+	});
 });

@@ -384,21 +384,34 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 		if(postData && this.contentType) {
 			// check that endpoint supports contentType
 			var supportedDataTypes = endpoint.supportedDataTypes;
-			if(supportedDataTypes && supportedDataTypes.indexOf(this.contentType) === -1) {
+			if(supportedDataTypes && supportedDataTypes != '*' 
+				&& supportedDataTypes.indexOf(this.contentType) === -1) {
+				
 				this._requestFinished(this._generateResponse(400, "text/plain", "Endpoint does not support content-type\n"));
 				return;
 			}
 			
-			// decode JSON or urlencoded post data, and pass through anything else
-			if(supportedDataTypes && this.contentType === "application/json") {
+			// decode content-type post data
+			if(this.contentType === "application/json") {
 				try {
 					decodedData = JSON.parse(postData);
 				} catch(e) {
 					this._requestFinished(this._generateResponse(400, "text/plain", "Invalid JSON provided\n"));
 					return;
 				}
-			} else if(supportedDataTypes && this.contentType === "application/x-www-form-urlencoded") {				
+			} else if(this.contentType === "application/x-www-form-urlencoded") {				
 				decodedData = Zotero.Server.decodeQueryString(postData);
+			} else if(this.contentType === "multipart/form-data") {
+				let boundary = /boundary=([^\s]*)/i.exec(this.header);
+				if (!boundary) {
+					return this._requestFinished(this._generateResponse(400, "text/plain", "Invalid multipart/form-data provided\n"));
+				}
+				boundary = '--' + boundary[1];
+				try {
+					decodedData = this._decodeMultipartData(postData, boundary);
+				} catch(e) {
+					return this._requestFinished(this._generateResponse(400, "text/plain", "Invalid multipart/form-data provided\n"));
+				}
 			} else {
 				decodedData = postData;
 			}
@@ -459,6 +472,40 @@ Zotero.Server.DataListener.prototype._requestFinished = function(response) {
 		intlStream.close();
 	}
 }
+
+Zotero.Server.DataListener.prototype._decodeMultipartData = function(data, boundary) {
+	var contentDispositionRe = /^Content-Disposition:\s*(.*)$/i;
+	var results = [];
+	data = data.split(boundary);
+	// Ignore pre first boundary and post last boundary
+	data = data.slice(1, data.length-1);
+	for (let field of data) {
+		let fieldData = {};
+		field = field.trim();
+		// Split header and body
+		let unixHeaderBoundary = field.indexOf("\n\n");
+		let windowsHeaderBoundary = field.indexOf("\r\n\r\n");
+		if (unixHeaderBoundary < windowsHeaderBoundary && unixHeaderBoundary != -1) {
+			fieldData.header = field.slice(0, unixHeaderBoundary);
+			fieldData.body = field.slice(unixHeaderBoundary+2);
+		} else if (windowsHeaderBoundary != -1) {
+			fieldData.header = field.slice(0, windowsHeaderBoundary);
+			fieldData.body = field.slice(windowsHeaderBoundary+4);
+		} else {
+			throw new Error('Malformed multipart/form-data body');
+		}
+		
+		let contentDisposition = contentDispositionRe.exec(fieldData.header);
+		if (contentDisposition) {
+			for (let nameVal of contentDisposition[1].split(';')) {
+				nameVal.split('=');
+				fieldData[nameVal[0]] = nameVal.length > 1 ? nameVal[1] : null;
+			}
+		}
+		results.push(fieldData);
+	}
+	return results;
+};
 
 
 /**
