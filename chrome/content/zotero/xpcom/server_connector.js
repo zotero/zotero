@@ -600,9 +600,9 @@ Zotero.Server.Connector.Progress.prototype = {
  * 	- Object[Item] an array of imported items
  */
  
-Zotero.Server.Connector.ImportTranslate = function() {};
-Zotero.Server.Endpoints["/connector/importFile"] = Zotero.Server.Connector.ImportTranslate;
-Zotero.Server.Connector.ImportTranslate.prototype = {
+Zotero.Server.Connector.Import = function() {};
+Zotero.Server.Endpoints["/connector/import"] = Zotero.Server.Connector.Import;
+Zotero.Server.Connector.Import.prototype = {
 	supportedMethods: ["POST"],
 	supportedDataTypes: '*',
 	permitBookmarklet: false,
@@ -628,7 +628,7 @@ Zotero.Server.Connector.ImportTranslate.prototype = {
  */
  
 Zotero.Server.Connector.InstallStyle = function() {};
-Zotero.Server.Endpoints["/connector/importStyle"] = Zotero.Server.Connector.InstallStyle;
+Zotero.Server.Endpoints["/connector/installStyle"] = Zotero.Server.Connector.InstallStyle;
 Zotero.Server.Connector.InstallStyle.prototype = {
 	supportedMethods: ["POST"],
 	supportedDataTypes: '*',

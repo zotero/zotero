@@ -384,8 +384,8 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 		if(postData && this.contentType) {
 			// check that endpoint supports contentType
 			var supportedDataTypes = endpoint.supportedDataTypes;
-			if(supportedDataTypes && 
-				(supportedDataTypes == '*' || supportedDataTypes.indexOf(this.contentType) === -1)) {
+			if(supportedDataTypes && supportedDataTypes != '*' 
+				&& supportedDataTypes.indexOf(this.contentType) === -1) {
 				
 				this._requestFinished(this._generateResponse(400, "text/plain", "Endpoint does not support content-type\n"));
 				return;
@@ -492,7 +492,7 @@ Zotero.Server.DataListener.prototype._decodeMultipartData = function(data, bound
 			fieldData.header = field.slice(0, windowsHeaderBoundary);
 			fieldData.body = field.slice(windowsHeaderBoundary+4);
 		} else {
-			throw ('Malformed multipart/form-data body');
+			throw new Error('Malformed multipart/form-data body');
 		}
 		
 		let contentDisposition = contentDispositionRe.exec(fieldData.header);
