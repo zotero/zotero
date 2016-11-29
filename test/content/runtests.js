@@ -196,6 +196,38 @@ mocha.setup({
 	};
 })();
 
+before(function () {
+	// Store all prefs set in runtests.sh
+	var prefBranch = Services.prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
+	ZoteroUnit.customPrefs = {};
+	prefBranch.getChildList("", {})
+		.filter(key => prefBranch.prefHasUserValue(key))
+		.forEach(key => ZoteroUnit.customPrefs[key] = Zotero.Prefs.get(key));
+});
+
+/**
+ * Clear all prefs, and reset those set in runtests.sh to original values
+ */
+function resetPrefs() {
+	var prefBranch = Services.prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
+	prefBranch.getChildList("", {}).forEach(key => {
+		var origVal = ZoteroUnit.customPrefs[key];
+		if (origVal !== undefined) {
+			if (origVal != Zotero.Prefs.get(key)) {
+				Zotero.Prefs.set(key, ZoteroUnit.customPrefs[key]);
+			}
+		}
+		else if (prefBranch.prefHasUserValue(key)) {
+			Zotero.Prefs.clear(key)
+		}
+	});
+}
+
+afterEach(function () {
+	resetPrefs();
+});
+
+
 var assert = chai.assert,
     expect = chai.expect;
 
