@@ -1661,11 +1661,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			Zotero.Prefs.set("search.quicksearch-mode", "fields");
 			mode = 'fields';
 		}
-		// TEMP -- pre-3.0b3
-		else if (modes[mode] == 'titlesAndCreators') {
-			Zotero.Prefs.set("search.quicksearch-mode", "titleCreatorYear");
-			mode = 'titleCreatorYear'
-		}
 		
 		var hbox = document.getAnonymousNodes(searchBox)[0];
 		var input = hbox.getElementsByAttribute('class', 'textbox-input')[0];
@@ -1673,7 +1668,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		// Already initialized, so just update selection
 		var button = hbox.getElementsByAttribute('id', 'zotero-tb-search-menu-button');
 		if (button.length) {
-			Zotero.debug("already initialized search menu");
 			button = button[0];
 			var menupopup = button.firstChild;
 			for each(var menuitem in menupopup.childNodes) {

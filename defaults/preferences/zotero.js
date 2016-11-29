@@ -87,6 +87,8 @@ pref("extensions.zotero.keys.sync", 'Y');
 pref("extensions.zotero.keys.toggleAllRead", 'R');
 pref("extensions.zotero.keys.toggleRead", '`');
 
+pref("extensions.zotero.search.quicksearch-mode", "fields");
+
 // Fulltext indexing
 pref("extensions.zotero.fulltext.textMaxLength", 500000);
 pref("extensions.zotero.fulltext.pdfMaxPages", 100);
