@@ -62,18 +62,17 @@ describe("Zotero.DataDirectory", function () {
 	var disableCommandMode = function () {
 		// Force non-mv mode
 		var origFunc = OS.File.exists;
-		stubs.fileExists = sinon.stub(OS.File, "exists", function (path) {
-			if (path == '/bin/mv') {
-				return Zotero.Promise.resolve(false);
-			}
-			else {
-				return origFunc(path);
-			}
-		});
+		if (!stubs.canMoveDirectoryAtomic) {
+			stubs.canMoveDirectoryAtomic = sinon.stub(Zotero.File, "canMoveDirectoryAtomic")
+				.returns(false);
+		}
 	};
 	
 	var resetCommandMode = function () {
-		stubs.fileExists.restore();
+		if (stubs.canMoveDirectoryAtomic) {
+			stubs.canMoveDirectoryAtomic.restore();
+			stubs.canMoveDirectoryAtomic = undefined;
+		}
 	};
 	
 	var populateDataDirectory = Zotero.Promise.coroutine(function* (dir, srcDir, automatic = false) {
@@ -143,7 +142,7 @@ describe("Zotero.DataDirectory", function () {
 	describe("#checkForMigration()", function () {
 		let fileMoveStub;
 		
-		before(function () {
+		beforeEach(function () {
 			disableCommandMode();
 		});
 		
@@ -155,6 +154,22 @@ describe("Zotero.DataDirectory", function () {
 		function add(desc, fn) {
 			tests.push([desc, fn]);
 		}
+		
+		it("should skip automatic migration if target directory exists and is non-empty", function* () {
+			resetCommandMode();
+			
+			// No automatic migration without atomic directory move
+			if (!Zotero.File.canMoveDirectoryAtomic()) {
+				this.skip();
+			}
+			
+			yield populateDataDirectory(oldDir);
+			yield OS.File.remove(oldMigrationMarker);
+			yield OS.File.makeDir(newDir, { unixMode: 0o755 });
+			yield Zotero.File.putContentsAsync(OS.Path.join(newDir, 'a'), '');
+			
+			yield assert.eventually.isFalse(Zotero.DataDirectory.checkForMigration(oldDir, newDir));
+		});
 		
 		add("should show error on partial failure", function (automatic) {
 			return function* () {

@@ -428,6 +428,9 @@ Zotero.DataDirectory = {
 	},
 	
 	
+	/**
+	 * Determine if current data directory is in a legacy location
+	 */
 	canMigrate: function () {
 		// If (not default location) && (not useDataDir or within legacy location)
 		var currentDir = this.dir;
@@ -487,6 +490,12 @@ Zotero.DataDirectory = {
 				automatic = true;
 			}
 			else {
+				return false;
+			}
+			
+			// Skip automatic migration if there's a non-empty directory at the new location
+			if ((yield OS.File.exists(newDir)) && !(yield Zotero.File.directoryIsEmpty(newDir))) {
+				Zotero.debug(`${newDir} exists and is non-empty -- skipping migration`);
 				return false;
 			}
 		}
