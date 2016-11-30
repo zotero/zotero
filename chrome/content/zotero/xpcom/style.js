@@ -242,31 +242,40 @@ Zotero.Styles = new function() {
 	 *     containing the style data
 	 * @param {String} origin The origin of the style, either a filename or URL, to be
 	 *     displayed in dialogs referencing the style
-	 * @param {Boolean} [noPrompt=false] Skip the confirmation prompt
+	 * @param {Boolean} [silent=false] Skip prompts
 	 */
-	this.install = Zotero.Promise.coroutine(function* (style, origin, noPrompt=false) {
+	this.install = Zotero.Promise.coroutine(function* (style, origin, silent=false) {
 		var styleTitle;
+		origin = origin || Zotero.getString('styles.unknownOrigin');
 		
 		try {
 			if (style instanceof Components.interfaces.nsIFile) {
 				// handle nsIFiles
 				var url = Services.io.newFileURI(style);
 				var xmlhttp = yield Zotero.HTTP.request("GET", url.spec);
-				styleTitle = yield _install(xmlhttp.responseText, style.leafName, false, noPrompt);
+				styleTitle = yield _install(xmlhttp.responseText, style.leafName, false, silent);
 			} else {
-				styleTitle = yield _install(style, origin, false, noPrompt);
+				styleTitle = yield _install(style, origin, false, silent);
 			}
 		}
 		catch (error) {
 			// Unless user cancelled, show an alert with the error
 			if(typeof error === "object" && error instanceof Zotero.Exception.UserCancelled) return;
 			if(typeof error === "object" && error instanceof Zotero.Exception.Alert) {
-				error.present();
 				error.log();
+				if (silent) {
+					throw (error)
+				} else {
+					error.present();
+				}
 			} else {
 				Zotero.logError(error);
-				(new Zotero.Exception.Alert("styles.install.unexpectedError",
-					origin, "styles.install.title", error)).present();
+				if (silent) {
+					throw error
+				} else {
+					(new Zotero.Exception.Alert("styles.install.unexpectedError",
+						origin, "styles.install.title", error)).present();
+				}
 			}
 		}
 		return styleTitle;
@@ -278,10 +287,10 @@ Zotero.Styles = new function() {
 	 * @param {String} origin The origin of the style, either a filename or URL, to be
 	 *     displayed in dialogs referencing the style
 	 * @param {Boolean} [hidden] Whether style is to be hidden.
-	 * @param {Boolean} [noPrompt=false] Skip the confirmation prompt
+	 * @param {Boolean} [silent=false] Skip prompts
 	 * @return {Promise}
 	 */
-	var _install = Zotero.Promise.coroutine(function* (style, origin, hidden, noPrompt=false) {
+	var _install = Zotero.Promise.coroutine(function* (style, origin, hidden, silent=false) {
 		if (!_initialized) yield Zotero.Styles.init();
 		
 		var existingFile, destFile, source;
@@ -364,7 +373,7 @@ Zotero.Styles = new function() {
 		// display a dialog to tell the user we're about to install the style
 		if(hidden) {
 			destFile = destFileHidden;
-		} else if (!noPrompt) {
+		} else if (!silent) {
 			if(existingTitle) {
 				var text = Zotero.getString('styles.updateStyle', [existingTitle, title, origin]);
 			} else {

@@ -1094,6 +1094,8 @@ Zotero.Translate.Base.prototype = {
 		if(this._currentState === "detect") throw new Error("getTranslators: detection is already running");
 		this._currentState = "detect";
 		this._getAllTranslators = getAllTranslators;
+		this._potentialTranslators = [];
+		this._foundTranslators = [];
 
 		if(checkSetTranslator) {
 			// setTranslator must be called beforehand if checkSetTranslator is set
@@ -1123,8 +1125,6 @@ Zotero.Translate.Base.prototype = {
 		return potentialTranslators.then(function(result) {
 			var allPotentialTranslators = result[0];
 			var properToProxyFunctions = result[1];
-			this._potentialTranslators = [];
-			this._foundTranslators = [];
 			
 			// this gets passed out by Zotero.Translators.getWebTranslatorsForLocation() because it is
 			// specific for each translator, but we want to avoid making a copy of a translator whenever
@@ -1441,7 +1441,6 @@ Zotero.Translate.Base.prototype = {
 		
 		var errorString = null;
 		if(!returnValue && error) errorString = this._generateErrorString(error);
-		
 		if(this._currentState === "detect") {
 			if(this._potentialTranslators.length) {
 				var lastTranslator = this._potentialTranslators.shift();

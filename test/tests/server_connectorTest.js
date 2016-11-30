@@ -6,11 +6,13 @@ describe("Connector Server", function () {
 	var testServerPort = 16213;
 	
 	before(function* () {
+		this.timeout(20000);
 		Zotero.Prefs.set("httpServer.enabled", true);
 		yield resetDB({
 			thisArg: this,
 			skipBundledFiles: true
 		});
+		yield Zotero.Translators.init();
 		
 		win = yield loadZoteroPane();
 		connectorServerPath = 'http://127.0.0.1:' + Zotero.Prefs.get('httpServer.port');
@@ -314,30 +316,30 @@ describe("Connector Server", function () {
 		});
 	});
 	
-	describe('/connector/importStyle', function() {
+	describe('/connector/installStyle', function() {
 		var endpoint;
 		
 		before(function() {
-			endpoint = connectorServerPath + "/connector/importStyle";
+			endpoint = connectorServerPath + "/connector/installStyle";
 		});
 		
-		it('should reject application/json requests', function* () {
-			try {
-				var response = yield Zotero.HTTP.request(
-					'POST',
-					endpoint,
-					{
-						headers: { "Content-Type": "application/json" },
-						body: '{}'
-					}
-				);	
-			} catch(e) {
-				assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
-				assert.equal(e.xmlhttp.status, 400);
-			}
+		it('should reject styles with invalid text', function* () {
+			var error = yield getPromiseError(Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: { "Content-Type": "application/json" },
+					body: '{}'
+				}
+			));	
+			assert.instanceOf(error, Zotero.HTTP.UnexpectedStatusException);
+			assert.equal(error.xmlhttp.status, 400);
+			assert.equal(error.xmlhttp.responseText, 
+				Zotero.getString("styles.installError", 
+					Zotero.getString('styles.unknownOrigin')));
 		});
 		
-		it('should import a style with text/x-csl content-type', function* () {
+		it('should import a style with application/vnd.citationstyles.style+xml content-type', function* () {
 			sinon.stub(Zotero.Styles, 'install', function(style) {
 				var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 					.createInstance(Components.interfaces.nsIDOMParser),
@@ -362,13 +364,53 @@ describe("Connector Server", function () {
 				'POST',
 				endpoint,
 				{
-					headers: { "Content-Type": "text/x-csl" },
+					headers: { "Content-Type": "application/vnd.citationstyles.style+xml" },
 					body: style
 				}
 			);	
 			assert.equal(response.status, 201);
 			assert.equal(response.response, JSON.stringify({name: 'Test1'}));
 			Zotero.Styles.install.restore();
+		});
+	});
+	
+	describe('/connector/import', function() {
+		var endpoint;
+		
+		before(function() {
+			endpoint = connectorServerPath + "/connector/import";
+		});
+		
+		it('should reject resources that do not contain import data', function* () {
+			var error = yield getPromiseError(Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: { "Content-Type": "text/plain" },
+					body: 'Owl'
+				}
+			));
+			assert.instanceOf(error, Zotero.HTTP.UnexpectedStatusException);
+			assert.equal(error.xmlhttp.status, 400);
+		});
+		
+		it('should import resources (BibTeX)', function* () {
+			var resource = `@book{test1,
+  title={Test1},
+  author={Owl},
+  year={1000},
+  publisher={Curly Braces Publishing}
+}`;
+			var response = yield Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: { "Content-Type": "application/x-bibtex" },
+					body: resource
+				}
+			);	
+			assert.equal(response.status, 201);
+			assert.equal(JSON.parse(response.responseText)[0].title, 'Test1');
 		});
 	});
 });

@@ -605,7 +605,7 @@ Zotero.Server.Connector.Import.prototype = {
 		translate.setString(data);
 		let translators = yield translate.getTranslators();
 		if (!translators || !translators.length) {
-			return sendResponseCallback(404);
+			return sendResponseCallback(400);
 		}
 		translate.setTranslator(translators[0]);
 		let items = yield translate.translate();
@@ -628,7 +628,11 @@ Zotero.Server.Connector.InstallStyle.prototype = {
 	permitBookmarklet: false,
 	
 	init: Zotero.Promise.coroutine(function* (url, data, sendResponseCallback){
-		let styleName = yield Zotero.Styles.install(data, url.query.origin || null, true);
+		try {
+			var styleName = yield Zotero.Styles.install(data, url.query.origin || null, true);
+		} catch (e) {
+			sendResponseCallback(400, "text/plain", e.message)
+		}
 		sendResponseCallback(201, "application/json", JSON.stringify({name: styleName}));
 	})
 };
