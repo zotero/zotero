@@ -25,7 +25,7 @@
 
 
 Zotero.Debug = new function () {
-	var _console, _consolePref, _stackTrace, _store, _level, _time, _lastTime, _output = [];
+	var _console, _consolePref, _stackTrace, _store, _level, _lastTime, _output = [];
 	
 	this.init = function (forceDebugLog) {
 		_consolePref = Zotero.Prefs.get('debug.log');
@@ -35,7 +35,6 @@ Zotero.Debug = new function () {
 			Zotero.Prefs.set('debug.store', false);
 		}
 		_level = Zotero.Prefs.get('debug.level');
-		_time = forceDebugLog || Zotero.Prefs.get('debug.time');
 		_stackTrace = Zotero.Prefs.get('debug.stackTrace');
 		
 		this.storing = _store;
@@ -61,20 +60,18 @@ Zotero.Debug = new function () {
 		}
 		
 		var deltaStr = '';
-		if (_time || _store) {
-			var delta = 0;
-			var d = new Date();
-			if (_lastTime) {
-				delta = d - _lastTime;
-			}
-			_lastTime = d;
-			
-			while (("" + delta).length < 7) {
-				delta = '0' + delta;
-			}
-			
-			deltaStr = '(+' + delta + ')';
+		var delta = 0;
+		var d = new Date();
+		if (_lastTime) {
+			delta = d - _lastTime;
 		}
+		_lastTime = d;
+		
+		while (("" + delta).length < 7) {
+			delta = '0' + delta;
+		}
+		
+		deltaStr = '(+' + delta + ')';
 		
 		if (stack === true) {
 			// Display stack starting from where this was called
@@ -97,7 +94,7 @@ Zotero.Debug = new function () {
 		}
 		
 		if (_console) {
-			var output = 'zotero(' + level + ')' + (_time ? deltaStr : '') + ': ' + message;
+			var output = 'zotero(' + level + ')' + deltaStr + ': ' + message;
 			if(Zotero.isFx && !Zotero.isBookmarklet) {
 				// On Windows, where the text console (-console) is inexplicably glacial,
 				// log to the Browser Console instead if only the -ZoteroDebug flag is used.

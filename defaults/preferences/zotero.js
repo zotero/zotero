@@ -18,7 +18,6 @@ pref("extensions.zotero.debug.store.limit",500000);
 pref("extensions.zotero.debug.store.submitSize",10000000);
 pref("extensions.zotero.debug.store.submitLineLength",10000);
 pref("extensions.zotero.debug.level",5);
-pref("extensions.zotero.debug.time", false);
 pref("extensions.zotero.automaticScraperUpdates",true);
 pref("extensions.zotero.zoteroDotOrgVersionHeader", true);
 pref("extensions.zotero.triggerProxyAuthentication", true);
