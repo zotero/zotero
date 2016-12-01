@@ -822,7 +822,25 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 		let unsyncedKeys = ids.map(id => objectsClass.getLibraryAndKeyFromID(id).key);
 		let queueKeys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue(objectType, this.libraryID);
 		unsyncedKeys = Zotero.Utilities.arrayDiff(unsyncedKeys, queueKeys);
-		ids = unsyncedKeys.map(key => objectsClass.getIDFromLibraryAndKey(this.libraryID, key));
+		// TEMP
+		//ids = unsyncedKeys.map(key => objectsClass.getIDFromLibraryAndKey(this.libraryID, key));
+		let missing = [];
+		ids = unsyncedKeys.map(key => {
+			let id = objectsClass.getIDFromLibraryAndKey(this.libraryID, key)
+			if (!id) {
+				missing.push(key);
+			}
+			return id;
+		});
+		if (missing.length) {
+			Zotero.debug("Missing " + objectTypePlural + ":");
+			for (let key of missing) {
+				Zotero.debug(yield Zotero.DB.valueQueryAsync(
+					`SELECT ${objectsClass.idColumn} FROM ${objectsClass.table} WHERE libraryID=? AND key=?`,
+					[this.libraryID, key]
+				));
+			}
+		}
 		
 		if (ids.length) {
 			Zotero.debug(ids.length + " "
