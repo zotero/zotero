@@ -334,9 +334,7 @@ describe("Connector Server", function () {
 			));	
 			assert.instanceOf(error, Zotero.HTTP.UnexpectedStatusException);
 			assert.equal(error.xmlhttp.status, 400);
-			assert.equal(error.xmlhttp.responseText, 
-				Zotero.getString("styles.installError", 
-					Zotero.getString('styles.unknownOrigin')));
+			assert.equal(error.xmlhttp.responseText, Zotero.getString("styles.installError", "(null)"));
 		});
 		
 		it('should import a style with application/vnd.citationstyles.style+xml content-type', function* () {
