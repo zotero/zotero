@@ -511,6 +511,8 @@ var removeDir = Zotero.Promise.coroutine(function* (dir) {
  *                             any that were set at startup
  */
 function resetDB(options = {}) {
+	// Hack to avoid CustomizableUI warnings in console from icon.js
+	var toolbarIconAdded = Zotero.toolbarIconAdded;
 	resetPrefs();
 	
 	if (options.thisArg) {
@@ -525,7 +527,10 @@ function resetDB(options = {}) {
 		false,
 		options
 	)
-	.then(() => Zotero.Schema.schemaUpdatePromise);
+	.then(() => {
+		Zotero.toolbarIconAdded = toolbarIconAdded;
+		return Zotero.Schema.schemaUpdatePromise;
+	});
 }
 
 /**
