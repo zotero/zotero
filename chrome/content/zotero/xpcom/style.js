@@ -246,7 +246,6 @@ Zotero.Styles = new function() {
 	 */
 	this.install = Zotero.Promise.coroutine(function* (style, origin, silent=false) {
 		var styleTitle;
-		origin = origin || Zotero.getString('styles.unknownOrigin');
 		
 		try {
 			if (style instanceof Components.interfaces.nsIFile) {
@@ -262,9 +261,9 @@ Zotero.Styles = new function() {
 			// Unless user cancelled, show an alert with the error
 			if(typeof error === "object" && error instanceof Zotero.Exception.UserCancelled) return;
 			if(typeof error === "object" && error instanceof Zotero.Exception.Alert) {
-				error.log();
+				Zotero.logError(error);
 				if (silent) {
-					throw (error)
+					throw error;
 				} else {
 					error.present();
 				}
