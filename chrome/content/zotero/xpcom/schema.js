@@ -88,7 +88,7 @@ Zotero.Schema = new function(){
 			Zotero.debug('Database does not exist -- creating\n');
 			return _initializeSchema()
 			.then(function() {
-				Zotero.initializationPromise
+				(Zotero.isStandalone ? Zotero.uiReadyPromise : Zotero.initializationPromise)
 				.then(1000)
 				.then(function () {
 					return Zotero.Schema.updateBundledFiles();
@@ -182,7 +182,9 @@ Zotero.Schema = new function(){
 		// Reset sync queue tries if new version
 		yield _checkClientVersion();
 		
-		Zotero.initializationPromise
+		// In Standalone, don't load bundled files until after UI is ready. In Firefox, load them as
+		// soon initialization is done so that translation works before the Zotero pane is opened.
+		(Zotero.isStandalone ? Zotero.uiReadyPromise : Zotero.initializationPromise)
 		.then(1000)
 		.then(function () {
 			return Zotero.Schema.updateBundledFiles();

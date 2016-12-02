@@ -1138,17 +1138,24 @@ var ZoteroPane = new function()
 	});
 	
 	
+	this.tagSelectorShown = function () {
+		var collectionTreeRow = this.getCollectionTreeRow();
+		if (!collectionTreeRow) return;
+		var tagSelector = document.getElementById('zotero-tag-selector');
+		return !tagSelector.getAttribute('collapsed')
+			|| tagSelector.getAttribute('collapsed') == 'false';
+	};
+	
+	
 	/*
 	 * Set the tags scope to the items in the current view
 	 *
 	 * Passed to the items tree to trigger on changes
 	 */
 	this.setTagScope = Zotero.Promise.coroutine(function* () {
-		var collectionTreeRow = self.getCollectionTreeRow();
-		if (!collectionTreeRow) return;
+		var collectionTreeRow = this.getCollectionTreeRow();
 		var tagSelector = document.getElementById('zotero-tag-selector');
-		if (!tagSelector.getAttribute('collapsed') ||
-				tagSelector.getAttribute('collapsed') == 'false') {
+		if (this.tagSelectorShown()) {
 			Zotero.debug('Updating tag selector with current tags');
 			if (collectionTreeRow.editable) {
 				tagSelector.mode = 'edit';
@@ -1157,7 +1164,7 @@ var ZoteroPane = new function()
 				tagSelector.mode = 'view';
 			}
 			tagSelector.collectionTreeRow = collectionTreeRow;
-			tagSelector.updateScope = self.setTagScope;
+			tagSelector.updateScope = () => this.setTagScope();
 			tagSelector.libraryID = collectionTreeRow.ref.libraryID;
 			tagSelector.scope = yield collectionTreeRow.getChildTags();
 		}
@@ -1224,7 +1231,18 @@ var ZoteroPane = new function()
 				Zotero.Prefs.clear('lastViewedFolder');
 				ZoteroPane_Local.displayErrorMessage();
 			};
-			this.itemsView.addEventListener('load', this.setTagScope);
+			this.itemsView.addEventListener('load', () => this.setTagScope());
+			if (this.tagSelectorShown()) {
+				let tagSelector = document.getElementById('zotero-tag-selector')
+				let handler = function () {
+					tagSelector.removeEventListener('refresh', handler);
+					Zotero.uiIsReady();
+				};
+				tagSelector.addEventListener('refresh', handler);
+			}
+			else {
+				this.itemsView.addEventListener('load', () => Zotero.uiIsReady());
+			}
 			
 			// If item data not yet loaded for library, load it now.
 			// Other data types are loaded at startup

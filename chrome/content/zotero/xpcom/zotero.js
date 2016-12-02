@@ -93,10 +93,12 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	this.closing = false;
 	
 	
-	this.initializationDeferred;
-	this.initializationPromise;
 	this.unlockDeferred;
 	this.unlockPromise;
+	this.initializationDeferred;
+	this.initializationPromise;
+	this.objectInitializationDeferred;
+	this.objectInitializationPromise;
 	
 	this.hiDPISuffix = "";
 	
@@ -129,6 +131,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	 */
 	var _runningTimers = new Map();
 	
+	var _startupTime = new Date();
 	// Errors that were in the console at startup
 	var _startupErrors = [];
 	// Number of errors to maintain in the recent errors buffer
@@ -146,9 +149,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			return false;
 		}
 		
+		this.locked = true;
 		this.initializationDeferred = Zotero.Promise.defer();
 		this.initializationPromise = this.initializationDeferred.promise;
-		this.locked = true;
+		this.uiReadyDeferred = Zotero.Promise.defer();
+		this.uiReadyPromise = this.uiReadyDeferred.promise;
 		
 		// Add a function to Zotero.Promise to check whether a value is still defined, and if not
 		// to throw a specific error that's ignored by the unhandled rejection handler in
@@ -427,6 +432,14 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		Zotero.debug('Triggering "zotero-loaded" event');
 		Services.obs.notifyObservers(Zotero, "zotero-loaded", null);
 	}
+	
+	
+	this.uiIsReady = function () {
+		if (this.uiReadyPromise.isPending()) {
+			Zotero.debug("User interface ready in " + (new Date() - _startupTime) + " ms");
+			this.uiReadyDeferred.resolve();
+		}
+	};
 	
 	
 	var _addToolbarIcon = function () {
