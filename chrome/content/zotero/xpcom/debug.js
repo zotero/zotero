@@ -123,7 +123,7 @@ Zotero.Debug = new function () {
 				//
 				// TODO: Get rid of the filename and line number
 				if (!_consolePref && Zotero.isWin && !Zotero.isStandalone) {
-					var console = Components.utils.import("resource://gre/modules/devtools/Console.jsm", {}).console;
+					var console = Components.utils.import("resource://gre/modules/Console.jsm", {}).console;
 					console.log(output);
 				}
 				// Otherwise dump to the text console
