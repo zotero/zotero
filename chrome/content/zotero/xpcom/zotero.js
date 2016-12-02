@@ -174,10 +174,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			}
 		};
 		
-		// Load in the preferences branch for the extension
-		Zotero.Prefs.init();
-		Zotero.Debug.init(options && options.forceDebugLog);
-		
 		if (options) {
 			let opts = [
 				'openPane',
@@ -270,6 +266,9 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			Zotero.dir = 'ltr';
 		}
 		Zotero.rtl = Zotero.dir == 'rtl';
+		
+		Zotero.Prefs.init();
+		Zotero.Debug.init(options && options.forceDebugLog);
 		
 		// Make sure that Zotero Standalone is not running as root
 		if(Zotero.isStandalone && !Zotero.isWin) _checkRoot();

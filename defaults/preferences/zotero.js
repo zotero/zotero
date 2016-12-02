@@ -12,6 +12,7 @@ pref("extensions.zotero.useDataDir", false);
 pref("extensions.zotero.dataDir", '');
 pref("extensions.zotero.warnOnUnsafeDataDir", true);
 pref("extensions.zotero.debug.log",false);
+pref("extensions.zotero.debug.log.slowTime", 250);
 pref("extensions.zotero.debug.stackTrace", false);
 pref("extensions.zotero.debug.store",false);
 pref("extensions.zotero.debug.store.limit",500000);

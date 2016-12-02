@@ -26,10 +26,20 @@
 
 Zotero.Debug = new function () {
 	var _console, _consolePref, _stackTrace, _store, _level, _lastTime, _output = [];
+	var _slowTime = false;
+	var _colorOutput = false;
 	
 	this.init = function (forceDebugLog) {
 		_consolePref = Zotero.Prefs.get('debug.log');
 		_console = _consolePref || forceDebugLog;
+		if (_console && Zotero.isFx && !Zotero.isBookmarklet && (!Zotero.isWin || _consolePref)) {
+			_colorOutput = true;
+		}
+		if (_colorOutput) {
+			// Time threshold in milliseconds above which intervals
+			// should be colored red in terminal output
+			_slowTime = Zotero.Prefs.get('debug.log.slowTime');
+		}
 		_store = Zotero.Prefs.get('debug.store');
 		if (_store) {
 			Zotero.Prefs.set('debug.store', false);
@@ -60,18 +70,29 @@ Zotero.Debug = new function () {
 		}
 		
 		var deltaStr = '';
+		var deltaStrStore = '';
 		var delta = 0;
 		var d = new Date();
 		if (_lastTime) {
 			delta = d - _lastTime;
 		}
 		_lastTime = d;
+		var slowPrefix = "";
+		var slowSuffix = "";
+		if (_slowTime && delta > _slowTime) {
+			slowPrefix = "\033[31;40m";
+			slowSuffix = "\033[0m";
+		}
 		
+		// TODO: Replace with String.prototype.padStart once available (Fx48)
 		while (("" + delta).length < 7) {
 			delta = '0' + delta;
 		}
 		
-		deltaStr = '(+' + delta + ')';
+		deltaStr = "(" + slowPrefix + "+" + delta + slowSuffix + ")";
+		if (_store) {
+			deltaStrStore = "(+" + delta + ")";
+		}
 		
 		if (stack === true) {
 			// Display stack starting from where this was called
@@ -121,7 +142,7 @@ Zotero.Debug = new function () {
 					_output.splice(0, Math.abs(overage));
 				}
 			}
-			_output.push('(' + level + ')' + deltaStr + ': ' + message);
+			_output.push('(' + level + ')' + deltaStrStore + ': ' + message);
 		}
 	}
 	
