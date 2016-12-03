@@ -139,13 +139,13 @@ Zotero.Connector = new function() {
 	/**
 	 * Sends the XHR to execute an RPC call.
 	 *
-	 * @param	{Object}		options
-	 *		method - method name
-	 *		queryString - a querystring to pass on the HTTP call
-	 *		httpMethod - GET|POST
-	 *		httpHeaders - an object of HTTP headers to send	
-	 * @param	{Object}		data			RPC data. See documentation above.
-	 * @param	{Function}		callback		Function to be called when requests complete.
+	 * @param {String|Object} options - The method name as a string or an object with the
+	 *     following properties:
+	 *         method - method name
+	 *         headers - an object of HTTP headers to send
+	 *         queryString - a query string to pass on the HTTP call
+	 * @param {Object} data - RPC data to POST. If null or undefined, a GET request is sent.
+	 * @param {Function} callback - Function to be called when requests complete.
 	 */
 	this.callMethod = function(options, data, callback, tab) {
 		// Don't bother trying if not online in bookmarklet
@@ -154,17 +154,18 @@ Zotero.Connector = new function() {
 			return;
 		}
 		if (typeof options == 'string') {
-			Zotero.debug('Zotero.Connector.callMethod() now takes an object instead of a string for method. Update your code.');
 			options = {method: options};
 		}
 		var method = options.method;
-		var sendRequest = options.httpMethod == 'GET' ? Zotero.HTTP.doGet : Zotero.HTTP.doPost;
-		var httpHeaders = Object.assign({
+		var sendRequest = (data === null || data === undefined)
+			? Zotero.HTTP.doGet.bind(Zotero.HTTP)
+			: Zotero.HTTP.doPost.bind(Zotero.HTTP);
+		var headers = Object.assign({
 				"Content-Type":"application/json",
 				"X-Zotero-Version":Zotero.version,
 				"X-Zotero-Connector-API-Version":CONNECTOR_API_VERSION
-			}, options.httpHeaders);
-		var queryString = options.queryString;
+			}, options.headers);
+		var queryString = options.queryString ? ("?" + options.queryString) : "";
 		
 		var newCallback = function(req) {
 			try {
@@ -219,11 +220,11 @@ Zotero.Connector = new function() {
 				callback(false, 0);
 			}
 		} else {							// Other browsers can use plain doPost
-			var uri = CONNECTOR_URI+"connector/" + method + '?' + queryString;
-			if (httpHeaders["Content-Type"] == 'application/json') {
+			var uri = CONNECTOR_URI + "connector/" + method + queryString;
+			if (headers["Content-Type"] == 'application/json') {
 				data = JSON.stringify(data);
 			}
-			sendRequest(uri, data, newCallback, httpHeaders);
+			sendRequest(uri, data, newCallback, headers);
 		}
 	},
 	
