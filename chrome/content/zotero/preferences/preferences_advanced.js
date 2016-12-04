@@ -239,12 +239,11 @@ Zotero_Preferences.Advanced = {
 	},
 	
 	
-	onDataDirUpdate: Zotero.Promise.coroutine(function* (event) {
+	onDataDirUpdate: Zotero.Promise.coroutine(function* (event, forceNew) {
 		var radiogroup = document.getElementById('data-dir');
-		var useDataDir = Zotero.Prefs.get('useDataDir');
 		var newUseDataDir = radiogroup.selectedIndex == 1;
 		
-		if (newUseDataDir && !this._usingDefaultDataDir()) {
+		if (!forceNew && newUseDataDir && !this._usingDefaultDataDir()) {
 			return;
 		}
 		
@@ -261,7 +260,7 @@ Zotero_Preferences.Advanced = {
 	
 	chooseDataDir: function(event) {
 		document.getElementById('data-dir').selectedIndex = 1;
-		//this.onDataDirUpdate(event);
+		this.onDataDirUpdate(event, true);
 	},
 	
 	
