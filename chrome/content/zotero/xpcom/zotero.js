@@ -310,7 +310,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 						Zotero.DataDirectory.choose();
 					}
 				}
-				_addToolbarIcon();
 				return;
 			}
 			// DEBUG: handle more startup errors
@@ -348,7 +347,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				]);
 				Zotero.startupError = msg;
 				Zotero.logError(e);
-				_addToolbarIcon();
 				return false;
 			}
 			throw (e);
@@ -392,7 +390,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			return _initFull()
 			.then(function (success) {
 				if (!success) {
-					_addToolbarIcon();
 					return false;
 				}
 				
@@ -416,8 +413,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		this.initializationDeferred.resolve();
 		
 		if(Zotero.isConnector) {
-			_addToolbarIcon();
-			
 			Zotero.Repo.init();
 			Zotero.locked = false;
 		}
