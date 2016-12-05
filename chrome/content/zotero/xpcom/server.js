@@ -282,7 +282,7 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 	if(method[1] == "HEAD" || method[1] == "OPTIONS") {
 		this._requestFinished(this._generateResponse(200));
 	} else if(method[1] == "GET") {
-		this._processEndpoint("GET", null);
+		this._processEndpoint("GET", null); // async
 	} else if(method[1] == "POST") {
 		const contentLengthRe = /[\r\n]Content-Length: +([0-9]+)/i;
 		
@@ -322,7 +322,7 @@ Zotero.Server.DataListener.prototype._bodyData = function() {
 		}		
 		
 		// handle envelope
-		this._processEndpoint("POST", this.body);
+		this._processEndpoint("POST", this.body); // async
 	}
 }
 	
@@ -358,7 +358,7 @@ Zotero.Server.DataListener.prototype._generateResponse = function(status, conten
 /**
  * Generates a response based on calling the function associated with the endpoint
  */
-Zotero.Server.DataListener.prototype._processEndpoint = function(method, postData) {
+Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine(function* (method, postData) {
 	try {
 		var endpoint = new this.endpoint;
 		
@@ -423,10 +423,54 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 			me._requestFinished(me._generateResponse(code, contentType, arg));
 		}
 		
-		// pass to endpoint
-		if (endpoint.init.length === 2) {
+		// Pass to endpoint
+		//
+		// Single-parameter endpoint
+		//   - Takes an object with 'method', 'pathname', 'query', 'headers', and 'data'
+		//   - Returns a status code, an array containing [statusCode, contentType, body],
+		//     or a promise for either
+		if (endpoint.init.length === 1
+				// Return value from Zotero.Promise.coroutine()
+				|| endpoint.init.length === 0) {
+			let headers = {};
+			let headerLines = this.header.trim().split(/\r\n/);
+			for (let line of headerLines) {
+				line = line.trim();
+				let pos = line.indexOf(':');
+				if (pos == -1) {
+					continue;
+				}
+				let k = line.substr(0, pos);
+				let v = line.substr(pos + 1).trim();
+				headers[k] = v;
+			}
+			
+			let maybePromise = endpoint.init({
+				method,
+				pathname: this.pathname,
+				query: this.query ? Zotero.Server.decodeQueryString(this.query.substr(1)) : {},
+				headers,
+				data: decodedData
+			});
+			let result;
+			if (maybePromise.then) {
+				result = yield maybePromise;
+			}
+			else {
+				result = maybePromise;
+			}
+			if (Number.isInteger(result)) {
+				sendResponseCallback(result);
+			}
+			else {
+				sendResponseCallback(...result);
+			}
+		}
+		// Two-parameter endpoint takes data and a callback
+		else if (endpoint.init.length === 2) {
 			endpoint.init(decodedData, sendResponseCallback);
 		}
+		// Three-parameter endpoint takes a URL, data, and a callback
 		else {
 			const uaRe = /[\r\n]User-Agent: +([^\r\n]+)/i;
 			var m = uaRe.exec(this.header);
@@ -442,7 +486,7 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 		this._requestFinished(this._generateResponse(500), "text/plain", "An error occurred\n");
 		throw e;
 	}
-}
+});
 
 /*
  * returns HTTP data from a request
