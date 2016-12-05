@@ -351,6 +351,9 @@ function ZoteroService() {
 				
 				dump(e + "\n\n");
 				Components.utils.reportError(e);
+				if (!zContext.Zotero.startupError) {
+					zContext.Zotero.startupError = e;
+				}
 				throw e;
 			})
 			.then(function () {
