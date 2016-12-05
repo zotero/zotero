@@ -188,6 +188,11 @@ Zotero.Sync.Data.Local = {
 			
 			// Reset library
 			if (index == 0) {
+				// This check happens before item data is loaded for syncing, so do it now,
+				// since the reset requires it
+				if (!library.getDataLoaded('item')) {
+					yield library.waitForDataLoad('item');
+				}
 				yield this.resetUnsyncedLibraryData(libraryID);
 				return true;
 			}
@@ -201,6 +206,11 @@ Zotero.Sync.Data.Local = {
 			
 			// Reset library files
 			if (index == 0) {
+				// This check happens before item data is loaded for syncing, so do it now,
+				// since the reset requires it
+				if (!library.getDataLoaded('item')) {
+					yield library.waitForDataLoad('item');
+				}
 				yield this.resetUnsyncedLibraryFiles(libraryID);
 				return true;
 			}
