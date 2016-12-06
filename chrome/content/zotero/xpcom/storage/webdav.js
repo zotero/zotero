@@ -1105,6 +1105,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				{
 					successCodes: [200, 300, 404],
 					requestObserver: xmlhttp => request.setChannel(xmlhttp.channel),
+					dontCache: true,
 					debug: true
 				}
 			);
