@@ -874,13 +874,15 @@ Zotero.Translate.ItemGetter.prototype = {
 				
 				// get attachments, although only urls will be passed if exportFileData is off
 				returnItemArray.attachments = [];
-				var attachments = returnItem.getAttachments();
-				for (let attachmentID of attachments) {
-					var attachment = Zotero.Items.get(attachmentID);
-					var attachmentInfo = this._attachmentToArray(attachment);
-					
-					if(attachmentInfo) {
-						returnItemArray.attachments.push(attachmentInfo);
+				if (returnItem.isRegularItem()) {
+					var attachments = returnItem.getAttachments();
+					for (let attachmentID of attachments) {
+						var attachment = Zotero.Items.get(attachmentID);
+						var attachmentInfo = this._attachmentToArray(attachment);
+						
+						if(attachmentInfo) {
+							returnItemArray.attachments.push(attachmentInfo);
+						}
 					}
 				}
 				
