@@ -2988,7 +2988,7 @@ var ZoteroPane = new function()
 					ZoteroPane_Local.buildItemContextMenu()
 					.then(function () {
 						document.getElementById('zotero-itemmenu').openPopup(
-							null, null, event.clientX, event.clientY, true, false, event
+							null, null, event.clientX + 1, event.clientY + 1, true, false, event
 						);
 					})
 				});
