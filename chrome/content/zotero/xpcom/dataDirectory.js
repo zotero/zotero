@@ -174,7 +174,7 @@ Zotero.DataDirectory = {
 			
 			if(defProfile) {
 				// get Zotero directory
-				let profileDir = defProfile[0].path;
+				let profileDir = defProfile[0];
 				Zotero.debug("Found default profile at " + profileDir);
 				
 				// copy prefs
