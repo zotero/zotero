@@ -576,7 +576,13 @@ Zotero.DataDirectory = {
 		// This can seemingly fail due to a race condition building the Standalone window,
 		// so just ignore it if it does
 		try {
-			Zotero.showZoteroPaneProgressMeter(Zotero.getString("dataDir.migration.inProgress"));
+			Zotero.showZoteroPaneProgressMeter(
+				Zotero.getString("dataDir.migration.inProgress"),
+				false,
+				null,
+				// Don't show message in a popup in Standalone if pane isn't ready
+				Zotero.iStandalone
+			);
 		}
 		catch (e) {
 			Zotero.logError(e);

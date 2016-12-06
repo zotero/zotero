@@ -1503,11 +1503,12 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	/**
 	 * Show Zotero pane overlay and progress bar in all windows
 	 *
-	 * @param	{String}		msg
-	 * @param	{Boolean}		[determinate=false]
+	 * @param {String} msg
+	 * @param {Boolean} [determinate=false]
+	 * @param {Boolean} [modalOnly=false] - Don't use popup if Zotero pane isn't showing
 	 * @return	void
 	 */
-	this.showZoteroPaneProgressMeter = function (msg, determinate, icon) {
+	this.showZoteroPaneProgressMeter = function (msg, determinate, icon, modalOnly) {
 		// If msg is undefined, keep any existing message. If false/null/"", clear.
 		// The message is also cleared when the meters are hidden.
 		_progressMessage = msg = (msg === undefined ? _progressMessage : msg) || "";
@@ -1517,7 +1518,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		while (enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
 			if(!win.ZoteroPane) continue;
-			if(!win.ZoteroPane.isShowing()) {
+			if (!win.ZoteroPane.isShowing() && !modalOnly) {
 				if (win != currentWindow) {
 					continue;
 				}
