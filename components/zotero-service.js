@@ -348,13 +348,14 @@ function ZoteroService() {
 						return zContext.Zotero.init(zInitOptions);
 					})
 				}
-				
 				dump(e + "\n\n");
 				Components.utils.reportError(e);
 				if (!zContext.Zotero.startupError) {
-					zContext.Zotero.startupError = e;
+					zContext.Zotero.startupError = e.stack || e + "\n\n" + e.stack;
 				}
-				throw e;
+				if (!isStandalone()) {
+					throw e;
+				}
 			})
 			.then(function () {
 				if (isStandalone()) {
@@ -363,7 +364,9 @@ function ZoteroService() {
 							zContext.Zotero.startupErrorHandler();
 						}
 						else if (zContext.Zotero.startupError) {
-							zContext.alert(zContext.Zotero.startupError);
+							Cc["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Ci.nsIPromptService)
+								.alert(null, "Error", zContext.Zotero.startupError);
 						}
 						zContext.Zotero.Utilities.Internal.quitZotero();
 					}
