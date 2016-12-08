@@ -2470,9 +2470,11 @@ Zotero.Item.prototype.renameAttachmentFile = Zotero.Promise.coroutine(function* 
 		
 		yield this.relinkAttachmentFile(destPath);
 		
-		this.attachmentSyncedHash = null;
-		this.attachmentSyncState = "to_upload";
-		yield this.saveTx({ skipAll: true });
+		if (this.isImportedAttachment()) {
+			this.attachmentSyncedHash = null;
+			this.attachmentSyncState = "to_upload";
+			yield this.saveTx({ skipAll: true });
+		}
 		
 		return true;
 	}

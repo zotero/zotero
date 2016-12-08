@@ -746,6 +746,25 @@ describe("Zotero.Item", function () {
 			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD);
 			assert.isNull(item.attachmentSyncedHash);
 		})
+		
+		it("should rename a linked file", function* () {
+			var filename = 'test.png';
+			var file = getTestDataDirectory();
+			file.append(filename);
+			var tmpDir = yield getTempDirectory();
+			var tmpFile = OS.Path.join(tmpDir, filename);
+			yield OS.File.copy(file.path, tmpFile);
+			
+			var item = yield Zotero.Attachments.linkFromFile({
+				file: tmpFile
+			});
+			var newName = 'test2.png';
+			yield assert.eventually.isTrue(item.renameAttachmentFile(newName));
+			assert.equal(item.attachmentFilename, newName);
+			var path = yield item.getFilePathAsync();
+			assert.equal(OS.Path.basename(path), newName)
+			yield OS.File.exists(path);
+		})
 	})
 	
 	
