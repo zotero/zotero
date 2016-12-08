@@ -556,18 +556,6 @@ describe("Zotero.Sync.Runner", function () {
 	})
 
 	describe("#sync()", function () {
-		// Notifier is triggered without waiting for async actions to finish, which
-		// fires off database queries after its been closed.
-		var observerTriggerDeferred;
-		beforeEach(function() {
-			observerTriggerDeferred = Zotero.Promise.defer();
-			sinon.stub(Zotero.Notifier, 'trigger', 
-				(e) => {if (e == 'finish') observerTriggerDeferred.resolve(); return Zotero.Promise.resolve()});
-		});
-		afterEach(function* () {
-			yield observerTriggerDeferred.promise;
-			Zotero.Notifier.trigger.restore();
-		});
 		it("should perform a sync across all libraries and update library versions", function* () {
 			setResponse('keyInfo.fullAccess');
 			setResponse('userGroups.groupVersions');
@@ -958,18 +946,7 @@ describe("Zotero.Sync.Runner", function () {
 	describe("Error Handling", function () {
 		var win;
 		
-		// Notifier is triggered without waiting for async actions to finish, which
-		// fires off database queries after its been closed.
-		var observerTriggerDeferred;
-		beforeEach(function() {
-			observerTriggerDeferred = Zotero.Promise.defer();
-			sinon.stub(Zotero.Notifier, 'trigger', 
-				(e) => {if (e == 'finish') observerTriggerDeferred.resolve(); return Zotero.Promise.resolve()});
-		});
-		
-		afterEach(function* () {
-			yield observerTriggerDeferred.promise;
-			Zotero.Notifier.trigger.restore();
+		afterEach(function () {
 			if (win) {
 				win.close();
 			}

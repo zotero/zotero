@@ -44,6 +44,8 @@ Zotero.Feeds = new function() {
 		
 		Zotero.Notifier.registerObserver({notify: function(event) {
 			if (event == 'finish') {
+				// Don't update during tests, since the database will have been closed
+				if (Zotero.test) return;
 				Zotero.Feeds.updateFeeds();
 			}
 		}}, ['sync'], 'feedsUpdate');
