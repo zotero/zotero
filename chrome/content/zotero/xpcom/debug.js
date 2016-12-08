@@ -80,8 +80,8 @@ Zotero.Debug = new function () {
 		var slowPrefix = "";
 		var slowSuffix = "";
 		if (_slowTime && delta > _slowTime) {
-			slowPrefix = "\033[31;40m";
-			slowSuffix = "\033[0m";
+			slowPrefix = "\x1b[31;40m";
+			slowSuffix = "\x1b[0m";
 		}
 		
 		// TODO: Replace with String.prototype.padStart once available (Fx48)
