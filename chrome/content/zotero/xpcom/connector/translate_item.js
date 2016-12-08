@@ -26,9 +26,6 @@
 /**
  * Save translator items. 
  * 
- * In the connector these options are actually irrelevent. We're just passing the items to standalone or
- * saving to server.
- * 
  * @constructor
  * @param {Object} options
  *         <li>libraryID - ID of library in which items should be saved</li>
@@ -36,11 +33,14 @@
  *         <li>attachmentMode - One of Zotero.Translate.ItemSaver.ATTACHMENT_* specifying how attachments should be saved</li>
  *         <li>forceTagType - Force tags to specified tag type</li>
  *         <li>cookieSandbox - Cookie sandbox for attachment requests</li>
+ *         <li>proxy - A proxy to deproxify item URLs</li>
  *         <li>baseURI - URI to which attachment paths should be relative</li>
  *         
  */
 Zotero.Translate.ItemSaver = function(options) {
 	this.newItems = [];
+	this._proxy = options.proxy;
+	this._baseURI = options.baseURI;
 	
 	// Add listener for callbacks, but only for Safari or the bookmarklet. In Chrome, we
 	// (have to) save attachments from the inject page.
@@ -80,7 +80,12 @@ Zotero.Translate.ItemSaver.prototype = {
 	saveItems: function (items, attachmentCallback) {
 		var deferred = Zotero.Promise.defer();
 		// first try to save items via connector
-		var payload = {"items":items};
+		var payload = { items, uri: this._baseURI };
+		if (Zotero.isSafari) {
+			// This is the best in terms of cookies we can do in Safari
+			payload.cookie = document.cookie;
+		}
+		payload.proxy = this._proxy && this._proxy.toJSON();
 		Zotero.Connector.setCookiesThenSaveItems(payload, function(data, status) {
 			if(data !== false) {
 				Zotero.debug("Translate: Save via Standalone succeeded");
@@ -179,6 +184,10 @@ Zotero.Translate.ItemSaver.prototype = {
 		
 		for(var i=0, n=items.length; i<n; i++) {
 			var item = items[i];
+			// deproxify url
+			if (this._proxy && item.url) {
+				item.url = this._proxy.toProper(item.url);
+			}
 			itemIndices[i] = newItems.length;
 			newItems = newItems.concat(Zotero.Utilities.itemToServerJSON(item));
 			if(typedArraysSupported) {
@@ -239,7 +248,6 @@ Zotero.Translate.ItemSaver.prototype = {
 	 *     on failure or attachmentCallback(attachment, progressPercent) periodically during saving.
 	 */
 	"_saveAttachmentsToServer":function(itemKey, baseName, attachments, prefs, attachmentCallback) {
-						Zotero.debug("saveattachmentstoserver");
 		var me = this,
 			uploadAttachments = [],
 			retrieveHeadersForAttachments = attachments.length;
@@ -255,6 +263,10 @@ Zotero.Translate.ItemSaver.prototype = {
 			var attachmentPayload = [];
 			for(var i=0; i<uploadAttachments.length; i++) {
 				var attachment = uploadAttachments[i];
+				// deproxify url
+				if (this._proxy && attachment.url) {
+					attachment.url = this._proxy.toProper(attachment.url);
+				}
 				attachmentPayload.push({
 					"itemType":"attachment",
 					"parentItem":itemKey,

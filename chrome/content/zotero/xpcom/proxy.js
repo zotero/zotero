@@ -75,8 +75,8 @@ Zotero.Proxies = new function() {
 	 * @return {Promise<Zotero.Proxy>}
 	 */
 	this.newProxyFromRow = Zotero.Promise.coroutine(function* (row) {
-		var proxy = new Zotero.Proxy;
-		yield proxy._loadFromRow(row);
+		var proxy = new Zotero.Proxy(row);
+		yield proxy.loadHosts();
 		return proxy;
 	});
 	
@@ -368,6 +368,65 @@ Zotero.Proxies = new function() {
 	}
 	
 	/**
+	 * Check the url for potential proxies and deproxify, providing a scheme to build
+	 * a proxy object.
+	 * 
+	 * @param URL
+	 * @returns {Object} Unproxied url to proxy object
+	 */
+	this.getPotentialProxies = function(URL) {
+		var urlToProxy = {};
+		// If it's a known proxied URL just return it
+		if (Zotero.Proxies.transparent) {
+			for (var proxy of Zotero.Proxies.proxies) {
+				if (proxy.regexp) {
+					var m = proxy.regexp.exec(URL);
+					if (m) {
+						let proper = proxy.toProper(m);
+						urlToProxy[proper] = proxy.toJSON();
+						return urlToProxy;
+					}
+				}
+			}
+		}
+		urlToProxy[URL] = null;
+		
+		// if there is a subdomain that is also a TLD, also test against URI with the domain
+		// dropped after the TLD
+		// (i.e., www.nature.com.mutex.gmu.edu => www.nature.com)
+		var m = /^(https?:\/\/)([^\/]+)/i.exec(URL);
+		if (m) {
+			// First, drop the 0- if it exists (this is an III invention)
+			var host = m[2];
+			if (host.substr(0, 2) === "0-") host = host.substr(2);
+			var hostnameParts = [host.split(".")];
+			if (m[1] == 'https://' && host.replace(/-/g, '.') != host) {
+				// try replacing hyphens with dots for https protocol
+				// to account for EZProxy HttpsHypens mode
+				hostnameParts.push(host.replace(/-/g, '.').split('.'));
+			}
+			
+			for (let i=0; i < hostnameParts.length; i++) {
+				let parts = hostnameParts[i];
+				// If hostnameParts has two entries, then the second one is with replaced hyphens
+				let dotsToHyphens = i == 1;
+				// skip the lowest level subdomain, domain and TLD
+				for (let j=1; j<parts.length-2; j++) {
+					// if a part matches a TLD, everything up to it is probably the true URL
+					if (TLDS[parts[j].toLowerCase()]) {
+						var properHost = parts.slice(0, j+1).join(".");
+						// protocol + properHost + /path
+						var properURL = m[1]+properHost+URL.substr(m[0].length);
+						var proxyHost = parts.slice(j+1).join('.');
+						urlToProxy[properURL] = {scheme: m[1] + '%h.' + proxyHost + '/%p', dotsToHyphens};
+					}
+				}
+			}
+		}
+		return urlToProxy;
+	};
+	
+	/**
 	 * Determines whether a host is blacklisted, i.e., whether we should refuse to save transparent
 	 * proxy entries for this host. This is necessary because EZProxy offers to proxy all Google and
 	 * Wikipedia subdomains, but in practice, this would get really annoying.
@@ -521,9 +580,35 @@ Zotero.Proxies = new function() {
  * @constructor
  * @class Represents an individual proxy server
  */
-Zotero.Proxy = function () {
+Zotero.Proxy = function (row) {
 	this.hosts = [];
-	this.multiHost = false;
+	this._loadFromRow(row);
+}
+
+/**
+ * Loads a proxy object from a DB row
+ * @private
+ */
+Zotero.Proxy.prototype._loadFromRow = function (row) {
+	this.proxyID = row.proxyID;
+	this.multiHost = row.scheme && row.scheme.indexOf('%h') != -1 || !!row.multiHost;
+	this.autoAssociate = !!row.autoAssociate;
+	this.scheme = row.scheme;
+	// Database query results will throw as this option is only present when the proxy comes along with the translator
+	try {
+		this.dotsToHyphens = !!row.dotsToHyphens;
+	} catch (e) {}
+	
+	if (this.scheme) {
+		this.compileRegexp();
+	}
+};
+
+Zotero.Proxy.prototype.toJSON = function() {
+	if (!this.scheme) {
+		throw Error('Cannot convert proxy to JSON - no scheme');
+	}
+	return {id: this.id, scheme: this.scheme, dotsToHyphens: this.dotsToHyphens};
 }
 
 /**
@@ -556,7 +641,7 @@ const Zotero_Proxy_schemeParameterRegexps = {
 Zotero.Proxy.prototype.compileRegexp = function() {
 	// take host only if flagged as multiHost
 	var parametersToCheck = Zotero_Proxy_schemeParameters;
-	if(this.multiHost) parametersToCheck["%h"] = "([a-zA-Z0-9]+\\.[a-zA-Z0-9\.]+)";
+	if(this.multiHost) parametersToCheck["%h"] = "([a-zA-Z0-9]+[.\\-][a-zA-Z0-9.\\-]+)";
 	
 	var indices = this.indices = {};
 	this.parameters = [];
@@ -686,7 +771,8 @@ Zotero.Proxy.prototype.save = Zotero.Promise.coroutine(function* (transparent) {
 Zotero.Proxy.prototype.revert = Zotero.Promise.coroutine(function* () {
 	if (!this.proxyID) throw new Error("Cannot revert an unsaved proxy");
 	var row = yield Zotero.DB.rowQueryAsync("SELECT * FROM proxies WHERE proxyID = ?", [this.proxyID]);
-	yield this._loadFromRow(row);
+	this._loadFromRow(row);
+	yield this.loadHosts();
 });
 
 /**
@@ -706,14 +792,29 @@ Zotero.Proxy.prototype.erase = Zotero.Promise.coroutine(function* () {
 /**
  * Converts a proxied URL to an unproxied URL using this proxy
  *
- * @param m {Array} The match from running this proxy's regexp against a URL spec
- * @type String
+ * @param m {String|Array} The URL or the match from running this proxy's regexp against a URL spec
+ * @return {String} The unproxified URL if was proxified or the unchanged URL
  */
 Zotero.Proxy.prototype.toProper = function(m) {
+	if (!Array.isArray(m)) {
+		let match = this.regexp.exec(m);
+		if (!match) {
+			return m
+		} else {
+			m = match;
+		}
+	}
+	let scheme = this.scheme.indexOf('https') == -1 ? 'http://' : 'https://';
 	if(this.multiHost) {
-		var properURL = "http://"+m[this.parameters.indexOf("%h")+1]+"/";
+		var properURL = scheme+m[this.parameters.indexOf("%h")+1]+"/";
 	} else {
-		var properURL = "http://"+this.hosts[0]+"/";
+		var properURL = scheme+this.hosts[0]+"/";
+	}
+	
+	// Replace `-` with `.` in https to support EZProxy HttpsHyphens.
+	// Potentially troublesome with domains that contain dashes
+	if (this.dotsToHyphens) {
+		properURL = properURL.replace(/-/g, '.');
 	}
 	
 	if(this.indices["%p"]) {
@@ -731,17 +832,23 @@ Zotero.Proxy.prototype.toProper = function(m) {
 /**
  * Converts an unproxied URL to a proxied URL using this proxy
  *
- * @param {nsIURI} uri The nsIURI corresponding to the unproxied URL
- * @type String
+ * @param {String|nsIURI} uri The URL as a string or the nsIURI corresponding to the unproxied URL
+ * @return {String} The proxified URL if was unproxified or the unchanged url
  */
 Zotero.Proxy.prototype.toProxy = function(uri) {
+	if (typeof uri == "string") {
+		uri = Services.io.newURI(uri, null, null);
+	}
+	if (this.regexp.exec(uri.spec)) {
+		return uri.spec;
+	}
 	var proxyURL = this.scheme;
 	
 	for(var i=this.parameters.length-1; i>=0; i--) {
 		var param = this.parameters[i];
 		var value = "";
 		if(param == "%h") {
-			value = uri.hostPort;
+			value = this.dotsToHyphens ? uri.hostPort.replace(/-/g, '.') : uri.hostPort;
 		} else if(param == "%p") {
 			value = uri.path.substr(1);
 		} else if(param == "%d") {
@@ -756,19 +863,13 @@ Zotero.Proxy.prototype.toProxy = function(uri) {
 	return proxyURL;
 }
 
-/**
- * Loads a proxy object from a DB row
- * @private
- */
-Zotero.Proxy.prototype._loadFromRow = Zotero.Promise.coroutine(function* (row) {
-	this.proxyID = row.proxyID;
-	this.multiHost = !!row.multiHost;
-	this.autoAssociate = !!row.autoAssociate;
-	this.scheme = row.scheme;
+Zotero.Proxy.prototype.loadHosts = Zotero.Promise.coroutine(function* () {
+	if (!this.proxyID) {
+		throw Error("Cannot load hosts without a proxyID")
+	}
 	this.hosts = yield Zotero.DB.columnQueryAsync(
-		"SELECT hostname FROM proxyHosts WHERE proxyID = ? ORDER BY hostname", row.proxyID
+		"SELECT hostname FROM proxyHosts WHERE proxyID = ? ORDER BY hostname", this.proxyID
 	);
-	this.compileRegexp();
 });
 
 /**

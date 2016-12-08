@@ -146,10 +146,10 @@ Zotero.Translators = new function() {
 		if(!_initialized) Zotero.Translators.init();
 		var allTranslators = _cache["web"];
 		var potentialTranslators = [];
-		var converterFunctions = [];
+		var proxies = [];
 		
-		var rootSearchURIs = this.getSearchURIs(rootURI);
-		var frameSearchURIs = isFrame ? this.getSearchURIs(URI) : rootSearchURIs;
+		var rootSearchURIs = Zotero.Proxies.getPotentialProxies(rootURI);
+		var frameSearchURIs = isFrame ? Zotero.Proxies.getPotentialProxies(URI) : rootSearchURIs;
 
 		Zotero.debug("Translators: Looking for translators for "+Object.keys(frameSearchURIs).join(', '));
 
@@ -174,14 +174,14 @@ Zotero.Translators = new function() {
 							
 						if (frameURIMatches) {
 							potentialTranslators.push(translator);
-							converterFunctions.push(frameSearchURIs[frameSearchURI]);
+							proxies.push(frameSearchURIs[frameSearchURI]);
 							// prevent adding the translator multiple times
 							break rootURIsLoop;
 						}
 					}
 				} else if(!isFrame && (isGeneric || rootURIMatches)) {
 					potentialTranslators.push(translator);
-					converterFunctions.push(rootSearchURIs[rootSearchURI]);
+					proxies.push(rootSearchURIs[rootSearchURI]);
 					break;
 				}
 			}
@@ -189,51 +189,10 @@ Zotero.Translators = new function() {
 		
 		var codeGetter = new Zotero.Translators.CodeGetter(potentialTranslators);
 		return codeGetter.getAll().then(function () {
-			return [potentialTranslators, converterFunctions];
+			return [potentialTranslators, proxies];
 		});
 	});
-	
-	/**
-	 * Get the array of searchURIs and related proxy converter functions
-	 * 
-	 * @param {String} URI to get searchURIs and converterFunctions for
-	 */
-	this.getSearchURIs = function(URI) {
-		var searchURIs = {};
-		searchURIs[URI] = null;
-		
-		// if there is a subdomain that is also a TLD, also test against URI with the domain
-		// dropped after the TLD
-		// (i.e., www.nature.com.mutex.gmu.edu => www.nature.com)
-		var m = /^(https?:\/\/)([^\/]+)/i.exec(URI);
-		if (m) {
-			// First, drop the 0- if it exists (this is an III invention)
-			var host = m[2];
-			if(host.substr(0, 2) === "0-") host = host.substr(2);
-			var hostnames = host.split(".");
-			for (var i=1; i<hostnames.length-2; i++) {
-				if (TLDS[hostnames[i].toLowerCase()]) {
-					var properHost = hostnames.slice(0, i+1).join(".");
-					var proxyHost = hostnames.slice(i+1).join(".");
-					var searchURI = m[1]+properHost+URI.substr(m[0].length);
-					if(Zotero.isBrowserExt || Zotero.isSafari) {
-						// in Chrome/Safari, the converterFunction needs to be passed as JSON, so
-						// just push an array with the proper and proxyHosts
-						searchURIs[searchURI] = [properHost, proxyHost];
-					} else {
-						// in Firefox, add a converterFunction
-						searchURIs[searchURI] = new function() {
-							var re = new RegExp('^https?://(?:[^/]+\\.)?'+Zotero.Utilities.quotemeta(properHost)+'(?=/)', "gi");
-							var _proxyHost = proxyHost.replace(/\$/g, "$$$$");
-							return function(uri) { return uri.replace(re, "$&."+_proxyHost) };
-						};
-					}
-				}
-			}
-		}
-		return searchURIs;
-	};
-	
+
 	/**
 	 * Converts translators to JSON-serializable objects
 	 */

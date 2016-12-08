@@ -177,17 +177,18 @@ Zotero.Server.Connector.Detect.prototype = {
 	},
 
 	/**
-	 * Callback to be executed when list of translators becomes available. Sends response with
-	 * item types, translator IDs, labels, and icons for available translators.
+	 * Callback to be executed when list of translators becomes available. Sends standard
+	 * translator passing properties with proxies where available for translators.
 	 * @param {Zotero.Translate} translate
 	 * @param {Zotero.Translator[]} translators
 	 */
-	_translatorsAvailable: function(obj, translators) {
-		var jsons = [];
-		for (let translator of translators) {
-			jsons.push(translator.serialize(TRANSLATOR_PASSING_PROPERTIES));
-		}
-		this.sendResponse(200, "application/json", JSON.stringify(jsons));
+	_translatorsAvailable: function(translate, translators) {
+		translators = translators.map(function(translator) {
+			translator = translator.serialize(TRANSLATOR_PASSING_PROPERTIES.concat('proxy'));
+			translator.proxy = translator.proxy ? translator.proxy.toJSON() : null;
+			return translator;
+		});
+		this.sendResponse(200, "application/json", JSON.stringify(translators));
 		
 		Zotero.Browser.deleteHiddenBrowser(this._browser);
 	}
@@ -371,13 +372,15 @@ Zotero.Server.Connector.SaveItem.prototype = {
 			Zotero.Server.Connector.AttachmentProgressManager.add(data.items[i].attachments);
 		}
 		
+		let proxy = data.proxy && new Zotero.Proxy(data.proxy);
 		// save items
 		var itemSaver = new Zotero.Translate.ItemSaver({
 			libraryID,
 			collections: collection ? [collection.id] : undefined,
 			attachmentMode: Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD,
 			forceTagType: 1,
-			cookieSandbox
+			cookieSandbox,
+			proxy
 		});
 		try {
 			let items = yield itemSaver.saveItems(

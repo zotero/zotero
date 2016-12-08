@@ -33,6 +33,7 @@
  *         <li>attachmentMode - One of Zotero.Translate.ItemSaver.ATTACHMENT_* specifying how attachments should be saved</li>
  *         <li>forceTagType - Force tags to specified tag type</li>
  *         <li>cookieSandbox - Cookie sandbox for attachment requests</li>
+ *         <li>proxy - A proxy to deproxify item URLs</li>
  *         <li>baseURI - URI to which attachment paths should be relative</li>
  */
 Zotero.Translate.ItemSaver = function(options) {
@@ -53,6 +54,7 @@ Zotero.Translate.ItemSaver = function(options) {
 	                      Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE;
 	this._forceTagType = options.forceTagType;
 	this._cookieSandbox = options.cookieSandbox;
+	this._proxy = options.proxy;
 	
 	// the URI to which other URIs are assumed to be relative
 	if(typeof baseURI === "object" && baseURI instanceof Components.interfaces.nsIURI) {
@@ -108,6 +110,13 @@ Zotero.Translate.ItemSaver.prototype = {
 						id:item.itemID || item.id
 					};
 					newItem.fromJSON(this._deleteIrrelevantFields(item));
+					
+					// deproxify url
+					if (this._proxy && item.url) {
+						let url = this._proxy.toProper(item.url);
+						Zotero.debug(`Deproxifying item url ${item.url} with scheme ${this._proxy.scheme} to ${url}`, 5);
+						newItem.setField('url', url);
+					}
 					
 					if (this._collections) {
 						newItem.setCollections(this._collections);
@@ -253,6 +262,12 @@ Zotero.Translate.ItemSaver.prototype = {
 			}
 			
 			if (!newAttachment) return false; // attachmentCallback should not have been called in this case
+			
+			// deproxify url
+			let url = newAttachment.getField('url');
+			if (this._proxy && url) {
+				newAttachment.setField('url', this._proxy.toProper(url));
+			}
 
 			// save fields
 			if (attachment.accessDate) newAttachment.setField("accessDate", attachment.accessDate);
