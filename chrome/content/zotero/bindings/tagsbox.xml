@@ -703,7 +703,7 @@
 								}
 							}
 							
-							this.item.addTags(tags);
+							tags.forEach(tag => this.item.addTag(tag));
 							yield this.item.saveTx();
 							
 							if (lastTag) {
