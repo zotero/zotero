@@ -35,6 +35,7 @@ var TRANSLATOR_TYPES = {"import":1, "export":2, "web":4, "search":8};
 Zotero.Translators = new function() {
 	var _cache, _translators;
 	var _initialized = false;
+	var _initializationDeferred = false;
 	
 	/**
 	 * Initializes translator cache, loading all translator metadata into memory
@@ -42,17 +43,16 @@ Zotero.Translators = new function() {
 	 * @param {Object} [options.metadataCache] - Translator metadata keyed by filename, if already
 	 *     available (e.g., in updateBundledFiles()), to avoid unnecesary file reads
 	 */
-	this.reinit = Zotero.Promise.coroutine(function* (options = {}) {
+	this.init = Zotero.Promise.coroutine(function* (options = {}) {
+		if (_initializationDeferred && !options.reinit) {
+			return _initializationDeferred.promise;
+		}
+		_initializationDeferred = Zotero.Promise.defer();
+		
 		// Wait until bundled files have been updated, except when this is called by the schema update
 		// code itself
 		if (!options.fromSchemaUpdate) {
 			yield Zotero.Schema.schemaUpdatePromise;
-		}
-		// Before bundled files can be updated, any existing translators need to be loaded, but other
-		// init() calls from elsewhere should still wait on schemaUpdatePromise, so init()/lazy()
-		// can't be used. Instead, the schema update code calls reinit() with noReinit.
-		else if (options.noReinit && _initialized) {
-			return;
 		}
 		
 		Zotero.debug("Initializing translators");
@@ -211,12 +211,18 @@ Zotero.Translators = new function() {
 			_cache[type].sort(cmp);
 		}
 		
+		_initializationDeferred.resolve();
 		_initialized = true;
 		
 		Zotero.debug("Cached " + numCached + " translators in " + ((new Date) - start) + " ms");
 	});
-	this.init = Zotero.lazy(this.reinit);
-
+	
+	
+	this.reinit = function (options = {}) {
+		return this.init(Object.assign({}, options, { reinit: true }));
+	};
+	
+	
 	/**
 	 * Loads a translator from JSON, with optional code
 	 *

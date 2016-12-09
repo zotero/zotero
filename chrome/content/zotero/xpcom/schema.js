@@ -464,22 +464,22 @@ Zotero.Schema = new function(){
 			}
 			installLocation = installLocation.path;
 			
-			let reinitOptions = { fromSchemaUpdate: true, noReinit: true };
+			let initOpts = { fromSchemaUpdate: true };
 			
 			// Update files
 			switch (mode) {
 			case 'styles':
-				yield Zotero.Styles.reinit(reinitOptions);
+				yield Zotero.Styles.init(initOpts);
 				var updated = yield _updateBundledFilesAtLocation(installLocation, mode);
 			
 			case 'translators':
-				yield Zotero.Translators.reinit(reinitOptions);
+				yield Zotero.Translators.init(initOpts);
 				var updated = yield _updateBundledFilesAtLocation(installLocation, mode);
 			
 			default:
-				yield Zotero.Translators.reinit(reinitOptions);
+				yield Zotero.Translators.init(initOpts);
 				let up1 = yield _updateBundledFilesAtLocation(installLocation, 'translators', true);
-				yield Zotero.Styles.reinit(reinitOptions);
+				yield Zotero.Styles.init(initOpts);
 				let up2 = yield _updateBundledFilesAtLocation(installLocation, 'styles');
 				var updated = up1 || up2;
 			}
