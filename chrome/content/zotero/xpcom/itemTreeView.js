@@ -1748,23 +1748,7 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 		yield deferred.promise;
 	}
 	
-	// We aim for a row 5 below the target row, since ensureRowIsVisible() does
-	// the bare minimum to get the row in view
-	for (var v = row + 5; v>=row; v--) {
-		if (this._rows[v]) {
-			this._treebox.ensureRowIsVisible(v);
-			if (this._treebox.getFirstVisibleRow() <= row) {
-				break;
-			}
-		}
-	}
-	
-	// If the parent row isn't in view and we have enough room, make parent visible
-	if (parentRow !== null && this._treebox.getFirstVisibleRow() > parentRow) {
-		if ((row - parentRow) < this._treebox.getPageLength()) {
-			this._treebox.ensureRowIsVisible(parentRow);
-		}
-	}
+	this.betterEnsureRowIsVisible(row, parentRow);
 	
 	return true;
 });
@@ -1801,7 +1785,30 @@ Zotero.ItemTreeView.prototype.selectItems = function(ids) {
 	}
 	
 	this.selection.selectEventsSuppressed = false;
+	// TODO: This could probably be improved to try to focus more of the selected rows
+	this.betterEnsureRowIsVisible(rows[0]);
 }
+
+
+Zotero.ItemTreeView.prototype.betterEnsureRowIsVisible = function (row, parentRow = null) {
+	// We aim for a row 5 below the target row, since ensureRowIsVisible() does
+	// the bare minimum to get the row in view
+	for (let v = row + 5; v >= row; v--) {
+		if (this._rows[v]) {
+			this._treebox.ensureRowIsVisible(v);
+			if (this._treebox.getFirstVisibleRow() <= row) {
+				break;
+			}
+		}
+	}
+	
+	// If the parent row isn't in view and we have enough room, make parent visible
+	if (parentRow !== null && this._treebox.getFirstVisibleRow() > parentRow) {
+		if ((row - parentRow) < this._treebox.getPageLength()) {
+			this._treebox.ensureRowIsVisible(parentRow);
+		}
+	}
+};
 
 
 /*
