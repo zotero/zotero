@@ -197,10 +197,12 @@ Zotero.ProgressWindow = function(_window = null) {
 	this.addLines = _deferUntilWindowLoad(function addLines(labels, icons) {
 		if(typeof labels === "object" && typeof icons === "object") {
 			for (var i in labels) {
-				new this.ItemProgress(icons[i], labels[i]);
+				let progress = new this.ItemProgress(icons[i], labels[i]);
+				progress.setProgress(100);
 			}
 		} else {
-			new this.ItemProgress(icons, labels);
+			let progress = new this.ItemProgress(icons, labels);
+			progress.setProgress(100);
 		}
 		
 		_move();
