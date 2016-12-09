@@ -425,7 +425,7 @@ Zotero.Attachments = new function(){
 	/**
 	 * Create a link attachment from a URL
 	 *
-	 * @param {Object} options - 'url', 'parentItemID', 'contentType', 'title'
+	 * @param {Object} options - 'url', 'parentItemID', 'contentType', 'title', 'collections'
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
 	this.linkFromURL = Zotero.Promise.coroutine(function* (options) {
@@ -435,6 +435,7 @@ Zotero.Attachments = new function(){
 		var parentItemID = options.parentItemID;
 		var contentType = options.contentType;
 		var title = options.title;
+		var collections = options.collections;
 		
 		/* Throw error on invalid URLs
 		 We currently accept the following protocols:
@@ -490,11 +491,12 @@ Zotero.Attachments = new function(){
 		}
 		
 		return _addToDB({
-			url: url,
-			title: title,
+			url,
+			title,
 			linkMode: this.LINK_MODE_LINKED_URL,
-			contentType: contentType,
-			parentItemID: parentItemID
+			contentType,
+			parentItemID,
+			collections
 		});
 	});
 	
