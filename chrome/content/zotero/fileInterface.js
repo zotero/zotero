@@ -260,10 +260,21 @@ var Zotero_File_Interface = new function() {
 	
 		try {
 			if (!ZoteroPane.collectionsView.editable) {
-				ZoteroPane.collectionsView.selectLibrary(null);
+				yield ZoteroPane.collectionsView.selectLibrary();
 			}
 		} catch(e) {}
+		
 		yield _finishImport(translation, false);
+		
+		// Select imported items
+		try {
+			if (translation.newItems) {
+				ZoteroPane.itemsView.selectItems(translation.newItems.map(item => item.id));
+			}
+		}
+		catch (e) {
+			Zotero.logError(e, 2);
+		}
 	});
 	
 	
