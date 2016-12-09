@@ -224,8 +224,11 @@ var Zotero_File_Interface = new function() {
 			fp.init(window, Zotero.getString("fileInterface.import"), nsIFilePicker.modeOpen);
 			
 			fp.appendFilters(nsIFilePicker.filterAll);
-			for(var i in translators) {
-				fp.appendFilter(translators[i].label, "*."+translators[i].target);
+			
+			var collation = Zotero.getLocaleCollation();
+			translators.sort((a, b) => collation.compareString(1, a.label, b.label))
+			for (let translator of translators) {
+				fp.appendFilter(translator.label, "*." + translator.target);
 			}
 			
 			var rv = fp.show();
