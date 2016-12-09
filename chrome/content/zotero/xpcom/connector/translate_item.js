@@ -73,16 +73,12 @@ Zotero.Translate.ItemSaver.prototype = {
 	/**
 	 * Saves items to Standalone or the server
 	 * @param items Items in Zotero.Item.toArray() format
-	 * @param {Function} callback A callback to be executed when saving is complete. If saving
-	 *    succeeded, this callback will be passed true as the first argument and a list of items
-	 *    saved as the second. If saving failed, the callback will be passed false as the first
-	 *    argument and an error object as the second
 	 * @param {Function} [attachmentCallback] A callback that receives information about attachment
 	 *     save progress. The callback will be called as attachmentCallback(attachment, false, error)
 	 *     on failure or attachmentCallback(attachment, progressPercent) periodically during saving.
 	 */
-	"saveItems":function(items, callback, attachmentCallback) {
-		var me = this;
+	saveItems: function (items, attachmentCallback) {
+		var deferred = Zotero.Promise.defer();
 		// first try to save items via connector
 		var payload = {"items":items};
 		Zotero.Connector.setCookiesThenSaveItems(payload, function(data, status) {
@@ -100,14 +96,15 @@ Zotero.Translate.ItemSaver.prototype = {
 						}
 					}
 				}
-				callback(true, items);
-				if(haveAttachments) me._pollForProgress(items, attachmentCallback);
+				deferred.resolve(items);
+				if (haveAttachments) this._pollForProgress(items, attachmentCallback);
 			} else if(Zotero.isFx) {
-				callback(false, new Error("Save via Standalone failed with "+status));
+				deferred.reject(new Error("Save via Standalone failed with " + status));
 			} else {
-				me._saveToServer(items, callback, attachmentCallback);
+				deferred.resolve(this._saveToServer(items, attachmentCallback));
 			}
-		});
+		}.bind(this));
+		return deferred.promise;
 	},
 	
 	/**
@@ -169,16 +166,12 @@ Zotero.Translate.ItemSaver.prototype = {
 	/**
 	 * Saves items to server
 	 * @param items Items in Zotero.Item.toArray() format
-	 * @param {Function} callback A callback to be executed when saving is complete. If saving
-	 *    succeeded, this callback will be passed true as the first argument and a list of items
-	 *    saved as the second. If saving failed, the callback will be passed false as the first
-	 *    argument and an error object as the second
 	 * @param {Function} attachmentCallback A callback that receives information about attachment
 	 *     save progress. The callback will be called as attachmentCallback(attachment, false, error)
 	 *     on failure or attachmentCallback(attachment, progressPercent) periodically during saving.
 	 *     attachmentCallback() will be called with all attachments that will be saved 
 	 */
-	"_saveToServer":function(items, callback, attachmentCallback) {
+	_saveToServer: function (items, attachmentCallback) {
 		var newItems = [], itemIndices = [], typedArraysSupported = false;
 		try {
 			typedArraysSupported = !!(new Uint8Array(1) && new Blob());
@@ -197,41 +190,42 @@ Zotero.Translate.ItemSaver.prototype = {
 			}
 		}
 		
-		var me = this;
+		var deferred = Zotero.Promise.defer();
 		Zotero.API.createItem({"items":newItems}, function(statusCode, response) {
 			if(statusCode !== 200) {
-				callback(false, new Error("Save to server failed with "+statusCode+" "+response));
+				deferred.reject(new Error("Save to server failed with " + statusCode + " " + response));
 				return;
 			}
 
 			try {
 				var resp = JSON.parse(response);
 			} catch(e) {
-				callback(false, new Error("Unexpected response received from server"));
+				deferred.reject(new Error("Unexpected response received from server"));
 				return;
 			}
 			for(var i in resp.failed) {
-				callback(false, new Error("Save to server failed with "+statusCode+" "+response));
+				deferred.reject(new Error("Save to server failed with " + statusCode + " " + response));
 				return;
 			}
 			
 			Zotero.debug("Translate: Save to server complete");
-			Zotero.Prefs.getCallback(["downloadAssociatedFiles", "automaticSnapshots"],
-			function(prefs) {
-
-				if(typedArraysSupported) {
-					for(var i=0; i<items.length; i++) {
-						var item = items[i], key = resp.success[itemIndices[i]];
-						if(item.attachments && item.attachments.length) {
-							me._saveAttachmentsToServer(key, me._getFileBaseNameFromItem(item),
-								item.attachments, prefs, attachmentCallback);
+			Zotero.Prefs.getCallback(
+				["downloadAssociatedFiles", "automaticSnapshots"],
+				function (prefs) {
+					if(typedArraysSupported) {
+						for(var i=0; i<items.length; i++) {
+							var item = items[i], key = resp.success[itemIndices[i]];
+							if(item.attachments && item.attachments.length) {
+								this._saveAttachmentsToServer(key, this._getFileBaseNameFromItem(item),
+									item.attachments, prefs, attachmentCallback);
+							}
 						}
 					}
-				}
-				
-				callback(true, items);
-			});
-		});
+					deferred.resolve(items);
+				}.bind(this)
+			);
+		}.bind(this));
+		return deferred.promise;
 	},
 	
 	/**

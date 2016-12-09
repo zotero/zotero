@@ -74,94 +74,98 @@ Zotero.Translate.ItemSaver.prototype = {
 	/**
 	 * Saves items to Standalone or the server
 	 * @param items Items in Zotero.Item.toArray() format
-	 * @param {Function} callback A callback to be executed when saving is complete. If saving
-	 *    succeeded, this callback will be passed true as the first argument and a list of items
-	 *    saved as the second. If saving failed, the callback will be passed false as the first
-	 *    argument and an error object as the second
 	 * @param {Function} [attachmentCallback] A callback that receives information about attachment
 	 *     save progress. The callback will be called as attachmentCallback(attachment, false, error)
 	 *     on failure or attachmentCallback(attachment, progressPercent) periodically during saving.
 	 */
-	"saveItems": Zotero.Promise.coroutine(function* (items, callback, attachmentCallback) {
-		try {
-			let newItems = [], standaloneAttachments = [];
-			yield Zotero.DB.executeTransaction(function* () {
-				for (let iitem=0; iitem<items.length; iitem++) {
-					let item = items[iitem], newItem, myID;
-					// Type defaults to "webpage"
-					let type = (item.itemType ? item.itemType : "webpage");
+	saveItems: Zotero.Promise.coroutine(function* (items, attachmentCallback) {
+		let newItems = [], standaloneAttachments = [], childAttachments = [];
+		yield Zotero.DB.executeTransaction(function* () {
+			for (let iitem=0; iitem<items.length; iitem++) {
+				let item = items[iitem], newItem, myID;
+				// Type defaults to "webpage"
+				let type = (item.itemType ? item.itemType : "webpage");
+				
+				if (type == "note") {				// handle notes differently
+					newItem = yield this._saveNote(item);
+				}
+				// Handle standalone attachments differently
+				else if (type == "attachment") {
+					standaloneAttachments.push(items[iitem]);
+					attachmentCallback(items[iitem], 0);
+					continue;
+				} else {
+					newItem = new Zotero.Item(type);
+					newItem.libraryID = this._libraryID;
+					if(item.tags) item.tags = this._cleanTags(item.tags);
+
+					// Need to handle these specially. Put them in a separate object to
+					// avoid a warning from fromJSON()
+					let specialFields = {
+						attachments:item.attachments,
+						notes:item.notes,
+						seeAlso:item.seeAlso,
+						id:item.itemID || item.id
+					};
+					newItem.fromJSON(this._deleteIrrelevantFields(item));
 					
-					if (type == "note") {				// handle notes differently
-						newItem = yield this._saveNote(item);
-					} else if (type == "attachment") {	// handle attachments differently
-						standaloneAttachments.push(iitem);
-						continue;
-					} else {
-						newItem = new Zotero.Item(type);
-						newItem.libraryID = this._libraryID;
-						if(item.tags) item.tags = this._cleanTags(item.tags);
+					if (this._collections) {
+						newItem.setCollections(this._collections);
+					}
+					
+					// save item
+					myID = yield newItem.save();
 
-						// Need to handle these specially. Put them in a separate object to
-						// avoid a warning from fromJSON()
-						let specialFields = {
-							attachments:item.attachments,
-							notes:item.notes,
-							seeAlso:item.seeAlso,
-							id:item.itemID || item.id
-						};
-						newItem.fromJSON(this._deleteIrrelevantFields(item));
-						
-						if (this._collections) {
-							newItem.setCollections(this._collections);
+					// handle notes
+					if (specialFields.notes) {
+						for (let i=0; i<specialFields.notes.length; i++) {
+							yield this._saveNote(specialFields.notes[i], myID);
 						}
-						
-						// save item
-						myID = yield newItem.save();
-
-						// handle notes
-						if (specialFields.notes) {
-							for (let i=0; i<specialFields.notes.length; i++) {
-								yield this._saveNote(specialFields.notes[i], myID);
-							}
-						}
-
-						// handle attachments
-						if (specialFields.attachments) {
-							for (let i=0; i<specialFields.attachments.length; i++) {
-								let attachment = specialFields.attachments[i];
-								// Don't wait for the promise to resolve, since we want to
-								// signal completion as soon as the items are saved
-								this._saveAttachment(attachment, myID, attachmentCallback);
-							}
-							// Restore the attachments field, since we use it later in
-							// translation
-							item.attachments = specialFields.attachments;
-						}
-
-						// handle see also
-						this._handleRelated(specialFields, newItem);
 					}
 
-					// add to new item list
-					newItems.push(newItem);
+					// handle attachments
+					if (specialFields.attachments) {
+						for (let attachment of specialFields.attachments) {
+							childAttachments.push([attachment, myID]);
+							attachmentCallback(attachment, 0);
+						}
+						// Restore the attachments field, since we use it later in
+						// translation
+						item.attachments = specialFields.attachments;
+					}
+
+					// handle see also
+					this._handleRelated(specialFields, newItem);
 				}
-			}.bind(this));
 
-			// Handle standalone attachments outside of the transaction
-			for (let iitem of standaloneAttachments) {
-				let newItem = yield this._saveAttachment(items[iitem], null, attachmentCallback);
-				if (newItem) newItems.push(newItem);
+				// add to new item list
+				newItems.push(newItem);
 			}
+		}.bind(this));
 
-			callback(true, newItems);
-		} catch(e) {
-			callback(false, e);
+		// Handle standalone attachments outside of the transaction, because they can involve downloading
+		for (let item of standaloneAttachments) {
+			let newItem = yield this._saveAttachment(item, null, attachmentCallback);
+			if (newItem) newItems.push(newItem);
 		}
+		// Save attachments afterwards, since we want to signal completion as soon as the main items
+		// are saved
+		var promise = Zotero.Promise.delay(1);
+		for (let a of childAttachments) {
+			// Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=449811 (fixed in Fx51?)
+			let [item, parentItemID] = a;
+			promise = promise.then(() => this._saveAttachment(item, parentItemID, attachmentCallback));
+		}
+
+		return newItems;
 	}),
 	
 	"saveCollections": Zotero.Promise.coroutine(function* (collections) {
 		var collectionsToProcess = collections.slice();
-		var parentIDs = [null];
+		// Use first collection passed to translate process as the root
+		var rootCollectionID = (this._collections && this._collections.length)
+			? this._collections[0] : null;
+		var parentIDs = collections.map(c => null);
 		var topLevelCollections = [];
 
 		yield Zotero.DB.executeTransaction(function* () {
@@ -175,9 +179,13 @@ Zotero.Translate.ItemSaver.prototype = {
 				if (parentID) {
 					newCollection.parentID = parentID;
 				}
-				yield newCollection.save();
-
-				if(parentID === null) topLevelCollections.push(newCollection);
+				else {
+					newCollection.parentID = rootCollectionID;
+					topLevelCollections.push(newCollection)
+				}
+				yield newCollection.save({
+					skipSelect: true
+				});
 
 				var toAdd = [];
 
@@ -222,7 +230,7 @@ Zotero.Translate.ItemSaver.prototype = {
 	 * Saves a translator attachment to the database
 	 *
 	 * @param {Translator Attachment} attachment
-	 * @param {Integer} parentID Item to attach to
+	 * @param {Integer} parentItemID - Item to attach to
 	 * @param {Function} attachmentCallback Callback function that takes three
 	 *   parameters: translator attachment object, percent completion (integer),
 	 *   and an optional error object
@@ -230,7 +238,7 @@ Zotero.Translate.ItemSaver.prototype = {
 	 * @return {Zotero.Primise<Zotero.Item|False} Flase is returned if attachment
 	 *   was not saved due to error or user settings.
 	 */
-	"_saveAttachment": Zotero.Promise.coroutine(function* (attachment, parentID, attachmentCallback) {
+	_saveAttachment: Zotero.Promise.coroutine(function* (attachment, parentItemID, attachmentCallback) {
 		try {
 			let newAttachment;
 
@@ -263,7 +271,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		}
 	}),
 	
-	"_saveAttachmentFile": Zotero.Promise.coroutine(function* (attachment, parentID, attachmentCallback) {
+	_saveAttachmentFile: Zotero.Promise.coroutine(function* (attachment, parentItemID, attachmentCallback) {
 		Zotero.debug("Translate: Adding attachment", 4);
 		attachmentCallback(attachment, 0);
 		
@@ -319,9 +327,10 @@ Zotero.Translate.ItemSaver.prototype = {
 			attachment.linkMode = "linked_file";
 			newItem = yield Zotero.Attachments.linkFromURL({
 				url: attachment.url,
-				parentItemID: parentID,
+				parentItemID,
 				contentType: attachment.mimeType || undefined,
-				title: attachment.title || undefined
+				title: attachment.title || undefined,
+				collections: !parentItemID ? this._collections : undefined
 			});
 		} else {
 			if (attachment.url) {
@@ -332,14 +341,16 @@ Zotero.Translate.ItemSaver.prototype = {
 					title: attachment.title,
 					contentType: attachment.mimeType,
 					charset: attachment.charset,
-					parentItemID: parentID
+					parentItemID,
+					collections: !parentItemID ? this._collections : undefined
 				});
 			}
 			else {
 				attachment.linkMode = "imported_file";
 				newItem = yield Zotero.Attachments.importFromFile({
 					file: file,
-					parentItemID: parentID
+					parentItemID,
+					collections: !parentItemID ? this._collections : undefined
 				});
 				if (attachment.title) newItem.setField("title", attachment.title);
 			}
@@ -473,7 +484,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		return false;
 	},
 	
-	"_saveAttachmentDownload": Zotero.Promise.coroutine(function* (attachment, parentID, attachmentCallback) {
+	_saveAttachmentDownload: Zotero.Promise.coroutine(function* (attachment, parentItemID, attachmentCallback) {
 		Zotero.debug("Translate: Adding attachment", 4);
 		
 		if(!attachment.url && !attachment.document) {
@@ -542,9 +553,10 @@ Zotero.Translate.ItemSaver.prototype = {
 			
 			return Zotero.Attachments.linkFromURL({
 				url: cleanURI,
-				parentItemID: parentID,
+				parentItemID,
 				contentType: mimeType,
-				title: title
+				title,
+				collections: !parentItemID ? this._collections : undefined
 			});
 		}
 		
@@ -558,16 +570,17 @@ Zotero.Translate.ItemSaver.prototype = {
 			return Zotero.Attachments.importFromDocument({
 				libraryID: this._libraryID,
 				document: attachment.document,
-				parentItemID: parentID,
-				title: title
+				parentItemID,
+				title,
+				collections: !parentItemID ? this._collections : undefined
 			});
 		}
 		
 		// Import from URL
 		let mimeType = attachment.mimeType ? attachment.mimeType : null;
 		let fileBaseName;
-		if (parentID) {
-			let parentItem = yield Zotero.Items.getAsync(parentID);
+		if (parentItemID) {
+			let parentItem = yield Zotero.Items.getAsync(parentItemID);
 			fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentItem);
 		}
 		
@@ -579,19 +592,20 @@ Zotero.Translate.ItemSaver.prototype = {
 		return Zotero.Attachments.importFromURL({
 			libraryID: this._libraryID,
 			url: attachment.url,
-			parentItemID: parentID,
-			title: title,
-			fileBaseName: fileBaseName,
+			parentItemID,
+			title,
+			fileBaseName,
 			contentType: mimeType,
-			cookieSandbox: this._cookieSandbox
+			cookieSandbox: this._cookieSandbox,
+			collections: !parentItemID ? this._collections : undefined
 		});
 	}),
 	
-	"_saveNote":Zotero.Promise.coroutine(function* (note, parentID) {
+	"_saveNote":Zotero.Promise.coroutine(function* (note, parentItemID) {
 		var myNote = new Zotero.Item('note');
 		myNote.libraryID = this._libraryID;
-		if(parentID) {
-			myNote.parentID = parentID;
+		if (parentItemID) {
+			myNote.parentItemID = parentItemID;
 		}
 
 		if(typeof note == "object") {
@@ -601,7 +615,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		} else {
 			myNote.setNote(note);
 		}
-		if (!parentID && this._collections) {
+		if (!parentItemID && this._collections) {
 			myNote.setCollections(this._collections);
 		}
 		yield myNote.save();

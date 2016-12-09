@@ -596,6 +596,92 @@ describe("Zotero.Translate", function() {
 			Zotero.Translators.get.restore();
 		});
 	});
+	
+	describe("ItemSaver", function () {
+		describe("#saveCollections()", function () {
+			it("should add top-level collections to specified collection", function* () {
+				var collection = yield createDataObject('collection');
+				var collections = [
+					{
+						name: "Collection",
+						type: "collection",
+						children: []
+					}
+				];
+				var items = [
+					{
+						itemType: "book",
+						title: "Test"
+					}
+				];
+				
+				var translation = new Zotero.Translate.Import();
+				translation.setString("");
+				translation.setTranslator(buildDummyTranslator(
+					"import",
+					"function detectImport() {}\n"
+					+ "function doImport() {\n"
+					+ "	var json = JSON.parse('" + JSON.stringify(collections).replace(/['\\]/g, "\\$&") + "');\n"
+					+ "	for (let o of json) {"
+					+ "		var collection = new Zotero.Collection;\n"
+					+ "		for (let field in o) { collection[field] = o[field]; }\n"
+					+ "		collection.complete();\n"
+					+ "	}\n"
+					+ "	json = JSON.parse('" + JSON.stringify(items).replace(/['\\]/g, "\\$&") + "');\n"
+					+ "	for (let o of json) {"
+					+ "		var item = new Zotero.Item;\n"
+					+ "		for (let field in o) { item[field] = o[field]; }\n"
+					+ "		item.complete();\n"
+					+ "	}\n"
+					+ "}"
+				));
+				yield translation.translate({
+					collections: [collection.id]
+				});
+				assert.lengthOf(translation.newCollections, 1);
+				assert.isNumber(translation.newCollections[0].id);
+				assert.lengthOf(translation.newItems, 1);
+				assert.isNumber(translation.newItems[0].id);
+				var childCollections = Array.from(collection.getChildCollections(true));
+				assert.sameMembers(childCollections, translation.newCollections.map(c => c.id));
+			});
+		});
+		
+		describe("#_saveAttachment()", function () {
+			it("should save standalone attachment to collection", function* () {
+				var collection = yield createDataObject('collection');
+				var items = [
+					{
+						itemType: "attachment",
+						title: "Test",
+						mimeType: "text/html",
+						url: "http://example.com"
+					}
+				];
+				
+				var translation = new Zotero.Translate.Import();
+				translation.setString("");
+				translation.setTranslator(buildDummyTranslator(
+					"import",
+					"function detectImport() {}\n"
+					+ "function doImport() {\n"
+					+ "	var json = JSON.parse('" + JSON.stringify(items).replace(/['\\]/g, "\\$&") + "');\n"
+					+ "	for (var i=0; i<json.length; i++) {"
+					+ "		var item = new Zotero.Item;\n"
+					+ "		for (var field in json[i]) { item[field] = json[i][field]; }\n"
+					+ "		item.complete();\n"
+					+ "	}\n"
+					+ "}"
+				));
+				yield translation.translate({
+					collections: [collection.id]
+				});
+				assert.lengthOf(translation.newItems, 1);
+				assert.isNumber(translation.newItems[0].id);
+				assert.ok(collection.hasItem(translation.newItems[0].id));
+			});
+		});
+	});
 });
 
 describe("Zotero.Translate.ItemGetter", function() {

@@ -379,31 +379,27 @@ Zotero.Server.Connector.SaveItem.prototype = {
 			forceTagType: 1,
 			cookieSandbox
 		});
-		var deferred = Zotero.Promise.defer();
-		itemSaver.saveItems(data.items, function(returnValue, items) {
-			if(returnValue) {
-				try {
-					// Remove attachments not being saved from item.attachments
-					for(var i=0; i<data.items.length; i++) {
-						var item = data.items[i];
-						for(var j=0; j<item.attachments.length; j++) {
-							if(!Zotero.Server.Connector.AttachmentProgressManager.has(item.attachments[j])) {
-								item.attachments.splice(j--, 1);
-							}
-						}
+		try {
+			let items = yield itemSaver.saveItems(
+				data.items,
+				Zotero.Server.Connector.AttachmentProgressManager.onProgress
+			);
+			// Remove attachments not being saved from item.attachments
+			for(var i=0; i<data.items.length; i++) {
+				var item = data.items[i];
+				for(var j=0; j<item.attachments.length; j++) {
+					if(!Zotero.Server.Connector.AttachmentProgressManager.has(item.attachments[j])) {
+						item.attachments.splice(j--, 1);
 					}
-					
-					deferred.resolve([201, "application/json", JSON.stringify({items: data.items})]);
-				} catch(e) {
-					Zotero.logError(e);
-					deferred.resolve(500);
 				}
-			} else {
-				Zotero.logError(items);
-				deferred.resolve(500);
 			}
-		}, Zotero.Server.Connector.AttachmentProgressManager.onProgress);
-		return deferred.promise;
+			
+			return [201, "application/json", JSON.stringify({items: data.items})];
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return 500;
+		}
 	})
 }
 

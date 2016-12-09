@@ -320,44 +320,40 @@ var Zotero_File_Interface = new function() {
 		}
 
 		translation.setTranslator(translators[0]);
-		translation.setHandler("itemDone",  function () {
+		// TODO: Restore a progress meter
+		/*translation.setHandler("itemDone",  function () {
 			Zotero.updateZoteroPaneProgressMeter(translation.getProgress());
-		});
-
-		// show progress indicator
-		Zotero_File_Interface.Progress.show(
-			Zotero.getString("fileInterface.itemsImported")
-		);
+		});*/
 
 		yield Zotero.Promise.delay(0);
 
 		let failed = false;
 		try {
-			yield translation.translate(libraryID);
+			yield translation.translate({
+				libraryID,
+				collections: importCollection ? [importCollection.id] : null
+			});
 		} catch(e) {
 			Zotero.logError(e);
-			failed = true;
-		}
-		Zotero_File_Interface.Progress.close();
-
-		// Add items to import collection
-		if(importCollection) {
-			yield Zotero.DB.executeTransaction(function* () {
-				yield importCollection.addItems(translation.newItems.map(item => item.id));
-				for(let i=0; i<translation.newCollections.length; i++) {
-					let collection = translation.newCollections[i];
-					collection.parent = importCollection.id;
-					yield collection.save();
-				}
-			});
-			// 	// TODO: yield or change to .queue()
-			// 	Zotero.Notifier.trigger('refresh', 'collection', importCollection.id);
-		}
-
-		if(failed) {
 			window.alert(Zotero.getString("fileInterface.importError"));
 			return;
 		}
+		
+		// Show popup on completion
+		var numItems = translation.newItems.length;
+		translation.newItems.forEach(item => numItems += item.numChildren());
+		var progressWin = new Zotero.ProgressWindow();
+		progressWin.changeHeadline(Zotero.getString('fileInterface.importComplete'));
+		if (numItems == 1) {
+			var icon = translation.newItems[0].getImageSrc();
+		}
+		else {
+			var icon = 'chrome://zotero/skin/treesource-unfiled' + (Zotero.hiDPI ? "@2x" : "") + '.png';
+		}
+		var title = Zotero.getString(`fileInterface.itemsWereImported`, numItems, numItems);
+		progressWin.addLines(title, icon)
+		progressWin.show();
+		progressWin.startCloseTimer();
 	});
 	
 	/*

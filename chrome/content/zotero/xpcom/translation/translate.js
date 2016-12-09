@@ -199,13 +199,9 @@ Zotero.Translate.Sandbox = {
 			// Fire itemSaving event
 			translate._runHandler("itemSaving", item);
 			
-			if(translate instanceof Zotero.Translate.Web) {
-				// For web translators, we queue saves
-				translate.saveQueue.push(item);
-			} else {
-				// Save items
-				translate._saveItems([item]);
-			}
+			// TODO: This used to only be used for some modes. Since it's now used for everything with
+			// async saving, there's probably a bunch of code for the non-queued mode that can be removed.
+			translate.saveQueue.push(item);
 		},
 		
 		/**
@@ -1480,8 +1476,7 @@ Zotero.Translate.Base.prototype = {
 			if(returnValue) {
 				if(this.saveQueue.length) {
 					this._waitingForSave = true;
-					this._saveItems(this.saveQueue);
-					this.saveQueue = [];
+					this._saveItems(this.saveQueue).then(() => this.saveQueue = []);
 					return;
 				}
 				this._debug("Translation successful");
@@ -1540,69 +1535,70 @@ Zotero.Translate.Base.prototype = {
 	 * Saves items to the database, taking care to defer attachmentProgress notifications
 	 * until after save
 	 */
-	"_saveItems":function(items) {
-		var me = this,
-			itemDoneEventsDispatched = false,
-			deferredProgress = [],
-			attachmentsWithProgress = [];
+	_saveItems: function (items) {
+		var itemDoneEventsDispatched = false;
+		var deferredProgress = [];
+		var attachmentsWithProgress = [];
 		
 		this._savingItems++;
-		this._itemSaver.saveItems(items.slice(), function(returnValue, newItems) {	
-			if(returnValue) {
-				// Remove attachments not being saved from item.attachments
-				for(var i=0; i<items.length; i++) {
-					var item = items[i];
-					for(var j=0; j<item.attachments.length; j++) {
-						if(attachmentsWithProgress.indexOf(item.attachments[j]) === -1) {
-							item.attachments.splice(j--, 1);
-						}
+		return this._itemSaver.saveItems(
+			items.slice(),
+			function (attachment, progress, error) {
+				var attachmentIndex = this._savingAttachments.indexOf(attachment);
+				if(progress === false || progress === 100) {
+					if(attachmentIndex !== -1) {
+						this._savingAttachments.splice(attachmentIndex, 1);
+					}
+				} else if(attachmentIndex === -1) {
+					this._savingAttachments.push(attachment);
+				}
+				
+				if(itemDoneEventsDispatched) {
+					// itemDone event has already fired, so we can fire attachmentProgress
+					// notifications
+					this._runHandler("attachmentProgress", attachment, progress, error);
+					this._checkIfDone();
+				} else {
+					// Defer until after we fire the itemDone event
+					deferredProgress.push([attachment, progress, error]);
+					attachmentsWithProgress.push(attachment);
+				}
+			}.bind(this)
+		)
+		.then(function (newItems) {
+			// Remove attachments not being saved from item.attachments
+			for(var i=0; i<items.length; i++) {
+				var item = items[i];
+				for(var j=0; j<item.attachments.length; j++) {
+					if(attachmentsWithProgress.indexOf(item.attachments[j]) === -1) {
+						item.attachments.splice(j--, 1);
 					}
 				}
-				
-				// Trigger itemDone events
-				for(var i=0, nItems = items.length; i<nItems; i++) {
-					me._runHandler("itemDone", newItems[i], items[i]);
-				}
-				
-				// Specify that itemDone event was dispatched, so that we don't defer
-				// attachmentProgress notifications anymore
-				itemDoneEventsDispatched = true;
-				
-				// Run deferred attachmentProgress notifications
-				for(var i=0; i<deferredProgress.length; i++) {
-					me._runHandler("attachmentProgress", deferredProgress[i][0],
-						deferredProgress[i][1], deferredProgress[i][2]);
-				}
-				
-				me.newItems = me.newItems.concat(newItems);
-				me._savingItems--;
-				me._checkIfDone();
-			} else {
-				Zotero.logError(newItems);
-				me.complete(returnValue, newItems);
-			}
-		},
-		function(attachment, progress, error) {
-			var attachmentIndex = me._savingAttachments.indexOf(attachment);
-			if(progress === false || progress === 100) {
-				if(attachmentIndex !== -1) {
-					me._savingAttachments.splice(attachmentIndex, 1);
-				}
-			} else if(attachmentIndex === -1) {
-				me._savingAttachments.push(attachment);
 			}
 			
-			if(itemDoneEventsDispatched) {
-				// itemDone event has already fired, so we can fire attachmentProgress
-				// notifications
-				me._runHandler("attachmentProgress", attachment, progress, error);
-				me._checkIfDone();
-			} else {
-				// Defer until after we fire the itemDone event
-				deferredProgress.push([attachment, progress, error]);
-				attachmentsWithProgress.push(attachment);
+			// Trigger itemDone events
+			for(var i=0, nItems = items.length; i<nItems; i++) {
+				this._runHandler("itemDone", newItems[i], items[i]);
 			}
-		});
+			
+			// Specify that itemDone event was dispatched, so that we don't defer
+			// attachmentProgress notifications anymore
+			itemDoneEventsDispatched = true;
+			
+			// Run deferred attachmentProgress notifications
+			for(var i=0; i<deferredProgress.length; i++) {
+				this._runHandler("attachmentProgress", deferredProgress[i][0],
+					deferredProgress[i][1], deferredProgress[i][2]);
+			}
+			
+			this.newItems = this.newItems.concat(newItems);
+			this._savingItems--;
+			this._checkIfDone();
+		}.bind(this))
+		.catch(function (e) {
+			Zotero.logError(e);
+			this.complete(false, e);
+		}.bind(this));
 	},
 	
 	/**
