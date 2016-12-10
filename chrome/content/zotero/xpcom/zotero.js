@@ -28,6 +28,7 @@ Components.utils.import("resource://zotero/config.js");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm");
+Components.utils.import("resource://gre/modules/PluralForm.jsm");
 
 /*
  * Core functions
@@ -39,7 +40,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	this.log = log;
 	this.logError = logError;
 	this.getErrors = getErrors;
-	this.getString = getString;
 	this.localeJoin = localeJoin;
 	this.setFontSize = setFontSize;
 	this.flattenArguments = flattenArguments;
@@ -245,6 +245,9 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		
 		_localizedStringBundle = Services.strings.createBundle(
 			"chrome://zotero/locale/zotero.properties", appLocale);
+		// Fix logged error in PluralForm.jsm when numForms() is called before get(), as it is in
+		// getString() when a number is based
+		PluralForm.get(1, '1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16')
 		
 		// Also load the brand as appName
 		var brandBundle = Services.strings.createBundle(
@@ -1174,9 +1177,17 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		return deferred.promise;
 	});
 	
-	function getString(name, params){
+	/**
+	 * @param {String} name
+	 * @param {String[]} [params=[]] - Strings to substitute for placeholders
+	 * @param {Number} [num] - Number (also appearing in `params`) to use when determining which plural
+	 *     form of the string to use; localized strings should include all forms in the order specified
+	 *     in https://developer.mozilla.org/en-US/docs/Mozilla/Localization/Localization_and_Plurals,
+	 *     separated by semicolons
+	 */
+	this.getString = function (name, params, num) {
 		try {
-			if (params != undefined){
+			if (params != undefined) {
 				if (typeof params != 'object'){
 					params = [params];
 				}
@@ -1184,6 +1195,18 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			}
 			else {
 				var l10n = _localizedStringBundle.GetStringFromName(name);
+			}
+			if (num !== undefined) {
+				let availableForms = l10n.split(/;/);
+				// If not enough available forms, use last one -- PluralForm.get() uses first by
+				// default, but it's more likely that a localizer will translate the two English
+				// strings with some plural form as the second one, so we might as well use that
+				if (availableForms.length < PluralForm.numForms()) {
+					l10n = availableForms[availableForms.length - 1];
+				}
+				else {
+					l10n = PluralForm.get(num, l10n);
+				}
 			}
 		}
 		catch (e){
