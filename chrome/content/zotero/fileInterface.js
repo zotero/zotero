@@ -352,7 +352,6 @@ var Zotero_File_Interface = new function() {
 		
 		// Show popup on completion
 		var numItems = translation.newItems.length;
-		translation.newItems.forEach(item => numItems += item.numChildren());
 		var progressWin = new Zotero.ProgressWindow();
 		progressWin.changeHeadline(Zotero.getString('fileInterface.importComplete'));
 		if (numItems == 1) {
