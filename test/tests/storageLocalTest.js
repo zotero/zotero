@@ -218,24 +218,6 @@ describe("Zotero.Sync.Storage.Local", function () {
 		})
 	})
 	
-	describe("#_deleteExistingAttachmentFiles()", function () {
-		it("should delete all files", function* () {
-			var item = yield importFileAttachment('test.html');
-			var path = OS.Path.dirname(item.getFilePath());
-			var files = ['a', 'b', 'c', 'd'];
-			for (let file of files) {
-				yield Zotero.File.putContentsAsync(OS.Path.join(path, file), file);
-			}
-			yield Zotero.Sync.Storage.Local._deleteExistingAttachmentFiles(item);
-			for (let file of files) {
-				assert.isFalse(
-					(yield OS.File.exists(OS.Path.join(path, file))),
-					`File '${file}' doesn't exist`
-				);
-			}
-		})
-	})
-	
 	describe("#getConflicts()", function () {
 		it("should return an array of objects for attachments in conflict", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;

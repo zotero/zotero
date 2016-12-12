@@ -274,5 +274,36 @@ describe("Zotero.Attachments", function() {
 			assert.isTrue(yield Zotero.Attachments.hasMultipleFiles(item));
 			assert.equal((yield Zotero.Attachments.getNumFiles(item)), 2);
 		})
-	})
+	});
+	
+	describe("#createDirectoryForItem()", function () {
+		it("should create missing directory", function* () {
+			var item = yield importFileAttachment('test.png');
+			var path = OS.Path.dirname(item.getFilePath());
+			yield OS.File.removeDir(path);
+			yield Zotero.Attachments.createDirectoryForItem(item);
+			assert.isTrue(yield OS.File.exists(path));
+		});
+		
+		it("should delete all existing files", function* () {
+			var item = yield importFileAttachment('test.html');
+			var path = OS.Path.dirname(item.getFilePath());
+			var files = ['a', 'b', 'c', 'd'];
+			for (let file of files) {
+				yield Zotero.File.putContentsAsync(OS.Path.join(path, file), file);
+			}
+			yield Zotero.Attachments.createDirectoryForItem(item);
+			assert.isTrue(yield Zotero.File.directoryIsEmpty(path));
+			assert.isTrue(yield OS.File.exists(path));
+		});
+		
+		it("should handle empty directory", function* () {
+			var item = yield importFileAttachment('test.png');
+			var file = item.getFilePath();
+			var dir = OS.Path.dirname(item.getFilePath());
+			yield OS.File.remove(file);
+			yield Zotero.Attachments.createDirectoryForItem(item);
+			assert.isTrue(yield OS.File.exists(dir));
+		});
+	});
 })

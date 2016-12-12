@@ -61,62 +61,61 @@ Zotero.Attachments = new function(){
 		}
 		
 		var attachmentItem, itemID, newFile, contentType;
-		return Zotero.DB.executeTransaction(function* () {
-			// Create a new attachment
-			attachmentItem = new Zotero.Item('attachment');
-			if (parentItemID) {
-				let {libraryID: parentLibraryID, key: parentKey} =
-					Zotero.Items.getLibraryAndKeyFromID(parentItemID);
-				attachmentItem.libraryID = parentLibraryID;
-			}
-			else if (libraryID) {
-				attachmentItem.libraryID = libraryID;
-			}
-			attachmentItem.setField('title', newName);
-			attachmentItem.parentID = parentItemID;
-			attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_FILE;
-			if (collections) {
-				attachmentItem.setCollections(collections);
-			}
-			yield attachmentItem.save(saveOptions);
-			
-			// Create directory for attachment files within storage directory
-			destDir = yield this.createDirectoryForItem(attachmentItem);
-			
-			// Point to copied file
-			newFile = destDir.clone();
-			newFile.append(newName);
-			
-			// Copy file to unique filename, which automatically shortens long filenames
-			newFile = Zotero.File.copyToUnique(file, newFile);
-			
-			contentType = yield Zotero.MIME.getMIMETypeFromFile(newFile);
-			
-			attachmentItem.attachmentContentType = contentType;
-			attachmentItem.attachmentPath = newFile.path;
-			yield attachmentItem.save(saveOptions);
-		}.bind(this))
-		.then(function () {
-			return _postProcessFile(attachmentItem, newFile, contentType);
-		})
-		.catch(function (e) {
+		try {
+			yield Zotero.DB.executeTransaction(function* () {
+				// Create a new attachment
+				attachmentItem = new Zotero.Item('attachment');
+				if (parentItemID) {
+					let {libraryID: parentLibraryID, key: parentKey} =
+						Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+					attachmentItem.libraryID = parentLibraryID;
+				}
+				else if (libraryID) {
+					attachmentItem.libraryID = libraryID;
+				}
+				attachmentItem.setField('title', newName);
+				attachmentItem.parentID = parentItemID;
+				attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_FILE;
+				if (collections) {
+					attachmentItem.setCollections(collections);
+				}
+				yield attachmentItem.save(saveOptions);
+				
+				// Create directory for attachment files within storage directory
+				destDir = yield this.createDirectoryForItem(attachmentItem);
+				
+				// Point to copied file
+				newFile = OS.Path.join(destDir, newName);
+				
+				// Copy file to unique filename, which automatically shortens long filenames
+				newFile = Zotero.File.copyToUnique(file, newFile);
+				
+				contentType = yield Zotero.MIME.getMIMETypeFromFile(newFile);
+				
+				attachmentItem.attachmentContentType = contentType;
+				attachmentItem.attachmentPath = newFile.path;
+				yield attachmentItem.save(saveOptions);
+			}.bind(this));
+			yield _postProcessFile(attachmentItem, newFile, contentType);
+		}
+		catch (e) {
 			Zotero.logError(e);
-			var msg = "Failed importing file " + file.path;
-			Zotero.logError(msg);
+			Zotero.logError("Failed importing file " + file.path);
 			
 			// Clean up
 			try {
-				if (destDir && destDir.exists()) {
-					destDir.remove(true);
+				if (destDir && (yield OS.File.exists(destDir))) {
+					yield OS.File.removeDir(destDir);
 				}
 			}
 			catch (e) {
 				Zotero.logError(e);
 			}
-		}.bind(this))
-		.then(function () {
-			return attachmentItem;
-		});
+			
+			throw e;
+		}
+		
+		return attachmentItem;
 	});
 	
 	
@@ -174,39 +173,39 @@ Zotero.Attachments = new function(){
 		}
 		
 		var attachmentItem, itemID, destDir, newFile;
-		return Zotero.DB.executeTransaction(function* () {
-			// Create a new attachment
-			attachmentItem = new Zotero.Item('attachment');
-			let {libraryID, key: parentKey} = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
-			attachmentItem.libraryID = libraryID;
-			attachmentItem.setField('title', title);
-			attachmentItem.setField('url', url);
-			attachmentItem.parentID = parentItemID;
-			attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_URL;
-			attachmentItem.attachmentContentType = contentType;
-			attachmentItem.attachmentCharset = charset;
-			
-			// DEBUG: this should probably insert access date too so as to
-			// create a proper item, but at the moment this is only called by
-			// translate.js, which sets the metadata fields itself
-			itemID = yield attachmentItem.save();
-			
-			var storageDir = Zotero.getStorageDirectory();
-			destDir = this.getStorageDirectory(attachmentItem);
-			yield _moveOrphanedDirectory(destDir);
-			file.parent.copyTo(storageDir, destDir.leafName);
-			
-			// Point to copied file
-			newFile = destDir.clone();
-			newFile.append(file.leafName);
-			
-			attachmentItem.attachmentPath = newFile.path;
-			yield attachmentItem.save();
-		}.bind(this))
-		.then(function () {
-			return _postProcessFile(attachmentItem, newFile, contentType, charset);
-		})
-		.catch(function (e) {
+		try {
+			yield Zotero.DB.executeTransaction(function* () {
+				// Create a new attachment
+				attachmentItem = new Zotero.Item('attachment');
+				let {libraryID, key: parentKey} = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+				attachmentItem.libraryID = libraryID;
+				attachmentItem.setField('title', title);
+				attachmentItem.setField('url', url);
+				attachmentItem.parentID = parentItemID;
+				attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_URL;
+				attachmentItem.attachmentContentType = contentType;
+				attachmentItem.attachmentCharset = charset;
+				
+				// DEBUG: this should probably insert access date too so as to
+				// create a proper item, but at the moment this is only called by
+				// translate.js, which sets the metadata fields itself
+				itemID = yield attachmentItem.save();
+				
+				var storageDir = Zotero.getStorageDirectory();
+				destDir = this.getStorageDirectory(attachmentItem);
+				yield OS.File.removeDir(destDir.path);
+				file.parent.copyTo(storageDir, destDir.leafName);
+				
+				// Point to copied file
+				newFile = destDir.clone();
+				newFile.append(file.leafName);
+				
+				attachmentItem.attachmentPath = newFile.path;
+				yield attachmentItem.save();
+			}.bind(this));
+			yield _postProcessFile(attachmentItem, newFile, contentType, charset);
+		}
+		catch (e) {
 			Zotero.logError(e);
 			
 			// Clean up
@@ -218,10 +217,10 @@ Zotero.Attachments = new function(){
 			catch (e) {
 				Zotero.logError(e, 1);
 			}
-		}.bind(this))
-		.then(function () {
-			return attachmentItem;
-		});
+			
+			throw e;
+		}
+		return attachmentItem;
 	});
 	
 	
@@ -787,21 +786,18 @@ Zotero.Attachments = new function(){
 	/**
 	 * Create directory for attachment files within storage directory
 	 *
-	 * If a directory exists with the same name, move it to orphaned-files
+	 * If a directory exists, delete and recreate
 	 *
 	 * @param {Number} itemID - Item id
-	 * @return {Promise<nsIFile>}
+	 * @return {Promise<String>} - Path of new directory
 	 */
 	this.createDirectoryForItem = Zotero.Promise.coroutine(function* (item) {
 		if (!(item instanceof Zotero.Item)) {
 			throw new Error("'item' must be a Zotero.Item");
 		}
-		var dir = this.getStorageDirectory(item);
-		yield _moveOrphanedDirectory(dir);
-		if (!dir.exists()) {
-			Zotero.debug("Creating directory " + dir.path);
-			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
-		}
+		var dir = this.getStorageDirectory(item).path;
+		yield OS.File.removeDir(dir, { ignoreAbsent: true });
+		yield Zotero.File.createDirectoryIfMissingAsync(dir);
 		return dir;
 	});
 	
@@ -1158,55 +1154,6 @@ Zotero.Attachments = new function(){
 		nsIURL.spec = url;
 		return Zotero.MIME.getPrimaryExtension(contentType, nsIURL.fileExtension);
 	}
-	
-	
-	/**
-	 * If directory exists and is non-empty, move it to orphaned-files directory
-	 *
-	 * If empty, just remove it
-	 */
-	var _moveOrphanedDirectory = Zotero.Promise.coroutine(function* (dir) {
-		if (!dir.exists()) {
-			return;
-		}
-		
-		dir = dir.clone();
-		
-		// If directory is empty or has only hidden files, delete it
-		var files = dir.directoryEntries;
-		files.QueryInterface(Components.interfaces.nsIDirectoryEnumerator);
-		var empty = true;
-		while (files.hasMoreElements()) {
-			var file = files.getNext();
-			file.QueryInterface(Components.interfaces.nsIFile);
-			if (file.leafName[0] == '.') {
-				continue;
-			}
-			empty = false;
-			break;
-		}
-		files.close();
-		if (empty) {
-			dir.remove(true);
-			return;
-		}
-		
-		// Create orphaned-files directory if it doesn't exist
-		var orphaned = OS.Path.join(Zotero.DataDirectory.dir, 'orphaned-files');
-		yield Zotero.File.createDirectoryIfMissingAsync(orphaned);
-		
-		// Find unique filename for orphaned file
-		var orphanTarget = OS.Path.join(orphaned, dir.leafName);
-		var newName = null;
-		if (yield OS.File.exists(orphanTarget)) {
-			let newFile = yield OS.File.openUnique(orphanTarget, { humanReadable: true })
-			newName = OS.Path.basename(newFile.path);
-			newFile.file.close();
-		}
-		
-		// Move target to orphaned files directory
-		dir.moveTo(Zotero.File.pathToFile(orphaned), newName);
-	});
 	
 	
 	/**

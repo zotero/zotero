@@ -2536,7 +2536,7 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 		}
 		// Create storage directory if necessary
 		else if (!(yield OS.File.exists(storageDir))) {
-			Zotero.Attachments.createDirectoryForItem(this);
+			yield Zotero.Attachments.createDirectoryForItem(this);
 		}
 		
 		let newFile;
