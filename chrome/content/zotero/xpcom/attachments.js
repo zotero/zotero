@@ -796,7 +796,16 @@ Zotero.Attachments = new function(){
 			throw new Error("'item' must be a Zotero.Item");
 		}
 		var dir = this.getStorageDirectory(item).path;
-		yield OS.File.removeDir(dir, { ignoreAbsent: true });
+		// Testing for directories in OS.File, used by removeDir(), is broken on Travis, so use nsIFile
+		if (Zotero.automatedTest) {
+			let nsIFile = Zotero.File.pathToFile(dir);
+			if (nsIFile.exists()) {
+				nsIFile.remove(true);
+			}
+		}
+		else {
+			yield OS.File.removeDir(dir, { ignoreAbsent: true });
+		}
 		yield Zotero.File.createDirectoryIfMissingAsync(dir);
 		return dir;
 	});
