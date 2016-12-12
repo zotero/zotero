@@ -12,6 +12,7 @@
 <!ENTITY zotero.general.saveAs "Farklı Kaydet...">
 <!ENTITY zotero.general.advancedOptions.label "Gelişmiş Seçenekler">
 <!ENTITY zotero.general.more "Daha Başka">
+<!ENTITY zotero.general.loading "Loading…">
 
 <!ENTITY zotero.errorReport.title "Zotero Hata Raporu">
 <!ENTITY zotero.errorReport.unrelatedMessages "Bu, Zotero ile ilgili olmayan mesajlar içerebilir.">

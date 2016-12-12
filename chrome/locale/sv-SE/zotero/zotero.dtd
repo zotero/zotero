@@ -12,6 +12,7 @@
 <!ENTITY zotero.general.saveAs "Spara som…">
 <!ENTITY zotero.general.advancedOptions.label "Avancerade alternativ">
 <!ENTITY zotero.general.more "Mera">
+<!ENTITY zotero.general.loading "Loading…">
 
 <!ENTITY zotero.errorReport.title "Zotero-felrapporting">
 <!ENTITY zotero.errorReport.unrelatedMessages "Det kan innehålla meddelanden som inte har med Zotero att göra.">

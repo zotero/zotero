@@ -12,6 +12,7 @@
 <!ENTITY zotero.general.saveAs "Gardar como...">
 <!ENTITY zotero.general.advancedOptions.label "Opcións avanzadas">
 <!ENTITY zotero.general.more "Máis">
+<!ENTITY zotero.general.loading "Loading…">
 
 <!ENTITY zotero.errorReport.title "Informe de erros de Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Isto pode conter mensaxes que non estean relacionadas con Zotero.">

@@ -12,6 +12,7 @@
 <!ENTITY zotero.general.saveAs "Salvare ca...">
 <!ENTITY zotero.general.advancedOptions.label "Opțiuni avansate">
 <!ENTITY zotero.general.more "Mai mult">
+<!ENTITY zotero.general.loading "Loading…">
 
 <!ENTITY zotero.errorReport.title "Raportul de erori Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Aceasta ar putea include mesaje fără legătură cu Zotero.">

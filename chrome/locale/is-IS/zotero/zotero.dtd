@@ -12,6 +12,7 @@
 <!ENTITY zotero.general.saveAs "Vista sem...">
 <!ENTITY zotero.general.advancedOptions.label "Ítarlegir valkostir">
 <!ENTITY zotero.general.more "Meira">
+<!ENTITY zotero.general.loading "Loading…">
 
 <!ENTITY zotero.errorReport.title "Zotero villutilkynning">
 <!ENTITY zotero.errorReport.unrelatedMessages "Hér gætu einnig verið skilaboð ótengd Zotero.">

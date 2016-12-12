@@ -12,6 +12,7 @@
 <!ENTITY zotero.general.saveAs "Įrašyti kaip...">
 <!ENTITY zotero.general.advancedOptions.label "Kitos parinktys">
 <!ENTITY zotero.general.more "Daugiau">
+<!ENTITY zotero.general.loading "Loading…">
 
 <!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Zotero programoje">
 <!ENTITY zotero.errorReport.unrelatedMessages "Čia gali būti pranešimų, visai nesusijusių su Zotero.">

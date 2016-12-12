@@ -12,6 +12,7 @@
 <!ENTITY zotero.general.saveAs "Save As…">
 <!ENTITY zotero.general.advancedOptions.label "Lisäasetukset">
 <!ENTITY zotero.general.more "More">
+<!ENTITY zotero.general.loading "Loading…">
 
 <!ENTITY zotero.errorReport.title "Zoteron virheraportti">
 <!ENTITY zotero.errorReport.unrelatedMessages "Mukana saattaa olla Zoteroon liittymättömiä viestejä.">
