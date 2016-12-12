@@ -47,13 +47,14 @@ Zotero.Translators = new function() {
 		if (_initializationDeferred && !options.reinit) {
 			return _initializationDeferred.promise;
 		}
-		_initializationDeferred = Zotero.Promise.defer();
 		
 		// Wait until bundled files have been updated, except when this is called by the schema update
 		// code itself
 		if (!options.fromSchemaUpdate) {
 			yield Zotero.Schema.schemaUpdatePromise;
 		}
+		
+		_initializationDeferred = Zotero.Promise.defer();
 		
 		Zotero.debug("Initializing translators");
 		var start = new Date;
