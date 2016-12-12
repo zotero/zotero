@@ -161,7 +161,7 @@ Zotero.Connector = new function() {
 				"Content-Type":"application/json",
 				"X-Zotero-Version":Zotero.version,
 				"X-Zotero-Connector-API-Version":CONNECTOR_API_VERSION
-			}, options.httpHeaders || {});
+			}, options.headers || {});
 		var queryString = options.queryString ? ("?" + options.queryString) : "";
 		
 		var newCallback = function(req) {

@@ -85,7 +85,6 @@ describe("Connector Server", function () {
 				}
 			);
 			
-			Zotero.debug(response.response, 1);
 			assert.equal(JSON.parse(response.response)[0].proxy.scheme, 'https://%h.proxy.example.com/%p');
 
 			Zotero.Translators.getAllForType.restore();

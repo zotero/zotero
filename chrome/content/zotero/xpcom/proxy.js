@@ -595,9 +595,9 @@ Zotero.Proxy.prototype._loadFromRow = function (row) {
 	this.autoAssociate = !!row.autoAssociate;
 	this.scheme = row.scheme;
 	// Database query results will throw as this option is only present when the proxy comes along with the translator
-	try {
+	if (!row instanceof Components.interfaces.mozIStorageValueArray) {
 		this.dotsToHyphens = !!row.dotsToHyphens;
-	} catch (e) {}
+	}
 	
 	if (this.scheme) {
 		this.compileRegexp();
