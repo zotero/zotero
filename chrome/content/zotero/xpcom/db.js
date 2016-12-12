@@ -677,7 +677,7 @@ Zotero.DBConnection.prototype.queryAsync = Zotero.Promise.coroutine(function* (s
 				},
 				has: function(target, name) {
 					try {
-						return !!target.getResultNyName(name);
+						return !!target.getResultByName(name);
 					} catch (e) {
 						return false;
 					}
