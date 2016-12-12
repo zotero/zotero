@@ -680,7 +680,9 @@ describe("Zotero.Translate", function() {
 				assert.isNumber(translation.newItems[0].id);
 				assert.ok(collection.hasItem(translation.newItems[0].id));
 			});
-			
+
+		});
+		describe('#saveItems', function() {
 			it("should deproxify item and attachment urls when proxy provided", function* (){
 				var itemID;
 				var item = loadSampleData('journalArticle');
@@ -697,16 +699,9 @@ describe("Zotero.Translate", function() {
 				});
 				var itemDeferred = Zotero.Promise.defer();
 				var attachmentDeferred = Zotero.Promise.defer();
-				itemSaver.saveItems([item], function(success, items) {
-					try {
-						assert.ok(success);
-						assert.equal(items[0].getField('url'), 'https://www.example.com/');
-						itemID = items[0].id;
-						itemDeferred.resolve();
-					} catch (e) {
-						itemDeferred.reject(e);
-					}
-				}, Zotero.Promise.coroutine(function* (attachment, progressPercentage) {
+				itemSaver.saveItems([item], Zotero.Promise.coroutine(function* (attachment, progressPercentage) {
+					// ItemSaver returns immediately without waiting for attachments, so we use the callback
+					// to test attachments
 					if (progressPercentage != 100) return;
 					try {
 						yield itemDeferred.promise;
@@ -717,9 +712,17 @@ describe("Zotero.Translate", function() {
 					} catch (e) {
 						attachmentDeferred.reject(e);
 					}
-				}));
+				})).then(function(items) {
+					try {
+						assert.equal(items[0].getField('url'), 'https://www.example.com/');
+						itemID = items[0].id;
+						itemDeferred.resolve();
+					} catch (e) {
+						itemDeferred.reject(e);
+					}
+				});
 				yield Zotero.Promise.all([itemDeferred.promise, attachmentDeferred.promise]);
-			})
+			});
 		});
 	});
 });

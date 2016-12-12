@@ -57,7 +57,8 @@ describe("Connector Server", function () {
 			);
 
 			assert.isTrue(Zotero.Translators.get.calledWith('dummy-translator'));
-			assert.equal(response.response, `{"translatorID":"dummy-translator","label":"Dummy Translator","creator":"Simon Kornblith","target":"","priority":100,"browserSupport":"g","inRepository":false,"lastUpdated":"0000-00-00 00:00:00"}\n` + code);
+			let translatorCode = yield translator.getCode();
+			assert.equal(response.response, translatorCode);
 
 			Zotero.Translators.get.restore();
 		})
