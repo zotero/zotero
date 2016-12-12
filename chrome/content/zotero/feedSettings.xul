@@ -53,9 +53,14 @@
 				<label value="&zotero.feedSettings.refresh.label2;" control="feed-ttl"/>
 			</hbox>
 			<hbox align="center">
-				<label value="&zotero.feedSettings.cleanupAfter.label1;" control="feed-cleanupAfter"/>
-				<textbox id="feed-cleanupAfter" type="number" min="0" increment="1" size="2"/>
-				<label value="&zotero.feedSettings.cleanupAfter.label2;" control="feed-cleanupAfter"/>
+				<label value="&zotero.feedSettings.cleanupReadAfter.label1;" control="feed-cleanupReadAfter"/>
+				<textbox id="feed-cleanupReadAfter" type="number" min="0" increment="1" size="2"/>
+				<label value="&zotero.feedSettings.cleanupReadAfter.label2;" control="feed-cleanupReadAfter"/>
+			</hbox>
+			<hbox align="center">
+				<label value="&zotero.feedSettings.cleanupUnreadAfter.label1;" control="feed-cleanupUnreadAfter"/>
+				<textbox id="feed-cleanupUnreadAfter" type="number" min="0" increment="1" size="2"/>
+				<label value="&zotero.feedSettings.cleanupUnreadAfter.label2;" control="feed-cleanupUnreadAfter"/>
 			</hbox>
 		</vbox>
 	</vbox>

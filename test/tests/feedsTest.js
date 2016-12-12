@@ -56,7 +56,8 @@ describe("Zotero.Feeds", function () {
 					url,
 					name: Zotero.Utilities.randomString(),
 					refreshInterval: 5,
-					cleanupAfter: 3,
+					cleanupReadAfter: 3,
+					cleanupUnreadAfter: 30,
 				};
 				if (i == 0) {
 					existingFeedURL = url;
