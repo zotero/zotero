@@ -157,14 +157,11 @@ Zotero.Connector = new function() {
 			options = {method: options};
 		}
 		var method = options.method;
-		var sendRequest = (data === null || data === undefined)
-			? Zotero.HTTP.doGet.bind(Zotero.HTTP)
-			: Zotero.HTTP.doPost.bind(Zotero.HTTP);
 		var headers = Object.assign({
 				"Content-Type":"application/json",
 				"X-Zotero-Version":Zotero.version,
 				"X-Zotero-Connector-API-Version":CONNECTOR_API_VERSION
-			}, options.headers);
+			}, options.headers || {});
 		var queryString = options.queryString ? ("?" + options.queryString) : "";
 		
 		var newCallback = function(req) {
@@ -224,7 +221,11 @@ Zotero.Connector = new function() {
 			if (headers["Content-Type"] == 'application/json') {
 				data = JSON.stringify(data);
 			}
-			sendRequest(uri, data, newCallback, headers);
+			if (data == null || data == undefined) {
+				Zotero.HTTP.doGet(uri, newCallback, headers);
+			} else {
+				Zotero.HTTP.doPost(uri, data, newCallback, headers);
+			}
 		}
 	},
 	

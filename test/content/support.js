@@ -788,7 +788,7 @@ function buildDummyTranslator(translatorType, code, info={}) {
 		"lastUpdated":"0000-00-00 00:00:00",
 	}, info);
 	let translator = new Zotero.Translator(info);
-	translator.code = code;
+	translator.code = JSON.stringify(info) + "\n" + code;
 	return translator;
 }
 

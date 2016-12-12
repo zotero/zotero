@@ -57,10 +57,38 @@ describe("Connector Server", function () {
 			);
 
 			assert.isTrue(Zotero.Translators.get.calledWith('dummy-translator'));
-			assert.equal(response.response, code);
+			let translatorCode = yield translator.getCode();
+			assert.equal(response.response, translatorCode);
 
 			Zotero.Translators.get.restore();
 		})
+	});
+	
+	
+	describe("/connector/detect", function() {
+		it("should return relevant translators with proxies", function* () {
+			var code = 'function detectWeb() {return "newspaperArticle";}\nfunction doWeb() {}';
+			var translator = buildDummyTranslator("web", code, {target: "https://www.example.com/.*"});
+			sinon.stub(Zotero.Translators, 'getAllForType').resolves([translator]);
+			
+			var response = yield Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/detect",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						uri: "https://www-example-com.proxy.example.com/article",
+						html: "<head><title>Owl</title></head><body><p>🦉</p></body>"
+					})
+				}
+			);
+			
+			assert.equal(JSON.parse(response.response)[0].proxy.scheme, 'https://%h.proxy.example.com/%p');
+
+			Zotero.Translators.getAllForType.restore();
+		});
 	});
 	
 	
@@ -184,6 +212,49 @@ describe("Connector Server", function () {
 			assert.equal(
 				win.ZoteroPane.collectionsView.getSelectedLibraryID(), Zotero.Libraries.userLibraryID
 			);
+		});
+		
+		it("should use the provided proxy to deproxify item url", function* () {
+			yield selectLibrary(win, Zotero.Libraries.userLibraryID);
+			yield waitForItemsLoad(win);
+			
+			var body = {
+				items: [
+					{
+						itemType: "newspaperArticle",
+						title: "Title",
+						creators: [
+							{
+								firstName: "First",
+								lastName: "Last",
+								creatorType: "author"
+							}
+						],
+						attachments: [],
+						url: "https://www-example-com.proxy.example.com/path"
+					}
+				],
+				uri: "https://www-example-com.proxy.example.com/path",
+				proxy: {scheme: 'https://%h.proxy.example.com/%p', dotsToHyphens: true}
+			};
+			
+			var promise = waitForItemEvent('add');
+			var req = yield Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(body)
+				}
+			);
+			
+			// Check item
+			var ids = yield promise;
+			assert.lengthOf(ids, 1);
+			var item = Zotero.Items.get(ids[0]);
+			assert.equal(item.getField('url'), 'https://www.example.com/path');
 		});
 	});
 	

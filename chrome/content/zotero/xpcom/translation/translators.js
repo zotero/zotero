@@ -25,9 +25,6 @@
 
 "use strict";
 
-// Enumeration of types of translators
-var TRANSLATOR_TYPES = {"import":1, "export":2, "web":4, "search":8};
-
 /**
  * Singleton to handle loading and caching of translators
  * @namespace
@@ -297,10 +294,10 @@ Zotero.Translators = new function() {
 		
 		return this.getAllForType(type).then(function(allTranslators) {
 			var potentialTranslators = [];
-			var converterFunctions = [];
+			var proxies = [];
 			
-			var rootSearchURIs = this.getSearchURIs(rootURI);
-			var frameSearchURIs = isFrame ? this.getSearchURIs(URI) : rootSearchURIs;
+			var rootSearchURIs = Zotero.Proxies.getPotentialProxies(rootURI);
+			var frameSearchURIs = isFrame ? Zotero.Proxies.getPotentialProxies(URI) : rootSearchURIs;
 			
 			Zotero.debug("Translators: Looking for translators for "+Object.keys(frameSearchURIs).join(', '));
 			
@@ -316,7 +313,7 @@ Zotero.Translators = new function() {
 								
 							if (frameURIMatches) {
 								potentialTranslators.push(translator);
-								converterFunctions.push(frameSearchURIs[frameSearchURI]);
+								proxies.push(frameSearchURIs[frameSearchURI]);
 								// prevent adding the translator multiple times
 								break rootURIsLoop;
 							}
@@ -324,13 +321,13 @@ Zotero.Translators = new function() {
 					}
 					else if(!isFrame && (isGeneric || rootURIMatches)) {
 						potentialTranslators.push(translator);
-						converterFunctions.push(rootSearchURIs[rootSearchURI]);
+						proxies.push(rootSearchURIs[rootSearchURI]);
 						break;
 					}
 				}
 			}
 			
-			return [potentialTranslators, converterFunctions];
+			return [potentialTranslators, proxies];
 		}.bind(this));
 	},
 

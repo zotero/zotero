@@ -253,8 +253,8 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 	}
 	
 	for(var i=0; i<urls.length; i++) {
-		if(this._translate.document && this._translate.document.location
-				&& this._translate.document.location.toString() === urls[i]) {
+		if(translate.document && translate.document.location
+				&& translate.document.location.toString() === urls[i]) {
 			// Document is attempting to reload itself
 			Zotero.debug("Translate: Attempted to load the current document using processDocuments; using loaded document instead");
 			// This fixes document permissions issues in translation-server when translators call
@@ -373,6 +373,18 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
 		}
 	}, headers, responseCharset, translate.cookieSandbox ? translate.cookieSandbox : undefined);
 }
+
+Zotero.Utilities.Translate.prototype.urlToProxy = function(url) {
+	var proxy = this._translate._proxy;
+	if (proxy) return proxy.toProxy(url);
+	return url;
+};
+
+Zotero.Utilities.Translate.prototype.urlToProper = function(url) {
+	var proxy = this._translate._proxy;
+	if (proxy) return proxy.toProper(url);
+	return url;
+};
 
 Zotero.Utilities.Translate.prototype.__exposedProps__ = {"HTTP":"r"};
 for(var j in Zotero.Utilities.Translate.prototype) {

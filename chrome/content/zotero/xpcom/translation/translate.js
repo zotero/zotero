@@ -1120,18 +1120,21 @@ Zotero.Translate.Base.prototype = {
 		// if detection returns immediately, return found translators
 		return potentialTranslators.then(function(result) {
 			var allPotentialTranslators = result[0];
-			var properToProxyFunctions = result[1];
+			var proxies = result[1];
 			
 			// this gets passed out by Zotero.Translators.getWebTranslatorsForLocation() because it is
 			// specific for each translator, but we want to avoid making a copy of a translator whenever
 			// possible.
-			this._properToProxyFunctions = properToProxyFunctions ? properToProxyFunctions : null;
+			this._proxies = proxies ? [] : null;
 			this._waitingForRPC = false;
 			
 			for(var i=0, n=allPotentialTranslators.length; i<n; i++) {
 				var translator = allPotentialTranslators[i];
 				if(translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER) {
 					this._potentialTranslators.push(translator);
+					if (proxies) {
+						this._proxies.push(proxies[i]);
+					}
 				} else if (this instanceof Zotero.Translate.Web && Zotero.Connector) {
 					this._waitingForRPC = true;
 				}
@@ -1166,6 +1169,7 @@ Zotero.Translate.Base.prototype = {
 							for(var i=0, n=rpcTranslators.length; i<n; i++) {
 								rpcTranslators[i] = new Zotero.Translator(rpcTranslators[i]);
 								rpcTranslators[i].runMode = Zotero.Translator.RUN_MODE_ZOTERO_STANDALONE;
+								rpcTranslators[i].proxy = rpcTranslators[i].proxy ? new Zotero.Proxy(rpcTranslators[i].proxy) : null;
 							}
 							this._foundTranslators = this._foundTranslators.concat(rpcTranslators);
 						}
@@ -1378,8 +1382,8 @@ Zotero.Translate.Base.prototype = {
 		
 		// convert proxy to proper if applicable
 		if(!dontUseProxy && this.translator && this.translator[0]
-				&& this.translator[0].properToProxy) {
-			var proxiedURL = this.translator[0].properToProxy(resolved);
+				&& this._proxy) {
+			var proxiedURL = this._proxy.toProxy(resolved);
 			if (proxiedURL != resolved) {
 				Zotero.debug("Translate: proxified to " + proxiedURL);
 			}
@@ -1440,13 +1444,13 @@ Zotero.Translate.Base.prototype = {
 		if(this._currentState === "detect") {
 			if(this._potentialTranslators.length) {
 				var lastTranslator = this._potentialTranslators.shift();
-				var lastProperToProxyFunction = this._properToProxyFunctions ? this._properToProxyFunctions.shift() : null;
+				var lastProxy = this._proxies ? this._proxies.shift() : null;
 				
-				if(returnValue) {
-					var dupeTranslator = {"properToProxy":lastProperToProxyFunction};
+				if (returnValue) {
+					var dupeTranslator = {proxy: lastProxy ? new Zotero.Proxy(lastProxy) : null};
 					
-					for(var i in lastTranslator) dupeTranslator[i] = lastTranslator[i];
-					if(Zotero.isBookmarklet && returnValue === "server") {
+					for (var i in lastTranslator) dupeTranslator[i] = lastTranslator[i];
+					if (Zotero.isBookmarklet && returnValue === "server") {
 						// In the bookmarklet, the return value from detectWeb can be "server" to
 						// indicate the translator should be run on the Zotero server
 						dupeTranslator.runMode = Zotero.Translator.RUN_MODE_ZOTERO_SERVER;
@@ -1689,6 +1693,13 @@ Zotero.Translate.Base.prototype = {
 		}
 		
 		this._currentTranslator = translator;
+		
+		// Pass on the proxy of the parent translate
+		if (this._parentTranslator) {
+			this._proxy = this._parentTranslator._proxy;
+		} else {
+			this._proxy = translator.proxy;
+		}
 		this._runningAsyncProcesses = 0;
 		this._returnValue = undefined;
 		this._aborted = false;
@@ -1950,12 +1961,13 @@ Zotero.Translate.Web.prototype._getParameters = function() {
  */
 Zotero.Translate.Web.prototype._prepareTranslation = Zotero.Promise.method(function () {
 	this._itemSaver = new Zotero.Translate.ItemSaver({
-		"libraryID":this._libraryID,
-		"collections": this._collections,
-		"attachmentMode":Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_DOWNLOAD" : "ATTACHMENT_MODE_IGNORE")],
-		"forceTagType":1,
-		"cookieSandbox":this._cookieSandbox,
-		"baseURI":this.location
+		libraryID: this._libraryID,
+		collections: this._collections,
+		attachmentMode: Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_DOWNLOAD" : "ATTACHMENT_MODE_IGNORE")],
+		forceTagType: 1,
+		cookieSandbox: this._cookieSandbox,
+		proxy: this._proxy,
+		baseURI: this.location
 	});
 	this.newItems = [];
 });
@@ -1987,11 +1999,12 @@ Zotero.Translate.Web.prototype._translateTranslatorLoaded = function() {
 			(runMode === Zotero.Translator.RUN_MODE_ZOTERO_SERVER && Zotero.Connector.isOnline)) {
 		var me = this;
 		Zotero.Connector.callMethod("savePage", {
-				"uri":this.location.toString(),
-				"translatorID":(typeof this.translator[0] === "object"
+				uri: this.location.toString(),
+				translatorID: (typeof this.translator[0] === "object"
 				                ? this.translator[0].translatorID : this.translator[0]),
-				"cookie":this.document.cookie,
-				"html":this.document.documentElement.innerHTML
+				cookie: this.document.cookie,
+				proxy: this._proxy ? this._proxy.toJSON() : null,
+				html: this.document.documentElement.innerHTML
 			}, function(obj) { me._translateRPCComplete(obj) });
 	} else if(runMode === Zotero.Translator.RUN_MODE_ZOTERO_SERVER) {
 		var me = this;
