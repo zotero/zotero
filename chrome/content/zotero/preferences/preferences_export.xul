@@ -52,7 +52,7 @@
 			<separator/>
 			
 			<label value="&zotero.preferences.quickCopy.defaultOutputFormat;" control="quickCopy-menu"/>
-			<menulist id="zotero-quickCopy-menu"/>
+			<menulist id="zotero-quickCopy-menu" label="&zotero.general.loading;"/>
 			
 			<hbox align="center">
 				<label id="zotero-quickCopy-locale-menu-label" value="&zotero.bibliography.locale.label;" control="zotero-quickCopy-locale-menu"/>
