@@ -1,19 +1,26 @@
-function lookupIdentifier(win, identifier) {
+var lookupIdentifier = Zotero.Promise.coroutine(function* (win, identifier) {
 	var textbox = win.document.getElementById("zotero-lookup-textbox");
 	textbox.value = identifier;
-	win.Zotero_Lookup.accept(textbox);
-	return waitForItemEvent("add");
-}
+	var promise = waitForItemEvent("add");
+	yield win.Zotero_Lookup.accept(textbox);
+	return promise;
+});
 
-describe.skip("Add Item by Identifier", function() {
+describe("Add Item by Identifier", function() {
 	var win;
 	
 	before(function* () {
+		if (Zotero.automatedTest) {
+			this.skip();
+			return;
+		}
 		win = yield loadZoteroPane();
 	});
 	
 	after(function() {
-		win.close();
+		if (win) {
+			win.close();
+		}
 	});
 	
 	// TODO: mock external services: https://github.com/zotero/zotero/issues/699
