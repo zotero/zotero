@@ -1180,9 +1180,11 @@ Zotero.DataObject.prototype._initErase = Zotero.Promise.method(function (env) {
 
 Zotero.DataObject.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env) {
 	// Delete versions from sync cache
-	yield Zotero.Sync.Data.Local.deleteCacheObjectVersions(
-		this.objectType, this._libraryID, this._key
-	);
+	if (this._objectType != 'feedItem') {
+		yield Zotero.Sync.Data.Local.deleteCacheObjectVersions(
+			this.objectType, this._libraryID, this._key
+		);
+	}
 	
 	Zotero.DB.addCurrentCallback("commit", function () {
 		this.ObjectsClass.unload(env.deletedObjectIDs || this.id);
