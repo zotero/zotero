@@ -148,17 +148,15 @@ Zotero.FeedItems = new Proxy(function() {
 
 		let feedsToUpdate = new Set();
 		let readTime = state ? Zotero.Date.dateToSQL(new Date(), true) : null;
-		yield Zotero.DB.executeTransaction(function() {
-			for (let i=0; i<items.length; i++) {
-				items[i]._feedItemReadTime = readTime;
+		for (let i=0; i<items.length; i++) {
+			items[i]._feedItemReadTime = readTime;
 
-				let feed = Zotero.Feeds.get(items[i].libraryID);
-				feedsToUpdate.add(feed);
-			}
-		});
+			let feed = Zotero.Feeds.get(items[i].libraryID);
+			feedsToUpdate.add(feed);
+		}
 		
 		yield Zotero.DB.queryAsync(`UPDATE feedItems SET readTime=? WHERE itemID IN (${ids.join(', ')})`, readTime);
-		Zotero.Notifier.trigger('modify', 'item', ids, {});
+		yield Zotero.Notifier.trigger('modify', 'item', ids, {});
 
 		for (let feed of feedsToUpdate) {
 			yield feed.updateUnreadCount();
