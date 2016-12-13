@@ -1,4 +1,4 @@
--- 89
+-- 90
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -203,7 +203,8 @@ CREATE TABLE feeds (
     lastUpdate TIMESTAMP,
     lastCheck TIMESTAMP,
     lastCheckError TEXT,
-    cleanupAfter INT,
+    cleanupReadAfter INT,
+    cleanupUnreadAfter INT,
     refreshInterval INT,
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );

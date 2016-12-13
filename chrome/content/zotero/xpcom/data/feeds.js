@@ -164,8 +164,12 @@ Zotero.Feeds = new function() {
 			if (json[feed.url]) {
 				Zotero.debug("Feed " + feed.url + " exists remotely and locally");
 				feed.name = json[feed.url][0];
-				feed.cleanupAfter = json[feed.url][1];
-				feed.refreshInterval = json[feed.url][2];
+				feed.cleanupReadAfter = json[feed.url][1];
+				// TEMP after adding cleanupUnreadAfter for unread items
+				if (json[feed.url].length == 4) {
+					feed.cleanupUnreadAfter = json[feed.url][2];
+				}
+				feed.refreshInterval = json[feed.url][json[feed.url].length-1];
 				delete json[feed.url];
 			} else {
 				Zotero.debug("Feed " + feed.url + " does not exist in remote JSON. Deleting");
@@ -175,12 +179,17 @@ Zotero.Feeds = new function() {
 		// Because existing json[feed.url] got deleted, `json` now only contains new feeds
 		for (let url in json) {
 			Zotero.debug("Feed " + url + " exists remotely but not locally. Creating");
-			let feed = new Zotero.Feed({
+			let obj = {
 				url, 
 				name: json[url][0], 
-				cleanupAfter: json[url][1], 
-				refreshInterval: json[url[2]]
-			});
+				cleanupReadAfter: json[url][1], 
+				refreshInterval: json[url][json[url].length-1]
+			};
+			// TEMP after adding cleanupUnreadAfter for unread items
+			if (json[url].length == 4) {
+				obj.cleanupUnreadAfter = json[url][2];
+			}
+			let feed = new Zotero.Feed(obj);
 			yield feed.save();
 		}
 	});
@@ -292,7 +301,7 @@ Zotero.Feeds = new function() {
 			if(Array.isArray(json[url])) {
 				continue;
 			}
-			json[url] = [json[url].name, json[url].cleanupAfter, json[url].refreshInterval];
+			json[url] = [json[url].name, json[url].cleanupReadAfter, json[url].cleanupUnreadAfter, json[url].refreshInterval];
 		}
 		return json;
 	};

@@ -72,9 +72,13 @@ var Zotero_Feed_Settings = new function() {
 		}
 		document.getElementById('feed-ttl').value = ttl;
 		
-		let cleanupAfter = data.cleanupAfter;
-		if (cleanupAfter === undefined) cleanupAfter = Zotero.Prefs.get('feeds.defaultCleanupAfter');
-		document.getElementById('feed-cleanupAfter').value = cleanupAfter;
+		let cleanupReadAfter = data.cleanupReadAfter;
+		if (cleanupReadAfter === undefined) cleanupReadAfter = Zotero.Prefs.get('feeds.defaultCleanupReadAfter');
+		document.getElementById('feed-cleanupReadAfter').value = cleanupReadAfter;
+		
+		let cleanupUnreadAfter = data.cleanupUnreadAfter;
+		if (cleanupUnreadAfter === undefined) cleanupUnreadAfter = Zotero.Prefs.get('feeds.defaultCleanupUnreadAfter');
+		document.getElementById('feed-cleanupUnreadAfter').value = cleanupUnreadAfter;
 		
 		if (data.url && !data.urlIsValid) {
 			yield this.validateURL();
@@ -93,7 +97,8 @@ var Zotero_Feed_Settings = new function() {
 		urlIsValid = false;
 		document.getElementById('feed-title').disabled = true;
 		document.getElementById('feed-ttl').disabled = true;
-		document.getElementById('feed-cleanupAfter').disabled = true;
+		document.getElementById('feed-cleanupReadAfter').disabled = true;
+		document.getElementById('feed-cleanupUnreadAfter').disabled = true;
 		document.documentElement.getButton('accept').disabled = true;
 	};
 	
@@ -130,7 +135,8 @@ var Zotero_Feed_Settings = new function() {
 			urlIsValid = true;
 			title.disabled = false;
 			ttl.disabled = false;
-			document.getElementById('feed-cleanupAfter').disabled = false;
+			document.getElementById('feed-cleanupReadAfter').disabled = false;
+			document.getElementById('feed-cleanupUnreadAfter').disabled = false;
 			document.documentElement.getButton('accept').disabled = false;
 		}
 		catch (e) {
@@ -145,7 +151,8 @@ var Zotero_Feed_Settings = new function() {
 		data.url = document.getElementById('feed-url').value;
 		data.title = document.getElementById('feed-title').value;
 		data.ttl = document.getElementById('feed-ttl').value * 60;
-		data.cleanupAfter = document.getElementById('feed-cleanupAfter').value * 1;
+		data.cleanupReadAfter = document.getElementById('feed-cleanupReadAfter').value * 1;
+		data.cleanupUnreadAfter = document.getElementById('feed-cleanupUnreadAfter').value * 1;
 		return true;
 	};
 	

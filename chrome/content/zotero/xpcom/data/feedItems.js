@@ -128,7 +128,6 @@ Zotero.FeedItems = new Proxy(function() {
 	});
 	
 	this.toggleReadByID = Zotero.Promise.coroutine(function* (ids, state) {
-		var feedsToUpdate = new Set();
 		if (!Array.isArray(ids)) {
 			if (typeof ids != 'string') throw new Error('ids must be a string or array in Zotero.FeedItems.toggleReadByID');
 			
@@ -146,20 +145,21 @@ Zotero.FeedItems = new Proxy(function() {
 				}
 			}
 		}
-		
-		
-		yield Zotero.DB.executeTransaction(function() {
-			for (let i=0; i<items.length; i++) {
-				items[i].isRead = state;
 
-				yield items[i].save();
-				let feed = Zotero.Feeds.get(items[i].libraryID);
-				feedsToUpdate.add(feed);
-			}
-		});
+		let feedsToUpdate = new Set();
+		let readTime = state ? Zotero.Date.dateToSQL(new Date(), true) : null;
+		for (let i=0; i<items.length; i++) {
+			items[i]._feedItemReadTime = readTime;
+
+			let feed = Zotero.Feeds.get(items[i].libraryID);
+			feedsToUpdate.add(feed);
+		}
+		
+		yield Zotero.DB.queryAsync(`UPDATE feedItems SET readTime=? WHERE itemID IN (${ids.join(', ')})`, readTime);
+		yield Zotero.Notifier.trigger('modify', 'item', ids, {});
 
 		for (let feed of feedsToUpdate) {
-			yield Zotero.Promise.all([feed.updateUnreadCount(), feed.storeSyncedSettings()]);
+			yield feed.updateUnreadCount();
 		}
 	});
 	

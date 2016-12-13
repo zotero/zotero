@@ -915,7 +915,8 @@ var ZoteroPane = new function()
 			feed.url = data.url;
 			feed.name = data.title;
 			feed.refreshInterval = data.ttl;
-			feed.cleanupAfter = data.cleanupAfter;
+			feed.cleanupReadAfter = data.cleanupReadAfter;
+			feed.cleanupUnreadAfter = data.cleanupUnreadAfter;
 			yield feed.saveTx();
 			yield feed.updateFeed();
 		}
@@ -930,7 +931,8 @@ var ZoteroPane = new function()
 			feed.url = data.url;
 			feed.name = data.title;
 			feed.refreshInterval = data.ttl;
-			feed.cleanupAfter = data.cleanupAfter;
+			feed.cleanupReadAfter = data.cleanupReadAfter;
+			feed.cleanupUnreadAfter = data.cleanupUnreadAfter;
 			yield feed.saveTx();
 			yield feed.updateFeed();
 		}
@@ -2066,7 +2068,8 @@ var ZoteroPane = new function()
 			url: feed.url,
 			title: feed.name,
 			ttl: feed.refreshInterval,
-			cleanupAfter: feed.cleanupAfter
+			cleanupReadAfter: feed.cleanupReadAfter,
+			cleanupUnreadAfter: feed.cleanupUnreadAfter
 		};
 		
 		window.openDialog('chrome://zotero/content/feedSettings.xul', 
@@ -2075,7 +2078,8 @@ var ZoteroPane = new function()
 		
 		feed.name = data.title;
 		feed.refreshInterval = data.ttl;
-		feed.cleanupAfter = data.cleanupAfter;
+		feed.cleanupReadAfter = data.cleanupReadAfter;
+		feed.cleanupUnreadAfter = data.cleanupUnreadAfter;
 		yield feed.saveTx();
 	});
 	

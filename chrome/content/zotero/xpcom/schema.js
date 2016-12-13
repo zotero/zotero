@@ -34,7 +34,7 @@ Zotero.Schema = new function(){
 	var _dbVersions = [];
 	var _schemaVersions = [];
 	// Update when adding _updateCompatibility() line to schema update step
-	var _maxCompatibility = 3;
+	var _maxCompatibility = 4;
 	var _repositoryTimer;
 	var _remoteUpdateInProgress = false, _localUpdateInProgress = false;
 	
@@ -2355,6 +2355,14 @@ Zotero.Schema = new function(){
 					}
 					yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO itemRelations VALUES (?, ?, ?)", [newSubjectID, predicateID, newObjectURI]);
 				}
+			}
+			
+			else if (i == 90) {
+				yield _updateCompatibility(4);
+				yield Zotero.DB.queryAsync("ALTER TABLE feeds RENAME TO feedsOld");
+				yield Zotero.DB.queryAsync("CREATE TABLE feeds (\n    libraryID INTEGER PRIMARY KEY,\n    name TEXT NOT NULL,\n    url TEXT NOT NULL UNIQUE,\n    lastUpdate TIMESTAMP,\n    lastCheck TIMESTAMP,\n    lastCheckError TEXT,\n    cleanupReadAfter INT,\n    cleanupUnreadAfter INT,\n    refreshInterval INT,\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
+				yield Zotero.DB.queryAsync("INSERT INTO feeds SELECT libraryID, name, url, lastUpdate, lastCheck, lastCheckError, 30, cleanupAfter, refreshInterval FROM feedsOld");
+				yield Zotero.DB.queryAsync("DROP TABLE feedsOld");
 			}
 		}
 		
