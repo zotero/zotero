@@ -52,7 +52,6 @@ var Zotero_Citation_Dialog = new function () {
 	var serial_number;
 	var io;
 	
-	this.load = load;
 	this.toggleMultipleSources = toggleMultipleSources;
 	this.toggleEditor = toggleEditor;
 	this.treeItemSelected = treeItemSelected;
@@ -70,7 +69,7 @@ var Zotero_Citation_Dialog = new function () {
 	/*
 	 * initialize add citation dialog
 	 */
-	function load() {
+	this.load = Zotero.Promise.coroutine(function* () {
 		// make sure we are visible
 		window.setTimeout(function() {
 			var screenX = window.screenX;
@@ -129,7 +128,7 @@ var Zotero_Citation_Dialog = new function () {
 		menu.selectedIndex = 0;
 		
 		// load (from selectItemsDialog.js)
-		doLoad();
+		yield doLoad();
 		
 		// if we already have a citation, load data from it
 		document.getElementById('editor').format = "RTF";
@@ -139,20 +138,12 @@ var Zotero_Citation_Dialog = new function () {
 				toggleMultipleSources(false);
 				_suppressNextTreeSelect = true;
 				
-				// If we're in a different library, switch libraries
+				// DEBUG: When editing a citation before the library data has been loaded (i.e., in
+				// Firefox before the pane has been opened), this is the citation id, not the item id,
+				// and this fails. It works on subsequent attempts. Since this won't happen in
+				// Standalone, we can ignore.
 				var id = io.citation.citationItems[0].id;
-				var collectionTreeRow = collectionsView.selectedTreeRow;
-				var item = Zotero.Items.get(id);
-				if(item.libraryID != collectionTreeRow.ref.libraryID) {
-					collectionsView.selectLibrary(item.libraryID);
-				}
-				var selected = itemsView.selectItem(id);
-				if(!selected) {
-					// If item wasn't found in current view, select library root
-					// and try again (in case we were in a collection of correct library)
-					collectionsView.selectLibrary(item.libraryID);
-					itemsView.selectItem(id);
-				}
+				var selected = yield itemsView.selectItem(id);
 				
 				for(var box in _preserveData) {
 					var property = _preserveData[box][0];
@@ -209,7 +200,7 @@ var Zotero_Citation_Dialog = new function () {
 		} else {
 			toggleMultipleSources(false);
 		}
-	}
+	});
 	
 	/*
 	 * turn on/off multiple sources item list
@@ -652,7 +643,7 @@ var Zotero_Citation_Dialog = new function () {
 	/*
 	 * Controls whether the accept (OK) button should be enabled
 	 */
-	function _updateAccept(status) {
+	function _updateAccept() {
 		if(_multipleSourcesOn) {
 			_acceptButton.disabled = !_citationList.getRowCount();
 			// To prevent accidental data loss, do not allow change to
@@ -664,9 +655,14 @@ var Zotero_Citation_Dialog = new function () {
 				_multipleSourceButton.disabled = false;
 			}
 		} else {
-			collectionsView.addEventListener('load', () => {
-				_acceptButton.disabled = !itemsView.getSelectedItems().length;
-			});
+			collectionsView.addEventListener('load', Zotero.Promise.coroutine(function* () {
+				if (itemsView) {
+					var deferred = Zotero.Promise.defer();
+					itemsView.addEventListener('load', () => deferred.resolve());
+					yield deferred.promise;
+					_acceptButton.disabled = !itemsView.getSelectedItems().length;
+				}
+			}));
 		}
 	}
 	
