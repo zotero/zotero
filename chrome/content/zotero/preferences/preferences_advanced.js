@@ -48,6 +48,50 @@ Zotero_Preferences.Advanced = {
 		Components.utils.import("resource://zotero/config.js")
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 			.getService(Components.interfaces.nsIPromptService);
+		
+		// ~/Zotero exists and is non-empty
+		if ((yield OS.File.exists(defaultDir)) && !(yield Zotero.File.directoryIsEmpty(defaultDir))) {
+			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+			let index = ps.confirmEx(
+				window,
+				Zotero.getString('general.error'),
+				Zotero.getString('zotero.preferences.advanced.migrateDataDir.directoryExists1', defaultDir)
+					+ "\n\n"
+					+ Zotero.getString('zotero.preferences.advanced.migrateDataDir.directoryExists2'),
+				buttonFlags,
+				Zotero.getString('general.showDirectory'),
+				null, null, null, {}
+			);
+			if (index == 0) {
+				yield Zotero.File.reveal(
+					// Windows opens the directory, which might be confusing here, so open parent instead
+					Zotero.isWin ? OS.Path.dirname(defaultDir) : defaultDir
+				);
+			}
+			return;
+		}
+		
+		var additionalText = '';
+		if (Zotero.isWin) {
+			try {
+				let numItems = yield Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM itemAttachments WHERE linkMode IN (?, ?)",
+					[Zotero.Attachments.LINK_MODE_IMPORTED_FILE, Zotero.Attachments.LINK_MODE_IMPORTED_URL]
+				);
+				if (numItems > 100) {
+					additionalText = '\n\n' + Zotero.getString(
+						'zotero.preferences.advanced.migrateDataDir.manualMigration',
+						[Zotero.appName, defaultDir, ZOTERO_CONFIG.CLIENT_NAME]
+					);
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+		
+		// Prompt to restart
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 		var index = ps.confirmEx(window,
@@ -58,9 +102,9 @@ Zotero_Preferences.Advanced = {
 			) + '\n\n'
 			+ Zotero.getString(
 				'zotero.preferences.advanced.migrateDataDir.appMustBeRestarted', Zotero.appName
-			),
+			) + additionalText,
 			buttonFlags,
-			Zotero.getString('general.restartApp', Zotero.appName),
+			Zotero.getString('general.continue'),
 			null, null, null, {}
 		);
 		

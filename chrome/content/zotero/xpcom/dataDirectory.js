@@ -730,47 +730,13 @@ Zotero.DataDirectory = {
 		
 		// Create the new directory
 		if (!partial) {
-			try {
-				yield OS.File.makeDir(
-					newDir,
-					{
-						ignoreExisting: false,
-						unixMode: 0o755
-					}
-				);
-			}
-			catch (e) {
-				// If default dir exists and is non-empty, move it out of the way
-				// ("Zotero-1", "Zotero-2", …)
-				if (e instanceof OS.File.Error && e.becauseExists) {
-					if (!(yield Zotero.File.directoryIsEmpty(newDir))) {
-						let i = 1;
-						while (true) {
-							let backupDir = newDir + "-" + i++;
-							if (yield OS.File.exists(backupDir)) {
-								if (i > 5) {
-									throw new Error("Too many backup directories "
-										+ "-- stopped at " + backupDir);
-								}
-								continue;
-							}
-							Zotero.debug(`Moving existing directory to ${backupDir}`);
-							yield Zotero.File.moveDirectory(newDir, backupDir);
-							break;
-						}
-						yield OS.File.makeDir(
-							newDir,
-							{
-								ignoreExisting: false,
-								unixMode: 0o755
-							}
-						);
-					}
+			yield OS.File.makeDir(
+				newDir,
+				{
+					ignoreExisting: false,
+					unixMode: 0o755
 				}
-				else {
-					throw e;
-				}
-			}
+			);
 		}
 		
 		// Copy marker
