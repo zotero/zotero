@@ -197,7 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Personalizare:">
 <!ENTITY zotero.preferences.dataDir.choose "Alege...">
 <!ENTITY zotero.preferences.dataDir.reveal "Afișează dosarul de date">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrează la o nouă locație implicită...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Dosarul de bază pentru anexe atașate">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero va folosi căi relative pentru fișierele anexate în directorul de bază, permițând accesarea fișierelor pe diferite calculatoare atâta timp cât structura fișierelor în dosarul de bază rămâne aceeași.">

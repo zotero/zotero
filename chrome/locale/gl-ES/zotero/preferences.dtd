@@ -197,7 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Personalizado:">
 <!ENTITY zotero.preferences.dataDir.choose "Escoller...">
 <!ENTITY zotero.preferences.dataDir.reveal "Mostrar o cartafol de datos">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrar ao novo aloxamento....">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Cartafol principal de anexos ligados">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero usará rutas relativas para os ficheiros anexos que foran ligados ao cartafol principal. Con isto faise que sexa posible acceder a ficheiros en diferentes computadores sempre e cando a estrutura de ficheiros dentro do cartafol principal se manteña igual.">
