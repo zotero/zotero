@@ -951,8 +951,12 @@ var ZoteroPane = new function()
 		s.addCondition('title', 'contains', '');
 		
 		var untitled = Zotero.getString('pane.collections.untitled');
-		untitled = yield Zotero.DB.getNextName('savedSearches', 'savedSearchName',
-			Zotero.getString('pane.collections.untitled'));
+		untitled = yield Zotero.DB.getNextName(
+			s.libraryID,
+			'savedSearches',
+			'savedSearchName',
+			Zotero.getString('pane.collections.untitled')
+		);
 		var io = {dataIn: {search: s, name: untitled}, dataOut: null};
 		window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
 		if (!io.dataOut) {
