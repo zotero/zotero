@@ -174,10 +174,17 @@ Zotero.Connector = new function() {
 						Zotero.Connector_Browser.onStateChange(isOnline);
 					}
 				}
-				
+				var val = null;
+				if(req.responseText) {
+					if(req.getResponseHeader("Content-Type") === "application/json") {
+						val = JSON.parse(req.responseText);
+					} else {
+						val = req.responseText;
+					}
+				}	
 				if(req.status == 0 || req.status >= 400) {
 					Zotero.debug("Connector: Method "+method+" failed with status "+req.status);
-					if(callback) callback(false, req.status);
+					if(callback) callback(false, req.status, val);
 					
 					// Check for incompatible version
 					if(req.status === 412) {
@@ -190,14 +197,6 @@ Zotero.Connector = new function() {
 					}
 				} else {
 					Zotero.debug("Connector: Method "+method+" succeeded");
-					var val = null;
-					if(req.responseText) {
-						if(req.getResponseHeader("Content-Type") === "application/json") {
-							val = JSON.parse(req.responseText);
-						} else {
-							val = req.responseText;
-						}
-					}
 					if(callback) callback(val, req.status);
 				}
 			} catch(e) {
