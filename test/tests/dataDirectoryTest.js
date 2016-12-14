@@ -337,18 +337,6 @@ describe("Zotero.DataDirectory", function () {
 			yield checkMigration();
 		});
 		
-		add("should move existing directory out of the way", function* () {
-			yield populateDataDirectory(oldDir);
-			yield OS.File.makeDir(newDir, { unixMode: 0o755 });
-			yield Zotero.File.putContentsAsync(OS.Path.join(newDir, 'existing'), '');
-			
-			yield Zotero.DataDirectory.migrate(oldDir, newDir);
-			yield checkMigration();
-			
-			assert.isTrue(yield OS.File.exists(OS.Path.join(newDir + "-1", 'existing')));
-			yield removeDir(newDir + "-1");
-		});
-		
 		// Run all tests again without using mv
 		//
 		// On Windows these will just be duplicates of the above tests.
