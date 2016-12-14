@@ -225,22 +225,17 @@ Zotero.Translators = new function() {
 		if(!_initialized) Zotero.Translators.init();
 		if(!newMetadata.length) return;
 		
-		if(reset) {
-			var serializedTranslators = newMetadata.filter(function(translator) {
-				return !translator.deleted;
-			});
-		} else {
+		if(!reset) {
+			var existingTranslatorIDs = new Set();
 			var serializedTranslators = [];
 			var hasChanged = false;
 			
 			// Update translators with new metadata
 			for(var i in newMetadata) {
 				var newTranslator = newMetadata[i];
+				existingTranslatorIDs.add(newTranslator.translatorID);
 				
-				if(newTranslator.deleted) {
-					// handle translator deletions
-					delete _translators[newTranslator.translatorID];
-				} else if(_translators.hasOwnProperty(newTranslator.translatorID)) {
+				if(_translators.hasOwnProperty(newTranslator.translatorID)) {
 					var oldTranslator = _translators[newTranslator.translatorID];
 					
 					// check whether translator has changed
@@ -251,14 +246,23 @@ Zotero.Translators = new function() {
 							continue;
 						}
 						
-						Zotero.debug("Translators: Updating "+newTranslator.label);
+						Zotero.debug(`Translators: Updating ${newTranslator.label}`);
 						oldTranslator.init(newTranslator);
 						hasChanged = true;
 					}
 				} else {
-					Zotero.debug("Translators: Adding "+newTranslator.label);
+					Zotero.debug(`Translators: Adding ${newTranslator.label}`);
 					_translators[newTranslator.translatorID] = new Zotero.Translator(newTranslator);
 					hasChanged = true;
+				}
+			}
+			
+			let deletedTranslators = Object.keys(_translators).filter((ID) => !existingTranslatorIDs.has(ID));
+			if (deletedTranslators.length) {
+				hasChanged = true;
+				for (let ID of deletedTranslators) {
+					Zotero.debug(`Translators: Removing ${_translators[ID].label}`);
+					delete _translators[ID];
 				}
 			}
 			
