@@ -1564,10 +1564,11 @@ Zotero.Translate.Base.prototype = {
 				// Defer until after we fire the itemDone event
 				deferredProgress.push([attachment, progress, error]);
 				attachmentsWithProgress.push(attachment);
-			}	
+			}
 		}
 		
-		return this._itemSaver.saveItems(items.slice(), attachmentCallback.bind(this)).then(function(newItems) {
+		return this._itemSaver.saveItems(items.slice(), attachmentCallback.bind(this))
+		.then(function(newItems) {
 			// Remove attachments not being saved from item.attachments
 			for(var i=0; i<items.length; i++) {
 				var item = items[i];
@@ -1595,10 +1596,10 @@ Zotero.Translate.Base.prototype = {
 			
 			this._savingItems -= items.length;
 			this.newItems = this.newItems.concat(newItems);
-			this._checkIfDone();	
-		}.bind(this)).catch(function(e) {
+			this._checkIfDone();
+		}.bind(this))
+		.catch(function(e) {
 			this._savingItems -= items.length;
-			Zotero.debug("REDUCING SAVING ITEMS ERROR TO " + this._savingItems);
 			Zotero.logError(e);
 			this.complete(false, e);
 		}.bind(this));

@@ -257,12 +257,12 @@ Zotero.Translators = new function() {
 				}
 			}
 			
-			let deletedTranslators = Object.keys(_translators).filter((ID) => !existingTranslatorIDs.has(ID));
+			let deletedTranslators = Object.keys(_translators).filter(id => !existingTranslatorIDs.has(id));
 			if (deletedTranslators.length) {
 				hasChanged = true;
-				for (let ID of deletedTranslators) {
+				for (let id of deletedTranslators) {
 					Zotero.debug(`Translators: Removing ${_translators[ID].label}`);
-					delete _translators[ID];
+					delete _translators[id];
 				}
 			}
 			

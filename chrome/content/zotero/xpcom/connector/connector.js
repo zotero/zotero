@@ -181,7 +181,7 @@ Zotero.Connector = new function() {
 					} else {
 						val = req.responseText;
 					}
-				}	
+				}
 				if(req.status == 0 || req.status >= 400) {
 					Zotero.debug("Connector: Method "+method+" failed with status "+req.status);
 					if(callback) callback(false, req.status, val);
