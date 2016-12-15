@@ -621,7 +621,7 @@ Components.utils.import("resource://gre/modules/PluralForm.jsm");
 								Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 									.getService(Components.interfaces.nsIWindowWatcher)
 									.openWindow(null, 'chrome://mozapps/content/update/updates.xul',
-										'updateChecker', 'chrome,centerscreen', null);
+										'updateChecker', 'chrome,centerscreen,modal', null);
 							} else {
 								// In Firefox, show the add-on manager
 								Components.utils.import("resource://gre/modules/AddonManager.jsm");
