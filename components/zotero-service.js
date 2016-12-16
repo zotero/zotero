@@ -149,6 +149,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 var instanceID = (new Date()).getTime();
 var isFirstLoadThisSession = true;
 var zContext = null;
+var initCallbacks = [];
 var zInitOptions = {};
 
 ZoteroContext = function() {}
@@ -375,6 +376,11 @@ function ZoteroService() {
 				zContext.Zotero.debug("Initialized in "+(Date.now() - start)+" ms");
 				isFirstLoadThisSession = false;
 			});
+			
+			let cb;
+			while (cb = initCallbacks.shift()) {
+				cb(zContext.Zotero);
+			}
 		}
 		else {
 			zContext.Zotero.debug("Already initialized");
@@ -396,6 +402,15 @@ ZoteroService.prototype = {
 	classID: Components.ID('{e4c61080-ec2d-11da-8ad9-0800200c9a66}'),
 	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsISupports,
 			Components.interfaces.nsIProtocolHandler])
+}
+
+function addInitCallback(callback) {
+	if (zContext && zContext.Zotero) {
+		callback(zContext.Zotero);
+	}
+	else {
+		initCallbacks.push(callback);
+	}
 }
 
 var _isStandalone = null;
@@ -428,6 +443,16 @@ ZoteroCommandLineHandler.prototype = {
 			zInitOptions.openPane = true;
 		}
 		
+		if (cmdLine.handleFlag("ZoteroTest", false)) {
+			zInitOptions.test = true;
+		}
+		if (cmdLine.handleFlag("ZoteroAutomatedTest", false)) {
+			zInitOptions.automatedTest = true;
+		}
+		if (cmdLine.handleFlag("ZoteroSkipBundledFiles", false)) {
+			zInitOptions.skipBundledFiles = true;
+		}
+		
 		// handler for Zotero integration commands
 		// this is typically used on Windows only, via WM_COPYDATA rather than the command line
 		var agent = cmdLine.handleFlagWithParam("ZoteroIntegrationAgent", false);
@@ -438,9 +463,7 @@ ZoteroCommandLineHandler.prototype = {
 			var command = cmdLine.handleFlagWithParam("ZoteroIntegrationCommand", false);
 			var docId = cmdLine.handleFlagWithParam("ZoteroIntegrationDocument", false);
 			
-			// Not quite sure why this is necessary to get the appropriate scoping
-			var Zotero = this.Zotero;
-			Zotero.setTimeout(function() { Zotero.Integration.execCommand(agent, command, docId) }, 0);
+			zContext.Zotero.Integration.execCommand(agent, command, docId);
 		}
 		
 		// handler for Windows IPC commands
@@ -448,15 +471,16 @@ ZoteroCommandLineHandler.prototype = {
 		if(ipcParam) {
 			// Don't open a new window
 			cmdLine.preventDefault = true;
-			var Zotero = this.Zotero;
-			Zotero.setTimeout(function() { Zotero.IPC.parsePipeInput(ipcParam) }, 0);
+			if (!zContext) new ZoteroService();
+			let Zotero = zContext.Zotero;
+			Zotero.setTimeout(() => Zotero.IPC.parsePipeInput(ipcParam), 0);
 		}
 		
-		// special handler for "zotero" URIs at the command line to prevent them from opening a new
-		// window
 		if(isStandalone()) {
+			var fileToOpen;
+			// Special handler for "zotero" URIs at the command line to prevent them from opening a new window
 			var param = cmdLine.handleFlagWithParam("url", false);
-			if(param) {
+			if (param) {
 				var uri = cmdLine.resolveURI(param);
 				if(uri.schemeIs("zotero")) {
 					// Check for existing window and focus it
@@ -468,49 +492,66 @@ ZoteroCommandLineHandler.prototype = {
 						Components.classes["@mozilla.org/network/protocol;1?name=zotero"]
 							.createInstance(Components.interfaces.nsIProtocolHandler).newChannel(uri);
 					}
-				} else {
-					this.Zotero.debug("Not handling URL: "+uri.spec);
+				}
+				// See below
+				else if (uri.schemeIs("file")) {
+					Components.utils.import("resource://gre/modules/osfile.jsm")
+					fileToOpen = OS.Path.fromFileURI(uri.spec)
+				}
+				else {
+					dump(`Not handling URL: ${uri.spec}\n\n`);
 				}
 			}
 			
-			var param = cmdLine.handleFlagWithParam("file", false);
-			if(param) {
-				var file = Components.classes["@mozilla.org/file/local;1"].
-					createInstance(Components.interfaces.nsILocalFile);
-				file.initWithPath(param);
-				
-				if(file.leafName.substr(-4).toLowerCase() === ".csl"
-						|| file.leafName.substr(-8).toLowerCase() === ".csl.txt") {
-					// Install CSL file
-					this.Zotero.Styles.install(file);
-				} else {
-					// Ask before importing
-					var checkState = {"value":this.Zotero.Prefs.get('import.createNewCollection.fromFileOpenHandler')};
-					if(Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-							.getService(Components.interfaces.nsIPromptService)
-							.confirmCheck(null, this.Zotero.getString('ingester.importFile.title'),
-							this.Zotero.getString('ingester.importFile.text', [file.leafName]),
-							this.Zotero.getString('ingester.importFile.intoNewCollection'), 
-							checkState)) {
-						// Perform file import in front window
-						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-										   .getService(Components.interfaces.nsIWindowMediator);
-						var browserWindow = wm.getMostRecentWindow("navigator:browser");
-						browserWindow.Zotero_File_Interface.importFile(file, checkState.value);
-						this.Zotero.Prefs.set('import.createNewCollection.fromFileOpenHandler', checkState.value);
-					}
+			// In Fx49-based Mac Standalone, if Zotero is closed, an associated file is launched, and
+			// Zotero hasn't been opened before, a -file parameter is passed and two main windows open.
+			// Subsequent file openings when closed result in -url with file:// URLs (converted above)
+			// and don't result in two windows.
+			param = fileToOpen;
+			if (!param) {
+				param = cmdLine.handleFlagWithParam("file", false);
+				if (param) {
+					cmdLine.preventDefault = true;
 				}
 			}
-		}
-		
-		if (cmdLine.handleFlag("ZoteroTest", false)) {
-			zInitOptions.test = true;
-		}
-		if (cmdLine.handleFlag("ZoteroAutomatedTest", false)) {
-			zInitOptions.automatedTest = true;
-		}
-		if (cmdLine.handleFlag("ZoteroSkipBundledFiles", false)) {
-			zInitOptions.skipBundledFiles = true;
+			if (param) {
+				addInitCallback(function (Zotero) {
+					// Wait to handle things that require the UI until after it's loaded
+					Zotero.uiReadyPromise
+					.then(function () {
+						var file = Components.classes["@mozilla.org/file/local;1"].
+							createInstance(Components.interfaces.nsILocalFile);
+						file.initWithPath(param);
+						
+						if(file.leafName.substr(-4).toLowerCase() === ".csl"
+								|| file.leafName.substr(-8).toLowerCase() === ".csl.txt") {
+							// Install CSL file
+							Zotero.Styles.install(file);
+						} else {
+							// Ask before importing
+							var checkState = {
+								value: Zotero.Prefs.get('import.createNewCollection.fromFileOpenHandler')
+							};
+							if (Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+									.getService(Components.interfaces.nsIPromptService)
+									.confirmCheck(null, Zotero.getString('ingester.importFile.title'),
+									Zotero.getString('ingester.importFile.text', [file.leafName]),
+									Zotero.getString('ingester.importFile.intoNewCollection'),
+									checkState)) {
+								Zotero.Prefs.set(
+									'import.createNewCollection.fromFileOpenHandler', checkState.value
+								);
+								
+								// Perform file import in front window
+								var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+								   .getService(Components.interfaces.nsIWindowMediator);
+								var browserWindow = wm.getMostRecentWindow("navigator:browser");
+								browserWindow.Zotero_File_Interface.importFile(file, checkState.value);
+							}
+						}
+					});
+				});
+			}
 		}
 	},
 	
@@ -522,10 +563,5 @@ ZoteroCommandLineHandler.prototype = {
 	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsICommandLineHandler,
 	                                       Components.interfaces.nsISupports])
 };
-
-ZoteroCommandLineHandler.prototype.__defineGetter__("Zotero", function() {
-	if(!zContext) new ZoteroService();
-	return zContext.Zotero;
-});
 
 var NSGetFactory = XPCOMUtils.generateNSGetFactory([ZoteroService, ZoteroCommandLineHandler]);
