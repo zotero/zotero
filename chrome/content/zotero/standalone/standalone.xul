@@ -169,6 +169,7 @@
 							<menuseparator/>
 							<menuitem id="menu_addons" label="&addons.label;"
 									oncommand="ZoteroStandalone.openInViewer('chrome://mozapps/content/extensions/extensions.xul', ZoteroStandalone.updateAddonsPane)"/>
+							<!--<menuitem label="Error Console" oncommand="toJavaScriptConsole()"/>-->
 						</menupopup>
 					</menu>
 					
