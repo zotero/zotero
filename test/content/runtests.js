@@ -236,25 +236,37 @@ var assert = chai.assert,
 // Set up tests to run
 var run = ZoteroUnit.runTests;
 if(run && ZoteroUnit.tests) {
+	function getTestFilename(test) {
+		// Allow foo, fooTest, fooTest.js, and tests/fooTest.js
+		test = test.replace(/\.js$/, "");
+		test = test.replace(/Test$/, "");
+		test = test.replace(/^tests[/\\]/, "");
+		return test + "Test.js";
+	}
+	
 	var testDirectory = getTestDataDirectory().parent,
 	    testFiles = [];
 	if(ZoteroUnit.tests == "all") {
 		var enumerator = testDirectory.directoryEntries;
+		let startFile = ZoteroUnit.startAt ? getTestFilename(ZoteroUnit.startAt) : false;
+		let started = !startFile;
 		while(enumerator.hasMoreElements()) {
 			var file = enumerator.getNext().QueryInterface(Components.interfaces.nsIFile);
 			if(file.leafName.endsWith(".js")) {
-				testFiles.push(file.leafName);
+				if (started || file.leafName == startFile) {
+					testFiles.push(file.leafName);
+					started = true;
+				}
 			}
+		}
+		if (!started) {
+			dump(`Invalid start file ${startFile}\n`);
 		}
 		testFiles.sort();
 	} else {
 		var specifiedTests = ZoteroUnit.tests.split(",");
 		for (let test of specifiedTests) {
-			// Allow foo, fooTest, fooTest.js, and tests/fooTest.js
-			test = test.replace(/\.js$/, "");
-			test = test.replace(/Test$/, "");
-			test = test.replace(/^tests[/\\]/, "");
-			let fname = test + "Test.js";
+			let fname = getTestFilename(test);
 			let file = testDirectory.clone();
 			file.append(fname);
 			if (!file.exists()) {

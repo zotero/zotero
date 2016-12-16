@@ -38,6 +38,7 @@ Options
  -f                  stop after first test failure
  -g                  only run tests matching the given pattern (grep)
  -h                  display this help
+ -s TEST             start at the given test
  -t                  generate test data and quit
  -x FX_EXECUTABLE    path to Firefox executable (default: $FX_EXECUTABLE)
  TESTS               set of tests to run (default: all)
@@ -47,7 +48,7 @@ DONE
 
 DEBUG=false
 DEBUG_LEVEL=5
-while getopts "bcd:fg:htx:" opt; do
+while getopts "bcd:fg:hs:tx:" opt; do
 	case $opt in
         b)
         	FX_ARGS="$FX_ARGS -ZoteroSkipBundledFiles"
@@ -67,6 +68,12 @@ while getopts "bcd:fg:htx:" opt; do
 			;;
 		h)
 			usage
+			;;
+		s)
+			if [[ -z "$OPTARG" ]] || [[ ${OPTARG:0:1} = "-" ]]; then
+				usage
+			fi
+			FX_ARGS="$FX_ARGS -startAtTestFile $OPTARG"
 			;;
 		t)
 			FX_ARGS="$FX_ARGS -makeTestData"
