@@ -35,41 +35,96 @@ var ZoteroOverlay = new function()
 	
 	this.isTab = false;
 	
-	this.onLoad = function() {
-		zoteroPane = document.getElementById('zotero-pane-stack');
-		zoteroSplitter = document.getElementById('zotero-splitter');
-		
-		var self = this;
-		var iconLoaded = false;
-		
-		if (Zotero.isConnector) {
-			return;
-		}
-		
-		Zotero.Promise.try(function () {
-			if (!Zotero) {
-				throw new Error("No Zotero object");
+	this.onLoad = function () {
+		Zotero.spawn(function* () {
+			try {
+				//
+				// Code that runs in both full and connector mode
+				//
+				zoteroPane = document.getElementById('zotero-pane-stack');
+				zoteroSplitter = document.getElementById('zotero-splitter');
+				
+				var iconLoaded = false;
+				
+				if (!Zotero) {
+					throw new Error("No Zotero object");
+				}
+				if (Zotero.skipLoading) {
+					throw new Error("Skipping loading");
+				}
+				
+				ZoteroPane_Overlay = ZoteroPane;
+				
+				// Close pane before reload
+				ZoteroPane_Local.addBeforeReloadListener(function(newMode) {
+					if(newMode == "connector") {
+						// save current state
+						_stateBeforeReload = !zoteroPane.hidden && !zoteroPane.collapsed;
+						// ensure pane is closed
+						if(!zoteroPane.collapsed) ZoteroOverlay.toggleDisplay(false, true);
+					}
+				});
+				
+				// Close pane if connector is enabled
+				ZoteroPane_Local.addReloadListener(function() {
+					if(!Zotero.isConnector) {
+						// reopen pane if it was open before
+						ZoteroOverlay.toggleDisplay(_stateBeforeReload, true);
+					}
+				});
+				
+				// TODO: Add only when progress window is open
+				document.getElementById('appcontent').addEventListener('mousemove', Zotero.ProgressWindowSet.updateTimers, false);
+				
+				// Hide browser chrome on Zotero tab
+				XULBrowserWindow.inContentWhitelist.push("chrome://zotero/content/tab.xul");
+				
+				// Perform additional initialization for full mode
+				if (!Zotero.isConnector) {
+					yield _onLoadFull();
+				}
 			}
-			if (Zotero.skipLoading) {
-				throw new Error("Skipping loading");
+			catch (e) {
+				Zotero.debug(e, 1);
+				
+				// Add toolbar icon if still necessary
+				if (!iconLoaded) {
+					try {
+						Services.scriptloader.loadSubScript("chrome://zotero/content/icon.js", {}, "UTF-8");
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+				}
+				
+				throw e;
 			}
-			return Zotero.Promise.all([Zotero.initializationPromise, Zotero.unlockPromise]);
-		})
-		.then(function () {
+		});
+	}
+	
+	
+	/**
+	 * Initialize overlay in new windows in full mode
+	 *
+	 * This is never run in Zotero for Firefox if Standalone is open first and Z4Fx is opened
+	 * second, but we don't care.
+	 */
+	var _onLoadFull = function () {
+		return Zotero.spawn(function* () {
+			yield Zotero.Promise.all([Zotero.initializationPromise, Zotero.unlockPromise]);
+			
 			Zotero.debug("Initializing overlay");
 			
 			if (Zotero.skipLoading) {
 				throw new Error("Skipping loading");
 			}
 			
-			ZoteroPane_Overlay = ZoteroPane;
-			
 			// Open Zotero app tab, if in Fx 4 and requested by pref
 			showInPref = Components.classes["@mozilla.org/preferences-service;1"]
 								.getService(Components.interfaces.nsIPrefService)
 								.getBranch('extensions.zotero.').getIntPref('showIn');
-			self.isTab = showInPref !== 1;
-	
+			this.isTab = showInPref !== 1;
+			
 			var observerService = Components.classes["@mozilla.org/observer-service;1"]
 				.getService(Components.interfaces.nsIObserverService);
 			var zoteroObserver = function(subject, topic, data) {
@@ -87,7 +142,6 @@ var ZoteroOverlay = new function()
 					if(zoteroTab) gBrowser.removeTab(zoteroTab);
 				}
 			};
-			
 			observerService.addObserver(zoteroObserver, "browser-delayed-startup-finished", false);
 			
 			ZoteroPane.init();
@@ -107,9 +161,6 @@ var ZoteroOverlay = new function()
 				Zotero.logError(e);
 			}
 			
-			// TODO: Add only when progress window is open
-			document.getElementById('appcontent').addEventListener('mousemove', Zotero.ProgressWindowSet.updateTimers, false);
-			
 			// Used for loading pages from upgrade wizard
 			if (Zotero.initialURL) {
 				setTimeout(function () {
@@ -117,43 +168,7 @@ var ZoteroOverlay = new function()
 					Zotero.initialURL = null;
 				}, 1);
 			}
-			
-			// Hide browser chrome on Zotero tab
-			XULBrowserWindow.inContentWhitelist.push("chrome://zotero/content/tab.xul");
-			
-			// Close pane before reload
-			ZoteroPane_Local.addBeforeReloadListener(function(newMode) {
-				if(newMode == "connector") {
-					// save current state
-					_stateBeforeReload = !zoteroPane.hidden && !zoteroPane.collapsed;
-					// ensure pane is closed
-					if(!zoteroPane.collapsed) ZoteroOverlay.toggleDisplay(false, true);
-				}
-			});
-			
-			// Close pane if connector is enabled
-			ZoteroPane_Local.addReloadListener(function() {
-				if(!Zotero.isConnector) {
-					// reopen pane if it was open before
-					ZoteroOverlay.toggleDisplay(_stateBeforeReload, true);
-				}
-			});
-		})
-		.catch(function (e) {
-			Zotero.debug(e, 1);
-			
-			// Add toolbar icon if still necessary
-			if (!iconLoaded) {
-				try {
-					Services.scriptloader.loadSubScript("chrome://zotero/content/icon.js", {}, "UTF-8");
-				}
-				catch (e) {
-					Zotero.logError(e);
-				}
-			}
-			
-			throw e;
-		});
+		}, this);
 	}
 	
 	
