@@ -365,9 +365,44 @@ function ZoteroService() {
 							zContext.Zotero.startupErrorHandler();
 						}
 						else if (zContext.Zotero.startupError) {
-							Cc["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Ci.nsIPromptService)
-								.alert(null, "Error", zContext.Zotero.startupError);
+							let ps = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Ci.nsIPromptService);
+							let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+								+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
+							// Get the stringbundle manually
+							let errorStr = "Error";
+							let quitStr = "Quit";
+							let checkForUpdateStr = "Check for Update";
+							try {
+								let src = 'chrome://zotero/locale/zotero.properties';
+								let localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1']
+									.getService(Components.interfaces.nsILocaleService);
+								let appLocale = localeService.getApplicationLocale();
+								let stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
+									.getService(Components.interfaces.nsIStringBundleService);
+								let stringBundle = stringBundleService.createBundle(src, appLocale);
+								errorStr = stringBundle.GetStringFromName('general.error');
+								checkForUpdateStr = stringBundle.GetStringFromName('general.checkForUpdate');
+								quitStr = stringBundle.GetStringFromName('general.quit');
+							}
+							catch (e) {}
+							let index = ps.confirmEx(
+								null,
+								errorStr,
+								zContext.Zotero.startupError,
+								buttonFlags,
+								checkForUpdateStr,
+								quitStr,
+								null,
+								null,
+								{}
+							);
+							if (index == 0) {
+								Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+									.getService(Components.interfaces.nsIWindowWatcher)
+									.openWindow(null, 'chrome://mozapps/content/update/updates.xul',
+										'updateChecker', 'chrome,centerscreen,modal', null);
+							}
 						}
 						zContext.Zotero.Utilities.Internal.quitZotero();
 					}
