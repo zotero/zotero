@@ -258,6 +258,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				newAttachment = yield this._saveAttachmentFile.apply(this, arguments);
 			} else {
 				Zotero.debug('Translate: Ignoring attachment due to ATTACHMENT_MODE_IGNORE');
+				attachmentCallback(attachment, false, e);
 				return false;
 			}
 			
