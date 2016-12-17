@@ -506,6 +506,25 @@ Zotero.DataDirectory = {
 			let foundPipe = yield Zotero.IPC.pipeExists();
 			if (foundPipe) {
 				Zotero.debug("Found existing pipe -- skipping migration");
+				
+				if (!automatic) {
+					let ps = Services.prompt;
+					let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
+					let index = ps.confirmEx(null,
+						Zotero.getString('dataDir.migration.failure.title'),
+						Zotero.getString('dataDir.migration.failure.full.firefoxOpen'),
+						buttonFlags,
+						Zotero.getString('general.tryAgain'),
+						Zotero.getString('general.tryLater'),
+						null, null, {}
+					);
+					
+					if (index == 0) {
+						return this.checkForMigration(newDir, newDir);
+					}
+				}
+				
 				return false;
 			}
 		}
