@@ -60,7 +60,7 @@
 <!ENTITY zotero.preferences.sync.password "Hasło:">
 <!ENTITY zotero.preferences.sync.syncServer "Synchronizacja danych">
 <!ENTITY zotero.preferences.sync.setUpSync "Ustaw synchronizację">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Usuń powiązane konto...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Odłącz konto...">
 <!ENTITY zotero.preferences.sync.createAccount "Utwórz konto">
 <!ENTITY zotero.preferences.sync.lostPassword "Zapomniane hasło?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchronizacja automatyczna">
@@ -92,7 +92,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Wyczyść historię synchronizacji plików">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Wymuś sprawdzenie wszystkich lokalnych załączników na serwerze przechowywania.">
 <!ENTITY zotero.preferences.sync.reset "Przywróć">
-<!ENTITY zotero.preferences.sync.reset.button "Wyczyść...">
+<!ENTITY zotero.preferences.sync.reset.button "Przywróć...">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Wyszukiwanie">
@@ -185,7 +185,7 @@
 <!ENTITY zotero.preferences.locate.description "Opis">
 <!ENTITY zotero.preferences.locate.name "Nazwa">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Silnik wyszukiwania rozszerza możliwości menu wyszukiwania w panelu informacji. Włączając silniki wyszukiwania na poniższej liście, zostaną one dodane do rozwijanego i mogą zostać użyte do wyszukiwania zasobów z twojej biblioteki w sieci internet.">
-<!ENTITY zotero.preferences.locate.addDescription "Aby dodać silnik wyszukiwania, którego nie ma na liście, odwiedź określony silnik wyszukiwania w przeglądarce i wybierz &quot;Dodaj&quot; na pasku wyszukiwania Zotero.">
+<!ENTITY zotero.preferences.locate.addDescription "Aby dodać silnik wyszukiwania, którego nie ma na liście, odwiedź określony silnik wyszukiwania w przeglądarce i wybierz &quot;Dodaj&quot; w menu wyszukiwania Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Przywróć domyślne">
 
 <!ENTITY zotero.preferences.charset "Kodowanie znaków">
@@ -195,7 +195,7 @@
 <!ENTITY zotero.preferences.dataDir "Miejsce przechowywania:">
 <!ENTITY zotero.preferences.dataDir.useProfile "Użyj katalogu profilu">
 <!ENTITY zotero.preferences.dataDir.custom "Określ katalog:">
-<!ENTITY zotero.preferences.dataDir.choose "Przeglądaj...">
+<!ENTITY zotero.preferences.dataDir.choose "Wybierz...">
 <!ENTITY zotero.preferences.dataDir.reveal "Wyświetl katalog bazy danych">
 <!ENTITY zotero.preferences.dataDir.migrate "Przenieś do nowej domyślnej lokalizacji...">
 

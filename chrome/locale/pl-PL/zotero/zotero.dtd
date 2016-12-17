@@ -12,7 +12,7 @@
 <!ENTITY zotero.general.saveAs "Zapisz jako...">
 <!ENTITY zotero.general.advancedOptions.label "Zaawansowane ustawienia">
 <!ENTITY zotero.general.more "Więcej">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.loading "Wczytywanie...">
 
 <!ENTITY zotero.errorReport.title "Raport błędów Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Może zawierać informacje niezwiązane z Zotero.">
@@ -272,10 +272,10 @@
 <!ENTITY zotero.feedSettings.title.label "Tytuł:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Aktualizuj kanał co">
 <!ENTITY zotero.feedSettings.refresh.label2 "godzin(y)">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Usuń nieprzeczytane elementy kanału po">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "dniu(ach)">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Usuń przeczytane elementy kanału po">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dniu(ach)">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Pobieranie metadanych...">
