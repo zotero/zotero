@@ -2,6 +2,8 @@ describe("PDF Recognition", function() {
 	var win;
 	
 	before(function* () {
+		if (Zotero.automatedTest) this.skip(); // TODO: Mock services
+		
 		this.timeout(60000);
 		// Load Zotero pane and install PDF tools
 		yield Zotero.Promise.all([
@@ -52,8 +54,6 @@ describe("PDF Recognition", function() {
 	});
 
 	it("should recognize a PDF without a DOI", function* () {
-		if (Zotero.automatedTest) this.skip(); // TODO: Mock
-		
 		this.timeout(30000);
 		// Import the PDF
 		var testdir = getTestDataDirectory();
