@@ -93,8 +93,10 @@ Zotero.Translate.ItemSaver.prototype = {
 				}
 				// Handle standalone attachments differently
 				else if (type == "attachment") {
-					standaloneAttachments.push(items[iitem]);
-					attachmentCallback(items[iitem], 0);
+					if (this._canSaveAttachment(item)) {
+						standaloneAttachments.push(item);
+						attachmentCallback(item, 0);
+					}
 					continue;
 				} else {
 					newItem = new Zotero.Item(type);
@@ -135,8 +137,10 @@ Zotero.Translate.ItemSaver.prototype = {
 					// handle attachments
 					if (specialFields.attachments) {
 						for (let attachment of specialFields.attachments) {
+							if (this._canSaveAttachment(attachment)) {
+								attachmentCallback(attachment, 0);
+							}
 							childAttachments.push([attachment, myID]);
-							attachmentCallback(attachment, 0);
 						}
 						// Restore the attachments field, since we use it later in
 						// translation
@@ -157,15 +161,15 @@ Zotero.Translate.ItemSaver.prototype = {
 			let newItem = yield this._saveAttachment(item, null, attachmentCallback);
 			if (newItem) newItems.push(newItem);
 		}
-		// Save attachments afterwards, since we want to signal completion as soon as the main items
-		// are saved
+		// Save child attachments afterwards, since we want to signal completion as soon as the main
+		// items are saved
 		var promise = Zotero.Promise.delay(1);
 		for (let a of childAttachments) {
 			// Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=449811 (fixed in Fx51?)
 			let [item, parentItemID] = a;
 			promise = promise.then(() => this._saveAttachment(item, parentItemID, attachmentCallback));
 		}
-
+		
 		return newItems;
 	}),
 	
@@ -235,6 +239,37 @@ Zotero.Translate.ItemSaver.prototype = {
 		return item;
 	},
 	
+	
+	_canSaveAttachment: function (attachment) {
+		if (this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD) {
+			if (!attachment.url && !attachment.document) {
+				Zotero.debug("Translate: Not adding attachment: no URL specified");
+				return false;
+			}
+			if (attachment.snapshot !== false) {
+				if (attachment.document || Zotero.MIME.isWebPageType(attachment.mimeType)) {
+					if (!Zotero.Prefs.get("automaticSnapshots")) {
+						Zotero.debug("Translate: Not adding attachment: automatic snapshots are disabled");
+						return false;
+					}
+				}
+				else {
+					if (!Zotero.Prefs.get("downloadAssociatedFiles")) {
+						Zotero.debug("Translate: Not adding attachment: automatic file attachments are disabled");
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+		else if (this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE) {
+			return true;
+		}
+		Zotero.debug('Translate: Ignoring attachment due to ATTACHMENT_MODE_IGNORE');
+		return false;
+	},
+	
+	
 	/**
 	 * Saves a translator attachment to the database
 	 *
@@ -258,8 +293,6 @@ Zotero.Translate.ItemSaver.prototype = {
 				newAttachment = yield this._saveAttachmentFile.apply(this, arguments);
 			} else {
 				Zotero.debug('Translate: Ignoring attachment due to ATTACHMENT_MODE_IGNORE');
-				attachmentCallback(attachment, false);
-				return false;
 			}
 			
 			if (!newAttachment) return false; // attachmentCallback should not have been called in this case
@@ -502,26 +535,6 @@ Zotero.Translate.ItemSaver.prototype = {
 	
 	_saveAttachmentDownload: Zotero.Promise.coroutine(function* (attachment, parentItemID, attachmentCallback) {
 		Zotero.debug("Translate: Adding attachment", 4);
-		
-		if(!attachment.url && !attachment.document) {
-			Zotero.debug("Translate: Not adding attachment: no URL specified");
-			return false;
-		}
-		
-		// Determine whether to save an attachment
-		if(attachment.snapshot !== false) {
-			if(attachment.document || Zotero.MIME.isWebPageType(attachment.mimeType)) {
-				if(!Zotero.Prefs.get("automaticSnapshots")) {
-					Zotero.debug("Translate: Not adding attachment: automatic snapshots are disabled");
-					return false;
-				}
-			} else {
-				if(!Zotero.Prefs.get("downloadAssociatedFiles")) {
-					Zotero.debug("Translate: Not adding attachment: automatic file attachments are disabled");
-					return false;
-				}
-			}
-		}
 		
 		let doc = undefined;
 		if(attachment.document) {
