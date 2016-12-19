@@ -137,9 +137,10 @@ Zotero.Translate.ItemSaver.prototype = {
 					// handle attachments
 					if (specialFields.attachments) {
 						for (let attachment of specialFields.attachments) {
-							if (this._canSaveAttachment(attachment)) {
-								attachmentCallback(attachment, 0);
+							if (!this._canSaveAttachment(attachment)) {
+								continue;
 							}
+							attachmentCallback(attachment, 0);
 							childAttachments.push([attachment, myID]);
 						}
 						// Restore the attachments field, since we use it later in
