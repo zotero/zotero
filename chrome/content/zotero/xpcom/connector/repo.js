@@ -150,7 +150,8 @@ Zotero.Repo = new function() {
 			if(!result && tryRepoOnFailure) {
 				_updateFromRepo(reset, callback);
 			} else {
-				_handleResponse(result, reset);
+				// Standalone always returns all translators without .deleted property
+				_handleResponse(result, true);
 				if(callback) callback(!!result);
 			}
 		});

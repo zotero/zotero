@@ -222,18 +222,19 @@ Zotero.Translators = new function() {
 	 *                        the specified translators.
 	 */
 	this.update = function(newMetadata, reset) {
-		if(!_initialized) Zotero.Translators.init();
-		if(!newMetadata.length) return;
+		if (!_initialized) Zotero.Translators.init();
+		if (!newMetadata.length) return;
+		var serializedTranslators = [];
 		
-		if(!reset) {
-			var existingTranslatorIDs = new Set();
-			var serializedTranslators = [];
+		if (reset) {
+			serializedTranslators = newMetadata.map((t) => new Zotero.Translator(t));
+		}
+		else {
 			var hasChanged = false;
 			
 			// Update translators with new metadata
 			for(var i in newMetadata) {
 				var newTranslator = newMetadata[i];
-				existingTranslatorIDs.add(newTranslator.translatorID);
 				
 				if(_translators.hasOwnProperty(newTranslator.translatorID)) {
 					var oldTranslator = _translators[newTranslator.translatorID];
@@ -257,11 +258,11 @@ Zotero.Translators = new function() {
 				}
 			}
 			
-			let deletedTranslators = Object.keys(_translators).filter(id => !existingTranslatorIDs.has(id));
+			let deletedTranslators = Object.keys(_translators).filter(id => _translators[id].deleted);
 			if (deletedTranslators.length) {
 				hasChanged = true;
 				for (let id of deletedTranslators) {
-					Zotero.debug(`Translators: Removing ${_translators[ID].label}`);
+					Zotero.debug(`Translators: Removing ${_translators[id].label}`);
 					delete _translators[id];
 				}
 			}
@@ -326,7 +327,7 @@ Zotero.Translators.CodeGetter.prototype.getCodeFor = Zotero.Promise.method(funct
 			// include test cases)
 			|| (Zotero.Repo && translator.codeSource === Zotero.Repo.SOURCE_REPO)))) {
 		// get code
-		return translator.getCode();
+		return translator.getCode().catch((e) => Zotero.debug(`Failed to retrieve code for ${translator.translatorID}`));
 	}
 });
 
