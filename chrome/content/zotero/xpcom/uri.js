@@ -110,7 +110,7 @@ Zotero.URI = new function () {
 				break;
 			
 			default:
-				throw ("Unsupported library type '" + libraryType + "' in Zotero.URI.getLibraryPath()");
+				throw new Error(`Unsupported library type '${libraryType}' for library ${libraryID}`);
 		}
 		
 		return libraryType + "s/" + id;
