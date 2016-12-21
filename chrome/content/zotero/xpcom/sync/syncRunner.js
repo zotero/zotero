@@ -41,7 +41,15 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	Zotero.defineProperty(this, 'syncInProgress', { get: () => _syncInProgress });
 	Zotero.defineProperty(this, 'lastSyncStatus', { get: () => _lastSyncStatus });
 	
-	this.baseURL = options.baseURL || ZOTERO_CONFIG.API_URL;
+	Zotero.defineProperty(this, 'baseURL', {
+		get: () => {
+			let url = options.baseURL || Zotero.Prefs.get("api.url") || ZOTERO_CONFIG.API_URL;
+			if (!url.endsWith('/')) {
+				url += '/';
+			}
+			return url;
+		}
+	});
 	this.apiVersion = options.apiVersion || ZOTERO_CONFIG.API_VERSION;
 	
 	// Allows tests to set apiKey in options or as property, overriding login manager
