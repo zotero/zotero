@@ -675,7 +675,8 @@ Components.utils.import("resource://gre/modules/PluralForm.jsm");
 					throw e;
 				}
 				
-				Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError') + "\n\n" + e;
+				Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError') + "\n\n"
+					+ (e.stack || e);
 				throw e;
 			}
 			
@@ -751,7 +752,7 @@ Components.utils.import("resource://gre/modules/PluralForm.jsm");
 		catch (e) {
 			Zotero.logError(e);
 			if (!Zotero.startupError) {
-				Zotero.startupError = Zotero.getString('startupError') + "\n\n" + e;
+				Zotero.startupError = Zotero.getString('startupError') + "\n\n" + (e.stack || e);
 			}
 			return false;
 		}
@@ -808,7 +809,7 @@ Components.utils.import("resource://gre/modules/PluralForm.jsm");
 						"startupError.close" + (Zotero.isStandalone ? 'Firefox' : 'Standalone')
 					);
 			} else {
-				Zotero.startupError = Zotero.getString('startupError') + "\n\n" + e;
+				Zotero.startupError = Zotero.getString('startupError') + "\n\n" + (e.stack || e);
 			}
 			
 			Zotero.debug(e.toString(), 1);
