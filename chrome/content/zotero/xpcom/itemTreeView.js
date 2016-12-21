@@ -128,6 +128,19 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 				return;
 			}
 			
+			// Focus note editor when Tab is pressed on a selected note
+			if (event.keyCode == event.DOM_VK_TAB) {
+				let items = this.getSelectedItems();
+				if (items.length == 1 && items[0].isNote()) {
+					let noteEditor = this._ownerDocument.getElementById('zotero-note-editor');
+					if (noteEditor) {
+						noteEditor.focus();
+						event.preventDefault();
+					}
+				}
+				return;
+			}
+			
 			// Handle arrow keys specially on multiple selection, since
 			// otherwise the tree just applies it to the last-selected row
 			if (event.keyCode == 39 || event.keyCode == 37) {
@@ -220,7 +233,7 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 			.catch(function (e) {
 				Zotero.logError(e);
 			})
-		};
+		}.bind(this);
 		// Store listener so we can call removeEventListener() in ItemTreeView.unregister()
 		this.listener = listener;
 		tree.addEventListener('keypress', listener);
