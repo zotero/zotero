@@ -3,24 +3,16 @@ language: cpp
 compiler:
     - gcc
 env:
-    - FX_CHANNEL="release"
-    - FX_CHANNEL="esr"
-    - FX_CHANNEL="beta"
+    - FX_VERSION="49.0.2"
 matrix:
     fast_finish: true
-    allow_failures:
-        - env: FX_CHANNEL="beta"
+    #allow_failures:
+    #    - env: FX_CHANNEL="beta"
 notifications:
     email: false
 install:
-    # Use unbranded builds for 'release' and 'beta'
-    - if [ $FX_CHANNEL != "esr" ]; then
-        URL="`curl -s https://wiki.mozilla.org/Addons/Extension_Signing | sed -n -r \"s/.+https?(:\/\/archive.mozilla.org[^ ]+\/mozilla-${FX_CHANNEL}-linux64-add-on-devel\/[0-9]+\/.+.bz2).+/https\1/p\"`";
-        wget -O tarball "$URL";
-      fi
-    # Use official build for 'esr'
-    - if [ $FX_CHANNEL == "esr" ]; then
-        wget -O tarball "https://download.mozilla.org/?product=firefox-${FX_CHANNEL}-latest&os=linux64&lang=en-US";
+    - if [ $FX_VERSION = "49.0.2" ]; then
+        wget -O tarball "https://archive.mozilla.org/pub/firefox/tinderbox-builds/mozilla-release-linux64-add-on-devel/1476892163/firefox-49.0.2.en-US.linux-x86_64-add-on-devel.tar.bz2";
       fi
     - tar xf tarball
 before_script:
