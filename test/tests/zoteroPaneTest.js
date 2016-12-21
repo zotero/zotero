@@ -160,8 +160,8 @@ describe("ZoteroPane", function() {
 		before(function () {
 			Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
 			
+			Zotero.Prefs.set("api.url", baseURL);
 			Zotero.Sync.Runner.apiKey = apiKey;
-			Zotero.Sync.Runner.baseURL = baseURL;
 		})
 		beforeEach(function* () {
 			this.httpd = new HttpServer();
