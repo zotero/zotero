@@ -44,6 +44,9 @@ Zotero.Feed = function(params = {}) {
 	this._feedCleanupReadAfter = null;
 	this._feedCleanupUnreadAfter = null;
 	this._feedRefreshInterval = null;
+	this._feedUnreadCount = null;
+	this._updating = false;
+	this._previousURL = null;
 
 	// Feeds are not editable by the user. Remove the setter
 	this.editable = false;
@@ -69,10 +72,6 @@ Zotero.Feed = function(params = {}) {
 			return obj[prop];
 		}
 	});
-	this._feedUnreadCount = null;
-	
-	this._updating = false;
-	this._previousURL = null;
 }
 
 Zotero.Feed._colToProp = function(c) {

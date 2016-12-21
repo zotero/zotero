@@ -1056,11 +1056,14 @@
 				<body>
 				<![CDATA[
 					// DEBUG: Valid nsIScrollBoxObject but methods return errors
-					return;
-					
-					var sbo = document.getAnonymousNodes(this)[0].boxObject;
-					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
-					sbo.scrollTo(0,0);
+					try {
+						var sbo = document.getAnonymousNodes(this)[0].boxObject;
+						sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
+						sbo.scrollTo(0,0);
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
 				]]>
 				</body>
 			</method>
