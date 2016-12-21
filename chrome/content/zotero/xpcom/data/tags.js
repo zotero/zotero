@@ -248,7 +248,7 @@ Zotero.Tags = new function() {
 				oldItemIDs,
 				Zotero.DB.MAX_BOUND_PARAMETERS - 2,
 				Zotero.Promise.coroutine(function* (chunk) {
-					let placeholders = chunk.map(function () '?').join(',');
+					let placeholders = chunk.map(() => '?').join(',');
 					
 					// This is ugly, but it's much faster than doing replaceTag() for each item
 					let sql = 'UPDATE OR REPLACE itemTags SET tagID=?, type=0 '
@@ -349,7 +349,7 @@ Zotero.Tags = new function() {
 				Zotero.Utilities.arrayUnique(oldItemIDs),
 				Zotero.DB.MAX_BOUND_PARAMETERS - 1,
 				Zotero.Promise.coroutine(function* (chunk) {
-					let placeholders = chunk.map(function () '?').join(',');
+					let placeholders = chunk.map(() => '?').join(',');
 					
 					sql = 'UPDATE items SET synced=0, clientDateModified=? '
 						+ 'WHERE itemID IN (' + placeholders + ')'
@@ -539,7 +539,7 @@ Zotero.Tags = new function() {
 				return;
 			}
 			
-			tagColors = tagColors.filter(function (val) val.name != name);
+			tagColors = tagColors.filter(val => val.name != name);
 		}
 		else {
 			// Get current position if present
@@ -620,7 +620,7 @@ Zotero.Tags = new function() {
 			var affectedItems = [];
 			
 			// Get all items linked to previous or current tag colors
-			var tagNames = tagColors.concat(previousTagColors).map(function (val) val.name);
+			var tagNames = tagColors.concat(previousTagColors).map(val => val.name);
 			tagNames = Zotero.Utilities.arrayUnique(tagNames);
 			if (tagNames.length) {
 				for (let i=0; i<tagNames.length; i++) {

@@ -283,7 +283,7 @@ Zotero.CreatorTypes = new function() {
 		
 		var valid = false;
 		var types = this.getTypesForItemType(itemTypeID);
-		for each(var type in types) {
+		for (let type of types) {
 			if (type.id == creatorTypeID) {
 				valid = true;
 				break;
@@ -371,9 +371,9 @@ Zotero.ItemTypes = new function() {
 			}
 			if (params.length) {
 				sql += 'OR id IN '
-						+ '(' + params.map(function () '?').join() + ') '
+						+ '(' + params.map(() => '?').join() + ') '
 						+ 'ORDER BY id NOT IN '
-						+ '(' + params.map(function () '?').join() + ') ';
+						+ '(' + params.map(() => '?').join() + ') ';
 				params = params.concat(params);
 			}
 			else {

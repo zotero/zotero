@@ -76,7 +76,7 @@ Zotero.API = {
 					var s2 = new Zotero.Search();
 					s2.setScope(s);
 					var groups = Zotero.Groups.getAll();
-					for each(var group in groups) {
+					for (let group of groups) {
 						s2.addCondition('libraryID', 'isNot', group.libraryID);
 					}
 					var ids = yield s2.search();

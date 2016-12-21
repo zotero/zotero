@@ -347,7 +347,7 @@ Zotero.Styles = new function() {
 			
 			if(existingFile) {
 				// find associated style
-				for each(var existingStyle in _styles) {
+				for (let existingStyle of _styles) {
 					if(destFile.equals(existingStyle.file)) {
 						existingTitle = existingStyle.title;
 						break;

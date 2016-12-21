@@ -33,7 +33,7 @@ Zotero.IPC = new function() {
 		if(!Zotero.isWin) {	// no pipe support on Fx 3.6
 			_instancePipe = _getPipeDirectory();
 			if(!_instancePipe.exists()) {
-				_instancePipe.create(Ci.nsIFile.DIRECTORY_TYPE, 0700);
+				_instancePipe.create(Ci.nsIFile.DIRECTORY_TYPE, 0o700);
 			}
 			_instancePipe.append(Zotero.instanceID);
 			
@@ -126,7 +126,7 @@ Zotero.IPC = new function() {
 		// On Linux, O_NONBLOCK = 00004000
 		// On both, O_WRONLY = 0x0001
 		var mode = 0x0001;
-		if(!block) mode = mode | (Zotero.isLinux ? 00004000 : 0x0004);
+		if(!block) mode = mode | (Zotero.isLinux ? 0o0004000 : 0x0004);
 		
 		var fd = open(pipe.path, mode);
 		if(fd === -1) return false;			
@@ -387,7 +387,7 @@ Zotero.IPC.Pipe = new function() {
 		}
 		
 		// make pipe
-		var ret = _mkfifo(file.path, 0600);
+		var ret = _mkfifo(file.path, 0o600);
 		return file.exists();
 	}
 	

@@ -62,18 +62,18 @@ Zotero.DataObjects.prototype._ZDO_idOnly = false;
 
 // Public properties
 Zotero.defineProperty(Zotero.DataObjects.prototype, 'idColumn', {
-	get: function() this._ZDO_id
+	get: function() { return this._ZDO_id; }
 });
 Zotero.defineProperty(Zotero.DataObjects.prototype, 'table', {
-	get: function() this._ZDO_table
+	get: function() { return this._ZDO_table; }
 });
 
 Zotero.defineProperty(Zotero.DataObjects.prototype, 'relationsTable', {
-	get: function() this._ZDO_object + 'Relations'
+	get: function() { return this._ZDO_object + 'Relations'; }
 });
 
 Zotero.defineProperty(Zotero.DataObjects.prototype, 'primaryFields', {
-	get: function () Object.keys(this._primaryDataSQLParts)
+	get: function () { return Object.keys(this._primaryDataSQLParts); }
 }, {lazy: true});
 
 Zotero.defineProperty(Zotero.DataObjects.prototype, "_primaryDataSQLWhere", {
@@ -81,7 +81,7 @@ Zotero.defineProperty(Zotero.DataObjects.prototype, "_primaryDataSQLWhere", {
 });
 
 Zotero.defineProperty(Zotero.DataObjects.prototype, 'primaryDataSQLFrom', {
-	get: function() " " + this._primaryDataSQLFrom + " " + this._primaryDataSQLWhere
+	get: function() { return " " + this._primaryDataSQLFrom + " " + this._primaryDataSQLWhere; }
 }, {lateInit: true});
 
 Zotero.DataObjects.prototype.init = function() {

@@ -1500,7 +1500,7 @@ Zotero.Integration.Fields.prototype._processFields = function(i) {
 					e.setContext(this, i)
 				} else if(e instanceof Zotero.Integration.MissingItemException) {						
 					// Check if we've already decided to remove this field code
-					for each(var reselectKey in e.reselectKeys) {
+					for (let reselectKey of e.reselectKeys) {
 						if(this._removeCodeKeys[reselectKey]) {
 							this._removeCodeFields[i] = true;
 							removeCode = true;
@@ -2173,7 +2173,7 @@ Zotero.Integration.Session.prototype.reselectItem = function(doc, exception) {
 			var itemID = io.dataOut[0];
 			
 			// add reselected item IDs to hash, so they can be used
-			for each(var reselectKey in exception.reselectKeys) {
+			for (let reselectKey of exception.reselectKeys) {
 				me.reselectedItems[reselectKey] = itemID;
 			}
 			// add old URIs to map, so that they will be included
@@ -2379,7 +2379,7 @@ Zotero.Integration.Session.prototype.lookupItems = function(citation, index) {
 			}
 			
 			// look to see if item has already been reselected
-			for each(var reselectKey in reselectKeys) {
+			for (let reselectKey of reselectKeys) {
 				if(this.reselectedItems[reselectKey]) {
 					zoteroItem = Zotero.Items.get(this.reselectedItems[reselectKey]);
 					citationItem.id = zoteroItem.id;
@@ -2479,7 +2479,7 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) 
 		
 		if(!citation.properties) citation.properties = {};
 		
-		for each(var citationItem in citation.citationItems) {
+		for (let citationItem of citation.citationItems) {
 			// for upgrade from Zotero 2.0 or earlier
 			if(citationItem.locatorType) {
 				citationItem.label = citationItem.locatorType;
@@ -2634,7 +2634,7 @@ Zotero.Integration.Session.prototype.formatCitation = function(index, citation) 
 			Zotero.debug("Integration: style.processCitationCluster("+citation.toSource()+", "+citationsPre.toSource()+", "+citationsPost.toSource());
 		}
 		var newCitations = this.style.processCitationCluster(citation, citationsPre, citationsPost);
-		for each(var newCitation in newCitations[1]) {
+		for (let newCitation of newCitations[1]) {
 			this.citationText[citationIndices[newCitation[0]]] = newCitation[1];
 			this.updateIndices[citationIndices[newCitation[0]]] = true;
 		}
@@ -2651,7 +2651,7 @@ Zotero.Integration.Session.prototype._updateCitations = function* () {
 	if(force) {
 		allUpdatesForced = true;
 		// make sure at least one citation gets updated
-		updateLoop: for each(var indexList in [this.newIndices, this.updateIndices]) {
+		updateLoop: for (let indexList of [this.newIndices, this.updateIndices]) {
 			for(var i in indexList) {
 				if(!this.citationsByIndex[i].properties.delete) {
 					allUpdatesForced = false;
@@ -2736,7 +2736,7 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 		if(documentData.uncited[0]) {
 			// new style array of arrays with URIs
 			let zoteroItem, needUpdate;
-			for each(var uris in documentData.uncited) {
+			for (let uris of documentData.uncited) {
 				[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(uris);
 				var id = zoteroItem.cslItemID ? zoteroItem.cslItemID : zoteroItem.id;
 				if(zoteroItem && !this.citationsByItemID[id]) {
@@ -2765,7 +2765,7 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 		if(documentData.custom[0]) {
 			// new style array of arrays with URIs
 			var zoteroItem, needUpdate;
-			for each(var custom in documentData.custom) {
+			for (let custom of documentData.custom) {
 				[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(custom[0]);
 				if(!zoteroItem) continue;
 				if(needUpdate) this.bibliographyDataHasChanged = true;
@@ -2794,7 +2794,7 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 	// set entries to be omitted from bibliography
 	if(documentData.omitted) {
 			let zoteroItem, needUpdate;
-			for each(var uris in documentData.omitted) {
+			for (let uris of documentData.omitted) {
 				[zoteroItem, update] = this.uriMap.getZoteroItemForURIs(uris);
 				var id = zoteroItem.cslItemID ? zoteroItem.cslItemID : zoteroItem.id;
 				if(zoteroItem && this.citationsByItemID[id]) {

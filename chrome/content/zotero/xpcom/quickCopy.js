@@ -71,7 +71,12 @@ Zotero.QuickCopy = new function() {
 			+ "WHERE setting='quickCopySite'";
 		var rows = yield Zotero.DB.queryAsync(sql);
 		// Unproxify storage row
-		_siteSettings = [for (row of rows) { domainPath: row.domainPath, format: row.format }];
+		_siteSettings = rows.map(row => {
+			return {
+				domainPath: row.domainPath,
+				format: row.format 
+			};
+		});
 	});
 	
 	
@@ -464,7 +469,7 @@ Zotero.QuickCopy = new function() {
 		// add styles to list
 		_formattedNames = {};
 		var styles = Zotero.Styles.getVisible();
-		for each(var style in styles) {
+		for (let style of styles) {
 			_formattedNames['bibliography=' + style.styleID] = style.title;
 		}
 		

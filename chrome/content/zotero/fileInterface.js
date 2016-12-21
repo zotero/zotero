@@ -474,7 +474,7 @@ var Zotero_File_Interface = new function() {
 	function _doBibliographyOptions(name, items) {
 		// make sure at least one item is not a standalone note or attachment
 		var haveRegularItem = false;
-		for each(var item in items) {
+		for (let item of items) {
 			if (item.isRegularItem()) {
 				haveRegularItem = true;
 				break;
@@ -611,7 +611,7 @@ var Zotero_File_Interface = new function() {
 			// open file
 			var fStream = Components.classes["@mozilla.org/network/file-output-stream;1"].
 						  createInstance(Components.interfaces.nsIFileOutputStream);
-			fStream.init(fp.file, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
+			fStream.init(fp.file, 0x02 | 0x08 | 0x20, 0o664, 0); // write, create, truncate
 			return fStream;
 		} else {
 			return false;

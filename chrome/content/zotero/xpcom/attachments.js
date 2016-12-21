@@ -848,7 +848,7 @@ Zotero.Attachments = new function(){
 		var tmpDir = Zotero.getStorageDirectory();
 		tmpDir.append("tmp-" + Zotero.Utilities.randomString(6));
 		yield OS.File.makeDir(tmpDir.path, {
-			unixMode: 0755
+			unixMode: 0o755
 		});
 		return tmpDir;
 	});
