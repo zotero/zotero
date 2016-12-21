@@ -23,7 +23,9 @@ describe("PDF Recognition", function() {
 	});
 	
 	after(function() {
-		win.close();
+		if (win) {
+			win.close();
+		}
 	});
 
 	it("should recognize a PDF with a DOI within a collection", function* () {
