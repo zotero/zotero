@@ -803,35 +803,10 @@ Components.utils.import("resource://gre/modules/PluralForm.jsm");
 			}
 			// Storage busy
 			else if (e.message.endsWith('2153971713')) {
-				if(Zotero.isStandalone) {
-					// Standalone should force Fx to release lock 
-					if(!haveReleasedLock && Zotero.IPC.broadcast("releaseLock")) {
-						_waitingForDBLock = true;
-						
-						var timeout = Date.now() + 5000; // 5 second timeout
-						while(_waitingForDBLock && !Zotero.closing && Date.now() < timeout) {
-							// AMO Reviewer: This is used by Zotero Standalone, not Zotero for Firefox.
-							Zotero.mainThread.processNextEvent(true);
-						}
-						if(Zotero.closing) return false;
-						
-						// Run a second init with haveReleasedLock = true, so that
-						// if we still can't acquire a DB lock, we will give up
-						return _initDB(true);
-					}
-				} else {
-					// Fx should start as connector if Standalone is running
-					var haveStandalone = Zotero.IPC.broadcast("test");
-					if(haveStandalone) {
-						throw "ZOTERO_SHOULD_START_AS_CONNECTOR";
-					}
-				}
-				
-				var msg = Zotero.localeJoin([
-					Zotero.getString('startupError.databaseInUse'),
-					Zotero.getString(Zotero.isStandalone ? 'startupError.closeFirefox' : 'startupError.closeStandalone')
-				]);
-				Zotero.startupError = msg;
+				Zotero.startupError = Zotero.getString('startupError.databaseInUse') + "\n\n"
+					+ Zotero.getString(
+						"startupError.close" + (Zotero.isStandalone ? 'Firefox' : 'Standalone')
+					);
 			} else {
 				Zotero.startupError = Zotero.getString('startupError') + "\n\n" + e;
 			}
