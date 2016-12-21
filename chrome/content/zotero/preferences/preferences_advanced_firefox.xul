@@ -56,12 +56,6 @@
 							</row>
 							
 							<row insertbefore="zotero-keys-new-item">
-								<label value="&zotero.preferences.keys.toggleFullscreen;" control="textbox-toggleFullscreen"/>
-								<label class="modifier"/>
-								<textbox id="textbox-toggleFullscreen" maxlength="1" size="1" preference="pref-keys-toggleFullscreen"/>
-							</row>
-							
-							<row insertbefore="zotero-keys-new-item">
 								<label value="&zotero.preferences.keys.saveToZotero;" control="key-textbox-saveToZotero"/>
 								<label class="modifier"/>
 								<textbox id="textbox-saveToZotero" maxlength="1" size="1" preference="pref-keys-saveToZotero"/>

@@ -28,28 +28,11 @@
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<prefpane id="zotero-prefpane-general">
 		<preferences id="zotero-prefpane-general-preferences">
-			<preference id="pref-showIn" name="extensions.zotero.showIn" type="int"/>
 			<preference id="pref-launchNonNativeFiles" name="extensions.zotero.launchNonNativeFiles" type="bool"/>
 			<preference id="pref-parseEndNoteMIMETypes"
 				name="extensions.zotero.parseEndNoteMIMETypes"
 				type="bool" onchange="Zotero.MIMETypeHandler.init()"/>
 		</preferences>
-		<groupbox id="zotero-prefpane-general-groupbox">
-			<grid id="zotero-prefpane-general-grid">
-				<rows id="zotero-prefpane-general-rows">
-					<row position="1">
-						<hbox align="center">
-							<label value="&zotero.preferences.showIn;" control="showAs"/>
-						</hbox>
-						<radiogroup id="showIn" orient="horizontal" preference="pref-showIn">
-							<radio id="zotero-prefpane-general-showIn-browserPane" label="&zotero.preferences.showIn.browserPane;" value="1"/>
-							<radio id="zotero-prefpane-general-showIn-separateTab" label="&zotero.preferences.showIn.separateTab;" value="2"/>
-							<radio id="zotero-prefpane-general-showIn-appTab" label="&zotero.preferences.showIn.appTab;" value="3"/>
-						</radiogroup>
-					</row>
-				</rows>
-			</grid>
-		</groupbox>
 		<groupbox id="zotero-prefpane-miscellaneous-groupbox">
 			<checkbox id="launchNonNativeFiles-checkbox"
 				preference="pref-launchNonNativeFiles"

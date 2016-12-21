@@ -29,7 +29,7 @@
 var ZoteroOverlay = new function()
 {
 	const DEFAULT_ZPANE_HEIGHT = 300;
-	var toolbarCollapseState, showInPref;
+	var toolbarCollapseState;
 	var zoteroPane, zoteroSplitter;
 	var _stateBeforeReload = false;
 	
@@ -118,31 +118,6 @@ var ZoteroOverlay = new function()
 			if (Zotero.skipLoading) {
 				throw new Error("Skipping loading");
 			}
-			
-			// Open Zotero app tab, if in Fx 4 and requested by pref
-			showInPref = Components.classes["@mozilla.org/preferences-service;1"]
-								.getService(Components.interfaces.nsIPrefService)
-								.getBranch('extensions.zotero.').getIntPref('showIn');
-			this.isTab = showInPref !== 1;
-			
-			var observerService = Components.classes["@mozilla.org/observer-service;1"]
-				.getService(Components.interfaces.nsIObserverService);
-			var zoteroObserver = function(subject, topic, data) {
-				if(subject != window) return;
-				observerService.removeObserver(this, "browser-delayed-startup-finished");
-				if(showInPref === 3) {
-					var tabbar = document.getElementById("TabsToolbar");
-					if(tabbar && window.getComputedStyle(tabbar).display !== "none") {
-						// load Zotero as a tab, if it isn't loading by default
-						ZoteroOverlay.loadZoteroTab(true);
-					}
-				} else if(showInPref === 1) {
-					// close Zotero as a tab, in case it was pinned
-					var zoteroTab = ZoteroOverlay.findZoteroTab();
-					if(zoteroTab) gBrowser.removeTab(zoteroTab);
-				}
-			};
-			observerService.addObserver(zoteroObserver, "browser-delayed-startup-finished", false);
 			
 			ZoteroPane.init();
 			
@@ -262,71 +237,6 @@ var ZoteroOverlay = new function()
 				// Return focus to the browser content pane
 				window.content.window.focus();
 			}
-		}
-	}
-	
-	/**
-	 * Determines whether there is an open Zotero tab
-	 */
-	this.findZoteroTab = function() {
-		// Look for an existing tab
-		var tab = false;
-		var numTabs = gBrowser.browsers.length;
-		for(var index = 0; index < numTabs; index++) {
-			var currentBrowser = gBrowser.getBrowserAtIndex(index);
-			if(ZOTERO_TAB_URL == currentBrowser.currentURI.spec) {
-				tab = (gBrowser.tabs ? gBrowser.tabs : gBrowser.mTabs)[index];
-				break;
-			}
-		}
-		
-		return tab;
-	}
-	
-	/**
-	 * Loads the Zotero tab, or adds a new tab if no tab yet exists
-	 * @param {Boolean} background Whether the Zotero tab should be loaded in the background
-	 */
-	this.loadZoteroTab = function(background) {
-		var tab = this.findZoteroTab();
-		
-		// If no existing tab, add a new tab
-		if(!tab) tab = gBrowser.addTab(ZOTERO_TAB_URL);
-		// Pin tab
-		if(showInPref == 3) gBrowser.pinTab(tab);
-		// If requested, activate tab
-		if(!background) gBrowser.selectedTab = tab;
-	}
-	
-	/**
-	 * Toggle between Zotero as a tab and Zotero as a pane
-	 */
-	this.toggleTab = function(setMode) {
-		var tab = this.findZoteroTab();
-		window.zoteroSavedCollectionSelection = ZoteroPane.collectionsView.selectedTreeRow.id;
-		window.zoteroSavedItemSelection = ZoteroPane.itemsView.saveSelection();
-		if(tab) {		// Zotero is running in a tab
-			if(setMode) return;
-			// if Zotero tab is the only tab, open the home page in a new tab
-			if((gBrowser.tabs ? gBrowser.tabs : gBrowser.mTabs).length === 1) {
-				gBrowser.addTab(gBrowser.homePage);
-			}
-			
-			// swap ZoteroPane object
-			ZoteroPane = ZoteroPane_Overlay;
-			
-			// otherwise, close Zotero tab and open Zotero pane
-			gBrowser.removeTab(tab);
-			this.isTab = false;
-			this.toggleDisplay();
-		} else {		// Zotero is running in the pane
-			if(setMode === false) return;
-			// close Zotero pane
-			this.toggleDisplay(false);
-			
-			// open Zotero tab
-			this.isTab = true;
-			this.loadZoteroTab();
 		}
 	}
 }

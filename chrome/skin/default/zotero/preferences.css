@@ -73,11 +73,6 @@ grid row hbox:first-child
 }
 
 
-#showIn radio
-{
-	width: 120px;
-}
-
 #fontSize radio
 {
 	margin-right: 20px;

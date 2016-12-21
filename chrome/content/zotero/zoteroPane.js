@@ -22,7 +22,6 @@
     
     ***** END LICENSE BLOCK *****
 */
-const ZOTERO_TAB_URL = "chrome://zotero/content/tab.xul";
 
 /*
  * This object contains the various functions for the interface
@@ -395,7 +394,8 @@ var ZoteroPane = new function()
 		this.updateTagSelectorSize();
 		
 		// restore saved row selection (for tab switching)
-		var containerWindow = (window.ZoteroTab ? window.ZoteroTab.containerWindow : window);
+		// TODO: Remove now that no tab mode?
+		var containerWindow = window;
 		if(containerWindow.zoteroSavedCollectionSelection) {
 			this.collectionsView.addEventListener('load', Zotero.Promise.coroutine(function* () {
 				yield this.collectionsView.selectByID(containerWindow.zoteroSavedCollectionSelection);
@@ -724,9 +724,6 @@ var ZoteroPane = new function()
 					break;
 				case 'toggleTagSelector':
 					ZoteroPane_Local.toggleTagSelector();
-					break;
-				case 'toggleFullscreen':
-					ZoteroPane_Local.toggleTab();
 					break;
 				case 'copySelectedItemCitationsToClipboard':
 					ZoteroPane_Local.copySelectedItemsToClipboard(true)
@@ -4714,17 +4711,6 @@ var ZoteroPane = new function()
 	}
 	
 	/**
-	 * Toggles Zotero-as-a-tab by passing off the request to the ZoteroOverlay object associated
-	 * with the present window
-	 */
-	this.toggleTab = function() {
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						   .getService(Components.interfaces.nsIWindowMediator);
-		var browserWindow = wm.getMostRecentWindow("navigator:browser");
-		if(browserWindow.ZoteroOverlay) browserWindow.ZoteroOverlay.toggleTab();
-	}
-
-	/**
 	 * Sets the layout to either a three-vertical-pane layout and a layout where itemsPane is above itemPane
 	 */
 	this.updateLayout = function() {
@@ -4747,9 +4733,7 @@ var ZoteroPane = new function()
 	 */
 	this.show = function() {
 		if(window.ZoteroOverlay) {
-			if(ZoteroOverlay.isTab) {
-				ZoteroOverlay.loadZoteroTab();
-			} else if(!this.isShowing()) {
+			if (!this.isShowing()) {
 				ZoteroOverlay.toggleDisplay();
 			}
 		}

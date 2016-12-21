@@ -612,16 +612,6 @@
 	color: gray;
 }
 
-#zotero-tb-fullscreen
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-fullscreen-bottom.png');
-}
-
-#zotero-pane-stack[fullscreenmode="true"] #zotero-tb-fullscreen
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-fullscreen-top.png');
-}
-
 #zotero-tb-search
 {
 	font-size: 11px !important;

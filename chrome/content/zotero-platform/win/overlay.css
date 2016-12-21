@@ -219,11 +219,6 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 	padding-top: 4px;
 }
 
-#zotero-tb-fullscreen {
-	margin-left: 2px;
-	margin-right: 5px;
-}
-
 #zotero-view-tabbox tab {
 	padding-left: .7em;
 	padding-right: .7em;
