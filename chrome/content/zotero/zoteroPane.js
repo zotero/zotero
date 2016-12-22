@@ -424,7 +424,8 @@ var ZoteroPane = new function()
 		
 		// Auto-sync on pane open or if new account
 		if (Zotero.Prefs.get('sync.autoSync') || Zotero.initAutoSync) {
-			yield Zotero.proxyAuthComplete.delay(1000);
+			yield Zotero.proxyAuthComplete;
+			yield Zotero.uiReadyPromise;
 			
 			if (!Zotero.Sync.Runner.enabled) {
 				Zotero.debug('Sync not enabled -- skipping auto-sync', 4);
