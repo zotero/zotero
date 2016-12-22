@@ -102,14 +102,14 @@ describe("Zotero.Sync.Storage.Local", function () {
 		})
 	})
 	
-	describe("#resetModeSyncStates()", function () {
+	describe("#resetAllSyncStates()", function () {
 		it("should reset attachment sync states to 'to_upload'", function* () {
 			var attachment = yield importFileAttachment('test.png');
 			attachment.attachmentSyncState = 'in_sync';
 			yield attachment.saveTx();
 			
 			var local = Zotero.Sync.Storage.Local;
-			yield local.resetModeSyncStates()
+			yield local.resetAllSyncStates()
 			assert.strictEqual(attachment.attachmentSyncState, local.SYNC_STATE_TO_UPLOAD);
 			var state = yield Zotero.DB.valueQueryAsync(
 				"SELECT syncState FROM itemAttachments WHERE itemID=?", attachment.id

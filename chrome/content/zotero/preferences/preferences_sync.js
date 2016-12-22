@@ -408,7 +408,7 @@ Zotero_Preferences.Sync = {
 		var newEnabled = document.getElementById('pref-storage-enabled').value;
 		
 		if (oldProtocol != newProtocol) {
-			yield Zotero.Sync.Storage.Local.resetModeSyncStates(oldProtocol);
+			yield Zotero.Sync.Storage.Local.resetAllSyncStates();
 		}
 		
 		if (oldProtocol == 'webdav') {
@@ -751,7 +751,7 @@ Zotero_Preferences.Sync = {
 				
 				switch (index) {
 					case 0:
-						Zotero.Sync.Storage.resetAllSyncStates();
+						yield Zotero.Sync.Storage.Local.resetAllSyncStates();
 						ps.alert(
 							null,
 							"File Sync History Cleared",
