@@ -78,6 +78,9 @@ grid row hbox:first-child
 	margin-right: 20px;
 }
 
+#zotero-prefpane-general .statusLine {
+	margin-left: .75em;
+}
 
 /*
  * Sync pane

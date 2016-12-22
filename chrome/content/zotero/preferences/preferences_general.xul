@@ -100,12 +100,12 @@
 									<menuitem label="96"/>
 								</menupopup>
 							</menulist>
+							
+							<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
 						</hbox>
 					</row>
 				</rows>
 			</grid>
-			
-			<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
 		</groupbox>
 		
 		<groupbox id="zotero-prefpane-miscellaneous-groupbox">

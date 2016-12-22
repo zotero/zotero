@@ -2035,6 +2035,11 @@ Zotero.Prefs = new function(){
 				Zotero.Schema.stopRepositoryTimer();
 			}
 		}],
+		["fontSize", function (val) {
+			Zotero.setFontSize(
+				Zotero.getActiveZoteroPane().document.getElementById('zotero-pane')
+			);
+		}],
 		[ "layout", function(val) {
 			Zotero.getActiveZoteroPane().updateLayout();
 		}],
