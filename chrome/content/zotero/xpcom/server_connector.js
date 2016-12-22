@@ -773,17 +773,22 @@ Zotero.Server.Connector.GetClientHostnames.prototype = {
 Zotero.Server.Connector.Ping = function() {};
 Zotero.Server.Endpoints["/connector/ping"] = Zotero.Server.Connector.Ping;
 Zotero.Server.Connector.Ping.prototype = {
-	supportedMethods: ["POST"],
+	supportedMethods: ["GET", "POST"],
 	supportedDataTypes: ["application/json", "text/plain"],
 	permitBookmarklet: true,
 	
 	/**
-	 * Sends nothing
-	 * @param {String} data POST data or GET query string
-	 * @param {Function} sendResponseCallback function to send HTTP response
+	 * Sends 200 and HTML status on GET requests
+	 * @param data {Object} request information defined in connector.js
 	 */
-	init: function(postData, sendResponseCallback) {
-		sendResponseCallback(200);
+	init: function(data) {
+		if (data.method == 'GET') {
+			return [200, "text/html", '<!DOCTYPE html><html><head>' +
+				'<title>Zotero Connector Server is Available</title></head>' +
+				'<body>Zotero Connector Server is Available</body></html>'];
+		} else {
+			return [200];
+		}
 	}
 }
 
