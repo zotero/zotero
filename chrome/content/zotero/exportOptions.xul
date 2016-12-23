@@ -24,7 +24,7 @@
 
 	
 	<vbox id="zotero-export-options-container" flex="1">
-		<hbox>
+		<hbox align="center">
 			<label value="&zotero.exportOptions.format.label;" control="format-menu"/>
 			<menulist id="format-menu" oncommand="Zotero_File_Interface_Export.updateOptions()">
 				<menupopup id="format-popup"/>
