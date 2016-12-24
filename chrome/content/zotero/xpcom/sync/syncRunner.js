@@ -110,6 +110,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		}
 		_syncInProgress = true;
 		
+		yield Zotero.Notifier.trigger('start', 'sync', []);
+		
 		// Purge deleted objects so they don't cause sync errors (e.g., long tags)
 		yield Zotero.purgeDataObjects(true);
 		
