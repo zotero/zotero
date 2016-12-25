@@ -3601,7 +3601,7 @@ var ZoteroPane = new function()
 		if(fp.show() == nsIFilePicker.returnOK)
 		{
 			if (!parentItemID) {
-				var collection = this.getSelectedCollection();
+				var collection = this.getSelectedCollection(true);
 			}
 			
 			var files = fp.files;
