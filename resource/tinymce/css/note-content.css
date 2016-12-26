@@ -1,16 +1,7 @@
-pre {
-	font-family: -moz-fixed;
-}
-
 blockquote {
-	margin-left: 2em;
-}
-
-/* Add quotation marks around blockquote */
-blockquote p:not(:empty):before {
-	content: '“';
-}
-
-blockquote p:not(:empty):last-child:after {
-	content: '”';
+	margin-top: 1.5em;
+	margin-bottom: 1.5em;
+	margin-left: 1em;
+	padding-left: .75em;
+	border-left: 3px solid lightblue;
 }

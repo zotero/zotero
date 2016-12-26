@@ -623,14 +623,11 @@ var Zotero_Citation_Dialog = new function () {
 				io.preview().then(function(preview) {
 					editor.value = preview;
 					
-					if(editor.initialized) {
+					if (editor.initialized) {
 						_originalHTML = editor.value;
-					} else {
-						var eventListener = function() {
-							_originalHTML = editor.value;
-							editor.removeEventListener("tinymceInitialized", eventListener, false);
-						};
-						editor.addEventListener("tinymceInitialized", eventListener, false);
+					}
+					else {
+						editor.onInit(() => _originalHTML = editor.value);
 					}
 				});
 			} else {

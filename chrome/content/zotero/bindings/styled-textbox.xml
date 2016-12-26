@@ -48,6 +48,7 @@
 			<constructor><![CDATA[
 				this.mode = this.getAttribute('mode');
 				
+				this._onInitCallbacks = [];
 				this._iframe = document.getAnonymousElementByAttribute(this, "anonid", "rt-view");
 				
 				this._htmlRTFmap = [
@@ -68,8 +69,10 @@
 					[/(?:\\par{}|\\\r?\n)/g, "</p><p>"]
 				];
 				
-				this.init = function() {
-					if (this.initialized) return;
+				this.prepare = function() {
+					// DEBUG: Does this actually happen?
+					if (this.prepared) return;
+					
 					// Tag data
 					var _rexData = [
 						[
@@ -282,9 +285,9 @@
 					this.rtfHTMLtagRegistry = tagRegistryMaker(1);
 					this.htmlRTFtagRegistry = tagRegistryMaker(0);
 
-                    this.initialized = true;
+                    this.prepared = true;
 				}
-				this.init();
+				this.prepare();
 				
 				this.getSplit = function(mode, txt) {
 					if (!txt) return [];
@@ -375,13 +378,13 @@
 					Zotero.debug("Setting mode to " + val);
 					switch (val) {
 						case 'note':
-							var self = this;
-							
 							this._eventHandler = function (event) {
 								// Necessary in Fx32+
 								if (event.wrappedJSObject) {
 									event = event.wrappedJSObject;
 								}
+								
+								var commandEvent = false;
 								
 								//Zotero.debug(event.type);
 								switch (event.type) {
@@ -392,7 +395,7 @@
 												&& !event.altKey && event.keyCode == 90) {
 											event.stopPropagation();
 											event.preventDefault();
-											self.redo();
+											this.redo();
 											return;
 										}
 										break;
@@ -407,38 +410,36 @@
 											//Zotero.debug("Not a char");
 											return;
 										}
+										commandEvent = true;
 										break;
 									
+									// 'change' includes text added via drag-and-drop
 									case 'change':
+									case 'undo':
+									case 'redo':
+										commandEvent = true;
 										break;
 
-									case 'openlink':
-										var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-											.getService(Components.interfaces.nsIWindowMediator);
-										win = wm.getMostRecentWindow('navigator:browser');
-										win.ZoteroPane.loadURI(event.target.href, event.modifierKeys);
-										break;
-									
 									default:
 										return;
 								}
 								
-								if (self._timer) {
-									clearTimeout(self._timer);
-								}
-								
-								// Trigger command event on change
-								if (event.type == 'keypress' || event.type == 'change') {
-									self._timer = self.timeout && setTimeout(function () {
-										var attr = self.getAttribute('oncommand');
+								// Trigger command on change
+								if (commandEvent && this.timeout) {
+									if (this._timer) {
+										clearTimeout(this._timer);
+									}
+									
+									this._timer = setTimeout(function () {
+										var attr = this.getAttribute('oncommand');
 										attr = attr.replace('this', 'thisObj');
 										var func = new Function('thisObj', 'event', attr);
-										func(self, event);
-									}, self.timeout);
+										func(this, event);
+									}.bind(this), this.timeout);
 								}
 								
 								return true;
-							};
+							}.bind(this);
 							break;
 						
 						case 'integration':
@@ -583,6 +584,18 @@
 				</body>
 			</method>
 			
+			<method name="onInit">
+				<parameter name="callback"/>
+				<body><![CDATA[
+					if (this.initialized) {
+						this._editor.once(event, callback);
+					}
+					else {
+						this._onInitCallbacks.push(callback);
+					}
+				]]></body>
+			</method>
+			
 			<field name="_loaded"/>
 			<method name="_load">
 				<body>
@@ -660,15 +673,15 @@
 									if (fontSize < 6) {
 										fontSize = 11;
 									}
-									var css = "body#zotero-tinymce-note.mceContentBody, "
-										+ "body#zotero-tinymce-note.mceContentBody p, "
-										+ "body#zotero-tinymce-note.mceContentBody th, "
-										+ "body#zotero-tinymce-note.mceContentBody td, "
-										+ "body#zotero-tinymce-note.mceContentBody pre { "
+									var css = "body#zotero-tinymce-note, "
+										+ "body#zotero-tinymce-note p, "
+										+ "body#zotero-tinymce-note th, "
+										+ "body#zotero-tinymce-note td, "
+										+ "body#zotero-tinymce-note pre { "
 											+ "font-size: " + fontSize + "px; "
 										+ "} "
-										+ "body#zotero-tinymce-note.mceContentBody, "
-										+ "body#zotero-tinymce-note.mceContentBody p { "
+										+ "body#zotero-tinymce-note, "
+										+ "body#zotero-tinymce-note p { "
 											+ "font-family: "
 											+ Zotero.Prefs.get('note.fontFamily') + "; "
 										+ "}"
@@ -681,11 +694,11 @@
 									head.appendChild(style);
 								}
 								
-								// Dispatch a tinymceInitialized event
-								var ev = document.createEvent('HTMLEvents');
-								ev.initEvent('tinymceInitialized', true, true);
-								self.dispatchEvent(ev);
-							};
+								let cb;
+								while (cb = this._onInitCallbacks.shift()) {
+									cb(this._editor);
+								}
+							}.bind(this);
 						}
 						
 						var editor = SJOW.tinyMCE.get("tinymce");
@@ -701,11 +714,7 @@
 							return;
 						}
 						
-						if(window.ZoteroTab) {
-							ZoteroTab.containerWindow.gBrowser.removeEventListener("DOMContentLoaded", listener, true);
-						} else {
-							self._iframe.removeEventListener("DOMContentLoaded", listener, false);
-						}
+						self._iframe.removeEventListener("DOMContentLoaded", listener, false);
 						
 						if (self._eventHandler) {
 							win.wrappedJSObject.zoteroHandleEvent = self._eventHandler;
@@ -715,20 +724,9 @@
 						win.wrappedJSObject.zoteroExecCommand = function (doc, command, ui, value) {
 							return doc.execCommand(command, ui, value);
 						}
-						
-						win.wrappedJSObject.zoteroFixWindow = function (win) {
-							win.locationbar.visible = false;
-							win.statusbar.visible = false;
-						}
-					};
+					}.bind(this);
 					
-					if(window.ZoteroTab) {
-						// I'm not sure why it's necessary to attach the event listener to the 
-						// container window to get it to fire on the tab, but apparently it is...
-						ZoteroTab.containerBrowser.addEventListener("DOMContentLoaded", listener, true);
-					} else {
-						this._iframe.addEventListener("DOMContentLoaded", listener, false);
-					}
+					this._iframe.addEventListener("DOMContentLoaded", listener, false);
 					
 					this._iframe.webNavigation.loadURI(uri.spec,
 						Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, null, null);

@@ -2,40 +2,55 @@ html, body {
 	height: 100%;
 	margin: 0;
 }
-#tinymce_parent {
-	display: block;
-	height: 100%;
-}
-#tinymce_tbl {
+
+/* Stretch editor to fit frame */
+#tinymce_ifr, .mce-tinymce:not(.mce-floatpanel) {
 	height: 100% !important;
-	width: 100% !important;
+	border: 0 !important;
 }
 
-table.mceLayout > tbody > tr.mceLast {
-	position: absolute;
-	display: block;
-	top: 54px;
-	bottom: 2px;
-	left: 1px;
-	right: 1px;
+.mce-container-body {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
-td.mceIframeContainer {
-	display: block;
-	height: 100% !important;
-	width: 100% !important;
-}
-#tinymce_ifr {
-	height: 100% !important;
-	width: 100% !important;
+.mce-container-body .mce-edit-area {
+    position: absolute;
+    top: 57px;
+    bottom: 1px;
+    left: 0;
+    right: 0;
 }
 
-#tinymce_formatselect_text {
-	width: 65px;
+/* Shrink the buttons a bit */
+.mce-listbox button {
+	padding-right: 8px !important;
+}
+
+.mce-btn-small button {
+	padding-left: 4px !important;
+	padding-right: 4px !important;
+}
+
+/* Tighten some padding */
+.mce-toolbar:first-child > div > :nth-child(3) {
+	margin-left: 0;
+}
+
+.mce-toolbar:last-child > div > :nth-child(2) {
+	margin-left: 0;
+}
+
+/* Keep popup windows within frame */
+.mce-window {
+	max-width: calc(100% - 15px) !important;
+	overflow-x: hidden;
 }
 
 #noScriptWarning {
 	padding: 4px;
-	font-family: "Lucida Sans Unicode", "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+	font-family: sans-serif;
 	font-size: 12px;
 }
