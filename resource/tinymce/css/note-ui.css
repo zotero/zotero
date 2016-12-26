@@ -43,11 +43,123 @@ html, body {
 	margin-left: 0;
 }
 
-/* Keep popup windows within frame */
-.mce-window {
-	max-width: calc(100% - 15px) !important;
-	overflow-x: hidden;
+/*
+ * Keep popups within frame
+ *
+ * Modified from http://stackoverflow.com/a/34627616
+ */
+#mce-modal-block {
 }
+
+.mce-window {
+	width: auto !important;
+	background: none !important;
+}
+
+/* This is unfortunate, but without it the Search/Replace window runs off the left side when the
+   pane is too narrow */
+.mce-window:not([role=alertdialog]) {
+	left: 0 !important;
+}
+
+.mce-window-head {
+	background: #fff !important;
+}
+
+.mce-window-body {
+	background: #fff !important;
+}
+
+.mce-foot {
+}
+
+.mce-foot > .mce-container-body {
+	padding: 10px !important;
+}
+
+.mce-foot button {
+}
+
+.mce-panel {
+	max-width: 100% !important;
+}
+
+.mce-container {
+	max-width: 100% !important;
+	height: auto !important;
+}
+
+.mce-container-body {
+	max-width: 100% !important;
+	height: auto !important;
+}
+
+.mce-form {
+	padding: 10px !important;
+}
+
+.mce-tabs {
+	max-width: 100% !important;
+}
+
+.mce-tabs .mce-tab, .mce-tabs .mce-tab.mce-active {
+}
+
+.mce-formitem {
+	margin: 10px 0 !important;
+}
+
+/* Keep button sizes consistent */
+.mce-window .mce-menubtn {
+	min-width: 150px
+}
+
+.mce-foot .mce-primary {
+
+}
+
+/* Space out buttons */
+.mce-foot .mce-btn {
+  margin-right: 6px;
+	margin-top: 5px;
+	min-width: 75px !important;;
+}
+
+/* Correct for margin on buttons */
+.mce-foot .mce-container-body {
+	margin-top: -5px;
+}
+
+/* Space out alerts (e.g., string not found in search) */
+.mce-floatpanel[role=alertdialog] .mce-window-body .mce-first {
+	padding: 20px 40px 0;
+}
+
+.mce-abs-layout-item {
+	position: static !important;
+	width: auto !important;
+}
+
+.mce-abs-layout-item.mce-label {
+	display: block !important;
+}
+
+.mce-abs-layout-item.mce-textbox {
+	box-sizing: border-box !important;
+	display: block !important;
+	width: 100% !important;
+}
+
+.mce-abs-layout-item.mce-combobox {
+	display: flex !important;
+}
+
+.mce-abs-layout-item.mce-combobox > .mce-textbox {
+	flex: 1 1 auto;
+	height: 29px !important;
+}
+
+
 
 #noScriptWarning {
 	padding: 4px;
