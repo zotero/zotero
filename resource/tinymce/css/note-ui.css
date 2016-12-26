@@ -25,13 +25,13 @@ html, body {
 }
 
 /* Shrink the buttons a bit */
-.mce-listbox button {
-	padding-right: 8px !important;
-}
-
 .mce-btn-small button {
 	padding-left: 4px !important;
 	padding-right: 4px !important;
+}
+
+.mce-listbox button {
+	padding-right: 12px !important;
 }
 
 /* Tighten some padding */
