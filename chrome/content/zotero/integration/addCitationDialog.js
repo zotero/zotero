@@ -143,7 +143,7 @@ var Zotero_Citation_Dialog = new function () {
 				// and this fails. It works on subsequent attempts. Since this won't happen in
 				// Standalone, we can ignore.
 				var id = io.citation.citationItems[0].id;
-				var selected = yield itemsView.selectItem(id);
+				let selected = yield collectionsView.selectItem(id);
 				
 				for(var box in _preserveData) {
 					var property = _preserveData[box][0];
@@ -256,7 +256,7 @@ var Zotero_Citation_Dialog = new function () {
 
 			// refresh
 			if (itemID) {
-				itemsView.wrappedJSObject.selectItem(itemID);
+				collectionsView.selectItem(itemID);
 			}
 			_updateAccept();
 			_updatePreview();

@@ -78,7 +78,7 @@
 						<deck id="zotero-items-pane-content" selectedIndex="0" flex="1">
 							<tree id="zotero-items-tree"
 									enableColumnDrag="true" flex="1" seltype="single"
-									onselect="Zotero_Citation_Dialog.treeItemSelected();">
+									onselect="onItemSelected(); Zotero_Citation_Dialog.treeItemSelected();">
 								<treecols id="zotero-items-columns-header">
 									<treecol
 										id="zotero-items-column-title" primary="true"

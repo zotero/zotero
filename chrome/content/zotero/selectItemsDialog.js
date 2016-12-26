@@ -57,7 +57,7 @@ var doLoad = Zotero.Promise.coroutine(function* () {
 	yield connectionSelectedDeferred.promise;
 	
 	if (io.select) {
-		yield itemsView.selectItem(io.select);
+		yield collectionsView.selectItem(io.select);
 	}
 	
 	Zotero.updateQuickSearchBox(document);
@@ -99,6 +99,7 @@ var onCollectionSelected = Zotero.Promise.coroutine(function* ()
 		clearItemsPaneMessage();
 		
 		connectionSelectedDeferred.resolve();
+		collectionsView.onSelect();
 	}
 });
 
@@ -113,7 +114,7 @@ function onSearch()
 
 function onItemSelected()
 {
-	
+	itemsView.onSelect();
 }
 
 function setItemsPaneMessage(content) {
