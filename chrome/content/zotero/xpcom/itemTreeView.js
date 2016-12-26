@@ -40,6 +40,7 @@ Zotero.ItemTreeView = function (collectionTreeRow, sourcesOnly) {
 	this.wrappedJSObject = this;
 	this.rowCount = 0;
 	this.collectionTreeRow = collectionTreeRow;
+	collectionTreeRow.itemTreeView = this;
 	
 	this._skipKeypress = false;
 	

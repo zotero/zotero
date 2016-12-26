@@ -2201,14 +2201,7 @@ var ZoteroPane = new function()
 	});
 	
 	
-	/*
-	 * Select item in current collection or, if not there, in Library
-	 *
-	 * If _inLibrary_, force switch to Library
-	 * If _expand_, open item if it's a container
-	 */
-	this.selectItem = Zotero.Promise.coroutine(function* (itemID, inLibrary, expand)
-	{
+	this.selectItem = Zotero.Promise.coroutine(function* (itemID, inLibraryRoot, expand) {
 		if (!itemID) {
 			return false;
 		}
@@ -2227,47 +2220,11 @@ var ZoteroPane = new function()
 			throw new Error("Collections view not loaded");
 		}
 		
-		var cv = this.collectionsView;
+		var found = yield this.collectionsView.selectItem(itemID, inLibraryRoot, expand);
 		
-		var deferred = Zotero.Promise.defer();
-		cv.addEventListener('load', () => deferred.resolve());
-		yield deferred.promise;
-		
-		var currentLibraryID = this.getSelectedLibraryID();
-		// If in a different library
-		if (item.libraryID != currentLibraryID) {
-			Zotero.debug("Library ID differs; switching library");
-			yield cv.selectLibrary(item.libraryID);
-		}
-		// Force switch to library view
-		else if (!cv.selectedTreeRow.isLibrary() && inLibrary) {
-			Zotero.debug("Told to select in library; switching to library");
-			yield cv.selectLibrary(item.libraryID);
-		}
-		
-		deferred = Zotero.Promise.defer();
-		this.itemsView.addEventListener('load', () => deferred.resolve());
-		yield deferred.promise;
-		
-		// Focus the items column before selecting the item.
-		document.getElementById('zotero-items-tree').focus();
-		
-		var selected = yield this.itemsView.selectItem(itemID, expand);
-		if (!selected) {
-			if (item.deleted) {
-				Zotero.debug("Item is deleted; switching to trash");
-				yield cv.selectTrash(item.libraryID);
-			}
-			else {
-				Zotero.debug("Item was not selected; switching to library");
-				yield cv.selectLibrary(item.libraryID);
-			}
-			
-			deferred = Zotero.Promise.defer();
-			this.itemsView.addEventListener('load', () => deferred.resolve());
-			yield deferred.promise;
-			
-			yield this.itemsView.selectItem(itemID, expand);
+		// Focus the items pane
+		if (found) {
+			document.getElementById('zotero-items-tree').focus();
 		}
 		
 		// open Zotero pane

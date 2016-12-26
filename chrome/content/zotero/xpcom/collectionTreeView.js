@@ -1147,6 +1147,69 @@ Zotero.CollectionTreeView.prototype.selectTrash = Zotero.Promise.coroutine(funct
 });
 
 
+/**
+ * Find item in current collection, or, if not there, in a library root, and select it
+ *
+ * @param {Integer} itemID
+ * @param {Boolean} [inLibraryRoot=false] - Always show in library root
+ * @param {Boolean} [expand=false] - Open item if it's a container
+ * @return {Boolean} - True if item was found, false if not
+ */
+Zotero.CollectionTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (itemID, inLibraryRoot, expand) {
+	if (!itemID) {
+		return false;
+	}
+	
+	var item = yield Zotero.Items.getAsync(itemID);
+	if (!item) {
+		return false;
+	}
+	
+	var deferred = Zotero.Promise.defer();
+	this.addEventListener('load', () => deferred.resolve());
+	yield deferred.promise;
+	
+	var currentLibraryID = this.getSelectedLibraryID();
+	// If in a different library
+	if (item.libraryID != currentLibraryID) {
+		Zotero.debug("Library ID differs; switching library");
+		yield this.selectLibrary(item.libraryID);
+	}
+	// Force switch to library view
+	else if (!this.selectedTreeRow.isLibrary() && inLibraryRoot) {
+		Zotero.debug("Told to select in library; switching to library");
+		yield cv.selectLibrary(item.libraryID);
+	}
+	
+	var itemsView = this.selectedTreeRow.itemTreeView;
+	
+	deferred = Zotero.Promise.defer();
+	itemsView.addEventListener('load', () => deferred.resolve());
+	yield deferred.promise;
+	
+	var selected = yield itemsView.selectItem(itemID, expand);
+	if (selected) {
+		return true;
+	}
+	
+	if (item.deleted) {
+		Zotero.debug("Item is deleted; switching to trash");
+		yield this.selectTrash(item.libraryID);
+	}
+	else {
+		Zotero.debug("Item was not selected; switching to library");
+		yield this.selectLibrary(item.libraryID);
+	}
+	
+	itemsView = this.selectedTreeRow.itemTreeView;
+	deferred = Zotero.Promise.defer();
+	itemsView.addEventListener('load', () => deferred.resolve());
+	yield deferred.promise;
+	
+	return itemsView.selectItem(itemID, expand);
+});
+
+
 /*
  *  Delete the selection
  */
