@@ -461,6 +461,22 @@ function isStandalone() {
 	return _isStandalone;
 }
 
+function getOS() {
+	return Services.appinfo.OS;
+}
+
+function isMac() {
+	return getOS() == "Darwin";
+}
+
+function isWin() {
+	return getOS() == "WINNT";
+}
+
+function isLinux() {
+	return getOS() == "Linux";
+}
+
 /**
  * The class representing the Zotero command line handler
  */
@@ -541,11 +557,11 @@ ZoteroCommandLineHandler.prototype = {
 			// In Fx49-based Mac Standalone, if Zotero is closed, an associated file is launched, and
 			// Zotero hasn't been opened before, a -file parameter is passed and two main windows open.
 			// Subsequent file openings when closed result in -url with file:// URLs (converted above)
-			// and don't result in two windows.
+			// and don't result in two windows. Here we prevent the double window.
 			param = fileToOpen;
 			if (!param) {
 				param = cmdLine.handleFlagWithParam("file", false);
-				if (param) {
+				if (param && isMac()) {
 					cmdLine.preventDefault = true;
 				}
 			}
