@@ -30,6 +30,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.utils.import("resource://gre/modules/PluralForm.jsm");
 
+Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
+
 /*
  * Core functions
  */
