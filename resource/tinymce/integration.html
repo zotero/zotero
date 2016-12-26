@@ -22,6 +22,7 @@ html, body {
 </style>
 
 <script type="text/javascript" src="tinymce.js"></script>
+<script type="text/javascript" src="locale.js"></script>
 <script type="text/javascript">
 	tinyMCE.init({
 		content_css: "css/integration-content.css",
@@ -33,6 +34,7 @@ html, body {
 		statusbar: false,
 		
 		init_instance_callback: function (ed) {
+			setLocale(ed);
 			zoteroInit(ed);
 		}
 	});

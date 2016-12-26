@@ -4,11 +4,11 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link type="text/css" rel="stylesheet" href="css/note-ui.css"/>
 <script type="text/javascript" src="tinymce.js"></script>
+<script type="text/javascript" src="locale.js"></script>
 <script type="text/javascript">
 	tinyMCE.init({
 		body_id: "zotero-tinymce-note",
 		content_css: "css/note-content.css",
-		language: "en", // TODO: localize
 		entity_encoding: "raw",
 		fix_list_elements: true,
 		readonly: true,
@@ -18,6 +18,7 @@
 		statusbar: false,
 		
 		init_instance_callback: function (ed) {
+			setLocale(ed);
 			zoteroInit(ed);
 		},
 		

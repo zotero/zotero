@@ -610,8 +610,10 @@
 						getService(Components.interfaces.nsIIOService);
 					var uri = ios.newURI("resource://zotero/tinymce/" + htmlFile + ".html", null, null);
 					
-					// Pass directionality (LTR/RTL) in URL
-					uri.spec += "?dir=" + Zotero.dir;
+					// Pass directionality (LTR/RTL) and locale in URL
+					uri.spec += "?locale=" + encodeURIComponent(Zotero.locale)
+						+ "&dir=" + Zotero.dir;
+					
 					
 					Zotero.debug("Loading " + uri.spec);
 					

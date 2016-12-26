@@ -4,12 +4,12 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link type="text/css" rel="stylesheet" href="css/note-ui.css"/>
 <script type="text/javascript" src="tinymce.js"></script>
+<script type="text/javascript" src="locale.js"></script>
 <script type="text/javascript">
 	tinymce.init({
 		body_id: "zotero-tinymce-note",
 		content_css: "css/note-content.css",
-		language: "en", // TODO: localize
-		entities: "160,nbsp",
+		entities: "160,nbsp",
 		browser_spellcheck: true,
 		convert_urls: false,
 		fix_list_elements: true,
@@ -29,6 +29,8 @@
 		link_assume_external_targets: true,
 		
 		setup: function (ed) {
+			setLocale(ed);
+			
 			// Set text direction
 			var dir = window.location.href.match(/dir=(ltr|rtl)/)[1];
 			ed.settings.directionality = dir;
