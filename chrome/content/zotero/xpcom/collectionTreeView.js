@@ -2227,71 +2227,65 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			var parentCollectionID = false;
 		}
 		
-		var commitNotifier = Zotero.Notifier.begin();
-		try {
-			for (var i=0; i<data.length; i++) {
-				var file = data[i];
+		for (var i=0; i<data.length; i++) {
+			var file = data[i];
+			
+			if (dataType == 'text/x-moz-url') {
+				var url = data[i];
 				
-				if (dataType == 'text/x-moz-url') {
-					var url = data[i];
-					
-					if (url.indexOf('file:///') == 0) {
-						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								   .getService(Components.interfaces.nsIWindowMediator);
-						var win = wm.getMostRecentWindow("navigator:browser");
-						// If dragging currently loaded page, only convert to
-						// file if not an HTML document
-						if (win.content.location.href != url ||
-								win.content.document.contentType != 'text/html') {
-							var nsIFPH = Components.classes["@mozilla.org/network/protocol;1?name=file"]
-									.getService(Components.interfaces.nsIFileProtocolHandler);
-							try {
-								var file = nsIFPH.getFileFromURLSpec(url);
-							}
-							catch (e) {
-								Zotero.debug(e);
-							}
-						}
-					}
-					
-					// Still string, so remote URL
-					if (typeof file == 'string') {
-						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								   .getService(Components.interfaces.nsIWindowMediator);
-						var win = wm.getMostRecentWindow("navigator:browser");
-						win.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack', null, row); // TODO: don't do this
-						continue;
-					}
-					
-					// Otherwise file, so fall through
-				}
-				
-				if (dropEffect == 'link') {
-					yield Zotero.Attachments.linkFromFile({
-						file: file,
-						collections: [parentCollectionID]
-					});
-				}
-				else {
-					yield Zotero.Attachments.importFromFile({
-						file: file,
-						libraryID: targetLibraryID,
-						collections: [parentCollectionID]
-					});
-					// If moving, delete original file
-					if (dragData.dropEffect == 'move') {
+				if (url.indexOf('file:///') == 0) {
+					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+							   .getService(Components.interfaces.nsIWindowMediator);
+					var win = wm.getMostRecentWindow("navigator:browser");
+					// If dragging currently loaded page, only convert to
+					// file if not an HTML document
+					if (win.content.location.href != url ||
+							win.content.document.contentType != 'text/html') {
+						var nsIFPH = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+								.getService(Components.interfaces.nsIFileProtocolHandler);
 						try {
-							file.remove(false);
+							var file = nsIFPH.getFileFromURLSpec(url);
 						}
 						catch (e) {
-							Components.utils.reportError("Error deleting original file " + file.path + " after drag");
+							Zotero.debug(e);
 						}
+					}
+				}
+				
+				// Still string, so remote URL
+				if (typeof file == 'string') {
+					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+							   .getService(Components.interfaces.nsIWindowMediator);
+					var win = wm.getMostRecentWindow("navigator:browser");
+					win.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack', null, row); // TODO: don't do this
+					continue;
+				}
+				
+				// Otherwise file, so fall through
+			}
+			
+			if (dropEffect == 'link') {
+				yield Zotero.Attachments.linkFromFile({
+					file: file,
+					collections: parentCollectionID ? [parentCollectionID] : undefined
+				});
+			}
+			else {
+				yield Zotero.Attachments.importFromFile({
+					file: file,
+					libraryID: targetLibraryID,
+					collections: parentCollectionID ? [parentCollectionID] : undefined
+				});
+				// If moving, delete original file
+				if (dragData.dropEffect == 'move') {
+					try {
+						file.remove(false);
+					}
+					catch (e) {
+						Components.utils.reportError("Error deleting original file " + file.path + " after drag");
 					}
 				}
 			}
-		}
-		finally {
-			Zotero.Notifier.commit(unlock);
 		}
 	}
 });

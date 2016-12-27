@@ -60,7 +60,7 @@ Zotero.Attachments = new function(){
 			throw new Error("parentItemID and collections cannot both be provided");
 		}
 		
-		var attachmentItem, itemID, newFile, contentType;
+		var attachmentItem, itemID, newFile, contentType, destDir;
 		try {
 			yield Zotero.DB.executeTransaction(function* () {
 				// Create a new attachment
