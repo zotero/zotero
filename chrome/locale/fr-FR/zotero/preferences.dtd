@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Générales">
 
 <!ENTITY zotero.preferences.userInterface "Interface utilisateur">
-<!ENTITY zotero.preferences.showIn "Ouvrir Zotero dans :">
-<!ENTITY zotero.preferences.showIn.browserPane "un panneau du navigateur">
-<!ENTITY zotero.preferences.showIn.separateTab "un onglet séparé">
-<!ENTITY zotero.preferences.showIn.appTab "un onglet applicatif">
 <!ENTITY zotero.preferences.layout "Disposition :">
 <!ENTITY zotero.preferences.layout.standard "Standard">
 <!ENTITY zotero.preferences.layout.stacked "Empilée">
@@ -60,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "Mot de passe :">
 <!ENTITY zotero.preferences.sync.syncServer "Synchronisation des données">
 <!ENTITY zotero.preferences.sync.setUpSync "Régler la synchronisation">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Dissocier  le compte…">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Dissocier le compte…">
 <!ENTITY zotero.preferences.sync.createAccount "Créer un compte">
 <!ENTITY zotero.preferences.sync.lostPassword "Mot de passe oublié ?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchroniser automatiquement">
@@ -92,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Réinitialiser l'historique de synchronisation des fichiers">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Forcer le serveur de stockage à rechercher tous les fichiers locaux.">
 <!ENTITY zotero.preferences.sync.reset "Réinitialisation">
-<!ENTITY zotero.preferences.sync.reset.button "Réinitialiser...">
+<!ENTITY zotero.preferences.sync.reset.button "Réinitialiser…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Recherche">
@@ -129,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "Styles">
 <!ENTITY zotero.preferences.cite.wordProcessors "Traitements de texte">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Aucune extension pour traitement de texte n'est installée.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Obtenir des extensions pour traitement de texte…">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Obtenir des modules complémentaires pour traitement de texte…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/fr/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Utiliser la fenêtre classique d'ajout de citation">
 
@@ -137,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titre">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Mis à jour">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Obtenir des styles supplémentaires…">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Obtenir d'autres styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "Ouvrir / Fermer le panneau Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Enregistrer dans Zotero (icône de la barre d'adresse)">
@@ -185,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "Description">
 <!ENTITY zotero.preferences.locate.name "Nom">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Un moteur de recherche étend les capacités du menu Localiser du panneau Info. En activant des moteurs de recherche dans la liste ci-dessous, ils seront ajoutés au menu déroulant et pourront être utilisés pour localiser des ressources de votre bibliothèque sur le Web.">
-<!ENTITY zotero.preferences.locate.addDescription "Pour ajouter un moteur de recherche absent de la liste, allez sur le moteur de recherche voulu dans votre navigateur et sélectionnez &#34;Ajoutez&#34; dans le menu &#34;Localiser&#34; de Zotero.">
+<!ENTITY zotero.preferences.locate.addDescription "Pour ajouter un moteur de recherche absent de la liste, rendez-vous à l'adresse de ce moteur de recherche avec votre navigateur, puis sélectionnez “Ajoutez” à partir du menu Localiser de Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Rétablir les moteurs par défaut">
 
 <!ENTITY zotero.preferences.charset "Codage de caractères">
@@ -195,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "Emplacement du répertoire de données">
 <!ENTITY zotero.preferences.dataDir.useProfile "Utiliser le répertoire de profil">
 <!ENTITY zotero.preferences.dataDir.custom "Personnalisé :">
-<!ENTITY zotero.preferences.dataDir.choose "Sélectionner…">
+<!ENTITY zotero.preferences.dataDir.choose "Choisir…">
 <!ENTITY zotero.preferences.dataDir.reveal "Ouvrir le répertoire de données">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrer vers le nouvel emplacement par défaut…">
 

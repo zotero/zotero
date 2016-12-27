@@ -12,7 +12,7 @@
 <!ENTITY zotero.general.saveAs "Enregistrer sous…">
 <!ENTITY zotero.general.advancedOptions.label "Options avancées">
 <!ENTITY zotero.general.more "Plus">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.loading "Chargement…">
 
 <!ENTITY zotero.errorReport.title "Rapport d'erreur Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Il peut y avoir des messages sans lien avec Zotero.">
@@ -123,7 +123,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Assistance et documentation">
 <!ENTITY zotero.toolbar.about.label "À propos de Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Recherche avancée">
-<!ENTITY zotero.toolbar.tab.tooltip "Activer / Désactiver le mode onglet">
 <!ENTITY zotero.toolbar.openURL.label "Localiser">
 <!ENTITY zotero.toolbar.openURL.tooltip "Chercher dans votre bibliothèque locale">
 
@@ -272,10 +271,10 @@
 <!ENTITY zotero.feedSettings.title.label "Titre :">
 <!ENTITY zotero.feedSettings.refresh.label1 "Mettre à jour le flux toutes les">
 <!ENTITY zotero.feedSettings.refresh.label2 "heure(s)">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Retirer les documents non lus après">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "jour(s)">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Retirer les documents lus">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "jour(s)">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Récupération des métadonnées…">
