@@ -82,6 +82,12 @@ var ZoteroPane = new function()
 			window.document.documentElement.setAttribute('sizemode', 'normal');
 		}
 		
+		// For now, keep actions menu in the DOM and show it in Firefox for development
+		if (!Zotero.isStandalone) {
+			document.getElementById('zotero-tb-actions-menu-separator').hidden = false;
+			document.getElementById('zotero-tb-actions-menu').hidden = false;
+		}
+		
 		// Set "Report Errors..." label via property rather than DTD entity,
 		// since we need to reference it in script elsewhere
 		document.getElementById('zotero-tb-actions-reportErrors').setAttribute('label',

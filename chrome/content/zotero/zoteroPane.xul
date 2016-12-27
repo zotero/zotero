@@ -123,8 +123,8 @@
 							</menu>
 						</menupopup>
 					</toolbarbutton>
-					<spacer flex="1"/>
-					<toolbarbutton id="zotero-tb-actions-menu" class="zotero-tb-button" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
+					<spacer id="zotero-tb-actions-menu-separator" flex="1" hidden="true"/>
+					<toolbarbutton id="zotero-tb-actions-menu" class="zotero-tb-button" tooltiptext="&zotero.toolbar.actions.label;" type="menu" hidden="true">
 						<menupopup id="zotero-tb-actions-popup">
 							<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" command="cmd_zotero_import"/>
 							<menuitem id="zotero-tb-actions-import-clipboard" label="&zotero.toolbar.importFromClipboard;" command="cmd_zotero_importFromClipboard"/>
