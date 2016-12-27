@@ -4785,7 +4785,12 @@ var ZoteroPane = new function()
 			if (collectionsPane.collapsed) {
 				itemsToolbarWidth -= collectionsToolbar.boxObject.width;
 			}
-
+			// Not sure why this is necessary, but it keeps the search bar from overflowing into the
+			// right-hand pane
+			else {
+				itemsToolbarWidth -= 8;
+			}
+			
 			itemsToolbar.style.width = itemsToolbarWidth + "px";
 			itemsToolbar.setAttribute("flex", "0");
 			itemToolbar.setAttribute("flex", "1");
