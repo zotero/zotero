@@ -404,7 +404,7 @@
 						);
 						
 						var prefix = '';
-						// Add '(...)' before 'Abstract:' for collapsed abstracts
+						// Add '(...)' before 'Abstract' for collapsed abstracts
 						if (fieldName == 'abstractNote') {
 							if (val && !Zotero.Prefs.get('lastAbstractExpand')) {
 								prefix = '(\u2026) ';
@@ -413,7 +413,7 @@
 						
 						if (fieldName) {
 							label.setAttribute("value", prefix +
-								Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, fieldName) + ":");
+								Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, fieldName));
 						}
 						
 						// TEMP - NSF (homepage)
@@ -748,7 +748,7 @@
 					
 					var label = document.createElement("label");
 					label.setAttribute('value',
-						Zotero.getString('creatorTypes.'+Zotero.CreatorTypes.getName(typeID)) + ":")
+						Zotero.getString('creatorTypes.' + Zotero.CreatorTypes.getName(typeID)));
 					typeBox.appendChild(label);
 					
 					var hbox = document.createElement("hbox");
@@ -884,7 +884,7 @@
 				<body>
 				<![CDATA[
 					var label = document.createElement("label");
-					label.setAttribute("value", Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, field) + ':');
+					label.setAttribute("value", Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, field));
 					label.setAttribute("fieldname", field);
 					label.setAttribute("onclick", "this.nextSibling.firstChild.blur()");
 					
@@ -1186,8 +1186,8 @@
 					);
 					valueElement.parentNode.replaceChild(newValueElement, valueElement);
 					
-					var text = Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, 'abstractNote') + ':';
-					// Add '(...)' before "Abstract:" for collapsed abstracts
+					var text = Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, 'abstractNote');
+					// Add '(...)' before "Abstract" for collapsed abstracts
 					if (valueText && cur) {
 						text = '(\u2026) ' + text;
 					}
@@ -2373,7 +2373,7 @@
 								'value',
 								Zotero.getString(
 									'creatorTypes.' + Zotero.CreatorTypes.getName(typeID)
-								) + ':'
+								)
 							);
 							typeBox.setAttribute('typeid', typeID);
 							
@@ -2423,7 +2423,7 @@
 					</columns>
 					<rows id="dynamic-fields" flex="1">
 						<row class="zotero-item-first-row">
-							<label value="&zotero.items.itemType;:"/>
+							<label value="&zotero.items.itemType;"/>
 							<menulist class="zotero-clicky" id="item-type-menu" oncommand="document.getBindingParent(this).changeTypeTo(this.value, this)" flex="1"
 								onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"
 								onkeypress="if (event.keyCode == event.DOM_VK_TAB) { document.getBindingParent(this).itemTypeMenuTab(event); }">
