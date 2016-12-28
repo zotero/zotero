@@ -36,8 +36,6 @@ var TRANSLATOR_OPTIONAL_PROPERTIES = ["targetAll", "browserSupport", "minVersion
 // Properties that are passed from background to inject page in connector
 var TRANSLATOR_PASSING_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.
                                     concat(["targetAll", "browserSupport", "code", "runMode", "itemType"]);
-// Properties that are saved in connector if set but not required
-var TRANSLATOR_SAVE_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browserSupport"]);
 
 /**
  * @class Represents an individual translator
@@ -77,17 +75,15 @@ Zotero.Translator = function(info) {
  */
 Zotero.Translator.prototype.init = function(info) {
 	// make sure we have all the properties
-	for(var i=0; i<TRANSLATOR_REQUIRED_PROPERTIES.length; i++) {
-		var property = TRANSLATOR_REQUIRED_PROPERTIES[i];
-		if(info[property] === undefined) {
+	for (let property of TRANSLATOR_REQUIRED_PROPERTIES) {
+		if (info[property] === undefined) {
 			this.logError(new Error('Missing property "'+property+'" in translator metadata JSON object in ' + info.label));
 			break;
 		} else {
 			this[property] = info[property];
 		}
 	}
-	for(var i=0; i<TRANSLATOR_OPTIONAL_PROPERTIES.length; i++) {
-		var property = TRANSLATOR_OPTIONAL_PROPERTIES[i];
+	for (let property of TRANSLATOR_OPTIONAL_PROPERTIES) {
 		if(info[property] !== undefined) {
 			this[property] = info[property];
 		}
@@ -95,34 +91,32 @@ Zotero.Translator.prototype.init = function(info) {
 	
 	this.browserSupport = info["browserSupport"] ? info["browserSupport"] : "g";
 	
-	var supported = (
-		Zotero.isBookmarklet ?
-			(this.browserSupport.indexOf(Zotero.browser) !== -1 && this.browserSupport.indexOf("b") !== -1) ||
-			/(?:^|; ?)bookmarklet-debug-mode=1(?:$|; ?)/.test(document.cookie) :
-		this.browserSupport.indexOf(Zotero.browser) !== -1);
+	var supported = this.browserSupport.indexOf(Zotero.browser) !== -1 && 
+		(!Zotero.isBookmarklet || this.browserSupport.indexOf("b") !== -1 || 
+			/(?:^|; ?)bookmarklet-debug-mode=1(?:$|; ?)/.test(document.cookie));
 
-	if(supported) {
+	if (supported) {
 		this.runMode = Zotero.Translator.RUN_MODE_IN_BROWSER;
 	} else {
 		this.runMode = Zotero.Translator.RUN_MODE_ZOTERO_STANDALONE;
 	}
 	
-	if(this.translatorType & TRANSLATOR_TYPES["import"]) {
+	if (this.translatorType & TRANSLATOR_TYPES["import"]) {
 		// compile import regexp to match only file extension
 		this.importRegexp = this.target ? new RegExp("\\."+this.target+"$", "i") : null;
-	} else if(this.hasOwnProperty("importRegexp")) {
+	} else if (this.hasOwnProperty("importRegexp")) {
 		delete this.importRegexp;
 	}
 	
 	this.cacheCode = Zotero.isConnector;
-	if(this.translatorType & TRANSLATOR_TYPES["web"]) {
+	if (this.translatorType & TRANSLATOR_TYPES["web"]) {
 		// compile web regexp
 		this.cacheCode |= !this.target;
 		this.webRegexp = {
 			root: this.target ? new RegExp(this.target, "i") : null,
 			all: this.targetAll ? new RegExp(this.targetAll, "i") : null
 		};
-	} else if(this.hasOwnProperty("webRegexp")) {
+	} else if (this.hasOwnProperty("webRegexp")) {
 		delete this.webRegexp;
 	}
 	
@@ -130,9 +124,9 @@ Zotero.Translator.prototype.init = function(info) {
 		this.path = info.path;
 		this.fileName = OS.Path.basename(info.path);
 	}
-	if(info.code && this.cacheCode) {
-		this.code = info.code;
-	} else if(this.hasOwnProperty("code")) {
+	if (info.code && this.cacheCode) {
+		this.code = Zotero.Translator.replaceDeprecatedStatements(info.code);
+	} else if (this.hasOwnProperty("code")) {
 		delete this.code;
 	}
 	// Save a copy of the metadata block
@@ -148,7 +142,7 @@ Zotero.Translator.prototype.init = function(info) {
 Zotero.Translator.prototype.getCode = Zotero.Promise.method(function () {
 	if (this.code) return this.code;
 
-	if(Zotero.isConnector) {
+	if (Zotero.isConnector) {
 		return Zotero.Repo.getTranslatorCode(this.translatorID)
 		.then(function (args) {
 			var code = args[0];
@@ -207,6 +201,17 @@ Zotero.Translator.prototype.logError = function(message, type, line, lineNumber,
 	} else {
 		Zotero.logError(message);
 	}
+}
+
+/**
+ * Replace deprecated ES5 statements
+ */
+Zotero.Translator.replaceDeprecatedStatements = function(code) {
+	const foreach = /^(\s*)for each\s*\((var )?([^ ]+) in (.*?)\)(\s*){/gm;
+	code = code.replace(foreach, "$1var $3_zForEachSubject = $4; "+
+		"for(var $3_zForEachIndex in $3_zForEachSubject)$5{ "+
+		"$2$3 = $3_zForEachSubject[$3_zForEachIndex];");
+	return code;
 }
 
 Zotero.Translator.RUN_MODE_IN_BROWSER = 1;
