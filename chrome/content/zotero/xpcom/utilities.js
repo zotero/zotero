@@ -842,18 +842,32 @@ Zotero.Utilities = {
 	/**
 	 * Shorten and add an ellipsis to a string if necessary
 	 *
-	 * @param	{String}	str
-	 * @param	{Integer}	len
-	 * @param	{Boolean}	[countChars=false]
+	 * @param {String}	str
+	 * @param {Integer}	len
+	 * @param {Boolean} [wordBoundary=false]
+	 * @param {Boolean} [countChars=false]
 	 */
-	"ellipsize":function (str, len, countChars) {
+	ellipsize: function (str, len, wordBoundary = false, countChars) {
 		if (!len) {
 			throw ("Length not specified in Zotero.Utilities.ellipsize()");
 		}
-		if (str.length > len) {
-			return str.substr(0, len) + '\u2026' + (countChars ? ' (' + str.length + ' chars)' : '');
+		if (str.length <= len) {
+			return str;
 		}
-		return str;
+		let radius = Math.min(len, 5);
+		if (wordBoundary) {
+			let min = len - radius;
+			// If next character is a space, include that so we stop at len
+			if (str.charAt(len).match(/\s/)) {
+				radius++;
+			}
+			// Remove trailing characters and spaces, up to radius
+			str = str.substr(0, min) + str.substr(min, radius).replace(/\W*\s\S*$/, "");
+		}
+		else {
+			str = str.substr(0, len)
+		}
+		return str + '\u2026' + (countChars ? ' (' + str.length + ' chars)' : '');
 	},
 	
 	/**

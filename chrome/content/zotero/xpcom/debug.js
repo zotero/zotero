@@ -158,7 +158,7 @@ Zotero.Debug = new function () {
 		if (maxLineLength) {
 			for (var i=0, len=output.length; i<len; i++) {
 				if (output[i].length > maxLineLength) {
-					output[i] = Zotero.Utilities.ellipsize(output[i], maxLineLength, true);
+					output[i] = Zotero.Utilities.ellipsize(output[i], maxLineLength, false, true);
 				}
 			}
 		}

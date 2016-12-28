@@ -370,4 +370,36 @@ describe("Zotero.Utilities", function() {
 			assert.equal(item.getField('title'), jsonAttachment.title, 'title imported correctly');
 		});
 	});
+	
+	describe("#ellipsize()", function () {
+		describe("with wordBoundary", function () {
+			it("should truncate at word boundary", function* () {
+				assert.equal(Zotero.Utilities.ellipsize("abc def ghi", 3, true), "abc…");
+			});
+			
+			it("should trim whitespace after word boundary", function* () {
+				assert.equal(Zotero.Utilities.ellipsize("abc def ghi", 4, true), "abc…");
+			});
+			
+			it("should trim characters after word boundary", function () {
+				assert.equal(Zotero.Utilities.ellipsize("abc def ghi", 5, true), "abc…");
+			});
+			
+			it("should truncate in the middle of a word", function () {
+				assert.equal(Zotero.Utilities.ellipsize("abcdefghi", 6, true), "abcdef…");
+			});
+			
+			it("should truncate at word boundary with previous space within radius", function () {
+				assert.equal(Zotero.Utilities.ellipsize("abc def ghi", 7, true), "abc def…");
+			});
+			
+			it("should return string as is if shorter than length", function () {
+				assert.equal(Zotero.Utilities.ellipsize("abcdefg", 8, true), "abcdefg");
+			});
+			
+			it("should return string as is if equal to length", function () {
+				assert.equal(Zotero.Utilities.ellipsize("abcdefgh", 8, true), "abcdefgh");
+			});
+		});
+	});
 });
