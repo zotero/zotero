@@ -53,7 +53,7 @@
 			<field name="blurHandler"/>
 			<field name="eventHandlers">[]</field>
 			
-			<field name="_initialVisibleCreators">10</field>
+			<field name="_initialVisibleCreators">5</field>
 			<field name="_displayAllCreators"/>
 			
 			<!-- Modes are predefined settings groups for particular tasks -->
@@ -561,8 +561,8 @@
 					if (num > 0) {
 						// Limit number of creators display
 						var max = Math.min(num, this._initialVisibleCreators);
-						// If fewer than five more, just display
-						if (num < max + 5 || this._displayAllCreators) {
+						// If only 1 or 2 more, just display
+						if (num < max + 3 || this._displayAllCreators) {
 							max = num;
 						}
 						for (var i = 0; i < max; i++) {
