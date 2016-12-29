@@ -146,7 +146,6 @@
 				
 				<hbox id="zotero-items-toolbar" align="center">
 					<toolbarbutton id="zotero-tb-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItem.label;" type="menu">
-						<!-- New Item drop-down built in overlay.js::onLoad() -->
 						<menupopup onpopupshowing="ZoteroPane_Local.updateNewItemTypes()">
 							<menuseparator/>
 							<menuitem label="&zotero.toolbar.attachment.linked;" oncommand="ZoteroPane_Local.addAttachmentFromDialog(true);" tooltiptext=""/>

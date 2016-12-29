@@ -345,6 +345,8 @@ Zotero.ItemTypes = new function() {
 	var _secondaryTypes;
 	var _hiddenTypes;
 	
+	var _numPrimary = 5;
+	
 	var _customImages = {};
 	var _customLabels = {};
 	
@@ -352,39 +354,9 @@ Zotero.ItemTypes = new function() {
 	this.init = Zotero.Promise.coroutine(function* () {
 		yield this.constructor.prototype.init.apply(this);
 		
-		// Primary types
-		var limit = 5;
-		
 		// TODO: get rid of ' AND itemTypeID!=5' and just remove display=2
 		// from magazineArticle in system.sql
-		var sql = 'WHERE (display=2 AND itemTypeID!=5) ';
-		
-		var mru = Zotero.Prefs.get('newItemTypeMRU');
-		if (mru) {
-			var params = [];
-			mru = mru.split(',').slice(0, limit);
-			for (var i=0, len=mru.length; i<len; i++) {
-				var id = parseInt(mru[i]);
-				if (!isNaN(id) && id != 13) { // ignore 'webpage' item type
-					params.push(id);
-				}
-			}
-			if (params.length) {
-				sql += 'OR id IN '
-						+ '(' + params.map(() => '?').join() + ') '
-						+ 'ORDER BY id NOT IN '
-						+ '(' + params.map(() => '?').join() + ') ';
-				params = params.concat(params);
-			}
-			else {
-				params = false;
-			}
-		}
-		else {
-			params = false;
-		}
-		sql += 'LIMIT ' + limit;
-		_primaryTypes = yield this._getTypesFromDB(sql, params);
+		_primaryTypes = yield this._getTypesFromDB('WHERE (display=2 AND itemTypeID!=5) LIMIT ' + _numPrimary);
 		
 		// Secondary types
 		_secondaryTypes = yield this._getTypesFromDB('WHERE display IN (1,2)');
@@ -408,6 +380,26 @@ Zotero.ItemTypes = new function() {
 		if (!_primaryTypes) {
 			throw new Zotero.Exception.UnloadedDataException("Primary item type data not yet loaded");
 		}
+		
+		var mru = Zotero.Prefs.get('newItemTypeMRU');
+		if (mru && mru.length) {
+			// Get types from the MRU list
+			mru = new Set(
+				mru.split(',')
+				.slice(0, _numPrimary)
+				.map(id => parseInt(id))
+				// Ignore 'webpage' item type
+				.filter(id => !isNaN(id) && id != 13)
+			);
+			
+			// Add types from defaults until we reach our limit
+			for (let i = 0; i < _primaryTypes.length && mru.size < _numPrimary; i++) {
+				mru.add(_primaryTypes[i].id);
+			}
+			
+			return Array.from(mru).map(id => ({ id, name: this.getName(id) }));
+		}
+		
 		return _primaryTypes;
 	}
 

@@ -107,7 +107,9 @@ const ZoteroStandalone = new function() {
 				menuitem.setAttribute("label", itemTypes[i].localized);
 				menuitem.setAttribute("tooltiptext", "");
 				let type = itemTypes[i].id;
-				menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type); }, false);
+				menuitem.addEventListener("command", function() {
+					ZoteroPane_Local.newItem(type, null, null, true);
+				}, false);
 				menuitem.className = "zotero-tb-add";
 				addMenu.appendChild(menuitem);
 			}
