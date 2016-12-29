@@ -239,8 +239,10 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			// https://github.com/cjohansen/Sinon.JS/issues/607
 			var fixSinonBug = ";charset=utf-8";
 			
-			var libraryID = Zotero.Libraries.userLibraryID;
-			yield Zotero.Libraries.setVersion(libraryID, 5);
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			library.libraryVersion = 5;
+			yield library.saveTx();
 			
 			({ engine, client, caller } = yield setup());
 			
@@ -347,7 +349,8 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			// Upload new content
 			//
 			({ engine, client, caller } = yield setup());
-			yield Zotero.Libraries.setVersion(libraryID, libraryVersion);
+			library.libraryVersion = libraryVersion;
+			yield library.saveTx();
 			
 			var attachment3 = new Zotero.Item('attachment');
 			attachment3.parentItemID = item.id;

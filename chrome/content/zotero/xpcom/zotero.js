@@ -1453,7 +1453,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		caller.setLogger(Zotero.debug);
 		return function () {
 			var args = arguments;
-			return caller.fcall(function () {
+			return caller.start(function () {
 				return fn.apply(this, args);
 			}.bind(this));
 		};

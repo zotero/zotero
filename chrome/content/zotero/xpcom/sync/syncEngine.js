@@ -274,7 +274,8 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 	}
 	
 	if (newLibraryVersion) {
-		yield Zotero.Libraries.setVersion(this.libraryID, newLibraryVersion);
+		this.library.libraryVersion = newLibraryVersion;
+		yield this.library.saveTx();
 	}
 	
 	return localChanges
@@ -1513,7 +1514,8 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 		break;
 	}
 	
-	yield Zotero.Libraries.setVersion(this.libraryID, lastLibraryVersion);
+	this.library.libraryVersion = lastLibraryVersion;
+	yield this.library.saveTx();
 	
 	Zotero.debug("Done with full sync for " + this.library.name);
 	

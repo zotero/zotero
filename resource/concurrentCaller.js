@@ -165,12 +165,6 @@ ConcurrentCaller.prototype.runAll = function () {
 }
 
 
-ConcurrentCaller.prototype.fcall = function (func) {
-	this._log("fcall() is deprecated -- use start()");
-	return this.start(func);
-}
-
-
 /**
  * Wait for all running tasks to complete
  *
