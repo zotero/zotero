@@ -10,6 +10,7 @@ var ZOTERO_CONFIG = {
 	WWW_BASE_URL: 'https://www.zotero.org/',
 	PROXY_AUTH_URL: 'https://s3.amazonaws.com/zotero.org/proxy-auth',
 	API_URL: 'https://api.zotero.org/',
+	STREAMING_URL: 'wss://stream.zotero.org/',
 	API_VERSION: 3,
 	PREF_BRANCH: 'extensions.zotero.',
 	BOOKMARKLET_ORIGIN: 'https://www.zotero.org',

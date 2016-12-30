@@ -118,6 +118,34 @@ Zotero.URI = new function () {
 	
 	
 	/**
+	 * Get library from path (e.g., users/6 or groups/1)
+	 *
+	 * @return {Zotero.Library|false}
+	 */
+	this.getPathLibrary = function (path) {
+		let matches = path.match(/^\/\/?users\/(\d+)(\/publications)?/);
+		if (matches) {
+			let userID = matches[1];
+			let currentUserID = Zotero.Users.getCurrentUserID();
+			if (userID != currentUserID) {
+				Zotero.debug("User ID from streaming server doesn't match current id! "
+					+ `(${userID} != ${currentUserID})`);
+				return false;
+			}
+			if (matches[2]) {
+				return Zotero.Libraries.get(Zotero.Libraries.publicationsLibraryID);
+			}
+			return Zotero.Libraries.userLibrary;
+		}
+		matches = event.data.topic.match(/^\/groups\/(\d+)/);
+		if (matches) {
+			let groupID = matches[1];
+			return Zotero.Groups.get(groupID);
+		}
+	}
+	
+	
+	/**
 	 * Return URI of item, which might be a local URI if user hasn't synced
 	 */
 	this.getItemURI = function (item) {

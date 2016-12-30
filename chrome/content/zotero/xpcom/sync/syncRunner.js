@@ -97,7 +97,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	 * @param {Function}  [options.onError]           Function to pass errors to instead of
 	 *                                                handling internally (used for testing)
 	 */
-	this.sync = Zotero.Promise.coroutine(function* (options = {}) {
+	this.sync = Zotero.serial(Zotero.Promise.coroutine(function* (options = {}) {
 		// Clear message list
 		_errors = [];
 		
@@ -240,7 +240,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			Zotero.debug("Done syncing");
 			Zotero.Notifier.trigger('finish', 'sync', librariesToSync || []);
 		}
-	});
+	}));
 	
 	
 	/**

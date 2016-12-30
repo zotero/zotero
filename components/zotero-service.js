@@ -113,6 +113,7 @@ const xpcomFilesLocal = [
 	'sync/syncFullTextEngine',
 	'sync/syncLocal',
 	'sync/syncRunner',
+	'sync/syncStreamer',
 	'sync/syncUtilities',
 	'storage',
 	'storage/storageEngine',

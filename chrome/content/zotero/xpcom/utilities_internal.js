@@ -619,6 +619,7 @@ Zotero.Utilities.Internal = {
 	 *                              maxTime isn't specified, the promises will yield true.
 	 */
 	"delayGenerator": function* (intervals, maxTime) {
+		var delay;
 		var totalTime = 0;
 		var last = false;
 		while (true) {

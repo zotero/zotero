@@ -80,6 +80,7 @@ Zotero.Sync.Data.Local = {
 				Zotero.debug("Clearing old API key");
 				loginManager.removeLogin(oldLoginInfo);
 			}
+			Zotero.Notifier.trigger('delete', 'api-key', []);
 			return;
 		}
 		
@@ -102,6 +103,7 @@ Zotero.Sync.Data.Local = {
 			Zotero.debug("Replacing API key");
 			loginManager.modifyLogin(oldLoginInfo, loginInfo);
 		}
+		Zotero.Notifier.trigger('modify', 'api-key', []);
 	},
 	
 	
