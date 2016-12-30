@@ -58,7 +58,9 @@
 						</tree>
 						<separator class="thin"/>
 						<hbox align="center" flex="1" height="40">
-							<label class="zotero-text-link" href="http://www.zotero.org/styles/" value="&zotero.preferences.export.getAdditionalStyles;" flex="1"/>
+							<label class="zotero-text-link"
+									value="&zotero.preferences.export.getAdditionalStyles;" flex="1"
+									onclick="Zotero_Preferences.Cite.openStylesPage(); event.preventDefault()"/>
 							<button disabled="true" id="styleManager-delete" label="-" onclick="Zotero_Preferences.Cite.deleteStyle()"/>
 							<button label="+" onclick="Zotero_Preferences.Cite.addStyle()"/>
 						</hbox>

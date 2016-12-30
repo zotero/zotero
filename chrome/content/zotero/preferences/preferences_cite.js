@@ -90,6 +90,20 @@ Zotero_Preferences.Cite = {
 	}),
 	
 	
+	openStylesPage: function () {
+		Zotero.openInViewer("https://www.zotero.org/styles/", function (doc) {
+			// Hide header, intro paragraph, Link, and Source
+			//
+			// (The first two aren't sent to the client normally, but hide anyway in case they are.)
+			var style = doc.createElement('style');
+			style.type = 'text/css';
+			style.innerHTML = 'h1, #intro, .style-individual-link, .style-view-source { display: none !important; }';
+			Zotero.debug(doc.documentElement.innerHTML);
+			doc.getElementsByTagName('head')[0].appendChild(style);
+		});
+	},
+	
+	
 	/**
 	 * Adds a new style to the style pane
 	 **/

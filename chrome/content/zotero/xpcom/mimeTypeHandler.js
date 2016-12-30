@@ -62,7 +62,21 @@ Zotero.MIMETypeHandler = new function () {
 			else this.unregisterMetadataHandlers();
 		}.bind(this));
 		
-		this.addHandler("application/vnd.citationstyles.style+xml", function(a1, a2) { Zotero.Styles.install(a1, a2) });
+		this.addHandler("application/vnd.citationstyles.style+xml", Zotero.Promise.coroutine(function* (a1, a2) {
+			let win = Services.wm.getMostRecentWindow("zotero:basicViewer");
+			try {
+				yield Zotero.Styles.install(a1, a2, true);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				(new Zotero.Exception.Alert("styles.install.unexpectedError",
+					a2, "styles.install.title", e)).present();
+			}
+			// Close styles page in basic viewer after installing a style
+			if (win) {
+				win.close();
+			}
+		}));
 		this.addHandler("text/x-csl", function(a1, a2) { Zotero.Styles.install(a1, a2) }); // deprecated
 		this.addHandler("application/x-zotero-schema", Zotero.Schema.importSchema);
 		this.addHandler("application/x-zotero-settings", Zotero.Prefs.importSettings);
