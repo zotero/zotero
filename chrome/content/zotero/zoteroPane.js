@@ -3195,7 +3195,7 @@ var ZoteroPane = new function()
 				if(uri.match(/^https?/)) {
 					this.launchURL(uri);
 				} else {
-					ZoteroStandalone.openInViewer(uri);
+					Zotero.openInViewer(uri);
 				}
 				return;
 			}
