@@ -10,3 +10,12 @@
 #zotero-feed-item-addTo-button .menu-iconic-left {
 	visibility: visible;
 }
+
+/* Possibly irrelevant if mozilla fixes https://bugzilla.mozilla.org/show_bug.cgi?id=1306425 */
+#zotero-view-tabbox tabs tab[visuallyselected=true] {
+	margin-top: 0px !important; /* Importanter than ./itemPane.css:20 */
+	margin-bottom: -2px !important; /* Importanter than skin/itemPane.css:12 */
+}
+#zotero-view-tabbox tabs tab {
+	margin-top: 2px !important; /* Importanter than skin/itemPane.css:11 */
+}

@@ -196,3 +196,26 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 #zotero-tb-search .textbox-search-icon {
 	visibility: hidden;
 }
+
+/* Fixes tabs missing styling on (GTK 3.20) Ubuntu 16.10. See https://bugzilla.mozilla.org/show_bug.cgi?id=1306425 */
+#zotero-pane tabpanels, #zotero-prefs tabpanels {
+	-moz-appearance: none;
+	border: 1px solid ThreeDHighlight;
+	
+}
+#zotero-pane tab, #zotero-prefs tab {
+	-moz-appearance: none;
+	border-top: 1px solid ThreeDHighlight;
+	border-right: 1px solid ThreeDHighlight;
+	border-left: 1px solid ThreeDHighlight;
+	-moz-border-top-colors: none;
+	-moz-border-right-colors: none;
+	-moz-border-left-colors: none;
+}
+/* Fixes misc Ubuntu 16.10 rendering issue fixes. */
+#zotero-prefs menulist dropmarker{
+	width: 30px;
+}
+#zotero-prefs .numberbox-input-box{
+	-moz-appearance: textfield;
+}
