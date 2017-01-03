@@ -219,3 +219,8 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 #zotero-prefs .numberbox-input-box{
 	-moz-appearance: textfield;
 }
+/* Grippy icon missing anyway */
+#zotero-pane splitter{
+	width: 6px;
+}
+
