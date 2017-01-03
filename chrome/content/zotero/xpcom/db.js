@@ -345,7 +345,7 @@ Zotero.DBConnection.prototype.rollbackAllTransactions = function () {
 
 
 Zotero.DBConnection.prototype.getColumns = function (table) {
-	return Zotero.DB.queryAsync("PRAGMA table_info(" + table + ")")
+	return this.queryAsync("PRAGMA table_info(" + table + ")")
 	.then(function (rows) {
 		return rows.map(row => row.name);
 	})
@@ -468,7 +468,7 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 	
 	try {
 		while (this._transactionID) {
-			yield Zotero.DB.waitForTransaction(id).timeout(options.waitTimeout || 10000);
+			yield this.waitForTransaction(id).timeout(options.waitTimeout || 10000);
 		}
 		startedTransaction = true;
 		this._transactionID = id;
@@ -499,7 +499,7 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 		
 		if (options.vacuumOnCommit) {
 			Zotero.debug('Vacuuming database');
-			yield Zotero.DB.queryAsync('VACUUM');
+			yield this.queryAsync('VACUUM');
 		}
 		
 		this._transactionID = null;
@@ -816,16 +816,12 @@ Zotero.DBConnection.prototype.logQuery = function (sql, params = [], options) {
 }
 
 
-Zotero.DBConnection.prototype.tableExists = function (table) {
-	return this._getConnectionAsync()
-	.then(function () {
-		var sql = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND tbl_name=?";
-		return Zotero.DB.valueQueryAsync(sql, [table]);
-	})
-	.then(function (count) {
-		return !!count;
-	});
-}
+Zotero.DBConnection.prototype.tableExists = Zotero.Promise.coroutine(function* (table) {
+	yield this._getConnectionAsync();
+	var sql = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND tbl_name=?";
+	var count = yield this.valueQueryAsync(sql, [table]);
+	return !!count;
+});
 
 
 /**
@@ -855,7 +851,7 @@ Zotero.DBConnection.prototype.executeSQLFile = Zotero.Promise.coroutine(function
 	
 	var statement;
 	while (statement = statements.shift()) {
-		yield Zotero.DB.queryAsync(statement);
+		yield this.queryAsync(statement);
 	}
 });
 
@@ -1259,19 +1255,19 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 	}
 	
 	if (DB_LOCK_EXCLUSIVE) {
-		yield Zotero.DB.queryAsync("PRAGMA locking_mode=EXCLUSIVE");
+		yield this.queryAsync("PRAGMA locking_mode=EXCLUSIVE");
 	}
 	else {
-		yield Zotero.DB.queryAsync("PRAGMA locking_mode=NORMAL");
+		yield this.queryAsync("PRAGMA locking_mode=NORMAL");
 	}
 	
 	// Set page cache size to 8MB
-	var pageSize = yield Zotero.DB.valueQueryAsync("PRAGMA page_size");
+	var pageSize = yield this.valueQueryAsync("PRAGMA page_size");
 	var cacheSize = 8192000 / pageSize;
-	yield Zotero.DB.queryAsync("PRAGMA cache_size=" + cacheSize);
+	yield this.queryAsync("PRAGMA cache_size=" + cacheSize);
 	
 	// Enable foreign key checks
-	yield Zotero.DB.queryAsync("PRAGMA foreign_keys=true");
+	yield this.queryAsync("PRAGMA foreign_keys=true");
 	
 	// Register idle and shutdown handlers to call this.observe() for DB backup
 	var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
