@@ -35,9 +35,9 @@
 	margin-right: 5px;
 }
 
-/*#zotero-collections-tree treechildren::-moz-tree-separator {
+#zotero-collections-tree treechildren::-moz-tree-separator {
 	border: none;
-}*/
+}
 
 #zotero-collections-tree treechildren::-moz-tree-twisty(notwisty),
 #zotero-collections-tree treechildren::-moz-tree-twisty(header) {
