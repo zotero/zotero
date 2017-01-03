@@ -468,7 +468,7 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 	
 	try {
 		while (this._transactionID) {
-			yield this.waitForTransaction(id).timeout(options.waitTimeout || 10000);
+			yield this.waitForTransaction(id).timeout(options.waitTimeout || 30000);
 		}
 		startedTransaction = true;
 		this._transactionID = id;
