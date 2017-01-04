@@ -51,19 +51,26 @@
 				this._onInitCallbacks = [];
 				this._iframe = document.getAnonymousElementByAttribute(this, "anonid", "rt-view");
 				
+				// Atomic units, HTML -> RTF (cleanup)
+				//[/<\/p>(?!\s*$)/g, "\\par{}"],
+				//[/ /g, "&nbsp;"],
+				//[/\u00A0/g, " "],
 				this._htmlRTFmap = [
-					// Atomic units, HTML -> RTF (cleanup)
 					[/<br \/>/g, "\x0B"],
+					[/<span class=\"tab\">&nbsp;<\/span>/g, "\\tab{}"],
+					[/&lsquo;/g, "‘"],
+					[/&rsquo;/g, "’"],
+					[/&ldquo;/g, "“"],
+					[/&rdquo;/g, "”"],
+					[/&nbsp;/g, "\u00A0"],
 					[/"(\w)/g, "“$1"],
 					[/([\w,.?!])"/g, "$1”"],
 					[/<p>/g, ""],
-					//[/<\/p>(?!\s*$)/g, "\\par{}"],
-					[/<\/?div[^>]*>/g, ""],
-					[/[\x7F-\uFFFF]/g, function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+"{}"}]
+					[/<\/?div[^>]*>/g, ""]
 				];
 				
+				// Atomic units, RTF -> HTML (cleanup)
 				this._rtfHTMLmap = [
-					// Atomic units, RTF -> HTML (cleanup)
 					[/\\uc0\{?\\u([0-9]+)\}?(?:{}| )?/g, function(wholeStr, aCode) { return String.fromCharCode(aCode) }],
 					[/\\tab(?:\{\}| )/g, '<span class="tab">&nbsp;</span>'],
 					[/(?:\\par{}|\\\r?\n)/g, "</p><p>"]
@@ -339,14 +346,13 @@
 				}
 				
 				this.htmlToRTF = function(txt) {
-					// Catch this one before &nbsp; is clobbered by unescape
-					txt = txt.replace(/<span class=\"tab\">&nbsp;<\/span>/g, "\\tab{}");
-					txt = Zotero.Utilities.unescapeHTML(txt);
+					txt = this.convert("htmlRTF", txt);
 					for (var i=0,ilen=this._htmlRTFmap.length; i < ilen; i++) {
 						var entry = this._htmlRTFmap[i];
 						txt = txt.replace(entry[0], entry[1]);
 					}
-					txt = this.convert("htmlRTF", txt);
+					txt = Zotero.Utilities.unescapeHTML(txt);
+					txt = txt.replace(/[\x7F-\uFFFF]/g, function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+"{}"});
 					return txt.trim();
 				}
 				
