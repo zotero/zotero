@@ -84,7 +84,7 @@
 					var _rexData = [
 						[
 							[
-								["<span style=\"font-variant:small-caps;\">"],
+								["<span +style=\"font-variant: *small-caps;\">"],
 								["{\\scaps ", "{\\scaps{}"]
 							],
 							[
@@ -94,7 +94,7 @@
 						],
 						[
 							[
-								["<span style=\"text-decoration:underline;\">"],
+								["<span +style=\"text-decoration: *underline;\">"],
 								["{\\ul{}", "{\\ul "]
 							],
 							[
@@ -164,7 +164,7 @@
 						],
 						[
 							[
-								["<span style=\"font-variant:normal;\">"],
+								["<span +style=\"font-variant: *normal;\">"],
 								["{\\scaps0{}", "{\\scaps0 "]
 							],
 							[
@@ -174,7 +174,7 @@
 						],
 						[
 							[
-								["<span style=\"font-style:normal;\">"],
+								["<span +style=\"font-style: *normal;\">"],
 								["{\\i0{}", "{\\i0 "]
 							],
 							[
@@ -184,7 +184,7 @@
 						],
 						[
 							[
-								["<span style=\"font-weight:normal;\">"],
+								["<span +style=\"font-weight: *normal;\">"],
 								["{\\b0{}", "{\\b0 "]
 							],
 							[
@@ -203,6 +203,16 @@
 							return 0;
 						}
 					}
+					
+					function normalizeRegExpString(str) {
+						if (!str) return str;
+						return str.replace(/\s+/g, " ")
+									.replace(/(?:[\+]|\s[\*])/g, "")
+									.replace(/[\']/g, '\"')
+									.replace(/:\s/g, ":");
+					}
+
+					this.normalizeRegExpString = normalizeRegExpString;
 					
 					function composeRex(rexes, noGlobal) {
 						var lst = [];
@@ -247,13 +257,15 @@
 					function openTagRemapMaker(segment) {
 						var ret = {};
 						for (var i=0,ilen=_rexData.length; i < ilen; i++) {
-							var master = _rexData[i][0][segment][0];
+							var primaryVal = normalizeRegExpString(_rexData[i][0][segment][0]);
 							for (var j=0,jlen=_rexData[i][0][segment].length; j < jlen; j++) {
-								ret[_rexData[i][0][segment][j]] = master;
+								var key = normalizeRegExpString(_rexData[i][0][segment][j]);
+								ret[key] = primaryVal;
 							}
 						}
 						return ret;
 					}
+
 					this.rtfHTMLopenTagRemap = openTagRemapMaker(1);
 					this.htmlRTFopenTagRemap = openTagRemapMaker(0);
 					
@@ -262,11 +274,11 @@
 						var ret = {};
 						var rexes = {};
 						for (var i=0,ilen=_rexData.length; i < ilen; i++) {
-							var master = _rexData[i][0][segment][0];
+							var primaryVal = _rexData[i][0][segment][0];
 							for (var j=0,jlen=_rexData[i][1][segment].length; j < jlen; j++) {
 								rexes[_rexData[i][1][segment][j]] = true;
 							}
-							ret[master] = composeRex(rexes);
+							ret[primaryVal] = composeRex(rexes);
 						}
 						return ret;
 					}
@@ -281,14 +293,15 @@
 						}
 						var ret = {};
 						for (var i=0,ilen=_rexData.length; i < ilen; i++) {
-							var master = _rexData[i][0][segment][0];
-							ret[master] = {
-								open: _rexData[i][0][antisegment][0],
+							var primaryVal = normalizeRegExpString(_rexData[i][0][segment][0]);
+							ret[primaryVal] = {
+								open: normalizeRegExpString(_rexData[i][0][antisegment][0]),
 								close: _rexData[i][1][antisegment][0]
 							}
 						}
 						return ret;
 					}
+					
 					this.rtfHTMLtagRegistry = tagRegistryMaker(1);
 					this.htmlRTFtagRegistry = tagRegistryMaker(0);
 
@@ -311,7 +324,7 @@
 				this.getOpenTag = function(mode, str) {
 					var m = str.match(this[mode + "openSniffRex"]);
 					if (m) {
-						m = this[mode + "openTagRemap"][m[0]];
+						m = this[mode + "openTagRemap"][this.normalizeRegExpString(m[0])];
 					}
 					return m;
 				}
