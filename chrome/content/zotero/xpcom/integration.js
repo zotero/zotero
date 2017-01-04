@@ -939,7 +939,8 @@ Zotero.Integration.Document.prototype._getSession = function _getSession(require
 		} catch(e) {};
 	}
 	
-	if(!data) {
+	// If no data or corrupted data, show doc prefs window again
+	if (!data || !data.prefs || !data.prefs.fieldType) {
 		var haveFields = false;
 		data = new Zotero.Integration.DocumentData();
 		
@@ -2121,7 +2122,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 	return Zotero.Integration.displayDialog(doc,
 	'chrome://zotero/content/integration/integrationDocPrefs.xul', '', io)
 	.then(function() {
-		if(!io.style) {
+		if (!io.style || !io.fieldType) {
 			throw new Zotero.Exception.UserCancelled("document preferences window");
 		}
 		
