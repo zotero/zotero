@@ -43,6 +43,10 @@ const ZoteroStandalone = new function() {
 			return Zotero.initializationPromise;
 		})
 		.then(function () {
+			if (Zotero.Prefs.get('devtools.errorconsole.enabled', true)) {
+				document.getElementById('menu_errorConsole').hidden = false;
+			}
+			
 			Zotero.hideZoteroPaneOverlays();
 			ZoteroPane.init();
 			ZoteroPane.makeVisible();
