@@ -204,7 +204,7 @@
 						}
 					}
 					
-					function normalizeRegexpString(str) {
+					function normalizeRegExpString(str) {
 						if (!str) return str;
 						return str.replace(/\s+/g, " ")
 									.replace(/(?:[\+]|\s[\*])/g, "")
@@ -212,7 +212,7 @@
 									.replace(/:\s/g, ":");
 					}
 
-					this.normalizeRegexpString = normalizeRegexpString;
+					this.normalizeRegExpString = normalizeRegExpString;
 					
 					function composeRex(rexes, noGlobal) {
 						var lst = [];
@@ -257,9 +257,9 @@
 					function openTagRemapMaker(segment) {
 						var ret = {};
 						for (var i=0,ilen=_rexData.length; i < ilen; i++) {
-							var primaryVal = normalizeRegexpString(_rexData[i][0][segment][0]);
+							var primaryVal = normalizeRegExpString(_rexData[i][0][segment][0]);
 							for (var j=0,jlen=_rexData[i][0][segment].length; j < jlen; j++) {
-								var key = normalizeRegexpString(_rexData[i][0][segment][j]);
+								var key = normalizeRegExpString(_rexData[i][0][segment][j]);
 								ret[key] = primaryVal;
 							}
 						}
@@ -293,9 +293,9 @@
 						}
 						var ret = {};
 						for (var i=0,ilen=_rexData.length; i < ilen; i++) {
-							var primaryVal = normalizeRegexpString(_rexData[i][0][segment][0]);
+							var primaryVal = normalizeRegExpString(_rexData[i][0][segment][0]);
 							ret[primaryVal] = {
-								open: normalizeRegexpString(_rexData[i][0][antisegment][0]),
+								open: normalizeRegExpString(_rexData[i][0][antisegment][0]),
 								close: _rexData[i][1][antisegment][0]
 							}
 						}
@@ -324,7 +324,7 @@
 				this.getOpenTag = function(mode, str) {
 					var m = str.match(this[mode + "openSniffRex"]);
 					if (m) {
-						m = this[mode + "openTagRemap"][this.normalizeRegexpString(m[0])];
+						m = this[mode + "openTagRemap"][this.normalizeRegExpString(m[0])];
 					}
 					return m;
 				}
