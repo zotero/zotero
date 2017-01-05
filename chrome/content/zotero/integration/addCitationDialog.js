@@ -41,6 +41,7 @@ var Zotero_Citation_Dialog = new function () {
 	var _previewShown = false;
 	var _suppressNextTreeSelect = false;
 	var _suppressNextListSelect = false;
+	var _customHTML = false;
 	var _locatorIndexArray = {};
 	var _locatorNameArray = {};
 	var _autoRegeneratePref;
@@ -556,6 +557,9 @@ var Zotero_Citation_Dialog = new function () {
 		
 		if(_previewShown) {
 			document.documentElement.getButton("extra2").label = Zotero.getString("citation.hideEditor");		
+			if (!text && _customHTML) {
+				text = _customHTML;
+			}
 			if(text) {
 				io.preview().then(function(preview) {
 					_originalHTML = preview;
@@ -565,6 +569,11 @@ var Zotero_Citation_Dialog = new function () {
 				_updatePreview();
 			}
 		} else {
+			if (editor.initialized) {
+				if (editor.value) {
+					_customHTML = editor.value;
+				}
+			}
 			document.documentElement.getButton("extra2").label = Zotero.getString("citation.showEditor");		
 		}
 	}
