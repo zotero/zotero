@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Genel">
 
 <!ENTITY zotero.preferences.userInterface "Kullanıcı Arabirimi">
-<!ENTITY zotero.preferences.showIn "Zotero'yu Bunda Aç:">
-<!ENTITY zotero.preferences.showIn.browserPane "Tarayıcı bölmesi">
-<!ENTITY zotero.preferences.showIn.separateTab "Ayrı sekme">
-<!ENTITY zotero.preferences.showIn.appTab "Uygulama sekmesi">
 <!ENTITY zotero.preferences.layout "Düzen:">
 <!ENTITY zotero.preferences.layout.standard "Standart">
 <!ENTITY zotero.preferences.layout.stacked "Üst üste yığılmış">
@@ -129,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "Stiller">
 <!ENTITY zotero.preferences.cite.wordProcessors "Sözcük İşlemcileri">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Hiçbir sözcük işlemcisi eklentisi kurulu değildir.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Sözcük İşlemcisi Eklentilerini Al...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Kelime işlemcisi eklentilerini al...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Klasik Gönderme Ekleme İletişim Kutusunu kullan">
 
@@ -180,12 +176,12 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Dosyalar ve Klasörler">
 <!ENTITY zotero.preferences.advanced.keys "Kısayollar">
 
-<!ENTITY zotero.preferences.prefpane.locate "Yerini Belirle">
+<!ENTITY zotero.preferences.prefpane.locate "Yerini Bul">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Makale Bakma Motoru Yöneticisi">
 <!ENTITY zotero.preferences.locate.description "Tanım">
 <!ENTITY zotero.preferences.locate.name "Ad">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Bir Bakma Motoru, Bilgi bölmesindeki Yerini Bul açılırının yeteneklerini genişletir. Bakma Motorlarını aşağıdaki listede etkinleştirerek bu açılıra ekleyebilir ve onları kitaplığınızdaki kaynakların yerlerini bulmak amacıyla webde kullanabilirsiniz.">
-<!ENTITY zotero.preferences.locate.addDescription "Listenizde olmayan bir Bakma Motoru eklemek için, tarayıcınızda arzuladığınız arama motoruna gidin ve Zotero'nun Yerini Bul menüsünde &#34;Add&#34;'yi seçin.">
+<!ENTITY zotero.preferences.locate.addDescription "Listede olmayan bir Bakma Motoru eklemek için, tarayıcınızda istediğiniz arama moturunu ziyaret edip Zotero'nun Yerini Bul menüsünden &quot;Ekle&quot;yi seçiniz.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Varsayılanları Geri Yükle">
 
 <!ENTITY zotero.preferences.charset "Karakter Kodlaması">
@@ -207,7 +203,7 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Veritabanı Bakımı">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Veritabanı Bütünlüğünü Denetle">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Çevirmenleri ve Stilleri Sıfırla">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Çevirmenleri ve Stilleri Sıfırla...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Çevirmenleri Sıfırla...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stilleri Sıfırla...">
 
