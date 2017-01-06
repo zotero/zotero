@@ -326,54 +326,52 @@ Zotero.Attachments = new function(){
 
 			yield deferred.promise;
 			let sample = yield Zotero.File.getSample(tmpFile);
-			if (contentType == 'application/pdf' &&
+			try {
+				if (contentType == 'application/pdf' &&
 					Zotero.MIME.sniffForMIMEType(sample) != 'application/pdf') {
-				let errString = "Downloaded PDF did not have MIME type "
-					+ "'application/pdf' in Attachments.importFromURL()";
-				Zotero.debug(errString, 2);
-				Zotero.debug(sample, 3);
-				throw(new Error(errString));
-			}
-			
-			// Create DB item
-			var attachmentItem;
-			var destDir;
-			yield Zotero.DB.executeTransaction(function* () {
-				// Create a new attachment
-				attachmentItem = new Zotero.Item('attachment');
-				if (libraryID) {
-					attachmentItem.libraryID = libraryID;
+					let errString = "Downloaded PDF did not have MIME type "
+						+ "'application/pdf' in Attachments.importFromURL()";
+					Zotero.debug(errString, 2);
+					Zotero.debug(sample, 3);
+					throw(new Error(errString));
 				}
-				else if (parentItemID) {
-					let {libraryID: parentLibraryID, key: parentKey} =
-						Zotero.Items.getLibraryAndKeyFromID(parentItemID);
-					attachmentItem.libraryID = parentLibraryID;
-				}
-				attachmentItem.setField('title', title ? title : fileName);
-				attachmentItem.setField('url', url);
-				attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
-				attachmentItem.parentID = parentItemID;
-				attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
-				attachmentItem.attachmentContentType = contentType;
-				if (collections) {
-					attachmentItem.setCollections(collections);
-				}
-				var itemID = yield attachmentItem.save(saveOptions);
-				
-				// Create a new folder for this item in the storage directory
-				destDir = this.getStorageDirectory(attachmentItem);
-				yield OS.File.move(tmpDir.path, destDir.path);
-				var destFile = destDir.clone();
-				destFile.append(fileName);
-				
-				// Refetch item to update path
-				attachmentItem.attachmentPath = destFile.path;
-				yield attachmentItem.save(saveOptions);
-			}.bind(this))
-			.catch(function (e) {
-				Zotero.debug(e, 1);
-				
-				// Clean up
+
+				// Create DB item
+				var attachmentItem;
+				var destDir;
+				yield Zotero.DB.executeTransaction(function*() {
+					// Create a new attachment
+					attachmentItem = new Zotero.Item('attachment');
+					if (libraryID) {
+						attachmentItem.libraryID = libraryID;
+					}
+					else if (parentItemID) {
+						let {libraryID: parentLibraryID, key: parentKey} =
+							Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+						attachmentItem.libraryID = parentLibraryID;
+					}
+					attachmentItem.setField('title', title ? title : fileName);
+					attachmentItem.setField('url', url);
+					attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
+					attachmentItem.parentID = parentItemID;
+					attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+					attachmentItem.attachmentContentType = contentType;
+					if (collections) {
+						attachmentItem.setCollections(collections);
+					}
+					var itemID = yield attachmentItem.save(saveOptions);
+
+					// Create a new folder for this item in the storage directory
+					destDir = this.getStorageDirectory(attachmentItem);
+					yield OS.File.move(tmpDir.path, destDir.path);
+					var destFile = destDir.clone();
+					destFile.append(fileName);
+
+					// Refetch item to update path
+					attachmentItem.attachmentPath = destFile.path;
+					yield attachmentItem.save(saveOptions);
+				}.bind(this));
+			} catch (e) {
 				try {
 					if (tmpDir && tmpDir.exists()) {
 						tmpDir.remove(true);
@@ -385,9 +383,8 @@ Zotero.Attachments = new function(){
 				catch (e) {
 					Zotero.debug(e, 1);
 				}
-				
 				throw e;
-			});
+			}
 			
 			// We don't have any way of knowing that the file is flushed to disk,
 			// so we just wait a second before indexing and hope for the best.
