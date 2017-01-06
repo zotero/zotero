@@ -137,7 +137,12 @@ Zotero.Date = new function(){
 				var seconds = date.getUTCSeconds();
 			}
 			else {
-				return date.toLocaleFormat('%Y-%m-%d %H:%M:%S');
+				var year = date.getFullYear();
+				var month = date.getMonth();
+				var day = date.getDate();
+				var hours = date.getHours();
+				var minutes = date.getMinutes();
+				var seconds = date.getSeconds();
 			}
 			
 			year = Zotero.Utilities.lpad(year, '0', 4);
