@@ -68,7 +68,7 @@ var Zotero_Charset_Menu = new function() {
 			Components.utils.import("resource://gre/modules/CharsetMenu.jsm");
 			var cmData = CharsetMenu.getData();
 			for (let charsetList of [cmData.pinnedCharsets, cmData.otherCharsets]) {
-				for each(var charsetInfo in charsetList) {
+				for (let charsetInfo of charsetList) {
 					if(charsetInfo.value == "UTF-8") {
 						charsets.push({
 							"label":"Unicode (UTF-8)",
