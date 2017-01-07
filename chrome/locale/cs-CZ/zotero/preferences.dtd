@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Obecné">
 
 <!ENTITY zotero.preferences.userInterface "Uživatelské rozhraní">
-<!ENTITY zotero.preferences.showIn "Nahrát Zotero v:">
-<!ENTITY zotero.preferences.showIn.browserPane "Panel prohlížeče">
-<!ENTITY zotero.preferences.showIn.separateTab "Samostatný panel">
-<!ENTITY zotero.preferences.showIn.appTab "Panel aplikace">
 <!ENTITY zotero.preferences.layout "Rozvržení:">
 <!ENTITY zotero.preferences.layout.standard "Standardní">
 <!ENTITY zotero.preferences.layout.stacked "Stacked">

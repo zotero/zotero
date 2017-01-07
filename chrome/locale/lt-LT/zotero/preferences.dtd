@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Bendrosios">
 
 <!ENTITY zotero.preferences.userInterface "Naudotojo sąsaja">
-<!ENTITY zotero.preferences.showIn "Zotero paleisdimas:">
-<!ENTITY zotero.preferences.showIn.browserPane "Naršyklės skydelyje">
-<!ENTITY zotero.preferences.showIn.separateTab "Atskiroje kortelėje">
-<!ENTITY zotero.preferences.showIn.appTab "Programos kortelėje">
 <!ENTITY zotero.preferences.layout "Išdėstymas">
 <!ENTITY zotero.preferences.layout.standard "Įprastas">
 <!ENTITY zotero.preferences.layout.stacked "Glaustas">

@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label "Upraviť">
+<!ENTITY editMenu.accesskey "U">
+<!ENTITY undoCmd.label "Späť">
+<!ENTITY undoCmd.key "Z">
+<!ENTITY undoCmd.accesskey "S">
+<!ENTITY redoCmd.label "Znova">
+<!ENTITY redoCmd.key "Y">
+<!ENTITY redoCmd.accesskey "Z">
+<!ENTITY cutCmd.label "Vystrihnúť">
+<!ENTITY cutCmd.key "X">
+<!ENTITY cutCmd.accesskey "V">
+<!ENTITY copyCmd.label "Kopírovať">
+<!ENTITY copyCmd.key "C">
+<!ENTITY copyCmd.accesskey "K">
+<!ENTITY pasteCmd.label "Prilepiť">
+<!ENTITY pasteCmd.key "V">
+<!ENTITY pasteCmd.accesskey "P">
+<!ENTITY deleteCmd.label "Odstrániť">
+<!ENTITY deleteCmd.accesskey "O">
+<!ENTITY selectAllCmd.label "Vybrať všetko">
+<!ENTITY selectAllCmd.key "A">
+<!ENTITY selectAllCmd.accesskey "a">
+<!ENTITY findCmd.label "Hľadať">
+<!ENTITY findCmd.key "F">
+<!ENTITY findCmd.accesskey "H">
+<!ENTITY findAgainCmd.label "Hľadať znova">
+<!ENTITY findAgainCmd.key "G">
+<!ENTITY findAgainCmd.key2 "VK_F3">
+<!ENTITY findAgainCmd.accesskey "n">
+<!ENTITY findPreviousCmd.label "Hľadať predchádzajúci">
+<!ENTITY findPreviousCmd.accesskey "r">

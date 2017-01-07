@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "កែសម្រួល">
+<!ENTITY editMenu.accesskey        "ក">
+<!ENTITY undoCmd.label             "មិនធ្វើវិញ">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "ន">
+<!ENTITY redoCmd.label             "ធ្វើ​វិញ">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "ញ">
+<!ENTITY cutCmd.label              "កាត់">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "ក">
+<!ENTITY copyCmd.label             "ចម្លង">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "ច">
+<!ENTITY pasteCmd.label            "បិទភ្ជាប់">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "ប">
+<!ENTITY deleteCmd.label           "លុប">
+<!ENTITY deleteCmd.accesskey       "ល">
+<!ENTITY selectAllCmd.label        "ជ្រើស​ទាំងអស់">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "អ">
+<!ENTITY findCmd.label             "រក">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "ក">
+<!ENTITY findAgainCmd.label        "រក​ម្តង​ទៀត">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "ត">
+<!ENTITY findPreviousCmd.label     "រក​ពី​ដើម">
+<!ENTITY findPreviousCmd.accesskey "រ">

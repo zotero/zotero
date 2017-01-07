@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "General">
 
 <!ENTITY zotero.preferences.userInterface "Interfície de l'usuari">
-<!ENTITY zotero.preferences.showIn "Carrega el Zotero en:">
-<!ENTITY zotero.preferences.showIn.browserPane "Subfinestra del navegador">
-<!ENTITY zotero.preferences.showIn.separateTab "Pestanya separada">
-<!ENTITY zotero.preferences.showIn.appTab "Pestanya d'aplicacions">
 <!ENTITY zotero.preferences.layout "Layout:">
 <!ENTITY zotero.preferences.layout.standard "Standard">
 <!ENTITY zotero.preferences.layout.stacked "Stacked">

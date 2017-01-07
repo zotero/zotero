@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Splošno">
 
 <!ENTITY zotero.preferences.userInterface "Uporabniški vmesnik">
-<!ENTITY zotero.preferences.showIn "Naloži Zotero v:">
-<!ENTITY zotero.preferences.showIn.browserPane "podoknu brskalnika">
-<!ENTITY zotero.preferences.showIn.separateTab "ločenem zavihku">
-<!ENTITY zotero.preferences.showIn.appTab "zavihku programa">
 <!ENTITY zotero.preferences.layout "Postavitev:">
 <!ENTITY zotero.preferences.layout.standard "Standardno">
 <!ENTITY zotero.preferences.layout.stacked "Naloženo">

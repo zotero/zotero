@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "Rediger">
+<!ENTITY editMenu.accesskey        "R">
+<!ENTITY undoCmd.label             "Angre">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "A">
+<!ENTITY redoCmd.label             "Gjenta">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "G">
+<!ENTITY cutCmd.label              "Klipp ut">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "u">
+<!ENTITY copyCmd.label             "Kopier">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "K">
+<!ENTITY pasteCmd.label            "Lim inn">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "L">
+<!ENTITY deleteCmd.label           "Slett">
+<!ENTITY deleteCmd.accesskey       "t">
+<!ENTITY selectAllCmd.label        "Merk alt">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "M">
+<!ENTITY findCmd.label             "Søk">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "S">
+<!ENTITY findAgainCmd.label        "Søk igjen">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "i">
+<!ENTITY findPreviousCmd.label     "Søk etter forrige">
+<!ENTITY findPreviousCmd.accesskey "f">

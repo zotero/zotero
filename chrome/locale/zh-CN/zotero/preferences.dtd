@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "常规">
 
 <!ENTITY zotero.preferences.userInterface "用户界面">
-<!ENTITY zotero.preferences.showIn "载入Zotero于:">
-<!ENTITY zotero.preferences.showIn.browserPane "浏览器边栏">
-<!ENTITY zotero.preferences.showIn.separateTab "独立标签页">
-<!ENTITY zotero.preferences.showIn.appTab "App 标签页">
 <!ENTITY zotero.preferences.layout "布局:">
 <!ENTITY zotero.preferences.layout.standard "标准">
 <!ENTITY zotero.preferences.layout.stacked "堆叠">

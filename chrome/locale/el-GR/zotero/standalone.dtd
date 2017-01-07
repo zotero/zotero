@@ -29,38 +29,9 @@
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Επεξεργασία">
-<!ENTITY editMenu.accesskey "Ε">
-<!ENTITY undoCmd.label "Επαναφορά">
-<!ENTITY undoCmd.key "Ζ">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Επανάληψη">
-<!ENTITY redoCmd.key "Υ">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Αποκοπή">
-<!ENTITY cutCmd.key "Χ">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Αντιγραφή">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Αντιγραφή παραπομπής/παράθεσης">
 <!ENTITY copyBibliographyCmd.label "Αντιγραφή βιβλιογραφίας">
-<!ENTITY pasteCmd.label "Επικόλληση">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Διαγραφή">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Επιλογή όλων">
-<!ENTITY selectAllCmd.key "Α">
-<!ENTITY selectAllCmd.accesskey "Α">
-<!ENTITY preferencesCmd.label "Προτιμήσεις">
-<!ENTITY preferencesCmd.accesskey "Ο">
-<!ENTITY preferencesCmdUnix.label "Προτιμήσεις">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Εύρεση">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Αλλαγή κατεύθυνσης σελίδας">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Αλλαγή κατεύθυνσης κειμένου">

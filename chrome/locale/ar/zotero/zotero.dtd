@@ -123,7 +123,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "الدعم و الوثائق">
 <!ENTITY zotero.toolbar.about.label "حول زوتيرو">
 <!ENTITY zotero.toolbar.advancedSearch "البحث المتقدم">
-<!ENTITY zotero.toolbar.tab.tooltip "تبديل وضع التبويب">
 <!ENTITY zotero.toolbar.openURL.label "تحديد موقع العنصر">
 <!ENTITY zotero.toolbar.openURL.tooltip "البحث في مكتبتك المحلية">
 

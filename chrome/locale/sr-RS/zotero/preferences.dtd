@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Опште">
 
 <!ENTITY zotero.preferences.userInterface "Корисничко сучеље">
-<!ENTITY zotero.preferences.showIn "Учитај Зотеро у:">
-<!ENTITY zotero.preferences.showIn.browserPane "Површ за разгледање">
-<!ENTITY zotero.preferences.showIn.separateTab "Засебна површ">
-<!ENTITY zotero.preferences.showIn.appTab "Површ програма">
 <!ENTITY zotero.preferences.layout "Распоред:">
 <!ENTITY zotero.preferences.layout.standard "Уобичајени">
 <!ENTITY zotero.preferences.layout.stacked "На гомили">

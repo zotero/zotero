@@ -29,38 +29,9 @@
 <!ENTITY quitApplicationCmd.accesskey "z">
 
 
-<!ENTITY editMenu.label "Uredi">
-<!ENTITY editMenu.accesskey "R">
-<!ENTITY undoCmd.label "Razveljavi">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "R">
-<!ENTITY redoCmd.label "Ponovi">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "P">
-<!ENTITY cutCmd.label "Izreži">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "z">
-<!ENTITY copyCmd.label "Kopiraj">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "K">
 <!ENTITY copyCitationCmd.label "Kopiraj citat">
 <!ENTITY copyBibliographyCmd.label "Kopiraj bibliografijo">
-<!ENTITY pasteCmd.label "Prilepi">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Izbriši">
-<!ENTITY deleteCmd.key "b">
-<!ENTITY deleteCmd.accesskey "b">
-<!ENTITY selectAllCmd.label "Izberi vse">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "z">
-<!ENTITY preferencesCmd.label "Nastavitve">
-<!ENTITY preferencesCmd.accesskey "M">
-<!ENTITY preferencesCmdUnix.label "Nastavitve">
-<!ENTITY preferencesCmdUnix.accesskey "N">
-<!ENTITY findCmd.label "Najdi">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "N">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Preklopi smer strani">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "t">
 <!ENTITY bidiSwitchTextDirectionItem.label "Preklopi smer besedila">

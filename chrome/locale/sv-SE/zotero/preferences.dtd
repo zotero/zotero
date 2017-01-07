@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Allmänt">
 
 <!ENTITY zotero.preferences.userInterface "Användargränssnitt">
-<!ENTITY zotero.preferences.showIn "Ladda Zotero i:">
-<!ENTITY zotero.preferences.showIn.browserPane "webbläsarfönstret">
-<!ENTITY zotero.preferences.showIn.separateTab "ny flik">
-<!ENTITY zotero.preferences.showIn.appTab "programflik">
 <!ENTITY zotero.preferences.layout "Utseende:">
 <!ENTITY zotero.preferences.layout.standard "Standard">
 <!ENTITY zotero.preferences.layout.stacked "Staplad">

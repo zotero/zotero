@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "Szerkesztés">
+<!ENTITY editMenu.accesskey        "z">
+<!ENTITY undoCmd.label             "Visszavonás">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "V">
+<!ENTITY redoCmd.label             "Újra">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "r">
+<!ENTITY cutCmd.label              "Kivágás">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "K">
+<!ENTITY copyCmd.label             "Másolás">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "M">
+<!ENTITY pasteCmd.label            "Beillesztés">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "B">
+<!ENTITY deleteCmd.label           "Törlés">
+<!ENTITY deleteCmd.accesskey       "T">
+<!ENTITY selectAllCmd.label        "Minden kijelölése">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "d">
+<!ENTITY findCmd.label             "Keresés">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "e">
+<!ENTITY findAgainCmd.label        "Következő keresése">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "z">
+<!ENTITY findPreviousCmd.label     "Előző keresése">
+<!ENTITY findPreviousCmd.accesskey "E">

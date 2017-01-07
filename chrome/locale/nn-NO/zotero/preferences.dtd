@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
 
 <!ENTITY zotero.preferences.userInterface "Brukargrensesnitt">
-<!ENTITY zotero.preferences.showIn "Opna Zotero i:">
-<!ENTITY zotero.preferences.showIn.browserPane "Ramme i nettlesaren">
-<!ENTITY zotero.preferences.showIn.separateTab "Eiga fane">
-<!ENTITY zotero.preferences.showIn.appTab "App-fane">
 <!ENTITY zotero.preferences.layout "Layout:">
 <!ENTITY zotero.preferences.layout.standard "Standard">
 <!ENTITY zotero.preferences.layout.stacked "Stacked">

@@ -29,38 +29,9 @@
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "កែតម្រូវ">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "បកមកក្រោយ">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "បកទៅមុខ">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "កាត់">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "ថតចម្លង">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "ថតចម្លងអាគតដ្ឋាន">
 <!ENTITY copyBibliographyCmd.label "ថតចម្លងគន្ថនិទេ្ទស">
-<!ENTITY pasteCmd.label "បិទភ្ជាប់">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "លុបចោល">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "ជ្រើសរើសទាំងអស់">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Preferences">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "ជម្រើសអាទិភាព">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "ស្វែងរក">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "ប្តូរទិសទំព័រ">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "ប្តូរទិសអត្ថបទ">

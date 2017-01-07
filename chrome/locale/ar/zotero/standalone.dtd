@@ -29,38 +29,9 @@
 <!ENTITY quitApplicationCmd.accesskey "ن">
 
 
-<!ENTITY editMenu.label "تحرير">
-<!ENTITY editMenu.accesskey "ح">
-<!ENTITY undoCmd.label "تراجع">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "ر">
-<!ENTITY redoCmd.label "إعادة">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "ع">
-<!ENTITY cutCmd.label "قص">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "ص">
-<!ENTITY copyCmd.label "نسخ">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "س">
 <!ENTITY copyCitationCmd.label "نسخ الاقتباس">
 <!ENTITY copyBibliographyCmd.label "نسخ قائمة المراجع">
-<!ENTITY pasteCmd.label "لصق">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "ل">
-<!ENTITY deleteCmd.label "حذف">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "ذ">
-<!ENTITY selectAllCmd.label "تحديد الكل">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "ح">
-<!ENTITY preferencesCmd.label "تفضيلات">
-<!ENTITY preferencesCmd.accesskey "ي">
-<!ENTITY preferencesCmdUnix.label "تفضيلات">
-<!ENTITY preferencesCmdUnix.accesskey "ف">
-<!ENTITY findCmd.label "اعثر">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "تغيير اتجاه الصفحة">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "ه">
 <!ENTITY bidiSwitchTextDirectionItem.label "تغيير اتجاه النص">

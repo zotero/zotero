@@ -123,7 +123,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Hộ trợ và Tài liệu">
 <!ENTITY zotero.toolbar.about.label "Giới thiệu về Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Tìm kiếm Nâng cao">
-<!ENTITY zotero.toolbar.tab.tooltip "Chế độ tab lật">
 <!ENTITY zotero.toolbar.openURL.label "Định vị">
 <!ENTITY zotero.toolbar.openURL.tooltip "Tìm trong thư viện cục bộ của bạn">
 

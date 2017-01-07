@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "一般">
 
 <!ENTITY zotero.preferences.userInterface "ユーザーインターフェース">
-<!ENTITY zotero.preferences.showIn "Zoteroを表示するのは:">
-<!ENTITY zotero.preferences.showIn.browserPane "ブラウザ画面下">
-<!ENTITY zotero.preferences.showIn.separateTab "新しいタブ">
-<!ENTITY zotero.preferences.showIn.appTab "アプリタブ">
 <!ENTITY zotero.preferences.layout "レイアウト:">
 <!ENTITY zotero.preferences.layout.standard "標準">
 <!ENTITY zotero.preferences.layout.stacked "Stacked">

@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Общие">
 
 <!ENTITY zotero.preferences.userInterface "Интерфейс">
-<!ENTITY zotero.preferences.showIn "Открывать Zotero в:">
-<!ENTITY zotero.preferences.showIn.browserPane "Текущей панели">
-<!ENTITY zotero.preferences.showIn.separateTab "Отдельной вкладке">
-<!ENTITY zotero.preferences.showIn.appTab "Вкладке приложения">
 <!ENTITY zotero.preferences.layout "Вид окна">
 <!ENTITY zotero.preferences.layout.standard "Стандартный">
 <!ENTITY zotero.preferences.layout.stacked "Stacked">

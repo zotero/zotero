@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Almennt">
 
 <!ENTITY zotero.preferences.userInterface "Notendaviðmót">
-<!ENTITY zotero.preferences.showIn "Hlaða Zotero í:">
-<!ENTITY zotero.preferences.showIn.browserPane "Nýjum vafraglugga">
-<!ENTITY zotero.preferences.showIn.separateTab "Nýjum flipa">
-<!ENTITY zotero.preferences.showIn.appTab "Flipa í smáforriti">
 <!ENTITY zotero.preferences.layout "Layout:">
 <!ENTITY zotero.preferences.layout.standard "Standard">
 <!ENTITY zotero.preferences.layout.stacked "Stacked">

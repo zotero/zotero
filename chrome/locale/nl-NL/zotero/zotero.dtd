@@ -123,7 +123,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Ondersteuning en documentatie">
 <!ENTITY zotero.toolbar.about.label "Over Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Uitgebreid zoeken">
-<!ENTITY zotero.toolbar.tab.tooltip "Tabbladmodus veranderen">
 <!ENTITY zotero.toolbar.openURL.label "Opzoeken">
 <!ENTITY zotero.toolbar.openURL.tooltip "Via uw lokale bibliotheek opzoeken">
 

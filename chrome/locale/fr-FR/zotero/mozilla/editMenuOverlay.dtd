@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "Édition">
+<!ENTITY editMenu.accesskey        "n">
+<!ENTITY undoCmd.label             "Annuler">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "u">
+<!ENTITY redoCmd.label             "Rétablir">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "R">
+<!ENTITY cutCmd.label              "Couper">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "C">
+<!ENTITY copyCmd.label             "Copier">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "p">
+<!ENTITY pasteCmd.label            "Coller">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "o">
+<!ENTITY deleteCmd.label           "Supprimer">
+<!ENTITY deleteCmd.accesskey       "e">
+<!ENTITY selectAllCmd.label        "Tout sélectionner">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "T">
+<!ENTITY findCmd.label             "Rechercher">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "h">
+<!ENTITY findAgainCmd.label        "Rechercher le suivant">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "v">
+<!ENTITY findPreviousCmd.label     "Rechercher le précédent">
+<!ENTITY findPreviousCmd.accesskey "e">

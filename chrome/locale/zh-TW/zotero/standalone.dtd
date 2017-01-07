@@ -29,38 +29,9 @@
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "編輯">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "撤消 (U)">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "復原撤消 (R)">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "剪下 (T)">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "T">
-<!ENTITY copyCmd.label "複製 (C)">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "複製成引用文獻條">
 <!ENTITY copyBibliographyCmd.label "複製成參考文獻條">
-<!ENTITY pasteCmd.label "貼上 (P)">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "刪除">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "全選">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "偏好設定 (N)">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "偏好設定 (N)">
-<!ENTITY preferencesCmdUnix.accesskey "N">
-<!ENTITY findCmd.label "搜尋 (F)">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "切換頁面方向 (G)">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "G">
 <!ENTITY bidiSwitchTextDirectionItem.label "切換文字方向 (W)">

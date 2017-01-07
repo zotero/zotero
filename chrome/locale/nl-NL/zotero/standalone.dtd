@@ -29,38 +29,9 @@
 <!ENTITY quitApplicationCmd.accesskey "A">
 
 
-<!ENTITY editMenu.label "Bewerken">
-<!ENTITY editMenu.accesskey "e">
-<!ENTITY undoCmd.label "Ongedaan maken">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "O">
-<!ENTITY redoCmd.label "Opnieuw uitvoeren">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "u">
-<!ENTITY cutCmd.label "Knippen">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "n">
-<!ENTITY copyCmd.label "Kopiëren">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "K">
 <!ENTITY copyCitationCmd.label "Verwijzing kopiëren">
 <!ENTITY copyBibliographyCmd.label "Bibliografie kopiëren">
-<!ENTITY pasteCmd.label "Plakken">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Wissen">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "W">
-<!ENTITY selectAllCmd.label "Alles selecteren">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Voorkeuren">
-<!ENTITY preferencesCmd.accesskey "V">
-<!ENTITY preferencesCmdUnix.label "Voorkeuren">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Zoeken">
-<!ENTITY findCmd.accesskey "Z">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Paginarichting wijzigen">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Tekstrichting wijzigen">

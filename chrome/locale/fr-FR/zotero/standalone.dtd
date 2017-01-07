@@ -29,38 +29,9 @@
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Édition">
-<!ENTITY editMenu.accesskey "n">
-<!ENTITY undoCmd.label "Annuler">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "u">
-<!ENTITY redoCmd.label "Rétablir">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Couper">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "C">
-<!ENTITY copyCmd.label "Copier">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "p">
 <!ENTITY copyCitationCmd.label "Copier la citation">
 <!ENTITY copyBibliographyCmd.label "Copier la bibliographie">
-<!ENTITY pasteCmd.label "Coller">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "o">
-<!ENTITY deleteCmd.label "Supprimer">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "S">
-<!ENTITY selectAllCmd.label "Tout sélectionner">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "T">
-<!ENTITY preferencesCmd.label "Préférences">
-<!ENTITY preferencesCmd.accesskey "i">
-<!ENTITY preferencesCmdUnix.label "Préférences">
-<!ENTITY preferencesCmdUnix.accesskey "f">
-<!ENTITY findCmd.label "Rechercher">
-<!ENTITY findCmd.accesskey "h">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Inverser le sens de la page">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Inverser le sens du texte">

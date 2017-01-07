@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "General">
 
 <!ENTITY zotero.preferences.userInterface "Antarmuka pengguna">
-<!ENTITY zotero.preferences.showIn "Muat Zotero di dalam:">
-<!ENTITY zotero.preferences.showIn.browserPane "Jendela peramban">
-<!ENTITY zotero.preferences.showIn.separateTab "Tab terpisah">
-<!ENTITY zotero.preferences.showIn.appTab "Tab App">
 <!ENTITY zotero.preferences.layout "Layout:">
 <!ENTITY zotero.preferences.layout.standard "Standard">
 <!ENTITY zotero.preferences.layout.stacked "Stacked">

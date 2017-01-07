@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "Επεξεργασία">
+<!ENTITY editMenu.accesskey        "ε">
+<!ENTITY undoCmd.label             "Αναίρεση">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "α">
+<!ENTITY redoCmd.label             "Επανάληψη">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "π">
+<!ENTITY cutCmd.label              "Αποκοπή">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "κ">
+<!ENTITY copyCmd.label             "Αντιγραφή">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "τ">
+<!ENTITY pasteCmd.label            "Επικόλληση">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "λ">
+<!ENTITY deleteCmd.label           "Διαγραφή">
+<!ENTITY deleteCmd.accesskey       "Δ">
+<!ENTITY selectAllCmd.label        "Επιλογή όλων">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "ο">
+<!ENTITY findCmd.label             "Εύρεση">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "ρ">
+<!ENTITY findAgainCmd.label        "Εύρεση ξανά">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "ξ">
+<!ENTITY findPreviousCmd.label     "Εύρεση Προηγουμένου">
+<!ENTITY findPreviousCmd.accesskey "γ">

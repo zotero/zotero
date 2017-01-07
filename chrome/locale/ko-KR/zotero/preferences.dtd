@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "일반">
 
 <!ENTITY zotero.preferences.userInterface "사용자 인터페이스">
-<!ENTITY zotero.preferences.showIn "Zotero 창을 열 곳:">
-<!ENTITY zotero.preferences.showIn.browserPane "브라우저 창">
-<!ENTITY zotero.preferences.showIn.separateTab "분리 탭">
-<!ENTITY zotero.preferences.showIn.appTab "어플리케이션 탭">
 <!ENTITY zotero.preferences.layout "레이아웃:">
 <!ENTITY zotero.preferences.layout.standard "Standard">
 <!ENTITY zotero.preferences.layout.stacked "Stacked">

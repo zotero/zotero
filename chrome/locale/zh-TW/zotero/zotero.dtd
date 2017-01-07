@@ -123,7 +123,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "支援及說明文件">
 <!ENTITY zotero.toolbar.about.label "關於 Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "進階搜尋">
-<!ENTITY zotero.toolbar.tab.tooltip "切換頁籤模式">
 <!ENTITY zotero.toolbar.openURL.label "查詢">
 <!ENTITY zotero.toolbar.openURL.tooltip "於本機文獻庫尋找">
 

@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "편집">
+<!ENTITY editMenu.accesskey        "e">
+<!ENTITY undoCmd.label             "실행 취소">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "u">
+<!ENTITY redoCmd.label             "재실행">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "r">
+<!ENTITY cutCmd.label              "잘라내기">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "t">
+<!ENTITY copyCmd.label             "복사">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "c">
+<!ENTITY pasteCmd.label            "붙여넣기">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "p">
+<!ENTITY deleteCmd.label           "삭제">
+<!ENTITY deleteCmd.accesskey       "d">
+<!ENTITY selectAllCmd.label        "모두 선택">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "a">
+<!ENTITY findCmd.label             "찾기">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "F">
+<!ENTITY findAgainCmd.label        "다시 찾기">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "g">
+<!ENTITY findPreviousCmd.label     "이전 찾기">
+<!ENTITY findPreviousCmd.accesskey "v">

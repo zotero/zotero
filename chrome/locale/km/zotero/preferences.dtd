@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "ទូទៅ">
 
 <!ENTITY zotero.preferences.userInterface "ចំណុចប្រទាក់ក្រឡាអ្នកប្រើប្រាស់">
-<!ENTITY zotero.preferences.showIn "ហ្ស៊ូតេរ៉ូផ្ទុកនៅក្នុងៈ">
-<!ENTITY zotero.preferences.showIn.browserPane "ផ្ទាំងកម្មវិធីរុករក">
-<!ENTITY zotero.preferences.showIn.separateTab "ផ្ទាំងកម្មវិធីដោយឡែក">
-<!ENTITY zotero.preferences.showIn.appTab "ផ្ទាំងបន្ទាត់ថេប">
 <!ENTITY zotero.preferences.layout "Layout:">
 <!ENTITY zotero.preferences.layout.standard "Standard">
 <!ENTITY zotero.preferences.layout.stacked "Stacked">

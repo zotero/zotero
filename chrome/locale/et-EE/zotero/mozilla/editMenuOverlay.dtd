@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label "Redigeerimine">
+<!ENTITY editMenu.accesskey "R">
+<!ENTITY undoCmd.label "Võta tagasi">
+<!ENTITY undoCmd.key "Z">
+<!ENTITY undoCmd.accesskey "V">
+<!ENTITY redoCmd.label "Tee uuesti">
+<!ENTITY redoCmd.key "Y">
+<!ENTITY redoCmd.accesskey "T">
+<!ENTITY cutCmd.label "Lõika">
+<!ENTITY cutCmd.key "X">
+<!ENTITY cutCmd.accesskey "l">
+<!ENTITY copyCmd.label "Kopeeri">
+<!ENTITY copyCmd.key "C">
+<!ENTITY copyCmd.accesskey "K">
+<!ENTITY pasteCmd.label "Aseta">
+<!ENTITY pasteCmd.key "V">
+<!ENTITY pasteCmd.accesskey "A">
+<!ENTITY deleteCmd.label "Kustuta">
+<!ENTITY deleteCmd.accesskey "U">
+<!ENTITY selectAllCmd.label "Vali kõik">
+<!ENTITY selectAllCmd.key "A">
+<!ENTITY selectAllCmd.accesskey "I">
+<!ENTITY findCmd.label "Otsi">
+<!ENTITY findCmd.key "F">
+<!ENTITY findCmd.accesskey "O">
+<!ENTITY findAgainCmd.label "Otsi uuesti">
+<!ENTITY findAgainCmd.key "G">
+<!ENTITY findAgainCmd.key2 "VK_F3">
+<!ENTITY findAgainCmd.accesskey "e">
+<!ENTITY findPreviousCmd.label "Eelmine otsingutulemus">
+<!ENTITY findPreviousCmd.accesskey "m">

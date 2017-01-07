@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
 
 <!ENTITY zotero.preferences.userInterface "Brugerflade">
-<!ENTITY zotero.preferences.showIn "Indlæs Zotero i:">
-<!ENTITY zotero.preferences.showIn.browserPane "Browser-vindue">
-<!ENTITY zotero.preferences.showIn.separateTab "Separat faneblad">
-<!ENTITY zotero.preferences.showIn.appTab "Applikationsfaneblad">
 <!ENTITY zotero.preferences.layout "Layout:">
 <!ENTITY zotero.preferences.layout.standard "Standard">
 <!ENTITY zotero.preferences.layout.stacked "Stablet">

@@ -29,38 +29,9 @@
 <!ENTITY quitApplicationCmd.accesskey "A">
 
 
-<!ENTITY editMenu.label "Rediger">
-<!ENTITY editMenu.accesskey "R">
-<!ENTITY undoCmd.label "Angra">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "A">
-<!ENTITY redoCmd.label "Gjer om">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "G">
-<!ENTITY cutCmd.label "Klipp ut">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Kopier">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "K">
 <!ENTITY copyCitationCmd.label "Kopier sitering">
 <!ENTITY copyBibliographyCmd.label "Kopier bibliografi">
-<!ENTITY pasteCmd.label "Lim inn">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "L">
-<!ENTITY deleteCmd.label "Slett">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "S">
-<!ENTITY selectAllCmd.label "Merk alt">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Preferences">
-<!ENTITY preferencesCmd.accesskey "I">
-<!ENTITY preferencesCmdUnix.label "Innstillingar">
-<!ENTITY preferencesCmdUnix.accesskey "I">
-<!ENTITY findCmd.label "Finn">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Byt sideretning">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Byt tekstretning">

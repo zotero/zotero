@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "ویرایش">
+<!ENTITY editMenu.accesskey        "و">
+<!ENTITY undoCmd.label             "واگرد">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "و">
+<!ENTITY redoCmd.label             "از نو">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "ز">
+<!ENTITY cutCmd.label              "بریدن">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "ر">
+<!ENTITY copyCmd.label             "رونوشت برداشتن">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "ن">
+<!ENTITY pasteCmd.label            "جایگذاری">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "ج">
+<!ENTITY deleteCmd.label           "حذف">
+<!ENTITY deleteCmd.accesskey       "ح">
+<!ENTITY selectAllCmd.label        "انتخاب همه">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "ه">
+<!ENTITY findCmd.label             "پیدا کردن">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "پ">
+<!ENTITY findAgainCmd.label        "پیدا کردن مجدد">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "ج">
+<!ENTITY findPreviousCmd.label     "پیدا کردن قبلی">
+<!ENTITY findPreviousCmd.accesskey "ق">

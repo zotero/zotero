@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "Chỉnh sửa">
+<!ENTITY editMenu.accesskey        "s">
+<!ENTITY undoCmd.label             "Hoàn tác">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "H">
+<!ENTITY redoCmd.label             "Làm lại">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "L">
+<!ENTITY cutCmd.label              "Cắt">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "t">
+<!ENTITY copyCmd.label             "Chép">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "C">
+<!ENTITY pasteCmd.label            "Dán">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "D">
+<!ENTITY deleteCmd.label           "Xóa">
+<!ENTITY deleteCmd.accesskey       "X">
+<!ENTITY selectAllCmd.label        "Chọn toàn bộ">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "b">
+<!ENTITY findCmd.label             "Tìm">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "m">
+<!ENTITY findAgainCmd.label        "Tìm tiếp">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "p">
+<!ENTITY findPreviousCmd.label     "Tìm phía trước">
+<!ENTITY findPreviousCmd.accesskey "r">

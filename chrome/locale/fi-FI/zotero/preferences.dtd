@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Yleistä">
 
 <!ENTITY zotero.preferences.userInterface "Käyttöliittymä">
-<!ENTITY zotero.preferences.showIn "Zoteron paikka">
-<!ENTITY zotero.preferences.showIn.browserPane "Selainikkuna">
-<!ENTITY zotero.preferences.showIn.separateTab "Erillinen välilehti">
-<!ENTITY zotero.preferences.showIn.appTab "Sovellusvälilehti">
 <!ENTITY zotero.preferences.layout "Asettelu">
 <!ENTITY zotero.preferences.layout.standard "Vakio">
 <!ENTITY zotero.preferences.layout.stacked "Pinottu">

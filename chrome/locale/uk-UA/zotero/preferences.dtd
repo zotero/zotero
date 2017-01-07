@@ -8,10 +8,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Загальні">
 
 <!ENTITY zotero.preferences.userInterface "Інтерфейс">
-<!ENTITY zotero.preferences.showIn "Відкривати в Zotero:">
-<!ENTITY zotero.preferences.showIn.browserPane "Поточній панелі">
-<!ENTITY zotero.preferences.showIn.separateTab "Окремій вкладці">
-<!ENTITY zotero.preferences.showIn.appTab "Вкладці додатку">
 <!ENTITY zotero.preferences.layout "Компонування">
 <!ENTITY zotero.preferences.layout.standard "Стандарт">
 <!ENTITY zotero.preferences.layout.stacked "Stacked">
