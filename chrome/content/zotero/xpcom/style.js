@@ -347,8 +347,9 @@ Zotero.Styles = new function() {
 			
 			if(existingFile) {
 				// find associated style
-				for (let existingStyle of _styles) {
-					if(destFile.equals(existingStyle.file)) {
+				for (let id in _styles) {
+					let existingStyle = _styles[id];
+					if(existingStyle.file && destFile.equals(existingStyle.file)) {
 						existingTitle = existingStyle.title;
 						break;
 					}
@@ -594,6 +595,9 @@ Zotero.Style = function (style, path) {
 	if (path) {
 		this.path = path;
 		this.fileName = OS.Path.basename(path);
+	}
+	else {
+		this.string = style;
 	}
 	
 	this.styleID = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:id[1]',
