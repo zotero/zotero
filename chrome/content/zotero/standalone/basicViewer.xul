@@ -28,7 +28,7 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/standalone.css" type="text/css"?>
-<?xul-overlay href="chrome://global/content/editMenuOverlay.xul"?>
+<?xul-overlay href="chrome://zotero/content/standalone/editMenuOverlay.xul"?>
 <?xul-overlay href="chrome://zotero-platform/content/standalone/menuOverlay.xul"?>
 
 <!DOCTYPE window [
@@ -127,15 +127,13 @@
 						</menupopup>
 					</menu>
 					
-					<menu id="editMenu" label="&editMenu.label;" accesskey="&editMenu.accesskey;">
+					<menu id="menu_edit">
 						<menupopup id="menu_EditPopup">
 							<menuitem id="menu_undo"/>
 							<menuitem id="menu_redo"/>
 							<menuseparator/>
 							<menuitem id="menu_cut"/>
-							<menuitem id="menu_copy" label="&copyCmd.label;"
-									key="key_copy" accesskey="&copyCmd.accesskey;"
-									command="cmd_copy"/>
+							<menuitem id="menu_copy"/>
 							<menuitem id="menu_paste"/>
 							<menuitem id="menu_delete"/>
 							<menuseparator/>
