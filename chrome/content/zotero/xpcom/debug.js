@@ -50,7 +50,9 @@ Zotero.Debug = new function () {
 		this.storing = _store;
 		this.enabled = _console || _store;
 		
-		Zotero.Prefs.set('browser.dom.window.dump.enabled', _console, true);
+		if (Zotero.isStandalone) {
+			Zotero.Prefs.set('browser.dom.window.dump.enabled', _console, true);
+		}
 	}
 	
 	this.log = function (message, level, stack) {
