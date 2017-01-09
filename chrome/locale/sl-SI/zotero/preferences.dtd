@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "Geslo:">
 <!ENTITY zotero.preferences.sync.syncServer "Usklajevanje podatkov">
 <!ENTITY zotero.preferences.sync.setUpSync "Nastavi usklajevanje">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Razveži račun ...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Odveži račun ...">
 <!ENTITY zotero.preferences.sync.createAccount "Ustvari račun">
 <!ENTITY zotero.preferences.sync.lostPassword "Ste pozabili geslo?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Uskladi samodejno">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "Opis">
 <!ENTITY zotero.preferences.locate.name "Ime">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Iskalnik razširi zmogljivost spustnega polja Lociraj v podoknu Podatki. Če omogočite iskalnike na spodnjem seznamu, bodo dodani v spustno polje in boste z njimi lahko na spletu našli vire iz svoje knjižnice.">
-<!ENTITY zotero.preferences.locate.addDescription "Če želite dodati iskalnik, ki ni na seznamu, obiščite želeni iskalnik s svojim brskalnikom in izberite »Dodaj« v meniju Zotera Lociraj.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Obnovi privzeto">
 
 <!ENTITY zotero.preferences.charset "Kodiranje znakov">

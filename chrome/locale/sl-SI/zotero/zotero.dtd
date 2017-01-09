@@ -12,7 +12,7 @@
 <!ENTITY zotero.general.saveAs "Shrani kot ...">
 <!ENTITY zotero.general.advancedOptions.label "Napredne možnosti">
 <!ENTITY zotero.general.more "Dodatno">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.loading "Nalaganje ...">
 
 <!ENTITY zotero.errorReport.title "Poročilo o napaki Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Vključuje lahko sporočila, ki se ne nanašajo na Zotero.">
@@ -271,10 +271,10 @@
 <!ENTITY zotero.feedSettings.title.label "Naslov:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Vir posodobi vsakih">
 <!ENTITY zotero.feedSettings.refresh.label2 "ur">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Odstrani neprebrane objave vira po">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "dneh">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Odstrani prebrane objave vira po">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dneh">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Pridobivanje metapodatkov ...">
