@@ -24,12 +24,6 @@
 */
 
 Zotero.Date = new function(){
-	this.sqlToDate = sqlToDate;
-	this.dateToSQL = dateToSQL;
-	this.strToDate = strToDate;
-	this.formatDate = formatDate;
-	this.strToISO = strToISO;
-	this.strToMultipart = strToMultipart;
 	this.isMultipart = isMultipart;
 	this.multipartToSQL = multipartToSQL;
 	this.multipartToStr = multipartToStr;
@@ -85,7 +79,7 @@ Zotero.Date = new function(){
 	*
 	* Can also accept just the date part (e.g. '2006-06-13')
 	**/
-	function sqlToDate(sqldate, isUTC){
+	this.sqlToDate = function (sqldate, isUTC) {
 		try {
 			if (!this.isSQLDate(sqldate) && !this.isSQLDateTime(sqldate)) {
 				throw new Error("Invalid date");
@@ -125,8 +119,7 @@ Zotero.Date = new function(){
 	*
 	* If _toUTC_ is true, creates a UTC date
 	**/
-	function dateToSQL(date, toUTC)
-	{
+	this.dateToSQL = function (date, toUTC) {
 		try {
 			if (toUTC){
 				var year = date.getUTCFullYear();
@@ -250,7 +243,7 @@ Zotero.Date = new function(){
 	var _monthRe = null;
 	var _dayRe = null;
 	
-	function strToDate(string) {
+	this.strToDate = function (string) {
 		var date = {
 			order: ''
 		};
@@ -265,13 +258,13 @@ Zotero.Date = new function(){
 		// Parse 'yesterday'/'today'/'tomorrow'
 		var lc = (string + '').toLowerCase();
 		if (lc == 'yesterday' || (Zotero.getString && lc === Zotero.getString('date.yesterday'))) {
-			string = Zotero.Date.dateToSQL(new Date(Date.now() - 1000*60*60*24)).substr(0, 10);
+			string = this.dateToSQL(new Date(Date.now() - 1000*60*60*24)).substr(0, 10);
 		}
 		else if (lc == 'today' || (Zotero.getString && lc == Zotero.getString('date.today'))) {
-			string = Zotero.Date.dateToSQL(new Date()).substr(0, 10);
+			string = this.dateToSQL(new Date()).substr(0, 10);
 		}
 		else if (lc == 'tomorrow' || (Zotero.getString && lc == Zotero.getString('date.tomorrow'))) {
-			string = Zotero.Date.dateToSQL(new Date(Date.now() + 1000*60*60*24)).substr(0, 10);
+			string = this.dateToSQL(new Date(Date.now() + 1000*60*60*24)).substr(0, 10);
 		}
 		else {
 			string = string.toString().replace(/^\s+|\s+$/g, "").replace(/\s+/, " ");
@@ -396,14 +389,9 @@ Zotero.Date = new function(){
 		// MONTH
 		if(date.month === undefined) {
 			// compile month regular expression
-			var months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul',
-				'aug', 'sep', 'oct', 'nov', 'dec'];
-			// If using a non-English bibliography locale, try those too
-			if (Zotero.locale != 'en-US') {
-				Zotero.Date.getMonths();
-				months = months.concat(_months['short']).concat(_months['long']);
-				for(var i=0, n=months.length; i<n; i++) months[i] = months[i].toLowerCase();
-			}
+			let months = this.getMonths(true);
+			months = months.short.map(m => m.toLowerCase())
+				.concat(months.long.map(m => m.toLowerCase()));
 			
 			if(!_monthRe) {
 				_monthRe = new RegExp("^(.*)\\b("+months.join("|")+")[^ ]*(?: (.*)$|$)", "i");
@@ -563,7 +551,7 @@ Zotero.Date = new function(){
 	 * @return A formatted date string
 	 * @type String
 	 **/
-	function formatDate(date, shortFormat) {
+	this.formatDate = function (date, shortFormat) {
 		if(shortFormat) {
 			var localeDateOrder = getLocaleDateOrder();
 			var string = localeDateOrder[0]+"/"+localeDateOrder[1]+"/"+localeDateOrder[2];
@@ -577,7 +565,7 @@ Zotero.Date = new function(){
 				string += date.part+" ";
 			}
 			
-			var months = Zotero.Date.getMonths().long;
+			var months = this.getMonths().long;
 			if(date.month != undefined && months[date.month]) {
 				// get short month strings from CSL interpreter
 				string += months[date.month];
@@ -596,8 +584,8 @@ Zotero.Date = new function(){
 		return string;
 	}
 	
-	function strToISO(str) {
-		var date = Zotero.Date.strToDate(str);
+	this.strToISO = function (str) {
+		var date = this.strToDate(str);
 		
 		if(date.year) {
 			var dateString = Zotero.Utilities.lpad(date.year, "0", 4);
@@ -635,12 +623,12 @@ Zotero.Date = new function(){
 		return date;
 	}
 	
-	function strToMultipart(str){
+	this.strToMultipart = function (str) {
 		if (!str){
 			return '';
 		}
 		
-		var parts = strToDate(str);
+		var parts = this.strToDate(str);
 		
 		// FIXME: Until we have a better BCE date solution,
 		// remove year value if not between 1 and 9999
