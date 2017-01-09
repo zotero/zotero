@@ -39,39 +39,75 @@ Zotero.Date = new function(){
 	this.getLocaleDateOrder = getLocaleDateOrder;
 	
 	var _localeDateOrder = null;
-	var _months = null;
+	var _months;
+	var _monthsWithEnglish;
 	
-	/**
-	 * Load dateFormat bundle into _dateFormatsBundle
-	 */
-	this.getMonths = function() {
-		if(_months) return _months;
-		
-		if(Zotero.isFx && !Zotero.isBookmarklet) {
-			var src = 'chrome://global/locale/dateFormat.properties';
-			var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
-								getService(Components.interfaces.nsILocaleService);
-			var appLocale = localeService.getApplicationLocale();
-			
-			var bundle =
-				Components.classes["@mozilla.org/intl/stringbundle;1"]
-				.getService(Components.interfaces.nsIStringBundleService).createBundle(src, appLocale);
-			
-			_months = {"short":[], "long":[]};
-			for(var i=1; i<=12; i++) {
-				_months.short.push(bundle.GetStringFromName("month."+i+".Mmm"));
-				_months.long.push(bundle.GetStringFromName("month."+i+".name"));
-			}
-		} else {
-			// TODO localize for Chrome/Safari
-			_months = {
-				"short":["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
-					"Oct", "Nov", "Dec"],
-				"long":["January", "February", "March", "April", "May", "June", "July",
-					"August", "September", "October", "November", "December"]};
+	this.init = Zotero.Promise.coroutine(function* () {
+		if (!Zotero.isFx || Zotero.isBookmarklet) {
+			throw new Error("Unimplemented");
 		}
 		
-		return _months;
+		var json = (yield Zotero.HTTP.request(
+			'GET', 'resource://zotero/schema/dateFormats.json', { responseType: 'json' }
+		)).response;
+		var locale = Zotero.locale;
+		var english = locale.startsWith('en');
+		// If no exact match, try first two characters ('de')
+		if (!json[locale]) {
+			locale = locale.substr(0, 2);
+		}
+		// Try first two characters repeated ('de-DE')
+		if (!json[locale]) {
+			locale = locale + "-" + locale.toUpperCase();
+		}
+		// Look for another locale with same first two characters
+		if (!json[locale]) {
+			let sameLang = Object.keys(json).filter(l => l.startsWith(locale.substr(0, 2)));
+			if (sameLang.length) {
+				locale = sameLang[0];
+			}
+		}
+		// If all else fails, use English
+		if (!json[locale]) {
+			locale = 'en-US';
+			english = true;
+		}
+		_months = json[locale];
+		
+		// Add English versions if not already added
+		if (english) {
+			_monthsWithEnglish = _months;
+		}
+		else {
+			_monthsWithEnglish = {};
+			for (let key in _months) {
+				_monthsWithEnglish[key] = _months[key].concat(json['en-US'][key]);
+			}
+		}
+	});
+	
+	
+	/**
+	 * @param {Boolean} [withEnglish = false] - Include English months
+	 * @return {Object} - Object with 'short' and 'long' arrays
+	 */
+	this.getMonths = function (withEnglish) {
+		if (withEnglish) {
+			if (_monthsWithEnglish) return _monthsWithEnglish;
+		}
+		else {
+			if (_months) return _months;
+		}
+		
+		if (Zotero.isFx && !Zotero.isBookmarklet) {
+			throw new Error("Months not cached");
+		}
+		
+		// TODO: Use JSON file for connectors
+		return _months = _monthsWithEnglish = {
+			short: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+			long: ["January", "February", "March", "April", "May", "June", "July", "August",
+				"September", "October", "November", "December"]};
 	}
 	
 	/**

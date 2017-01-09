@@ -717,7 +717,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			// Initialize keyboard shortcuts
 			Zotero.Keys.init();
 			
-			// Initialize Locate Manager
+			yield Zotero.Date.init();
 			Zotero.LocateManager.init();
 			yield Zotero.ID.init();
 			yield Zotero.Collections.init();

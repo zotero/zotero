@@ -1,4 +1,122 @@
 describe("Zotero.Date", function() {
+	describe("#getMonths()", function () {
+		var origLocale;
+		var englishShort = [
+			"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+		];
+		var englishLong = [
+			"January", "February", "March", "April", "May", "June", "July", "August", "September",
+			"October", "November", "December"
+		];
+		var frenchShort = [
+			"jan", "fév", "mar", "avr", "mai", "jun", "jul", "aoû", "sep", "oct", "nov", "dec"
+		];
+		var frenchLong = [
+			"janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre",
+			"octobre", "novembre", "décembre"
+		];
+		
+		before(function () {
+			origLocale = Zotero.locale;
+		});
+		
+		after(function () {
+			Zotero.locale = origLocale;
+		});
+		
+		describe("English", function () {
+			beforeEach(function* () {
+				if (Zotero.locale != 'en-US') {
+					Zotero.locale = 'en-US';
+					yield Zotero.Date.init();
+				}
+			});
+			
+			it("should get English short months", function () {
+				let months = Zotero.Date.getMonths().short;
+				assert.lengthOf(months, 12);
+				assert.sameMembers(months, englishShort);
+			});
+			
+			it("should get English long months", function () {
+				let months = Zotero.Date.getMonths().long;
+				assert.lengthOf(months, 12);
+				assert.sameMembers(months, englishLong);
+			});
+			
+			it("shouldn't repeat months in 'withEnglish' mode", function () {
+				let months = Zotero.Date.getMonths(true).short;
+				assert.lengthOf(months, 12);
+				assert.sameMembers(months, englishShort);
+			});
+			
+			it("should resolve to English from unknown locale", function* () {
+				Zotero.locale = 'zz';
+				yield Zotero.Date.init();
+				let months = Zotero.Date.getMonths().short;
+				assert.lengthOf(months, 12);
+				assert.sameMembers(months, englishShort);
+			});
+			
+			it("shouldn't repeat English with unknown locale", function* () {
+				Zotero.locale = 'zz';
+				yield Zotero.Date.init();
+				let months = Zotero.Date.getMonths(true).short;
+				assert.lengthOf(months, 12);
+				assert.sameMembers(months, englishShort);
+			});
+		});
+		
+		describe("French", function () {
+			beforeEach(function* () {
+				if (Zotero.locale != 'fr-FR') {
+					Zotero.locale = 'fr-FR';
+					yield Zotero.Date.init();
+				}
+			});
+			
+			it("should get French short months", function () {
+				let months = Zotero.Date.getMonths().short;
+				assert.lengthOf(months, 12);
+				assert.sameMembers(months, frenchShort);
+			});
+			
+			it("should get French long months", function () {
+				let months = Zotero.Date.getMonths().long;
+				assert.lengthOf(months, 12);
+				assert.sameMembers(months, frenchLong);
+			});
+			
+			it("should get French short months with English", function () {
+				let months = Zotero.Date.getMonths(true).short;
+				assert.lengthOf(months, 24);
+				assert.sameMembers(months, frenchShort.concat(englishShort));
+			});
+			
+			it("should get French long months with English", function () {
+				let months = Zotero.Date.getMonths(true).long;
+				assert.lengthOf(months, 24);
+				assert.sameMembers(months, frenchLong.concat(englishLong));
+			});
+			
+			it("should resolve from two-letter locale", function* () {
+				Zotero.locale = 'fr';
+				yield Zotero.Date.init();
+				let months = Zotero.Date.getMonths().short;
+				assert.lengthOf(months, 12);
+				assert.sameMembers(months, frenchShort);
+			});
+			
+			it("should resolve from unknown four-letter locale with common prefix", function* () {
+				Zotero.locale = 'fr-ZZ';
+				yield Zotero.Date.init();
+				let months = Zotero.Date.getMonths().short;
+				assert.lengthOf(months, 12);
+				assert.sameMembers(months, frenchShort);
+			});
+		});
+	});
+	
 	describe("#sqlToDate()", function () {
 		it("should convert an SQL local date into a JS Date object", function* () {
 			var d1 = new Date();
