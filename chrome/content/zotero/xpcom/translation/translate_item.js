@@ -101,6 +101,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				} else {
 					newItem = new Zotero.Item(type);
 					newItem.libraryID = this._libraryID;
+					if (item.creators) this._cleanCreators(item.creators);
 					if(item.tags) item.tags = this._cleanTags(item.tags);
 
 					// Need to handle these specially. Put them in a separate object to
@@ -651,7 +652,16 @@ Zotero.Translate.ItemSaver.prototype = {
 		yield myNote.save();
 		return myNote;
 	}),
-
+	
+	_cleanCreators: function (creators) {
+		creators.forEach(creator => {
+			if (!creator.creatorType) {
+				Zotero.warn(".creatorType missing in creator -- update translator code");
+				creator.creatorType = "author";
+			}
+		});
+	},
+	
 	/**
 	 * Remove automatic tags if automatic tags pref is on, and set type
 	 * to automatic if forced
