@@ -194,8 +194,36 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 		}),
 		added++
 	);
-
+	
 	// TODO: Unify feed and group adding code
+	
+	// Add groups
+	var groups = Zotero.Groups.getAll();
+	if (groups.length) {
+		this._addRowToArray(
+			newRows,
+			new Zotero.CollectionTreeRow('separator', false),
+			added++
+		);
+		this._addRowToArray(
+			newRows,
+			new Zotero.CollectionTreeRow('header', {
+				id: "group-libraries-header",
+				label: Zotero.getString('pane.collections.groupLibraries'),
+				libraryID: -1
+			}, 0),
+			added++
+		);
+		for (let group of groups) {
+			this._addRowToArray(
+				newRows,
+				new Zotero.CollectionTreeRow('group', group),
+				added++
+			);
+			added += yield this._expandRow(newRows, added - 1);
+		}
+	}
+	
 	// Add feeds
 	if (this.hideSources.indexOf('feeds') == -1) {
 		var feeds = Zotero.Feeds.getAll();
@@ -228,33 +256,6 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 					added++
 				);
 			}
-		}
-	}
-
-	// Add groups
-	var groups = Zotero.Groups.getAll();
-	if (groups.length) {
-		this._addRowToArray(
-			newRows,
-			new Zotero.CollectionTreeRow('separator', false),
-			added++
-		);
-		this._addRowToArray(
-			newRows,
-			new Zotero.CollectionTreeRow('header', {
-				id: "group-libraries-header",
-				label: Zotero.getString('pane.collections.groupLibraries'),
-				libraryID: -1
-			}, 0),
-			added++
-		);
-		for (let group of groups) {
-			this._addRowToArray(
-				newRows,
-				new Zotero.CollectionTreeRow('group', group),
-				added++
-			);
-			added += yield this._expandRow(newRows, added - 1);
 		}
 	}
 	
