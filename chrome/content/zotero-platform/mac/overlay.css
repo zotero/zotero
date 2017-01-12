@@ -213,7 +213,7 @@
 	background: -moz-linear-gradient(top, #ededed, #cccccc);
 	border-style: solid;
 	border-width: 0 0 1px 0;
-	border-color: #5e5e5e;
+	border-color: #bdbdbd;
 	padding: 2px 0 2px 0;
 }
 
@@ -297,26 +297,32 @@
 	list-style-image: url("chrome://zotero/skin/mac/twisty-selected-open.svg");
 }
 
-#zotero-collections-splitter, #zotero-items-splitter
+#zotero-collections-splitter:not([state=collapsed]),
+#zotero-items-splitter:not([state=collapsed])[orient=horizontal]
 {
 	-moz-appearance: none;
-	-moz-border-start: none !important;
-	-moz-border-end: none !important;
-	background-color: #8b8b8b !important;
-}
-
-#zotero-collections-splitter, #zotero-items-splitter[orient=horizontal]
-{
-	max-width: 1px !important;
-	min-width: 1px !important;
-	width: 1px !important;
+	border-inline-start: 1px solid #bdbdbd;
+	margin-inline-end: -4px;
+	width: 5px !important;
+	min-width: 5px;
+	position: relative;
+	background-image: none;
 }
 
 #zotero-items-splitter[orient=vertical]
 {
+	-moz-border-start: none !important;
+	-moz-border-end: none !important;
+	background-color: #bdbdbd !important;
 	max-height: 1px !important;
 	min-height: 1px !important;
 	height: 1px !important;
+}
+
+#zotero-collections-splitter:not([state=collapsed]) > grippy,
+#zotero-items-splitter:not([state=collapsed]) > grippy
+{
+	display: none;
 }
 
 #zotero-collections-splitter[state=collapsed], #zotero-items-splitter[state=collapsed] {
