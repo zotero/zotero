@@ -593,14 +593,13 @@ var ZoteroPane = new function()
 			}
 		}
 		else if (from == 'zotero-items-tree') {
-			// Focus TinyMCE explicitly on tab key, since the normal focusing
-			// doesn't work right
-			if (!event.shiftKey && event.keyCode == String.fromCharCode(event.which)) {
+			// Focus TinyMCE explicitly on tab key, since the normal focusing doesn't work right
+			if (!event.shiftKey && event.keyCode == event.DOM_VK_TAB) {
 				var deck = document.getElementById('zotero-item-pane-content');
 				if (deck.selectedPanel.id == 'zotero-view-note') {
-					setTimeout(function () {
-						document.getElementById('zotero-note-editor').focus();
-					}, 0);
+					document.getElementById('zotero-note-editor').focus();
+					event.preventDefault();
+					return;
 				}
 			}
 			else if ((event.keyCode == event.DOM_VK_BACK_SPACE && Zotero.isMac) ||
