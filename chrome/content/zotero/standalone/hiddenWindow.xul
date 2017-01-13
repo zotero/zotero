@@ -38,7 +38,6 @@
 
 <window id="main-window" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
     <script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
-    <script type="application/javascript" src="chrome://zotero/content/include.js"/>
 	<commandset id="mainCommandSet">
 		<!--FILE-->
 		<command id="cmd_quitApplication" oncommand="goQuitApplication();"/>
