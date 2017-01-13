@@ -273,8 +273,13 @@ Zotero.File = new function(){
 		if (source instanceof Components.interfaces.nsIFile) {
 			source = source.path;
 		}
-		else if (source.startsWith('file:')) {
-			source = OS.Path.fromFileURI(source);
+		else if (typeof source == 'string') {
+			if (source.startsWith('file:')) {
+				source = OS.Path.fromFileURI(source);
+			}
+		}
+		else {
+			throw new Error(`Unsupported type '${typeof source}' for source`);
 		}
 		var options = {
 			encoding: charset ? charset : "utf-8"
