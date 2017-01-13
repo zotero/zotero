@@ -48,6 +48,13 @@ describe("Zotero.File", function () {
 			assert.lengthOf(contents, 6);
 			assert.equal(contents, "Zotero");
 		});
+		
+		it("should get a file from a file: URI", function* () {
+			var contents = yield Zotero.File.getContentsAsync(
+				OS.Path.toFileURI(OS.Path.join(getTestDataDirectory().path, "test.txt"))
+			);
+			assert.isTrue(contents.startsWith('Zotero'));
+		});
 	})
 	
 	describe("#getBinaryContentsAsync()", function () {
