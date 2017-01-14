@@ -485,9 +485,13 @@ function ZoteroCommandLineHandler() {}
 ZoteroCommandLineHandler.prototype = {
 	/* nsICommandLineHandler */
 	handle : function(cmdLine) {
-		// Force debug output
+		// Force debug output to window
 		if (cmdLine.handleFlag("ZoteroDebug", false)) {
-			zInitOptions.forceDebugLog = true;
+			zInitOptions.forceDebugLog = 2;
+		}
+		// Force debug output to text console
+		else if (cmdLine.handleFlag("ZoteroDebugText", false)) {
+			zInitOptions.forceDebugLog = 1;
 		}
 		
 		// handler to open Zotero pane at startup in Zotero for Firefox

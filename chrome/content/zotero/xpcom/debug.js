@@ -25,19 +25,38 @@
 
 
 Zotero.Debug = new function () {
-	var _console, _consolePref, _stackTrace, _store, _level, _lastTime, _output = [];
+	var _console, _stackTrace, _store, _level, _lastTime, _output = [];
 	var _slowTime = false;
 	var _colorOutput = false;
+	var _consoleViewer = false;
+	var _consoleViewerQueue = [];
+	var _consoleViewerListener;
 	
-	this.init = function (forceDebugLog) {
-		_consolePref = Zotero.Prefs.get('debug.log');
-		_console = _consolePref || forceDebugLog;
-		if (_console && Zotero.isFx && !Zotero.isBookmarklet && (!Zotero.isWin || _consolePref)) {
+	/**
+	 * Initialize debug logging
+	 *
+	 * Debug logging can be set in several different ways:
+	 *
+	 *   - via the debug.log pref in the client or connector
+	 *   - by enabling debug output logging in the Advanced prefs in the client
+	 *   - by passing -ZoteroDebug or -ZoteroDebugText on the command line
+	 *
+	 * In the client, debug.log and -ZoteroDebugText enable logging via the terminal, while -ZoteroDebug
+	 * enables logging via an in-app HTML-based window.
+	 *
+	 * @param {Integer} [forceDebugLog = 0] - Force output even if pref disabled
+	 *    2: window (-ZoteroDebug)
+	 *    1: text console (-ZoteroDebugText)
+	 *    0: disabled
+	 */
+	this.init = function (forceDebugLog = 0) {
+		_console = Zotero.Prefs.get('debug.log') || forceDebugLog == 1;
+		_consoleViewer = forceDebugLog == 2;
+		// When logging to the text console from the client on Mac/Linux, colorize output
+		if (_console && Zotero.isFx && !Zotero.isBookmarklet) {
 			_colorOutput = true;
-		}
-		if (_colorOutput) {
-			// Time threshold in milliseconds above which intervals
-			// should be colored red in terminal output
+			
+			// Time threshold in ms above which intervals should be colored red in terminal output
 			_slowTime = Zotero.Prefs.get('debug.log.slowTime');
 		}
 		_store = Zotero.Prefs.get('debug.store');
@@ -48,15 +67,23 @@ Zotero.Debug = new function () {
 		_stackTrace = Zotero.Prefs.get('debug.stackTrace');
 		
 		this.storing = _store;
-		this.enabled = _console || _store;
+		this.updateEnabled();
 		
 		if (Zotero.isStandalone) {
-			Zotero.Prefs.set('browser.dom.window.dump.enabled', _console, true);
+			// Enable dump() from window (non-XPCOM) scopes when terminal or viewer logging is enabled.
+			// (These will always go to the terminal, even in viewer mode.)
+			Zotero.Prefs.set('browser.dom.window.dump.enabled', _console || _consoleViewer, true);
+			
+			if (_consoleViewer) {
+				setTimeout(function () {
+					Zotero.openInViewer("chrome://zotero/content/debugViewer.html");
+				}, 1000);
+			}
 		}
 	}
 	
 	this.log = function (message, level, stack) {
-		if (!_console && !_store) {
+		if (!this.enabled) {
 			return;
 		}
 		
@@ -118,21 +145,23 @@ Zotero.Debug = new function () {
 			message += '\n' + Zotero.Debug.stackToString(stack);
 		}
 		
-		if (_console) {
-			var output = 'zotero(' + level + ')' + deltaStr + ': ' + message;
-			if(Zotero.isFx && !Zotero.isBookmarklet) {
-				// On Windows, where the text console (-console) is inexplicably glacial,
-				// log to the Browser Console instead if only the -ZoteroDebug flag is used.
-				// Developers can use the debug.log/debug.time prefs and the Cygwin text console.
-				//
-				// TODO: Get rid of the filename and line number
-				if (!_consolePref && Zotero.isWin && !Zotero.isStandalone) {
-					var console = Components.utils.import("resource://gre/modules/Console.jsm", {}).console;
-					console.log(output);
+		if (_console || _consoleViewer) {
+			var output = '(' + level + ')' + deltaStr + ': ' + message;
+			if (Zotero.isFx && !Zotero.isBookmarklet) {
+				// Text console
+				if (_console) {
+					dump("zotero" + output + "\n\n");
 				}
-				// Otherwise dump to the text console
-				else {
-					dump(output + "\n\n");
+				// Console window
+				if (_consoleViewer) {
+					// If there's a listener, pass line immediately
+					if (_consoleViewerListener) {
+						_consoleViewerListener(output);
+					}
+					// Otherwise add to queue
+					else {
+						_consoleViewerQueue.push(output);
+					}
 				}
 			} else if(window.console) {
 				window.console.log(output);
@@ -193,6 +222,26 @@ Zotero.Debug = new function () {
 	});
 	
 	
+	this.getConsoleViewerOutput = function () {
+		var queue = _consoleViewerQueue;
+		_consoleViewerQueue = [];
+		return queue;
+	}
+	
+	
+	this.addConsoleViewerListener = function (listener) {
+		_consoleViewerListener = listener;
+	};
+	
+	
+	this.removeConsoleViewerListener = function () {
+		_consoleViewerListener = null;
+		// At least for now, stop logging once console viewer is closed
+		_consoleViewer = false;
+		this.updateEnabled();
+	};
+	
+	
 	this.setStore = function (enable) {
 		if (enable) {
 			this.clear();
@@ -200,8 +249,12 @@ Zotero.Debug = new function () {
 		_store = enable;
 		
 		this.storing = _store;
-		this.enabled = _console || _store;
 	}
+	
+	
+	this.updateEnabled = function () {
+		this.enabled = _console || _consoleViewer || _store;
+	};
 	
 	
 	this.count = function () {
