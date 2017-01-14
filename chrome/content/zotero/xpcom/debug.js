@@ -247,7 +247,7 @@ Zotero.Debug = new function () {
 			this.clear();
 		}
 		_store = enable;
-		
+		this.updateEnabled();
 		this.storing = _store;
 	}
 	
