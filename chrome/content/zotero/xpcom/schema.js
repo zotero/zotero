@@ -1010,8 +1010,9 @@ Zotero.Schema = new function(){
 			return;
 		}
 		
-		// If transaction already in progress, delay by ten minutes
-		yield Zotero.DB.waitForTransaction();
+		if (Zotero.DB.inTransaction()) {
+			yield Zotero.DB.waitForTransaction();
+		}
 		
 		// Get the last timestamp we got from the server
 		var lastUpdated = yield this.getDBVersion('repository');

@@ -605,7 +605,7 @@ var Zotero_Browser = new function() {
 			return;
 		}
 		
-		if (!Zotero.isConnector) {
+		if (!Zotero.isConnector && Zotero.DB.inTransaction()) {
 			yield Zotero.DB.waitForTransaction();
 		}
 		

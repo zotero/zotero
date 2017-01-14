@@ -953,7 +953,9 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 	
 	// Start a promise that will be resolved when the backup is finished
 	var resolveBackupPromise;
-	yield this.waitForTransaction();
+	if (this.inTransaction()) {
+		yield this.waitForTransaction();
+	}
 	this._backupPromise = new Zotero.Promise(function () {
 		resolveBackupPromise = arguments[0];
 	});

@@ -947,7 +947,9 @@ var ZoteroPane = new function()
 	
 	
 	this.newSearch = Zotero.Promise.coroutine(function* () {
-		yield Zotero.DB.waitForTransaction();
+		if (Zotero.DB.inTransaction()) {
+			yield Zotero.DB.waitForTransaction();
+		}
 		
 		var s = new Zotero.Search();
 		s.libraryID = this.getSelectedLibraryID();
@@ -1011,7 +1013,9 @@ var ZoteroPane = new function()
 	
 	
 	this.openLookupWindow = Zotero.Promise.coroutine(function* () {
-		yield Zotero.DB.waitForTransaction();
+		if (Zotero.DB.inTransaction()) {
+			yield Zotero.DB.waitForTransaction();
+		}
 		
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
@@ -1379,8 +1383,10 @@ var ZoteroPane = new function()
 	 *                              be a better test for whether the item pane changed)
 	 */
 	this.itemSelected = function (event) {
-		return Zotero.spawn(function* () {
-			yield Zotero.DB.waitForTransaction();
+		return Zotero.Promise.coroutine(function* () {
+			if (Zotero.DB.inTransaction()) {
+				yield Zotero.DB.waitForTransaction();
+			}
 			
 			// Don't select item until items list has loaded
 			//
@@ -1389,7 +1395,9 @@ var ZoteroPane = new function()
 			this.itemsView.addEventListener('load', function () {
 				deferred.resolve();
 			});
-			yield deferred.promise;
+			if (deferred.promise.isPending()) {
+				yield deferred.promise;
+			}
 			
 			if (!this.itemsView || !this.itemsView.selection) {
 				Zotero.debug("Items view not available in itemSelected", 2);
@@ -1592,7 +1600,7 @@ var ZoteroPane = new function()
 			}
 			
 			return true;
-		}, this)
+		}.bind(this))()
 		.finally(function () {
 			return this.itemsView.onSelect();
 		}.bind(this));
@@ -3686,7 +3694,9 @@ var ZoteroPane = new function()
 				//
 				// Duplicate newItem() checks here
 				//
-				yield Zotero.DB.waitForTransaction();
+				if (Zotero.DB.inTransaction()) {
+					yield Zotero.DB.waitForTransaction();
+				}
 				
 				// Currently selected row
 				if (row === undefined && this.collectionsView && this.collectionsView.selection) {
@@ -3806,7 +3816,9 @@ var ZoteroPane = new function()
 					//
 					// Duplicate newItem() checks here
 					//
-					yield Zotero.DB.waitForTransaction();
+					if (Zotero.DB.inTransaction()) {
+						yield Zotero.DB.waitForTransaction();
+					}
 					
 					// Currently selected row
 					if (row === undefined) {
@@ -3894,7 +3906,9 @@ var ZoteroPane = new function()
 	 * |link|      -- create web link instead of snapshot
 	 */
 	this.addAttachmentFromPage = Zotero.Promise.coroutine(function* (link, itemID) {
-		yield Zotero.DB.waitForTransaction();
+		if (Zotero.DB.inTransaction()) {
+			yield Zotero.DB.waitForTransaction();
+		}
 		
 		if (typeof itemID != 'number') {
 			throw new Error("itemID must be an integer");
