@@ -1418,26 +1418,24 @@ Zotero.Schema = new function(){
 	}
 	
 	
-	function _updateSchema(schema){
-		return Zotero.Promise.all([Zotero.Schema.getDBVersion(schema), _getSchemaSQLVersion(schema)])
-		.spread(function (dbVersion, schemaVersion) {
-			if (dbVersion == schemaVersion) {
-				return false;
-			}
-			else if (dbVersion < schemaVersion) {
-				return _getSchemaSQL(schema)
-				.then(function (sql) {
-					return Zotero.DB.executeSQLFile(sql);
-				})
-				.then(function () {
-					return _updateDBVersion(schema, schemaVersion);
-				});
-			}
-			
+	/**
+	 * Requires a transaction
+	 */
+	var _updateSchema = Zotero.Promise.coroutine(function* (schema) {
+		var [dbVersion, schemaVersion] = yield Zotero.Promise.all(
+			[Zotero.Schema.getDBVersion(schema), _getSchemaSQLVersion(schema)]
+		);
+		if (dbVersion == schemaVersion) {
+			return false;
+		}
+		if (dbVersion > schemaVersion) {
 			throw new Error("Zotero '" + schema + "' DB version (" + dbVersion
 				+ ") is newer than SQL file (" + schemaVersion + ")");
-		});
-	}
+		}
+		let sql = yield _getSchemaSQL(schema);
+		yield Zotero.DB.executeSQLFile(sql);
+		return _updateDBVersion(schema, schemaVersion);
+	});
 	
 	
 	var _updateCompatibility = Zotero.Promise.coroutine(function* (version) {
