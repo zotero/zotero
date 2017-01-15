@@ -3163,7 +3163,7 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = function(uris) {
 			'item', Zotero.Relations.replacedItemPredicate, uri
 		);
 		if (replacer.length && !replacer[0].deleted) {
-			zoteroItem = replacer;
+			zoteroItem = replacer[0];
 		}
 		
 		if(zoteroItem) break;
