@@ -12,7 +12,7 @@
 <!ENTITY zotero.general.saveAs "Įrašyti kaip...">
 <!ENTITY zotero.general.advancedOptions.label "Kitos parinktys">
 <!ENTITY zotero.general.more "Daugiau">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.loading "Įkeliama...">
 
 <!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Zotero programoje">
 <!ENTITY zotero.errorReport.unrelatedMessages "Čia gali būti pranešimų, visai nesusijusių su Zotero.">
@@ -91,7 +91,7 @@
 <!ENTITY zotero.items.menu.attach.link "Pridėti nuorodą į šį puslapį">
 <!ENTITY zotero.items.menu.attach.link.uri "Pridėti URI nuorodą...">
 <!ENTITY zotero.items.menu.attach.file "Pridėti turimo failo kopiją...">
-<!ENTITY zotero.items.menu.attach.fileLink "Pridėti failo nuorodą...">
+<!ENTITY zotero.items.menu.attach.fileLink "Pridėti nuorodą iki failo...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Atkurti į biblioteką">
 <!ENTITY zotero.items.menu.duplicateItem "Sukurti įrašo kopiją">
@@ -271,10 +271,10 @@
 <!ENTITY zotero.feedSettings.title.label "Pavadinimas:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Atnaujinti kas">
 <!ENTITY zotero.feedSettings.refresh.label2 "val.">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Neskaitytus naujienų kanalo įrašus pašalinti po">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "d.">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Perskaitytus naujienų kanalo įrašus pašalinti po">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "d.">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Gaunami meta duomenys...">

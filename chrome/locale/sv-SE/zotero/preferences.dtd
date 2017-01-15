@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Sök efter länkservrar">
-<!ENTITY zotero.preferences.openurl.custom "Anpassat...">
+<!ENTITY zotero.preferences.openurl.custom "Anpassad...">
 <!ENTITY zotero.preferences.openurl.server "Länkserver:">
 <!ENTITY zotero.preferences.openurl.version "Version:">
 
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "Stilar">
 <!ENTITY zotero.preferences.cite.wordProcessors "Ordbehandlare">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Inget insticksprogram för ordbehandlare är installerat.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Hämtar insticksprogram för ordbehandlare...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Få ordbehandlare insticksfiler...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Använd äldre dialogruta för att lägga till nya källor">
 
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Uppdaterad">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Lägg till ytterligare stilar...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Få ytterligare stilar...">
 
 <!ENTITY zotero.preferences.keys.openZotero "Öppna/Stäng Zotero-panelen">
 <!ENTITY zotero.preferences.keys.saveToZotero "Spara till Zotero (adressradsikon)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiera markerade källor som noter till urklipp">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiera markerade källor till urklipp">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Klistra in från urklipp">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Ändringarna gäller bara i nya fönster">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Ändringarna börjar gälla efter omstart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxyservrar">
 
@@ -181,19 +181,19 @@
 <!ENTITY zotero.preferences.locate.description "Beskrivning">
 <!ENTITY zotero.preferences.locate.name "Namn">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "En söktjänst förbättrar funktionerna i Hitta-menyn ovanför Infofliken. Genom att aktivera söktjänsterna nedan läggs de till Hitta-menyn och kan användas för att hitta källor på ditt bibliotek eller på nätet.">
-<!ENTITY zotero.preferences.locate.addDescription "För att lägga till en söktjänst som inte finns på listan, gå till söktjänstens hemsida i din webbläsare och välj &#34;Lägg till&#34; från Zoteros Hitta-meny.">
+<!ENTITY zotero.preferences.locate.addDescription "För att lägga till en söktjänst som inte finns på listan, gå till söktjänstens hemsida i din webbläsare och välj “Lägg till” i Zoteros Hitta-meny.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Återställ till standard">
 
 <!ENTITY zotero.preferences.charset "Teckenkod">
 <!ENTITY zotero.preferences.charset.importCharset "Importera teckenkod">
 <!ENTITY zotero.preferences.charset.displayExportOption "Visa val för teckenkod vid export">
 
-<!ENTITY zotero.preferences.dataDir "Lagringsplats">
+<!ENTITY zotero.preferences.dataDir "Plats för Datakatalog">
 <!ENTITY zotero.preferences.dataDir.useProfile "Använd profilkatalog">
 <!ENTITY zotero.preferences.dataDir.custom "Egen:">
 <!ENTITY zotero.preferences.dataDir.choose "Välj...">
-<!ENTITY zotero.preferences.dataDir.reveal "Visa datakatalog">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
+<!ENTITY zotero.preferences.dataDir.reveal "Visa Datakatalog">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrera till ny standardplats...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Baskatalog för länkande bilagor">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero använder relativa sökvägar för länkade filbilagor inom baskatalogen, vilket gör att du kan använda nå filerna på olika datorer så länge filstrukturen inom baskatalogen är densamma.">
@@ -203,8 +203,8 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Databasunderhåll">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Undersök om databasen är oskadd">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Återställ källfångare och stilar...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Återställ källfångare...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Återställ översättare och stilar...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Återställ översättare...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Återställ stilar...">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Logga utdata för debuggning">

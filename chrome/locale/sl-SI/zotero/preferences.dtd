@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiraj citate izbranega elementa na odložišče">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiraj izbrane elemente na odložišče">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Uvozi z odložišča">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Spremembe veljajo le v novih oknih">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Spremembe bodo uveljavljene po ponovnem zagonu">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Posredovalni strežniki">
 
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "Opis">
 <!ENTITY zotero.preferences.locate.name "Ime">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Iskalnik razširi zmogljivost spustnega polja Lociraj v podoknu Podatki. Če omogočite iskalnike na spodnjem seznamu, bodo dodani v spustno polje in boste z njimi lahko na spletu našli vire iz svoje knjižnice.">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
+<!ENTITY zotero.preferences.locate.addDescription "Če želite dodati iskalnik, ki ni na seznamu, obiščite želeni iskalnik v svojem brskalniku in izberite &quot;Dodaj&quot; v Zoterovem meniju Lociraj.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Obnovi privzeto">
 
 <!ENTITY zotero.preferences.charset "Kodiranje znakov">
@@ -193,7 +193,7 @@
 <!ENTITY zotero.preferences.dataDir.custom "Po meri:">
 <!ENTITY zotero.preferences.dataDir.choose "Izberi ...">
 <!ENTITY zotero.preferences.dataDir.reveal "Pokaži mapo s podatki">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
+<!ENTITY zotero.preferences.dataDir.migrate "Migriraj na novo privzeto mesto ...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Osnovna mapa za povezane priponke">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero bo uporabil relativne poti za povezane datotečne priponke v osnovni mapi, kar omogoča dostop do datotek na različnih računalnikih, vse dokler ostaja datotečna struktura v osnovni mapi enaka.">
