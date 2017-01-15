@@ -21,6 +21,9 @@ dialog
 {
 	color: gray;
 	margin-bottom: 5px;
+	-moz-user-select: text;
+	-moz-user-focus: normal;
+	cursor: text;
 }
 
 .subhead
