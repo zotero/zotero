@@ -218,5 +218,10 @@ const gXPInstallObserver = {
 	}
 };
 
+// Used by update prompt
+function openUILinkIn(url) {
+	ZoteroPane.loadURI(url);
+}
+
 window.addEventListener("load", function(e) { ZoteroStandalone.onLoad(e); }, false);
 window.addEventListener("unload", function(e) { ZoteroStandalone.onUnload(e); }, false);
