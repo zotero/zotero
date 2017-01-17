@@ -9,7 +9,7 @@ describe("Zotero.Date", function() {
 			"October", "November", "December"
 		];
 		var frenchShort = [
-			"jan", "fév", "mar", "avr", "mai", "jun", "jul", "aoû", "sep", "oct", "nov", "dec"
+			"jan", "fév", "mar", "avr", "mai", "juin", "juil", "aoû", "sep", "oct", "nov", "déc"
 		];
 		var frenchLong = [
 			"janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre",
