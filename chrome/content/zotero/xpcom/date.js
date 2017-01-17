@@ -260,7 +260,7 @@ Zotero.Date = new function(){
 	
 	
 	this.isoToSQL = function (isoDate) {
-		return this.dateToSQL(this.isoToDate(isoDate), true);
+		return Zotero.Date.dateToSQL(Zotero.Date.isoToDate(isoDate), true); // no 'this' for translator sandbox
 	}
 	
 	
@@ -294,13 +294,13 @@ Zotero.Date = new function(){
 		// Parse 'yesterday'/'today'/'tomorrow'
 		var lc = (string + '').toLowerCase();
 		if (lc == 'yesterday' || (Zotero.getString && lc === Zotero.getString('date.yesterday'))) {
-			string = this.dateToSQL(new Date(Date.now() - 1000*60*60*24)).substr(0, 10);
+			string = Zotero.Date.dateToSQL(new Date(Date.now() - 1000*60*60*24)).substr(0, 10); // no 'this' for translator sandbox
 		}
 		else if (lc == 'today' || (Zotero.getString && lc == Zotero.getString('date.today'))) {
-			string = this.dateToSQL(new Date()).substr(0, 10);
+			string = Zotero.Date.dateToSQL(new Date()).substr(0, 10);
 		}
 		else if (lc == 'tomorrow' || (Zotero.getString && lc == Zotero.getString('date.tomorrow'))) {
-			string = this.dateToSQL(new Date(Date.now() + 1000*60*60*24)).substr(0, 10);
+			string = Zotero.Date.dateToSQL(new Date(Date.now() + 1000*60*60*24)).substr(0, 10);
 		}
 		else {
 			string = string.toString().replace(/^\s+|\s+$/g, "").replace(/\s+/, " ");
@@ -425,7 +425,7 @@ Zotero.Date = new function(){
 		// MONTH
 		if(date.month === undefined) {
 			// compile month regular expression
-			let months = this.getMonths(true);
+			let months = Zotero.Date.getMonths(true); // no 'this' for translator sandbox
 			months = months.short.map(m => m.toLowerCase())
 				.concat(months.long.map(m => m.toLowerCase()));
 			
@@ -601,7 +601,7 @@ Zotero.Date = new function(){
 				string += date.part+" ";
 			}
 			
-			var months = this.getMonths().long;
+			var months = Zotero.Date.getMonths().long; // no 'this' for translator sandbox
 			if(date.month != undefined && months[date.month]) {
 				// get short month strings from CSL interpreter
 				string += months[date.month];
