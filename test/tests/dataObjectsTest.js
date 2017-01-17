@@ -9,6 +9,14 @@ describe("Zotero.DataObjects", function () {
 		});
 	});
 	
+	describe("#getAsync()", function () {
+		it("show throw if passed an invalid id", function* () {
+			var e = yield getPromiseError(Zotero.Items.getAsync("[Object]"));
+			assert.ok(e);
+			assert.include(e.message, '(string)');
+		});
+	});
+	
 	describe("#getLibraryAndKeyFromID()", function () {
 		it("should return a libraryID and key within a transaction", function* () {
 			for (let type of types) {
