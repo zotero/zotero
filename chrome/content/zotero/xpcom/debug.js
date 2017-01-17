@@ -82,13 +82,13 @@ Zotero.Debug = new function () {
 		}
 	}
 	
-	this.log = function (message, level, stack) {
+	this.log = function (message, level, maxDepth, stack) {
 		if (!this.enabled) {
 			return;
 		}
 		
 		if (typeof message != 'string') {
-			message = Zotero.Utilities.varDump(message);
+			message = Zotero.Utilities.varDump(message, 0, maxDepth);
 		}
 		
 		if (!level) {

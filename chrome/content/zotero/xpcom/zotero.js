@@ -1031,11 +1031,12 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 *
 	 * @param {} message
 	 * @param {Integer} [level=3]
+	 * @param {Integer} [maxDepth]
 	 * @param {Boolean|Integer} [stack] Whether to display the calling stack.
 	 *   If true, stack is displayed starting from the caller. If an integer,
 	 *   that many stack levels will be omitted starting from the caller.
 	 */
-	function debug(message, level, stack) {
+	function debug(message, level, maxDepth, stack) {
 		// Account for this alias
 		if (stack === true) {
 			stack = 1;
@@ -1043,7 +1044,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			stack++;
 		}
 		
-		Zotero.Debug.log(message, level, stack);
+		Zotero.Debug.log(message, level, maxDepth, stack);
 	}
 	
 	
