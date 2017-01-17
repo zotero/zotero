@@ -1892,6 +1892,11 @@ var ZoteroPane = new function()
 	this.deleteSelectedCollection = function (deleteItems) {
 		var collectionTreeRow = this.getCollectionTreeRow();
 		
+		// Don't allow deleting libraries
+		if (collectionTreeRow.isLibrary(true) && !collectionTreeRow.isFeed()) {
+			return;
+		}
+		
 		// Remove virtual duplicates collection
 		if (collectionTreeRow.isDuplicates()) {
 			this.setVirtual(collectionTreeRow.ref.libraryID, 'duplicates', false);
