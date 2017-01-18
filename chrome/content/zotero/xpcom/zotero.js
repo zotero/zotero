@@ -2460,7 +2460,7 @@ Zotero.Browser = new function() {
 /*
  * Implements nsIWebProgressListener
  */
-Zotero.WebProgressFinishListener = function(onFinish) {
+Zotero.WebProgressFinishListener = function(onFinish, maxSize=0) {
 	this.onStateChange = function(wp, req, stateFlags, status) {
 		//Zotero.debug('onStageChange: ' + stateFlags);
 		if (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP
@@ -2470,9 +2470,16 @@ Zotero.WebProgressFinishListener = function(onFinish) {
 	}
 	
 	this.onProgressChange = function(wp, req, curSelfProgress, maxSelfProgress, curTotalProgress, maxTotalProgress) {
-		//Zotero.debug('onProgressChange');
-		//Zotero.debug('Current: ' + curTotalProgress);
-		//Zotero.debug('Max: ' + maxTotalProgress);
+		// Zotero.debug(`onProgressChange ${req.name}`);
+		// Zotero.debug(`Self: ${curSelfProgress}/${maxSelfProgress}`);
+		// Zotero.debug(`Total: ${curTotalProgress}/${maxTotalProgress}`);
+		
+		// -1 if size unknown or too big to fit a long (2GB upwards)
+		var curMax = maxSelfProgress != -1 ? maxSelfProgress : maxTotalProgress;
+		if (maxSize && curMax != -1 && curMax > maxSize) {
+			Zotero.debug(`Canceling request to ${req.name} with size ${curMax/1024}KB > ${maxSize/1024}KB`, 2);
+			req.cancel(Components.results.NS_BINDING_ABORTED);
+		}
 	}
 	
 	this.onLocationChange = function(wp, req, location) {}

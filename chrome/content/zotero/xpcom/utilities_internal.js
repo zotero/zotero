@@ -476,7 +476,7 @@ Zotero.Utilities.Internal = {
 		var deferred = Zotero.Promise.defer();
 		wbp.progressListener = new Zotero.WebProgressFinishListener(function () {
 			deferred.resolve();
-		});
+		}, 8*1024*1024);
 		
 		wbp.saveDocument(
 			document,
