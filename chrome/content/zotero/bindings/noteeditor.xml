@@ -171,6 +171,10 @@
 							//Zotero.debug("Skipping notification from current note field");
 							continue;
 						}
+						if (this.noteField.changed) {
+							//Zotero.debug("Note has changed since last save -- skipping refresh");
+							return;
+						}
 						this.refresh();
 						break;
 					}
@@ -181,7 +185,7 @@
 				<body><![CDATA[
 					Zotero.debug('Refreshing note editor');
 					
-					var textbox = this._id('noteField');
+					var textbox = this.noteField;
 					var textboxReadOnly = this._id('noteFieldReadOnly');
 					var button = this._id('goButton');
 					
@@ -249,6 +253,7 @@
 							if (this.item) {
 								let changed = this.item.setNote(noteField.value);
 								if (changed && this.saveOnEdit) {
+									this.noteField.changed = false;
 									yield this.item.saveTx({
 										notifierData: {
 											noteEditorID: this._instanceID

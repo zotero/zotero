@@ -429,6 +429,7 @@
 											//Zotero.debug("Not a char");
 											return;
 										}
+										this._changed = true;
 										commandEvent = true;
 										break;
 									
@@ -436,6 +437,7 @@
 									case 'change':
 									case 'undo':
 									case 'redo':
+										this._changed = true;
 										commandEvent = true;
 										break;
 
@@ -524,6 +526,7 @@
 					
 					if (this.value == val) {
 						Zotero.debug("Textbox value hasn't changed");
+						this._changed = false;
 						return;
 					}
 					
@@ -570,7 +573,7 @@
 					onset="this.setAttribute('timeout', val); return val;"
 					onget="return parseInt(this.getAttribute('timeout')) || 0;"/>
 			
-			<property name="changed" onget="return this._changed;"/>
+			<property name="changed" onget="return this._changed;" onset="this._changed = !!val;"/>
 			
 			<method name="focus">
 				<body>
