@@ -23,6 +23,9 @@
 <!ENTITY closeCmd.label "關閉 (C)">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
 <!ENTITY quitApplicationCmdWin.label "退出 (X)">
 <!ENTITY quitApplicationCmdWin.accesskey "X">
 <!ENTITY quitApplicationCmd.label "結束 (Q)">

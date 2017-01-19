@@ -23,6 +23,9 @@
 <!ENTITY closeCmd.label "Fermer">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "r">
+<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
 <!ENTITY quitApplicationCmdWin.label "Quitter">
 <!ENTITY quitApplicationCmdWin.accesskey "Q">
 <!ENTITY quitApplicationCmd.label "Quitter">

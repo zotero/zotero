@@ -23,6 +23,9 @@
 <!ENTITY closeCmd.label "إغلاق">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "ق">
+<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
 <!ENTITY quitApplicationCmdWin.label "خروج">
 <!ENTITY quitApplicationCmdWin.accesskey "خ">
 <!ENTITY quitApplicationCmd.label "إنهاء">

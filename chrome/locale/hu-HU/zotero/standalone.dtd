@@ -23,6 +23,9 @@
 <!ENTITY closeCmd.label "Bezárás">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "B">
+<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
 <!ENTITY quitApplicationCmdWin.label "Kilépés">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Bezárás">

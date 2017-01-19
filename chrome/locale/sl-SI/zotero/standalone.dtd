@@ -23,6 +23,9 @@
 <!ENTITY closeCmd.label "Zapri">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "Z">
+<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
 <!ENTITY quitApplicationCmdWin.label "Izhod">
 <!ENTITY quitApplicationCmdWin.accesskey "h">
 <!ENTITY quitApplicationCmd.label "Izhod">
