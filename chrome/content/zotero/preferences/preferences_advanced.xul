@@ -52,7 +52,6 @@
 			<preference id="pref-keys-newNote" name="extensions.zotero.keys.newNote" type="string"/>
 			<preference id="pref-keys-toggleRead" name="extensions.zotero.keys.toggleRead" type="string"/>
 			<preference id="pref-keys-toggleAllRead" name="extensions.zotero.keys.toggleAllRead" type="string"/>
-			<preference id="pref-keys-importFromClipboard" name="extensions.zotero.keys.importFromClipboard" type="string"/>
 			<preference id="pref-keys-copySelectedItemCitationsToClipboard" name="extensions.zotero.keys.copySelectedItemCitationsToClipboard" type="string"/>
 			<preference id="pref-keys-copySelectedItemsToClipboard" name="extensions.zotero.keys.copySelectedItemsToClipboard" type="string"/>
 
@@ -239,12 +238,6 @@
 								<label value="&zotero.preferences.keys.newNote;" control="textbox-newNote"/>
 								<label class="modifier"/>
 								<textbox id="textbox-newNote" maxlength="1" size="1" preference="pref-keys-newNote"/>
-							</row>
-				
-							<row>
-								<label value="&zotero.preferences.keys.importFromClipboard;" control="textbox-importFromClipboard"/>
-								<label class="modifier"/>
-								<textbox id="textbox-importFromClipboard" maxlength="1" size="1" preference="pref-keys-importFromClipboard"/>
 							</row>
 				
 							<row id="zotero-keys-focus-libraries-pane">

@@ -65,6 +65,14 @@
 	
 	<keyset id="mainKeyset">
 		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
+		<key id="key_import"
+				key="&importCmd.key;"
+				command="cmd_zotero_import"
+				modifiers="accel shift"/>
+		<key id="key_importFromClipboard"
+				key="&importCmd.key;"
+				command="cmd_zotero_importFromClipboard"
+				modifiers="accel shift alt"/>
 	</keyset>
 	<keyset id="editMenuKeys"/>
 	
@@ -119,10 +127,10 @@
 							<menuitem id="menu_close" label="&closeCmd.label;" key="key_close"
 									accesskey="&closeCmd.accesskey;" command="cmd_close"/>
 							<menuseparator/>
-							<menuitem id="menu_import" label="&zotero.toolbar.import.label;"
-									command="cmd_zotero_import"/>
-							<menuitem id="menu_importFromClipboard" label="&zotero.toolbar.importFromClipboard;"
-									command="cmd_zotero_importFromClipboard"/>
+							<menuitem id="menu_import" label="&importCmd.label;"
+									command="cmd_zotero_import" key="key_import"/>
+							<menuitem id="menu_importFromClipboard" label="&importFromClipboardCmd.label;"
+									command="cmd_zotero_importFromClipboard" key="key_importFromClipboard"/>
 							<menuitem id="menu_exportLibrary" label="&zotero.toolbar.export.label;"
 									command="cmd_zotero_exportLibrary"/>
 						</menupopup>

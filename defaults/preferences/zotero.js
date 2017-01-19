@@ -77,7 +77,6 @@ pref("extensions.zotero.keys.toggleFullscreen", 'F');
 pref("extensions.zotero.keys.saveToZotero", 'S');
 pref("extensions.zotero.keys.newItem", 'N');
 pref("extensions.zotero.keys.newNote", 'O');
-pref("extensions.zotero.keys.importFromClipboard", 'V');
 pref("extensions.zotero.keys.library", 'L');
 pref("extensions.zotero.keys.quicksearch", 'K');
 pref("extensions.zotero.keys.copySelectedItemCitationsToClipboard", 'A');

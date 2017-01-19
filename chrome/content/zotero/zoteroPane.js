@@ -737,9 +737,6 @@ var ZoteroPane = new function()
 				case 'copySelectedItemsToClipboard':
 					ZoteroPane_Local.copySelectedItemsToClipboard();
 					break;
-				case 'importFromClipboard':
-					Zotero_File_Interface.importFromClipboard();
-					break;
 				case 'sync':
 					Zotero.Sync.Runner.sync();
 					break;
