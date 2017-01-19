@@ -603,7 +603,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 			sql += ")";
 			
 			var res = yield Zotero.DB.valueQueryAsync(sql, this._sqlParams);
-			var ids = res ? res.split(",") : [];
+			var ids = res ? res.split(",").map(id => parseInt(id)) : [];
 			/*
 			// DEBUG: Should this be here?
 			//
@@ -653,7 +653,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 						var sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE "
 							+ "itemID NOT IN (SELECT itemID FROM " + tmpTable + ")";
 						var res = yield Zotero.DB.valueQueryAsync(sql);
-						var scopeIDs = res ? res.split(",") : [];
+						var scopeIDs = res ? res.split(",").map(id => parseInt(id)) : [];
 					}
 					// If an ALL search, scan only items from the main search
 					else {
@@ -701,7 +701,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 					if (joinMode == 'all' && !hasQuicksearch) {
 						var hash = {};
 						for (let i=0; i<fulltextWordIDs.length; i++) {
-							hash[fulltextWordIDs[i].id] = true;
+							hash[fulltextWordIDs[i]] = true;
 						}
 						
 						if (ids) {
@@ -791,15 +791,12 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 			
 			sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE itemID IN (" + sql + ")";
 			var res = yield Zotero.DB.valueQueryAsync(sql);
-			var parentChildIDs = res ? res.split(",") : [];
+			var parentChildIDs = res ? res.split(",").map(id => parseInt(id)) : [];
 			
 			// Add parents and children to main ids
-			if (parentChildIDs) {
-				for (var i=0; i<parentChildIDs.length; i++) {
-					var id = parentChildIDs[i];
-					if (ids.indexOf(id) == -1) {
-						ids.push(id);
-					}
+			for (let id of parentChildIDs) {
+				if (!ids.includes(id)) {
+					ids.push(id);
 				}
 			}
 		}

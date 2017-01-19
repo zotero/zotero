@@ -14,11 +14,7 @@ describe("Zotero.Search", function() {
 			var s = new Zotero.Search;
 			s.name = "Test";
 			s.addCondition('title', 'is', 'test');
-			Zotero.debug("BEFORE SAVING");
-			Zotero.debug(s._conditions);
 			var id = yield s.saveTx();
-			Zotero.debug("DONE SAVING");
-			Zotero.debug(s._conditions);
 			assert.typeOf(id, 'number');
 			
 			// Check saved search
@@ -27,7 +23,6 @@ describe("Zotero.Search", function() {
 			assert.instanceOf(s, Zotero.Search);
 			assert.equal(s.libraryID, Zotero.Libraries.userLibraryID);
 			assert.equal(s.name, "Test");
-			Zotero.debug("GETTING CONDITIONS");
 			var conditions = s.getConditions();
 			assert.lengthOf(Object.keys(conditions), 1);
 			assert.property(conditions, "0");
@@ -106,6 +101,28 @@ describe("Zotero.Search", function() {
 		});
 		
 		describe("Conditions", function () {
+			describe("attachmentContent", function () {
+				it("should find text in HTML files", function* () {
+					var s = new Zotero.Search();
+					s.libraryID = foobarItem.libraryID;
+					s.addCondition('fulltextContent', 'contains', 'foo bar');
+					var matches = yield s.search();
+					assert.sameMembers(matches, [foobarItem.id]);
+				});
+				
+				it("should work in subsearch", function* () {
+					var s = new Zotero.Search();
+					s.libraryID = foobarItem.libraryID;
+					s.addCondition('fulltextContent', 'contains', 'foo bar');
+					
+					var s2 = new Zotero.Search();
+					s2.setScope(s);
+					s2.addCondition('title', 'contains', 'foobar');
+					var matches = yield s2.search();
+					assert.sameMembers(matches, [foobarItem.id]);
+				});
+			});
+			
 			describe("collection", function () {
 				it("should find item in collection", function* () {
 					var col = yield createDataObject('collection');
