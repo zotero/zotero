@@ -3,7 +3,7 @@ language: cpp
 compiler:
     - gcc
 env:
-    - FX_VERSION="49.0.2"
+    - FX_VERSION="50.1.0"
 matrix:
     fast_finish: true
     #allow_failures:
@@ -11,8 +11,8 @@ matrix:
 notifications:
     email: false
 install:
-    - if [ $FX_VERSION = "49.0.2" ]; then
-        wget -O tarball "https://archive.mozilla.org/pub/firefox/tinderbox-builds/mozilla-release-linux64-add-on-devel/1476892163/firefox-49.0.2.en-US.linux-x86_64-add-on-devel.tar.bz2";
+    - if [ $FX_VERSION = "50.1.0" ]; then
+        wget -O tarball "http://archive.mozilla.org/pub/firefox/tinderbox-builds/mozilla-release-linux64-add-on-devel/1481240107/firefox-50.1.0.en-US.linux-x86_64-add-on-devel.tar.bz2";
       fi
     - tar xf tarball
 before_script:
