@@ -43,7 +43,7 @@ Zotero.Report.HTML = new function () {
 		for (let i=0; i<items.length; i++) {
 			let obj = items[i];
 			
-			let content = '\n\t\t\t<li id="item_' + obj.itemKey + '" class="item ' + obj.itemType + '">\n';
+			let content = '\n\t\t\t<li id="item_' + obj.key + '" class="item ' + obj.itemType + '">\n';
 			
 			if (obj.title) {
 				// Top-level item matched search, so display title
@@ -99,7 +99,7 @@ Zotero.Report.HTML = new function () {
 					}
 					content += '\t\t\t\t<ul class="notes">\n';
 					for (let note of obj.reportChildren.notes) {
-						content += '\t\t\t\t\t<li id="item_' + note.itemKey + '">\n';
+						content += '\t\t\t\t\t<li id="item_' + note.key + '">\n';
 						
 						// If not valid XML, display notes with entities encoded
 						var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
@@ -306,7 +306,7 @@ Zotero.Report.HTML = new function () {
 			for (let i=0; i<obj.attachments.length; i++) {
 				let attachment = obj.attachments[i];
 				
-				content += '\t\t\t\t\t<li id="item_' + attachment.itemKey + '">';
+				content += '\t\t\t\t\t<li id="item_' + attachment.key + '">';
 				if (attachment.title !== undefined) {
 					content += escapeXML(attachment.title);
 				}
