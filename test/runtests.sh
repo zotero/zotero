@@ -122,6 +122,7 @@ cat <<EOF > "$PROFILE/prefs.js"
 user_pref("extensions.autoDisableScopes", 0);
 user_pref("browser.uitour.enabled", false);
 user_pref("browser.shell.checkDefaultBrowser", false);
+user_pref("dom.max_chrome_script_run_time", 0);
 user_pref("extensions.zotero.debug.log", $DEBUG);
 user_pref("extensions.zotero.debug.level", $DEBUG_LEVEL);
 user_pref("extensions.zotero.debug.time", $DEBUG);
