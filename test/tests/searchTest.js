@@ -224,6 +224,17 @@ describe("Zotero.Search", function() {
 				});
 			});
 			
+			describe("key", function () {
+				it("should allow more than max bound parameters", function* () {
+					let s = new Zotero.Search();
+					let max = Zotero.DB.MAX_BOUND_PARAMETERS + 100;
+					for (let i = 0; i < max; i++) {
+						s.addCondition('key', 'is', Zotero.DataObjectUtilities.generateKey());
+					}
+					yield s.search();
+				});
+			});
+			
 			describe("savedSearch", function () {
 				it("should return items in the saved search", function* () {
 					var search = yield createDataObject('search');

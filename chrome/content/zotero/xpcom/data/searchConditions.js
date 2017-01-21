@@ -450,7 +450,17 @@ Zotero.SearchConditions = new function(){
 				table: 'items',
 				field: 'key',
 				special: true,
-				noLoad: true
+				noLoad: true,
+				inlineFilter: function (val) {
+					try {
+						val = Zotero.DataObjectUtilities.checkKey(val);
+						if (val) return `'${val}'`;
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+					return false;
+				}
 			},
 			
 			{

@@ -96,17 +96,14 @@ Zotero.API = {
 						s.addCondition('key', 'is', params.objectKey);
 					}
 					else if (params.objectID) {
-						Zotero.debug('adding ' + params.objectID);
 						s.addCondition('itemID', 'is', params.objectID);
 					}
 					
 					if (params.itemKey) {
-						s.addCondition('blockStart');
 						for (let i=0; i<params.itemKey.length; i++) {
 							let itemKey = params.itemKey[i];
 							s.addCondition('key', 'is', itemKey);
 						}
-						s.addCondition('blockEnd');
 					}
 					
 					// Display all top-level items
