@@ -444,12 +444,26 @@ function ZoteroProtocolHandler() {
 					
 					default:
 						this.contentType = 'text/html';
-						return Zotero.Utilities.Internal.getAsyncInputStream(
+						
+						// DEBUG: Results in mangled reports
+						//
+						// https://forums.zotero.org/discussion/64022/5-0-beta-generate-report-is-often-garbled
+						/*return Zotero.Utilities.Internal.getAsyncInputStream(
+							Zotero.Report.HTML.listGenerator(items, combineChildItems),
+							function () {
+								return '<span style="color: red; font-weight: bold">Error generating report</span>';
+							}
+						);*/
+						
+						Components.utils.import("resource://gre/modules/NetUtil.jsm");
+						var is = Zotero.Utilities.Internal.getAsyncInputStream(
 							Zotero.Report.HTML.listGenerator(items, combineChildItems),
 							function () {
 								return '<span style="color: red; font-weight: bold">Error generating report</span>';
 							}
 						);
+						var str = NetUtil.readInputStreamToString(is, is.available(), {});
+						return Zotero.Promise.resolve(str);
 				}
 			});
 		}
