@@ -374,33 +374,49 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		}
 		body = body.join('&');
 		
-		try {
-			var req = yield this.apiClient.makeRequest(
-				"POST",
-				uri,
-				{
-					body,
-					headers,
-					// This should include all errors in _handleUploadAuthorizationFailure()
-					successCodes: [200, 201, 204, 403, 404, 412, 413],
-					debug: true
-				}
-			);
-		}
-		catch (e) {
-			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-				let msg = "Unexpected status code " + e.status + " in " + funcName
-					 + " (" + item.libraryKey + ")";
-				Zotero.logError(msg);
-				Zotero.debug(e.xmlhttp.getAllResponseHeaders());
-				throw new Error(Zotero.Sync.Storage.defaultError);
+		var req;
+		while (true) {
+			try {
+				req = yield this.apiClient.makeRequest(
+					"POST",
+					uri,
+					{
+						body,
+						headers,
+						// This should include all errors in _handleUploadAuthorizationFailure()
+						successCodes: [200, 201, 204, 403, 404, 412, 413],
+						debug: true
+					}
+				);
 			}
-			throw e;
-		}
-		
-		var result = yield this._handleUploadAuthorizationFailure(req, item);
-		if (result instanceof Zotero.Sync.Storage.Result) {
-			return result;
+			catch (e) {
+				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+					let msg = "Unexpected status code " + e.status + " in " + funcName
+						 + " (" + item.libraryKey + ")";
+					Zotero.logError(msg);
+					Zotero.debug(e.xmlhttp.getAllResponseHeaders());
+					throw new Error(Zotero.Sync.Storage.defaultError);
+				}
+				throw e;
+			}
+			
+			let result = yield this._handleUploadAuthorizationFailure(req, item);
+			if (result instanceof Zotero.Sync.Storage.Result) {
+				return result;
+			}
+			// If remote attachment exists but has no hash (which can happen for an old (pre-4.0?)
+			// attachment with just an mtime, or after a storage purge), send again with If-None-Match
+			else if (result == "ERROR_412_WITHOUT_VERSION") {
+				if (headers["If-None-Match"]) {
+					throw new Error("412 returned for request with If-None-Match");
+				}
+				delete headers["If-Match"];
+				headers["If-None-Match"] = "*";
+				Zotero.debug("Retrying with If-None-Match");
+			}
+			else {
+				break;
+			}
 		}
 		
 		try {
@@ -468,10 +484,9 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			throw new Error(Zotero.Sync.Storage.defaultError);
 		}
 		else if (req.status == 412) {
-			Zotero.debug("412 BUT WE'RE COOL");
 			let version = req.getResponseHeader('Last-Modified-Version');
 			if (!version) {
-				throw new Error("Last-Modified-Version header not provided");
+				return "ERROR_412_WITHOUT_VERSION";
 			}
 			if (version > item.version) {
 				return new Zotero.Sync.Storage.Result({

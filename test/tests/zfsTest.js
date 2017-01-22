@@ -817,7 +817,75 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.isFalse(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isTrue(result.syncRequired);
-		})
+		});
+		
+		it("should retry with If-None-Match on 412 with missing remote hash", function* () {
+			var { engine, client, caller } = yield setup();
+			var zfs = new Zotero.Sync.Storage.Mode.ZFS({
+				apiClient: client
+			})
+			
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var item = yield Zotero.Attachments.importFromFile({ file });
+			item.version = 5;
+			item.synced = true;
+			item.attachmentSyncedModificationTime = Date.now();
+			item.attachmentSyncedHash = 'bd4c33e03798a7e8bc0b46f8bda74fac'
+			yield item.saveTx();
+			
+			var contentType = 'image/png';
+			var prefix = Zotero.Utilities.randomString();
+			var suffix = Zotero.Utilities.randomString();
+			var uploadKey = Zotero.Utilities.randomString(32, 'abcdef0123456789');
+			
+			var called = 0;
+			server.respond(function (req) {
+				if (req.method == "POST"
+						&& req.url == `${baseURL}users/1/items/${item.key}/file`
+						&& !req.requestBody.includes('upload=')
+						&& req.requestHeaders["If-Match"] == item.attachmentSyncedHash) {
+					called++;
+					req.respond(
+						412,
+						{
+							"Content-Type": "application/json"
+						},
+						"If-Match set but file does not exist"
+					);
+				}
+				else if (req.method == "POST"
+						&& req.url == `${baseURL}users/1/items/${item.key}/file`
+						&& !req.requestBody.includes('upload=')
+						&& req.requestHeaders["If-None-Match"] == "*") {
+					assert.equal(called++, 1)
+					req.respond(
+						200,
+						{
+							"Content-Type": "application/json"
+						},
+						JSON.stringify({
+							url: baseURL + "pretend-s3/1",
+							contentType: contentType,
+							prefix: prefix,
+							suffix: suffix,
+							uploadKey: uploadKey
+						})
+					);
+				}
+			})
+			
+			var stub = sinon.stub(zfs, "_uploadFile");
+			
+			yield zfs._processUploadFile({
+				name: item.libraryKey
+			});
+			
+			assert.equal(called, 2);
+			assert.ok(stub.called);
+			
+			stub.restore();
+		});
 		
 		it("should handle 413 on quota limit", function* () {
 			var { engine, client, caller } = yield setup();
