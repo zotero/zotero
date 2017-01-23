@@ -475,8 +475,12 @@ Zotero.Translators = new function() {
 		// JSON.stringify has the benefit of indenting JSON
 		var metadataJSON = JSON.stringify(metadata, null, "\t");
 		
-		var str = metadataJSON + "\n\n" + code,
-			translator;
+		var str = metadataJSON + "\n\n" + code;
+		
+		// Make sure file ends with newline
+		if (!str.endsWith('\n')) {
+			str += '\n';
+		}
 		
 		var translator = Zotero.Translators.get(metadata.translatorID);
 		var sameFile = translator && destFile == translator.path;
