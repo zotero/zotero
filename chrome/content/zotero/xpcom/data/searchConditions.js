@@ -452,14 +452,7 @@ Zotero.SearchConditions = new function(){
 				special: true,
 				noLoad: true,
 				inlineFilter: function (val) {
-					try {
-						val = Zotero.DataObjectUtilities.checkKey(val);
-						if (val) return `'${val}'`;
-					}
-					catch (e) {
-						Zotero.logError(e);
-					}
-					return false;
+					return Zotero.Utilities.isValidObjectKey(val) ? val : false;
 				}
 			},
 			

@@ -302,8 +302,8 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 		for (let part of parts) {
 			this.addCondition('blockStart');
 			
-			// If search string is 8 characters, see if this is a item key
-			if (operator == 'contains' && part.text.length == 8) {
+			// Allow searching for exact object key
+			if (operator == 'contains' && Zotero.Utilities.isValidObjectKey(part.text)) {
 				this.addCondition('key', 'is', part.text, false);
 			}
 			
@@ -935,7 +935,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 			// For conditions with an inline filter using 'is'/'isNot', combine with last condition
 			// if the same
 			if (lastCondition
-					&& name == lastCondition.name
+					&& (!lastCondition.alias || name == lastCondition.alias)
 					&& condition.operator.startsWith('is')
 					&& condition.operator == lastCondition.operator
 					&& conditionData.inlineFilter) {
@@ -947,7 +947,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 			}
 			
 			lastCondition = {
-				name,
+				name: conditionData.name,
 				alias: conditionData.name != name ? name : false,
 				table: conditionData.table,
 				field: conditionData.field,
@@ -1491,11 +1491,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 										if (val) {
 											values.push(val);
 										}
-										else {
-											Zotero.logError(`${val} is not a valid `
-												+ `'${condition.field}' value -- skipping`);
-											continue;
-										}
+									}
+									
+									if (!values.length) {
+										continue;
 									}
 									
 									condSQL += values.length > 1
