@@ -776,10 +776,10 @@ var generateTranslatorExportData = Zotero.Promise.coroutine(function* generateTr
  * Build a dummy translator that can be passed to Zotero.Translate
  */
 function buildDummyTranslator(translatorType, code, info={}) {
-	const TRANSLATOR_TYPES = {1: "import", 2: "export", 4: "web", 8: "search"};
+	const TRANSLATOR_TYPES = {"import":1, "export":2, "web":4, "search":8};
 	info = Object.assign({
 		"translatorID":"dummy-translator",
-		"translatorType":TRANSLATOR_TYPES[translatorType],
+		"translatorType": Number.isInteger(translatorType) ? translatorType : TRANSLATOR_TYPES[translatorType],
 		"label":"Dummy Translator",
 		"creator":"Simon Kornblith",
 		"target":"",
