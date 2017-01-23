@@ -137,7 +137,7 @@ Zotero.URI = new function () {
 			}
 			return Zotero.Libraries.userLibrary;
 		}
-		matches = event.data.topic.match(/^\/groups\/(\d+)/);
+		matches = path.match(/^\/groups\/(\d+)/);
 		if (matches) {
 			let groupID = matches[1];
 			return Zotero.Groups.get(groupID);

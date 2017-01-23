@@ -121,11 +121,11 @@ Zotero.Sync.Streamer_Module.prototype = {
 				if (library) {
 					// Ignore if skipped library
 					let skipped = Zotero.Sync.Data.Local.getSkippedLibraries();
-					if (skipped.includes(library.id)) return;
+					if (skipped.includes(library.libraryID)) return;
 					
 					yield Zotero.Sync.Runner.sync({
 						background: true,
-						libraries: [library.id]
+						libraries: [library.libraryID]
 					});
 				}
 			}
