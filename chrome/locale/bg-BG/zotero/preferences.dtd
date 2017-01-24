@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Търси решаващи сървъри">
-<!ENTITY zotero.preferences.openurl.custom "Потребителси...">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "Решаващ сървър:">
 <!ENTITY zotero.preferences.openurl.version "Версия:">
 
@@ -79,8 +79,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Възстановява Зотеро сървъра">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Изтрива всички локални дани и ги възстановява от сървъра.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Възстановява на Зотеро сървъра">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Изтрива историята на предходните файлови синхронизации">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Принудителна проверка на хранилището за копията на всички локални файлове.">
 <!ENTITY zotero.preferences.sync.reset "Reset">
-<!ENTITY zotero.preferences.sync.reset.button "Възстановява...">
+<!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Търсене">
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Инсталира на допълнителни стилове...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "Отваря/Затваря на Панела на Зотеро">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Копирани на цитати за избраните записите в клипборда">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Копиране на избраните записи в клипборда">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Внос от Клипборда">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Промените ще се отразят само в новите прозорци">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Проксита">
 
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "Място за съхранение">
 <!ENTITY zotero.preferences.dataDir.useProfile "Използва папката с профила на Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Потребителски">
-<!ENTITY zotero.preferences.dataDir.choose "Избор...">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "Показва папката с дани">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
@@ -203,9 +203,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Подръжка на базата дани">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Проверка на цялостта на базата дани">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Възстановява преводачите и стиловете...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Възстановява преводачите...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Възстановява стиловете...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Запис на грешките в журнал">
 <!ENTITY zotero.preferences.debugOutputLogging.message "Журнала с грешките може да помогне за разработчитците на Зотеро да диагностицират проблемите. Записа на грешките забавя Зотеро, така че е по-добре да го държите изключен освен ако някой от разработчиците не го поиска.">

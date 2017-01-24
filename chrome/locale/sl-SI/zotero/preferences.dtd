@@ -79,8 +79,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Naslednje operacije so uporabne samo v redkih, posebnih primerih in jih ni pametno uporabiti za splošno reševanje težav. V mnogih primerih bo ponastavljanje porodilo nove težave. Za dodatne informacije si oglejte">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Možnosti ponastavitve uskladitve">
 <!ENTITY zotero.preferences.sync.reset.warning3 ".">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Polno usklajevanje">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Spoji krajevne podatke Zotero s podatki s strežnika, pri čemer prezri zgodovino usklajevanja.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Obnovi s strežnika Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Pobriši vse krajevne podatke Zotero in obnovi z uskladitvenega strežnika.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Obnovi na stanje na strežniku Zotero">

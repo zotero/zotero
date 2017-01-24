@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "開啟 URL">
 
 <!ENTITY zotero.preferences.openurl.search "搜尋解析器">
-<!ENTITY zotero.preferences.openurl.custom "自訂…">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "解析器：">
 <!ENTITY zotero.preferences.openurl.version "版本：">
 
@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "密碼：">
 <!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "建立帳號">
 <!ENTITY zotero.preferences.sync.lostPassword "遺失密碼？">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自動同步">
@@ -73,14 +73,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "使用 Zotero 本機儲存時，您同意遵守它的">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "條款與條件">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
 <!ENTITY zotero.preferences.sync.reset.warning1 "後面操作只在極少與特定情況可用，不該作為解決問題的一般方法。於許多情況，回復預設值會導致更多問題。請參見 ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "同步回復預設值選項">
 <!ENTITY zotero.preferences.sync.reset.warning3 " 以得更多資訊。">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "從 Zotero 伺服器回復">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "刪除本機的所有 Zotero 資料，並從同步伺服器回復。">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "回復到 Zotero 伺服器">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重設檔案同步歷史">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "強制檢查空間伺服器上所有本機的附加檔案">
 <!ENTITY zotero.preferences.sync.reset "回復預設值">
-<!ENTITY zotero.preferences.sync.reset.button "回復預設值…">
+<!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "搜尋">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "樣式">
 <!ENTITY zotero.preferences.cite.wordProcessors "文書處理器">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "目前未安裝文書處理器外掛。">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "取得文書處理器外掛…">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用傳統新增引用文獻條對話框">
 
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "標題">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "已更新">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "文獻條樣式語言 CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "獲取更多樣式…">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "開/關 Zotero 窗格">
 <!ENTITY zotero.preferences.keys.saveToZotero "儲存到 Zotero (網址列圖示)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "複製所選項目的引用部分到剪貼簿">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "複製所選項目到剪貼簿">
 <!ENTITY zotero.preferences.keys.importFromClipboard "從剪貼簿匯入">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "變更只在之後開的視窗生效">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "代理伺服器">
 
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "描述">
 <!ENTITY zotero.preferences.locate.name "名稱">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "每一資訊窗格中的下拉選單中的查詢引擎擴充查詢能力。下面清單中的查詢引擎啟用後，會被加到下拉選單中，且能被用來查詢來自網站文獻庫的資源。">
-<!ENTITY zotero.preferences.locate.addDescription "新增不在清單中的查詢引擎：於瀏覽器到所要用的搜尋引擎頁，且於火狐搜尋列選「新增」。當您再次開啟此偏好設定窗格，您會有一選項可以啟用此新的查詢引擎。">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "回復預設值">
 
 <!ENTITY zotero.preferences.charset "字元編碼">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "資料目錄所在">
 <!ENTITY zotero.preferences.dataDir.useProfile "使用 Zotero 的個人設定檔目錄">
 <!ENTITY zotero.preferences.dataDir.custom "自訂：">
-<!ENTITY zotero.preferences.dataDir.choose "選擇…">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "顯示資料目錄">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
@@ -203,9 +203,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "資料庫檢修">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "檢查資料庫完整性">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "回復預設轉譯器與樣式…">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "回復預設轉譯器…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "回復預設樣式…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "偵錯輸出紀錄">
 <!ENTITY zotero.preferences.debugOutputLogging.message "偵錯輸出可幫助 Zotero 開發人員診斷 Zotero 的問題。偵錯記錄會拖慢 Zotero，所以除非 Zotero 開發人員要求偵錯輸出，否則一般來說請關閉它。">

@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Hľadať resolvery">
-<!ENTITY zotero.preferences.openurl.custom "Vlastné...">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Verzia:">
 
@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "Heslo:">
 <!ENTITY zotero.preferences.sync.syncServer "Synchronizácia dát">
 <!ENTITY zotero.preferences.sync.setUpSync "Nastaviť synchronizáciu">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Odpojiť účet...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "Vytvoriť nový účet">
 <!ENTITY zotero.preferences.sync.lostPassword "Stratené heslo?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchronizovať automaticky">
@@ -73,14 +73,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Používaním Úložiska Zotero súhlasíte s uvedenými">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "pravidlami a podmienkami">
 <!ENTITY zotero.preferences.sync.librariesToSync "Synchronizovať knižnice">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Vybrať knižnice">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Synchronizovať">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Knižnica">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Nasledujúce operácie treba použiť iba v zriedkavých, špecifických situáciách a nie pre všeobecné odstraňovanie chýb. V mnohých prípadoch obnova zapríčiní dodatočné problémy. Pozri ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Možnosti obnovy synchronizácie">
 <!ENTITY zotero.preferences.sync.reset.warning3 "pre viac informácií.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Úplná synchronizácia">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Zlúčiť lokálne dáta s dátami na serveri bez ohľadu na predchádzajúce synchronizácie.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Obnoviť dáta zo servera Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Vymazať všetky lokálne dáta a nahradiť ich dátami na serveri.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Nahradiť dáta na serveri Zotero">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Obnoviť históriu synchronizácie súborov">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Nechať server znovu preveriť, či obsahuje všetky lokálne prílohy.">
 <!ENTITY zotero.preferences.sync.reset "Obnova">
-<!ENTITY zotero.preferences.sync.reset.button "Obnoviť...">
+<!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Vyhľadávanie">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "Štýly">
 <!ENTITY zotero.preferences.cite.wordProcessors "Textové editory">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Momentálne nie sú nainštalované žiadne zásuvné moduly pre textové editory.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Získať zásuvné moduly pre textové editory...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Použiť klasické okno pridávania citácií">
 
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Názov">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Aktualizované">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Získať ďalšie štýly...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "Otvoriť/zatvoriť Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Uložiť do Zotera (ikona v lište pre adresu)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopírovať vybrané citácie do schránky">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopírovať vybrané položky do schránky">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importovať zo schránky">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Zmeny sa prejavia iba v novootvorených oknách.">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxy">
 
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "Popis">
 <!ENTITY zotero.preferences.locate.name "Meno">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Vyhľadávací motor rozširuje schopnosť rozbaľovacej ponuky lokalizácie v paneli informácií. Aktivované vyhľadávacie motory v zozname dole sa pridajú do rozbaľovacej ponuky a použijú sa na lokalizáciu zdrojov z vašej knižnice na webe.">
-<!ENTITY zotero.preferences.locate.addDescription "Pre pridanie vyhľadávacieho motora, ktorý sa nenachádza na zozname, navštívte želaný vyhľadávací motor vo vašom prehliadači a zvoľte  &#34;Pridať&#34; z ponuky Lokalizovať v Zotere.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Obnoviť predvolené">
 
 <!ENTITY zotero.preferences.charset "Kódovanie znakov">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "Umiestnenie priečinku s dátami">
 <!ENTITY zotero.preferences.dataDir.useProfile "Použiť priečinok, do ktorého Firefox ukladá používateľské dáta">
 <!ENTITY zotero.preferences.dataDir.custom "Vlastné umiestnenie:">
-<!ENTITY zotero.preferences.dataDir.choose "Prehľadávať...">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "Zobraziť priečinok s dátami">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
@@ -203,9 +203,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Údržba databázy">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Skontrolovať integritu databázy">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Obnoviť konvertory a štýly...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Obnoviť konvertory...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Obnoviť štýly...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Záznam protokolu ladenia chýb">
 <!ENTITY zotero.preferences.debugOutputLogging.message "Protokol ladenia môže pomôcť vývojárom rozpoznať problémy v Zotere. Zaznamenávanie protokolu spomalí Zotero, takže túto možnosť by ste mali povoliť iba vtedy, keď si od vás protokol ladenia vyžiada niekto z vývojárskeho tímu Zotera.">

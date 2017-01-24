@@ -79,8 +79,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Poniższe operacje są używane tylko w rzadkich i określonych sytuacjach i nie powinny być używane do rozwiązywania ogólnych problemów z synchronizacją. W wielu przypadkach przywracanie może spowodować dodatkowe problemy. Zobacz">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Opcje przywracania synchronizacji">
 <!ENTITY zotero.preferences.sync.reset.warning3 "aby uzyskać więcej informacji.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Pełna synchronizacja">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Połącz lokalne dane Zotero z danymi z serwera synchronizacji, ignorując historię synchronizacji.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Przywróć z serwera Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Usuń wszystkie lokalne dane Zostero i przywróć je z serwera synchronizacji.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zapisz na serwer Zotero">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiuje wybrane odnośniki bibliograficzne do schowka">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiuj zaznaczone elementy do schowka">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importuj ze schowka">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Zmiany zostaną zastosowane tylko w nowych oknach">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Zmiany zostaną zastosowane po ponownym uruchomieniu">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Serwery proxy">
 

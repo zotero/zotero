@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "Opna slóð">
 
 <!ENTITY zotero.preferences.openurl.search "Leita að auðkennum netþjóna">
-<!ENTITY zotero.preferences.openurl.custom "Eigin stillingar...">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "Auðkennir:">
 <!ENTITY zotero.preferences.openurl.version "Útgáfa:">
 
@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "Lykilorð:">
 <!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "Nýr notandi">
 <!ENTITY zotero.preferences.sync.lostPassword "Týnt lykilorð?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Samhæfa sjálfkrafa">
@@ -73,14 +73,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Með notkun Zotero geymsluaðferðar samþykkir þú">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "skilmála">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Aðgerðir hér fyrir neðan eru einungis notaðar í sjaldgæfum og sérhæfðum tilvikum og ætti ekki að beita almennt. Í mörgum tilvikum mun endurræsing valda viðbótar vandræðum. Sjá ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Stillingar vegna endurræsingar á samhæfingu">
 <!ENTITY zotero.preferences.sync.reset.warning3 "til frekari upplýsinga">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Endurheimta frá Zotero netþjóni">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Eyða öllum staðbundnum Zotero gögnum og endurheimta frá samhæfingar netþjóni.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Endurheimta í Zotero netþjón">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Endurræsa forsögu skráasamhæfingar">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Þvinga athugun á tilveru staðbundinna viðhengja á geymslusvæði netþjóns">
 <!ENTITY zotero.preferences.sync.reset "Endurræsa">
-<!ENTITY zotero.preferences.sync.reset.button "Endurræsa...">
+<!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Leita">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "Leturstílar">
 <!ENTITY zotero.preferences.cite.wordProcessors "Ritvinnslur">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Engin tenging við ritvinnslu hefur verið sett upp.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Koma á tengingu við ritvinnslu...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Nota hefðbundið viðmót til að Bæta við tilvísun">
 
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titill">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Uppfært">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "Tilvísunarmál - CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Ná í viðbótar leturstíla...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "Opna/Loka Zotero svæði">
 <!ENTITY zotero.preferences.keys.saveToZotero "Vista í Zotero (tákn birt í vefslóðareit)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Afrita valdar tilvísunarfærslur í klemmuspjald">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Afrita valdar færslur í klemmuspjald">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Færa inn frá klemmuspjaldi">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Breytingarnar virkjast þegar nýr gluggi er opnaður">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Leppar">
 
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "Lýsing">
 <!ENTITY zotero.preferences.locate.name "Nafn">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Leitarvél fjölgar mögulegum leitarleiðum í upplýsingaflipanum. Ef leitarvélar eru virkjaðar í listanum hér fyrir neðan bætast þær við í flettilistanum og hægt verður að nota þær til að leita á vefnum að gögnum sem tengjast þínu færslusafni.">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Endurheimta upphafsstillingar">
 
 <!ENTITY zotero.preferences.charset "Leturtegund">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "Storage Location">
 <!ENTITY zotero.preferences.dataDir.useProfile "Nota forstillta möppu">
 <!ENTITY zotero.preferences.dataDir.custom "Egin stillingar:">
-<!ENTITY zotero.preferences.dataDir.choose "Veldu...">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "Sýna gagnamöppu">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
@@ -203,9 +203,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Viðhald gagnagrunns">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Ahuga ástand gagnagrunns">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Endurræsa þýðingar og leturstíla...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Endurræsa þýðendur...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Endurræsa leturstíla...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Kemba útkeyrslu eftirlitsskrár">
 <!ENTITY zotero.preferences.debugOutputLogging.message "Kembun á útkeyrslu getur hjálpað Zotero forriturum og hönnuðum að greina vandamál í Zotero. Aðgerðaskráning mun hægja á Zotero og því er best að afvirkja slíka skráningu nema forritunaraðili frá Zotero biðji um kembunar útkeyrslu.">

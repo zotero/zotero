@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "متد OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "گشتن به دنبال تشخیص‌دهنده‌ها (resolvers)">
-<!ENTITY zotero.preferences.openurl.custom "دلخواه...">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "تشخیص‌دهنده (resolver):">
 <!ENTITY zotero.preferences.openurl.version "نگارش:">
 
@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "گذرواژه:">
 <!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "ساخت حساب کاربری">
 <!ENTITY zotero.preferences.sync.lostPassword "گذرواژه را فراموش کرده‌اید؟">
 <!ENTITY zotero.preferences.sync.syncAutomatically "همزمان‌‌سازی خودکار">
@@ -73,14 +73,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "با استفاده از سامانه ذخیره زوترو (Zotero storage) می‌پذیرید که تابع">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "شرایط و قوانین آن باشید ">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 "جهت کسب اطلاعات بیشتر">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "بازیابی از کارگزار زوترو">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "پاک کردن همه اطلاعات محلی زوترو و دریافت اطلاعات از کارگزار همزمان‌‌سازی">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "بازنشانی اطلاعات در کارگزار زوترو">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "پاک کردن تاریخچه همزمان‌‌سازی پرونده‌ها">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Force checking of the storage server for all local attachment files.">
 <!ENTITY zotero.preferences.sync.reset "تنظیم مجدد">
-<!ENTITY zotero.preferences.sync.reset.button "بازنشانی...">
+<!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "جستجو">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "شیوه‌ها">
 <!ENTITY zotero.preferences.cite.wordProcessors "واژه‌پردازها">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "هیچ افزونه‌ای برای ارتباط با واژه‌پردازها نصب نشده است.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "دریافت افزونه واژه‌پرداز...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "استفاده از پنجره استناد‌کننده کلاسیک">
 
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "عنوان">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "روزآمد">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "دریافت شیوه‌های بیشتر...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "باز کردن/بستن قاب زوترو">
 <!ENTITY zotero.preferences.keys.saveToZotero "ذخیره در زوترو ( نماد نوار آدرس)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "رونوشت یادکرد آیتم‌های انتخاب شده به حافظه موقت">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "رونوشت آیتم‌های انتخاب شده به حافظه موقت">
 <!ENTITY zotero.preferences.keys.importFromClipboard "درون‌برد از حافظه موقت">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "تغییرات فقط در پنجره‌های جدید اعمال می‌شوند">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "پیشکارها">
 
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "توضیح">
 <!ENTITY zotero.preferences.locate.name "نام">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "یک مکان‌یاب، قابلیت منوی مکان‌یابی در قسمت «اطلاعات» را افزایش می‌دهد. با فعال کردن مکان‌یاب‌های فهرست زیر، می‌توانید آنها را به منوی مذکور اضافه کنید و منابع را از کتابخانه خود روی وب مکان‌یابی کنید.">
-<!ENTITY zotero.preferences.locate.addDescription "برای افزودن مکان‌یاب‌هایی که در فهرست زیر دیده نمی‌شوند، از موتور جستجوی مورد نظر در مرورگر خود بازدید کنید و سپس گزینه 'افزودن' را در نوار جستجوی فایرفاکس انتخاب کنید. با مراجعه دوباره به این قسمت، امکان فعال‌سازی مکان‌یاب جدید را خواهید داشت.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "بازگرداندن تنظیمات پیش‌فرض">
 
 <!ENTITY zotero.preferences.charset "کدبندی نویسه‌ها">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "محل ذخیره اطلاعات">
 <!ENTITY zotero.preferences.dataDir.useProfile "استفاده از پوشه پروفایل فایرفاکس">
 <!ENTITY zotero.preferences.dataDir.custom "محل دلخواه:">
-<!ENTITY zotero.preferences.dataDir.choose "انتخاب...">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "نمایش محل ذخیره اطلاعات">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
@@ -203,9 +203,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "رسیدگی به دادگان">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "بررسی یکپارچگی دادگان">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "بازنشانی مترجم‌ها و شیوه‌ها...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "بازنشانی مترجم‌ها...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "بازنشانی شیوه‌ها...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "ثبت وقایع برای اشکال‌زدایی">
 <!ENTITY zotero.preferences.debugOutputLogging.message "ثبت وقایع برای اشکال‌زدایی، به توسعه‌دهندگان زوترو برای یافتن اشکالات کمک می‌کند. ثبت وقایع زوترو را کند می‌کند. بنابراین بهتر است این گزینه را غیرفعال کنید مگر اینکه یک توسعه‌دهنده زوترو، اطلاعات اشکال‌زدایی را درخواست کرده باشد.">

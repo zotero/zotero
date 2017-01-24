@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Nach Resolvern suchen">
-<!ENTITY zotero.preferences.openurl.custom "Eigene...">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Version:">
 
@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "Passwort:">
 <!ENTITY zotero.preferences.sync.syncServer "Daten-Synchronisierung">
 <!ENTITY zotero.preferences.sync.setUpSync "Synchronisierung Konfigurieren">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Account entkoppeln...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "Account erstellen">
 <!ENTITY zotero.preferences.sync.lostPassword "Passwort vergessen?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatisch synchronisieren">
@@ -73,14 +73,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Wenn Sie Zotero Storage benutzen, erklären Sie sich einverstanden mit den">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "allgemeinen Geschäftsbedingungen">
 <!ENTITY zotero.preferences.sync.librariesToSync "Zu synchronisierende Bibliotheken">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Bibliotheken auswählen...">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Bibliothek">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Diese Optionen sind nur für spezifische und sehr seltene Probleme geeignet und  sollten nicht als normale Methode zur Problemlösung dienen. Die Reset Option kann oft sogar zusätzliche Probleme verursachen. Siehe:">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Optionene">
 <!ENTITY zotero.preferences.sync.reset.warning3 "für weitere Informationen.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Komplette Synchronisierung">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Lokale Daten mit Daten vom Server zusammenführen, ohne die Sync-History zu beachten.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Vom Zotero-Server wiederherstellen">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Alle lokalen Zotero-Daten löschen und vom Sync-Server wiederherstellen.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zum Zotero-Server wiederherstellen">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Zurücksetzen des Synchronisierungsverlaufs">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Überprüfung des Sicherungsservers für alle lokalen Datei-Anhänge erzwingen.">
 <!ENTITY zotero.preferences.sync.reset "Zurücksetzen">
-<!ENTITY zotero.preferences.sync.reset.button "Zurücksetzen...">
+<!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Suche">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "Stile">
 <!ENTITY zotero.preferences.cite.wordProcessors "Textverarbeitungsprogramme">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Keine Erweiterungen für Textverarbeitungsprogramme installiert.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Erweiterungen für Textverarbeitungsprogramme herunterladen...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Alten Zitations-Dialog nutzen">
 
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Aktualisiert">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Weitere Stile hinzufügen...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "Zotero-Panel öffnen/schließen">
 <!ENTITY zotero.preferences.keys.saveToZotero "In Zotero speichern (Adressleisten-Symbol)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Ausgewählte Eintragszitationen in die Zwischenablage kopieren">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Ausgewählte Einträge in die Zwischenablage kopieren">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import aus der Zwischenablage">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Änderungen werden nur in neuen Fenstern wirksam">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">
 
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "Beschreibung">
 <!ENTITY zotero.preferences.locate.name "Name">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Ein Artikel Finder erweitert die Optionen der &quot;Finden&quot; Funktion. Die unten ausgewählten Finder werden zum drop-down Menü hinzugefügt und können zum finden von Ressourcen  in Bibliotheken oder dem Netz verwendet werden.">
-<!ENTITY zotero.preferences.locate.addDescription "Um einen Artikel Findern hinzuzufügen der nicht auf der Liste ist, besuchen Sie die Seite der gewünschten Suchmaschine und klicken &#34;hinzufügen&#34;  in Zoteros &quot;Finden&quot; Menü.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Standardeinstellung wiederherstellen">
 
 <!ENTITY zotero.preferences.charset "Zeichenkodierung">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "Speicherort">
 <!ENTITY zotero.preferences.dataDir.useProfile "Verwende den Firefox-Profil-Ordner">
 <!ENTITY zotero.preferences.dataDir.custom "Eigene:">
-<!ENTITY zotero.preferences.dataDir.choose "Auswählen...">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "Datenverzeichnis anzeigen">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
@@ -203,9 +203,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Datenbankwartung">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Integrität der Datenbank überprüfen">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Übersetzer und Stile zurücksetzen...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Übersetzer zurücksetzen...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stile zurücksetzen...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Logging des Debug-Outputs">
 <!ENTITY zotero.preferences.debugOutputLogging.message "Debug-Output kann den Zotero-Entwicklern bei der Problemdiagnose helfen. Das Loggen des Debug-Outputs macht Zotero langsamer und sollte deswegen standardmäßig deaktiviert sein, außer wenn ein Zotero-Entwickler nach dem Debug-Output fragt.">

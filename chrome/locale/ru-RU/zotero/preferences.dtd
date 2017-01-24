@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Поиск ресолверов">
-<!ENTITY zotero.preferences.openurl.custom "Пользовательское">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "Сервер">
 <!ENTITY zotero.preferences.openurl.version "Версия">
 
@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "Пароль:">
 <!ENTITY zotero.preferences.sync.syncServer "Синхронизация данных">
 <!ENTITY zotero.preferences.sync.setUpSync "Настройка синхронизации">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "Создать учётную запись">
 <!ENTITY zotero.preferences.sync.lostPassword "Забыли пароль?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Синхронизировать автоматически">
@@ -73,14 +73,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Используя хранилище Zotero, вы соглашаетесь быть связанными его">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "условиями использования">
 <!ENTITY zotero.preferences.sync.librariesToSync "Бибиотеки для синхронизации">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Выбрать библиотеки...">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Синхронизировать">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Библиотека">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Следующие операции используются только в редких особых случаях и не должны использоваться при решении проблем общего характера. Во многих случаях, сброс настроек приводит к возникновению дополнительных сложностей. См. ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Параметры сброса настроек синхронизации">
 <!ENTITY zotero.preferences.sync.reset.warning3 " для дополнительных сведений.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Полная синхронизация">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Объединить локальные данные с данными сервера, игнорируя историю синхронизации.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Восстановить с сервера Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Удалить все локальные данные Zotero и восстановить с сервера">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Восстановить на сервере Zotero">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Сбросить историю синхронизации файлов">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Осуществить принудительную проверку наличия в хранилище сервера всех локальных файлов приложений">
 <!ENTITY zotero.preferences.sync.reset "Сбросить">
-<!ENTITY zotero.preferences.sync.reset.button "Сбросить…">
+<!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Поиск">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "Стили">
 <!ENTITY zotero.preferences.cite.wordProcessors "Текстовые редакторы">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Плагины для текстовых редакторов не установлены.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Скачать плагины для текстовых редакторов…">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Использовать стандартный способ Добавления Цитаты">
 
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Название">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Обновлён">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Загрузить дополнительные стили…">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "Открыть/закрыть панель Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Сохранить в Zotero (значок в адресной строке браузера)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Скопировать цитаты из выбранного документа в буфер обмена">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Копировать выбранные документы в буфер обмена">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Импортировать из буфера обмена">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Изменения вступят в силу только в новых окнах">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Прокси">
 
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "Описание">
 <!ENTITY zotero.preferences.locate.name "Название">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Поисковая Система расширяет возможности выпадающего меню 'Обнаружить' в панеле 'Информация'. Включение Поисковой Системы в приведённом списке добавит её в это выпадающее меню, и её можно будет использовать для поиска ресурсов в вашей библиотеке через Интернет.">
-<!ENTITY zotero.preferences.locate.addDescription "Для добавления Поисковой Системы, отсутствующей в списке, посетите страницу желаемой системы в браузере и выберите 'Добавить' в панеле поиска Firefox. Когда вы откроете заново данную панель настроек, у вас будет возможность включить новую Поисковую Систему.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Востановить список по умолчанию">
 
 <!ENTITY zotero.preferences.charset "Кодировка символов">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "Расположение папки с данными">
 <!ENTITY zotero.preferences.dataDir.useProfile "Использовать папку профиля Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Пользовательская:">
-<!ENTITY zotero.preferences.dataDir.choose "Выбрать…">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "Показать папку с данными">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
@@ -203,9 +203,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Поддержка БД">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Проверить целостность БД">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Обнулить трансляторы и стили…">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Обнулить трансляторы…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Обнулить стили…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Запись отладочной информации">
 <!ENTITY zotero.preferences.debugOutputLogging.message "Отладочная информация может помочь разработчикам Zotero диагностировать возникшие проблемы. Запись отладочной информации замедлит Zotero, поэтому обычно её следует включать, только если об этом попросит разработчик.">

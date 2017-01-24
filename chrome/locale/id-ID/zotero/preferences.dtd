@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Cari resolver">
-<!ENTITY zotero.preferences.openurl.custom "Susun...">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versi:">
 
@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "Password:">
 <!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "Buat Akun">
 <!ENTITY zotero.preferences.sync.lostPassword "Kehilangan Password?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "SInkronisasikan secara automatis">
@@ -73,14 +73,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Dengan menggunakan penyimpanan Zotero, Anda sepakat untuk terikat dengan ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "syarat dan ketentuan di dalamnya">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Kembalikan dari Server Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Hapus semua data Zotero lokal dan kembalikan dari server sinkronisasi.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Kembalikan kepada Server Zotero">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reset Riwayat Sinkronisasi Berkas">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Periksa dengan paksa server penyimpanan untuk semua berkar lampiran lokal.">
 <!ENTITY zotero.preferences.sync.reset "Reset">
-<!ENTITY zotero.preferences.sync.reset.button "Reset...">
+<!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Pencarian">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "Gaya">
 <!ENTITY zotero.preferences.cite.wordProcessors "Pengolah Kata">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Tidak ada plugin pengolah kata yang terinstal saat ini.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Dapatkan plugin pengolah kata...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Gunakan kotak dialog Tambahkan Sitasi klasik">
 
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Judul">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Diperbarui">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Dapatkan gaya tambahan">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "Buka/Tutup  Jendela Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Salin Sitasi Item Terpilih ke Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Salin Item Terpilih ke Clipboard">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Impor dari Clipboard">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Perubahan hanya berlaku pada jendela baru saja">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proksi">
 
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "Deskripsi">
 <!ENTITY zotero.preferences.locate.name "Nama">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Mesin Pencarian memperluas kapabilitas menu drop down Temukan dalam jendela Info. Dengan mengaktifkan Mesin Pencarian yang terdapat dalam daftar di bawah ini, mereka akan ditambahkan pada menu drop down dan dapat digunakan untuk menemukan referensi-referensi dari perpustakaan Anda di web.">
-<!ENTITY zotero.preferences.locate.addDescription "Untuk menambahkan Mesin Pencari yang tidak terdapat dalam daftar, kunjungi mesin pencari yang diinginkan melalui peramban Anda, lalu pilihlah &#34;Add&#34; dari menu Temukan Zotero.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Kembalikan Default">
 
 <!ENTITY zotero.preferences.charset "Pengkodean karakter">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "Lokasi Direktori Data">
 <!ENTITY zotero.preferences.dataDir.useProfile "Gunakan direktori profil">
 <!ENTITY zotero.preferences.dataDir.custom "Buatan:">
-<!ENTITY zotero.preferences.dataDir.choose "Pilih...">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "Tunjukkan Direktori Data">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
@@ -203,9 +203,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Pemeliharaan Database">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Periksa Integritas Database">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translator dan Gaya...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translator...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Gaya...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Pencatatan Output Debug">
 <!ENTITY zotero.preferences.debugOutputLogging.message "Output debug dapat membantu pengembang Zotero untuk mendiagnosis masalah yang terjadi pada Zotero.  Pencatatan debug akan memperlambat Zotero, sehingga Anda sebaiknya tetap menonaktifkannya, kecuali bila pengembang Zotero meminta output debug.">

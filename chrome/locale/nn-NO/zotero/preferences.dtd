@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "Opne URL">
 
 <!ENTITY zotero.preferences.openurl.search "Leit etter &quot;resolvers&quot;">
-<!ENTITY zotero.preferences.openurl.custom "Eigendefinert …">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versjon:">
 
@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "Passord:">
 <!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "Lag konto">
 <!ENTITY zotero.preferences.sync.lostPassword "Mista passordet?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkroniser automatisk">
@@ -73,14 +73,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Ved å bruka Zotero-lagring godtek du ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "vilkåra for bruk">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Dei følgjande handlingane er berre meint å brukast i sjeldne, spesifikke situasjonar og bør ikkje brukast i alminneleg feilsøking. I mange tilfelle vil tilbakestilling skapa nye problem. Sjå">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Nullstill synkronisering">
 <!ENTITY zotero.preferences.sync.reset.warning3 "for meir informasjon.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Gjenopprett frå Zotero-tenaren">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Slett alle lokale Zotero-data og gjenopprett frå synkroniseringstenaren.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Gjenopprett til Zotero-tenaren">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Nullstill filsynkroniseringshistorikken">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Force checking of the storage server for all local attachment files.">
 <!ENTITY zotero.preferences.sync.reset "Nullstill">
-<!ENTITY zotero.preferences.sync.reset.button "Nullstill …">
+<!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Søk">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "Stilar">
 <!ENTITY zotero.preferences.cite.wordProcessors "Teksthandsamarar">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Det er ikkje installert nokon teksthandsamartillegg.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Hent teksthandsamartillegg …">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Bruk klassisk Legg til sitering-dialog">
 
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Tittel">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Oppdatert">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Hent fleire stilar …">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "Opne/lukk Zotero-panelet">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopier dei valde siteringane til utklipptavla.">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopier dei valde elementa til utklipptavla.">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Endringar gjeld berre for nye vindauge">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Mellomtenarar">
 
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "Skildring">
 <!ENTITY zotero.preferences.locate.name "Name">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
-<!ENTITY zotero.preferences.locate.addDescription "Dersom du vil leggje til ein oppslagsmotor som ikkje er i lista, besøker du søkemotoren du ynskjer å leggje til og vel «Legg til» i Zotero sin lokaliseringsmeny.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
 
 <!ENTITY zotero.preferences.charset "Character Encoding">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "Lagringsplass">
 <!ENTITY zotero.preferences.dataDir.useProfile "Bruk profilmappa">
 <!ENTITY zotero.preferences.dataDir.custom "Egendefinert:">
-<!ENTITY zotero.preferences.dataDir.choose "Vel …">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "Vis datamappe">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
@@ -203,9 +203,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Vedlikehald av database">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Kontroller databasen">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Nullstill omsetjarar og stilar …">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Nullstill omsetjarar …">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Nullstill stilar …">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Debug Output Logging">
 <!ENTITY zotero.preferences.debugOutputLogging.message "Debug output can help Zotero developers diagnose problems in Zotero. Debug logging will slow down Zotero, so you should generally leave it disabled unless a Zotero developer requests debug output.">

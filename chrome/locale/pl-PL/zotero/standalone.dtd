@@ -69,7 +69,7 @@
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "Prześlij swoją opinię...">
 <!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Raport błędów do Zotero...">
+<!ENTITY helpReportErrors.label "Raportuj błędy do Zotero...">
 <!ENTITY helpReportErrors.accesskey "R">
 <!ENTITY helpCheckForUpdates.label "Sprawdź uaktualnienia...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "الرابط المفتوح">
 
 <!ENTITY zotero.preferences.openurl.search "البحث عن مقرر">
-<!ENTITY zotero.preferences.openurl.custom "تخصيص...">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "رابط المقرر:">
 <!ENTITY zotero.preferences.openurl.version "الإصدار:">
 
@@ -79,8 +79,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "خيارات اعادة ضبط التزامن">
 <!ENTITY zotero.preferences.sync.reset.warning3 "لمزيد من المعلومات.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "الاسترجاع من خادم زوتيرو">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "حذف جميع بيانات زوتيرو المحلية والاسترجاع من خادم التزامن.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "الاسترجاع إلى خادم زوتيرو">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "إعادة تعيين ملف سجل المزامنة">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "تنفيذ عملية التحقق من الخادم لتخزين جميع الملفات المحلية المرفقة.">
 <!ENTITY zotero.preferences.sync.reset "اعادة ضبط">
-<!ENTITY zotero.preferences.sync.reset.button "إعادة التعيين...">
+<!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "بحث">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "الأنماط">
 <!ENTITY zotero.preferences.cite.wordProcessors "معالجات النصوص">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "الوظائف الاضافية لمعالجات النصوص غير مثبته حالياً">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "أحصل على الوظائف الاضافية لمعالجات النصوص...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "استخدم المربع الحواري التقليدي لاضافة استشهاد">
 
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "اسم النمط">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "آخر تحديث">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "لغة نمط الاستشهاد">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "احصل على انماط اضافية...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "فتح/إغلاق نافذة زوتيرو">
 <!ENTITY zotero.preferences.keys.saveToZotero "احفظ في زوتيرو (ايقونة شريط العنوان)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "نسخ استشهادات العنصر المختار للحافظة">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "انسخ العناصر المحددة للحافظة">
 <!ENTITY zotero.preferences.keys.importFromClipboard "الاستيراد من الحافظة">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "يتم تفعيل التغييرات في النوافذ الجديدة فقط">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "الوكيل">
 
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "الوصف">
 <!ENTITY zotero.preferences.locate.name "الاسم">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "خاصية محرك البحث تمد القائمة المنسدلة لتحديد الموقع الموجودة بالنافذة الرئيسية للبرنامج. بتفعيل محركات البحث في القائمة التالية سيتم اضافة محرك البحث للقائمة النسدلة ويمكن استخدامها للبحث وتحديد موقع المصادر بمكتبتك على الويب.">
-<!ENTITY zotero.preferences.locate.addDescription "لاضافة محرك بحث غير موجود بالقائمة، قم بزيارة محرك البحث المطلوب في المتصفح واختار 'اضافة' من شريط البحث لفايرفوكس. عند اعادة فتح نافذة التفضيلات الحالية مرة اخرى سيكون لديك الخيار لتمكين محرك البحث الجديد.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "استعادة الاعدادات الافتراضية">
 
 <!ENTITY zotero.preferences.charset "ترميز الحروف">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "مكان تخزين البيانات">
 <!ENTITY zotero.preferences.dataDir.useProfile "استخدم مجلد الملف الشخصي لفايرفوكس">
 <!ENTITY zotero.preferences.dataDir.custom "تخصيص:">
-<!ENTITY zotero.preferences.dataDir.choose "اختر...">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "عرض مجلد البيانات">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
@@ -203,9 +203,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "صيانة قاعدة البيانات">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "التأكد من سلامة قاعدة البيانات">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "اعادة تعيين المترجمات والانماط...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "اعادة تعيين المترجمات...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "اعادة تعيين الانماط">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "تسجيل اخطاء تشغيل البرنامج">
 <!ENTITY zotero.preferences.debugOutputLogging.message "سجل اخطاء تشغيل البرنامج تساعد المطورين للتعرف على المشاكل في برنامج زوتيرو. سجل اخطاء تشغيل البرنامج سوف تبطئ عمل برنامج زوتيرو، لذا يجب عليك تركها معطلة مالم يطلب منك احد المطورين سجل الاخطاء لديك.">

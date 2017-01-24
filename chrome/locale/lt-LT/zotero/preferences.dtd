@@ -79,8 +79,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Tolaiu pateiktos funkcijos skirtos retiems specifiniams atvejams - jų nereikėtų naudoti įprastų nesklandumų sprendimui. Dažniausiai atkūrimas sukelia dar daugiau problemų. Daugiau informacijos rasite ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "atkūrimo sinchronizuojant parinkčių">
 <!ENTITY zotero.preferences.sync.reset.warning3 " puslapyje.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Visiškas sinchronizavimas">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Vietinius duomenis apjungti su duomenimis iš serverio, nepaisant sinchronizavimų praeityje.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Atkurti parsiunčiant iš Zotero serverio">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Išvalyti visus vietinius Zotero duomenis ir parsiųsti duomenis iš sinchronizavimo serverio.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Atkurti perrašant Zotero serverio duomenis">

@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Etsi linkkipalvelimia">
-<!ENTITY zotero.preferences.openurl.custom "Oma asetus...">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "Palvelin:">
 <!ENTITY zotero.preferences.openurl.version "Versio:">
 
@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "Salasana:">
 <!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "Määritä synkronointi">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "Luo käyttäjätili">
 <!ENTITY zotero.preferences.sync.lostPassword "Unohditko salasanan?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkronoi automaattisesti">
@@ -73,14 +73,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Käyttämällä Zoteron tallennustilaa sitoudut samalla siihen liittyviin">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "käyttöehtoihin">
 <!ENTITY zotero.preferences.sync.librariesToSync "Synkronoitavat kirjastot">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Valitse kirjastot...">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Synkronoi">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Kirjasto">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Seuraavat toiminnot ovat tarpeen vain äärimmäisen harvinaisissa tilanteissa, eikä niitä tulisi käyttää tavalliseen virheenetsintään. Monissa tapauksissa asetusten nollaus voi aiheuttaa lisää ongelmia. Katso ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Synkroinnin nollauksen asetukset">
 <!ENTITY zotero.preferences.sync.reset.warning3 "saadaksesi lisätietoja.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Täysi synkronointi">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Palauta aineisto Zotero-palvelimelta">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Poista kaikki paikallinen aineisto ja palauta aineisto synkronointipalvelimelta">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Palauta aineisto Zotero-palvelimelle">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Poista tiedostojen synkronointihistoria">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tarkistaa jokaisen paikallisen liitetiedoston löytymisen tallennuspalvelimelta">
 <!ENTITY zotero.preferences.sync.reset "Nollaa">
-<!ENTITY zotero.preferences.sync.reset.button "Palauta">
+<!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Etsi">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "Tyylit">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstinkäsittelyohjelmat">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Tekstinkäsittelyohjelmaliitännäisiä ei ole tällä hetkellä asennettuna.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Hanki tekstinkäsittelyohjelmaliitännäisiä...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Käytä perinteistä &quot;Lisää sitaatti&quot; -ikkunaa">
 
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Nimi">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Päivitetty">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Hanki lisää tyylejä...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "Avaa/sulje Zotero-ikkuna">
 <!ENTITY zotero.preferences.keys.saveToZotero "Tallenna Zoteroon (osoitepalkin kuvake)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopioi valittujen nimikkeiden sitaatit leikepöydälle">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopioi valitut nimikkeet leikepöydälle">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Tuo leikepöydältä">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Muutokset tulevat voimaan vasta uusissa ikkunoissa">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Välityspalvelimet">
 
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "Kuvaus">
 <!ENTITY zotero.preferences.locate.name "Nimi">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Artikkelihakumoottori laajentaa Info-sivulla olevan Paikanna-valikon toimintaa. Laittamalla päälle alla luetellut artikkelihakumoottorit ne lisätään pudotusvalikkoon ja niitä voi käyttää kirjastossasi olevien resurssien etsimiseen webistä.">
-<!ENTITY zotero.preferences.locate.addDescription "Lisätäksesi artikkelihakumoottorin, jota ei ole luettelossa, vieraile kyseisellä nettisivulla ja valitse 'Add' (Lisää) Firefoxin hakupalkista. Kun avaat uudelleen asetukset, voit aktivoida uuden artikkelihakumoottorin.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Palauta oletusarvot">
 
 <!ENTITY zotero.preferences.charset "Merkistökoodaus">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "Storage Location">
 <!ENTITY zotero.preferences.dataDir.useProfile "Käytä profiilikansiota">
 <!ENTITY zotero.preferences.dataDir.custom "Oma asetus:">
-<!ENTITY zotero.preferences.dataDir.choose "Valitse...">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "Näytä datahakemisto">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
@@ -203,9 +203,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Tietokannan huolto">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Tarkista tietokannan eheys">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Palauta sivustotulkkien ja tyylien oletusarvot...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Palauta sivustotulkkien oletusarvot...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Palauta tyylien oletusarvot...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Virheenjäljityksen päiväkirja">
 <!ENTITY zotero.preferences.debugOutputLogging.message "Virheenjäljityksen päiväkirja voi auttaa Zoteron kehittäjiä diagnosoimaan Zoteron ongelmia. Virheenjäljitys hidastaa Zoteron toimintaa, joten sen tulisi yleisesti ottaen olla poissa päältä ellei Zoteron kehittäjä erikseen pyydää virheenjäljityksen päiväkirjaa.">

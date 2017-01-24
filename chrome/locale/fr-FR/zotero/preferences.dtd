@@ -79,8 +79,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Les opérations suivantes ne sont à utiliser que dans de rares et spécifiques situations et ne doivent pas être utilisées pour un dépannage général. Dans la plupart des cas, la réinitialisation ne fera que causer des problèmes supplémentaires. Consultez ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "les options de réinitialisation du serveur de synchronisation">
 <!ENTITY zotero.preferences.sync.reset.warning3 " pour plus d'informations.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Synchronisation complète">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Fusionner les données locales avec les données du serveur, en ignorant l'historique de synchronisation.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurer à partir du serveur Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Effacer toutes les données locales de Zotero et restaurer à partir du serveur de synchronisation.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaurer vers le serveur Zotero">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copier dans le presse-papiers les documents sélectionnés, comme des citations">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copier dans le presse-papiers les documents sélectionnés, comme une bibliographie">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importer du presse-papiers">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Les modifications ne prennent effet que dans les nouvelles fenêtres.">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Les modifications prennent effet au prochain démarrage de Zotero">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Serveurs mandataires">
 

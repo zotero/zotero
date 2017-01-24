@@ -79,8 +79,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 "per obtenir més informació.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Sincronització completa amb el servidor del Zotero">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Fusiona les dades locals del Zotero amb les dades del servidor de sincronització i ignorant l'historial de sincronització.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaura des del servidor del Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Elimina totes les dades locals del Zotero i restaura-les des del servidor de sincronització">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaura al servidor del Zotero">

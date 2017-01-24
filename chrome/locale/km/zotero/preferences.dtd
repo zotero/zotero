@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "បើកគេហទំព័រ">
 
 <!ENTITY zotero.preferences.openurl.search "ស្វែងរកដំណោះស្រាយ">
-<!ENTITY zotero.preferences.openurl.custom "ធម្មតា...">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "ដំណោះស្រាយ:">
 <!ENTITY zotero.preferences.openurl.version "កំណែថ្មី:">
 
@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "លេខសម្ងាត់:">
 <!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "បង្កើតគណនី">
 <!ENTITY zotero.preferences.sync.lostPassword "ភ្លេចលេខសម្ងាត់?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "ធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ">
@@ -73,14 +73,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "តាមរយៈការប្រើបន្ទុកហ្ស៊ូតេរ៉ូ អ្នកត្រូវគោរពទៅតាម">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "លក្ខខណ្ឌ​ និង ខសន្យា។">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 "សម្រាប់ព័ត៌មានបន្ថែម។">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "ស្តារឡើងវិញពីម៉ាស៊ីនបម្រើហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "លុបចោលទិន្នន័យហ្ស៊ូតេរ៉ូមូលដ្ឋានទាំងអស់ និង ស្តារឡើងវិញពីម៉ាស៊ីន បម្រើសមកាលកម្ម">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "ស្តារទៅកាន់ម៉ាស៊ីនបម្រើហ្ស៊ូតេរ៉ូ">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "កំណត់រៀបចំប្រវត្តិឯកសារសមកាលកម្ម">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "ពិនិត្យដោយហ្មត់ចត់ចំពោះឯកសារភ្ជាប់មូលដ្ឋានទាំងអស់ដែលបានផ្ទុកនៅក្នុងម៉ាស៊ីនបម្រើ">
 <!ENTITY zotero.preferences.sync.reset "កំណត់ជាថ្មី">
-<!ENTITY zotero.preferences.sync.reset.button "កំណត់រៀបចំជាថ្មី...">
+<!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "ស្វែងរក">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "រចនាបថ">
 <!ENTITY zotero.preferences.cite.wordProcessors "កម្មវិធីវាយអត្ថបទ">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "កម្មវិធីជំនួយវាយអត្ថបទមិនទាន់បានដំឡើងទេឥលូវនេះ។">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "សូមដំឡើងកម្មវិធីជំនួយវាយអត្ថបទ...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "ប្រើទម្រង់អាគតដ្ឋានបែបបុរាណ">
 
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "ចំណងជើង">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "បានធ្វើទំនើបកម្ម">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "ស៊ីអេសអិល">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "បន្ថែមរចនាបថថ្មី...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "បើក/បិទផ្ទាំងហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "ចម្លងអាគតដ្ឋានឯកសារដែលបានជ្រើសរើសទៅកាន់កន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "ចម្លងឯកសារដែលបានជ្រើសរើសកន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
 <!ENTITY zotero.preferences.keys.importFromClipboard "ទាញឯកសារចេញពីកន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "បំលាស់ប្តូរអាចមានសុពលភាពនៅលើវីនដូយ៍ថ្មីតែប៉ុណ្ណោះ">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "សិទ្ធិប្រទាន">
 
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "ពិពណ៌នា">
 <!ENTITY zotero.preferences.locate.name "ឈ្មោះ">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "ម៉ាស៊ីនស្រាវជ្រាវអាចពង្រីកសមត្ថភាពនៃទីតាំងឯកសារតាមរយៈទាញចូលទៅក្នុងផ្ទាំងទិន្នន័យ។ តាមរយៈការធ្វើឲម៉ាស៊ីនស្រាវជ្រាវអាចដំណើរ​ការនៅក្នុងបញ្ជីខាងក្រោមនឹងត្រូវបញ្ចូលក្នុងបញ្ជីដែលបានពង្រីក ហើយ អាចត្រូវបានប្រើដើម្បីកំណត់ទីតាំងប្រភពឯកសារក្នុងបណ្ណាល័យរបស់នៅលើគេហទំព័រ។">
-<!ENTITY zotero.preferences.locate.addDescription "បន្ថែមម៉ាស៊ីនស្រាវជ្រាវដែលមិនមាននៅក្នុងបញ្ជី សូមចូលទៅកាន់​ម៉ាស៊ីនស្រាវជ្រាវដែលអ្នកចង់បាននៅក្នុងម៉ាស៊ីនបម្រើរបស់អ្នក ហើយ ជ្រើសរើស ចេញពីបញ្ជីទីតាំងឯកសារហ្ស៊ូតេរ៉ូ។">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "ស្តារលំនាំដើម">
 
 <!ENTITY zotero.preferences.charset "បញ្ចូលកូដអក្សរ">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "ទីតាំងថតទិន្នន័យ">
 <!ENTITY zotero.preferences.dataDir.useProfile "ប្រើថតទម្រង់ហ្វៃអ៊ើហ្វក់ស៍">
 <!ENTITY zotero.preferences.dataDir.custom "ធម្មតា:">
-<!ENTITY zotero.preferences.dataDir.choose "ជ្រើសរើស...">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "បង្ហាញថតទិន្នន័យ">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
@@ -203,9 +203,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "ថែរក្សាទិន្នន័យ">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "ពិនិត្យដែនទិន្នន័យ">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "កំណត់កូដចម្លង និង រចនាបថ...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "កំណត់កូដចម្លង...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "កំណត់រចនាបថ...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "ចុះកំណត់ហេតុកំហុស">
 <!ENTITY zotero.preferences.debugOutputLogging.message "កំណត់ហេតុកំហុសអាចជួយឲអ្នកបង្កើតហ្ស៊ូតេរ៉ូវិភាគបញ្ហាដែលមាននៅក្នុងហ្ស៊ូតេរ៉ូ។ ការចុះកំណត់ហេតុកំហុសអាចពន្យឺតហ្ស៊ូតេរ៉ូរបស់អ្នក ដូច្នេះហើយ អ្នកគួរតែទុកវាមិនឲដំណើរការ លុះត្រាតែអ្នកបង្កើតហ្ស៊ូតេរ៉ូ ស្នើសុំកំណត់ហេតុទិន្នផលកំហុស។">

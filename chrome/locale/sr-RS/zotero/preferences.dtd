@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "ОпенУРЛ">
 
 <!ENTITY zotero.preferences.openurl.search "Нађи разрешиваче">
-<!ENTITY zotero.preferences.openurl.custom "Прилагођено...">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "Разрешивач:">
 <!ENTITY zotero.preferences.openurl.version "Верзија:">
 
@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "Лозинка:">
 <!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "Подешавање усклађивања">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Уклони налог…">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "Направи налог">
 <!ENTITY zotero.preferences.sync.lostPassword "Изгубили сте лозинку?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Аутоматско усклађивање">
@@ -73,14 +73,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Коришћењем Зотеровог складишта, слажете се са његовим">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "одредбама и условима коришћења">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Следеће радње служе само у ретким, спецфичним околностима и не треба их користити за свакодневно тражење грешака у програму. Оне ће у многим случајевима само изазвати додатне проблеме. Погледајте страницу">
 <!ENTITY zotero.preferences.sync.reset.warning2 "о поновном постављању усклађивања">
 <!ENTITY zotero.preferences.sync.reset.warning3 "за више података.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Потпуно усклађивање">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Споаја локалне податке са подацима на серверу, занемарујући историју усклађивања.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Врати са Зотеровог сервера">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Брише све Зотерове локалне податке и поново их преузима са сервера.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Пошаљи на Зотеров сервер">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Поништи историју усклађивања">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Приморава проверу складишта на серверу у тражећи прилоге са локалног рачунара.">
 <!ENTITY zotero.preferences.sync.reset "Врати">
-<!ENTITY zotero.preferences.sync.reset.button "Врати…">
+<!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Претражи">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "Стилови">
 <!ENTITY zotero.preferences.cite.wordProcessors "Програм за уређивање текста">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Нису инсталирани додатци уређивача текста.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Преузмите додатке уређивача текста…">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Користи класични прозорчић за цитирање">
 
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Наслов">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Ажуриран">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Добави додатне стилове...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "Отвори/затвори Зотеро површ">
 <!ENTITY zotero.preferences.keys.saveToZotero "Сачувај у Зотеро (иконица траке за адресу)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Умножи цитат изабране ставке у списак исечака">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Умножи изабране ставке у списак исечака">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Увези из оставе">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Промене ће бити примењене само у новим прозорима">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Мрежни посредници">
 
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "Опис">
 <!ENTITY zotero.preferences.locate.name "Назив">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Позадински програми за претрагу научних радова проширују могућност опције Лоцирај из површи са информацијама. Уколико омогућите додатне позадинске програме са приложеног списка, они ће бити додати на списак, па се могу користити за претрагу библиотека на вебу.">
-<!ENTITY zotero.preferences.locate.addDescription "За додавање позадинских програма за претрагу научних радова, потребно је да посетите адресу странице из вашег прегледача интернета и изаберете &#34;Додај&#34; из Зотеровог менија Лоцирај.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Врати подразумевано">
 
 <!ENTITY zotero.preferences.charset "Кодирање знакова">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "Место за складиштење">
 <!ENTITY zotero.preferences.dataDir.useProfile "Користи Firefox директоријум за профил">
 <!ENTITY zotero.preferences.dataDir.custom "Прилагођено:">
-<!ENTITY zotero.preferences.dataDir.choose "Изабери...">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "Прикажи директоријум података">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
@@ -203,9 +203,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Одржавање базе података">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Провери целовитост базе података">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Постави на почетне вредности преводиоце и стилове...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Постави на почетне вредности преводиоце...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Постави на почетне вредности стилове...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Испис за отклањање грешака">
 <!ENTITY zotero.preferences.debugOutputLogging.message "Испис намењен отклањању грешака може да помогне Зотеровим програмерима да увиде проблеме у Зотеру. Дневник за грешкама ће успорити Зотеро, тако да је препоручљиво да га не користите осим уколико вам програмери не затраже испис са грешком ради отклањања одређеног проблема.">

@@ -79,8 +79,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Aşağıdaki işlemler, yalnızca ender ve özel durumlar altında kullanılmalı, ve genel sorun giderme amaçlı kullanılmamalıdırlar. Birçok durumda, sıfırlama ek sorunlara neden olacaktır. Bakınız:">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Eşitlemeyi Sıfırlama Seçenekleri">
 <!ENTITY zotero.preferences.sync.reset.warning3 "Daha fazla bilgi için">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Tam Eşitleme">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Eşitleme geçmişini gözetmeksinizin, yerel Zotero verilerini sunucudaki veri ile birleştir.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zotero Sunucusundan Geri Yükle">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Bütün yerel Zotero verilerini sil ve eşitleme sunucusundaki verileri yükle.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zotero Sunucusuna Yükle">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Seçili Eserin Göndermelerini Panoya Kopyala">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Seçilen Eserleri Panoya Kopyala">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Panodan İçeri Aktar">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Değişiklikler yeni açılan pencerelerde etkili olacaktır.">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Değişiklikler tekrar başlamadan sonra etkinleşir">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Vekil Sunucular">
 

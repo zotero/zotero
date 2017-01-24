@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "해독기로 검색">
-<!ENTITY zotero.preferences.openurl.custom "사용자 지정...">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "해독기:">
 <!ENTITY zotero.preferences.openurl.version "버전:">
 
@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "비밀번호:">
 <!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "동기화 설정">
-<!ENTITY zotero.preferences.sync.unlinkAccount "계정 연결 끊기...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "계정 생성">
 <!ENTITY zotero.preferences.sync.lostPassword "비밀번호를 분실하셨나요?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "자동 동기화">
@@ -73,14 +73,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero 스토리지 이용시 다음 약관에 동의하는 것으로 간주합니다: ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "이용 약관">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zotero 서버로부터 복원">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "모든 지역 Zotero 자료를 지우고 동기화 서버로부터 복원">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zotero Server로 복원">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "파일 동기화 기록 재설정">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "모든 지역 첨부 파일을 위해 저장서버의 검사를 강제합니다.">
 <!ENTITY zotero.preferences.sync.reset "재설정">
-<!ENTITY zotero.preferences.sync.reset.button "재설정...">
+<!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "검색">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "스타일">
 <!ENTITY zotero.preferences.cite.wordProcessors "워드 프로세서">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "설치된 워드 프로세서 플러그인 없음">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "워드 프로세서 플러그인 얻기...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "클래식 인용추가 대화창 사용">
 
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "제목">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "업데이트됨">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "추가 스타일 받기...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "Zotero 패널 열기/닫기">
 <!ENTITY zotero.preferences.keys.saveToZotero "Zotero에 저장 (주소 표시줄 아이콘)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "선택된 항목 인용을 클립보드에 복사">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "선택된 항목을 클립보드에 복사">
 <!ENTITY zotero.preferences.keys.importFromClipboard "클립보드에서 불러오기">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "새 창에서만 변경한 효과가 나타납니다">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "프록시">
 
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "설명">
 <!ENTITY zotero.preferences.locate.name "이름">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "기본값 복원">
 
 <!ENTITY zotero.preferences.charset "문자 인코딩">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "저장 위치">
 <!ENTITY zotero.preferences.dataDir.useProfile "Firefox 프로필 디렉토리 이용">
 <!ENTITY zotero.preferences.dataDir.custom "사용자 지정:">
-<!ENTITY zotero.preferences.dataDir.choose "선택...">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "자료 디렉토리 표시">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
@@ -203,9 +203,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "데이터베이스 관리">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "데이터베이스 무결성 점검">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "중계기 및 스타일 재설정...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "중계기 재설정...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "스타일 재설정...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "디버그 출력 로그">
 <!ENTITY zotero.preferences.debugOutputLogging.message "디버그 출력은 Zotero 개발자가 문제를 해결하는데 도움을 줍니다. 디버그 로깅은 Zotero의 실행속도를 저하시킵니다. 따라서 Zotero 개발자가 디버그 출력을 요구하지 않는한 사용하지 마십시오.">

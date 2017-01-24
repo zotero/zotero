@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "リンク・リゾルバを検索">
-<!ENTITY zotero.preferences.openurl.custom "カスタム設定...">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "リンク・リゾルバ:">
 <!ENTITY zotero.preferences.openurl.version "バージョン:">
 
@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.password "パスワード:">
 <!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "同期の設定">
-<!ENTITY zotero.preferences.sync.unlinkAccount "アカウントを切断する">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "アカウントを作成">
 <!ENTITY zotero.preferences.sync.lostPassword "パスワードを忘れましたか？">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自動的に同期">
@@ -73,14 +73,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero ストレジをお使いになると、次の使用許諾条件に同意したことになります。">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "使用許諾条件">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries...">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
 <!ENTITY zotero.preferences.sync.reset.warning1 "次の操作は、稀に起こる特別な状況のためだけのもので、一般的な問題解決に用いられるべきではありません。多くの場合、リセットすることで更なる問題を引き起こします。以下をご参照ください。">
 <!ENTITY zotero.preferences.sync.reset.warning2 "同期リセットの設定">
 <!ENTITY zotero.preferences.sync.reset.warning3 "により詳しい情報があります。">
-<!ENTITY zotero.preferences.sync.reset.fullSync "完全に同期">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "ローカルのデータをサーバーからのデータと統合し、同期の履歴は無視する">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zotero サーバーから復元（リストア）する">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "ローカル（手元）の Zotero データを全て消去して、同期サーバのデータで復元する。">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zotero サーバのデータに復元する。">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "ファイル同期の履歴を削除する">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "すべてのローカルの添付ファイルに関して、ストレージ・サーバーを強制的に確認する。">
 <!ENTITY zotero.preferences.sync.reset "リセット">
-<!ENTITY zotero.preferences.sync.reset.button "リセット...">
+<!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "検索">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.cite.styles "引用スタイル">
 <!ENTITY zotero.preferences.cite.wordProcessors "ワード・プロセッサ">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "ワード・プロセッサ用プラグインはインストールされていません。">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "ワード・プロセッサ用プラグインを入手...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "旧式の出典表記追加ダイアログを使用する">
 
@@ -133,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "スタイル名">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "更新日">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "他の引用スタイルを入手する...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.openZotero "Zotero 画面を開く／閉じる">
 <!ENTITY zotero.preferences.keys.saveToZotero "Zotero に保存する (アドレスバーのアイコン)">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "選択されたアイテムの出典表記をクリップボードにコピー">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "選択されたアイテムの参考文献目録をクリップボードにコピー">
 <!ENTITY zotero.preferences.keys.importFromClipboard "クリップボードからインポート">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "変更を有効にするためには、新規画面を開いてください">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "プロキシ">
 
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.locate.description "詳細">
 <!ENTITY zotero.preferences.locate.name "名称">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "所在確認エンジンは、所在確認ドロップダウンメニューの機能を拡張するものです。所在確認エンジンを有効化すると、それがドロップダウンメニューに追加され、ウェブ上での資料の所在確認に利用することができます。">
-<!ENTITY zotero.preferences.locate.addDescription "リストにない所在確認エンジンを追加するには、お望みの検索エンジンのページをウェブブラウザを通じて訪れ、Zotero の所在確認メニューから &#34;Add&#34; を選んでください。">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "初期設定に戻す">
 
 <!ENTITY zotero.preferences.charset "文字コード">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "データ・ディレクトリの場所">
 <!ENTITY zotero.preferences.dataDir.useProfile "Firefox プロファイルのディレクトリを使用する">
 <!ENTITY zotero.preferences.dataDir.custom "個人設定:">
-<!ENTITY zotero.preferences.dataDir.choose "選択する...">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "データ・ディレクトリを表示する">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
@@ -203,9 +203,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "データベースの管理">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "データベースの整合性をチェック">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "サイト・トランスレータと引用スタイルをリセットする...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "トランスレータをリセットする...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "引用スタイルをリセットする...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "デバッグ出力の記録">
 <!ENTITY zotero.preferences.debugOutputLogging.message "デバッグ出力は Zotero 開発者が Zotero 内部の問題を診断する際に役立ちます。デバッグ出力の記録は Zotero の動作を重くするので、Zotero 開発者からデバッグ出力の要求があった場合を除き、通常はこの機能を無効のままにしてください。">

@@ -94,7 +94,7 @@
 <!ENTITY zotero.items.menu.attach.fileLink "Dołącz odnośnik do pliku...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Przywróć do biblioteki">
-<!ENTITY zotero.items.menu.duplicateItem "Duplikuj zaznaczony element">
+<!ENTITY zotero.items.menu.duplicateItem "Duplikuj element">
 <!ENTITY zotero.items.menu.mergeItems "Złącz elementy...">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Wybierz wersję elementu, którą chcesz użyć jako element główny:">
@@ -104,19 +104,19 @@
 <!ENTITY zotero.toolbar.moreItemTypes.label "Więcej">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Utwórz nowy element z aktywnej strony">
 <!ENTITY zotero.toolbar.lookup.label "Dodaj element za pomocą identyfikatora">
-<!ENTITY zotero.toolbar.removeItem.label "Usuń element">
+<!ENTITY zotero.toolbar.removeItem.label "Usuń element...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nowa biblioteka...">
-<!ENTITY zotero.toolbar.newCollection.label "Nowa kolekcja">
+<!ENTITY zotero.toolbar.newCollection.label "Nowa kolekcja...">
 <!ENTITY zotero.toolbar.markFeedRead.label "Oznacz kanał jako przeczytany">
 <!ENTITY zotero.toolbar.newGroup "Nowa grupa...">
-<!ENTITY zotero.toolbar.newSubcollection.label "Nowa subkolekcja">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Nowe zapisane wyszukiwanie">
+<!ENTITY zotero.toolbar.newSubcollection.label "Nowa subkolekcja...">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Nowe zapisane wyszukiwanie...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Opróżnij Kosz">
 <!ENTITY zotero.toolbar.tagSelector.label "Wyświetl/Ukryj selektor etykiet">
 <!ENTITY zotero.toolbar.actions.label "Funkcje">
-<!ENTITY zotero.toolbar.import.label "Importuj">
+<!ENTITY zotero.toolbar.import.label "Importuj...">
 <!ENTITY zotero.toolbar.importFromClipboard "Importuj ze schowka">
-<!ENTITY zotero.toolbar.export.label "Eksportuj bibliotekę">
+<!ENTITY zotero.toolbar.export.label "Eksportuj bibliotekę...">
 <!ENTITY zotero.toolbar.rtfScan.label "Skanowanie RTF...">
 <!ENTITY zotero.toolbar.timeline.label "Utwórz oś czasową">
 <!ENTITY zotero.toolbar.preferences.label "Ustawienia...">

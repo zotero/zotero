@@ -47,7 +47,7 @@
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Search for resolvers">
-<!ENTITY zotero.preferences.openurl.custom "Doelmaak...">
+<!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "Oplosser:">
 <!ENTITY zotero.preferences.openurl.version "Weergawe:">
 
@@ -79,8 +79,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local data with data from server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Zotero Server">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Erase all local Zotero data and restore from the sync server.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Zotero Server">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopieer geselekteerde items na knipbord">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Veranderinge vind net in nuwe vensters plaas">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">
 
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.dataDir "Stoorligging">
 <!ENTITY zotero.preferences.dataDir.useProfile "Gebruik Firerfox-profielgids">
 <!ENTITY zotero.preferences.dataDir.custom "Doelmaak:">
-<!ENTITY zotero.preferences.dataDir.choose "Kies...">
+<!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 

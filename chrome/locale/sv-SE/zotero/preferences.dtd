@@ -79,8 +79,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Följande åtgärder är endast till för sällsynta, särskilda situationer och ska inte användas för vanlig felsökning. I många fall kan en återställning istället orsaka nya problem. Se">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Återställningsalternativ för synkronisering">
 <!ENTITY zotero.preferences.sync.reset.warning3 "för mer information.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Fullständig synkronsering">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Slå ihop lokala data med data från servern, strunta i synkronseringshistrorik">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Återställ från Zotero Server">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Radera alla lokala Zoterodata och återställ från synkroniseringsservern.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Återställ till Zotero Server">
