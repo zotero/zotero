@@ -4,6 +4,7 @@ compiler:
     - gcc
 env:
     - FX_VERSION="50.1.0"
+    - FX_VERSION="45.0.2esr"
 matrix:
     fast_finish: true
     #allow_failures:
@@ -11,6 +12,9 @@ matrix:
 notifications:
     email: false
 install:
+    - if [ $FX_VERSION = "45.0.2esr" ]; then
+        wget -O tarball "https://archive.mozilla.org/pub/firefox/releases/45.0.2esr/linux-x86_64/en-US/firefox-45.0.2esr.tar.bz2";
+      fi
     - if [ $FX_VERSION = "50.1.0" ]; then
         wget -O tarball "http://archive.mozilla.org/pub/firefox/tinderbox-builds/mozilla-release-linux64-add-on-devel/1481240107/firefox-50.1.0.en-US.linux-x86_64-add-on-devel.tar.bz2";
       fi
