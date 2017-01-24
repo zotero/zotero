@@ -89,9 +89,12 @@ To add a new preference:
 		
 			<separator class="thin"/>
 			
+			<!--
+			TODO: Restore a way to add these
 			<label id="addLocateEngineDescription" style="font-size: 10px; width: 45em; height: 6em">
 				&zotero.preferences.locate.addDescription;
 			</label>
+			-->
 		</groupbox>
 	</prefpane>
 	
