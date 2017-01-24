@@ -590,15 +590,15 @@ Zotero_Preferences.Sync = {
 					+ ps.BUTTON_POS_1_DEFAULT;
 				var index = ps.confirmEx(
 					null,
-					// TODO: localize
 					Zotero.getString('general.warning'),
-					"Zotero will compare all local and remote data and merge any data that does not "
-						+ "exist in both locations.\n\n"
+					// TODO: localize
+					"On the next sync, Zotero will compare all local and remote data and merge any "
+						+ "data that does not exist in both locations.\n\n"
 						+ "This option is not necessary during normal usage and should "
 						+ "generally be used only to troubleshoot specific issues as recommended "
 						+ "by Zotero support staff.",
 					buttonFlags,
-					"Sync",
+					Zotero.getString('general.reset'),
 					null, null, null, {}
 				);
 				
@@ -611,7 +611,6 @@ Zotero_Preferences.Sync = {
 							yield library.save();
 						}
 					});
-					yield Zotero.Sync.Runner.sync();
 					break;
 					
 					// Cancel
