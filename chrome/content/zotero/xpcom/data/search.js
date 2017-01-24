@@ -935,7 +935,8 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 			// For conditions with an inline filter using 'is'/'isNot', combine with last condition
 			// if the same
 			if (lastCondition
-					&& (!lastCondition.alias || name == lastCondition.alias)
+					&& ((!lastCondition.alias && !condition.alias && name == lastCondition.name)
+						|| (lastCondition.alias && condition.alias && lastCondition.alias == condition.alias))
 					&& condition.operator.startsWith('is')
 					&& condition.operator == lastCondition.operator
 					&& conditionData.inlineFilter) {
