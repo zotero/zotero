@@ -838,7 +838,9 @@ Zotero.Sync.Data.Local = {
 										jsonObject,
 										{
 											skipData: true,
-											notifierQueue
+											notifierQueue,
+											// Save as unsynced
+											saveAsChanged: !!result.localChanged
 										}
 									);
 									results.push(saveResults);
@@ -884,6 +886,11 @@ Zotero.Sync.Data.Local = {
 									jsonDataLocal[x] = jsonData[x];
 								})
 								jsonObject.data = jsonDataLocal;
+								
+								// Save as unsynced
+								if (results.localChanged) {
+									saveOptions.saveAsChanged = true;
+								}
 							}
 						}
 						// Object doesn't exist locally
@@ -1160,7 +1167,7 @@ Zotero.Sync.Data.Local = {
 				
 				let saveOptions = {};
 				Object.assign(saveOptions, options);
-				// Tell _saveObjectFromJSON to save as unsynced
+				// Tell _saveObjectFromJSON() to save as unsynced
 				saveOptions.saveAsChanged = true;
 				saveOptions.notifierQueue = notifierQueue;
 				
@@ -1533,7 +1540,31 @@ Zotero.Sync.Data.Local = {
 			conflicts.push([c1, c2]);
 		}
 		
-		return { changes, conflicts };
+		var localChanged = false;
+		
+		// Massage some old data
+		conflicts = conflicts.filter((x) => {
+			// If one side has auto-hyphenated ISBN, use that
+			if (x[0].field == 'ISBN' && x[0].op == 'add' && x[1].op == 'add') {
+				let hyphenatedA = Zotero.Utilities.Internal.hyphenateISBN(x[0].value);
+				let hyphenatedB = Zotero.Utilities.Internal.hyphenateISBN(x[1].value);
+				if (hyphenatedA && hyphenatedB) {
+					// Use remote
+					if (hyphenatedA == x[1].value) {
+						changes.push(x[1]);
+						return false;
+					}
+					// Use local
+					else if (x[0].value == hyphenatedB) {
+						localChanged = true;
+						return false;
+					}
+				}
+				return true;
+			}
+		});
+		
+		return { changes, conflicts, localChanged };
 	},
 	
 	

@@ -439,6 +439,35 @@ describe("Zotero.Sync.Data.Local", function() {
 			assert.equal(obj.getField('place'), changedPlace);
 		})
 		
+		it("should save item with overriding local conflict as unsynced", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			var isbn = '978-0-335-22006-9';
+			var type = 'item';
+			let obj = createUnsavedDataObject(type, { version: 5 });
+			obj.setField('ISBN', isbn);
+			yield obj.saveTx();
+			let data = obj.toJSON();
+			
+			data.key = obj.key;
+			data.version = 10;
+			data.ISBN = '9780335220069';
+			let json = {
+				key: obj.key,
+				version: 10,
+				data
+			};
+			var results = yield Zotero.Sync.Data.Local.processObjectsFromJSON(
+				type, libraryID, [json], { stopOnError: true }
+			);
+			assert.isTrue(results[0].processed);
+			assert.isUndefined(results[0].changes);
+			assert.isUndefined(results[0].conflicts);
+			assert.equal(obj.version, 10);
+			assert.equal(obj.getField('ISBN'), isbn);
+			assert.isFalse(obj.synced);
+		});
+		
 		it("should delete older versions in sync cache after processing", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
@@ -1835,5 +1864,58 @@ describe("Zotero.Sync.Data.Local", function() {
 				]
 			);
 		})
+		
+		it("should automatically use local hyphenated ISBN value if only difference", function () {
+			var json1 = {
+				key: "AAAAAAAA",
+				version: 1234,
+				itemType: "book",
+				ISBN: "978-0-335-22006-9"
+			};
+			var json2 = {
+				key: "AAAAAAAA",
+				version: 1235,
+				itemType: "book",
+				ISBN: "9780335220069"
+			};
+			var ignoreFields = ['dateAdded', 'dateModified'];
+			var result = Zotero.Sync.Data.Local._reconcileChangesWithoutCache(
+				'item', json1, json2, ignoreFields
+			);
+			assert.lengthOf(result.changes, 0);
+			assert.lengthOf(result.conflicts, 0);
+			assert.isTrue(result.localChanged);
+		});
+		
+		it("should automatically use remote hyphenated ISBN value if only difference", function () {
+			var json1 = {
+				key: "AAAAAAAA",
+				version: 1234,
+				itemType: "book",
+				ISBN: "9780335220069"
+			};
+			var json2 = {
+				key: "AAAAAAAA",
+				version: 1235,
+				itemType: "book",
+				ISBN: "978-0-335-22006-9"
+			};
+			var ignoreFields = ['dateAdded', 'dateModified'];
+			var result = Zotero.Sync.Data.Local._reconcileChangesWithoutCache(
+				'item', json1, json2, ignoreFields
+			);
+			assert.sameDeepMembers(
+				result.changes,
+				[
+					{
+						field: "ISBN",
+						op: "add",
+						value: "978-0-335-22006-9"
+					}
+				]
+			);
+			assert.lengthOf(result.conflicts, 0);
+			assert.isFalse(result.localChanged);
+		});
 	})
 })
