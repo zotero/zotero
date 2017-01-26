@@ -462,7 +462,7 @@ function ZoteroProtocolHandler() {
 								return '<span style="color: red; font-weight: bold">Error generating report</span>';
 							}
 						);
-						var str = NetUtil.readInputStreamToString(is, is.available(), {});
+						var str = NetUtil.readInputStreamToString(is, is.available(), { charset: "UTF-8" });
 						return Zotero.Promise.resolve(str);
 				}
 			});
