@@ -1563,8 +1563,8 @@ Zotero.Sync.Data.Local = {
 						return false;
 					}
 				}
-				return true;
 			}
+			return true;
 		});
 		
 		return { changes, conflicts, localChanged };
