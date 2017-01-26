@@ -1342,6 +1342,44 @@ describe("Zotero.Sync.Data.Local", function() {
 					]
 				);
 			})
+			
+			it("should automatically use remote version for unresolvable conflicts when both sides are in trash", function () {
+				var cacheJSON = {
+					key: "AAAAAAAA",
+					version: 1234,
+					title: "Title 1",
+					dateModified: "2015-05-14 12:34:56"
+				};
+				var json1 = {
+					key: "AAAAAAAA",
+					version: 1234,
+					title: "Title 2",
+					deleted: true,
+					dateModified: "2015-05-14 14:12:34"
+				};
+				var json2 = {
+					key: "AAAAAAAA",
+					version: 1235,
+					title: "Title 3",
+					deleted: true,
+					dateModified: "2015-05-14 13:45:12"
+				};
+				var ignoreFields = ['dateAdded', 'dateModified'];
+				var result = Zotero.Sync.Data.Local._reconcileChanges(
+					'item', cacheJSON, json1, json2, ignoreFields
+				);
+				assert.lengthOf(result.changes, 1);
+				assert.sameDeepMembers(
+					result.changes,
+					[
+						{
+							field: "title",
+							op: "modify",
+							value: "Title 3"
+						},
+					]
+				);
+			});
 		})
 		
 		
@@ -1864,6 +1902,49 @@ describe("Zotero.Sync.Data.Local", function() {
 				]
 			);
 		})
+		
+		it("should automatically use remote version for conflicting fields when both sides are in trash", function () {
+			var json1 = {
+				key: "AAAAAAAA",
+				version: 1234,
+				title: "Title 1",
+				pages: 10,
+				deleted: true,
+				dateModified: "2015-05-14 14:12:34"
+			};
+			var json2 = {
+				key: "AAAAAAAA",
+				version: 1235,
+				title: "Title 2",
+				place: "New York",
+				deleted: true,
+				dateModified: "2015-05-14 13:45:12"
+			};
+			var ignoreFields = ['dateAdded', 'dateModified'];
+			var result = Zotero.Sync.Data.Local._reconcileChangesWithoutCache(
+				'item', json1, json2, ignoreFields
+			);
+			assert.lengthOf(result.changes, 3);
+			assert.sameDeepMembers(
+				result.changes,
+				[
+					{
+						field: "title",
+						op: "modify",
+						value: "Title 2"
+					},
+					{
+						field: "pages",
+						op: "delete"
+					},
+					{
+						field: "place",
+						op: "add",
+						value: "New York"
+					}
+				]
+			);
+		});
 		
 		it("should automatically use local hyphenated ISBN value if only difference", function () {
 			var json1 = {

@@ -1470,8 +1470,10 @@ Zotero.Sync.Data.Local = {
 					continue;
 				}
 				
-				// Automatically apply remote changes for non-items, even if in conflict
-				if (objectType != 'item') {
+				// Automatically apply remote changes if both items are in trash and for non-items,
+				// even if in conflict
+				if ((objectType == 'item' && currentJSON.deleted && newJSON.deleted)
+						|| objectType != 'item') {
 					continue;
 				}
 				
@@ -1515,7 +1517,8 @@ Zotero.Sync.Data.Local = {
 			}
 			
 			// Automatically apply remote changes for non-items, even if in conflict
-			if (objectType != 'item') {
+			if ((objectType == 'item' && currentJSON.deleted && newJSON.deleted)
+						|| objectType != 'item') {
 				changes.push(c2);
 				continue;
 			}
