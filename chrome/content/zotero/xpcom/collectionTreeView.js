@@ -1179,7 +1179,7 @@ Zotero.CollectionTreeView.prototype.selectItem = Zotero.Promise.coroutine(functi
 	// Force switch to library view
 	else if (!this.selectedTreeRow.isLibrary() && inLibraryRoot) {
 		Zotero.debug("Told to select in library; switching to library");
-		yield cv.selectLibrary(item.libraryID);
+		yield this.selectLibrary(item.libraryID);
 	}
 	
 	var itemsView = this.selectedTreeRow.itemTreeView;
