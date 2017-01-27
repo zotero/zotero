@@ -1220,7 +1220,7 @@ AsyncChannel.prototype = {
 					.createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
 				converter.charset = "UTF-8";
 				let inputStream = converter.convertToInputStream(data);
-				listenerWrapper.onDataAvailable(this, context, inputStream, 0, data.length);
+				listenerWrapper.onDataAvailable(this, context, inputStream, 0, inputStream.available());
 				
 				listenerWrapper.onStopRequest(this, context, this.status);
 			}
