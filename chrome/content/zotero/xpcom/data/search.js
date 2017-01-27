@@ -1198,20 +1198,14 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						}
 						
 						if (objectType == 'collection') {
-							var q = ['?'];
-							var p = [obj.id];
+							let ids = [obj.id];
 							
 							// Search descendent collections if recursive search
 							if (recursive){
-								var descendents = obj.getDescendents(false, 'collection');
-								for (let d of descendents) {
-									q.push('?');
-									p.push(d.id);
-								}
+								ids = ids.concat(obj.getDescendents(false, 'collection').map(d => d.id));
 							}
 							
-							condSQL += "collectionID IN (" + q.join() + ")";
-							condSQLParams = condSQLParams.concat(p);
+							condSQL += 'collectionID IN (' + ids.join(', ') + ')';
 						}
 						// Saved search
 						else {
