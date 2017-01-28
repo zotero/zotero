@@ -111,7 +111,9 @@ Zotero.ProgressWindowSet = new function() {
  *
  * Pass the active window into the constructor
  */
-Zotero.ProgressWindow = function(_window = null) {
+Zotero.ProgressWindow = function(options = {}) {
+	var _window = options.window || null;
+	var _closeOnClick = typeof options.closeOnClick == 'undefined' ? true : options.closeOnClick;
 	var self = this,
 		_progressWindow = null,
 		_windowLoaded = false,
@@ -541,7 +543,9 @@ Zotero.ProgressWindow = function(_window = null) {
 	}
 	
 	function _onMouseUp(e) {
-		self.close();
+		if (_closeOnClick) {
+			self.close();
+		}
 	}
 	
 	/**
