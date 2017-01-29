@@ -1674,12 +1674,6 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 		return false;
 	}
 	
-	var selected = this.getSelectedItems(true);
-	if (selected.length == 1 && selected[0] == id) {
-		Zotero.debug("Item " + id + " is already selected");
-		return true;
-	}
-	
 	var row = this._rowMap[id];
 	
 	// Get the row of the parent, if there is one
@@ -1694,6 +1688,13 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 	var parent = item.parentItemID;
 	if (parent && this._rowMap[parent] != undefined) {
 		parentRow = this._rowMap[parent];
+	}
+	
+	var selected = this.getSelectedItems(true);
+	if (selected.length == 1 && selected[0] == id) {
+		Zotero.debug("Item " + id + " is already selected");
+		this.betterEnsureRowIsVisible(row, parentRow);
+		return true;
 	}
 	
 	// If row with id not visible, check to see if it's hidden under a parent
