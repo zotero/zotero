@@ -984,16 +984,20 @@ Zotero.Sync.Storage.Local = {
 		yield Zotero.DB.executeTransaction(function* () {
 			for (let i = 0; i < conflicts.length; i++) {
 				let conflict = conflicts[i];
+				let item = Zotero.Items.getByLibraryAndKey(libraryID, conflict.left.key);
 				let mtime = io.dataOut[i].dateModified;
 				// Local
 				if (mtime == conflict.left.dateModified) {
 					syncState = this.SYNC_STATE_FORCE_UPLOAD;
+					// When local version is chosen, update stored hash (and mtime) to remote values so
+					// that upload goes through without 412
+					item.attachmentSyncedModificationTime = conflict.right.mtime;
+					item.attachmentSyncedHash = conflict.right.md5;
 				}
 				// Remote
 				else {
 					syncState = this.SYNC_STATE_FORCE_DOWNLOAD;
 				}
-				let item = Zotero.Items.getByLibraryAndKey(libraryID, conflict.left.key);
 				item.attachmentSyncState = syncState;
 				yield item.save({ skipAll: true });
 			}
