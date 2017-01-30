@@ -59,11 +59,14 @@ tinymce.PluginManager.add('link', function(editor) {
 	}
 
 	function openDetachedWindow(url) {
+		// Added by Zotero
+		editor.execCommand('ZoteroLinkClick', false, url);
+		
 		// Chrome and Webkit has implemented noopener and works correctly with/without popup blocker
 		// Firefox has it implemented noopener but when the popup blocker is activated it doesn't work
 		// Edge has only implemented noreferrer and it seems to remove opener as well
 		// Older IE versions pre IE 11 falls back to a window.open approach
-		if (!tinymce.Env.ie || tinymce.Env.ie > 10) {
+		/*if (!tinymce.Env.ie || tinymce.Env.ie > 10) {
 			var link = document.createElement('a');
 			link.target = '_blank';
 			link.href = url;
@@ -81,7 +84,7 @@ tinymce.PluginManager.add('link', function(editor) {
 				doc.write('<meta http-equiv="refresh" content="0; url=' + tinymce.DOM.encode(url) + '">');
 				doc.close();
 			}
-		}
+		}*/
 	}
 
 	function gotoLink(a) {

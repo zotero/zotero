@@ -57,6 +57,15 @@
 					zoteroExecCommand(ed.getDoc(), cmd, ui, value);
 				});
 			});
+			
+			["ZoteroLinkClick"].forEach(function (command) {
+				ed.addCommand(command, function (ui, value) {
+					zoteroHandleEvent({
+						type: command,
+						value
+					});
+				});
+			});
 		},
 		
 		// More restrictive version of default set, with JS/etc. removed
