@@ -27,6 +27,9 @@
 Zotero.Report = {};
 
 Zotero.Report.HTML = new function () {
+	let domParser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+		.createInstance(Components.interfaces.nsIDOMParser);
+	
 	this.listGenerator = function* (items, combineChildItems) {
 		yield '<!DOCTYPE html>\n'
 			+ '<html>\n'
@@ -67,25 +70,13 @@ Zotero.Report.HTML = new function () {
 				if (obj['note']) {
 					content += '\n\t\t\t';
 					
-					// If not valid XML, display notes with entities encoded
-					var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-							.createInstance(Components.interfaces.nsIDOMParser);
-					var doc = parser.parseFromString('<div>'
+					let doc = domParser.parseFromString('<div>'
 						+ obj.note
-							// &nbsp; isn't valid in HTML
-							.replace(/&nbsp;/g, "&#160;")
 							// Strip control characters (for notes that were
 							// added before item.setNote() started doing this)
 							.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
-					+ '</div>', "application/xml");
-					if (doc.documentElement.tagName == 'parsererror') {
-						Zotero.debug(doc.documentElement.textContent, 2);
-						content += '<p class="plaintext">' + escapeXML(obj.note) + '</p>\n';
-					}
-					// Otherwise render markup normally
-					else {
-						content += obj.note + '\n';
-					}
+						 + '</div>', "text/html");
+					content += doc.body.innerHTML + '\n';
 				}
 			}
 			
@@ -101,24 +92,13 @@ Zotero.Report.HTML = new function () {
 					for (let note of obj.reportChildren.notes) {
 						content += '\t\t\t\t\t<li id="item_' + note.key + '">\n';
 						
-						// If not valid XML, display notes with entities encoded
-						var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-								.createInstance(Components.interfaces.nsIDOMParser);
-						var doc = parser.parseFromString('<div>'
+						let doc = domParser.parseFromString('<div>'
 							+ note.note
-								.replace(/&nbsp;/g, "&#160;")
 								// Strip control characters (for notes that were
 								// added before item.setNote() started doing this)
 								.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
-						 + '</div>', "application/xml");
-						if (doc.documentElement.tagName == 'parsererror') {
-							Zotero.debug(doc.documentElement.textContent, 2);
-							content += '<p class="plaintext">' + escapeXML(note.note) + '</p>\n';
-						}
-						// Otherwise render markup normally
-						else {
-							content += note.note + '\n';
-						}
+						 + '</div>', "text/html");
+						content += doc.body.innerHTML + '\n';
 						
 						// Child note tags
 						content += _generateTagsList(note);
