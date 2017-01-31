@@ -2132,12 +2132,12 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 		}
 		
 		var translator = this.translator[0];
-		Zotero.getSystemInfo(function(info) {
+		Zotero.getSystemInfo().then(function(info) {
 			var postBody = "id=" + encodeURIComponent(translator.translatorID) +
 						   "&lastUpdated=" + encodeURIComponent(translator.lastUpdated) +
 						   "&diagnostic=" + encodeURIComponent(info) +
 						   "&errorData=" + encodeURIComponent(errorString);
-			Zotero.HTTP.doPost(ZOTERO_CONFIG.REPOSITORY_URL + "report", postBody);
+			return Zotero.HTTP.doPost(ZOTERO_CONFIG.REPOSITORY_URL + "report", postBody);
 		});
 	}
 }
