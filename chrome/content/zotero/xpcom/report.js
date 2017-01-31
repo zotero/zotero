@@ -69,14 +69,7 @@ Zotero.Report.HTML = new function () {
 				// Independent note
 				if (obj['note']) {
 					content += '\n\t\t\t';
-					
-					let doc = domParser.parseFromString('<div>'
-						+ obj.note
-							// Strip control characters (for notes that were
-							// added before item.setNote() started doing this)
-							.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
-						 + '</div>', "text/html");
-					content += doc.body.innerHTML + '\n';
+					content += getNoteHTML(obj.note);
 				}
 			}
 			
@@ -92,13 +85,7 @@ Zotero.Report.HTML = new function () {
 					for (let note of obj.reportChildren.notes) {
 						content += '\t\t\t\t\t<li id="item_' + note.key + '">\n';
 						
-						let doc = domParser.parseFromString('<div>'
-							+ note.note
-								// Strip control characters (for notes that were
-								// added before item.setNote() started doing this)
-								.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
-						 + '</div>', "text/html");
-						content += doc.body.innerHTML + '\n';
+						content += getNoteHTML(note.note);
 						
 						// Child note tags
 						content += _generateTagsList(note);
@@ -297,13 +284,7 @@ Zotero.Report.HTML = new function () {
 				// Attachment note
 				if (attachment.note) {
 					content += '\t\t\t\t\t\t<div class="note">';
-					if (attachment.note.substr(0, 1024).match(/<p[^>]*>/)) {
-						content += attachment.note + '\n';
-					}
-					// Wrap plaintext notes in <p>
-					else {
-						content += '<p class="plaintext">' + escapeXML(attachment.note) + '</p>\n';
-					}
+					content += getNoteHTML(attachment.note);
 					content += '\t\t\t\t\t</div>';
 				}
 				
@@ -312,6 +293,22 @@ Zotero.Report.HTML = new function () {
 			content += '\t\t\t\t</ul>\n';
 		}
 		return content;
+	}
+	
+	
+	function getNoteHTML(note) {
+		// If HTML tag or entity, parse as HTML
+		if (note.match(/(<(p|ul|ol|div|a|br|b|i|u|strong|em( >))|&[a-z]+;|&#[0-9]+;)/)) {
+			let doc = domParser.parseFromString('<div>'
+				+ note
+					// Strip control characters (for notes that were
+					// added before item.setNote() started doing this)
+					.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+			 + '</div>', "text/html");
+			return doc.body.innerHTML + '\n';
+		}
+		// Otherwise, treat as plain text
+		return '<p class="plaintext">' + escapeXML(note) + '</p>\n';
 	}
 	
 	
