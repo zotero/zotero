@@ -87,7 +87,7 @@ Zotero.Date = new function(){
 				}
 			}
 		});
-	});
+	};
 	
 	
 	/**
