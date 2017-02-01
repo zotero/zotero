@@ -95,7 +95,7 @@
 					</groupbox>
 					
 					<groupbox>
-						<caption label="&zotero.preferences.openurl.caption;"/>
+						<caption label="OpenURL"/>
 						
 						<hbox align="center">
 							<!-- vbox prevents some weird vertical stretching of the menulist -->
