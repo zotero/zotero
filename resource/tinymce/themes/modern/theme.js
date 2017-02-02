@@ -875,13 +875,16 @@ define('tinymce.modern.ui.Sidebar', [
 define('tinymce.modern.ui.SkinLoaded', [
 ], function () {
 	var fireSkinLoaded = function (editor) {
+		var done = function () {
+			editor._skinLoaded = true;
+			editor.fire('SkinLoaded');
+		};
+
 		return function() {
 			if (editor.initialized) {
-				editor.fire('SkinLoaded');
+				done();
 			} else {
-				editor.on('init', function() {
-					editor.fire('SkinLoaded');
-				});
+				editor.on('init', done);
 			}
 		};
 	};
