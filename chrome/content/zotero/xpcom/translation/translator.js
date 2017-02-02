@@ -35,7 +35,7 @@ var TRANSLATOR_OPTIONAL_PROPERTIES = ["targetAll", "browserSupport", "minVersion
                                       "hiddenPrefs", "itemType"];
 // Properties that are passed from background to inject page in connector
 var TRANSLATOR_PASSING_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.
-                                    concat(["targetAll", "browserSupport", "code", "runMode", "itemType"]);
+                                    concat(["targetAll", "browserSupport", "code", "runMode", "itemType", "inRepository"]);
 
 /**
  * @class Represents an individual translator
