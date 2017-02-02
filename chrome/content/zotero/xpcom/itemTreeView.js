@@ -487,7 +487,11 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	var sort = false;
 	
 	var savedSelection = this.getSelectedItems(true);
-	var previousFirstSelectedRow = this._rowMap[ids[0]];
+	var previousFirstSelectedRow = this._rowMap[
+		// 'collection-item' ids are in the form <collectionID>-<itemID>
+		// 'item' events are just integers
+		type == 'collection-item' ? ids[0].split('-')[1] : ids[0]
+	];
 	
 	// If there's not at least one new item to be selected, get a scroll position to restore later
 	var scrollPosition = false;
