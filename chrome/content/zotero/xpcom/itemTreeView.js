@@ -1883,13 +1883,15 @@ Zotero.ItemTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(functio
 		collectionTreeRow.ref.deleteItems(ids);
 	}
 	else if (collectionTreeRow.isTrash() || collectionTreeRow.isPublications()) {
-		Zotero.Items.erase(ids);
+		yield Zotero.Items.eraseTx(ids);
 	}
 	else if (collectionTreeRow.isLibrary(true) || force) {
-		Zotero.Items.trashTx(ids);
+		yield Zotero.Items.trashTx(ids);
 	}
 	else if (collectionTreeRow.isCollection()) {
-		collectionTreeRow.ref.removeItems(ids);
+		yield Zotero.DB.executeTransaction(function* () {
+			yield collectionTreeRow.ref.removeItems(ids);
+		});
 	}
 	//this._treebox.endUpdateBatch();
 });
@@ -3047,7 +3049,9 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 				throw new Error("Drag source must be a collection");
 			}
 			if (collectionTreeRow.id != sourceCollectionTreeRow.id) {
-				yield collectionTreeRow.ref.removeItems(toMove);
+				yield Zotero.DB.executeTransaction(function* () {
+					yield collectionTreeRow.ref.removeItems(toMove);
+				}.bind(this));
 			}
 		}
 	}
