@@ -168,6 +168,17 @@ describe("Zotero.Collection", function() {
 			var childCollections = collection1.getChildCollections();
 			assert.lengthOf(childCollections, 0);
 		})
+		
+		it("should not include collections that have been deleted", function* () {
+			var collection1 = yield createDataObject('collection');
+			var collection2 = yield createDataObject('collection', { parentID: collection1.id });
+			yield collection1.saveTx();
+			
+			yield collection2.eraseTx()
+			
+			var childCollections = collection1.getChildCollections();
+			assert.lengthOf(childCollections, 0);
+		})
 	})
 	
 	describe("#getChildItems()", function () {

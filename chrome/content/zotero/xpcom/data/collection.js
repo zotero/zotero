@@ -605,6 +605,16 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 		}
 	}
 	
+	// Update child collection cache of parent collection
+	if (this.parentKey) {
+		let parentCollectionID = this.ObjectsClass.getIDFromLibraryAndKey(
+			this.libraryID, this.parentKey
+		);
+		Zotero.DB.addCurrentCallback("commit", function () {
+			this.ObjectsClass.unregisterChildCollection(parentCollectionID, this.id);
+		}.bind(this));
+	}
+	
 	var placeholders = collections.map(() => '?').join();
 	
 	// Remove item associations for all descendent collections
