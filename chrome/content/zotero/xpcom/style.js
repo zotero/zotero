@@ -595,6 +595,9 @@ Zotero.Style = function (style, path) {
 		this.path = path;
 		this.fileName = OS.Path.basename(path);
 	}
+	else {
+		this.string = style;
+	}
 	
 	this.styleID = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:id[1]',
 		Zotero.Styles.ns);
