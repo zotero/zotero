@@ -450,7 +450,7 @@ describe("Zotero.CollectionTreeView", function() {
 		 *     value returned after the drag. Otherwise, an 'add' event will be waited for, and
 		 *     an object with 'ids' and 'extraData' will be returned.
 		 */
-		var drop = Zotero.Promise.coroutine(function* (objectType, targetRow, ids, promise) {
+		var drop = Zotero.Promise.coroutine(function* (objectType, targetRow, ids, promise, action = 'copy') {
 			if (typeof targetRow == 'string') {
 				var row = cv.getRowIndexByID(targetRow);
 				var orient = 0;
@@ -465,9 +465,9 @@ describe("Zotero.CollectionTreeView", function() {
 				promise = waitForNotifierEvent("add", objectType);
 			}
 			yield cv.drop(row, orient, {
-				dropEffect: 'copy',
-				effectAllowed: 'copy',
-				mozSourceNode: win.document.getElementById(`zotero-${objectType}s-tree`),
+				dropEffect: action,
+				effectAllowed: action,
+				mozSourceNode: win.document.getElementById(`zotero-${objectType}s-tree`).treeBoxObject.treeBody,
 				types: {
 					contains: function (type) {
 						return type == `zotero/${objectType}`;
@@ -545,6 +545,41 @@ describe("Zotero.CollectionTreeView", function() {
 				var treeRow = itemsView.getRow(0);
 				assert.equal(treeRow.ref.id, item.id);
 			})
+			
+			it("should move an item from one collection to another", function* () {
+				var collection1 = yield createDataObject('collection');
+				yield waitForItemsLoad(win);
+				var collection2 = yield createDataObject('collection', false, { skipSelect: true });
+				var item = yield createDataObject('item', { collections: [collection1.id] });
+				
+				// Add observer to wait for collection add
+				var deferred = Zotero.Promise.defer();
+				var observerID = Zotero.Notifier.registerObserver({
+					notify: function (event, type, ids, extraData) {
+						if (type == 'collection-item' && event == 'add'
+								&& ids[0] == collection2.id + "-" + item.id) {
+							setTimeout(function () {
+								deferred.resolve();
+							});
+						}
+					}
+				}, 'collection-item', 'test');
+				
+				yield drop('item', 'C' + collection2.id, [item.id], deferred.promise, 'move');
+				
+				Zotero.Notifier.unregisterObserver(observerID);
+				
+				// Source collection should be empty
+				assert.equal(zp.itemsView.rowCount, 0);
+				
+				yield cv.selectCollection(collection2.id);
+				yield waitForItemsLoad(win);
+				
+				// Target collection should have item
+				assert.equal(zp.itemsView.rowCount, 1);
+				var treeRow = zp.itemsView.getRow(0);
+				assert.equal(treeRow.ref.id, item.id);
+			});
 			
 			it("should copy an item with an attachment to a group", function* () {
 				var group = yield createGroup();

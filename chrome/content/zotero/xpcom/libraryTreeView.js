@@ -310,10 +310,10 @@ Zotero.LibraryTreeView.prototype = {
 		}
 		
 		if (event.dataTransfer.getData("zotero/item")) {
-			var sourceCollectionTreeRow = Zotero.DragDrop.getDragSource();
+			var sourceCollectionTreeRow = Zotero.DragDrop.getDragSource(event.dataTransfer);
 			if (sourceCollectionTreeRow) {
 				if (this.type == 'collection') {
-					var targetCollectionTreeRow = Zotero.DragDrop.getDragTarget();
+					var targetCollectionTreeRow = Zotero.DragDrop.getDragTarget(event);
 				}
 				else if (this.type == 'item') {
 					var targetCollectionTreeRow = this.collectionTreeRow;

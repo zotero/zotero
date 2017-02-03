@@ -2312,6 +2312,7 @@ Zotero.VersionHeader = {
 Zotero.DragDrop = {
 	currentEvent: null,
 	currentOrientation: 0,
+	currentSourceNode: null,
 	
 	getDataFromDataTransfer: function (dataTransfer, firstOnly) {
 		var dt = dataTransfer;
@@ -2374,7 +2375,7 @@ Zotero.DragDrop = {
 		// For items, the drag source is the CollectionTreeRow of the parent window
 		// of the source tree
 		if (dataTransfer.types.contains("zotero/item")) {
-			var sourceNode = dataTransfer.mozSourceNode;
+			let sourceNode = dataTransfer.mozSourceNode || this.currentSourceNode;
 			if (!sourceNode || sourceNode.tagName != 'treechildren'
 					|| sourceNode.parentElement.id != 'zotero-items-tree') {
 				return false;
@@ -2385,9 +2386,8 @@ Zotero.DragDrop = {
 			}
 			return win.ZoteroPane.collectionsView.selectedTreeRow;
 		}
-		else {
-			return false;
-		}
+		
+		return false;
 	},
 	
 	

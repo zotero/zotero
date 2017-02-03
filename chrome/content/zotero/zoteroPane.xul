@@ -554,7 +554,8 @@
 								<treechildren ondragstart="ZoteroPane_Local.itemsView.onDragStart(event)"
 									ondragenter="return ZoteroPane_Local.itemsView.onDragEnter(event)"
 									ondragover="return ZoteroPane_Local.itemsView.onDragOver(event)"
-									ondrop="return ZoteroPane_Local.itemsView.onDrop(event)"/>
+									ondrop="return ZoteroPane_Local.itemsView.onDrop(event)"
+									ondragend="ZoteroPane_Local.itemsView.onDragEnd(event)"/>
 							</tree>
 
 							<!-- Label for displaying messages when items pane is hidden

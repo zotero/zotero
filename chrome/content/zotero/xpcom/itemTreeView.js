@@ -2518,6 +2518,12 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 	
 	var itemIDs = this.getSelectedItems(true);
 	event.dataTransfer.setData("zotero/item", itemIDs);
+	// dataTransfer.mozSourceNode doesn't seem to be properly set anymore (tested in 50), so store
+	// target separately
+	if (!event.dataTransfer.mozSourceNode) {
+		Zotero.debug("mozSourceNode not set -- storing source node");
+		Zotero.DragDrop.currentSourceNode = event.target;
+	}
 	
 	var items = Zotero.Items.get(itemIDs);
 	
@@ -2608,6 +2614,12 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 		Components.utils.reportError(e + " with '" + format.id + "'");
 	}
 };
+
+Zotero.ItemTreeView.prototype.onDragEnd = function (event) {
+	setTimeout(function () {
+		Zotero.DragDrop.currentDragSource = null;
+	});
+}
 
 
 // Implements nsIFlavorDataProvider for dragging attachment files to OS
