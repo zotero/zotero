@@ -909,14 +909,16 @@ Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env)
 	}
 	
 	// Undo registerObject() on failure
-	var func = function () {
-		this.ObjectsClass.unload(this._id);
-	}.bind(this);
-	if (env.options.tx) {
-		env.transactionOptions.onRollback = func;
-	}
-	else {
-		Zotero.DB.addCurrentCallback("rollback", func);
+	if (env.isNew) {
+		var func = function () {
+			this.ObjectsClass.unload(this._id);
+		}.bind(this);
+		if (env.options.tx) {
+			env.transactionOptions.onRollback = func;
+		}
+		else {
+			Zotero.DB.addCurrentCallback("rollback", func);
+		}
 	}
 	
 	env.relationsToRegister = [];
