@@ -26,8 +26,8 @@ html, body {
 
 /* Shrink the buttons a bit */
 .mce-btn-small button {
-	padding-left: 4px !important;
-	padding-right: 4px !important;
+	padding-left: 3px !important;
+	padding-right: 3px !important;
 }
 
 .mce-listbox button {

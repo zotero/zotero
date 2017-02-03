@@ -15,16 +15,16 @@
 		entity_encoding: 'raw',
 		fix_list_elements: true,
 		
-		plugins: "autolink,code,contextmenu,directionality,link,lists,paste,searchreplace",
+		plugins: "autolink,code,contextmenu,directionality,link,lists,paste,searchreplace,textcolor",
 		
-		toolbar1: "bold italic underline strikethrough | subscript superscript | forecolor backcolor | blockquote link | %DIR% | removeformat",
-		toolbar2: "formatselect | alignleft aligncenter alignright | bullist numlist outdent indent | searchreplace",
+		toolbar1: "bold italic underline strikethrough | subscript superscript | forecolor backcolor | blockquote link | removeformat",
+		toolbar2: "formatselect | alignleft aligncenter alignright | bullist numlist outdent indent |  %DIR% | searchreplace",
 		toolbar_items_size: 'small',
 		menubar: false,
 		resize: false,
 		statusbar: false,
 		
-		contextmenu: "link | code",
+		contextmenu: "link | dir | code",
 		
 		link_context_toolbar: true,
 		link_assume_external_targets: true,
@@ -36,12 +36,18 @@
 			
 			// Set text direction
 			var dir = window.location.href.match(/dir=(ltr|rtl)/)[1];
+			var opDir = dir.split("").reverse().join("");
 			ed.settings.directionality = dir;
-			// Include button for opposite direction, to function as a toggle
-			ed.settings.toolbar1 = ed.settings.toolbar1.replace(
-				"%DIR%",
-				dir.split("").reverse().join("")
-			);
+			ed.addMenuItem('dir', {
+				icon: opDir,
+				// TODO: Show correct label based on current line
+				text: opDir == 'rtl' ? "Right to left" : "Left to right",
+				onclick: function () {
+					ed.execCommand('mceDirection' + opDir.toUpperCase());
+				},
+				context: 'insert',
+				prependToContext: true
+			});
 		},
 		
 		init_instance_callback: function (ed) {
