@@ -42,49 +42,52 @@ Zotero.Date = new function(){
 	var _months;
 	var _monthsWithEnglish;
 	
-	this.init = Zotero.Promise.coroutine(function* () {
+	this.init = function () {
 		if (!Zotero.isFx || Zotero.isBookmarklet) {
 			throw new Error("Unimplemented");
 		}
 		
-		var json = (yield Zotero.HTTP.request(
+		return Zotero.HTTP.request(
 			'GET', 'resource://zotero/schema/dateFormats.json', { responseType: 'json' }
-		)).response;
-		var locale = Zotero.locale;
-		var english = locale.startsWith('en');
-		// If no exact match, try first two characters ('de')
-		if (!json[locale]) {
-			locale = locale.substr(0, 2);
-		}
-		// Try first two characters repeated ('de-DE')
-		if (!json[locale]) {
-			locale = locale + "-" + locale.toUpperCase();
-		}
-		// Look for another locale with same first two characters
-		if (!json[locale]) {
-			let sameLang = Object.keys(json).filter(l => l.startsWith(locale.substr(0, 2)));
-			if (sameLang.length) {
-				locale = sameLang[0];
+		).then(function(xmlhttp) {
+			var json = xmlhttp.response;
+			
+			var locale = Zotero.locale;
+			var english = locale.startsWith('en');
+			// If no exact match, try first two characters ('de')
+			if (!json[locale]) {
+				locale = locale.substr(0, 2);
 			}
-		}
-		// If all else fails, use English
-		if (!json[locale]) {
-			locale = 'en-US';
-			english = true;
-		}
-		_months = json[locale];
-		
-		// Add English versions if not already added
-		if (english) {
-			_monthsWithEnglish = _months;
-		}
-		else {
-			_monthsWithEnglish = {};
-			for (let key in _months) {
-				_monthsWithEnglish[key] = _months[key].concat(json['en-US'][key]);
+			// Try first two characters repeated ('de-DE')
+			if (!json[locale]) {
+				locale = locale + "-" + locale.toUpperCase();
 			}
-		}
-	});
+			// Look for another locale with same first two characters
+			if (!json[locale]) {
+				let sameLang = Object.keys(json).filter(l => l.startsWith(locale.substr(0, 2)));
+				if (sameLang.length) {
+					locale = sameLang[0];
+				}
+			}
+			// If all else fails, use English
+			if (!json[locale]) {
+				locale = 'en-US';
+				english = true;
+			}
+			_months = json[locale];
+
+			// Add English versions if not already added
+			if (english) {
+				_monthsWithEnglish = _months;
+			}
+			else {
+				_monthsWithEnglish = {};
+				for (let key in _months) {
+					_monthsWithEnglish[key] = _months[key].concat(json['en-US'][key]);
+				}
+			}
+		});
+	};
 	
 	
 	/**

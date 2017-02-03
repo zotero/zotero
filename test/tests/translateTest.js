@@ -597,6 +597,45 @@ describe("Zotero.Translate", function() {
 		});
 	});
 	
+	
+	describe("Translators", function () {
+		it("should round-trip child attachment via BibTeX", function* () {
+			var item = yield createDataObject('item');
+			yield importFileAttachment('test.png', { parentItemID: item.id });
+			
+			var translation = new Zotero.Translate.Export();
+			var tmpDir = yield getTempDirectory();
+			var exportDir = OS.Path.join(tmpDir, 'export');
+			translation.setLocation(Zotero.File.pathToFile(exportDir));
+			translation.setItems([item]);
+			translation.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+			translation.setDisplayOptions({
+				exportFileData: true
+			});
+			yield translation.translate();
+			
+			var exportFile = OS.Path.join(exportDir, 'export.bib');
+			assert.isTrue(yield OS.File.exists(exportFile));
+			
+			var translation = new Zotero.Translate.Import();
+			translation.setLocation(Zotero.File.pathToFile(exportFile));
+			var translators = yield translation.getTranslators();
+			translation.setTranslator(translators[0]);
+			var importCollection = yield createDataObject('collection');
+			var items = yield translation.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: [importCollection.id]
+			});
+			
+			assert.lengthOf(items, 1);
+			var attachments = items[0].getAttachments();
+			assert.lengthOf(attachments, 1);
+			var attachment = Zotero.Items.get(attachments[0]);
+			assert.isTrue(yield attachment.fileExists());
+		});
+	});
+	
+	
 	describe("ItemSaver", function () {
 		describe("#saveCollections()", function () {
 			it("should add top-level collections to specified collection", function* () {

@@ -16,8 +16,12 @@ Zotero.Sync.Storage.Local = {
 		var libraryType = Zotero.Libraries.get(libraryID).libraryType;
 		switch (libraryType) {
 		case 'user':
-		case 'publications':
 			return Zotero.Prefs.get("sync.storage.enabled");
+		
+		// TEMP: Always sync publications files, at least until we have a better interface for
+		// setting library-specific settings
+		case 'publications':
+			return true;
 		
 		case 'group':
 			return Zotero.Prefs.get("sync.storage.groups.enabled");
@@ -38,11 +42,12 @@ Zotero.Sync.Storage.Local = {
 		var libraryType = Zotero.Libraries.get(libraryID).libraryType;
 		switch (libraryType) {
 		case 'user':
-		case 'publications':
-		case 'feed':
 			return Zotero.Prefs.get("sync.storage.protocol") == 'webdav' ? 'webdav' : 'zfs';
 		
+		case 'publications':
 		case 'group':
+		// TODO: Remove after making sure this is never called for feed libraries
+		case 'feed':
 			return 'zfs';
 		
 		default:
@@ -979,16 +984,20 @@ Zotero.Sync.Storage.Local = {
 		yield Zotero.DB.executeTransaction(function* () {
 			for (let i = 0; i < conflicts.length; i++) {
 				let conflict = conflicts[i];
+				let item = Zotero.Items.getByLibraryAndKey(libraryID, conflict.left.key);
 				let mtime = io.dataOut[i].dateModified;
 				// Local
 				if (mtime == conflict.left.dateModified) {
 					syncState = this.SYNC_STATE_FORCE_UPLOAD;
+					// When local version is chosen, update stored hash (and mtime) to remote values so
+					// that upload goes through without 412
+					item.attachmentSyncedModificationTime = conflict.right.mtime;
+					item.attachmentSyncedHash = conflict.right.md5;
 				}
 				// Remote
 				else {
 					syncState = this.SYNC_STATE_FORCE_DOWNLOAD;
 				}
-				let item = Zotero.Items.getByLibraryAndKey(libraryID, conflict.left.key);
 				item.attachmentSyncState = syncState;
 				yield item.save({ skipAll: true });
 			}

@@ -208,17 +208,23 @@ Zotero.Debug = new function () {
 				}
 			}
 		}
-		
-		if (Zotero.getErrors) {
-			return Zotero.getSystemInfo().then(function(sysInfo) {
+
+		return Zotero.getSystemInfo().then(function(sysInfo) {
+			if (Zotero.isConnector) {
+				return Zotero.Error.getErrors().then(function(errors) {
+					return errors.join('\n\n') +
+						"\n\n" + sysInfo + "\n\n" +
+						"=========================================================\n\n" +
+						output;	
+				});
+			}
+			else {
 				return Zotero.getErrors(true).join('\n\n') +
 					"\n\n" + sysInfo + "\n\n" +
 					"=========================================================\n\n" +
 					output;
-			});
-		} else {
-			return output;
-		}
+			}
+		});
 	});
 	
 	

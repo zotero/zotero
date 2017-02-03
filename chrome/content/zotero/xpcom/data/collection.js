@@ -369,6 +369,7 @@ Zotero.Collection.prototype.addItem = function (itemID, options) {
 /**
  * Add multiple items to the collection in batch
  *
+ * Requires a transaction
  * Does not require a separate save()
  *
  * @param {Number[]} itemIDs
@@ -403,6 +404,7 @@ Zotero.Collection.prototype.addItems = Zotero.Promise.coroutine(function* (itemI
 /**
  * Remove a item from the collection. The item is not deleted from the library.
  *
+ * Requires a transaction
  * Does not require a separate save()
  *
  * @return {Promise}
@@ -425,22 +427,21 @@ Zotero.Collection.prototype.removeItems = Zotero.Promise.coroutine(function* (it
 	
 	var current = this.getChildItems(true);
 	
-	return Zotero.DB.executeTransaction(function* () {
-		for (let i=0; i<itemIDs.length; i++) {
-			let itemID = itemIDs[i];
-			
-			if (current.indexOf(itemID) == -1) {
-				Zotero.debug("Item " + itemID + " not a child of collection " + this.id);
-				continue;
-			}
-			
-			let item = yield this.ChildObjects.getAsync(itemID);
-			item.removeFromCollection(this.id);
-			yield item.save({
-				skipDateModifiedUpdate: true
-			})
+	Zotero.DB.requireTransaction();
+	for (let i=0; i<itemIDs.length; i++) {
+		let itemID = itemIDs[i];
+		
+		if (current.indexOf(itemID) == -1) {
+			Zotero.debug("Item " + itemID + " not a child of collection " + this.id);
+			continue;
 		}
-	}.bind(this));
+		
+		let item = yield this.ChildObjects.getAsync(itemID);
+		item.removeFromCollection(this.id);
+		yield item.save({
+			skipDateModifiedUpdate: true
+		})
+	}
 });
 
 
@@ -602,6 +603,16 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 				yield obj.erase(options);
 			}
 		}
+	}
+	
+	// Update child collection cache of parent collection
+	if (this.parentKey) {
+		let parentCollectionID = this.ObjectsClass.getIDFromLibraryAndKey(
+			this.libraryID, this.parentKey
+		);
+		Zotero.DB.addCurrentCallback("commit", function () {
+			this.ObjectsClass.unregisterChildCollection(parentCollectionID, this.id);
+		}.bind(this));
 	}
 	
 	var placeholders = collections.map(() => '?').join();

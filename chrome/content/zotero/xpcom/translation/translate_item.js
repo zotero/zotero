@@ -57,7 +57,7 @@ Zotero.Translate.ItemSaver = function(options) {
 	this._proxy = options.proxy;
 	
 	// the URI to which other URIs are assumed to be relative
-	if(typeof baseURI === "object" && baseURI instanceof Components.interfaces.nsIURI) {
+	if(typeof options.baseURI === "object" && options.baseURI instanceof Components.interfaces.nsIURI) {
 		this._baseURI = options.baseURI;
 	} else {
 		// try to convert to a URI

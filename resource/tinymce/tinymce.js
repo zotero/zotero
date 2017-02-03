@@ -1,4 +1,4 @@
-// 4.5.1 (2016-12-07)
+// 4.5.2 (2017-01-04)
 
 /**
  * Compiled inline version. (Library mode)
@@ -9425,10 +9425,15 @@ define("tinymce/dom/ScriptLoader", [
 	var DOM = DOMUtils.DOM;
 	var each = Tools.each, grep = Tools.grep;
 
+	var isFunction = function (f) {
+		return typeof f === 'function';
+	};
+
 	function ScriptLoader() {
 		var QUEUED = 0,
 			LOADING = 1,
 			LOADED = 2,
+			FAILED = 3,
 			states = {},
 			queue = [],
 			scriptLoadedCallbacks = {},
@@ -9441,9 +9446,10 @@ define("tinymce/dom/ScriptLoader", [
 		 *
 		 * @method load
 		 * @param {String} url Absolute URL to script to add.
-		 * @param {function} callback Optional callback function to execute ones this script gets loaded.
+		 * @param {function} callback Optional success callback function when the script loaded successfully.
+		 * @param {function} callback Optional failure callback function when the script failed to load.
 		 */
-		function loadScript(url, callback) {
+		function loadScript(url, success, failure) {
 			var dom = DOM, elm, id;
 
 			// Execute callback when script is loaded
@@ -9454,21 +9460,25 @@ define("tinymce/dom/ScriptLoader", [
 					elm.onreadystatechange = elm.onload = elm = null;
 				}
 
-				callback();
+				success();
 			}
 
 			function error() {
 				/*eslint no-console:0 */
 
-				// Report the error so it's easier for people to spot loading errors
-				if (typeof console !== "undefined" && console.log) {
-					console.log("Failed to load: " + url);
-				}
-
 				// We can't mark it as done if there is a load error since
 				// A) We don't want to produce 404 errors on the server and
 				// B) the onerror event won't fire on all browsers.
 				// done();
+
+				if (isFunction(failure)) {
+					failure();
+				} else {
+					// Report the error so it's easier for people to spot loading errors
+					if (typeof console !== "undefined" && console.log) {
+						console.log("Failed to load script: " + url);
+					}
+				}
 			}
 
 			id = dom.uniqueId();
@@ -9524,10 +9534,11 @@ define("tinymce/dom/ScriptLoader", [
 		 *
 		 * @method add
 		 * @param {String} url Absolute URL to script to add.
-		 * @param {function} callback Optional callback function to execute ones this script gets loaded.
+		 * @param {function} success Optional success callback function to execute when the script loades successfully.
 		 * @param {Object} scope Optional scope to execute callback in.
+		 * @param {function} failure Optional failure callback function to execute when the script failed to load.
 		 */
-		this.add = this.load = function(url, callback, scope) {
+		this.add = this.load = function(url, success, scope, failure) {
 			var state = states[url];
 
 			// Add url to load queue
@@ -9536,14 +9547,15 @@ define("tinymce/dom/ScriptLoader", [
 				states[url] = QUEUED;
 			}
 
-			if (callback) {
+			if (success) {
 				// Store away callback for later execution
 				if (!scriptLoadedCallbacks[url]) {
 					scriptLoadedCallbacks[url] = [];
 				}
 
 				scriptLoadedCallbacks[url].push({
-					func: callback,
+					success: success,
+					failure: failure,
 					scope: scope || this
 				});
 			}
@@ -9558,11 +9570,12 @@ define("tinymce/dom/ScriptLoader", [
 		 * Starts the loading of the queue.
 		 *
 		 * @method loadQueue
-		 * @param {function} callback Optional callback to execute when all queued items are loaded.
+		 * @param {function} success Optional callback to execute when all queued items are loaded.
+		 * @param {function} failure Optional callback to execute when queued items failed to load.
 		 * @param {Object} scope Optional scope to execute the callback in.
 		 */
-		this.loadQueue = function(callback, scope) {
-			this.loadScripts(queue, callback, scope);
+		this.loadQueue = function(success, scope, failure) {
+			this.loadScripts(queue, success, scope, failure);
 		};
 
 		/**
@@ -9571,23 +9584,27 @@ define("tinymce/dom/ScriptLoader", [
 		 *
 		 * @method loadScripts
 		 * @param {Array} scripts Array of queue items to load.
-		 * @param {function} callback Optional callback to execute ones all items are loaded.
+		 * @param {function} callback Optional callback to execute when scripts is loaded successfully.
 		 * @param {Object} scope Optional scope to execute callback in.
+		 * @param {function} callback Optional callback to execute if scripts failed to load.
 		 */
-		this.loadScripts = function(scripts, callback, scope) {
-			var loadScripts;
+		this.loadScripts = function(scripts, success, scope, failure) {
+			var loadScripts, failures = [];
 
-			function execScriptLoadedCallbacks(url) {
+			function execCallbacks(name, url) {
 				// Execute URL callback functions
 				each(scriptLoadedCallbacks[url], function(callback) {
-					callback.func.call(callback.scope);
+					if (isFunction(callback[name])) {
+						callback[name].call(callback.scope);
+					}
 				});
 
 				scriptLoadedCallbacks[url] = undef;
 			}
 
 			queueLoadedCallbacks.push({
-				func: callback,
+				success: success,
+				failure: failure,
 				scope: scope || this
 			});
 
@@ -9600,13 +9617,18 @@ define("tinymce/dom/ScriptLoader", [
 				// Load scripts that needs to be loaded
 				each(loadingScripts, function(url) {
 					// Script is already loaded then execute script callbacks directly
-					if (states[url] == LOADED) {
-						execScriptLoadedCallbacks(url);
+					if (states[url] === LOADED) {
+						execCallbacks('success', url);
+						return;
+					}
+
+					if (states[url] === FAILED) {
+						execCallbacks('failure', url);
 						return;
 					}
 
 					// Is script not loading then start loading it
-					if (states[url] != LOADING) {
+					if (states[url] !== LOADING) {
 						states[url] = LOADING;
 						loading++;
 
@@ -9614,7 +9636,16 @@ define("tinymce/dom/ScriptLoader", [
 							states[url] = LOADED;
 							loading--;
 
-							execScriptLoadedCallbacks(url);
+							execCallbacks('success', url);
+
+							// Load more scripts if they where added by the recently loaded script
+							loadScripts();
+						}, function () {
+							states[url] = FAILED;
+							loading--;
+
+							failures.push(url);
+							execCallbacks('failure', url);
 
 							// Load more scripts if they where added by the recently loaded script
 							loadScripts();
@@ -9625,7 +9656,15 @@ define("tinymce/dom/ScriptLoader", [
 				// No scripts are currently loading then execute all pending queue loaded callbacks
 				if (!loading) {
 					each(queueLoadedCallbacks, function(callback) {
-						callback.func.call(callback.scope);
+						if (failures.length === 0) {
+							if (isFunction(callback.success)) {
+								callback.success.call(callback.scope);
+							}
+						} else {
+							if (isFunction(callback.failure)) {
+								callback.failure.call(callback.scope, failures);
+							}
+						}
 					});
 
 					queueLoadedCallbacks.length = 0;
@@ -9793,8 +9832,9 @@ define("tinymce/AddOnManager", [
 		 * @method load
 		 * @param {String} name Short name of the add-on that gets loaded.
 		 * @param {String} addOnUrl URL to the add-on that will get loaded.
-		 * @param {function} callback Optional callback to execute ones the add-on is loaded.
+		 * @param {function} success Optional success callback to execute when an add-on is loaded.
 		 * @param {Object} scope Optional scope to execute the callback in.
+		 * @param {function} failure Optional failure callback to execute when an add-on failed to load.
 		 * @example
 		 * // Loads a plugin from an external URL
 		 * tinymce.PluginManager.load('myplugin', '/some/dir/someplugin/plugin.js');
@@ -9805,7 +9845,7 @@ define("tinymce/AddOnManager", [
 		 *  plugins: '-myplugin' // Don't try to load it again
 		 * });
 		 */
-		load: function(name, addOnUrl, callback, scope) {
+		load: function(name, addOnUrl, success, scope, failure) {
 			var self = this, url = addOnUrl;
 
 			function loadDependencies() {
@@ -9817,11 +9857,11 @@ define("tinymce/AddOnManager", [
 					self.load(newUrl.resource, newUrl, undefined, undefined);
 				});
 
-				if (callback) {
+				if (success) {
 					if (scope) {
-						callback.call(scope);
+						success.call(scope);
 					} else {
-						callback.call(ScriptLoader);
+						success.call(ScriptLoader);
 					}
 				}
 			}
@@ -9843,7 +9883,7 @@ define("tinymce/AddOnManager", [
 			if (self.lookup[name]) {
 				loadDependencies();
 			} else {
-				ScriptLoader.ScriptLoader.add(url, loadDependencies, scope);
+				ScriptLoader.ScriptLoader.add(url, loadDependencies, scope, failure);
 			}
 		}
 	};
@@ -18811,7 +18851,7 @@ define("tinymce/fmt/Preview", [
 
 
 	function selectorToHtml(selector, editor) {
-		return parsedSelectorToHtml(parseSelector(selector, editor));
+		return parsedSelectorToHtml(parseSelector(selector), editor);
 	}
 
 
@@ -18934,9 +18974,9 @@ define("tinymce/fmt/Preview", [
 				items[0].name = name;
 			}
 			name = format.selector;
-			previewFrag = parsedSelectorToHtml(items);
+			previewFrag = parsedSelectorToHtml(items, editor);
 		} else {
-			previewFrag = parsedSelectorToHtml([name]);
+			previewFrag = parsedSelectorToHtml([name], editor);
 		}
 
 		previewElm = dom.select(name, previewFrag)[0] || previewFrag.firstChild;
@@ -21364,8 +21404,10 @@ define("tinymce/Formatter", [
 					textNode = findFirstTextNode(caretContainer);
 				}
 
-				// Expand to word is caret is in the middle of a text node and the char before/after is a alpha numeric character
-				if (text && offset > 0 && offset < text.length && /\w/.test(text.charAt(offset)) && /\w/.test(text.charAt(offset - 1))) {
+				// Expand to word if caret is in the middle of a text node and the char before/after is a alpha numeric character
+				var wordcharRegex = /[^\s\u00a0\u00ad\u200b\ufeff]/;
+				if (text && offset > 0 && offset < text.length &&
+					wordcharRegex.test(text.charAt(offset)) && wordcharRegex.test(text.charAt(offset - 1))) {
 					// Get bookmark of caret position
 					bookmark = selection.getBookmark();
 
@@ -22952,6 +22994,10 @@ define("tinymce/EnterKey", [
 			// Insert new block before/after the parent block depending on caret location
 			if (CaretContainer.isCaretContainerBlock(parentBlock)) {
 				newBlock = CaretContainer.showCaretContainerBlock(parentBlock);
+				if (dom.isEmpty(parentBlock)) {
+					emptyBlock(parentBlock);
+				}
+				moveToCaretPosition(newBlock);
 			} else if (isCaretAtStartOrEndOfBlock()) {
 				insertNewBlockAfter();
 			} else if (isCaretAtStartOrEndOfBlock(true)) {
@@ -26051,7 +26097,7 @@ define("tinymce/util/Observable", [
 	return {
 		/**
 		 * Fires the specified event by name. Consult the
-		 * <a href="/advanced/events">event reference</a> for more details on each event.
+		 * <a href="/docs/advanced/events">event reference</a> for more details on each event.
 		 *
 		 * @method fire
 		 * @param {String} name Name of the event to fire.
@@ -26085,7 +26131,7 @@ define("tinymce/util/Observable", [
 
 		/**
 		 * Binds an event listener to a specific event by name. Consult the
-		 * <a href="/advanced/events">event reference</a> for more details on each event.
+		 * <a href="/docs/advanced/events">event reference</a> for more details on each event.
 		 *
 		 * @method on
 		 * @param {String} name Event name or space separated list of events to bind.
@@ -26103,7 +26149,7 @@ define("tinymce/util/Observable", [
 
 		/**
 		 * Unbinds an event listener to a specific event by name. Consult the
-		 * <a href="/advanced/events">event reference</a> for more details on each event.
+		 * <a href="/docs/advanced/events">event reference</a> for more details on each event.
 		 *
 		 * @method off
 		 * @param {String?} name Name of the event to unbind.
@@ -26125,7 +26171,7 @@ define("tinymce/util/Observable", [
 
 		/**
 		 * Bind the event callback and once it fires the callback is removed. Consult the
-		 * <a href="/advanced/events">event reference</a> for more details on each event.
+		 * <a href="/docs/advanced/events">event reference</a> for more details on each event.
 		 *
 		 * @method once
 		 * @param {String} name Name of the event to bind.
@@ -34409,8 +34455,12 @@ define("tinymce/util/Quirks", [
 				var rng = editor.selection.getRng();
 				var startCaretPos = CaretPosition.fromRangeStart(rng);
 				var endCaretPos = CaretPosition.fromRangeEnd(rng);
+				var prev = caretWalker.prev(startCaretPos);
+				var next = caretWalker.next(endCaretPos);
 
-				return !editor.selection.isCollapsed() && !caretWalker.prev(startCaretPos) && !caretWalker.next(endCaretPos);
+				return !editor.selection.isCollapsed() &&
+					(!prev || prev.isAtStart()) &&
+					(!next || (next.isAtEnd() && startCaretPos.getNode() !== next.getNode()));
 			}
 
 			// Type over case delete and insert this won't cover typeover with a IME but at least it covers the common case
@@ -35199,11 +35249,11 @@ define("tinymce/file/Uploader", [
 						resolve(handlerSuccess(blobInfo, url));
 					};
 
-					var failure = function() {
+					var failure = function(error) {
 						closeNotification();
 						uploadStatus.removeFailed(blobInfo.blobUri());
-						resolvePending(blobInfo.blobUri(), handlerFailure(blobInfo, failure));
-						resolve(handlerFailure(blobInfo, failure));
+						resolvePending(blobInfo.blobUri(), handlerFailure(blobInfo, error));
+						resolve(handlerFailure(blobInfo, error));
 					};
 
 					progress = function(percent) {
@@ -35401,6 +35451,10 @@ define("tinymce/file/ImageScanner", [
 ], function(Promise, Arr, Fun, Conversions, Env) {
 	var count = 0;
 
+	var uniqueId = function(prefix) {
+		return (prefix || 'blobid') + (count++);
+	};
+
 	return function(uploadStatus, blobCache) {
 		var cachedPromises = {};
 
@@ -35417,6 +35471,19 @@ define("tinymce/file/ImageScanner", [
 						resolve({
 							image: img,
 							blobInfo: blobInfo
+						});
+					} else {
+						Conversions.uriToBlob(img.src).then(function (blob) {
+							Conversions.blobToDataUri(blob).then(function (dataUri) {
+								base64 = Conversions.parseDataUri(dataUri).data;
+								blobInfo = blobCache.create(uniqueId(), blob, base64);
+								blobCache.add(blobInfo);
+
+								resolve({
+									image: img,
+									blobInfo: blobInfo
+								});
+							});
 						});
 					}
 
@@ -35435,9 +35502,7 @@ define("tinymce/file/ImageScanner", [
 					});
 				} else {
 					Conversions.uriToBlob(img.src).then(function(blob) {
-						var blobInfoId = 'blobid' + (count++),
-							blobInfo = blobCache.create(blobInfoId, blob, base64);
-
+						blobInfo = blobCache.create(uniqueId(), blob, base64);
 						blobCache.add(blobInfo);
 
 						resolve({
@@ -35688,6 +35753,78 @@ define("tinymce/file/UploadStatus", [
 	};
 });
 
+// Included from: js/tinymce/classes/ErrorReporter.js
+
+/**
+ * ErrorReporter.js
+ *
+ * Released under LGPL License.
+ * Copyright (c) 1999-2016 Ephox Corp. All rights reserved
+ *
+ * License: http://www.tinymce.com/license
+ * Contributing: http://www.tinymce.com/contributing
+ */
+
+/**
+ * Various error reporting helper functions.
+ *
+ * @class tinymce.ErrorReporter
+ * @private
+ */
+define("tinymce/ErrorReporter", [
+	"tinymce/AddOnManager"
+], function (AddOnManager) {
+	var PluginManager = AddOnManager.PluginManager;
+
+	var resolvePluginName = function (targetUrl, suffix) {
+		for (var name in PluginManager.urls) {
+			var matchUrl = PluginManager.urls[name] + '/plugin' + suffix + '.js';
+			if (matchUrl === targetUrl) {
+				return name;
+			}
+		}
+
+		return null;
+	};
+
+	var pluginUrlToMessage = function (editor, url) {
+		var plugin = resolvePluginName(url, editor.suffix);
+		return plugin ?
+			'Failed to load plugin: ' + plugin + ' from url ' + url :
+			'Failed to load plugin url: ' + url;
+	};
+
+	var displayNotification = function (editor, message) {
+		editor.notificationManager.open({
+			type: 'error',
+			text: message
+		});
+	};
+
+	var displayError = function (editor, message) {
+		if (editor._skinLoaded) {
+			displayNotification(editor, message);
+		} else {
+			editor.on('SkinLoaded', function () {
+				displayNotification(editor, message);
+			});
+		}
+	};
+
+	var uploadError = function (editor, message) {
+		displayError(editor, 'Failed to upload image: ' + message);
+	};
+
+	var pluginLoadError = function (editor, url) {
+		displayError(editor, pluginUrlToMessage(editor, url));
+	};
+
+	return {
+		pluginLoadError: pluginLoadError,
+		uploadError: uploadError
+	};
+});
+
 // Included from: js/tinymce/classes/EditorUpload.js
 
 /**
@@ -35711,8 +35848,9 @@ define("tinymce/EditorUpload", [
 	"tinymce/file/Uploader",
 	"tinymce/file/ImageScanner",
 	"tinymce/file/BlobCache",
-	"tinymce/file/UploadStatus"
-], function(Arr, Uploader, ImageScanner, BlobCache, UploadStatus) {
+	"tinymce/file/UploadStatus",
+	"tinymce/ErrorReporter"
+], function(Arr, Uploader, ImageScanner, BlobCache, UploadStatus, ErrorReporter) {
 	return function(editor) {
 		var blobCache = new BlobCache(), uploader, imageScanner, settings = editor.settings;
 		var uploadStatus = new UploadStatus();
@@ -35808,6 +35946,8 @@ define("tinymce/EditorUpload", [
 
 						if (uploadInfo.status && editor.settings.images_replace_blob_uris !== false) {
 							replaceImageUri(image, uploadInfo.url);
+						} else if (uploadInfo.error) {
+							ErrorReporter.uploadError(editor, uploadInfo.error);
 						}
 
 						return {
@@ -37822,6 +37962,7 @@ define("tinymce/SelectionOverrides", [
 			editor.$('*[data-mce-selected]').removeAttr('data-mce-selected');
 			node.setAttribute('data-mce-selected', 1);
 			selectedContentEditableNode = node;
+			hideFakeCaret();
 
 			return range;
 		}
@@ -38005,13 +38146,14 @@ define("tinymce/Editor", [
 	"tinymce/EditorUpload",
 	"tinymce/SelectionOverrides",
 	"tinymce/util/Uuid",
-	"tinymce/ui/Sidebar"
+	"tinymce/ui/Sidebar",
+	"tinymce/ErrorReporter"
 ], function(
 	DOMUtils, DomQuery, AddOnManager, NodeChange, Node, DomSerializer, Serializer,
 	Selection, Formatter, UndoManager, EnterKey, ForceBlocks, EditorCommands,
 	URI, ScriptLoader, EventUtils, WindowManager, NotificationManager,
 	Schema, DomParser, Quirks, Env, Tools, Delay, EditorObservable, Mode, Shortcuts, EditorUpload,
-	SelectionOverrides, Uuid, Sidebar
+	SelectionOverrides, Uuid, Sidebar, ErrorReporter
 ) {
 	// Shorten these names
 	var DOM = DOMUtils.DOM, ThemeManager = AddOnManager.ThemeManager, PluginManager = AddOnManager.PluginManager;
@@ -38407,6 +38549,12 @@ define("tinymce/Editor", [
 				});
 
 				scriptLoader.loadQueue(function() {
+					if (!self.removed) {
+						self.init();
+					}
+				}, self, function (urls) {
+					ErrorReporter.pluginLoadError(self, urls[0]);
+
 					if (!self.removed) {
 						self.init();
 					}
@@ -40695,7 +40843,7 @@ define("tinymce/EditorManager", [
 		 * @property minorVersion
 		 * @type String
 		 */
-		minorVersion: '5.1',
+		minorVersion: '5.2',
 
 		/**
 		 * Release date of TinyMCE build.
@@ -40703,7 +40851,7 @@ define("tinymce/EditorManager", [
 		 * @property releaseDate
 		 * @type String
 		 */
-		releaseDate: '2016-12-07',
+		releaseDate: '2017-01-04',
 
 		/**
 		 * Collection of editor instances.
@@ -45239,6 +45387,73 @@ define("tinymce/ui/FlowLayout", [
 	});
 });
 
+// Included from: js/tinymce/classes/fmt/FontInfo.js
+
+/**
+ * FontInfo.js
+ *
+ * Released under LGPL License.
+ * Copyright (c) 1999-2016 Ephox Corp. All rights reserved
+ *
+ * License: http://www.tinymce.com/license
+ * Contributing: http://www.tinymce.com/contributing
+ */
+
+/**
+ * Internal class for computing font size for elements.
+ *
+ * @private
+ * @class tinymce.fmt.FontInfo
+ */
+define("tinymce/fmt/FontInfo", [
+	"tinymce/dom/DOMUtils"
+], function(DOMUtils) {
+	var getSpecifiedFontProp = function (propName, rootElm, elm) {
+		while (elm !== rootElm) {
+			if (elm.style[propName]) {
+				return elm.style[propName];
+			}
+
+			elm = elm.parentNode;
+		}
+
+		return 0;
+	};
+
+	var toPt = function (fontSize) {
+		if (/[0-9.]+px$/.test(fontSize)) {
+			return Math.round(parseInt(fontSize, 10) * 72 / 96) + 'pt';
+		}
+
+		return fontSize;
+	};
+
+	var normalizeFontFamily = function (fontFamily) {
+		// 'Font name', Font -> Font name,Font
+		return fontFamily.replace(/[\'\"]/g, '').replace(/,\s+/g, ',');
+	};
+
+	var getComputedFontProp = function (propName, elm) {
+		return DOMUtils.DOM.getStyle(elm, propName, true);
+	};
+
+	var getFontSize = function (rootElm, elm) {
+		var specifiedFontSize = getSpecifiedFontProp('fontSize', rootElm, elm);
+		return specifiedFontSize ? specifiedFontSize : getComputedFontProp('fontSize', elm);
+	};
+
+	var getFontFamily = function (rootElm, elm) {
+		var specifiedFontSize = getSpecifiedFontProp('fontFamily', rootElm, elm);
+		return normalizeFontFamily(specifiedFontSize ? specifiedFontSize : getComputedFontProp('fontFamily', elm));
+	};
+
+	return {
+		getFontSize: getFontSize,
+		getFontFamily: getFontFamily,
+		toPt: toPt
+	};
+});
+
 // Included from: js/tinymce/classes/ui/FormatControls.js
 
 /**
@@ -45265,8 +45480,9 @@ define("tinymce/ui/FormatControls", [
 	"tinymce/util/Arr",
 	"tinymce/dom/DOMUtils",
 	"tinymce/EditorManager",
-	"tinymce/Env"
-], function(Control, Widget, FloatPanel, Tools, Arr, DOMUtils, EditorManager, Env) {
+	"tinymce/Env",
+	"tinymce/fmt/FontInfo"
+], function(Control, Widget, FloatPanel, Tools, Arr, DOMUtils, EditorManager, Env, FontInfo) {
 	var each = Tools.each;
 
 	var flatten = function (ar) {
@@ -45337,6 +45553,67 @@ define("tinymce/ui/FormatControls", [
 					});
 
 					self.value(value);
+				});
+			};
+		}
+
+		function createFontNameListBoxChangeHandler(items) {
+			return function() {
+				var self = this;
+
+				var getFirstFont = function (fontFamily) {
+					return fontFamily ? fontFamily.split(',')[0] : '';
+				};
+
+				editor.on('nodeChange', function(e) {
+					var fontFamily, value = null;
+
+					fontFamily = FontInfo.getFontFamily(editor.getBody(), e.element);
+
+					each(items, function(item) {
+						if (item.value.toLowerCase() === fontFamily.toLowerCase()) {
+							value = item.value;
+						}
+					});
+
+					each(items, function(item) {
+						if (!value && getFirstFont(item.value).toLowerCase() === getFirstFont(fontFamily).toLowerCase()) {
+							value = item.value;
+						}
+					});
+
+					self.value(value);
+
+					if (!value && fontFamily) {
+						self.text(getFirstFont(fontFamily));
+					}
+				});
+			};
+		}
+
+		function createFontSizeListBoxChangeHandler(items) {
+			return function() {
+				var self = this;
+
+				editor.on('nodeChange', function(e) {
+					var px, pt, value = null;
+
+					px = FontInfo.getFontSize(editor.getBody(), e.element);
+					pt = FontInfo.toPt(px);
+
+					each(items, function(item) {
+						if (item.value === px) {
+							value = px;
+						} else if (item.value === pt) {
+							value = pt;
+						}
+					});
+
+					self.value(value);
+
+					if (!value) {
+						self.text(pt);
+					}
 				});
 			};
 		}
@@ -45724,7 +46001,7 @@ define("tinymce/ui/FormatControls", [
 			selectall: ['Select all', 'SelectAll', 'Meta+A'],
 			bold: ['Bold', 'Bold', 'Meta+B'],
 			italic: ['Italic', 'Italic', 'Meta+I'],
-			underline: ['Underline', 'Underline'],
+			underline: ['Underline', 'Underline', 'Meta+U'],
 			strikethrough: ['Strikethrough', 'Strikethrough'],
 			subscript: ['Subscript', 'Subscript'],
 			superscript: ['Superscript', 'Superscript'],
@@ -45877,7 +46154,7 @@ define("tinymce/ui/FormatControls", [
 				tooltip: 'Font Family',
 				values: items,
 				fixedWidth: true,
-				onPostRender: createListBoxChangeHandler(items, 'fontname'),
+				onPostRender: createFontNameListBoxChangeHandler(items),
 				onselect: function(e) {
 					if (e.control.settings.value) {
 						editor.execCommand('FontName', false, e.control.settings.value);
@@ -45907,7 +46184,7 @@ define("tinymce/ui/FormatControls", [
 				tooltip: 'Font Sizes',
 				values: items,
 				fixedWidth: true,
-				onPostRender: createListBoxChangeHandler(items, 'fontsize'),
+				onPostRender: createFontSizeListBoxChangeHandler(items),
 				onclick: function(e) {
 					if (e.control.settings.value) {
 						editor.execCommand('FontSize', false, e.control.settings.value);

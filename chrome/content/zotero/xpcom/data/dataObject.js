@@ -790,10 +790,9 @@ Zotero.DataObject.prototype.editCheck = function () {
  * @return {Promise<Integer|Boolean>}  Promise for itemID of new item,
  *                                     TRUE on item update, or FALSE if item was unchanged
  */
-Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) {
-	options = options || {};
+Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options = {}) {
 	var env = {
-		options: options,
+		options: Object.assign({}, options),
 		transactionOptions: {}
 	};
 	
@@ -880,8 +879,8 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) 
 });
 
 
-Zotero.DataObject.prototype.saveTx = function (options) {
-	options = options || {};
+Zotero.DataObject.prototype.saveTx = function (options = {}) {
+	options = Object.assign({}, options);
 	options.tx = true;
 	return this.save(options);
 }
@@ -910,14 +909,16 @@ Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env)
 	}
 	
 	// Undo registerObject() on failure
-	var func = function () {
-		this.ObjectsClass.unload(this._id);
-	}.bind(this);
-	if (env.options.tx) {
-		env.transactionOptions.onRollback = func;
-	}
-	else {
-		Zotero.DB.addCurrentCallback("rollback", func);
+	if (env.isNew) {
+		var func = function () {
+			this.ObjectsClass.unload(this._id);
+		}.bind(this);
+		if (env.options.tx) {
+			env.transactionOptions.onRollback = func;
+		}
+		else {
+			Zotero.DB.addCurrentCallback("rollback", func);
+		}
 	}
 	
 	env.relationsToRegister = [];
@@ -1129,7 +1130,9 @@ Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* (options 
 		throw new Error("'options' must be an object");
 	}
 	
-	var env = { options };
+	var env = {
+		options: Object.assign({}, options)
+	};
 	
 	if (!env.options.tx && !Zotero.DB.inTransaction()) {
 		Zotero.logError("erase() called on Zotero." + this._ObjectType + " without a wrapping "

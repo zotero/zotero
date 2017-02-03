@@ -658,16 +658,18 @@ Zotero.Utilities.Internal = {
 		var g = gen.next ? gen : gen();
 		var seq = 0;
 		
+		const PR_UINT32_MAX = Math.pow(2, 32) - 1;
 		var pipe = Cc["@mozilla.org/pipe;1"].createInstance(Ci.nsIPipe);
-		pipe.init(true, true, 0, 0, null);
+		pipe.init(true, true, 0, PR_UINT32_MAX, null);
 		
 		var os = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
 			.createInstance(Components.interfaces.nsIConverterOutputStream);
 		os.init(pipe.outputStream, 'utf-8', 0, 0x0000);
 		
+		
 		pipe.outputStream.asyncWait({
 			onOutputStreamReady: function (aos) {
-				Zotero.debug("Output stream is ready");
+				//Zotero.debug("Output stream is ready");
 				
 				let currentSeq = seq++;
 				
@@ -710,6 +712,12 @@ Zotero.Utilities.Internal = {
 						}
 					}
 					
+					if (error) {
+						Zotero.debug("Closing input stream");
+						aos.close();
+						throw error;
+					}
+					
 					if (typeof data != 'string') {
 						throw new Error("Yielded value is not a string or promise in " + funcName
 							+ " ('" + data + "')");
@@ -732,14 +740,6 @@ Zotero.Utilities.Internal = {
 					// Write to stream
 					Zotero.debug("Writing " + data.length + " characters");
 					os.writeString(data);
-					
-					if (error) {
-						Zotero.debug("Closing input stream");
-						aos.close();
-						throw error;
-					}
-					
-					Zotero.debug("Waiting to write more");
 					
 					// Wait until stream is ready for more
 					aos.asyncWait(this, 0, 0, null);

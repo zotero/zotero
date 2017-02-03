@@ -31,12 +31,6 @@
 			<button id="openAboutMemory"
 				label="&zotero.preferences.openAboutMemory;"
 				oncommand="Zotero_Preferences.openInViewer('about:memory')"/>
-			<button id="db-info"
-				label="DB Info"
-				oncommand="Zotero.DB.info().then(json => Zotero.alert(null, '', JSON.stringify(json, null, 4)))"/>
-			<button id="vacuum"
-				label="Vacuum DB"
-				oncommand="Zotero.DB.vacuum().then(() => Zotero.alert(null, '', 'Done'))"/>
 		</hbox>
 	</groupbox>
 </overlay>

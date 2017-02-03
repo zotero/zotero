@@ -487,7 +487,11 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	var sort = false;
 	
 	var savedSelection = this.getSelectedItems(true);
-	var previousFirstSelectedRow = this._rowMap[ids[0]];
+	var previousFirstSelectedRow = this._rowMap[
+		// 'collection-item' ids are in the form <collectionID>-<itemID>
+		// 'item' events are just integers
+		type == 'collection-item' ? ids[0].split('-')[1] : ids[0]
+	];
 	
 	// If there's not at least one new item to be selected, get a scroll position to restore later
 	var scrollPosition = false;
@@ -1674,12 +1678,6 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 		return false;
 	}
 	
-	var selected = this.getSelectedItems(true);
-	if (selected.length == 1 && selected[0] == id) {
-		Zotero.debug("Item " + id + " is already selected");
-		return true;
-	}
-	
 	var row = this._rowMap[id];
 	
 	// Get the row of the parent, if there is one
@@ -1694,6 +1692,13 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 	var parent = item.parentItemID;
 	if (parent && this._rowMap[parent] != undefined) {
 		parentRow = this._rowMap[parent];
+	}
+	
+	var selected = this.getSelectedItems(true);
+	if (selected.length == 1 && selected[0] == id) {
+		Zotero.debug("Item " + id + " is already selected");
+		this.betterEnsureRowIsVisible(row, parentRow);
+		return true;
 	}
 	
 	// If row with id not visible, check to see if it's hidden under a parent
@@ -1878,13 +1883,15 @@ Zotero.ItemTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(functio
 		collectionTreeRow.ref.deleteItems(ids);
 	}
 	else if (collectionTreeRow.isTrash() || collectionTreeRow.isPublications()) {
-		Zotero.Items.erase(ids);
+		yield Zotero.Items.eraseTx(ids);
 	}
 	else if (collectionTreeRow.isLibrary(true) || force) {
-		Zotero.Items.trashTx(ids);
+		yield Zotero.Items.trashTx(ids);
 	}
 	else if (collectionTreeRow.isCollection()) {
-		collectionTreeRow.ref.removeItems(ids);
+		yield Zotero.DB.executeTransaction(function* () {
+			yield collectionTreeRow.ref.removeItems(ids);
+		});
 	}
 	//this._treebox.endUpdateBatch();
 });
@@ -2511,6 +2518,12 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 	
 	var itemIDs = this.getSelectedItems(true);
 	event.dataTransfer.setData("zotero/item", itemIDs);
+	// dataTransfer.mozSourceNode doesn't seem to be properly set anymore (tested in 50), so store
+	// target separately
+	if (!event.dataTransfer.mozSourceNode) {
+		Zotero.debug("mozSourceNode not set -- storing source node");
+		Zotero.DragDrop.currentSourceNode = event.target;
+	}
 	
 	var items = Zotero.Items.get(itemIDs);
 	
@@ -2601,6 +2614,12 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 		Components.utils.reportError(e + " with '" + format.id + "'");
 	}
 };
+
+Zotero.ItemTreeView.prototype.onDragEnd = function (event) {
+	setTimeout(function () {
+		Zotero.DragDrop.currentDragSource = null;
+	});
+}
 
 
 // Implements nsIFlavorDataProvider for dragging attachment files to OS
@@ -3042,7 +3061,9 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 				throw new Error("Drag source must be a collection");
 			}
 			if (collectionTreeRow.id != sourceCollectionTreeRow.id) {
-				yield collectionTreeRow.ref.removeItems(toMove);
+				yield Zotero.DB.executeTransaction(function* () {
+					yield collectionTreeRow.ref.removeItems(toMove);
+				}.bind(this));
 			}
 		}
 	}

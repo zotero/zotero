@@ -51,7 +51,6 @@ var ZoteroPane = new function()
 	this.getSortedItems = getSortedItems;
 	this.getSortField = getSortField;
 	this.getSortDirection = getSortDirection;
-	this.loadURI = loadURI;
 	this.setItemsPaneMessage = setItemsPaneMessage;
 	this.clearItemsPaneMessage = clearItemsPaneMessage;
 	this.contextPopupShowing = contextPopupShowing;
@@ -3188,7 +3187,7 @@ var ZoteroPane = new function()
 	 *  (e.g. meta-click == new background tab, meta-shift-click == new front tab,
 	 *  shift-click == new window, no modifier == frontmost tab
 	 */
-	function loadURI(uris, event) {
+	this.loadURI = function (uris, event) {
 		if(typeof uris === "string") {
 			uris = [uris];
 		}
@@ -3203,9 +3202,22 @@ var ZoteroPane = new function()
 			if (Zotero.isStandalone) {
 				if(uri.match(/^https?/)) {
 					this.launchURL(uri);
-				} else {
-					Zotero.openInViewer(uri);
+					return;
 				}
+				
+				// Handle no-content zotero: URLs (e.g., zotero://select) without opening viewer
+				if (uri.startsWith('zotero:')) {
+					let nsIURI = Services.io.newURI(uri, null, null);
+					let handler = Components.classes["@mozilla.org/network/protocol;1?name=zotero"]
+						.createInstance(Components.interfaces.nsIProtocolHandler);
+					let extension = handler.wrappedJSObject.getExtension(nsIURI);
+					if (extension.noContent) {
+						extension.doAction(nsIURI);
+						return;
+					}
+				}
+				
+				Zotero.openInViewer(uri);
 				return;
 			}
 			

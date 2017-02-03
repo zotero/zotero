@@ -283,9 +283,11 @@ describe("Zotero.Sync.Storage.Local", function () {
 			
 			var json1 = item1.toJSON();
 			var json3 = item3.toJSON();
-			// Change remote mtimes
+			// Change remote mtimes and hashes
 			json1.mtime = new Date().getTime() + 10000;
+			json1.md5 = 'f4ce1167f3a854896c257a0cc1ac387f';
 			json3.mtime = new Date().getTime() - 10000;
+			json3.md5 = 'fcd080b1c2cad562237823ec27671bbd';
 			yield Zotero.Sync.Data.Local.saveCacheObjects('item', libraryID, [json1, json3]);
 			
 			item1.attachmentSyncState = "in_conflict";
@@ -334,7 +336,11 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield promise;
 			
 			assert.equal(item1.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_UPLOAD);
+			assert.equal(item1.attachmentSyncedModificationTime, json1.mtime);
+			assert.equal(item1.attachmentSyncedHash, json1.md5);
 			assert.equal(item3.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_DOWNLOAD);
+			assert.isNull(item3.attachmentSyncedModificationTime);
+			assert.isNull(item3.attachmentSyncedHash);
 		})
 	})
 	

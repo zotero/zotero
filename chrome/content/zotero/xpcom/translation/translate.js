@@ -2119,27 +2119,36 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 	var oldState = this._currentState;
 	var errorString = Zotero.Translate.Base.prototype.complete.apply(this, [returnValue, error]);
 	
-	// Report translation failure if we failed
-	if(oldState == "translate" && errorString && !this._parentTranslator && this.translator.length
-		&& this.translator[0].inRepository && Zotero.Prefs.get("reportTranslationFailure")) {
-		// Don't report failure if in private browsing mode
-		if(Zotero.isFx && !Zotero.isBookmarklet && !Zotero.isStandalone && Components.classes["@mozilla.org/privatebrowsing;1"]) {
-			var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
-						.getService(Components.interfaces.nsIPrivateBrowsingService);
-			if (pbs.privateBrowsingEnabled) {
-				return;
-			}
-		}
-		
-		var translator = this.translator[0];
-		Zotero.getSystemInfo(function(info) {
-			var postBody = "id=" + encodeURIComponent(translator.translatorID) +
-						   "&lastUpdated=" + encodeURIComponent(translator.lastUpdated) +
-						   "&diagnostic=" + encodeURIComponent(info) +
-						   "&errorData=" + encodeURIComponent(errorString);
-			Zotero.HTTP.doPost(ZOTERO_CONFIG.REPOSITORY_URL + "report", postBody);
-		});
+	var promise;
+	if (Zotero.isConnector) {
+		promise = Zotero.Prefs.getAsync('reportTranslationFailure');
+	} else {
+		promise = Zotero.Promise.resolve(Zotero.Prefs.get("reportTranslationFailure"));
 	}
+	
+	return promise.then(function(reportTranslationFailure) {
+		// Report translation failure if we failed
+		if(oldState == "translate" && errorString && !this._parentTranslator && this.translator.length
+			&& this.translator[0].inRepository && reportTranslationFailure) {
+			// Don't report failure if in private browsing mode
+			if(Zotero.isFx && !Zotero.isBookmarklet && !Zotero.isStandalone && Components.classes["@mozilla.org/privatebrowsing;1"]) {
+				var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
+							.getService(Components.interfaces.nsIPrivateBrowsingService);
+				if (pbs.privateBrowsingEnabled) {
+					return;
+				}
+			}
+			
+			var translator = this.translator[0];
+			return Zotero.getSystemInfo().then(function(info) {
+				var postBody = "id=" + encodeURIComponent(translator.translatorID) +
+							   "&lastUpdated=" + encodeURIComponent(translator.lastUpdated) +
+							   "&diagnostic=" + encodeURIComponent(info) +
+							   "&errorData=" + encodeURIComponent(errorString);
+				return Zotero.HTTP.doPost(ZOTERO_CONFIG.REPOSITORY_URL + "report", postBody);
+			});
+		}	
+	}.bind(this));
 }
 
 /**

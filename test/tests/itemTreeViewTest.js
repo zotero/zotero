@@ -242,7 +242,7 @@ describe("Zotero.ItemTreeView", function() {
 			var items = [];
 			var num = 6;
 			for (let i = 0; i < num; i++) {
-				let item = createUnsavedDataObject('item');
+				let item = createUnsavedDataObject('item', { title: "" + i });
 				item.addToCollection(collection.id);
 				yield item.saveTx();
 				items.push(item);
@@ -251,6 +251,17 @@ describe("Zotero.ItemTreeView", function() {
 			
 			// Select the third item in the list
 			itemsView.selection.select(2);
+			
+			// Remove item
+			var treeRow = itemsView.getRow(2);
+			yield Zotero.DB.executeTransaction(function* () {
+				yield collection.removeItems([treeRow.ref.id]);
+			}.bind(this));
+			
+			// Selection should stay on third row
+			assert.equal(itemsView.selection.currentIndex, 2);
+			
+			// Delete item
 			var treeRow = itemsView.getRow(2);
 			yield treeRow.ref.eraseTx();
 			

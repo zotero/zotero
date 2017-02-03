@@ -35,7 +35,7 @@ var Zotero_CSL_Editor = new function() {
 		
 		var lastStyle = Zotero.Prefs.get('export.lastStyle');
 		
-		var styles = Zotero.Styles.getAll();
+		var styles = Zotero.Styles.getVisible();
 		var currentStyle = null;
 		for (let style of styles) {
 			if (style.source) {
@@ -119,7 +119,7 @@ var Zotero_CSL_Editor = new function() {
 	function loadCSL(cslID) {
 		var editor = document.getElementById('zotero-csl-editor');
 		var style = Zotero.Styles.get(cslID);
-		editor.value = Zotero.File.getContents(style.file);
+		editor.value = style.getXML();
 		editor.cslID = cslID;
 		editor.doCommand();
 		document.getElementById('zotero-csl-list').value = cslID;

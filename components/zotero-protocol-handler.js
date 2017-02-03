@@ -127,7 +127,7 @@ function ZoteroProtocolHandler() {
 				router.add('groups/:groupID/:scopeObject/:scopeObjectKey/items');
 				
 				// All items
-				router.add('library/items', function () {
+				router.add('library/items/:objectKey', function () {
 					params.libraryID = userLibraryID;
 				});
 				router.add('groups/:groupID/items');
@@ -444,26 +444,12 @@ function ZoteroProtocolHandler() {
 					
 					default:
 						this.contentType = 'text/html';
-						
-						// DEBUG: Results in mangled reports
-						//
-						// https://forums.zotero.org/discussion/64022/5-0-beta-generate-report-is-often-garbled
-						/*return Zotero.Utilities.Internal.getAsyncInputStream(
-							Zotero.Report.HTML.listGenerator(items, combineChildItems),
-							function () {
-								return '<span style="color: red; font-weight: bold">Error generating report</span>';
-							}
-						);*/
-						
-						Components.utils.import("resource://gre/modules/NetUtil.jsm");
-						var is = Zotero.Utilities.Internal.getAsyncInputStream(
+						return Zotero.Utilities.Internal.getAsyncInputStream(
 							Zotero.Report.HTML.listGenerator(items, combineChildItems),
 							function () {
 								return '<span style="color: red; font-weight: bold">Error generating report</span>';
 							}
 						);
-						var str = NetUtil.readInputStreamToString(is, is.available(), { charset: "UTF-8" });
-						return Zotero.Promise.resolve(str);
 				}
 			});
 		}
@@ -810,73 +796,70 @@ function ZoteroProtocolHandler() {
 	 * zotero://select/[type]/1234 (not consistent across synced machines)
 	 */
 	var SelectExtension = {
-		newChannel: function (uri) {
-			return new AsyncChannel(uri, function* () {
-				var userLibraryID = Zotero.Libraries.userLibraryID;
-				
-				var path = uri.path;
-				if (!path) {
-					return 'Invalid URL';
-				}
-				// Strip leading '/'
-				path = path.substr(1);
-				var mimeType, content = '';
-				
-				var params = {
-					objectType: 'item'
-				};
-				var router = new Zotero.Router(params);
-				
-				// Item within a collection or search
-				router.add('library/:scopeObject/:scopeObjectKey/items/:objectKey', function () {
-					params.libraryID = userLibraryID;
-				});
-				router.add('groups/:groupID/:scopeObject/:scopeObjectKey/items/:objectKey');
-				
-				// All items
-				router.add('library/items/:objectKey', function () {
-					params.libraryID = userLibraryID;
-				});
-				router.add('groups/:groupID/items/:objectKey');
-				
-				// Old-style URLs
-				router.add('item/:id', function () {
-					var lkh = Zotero.Items.parseLibraryKeyHash(params.id);
-					if (lkh) {
-						params.libraryID = lkh.libraryID;
-						params.objectKey = lkh.key;
-					}
-					else {
-						params.objectID = params.id;
-					}
-					delete params.id;
-				});
-				router.run(path);
-				
-				try {
-					Zotero.API.parseParams(params);
-					var results = yield Zotero.API.getResultsFromParams(params);
-				}
-				catch (e) {
-					Zotero.debug(e, 1);
-					return e.toString();
-				}
-				
-				
-				if (!results.length) {
-					var msg = "Selected items not found";
-					Zotero.debug(msg, 2);
-					Components.utils.reportError(msg);
-					return;
-				}
-				
-				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-					.getService(Components.interfaces.nsIWindowMediator);
-				var win = wm.getMostRecentWindow("navigator:browser");
-				
-				// TODO: Currently only able to select one item
-				yield win.ZoteroPane.selectItem(results[0].id);
+		noContent: true,
+		
+		doAction: Zotero.Promise.coroutine(function* (uri) {
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			
+			var path = uri.path;
+			if (!path) {
+				return 'Invalid URL';
+			}
+			// Strip leading '/'
+			path = path.substr(1);
+			var mimeType, content = '';
+			
+			var params = {
+				objectType: 'item'
+			};
+			var router = new Zotero.Router(params);
+			
+			// Item within a collection or search
+			router.add('library/:scopeObject/:scopeObjectKey/items/:objectKey', function () {
+				params.libraryID = userLibraryID;
 			});
+			router.add('groups/:groupID/:scopeObject/:scopeObjectKey/items/:objectKey');
+			
+			// All items
+			router.add('library/items/:objectKey', function () {
+				params.libraryID = userLibraryID;
+			});
+			router.add('groups/:groupID/items/:objectKey');
+			
+			// Old-style URLs
+			router.add('item/:id', function () {
+				var lkh = Zotero.Items.parseLibraryKeyHash(params.id);
+				if (lkh) {
+					params.libraryID = lkh.libraryID;
+					params.objectKey = lkh.key;
+				}
+				else {
+					params.objectID = params.id;
+				}
+				delete params.id;
+			});
+			router.run(path);
+			
+			Zotero.API.parseParams(params);
+			var results = yield Zotero.API.getResultsFromParams(params);
+			
+			if (!results.length) {
+				var msg = "Items not found";
+				Zotero.debug(msg, 2);
+				Components.utils.reportError(msg);
+				return;
+			}
+			
+			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+				.getService(Components.interfaces.nsIWindowMediator);
+			var win = wm.getMostRecentWindow("navigator:browser");
+			
+			// TODO: Currently only able to select one item
+			return win.ZoteroPane.selectItem(results[0].id);
+		}),
+		
+		newChannel: function (uri) {
+			this.doAction(uri);
 		}
 	};
 	
@@ -1053,6 +1036,22 @@ ZoteroProtocolHandler.prototype = {
 		return false;
 	},
 	
+	getExtension: function (uri) {
+		let uriString = uri;
+		if (uri instanceof Components.interfaces.nsIURI) {
+			uriString = uri.spec;
+		}
+		uriString = uriString.toLowerCase();
+		
+		for (let extSpec in this._extensions) {
+			if (uriString.startsWith(extSpec)) {
+				return this._extensions[extSpec];
+			}
+		}
+		
+		return false;
+	},
+				
 	newURI : function(spec, charset, baseURI) {
 		var newURL = Components.classes["@mozilla.org/network/standard-url;1"]
 			.createInstance(Components.interfaces.nsIStandardURL);
@@ -1070,53 +1069,49 @@ ZoteroProtocolHandler.prototype = {
 		var newChannel = null;
 		
 		try {
-			var uriString = uri.spec.toLowerCase();
+			let ext = this.getExtension(uri);
 			
-			for (var extSpec in this._extensions) {
-				var ext = this._extensions[extSpec];
-				
-				if (uriString.indexOf(extSpec) == 0) {
-					if (!this._principal) {
-						if (ext.loadAsChrome) {
-							var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
-							var chromeChannel = chromeService.newChannel(chromeURI);
-							
-							// Cache System Principal from chrome request
-							// so proxied pages load with chrome privileges
-							this._principal = chromeChannel.owner;
-							
-							var chromeRequest = chromeChannel.QueryInterface(Components.interfaces.nsIRequest);
-							chromeRequest.cancel(0x804b0002); // BINDING_ABORTED
-						}
-					}
+			if (!ext) {
+				// Return cancelled channel for unknown paths
+				//
+				// These can be in the form zotero://example.com/... -- maybe for "//example.com" URLs?
+				var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
+				var extChannel = chromeService.newChannel(chromeURI);
+				var chromeRequest = extChannel.QueryInterface(Components.interfaces.nsIRequest);
+				chromeRequest.cancel(0x804b0002); // BINDING_ABORTED
+				return extChannel;
+			}
+			
+			if (!this._principal) {
+				if (ext.loadAsChrome) {
+					var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
+					var chromeChannel = chromeService.newChannel(chromeURI);
 					
-					var extChannel = ext.newChannel(uri);
-					// Extension returned null, so cancel request
-					if (!extChannel) {
-						var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
-						var extChannel = chromeService.newChannel(chromeURI);
-						var chromeRequest = extChannel.QueryInterface(Components.interfaces.nsIRequest);
-						chromeRequest.cancel(0x804b0002); // BINDING_ABORTED
-					}
+					// Cache System Principal from chrome request
+					// so proxied pages load with chrome privileges
+					this._principal = chromeChannel.owner;
 					
-					// Apply cached principal to extension channel
-					if (this._principal) {
-						extChannel.owner = this._principal;
-					}
-					
-					if(!extChannel.originalURI) extChannel.originalURI = uri;
-					
-					return extChannel;
+					var chromeRequest = chromeChannel.QueryInterface(Components.interfaces.nsIRequest);
+					chromeRequest.cancel(0x804b0002); // BINDING_ABORTED
 				}
 			}
 			
-			// Return cancelled channel for unknown paths
-			//
-			// These can be in the form zotero://example.com/... -- maybe for "//example.com" URLs?
-			var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
-			var extChannel = chromeService.newChannel(chromeURI);
-			var chromeRequest = extChannel.QueryInterface(Components.interfaces.nsIRequest);
-			chromeRequest.cancel(0x804b0002); // BINDING_ABORTED
+			var extChannel = ext.newChannel(uri);
+			// Extension returned null, so cancel request
+			if (!extChannel) {
+				var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
+				var extChannel = chromeService.newChannel(chromeURI);
+				var chromeRequest = extChannel.QueryInterface(Components.interfaces.nsIRequest);
+				chromeRequest.cancel(0x804b0002); // BINDING_ABORTED
+			}
+			
+			// Apply cached principal to extension channel
+			if (this._principal) {
+				extChannel.owner = this._principal;
+			}
+			
+			if(!extChannel.originalURI) extChannel.originalURI = uri;
+			
 			return extChannel;
 		}
 		catch (e) {
