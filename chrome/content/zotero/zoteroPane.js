@@ -753,6 +753,9 @@ var ZoteroPane = new function()
 						this.markFeedRead();
 					}
 					break;
+				case 'openPreferences':
+					ZoteroPane_Local.openPreferences();
+					break;
 				default:
 					throw ('Command "' + command + '" not found in ZoteroPane_Local.handleKeyDown()');
 			}
