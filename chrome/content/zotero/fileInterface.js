@@ -329,12 +329,21 @@ var Zotero_File_Interface = new function() {
 			importCollection.name = collectionName;
 			yield importCollection.saveTx();
 		}
-
+		
 		translation.setTranslator(translators[0]);
-		// TODO: Restore a progress meter
-		/*translation.setHandler("itemDone",  function () {
-			Zotero.updateZoteroPaneProgressMeter(translation.getProgress());
-		});*/
+		
+		// Show progress popup
+		var progressWin = new Zotero.ProgressWindow({
+			closeOnClick: false
+		});
+		progressWin.changeHeadline(Zotero.getString('fileInterface.importing'));
+		var icon = 'chrome://zotero/skin/treesource-unfiled' + (Zotero.hiDPI ? "@2x" : "") + '.png';
+		let progress = new progressWin.ItemProgress(icon, OS.Path.basename(translation.path));
+		progressWin.show();
+		
+		translation.setHandler("itemDone",  function () {
+			progress.setProgress(translation.getProgress());
+		});
 
 		yield Zotero.Promise.delay(0);
 
@@ -352,7 +361,6 @@ var Zotero_File_Interface = new function() {
 		
 		// Show popup on completion
 		var numItems = translation.newItems.length;
-		var progressWin = new Zotero.ProgressWindow();
 		progressWin.changeHeadline(Zotero.getString('fileInterface.importComplete'));
 		if (numItems == 1) {
 			var icon = translation.newItems[0].getImageSrc();
@@ -360,10 +368,12 @@ var Zotero_File_Interface = new function() {
 		else {
 			var icon = 'chrome://zotero/skin/treesource-unfiled' + (Zotero.hiDPI ? "@2x" : "") + '.png';
 		}
-		var title = Zotero.getString(`fileInterface.itemsWereImported`, numItems, numItems);
-		progressWin.addLines(title, icon)
-		progressWin.show();
-		progressWin.startCloseTimer();
+		var text = Zotero.getString(`fileInterface.itemsWereImported`, numItems, numItems);
+		progress.setIcon(icon);
+		progress.setText(text);
+		// For synchronous translators, which don't update progress
+		progress.setProgress(100);
+		progressWin.startCloseTimer(5000);
 	});
 	
 	/*

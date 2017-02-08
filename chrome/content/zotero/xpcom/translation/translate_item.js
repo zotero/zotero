@@ -158,18 +158,15 @@ Zotero.Translate.ItemSaver.prototype = {
 			}
 		}.bind(this));
 
-		// Handle standalone attachments outside of the transaction, because they can involve downloading
+		// Handle attachments outside of the transaction, because they can involve downloading
 		for (let item of standaloneAttachments) {
 			let newItem = yield this._saveAttachment(item, null, attachmentCallback);
 			if (newItem) newItems.push(newItem);
 		}
-		// Save child attachments afterwards, since we want to signal completion as soon as the main
-		// items are saved
-		var promise = Zotero.Promise.delay(1);
 		for (let a of childAttachments) {
 			// Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=449811 (fixed in Fx51?)
 			let [item, parentItemID] = a;
-			promise = promise.then(() => this._saveAttachment(item, parentItemID, attachmentCallback));
+			yield this._saveAttachment(item, parentItemID, attachmentCallback);
 		}
 		
 		return newItems;
