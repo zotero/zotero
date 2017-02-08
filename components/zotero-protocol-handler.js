@@ -137,7 +137,7 @@ function ZoteroProtocolHandler() {
 					params.scopeObject = 'collections';
 					var lkh = Zotero.Collections.parseLibraryKeyHash(params.id);
 					if (lkh) {
-						params.libraryID = lkh.libraryID;
+						params.libraryID = lkh.libraryID || userLibraryID;
 						params.scopeObjectKey = lkh.key;
 					}
 					else {
@@ -149,7 +149,7 @@ function ZoteroProtocolHandler() {
 					params.scopeObject = 'searches';
 					var lkh = Zotero.Searches.parseLibraryKeyHash(this.id);
 					if (lkh) {
-						params.libraryID = lkh.libraryID;
+						params.libraryID = lkh.libraryID || userLibraryID;
 						params.scopeObjectKey = lkh.key;
 					}
 					else {
@@ -159,7 +159,7 @@ function ZoteroProtocolHandler() {
 				});
 				router.add('items/:ids/html/report.html', function () {
 					var ids = this.ids.split('-');
-					params.libraryID = ids[0].split('_')[0];
+					params.libraryID = ids[0].split('_')[0] || userLibraryID;
 					params.itemKey = ids.map(x => x.split('_')[1]);
 					delete params.ids;
 				});
@@ -524,7 +524,7 @@ function ZoteroProtocolHandler() {
 					params.scopeObject = 'collections';
 					var lkh = Zotero.Collections.parseLibraryKeyHash(params.id);
 					if (lkh) {
-						params.libraryID = lkh.libraryID;
+						params.libraryID = lkh.libraryID || userLibraryID;
 						params.scopeObjectKey = lkh.key;
 					}
 					else {
@@ -537,7 +537,7 @@ function ZoteroProtocolHandler() {
 					params.scopeObject = 'searches';
 					var lkh = Zotero.Searches.parseLibraryKeyHash(params.id);
 					if (lkh) {
-						params.libraryID = lkh.libraryID;
+						params.libraryID = lkh.libraryID || userLibraryID;
 						params.scopeObjectKey = lkh.key;
 					}
 					else {
@@ -827,10 +827,10 @@ function ZoteroProtocolHandler() {
 			router.add('groups/:groupID/items/:objectKey');
 			
 			// Old-style URLs
-			router.add('item/:id', function () {
+			router.add('items/:id', function () {
 				var lkh = Zotero.Items.parseLibraryKeyHash(params.id);
 				if (lkh) {
-					params.libraryID = lkh.libraryID;
+					params.libraryID = lkh.libraryID || userLibraryID;
 					params.objectKey = lkh.key;
 				}
 				else {
