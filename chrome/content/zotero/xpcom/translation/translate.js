@@ -1278,6 +1278,9 @@ Zotero.Translate.Base.prototype = {
 		this._currentState = "translate";
 		
 		this._libraryID = options.libraryID;
+		if (options.collections && !Array.isArray(options.collections)) {
+			throw new Error("'collections' must be an array");
+		}
 		this._collections = options.collections;
 		this._saveAttachments = options.saveAttachments === undefined || options.saveAttachments;
 		
