@@ -412,6 +412,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				}
 				delete headers["If-Match"];
 				headers["If-None-Match"] = "*";
+				storedHash = null;
 				Zotero.debug("Retrying with If-None-Match");
 			}
 			else {
@@ -728,7 +729,8 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					successCodes: [204],
 					requestObserver: function (xmlhttp) {
 						request.setChannel(xmlhttp.channel);
-					}
+					},
+					debug: true
 				}
 			);
 		}
