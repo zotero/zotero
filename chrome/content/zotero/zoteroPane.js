@@ -154,7 +154,7 @@ var ZoteroPane = new function()
 		ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 		
 		// Add a default progress window
-		ZoteroPane_Local.progressWindow = new Zotero.ProgressWindow(window);
+		ZoteroPane_Local.progressWindow = new Zotero.ProgressWindow({ window });
 		
 		//Initialize collections view
 		ZoteroPane_Local.collectionsView = new Zotero.CollectionTreeView();
