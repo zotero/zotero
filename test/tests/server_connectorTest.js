@@ -133,7 +133,7 @@ describe("Connector Server", function () {
 			);
 			
 			var promise = waitForItemEvent('add');
-			var req = yield Zotero.HTTP.request(
+			var reqPromise = Zotero.HTTP.request(
 				'POST',
 				connectorServerPath + "/connector/saveItems",
 				{
@@ -160,6 +160,9 @@ describe("Connector Server", function () {
 			
 			// Wait until indexing is done
 			yield waitForItemEvent('refresh');
+			
+			var req = yield reqPromise;
+			assert.equal(req.status, 201);
 		});
 		
 		
