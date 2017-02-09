@@ -2320,10 +2320,13 @@ Zotero.Translate.Import.prototype._prepareTranslation = Zotero.Promise.method(fu
 	}
 
 	this._itemSaver = new Zotero.Translate.ItemSaver({
-		"libraryID":this._libraryID,
-		"collections": this._collections,
-		"attachmentMode":Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_FILE" : "ATTACHMENT_MODE_IGNORE")],
-		"baseURI":baseURI
+		libraryID: this._libraryID,
+		collections: this._collections,
+		attachmentMode: Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_FILE" : "ATTACHMENT_MODE_IGNORE")],
+		baseURI,
+		saveOptions: {
+			skipSelect: true
+		}
 	});
 	this.newItems = [];
 	this.newCollections = [];

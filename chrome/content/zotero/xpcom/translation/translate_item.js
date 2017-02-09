@@ -35,6 +35,7 @@
  *         <li>cookieSandbox - Cookie sandbox for attachment requests</li>
  *         <li>proxy - A proxy to deproxify item URLs</li>
  *         <li>baseURI - URI to which attachment paths should be relative</li>
+ *         <li>saveOptions - Options to pass to DataObject::save() (e.g., skipSelect)</li>
  */
 Zotero.Translate.ItemSaver = function(options) {
 	// initialize constants
@@ -66,6 +67,7 @@ Zotero.Translate.ItemSaver = function(options) {
 				getService(Components.interfaces.nsIIOService).newURI(options.baseURI, null, null);
 		} catch(e) {};
 	}
+	this._saveOptions = options.saveOptions || {};
 };
 
 Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE = 0;
@@ -126,7 +128,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					}
 					
 					// save item
-					myID = yield newItem.save();
+					myID = yield newItem.save(this._saveOptions);
 
 					// handle notes
 					if (specialFields.notes) {
@@ -195,9 +197,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					newCollection.parentID = rootCollectionID;
 					topLevelCollections.push(newCollection)
 				}
-				yield newCollection.save({
-					skipSelect: true
-				});
+				yield newCollection.save(this._saveOptions);
 
 				var toAdd = [];
 
@@ -307,7 +307,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			if (attachment.tags) newAttachment.setTags(this._cleanTags(attachment.tags));
 			if (attachment.note) newAttachment.setNote(attachment.note);
 			this._handleRelated(attachment, newAttachment);
-			yield newAttachment.saveTx();
+			yield newAttachment.saveTx(this._saveOptions);
 
 			Zotero.debug("Translate: Created attachment; id is " + newAttachment.id, 4);
 			attachmentCallback(attachment, 100);
@@ -646,7 +646,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		if (!parentItemID && this._collections) {
 			myNote.setCollections(this._collections);
 		}
-		yield myNote.save();
+		yield myNote.save(this._saveOptions);
 		return myNote;
 	}),
 	
