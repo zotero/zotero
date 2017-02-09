@@ -87,6 +87,28 @@ describe("Zotero.Items", function () {
 		})
 	})
 	
+	
+	describe("#trash()", function () {
+		it("should send items to the trash", function* () {
+			var items = [];
+			items.push(
+				(yield createDataObject('item')),
+				(yield createDataObject('item')),
+				(yield createDataObject('item'))
+			);
+			var ids = items.map(item => item.id);
+			yield Zotero.Items.trashTx(ids);
+			items.forEach(item => {
+				assert.isTrue(item.deleted);
+				assert.isFalse(item.hasChanged());
+			});
+			assert.equal((yield Zotero.DB.valueQueryAsync(
+				`SELECT COUNT(*) FROM deletedItems WHERE itemID IN (${ids})`
+			)), 3);
+		});
+	});
+	
+	
 	describe("#emptyTrash()", function () {
 		it("should delete items in the trash", function* () {
 			var item1 = createUnsavedDataObject('item');

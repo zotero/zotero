@@ -641,7 +641,6 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			}
 			
 			madeChanges = true;
-			sort = true;
 		}
 	}
 	else if (type == 'item' && action == 'modify')

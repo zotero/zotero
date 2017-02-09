@@ -338,8 +338,7 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 		// If trash is refreshed, we probably need to update the icon from full to empty
 		if (type == 'trash') {
 			// libraryID is passed as parameter to 'refresh'
-			let deleted = yield Zotero.Items.getDeleted(ids[0], true);
-			this._trashNotEmpty[ids[0]] = !!deleted.length;
+			this._trashNotEmpty[ids[0]] = yield Zotero.Items.hasDeleted(ids[0]);
 			let row = this.getRowIndexByID("T" + ids[0]);
 			this._treebox.invalidateRow(row);
 		}

@@ -3603,6 +3603,28 @@ Zotero.Item.prototype.inCollection = function (collectionID) {
 };
 
 
+/**
+ * Update item deleted (i.e., trash) state without marking as changed or modifying DB
+ *
+ * This is used by Zotero.Items.trash().
+ *
+ * Database state must be set separately!
+ *
+ * @param {Boolean} deleted
+ */
+Zotero.DataObject.prototype.setDeleted = Zotero.Promise.coroutine(function* (deleted) {
+	if (!this.id) {
+		throw new Error("Cannot update deleted state of unsaved item");
+	}
+	
+	this._deleted = !!deleted;
+	
+	if (this._changed.deleted) {
+		delete this._changed.deleted;
+	}
+});
+
+
 Zotero.Item.prototype.getImageSrc = function() {
 	var itemType = Zotero.ItemTypes.getName(this.itemTypeID);
 	if (itemType == 'attachment') {

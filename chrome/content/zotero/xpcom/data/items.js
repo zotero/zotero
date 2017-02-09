@@ -103,12 +103,23 @@ Zotero.Items = function() {
 	
 	this._relationsTable = "itemRelations";
 	
+	
+	/**
+	 * @param {Integer} libraryID
+	 * @return {Promise<Boolean>} - True if library has items in trash, false otherwise
+	 */
+	this.hasDeleted = Zotero.Promise.coroutine(function* (libraryID) {
+		var sql = "SELECT COUNT(*) > 0 FROM items JOIN deletedItems USING (itemID) WHERE libraryID=?";
+		return !!(yield Zotero.DB.valueQueryAsync(sql, [libraryID]));
+	});
+	
+	
 	/**
 	 * Return items marked as deleted
 	 *
 	 * @param {Integer} libraryID - Library to search
 	 * @param {Boolean} [asIDs] - Return itemIDs instead of Zotero.Item objects
-	 * @return {Zotero.Item[]|Integer[]}
+	 * @return {Promise<Zotero.Item[]|Integer[]>}
 	 */
 	this.getDeleted = Zotero.Promise.coroutine(function* (libraryID, asIDs, days) {
 		var sql = "SELECT itemID FROM items JOIN deletedItems USING (itemID) "
@@ -818,14 +829,14 @@ Zotero.Items = function() {
 	this.trash = Zotero.Promise.coroutine(function* (ids) {
 		Zotero.DB.requireTransaction();
 		
+		var libraryIDs = new Set();
 		ids = Zotero.flattenArguments(ids);
-		
-		for (let i=0; i<ids.length; i++) {
-			let id = ids[i];
-			let item = yield this.getAsync(id);
+		var items = [];
+		for (let id of ids) {
+			let item = this.get(id);
 			if (!item) {
 				Zotero.debug('Item ' + id + ' does not exist in Items.trash()!', 1);
-				Zotero.Notifier.queue('delete', 'item', id);
+				Zotero.Notifier.queue('trash', 'item', id);
 				continue;
 			}
 			
@@ -833,15 +844,32 @@ Zotero.Items = function() {
 				throw new Error(item._ObjectType + " " + item.libraryKey + " is not editable");
 			}
 			
-			if (!Zotero.Libraries.hasTrash(item.libraryID)) {
-				throw new Error(Zotero.Libraries.getName(item.libraryID) + " does not have Trash");
+			if (!Zotero.Libraries.get(item.libraryID).hasTrash) {
+				throw new Error(Zotero.Libraries.getName(item.libraryID) + " does not have a trash");
 			}
 			
-			item.deleted = true;
-			yield item.save({
-				skipDateModifiedUpdate: true
-			});
+			items.push(item);
+			libraryIDs.add(item.libraryID);
 		}
+		
+		items.forEach(item => {
+			item.setDeleted(true);
+		});
+		yield Zotero.Utilities.Internal.forEachChunkAsync(ids, 250, Zotero.Promise.coroutine(function* (chunk) {
+			yield Zotero.DB.queryAsync(
+				"UPDATE items SET synced=1, clientDateModified=CURRENT_TIMESTAMP "
+					+ `WHERE itemID IN (${chunk.map(id => parseInt(id)).join(", ")})`
+			);
+			yield Zotero.DB.queryAsync(
+				"INSERT OR IGNORE INTO deletedItems (itemID) VALUES "
+					+ chunk.map(id => "(" + id + ")").join(", ")
+			);
+		}.bind(this)));
+		
+		Zotero.Notifier.queue('trash', 'item', ids);
+		Array.from(libraryIDs).forEach(libraryID => {
+			Zotero.Notifier.queue('refresh', 'trash', libraryID);
+		});
 	});
 	
 	
