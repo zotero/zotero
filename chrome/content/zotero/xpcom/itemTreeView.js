@@ -1882,7 +1882,7 @@ Zotero.ItemTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(functio
 		collectionTreeRow.ref.deleteItems(ids);
 	}
 	else if (collectionTreeRow.isTrash() || collectionTreeRow.isPublications()) {
-		yield Zotero.Items.eraseTx(ids);
+		yield Zotero.Items.erase(ids);
 	}
 	else if (collectionTreeRow.isLibrary(true) || force) {
 		yield Zotero.Items.trashTx(ids);

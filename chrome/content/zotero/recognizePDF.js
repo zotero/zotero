@@ -390,7 +390,7 @@ var Zotero_RecognizePDF = new function() {
 					
 					// If already stopped, delete
 					if (this._stopped) {
-						yield Zotero.Items.eraseTx(newItem.id);
+						yield Zotero.Items.erase(newItem.id);
 						throw new Zotero.Exception.Alert('recognizePDF.stopped');
 					}
 					
