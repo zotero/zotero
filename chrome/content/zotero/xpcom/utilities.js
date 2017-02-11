@@ -179,9 +179,13 @@ Zotero.Utilities = {
 				var lastName = author;
 			}
 		} else {
-			var spaceIndex = author.lastIndexOf(" ");
-			var lastName = author.substring(spaceIndex+1);
-			var firstName = author.substring(0, spaceIndex);
+			// Don't parse "Firstname Lastname [Country]" as "[Country], Firstname Lastname"
+			var spaceIndex = author.length;
+			do {
+				spaceIndex = author.lastIndexOf(" ", spaceIndex-1);
+				var lastName = author.substring(spaceIndex + 1);
+				var firstName = author.substring(0, spaceIndex);
+			} while (!Zotero.Utilities.XRegExp('\\pL').test(lastName[0]) && spaceIndex > 0)
 		}
 
 		if(firstName && allCapsRe.test(firstName) &&
