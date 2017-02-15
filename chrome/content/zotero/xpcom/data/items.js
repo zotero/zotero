@@ -852,12 +852,17 @@ Zotero.Items = function() {
 			libraryIDs.add(item.libraryID);
 		}
 		
+		var parentItemIDs = new Set();
 		items.forEach(item => {
 			item.setDeleted(true);
+			item.synced = false;
+			if (item.parentItemID) {
+				parentItemIDs.add(item.parentItemID);
+			}
 		});
 		yield Zotero.Utilities.Internal.forEachChunkAsync(ids, 250, Zotero.Promise.coroutine(function* (chunk) {
 			yield Zotero.DB.queryAsync(
-				"UPDATE items SET synced=1, clientDateModified=CURRENT_TIMESTAMP "
+				"UPDATE items SET synced=0, clientDateModified=CURRENT_TIMESTAMP "
 					+ `WHERE itemID IN (${chunk.map(id => parseInt(id)).join(", ")})`
 			);
 			yield Zotero.DB.queryAsync(
@@ -866,6 +871,11 @@ Zotero.Items = function() {
 			);
 		}.bind(this)));
 		
+		// Keep in sync with Zotero.Item::saveData()
+		for (let parentItemID of parentItemIDs) {
+			let parentItem = yield Zotero.Items.getAsync(parentItemID);
+			yield parentItem.reload(['primaryData', 'childItems'], true);
+		}
 		Zotero.Notifier.queue('trash', 'item', ids);
 		Array.from(libraryIDs).forEach(libraryID => {
 			Zotero.Notifier.queue('refresh', 'trash', libraryID);

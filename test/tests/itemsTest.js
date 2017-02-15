@@ -92,19 +92,38 @@ describe("Zotero.Items", function () {
 		it("should send items to the trash", function* () {
 			var items = [];
 			items.push(
-				(yield createDataObject('item')),
-				(yield createDataObject('item')),
-				(yield createDataObject('item'))
+				(yield createDataObject('item', { synced: true })),
+				(yield createDataObject('item', { synced: true })),
+				(yield createDataObject('item', { synced: true }))
 			);
+			items.forEach(item => {
+				// Sanity-checked as true in itemTest#deleted
+				assert.isUndefined(item._changed.deleted);
+			});
 			var ids = items.map(item => item.id);
 			yield Zotero.Items.trashTx(ids);
 			items.forEach(item => {
 				assert.isTrue(item.deleted);
-				assert.isFalse(item.hasChanged());
+				// Item should be saved (can't use hasChanged() because that includes .synced)
+				assert.isUndefined(item._changed.deleted);
+				assert.isFalse(item.synced);
 			});
 			assert.equal((yield Zotero.DB.valueQueryAsync(
 				`SELECT COUNT(*) FROM deletedItems WHERE itemID IN (${ids})`
 			)), 3);
+			for (let item of items) {
+				assert.equal((yield Zotero.DB.valueQueryAsync(
+					`SELECT synced FROM items WHERE itemID=${item.id}`
+				)), 0);
+			}
+		});
+		
+		it("should update parent item when trashing child item", function* () {
+			var item = yield createDataObject('item');
+			var note = yield createDataObject('item', { itemType: 'note', parentID: item.id });
+			assert.lengthOf(item.getNotes(), 1);
+			yield Zotero.Items.trashTx([note.id]);
+			assert.lengthOf(item.getNotes(), 0);
 		});
 	});
 	

@@ -151,6 +151,55 @@ describe("Item pane", function () {
 			
 			assert.equal(noteBox.noteField.value, '<p>Test</p>');
 		})
+		
+		it("should refresh on note trash", function* () {
+			var item = yield createDataObject('item');
+			
+			var note = new Zotero.Item('note');
+			note.parentItemID = item.id;
+			yield note.saveTx();
+			yield itemsView.selectItem(note.id);
+			
+			// Wait for the note editor, just to be polite
+			var noteBox = doc.getElementById('zotero-note-editor');
+			var val = false;
+			do {
+				try {
+					val = noteBox.noteField.value;
+				}
+				catch (e) {}
+				yield Zotero.Promise.delay(1);
+			}
+			while (val === false)
+			
+			// Select parent and make sure there's 1 note
+			yield itemsView.selectItem(item.id);
+			var tabs = doc.getElementById('zotero-editpane-tabs');
+			var infoTab = doc.getElementById('zotero-editpane-info-tab');
+			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
+			var notesList = doc.getElementById('zotero-editpane-dynamic-notes');
+			tabs.selectedItem = notesTab;
+			// Wait for note list to update
+			do {
+				yield Zotero.Promise.delay(1);
+			}
+			while (notesList.childNodes.length !== 1);
+			tabs.selectedItem = infoTab;
+			
+			// Select child and trash it
+			yield itemsView.selectItem(note.id);
+			yield Zotero.Items.trashTx([note.id]);
+			
+			// Select parent and select notes pane
+			yield itemsView.selectItem(item.id);
+			tabs.selectedItem = notesTab;
+			// Wait for note list to update
+			var len = false;
+			do {
+				yield Zotero.Promise.delay(1);
+			}
+			while (notesList.childNodes.length !== 0);
+		})
 	})
 	
 	describe("Feed buttons", function() {

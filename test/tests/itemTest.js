@@ -301,6 +301,8 @@ describe("Zotero.Item", function () {
 		it("should be set to true after save", function* () {
 			var item = yield createDataObject('item');
 			item.deleted = true;
+			// Sanity check for itemsTest#trash()
+			assert.isTrue(item._changed.deleted);
 			yield item.saveTx();
 			assert.ok(item.deleted);
 		})
