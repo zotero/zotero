@@ -44,8 +44,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
 
-<!ENTITY zotero.preferences.openurl.caption "Obre la URL">
-
 <!ENTITY zotero.preferences.openurl.search "Cerca resolutors">
 <!ENTITY zotero.preferences.openurl.custom "Personalitzat...">
 <!ENTITY zotero.preferences.openurl.server "Resolutor:">

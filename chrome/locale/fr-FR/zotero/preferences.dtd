@@ -44,8 +44,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Les plus anciens documents en premier">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Paramètres par défaut des flux">
 
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
-
 <!ENTITY zotero.preferences.openurl.search "Chercher des résolveurs de liens">
 <!ENTITY zotero.preferences.openurl.custom "Personnaliser…">
 <!ENTITY zotero.preferences.openurl.server "Résolveur de liens :">
@@ -79,14 +77,14 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Les opérations suivantes ne sont à utiliser que dans de rares et spécifiques situations et ne doivent pas être utilisées pour un dépannage général. Dans la plupart des cas, la réinitialisation ne fera que causer des problèmes supplémentaires. Consultez ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "les options de réinitialisation du serveur de synchronisation">
 <!ENTITY zotero.preferences.sync.reset.warning3 " pour plus d'informations.">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Réinitialiser l'historique de synchronisation des données">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Fusionner les données locales avec les données distantes, en ignorant l'historique de synchronisation">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurer à partir du serveur Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Effacer toutes les données locales de Zotero et restaurer à partir du serveur de synchronisation.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaurer vers le serveur Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Effacer toutes les données du serveur et les écraser avec les données locales de Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Réinitialiser l'historique de synchronisation des fichiers">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Forcer le serveur de stockage à rechercher tous les fichiers locaux.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Rechercher les copies distantes de tous les fichiers joints locaux">
 <!ENTITY zotero.preferences.sync.reset "Réinitialisation">
 <!ENTITY zotero.preferences.sync.reset.button "Réinitialiser…">
 

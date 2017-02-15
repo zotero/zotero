@@ -9,8 +9,8 @@
 
 <!ENTITY zotero.preferences.userInterface "사용자 인터페이스">
 <!ENTITY zotero.preferences.layout "레이아웃:">
-<!ENTITY zotero.preferences.layout.standard "Standard">
-<!ENTITY zotero.preferences.layout.stacked "Stacked">
+<!ENTITY zotero.preferences.layout.standard "표준">
+<!ENTITY zotero.preferences.layout.stacked "스택">
 <!ENTITY zotero.preferences.fontSize "글꼴 크기:">
 <!ENTITY zotero.preferences.fontSize.small "작게">
 <!ENTITY zotero.preferences.fontSize.medium "중간">
@@ -44,19 +44,17 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "오래된 항목 먼저">
 <!ENTITY zotero.preferences.feeds.feedDefaults "피드 기본값">
 
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
-
 <!ENTITY zotero.preferences.openurl.search "해독기로 검색">
-<!ENTITY zotero.preferences.openurl.custom "Custom…">
+<!ENTITY zotero.preferences.openurl.custom "사용자 지정...">
 <!ENTITY zotero.preferences.openurl.server "해독기:">
 <!ENTITY zotero.preferences.openurl.version "버전:">
 
 <!ENTITY zotero.preferences.prefpane.sync "동기화">
 <!ENTITY zotero.preferences.sync.username "사용자명:">
 <!ENTITY zotero.preferences.sync.password "비밀번호:">
-<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
+<!ENTITY zotero.preferences.sync.syncServer "데이터 동기화">
 <!ENTITY zotero.preferences.sync.setUpSync "동기화 설정">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
+<!ENTITY zotero.preferences.sync.unlinkAccount "계정 연결 해제...">
 <!ENTITY zotero.preferences.sync.createAccount "계정 생성">
 <!ENTITY zotero.preferences.sync.lostPassword "비밀번호를 분실하셨나요?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "자동 동기화">
@@ -72,12 +70,12 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "필요할 때">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero 스토리지 이용시 다음 약관에 동의하는 것으로 간주합니다: ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "이용 약관">
-<!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
+<!ENTITY zotero.preferences.sync.librariesToSync "동기화할 라이브러리">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "라이브러리 선택...">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "동기화">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "라이브러리">
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning2 "동기화 초기화 옵션">
 <!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
@@ -86,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zotero Server로 복원">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "모든 서버 자료를 지우고 지역 Zotero 자료로 덮어 씁니다.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "파일 동기화 기록 재설정">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "모든 지역 첨부 파일을 위해 저장서버의 검사를 강제합니다.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
 <!ENTITY zotero.preferences.sync.reset "재설정">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

@@ -44,8 +44,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "as máis antigas primeiro">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Configuracións das fontes">
 
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
-
 <!ENTITY zotero.preferences.openurl.search "Busca de solucións">
 <!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "Buscador de solucións:">
@@ -86,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaurar no servidor de Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Borrar todos os datos do servidor e substituír con datos locais de Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reiniciar o historial de sincronización de ficheiros">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Forzar a comprobación do servidor de almacenamento para todos os ficheiros locais anexos.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
 <!ENTITY zotero.preferences.sync.reset "Reiniciar">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

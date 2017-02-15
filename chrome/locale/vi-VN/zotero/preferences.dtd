@@ -44,8 +44,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Mục cũ nhất trước">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed mặc định">
 
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
-
 <!ENTITY zotero.preferences.openurl.search "Tìm kiếm các bộ phân giải">
 <!ENTITY zotero.preferences.openurl.custom "Tùy chỉnh...">
 <!ENTITY zotero.preferences.openurl.server "Bộ phân giải:">
@@ -86,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Lưu lên máy chủ Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Xóa toàn bộ dữ liệu trên máy chủ và ghi đè bằng dữ liệu cục bộ.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Thiết lập lại lịch sử đồng bộ tập tin">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Bắt buộc kiểm tra các tập tin đính kèm trên máy chủ lưu trữ.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
 <!ENTITY zotero.preferences.sync.reset "Thiết lập lại">
 <!ENTITY zotero.preferences.sync.reset.button "Đang thiết lập lại...">
 

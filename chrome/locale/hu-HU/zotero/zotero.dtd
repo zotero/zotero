@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.delete "Törlés">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Mégse">
-<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.refresh "Újratöltés">
 <!ENTITY zotero.general.saveAs "Mentés másként…">
 <!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 <!ENTITY zotero.general.more "More">
@@ -257,7 +257,7 @@
 
 <!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.deleted "Törölve">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy felismerve">
 <!ENTITY zotero.proxy.recognized.warning "Csak a könyvtárból, iskolából vagy vállalati weboldalról linkelt proxy-t adható hozzá">
@@ -266,15 +266,15 @@
 <!ENTITY zotero.proxy.recognized.ignore.label "Elutasít">
 
 <!ENTITY zotero.feedSettings.title "Feed Settings">
-<!ENTITY zotero.feedSettings.saveButton.label "Save">
+<!ENTITY zotero.feedSettings.saveButton.label "Mentés">
 <!ENTITY zotero.feedSettings.url.label "URL">
 <!ENTITY zotero.feedSettings.title.label "Cím:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
-<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
+<!ENTITY zotero.feedSettings.refresh.label2 "óra">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "nap(ok)">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "nap(ok)">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Metaadatok kigyűjtése...">

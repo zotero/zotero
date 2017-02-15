@@ -44,8 +44,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "最早的项目在前">
 <!ENTITY zotero.preferences.feeds.feedDefaults "订阅默认">
 
-<!ENTITY zotero.preferences.openurl.caption "打开 URL">
-
 <!ENTITY zotero.preferences.openurl.search "搜索解析器">
 <!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "解析器:">
@@ -86,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "恢复到 Zotero 服务器">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "删除服务器所有数据并用本地数据覆盖.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重置文件同步历史">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "强制检查本地所有附件的存储服务器">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
 <!ENTITY zotero.preferences.sync.reset "重置">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

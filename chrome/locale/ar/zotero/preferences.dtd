@@ -44,8 +44,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
 
-<!ENTITY zotero.preferences.openurl.caption "الرابط المفتوح">
-
 <!ENTITY zotero.preferences.openurl.search "البحث عن مقرر">
 <!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "رابط المقرر:">
@@ -86,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "الاسترجاع إلى خادم زوتيرو">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "حذف جميع بيانات الخادم وإحلال بيانات زوتيرو المحلية على الخادم.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "إعادة تعيين ملف سجل المزامنة">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "تنفيذ عملية التحقق من الخادم لتخزين جميع الملفات المحلية المرفقة.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
 <!ENTITY zotero.preferences.sync.reset "اعادة ضبط">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

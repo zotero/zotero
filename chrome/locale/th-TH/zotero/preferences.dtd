@@ -44,8 +44,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
 
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
-
 <!ENTITY zotero.preferences.openurl.search "ค้นหาตัวแก้ปัญหา">
 <!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "ตัวแก้ปัญหา: ">
@@ -86,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "ส่งข้อมูลคืนเครื่องบริการของ Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "ล้างข้อมูลในเครื่องบริการของ Zotero แล้วบันทึกทับด้วยข้อมูลจากเครื่องนี้">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "ตั้งค่าประวัติการประสานข้อมูลแฟ้มใหม่">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "บังคับตรวจสอบเครื่องบริการเก็บข้อมูลสำหรับแฟ้มแนบทั้งหมดในเครื่องนี้">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
 <!ENTITY zotero.preferences.sync.reset "ตั้งค่าใหม่">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

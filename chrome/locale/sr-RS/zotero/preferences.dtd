@@ -44,8 +44,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Најпре најстарије ставке">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Подразумевано за довод">
 
-<!ENTITY zotero.preferences.openurl.caption "ОпенУРЛ">
-
 <!ENTITY zotero.preferences.openurl.search "Нађи разрешиваче">
 <!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "Разрешивач:">
@@ -86,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Пошаљи на Зотеров сервер">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Брише све податке са сервера и преписује их локалним подацима из Зотера.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Поништи историју усклађивања">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Приморава проверу складишта на серверу у тражећи прилоге са локалног рачунара.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
 <!ENTITY zotero.preferences.sync.reset "Врати">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

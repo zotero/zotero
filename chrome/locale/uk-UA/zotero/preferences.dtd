@@ -44,8 +44,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Спочатку старі записи">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Знчення за замовчуванням стрічки">
 
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
-
 <!ENTITY zotero.preferences.openurl.search "Пошук ресолверів">
 <!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "Сервер">
@@ -86,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Віднвити на сервері Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Віновити всі дані на сервері та перезаписати даними Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Скинути історію синхронізації файлів">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Здійснити примусову перевірку наявності і сховищі сервера всіх локаьних файлів">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
 <!ENTITY zotero.preferences.sync.reset "Скинути">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

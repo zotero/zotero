@@ -184,7 +184,7 @@
 <!ENTITY zotero.bibliography.outputMethod "Çıktı Metodu:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF olarak Kaydet">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML olarak Kaydet">
-<!ENTITY zotero.bibliography.copyToClipboard.label "Pano'ya Kopyala">
+<!ENTITY zotero.bibliography.copyToClipboard.label "Panoya Kopyala">
 <!ENTITY zotero.bibliography.print.label "Yazdır">
 
 <!ENTITY zotero.integration.docPrefs.title "Döküman Tercihleri">

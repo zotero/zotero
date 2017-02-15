@@ -44,8 +44,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Od najstarszych elementów">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Wartości domyślne kanału">
 
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
-
 <!ENTITY zotero.preferences.openurl.search "Szukaj resolwerów">
 <!ENTITY zotero.preferences.openurl.custom "Dostosuj...">
 <!ENTITY zotero.preferences.openurl.server "Resolwer:">
@@ -79,14 +77,14 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Poniższe operacje są używane tylko w rzadkich i określonych sytuacjach i nie powinny być używane do rozwiązywania ogólnych problemów z synchronizacją. W wielu przypadkach przywracanie może spowodować dodatkowe problemy. Zobacz">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Opcje przywracania synchronizacji">
 <!ENTITY zotero.preferences.sync.reset.warning3 "aby uzyskać więcej informacji.">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Wyczyść historię synchronizacji danych">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Połącz lokalne dane ze zdalnymi, ignorując historię synchronizacji">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Przywróć z serwera Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Usuń wszystkie lokalne dane Zostero i przywróć je z serwera synchronizacji.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zapisz na serwer Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Usuń wszystkie dane na serwerze i nadpisz je lokalnymi danymi Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Wyczyść historię synchronizacji plików">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Wymuś sprawdzenie wszystkich lokalnych załączników na serwerze przechowywania.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Sprawdź zdalne kopie wszystkich lokalnych załączników">
 <!ENTITY zotero.preferences.sync.reset "Przywróć">
 <!ENTITY zotero.preferences.sync.reset.button "Przywróć...">
 

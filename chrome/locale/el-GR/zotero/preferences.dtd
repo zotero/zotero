@@ -44,8 +44,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
 
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
-
 <!ENTITY zotero.preferences.openurl.search "Αναζήτηση διακομιστών resolver">
 <!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "Διακομιστή resolver:">
@@ -86,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Αποκατάσταση στον διακομιστή Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Διαγραφή όλων των δεδομένων στον διακομιστή και αντικατάστασή τους με τα τοπικά δεδομένα Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Μηδενισμός του ιστορικού συγχρονισμού αρχείων">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Έλεγχος του αποθηκευτικού διακομιστή για όλα τα τοπικά προσαρτημένα αρχεία.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
 <!ENTITY zotero.preferences.sync.reset "Μηδενισμός/Επαναφορά">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

@@ -8,9 +8,9 @@
 <!ENTITY zotero.preferences.prefpane.general "Almennt">
 
 <!ENTITY zotero.preferences.userInterface "Notendaviðmót">
-<!ENTITY zotero.preferences.layout "Layout:">
-<!ENTITY zotero.preferences.layout.standard "Standard">
-<!ENTITY zotero.preferences.layout.stacked "Stacked">
+<!ENTITY zotero.preferences.layout "Framsetning:">
+<!ENTITY zotero.preferences.layout.standard "Stöðluð">
+<!ENTITY zotero.preferences.layout.stacked "Stöfluð">
 <!ENTITY zotero.preferences.fontSize "Stærð leturs:">
 <!ENTITY zotero.preferences.fontSize.small "Smátt">
 <!ENTITY zotero.preferences.fontSize.medium "Meðalstórt">
@@ -39,12 +39,10 @@
 <!ENTITY zotero.preferences.groups.tags "tög">
 
 <!ENTITY zotero.preferences.feeds "Feeds">
-<!ENTITY zotero.preferences.feeds.sorting.label "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label "Röðun:">
 <!ENTITY zotero.preferences.feeds.sorting.newest "Newest items first">
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
-
-<!ENTITY zotero.preferences.openurl.caption "Opna slóð">
 
 <!ENTITY zotero.preferences.openurl.search "Leita að auðkennum netþjóna">
 <!ENTITY zotero.preferences.openurl.custom "Custom…">
@@ -74,8 +72,8 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "skilmála">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "Samstilla">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "Safn">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Aðgerðir hér fyrir neðan eru einungis notaðar í sjaldgæfum og sérhæfðum tilvikum og ætti ekki að beita almennt. Í mörgum tilvikum mun endurræsing valda viðbótar vandræðum. Sjá ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Stillingar vegna endurræsingar á samhæfingu">
 <!ENTITY zotero.preferences.sync.reset.warning3 "til frekari upplýsinga">
@@ -86,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Endurheimta í Zotero netþjón">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Eyða öllum gögnum frá netþjóni og endurnýja með staðbundnum Zotero gögnum.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Endurræsa forsögu skráasamhæfingar">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Þvinga athugun á tilveru staðbundinna viðhengja á geymslusvæði netþjóns">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
 <!ENTITY zotero.preferences.sync.reset "Endurræsa">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
@@ -191,7 +189,7 @@
 <!ENTITY zotero.preferences.dataDir "Storage Location">
 <!ENTITY zotero.preferences.dataDir.useProfile "Nota forstillta möppu">
 <!ENTITY zotero.preferences.dataDir.custom "Egin stillingar:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose…">
+<!ENTITY zotero.preferences.dataDir.choose "Veldu...">
 <!ENTITY zotero.preferences.dataDir.reveal "Sýna gagnamöppu">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 

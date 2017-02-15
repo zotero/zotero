@@ -44,8 +44,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "最古のアイテムを最初に表示">
 <!ENTITY zotero.preferences.feeds.feedDefaults "デフォルトのフィード">
 
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
-
 <!ENTITY zotero.preferences.openurl.search "リンク・リゾルバを検索">
 <!ENTITY zotero.preferences.openurl.custom "Custom…">
 <!ENTITY zotero.preferences.openurl.server "リンク・リゾルバ:">
@@ -86,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zotero サーバのデータに復元する。">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "サーバのデータを全て消去して、ローカル（手元）の Zotero データで上書きする。">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "ファイル同期の履歴を削除する">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "すべてのローカルの添付ファイルに関して、ストレージ・サーバーを強制的に確認する。">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
 <!ENTITY zotero.preferences.sync.reset "リセット">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

@@ -12,7 +12,7 @@
 <!ENTITY zotero.general.saveAs "Salvare ca...">
 <!ENTITY zotero.general.advancedOptions.label "Opțiuni avansate">
 <!ENTITY zotero.general.more "Mai mult">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.loading "Se încarcă...">
 
 <!ENTITY zotero.errorReport.title "Raportul de erori Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Aceasta ar putea include mesaje fără legătură cu Zotero.">
@@ -271,10 +271,10 @@
 <!ENTITY zotero.feedSettings.title.label "Titlu:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Actualizare flux la fiecare">
 <!ENTITY zotero.feedSettings.refresh.label2 "ore (oră)">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Șterge itemii feed necitiți după">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "zi(le)">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Șterge itemii feed citiți după">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "zi(le)">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Extrage metadatele...">

@@ -44,8 +44,6 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Seniausi pradžioje">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Numatytosios kanalų parinktys">
 
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
-
 <!ENTITY zotero.preferences.openurl.search "Sprendiklių paieška">
 <!ENTITY zotero.preferences.openurl.custom "Savitas...">
 <!ENTITY zotero.preferences.openurl.server "Sprendiklis:">
@@ -86,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Atkurti perrašant Zotero serverio duomenis">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Ištrinti visus serverio duomenis, po to vietinius Zotero duomenis nusiųsti į serverį.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Perrašyti failų sinchronizavimo žurnalą">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Priverstinai patikrinti saugyklos serverį, ar jame yra visi vietiniai prisegtiniai failai.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
 <!ENTITY zotero.preferences.sync.reset "Atkūrimas">
 <!ENTITY zotero.preferences.sync.reset.button "Atkurti...">
 

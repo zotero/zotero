@@ -1,7 +1,7 @@
 <!ENTITY zotero.preferences.title "Inställningar i Zotero">
 
 <!ENTITY zotero.preferences.default "Standardvärde:">
-<!ENTITY zotero.preferences.items "Källor">
+<!ENTITY zotero.preferences.items "källor">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Inställningar">
 
@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Kolla automatiskt efter uppdaterade källfångare och stilar">
 <!ENTITY zotero.preferences.updateNow "Uppdatera nu">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapportera felaktiga källfångare">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Tillåt zotero.org att justera innehåll beroende på installerad Zoteroversion">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Tillåt zotero.org att justera innehåll beroende på installerad Zotero-version">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Visa för zotero.org vilken version av programmet jag använder">
 <!ENTITY zotero.preferences.parseRISRefer "Använd Zotero för nedladdade BibTeX/RIS/Refer-filer">
 <!ENTITY zotero.preferences.automaticSnapshots "Ta automatiskt lokala kopior när källor skapas av hemsidor">
@@ -39,12 +39,10 @@
 <!ENTITY zotero.preferences.groups.tags "etiketter">
 
 <!ENTITY zotero.preferences.feeds "Matningar">
-<!ENTITY zotero.preferences.feeds.sorting.label "Sortering">
+<!ENTITY zotero.preferences.feeds.sorting.label "Sortering:">
 <!ENTITY zotero.preferences.feeds.sorting.newest "Nyast först">
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Äldst först">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Matningens standardvärden">
-
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Sök efter länkservrar">
 <!ENTITY zotero.preferences.openurl.custom "Anpassad...">
@@ -79,14 +77,14 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Följande åtgärder är endast till för sällsynta, särskilda situationer och ska inte användas för vanlig felsökning. I många fall kan en återställning istället orsaka nya problem. Se">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Återställningsalternativ för synkronisering">
 <!ENTITY zotero.preferences.sync.reset.warning3 "för mer information.">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Återställ från Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Radera alla lokala Zoterodata och återställ från synkroniseringsservern.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Återställ till Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Byt ut allt innehåll på Zotero Server mot lokala Zoterodata.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Återställ datasynkroniseringshistorik">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Sammanfoga lokala data med fjärrdata, strunta i synkroniseringshistorik">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Återställ från Zotero-server">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Radera alla lokala Zotero-data och återställ från synkroniseringsservern.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Återställ till Zotero-server">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Byt ut allt innehåll på Zotero-server mot lokala Zoterodata.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Återställ filsynkroniseringshistorik">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tvinga kontroll mot lagringsservern för alla lokala bifogade filer.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Kontrollera fjärrkopior för alla lokala bifogade filer">
 <!ENTITY zotero.preferences.sync.reset "Återställ">
 <!ENTITY zotero.preferences.sync.reset.button "Återställ...">
 
@@ -135,7 +133,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Få ytterligare stilar...">
 
-<!ENTITY zotero.preferences.keys.openZotero "Öppna/Stäng Zotero-panelen">
+<!ENTITY zotero.preferences.keys.openZotero "Öppna/stäng Zotero-panelen">
 <!ENTITY zotero.preferences.keys.saveToZotero "Spara till Zotero (adressradsikon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Växla fullskärmsläge">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Ruta för fokusbibliotek">
@@ -207,13 +205,13 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Återställ översättare...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Återställ stilar...">
 
-<!ENTITY zotero.preferences.debugOutputLogging "Logga utdata för debuggning">
+<!ENTITY zotero.preferences.debugOutputLogging "Logga utdata för felsökning">
 <!ENTITY zotero.preferences.debugOutputLogging.message "En logg kan hjälpa Zoteros utvecklare att diagnosticera problem i Zotero. Att skapa loggar kommer att sakta ner Zotero, så det bör inte vara påslaget om man inte vill felsöka Zotero.">
 <!ENTITY zotero.preferences.debugOutputLogging.linesLogged "loggade rader">
 <!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Aktivera efter omstart">
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Visa utdata">
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Rensa utdata">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Skicka till Zotero Server">
+<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Skicka till Zotero-server">
 
 <!ENTITY zotero.preferences.openAboutConfig "Öppna about:config">
 <!ENTITY zotero.preferences.openCSLEdit "Öppna stilredigerare">
