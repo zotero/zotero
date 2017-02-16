@@ -18,6 +18,23 @@ describe("Zotero.Item", function () {
 			item.setField('title', 'foo');
 			assert.strictEqual(item.getField('invalid'), "");
 		});
+		
+		it("should return a firstCreator for an unsaved item", function* () {
+			var item = createUnsavedDataObject('item');
+			item.setCreators([
+				{
+					firstName: "A",
+					lastName: "B",
+					creatorType: "author"
+				},
+				{
+					firstName: "C",
+					lastName: "D",
+					creatorType: "editor"
+				}
+			]);
+			assert.equal(item.getField('firstCreator'), "B");
+		});
 	});
 	
 	describe("#setField", function () {

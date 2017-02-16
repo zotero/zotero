@@ -158,6 +158,167 @@ describe("Zotero.Items", function () {
 		})
 	})
 	
+	describe("#getFirstCreatorFromData()", function () {
+		it("should handle single eligible creator", function* () {
+			for (let creatorType of ['author', 'editor', 'contributor']) {
+				assert.equal(
+					Zotero.Items.getFirstCreatorFromData(
+						Zotero.ItemTypes.getID('book'),
+						[
+							{
+								fieldMode: 0,
+								firstName: 'A',
+								lastName: 'B',
+								creatorTypeID: Zotero.CreatorTypes.getID(creatorType)
+							}
+						]
+					),
+					'B',
+					creatorType
+				);
+			}
+		});
+		
+		it("should ignore single ineligible creator", function* () {
+			assert.strictEqual(
+				Zotero.Items.getFirstCreatorFromData(
+					Zotero.ItemTypes.getID('book'),
+					[
+						{
+							fieldMode: 0,
+							firstName: 'A',
+							lastName: 'B',
+							creatorTypeID: Zotero.CreatorTypes.getID('translator')
+						}
+					]
+				),
+				''
+			);
+		});
+		
+		it("should handle single eligible creator after ineligible creator", function* () {
+			for (let creatorType of ['author', 'editor', 'contributor']) {
+				assert.equal(
+					Zotero.Items.getFirstCreatorFromData(
+						Zotero.ItemTypes.getID('book'),
+						[
+							{
+								fieldMode: 0,
+								firstName: 'A',
+								lastName: 'B',
+								creatorTypeID: Zotero.CreatorTypes.getID('translator')
+							},
+							{
+								fieldMode: 0,
+								firstName: 'C',
+								lastName: 'D',
+								creatorTypeID: Zotero.CreatorTypes.getID(creatorType)
+							}
+						]
+					),
+					'D',
+					creatorType
+				);
+			}
+		});
+		
+		it("should handle two eligible creators", function* () {
+			for (let creatorType of ['author', 'editor', 'contributor']) {
+				assert.equal(
+					Zotero.Items.getFirstCreatorFromData(
+						Zotero.ItemTypes.getID('book'),
+						[
+							{
+								fieldMode: 0,
+								firstName: 'A',
+								lastName: 'B',
+								creatorTypeID: Zotero.CreatorTypes.getID(creatorType)
+							},
+							{
+								fieldMode: 0,
+								firstName: 'C',
+								lastName: 'D',
+								creatorTypeID: Zotero.CreatorTypes.getID(creatorType)
+							}
+						]
+					),
+					'B ' + Zotero.getString('general.and') + ' D',
+					creatorType
+				);
+			}
+		});
+		
+		it("should handle three eligible creators", function* () {
+			for (let creatorType of ['author', 'editor', 'contributor']) {
+				assert.equal(
+					Zotero.Items.getFirstCreatorFromData(
+						Zotero.ItemTypes.getID('book'),
+						[
+							{
+								fieldMode: 0,
+								firstName: 'A',
+								lastName: 'B',
+								creatorTypeID: Zotero.CreatorTypes.getID(creatorType)
+							},
+							{
+								fieldMode: 0,
+								firstName: 'C',
+								lastName: 'D',
+								creatorTypeID: Zotero.CreatorTypes.getID(creatorType)
+							},
+							{
+								fieldMode: 0,
+								firstName: 'E',
+								lastName: 'F',
+								creatorTypeID: Zotero.CreatorTypes.getID(creatorType)
+							}
+						]
+					),
+					'B ' + Zotero.getString('general.etAl'),
+					creatorType
+				);
+			}
+		});
+		
+		it("should handle two eligible creators with intervening creators", function* () {
+			for (let creatorType of ['author', 'editor', 'contributor']) {
+				assert.equal(
+					Zotero.Items.getFirstCreatorFromData(
+						Zotero.ItemTypes.getID('book'),
+						[
+							{
+								fieldMode: 0,
+								firstName: 'A',
+								lastName: 'B',
+								creatorTypeID: Zotero.CreatorTypes.getID('translator')
+							},
+							{
+								fieldMode: 0,
+								firstName: 'C',
+								lastName: 'D',
+								creatorTypeID: Zotero.CreatorTypes.getID(creatorType)
+							},
+							{
+								fieldMode: 0,
+								firstName: 'E',
+								lastName: 'F',
+								creatorTypeID: Zotero.CreatorTypes.getID('translator')
+							},
+							{
+								fieldMode: 0,
+								firstName: 'G',
+								lastName: 'H',
+								creatorTypeID: Zotero.CreatorTypes.getID(creatorType)
+							}
+						]
+					),
+					'D ' + Zotero.getString('general.and') + ' H',
+					creatorType
+				);
+			}
+		});
+	});
+	
 	describe("#getAsync()", function() {
 		it("should return Zotero.Item for item ID", function* () {
 			let item = new Zotero.Item('journalArticle');
