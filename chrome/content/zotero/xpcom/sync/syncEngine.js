@@ -1113,6 +1113,32 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 				Zotero.logError("Error for " + objectType + " " + jsonBatch[index].key + " in "
 					+ this.library.name + ":\n\n" + e);
 				
+				// If parent item is missing remotely and it isn't in the queue (which shouldn't happen),
+				// mark it as unsynced and add to queue
+				if (e.code == 400 && objectType == 'item' && data && data.parentItem) {
+					let parentItem = Zotero.Items.getByLibraryAndKey(this.libraryID, data.parentItem);
+					if (!parentItem) {
+						throw new Error(`Item ${this.libraryID}/${jsonBatch[index].key} references parent `
+							+ `item ${data.parentItem}, which doesn't exist`);
+					}
+					
+					let id = parentItem.id;
+					// If parent item isn't already in queue, mark it as unsynced and add it
+					if (!queue.find(o => o.id == id) && !batch.find(o => o.id == id)) {
+						yield Zotero.Sync.Data.Local.markObjectAsUnsynced(parentItem);
+						Zotero.logError(`Adding parent item ${data.parentItem} to upload queue`);
+						queue.push({
+							id,
+							json: null,
+							tries: 0,
+							failed: false
+						});
+						// Pretend that we were successful so syncing continues
+						numSuccessful++;
+						continue;
+					}
+				}
+				
 				// This shouldn't happen, because the upload request includes a library version and should
 				// prevent an outdated upload before the object version is checked. If it does, we need to
 				// do a full sync. This error is checked in handleUploadError().

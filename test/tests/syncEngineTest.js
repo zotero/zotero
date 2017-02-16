@@ -2175,6 +2175,75 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var result = yield engine._startUpload();
 			assert.equal(result, engine.UPLOAD_RESULT_OBJECT_CONFLICT);
 		});
+		
+		
+		it("should mark local parent item as unsynced if it doesn't exist when uploading child", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			var lastLibraryVersion = 5;
+			library.libraryVersion = lastLibraryVersion;
+			yield library.saveTx();
+			
+			var item = createUnsavedDataObject('item');
+			// Set the parent item as synced (though this shouldn't happen)
+			item.synced = true;
+			yield item.saveTx();
+			var note = yield createDataObject('item', { itemType: 'note', parentID: item.id });
+			
+			var called = 0;
+			server.respond(function (req) {
+				let requestJSON = JSON.parse(req.requestBody);
+				
+				if (called == 0) {
+					assert.lengthOf(requestJSON, 1);
+					assert.equal(requestJSON[0].key, note.key);
+					req.respond(
+						200,
+						{
+							"Last-Modified-Version": lastLibraryVersion
+						},
+						JSON.stringify({
+							successful: {},
+							unchanged: {},
+							failed: {
+								0: {
+									code: 400,
+									message: `Parent item '${item.key}' doesn't exist`,
+									data: {
+										parentItem: item.key
+									}
+								}
+							}
+						})
+					);
+				}
+				else if (called == 1) {
+					assert.lengthOf(requestJSON, 2);
+					assert.sameMembers(requestJSON.map(o => o.key), [item.key, note.key]);
+					req.respond(
+						200,
+						{
+							"Last-Modified-Version": ++lastLibraryVersion
+						},
+						JSON.stringify({
+							successful: {
+								0: item.toResponseJSON(),
+								1: note.toResponseJSON()
+							},
+							unchanged: {},
+							failed: {}
+						})
+					);
+				}
+				called++;
+			});
+			
+			var result = yield engine._startUpload();
+			assert.equal(result, engine.UPLOAD_RESULT_SUCCESS);
+			assert.equal(called, 2);
+		});
 	});
 	
 	
