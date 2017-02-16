@@ -819,6 +819,7 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options =
 			'skipClientDateModifiedUpdate',
 			'skipSyncedUpdate',
 			'skipEditCheck',
+			'skipNotifier',
 			'skipSelect'
 		].forEach(x => env.options[x] = true);
 	}
