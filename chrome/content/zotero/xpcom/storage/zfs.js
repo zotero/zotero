@@ -476,13 +476,14 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			);
 			throw e;
 		}
+		// This shouldn't happen, but if it does, mark item for upload and restart sync
 		else if (req.status == 404) {
-			Components.utils.reportError("Unexpected status code 404 in upload authorization "
-				+ "request (" + item.libraryKey + ")");
-			
-			// TODO: Make an API request to fix this
-			
-			throw new Error(Zotero.Sync.Storage.defaultError);
+			Zotero.logError(`Item ${item.libraryID}/${item.key} not found in upload authorization `
+				+ 'request -- marking for upload');
+			yield Zotero.Sync.Data.Local.markObjectAsUnsynced(item);
+			return new Zotero.Sync.Storage.Result({
+				syncRequired: true
+			});
 		}
 		else if (req.status == 412) {
 			let version = req.getResponseHeader('Last-Modified-Version');

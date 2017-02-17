@@ -132,7 +132,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.equal(library.storageVersion, library.libraryVersion);
 		})
 		
-		it("should ignore a remotely missing file", function* () {
+		it("should ignore download for a remotely missing file", function* () {
 			var { engine, client, caller } = yield setup();
 			
 			var library = Zotero.Libraries.userLibrary;
@@ -758,6 +758,42 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 	
 	
 	describe("#_processUploadFile()", function () {
+		it("should handle 404 from upload authorization request", function* () {
+			var { engine, client, caller } = yield setup();
+			var zfs = new Zotero.Sync.Storage.Mode.ZFS({
+				apiClient: client
+			})
+			
+			var filePath = OS.Path.join(getTestDataDirectory().path, 'test.png');
+			var item = yield Zotero.Attachments.importFromFile({ file: filePath });
+			item.version = 5;
+			item.synced = true;
+			yield item.saveTx();
+			
+			var itemJSON = item.toResponseJSON();
+			itemJSON.data.mtime = yield item.attachmentModificationTime;
+			itemJSON.data.md5 = yield item.attachmentHash;
+			
+			server.respond(function (req) {
+				if (req.method == "POST"
+						&& req.url == `${baseURL}users/1/items/${item.key}/file`
+						&& !req.requestBody.includes('upload=')) {
+					req.respond(
+						404,
+						{
+							"Last-Modified-Version": 5
+						},
+						"Not Found"
+					);
+				}
+			})
+			
+			var result = yield zfs._processUploadFile({
+				name: item.libraryKey
+			});
+			assert.isTrue(result.syncRequired);
+		});
+		
 		it("should handle 412 with matching version and hash matching local file", function* () {
 			var { engine, client, caller } = yield setup();
 			var zfs = new Zotero.Sync.Storage.Mode.ZFS({
