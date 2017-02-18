@@ -1153,6 +1153,9 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						// Old-style library-key hash
 						if (objKey.indexOf('_') != -1) {
 							[objLibraryID, objKey] = objKey.split('_');
+							if (objLibraryID === "0") {
+								objLibraryID = Zotero.Libraries.userLibraryID;
+							}
 						}
 						// libraryID assigned on search
 						else if (this.libraryID !== null) {

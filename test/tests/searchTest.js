@@ -135,6 +135,17 @@ describe("Zotero.Search", function() {
 					assert.sameMembers(matches, [item.id]);
 				});
 				
+				it("should find item in collection in old-style format", function* () {
+					var col = yield createDataObject('collection');
+					var item = yield createDataObject('item', { collections: [col.id] });
+					
+					var s = new Zotero.Search();
+					s.libraryID = item.libraryID;
+					s.addCondition('collection', 'is', "0_" + col.key);
+					var matches = yield s.search();
+					assert.sameMembers(matches, [item.id]);
+				});
+				
 				it("should find items not in collection", function* () {
 					var col = yield createDataObject('collection');
 					var item = yield createDataObject('item', { collections: [col.id] });
@@ -169,6 +180,20 @@ describe("Zotero.Search", function() {
 					var matches = yield s.search();
 					assert.sameMembers(matches, [item.id]);
 				});
+				
+				it("should find item in subcollection in recursive mode with old-style key", function* () {
+					var col1 = yield createDataObject('collection');
+					var col2 = yield createDataObject('collection', { parentID: col1.id });
+					var item = yield createDataObject('item', { collections: [col2.id] });
+					
+					var s = new Zotero.Search();
+					s.libraryID = item.libraryID;
+					s.addCondition('collection', 'is', "0_" + col1.key);
+					s.addCondition('recursive', 'true');
+					var matches = yield s.search();
+					assert.sameMembers(matches, [item.id]);
+				});
+
 			});
 			
 			describe("fileTypeID", function () {
