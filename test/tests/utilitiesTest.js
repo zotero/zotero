@@ -16,6 +16,21 @@ describe("Zotero.Utilities", function() {
 				}
 			}
 		});
+		
+		it('should not parse words starting with symbols as last name', function() {
+			let author = Zotero.Utilities.cleanAuthor('First Middle Last [CountryName]', false);
+			assert.equal(author.firstName, 'First Middle');
+			// Brackets at the beginning and end of a string get removed for strings
+			// such as [First Last] -> Last, First.
+			// The current output is not ideal, but better than "[CountryName, First Middle Last"
+			assert.equal(author.lastName, 'Last [CountryName');
+		});
+		
+		it('should parse names starting with unicode characters correctly', function() {
+			let author = Zotero.Utilities.cleanAuthor('Ąžuolas Žolynas', false);
+			assert.equal(author.firstName, 'Ąžuolas');
+			assert.equal(author.lastName, 'Žolynas');
+		})
 	});
 	describe("cleanISBN", function() {
 		let cleanISBN = Zotero.Utilities.cleanISBN;
