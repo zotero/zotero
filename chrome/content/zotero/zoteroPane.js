@@ -3202,7 +3202,7 @@ var ZoteroPane = new function()
 			if (Zotero.isStandalone) {
 				if(uri.match(/^https?/)) {
 					this.launchURL(uri);
-					return;
+					continue;
 				}
 				
 				// Handle no-content zotero: URLs (e.g., zotero://select) without opening viewer
