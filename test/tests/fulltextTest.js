@@ -14,7 +14,7 @@ describe("Zotero.Fulltext", function () {
 		}
 	});
 	
-	describe("#indexItems()", function () {
+	describe("Indexing", function () {
 		before(function* () {
 			yield Zotero.Fulltext.downloadPDFTool('info', pdfToolsVersion);
 			yield Zotero.Fulltext.downloadPDFTool('converter', pdfToolsVersion);
@@ -29,49 +29,68 @@ describe("Zotero.Fulltext", function () {
 			Zotero.Prefs.clear('fulltext.pdfMaxPages');
 		});
 		
-		it("should index a text file by default", function* () {
-			var item = yield importFileAttachment('test.txt');
-			assert.equal(
-				(yield Zotero.Fulltext.getIndexedState(item)),
-				Zotero.Fulltext.INDEX_STATE_INDEXED
-			);
-		})
+		describe("#indexItems()", function () {
+			it("should index a text file by default", function* () {
+				var item = yield importFileAttachment('test.txt');
+				assert.equal(
+					(yield Zotero.Fulltext.getIndexedState(item)),
+					Zotero.Fulltext.INDEX_STATE_INDEXED
+				);
+			})
+			
+			it("should skip indexing of a text file if fulltext.textMaxLength is 0", function* () {
+				Zotero.Prefs.set('fulltext.textMaxLength', 0);
+				var item = yield importFileAttachment('test.txt');
+				assert.equal(
+					(yield Zotero.Fulltext.getIndexedState(item)),
+					Zotero.Fulltext.INDEX_STATE_UNINDEXED
+				);
+			})
+			
+			it("should index a PDF by default", function* () {
+				var item = yield importFileAttachment('test.pdf');
+				assert.equal(
+					(yield Zotero.Fulltext.getIndexedState(item)),
+					Zotero.Fulltext.INDEX_STATE_INDEXED
+				);
+			})
+			
+			it("should skip indexing of a PDF if fulltext.textMaxLength is 0", function* () {
+				Zotero.Prefs.set('fulltext.textMaxLength', 0);
+				var item = yield importFileAttachment('test.pdf');
+				assert.equal(
+					(yield Zotero.Fulltext.getIndexedState(item)),
+					Zotero.Fulltext.INDEX_STATE_UNINDEXED
+				);
+			})
+			
+			it("should skip indexing of a PDF if fulltext.pdfMaxPages is 0", function* () {
+				Zotero.Prefs.set('fulltext.pdfMaxPages', 0);
+				var item = yield importFileAttachment('test.pdf');
+				assert.equal(
+					(yield Zotero.Fulltext.getIndexedState(item)),
+					Zotero.Fulltext.INDEX_STATE_UNINDEXED
+				);
+			})
+		});
 		
-		it("should skip indexing of a text file if fulltext.textMaxLength is 0", function* () {
-			Zotero.Prefs.set('fulltext.textMaxLength', 0);
-			var item = yield importFileAttachment('test.txt');
-			assert.equal(
-				(yield Zotero.Fulltext.getIndexedState(item)),
-				Zotero.Fulltext.INDEX_STATE_UNINDEXED
-			);
-		})
-		
-		it("should index a PDF by default", function* () {
-			var item = yield importFileAttachment('test.pdf');
-			assert.equal(
-				(yield Zotero.Fulltext.getIndexedState(item)),
-				Zotero.Fulltext.INDEX_STATE_INDEXED
-			);
-		})
-		
-		it("should skip indexing of a PDF if fulltext.textMaxLength is 0", function* () {
-			Zotero.Prefs.set('fulltext.textMaxLength', 0);
-			var item = yield importFileAttachment('test.pdf');
-			assert.equal(
-				(yield Zotero.Fulltext.getIndexedState(item)),
-				Zotero.Fulltext.INDEX_STATE_UNINDEXED
-			);
-		})
-		
-		it("should skip indexing of a PDF if fulltext.pdfMaxPages is 0", function* () {
-			Zotero.Prefs.set('fulltext.pdfMaxPages', 0);
-			var item = yield importFileAttachment('test.pdf');
-			assert.equal(
-				(yield Zotero.Fulltext.getIndexedState(item)),
-				Zotero.Fulltext.INDEX_STATE_UNINDEXED
-			);
-		})
-	})
+		describe("#indexPDF()", function () {
+			it("should create cache files for linked attachments in storage directory", function* () {
+				var filename = 'test.pdf';
+				var file = OS.Path.join(getTestDataDirectory().path, filename);
+				var tempDir = yield getTempDirectory();
+				var linkedFile = OS.Path.join(tempDir, filename);
+				yield OS.File.copy(file, linkedFile);
+				
+				var item = yield Zotero.Attachments.linkFromFile({ file: linkedFile });
+				var storageDir = Zotero.Attachments.getStorageDirectory(item).path;
+				assert.isTrue(yield OS.File.exists(storageDir));
+				assert.isTrue(yield OS.File.exists(OS.Path.join(storageDir, '.zotero-ft-info')));
+				assert.isTrue(yield OS.File.exists(OS.Path.join(storageDir, '.zotero-ft-cache')));
+				assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, filename)));
+			});
+		});
+	});
 	
 	describe("#downloadPDFTool()", function () {
 		it("should install the PDF tools", function* () {

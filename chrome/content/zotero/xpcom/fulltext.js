@@ -659,15 +659,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		// If file is stored outside of Zotero, create a directory for the item
 		// in the storage directory and save the cache file there
 		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-			let path = item.getFilePath();
-			if (!path) {
-				Zotero.debug("Invalid path for item " + itemID);
-				return false;
-			}
-			var parentDirPath = OS.Path.dirname(path);
-			if (!(yield OS.File.exists(parentDirPath))) {
-				yield Zotero.Attachments.createDirectoryForItem(item);
-			}
+			var parentDirPath = yield Zotero.Attachments.createDirectoryForItem(item);
 		}
 		else {
 			var parentDirPath = OS.Path.dirname(filePath);
