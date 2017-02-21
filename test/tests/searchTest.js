@@ -1,4 +1,40 @@
 describe("Zotero.Search", function() {
+	describe("#addCondition()", function () {
+		it("should convert old-style 'collection' condition value", function* () {
+			var col = yield createDataObject('collection');
+			var item = yield createDataObject('item', { collections: [col.id] });
+			
+			var s = new Zotero.Search();
+			s.libraryID = item.libraryID;
+			s.name = "Test";
+			s.addCondition('collection', 'is', '0_' + col.key);
+			var matches = yield s.search();
+			assert.sameMembers(matches, [item.id]);
+		});
+	});
+	
+	// This is for Zotero.Search._loadConditions()
+	describe("Loading", function () {
+		it("should convert old-style 'collection' condition value", function* () {
+			var col = yield createDataObject('collection');
+			var item = yield createDataObject('item', { collections: [col.id] });
+			
+			var s = new Zotero.Search();
+			s.libraryID = item.libraryID;
+			s.name = "Test";
+			s.addCondition('collection', 'is', col.key);
+			yield s.saveTx();
+			yield Zotero.DB.queryAsync(
+				"UPDATE savedSearchConditions SET value=? WHERE savedSearchID=? AND condition=?",
+				["0_" + col.key, s.id, 'collection']
+			);
+			yield s.reload(['conditions'], true);
+			var matches = yield s.search();
+			assert.sameMembers(matches, [item.id]);
+		});
+	});
+	
+	
 	describe("#save()", function () {
 		it("should fail without a name", function* () {
 			var s = new Zotero.Search;
@@ -135,17 +171,6 @@ describe("Zotero.Search", function() {
 					assert.sameMembers(matches, [item.id]);
 				});
 				
-				it("should find item in collection in old-style format", function* () {
-					var col = yield createDataObject('collection');
-					var item = yield createDataObject('item', { collections: [col.id] });
-					
-					var s = new Zotero.Search();
-					s.libraryID = item.libraryID;
-					s.addCondition('collection', 'is', "0_" + col.key);
-					var matches = yield s.search();
-					assert.sameMembers(matches, [item.id]);
-				});
-				
 				it("should find items not in collection", function* () {
 					var col = yield createDataObject('collection');
 					var item = yield createDataObject('item', { collections: [col.id] });
@@ -180,20 +205,6 @@ describe("Zotero.Search", function() {
 					var matches = yield s.search();
 					assert.sameMembers(matches, [item.id]);
 				});
-				
-				it("should find item in subcollection in recursive mode with old-style key", function* () {
-					var col1 = yield createDataObject('collection');
-					var col2 = yield createDataObject('collection', { parentID: col1.id });
-					var item = yield createDataObject('item', { collections: [col2.id] });
-					
-					var s = new Zotero.Search();
-					s.libraryID = item.libraryID;
-					s.addCondition('collection', 'is', "0_" + col1.key);
-					s.addCondition('recursive', 'true');
-					var matches = yield s.search();
-					assert.sameMembers(matches, [item.id]);
-				});
-
 			});
 			
 			describe("fileTypeID", function () {

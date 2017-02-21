@@ -374,6 +374,14 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 		}
 		return this.addCondition('savedSearch', operator, key, required);
 	}
+	// Parse old-style collection/savedSearch conditions ('0_ABCD2345' -> 'ABCD2345')
+	else if (condition == 'collection' || condition == 'savedSearch') {
+		if (value.includes('_')) {
+			Zotero.logError(`'condition' value '${value}' should be an object key`);
+			let [_, objKey] = value.split('_');
+			value = objKey;
+		}
+	}
 	
 	var searchConditionID = ++this._maxSearchConditionID;
 	
@@ -1150,15 +1158,8 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						let objectType = condition.name == 'collection' ? 'collection' : 'search';
 						let objectTypeClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 						
-						// Old-style library-key hash
-						if (objKey.indexOf('_') != -1) {
-							[objLibraryID, objKey] = objKey.split('_');
-							if (objLibraryID === "0") {
-								objLibraryID = Zotero.Libraries.userLibraryID;
-							}
-						}
 						// libraryID assigned on search
-						else if (this.libraryID !== null) {
+						if (this.libraryID !== null) {
 							objLibraryID = this.libraryID;
 						}
 						

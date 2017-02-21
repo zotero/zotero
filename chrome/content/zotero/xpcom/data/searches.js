@@ -136,6 +136,13 @@ Zotero.Searches = function() {
 					conditionName = 'itemType';
 					condition.value = Zotero.ItemTypes.getName(condition.value);
 				}
+				// Parse old-style collection/savedSearch conditions ('0_ABCD2345' -> 'ABCD2345')
+				else if (conditionName == 'collection' || conditionName == 'savedSearch') {
+					if (condition.value.includes('_')) {
+						let [_, objKey] = condition.value.split('_');
+						condition.value = objKey;
+					}
+				}
 				
 				search._conditions[i] = {
 					id: i,
