@@ -390,6 +390,56 @@ describe("Connector Server", function () {
 		});
 	});
 	
+	describe("/connector/savePage", function() {
+		// TEMP: Wait for indexing to complete, which happens after a 1-second delay, after a 201 has
+		// been returned to the connector. Would be better to make sure indexing has completed.
+		afterEach(function* () {
+			yield Zotero.Promise.delay(1050);
+		});
+		
+		it("should return 500 if no translator available for page", function* () {
+			var xmlhttp = yield Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/savePage",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						uri: "http://example.com",
+						html: "<html><head><title>Title</title><body>Body</body></html>"
+					}),
+					successCodes: false
+				}
+			);
+			assert.equal(xmlhttp.status, 500);
+		});
+		
+		it("should translate a page if translators are available", function* () {
+			var html = Zotero.File.getContentsFromURL(getTestDataUrl('article.html'));
+			var promise = waitForItemEvent('add');
+			var xmlhttp = yield Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/savePage",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						uri: "https://www.zotero.org/blog/indiana-university-survey-of-zotero-users/",
+						html: html
+					}),
+					successCodes: false
+				}
+			);
+
+			let ids = yield promise;
+			var item = Zotero.Items.get(ids[0]);
+			assert.equal(JSON.parse(xmlhttp.responseText).items[0].title, item.getField('title'));
+			assert.equal(xmlhttp.status, 201);
+		});
+	});
+	
 	describe('/connector/installStyle', function() {
 		var endpoint;
 		
