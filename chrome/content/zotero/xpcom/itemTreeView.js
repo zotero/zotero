@@ -901,9 +901,10 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				this.rememberSelection(savedSelection);
 			}
 		}
-		// On removal of a row, select item at previous position
+		// On removal of a selected row, select item at previous position
 		else if (savedSelection.length) {
-			if (action == 'remove' || action == 'trash' || action == 'delete') {
+			if ((action == 'remove' || action == 'trash' || action == 'delete')
+					&& savedSelection.some(id => this.getRowIndexByID(id) === false)) {
 				// In duplicates view, select the next set on delete
 				if (collectionTreeRow.isDuplicates()) {
 					if (this._rows[previousFirstSelectedRow]) {

@@ -269,7 +269,17 @@ describe("Zotero.ItemTreeView", function() {
 			assert.equal(itemsView.selection.currentIndex, 2);
 			
 			yield Zotero.Items.erase(items.map(item => item.id));
-		})
+		});
+		
+		it("shouldn't select sibling on attachment erase if attachment wasn't selected", function* () {
+			var item = yield createDataObject('item');
+			var att1 = yield importFileAttachment('test.png', { title: 'A', parentItemID: item.id });
+			var att2 = yield importFileAttachment('test.png', { title: 'B', parentItemID: item.id });
+			yield zp.itemsView.selectItem(att2.id); // expand
+			yield zp.itemsView.selectItem(item.id);
+			yield att1.eraseTx();
+			assert.sameMembers(zp.itemsView.getSelectedItems(true), [item.id]);
+		});
 		
 		it("should keep first visible item in view when other items are added with skipSelect and nothing in view is selected", function* () {
 			var collection = yield createDataObject('collection');
