@@ -99,8 +99,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.unlockPromise;
 	this.initializationDeferred;
 	this.initializationPromise;
-	this.objectInitializationDeferred;
-	this.objectInitializationPromise;
 	
 	this.hiDPISuffix = "";
 	
