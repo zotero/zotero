@@ -201,6 +201,7 @@ Zotero.Server.Connector.Detect.prototype = {
  *		uri - The URI of the page to be saved
  *		html - document.innerHTML or equivalent
  *		cookie - document.cookie or equivalent
+ *		translatorID [optional] - a translator ID as returned by /connector/detect
  *
  * Returns:
  *		If a single item, sends response code 201 with item in body.
@@ -297,8 +298,11 @@ Zotero.Server.Connector.SavePage.prototype = {
 			}
 		});
 		
-		// set translator and translate
-		translate.setTranslator(this._parsedPostData.translatorID);
+		if (this._parsedPostData.translatorID) {
+			translate.setTranslator(this._parsedPostData.translatorID);
+		} else {
+			translate.setTranslator(translators[0]);
+		}
 		translate.translate(libraryID);
 	}
 }
