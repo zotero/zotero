@@ -371,6 +371,9 @@ function createUnsavedDataObject(objectType, params = {}) {
 	}
 	
 	var obj = new Zotero[Zotero.Utilities.capitalize(objectType)](itemType);
+	if (params.libraryID) {
+		obj.libraryID = params.libraryID;
+	}
 	
 	switch (objectType) {
 	case 'item':
