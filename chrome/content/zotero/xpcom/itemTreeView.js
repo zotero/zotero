@@ -2512,7 +2512,7 @@ Zotero.ItemTreeCommandController.prototype.onEvent = function(evt)
  */
 Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 	// See note in LibraryTreeView::_setDropEffect()
-	if (Zotero.isWin) {
+	if (Zotero.isWin || Zotero.isLinux) {
 		event.dataTransfer.effectAllowed = 'copyMove';
 	}
 	

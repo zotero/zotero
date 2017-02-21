@@ -439,7 +439,7 @@ Zotero.LibraryTreeView.prototype = {
 		// the same action as the dropEffect. This allows the dropEffect setting
 		// (which we use in the tree's canDrop() and drop() to determine the desired
 		// action) to be changed, even if the cursor doesn't reflect the new setting.
-		if (Zotero.isWin) {
+		if (Zotero.isWin || Zotero.isLinux) {
 			event.dataTransfer.effectAllowed = effect;
 		}
 		event.dataTransfer.dropEffect = effect;
