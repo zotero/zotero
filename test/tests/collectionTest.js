@@ -35,7 +35,24 @@ describe("Zotero.Collection", function() {
 			
 			assert.isTrue((yield Zotero.Items.getAsync(item1.id)).deleted);
 			assert.isTrue((yield Zotero.Items.getAsync(item2.id)).deleted);
-		})
+		});
+		
+		it("should clear collection from item cache", function* () {
+			var collection = yield createDataObject('collection');
+			var item = yield createDataObject('item', { collections: [collection.id] });
+			assert.lengthOf(item.getCollections(), 1);
+			yield collection.eraseTx();
+			assert.lengthOf(item.getCollections(), 0);
+		});
+		
+		it("should clear subcollection from descendent item cache", function* () {
+			var collection = yield createDataObject('collection');
+			var subcollection = yield createDataObject('collection', { parentID: collection.id });
+			var item = yield createDataObject('item', { collections: [subcollection.id] });
+			assert.lengthOf(item.getCollections(), 1);
+			yield collection.eraseTx();
+			assert.lengthOf(item.getCollections(), 0);
+		});
 	})
 	
 	describe("#version", function () {

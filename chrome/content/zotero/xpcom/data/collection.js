@@ -569,6 +569,7 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 	var items = [];
 	
 	var del = [];
+	var itemsToUpdate = [];
 	for(var i=0, len=descendents.length; i<len; i++) {
 		// Descendent collections
 		if (descendents[i].type == 'collection') {
@@ -586,6 +587,9 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 			// Delete items from DB
 			if (env.options.deleteItems) {
 				del.push(descendents[i].id);
+			}
+			else {
+				itemsToUpdate.push(descendents[i].id);
 			}
 		}
 	}
@@ -629,8 +633,16 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 	yield Zotero.DB.queryAsync ('DELETE FROM collections WHERE collectionID IN '
 		+ '(' + placeholders + ')', collections);
 	
-	// TODO: Update member items
 	env.deletedObjectIDs = collections;
+	
+	// Update collection cache for descendant items
+	if (!env.options.deleteItems) {
+		let deletedCollections = new Set(env.deletedObjectIDs);
+		itemsToUpdate.forEach(itemID => {
+			let item = Zotero.Items.get(itemID);
+			item._collections = item._collections.filter(c => !deletedCollections.has(c));
+		});
+	}
 });
 
 Zotero.Collection.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env) {
