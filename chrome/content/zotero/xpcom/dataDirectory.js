@@ -484,14 +484,7 @@ Zotero.DataDirectory = {
 		}
 		let automatic = false;
 		if (!exists) {
-			// Migrate automatically on macOS and Linux -- this should match the check in
-			// Zotero.File.moveDirectory()
-			if (!Zotero.isWin && (yield OS.File.exists("/bin/mv"))) {
-				automatic = true;
-			}
-			else {
-				return false;
-			}
+			automatic = true;
 			
 			// Skip automatic migration if there's a non-empty directory at the new location
 			if ((yield OS.File.exists(newDir)) && !(yield Zotero.File.directoryIsEmpty(newDir))) {

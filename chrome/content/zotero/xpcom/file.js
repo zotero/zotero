@@ -497,9 +497,16 @@ Zotero.File = new function(){
 	 *
 	 * Currently this means using /bin/mv, which only works on macOS and Linux
 	 */
-	this.canMoveDirectoryAtomic = Zotero.lazy(function () {
+	this.canMoveDirectoryWithCommand = Zotero.lazy(function () {
 		var cmd = "/bin/mv";
 		return !Zotero.isWin && this.pathToFile(cmd).exists();
+	});
+	
+	/**
+	 * For tests
+	 */
+	this.canMoveDirectoryWithFunction = Zotero.lazy(function () {
+		return true;
 	});
 	
 	/**
@@ -513,7 +520,8 @@ Zotero.File = new function(){
 	this.moveDirectory = Zotero.Promise.coroutine(function* (oldDir, newDir, options = {}) {
 		var maxDepth = options.maxDepth || 10;
 		var cmd = "/bin/mv";
-		var useCmd = this.canMoveDirectoryAtomic();
+		var useCmd = this.canMoveDirectoryWithCommand();
+		var useFunction = this.canMoveDirectoryWithFunction();
 		
 		if (!options.allowExistingTarget && (yield OS.File.exists(newDir))) {
 			throw new Error(newDir + " exists");
@@ -591,6 +599,7 @@ Zotero.File = new function(){
 						let moved = false;
 						
 						if (useCmd && !(yield OS.File.exists(dest))) {
+							Zotero.debug(`Moving ${entry.path} with ${cmd}`);
 							let args = [entry.path, dest];
 							try {
 								yield Zotero.Utilities.Internal.exec(cmd, args);
@@ -598,7 +607,29 @@ Zotero.File = new function(){
 							}
 							catch (e) {
 								checkError(e);
-								addError(e);
+								Zotero.debug(e, 1);
+							}
+						}
+						
+						
+						// If can't use command, try moving with OS.File.move(). Technically this is
+						// unsupported for directories, but it works on all platforms as long as noCopy
+						// is set (and on some platforms regardless)
+						if (!moved && useFunction) {
+							Zotero.debug(`Moving ${entry.path} with OS.File`);
+							try {
+								yield OS.File.move(
+									entry.path,
+									dest,
+									{
+										noCopy: true
+									}
+								);
+								moved = true;
+							}
+							catch (e) {
+								checkError(e);
+								Zotero.debug(e, 1);
 							}
 						}
 						

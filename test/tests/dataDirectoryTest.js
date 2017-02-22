@@ -59,19 +59,33 @@ describe("Zotero.DataDirectory", function () {
 		stubs.pipeExists.restore();
 	});
 	
+	// Force non-mv mode
 	var disableCommandMode = function () {
-		// Force non-mv mode
-		var origFunc = OS.File.exists;
-		if (!stubs.canMoveDirectoryAtomic) {
-			stubs.canMoveDirectoryAtomic = sinon.stub(Zotero.File, "canMoveDirectoryAtomic")
+		if (!stubs.canMoveDirectoryWithCommand) {
+			stubs.canMoveDirectoryWithCommand = sinon.stub(Zotero.File, "canMoveDirectoryWithCommand")
+				.returns(false);
+		}
+	};
+	
+	// Force non-OS.File.move() mode
+	var disableFunctionMode = function () {
+		if (!stubs.canMoveDirectoryWithFunction) {
+			stubs.canMoveDirectoryWithFunction = sinon.stub(Zotero.File, "canMoveDirectoryWithFunction")
 				.returns(false);
 		}
 	};
 	
 	var resetCommandMode = function () {
-		if (stubs.canMoveDirectoryAtomic) {
-			stubs.canMoveDirectoryAtomic.restore();
-			stubs.canMoveDirectoryAtomic = undefined;
+		if (stubs.canMoveDirectoryWithCommand) {
+			stubs.canMoveDirectoryWithCommand.restore();
+			stubs.canMoveDirectoryWithCommand = undefined;
+		}
+	};
+	
+	var resetFunctionMode = function () {
+		if (stubs.canMoveDirectoryWithFunction) {
+			stubs.canMoveDirectoryWithFunction.restore();
+			stubs.canMoveDirectoryWithFunction = undefined;
 		}
 	};
 	
@@ -144,10 +158,12 @@ describe("Zotero.DataDirectory", function () {
 		
 		beforeEach(function () {
 			disableCommandMode();
+			disableFunctionMode();
 		});
 		
 		after(function () {
 			resetCommandMode();
+			resetFunctionMode();
 		});
 		
 		var tests = [];
@@ -157,11 +173,7 @@ describe("Zotero.DataDirectory", function () {
 		
 		it("should skip automatic migration if target directory exists and is non-empty", function* () {
 			resetCommandMode();
-			
-			// No automatic migration without atomic directory move
-			if (!Zotero.File.canMoveDirectoryAtomic()) {
-				this.skip();
-			}
+			resetFunctionMode();
 			
 			yield populateDataDirectory(oldDir);
 			yield OS.File.remove(oldMigrationMarker);
@@ -347,10 +359,12 @@ describe("Zotero.DataDirectory", function () {
 			
 			before(function () {
 				disableCommandMode();
+				disableFunctionMode();
 			});
 			
 			after(function () {
 				resetCommandMode();
+				resetFunctionMode();
 			});
 			
 			it("should handle partial failure", function* () {
