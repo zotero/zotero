@@ -339,7 +339,7 @@ var Zotero_File_Interface = new function() {
 		progressWin.changeHeadline(Zotero.getString('fileInterface.importing'));
 		var icon = 'chrome://zotero/skin/treesource-unfiled' + (Zotero.hiDPI ? "@2x" : "") + '.png';
 		let progress = new progressWin.ItemProgress(
-			icon, translation.path ? OS.Path.basename(translation.label) : translators[0].label
+			icon, translation.path ? OS.Path.basename(translation.path) : translators[0].label
 		);
 		progressWin.show();
 		
