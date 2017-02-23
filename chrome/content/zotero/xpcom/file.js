@@ -381,13 +381,7 @@ Zotero.File = new function(){
 				path,
 				data,
 				{
-					// Note: this will fail on Windows if the temp
-					// directory is on a different drive from
-					// destination path
-					tmpPath: OS.Path.join(
-						Zotero.getTempDirectory().path,
-						OS.Path.basename(path) + ".tmp"
-					),
+					tmpPath: path + ".tmp",
 					encoding: charset ? charset.toLowerCase() : 'utf-8'
 				}
 			));

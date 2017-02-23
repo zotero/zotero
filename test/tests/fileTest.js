@@ -82,6 +82,20 @@ describe("Zotero.File", function () {
 		});
 	});
 	
+	describe("#putContentsAsync()", function () {
+		it("should save via .tmp file", function* () {
+			var tmpDir = yield getTempDirectory();
+			var destFile = OS.Path.join(tmpDir, 'test.txt')
+			var tmpFile = destFile + ".tmp";
+			yield Zotero.File.putContentsAsync(tmpFile, 'A');
+			assert.isTrue(yield OS.File.exists(tmpFile));
+			yield Zotero.File.putContentsAsync(destFile, 'B');
+			assert.isFalse(yield OS.File.exists(tmpFile));
+			// Make sure .tmp file created when creating temp file was deleted too
+			assert.isFalse(yield OS.File.exists(tmpFile + '.tmp'));
+		});
+	});
+	
 	describe("#copyDirectory()", function () {
 		it("should copy all files within a directory", function* () {
 			var tmpDir = Zotero.getTempDirectory().path;
