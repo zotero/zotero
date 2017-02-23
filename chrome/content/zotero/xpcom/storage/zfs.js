@@ -495,10 +495,6 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					syncRequired: true
 				});
 			}
-			if (version < item.version) {
-				throw new Error("Last-Modified-Version is lower than item version "
-					+ `(${version} < ${item.version})`);
-			}
 			
 			// Get updated item metadata
 			let library = Zotero.Libraries.get(item.libraryID);
