@@ -511,9 +511,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			}
 			catch (e) {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					this._throwFriendlyError(
-						e.xmlhttp.method, Zotero.HTTP.getDisplayURI(propURI).spec, e.status
-					);
+					this._throwFriendlyError("DELETE", Zotero.HTTP.getDisplayURI(propURI).spec, e.status);
 				}
 				throw e;
 			}
@@ -555,9 +553,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					);
 				}
 				
-				this._throwFriendlyError(
-					e.xmlhttp.method, Zotero.HTTP.getDisplayURI(uri).spec, e.status
-				);
+				this._throwFriendlyError("PUT", Zotero.HTTP.getDisplayURI(uri).spec, e.status);
 			}
 			throw e;
 			
@@ -1112,9 +1108,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		}
 		catch (e) {
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-				this._throwFriendlyError(
-					e.xmlhttp.method, Zotero.HTTP.getDisplayURI(uri).spec, e.status
-				);
+				this._throwFriendlyError("GET", Zotero.HTTP.getDisplayURI(uri).spec, e.status);
 			}
 			throw e;
 		}
@@ -1227,9 +1221,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		}
 		catch (e) {
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-				this._throwFriendlyError(
-					e.xmlhttp.method, Zotero.HTTP.getDisplayURI(uri).spec, e.status
-				);
+				this._throwFriendlyError("PUT", Zotero.HTTP.getDisplayURI(uri).spec, e.status);
 			}
 			throw e;
 		}
