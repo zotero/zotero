@@ -34,7 +34,8 @@ var Zotero = Components.classes["@zotero.org/Zotero;1"]
 				//.getService(Components.interfaces.chnmIZoteroService).
 				.getService(Components.interfaces.nsISupports)
 				.wrappedJSObject;
-	
+
+Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
 var installationInProgress = false;
@@ -85,7 +86,7 @@ ZoteroPluginInstaller.prototype = {
 			var version = this.prefBranch.getCharPref("version");			
 			if(this.force || (
 					(
-						versionComparator.compare(version, this._addon.LAST_INSTALLED_FILE_UPDATE) < 0
+						Services.vc.compare(version, this._addon.LAST_INSTALLED_FILE_UPDATE) < 0
 						|| (!Zotero.isStandalone && !this.prefBranch.getBoolPref("installed"))
 					)
 					&& !this.prefBranch.getBoolPref("skipInstallation")
