@@ -360,7 +360,12 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 	// If there's not at least one new collection to be selected, get a scroll position to restore later
 	var scrollPosition = false;
 	if (action != 'add' || ids.every(id => extraData[id] && extraData[id].skipSelect)) {
-		scrollPosition = this._saveScrollPosition();
+		if (action == 'delete' && (type == 'group' || type == 'feed')) {
+			// Don't try to access deleted library
+		}
+		else {
+			scrollPosition = this._saveScrollPosition();
+		}
 	}
 	
 	if (action == 'delete') {

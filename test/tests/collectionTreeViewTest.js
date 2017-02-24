@@ -409,6 +409,10 @@ describe("Zotero.CollectionTreeView", function() {
 			// Group, collections, Duplicates, Unfiled, and trash
 			assert.equal(cv.rowCount, originalRowCount + 9);
 			
+			// Select group
+			yield cv.selectLibrary(group.libraryID);
+			yield waitForItemsLoad(win);
+			
 			var spy = sinon.spy(cv, "refresh");
 			try {
 				yield group.eraseTx();
