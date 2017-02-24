@@ -102,6 +102,14 @@ describe("Zotero.Library", function() {
 	});
 	
 	describe("#filesEditable", function() {
+		it("should always return true for user library", function() {
+			assert.isTrue(Zotero.Libraries.userLibrary.filesEditable);
+		});
+		
+		it("should always return true for publications library", function() {
+			assert.isTrue(Zotero.Libraries.get(Zotero.Libraries.publicationsLibraryID).filesEditable);
+		});
+		
 		it("should return files editable status", function() {
 			let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
 			assert.isTrue(library.filesEditable, 'user library is files editable');
@@ -118,6 +126,7 @@ describe("Zotero.Library", function() {
 			assert.isFalse(library.filesEditable);
 			assert.isFalse(Zotero.Libraries.isFilesEditable(library.libraryID), "sets files editable in cache to false");
 		});
+		
 		it("should not be settable for user and publications libraries", function* () {
 			let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
 			assert.throws(function() {library.filesEditable = false}, /^Cannot change _libraryFilesEditable for user library$/, "does not allow setting user library as not files editable");

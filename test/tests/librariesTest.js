@@ -162,41 +162,8 @@ describe("Zotero.Libraries", function() {
 		});
 	});
 	describe("#isFilesEditable()", function() {
-		it("should always return true for user library", function() {
-			assert.isTrue(Zotero.Libraries.isFilesEditable(Zotero.Libraries.userLibraryID));
-		});
-		it("should always return true for publications library", function() {
-			assert.isTrue(Zotero.Libraries.isFilesEditable(Zotero.Libraries.publicationsLibraryID));
-		});
 		it("should throw for invalid library ID", function() {
 			assert.throws(Zotero.Libraries.isFilesEditable.bind(Zotero.Libraries, -1), /^Invalid library ID /);
-		});
-		
-		it("should not depend on editable", function* () {
-			let editableStartState = Zotero.Libraries.isEditable(group.libraryID),
-				filesEditableStartState = Zotero.Libraries.isFilesEditable(group.libraryID);
-			
-			// Test all combinations
-			// E: true, FE: true => true
-			yield Zotero.Libraries.setEditable(group.libraryID, true);
-			yield Zotero.Libraries.setFilesEditable(group.libraryID, true);
-			assert.isTrue(Zotero.Libraries.isFilesEditable(group.libraryID));
-			
-			// E: false, FE: true => true
-			yield Zotero.Libraries.setEditable(group.libraryID, false);
-			assert.isTrue(Zotero.Libraries.isFilesEditable(group.libraryID));
-			
-			// E: false, FE: false => false
-			yield Zotero.Libraries.setFilesEditable(group.libraryID, false);
-			assert.isFalse(Zotero.Libraries.isFilesEditable(group.libraryID));
-			
-			// E: true, FE: false => false
-			yield Zotero.Libraries.setEditable(group.libraryID, true);
-			assert.isFalse(Zotero.Libraries.isFilesEditable(group.libraryID));
-			
-			// Revert settings
-			yield Zotero.Libraries.setFilesEditable(group.libraryID, filesEditableStartState);
-			yield Zotero.Libraries.setEditable(group.libraryID, editableStartState);
 		});
 	});
 	describe("#setFilesEditable()", function() {
