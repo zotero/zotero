@@ -249,7 +249,7 @@ Zotero.Sync.Data.Local = {
 	
 	_libraryHasUnsyncedFiles: Zotero.Promise.coroutine(function* (libraryID) {
 		yield Zotero.Sync.Storage.Local.checkForUpdatedFiles(libraryID);
-		return !!(yield Zotero.Sync.Storage.Local.getFilesToUpload(libraryID));
+		return !!(yield Zotero.Sync.Storage.Local.getFilesToUpload(libraryID)).length;
 	}),
 	
 	
