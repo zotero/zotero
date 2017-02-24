@@ -371,9 +371,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				let group = Zotero.Groups.get(id);
 				
 				if (syncAllLibraries) {
-					// If syncing all libraries, mark any that don't exist or are outdated
-					// locally for update. Group is added to the library list after downloading
-					if (!group || group.version < remoteGroupVersions[id]) {
+					// If syncing all libraries, mark any that don't exist, are outdated, or are
+					// archived locally for update. Group is added to the library list after downloading.
+					if (!group || group.version < remoteGroupVersions[id] || group.archived) {
 						groupsToDownload.push(id);
 					}
 					// If not outdated, just add to library list
@@ -421,6 +421,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			// TODO: What about explicit deletions?
 			
 			let removedGroups = [];
+			let keptGroups = [];
 			
 			let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 				.getService(Components.interfaces.nsIPromptService);
@@ -433,6 +434,12 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			//
 			// TODO: Localize
 			for (let group of remotelyMissingGroups) {
+				// Ignore archived groups
+				if (group.archived) {
+					groupsToDownload.splice(groupsToDownload.indexOf(group.id), 1);
+					continue;
+				}
+				
 				let msg;
 				// If all-groups access but group is missing, user left it
 				if (access.groups && access.groups.all) {
@@ -467,18 +474,25 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					return [];
 				}
 				else if (index == 2) {
-					// TODO: Mark groups to be ignored
+					keptGroups.push(group);
 				}
 			}
 			
 			let removedLibraryIDs = [];
 			for (let group of removedGroups) {
 				removedLibraryIDs.push(group.libraryID);
-				yield Zotero.DB.executeTransaction(function* () {
-					return group.erase();
-				});
+				yield group.eraseTx();
 			}
 			libraries = Zotero.Utilities.arrayDiff(libraries, removedLibraryIDs);
+			
+			let keptLibraryIDs = [];
+			for (let group of keptGroups) {
+				keptLibraryIDs.push(group.libraryID);
+				group.editable = false;
+				group.archived = true;
+				yield group.saveTx();
+			}
+			libraries = Zotero.Utilities.arrayDiff(libraries, keptLibraryIDs);
 		}
 		
 		// Update metadata and permissions on missing or outdated groups
@@ -508,12 +522,15 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				group.id = groupID;
 			}
 			group.version = info.version;
+			group.archived = false;
 			group.fromJSON(info.data, Zotero.Users.getCurrentUserID());
 			yield group.saveTx();
 			
 			// Add group to library list
 			libraries.push(group.libraryID);
 		}
+		
+		// Note: If any non-group library types become archivable, they'll need to be unarchived here.
 		
 		return [...new Set(libraries)];
 	});

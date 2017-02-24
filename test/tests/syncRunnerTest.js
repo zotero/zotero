@@ -296,6 +296,64 @@ describe("Zotero.Sync.Runner", function () {
 			assert.equal(skippedGroup.version, responses.groups.memberGroup.json.version - 1);
 		});
 		
+		it("should filter out remotely missing archived libraries if library list not provided", function* () {
+			var syncedGroupID = responses.groups.ownerGroup.json.id;
+			var archivedGroupID = 162512451; // nonexistent group id
+			
+			var syncedGroup = yield createGroup({
+				id: syncedGroupID,
+				version: responses.groups.ownerGroup.json.version - 1
+			});
+			var archivedGroup = yield createGroup({
+				id: archivedGroupID,
+				editable: false,
+				archived: true
+			});
+			
+			setResponse('userGroups.groupVersions');
+			setResponse('groups.ownerGroup');
+			var libraries = yield runner.checkLibraries(
+				runner.getAPIClient({ apiKey }),
+				false,
+				responses.keyInfo.fullAccess.json
+			);
+			
+			assert.lengthOf(libraries, 3);
+			assert.sameMembers(libraries, [userLibraryID, publicationsLibraryID, syncedGroup.libraryID]);
+		});
+		
+		it("should unarchive library if available remotely", function* () {
+			var syncedGroupID = responses.groups.ownerGroup.json.id;
+			var archivedGroupID = responses.groups.memberGroup.json.id;
+			
+			var syncedGroup = yield createGroup({
+				id: syncedGroupID,
+				version: responses.groups.ownerGroup.json.version
+			});
+			var archivedGroup = yield createGroup({
+				id: archivedGroupID,
+				version: responses.groups.memberGroup.json.version - 1,
+				editable: false,
+				archived: true
+			});
+			
+			setResponse('userGroups.groupVersions');
+			setResponse('groups.ownerGroup');
+			setResponse('groups.memberGroup');
+			var libraries = yield runner.checkLibraries(
+				runner.getAPIClient({ apiKey }),
+				false,
+				responses.keyInfo.fullAccess.json
+			);
+			
+			assert.lengthOf(libraries, 4);
+			assert.sameMembers(
+				libraries,
+				[userLibraryID, publicationsLibraryID, syncedGroup.libraryID, archivedGroup.libraryID]
+			);
+			assert.isFalse(archivedGroup.archived);
+		});
+		
 		it("shouldn't filter out skipped libraries if library list is provided", function* () {
 			var groupData = responses.groups.memberGroup;
 			var group = yield createGroup({
@@ -453,21 +511,45 @@ describe("Zotero.Sync.Runner", function () {
 			assert.isTrue(Zotero.Groups.exists(groupData2.json.id));
 		})
 		
-		it.skip("should keep remotely missing groups", function* () {
-			var groupData = responses.groups.ownerGroup;
-			var group = yield createGroup({ id: groupData.json.id, version: groupData.json.version });
+		it("should keep remotely missing groups", function* () {
+			var group1 = yield createGroup({ editable: true, filesEditable: true });
+			var group2 = yield createGroup({ editable: true, filesEditable: true });
 			
 			setResponse('userGroups.groupVersionsEmpty');
+			var called = 0;
+			var otherGroup;
 			waitForDialog(function (dialog) {
+				called++;
 				var text = dialog.document.documentElement.textContent;
-				assert.include(text, group.name);
+				if (text.includes(group1.name)) {
+					otherGroup = group2;
+				}
+				else if (text.includes(group2.name)) {
+					otherGroup = group1;
+				}
+				else {
+					throw new Error("Dialog text does not include either group name");
+				}
+				
+				waitForDialog(function (dialog) {
+					called++;
+					var text = dialog.document.documentElement.textContent;
+					assert.include(text, otherGroup.name);
+				}, "extra1");
 			}, "extra1");
 			var libraries = yield runner.checkLibraries(
 				runner.getAPIClient({ apiKey }), false, responses.keyInfo.fullAccess.json
 			);
-			assert.lengthOf(libraries, 3);
-			assert.sameMembers(libraries, [userLibraryID, publicationsLibraryID, group.libraryID]);
-			assert.isTrue(Zotero.Groups.exists(groupData.json.id));
+			assert.equal(called, 2);
+			assert.lengthOf(libraries, 2);
+			assert.sameMembers(libraries, [userLibraryID, publicationsLibraryID]);
+			// Groups should still exist but be read-only and archived
+			[group1, group2].forEach((group) => {
+				assert.isTrue(Zotero.Groups.exists(group.id));
+				assert.isTrue(group.archived);
+				assert.isFalse(group.editable);
+				assert.isFalse(group.filesEditable);
+			});
 		})
 		
 		it("should cancel sync with remotely missing groups", function* () {
