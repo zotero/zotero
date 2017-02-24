@@ -183,11 +183,8 @@ Zotero.Sync.Data.Local = {
 		var library = Zotero.Libraries.get(libraryID);
 		
 		// If library is going from editable to non-editable and there's unsynced local data, prompt
-		if (library.editable && !editable
-				&& ((yield this._libraryHasUnsyncedData(libraryID))
-					|| (yield this._libraryHasUnsyncedFiles(libraryID)))) {
+		if (library.editable && !editable && (yield this._libraryHasUnsyncedData(libraryID))) {
 			let index = Zotero.Sync.Data.Utilities.showWriteAccessLostPrompt(win, library);
-			
 			// Reset library
 			if (index == 0) {
 				// This check happens before item data is loaded for syncing, so do it now,
@@ -205,7 +202,6 @@ Zotero.Sync.Data.Local = {
 		
 		if (library.filesEditable && !filesEditable && (yield this._libraryHasUnsyncedFiles(libraryID))) {
 			let index = Zotero.Sync.Storage.Utilities.showFileWriteAccessLostPrompt(win, library);
-			
 			// Reset library files
 			if (index == 0) {
 				// This check happens before item data is loaded for syncing, so do it now,

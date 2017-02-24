@@ -110,6 +110,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			});
 			
 			var mock = sinon.mock(Zotero.Sync.Data.Local);
+			mock.expects("_libraryHasUnsyncedData").once().returns(Zotero.Promise.resolve(true));
 			mock.expects("resetUnsyncedLibraryData").once().returns(Zotero.Promise.resolve());
 			mock.expects("resetUnsyncedLibraryFiles").never();
 			
@@ -130,6 +131,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			}, "cancel");
 			
 			var mock = sinon.mock(Zotero.Sync.Data.Local);
+			mock.expects("_libraryHasUnsyncedData").once().returns(Zotero.Promise.resolve(true));
 			mock.expects("resetUnsyncedLibraryData").never();
 			mock.expects("resetUnsyncedLibraryFiles").never();
 			
@@ -159,6 +161,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			});
 			
 			var mock = sinon.mock(Zotero.Sync.Data.Local);
+			mock.expects("_libraryHasUnsyncedFiles").once().returns(Zotero.Promise.resolve(true));
 			mock.expects("resetUnsyncedLibraryData").never();
 			mock.expects("resetUnsyncedLibraryFiles").once().returns(Zotero.Promise.resolve());
 			
@@ -179,6 +182,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			}, "cancel");
 			
 			var mock = sinon.mock(Zotero.Sync.Data.Local);
+			mock.expects("_libraryHasUnsyncedFiles").once().returns(Zotero.Promise.resolve(true));
 			mock.expects("resetUnsyncedLibraryData").never();
 			mock.expects("resetUnsyncedLibraryFiles").never();
 			
