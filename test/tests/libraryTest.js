@@ -73,11 +73,13 @@ describe("Zotero.Library", function() {
 			
 			assert.isTrue(library.editable);
 			assert.isTrue(Zotero.Libraries.isEditable(library.libraryID), "sets editable in cache to true");
+			assert.equal((yield Zotero.DB.valueQueryAsync("SELECT editable FROM libraries WHERE libraryID=?", library.libraryID)), 1)
 			
 			library.editable = false;
 			yield library.saveTx();
 			assert.isFalse(library.editable);
 			assert.isFalse(Zotero.Libraries.isEditable(library.libraryID), "sets editable in cache to false");
+			assert.equal((yield Zotero.DB.valueQueryAsync("SELECT editable FROM libraries WHERE libraryID=?", library.libraryID)), 0)
 		});
 		it("should not be settable for user and publications libraries", function* () {
 			let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
