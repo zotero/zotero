@@ -40,7 +40,7 @@ Zotero.Groups = new function () {
 	
 	this.register = function (group) {
 		if (!this._cache) throw new Error("Zotero.Groups cache is not initialized");
-		Zotero.debug("Zotero.Groups: Registering group " + group.id + " (" + group.libraryID + ")", 5);
+		Zotero.debug("Registering group " + group.id + " (" + group.libraryID + ")", 5);
 		this._addToCache(this._cache, group);
 	}
 	
@@ -52,7 +52,7 @@ Zotero.Groups = new function () {
 	this.unregister = function (groupID) {
 		if (!this._cache) throw new Error("Zotero.Groups cache is not initialized");
 		let libraryID = this._cache.libraryIDByGroupID[groupID];
-		Zotero.debug("Zotero.Groups: Unegistering group " + groupID + " (" + libraryID + ")", 5);
+		Zotero.debug("Unregistering group " + groupID + " (" + libraryID + ")", 5);
 		delete this._cache.groupIDByLibraryID[libraryID];
 		delete this._cache.libraryIDByGroupID[groupID];
 	}
