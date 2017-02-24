@@ -275,6 +275,7 @@
 					<menuitem class="zotero-menuitem-export" label="&zotero.toolbar.export.label;"/>
 					<menuitem class="zotero-menuitem-create-report"/>
 					<menuitem class="zotero-menuitem-delete-from-lib" label="&zotero.toolbar.emptyTrash.label;"/>
+					<menuitem class="zotero-menuitem-removeLibrary"/>
 				</menupopup>
 				<menupopup id="zotero-itemmenu">
 					<!-- Keep order in sync with buildItemContextMenu -->

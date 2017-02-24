@@ -2425,7 +2425,29 @@ var ZoteroPane = new function()
 			{
 				id: "emptyTrash",
 				onclick: () => this.emptyTrash()
-			}
+			},
+			{
+				id: "removeLibrary",
+				label: Zotero.getString('pane.collections.menu.remove.library'),
+				onclick: () => {
+					let library = Zotero.Libraries.get(libraryID);
+					let ps = Services.prompt;
+					let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+					let index = ps.confirmEx(
+						null,
+						Zotero.getString('pane.collections.removeLibrary'),
+						Zotero.getString('pane.collections.removeLibrary.text', library.name),
+						buttonFlags,
+						Zotero.getString('general.remove'),
+						null,
+						null, null, {}
+					);
+					if (index == 0) {
+						library.eraseTx();
+					}
+				}
+			},
 		];
 		
 		
@@ -2554,12 +2576,16 @@ var ZoteroPane = new function()
 		}
 		// Library
 		else {
-			show = [
-				'sync',
-				'sep1',
-				'newCollection',
-				'newSavedSearch',
-			];
+			let library = Zotero.Libraries.get(libraryID);
+			show = [];
+			if (!library.archived) {
+				show.push(
+					'sync',
+					'sep1',
+					'newCollection',
+					'newSavedSearch'
+				);
+			}
 			// Only show "Show Duplicates" and "Show Unfiled Items" if rows are hidden
 			let duplicates = Zotero.Utilities.Internal.getVirtualCollectionStateForLibrary(
 				libraryID, 'duplicates'
@@ -2568,7 +2594,9 @@ var ZoteroPane = new function()
 				libraryID, 'unfiled'
 			);
 			if (!duplicates || !unfiled) {
-				show.push('sep2');
+				if (!library.archived) {
+					show.push('sep2');
+				}
 				if (!duplicates) {
 					show.push('showDuplicates');
 				}
@@ -2576,10 +2604,15 @@ var ZoteroPane = new function()
 					show.push('showUnfiled');
 				}
 			}
+			if (!library.archived) {
+				show.push('sep3');
+			}
 			show.push(
-				'sep3',
 				'exportFile'
 			);
+			if (library.archived) {
+				show.push('removeLibrary');
+			}
 		}
 		
 		// Disable some actions if user doesn't have write access
