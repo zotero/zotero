@@ -311,6 +311,7 @@ var createGroup = Zotero.Promise.coroutine(function* (props = {}) {
 	if (props.libraryVersion) {
 		group.libraryVersion = props.libraryVersion;
 	}
+	group.archived = props.archived === undefined ? false : props.archived;
 	yield group.saveTx();
 	return group;
 });

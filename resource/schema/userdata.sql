@@ -1,4 +1,4 @@
--- 90
+-- 91
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -255,7 +255,8 @@ CREATE TABLE libraries (
     filesEditable INT NOT NULL,
     version INT NOT NULL DEFAULT 0,
     storageVersion INT NOT NULL DEFAULT 0,
-    lastSync INT NOT NULL DEFAULT 0
+    lastSync INT NOT NULL DEFAULT 0,
+    archived INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE users (

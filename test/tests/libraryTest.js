@@ -127,6 +127,37 @@ describe("Zotero.Library", function() {
 		});
 	});
 	
+	describe("#archived", function() {
+		it("should return archived status", function() {
+			let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
+			assert.isFalse(library.archived, 'user library is not archived');
+		});
+		
+		it("should allow setting archived status", function* () {
+			let library = yield createGroup({ editable: false, archived: true });
+			assert.isTrue(library.archived);
+			assert.equal((yield Zotero.DB.valueQueryAsync("SELECT archived FROM libraries WHERE libraryID=?", library.libraryID)), 1)
+			
+			library.archived = false;
+			yield library.saveTx();
+			assert.isFalse(library.archived);
+			assert.equal((yield Zotero.DB.valueQueryAsync("SELECT archived FROM libraries WHERE libraryID=?", library.libraryID)), 0)
+		});
+		
+		it("should not be settable for user and publications libraries", function* () {
+			let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
+			assert.throws(() => library.archived = true, /^Cannot change _libraryArchived for user library$/, "does not allow setting user library as archived");
+			
+			library = Zotero.Libraries.get(Zotero.Libraries.publicationsLibraryID);
+			assert.throws(() => library.archived = true, /^Cannot change _libraryArchived for publications library$/, "does not allow setting publications library as archived");
+		});
+		
+		it("should only be settable on read-only library", function* () {
+			let library = yield createGroup();
+			assert.throws(() => library.archived = true, /^Cannot set editable library as archived$/);
+		});
+	});
+	
 	describe("#save()", function() {
 		it("should require mandatory parameters to be set", function* () {
 			let library = new Zotero.Library({ editable: true, filesEditable: true });

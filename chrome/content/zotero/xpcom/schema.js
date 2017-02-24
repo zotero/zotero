@@ -2367,6 +2367,10 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("INSERT INTO feeds SELECT libraryID, name, url, lastUpdate, lastCheck, lastCheckError, 30, cleanupAfter, refreshInterval FROM feedsOld");
 				yield Zotero.DB.queryAsync("DROP TABLE feedsOld");
 			}
+			
+			else if (i == 91) {
+				yield Zotero.DB.queryAsync("ALTER TABLE libraries ADD COLUMN archived INT NOT NULL DEFAULT 0");
+			}
 		}
 		
 		yield _updateDBVersion('userdata', toVersion);
