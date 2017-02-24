@@ -385,27 +385,45 @@
 			<method name="editTitle">
 				<body>
 				<![CDATA[
-					var item = document.getBindingParent(this).item;
-					var oldTitle = item.getField('title');
-					
-					var nsIPS = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-							.getService(Components.interfaces.nsIPromptService);
-					
-					var newTitle = { value: oldTitle };
-					var checkState = { value: Zotero.Prefs.get('lastRenameAssociatedFile') };
-					
-					while (true) {
-						// Don't show "Rename associated file" option for
-						// linked URLs
-						if (item.attachmentLinkMode ==
-								Zotero.Attachments.LINK_MODE_LINKED_URL) {
+					return Zotero.spawn(function* () {
+						var item = document.getBindingParent(this).item;
+						var oldTitle = item.getField('title');
+						
+						var nsIPS = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Components.interfaces.nsIPromptService);
+						
+						var newTitle = { value: oldTitle };
+						var checkState = { value: Zotero.Prefs.get('lastRenameAssociatedFile') };
+						
+						while (true) {
+							// Don't show "Rename associated file" option for
+							// linked URLs
+							if (item.attachmentLinkMode ==
+									Zotero.Attachments.LINK_MODE_LINKED_URL) {
+								var result = nsIPS.prompt(
+									window,
+									'',
+									Zotero.getString('pane.item.attachments.rename.title'),
+									newTitle,
+									null,
+									{}
+								);
+								
+								// If they hit cancel or left it blank
+								if (!result || !newTitle.value) {
+									return;
+								}
+								
+								break;
+							}
+							
 							var result = nsIPS.prompt(
 								window,
 								'',
 								Zotero.getString('pane.item.attachments.rename.title'),
 								newTitle,
-								null,
-								{}
+								Zotero.getString('pane.item.attachments.rename.renameAssociatedFile'),
+								checkState
 							);
 							
 							// If they hit cancel or left it blank
@@ -413,74 +431,58 @@
 								return;
 							}
 							
+							Zotero.Prefs.set('lastRenameAssociatedFile', checkState.value);
+							
+							// Rename associated file
+							if (checkState.value) {
+								var newFilename = newTitle.value.trim();
+								if (newFilename.search(/\.\w{1,10}$/) == -1) {
+									// User did not specify extension. Use current
+									var oldExt = item.getFilename().match(/\.\w{1,10}$/);
+									if (oldExt) newFilename += oldExt[0];
+								}
+								var renamed = yield item.renameAttachmentFile(newFilename);
+								if (renamed == -1) {
+									var confirmed = nsIPS.confirm(
+										window,
+										'',
+										newFilename + ' exists. Overwrite existing file?'
+									);
+									if (!confirmed) {
+										// If they said not to overwrite existing file,
+										// start again
+										continue;
+									}
+									
+									// Force overwrite, but make sure we check that this doesn't fail
+									renamed = yield item.renameAttachmentFile(newFilename, true);
+								}
+								
+								if (renamed == -2) {
+									nsIPS.alert(
+										window,
+										Zotero.getString('general.error'),
+										Zotero.getString('pane.item.attachments.rename.error')
+									);
+									return;
+								}
+								else if (!renamed) {
+									nsIPS.alert(
+										window,
+										Zotero.getString('pane.item.attachments.fileNotFound.title'),
+										Zotero.getString('pane.item.attachments.fileNotFound.text')
+									);
+								}
+							}
+							
 							break;
 						}
 						
-						var result = nsIPS.prompt(
-							window,
-							'',
-							Zotero.getString('pane.item.attachments.rename.title'),
-							newTitle,
-							Zotero.getString('pane.item.attachments.rename.renameAssociatedFile'),
-							checkState
-						);
-						
-						// If they hit cancel or left it blank
-						if (!result || !newTitle.value) {
-							return;
+						if (newTitle.value != oldTitle) {
+							item.setField('title', newTitle.value);
+							yield item.saveTx();
 						}
-						
-						Zotero.Prefs.set('lastRenameAssociatedFile', checkState.value);
-						
-						// Rename associated file
-						if (checkState.value) {
-							var newFilename = newTitle.value.trim();
-							if (newFilename.search(/\.\w{1,10}$/) == -1) {
-								// User did not specify extension. Use current
-								var oldExt = item.getFilename().match(/\.\w{1,10}$/);
-								if (oldExt) newFilename += oldExt[0];
-							}
-							var renamed = item.renameAttachmentFile(newFilename);
-							if (renamed == -1) {
-								var confirmed = nsIPS.confirm(
-									window,
-									'',
-									newFilename + ' exists. Overwrite existing file?'
-								);
-								if (!confirmed) {
-									// If they said not to overwrite existing file,
-									// start again
-									continue;
-								}
-								
-								// Force overwrite, but make sure we check that this doesn't fail
-								renamed = item.renameAttachmentFile(newFilename, true);
-							}
-							
-							if (renamed == -2) {
-								nsIPS.alert(
-									window,
-									Zotero.getString('general.error'),
-									Zotero.getString('pane.item.attachments.rename.error')
-								);
-								return;
-							}
-							else if (!renamed) {
-								nsIPS.alert(
-									window,
-									Zotero.getString('pane.item.attachments.fileNotFound.title'),
-									Zotero.getString('pane.item.attachments.fileNotFound.text')
-								);
-							}
-						}
-						
-						break;
-					}
-					
-					if (newTitle.value != oldTitle) {
-						item.setField('title', newTitle.value);
-						item.save();
-					}
+					}.bind(this));
 				]]>
 				</body>
 			</method>
