@@ -81,6 +81,17 @@ describe("Zotero.Library", function() {
 			assert.isFalse(Zotero.Libraries.isEditable(library.libraryID), "sets editable in cache to false");
 			assert.equal((yield Zotero.DB.valueQueryAsync("SELECT editable FROM libraries WHERE libraryID=?", library.libraryID)), 0)
 		});
+		
+		it("should also set filesEditable to false", function* () {
+			let library = yield createGroup({ editable: true, filesEditable: true });
+			assert.isTrue(library.filesEditable);
+			
+			library.editable = false;
+			yield library.saveTx();
+			assert.isFalse(library.filesEditable);
+			assert.equal((yield Zotero.DB.valueQueryAsync("SELECT filesEditable FROM libraries WHERE libraryID=?", library.libraryID)), 0)
+		});
+		
 		it("should not be settable for user and publications libraries", function* () {
 			let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
 			assert.throws(function() {library.editable = false}, /^Cannot change _libraryEditable for user library$/, "does not allow setting user library as not editable");

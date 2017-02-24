@@ -250,13 +250,20 @@ Zotero.Library.prototype._set = function(prop, val) {
 				throw new Error('Cannot create library of type "' + val + '"');
 			}
 			break;
+		
 		case '_libraryEditable':
 		case '_libraryFilesEditable':
 			if (['user', 'publications'].indexOf(this._libraryType) != -1) {
 				throw new Error('Cannot change ' + prop + ' for ' + this._libraryType + ' library');
 			}
 			val = !!val;
+			
+			// Setting 'editable' to false should also set 'filesEditable' to false
+			if (prop == '_libraryEditable' && !val) {
+				this._set('_libraryFilesEditable', false);
+			}
 			break;
+		
 		case '_libraryVersion':
 			var newVal = Number.parseInt(val, 10);
 			if (newVal != val) {
