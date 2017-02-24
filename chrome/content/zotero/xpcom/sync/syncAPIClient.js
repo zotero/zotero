@@ -661,6 +661,77 @@ Zotero.Sync.APIClient.prototype = {
 	}),
 	
 	
+	/**
+	 * Retrieve paginated requests automatically based on the Link header, passing the results to a
+	 * reducer
+	 *
+	 * @param {String} initialURL
+	 * @param {Function} reducer - Reducer function taking (previousValue, xmlhttp, restart)
+	 *                                accumulator: Return value from previous invocation, or initialValue
+	 *                                xmlhttp: XMLHTTPRequest object from previous request
+	 *                                restart: A function to restart from the beginning
+	 * @param {mixed} initialValue
+	 * @return {mixed} - The reduced value
+	 */
+	getPaginatedResults: Zotero.Promise.coroutine(function* (initialURL, reducer, initialValue) {
+		let url = initialURL;
+		let accumulator;
+		let restart = false;
+		while (true) {
+			let xmlhttp = yield this.makeRequest("GET", url);
+			accumulator = reducer(
+				accumulator === undefined ? initialValue : accumulator,
+				xmlhttp,
+				function () {
+					restart = true;
+				}
+			);
+			if (restart) {
+				accumulator = undefined;
+				url = initialURL;
+				restart = false;
+				continue;
+			}
+			let link = this._parseLinkHeader(xmlhttp.getResponseHeader('Link'));
+			if (link && link.next) {
+				url = link.next;
+			}
+			else {
+				break;
+			}
+		}
+		return accumulator;
+	}),
+	
+	
+	/**
+	 * Parse a Link header
+	 *
+	 * From https://gist.github.com/deiu/9335803
+	 * MIT-licensed
+	 */
+	_parseLinkHeader: function (link) {
+		var linkexp = /<[^>]*>\s*(\s*;\s*[^\(\)<>@,;:"\/\[\]\?={} \t]+=(([^\(\)<>@,;:"\/\[\]\?={} \t]+)|("[^"]*")))*(,|$)/g;
+		var paramexp = /[^\(\)<>@,;:"\/\[\]\?={} \t]+=(([^\(\)<>@,;:"\/\[\]\?={} \t]+)|("[^"]*"))/g;
+		var matches = link.match(linkexp);
+		var rels = {};
+		for (var i = 0; i < matches.length; i++) {
+			var split = matches[i].split('>');
+			var href = split[0].substring(1);
+			var ps = split[1];
+			var s = ps.match(paramexp);
+			for (var j = 0; j < s.length; j++) {
+				var p = s[j];
+				var paramsplit = p.split('=');
+				var name = paramsplit[0];
+				var rel = paramsplit[1].replace(/["']/g, '');
+				rels[rel] = href;
+			}
+		}
+		return rels;
+	},
+	
+	
 	_parseJSON: function (json) {
 		try {
 			json = JSON.parse(json);
