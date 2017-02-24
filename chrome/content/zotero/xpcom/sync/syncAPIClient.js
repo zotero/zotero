@@ -83,10 +83,13 @@ Zotero.Sync.APIClient.prototype = {
 	 */	
 	getGroups: Zotero.Promise.coroutine(function* (userID) {
 		if (!userID) throw new Error("User ID not provided");
-
+		
 		var uri = this.baseURL + "users/" + userID + "/groups";
-		var xmlhttp = yield this.makeRequest("GET", uri);
-		return this._parseJSON(xmlhttp.responseText);
+		return yield this.getPaginatedResults(
+			uri,
+			(previous, xmlhttp, restart) => [...previous, ...this._parseJSON(xmlhttp.responseText)],
+			[]
+		);
 	}),
 	
 	

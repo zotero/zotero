@@ -81,4 +81,72 @@ describe("Zotero.Sync.APIClient", function () {
 			assert.equal(e.message, Zotero.getString('sync.error.checkConnection'));
 		})
 	})
+	
+	describe("#getGroups()", function () {
+		it("should automatically fetch multiple pages of results", function* () {
+			function groupJSON(groupID) {
+				return {
+					id: groupID,
+					version: 1,
+					data: {
+						id: groupID,
+						version: 1,
+						name: "Group " + groupID
+					}
+				};
+			}
+			
+			server.respond(function (req) {
+				if (req.method == "GET" && req.url.startsWith(baseURL + "users/1/groups")) {
+					// TODO: Use a real parser
+					let matches = req.url.match(/start=(\d+)/);
+					let start = matches ? parseInt(matches[1]) : null;
+					matches = req.url.match(/limit=(\d+)/);
+					let limit = matches ? parseInt(matches[1]) : null;
+					if (start === null && limit === null) {
+						req.respond(
+							200,
+							{
+								Link: `<${baseURL}users/1/groups?limit=2&start=2>; rel="next", <${baseURL}users/1/groups?limit=2&start=4>; rel="last", <${baseURL}users/1/groups>; rel="alternate"`,
+								"Total-Results": 2
+							},
+							JSON.stringify([
+								groupJSON(1),
+								groupJSON(2)
+							])
+						);
+					}
+					else if (start == 2 && limit == 2) {
+						req.respond(
+							200,
+							{
+								Link: `<${baseURL}users/1/groups?limit=2&start=4>; rel="next", <${baseURL}users/1/groups?limit=2&start=4>; rel="last", <${baseURL}users/1/groups>; rel="alternate"`,
+								"Total-Results": 5
+							},
+							JSON.stringify([
+								groupJSON(3),
+								groupJSON(4)
+							])
+						);
+					}
+					else if (start == 4 && limit == 2) {
+						req.respond(
+							200,
+							{
+								Link: `<${baseURL}users/1/groups?limit=2&start=4>; rel="last", <${baseURL}users/1/groups>; rel="alternate"`,
+								"Total-Results": 5
+							},
+							JSON.stringify([
+								groupJSON(5),
+							])
+						);
+					}
+				}
+			});
+			
+			var results = yield client.getGroups(1);
+			assert.lengthOf(results, 5);
+			assert.sameMembers(results.map(o => o.id), [1, 2, 3, 4, 5]);
+		});
+	});
 })
