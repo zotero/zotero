@@ -1064,6 +1064,17 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 			}
 			return false;
 		}
+		finally {
+			if (connection) {
+				let deferred = Zotero.Promise.defer();
+				connection.asyncClose({
+					complete: function () {
+						deferred.resolve();
+					}
+				});
+				yield deferred.promise;
+			}
+        }
 		
 		// Special backup
 		if (!suffix && numBackups > 1) {
