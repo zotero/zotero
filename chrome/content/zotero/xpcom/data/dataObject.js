@@ -1110,7 +1110,7 @@ Zotero.DataObject.prototype.updateSynced = Zotero.Promise.coroutine(function* (s
 	}
 	
 	if (this._changed.primaryData && this._changed.primaryData.synced) {
-		if (Objects.keys(this._changed.primaryData).length == 1) {
+		if (Object.keys(this._changed.primaryData).length == 1) {
 			delete this._changed.primaryData;
 		}
 		else {
