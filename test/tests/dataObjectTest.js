@@ -362,6 +362,31 @@ describe("Zotero.DataObject", function() {
 				yield obj.eraseTx();
 			}
 		})
+		
+		it("should clear changed status", function* () {
+			var item = createUnsavedDataObject('item');
+			item.synced = true;
+			yield item.saveTx();
+			
+			// Only synced changed
+			item.synced = false;
+			assert.isTrue(item.hasChanged());
+			assert.isTrue(item._changed.primaryData.synced);
+			yield item.updateSynced(true);
+			assert.isFalse(item.hasChanged());
+			// Should clear primary data change object
+			assert.isUndefined(item._changed.primaryData);
+			
+			// Another primary field also changed
+			item.setField('dateModified', '2017-02-27 12:34:56');
+			item.synced = false;
+			assert.isTrue(item.hasChanged());
+			assert.isTrue(item._changed.primaryData.synced);
+			yield item.updateSynced(true);
+			assert.isTrue(item.hasChanged());
+			// Should clear only 'synced' change status
+			assert.isUndefined(item._changed.primaryData.synced);
+		});
 	})
 	
 	describe("Relations", function () {
