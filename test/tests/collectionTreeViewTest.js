@@ -326,6 +326,29 @@ describe("Zotero.CollectionTreeView", function() {
 		})
 		
 		
+		it("should add collection after parent's subcollection and before non-sibling", function* () {
+			var c0 = yield createDataObject('collection', { name: "Test" });
+			var rootRow = cv.getRowIndexByID(c0.treeViewID);
+			
+			var c1 = yield createDataObject('collection', { name: "1", parentID: c0.id });
+			var c2 = yield createDataObject('collection', { name: "2", parentID: c0.id });
+			var c3 = yield createDataObject('collection', { name: "3", parentID: c1.id });
+			var c4 = yield createDataObject('collection', { name: "4", parentID: c3.id });
+			var c5 = yield createDataObject('collection', { name: "5", parentID: c1.id });
+			
+			assert.equal(cv.getRowIndexByID(c1.treeViewID), rootRow + 1);
+			
+			assert.isAbove(cv.getRowIndexByID(c1.treeViewID), cv.getRowIndexByID(c0.treeViewID));
+			assert.isAbove(cv.getRowIndexByID(c2.treeViewID), cv.getRowIndexByID(c0.treeViewID));
+			
+			assert.isAbove(cv.getRowIndexByID(c3.treeViewID), cv.getRowIndexByID(c1.treeViewID));
+			assert.isAbove(cv.getRowIndexByID(c5.treeViewID), cv.getRowIndexByID(c1.treeViewID));
+			assert.isBelow(cv.getRowIndexByID(c5.treeViewID), cv.getRowIndexByID(c2.treeViewID));
+			
+			assert.equal(cv.getRowIndexByID(c4.treeViewID), cv.getRowIndexByID(c3.treeViewID) + 1);
+		});
+		
+		
 		it("should add multiple collections", function* () {
 			var col1, col2;
 			yield Zotero.DB.executeTransaction(function* () {

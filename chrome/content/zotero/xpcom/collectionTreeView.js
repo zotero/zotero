@@ -588,6 +588,16 @@ Zotero.CollectionTreeView.prototype._addSortedRow = Zotero.Promise.coroutine(fun
 						}
 						treeRow = this.getRow(i);
 						rowLevel = this.getLevel(i);
+						// If going from lower level to a row higher than the target level, we found
+						// our place:
+						//
+						// - 1
+						//   - 3
+						//     - 4
+						// - 2 <<<< 5, a sibling of 3, goes above here
+						if (rowLevel < level) {
+							break loop;
+						}
 					}
 					
 					if (Zotero.localeCompare(treeRow.ref.name, collection.name) > 0) {
