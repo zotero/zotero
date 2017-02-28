@@ -81,11 +81,12 @@ var onCollectionSelected = Zotero.Promise.coroutine(function* ()
 		collectionTreeRow.setSearch('');
 		Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
 		
+		setItemsPaneMessage(Zotero.getString('pane.items.loading'));
+		
 		// Load library data if necessary
 		var library = Zotero.Libraries.get(collectionTreeRow.ref.libraryID);
 		if (!library.getDataLoaded('item')) {
 			Zotero.debug("Waiting for items to load for library " + library.libraryID);
-			setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 			yield library.waitForDataLoad('item');
 		}
 		
