@@ -18,4 +18,17 @@ describe("Zotero.Creators", function() {
 			assert.propertyVal(data2, "lastName", data1.lastName);
 		});
 	});
+	
+	describe("#cleanData()", function () {
+		it("should allow firstName to be null for fieldMode 1", function* () {
+			var data = Zotero.Creators.cleanData({
+				firstName: null,
+				lastName: "Test",
+				fieldMode: 1
+			});
+			assert.propertyVal(data, 'fieldMode', 1);
+			assert.propertyVal(data, 'firstName', '');
+			assert.propertyVal(data, 'lastName', 'Test');
+		});
+	});
 });
