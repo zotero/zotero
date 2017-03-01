@@ -876,6 +876,7 @@ Zotero.Items = function() {
 			let parentItem = yield Zotero.Items.getAsync(parentItemID);
 			yield parentItem.reload(['primaryData', 'childItems'], true);
 		}
+		Zotero.Notifier.queue('modify', 'item', ids);
 		Zotero.Notifier.queue('trash', 'item', ids);
 		Array.from(libraryIDs).forEach(libraryID => {
 			Zotero.Notifier.queue('refresh', 'trash', libraryID);

@@ -112,6 +112,129 @@ describe("Item pane", function () {
 		});
 	})
 	
+	
+	describe("Notes pane", function () {
+		it("should refresh on child note change", function* () {
+			var item;
+			var note1;
+			var note2;
+			yield Zotero.DB.executeTransaction(function* () {
+				item = createUnsavedDataObject('item');
+				yield item.save();
+				
+				note1 = new Zotero.Item('note');
+				note1.parentID = item.id;
+				note1.setNote('A');
+				yield note1.save();
+				
+				note2 = new Zotero.Item('note');
+				note2.parentID = item.id;
+				note2.setNote('B');
+				yield note2.save();
+			});
+			
+			var tabs = doc.getElementById('zotero-editpane-tabs');
+			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
+			var noteRows = doc.getElementById('zotero-editpane-dynamic-notes');
+			tabs.selectedItem = notesTab;
+			// Wait for note list to update
+			do {
+				yield Zotero.Promise.delay(1);
+			}
+			while (noteRows.childNodes.length !== 2);
+			
+			// Update note text
+			note2.setNote('C');
+			yield note2.saveTx();
+			
+			// Wait for note list to update
+			do {
+				yield Zotero.Promise.delay(1);
+			}
+			while (Array.from(noteRows.querySelectorAll('label.zotero-box-label')).every(label => label.value != 'C'));
+		});
+		
+		it("should refresh on child note trash", function* () {
+			var item;
+			var note1;
+			var note2;
+			yield Zotero.DB.executeTransaction(function* () {
+				item = createUnsavedDataObject('item');
+				yield item.save();
+				
+				note1 = new Zotero.Item('note');
+				note1.parentID = item.id;
+				note1.setNote('A');
+				yield note1.save();
+				
+				note2 = new Zotero.Item('note');
+				note2.parentID = item.id;
+				note2.setNote('B');
+				yield note2.save();
+			});
+			
+			var tabs = doc.getElementById('zotero-editpane-tabs');
+			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
+			var noteRows = doc.getElementById('zotero-editpane-dynamic-notes');
+			tabs.selectedItem = notesTab;
+			// Wait for note list to update
+			do {
+				yield Zotero.Promise.delay(1);
+			}
+			while (noteRows.childNodes.length !== 2);
+			
+			// Click "-" in first note
+			var promise = waitForDialog();
+			noteRows.childNodes[0].lastChild.click();
+			yield promise;
+			
+			// Wait for note list to update
+			do {
+				yield Zotero.Promise.delay(1);
+			}
+			while (noteRows.childNodes.length !== 1);
+		});
+		
+		it("should refresh on child note delete", function* () {
+			var item;
+			var note1;
+			var note2;
+			yield Zotero.DB.executeTransaction(function* () {
+				item = createUnsavedDataObject('item');
+				yield item.save();
+				
+				note1 = new Zotero.Item('note');
+				note1.parentID = item.id;
+				note1.setNote('A');
+				yield note1.save();
+				
+				note2 = new Zotero.Item('note');
+				note2.parentID = item.id;
+				note2.setNote('B');
+				yield note2.save();
+			});
+			
+			var tabs = doc.getElementById('zotero-editpane-tabs');
+			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
+			var noteRows = doc.getElementById('zotero-editpane-dynamic-notes');
+			tabs.selectedItem = notesTab;
+			// Wait for note list to update
+			do {
+				yield Zotero.Promise.delay(1);
+			}
+			while (noteRows.childNodes.length !== 2);
+			
+			yield note2.eraseTx();
+			
+			// Wait for note list to update
+			do {
+				yield Zotero.Promise.delay(1);
+			}
+			while (noteRows.childNodes.length !== 1);
+		});
+	});
+	
+	
 	describe("Attachment pane", function () {
 		it("should refresh on file rename", function* () {
 			var file = getTestDataDirectory();
@@ -128,7 +251,8 @@ describe("Item pane", function () {
 		})
 	})
 	
-	describe("Note pane", function () {
+	
+	describe("Note editor", function () {
 		it("should refresh on note update", function* () {
 			var item = new Zotero.Item('note');
 			var id = yield item.saveTx();
@@ -150,55 +274,6 @@ describe("Item pane", function () {
 			yield item.saveTx();
 			
 			assert.equal(noteBox.noteField.value, '<p>Test</p>');
-		})
-		
-		it("should refresh on note trash", function* () {
-			var item = yield createDataObject('item');
-			
-			var note = new Zotero.Item('note');
-			note.parentItemID = item.id;
-			yield note.saveTx();
-			yield itemsView.selectItem(note.id);
-			
-			// Wait for the note editor, just to be polite
-			var noteBox = doc.getElementById('zotero-note-editor');
-			var val = false;
-			do {
-				try {
-					val = noteBox.noteField.value;
-				}
-				catch (e) {}
-				yield Zotero.Promise.delay(1);
-			}
-			while (val === false)
-			
-			// Select parent and make sure there's 1 note
-			yield itemsView.selectItem(item.id);
-			var tabs = doc.getElementById('zotero-editpane-tabs');
-			var infoTab = doc.getElementById('zotero-editpane-info-tab');
-			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
-			var notesList = doc.getElementById('zotero-editpane-dynamic-notes');
-			tabs.selectedItem = notesTab;
-			// Wait for note list to update
-			do {
-				yield Zotero.Promise.delay(1);
-			}
-			while (notesList.childNodes.length !== 1);
-			tabs.selectedItem = infoTab;
-			
-			// Select child and trash it
-			yield itemsView.selectItem(note.id);
-			yield Zotero.Items.trashTx([note.id]);
-			
-			// Select parent and select notes pane
-			yield itemsView.selectItem(item.id);
-			tabs.selectedItem = notesTab;
-			// Wait for note list to update
-			var len = false;
-			do {
-				yield Zotero.Promise.delay(1);
-			}
-			while (notesList.childNodes.length !== 0);
 		})
 	})
 	

@@ -26,6 +26,7 @@
 var ZoteroItemPane = new function() {
 	var _lastItem, _itemBox, _notesLabel, _notesButton, _notesList, _tagsBox, _relatedBox;
 	var _translationTarget;
+	var _noteIDs;
 	
 	this.onLoad = function () {
 		if (!Zotero) {
@@ -45,7 +46,14 @@ var ZoteroItemPane = new function() {
 		_notesList = document.getElementById('zotero-editpane-dynamic-notes');
 		_tagsBox = document.getElementById('zotero-editpane-tags');
 		_relatedBox = document.getElementById('zotero-editpane-related');
+		
+		this._unregisterID = Zotero.Notifier.registerObserver(this, ['item'], 'itemPane');
 	}
+	
+	
+	this.onUnload = function () {
+		Zotero.Notifier.unregisterObserver(this._unregisterID);
+	},
 	
 	
 	/*
@@ -125,6 +133,7 @@ var ZoteroItemPane = new function() {
 				_notesList.removeChild(_notesList.firstChild);
 			}
 			
+			_noteIDs = new Set();
 			let notes = yield Zotero.Items.getAsync(item.getNotes());
 			if (notes.length) {
 				for (var i = 0; i < notes.length; i++) {
@@ -163,6 +172,7 @@ var ZoteroItemPane = new function() {
 					}
 					
 					_notesList.appendChild(row);
+					_noteIDs.add(id);
 				}
 			}
 			
@@ -182,6 +192,21 @@ var ZoteroItemPane = new function() {
 		}
 		
 		box.item = item;
+	});
+	
+	
+	this.notify = Zotero.Promise.coroutine(function* (action, type, ids, extraData) {
+		var viewBox = document.getElementById('zotero-view-item');
+		// If notes pane is selected, refresh it if any of the notes change or are deleted
+		if (viewBox.selectedIndex == 1 && (action == 'modify' || action == 'delete')) {
+			let refresh = false;
+			if (ids.some(id => _noteIDs.has(id))) {
+				refresh = true;
+			}
+			if (refresh) {
+				yield this.viewItem(_lastItem, null, 1);
+			}
+		}
 	});
 	
 	
@@ -346,3 +371,4 @@ var ZoteroItemPane = new function() {
 }   
 
 addEventListener("load", function(e) { ZoteroItemPane.onLoad(e); }, false);
+addEventListener("unload", function(e) { ZoteroItemPane.onUnload(e); }, false);
