@@ -313,14 +313,14 @@
 						<hbox>
 							<hbox align="center">
 								<label value="&zotero.feedSettings.cleanupReadAfter.label1;"/>
-								<textbox type="number" min="0" increment="1" size="2" preference="pref-feeds-defaultCleanupReadAfter"/>
+								<textbox type="number" min="1" increment="1" size="2" preference="pref-feeds-defaultCleanupReadAfter"/>
 								<label value="&zotero.feedSettings.cleanupReadAfter.label2;"/>
 							</hbox>
 						</hbox>
 						<hbox>
 							<hbox align="center">
 								<label value="&zotero.feedSettings.cleanupUnreadAfter.label1;"/>
-								<textbox type="number" min="0" increment="1" size="2" preference="pref-feeds-defaultCleanupUnreadAfter"/>
+								<textbox type="number" min="1" increment="1" size="2" preference="pref-feeds-defaultCleanupUnreadAfter"/>
 								<label value="&zotero.feedSettings.cleanupUnreadAfter.label2;"/>
 							</hbox>
 						</hbox>
