@@ -38,7 +38,7 @@ describe("Zotero.Relations", function () {
 			assert.include(rels[0], "/users/local");
 			
 			yield Zotero.DB.executeTransaction(function* () {
-				yield Zotero.Relations.updateUser(1);
+				yield Zotero.Relations.updateUser(null, 1);
 			})
 			
 			var rels = item2.getRelationsByPredicate(Zotero.Relations.relatedItemPredicate);
@@ -57,7 +57,7 @@ describe("Zotero.Relations", function () {
 			assert.include(rels[0], "/users/1");
 			
 			yield Zotero.DB.executeTransaction(function* () {
-				yield Zotero.Relations.updateUser(2);
+				yield Zotero.Relations.updateUser(1, 2);
 			});
 			
 			var rels = item2.getRelationsByPredicate(Zotero.Relations.relatedItemPredicate);

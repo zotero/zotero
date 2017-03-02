@@ -94,6 +94,28 @@ describe("Zotero.Sync.Data.Local", function() {
 			
 			Zotero.DataDirectory.forceChange.restore();
 		});
+		
+		it("should migrate relations using local user key", function* () {
+			yield Zotero.DB.queryAsync("DELETE FROM settings WHERE setting='account'");
+			yield Zotero.Users.init();
+			
+			var item1 = yield createDataObject('item');
+			var item2 = createUnsavedDataObject('item');
+			item2.addRelatedItem(item1);
+			yield item2.save();
+			
+			var pred = Zotero.Relations.relatedItemPredicate;
+			assert.isTrue(
+				item2.toJSON().relations[pred][0].startsWith('http://zotero.org/users/local/')
+			);
+			
+			waitForDialog(false, 'accept', 'chrome://zotero/content/hardConfirmationDialog.xul');
+			yield Zotero.Sync.Data.Local.checkUser(window, 1, "A");
+			
+			assert.isTrue(
+				item2.toJSON().relations[pred][0].startsWith('http://zotero.org/users/1/items/')
+			);
+		});
 	});
 	
 	
