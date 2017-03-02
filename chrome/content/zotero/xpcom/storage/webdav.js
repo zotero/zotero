@@ -520,7 +520,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		var file = Zotero.getTempDirectory();
 		file.append(item.key + '.zip');
 		Components.utils.importGlobalProperties(["File"]);
-		file = new File(file);
+		file = File.createFromFileName ? File.createFromFileName(file.path) : new File(file);
 		
 		var uri = this._getItemURI(item);
 		
