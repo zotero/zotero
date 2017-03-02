@@ -131,26 +131,10 @@ Zotero.Sync.Data.Local = {
 			win.openDialog("chrome://zotero/content/hardConfirmationDialog.xul", "",
 				"chrome, dialog, modal, centerscreen", io);
 					
-			var accept = false;
 			if (io.accept) {
 				var resetDataDirFile = OS.Path.join(Zotero.DataDirectory.dir, 'reset-data-directory');
 				yield Zotero.File.putContentsAsync(resetDataDirFile, '');
-
-				Zotero.Utilities.Internal.quitZotero(true);
-				accept = true;
-			}
-			// else if (io.extra1) {
-			// 	if (Zotero.DataDirectory.forceChange(win)) {
-			// 		var ps = Services.prompt;
-			// 		ps.alert(null,
-			// 			Zotero.getString('general.restartRequired'),
-			// 			Zotero.getString('general.restartRequiredForChange', Zotero.appName)
-			// 		);
-			// 		Zotero.Utilities.Internal.quitZotero(true);
-			// 		accept = true;
-			// 	} 
-			// }
-			if (accept) {
+				
 				Zotero.Prefs.clear('sync.storage.downloadMode.groups');
 				Zotero.Prefs.clear('sync.storage.groups.enabled');
 				Zotero.Prefs.clear('sync.storage.downloadMode.personal');
@@ -159,8 +143,13 @@ Zotero.Sync.Data.Local = {
 				Zotero.Prefs.clear('sync.storage.scheme');
 				Zotero.Prefs.clear('sync.storage.protocol');
 				Zotero.Prefs.clear('sync.storage.enabled');
+				
+				Zotero.Utilities.Internal.quitZotero(true);
+				
+				return true;
 			}
-			return accept;
+			
+			return false;
 		}
 		
 		yield Zotero.DB.executeTransaction(function* () {
