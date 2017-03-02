@@ -2371,6 +2371,13 @@ Zotero.Schema = new function(){
 			else if (i == 91) {
 				yield Zotero.DB.queryAsync("ALTER TABLE libraries ADD COLUMN archived INT NOT NULL DEFAULT 0");
 			}
+			
+			else if (i == 92) {
+				let userID = yield Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='account' AND key='userID'");
+				if (userID) {
+					yield Zotero.DB.queryAsync("UPDATE itemRelations SET object='http://zotero.org/users/' || ? || SUBSTR(object, 39) WHERE object LIKE ?", [userID, 'http://zotero.org/users/local/%']);
+				}
+			}
 		}
 		
 		yield _updateDBVersion('userdata', toVersion);
