@@ -1571,6 +1571,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			}
 			
 			var label = win.ZoteroPane.document.getElementById('zotero-pane-progress-label');
+			if (!label) {
+				Components.utils.reportError("label not found in " + win.document.location.href);
+			}
 			if (msg) {
 				label.hidden = false;
 				label.value = msg;
