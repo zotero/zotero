@@ -1,4 +1,4 @@
-<!ENTITY preferencesCmdMac.label "설정">
+<!ENTITY preferencesCmdMac.label "Preferences…">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "서비스">
 <!ENTITY hideThisAppCmdMac.label "&brandShortName; 감추기">
@@ -23,9 +23,9 @@
 <!ENTITY closeCmd.label "닫기">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.label "불러오기...">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY importFromClipboardCmd.label "클립보드에서 불러오기">
 <!ENTITY quitApplicationCmdWin.label "종료">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "종료">
