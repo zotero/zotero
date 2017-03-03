@@ -519,8 +519,9 @@ Zotero.Translate.SandboxManager.prototype = {
 
 	"_canCopy":function(obj) {
 		if(typeof obj !== "object" || obj === null) return false;
-		if((obj.constructor.name !== "Object" && obj.constructor.name !== "Array") ||
-		   "__exposedProps__" in obj || (obj.wrappedJSObject && obj.wrappedJSObject.__wrappingManager)) {
+		if (!["Object", "Array", "Error"].includes(obj.constructor.name)
+				|| "__exposedProps__" in obj
+				|| (obj.wrappedJSObject && obj.wrappedJSObject.__wrappingManager)) {
 			return false;
 		}
 		return true;
@@ -534,7 +535,16 @@ Zotero.Translate.SandboxManager.prototype = {
 	"copyObject":function(obj, wm) {
 		if(!this._canCopy(obj)) return obj;
 		if(!wm) wm = new WeakMap();
-		var obj2 = (obj.constructor.name === "Array" ? this.sandbox.Array() : this.sandbox.Object());
+		switch (obj.constructor.name) {
+		case 'Array':
+		case 'Error':
+			var obj2 = this.sandbox[obj.constructor.name]();
+			break;
+		
+		default:
+			var obj2 = this.sandbox.Object();
+			break;
+		}
 		var wobj2 = obj2.wrappedJSObject ? obj2.wrappedJSObject : obj2;
 		for(var i in obj) {
 			if(!obj.hasOwnProperty(i)) continue;
