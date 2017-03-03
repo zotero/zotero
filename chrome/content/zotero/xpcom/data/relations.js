@@ -232,7 +232,7 @@ Zotero.Relations = new function () {
 				// removing
 				if (uri.indexOf(prefix) != -1
 						&& uri.indexOf("/" + type + "s/") != -1
-						&& !Zotero.URI[getFunc](uri)) {
+						&& !(yield Zotero.URI[getFunc](uri))) {
 					if (!objects[row.id]) {
 						objects[row.id] = yield objectsClass.getAsync(row.id, { noCache: true });
 					}

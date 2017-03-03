@@ -786,7 +786,7 @@ Zotero.Integration.MissingItemException.prototype = {
 				// Now try again
 				Zotero.Integration.currentWindow = oldCurrentWindow;
 				fieldGetter._doc.activate();
-				fieldGetter._processFields(fieldIndex);
+				return fieldGetter._processFields(fieldIndex);
 			});
 		}
 	}
@@ -1420,61 +1420,56 @@ Zotero.Integration.Fields.prototype.get = function get() {
 /**
  * Updates Zotero.Integration.Session attached to Zotero.Integration.Fields in line with document
  */
-Zotero.Integration.Fields.prototype.updateSession = function() {
-	var me = this, collectFieldsTime;
-	return this.get().then(function() {
-		me._session.resetRequest(me._doc);
-		
-		me._removeCodeKeys = {};
-		me._removeCodeFields = {};
-		me._bibliographyFields = [];
-		me._bibliographyData = "";
-		
-		collectFieldsTime = (new Date()).getTime();
-		return me._processFields();
-	}).then(function() {
-		var endTime = (new Date()).getTime();
-		if(Zotero.Debug.enabled) {
-			Zotero.debug("Integration: Updated session data for "+me._fields.length+" fields in "+
-				(endTime-collectFieldsTime)/1000+"; "+
-				1000/((endTime-collectFieldsTime)/me._fields.length)+" fields/second");
+Zotero.Integration.Fields.prototype.updateSession = Zotero.Promise.coroutine(function* () {
+	var collectFieldsTime;
+	yield this.get();
+	this._session.resetRequest(this._doc);
+	
+	this._removeCodeKeys = {};
+	this._removeCodeFields = {};
+	this._bibliographyFields = [];
+	this._bibliographyData = "";
+	
+	collectFieldsTime = (new Date()).getTime();
+	yield this._processFields();
+	
+	var endTime = (new Date()).getTime();
+	if(Zotero.Debug.enabled) {
+		Zotero.debug("Integration: Updated session data for " + this._fields.length + " fields in "
+			+ (endTime - collectFieldsTime) / 1000 + "; "
+			+ 1000/ ((endTime - collectFieldsTime) / this._fields.length) + " fields/second");
+	}
+	
+	// Load uncited items from bibliography
+	if (this._bibliographyData && !this._session.bibliographyData) {
+		try {
+			yield this._session.loadBibliographyData(this._bibliographyData);
+		} catch(e) {
+			var exception = new Zotero.Integration.CorruptBibliographyException(me, e);
+			exception.setContext(me);
+			throw exception;
 		}
-		
-		// Load uncited items from bibliography
-		if(me._bibliographyData && !me._session.bibliographyData) {
-			try {
-				me._session.loadBibliographyData(me._bibliographyData);
-			} catch(e) {
-				var exception = new Zotero.Integration.CorruptBibliographyException(me, e);
-				exception.setContext(me);
-				throw exception;
-			}
-		}
-		
-		// if we are reloading this session, assume no item IDs to be updated except for
-		// edited items
-		if(me._session.reload) {
-			//this._session.restoreProcessorState(); TODO doesn't appear to be working properly
-			me._session.updateUpdateIndices();
-			// Iterate through citations, yielding for UI updates
-			return Zotero.Promise.each(me._session._updateCitations(), () => {})
-			.then(function() {
-				me._session.updateIndices = {};
-				me._session.updateItemIDs = {};
-				me._session.citationText = {};
-				me._session.bibliographyHasChanged = false;
-				delete me._session.reload;
-			});
-		} else {
-			return;
-		}
-	});
-}
+	}
+	
+	// if we are reloading this session, assume no item IDs to be updated except for
+	// edited items
+	if (this._session.reload) {
+		//this._session.restoreProcessorState(); TODO doesn't appear to be working properly
+		this._session.updateUpdateIndices();
+		// Iterate through citations, yielding for UI updates
+		yield Zotero.Promise.each(this._session._updateCitations(), () => {});
+		this._session.updateIndices = {};
+		this._session.updateItemIDs = {};
+		this._session.citationText = {};
+		this._session.bibliographyHasChanged = false;
+		delete this._session.reload;
+	}
+});
 
 /**
  * Keep processing fields until all have been processed
  */
-Zotero.Integration.Fields.prototype._processFields = function(i) {
+Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(function* (i) {
 	if(!i) i = 0;
 	
 	for(var n = this._fields.length; i<n; i++) {
@@ -1493,7 +1488,7 @@ Zotero.Integration.Fields.prototype._processFields = function(i) {
 		if(type === INTEGRATION_TYPE_ITEM) {
 			var noteIndex = field.getNoteIndex();
 			try {
-				this._session.addCitation(i, noteIndex, content);
+				yield this._session.addCitation(i, noteIndex, content);
 			} catch(e) {
 				var removeCode = false;
 				
@@ -1527,7 +1522,8 @@ Zotero.Integration.Fields.prototype._processFields = function(i) {
 			}
 		}
 	}
-}
+});
+
 /**
  * Updates bibliographies and fields within a document
  * @param {Boolean} forceCitations Whether to regenerate all citations
@@ -1716,7 +1712,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function* (forceCitations,
 /**
  * Brings up the addCitationDialog, prepopulated if a citation is provided
  */
-Zotero.Integration.Fields.prototype.addEditCitation = function(field) {
+Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(function* (field) {
 	var newField, citation, fieldIndex, session = this._session;
 	
 	// if there's already a citation, make sure we have item IDs in addition to keys
@@ -1737,7 +1733,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field) {
 			
 			if(citation) {
 				try {
-					session.lookupItems(citation);
+					yield session.lookupItems(citation);
 				} catch(e) {
 					if(e instanceof Zotero.Integration.MissingItemException) {
 						citation.citationItems = [];
@@ -1805,7 +1801,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field) {
 			return io.promise;
 		}
 	});
-}
+});
 
 /**
  * Citation editing functions and propertiesaccessible to quickFormat.js and addCitationDialog.js
@@ -1848,9 +1844,9 @@ Zotero.Integration.CitationEditInterface = function(citation, field, fieldGetter
 		}
 		me._fieldGetter.progressCallback = progressCallback;
 		return me._updateSession(true);
-	}).then(function() {
+	}).then(Zotero.Promise.coroutine(function* () {
 		// Add new citation
-		me._session.addCitation(me._fieldIndex, me._field.getNoteIndex(), me.citation);
+		yield me._session.addCitation(me._fieldIndex, me._field.getNoteIndex(), me.citation);
 		me._session.updateIndices[me._fieldIndex] = true;
 		
 		// Check if bibliography changed
@@ -1867,7 +1863,7 @@ Zotero.Integration.CitationEditInterface = function(citation, field, fieldGetter
 		
 		// Update document
 		return me._fieldGetter.updateDocument(FORCE_CITATIONS_FALSE, false, false);
-	});
+	}));
 }
 
 Zotero.Integration.CitationEditInterface.prototype = {
@@ -2270,7 +2266,7 @@ Zotero.Integration._oldCitationLocatorMap = {
 /**
  * Adds a citation to the arrays representing the document
  */
-Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, arg) {
+Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(function* (index, noteIndex, arg) {
 	var index = parseInt(index, 10);
 	
 	if(typeof(arg) == "string") {	// text field
@@ -2282,7 +2278,7 @@ Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, ar
 	}
 	
 	// get items
-	this.lookupItems(citation, index);
+	yield this.lookupItems(citation, index);
 	
 	citation.properties.added = true;
 	citation.properties.zoteroIndex = index;
@@ -2320,13 +2316,13 @@ Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, ar
 	}
 	Zotero.debug("Integration: Adding citationID "+citation.citationID);
 	this.documentCitationIDs[citation.citationID] = citation.citationID;
-}
+});
 
 /**
  * Looks up item IDs to correspond with keys or generates embedded items for given citation object.
  * Throws a MissingItemException if item was not found.
  */
-Zotero.Integration.Session.prototype.lookupItems = function(citation, index) {
+Zotero.Integration.Session.prototype.lookupItems = Zotero.Promise.coroutine(function* (citation, index) {
 	for(var i=0, n=citation.citationItems.length; i<n; i++) {
 		var citationItem = citation.citationItems[i];
 		
@@ -2334,7 +2330,7 @@ Zotero.Integration.Session.prototype.lookupItems = function(citation, index) {
 		var zoteroItem = false,
 		    needUpdate;
 		if(citationItem.uris) {
-			[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(citationItem.uris);
+			[zoteroItem, needUpdate] = yield this.uriMap.getZoteroItemForURIs(citationItem.uris);
 			if(needUpdate && index) this.updateIndices[index] = true;
 			
 			// Unfortunately, people do weird things with their documents. One weird thing people
@@ -2421,7 +2417,7 @@ Zotero.Integration.Session.prototype.lookupItems = function(citation, index) {
 			citationItem.id = zoteroItem.cslItemID ? zoteroItem.cslItemID : zoteroItem.id;
 		}
 	}
-}
+});
 
 /**
  * Unserializes a JSON citation into a citation object (sans items)
@@ -2716,7 +2712,7 @@ Zotero.Integration.Session.prototype.restoreProcessorState = function() {
 /**
  * Loads document data from a JSON object
  */
-Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
+Zotero.Integration.Session.prototype.loadBibliographyData = Zotero.Promise.coroutine(function* (json) {
 	var openBraceIndex = json.indexOf("{");
 	if(openBraceIndex == -1) return;
 	
@@ -2738,7 +2734,7 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 			// new style array of arrays with URIs
 			let zoteroItem, needUpdate;
 			for (let uris of documentData.uncited) {
-				[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(uris);
+				[zoteroItem, needUpdate] = yield this.uriMap.getZoteroItemForURIs(uris);
 				var id = zoteroItem.cslItemID ? zoteroItem.cslItemID : zoteroItem.id;
 				if(zoteroItem && !this.citationsByItemID[id]) {
 					this.uncitedItems[id] = true;
@@ -2767,7 +2763,7 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 			// new style array of arrays with URIs
 			var zoteroItem, needUpdate;
 			for (let custom of documentData.custom) {
-				[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(custom[0]);
+				[zoteroItem, needUpdate] = yield this.uriMap.getZoteroItemForURIs(custom[0]);
 				if(!zoteroItem) continue;
 				if(needUpdate) this.bibliographyDataHasChanged = true;
 				
@@ -2796,7 +2792,7 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 	if(documentData.omitted) {
 			let zoteroItem, needUpdate;
 			for (let uris of documentData.omitted) {
-				[zoteroItem, update] = this.uriMap.getZoteroItemForURIs(uris);
+				[zoteroItem, update] = yield this.uriMap.getZoteroItemForURIs(uris);
 				var id = zoteroItem.cslItemID ? zoteroItem.cslItemID : zoteroItem.id;
 				if(zoteroItem && this.citationsByItemID[id]) {
 					this.omittedItems[id] = true;
@@ -2808,7 +2804,7 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 	}
 	
 	this.bibliographyData = json;
-}
+});
 
 /**
  * Saves document data from a JSON object
@@ -3132,7 +3128,7 @@ Zotero.Integration.URIMap.prototype.getURIsForItemID = function(id) {
 /**
  * Gets Zotero item for a given set of URIs
  */
-Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = function(uris) {
+Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = Zotero.Promise.coroutine(function* (uris) {
 	var zoteroItem = false;
 	var needUpdate = false;
 	var embeddedItem = false;;
@@ -3147,7 +3143,7 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = function(uris) {
 		
 		// Next try getting URI directly
 		try {
-			zoteroItem = Zotero.URI.getURIItem(uri);
+			zoteroItem = yield Zotero.URI.getURIItem(uri);
 			if(zoteroItem) {
 				// Ignore items in the trash
 				if(zoteroItem.deleted) {
@@ -3183,4 +3179,4 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = function(uris) {
 	}
 	
 	return [zoteroItem, needUpdate];
-}
+});

@@ -810,6 +810,8 @@ Zotero.Collection.prototype.getDescendents = function (nested, type, includeDele
 
 /**
  * Return a collection in the specified library equivalent to this collection
+ *
+ * @return {Promise<Zotero.Collection>}
  */
 Zotero.Collection.prototype.getLinkedCollection = function (libraryID, bidrectional) {
 	return this._getLinkedObject(libraryID, bidrectional);

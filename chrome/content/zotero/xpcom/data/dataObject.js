@@ -451,9 +451,9 @@ Zotero.DataObject.prototype.setRelations = function (newRelations) {
  * calling this directly.
  *
  * @param {Integer} [libraryID]
- * @return {Zotero.DataObject|false} Linked object, or false if not found
+ * @return {Promise<Zotero.DataObject|false>} Linked object, or false if not found
  */
-Zotero.DataObject.prototype._getLinkedObject = function (libraryID, bidirectional) {
+Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function* (libraryID, bidirectional) {
 	if (!libraryID) {
 		throw new Error("libraryID not provided");
 	}
@@ -471,7 +471,7 @@ Zotero.DataObject.prototype._getLinkedObject = function (libraryID, bidirectiona
 	for (let i = 0; i < uris.length; i++) {
 		let uri = uris[i];
 		if (uri.startsWith(libraryObjectPrefix)) {
-			let obj = Zotero.URI['getURI' + this._ObjectType](uri);
+			let obj = yield Zotero.URI['getURI' + this._ObjectType](uri);
 			if (!obj) {
 				Zotero.debug("Referenced linked " + this._objectType + " '" + uri + "' not found "
 					+ "in Zotero." + this._ObjectType + "::getLinked" + this._ObjectType + "()", 2);
@@ -501,7 +501,7 @@ Zotero.DataObject.prototype._getLinkedObject = function (libraryID, bidirectiona
 	}
 	
 	return false;
-};
+});
 
 
 /**

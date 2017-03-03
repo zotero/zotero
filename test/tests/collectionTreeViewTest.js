@@ -631,7 +631,7 @@ describe("Zotero.CollectionTreeView", function() {
 				assert.equal(treeRow.ref.libraryID, group.libraryID);
 				assert.equal(treeRow.ref.id, ids[0]);
 				// New item should link back to original
-				var linked = item.getLinkedItem(group.libraryID);
+				var linked = yield item.getLinkedItem(group.libraryID);
 				assert.equal(linked.id, treeRow.ref.id);
 				
 				// Check attachment
@@ -641,7 +641,7 @@ describe("Zotero.CollectionTreeView", function() {
 				treeRow = itemsView.getRow(1);
 				assert.equal(treeRow.ref.id, ids[1]);
 				// New attachment should link back to original
-				linked = attachment.getLinkedItem(group.libraryID);
+				linked = yield attachment.getLinkedItem(group.libraryID);
 				assert.equal(linked.id, treeRow.ref.id);
 				
 				return group.eraseTx();
@@ -673,7 +673,7 @@ describe("Zotero.CollectionTreeView", function() {
 				var item = yield createDataObject('item', false, { skipSelect: true });
 				yield drop('item', 'L' + group.libraryID, [item.id]);
 				
-				var droppedItem = item.getLinkedItem(group.libraryID);
+				var droppedItem = yield item.getLinkedItem(group.libraryID);
 				droppedItem.setCollections([collection.id]);
 				droppedItem.deleted = true;
 				yield droppedItem.saveTx();
