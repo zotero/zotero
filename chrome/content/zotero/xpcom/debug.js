@@ -211,7 +211,7 @@ Zotero.Debug = new function () {
 
 		return Zotero.getSystemInfo().then(function(sysInfo) {
 			if (Zotero.isConnector) {
-				return Zotero.Error.getErrors().then(function(errors) {
+				return Zotero.Errors.getErrors().then(function(errors) {
 					return errors.join('\n\n') +
 						"\n\n" + sysInfo + "\n\n" +
 						"=========================================================\n\n" +
