@@ -1092,7 +1092,7 @@ Zotero.Attachments = new function(){
 		yield newAttachment.save();
 		
 		// Copy over files if they exist
-		if (newAttachment.isImportedAttachment() && attachment.getFile()) {
+		if (newAttachment.isImportedAttachment() && (yield attachment.fileExists())) {
 			let dir = Zotero.Attachments.getStorageDirectory(attachment);
 			let newDir = yield Zotero.Attachments.createDirectoryForItem(newAttachment);
 			yield Zotero.File.copyDirectory(dir, newDir);
