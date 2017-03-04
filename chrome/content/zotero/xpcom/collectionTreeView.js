@@ -1553,8 +1553,8 @@ Zotero.CollectionTreeCommandController.prototype.onEvent = function(evt)
  */
 Zotero.CollectionTreeView.prototype.onDragStart = function(event) {
 	// See note in LibraryTreeView::_setDropEffect()
-	if (Zotero.isWin) {
-		event.dataTransfer.effectAllowed = 'move';
+	if (Zotero.isWin || Zotero.isLinux) {
+		event.dataTransfer.effectAllowed = 'copyMove';
 	}
 	
 	var treeRow = this.selectedTreeRow;
