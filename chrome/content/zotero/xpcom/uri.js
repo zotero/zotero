@@ -173,7 +173,7 @@ Zotero.URI = new function () {
 	 * Return URI of collection, which might be a local URI if user hasn't synced
 	 */
 	this.getCollectionURI = function (collection) {
-		return this._getObjectURI(item);
+		return this._getObjectURI(collection);
 	}
 	
 	
