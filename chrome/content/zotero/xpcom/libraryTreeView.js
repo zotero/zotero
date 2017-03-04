@@ -357,6 +357,32 @@ Zotero.LibraryTreeView.prototype = {
 				this._setDropEffect(event, "copy");
 			}
 		}
+		else if (event.dataTransfer.getData("zotero/collection")) {
+			let collectionID = Zotero.DragDrop.getDataFromDataTransfer(event.dataTransfer).data[0];
+			let { libraryID: sourceLibraryID } = Zotero.Collections.getLibraryAndKeyFromID(collectionID);
+			
+			if (this.type == 'collection') {
+				var targetCollectionTreeRow = Zotero.DragDrop.getDragTarget(event);
+			}
+			else {
+				throw new Error("Invalid type '" + this.type + "'");
+			}
+			
+			// For now, all cross-library drags are copies
+			if (sourceLibraryID != targetCollectionTreeRow.ref.libraryID) {
+				/*if ((Zotero.isMac && event.metaKey) || (!Zotero.isMac && event.shiftKey)) {
+					this._setDropEffect(event, "move");
+				}
+				else {
+					this._setDropEffect(event, "copy");
+				}*/
+				this._setDropEffect(event, "copy");
+				return false;
+			}
+			
+			// And everything else is a move
+			this._setDropEffect(event, "move");
+		}
 		else if (event.dataTransfer.types.contains("application/x-moz-file")) {
 			// As of Aug. 2013 nightlies:
 			//
