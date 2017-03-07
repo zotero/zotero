@@ -29,40 +29,43 @@ Zotero.QuickCopy = new function() {
 	var _initTimeoutID
 	var _initPromise;
 	var _initialized = false;
+	var _initCancelled = false;
 	var _siteSettings;
 	var _formattedNames;
 	
 	this.init = Zotero.Promise.coroutine(function* () {
+		Zotero.debug("Initializing Quick Copy");
+		
 		yield this.loadSiteSettings();
+		
+		if (!_initialized) {
+			// Make sure export translator code is loaded whenever the output format changes
+			Zotero.Prefs.registerObserver("export.quickCopy.setting", _loadOutputFormat);
+			_initialized = true;
+		}
 		
 		// Load code for selected export translator ahead of time
 		// (in the background, because it requires translator initialization)
-		_initTimeoutID = setTimeout(() => {
+		Zotero.Schema.schemaUpdatePromise
+		.then(function () {
+			if (_initCancelled) return;
+			
 			// Avoid random translator initialization during tests, which can result in timeouts,
 			// if an export format is selected
 			if (Zotero.test) return;
 			
-			_initTimeoutID = null;
-			_initPromise = _loadOutputFormat().then(() => _initPromise = null);
-		}, 5000);
-		
-		if (!_initialized) {
-			Zotero.Prefs.registerObserver("export.quickCopy.setting", () => _loadOutputFormat());
-			_initialized = true;
-		}
+			_initPromise = _loadOutputFormat();
+		});
 	});
 	
 	
 	this.uninit = function () {
-		// Cancel load if not yet done
-		if (_initTimeoutID) {
-			clearTimeout(_initTimeoutID);
-			_initTimeoutID = null
-		}
+		_initCancelled = true;
 		// Cancel load if in progress
 		if (_initPromise) {
 			_initPromise.cancel();
 		}
+		Zotero.Prefs.unregisterObserver("export.quickCopy.setting", _loadOutputFormat);
 	};
 	
 	
@@ -451,6 +454,7 @@ Zotero.QuickCopy = new function() {
 		var format = Zotero.Prefs.get("export.quickCopy.setting");
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		if (format.mode == 'export') {
+			Zotero.debug("Preloading code for Quick Copy export format");
 			yield Zotero.Translators.init();
 			let translator = Zotero.Translators.get(format.id);
 			translator.cacheCode = true;

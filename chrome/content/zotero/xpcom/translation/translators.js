@@ -41,14 +41,23 @@ Zotero.Translators = new function() {
 	 *     available (e.g., in updateBundledFiles()), to avoid unnecesary file reads
 	 */
 	this.init = Zotero.Promise.coroutine(function* (options = {}) {
-		if (_initializationDeferred && !options.reinit) {
-			return _initializationDeferred.promise;
-		}
-		
 		// Wait until bundled files have been updated, except when this is called by the schema update
 		// code itself
 		if (!options.fromSchemaUpdate) {
 			yield Zotero.Schema.schemaUpdatePromise;
+		}
+		
+		// If an initialization has already started, a regular init() call should return the promise
+		// for that (which may already be resolved). A reinit should yield on that but then continue
+		// with reinitialization.
+		if (_initializationDeferred) {
+			let promise = _initializationDeferred.promise;
+			if (options.reinit) {
+				yield promise;
+			}
+			else {
+				return promise;
+			}
 		}
 		
 		_initializationDeferred = Zotero.Promise.defer();
