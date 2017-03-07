@@ -119,103 +119,407 @@ describe("Zotero.Sync.Storage.Local", function () {
 	});
 	
 	describe("#processDownload()", function () {
-		var file1Name = 'index.html';
-		var file1Contents = '<html><body>Test</body></html>';
-		var file2Name = 'aux1.txt';
-		var file2Contents = 'Test 1';
-		var subDirName = 'sub';
-		var file3Name = 'aux2';
-		var file3Contents = 'Test 2';
-		
-		var createZIP = Zotero.Promise.coroutine(function* (zipFile) {
-			var tmpDir = Zotero.getTempDirectory().path;
-			var zipDir = OS.Path.join(tmpDir, Zotero.Utilities.randomString());
-			yield OS.File.makeDir(zipDir);
-			yield Zotero.File.putContentsAsync(OS.Path.join(zipDir, file1Name), file1Contents);
-			yield Zotero.File.putContentsAsync(OS.Path.join(zipDir, file2Name), file2Contents);
+		describe("single file", function () {
+			it("should download a single file into the attachment directory", function* () {
+				var libraryID = Zotero.Libraries.userLibraryID;
+				var parentItem = yield createDataObject('item');
+				var key = Zotero.DataObjectUtilities.generateKey();
+				var fileContents = Zotero.Utilities.randomString();
+				
+				var oldFilename = "Old File";
+				var tmpDir = Zotero.getTempDirectory().path;
+				var tmpFile = OS.Path.join(tmpDir, key + '.tmp');
+				yield Zotero.File.putContentsAsync(tmpFile, fileContents);
+				
+				// Create an existing attachment directory to replace
+				var dir = Zotero.Attachments.getStorageDirectoryByLibraryAndKey(libraryID, key).path;
+				yield OS.File.makeDir(
+					dir,
+					{
+						unixMode: 0o755
+					}
+				);
+				yield Zotero.File.putContentsAsync(OS.Path.join(dir, oldFilename), '');
+				
+				var md5 = Zotero.Utilities.Internal.md5(Zotero.File.pathToFile(tmpFile));
+				var mtime = 1445667239000;
+				
+				var json = {
+					key,
+					version: 10,
+					itemType: 'attachment',
+					linkMode: 'imported_url',
+					url: 'https://example.com/foo.txt',
+					filename: 'foo.txt',
+					contentType: 'text/plain',
+					charset: 'utf-8',
+					md5,
+					mtime
+				};
+				yield Zotero.Sync.Data.Local.processObjectsFromJSON('item', libraryID, [json]);
+				
+				var item = yield Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
+				yield Zotero.Sync.Storage.Local.processDownload({
+					item,
+					md5,
+					mtime
+				});
+				yield OS.File.remove(tmpFile);
+				
+				var storageDir = Zotero.Attachments.getStorageDirectory(item).path;
+				
+				// Make sure previous files don't exist
+				assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, oldFilename)));
+				
+				// Make sure main file matches attachment hash and mtime
+				yield assert.eventually.equal(
+					item.attachmentHash, Zotero.Utilities.Internal.md5(fileContents)
+				);
+				yield assert.eventually.equal(item.attachmentModificationTime, mtime);
+			});
 			
-			// Subdirectory
-			var subDir = OS.Path.join(zipDir, subDirName);
-			yield OS.File.makeDir(subDir);
-			yield Zotero.File.putContentsAsync(OS.Path.join(subDir, file3Name), file3Contents);
 			
-			yield Zotero.File.zipDirectory(zipDir, zipFile);
-			yield removeDir(zipDir);
+			it("should download and rename a single file with invalid filename into the attachment directory", function* () {
+				var libraryID = Zotero.Libraries.userLibraryID;
+				var parentItem = yield createDataObject('item');
+				var key = Zotero.DataObjectUtilities.generateKey();
+				var fileContents = Zotero.Utilities.randomString();
+				
+				var oldFilename = "Old File";
+				var newFilename = " ab — c \\:.txt.";
+				var filteredFilename = " ab — c .txt.";
+				var tmpDir = Zotero.getTempDirectory().path;
+				var tmpFile = OS.Path.join(tmpDir, key + '.tmp');
+				yield Zotero.File.putContentsAsync(tmpFile, fileContents);
+				
+				// Create an existing attachment directory to replace
+				var dir = Zotero.Attachments.getStorageDirectoryByLibraryAndKey(libraryID, key).path;
+				yield OS.File.makeDir(
+					dir,
+					{
+						unixMode: 0o755
+					}
+				);
+				yield Zotero.File.putContentsAsync(OS.Path.join(dir, oldFilename), '');
+				
+				var md5 = Zotero.Utilities.Internal.md5(Zotero.File.pathToFile(tmpFile));
+				var mtime = 1445667239000;
+				
+				var json = {
+					key,
+					version: 10,
+					itemType: 'attachment',
+					linkMode: 'imported_url',
+					url: 'https://example.com/foo.txt',
+					filename: newFilename,
+					contentType: 'text/plain',
+					charset: 'utf-8',
+					md5,
+					mtime
+				};
+				yield Zotero.Sync.Data.Local.processObjectsFromJSON('item', libraryID, [json]);
+				
+				var item = yield Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
+				yield Zotero.Sync.Storage.Local.processDownload({
+					item,
+					md5,
+					mtime
+				});
+				yield OS.File.remove(tmpFile);
+				
+				var storageDir = Zotero.Attachments.getStorageDirectory(item).path;
+				
+				// Make sure previous file doesn't exist
+				assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, oldFilename)));
+				// And new one does
+				assert.isTrue(yield OS.File.exists(OS.Path.join(storageDir, filteredFilename)));
+				
+				// Make sure main file matches attachment hash and mtime
+				yield assert.eventually.equal(
+					item.attachmentHash, Zotero.Utilities.Internal.md5(fileContents)
+				);
+				yield assert.eventually.equal(item.attachmentModificationTime, mtime);
+			});
+			
+			
+			it("should download and rename a single file with invalid filename using Windows parsing rules into the attachment directory", function* () {
+				var libraryID = Zotero.Libraries.userLibraryID;
+				var parentItem = yield createDataObject('item');
+				var key = Zotero.DataObjectUtilities.generateKey();
+				var fileContents = Zotero.Utilities.randomString();
+				
+				var oldFilename = "Old File";
+				var newFilename = "a:b.txt";
+				var filteredFilename = "ab.txt";
+				var tmpDir = Zotero.getTempDirectory().path;
+				var tmpFile = OS.Path.join(tmpDir, key + '.tmp');
+				yield Zotero.File.putContentsAsync(tmpFile, fileContents);
+				
+				// Create an existing attachment directory to replace
+				var dir = Zotero.Attachments.getStorageDirectoryByLibraryAndKey(libraryID, key).path;
+				yield OS.File.makeDir(
+					dir,
+					{
+						unixMode: 0o755
+					}
+				);
+				yield Zotero.File.putContentsAsync(OS.Path.join(dir, oldFilename), '');
+				
+				var md5 = Zotero.Utilities.Internal.md5(Zotero.File.pathToFile(tmpFile));
+				var mtime = 1445667239000;
+				
+				var json = {
+					key,
+					version: 10,
+					itemType: 'attachment',
+					linkMode: 'imported_url',
+					url: 'https://example.com/foo.txt',
+					filename: 'a:b.txt',
+					contentType: 'text/plain',
+					charset: 'utf-8',
+					md5,
+					mtime
+				};
+				yield Zotero.Sync.Data.Local.processObjectsFromJSON('item', libraryID, [json]);
+				
+				var item = yield Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
+				
+				// Stub functions to simulate OS.Path.basename() behavior on Windows
+				var basenameOrigFunc = OS.Path.basename.bind(OS.Path);
+				var basenameStub = sinon.stub(OS.Path, "basename", (path) => {
+					// Split on colon
+					if (path.endsWith("a:b.txt")) {
+						return "b.txt";
+					}
+					return basenameOrigFunc(path);
+				});
+				var pathToFileOrigFunc = Zotero.File.pathToFile.bind(Zotero.File);
+				var pathToFileStub = sinon.stub(Zotero.File, "pathToFile", (path) => {
+					if (path.includes(":")) {
+						throw new Error("Path contains colon");
+					}
+					return pathToFileOrigFunc(path);
+				});
+				
+				yield Zotero.Sync.Storage.Local.processDownload({
+					item,
+					md5,
+					mtime
+				});
+				yield OS.File.remove(tmpFile);
+				
+				var storageDir = Zotero.Attachments.getStorageDirectory(item).path;
+				
+				basenameStub.restore();
+				pathToFileStub.restore();
+				
+				// Make sure path is set correctly
+				assert.equal(item.getFilePath(), OS.Path.join(storageDir, filteredFilename));
+				// Make sure previous files don't exist
+				assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, oldFilename)));
+				// And new one does
+				assert.isTrue(yield OS.File.exists(OS.Path.join(storageDir, filteredFilename)));
+				
+				// Make sure main file matches attachment hash and mtime
+				yield assert.eventually.equal(
+					item.attachmentHash, Zotero.Utilities.Internal.md5(fileContents)
+				);
+				yield assert.eventually.equal(item.attachmentModificationTime, mtime);
+			});
 		});
 		
-		it("should download and extract a ZIP file into the attachment directory", function* () {
-			var libraryID = Zotero.Libraries.userLibraryID;
-			var parentItem = yield createDataObject('item');
-			var key = Zotero.DataObjectUtilities.generateKey();
-			
-			var tmpDir = Zotero.getTempDirectory().path;
-			var zipFile = OS.Path.join(tmpDir, key + '.tmp');
-			yield createZIP(zipFile);
-			
-			// Create an existing attachment directory (and subdirectory) to replace
-			var dir = Zotero.Attachments.getStorageDirectoryByLibraryAndKey(libraryID, key).path;
-			yield OS.File.makeDir(
-				OS.Path.join(dir, 'subdir'),
-				{
-					from: Zotero.DataDirectory.dir,
-					unixMode: 0o755
-				}
-			);
-			yield Zotero.File.putContentsAsync(OS.Path.join(dir, 'A'), '');
-			yield Zotero.File.putContentsAsync(OS.Path.join(dir, 'subdir', 'B'), '');
-			
-			var md5 = Zotero.Utilities.Internal.md5(Zotero.File.pathToFile(zipFile));
-			var mtime = 1445667239000;
-			
-			var json = {
-				key,
-				version: 10,
-				itemType: 'attachment',
-				linkMode: 'imported_url',
-				url: 'https://example.com',
-				filename: file1Name,
-				contentType: 'text/html',
-				charset: 'utf-8',
-				md5,
-				mtime
-			};
-			yield Zotero.Sync.Data.Local.processObjectsFromJSON('item', libraryID, [json]);
-			
-			var item = yield Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
-			yield Zotero.Sync.Storage.Local.processDownload({
-				item,
-				md5,
-				mtime,
-				compressed: true
+		describe("ZIP", function () {
+			it("should download and extract a ZIP file into the attachment directory", function* () {
+				var file1Name = 'index.html';
+				var file1Contents = '<html><body>Test</body></html>';
+				var file2Name = 'aux1.txt';
+				var file2Contents = 'Test 1';
+				var subDirName = 'sub';
+				var file3Name = 'aux2';
+				var file3Contents = 'Test 2';
+				
+				var libraryID = Zotero.Libraries.userLibraryID;
+				var parentItem = yield createDataObject('item');
+				var key = Zotero.DataObjectUtilities.generateKey();
+				
+				var tmpDir = Zotero.getTempDirectory().path;
+				var zipFile = OS.Path.join(tmpDir, key + '.tmp');
+				
+				// Create ZIP file with subdirectory
+				var tmpDir = Zotero.getTempDirectory().path;
+				var zipDir = yield getTempDirectory();
+				yield Zotero.File.putContentsAsync(OS.Path.join(zipDir, file1Name), file1Contents);
+				yield Zotero.File.putContentsAsync(OS.Path.join(zipDir, file2Name), file2Contents);
+				var subDir = OS.Path.join(zipDir, subDirName);
+				yield OS.File.makeDir(subDir);
+				yield Zotero.File.putContentsAsync(OS.Path.join(subDir, file3Name), file3Contents);
+				yield Zotero.File.zipDirectory(zipDir, zipFile);
+				yield removeDir(zipDir);
+				
+				// Create an existing attachment directory (and subdirectory) to replace
+				var dir = Zotero.Attachments.getStorageDirectoryByLibraryAndKey(libraryID, key).path;
+				yield OS.File.makeDir(
+					OS.Path.join(dir, 'subdir'),
+					{
+						from: Zotero.DataDirectory.dir,
+						unixMode: 0o755
+					}
+				);
+				yield Zotero.File.putContentsAsync(OS.Path.join(dir, 'A'), '');
+				yield Zotero.File.putContentsAsync(OS.Path.join(dir, 'subdir', 'B'), '');
+				
+				var md5 = Zotero.Utilities.Internal.md5(Zotero.File.pathToFile(zipFile));
+				var mtime = 1445667239000;
+				
+				var json = {
+					key,
+					version: 10,
+					itemType: 'attachment',
+					linkMode: 'imported_url',
+					url: 'https://example.com',
+					filename: file1Name,
+					contentType: 'text/html',
+					charset: 'utf-8',
+					md5,
+					mtime
+				};
+				yield Zotero.Sync.Data.Local.processObjectsFromJSON('item', libraryID, [json]);
+				
+				var item = yield Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
+				yield Zotero.Sync.Storage.Local.processDownload({
+					item,
+					md5,
+					mtime,
+					compressed: true
+				});
+				yield OS.File.remove(zipFile);
+				
+				var storageDir = Zotero.Attachments.getStorageDirectory(item).path;
+				
+				// Make sure previous files don't exist
+				assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, 'A')));
+				assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, 'subdir')));
+				assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, 'subdir', 'B')));
+				
+				// Make sure main file matches attachment hash and mtime
+				yield assert.eventually.equal(
+					item.attachmentHash, Zotero.Utilities.Internal.md5(file1Contents)
+				);
+				yield assert.eventually.equal(item.attachmentModificationTime, mtime);
+				
+				// Check second file
+				yield assert.eventually.equal(
+					Zotero.File.getContentsAsync(OS.Path.join(storageDir, file2Name)),
+					file2Contents
+				);
+				
+				// Check subdirectory and file
+				assert.isTrue((yield OS.File.stat(OS.Path.join(storageDir, subDirName))).isDir);
+				yield assert.eventually.equal(
+					Zotero.File.getContentsAsync(OS.Path.join(storageDir, subDirName, file3Name)),
+					file3Contents
+				);
 			});
-			yield OS.File.remove(zipFile);
 			
-			var storageDir = Zotero.Attachments.getStorageDirectory(item).path;
 			
-			// Make sure previous files don't exist
-			assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, 'A')));
-			assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, 'subdir')));
-			assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, 'subdir', 'B')));
-			
-			// Make sure main file matches attachment hash and mtime
-			yield assert.eventually.equal(
-				item.attachmentHash, Zotero.Utilities.Internal.md5(file1Contents)
-			);
-			yield assert.eventually.equal(item.attachmentModificationTime, mtime);
-			
-			// Check second file
-			yield assert.eventually.equal(
-				Zotero.File.getContentsAsync(OS.Path.join(storageDir, file2Name)),
-				file2Contents
-			);
-			
-			// Check subdirectory and file
-			assert.isTrue((yield OS.File.stat(OS.Path.join(storageDir, subDirName))).isDir);
-			yield assert.eventually.equal(
-				Zotero.File.getContentsAsync(OS.Path.join(storageDir, subDirName, file3Name)),
-				file3Contents
-			);
-		})
+			it("should download and rename a ZIP file with invalid filename using Windows parsing rules into the attachment directory", function* () {
+				var libraryID = Zotero.Libraries.userLibraryID;
+				var parentItem = yield createDataObject('item');
+				var key = Zotero.DataObjectUtilities.generateKey();
+				
+				var oldFilename = "Old File";
+				var oldAuxFilename = "a.gif";
+				var newFilename = "a:b.html";
+				var fileContents = Zotero.Utilities.randomString();
+				var newAuxFilename = "b.gif";
+				var filteredFilename = "ab.html";
+				var tmpDir = Zotero.getTempDirectory().path;
+				var zipFile = OS.Path.join(tmpDir, key + '.tmp');
+				
+				// Create ZIP file
+				var tmpDir = Zotero.getTempDirectory().path;
+				var zipDir = yield getTempDirectory();
+				yield Zotero.File.putContentsAsync(OS.Path.join(zipDir, newFilename), fileContents);
+				yield Zotero.File.putContentsAsync(OS.Path.join(zipDir, newAuxFilename), '');
+				yield Zotero.File.zipDirectory(zipDir, zipFile);
+				yield removeDir(zipDir);
+				
+				// Create an existing attachment directory to replace
+				var dir = Zotero.Attachments.getStorageDirectoryByLibraryAndKey(libraryID, key).path;
+				yield OS.File.makeDir(
+					dir,
+					{
+						unixMode: 0o755
+					}
+				);
+				yield Zotero.File.putContentsAsync(OS.Path.join(dir, oldFilename), '');
+				yield Zotero.File.putContentsAsync(OS.Path.join(dir, oldAuxFilename), '');
+				
+				var md5 = Zotero.Utilities.Internal.md5(Zotero.File.pathToFile(zipFile));
+				var mtime = 1445667239000;
+				
+				var json = {
+					key,
+					version: 10,
+					itemType: 'attachment',
+					linkMode: 'imported_url',
+					url: 'https://example.com/foo.html',
+					filename: 'a:b.html',
+					contentType: 'text/plain',
+					charset: 'utf-8',
+					md5,
+					mtime
+				};
+				yield Zotero.Sync.Data.Local.processObjectsFromJSON('item', libraryID, [json]);
+				
+				var item = yield Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
+				
+				// Stub functions to simulate OS.Path.basename() behavior on Windows
+				var basenameOrigFunc = OS.Path.basename.bind(OS.Path);
+				var basenameStub = sinon.stub(OS.Path, "basename", (path) => {
+					// Split on colon
+					if (path.endsWith("a:b.html")) {
+						return "b.html";
+					}
+					return basenameOrigFunc(path);
+				});
+				var pathToFileOrigFunc = Zotero.File.pathToFile.bind(Zotero.File);
+				var pathToFileStub = sinon.stub(Zotero.File, "pathToFile", (path) => {
+					if (path.includes(":")) {
+						throw new Error("Path contains colon");
+					}
+					return pathToFileOrigFunc(path);
+				});
+				
+				yield Zotero.Sync.Storage.Local.processDownload({
+					item,
+					md5,
+					mtime,
+					compressed: true
+				});
+				yield OS.File.remove(zipFile);
+				
+				var storageDir = Zotero.Attachments.getStorageDirectory(item).path;
+				
+				basenameStub.restore();
+				pathToFileStub.restore();
+				
+				// Make sure path is set correctly
+				assert.equal(item.getFilePath(), OS.Path.join(storageDir, filteredFilename));
+				// Make sure previous files don't exist
+				assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, oldFilename)));
+				assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, oldAuxFilename)));
+				// And new ones do
+				assert.isTrue(yield OS.File.exists(OS.Path.join(storageDir, filteredFilename)));
+				assert.isTrue(yield OS.File.exists(OS.Path.join(storageDir, newAuxFilename)));
+				
+				// Make sure main file matches attachment hash and mtime
+				yield assert.eventually.equal(
+					item.attachmentHash, Zotero.Utilities.Internal.md5(fileContents)
+				);
+				yield assert.eventually.equal(item.attachmentModificationTime, mtime);
+			});
+		});
 	})
 	
 	describe("#getConflicts()", function () {

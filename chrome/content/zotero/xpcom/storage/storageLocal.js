@@ -632,33 +632,32 @@ Zotero.Sync.Storage.Local = {
 		
 		yield Zotero.Attachments.createDirectoryForItem(item);
 		
-		var path = item.getFilePath();
-		if (!path) {
+		var filename = item.attachmentFilename;
+		if (!filename) {
 			throw new Error("Empty path for item " + item.key);
 		}
 		// Don't save Windows aliases
-		if (path.endsWith('.lnk')) {
+		if (filename.endsWith('.lnk')) {
 			return false;
 		}
 		
-		var dir = OS.Path.dirname(path);
-		var fileName = OS.Path.basename(path);
+		var attachmentDir = Zotero.Attachments.getStorageDirectory(item).path;
 		var renamed = false;
 		
 		// Make sure the new filename is valid, in case an invalid character made it over
 		// (e.g., from before we checked for them)
-		var filteredName = Zotero.File.getValidFileName(fileName);
-		if (filteredName != fileName) {
-			Zotero.debug("Filtering filename '" + fileName + "' to '" + filteredName + "'");
-			fileName = filteredName;
-			path = OS.Path.join(dir, fileName);
+		var filteredFilename = Zotero.File.getValidFileName(filename);
+		if (filteredFilename != filename) {
+			Zotero.debug("Filtering filename '" + filename + "' to '" + filteredFilename + "'");
+			filename = filteredFilename;
 			renamed = true;
 		}
+		var path = OS.Path.join(attachmentDir, filename);
 		
 		Zotero.debug("Moving download file " + OS.Path.basename(tempFilePath)
-			+ " into attachment directory as '" + fileName + "'");
+			+ ` into attachment directory as '${filename}'`);
 		try {
-			var finalFileName = Zotero.File.createShortened(
+			var finalFilename = Zotero.File.createShortened(
 				path, Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0o644
 			);
 		}
@@ -666,14 +665,14 @@ Zotero.Sync.Storage.Local = {
 			Zotero.File.checkFileAccessError(e, path, 'create');
 		}
 		
-		if (finalFileName != fileName) {
-			Zotero.debug("Changed filename '" + fileName + "' to '" + finalFileName + "'");
+		if (finalFilename != filename) {
+			Zotero.debug("Changed filename '" + filename + "' to '" + finalFilename + "'");
 			
-			fileName = finalFileName;
-			path = OS.Path.join(dir, fileName);
+			filename = finalFilename;
+			path = OS.Path.join(attachmentDir, filename);
 			
 			// Abort if Windows path limitation would cause filenames to be overly truncated
-			if (Zotero.isWin && fileName.length < 40) {
+			if (Zotero.isWin && filename.length < 40) {
 				try {
 					yield OS.File.remove(path);
 				}
@@ -776,12 +775,11 @@ Zotero.Sync.Storage.Local = {
 				Zotero.debug("Skipping directory " + filePath);
 				continue;
 			}
-			
 			count++;
 			
 			Zotero.debug("Extracting " + filePath);
 			
-			var primaryFile = false;
+			var primaryFile = itemFileName == filePath;
 			var filtered = false;
 			var renamed = false;
 			
@@ -808,10 +806,10 @@ Zotero.Sync.Storage.Local = {
 					filePath = itemFileName;
 					destPath = OS.Path.join(OS.Path.dirname(destPath), itemFileName);
 					renamed = true;
+					primaryFile = true;
 				}
 			}
 			
-			var primaryFile = itemFileName == filePath;
 			if (primaryFile && filtered) {
 				renamed = true;
 			}
