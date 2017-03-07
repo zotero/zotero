@@ -1542,7 +1542,7 @@ Zotero.Translate.Base.prototype = {
 					this._waitingForSave = true;
 					this._saveItems(this.saveQueue)
 						.catch(e => this._runHandler("error", e))
-						.finally(() => this.saveQueue = []);
+						.then(() => this.saveQueue = []);
 					return;
 				}
 				this._debug("Translation successful");
