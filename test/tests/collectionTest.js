@@ -227,6 +227,25 @@ describe("Zotero.Collection", function() {
 			
 			assert.lengthOf(collection.getChildItems(false, true), 1);
 		})
+		
+		it("should not include removed items", function* () {
+			var col = yield createDataObject('collection');
+			var item = yield createDataObject('item', { collections: [ col.id ] });
+			assert.lengthOf(col.getChildItems(), 1);
+			item.setCollections([]);
+			yield item.saveTx();
+			Zotero.debug(col.getChildItems());
+			assert.lengthOf(col.getChildItems(), 0);
+		});
+		
+		it("should not include deleted items", function* () {
+			var col = yield createDataObject('collection');
+			var item = yield createDataObject('item', { collections: [ col.id ] });
+			assert.lengthOf(col.getChildItems(), 1);
+			yield item.erase();
+			Zotero.debug(col.getChildItems());
+			assert.lengthOf(col.getChildItems(), 0);
+		});
 	})
 	
 	describe("#toJSON()", function () {
@@ -293,5 +312,14 @@ describe("Zotero.Collection", function() {
 				]
 			);
 		});
+		
+		it("should not include deleted items", function* () {
+			var col = yield createDataObject('collection');
+			var item = yield createDataObject('item', { collections: [col.id] });
+			assert.lengthOf(col.getDescendents(), 1);
+			yield item.eraseTx();
+			assert.lengthOf(col.getDescendents(), 0);
+		});
+
 	});
 })
