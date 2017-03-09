@@ -582,9 +582,6 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 				if (!ids) {
 					return [];
 				}
-				
-				Zotero.debug('g');
-				Zotero.debug(ids);
 				tmpTable = yield Zotero.Search.idsToTempTable(ids);
 			}
 			// Otherwise, just copy to temp table directly
@@ -897,26 +894,20 @@ Zotero.Search.prototype.getSQLParams = Zotero.Promise.coroutine(function* () {
 /*
  * Batch insert
  */
-Zotero.Search.idsToTempTable = function (ids) {
-	const N_COMBINED_INSERTS = 1000;
-	
+Zotero.Search.idsToTempTable = Zotero.Promise.coroutine(function* (ids) {
 	var tmpTable = "tmpSearchResults_" + Zotero.randomString(8);
 	
-	return Zotero.DB.executeTransaction(function* () {
-		var sql = "CREATE TEMPORARY TABLE " + tmpTable + " (itemID INTEGER PRIMARY KEY)";
-		yield Zotero.DB.queryAsync(sql);
-		
-		var ids2 = ids ? ids.concat() : [];
-		while (ids2.length) {
-			let chunk = ids2.splice(0, N_COMBINED_INSERTS);
-			let sql = 'INSERT INTO ' + tmpTable + ' VALUES '
-				+ chunk.map((x) => "(" + parseInt(x) + ")").join(", ");
-			yield Zotero.DB.queryAsync(sql, false, { debug: false });
-		}
-		
-		return tmpTable;
-	});
-}
+	Zotero.debug(`Creating ${tmpTable} with ${ids.length} item${ids.length != 1 ? 's' : ''}`);
+	var sql = "CREATE TEMPORARY TABLE " + tmpTable + " AS "
+		+ "WITH cte(itemID) AS ("
+			+ "VALUES " + ids.map(id => "(" + parseInt(id) + ")").join(',')
+		+ ") "
+		+ "SELECT * FROM cte";
+	yield Zotero.DB.queryAsync(sql, false, { debug: false });
+	yield Zotero.DB.queryAsync(`CREATE UNIQUE INDEX ${tmpTable}_itemID ON ${tmpTable}(itemID)`);
+	
+	return tmpTable;
+});
 
 
 /*
