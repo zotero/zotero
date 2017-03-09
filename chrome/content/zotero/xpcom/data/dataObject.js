@@ -626,9 +626,7 @@ Zotero.DataObject.prototype.reload = Zotero.Promise.coroutine(function* (dataTyp
 	}
 	
 	if (!dataTypes) {
-		dataTypes = Object.keys(this._loaded).filter(
-			val => this._loaded[val]
-		);
+		dataTypes = Object.keys(this._loaded).filter(type => this._loaded[type]);
 	}
 	
 	if (dataTypes && dataTypes.length) {
@@ -644,7 +642,7 @@ Zotero.DataObject.prototype.reload = Zotero.Promise.coroutine(function* (dataTyp
 });
 
 /**
- * Checks wheteher a given data type has been loaded
+ * Checks whether a given data type has been loaded
  *
  * @param {String} [dataType=primaryData] Data type to check
  * @throws {Zotero.DataObjects.UnloadedDataException} If not loaded, unless the

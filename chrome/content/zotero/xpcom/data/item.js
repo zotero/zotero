@@ -804,8 +804,8 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 				}
 				
 				if (!Zotero.Date.isSQLDate(value) && !Zotero.Date.isSQLDateTime(value)) {
-					Zotero.logError(`Discarding invalid ${field} '${value}' for `
-						+ `item ${this.libraryKey} in setField()`);
+					Zotero.logError(`Discarding invalid ${Zotero.ItemFields.getName(field)} '${value}' `
+						+ `for item ${this.libraryKey} in setField()`);
 					return false;
 				}
 			}
