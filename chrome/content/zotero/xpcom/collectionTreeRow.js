@@ -238,9 +238,21 @@ Zotero.CollectionTreeRow.prototype.getItems = Zotero.Promise.coroutine(function*
 	}
 	
 	var ids = yield this.getSearchResults();
+	
+	// Filter out items that exist in the items table (where search results come from) but that haven't
+	// yet been registered. This helps prevent unloaded-data crashes when switching collections while
+	// items are being added (e.g., during sync).
+	var len = ids.length;
+	ids = ids.filter(id => Zotero.Items.getLibraryAndKeyFromID(id));
+	if (len > ids.length) {
+		let diff = len - ids.length;
+		Zotero.debug(`Not showing ${diff} unloaded item${diff != 1 ? 's' : ''}`);
+	}
+	
 	if (!ids.length) {
 		return []
 	}
+	
 	return Zotero.Items.getAsync(ids);
 });
 
