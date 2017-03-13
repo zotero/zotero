@@ -6,10 +6,6 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	//
 	Components.utils.import("resource://zotero-unit/httpd.js");
 	
-	var apiKey = Zotero.Utilities.randomString(24);
-	var apiPort = 16213;
-	var apiURL = `http://localhost:${apiPort}/`;
-	
 	var davScheme = "http";
 	var davPort = 16214;
 	var davBasePath = "/webdav/";
@@ -48,10 +44,6 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			params[key] = decodeURIComponent(val);
 		}
 		return params;
-	}
-	
-	function assertAPIKey(request) {
-		assert.equal(request.requestHeaders["Zotero-API-Key"], apiKey);
 	}
 	
 	beforeEach(function* () {
@@ -136,6 +128,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	})
 	
 	after(function* () {
+		Zotero.HTTP.mock = null;
 		if (win) {
 			win.close();
 		}
@@ -593,7 +586,65 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assert.equal(item.attachmentSyncedModificationTime, newModTime);
 			assert.isTrue(item.synced);
 		})
-	})
+	});
+	
+	describe("Verify Server", function () {
+		it("should show an error for a connection error", function* () {
+			Zotero.HTTP.mock = null;
+			Zotero.Prefs.set("sync.storage.url", "127.0.0.1:9999");
+			
+			// Begin install procedure
+			var win = yield loadPrefPane('sync');
+			var button = win.document.getElementById('storage-verify');
+			
+			var spy = sinon.spy(win.Zotero_Preferences.Sync, "verifyStorageServer");
+			var promise1 = waitForDialog(function (dialog) {
+				assert.include(
+					dialog.document.documentElement.textContent,
+					Zotero.getString('sync.storage.error.serverCouldNotBeReached', '127.0.0.1')
+				);
+			});
+			button.click();
+			yield promise1;
+			
+			var promise2 = spy.returnValues[0];
+			spy.restore();
+			yield promise2;
+		});
+		
+		it("should show an error for a 403", function* () {
+			Zotero.HTTP.mock = null;
+			this.httpd.registerPathHandler(
+				`${davBasePath}zotero/`,
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 403, null);
+					}
+				}
+			);
+			
+			// Use httpd.js instead of sinon so we get a real nsIURL with a channel
+			Zotero.Prefs.set("sync.storage.url", davHostPath);
+			
+			// Begin install procedure
+			var win = yield loadPrefPane('sync');
+			var button = win.document.getElementById('storage-verify');
+			
+			var spy = sinon.spy(win.Zotero_Preferences.Sync, "verifyStorageServer");
+			var promise1 = waitForDialog(function (dialog) {
+				assert.include(
+					dialog.document.documentElement.textContent,
+					Zotero.getString('sync.storage.error.webdav.permissionDenied', davBasePath + 'zotero/')
+				);
+			});
+			button.click();
+			yield promise1;
+			
+			var promise2 = spy.returnValues[0];
+			spy.restore();
+			yield promise2;
+		});
+	});
 	
 	describe("#purgeDeletedStorageFiles()", function () {
 		beforeEach(function () {

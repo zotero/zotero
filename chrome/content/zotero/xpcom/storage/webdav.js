@@ -755,7 +755,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		if (err instanceof Zotero.HTTP.UnexpectedStatusException) {
 			switch (err.status) {
 			case 0:
-				errorMsg = Zotero.getString('sync.storage.error.serverCouldNotBeReached', uri.host);
+				errorMsg = Zotero.getString('sync.storage.error.serverCouldNotBeReached', err.channel.URI.host);
 				break;
 				
 			case 401:
@@ -766,7 +766,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			
 			case 403:
 				errorTitle = Zotero.getString('general.permissionDenied');
-				errorMsg = Zotero.getString('sync.storage.error.webdav.permissionDenied', uri.path)
+				errorMsg = Zotero.getString('sync.storage.error.webdav.permissionDenied', err.channel.URI.path)
 					+ "\n\n" + Zotero.getString('sync.storage.error.checkFileSyncSettings');
 				break;
 			
