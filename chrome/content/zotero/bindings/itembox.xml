@@ -1296,6 +1296,13 @@
 						case 'dateDue':
 						case 'accepted':
 							if (fieldName == 'date' && this.item._objectType != 'feedItem') {
+								if (valueText) {
+									var date = Zotero.Date.strToDate(valueText);
+									if (date.part == undefined) {
+										// valueText = Zotero.Date.isoToDate(date).toLocaleDateString();
+										valueText = Zotero.Date.dateToISO(date);
+									}
+								}
 								break;
 							}
 							if (valueText) {

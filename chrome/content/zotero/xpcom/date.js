@@ -623,14 +623,12 @@ Zotero.Date = new function(){
 		return string;
 	}
 	
-	this.strToISO = function (str) {
-		var date = this.strToDate(str);
-		
-		if(date.year) {
+	this.dateToISO = function (date) {
+		if (date.year) {
 			var dateString = Zotero.Utilities.lpad(date.year, "0", 4);
 			if (parseInt(date.month) == date.month) {
 				dateString += "-"+Zotero.Utilities.lpad(date.month+1, "0", 2);
-				if(date.day) {
+				if (date.day) {
 					dateString += "-"+Zotero.Utilities.lpad(date.day, "0", 2);
 				}
 			}
@@ -639,6 +637,11 @@ Zotero.Date = new function(){
 		return false;
 	}
 	
+	this.strToISO = function (str) {
+		var date = this.strToDate(str);
+		var dateString = this.dateToISO(date);
+		return dateString;
+	}
 	
 	this.sqlToISO8601 = function (sqlDate) {
 		var date = sqlDate.substr(0, 10);
