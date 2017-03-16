@@ -475,9 +475,17 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			filesEditable = true;
 		}
 		
-		var cookieSandbox = new Zotero.CookieSandbox(
-			null, data.url, data.cookie, options.headers["User-Agent"]
-		);
+		var cookieSandbox = data.uri
+			? new Zotero.CookieSandbox(
+				null,
+				data.uri,
+				data.detailedCookies ? "" : data.cookie || "",
+				options.headers["User-Agent"]
+			)
+			: null;
+		if(cookieSandbox && data.detailedCookies) {
+			cookieSandbox.addCookiesFromHeader(data.detailedCookies);
+		}
 		
 		if (data.pdf && filesEditable) {
 			delete Zotero.Server.Connector.Data[data.url];
