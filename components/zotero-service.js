@@ -559,6 +559,33 @@ ZoteroCommandLineHandler.prototype = {
 				}
 			}
 			
+			param = cmdLine.handleFlag("debugger", false);
+			if (param) {
+				try {
+					let portOrPath = Services.prefs.getBranch('').getIntPref('devtools.debugger.remote-port');
+					
+					const { devtools } = Components.utils.import("resource://devtools/shared/Loader.jsm", {});
+					const { DebuggerServer } = devtools.require("devtools/server/main");
+					
+					if (!DebuggerServer.initialized) {
+						dump("Initializing devtools server\n");
+						DebuggerServer.init();
+						DebuggerServer.allowChromeProcess = true;
+						DebuggerServer.addBrowserActors();
+					}
+					
+					let listener = DebuggerServer.createListener();
+					listener.portOrPath = portOrPath;
+					listener.open();
+					
+					dump("Debugger server started on " + portOrPath + "\n\n");
+				}
+				catch (e) {
+					dump(e + "\n\n");
+					Components.utils.reportError(e);
+				}
+			}
+			
 			// In Fx49-based Mac Standalone, if Zotero is closed, an associated file is launched, and
 			// Zotero hasn't been opened before, a -file parameter is passed and two main windows open.
 			// Subsequent file openings when closed result in -url with file:// URLs (converted above)
