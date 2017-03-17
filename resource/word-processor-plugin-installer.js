@@ -43,7 +43,7 @@ var _runningTimers = [];
 function setTimeout(func, ms) {
 	var timer = Components.classes["@mozilla.org/timer;1"].
 		createInstance(Components.interfaces.nsITimer);
-	var timerCallback = {"notify":function() {
+	var timerCallback = {notify: function() {
 		_runningTimers.splice(_runningTimers.indexOf(timer), 1);
 		func();
 	}};
@@ -70,16 +70,16 @@ var ZoteroPluginInstaller = function(addon, failSilently, force) {
 };
 
 ZoteroPluginInstaller.prototype = {
-	"_errorDisplayed":false,
+	_errorDisplayed: false,
 	
-	"_addonInfoAvailable":function() {
+	_addonInfoAvailable: function() {
 		try {
 			this._version = this._addons[0].version;
 			
 			try {
 				this._addon.verifyNotCorrupt(this);
 			} catch(e) {
-				Zotero.debug("Not installing "+this._addon.EXTENSION_STRING+": "+e.toString());
+				Zotero.debug("Not installing +this._addon.EXTENSION_STRING+:  "+e.toString());
 				return;
 			}
 			
@@ -111,13 +111,13 @@ ZoteroPluginInstaller.prototype = {
 		}
 	},
 	
-	"isInstalled":function() {
+	isInstalled: function() {
 		while(!this._version) Zotero.mainThread.processNextEvent(true);
 		return this.prefBranch.getCharPref("version") == this._version && 
 			this.prefBranch.getBoolPref("installed");
 	},
 	
-	"getAddonPath":function(addonID) {
+	getAddonPath: function(addonID) {
 		if(AddonManager) {
 			for (var addon of this._addons) {
 				if(addon && addon.id == addonID) {
@@ -133,15 +133,15 @@ ZoteroPluginInstaller.prototype = {
 		}
 	},
 	
-	"setProgressWindowLabel":function(value) {
+	setProgressWindowLabel: function(value) {
 		if(this._progressWindow) this._progressWindowLabel.value = value;
 	},
 	
-	"closeProgressWindow":function(value) {
+	closeProgressWindow: function(value) {
 		if(this._progressWindow) this._progressWindow.close();
 	},
 	
-	"success":function() {
+	success: function() {
 		installationInProgress = false;
 		this.closeProgressWindow();
 		this.prefBranch.setCharPref("version", this._version);
@@ -158,7 +158,7 @@ ZoteroPluginInstaller.prototype = {
 		}
 	},
 	
-	"error":function(error, notFailure) {
+	error: function(error, notFailure) {
 		installationInProgress = false;
 		this.closeProgressWindow();
 		if(!notFailure) {
@@ -177,13 +177,13 @@ ZoteroPluginInstaller.prototype = {
 		}, 0);
 	},
 	
-	"cancelled":function(dontSkipInstallation) {
+	cancelled: function(dontSkipInstallation) {
 		installationInProgress = false;
 		this.closeProgressWindow();
 		if(!this.force && !dontSkipInstallation) this.prefBranch.setBoolPref("skipInstallation", true);
 	},
 
-	"showPreferences":function(document) {
+	showPreferences: function(document) {
 		var isInstalled = this.isInstalled(),
 			groupbox = document.createElement("groupbox");
 		groupbox.id = this._addon.EXTENSION_DIR;
@@ -224,7 +224,7 @@ ZoteroPluginInstaller.prototype = {
 		}
 	},
 	
-	"_firstRunListener":function() {
+	_firstRunListener: function() {
 		this._progressWindowLabel = this._progressWindow.document.getElementById("progress-label");
 		this._progressWindowLabel.value = Zotero.getString('zotero.preferences.wordProcessors.installing', this._addon.EXTENSION_STRING);
 		var me = this;
