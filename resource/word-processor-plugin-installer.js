@@ -60,6 +60,8 @@ var ZoteroPluginInstaller = function(addon, failSilently, force) {
 	var prefService = Components.classes["@mozilla.org/preferences-service;1"].
 			getService(Components.interfaces.nsIPrefService);
 	this.prefBranch = prefService.getBranch(this._addon.EXTENSION_PREF_BRANCH);
+
+	this.prefPaneDoc = null;
 	
 	var me = this;
 	var extensionIDs = [this._addon.EXTENSION_ID].concat(this._addon.REQUIRED_ADDONS.map(req => req.id));
@@ -145,7 +147,7 @@ ZoteroPluginInstaller.prototype = {
 		installationInProgress = false;
 		this.closeProgressWindow();
 		this.prefBranch.setCharPref("version", this._version);
-		this.prefBranch.setBoolPref("installed", true);
+		this.updateInstallStatus(true);
 		this.prefBranch.setBoolPref("skipInstallation", false);
 		if(this.force && !this._addon.DISABLE_PROGRESS_WINDOW) {
 			var addon = this._addon;
@@ -163,7 +165,7 @@ ZoteroPluginInstaller.prototype = {
 		this.closeProgressWindow();
 		if(!notFailure) {
 			this.prefBranch.setCharPref("version", this._version);
-			this.prefBranch.setBoolPref("installed", false);
+			this.updateInstallStatus(false);
 		}
 		if(this.failSilently) return;
 		if(this._errorDisplayed) return;
@@ -184,6 +186,7 @@ ZoteroPluginInstaller.prototype = {
 	},
 
 	showPreferences: function(document) {
+		this.prefPaneDoc = document;
 		var isInstalled = this.isInstalled(),
 			groupbox = document.createElement("groupbox");
 		groupbox.id = this._addon.EXTENSION_DIR;
@@ -223,6 +226,23 @@ ZoteroPluginInstaller.prototype = {
 			tabpanel.insertBefore(groupbox, tabpanel.firstChild);
 		}
 	},
+	
+	updateInstallStatus: function(status) {
+		this.prefBranch.setBoolPref("installed", status);
+		if (! this.prefPaneDoc) return;
+		var isInstalled = this.isInstalled();
+		var description = this.prefPaneDoc.querySelector(`#${this._addon.EXTENSION_DIR} description`);
+		description.replaceChild(this.prefPaneDoc.createTextNode(
+				isInstalled ?
+					Zotero.getString('zotero.preferences.wordProcessors.installed', this._addon.APP) :
+					Zotero.getString('zotero.preferences.wordProcessors.notInstalled', this._addon.APP)
+				), description.childNodes[0]);
+		var button = this.prefPaneDoc.querySelector(`#${this._addon.EXTENSION_DIR} button`);
+		button.setAttribute("label", 
+			(isInstalled ?
+				Zotero.getString('zotero.preferences.wordProcessors.reinstall', this._addon.APP) :
+				Zotero.getString('zotero.preferences.wordProcessors.install', this._addon.APP)));
+	},	
 	
 	_firstRunListener: function() {
 		this._progressWindowLabel = this._progressWindow.document.getElementById("progress-label");
