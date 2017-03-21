@@ -49,7 +49,6 @@ Zotero.Styles = new function() {
 	this.reinit = Zotero.Promise.coroutine(function* () {
 		Zotero.debug("Initializing styles");
 		var start = new Date;
-		_initialized = true;
 		
 		// Upgrade style locale prefs for 4.0.27
 		var bibliographyLocale = Zotero.Prefs.get("export.bibliographyLocale");
@@ -114,6 +113,7 @@ Zotero.Styles = new function() {
 				_renamedStyles = xmlhttp.response;
 			}
 		})
+		_initialized = true;
 	});
 	this.init = Zotero.lazy(this.reinit);
 	

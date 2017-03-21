@@ -45,7 +45,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 	 * Initialize some variables and prepare event listeners for when chrome is done
 	 * loading
 	 */
-	this.init = function () {
+	this.init = Zotero.Promise.coroutine(function* () {
 		// Set font size from pref
 		// Affects bibliography.xul and integrationDocPrefs.xul
 		var bibContainer = document.getElementById("zotero-bibliography-container");
@@ -68,6 +68,8 @@ var Zotero_File_Interface_Bibliography = new function() {
 		}
 		
 		// add styles to list
+		
+		yield Zotero.Styles.init();
 		var styles = Zotero.Styles.getVisible();
 		var index = 0;
 		var nStyles = styles.length;
@@ -171,7 +173,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		
 		// set style to false, in case this is cancelled
 		_io.style = false;
-	};
+	});
 
 	/*
 	 * Called when locale is changed
