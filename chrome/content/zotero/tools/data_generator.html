@@ -79,13 +79,16 @@
 			
 			var rand = Zotero.Utilities.rand;
 			function randStr(min, max) {
-				return Zotero.Utilities.randomString(
-					rand(min, max),
-					"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-						+ "éØü"
-						+ "漢字"
-						+ "                    "
-				);
+				var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+					+ "éØü"
+					+ "漢字"
+					+ "                    "
+				do {
+					var rnd = Zotero.Utilities.randomString(rand(min, max), chars);
+				}
+				// Make sure string isn't all spaces
+				while (rnd.trim().length == 0);
+				return rnd;
 			}
 			
 			function addCreatorOfType(creators, creatorType) {
