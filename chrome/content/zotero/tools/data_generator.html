@@ -3,11 +3,12 @@
 		<script src="../include.js"></script>
 		<script>
 			var generateData = Zotero.Promise.coroutine(function* (options = {}) {
-				var numItems = options.numItems || 100;
-				var created = 0;
-				var chunkSize = 50;
+				var chunkSize = options.chunkSize;
+				var numItems = options.numItems;
 				var runs = Math.ceil(numItems / chunkSize);
+				var created = 0;
 				var itemTypes = Zotero.ItemTypes.getAll()
+					// Don't create attachments, notes, or custom item types
 					.filter(x => x.name != 'attachment' && x.name != 'note' && x.id < 10000);
 				var accessDateFieldID = Zotero.ItemFields.getID('accessDate');
 				for (let i = 0; i < runs; i++) {
@@ -109,6 +110,7 @@
 		</script>
 	</head>
 	<body>
-		<button onclick="generateData({numItems: 10000})">Generate Data</button>
+		<!-- TODO: Add text fields for numItems and chunkSize -->
+		<button onclick="generateData({ numItems: 10000, chunkSize: 50 })">Generate Data</button>
 	</body>
 </html>
