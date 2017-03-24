@@ -201,6 +201,23 @@ var waitForItemsLoad = Zotero.Promise.coroutine(function* (win, collectionRowToS
 	return deferred.promise;
 });
 
+var waitForTagSelector = function (win) {
+	var zp = win.ZoteroPane;
+	var deferred = Zotero.Promise.defer();
+	if (zp.tagSelectorShown()) {
+		var tagSelector = win.document.getElementById('zotero-tag-selector');
+		var onRefresh = () => {
+			tagSelector.removeEventListener('refresh', onRefresh);
+			deferred.resolve();
+		};
+		tagSelector.addEventListener('refresh', onRefresh);
+	}
+	else {
+		deferred.resolve();
+	}
+	return deferred.promise;
+};
+
 /**
  * Waits for a single item event. Returns a promise for the item ID(s).
  */
