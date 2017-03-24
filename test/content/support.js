@@ -190,15 +190,11 @@ var waitForItemsLoad = Zotero.Promise.coroutine(function* (win, collectionRowToS
 	var zp = win.ZoteroPane;
 	var cv = zp.collectionsView;
 	
-	var deferred = Zotero.Promise.defer();
-	cv.addEventListener('load', () => deferred.resolve());
-	yield deferred.promise;
+	yield cv.waitForLoad();
 	if (collectionRowToSelect !== undefined) {
 		yield cv.selectWait(collectionRowToSelect);
 	}
-	deferred = Zotero.Promise.defer();
-	zp.itemsView.addEventListener('load', () => deferred.resolve());
-	return deferred.promise;
+	yield zp.itemsView.waitForLoad();
 });
 
 var waitForTagSelector = function (win) {

@@ -35,9 +35,7 @@ describe("Related Box", function () {
 				yield Zotero.Promise.delay(50);
 			}
 			while (!view);
-			var deferred = Zotero.Promise.defer();
-			view.addEventListener('load', () => deferred.resolve());
-			yield deferred.promise;
+			yield view.waitForLoad();
 			
 			// Select the other item
 			for (let i = 0; i < view.rowCount; i++) {

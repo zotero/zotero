@@ -120,7 +120,7 @@ Zotero.CollectionTreeView.prototype.setTree = Zotero.Promise.coroutine(function*
 		}
 		this.selection.selectEventsSuppressed = false;
 		
-		yield this._runListeners('load');
+		yield this.runListeners('load');
 		this._initialized = true;
 	}
 	catch (e) {
@@ -301,10 +301,9 @@ Zotero.CollectionTreeView.prototype.selectWait = Zotero.Promise.method(function 
 	if (this.selection.currentIndex == row) {
 		return;
 	};
-	var deferred = Zotero.Promise.defer();
-	this.addEventListener('select', () => deferred.resolve());
+	var promise = this.waitForSelect();
 	this.selection.select(row);
-	return deferred.promise;
+	return promise;
 });
 
 
@@ -516,10 +515,9 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 	
 	this._rememberScrollPosition(scrollPosition);
 	
-	var deferred = Zotero.Promise.defer();
-	this.addEventListener('select', () => deferred.resolve());
+	var promise = this.waitForSelect();
 	this.selection.selectEventsSuppressed = false;
-	return deferred.promise;
+	return promise;
 });
 
 /**
@@ -1180,9 +1178,7 @@ Zotero.CollectionTreeView.prototype.selectItem = Zotero.Promise.coroutine(functi
 		return false;
 	}
 	
-	var deferred = Zotero.Promise.defer();
-	this.addEventListener('load', () => deferred.resolve());
-	yield deferred.promise;
+	yield this.waitForLoad();
 	
 	var currentLibraryID = this.getSelectedLibraryID();
 	// If in a different library
@@ -1198,9 +1194,7 @@ Zotero.CollectionTreeView.prototype.selectItem = Zotero.Promise.coroutine(functi
 	
 	var itemsView = this.selectedTreeRow.itemTreeView;
 	
-	deferred = Zotero.Promise.defer();
-	itemsView.addEventListener('load', () => deferred.resolve());
-	yield deferred.promise;
+	yield itemsView.waitForLoad();
 	
 	var selected = yield itemsView.selectItem(itemID, expand);
 	if (selected) {
@@ -1217,9 +1211,7 @@ Zotero.CollectionTreeView.prototype.selectItem = Zotero.Promise.coroutine(functi
 	}
 	
 	itemsView = this.selectedTreeRow.itemTreeView;
-	deferred = Zotero.Promise.defer();
-	itemsView.addEventListener('load', () => deferred.resolve());
-	yield deferred.promise;
+	yield itemsView.waitForLoad();
 	
 	return itemsView.selectItem(itemID, expand);
 });

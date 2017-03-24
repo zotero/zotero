@@ -35,8 +35,7 @@ describe("Advanced Search", function () {
 		var deferred = Zotero.Promise.defer();
 		o.search();
 		var iv = o.itemsView;
-		iv.addEventListener('load', () => deferred.resolve());
-		yield deferred.promise;
+		yield iv.waitForLoad();
 		
 		// Check results
 		assert.equal(iv.rowCount, 1);

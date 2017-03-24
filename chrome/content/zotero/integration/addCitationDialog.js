@@ -661,11 +661,9 @@ var Zotero_Citation_Dialog = new function () {
 				_multipleSourceButton.disabled = false;
 			}
 		} else {
-			collectionsView.addEventListener('load', Zotero.Promise.coroutine(function* () {
+			collectionsView.onLoad.addListener(Zotero.Promise.coroutine(function* () {
 				if (itemsView) {
-					var deferred = Zotero.Promise.defer();
-					itemsView.addEventListener('load', () => deferred.resolve());
-					yield deferred.promise;
+					yield itemsView.waitForLoad();
 					_acceptButton.disabled = !itemsView.getSelectedItems().length;
 				}
 			}));

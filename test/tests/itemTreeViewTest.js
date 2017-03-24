@@ -566,8 +566,7 @@ describe("Zotero.ItemTreeView", function() {
 			let view = zp.itemsView;
 			yield view.selectItem(item3.id, true);
 			
-			var deferred = Zotero.Promise.defer();
-			view.addEventListener('select', () => deferred.resolve());
+			var promise = view.waitForSelect();
 			
 			view.drop(view.getRowIndexByID(item2.id), 0, {
 				dropEffect: 'copy',
@@ -585,7 +584,7 @@ describe("Zotero.ItemTreeView", function() {
 				mozItemCount: 1
 			})
 			
-			yield deferred.promise;
+			yield promise;
 			
 			// Old parent should be empty
 			assert.isFalse(view.isContainerOpen(view.getRowIndexByID(item1.id)));
@@ -606,8 +605,7 @@ describe("Zotero.ItemTreeView", function() {
 			let view = zp.itemsView;
 			yield view.selectItem(item3.id, true);
 			
-			var deferred = Zotero.Promise.defer();
-			view.addEventListener('select', () => deferred.resolve());
+			var promise = view.waitForSelect();
 			
 			view.drop(view.getRowIndexByID(item1.id), 0, {
 				dropEffect: 'copy',
@@ -625,7 +623,7 @@ describe("Zotero.ItemTreeView", function() {
 				mozItemCount: 1
 			})
 			
-			yield deferred.promise;
+			yield promise;
 			
 			// Old parent should be empty
 			assert.isFalse(view.isContainerOpen(view.getRowIndexByID(item2.id)));
@@ -640,8 +638,7 @@ describe("Zotero.ItemTreeView", function() {
 			var file = getTestDataDirectory();
 			file.append('test.png');
 			
-			var deferred = Zotero.Promise.defer();
-			itemsView.addEventListener('select', () => deferred.resolve());
+			var promise = itemsView.waitForSelect();
 			
 			itemsView.drop(0, -1, {
 				dropEffect: 'copy',
@@ -659,7 +656,7 @@ describe("Zotero.ItemTreeView", function() {
 				}
 			})
 			
-			yield deferred.promise;
+			yield promise;
 			var items = itemsView.getSelectedItems();
 			var path = yield items[0].getFilePathAsync();
 			assert.equal(
@@ -669,8 +666,7 @@ describe("Zotero.ItemTreeView", function() {
 		});
 		
 		it("should create a top-level attachment when a URL is dragged", function* () {
-			var deferred = Zotero.Promise.defer();
-			itemsView.addEventListener('select', () => deferred.resolve());
+			var promise = itemsView.waitForSelect();
 			
 			itemsView.drop(0, -1, {
 				dropEffect: 'copy',
@@ -688,7 +684,7 @@ describe("Zotero.ItemTreeView", function() {
 				mozItemCount: 1,
 			})
 			
-			yield deferred.promise;
+			yield promise;
 			var item = itemsView.getSelectedItems()[0];
 			assert.equal(item.getField('url'), pdfURL);
 			assert.equal(

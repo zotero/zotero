@@ -402,11 +402,11 @@ var ZoteroPane = new function()
 		// TODO: Remove now that no tab mode?
 		var containerWindow = window;
 		if(containerWindow.zoteroSavedCollectionSelection) {
-			this.collectionsView.addEventListener('load', Zotero.Promise.coroutine(function* () {
+			this.collectionsView.onLoad.addListener(Zotero.Promise.coroutine(function* () {
 				yield this.collectionsView.selectByID(containerWindow.zoteroSavedCollectionSelection);
 				
 				if (containerWindow.zoteroSavedItemSelection) {
-					this.itemsView.addEventListener('load', function () {
+					this.itemsView.onLoad.addListener(function () {
 						this.itemsView.rememberSelection(containerWindow.zoteroSavedItemSelection);
 						delete containerWindow.zoteroSavedItemSelection;
 					}.bind(this));
@@ -987,8 +987,7 @@ var ZoteroPane = new function()
 		
 		var cv = this.collectionsView;
 		
-		var deferred = Zotero.Promise.defer();
-		cv.addEventListener('select', () => deferred.resolve());
+		var promise = cv.waitForSelect();
 		var selectedRow = cv.selection.currentIndex;
 		
 		yield cv.refresh();
@@ -1004,7 +1003,7 @@ var ZoteroPane = new function()
 		
 		this.collectionsView.selection.selectEventsSuppressed = false;
 		
-		return deferred.promise;
+		return promise;
 	});
 	
 	
@@ -1199,11 +1198,10 @@ var ZoteroPane = new function()
 				// Wait for existing items view to finish loading before unloading it
 				//
 				// TODO: Cancel loading
-				let deferred = Zotero.Promise.defer();
-				this.itemsView.addEventListener('load', () => deferred.resolve());
-				if (deferred.promise.isPending()) {
+				let promise = this.itemsView.waitForLoad();
+				if (promise.isPending()) {
 					Zotero.debug("Waiting for items view " + this.itemsView.id + " to finish loading");
-					yield deferred.promise;
+					yield promise;
 				}
 				
 				this.itemsView.unregister();
@@ -1240,7 +1238,7 @@ var ZoteroPane = new function()
 				Zotero.Prefs.clear('lastViewedFolder');
 				ZoteroPane_Local.displayErrorMessage();
 			};
-			this.itemsView.addEventListener('load', () => this.setTagScope());
+			this.itemsView.onLoad.addListener(() => this.setTagScope());
 			if (this.tagSelectorShown()) {
 				let tagSelector = document.getElementById('zotero-tag-selector')
 				let handler = function () {
@@ -1250,7 +1248,7 @@ var ZoteroPane = new function()
 				tagSelector.addEventListener('refresh', handler);
 			}
 			else {
-				this.itemsView.addEventListener('load', () => Zotero.uiIsReady());
+				this.itemsView.onLoad.addListener(() => Zotero.uiIsReady());
 			}
 			
 			// If item data not yet loaded for library, load it now.
@@ -1320,7 +1318,7 @@ var ZoteroPane = new function()
 			Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
 		}, this)
 		.finally(function () {
-			return this.collectionsView.onSelect();
+			return this.collectionsView.runListeners('select');
 		}.bind(this));
 	};
 	
@@ -1387,12 +1385,9 @@ var ZoteroPane = new function()
 			// Don't select item until items list has loaded
 			//
 			// This avoids an error if New Item is used while the pane is first loading.
-			var deferred = Zotero.Promise.defer();
-			this.itemsView.addEventListener('load', function () {
-				deferred.resolve();
-			});
-			if (deferred.promise.isPending()) {
-				yield deferred.promise;
+			var promise = this.itemsView.waitForLoad();
+			if (promise.isPending()) {
+				yield promise;
 			}
 			
 			if (!this.itemsView || !this.itemsView.selection) {
@@ -1598,7 +1593,7 @@ var ZoteroPane = new function()
 			return true;
 		}.bind(this))()
 		.finally(function () {
-			return this.itemsView.onSelect();
+			return this.itemsView.runListeners('select');
 		}.bind(this));
 	}
 	
@@ -2462,9 +2457,7 @@ var ZoteroPane = new function()
 		// some menu items (e.g., export/createBib/loadReport) to appear gray in the menu at first and
 		// then turn black once there are items. Pass a flag to prevent an accidental infinite loop.
 		if (!collectionTreeRow.isHeader() && !this.itemsView.initialized && !noRepeat) {
-			this.itemsView.addEventListener('load', function () {
-				this.buildCollectionContextMenu(true);
-			}.bind(this));
+			this.itemsView.onLoad.addListener(() => this.buildCollectionContextMenu(true));
 		}
 		
 		// Set attributes on the menu from the configuration object

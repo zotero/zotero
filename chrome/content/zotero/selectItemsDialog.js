@@ -49,9 +49,7 @@ var doLoad = Zotero.Promise.coroutine(function* () {
 	collectionsView.hideSources = ['duplicates', 'trash', 'feeds'];
 	document.getElementById('zotero-collections-tree').view = collectionsView;
 	
-	var deferred = Zotero.Promise.defer();
-	collectionsView.addEventListener('load', () => deferred.resolve());
-	yield deferred.promise;
+	yield collectionsView.waitForLoad();
 	
 	connectionSelectedDeferred = Zotero.Promise.defer();
 	yield connectionSelectedDeferred.promise;
@@ -93,9 +91,7 @@ var onCollectionSelected = Zotero.Promise.coroutine(function* ()
 		// Create items list and wait for it to load
 		itemsView = new Zotero.ItemTreeView(collectionTreeRow, (window.arguments[1] ? true : false));
 		document.getElementById('zotero-items-tree').view = itemsView;
-		var deferred = Zotero.Promise.defer();
-		itemsView.addEventListener('load', () => deferred.resolve());
-		yield deferred.promise;
+		yield itemsView.waitForLoad();
 		
 		clearItemsPaneMessage();
 		

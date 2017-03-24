@@ -25,15 +25,28 @@
 
 Zotero.LibraryTreeView = function () {
 	this._initialized = false;
-	this._listeners = {
-		load: [],
-		select: []
-	};
+	this._listeners = {};
 	this._rows = [];
 	this._rowMap = {};
 	
 	this.id = Zotero.Utilities.randomString();
 	Zotero.debug("Creating " + this.type + "s view with id " + this.id);
+	
+	//
+	// Create .on(Load|Select).addListener() methods
+	//
+	var _createEventBinding = function (event, alwaysOnce) {
+		return alwaysOnce
+			? {
+				addListener: listener => this._addListener(event, listener, true)
+			}
+			: {
+				addListener: (listener, once) => this._addListener(event, listener, once)
+			};
+	}.bind(this);
+	
+	this.onLoad = _createEventBinding('load', true);
+	this.onSelect = _createEventBinding('select');
 };
 
 Zotero.LibraryTreeView.prototype = {
@@ -41,31 +54,56 @@ Zotero.LibraryTreeView.prototype = {
 		return this._initialized;
 	},
 	
-	addEventListener: function(event, listener) {
-		if (event == 'load') {
-			// If already initialized run now
-			if (this._initialized) {
-				listener.call(this);
+	
+	addEventListener: function (event, listener) {
+		Zotero.logError("Zotero.LibraryTreeView::addEventListener() is deprecated");
+		this.addListener(event, listener);
+	},
+	
+	
+	waitForLoad: function () {
+		return this._waitForEvent('load');
+	},
+	
+	
+	waitForSelect: function () {
+		return this._waitForEvent('select');
+	},
+	
+	
+	runListeners: Zotero.Promise.coroutine(function* (event) {
+		//Zotero.debug(`Calling ${event} listeners on ${this.type} tree ${this.id}`);
+		if (!this._listeners[event]) return;
+		for (let [listener, once] of this._listeners[event].entries()) {
+			yield Zotero.Promise.resolve(listener.call(this));
+			if (once) {
+				this._listeners[event].delete(listener);
 			}
-			else {
-				this._listeners[event].push(listener);
-			}
+		}
+	}),
+	
+	
+	_addListener: function(event, listener, once) {
+		// If already initialized run now
+		if (event == 'load' && this._initialized) {
+			listener.call(this);
 		}
 		else {
 			if (!this._listeners[event]) {
-				this._listeners[event] = [];
+				this._listeners[event] = new Map();
 			}
-			this._listeners[event].push(listener);
+			this._listeners[event].set(listener, once);
 		}
 	},
 	
 	
-	_runListeners: Zotero.Promise.coroutine(function* (event) {
-		if (!this._listeners[event]) return;
-		var listener;
-		while (listener = this._listeners[event].shift()) {
-			yield Zotero.Promise.resolve(listener.call(this));
+	_waitForEvent: Zotero.Promise.coroutine(function* (event) {
+		if (event == 'load' && this._initialized) {
+			return;
 		}
+		return new Zotero.Promise((resolve, reject) => {
+			this._addListener(event, () => resolve(), true);
+		});
 	}),
 	
 	
@@ -141,7 +179,7 @@ Zotero.LibraryTreeView.prototype = {
 	},
 	
 	
-	onSelect: function () {
+	runSelectListeners: function () {
 		return this._runListeners('select');
 	},
 	
