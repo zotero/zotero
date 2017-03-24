@@ -53,6 +53,52 @@ describe("Tag Selector", function () {
 		win.close();
 	});
 	
+	describe("#refresh()", function () {
+		it("should remove tags not on matching items on tag click", function* () {
+			var collection = yield createDataObject('collection');
+			var item1 = createUnsavedDataObject('item', { collections: [collection.id] });
+			item1.setTags([
+				{
+					tag: "A"
+				}
+			]);
+			var item2 = createUnsavedDataObject('item', { collections: [collection.id] });
+			item2.setTags([
+				{
+					tag: "A"
+				},
+				{
+					tag: "B"
+				}
+			]);
+			var item3 = createUnsavedDataObject('item', { collections: [collection.id] });
+			item3.setTags([
+				{
+					tag: "C"
+				}
+			]);
+			var promise = waitForTagSelector(win);
+			yield Zotero.DB.executeTransaction(function* () {
+				yield item1.save();
+				yield item2.save();
+				yield item3.save();
+			});
+			yield promise;
+			
+			var tagSelector = doc.getElementById('zotero-tag-selector');
+			var buttons = tagSelector.id('tags-box').getElementsByTagName('button');
+			var spy = sinon.spy(win.ZoteroPane, "updateTagFilter");
+			buttons[0].click();
+			
+			yield spy.returnValues[0];
+			
+			spy.restore();
+			
+			var tags = getRegularTags();
+			assert.sameMembers(tags, ['A', 'B']);
+		});
+	});
+	
 	describe("#notify()", function () {
 		it("should add a tag when added to an item in the library root", function* () {
 			var promise, tagSelector;

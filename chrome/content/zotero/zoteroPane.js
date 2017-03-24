@@ -1238,7 +1238,7 @@ var ZoteroPane = new function()
 				Zotero.Prefs.clear('lastViewedFolder');
 				ZoteroPane_Local.displayErrorMessage();
 			};
-			this.itemsView.onLoad.addListener(() => this.setTagScope());
+			this.itemsView.onRefresh.addListener(() => this.setTagScope());
 			if (this.tagSelectorShown()) {
 				let tagSelector = document.getElementById('zotero-tag-selector')
 				let handler = function () {

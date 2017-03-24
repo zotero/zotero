@@ -33,7 +33,7 @@ Zotero.LibraryTreeView = function () {
 	Zotero.debug("Creating " + this.type + "s view with id " + this.id);
 	
 	//
-	// Create .on(Load|Select).addListener() methods
+	// Create .on(Load|Select|Refresh).addListener() methods
 	//
 	var _createEventBinding = function (event, alwaysOnce) {
 		return alwaysOnce
@@ -47,6 +47,7 @@ Zotero.LibraryTreeView = function () {
 	
 	this.onLoad = _createEventBinding('load', true);
 	this.onSelect = _createEventBinding('select');
+	this.onRefresh = _createEventBinding('refresh');
 };
 
 Zotero.LibraryTreeView.prototype = {

@@ -426,6 +426,8 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 			this.selection.selectEventsSuppressed = false;
 		}
 		
+		yield this.runListeners('refresh');
+		
 		setTimeout(function () {
 			resolve();
 		});
