@@ -463,7 +463,6 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		// TODO: Only refresh on condition change (not currently available in extraData)
 		yield this.refresh();
 		this.sort();
-		this._treebox.invalidate();
 		return;
 	}
 	
@@ -945,7 +944,6 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		}
 		
 		this._rememberScrollPosition(scrollPosition);
-		this._treebox.invalidate();
 	}
 	// For special case in which an item needs to be selected without changes
 	// necessarily having been made
@@ -1629,7 +1627,6 @@ Zotero.ItemTreeView.prototype.sort = function (itemID) {
 			if (i == len-1) {
 				let rowItem = this._rows.splice(row, 1);
 				this._rows.splice(i, 0, rowItem[0]);
-				this._treebox.invalidate();
 			}
 		}
 	}
@@ -1653,6 +1650,7 @@ Zotero.ItemTreeView.prototype.sort = function (itemID) {
 	}
 	
 	Zotero.debug("Sorted items list in " + (new Date - t) + " ms");
+	this._treebox.invalidate();
 };
 
 
