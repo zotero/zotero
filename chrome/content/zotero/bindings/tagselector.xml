@@ -659,6 +659,11 @@
 						
 						var elem = event.target;
 						
+						// Ignore clicks not on tags
+						if (elem.localName != 'button') {
+							return;
+						}
+						
 						// Ignore clicks on tags not in scope
 						if (elem.getAttribute('inScope') == 'false') {
 							return;
