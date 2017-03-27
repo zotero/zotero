@@ -513,17 +513,6 @@ Zotero.Schema = new function(){
 			var xpiZipReader = Components.classes["@mozilla.org/libjar/zip-reader;1"]
 					.createInstance(Components.interfaces.nsIZipReader);
 			xpiZipReader.open(new FileUtils.File(installLocation));
-			
-			if(Zotero.isStandalone && !xpiZipReader.hasEntry("translators.index")) {
-				// Symlinked dev Standalone build
-				let parentDir = OS.Path.dirname(installLocation);
-				let translatorsDir = OS.Path.join(parentDir, 'translators');
-				if (yield OS.File.exists(translatorsDir)) {
-					installLocation = parentDir;
-					isUnpacked = true;
-					xpiZipReader.close();
-				}
-			}
 		}
 		
 		switch (mode) {
