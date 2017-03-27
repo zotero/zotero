@@ -316,6 +316,8 @@
 						}
 						// Otherwise just update based on visibility
 						else {
+							var parentOfTagsBox = tagsBox.parentNode;
+							tagsBox = parentOfTagsBox.removeChild(tagsBox);
 							elems = tagsBox.childNodes;
 							for (let i = 0; i < elems.length; i++) {
 								let elem = elems[i];
@@ -326,6 +328,7 @@
 									emptyRegular = false;
 								}
 							}
+							parentOfTagsBox.appendChild(tagsBox);
 						}
 						
 						//start tag cloud code
