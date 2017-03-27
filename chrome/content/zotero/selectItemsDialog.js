@@ -96,7 +96,7 @@ var onCollectionSelected = Zotero.Promise.coroutine(function* ()
 		clearItemsPaneMessage();
 		
 		connectionSelectedDeferred.resolve();
-		collectionsView.onSelect();
+		collectionsView.runListeners('select');
 	}
 });
 
@@ -111,7 +111,7 @@ function onSearch()
 
 function onItemSelected()
 {
-	itemsView.onSelect();
+	itemsView.runListeners('select');
 }
 
 function setItemsPaneMessage(content) {
