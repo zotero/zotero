@@ -664,7 +664,7 @@ Zotero.Schema = new function(){
 			
 			if (!skipVersionUpdates) {
 				let sql = "REPLACE INTO version (schema, version) VALUES ('delete', ?)";
-				yield Zotero.DB.queryAsync(sql, version);
+				yield Zotero.DB.queryAsync(sql, deletedVersion);
 			}
 		}
 		
