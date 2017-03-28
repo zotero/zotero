@@ -501,7 +501,17 @@ Zotero.Tags = new function() {
 		
 		var tagColors = Zotero.SyncedSettings.get(libraryID, 'tagColors');
 		
-		tagColors = tagColors || [];
+		// Sanitize -- shouldn't be necessary, but just in case a bad value makes it into the setting
+		if (!Array.isArray(tagColors)) {
+			tagColors = [];
+		}
+		tagColors = tagColors.filter(color => {
+			if (typeof color != 'object' || typeof color.name != 'string' || typeof color.color != 'string') {
+				Zotero.logError("Skipping invalid colored tag: " + JSON.stringify(color));
+				return false;
+			}
+			return true;
+		});
 		
 		_libraryColors[libraryID] = tagColors;
 		_libraryColorsByName[libraryID] = new Map;
@@ -539,7 +549,8 @@ Zotero.Tags = new function() {
 				return;
 			}
 			
-			tagColors = tagColors.filter(val => val.name != name);
+			_libraryColors[libraryID] = tagColors = tagColors.filter(val => val.name != name);
+			_libraryColorsByName[libraryID].delete(name);
 		}
 		else {
 			// Get current position if present

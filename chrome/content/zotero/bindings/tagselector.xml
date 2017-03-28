@@ -772,8 +772,16 @@
 							if (!color) {
 								throw new Error("Can't rename missing tag");
 							}
-							yield Zotero.Tags.setColor(this.libraryID, oldName, false);
-							yield Zotero.Tags.setColor(this.libraryID, newName, color);
+							
+							yield Zotero.DB.executeTransaction(function* () {
+								yield Zotero.Tags.setColor(this.libraryID, oldName, false);
+								yield Zotero.Tags.setColor(
+									this.libraryID,
+									newName.value,
+									color.color,
+									color.position
+								);
+							}.bind(this));
 						}
 						
 						if (wasSelected) {

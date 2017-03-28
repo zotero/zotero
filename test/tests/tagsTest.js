@@ -69,7 +69,7 @@ describe("Zotero.Tags", function () {
 	describe("#setColor()", function () {
 		var libraryID;
 		
-		before(function* () {
+		beforeEach(function* () {
 			libraryID = Zotero.Libraries.userLibraryID;
 			
 			// Clear library tag colors
@@ -96,6 +96,21 @@ describe("Zotero.Tags", function () {
 			assert.isArray(o);
 			assert.lengthOf(o, 2);
 			assert.sameMembers(o.map(c => c.color), [aColor, bColor]);
+		});
+		
+		it("should clear color for a tag", function* () {
+			var aColor = '#ABCDEF';
+			yield Zotero.Tags.setColor(libraryID, "A", aColor);
+			var o = Zotero.Tags.getColor(libraryID, "A")
+			assert.equal(o.color, aColor);
+			assert.equal(o.position, 0);
+			
+			yield Zotero.Tags.setColor(libraryID, "A", false);
+			assert.equal(Zotero.Tags.getColors(libraryID).size, 0);
+			assert.isFalse(Zotero.Tags.getColor(libraryID, "A"));
+			
+			var o = Zotero.SyncedSettings.get(libraryID, 'tagColors');
+			assert.isNull(o);
 		});
 	});
 })
