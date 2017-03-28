@@ -799,7 +799,7 @@ Zotero.Server.Connector.Ping.prototype = {
 				'<title>Zotero Connector Server is Available</title></head>' +
 				'<body>Zotero Connector Server is Available</body></html>'];
 		} else {
-			return [200];
+			return [200, 'text/plain', ''];
 		}
 	}
 }
