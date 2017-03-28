@@ -541,7 +541,7 @@
 				<body><![CDATA[
 					return Zotero.spawn(function* () {
 						if (type == 'setting') {
-							if (ids.some(function (val) val.split("/")[1] == 'tagColors')) {
+							if (ids.some(val => val.split("/")[1] == 'tagColors')) {
 								yield this.refresh(true);
 							}
 							return;
