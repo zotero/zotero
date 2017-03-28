@@ -12,7 +12,7 @@
 <!ENTITY zotero.general.saveAs "Uložit jako...">
 <!ENTITY zotero.general.advancedOptions.label "Pokročilé možnosti">
 <!ENTITY zotero.general.more "Více">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.loading "Nahrává se...">
 
 <!ENTITY zotero.errorReport.title "Chybová zpráva Zotera">
 <!ENTITY zotero.errorReport.unrelatedMessages "Může obsahovat zprávy nesouvisející se Zoterem.">
@@ -271,10 +271,10 @@
 <!ENTITY zotero.feedSettings.title.label "Název:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Obnovit vlákno každých">
 <!ENTITY zotero.feedSettings.refresh.label2 "hodin(a)">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Odstranit nepřečtené položky z kanálu po">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "dnech">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Odstranit přečtené položky z kanálu po">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dnech">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Získávají se metadata...">

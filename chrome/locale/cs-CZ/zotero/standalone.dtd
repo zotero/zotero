@@ -25,7 +25,7 @@
 <!ENTITY closeCmd.accesskey "C">
 <!ENTITY importCmd.label "Import…">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY importFromClipboardCmd.label "Vložit ze schránky">
 <!ENTITY quitApplicationCmdWin.label "Zavřít">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Zavřít">
