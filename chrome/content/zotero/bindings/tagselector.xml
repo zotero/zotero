@@ -267,64 +267,64 @@
 							fetch = true;
 						}
 						
-						var emptyColored = true;
-						var emptyRegular = true;
+						this._emptyRegular = true;
 						var tagsBox = this.id('tags-box');
 						
-						var tagColors = Zotero.Tags.getColors(this.libraryID);
-						
-						// If new data, rebuild boxes
+						// If new data, rebuild buttons
 						if (fetch || this._dirty) {
 							this._tags = yield Zotero.Tags.getAll(this.libraryID, this._types)
 								.tap(() => Zotero.Promise.check(this.mode));
-							tagsBox.textContent = "";
 							
-							// Add colored tags that aren't already real tags
-							let regularTags = new Set(this._tags.map(tag => tag.tag));
-							let coloredTags = new Set(tagColors.keys());
-							[for (x of coloredTags) if (!regularTags.has(x)) x].forEach(x =>
-								this._tags.push(Zotero.Tags.cleanData({ tag: x }))
-							);
+							let { div, emptyRegular } = this.createTagsList(this._tags);
 							
-							// Sort by name
-							let collation = Zotero.getLocaleCollation();
-							this._tags.sort(function (a, b) {
-								return collation.compareString(1, a.tag, b.tag);
-							});
-							
-							var fragment = document.createDocumentFragment();
-							let lastTag;
-							for (let i = 0; i < this._tags.length; i++) {
-								let tagData = this._tags[i];
-								
-								// Only show tags of different types once
-								if (tagData.tag === lastTag) {
-									continue;
-								}
-								lastTag = tagData.tag;
-								
-								let elem = this._insertClickableTag(fragment, tagData);
-								let visible = this._updateClickableTag(
-									elem, tagData.tag, tagColors
-								);
-								if (visible) {
-									emptyRegular = false;
-								}
-							}
-							tagsBox.appendChild(fragment);
+							this._emptyRegular = emptyRegular;
+							tagsBox.innerHTML = "";
+							tagsBox.appendChild(div);
 							this._dirty = false;
+							this._tagsDiv = null;
 						}
 						// Otherwise just update based on visibility
 						else {
-							elems = tagsBox.childNodes;
-							for (let i = 0; i < elems.length; i++) {
-								let elem = elems[i];
-								let visible = this._updateClickableTag(
-									elem, elem.textContent, tagColors
-								);
-								if (visible) {
-									emptyRegular = false;
+							// If only a few tags, regenerate buttons from scratch
+							if (Object.keys(this.scope).length <= 100) {
+								// If full set is currently displayed, store it for later
+								if (!this._tagsDiv) {
+									this._tagsDiv = tagsBox.firstChild;
 								}
+								
+								let tags = [];
+								for (let name in this.scope) {
+									tags.push(...this.scope[name].map(type => {
+										return {
+											tag: name,
+											type: type
+										};
+									}));
+								}
+								let { div, emptyRegular } = this.createTagsList(tags);
+								tagsBox.replaceChild(div, tagsBox.firstChild);
+								this._emptyRegular = emptyRegular;
+							}
+							// Otherwise swap in the stored buttons from the last full run,
+							// after updating their visibility
+							else {
+								let oldDiv = tagsBox.removeChild(tagsBox.firstChild);
+								if (!this._tagsDiv) {
+									this._tagsDiv = oldDiv;
+								}
+								
+								let elems = this._tagsDiv.childNodes;
+								let tagColors = Zotero.Tags.getColors(this.libraryID);
+								for (let i = 0; i < elems.length; i++) {
+									let elem = elems[i];
+									let visible = this._updateClickableTag(
+										elem, elem.textContent, tagColors
+									);
+									if (visible) {
+										this._emptyRegular = false;
+									}
+								}
+								tagsBox.appendChild(this._tagsDiv);
 							}
 						}
 						
@@ -397,9 +397,8 @@
 						//end tag cloud code
 						
 						this.updateNumSelected();
-						var empty = this._emptyRegular = emptyRegular;
 						// TODO: Show loading again when switching libraries/collections?
-						this.id('tags-deck').selectedIndex = empty ? 1 : 2;
+						this.id('tags-deck').selectedIndex = this._emptyRegular ? 1 : 2;
 						
 						if (this.onRefresh) {
 							this.onRefresh();
@@ -415,7 +414,53 @@
 				</body>
 			</method>
 			
+			<method name="createTagsList">
+				<parameter name="tags"/>
+				<body><![CDATA[
+					var tagColors = Zotero.Tags.getColors(this.libraryID);
+					
+					// Add colored tags that aren't already real tags
+					var regularTags = new Set(tags.map(tag => tag.tag));
+					[...new Set(tagColors.keys())].filter(x => !regularTags.has(x)).forEach((x) => {
+						tags.push(Zotero.Tags.cleanData({ tag: x }));
+					});
+					
+					// Sort by name
+					var t = new Date();
+					Zotero.debug("Sorting tags");
+					var collation = Zotero.getLocaleCollation();
+					tags.sort(function (a, b) {
+						return collation.compareString(1, a.tag, b.tag);
+					});
+					Zotero.debug(`Sorted tags in ${new Date() - t} ms`);
+					
+					var div = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
+					var emptyRegular = true;
+					var lastTag;
+					for (let i = 0; i < tags.length; i++) {
+						let tagData = tags[i];
+						
+						// Only show tags of different types once
+						if (tagData.tag === lastTag) {
+							continue;
+						}
+						lastTag = tagData.tag;
+						
+						let elem = this._insertClickableTag(div, tagData);
+						let visible = this._updateClickableTag(
+							elem, tagData.tag, tagColors
+						);
+						if (visible) {
+							emptyRegular = false;
+						}
+					}
+					return { div, emptyRegular };
+				]]>
+				</body>
+			</method>
+			
 			<method name="insertSorted">
+				<parameter name="tagsList"/>
 				<parameter name="tagObjs"/>
 				<body><![CDATA[
 					var tagColors = Zotero.Tags.getColors(this._libraryID);
@@ -426,8 +471,7 @@
 					});
 					
 					// Create tag elements in sorted order
-					var tagsBox = this.id('tags-box');
-					var tagElems = tagsBox.childNodes;
+					var tagElems = tagsList.childNodes;
 					var j = 0;
 					loop:
 					for (let i = 0; i < tagObjs.length; i++) {
@@ -450,7 +494,7 @@
 							}
 							j++;
 						}
-						this._insertClickableTag(tagsBox, tagObj, tagElems[j]);
+						this._insertClickableTag(tagsList, tagObj, tagElems[j]);
 						this._updateClickableTag(
 							tagElems[j], tagElems[j].textContent, tagColors
 						);
@@ -553,7 +597,11 @@
 								}.bind(this));
 								
 								if (tagObjs.length) {
-									this.insertSorted(tagObjs);
+									this.insertSorted(this.id('tags-box').firstChild, tagObjs);
+									// If full set isn't currently displayed, update it too
+									if (this._tagsDiv) {
+										this.insertSorted(this._tagsDiv, tagObjs);
+									}
 								}
 							}
 							// Don't add anything for item or collection-item; just update scope

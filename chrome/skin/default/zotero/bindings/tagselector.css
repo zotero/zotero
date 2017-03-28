@@ -16,13 +16,16 @@ groupbox
 }
 
 #tags-box {
+	overflow-x: hidden;
+	overflow-y: auto;
+	background-color: -moz-field;
+}
+
+#tags-box > div {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: flex-start;
 	align-content: flex-start;
-	overflow-x: hidden;
-	overflow-y: auto;
-	background-color: -moz-field;
 }
 
 #tags-box button {

@@ -48,6 +48,7 @@ describe("Tag Selector", function () {
 	beforeEach(function* () {
 		var libraryID = Zotero.Libraries.userLibraryID;
 		yield clearTagColors(libraryID);
+		yield doc.getElementById('zotero-tag-selector').refresh(true);
 	})
 	after(function () {
 		win.close();
@@ -194,7 +195,7 @@ describe("Tag Selector", function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
 			var tagSelector = doc.getElementById('zotero-tag-selector');
-			var tagElems = tagSelector.id('tags-box').childNodes;
+			var tagElems = tagSelector.id('tags-box').getElementsByTagName('button');
 			var count = tagElems.length;
 			
 			yield Zotero.Tags.setColor(libraryID, "Top", '#AAAAAA');
@@ -228,7 +229,7 @@ describe("Tag Selector", function () {
 			yield promise;
 			
 			var tagSelector = doc.getElementById('zotero-tag-selector');
-			var tagElems = tagSelector.id('tags-box').childNodes;
+			var tagElems = tagSelector.id('tags-box').getElementsByTagName('button');
 			
 			// Make sure the colored tags are still in the right position
 			var tags = new Map();

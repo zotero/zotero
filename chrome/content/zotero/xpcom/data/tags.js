@@ -171,7 +171,7 @@ Zotero.Tags = new function() {
 			throw new Error("ids must be an array");
 		}
 		if (!ids.length) {
-			return {};
+			return [];
 		}
 		
 		var prefix = "SELECT DISTINCT name AS tag, type FROM itemTags "

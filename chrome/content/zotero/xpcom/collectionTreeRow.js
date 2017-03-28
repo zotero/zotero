@@ -351,16 +351,16 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 /**
  * Returns all the tags used by items in the current view
  *
- * @return {Promise}
+ * @return {Promise<Object[]>}
  */
 Zotero.CollectionTreeRow.prototype.getChildTags = Zotero.Promise.coroutine(function* () {
 	switch (this.type) {
 		// TODO: implement?
 		case 'share':
-			return false;
+			return [];
 		
 		case 'bucket':
-			return false;
+			return [];
 	}
 	var results = yield this.getSearchResults();
 	return Zotero.Tags.getAllWithinItemsList(results);
