@@ -9,9 +9,9 @@ describe("Note Editor", function () {
 	});
 	
 	beforeEach(function* () {
-		// Avoid "this._editor is undefined" error between tests,
+		// Avoid "this._editor is undefined" error and incorrect note selection between tests,
 		// though there's definitely a better way to fix this
-		yield Zotero.Promise.delay(50);
+		yield Zotero.Promise.delay(150);
 	});
 	
 	after(function () {
@@ -49,12 +49,6 @@ describe("Note Editor", function () {
 		});
 		
 		it("should show tags in alphabetical order", function* () {
-			// FIXME: This test fails too often in Travis
-			if (Zotero.automatedTest) {
-				this.skip();
-				return;
-			}
-			
 			var note = new Zotero.Item('note');
 			note.addTag('B');
 			yield note.saveTx();
