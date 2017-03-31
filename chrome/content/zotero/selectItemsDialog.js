@@ -89,7 +89,8 @@ var onCollectionSelected = Zotero.Promise.coroutine(function* ()
 		}
 		
 		// Create items list and wait for it to load
-		itemsView = new Zotero.ItemTreeView(collectionTreeRow, (window.arguments[1] ? true : false));
+		itemsView = new Zotero.ItemTreeView(collectionTreeRow);
+		itemsView.sourcesOnly = !!window.arguments[1];
 		document.getElementById('zotero-items-tree').view = itemsView;
 		yield itemsView.waitForLoad();
 		

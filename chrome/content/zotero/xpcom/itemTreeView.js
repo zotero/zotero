@@ -34,7 +34,7 @@
 /*
  *  Constructor for the ItemTreeView object
  */
-Zotero.ItemTreeView = function (collectionTreeRow, sourcesOnly) {
+Zotero.ItemTreeView = function (collectionTreeRow) {
 	Zotero.LibraryTreeView.apply(this);
 	
 	this.wrappedJSObject = this;
@@ -43,8 +43,6 @@ Zotero.ItemTreeView = function (collectionTreeRow, sourcesOnly) {
 	collectionTreeRow.itemTreeView = this;
 	
 	this._skipKeypress = false;
-	
-	this._sourcesOnly = sourcesOnly;
 	
 	this._ownerDocument = null;
 	this._needsSort = false;
@@ -64,6 +62,8 @@ Zotero.ItemTreeView = function (collectionTreeRow, sourcesOnly) {
 
 Zotero.ItemTreeView.prototype = Object.create(Zotero.LibraryTreeView.prototype);
 Zotero.ItemTreeView.prototype.type = 'item';
+Zotero.ItemTreeView.prototype.regularOnly = false;
+Zotero.ItemTreeView.prototype.expandAll = false;
 
 
 /**
@@ -118,6 +118,19 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 		if (!this._treebox.treeBody) {
 			return;
 		}
+		
+		// Expand all parent items for some views (e.g., My Publications). We do this here instead of
+		// refresh so that it doesn't get reverted after item changes.
+		if (this.expandAll) {
+			var t = new Date();
+			for (let i = 0; i < this._rows.length; i++) {
+				if (this.isContainer(i) && !this.isContainerOpen(i)) {
+					this.toggleOpenState(i, true);
+				}
+			}
+			Zotero.debug(`Opened all parent items in ${new Date() - t} ms`);
+		}
+		this._refreshItemRowMap();
 		
 		// Add a keypress listener for expand/collapse
 		var tree = this._treebox.treeBody.parentNode;
@@ -371,8 +384,8 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 		for (let i=0, len=newItems.length; i < len; i++) {
 			let item = newItems[i];
 			
-			// Only add regular items if sourcesOnly is set
-			if (this._sourcesOnly && !item.isRegularItem()) {
+			// Only add regular items if regularOnly is set
+			if (this.regularOnly && !item.isRegularItem()) {
 				continue;
 			}
 			
@@ -1174,7 +1187,7 @@ Zotero.ItemTreeView.prototype.isContainer = function(row)
 
 Zotero.ItemTreeView.prototype.isContainerEmpty = function(row)
 {
-	if (this._sourcesOnly) {
+	if (this.regularOnly) {
 		return true;
 	}
 	
