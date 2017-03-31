@@ -1378,10 +1378,6 @@ var ZoteroPane = new function()
 	 */
 	this.itemSelected = function (event) {
 		return Zotero.Promise.coroutine(function* () {
-			if (Zotero.DB.inTransaction()) {
-				yield Zotero.DB.waitForTransaction();
-			}
-			
 			// Don't select item until items list has loaded
 			//
 			// This avoids an error if New Item is used while the pane is first loading.
