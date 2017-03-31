@@ -928,7 +928,7 @@ Zotero.Integration.Document.prototype._createNewSession = function _createNewSes
  *    dontRunSetDocPrefs is true and no session was found, or rejected with
  *    Zotero.Exception.UserCancelled if the document preferences window was cancelled.
  */
-Zotero.Integration.Document.prototype._getSession = function _getSession(require, dontRunSetDocPrefs) {
+Zotero.Integration.Document.prototype._getSession = Zotero.Promise.coroutine(function *(require, dontRunSetDocPrefs) {
 	var dataString = this._doc.getDocumentData(),
 		data,
 		me = this;
@@ -967,7 +967,7 @@ Zotero.Integration.Document.prototype._getSession = function _getSession(require
 		
 		// Set doc prefs if no data string yet
 		this._session = this._createNewSession(data);
-		this._session.setData(data);
+		yield this._session.setData(data);
 		if(dontRunSetDocPrefs) return Zotero.Promise.resolve(false);
 		
 		return this._session.setDocPrefs(this._doc, this._app.primaryFieldType,
@@ -1012,7 +1012,7 @@ Zotero.Integration.Document.prototype._getSession = function _getSession(require
 		} else {
 			this._session = this._createNewSession(data);
 			try {
-				this._session.setData(data);
+				yield this._session.setData(data);
 			} catch(e) {
 				// make sure style is defined
 				if(e instanceof Zotero.Exception.Alert && e.name === "integration.error.invalidStyle") {
@@ -1032,7 +1032,7 @@ Zotero.Integration.Document.prototype._getSession = function _getSession(require
 		}
 		return Zotero.Promise.resolve(this._session);
 	}
-};
+});
 
 /**
  * Adds a citation to the current document.
@@ -2066,30 +2066,35 @@ Zotero.Integration.Session.prototype.resetRequest = function(doc) {
  *     regardless of whether it has changed. This is desirable if the
  *     automaticJournalAbbreviations or locale has changed.
  */
-Zotero.Integration.Session.prototype.setData = function(data, resetStyle) {
+Zotero.Integration.Session.prototype.setData = Zotero.Promise.coroutine(function *(data, resetStyle) {
 	var oldStyle = (this.data && this.data.style ? this.data.style : false);
 	this.data = data;
-	if(data.style.styleID && (!oldStyle || oldStyle.styleID != data.style.styleID || resetStyle)) {
+	if (data.style.styleID && (!oldStyle || oldStyle.styleID != data.style.styleID || resetStyle)) {
 		this.styleID = data.style.styleID;
 		try {
+			yield Zotero.Styles.init();
 			var getStyle = Zotero.Styles.get(data.style.styleID);
+			if (!getStyle) {
+				yield Zotero.Styles.install({url: data.style.styleID}, data.style.styleID, true);
+				getStyle = Zotero.Styles.get(data.style.styleID);
+			}
 			data.style.hasBibliography = getStyle.hasBibliography;
 			this.style = getStyle.getCiteProc(data.style.locale, data.prefs.automaticJournalAbbreviations);
 			this.style.setOutputFormat("rtf");
 			this.styleClass = getStyle.class;
 			this.dateModified = new Object();
-		} catch(e) {
+		} catch (e) {
 			Zotero.logError(e);
 			data.style.styleID = undefined;
 			throw new Zotero.Exception.Alert("integration.error.invalidStyle");
 		}
 		
 		return true;
-	} else if(oldStyle) {
+	} else if (oldStyle) {
 		data.style = oldStyle;
 	}
 	return false;
-}
+});
 
 /**
  * Displays a dialog to set document preferences
@@ -2097,12 +2102,12 @@ Zotero.Integration.Session.prototype.setData = function(data, resetStyle) {
  *    if there wasn't, or rejected with Zotero.Exception.UserCancelled if the dialog was
  *    cancelled.
  */
-Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldType, secondaryFieldType) {
+Zotero.Integration.Session.prototype.setDocPrefs = Zotero.Promise.coroutine(function* (doc, primaryFieldType, secondaryFieldType) {
 	var io = new function() {
 		this.wrappedJSObject = this;
 	};
 	
-	if(this.data) {
+	if (this.data) {
 		io.style = this.data.style.styleID;
 		io.locale = this.data.style.locale;
 		io.useEndnotes = this.data.prefs.noteType == 0 ? 0 : this.data.prefs.noteType-1;
@@ -2114,45 +2119,43 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		io.requireStoreReferences = !Zotero.Utilities.isEmpty(this.embeddedItems);
 	}
 	
-	var me = this;
-	return Zotero.Integration.displayDialog(doc,
-	'chrome://zotero/content/integration/integrationDocPrefs.xul', '', io)
-	.then(function() {
-		if (!io.style || !io.fieldType) {
-			throw new Zotero.Exception.UserCancelled("document preferences window");
-		}
-		
-		// set data
-		var oldData = me.data;
-		var data = new Zotero.Integration.DocumentData();
-		data.sessionID = oldData.sessionID;
-		data.style.styleID = io.style;
-		data.style.locale = io.locale;
-		data.prefs.fieldType = io.fieldType;
-		data.prefs.storeReferences = io.storeReferences;
-		data.prefs.automaticJournalAbbreviations = io.automaticJournalAbbreviations;
-		
-		var forceStyleReset = oldData
-			&& (
-				oldData.prefs.automaticJournalAbbreviations != data.prefs.automaticJournalAbbreviations
-				|| oldData.style.locale != io.locale
-			);
-		me.setData(data, forceStyleReset);
+	yield Zotero.Integration.displayDialog(doc,
+		'chrome://zotero/content/integration/integrationDocPrefs.xul', '', io);
+	
+	if (!io.style || !io.fieldType) {
+		throw new Zotero.Exception.UserCancelled("document preferences window");
+	}
+	
+	// set data
+	var oldData = this.data;
+	var data = new Zotero.Integration.DocumentData();
+	data.sessionID = oldData.sessionID;
+	data.style.styleID = io.style;
+	data.style.locale = io.locale;
+	data.prefs.fieldType = io.fieldType;
+	data.prefs.storeReferences = io.storeReferences;
+	data.prefs.automaticJournalAbbreviations = io.automaticJournalAbbreviations;
+	
+	var forceStyleReset = oldData
+		&& (
+			oldData.prefs.automaticJournalAbbreviations != data.prefs.automaticJournalAbbreviations
+			|| oldData.style.locale != io.locale
+		);
+	yield this.setData(data, forceStyleReset);
 
-		// need to do this after setting the data so that we know if it's a note style
-		me.data.prefs.noteType = me.style && me.styleClass == "note" ? io.useEndnotes+1 : 0;
-		
-		if(!oldData || oldData.style.styleID != data.style.styleID
-				|| oldData.prefs.noteType != data.prefs.noteType
-				|| oldData.prefs.fieldType != data.prefs.fieldType
-				|| oldData.prefs.automaticJournalAbbreviations != data.prefs.automaticJournalAbbreviations) {
-			// This will cause us to regenerate all citations
-			me.oldCitationIDs = {};
-		}
-		
-		return oldData || null;
-	});
-}
+	// need to do this after setting the data so that we know if it's a note style
+	this.data.prefs.noteType = this.style && this.styleClass == "note" ? io.useEndnotes+1 : 0;
+	
+	if (!oldData || oldData.style.styleID != data.style.styleID
+			|| oldData.prefs.noteType != data.prefs.noteType
+			|| oldData.prefs.fieldType != data.prefs.fieldType
+			|| oldData.prefs.automaticJournalAbbreviations != data.prefs.automaticJournalAbbreviations) {
+		// This will cause us to regenerate all citations
+		this.oldCitationIDs = {};
+	}
+	
+	return oldData || null;
+})
 
 /**
  * Reselects an item to replace a deleted item

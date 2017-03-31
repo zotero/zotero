@@ -67,23 +67,25 @@ var Zotero_File_Interface_Bibliography = new function() {
 			_io.style = Zotero.Prefs.get("export.lastStyle");
 		}
 		
+		// Initialize styles and try to load the style, attempting a download
+		yield Zotero.Styles.init();
+		if (!Zotero.Styles.get(_io.style)) {
+			yield Zotero.Styles.install({url: _io.style}, data.style.styleID, true);
+		}
+		
 		// add styles to list
 		
-		yield Zotero.Styles.init();
 		var styles = Zotero.Styles.getVisible();
-		var index = 0;
-		var nStyles = styles.length;
 		var selectIndex = null;
-		for(var i=0; i<nStyles; i++) {
+		for (let i=0; i < styles.length; i++) {
 			var itemNode = document.createElement("listitem");
 			itemNode.setAttribute("value", styles[i].styleID);
 			itemNode.setAttribute("label", styles[i].title);
 			listbox.appendChild(itemNode);
 			
 			if(styles[i].styleID == _io.style) {
-				selectIndex = index;
+				selectIndex = i;
 			}
-			index++;
 		}
 		
 		let requestedLocale;
