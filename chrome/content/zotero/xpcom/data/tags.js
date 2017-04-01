@@ -258,13 +258,11 @@ Zotero.Tags = new function() {
 						+ 'WHERE tagID=? AND itemID IN (' + placeholders + ')';
 					yield Zotero.DB.queryAsync(sql, [newTagID, oldTagID].concat(chunk));
 					
-					sql = 'UPDATE items SET clientDateModified=?, synced=0 '
+					sql = 'UPDATE items SET synced=0, clientDateModified=? '
 						+ 'WHERE itemID IN (' + placeholders + ')'
 					yield Zotero.DB.queryAsync(sql, [Zotero.DB.transactionDateTime].concat(chunk));
 					
-					chunk.forEach(id => Zotero.Items.get(id).updateSynced(false, true));
-					
-					yield Zotero.Items.reload(oldItemIDs, ['tags'], true);
+					yield Zotero.Items.reload(oldItemIDs, ['primaryData', 'tags'], true);
 				})
 			);
 			
