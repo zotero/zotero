@@ -25,6 +25,19 @@ describe("Zotero.Tags", function () {
 		})
 	})
 	
+	describe("#rename()", function () {
+		it("should mark items as changed", function* () {
+			var item1 = yield createDataObject('item', { tags: [{ tag: "A" }], synced: true });
+			var item2 = yield createDataObject('item', { tags: [{ tag: "A" }, { tag: "B" }], synced: true });
+			var item3 = yield createDataObject('item', { tags: [{ tag: "B" }, { tag: "C" }], synced: true });
+			
+			yield Zotero.Tags.rename(item1.libraryID, "A", "D");
+			assert.isFalse(item1.synced);
+			assert.isFalse(item2.synced);
+			assert.isTrue(item3.synced);
+		});
+	});
+	
 	describe("#removeFromLibrary()", function () {
 		it("should reload tags of associated items", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;

@@ -414,6 +414,9 @@ function createUnsavedDataObject(objectType, params = {}) {
 		if (params.collections !== undefined) {
 			obj.setCollections(params.collections);
 		}
+		if (params.tags !== undefined) {
+			obj.setTags(params.tags);
+		}
 		break;
 	
 	case 'collection':

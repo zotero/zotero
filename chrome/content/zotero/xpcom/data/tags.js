@@ -235,6 +235,9 @@ Zotero.Tags = new function() {
 		}
 		
 		var oldTagID = this.getID(oldName);
+		if (!oldTagID) {
+			throw new Error(`Tag '${oldName}' not found`);
+		}
 		
 		// We need to know if the old tag has a color assigned so that
 		// we can assign it to the new name
@@ -255,9 +258,11 @@ Zotero.Tags = new function() {
 						+ 'WHERE tagID=? AND itemID IN (' + placeholders + ')';
 					yield Zotero.DB.queryAsync(sql, [newTagID, oldTagID].concat(chunk));
 					
-					sql = 'UPDATE items SET clientDateModified=? '
+					sql = 'UPDATE items SET clientDateModified=?, synced=0 '
 						+ 'WHERE itemID IN (' + placeholders + ')'
 					yield Zotero.DB.queryAsync(sql, [Zotero.DB.transactionDateTime].concat(chunk));
+					
+					chunk.forEach(id => Zotero.Items.get(id).updateSynced(false, true));
 					
 					yield Zotero.Items.reload(oldItemIDs, ['tags'], true);
 				})
