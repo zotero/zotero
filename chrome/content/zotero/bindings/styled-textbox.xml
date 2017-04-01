@@ -614,7 +614,7 @@
 				<parameter name="callback"/>
 				<body><![CDATA[
 					if (this.initialized) {
-						this._editor.once(event, callback);
+						callback(this._editor);
 					}
 					else {
 						this._onInitCallbacks.push(callback);
