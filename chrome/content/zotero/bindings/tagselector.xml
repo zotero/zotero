@@ -176,25 +176,7 @@
 					}.bind(this));
 					
 					tagsBox.addEventListener('mousedown', function (event) {
-						if (!this.editable) return;
-						
-						if (event.button == 2) {
-							// Without the setTimeout, the popup gets immediately hidden
-							// for some reason
-							setTimeout(function () {
-								_popupNode = event.originalTarget;
-								this.id('tag-menu').openPopup(
-									null,
-									'after_pointer',
-									event.clientX + 2,
-									event.clientY + 2,
-									true,
-									event
-								);
-								event.stopPropagation();
-								event.preventDefault();
-							}.bind(this));
-						}
+						this.handleTagMouseDown(event);
 					}.bind(this));
 					
 					tagsBox.addEventListener('dragover', this.dragObserver.onDragOver);
@@ -739,6 +721,36 @@
 				</body>
 			</method>
 			
+			<method name="handleTagMouseDown">
+				<parameter name="event"/>
+				<body><![CDATA[
+					if (event.button != 2) {
+						return;
+					}
+					
+					var elem = event.target;
+					
+					// Ignore clicks not on tags
+					if (elem.localName != 'button') {
+						return;
+					}
+					
+					if (!this.editable) return;
+					
+					// Without the setTimeout, the popup gets immediately hidden for some reason
+					setTimeout(function () {
+						_popupNode = event.originalTarget;
+						this.id('tag-menu').openPopup(
+							null,
+							'after_pointer',
+							event.clientX + 2,
+							event.clientY + 2,
+							true,
+							event
+						);
+					}.bind(this));
+				]]></body>
+			</method>
 			
 			<method name="rename">
 				<parameter name="oldName"/>
