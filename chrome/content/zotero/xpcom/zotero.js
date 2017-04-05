@@ -2336,31 +2336,36 @@ Zotero.DragDrop = {
 			var ids = dt.getData('zotero/item').split(",");
 			dragData.data = ids;
 		}
-		else if (dt.types.contains('application/x-moz-file')) {
-			dragData.dataType = 'application/x-moz-file';
-			var files = [];
-			for (var i=0; i<len; i++) {
-				var file = dt.mozGetDataAt("application/x-moz-file", i);
-				if (!file) {
-					continue;
+		else {
+			if (dt.types.contains('application/x-moz-file')) {
+				dragData.dataType = 'application/x-moz-file';
+				var files = [];
+				for (var i=0; i<len; i++) {
+					var file = dt.mozGetDataAt("application/x-moz-file", i);
+					if (!file) {
+						continue;
+					}
+					file.QueryInterface(Components.interfaces.nsIFile);
+					// Don't allow folder drag
+					if (file.isDirectory()) {
+						continue;
+					}
+					files.push(file);
 				}
-				file.QueryInterface(Components.interfaces.nsIFile);
-				// Don't allow folder drag
-				if (file.isDirectory()) {
-					continue;
+				dragData.data = files;
+			}
+			// This isn't an else because on Linux a link drag contains an empty application/x-moz-file too
+			if (!dragData.data || !dragData.data.length) {
+				if (dt.types.contains('text/x-moz-url')) {
+					dragData.dataType = 'text/x-moz-url';
+					var urls = [];
+					for (var i=0; i<len; i++) {
+						var url = dt.getData("text/x-moz-url").split("\n")[0];
+						urls.push(url);
+					}
+					dragData.data = urls;
 				}
-				files.push(file);
 			}
-			dragData.data = files;
-		}
-		else if (dt.types.contains('text/x-moz-url')) {
-			dragData.dataType = 'text/x-moz-url';
-			var urls = [];
-			for (var i=0; i<len; i++) {
-				var url = dt.getData("text/x-moz-url").split("\n")[0];
-				urls.push(url);
-			}
-			dragData.data = urls;
 		}
 		
 		return dragData;
