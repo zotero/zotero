@@ -12,7 +12,7 @@ describe("Zotero.Styles", function() {
 	});
 	
 	describe("Zotero.Styles.install", function() {
-		afterEach(function* (){
+		afterEach(`${styleID} style should be installed`, function* (){
 			assert.isOk(Zotero.Styles.get(styleID));
 			yield Zotero.Styles.get(styleID).remove();
 		});
