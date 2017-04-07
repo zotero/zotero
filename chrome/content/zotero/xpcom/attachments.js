@@ -277,8 +277,14 @@ Zotero.Attachments = new function(){
 						saveOptions
 					})
 					.then(function (attachmentItem) {
-						Zotero.Browser.deleteHiddenBrowser(browser);
 						deferred.resolve(attachmentItem);
+					})
+					.catch(function(e) {
+						Zotero.logError(e);
+						deferred.reject();
+					})
+					.finally(function() {
+						Zotero.Browser.deleteHiddenBrowser(browser);
 					});
 				},
 				undefined,
@@ -586,7 +592,7 @@ Zotero.Attachments = new function(){
 			}
 			
 			if (contentType === 'text/html' || contentType === 'application/xhtml+xml') {
-				Zotero.debug('Saving document with saveURI()');
+				Zotero.debug('Saving document with saveDocument()');
 				yield Zotero.Utilities.Internal.saveDocument(document, tmpFile.path);
 			}
 			else {
@@ -670,9 +676,10 @@ Zotero.Attachments = new function(){
 			}, 1000);
 		}
 		else if (Zotero.MIME.isTextType(contentType)) {
-			// Index document immediately, so that browser object can't
-			// be removed before indexing completes
-			yield Zotero.Fulltext.indexDocument(document, attachmentItem.id);
+			// wbp.saveDocument consumes the document context (in Zotero.Utilities.Internal.saveDocument)
+			// Seems like a mozilla bug, but nothing on bugtracker.
+			// Either way, we don't rely on Zotero.Fulltext.indexDocument here anymore
+			yield Zotero.Fulltext.indexItems(attachmentItem.id, true, true);
 		}
 		
 		return attachmentItem;
