@@ -2177,6 +2177,57 @@ describe("Zotero.Sync.Data.Engine", function () {
 		});
 		
 		
+		it("should mark local collection as unsynced if it doesn't exist when uploading item", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			var lastLibraryVersion = 5;
+			library.libraryVersion = lastLibraryVersion;
+			yield library.saveTx();
+			
+			var collection = createUnsavedDataObject('collection');
+			// Set the collection as synced (though this shouldn't happen)
+			collection.synced = true;
+			yield collection.saveTx();
+			var item = yield createDataObject('item', { collections: [collection.id] });
+			
+			var called = 0;
+			server.respond(function (req) {
+				let requestJSON = JSON.parse(req.requestBody);
+				
+				if (called == 0) {
+					assert.lengthOf(requestJSON, 1);
+					assert.equal(requestJSON[0].key, item.key);
+					req.respond(
+						200,
+						{
+							"Last-Modified-Version": lastLibraryVersion
+						},
+						JSON.stringify({
+							successful: {},
+							unchanged: {},
+							failed: {
+								0: {
+									code: 409,
+									message: `Collection ${collection.key} doesn't exist`,
+									data: {
+										collection: collection.key
+									}
+								}
+							}
+						})
+					);
+				}
+				called++;
+			});
+			
+			var e = yield getPromiseError(engine._startUpload());
+			assert.ok(e);
+			assert.isFalse(collection.synced);
+		});
+		
+		
 		it("should mark local parent item as unsynced if it doesn't exist when uploading child", function* () {
 			({ engine, client, caller } = yield setup());
 			
@@ -2209,8 +2260,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 							unchanged: {},
 							failed: {
 								0: {
-									code: 400,
-									message: `Parent item '${item.key}' doesn't exist`,
+									code: 409,
+									message: `Parent item ${item.key} doesn't exist`,
 									data: {
 										parentItem: item.key
 									}
