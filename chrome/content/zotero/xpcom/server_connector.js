@@ -387,21 +387,25 @@ Zotero.Server.Connector.SaveItem.prototype = {
 			proxy
 		});
 		try {
-			let items = yield itemSaver.saveItems(
+			var deferred = Zotero.Promise.defer();
+			itemSaver.saveItems(
 				data.items,
-				Zotero.Server.Connector.AttachmentProgressManager.onProgress
-			);
-			// Remove attachments not being saved from item.attachments
-			for(var i=0; i<data.items.length; i++) {
-				var item = data.items[i];
-				for(var j=0; j<item.attachments.length; j++) {
-					if(!Zotero.Server.Connector.AttachmentProgressManager.has(item.attachments[j])) {
-						item.attachments.splice(j--, 1);
+				Zotero.Server.Connector.AttachmentProgressManager.onProgress,
+				function() {
+					// Remove attachments not being saved from item.attachments
+					for(var i=0; i<data.items.length; i++) {
+						var item = data.items[i];
+						for(var j=0; j<item.attachments.length; j++) {
+							if(!Zotero.Server.Connector.AttachmentProgressManager.has(item.attachments[j])) {
+								item.attachments.splice(j--, 1);
+							}
+						}
 					}
+					
+					deferred.resolve([201, "application/json", JSON.stringify({items: data.items})]);	
 				}
-			}
-			
-			return [201, "application/json", JSON.stringify({items: data.items})];
+			);
+			return deferred.promise;
 		}
 		catch (e) {
 			Zotero.logError(e);
