@@ -566,7 +566,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					throw e;
 				}
 				
-				Zotero.debug("Sync failed for library " + libraryID);
+				Zotero.debug("Sync failed for library " + libraryID, 1);
 				Zotero.logError(e);
 				this.checkError(e);
 				options.onError(e);
@@ -1217,8 +1217,13 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 			// For unexpected ones, just show a generic message
 			else {
-				// TODO: improve and localize
-				var msg = "An error occurred during syncing:\n\n" + e.message;
+				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+					msg = Zotero.Utilities.ellipsize(e.xmlhttp.responseText, 1000, true);
+				}
+				else {
+					// TODO: Localize
+					var msg = "An error occurred during syncing:\n\n" + e.message;
+				}
 			}
 			
 			var desc = doc.createElement('description');
