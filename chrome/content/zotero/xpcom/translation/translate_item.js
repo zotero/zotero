@@ -162,8 +162,10 @@ Zotero.Translate.ItemSaver.prototype = {
 			}
 		}.bind(this));
 		
-		itemsDoneCallback(newItems.splice());
-
+		if (itemsDoneCallback) {
+			itemsDoneCallback(newItems.splice());
+		}
+		
 		// Handle attachments outside of the transaction, because they can involve downloading
 		for (let item of standaloneAttachments) {
 			let newItem = yield this._saveAttachment(item, null, attachmentCallback);
