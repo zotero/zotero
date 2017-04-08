@@ -14,6 +14,7 @@ Zotero.HTTP = new function() {
 		this.status = xmlhttp.status;
 		this.channel = xmlhttp.channel;
 		this.message = msg;
+		this.stack = new Error().stack;
 		
 		// Hide password from debug output
 		//
@@ -40,9 +41,6 @@ Zotero.HTTP = new function() {
 	this.UnexpectedStatusException.prototype.is5xx = function () {
 		return this.status >= 500 && this.status < 600;
 	}
-	this.UnexpectedStatusException.prototype.toString = function() {
-		return this.message;
-	};
 	
 	/**
 	 * Exception returned if the browser is offline when promise* is used
@@ -50,19 +48,15 @@ Zotero.HTTP = new function() {
 	 */
 	this.BrowserOfflineException = function() {
 		this.message = "XMLHttpRequest could not complete because the browser is offline";
+		this.stack = new Error().stack;
 	};
 	this.BrowserOfflineException.prototype = Object.create(Error.prototype);
-	this.BrowserOfflineException.prototype.toString = function() {
-		return this.message;
-	};
 
 	this.TimeoutException = function(ms) {
 		this.message = "XMLHttpRequest has timed out after " + ms + "ms";
+		this.stack = new Error().stack;
 	};
 	this.TimeoutException.prototype = Object.create(Error.prototype);
-	this.TimeoutException.prototype.toString = function() {
-		return this.message;
-	};
 
 	this.promise = function () {
 		Zotero.debug("Zotero.HTTP.promise() is deprecated -- use Zotero.HTTP.request()", 2);
