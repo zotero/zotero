@@ -53,7 +53,10 @@ describe("Zotero.Integration", function () {
 	
 	DocumentPluginDummy.Field = function(doc) {
 		this.doc = doc;
-		this.code = this.text = '';
+		this.code = '';
+		// This is actually required and current integration code depends on text being non-empty upon insertion.
+		// insertBibliography will fail if there is no placeholder text.
+		this.text = '{Placeholder}';
 		this.noteIndex = DocumentPluginDummy.Field.noteIndex++;
 		this.wrappedJSObject = this;
 	};
@@ -317,6 +320,36 @@ describe("Zotero.Integration", function () {
 					styleInstallStub.restore();
 					styleGetStub.restore();	
 				});
+			});
+		});
+		
+		describe('#addEditBibliography', function() {
+			var docID = this.fullTitle();
+			beforeEach(function* () {
+				initDoc(docID);
+				yield execCommand('addEditCitation', docID);
+			});
+			
+			it('should insert bibliography if no bibliography field present', function* () {
+				yield execCommand('addEditBibliography', docID);
+				var biblPresent = false;
+				for (let i = applications[docID].doc.fields.length-1; i >= 0; i--) {
+					let field = applications[docID].doc.fields[i];
+					Zotero.debug(field.getCode(), 1);
+					if (field.getCode().includes("CSL_BIBLIOGRAPHY")) {
+						biblPresent = true;
+						break;
+					}
+				}
+				assert.isTrue(biblPresent);
+			});
+			
+			it('should display the edit bibliography dialog if bibliography present', function* () {
+				yield execCommand('addEditBibliography', docID);
+				displayDialogStub.reset();
+				yield execCommand('addEditBibliography', docID);
+				assert.isTrue(displayDialogStub.calledOnce);
+				assert.isTrue(displayDialogStub.lastCall.args[1].includes('editBibliographyDialog'));
 			});
 		});
 	});

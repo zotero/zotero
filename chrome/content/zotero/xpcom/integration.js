@@ -1150,6 +1150,40 @@ Zotero.Integration.Document.prototype.editBibliography = function() {
 	});
 }
 
+
+Zotero.Integration.Document.prototype.addEditBibliography = Zotero.Promise.coroutine(function *() {
+	// Check if we have a bibliography
+	var session = yield this._getSession(true, false);
+	
+	if (!session.data.style.hasBibliography) {
+		throw new Zotero.Exception.Alert("integration.error.noBibliography", [],
+			"integration.error.title");
+	}
+	
+	var fieldGetter = new Zotero.Integration.Fields(session, this._doc, Zotero.Integration.onFieldError);
+	var fields = yield fieldGetter.get();
+	
+	var haveBibliography = false;
+	for (var i=fields.length-1; i>=0; i--) {
+		var code = fields[i].getCode();
+		var [type, content] = fieldGetter.getCodeTypeAndContent(code);
+		if (type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
+			haveBibliography = true;
+			break;
+		}
+	}
+	
+	if (haveBibliography) {
+		yield fieldGetter.updateSession();
+		yield session.editBibliography(this._doc);
+	} else {
+		var field = yield fieldGetter.addField();
+		field.setCode("BIBL");
+		yield fieldGetter.updateSession();
+	}
+	return fieldGetter.updateDocument(FORCE_CITATIONS_FALSE, true, false);
+});
+
 /**
  * Updates the citation data for all citations and bibliography entries.
  * @return {Promise}
@@ -1312,23 +1346,28 @@ Zotero.Integration.Fields = function(session, doc, fieldErrorHandler) {
  */
 Zotero.Integration.Fields.prototype.addField = function(note) {
 	// Get citation types if necessary
-	if(!this._doc.canInsertField(this._session.data.prefs['fieldType'])) {
+	if (!this._doc.canInsertField(this._session.data.prefs['fieldType'])) {
 		return Zotero.Promise.reject(new Zotero.Exception.Alert("integration.error.cannotInsertHere",
 		[], "integration.error.title"));
 	}
 	
 	var field = this._doc.cursorInField(this._session.data.prefs['fieldType']);
-	if(field) {
-		if(!this._doc.displayAlert(Zotero.getString("integration.replace"),
+	if (field) {
+		if (!this._doc.displayAlert(Zotero.getString("integration.replace"),
 				DIALOG_ICON_STOP,
 				DIALOG_BUTTONS_OK_CANCEL)) {
 			return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("inserting citation"));
 		}
 	}
 	
-	if(!field) {
-		var field = this._doc.insertField(this._session.data.prefs['fieldType'],
+	if (!field) {
+		field = this._doc.insertField(this._session.data.prefs['fieldType'],
 			(note ? this._session.data.prefs["noteType"] : 0));
+	}
+	// If fields already retrieved, further this.get() calls will returned the cached version
+	// So we append this field to that list
+	if (this._fields) {
+		this._fields.push(field);
 	}
 	
 	return Zotero.Promise.resolve(field);
@@ -1551,21 +1590,16 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
  *	   modified since they were created, instead of showing a warning
  * @return {Promise} A promise resolved when the document is updated
  */
-Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, forceBibliography,
+Zotero.Integration.Fields.prototype.updateDocument = Zotero.Promise.coroutine(function* (forceCitations, forceBibliography,
 		ignoreCitationChanges) {
 	// Update citations
 	this._session.updateUpdateIndices(forceCitations);
-	var me = this;
 	// Iterate through citations, yielding for UI updates
-	return Zotero.Promise.each(this._session._updateCitations(), () => {}).then(function() {
-		return Zotero.Promise.each(
-			me._updateDocument(
-				forceCitations, forceBibliography, ignoreCitationChanges
-			),
-			() => {}
-		);
-	});
-}
+	yield Zotero.Promise.each(this._session._updateCitations(), () => {});
+	
+	yield Zotero.Promise.each(
+		this._updateDocument(forceCitations, forceBibliography, ignoreCitationChanges), () => {});
+});
 
 /**
  * Helper function to update bibliographys and fields within a document
