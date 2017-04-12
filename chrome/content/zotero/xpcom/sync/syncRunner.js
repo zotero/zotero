@@ -319,7 +319,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		
 		if (syncAllLibraries) {
 			if (access.user && access.user.library) {
-				libraries = [Zotero.Libraries.userLibraryID, Zotero.Libraries.publicationsLibraryID];
+				libraries = [Zotero.Libraries.userLibraryID];
 				// If syncing all libraries, remove skipped libraries
 				libraries = Zotero.Utilities.arrayDiff(
 					libraries, Zotero.Sync.Data.Local.getSkippedLibraries()
@@ -330,7 +330,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			// Check access to specified libraries
 			for (let libraryID of libraries) {
 				let type = Zotero.Libraries.get(libraryID).libraryType;
-				if (type == 'user' || type == 'publications') {
+				if (type == 'user') {
 					if (!access.user || !access.user.library) {
 						// TODO: Alert
 						throw new Error("Key does not have access to library " + libraryID);

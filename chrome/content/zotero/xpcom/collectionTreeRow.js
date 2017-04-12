@@ -37,7 +37,6 @@ Zotero.CollectionTreeRow = function(type, ref, level, isOpen)
 Zotero.CollectionTreeRow.prototype.__defineGetter__('id', function () {
 	switch (this.type) {
 		case 'library':
-		case 'publications':
 		case 'group':
 		case 'feed':
 			return 'L' + this.ref.libraryID;
@@ -54,6 +53,9 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('id', function () {
 		case 'unfiled':
 			return 'U' + this.ref.libraryID;
 		
+		case 'publications':
+			return 'P' + this.ref.libraryID;
+			
 		case 'trash':
 			return 'T' + this.ref.libraryID;
 		
@@ -73,7 +75,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('id', function () {
 Zotero.CollectionTreeRow.prototype.isLibrary = function (includeGlobal)
 {
 	if (includeGlobal) {
-		var global = ['library', 'publications', 'group', 'feed'];
+		var global = ['library', 'group', 'feed'];
 		return global.indexOf(this.type) != -1;
 	}
 	return this.type == 'library';
@@ -315,6 +317,9 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 			}
 			includeScopeChildren = true;
 		}
+		else if (this.isPublications()) {
+			s.addCondition('publications', 'true');
+		}
 		else if (this.isTrash()) {
 			s.addCondition('deleted', 'true');
 		}
@@ -383,6 +388,7 @@ Zotero.CollectionTreeRow.prototype.setTags = function (tags) {
 Zotero.CollectionTreeRow.prototype.isSearchMode = function() {
 	switch (this.type) {
 		case 'search':
+		case 'publications':
 		case 'trash':
 			return true;
 	}

@@ -50,6 +50,7 @@ Zotero.Items = function() {
 				sortCreator: _getSortCreatorSQL(),
 				
 				deleted: "DI.itemID IS NOT NULL AS deleted",
+				inPublications: "PI.itemID IS NOT NULL AS inPublications",
 				
 				numNotes: "(SELECT COUNT(*) FROM itemNotes INo "
 					+ "WHERE parentItemID=O.itemID AND "
@@ -99,6 +100,7 @@ Zotero.Items = function() {
 		+ "LEFT JOIN itemNotes INo ON (O.itemID=INo.itemID) "
 		+ "LEFT JOIN items INoP ON (INo.parentItemID=INoP.itemID) "
 		+ "LEFT JOIN deletedItems DI ON (O.itemID=DI.itemID) "
+		+ "LEFT JOIN publicationsItems PI ON (O.itemID=PI.itemID) "
 		+ "LEFT JOIN charsets CS ON (IA.charsetID=CS.charsetID)";
 	
 	this._relationsTable = "itemRelations";
@@ -974,6 +976,107 @@ Zotero.Items = function() {
 							getService(Components.interfaces.nsIIdleService);
 		idleService.addIdleObserver(this._emptyTrashIdleObserver, 305);
 	}
+	
+	
+	this.addToPublications = function (items, options = {}) {
+		if (!items.length) return;
+		
+		return Zotero.DB.executeTransaction(function* () {
+			var timestamp = Zotero.DB.transactionTimestamp;
+			
+			var allItems = [...items];
+			
+			if (options.license) {
+				for (let item of items) {
+					if (!options.keepRights || !item.getField('rights')) {
+						item.setField('rights', options.licenseName);
+					}
+				}
+			}
+			
+			if (options.childNotes) {
+				for (let item of items) {
+					item.getNotes().forEach(id => allItems.push(Zotero.Items.get(id)));
+				}
+			}
+			
+			if (options.childFileAttachments || options.childLinks) {
+				for (let item of items) {
+					item.getAttachments().forEach(id => {
+						var attachment = Zotero.Items.get(id);
+						var linkMode = attachment.attachmentLinkMode;
+						
+						if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+							Zotero.debug("Skipping child linked file attachment on drag");
+							return;
+						}
+						if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+							if (!options.childLinks) {
+								Zotero.debug("Skipping child link attachment on drag");
+								return;
+							}
+						}
+						else if (!options.childFileAttachments) {
+							Zotero.debug("Skipping child file attachment on drag");
+							return;
+						}
+						allItems.push(attachment);
+					});
+				}
+			}
+			
+			yield Zotero.Utilities.Internal.forEachChunkAsync(allItems, 250, Zotero.Promise.coroutine(function* (chunk) {
+				for (let item of chunk) {
+					item.setPublications(true);
+					item.synced = false;
+				}
+				let ids = chunk.map(item => item.id);
+				yield Zotero.DB.queryAsync(
+					`UPDATE items SET synced=0, clientDateModified=? WHERE itemID IN (${ids.join(", ")})`,
+					timestamp
+				);
+				yield Zotero.DB.queryAsync(
+					`INSERT OR IGNORE INTO publicationsItems VALUES (${ids.join("), (")})`
+				);
+			}.bind(this)));
+			Zotero.Notifier.queue('modify', 'item', allItems.map(item => item.id));
+		}.bind(this));
+	};
+	
+	
+	this.removeFromPublications = function (items) {
+		return Zotero.DB.executeTransaction(function* () {
+			let allItems = [];
+			for (let item of items) {
+				if (!item.inPublications) {
+					throw new Error(`Item ${item.libraryKey} is not in My Publications`);
+				}
+				
+				// Remove all child items too
+				if (item.isRegularItem()) {
+					allItems.push(...this.get(item.getNotes(true).concat(item.getAttachments(true))));
+				}
+				
+				allItems.push(item);
+			}
+			
+			allItems.forEach(item => {
+				item.setPublications(false);
+				item.synced = false;
+			});
+			
+			var timestamp = Zotero.DB.transactionTimestamp;
+			yield Zotero.Utilities.Internal.forEachChunkAsync(allItems, 250, Zotero.Promise.coroutine(function* (chunk) {
+				let idStr = chunk.map(item => item.id).join(", ");
+				yield Zotero.DB.queryAsync(
+					`UPDATE items SET synced=0, clientDateModified=? WHERE itemID IN (${idStr})`,
+					timestamp
+				);
+				yield Zotero.DB.queryAsync(`DELETE FROM publicationsItems WHERE itemID IN (${idStr})`);
+			}.bind(this)));
+			Zotero.Notifier.queue('modify', 'item', items.map(item => item.id));
+		}.bind(this));
+	};
 	
 	
 	/**

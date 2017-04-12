@@ -29,7 +29,7 @@ Zotero.Notifier = new function(){
 	var _observers = {};
 	var _types = [
 		'collection', 'search', 'share', 'share-items', 'item', 'file',
-		'collection-item', 'item-tag', 'tag', 'setting', 'group', 'trash', 'publications',
+		'collection-item', 'item-tag', 'tag', 'setting', 'group', 'trash',
 		'bucket', 'relation', 'feed', 'feedItem', 'sync', 'api-key'
 	];
 	var _inTransaction;

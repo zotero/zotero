@@ -336,6 +336,36 @@ describe("Zotero.Item", function () {
 		})
 	})
 	
+	describe("#inPublications", function () {
+		it("should add item to publications table", function* () {
+			var item = yield createDataObject('item');
+			item.inPublications = true;
+			yield item.saveTx();
+			assert.ok(item.inPublications);
+			assert.equal(
+				(yield Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id)),
+				1
+			);
+		})
+		
+		it("should be set to false after save", function* () {
+			var collection = yield createDataObject('collection');
+			var item = createUnsavedDataObject('item');
+			item.inPublications = false;
+			yield item.saveTx();
+			
+			item.inPublications = false;
+			yield item.saveTx();
+			assert.isFalse(item.inPublications);
+			assert.equal(
+				(yield Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id)),
+				0
+			);
+		})
+	});
+	
 	describe("#parentID", function () {
 		it("should create a child note", function* () {
 			var item = new Zotero.Item('book');
@@ -1167,6 +1197,25 @@ describe("Zotero.Item", function () {
 				var json = item.toJSON();
 				assert.notProperty(json, "filename");
 				assert.notProperty(json, "path");
+			});
+			
+			it("should include inPublications=true for items in My Publications", function* () {
+				var item = createUnsavedDataObject('item');
+				item.inPublications = true;
+				var json = item.toJSON();
+				assert.propertyVal(json, "inPublications", true);
+			});
+			
+			it("shouldn't include inPublications for items not in My Publications in patch mode", function* () {
+				var item = createUnsavedDataObject('item');
+				var json = item.toJSON();
+				assert.notProperty(json, "inPublications");
+			});
+			
+			it("should include inPublications=false for items not in My Publications in full mode", function* () {
+				var item = createUnsavedDataObject('item');
+				var json = item.toJSON({ mode: 'full' });
+				assert.property(json, "inPublications", false);
 			});
 		})
 		

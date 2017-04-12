@@ -439,6 +439,11 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 			this.selection.selectEventsSuppressed = false;
 		}
 		
+		// Clear My Publications intro text on a refresh with items
+		if (this.collectionTreeRow.isPublications() && this.rowCount) {
+			this._ownerDocument.defaultView.ZoteroPane_Local.clearItemsPaneMessage();
+		}
+		
 		yield this.runListeners('refresh');
 		
 		setTimeout(function () {
@@ -557,12 +562,6 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				refreshed = true;
 			}
 		}
-		else if (type == 'publications') {
-			if (collectionTreeRow.isPublications()) {
-				yield this.refresh();
-				refreshed = true;
-			}
-		}
 		// If refreshing a single item, clear caches and then unselect and reselect row
 		else if (savedSelection.length == 1 && savedSelection[0] == ids[0]) {
 			let row = this._rowMap[ids[0]];
@@ -667,9 +666,10 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			delete this._cellTextCache[id];
 		}
 		
-		// If trash or saved search, just re-run search
-		if (collectionTreeRow.isTrash() || collectionTreeRow.isSearch())
-		{
+		// If saved search, publications, or trash, just re-run search
+		if (collectionTreeRow.isSearch()
+				|| collectionTreeRow.isPublications()
+				|| collectionTreeRow.isTrash()) {
 			yield this.refresh();
 			refreshed = true;
 			madeChanges = true;
@@ -789,7 +789,10 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		let items = Zotero.Items.get(ids);
 		
 		// In some modes, just re-run search
-		if (collectionTreeRow.isSearch() || collectionTreeRow.isTrash() || collectionTreeRow.isUnfiled()) {
+		if (collectionTreeRow.isSearch()
+				|| collectionTreeRow.isPublications()
+				|| collectionTreeRow.isTrash()
+				|| collectionTreeRow.isUnfiled()) {
 			yield this.refresh();
 			refreshed = true;
 			madeChanges = true;
@@ -1887,7 +1890,7 @@ Zotero.ItemTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(functio
 	if (collectionTreeRow.isBucket()) {
 		collectionTreeRow.ref.deleteItems(ids);
 	}
-	else if (collectionTreeRow.isTrash() || collectionTreeRow.isPublications()) {
+	if (collectionTreeRow.isTrash()) {
 		yield Zotero.Items.erase(ids);
 	}
 	else if (collectionTreeRow.isLibrary(true) || force) {
@@ -1898,6 +1901,10 @@ Zotero.ItemTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(functio
 			yield collectionTreeRow.ref.removeItems(ids);
 		});
 	}
+	else if (collectionTreeRow.isPublications()) {
+		yield Zotero.Items.removeFromPublications(ids.map(id => Zotero.Items.get(id)));
+	}
+
 	//this._treebox.endUpdateBatch();
 });
 

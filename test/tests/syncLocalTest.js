@@ -1406,6 +1406,43 @@ describe("Zotero.Sync.Data.Local", function() {
 					]
 				);
 			});
+			
+			it("should automatically apply inPublications setting from remote", function () {
+				var cacheJSON = {
+					key: "AAAAAAAA",
+					version: 1234,
+					title: "Title 1",
+					dateModified: "2017-04-02 12:34:56"
+				};
+				var json1 = {
+					key: "AAAAAAAA",
+					version: 1234,
+					title: "Title 1",
+					dateModified: "2017-04-02 12:34:56"
+				};
+				var json2 = {
+					key: "AAAAAAAA",
+					version: 1235,
+					title: "Title 1",
+					inPublications: true,
+					dateModified: "2017-04-03 12:34:56"
+				};
+				var ignoreFields = ['dateAdded', 'dateModified'];
+				var result = Zotero.Sync.Data.Local._reconcileChanges(
+					'item', cacheJSON, json1, json2, ignoreFields
+				);
+				assert.lengthOf(result.changes, 1);
+				assert.sameDeepMembers(
+					result.changes,
+					[
+						{
+							field: "inPublications",
+							op: "add",
+							value: true
+						}
+					]
+				);
+			});
 		})
 		
 		

@@ -40,16 +40,6 @@ Zotero.Libraries = new function () {
 		}
 	})
 	
-	let _publicationsLibraryID;
-	Zotero.defineProperty(this, 'publicationsLibraryID', {
-		get: function() {
-			if (_publicationsLibraryID === undefined) {
-				throw new Error("Library data not yet loaded");
-			}
-			return _publicationsLibraryID;
-		}
-	});
-	
 	/**
 	 * Manage cache
 	 */
@@ -105,7 +95,6 @@ Zotero.Libraries = new function () {
 			let library;
 			switch (row._libraryType) {
 				case 'user':
-				case 'publications':
 					library = new Zotero.Library();
 					library._loadDataFromRow(row); // Does not call save()
 					break;
@@ -115,9 +104,6 @@ Zotero.Libraries = new function () {
 			
 			if (library.libraryType == 'user') {
 				_userLibraryID = library.libraryID;
-			}
-			else if (library.libraryType == 'publications') {
-				_publicationsLibraryID = library.libraryID;
 			}
 			
 			this._addToCache(newCaches.library, library);
@@ -169,12 +155,10 @@ Zotero.Libraries = new function () {
 		if (!this._cache) throw new Error("Zotero.Libraries cache is not initialized");
 		var libraries = Object.keys(this._cache).map(v => Zotero.Libraries.get(parseInt(v)));
 		var collation = Zotero.getLocaleCollation();
-		// Sort My Library, My Publications, then others by name
+		// Sort My Library, then others by name
 		libraries.sort(function (a, b) {
 			if (a.libraryID == _userLibraryID) return -1;
 			if (b.libraryID == _userLibraryID) return 1;
-			if (a.libraryID == _publicationsLibraryID) return -1;
-			if (b.libraryID == _publicationsLibraryID) return 1;
 			return collation.compareString(1, a.name, b.name);
 		}.bind(this))
 		return libraries;

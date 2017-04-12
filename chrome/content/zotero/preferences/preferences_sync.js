@@ -318,8 +318,6 @@ Zotero_Preferences.Sync = {
 		// Add default rows
 		addRow(Zotero.getString("pane.collections.libraryAndFeeds"), "L" + Zotero.Libraries.userLibraryID, 
 			librariesToSkip.indexOf("L" + Zotero.Libraries.userLibraryID) == -1);
-		addRow(Zotero.getString("pane.collections.publications"), "L" + Zotero.Libraries.publicationsLibraryID, 
-			librariesToSkip.indexOf("L" + Zotero.Libraries.publicationsLibraryID) == -1);
 		
 		// Add group rows
 		for (let group of groups) {

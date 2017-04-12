@@ -34,7 +34,7 @@ Zotero.Schema = new function(){
 	var _dbVersions = [];
 	var _schemaVersions = [];
 	// Update when adding _updateCompatibility() line to schema update step
-	var _maxCompatibility = 4;
+	var _maxCompatibility = 5;
 	var _repositoryTimer;
 	var _remoteUpdateInProgress = false, _localUpdateInProgress = false;
 	
@@ -1356,8 +1356,7 @@ Zotero.Schema = new function(){
 			
 			var sql = "INSERT INTO libraries (libraryID, type, editable, filesEditable) "
 				+ "VALUES "
-				+ "(?, 'user', 1, 1), "
-				+ "(4, 'publications', 1, 1)"
+				+ "(?, 'user', 1, 1)";
 			yield Zotero.DB.queryAsync(sql, userLibraryID);
 			
 			/*if (!Zotero.Schema.skipDefaultData) {
@@ -2368,6 +2367,28 @@ Zotero.Schema = new function(){
 				let userID = yield Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='account' AND key='userID'");
 				if (userID) {
 					yield Zotero.DB.queryAsync("UPDATE itemRelations SET object='http://zotero.org/users/' || ? || SUBSTR(object, 39) WHERE object LIKE ?", [userID, 'http://zotero.org/users/local/%']);
+				}
+			}
+			
+			else if (i == 93) {
+				yield _updateCompatibility(5);
+				yield Zotero.DB.queryAsync("CREATE TABLE publicationsItems (\n    itemID INTEGER PRIMARY KEY\n);");
+				yield Zotero.DB.queryAsync("INSERT INTO publicationsItems SELECT itemID FROM items WHERE libraryID=4");
+				yield Zotero.DB.queryAsync("UPDATE OR IGNORE items SET libraryID=1, synced=0 WHERE libraryID=4");
+				yield Zotero.DB.queryAsync("DELETE FROM itemRelations WHERE object LIKE ? AND object LIKE ?", ['http://zotero.org/users/%', '%/publications/items%']);
+				yield Zotero.DB.queryAsync("DELETE FROM libraries WHERE libraryID=4");
+				
+				let rows = yield Zotero.DB.queryAsync("SELECT itemID, data FROM syncCache JOIN items USING (libraryID, key, version) WHERE syncObjectTypeID=3");
+				let ids = [];
+				for (let row of rows) {
+					let json = JSON.parse(row.data);
+					if (json.data && json.data.inPublications) {
+						ids.push(row.itemID);
+					}
+				}
+				if (ids.length) {
+					yield Zotero.DB.queryAsync("INSERT INTO publicationsItems (itemID) VALUES "
+						+ ids.map(id => `(${id})`).join(', '));
 				}
 			}
 		}

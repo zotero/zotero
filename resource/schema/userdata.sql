@@ -1,4 +1,4 @@
--- 92
+-- 93
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -280,6 +280,10 @@ CREATE TABLE groupItems (
     FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
     FOREIGN KEY (createdByUserID) REFERENCES users(userID) ON DELETE SET NULL,
     FOREIGN KEY (lastModifiedByUserID) REFERENCES users(userID) ON DELETE SET NULL
+);
+
+CREATE TABLE publicationsItems (
+    itemID INTEGER PRIMARY KEY
 );
 
 CREATE TABLE fulltextItems (

@@ -608,6 +608,157 @@ describe("Zotero.CollectionTreeView", function() {
 				assert.equal(treeRow.ref.id, item.id);
 			});
 			
+			describe("My Publications", function () {
+				it("should add an item to My Publications", function* () {
+					var item = yield createDataObject('item', false, { skipSelect: true });
+					var libraryID = item.libraryID;
+					
+					var stub = sinon.stub(zp, "showPublicationsWizard")
+						.returns({
+							includeNotes: false,
+							includeFiles: false,
+							keepRights: true
+						});
+					
+					// Add observer to wait for item modification
+					var deferred = Zotero.Promise.defer();
+					var observerID = Zotero.Notifier.registerObserver({
+						notify: function (event, type, ids, extraData) {
+							if (type == 'item' && event == 'modify' && ids[0] == item.id) {
+								setTimeout(function () {
+									deferred.resolve();
+								});
+							}
+						}
+					}, 'item', 'test');
+					
+					yield drop('item', 'P' + libraryID, [item.id], deferred.promise);
+					
+					Zotero.Notifier.unregisterObserver(observerID);
+					stub.restore();
+					
+					// Select publications and check for item
+					yield cv.selectByID("P" + libraryID);
+					yield waitForItemsLoad(win);
+					var itemsView = win.ZoteroPane.itemsView
+					assert.equal(itemsView.rowCount, 1);
+					var treeRow = itemsView.getRow(0);
+					assert.equal(treeRow.ref.id, item.id);
+				});
+				
+				it("should add an item with a file attachment to My Publications", function* () {
+					var item = yield createDataObject('item', false, { skipSelect: true });
+					var attachment = yield importFileAttachment('test.png', { parentItemID: item.id });
+					var libraryID = item.libraryID;
+					
+					var stub = sinon.stub(zp, "showPublicationsWizard")
+						.returns({
+							includeNotes: false,
+							includeFiles: true,
+							keepRights: true
+						});
+					
+					// Add observer to wait for modify
+					var deferred = Zotero.Promise.defer();
+					var observerID = Zotero.Notifier.registerObserver({
+						notify: function (event, type, ids, extraData) {
+							if (type == 'item' && event == 'modify' && ids[0] == item.id) {
+								setTimeout(function () {
+									deferred.resolve();
+								});
+							}
+						}
+					}, 'item', 'test');
+					
+					yield drop('item', 'P' + libraryID, [item.id], deferred.promise);
+					
+					Zotero.Notifier.unregisterObserver(observerID);
+					stub.restore();
+					
+					assert.isTrue(item.inPublications);
+					// File attachment should be in My Publications
+					assert.isTrue(attachment.inPublications);
+				});
+				
+				it("should add an item with a linked URL attachment to My Publications", function* () {
+					var item = yield createDataObject('item', false, { skipSelect: true });
+					var attachment = yield Zotero.Attachments.linkFromURL({
+						parentItemID: item.id,
+						title: 'Test',
+						url: 'http://127.0.0.1/',
+						contentType: 'text/html'
+					});
+					var libraryID = item.libraryID;
+					
+					var stub = sinon.stub(zp, "showPublicationsWizard")
+						.returns({
+							includeNotes: false,
+							includeFiles: false,
+							keepRights: true
+						});
+					
+					// Add observer to wait for modify
+					var deferred = Zotero.Promise.defer();
+					var observerID = Zotero.Notifier.registerObserver({
+						notify: function (event, type, ids, extraData) {
+							if (type == 'item' && event == 'modify' && ids[0] == item.id) {
+								setTimeout(function () {
+									deferred.resolve();
+								});
+							}
+						}
+					}, 'item', 'test');
+					
+					yield drop('item', 'P' + libraryID, [item.id], deferred.promise);
+					
+					Zotero.Notifier.unregisterObserver(observerID);
+					stub.restore();
+					
+					assert.isTrue(item.inPublications);
+					// Link attachment should be in My Publications
+					assert.isTrue(attachment.inPublications);
+				});
+				
+				it("shouldn't add linked file attachment to My Publications", function* () {
+					var item = yield createDataObject('item', false, { skipSelect: true });
+					var attachment = yield Zotero.Attachments.linkFromFile({
+						parentItemID: item.id,
+						title: 'Test',
+						file: OS.Path.join(getTestDataDirectory().path, 'test.png'),
+						contentType: 'image/png'
+					});
+					var libraryID = item.libraryID;
+					
+					var stub = sinon.stub(zp, "showPublicationsWizard")
+						.returns({
+							includeNotes: false,
+							includeFiles: false,
+							keepRights: true
+						});
+					
+					// Add observer to wait for modify
+					var deferred = Zotero.Promise.defer();
+					var observerID = Zotero.Notifier.registerObserver({
+						notify: function (event, type, ids, extraData) {
+							if (type == 'item' && event == 'modify' && ids[0] == item.id) {
+								setTimeout(function () {
+									deferred.resolve();
+								});
+							}
+						}
+					}, 'item', 'test');
+					
+					yield drop('item', 'P' + libraryID, [item.id], deferred.promise);
+					
+					Zotero.Notifier.unregisterObserver(observerID);
+					stub.restore();
+					
+					assert.isTrue(item.inPublications);
+					// Linked URL attachment shouldn't be in My Publications
+					assert.isFalse(attachment.inPublications);
+				});
+			});
+			
 			it("should copy an item with an attachment to a group", function* () {
 				var group = yield createGroup();
 				

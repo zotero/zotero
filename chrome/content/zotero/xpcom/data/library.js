@@ -103,12 +103,12 @@ Zotero.defineProperty(Zotero.Library.prototype, '_childObjectTypes', {
 
 // Valid library types
 Zotero.defineProperty(Zotero.Library.prototype, 'libraryTypes', {
-	value: Object.freeze(['user', 'publications'])
+	value: Object.freeze(['user'])
 });
 
 // Immutable libraries
 Zotero.defineProperty(Zotero.Library.prototype, 'fixedLibraries', {
-	value: Object.freeze(['user', 'publications'])
+	value: Object.freeze(['user'])
 });
 
 Zotero.defineProperty(Zotero.Library.prototype, 'libraryID', {
@@ -136,7 +136,6 @@ Zotero.defineProperty(Zotero.Library.prototype, 'libraryTypeID', {
 	get: function () {
 		switch (this._libraryType) {
 		case 'user':
-		case 'publications':
 			return Zotero.Users.getCurrentUserID();
 		
 		case 'group':
@@ -168,10 +167,6 @@ Zotero.defineProperty(Zotero.Library.prototype, 'name', {
 	get: function() {
 		if (this._libraryType == 'user') {
 			return Zotero.getString('pane.collections.library');
-		}
-		
-		if (this._libraryType == 'publications') {
-			return Zotero.getString('pane.collections.publications');
 		}
 		
 		throw new Error('Unhandled library type "' + this._libraryType + '"');
@@ -254,7 +249,7 @@ Zotero.Library.prototype._set = function(prop, val) {
 		
 		case '_libraryEditable':
 		case '_libraryFilesEditable':
-			if (['user', 'publications'].indexOf(this._libraryType) != -1) {
+			if (['user'].indexOf(this._libraryType) != -1) {
 				throw new Error('Cannot change ' + prop + ' for ' + this._libraryType + ' library');
 			}
 			val = !!val;
@@ -303,7 +298,7 @@ Zotero.Library.prototype._set = function(prop, val) {
 			break;
 		
 		case '_libraryArchived':
-			if (['user', 'publications', 'feeds'].indexOf(this._libraryType) != -1) {
+			if (['user', 'feeds'].indexOf(this._libraryType) != -1) {
 				throw new Error('Cannot change ' + prop + ' for ' + this._libraryType + ' library');
 			}
 			if (val && this._libraryEditable) {

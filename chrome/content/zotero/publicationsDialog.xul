@@ -54,6 +54,8 @@
 		<checkbox id="include-notes" label="&zotero.publications.include.checkbox.notes;"
 				oncommand="Zotero_Publications_Dialog.updateInclude()"/>
 		<separator/>
+		<description>&zotero.publications.include.adjustAtAnyTime;</description>
+		<separator/>
 		<checkbox id="confirm-authorship-checkbox"
 				oncommand="Zotero_Publications_Dialog.updateNextButton()"/>
 	</wizardpage>

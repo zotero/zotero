@@ -137,11 +137,6 @@ Zotero.Collections = function() {
 	
 	
 	this.getCollectionsContainingItems = function (itemIDs, asIDs) {
-		// If an unreasonable number of items, don't try
-		if (itemIDs.length > 100) {
-			return Zotero.Promise.resolve([]);
-		}
-		
 		var sql = "SELECT collectionID FROM collections WHERE ";
 		var sqlParams = [];
 		for (let id of itemIDs) {

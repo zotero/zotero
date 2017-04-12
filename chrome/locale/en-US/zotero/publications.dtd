@@ -3,6 +3,7 @@
 <!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
 <!ENTITY zotero.publications.include.checkbox.files "Include files">
 <!ENTITY zotero.publications.include.checkbox.notes "Include notes">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
 
 <!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
 <!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">

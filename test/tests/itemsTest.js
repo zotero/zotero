@@ -15,6 +15,144 @@ describe("Zotero.Items", function () {
 	})
 	
 	
+	describe("#addToPublications", function () {
+		it("should add an item to My Publications", function* () {
+			var item = yield createDataObject('item');
+			yield Zotero.Items.addToPublications([item]);
+			assert.isTrue(item.inPublications);
+			assert.equal(
+				(yield Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id)),
+				1
+			);
+		});
+		
+		describe("#license", function () {
+			it("should set a license if specified", function* () {
+				var item = createUnsavedDataObject('item');
+				item.setField('rights', 'Test');
+				yield item.saveTx();
+				yield Zotero.Items.addToPublications(
+					[item],
+					{
+						license: 'reserved',
+						licenseName: 'All Rights Reserved',
+						keepRights: false
+					}
+				);
+				assert.equal(item.getField('rights'), 'All Rights Reserved');
+			});
+			
+			it("should keep existing Rights field if .keepRights is true", function* () {
+				var item1 = createUnsavedDataObject('item');
+				item1.setField('rights', 'Test');
+				yield item1.saveTx();
+				var item2 = yield createDataObject('item');
+				yield Zotero.Items.addToPublications(
+					[item1, item2],
+					{
+						license: 'reserved',
+						licenseName: 'All Rights Reserved',
+						keepRights: true
+					}
+				);
+				assert.equal(item1.getField('rights'), 'Test');
+				assert.equal(item2.getField('rights'), 'All Rights Reserved');
+			});
+			
+			it("shouldn't set a license if not specified", function* () {
+				var item = createUnsavedDataObject('item');
+				item.setField('rights', 'Test');
+				yield item.saveTx();
+				yield Zotero.Items.addToPublications([item]);
+				assert.equal(item.getField('rights'), 'Test');
+			});
+		});
+		
+		it("should add child notes if .childNotes is true", function* () {
+			var item = yield createDataObject('item');
+			var note = yield createDataObject('item', { itemType: 'note', parentID: item.id });
+			var attachment = yield Zotero.Attachments.linkFromURL({
+				url: "http://example.com",
+				parentItemID: item.id,
+				title: "Example"
+			});
+			
+			yield Zotero.Items.addToPublications([item], { childNotes: true });
+			assert.isTrue(note.inPublications);
+			assert.equal(
+				(yield Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", note.id)),
+				1
+			);
+			assert.isFalse(attachment.inPublications);
+		});
+		
+		it("should add child link attachments if .childLinks is true", function* () {
+			var item = yield createDataObject('item');
+			var attachment1 = yield Zotero.Attachments.linkFromURL({
+				url: "http://example.com",
+				parentItemID: item.id,
+				title: "Example"
+			});
+			var attachment2 = yield importFileAttachment('test.png', { parentItemID: item.id });
+			var note = yield createDataObject('item', { itemType: 'note', parentID: item.id });
+			
+			yield Zotero.Items.addToPublications([item], { childLinks: true });
+			assert.isTrue(attachment1.inPublications);
+			assert.equal(
+				(yield Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", attachment1.id)),
+				1
+			);
+			assert.isFalse(attachment2.inPublications);
+			assert.isFalse(note.inPublications);
+		});
+		
+		it("should add child file attachments if .childFileAttachments is true", function* () {
+			var item = yield createDataObject('item');
+			var attachment1 = yield importFileAttachment('test.png', { parentItemID: item.id });
+			var attachment2 = yield Zotero.Attachments.linkFromURL({
+				url: "http://example.com",
+				parentItemID: item.id,
+				title: "Example"
+			});
+			var note = yield createDataObject('item', { itemType: 'note', parentID: item.id });
+			
+			yield Zotero.Items.addToPublications([item], { childFileAttachments: true });
+			assert.isTrue(attachment1.inPublications);
+			assert.equal(
+				(yield Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", attachment1.id)),
+				1
+			);
+			assert.isFalse(attachment2.inPublications);
+			assert.isFalse(note.inPublications);
+		});
+	});
+	
+	
+	describe("#removeFromPublications", function () {
+		it("should remove an item from My Publications", function* () {
+			var item = yield createDataObject('item');
+			item.inPublications = true;
+			yield item.saveTx();
+			assert.equal(
+				(yield Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id)),
+				1
+			);
+			yield Zotero.Items.removeFromPublications([item]);
+			assert.isFalse(item.inPublications);
+			assert.equal(
+				(yield Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id)),
+				0
+			);
+		});
+	});
+	
+	
 	describe("#merge()", function () {
 		it("should merge two items", function* () {
 			var item1 = yield createDataObject('item');

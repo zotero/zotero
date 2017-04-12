@@ -421,8 +421,7 @@
 	list-style-image: url('chrome://zotero/skin/arrow_refresh.png');
 }
 
-.zotero-menuitem-delete-collection
-{
+.zotero-menuitem-delete-collection, .zotero-menuitem-remove-items {
 	list-style-image: url('chrome://zotero/skin/toolbar-collection-delete.png');
 }
 

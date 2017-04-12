@@ -989,6 +989,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					var unfiled = condition.operator == 'true';
 					continue;
 				
+				case 'publications':
+					var publications = condition.operator == 'true';
+					continue;
+				
 				// Search subcollections
 				case 'recursive':
 					var recursive = condition.operator == 'true';
@@ -1043,6 +1047,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 			+ "(SELECT itemID FROM itemAttachments WHERE parentItemID IS NOT NULL "
 			+ "UNION SELECT itemID FROM itemNotes WHERE parentItemID IS NOT NULL)"
 			+ ")";
+	}
+	
+	if (publications) {
+		sql += " AND (itemID IN (SELECT itemID FROM publicationsItems))";
 	}
 	
 	// Limit to library search belongs to

@@ -100,6 +100,14 @@ Zotero.SearchConditions = new function(){
 			},
 			
 			{
+				name: 'publications',
+				operators: {
+					true: true,
+					false: true
+				}
+			},
+			
+			{
 				name: 'includeParentsAndChildren',
 				operators: {
 					true: true,

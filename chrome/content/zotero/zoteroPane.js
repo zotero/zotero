@@ -546,19 +546,23 @@ var ZoteroPane = new function()
 	 */
 	function setHighlightedRowsCallback() {
 		var itemIDs = ZoteroPane_Local.getSelectedItems(true);
-		if (itemIDs && itemIDs.length) {
-			Zotero.Promise.coroutine(function* () {
-				var collectionIDs = yield Zotero.Collections.getCollectionsContainingItems(itemIDs, true);
-				var ids = collectionIDs.map(id => "C" + id);
-				Zotero.debug(Zotero.Items.get(itemIDs).some(item => !item.publication));
-				if (!Zotero.Items.get(itemIDs).some(item => !item.publication)) {
-					ids.push("P");
-				}
-				if (ids.length) {
-					ZoteroPane_Local.collectionsView.setHighlightedRows(ids);
-				}
-			})();
-		}
+		// If no items or an unreasonable number, don't try
+		if (!itemIDs || !itemIDs.length || itemIDs.length > 100) return;
+		
+		Zotero.Promise.coroutine(function* () {
+			var collectionIDs = yield Zotero.Collections.getCollectionsContainingItems(itemIDs, true);
+			var ids = collectionIDs.map(id => "C" + id);
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			var allInPublications = Zotero.Items.get(itemIDs).every((item) => {
+				return item.libraryID == userLibraryID && item.inPublications;
+			})
+			if (allInPublications) {
+				ids.push("P" + Zotero.Libraries.userLibraryID);
+			}
+			if (ids.length) {
+				ZoteroPane_Local.collectionsView.setHighlightedRows(ids);
+			}
+		})();
 	}
 	
 	
@@ -1233,6 +1237,9 @@ var ZoteroPane = new function()
 			this._updateToolbarIconsForRow(collectionTreeRow);
 			
 			this.itemsView = new Zotero.ItemTreeView(collectionTreeRow);
+			if (collectionTreeRow.isPublications()) {
+				this.itemsView.expandAll = true;
+			}
 			this.itemsView.onError = function () {
 				// Don't reload last folder, in case that's the problem
 				Zotero.Prefs.clear('lastViewedFolder');
@@ -1391,30 +1398,21 @@ var ZoteroPane = new function()
 				return false;
 			}
 			
+			var selectedItems = this.itemsView.getSelectedItems();
+			
+			// Display buttons at top of item pane depending on context. This needs to run even if the
+			// selection hasn't changed, because the selected items might have been modified.
+			this.updateItemPaneButtons(selectedItems);
+			
 			// Check if selection has actually changed. The onselect event that calls this
 			// can be called in various situations where the selection didn't actually change,
 			// such as whenever selectEventsSuppressed is set to false.
-			var selectedItems = this.itemsView.getSelectedItems();
 			var ids = selectedItems.map(item => item.id);
 			ids.sort();
 			if (ids.length && Zotero.Utilities.arrayEquals(_lastSelectedItems, ids)) {
 				return false;
 			}
 			_lastSelectedItems = ids;
-			
-			// Display restore/delete buttons depending on context
-			if (this.itemsView.selection.count) {
-				document.getElementById('zotero-item-pane-top-buttons-trash').hidden
-					= !this.getCollectionTreeRow().isTrash()
-						|| _nonDeletedItemsSelected(this.itemsView);
-
-				document.getElementById('zotero-item-pane-top-buttons-feed').hidden
-					= !this.getCollectionTreeRow().isFeed()
-			}
-			else {
-				document.getElementById('zotero-item-pane-top-buttons-trash').hidden = true;
-				document.getElementById('zotero-item-pane-top-buttons-feed').hidden = true;
-			}
 			
 			var tabs = document.getElementById('zotero-view-tabbox');
 			
@@ -1595,33 +1593,47 @@ var ZoteroPane = new function()
 	
 	
 	/**
-	 * Check if any selected items in the passed (trash) treeview are not deleted
+	 * Display buttons at top of item pane depending on context
 	 *
-	 * @param	{nsITreeView}
-	 * @return	{Boolean}
+	 * @param {Zotero.Item[]}
 	 */
-	function _nonDeletedItemsSelected(itemsView) {
-		var start = {};
-		var end = {};
-		for (var i=0, len=itemsView.selection.getRangeCount(); i<len; i++) {
-			itemsView.selection.getRangeAt(i, start, end);
-			for (var j=start.value; j<=end.value; j++) {
-				let itemRow = itemsView.getRow(j);
-				
-				// DEBUG: Not sure how this is possible, but it was happening while switching
-				// to an item in the trash in a collapsed library from another library
-				if (!itemRow) {
-					Zotero.debug("Item row " + j + " not found in _nonDeletedItemsSelected()", 2);
-					continue;
-				}
-				
-				if (!itemRow.ref.deleted) {
-					return true;
-				}
-			}
+	this.updateItemPaneButtons = function (selectedItems) {
+		if (!selectedItems.length) {
+			document.querySelectorAll('.zotero-item-pane-top-buttons').forEach(x => x.hidden = true);
+			return;
 		}
-		return false;
-	}
+		
+		// My Publications buttons
+		let isPublications = this.getCollectionTreeRow().isPublications();
+		let myPublicationsButtons = document.getElementById('zotero-item-pane-top-buttons-my-publications');
+		let regularItemsSelected = selectedItems.some(item => item.isRegularItem());
+		let myPublicationsShown = isPublications && !regularItemsSelected;
+		myPublicationsButtons.hidden = !myPublicationsShown;
+		if (myPublicationsShown) {
+			let button = myPublicationsButtons.firstChild;
+			let hiddenItemsSelected = selectedItems.some(item => !item.inPublications);
+			let str, onclick;
+			if (hiddenItemsSelected) {
+				str = 'showInMyPublications';
+				onclick = () => Zotero.Items.addToPublications(selectedItems);
+			}
+			else {
+				str = 'hideFromMyPublications';
+				onclick = () => Zotero.Items.removeFromPublications(selectedItems);
+			}
+			button.label = Zotero.getString('pane.item.' + str);
+			button.onclick = onclick;
+		}
+		
+		// Trash button
+		let nonDeletedItemsSelected = selectedItems.some(item => !item.deleted);
+		document.getElementById('zotero-item-pane-top-buttons-trash').hidden
+			= !this.getCollectionTreeRow().isTrash() || nonDeletedItemsSelected;
+		
+		// Feed buttons
+		document.getElementById('zotero-item-pane-top-buttons-feed').hidden
+			= !this.getCollectionTreeRow().isFeed()
+	};
 	
 	
 	/**
@@ -1805,7 +1817,13 @@ var ZoteroPane = new function()
 		};
 		
 		if (collectionTreeRow.isPublications()) {
-			var prompt = toDelete;
+			let toRemoveFromPublications = {
+				title: Zotero.getString('pane.items.removeFromPublications.title'),
+				text: Zotero.getString(
+					'pane.items.removeFromPublications' + (this.itemsView.selection.count > 1 ? '.multiple' : '')
+				)
+			};
+			var prompt = force ? toTrash : toRemoveFromPublications;
 		}
 		else if (collectionTreeRow.isLibrary(true)) {
 			// In library, don't prompt if meta key was pressed
@@ -2558,8 +2576,6 @@ var ZoteroPane = new function()
 		}
 		else if (collectionTreeRow.isPublications()) {
 			show = [
-				'sync',
-				'sep1',
 				'exportFile'
 			];
 		}
@@ -2647,7 +2663,7 @@ var ZoteroPane = new function()
 			'sep2',
 			'toggleRead',
 			'duplicateItem',
-			'deleteItem',
+			'removeItems',
 			'restoreToLibrary',
 			'moveToTrash',
 			'deleteFromLibrary',
@@ -2687,9 +2703,6 @@ var ZoteroPane = new function()
 		if (isTrash) {
 			show.push(m.deleteFromLibrary);
 			show.push(m.restoreToLibrary);
-		}
-		else if (collectionTreeRow.isPublications()) {
-			show.push(m.deleteFromLibrary);
 		}
 		else if (!collectionTreeRow.isFeed()) {
 			show.push(m.moveToTrash);
@@ -2852,7 +2865,7 @@ var ZoteroPane = new function()
 							menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.item.markAsRead'));
 						}
 					}
-					else {
+					else if (!collectionTreeRow.isPublications()) {
 						show.push(m.duplicateItem);
 					}
 				}
@@ -2877,14 +2890,15 @@ var ZoteroPane = new function()
 				show.push(m.showInLibrary, m.sep1);
 			}
 			
-			disable.push(m.showInLibrary, m.duplicateItem, m.deleteItem,
+			disable.push(m.showInLibrary, m.duplicateItem, m.removeItems,
 				m.moveToTrash, m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
 		}
 		
 		if ((!collectionTreeRow.editable || collectionTreeRow.isPublications()) && !collectionTreeRow.isFeed()) {
 			for (let i in m) {
-				// Still allow export/bib/report/read for non-editable views
+				// Still allow some options for non-editable views
 				switch (i) {
+					case 'showInLibrary':
 					case 'exportItems':
 					case 'createBib':
 					case 'loadReport':
@@ -2901,7 +2915,8 @@ var ZoteroPane = new function()
 				else if (collectionTreeRow.isPublications()) {
 					switch (i) {
 					case 'addNote':
-					case 'deleteFromLibrary':
+					case 'removeItems':
+					case 'moveToTrash':
 						continue;
 					}
 				}
@@ -2910,10 +2925,13 @@ var ZoteroPane = new function()
 		}
 		
 		// Remove from collection
-		if (collectionTreeRow.isCollection() && !(item && !item.isTopLevelItem()))
-		{
-			menu.childNodes[m.deleteItem].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
-			show.push(m.deleteItem);
+		if (collectionTreeRow.isCollection() && (!item || item.isTopLevelItem())) {
+			menu.childNodes[m.removeItems].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
+			show.push(m.removeItems);
+		}
+		else if (collectionTreeRow.isPublications()) {
+			menu.childNodes[m.removeItems].setAttribute('label', Zotero.getString('pane.items.menu.removeFromPublications' + multiple));
+			show.push(m.removeItems);
 		}
 		
 		// Set labels, plural if necessary
