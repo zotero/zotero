@@ -1027,6 +1027,16 @@ Zotero.Integration.Document.prototype._getSession = Zotero.Promise.coroutine(fun
 			} catch(e) {
 				// make sure style is defined
 				if(e instanceof Zotero.Exception.Alert && e.name === "integration.error.invalidStyle") {
+					if (data.style.styleID) {
+						let displayError = Zotero.getString("integration.error.styleMissing", data.style.styleID);
+						if (/^https?:\/\/(www\.)?(zotero\.org|citationstyles\.org)/.test(data.style.styleID) || 
+							me._doc.displayAlert(displayError, DIALOG_ICON_WARNING, DIALOG_BUTTONS_YES_NO)) {
+							
+							yield Zotero.Styles.install({url: data.style.styleID}, data.style.styleID, true);
+							yield this._session.setData(data, true);
+							return Zotero.Promise.resolve(this._session);
+						}
+					}
 					return this._session.setDocPrefs(this._doc, this._app.primaryFieldType,
 					this._app.secondaryFieldType).then(function(status) {			
 						me._doc.setDocumentData(me._session.data.serializeXML());
@@ -2081,10 +2091,6 @@ Zotero.Integration.Session.prototype.setData = Zotero.Promise.coroutine(function
 		try {
 			yield Zotero.Styles.init();
 			var getStyle = Zotero.Styles.get(data.style.styleID);
-			if (!getStyle) {
-				yield Zotero.Styles.install({url: data.style.styleID}, data.style.styleID, true);
-				getStyle = Zotero.Styles.get(data.style.styleID);
-			}
 			data.style.hasBibliography = getStyle.hasBibliography;
 			this.style = getStyle.getCiteProc(data.style.locale, data.prefs.automaticJournalAbbreviations);
 			this.style.setOutputFormat("rtf");
@@ -2092,7 +2098,6 @@ Zotero.Integration.Session.prototype.setData = Zotero.Promise.coroutine(function
 			this.dateModified = new Object();
 		} catch (e) {
 			Zotero.logError(e);
-			data.style.styleID = undefined;
 			throw new Zotero.Exception.Alert("integration.error.invalidStyle");
 		}
 		
