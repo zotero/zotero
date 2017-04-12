@@ -45,7 +45,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 	 * Initialize some variables and prepare event listeners for when chrome is done
 	 * loading
 	 */
-	this.init = function () {
+	this.init = Zotero.Promise.coroutine(function* () {
 		// Set font size from pref
 		// Affects bibliography.xul and integrationDocPrefs.xul
 		var bibContainer = document.getElementById("zotero-bibliography-container");
@@ -67,21 +67,22 @@ var Zotero_File_Interface_Bibliography = new function() {
 			_io.style = Zotero.Prefs.get("export.lastStyle");
 		}
 		
+		// Initialize styles
+		yield Zotero.Styles.init();
+		
 		// add styles to list
+		
 		var styles = Zotero.Styles.getVisible();
-		var index = 0;
-		var nStyles = styles.length;
 		var selectIndex = null;
-		for(var i=0; i<nStyles; i++) {
+		for (let i=0; i < styles.length; i++) {
 			var itemNode = document.createElement("listitem");
 			itemNode.setAttribute("value", styles[i].styleID);
 			itemNode.setAttribute("label", styles[i].title);
 			listbox.appendChild(itemNode);
 			
 			if(styles[i].styleID == _io.style) {
-				selectIndex = index;
+				selectIndex = i;
 			}
-			index++;
 		}
 		
 		let requestedLocale;
@@ -171,7 +172,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		
 		// set style to false, in case this is cancelled
 		_io.style = false;
-	};
+	});
 
 	/*
 	 * Called when locale is changed

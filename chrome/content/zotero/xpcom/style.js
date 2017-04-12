@@ -49,7 +49,6 @@ Zotero.Styles = new function() {
 	this.reinit = Zotero.Promise.coroutine(function* () {
 		Zotero.debug("Initializing styles");
 		var start = new Date;
-		_initialized = true;
 		
 		// Upgrade style locale prefs for 4.0.27
 		var bibliographyLocale = Zotero.Prefs.get("export.bibliographyLocale");
@@ -114,6 +113,7 @@ Zotero.Styles = new function() {
 				_renamedStyles = xmlhttp.response;
 			}
 		})
+		_initialized = true;
 	});
 	this.init = Zotero.lazy(this.reinit);
 	
@@ -190,7 +190,7 @@ Zotero.Styles = new function() {
 		}
 		
 		return _styles[id] || false;
-	}
+	};
 	
 	/**
 	 * Gets all visible styles
@@ -238,24 +238,36 @@ Zotero.Styles = new function() {
 	/**
 	 * Installs a style file, getting the contents of an nsIFile and showing appropriate
 	 * error messages
-	 * @param {String|nsIFile} style An nsIFile representing a style on disk, or a string
-	 *     containing the style data
+	 * @param {Object} style An object with one of the following properties
+	 * 		- file: An nsIFile representing a style on disk
+	 * 		- url: A url of the location of the style (local or remote)
+	 * 		- string: A string containing the style data
 	 * @param {String} origin The origin of the style, either a filename or URL, to be
 	 *     displayed in dialogs referencing the style
 	 * @param {Boolean} [silent=false] Skip prompts
 	 */
 	this.install = Zotero.Promise.coroutine(function* (style, origin, silent=false) {
 		var styleTitle;
+		var warnDeprecated;
+		if (style instanceof Components.interfaces.nsIFile) {
+			warnDeprecated = true;
+			style = {file: style};
+		} else if (typeof style == 'string') {
+			warnDeprecated = true;
+			style = {string: style};
+		}
+		if (warnDeprecated) {
+			Zotero.debug("Zotero.Styles.install() now takes a style object as first argument -- update your code", 2);
+		}
 		
 		try {
-			if (style instanceof Components.interfaces.nsIFile) {
-				// handle nsIFiles
-				var url = Services.io.newFileURI(style);
-				var xmlhttp = yield Zotero.HTTP.request("GET", url.spec);
-				styleTitle = yield _install(xmlhttp.responseText, style.leafName, false, silent);
-			} else {
-				styleTitle = yield _install(style, origin, false, silent);
+			if (style.file) {
+				style.string = yield Zotero.File.getContentsAsync(style.file);
 			}
+			else if (style.url) {
+				style.string = yield Zotero.File.getContentsFromURLAsync(style.url);
+			}
+			styleTitle = yield _install(style.string, origin, false, silent);
 		}
 		catch (error) {
 			// Unless user cancelled, show an alert with the error

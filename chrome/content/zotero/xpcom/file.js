@@ -335,8 +335,8 @@ Zotero.File = new function(){
 	/*
 	 * Return a promise for the contents of a URL as a string
 	 */
-	this.getContentsFromURLAsync = function (url) {
-		return Zotero.HTTP.request("GET", url, { responseType: "text" })
+	this.getContentsFromURLAsync = function (url, options={}) {
+		return Zotero.HTTP.request("GET", url, Object.assign(options, { responseType: "text" }))
 		.then(function (xmlhttp) {
 			return xmlhttp.response;
 		});

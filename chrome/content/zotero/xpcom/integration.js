@@ -40,6 +40,19 @@ const FORCE_CITATIONS_RESET_TEXT = 2;
 // this is used only for update checking
 const INTEGRATION_PLUGINS = ["zoteroMacWordIntegration@zotero.org",
 	"zoteroOpenOfficeIntegration@zotero.org", "zoteroWinWordIntegration@zotero.org"];
+	
+// These must match the constants defined in zoteroIntegration.idl 
+const DIALOG_ICON_STOP = 0;
+const DIALOG_ICON_WARNING = 1;
+const DIALOG_ICON_CAUTION = 2;
+
+const DIALOG_BUTTONS_OK = 0;
+const DIALOG_BUTTONS_OK_CANCEL = 1;
+const DIALOG_BUTTONS_YES_NO = 2;
+const DIALOG_BUTTONS_YES_NO_CANCEL = 3;
+
+const NOTE_FOOTNOTE = 1;
+const NOTE_ENDNOTE = 2;
 
 Zotero.Integration = new function() {
 	Components.utils.import("resource://gre/modules/Services.jsm");
@@ -210,6 +223,19 @@ Zotero.Integration = new function() {
 		};
 	}
 	
+	this.getApplication = function(agent, command, docId) {
+		// Try to load the appropriate Zotero component; otherwise display an error
+		try {
+			var componentClass = "@zotero.org/Zotero/integration/application?agent="+agent+";1";
+			Zotero.debug("Integration: Instantiating "+componentClass+" for command "+command+(docId ? " with doc "+docId : ""));
+			return Components.classes[componentClass]
+				.getService(Components.interfaces.zoteroIntegrationApplication);
+		} catch(e) {
+			throw new Zotero.Exception.Alert("integration.error.notInstalled",
+				[], "integration.error.title");
+		}	
+	},
+	
 	/**
 	 * Executes an integration command, first checking to make sure that versions are compatible
 	 */
@@ -230,17 +256,8 @@ Zotero.Integration = new function() {
 			inProgress = true;
 			
 			// Check integration component versions
-			_checkPluginVersions().then(function() {		
-				// Try to load the appropriate Zotero component; otherwise display an error
-				try {
-					var componentClass = "@zotero.org/Zotero/integration/application?agent="+agent+";1";
-					Zotero.debug("Integration: Instantiating "+componentClass+" for command "+command+(docId ? " with doc "+docId : ""));
-					var application = Components.classes[componentClass]
-						.getService(Components.interfaces.zoteroIntegrationApplication);
-				} catch(e) {
-					throw new Zotero.Exception.Alert("integration.error.notInstalled",
-						[], "integration.error.title");
-				}
+			return _checkPluginVersions().then(function() {		
+				var application = Zotero.Integration.getApplication(agent, command, docId);
 				
 				// Try to execute the command; otherwise display an error in alert service or word processor
 				// (depending on what is possible)
@@ -267,9 +284,7 @@ Zotero.Integration = new function() {
 							if(document) {
 								try {
 									document.activate();
-									document.displayAlert(displayError,
-											Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-											Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
+									document.displayAlert(displayError, DIALOG_ICON_STOP, DIALOG_BUTTONS_OK);
 								} catch(e) {
 									showErrorInFirefox = true;
 								}
@@ -821,10 +836,7 @@ Zotero.Integration.CorruptFieldException.prototype = {
 			field = this.fieldGetter._fields[this.fieldIndex];
 		field.select();
 		this.fieldGetter._doc.activate();
-		var result = this.fieldGetter._doc.displayAlert(msg,
-			Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
-			Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_YES_NO_CANCEL);
-		
+		var result = this.fieldGetter._doc.displayAlert(msg, DIALOG_ICON_CAUTION, DIALOG_BUTTONS_YES_NO_CANCEL); 
 		if(result == 0) {
 			return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("document update"));
 		} else if(result == 1) {		// No
@@ -878,9 +890,7 @@ Zotero.Integration.CorruptBibliographyException.prototype = {
 		
 		var msg = Zotero.getString("integration.corruptBibliography")+'\n\n'+
 				  Zotero.getString('integration.corruptBibliography.description');
-		var result = this.fieldGetter._doc.displayAlert(msg, 
-					Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
-					Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL);
+		var result = this.fieldGetter._doc.displayAlert(msg, DIALOG_ICON_CAUTION, DIALOG_BUTTONS_OK_CANCEL);
 		if(result == 0) {
 			return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("clearing corrupted bibliography"));
 		} else {
@@ -928,7 +938,7 @@ Zotero.Integration.Document.prototype._createNewSession = function _createNewSes
  *    dontRunSetDocPrefs is true and no session was found, or rejected with
  *    Zotero.Exception.UserCancelled if the document preferences window was cancelled.
  */
-Zotero.Integration.Document.prototype._getSession = function _getSession(require, dontRunSetDocPrefs) {
+Zotero.Integration.Document.prototype._getSession = Zotero.Promise.coroutine(function *(require, dontRunSetDocPrefs) {
 	var dataString = this._doc.getDocumentData(),
 		data,
 		me = this;
@@ -967,7 +977,7 @@ Zotero.Integration.Document.prototype._getSession = function _getSession(require
 		
 		// Set doc prefs if no data string yet
 		this._session = this._createNewSession(data);
-		this._session.setData(data);
+		yield this._session.setData(data);
 		if(dontRunSetDocPrefs) return Zotero.Promise.resolve(false);
 		
 		return this._session.setDocPrefs(this._doc, this._app.primaryFieldType,
@@ -991,8 +1001,7 @@ Zotero.Integration.Document.prototype._getSession = function _getSession(require
 			}
 			
 			var warning = this._doc.displayAlert(Zotero.getString("integration.upgradeWarning"),
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_WARNING,
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL);
+				DIALOG_ICON_WARNING, DIALOG_BUTTONS_OK_CANCEL);
 			if(!warning) {
 				return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("document upgrade"));
 			}
@@ -1007,15 +1016,27 @@ Zotero.Integration.Document.prototype._getSession = function _getSession(require
 					[], "integration.error.title"));
 		}
 		
-		if(Zotero.Integration.sessions[data.sessionID]) {
+		if (Zotero.Integration.sessions[data.sessionID]) {
+			// If communication occured with this document since restart
 			this._session = Zotero.Integration.sessions[data.sessionID];
 		} else {
+			// Document has zotero data, but has not communicated since Zotero restart
 			this._session = this._createNewSession(data);
 			try {
-				this._session.setData(data);
+				yield this._session.setData(data);
 			} catch(e) {
 				// make sure style is defined
 				if(e instanceof Zotero.Exception.Alert && e.name === "integration.error.invalidStyle") {
+					if (data.style.styleID) {
+						let displayError = Zotero.getString("integration.error.styleMissing", data.style.styleID);
+						if (/^https?:\/\/(www\.)?(zotero\.org|citationstyles\.org)/.test(data.style.styleID) || 
+							me._doc.displayAlert(displayError, DIALOG_ICON_WARNING, DIALOG_BUTTONS_YES_NO)) {
+							
+							yield Zotero.Styles.install({url: data.style.styleID}, data.style.styleID, true);
+							yield this._session.setData(data, true);
+							return Zotero.Promise.resolve(this._session);
+						}
+					}
 					return this._session.setDocPrefs(this._doc, this._app.primaryFieldType,
 					this._app.secondaryFieldType).then(function(status) {			
 						me._doc.setDocumentData(me._session.data.serializeXML());
@@ -1027,12 +1048,11 @@ Zotero.Integration.Document.prototype._getSession = function _getSession(require
 				}
 			}
 			
-			this._doc.setDocumentData(this._session.data.serializeXML());
 			this._session.reload = true;
 		}
 		return Zotero.Promise.resolve(this._session);
 	}
-};
+});
 
 /**
  * Adds a citation to the current document.
@@ -1156,8 +1176,7 @@ Zotero.Integration.Document.prototype.removeCodes = function() {
 		return fieldGetter.get()
 	}).then(function(fields) {
 		var result = me._doc.displayAlert(Zotero.getString("integration.removeCodesWarning"),
-					Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_WARNING,
-					Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL);
+					DIALOG_ICON_WARNING, DIALOG_BUTTONS_OK_CANCEL);
 		if(result) {
 			for(var i=fields.length-1; i>=0; i--) {
 				fields[i].removeCode();
@@ -1301,8 +1320,8 @@ Zotero.Integration.Fields.prototype.addField = function(note) {
 	var field = this._doc.cursorInField(this._session.data.prefs['fieldType']);
 	if(field) {
 		if(!this._doc.displayAlert(Zotero.getString("integration.replace"),
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL)) {
+				DIALOG_ICON_STOP,
+				DIALOG_BUTTONS_OK_CANCEL)) {
 			return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("inserting citation"));
 		}
 	}
@@ -1607,8 +1626,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function* (forceCitations,
 						field.select();
 						var result = this._doc.displayAlert(
 							Zotero.getString("integration.citationChanged")+"\n\n"+Zotero.getString("integration.citationChanged.description"), 
-							Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
-							Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_YES_NO);
+							DIALOG_ICON_CAUTION, DIALOG_BUTTONS_YES_NO);
 						if(result) {
 							citation.properties.dontUpdate = true;
 						}
@@ -1752,8 +1770,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 						+ "Current:  " + field.getText()
 					);
 					if(!this._doc.displayAlert(Zotero.getString("integration.citationChanged.edit"),
-							Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_WARNING,
-							Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL)) {
+							DIALOG_ICON_WARNING, DIALOG_BUTTONS_OK_CANCEL)) {
 						throw new Zotero.Exception.UserCancelled("editing citation");
 					}
 				}
@@ -2066,30 +2083,30 @@ Zotero.Integration.Session.prototype.resetRequest = function(doc) {
  *     regardless of whether it has changed. This is desirable if the
  *     automaticJournalAbbreviations or locale has changed.
  */
-Zotero.Integration.Session.prototype.setData = function(data, resetStyle) {
+Zotero.Integration.Session.prototype.setData = Zotero.Promise.coroutine(function *(data, resetStyle) {
 	var oldStyle = (this.data && this.data.style ? this.data.style : false);
 	this.data = data;
-	if(data.style.styleID && (!oldStyle || oldStyle.styleID != data.style.styleID || resetStyle)) {
+	if (data.style.styleID && (!oldStyle || oldStyle.styleID != data.style.styleID || resetStyle)) {
 		this.styleID = data.style.styleID;
 		try {
+			yield Zotero.Styles.init();
 			var getStyle = Zotero.Styles.get(data.style.styleID);
 			data.style.hasBibliography = getStyle.hasBibliography;
 			this.style = getStyle.getCiteProc(data.style.locale, data.prefs.automaticJournalAbbreviations);
 			this.style.setOutputFormat("rtf");
 			this.styleClass = getStyle.class;
 			this.dateModified = new Object();
-		} catch(e) {
+		} catch (e) {
 			Zotero.logError(e);
-			data.style.styleID = undefined;
 			throw new Zotero.Exception.Alert("integration.error.invalidStyle");
 		}
 		
 		return true;
-	} else if(oldStyle) {
+	} else if (oldStyle) {
 		data.style = oldStyle;
 	}
 	return false;
-}
+});
 
 /**
  * Displays a dialog to set document preferences
@@ -2097,12 +2114,12 @@ Zotero.Integration.Session.prototype.setData = function(data, resetStyle) {
  *    if there wasn't, or rejected with Zotero.Exception.UserCancelled if the dialog was
  *    cancelled.
  */
-Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldType, secondaryFieldType) {
+Zotero.Integration.Session.prototype.setDocPrefs = Zotero.Promise.coroutine(function* (doc, primaryFieldType, secondaryFieldType) {
 	var io = new function() {
 		this.wrappedJSObject = this;
 	};
 	
-	if(this.data) {
+	if (this.data) {
 		io.style = this.data.style.styleID;
 		io.locale = this.data.style.locale;
 		io.useEndnotes = this.data.prefs.noteType == 0 ? 0 : this.data.prefs.noteType-1;
@@ -2114,45 +2131,43 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		io.requireStoreReferences = !Zotero.Utilities.isEmpty(this.embeddedItems);
 	}
 	
-	var me = this;
-	return Zotero.Integration.displayDialog(doc,
-	'chrome://zotero/content/integration/integrationDocPrefs.xul', '', io)
-	.then(function() {
-		if (!io.style || !io.fieldType) {
-			throw new Zotero.Exception.UserCancelled("document preferences window");
-		}
-		
-		// set data
-		var oldData = me.data;
-		var data = new Zotero.Integration.DocumentData();
-		data.sessionID = oldData.sessionID;
-		data.style.styleID = io.style;
-		data.style.locale = io.locale;
-		data.prefs.fieldType = io.fieldType;
-		data.prefs.storeReferences = io.storeReferences;
-		data.prefs.automaticJournalAbbreviations = io.automaticJournalAbbreviations;
-		
-		var forceStyleReset = oldData
-			&& (
-				oldData.prefs.automaticJournalAbbreviations != data.prefs.automaticJournalAbbreviations
-				|| oldData.style.locale != io.locale
-			);
-		me.setData(data, forceStyleReset);
+	yield Zotero.Integration.displayDialog(doc,
+		'chrome://zotero/content/integration/integrationDocPrefs.xul', '', io);
+	
+	if (!io.style || !io.fieldType) {
+		throw new Zotero.Exception.UserCancelled("document preferences window");
+	}
+	
+	// set data
+	var oldData = this.data;
+	var data = new Zotero.Integration.DocumentData();
+	data.sessionID = oldData.sessionID;
+	data.style.styleID = io.style;
+	data.style.locale = io.locale;
+	data.prefs.fieldType = io.fieldType;
+	data.prefs.storeReferences = io.storeReferences;
+	data.prefs.automaticJournalAbbreviations = io.automaticJournalAbbreviations;
+	
+	var forceStyleReset = oldData
+		&& (
+			oldData.prefs.automaticJournalAbbreviations != data.prefs.automaticJournalAbbreviations
+			|| oldData.style.locale != io.locale
+		);
+	yield this.setData(data, forceStyleReset);
 
-		// need to do this after setting the data so that we know if it's a note style
-		me.data.prefs.noteType = me.style && me.styleClass == "note" ? io.useEndnotes+1 : 0;
-		
-		if(!oldData || oldData.style.styleID != data.style.styleID
-				|| oldData.prefs.noteType != data.prefs.noteType
-				|| oldData.prefs.fieldType != data.prefs.fieldType
-				|| oldData.prefs.automaticJournalAbbreviations != data.prefs.automaticJournalAbbreviations) {
-			// This will cause us to regenerate all citations
-			me.oldCitationIDs = {};
-		}
-		
-		return oldData || null;
-	});
-}
+	// need to do this after setting the data so that we know if it's a note style
+	this.data.prefs.noteType = this.style && this.styleClass == "note" ? io.useEndnotes+1 : 0;
+	
+	if (!oldData || oldData.style.styleID != data.style.styleID
+			|| oldData.prefs.noteType != data.prefs.noteType
+			|| oldData.prefs.fieldType != data.prefs.fieldType
+			|| oldData.prefs.automaticJournalAbbreviations != data.prefs.automaticJournalAbbreviations) {
+		// This will cause us to regenerate all citations
+		this.oldCitationIDs = {};
+	}
+	
+	return oldData || null;
+})
 
 /**
  * Reselects an item to replace a deleted item
@@ -2348,9 +2363,9 @@ Zotero.Integration.Session.prototype.lookupItems = Zotero.Promise.coroutine(func
 				this.updateIndices[index] = true;
 			}
 		} else {
-			if(citationItem.key) {
+			if(citationItem.key && citationItem.libraryID) {
 				// DEBUG: why no library id?
-				zoteroItem = Zotero.Items.getByLibraryAndKey(0, citationItem.key);
+				zoteroItem = Zotero.Items.getByLibraryAndKey(citationItem.libraryID, citationItem.key);
 			} else if(citationItem.itemID) {
 				zoteroItem = Zotero.Items.get(citationItem.itemID);
 			} else if(citationItem.id) {
@@ -3082,9 +3097,9 @@ Zotero.Integration.DocumentData.prototype.unserialize = function(input) {
 			"storeReferences":false};
 		if(prefParameters[2] == "note") {
 			if(prefParameters[4] == "1" || prefParameters[4] == "True") {
-				this.prefs.noteType = Components.interfaces.zoteroIntegrationDocument.NOTE_ENDNOTE;
+				this.prefs.noteType = NOTE_ENDNOTE;
 			} else {
-				this.prefs.noteType = Components.interfaces.zoteroIntegrationDocument.NOTE_FOOTNOTE;
+				this.prefs.noteType = NOTE_FOOTNOTE;
 			}
 		} else {
 			this.prefs.noteType = 0;
