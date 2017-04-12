@@ -191,13 +191,6 @@ describe("ZoteroPane", function() {
 			var mtime = "1441252524000";
 			var md5 = Zotero.Utilities.Internal.md5(text)
 			
-			var newStorageSyncTime = Math.round(new Date().getTime() / 1000);
-			setResponse({
-				method: "GET",
-				url: "users/1/laststoragesync",
-				status: 200,
-				text: "" + newStorageSyncTime
-			});
 			var s3Path = `pretend-s3/${item.key}`;
 			this.httpd.registerPathHandler(
 				`/users/1/items/${item.key}/file`,
