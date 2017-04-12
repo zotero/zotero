@@ -704,12 +704,18 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		*/
 		
 		// If field value has changed
-		if (this['_' + field] === value && field != 'synced') {
-			Zotero.debug("Field '" + field + "' has not changed", 4);
-			return false;
+		if (this['_' + field] === value) {
+			if (field == 'synced') {
+				Zotero.debug("Setting synced to " + value);
+			}
+			else {
+				Zotero.debug("Field '" + field + "' has not changed", 4);
+				return false;
+			}
 		}
-		
-		Zotero.debug("Field '" + field + "' has changed from '" + this['_' + field] + "' to '" + value + "'", 4);
+		else {
+			Zotero.debug("Field '" + field + "' has changed from '" + this['_' + field] + "' to '" + value + "'", 4);
+		}
 		
 		// Save a copy of the field before modifying
 		this._markFieldChange(field, this['_' + field]);
