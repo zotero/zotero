@@ -236,6 +236,88 @@ describe("Zotero.Integration", function () {
 				yield execCommand('addEditCitation', docID);
 				assert.isFalse(setDocumentDataSpy.called);
 			});
-		})
-	})
+			
+			describe('when style used in the document does not exist', function() {
+				var docID = this.fullTitle();
+				var displayAlertStub;
+				var style;
+				before(function* () {
+					displayAlertStub = sinon.stub(DocumentPluginDummy.Document.prototype, 'displayAlert').returns(0);
+				});
+				
+				beforeEach(function() {
+					// 🦉birds?
+					style = {styleID: "http://www.example.com/csl/waterbirds", locale: 'en-US'};
+					
+					// Make sure style not in library
+					try {
+						Zotero.Styles.get(style.styleID).remove();
+					} catch (e) {}
+					initDoc(docID, {style});
+					displayDialogStub.reset();
+					displayAlertStub.reset();
+				});
+				
+				after(function* () {
+					displayAlertStub.restore();
+				});
+			
+				describe('when the style is not from a trusted source', function() {
+					it('should download the style and not call doc.setDocumentData if user clicks YES', function* () {
+						setDocumentDataSpy.reset();
+						var styleInstallStub = sinon.stub(Zotero.Styles, "install").resolves();
+						var style = Zotero.Styles.get(styleID);
+						var styleGetCalledOnce = false;
+						var styleGetStub = sinon.stub(Zotero.Styles, 'get', function() {
+							if (!styleGetCalledOnce) {
+								styleGetCalledOnce = true;
+								return false;
+							}
+							return style;
+						});
+						displayAlertStub.returns(1);
+						yield execCommand('addEditCitation', docID);
+						assert.isTrue(displayAlertStub.calledOnce);
+						assert.isFalse(displayDialogStub.calledWith(applications[docID].doc, 'chrome://zotero/content/integration/integrationDocPrefs.xul'));
+						assert.isTrue(styleInstallStub.calledOnce);
+						assert.isFalse(setDocumentDataSpy.called);
+						assert.isOk(Zotero.Styles.get(style.styleID));
+						styleInstallStub.restore();
+						styleGetStub.restore();
+					});
+					
+					it('should prompt with the document preferences dialog if user clicks NO', function* () {
+						displayAlertStub.returns(0);
+						yield execCommand('addEditCitation', docID);
+						assert.isTrue(displayAlertStub.calledOnce);
+						// Prefs to select a new style and quickFormat
+						assert.isTrue(displayDialogStub.calledTwice);
+						assert.isNotOk(Zotero.Styles.get(style.styleID));
+					});	
+				});
+					
+				it('should download the style without prompting if it is from zotero.org', function* (){
+					initDoc(docID, {styleID: "http://www.zotero.org/styles/waterbirds", locale: 'en-US'});
+					var styleInstallStub = sinon.stub(Zotero.Styles, "install").resolves();
+					var style = Zotero.Styles.get(styleID);
+					var styleGetCalledOnce = false;
+					var styleGetStub = sinon.stub(Zotero.Styles, 'get', function() {
+						if (!styleGetCalledOnce) {
+							styleGetCalledOnce = true;
+							return false;
+						}
+						return style;
+					});
+					displayAlertStub.returns(1);
+					yield execCommand('addEditCitation', docID);
+					assert.isFalse(displayAlertStub.called);
+					assert.isFalse(displayDialogStub.calledWith(applications[docID].doc, 'chrome://zotero/content/integration/integrationDocPrefs.xul'));
+					assert.isTrue(styleInstallStub.calledOnce);
+					assert.isOk(Zotero.Styles.get(style.styleID));
+					styleInstallStub.restore();
+					styleGetStub.restore();	
+				});
+			});
+		});
+	});
 });
