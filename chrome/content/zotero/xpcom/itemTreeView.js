@@ -777,6 +777,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			}
 			
 			if (!allDeleted) {
+				// DEBUG: Search is async, so this might not work properly
 				quicksearch.doCommand();
 				madeChanges = true;
 				sort = true;
@@ -899,15 +900,6 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		// If single item is selected and was modified
 		else if (action == 'modify' && ids.length == 1 &&
 				savedSelection.length == 1 && savedSelection[0] == ids[0]) {
-			// If the item no longer matches the search term, clear the search
-			// DEBUG: Still needed/wanted? (and search is async, so doesn't work anyway,
-			// here or above)
-			if (quicksearch && this._rowMap[ids[0]] == undefined) {
-				Zotero.debug('Selected item no longer matches quicksearch -- clearing');
-				quicksearch.value = '';
-				quicksearch.doCommand();
-			}
-			
 			if (activeWindow) {
 				yield this.selectItem(ids[0]);
 			}
