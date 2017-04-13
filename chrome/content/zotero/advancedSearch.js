@@ -70,6 +70,7 @@ var ZoteroAdvancedSearch = new function() {
 			isLibrary: function () { return false; },
 			isCollection: function () { return false; },
 			isSearch: function () { return true; },
+			isPublications: () => false,
 			isFeed: () => false,
 			isShare: function () { return false; },
 			isTrash: function () { return false; }

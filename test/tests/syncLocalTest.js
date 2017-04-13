@@ -649,7 +649,7 @@ describe("Zotero.Sync.Data.Local", function() {
 		})
 		
 		it("should roll back partial object changes on error", function* () {
-			var libraryID = Zotero.Libraries.publicationsLibraryID;
+			var libraryID = Zotero.Libraries.userLibraryID;
 			var key1 = "AAAAAAAA";
 			var key2 = "BBBBBBBB";
 			var json = [
@@ -669,9 +669,8 @@ describe("Zotero.Sync.Data.Local", function() {
 					data: {
 						key: key2,
 						version: 1,
-						itemType: "journalArticle",
-						title: "Test B",
-						deleted: true // Not allowed in My Publications
+						itemType: "invalidType",
+						title: "Test B"
 					}
 				}
 			];
@@ -693,7 +692,7 @@ describe("Zotero.Sync.Data.Local", function() {
 		
 		before(function* () {
 			lib1 = Zotero.Libraries.userLibraryID;
-			lib2 = Zotero.Libraries.publicationsLibraryID;
+			lib2 = (yield getGroup()).libraryID;
 		});
 		
 		beforeEach(function* () {

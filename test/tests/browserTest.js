@@ -190,7 +190,7 @@ describe("Zotero_Browser", function () {
 		yield deferred.promise;
 		
 		yield loadZoteroPane(win);
-		yield selectLibrary(win, Zotero.Libraries.publicationsLibraryID);
+		yield win.ZoteroPane.collectionsView.selectByID("P" + Zotero.Libraries.userLibraryID);
 		
 		var promise = waitForDialog(function (dialog) {
 			assert.include(
@@ -212,7 +212,7 @@ describe("Zotero_Browser", function () {
 		yield deferred.promise;
 		
 		yield loadZoteroPane(win);
-		yield selectLibrary(win, Zotero.Libraries.publicationsLibraryID);
+		yield win.ZoteroPane.collectionsView.selectByID("P" + Zotero.Libraries.userLibraryID);
 		
 		var promise = waitForDialog(function (dialog) {
 			assert.include(

@@ -92,22 +92,15 @@ describe("Zotero.Library", function() {
 			assert.equal((yield Zotero.DB.valueQueryAsync("SELECT filesEditable FROM libraries WHERE libraryID=?", library.libraryID)), 0)
 		});
 		
-		it("should not be settable for user and publications libraries", function* () {
+		it("should not be settable for user libraries", function* () {
 			let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
 			assert.throws(function() {library.editable = false}, /^Cannot change _libraryEditable for user library$/, "does not allow setting user library as not editable");
-			
-			library = Zotero.Libraries.get(Zotero.Libraries.publicationsLibraryID);
-			assert.throws(function() {library.editable = false}, /^Cannot change _libraryEditable for publications library$/, "does not allow setting publications library as not editable");
 		});
 	});
 	
 	describe("#filesEditable", function() {
 		it("should always return true for user library", function() {
 			assert.isTrue(Zotero.Libraries.userLibrary.filesEditable);
-		});
-		
-		it("should always return true for publications library", function() {
-			assert.isTrue(Zotero.Libraries.get(Zotero.Libraries.publicationsLibraryID).filesEditable);
 		});
 		
 		it("should return files editable status", function() {
@@ -127,12 +120,9 @@ describe("Zotero.Library", function() {
 			assert.isFalse(Zotero.Libraries.isFilesEditable(library.libraryID), "sets files editable in cache to false");
 		});
 		
-		it("should not be settable for user and publications libraries", function* () {
+		it("should not be settable for user libraries", function* () {
 			let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
 			assert.throws(function() {library.filesEditable = false}, /^Cannot change _libraryFilesEditable for user library$/, "does not allow setting user library as not files editable");
-			
-			library = Zotero.Libraries.get(Zotero.Libraries.publicationsLibraryID);
-			assert.throws(function() {library.filesEditable = false}, /^Cannot change _libraryFilesEditable for publications library$/, "does not allow setting publications library as not files editable");
 		});
 	});
 	
@@ -153,12 +143,9 @@ describe("Zotero.Library", function() {
 			assert.equal((yield Zotero.DB.valueQueryAsync("SELECT archived FROM libraries WHERE libraryID=?", library.libraryID)), 0)
 		});
 		
-		it("should not be settable for user and publications libraries", function* () {
+		it("should not be settable for user libraries", function* () {
 			let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
 			assert.throws(() => library.archived = true, /^Cannot change _libraryArchived for user library$/, "does not allow setting user library as archived");
-			
-			library = Zotero.Libraries.get(Zotero.Libraries.publicationsLibraryID);
-			assert.throws(() => library.archived = true, /^Cannot change _libraryArchived for publications library$/, "does not allow setting publications library as archived");
 		});
 		
 		it("should only be settable on read-only library", function* () {
@@ -231,9 +218,6 @@ describe("Zotero.Library", function() {
 		it("should not allow erasing permanent libraries", function* () {
 			let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
 			yield assert.isRejected(library.eraseTx(), /^Error: Cannot erase library of type 'user'$/, "does not allow erasing user library");
-			
-			library = Zotero.Libraries.get(Zotero.Libraries.publicationsLibraryID);
-			yield assert.isRejected(library.eraseTx(), /^Error: Cannot erase library of type 'publications'$/, "does not allow erasing publications library");
 		});
 		
 		it("should not allow erasing unsaved libraries", function* () {

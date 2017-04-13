@@ -123,7 +123,7 @@ Zotero.URI = new function () {
 	 * @return {Zotero.Library|false}
 	 */
 	this.getPathLibrary = function (path) {
-		let matches = path.match(/^\/\/?users\/(\d+)(\/publications)?/);
+		let matches = path.match(/^\/\/?users\/(\d+));
 		if (matches) {
 			let userID = matches[1];
 			let currentUserID = Zotero.Users.getCurrentUserID();
@@ -131,9 +131,6 @@ Zotero.URI = new function () {
 				Zotero.debug("User ID from streaming server doesn't match current id! "
 					+ `(${userID} != ${currentUserID})`);
 				return false;
-			}
-			if (matches[2]) {
-				return Zotero.Libraries.get(Zotero.Libraries.publicationsLibraryID);
 			}
 			return Zotero.Libraries.userLibrary;
 		}
@@ -365,9 +362,7 @@ Zotero.URI = new function () {
 		let library;
 		if (uriParts[1] == 'users') {
 			let type = uriParts[4];
-			if (type == 'publications') {
-				library = Zotero.Libraries.get(Zotero.Libraries.publicationsLibraryID);
-			} else if (!type) {
+			if (!type) {
 				// Handles local and synced libraries
 				library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
 			} else {

@@ -630,7 +630,10 @@ var Zotero_Browser = new function() {
 		}
 		
 		if (!Zotero.isConnector) {
-			if (libraryID === Zotero.Libraries.publicationsLibraryID) {
+			if (ZoteroPane.collectionsView
+					&& ZoteroPane.collectionsView
+					&& ZoteroPane.collectionsView.selectedTreeRow
+					&& ZoteroPane.collectionsView.selectedTreeRow.isPublications()) {
 				Zotero_Browser.progress.Translation.cannotAddToPublications();
 				return;
 			}

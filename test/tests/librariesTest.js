@@ -5,7 +5,6 @@ describe("Zotero.Libraries", function() {
 	before(function* () {
 		builtInLibraries = [
 			Zotero.Libraries.userLibraryID,
-			Zotero.Libraries.publicationsLibraryID
 		];
 		
 		group = yield createGroup({ name: groupName });
@@ -15,11 +14,6 @@ describe("Zotero.Libraries", function() {
 		assert.isDefined(Zotero.Libraries.userLibraryID);
 		assert(Number.isInteger(Zotero.Libraries.userLibraryID), ".userLibraryID is an integer");
 		assert.isAbove(Zotero.Libraries.userLibraryID, 0);
-	});
-	it("should provide publications library ID as .publicationsLibraryID", function() {
-		assert.isDefined(Zotero.Libraries.publicationsLibraryID);
-		assert(Number.isInteger(Zotero.Libraries.publicationsLibraryID), ".publicationsLibraryID is an integer");
-		assert.isAbove(Zotero.Libraries.publicationsLibraryID, 0);
 	});
 	
 	describe("#getAll()", function() {
@@ -43,7 +37,6 @@ describe("Zotero.Libraries", function() {
 			
 			// Check sort
 			assert.equal(ids[0], Zotero.Libraries.userLibraryID);
-			assert.equal(ids[1], Zotero.Libraries.publicationsLibraryID);
 			
 			var last = "";
 			var collation = Zotero.getLocaleCollation();
@@ -76,7 +69,6 @@ describe("Zotero.Libraries", function() {
 	describe("#getName()", function() {
 		it("should return correct library name for built-in libraries", function() {
 			assert.equal(Zotero.Libraries.getName(Zotero.Libraries.userLibraryID), Zotero.getString('pane.collections.library'), "user library name is correct");
-			assert.equal(Zotero.Libraries.getName(Zotero.Libraries.publicationsLibraryID), Zotero.getString('pane.collections.publications'), "publications library name is correct");
 		});
 		it("should return correct name for a group library", function() {
 			assert.equal(Zotero.Libraries.getName(group.libraryID), groupName);
@@ -88,7 +80,6 @@ describe("Zotero.Libraries", function() {
 	describe("#getType()", function() {
 		it("should return correct library type for built-in libraries", function() {
 			assert.equal(Zotero.Libraries.getType(Zotero.Libraries.userLibraryID), 'user', "user library type is correct");
-			assert.equal(Zotero.Libraries.getType(Zotero.Libraries.publicationsLibraryID), 'publications', "publications library type is correct");
 		});
 		it("should return correct library type for a group library", function() {
 			assert.equal(Zotero.Libraries.getType(group.libraryID), 'group');
@@ -100,9 +91,6 @@ describe("Zotero.Libraries", function() {
 	describe("#isEditable()", function() {
 		it("should always return true for user library", function() {
 			assert.isTrue(Zotero.Libraries.isEditable(Zotero.Libraries.userLibraryID));
-		});
-		it("should always return true for publications library", function() {
-			assert.isTrue(Zotero.Libraries.isEditable(Zotero.Libraries.publicationsLibraryID));
 		});
 		it("should return correct state for a group library", function* () {
 			group.editable = true;
@@ -209,7 +197,6 @@ describe("Zotero.Libraries", function() {
 	describe("#hasTrash()", function() {
 		it("should return true for all library types", function() {
 			assert.isTrue(Zotero.Libraries.hasTrash(Zotero.Libraries.userLibraryID));
-			assert.isTrue(Zotero.Libraries.hasTrash(Zotero.Libraries.publicationsLibraryID));
 			assert.isTrue(Zotero.Libraries.hasTrash(group.libraryID));
 		});
 		it("should throw for invalid library ID", function() {
