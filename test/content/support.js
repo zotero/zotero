@@ -85,35 +85,36 @@ function waitForWindow(uri, callback) {
 	var loadobserver = function(ev) {
 		ev.originalTarget.removeEventListener("load", loadobserver, false);
 		Zotero.debug("Window opened: " + ev.target.location.href);
-		if(ev.target.location.href == uri) {
-			Services.ww.unregisterNotification(winobserver);
-			var win = ev.target.docShell
-				.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-				.getInterface(Components.interfaces.nsIDOMWindow);
-			// Give window code time to run on load
-			win.setTimeout(function () {
-				if (callback) {
-					try {
-						// If callback is a promise, wait for it
-						let maybePromise = callback(win);
-						if (maybePromise && maybePromise.then) {
-							maybePromise.then(() => deferred.resolve(win)).catch(e => deferred.reject(e));
-							return;
-						}
-					}
-					catch (e) {
-						Zotero.logError(e);
-						win.close();
-						deferred.reject(e);
+		
+		if (ev.target.location.href != uri) {
+			Zotero.debug(`Ignoring window ${uri} in waitForWindow()`);
+			return;
+		}
+		
+		Services.ww.unregisterNotification(winobserver);
+		var win = ev.target.docShell
+			.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+			.getInterface(Components.interfaces.nsIDOMWindow);
+		// Give window code time to run on load
+		 win.setTimeout(function () {
+			if (callback) {
+				try {
+					// If callback returns a promise, wait for it
+					let maybePromise = callback(win);
+					if (maybePromise && maybePromise.then) {
+						maybePromise.then(() => deferred.resolve(win)).catch(e => deferred.reject(e));
 						return;
 					}
 				}
-				deferred.resolve(win);
-			});
-		}
-		else {
-			Zotero.debug(`Ignoring window ${uri} in waitForWindow()`);
-		}
+				catch (e) {
+					Zotero.logError(e);
+					win.close();
+					deferred.reject(e);
+					return;
+				}
+			}
+			deferred.resolve(win);
+		});
 	};
 	var winobserver = {"observe":function(subject, topic, data) {
 		if(topic != "domwindowopened") return;
