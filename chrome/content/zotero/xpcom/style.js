@@ -30,6 +30,7 @@
  */
 Zotero.Styles = new function() {
 	var _initialized = false;
+	var _initializationDeferred = false;
 	var _styles, _visibleStyles;
 	
 	var _renamedStyles = null;
@@ -46,7 +47,28 @@ Zotero.Styles = new function() {
 	/**
 	 * Initializes styles cache, loading metadata for styles into memory
 	 */
-	this.reinit = Zotero.Promise.coroutine(function* () {
+	this.init = Zotero.Promise.coroutine(function* (options = {}) {
+		// Wait until bundled files have been updated, except when this is called by the schema update
+		// code itself
+		if (!options.fromSchemaUpdate) {
+			yield Zotero.Schema.schemaUpdatePromise;
+		}
+		
+		// If an initialization has already started, a regular init() call should return the promise
+		// for that (which may already be resolved). A reinit should yield on that but then continue
+		// with reinitialization.
+		if (_initializationDeferred) {
+			let promise = _initializationDeferred.promise;
+			if (options.reinit) {
+				yield promise;
+			}
+			else {
+				return promise;
+			}
+		}
+		
+		_initializationDeferred = Zotero.Promise.defer();
+		
 		Zotero.debug("Initializing styles");
 		var start = new Date;
 		
@@ -100,22 +122,25 @@ Zotero.Styles = new function() {
 		
 		// Load renamed styles
 		_renamedStyles = {};
-		yield Zotero.HTTP.request(
+		var xmlhttp = yield Zotero.HTTP.request(
 			"GET",
 			"resource://zotero/schema/renamed-styles.json",
 			{
 				responseType: 'json'
 			}
-		)
-		.then(function (xmlhttp) {
-			// Map some obsolete styles to current ones
-			if (xmlhttp.response) {
-				_renamedStyles = xmlhttp.response;
-			}
-		})
+		);
+		// Map some obsolete styles to current ones
+		if (xmlhttp.response) {
+			_renamedStyles = xmlhttp.response;
+		}
+		
+		_initializationDeferred.resolve();
 		_initialized = true;
 	});
-	this.init = Zotero.lazy(this.reinit);
+	
+	this.reinit = function (options = {}) {
+		return this.init(Object.assign({}, options, { reinit: true }));
+	};
 	
 	// This is used by bibliography.js to work around a weird interaction between Bluebird and modal
 	// dialogs in tests. Calling `yield Zotero.Styles.init()` from `Zotero_File_Interface_Bibliography.init()`
