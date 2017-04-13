@@ -442,7 +442,10 @@
 										break;
 									
 									case 'ZoteroLinkClick':
-										ZoteroPane.loadURI(event.value);
+										var zp = typeof ZoteroPane != 'undefined'
+											? ZoteroPane
+											: window.opener.ZoteroPane;
+										zp.loadURI(event.value);
 										break;
 									
 									default:
