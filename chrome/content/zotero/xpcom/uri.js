@@ -123,7 +123,7 @@ Zotero.URI = new function () {
 	 * @return {Zotero.Library|false}
 	 */
 	this.getPathLibrary = function (path) {
-		let matches = path.match(/^\/\/?users\/(\d+));
+		let matches = path.match(/^\/\/?users\/(\d+)/);
 		if (matches) {
 			let userID = matches[1];
 			let currentUserID = Zotero.Users.getCurrentUserID();
