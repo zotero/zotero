@@ -67,8 +67,11 @@ var Zotero_File_Interface_Bibliography = new function() {
 			_io.style = Zotero.Prefs.get("export.lastStyle");
 		}
 		
-		// Initialize styles
-		yield Zotero.Styles.init();
+		// See note in style.js
+		if (!Zotero.Styles.initialized) {
+			// Initialize styles
+			yield Zotero.Styles.init();
+		}
 		
 		// add styles to list
 		

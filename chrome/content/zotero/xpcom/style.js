@@ -117,6 +117,14 @@ Zotero.Styles = new function() {
 	});
 	this.init = Zotero.lazy(this.reinit);
 	
+	// This is used by bibliography.js to work around a weird interaction between Bluebird and modal
+	// dialogs in tests. Calling `yield Zotero.Styles.init()` from `Zotero_File_Interface_Bibliography.init()`
+	// in the modal Create Bibliography dialog results in a hang, so instead use a synchronous check for
+	// initialization. The hang doesn't seem to happen (at least in the same way) outside of tests.
+	this.initialized = function () {
+		return _initialized;
+	};
+	
 	/**
 	 * Reads all styles from a given directory and caches their metadata
 	 * @private
