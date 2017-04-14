@@ -2177,6 +2177,8 @@ Zotero.Integration.Session.prototype.setDocPrefs = Zotero.Promise.coroutine(func
 		io.requireStoreReferences = !Zotero.Utilities.isEmpty(this.embeddedItems);
 	}
 	
+	// Make sure styles are initialized for new docs
+	yield Zotero.Styles.init();
 	yield Zotero.Integration.displayDialog(doc,
 		'chrome://zotero/content/integration/integrationDocPrefs.xul', '', io);
 	
