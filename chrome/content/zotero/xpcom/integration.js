@@ -41,7 +41,7 @@ const FORCE_CITATIONS_RESET_TEXT = 2;
 const INTEGRATION_PLUGINS = ["zoteroMacWordIntegration@zotero.org",
 	"zoteroOpenOfficeIntegration@zotero.org", "zoteroWinWordIntegration@zotero.org"];
 	
-// These must match the constants defined in zoteroIntegration.idl 
+// These must match the constants in corresponding word plugins 
 const DIALOG_ICON_STOP = 0;
 const DIALOG_ICON_WARNING = 1;
 const DIALOG_ICON_CAUTION = 2;

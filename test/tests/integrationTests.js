@@ -2,10 +2,14 @@
 
 describe("Zotero.Integration", function () {
 	Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-	// Fully functional document plugin dummy based on word-for-windows-integration
-	// Functions should be stubbed when testing as needed
+	/**
+	 * To be used as a reference for Zotero-Word Integration plugins
+	 */
 	var DocumentPluginDummy = {};
-	
+
+	/**
+	 * The Application class corresponds to a word processing application.
+	 */
 	DocumentPluginDummy.Application = function() { 
 		this.doc = new DocumentPluginDummy.Document();
 		this.primaryFieldType = "Field";
@@ -13,36 +17,112 @@ describe("Zotero.Integration", function () {
 		this.fields = [];
 	};
 	DocumentPluginDummy.Application.prototype = {
+		/**
+		 * Gets the active document.
+		 * @returns {DocumentPluginDummy.Document}
+		 */
 		getActiveDocument: function() {return this.doc},
-		getDocument: function() {return this.doc},
+		/**
+		 * Gets the document by some app-specific identifier.
+		 * @param {String|Number} docID
+		 */
+		getDocument: function(docID) {return this.doc},
 		QueryInterface: function() {return this},
 	};
-	
+
+	/**
+	 * The Document class corresponds to a single word processing document.
+	 */
 	DocumentPluginDummy.Document = function() {this.fields = []};
 	DocumentPluginDummy.Document.prototype = {
-		// Needs to be stubbed for expected return values depending on prompt type
-		// - Yes: 2, No: 1, Cancel: 0
-		// - Yes: 1, No: 0
-		// - Ok: 1, Cancel: 0
-		// - Ok: 0
-		displayAlert: () => 0,
+		/**
+		 * Displays a dialog in the word processing application
+		 * @param {String} dialogText
+		 * @param {Number} icon - one of the constants defined in integration.js for dialog icons
+		 * @param {Number} buttons - one of the constants defined in integration.js for dialog buttons
+		 * @returns {Number}
+		 *		 - Yes: 2, No: 1, Cancel: 0
+		 *		 - Yes: 1, No: 0
+		 *		 - Ok: 1, Cancel: 0
+		 *		 - Ok: 0
+		 */
+		displayAlert: (dialogText, icon, buttons) => 0,
+		/**
+		 * Brings this document to the foreground (if necessary to return after displaying a dialog)
+		 */
 		activate: () => 0,
-		canInsertField: () => true,
-		cursorInField: () => false,
+		/**
+		 * Determines whether a field can be inserted at the current position.
+		 * @param {String} fieldType
+		 * @returns {Boolean}
+		 */
+		canInsertField: (fieldType) => true,
+		/**
+		 * Returns the field in which the cursor resides, or NULL if none.
+		 * @param {String} fieldType
+		 * @returns {Boolean}
+		 */
+		cursorInField: (fieldType) => false,
+		/**
+		 * Get document data property from the current document
+		 * @returns {String}
+		 */
 		getDocumentData: function() {return this.data},
+		/**
+		 * Set document data property
+		 * @param {String} data
+		 */
 		setDocumentData: function(data) {this.data = data},
-		insertField: function() { var field = new DocumentPluginDummy.Field(this); this.fields.push(field); return field },
-		getFields: function() {return new DocumentPluginDummy.FieldEnumerator(this)},
+		/**
+		 * Inserts a field at the given position and initializes the field object.
+		 * @param {String} fieldType
+		 * @param {String} noteType
+		 * @returns {DocumentPluginDummy.Field}
+		 */
+		insertField: function(fieldType, noteType) { 
+			var field = new DocumentPluginDummy.Field(this); 
+			this.fields.push(field); 
+			return field 
+		},
+		/**
+		 * Gets all fields present in the document.
+		 * @param {String} fieldType
+		 * @returns {DocumentPluginDummy.FieldEnumerator}
+		 */
+		getFields: function(fieldType) {return new DocumentPluginDummy.FieldEnumerator(this)},
+		/**
+		 * Gets all fields present in the document. The observer will receive notifications for two
+		 * topics: "fields-progress", with the document as the subject and percent progress as data, and
+		 * "fields-available", with an nsISimpleEnumerator of fields as the subject and the length as
+		 * data
+		 * @param {String} fieldType
+		 * @param {nsIObserver} observer
+		 */
 		getFieldsAsync: function(fieldType, observer) {
 			observer.observe(this.getFields(fieldType), 'fields-available', null)
 		},
-		setBibliographyStyle: () => 0,
-		convert: () => 0,
-		cleanup: () => 0, 
+		/**
+		 * Sets the bibliography style, overwriting the current values for this document
+		 */
+		setBibliographyStyle: (firstLineIndent, bodyIndent, lineSpacing, entrySpacing,
+			tabStops, tabStopsCount) => 0,
+		/**
+		 * Converts all fields in a document to a different fieldType or noteType
+		 * @params {DocumentPluginDummy.FieldEnumerator} fields
+		 */
+		convert: (fields, toFieldType, toNoteType, count) => 0,
+		/**
+		 * Cleans up the document state and resumes processor for editing
+		 */
+		cleanup: () => 0,
+
+		/**
+		 * Informs the document processor that the operation is complete
+		 */
 		complete: () => 0,
 		QueryInterface: function() {return this},
 	};
-	
+
 	DocumentPluginDummy.FieldEnumerator = function(doc) {this.doc = doc; this.idx = 0};
 	DocumentPluginDummy.FieldEnumerator.prototype = {
 		hasMoreElements: function() {return this.idx < this.doc.fields.length;},
@@ -51,26 +131,65 @@ describe("Zotero.Integration", function () {
 			Components.interfaces.nsISimpleEnumerator])
 	};
 	
+	/**
+	 * The Field class corresponds to a field containing an individual citation
+	 * or bibliography
+	 */
 	DocumentPluginDummy.Field = function(doc) {
 		this.doc = doc;
 		this.code = '';
 		// This is actually required and current integration code depends on text being non-empty upon insertion.
 		// insertBibliography will fail if there is no placeholder text.
 		this.text = '{Placeholder}';
-		this.noteIndex = DocumentPluginDummy.Field.noteIndex++;
 		this.wrappedJSObject = this;
 	};
 	DocumentPluginDummy.Field.noteIndex = 0;
 	DocumentPluginDummy.Field.prototype = {
-		delete: function() {this.doc.fields.filter((field) => field != this)},
+		/**
+		 * Deletes this field and its contents.
+		 */
+		delete: function() {this.doc.fields.filter((field) => field !== this)},
+		/**
+		 * Removes this field, but maintains the field's contents.
+		 */
 		removeCode: function() {this.code = ""},
+		/**
+		 * Selects this field.
+		 */
 		select: () => 0,
-		setText: function(text) {this.text = text},
+		/**
+		 * Sets the text inside this field to a specified plain text string or pseudo-RTF formatted text
+		 * string.
+		 * @param {String} text
+		 * @param {Boolean} isRich
+		 */
+		setText: function(text, isRich) {this.text = text},
+		/**
+		 * Gets the text inside this field, preferably with formatting, but potentially without
+		 * @returns {String}
+		 */
 		getText: function() {return this.text},
+		/**
+		 * Sets field's code
+		 * @param {String} code
+		 */
 		setCode: function(code) {this.code = code},
+		/**
+		 * Gets field's code.
+		 * @returns {String}
+		 */
 		getCode: function() {return this.code},
+		/**
+		 * Returns true if this field and the passed field are actually references to the same field.
+		 * @param {DocumentPluginDummy.Field} field
+		 * @returns {Boolean}
+		 */
 		equals: function(field) {return this == field},
-		getNoteIndex: function() {return this.noteIndex},
+		/**
+		 * This field's note index, if it is in a footnote or endnote; otherwise zero.
+		 * @returns {Number}
+		 */
+		getNoteIndex: () => 0,
 		QueryInterface: function() {return this},
 	};
 
