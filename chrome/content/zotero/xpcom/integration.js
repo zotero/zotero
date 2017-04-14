@@ -228,8 +228,13 @@ Zotero.Integration = new function() {
 		try {
 			var componentClass = "@zotero.org/Zotero/integration/application?agent="+agent+";1";
 			Zotero.debug("Integration: Instantiating "+componentClass+" for command "+command+(docId ? " with doc "+docId : ""));
-			return Components.classes[componentClass]
-				.getService(Components.interfaces.zoteroIntegrationApplication);
+			try {
+				return Components.classes[componentClass]
+					.getService(Components.interfaces.zoteroIntegrationApplication);
+			} catch (e) {
+				return Components.classes[componentClass]
+					.getService(Components.interfaces.nsISupports).wrappedJSObject;
+			}
 		} catch(e) {
 			throw new Zotero.Exception.Alert("integration.error.notInstalled",
 				[], "integration.error.title");
@@ -309,8 +314,10 @@ Zotero.Integration = new function() {
 						document.activate();
 						
 						// Call complete function if one exists
-						if(document.wrappedJSObject && document.wrappedJSObject.complete) {
+						if (document.wrappedJSObject && document.wrappedJSObject.complete) {
 							document.wrappedJSObject.complete();
+						} else if (document.complete) {
+							document.complete();
 						}
 					} catch(e) {
 						Zotero.logError(e);
@@ -1434,7 +1441,12 @@ Zotero.Integration.Fields.prototype.get = function get() {
 				var fieldsEnumerator = subject.QueryInterface(Components.interfaces.nsISimpleEnumerator);
 				var fields = me._fields = [];
 				while(fieldsEnumerator.hasMoreElements()) {
-					fields.push(fieldsEnumerator.getNext().QueryInterface(Components.interfaces.zoteroIntegrationField));
+					let field = fieldsEnumerator.getNext();
+					try {
+						fields.push(field.QueryInterface(Components.interfaces.zoteroIntegrationField));
+					} catch (e) {
+						fields.push(field);
+					}
 				}
 				
 				if(Zotero.Debug.enabled) {

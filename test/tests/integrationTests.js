@@ -120,7 +120,6 @@ describe("Zotero.Integration", function () {
 		 * Informs the document processor that the operation is complete
 		 */
 		complete: () => 0,
-		QueryInterface: function() {return this},
 	};
 
 	DocumentPluginDummy.FieldEnumerator = function(doc) {this.doc = doc; this.idx = 0};
@@ -190,7 +189,6 @@ describe("Zotero.Integration", function () {
 		 * @returns {Number}
 		 */
 		getNoteIndex: () => 0,
-		QueryInterface: function() {return this},
 	};
 
 	for (let cls of ['Application', 'Document', 'FieldEnumerator', 'Field']) {
