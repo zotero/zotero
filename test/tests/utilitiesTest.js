@@ -52,7 +52,7 @@ describe("Zotero.Utilities", function() {
 		});
 		it("should strip off internal characters in ISBN string", function() {
 			let ignoredChars = '\x2D\xAD\u2010\u2011\u2012\u2013\u2014\u2015\u2043\u2212' // Dashes
-				+ ' \xA0\r\n\t\x0B\x0C\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005' // Spaces
+				+ ' \xA0\r\n\t\x0B\x0C\u1680\u2000\u2001\u2002\u2003\u2004\u2005' // Spaces
 				+ '\u2006\u2007\u2008\u2009\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF';
 			for (let i=0; i<ignoredChars.length; i++) {
 				let charCode = '\\u' + Zotero.Utilities.lpad(ignoredChars.charCodeAt(i).toString(16).toUpperCase(), '0', 4);
@@ -149,7 +149,7 @@ describe("Zotero.Utilities", function() {
 		});
 		it("should strip off internal characters in ISSN string", function() {
 			let ignoredChars = '\x2D\xAD\u2010\u2011\u2012\u2013\u2014\u2015\u2043\u2212' // Dashes
-				+ ' \xA0\r\n\t\x0B\x0C\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005' // Spaces
+				+ ' \xA0\r\n\t\x0B\x0C\u1680\u2000\u2001\u2002\u2003\u2004\u2005' // Spaces
 				+ '\u2006\u2007\u2008\u2009\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF';
 			for (let i=0; i<ignoredChars.length; i++) {
 				let charCode = '\\u' + Zotero.Utilities.lpad(ignoredChars.charCodeAt(i).toString(16).toUpperCase(), '0', 4);
