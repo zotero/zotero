@@ -19,11 +19,11 @@
 <!ENTITY pageSetupCmd.accesskey "U">
 <!ENTITY printCmd.label "Tisk...">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "Zavřít">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.label "Importovat...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Vložit ze schránky">
 <!ENTITY quitApplicationCmdWin.label "Zavřít">
@@ -39,7 +39,7 @@
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Přepnout směr textu">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
-<!ENTITY bidiSwitchTextDirectionItem.commandkey "x">
+<!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
 <!ENTITY toolsMenu.label "Nástroje">
@@ -64,7 +64,7 @@
 <!ENTITY aboutProduct.label "O &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "Podpora a dokumentace">
-<!ENTITY productHelp.accesskey "H">
+<!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Informace o řešení potíží">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "Poslat zpětnou vazbu...">
