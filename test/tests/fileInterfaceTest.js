@@ -129,11 +129,11 @@ describe("Zotero_File_Interface", function() {
 			
 			// HTML
 			var str = getDataForFlavor('text/html');
-			assert.equal(str, '(<i>A</i>, 2016, <i>B</i>, 2016)');
+			assert.equal(str, '(<i>A</i>, 2016; <i>B</i>, 2016)');
 			
 			// Plain text
 			str = getDataForFlavor('text/unicode');
-			assert.equal(str, '(A, 2016, B, 2016)');
+			assert.equal(str, '(A, 2016; B, 2016)');
 		});
 		
 		it("should copy HTML and text bibliography to the clipboard", function* () {
@@ -166,11 +166,11 @@ describe("Zotero_File_Interface", function() {
 			);
 			
 			var str = getDataForFlavor('text/html');
-			assert.equal(str, '(<i>A</i>, 2016, <i>B</i>, 2016)');
+			assert.equal(str, '(<i>A</i>, 2016; <i>B</i>, 2016)');
 			
 			// Plain text
 			str = getDataForFlavor('text/unicode');
-			assert.equal(str, '(<i>A</i>, 2016, <i>B</i>, 2016)');
+			assert.equal(str, '(<i>A</i>, 2016; <i>B</i>, 2016)');
 		});
 		
 		it("should copy HTML and HTML source bibliography to the clipboard", function* () {
