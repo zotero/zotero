@@ -1104,6 +1104,8 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 			// Handle failed objects
 			for (let index in results.failed) {
 				let { code, message, data } = results.failed[index];
+				// API errors are HTML
+				message = Zotero.Utilities.unescapeHTML(message);
 				let e = new Error(message);
 				e.name = "ZoteroObjectUploadError";
 				e.code = code;
