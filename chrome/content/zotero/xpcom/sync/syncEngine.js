@@ -1155,8 +1155,6 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 				// This shouldn't happen, because the upload request includes a library version and should
 				// prevent an outdated upload before the object version is checked. If it does, we need to
 				// do a full sync. This error is checked in handleUploadError().
-				// TEMP - Revert after 2016-08-19
-				//if (e.code == 412) {
 				if (e.code == 404 || e.code == 412) {
 					throw e;
 				}
@@ -1599,7 +1597,6 @@ Zotero.Sync.Data.Engine.prototype._handleUploadError = Zotero.Promise.coroutine(
 	}
 	else if (e.name == "ZoteroObjectUploadError") {
 		switch (e.code) {
-		// TEMP - Revert after 2016-08-19
 		case 404:
 		case 412:
 			return this.UPLOAD_RESULT_OBJECT_CONFLICT;
