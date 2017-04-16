@@ -2960,8 +2960,8 @@ Zotero.ItemTreeView.prototype.canDropCheck = function (row, orient, dataTransfer
 				return false;
 			}
 		}
-		// Don't allow drop into searches
-		else if (collectionTreeRow.isSearch()) {
+		// Don't allow drop into searches or publications
+		else if (collectionTreeRow.isSearch() || collectionTreeRow.isPublications()) {
 			return false;
 		}
 		
