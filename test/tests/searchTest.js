@@ -296,6 +296,20 @@ describe("Zotero.Search", function() {
 					assert.notInclude(matches, item.id);
 				});
 			});
+			
+			describe("unfiled", function () {
+				it("shouldn't include items in My Publications", function* () {
+					var item1 = yield createDataObject('item');
+					var item2 = yield createDataObject('item', { inPublications: true });
+					
+					var s = new Zotero.Search;
+					s.libraryID = Zotero.Libraries.userLibraryID;
+					s.addCondition('unfiled', 'true');
+					var matches = yield s.search();
+					assert.include(matches, item1.id);
+					assert.notInclude(matches, item2.id);
+				});
+			});
 		});
 	});
 	

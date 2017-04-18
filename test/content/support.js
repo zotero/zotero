@@ -395,7 +395,9 @@ function createUnsavedDataObject(objectType, params = {}) {
 		itemType = params.itemType || 'book';
 		allowedParams.push('dateAdded', 'dateModified');
 	}
-	
+	if (objectType == 'item') {
+		allowedParams.push('inPublications');
+	}
 	if (objectType == 'feedItem') {
 		params.guid = params.guid || Zotero.randomString();
 		allowedParams.push('guid');
