@@ -116,11 +116,19 @@ Zotero.Schema = new function(){
 			throw new Zotero.DB.IncompatibleVersionException(msg, dbClientVersion);
 		}
 		
+		// Check if DB is coming from the DB Repair Tool and should be checked
+		var integrityCheck = yield Zotero.DB.valueQueryAsync(
+			"SELECT value FROM settings WHERE setting='db' AND key='integrityCheck'"
+		);
+		
 		var schemaVersion = yield _getSchemaSQLVersion('userdata');
 		
 		// If upgrading userdata, make backup of database first
 		if (userdata < schemaVersion) {
 			yield Zotero.DB.backupDatabase(userdata, true);
+		}
+		else if (integrityCheck) {
+			yield Zotero.DB.backupDatabase(false, true);
 		}
 		
 		yield Zotero.DB.queryAsync("PRAGMA foreign_keys = false");
@@ -133,6 +141,15 @@ Zotero.Schema = new function(){
 				if (Zotero.DB.tableExists('customItemTypes')) {
 					yield _updateCustomTables(updated);
 				}
+				
+				// Auto-repair databases coming from the DB Repair Tool
+				if (integrityCheck) {
+					yield this.integrityCheck(true);
+					yield Zotero.DB.queryAsync(
+						"DELETE FROM settings WHERE setting='db' AND key='integrityCheck'"
+					);
+				}
+				
 				updated = yield _migrateUserDataSchema(userdata, options);
 				yield _updateSchema('triggers');
 				
@@ -1148,7 +1165,7 @@ Zotero.Schema = new function(){
 	
 	
 	this.integrityCheck = Zotero.Promise.coroutine(function* (fix) {
-		var userLibraryID = Zotero.Libraries.userLibraryID;
+		Zotero.debug("Checking database integrity");
 		
 		// Just as a sanity check, make sure combined field tables are populated,
 		// so that we don't try to wipe out all data
