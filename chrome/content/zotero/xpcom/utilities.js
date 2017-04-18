@@ -459,7 +459,7 @@ Zotero.Utilities = {
 	 * @return {String}
 	 */
 	"htmlSpecialChars":function(str) {
-		if (str && typeof str != 'string') {
+		if (str !== undefined && typeof str != 'string') {
 			str = str.toString();
 		}
 		
