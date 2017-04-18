@@ -1593,6 +1593,7 @@ Zotero.Sync.Data.Engine.prototype._handleUploadError = Zotero.Promise.coroutine(
 			}
 			throw new Error(`Unexpected index value ${index}`);
 		
+		case 409: // TEMP: from classic sync
 		case 412:
 			return this.UPLOAD_RESULT_LIBRARY_CONFLICT;
 		}
