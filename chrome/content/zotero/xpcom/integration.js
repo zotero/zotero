@@ -2386,6 +2386,8 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
  * Throws a MissingItemException if item was not found.
  */
 Zotero.Integration.Session.prototype.lookupItems = Zotero.Promise.coroutine(function* (citation, index) {
+	let items = [];
+	
 	for(var i=0, n=citation.citationItems.length; i<n; i++) {
 		var citationItem = citation.citationItems[i];
 		
@@ -2477,8 +2479,16 @@ Zotero.Integration.Session.prototype.lookupItems = Zotero.Promise.coroutine(func
 		}
 		
 		if(zoteroItem) {
+			items.push(zoteroItem);
 			citationItem.id = zoteroItem.cslItemID ? zoteroItem.cslItemID : zoteroItem.id;
 		}
+	}
+	
+	// Items may be in libraries that haven't been loaded, and retrieveItem() is synchronous, so load
+	// all data (as required by toJSON(), which is used by itemToExportFormat(), which is used by
+	// itemToCSLJSON()) now
+	if (items.length) {
+		yield Zotero.Items.loadDataTypes(items);
 	}
 });
 
