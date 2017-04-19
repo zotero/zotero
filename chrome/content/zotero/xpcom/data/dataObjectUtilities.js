@@ -139,6 +139,7 @@ Zotero.DataObjectUtilities = {
 				
 				case 'deleted':
 				case 'parentItem':
+				case 'inPublications':
 					target[i] = false;
 					break;
 				
