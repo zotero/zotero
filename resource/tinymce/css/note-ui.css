@@ -159,7 +159,10 @@ html, body {
 	height: 29px !important;
 }
 
-
+/* Fix 100% width of link toolbar */
+div.mce-tinymce-inline {
+	width: initial !important;
+}
 
 #noScriptWarning {
 	padding: 4px;
