@@ -990,7 +990,7 @@ Zotero.Integration.Document.prototype._getSession = Zotero.Promise.coroutine(fun
 		return this._session.setDocPrefs(this._doc, this._app.primaryFieldType,
 		this._app.secondaryFieldType).then(function(status) {
 			// save doc prefs in doc
-			me._doc.setDocumentData(me._session.data.serializeXML());
+			me._doc.setDocumentData(me._session.data.serialize());
 			
 			if(haveFields) {
 				me._session.reload = true;
@@ -1007,12 +1007,13 @@ Zotero.Integration.Document.prototype._getSession = Zotero.Promise.coroutine(fun
 				data.prefs.fieldType = "ReferenceMark";
 			}
 			
-			var warning = this._doc.displayAlert(Zotero.getString("integration.upgradeWarning"),
+			var warning = this._doc.displayAlert(Zotero.getString("integration.upgradeWarning", Zotero.clientName, '5.0'),
 				DIALOG_ICON_WARNING, DIALOG_BUTTONS_OK_CANCEL);
 			if(!warning) {
 				return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("document upgrade"));
 			}
-		} else if(data.dataVersion > DATA_VERSION) {
+		// Don't throw for version 4(JSON) during the transition from 4.0 to 5.0
+		} else if((data.dataVersion > DATA_VERSION) && data.dataVersion != 4) {
 			return Zotero.Promise.reject(new Zotero.Exception.Alert("integration.error.newerDocumentVersion",
 					[data.zoteroVersion, Zotero.version], "integration.error.title"));
 		}
@@ -1046,7 +1047,7 @@ Zotero.Integration.Document.prototype._getSession = Zotero.Promise.coroutine(fun
 					}
 					return this._session.setDocPrefs(this._doc, this._app.primaryFieldType,
 					this._app.secondaryFieldType).then(function(status) {			
-						me._doc.setDocumentData(me._session.data.serializeXML());
+						me._doc.setDocumentData(me._session.data.serialize());
 						me._session.reload = true;
 						return me._session;
 					});
@@ -1259,7 +1260,7 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 		oldData = aOldData;
 		
 		// Write document data to document
-		me._doc.setDocumentData(me._session.data.serializeXML());
+		me._doc.setDocumentData(me._session.data.serialize());
 		
 		// If oldData is null, then there was no document data, so we don't need to update
 		// fields
@@ -1736,7 +1737,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function* (forceCitations,
 				
 				// set bibliographyStyleHasBeenSet parameter to prevent further changes	
 				this._session.data.style.bibliographyStyleHasBeenSet = true;
-				this._doc.setDocumentData(this._session.data.serializeXML());
+				this._doc.setDocumentData(this._session.data.serialize());
 			}
 		}
 		
@@ -3080,9 +3081,20 @@ Zotero.Integration.DocumentData = function(string) {
 }
 
 /**
- * Serializes document-specific data as XML
+ * Serializes document-specific data as JSON
  */
-Zotero.Integration.DocumentData.prototype.serializeXML = function() {
+Zotero.Integration.DocumentData.prototype.serialize = function() {
+	// If we've retrieved data with version 4 (JSON), serialize back to JSON
+	if (this.dataVersion == 4) {
+		return JSON.stringify({
+			style: this.style,
+			prefs: this.prefs,
+			sessionID: this.sessionID,
+			zoteroVersion: Zotero.version,
+			dataVersion: 4
+		});
+	}
+	// Otherwise default to XML for now
 	var prefs = "";
 	for(var pref in this.prefs) {
 		prefs += `<pref name="${Zotero.Utilities.htmlSpecialChars(pref)}" `+
@@ -3136,7 +3148,14 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
  * Unserializes document-specific data, either as XML or as the string form used previously
  */
 Zotero.Integration.DocumentData.prototype.unserialize = function(input) {
-	if(input[0] == "<") {
+	try {
+		return Object.assign(this, JSON.parse(input))
+	} catch (e) {
+		if (!(e instanceof SyntaxError)) {
+			throw e;
+		}
+	}
+	if (input[0] == "<") {
 		this.unserializeXML(input);
 	} else {
 		const splitRe = /(^|[^:]):(?!:)/;
