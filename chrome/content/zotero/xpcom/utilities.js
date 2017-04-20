@@ -459,7 +459,9 @@ Zotero.Utilities = {
 	 * @return {String}
 	 */
 	"htmlSpecialChars":function(str) {
-		if (str !== undefined && typeof str != 'string') {
+		if (str && typeof str != 'string') {
+			Zotero.debug('#htmlSpecialChars: non-string arguments are deprecated. Update your code',
+				1, undefined, true);
 			str = str.toString();
 		}
 		
