@@ -64,6 +64,7 @@ Zotero.ItemTreeView.prototype = Object.create(Zotero.LibraryTreeView.prototype);
 Zotero.ItemTreeView.prototype.type = 'item';
 Zotero.ItemTreeView.prototype.regularOnly = false;
 Zotero.ItemTreeView.prototype.expandAll = false;
+Zotero.ItemTreeView.prototype.collapseAll = false;
 
 
 /**
@@ -114,13 +115,13 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 			return;
 		}
 		
-		yield this.refresh();
+		yield this.refresh(true);
 		if (!this._treebox.treeBody) {
 			return;
 		}
 		
-		// Expand all parent items for some views (e.g., My Publications). We do this here instead of
-		// refresh so that it doesn't get reverted after item changes.
+		// Expand all parent items in the view, regardless of search matches. We do this here instead
+		// of refresh so that it doesn't get reverted after item changes.
 		if (this.expandAll) {
 			var t = new Date();
 			for (let i = 0; i < this._rows.length; i++) {
@@ -245,7 +246,9 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 		tree._handleEnter = function () {};
 		
 		this.sort();
-		this.expandMatchParents();
+		if (!this.collapseAll) {
+			this.expandMatchParents();
+		}
 		
 		if (this._ownerDocument.defaultView.ZoteroPane_Local) {
 			// For My Publications, show intro text in middle pane if no items
@@ -343,7 +346,7 @@ Zotero.ItemTreeView.prototype.setSortColumn = function() {
  *  Reload the rows from the data access methods
  *  (doesn't call the tree.invalidate methods, etc.)
  */
-Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(function* () {
+Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(function* (skipExpandMatchParents) {
 	Zotero.debug('Refreshing items list for ' + this.id);
 	
 	// DEBUG: necessary?
@@ -433,7 +436,9 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 		
 		this.rememberOpenState(savedOpenState);
 		this.rememberSelection(savedSelection);
-		this.expandMatchParents();
+		if (!skipExpandMatchParents) {
+			this.expandMatchParents();
+		}
 		if (unsuppress) {
 			this._treebox.endUpdateBatch();
 			this.selection.selectEventsSuppressed = false;
@@ -670,7 +675,8 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		if (collectionTreeRow.isSearch()
 				|| collectionTreeRow.isPublications()
 				|| collectionTreeRow.isTrash()) {
-			yield this.refresh();
+			let skipExpandMatchParents = collectionTreeRow.isPublications();
+			yield this.refresh(skipExpandMatchParents);
 			refreshed = true;
 			madeChanges = true;
 			sort = true;

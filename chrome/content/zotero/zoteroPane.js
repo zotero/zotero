@@ -1238,7 +1238,7 @@ var ZoteroPane = new function()
 			
 			this.itemsView = new Zotero.ItemTreeView(collectionTreeRow);
 			if (collectionTreeRow.isPublications()) {
-				this.itemsView.expandAll = true;
+				this.itemsView.collapseAll = true;
 			}
 			this.itemsView.onError = function () {
 				// Don't reload last folder, in case that's the problem
