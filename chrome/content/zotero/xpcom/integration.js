@@ -3085,8 +3085,8 @@ Zotero.Integration.DocumentData = function(string) {
 Zotero.Integration.DocumentData.prototype.serializeXML = function() {
 	var prefs = "";
 	for(var pref in this.prefs) {
-		prefs += '<pref name="'+Zotero.Utilities.htmlSpecialChars(pref)+'" '+
-			'value="'+Zotero.Utilities.htmlSpecialChars(this.prefs[pref])+'"/>';
+		prefs += `<pref name="${Zotero.Utilities.htmlSpecialChars(pref)}" `+
+			`value="${Zotero.Utilities.htmlSpecialChars(this.prefs[pref].toString())}"/>`;
 	}
 	
 	return '<data data-version="'+Zotero.Utilities.htmlSpecialChars(DATA_VERSION)+'" '+

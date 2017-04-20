@@ -470,4 +470,65 @@ describe("Zotero.Integration", function () {
 			});
 		});
 	});
+	
+	describe("DocumentData", function() {
+		it('should properly unserialize document data', function() {
+			var serializedXMLData = "<data data-version=\"3\" zotero-version=\"5.0.SOURCE\"><session id=\"F0NFmZ32\"/><style id=\"http://www.zotero.org/styles/cell\" hasBibliography=\"1\" bibliographyStyleHasBeenSet=\"1\"/><prefs><pref name=\"fieldType\" value=\"ReferenceMark\"/><pref name=\"storeReferences\" value=\"true\"/><pref name=\"automaticJournalAbbreviations\" value=\"true\"/><pref name=\"noteType\" value=\"0\"/></prefs></data>";
+			var data = new Zotero.Integration.DocumentData(serializedXMLData);
+			var expectedData = {
+				style: {
+					styleID: 'http://www.zotero.org/styles/cell',
+					locale: null,
+					hasBibliography: true,
+					bibliographyStyleHasBeenSet: true
+				},
+				prefs: {
+					fieldType: 'ReferenceMark',
+					storeReferences: true,
+					automaticJournalAbbreviations: true,
+					noteType: '0'
+				},
+				sessionID: 'F0NFmZ32',
+				zoteroVersion: '5.0.SOURCE',
+				dataVersion: '3'
+			};
+			// Convert to JSON to remove functions from DocumentData object
+			assert.equal(JSON.stringify(data), JSON.stringify(expectedData));
+		});
+		
+		it('should properly serialize document data', function() {
+			sinon.spy(Zotero, 'debug');
+			var data = new Zotero.Integration.DocumentData();
+			data.sessionID = "owl-sesh";
+			data.zoteroVersion = Zotero.version;
+			data.dataVersion = 3;
+			data.style = {
+				styleID: 'http://www.zotero.org/styles/cell',
+				locale: 'en-US',
+				hasBibliography: false,
+				bibliographyStyleHasBeenSet: true
+			};
+			data.prefs = {
+				noteType: 1,
+				fieldType: "Field",
+				storeReferences: true,
+				automaticJournalAbbreviations: true
+			};
+			
+			// Serialize and unserialize (above test makes sure unserialize works properly).
+			var processedData = new Zotero.Integration.DocumentData(data.serializeXML());
+			
+			// This isn't ideal, but currently how it works. Better serialization which properly retains types
+			// coming with official 5.0 release.
+			data.prefs.noteType = "1";
+			data.dataVersion = "3";
+
+			// Convert to JSON to remove functions from DocumentData objects
+			assert.equal(JSON.stringify(processedData), JSON.stringify(data));
+			
+			// Make sure we are not triggering debug traces in Utilities.htmlSpecialChars()
+			assert.isFalse(Zotero.debug.calledWith(sinon.match.string, 1));
+			Zotero.debug.restore();
+		});
+	})
 });
