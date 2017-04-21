@@ -3089,7 +3089,7 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
 			`value="${Zotero.Utilities.htmlSpecialChars(this.prefs[pref].toString())}"/>`;
 	}
 	
-	return '<data data-version="'+Zotero.Utilities.htmlSpecialChars(DATA_VERSION)+'" '+
+	return '<data data-version="'+Zotero.Utilities.htmlSpecialChars(`${DATA_VERSION}`)+'" '+
 		'zotero-version="'+Zotero.Utilities.htmlSpecialChars(Zotero.version)+'">'+
 			'<session id="'+Zotero.Utilities.htmlSpecialChars(this.sessionID)+'"/>'+
 		'<style id="'+Zotero.Utilities.htmlSpecialChars(this.style.styleID)+'" '+
