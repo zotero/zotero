@@ -1781,7 +1781,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		yield Zotero.DB.executeTransaction(function* () {
 			return Zotero.Tags.purge();
 		});
-		Zotero.Fulltext.purgeUnusedWords();
+		yield Zotero.Fulltext.purgeUnusedWords();
 		yield Zotero.DB.executeTransaction(function* () {
 			return Zotero.Items.purge();
 		});

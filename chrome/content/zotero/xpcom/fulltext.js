@@ -958,7 +958,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			return;
 		}
 		var itemID = item.id;
-		var currentVersion = this.getItemVersion(itemID)
+		var currentVersion = yield this.getItemVersion(itemID)
 		
 		var processorCacheFile = this.getItemProcessorCacheFile(item);
 		var itemCacheFile = this.getItemCacheFile(item);
