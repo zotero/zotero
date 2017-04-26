@@ -960,35 +960,39 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		var itemID = item.id;
 		var currentVersion = yield this.getItemVersion(itemID)
 		
-		var processorCacheFile = this.getItemProcessorCacheFile(item);
-		var itemCacheFile = this.getItemCacheFile(item);
+		var processorCacheFile = this.getItemProcessorCacheFile(item); // .zotero-ft-unprocessed
+		var itemCacheFile = this.getItemCacheFile(item); // .zotero-ft-cache
 		
 		// If a storage directory doesn't exist, create it
 		if (!processorCacheFile.parent.exists()) {
 			yield Zotero.Attachments.createDirectoryForItem(item);
 		}
 		
-		// If the local version is 0 but the text matches, just update the version
-		if (currentVersion == 0 && itemCacheFile.exists()
-				&& (yield Zotero.File.getContentsAsync(itemCacheFile)) == text) {
+		// If indexed previously and the existing extracted text matches the new text,
+		// just update the version
+		if (currentVersion !== false
+				&& itemCacheFile.exists()
+				&& (yield Zotero.File.getContentsAsync(itemCacheFile)) == data.content) {
 			Zotero.debug("Current full-text content matches remote for item "
 				+ libraryKey + " -- updating version");
-			var synced = SYNC_STATE_IN_SYNC;
-			yield Zotero.DB.queryAsync("UPDATE fulltextItems SET version=? WHERE itemID=?", [version, itemID]);
+			return Zotero.DB.queryAsync(
+				"REPLACE INTO fulltextItems (itemID, version, synced) VALUES (?, ?, ?)",
+				[itemID, version, SYNC_STATE_IN_SYNC]
+			);
 		}
-		else {
-			Zotero.debug("Writing full-text content and data for item " + libraryKey
-				+ " to " + processorCacheFile.path);
-			yield Zotero.File.putContentsAsync(processorCacheFile, JSON.stringify({
-				indexedChars: data.indexedChars,
-				totalChars: data.totalChars,
-				indexedPages: data.indexedPages,
-				totalPages: data.totalPages,
-				version: version,
-				text: data.content
-			}));
-			var synced = SYNC_STATE_TO_PROCESS;
-		}
+		
+		// Otherwise save data to -unprocessed file
+		Zotero.debug("Writing full-text content and data for item " + libraryKey
+			+ " to " + processorCacheFile.path);
+		yield Zotero.File.putContentsAsync(processorCacheFile, JSON.stringify({
+			indexedChars: data.indexedChars,
+			totalChars: data.totalChars,
+			indexedPages: data.indexedPages,
+			totalPages: data.totalPages,
+			version,
+			text: data.content
+		}));
+		var synced = SYNC_STATE_TO_PROCESS;
 		
 		// If indexed previously, update the sync state
 		if (currentVersion !== false) {

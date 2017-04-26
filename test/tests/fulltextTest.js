@@ -231,4 +231,64 @@ describe("Zotero.Fulltext", function () {
 			}
 		})
 	})
+	
+	describe("#setItemContent()", function () {
+		it("should store data in .zotero-ft-unprocessed file", function* () {
+			var item = yield importFileAttachment('test.pdf');
+			
+			var processorCacheFile = Zotero.Fulltext.getItemProcessorCacheFile(item).path;
+			var itemCacheFile = Zotero.Fulltext.getItemCacheFile(item).path;
+			yield Zotero.File.putContentsAsync(itemCacheFile, "Test");
+			
+			yield Zotero.Fulltext.setItemContent(
+				item.libraryID,
+				item.key,
+				{
+					content: "Test",
+					indexedChars: 4,
+					totalChars: 4
+				},
+				5
+			);
+			
+			assert.equal((yield Zotero.Fulltext.getItemVersion(item.id)), 0);
+			assert.equal(
+				yield Zotero.DB.	valueQueryAsync("SELECT synced FROM fulltextItems WHERE itemID=?", item.id),
+				2 // to process
+			);
+			assert.isTrue(yield OS.File.exists(processorCacheFile));
+		});
+		
+		
+		it("should update the version if the local version is 0 but the text matches", function* () {
+			var item = yield importFileAttachment('test.pdf');
+			
+			yield Zotero.DB.queryAsync(
+				"REPLACE INTO fulltextItems (itemID, version, synced) VALUES (?, 0, ?)",
+				[item.id, 0] // to process
+			);
+			
+			var processorCacheFile = Zotero.Fulltext.getItemProcessorCacheFile(item).path;
+			var itemCacheFile = Zotero.Fulltext.getItemCacheFile(item).path;
+			yield Zotero.File.putContentsAsync(itemCacheFile, "Test");
+			
+			yield Zotero.Fulltext.setItemContent(
+				item.libraryID,
+				item.key,
+				{
+					content: "Test",
+					indexedChars: 4,
+					totalChars: 4
+				},
+				5
+			);
+			
+			assert.equal((yield Zotero.Fulltext.getItemVersion(item.id)), 5);
+			assert.equal(
+				yield Zotero.DB.	valueQueryAsync("SELECT synced FROM fulltextItems WHERE itemID=?", item.id),
+				1 // in sync
+			);
+			assert.isFalse(yield OS.File.exists(processorCacheFile));
+		});
+	});
 })
