@@ -604,6 +604,37 @@ describe("Zotero.ItemTreeView", function() {
 				
 				assert.isNumber(iv.getRowIndexByID(item2.id));
 			});
+			
+			it("should show Show/Hide button for imported file attachment", function* () {
+				var item = yield createDataObject('item', { inPublications: true });
+				var attachment = yield importFileAttachment('test.png', { parentItemID: item.id });
+				
+				yield zp.collectionsView.selectByID("P" + item.libraryID);
+				yield waitForItemsLoad(win);
+				var iv = zp.itemsView;
+				
+				yield iv.selectItem(attachment.id);
+				
+				var box = win.document.getElementById('zotero-item-pane-top-buttons-my-publications');
+				assert.isFalse(box.hidden);
+			});
+			
+			it("shouldn't show Show/Hide button for linked file attachment", function* () {
+				var item = yield createDataObject('item', { inPublications: true });
+				var attachment = yield Zotero.Attachments.linkFromFile({
+					file: OS.Path.join(getTestDataDirectory().path, 'test.png'),
+					parentItemID: item.id
+				});
+				
+				yield zp.collectionsView.selectByID("P" + item.libraryID);
+				yield waitForItemsLoad(win);
+				var iv = zp.itemsView;
+				
+				yield iv.selectItem(attachment.id);
+				
+				var box = win.document.getElementById('zotero-item-pane-top-buttons-my-publications');
+				assert.isTrue(box.hidden);
+			});
 		});
 	})
 	
