@@ -59,7 +59,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	Components.utils.import("resource://zotero/concurrentCaller.js");
 	this.caller = new ConcurrentCaller({
 		numConcurrent: 4,
-		stopOnError: true,
+		stopOnError,
 		logger: msg => Zotero.debug(msg),
 		onError: e => Zotero.logError(e)
 	});
