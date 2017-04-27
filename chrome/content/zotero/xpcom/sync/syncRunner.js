@@ -57,9 +57,12 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	Zotero.defineProperty(this, 'apiKey', { set: val => _apiKey = val });
 	
 	Components.utils.import("resource://zotero/concurrentCaller.js");
-	this.caller = new ConcurrentCaller(4);
-	this.caller.setLogger(msg => Zotero.debug(msg));
-	this.caller.stopOnError = stopOnError;
+	this.caller = new ConcurrentCaller({
+		numConcurrent: 4,
+		stopOnError: true,
+		logger: msg => Zotero.debug(msg),
+		onError: e => Zotero.logError(e)
+	});
 	
 	var _enabled = false;
 	var _autoSyncTimer;
