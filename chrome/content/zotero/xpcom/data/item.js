@@ -1513,8 +1513,13 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		}
 	}
 	
-	if (this._inPublications && !this.isRegularItem() && !parentItemID) {
-		throw new Error("Top-level attachments and notes cannot be added to My Publications");
+	if (this._inPublications) {
+		if (!this.isRegularItem() && !parentItemID) {
+			throw new Error("Top-level attachments and notes cannot be added to My Publications");
+		}
+		if (this.isAttachment() && this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+			throw new Error("Linked-file attachments cannot be added to My Publications");
+		}
 	}
 	
 	// Trashed status

@@ -363,7 +363,19 @@ describe("Zotero.Item", function () {
 					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id)),
 				0
 			);
-		})
+		});
+		
+		it("should be invalid for linked-file attachments", function* () {
+			var item = yield createDataObject('item', { inPublications: true });
+			var attachment = yield Zotero.Attachments.linkFromFile({
+				file: OS.Path.join(getTestDataDirectory().path, 'test.png'),
+				parentItemID: item.id
+			});
+			attachment.inPublications = true;
+			var e = yield getPromiseError(attachment.saveTx());
+			assert.ok(e);
+			assert.include(e.message, "Linked-file attachments cannot be added to My Publications");
+		});
 	});
 	
 	describe("#parentID", function () {
