@@ -2480,8 +2480,13 @@ Zotero.Integration.Session.prototype.lookupItems = Zotero.Promise.coroutine(func
 		}
 		
 		if(zoteroItem) {
-			items.push(zoteroItem);
-			citationItem.id = zoteroItem.cslItemID ? zoteroItem.cslItemID : zoteroItem.id;
+			if (zoteroItem.cslItemID) {
+				citationItem.id = zoteroItem.cslItemID;
+			}
+			else {
+				citationItem.id = zoteroItem.id;
+				items.push(zoteroItem);
+			}
 		}
 	}
 	
