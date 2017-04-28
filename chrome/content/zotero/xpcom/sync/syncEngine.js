@@ -1118,37 +1118,50 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 				// If an item's dependency is missing remotely and it isn't in the queue (which
 				// shouldn't happen), mark it as unsynced
 				if (e.code == 400 || e.code == 409) {
-					if (objectType == 'item' && data) {
-						if (data.collection) {
-							let collection = Zotero.Collections.getByLibraryAndKey(this.libraryID, data.collection);
-							if (!collection) {
-								throw new Error(`Item ${this.libraryID}/${jsonBatch[index].key} `
-									+ `references collection ${data.collection}, which doesn't exist`);
+					if (data) {
+						if (objectType == 'collection' && e.code == 409) {
+							if (data.collection) {
+								let collection = Zotero.Collections.getByLibraryAndKey(this.libraryID, data.collection);
+								if (!collection) {
+									throw new Error(`Collection ${this.libraryID}/${jsonBatch[index].key} `
+										+ `references parent collection ${data.collection}, which doesn't exist`);
+								}
+								Zotero.logError(`Marking collection ${data.collection} as unsynced`);
+								yield Zotero.Sync.Data.Local.markObjectAsUnsynced(collection);
 							}
-							Zotero.logError(`Marking collection ${data.collection} as unsynced`);
-							yield Zotero.Sync.Data.Local.markObjectAsUnsynced(collection);
 						}
-						else if (data.parentItem) {
-							let parentItem = Zotero.Items.getByLibraryAndKey(this.libraryID, data.parentItem);
-							if (!parentItem) {
-								throw new Error(`Item ${this.libraryID}/${jsonBatch[index].key} references parent `
-									+ `item ${data.parentItem}, which doesn't exist`);
+						else if (objectType == 'item') {
+							if (data.collection) {
+								let collection = Zotero.Collections.getByLibraryAndKey(this.libraryID, data.collection);
+								if (!collection) {
+									throw new Error(`Item ${this.libraryID}/${jsonBatch[index].key} `
+										+ `references collection ${data.collection}, which doesn't exist`);
+								}
+								Zotero.logError(`Marking collection ${data.collection} as unsynced`);
+								yield Zotero.Sync.Data.Local.markObjectAsUnsynced(collection);
 							}
-							
-							let id = parentItem.id;
-							// If parent item isn't already in queue, mark it as unsynced and add it
-							if (!queue.find(o => o.id == id) && !batch.find(o => o.id == id)) {
-								yield Zotero.Sync.Data.Local.markObjectAsUnsynced(parentItem);
-								Zotero.logError(`Adding parent item ${data.parentItem} to upload queue`);
-								queue.push({
-									id,
-									json: null,
-									tries: 0,
-									failed: false
-								});
-								// Pretend that we were successful so syncing continues
-								numSuccessful++;
-								continue;
+							else if (data.parentItem) {
+								let parentItem = Zotero.Items.getByLibraryAndKey(this.libraryID, data.parentItem);
+								if (!parentItem) {
+									throw new Error(`Item ${this.libraryID}/${jsonBatch[index].key} references parent `
+										+ `item ${data.parentItem}, which doesn't exist`);
+								}
+								
+								let id = parentItem.id;
+								// If parent item isn't already in queue, mark it as unsynced and add it
+								if (!queue.find(o => o.id == id) && !batch.find(o => o.id == id)) {
+									yield Zotero.Sync.Data.Local.markObjectAsUnsynced(parentItem);
+									Zotero.logError(`Adding parent item ${data.parentItem} to upload queue`);
+									queue.push({
+										id,
+										json: null,
+										tries: 0,
+										failed: false
+									});
+									// Pretend that we were successful so syncing continues
+									numSuccessful++;
+									continue;
+								}
 							}
 						}
 					}

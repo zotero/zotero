@@ -2177,6 +2177,58 @@ describe("Zotero.Sync.Data.Engine", function () {
 		});
 		
 		
+		// Note: This shouldn't be necessary, since collections are sorted top-down before uploading
+		it("should mark local collection as unsynced if it doesn't exist when uploading collection", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			var lastLibraryVersion = 5;
+			library.libraryVersion = lastLibraryVersion;
+			yield library.saveTx();
+			
+			var collection1 = createUnsavedDataObject('collection');
+			// Set the collection as synced (though this shouldn't happen)
+			collection1.synced = true;
+			yield collection1.saveTx();
+			var collection2 = yield createDataObject('collection', { collections: [collection1.id] });
+			
+			var called = 0;
+			server.respond(function (req) {
+				let requestJSON = JSON.parse(req.requestBody);
+				
+				if (called == 0) {
+					assert.lengthOf(requestJSON, 1);
+					assert.equal(requestJSON[0].key, collection2.key);
+					req.respond(
+						200,
+						{
+							"Last-Modified-Version": lastLibraryVersion
+						},
+						JSON.stringify({
+							successful: {},
+							unchanged: {},
+							failed: {
+								0: {
+									code: 409,
+									message: `Parent collection ${collection1.key} doesn't exist`,
+									data: {
+										collection: collection1.key
+									}
+								}
+							}
+						})
+					);
+				}
+				called++;
+			});
+			
+			var e = yield getPromiseError(engine._startUpload());
+			assert.ok(e);
+			assert.isFalse(collection1.synced);
+		});
+		
+		
 		it("should mark local collection as unsynced if it doesn't exist when uploading item", function* () {
 			({ engine, client, caller } = yield setup());
 			
