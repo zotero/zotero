@@ -1244,14 +1244,10 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	// If available id value, use it -- otherwise we'll use autoincrement
 	var itemID = this._id = this.id ? this.id : Zotero.ID.get('items');
 	
-	env.sqlColumns.push(
-		'itemTypeID',
-		'dateAdded'
-	);
-	env.sqlValues.push(
-		{ int: itemTypeID },
-		this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime
-	);
+	if (this._changed.primaryData && this._changed.primaryData.itemTypeID) {
+		env.sqlColumns.push('itemTypeID');
+		env.sqlValues.push({ int: itemTypeID });
+	}
 	
 	// If a new item and Date Modified hasn't been provided, or an existing item and
 	// Date Modified hasn't changed from its previous value and skipDateModifiedUpdate wasn't
@@ -1271,6 +1267,9 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	}
 	
 	if (isNew) {
+		env.sqlColumns.push('dateAdded');
+		env.sqlValues.push(this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime);
+		
 		env.sqlColumns.unshift('itemID');
 		env.sqlValues.unshift(parseInt(itemID));
 		

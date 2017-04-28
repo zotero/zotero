@@ -930,14 +930,19 @@ Zotero.DataObject.prototype._saveData = function (env) {
 	var libraryID = env.libraryID = this.libraryID || Zotero.Libraries.userLibraryID;
 	var key = env.key = this._key = this.key ? this.key : this._generateKey();
 	
-	env.sqlColumns = [
-		'libraryID',
-		'key'
-	];
-	env.sqlValues = [
-		libraryID,
-		key
-	];
+	env.sqlColumns = [];
+	env.sqlValues = [];
+	
+	if (env.isNew) {
+		env.sqlColumns.push(
+			'libraryID',
+			'key'
+		);
+		env.sqlValues.push(
+			libraryID,
+			key
+		);
+	}
 	
 	if (this._changed.primaryData && this._changed.primaryData.version) {
 		env.sqlColumns.push('version');
