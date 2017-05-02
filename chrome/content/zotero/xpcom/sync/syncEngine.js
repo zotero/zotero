@@ -1133,7 +1133,14 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 										+ `references parent collection ${data.collection}, which doesn't exist`);
 								}
 								Zotero.logError(`Marking collection ${data.collection} as unsynced`);
+								Zotero.debug(collection.synced); // TEMP
 								yield Zotero.Sync.Data.Local.markObjectAsUnsynced(collection);
+								// TEMP
+								Zotero.debug(collection.synced);
+								Zotero.debug(yield Zotero.DB.valueQueryAsync(
+									"SELECT synced FROM collections WHERE collectionID=?",
+									collection.id
+								));
 							}
 						}
 						else if (objectType == 'item') {
