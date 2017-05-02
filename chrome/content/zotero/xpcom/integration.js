@@ -1242,10 +1242,6 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 		if(!haveSession) {
 			// This is a brand new document; don't try to get fields
 			return setDocPrefs();
-		} else if(me._session.reload) {
-			// Always reload before setDocPrefs so we can permit/deny unchecking storeReferences as
-			// appropriate
-			return fieldGetter.updateSession().then(setDocPrefs);
 		} else {
 			// Can get fields while dialog is open
 			return Zotero.Promise.all([
@@ -1691,9 +1687,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function* (forceCitations,
 		
 		var fieldCode = this._session.getCitationField(citation);
 		if(fieldCode != citation.properties.field) {
-			field.setCode(
-				(this._session.data.prefs.storeReferences ? "ITEM CSL_CITATION" : "ITEM")
-				+" "+fieldCode);
+			field.setCode(`ITEM CSL_CITATION ${fieldCode}`);
 			
 			if(this._session.data.prefs.fieldType === "ReferenceMark" && isRich
 					&& !citation.properties.dontUpdate) {
@@ -1715,8 +1709,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function* (forceCitations,
 		if(forceBibliography || this._session.bibliographyDataHasChanged) {
 			var bibliographyData = this._session.getBibliographyData();
 			for (let field of bibliographyFields) {
-				field.setCode("BIBL "+bibliographyData
-					+(this._session.data.prefs.storeReferences ? " CSL_BIBLIOGRAPHY" : ""));
+				field.setCode(`BIBL ${bibliographyData} CSL_BIBLIOGRAPHY`);
 			}
 		}
 		
@@ -2173,7 +2166,6 @@ Zotero.Integration.Session.prototype.setDocPrefs = Zotero.Promise.coroutine(func
 		io.fieldType = this.data.prefs.fieldType;
 		io.primaryFieldType = primaryFieldType;
 		io.secondaryFieldType = secondaryFieldType;
-		io.storeReferences = this.data.prefs.storeReferences;
 		io.automaticJournalAbbreviations = this.data.prefs.automaticJournalAbbreviations;
 		io.requireStoreReferences = !Zotero.Utilities.isEmpty(this.embeddedItems);
 	}
@@ -2194,7 +2186,6 @@ Zotero.Integration.Session.prototype.setDocPrefs = Zotero.Promise.coroutine(func
 	data.style.styleID = io.style;
 	data.style.locale = io.locale;
 	data.prefs.fieldType = io.fieldType;
-	data.prefs.storeReferences = io.storeReferences;
 	data.prefs.automaticJournalAbbreviations = io.automaticJournalAbbreviations;
 	
 	var forceStyleReset = oldData
@@ -2254,7 +2245,6 @@ Zotero.Integration.Session.prototype.getCitationField = function(citation) {
 	const saveProperties = ["custom", "unsorted", "formattedCitation", "plainCitation", "dontUpdate"];
 	const saveCitationItemKeys = ["locator", "label", "suppress-author", "author-only", "prefix",
 		"suffix"];
-	var addSchema = false;
 	
 	var type;
 	var field = [];
@@ -2285,7 +2275,6 @@ Zotero.Integration.Session.prototype.getCitationField = function(citation) {
 			
 			// always store itemData, since we have no way to get it back otherwise
 			serializeCitationItem.itemData = citationItem.itemData;
-			addSchema = true;
 		} else {
 			serializeCitationItem.id = citationItem.id;
 			serializeCitationItem.uris = this.uriMap.getURIsForItemID(citationItem.id);
@@ -2293,11 +2282,7 @@ Zotero.Integration.Session.prototype.getCitationField = function(citation) {
 			// XXX For compatibility with older versions of Zotero; to be removed at a later date
 			serializeCitationItem.uri = serializeCitationItem.uris;
 		
-			// add itemData only if requested
-			if(this.data.prefs.storeReferences) {
-				serializeCitationItem.itemData = this.style.sys.retrieveItem(citationItem.id);
-				addSchema = true;
-			}
+			serializeCitationItem.itemData = this.style.sys.retrieveItem(citationItem.id);
 		}
 		
 		// copy saveCitationItemKeys
@@ -2310,10 +2295,7 @@ Zotero.Integration.Session.prototype.getCitationField = function(citation) {
 		citationItems[j] = JSON.stringify(serializeCitationItem);
 	}
 	field.push('"citationItems":['+citationItems.join(",")+"]");
-	
-	if(addSchema) {
-		field.push('"schema":"https://github.com/citation-style-language/schema/raw/master/csl-citation.json"');
-	}
+	field.push('"schema":"https://github.com/citation-style-language/schema/raw/master/csl-citation.json"');
 	
 	return "{"+field.join(",")+"}";
 }
@@ -3146,7 +3128,6 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 	} catch (e) {
 		this.prefs.noteType = 0;
 	}
-	if (this.prefs["storeReferences"] === undefined) this.prefs["storeReferences"] = false;
 	if (this.prefs["automaticJournalAbbreviations"] === undefined) this.prefs["automaticJournalAbbreviations"] = false;
 	this.zoteroVersion = doc.documentElement.getAttribute("zotero-version");
 	if (!this.zoteroVersion) this.zoteroVersion = "2.0";
@@ -3180,8 +3161,7 @@ Zotero.Integration.DocumentData.prototype.unserialize = function(input) {
 		this.style = {"styleID":prefParameters[1], 
 			"hasBibliography":(prefParameters[3] == "1" || prefParameters[3] == "True"),
 			"bibliographyStyleHasBeenSet":false};
-		this.prefs = {"fieldType":((prefParameters[5] == "1" || prefParameters[5] == "True") ? "Bookmark" : "Field"),
-			"storeReferences":false};
+		this.prefs = {"fieldType":((prefParameters[5] == "1" || prefParameters[5] == "True") ? "Bookmark" : "Field")};
 		if(prefParameters[2] == "note") {
 			if(prefParameters[4] == "1" || prefParameters[4] == "True") {
 				this.prefs.noteType = NOTE_ENDNOTE;
