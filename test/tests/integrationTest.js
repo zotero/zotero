@@ -76,10 +76,13 @@ describe("Zotero.Integration", function () {
 		/**
 		 * Inserts a field at the given position and initializes the field object.
 		 * @param {String} fieldType
-		 * @param {String} noteType
+		 * @param {Integer} noteType
 		 * @returns {DocumentPluginDummy.Field}
 		 */
 		insertField: function(fieldType, noteType) { 
+			if (typeof noteType != "number") {
+				throw new Error("noteType must be an integer");
+			}
 			var field = new DocumentPluginDummy.Field(this); 
 			this.fields.push(field); 
 			return field 
@@ -274,7 +277,7 @@ describe("Zotero.Integration", function () {
 		if (items.length == undefined) items = [items];
 		dialogResults.quickFormat = function(doc, dialogName) {
 			var citationItems = items.map((i) => {return {id: i.id} });
-			var field = doc.insertField();
+			var field = doc.insertField("Field", 0);
 			field.setCode('TEMP');
 			var integrationDoc = addEditCitationSpy.lastCall.thisValue;
 			var fieldGetter = new Zotero.Integration.Fields(integrationDoc._session, integrationDoc._doc, () => 0);
@@ -486,7 +489,7 @@ describe("Zotero.Integration", function () {
 					fieldType: 'ReferenceMark',
 					storeReferences: true,
 					automaticJournalAbbreviations: true,
-					noteType: '0'
+					noteType: 0
 				},
 				sessionID: 'F0NFmZ32',
 				zoteroVersion: '5.0.SOURCE',
@@ -546,7 +549,6 @@ describe("Zotero.Integration", function () {
 			
 			// This isn't ideal, but currently how it works. Better serialization which properly retains types
 			// coming with official 5.0 release.
-			data.prefs.noteType = "1";
 			data.dataVersion = "3";
 
 			// Convert to JSON to remove functions from DocumentData objects

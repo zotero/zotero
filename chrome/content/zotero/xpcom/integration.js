@@ -3142,7 +3142,7 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 		this.prefs[name] = value;
 	}
 	try {
-		this.prefs.noteType = parseInt(noteType);
+		this.prefs.noteType = parseInt(this.prefs.noteType);
 	} catch (e) {
 		this.prefs.noteType = 0;
 	}
