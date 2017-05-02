@@ -3141,12 +3141,17 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 		
 		this.prefs[name] = value;
 	}
-	if(this.prefs["storeReferences"] === undefined) this.prefs["storeReferences"] = false;
-	if(this.prefs["automaticJournalAbbreviations"] === undefined) this.prefs["automaticJournalAbbreviations"] = false;
+	try {
+		this.prefs.noteType = parseInt(noteType);
+	} catch (e) {
+		this.prefs.noteType = 0;
+	}
+	if (this.prefs["storeReferences"] === undefined) this.prefs["storeReferences"] = false;
+	if (this.prefs["automaticJournalAbbreviations"] === undefined) this.prefs["automaticJournalAbbreviations"] = false;
 	this.zoteroVersion = doc.documentElement.getAttribute("zotero-version");
-	if(!this.zoteroVersion) this.zoteroVersion = "2.0";
+	if (!this.zoteroVersion) this.zoteroVersion = "2.0";
 	this.dataVersion = doc.documentElement.getAttribute("data-version");
-	if(!this.dataVersion) this.dataVersion = 2;
+	if (!this.dataVersion) this.dataVersion = 2;
 };
 
 /**
