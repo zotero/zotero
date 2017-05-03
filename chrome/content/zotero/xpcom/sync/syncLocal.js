@@ -1104,6 +1104,21 @@ Zotero.Sync.Data.Local = {
 	},
 	
 	
+	/**
+	 * Delete entries from sync cache that don't exist or are less than the current object version
+	 */
+	purgeCache: Zotero.Promise.coroutine(function* (objectType, libraryID) {
+		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
+		var table = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType).table;
+		var sql = "DELETE FROM syncCache WHERE ROWID IN ("
+			+ "SELECT SC.ROWID FROM syncCache SC "
+			+ `LEFT JOIN ${table} O USING (libraryID, key, version) `
+			+ "WHERE syncObjectTypeID=? AND SC.libraryID=? AND "
+			+ "(O.libraryID IS NULL OR SC.version < O.version)";
+		yield Zotero.DB.queryAsync(sql, [syncObjectTypeID, libraryID]);
+	}),
+	
+	
 	processConflicts: Zotero.Promise.coroutine(function* (objectType, libraryID, conflicts, options = {}) {
 		if (!conflicts.length) return [];
 		

@@ -204,7 +204,7 @@ Zotero.Sync.Data.Engine.prototype.stop = function () {
 
 
 /**
- * Download updated objects from API and save to local cache
+ * Download updated objects from API and save to DB
  *
  * @return {Promise<Integer>} - A download result code (this.DOWNLOAD_RESULT_*)
  */
@@ -1106,6 +1106,11 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 				objectsClass.updateVersion(updateVersionIDs, libraryVersion);
 				objectsClass.updateSynced(updateSyncedIDs, true);
 			}.bind(this));
+			
+			// Purge older objects in sync cache
+			if (toSave.length) {
+				yield Zotero.Sync.Data.Local.purgeCache(objectType, this.libraryID);
+			}
 			
 			// Handle failed objects
 			for (let index in results.failed) {

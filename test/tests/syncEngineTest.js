@@ -682,6 +682,10 @@ describe("Zotero.Sync.Data.Engine", function () {
 					assert.isArray(cached.data.conditions);
 					break;
 				}
+				
+				// Make sure older versions have been removed from the cache
+				let versions = yield Zotero.Sync.Data.Local.getCacheObjectVersions(type, libraryID, key);
+				assert.sameMembers(versions, [version]);
 			}
 		})
 		
