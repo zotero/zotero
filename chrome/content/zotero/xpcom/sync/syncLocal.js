@@ -1113,7 +1113,7 @@ Zotero.Sync.Data.Local = {
 			+ "SELECT SC.ROWID FROM syncCache SC "
 			+ `LEFT JOIN ${table} O USING (libraryID, key, version) `
 			+ "WHERE syncObjectTypeID=? AND SC.libraryID=? AND "
-			+ "(O.libraryID IS NULL OR SC.version < O.version)";
+			+ "(O.libraryID IS NULL OR SC.version < O.version))";
 		yield Zotero.DB.queryAsync(sql, [syncObjectTypeID, libraryID]);
 	}),
 	
