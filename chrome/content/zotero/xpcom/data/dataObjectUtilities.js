@@ -274,8 +274,13 @@ Zotero.DataObjectUtilities = {
 		var pred2 = Object.keys(data2);
 		pred2.sort();
 		if (!Zotero.Utilities.arrayEquals(pred1, pred2)) return true;
-		for (let i in pred1) {
-			if (!Zotero.Utilities.arrayEquals(pred1[i], pred2[i])) {
+		for (let pred in pred1) {
+			let vals1 = typeof data1[pred] == 'string' ? [data1[pred]] : data1[pred];
+			let vals2 = (!data2[pred] || data2[pred] === '')
+				? []
+				: typeof data2[pred] == 'string' ? [data2[pred]] : data2[pred];
+			
+			if (!Zotero.Utilities.arrayEquals(vals1, vals2)) {
 				return true;
 			}
 		}
@@ -561,7 +566,7 @@ Zotero.DataObjectUtilities = {
 			}
 		}
 		for (let pred in data2) {
-			// Property in first object have already been handled
+			// Property in first object has already been handled
 			if (data1[pred]) continue;
 			
 			let vals = typeof data2[pred] == 'string' ? [data2[pred]] : data2[pred];

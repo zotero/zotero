@@ -1316,6 +1316,40 @@ describe("Zotero.Item", function () {
 				assert.isFalse(json.parentItem);
 			});
 			
+			it("should include relations if related item was removed", function* () {
+				var item1 = yield createDataObject('item');
+				var item2 = yield createDataObject('item');
+				var item3 = yield createDataObject('item');
+				var item4 = yield createDataObject('item');
+				
+				var relateItems = Zotero.Promise.coroutine(function* (i1, i2) {
+					yield Zotero.DB.executeTransaction(function* () {
+						i1.addRelatedItem(i2);
+						yield i1.save({
+							skipDateModifiedUpdate: true
+						});
+						i2.addRelatedItem(i1);
+						yield i2.save({
+							skipDateModifiedUpdate: true
+						});
+					});
+				});
+				
+				yield relateItems(item1, item2);
+				yield relateItems(item1, item3);
+				yield relateItems(item1, item4);
+				
+				var patchBase = item1.toJSON();
+				
+				item1.removeRelatedItem(item2);
+				yield item1.saveTx();
+				item2.removeRelatedItem(item1);
+				yield item2.saveTx();
+				
+				var json = item1.toJSON({ patchBase });
+				assert.sameMembers(json.relations['dc:relation'], item1.getRelations()['dc:relation']);
+			});
+			
 			it("shouldn't clear storage properties from original in .skipStorageProperties mode", function* () {
 				var item = new Zotero.Item('attachment');
 				item.attachmentLinkMode = 'imported_file';
