@@ -166,12 +166,6 @@ var Zotero_File_Interface_Bibliography = new function() {
 				document.getElementById("automaticJournalAbbreviations-checkbox").checked = true;
 			}
 		}
-		if(document.getElementById("storeReferences")) {
-			if(_io.storeReferences || _io.storeReferences === undefined) {
-				document.getElementById("storeReferences").checked = true;
-				if(_io.requireStoreReferences) document.getElementById("storeReferences").disabled = true;
-			}
-		}
 		
 		// set style to false, in case this is cancelled
 		_io.style = false;
@@ -271,7 +265,6 @@ var Zotero_File_Interface_Bibliography = new function() {
 			}
 			_io.useEndnotes = document.getElementById("displayAs").selectedIndex;
 			_io.fieldType = (document.getElementById("formatUsing").selectedIndex == 0 ? _io.primaryFieldType : _io.secondaryFieldType);
-			_io.storeReferences = document.getElementById("storeReferences").checked;
 		}
 		
 		// remember style and locale if user selected these explicitly

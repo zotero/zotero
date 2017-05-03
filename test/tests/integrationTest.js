@@ -252,7 +252,6 @@ describe("Zotero.Integration", function () {
 		data.prefs = {
 			noteType: 0,
 			fieldType: "Field",
-			storeReferences: true,
 			automaticJournalAbbreviations: true
 		};
 		data.style = {styleID, locale: 'en-US', hasBibliography: true, bibliographyStyleHasBeenSet: true};
@@ -266,7 +265,6 @@ describe("Zotero.Integration", function () {
 			style: "http://www.zotero.org/styles/cell",
 			locale: 'en-US',
 			fieldType: 'Field',
-			storeReferences: true,
 			automaticJournalAbbreviations: false,
 			useEndnotes: 0
 		};
@@ -476,7 +474,7 @@ describe("Zotero.Integration", function () {
 	
 	describe("DocumentData", function() {
 		it('should properly unserialize old XML document data', function() {
-			var serializedXMLData = "<data data-version=\"3\" zotero-version=\"5.0.SOURCE\"><session id=\"F0NFmZ32\"/><style id=\"http://www.zotero.org/styles/cell\" hasBibliography=\"1\" bibliographyStyleHasBeenSet=\"1\"/><prefs><pref name=\"fieldType\" value=\"ReferenceMark\"/><pref name=\"storeReferences\" value=\"true\"/><pref name=\"automaticJournalAbbreviations\" value=\"true\"/><pref name=\"noteType\" value=\"0\"/></prefs></data>";
+			var serializedXMLData = "<data data-version=\"3\" zotero-version=\"5.0.SOURCE\"><session id=\"F0NFmZ32\"/><style id=\"http://www.zotero.org/styles/cell\" hasBibliography=\"1\" bibliographyStyleHasBeenSet=\"1\"/><prefs><pref name=\"fieldType\" value=\"ReferenceMark\"/><pref name=\"automaticJournalAbbreviations\" value=\"true\"/><pref name=\"noteType\" value=\"0\"/></prefs></data>";
 			var data = new Zotero.Integration.DocumentData(serializedXMLData);
 			var expectedData = {
 				style: {
@@ -487,7 +485,6 @@ describe("Zotero.Integration", function () {
 				},
 				prefs: {
 					fieldType: 'ReferenceMark',
-					storeReferences: true,
 					automaticJournalAbbreviations: true,
 					noteType: 0
 				},
@@ -509,7 +506,6 @@ describe("Zotero.Integration", function () {
 				},
 				prefs: {
 					fieldType: 'ReferenceMark',
-					storeReferences: true,
 					automaticJournalAbbreviations: false,
 					noteType: 0
 				},
@@ -537,7 +533,6 @@ describe("Zotero.Integration", function () {
 			data.prefs = {
 				noteType: 1,
 				fieldType: "Field",
-				storeReferences: true,
 				automaticJournalAbbreviations: true
 			};
 			
@@ -574,7 +569,6 @@ describe("Zotero.Integration", function () {
 			data.prefs = {
 				noteType: 1,
 				fieldType: "Field",
-				storeReferences: true,
 				automaticJournalAbbreviations: true
 			};
 			
