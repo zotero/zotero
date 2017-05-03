@@ -187,6 +187,13 @@ Zotero.Integration = new function() {
 		}
 	}
 	
+	this.resetSessionStyles = Zotero.Promise.coroutine(function* (){
+		for (let sessionID in Zotero.Integration.sessions) {
+			let session = Zotero.Integration.sessions[sessionID];
+			yield session.setData(session.data, true);
+		}
+	});
+	
 	/**
 	 * Checks to see that plugin versions are up to date.
 	 * @return {Promise} Promise that is resolved with true if versions are up to date

@@ -130,6 +130,10 @@ Zotero.Styles = new function() {
 		
 		_initializationDeferred.resolve();
 		_initialized = true;
+		
+		// Styles are fully loaded, but we still need to trigger citeproc reloads in Integration
+		// so that style updates are reflected in open documents
+		Zotero.Integration.resetSessionStyles();
 	});
 	
 	this.reinit = function (options = {}) {
