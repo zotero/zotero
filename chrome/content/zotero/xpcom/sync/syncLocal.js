@@ -1082,10 +1082,9 @@ Zotero.Sync.Data.Local = {
 	 * @param {Integer} [maxVersion]
 	 */
 	deleteCacheObjectVersions: function (objectType, libraryID, key, minVersion, maxVersion) {
-		var sql = "DELETE FROM syncCache WHERE libraryID=? AND key=? "
-			+ "AND syncObjectTypeID IN (SELECT syncObjectTypeID FROM "
-			+ "syncObjectTypes WHERE name=?)";
-		var params = [libraryID, key, objectType];
+		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
+		var sql = "DELETE FROM syncCache WHERE libraryID=? AND key=? AND syncObjectTypeID=?";
+		var params = [libraryID, key, syncObjectTypeID];
 		if (minVersion && minVersion == maxVersion) {
 			sql += " AND version=?";
 			params.push(minVersion);
