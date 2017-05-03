@@ -1032,6 +1032,8 @@ Zotero.Integration.Document.prototype._getSession = Zotero.Promise.coroutine(fun
 			this._session = this._createNewSession(data);
 			try {
 				yield this._session.setData(data);
+				// this._createNewSession() updates sessionID, which we need to store back into the doc
+				this._doc.setDocumentData(me._session.data.serialize())
 			} catch(e) {
 				// make sure style is defined
 				if(e instanceof Zotero.Exception.Alert && e.name === "integration.error.invalidStyle") {

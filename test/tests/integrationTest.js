@@ -352,10 +352,10 @@ describe("Zotero.Integration", function () {
 				assert.isFalse(setDocumentDataSpy.called);
 			});
 			
-			it('should not call doc.setDocumentData when document communicates for first time since restart, but has data', function* () {
+			it('should call doc.setDocumentData when document communicates for first time since restart to write new sessionID', function* () {
 				Zotero.Integration.sessions = {};
 				yield execCommand('addEditCitation', docID);
-				assert.isFalse(setDocumentDataSpy.called);
+				assert.isTrue(setDocumentDataSpy.calledOnce);
 			});
 			
 			describe('when style used in the document does not exist', function() {
