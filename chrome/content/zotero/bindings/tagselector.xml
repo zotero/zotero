@@ -1011,10 +1011,17 @@
 							}
 						}
 						*/
-
+						
+						var elem = event.target;
+						
+						// Ignore drops not on tags
+						if (elem.localName != 'button') {
+							return;
+						}
+						
 						// Store the event, because drop event does not have shiftKey attribute set
 						Zotero.DragDrop.currentEvent = event;
-						event.target.setAttribute('draggedOver', true);
+						elem.setAttribute('draggedOver', true);
 						event.preventDefault();
 						event.dataTransfer.dropEffect = "copy";
 					}
@@ -1026,8 +1033,14 @@
 					
 					
 					this.onDrop = Zotero.Promise.method(function (event) {
-						var node = event.target;
-						node.setAttribute('draggedOver', false);
+						var elem = event.target;
+						
+						// Ignore drops not on tags
+						if (elem.localName != 'button') {
+							return;
+						}
+						
+						elem.setAttribute('draggedOver', false);
 						
 						var dt = event.dataTransfer;
 						var ids = dt.getData('zotero/item');
@@ -1038,7 +1051,7 @@
 						return Zotero.DB.executeTransaction(function* () {
 							ids = ids.split(',');
 							var items = Zotero.Items.get(ids);
-							var value = node.textContent
+							var value = elem.textContent
 							
 							for (let i=0; i<items.length; i++) {
 								let item = items[i];
