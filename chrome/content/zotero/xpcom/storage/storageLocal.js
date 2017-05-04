@@ -415,17 +415,13 @@ Zotero.Sync.Storage.Local = {
 		}
 		// Compare floored timestamps for filesystems that don't support millisecond
 		// precision (e.g., HFS+)
-		else if (Math.floor(mtime / 1000) * 1000 == fmtime
-				|| Math.floor(fmtime / 1000) * 1000 == mtime) {
+		else if (Math.floor(mtime / 1000) == Math.floor(fmtime / 1000)) {
 			Zotero.debug(`File mod times for ${libraryKey} are within one-second precision `
 				+ "(" + fmtime + " \u2248 " + mtime + ") -- skipping");
 		}
 		// Allow timestamp to be exactly one hour off to get around time zone issues
 		// -- there may be a proper way to fix this
-		else if (Math.abs(fmtime - mtime) == 3600000
-				// And check with one-second precision as well
-				|| Math.abs(fmtime - Math.floor(mtime / 1000) * 1000) == 3600000
-				|| Math.abs(Math.floor(fmtime / 1000) * 1000 - mtime) == 3600000) {
+		else if (Math.abs(Math.floor(fmtime / 1000) - Math.floor(mtime / 1000)) == 3600) {
 			Zotero.debug(`File mod time (${fmtime}) for {$libraryKey} is exactly one hour off `
 				+ `remote file (${mtime}) -- assuming time zone issue and skipping`);
 		}
