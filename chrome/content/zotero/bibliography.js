@@ -140,11 +140,12 @@ var Zotero_File_Interface_Bibliography = new function() {
 				document.getElementById(method);
 		}
 		
-		// ONLY FOR integrationDocPrefs.xul: update status of displayAs, set
-		// bookmarks text
+		// ONLY FOR integrationDocPrefs.xul: set selected endnotes/footnotes
 		isDocPrefs = !!document.getElementById("displayAs");
-		if(document.getElementById("displayAs")) {
+		if (isDocPrefs) {
 			if(_io.useEndnotes && _io.useEndnotes == 1) document.getElementById("displayAs").selectedIndex = 1;
+			let dialog = document.getElementById("zotero-doc-prefs-dialog");
+			dialog.setAttribute('title', `${Zotero.clientName} - ${dialog.getAttribute('title')}`);
 		}
 		if(document.getElementById("formatUsing")) {
 			if(_io.fieldType == "Bookmark") document.getElementById("formatUsing").selectedIndex = 1;
@@ -257,7 +258,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		}
 		
 		// ONLY FOR integrationDocPrefs.xul:
-		if(document.getElementById("displayAs")) {
+		if(isDocPrefs) {
 			var automaticJournalAbbreviationsEl = document.getElementById("automaticJournalAbbreviations-checkbox");
 			_io.automaticJournalAbbreviations = automaticJournalAbbreviationsEl.checked;
 			if(!automaticJournalAbbreviationsEl.hidden && lastSelectedStyle) {

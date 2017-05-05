@@ -224,7 +224,7 @@
 <!ENTITY zotero.integration.prefs.footnotes.label		"Footnotes">
 <!ENTITY zotero.integration.prefs.endnotes.label		"Endnotes">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label		"Format Using:">
+<!ENTITY zotero.integration.prefs.formatUsing.label		"Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label		"Bookmarks">
 <!ENTITY zotero.integration.prefs.bookmarks.caption		"Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
