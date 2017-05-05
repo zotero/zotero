@@ -740,21 +740,11 @@ Zotero.Utilities = {
 	/**
 	 * Return new array with duplicate values removed
 	 *
-	 * From http://stackoverflow.com/a/1961068
-	 *
 	 * @param	{Array}		array
 	 * @return	{Array}
 	 */
-	"arrayUnique":function(arr) {
-		var u = {}, a = [];
-		for (var i=0, l=arr.length; i<l; ++i){
-			if (u.hasOwnProperty(arr[i])) {
-				continue;
-			}
-			a.push(arr[i]);
-			u[arr[i]] = 1;
-		}
-		return a;
+	arrayUnique: function (arr) {
+		return [...new Set(arr)];
 	},
 	
 	/**
