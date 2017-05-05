@@ -2056,6 +2056,88 @@ describe("Zotero.Sync.Data.Engine", function () {
 	});
 	
 	
+	describe("#_downloadUpdatedObjects()", function () {
+		it("should include objects in sync queue", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var objectType = 'collection';
+			var objectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
+			yield Zotero.Sync.Data.Local.addObjectsToSyncQueue(
+				objectType, libraryID, ["BBBBBBBB", "CCCCCCCC"]
+			);
+			yield Zotero.DB.queryAsync(
+				"UPDATE syncQueue SET lastCheck=lastCheck-3600 "
+					+ "WHERE syncObjectTypeID=? AND libraryID=? AND key IN (?, ?)",
+				[objectTypeID, libraryID, 'BBBBBBBB', 'CCCCCCCC']
+			);
+			
+			var headers = {
+				"Last-Modified-Version": 5
+			};
+			setResponse({
+				method: "GET",
+				url: "users/1/collections?format=versions&since=1",
+				status: 200,
+				headers,
+				json: {
+					AAAAAAAA: 5,
+					BBBBBBBB: 5
+				}
+			});
+			
+			var stub = sinon.stub(engine, "_downloadObjects");
+			
+			yield engine._downloadUpdatedObjects(objectType, 1, 5);
+			
+			assert.ok(stub.calledWith("collection", ["AAAAAAAA", "BBBBBBBB", "CCCCCCCC"]));
+			stub.restore();
+		});
+	});
+	
+	
+	describe("#_downloadObjects()", function () {
+		it("should remove object from sync queue if missing from response", function* () {
+			({ engine, client, caller } = yield setup({
+				stopOnError: false
+			}));
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var objectType = 'collection';
+			var objectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
+			yield Zotero.Sync.Data.Local.addObjectsToSyncQueue(
+				objectType, libraryID, ["BBBBBBBB", "CCCCCCCC"]
+			);
+			
+			var headers = {
+				"Last-Modified-Version": 5
+			};
+			setResponse({
+				method: "GET",
+				url: "users/1/collections?format=json&collectionKey=AAAAAAAA%2CBBBBBBBB%2CCCCCCCCC",
+				status: 200,
+				headers,
+				json: [
+					makeCollectionJSON({
+						key: "AAAAAAAA",
+						version: 5,
+						name: "A"
+					}),
+					makeCollectionJSON({
+						key: "BBBBBBBB",
+						version: 5
+						// Missing 'name', which causes a save error
+					})
+				]
+			});
+			yield engine._downloadObjects(objectType, ["AAAAAAAA", "BBBBBBBB", "CCCCCCCC"]);
+			
+			// Missing object should have been removed, but invalid object should remain
+			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue(objectType, libraryID);
+			assert.sameMembers(keys, ['BBBBBBBB']);
+		});
+	});
+	
+	
 	describe("#_startUpload()", function () {
 		it("shouldn't upload unsynced objects if present in sync queue", function* () {
 			({ engine, client, caller } = yield setup());

@@ -1692,10 +1692,10 @@ Zotero.Sync.Data.Local = {
 	
 	
 	getObjectsToTryFromSyncQueue: Zotero.Promise.coroutine(function* (objectType, libraryID) {
+		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
 		var rows = yield Zotero.DB.queryAsync(
-			"SELECT key, lastCheck, tries FROM syncQueue WHERE libraryID=? AND "
-				+ "syncObjectTypeID IN (SELECT syncObjectTypeID FROM syncObjectTypes WHERE name=?)",
-			[libraryID, objectType]
+			"SELECT key, lastCheck, tries FROM syncQueue WHERE libraryID=? AND syncObjectTypeID=?",
+			[libraryID, syncObjectTypeID]
 		);
 		var keysToTry = [];
 		for (let row of rows) {

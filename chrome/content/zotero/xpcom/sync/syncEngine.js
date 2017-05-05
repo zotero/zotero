@@ -436,6 +436,7 @@ Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.corou
 	}
 	
 	keys.push(...queuedKeys);
+	keys = Zotero.Utilities.arrayUnique(keys);
 	
 	if (!keys.length) {
 		Zotero.debug(`No ${objectTypePlural} to download`);
@@ -455,14 +456,13 @@ Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.corou
 Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(function* (objectType, keys) {
 	var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 	
+	var remainingKeys = [...keys];
 	var lastLength = keys.length;
 	var objectData = {};
 	keys.forEach(key => objectData[key] = null);
 	
 	while (true) {
 		this._failedCheck();
-		
-		let lastError = false;
 		
 		// Get data we've downloaded in a previous loop but failed to process
 		var json = [];
@@ -491,7 +491,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 			"Downloading "
 			+ (keysToDownload.length == 1
 				? "1 " + objectType
-				: Zotero.Utilities.numberFormat(keys.length, 0) + " " + objectTypePlural)
+				: Zotero.Utilities.numberFormat(remainingKeys.length, 0) + " " + objectTypePlural)
 			+ " in " + this.library.name
 		);
 		
@@ -510,7 +510,6 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 				
 				if (!Array.isArray(batch)) {
 					this.failed = batch;
-					lastError = batch;
 					return;
 				}
 				
@@ -564,7 +563,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 						conflictResults.push(x);
 					}
 				});
-				keys = Zotero.Utilities.arrayDiff(keys, processedKeys);
+				remainingKeys = Zotero.Utilities.arrayDiff(remainingKeys, processedKeys);
 				conflicts.push(...conflictResults);
 			}.bind(this)),
 			{
@@ -572,12 +571,28 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 			}
 		);
 		
-		if (!keys.length || keys.length == lastLength) {
+		this._failedCheck();
+		
+		// If all requests were successful, such that we had a chance to see all keys, remove keys we
+		// didn't see from the sync queue so they don't keep being retried forever
+		if (!this.failed) {
+			let missingKeys = keys.filter(key => objectData[key] === null);
+			if (missingKeys.length) {
+				Zotero.debug(`Removing ${missingKeys.length} missing `
+					+ Zotero.Utilities.pluralize(missingKeys.length, [objectType, objectTypePlural])
+					+ " from sync queue");
+				yield Zotero.Sync.Data.Local.removeObjectsFromSyncQueue(objectType, this.libraryID, missingKeys);
+				remainingKeys = Zotero.Utilities.arrayDiff(remainingKeys, missingKeys);
+			}
+		}
+		
+		if (!remainingKeys.length || remainingKeys.length == lastLength) {
 			// Add failed objects to sync queue
-			let failedKeys = Object.keys(objectData).filter(key => objectData[key])
+			let failedKeys = keys.filter(key => objectData[key]);
 			if (failedKeys.length) {
-				let objDesc = `${failedKeys.length == 1 ? objectType : objectTypePlural}`;
-				Zotero.debug(`Queueing ${failedKeys.length} failed ${objDesc} for later`, 2);
+				Zotero.debug(`Queueing ${failedKeys.length} failed `
+					+ Zotero.Utilities.pluralize(failedKeys.length, [objectType, objectTypePlural])
+					+ " for later", 2);
 				yield Zotero.Sync.Data.Local.addObjectsToSyncQueue(
 					objectType, this.libraryID, failedKeys
 				);
@@ -598,10 +613,10 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 			break;
 		}
 		
-		lastLength = keys.length;
+		lastLength = remainingKeys.length;
 		
-		var remainingObjectDesc = `${keys.length == 1 ? objectType : objectTypePlural}`;
-		Zotero.debug(`Retrying ${keys.length} remaining ${remainingObjectDesc}`);
+		Zotero.debug(`Retrying ${remainingKeys.length} remaining `
+			+ Zotero.Utilities.pluralize(remainingKeys, [objectType, objectTypePlural]));
 	}
 	
 	// Show conflict resolution window
