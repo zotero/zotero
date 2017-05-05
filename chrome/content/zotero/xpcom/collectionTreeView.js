@@ -1639,6 +1639,14 @@ Zotero.CollectionTreeView.prototype.canDropCheck = function (row, orient, dataTr
 						Zotero.debug("FeedItems cannot be added to My Publications");
 						return false;
 					}
+					if (item.inPublications) {
+						Zotero.debug("Item " + item.id + " already exists in My Publications");
+						continue;
+					}
+					if (treeRow.ref.libraryID != item.libraryID) {
+						Zotero.debug("Cross-library drag to My Publications not allowed");
+						continue;
+					}
 					skip = false;
 					continue;
 				}
@@ -1662,10 +1670,14 @@ Zotero.CollectionTreeView.prototype.canDropCheck = function (row, orient, dataTr
 					return false;
 				}
 				
-				// Allow drags to collections. Item collection membership is an asynchronous
-				// check, so we do that on drop()
+				// Make sure there's at least one item that's not already in this destination
 				if (treeRow.isCollection()) {
+					if (treeRow.ref.hasItem(item.id)) {
+						Zotero.debug("Item " + item.id + " already exists in collection");
+						continue;
+					}
 					skip = false;
+					continue;
 				}
 			}
 			if (skip) {
@@ -1785,27 +1797,10 @@ Zotero.CollectionTreeView.prototype.canDropCheckAsync = Zotero.Promise.coroutine
 					continue;
 				}
 				
-				// Intra-library drag
-				
-				// Make sure there's at least one item that's not already in this destination
-				if (treeRow.isCollection()) {
-					if (treeRow.ref.hasItem(item.id)) {
-						Zotero.debug("Item " + item.id + " already exists in collection");
-						continue;
-					}
-					skip = false;
-					continue;
-				}
-				
-				// Make sure there's at least one item that's not already in My Publications
-				if (treeRow.isPublications()) {
-					if (item.inPublications) {
-						Zotero.debug("Item " + item.id + " already exists in My Publications");
-						continue;
-					}
-					skip = false;
-					continue;
-				}
+				// Intra-library drags have already been vetted by canDrop(). This 'break' should be
+				// changed to a 'continue' if any asynchronous checks that stop the drag are added above
+				skip = false;
+				break;
 			}
 			if (skip) {
 				Zotero.debug("Drag skipped");

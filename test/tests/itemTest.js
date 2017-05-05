@@ -376,6 +376,15 @@ describe("Zotero.Item", function () {
 			assert.ok(e);
 			assert.include(e.message, "Linked-file attachments cannot be added to My Publications");
 		});
+		
+		it("should be invalid for group library items", function* () {
+			var group = yield getGroup();
+			var item = yield createDataObject('item', { libraryID: group.libraryID });
+			item.inPublications = true;
+			var e = yield getPromiseError(item.saveTx());
+			assert.ok(e);
+			assert.equal(e.message, "Only items in user libraries can be added to My Publications");
+		});
 	});
 	
 	describe("#parentID", function () {

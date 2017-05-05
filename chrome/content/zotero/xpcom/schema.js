@@ -2416,6 +2416,10 @@ Zotero.Schema = new function(){
 				}
 				yield Zotero.DB.queryAsync("DELETE FROM publicationsItems WHERE itemID IN (SELECT itemID FROM items JOIN itemAttachments USING (itemID) WHERE linkMode=2)");
 			}
+			
+			else if (i == 95) {
+				yield Zotero.DB.queryAsync("DELETE FROM publicationsItems WHERE itemID NOT IN (SELECT itemID FROM items WHERE libraryID=1)");
+			}
 		}
 		
 		yield _updateDBVersion('userdata', toVersion);

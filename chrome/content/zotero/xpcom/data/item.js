@@ -1519,6 +1519,9 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		if (this.isAttachment() && this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 			throw new Error("Linked-file attachments cannot be added to My Publications");
 		}
+		if (Zotero.Libraries.get(this.libraryID).libraryType != 'user') {
+			throw new Error("Only items in user libraries can be added to My Publications");
+		}
 	}
 	
 	// Trashed status
