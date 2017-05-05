@@ -1320,7 +1320,7 @@ var Zotero_QuickFormat = new function () {
 		pane.selectItem(id);
 		
 		// Pull window to foreground
-		Zotero.Integration.activate(pane.document.defaultView);
+		Zotero.Utilities.Internal.activate(pane.document.defaultView);
 	}
 	
 	/**

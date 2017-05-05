@@ -283,8 +283,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		document.documentElement.getButton('cancel').click();
 		var win = Zotero.Utilities.Internal.openPreferences('zotero-prefpane-cite', { tab: 'styles-tab' });
 		if (isDocPrefs) {
-			// TODO: Move activate() code elsewhere
-			Zotero.Integration.activate(win);
+			Zotero.Utilities.Internal.activate(win);
 		}
 	};
 }
