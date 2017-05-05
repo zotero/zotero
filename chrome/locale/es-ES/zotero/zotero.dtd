@@ -224,16 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "notas al pie">
 <!ENTITY zotero.integration.prefs.endnotes.label "notas al final">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Dar formato mediante:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Marcadores">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Los marcadores se mantienen en Microsoft Word y OpenOffice, pero puede que se modifiquen accidentalmente.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abreviar títulos de revista automáticamente">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Se generarán automáticamente abreviaturas de revistas MEDLINE usando los títulos de las revistas. El campo &quot;Abrev. de la revista&quot; será ignorado.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Guardar las referencias en el documento">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Guardar las referencias en el documento incrementa ligeramente el tamaño del archivo, pero te permitirá compartir tu documento con otros sin usar un grupo Zotero. Se necesita Zotero 3.0 o posterior para actualizar documentos creados con esta opción.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "Mostrar editor">
 <!ENTITY zotero.integration.classicView.label "Vista clásica">

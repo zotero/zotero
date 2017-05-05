@@ -224,16 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Fotnoter">
 <!ENTITY zotero.integration.prefs.endnotes.label "Slutnoter">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Formatera med:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bokmärken">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmärken sparas i Microsoft Word och LibreOffice, men kan ändras av misstag. Av kompatibilitetsskäl kan inte källhänvisningar läggas till fotnoter eller slutkommentarer när detta alternativ är valt.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Förkorta tidskriftstitlar automatiskt">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE-tidskriftsförkortningar genereras automatiskt från tidskriftstitlarna. Tidskriftsförkortningsfältet ignoreras.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Lagra referenserna i dokumentet">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "När du lagrar referenserna i ett dokument ökar filstorleken något, men det ger dig möjligheten att dela dokumentet med andra utan att använda en Zotero-grupp. Zotero 3.0 eller senare krävs för att redigera dokument som skapats med detta tillval.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "Visa redigerare">
 <!ENTITY zotero.integration.classicView.label "Klassisk vy">

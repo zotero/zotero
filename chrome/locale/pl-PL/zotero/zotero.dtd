@@ -224,16 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Przypisy dolne">
 <!ENTITY zotero.integration.prefs.endnotes.label "Przypisy końcowe">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Używany format:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Zakładki">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Zakładki są zabezpieczone przez programy Microsoft Word i LibreOffice, ale w wyjątkowych przypadkach mogą być modyfikowane. Z powodów zgodności, cytowania nie mogą być wstawiane do przypisów dolnych i przypisów końcowych, jeśli ta opcja jest wybrana.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatycznie skróć tytuły czasopism">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Skróty czasopism MEDLINE zostaną automatycznie utworzone z wykorzystaniem tytułów czasopism. Pole &quot;Skrót czasopisma&quot; będzie zignorowane.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Zapisz cytowania w dokumencie">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "Pokaż edytor">
 <!ENTITY zotero.integration.classicView.label "Widok klasyczny">

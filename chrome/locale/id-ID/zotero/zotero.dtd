@@ -224,16 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Catatan Kaki">
 <!ENTITY zotero.integration.prefs.endnotes.label "Catatan Akhir">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Format Menggunakan:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bookmark">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmark terjaga dengan baik pada Microsoft Word dan OpenOffice, tetapi berpotensi mengalami perubahan akibat ketidaksengajaan. Demi alasan kompatibilitas, sitasi tidak dapat dimasukkan ke dalam catatan kaki atau catatan akhir bila opsi ini dipilih.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Simpan referensi pada dokumen">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Menyimpan referensi pada dokumen Anda akan sedikit meningkatkan ukuran berkas, tetapi memungkinkan Anda untuk berbagi dokumen Anda dengan orang lain tanpa perlu menggunakan grup Zotero. Zotero versi 3.0 atau lebih baru diperlukan untuk memutakhirkan dokumen yang dibuat dengan pilihan ini.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "Tunjukkan Editor">
 <!ENTITY zotero.integration.classicView.label "Tampilan Klasik">

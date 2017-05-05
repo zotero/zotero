@@ -224,16 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Dipnot">
 <!ENTITY zotero.integration.prefs.endnotes.label "Son notlar">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Kullanılan Biçim:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Yer imleri">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Yer imleri Microsoft Word ve OpenOffice arasında korunmuştur, ancak yanlışlıkla değiştirilebilirler. &#xA;Uyumluluk için, bu seçenek seçildiğinde, göndermeler dipnot ve sonnotlara eklenemez.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Dergi başlıklarını otomatik olarak kısalt">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE dergi kısaltmaları, dergi başlıkları kullanılarak otomatik olarak üretileceklerdir. &quot;Dergi Kısaltması&quot; alanı yok sayılacaktır.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Kaynakları belgede göster">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Kaynakları belgenizde kaydetmeniz dosya boyutunuzu büyütebilir, ancak belgenizi başkalarıyla bir Zotero grubu kullanmadan paylaşabilmenizi sağlayacaktır. Bu seçenekle yaratılmış belgelerin güncellenebilmesi, Zotero 3.0 veya sonraki sürümleri gerektirir.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "Düzenleyiciyi Göster">
 <!ENTITY zotero.integration.classicView.label "Klasik Görünüm">

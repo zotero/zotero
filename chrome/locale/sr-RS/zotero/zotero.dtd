@@ -224,16 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Фуснота">
 <!ENTITY zotero.integration.prefs.endnotes.label "Енднота">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Форматирај помоћу:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Обележивачи">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Обележивачи ће остати сачувани кроз Microsoft Word и ЛибреОфис, али могу бити нехотично промењени. Због сагласности са свим програмима, цитате не можете уметнути у фусноте или ендноте у овом режиму.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Аутоматски скрати наслове часописа">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Аутоматски преузима МЕДЛАЈН скраћенице часописа на основу наслова часописа. Поље „Скраћеница часописа“ ће бити занемарено.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Сачувај референце у документу">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Чување референци унутар документа мало повећава величину датотеке, али ће вам омогућити да делите документ са колегама без потребе да правите Зотеро групу. Зотеро 3.0 и новије верзије ће захтевати да ажурирате документе.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "Прикажи уређивача">
 <!ENTITY zotero.integration.classicView.label "Класични приказ">

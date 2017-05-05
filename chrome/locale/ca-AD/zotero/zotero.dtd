@@ -232,9 +232,6 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abrevia automàticament els títols de les publicacions">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Les abreviacions de la revista MEDLINE es generaràn automàticament ambs els noms de les revistes. S'ignorarà el camp &quot;Revista abr.”.">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Emmagatzema les referències al document">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "L'emmagatzematge de les referències en el document augmenta lleugerament la mida del fitxer, però us permet compartir el document amb altres persones sense necessitat de fer servir un grup del Zotero. Per actualitzar els documents creats amb aquesta opció cal tenir la versió Zotero 3.0 o versions posteriors.">
-
 <!ENTITY zotero.integration.showEditor.label "Mostra l'editor">
 <!ENTITY zotero.integration.classicView.label "Vista clàssica">
 

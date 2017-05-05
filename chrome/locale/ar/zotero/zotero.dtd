@@ -224,16 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "حواشي سفلية">
 <!ENTITY zotero.integration.prefs.endnotes.label "تعليقات ختامية">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "الصياغة باستخدام:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "الاشارات المرجعية">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "الاشارات المرجعية هي خاصية متاحة عبر مايكروسوفت وورد و اوبن اوفيس، ولكنها قد تكون عرضة للتغيير الغير مقصود. ولأسباب تتعلق &#xA; بالتوافق، فالاستشهادات المرجعية لا يمكن ادراجها في الحواشي السفلية او التعليقات الختامية عند تحديد هذا الخيار.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "اختصر عناوين الدوريات تلقائيا">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "سيتم الاختصار التلقائي وفق اختصارات دورية MEDLINE وذلك باستخدام عناوين الدوريات. وسيتم تجاهل حقل &quot;اختصار الدورية&quot;.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "تخزين المراجع في الوثيقة">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "عرض المحرر">
 <!ENTITY zotero.integration.classicView.label "عرض تقليدي">

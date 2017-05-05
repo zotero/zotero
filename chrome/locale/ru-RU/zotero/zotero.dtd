@@ -224,16 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Сноски">
 <!ENTITY zotero.integration.prefs.endnotes.label "Концевые сноски">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Форматировать используя:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Закладки">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Закладки сохраняются при переходе между Microsoft Word и OpenOffice, но могут быть случайно изменены. Из соображений совместимости, когда эта опция выбрана, цитаты не могут быть вставлены в (концевые) сноски.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Автоматическое сокращение названий журналов">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Сокращения названий журналов для MEDLINE будут созданы автоматически на основе названий журналов. Параметры поля “Журн. сокр.” будут проигнорированы.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Сохранить ссылки в документе">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Хранение ссылок в вашем документе немного увеличивает размер файла, но позволяет обмениваться им с другими без использования группы Zotero. Для обновления таких документов требуется Zotero не ниже версии 3.0.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "Показать редактор">
 <!ENTITY zotero.integration.classicView.label "Классический вид">

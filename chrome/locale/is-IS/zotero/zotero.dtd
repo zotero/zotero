@@ -224,16 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Neðanmálsgreinar">
 <!ENTITY zotero.integration.prefs.endnotes.label "Aftanmálsgreinar">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Forsnið samkvæmt:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bókamerki">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and LibreOffice, but may be accidentally modified. For &#xA;compatibility reasons, citations cannot be inserted into footnotes or endnotes when this option is selected.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Skammstafa sjálfvirkt nöfn á tímaritum">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Skammstöfun tímarita notaðar í MEDLINE verða sjálfvirkt notaðar. Svæðið &quot;Skammstöfun tímarits&quot; verður ekki notað.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Vista tilvísanir í skjali">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Vistun tilvísana í skjali veldur lítilsháttar stækkun skjalanna, en leyfir þér að deila þínum skjölum með öðrum án þess að notar Zotero tól. Til að uppfæra skjöl sem voru búin til með þessari tilvísunaraðferð þarf að nota Zotero útgáfu 3.0 eða síðari útgáfur.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "Sýna ritil">
 <!ENTITY zotero.integration.classicView.label "Hefðbundin framsetning">

@@ -224,16 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "頁末註">
 <!ENTITY zotero.integration.prefs.endnotes.label "文末註">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "用以格式化：">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "書籤">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "無論切換 Microsoft Word 及 OpenOffice，書籤會被保留，但也可能意外地受到改變。為了&#xA;相容，選用此項時，引用文獻條不能被插到同頁註或文末註中。">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "自動將期刊標題簡寫">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE 期刊簡寫會自動根據期刊標題產生出來。「期刊簡寫」欄會被忽略。">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "將參考文獻存在文件中">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "將參考文獻存在文件中會讓檔案大一點，但可以讓您在不使用Zotero群組下和別人分享文件。只有 Zotero 3.0 以上的版本才能更新用這個選項建立的文件。">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "顯示編輯器">
 <!ENTITY zotero.integration.classicView.label "傳統的外觀">

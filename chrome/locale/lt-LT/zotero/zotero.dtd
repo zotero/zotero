@@ -224,16 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Išnaša">
 <!ENTITY zotero.integration.prefs.endnotes.label "Galinė išnaša">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Naudotinas formatas:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Žymelės">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Žymelės išlaikomos tiek „Microsoft Word“, tiek „LibreOffice“ programose, tačiau jas galite netyčia pakeisti. &#xA; Pasirinkę šią parinktį, citavimų negalite įterpti į išnašas ar galines išnašas dėl suderinamumo problemų.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatiškai trumpinti žurnalų pavadinimus">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE žurnalų santrumpos automatiškai sukursimos naudojant žurnalų pavadinimus. Nepaisysima „žurnalo santrumpa“ laukelyje esančios reikšmės.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Nuorodas talpinti dokumente">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Patalpinus nuorodas dokumente, šiek tiek padidėja jo dydis, tačiau tai leis jums dalintis dokumentu su kitais naudotojais, nenaudodami Zotero grupės. Norint atnaujinti dokumentus, reikės Zotero 3.0 arba vėlesnės versijos.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "Rodyti rengyklę">
 <!ENTITY zotero.integration.classicView.label "Klasikinis rodinys">

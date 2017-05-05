@@ -224,16 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Note de subsol">
 <!ENTITY zotero.integration.prefs.endnotes.label "Note de final">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Formatare cu:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Semne de carte">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Semnele de carte sunt protejate în Microsoft Word și OpenOffice, dar pot fi accidental modificate. Pentru rațiuni de &#xA;compatibilitate, citările nu pot fi inserate în notele de subsol sau în cele de final când această opțiune este selectată.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abreviere automată a titlurilor de revistă">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Abrevierile de reviste MEDLINE vor fi automat generate folosind titlurile revistelor. Câmpul „Abr. revistă” va fi ignorat.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Stochează referințele în document">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Stocarea referințelor în documentul va crește dimensiunea fișierului, dar îți va permite să-l partajezi cu alții fără a folosi un grup Zotero. Este nevoie de Zotero 3.0 sau mai recent pentru a actualiza documentele create cu această opțiune.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "Arată editor">
 <!ENTITY zotero.integration.classicView.label "Vizualizare clasică">

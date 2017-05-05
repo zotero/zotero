@@ -224,16 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Σημειώσεις υποσέλιδου">
 <!ENTITY zotero.integration.prefs.endnotes.label "Σημειώσεις τέλους">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Χρήση μορφής:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Σελιδοδείκτες">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Στα Microsoft Word και LibreOffice οι σελιδοδείκτες διατηρούνται αλλά ίσως τροποποιηθούν κατά λάθος. Για &#xA;λόγους συμβατότητας, όταν η λειτουργία αυτή είναι επιλεγμένη οι παραθέσεις/παραπομπές δεν μπορούν να εισαχθούν σε υποσέλιδες σημειώσεις ή σε σημειώσεις τέλους.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Αυτόματη συντομογράφηση τίτλων περιοδικών">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Οι συντομογραφίες MEDLINE των περιοδικών θα δημιουργούνται αυτόματα, χρησιμοποιώντας τους τίτλους των περιοδικών. Το πεδίο «Συντομογραφίες περιοδικών» θα αγνοείται.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Αποθήκευση αναφορών σε έγγραφο">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Η αποθήκευση των αναφορών σε έγγραφο αυξάνει ελαφρώς το μέγεθος του αρχείου, αλλά επιτρέπει τον διαμοιρασμό του εγγράφου σας με άλλους, χρησιμοποιώντας κάποια ομάδα Zotero. Για την αναβάθμιση εγγράφων που δημιουργήθηκαν με την λειτουργία αυτή απαιτείται Zotero 3.0 ή μεταγενέστερο.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "Εμφάνιση επεξεργαστή">
 <!ENTITY zotero.integration.classicView.label "Κλασική προβολή">

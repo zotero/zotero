@@ -224,16 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "각주">
 <!ENTITY zotero.integration.prefs.endnotes.label "미주">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "사용 형식:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "북마크">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "책갈피는 Microsoft Word와 OpenOffice에서 보존되지만, 경우에 따라 변경될 수도 있습니다. 이 옵션이 선택되면, 호환성 때문에 인용이 각주나 미주에 삽입되지 않게 됩니다.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "자동으로 저널 제목을 약자로 고치기">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE 저널 약자가 저널 제목을 바탕으로 자동 생성됩니다. &quot;저널 약자&quot; 필드가 무시됩니다.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "문서 안에 레퍼런스 저장">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "문서 안에 레퍼런스를 저장하면 파일 크기가 다소 증가할 수 있습니다. 하지만 문서를 Zotero 그룹을 통하지 않고도 공유할 수 있습니다. Zotero 3.0이상 버전이 필요한 기능입니다.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "편집자 보이기">
 <!ENTITY zotero.integration.classicView.label "클래식 뷰">

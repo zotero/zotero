@@ -224,16 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Alaviitteet">
 <!ENTITY zotero.integration.prefs.endnotes.label "Loppuviitteet">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Muotoile käyttäen:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Kirjanmerkit">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Kirjanmerkit säilytetään Microsoft Wordin ja OpenOfficen välillä, mutta ne voivat tahattomasti muuttua.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Lyhennä lehtien nimet automaattisesti">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Lehtien MEDLINE-lyhenteet muodostetaan automaattisesti lehtien nimistä. &quot;Lehden lyhenne&quot; -kenttä ohitetaan.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Tallenna viitteet asiakirjassa">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Viitteiden tallentaminen asiakirjassa kasvattaa hiukan tiedoston kokoa, mutta tällöin tiedoston voi jakaa muiden kanssa käyttämättä Zotero-ryhmää. Tällä toiminnalle luotujen asiakirjojen muokkaamiseen tarvitaan Zotero 3.0 tai uudempi.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "Näytä muokkain">
 <!ENTITY zotero.integration.classicView.label "Perinteinen näkymä">
