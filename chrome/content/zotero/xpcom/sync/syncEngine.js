@@ -501,7 +501,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 		// Process batches when they're available, one at a time
 		yield Zotero.Promise.map(
 			json,
-			function (batch) {
+			Zotero.Promise.coroutine(function* (batch) {
 				this._failedCheck();
 				
 				Zotero.debug(`Processing batch of downloaded ${objectTypePlural} in `
@@ -520,7 +520,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 				});
 				
 				// Process objects
-				return Zotero.Sync.Data.Local.processObjectsFromJSON(
+				let results = yield Zotero.Sync.Data.Local.processObjectsFromJSON(
 					objectType,
 					this.libraryID,
 					batch,
@@ -546,28 +546,27 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 							return Math.min(size, batch.length);
 						}
 					})
-				)
-				.then(function (results) {
-					num += results.length;
-					let processedKeys = [];
-					let conflictResults = [];
-					results.forEach(x => {
-						// If data was processed, remove JSON
-						if (x.processed) {
-							delete objectData[x.key];
-						}
-						// If object shouldn't be retried, mark as processed
-						if (x.processed || !x.retry) {
-							processedKeys.push(x.key);
-						}
-						if (x.conflict) {
-							conflictResults.push(x);
-						}
-					});
-					keys = Zotero.Utilities.arrayDiff(keys, processedKeys);
-					conflicts.push(...conflictResults);
-				}.bind(this));
-			}.bind(this),
+				);
+				
+				num += results.length;
+				let processedKeys = [];
+				let conflictResults = [];
+				results.forEach(x => {
+					// If data was processed, remove JSON
+					if (x.processed) {
+						delete objectData[x.key];
+					}
+					// If object shouldn't be retried, mark as processed
+					if (x.processed || !x.retry) {
+						processedKeys.push(x.key);
+					}
+					if (x.conflict) {
+						conflictResults.push(x);
+					}
+				});
+				keys = Zotero.Utilities.arrayDiff(keys, processedKeys);
+				conflicts.push(...conflictResults);
+			}.bind(this)),
 			{
 				concurrency: 1
 			}
