@@ -498,15 +498,13 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 		var conflicts = [];
 		var num = 0;
 		
-		// Process batches when they're available, one at a time
+		// Process batches of object data as they're available, one at a time
 		yield Zotero.Promise.map(
 			json,
 			Zotero.Promise.coroutine(function* (batch) {
 				this._failedCheck();
 				
-				Zotero.debug(`Processing batch of downloaded ${objectTypePlural} in `
-					+ this.library.name);
-				
+				Zotero.debug(`Processing batch of downloaded ${objectTypePlural} in ${this.library.name}`);
 				
 				if (!Array.isArray(batch)) {
 					this.failed = batch;
@@ -527,7 +525,8 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 						onObjectProcessed: () => {
 							num++;
 						},
-						// Increase the notifier batch size as we go
+						// Increase the notifier batch size as we go, so that new items start coming in
+						// one by one but then switch to larger chunks
 						getNotifierBatchSize: () => {
 							var size;
 							if (num < 10) {
@@ -603,8 +602,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 				}
 			}
 			else {
-				Zotero.debug("All " + objectTypePlural + " for "
-					+ this.library.name + " saved to database");
+				Zotero.debug(`All ${objectTypePlural} for ${this.library.name} saved to database`);
 				
 				if (objectType == 'item') {
 					this.failedItems = [];
