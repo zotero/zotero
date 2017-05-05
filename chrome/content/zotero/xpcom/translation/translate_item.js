@@ -965,7 +965,7 @@ Zotero.Translate.ItemGetter.prototype = {
 	 * Retrieves the next available item
 	 */
 	"nextItem":function() {
-		while(this._itemsLeft.length != 0) {
+		while(this._itemsLeft.length) {
 			var returnItem = this._itemsLeft.shift();
 			// export file data for single files
 			if(returnItem.isAttachment()) {		// an independent attachment
