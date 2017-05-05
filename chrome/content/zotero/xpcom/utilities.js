@@ -866,6 +866,22 @@ Zotero.Utilities = {
 		return str + '\u2026' + (countChars ? ' (' + str.length + ' chars)' : '');
 	},
 	
+	
+	/**
+	 * Return the proper plural form of a string
+	 *
+	 * For now, this is only used for debug output in English.
+	 *
+	 * @param {Integer} num
+	 * @param {String[]} forms - An array of plural forms (e.g., ['object', 'objects']); currently only
+	 *     the two English forms are supported, for 1 and 0/many
+	 * @return {String}
+	 */
+	pluralize: function (num, forms) {
+		return num == 1 ? forms[0] : forms[1];
+	},
+	
+	
 	/**
 	  * Port of PHP's number_format()
 	  *
