@@ -836,12 +836,12 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 		let unsyncedKeys = ids.map(id => objectsClass.getLibraryAndKeyFromID(id).key);
 		let origUnsynced = unsyncedKeys; // TEMP
 		let queueKeys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue(objectType, this.libraryID);
-		let num = unsyncedKeys.length;
-		unsyncedKeys = Zotero.Utilities.arrayDiff(unsyncedKeys, queueKeys);
-		if (unsyncedKeys.length < num) {
-			Zotero.debug(`Skipping ${num - unsyncedKeys.length} key(s) in sync queue`);
-			Zotero.debug(Zotero.Utilities.arrayDiff(unsyncedKeys, queueKeys));
+		let newUnsyncedKeys = Zotero.Utilities.arrayDiff(unsyncedKeys, queueKeys);
+		if (newUnsyncedKeys.length < unsyncedKeys.length) {
+			Zotero.debug(`Skipping ${unsyncedKeys.length - newUnsyncedKeys.length} key(s) in sync queue`);
+			Zotero.debug(Zotero.Utilities.arrayDiff(unsyncedKeys, newUnsyncedKeys));
 		}
+		unsyncedKeys = newUnsyncedKeys;
 		
 		// TEMP
 		//ids = unsyncedKeys.map(key => objectsClass.getIDFromLibraryAndKey(this.libraryID, key));
