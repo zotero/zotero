@@ -207,6 +207,13 @@ describe("Zotero.Item", function () {
 			}
 		})
 		
+		it("should accept SQL accessDate without time", function* () {
+			var item = createUnsavedDataObject('item');
+			var date = "2017-04-05";
+			item.setField("accessDate", date);
+			assert.strictEqual(item.getField('accessDate'), date);
+		});
+		
 		it("should ignore unknown accessDate values", function* () {
 			var fields = {
 				accessDate: "foo"

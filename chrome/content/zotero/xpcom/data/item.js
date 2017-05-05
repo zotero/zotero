@@ -805,7 +805,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		else if (fieldID == Zotero.ItemFields.getID('accessDate')) {
 			if (value && value != 'CURRENT_TIMESTAMP') {
 				// Accept ISO dates
-				if (Zotero.Date.isISODate(value)) {
+				if (Zotero.Date.isISODate(value) && !Zotero.Date.isSQLDate(value)) {
 					let d = Zotero.Date.isoToDate(value);
 					value = Zotero.Date.dateToSQL(d, true);
 				}
