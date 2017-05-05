@@ -120,8 +120,18 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 	
 	sync:
 	while (true) {
-		let uploadResult = yield this._startUpload();
-		let downloadResult;
+		let downloadResult, uploadResult;
+		
+		try {
+			uploadResult = yield this._startUpload();
+		}
+		catch (e) {
+			Zotero.debug("Upload failed -- performing download", 2);
+			downloadResult = yield this._startDownload();
+			Zotero.debug("Download result is " + downloadResult, 4);
+			throw e;
+		}
+		
 		Zotero.debug("Upload result is " + uploadResult, 4);
 		
 		switch (uploadResult) {

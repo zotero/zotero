@@ -835,6 +835,59 @@ describe("Zotero.Sync.Data.Engine", function () {
 		})
 		
 		
+		it("should process downloads after upload failure", function* () {
+			({ engine, client, caller } = yield setup({
+				stopOnError: false
+			}));
+			
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			var lastLibraryVersion = 5;
+			library.libraryVersion = lastLibraryVersion;
+			yield library.saveTx();
+			
+			var collection = yield createDataObject('collection');
+			
+			var called = 0;
+			server.respond(function (req) {
+				if (called == 0) {
+					req.respond(
+						200,
+						{
+							"Last-Modified-Version": lastLibraryVersion
+						},
+						JSON.stringify({
+							successful: {},
+							unchanged: {},
+							failed: {
+								0: {
+									code: 400,
+									message: "Upload failed"
+								}
+							}
+						})
+					);
+				}
+				called++;
+			});
+			
+			var stub = sinon.stub(engine, "_startDownload")
+				.returns(Zotero.Promise.resolve(engine.DOWNLOAD_RESULT_CONTINUE));
+			
+			var e = yield getPromiseError(engine.start());
+			assert.equal(called, 1);
+			// start() should still fail
+			assert.ok(e);
+			assert.equal(e.message, "Made no progress during upload -- stopping");
+			// The collection shouldn't have been marked as synced
+			assert.isFalse(collection.synced);
+			// Download should have been performed
+			assert.ok(stub.called);
+			
+			stub.restore();
+		});
+		
+		
 		it("shouldn't include mtime and md5 for attachments in ZFS libraries", function* () {
 			({ engine, client, caller } = yield setup());
 			
