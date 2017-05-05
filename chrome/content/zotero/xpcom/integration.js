@@ -3082,8 +3082,13 @@ Zotero.Integration.DocumentData = function(string) {
 Zotero.Integration.DocumentData.prototype.serialize = function() {
 	// If we've retrieved data with version 4 (JSON), serialize back to JSON
 	if (this.dataVersion == 4) {
+		// Filter style properties
+		let style = {};
+		for (let prop of ['styleID', 'locale', 'hasBibliography', 'bibliographyStyleHasBeenSet']) {
+			style[prop] = this.style[prop];
+		}
 		return JSON.stringify({
-			style: this.style,
+			style,
 			prefs: this.prefs,
 			sessionID: this.sessionID,
 			zoteroVersion: Zotero.version,
