@@ -37,10 +37,6 @@ const FORCE_CITATIONS_REGENERATE = 1;
 // Specifies that citations should be reset regardless of whether formattedText has changed
 const FORCE_CITATIONS_RESET_TEXT = 2;
 
-// this is used only for update checking
-const INTEGRATION_PLUGINS = ["zoteroMacWordIntegration@zotero.org",
-	"zoteroOpenOfficeIntegration@zotero.org", "zoteroWinWordIntegration@zotero.org"];
-	
 // These must match the constants in corresponding word plugins 
 const DIALOG_ICON_STOP = 0;
 const DIALOG_ICON_WARNING = 1;
@@ -58,8 +54,6 @@ Zotero.Integration = new function() {
 	Components.utils.import("resource://gre/modules/Services.jsm");
 	Components.utils.import("resource://gre/modules/AddonManager.jsm");
 	
-	const INTEGRATION_MIN_VERSIONS = ["3.1.7.SOURCE", "3.5b2.SOURCE", "3.1.3.SOURCE"];
-
 	this.currentWindow = false;
 	this.sessions = {};
 	
@@ -114,8 +108,6 @@ Zotero.Integration = new function() {
 		} catch(e) {
 			Zotero.logError(e);
 		}
-		
-		Zotero.Promise.delay(1000).then(_checkPluginVersions);
 	}
 
 	/**
@@ -182,42 +174,6 @@ Zotero.Integration = new function() {
 		}
 	});
 	
-	/**
-	 * Checks to see that plugin versions are up to date.
-	 * @return {Promise} Promise that is resolved with true if versions are up to date
-	 *     or with false if they are not.
-	 */
-	var _checkPluginVersions = new function () {
-		var integrationVersionsOK;
-		
-		return function _checkPluginVersions() {
-			if(integrationVersionsOK) {
-				if(integrationVersionsOK === true) {
-					return Zotero.Promise.resolve(integrationVersionsOK);
-				} else {
-					return Zotero.Promise.reject(integrationVersionsOK);
-				}
-			}
-			
-			var deferred = Zotero.Promise.defer();
-			AddonManager.getAddonsByIDs(INTEGRATION_PLUGINS, function(addons) {
-				for(var i in addons) {
-					var addon = addons[i];
-					if(!addon || addon.userDisabled) continue;
-					
-					if(Services.vc.compare(INTEGRATION_MIN_VERSIONS[i], addon.version) > 0) {
-						deferred.reject(integrationVersionsOK = new Zotero.Exception.Alert(
-							"integration.error.incompatibleVersion2",
-							[Zotero.version, addon.name, INTEGRATION_MIN_VERSIONS[i]],
-							"integration.error.title"));
-					}
-				}
-				deferred.resolve(integrationVersionsOK = true);
-			});
-			return deferred.promise;
-		};
-	}
-	
 	this.getApplication = function(agent, command, docId) {
 		// Try to load the appropriate Zotero component; otherwise display an error
 		try {
@@ -242,10 +198,10 @@ Zotero.Integration = new function() {
 	this.execCommand = new function() {
 		var inProgress;
 		
-		return function execCommand(agent, command, docId) {
+		return Zotero.Promise.coroutine(function* execCommand(agent, command, docId) {
 			var document;
 			
-			if(inProgress) {
+			if (inProgress) {
 				Zotero.Utilities.Internal.activate();
 				if(Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {
 					Zotero.Integration.currentWindow.focus();
@@ -255,15 +211,15 @@ Zotero.Integration = new function() {
 			}
 			inProgress = true;
 			
-			// Check integration component versions
-			return _checkPluginVersions().then(function() {		
-				var application = Zotero.Integration.getApplication(agent, command, docId);
-				
-				// Try to execute the command; otherwise display an error in alert service or word processor
-				// (depending on what is possible)
-				document = (application.getDocument && docId ? application.getDocument(docId) : application.getActiveDocument());
-				return Zotero.Promise.resolve((new Zotero.Integration.Document(application, document))[command]());
-			}).catch(function(e) {
+			var application = Zotero.Integration.getApplication(agent, command, docId);
+			
+			// Try to execute the command; otherwise display an error in alert service or word processor
+			// (depending on what is possible)
+			document = (application.getDocument && docId ? application.getDocument(docId) : application.getActiveDocument());
+			try {
+				yield Zotero.Promise.resolve((new Zotero.Integration.Document(application, document))[command]());
+			}
+			catch (e) {
 				if(!(e instanceof Zotero.Exception.UserCancelled)) {
 					try {
 						var displayError = null;
@@ -301,8 +257,8 @@ Zotero.Integration = new function() {
 						Zotero.logError(e);
 					}
 				}
-			})
-			.finally(function() {
+			}
+			finally {
 				if(document) {
 					try {
 						document.cleanup();
@@ -327,8 +283,8 @@ Zotero.Integration = new function() {
 				}
 				
 				inProgress = Zotero.Integration.currentWindow = false;
-			});
-		};
+			}
+		});
 	};
 	
 	/**
