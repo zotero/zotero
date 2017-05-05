@@ -12,24 +12,26 @@ describe("Zotero.Sync.Data.Engine", function () {
 	var setup = Zotero.Promise.coroutine(function* (options = {}) {
 		server = sinon.fakeServer.create();
 		server.autoRespond = true;
+		var background = options.background === undefined ? true : options.background;
+		var stopOnError = options.stopOnError === undefined ?  true : options.stopOnError;
 		
 		Components.utils.import("resource://zotero/concurrentCaller.js");
 		var caller = new ConcurrentCaller(1);
 		caller.setLogger(msg => Zotero.debug(msg));
-		caller.stopOnError = true;
+		caller.stopOnError = stopOnError;
 		
 		var client = new Zotero.Sync.APIClient({
 			baseURL,
 			apiVersion: options.apiVersion || ZOTERO_CONFIG.API_VERSION,
 			apiKey,
 			caller,
-			background: options.background || true
+			background
 		});
 		
 		var engine = new Zotero.Sync.Data.Engine({
 			apiClient: client,
 			libraryID: options.libraryID || Zotero.Libraries.userLibraryID,
-			stopOnError: true
+			stopOnError
 		});
 		
 		return { engine, client, caller };
@@ -1170,8 +1172,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 		})
 		
 		it("should ignore errors when saving downloaded objects", function* () {
-			({ engine, client, caller } = yield setup());
-			engine.stopOnError = false;
+			({ engine, client, caller } = yield setup({
+				stopOnError: false
+			}));
 			
 			var headers = {
 				"Last-Modified-Version": 3
