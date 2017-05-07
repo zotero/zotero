@@ -1815,7 +1815,7 @@ Zotero.Utilities = {
 	 * @param {Object} cslItem
 	 */
 	"itemFromCSLJSON":function(item, cslItem) {
-		var isZoteroItem = item instanceof Zotero.Item,
+		var isZoteroItem = !!item.setType,
 			zoteroType;
 		
 		// Some special cases to help us map item types correctly

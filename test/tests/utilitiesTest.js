@@ -384,6 +384,19 @@ describe("Zotero.Utilities", function() {
 			
 			assert.equal(item.getField('title'), jsonAttachment.title, 'title imported correctly');
 		});
+		// For Zotero.Item created in translation sandbox in connectors
+		it("should not depend on Zotero.Item existing", function* () {
+			let item = new Zotero.Item;
+			var Item = Zotero.Item;
+			delete Zotero.Item;
+			assert.throws(() => "" instanceof Zotero.Item);
+
+			let data = loadSampleData('citeProcJSExport');
+			assert.doesNotThrow(Zotero.Utilities.itemFromCSLJSON.bind(Zotero.Utilities, item, Object.values(data)[0]));
+			
+			Zotero.Item = Item;
+			assert.doesNotThrow(() => "" instanceof Zotero.Item);
+		})
 	});
 	
 	describe("#ellipsize()", function () {
