@@ -3,7 +3,7 @@
 	<title>Build schemaData.js</title>
 </head>
 <body>
-<p>This script builds schemaData.js, which contains Zotero schema information for the connector.</p>
+<p>This script builds typeSchemaData.js, which contains Zotero schema information for the connector.</p>
 <p id="result"></p>
 <script src="../include.js"></script>
 <script type="text/javascript">
@@ -13,7 +13,7 @@
 		var types = Zotero.ItemTypes.getTypes();
 
 		var fieldIDs = yield Zotero.DB.columnQueryAsync("SELECT fieldID FROM fieldsCombined");
-	  var baseMappedFields = Zotero.ItemFields.getBaseMappedFields();
+		var baseMappedFields = Zotero.ItemFields.getBaseMappedFields();
 		
 		for (let fieldID of fieldIDs) {
 			var fieldObj = [/* name */Zotero.ItemFields.getName(fieldID)];
@@ -70,7 +70,7 @@
 		}
 
 		// Write to file
-	  var nsIFilePicker = Components.interfaces.nsIFilePicker;
+		var nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
 			.createInstance(nsIFilePicker);
 		fp.init(window, Zotero.getString('dataDir.selectDir'), nsIFilePicker.modeGetFolder);
