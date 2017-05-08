@@ -224,13 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Przypisy dolne">
 <!ENTITY zotero.integration.prefs.endnotes.label "Przypisy końcowe">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Zapisz cytowania jako:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Zakładki">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Zakładki mogą być współdzielone między edytorami Word i LibreOffice Writer, ale w razie ich przypadkowej modyfikacji mogą wystąpić błędy i nie mogą być one wstawiane do przypisów dolnych.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Użyj skrótów czasopism w formacie MEDLINE">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Pole &quot;Skrót czasopisma&quot; będzie ignorowane.">
 
 <!ENTITY zotero.integration.showEditor.label "Pokaż edytor">
 <!ENTITY zotero.integration.classicView.label "Widok klasyczny">
