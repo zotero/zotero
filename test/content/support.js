@@ -81,7 +81,6 @@ var loadPrefPane = Zotero.Promise.coroutine(function* (paneName) {
  */
 function waitForWindow(uri, callback) {
 	var deferred = Zotero.Promise.defer();
-	Components.utils.import("resource://gre/modules/Services.jsm");
 	var loadobserver = function(ev) {
 		ev.originalTarget.removeEventListener("load", loadobserver, false);
 		Zotero.debug("Window opened: " + ev.target.location.href);
@@ -245,7 +244,6 @@ function waitForNotifierEvent(event, type) {
  * Looks for windows with a specific URL.
  */
 function getWindows(uri) {
-	Components.utils.import("resource://gre/modules/Services.jsm");
 	var enumerator = Services.wm.getEnumerator(null);
 	var wins = [];
 	while(enumerator.hasMoreElements()) {
@@ -499,7 +497,6 @@ function uninstallPDFTools() {
  * (i.e., test/tests/data)
  */
 function getTestDataDirectory() {
-	Components.utils.import("resource://gre/modules/Services.jsm");
 	var resource = Services.io.getProtocolHandler("resource").
 	               QueryInterface(Components.interfaces.nsIResProtocolHandler),
 	    resURI = Services.io.newURI("resource://zotero-unit-tests/data", null, null);
