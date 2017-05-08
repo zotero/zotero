@@ -937,7 +937,7 @@
 					}
 					else {
 						elem.style.order = 0;
-						elem.removeAttribute('hasColor', false);
+						elem.removeAttribute('hasColor');
 					}
 					
 					return visible;
