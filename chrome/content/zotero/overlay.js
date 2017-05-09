@@ -103,6 +103,13 @@ var ZoteroOverlay = new function()
 			if(newMode == "connector") {
 				// save current state
 				_stateBeforeReload = !zoteroPane.hidden && !zoteroPane.collapsed;
+				
+				// Don't display startup error when Standalone opens
+				if (Zotero.startupError) {
+					Zotero.debug(startupError, 1);
+					return;
+				}
+				
 				// ensure pane is closed
 				if(!zoteroPane.collapsed) ZoteroOverlay.toggleDisplay(false, true);
 			}

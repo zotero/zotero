@@ -611,6 +611,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			}
 			catch (e) {
 				if (e instanceof Zotero.DB.IncompatibleVersionException) {
+					Zotero.DB.closeDatabase(true).then(() => Zotero.debug("Database closed"));
+					
 					let kbURL = "https://www.zotero.org/support/kb/newer_db_version";
 					let msg = (e.dbClientVersion
 						? Zotero.getString('startupError.incompatibleDBVersion',
