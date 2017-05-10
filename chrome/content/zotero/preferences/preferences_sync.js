@@ -130,9 +130,23 @@ Zotero_Preferences.Sync = {
 
 		// Try to acquire API key with current credentials
 		this.updateSyncIndicator('animated');
-		var json = yield Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
-		this.updateSyncIndicator();
-
+		try {
+			var json = yield Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
+		}
+		catch (e) {
+			setTimeout(function () {
+				Zotero.alert(
+					window,
+					Zotero.getString('general.error'),
+					e.message
+				);
+			});
+			throw e;
+		}
+		finally {
+			this.updateSyncIndicator();
+		}
+		
 		// Invalid credentials
 		if (!json) {
 			Zotero.alert(window,
