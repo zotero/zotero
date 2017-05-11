@@ -324,7 +324,7 @@
 								if (mtime) {
 									this._id("dateModified").value = new Date(mtime).toLocaleString();
 								}
-								dateModifiedRow.hidden = false;
+								dateModifiedRow.hidden = !mtime;
 							}.bind(this));
 						}
 					}
@@ -593,7 +593,7 @@
 							<label id="pages-label"/>
 							<label id="pages"/>
 						</row>
-						<row id="dateModifiedRow">
+						<row id="dateModifiedRow" hidden="true">
 							<label id="dateModified-label"/>
 							<label id="dateModified"/>
 						</row>
