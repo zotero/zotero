@@ -4119,12 +4119,7 @@ var ZoteroPane = new function()
 				
 				let downloadedItem = item;
 				try {
-					yield Zotero.Sync.Runner.downloadFile(
-						downloadedItem,
-						{
-							onProgress: function (progress, progressMax) {}
-						}
-					);
+					yield Zotero.Sync.Runner.downloadFile(downloadedItem);
 				}
 				catch (e) {
 					// TODO: show error somewhere else

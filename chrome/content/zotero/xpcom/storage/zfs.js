@@ -145,8 +145,8 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					
 					return false;
 				}),
-				onProgress: function (a, b, c) {
-					request.onProgress(a, b, c)
+				onProgress: function (req, progress, progressMax) {
+					request.onProgress(progress, progressMax);
 				},
 				onStop: function (req, status, res) {
 					request.setChannel(false);

@@ -209,6 +209,8 @@ Zotero.Sync.Storage.Request.prototype.start = Zotero.Promise.coroutine(function*
 		this._finished = true;
 		this._running = false;
 		
+		Zotero.Sync.Storage.setItemDownloadPercentage(this.name, false);
+		
 		if (this._onStop) {
 			this._onStop.forEach(x => x());
 		}
@@ -266,7 +268,7 @@ Zotero.Sync.Storage.Request.prototype.onProgress = function (progress, progressM
 		Zotero.Sync.Storage.setItemDownloadPercentage(this.name, this.percentage);
 	}
 	
-	if (this.onProgress && this._onProgress) {
+	if (this._onProgress) {
 		for (let f of this._onProgress) {
 			f(progress, progressMax);
 		}
