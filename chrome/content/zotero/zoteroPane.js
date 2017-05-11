@@ -4117,9 +4117,8 @@ var ZoteroPane = new function()
 					return;
 				}
 				
-				let downloadedItem = item;
 				try {
-					yield Zotero.Sync.Runner.downloadFile(downloadedItem);
+					yield Zotero.Sync.Runner.downloadFile(item);
 				}
 				catch (e) {
 					// TODO: show error somewhere else
@@ -4128,10 +4127,8 @@ var ZoteroPane = new function()
 					return;
 				}
 				
-				if (!(yield downloadedItem.getFilePathAsync())) {
-					ZoteroPane_Local.showAttachmentNotFoundDialog(
-						downloadedItem.id, noLocateOnMissing, true
-					);
+				if (!(yield item.getFilePathAsync())) {
+					ZoteroPane_Local.showAttachmentNotFoundDialog(item.id, noLocateOnMissing, true);
 					return;
 				}
 				
@@ -4139,9 +4136,8 @@ var ZoteroPane = new function()
 				// maybe not necessary, since we'll get an error if there's an error
 				
 				Zotero.Notifier.trigger('redraw', 'item', []);
-				setTimeout(() => {
-					ZoteroPane_Local.viewAttachment(downloadedItem.id, event, false, forceExternalViewer);
-				});
+				// Retry after download
+				i--;
 			}
 		}
 	}));
