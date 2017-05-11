@@ -1433,6 +1433,20 @@ describe("Zotero.Item", function () {
 			assert.equal(item.dateModified, '2015-06-07 20:58:00');
 		})
 		
+		it("should accept ISO 8601 access date without time", function* () {
+			var json = {
+				itemType: "journalArticle",
+				accessDate: "2015-06-07",
+				dateAdded: "2015-06-07T20:57:00Z",
+				dateModified: "2015-06-07T20:58:00Z",
+			};
+			var item = new Zotero.Item;
+			item.fromJSON(json);
+			assert.equal(item.getField('accessDate'), '2015-06-07');
+			assert.equal(item.dateAdded, '2015-06-07 20:57:00');
+			assert.equal(item.dateModified, '2015-06-07 20:58:00');
+		})
+		
 		it("should ignore non–ISO 8601 dates", function* () {
 			var json = {
 				itemType: "journalArticle",

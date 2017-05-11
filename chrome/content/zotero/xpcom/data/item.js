@@ -4099,24 +4099,29 @@ Zotero.Item.prototype.fromJSON = function (json) {
 			break;
 		
 		case 'accessDate':
+			if (val && !Zotero.Date.isSQLDate(val)) {
+				let d = Zotero.Date.isoToDate(val);
+				if (!d) {
+					Zotero.logError(`Discarding invalid ${field} '${val}' for item ${this.libraryKey}`);
+					continue;
+				}
+				val = Zotero.Date.dateToSQL(d, true);
+			}
+			this.setField(field, val);
+			setFields[field] = true;
+			break;
+		
 		case 'dateAdded':
 		case 'dateModified':
 			if (val) {
 				let d = Zotero.Date.isoToDate(val);
 				if (!d) {
-					Zotero.logError("Discarding invalid " + field + " '" + val
-						+ "' for item " + this.libraryKey);
+					Zotero.logError(`Discarding invalid ${field} '${val}' for item ${this.libraryKey}`);
 					continue;
 				}
 				val = Zotero.Date.dateToSQL(d, true);
 			}
-			if (field == 'accessDate') {
-				this.setField(field, val);
-				setFields[field] = true;
-			}
-			else {
-				this[field] = val;
-			}
+			this[field] = val;
 			break;
 		
 		case 'parentItem':
