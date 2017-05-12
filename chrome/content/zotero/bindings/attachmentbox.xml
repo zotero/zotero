@@ -99,7 +99,6 @@
 							this.displayFileName = true;
 							this.displayAccessed = true;
 							this.displayNote = true;
-							this.displayButton = true;
 							this.displayDateModified = true;
 							break;
 						
@@ -346,28 +345,24 @@
 					
 					// Note editor
 					var noteEditor = this._id('attachment-note-editor');
-					if (this.displayNote) {
-						if (this.displayNoteIfEmpty || this.item.getNote() != '') {
-							Zotero.debug("setting links on top");
-							noteEditor.linksOnTop = true;
-							noteEditor.hidden = false;
-							
-							// Don't make note editable (at least for now)
-							if (this.mode == 'merge' || this.mode == 'mergeedit') {
-								noteEditor.mode = 'merge';
-								noteEditor.displayButton = false;
-							}
-							else {
-								noteEditor.mode = this.mode;
-							}
-							noteEditor.parent = null;
-							noteEditor.item = this.item;
+					if (this.displayNote && (this.displayNoteIfEmpty || this.item.getNote() != '')) {
+						noteEditor.linksOnTop = true;
+						noteEditor.hidden = false;
+						
+						// Don't make note editable (at least for now)
+						if (this.mode == 'merge' || this.mode == 'mergeedit') {
+							noteEditor.mode = 'merge';
+							noteEditor.displayButton = false;
 						}
+						else {
+							noteEditor.mode = this.mode;
+						}
+						noteEditor.parent = null;
+						noteEditor.item = this.item;
 					}
 					else {
 						noteEditor.hidden = true;
 					}
-						
 					
 					if (this.displayButton) {
 						selectButton.label = this.buttonCaption;
@@ -572,40 +567,42 @@
 		<content>
 			<vbox id="attachment-box" flex="1" orient="vertical"
 				 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-				<label id="title"/>
-				<label id="url" crop="end"
-					ondragstart="var dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
-				<grid>
-					<columns>
-						<column/>
-						<column flex="1"/>
-					</columns>
-					<rows>
-						<row id="fileNameRow">
-							<label id="fileName-label"/>
-							<label id="fileName" crop="end"/>
-						</row>
-						<row id="accessedRow">
-							<label id="accessed-label"/>
-							<label id="accessed"/>
-						</row>
-						<row id="pagesRow">
-							<label id="pages-label"/>
-							<label id="pages"/>
-						</row>
-						<row id="dateModifiedRow" hidden="true">
-							<label id="dateModified-label"/>
-							<label id="dateModified"/>
-						</row>
-						<row id="indexStatusRow">
-							<label id="index-status-label"/>
-							<hbox>
-								<label id="index-status"/>
-								<image id="reindex" onclick="this.hidden = true; setTimeout(function () { ZoteroPane_Local.reindexItem(); }, 50)"/>
-							</hbox>
-						</row>
-					</rows>
-				</grid>
+				<vbox id="metadata">
+					<label id="title"/>
+					<label id="url" crop="end"
+						ondragstart="var dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
+					<grid>
+						<columns>
+							<column/>
+							<column flex="1"/>
+						</columns>
+						<rows>
+							<row id="fileNameRow">
+								<label id="fileName-label"/>
+								<label id="fileName" crop="end"/>
+							</row>
+							<row id="accessedRow">
+								<label id="accessed-label"/>
+								<label id="accessed"/>
+							</row>
+							<row id="pagesRow">
+								<label id="pages-label"/>
+								<label id="pages"/>
+							</row>
+							<row id="dateModifiedRow" hidden="true">
+								<label id="dateModified-label"/>
+								<label id="dateModified"/>
+							</row>
+							<row id="indexStatusRow">
+								<label id="index-status-label"/>
+								<hbox>
+									<label id="index-status"/>
+									<image id="reindex" onclick="this.hidden = true; setTimeout(function () { ZoteroPane_Local.reindexItem(); }, 50)"/>
+								</hbox>
+							</row>
+						</rows>
+					</grid>
+				</vbox>
 				
 				<zoteronoteeditor id="attachment-note-editor" notitle="1" flex="1"/>
 				

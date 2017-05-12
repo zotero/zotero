@@ -11,15 +11,19 @@
 		content_css: "css/note-content.css",
 		entity_encoding: "raw",
 		fix_list_elements: true,
-		readonly: true,
 		
+		toolbar: false,
 		menubar: false,
 		resize: false,
 		statusbar: false,
 		
 		init_instance_callback: function (ed) {
+			ed.setMode('readonly');
+			
 			setLocale(ed);
 			zoteroInit(ed);
+			
+			ed.getContainer().classList.add('readonly');
 		},
 		
 		// More restrictive version of default set, with JS/etc. removed

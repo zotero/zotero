@@ -24,6 +24,15 @@ html, body {
     right: 0;
 }
 
+/* Adjustments for read-only mode */
+.mce-container.readonly .mce-container-body .mce-edit-area {
+	top: 0;
+}
+
+.mce-container.readonly .mce-panel {
+	border: 0;
+}
+
 /* Shrink the buttons a bit */
 .mce-btn-small button {
 	padding-left: 3px !important;

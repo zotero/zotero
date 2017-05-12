@@ -74,6 +74,10 @@ zoteromergepane *[anonid="delete-box"] {
 	-moz-box-pack: center;
 }
 
+zoteromergepane .groupbox-body {
+	padding: 0;
+}
+
 zoteromergepane[selected=true] groupbox caption {
 	color: red;
 	font-weight: bold;
@@ -95,4 +99,8 @@ zoteromergepane div[anonid=parent-row] {
 
 zoteromergepane div[anonid=parent-row] span {
 	font-weight: bold;
+}
+
+zoteromergepane zoteronoteeditor {
+	margin: 10px 0 0;
 }
