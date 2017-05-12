@@ -268,7 +268,7 @@
 						// Otherwise just update based on visibility
 						else {
 							// If only a few tags, regenerate buttons from scratch
-							if (Object.keys(this.scope).length <= 100) {
+							if (this.filterToScope && Object.keys(this.scope).length <= 100) {
 								// If full set is currently displayed, store it for later
 								if (!this._tagsDiv) {
 									this._tagsDiv = tagsBox.firstChild;

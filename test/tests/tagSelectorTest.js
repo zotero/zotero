@@ -100,6 +100,45 @@ describe("Tag Selector", function () {
 		});
 	});
 	
+	
+	describe("#filterToScope", function () {
+		it("should show all tags in library when false", function* () {
+			var tagSelector = doc.getElementById('zotero-tag-selector');
+			tagSelector.filterToScope = false;
+			
+			var collection = yield createDataObject('collection');
+			var item1 = createUnsavedDataObject('item');
+			item1.setTags([
+				{
+					tag: "A"
+				}
+			]);
+			var item2 = createUnsavedDataObject('item', { collections: [collection.id] });
+			item2.setTags([
+				{
+					tag: "B"
+				}
+			]);
+			var item3 = createUnsavedDataObject('item', { collections: [collection.id] });
+			item3.setTags([
+				{
+					tag: "C"
+				}
+			]);
+			var promise = waitForTagSelector(win);
+			yield Zotero.DB.executeTransaction(function* () {
+				yield item1.save();
+				yield item2.save();
+				yield item3.save();
+			});
+			yield promise;
+			
+			var tags = getRegularTags();
+			assert.sameMembers(tags, ['A', 'B', 'C']);
+		});
+	});
+	
+	
 	describe("#notify()", function () {
 		it("should add a tag when added to an item in the library root", function* () {
 			var promise, tagSelector;
