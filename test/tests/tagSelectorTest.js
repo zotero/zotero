@@ -48,7 +48,10 @@ describe("Tag Selector", function () {
 	beforeEach(function* () {
 		var libraryID = Zotero.Libraries.userLibraryID;
 		yield clearTagColors(libraryID);
-		yield doc.getElementById('zotero-tag-selector').refresh(true);
+		var tagSelector = doc.getElementById('zotero-tag-selector');
+		// Default "Display All Tags in This Library" off
+		tagSelector.filterToScope = true;
+		yield tagSelector.refresh(true);
 	})
 	after(function () {
 		win.close();
