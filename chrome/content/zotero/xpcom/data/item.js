@@ -1972,7 +1972,8 @@ Zotero.Item.prototype.hasNote = Zotero.Promise.coroutine(function* () {
  **/
 Zotero.Item.prototype.getNote = function() {
 	if (!this.isNote() && !this.isAttachment()) {
-		throw ("getNote() can only be called on notes and attachments");
+		throw new Error("getNote() can only be called on notes and attachments "
+			+ `(${this.libraryID}/${this.key} is a {Zotero.ItemTypes.getName(this.itemTypeID)})`);
 	}
 	
 	// Store access time for later garbage collection
