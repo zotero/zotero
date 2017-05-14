@@ -107,7 +107,11 @@ Zotero_File_Exporter.prototype._exportDone = function(obj, worked) {
 	Zotero_File_Interface.Progress.close();
 	
 	if(!worked) {
-		window.alert(Zotero.getString("fileInterface.exportError"));
+		Zotero.alert(
+			null,
+			Zotero.getString('general.error'),
+			Zotero.getString("fileInterface.exportError")
+		);
 	}
 }
 
@@ -193,7 +197,9 @@ var Zotero_File_Interface = new function() {
 	 */
 	function _copyToClipboard(obj, worked) {
 		if(!worked) {
-			window.alert(Zotero.getString("fileInterface.exportError"));
+			Zotero.alert(
+				null, Zotero.getString('general.error'), Zotero.getString("fileInterface.exportError")
+			);
 		} else {
 			Components.classes["@mozilla.org/widget/clipboardhelper;1"]
                       .getService(Components.interfaces.nsIClipboardHelper)
@@ -252,7 +258,11 @@ var Zotero_File_Interface = new function() {
 		if(!str) {
 			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 									.getService(Components.interfaces.nsIPromptService);
-			ps.alert(null, "", Zotero.getString('fileInterface.importClipboardNoDataError'));
+			ps.alert(
+				null,
+				Zotero.getString('general.error'),
+				Zotero.getString('fileInterface.importClipboardNoDataError')
+			);
 		}
 		
 		var translation = new Zotero.Translate.Import();
@@ -357,7 +367,11 @@ var Zotero_File_Interface = new function() {
 			});
 		} catch(e) {
 			Zotero.logError(e);
-			window.alert(Zotero.getString("fileInterface.importError"));
+			Zotero.alert(
+				null,
+				Zotero.getString('general.error'),
+				Zotero.getString("fileInterface.importError")
+			);
 			return;
 		}
 		
@@ -493,7 +507,11 @@ var Zotero_File_Interface = new function() {
 			}
 		}
 		if (!haveRegularItem) {
-			window.alert(Zotero.getString("fileInterface.noReferencesError"));
+			Zotero.alert(
+				null,
+				Zotero.getString('general.error'),
+				Zotero.getString("fileInterface.noReferencesError")
+			);
 			return;
 		}
 		
@@ -524,7 +542,11 @@ var Zotero_File_Interface = new function() {
 					items, format, io.mode === "citations");
 			}
 		} catch(e) {
-			window.alert(Zotero.getString("fileInterface.bibliographyGenerationError"));
+			Zotero.alert(
+				null,
+				Zotero.getString('general.error'),
+				Zotero.getString("fileInterface.bibliographyGenerationError")
+			);
 			throw(e);
 		}
 		
