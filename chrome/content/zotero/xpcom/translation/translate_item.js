@@ -792,9 +792,16 @@ Zotero.Translate.ItemGetter.prototype = {
 				var exportDir = this._exportFileDirectory;
 				
 				// Add path and filename if not an internet link
-				var attachFile = Zotero.File.pathToFile(attachmentArray.localPath);
+				let attachFile;
+				if (attachmentArray.localPath) {
+					attachFile = Zotero.File.pathToFile(attachmentArray.localPath);
+				}
+				else {
+					Zotero.logError(`Path doesn't exist for attachment ${attachment.libraryKey} `
+						+ '-- not exporting file');
+				}
 				// TODO: Make async, but that will require translator changes
-				if (attachFile.exists()) {
+				if (attachFile && attachFile.exists()) {
 					attachmentArray.defaultPath = "files/" + attachment.id + "/" + attachFile.leafName;
 					attachmentArray.filename = attachFile.leafName;
 					
