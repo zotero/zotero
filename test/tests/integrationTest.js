@@ -322,7 +322,7 @@ describe("Zotero.Integration", function () {
 			return Zotero.Promise.resolve();
 		});
 		
-		addEditCitationSpy = sinon.spy(Zotero.Integration.Document.prototype, 'addEditCitation');
+		addEditCitationSpy = sinon.spy(Zotero.Integration.Interface.prototype, 'addEditCitation');
 	});
 	
 	after(function() {

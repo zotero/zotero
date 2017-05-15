@@ -217,7 +217,7 @@ Zotero.Integration = new function() {
 			// (depending on what is possible)
 			document = (application.getDocument && docId ? application.getDocument(docId) : application.getActiveDocument());
 			try {
-				yield Zotero.Promise.resolve((new Zotero.Integration.Document(application, document))[command]());
+				yield Zotero.Promise.resolve((new Zotero.Integration.Interface(application, document))[command]());
 			}
 			catch (e) {
 				if(!(e instanceof Zotero.Exception.UserCancelled)) {
@@ -508,7 +508,7 @@ const BIBLIOGRAPHY_PLACEHOLDER = "{Bibliography}";
  * All methods for interacting with a document
  * @constructor
  */
-Zotero.Integration.Document = function(app, doc) {
+Zotero.Integration.Interface = function(app, doc) {
 	this._app = app;
 	this._doc = doc;
 }
@@ -517,7 +517,7 @@ Zotero.Integration.Document = function(app, doc) {
  * @param data {Zotero.Integration.DocumentData} Document data for new session
  * @return {Zotero.Integration.Session}
  */
-Zotero.Integration.Document.prototype._createNewSession = function _createNewSession(data) {
+Zotero.Integration.Interface.prototype._createNewSession = function _createNewSession(data) {
 	data.sessionID = Zotero.randomString();
 	var session = Zotero.Integration.sessions[data.sessionID] = new Zotero.Integration.Session(this._doc);
 	return session;
@@ -533,7 +533,7 @@ Zotero.Integration.Document.prototype._createNewSession = function _createNewSes
  *    dontRunSetDocPrefs is true and no session was found, or rejected with
  *    Zotero.Exception.UserCancelled if the document preferences window was cancelled.
  */
-Zotero.Integration.Document.prototype._getSession = Zotero.Promise.coroutine(function *(require, dontRunSetDocPrefs) {
+Zotero.Integration.Interface.prototype._getSession = Zotero.Promise.coroutine(function *(require, dontRunSetDocPrefs) {
 	var dataString = this._doc.getDocumentData(),
 		data,
 		me = this;
@@ -673,7 +673,7 @@ Zotero.Integration.Document.prototype._getSession = Zotero.Promise.coroutine(fun
  * Adds a citation to the current document.
  * @return {Promise}
  */
-Zotero.Integration.Document.prototype.addCitation = function() {
+Zotero.Integration.Interface.prototype.addCitation = function() {
 	var me = this;
 	return this._getSession(false, false).then(function() {
 		return (new Zotero.Integration.Fields(me._session, me._doc)).addEditCitation(null);
@@ -684,7 +684,7 @@ Zotero.Integration.Document.prototype.addCitation = function() {
  * Edits the citation at the cursor position.
  * @return {Promise}
  */
-Zotero.Integration.Document.prototype.editCitation = function() {
+Zotero.Integration.Interface.prototype.editCitation = function() {
 	var me = this;
 	return this._getSession(true, false).then(function() {
 		var field = me._doc.cursorInField(me._session.data.prefs['fieldType']);
@@ -701,7 +701,7 @@ Zotero.Integration.Document.prototype.editCitation = function() {
  * Edits the citation at the cursor position if one exists, or else adds a new one.
  * @return {Promise}
  */
-Zotero.Integration.Document.prototype.addEditCitation = function() {
+Zotero.Integration.Interface.prototype.addEditCitation = function() {
 	var me = this;
 	return this._getSession(false, false).then(function() {
 		var field = me._doc.cursorInField(me._session.data.prefs['fieldType']);
@@ -713,7 +713,7 @@ Zotero.Integration.Document.prototype.addEditCitation = function() {
  * Adds a bibliography to the current document.
  * @return {Promise}
  */
-Zotero.Integration.Document.prototype.addBibliography = function() {
+Zotero.Integration.Interface.prototype.addBibliography = function() {
 	var me = this;
 	return this._getSession(true, false).then(function() {
 		// Make sure we can have a bibliography
@@ -736,7 +736,7 @@ Zotero.Integration.Document.prototype.addBibliography = function() {
  * Edits bibliography metadata.
  * @return {Promise}
  */
-Zotero.Integration.Document.prototype.editBibliography = function() {
+Zotero.Integration.Interface.prototype.editBibliography = function() {
 	// Make sure we have a bibliography
 	var me = this, fieldGetter;
 	return this._getSession(true, false).then(function() {
@@ -766,7 +766,7 @@ Zotero.Integration.Document.prototype.editBibliography = function() {
 }
 
 
-Zotero.Integration.Document.prototype.addEditBibliography = Zotero.Promise.coroutine(function *() {
+Zotero.Integration.Interface.prototype.addEditBibliography = Zotero.Promise.coroutine(function *() {
 	// Check if we have a bibliography
 	var session = yield this._getSession(true, false);
 	
@@ -803,7 +803,7 @@ Zotero.Integration.Document.prototype.addEditBibliography = Zotero.Promise.corou
  * Updates the citation data for all citations and bibliography entries.
  * @return {Promise}
  */
-Zotero.Integration.Document.prototype.refresh = function() {
+Zotero.Integration.Interface.prototype.refresh = function() {
 	var me = this;
 	return this._getSession(true, false).then(function() {
 		// Send request, forcing update of citations and bibliography
@@ -818,7 +818,7 @@ Zotero.Integration.Document.prototype.refresh = function() {
  * Deletes field codes.
  * @return {Promise}
  */
-Zotero.Integration.Document.prototype.removeCodes = function() {
+Zotero.Integration.Interface.prototype.removeCodes = function() {
 	var me = this;
 	return this._getSession(true, false).then(function() {
 		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
