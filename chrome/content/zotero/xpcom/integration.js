@@ -1014,7 +1014,7 @@ Zotero.Integration.Document.prototype._getSession = Zotero.Promise.coroutine(fun
 				data.prefs.fieldType = "ReferenceMark";
 			}
 			
-			var warning = this._doc.displayAlert(Zotero.getString("integration.upgradeWarning", Zotero.clientName, '5.0'),
+			var warning = this._doc.displayAlert(Zotero.getString("integration.upgradeWarning", [Zotero.clientName, '5.0']),
 				DIALOG_ICON_WARNING, DIALOG_BUTTONS_OK_CANCEL);
 			if(!warning) {
 				return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("document upgrade"));
