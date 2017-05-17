@@ -878,7 +878,7 @@ Zotero.Integration.Interface.prototype.setDocPrefs = Zotero.Promise.coroutine(fu
 		let field = Zotero.Integration.Field.loadExisting(fields[i]);
 		
 		if (convertItems && field.type === INTEGRATION_TYPE_ITEM) {
-			var citation = this._session.unserializeCitation(field.code);
+			var citation = field.unserialize();
 			if (!citation.properties.dontUpdate) {
 				fieldsToConvert.push(field);
 				fieldNoteTypes.push(this._session.data.prefs.noteType);
@@ -1121,7 +1121,7 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
 		if (field.type === INTEGRATION_TYPE_ITEM) {
 			var noteIndex = field.getNoteIndex();
 			try {
-				yield this._session.addCitation(i, noteIndex, field.code);
+				yield this._session.addCitation(i, noteIndex, field.unserialize());
 			} catch(e) {
 				var removeCode = false;
 				
@@ -1347,7 +1347,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 		}
 		
 		try {
-			citation = session.unserializeCitation(field.code);
+			citation = field.unserialize();
 		} catch(e) {}
 		
 		if (citation) {
@@ -1869,16 +1869,8 @@ Zotero.Integration._oldCitationLocatorMap = {
 /**
  * Adds a citation to the arrays representing the document
  */
-Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(function* (index, noteIndex, arg) {
+Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(function* (index, noteIndex, citation) {
 	var index = parseInt(index, 10);
-	
-	if(typeof(arg) == "string") {	// text field
-		if(arg == "!" || arg == "X") return;
-		
-		var citation = this.unserializeCitation(arg, index);
-	} else {					// a citation already
-		var citation = arg;
-	}
 	
 	// get items
 	yield this.lookupItems(citation, index);
@@ -2036,127 +2028,6 @@ Zotero.Integration.Session.prototype.lookupItems = Zotero.Promise.coroutine(func
 		yield Zotero.Items.loadDataTypes(items);
 	}
 });
-
-/**
- * Unserializes a JSON citation into a citation object (sans items)
- */
-Zotero.Integration.Session.prototype.unserializeCitation = function(code, index) {
-	var firstBracket = code.indexOf("{");
-	if (firstBracket !== -1) {		// JSON field
-		code = code.substr(firstBracket);
-		
-		// fix for corrupted fields
-		var lastBracket = code.lastIndexOf("}");
-		if(lastBracket+1 != code.length) {
-			if(index) this.updateIndices[index] = true;
-			code = code.substr(0, lastBracket+1);
-		}
-		
-		// get JSON
-		try {
-			var citation = JSON.parse(code);
-		} catch(e) {
-			// fix for corrupted fields (corrupted by Word, somehow)
-			try {
-				var citation = JSON.parse(code.substr(0, code.length-1));
-			} catch(e) {
-				// another fix for corrupted fields (corrupted by 2.1b1)
-				try {
-					var citation = JSON.parse(code.replace(/{{((?:\s*,?"unsorted":(?:true|false)|\s*,?"custom":"(?:(?:\\")?[^"]*\s*)*")*)}}/, "{$1}"));
-				} catch(e) {
-					throw new Zotero.Integration.CorruptFieldException(code, e);
-				}
-			}
-		}
-		
-		// fix for uppercase citation codes
-		if(citation.CITATIONITEMS) {
-			if(index) this.updateIndices[index] = true;
-			citation.citationItems = [];
-			for (var i=0; i<citation.CITATIONITEMS.length; i++) {
-				for (var j in citation.CITATIONITEMS[i]) {
-					switch (j) {
-						case 'ITEMID':
-							var field = 'itemID';
-							break;
-							
-						// 'position', 'custom'
-						default:
-							var field = j.toLowerCase();
-					}
-					if (!citation.citationItems[i]) {
-						citation.citationItems[i] = {};
-					}
-					citation.citationItems[i][field] = citation.CITATIONITEMS[i][j];
-				}
-			}
-		}
-		
-		if(!citation.properties) citation.properties = {};
-		
-		for (let citationItem of citation.citationItems) {
-			// for upgrade from Zotero 2.0 or earlier
-			if(citationItem.locatorType) {
-				citationItem.label = citationItem.locatorType;
-				delete citationItem.locatorType;
-			} else if(citationItem.suppressAuthor) {
-				citationItem["suppress-author"] = citationItem["suppressAuthor"];
-				delete citationItem.suppressAuthor;
-			} 
-			
-			// fix for improper upgrade from Zotero 2.1 in <2.1.5
-			if(parseInt(citationItem.label) == citationItem.label) {
-				const locatorTypeTerms = ["page", "book", "chapter", "column", "figure", "folio",
-					"issue", "line", "note", "opus", "paragraph", "part", "section", "sub verbo",
-					"volume", "verse"];
-				citationItem.label = locatorTypeTerms[parseInt(citationItem.label)];
-			}
-			
-			// for update from Zotero 2.1 or earlier
-			if(citationItem.uri) {
-				citationItem.uris = citationItem.uri;
-				delete citationItem.uri;
-			}
-		}
-		
-		// for upgrade from Zotero 2.0 or earlier
-		if(citation.sort) {
-			citation.properties.unsorted = !citation.sort;
-			delete citation.sort;
-		}
-		if(citation.custom) {
-			citation.properties.custom = citation.custom;
-			delete citation.custom;
-		}
-		if(!citation.citationID) citation.citationID = Zotero.randomString();
-		
-		citation.properties.field = code;
-	} else {				// ye olde style field
-		var underscoreIndex = code.indexOf("_");
-		var itemIDs = code.substr(0, underscoreIndex).split("|");
-		
-		var lastIndex = code.lastIndexOf("_");
-		if(lastIndex != underscoreIndex+1) {
-			var locatorString = code.substr(underscoreIndex+1, lastIndex-underscoreIndex-1);
-			var locators = locatorString.split("|");
-		}
-		
-		var citationItems = new Array();
-		for(var i=0; i<itemIDs.length; i++) {
-			var citationItem = {id:itemIDs[i]};
-			if(locators) {
-				citationItem.locator = locators[i].substr(1);
-				citationItem.label = Zotero.Integration._oldCitationLocatorMap[locators[i][0]];
-			}
-			citationItems.push(citationItem);
-		}
-		
-		var citation = {"citationItems":citationItems, properties:{}};
-		if(index) this.updateIndices[index] = true;
-	}
-	
-	return citation;
-}
 
 /**
  * Gets integration bibliography
@@ -2821,24 +2692,60 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = Zotero.Promise.corout
 	
 	return [zoteroItem, needUpdate];
 });
-Zotero.Integration.Field = function(field) {
-	this.dirty = false;
-	this._field = field;
-	this.type = INTEGRATION_TYPE_TEMP;
-	
-	return new Proxy(this, Zotero.Integration.Field.proxyHandler);
-};
 
-// Proxy properties through to the integration field
-Zotero.Integration.Field.proxyHandler = {
-	get: function(target, name) {
-		if (name in target) {
-			return target[name];
+Zotero.Integration.Field = class {
+	constructor(field) {
+		// This is not the best solution in terms of performance
+		for (let prop in field) {
+			if (!(prop in this)) this[prop] = field[prop];
 		}
-		return target._field[name];
+		this.dirty = false;
+		this._field = field;
+		this.type = INTEGRATION_TYPE_TEMP;	
 	}
-};
+	
+	get text() {return this._text = this._text ? this._text : this.getText()}
+	set text(v) {return this._text = v; this.dirty = true}
 
+	get code() {return this._code = this._code ? this._code : this.getCode()}
+	set code(v) {return this._code = v; this.dirty = true}
+	
+	clearCode() {
+		this.code = '{}';
+	};
+	
+	writeToDoc(doc) {
+		let text = this._text;
+		let isRich = false;
+		// If RTF wrap with RTF tags
+		if (text.indexOf("\\") !== -1) {
+			text = "{\\rtf "+text+"}";
+			isRich = true;
+		}
+		this._field.setText(text, isRich);
+
+		// Boo. Inconsistent.
+		if (this.type == INTEGRATION_TYPE_ITEM) {
+			this._field.setCode(`ITEM CSL_CITATION ${JSON.stringify(this.code)}`);
+		} else if (this.type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
+			this._field.setCode(`BIBL ${this.code} CSL_BIBLIOGRAPHY`);
+		}
+		this.dirty = false;
+
+		// Retrigger retrieval from doc.
+		this._text = null;
+		this._code = null;
+	};
+	
+	getCode() {
+		let code = this._field.getCode();
+		let start = code.indexOf('{');
+		if (start == -1) {
+			return '{}';
+		}
+		return code.substr(start, start + code.indexOf('}'));
+	};
+};
 
 /**
  * Load existing field in document and return correct instance of field type
@@ -2878,64 +2785,150 @@ Zotero.Integration.Field.loadExisting = function(docField) {
 	return field;
 };
 
-Zotero.defineProperty(Zotero.Integration.Field.prototype, 'text', {
-	get: () => this._text = this._text ? this._text : this.getText(),
-	set: (v) => {this._text = v; this.dirty = true}
-});
-
-Zotero.defineProperty(Zotero.Integration.Field.prototype, 'code', {
-	get: () => this._code = this._code ? this._code : this.getCode(),
-	set: (v) => {this._code = v; this.dirty = true;}
-});
-
-Zotero.Integration.Field.prototype = {
-	writeToDoc: function(doc) {
-		this.dirty = false;
-
-		let text = this._text;
-		let isRich = false;
-		// If RTF wrap with RTF tags
-		if (text.indexOf("\\") !== -1) {
-			text = "{\\rtf "+text+"}";
-			isRich = true;
-		}
-		this._field.setText(text, isRich);
-
-		// Boo. Inconsistent.
-		if (this.type == INTEGRATION_TYPE_ITEM) {
-			this._field.setCode(`ITEM CSL_CITATION ${JSON.stringify(this._data)}`);
-		} else if (this.type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
-			this._field.setCode(`BIBL ${JSON.stringify(this._data)} CSL_BIBLIOGRAPHY`);
-		}
-
-		// Retrigger retrieval from doc.
-		this._text = null;
-		this._code = null;
-	},
+Zotero.Integration.CitationField = class extends Zotero.Integration.Field {
+	constructor(field) {
+		super(field);
+		this.type = INTEGRATION_TYPE_ITEM;
+	}
 	
-	getCode: function() {
-		let code = this._field.getCode();
-		let start = code.indexOf('{');
-		if (start == -1) {
-			return '{}';
+	/**
+	 * Don't be fooled, this should be as simple as JSON.parse().
+	 * The schema for the code is defined @ https://raw.githubusercontent.com/citation-style-language/schema/master/csl-citation.json
+	 *
+	 * However, over the years and different versions of Zotero there's been changes to the schema,
+	 * incorrect serialization, etc. Therefore this function is cruft-full and we can't get rid of it.
+	 *
+	 * @returns {{citationItems: Object[], properties: Object}}
+	 */
+	unserialize() {
+		function unserialize(code) {
+			try {
+				return JSON.parse(code);
+			} catch(e) {
+				// fix for corrupted fields (corrupted by 2.1b1)
+				try {
+					return JSON.parse(code.replace(/{{((?:\s*,?"unsorted":(?:true|false)|\s*,?"custom":"(?:(?:\\")?[^"]*\s*)*")*)}}/, "{$1}"));
+				} catch(e) {
+					throw new Zotero.Integration.CorruptFieldException(code, e);
+				}
+			}
 		}
-		return code.substr(start, start + code.indexOf('}'));
+		
+		function upgradeCruft(citation, code) {
+			// fix for uppercase citation codes
+			if(citation.CITATIONITEMS) {
+				citation.citationItems = [];
+				for (var i=0; i<citation.CITATIONITEMS.length; i++) {
+					for (var j in citation.CITATIONITEMS[i]) {
+						switch (j) {
+							case 'ITEMID':
+								var field = 'itemID';
+								break;
+
+							// 'position', 'custom'
+							default:
+								var field = j.toLowerCase();
+						}
+						if (!citation.citationItems[i]) {
+							citation.citationItems[i] = {};
+						}
+						citation.citationItems[i][field] = citation.CITATIONITEMS[i][j];
+					}
+				}
+			}
+
+			if(!citation.properties) citation.properties = {};
+
+			for (let citationItem of citation.citationItems) {
+				// for upgrade from Zotero 2.0 or earlier
+				if(citationItem.locatorType) {
+					citationItem.label = citationItem.locatorType;
+					delete citationItem.locatorType;
+				} else if(citationItem.suppressAuthor) {
+					citationItem["suppress-author"] = citationItem["suppressAuthor"];
+					delete citationItem.suppressAuthor;
+				}
+
+				// fix for improper upgrade from Zotero 2.1 in <2.1.5
+				if(parseInt(citationItem.label) == citationItem.label) {
+					const locatorTypeTerms = ["page", "book", "chapter", "column", "figure", "folio",
+						"issue", "line", "note", "opus", "paragraph", "part", "section", "sub verbo",
+						"volume", "verse"];
+					citationItem.label = locatorTypeTerms[parseInt(citationItem.label)];
+				}
+
+				// for update from Zotero 2.1 or earlier
+				if(citationItem.uri) {
+					citationItem.uris = citationItem.uri;
+					delete citationItem.uri;
+				}
+			}
+
+			// for upgrade from Zotero 2.0 or earlier
+			if(citation.sort) {
+				citation.properties.unsorted = !citation.sort;
+				delete citation.sort;
+			}
+			if(citation.custom) {
+				citation.properties.custom = citation.custom;
+				delete citation.custom;
+			}
+			if(!citation.citationID) citation.citationID = Zotero.randomString();
+
+			citation.properties.field = code;	
+			return citation;
+		}
+		
+		function unserializePreZotero1_0(code) {
+			var underscoreIndex = code.indexOf("_");
+			var itemIDs = code.substr(0, underscoreIndex).split("|");
+
+			var lastIndex = code.lastIndexOf("_");
+			if(lastIndex != underscoreIndex+1) {
+				var locatorString = code.substr(underscoreIndex+1, lastIndex-underscoreIndex-1);
+				var locators = locatorString.split("|");
+			}
+
+			var citationItems = new Array();
+			for(var i=0; i<itemIDs.length; i++) {
+				var citationItem = {id:itemIDs[i]};
+				if(locators) {
+					citationItem.locator = locators[i].substr(1);
+					citationItem.label = Zotero.Integration._oldCitationLocatorMap[locators[i][0]];
+				}
+				citationItems.push(citationItem);
+			}
+
+			return {"citationItems":citationItems, properties:{}};
+		}
+		
+
+		if (this.code[0] == '{') {		// JSON field
+			return upgradeCruft(unserialize(this.code), this.code);
+		} else {				// ye olde style field
+			return unserializePreZotero1_0(this.code);
+		}
+	};
+	
+	clearCode() {
+		this.code = JSON.stringify({citationItems: [], properties: {}});
+		this.writeToDoc();
 	}
 };
 
 
-Zotero.Integration.CitationField = function(field) {
-	Zotero.Integration.Field.call(this, field);
-	this.type = INTEGRATION_TYPE_ITEM;
-
-	return new Proxy(this, Zotero.Integration.Field.proxyHandler);
+Zotero.Integration.BibliographyField = class extends Zotero.Integration.Field {
+	constructor(field) {
+		super(field);
+		this.type = INTEGRATION_TYPE_BIBLIOGRAPHY;
+		this.type = INTEGRATION_TYPE_ITEM;
+	};
+	
+	unserialize() {
+		try {
+			return JSON.parse(this.code);
+		} catch(e) {
+			throw new Zotero.Integration.CorruptFieldException(this.code, e);
+		}
+	}
 };
-Zotero.extendClass(Zotero.Integration.Field, Zotero.Integration.CitationField);
-
-Zotero.Integration.BibliographyField = function(field) {
-	Zotero.Integration.Field.call(this, field);
-	this.type = INTEGRATION_TYPE_BIBLIOGRAPHY;
-
-	return new Proxy(this, Zotero.Integration.Field.proxyHandler);
-};
-Zotero.extendClass(Zotero.Integration.Field, Zotero.Integration.BibliographyField);
