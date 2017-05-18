@@ -1586,6 +1586,10 @@ var ZoteroPane = new function()
 			
 			return true;
 		}.bind(this))()
+		.catch(function (e) {
+			this.displayErrorMessage();
+			throw e;
+		}.bind(this))
 		.finally(function () {
 			return this.itemsView.runListeners('select');
 		}.bind(this));
