@@ -224,13 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "sprotne opombe">
 <!ENTITY zotero.integration.prefs.endnotes.label "končne opombe">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Hrani citate kot:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Zaznamki">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Zaznamki se lahko skupno rabijo v Microsoft Word in LibreOffice, vendar lahko povzročijo napako, če se ponesreči spremenijo,  ter jih ni mogoče vstavljati v sprotne opombe.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Uporabi okrajšave revij MEDLINE">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Polje »Journal Abbr« bo prezrto.">
 
 <!ENTITY zotero.integration.showEditor.label "Pokaži urejevalnik">
 <!ENTITY zotero.integration.classicView.label "Klasični pogled">
