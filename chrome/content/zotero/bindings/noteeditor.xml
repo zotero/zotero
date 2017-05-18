@@ -201,10 +201,13 @@
 					
 					//var scrollPos = textbox.inputField.scrollTop;
 					if (this.item) {
+						// For sanity check in save()
+						textbox.setAttribute('itemID', this.item.id);
 						textbox.value = this.item.getNote();
 					}
 					else {
 						textbox.value = '';
+						textbox.removeAttribute('itemID');
 					}
 					//textbox.inputField.scrollTop = scrollPos;
 					
@@ -251,6 +254,15 @@
 							// Update note
 							var noteField = this._id('noteField');
 							if (this.item) {
+								// If note field doesn't match item, abort save and run error handler
+								if (noteField.getAttribute('itemID') != this.item.id) {
+									if (this.hasAttribute('onerror')) {
+										let fn = new Function("", this.getAttribute('onerror'));
+										fn.call(this)
+									}
+									throw new Error("Note field doesn't match current item");
+								}
+								
 								let changed = this.item.setNote(noteField.value);
 								if (changed && this.saveOnEdit) {
 									this.noteField.changed = false;
