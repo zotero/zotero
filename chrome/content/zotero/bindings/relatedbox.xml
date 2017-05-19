@@ -81,6 +81,11 @@
 						if (keys.length) {
 							for (let key of keys) {
 								let item = Zotero.Items.getByLibraryAndKey(this.item.libraryID, key);
+								if (!item) {
+									Zotero.debug(`Related item ${this.item.libraryID}/${key} not found `
+										+ `for item ${this.item.libraryKey}`, 2);
+									continue;
+								}
 								r = r + item.getDisplayTitle() + ", ";
 							}
 							r = r.substr(0,r.length-2);
@@ -139,6 +144,11 @@
 							let relatedItem = Zotero.Items.getByLibraryAndKey(
 								this.item.libraryID, key
 							);
+							if (!relatedItem) {
+								Zotero.debug(`Related item ${this.item.libraryID}/${key} not found `
+									+ `for item ${this.item.libraryKey}`, 2);
+								continue;
+							}
 							let id = relatedItem.id;
 							let icon = document.createElement("image");
 							icon.className = "zotero-box-icon";
@@ -194,7 +204,7 @@
 							}
 							rows.appendChild(row);
 						}
-						this.updateCount(relatedKeys.length);
+						this.updateCount(rows.childNodes.length);
 					}
 				]]></body>
 			</method>
