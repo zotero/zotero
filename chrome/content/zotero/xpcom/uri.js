@@ -89,7 +89,6 @@ Zotero.URI = new function () {
 		
 		switch (libraryType) {
 			case 'user':
-			case 'publications':
 				var id = Zotero.Users.getCurrentUserID();
 				if (!id) {
 					id = 'local/' + Zotero.Users.getLocalUserKey();
