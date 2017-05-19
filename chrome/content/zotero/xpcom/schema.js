@@ -1195,8 +1195,11 @@ Zotero.Schema = new function(){
 		
 		// Non-foreign key checks
 		//
-		// Repair entry (second position) can be either a string or an array with multiple statements.
-		var queries = [
+		// The first position is for testing and the second is for repairing. Can be either SQL
+		// statements or promise-returning functions. For statements, the repair entry can be either a
+		// string or an array with multiple statements. Functions should avoid assuming any global state
+		// (e.g., loaded data).
+		var checks = [
 			// Can't be a FK with itemTypesCombined
 			[
 				"SELECT COUNT(*) > 1 FROM items WHERE itemTypeID IS NULL",
@@ -1246,8 +1249,16 @@ Zotero.Schema = new function(){
 			]
 		];
 		
-		for (let sql of queries) {
-			let errorsFound = yield Zotero.DB.valueQueryAsync(sql[0]);
+		for (let check of checks) {
+			let errorsFound = false;
+			// SQL statement
+			if (typeof check[0] == 'string') {
+				errorsFound = yield Zotero.DB.valueQueryAsync(check[0]);
+			}
+			// Function
+			else {
+				errorsFound = yield check[0]();
+			}
 			if (!errorsFound) {
 				continue;
 			}
@@ -1257,14 +1268,18 @@ Zotero.Schema = new function(){
 			if (fix) {
 				try {
 					// Single query
-					if (typeof sql[1] == 'string') {
-						yield Zotero.DB.queryAsync(sql[1]);
+					if (typeof check[1] == 'string') {
+						yield Zotero.DB.queryAsync(check[1]);
 					}
 					// Multiple queries
-					else {
-						for (let s of sql[1]) {
+					else if (Array.isArray(check[1])) {
+						for (let s of check[1]) {
 							yield Zotero.DB.queryAsync(s);
 						}
+					}
+					// Function
+					else {
+						yield check[1]();
 					}
 					continue;
 				}
