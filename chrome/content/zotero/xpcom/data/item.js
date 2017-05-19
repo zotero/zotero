@@ -1167,6 +1167,8 @@ for (let name of ['deleted', 'inPublications']) {
 
 
 /**
+ * Relate this item to another. A separate save is required.
+ *
  * @param {Zotero.Item}
  * @return {Boolean}
  */
@@ -4038,8 +4040,14 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 		}
 	}
 	
-	// Flag related items for notification
-	// TEMP: Do something with relations
+	// Remove related-item relations pointing to this item
+	var relatedItems = Zotero.Relations.getByPredicateAndObject(
+		'item', Zotero.Relations.relatedItemPredicate, Zotero.URI.getItemURI(this)
+	);
+	for (let relatedItem of relatedItems) {
+		relatedItem.removeRelatedItem(this);
+		relatedItem.save();
+	}
 	
 	// Clear fulltext cache
 	if (this.isAttachment()) {

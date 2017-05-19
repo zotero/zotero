@@ -1069,6 +1069,26 @@ describe("Zotero.Item", function () {
 	})
 	
 	
+	describe("#_eraseData()", function () {
+		it("should remove relations pointing to this item", function* () {
+			var item1 = yield createDataObject('item');
+			var item2 = yield createDataObject('item');
+			item1.addRelatedItem(item2);
+			yield item1.saveTx();
+			item2.addRelatedItem(item1);
+			yield item2.saveTx();
+			
+			yield item1.eraseTx();
+			
+			assert.lengthOf(item2.relatedItems, 0);
+			yield assert.eventually.equal(
+				Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM itemRelations WHERE itemID=?", item2.id),
+				0
+			);
+		});
+	});
+	
+	
 	describe("#multiDiff", function () {
 		it("should return set of alternatives for differing fields in other items", function* () {
 			var type = 'item';
