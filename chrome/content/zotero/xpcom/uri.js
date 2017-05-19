@@ -249,6 +249,17 @@ Zotero.URI = new function () {
 		return this._getURIObject(itemURI, 'item');
 	}
 	
+	
+	/**
+	 * Convert an item URI into a libraryID and key from the database, without relying on global state
+	 *
+	 * Note that while the URI must point to a valid library, the item doesn't need to exist
+	 */
+	this.getURIItemLibraryKeyFromDB = function (itemURI) {
+		return this._getURIObjectLibraryKeyFromDB(itemURI, 'item');
+	}
+	
+	
 	/**
 	 * @param {String} itemURI
 	 * @return {Integer|FALSE} - itemID of matching item, or FALSE if none
@@ -345,6 +356,7 @@ Zotero.URI = new function () {
 		return retObj;
 	};
 	
+	
 	/**
 	 * Convert an object URI into a Zotero.Library that the object is in
 	 *
@@ -381,4 +393,84 @@ Zotero.URI = new function () {
 		
 		return library;
 	}
+	
+	
+	/**
+	 * Convert an object URI into a libraryID from the database, without relying on global state
+	 *
+	 * @param {String}	objectURI
+	 * @return {Promise<Integer|FALSE>} - A promise for either a libraryID or FALSE if a matching
+	 *     library couldn't be found
+	 */
+	this._getURIObjectLibraryID = Zotero.Promise.coroutine(function* (objectURI) {
+		let uri = objectURI.replace(/\/+$/, ''); // Drop trailing "/"
+		let uriParts = uri.match(uriPartsRe);
+		
+		let libraryID;
+		if (uriParts[1] == 'users') {
+			let type = uriParts[4];
+			// Personal library
+			if (!type || type == 'publications') {
+				libraryID = yield Zotero.DB.valueQueryAsync(
+					"SELECT libraryID FROM libraries WHERE type='user'"
+				);
+			}
+			// Feed libraries
+			else {
+				libraryID = type.split('/')[1];
+			}
+		}
+		// Group libraries
+		else {
+			libraryID = yield Zotero.DB.valueQueryAsync(
+				"SELECT libraryID FROM groups WHERE groupID=?", uriParts[3]
+			);
+		}
+		
+		if (!libraryID) {
+			Zotero.debug("Could not find a library for URI " + objectURI, 2, true);
+			return false;
+		}
+		
+		return libraryID;
+	});
+	
+	
+	
+	/**
+	 * Convert an object URI into a libraryID and key from the database, without relying on global state
+	 *
+	 * Note that while the URI must point to a valid library, the object doesn't need to exist
+	 *
+	 * @param {String} objectURI - Object URI
+	 * @param {String} type - Object type
+	 * @return {Promise<Object|FALSE>} - A promise for an object with 'objectType', 'libraryID', 'key'
+	 *     or FALSE if library didn't exist
+	 */
+	this._getURIObjectLibraryKeyFromDB = Zotero.Promise.coroutine(function* (objectURI, type) {
+		let uri = objectURI.replace(/\/+$/, ''); // Drop trailing /
+		let uriParts = uri.match(uriPartsRe);
+		
+		if (!uriParts) {
+			throw new Error("Could not parse object URI " + uri);
+		}
+		
+		let libraryID = yield this._getURIObjectLibraryID(uri);
+		if (!libraryID) {
+			return false;
+		}
+		
+		let retObj = { libraryID };
+		if (!uriParts[5]) {
+			// References the library itself
+			return false;
+		}
+		
+		retObj.objectType = uriParts[5] == 'items' ? 'item' : 'collection';
+		retObj.key = uriParts[6];
+		
+		if (type && type != retObj.objectType) return false;
+		
+		return retObj;
+	});
 }
