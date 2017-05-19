@@ -560,7 +560,7 @@
 					</xul:rows>
 				</xul:grid>
 				<xul:popupset>
-					<xul:menupopup id="relatedPopup" width="300" onpopupshowing="this.firstChild.reload();">
+					<xul:menupopup id="relatedPopup" width="300" onpopupshowing="this.firstChild.refresh();">
 						<xul:relatedbox id="related" flex="1"/>
 					</xul:menupopup>
 					<!-- The onpopup* stuff is an ugly hack to keep track of when the
