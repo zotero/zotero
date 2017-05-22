@@ -263,6 +263,47 @@ describe("Zotero.DataObject", function() {
 				assert.isFalse(obj.hasChanged());
 			}
 		})
+		
+		describe("Edit Check", function () {
+			var group;
+			
+			before(function* () {
+				group = yield createGroup({
+					editable: false
+				});
+			});
+			
+			it("should disallow saving to read-only libraries", function* () {
+				let item = createUnsavedDataObject('item', { libraryID: group.libraryID });
+				var e = yield getPromiseError(item.saveTx());
+				assert.ok(e);
+				assert.include(e.message, "read-only");
+			});
+			
+			it("should allow saving if skipEditCheck is passed", function* () {
+				let item = createUnsavedDataObject('item', { libraryID: group.libraryID });
+				var e = yield getPromiseError(item.saveTx({
+					skipEditCheck: true
+				}));
+				assert.isFalse(e);
+			});
+			
+			it("should allow saving if skipAll is passed", function* () {
+				let item = createUnsavedDataObject('item', { libraryID: group.libraryID });
+				var e = yield getPromiseError(item.saveTx({
+					skipAll: true
+				}));
+				assert.isFalse(e);
+			});
+		});
+		
+		describe("Options", function () {
+			describe("#skipAll", function () {
+				it("should include edit check", function* () {
+					
+				});
+			});
+		});
 	})
 	
 	describe("#erase()", function () {
