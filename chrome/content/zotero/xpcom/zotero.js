@@ -32,6 +32,22 @@ Components.utils.import("resource://gre/modules/PluralForm.jsm");
 
 Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 
+var require = (target) => {
+	var { Loader, Require, Module } = Components.utils.import('resource://gre/modules/commonjs/toolkit/loader.js');
+	var requirer = Module('/', '/');
+	var globals = {};
+
+	Components.utils.import("resource://gre/modules/Timer.jsm", globals);
+
+	var loader = Loader({
+		id: 'zotero/requireminimal',
+		globals
+	});
+
+	return (Require(loader, requirer))(target);
+};
+
+
 /*
  * Core functions
  */
@@ -63,7 +79,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.isWin;
 	this.initialURL; // used by Schema to show the changelog on upgrades
 	
-	Components.utils.import("resource://zotero/bluebird.js", this);
+	this.Promise = require('resource://zotero/bluebird/bluebird.js');
 	
 	this.getActiveZoteroPane = function() {
 		var win = Services.wm.getMostRecentWindow("navigator:browser");
