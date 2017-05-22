@@ -772,7 +772,7 @@
 			</method>
 			
 			
-			<method name="delete">
+			<method name="deleteTag">
 				<parameter name="name"/>
 				<body>
 				<![CDATA[
@@ -1002,7 +1002,7 @@
 					<menuitem label="&zotero.tagSelector.renameTag;"
 						oncommand="document.getBindingParent(this).rename(document.popupNode.getAttribute('value')); event.stopPropagation()"/>
 					<menuitem label="&zotero.tagSelector.deleteTag;"
-						oncommand="document.getBindingParent(this).delete(document.popupNode.getAttribute('value')); event.stopPropagation()"/>
+						oncommand="document.getBindingParent(this).deleteTag(document.popupNode.getAttribute('value')); event.stopPropagation()"/>
 				</menupopup>
 				
 				<vbox id="no-tags-box" align="center" pack="center" flex="1">
