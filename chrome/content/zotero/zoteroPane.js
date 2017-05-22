@@ -58,8 +58,6 @@ var ZoteroPane = new function()
 	
 	this.document = document;
 	
-	const COLLECTIONS_HEIGHT = 32; // minimum height of the collections pane and toolbar
-	
 	var self = this,
 		_loaded = false, _madeVisible = false,
 		titlebarcolorState, titleState, observerService,
@@ -171,11 +169,6 @@ var ZoteroPane = new function()
 		itemsTree.addEventListener("mousedown", ZoteroPane_Local.onTreeMouseDown, true);
 		itemsTree.addEventListener("click", ZoteroPane_Local.onTreeClick, true);
 		
-		var tagSelector = document.getElementById('zotero-tag-selector');
-		tagSelector.onchange = function () {
-			return ZoteroPane_Local.updateTagFilter();
-		};
-		
 		Zotero.Keys.windowInit(document);
 		
 		if (Zotero.restoreFromServer) {
@@ -240,6 +233,7 @@ var ZoteroPane = new function()
 			}
 			catch (e) {}
 		}
+		ZoteroPane.React.init();
 		
 		if (Zotero.openPane) {
 			Zotero.openPane = false;
@@ -351,8 +345,7 @@ var ZoteroPane = new function()
 			this.serializePersist();
 		}
 		
-		var tagSelector = document.getElementById('zotero-tag-selector');
-		tagSelector.unregister();
+		ZoteroPane_Local.React.destroy();
 		
 		if(this.collectionsView) this.collectionsView.unregister();
 		if(this.itemsView) this.itemsView.unregister();
@@ -1106,85 +1099,17 @@ var ZoteroPane = new function()
 		// and focus filter textbox
 		if (showing) {
 			yield this.setTagScope();
-			tagSelector.focusTextbox();
+			ZoteroPane_Local.tagSelector.focusTextbox();
 		}
 		// If hiding, clear selection
 		else {
-			tagSelector.uninit();
+			ZoteroPane_Local.tagSelector.uninit();
 		}
 	});
 	
 	
 	this.updateTagSelectorSize = function () {
-		//Zotero.debug('Updating tag selector size');
-		var zoteroPane = document.getElementById('zotero-pane-stack');
-		var splitter = document.getElementById('zotero-tags-splitter');
-		var tagSelector = document.getElementById('zotero-tag-selector');
 		
-		// Nothing should be bigger than appcontent's height
-		var max = document.getElementById('appcontent').boxObject.height
-					- splitter.boxObject.height;
-		
-		// Shrink tag selector to appcontent's height
-		var maxTS = max - COLLECTIONS_HEIGHT;
-		if (parseInt(tagSelector.getAttribute("height")) > maxTS) {
-			//Zotero.debug("Limiting tag selector height to appcontent");
-			tagSelector.setAttribute('height', maxTS);
-		}
-		
-		var height = tagSelector.boxObject.height;
-		
-		
-		/*Zotero.debug("tagSelector.boxObject.height: " + tagSelector.boxObject.height);
-		Zotero.debug("tagSelector.getAttribute('height'): " + tagSelector.getAttribute('height'));
-		Zotero.debug("zoteroPane.boxObject.height: " + zoteroPane.boxObject.height);
-		Zotero.debug("zoteroPane.getAttribute('height'): " + zoteroPane.getAttribute('height'));*/
-		
-		
-		// Don't let the Z-pane jump back down to its previous height
-		// (if shrinking or hiding the tag selector let it clear the min-height)
-		if (zoteroPane.getAttribute('height') < zoteroPane.boxObject.height) {
-			//Zotero.debug("Setting Zotero pane height attribute to " +  zoteroPane.boxObject.height);
-			zoteroPane.setAttribute('height', zoteroPane.boxObject.height);
-		}
-		
-		if (tagSelector.getAttribute('collapsed') == 'true') {
-			// 32px is the default Z pane min-height in overlay.css
-			height = 32;
-		}
-		else {
-			// tS.boxObject.height doesn't exist at startup, so get from attribute
-			if (!height) {
-				height = parseInt(tagSelector.getAttribute('height'));
-			}
-			// 121px seems to be enough room for the toolbar and collections
-			// tree at minimum height
-			height = height + COLLECTIONS_HEIGHT;
-		}
-		
-		//Zotero.debug('Setting Zotero pane minheight to ' + height);
-		zoteroPane.setAttribute('minheight', height);
-		
-		if (this.isShowing() && !this.isFullScreen()) {
-			zoteroPane.setAttribute('savedHeight', zoteroPane.boxObject.height);
-		}
-		
-		// Fix bug whereby resizing the Z pane downward after resizing
-		// the tag selector up and then down sometimes caused the Z pane to
-		// stay at a fixed size and get pushed below the bottom
-		tagSelector.height++;
-		tagSelector.height--;
-	}
-	
-	
-	function getTagSelection() {
-		var tagSelector = document.getElementById('zotero-tag-selector');
-		return tagSelector.selection ? tagSelector.selection : new Set();
-	}
-	
-	
-	this.clearTagSelection = function () {
-		document.getElementById('zotero-tag-selector').deselectAll();
 	}
 	
 	
@@ -1193,7 +1118,7 @@ var ZoteroPane = new function()
 	 */
 	this.updateTagFilter = Zotero.Promise.coroutine(function* () {
 		if (this.itemsView) {
-			yield this.itemsView.setFilter('tags', getTagSelection());
+			yield this.itemsView.setFilter('tags', ZoteroPane_Local.tagSelector.getTagSelection());
 		}
 	});
 	
@@ -1212,23 +1137,23 @@ var ZoteroPane = new function()
 	 *
 	 * Passed to the items tree to trigger on changes
 	 */
-	this.setTagScope = Zotero.Promise.coroutine(function* () {
-		var collectionTreeRow = this.getCollectionTreeRow();
+	this.setTagScope = async function () {
+		var collectionTreeRow = self.getCollectionTreeRow();
 		var tagSelector = document.getElementById('zotero-tag-selector');
-		if (this.tagSelectorShown()) {
+		if (self.tagSelectorShown()) {
 			Zotero.debug('Updating tag selector with current tags');
 			if (collectionTreeRow.editable) {
-				tagSelector.mode = 'edit';
+				ZoteroPane_Local.tagSelector.setMode('edit');
 			}
 			else {
-				tagSelector.mode = 'view';
+				ZoteroPane_Local.tagSelector.setMode('view');
 			}
-			tagSelector.collectionTreeRow = collectionTreeRow;
-			tagSelector.updateScope = () => this.setTagScope();
-			tagSelector.libraryID = collectionTreeRow.ref.libraryID;
-			tagSelector.scope = yield collectionTreeRow.getChildTags();
+			ZoteroPane_Local.tagSelector.collectionTreeRow = collectionTreeRow;
+			ZoteroPane_Local.tagSelector.updateScope = self.setTagScope;
+			ZoteroPane_Local.tagSelector.libraryID = collectionTreeRow.ref.libraryID;
+			ZoteroPane_Local.tagSelector.scope = await collectionTreeRow.getChildTags();
 		}
-	});
+	};
 	
 	
 	this.onCollectionSelected = function () {
@@ -1280,7 +1205,7 @@ var ZoteroPane = new function()
 			}*/
 			
 			collectionTreeRow.setSearch('');
-			collectionTreeRow.setTags(getTagSelection());
+			collectionTreeRow.setTags(ZoteroPane_Local.tagSelector.getTagSelection());
 			
 			this._updateToolbarIconsForRow(collectionTreeRow);
 			

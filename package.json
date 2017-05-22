@@ -16,20 +16,21 @@
   "license": "",
   "dependencies": {
     "bluebird": "^3.5.1",
+    "classnames": "^2.2.6",
+    "prop-types": "^15.6.2",
     "react": "^15.6.2",
-    "react-dom": "^15.6.2",
-    "zotero-web-library": "^0.9.4-alpha"
+    "react-dom": "^15.6.2"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-plugin-syntax-async-generators": "^6.13.0",
-    "babel-plugin-syntax-class-properties": "^6.13.0",
     "babel-plugin-syntax-decorators": "^6.13.0",
     "babel-plugin-syntax-do-expressions": "^6.13.0",
     "babel-plugin-syntax-export-extensions": "^6.13.0",
     "babel-plugin-syntax-flow": "^6.13.0",
     "babel-plugin-syntax-jsx": "^6.13.0",
     "babel-plugin-syntax-object-rest-spread": "^6.13.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
     "babel-preset-react": "^6.16.0",
     "browserify": "^14.5.0",

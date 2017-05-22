@@ -11,7 +11,7 @@ const sassRender = universalify.fromCallback(sass.render);
 
 const ROOT = path.resolve(__dirname, '..');
 
-async function getSass(source, options, signatures) {
+async function getSass(source, options, signatures={}) {
 	const t1 = Date.now();
 	const files = await globby(source, Object.assign({ cwd: ROOT }, options ));
 	const totalCount = files.length;
@@ -20,7 +20,9 @@ async function getSass(source, options, signatures) {
 
 	while ((f = files.pop()) != null) {
 		let newFileSignature = await getFileSignature(f);
-		const dest = path.join.apply(this, ['build', 'chrome', 'skin', 'default', 'zotero', 'components', getPathRelativeTo(f, 'scss')]);
+		let destFile = getPathRelativeTo(f, 'scss');
+		destFile = path.join(path.dirname(destFile), path.basename(destFile, '.scss') + '.css');
+		const dest = path.join.apply(this, ['build', 'chrome', 'skin', 'default', 'zotero', destFile]);
 
 		if (f in signatures) {
 			if (compareSignatures(newFileSignature, signatures[f])) {
@@ -34,10 +36,14 @@ async function getSass(source, options, signatures) {
 		}
 		try {
 			const sass = await sassRender({
-				file: f
+				file: f,
+				outFile: dest,
+				sourceMap: true,
+				outputStyle: 'compressed'
 			});
 
-			await fs.outputFile(dest, sass);
+			await fs.outputFile(dest, sass.css);
+			await fs.outputFile(`${dest}.map`, sass.map);
 			onProgress(f, dest, 'sass');
 			signatures[f] = newFileSignature;
 			count++;

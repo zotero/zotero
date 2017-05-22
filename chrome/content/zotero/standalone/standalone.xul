@@ -287,4 +287,7 @@
 			<stack id="zotero-pane-stack" fullscreenmode="true" flex="1"/>
 		</vbox>
 	</hbox>
+
+	<menupopup id="tag-menu"/>
+	<menupopup id="tag-selector-view-settings-menu"/>
 </window>

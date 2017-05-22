@@ -1,6 +1,5 @@
 /* Font sizes */
 *[zoteroFontSize=medium] #zotero-tb-search, *[zoteroFontSize=large] #zotero-tb-search,
-*[zoteroFontSize=medium] zoterotagselector textbox, *[zoteroFontSize=large] zoterotagselector textbox
 {
 	font-size: 1em !important;
 }
@@ -79,11 +78,6 @@ relatedbox
 zoterosearch
 {
 	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-box');
-}
-
-zoterotagselector
-{
-	-moz-binding: url('chrome://zotero/content/bindings/tagselector.xml#tag-selector');
 }
 
 

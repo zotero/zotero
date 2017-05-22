@@ -12,7 +12,7 @@ const cluster = require('cluster');
 async function babelWorker(ev) {
 	const t1 = Date.now();
 	const sourcefile = ev.file;
-	const outfile = path.join('build', sourcefile);
+	const outfile = path.join('build', sourcefile.replace('.jsx', '.js'));
 	const postError = (error) => {
 		process.send({
 			sourcefile,
@@ -28,7 +28,8 @@ async function babelWorker(ev) {
 		let contents = await fs.readFile(sourcefile, 'utf8');
 		if (sourcefile === 'resource/react-dom.js') {
 			// patch react
-			transformed = contents.replace(/ownerDocument\.createElement\((.*?)\)/gi, 'ownerDocument.createElementNS(DOMNamespaces.html, $1)');
+			transformed = contents.replace(/ownerDocument\.createElement\((.*?)\)/gi, 'ownerDocument.createElementNS(DOMNamespaces.html, $1)')
+				.replace("isInputEventSupported = false", 'isInputEventSupported = true');
 		} else if ('ignore' in options && options.ignore.some(ignoreGlob => multimatch(sourcefile, ignoreGlob).length)) {
 			transformed = contents;
 			isSkipped = true;

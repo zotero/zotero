@@ -1,0 +1,86 @@
+//
+// Tag selector
+// --------------------------------------------------
+
+.library .tag-selector {
+	height: 160px;
+}
+
+.tag-selector {
+	display: flex;
+	flex: 1 0 100%;
+	flex-direction: column;
+	overflow: hidden;
+	background-color: $tag-selector-bg;
+}
+
+.tag-selector-container {
+	flex: 1 1 auto;
+	justify-content: space-between;
+	overflow: auto;
+	height: auto;
+}
+
+.tag-selector-filter-container {
+	height: auto;
+	flex: 0 0 1em;
+	display: flex;
+	flex-direction: row;
+	padding: 0.25em;
+}
+
+.tag-selector-list {
+	list-style: none;
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+}
+
+.tag-selector-filter {
+	flex: 1 0 40px;
+	min-width: 40px;
+}
+
+.tag-selector-actions {
+	flex: 0 0 32px;
+}
+
+.tag-selector-item {
+	border-radius: 1em;
+	border: 1px solid transparent;
+	cursor: pointer;
+	display: inline-block;
+	padding: .05em .5em;
+	margin: 0;
+
+	&.selected {
+		background-color: $secondary;
+		border: 1px solid $secondary;
+	}
+
+	&.colored {
+		font-weight: bold;
+	}
+
+	&.disabled {
+		opacity: .6;
+		cursor: auto;
+		pointer-events: none;
+	}
+
+	&:not(.disabled):hover {
+		background-color: lighten($secondary, 15%);
+		border: 1px solid $secondary;
+	}
+}
+
+#zotero-tag-selector {
+	min-height: 100px;
+	width: 100%;
+	display: flex;
+}
+
+#zotero-tag-selector[collapsed=true] {
+	visibility: collapse;
+}
+

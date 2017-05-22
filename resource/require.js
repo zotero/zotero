@@ -1,5 +1,7 @@
 'use strict';
 
+var Zotero;
+
 var EXPORTED_SYMBOLS = ['require'];
 
 var require = (function() {
@@ -56,21 +58,42 @@ var require = (function() {
 	window.debug = function (msg) {
 		dump(msg + "\n\n");
 	};
+	
+	function getZotero() {
+		if (typeof Zotero === 'undefined') {
+			try {
+				Zotero = Components.classes["@zotero.org/Zotero;1"]
+					.getService(Components.interfaces.nsISupports).wrappedJSObject;
+			} catch (e) {}
+		}
+		return Zotero || {};	
+	}
 
+	var cons;
+	if (typeof console !== 'undefined') {
+		cons = console;
+	}
+	if (!cons) {
+		cons = {};
+		for (let key of ['log', 'warn', 'error']) {
+			cons[key] = text => {getZotero(); typeof Zotero !== 'undefined' && false && Zotero.debug(`console.${key}: ${text}`)};
+		}
+	}
+	let globals = {
+		document: typeof document !== 'undefined' && document || {},
+		console: cons,
+		navigator: typeof navigator !== 'undefined' && navigator || {},
+		window,
+		setTimeout: window.setTimeout,
+		clearTimeout: window.clearTimeout,
+	};
+	Object.defineProperty(globals, 'Zotero', { get: getZotero });
 	var loader = Loader({
 		id: 'zotero/require',
 		paths: {
 			'': 'resource://zotero/',
 		},
-		globals: {
-			document: typeof document !== 'undefined' && document || {},
-			console: typeof console !== 'undefined' && console || {},
-			navigator: typeof navigator !== 'undefined' && navigator || {},
-			window,
-			setTimeout: window.setTimeout,
-			clearTimeout: window.clearTimeout,
-			Zotero: typeof Zotero !== 'undefined' && Zotero || {} 
-		}
+		globals
 	});
 
 	return Require(loader, requirer);
