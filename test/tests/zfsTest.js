@@ -275,6 +275,11 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			var suffix1 = Zotero.Utilities.randomString();
 			var uploadKey1 = Zotero.Utilities.randomString(32, 'abcdef0123456789');
 			
+			let file1Blob = File.createFromFileName ? File.createFromFileName(file1.path) : new File(file1);
+			if (file1Blob.then) {
+				file1Blob = yield file1Blob;
+			}
+			
 			// HTML file with auxiliary image
 			var file2 = OS.Path.join(getTestDataDirectory().path, 'snapshot', 'index.html');
 			var parentItem = yield createDataObject('item');
@@ -397,9 +402,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 						(new Blob(
 							[
 								prefix1,
-								File.createFromFileName
-									? File.createFromFileName(file1.path)
-									: new File(file1),
+								file1Blob,
 								suffix1
 							]
 						).size)

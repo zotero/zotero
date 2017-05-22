@@ -613,6 +613,10 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		
 		Components.utils.importGlobalProperties(["File"]);
 		file = File.createFromFileName ? File.createFromFileName(file.path) : new File(file);
+		// File.createFromFileName() returns a Promise in Fx54+
+		if (file.then) {
+			file = yield file;
+		}
 		
 		var blob = new Blob([params.prefix, file, params.suffix]);
 		
