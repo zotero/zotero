@@ -363,7 +363,7 @@ describe("Tag Selector", function () {
 			promise = waitForTagSelector(win);
 			var dialogPromise = waitForDialog();
 			var tagSelector = doc.getElementById('zotero-tag-selector');
-			yield tagSelector.delete("A");
+			yield tagSelector.deleteTag("A");
 			yield promise;
 			
 			// Tag selector shouldn't show the deleted item's tag

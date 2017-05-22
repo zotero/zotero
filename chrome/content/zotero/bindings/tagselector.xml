@@ -805,7 +805,7 @@
 			</method>
 			
 			
-			<method name="delete">
+			<method name="deleteTag">
 				<parameter name="name"/>
 				<body><![CDATA[
 					return Zotero.spawn(function* () {
@@ -1090,7 +1090,7 @@
 					<menuitem label="&zotero.tagSelector.renameTag;"
 						oncommand="document.getBindingParent(this).rename(_popupNode.textContent); event.stopPropagation()"/>
 					<menuitem label="&zotero.tagSelector.deleteTag;"
-						oncommand="document.getBindingParent(this).delete(_popupNode.textContent); event.stopPropagation()"/>
+						oncommand="document.getBindingParent(this).deleteTag(_popupNode.textContent); event.stopPropagation()"/>
 				</menupopup>
 				
 				<deck id="tags-deck">

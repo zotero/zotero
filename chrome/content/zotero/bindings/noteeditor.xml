@@ -442,7 +442,7 @@
 					// If editable and no existing tags, open new empty row
 					var tagsBox = this.id('tags');
 					if (tagsBox.mode == 'edit' && tagsBox.count == 0) {
-						this.id('tags').new();
+						this.id('tags').newTag();
 					}
 				]]></body>
 			</method>
@@ -573,7 +573,7 @@
 					tagsbox and tagsLabel above, so be sure to update fixPopup() if it changes
 					-->
 					<xul:menupopup id="tagsPopup" ignorekeys="true"
-							onpopupshown="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ /* DEBUG: it would be nice to make this work -- if (this.firstChild.count==0){ this.firstChild.new(); } */ this.setAttribute('showing', 'true'); }"
+							onpopupshown="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ /* DEBUG: it would be nice to make this work -- if (this.firstChild.count==0){ this.firstChild.newTag(); } */ this.setAttribute('showing', 'true'); }"
 							onpopuphidden="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ this.setAttribute('showing', 'false'); }">
 						<xul:tagsbox id="tags" flex="1" mode="edit"/>
 					</xul:menupopup>

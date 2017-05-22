@@ -725,7 +725,7 @@
 			</method>
 			
 			
-			<method name="new">
+			<method name="newTag">
 				<body>
 					<![CDATA[
 						var rowsElement = this.id('tagRows');
@@ -954,7 +954,7 @@
 						next.click();
 					}
 					else {
-						next = this.new();
+						next = this.newTag();
 						next = next.firstChild.nextSibling;
 					}
 					
@@ -1056,7 +1056,7 @@
 					<xul:label id="tagsNum"/>
 					<xul:button id="addButton" label="&zotero.item.add;"
 						onkeypress="return document.getBindingParent(this)._onAddButtonKeypress(event)"
-						oncommand="document.getBindingParent(this).new();"/>
+						oncommand="document.getBindingParent(this).newTag();"/>
 				</xul:hbox>
 				<xul:grid>
 					<xul:columns>
