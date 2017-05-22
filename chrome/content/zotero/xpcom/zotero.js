@@ -242,7 +242,13 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 		
 		// Load in the localization stringbundle for use by getString(name)
-		var appLocale = Services.locale.getApplicationLocale();
+		if (Services.locale.getAppLocale) {
+			var appLocale = Services.locale.getAppLocale();
+		}
+		// Fx <=53
+		else {
+			var appLocale = Services.locale.getApplicationLocale();
+		}
 		
 		_localizedStringBundle = Services.strings.createBundle(
 			"chrome://zotero/locale/zotero.properties", appLocale);
