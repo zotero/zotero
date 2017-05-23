@@ -45,7 +45,7 @@ function getJS(source = jsGlob) {
 		.pipe(reactPatcher())
 		.on('error', onError)
 		.on('data', file => {
-			onSuccess(`[js] ${path.basename(file.path)}`);
+			onSuccess(`[js] ${file.path}`);
 		})
 		.pipe(gulp.dest('./build'));
 }
@@ -65,7 +65,7 @@ function getJSParallel(source = jsGlob) {
 				}
 
 				NODE_ENV == 'debug' && console.log(`process ${i} took ${ev.data.processingTime} ms to process ${ev.data.sourcefile}`);
-				NODE_ENV != 'debug' && onSuccess(`[js] ${path.basename(ev.data.sourcefile)}`);
+				NODE_ENV != 'debug' && onSuccess(`[js] ${ev.data.sourcefile}`);
 				
 				if(ev.data.isSkipped) {
 					NODE_ENV == 'debug' && console.log(`process ${i} SKIPPED ${ev.data.sourcefile}`);
@@ -99,7 +99,7 @@ function getSymlinks() {
 		.src(match, { nodir: true, base: '.', read: false })
 		.on('error', onError)
 		.on('data', file => {
-			onSuccess(`[ln] ${path.basename(file.path)}`);
+			onSuccess(`[ln] ${file.path.substr(__dirname.length + 1)}`);
 		})
 		.pipe(vfs.symlink('build/'));
 }
