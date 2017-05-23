@@ -23,7 +23,7 @@
  *     <http://www.gnu.org/licenses/> respectively.
  */
 var CSL = {
-    PROCESSOR_VERSION: "1.1.167",
+    PROCESSOR_VERSION: "1.1.169",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -14455,7 +14455,8 @@ CSL.Util.FlipFlopper = function(state) {
             outer: "true",
             flipflop: {
                 "true": "inner",
-                "inner": "true"
+                "inner": "true",
+                "false": "true"
             }
         },
         " \'": {
@@ -14466,7 +14467,8 @@ CSL.Util.FlipFlopper = function(state) {
             outer: "inner",
             flipflop: {
                 "true": "inner",
-                "inner": "true"
+                "inner": "true",
+                "false": "true"
             }
         }
     }
@@ -14615,19 +14617,32 @@ CSL.Util.FlipFlopper = function(state) {
         }
     }
     function _doppelString(str) {
+        var forcedSpaces = [];
         str = str.replace(/(<span)\s+(style=\"font-variant:)\s*(small-caps);?\"[^>]*(>)/g, "$1 $2$3;\"$4");
         str = str.replace(/(<span)\s+(class=\"no(?:case|decor)\")[^>]*(>)/g, "$1 $2$3");
         var match = str.match(_tagRex.matchAll);
         if (!match) {
             return {
                 tags: [],
-                strings: [str]
+                strings: [str],
+                forcedSpaces: []
             };
         }
         var split = str.split(_tagRex.splitAll);
+        for (var i=0,ilen=match.length-1;i<ilen;i++) {
+            if (_nestingData[match[i]]) {
+                if (split[i+1] === "" && ["\"", "'"].indexOf(match[i+1]) > -1) {
+                    match[i+1] = " " + match[i+1]
+                    forcedSpaces.push(true);
+                } else {
+                    forcedSpaces.push(false);
+                }
+            }
+        }
         return {
             tags: match,
-            strings: split
+            strings: split,
+            forcedSpaces: forcedSpaces
         }
     }
     function _undoppelString(obj) {
@@ -14701,7 +14716,7 @@ CSL.Util.FlipFlopper = function(state) {
         function Stack (blob) {
             this.stack = [blob];
             this.latest = blob;
-            this.addStyling = function(str, decor) {
+            this.addStyling = function(str, decor, forcedSpace) {
                 if (firstString) {
                     if (str.slice(0, 1) === " ") {
                         str = str.slice(1);
@@ -14821,7 +14836,11 @@ CSL.Util.FlipFlopper = function(state) {
                                 doppel.strings[i+1] = "\u2019" + doppel.strings[i+1];
                                 doppel.tags[i] = "";
                             } else {
-                                doppel.strings[tagInfo.fixtag+1] = doppel.tags[tagInfo.fixtag] + doppel.strings[tagInfo.fixtag+1];
+                                var failedTag = doppel.tags[tagInfo.fixtag];
+                                if (doppel.forcedSpaces[tagInfo.fixtag-1]) {
+                                    failedTag = failedTag.slice(1);
+                                }
+                                doppel.strings[tagInfo.fixtag+1] = failedTag + doppel.strings[tagInfo.fixtag+1];
                                 doppel.tags[tagInfo.fixtag] = "";
                             }
                             if (_nestingState.length > 0) {
@@ -14851,11 +14870,10 @@ CSL.Util.FlipFlopper = function(state) {
             var tag = doppel.tags[tagPos];
             if (tag === " \'" || tag === "\'") {
                 doppel.strings[tagPos+1] = " \u2019" + doppel.strings[tagPos+1];
-                doppel.tags[tagPos] = "";
             } else {
                 doppel.strings[tagPos+1] = doppel.tags[tagPos] + doppel.strings[tagPos+1];
-                doppel.tags[tagPos] = "";
             }
+            doppel.tags[tagPos] = "";
             _nestingState.pop();
         }
         for (var i=doppel.tags.length-1;i>-1;i--) {
@@ -14867,12 +14885,15 @@ CSL.Util.FlipFlopper = function(state) {
         }
         for (var i=0,ilen=doppel.tags.length;i<ilen;i++) {
             var tag = doppel.tags[i];
-            if ([" \"", " \'", "(\""].indexOf(tag) > -1) {
+            var forcedSpace = doppel.forcedSpaces[i-1];
+            if ([" \"", " \'", "(\"", "(\'"].indexOf(tag) > -1) {
                 if (!quoteFormSeen) {
                     _setOuterQuoteForm(tag);
                     quoteFormSeen = true;
                 }
-                doppel.strings[i] += tag.slice(0, 1);
+                if (!forcedSpace) {
+                    doppel.strings[i] += tag.slice(0, 1);
+                }
             }
         }
         _undoppelToQueue(blob, doppel, leadingSpace);
