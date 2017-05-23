@@ -193,7 +193,7 @@
 								var remove = document.createElement("label");
 								remove.setAttribute('value','-');
 								remove.setAttribute('onclick',
-									"document.getBindingParent(this).remove('" + id + "');");
+									"document.getBindingParent(this).remove(" + id + ");");
 								remove.setAttribute('class','zotero-clicky zotero-clicky-minus');
 							}
 							

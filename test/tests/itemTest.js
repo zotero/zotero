@@ -1066,6 +1066,26 @@ describe("Zotero.Item", function () {
 			assert.ok(e);
 			assert.equal(e.message, "Item type must be set before saving");
 		})
+		
+		it("should reload child items for parent items", function* () {
+			var item = yield createDataObject('item');
+			var attachment = yield importFileAttachment('test.png', { parentItemID: item.id });
+			var note1 = new Zotero.Item('note');
+			note1.parentItemID = item.id;
+			yield note1.saveTx();
+			var note2 = new Zotero.Item('note');
+			note2.parentItemID = item.id;
+			yield note2.saveTx();
+			
+			assert.lengthOf(item.getAttachments(), 1);
+			assert.lengthOf(item.getNotes(), 2);
+			
+			note2.parentItemID = null;
+			yield note2.saveTx();
+			
+			assert.lengthOf(item.getAttachments(), 1);
+			assert.lengthOf(item.getNotes(), 1);
+		});
 	})
 	
 	

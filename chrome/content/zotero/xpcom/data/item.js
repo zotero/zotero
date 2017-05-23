@@ -1792,7 +1792,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	if (reloadParentChildItems) {
 		for (let parentItemID in reloadParentChildItems) {
 			// Keep in sync with Zotero.Items.trash()
-			let parentItem = yield this.ObjectsClass.getAsync(parentItemID);
+			let parentItem = yield this.ObjectsClass.getAsync(parseInt(parentItemID));
 			yield parentItem.reload(['primaryData', 'childItems'], true);
 			parentItem.clearBestAttachmentState();
 		}

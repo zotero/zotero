@@ -2334,12 +2334,12 @@ Zotero.DragDrop = {
 		
 		if (dt.types.contains('zotero/collection')) {
 			dragData.dataType = 'zotero/collection';
-			var ids = dt.getData('zotero/collection').split(",");
+			let ids = dt.getData('zotero/collection').split(",").map(id => parseInt(id));
 			dragData.data = ids;
 		}
 		else if (dt.types.contains('zotero/item')) {
 			dragData.dataType = 'zotero/item';
-			var ids = dt.getData('zotero/item').split(",");
+			let ids = dt.getData('zotero/item').split(",").map(id => parseInt(id));
 			dragData.data = ids;
 		}
 		else {
