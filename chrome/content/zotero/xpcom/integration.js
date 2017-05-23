@@ -1337,7 +1337,10 @@ Zotero.Integration.Fields.prototype._updateDocument = function* (forceCitations,
  * Brings up the addCitationDialog, prepopulated if a citation is provided
  */
 Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(function* (field) {
-	var newField, citation, session = this._session;
+	var newField, citation;
+	
+	// TODO: refactor citation/field preparation
+	// Citation loading should be moved into Zotero.Integration.Citation
 	
 	// if there's already a citation, make sure we have item IDs in addition to keys
 	if (field) {
@@ -1352,7 +1355,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 		
 		if (citation) {
 			try {
-				yield session.lookupItems(citation);
+				yield this._session.lookupItems(citation);
 			} catch(e) {
 				if(e instanceof Zotero.Integration.MissingItemException) {
 					citation.citationItems = [];
@@ -1391,7 +1394,41 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 		citation = {"citationItems":[], "properties":{}};
 	}
 	
-	var io = new Zotero.Integration.CitationEditInterface(citation, field, this, session);
+	// -------------------
+	// Preparing stuff to pass into CitationEditInterface
+	var fieldIndexPromise = this.get().then(function(fields) {
+		for (var i=0, n=fields.length; i<n; i++) {
+			if (fields[i].equals(field)) {
+				return i;
+			}
+		}
+	});
+	
+	var citationsByItemIDPromise = fieldIndexPromise.then(function() {
+		return this.updateSession();
+	}.bind(this)).then(function() {
+		return this._session.citationsByItemID;
+	}.bind(this));
+
+	// Required for preview fn
+	citation.properties.noteIndex = field.getNoteIndex();
+	var previewFn = Zotero.Promise.coroutine(function* (citation) {
+		let idx = yield fieldIndexPromise;
+		let citationsPre, citationsPost, citationIndices;
+		[citationsPre, citationsPost, citationIndices] = this._session._getPrePost(idx);
+		try {
+			return this._session.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
+		} catch(e) {
+			throw e;
+		}
+	}.bind(this));
+		
+	var io = new Zotero.Integration.CitationEditInterface(
+		// Clone citation
+		JSON.parse(JSON.stringify(citation)), 
+		this._session.style.opt.sort_citations, fieldIndexPromise, citationsByItemIDPromise,
+		previewFn
+	);
 	
 	if (Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
 		Zotero.Integration.displayDialog(this._doc,
@@ -1403,169 +1440,79 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 		Zotero.Integration.displayDialog(this._doc,
 		'chrome://zotero/content/integration/quickFormat.xul', mode, io);
 	}
-	
-	if (newField) {
-		return io.promise.catch(function(e) {
+
+	// -------------------
+	// io.promise resolves/rejects when the citation dialog is closed
+	try {
+		this.progressCallback = yield io.promise;
+	} catch (e) {
+		if (newField) {
 			// Try to delete new field on failure
 			try {
 				field.delete();
 			} catch(e) {}
-			throw e;
-		});
-	} else {
-		return io.promise;
+			throw e;	
+		}
 	}
+	
+	if (!io.citation.citationItems.length) {
+		throw new Zotero.Exception.UserCancelled("inserting citation");
+	}
+
+	let fieldIndex = yield fieldIndexPromise;
+	yield this._session.addCitation(fieldIndex, field.getNoteIndex(), io.citation);
+	this._session.updateIndices[fieldIndex] = true;
+	
+	// Check if bibliography changed
+	// TODO: do an actual check
+	this._session.bibliographyHasChanged = true;
+	// if (!this._session.bibliographyHasChanged) {
+	// 	let citationItems = io.citation.citationItems;
+	// 	for (let i = 0; i < citationItems.length; i++) {
+	// 		if (this._session.citationsByItemID[citationItems[i].itemID] &&
+	// 				this._session.citationsByItemID[citationItems[i].itemID].length == 1) {
+	// 			this._session.bibliographyHasChanged = true;
+	// 			break;
+	// 		}
+	// 	}
+	// }
+	
+	// Update document
+	return this.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 });
 
 /**
  * Citation editing functions and propertiesaccessible to quickFormat.js and addCitationDialog.js
  */
-Zotero.Integration.CitationEditInterface = function(citation, field, fieldGetter, session) {
+Zotero.Integration.CitationEditInterface = function(citation, sortable, fieldIndexPromise, citationsByItemIDPromise, previewFn) {
 	this.citation = citation;
-	this._field = field;
-	this._fieldGetter = fieldGetter;
-	this._session = session;
+	this.sortable = sortable;
+	this.previewFn = previewFn;
+	this._fieldIndexPromise = fieldIndexPromise;
+	this._citationsByItemIDPromise = citationsByItemIDPromise;
 	
-	this._sessionUpdateResolveErrors = false;
-	this._sessionUpdateDeferreds = [];
-	
-	// Needed to make this work across boundaries
+	// Not available in quickFormat.js if this unspecified
 	this.wrappedJSObject = this;
-	
-	// Determine whether citation is sortable in current style
-	this.sortable = session.style.opt.sort_citations;
-	
-	// Citeproc-js style object for use of third-party extension
-	this.style = session.style;
-	
-	// Start getting citation data
+
 	this._acceptDeferred = Zotero.Promise.defer();
-	this._fieldIndexPromise = fieldGetter.get().then(function(fields) {
-		for(var i=0, n=fields.length; i<n; i++) {
-			if(fields[i].equals(field)) {
-				return i;
-			}
-		}
-	});
-	
-	var me = this;
-	this.promise = this._fieldIndexPromise.then(function(fieldIndex) {
-		me._fieldIndex = fieldIndex;
-		return me._acceptDeferred.promise;
-	}).then(function(progressCallback) {
-		if(!me.citation.citationItems.length) {
-			throw new Zotero.Exception.UserCancelled("inserting citation");
-		}
-		me._fieldGetter.progressCallback = progressCallback;
-		return me._updateSession(true);
-	}).then(Zotero.Promise.coroutine(function* () {
-		// Add new citation
-		yield me._session.addCitation(me._fieldIndex, me._field.getNoteIndex(), me.citation);
-		me._session.updateIndices[me._fieldIndex] = true;
-		
-		// Check if bibliography changed
-		if(!me._session.bibliographyHasChanged) {
-			var citationItems = me.citation.citationItems;
-			for(var i=0, n=citationItems.length; i<n; i++) {
-				if(me._session.citationsByItemID[citationItems[i].itemID] &&
-						me._session.citationsByItemID[citationItems[i].itemID].length == 1) {
-					me._session.bibliographyHasChanged = true;
-					break;
-				}
-			}
-		}
-		
-		// Update document
-		return me._fieldGetter.updateDocument(FORCE_CITATIONS_FALSE, false, false);
-	}));
+	this.promise = this._acceptDeferred.promise;
 }
 
 Zotero.Integration.CitationEditInterface.prototype = {
 	/**
-	 * Run a function when the session information has been updated
-	 * @param {Boolean} [resolveErrors] Whether to attempt to resolve errors that occur
-	 *     while session information is being updated, e.g. by showing a dialog to the
-	 *     user.
-	 * @return {Promise} A promise resolved when session information has been updated
-	 */
-	"_updateSession":function _updateSession(resolveErrors) {
-		var me = this;
-		if(this._sessionUpdatePromise && this._sessionUpdatePromise.isFulfilled()) {
-			// Session has already been updated. If we were deferring resolving an error,
-			// and we are supposed to resolve it now, then do that
-			if(this._sessionUpdateError) {
-				if(resolveErrors && this._sessionUpdateError.attemptToResolve) {
-					return this._sessionUpdateError.attemptToResolve().then(function() {
-						delete me._sessionUpdateError;
-					});
-				} else {
-					return Zotero.Promise.reject(this._sessionUpdateError);
-				}
-			} else {
-				return Zotero.Promise.resolve(true);
-			}
-		} else {
-			var deferred = Zotero.Promise.defer();
-			
-			this._sessionUpdateResolveErrors = this._sessionUpdateResolveErrors || resolveErrors;
-			this._sessionUpdateDeferreds.push(deferred);
-			
-			if(!this._sessionUpdatePromise) {
-				// Add deferred to queue
-				
-				var me = this;
-				this._fieldGetter.fieldErrorHandler = function(err) {
-					// If an error occurred, either try to resolve it or reject it
-					// depending on whether anyone has called _updateSession with
-					// resolveErrors set to true. This is necessary to prevent field code
-					// errors from appearing while the user interacts with the QuickFormat
-					// dialog, since some people find this very confusing.
-					if(me._sessionUpdateResolveErrors && err.attemptToResolve) {
-						return err.attemptToResolve();
-					} else {
-						throw err;
-					}
-				};
-				this._sessionUpdatePromise = this._fieldGetter.updateSession().then(function() {
-					// If no errors occurred, or errors were resolved, resolve promises
-					for(var i=0; i<me._sessionUpdateDeferreds.length; i++) {
-						me._sessionUpdateDeferreds[i].resolve(true);
-					}
-				}, function(err) {
-					// Error propagates if attemptToResolve failed or wasn't called to
-					// begin with
-					me._sessionUpdateError = err;
-					for(var i=0; i<me._sessionUpdateDeferreds.length; i++) {
-						me._sessionUpdateDeferreds[i].reject(err);
-					}
-					Zotero.logError(err);
-				});
-			}
-			
-			return deferred.promise;
-		}
-	},
-	
-	/**
 	 * Execute a callback with a preview of the given citation
 	 * @return {Promise} A promise resolved with the previewed citation string
 	 */
-	"preview":function preview() {
-		var me = this;
-		return this._updateSession().then(function() {
-			me.citation.properties.zoteroIndex = me._fieldIndex;
-			me.citation.properties.noteIndex = me._field.getNoteIndex();
-			return me._session.previewCitation(me.citation);
-		});
+	preview: function() {
+		return this.previewFn(this.citation);
 	},
 	
 	/**
-	 * Sort the citation
+	 * Sort the citationItems within citation (depends on this.citation.properties.unsorted)
+	 * @return {Promise} A promise resolved with the previewed citation string
 	 */
-	"sort":function() {
-		// Unlike above, we can do the previewing here without waiting for all the fields
-		// to load, since they won't change the sorting (I don't think)
-		this._session.previewCitation(this.citation);
+	sort: function() {
+		return this.preview();
 	},
 	
 	/**
@@ -1573,8 +1520,8 @@ Zotero.Integration.CitationEditInterface.prototype = {
 	 * @param {Function} [progressCallback] A callback to be run when progress has changed.
 	 *     Receives a number from 0 to 100 indicating current status.
 	 */
-	"accept":function(progressCallback) {
-		if(!this._acceptDeferred.promise.isFulfilled()) {
+	accept: function(progressCallback) {
+		if (!this._acceptDeferred.promise.isFulfilled()) {
 			this._acceptDeferred.resolve(progressCallback);
 		}
 	},
@@ -1583,30 +1530,8 @@ Zotero.Integration.CitationEditInterface.prototype = {
 	 * Get a list of items used in the current document
 	 * @return {Promise} A promise resolved by the items
 	 */
-	"getItems":function() {
-		if(this._fieldIndexPromise.isFulfilled()
-				|| Zotero.Utilities.isEmpty(this._session.citationsByItemID)) {
-			// Either we already have field data for this run or we have no item data at all.
-			// Update session before continuing.
-			var me = this;
-			return this._updateSession().then(function() {
-				return me._getItems();
-			}, function() {
-				return [];
-			});
-		} else {
-			// We have item data left over from a previous run with this document, so we don't need
-			// to wait.
-			return Zotero.Promise.resolve(this._getItems());
-		}
-	},
-	
-	/**
-	 * Helper function for getItems. Does the same thing, but this can assume that the session data
-	 * has already been updated if it should be.
-	 */
-	"_getItems":function() {
-		var citationsByItemID = this._session.citationsByItemID;
+	getItems: Zotero.Promise.coroutine(function* () {
+		var citationsByItemID = yield this._citationsByItemIDPromise;
 		var ids = Object.keys(citationsByItemID).filter(itemID => {
 			return citationsByItemID[itemID]
 				&& citationsByItemID[itemID].length
@@ -1616,7 +1541,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 		});
 		
 		// Sort all previously cited items at top, and all items cited later at bottom
-		var fieldIndex = this._fieldIndex;
+		var fieldIndex = yield this._fieldIndexPromise;
 		ids.sort(function(a, b) {
 			var indexA = citationsByItemID[a][0].properties.zoteroIndex,
 				indexB = citationsByItemID[b][0].properties.zoteroIndex;
@@ -1630,8 +1555,8 @@ Zotero.Integration.CitationEditInterface.prototype = {
 			return indexB - indexA;
 		});
 		
-		return Zotero.Cite.getItem(ids);
-	}
+		return Zotero.Cite.getItem(ids);	
+	}),
 }
 
 /**
@@ -2324,20 +2249,6 @@ Zotero.Integration.Session.prototype.getBibliographyData = function() {
 		return JSON.stringify(bibliographyData);
 	} else {
 		return ""; 	// nothing
-	}
-}
-
-/**
- * Returns a preview, given a citation object (whose citationItems lack item 
- * and position)
- */
-Zotero.Integration.Session.prototype.previewCitation = function(citation) {
-	var citationsPre, citationsPost, citationIndices;
-	[citationsPre, citationsPost, citationIndices] = this._getPrePost(citation.properties.zoteroIndex);
-	try {
-		return this.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
-	} catch(e) {
-		throw e;
 	}
 }
 
