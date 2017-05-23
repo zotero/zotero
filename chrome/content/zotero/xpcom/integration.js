@@ -50,6 +50,12 @@ const DIALOG_BUTTONS_YES_NO_CANCEL = 3;
 const NOTE_FOOTNOTE = 1;
 const NOTE_ENDNOTE = 2;
 
+const INTEGRATION_TYPE_ITEM = 1;
+const INTEGRATION_TYPE_BIBLIOGRAPHY = 2;
+const INTEGRATION_TYPE_TEMP = 3;
+const INTEGRATION_TYPE_REMOVE = 4;
+
+
 Zotero.Integration = new function() {
 	Components.utils.import("resource://gre/modules/Services.jsm");
 	Components.utils.import("resource://gre/modules/AddonManager.jsm");
@@ -497,13 +503,6 @@ Zotero.Integration.CorruptBibliographyException.prototype = {
 	}
 };
 
-const INTEGRATION_TYPE_ITEM = 1;
-const INTEGRATION_TYPE_BIBLIOGRAPHY = 2;
-const INTEGRATION_TYPE_TEMP = 3;
-
-// Placeholder for an empty bibliography
-const BIBLIOGRAPHY_PLACEHOLDER = "{Bibliography}";
-
 /**
  * All methods for interacting with a document
  * @constructor
@@ -724,7 +723,9 @@ Zotero.Integration.Interface.prototype.addBibliography = function() {
 		
 		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc, Zotero.Integration.onFieldError);
 		return fieldGetter.addField().then(function(field) {
-			field.setCode("BIBL");
+			field.clearCode();
+			field.type = INTEGRATION_TYPE_BIBLIOGRAPHY;
+			field.writeToDoc();
 			return fieldGetter.updateSession().then(function() {
 				return fieldGetter.updateDocument(FORCE_CITATIONS_FALSE, true, false);
 			});
@@ -791,7 +792,9 @@ Zotero.Integration.Interface.prototype.addEditBibliography = Zotero.Promise.coro
 		yield session.editBibliography(this._doc);
 	} else {
 		var field = new Zotero.Integration.BibliographyField(yield fieldGetter.addField());
-		field.setCode("BIBL");
+		field.clearCode();
+		field.type = INTEGRATION_TYPE_BIBLIOGRAPHY;
+		field.writeToDoc();
 		yield fieldGetter.updateSession();
 	}
 	return fieldGetter.updateDocument(FORCE_CITATIONS_FALSE, true, false);
@@ -963,13 +966,13 @@ Zotero.Integration.Fields.prototype.addField = function(note) {
 	}
 	
 	if (!field) {
-		field = this._doc.insertField(this._session.data.prefs['fieldType'],
-			(note ? this._session.data.prefs["noteType"] : 0));
+		field = new Zotero.Integration.Field(this._doc.insertField(this._session.data.prefs['fieldType'],
+			(note ? this._session.data.prefs["noteType"] : 0)));
 	}
 	// If fields already retrieved, further this.get() calls will returned the cached version
 	// So we append this field to that list
 	if (this._fields) {
-		this._fields.push(field);
+		this._fields.push(field._field);
 	}
 	
 	return Zotero.Promise.resolve(field);
@@ -1390,7 +1393,8 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 	}
 	
 	if (!citation) {
-		field.setCode("TEMP");
+		field.clearCode();
+		field.writeToDoc();
 		citation = {"citationItems":[], "properties":{}};
 	}
 	
@@ -2626,7 +2630,7 @@ Zotero.Integration.Field = class {
 	};
 	
 	writeToDoc(doc) {
-		let text = this._text;
+		let text = this.text;
 		let isRich = false;
 		// If RTF wrap with RTF tags
 		if (text.indexOf("\\") !== -1) {
@@ -2637,9 +2641,11 @@ Zotero.Integration.Field = class {
 
 		// Boo. Inconsistent.
 		if (this.type == INTEGRATION_TYPE_ITEM) {
-			this._field.setCode(`ITEM CSL_CITATION ${JSON.stringify(this.code)}`);
+			this._field.setCode(`ITEM CSL_CITATION ${this.code}`);
 		} else if (this.type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
 			this._field.setCode(`BIBL ${this.code} CSL_BIBLIOGRAPHY`);
+		} else {
+			this._field.setCode(`TEMP`);
 		}
 		this.dirty = false;
 
@@ -2654,7 +2660,7 @@ Zotero.Integration.Field = class {
 		if (start == -1) {
 			return '{}';
 		}
-		return code.substr(start, start + code.indexOf('}'));
+		return code.substring(start, code.indexOf('}')+1);
 	};
 };
 
@@ -2682,7 +2688,7 @@ Zotero.Integration.Field.loadExisting = function(docField) {
 	if (field) {
 		let start = rawCode.indexOf('{');
 		if (start != -1) {
-			field._code = rawCode.substr(start, start + rawCode.lastIndexOf('}'));
+			field._code = rawCode.substring(start, rawCode.lastIndexOf('}')+1);
 		} else {
 			field._code = rawCode.substr(rawCode.indexOf(' ')+1);
 		}
@@ -2832,7 +2838,6 @@ Zotero.Integration.BibliographyField = class extends Zotero.Integration.Field {
 	constructor(field) {
 		super(field);
 		this.type = INTEGRATION_TYPE_BIBLIOGRAPHY;
-		this.type = INTEGRATION_TYPE_ITEM;
 	};
 	
 	unserialize() {
