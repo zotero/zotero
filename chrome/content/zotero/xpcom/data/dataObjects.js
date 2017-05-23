@@ -172,14 +172,16 @@ Zotero.DataObjects.prototype.getAsync = Zotero.Promise.coroutine(function* (ids,
 	
 	for (let i=0; i<ids.length; i++) {
 		let id = ids[i];
+		
+		if (!Number.isInteger(id)) {
+			throw new Error(`Invalid ${this._ZDO_object} ID '${id}' (${typeof id})`);
+		}
+		
 		// Check if already loaded
 		if (this._objectCache[id]) {
 			toReturn.push(this._objectCache[id]);
 		}
 		else {
-			if (!Number.isInteger(id)) {
-				throw new Error(`Invalid ${this._ZDO_object} ID '${id}' (${typeof id})`);
-			}
 			toLoad.push(id);
 		}
 	}
