@@ -1,0 +1,46 @@
+{
+  "name": "zotero",
+  "private": "private",
+  "version": "5.0.0",
+  "description": "Zotero",
+  "main": "",
+  "scripts": {
+    "start": "./node_modules/.bin/gulp",
+    "build": "./node_modules/.bin/gulp",
+    "sass": "./node_modules/.bin/gulp sass",
+    "clean": "./node_modules/.bin/gulp clean"
+  },
+  "license": "",
+  "dependencies": {
+    "bluebird": "^3.4.6",
+    "zotero-web-library": "next",
+    "react": "^15.3.2",
+    "react-dom": "^15.3.2"
+  },
+  "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-plugin-syntax-async-generators": "^6.13.0",
+    "babel-plugin-syntax-class-properties": "^6.13.0",
+    "babel-plugin-syntax-decorators": "^6.13.0",
+    "babel-plugin-syntax-do-expressions": "^6.13.0",
+    "babel-plugin-syntax-export-extensions": "^6.13.0",
+    "babel-plugin-syntax-flow": "^6.13.0",
+    "babel-plugin-syntax-jsx": "^6.13.0",
+    "babel-plugin-syntax-object-rest-spread": "^6.13.0",
+    "babel-plugin-transform-async-to-module-method": "^6.16.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.18.0",
+    "babel-preset-react": "^6.16.0",
+    "del": "^2.2.2",
+    "glob": "^7.1.2",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-sass": "^3.1.0",
+    "gulp-util": "^3.0.7",
+    "through2": "^2.0.1",
+    "tiny-worker": "^2.1.1",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-fs": "^2.4.4",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.7.0"
+  }
+}
