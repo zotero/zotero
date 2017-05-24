@@ -1429,8 +1429,7 @@ var ZoteroPane = new function()
 			}
 			
 			// Single item selected
-			if (this.itemsView.selection.count == 1 && this.itemsView.selection.currentIndex != -1)
-			{
+			if (selectedItems.length == 1) {
 				var item = selectedItems[0];
 				
 				if (item.isNote()) {
@@ -1520,7 +1519,7 @@ var ZoteroPane = new function()
 					ZoteroItemPane.setToggleReadLabel();
 				}
 				
-				var count = this.itemsView.selection.count;
+				let count = selectedItems.length;
 				
 				// Display duplicates merge interface in item pane
 				if (collectionTreeRow.isDuplicates()) {
