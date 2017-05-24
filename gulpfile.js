@@ -15,12 +15,22 @@ const reactPatcher = require('./gulp/gulp-react-patcher');
 
 // list of folders from where .js files are compiled and non-js files are symlinked
 const dirs = [
-	'chrome', 'components', 'defaults', 'resource', 'resource/web-library'
+	'chrome',
+	'components',
+	'defaults',
+	'resource',
+	'resource/web-library',
+	'test',
+	'test/resource/chai',
+	'test/resource/chai-as-promised',
+	'test/resource/mocha'
 ];
 
-// list of folders from where all files are symlinked
+// list of folders from which all files are symlinked
 const symlinkDirs = [
-	'styles', 'translators'
+	'styles',
+	'translators',
+	'test/tests/data'
 ];
 
 // list of files from root folder to symlink
@@ -29,6 +39,7 @@ const symlinkFiles = [
 ];
 
 const jsGlob = `./\{${dirs.join(',')}\}/**/*.js`;
+const jsGlobIgnore = `./\{${symlinkDirs.join(',')}\}/**/*.js`;
 
 function onError(err) {
 	gutil.log(gutil.colors.red('Error:'), err);
@@ -39,7 +50,10 @@ function onSuccess(msg) {
 	gutil.log(gutil.colors.green('Build:'), msg);
 }
 
-function getJS(source = jsGlob) { 
+function getJS(source, sourceIgnore) {
+	if (sourceIgnore) {
+		source = [source, '!' + sourceIgnore];
+	}
 	return gulp.src(source, { base: '.' })
 		.pipe(babel())
 		.pipe(reactPatcher())
@@ -50,8 +64,8 @@ function getJS(source = jsGlob) {
 		.pipe(gulp.dest('./build'));
 }
 
-function getJSParallel(source = jsGlob) {
-	const jsFiles = glob.sync(source);
+function getJSParallel(source, sourceIgnore) {
+	const jsFiles = glob.sync(source, { ignore: sourceIgnore });
 	const cpuCount = os.cpus().length;
 	const threadCount = Math.min(cpuCount, jsFiles.length);
 	let threadsActive = threadCount;
@@ -93,7 +107,7 @@ function getSymlinks() {
 	const match = symlinkFiles
 		.concat(dirs.map(d => `${d}/**`))
 		.concat(symlinkDirs.map(d => `${d}/**`))
-		.concat([`!{${dirs.join(',')}}/**/*.js`]);
+		.concat([`!./{${dirs.join(',')}}/**/*.js`]);
 
 	return gulp
 		.src(match, { nodir: true, base: '.', read: false })
@@ -122,7 +136,7 @@ gulp.task('symlink', ['clean'], () => {
 });
 
 gulp.task('js', done => {
-	getJSParallel(jsGlob).then(() => done());
+	getJSParallel(jsGlob, jsGlobIgnore).then(() => done());
 });
 
 gulp.task('sass', () => {
@@ -137,7 +151,7 @@ gulp.task('dev', ['clean'], () => {
 	let watcher = gulp.watch(jsGlob, { interval });
 
 	watcher.on('change', function(event) {
-		getJS(event.path);
+		getJS(event.path, jsGlobIgnore);
 	});
 
 	gulp.watch('src/styles/*.scss', { interval }, ['sass']);
