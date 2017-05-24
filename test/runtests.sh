@@ -109,11 +109,11 @@ TEMPDIR="`mktemp -d 2>/dev/null || mktemp -d -t 'zotero-unit'`"
 PROFILE="$TEMPDIR/profile"
 mkdir -p "$PROFILE/extensions"
 
-makePath ZOTERO_UNIT_PATH "$CWD"
-echo "$ZOTERO_UNIT_PATH" > "$PROFILE/extensions/zotero-unit@zotero.org"
-
-makePath ZOTERO_PATH "`dirname "$CWD"`"
+makePath ZOTERO_PATH "`dirname "$CWD"`/build"
 echo "$ZOTERO_PATH" > "$PROFILE/extensions/zotero@chnm.gmu.edu"
+
+makePath ZOTERO_UNIT_PATH "$ZOTERO_PATH/test"
+echo "$ZOTERO_UNIT_PATH" > "$PROFILE/extensions/zotero-unit@zotero.org"
 
 # Create data directory
 mkdir "$TEMPDIR/Zotero"
