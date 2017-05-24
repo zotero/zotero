@@ -132,13 +132,15 @@ gulp.task('sass', () => {
 gulp.task('build', ['js', 'sass', 'symlink']);
 
 gulp.task('dev', ['clean'], () => {
-	let watcher = gulp.watch(jsGlob);
+	var interval = 750;
+	
+	let watcher = gulp.watch(jsGlob, { interval });
 
 	watcher.on('change', function(event) {
 		getJS(event.path);
 	});
 
-	gulp.watch('src/styles/*.scss', ['sass']);
+	gulp.watch('src/styles/*.scss', { interval }, ['sass']);
 	gulp.start('build');
 });
 
