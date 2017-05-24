@@ -70,7 +70,7 @@ Zotero.ItemTreeView.prototype.collapseAll = false;
 /**
  * Called by the tree itself
  */
-Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (treebox) {
+Zotero.ItemTreeView.prototype.setTree = async function (treebox) {
 	try {
 		Zotero.debug("Setting tree for " + this.collectionTreeRow.id + " items view " + this.id);
 		var start = Date.now();
@@ -115,7 +115,7 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 			return;
 		}
 		
-		yield this.refresh(true);
+		await this.refresh(true);
 		if (!this._treebox.treeBody) {
 			return;
 		}
@@ -280,14 +280,14 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 		
 		if (this.collectionTreeRow && this.collectionTreeRow.itemToSelect) {
 			var item = this.collectionTreeRow.itemToSelect;
-			yield this.selectItem(item['id'], item['expand']);
+			await this.selectItem(item['id'], item['expand']);
 			this.collectionTreeRow.itemToSelect = null;
 		}
 		
 		Zotero.debug("Set tree for items view " + this.id + " in " + (Date.now() - start) + " ms");
 		
 		this._initialized = true;
-		yield this.runListeners('load');
+		await this.runListeners('load');
 	}
 	catch (e) {
 		Zotero.debug(e, 1);
@@ -297,7 +297,7 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 		}
 		throw e;
 	}
-});
+}
 
 
 Zotero.ItemTreeView.prototype.setSortColumn = function() {
