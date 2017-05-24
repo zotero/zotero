@@ -25,7 +25,7 @@
     [
       "transform-async-to-module-method",
       {
-        "module": "bluebird/bluebird.js",
+        "module": "resource://zotero/bluebird/bluebird.js",
         "method": "coroutine"
       }
     ],

@@ -155,6 +155,21 @@ var zInitOptions = {};
 
 ZoteroContext = function() {}
 ZoteroContext.prototype = {
+	require: (target) => {
+		var { Loader, Require, Module } = Components.utils.import('resource://gre/modules/commonjs/toolkit/loader.js');
+		var requirer = Module('/', '/');
+		var globals = {};
+		
+		Components.utils.import("resource://gre/modules/Timer.jsm", globals);
+		
+		var loader = Loader({
+			id: 'zotero/requireminimal',
+			globals
+		});
+		
+		return (Require(loader, requirer))(target);
+	},
+	
 	/**
 	 * Convenience method to replicate window.alert()
 	 **/
