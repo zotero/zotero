@@ -348,18 +348,7 @@ describe("Zotero.Integration", function () {
 				setDocumentDataSpy.restore();
 			});
 			
-			it('should call doc.setDocumentData on a fresh document', function* () {
-				yield execCommand('addEditCitation', docID);
-				assert.isTrue(setDocumentDataSpy.calledOnce);
-			});
-			
-			it('should not call doc.setDocumentData on subsequent invocations', function* () {
-				yield execCommand('addEditCitation', docID);
-				assert.isFalse(setDocumentDataSpy.called);
-			});
-			
-			it('should call doc.setDocumentData when document communicates for first time since restart to write new sessionID', function* () {
-				Zotero.Integration.sessions = {};
+			it('should call doc.setDocumentData once', function* () {
 				yield execCommand('addEditCitation', docID);
 				assert.isTrue(setDocumentDataSpy.calledOnce);
 			});
@@ -390,8 +379,7 @@ describe("Zotero.Integration", function () {
 				});
 			
 				describe('when the style is not from a trusted source', function() {
-					it('should download the style and not call doc.setDocumentData if user clicks YES', function* () {
-						setDocumentDataSpy.reset();
+					it('should download the style and if user clicks YES', function* () {
 						var styleInstallStub = sinon.stub(Zotero.Styles, "install").resolves();
 						var style = Zotero.Styles.get(styleID);
 						var styleGetCalledOnce = false;
@@ -407,7 +395,6 @@ describe("Zotero.Integration", function () {
 						assert.isTrue(displayAlertStub.calledOnce);
 						assert.isFalse(displayDialogStub.calledWith(applications[docID].doc, 'chrome://zotero/content/integration/integrationDocPrefs.xul'));
 						assert.isTrue(styleInstallStub.calledOnce);
-						assert.isFalse(setDocumentDataSpy.called);
 						assert.isOk(Zotero.Styles.get(style.styleID));
 						styleInstallStub.restore();
 						styleGetStub.restore();
