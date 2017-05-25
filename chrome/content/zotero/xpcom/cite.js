@@ -526,7 +526,7 @@ Zotero.Cite.System.prototype = {
 		}
 
 		if(!zoteroItem) {
-			throw "Zotero.Cite.System.retrieveItem called on non-item "+item;
+			throw new Error("Zotero.Cite.System.retrieveItem called on non-item "+item);
 		}
 		
 		var cslItem = Zotero.Utilities.itemToCSLJSON(zoteroItem);

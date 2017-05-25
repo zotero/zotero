@@ -273,14 +273,16 @@ describe("Zotero.Integration", function () {
 	
 	function setAddEditItems(items) {
 		if (items.length == undefined) items = [items];
-		dialogResults.quickFormat = function(doc, dialogName) {
+		dialogResults.quickFormat = function(dialogName) {
 			var citationItems = items.map((i) => {return {id: i.id} });
-			var field = doc.insertField("Field", 0);
-			field.setCode('TEMP');
+			var field = new Zotero.Integration.CitationField(Zotero.Integration.currentDoc.insertField("Field", 0));
+			field.clearCode();
+			field.writeToDoc();
+			var citation = new Zotero.Integration.Citation(field);
 			var integrationDoc = addEditCitationSpy.lastCall.thisValue;
 			var fieldGetter = new Zotero.Integration.Fields(integrationDoc._session, integrationDoc._doc, () => 0);
 			var io = new Zotero.Integration.CitationEditInterface(
-				{ citationItems, properties: {} },
+				citation,
 				field,
 				fieldGetter,
 				integrationDoc._session
@@ -313,10 +315,11 @@ describe("Zotero.Integration", function () {
 		// possible bug that reset() erases callsFake.
 		// @NOTE: https://github.com/sinonjs/sinon/issues/1341
 		// displayDialogStub.callsFake(function(doc, dialogName, prefs, io) {
-		function(doc, dialogName, prefs, io) {
+		function(dialogName, prefs, io) {
+			Zotero.debug(`Display dialog: ${dialogName}`, 2);
 			var ioResult = dialogResults[dialogName.substring(dialogName.lastIndexOf('/')+1, dialogName.length-4)];
 			if (typeof ioResult == 'function') {
-				ioResult = ioResult(doc, dialogName);
+				ioResult = ioResult(dialogName);
 			}
 			Object.assign(io, ioResult);
 			return Zotero.Promise.resolve();
@@ -460,7 +463,7 @@ describe("Zotero.Integration", function () {
 				displayDialogStub.reset();
 				yield execCommand('addEditBibliography', docID);
 				assert.isTrue(displayDialogStub.calledOnce);
-				assert.isTrue(displayDialogStub.lastCall.args[1].includes('editBibliographyDialog'));
+				assert.isTrue(displayDialogStub.lastCall.args[0].includes('editBibliographyDialog'));
 			});
 		});
 	});
