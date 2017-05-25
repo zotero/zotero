@@ -54,19 +54,13 @@ Zotero.Date = new function(){
 		if(_months) return _months;
 		
 		if(Zotero.isFx && !Zotero.isBookmarklet) {
-			var src = 'chrome://global/locale/dateFormat.properties';
-			var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
-								getService(Components.interfaces.nsILocaleService);
-			var appLocale = localeService.getApplicationLocale();
-			
-			var bundle =
-				Components.classes["@mozilla.org/intl/stringbundle;1"]
-				.getService(Components.interfaces.nsIStringBundleService).createBundle(src, appLocale);
+			let dtfShort = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short'});
+			let dtfLong = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'long'});
 			
 			_months = {"short":[], "long":[]};
-			for(var i=1; i<=12; i++) {
-				_months.short.push(bundle.GetStringFromName("month."+i+".Mmm"));
-				_months.long.push(bundle.GetStringFromName("month."+i+".name"));
+			for(var i=0; i<=11; i++) {
+				_months.short.push(dtfShort.format(new Date(2017, i)).split(' ')[0]);
+				_months.long.push(dtfLong.format(new Date(2017, i)).split(' ')[0]);
 			}
 		} else {
 			// TODO localize for Chrome/Safari
