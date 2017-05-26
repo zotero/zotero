@@ -1329,9 +1329,13 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			return this.collation;
 		}
 		
-		var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
-				.getService(Components.interfaces.nsILocaleService);
-		var appLocale = localeService.getApplicationLocale();
+		if (Services.locale.getAppLocale) {
+			var appLocale = Services.locale.getAppLocale();
+		}
+		// Fx <=53
+		else {
+			var appLocale = Services.locale.getApplicationLocale();
+		}
 		
 		try {
 			var locale = appLocale.getCategory('NSILOCALE_COLLATE');

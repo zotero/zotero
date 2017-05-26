@@ -6,13 +6,18 @@ var lastJumpToYearValue;
  * Set up the localization string bundle from timeline.properties
  */
 function initLocaleBundle() {
-	var src = 'chrome://zotero/locale/timeline.properties';
-	var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1']
-		.getService(Components.interfaces.nsILocaleService);
-	var appLocale = localeService.getApplicationLocale();
+	Components.utils.import("resource://gre/modules/Services.jsm");
+	if (Services.locale.getAppLocale) {
+		var appLocale = Services.locale.getAppLocale();
+	}
+	// Fx <=53
+	else {
+		var appLocale = Services.locale.getApplicationLocale();
+	}
 	
+	var src = 'chrome://zotero/locale/timeline.properties';
 	var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
-			.getService(Components.interfaces.nsIStringBundleService);
+		.getService(Components.interfaces.nsIStringBundleService);
 	return stringBundleService.createBundle(src, appLocale);
 }
 
