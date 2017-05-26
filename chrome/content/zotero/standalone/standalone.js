@@ -156,12 +156,17 @@ const ZoteroStandalone = new function() {
 	 * Handles help menu requests
 	 */
 	this.openHelp = function(type) {
-		if(type === "troubleshooting") {
-			ZoteroPane.loadURI("http://www.zotero.org/support/getting_help");
-		} else if(type === "feedback") {
-			ZoteroPane.loadURI("http://forums.zotero.org/categories/");
-		} else {
-			ZoteroPane.loadURI("http://www.zotero.org/support/");
+		switch (type) {
+		case "troubleshooting":
+			ZoteroPane.loadURI(ZOTERO_CONFIG.TROUBLESHOOTING_URL);
+			break;
+		
+		case "feedback":
+			ZoteroPane.loadURI(ZOTERO_CONFIG.FEEDBACK_URL);
+			break;
+		
+		default:
+			ZoteroPane.loadURI(ZOTERO_CONFIG.SUPPORT_URL);
 		}
 	}
 	

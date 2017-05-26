@@ -16,7 +16,10 @@ var ZOTERO_CONFIG = {
 	BOOKMARKLET_ORIGIN: 'https://www.zotero.org',
 	HTTP_BOOKMARKLET_ORIGIN: 'http://www.zotero.org',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	PDF_TOOLS_URL: "https://www.zotero.org/download/xpdf/"
+	PDF_TOOLS_URL: "https://www.zotero.org/download/xpdf/",
+	SUPPORT_URL: "https://www.zotero.org/support/",
+	TROUBLESHOOTING_URL: "https://www.zotero.org/support/getting_help",
+	FEEDBACK_URL: "https://forums.zotero.org/",
 };
 
 EXPORTED_SYMBOLS = ["ZOTERO_CONFIG"];
