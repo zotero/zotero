@@ -1330,17 +1330,18 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 		
 		if (Services.locale.getAppLocale) {
-			var appLocale = Services.locale.getAppLocale();
+			var locale = Services.locale.getAppLocale();
 		}
 		// Fx <=53
 		else {
-			var appLocale = Services.locale.getApplicationLocale();
+			var locale = Services.locale.getApplicationLocale();
+			locale = locale.getCategory('NSILOCALE_COLLATE');
 		}
 		
 		try {
 			// Extract a valid language tag
-			appLocale = appLocale.match(/^[a-z]{2}(\-[A-Z]{2})?/)[0];
-			var collator = new Intl.Collator(appLocale, {
+			locale = locale.match(/^[a-z]{2}(\-[A-Z]{2})?/)[0];
+			var collator = new Intl.Collator(locale, {
 				ignorePunctuation: true,
 				numeric: true,
 				sensitivity: 'base'
