@@ -1498,15 +1498,15 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		
 		Components.utils.import("resource://gre/modules/Services.jsm");
 		if (Services.locale.getAppLocale) {
-			var appLocale = Services.locale.getAppLocale();
+			var locale = Services.locale.getAppLocale();
 		}
 		// Fx <=53
 		else {
-			var appLocale = Services.locale.getApplicationLocale();
+			var locale = Services.locale.getApplicationLocale();
+			locale = locale.getCategory('NSILOCALE_COLLATE');
 		}
 		
 		try {
-			var locale = appLocale.getCategory('NSILOCALE_COLLATE');
 			// Extract a valid language tag
 			locale = locale.match(/^[a-z]{2}(\-[A-Z]{2})?/)[0];
 			var collator = new Intl.Collator(locale, {
@@ -1516,7 +1516,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			});
 		}
 		catch (e) {
-			Zotero.debug(e, 1);
+			Zotero.logError(e);
 			
 			// If there's an error, just skip sorting
 			collator = {
