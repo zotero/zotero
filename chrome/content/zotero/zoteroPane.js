@@ -2721,12 +2721,13 @@ var ZoteroPane = new function()
 			show.push(m.sep3, m.exportItems, m.createBib, m.loadReport);
 		}
 		
-		if (this.itemsView.selection.count > 0) {
+		var items = this.getSelectedItems();
+		
+		if (items.length > 0) {
 			// Multiple items selected
-			if (this.itemsView.selection.count > 1) {
+			if (items.length.count > 1) {
 				var multiple =  '.multiple';
 				
-				var items = this.getSelectedItems();
 				var canMerge = true, canIndex = true, canRecognize = true, canRename = true;
 				var canMarkRead = collectionTreeRow.isFeed();
 				var markUnread = true;
@@ -2821,7 +2822,7 @@ var ZoteroPane = new function()
 			// Single item selected
 			else
 			{
-				let item = this.getSelectedItems()[0];
+				let item = items[0];
 				menu.setAttribute('itemID', item.id);
 				menu.setAttribute('itemKey', item.key);
 				
@@ -2934,7 +2935,7 @@ var ZoteroPane = new function()
 		}
 		
 		// Remove from collection
-		if (collectionTreeRow.isCollection() && (!item || item.isTopLevelItem())) {
+		if (collectionTreeRow.isCollection() && items.every(item => item.isTopLevelItem())) {
 			menu.childNodes[m.removeItems].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
 			show.push(m.removeItems);
 		}
