@@ -171,6 +171,14 @@ Zotero_Preferences.Advanced = {
 				
 				return;
 			}
+			
+			try {
+				yield Zotero.DB.vacuum();
+			}
+			catch (e) {
+				Zotero.logError(e);
+				ok = false;
+			}
 		}
 		var str = ok ? 'passed' : 'failed';
 		
