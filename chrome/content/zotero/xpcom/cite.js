@@ -16,13 +16,13 @@ Zotero.Cite = {
 	 * Remove specified item IDs in-place from a citeproc-js bibliography object returned
 	 * by makeBibliography()
 	 * @param {bib} citeproc-js bibliography object
-	 * @param {Array} itemsToRemove Array of items to remove
+	 * @param {Set} itemsToRemove Set of items to remove
 	 */
 	"removeFromBibliography":function(bib, itemsToRemove) {
 		var removeItems = [];
 		for(let i in bib[0].entry_ids) {
 			for(let j in bib[0].entry_ids[i]) {
-				if(itemsToRemove[bib[0].entry_ids[i][j]]) {
+				if(itemsToRemove.has(`${bib[0].entry_ids[i][j]}`)) {
 					removeItems.push(i);
 					break;
 				}
