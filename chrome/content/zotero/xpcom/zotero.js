@@ -1938,7 +1938,12 @@ Zotero.Prefs = new function(){
 		
 		// Register observer to handle pref changes
 		this.register();
-		
+
+		// Unregister observer handling pref changes
+		if (Zotero.addShutdownListener) {
+			Zotero.addShutdownListener(this.unregister.bind(this));
+		}
+
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
 		if (!fromVersion) {
