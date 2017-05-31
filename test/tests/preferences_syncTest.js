@@ -47,22 +47,24 @@ describe("Sync Preferences", function () {
 			before(function* () {
 				getAPIKeyFromCredentialsStub = sinon.stub(
 						Zotero.Sync.APIClient.prototype, 'createAPIKeyFromCredentials');
-				deleteAPIKey = sinon.stub(Zotero.Sync.APIClient.prototype, 'deleteAPIKey').resolves();
 				indicatorElem = doc.getElementById('sync-status-indicator')
 				sinon.stub(Zotero, 'alert');
 			});
 
 			beforeEach(function* (){
+				deleteAPIKey = sinon.stub(Zotero.Sync.APIClient.prototype, 'deleteAPIKey').resolves();
 				yield win.Zotero_Preferences.Sync.unlinkAccount(false);
-				deleteAPIKey.reset();
 				Zotero.alert.reset();
+			});
+
+			afterEach(function() {
+				deleteAPIKey.restore();
 			});
 			
 			after(function() {
 				Zotero.HTTP.mock = null;
 				Zotero.alert.restore();
 				getAPIKeyFromCredentialsStub.restore();
-				deleteAPIKey.restore();
 			});
 
 			it("should set API key and display full controls with correct credentials", function* () {
