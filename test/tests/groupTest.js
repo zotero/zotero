@@ -4,7 +4,7 @@ describe("Zotero.Group", function () {
 	describe("#constructor()", function() {
 		it("should accept required parameters", function* () {
 			let group = new Zotero.Group();
-			yield assert.isRejected(group.saveTx(), "fails without required parameters");
+			yield assert.isRejected(group.saveTx()); // fails without required parameters
 			
 			let groupID = Zotero.Utilities.rand(10000, 1000000);
 			let groupName = "Test " + Zotero.Utilities.randomString();
