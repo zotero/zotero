@@ -146,7 +146,7 @@ describe("Zotero.Libraries", function() {
 			assert.equal(Zotero.Libraries.isEditable(group.libraryID), startState, 'reverts state');
 		});
 		it("should throw for invalid library ID", function() {
-			return assert.isRejected(Zotero.Libraries.setEditable(-1), /^Error: Invalid library ID /);
+			return assert.isRejected(Zotero.Libraries.setEditable(-1), /^Invalid library ID /);
 		});
 	});
 	describe("#isFilesEditable()", function() {
@@ -176,7 +176,7 @@ describe("Zotero.Libraries", function() {
 			yield Zotero.Libraries.setEditable(group.libraryID, editableStartState);
 		});
 		it("should throw for invalid library ID", function* () {
-			return assert.isRejected(Zotero.Libraries.setFilesEditable(-1), /^Error: Invalid library ID /);
+			return assert.isRejected(Zotero.Libraries.setFilesEditable(-1), /^Invalid library ID /);
 		});
 	});
 	describe("#isGroupLibrary()", function() {
