@@ -128,12 +128,12 @@ describe("Zotero.FeedItem", function () {
 		it("should require feed being set", function* () {
 			let feedItem = new Zotero.FeedItem('book', { guid: Zotero.randomString() });
 			// Defaults to user library ID
-			yield assert.isRejected(feedItem.saveTx(), /^Error: Cannot add /);
+			yield assert.isRejected(feedItem.saveTx(), /^Cannot add /);
 		});
 		it("should require GUID being set", function* () {
 			let feedItem = new Zotero.FeedItem('book');
 			feedItem.libraryID = feed.libraryID;
-			yield assert.isRejected(feedItem.saveTx(),  /^Error: GUID must be set before saving FeedItem$/);
+			yield assert.isRejected(feedItem.saveTx(),  /^GUID must be set before saving FeedItem$/);
 		});
 		it("should require a unique GUID", function* () {
 			let guid = Zotero.randomString();
@@ -149,7 +149,7 @@ describe("Zotero.FeedItem", function () {
 		it("should require item type being set", function* () {
 			let feedItem = new Zotero.FeedItem(null, { guid: Zotero.randomString() });
 			feedItem.libraryID = feed.libraryID;
-			yield assert.isRejected(feedItem.saveTx(),  /^Error: Item type must be set before saving$/);
+			yield assert.isRejected(feedItem.saveTx(),  /^Item type must be set before saving$/);
 		});
 		it("should save feed item", function* () {
 			let guid = Zotero.randomString();
