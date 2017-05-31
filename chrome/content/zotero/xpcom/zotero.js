@@ -1127,6 +1127,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 * @param {String} msg
 	 */
 	this.alert = function (window, title, msg) {
+		this.debug(`Alert:\n\n${msg}`);
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 			.getService(Components.interfaces.nsIPromptService);
 		ps.alert(window, title, msg);
