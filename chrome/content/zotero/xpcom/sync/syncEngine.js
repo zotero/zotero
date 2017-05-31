@@ -1145,66 +1145,15 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 				if (data) {
 					e.data = data;
 				}
-				Zotero.logError("Error for " + objectType + " " + jsonBatch[index].key + " in "
+				Zotero.logError(`Error ${code} for ${objectType} ${jsonBatch[index].key} in `
 					+ this.library.name + ":\n\n" + e);
 				
-				// If an item's dependency is missing remotely and it isn't in the queue (which
-				// shouldn't happen), mark it as unsynced
-				if (e.code == 400 || e.code == 409) {
-					if (data) {
-						if (objectType == 'collection' && e.code == 409) {
-							if (data.collection) {
-								let collection = Zotero.Collections.getByLibraryAndKey(this.libraryID, data.collection);
-								if (!collection) {
-									throw new Error(`Collection ${this.libraryID}/${jsonBatch[index].key} `
-										+ `references parent collection ${data.collection}, which doesn't exist`);
-								}
-								Zotero.logError(`Marking collection ${data.collection} as unsynced`);
-								yield Zotero.Sync.Data.Local.markObjectAsUnsynced(collection);
-							}
-						}
-						else if (objectType == 'item') {
-							if (data.collection) {
-								let collection = Zotero.Collections.getByLibraryAndKey(this.libraryID, data.collection);
-								if (!collection) {
-									throw new Error(`Item ${this.libraryID}/${jsonBatch[index].key} `
-										+ `references collection ${data.collection}, which doesn't exist`);
-								}
-								Zotero.logError(`Marking collection ${data.collection} as unsynced`);
-								yield Zotero.Sync.Data.Local.markObjectAsUnsynced(collection);
-							}
-							else if (data.parentItem) {
-								let parentItem = Zotero.Items.getByLibraryAndKey(this.libraryID, data.parentItem);
-								if (!parentItem) {
-									throw new Error(`Item ${this.libraryID}/${jsonBatch[index].key} references parent `
-										+ `item ${data.parentItem}, which doesn't exist`);
-								}
-								
-								let id = parentItem.id;
-								// If parent item isn't already in queue, mark it as unsynced and add it
-								if (!queue.find(o => o.id == id) && !batch.find(o => o.id == id)) {
-									yield Zotero.Sync.Data.Local.markObjectAsUnsynced(parentItem);
-									Zotero.logError(`Adding parent item ${data.parentItem} to upload queue`);
-									queue.push({
-										id,
-										json: null,
-										tries: 0,
-										failed: false
-									});
-									// Pretend that we were successful so syncing continues
-									numSuccessful++;
-									continue;
-								}
-							}
-						}
-					}
-				}
-				
-				// This shouldn't happen, because the upload request includes a library version and should
-				// prevent an outdated upload before the object version is checked. If it does, we need to
-				// do a full sync. This error is checked in handleUploadError().
-				if (e.code == 404 || e.code == 412) {
-					throw e;
+				let keepGoing = yield this._checkObjectUploadError(
+					objectType, jsonBatch[index].key, e, queue
+				);
+				if (keepGoing) {
+					numSuccessful++;
+					continue;
 				}
 				
 				if (this.onError) {
@@ -1653,6 +1602,99 @@ Zotero.Sync.Data.Engine.prototype._handleUploadError = Zotero.Promise.coroutine(
 	}
 	throw e;
 });
+
+
+Zotero.Sync.Data.Engine.prototype._checkObjectUploadError = Zotero.Promise.coroutine(function* (objectType, key, e) {
+	var { code, data, message } = e;
+	
+	// If an item's dependency is missing remotely and it isn't in the queue (which
+	// shouldn't happen), mark it as unsynced
+	if (code == 400 || code == 409) {
+		if (data) {
+			if (objectType == 'collection' && code == 409) {
+				if (data.collection) {
+					let collection = Zotero.Collections.getByLibraryAndKey(this.libraryID, data.collection);
+					if (!collection) {
+						throw new Error(`Collection ${this.libraryID}/${key} `
+							+ `references parent collection ${data.collection}, which doesn't exist`);
+					}
+					Zotero.logError(`Marking collection ${data.collection} as unsynced`);
+					yield Zotero.Sync.Data.Local.markObjectAsUnsynced(collection);
+				}
+			}
+			else if (objectType == 'item') {
+				if (data.collection) {
+					let collection = Zotero.Collections.getByLibraryAndKey(this.libraryID, data.collection);
+					if (!collection) {
+						throw new Error(`Item ${this.libraryID}/${key} `
+							+ `references collection ${data.collection}, which doesn't exist`);
+					}
+					Zotero.logError(`Marking collection ${data.collection} as unsynced`);
+					yield Zotero.Sync.Data.Local.markObjectAsUnsynced(collection);
+				}
+				else if (data.parentItem) {
+					let parentItem = Zotero.Items.getByLibraryAndKey(this.libraryID, data.parentItem);
+					if (!parentItem) {
+						throw new Error(`Item ${this.libraryID}/${key} references parent `
+							+ `item ${data.parentItem}, which doesn't exist`);
+					}
+					
+					let id = parentItem.id;
+					// If parent item isn't already in queue, mark it as unsynced and add it
+					if (!queue.find(o => o.id == id) && !batch.find(o => o.id == id)) {
+						yield Zotero.Sync.Data.Local.markObjectAsUnsynced(parentItem);
+						Zotero.logError(`Adding parent item ${data.parentItem} to upload queue`);
+						queue.push({
+							id,
+							json: null,
+							tries: 0,
+							failed: false
+						});
+						// Pretend that we were successful so syncing continues
+						return true;
+					}
+				}
+			}
+		}
+	}
+	// This shouldn't happen, because the upload request includes a library version and should
+	// prevent an outdated upload before the object version is checked. If it does, we need to
+	// do a full sync. This error is checked in handleUploadError().
+	else if (code == 404 || code == 412) {
+		throw e;
+	}
+	else if (code == 413) {
+		// Note too long
+		if (objectType == 'item') {
+			let item = Zotero.Items.getByLibraryAndKey(this.libraryID, key);
+			if (item) {
+				// Throw an error that adds a button for selecting the item to the sync error dialog
+				if (message.includes('<img src="data:image')) {
+					// TODO: Localize
+					message = "Notes with embedded images cannot currently be synced to "
+						+ `${ZOTERO_CONFIG.DOMAIN_NAME}.`
+				}
+				
+				e = new Zotero.Error(
+					message,
+					0,
+					{
+						dialogButtonText: Zotero.getString('pane.items.showItemInLibrary'),
+						dialogButtonCallback: () => {
+							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+								.getService(Components.interfaces.nsIWindowMediator);
+							var win = wm.getMostRecentWindow("navigator:browser");
+							win.ZoteroPane.selectItem(item.id);
+						}
+					}
+				);
+			}
+			throw e;
+		}
+	}
+	return false;
+});
+
 
 Zotero.Sync.Data.Engine.prototype._failedCheck = function () {
 	if (this.stopOnError && this.failed) {
