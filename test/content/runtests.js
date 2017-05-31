@@ -184,19 +184,7 @@ mocha.setup({
 	grep: ZoteroUnit.grep
 });
 
-// Enable Bluebird generator support in Mocha
-(function () {
-	var Runnable = Mocha.Runnable;
-	var run = Runnable.prototype.run;
-	Runnable.prototype.run = function (fn) {
-		if (this.fn.constructor.name === 'GeneratorFunction') {
-			this.fn = Zotero.Promise.coroutine(this.fn);
-		} else if (typeof this.fn == 'function' && this.fn.isGenerator()) {
-			throw new Error("Attempting to use a legacy generator in Mocha test");
-		}
-		return run.call(this, fn);
-	};
-})();
+coMocha(Mocha);
 
 before(function () {
 	// Store all prefs set in runtests.sh

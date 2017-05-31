@@ -33,6 +33,7 @@
     "browserify": "^14.3.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
+    "co-mocha": "^1.2.0",
     "del": "^2.2.2",
     "glob": "^7.1.2",
     "gulp": "^3.9.1",
