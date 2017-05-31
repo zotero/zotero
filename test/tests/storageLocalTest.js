@@ -286,7 +286,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 				
 				// Stub functions to simulate OS.Path.basename() behavior on Windows
 				var basenameOrigFunc = OS.Path.basename.bind(OS.Path);
-				var basenameStub = sinon.stub(OS.Path, "basename", (path) => {
+				var basenameStub = sinon.stub(OS.Path, "basename").callsFake((path) => {
 					// Split on colon
 					if (path.endsWith("a:b.txt")) {
 						return "b.txt";
@@ -294,7 +294,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 					return basenameOrigFunc(path);
 				});
 				var pathToFileOrigFunc = Zotero.File.pathToFile.bind(Zotero.File);
-				var pathToFileStub = sinon.stub(Zotero.File, "pathToFile", (path) => {
+				var pathToFileStub = sinon.stub(Zotero.File, "pathToFile").callsFake((path) => {
 					if (path.includes(":")) {
 						throw new Error("Path contains colon");
 					}
@@ -476,7 +476,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 				
 				// Stub functions to simulate OS.Path.basename() behavior on Windows
 				var basenameOrigFunc = OS.Path.basename.bind(OS.Path);
-				var basenameStub = sinon.stub(OS.Path, "basename", (path) => {
+				var basenameStub = sinon.stub(OS.Path, "basename").callsFake((path) => {
 					// Split on colon
 					if (path.endsWith("a:b.html")) {
 						return "b.html";
@@ -484,7 +484,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 					return basenameOrigFunc(path);
 				});
 				var pathToFileOrigFunc = Zotero.File.pathToFile.bind(Zotero.File);
-				var pathToFileStub = sinon.stub(Zotero.File, "pathToFile", (path) => {
+				var pathToFileStub = sinon.stub(Zotero.File, "pathToFile").callsFake((path) => {
 					if (path.includes(":")) {
 						throw new Error("Path contains colon");
 					}
