@@ -37,6 +37,7 @@ Zotero.DBConnection = function(dbName) {
 	}
 	
 	this.MAX_BOUND_PARAMETERS = 999;
+	this.DB_CORRUPTION_STRING = "2152857611";
 	
 	Components.utils.import("resource://gre/modules/Sqlite.jsm", this);
 	
@@ -893,7 +894,7 @@ Zotero.DBConnection.prototype.integrityCheck = Zotero.Promise.coroutine(function
 
 
 Zotero.DBConnection.prototype.checkException = function (e) {
-	if (e.name && e.name == 'NS_ERROR_FILE_CORRUPTED') {
+	if (e.message.includes(this.DB_CORRUPTION_STRING)) {
 		// Write corrupt marker to data directory
 		var file = Zotero.File.pathToFile(Zotero.DataDirectory.getDatabase(this._dbName, 'is.corrupt'));
 		Zotero.File.putContents(file, '');
@@ -1173,16 +1174,16 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 	catchBlock: try {
 		var corruptMarker = Zotero.File.pathToFile(Zotero.DataDirectory.getDatabase(this._dbName, 'is.corrupt'));
 		if (corruptMarker.exists()) {
-			throw {
-				name: 'NS_ERROR_FILE_CORRUPTED'
-			};
+			throw new Error(this.DB_CORRUPTION_STRING);
 		}
 		this._connection = yield Zotero.Promise.resolve(this.Sqlite.openConnection({
 			path: file.path
 		}));
 	}
 	catch (e) {
-		if (e.name=='NS_ERROR_FILE_CORRUPTED') {
+		Zotero.logError(e);
+		
+		if (e.message.includes(this.DB_CORRUPTION_STRING)) {
 			this._debug("Database file '" + file.leafName + "' corrupted", 1);
 			
 			// No backup file! Eek!
@@ -1204,7 +1205,11 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 					corruptMarker.remove(null);
 				}
 				
-				alert(Zotero.getString('db.dbCorruptedNoBackup', fileName));
+				Zotero.alert(
+					null,
+					Zotero.getString('startupError'),
+					Zotero.getString('db.dbCorruptedNoBackup', fileName)
+				);
 				break catchBlock;
 			}
 			
@@ -1230,7 +1235,11 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 					path: file.path
 				}));
 				
-				alert(Zotero.getString('db.dbRestoreFailed', fileName));
+				Zotero.alert(
+					null,
+					Zotero.getString('general.error'),
+					Zotero.getString('db.dbRestoreFailed', fileName)
+				);
 				
 				if (corruptMarker.exists()) {
 					corruptMarker.remove(null);
@@ -1257,12 +1266,15 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 				path: file
 			}));
 			this._debug('Database restored', 1);
-			var msg = Zotero.getString('db.dbRestored', [
-				fileName,
-				Zotero.Date.getFileDateString(backupFile),
-				Zotero.Date.getFileTimeString(backupFile)
-			]);
-			alert(msg);
+			Zotero.alert(
+				null,
+				Zotero.getString('general.warning'),
+				Zotero.getString('db.dbRestored', [
+					fileName,
+					Zotero.Date.getFileDateString(backupFile),
+					Zotero.Date.getFileTimeString(backupFile)
+				])
+			);
 			
 			if (corruptMarker.exists()) {
 				corruptMarker.remove(null);
