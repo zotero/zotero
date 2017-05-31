@@ -12,7 +12,7 @@
   },
   "license": "",
   "dependencies": {
-    "bluebird": "^3.4.6",
+    "bluebird": "3.4.7",
     "zotero-web-library": "next",
     "react": "^15.3.2",
     "react-dom": "^15.3.2"
@@ -30,20 +30,24 @@
     "babel-plugin-transform-async-to-module-method": "^6.16.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.18.0",
     "babel-preset-react": "^6.16.0",
+    "browserify": "^14.3.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "del": "^2.2.2",
     "glob": "^7.1.2",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
+    "gulp-rename": "^1.2.2",
     "gulp-sass": "^3.1.0",
+    "gulp-tap": "^1.0.1",
     "gulp-util": "^3.0.7",
-    "mocha": "^3.4.1",
+    "merge-stream": "^1.0.1",
+    "mocha": "^3.4.2",
+    "sinon": "^2.3.1",
+    "sinon-as-promised": "^4.0.3",
     "through2": "^2.0.1",
     "tiny-worker": "^2.1.1",
-    "vinyl-buffer": "^1.0.0",
     "vinyl-fs": "^2.4.4",
-    "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.7.0"
   }
 }

@@ -10,8 +10,16 @@ const sass = require('gulp-sass');
 const os = require('os');
 const glob = require('glob');
 const Worker = require('tiny-worker');
-const NODE_ENV = process.env.NODE_ENV;
+const merge = require('merge-stream');
+const tap = require('gulp-tap');
+const rename = require("gulp-rename");
+const browserify = require('browserify');
 const reactPatcher = require('./gulp/gulp-react-patcher');
+const NODE_ENV = process.env.NODE_ENV;
+
+const formatDirsforMatcher = dirs => {
+	return dirs.length > 1 ? `{${dirs.join(',')}}` : dirs[0];
+};
 
 // list of folders from where .js files are compiled and non-js files are symlinked
 const dirs = [
@@ -30,7 +38,12 @@ const dirs = [
 const symlinkDirs = [
 	'styles',
 	'translators',
-	'test/tests/data'
+];
+
+// list of folders which are copied to the build folder
+const copyDirs = [
+	'test/tests/data' // browser follows symlinks when loading test data
+					  // triggering false-positive test results with mismatched URIs
 ];
 
 // list of files from root folder to symlink
@@ -38,8 +51,26 @@ const symlinkFiles = [
 	'chrome.manifest', 'install.rdf', 'update.rdf'
 ];
 
+// these files will be browserified during the build
+const browserifyConfigs = [
+	{
+		src: 'node_modules/sinon/lib/sinon.js',
+		dest: 'test/resource/sinon.js',
+		config: {
+			standalone: 'sinon'
+		}
+	},
+	{
+		src: 'node_modules/chai-as-promised/lib/chai-as-promised.js',
+		dest: 'test/resource/chai-as-promised.js',
+		config: {
+			standalone: 'chaiAsPromised'
+		}
+	}
+];
+
 const jsGlob = `./\{${dirs.join(',')}\}/**/*.js`;
-const jsGlobIgnore = `./\{${symlinkDirs.join(',')}\}/**/*.js`;
+const jsGlobIgnore = `./\{${symlinkDirs.concat(copyDirs).join(',')}\}/**/*.js`;
 
 function onError(err) {
 	gutil.log(gutil.colors.red('Error:'), err);
@@ -50,10 +81,25 @@ function onSuccess(msg) {
 	gutil.log(gutil.colors.green('Build:'), msg);
 }
 
+function getBrowserify() {
+	const streams = browserifyConfigs.map(config => {
+		return gulp
+			.src(config.src)
+			.pipe(tap(file => {
+				file.contents = browserify(file.path, config.config).bundle();
+			}))
+			.pipe(rename(config.dest))
+			.pipe(gulp.dest('build'));
+	});
+
+	return merge.apply(merge, streams);
+}
+
 function getJS(source, sourceIgnore) {
 	if (sourceIgnore) {
 		source = [source, '!' + sourceIgnore];
 	}
+
 	return gulp.src(source, { base: '.' })
 		.pipe(babel())
 		.pipe(reactPatcher())
@@ -107,7 +153,8 @@ function getSymlinks() {
 	const match = symlinkFiles
 		.concat(dirs.map(d => `${d}/**`))
 		.concat(symlinkDirs.map(d => `${d}/**`))
-		.concat([`!./{${dirs.join(',')}}/**/*.js`]);
+		.concat([`!./${formatDirsforMatcher(dirs)}/**/*.js`])
+		.concat([`!./${formatDirsforMatcher(copyDirs)}/**`]);
 
 	return gulp
 		.src(match, { nodir: true, base: '.', read: false })
@@ -116,6 +163,15 @@ function getSymlinks() {
 			onSuccess(`[ln] ${file.path.substr(__dirname.length + 1)}`);
 		})
 		.pipe(vfs.symlink('build/'));
+}
+
+function getCopy() {
+	return gulp
+		.src(copyDirs.map(d => `${d}/**`), { base: '.' })
+		.on('data', file => {
+			onSuccess(`[cp] ${file.path.substr(__dirname.length + 1)}`);
+		})
+		.pipe(gulp.dest('build/'));
 }
 
 function getSass() {
@@ -139,11 +195,19 @@ gulp.task('js', done => {
 	getJSParallel(jsGlob, jsGlobIgnore).then(() => done());
 });
 
+gulp.task('browserify', () => {
+	getBrowserify();
+});
+
+gulp.task('copy', () => {
+	getCopy();
+});
+
 gulp.task('sass', () => {
 	return getSass();
 });
 
-gulp.task('build', ['js', 'sass', 'symlink']);
+gulp.task('build', ['js', 'sass', 'symlink', 'browserify', 'copy']);
 
 gulp.task('dev', ['clean'], () => {
 	var interval = 750;
