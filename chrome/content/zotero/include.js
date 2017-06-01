@@ -7,24 +7,4 @@ var Zotero = Components.classes['@zotero.org/Zotero;1']
 				.getService(Components.interfaces.nsISupports)
 				.wrappedJSObject;
 
-
-var require = (function() {
-	var { Loader, Require, Module } = Components.utils.import('resource://gre/modules/commonjs/toolkit/loader.js');
-	var requirer = Module('/', '/');
-
-	var loader = Loader({
-		id: 'zotero/require',
-		paths: {
-			'': 'resource://zotero/',
-		},
-		globals: {
-			document,
-			console,
-			navigator,
-			window,
-			Zotero
-		}
-	});
-
-	return Require(loader, requirer);
-})();
+Components.utils.import('resource://zotero/require.js');

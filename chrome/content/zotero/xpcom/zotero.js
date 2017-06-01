@@ -62,27 +62,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.isMac;
 	this.isWin;
 	this.initialURL; // used by Schema to show the changelog on upgrades
-	
-	// Load and configure Bluebird
-	this.Promise = require('resource://zotero/bluebird/bluebird.js');
-	this.Promise.config({
-		warnings: true,
-		longStackTraces: true,
-		cancellation: true
-	});
-	this.Promise.onPossiblyUnhandledRejection(function (e, promise) {
-		if (e.name == 'ZoteroPromiseInterrupt' || e.handledRejection) {
-			return;
-		}
-		Zotero.debug('Possibly unhandled rejection:\n\n'
-			+ (e.message
-				? e.message + "\n\n" + e.stack.split(/\n/)
-					// Filter out internal Bluebird calls
-					.filter(line => !line.includes('bluebird'))
-					.join('\n')
-				: e), 1);
-		throw e;
-	});
+	this.Promise = require('resource://zotero/bluebird.js');
 	
 	this.getActiveZoteroPane = function() {
 		var win = Services.wm.getMostRecentWindow("navigator:browser");
@@ -1958,7 +1938,12 @@ Zotero.Prefs = new function(){
 		
 		// Register observer to handle pref changes
 		this.register();
-		
+
+		// Unregister observer handling pref changes
+		if (Zotero.addShutdownListener) {
+			Zotero.addShutdownListener(this.unregister.bind(this));
+		}
+
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
 		if (!fromVersion) {
