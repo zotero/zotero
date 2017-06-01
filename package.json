@@ -45,7 +45,6 @@
     "merge-stream": "^1.0.1",
     "mocha": "^3.4.2",
     "sinon": "^2.3.1",
-    "sinon-as-promised": "^4.0.3",
     "through2": "^2.0.1",
     "tiny-worker": "^2.1.1",
     "vinyl-fs": "^2.4.4",
