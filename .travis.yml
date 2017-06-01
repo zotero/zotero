@@ -1,7 +1,10 @@
 sudo: false
-language: cpp
-compiler:
-    - gcc
+language: node_js
+node_js:
+    - "node"
+cache:
+    directories:
+        - "node_modules"
 env:
     - FX_VERSION="54.0b"
     - FX_VERSION="45.0.2esr"
@@ -22,7 +25,6 @@ install:
 before_script:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
-    - npm i
     - node_modules/.bin/gulp build
 script:
     - test/runtests.sh -x firefox/firefox
