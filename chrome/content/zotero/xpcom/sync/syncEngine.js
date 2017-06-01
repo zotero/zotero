@@ -1137,6 +1137,7 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 			// Handle failed objects
 			for (let index in results.failed) {
 				let { code, message, data } = results.failed[index];
+				let key = jsonBatch[index].key;
 				// API errors are HTML
 				message = Zotero.Utilities.unescapeHTML(message);
 				let e = new Error(message);
@@ -1145,12 +1146,13 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 				if (data) {
 					e.data = data;
 				}
-				Zotero.logError(`Error ${code} for ${objectType} ${jsonBatch[index].key} in `
+				e.objectType = objectType;
+				e.object = objectsClass.getByLibraryAndKey(this.libraryID, key);
+				
+				Zotero.logError(`Error ${code} for ${objectType} ${key} in `
 					+ this.library.name + ":\n\n" + e);
 				
-				let keepGoing = yield this._checkObjectUploadError(
-					objectType, jsonBatch[index].key, e, queue
-				);
+				let keepGoing = yield this._checkObjectUploadError(objectType, key, e, queue, batch);
 				if (keepGoing) {
 					numSuccessful++;
 					continue;
@@ -1604,7 +1606,7 @@ Zotero.Sync.Data.Engine.prototype._handleUploadError = Zotero.Promise.coroutine(
 });
 
 
-Zotero.Sync.Data.Engine.prototype._checkObjectUploadError = Zotero.Promise.coroutine(function* (objectType, key, e) {
+Zotero.Sync.Data.Engine.prototype._checkObjectUploadError = Zotero.Promise.coroutine(function* (objectType, key, e, queue, batch) {
 	var { code, data, message } = e;
 	
 	// If an item's dependency is missing remotely and it isn't in the queue (which
@@ -1663,35 +1665,7 @@ Zotero.Sync.Data.Engine.prototype._checkObjectUploadError = Zotero.Promise.corou
 	else if (code == 404 || code == 412) {
 		throw e;
 	}
-	else if (code == 413) {
-		// Note too long
-		if (objectType == 'item') {
-			let item = Zotero.Items.getByLibraryAndKey(this.libraryID, key);
-			if (item) {
-				// Throw an error that adds a button for selecting the item to the sync error dialog
-				if (message.includes('<img src="data:image')) {
-					// TODO: Localize
-					message = "Notes with embedded images cannot currently be synced to "
-						+ `${ZOTERO_CONFIG.DOMAIN_NAME}.`
-				}
-				
-				e = new Zotero.Error(
-					message,
-					0,
-					{
-						dialogButtonText: Zotero.getString('pane.items.showItemInLibrary'),
-						dialogButtonCallback: () => {
-							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								.getService(Components.interfaces.nsIWindowMediator);
-							var win = wm.getMostRecentWindow("navigator:browser");
-							win.ZoteroPane.selectItem(item.id);
-						}
-					}
-				);
-			}
-			throw e;
-		}
-	}
+	
 	return false;
 });
 
