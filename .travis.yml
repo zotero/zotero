@@ -22,5 +22,7 @@ install:
 before_script:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
+    - npm i
+    - node_modules/.bin/gulp build
 script:
     - test/runtests.sh -x firefox/firefox
