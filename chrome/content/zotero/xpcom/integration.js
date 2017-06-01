@@ -567,7 +567,8 @@ Zotero.Integration.Interface.prototype.addEditBibliography = Zotero.Promise.coro
 		}
 	}
 	
-	if(!bibliographyField) {
+	var newBibliography = !bibliographyField;
+	if (!bibliographyField) {
 		bibliographyField = new Zotero.Integration.BibliographyField(yield this._session.fields.addField());
 		bibliographyField.clearCode();
 		bibliographyField.writeToDoc();
@@ -579,7 +580,7 @@ Zotero.Integration.Interface.prototype.addEditBibliography = Zotero.Promise.coro
 		this._session.reload = true;
 	}
 	yield this._session.fields.updateSession(FORCE_CITATIONS_FALSE);
-	yield this._session.editBibliography(bibliography);
+	if (!newBibliography) yield this._session.editBibliography(bibliography);
 	yield this._session.fields.updateDocument(FORCE_CITATIONS_FALSE, true, false);
 });
 
@@ -1134,13 +1135,13 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 
 	let fieldIndex = yield fieldIndexPromise;
 	this._session.updateIndices[fieldIndex] = true;
+	// Make sure session updated
+	yield citationsByItemIDPromise;
 	if (newField) {
-		// On next updateSession call this field will be properly recognised as citation
+		// For further processing this field will be properly recognised as citation
 		// instead of skipped as a temp field.
 		field.writeToDoc();
 	}
-	// Make sure session updated
-	yield citationsByItemIDPromise;
 	return [fieldIndex, field, io.citation];
 });
 
@@ -1887,7 +1888,7 @@ Zotero.Integration.Field = class {
 	
 	writeToDoc() {
 		if (!this.dirty) return;
-		// Boo. Inconsistent.
+		// Boo. Inconsistent order.
 		if (this.type == INTEGRATION_TYPE_ITEM) {
 			this._field.setCode(`ITEM CSL_CITATION ${this.code}`);
 		} else if (this.type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
@@ -1897,16 +1898,18 @@ Zotero.Integration.Field = class {
 		}
 		
 		// NB: Setting code in LO removes rtf formatting, so the order here is important
-		let text = this.text;
-		let isRich = false;
-		// If RTF wrap with RTF tags
-		if (text.includes("\\")) {
-			if (text.substr(0,5) != "{\\rtf") {
-				text = "{\\rtf "+text+"}";
+		let text = this._text;
+		if (text) {
+			let isRich = false;
+			// If RTF wrap with RTF tags
+			if (text.includes("\\")) {
+				if (text.substr(0,5) != "{\\rtf") {
+					text = "{\\rtf "+text+"}";
+				}
+				isRich = true;
 			}
-			isRich = true;
+			this._field.setText(text, isRich);
 		}
-		this._field.setText(text, isRich);
 
 		this.dirty = false;
 		// Retrigger retrieval from doc.
@@ -2048,7 +2051,6 @@ Zotero.Integration.CitationField = class extends Zotero.Integration.Field {
 				citation.properties.custom = citation.custom;
 				delete citation.custom;
 			}
-			if(!citation.citationID) citation.citationID = Zotero.randomString();
 
 			citation.properties.field = code;	
 			return citation;
@@ -2355,7 +2357,7 @@ Zotero.Integration.Citation = class {
 				serializeCitationItem.id = citationItem.id;
 				serializeCitationItem.uris = citationItem.uris;
 				
-				// XXX For compatibility with older versions of Zotero; to be removed at a later date
+				// XXX For compatibility with Zotero 2.0; to be removed at a later date
 				serializeCitationItem.uri = serializeCitationItem.uris;
 				
 				// always store itemData, since we have no way to get it back otherwise
@@ -2364,7 +2366,7 @@ Zotero.Integration.Citation = class {
 				serializeCitationItem.id = citationItem.id;
 				serializeCitationItem.uris = Zotero.Integration.currentSession.uriMap.getURIsForItemID(citationItem.id);
 				
-				// XXX For compatibility with older versions of Zotero; to be removed at a later date
+				// XXX For compatibility with Zotero 2.0; to be removed at a later date
 				serializeCitationItem.uri = serializeCitationItem.uris;
 			
 				serializeCitationItem.itemData = Zotero.Integration.currentSession.style.sys.retrieveItem(citationItem.id);
