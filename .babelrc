@@ -1,5 +1,6 @@
 {
   "compact": false,
+  "retainLines": true,
   "presets": [],
   "ignore": [
     "resource/require.js",
