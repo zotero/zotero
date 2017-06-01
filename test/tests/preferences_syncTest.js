@@ -54,7 +54,7 @@ describe("Sync Preferences", function () {
 
 			beforeEach(function* (){
 				yield win.Zotero_Preferences.Sync.unlinkAccount(false);
-				deleteAPIKey.reset();
+				deleteAPIKey.resetHistory();
 				Zotero.alert.reset();
 			});
 			

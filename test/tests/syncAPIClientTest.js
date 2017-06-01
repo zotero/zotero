@@ -144,7 +144,7 @@ describe("Zotero.Sync.APIClient", function () {
 			if (spy) {
 				spy.restore();
 			}
-			delayStub.reset();
+			delayStub.resetHistory();
 		});
 		
 		after(function () {

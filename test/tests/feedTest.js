@@ -308,9 +308,6 @@ describe("Zotero.Feed", function() {
 		before(function() {
 			scheduleNextFeedCheck = sinon.stub(Zotero.Feeds, 'scheduleNextFeedCheck');
 		});
-		after(function() {
-			scheduleNextFeedCheck.restore();
-		});
 		
 		beforeEach(function* (){
 			scheduleNextFeedCheck.reset();
@@ -321,6 +318,10 @@ describe("Zotero.Feed", function() {
 		
 		afterEach(function* () {
 			yield clearFeeds();
+		});
+		
+		after(function() {
+			scheduleNextFeedCheck.restore();
 		});
 		
 		it('should schedule next feed check', function* () {

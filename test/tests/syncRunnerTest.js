@@ -632,7 +632,7 @@ describe("Zotero.Sync.Runner", function () {
 			assert.isTrue(stub.calledOnce);
 			assert.isFalse(group.editable);
 			
-			stub.reset();
+			stub.restore();
 		});
 	})
 
