@@ -464,7 +464,7 @@ describe("Connector Server", function () {
 		});
 		
 		it('should import a style with application/vnd.citationstyles.style+xml content-type', function* () {
-			sinon.stub(Zotero.Styles, 'install', function(style) {
+			sinon.stub(Zotero.Styles, 'install').callsFake(function(style) {
 				var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 					.createInstance(Components.interfaces.nsIDOMParser),
 				doc = parser.parseFromString(style, "application/xml");

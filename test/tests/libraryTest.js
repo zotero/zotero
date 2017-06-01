@@ -157,7 +157,7 @@ describe("Zotero.Library", function() {
 	describe("#save()", function() {
 		it("should require mandatory parameters to be set", function* () {
 			let library = new Zotero.Library({ editable: true, filesEditable: true });
-			yield assert.isRejected(library.saveTx(), /^Error: libraryType must be set before saving/, 'libraryType is mandatory');
+			yield assert.isRejected(library.saveTx(), /^libraryType must be set before saving/, 'libraryType is mandatory');
 			
 			// Required group params
 			let groupID = Zotero.Utilities.rand(1000, 10000);
@@ -165,10 +165,10 @@ describe("Zotero.Library", function() {
 			let description = '';
 			let version = Zotero.Utilities.rand(1000, 10000);
 			library = new Zotero.Group({ filesEditable: true, groupID, name , description, version });
-			yield assert.isRejected(library.saveTx(), /^Error: editable must be set before saving/, 'editable is mandatory');
+			yield assert.isRejected(library.saveTx(), /^editable must be set before saving/, 'editable is mandatory');
 			
 			library = new Zotero.Group({ editable: true, groupID, name , description, version });
-			yield assert.isRejected(library.saveTx(), /^Error: filesEditable must be set before saving/, 'filesEditable is mandatory');
+			yield assert.isRejected(library.saveTx(), /^filesEditable must be set before saving/, 'filesEditable is mandatory');
 			
 			library = new Zotero.Group({ editable: true, filesEditable: true, groupID, name , description, version });
 			yield assert.isFulfilled(library.saveTx());
@@ -217,7 +217,7 @@ describe("Zotero.Library", function() {
 		
 		it("should not allow erasing permanent libraries", function* () {
 			let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
-			yield assert.isRejected(library.eraseTx(), /^Error: Cannot erase library of type 'user'$/, "does not allow erasing user library");
+			yield assert.isRejected(library.eraseTx(), /^Cannot erase library of type 'user'$/, "does not allow erasing user library");
 		});
 		
 		it("should not allow erasing unsaved libraries", function* () {

@@ -300,14 +300,20 @@ describe("Zotero.Integration", function () {
 		}
 		setAddEditItems(testItems[0]);
 		
-		sinon.stub(Zotero.Integration, 'getApplication', function(agent, command, docID) {
+		sinon.stub(Zotero.Integration, 'getApplication').callsFake(function(agent, command, docID) {
 			if (!applications[docID]) {
 				applications[docID] = new DocumentPluginDummy.Application();
 			}
 			return applications[docID];
 		});
 		
-		displayDialogStub = sinon.stub(Zotero.Integration, 'displayDialog', function(doc, dialogName, prefs, io) {
+		displayDialogStub = sinon.stub(Zotero.Integration, 'displayDialog', 
+		// @TODO: This sinon.stub syntax is deprecated!
+		// However when using callsFake tests won't work. This is due to a 
+		// possible bug that reset() erases callsFake.
+		// @NOTE: https://github.com/sinonjs/sinon/issues/1341
+		// displayDialogStub.callsFake(function(doc, dialogName, prefs, io) {
+		function(doc, dialogName, prefs, io) {
 			var ioResult = dialogResults[dialogName.substring(dialogName.lastIndexOf('/')+1, dialogName.length-4)];
 			if (typeof ioResult == 'function') {
 				ioResult = ioResult(doc, dialogName);
@@ -389,7 +395,7 @@ describe("Zotero.Integration", function () {
 						var styleInstallStub = sinon.stub(Zotero.Styles, "install").resolves();
 						var style = Zotero.Styles.get(styleID);
 						var styleGetCalledOnce = false;
-						var styleGetStub = sinon.stub(Zotero.Styles, 'get', function() {
+						var styleGetStub = sinon.stub(Zotero.Styles, 'get').callsFake(function() {
 							if (!styleGetCalledOnce) {
 								styleGetCalledOnce = true;
 								return false;
@@ -422,7 +428,7 @@ describe("Zotero.Integration", function () {
 					var styleInstallStub = sinon.stub(Zotero.Styles, "install").resolves();
 					var style = Zotero.Styles.get(styleID);
 					var styleGetCalledOnce = false;
-					var styleGetStub = sinon.stub(Zotero.Styles, 'get', function() {
+					var styleGetStub = sinon.stub(Zotero.Styles, 'get').callsFake(function() {
 						if (!styleGetCalledOnce) {
 							styleGetCalledOnce = true;
 							return false;

@@ -9,10 +9,13 @@ describe("Zotero.Sync.EventListeners", function () {
 			assert.ok(originalTimeout);
 			// Set timeout to 1ms
 			Zotero.Sync.EventListeners.AutoSyncListener._editTimeout = 0.001;
+		});
+		beforeEach(function() {
 			Zotero.Prefs.set('sync.autoSync', true);
 		});
-		
-		
+		afterEach(function() {
+			Zotero.Prefs.clear('sync.autoSync');
+		});
 		after(function () {
 			Zotero.Sync.EventListeners.AutoSyncListener._editTimeout = originalTimeout;
 			Zotero.Prefs.set('sync.autoSync', false);
