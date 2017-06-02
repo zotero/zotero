@@ -16,13 +16,14 @@ Promise.onPossiblyUnhandledRejection((e, promise) => {
 			return;
 		}
 
-		typeof Zotero !== 'undefined' && Zotero.debug('Possibly unhandled rejection:\n\n'
+		dump('Possibly unhandled rejection:\n\n'
 			+ (e.message
 				? e.message + "\n\n" + e.stack.split(/\n/)
 					// Filter out internal Bluebird calls
 					.filter(line => !line.includes('bluebird'))
 					.join('\n')
-				: e), 1);
+				: e)
+			+ '\n');
 		throw e;
 });
 
