@@ -37,8 +37,8 @@ function onLoad() {
 	if (window.arguments) {
 		var io = window.arguments[0];
 	}
-	var itemID = io.itemID;
-	var collectionID = io.collectionID;
+	var itemID = parseInt(io.itemID);
+	var collectionID = parseInt(io.collectionID);
 	var parentItemKey = io.parentItemKey;
 	
 	return Zotero.spawn(function* () {
