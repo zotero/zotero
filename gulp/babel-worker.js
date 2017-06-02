@@ -11,9 +11,9 @@ const options = JSON.parse(fs.readFileSync('.babelrc'));
 onmessage = (ev) => {
 	const t1 = Date.now();
 	const sourcefile = path.normalize(ev.data);
-	let isError = false;
+	let error = null;
 	let isSkipped = false;
-	
+
 	fs.readFile(sourcefile, 'utf8', (err, data) => {
 		var transformed;
 		if(sourcefile === 'resource/react-dom.js') {
@@ -22,24 +22,30 @@ onmessage = (ev) => {
 			transformed = data;
 			isSkipped = true;
 		} else {
-			transformed = babel.transform(data, options).code;
+			try {
+				transformed = babel.transform(data, options).code;
+			} catch(c) {
+				transformed = data;
+				isSkipped = true;
+				error = c.message;
+			}
 		}
 
 		const outfile = path.join('build', sourcefile);
-		isError = !!err;
+		error = error || err;
 
 		mkdirp(path.dirname(outfile), err => {
-			isError = !!err;
+			error = error || err;
 
 			fs.writeFile(outfile, transformed, err => {
-				isError = !!err;
-				const t2 = Date.now();
+				error = error || err;
 
+				const t2 = Date.now();
 				postMessage({
-					isError,
 					isSkipped,
 					sourcefile,
 					outfile,
+					error,
 					processingTime: t2 - t1
 				});	
 			});
