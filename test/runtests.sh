@@ -1,8 +1,8 @@
 #!/bin/bash
 CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-case "$(uname -s)" in
-   CYGWIN*) IS_CYGWIN=1 ;;
+case "$OSTYPE" in
+  msys*|mingw*|cygwin*) IS_CYGWIN=1 ;;
 esac
 
 function makePath {
