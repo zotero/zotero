@@ -14,6 +14,7 @@ const tap = require('gulp-tap');
 const rename = require('gulp-rename');
 const browserify = require('browserify');
 const reactPatcher = require('./gulp/gulp-react-patcher');
+const isWindows = /^win/.test(process.platform);
 const NODE_ENV = process.env.NODE_ENV;
 const workers = [];
 var isExiting = false;
@@ -184,12 +185,12 @@ function getSymlinks(exitOnError = true) {
 		.concat([`!./${formatDirsforMatcher(copyDirs)}/**`]);
 
 	return gulp
-		.src(match, { nodir: true, base: '.', read: false })
+		.src(match, { nodir: true, base: '.', read: isWindows })
 		.on('error', function(err) { onError.bind(this)(exitOnError, err); })
 		.on('data', file => {
 			onSuccess(`[ln] ${file.path.substr(__dirname.length + 1)}`);
 		})
-		.pipe(vfs.symlink('build/'));
+		.pipe(isWindows ? gulp.dest('build/') : vfs.symlink('build/'));
 }
 
 function getCopy(exitOnError = true) {
