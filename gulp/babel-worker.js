@@ -4,6 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const babel = require('babel-core');
+const minimatch = require('minimatch')
 const mkdirp = require('mkdirp');
 const options = JSON.parse(fs.readFileSync('.babelrc'));
 
@@ -18,7 +19,7 @@ onmessage = (ev) => {
 		var transformed;
 		if(sourcefile === 'resource/react-dom.js') {
 			transformed = data.replace(/ownerDocument\.createElement\((.*?)\)/gi, 'ownerDocument.createElementNS(DOMNamespaces.html, $1)');
-		} else if('ignore' in options && options.ignore.includes(sourcefile)) {
+		} else if('ignore' in options && options.ignore.some(ignoreGlob => minimatch(sourcefile, ignoreGlob))) {
 			transformed = data;
 			isSkipped = true;
 		} else {
