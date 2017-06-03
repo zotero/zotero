@@ -11,6 +11,7 @@
     "resource/react.js",
     "resource/react-dom.js",
     "resource/bluebird.js",
+    "resource/bluebird/*.js",
     "test/resource/httpd.js",
     "test/resource/mocha.js",
     "test/resource/co-mocha.js"
