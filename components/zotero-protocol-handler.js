@@ -192,9 +192,9 @@ function ZoteroProtocolHandler() {
 				var mimeType, content = '';
 				var items = [];
 				var itemsHash = {}; // key = itemID, val = position in |items|
-				var searchItemIDs = {}; // hash of all selected items
-				var searchParentIDs = {}; // hash of parents of selected child items
-				var searchChildIDs = {}; // hash of selected chlid items
+				var searchItemIDs = new Set(); // All selected items
+				var searchParentIDs = new Set(); // Parents of selected child items
+				var searchChildIDs = new Set() // Selected chlid items
 				
 				var includeAllChildItems = Zotero.Prefs.get('report.includeAllChildItems');
 				var combineChildItems = Zotero.Prefs.get('report.combineChildItems');
@@ -205,8 +205,8 @@ function ZoteroProtocolHandler() {
 					// (instead mark their parents for inclusion below)
 					var parentItemID = results[i].parentItemID;
 					if (parentItemID) {
-						searchParentIDs[parentItemID] = true;
-						searchChildIDs[results[i].id] = true;
+						searchParentIDs.add(parentItemID);
+						searchChildIDs.add(results[i].id);
 						
 						// Don't include all child items if any child
 						// items were selected
@@ -223,14 +223,14 @@ function ZoteroProtocolHandler() {
 					else {
 						unhandledParents[i] = true;
 					}
-					searchItemIDs[results[i].id] = true;
+					searchItemIDs.add(results[i].id);
 				}
 				
 				// If including all child items, add children of all matched
 				// parents to the child array
 				if (includeAllChildItems) {
-					for (var id in searchItemIDs) {
-						if (!searchChildIDs[id]) {
+					for (let id of searchItemIDs) {
+						if (!searchChildIDs.has(id)) {
 							var children = [];
 							var item = yield Zotero.Items.getAsync(id);
 							if (!item.isRegularItem()) {
@@ -239,7 +239,7 @@ function ZoteroProtocolHandler() {
 							var func = function (ids) {
 								if (ids) {
 									for (var i=0; i<ids.length; i++) {
-										searchChildIDs[ids[i]] = true;
+										searchChildIDs.add(ids[i]);
 									}
 								}
 							};
@@ -261,8 +261,8 @@ function ZoteroProtocolHandler() {
 				
 				if (combineChildItems) {
 					// Add parents of matches if parents aren't matches themselves
-					for (var id in searchParentIDs) {
-						if (!searchItemIDs[id] && !itemsHash[id]) {
+					for (let id of searchParentIDs) {
+						if (!searchItemIDs.has(id) && !itemsHash[id]) {
 							var item = yield Zotero.Items.getAsync(id);
 							itemsHash[id] = items.length;
 							items.push(item.toJSON({ mode: 'full' }));
@@ -270,8 +270,8 @@ function ZoteroProtocolHandler() {
 					}
 					
 					// Add children to reportChildren property of parents
-					for (var id in searchChildIDs) {
-						var item = yield Zotero.Items.getAsync(id);
+					for (let id of searchChildIDs) {
+						let item = yield Zotero.Items.getAsync(id);
 						var parentID = item.parentID;
 						if (!items[itemsHash[parentID]].reportChildren) {
 							items[itemsHash[parentID]].reportChildren = {
@@ -290,7 +290,7 @@ function ZoteroProtocolHandler() {
 				// If not combining children, add a parent/child pair
 				// for each matching child
 				else {
-					for (var id in searchChildIDs) {
+					for (let id of searchChildIDs) {
 						var item = yield Zotero.Items.getAsync(id);
 						var parentID = item.parentID;
 						var parentItem = Zotero.Items.get(parentID);
@@ -298,7 +298,7 @@ function ZoteroProtocolHandler() {
 						if (!itemsHash[parentID]) {
 							// If parent is a search match and not yet added,
 							// add on its own
-							if (searchItemIDs[parentID]) {
+							if (searchItemIDs.has(parentID)) {
 								itemsHash[parentID] = [items.length];
 								items.push(parentItem.toJSON({ mode: 'full' }));
 								items[items.length - 1].reportSearchMatch = true;
