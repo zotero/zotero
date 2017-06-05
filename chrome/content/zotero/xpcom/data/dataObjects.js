@@ -174,7 +174,7 @@ Zotero.DataObjects.prototype.getAsync = Zotero.Promise.coroutine(function* (ids,
 		let id = ids[i];
 		
 		if (!Number.isInteger(id)) {
-			// TEMP
+			// TEMP: Re-enable test when removed
 			Zotero.logError(`${this._ZDO_object} ID '${id}' is not an integer (${typeof id})`);
 			id = parseInt(id);
 			//throw new Error(`${this._ZDO_object} ID '${id}' is not an integer (${typeof id})`);
