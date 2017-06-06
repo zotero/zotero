@@ -39,10 +39,10 @@ deploy:
     access_key_id: AKIAJFDVJ54MCAEXPQ5Q
     secret_access_key:
         secure: YXRlWOAMELuCmArVTR50NH3HHEK/nwltmiS5iIEIVx0hFtI/GJCZWjWH0eQ5ro1V1GgYyEGT+Miud9SXNDeejYFNpR80G4gBSSpbngvT/CBYE5IIN/rvlykklCy5+HEgAZEt72zowBDzlX2DBRYPjryKXjL0Ahcz/H7NGvtS5Hk=
-    bucket: zotero-builds
+    bucket: zotero-download
     skip_cleanup: true
     local-dir: build-zip
-    upload-dir: client
+    upload-dir: ci/client
     acl: public-read
     on:
         repo: zotero/zotero
