@@ -43,7 +43,7 @@ deploy:
     skip_cleanup: true
     local-dir: build-zip
     upload-dir: client
-    acl: private
+    acl: public-read
     on:
         repo: zotero/zotero
         condition: "$FX_VERSION = 54.0b"
