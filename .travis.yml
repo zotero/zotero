@@ -32,7 +32,8 @@ script:
 before_deploy:
     - mkdir build-zip
     - cd build
-    - zip -r ../build-zip/$(date +"%Y-%m-%d")-$TRAVIS_BRANCH-$TRAVIS_COMMIT.zip *
+    - zip -r ../build-zip/$TRAVIS_COMMIT.zip *
+    - cd ..
 deploy:
     provider: s3
     access_key_id: AKIAJFDVJ54MCAEXPQ5Q
@@ -45,3 +46,4 @@ deploy:
     acl: private
     on:
         repo: zotero/zotero
+        condition: "$FX_VERSION = 54.0b"
