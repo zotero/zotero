@@ -505,7 +505,11 @@ Zotero.Utilities.Internal = {
 			if (item.note) {
 				item.uniqueFields.note = item.note;
 			}
-			
+			// preserve notes
+			if(item.note) { 
+				item.uniqueFields.note = item.note;
+			}
+
 			return item;
 		}
 	},
