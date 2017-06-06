@@ -86,7 +86,7 @@ var ZoteroItemPane = new function() {
 			switch (index) {
 				case 0:
 				case 2:
-					yield box.blurOpenField();
+					box.blurOpenField();
 					// DEBUG: Currently broken
 					//box.scrollToTop();
 					break;
