@@ -836,6 +836,8 @@ describe("Zotero.Sync.Runner", function () {
 				json: {}
 			});
 			
+			var startTime = new Date().getTime();
+			
 			yield runner.sync({
 				onError: e => { throw e },
 			});
@@ -854,9 +856,9 @@ describe("Zotero.Sync.Runner", function () {
 				20
 			);
 			
-			// Last sync time should be within the last second
+			// Last sync time should be within the last few seconds
 			var lastSyncTime = Zotero.Sync.Data.Local.getLastSyncTime();
-			assert.isAbove(lastSyncTime.getTime(), new Date().getTime() - 2000);
+			assert.isAbove(lastSyncTime.getTime(), startTime);
 			assert.isBelow(lastSyncTime.getTime(), new Date().getTime());
 		})
 		
