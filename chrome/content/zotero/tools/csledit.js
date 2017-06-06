@@ -175,6 +175,7 @@ var Zotero_CSL_Editor = new function() {
 			iframe.contentDocument.documentElement.innerHTML = '<div>' + Zotero.getString('styles.editor.warning.parseError') + '</div><div>'+e+'</div>';
 			throw e;
 		}
+		editor.styleEngine = styleEngine;
 		
 		var itemIds = items.map(item => item.id);
 
