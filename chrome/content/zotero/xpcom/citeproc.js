@@ -23,7 +23,7 @@
  *     <http://www.gnu.org/licenses/> respectively.
  */
 var CSL = {
-    PROCESSOR_VERSION: "1.1.169",
+    PROCESSOR_VERSION: "1.1.170",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -11560,7 +11560,7 @@ CSL.Attributes["@second-field-align"] = function (state, arg) {
 };
 CSL.Attributes["@hanging-indent"] = function (state, arg) {
     if (arg === "true") {
-        state[this.name].opt.hangingindent = true;
+        state[this.name].opt.hangingindent = 2;
     }
 };
 CSL.Attributes["@line-spacing"] = function (state, arg) {
