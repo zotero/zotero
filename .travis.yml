@@ -29,3 +29,19 @@ before_script:
     - node_modules/.bin/gulp build
 script:
     - test/runtests.sh -x firefox/firefox
+before_deploy:
+    - mkdir build-zip
+    - cd build
+    - zip -r ../build-zip/$(date +"%Y-%m-%d")-$TRAVIS_BRANCH-$TRAVIS_COMMIT.zip *
+deploy:
+    provider: s3
+    access_key_id: AKIAJFDVJ54MCAEXPQ5Q
+    secret_access_key:
+        secure: YXRlWOAMELuCmArVTR50NH3HHEK/nwltmiS5iIEIVx0hFtI/GJCZWjWH0eQ5ro1V1GgYyEGT+Miud9SXNDeejYFNpR80G4gBSSpbngvT/CBYE5IIN/rvlykklCy5+HEgAZEt72zowBDzlX2DBRYPjryKXjL0Ahcz/H7NGvtS5Hk=
+    bucket: zotero-builds
+    skip_cleanup: true
+    local-dir: build-zip
+    upload-dir: client
+    acl: private
+    on:
+        repo: zotero/zotero
