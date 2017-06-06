@@ -203,25 +203,33 @@ Zotero.OpenURL = new function() {
 			}
 		}
 		
-		if(item.creators && item.creators.length) {
-			// encode first author as first and last
-			var firstCreator = item.creators[0];
-			if(item.itemType == "patent") {
-				_mapTag(firstCreator.firstName, "invfirst");
-				_mapTag(firstCreator.lastName, "invlast");
-			} else {
-				if(firstCreator.isInstitution) {
-					_mapTag(firstCreator.lastName, "aucorp");
-				} else {
-					_mapTag(firstCreator.firstName, "aufirst");
-					_mapTag(firstCreator.lastName, "aulast");
+		var first = true;
+		for(var i=0; i<item.creators.length; i++) {
+			var creator = item.creators[i];
+			// only export authors
+			// other creator types cannot correctly export to COinS
+			if(creator.creatorType == "author") {
+				// encode first author as aufirst and aulast
+				if (first) {
+					if(item.itemType == "patent") {
+						_mapTag(creator.firstName, "invfirst");
+						_mapTag(creator.lastName, "invlast");
+					} else {
+						_mapTag(creator.firstName, "aufirst");
+						_mapTag(creator.lastName, "aulast");
+					}
+					first = false;
 				}
-			}
-			
-			// encode subsequent creators as au
-			for(var i=0; i<item.creators.length; i++) {
-				_mapTag((item.creators[i].firstName ? item.creators[i].firstName+" " : "")+
-					item.creators[i].lastName, (item.itemType == "patent" ? "inventor" : "au"));
+				// encode all authors (first and subsequents) as 
+				// au, aucorp or inventor
+				var goal = "au";
+				if (creator.fieldMode == 1) {
+					goal = "aucorp";
+				}
+				if (item.itemType == "patent") {
+					goal = "inventor";
+				}
+				_mapTag((creator.firstName ? creator.firstName+" " : "")+creator.lastName, goal);
 			}
 		}
 		
@@ -407,7 +415,7 @@ Zotero.OpenURL = new function() {
 				
 				item.creators.push(_cloneIfNecessary(Zotero.Utilities.cleanAuthor(value, type, value.indexOf(",") !== -1), item));
 			} else if(key == "rft.aucorp") {
-				complexAu.push(_cloneIfNecessary({lastName:value, isInstitution:true}, item));
+				complexAu.push(_cloneIfNecessary({lastName:value, fieldMode:1}, item));
 			} else if(key == "rft.isbn" && !item.ISBN) {
 				item.ISBN = value;
 			} else if(key == "rft.pub" || key == "rft.publisher") {
