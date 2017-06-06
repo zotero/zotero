@@ -6,16 +6,16 @@
   "main": "",
   "scripts": {
     "start": "./node_modules/.bin/gulp",
-    "build": "./node_modules/.bin/gulp",
+    "build": "./node_modules/.bin/gulp build-clean",
     "sass": "./node_modules/.bin/gulp sass",
     "clean": "./node_modules/.bin/gulp clean"
   },
   "license": "",
   "dependencies": {
     "bluebird": "3.4.7",
-    "zotero-web-library": "next",
     "react": "^15.3.2",
-    "react-dom": "^15.3.2"
+    "react-dom": "^15.3.2",
+    "zotero-web-library": "next"
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
@@ -43,6 +43,7 @@
     "gulp-tap": "^1.0.1",
     "gulp-util": "^3.0.7",
     "merge-stream": "^1.0.1",
+    "minimatch": "^3.0.4",
     "mocha": "^3.4.2",
     "sinon": "^2.3.1",
     "through2": "^2.0.1",
