@@ -47,6 +47,7 @@
 <!ENTITY zotero.preferences.openurl.version				"Version:">
 
 <!ENTITY zotero.preferences.prefpane.sync							"Sync">
+<!ENTITY zotero.preferences.sync.url								"URL:">
 <!ENTITY zotero.preferences.sync.username							"Username:">
 <!ENTITY zotero.preferences.sync.password							"Password:">
 <!ENTITY zotero.preferences.sync.syncServer						"Zotero Sync Server">
