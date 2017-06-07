@@ -2725,7 +2725,7 @@ var ZoteroPane = new function()
 		
 		if (items.length > 0) {
 			// Multiple items selected
-			if (items.length.count > 1) {
+			if (items.length > 1) {
 				var multiple =  '.multiple';
 				
 				var canMerge = true, canIndex = true, canRecognize = true, canRename = true;
