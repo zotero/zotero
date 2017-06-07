@@ -216,7 +216,7 @@ gulp.task('clean', () => {
 	return del('build');
 });
 
-gulp.task('symlink', ['clean'], () => {
+gulp.task('symlink', () => {
 	return getSymlinks();
 });
 
