@@ -948,6 +948,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.launchFile = function (file) {
 		file = Zotero.File.pathToFile(file);
 		try {
+			Zotero.debug("Launching " + file.path);
 			file.launch();
 		}
 		catch (e) {
@@ -967,7 +968,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 							.createInstance(Components.interfaces.nsILocalFile);
 				exec.initWithPath(path);
 				if (!exec.exists()) {
-					throw (path + " does not exist");
+					throw new Error(path + " does not exist");
 				}
 				
 				var proc = Components.classes["@mozilla.org/process/util;1"]

@@ -4219,6 +4219,7 @@ var ZoteroPane = new function()
 			if (path) {
 				let file = Zotero.File.pathToFile(path);
 				try {
+					Zotero.debug("Revealing " + file.path);
 					file.reveal();
 				}
 				catch (e) {
