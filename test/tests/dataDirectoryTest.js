@@ -39,10 +39,12 @@ describe("Zotero.DataDirectory", function () {
 		stubs.canMigrate = sinon.stub(Zotero.DataDirectory, "canMigrate").returns(true);
 		// A pipe always exists during tests, since Zotero is running
 		stubs.pipeExists = sinon.stub(Zotero.IPC, "pipeExists").returns(Zotero.Promise.resolve(false));
+		stubs.setDataDir = sinon.stub(Zotero.DataDirectory, "set");
+		stubs.isNewDirOnDifferentDrive = sinon.stub(Zotero.DataDirectory, 'isNewDirOnDifferentDrive').resolves(true);
 	});
 	
 	beforeEach(function* () {
-		stubs.setDataDir = sinon.stub(Zotero.DataDirectory, "set");
+		stubs.setDataDir.reset();
 	});
 	
 	afterEach(function* () {
@@ -50,13 +52,14 @@ describe("Zotero.DataDirectory", function () {
 		yield removeDir(newDir);
 		Zotero.DataDirectory._cache(false);
 		yield Zotero.DataDirectory.init();
-		
-		stubs.setDataDir.restore();
 	});
 	
 	after(function* () {
-		stubs.canMigrate.restore();
-		stubs.pipeExists.restore();
+		for (let key in stubs) {
+			try {
+				stubs[key].restore();
+			} catch(e) {}
+		}
 	});
 	
 	// Force non-mv mode
@@ -181,6 +184,28 @@ describe("Zotero.DataDirectory", function () {
 			yield Zotero.File.putContentsAsync(OS.Path.join(newDir, 'a'), '');
 			
 			yield assert.eventually.isFalse(Zotero.DataDirectory.checkForMigration(oldDir, newDir));
+		});
+		
+		it("should skip automatic migration and show prompt if target directory is on a different drive", function* () {
+			resetCommandMode();
+			resetFunctionMode();
+			
+			yield populateDataDirectory(oldDir);
+			yield OS.File.remove(oldMigrationMarker);
+			
+			stubs.isNewDirOnDifferentDrive.resolves(true);
+			
+			var promise = waitForDialog(function (dialog) {
+				assert.include(
+					dialog.document.documentElement.textContent,
+					Zotero.getString(`dataDir.migration.failure.full.automatic.newDirOnDifferentDrive`, Zotero.clientName)
+				);
+			}, 'cancel');
+			
+			yield assert.eventually.isNotOk(Zotero.DataDirectory.checkForMigration(oldDir, newDir));
+			yield promise;
+
+			stubs.isNewDirOnDifferentDrive.resolves(false);
 		});
 		
 		add("should show error on partial failure", function (automatic) {
