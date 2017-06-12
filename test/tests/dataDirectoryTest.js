@@ -183,6 +183,31 @@ describe("Zotero.DataDirectory", function () {
 			yield assert.eventually.isFalse(Zotero.DataDirectory.checkForMigration(oldDir, newDir));
 		});
 		
+		it("should skip automatic migration and show prompt if target directory is on a different drive", function* () {
+			resetCommandMode();
+			resetFunctionMode();
+			
+			yield populateDataDirectory(oldDir);
+			yield OS.File.remove(oldMigrationMarker);
+			
+			let stub1 = sinon.stub(Zotero.DataDirectory, 'isNewDirOnDifferentDrive');
+			stub1.resolves(true);
+			
+			var promise = waitForDialog(function (dialog) {
+				// Make sure we're displaying the right message for this mode (automatic or manual)
+				Components.utils.import("resource://zotero/config.js");
+				assert.include(
+					dialog.document.documentElement.textContent,
+					Zotero.getString(`dataDir.migration.failure.full.automatic.newDirOnDifferentDrive`)
+				);
+			}, 'cancel');
+			
+			yield assert.eventually.isNotOk(Zotero.DataDirectory.checkForMigration(oldDir, newDir));
+			yield promise;
+			
+			stub1.restore();
+		});
+		
 		add("should show error on partial failure", function (automatic) {
 			return function* () {
 				yield populateDataDirectory(oldDir, null, automatic);
