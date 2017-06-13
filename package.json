@@ -5,10 +5,13 @@
   "description": "Zotero",
   "main": "",
   "scripts": {
-    "start": "./node_modules/.bin/gulp",
-    "build": "./node_modules/.bin/gulp build-clean",
-    "sass": "./node_modules/.bin/gulp sass",
-    "clean": "./node_modules/.bin/gulp clean"
+    "start": "node ./scripts/build.js && node ./scripts/watch.js",
+    "build": "node ./scripts/build.js",
+    "sass": "node ./scripts/sass.js",
+    "js": "node ./scripts/js.js",
+    "clean": "node ./scripts/clean.js",
+    "clean-build": "node ./scripts/clean.js && node ./scripts/build.js",
+    "clean-start": "node ./scripts/clean.js && node ./scripts/build.js && node ./scripts/watch.js"
   },
   "license": "",
   "dependencies": {
@@ -33,22 +36,16 @@
     "browserify": "^14.3.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
+    "chokidar": "^1.7.0",
     "co-mocha": "^1.2.0",
-    "del": "^2.2.2",
-    "glob": "^7.1.2",
-    "gulp": "^3.9.1",
-    "gulp-babel": "^6.1.2",
-    "gulp-rename": "^1.2.2",
-    "gulp-sass": "^3.1.0",
-    "gulp-tap": "^1.0.1",
-    "gulp-util": "^3.0.7",
-    "merge-stream": "^1.0.1",
-    "minimatch": "^3.0.4",
+    "colors": "^1.1.2",
+    "eslint-plugin-react": "^7.1.0",
+    "fs-extra": "^3.0.1",
+    "globby": "^6.1.0",
     "mocha": "^3.4.2",
+    "multimatch": "^2.1.0",
+    "node-sass": "^4.5.3",
     "sinon": "^2.3.1",
-    "through2": "^2.0.1",
-    "tiny-worker": "^2.1.1",
-    "vinyl-fs": "^2.4.4",
-    "watchify": "^3.7.0"
+    "universalify": "^0.1.0"
   }
 }
