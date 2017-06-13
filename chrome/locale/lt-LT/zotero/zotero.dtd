@@ -224,13 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Išnaša">
 <!ENTITY zotero.integration.prefs.endnotes.label "Galinė išnaša">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Citavimo įrašymo pavidalas:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Žymelės">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Žymelės išlaikomos tiek „Word“, tiek „LibreOffice“ programose, tačiau netyčia jas pakeitus, gali atsirasti klaidų. Žymelių negalite įterpti į išnašas ar galines išnašas.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Naudoti MEDLINE žurnalų santrumpas">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Ignoruosima reikšmė „žurnalo santrumpos“ laukelyje">
 
 <!ENTITY zotero.integration.showEditor.label "Rodyti rengyklę">
 <!ENTITY zotero.integration.classicView.label "Klasikinis rodinys">

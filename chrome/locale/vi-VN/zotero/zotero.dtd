@@ -1,5 +1,5 @@
-<!ENTITY zotero.general.yes "Yes">
-<!ENTITY zotero.general.no "No">
+<!ENTITY zotero.general.yes "Đồng ý">
+<!ENTITY zotero.general.no "Bỏ qua">
 <!ENTITY zotero.general.optional "(Không bắt buộc)">
 <!ENTITY zotero.general.note "Chú ý:">
 <!ENTITY zotero.general.selectAll "Chạn tất cả">
@@ -10,9 +10,9 @@
 <!ENTITY zotero.general.cancel "Hủy">
 <!ENTITY zotero.general.refresh "Cập nhật">
 <!ENTITY zotero.general.saveAs "Lưu là...">
-<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
+<!ENTITY zotero.general.advancedOptions.label "Các tùy chỉnh nâng cao">
 <!ENTITY zotero.general.more "More">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.loading "Đang nạp...">
 
 <!ENTITY zotero.errorReport.title "Báo cáo lỗi Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Có thể gồm các thông báo không liên quan tới Zotero">
@@ -98,16 +98,16 @@
 <!ENTITY zotero.items.menu.mergeItems "Ghộp các mục...">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Chọn phiên bản của mục đề dùng như mục mẫu:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Chọn các trường muốn giữ lại từ các bản khác của mục này:">
 
 <!ENTITY zotero.toolbar.newItem.label "Tạo mục mới">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Khác">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Tạo một mục trang web mới cho Trang web hiện tại">
 <!ENTITY zotero.toolbar.lookup.label "Thêm các mục bằng định danh">
 <!ENTITY zotero.toolbar.removeItem.label "Xóa mục...">
-<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
+<!ENTITY zotero.toolbar.newLibrary.label "Thư viện mới...">
 <!ENTITY zotero.toolbar.newCollection.label "Bộ sưu tập mới...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
+<!ENTITY zotero.toolbar.markFeedRead.label "Đánh dấu là đã đọc">
 <!ENTITY zotero.toolbar.newGroup "Nhóm mới...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Bô sưu tập con mới...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Tìm kiếm mới...">
@@ -141,7 +141,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Hoán chuyên tên và họ">
 <!ENTITY zotero.item.viewOnline "Xem trực tuyến">
 <!ENTITY zotero.item.copyAsURL "Sao chép thành URL">
-<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
+<!ENTITY zotero.item.deletePermanently "Xóa hoàn toàn...">
 
 <!ENTITY zotero.toolbar.newNote "Ghi chú mới">
 <!ENTITY zotero.toolbar.note.standalone "Ghi chép Độc lập mới">
@@ -153,22 +153,22 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Tạo Bản lưu trang Web của Trang hiện tại">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Không có thẻ nào để hiển thị">
-<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
+<!ENTITY zotero.tagSelector.loadingTags "Đang nạp các tag...">
 <!ENTITY zotero.tagSelector.showAutomatic "Hiển thị tự động">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
 <!ENTITY zotero.tagSelector.clearAll "Bỏ tất cả lựa chọn">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
+<!ENTITY zotero.tagSelector.assignColor "Đặt màu...">
 <!ENTITY zotero.tagSelector.renameTag "Đổi tên Thẻ...">
 <!ENTITY zotero.tagSelector.deleteTag "Xóa Thẻ...">
 
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
-<!ENTITY zotero.tagColorChooser.color "Color:">
-<!ENTITY zotero.tagColorChooser.position "Position:">
-<!ENTITY zotero.tagColorChooser.setColor "Set Color">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.title "Chọn màu và vị trí cho tag">
+<!ENTITY zotero.tagColorChooser.color "Màu:">
+<!ENTITY zotero.tagColorChooser.position "Vị trí:">
+<!ENTITY zotero.tagColorChooser.setColor "Đặt màu">
+<!ENTITY zotero.tagColorChooser.removeColor "Bỏ màu">
 
-<!ENTITY zotero.lookup.description "Enter one or more ISBNs, DOIs, or PMIDs to look up in the box below.">
-<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.description "Nhập một hoặc nhiều ISBN, DOI hay PMID muốn tìm trong hộp dưới đây.">
+<!ENTITY zotero.lookup.button.search "Tìm">
 
 <!ENTITY zotero.selectitems.title "Chọn các Biểu ghi">
 <!ENTITY zotero.selectitems.intro.label "Chọn những biểu ghi bạn muốn thêm vào thư viện của bạn">
@@ -177,10 +177,10 @@
 
 <!ENTITY zotero.bibliography.title "Tạo Thư tịch">
 <!ENTITY zotero.bibliography.style.label "Văn phong của Trích dẫn">
-<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
-<!ENTITY zotero.bibliography.locale.label "Language:">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.manageStyles "Quản lý các style...">
+<!ENTITY zotero.bibliography.locale.label "Ngôn ngữ:">
+<!ENTITY zotero.bibliography.outputMode "Chế độ xuất:">
+<!ENTITY zotero.bibliography.bibliography "Danh mục tài liệu tham khảo">
 <!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Lưu dưới dạng RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Lưu dưới dạng HTML">

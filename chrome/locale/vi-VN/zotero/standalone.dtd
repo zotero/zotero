@@ -23,9 +23,9 @@
 <!ENTITY closeCmd.label "Đóng">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.label "Nhập khẩu...">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY importFromClipboardCmd.label "Nhập khẩu từ clipboard">
 <!ENTITY quitApplicationCmdWin.label "Thoát">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Quit">
