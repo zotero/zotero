@@ -12,10 +12,10 @@
   },
   "license": "",
   "dependencies": {
-    "bluebird": "3.4.7",
+    "bluebird": "^3.4.7",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
-    "zotero-web-library": "next"
+    "zotero-web-library": "^0.9.4-alpha"
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
