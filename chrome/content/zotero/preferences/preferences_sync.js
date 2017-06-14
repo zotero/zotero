@@ -333,6 +333,9 @@ Zotero_Preferences.Sync = {
 		addRow(Zotero.getString("pane.collections.libraryAndFeeds"), "L" + Zotero.Libraries.userLibraryID, 
 			librariesToSkip.indexOf("L" + Zotero.Libraries.userLibraryID) == -1);
 		
+		// Sort groups
+		var collation = Zotero.getLocaleCollation();
+		groups.sort((a, b) => collation.compareString(1, a.data.name, b.data.name));
 		// Add group rows
 		for (let group of groups) {
 			addRow(group.data.name, "G" + group.id, librariesToSkip.indexOf("G" + group.id) == -1);
