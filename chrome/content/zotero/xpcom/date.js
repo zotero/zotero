@@ -387,7 +387,7 @@ Zotero.Date = new function(){
 				if(date.month) date.month--;		// subtract one for JS style
 				else delete date.month;
 				
-				Zotero.debug("DATE: retrieved with algorithms: "+JSON.stringify(date));
+				//Zotero.debug("DATE: retrieved with algorithms: "+JSON.stringify(date));
 				
 				parts.push(
 					{ part: m[1], before: true },
@@ -402,7 +402,7 @@ Zotero.Date = new function(){
 				parts.push({ part: string });
 			}
 		} else {
-			Zotero.debug("DATE: could not apply algorithms");
+			//Zotero.debug("DATE: could not apply algorithms");
 			parts.push({ part: string });
 		}
 		
@@ -419,7 +419,7 @@ Zotero.Date = new function(){
 						{ part: m[1], before: true },
 						{ part: m[3] }
 					);
-					Zotero.debug("DATE: got year (" + date.year + ", " + JSON.stringify(parts) + ")");
+					//Zotero.debug("DATE: got year (" + date.year + ", " + JSON.stringify(parts) + ")");
 					break;
 				}
 			}
@@ -447,7 +447,7 @@ Zotero.Date = new function(){
 						{ part: m[1], before: "m" },
 						{ part: m[3], after: "m" }
 					);
-					Zotero.debug("DATE: got month (" + date.month + ", " + JSON.stringify(parts) + ")");
+					//Zotero.debug("DATE: got month (" + date.month + ", " + JSON.stringify(parts) + ")");
 					break;
 				}
 			}
@@ -481,7 +481,7 @@ Zotero.Date = new function(){
 							i, 1,
 							{ part: part }
 						);
-						Zotero.debug("DATE: got day (" + date.day + ", " + JSON.stringify(parts) + ")");
+						//Zotero.debug("DATE: got day (" + date.day + ", " + JSON.stringify(parts) + ")");
 						break;
 					}
 				}
