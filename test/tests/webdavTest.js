@@ -610,6 +610,8 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			var promise2 = spy.returnValues[0];
 			spy.restore();
 			yield promise2;
+			
+			win.close();
 		});
 		
 		it("should show an error for a 403", function* () {
@@ -643,6 +645,8 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			var promise2 = spy.returnValues[0];
 			spy.restore();
 			yield promise2;
+			
+			win.close();
 		});
 	});
 	
