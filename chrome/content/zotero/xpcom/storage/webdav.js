@@ -1348,9 +1348,9 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 */
 	_deleteStorageFiles: Zotero.Promise.coroutine(function* (files) {
 		var results = {
-			deleted: [],
-			missing: [],
-			error: []
+			deleted: new Set(),
+			missing: new Set(),
+			error: new Set()
 		};
 		
 		if (files.length == 0) {
@@ -1388,7 +1388,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					);
 				}
 				catch (e) {
-					results.error.push(fileName);
+					results.error.add(fileName);
 					throw e;
 				}
 				
@@ -1396,11 +1396,11 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					case 204:
 					// IIS 5.1 and Sakai return 200
 					case 200:
-						results.deleted.push(fileName);
+						results.deleted.add(fileName);
 						break;
 					
 					case 404:
-						results.missing.push(fileName);
+						results.missing.add(fileName);
 						break;
 				}
 				
@@ -1408,7 +1408,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				var deletePropURI = this._getPropertyURIFromItemURI(deleteURI);
 				
 				// If we already deleted the prop file, skip it
-				if (!deletePropURI || results.deleted.indexOf(deletePropURI.fileName) != -1) {
+				if (!deletePropURI || results.deleted.has(deletePropURI.fileName)) {
 					return;
 				}
 				
@@ -1426,11 +1426,11 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					case 204:
 					// IIS 5.1 and Sakai return 200
 					case 200:
-						results.deleted.push(fileName);
+						results.deleted.add(fileName);
 						break;
 					
 					case 404:
-						results.missing.push(fileName);
+						results.missing.add(fileName);
 						break;
 				}
 			}.bind(this)));
@@ -1444,6 +1444,11 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			onError: e => Zotero.logError(e)
 		});
 		yield caller.start(funcs);
+		
+		// Convert sets back to arrays
+		for (let i in results) {
+			results[i] = Array.from(results[i]);
+		}
 		return results;
 	}),
 	
