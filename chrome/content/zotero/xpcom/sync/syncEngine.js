@@ -1643,7 +1643,9 @@ Zotero.Sync.Data.Engine.prototype._checkObjectUploadError = Zotero.Promise.corou
 					
 					let id = parentItem.id;
 					// If parent item isn't already in queue, mark it as unsynced and add it
-					if (!queue.find(o => o.id == id) && !batch.find(o => o.id == id)) {
+					if (!queue.find(o => o.id == id)
+							// TODO: Don't use 'delete' on batch, which results in undefineds
+							&& !batch.find(o => o && o.id == id)) {
 						yield Zotero.Sync.Data.Local.markObjectAsUnsynced(parentItem);
 						Zotero.logError(`Adding parent item ${data.parentItem} to upload queue`);
 						queue.push({
