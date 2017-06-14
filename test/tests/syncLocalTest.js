@@ -1965,6 +1965,64 @@ describe("Zotero.Sync.Data.Local", function() {
 			);
 		})
 		
+		it("should automatically use remote version for note markup differences when text content matches", function () {
+			var val2 = "<p>Foo bar<br />bar   foo</p>";
+			
+			var json1 = {
+				key: "AAAAAAAA",
+				version: 0,
+				itemType: "note",
+				note: "Foo bar<br/>bar foo",
+				dateModified: "2017-06-13 13:45:12"
+			};
+			var json2 = {
+				key: "AAAAAAAA",
+				version: 5,
+				itemType: "note",
+				note: val2,
+				dateModified: "2017-06-13 13:45:12"
+			};
+			var ignoreFields = ['dateAdded', 'dateModified'];
+			var result = Zotero.Sync.Data.Local._reconcileChangesWithoutCache(
+				'item', json1, json2, ignoreFields
+			);
+			assert.lengthOf(result.changes, 1);
+			assert.sameDeepMembers(
+				result.changes,
+				[
+					{
+						field: "note",
+						op: "add",
+						value: val2
+					}
+				]
+			);
+			assert.lengthOf(result.conflicts, 0);
+		});
+		
+		it("should show conflict for note markup differences when text content doesn't match", function () {
+			var json1 = {
+				key: "AAAAAAAA",
+				version: 0,
+				itemType: "note",
+				note: "Foo bar?",
+				dateModified: "2017-06-13 13:45:12"
+			};
+			var json2 = {
+				key: "AAAAAAAA",
+				version: 5,
+				itemType: "note",
+				note: "<p>Foo bar!</p>",
+				dateModified: "2017-06-13 13:45:12"
+			};
+			var ignoreFields = ['dateAdded', 'dateModified'];
+			var result = Zotero.Sync.Data.Local._reconcileChangesWithoutCache(
+				'item', json1, json2, ignoreFields
+			);
+			assert.lengthOf(result.changes, 0);
+			assert.lengthOf(result.conflicts, 1);
+		});
+		
 		it("should automatically use remote version for conflicting fields when both sides are in trash", function () {
 			var json1 = {
 				key: "AAAAAAAA",

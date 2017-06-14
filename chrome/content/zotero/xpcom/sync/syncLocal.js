@@ -1547,6 +1547,15 @@ Zotero.Sync.Data.Local = {
 		}
 		
 		var localChanged = false;
+		var normalizeHTML = (str) => {
+			let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+				.createInstance(Components.interfaces.nsIDOMParser);
+			str = parser.parseFromString(str, 'text/html');
+			str = str.body.textContent;
+			// Normalize internal spaces
+			str = str.replace(/\s+/g, ' ');
+			return str;
+		};
 		
 		// Massage some old data
 		conflicts = conflicts.filter((x) => {
@@ -1565,6 +1574,27 @@ Zotero.Sync.Data.Local = {
 						localChanged = true;
 						return false;
 					}
+				}
+			}
+			// Ignore notes with the same text content
+			//
+			// These can happen to people upgrading to 5.0 with notes that were added without going
+			// through TinyMCE (e.g., from translators)
+			else if (x[0].field == 'note' && x[0].op == 'add' && x[1].op == 'add') {
+				let a = x[0].value;
+				let b = x[1].value;
+				try {
+					a = normalizeHTML(a);
+					b = normalizeHTML(b);
+					if (a == b) {
+						Zotero.debug("Notes differ only by markup -- using remote version");
+						changes.push(x[1]);
+						return false;
+					}
+				}
+				catch (e) {
+					Zotero.logError(e);
+					return true
 				}
 			}
 			return true;
