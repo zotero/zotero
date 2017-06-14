@@ -697,6 +697,13 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			library.updateLastSyncTime();
 			yield library.saveTx();
 			
+			// Create one item
+			var item1 = yield createDataObject('item');
+			var item1Key = item1.key;
+			// Add another item to sync queue
+			var item2Key = Zotero.DataObjectUtilities.generateKey();
+			yield Zotero.Sync.Data.Local.addObjectsToSyncQueue('item', library.id, [item2Key]);
+			
 			const daysBeforeSyncTime = 7;
 			
 			var beforeTime = new Date(Date.now() - (daysBeforeSyncTime * 86400 * 1000 + 1)).toUTCString();
@@ -738,6 +745,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 								+ '<D:status>HTTP/1.1 200 OK</D:status>'
 							+ '</D:propstat>'
 						+ '</D:response>'
+						
 						+ '<D:response xmlns:lp1="DAV:" xmlns:lp2="http://apache.org/dav/props/">'
 							+ `<D:href>${davBasePath}zotero/AAAAAAAA.zip</D:href>`
 							+ '<D:propstat>'
@@ -756,6 +764,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 								+ '<D:status>HTTP/1.1 200 OK</D:status>'
 							+ '</D:propstat>'
 						+ '</D:response>'
+						
 						+ '<D:response xmlns:lp1="DAV:" xmlns:lp2="http://apache.org/dav/props/">'
 							+ `<D:href>${davBasePath}zotero/BBBBBBBB.zip</D:href>`
 							+ '<D:propstat>'
@@ -770,6 +779,46 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 							+ '<D:propstat>'
 								+ '<D:prop>'
 								+ `<lp1:getlastmodified>${currentTime}</lp1:getlastmodified>`
+								+ '</D:prop>'
+								+ '<D:status>HTTP/1.1 200 OK</D:status>'
+							+ '</D:propstat>'
+						+ '</D:response>'
+						
+						// Item that exists
+						+ '<D:response xmlns:lp1="DAV:" xmlns:lp2="http://apache.org/dav/props/">'
+							+ `<D:href>${davBasePath}zotero/${item1Key}.zip</D:href>`
+							+ '<D:propstat>'
+								+ '<D:prop>'
+								+ `<lp1:getlastmodified>${beforeTime}</lp1:getlastmodified>`
+								+ '</D:prop>'
+								+ '<D:status>HTTP/1.1 200 OK</D:status>'
+							+ '</D:propstat>'
+						+ '</D:response>'
+						+ '<D:response xmlns:lp1="DAV:" xmlns:lp2="http://apache.org/dav/props/">'
+							+ `<D:href>${davBasePath}zotero/${item1Key}.prop</D:href>`
+							+ '<D:propstat>'
+								+ '<D:prop>'
+								+ `<lp1:getlastmodified>${beforeTime}</lp1:getlastmodified>`
+								+ '</D:prop>'
+								+ '<D:status>HTTP/1.1 200 OK</D:status>'
+							+ '</D:propstat>'
+						+ '</D:response>'
+						
+						// Item in sync queue
+						+ '<D:response xmlns:lp1="DAV:" xmlns:lp2="http://apache.org/dav/props/">'
+							+ `<D:href>${davBasePath}zotero/${item2Key}.zip</D:href>`
+							+ '<D:propstat>'
+								+ '<D:prop>'
+								+ `<lp1:getlastmodified>${beforeTime}</lp1:getlastmodified>`
+								+ '</D:prop>'
+								+ '<D:status>HTTP/1.1 200 OK</D:status>'
+							+ '</D:propstat>'
+						+ '</D:response>'
+						+ '<D:response xmlns:lp1="DAV:" xmlns:lp2="http://apache.org/dav/props/">'
+							+ `<D:href>${davBasePath}zotero/${item2Key}.prop</D:href>`
+							+ '<D:propstat>'
+								+ '<D:prop>'
+								+ `<lp1:getlastmodified>${beforeTime}</lp1:getlastmodified>`
 								+ '</D:prop>'
 								+ '<D:status>HTTP/1.1 200 OK</D:status>'
 							+ '</D:propstat>'
@@ -797,8 +846,12 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				status: 204
 			});
 			
-			yield controller.purgeOrphanedStorageFiles();
+			var results = yield controller.purgeOrphanedStorageFiles();
 			assertRequestCount(5);
+			
+			assert.sameMembers(results.deleted, ['lastsync.txt', 'lastsync', 'AAAAAAAA.prop', 'AAAAAAAA.zip']);
+			assert.lengthOf(results.missing, 0);
+			assert.lengthOf(results.error, 0);
 		})
 		
 		it("shouldn't purge if purged recently", function* () {
