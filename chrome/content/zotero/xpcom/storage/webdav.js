@@ -1071,7 +1071,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			lastModified = Zotero.Date.strToISO(lastModified);
 			lastModified = Zotero.Date.sqlToDate(lastModified, true);
 			
-			// Delete files older than a day before last sync time
+			// Delete files older than a week before last sync time
 			var days = (lastSyncDate - lastModified) / 1000 / 60 / 60 / 24;
 			
 			if (days > daysBeforeSyncTime) {

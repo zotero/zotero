@@ -262,7 +262,7 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	}
 	
 	// If WebDAV sync, purge orphaned files
-	if (this.controller.mode == 'webdav') {
+	if (downloadSuccessful && this.controller.mode == 'webdav') {
 		try {
 			yield this.controller.purgeOrphanedStorageFiles(libraryID);
 		}
