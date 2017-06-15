@@ -65,7 +65,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	var _pdfInfo = null; // nsIFile to executable
 	
 	var _idleObserverIsRegistered = false;
-	var _idleObserverDelay = 5;
+	var _idleObserverDelay = 30;
 	var _processorTimer = null;
 	var _processorBlacklist = {};
 	var _upgradeCheck = true;
@@ -99,7 +99,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		yield this.registerPDFTool('converter');
 		yield this.registerPDFTool('info');
 		
-		this.startContentProcessor();
+		Zotero.uiReadyPromise.delay(30000).then(() => this.startContentProcessor());
 		Zotero.addShutdownListener(this.stopContentProcessor.bind(this));
 	});
 	
@@ -1092,7 +1092,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 				function () {
 					Zotero.Fulltext.processUnprocessedContent(itemIDs);
 				},
-				100,
+				200,
 				Components.interfaces.nsITimer.TYPE_ONE_SHOT
 			);
 		}
