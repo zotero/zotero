@@ -33,7 +33,7 @@ before_script:
     - node_modules/.bin/gulp build
     - if [ $FX_VERSION = "54.0b" ] && [ $TRAVIS_REPO_SLUG = "zotero/zotero" ] && [ $TRAVIS_BRANCH = "master" ] && [ $TRAVIS_PULL_REQUEST = "false" ]; then
         mkdir build-zip && cd build && zip -r ../build-zip/$TRAVIS_COMMIT.zip * && cd .. &&
-        dpl --provider=s3 --access-key-id=AKIAJFDVJ54MCAEXPQ5Q --bucket=zotero-download --local-dir=build-zip --upload-dir=ci/client --acl=public-read;
+        dpl --provider=s3 --access-key-id=AKIAJFDVJ54MCAEXPQ5Q --bucket=zotero-download --local-dir=build-zip --upload-dir=ci/client --acl=public-read --skip_cleanup=true;
       fi
     - unset AWS_SECRET_ACCESS_KEY
 script:
