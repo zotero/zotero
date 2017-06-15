@@ -6,8 +6,11 @@ cache:
     directories:
         - "node_modules"
 env:
-    - FX_VERSION="54.0b"
-    - FX_VERSION="45.0.2esr"
+    global:
+        secure: ""
+    matrix:
+        - FX_VERSION="54.0b"
+        - FX_VERSION="45.0.2esr"
 matrix:
     fast_finish: true
     #allow_failures:
@@ -15,6 +18,7 @@ matrix:
 notifications:
     email: false
 install:
+    - gem install dpl
     - if [ $FX_VERSION = "45.0.2esr" ]; then
         wget -O tarball "https://archive.mozilla.org/pub/firefox/releases/45.0.2esr/linux-x86_64/en-US/firefox-45.0.2esr.tar.bz2";
       fi
@@ -27,23 +31,13 @@ before_script:
     - sh -e /etc/init.d/xvfb start
     - npm i
     - node_modules/.bin/gulp build
-script:
-    - test/runtests.sh -x firefox/firefox
-before_deploy:
     - mkdir build-zip
     - cd build
     - zip -r ../build-zip/$TRAVIS_COMMIT.zip *
     - cd ..
-deploy:
-    provider: s3
-    access_key_id: AKIAJFDVJ54MCAEXPQ5Q
-    secret_access_key:
-        secure: YXRlWOAMELuCmArVTR50NH3HHEK/nwltmiS5iIEIVx0hFtI/GJCZWjWH0eQ5ro1V1GgYyEGT+Miud9SXNDeejYFNpR80G4gBSSpbngvT/CBYE5IIN/rvlykklCy5+HEgAZEt72zowBDzlX2DBRYPjryKXjL0Ahcz/H7NGvtS5Hk=
-    bucket: zotero-download
-    skip_cleanup: true
-    local-dir: build-zip
-    upload-dir: ci/client
-    acl: public-read
-    on:
-        repo: zotero/zotero
-        condition: "$FX_VERSION = 54.0b"
+    - if [ $FX_VERSION = "54.0b" ] && [ $TRAVIS_REPO_SLUG = "zotero/zotero" ] && [ $TRAVIS_BRANCH = "master" ] && [ $TRAVIS_PULL_REQUEST = "false" ]; then
+        dpl --provider=s3 --access-key-id=AKIAJFDVJ54MCAEXPQ5Q --bucket=zotero-download --local-dir=build-zip --upload-dir=ci/client --acl=public-read;
+      fi
+    - unset AWS_SECRET_ACCESS_KEY
+script:
+    - test/runtests.sh -x firefox/firefox
