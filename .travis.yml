@@ -36,7 +36,13 @@ before_script:
         zip -r ../build-zip/$TRAVIS_COMMIT.zip *;
         cd ..;
         gem install dpl;
-        dpl --provider=s3 --access-key-id=AKIAJFDVJ54MCAEXPQ5Q --bucket=zotero-download --local-dir=build-zip --upload-dir=ci/client --acl=public-read --skip_cleanup=true;
+        dpl --provider=s3
+            --access-key-id=AKIAJFDVJ54MCAEXPQ5Q
+            --bucket=zotero-download
+            --local-dir=build-zip
+            --upload-dir=ci/client
+            --acl=public-read
+            --skip_cleanup=true;
       fi
     - unset AWS_SECRET_ACCESS_KEY
 script:
