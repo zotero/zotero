@@ -240,11 +240,7 @@ var ZoteroPane = new function()
 		else if (Zotero.Prefs.get('firstRun2')) {
 			if (Zotero.Schema.dbInitialized || !Zotero.Sync.Server.enabled) {
 				setTimeout(function () {
-					if(Zotero.isStandalone) {
-						ZoteroPane_Local.loadURI("https://www.zotero.org/start_standalone");
-					} else {
-						gBrowser.selectedTab = gBrowser.addTab("https://www.zotero.org/start");
-					}
+					ZoteroPane_Local.loadURI(ZOTERO_CONFIG.START_URL);
 				}, 400);
 			}
 			Zotero.Prefs.set('firstRun2', false);
