@@ -49,4 +49,4 @@ before_script:
       fi
     - unset AWS_SECRET_ACCESS_KEY
 script:
-    - test/runtests.sh -x firefox/firefox
+    - test/runtests.sh -x firefox/firefox -f
