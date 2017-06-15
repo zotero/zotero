@@ -7,7 +7,7 @@ cache:
         - "node_modules"
 env:
     global:
-        secure: ""
+        secure: "NxvkbZ7/Op7BTGQRR3C4q8lLoO29f8WtyNN27NSH7AO3H0vBr1Vp5xO8gn+H2qHEug5HvM+YrZ/xAkNXaZVbOInmBmKVMxqVvdpKp9JM1Amf+gzsXWQphfySvs6iqzyP6cwU/jspdvX/WSakgU5v7PWXxtUIaKxdANt6Rw7W+Pc="
     matrix:
         - FX_VERSION="54.0b"
         - FX_VERSION="45.0.2esr"
