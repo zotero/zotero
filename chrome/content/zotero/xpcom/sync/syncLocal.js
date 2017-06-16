@@ -640,22 +640,20 @@ Zotero.Sync.Data.Local = {
 		var sql = "INSERT OR REPLACE INTO syncCache "
 			+ "(libraryID, key, syncObjectTypeID, version, data) VALUES ";
 		var chunkSize = Math.floor(Zotero.DB.MAX_BOUND_PARAMETERS / 5);
-		return Zotero.DB.executeTransaction(function* () {
-			return Zotero.Utilities.Internal.forEachChunkAsync(
-				jsonArray,
-				chunkSize,
-				Zotero.Promise.coroutine(function* (chunk) {
-					var params = [];
-					for (let i = 0; i < chunk.length; i++) {
-						let o = chunk[i];
-						params.push(libraryID, o.key, syncObjectTypeID, o.version, JSON.stringify(o));
-					}
-					return Zotero.DB.queryAsync(
-						sql + chunk.map(() => "(?, ?, ?, ?, ?)").join(", "), params
-					);
-				})
-			);
-		}.bind(this));
+		return Zotero.Utilities.Internal.forEachChunkAsync(
+			jsonArray,
+			chunkSize,
+			Zotero.Promise.coroutine(function* (chunk) {
+				var params = [];
+				for (let i = 0; i < chunk.length; i++) {
+					let o = chunk[i];
+					params.push(libraryID, o.key, syncObjectTypeID, o.version, JSON.stringify(o));
+				}
+				return Zotero.DB.queryAsync(
+					sql + chunk.map(() => "(?, ?, ?, ?, ?)").join(", "), params
+				);
+			})
+		);
 	}),
 	
 	
@@ -1646,18 +1644,16 @@ Zotero.Sync.Data.Local = {
 		
 		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
 		var sql = "DELETE FROM syncDeleteLog WHERE libraryID=? AND syncObjectTypeID=? AND key IN (";
-		return Zotero.DB.executeTransaction(function* () {
-			return Zotero.Utilities.Internal.forEachChunkAsync(
-				keys,
-				Zotero.DB.MAX_BOUND_PARAMETERS - 2,
-				Zotero.Promise.coroutine(function* (chunk) {
-					var params = [libraryID, syncObjectTypeID].concat(chunk);
-					return Zotero.DB.queryAsync(
-						sql + Array(chunk.length).fill('?').join(',') + ")", params
-					);
-				})
-			);
-		}.bind(this));
+		return Zotero.Utilities.Internal.forEachChunkAsync(
+			keys,
+			Zotero.DB.MAX_BOUND_PARAMETERS - 2,
+			Zotero.Promise.coroutine(function* (chunk) {
+				var params = [libraryID, syncObjectTypeID].concat(chunk);
+				return Zotero.DB.queryAsync(
+					sql + Array(chunk.length).fill('?').join(',') + ")", params
+				);
+			})
+		);
 	},
 	
 	
@@ -1691,24 +1687,22 @@ Zotero.Sync.Data.Local = {
 		);
 		
 		// Insert or update
-		yield Zotero.DB.executeTransaction(function* () {
-			var sql = "INSERT OR REPLACE INTO syncQueue "
-				+ "(libraryID, key, syncObjectTypeID, lastCheck, tries) VALUES ";
-			return Zotero.Utilities.Internal.forEachChunkAsync(
-				keys,
-				Math.floor(Zotero.DB.MAX_BOUND_PARAMETERS / 5),
-				function (chunk) {
-					var params = chunk.reduce(
-						(arr, key) => arr.concat(
-							[libraryID, key, syncObjectTypeID, now, keyTries[key]]
-						), []
-					);
-					return Zotero.DB.queryAsync(
-						sql + Array(chunk.length).fill('(?, ?, ?, ?, ?)').join(', '), params
-					);
-				}
-			);
-		}.bind(this));
+		var sql = "INSERT OR REPLACE INTO syncQueue "
+			+ "(libraryID, key, syncObjectTypeID, lastCheck, tries) VALUES ";
+		return Zotero.Utilities.Internal.forEachChunkAsync(
+			keys,
+			Math.floor(Zotero.DB.MAX_BOUND_PARAMETERS / 5),
+			function (chunk) {
+				var params = chunk.reduce(
+					(arr, key) => arr.concat(
+						[libraryID, key, syncObjectTypeID, now, keyTries[key]]
+					), []
+				);
+				return Zotero.DB.queryAsync(
+					sql + Array(chunk.length).fill('(?, ?, ?, ?, ?)').join(', '), params
+				);
+			}
+		);
 	}),
 	
 	
@@ -1746,18 +1740,16 @@ Zotero.Sync.Data.Local = {
 	removeObjectsFromSyncQueue: function (objectType, libraryID, keys) {
 		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
 		var sql = "DELETE FROM syncQueue WHERE libraryID=? AND syncObjectTypeID=? AND key IN (";
-		return Zotero.DB.executeTransaction(function* () {
-			return Zotero.Utilities.Internal.forEachChunkAsync(
-				keys,
-				Zotero.DB.MAX_BOUND_PARAMETERS - 2,
-				Zotero.Promise.coroutine(function* (chunk) {
-					var params = [libraryID, syncObjectTypeID].concat(chunk);
-					return Zotero.DB.queryAsync(
-						sql + Array(chunk.length).fill('?').join(',') + ")", params
-					);
-				})
-			);
-		}.bind(this));
+		return Zotero.Utilities.Internal.forEachChunkAsync(
+			keys,
+			Zotero.DB.MAX_BOUND_PARAMETERS - 2,
+			Zotero.Promise.coroutine(function* (chunk) {
+				var params = [libraryID, syncObjectTypeID].concat(chunk);
+				return Zotero.DB.queryAsync(
+					sql + Array(chunk.length).fill('?').join(',') + ")", params
+				);
+			})
+		);
 	},
 	
 	
