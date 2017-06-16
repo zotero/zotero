@@ -451,9 +451,19 @@ describe("Zotero.CollectionTreeView", function() {
 		
 		it("should select a new feed", function* () {
 			var feed = yield createFeed();
-			// Library should still be selected
+			// Feed should be selected
 			assert.equal(cv.getSelectedLibraryID(), feed.id);
-		})
+		});
+		
+		it("shouldn't select a new feed with skipSelect: true", function* () {
+			var feed = yield createFeed({
+				saveOptions: {
+					skipSelect: true
+				}
+			});
+			// Library should still be selected
+			assert.equal(cv.getSelectedLibraryID(), userLibraryID);
+		});
 		
 		it("should remove deleted feed", function* () {
 			var feed = yield createFeed();

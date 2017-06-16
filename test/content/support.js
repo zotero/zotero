@@ -354,7 +354,7 @@ var createFeed = Zotero.Promise.coroutine(function* (props = {}) {
 	feed.refreshInterval = props.refreshInterval || 12;
 	feed.cleanupReadAfter = props.cleanupReadAfter || 2;
 	feed.cleanupUnreadAfter = props.cleanupUnreadAfter || 30;
-	yield feed.saveTx();
+	yield feed.saveTx(props.saveOptions);
 	return feed;
 });
 

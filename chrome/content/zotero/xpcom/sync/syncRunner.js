@@ -527,9 +527,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			group.version = info.version;
 			group.archived = false;
 			group.fromJSON(info.data, Zotero.Users.getCurrentUserID());
-			yield group.saveTx({
-				skipSelect: true
-			});
+			yield group.saveTx();
 			
 			// Add group to library list
 			libraries.push(group.libraryID);

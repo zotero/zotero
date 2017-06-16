@@ -490,7 +490,12 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 							+ "together in collectionTreeView::notify()")
 					}
 					yield this.reload();
-					yield this.selectByID(selectRow ? "L" + id : currentTreeRow.id);
+					yield this.selectByID(
+						// Groups only come from sync, so they should never be auto-selected
+						(type != 'group' && selectRow)
+							? "L" + id
+							: currentTreeRow.id
+					);
 					break;
 			}
 		}
