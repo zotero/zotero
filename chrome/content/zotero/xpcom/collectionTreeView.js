@@ -259,8 +259,10 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 });
 
 
-/*
- *  Redisplay everything
+/**
+ * Refresh tree and invalidate
+ *
+ * See note for refresh() for requirements of calling code
  */
 Zotero.CollectionTreeView.prototype.reload = function()
 {
@@ -433,13 +435,11 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 				}
 				this._removeRow(row);
 				yield this._addSortedRow('collection', id);
-				if (!extraData[id].skipSelect) {
-					yield this.selectByID(currentTreeRow.id);
-					if (reopen) {
-						let newRow = this.getRowIndexByID(rowID);
-						if (!this.isContainerOpen(newRow)) {
-							yield this.toggleOpenState(newRow);
-						}
+				yield this.selectByID(currentTreeRow.id);
+				if (reopen) {
+					let newRow = this.getRowIndexByID(rowID);
+					if (!this.isContainerOpen(newRow)) {
+						yield this.toggleOpenState(newRow);
 					}
 				}
 			}
@@ -484,17 +484,13 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 					break;
 				
 				case 'group':
-					if (ids.length != 1) {
+				case 'feed':
+					if (type == 'groups' && ids.length != 1) {
 						Zotero.logError("WARNING: Multiple groups shouldn't currently be added "
 							+ "together in collectionTreeView::notify()")
 					}
 					yield this.reload();
-					yield this.selectByID(currentTreeRow.id);
-					break;
-				
-				case 'feed':
-					yield this.reload();
-					yield this.selectByID("L" + id);
+					yield this.selectByID(selectRow ? "L" + id : currentTreeRow.id);
 					break;
 			}
 		}

@@ -137,7 +137,9 @@ Zotero.Feeds = new function() {
 		// This could potentially be a massive list, so we save in a transaction.
 		yield Zotero.DB.executeTransaction(function* () {
 			for (let feed of newFeeds) {
-				yield feed.save();
+				yield feed.save({
+					skipSelect: true
+				});
 			}
 		});
 		// Finally, update
@@ -190,7 +192,9 @@ Zotero.Feeds = new function() {
 				obj.cleanupUnreadAfter = json[url][2];
 			}
 			let feed = new Zotero.Feed(obj);
-			yield feed.save();
+			yield feed.saveTx({
+				skipSelect: true
+			});
 		}
 	});
 	

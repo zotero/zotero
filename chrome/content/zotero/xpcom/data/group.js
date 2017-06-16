@@ -198,7 +198,7 @@ Zotero.Group.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			+ "VALUES (" + Array(params.length).fill('?').join(', ') + ")";
 		yield Zotero.DB.queryAsync(sql, params);
 		
-		Zotero.Notifier.queue('add', 'group', this.groupID);
+		Zotero.Notifier.queue('add', 'group', this.groupID, env.notifierData);
 	}
 	else if (changedCols.length) {
 		let sql = "UPDATE groups SET " + changedCols.map(v => v + '=?').join(', ')
@@ -207,7 +207,7 @@ Zotero.Group.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		yield Zotero.DB.queryAsync(sql, params);
 		
 		if (!env.options.skipNotifier) {
-			Zotero.Notifier.queue('modify', 'group', this.groupID);
+			Zotero.Notifier.queue('modify', 'group', this.groupID, env.notifierData);
 		}
 	}
 	else {

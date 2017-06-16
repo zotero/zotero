@@ -276,7 +276,9 @@ Zotero.Feed.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			+ "VALUES (" + Array(params.length).fill('?').join(', ') + ")";
 		yield Zotero.DB.queryAsync(sql, params);
 		
-		Zotero.Notifier.queue('add', 'feed', this.libraryID, env.options.notifierQueue);
+		Zotero.Notifier.queue(
+			'add', 'feed', this.libraryID, env.notifierData, env.options.notifierQueue
+		);
 	}
 	else if (changedCols.length) {
 		let sql = "UPDATE feeds SET " + changedCols.map(v => v + '=?').join(', ')
@@ -285,7 +287,9 @@ Zotero.Feed.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		yield Zotero.DB.queryAsync(sql, params);
 		
 		if (!env.options.skipNotifier) {
-			Zotero.Notifier.queue('modify', 'feed', this.libraryID, env.options.notifierQueue);
+			Zotero.Notifier.queue(
+				'modify', 'feed', this.libraryID, env.notifierData, env.options.notifierQueue
+			);
 		}
 	}
 	else {

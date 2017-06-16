@@ -445,6 +445,9 @@ Zotero.Library.prototype.save = Zotero.Promise.coroutine(function* (options) {
 	
 	try {
 		env.notifierData = {};
+		if (env.options.skipSelect) {
+			env.notifierData.skipSelect = true;
+		}
 		
 		// Create transaction
 		if (env.options.tx) {
