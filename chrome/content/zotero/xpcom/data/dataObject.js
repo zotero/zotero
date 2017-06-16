@@ -959,7 +959,7 @@ Zotero.DataObject.prototype._saveData = function (env) {
 		env.sqlValues.push(0);
 	}
 	
-	if (env.isNew || !env.options.skipClientDateModified) {
+	if (env.isNew || !env.options.skipClientDateModifiedUpdate) {
 		env.sqlColumns.push('clientDateModified');
 		env.sqlValues.push(Zotero.DB.transactionDateTime);
 	}

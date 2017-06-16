@@ -286,20 +286,22 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 		env.parent ? env.parent : null
 	);
 	
-	if (isNew) {
-		env.sqlColumns.unshift('collectionID');
-		env.sqlValues.unshift(collectionID ? { int: collectionID } : null);
-		
-		let placeholders = env.sqlColumns.map(() => '?').join();
-		let sql = "INSERT INTO collections (" + env.sqlColumns.join(', ') + ") "
-			+ "VALUES (" + placeholders + ")";
-		yield Zotero.DB.queryAsync(sql, env.sqlValues);
-	}
-	else {
-		let sql = 'UPDATE collections SET '
-			+ env.sqlColumns.map(x => x + '=?').join(', ') + ' WHERE collectionID=?';
-		env.sqlValues.push(collectionID ? { int: collectionID } : null);
-		yield Zotero.DB.queryAsync(sql, env.sqlValues);
+	if (env.sqlColumns.length) {
+		if (isNew) {
+			env.sqlColumns.unshift('collectionID');
+			env.sqlValues.unshift(collectionID ? { int: collectionID } : null);
+			
+			let placeholders = env.sqlColumns.map(() => '?').join();
+			let sql = "INSERT INTO collections (" + env.sqlColumns.join(', ') + ") "
+				+ "VALUES (" + placeholders + ")";
+			yield Zotero.DB.queryAsync(sql, env.sqlValues);
+		}
+		else {
+			let sql = 'UPDATE collections SET '
+				+ env.sqlColumns.map(x => x + '=?').join(', ') + ' WHERE collectionID=?';
+			env.sqlValues.push(collectionID ? { int: collectionID } : null);
+			yield Zotero.DB.queryAsync(sql, env.sqlValues);
+		}
 	}
 	
 	if (this._changed.parentKey) {

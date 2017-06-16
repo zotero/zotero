@@ -171,20 +171,22 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		{ string: this.name }
 	);
 	
-	if (isNew) {
-		env.sqlColumns.unshift('savedSearchID');
-		env.sqlValues.unshift(searchID ? { int: searchID } : null);
-		
-		let placeholders = env.sqlColumns.map(() => '?').join();
-		let sql = "INSERT INTO savedSearches (" + env.sqlColumns.join(', ') + ") "
-			+ "VALUES (" + placeholders + ")";
-		yield Zotero.DB.queryAsync(sql, env.sqlValues);
-	}
-	else {
-		let sql = 'UPDATE savedSearches SET '
-			+ env.sqlColumns.map(x => x + '=?').join(', ') + ' WHERE savedSearchID=?';
-		env.sqlValues.push(searchID ? { int: searchID } : null);
-		yield Zotero.DB.queryAsync(sql, env.sqlValues);
+	if (env.sqlColumns.length) {
+		if (isNew) {
+			env.sqlColumns.unshift('savedSearchID');
+			env.sqlValues.unshift(searchID ? { int: searchID } : null);
+			
+			let placeholders = env.sqlColumns.map(() => '?').join();
+			let sql = "INSERT INTO savedSearches (" + env.sqlColumns.join(', ') + ") "
+				+ "VALUES (" + placeholders + ")";
+			yield Zotero.DB.queryAsync(sql, env.sqlValues);
+		}
+		else {
+			let sql = 'UPDATE savedSearches SET '
+				+ env.sqlColumns.map(x => x + '=?').join(', ') + ' WHERE savedSearchID=?';
+			env.sqlValues.push(searchID ? { int: searchID } : null);
+			yield Zotero.DB.queryAsync(sql, env.sqlValues);
+		}
 	}
 	
 	if (this._changed.conditions) {
