@@ -124,7 +124,7 @@ Zotero.DataDirectory = {
 				}
 				// For other custom directories that don't exist, show not-found dialog
 				else {
-					Zotero.debug("Custom data directory ${file} not found", 1);
+					Zotero.debug(`Custom data directory ${file} not found`, 1);
 					throw { name: "NS_ERROR_FILE_NOT_FOUND" };
 				}
 			}
@@ -264,7 +264,9 @@ Zotero.DataDirectory = {
 				var fp = Components.classes["@mozilla.org/filepicker;1"]
 							.createInstance(nsIFilePicker);
 				fp.init(win, Zotero.getString('dataDir.selectDir'), nsIFilePicker.modeGetFolder);
-				fp.displayDirectory = Zotero.File.pathToFile(this.dir);
+				fp.displayDirectory = Zotero.File.pathToFile(
+					this._dir ? this._dir : OS.Path.dirname(this.defaultDir)
+				);
 				fp.appendFilters(nsIFilePicker.filterAll);
 				if (fp.show() == nsIFilePicker.returnOK) {
 					var file = fp.file;

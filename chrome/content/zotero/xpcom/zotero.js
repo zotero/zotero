@@ -295,7 +295,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				_startupErrorHandler = function() {
 					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 							createInstance(Components.interfaces.nsIPromptService);
-					var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
+					var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
 						+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
 					// TEMP: lastDataDir can be removed once old persistent descriptors have been
@@ -305,7 +305,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 						Zotero.getString('general.error'),
 						Zotero.startupError + '\n\n' +
 						Zotero.getString('dataDir.previousDir') + ' ' + previousDir,
-						buttonFlags, null,
+						buttonFlags,
+						Zotero.getString('general.quit'),
 						Zotero.getString('dataDir.useDefaultLocation'),
 						Zotero.getString('general.locate'),
 						null, {});
@@ -316,7 +317,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					}
 					// Locate data directory
 					else if (index == 2) {
-						Zotero.DataDirectory.choose();
+						Zotero.DataDirectory.choose(true);
 					}
 				}
 				return;
