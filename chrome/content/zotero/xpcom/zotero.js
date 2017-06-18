@@ -313,7 +313,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					
 					// Revert to home directory
 					if (index == 1) {
-						Zotero.DataDirectory.choose(false, true);
+						Zotero.DataDirectory.choose(true, true);
 					}
 					// Locate data directory
 					else if (index == 2) {
