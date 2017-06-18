@@ -228,15 +228,27 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 		// Get synced settings first, since they affect how other data is displayed
 		let results = yield this._downloadSettings(libraryVersion);
 		if (results.result == this.DOWNLOAD_RESULT_LIBRARY_UNMODIFIED) {
-			break;
+			let stop = true;
+			// If it's the first sync of the session or a manual sync and there are objects in the
+			// sync queue, or it's a subsequent auto-sync but there are objects that it's time to try
+			// again, go through all the steps even though the library version is unchanged.
+			//
+			// TODO: Skip the steps without queued objects.
+			if (this.firstInSession || !this.background) {
+				stop = !(yield Zotero.Sync.Data.Local.hasObjectsInSyncQueue(this.libraryID));
+			}
+			else {
+				stop = !(yield Zotero.Sync.Data.Local.hasObjectsToTryInSyncQueue(this.libraryID));
+			}
+			if (stop) {
+				break;
+			}
 		}
 		else if (results.result == this.DOWNLOAD_RESULT_RESTART) {
 			yield this._onLibraryVersionChange();
 			continue loop;
 		}
-		else {
-			newLibraryVersion = results.libraryVersion;
-		}
+		newLibraryVersion = results.libraryVersion;
 		
 		//
 		// Get other object types
@@ -319,7 +331,8 @@ Zotero.Sync.Data.Engine.prototype._downloadSettings = Zotero.Promise.coroutine(f
 		Zotero.debug("Library " + this.libraryID + " hasn't been modified "
 			+ "-- skipping further object downloads");
 		return {
-			result: this.DOWNLOAD_RESULT_LIBRARY_UNMODIFIED
+			result: this.DOWNLOAD_RESULT_LIBRARY_UNMODIFIED,
+			libraryVersion: since
 		};
 	}
 	if (newLibraryVersion !== undefined && newLibraryVersion != results.libraryVersion) {
@@ -406,9 +419,20 @@ Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.corou
 	// (We don't know if the queued items are top-level or not, so we do them with child items.)
 	let queuedKeys = [];
 	if (objectType != 'item' || !options.top) {
-		queuedKeys = yield Zotero.Sync.Data.Local.getObjectsToTryFromSyncQueue(
-			objectType, this.libraryID
-		);
+		if (this.firstInSession || !this.background) {
+			queuedKeys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue(
+				objectType, this.libraryID
+			);
+		}
+		else {
+			queuedKeys = yield Zotero.Sync.Data.Local.getObjectsToTryFromSyncQueue(
+				objectType, this.libraryID
+			);
+		}
+		// Don't include items that just failed in the top-level run
+		if (this.failedItems.length) {
+			queuedKeys = Zotero.Utilities.arrayDiff(queuedKeys, this.failedItems);
+		}
 		if (queuedKeys.length) {
 			Zotero.debug(`Refetching ${queuedKeys.length} queued `
 				+ (queuedKeys.length == 1 ? objectType : objectTypePlural))

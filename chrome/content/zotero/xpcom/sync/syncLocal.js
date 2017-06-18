@@ -1712,6 +1712,13 @@ Zotero.Sync.Data.Local = {
 	}),
 	
 	
+	hasObjectsInSyncQueue: function (libraryID) {
+		return Zotero.DB.valueQueryAsync(
+			"SELECT ROWID FROM syncQueue WHERE libraryID=? LIMIT 1", libraryID
+		).then(x => !!x);
+	},
+	
+	
 	getObjectsFromSyncQueue: function (objectType, libraryID) {
 		return Zotero.DB.columnQueryAsync(
 			"SELECT key FROM syncQueue WHERE libraryID=? AND "
@@ -1719,6 +1726,25 @@ Zotero.Sync.Data.Local = {
 			[libraryID, objectType]
 		);
 	},
+	
+	
+	hasObjectsToTryInSyncQueue: Zotero.Promise.coroutine(function* (libraryID) {
+		var rows = yield Zotero.DB.queryAsync(
+			"SELECT key, lastCheck, tries FROM syncQueue WHERE libraryID=?", libraryID
+		);
+		for (let row of rows) {
+			let interval = this._syncQueueIntervals[row.tries];
+			// Keep using last interval if beyond
+			if (!interval) {
+				interval = this._syncQueueIntervals[this._syncQueueIntervals.length - 1];
+			}
+			let nextCheck = row.lastCheck + interval * 60 * 60;
+			if (nextCheck <= Zotero.Date.getUnixTimestamp()) {
+				return true;
+			}
+		}
+		return false;
+	}),
 	
 	
 	getObjectsToTryFromSyncQueue: Zotero.Promise.coroutine(function* (objectType, libraryID) {
