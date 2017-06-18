@@ -2188,6 +2188,99 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue(objectType, libraryID);
 			assert.sameMembers(keys, ['BBBBBBBB']);
 		});
+		
+		
+		it("should add items that exist remotely in a locally deleted, remotely modified collection back to collection", async function () {
+			({ engine, client, caller } = await setup({
+				stopOnError: false
+			}));
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			var collection = await createDataObject('collection');
+			var collectionKey = collection.key;
+			await collection.eraseTx();
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item', { deleted: true });
+			
+			var headers = {
+				"Last-Modified-Version": 5
+			};
+			setResponse({
+				method: "GET",
+				url: `users/1/collections?format=json&collectionKey=${collectionKey}`,
+				status: 200,
+				headers,
+				json: [
+					makeCollectionJSON({
+						key: collectionKey,
+						version: 5,
+						name: "A"
+					})
+				]
+			});
+			setResponse({
+				method: "GET",
+				url: `users/1/collections/${collectionKey}/items/top?format=keys`,
+				status: 200,
+				headers,
+				text: item1.key + "\n" + item2.key + "\n"
+			});
+			await engine._downloadObjects('collection', [collectionKey]);
+			
+			var collection = Zotero.Collections.getByLibraryAndKey(libraryID, collectionKey);
+			assert.sameMembers(collection.getChildItems(true), [item1.id, item2.id]);
+			// Item should be removed from trash
+			assert.isFalse(item2.deleted);
+		});
+		
+		
+		it("should add locally deleted items that exist remotely in a locally deleted, remotely modified collection to sync queue and remove from delete log", async function () {
+			({ engine, client, caller } = await setup({
+				stopOnError: false
+			}));
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			var collection = await createDataObject('collection');
+			var collectionKey = collection.key;
+			await collection.eraseTx();
+			var item = await createDataObject('item');
+			await item.eraseTx();
+			
+			var headers = {
+				"Last-Modified-Version": 5
+			};
+			setResponse({
+				method: "GET",
+				url: `users/1/collections?format=json&collectionKey=${collectionKey}`,
+				status: 200,
+				headers,
+				json: [
+					makeCollectionJSON({
+						key: collectionKey,
+						version: 5,
+						name: "A"
+					})
+				]
+			});
+			setResponse({
+				method: "GET",
+				url: `users/1/collections/${collectionKey}/items/top?format=keys`,
+				status: 200,
+				headers,
+				text: item.key + "\n"
+			});
+			await engine._downloadObjects('collection', [collectionKey]);
+			
+			var collection = Zotero.Collections.getByLibraryAndKey(libraryID, collectionKey);
+			
+			assert.sameMembers(
+				await Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', libraryID),
+				[item.key]
+			);
+			assert.isFalse(
+				await Zotero.Sync.Data.Local.getDateDeleted('item', libraryID, item.key)
+			);
+		});
 	});
 	
 	

@@ -494,6 +494,38 @@ describe("Zotero.Sync.Data.Local", function() {
 			assert.isFalse(obj.synced);
 		});
 		
+		it("should restore locally deleted collections and searches that changed remotely", async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			for (let type of ['collection', 'search']) {
+				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+				let obj = await createDataObject(type, { version: 1 });
+				let data = obj.toJSON();
+				
+				await obj.eraseTx();
+				
+				data.key = obj.key;
+				data.version = 2;
+				let json = {
+					key: obj.key,
+					version: 2,
+					data
+				};
+				let results = await Zotero.Sync.Data.Local.processObjectsFromJSON(
+					type, libraryID, [json], { stopOnError: true }
+				);
+				assert.isTrue(results[0].processed);
+				assert.notOk(results[0].conflict);
+				assert.isTrue(results[0].restored);
+				assert.isUndefined(results[0].changes);
+				assert.isUndefined(results[0].conflicts);
+				obj = objectsClass.getByLibraryAndKey(libraryID, data.key);
+				assert.equal(obj.version, 2);
+				assert.isTrue(obj.synced);
+				assert.isFalse(await Zotero.Sync.Data.Local.getDateDeleted(type, libraryID, data.key));
+			}
+		});
+		
 		it("should delete older versions in sync cache after processing", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			

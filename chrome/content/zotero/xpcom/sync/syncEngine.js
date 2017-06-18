@@ -463,7 +463,7 @@ Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.corou
  *
  * @return {Promise<Integer>} - A download result code (this.DOWNLOAD_RESULT_*)
  */
-Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(function* (objectType, keys) {
+Zotero.Sync.Data.Engine.prototype._downloadObjects = async function (objectType, keys) {
 	var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 	
 	var remainingKeys = [...keys];
@@ -506,12 +506,13 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 		);
 		
 		var conflicts = [];
+		var restored = [];
 		var num = 0;
 		
 		// Process batches of object data as they're available, one at a time
-		yield Zotero.Promise.map(
+		await Zotero.Promise.map(
 			json,
-			Zotero.Promise.coroutine(function* (batch) {
+			async function (batch) {
 				this._failedCheck();
 				
 				Zotero.debug(`Processing batch of downloaded ${objectTypePlural} in ${this.library.name}`);
@@ -527,7 +528,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 				});
 				
 				// Process objects
-				let results = yield Zotero.Sync.Data.Local.processObjectsFromJSON(
+				let results = await Zotero.Sync.Data.Local.processObjectsFromJSON(
 					objectType,
 					this.libraryID,
 					batch,
@@ -563,6 +564,11 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 					// If data was processed, remove JSON
 					if (x.processed) {
 						delete objectData[x.key];
+						
+						// We'll need to add items back to restored collections
+						if (x.restored) {
+							restored.push(x.key);
+						}
 					}
 					// If object shouldn't be retried, mark as processed
 					if (x.processed || !x.retry) {
@@ -574,11 +580,17 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 				});
 				remainingKeys = Zotero.Utilities.arrayDiff(remainingKeys, processedKeys);
 				conflicts.push(...conflictResults);
-			}.bind(this)),
+			}.bind(this),
 			{
 				concurrency: 1
 			}
 		);
+		
+		// If any locally deleted collections were restored, either add them back to the collection
+		// (if the items still exist) or remove them from the delete log and add them to the sync queue
+		if (restored.length && objectType == 'collection') {
+			await this._restoreRestoredCollectionItems(restored);
+		}
 		
 		this._failedCheck();
 		
@@ -590,7 +602,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 				Zotero.debug(`Removing ${missingKeys.length} missing `
 					+ Zotero.Utilities.pluralize(missingKeys.length, [objectType, objectTypePlural])
 					+ " from sync queue");
-				yield Zotero.Sync.Data.Local.removeObjectsFromSyncQueue(objectType, this.libraryID, missingKeys);
+				await Zotero.Sync.Data.Local.removeObjectsFromSyncQueue(objectType, this.libraryID, missingKeys);
 				remainingKeys = Zotero.Utilities.arrayDiff(remainingKeys, missingKeys);
 			}
 		}
@@ -602,7 +614,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 				Zotero.debug(`Queueing ${failedKeys.length} failed `
 					+ Zotero.Utilities.pluralize(failedKeys.length, [objectType, objectTypePlural])
 					+ " for later", 2);
-				yield Zotero.Sync.Data.Local.addObjectsToSyncQueue(
+				await Zotero.Sync.Data.Local.addObjectsToSyncQueue(
 					objectType, this.libraryID, failedKeys
 				);
 				
@@ -629,7 +641,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 	
 	// Show conflict resolution window
 	if (conflicts.length) {
-		let results = yield Zotero.Sync.Data.Local.processConflicts(
+		let results = await Zotero.Sync.Data.Local.processConflicts(
 			objectType, this.libraryID, conflicts, this._getOptions()
 		);
 		// Keys can be unprocessed if conflict resolution is cancelled
@@ -637,11 +649,77 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(fu
 		if (!keys.length) {
 			throw new Zotero.Sync.UserCancelledException();
 		}
-		yield Zotero.Sync.Data.Local.removeObjectsFromSyncQueue(objectType, this.libraryID, keys);
+		await Zotero.Sync.Data.Local.removeObjectsFromSyncQueue(objectType, this.libraryID, keys);
 	}
 	
 	return this.DOWNLOAD_RESULT_CONTINUE;
-});
+};
+
+
+/**
+ * If a collection is deleted locally but modified remotely between syncs, the local collection is
+ * restored, but collection membership is a property of items, the local items that were previously
+ * in that collection won't be any longer (or they might have been deleted along with the collection),
+ * so we have to get the current collection items from the API and either add them back
+ * (if they exist) or clear them from the delete log and mark them for download.
+ *
+ * Remote items in the trash aren't currently restored and will be removed from the collection when the
+ * local collection-item removal syncs up.
+ */
+Zotero.Sync.Data.Engine.prototype._restoreRestoredCollectionItems = async function (collectionKeys) {
+	for (let collectionKey of collectionKeys) {
+		let { keys: itemKeys } = await this.apiClient.getKeys(
+			this.library.libraryType,
+			this.libraryTypeID,
+			{
+				target: `collections/${collectionKey}/items/top`,
+				format: 'keys'
+			}
+		);
+		
+		if (itemKeys.length) {
+			let collection = Zotero.Collections.getByLibraryAndKey(this.libraryID, collectionKey);
+			let addToCollection = [];
+			let addToQueue = [];
+			for (let itemKey of itemKeys) {
+				let o = Zotero.Items.getByLibraryAndKey(this.libraryID, itemKey);
+				if (o) {
+					addToCollection.push(o.id);
+					// Remove item from trash if it's there, since it's not in the trash remotely.
+					// (This would happen if items were moved to the trash along with the collection
+					// deletion.)
+					if (o.deleted) {
+						o.deleted = false
+						await o.saveTx();
+					}
+				}
+				else {
+					addToQueue.push(itemKey);
+				}
+			}
+			if (addToCollection.length) {
+				Zotero.debug(`Restoring ${addToCollection.length} `
+					+ `${Zotero.Utilities.pluralize(addToCollection.length, ['item', 'items'])} `
+					+ `to restored collection ${collection.libraryKey}`);
+				await Zotero.DB.executeTransaction(function* () {
+					yield collection.addItems(addToCollection);
+				}.bind(this));
+			}
+			if (addToQueue.length) {
+				Zotero.debug(`Restoring ${addToQueue.length} deleted `
+					+ `${Zotero.Utilities.pluralize(addToQueue.length, ['item', 'items'])} `
+					+ `in restored collection ${collection.libraryKey}`);
+				await Zotero.Sync.Data.Local.removeObjectsFromDeleteLog(
+					'item', this.libraryID, addToQueue
+				);
+				await Zotero.Sync.Data.Local.addObjectsToSyncQueue(
+					'item', this.libraryID, addToQueue
+				);
+			}
+		}
+	}
+};
+
 
 
 /**

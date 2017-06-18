@@ -665,6 +665,7 @@ Zotero.Sync.Data.Local = {
 	 *         {Boolean} processed
 	 *         {Object} [error]
 	 *         {Boolean} [retry]
+	 *         {Boolean} [restored=false] - Locally deleted object was added back
 	 *         {Boolean} [conflict=false]
 	 *         {Object} [left] - Local JSON data for conflict (or .deleted and .dateDeleted)
 	 *         {Object} [right] - Remote JSON data for conflict
@@ -783,6 +784,7 @@ Zotero.Sync.Data.Local = {
 						let obj = yield objectsClass.getByLibraryAndKeyAsync(
 							libraryID, objectKey, { noCache: true }
 						);
+						let restored = false;
 						if (obj) {
 							Zotero.debug("Matching local " + objectType + " exists", 4);
 							
@@ -921,13 +923,14 @@ Zotero.Sync.Data.Local = {
 								// Auto-restore some locally deleted objects that have changed remotely
 								case 'collection':
 								case 'search':
+									Zotero.debug(`${ObjectType} ${objectKey} was modified remotely `
+										+ '-- restoring');
 									yield this.removeObjectsFromDeleteLog(
 										objectType,
 										libraryID,
 										[objectKey]
 									);
-									
-									throw new Error("Unimplemented");
+									restored = true;
 									break;
 								
 								default:
@@ -946,6 +949,9 @@ Zotero.Sync.Data.Local = {
 						}
 						
 						let saveResults = yield this._saveObjectFromJSON(obj, jsonObject, saveOptions);
+						if (restored) {
+							saveResults.restored = true;
+						}
 						results.push(saveResults);
 						if (!saveResults.processed) {
 							throw saveResults.error;
