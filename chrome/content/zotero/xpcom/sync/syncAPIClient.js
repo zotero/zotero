@@ -164,6 +164,35 @@ Zotero.Sync.APIClient.prototype = {
 	}),
 	
 	
+	getKeys: async function (libraryType, libraryTypeID, queryParams) {
+		var params = {
+			libraryType: libraryType,
+			libraryTypeID: libraryTypeID,
+			format: 'keys'
+		};
+		if (queryParams) {
+			for (let i in queryParams) {
+				params[i] = queryParams[i];
+			}
+		}
+		
+		// TODO: Use pagination
+		var uri = this.buildRequestURI(params);
+		
+		var options = {
+			successCodes: [200, 304]
+		};
+		var xmlhttp = await this.makeRequest("GET", uri, options);
+		if (xmlhttp.status == 304) {
+			return false;
+		}
+		return {
+			libraryVersion: this._getLastModifiedVersion(xmlhttp),
+			keys: xmlhttp.responseText.trim().split(/\n/).filter(key => key)
+		};
+	},
+	
+	
 	/**
 	 * Return a promise for a JS object with object keys as keys and version
 	 * numbers as values. By default, returns all objects in the library.
