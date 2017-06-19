@@ -306,11 +306,11 @@ describe("Zotero.Feed", function() {
 		var modifiedFeedUrl = getTestDataUrl("feedModified.rss");
 		
 		before(function() {
-			scheduleNextFeedCheck = sinon.stub(Zotero.Feeds, 'scheduleNextFeedCheck');
+			scheduleNextFeedCheck = sinon.stub(Zotero.Feeds, 'scheduleNextFeedCheck').resolves();
 		});
 		
 		beforeEach(function* (){
-			scheduleNextFeedCheck.reset();
+			scheduleNextFeedCheck.resetHistory();
 			feed = yield createFeed();
 			feed._feedUrl = feedUrl;
 			yield feed.updateFeed();
@@ -325,12 +325,10 @@ describe("Zotero.Feed", function() {
 		});
 		
 		it('should schedule next feed check', function* () {
-			
 			let feed = yield createFeed();
 			feed._feedUrl = feedUrl;
 			yield feed.updateFeed();
 			assert.equal(scheduleNextFeedCheck.called, true);
-			
 		});
 		
 		it('should add new feed items', function* () {

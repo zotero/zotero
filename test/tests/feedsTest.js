@@ -166,7 +166,7 @@ describe("Zotero.Feeds", function () {
 		before(function* () {
 			yield clearFeeds();
 		
-			sinon.stub(Zotero.Feeds, 'scheduleNextFeedCheck');
+			sinon.stub(Zotero.Feeds, 'scheduleNextFeedCheck').resolves();
 			_updateFeed = sinon.stub(Zotero.Feed.prototype, '_updateFeed').resolves();
 			let url = getTestDataUrl("feed.rss");
 			

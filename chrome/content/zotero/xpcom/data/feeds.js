@@ -27,14 +27,14 @@
 
 // Mimics Zotero.Libraries
 Zotero.Feeds = new function() {
-	var _initTimeoutID;
 	var _initPromise;
+	var _updating;
 	
 	this.init = function () {
-		_initTimeoutID = setTimeout(() => {
-			_initTimeoutID = null;
-			_initPromise = this.scheduleNextFeedCheck().then(() => _initPromise = null);
-		}, 5000);
+		// Delay initialization for tests
+		_initPromise = Zotero.Schema.schemaUpdatePromise.delay(5000).then(() => {
+			this.scheduleNextFeedCheck().then(() => _initPromise = null);
+		});
 		
 		Zotero.SyncedSettings.onSyncDownload.addListener(Zotero.Libraries.userLibraryID, 'feeds', 
 			(oldValue, newValue, conflict) => { 
@@ -42,22 +42,27 @@ Zotero.Feeds = new function() {
 			}
 		);
 		
-		Zotero.Notifier.registerObserver({notify: function(event) {
-			if (event == 'finish') {
-				// Don't update during tests, since the database will have been closed
-				if (Zotero.test) return;
-				Zotero.Feeds.updateFeeds();
-			}
-		}}, ['sync'], 'feedsUpdate');
+		Zotero.Notifier.registerObserver(
+			{
+				notify: async function (event) {
+					if (event == 'finish') {
+						// Don't update during tests, since the database will have been closed
+						if (Zotero.test) return;
+						
+						if (_initPromise) {
+							await _initPromise;
+						}
+						Zotero.Feeds.updateFeeds();
+					}
+				},
+			},
+			['sync'],
+			'feedsUpdate'
+		);
 	};
 	
 	this.uninit = function () {
-		// Cancel feed check if not yet run
-		if (_initTimeoutID) {
-			clearTimeout(_initTimeoutID);
-			_initTimeoutID = null
-		}
-		// Cancel feed check if in progress
+		// Cancel initialization if in progress
 		if (_initPromise) {
 			_initPromise.cancel();
 		}
@@ -246,6 +251,11 @@ Zotero.Feeds = new function() {
 
 	let globalFeedCheckDelay = Zotero.Promise.resolve();
 	this.scheduleNextFeedCheck = Zotero.Promise.coroutine(function* () {
+		// Don't schedule if already updating, since another check is scheduled at the end
+		if (_updating) {
+			return;
+		}
+		
 		Zotero.debug("Scheduling next feed update");
 		let sql = "SELECT ( CASE "
 			+ "WHEN lastCheck IS NULL THEN 0 "
@@ -266,6 +276,7 @@ Zotero.Feeds = new function() {
 			this._nextFeedCheck = Zotero.Promise.delay(nextCheck);
 			Zotero.Promise.all([this._nextFeedCheck, globalFeedCheckDelay])
 			.then(() => {
+				this._nextFeedCheck = null;
 				globalFeedCheckDelay = Zotero.Promise.delay(60000); // Don't perform auto-updates more than once per minute
 				return this.updateFeeds()
 			})
@@ -282,18 +293,31 @@ Zotero.Feeds = new function() {
 	});
 	
 	this.updateFeeds = Zotero.Promise.coroutine(function* () {
-		let sql = "SELECT libraryID AS id FROM feeds "
-			+ "WHERE refreshInterval IS NOT NULL "
-			+ "AND ( lastCheck IS NULL "
-				+ "OR (julianday(lastCheck, 'utc') + (refreshInterval/1440.0) - julianday('now', 'utc')) <= 0 )";
-		let needUpdate = (yield Zotero.DB.queryAsync(sql)).map(row => row.id);
-		Zotero.debug("Running update for feeds: " + needUpdate.join(', '));
-		for (let i=0; i<needUpdate.length; i++) {
-			let feed = Zotero.Feeds.get(needUpdate[i]);
-			yield feed.waitForDataLoad('item');
-			yield feed._updateFeed();
+		if (_updating) {
+			Zotero.debug("Feed update already in progress");
+			return;
 		}
-		
+		if (this._nextFeedCheck) {
+			this._nextFeedCheck.cancel();
+			this._nextFeedCheck = null;
+		}
+		_updating = true;
+		try {
+			let sql = "SELECT libraryID AS id FROM feeds "
+				+ "WHERE refreshInterval IS NOT NULL "
+				+ "AND ( lastCheck IS NULL "
+					+ "OR (julianday(lastCheck, 'utc') + (refreshInterval/1440.0) - julianday('now', 'utc')) <= 0 )";
+			let needUpdate = (yield Zotero.DB.queryAsync(sql)).map(row => row.id);
+			Zotero.debug("Running update for feeds: " + needUpdate.join(', '));
+			for (let i=0; i<needUpdate.length; i++) {
+				let feed = Zotero.Feeds.get(needUpdate[i]);
+				yield feed.waitForDataLoad('item');
+				yield feed._updateFeed();
+			}
+		}
+		finally {
+			_updating = false;
+		}
 		Zotero.debug("All feed updates done");
 		this.scheduleNextFeedCheck();
 	});
