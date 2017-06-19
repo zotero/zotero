@@ -4,6 +4,9 @@ describe("Zotero_Browser", function () {
 	var win, collection;
 	
 	before(function* () {
+		this.timeout(60000);
+		yield Zotero.Translators.init();
+		
 		win = yield loadBrowserWindow();
 		collection = yield createDataObject('collection');
 	});
