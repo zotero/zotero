@@ -1302,11 +1302,13 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 	// Enable foreign key checks
 	yield this.queryAsync("PRAGMA foreign_keys=true");
 	
-	// Register idle and shutdown handlers to call this.observe() for DB backup
-	var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
+	// Register idle observer for DB backup
+	Zotero.Schema.schemaUpdatePromise.then(() => {
+		Zotero.debug("Initializing DB backup idle observer");
+		var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
 			.getService(Components.interfaces.nsIIdleService);
-	idleService.addIdleObserver(this, 60);
-	idleService = null;
+		idleService.addIdleObserver(this, 300);
+	});
 	
 	return this._connection;
 });
