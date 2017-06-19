@@ -210,9 +210,11 @@
 						<hbox style="display: block">
 							<button label="&zotero.preferences.dbMaintenance.integrityCheck;"
 								oncommand="Zotero_Preferences.Advanced.runIntegrityCheck()"/>
-							<button label="&zotero.preferences.dbMaintenance.resetTranslators;"
+							<button id="reset-translators-button"
+								label="&zotero.preferences.dbMaintenance.resetTranslators;"
 								oncommand="Zotero_Preferences.Advanced.resetTranslators()"/>
-							<button label="&zotero.preferences.dbMaintenance.resetStyles;"
+							<button id="reset-styles-button"
+								label="&zotero.preferences.dbMaintenance.resetStyles;"
 								oncommand="Zotero_Preferences.Advanced.resetStyles()"/>
 						</hbox>
 					</groupbox>

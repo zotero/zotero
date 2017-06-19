@@ -1148,7 +1148,7 @@ Zotero.Schema = new function(){
 	
 	
 	this.resetStyles = Zotero.Promise.coroutine(function* () {
-		Zotero.debug("Resetting translators and styles");
+		Zotero.debug("Resetting styles");
 		
 		var sql = "DELETE FROM version WHERE schema IN "
 			+ "('styles', 'repository', 'lastcheck')";
