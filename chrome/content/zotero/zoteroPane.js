@@ -3670,18 +3670,6 @@ var ZoteroPane = new function()
 	 * @return {Promise<Zotero.Item>|false}
 	 */
 	this.addItemFromPage = Zotero.Promise.method(function (itemType, saveSnapshot, row) {
-		if(Zotero.isConnector) {
-			// In connector, save page via Zotero Standalone
-			var doc = window.content.document;
-			Zotero.Connector.callMethod("saveSnapshot", {"url":doc.location.toString(),
-				"cookie":doc.cookie, "html":doc.documentElement.innerHTML,
-				"skipSnapshot": saveSnapshot === false || (saveSnapshot === true ? false : undefined)},
-			function(returnValue, status) {
-				_showPageSaveStatus(doc.title);
-			});
-			return false;
-		}
-		
 		if (row == undefined && this.collectionsView && this.collectionsView.selection) {
 			row = this.collectionsView.selection.currentIndex;
 		}

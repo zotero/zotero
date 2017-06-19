@@ -1206,12 +1206,11 @@ Zotero.Translate.Base.prototype = {
 						uri: this.location.toString(),
 						cookie: this.document.cookie,
 						html: this.document.documentElement.innerHTML
-					},
-					function (rpcTranslators) {
+					}).catch(() => false).then(function (rpcTranslators) {
 						this._waitingForRPC = false;
 						
 						// if there are translators, add them to the list of found translators
-						if(rpcTranslators) {
+						if (rpcTranslators) {
 							for(var i=0, n=rpcTranslators.length; i<n; i++) {
 								rpcTranslators[i] = new Zotero.Translator(rpcTranslators[i]);
 								rpcTranslators[i].runMode = Zotero.Translator.RUN_MODE_ZOTERO_STANDALONE;
@@ -1224,8 +1223,7 @@ Zotero.Translate.Base.prototype = {
 						if (this._currentState === null) {
 							this._detectTranslatorsCollected();
 						}
-					}.bind(this)
-				);
+					}.bind(this));
 			}
 
 			return deferred.promise;
@@ -2071,7 +2069,7 @@ Zotero.Translate.Web.prototype._translateTranslatorLoaded = function() {
 				cookie: this.document.cookie,
 				proxy: this._proxy ? this._proxy.toJSON() : null,
 				html: this.document.documentElement.innerHTML
-			}, function(obj) { me._translateRPCComplete(obj) });
+			}).then(obj => me._translateRPCComplete(obj));
 	} else if(runMode === Zotero.Translator.RUN_MODE_ZOTERO_SERVER) {
 		var me = this;
 		Zotero.API.createItem({"url":this.document.location.href.toString()},
@@ -2093,8 +2091,8 @@ Zotero.Translate.Web.prototype._translateRPCComplete = function(obj, failureCode
 		this._runHandler("select", obj.selectItems,
 			function(selectedItems) {
 				Zotero.Connector.callMethod("selectItems",
-					{"instanceID":obj.instanceID, "selectedItems":selectedItems},
-					function(obj) { me._translateRPCComplete(obj) })
+					{"instanceID":obj.instanceID, "selectedItems":selectedItems})
+					.then((obj) => me._translateRPCComplete(obj))
 			}
 		);
 	} else {

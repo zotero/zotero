@@ -404,30 +404,18 @@ Zotero.ProgressWindow = function(options = {}) {
 	};
 	
 	this.Translation.scrapingTo = function(libraryID, collection) {
-		if(Zotero.isConnector) {
-			Zotero.Connector.callMethod("getSelectedCollection", {}, function(response, status) {
-				if(status !== 200) {
-					self.changeHeadline(Zotero.getString("ingester.scraping"));
-				} else {
-					self.changeHeadline(Zotero.getString("ingester.scrapingTo"),
-						"chrome://zotero/skin/treesource-"+(response.id ? "collection" : "library")+".png",
-						response.name+"\u2026");
-				}
-			});
+		var name;
+		if(collection) {
+			name = collection.name;
+		} else if(libraryID) {
+			name = Zotero.Libraries.getName(libraryID);
 		} else {
-			var name;
-			if(collection) {
-				name = collection.name;
-			} else if(libraryID) {
-				name = Zotero.Libraries.getName(libraryID);
-			} else {
-				name = Zotero.getString("pane.collections.library");
-			}
-			
-			self.changeHeadline(Zotero.getString("ingester.scrapingTo"),
-				"chrome://zotero/skin/treesource-"+(collection ? "collection" : "library")+".png",
-				name+"\u2026");
+			name = Zotero.getString("pane.collections.library");
 		}
+		
+		self.changeHeadline(Zotero.getString("ingester.scrapingTo"),
+			"chrome://zotero/skin/treesource-"+(collection ? "collection" : "library")+".png",
+			name+"\u2026");
 	};
 	
 	this.Translation.doneHandler = function(obj, returnValue) {		
