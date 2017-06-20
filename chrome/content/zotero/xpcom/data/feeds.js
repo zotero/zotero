@@ -32,9 +32,14 @@ Zotero.Feeds = new function() {
 	
 	this.init = function () {
 		// Delay initialization for tests
-		_initPromise = Zotero.Schema.schemaUpdatePromise.delay(5000).then(() => {
-			this.scheduleNextFeedCheck().then(() => _initPromise = null);
-		});
+		_initPromise = Zotero.Schema.schemaUpdatePromise.delay(5000)
+		.then(() => {
+			// Don't run feed checks randomly during tests
+			if (Zotero.test) return;
+			
+			return this.scheduleNextFeedCheck();
+		})
+		.then(() => _initPromise = null);
 		
 		Zotero.SyncedSettings.onSyncDownload.addListener(Zotero.Libraries.userLibraryID, 'feeds', 
 			(oldValue, newValue, conflict) => { 
@@ -52,7 +57,7 @@ Zotero.Feeds = new function() {
 						if (_initPromise) {
 							await _initPromise;
 						}
-						Zotero.Feeds.updateFeeds();
+						await Zotero.Feeds.updateFeeds();
 					}
 				},
 			},
