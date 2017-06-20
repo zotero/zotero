@@ -56,17 +56,22 @@ Zotero.Duplicates.prototype.getSearchObject = async function () {
 	var sql = `CREATE TEMPORARY TABLE ${table} (id INTEGER PRIMARY KEY)`;
 	await Zotero.DB.queryAsync(sql);
 	
-	Zotero.debug("Inserting rows into temp table");
-	sql = `INSERT INTO ${table} VALUES `;
-	await Zotero.Utilities.Internal.forEachChunkAsync(
-		ids,
-		Zotero.DB.MAX_BOUND_PARAMETERS,
-		async function (chunk) {
-			let idStr = '(' + chunk.join('), (') + ')';
-			await Zotero.DB.queryAsync(sql + idStr, false, { debug: false });
-		}
-	);
-	Zotero.debug("Done");
+	if (ids.length) {
+		Zotero.debug("Inserting rows into temp table");
+		sql = `INSERT INTO ${table} VALUES `;
+		await Zotero.Utilities.Internal.forEachChunkAsync(
+			ids,
+			Zotero.DB.MAX_BOUND_PARAMETERS,
+			async function (chunk) {
+				let idStr = '(' + chunk.join('), (') + ')';
+				await Zotero.DB.queryAsync(sql + idStr, false, { debug: false });
+			}
+		);
+		Zotero.debug("Done");
+	}
+	else {
+		Zotero.debug("No duplicates found");
+	}
 	
 	var s = new Zotero.Search;
 	s.libraryID = this._libraryID;
