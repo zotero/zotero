@@ -31,6 +31,7 @@ Zotero.CollectionTreeRow = function(type, ref, level, isOpen)
 	this.ref = ref;
 	this.level = level || 0
 	this.isOpen = isOpen || false;
+	this.onUnload = null;
 }
 
 
@@ -300,6 +301,18 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	}
 	else if (this.isDuplicates()) {
 		var s = yield this.ref.getSearchObject();
+		let tmpTable;
+		for (let id in s.conditions) {
+			let c = s.conditions[id];
+			if (c.condition == 'tempTable') {
+				tmpTable = c.value;
+				break;
+			}
+		}
+		// Called by ItemTreeView::unregister()
+		this.onUnload = async function () {
+			await Zotero.DB.queryAsync(`DROP TABLE IF EXISTS ${tmpTable}`);
+		};
 	}
 	else {
 		var s = new Zotero.Search();

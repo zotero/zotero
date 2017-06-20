@@ -1022,12 +1022,14 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	}
 });
 
-/*
- *  Unregisters view from Zotero.Notifier (called on window close)
- */
-Zotero.ItemTreeView.prototype.unregister = function()
-{
+
+Zotero.ItemTreeView.prototype.unregister = async function() {
 	Zotero.Notifier.unregisterObserver(this._unregisterID);
+	
+	if (this.collectionTreeRow.onUnload) {
+		await this.collectionTreeRow.onUnload();
+	}
+	
 	if (this.listener) {
 		if (!this._treebox.treeBody) {
 			Zotero.debug("No more tree body in Zotero.ItemTreeView::unregister()");
@@ -1038,7 +1040,7 @@ Zotero.ItemTreeView.prototype.unregister = function()
 		tree.removeEventListener('keypress', this.listener, false);
 		this.listener = null;
 	}
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

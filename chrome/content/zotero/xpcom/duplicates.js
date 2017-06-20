@@ -45,31 +45,34 @@ Zotero.Duplicates.prototype.__defineGetter__('libraryID', function () { return t
  *
  * @return {Zotero.Search}
  */
-Zotero.Duplicates.prototype.getSearchObject = Zotero.Promise.coroutine(function* () {
-	yield Zotero.DB.executeTransaction(function* () {
-		var sql = "DROP TABLE IF EXISTS tmpDuplicates";
-		yield Zotero.DB.queryAsync(sql);
-		
-		var sql = "CREATE TEMPORARY TABLE tmpDuplicates "
-					+ "(id INTEGER PRIMARY KEY)";
-		yield Zotero.DB.queryAsync(sql);
-		
-		yield this._findDuplicates();
-		var ids = this._sets.findAll(true);
-		
-		Zotero.debug("Inserting rows into temp table");
-		sql = "INSERT INTO tmpDuplicates VALUES (?)";
-		for (let i=0; i<ids.length; i++) {
-			yield Zotero.DB.queryAsync(sql, [ids[i]], { debug: false })
+Zotero.Duplicates.prototype.getSearchObject = async function () {
+	var table = 'tmpDuplicates_' + Zotero.Utilities.randomString();
+	
+	await this._findDuplicates();
+	var ids = this._sets.findAll(true);
+	
+	// Zotero.CollectionTreeRow::getSearchObject() extracts the table name and creates an
+	// unload listener that drops the table when the ItemTreeView is unregistered
+	var sql = `CREATE TEMPORARY TABLE ${table} (id INTEGER PRIMARY KEY)`;
+	await Zotero.DB.queryAsync(sql);
+	
+	Zotero.debug("Inserting rows into temp table");
+	sql = `INSERT INTO ${table} VALUES `;
+	await Zotero.Utilities.Internal.forEachChunkAsync(
+		ids,
+		Zotero.DB.MAX_BOUND_PARAMETERS,
+		async function (chunk) {
+			let idStr = '(' + chunk.join('), (') + ')';
+			await Zotero.DB.queryAsync(sql + idStr, false, { debug: false });
 		}
-		Zotero.debug("Done");
-	}.bind(this));
+	);
+	Zotero.debug("Done");
 	
 	var s = new Zotero.Search;
 	s.libraryID = this._libraryID;
-	s.addCondition('tempTable', 'is', 'tmpDuplicates');
+	s.addCondition('tempTable', 'is', table);
 	return s;
-});
+};
 
 
 /**
