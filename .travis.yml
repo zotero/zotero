@@ -29,7 +29,7 @@ before_script:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
     - npm i
-    - node_modules/.bin/gulp build
+    - npm run build
     - if [ $FX_VERSION = "54.0b" ] &&
          [ $TRAVIS_REPO_SLUG = "zotero/zotero" ] &&
          [ $TRAVIS_BRANCH = "master" ] &&
