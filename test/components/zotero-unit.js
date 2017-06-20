@@ -38,6 +38,7 @@ ZoteroUnit.prototype = {
 		this.runTests = !this.makeTestData;
 		this.bail = cmdLine.handleFlag("bail", false);
 		this.startAt = cmdLine.handleFlagWithParam("startAtTestFile", false);
+		this.stopAt = cmdLine.handleFlagWithParam("stopAtTestFile", false);
 		this.grep = cmdLine.handleFlagWithParam("grep", false);
 		this.timeout = cmdLine.handleFlagWithParam("ZoteroTestTimeout", false);
 	},

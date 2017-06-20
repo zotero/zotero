@@ -35,6 +35,7 @@ Options
  -b                  skip bundled translator/style installation
  -c                  open JavaScript console and don't quit on completion
  -d LEVEL            enable debug logging
+ -e TEST             end at the given test
  -f                  stop after first test failure
  -g                  only run tests matching the given pattern (grep)
  -h                  display this help
@@ -48,7 +49,7 @@ DONE
 
 DEBUG=false
 DEBUG_LEVEL=5
-while getopts "bcd:fg:hs:tx:" opt; do
+while getopts "bcd:e:fg:hs:tx:" opt; do
 	case $opt in
         b)
         	FX_ARGS="$FX_ARGS -ZoteroSkipBundledFiles"
@@ -59,6 +60,12 @@ while getopts "bcd:fg:hs:tx:" opt; do
 		d)
 			DEBUG=true
 			DEBUG_LEVEL="$OPTARG"
+			;;
+		e)
+			if [[ -z "$OPTARG" ]] || [[ ${OPTARG:0:1} = "-" ]]; then
+				usage
+			fi
+			FX_ARGS="$FX_ARGS -stopAtTestFile $OPTARG"
 			;;
 		f)
 			FX_ARGS="$FX_ARGS -bail"

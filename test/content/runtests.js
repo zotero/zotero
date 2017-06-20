@@ -240,12 +240,16 @@ if(run && ZoteroUnit.tests) {
 		var enumerator = testDirectory.directoryEntries;
 		let startFile = ZoteroUnit.startAt ? getTestFilename(ZoteroUnit.startAt) : false;
 		let started = !startFile;
+		let stopFile = ZoteroUnit.stopAt ? getTestFilename(ZoteroUnit.stopAt) : false;
 		while(enumerator.hasMoreElements()) {
 			var file = enumerator.getNext().QueryInterface(Components.interfaces.nsIFile);
 			if(file.leafName.endsWith(".js")) {
 				if (started || file.leafName == startFile) {
 					testFiles.push(file.leafName);
 					started = true;
+				}
+				if (file.leafName == stopFile) {
+					break;
 				}
 			}
 		}
