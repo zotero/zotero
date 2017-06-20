@@ -656,8 +656,7 @@ Zotero.CollectionTreeView.prototype.setHighlightedRows = Zotero.Promise.coroutin
 	// Make sure all highlighted collections are shown
 	for (let id of ids) {
 		if (id[0] == 'C') {
-			id = id.substr(1);
-			yield this.expandToCollection(id);
+			yield this.expandToCollection(parseInt(id.substr(1)));
 		}
 	}
 	
