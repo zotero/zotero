@@ -538,7 +538,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 						Zotero.getString('dataDir.incompatibleDbVersion.text'),
 						buttonFlags,
 						Zotero.getString('general.useDefault'),
-						Zotero.getString('dataDir.standaloneMigration.selectCustom'),
+						Zotero.getString('dataDir.chooseNewDataDirectory'),
 						Zotero.getString('general.quit'),
 						null,
 						{}
