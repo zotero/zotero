@@ -526,11 +526,12 @@ Zotero.Items = function() {
 			+ "LEFT JOIN itemDataValues IDV USING (valueID) "
 			+ "LEFT JOIN deletedItems DI USING (itemID) "
 			+ "WHERE libraryID=?"
-			+ (ids.length ? " AND parentItemID IN (" + ids.map(id => parseInt(id)).join(", ") + ")" : "");
+			+ (ids.length ? " AND parentItemID IN (" + ids.map(id => parseInt(id)).join(", ") + ")" : "")
+			+ " ORDER BY parentItemID";
 		// Since we do the sort here and cache these results, a restart will be required
 		// if this pref (off by default) is turned on, but that's OK
 		if (Zotero.Prefs.get('sortAttachmentsChronologically')) {
-			sql +=  " ORDER BY parentItemID, dateAdded";
+			sql +=  ", dateAdded";
 		}
 		var setAttachmentItem = function (itemID, rows) {
 			var item = this._objectCache[itemID];
@@ -575,9 +576,10 @@ Zotero.Items = function() {
 			+ "JOIN items I ON (N.parentItemID=I.itemID) "
 			+ "LEFT JOIN deletedItems DI USING (itemID) "
 			+ "WHERE libraryID=?"
-			+ (ids.length ? " AND parentItemID IN (" + ids.map(id => parseInt(id)).join(", ") + ")" : "");
+			+ (ids.length ? " AND parentItemID IN (" + ids.map(id => parseInt(id)).join(", ") + ")" : "")
+			+ " ORDER BY parentItemID";
 		if (Zotero.Prefs.get('sortNotesChronologically')) {
-			sql +=  " ORDER BY parentItemID, dateAdded";
+			sql +=  ", dateAdded";
 		}
 		var setNoteItem = function (itemID, rows) {
 			var item = this._objectCache[itemID];
