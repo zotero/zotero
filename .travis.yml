@@ -4,6 +4,7 @@ node_js:
     - "node"
 cache:
     directories:
+        - "build"
         - "node_modules"
 env:
     global:
