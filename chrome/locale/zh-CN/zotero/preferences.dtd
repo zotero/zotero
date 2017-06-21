@@ -45,7 +45,7 @@
 <!ENTITY zotero.preferences.feeds.feedDefaults "订阅默认">
 
 <!ENTITY zotero.preferences.openurl.search "搜索解析器">
-<!ENTITY zotero.preferences.openurl.custom "Custom…">
+<!ENTITY zotero.preferences.openurl.custom "自定义...">
 <!ENTITY zotero.preferences.openurl.server "解析器:">
 <!ENTITY zotero.preferences.openurl.version "版本:">
 
@@ -71,14 +71,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "若使用Zotero云存储, 你接受它的">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "条款和条件">
 <!ENTITY zotero.preferences.sync.librariesToSync "要同步的文献库">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "选择文献库...">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "同步">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "文献库">
 <!ENTITY zotero.preferences.sync.reset.warning1 "下列操作仅限于一些极少出现的, 特定的情况, 请不要在常见问题中使用. 多数情况下, 重置会引发一系列其它问题. 浏览">
 <!ENTITY zotero.preferences.sync.reset.warning2 "同步重置选项">
 <!ENTITY zotero.preferences.sync.reset.warning3 "以获取更多的信息.">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "重置数据同步历史">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "将本地数据与远程数据合并，忽略同步历史">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "从 Zotero 服务器恢复">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "删除本地所有 Zotero 数据并从同步服务器恢复.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "恢复到 Zotero 服务器">
