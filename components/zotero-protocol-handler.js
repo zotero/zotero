@@ -383,8 +383,8 @@ function ZoteroProtocolHandler() {
 							valB = Zotero.Items.getSortTitle(valB);
 						}
 						else if (sorts[index].field == 'date') {
-							var itemA = Zotero.Items.getByLibraryAndKey(a.libraryID, a.key);
-							var itemB = Zotero.Items.getByLibraryAndKey(b.libraryID, b.key);
+							var itemA = Zotero.Items.getByLibraryAndKey(params.libraryID, a.key);
+							var itemB = Zotero.Items.getByLibraryAndKey(params.libraryID, b.key);
 							valA = itemA.getField('date', true, true);
 							valB = itemB.getField('date', true, true);
 						}
@@ -392,8 +392,8 @@ function ZoteroProtocolHandler() {
 						// slightly less broken. To do this right, real creator
 						// sorting needs to be abstracted from itemTreeView.js.
 						else if (sorts[index].field == 'firstCreator') {
-							var itemA = Zotero.Items.getByLibraryAndKey(a.libraryID, a.key);
-							var itemB = Zotero.Items.getByLibraryAndKey(b.libraryID, b.key);
+							var itemA = Zotero.Items.getByLibraryAndKey(params.libraryID, a.key);
+							var itemB = Zotero.Items.getByLibraryAndKey(params.libraryID, b.key);
 							valA = itemA.getField('firstCreator');
 							valB = itemB.getField('firstCreator');
 						}
