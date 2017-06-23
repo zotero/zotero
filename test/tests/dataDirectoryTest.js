@@ -218,14 +218,7 @@ describe("Zotero.DataDirectory", function () {
 						return Zotero.Promise.reject(new Error("Error"));
 					}
 					else {
-						let args;
-						if (Zotero.platformMajorVersion < 46) {
-							args = Array.from(arguments);
-						}
-						else {
-							args = arguments;
-						}
-						return origFunc(...args);
+						return origFunc(...arguments);
 					}
 				});
 				let stub1 = sinon.stub(Zotero.File, "reveal").returns(Zotero.Promise.resolve());
@@ -401,14 +394,7 @@ describe("Zotero.DataDirectory", function () {
 						return Zotero.Promise.reject(new Error("Error"));
 					}
 					else {
-						let args;
-						if (Zotero.platformMajorVersion < 46) {
-							args = Array.from(arguments);
-						}
-						else {
-							args = arguments;
-						}
-						return origFunc(...args);
+						return origFunc(...arguments);
 					}
 				});
 				

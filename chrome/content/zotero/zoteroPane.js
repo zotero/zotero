@@ -1598,8 +1598,7 @@ var ZoteroPane = new function()
 	 */
 	this.updateItemPaneButtons = function (selectedItems) {
 		if (!selectedItems.length) {
-			// TODO: Remove Array.from after Firefox 45 support is removed
-			Array.from(document.querySelectorAll('.zotero-item-pane-top-buttons')).forEach(x => x.hidden = true);
+			document.querySelectorAll('.zotero-item-pane-top-buttons').forEach(x => x.hidden = true);
 			return;
 		}
 		

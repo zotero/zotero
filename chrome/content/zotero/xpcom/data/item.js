@@ -1137,9 +1137,6 @@ Zotero.Item.prototype.removeCreator = function(orderIndex, allowMissing) {
 // Define boolean properties
 for (let name of ['deleted', 'inPublications']) {
 	let prop = '_' + name;
-	// Fix for https://bugzilla.mozilla.org/show_bug.cgi?id=449811 (Fixed in Fx51)
-	let tmpName = name;
-	
 	Zotero.defineProperty(Zotero.Item.prototype, name, {
 		get: function() {
 			if (!this.id) {
@@ -1154,12 +1151,12 @@ for (let name of ['deleted', 'inPublications']) {
 			val = !!val;
 			
 			if (this[prop] == val) {
-				Zotero.debug(Zotero.Utilities.capitalize(tmpName)
+				Zotero.debug(Zotero.Utilities.capitalize(name)
 					+ " state hasn't changed for item " + this.id);
 				return;
 			}
-			this._markFieldChange(tmpName, !!this[prop]);
-			this._changed[tmpName] = true;
+			this._markFieldChange(name, !!this[prop]);
+			this._changed[name] = true;
 			this[prop] = val;
 		}
 	});

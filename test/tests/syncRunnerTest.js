@@ -1039,12 +1039,7 @@ describe("Zotero.Sync.Runner", function () {
 			win = yield loadZoteroPane();
 			var doc = win.document;
 			
-			if (Zotero.platformMajorVersion >= 48) {
-				var text = "".padStart(256, "a");
-			}
-			else {
-				var text = Array(256).fill("a").join("");
-			}
+			var text = "".padStart(256, "a");
 			var item = yield createDataObject('item', { itemType: 'note', note: text });
 			
 			setResponse('keyInfo.fullAccess');

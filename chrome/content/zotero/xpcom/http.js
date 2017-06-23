@@ -338,8 +338,6 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			// XXX Remove when we drop support for Fx <24
-			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
@@ -424,8 +422,6 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			// XXX Remove when we drop support for Fx <24
-			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
@@ -486,8 +482,6 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			// XXX Remove when we drop support for Fx <24
-			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, onDone);
 		};
 		
@@ -523,8 +517,6 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			// XXX Remove when we drop support for Fx <24
-			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(null);
@@ -696,8 +688,6 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			// XXX Remove when we drop support for Fx <24
-			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(null);
@@ -733,8 +723,6 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			// XXX Remove when we drop support for Fx <24
-			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(null);

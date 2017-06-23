@@ -502,24 +502,16 @@ Zotero.Proxies = new function() {
 	  * @return	{Object} Object containing the content browser as 'browser' and a ChromeWindow as 'window'
 	  */
 	function _getBrowserAndWindow(channel) {
-		// Firefox 45 and earlier
-		if (Zotero.platformMajorVersion < 46) {
-			var browser = channel.notificationCallbacks.getInterface(Ci.nsIWebNavigation)
-				.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
+		let outerWindowID = channel.loadInfo.outerWindowID;
+		var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+			.getService(Ci.nsIWindowMediator);
+		let outerContentWin = wm.getOuterWindowWithId(outerWindowID);
+		if (!outerContentWin) {
+			return { browser: null, window: null };
 		}
-		// Firefox 46 and up (non-e10s)
-		else {
-			let outerWindowID = channel.loadInfo.outerWindowID;
-			var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
-				.getService(Ci.nsIWindowMediator);
-			let outerContentWin = wm.getOuterWindowWithId(outerWindowID);
-			if (!outerContentWin) {
-				return { browser: null, window: null };
-			}
-			var browser = outerContentWin.QueryInterface(Ci.nsIInterfaceRequestor)
-				.getInterface(Ci.nsIWebNavigation)
-				.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
-		}
+		var browser = outerContentWin.QueryInterface(Ci.nsIInterfaceRequestor)
+			.getInterface(Ci.nsIWebNavigation)
+			.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
 		return {
 			browser,
 			window: browser.ownerDocument.defaultView
