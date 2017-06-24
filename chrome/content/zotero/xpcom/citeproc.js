@@ -23,7 +23,7 @@
  *     <http://www.gnu.org/licenses/> respectively.
  */
 var CSL = {
-    PROCESSOR_VERSION: "1.1.170",
+    PROCESSOR_VERSION: "1.1.171",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -15293,7 +15293,7 @@ CSL.Output.Formats.prototype.html = {
         return "<a href=\"" + str + "\">" + str + "</a>";
     },
     "@DOI/true": function (state, str) {
-        return "<a href=\"http://dx.doi.org/" + str + "\">" + str + "</a>";
+        return "<a href=\"https://doi.org/" + str + "\">" + str + "</a>";
     }
 };
 CSL.Output.Formats.prototype.text = {
