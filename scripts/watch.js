@@ -1,7 +1,7 @@
 const path = require('path');
 const chokidar = require('chokidar');
 const multimatch = require('multimatch');
-const { dirs, jsGlob, jsGlobIgnore, copyDirs, symlinkFiles } = require('./config');
+const { dirs, jsFiles, ignoreMask, copyDirs, symlinkFiles } = require('./config');
 const { onSuccess, onError, getSignatures, writeSignatures, cleanUp, formatDirsForMatcher } = require('./utils');
 const getJS = require('./js');
 const getSass = require('./sass');
@@ -47,8 +47,8 @@ function getWatch() {
 	let watcher = chokidar.watch(source, { cwd: ROOT })
 	.on('change', async (path) => {
 		try {
-			if (multimatch(path, jsGlob).length && !multimatch(path, jsGlobIgnore).length) {
-				onSuccess(await getJS(path, { ignore: jsGlobIgnore }, signatures));
+			if (multimatch(path, jsFiles).length && !multimatch(path, ignoreMask).length) {
+				onSuccess(await getJS(path, { ignore: ignoreMask }, signatures));
 			} else if (multimatch(path, 'scss/*.scss').length) {
 				onSuccess(await getSass(path, {}, signatures));
 			} else if (multimatch(path, copyDirs.map(d => `${d}/**`)).length) {
