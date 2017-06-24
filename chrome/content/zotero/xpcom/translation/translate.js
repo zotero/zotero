@@ -2184,7 +2184,7 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 	var errorString = Zotero.Translate.Base.prototype.complete.apply(this, [returnValue, error]);
 	
 	var promise;
-	if (Zotero.isConnector) {
+	if (Zotero.Prefs.getAsync) {
 		promise = Zotero.Prefs.getAsync('reportTranslationFailure');
 	} else {
 		promise = Zotero.Promise.resolve(Zotero.Prefs.get("reportTranslationFailure"));
