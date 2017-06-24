@@ -1538,6 +1538,14 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 				'item', predicate, thisURI
 			);
 			for (let mergeItem of mergeItems) {
+				// An item shouldn't have itself as a dc:replaces relation, but if it does it causes an
+				// infinite loop
+				if (mergeItem.id == this.id) {
+					Zotero.logError(`Item ${this.libraryKey} has itself as a ${predicate} relation`);
+					this.removeRelation(predicate, thisURI);
+					continue;
+				}
+				
 				mergeItem.removeRelation(predicate, thisURI);
 				yield mergeItem.save({
 					skipDateModifiedUpdate: true
