@@ -2040,7 +2040,7 @@ Zotero.Translate.Web.prototype._prepareTranslation = Zotero.Promise.method(funct
  * Overload translate to set selectedItems
  */
 Zotero.Translate.Web.prototype.translate = function (options = {}, ...args) {
-	if (typeof options == 'number') {
+	if (typeof options == 'number' || options === false) {
 		Zotero.debug("Translate: translate() now takes an object -- update your code", 2);
 		options = {
 			libraryID: options,
