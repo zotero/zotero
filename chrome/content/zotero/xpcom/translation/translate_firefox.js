@@ -43,6 +43,8 @@ Zotero.Translate.DOMWrapper = new function() {
 	/*
 	 * BEGIN SPECIAL POWERS WRAPPING CODE
 	 * https://dxr.mozilla.org/mozilla-central/source/testing/specialpowers/content/specialpowersAPI.js
+	 *
+	 * Includes modifications by Zotero to support overrides
 	 */
 	function isWrappable(x) {
 		if (typeof x === "object")
@@ -51,7 +53,7 @@ Zotero.Translate.DOMWrapper = new function() {
 	};
 	
 	function isWrapper(x) {
-		return isWrappable(x) && (typeof x.__wrappedObject !== "undefined");
+		return isWrappable(x) && (typeof x.SpecialPowers_wrappedObject !== "undefined");
 	};
 	
 	function unwrapIfWrapped(x) {
@@ -151,7 +153,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		if (!isWrapper(x))
 			throw "Trying to unwrap a non-wrapped object!";
 	
-		var obj = x.__wrappedObject;
+		var obj = x.SpecialPowers_wrappedObject;
 		// unwrapped.
 		return obj;
 	};
@@ -177,7 +179,7 @@ Zotero.Translate.DOMWrapper = new function() {
 	
 	function SpecialPowersHandler(wrappedObject, overrides) {
 		this.wrappedObject = wrappedObject;
-		this.overrides = overrides ? overrides: {};
+		this.overrides = overrides ? overrides : {};
 	}
 	
 	SpecialPowersHandler.prototype = {
@@ -209,7 +211,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		},
 	
 		has(target, prop) {
-			if (prop === "__wrappedObject")
+			if (prop === "SpecialPowers_wrappedObject")
 				return true;
 	
 			if (this.overrides[prop] !== undefined) {
@@ -220,10 +222,10 @@ Zotero.Translate.DOMWrapper = new function() {
 		},
 	
 		get(target, prop, receiver) {
-			if (prop === "__wrappedObject")
+			if (prop === "SpecialPowers_wrappedObject")
 				return this.wrappedObject;
 			
-			if (prop == "__wrapperOverrides") {
+			if (prop == "SpecialPowers_wrapperOverrides") {
 				return this.overrides;
 			}
 			
@@ -236,7 +238,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		},
 	
 		set(target, prop, val, receiver) {
-			if (prop === "__wrappedObject")
+			if (prop === "SpecialPowers_wrappedObject")
 				return false;
 	
 			let obj = waiveXraysIfAppropriate(this.wrappedObject, prop);
@@ -244,7 +246,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		},
 	
 		delete(target, prop) {
-			if (prop === "__wrappedObject")
+			if (prop === "SpecialPowers_wrappedObject")
 				return false;
 	
 			return Reflect.deleteProperty(this.wrappedObject, prop);
@@ -256,22 +258,21 @@ Zotero.Translate.DOMWrapper = new function() {
 	
 		getOwnPropertyDescriptor(target, prop) {
 			// Handle our special API.
-			if (prop === "__wrappedObject") {
+			if (prop === "SpecialPowers_wrappedObject") {
 				return { value: this.wrappedObject, writeable: true,
 								 configurable: true, enumerable: false };
 			}
-			if (prop == "__wrapperOverrides") {
+			
+			if (prop == "SpecialPowers_wrapperOverrides") {
 				return { value: this.overrides, writeable: false, configurable: false, enumerable: false };
 			}
-			// Handle __exposedProps__.
 			if (prop == "__exposedProps__") {
 				return { value: ExposedPropsWaiver, writable: false, configurable: false, enumerable: false };
 			}
-	
 			if (prop in this.overrides) {
-				return this.overrides[prop];
+				return { value: this.overrides[prop], writeable: false, configurable: true, enumerable: true };
 			}
-			
+	
 			let obj = waiveXraysIfAppropriate(this.wrappedObject, prop);
 			let desc = Reflect.getOwnPropertyDescriptor(obj, prop);
 	
@@ -298,7 +299,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		ownKeys(target) {
 			// Insert our special API. It's not enumerable, but ownKeys()
 			// includes non-enumerable properties.
-			let props = ['__wrappedObject'];
+			let props = ['SpecialPowers_wrappedObject'];
 	
 			// Do the normal thing.
 			let flt = (a) => !props.includes(a);
@@ -428,8 +429,8 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 			return overrides.hasOwnProperty(prop) || prop in target;
 		};
 		wrappedRet.get = function(x, prop, receiver) {
-			if (prop === "__wrappedObject") return target;
-			if (prop === "__wrapperOverrides") return overrides;
+			if (prop === "SpecialPowers_wrappedObject") return target;
+			if (prop === "SpecialPowers_wrapperOverrides") return overrides;
 			if (prop === "__wrappingManager") return me;
 			var y = overrides.hasOwnProperty(prop) ? overrides[prop] : target[prop];
 			if (y === null || (typeof y !== "object" && typeof y !== "function")) return y;
@@ -437,14 +438,18 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 				var args = Array.prototype.slice.apply(arguments);
 				for (var i = 0; i < args.length; i++) {
 					if (typeof args[i] === "object" && args[i] !== null &&
-						args[i].wrappedJSObject && args[i].wrappedJSObject.__wrappedObject)
-						args[i] = new XPCNativeWrapper(args[i].wrappedJSObject.__wrappedObject);
+						args[i].wrappedJSObject && args[i].wrappedJSObject.SpecialPowers_wrappedObject)
+						args[i] = new XPCNativeWrapper(args[i].wrappedJSObject.SpecialPowers_wrappedObject);
 				}
 				return wrap(y.apply(target, args));
 			} : new sandbox.Object());
 		};
 		wrappedRet.ownKeys = function(x) {
-			return Components.utils.cloneInto(target.getOwnPropertyNames(), sandbox);
+			return Components.utils.cloneInto(
+				Object.getOwnPropertyNames(target)
+					.concat(Object.getOwnPropertySymbols(target)),
+				sandbox
+			);
 		};
 		wrappedRet.enumerate = function(x) {
 			var y = new sandbox.Array();
@@ -519,9 +524,11 @@ Zotero.Translate.SandboxManager.prototype = {
 
 	"_canCopy":function(obj) {
 		if(typeof obj !== "object" || obj === null) return false;
-		if (!["Object", "Array", "Error"].includes(obj.constructor.name)
+		
+		if ((obj.wrappedJSObject && obj.wrappedJSObject.__wrappingManager)
+				|| Zotero.Translate.DOMWrapper.isWrapped(obj)
 				|| "__exposedProps__" in obj
-				|| (obj.wrappedJSObject && obj.wrappedJSObject.__wrappingManager)) {
+				|| !["Object", "Array", "Error"].includes(obj.constructor.name)) {
 			return false;
 		}
 		return true;

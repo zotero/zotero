@@ -342,7 +342,7 @@ Zotero.Translate.Sandbox = {
 			safeTranslator.setDocument = function(arg) {
 				if (Zotero.isFx && !Zotero.isBookmarklet) {
 					return translation.setDocument(
-						Zotero.Translate.DOMWrapper.wrap(arg, arg.__wrapperOverrides)
+						Zotero.Translate.DOMWrapper.wrap(arg, arg.SpecialPowers_wrapperOverrides)
 					);
 				} else {
 					return translation.setDocument(arg);
@@ -2011,7 +2011,7 @@ Zotero.Translate.Web.prototype._getParameters = function() {
 			this._sandboxManager.wrap(
 				Zotero.Translate.DOMWrapper.unwrap(this.document),
 				null,
-				this.document.__wrapperOverrides
+				this.document.SpecialPowers_wrapperOverrides
 			),
 			this.location
 		];
