@@ -69,6 +69,10 @@
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "Skicka återkoppling...">
 <!ENTITY helpFeedbackPage.accesskey "S">
+
+<!ENTITY helpInstallBrowserExtensions.accesskey "B">
+<!ENTITY helpInstallBrowserExtensions.label "Install Browser Extensions…">
+
 <!ENTITY helpReportErrors.label "Rapportera fel till Zotero...">
 <!ENTITY helpReportErrors.accesskey "R">
 <!ENTITY helpCheckForUpdates.label "Sök efter uppdateringar...">

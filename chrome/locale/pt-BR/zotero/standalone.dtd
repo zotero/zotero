@@ -69,6 +69,10 @@
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "Submeter feedback">
 <!ENTITY helpFeedbackPage.accesskey "S">
+
+<!ENTITY helpInstallBrowserExtensions.accesskey "B">
+<!ENTITY helpInstallBrowserExtensions.label "Install Browser Extensions…">
+
 <!ENTITY helpReportErrors.label "Transmitir erros à Zotero...">
 <!ENTITY helpReportErrors.accesskey "R">
 <!ENTITY helpCheckForUpdates.label "Buscar atualizações...">

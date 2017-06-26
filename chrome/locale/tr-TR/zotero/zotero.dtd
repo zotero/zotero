@@ -24,14 +24,14 @@
 
 <!ENTITY zotero.upgrade.title "Zotero Yükseltme Yardımcısı">
 <!ENTITY zotero.upgrade.newVersionInstalled "Zotero'nun yeni bir sürümünü kurdunuz.">
-<!ENTITY zotero.upgrade.upgradeRequired "Zotero veri tabanınız yeni sürüm ile birlikte çalışabilmesi için yükseltilmesi gerekir.">
-<!ENTITY zotero.upgrade.autoBackup "Herhangi bir değişiklik yapılmadan önce varolan veri tabanınız otomatik olarak yedeklenecektir.">
+<!ENTITY zotero.upgrade.upgradeRequired "Zotero veritabanınızın, yeni sürüm ile birlikte çalışabilmesi için yükseltilmesi gerekir.">
+<!ENTITY zotero.upgrade.autoBackup "Herhangi bir değişiklik yapılmadan önce, varolan veritabanınız otomatik olarak yedeklenecektir.">
 <!ENTITY zotero.upgrade.majorUpgrade "Bu büyük bir yükseltmedir.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Gözden geçirdiğinize emin olunuz">
 <!ENTITY zotero.upgrade.majorUpgradeLink "yükseltme yönergeleri">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "devam etmeden önce.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Lütfen yükseltme işleni bitene kadar bekleyiniz. Bu bir miktar zaman alabilir.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Zotero veri tabanınız başarılı olarak yükseltilmiştir.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Zotero veritabanınız başarılı olarak yükseltilmiştir.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Yeni olanları öğrenmek için, lütfen">
 <!ENTITY zotero.upgrade.changeLogLink "değişiklik kaydına">
 <!ENTITY zotero.upgrade.changeLogAfterLink "bakınız.">
@@ -206,7 +206,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Yazarı Sakla">
 <!ENTITY zotero.citation.prefix.label "Önek:">
 <!ENTITY zotero.citation.suffix.label "Sonek:">
-<!ENTITY zotero.citation.editorWarning.label "Uyarı: Eğer düzenleyicide bir gönderme düzenlerseniz, bu gönderme veri tabanınızdaki ya da gönderme stilinizdeki değişikliklerle güncellenmeyecektir.">
+<!ENTITY zotero.citation.editorWarning.label "Uyarı: Eğer düzenleyicide bir gönderme düzenlerseniz, bu gönderme veritabanınızdaki ya da gönderme stilinizdeki değişikliklerle güncellenmeyecektir.">
 
 <!ENTITY zotero.richText.italic.label "İtalik">
 <!ENTITY zotero.richText.bold.label "Kalın">

@@ -69,6 +69,10 @@
 <!ENTITY helpTroubleshootingInfo.accesskey "R">
 <!ENTITY helpFeedbackPage.label "Povratne informacije ...">
 <!ENTITY helpFeedbackPage.accesskey "I">
+
+<!ENTITY helpInstallBrowserExtensions.accesskey "B">
+<!ENTITY helpInstallBrowserExtensions.label "Install Browser Extensions…">
+
 <!ENTITY helpReportErrors.label "Poročaj o napakah Zoteru ...">
 <!ENTITY helpReportErrors.accesskey "P">
 <!ENTITY helpCheckForUpdates.label "Poišči posodobitve ...">

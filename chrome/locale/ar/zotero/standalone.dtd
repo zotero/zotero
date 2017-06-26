@@ -69,6 +69,10 @@
 <!ENTITY helpTroubleshootingInfo.accesskey "م">
 <!ENTITY helpFeedbackPage.label "ارسال ملاحظات">
 <!ENTITY helpFeedbackPage.accesskey "ر">
+
+<!ENTITY helpInstallBrowserExtensions.accesskey "B">
+<!ENTITY helpInstallBrowserExtensions.label "Install Browser Extensions…">
+
 <!ENTITY helpReportErrors.label "بلغ عن علة في Zotero…">
 <!ENTITY helpReportErrors.accesskey "ب">
 <!ENTITY helpCheckForUpdates.label "تحقق من التحديثات">
