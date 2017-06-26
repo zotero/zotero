@@ -21,6 +21,7 @@ var ZOTERO_CONFIG = {
 	SUPPORT_URL: "https://www.zotero.org/support/",
 	TROUBLESHOOTING_URL: "https://www.zotero.org/support/getting_help",
 	FEEDBACK_URL: "https://forums.zotero.org/",
+	EXTENSIONS_URL: "https://www.zotero.org/extensions"
 };
 
 EXPORTED_SYMBOLS = ["ZOTERO_CONFIG"];
