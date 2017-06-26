@@ -250,12 +250,12 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 			var m = bookmarkletRe.exec(this.header);
 			if(m) this.origin = "https://www.zotero.org";
 		}
-	}
-	
-	// Make sure the Host header is set to 127.0.0.1 to prevent DNS rebinding attacks
-	if (!hostRe.exec(this.header)) {
-		this._requestFinished(this._generateResponse(400, "text/plain", "Invalid Host header\n"));
-		return;
+		
+		// Make sure the Host header is set to localhost/127.0.0.1 to prevent DNS rebinding attacks
+		if (!hostRe.exec(this.header)) {
+			this._requestFinished(this._generateResponse(400, "text/plain", "Invalid Host header\n"));
+			return;
+		}
 	}
 	
 	// get first line of request
