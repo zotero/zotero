@@ -42,7 +42,7 @@ var Zotero_Feed_Settings = new function() {
 			if (/^https?:\/\/[^\/\s]+\/\S/.test(cleanURL)) {
 				return cleanURL;
 			} else {
-				Zotero.debug(uri.scheme + " is not a supported protocol for feeds");
+				Zotero.debug(url + " has an unsupported protocol for feeds");
 			}
 		}
 	};
