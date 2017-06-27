@@ -199,10 +199,10 @@
 									  label="&helpFeedbackPage.label;"
 									  oncommand="ZoteroStandalone.openHelp('feedback');"/>
 							<menuseparator/>
-							<menuitem id="installBrowserExtensions"
-									accessKey="&helpInstallBrowserExtensions.accesskey;"
-									label="&helpInstallBrowserExtensions.label;"
-									oncommand="ZoteroStandalone.openHelp('extensions');"/>
+							<menuitem id="installBrowserConnectors"
+									accessKey="&helpInstallBrowserConnectors.accesskey;"
+									label="&helpInstallBrowserConnectors.label;"
+									oncommand="ZoteroStandalone.openHelp('connectors');"/>
 							<menuseparator/>
 							<menuitem id="reportErrors"
 									  accesskey="&helpReportErrors.accesskey;"

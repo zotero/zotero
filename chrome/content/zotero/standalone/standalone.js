@@ -165,8 +165,8 @@ const ZoteroStandalone = new function() {
 			ZoteroPane.loadURI(ZOTERO_CONFIG.FEEDBACK_URL);
 			break;
 		
-		case "extensions":
-			ZoteroPane.loadURI(ZOTERO_CONFIG.EXTENSIONS_URL);
+		case "connectors":
+			ZoteroPane.loadURI(ZOTERO_CONFIG.CONNECTORS_URL);
 			break;
 		
 		default:
