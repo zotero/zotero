@@ -70,8 +70,8 @@
 <!ENTITY helpFeedbackPage.label "Someter a consulta...">
 <!ENTITY helpFeedbackPage.accesskey "S">
 
-<!ENTITY helpInstallBrowserExtensions.accesskey "B">
-<!ENTITY helpInstallBrowserExtensions.label "Install Browser Extensions…">
+<!ENTITY helpInstallBrowserConnectors.accesskey "C">
+<!ENTITY helpInstallBrowserConnectors.label "Install Browser Connectors…">
 
 <!ENTITY helpReportErrors.label "Notificar errores a Zotero...">
 <!ENTITY helpReportErrors.accesskey "R">

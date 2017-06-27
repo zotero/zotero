@@ -70,8 +70,8 @@
 <!ENTITY helpFeedbackPage.label "Feedback versturen…">
 <!ENTITY helpFeedbackPage.accesskey "v">
 
-<!ENTITY helpInstallBrowserExtensions.accesskey "B">
-<!ENTITY helpInstallBrowserExtensions.label "Install Browser Extensions…">
+<!ENTITY helpInstallBrowserConnectors.accesskey "C">
+<!ENTITY helpInstallBrowserConnectors.label "Install Browser Connectors…">
 
 <!ENTITY helpReportErrors.label "Foutrapportage opsturen…">
 <!ENTITY helpReportErrors.accesskey "F">

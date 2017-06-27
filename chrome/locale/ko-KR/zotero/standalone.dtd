@@ -70,8 +70,8 @@
 <!ENTITY helpFeedbackPage.label "의견 제출...">
 <!ENTITY helpFeedbackPage.accesskey "S">
 
-<!ENTITY helpInstallBrowserExtensions.accesskey "B">
-<!ENTITY helpInstallBrowserExtensions.label "Install Browser Extensions…">
+<!ENTITY helpInstallBrowserConnectors.accesskey "C">
+<!ENTITY helpInstallBrowserConnectors.label "Install Browser Connectors…">
 
 <!ENTITY helpReportErrors.label "Zotero 오류 보고서 보내기...">
 <!ENTITY helpReportErrors.accesskey "R">
