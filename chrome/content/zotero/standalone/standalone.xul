@@ -173,6 +173,10 @@
 							<menuitem id="menu_rtfScan" label="&zotero.toolbar.rtfScan.label;"
 									command="cmd_zotero_rtfScan"/>
 							<menuseparator/>
+							<menuitem id="installConnector"
+									accessKey="&installConnector.accesskey;"
+									label="&installConnector.label;"
+									oncommand="ZoteroStandalone.openHelp('connectors');"/>
 							<menuitem id="menu_addons" label="&addons.label;"
 									oncommand="Zotero.openInViewer('chrome://mozapps/content/extensions/extensions.xul', ZoteroStandalone.updateAddonsPane)"/>
 							<menuitem id="menu_errorConsole" label="Error Console" oncommand="toJavaScriptConsole()" hidden="true"/>
@@ -198,11 +202,6 @@
 									  accesskey="&helpFeedbackPage.accesskey;"
 									  label="&helpFeedbackPage.label;"
 									  oncommand="ZoteroStandalone.openHelp('feedback');"/>
-							<menuseparator/>
-							<menuitem id="installBrowserConnectors"
-									accessKey="&helpInstallBrowserConnectors.accesskey;"
-									label="&helpInstallBrowserConnectors.label;"
-									oncommand="ZoteroStandalone.openHelp('connectors');"/>
 							<menuseparator/>
 							<menuitem id="reportErrors"
 									  accesskey="&helpReportErrors.accesskey;"
