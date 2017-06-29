@@ -44,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Priemonės">
 <!ENTITY toolsMenu.accesskey "P">
+<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Priedai">
 
 
@@ -69,9 +71,6 @@
 <!ENTITY helpTroubleshootingInfo.accesskey "I">
 <!ENTITY helpFeedbackPage.label "Siųsti atsiliepimą...">
 <!ENTITY helpFeedbackPage.accesskey "S">
-
-<!ENTITY helpInstallBrowserConnectors.accesskey "C">
-<!ENTITY helpInstallBrowserConnectors.label "Install Browser Connectors…">
 
 <!ENTITY helpReportErrors.label "Pranešti apie Zotero klaidą...">
 <!ENTITY helpReportErrors.accesskey "r">

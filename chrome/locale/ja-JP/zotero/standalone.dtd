@@ -44,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "ツール">
 <!ENTITY toolsMenu.accesskey "T">
+<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "アドオン">
 
 
@@ -69,9 +71,6 @@
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "フィードバックを送る...">
 <!ENTITY helpFeedbackPage.accesskey "S">
-
-<!ENTITY helpInstallBrowserConnectors.accesskey "C">
-<!ENTITY helpInstallBrowserConnectors.label "Install Browser Connectors…">
 
 <!ENTITY helpReportErrors.label "エラーを Zotero に送信する...">
 <!ENTITY helpReportErrors.accesskey "R">
