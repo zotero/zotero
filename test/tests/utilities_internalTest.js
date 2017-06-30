@@ -19,7 +19,23 @@ describe("Zotero.Utilities.Internal", function () {
 				Zotero.Utilities.Internal.md5Async(file),
 				'93da8f1e5774c599f0942dcecf64b11c'
 			);
-		})
+		});
+		
+		it("should generate hex string given file path for file bigger than chunk size", function* () {
+			var tmpDir = Zotero.getTempDirectory().path;
+			var file = OS.Path.join(tmpDir, 'md5Async');
+			
+			let encoder = new TextEncoder();
+			let arr = encoder.encode("".padStart(100000, "a"));
+			yield OS.File.writeAtomic(file, arr);
+			
+			yield assert.eventually.equal(
+				Zotero.Utilities.Internal.md5Async(file),
+				'1af6d6f2f682f76f80e606aeaaee1680'
+			);
+			
+			yield OS.File.remove(file);
+		});
 	})
 	
 	
