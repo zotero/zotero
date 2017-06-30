@@ -528,12 +528,12 @@ Zotero.File = new function(){
 			if (!(e instanceof OS.File.Error)) {
 				return;
 			}
-			
-			if (!Zotero.isWin) {
-				switch (e.unixErrno) {
-				case OS.Constants.libc.ENOSPC:
-					throw e;
-				}
+			Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
+				.getService(Components.interfaces.nsIOSFileConstantsService)
+				.init();
+			if ((e.unixErrno !== undefined && e.unixErrno == OS.Constants.libc.ENOSPC)
+					|| (e.winLastError !== undefined && e.winLastError == OS.Constants.libc.ENOSPC)) {
+				throw e;
 			}
 		}
 		
