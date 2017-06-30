@@ -957,10 +957,12 @@ Zotero.Attachments = new function(){
 			}
 		}
 		catch (e) {
-			iterator.close();
 			if (e != StopIteration) {
 				throw e;
 			}
+		}
+		finally {
+			iterator.close();
 		}
 		return numFiles > 1;
 	});
