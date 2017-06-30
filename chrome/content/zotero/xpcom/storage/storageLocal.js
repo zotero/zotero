@@ -368,27 +368,31 @@ Zotero.Sync.Storage.Local = {
 			return this.SYNC_STATE_TO_UPLOAD;
 		}
 		catch (e) {
-			if (e instanceof OS.File.Error &&
-					(e.becauseNoSuchFile
+			if (e instanceof OS.File.Error) {
+				let missing = e.becauseNoSuchFile
 					// This can happen if a path is too long on Windows,
 					// e.g. a file is being accessed on a VM through a share
 					// (and probably in other cases).
 					|| (e.winLastError && e.winLastError == 3)
 					// Handle long filenames on OS X/Linux
-					|| (e.unixErrno && e.unixErrno == 63))) {
-				Zotero.debug("Marking attachment " + lk + " as missing");
-				return this.SYNC_STATE_TO_DOWNLOAD;
-			}
-			
-			if (e instanceof OS.File.Error) {
+					|| (e.unixErrno && e.unixErrno == 63);
+				if (!missing) {
+					Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
+						.getService(Components.interfaces.nsIOSFileConstantsService)
+						.init();
+					missing = (e.unixErrno !== undefined && e.unixErrno == OS.Constants.libc.ENOTDIR)
+						|| (e.winLastError !== undefined && e.winLastError == OS.Constants.libc.ENOTDIR);
+				}
+				if (missing) {
+					Zotero.debug("Marking attachment " + lk + " as missing");
+					return this.SYNC_STATE_TO_DOWNLOAD;
+				}
 				if (e.becauseClosed) {
 					Zotero.debug("File was closed", 2);
 				}
 				Zotero.debug(e);
-				Zotero.debug(e.toString());
 				throw new Error(`Error for operation '${e.operation}' for ${path}`);
 			}
-			
 			throw e;
 		}
 		finally {
