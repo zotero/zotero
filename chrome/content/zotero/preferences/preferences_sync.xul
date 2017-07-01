@@ -271,11 +271,10 @@
 					<!-- This doesn't wrap without an explicit width, for some reason -->
 					<description width="45em">&zotero.preferences.sync.reset.warning1;<label style="margin-left: 0; margin-right: 0" class="zotero-text-link" href="http://zotero.org/support/kb/sync_reset_options">&zotero.preferences.sync.reset.warning2;</label>&zotero.preferences.sync.reset.warning3;</description>
 					
-					<radiogroup id="zotero-reset-sync-group"
-							oncommand="Zotero_Preferences.Sync.handleSyncResetSelect(this)">
-						<groupbox>
-							<caption label="&zotero.preferences.sync.syncServer;"/>
-							
+					<groupbox>
+						<caption label="&zotero.preferences.sync.syncServer;"/>
+						
+						<radiogroup oncommand="Zotero_Preferences.Sync.handleSyncResetSelect(this)">
 							<grid>
 								<columns>
 									<column/>
@@ -301,7 +300,7 @@
 									</row>
 									-->
 									<row id="zotero-reset-data-sync-history">
-										<radio/>
+										<radio hidden="true"/>
 										<vbox onclick="this.previousSibling.click()">
 											<label value="&zotero.preferences.sync.reset.resetDataSyncHistory;"/>
 											<description>&zotero.preferences.sync.reset.resetDataSyncHistory.desc;</description>
@@ -309,16 +308,18 @@
 									</row>
 								</rows>
 							</grid>
-							
-							<hbox>
-								<button label="&zotero.preferences.sync.reset.button;"
-									oncommand="document.getElementById('sync-reset-rows').firstChild.firstChild.click(); Zotero_Preferences.Sync.handleSyncReset('full-sync')"/>
-							</hbox>
-						</groupbox>
+						</radiogroup>
 						
-						<groupbox>
-							<caption label="&zotero.preferences.sync.fileSyncing;"/>
-							
+						<hbox>
+							<button label="&zotero.preferences.sync.reset.button;"
+								oncommand="document.getElementById('sync-reset-rows').firstChild.firstChild.click(); Zotero_Preferences.Sync.handleSyncReset('full-sync')"/>
+						</hbox>
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.preferences.sync.fileSyncing;"/>
+						
+						<radiogroup oncommand="Zotero_Preferences.Sync.handleSyncResetSelect(this)">
 							<grid>
 								<columns>
 									<column/>
@@ -327,7 +328,7 @@
 								
 								<rows id="storage-reset-rows">
 									<row id="zotero-reset-storage-history">
-										<radio/>
+										<radio hidden="true"/>
 										<vbox onclick="this.previousSibling.click()">
 											<label value="&zotero.preferences.sync.reset.resetFileSyncHistory;"/>
 											<description>&zotero.preferences.sync.reset.resetFileSyncHistory.desc;</description>
@@ -335,13 +336,13 @@
 									</row>
 								</rows>
 							</grid>
-							
-							<hbox>
-								<button label="&zotero.preferences.sync.reset.button;"
-									oncommand="document.getElementById('storage-reset-rows').firstChild.firstChild.click(); Zotero_Preferences.Sync.handleSyncReset('reset-storage-history')"/>
-							</hbox>
-						</groupbox>
-					</radiogroup>
+						</radiogroup>
+						
+						<hbox>
+							<button label="&zotero.preferences.sync.reset.button;"
+								oncommand="document.getElementById('storage-reset-rows').firstChild.firstChild.click(); Zotero_Preferences.Sync.handleSyncReset('reset-storage-history')"/>
+						</hbox>
+					</groupbox>
 				</tabpanel>
 			</tabpanels>
 		</tabbox>

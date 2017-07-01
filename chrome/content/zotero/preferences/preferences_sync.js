@@ -757,7 +757,7 @@ Zotero_Preferences.Sync = {
 				var index = ps.confirmEx(
 					null,
 					Zotero.getString('general.warning'),
-					Zotero.getString('zotero.preferences.sync.reset.fileSyncHistory'),
+					Zotero.getString('zotero.preferences.sync.reset.fileSyncHistory', Zotero.clientName),
 					buttonFlags,
 					Zotero.getString('general.reset'),
 					null, null, null, {}
