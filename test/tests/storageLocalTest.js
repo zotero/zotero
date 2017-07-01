@@ -93,6 +93,28 @@ describe("Zotero.Sync.Storage.Local", function () {
 		})
 	})
 	
+	describe("#updateSyncStates()", function () {
+		it("should update attachment sync states to 'to_upload'", function* () {
+			var attachment1 = yield importFileAttachment('test.png');
+			attachment1.attachmentSyncState = 'in_sync';
+			yield attachment1.saveTx();
+			var attachment2 = yield importFileAttachment('test.png');
+			attachment2.attachmentSyncState = 'in_sync';
+			yield attachment2.saveTx();
+			
+			var local = Zotero.Sync.Storage.Local;
+			yield local.updateSyncStates([attachment1, attachment2], 'to_upload');
+			
+			for (let attachment of [attachment1, attachment2]) {
+				assert.strictEqual(attachment.attachmentSyncState, local.SYNC_STATE_TO_UPLOAD);
+				let state = yield Zotero.DB.valueQueryAsync(
+					"SELECT syncState FROM itemAttachments WHERE itemID=?", attachment.id
+				);
+				assert.strictEqual(state, local.SYNC_STATE_TO_UPLOAD);
+			}
+		});
+	});
+	
 	describe("#resetAllSyncStates()", function () {
 		it("should reset attachment sync states to 'to_upload'", function* () {
 			var attachment = yield importFileAttachment('test.png');

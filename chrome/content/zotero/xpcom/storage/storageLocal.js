@@ -258,15 +258,25 @@ Zotero.Sync.Storage.Local = {
 		//Zotero.debug("Memory usage: " + memmgr.resident);
 		
 		var changed = false;
-		for (let i = 0; i < items.length; i++) {
-			let item = items[i];
+		var statesToSet = {};
+		for (let item of items) {
 			// TODO: Catch error?
 			let state = yield this._checkForUpdatedFile(item, attachmentData[item.id]);
 			if (state !== false) {
-				item.attachmentSyncState = state;
-				yield item.saveTx({ skipAll: true });
+				if (!statesToSet[state]) {
+					statesToSet[state] = [];
+				}
+				statesToSet[state].push(item);
 				changed = true;
 			}
+		}
+		// Update sync states in bulk
+		if (changed) {
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let state in statesToSet) {
+					yield this.updateSyncStates(statesToSet[state], parseInt(state));
+				}
+			}.bind(this));
 		}
 		
 		if (!items.length) {
@@ -496,6 +506,35 @@ Zotero.Sync.Storage.Local = {
 	getDeletedFiles: function (libraryID) {
 		var sql = "SELECT key FROM storageDeleteLog WHERE libraryID=?";
 		return Zotero.DB.columnQueryAsync(sql, libraryID);
+	},
+	
+	
+	/**
+	 * @param {Zotero.Item[]} items
+	 * @param {String|Integer} syncState
+	 * @return {Promise}
+	 */
+	updateSyncStates: function (items, syncState) {
+		if (syncState === undefined) {
+			throw new Error("Sync state not specified");
+		}
+		if (typeof syncState == 'string') {
+			syncState = this["SYNC_STATE_" + syncState.toUpperCase()];
+		}
+		return Zotero.Utilities.Internal.forEachChunkAsync(
+			items,
+			1000,
+			async function (chunk) {
+				chunk.forEach((item) => {
+					item._attachmentSyncState = syncState;
+				});
+				return Zotero.DB.queryAsync(
+					"UPDATE itemAttachments SET syncState=? WHERE itemID IN "
+						+ "(" + chunk.map(item => item.id).join(', ') + ")",
+					syncState
+				);
+			}
+		);
 	},
 	
 	
