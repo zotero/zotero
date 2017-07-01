@@ -39,6 +39,8 @@ Zotero.Attachments = new function(){
 	 * @param {Integer} [options.libraryID]
 	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
 	 * @param {Integer[]} [options.collections] - Collection keys or ids to add new item to
+	 * @param {String} [options.contentType]
+	 * @param {String} [options.charset]
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>}
 	 */
@@ -49,6 +51,8 @@ Zotero.Attachments = new function(){
 		var file = Zotero.File.pathToFile(options.file);
 		var parentItemID = options.parentItemID;
 		var collections = options.collections;
+		var contentType = options.contentType;
+		var charset = options.charset;
 		var saveOptions = options.saveOptions;
 		
 		var newName = Zotero.File.getValidFileName(file.leafName);
@@ -90,9 +94,13 @@ Zotero.Attachments = new function(){
 				// Copy file to unique filename, which automatically shortens long filenames
 				newFile = Zotero.File.copyToUnique(file, newFile);
 				
-				contentType = yield Zotero.MIME.getMIMETypeFromFile(newFile);
-				
+				if (!contentType) {
+					contentType = yield Zotero.MIME.getMIMETypeFromFile(newFile);
+				}
 				attachmentItem.attachmentContentType = contentType;
+				if (charset) {
+					attachmentItem.attachmentCharset = charset;
+				}
 				attachmentItem.attachmentPath = newFile.path;
 				yield attachmentItem.save(saveOptions);
 			}.bind(this));

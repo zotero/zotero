@@ -851,6 +851,16 @@ function importFileAttachment(filename, options = {}) {
 }
 
 
+function importTextAttachment() {
+	return importFileAttachment('test.txt', { contentType: 'text/plain', charset: 'utf-8' });
+}
+
+
+function importHTMLAttachment() {
+	return importFileAttachment('test.html', { contentType: 'text/html', charset: 'utf-8' });
+}
+
+
 /**
  * Sets the fake XHR server to response to a given response
  *
