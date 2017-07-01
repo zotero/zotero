@@ -321,22 +321,9 @@ Zotero.Sync.Storage.Engine.prototype.queueItem = Zotero.Promise.coroutine(functi
 		onProgress: this.onProgress
 	});
 	if (type == 'upload') {
-		try {
-			request.setMaxSize(yield Zotero.Attachments.getTotalFileSize(item));
-		}
-		// If this fails, ignore it, though we might fail later
-		catch (e) {
-			// But if the file doesn't exist yet, don't try to upload it
-			//
-			// This isn't a perfect test, because the file could still be in the process of being
-			// downloaded (e.g., from the web). It'd be better to download files to a temp
-			// directory and move them into place.
-			if (!(yield item.getFilePathAsync())) {
-				Zotero.debug("File " + item.libraryKey + " not yet available to upload -- skipping");
-				return;
-			}
-			
-			Zotero.logError(e);
+		if (!(yield item.fileExists())) {
+			Zotero.debug("File " + item.libraryKey + " not yet available to upload -- skipping");
+			return;
 		}
 	}
 	this.queues[type].add(request.start.bind(request));
