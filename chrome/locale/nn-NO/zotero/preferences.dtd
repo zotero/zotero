@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Gjenopprett til Zotero-tenaren">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Erase all servar data and overwrite with local Zotero data.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Nullstill filsynkroniseringshistorikken">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "Nullstill">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

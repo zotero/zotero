@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Helyreállítás a Zotero szerverre">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "A szerveren található adatok törlése és frissítése a helyi adatokkal.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "A szinkronizációs előzmények törlése">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "Visszaállítás">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

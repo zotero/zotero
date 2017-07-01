@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Endurheimta í Zotero netþjón">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Eyða öllum gögnum frá netþjóni og endurnýja með staðbundnum Zotero gögnum.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Endurræsa forsögu skráasamhæfingar">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "Endurræsa">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

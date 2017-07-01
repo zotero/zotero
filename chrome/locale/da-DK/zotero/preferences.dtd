@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Gendan på Zotero Server">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Slet alle server-data og overskriv med lokale data fra Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Nulstil historik for fil-synkronisering">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tjek for fjernkopier af alle lokale vedhæftede filer">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "Nulstil">
 <!ENTITY zotero.preferences.sync.reset.button "Nulstil...">
 

@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zotero Server로 복원">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "모든 서버 자료를 지우고 지역 Zotero 자료로 덮어 씁니다.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "파일 동기화 기록 재설정">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "모든 로컬 첨부 파일의 원격 사본 ">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "재설정">
 <!ENTITY zotero.preferences.sync.reset.button "재설정...">
 

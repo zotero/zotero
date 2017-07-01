@@ -23,7 +23,7 @@
 <!ENTITY zotero.preferences.updateNow "Aktualizuj teraz">
 <!ENTITY zotero.preferences.reportTranslationFailure "Zgłoś niedziałający translator strony">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Pozwól zotero.org dostosować zawartość opierając się na aktualnej wersji Zotero">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Jeśli zaznaczone, bieżąca wersja Zotero będzie dołączona w nagłówku HTTP podczas zapytań zotero.org.">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Jeśli zaznaczone, bieżąca wersja Zotero będzie dołączona w nagłówku HTTP podczas zapytań do zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Używaj Zotero do pobranych plików BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "Podczas tworzenia elementów ze stron internetowych automatycznie wykonaj zrzut ekranu">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Zapisując element dołączaj powiązane pliki PDF i inne">
@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zapisz na serwer Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Usuń wszystkie dane na serwerze i nadpisz je lokalnymi danymi Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Wyczyść historię synchronizacji plików">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Sprawdź zdalne kopie wszystkich lokalnych załączników">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "Przywróć">
 <!ENTITY zotero.preferences.sync.reset.button "Przywróć...">
 
@@ -136,13 +136,13 @@
 <!ENTITY zotero.preferences.keys.openZotero "Otwórz/Zamknij okno Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Zapisz w Zotero (ikona paska adresu)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Przełącz w tryb pełnoekranowy">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Przenieś fokus na panel bibliotek (lewy)">
 <!ENTITY zotero.preferences.keys.quicksearch "Szybkie wyszukiwanie">
 <!ENTITY zotero.preferences.keys.newItem "Utwórz nowy element">
 <!ENTITY zotero.preferences.keys.newNote "Utwórz nową notatkę">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Oznacz wszystkie elementy kanału jako przeczytane/nieprzeczytane">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Wyświetl/Ukryj wybór etykiet">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiuje wybrane odnośniki bibliograficzne do schowka">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiuj wybrane odnośniki bibliograficzne do schowka">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiuj zaznaczone elementy do schowka">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importuj ze schowka">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Zmiany zostaną zastosowane po ponownym uruchomieniu">

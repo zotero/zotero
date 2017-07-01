@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "بازنشانی اطلاعات در کارگزار زوترو">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "پاک کردن همه اطلاعات و رونویسی با اطلاعات محلی زوترو">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "پاک کردن تاریخچه همزمان‌‌سازی پرونده‌ها">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "تنظیم مجدد">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

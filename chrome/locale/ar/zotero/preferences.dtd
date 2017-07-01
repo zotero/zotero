@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "الاسترجاع إلى خادم زوتيرو">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "حذف جميع بيانات الخادم وإحلال بيانات زوتيرو المحلية على الخادم.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "إعادة تعيين ملف سجل المزامنة">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "اعادة ضبط">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

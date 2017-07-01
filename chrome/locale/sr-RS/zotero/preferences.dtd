@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Пошаљи на Зотеров сервер">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Брише све податке са сервера и преписује их локалним подацима из Зотера.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Поништи историју усклађивања">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "Врати">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

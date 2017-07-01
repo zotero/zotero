@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Atkurti perrašant Zotero serverio duomenis">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Ištrinti visus serverio duomenis, po to vietinius Zotero duomenis nusiųsti į serverį.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Perrašyti failų sinchronizavimo žurnalą">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tikrinti, ar visi vietiniai įrašų priedai turi nuotolines kopijas">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "Atkūrimas">
 <!ENTITY zotero.preferences.sync.reset.button "Atkurti...">
 

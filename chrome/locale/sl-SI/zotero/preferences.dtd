@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Obnovi na stanje na strežniku Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Pobriši vse strežniške podatke in prepiši s krajevnimi podatki Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Ponastavi zgodovino usklajevanja datotek">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Preveri za oddaljene kopije vseh krajevnih datotek priponk">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "Ponastavi">
 <!ENTITY zotero.preferences.sync.reset.button "Ponastavi ...">
 

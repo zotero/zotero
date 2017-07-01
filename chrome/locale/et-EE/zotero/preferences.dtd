@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Taastada sünkroon-serveri andmed kohalikust hoidlast">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Kustutada kõik sünkroon-serveri andmed ja taastada need kohalikust hoidlast">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Algseadistada failide sünkroonimise ajalugu">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "Algseadistada">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

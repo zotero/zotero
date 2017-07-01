@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Obnovit na Zotero Server">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Vymazat všechna data na serveru a přepsat je lokálními daty Zotera.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Resetovat historii synchronizace souborů">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Zkontrolovat vzdálené kopie všech místních příloh">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "Resetování">
 <!ENTITY zotero.preferences.sync.reset.button "Reset...">
 

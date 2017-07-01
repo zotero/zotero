@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "ส่งข้อมูลคืนเครื่องบริการของ Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "ล้างข้อมูลในเครื่องบริการของ Zotero แล้วบันทึกทับด้วยข้อมูลจากเครื่องนี้">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "ตั้งค่าประวัติการประสานข้อมูลแฟ้มใหม่">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "ตั้งค่าใหม่">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

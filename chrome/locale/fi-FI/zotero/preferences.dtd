@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Palauta aineisto Zotero-palvelimelle">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Poista kaikki palvelimella oleva aineisto ja korvaa se paikallisella Zotero-aineistolla">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Poista tiedostojen synkronointihistoria">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "Nollaa">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

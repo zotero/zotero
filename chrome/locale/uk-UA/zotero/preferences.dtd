@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Віднвити на сервері Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Віновити всі дані на сервері та перезаписати даними Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Скинути історію синхронізації файлів">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "Скинути">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

@@ -44,8 +44,8 @@
 
 <!ENTITY toolsMenu.label "Outils">
 <!ENTITY toolsMenu.accesskey "O">
-<!ENTITY installConnector.label "Install Browser Connector">
-<!ENTITY installConnector.accesskey "C">
+<!ENTITY installConnector.label "Installer le Connecteur Zotero dans le navigateur">
+<!ENTITY installConnector.accesskey "I">
 <!ENTITY addons.label "Extensions">
 
 
@@ -65,12 +65,12 @@
 <!ENTITY helpMac.commandkey "?">
 <!ENTITY aboutProduct.label "À propos de &brandShortName;">
 <!ENTITY aboutProduct.accesskey "p">
-<!ENTITY productHelp.label "Assistance et documentation">
+<!ENTITY productHelp.label "Assistance et documentation générales">
 <!ENTITY productHelp.accesskey "A">
-<!ENTITY helpTroubleshootingInfo.label "Informations de dépannage">
-<!ENTITY helpTroubleshootingInfo.accesskey "n">
-<!ENTITY helpFeedbackPage.label "Soumettre un commentaire ou un retour d'expérience…">
-<!ENTITY helpFeedbackPage.accesskey "S">
+<!ENTITY helpTroubleshootingInfo.label "Aide en cas de problème">
+<!ENTITY helpTroubleshootingInfo.accesskey "i">
+<!ENTITY helpFeedbackPage.label "Envoyer un commentaire ou un retour d'expérience…">
+<!ENTITY helpFeedbackPage.accesskey "E">
 
 <!ENTITY helpReportErrors.label "Signaler les erreurs à Zotero…">
 <!ENTITY helpReportErrors.accesskey "Z">

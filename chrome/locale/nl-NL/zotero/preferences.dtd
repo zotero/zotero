@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Herstellen naar Zotero-server">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Alle gegevens op de server wissen en vervangen door de lokale Zotero-gegevens.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Wis bestandssynchronisatiegeschiedenis">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

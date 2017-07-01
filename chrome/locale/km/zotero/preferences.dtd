@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "ស្តារទៅកាន់ម៉ាស៊ីនបម្រើហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "លុបចោលរាល់ទិន្នន័យម៉ាស៊ីនបម្រើទាំងអស់ និង សរសេរលុបពីលើទិន្នន័យ ហ្ស៊ូតេរ៉ូមូលដ្ឋាន">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "កំណត់រៀបចំប្រវត្តិឯកសារសមកាលកម្ម">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "កំណត់ជាថ្មី">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

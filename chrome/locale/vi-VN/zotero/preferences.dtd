@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Lưu lên máy chủ Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Xóa toàn bộ dữ liệu trên máy chủ và ghi đè bằng dữ liệu cục bộ.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Thiết lập lại lịch sử đồng bộ tập tin">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Kiểm tra bản lưu trên máy chủ của các tập tin đính kèm">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "Thiết lập lại">
 <!ENTITY zotero.preferences.sync.reset.button "Đang thiết lập lại...">
 

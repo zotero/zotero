@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Kembalikan kepada Server Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Hapus semua data server dan ganti dengan data Zotero lokal.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reset Riwayat Sinkronisasi Berkas">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 

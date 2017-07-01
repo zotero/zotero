@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "恢复到 Zotero 服务器">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "删除服务器所有数据并用本地数据覆盖.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重置文件同步历史">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Check for remote copies of all local attachment files">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
 <!ENTITY zotero.preferences.sync.reset "重置">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
