@@ -159,6 +159,16 @@ fi
 # Clean up on exit
 trap "{ rm -rf \"$TEMPDIR\"; }" EXIT
 
+# Check if build watch process is running
+# If not, run now
+if [[ "$TRAVIS" != true ]] && ! ps | grep scripts/build.js | grep -v grep > /dev/null; then
+	echo
+	echo "Running JS build process"
+	cd "$CWD/.."
+	npm run build
+	echo
+fi
+
 makePath FX_PROFILE "$PROFILE"
 MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$FX_EXECUTABLE" -profile "$FX_PROFILE" \
     -chrome chrome://zotero-unit/content/runtests.html -test "$TESTS" -grep "$GREP" -ZoteroTest $FX_ARGS
