@@ -52,8 +52,7 @@ Zotero.Sync.Streamer_Module.prototype = {
 	_retry: null,
 	
 	init: Zotero.Promise.coroutine(function* () {
-		// Connect to the streaming server
-		if (!Zotero.Prefs.get('sync.autoSync') || !Zotero.Prefs.get('sync.streaming.enabled')) {
+		if (!this._isEnabled()) {
 			return this.disconnect();
 		}
 		
@@ -71,7 +70,15 @@ Zotero.Sync.Streamer_Module.prototype = {
 		}
 	}),
 	
+	_isEnabled: function () {
+		return Zotero.Prefs.get('sync.autoSync') && Zotero.Prefs.get('sync.streaming.enabled');
+	},
+	
 	_connect: function (url, apiKey) {
+		if (!this._isEnabled()) {
+			return;
+		}
+		
 		Zotero.debug(`Connecting to streaming server at ${url}`);
 		
 		var window = Cc["@mozilla.org/appshell/appShellService;1"]
@@ -83,7 +90,6 @@ Zotero.Sync.Streamer_Module.prototype = {
 		
 		this._socket.onopen = () => {
 			Zotero.debug("WebSocket connection opened");
-			this._reconnectGenerator = null;
 		};
 		
 		this._socket.onerror = event => {
@@ -105,18 +111,24 @@ Zotero.Sync.Streamer_Module.prototype = {
 				this._socket.send(data);
 			}
 			else if (data.event == "subscriptionsCreated") {
+				this._reconnectGenerator = null;
+				
 				for (let error of data.errors) {
 					Zotero.logError(this._hideAPIKey(JSON.stringify(error)));
 				}
 			}
 			// Library added or removed
 			else if (data.event == 'topicAdded' || data.event == 'topicRemoved') {
+				this._reconnectGenerator = null;
+				
 				yield Zotero.Sync.Runner.sync({
 					background: true
 				});
 			}
 			// Library modified
 			else if (data.event == 'topicUpdated') {
+				this._reconnectGenerator = null;
+				
 				let library = Zotero.URI.getPathLibrary(data.topic);
 				if (library) {
 					// Ignore if skipped library
