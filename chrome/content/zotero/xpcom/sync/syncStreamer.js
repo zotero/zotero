@@ -139,7 +139,7 @@ Zotero.Sync.Streamer_Module.prototype = {
 			}
 			
 			if (this._reconnect) {
-				if (event.code >= 4000) {
+				if (event.code >= 4400 && event.code < 4500) {
 					Zotero.debug("Not reconnecting to WebSocket due to client error");
 					return;
 				}
