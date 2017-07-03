@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zotero Sunucusuna Yükle">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Sunucudaki tüm verileri sil ve yerel Zotero verisini üzerine yaz.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Dosya Eşitleme Geçmişini Sıfırla">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tüm ek dosyaları depolama hizmetindekiler ile karşılaştır">
 <!ENTITY zotero.preferences.sync.reset "Sıfırla">
 <!ENTITY zotero.preferences.sync.reset.button "Sıfırla...">
 

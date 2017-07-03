@@ -11,8 +11,8 @@
 <!ENTITY zotero.general.refresh "Recarregar">
 <!ENTITY zotero.general.saveAs "Guardar Como…">
 <!ENTITY zotero.general.advancedOptions.label "Opções Avançadas">
-<!ENTITY zotero.general.more "More">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.more "Mais">
+<!ENTITY zotero.general.loading "Carregando…">
 
 <!ENTITY zotero.errorReport.title "Relatório de Erros do Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Pode incluir mensagens sem relação com o Zotero.">
@@ -177,7 +177,7 @@
 
 <!ENTITY zotero.bibliography.title "Criar Citação/Bibliografia">
 <!ENTITY zotero.bibliography.style.label "Estilo de Citação:">
-<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
+<!ENTITY zotero.bibliography.manageStyles "Gerir Estilos…">
 <!ENTITY zotero.bibliography.locale.label "Língua:">
 <!ENTITY zotero.bibliography.outputMode "Modo de Saída:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografia:">
@@ -224,13 +224,13 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Notas de pé-de-página">
 <!ENTITY zotero.integration.prefs.endnotes.label "Notas finais">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Guardar Citações como:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Marcadores">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Os marcadores podem ser partilhados entre o Word e o LibreOffice, mas podem causar erros se forem acidentalmente modificados e não podem ser inseridos em notas de rodapé.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Usar abreviaturas de publicações periódicas do MEDLINE">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "O campo «Abreviatura da Publicação» será ignorado.">
 
 <!ENTITY zotero.integration.showEditor.label "Mostrar Editor">
 <!ENTITY zotero.integration.classicView.label "Visualização Clássica">
@@ -268,10 +268,10 @@
 <!ENTITY zotero.feedSettings.title.label "Título:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Actualizar feed a cada">
 <!ENTITY zotero.feedSettings.refresh.label2 "hora(s)">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remover itens do feed por ler após">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "dia(s)">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remover itens do feed já lidos após">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dia(s)">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Obtendo Metadados...">
