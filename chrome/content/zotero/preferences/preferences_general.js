@@ -40,7 +40,7 @@ Zotero_Preferences.General = {
 	
 	
 	updateTranslators: Zotero.Promise.coroutine(function* () {
-		var updated = yield Zotero.Schema.updateFromRepository(true);
+		var updated = yield Zotero.Schema.updateFromRepository(Zotero.Schema.REPO_UPDATE_MANUAL);
 		var button = document.getElementById('updateButton');
 		if (button) {
 			if (updated===-1) {

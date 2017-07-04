@@ -28,6 +28,11 @@ Zotero.Schema = new function(){
 	this.dbInitialized = false;
 	this.goToChangeLog = false;
 	
+	this.REPO_UPDATE_MANUAL = 1;
+	this.REPO_UPDATE_UPGRADE = 2;
+	this.REPO_UPDATE_STARTUP = 3;
+	this.REPO_UPDATE_NOTIFICATION = 4;
+	
 	var _schemaUpdateDeferred = Zotero.Promise.defer();
 	this.schemaUpdatePromise = _schemaUpdateDeferred.promise;
 	
@@ -35,8 +40,12 @@ Zotero.Schema = new function(){
 	var _schemaVersions = [];
 	// Update when adding _updateCompatibility() line to schema update step
 	var _maxCompatibility = 5;
-	var _repositoryTimer;
-	var _remoteUpdateInProgress = false, _localUpdateInProgress = false;
+	
+	var _repositoryTimerID;
+	var _repositoryNotificationTimerID;
+	var _nextRepositoryUpdate;
+	var _remoteUpdateInProgress = false;
+	var _localUpdateInProgress = false;
 	
 	var self = this;
 	
@@ -90,13 +99,14 @@ Zotero.Schema = new function(){
 			.then(function() {
 				(Zotero.isStandalone ? Zotero.uiReadyPromise : Zotero.initializationPromise)
 				.then(1000)
-				.then(function () {
-					return Zotero.Schema.updateBundledFiles();
-				})
-				.then(function () {
+				.then(async function () {
+					await this.updateBundledFiles();
+					if (Zotero.Prefs.get('automaticScraperUpdates')) {
+						await this.updateFromRepository(this.REPO_UPDATE_UPGRADE);
+					}
 					_schemaUpdateDeferred.resolve(true);
-				});
-			});
+				}.bind(this))
+			}.bind(this));
 		}
 		
 		// We don't handle upgrades from pre-Zotero 2.1 databases
@@ -203,12 +213,13 @@ Zotero.Schema = new function(){
 		// soon initialization is done so that translation works before the Zotero pane is opened.
 		(Zotero.isStandalone ? Zotero.uiReadyPromise : Zotero.initializationPromise)
 		.then(1000)
-		.then(function () {
-			return Zotero.Schema.updateBundledFiles();
-		})
-		.then(function () {
+		.then(async function () {
+			await this.updateBundledFiles();
+			if (Zotero.Prefs.get('automaticScraperUpdates')) {
+				await this.updateFromRepository(this.REPO_UPDATE_STARTUP);
+			}
 			_schemaUpdateDeferred.resolve(true);
-		});
+		}.bind(this));
 		
 		return updated;
 	});
@@ -488,10 +499,12 @@ Zotero.Schema = new function(){
 			case 'styles':
 				yield Zotero.Styles.init(initOpts);
 				var updated = yield _updateBundledFilesAtLocation(installLocation, mode);
+				break;
 			
 			case 'translators':
 				yield Zotero.Translators.init(initOpts);
 				var updated = yield _updateBundledFilesAtLocation(installLocation, mode);
+				break;
 			
 			default:
 				yield Zotero.Translators.init(initOpts);
@@ -505,14 +518,7 @@ Zotero.Schema = new function(){
 			_localUpdateInProgress = false;
 		}
 		
-		if (updated) {
-			if (Zotero.Prefs.get('automaticScraperUpdates')) {
-				yield Zotero.Schema.updateFromRepository(2);
-			}
-		}
-		else {
-			yield Zotero.Schema.updateFromRepository(false);
-		}
+		return updated;
 	});
 	
 	/**
@@ -977,19 +983,51 @@ Zotero.Schema = new function(){
 	});
 	
 	
+	this.onUpdateNotification = async function (delay) {
+		if (!Zotero.Prefs.get('automaticScraperUpdates')) {
+			return;
+		}
+		
+		// If another repository check -- either from notification or daily check -- is scheduled
+		// before delay, just wait for that one
+		if (_nextRepositoryUpdate) {
+			if (_nextRepositoryUpdate <= (Date.now() + delay)) {
+				Zotero.debug("Next scheduled update from repository is in "
+					+ Math.round((_nextRepositoryUpdate - Date.now()) / 1000) + " seconds "
+					+ "-- ignoring notification");
+				return;
+			}
+			if (_repositoryNotificationTimerID) {
+				clearTimeout(_repositoryNotificationTimerID);
+			}
+		}
+		
+		_nextRepositoryUpdate = Date.now() + delay;
+		Zotero.debug(`Updating from repository in ${Math.round(delay / 1000)} seconds`);
+		_repositoryNotificationTimerID = setTimeout(() => {
+			this.updateFromRepository(this.REPO_UPDATE_NOTIFICATION)
+		}, delay);
+	};
+	
+	
 	/**
 	 * Send XMLHTTP request for updated translators and styles to the central repository
 	 *
 	 * @param {Integer} [force=0]	 - If non-zero, force a repository query regardless of how long it's
-	 *     been since the last check. 1 means manual update, 2 means forced update after upgrade.
+	 *     been since the last check. Should be a REPO_UPDATE_* constant.
 	 */
 	this.updateFromRepository = Zotero.Promise.coroutine(function* (force = 0) {
+		if (Zotero.skipBundledFiles) {
+			Zotero.debug("No bundled files -- skipping repository update");
+			return;
+		}
+		
+		if (_remoteUpdateInProgress) {
+			Zotero.debug("A remote update is already in progress -- not checking repository");
+			return false;
+		}
+		
 		if (!force) {
-			if (_remoteUpdateInProgress) {
-				Zotero.debug("A remote update is already in progress -- not checking repository");
-				return false;
-			}
-			
 			// Check user preference for automatic updates
 			if (!Zotero.Prefs.get('automaticScraperUpdates')) {
 				Zotero.debug('Automatic repository updating disabled -- not checking repository', 4);
@@ -1014,13 +1052,20 @@ Zotero.Schema = new function(){
 		if (_localUpdateInProgress) {
 			Zotero.debug('A local update is already in progress -- delaying repository check', 4);
 			_setRepositoryTimer(600);
-			return;
+			return false;
 		}
 		
 		if (Zotero.locked) {
 			Zotero.debug('Zotero is locked -- delaying repository check', 4);
 			_setRepositoryTimer(600);
-			return;
+			return false;
+		}
+		
+		// If an update from a notification is queued, stop it, since we're updating now
+		if (_repositoryNotificationTimerID) {
+			clearTimeout(_repositoryNotificationTimerID);
+			_repositoryNotificationTimerID = null;
+			_nextRepositoryUpdate = null;
 		}
 		
 		if (Zotero.DB.inTransaction()) {
@@ -1029,6 +1074,7 @@ Zotero.Schema = new function(){
 		
 		// Get the last timestamp we got from the server
 		var lastUpdated = yield this.getDBVersion('repository');
+		var updated = false;
 		
 		try {
 			var url = ZOTERO_CONFIG.REPOSITORY_URL + 'updated?'
@@ -1039,23 +1085,20 @@ Zotero.Schema = new function(){
 			
 			_remoteUpdateInProgress = true;
 			
-			if (force == 2) {
-				url += '&m=2';
-			}
-			else if (force) {
-				url += '&m=1';
+			if (force) {
+				url += '&m=' + force;
 			}
 			
 			// Send list of installed styles
 			var styles = Zotero.Styles.getAll();
 			var styleTimestamps = [];
-			for (var id in styles) {
-				var updated = Zotero.Date.sqlToDate(styles[id].updated);
-				updated = updated ? updated.getTime() / 1000 : 0;
+			for (let id in styles) {
+				let styleUpdated = Zotero.Date.sqlToDate(styles[id].updated);
+				styleUpdated = styleUpdated ? styleUpdated.getTime() / 1000 : 0;
 				var selfLink = styles[id].url;
 				var data = {
 					id: id,
-					updated: updated
+					updated: styleUpdated
 				};
 				if (selfLink) {
 					data.url = selfLink;
@@ -1066,24 +1109,26 @@ Zotero.Schema = new function(){
 			
 			try {
 				var xmlhttp = yield Zotero.HTTP.request("POST", url, { body: body });
-				return _updateFromRepositoryCallback(xmlhttp, force);
+				updated = yield _handleRepositoryResponse(xmlhttp, force);
 			}
 			catch (e) {
-				if (e instanceof Zotero.HTTP.UnexpectedStatusException
-						|| e instanceof Zotero.HTTP.BrowserOfflineException) {
-					let msg = " -- retrying in " + ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL
-					if (e instanceof Zotero.HTTP.BrowserOfflineException) {
-						Zotero.debug("Browser is offline" + msg, 2);
+				if (!force) {
+					if (e instanceof Zotero.HTTP.UnexpectedStatusException
+							|| e instanceof Zotero.HTTP.BrowserOfflineException) {
+						let msg = " -- retrying in " + ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL
+						if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+							Zotero.debug("Browser is offline" + msg, 2);
+						}
+						else {
+							Zotero.logError(e);
+							Zotero.debug(e.status, 1);
+							Zotero.debug(e.xmlhttp.responseText, 1);
+							Zotero.debug("Error updating from repository " + msg, 1);
+						}
+						// TODO: instead, add an observer to start and stop timer on online state change
+						_setRepositoryTimer(ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL);
+						return;
 					}
-					else {
-						Zotero.logError(e);
-						Zotero.debug(e.status, 1);
-						Zotero.debug(e.xmlhttp.responseText, 1);
-						Zotero.debug("Error updating from repository " + msg, 1);
-					}
-					// TODO: instead, add an observer to start and stop timer on online state change
-					_setRepositoryTimer(ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL);
-					return;
 				}
 				if (xmlhttp) {
 					Zotero.debug(xmlhttp.status, 1);
@@ -1093,16 +1138,28 @@ Zotero.Schema = new function(){
 			};
 		}
 		finally {
+			if (!force) {
+				_setRepositoryTimer(ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL);
+			}
 			_remoteUpdateInProgress = false;
 		}
+		
+		return updated;
 	});
 	
 	
 	this.stopRepositoryTimer = function () {
-		if (_repositoryTimer){
+		if (_repositoryTimerID) {
 			Zotero.debug('Stopping repository check timer');
-			_repositoryTimer.cancel();
+			clearTimeout(_repositoryTimerID);
+			_repositoryTimerID = null;
 		}
+		if (_repositoryNotificationTimerID) {
+			Zotero.debug('Stopping repository notification update timer');
+			clearTimeout(_repositoryNotificationTimerID);
+			_repositoryNotificationTimerID = null
+		}
+		_nextRepositoryUpdate = null;
 	}
 	
 	
@@ -1126,7 +1183,11 @@ Zotero.Schema = new function(){
 		Zotero.getStylesDirectory();
 		
 		yield Zotero.Promise.all(Zotero.Translators.reinit(), Zotero.Styles.reinit());
-		yield this.updateBundledFiles();
+		var updated = yield this.updateBundledFiles();
+		if (updated && Zotero.Prefs.get('automaticScraperUpdates')) {
+			yield Zotero.Schema.updateFromRepository(this.REPO_UPDATE_MANUAL);
+		}
+		return updated;
 	});
 	
 	
@@ -1143,7 +1204,11 @@ Zotero.Schema = new function(){
 		translatorsDir.remove(true);
 		Zotero.getTranslatorsDirectory(); // recreate directory
 		yield Zotero.Translators.reinit();
-		return this.updateBundledFiles('translators');
+		var updated = yield this.updateBundledFiles('translators');
+		if (updated && Zotero.Prefs.get('automaticScraperUpdates')) {
+			yield Zotero.Schema.updateFromRepository(this.REPO_UPDATE_MANUAL);
+		}
+		return updated;
 	});
 	
 	
@@ -1160,7 +1225,11 @@ Zotero.Schema = new function(){
 		stylesDir.remove(true);
 		Zotero.getStylesDirectory(); // recreate directory
 		yield Zotero.Styles.reinit()
-		return this.updateBundledFiles('styles');
+		var updated = yield this.updateBundledFiles('styles');
+		if (updated && Zotero.Prefs.get('automaticScraperUpdates')) {
+			yield Zotero.Schema.updateFromRepository(this.REPO_UPDATE_MANUAL);
+		}
+		return updated;
 	});
 	
 	
@@ -1517,7 +1586,7 @@ Zotero.Schema = new function(){
 	 *
 	 * @return {Promise:Boolean} A promise for whether the update suceeded
 	 **/
-	function _updateFromRepositoryCallback(xmlhttp, force) {
+	async function _handleRepositoryResponse(xmlhttp, force) {
 		if (!xmlhttp.responseXML){
 			try {
 				if (xmlhttp.status>1000){
@@ -1532,12 +1601,7 @@ Zotero.Schema = new function(){
 			catch (e){
 				Zotero.debug('Repository cannot be contacted');
 			}
-			
-			if (!force) {
-				_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_RETRY_INTERVAL']);
-			}
-			
-			return Zotero.Promise.resolve(false);
+			return false;
 		}
 		
 		var currentTime = xmlhttp.responseXML.
@@ -1657,71 +1721,55 @@ Zotero.Schema = new function(){
 		};
 		
 		if (!translatorUpdates.length && !styleUpdates.length){
-			return Zotero.DB.executeTransaction(function* (conn) {
+			await Zotero.DB.executeTransaction(function* (conn) {
 				// Store the timestamp provided by the server
 				yield _updateDBVersion('repository', currentTime);
 				
 				// And the local timestamp of the update time
 				yield _updateDBVersion('lastcheck', lastCheckTime);
-			})
-			.then(function () {
-				Zotero.debug('All translators and styles are up-to-date');
-				if (!force) {
-					_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
-				}
+			});
+			
+			Zotero.debug('All translators and styles are up-to-date');
+			if (!force) {
+				_setRepositoryTimer(ZOTERO_CONFIG.REPOSITORY_CHECK_INTERVAL);
+			}
+			updatePDFTools();
+			return true;
+		}
+		
+		var updated = false;
+		try {
+			for (var i=0, len=translatorUpdates.length; i<len; i++){
+				await _translatorXMLToFile(translatorUpdates[i]);
+			}
+			
+			for (var i=0, len=styleUpdates.length; i<len; i++){
+				await _styleXMLToFile(styleUpdates[i]);
+			}
+			
+			// Rebuild caches
+			await Zotero.Translators.reinit({ fromSchemaUpdate: force != 1 });
+			await Zotero.Styles.reinit({ fromSchemaUpdate: force != 1 });
+			
+			updated = true;
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		
+		if (updated) {
+			await Zotero.DB.executeTransaction(function* (conn) {
+				// Store the timestamp provided by the server
+				yield _updateDBVersion('repository', currentTime);
 				
-				return Zotero.Promise.resolve(true);
-			})
-			.tap(function () {
-				updatePDFTools();
+				// And the local timestamp of the update time
+				yield _updateDBVersion('lastcheck', lastCheckTime);
 			});
 		}
 		
-		return Zotero.spawn(function* () {
-			try {
-				for (var i=0, len=translatorUpdates.length; i<len; i++){
-					yield _translatorXMLToFile(translatorUpdates[i]);
-				}
-				
-				for (var i=0, len=styleUpdates.length; i<len; i++){
-					yield _styleXMLToFile(styleUpdates[i]);
-				}
-				
-				// Rebuild caches
-				yield Zotero.Translators.reinit({ fromSchemaUpdate: force != 1 });
-				yield Zotero.Styles.reinit({ fromSchemaUpdate: force != 1 });
-			}
-			catch (e) {
-				Zotero.debug(e, 1);
-				if (!force) {
-					_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_RETRY_INTERVAL']);
-				}
-				return false;
-			}
-			
-			return true;
-		})
-		.then(function (update) {
-			if (!update) return false;
-			
-			return Zotero.DB.executeTransaction(function* (conn) {
-				// Store the timestamp provided by the server
-				yield _updateDBVersion('repository', currentTime);
-				
-				// And the local timestamp of the update time
-				yield _updateDBVersion('lastcheck', lastCheckTime);
-			})
-			.then(function () {
-				if (!force) {
-					_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
-				}
-				
-				return true;
-			});
-		})
-		.tap(function () {
-			updatePDFTools();
-		});
+		updatePDFTools();
+		
+		return updated;
 	}
 	
 	
@@ -1730,26 +1778,23 @@ Zotero.Schema = new function(){
 	*
 	* We add an additional two seconds to avoid race conditions
 	**/
-	function _setRepositoryTimer(interval){
-		if (!interval){
-			interval = ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL'];
-		}
-		
+	function _setRepositoryTimer(delay) {
 		var fudge = 2; // two seconds
-		var displayInterval = interval + fudge;
-		var interval = (interval + fudge) * 1000; // convert to ms
+		var displayInterval = delay + fudge;
+		delay = (delay + fudge) * 1000; // convert to ms
 		
-		if (!_repositoryTimer || _repositoryTimer.delay!=interval){
-			Zotero.debug('Setting repository check interval to ' + displayInterval + ' seconds');
-			_repositoryTimer = Components.classes["@mozilla.org/timer;1"].
-				createInstance(Components.interfaces.nsITimer);
-			_repositoryTimer.initWithCallback({
-				// implements nsITimerCallback
-				notify: function(timer){
-					Zotero.Schema.updateFromRepository();
-				}
-			}, interval, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
+		if (_repositoryTimerID) {
+			clearTimeout(_repositoryTimerID);
+			_repositoryTimerID = null;
 		}
+		if (_repositoryNotificationTimerID) {
+			clearTimeout(_repositoryNotificationTimerID);
+			_repositoryNotificationTimerID = null;
+		}
+		
+		Zotero.debug('Scheduling next repository check in ' + displayInterval + ' seconds');
+		_repositoryTimerID = setTimeout(() => Zotero.Schema.updateFromRepository(), delay);
+		_nextRepositoryUpdate = Date.now() + delay;
 	}
 	
 	

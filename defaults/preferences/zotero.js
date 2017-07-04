@@ -137,6 +137,9 @@ pref("extensions.zotero.zeroconf.server.enabled", false);
 // Annotation settings
 pref("extensions.zotero.annotations.warnOnClose", true);
 
+// Streaming server
+pref("extensions.zotero.streaming.enabled", true);
+
 // Sync
 pref("extensions.zotero.sync.autoSync", true);
 pref("extensions.zotero.sync.server.username", '');
@@ -154,7 +157,6 @@ pref("extensions.zotero.sync.storage.groups.enabled", true);
 pref("extensions.zotero.sync.storage.downloadMode.personal", "on-sync");
 pref("extensions.zotero.sync.storage.downloadMode.groups", "on-sync");
 pref("extensions.zotero.sync.fulltext.enabled", true);
-pref("extensions.zotero.sync.streaming.enabled", true);
 
 // Proxy
 pref("extensions.zotero.proxies.autoRecognize", true);

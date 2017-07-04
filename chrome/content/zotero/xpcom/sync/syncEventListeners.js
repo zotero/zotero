@@ -111,7 +111,6 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 	
 	register: function () {
 		this._observerID = Zotero.Notifier.registerObserver(this, false, 'autosync');
-		Zotero.uiReadyPromise.then(() => Zotero.Sync.Streamer.init());
 	},
 	
 	notify: function (event, type, ids, extraData) {
@@ -164,7 +163,6 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 		if (this._observerID) {
 			Zotero.Notifier.unregisterObserver(this._observerID);
 		}
-		Zotero.Sync.Streamer.disconnect();
 	}
 }
 
