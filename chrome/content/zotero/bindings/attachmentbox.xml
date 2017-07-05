@@ -201,8 +201,8 @@
 					}
 					
 					var firstSpace = val.indexOf(" ");
-					// Crop long uninterrupted text
-					if ((firstSpace == -1 && val.length > 29 ) || firstSpace > 29) {
+					// Crop long uninterrupted text, and use value attribute for empty field
+					if ((firstSpace == -1 && val.length > 29 ) || firstSpace > 29 || val === "") {
 						title.setAttribute('crop', 'end');
 						title.setAttribute('value', val);
 					}
