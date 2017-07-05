@@ -81,8 +81,9 @@ Zotero.Translate.Sandbox = {
 		 * @param {SandboxItem} An item created using the Zotero.Item class from the sandbox
 		 */
 		_itemDone: function (translate, item) {
-			var asyncTranslator = translate.translator[0].minVersion
-					&& parseInt(translate.translator[0].minVersion.match(/^[0-9]+/)[0]) >= 5;
+			// https://github.com/zotero/translators/issues/1353
+			var asyncTranslator = translate instanceof Zotero.Translate.Import
+				&& translate.translator[0].lastUpdated > '2017-07-05';
 			
 			var run = function (resolve) {
 				Zotero.debug("Translate: Saving item");
@@ -205,7 +206,7 @@ Zotero.Translate.Sandbox = {
 				
 				// For synchronous import (when Promise isn't available in the sandbox or the do*
 				// function doesn't use it) and web translators, queue saves
-				if (!resolve || translate instanceof Zotero.Translate.Web || !asyncTranslator) {
+				if (!resolve || !asyncTranslator) {
 					Zotero.debug("Translate: Saving via queue");
 					translate.saveQueue.push(item);
 					if (resolve) {
