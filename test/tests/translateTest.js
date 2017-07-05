@@ -850,7 +850,7 @@ describe("Zotero.Translate", function() {
 					+ "	});"
 					+ "}",
 				{
-					minVersion: "5.0"
+					lastUpdated: "2017-07-05 00:00:00"
 				}
 			));
 			var e = yield getPromiseError(translation.translate());
@@ -906,7 +906,7 @@ describe("Zotero.Translate", function() {
 					+ "	});"
 					+ "}",
 				{
-					minVersion: "5.0"
+					lastUpdated: "2017-07-05 00:00:00"
 				}
 			));
 			translation.setSearch({ itemType: "journalArticle", DOI: "10.111/Test"});
