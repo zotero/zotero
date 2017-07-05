@@ -2091,7 +2091,7 @@ Zotero.Prefs = new function(){
 	var _handlers = [
 		[ "automaticScraperUpdates", function(val) {
 			if (val){
-				Zotero.Schema.updateFromRepository();
+				Zotero.Schema.updateFromRepository(1);
 			}
 			else {
 				Zotero.Schema.stopRepositoryTimer();
