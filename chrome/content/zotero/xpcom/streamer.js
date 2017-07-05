@@ -32,14 +32,11 @@ Zotero.Streamer_Module = function (options = {}) {
 	this.apiKey = options.apiKey;
 	
 	let observer = {
-		notify: function (event, type) {
-			if (event == 'modify') {
-				this.init();
+		notify: (event, type) => {
+			if (event == 'modify' || event == 'delete') {
+				this._update();
 			}
-			else if (event == 'delete') {
-				this._disconnect();
-			}
-		}.bind(this)
+		}
 	};
 	this._observerID = Zotero.Notifier.registerObserver(observer, ['api-key'], 'streamer');
 };
@@ -83,7 +80,7 @@ Zotero.Streamer_Module.prototype = {
 		var subscriptionsToAdd = [];
 		var subscriptionsToRemove = [];
 		
-		if (Zotero.Prefs.get('sync.autoSync')) {
+		if (Zotero.Prefs.get('sync.autoSync') && Zotero.Sync.Runner.enabled) {
 			if (!this._subscriptions.has('sync')) {
 				// Subscribe to all topics accessible to the API key
 				subscriptionsToAdd.push({ apiKey });
@@ -135,7 +132,8 @@ Zotero.Streamer_Module.prototype = {
 	_isEnabled: function () {
 		return Zotero.Prefs.get('streaming.enabled')
 			// Only connect if either auto-sync or automatic style/translator updates are enabled
-			&& (Zotero.Prefs.get('sync.autoSync') || Zotero.Prefs.get('automaticScraperUpdates'));
+			&& ((Zotero.Prefs.get('sync.autoSync') && Zotero.Sync.Runner.enabled)
+				|| Zotero.Prefs.get('automaticScraperUpdates'));
 	},
 	
 	
