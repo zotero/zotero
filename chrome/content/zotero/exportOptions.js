@@ -162,7 +162,7 @@ var Zotero_File_Interface_Export = new function() {
 		}
 		
 		// handle charset popup
-		if(_charsets && translatorOptions.exportCharset) {
+		if(_charsets && translatorOptions && translatorOptions.exportCharset) {
 			optionsBox.hidden = undefined;
 			document.getElementById("charset-box").hidden = undefined;
 			var charsetMenu = document.getElementById(OPTION_PREFIX+"exportCharset");
