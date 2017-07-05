@@ -850,7 +850,9 @@ describe("Zotero.Translate", function() {
 					+ "	});"
 					+ "}",
 				{
-					lastUpdated: "2017-07-05 00:00:00"
+					configOptions: {
+						async: true
+					}
 				}
 			));
 			var e = yield getPromiseError(translation.translate());
@@ -906,7 +908,9 @@ describe("Zotero.Translate", function() {
 					+ "	});"
 					+ "}",
 				{
-					lastUpdated: "2017-07-05 00:00:00"
+					configOptions: {
+						async: true
+					}
 				}
 			));
 			translation.setSearch({ itemType: "journalArticle", DOI: "10.111/Test"});

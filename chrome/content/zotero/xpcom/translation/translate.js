@@ -83,7 +83,8 @@ Zotero.Translate.Sandbox = {
 		_itemDone: function (translate, item) {
 			// https://github.com/zotero/translators/issues/1353
 			var asyncTranslator = !(translate instanceof Zotero.Translate.Web)
-				&& translate.translator[0].lastUpdated > '2017-07-05';
+				&& translate.translator[0].configOptions
+				&& translate.translator[0].configOptions.async;
 			
 			var run = function (resolve) {
 				Zotero.debug("Translate: Saving item");
