@@ -44,7 +44,7 @@ Zotero.Sync.Data.FullTextEngine = function (options) {
 	this.setStatus = options.setStatus || function () {};
 	this.onError = options.onError || function (e) {};
 	this.stopOnError = options.stopOnError;
-	this.requestPromises = [];
+	this._stopping = false;
 	this.failed = false;
 }
 
@@ -60,6 +60,8 @@ Zotero.Sync.Data.FullTextEngine.prototype.start = Zotero.Promise.coroutine(funct
 	else {
 		Zotero.debug("Library version hasn't changed -- skipping full-text download");
 	}
+	
+	this._stopCheck();
 	
 	yield this._upload();
 })
@@ -95,22 +97,26 @@ Zotero.Sync.Data.FullTextEngine.prototype._download = Zotero.Promise.coroutine(f
 	}
 	
 	this.requestPromises = [];
-	for (let key of keys) {
-		// https://bugzilla.mozilla.org/show_bug.cgi?id=449811
-		let tmpKey = key;
-		this.requestPromises.push(
+	
+	yield Zotero.Promise.map(
+		keys,
+		(key) => {
+			this._stopCheck();
 			this.apiClient.getFullTextForItem(
 				this.library.libraryType, this.library.libraryTypeID, key
 			)
-			.then(function (results) {
+			.then((results) => {
+				this._stopCheck();
 				if (!results) return;
 				return Zotero.Fulltext.setItemContent(
-					this.libraryID, tmpKey, results.data, results.version
+					this.libraryID, key, results.data, results.version
 				)
-			}.bind(this))
-		);
-	}
-	yield Zotero.Promise.all(this.requestPromises);
+			})
+		},
+		// Prepare twice the number of concurrent requests
+		{ concurrency: 8 }
+	);
+	
 	yield Zotero.FullText.setLibraryVersion(this.libraryID, results.libraryVersion);
 });
 
@@ -125,6 +131,8 @@ Zotero.Sync.Data.FullTextEngine.prototype._upload = Zotero.Promise.coroutine(fun
 	
 	let lastItemID = 0;
 	while (true) {
+		this._stopCheck();
+		
 		let objs = yield Zotero.FullText.getUnsyncedContent(this.libraryID, {
 			maxSize: this.MAX_BATCH_SIZE,
 			maxItems: this.MAX_BATCH_ITEMS,
@@ -190,6 +198,13 @@ Zotero.Sync.Data.FullTextEngine.prototype._upload = Zotero.Promise.coroutine(fun
 
 
 Zotero.Sync.Data.FullTextEngine.prototype.stop = Zotero.Promise.coroutine(function* () {
-	// TODO: Cancel requests
-	throw new Error("Unimplemented");
+	// TODO: Cancel requests?
+	this._stopping = true;
 })
+
+
+Zotero.Sync.Data.FullTextEngine.prototype._stopCheck = function () {
+	if (!this._stopping) return;
+	Zotero.debug("Full-text sync stopped for " + this.library.name);
+	throw new Zotero.Sync.UserCancelledException;
+}

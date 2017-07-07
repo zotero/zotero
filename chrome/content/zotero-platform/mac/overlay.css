@@ -112,6 +112,7 @@
 		max-width: 28px;
 	}
 	
+	#zotero-tb-sync-stop .toolbarbutton-icon,
 	#zotero-tb-sync-error .toolbarbutton-icon {
 		width: 16px;
 	}

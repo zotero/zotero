@@ -49,7 +49,6 @@ Zotero.Sync.Data.Engine = function (options) {
 	this.libraryID = options.libraryID;
 	this.library = Zotero.Libraries.get(options.libraryID);
 	this.libraryTypeID = this.library.libraryTypeID;
-	this.requests = [];
 	this.uploadBatchSize = 25;
 	this.uploadDeletionBatchSize = 50;
 	
@@ -93,6 +92,8 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 		this.libraryTypeID = info.userID;
 	}
 	
+	this._statusCheck();
+	
 	// Check if we've synced this library with the current architecture yet
 	var libraryVersion = this.library.libraryVersion;
 	if (!libraryVersion || libraryVersion == -1) {
@@ -100,6 +101,8 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 		if (versionResults) {
 			libraryVersion = this.library.libraryVersion;
 		}
+		
+		this._statusCheck();
 		
 		// Perform a full sync if necessary, passing the getVersions() results if available.
 		//
@@ -120,6 +123,8 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 	
 	sync:
 	while (true) {
+		this._statusCheck();
+		
 		let downloadResult, uploadResult;
 		
 		try {
@@ -199,17 +204,11 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 
 
 /**
- * Stop all active requests
- *
- * @return {Promise<PromiseInspection[]>} Promise from Zotero.Promise.settle()
+ * Stop the sync process
  */
 Zotero.Sync.Data.Engine.prototype.stop = function () {
-	var funcs;
-	var request;
-	while (request = this.requests.shift()) {
-		funcs.push(() => request.stop());
-	}
-	return Zotero.Promise.settle(funcs);
+	Zotero.debug("Stopping sync for " + this.library.name);
+	this._stopping = true;
 }
 
 
@@ -254,7 +253,7 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 		// Get other object types
 		//
 		for (let objectType of Zotero.DataObjectUtilities.getTypesForLibrary(this.libraryID)) {
-			this._failedCheck();
+			this._statusCheck();
 			
 			// For items, fetch top-level items first
 			//
@@ -496,7 +495,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = async function (objectType,
 	keys.forEach(key => objectData[key] = null);
 	
 	while (true) {
-		this._failedCheck();
+		this._statusCheck();
 		
 		// Get data we've downloaded in a previous loop but failed to process
 		var json = [];
@@ -537,7 +536,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = async function (objectType,
 		await Zotero.Promise.map(
 			json,
 			async function (batch) {
-				this._failedCheck();
+				this._statusCheck();
 				
 				Zotero.debug(`Processing batch of downloaded ${objectTypePlural} in ${this.library.name}`);
 				
@@ -559,6 +558,10 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = async function (objectType,
 					this._getOptions({
 						onObjectProcessed: () => {
 							num++;
+							// Check for stop every 5 items
+							if (num % 5 == 0) {
+								this._statusCheck();
+							}
 						},
 						// Increase the notifier batch size as we go, so that new items start coming in
 						// one by one but then switch to larger chunks
@@ -616,7 +619,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = async function (objectType,
 			await this._restoreRestoredCollectionItems(restored);
 		}
 		
-		this._failedCheck();
+		this._statusCheck();
 		
 		// If all requests were successful, such that we had a chance to see all keys, remove keys we
 		// didn't see from the sync queue so they don't keep being retried forever
@@ -665,6 +668,8 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = async function (objectType,
 	
 	// Show conflict resolution window
 	if (conflicts.length) {
+		this._statusCheck();
+		
 		let results = await Zotero.Sync.Data.Local.processConflicts(
 			objectType, this.libraryID, conflicts, this._getOptions()
 		);
@@ -827,6 +832,8 @@ Zotero.Sync.Data.Engine.prototype._downloadDeletions = Zotero.Promise.coroutine(
 		}
 		
 		if (conflicts.length) {
+			this._statusCheck();
+			
 			// Sort conflicts by Date Modified
 			conflicts.sort(function (a, b) {
 				var d1 = a.left.dateModified;
@@ -936,6 +943,8 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 	
 	// Get unsynced local objects for each object type
 	for (let objectType of Zotero.DataObjectUtilities.getTypesForLibrary(this.libraryID)) {
+		this._statusCheck();
+		
 		let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 		let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		
@@ -1015,6 +1024,8 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 	try {
 		Zotero.debug(JSON.stringify(objectIDs));
 		for (let objectType in objectIDs) {
+			this._statusCheck();
+			
 			libraryVersion = yield this._uploadObjects(
 				objectType, objectIDs[objectType], libraryVersion
 			);
@@ -1022,6 +1033,8 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 		
 		Zotero.debug(JSON.stringify(objectDeletions));
 		for (let objectType in objectDeletions) {
+			this._statusCheck();
+			
 			libraryVersion = yield this._uploadDeletions(
 				objectType, objectDeletions[objectType], libraryVersion
 			);
@@ -1562,7 +1575,7 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 		
 		// Get object types
 		for (let objectType of Zotero.DataObjectUtilities.getTypesForLibrary(this.libraryID)) {
-			this._failedCheck();
+			this._statusCheck();
 			
 			let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 			let ObjectType = Zotero.Utilities.capitalize(objectType);
@@ -1772,6 +1785,19 @@ Zotero.Sync.Data.Engine.prototype._checkObjectUploadError = Zotero.Promise.corou
 	
 	return false;
 });
+
+
+Zotero.Sync.Data.Engine.prototype._statusCheck = function () {
+	this._stopCheck();
+	this._failedCheck();
+}
+
+
+Zotero.Sync.Data.Engine.prototype._stopCheck = function () {
+	if (!this._stopping) return;
+	Zotero.debug("Sync stopped for " + this.library.name);
+	throw new Zotero.Sync.UserCancelledException;
+}
 
 
 Zotero.Sync.Data.Engine.prototype._failedCheck = function () {

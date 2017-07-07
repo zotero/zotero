@@ -68,10 +68,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	var _autoSyncTimer;
 	var _firstInSession = true;
 	var _syncInProgress = false;
+	var _stopping = false;
 	var _manualSyncRequired = false; // TODO: make public?
 	
-	var _syncEngines = [];
-	var _storageEngines = [];
+	var _currentEngine = null;
 	var _storageControllers = {};
 	
 	var _lastSyncStatus;
@@ -117,6 +117,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			return false;
 		}
 		_syncInProgress = true;
+		_stopping = false;
 		
 		yield Zotero.Notifier.trigger('start', 'sync', []);
 		
@@ -139,9 +140,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			let client = this.getAPIClient({ apiKey });
 			let keyInfo = yield this.checkAccess(client, options);
 			
+			_stopCheck();
+			
 			let emptyLibraryContinue = yield this.checkEmptyLibrary(keyInfo);
 			if (!emptyLibraryContinue) {
-				yield this.end(options);
 				Zotero.debug("Syncing cancelled because user library is empty");
 				return false;
 			}
@@ -150,7 +152,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				.getService(Components.interfaces.nsIWindowMediator);
 			let lastWin = wm.getMostRecentWindow("navigator:browser");
 			if (!(yield Zotero.Sync.Data.Local.checkUser(lastWin, keyInfo.userID, keyInfo.username))) {
-				yield this.end(options);
 				Zotero.debug("User cancelled sync on username mismatch");
 				return false;
 			}
@@ -179,6 +180,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				options.libraries ? Array.from(options.libraries) : []
 			);
 			
+			_stopCheck();
+			
 			// If items not yet loaded for libraries we need, load them now
 			for (let libraryID of librariesToSync) {
 				let library = Zotero.Libraries.get(libraryID);
@@ -187,10 +190,14 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				}
 			}
 			
+			_stopCheck();
+			
 			// Sync data and files, and then repeat if necessary
 			let attempt = 1;
 			let successfulLibraries = new Set(librariesToSync);
 			while (librariesToSync.length) {
+				_stopCheck();
+				
 				if (attempt > 3) {
 					// TODO: Back off and/or nicer error
 					throw new Error("Too many sync attempts -- stopping");
@@ -201,12 +208,16 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					successfulLibraries.delete(libraryID);
 				});
 				
+				_stopCheck();
+				
 				// Run file sync on all libraries that passed the last data sync
 				librariesToSync = yield _doFileSync(nextLibraries, engineOptions);
 				if (librariesToSync.length) {
 					attempt++;
 					continue;
 				}
+				
+				_stopCheck();
 				
 				// Run full-text sync on all libraries that haven't failed a data sync
 				librariesToSync = yield _doFullTextSync([...successfulLibraries], engineOptions);
@@ -550,13 +561,15 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	var _doDataSync = Zotero.Promise.coroutine(function* (libraries, options, skipUpdateLastSyncTime) {
 		var successfulLibraries = [];
 		for (let libraryID of libraries) {
+			_stopCheck();
 			try {
 				let opts = {};
 				Object.assign(opts, options);
 				opts.libraryID = libraryID;
 				
-				let engine = new Zotero.Sync.Data.Engine(opts);
-				yield engine.start();
+				_currentEngine = new Zotero.Sync.Data.Engine(opts);
+				yield _currentEngine.start();
+				_currentEngine = null;
 				successfulLibraries.push(libraryID);
 			}
 			catch (e) {
@@ -597,6 +610,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		this.setSyncStatus(Zotero.getString('sync.status.syncingFiles'));
 		var resyncLibraries = []
 		for (let libraryID of libraries) {
+			_stopCheck();
 			try {
 				let opts = {};
 				Object.assign(opts, options);
@@ -611,8 +625,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 						throw new Error("Too many file sync attempts for library " + libraryID);
 					}
 					tries--;
-					let engine = new Zotero.Sync.Storage.Engine(opts);
-					let results = yield engine.start();
+					_currentEngine = new Zotero.Sync.Storage.Engine(opts);
+					let results = yield _currentEngine.start();
+					_currentEngine = null;
 					if (results.syncRequired) {
 						resyncLibraries.push(libraryID);
 					}
@@ -624,6 +639,15 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				}
 			}
 			catch (e) {
+				if (e instanceof Zotero.Sync.UserCancelledException) {
+					if (e.advanceToNextLibrary) {
+						Zotero.debug("Storage sync cancelled for library " + libraryID + " -- "
+							+ "advancing to next library");
+						continue;
+					}
+					throw e;
+				}
+				
 				Zotero.debug("File sync failed for library " + libraryID);
 				Zotero.logError(e);
 				this.checkError(e);
@@ -652,15 +676,21 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		this.setSyncStatus(Zotero.getString('sync.status.syncingFullText'));
 		var resyncLibraries = [];
 		for (let libraryID of libraries) {
+			_stopCheck();
 			try {
 				let opts = {};
 				Object.assign(opts, options);
 				opts.libraryID = libraryID;
 				
-				let engine = new Zotero.Sync.Data.FullTextEngine(opts);
-				yield engine.start();
+				_currentEngine = new Zotero.Sync.Data.FullTextEngine(opts);
+				yield _currentEngine.start();
+				_currentEngine = null;
 			}
 			catch (e) {
+				if (e instanceof Zotero.Sync.UserCancelledException) {
+					throw e;
+				}
+				
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status == 412) {
 					resyncLibraries.push(libraryID);
 					continue;
@@ -762,8 +792,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	
 	
 	this.stop = function () {
-		_syncEngines.forEach(engine => engine.stop());
-		_storageEngines.forEach(engine => engine.stop());
+		this.setSyncStatus(Zotero.getString('sync.stopping'));
+		_stopping = true;
+		if (_currentEngine) {
+			_currentEngine.stop();
+		}
 	}
 	
 	
@@ -1143,14 +1176,17 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			
 			// Update sync icon
 			var syncIcon = doc.getElementById('zotero-tb-sync');
+			var stopIcon = doc.getElementById('zotero-tb-sync-stop');
 			if (state == 'animate') {
 				syncIcon.setAttribute('status', state);
 				// Disable button while spinning
 				syncIcon.disabled = true;
+				stopIcon.hidden = false;
 			}
 			else {
 				syncIcon.removeAttribute('status');
 				syncIcon.disabled = false;
+				stopIcon.hidden = true;
 			}
 		}
 		
@@ -1386,4 +1422,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		// Set as .apiKey on Runner in tests or set in login manager
 		return _apiKey || Zotero.Sync.Data.Local.getAPIKey()
 	})
+	
+	
+	function _stopCheck() {
+		if (_stopping) {
+			throw new Zotero.Sync.UserCancelledException;
+		}
+	}
 }

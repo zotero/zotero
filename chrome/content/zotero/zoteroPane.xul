@@ -210,6 +210,10 @@
 						</toolbarbutton>
 					</hbox>
 					<hbox align="center" pack="end">
+						<toolbarbutton id="zotero-tb-sync-stop"
+							tooltiptext="&zotero.sync.stop;"
+							oncommand="this.hidden = true; Zotero.Sync.Runner.stop()"
+							hidden="true"/>
 						<hbox id="zotero-tb-sync-progress-box" hidden="true" align="center">
 							<!-- TODO: localize -->
 							<toolbarbutton id="zotero-tb-sync-storage-cancel"

@@ -282,6 +282,7 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 
 
 Zotero.Sync.Storage.Engine.prototype.stop = function () {
+	Zotero.debug("Stopping file syncing for " + this.library.name);
 	for (let type in this.queues) {
 		this.queues[type].stop();
 	}
