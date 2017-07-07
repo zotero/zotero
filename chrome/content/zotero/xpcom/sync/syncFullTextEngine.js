@@ -102,7 +102,7 @@ Zotero.Sync.Data.FullTextEngine.prototype._download = Zotero.Promise.coroutine(f
 		keys,
 		(key) => {
 			this._stopCheck();
-			this.apiClient.getFullTextForItem(
+			return this.apiClient.getFullTextForItem(
 				this.library.libraryType, this.library.libraryTypeID, key
 			)
 			.then((results) => {
