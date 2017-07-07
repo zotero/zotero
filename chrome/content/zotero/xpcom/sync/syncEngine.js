@@ -131,6 +131,9 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 			uploadResult = yield this._startUpload();
 		}
 		catch (e) {
+			if (e instanceof Zotero.Sync.UserCancelledException) {
+				throw e;
+			}
 			Zotero.debug("Upload failed -- performing download", 2);
 			downloadResult = yield this._startDownload();
 			Zotero.debug("Download result is " + downloadResult, 4);
@@ -224,6 +227,8 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 	
 	loop:
 	while (true) {
+		this._statusCheck();
+		
 		// Get synced settings first, since they affect how other data is displayed
 		let results = yield this._downloadSettings(libraryVersion);
 		if (results.result == this.DOWNLOAD_RESULT_LIBRARY_UNMODIFIED) {
@@ -1119,6 +1124,8 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 	
 	try {
 		while (queue.length) {
+			this._statusCheck();
+			
 			// Get a slice of the queue and generate JSON for objects if necessary
 			let batch = [];
 			let numSkipped = 0;
@@ -1556,6 +1563,8 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 	
 	loop:
 	while (true) {
+		this._statusCheck();
+		
 		// Reprocess all deletions available from API
 		let result = yield this._downloadDeletions(0, lastLibraryVersion);
 		if (result == this.DOWNLOAD_RESULT_RESTART) {
