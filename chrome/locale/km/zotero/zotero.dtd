@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "កំណត់យោងក្នុងគន្ថនិទេ្ទស">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "សមកាលកម្មបានជួបនឹងកំហុសឆ្គង">
 <!ENTITY zotero.sync.storage.progress "កំពុងដំណើរការ:">
 <!ENTITY zotero.sync.storage.downloads "ទាញរក្សាទុក:">

@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "Kaynakçadaki Kaynaklar">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "Eşitleme Hatası">
 <!ENTITY zotero.sync.storage.progress "İşlem:">
 <!ENTITY zotero.sync.storage.downloads "İndirilenler:">

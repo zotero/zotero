@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "Препратки в библиографията">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "Грешка в синхронизирането">
 <!ENTITY zotero.sync.storage.progress "Прогрес:">
 <!ENTITY zotero.sync.storage.downloads "Изтегля:">

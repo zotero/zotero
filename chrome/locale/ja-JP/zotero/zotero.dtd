@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "参考文献目録に含まれる文献">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "同期エラー">
 <!ENTITY zotero.sync.storage.progress "進捗:">
 <!ENTITY zotero.sync.storage.downloads "ダウンロード:">

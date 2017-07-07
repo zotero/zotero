@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "Références dans la bibliographie">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "Erreur de synchronisation">
 <!ENTITY zotero.sync.storage.progress "Progression :">
 <!ENTITY zotero.sync.storage.downloads "Téléchargés :">

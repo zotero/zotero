@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "Referenser i källförteckningen">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "Synkroniseringsfel">
 <!ENTITY zotero.sync.storage.progress "Förlopp:">
 <!ENTITY zotero.sync.storage.downloads "Nedladdningar:">

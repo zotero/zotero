@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "Viitteet lähdeluettelossa">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "Synkronointivirhe">
 <!ENTITY zotero.sync.storage.progress "Tilanne:">
 <!ENTITY zotero.sync.storage.downloads "Lataukset:">

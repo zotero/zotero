@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "Reference v bibliografii">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "Chyba synchronizace">
 <!ENTITY zotero.sync.storage.progress "Průběh:">
 <!ENTITY zotero.sync.storage.downloads "Stahování:">

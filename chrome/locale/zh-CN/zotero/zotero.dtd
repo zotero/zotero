@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "引文目录中的参考文献">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "同步错误">
 <!ENTITY zotero.sync.storage.progress "进度:">
 <!ENTITY zotero.sync.storage.downloads "下载:">

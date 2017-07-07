@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "المراجع الواردة في قائمة المراجع المستشهد بها">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "خطأ في التزامن">
 <!ENTITY zotero.sync.storage.progress "التقدم:">
 <!ENTITY zotero.sync.storage.downloads "التحميل:">

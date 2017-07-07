@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "Verwysings in bronnelys">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "Sinkroniseringsfout">
 <!ENTITY zotero.sync.storage.progress "Vordering:">
 <!ENTITY zotero.sync.storage.downloads "Aflaaie:">

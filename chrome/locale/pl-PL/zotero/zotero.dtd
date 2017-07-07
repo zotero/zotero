@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "Pozycje w bibliografii">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "Błąd synchronizacji">
 <!ENTITY zotero.sync.storage.progress "Postęp:">
 <!ENTITY zotero.sync.storage.downloads "Pobrano:">

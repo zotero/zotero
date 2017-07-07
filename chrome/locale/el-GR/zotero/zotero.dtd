@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "Αναφορές μέσα στη Βιβλιογραφία">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "Σφάλμα συγχρονισμού">
 <!ENTITY zotero.sync.storage.progress "Πρόοδος:">
 <!ENTITY zotero.sync.storage.downloads "Λήψεις:">

@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "Nuorodos bibliogafijoje">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "Sinchronizavimo klaida">
 <!ENTITY zotero.sync.storage.progress "Eiga:">
 <!ENTITY zotero.sync.storage.downloads "Siuntiniai:">

@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "參考文獻表中的參考文獻條">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "同步錯誤">
 <!ENTITY zotero.sync.storage.progress "進度：">
 <!ENTITY zotero.sync.storage.downloads "下載：">

@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "Referencer i referenceliste">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "Synkroniseringsfejl">
 <!ENTITY zotero.sync.storage.progress "Fremdrift:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">

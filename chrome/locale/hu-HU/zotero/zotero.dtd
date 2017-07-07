@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "Hivatkozások a bibliográfiában">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "Szinkronizációs hiba">
 <!ENTITY zotero.sync.storage.progress "Állapot:">
 <!ENTITY zotero.sync.storage.downloads "Letöltések:">

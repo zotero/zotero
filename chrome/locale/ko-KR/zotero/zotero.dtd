@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "참고문헌 목록 내 참조">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "동기화 오류">
 <!ENTITY zotero.sync.storage.progress "진행률:">
 <!ENTITY zotero.sync.storage.downloads "다운로드:">

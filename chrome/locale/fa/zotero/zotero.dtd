@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "مرجع‌های کتابنامه‌‌">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "خطای همزمان‌‌سازی">
 <!ENTITY zotero.sync.storage.progress "پیشرفت:">
 <!ENTITY zotero.sync.storage.downloads "بارگیری‌ها:">

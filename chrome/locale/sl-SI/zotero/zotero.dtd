@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "Sklici v bibliografiji">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "Napaka usklajevanja">
 <!ENTITY zotero.sync.storage.progress "Napredek:">
 <!ENTITY zotero.sync.storage.downloads "Prenosi s strežnika:">

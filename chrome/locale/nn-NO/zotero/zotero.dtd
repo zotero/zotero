@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "Referansar i bibliografi">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "Synkroniseringsfeil">
 <!ENTITY zotero.sync.storage.progress "Framdrift:">
 <!ENTITY zotero.sync.storage.downloads "Nedlastingar:">

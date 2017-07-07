@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "เอกสารอ้างอิงในบรรณานุกรม">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "การประสานมีความผิดพลาด">
 <!ENTITY zotero.sync.storage.progress "ความคืบหน้า:">
 <!ENTITY zotero.sync.storage.downloads "ดาวน์โหลด:">

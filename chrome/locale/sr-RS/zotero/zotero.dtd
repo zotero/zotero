@@ -237,6 +237,7 @@
 
 <!ENTITY zotero.integration.references.label "Референце у библиографији">
 
+<!ENTITY zotero.sync.stop "Stop Sync">
 <!ENTITY zotero.sync.error "Грешка приликом усклађивања">
 <!ENTITY zotero.sync.storage.progress "Напредак:">
 <!ENTITY zotero.sync.storage.downloads "Преузимања:">
