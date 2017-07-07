@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags            "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic			"Show Automatic">
 <!ENTITY zotero.tagSelector.displayAllInLibrary	"Display All Tags in This Library">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll					"Deselect All">
 <!ENTITY zotero.tagSelector.assignColor              "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag				"Rename Tag…">

@@ -39,6 +39,36 @@ describe("Zotero.Tags", function () {
 	});
 	
 	describe("#removeFromLibrary()", function () {
+		it("should remove tags in given library", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var groupLibraryID = (yield getGroup()).libraryID;
+			
+			var tags = [];
+			var items = [];
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let i = 0; i < 10; i++) {
+					let tagName = Zotero.Utilities.randomString();
+					tags.push(tagName);
+					let item = createUnsavedDataObject('item');
+					item.addTag(tagName);
+					yield item.save();
+					items.push(item);
+				}
+			});
+			
+			var groupTagName = Zotero.Utilities.randomString();
+			var groupItem = createUnsavedDataObject('item', { libraryID: groupLibraryID });
+			groupItem.addTag(groupTagName);
+			yield groupItem.saveTx();
+			
+			var tagIDs = tags.map(tag => Zotero.Tags.getID(tag));
+			yield Zotero.Tags.removeFromLibrary(libraryID, tagIDs);
+			items.forEach(item => assert.lengthOf(item.getTags(), 0));
+			
+			// Group item should still have the tag
+			assert.lengthOf(groupItem.getTags(), 1);
+		})
+		
 		it("should reload tags of associated items", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			

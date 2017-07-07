@@ -833,6 +833,59 @@
 			</method>
 			
 			
+			<method name="_updateDeleteAutomaticMenuOption">
+				<body><![CDATA[
+					(async function () {
+						var hasAutomatic = !!(await Zotero.Tags.getAutomaticInLibrary(this.libraryID)).length;
+						var menuitem = this.id('delete-automatic-tags');
+						menuitem.disabled = !hasAutomatic;
+					}.bind(this))();
+				]]></body>
+			</method>
+			
+			
+			<method name="_deleteAutomatic">
+				<body><![CDATA[
+					(async function () {
+						var num = (await Zotero.Tags.getAutomaticInLibrary(this.libraryID)).length;
+						if (!num) {
+							return;
+						}
+						
+						var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+							.getService(Components.interfaces.nsIPromptService);
+						var confirmed = ps.confirm(
+							window,
+							Zotero.getString('pane.tagSelector.deleteAutomatic.title'),
+							Zotero.getString(
+									'pane.tagSelector.deleteAutomatic.message',
+									new Intl.NumberFormat().format(num),
+									num
+								)
+								+ "\n\n"
+								+ Zotero.getString('general.actionCannotBeUndone')
+						);
+						if (confirmed) {
+							Zotero.showZoteroPaneProgressMeter(null, true);
+							try {
+								await Zotero.Tags.removeAutomaticFromLibrary(
+									this.libraryID,
+									(progress, progressMax) => {
+										Zotero.updateZoteroPaneProgressMeter(
+											Math.round(progress / progressMax * 100)
+										);
+									}
+								);
+							}
+							finally {
+								Zotero.hideZoteroPaneOverlays();
+							}
+						}
+					}.bind(this))();
+				]]></body>
+			</method>
+			
+			
 			<method name="_insertClickableTag">
 				<parameter name="tagsBox"/>
 				<parameter name="tagData"/>
@@ -1113,6 +1166,7 @@
 						<toolbarbutton id="view-settings-menu" tooltiptext="&zotero.toolbar.actions.label;"
 								image="chrome://zotero/skin/tag-selector-menu.png" type="menu">
 							<menupopup id="view-settings-popup"
+									onpopupshowing="document.getBindingParent(this)._updateDeleteAutomaticMenuOption()"
 									onpopupshown="/*
 											This is necessary to fix a bug with Display All Tags not
 											being checked if enabled before menuu is shown (OS X only?)
@@ -1135,6 +1189,11 @@
 									oncommand="var displayAll = this.getAttribute('checked') == 'true';
 										this.setAttribute('checked', !displayAll);
 										document.getBindingParent(this).filterToScope = !displayAll;
+										event.stopPropagation();"/>
+								<menuseparator/>
+								<menuitem id="delete-automatic-tags" label="&zotero.tagSelector.deleteAutomaticInLibrary;" type="checkbox"
+									oncommand="document.getBindingParent(this)._deleteAutomatic();
+										this.setAttribute('checked', false);
 										event.stopPropagation();"/>
 							</menupopup>
 						</toolbarbutton>
