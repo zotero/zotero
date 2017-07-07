@@ -461,10 +461,12 @@ label.zotero-text-link {
 	margin-right: 2px;
 }
 
+
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.5dppx) {
 	#zotero-toolbar-save-button,#zotero-toolbar-save-button-single  { list-style-image: url("chrome://zotero/skin/treeitem-webpage@2x.png"); }
 	#zotero-toolbar-save-button[cui-areatype="menu-panel"],#zotero-toolbar-save-button-single[cui-areatype="menu-panel"],toolbarpaletteitem[place="palette"] #zotero-toolbar-save-button,toolbarpaletteitem[place="palette"] #zotero-toolbar-save-button-single  { list-style-image: url("chrome://zotero/skin/treeitem-webpage@2x.png"); }
 	.zotero-scrape-popup-library { list-style-image: url('chrome://zotero/skin/treesource-library@2x.png'); }
 	.zotero-scrape-popup-collection { list-style-image: url('chrome://zotero/skin/treesource-collection@2x.png'); }
+	.zotero-spinner  { list-style-image: url(chrome://zotero/skin/spinner-14px@2x.png); height: 14px; width: 14px; margin-right: 2px; }
 }
