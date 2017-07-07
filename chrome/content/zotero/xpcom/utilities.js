@@ -873,11 +873,15 @@ Zotero.Utilities = {
 	 * For now, this is only used for debug output in English.
 	 *
 	 * @param {Integer} num
-	 * @param {String[]} forms - An array of plural forms (e.g., ['object', 'objects']); currently only
-	 *     the two English forms are supported, for 1 and 0/many
+	 * @param {String[]|String} forms - If an array, an array of plural forms (e.g., ['object', 'objects']);
+	 *     currently only the two English forms are supported, for 1 and 0/many. If a single string,
+	 *     's' is added automatically for 0/many.
 	 * @return {String}
 	 */
 	pluralize: function (num, forms) {
+		if (typeof forms == 'string') {
+			forms = [forms, forms + 's'];
+		}
 		return num == 1 ? forms[0] : forms[1];
 	},
 	
