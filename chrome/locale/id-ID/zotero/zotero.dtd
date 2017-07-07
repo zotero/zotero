@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "Tunjukkan Automatis">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Tampilkan Semua Tag di Perpustakaan Ini">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "Hilangkan Semua Pilihan">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "Namai Ulang Tag...">

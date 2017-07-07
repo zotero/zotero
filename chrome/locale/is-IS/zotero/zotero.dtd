@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Hleð inn merkjum...">
 <!ENTITY zotero.tagSelector.showAutomatic "Birta sjálfvirkt">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Birta öll merki í þessu safni">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "Velja ekkert">
 <!ENTITY zotero.tagSelector.assignColor "Úthluta lit...">
 <!ENTITY zotero.tagSelector.renameTag "Endurnefna merki...">

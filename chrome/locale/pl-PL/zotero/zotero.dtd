@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Wczytywanie znaczników...">
 <!ENTITY zotero.tagSelector.showAutomatic "Wyświetl etykiety automatyczne">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Wyświetl wszystkie etykiety w tej bibliotece">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "Odznacz wszystkie">
 <!ENTITY zotero.tagSelector.assignColor "Przypisz kolor...">
 <!ENTITY zotero.tagSelector.renameTag "Zmień nazwę etykiety...">
@@ -237,7 +238,7 @@
 
 <!ENTITY zotero.integration.references.label "Pozycje w bibliografii">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "Zatrzymaj synchronizację">
 <!ENTITY zotero.sync.error "Błąd synchronizacji">
 <!ENTITY zotero.sync.storage.progress "Postęp:">
 <!ENTITY zotero.sync.storage.downloads "Pobrano:">

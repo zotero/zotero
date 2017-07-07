@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Chargement des marqueurs…">
 <!ENTITY zotero.tagSelector.showAutomatic "Afficher les marqueurs ajoutés automatiquement">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Afficher tous les marqueurs de cette bibliothèque">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "Tout désélectionner">
 <!ENTITY zotero.tagSelector.assignColor "Attribuer une couleur…">
 <!ENTITY zotero.tagSelector.renameTag "Renommer le marqueur…">
@@ -237,7 +238,7 @@
 
 <!ENTITY zotero.integration.references.label "Références dans la bibliographie">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "Arrêter la synchronisation">
 <!ENTITY zotero.sync.error "Erreur de synchronisation">
 <!ENTITY zotero.sync.storage.progress "Progression :">
 <!ENTITY zotero.sync.storage.downloads "Téléchargés :">

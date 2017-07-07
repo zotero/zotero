@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "Automatisch labels tonen">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Toon alle labels in deze bibliotheek">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "Niets selecteren">
 <!ENTITY zotero.tagSelector.assignColor "Wijs een kleur toe...">
 <!ENTITY zotero.tagSelector.renameTag "Label hernoemen…">

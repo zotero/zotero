@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Etiketleri yüklüyor...">
 <!ENTITY zotero.tagSelector.showAutomatic "Otomatik göster">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Bu kitaplık içindeki tüm etiketleri göster">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "Hiçbirini Seçme">
 <!ENTITY zotero.tagSelector.assignColor "Renk Belirle...">
 <!ENTITY zotero.tagSelector.renameTag "Etiketi Yeniden Adlandır...">
@@ -237,7 +238,7 @@
 
 <!ENTITY zotero.integration.references.label "Kaynakçadaki Kaynaklar">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "Eşitlemeyi Durdur">
 <!ENTITY zotero.sync.error "Eşitleme Hatası">
 <!ENTITY zotero.sync.storage.progress "İşlem:">
 <!ENTITY zotero.sync.storage.downloads "İndirilenler:">

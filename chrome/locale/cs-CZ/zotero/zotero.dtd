@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Nahrávám štítky...">
 <!ENTITY zotero.tagSelector.showAutomatic "Ukazovat automaticky přidané">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "Zrušit výběr všech">
 <!ENTITY zotero.tagSelector.assignColor "Nastavit barvu...">
 <!ENTITY zotero.tagSelector.renameTag "Přejmenovat štítek...">

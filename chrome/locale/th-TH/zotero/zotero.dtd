@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "แสดงอัตโนมัติ">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "แสดงแท็กทั้งหมดในไลบรารี่นี้">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "ไม่เลือกทั้งหมด">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "เปลี่ยนชื่อแท็ก...">

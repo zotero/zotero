@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "タグを読込中...">
 <!ENTITY zotero.tagSelector.showAutomatic "自動生成タグも表示">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "このライブラリの全タグを表示">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "選択をすべて解除">
 <!ENTITY zotero.tagSelector.assignColor "色を指定...">
 <!ENTITY zotero.tagSelector.renameTag "タグ名の変更...">

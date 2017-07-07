@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Đang nạp các tag...">
 <!ENTITY zotero.tagSelector.showAutomatic "Hiển thị tự động">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "Bỏ tất cả lựa chọn">
 <!ENTITY zotero.tagSelector.assignColor "Đặt màu...">
 <!ENTITY zotero.tagSelector.renameTag "Đổi tên Thẻ...">

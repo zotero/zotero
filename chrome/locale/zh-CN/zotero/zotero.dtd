@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "加载标记…">
 <!ENTITY zotero.tagSelector.showAutomatic "自动显示">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "显示文献库里的所有标签">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "取消全部选择">
 <!ENTITY zotero.tagSelector.assignColor "指派颜色…">
 <!ENTITY zotero.tagSelector.renameTag "重命名标签...">

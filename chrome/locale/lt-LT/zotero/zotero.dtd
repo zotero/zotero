@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Įkeliamos gairės...">
 <!ENTITY zotero.tagSelector.showAutomatic "Rodyti automatiškai">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Rodyti visas šios bibliotekos gaires">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "Panaikinti pažymėjimą">
 <!ENTITY zotero.tagSelector.assignColor "Priskirti spalvą:">
 <!ENTITY zotero.tagSelector.renameTag "Pervadinti gairę...">

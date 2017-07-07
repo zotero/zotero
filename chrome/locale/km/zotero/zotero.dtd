@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "បង្ហាញដោយស្វ័យប្រវត្តិ">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "បង្ហាញគ្រប់ស្លាកនៅក្នុងបណ្ណាល័យនេះ">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "ដោះជម្រើសទាំងអស់">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "ផ្លាស់ឈ្មោះស្លាក...">

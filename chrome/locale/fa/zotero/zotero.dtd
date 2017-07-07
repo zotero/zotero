@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "نمایش خودکار">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "نمایش همه برچسب‌های کتابخانه">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "انتخاب هیچ‌کدام">
 <!ENTITY zotero.tagSelector.assignColor "اختصاص رنگ...">
 <!ENTITY zotero.tagSelector.renameTag "تغییر نام برچسب...">

@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "Αυτόματη προβολή">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Εμφάνιση όλων των ετικετών αυτής της βιβλιοθήκης">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "Αποεπιλογή όλων">
 <!ENTITY zotero.tagSelector.assignColor "Απόδοση χρώματος...">
 <!ENTITY zotero.tagSelector.renameTag "Rename Tag...">

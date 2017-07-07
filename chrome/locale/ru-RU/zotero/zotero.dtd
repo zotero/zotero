@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Загрузка тэгов...">
 <!ENTITY zotero.tagSelector.showAutomatic "Показывать автоматически">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Показать все теги в библиотеке">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "Отменить выбор">
 <!ENTITY zotero.tagSelector.assignColor "Назначить цвет…">
 <!ENTITY zotero.tagSelector.renameTag "Переименовать тег…">

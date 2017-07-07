@@ -156,6 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
 <!ENTITY zotero.tagSelector.showAutomatic "Automaatselt näidata">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Näidata kõiki lipikuid raamatukogus">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
 <!ENTITY zotero.tagSelector.clearAll "Ära vali midagi">
 <!ENTITY zotero.tagSelector.assignColor "Värvi valik...">
 <!ENTITY zotero.tagSelector.renameTag "Lipiku ümbernimetamine...">
