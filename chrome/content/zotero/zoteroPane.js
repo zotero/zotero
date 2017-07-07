@@ -37,7 +37,6 @@ var ZoteroPane = new function()
 	var _lastSelectedItems = [];
 	
 	//Privileged methods
-	this.init = init;
 	this.destroy = destroy;
 	this.isShowing = isShowing;
 	this.isFullScreen = isFullScreen;
@@ -71,7 +70,7 @@ var ZoteroPane = new function()
 	/**
 	 * Called when the window containing Zotero pane is open
 	 */
-	function init() {
+	this.init = function () {
 		Zotero.debug("Initializing Zotero pane");
 		
 		// Fix window without menubar/titlebar when Standalone is closed in full-screen mode
@@ -100,7 +99,11 @@ var ZoteroPane = new function()
 		Zotero.setFontSize(zp);
 		ZoteroPane_Local.updateLayout();
 		ZoteroPane_Local.updateToolbarPosition();
-		window.addEventListener("resize", ZoteroPane_Local.updateToolbarPosition, false);
+		this.updateWindow();
+		window.addEventListener("resize", () => {
+			this.updateWindow();
+			this.updateToolbarPosition();
+		});
 		window.setTimeout(ZoteroPane_Local.updateToolbarPosition, 0);
 		
 		Zotero.updateQuickSearchBox(document);
@@ -138,7 +141,7 @@ var ZoteroPane = new function()
 		
 		// continue loading pane
 		_loadPane();
-	}
+	};
 	
 	/**
 	 * Called on window load or when pane has been reloaded after switching into or out of connector
@@ -4811,6 +4814,21 @@ var ZoteroPane = new function()
 		}
 		Zotero.Prefs.set("pane.persist", JSON.stringify(serializedValues));
 	}
+	
+	
+	this.updateWindow = function () {
+		var zoteroPane = document.getElementById('zotero-pane');
+		// Must match value in overlay.css
+		var breakpoint = 1000;
+		var className = `width-${breakpoint}`;
+		if (window.innerWidth >= breakpoint) {
+			zoteroPane.classList.add(className);
+		}
+		else {
+			zoteroPane.classList.remove(className);
+		}
+	};
+	
 	
 	/**
 	 * Moves around the toolbar when the user moves around the pane

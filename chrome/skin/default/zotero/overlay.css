@@ -227,7 +227,7 @@
 	min-height: 150px;
 }
 
-/* Used for intro text for My Publications */
+/* Used for intro text */
 #zotero-items-pane-message-box {
 	overflow-y: auto;
 	cursor: default;
@@ -239,9 +239,34 @@
 
 #zotero-items-pane-message-box p {
 	max-width: 800px;
-	font-size: 1.2em;
+	font-size: 1.45em;
 	line-height: 1.7em;
 	text-align: left;
+}
+
+#zotero-items-pane-message-box div.publications p {
+	font-size: 1.2em;
+}
+
+/* Increase size when window is wider */
+#zotero-pane.width-1000 #zotero-items-pane-message-box div.publications p {
+	font-size: 1.35em;
+}
+
+#zotero-items-pane-message-box span.text-link {
+	color: rgb(0, 149, 221);
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+#zotero-items-pane-message-box {
+	-moz-appearance: listbox;
+	text-align: center;
+	padding: 20px;
+}
+
+#zotero-items-pane-message-box description:not(:first-child) {
+	margin-top: .75em;
 }
 
 #zotero-item-pane
@@ -635,18 +660,6 @@
 	max-height: 4px;
 	background-image: none;
 }
-
-#zotero-items-pane-message-box
-{
-	-moz-appearance: listbox;
-	text-align: center;
-	padding: 20px;
-}
-
-#zotero-items-pane-message-box description:not(:first-child) {
-	margin-top: .75em;
-}
-
 
 #zotero-annotate-tb-add
 {

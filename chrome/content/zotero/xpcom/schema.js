@@ -1460,36 +1460,6 @@ Zotero.Schema = new function(){
 				+ "(?, 'user', 1, 1)";
 			yield Zotero.DB.queryAsync(sql, userLibraryID);
 			
-			/*if (!Zotero.Schema.skipDefaultData) {
-				// Quick Start Guide web page item
-				var sql = "INSERT INTO items VALUES(1, 13, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 'ABCD2345', 0, 0)";
-				yield Zotero.DB.queryAsync(sql, userLibraryID);
-				var sql = "INSERT INTO itemDataValues VALUES (1, ?)";
-				yield Zotero.DB.queryAsync(sql, Zotero.getString('install.quickStartGuide'));
-				var sql = "INSERT INTO itemData VALUES (1, 110, 1)";
-				yield Zotero.DB.queryAsync(sql);
-				var sql = "INSERT INTO itemDataValues VALUES (2, 'https://www.zotero.org/support/quick_start_guide')";
-				yield Zotero.DB.queryAsync(sql);
-				var sql = "INSERT INTO itemData VALUES (1, 1, 2)";
-				yield Zotero.DB.queryAsync(sql);
-				
-				// CHNM as creator
-				var sql = "INSERT INTO creators VALUES (1, '', 'Center for History and New Media', 1)";
-				yield Zotero.DB.queryAsync(sql);
-				var sql = "INSERT INTO itemCreators VALUES (1, 1, 1, 0)";
-				yield Zotero.DB.queryAsync(sql);
-				
-				// Welcome note
-				var sql = "INSERT INTO items VALUES(2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 'ABCD3456', 0, 0)";
-				yield Zotero.DB.queryAsync(sql, userLibraryID);
-				var welcomeTitle = Zotero.getString('install.quickStartGuide.message.welcome');
-				var welcomeMsg = '<div class="zotero-note znv1"><p><strong>' + welcomeTitle + '</strong></p>'
-					+ '<p>' + Zotero.getString('install.quickStartGuide.message.view') + '</p>'
-					+ '<p>' + Zotero.getString('install.quickStartGuide.message.thanks') + '</p></div>';
-				var sql = "INSERT INTO itemNotes VALUES (2, 1, ?, ?)";
-				yield Zotero.DB.queryAsync(sql, [welcomeMsg, welcomeTitle]);
-			}*/
-			
 			yield _updateLastClientVersion();
 			
 			self.dbInitialized = true;

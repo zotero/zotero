@@ -46,6 +46,7 @@ Zotero.ItemTreeView = function (collectionTreeRow) {
 	
 	this._ownerDocument = null;
 	this._needsSort = false;
+	this._introText = null;
 	
 	this._cellTextCache = {};
 	this._itemImages = {};
@@ -245,38 +246,7 @@ Zotero.ItemTreeView.prototype.setTree = async function (treebox) {
 		// handleKeyPress() in zoteroPane.js.
 		tree._handleEnter = function () {};
 		
-		if (this._ownerDocument.defaultView.ZoteroPane_Local) {
-			// For My Publications, show intro text in middle pane if no items
-			if (this.collectionTreeRow && this.collectionTreeRow.isPublications() && !this.rowCount) {
-				let doc = this._ownerDocument;
-				let ns = 'http://www.w3.org/1999/xhtml'
-				let div = doc.createElementNS(ns, 'div');
-				let p = doc.createElementNS(ns, 'p');
-				p.textContent = Zotero.getString('publications.intro.text1', ZOTERO_CONFIG.DOMAIN_NAME);
-				div.appendChild(p);
-				
-				p = doc.createElementNS(ns, 'p');
-				p.textContent = Zotero.getString('publications.intro.text2');
-				div.appendChild(p);
-				
-				p = doc.createElementNS(ns, 'p');
-				let html = Zotero.getString('publications.intro.text3');
-				// Convert <b> tags to placeholders
-				html = html.replace('<b>', ':b:').replace('</b>', ':/b:');
-				// Encode any other special chars, which shouldn't exist
-				html = Zotero.Utilities.htmlSpecialChars(html);
-				// Restore bold text
-				html = html.replace(':b:', '<strong>').replace(':/b:', '</strong>');
-				p.innerHTML = html; // AMO note: markup from hard-coded strings and filtered above
-				div.appendChild(p);
-				
-				content = div;
-				doc.defaultView.ZoteroPane_Local.setItemsPaneMessage(content);
-			}
-			else {
-				this._ownerDocument.defaultView.ZoteroPane_Local.clearItemsPaneMessage();
-			}
-		}
+		this._updateIntroText();
 		
 		if (this.collectionTreeRow && this.collectionTreeRow.itemToSelect) {
 			var item = this.collectionTreeRow.itemToSelect;
@@ -1010,6 +980,8 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		yield this.selectItem(selectItem);
 	}*/
 	
+	this._updateIntroText();
+	
 	//this._treebox.endUpdateBatch();
 	let selectPromise;
 	if (madeChanges) {
@@ -1722,6 +1694,113 @@ Zotero.ItemTreeView.prototype.sort = function (itemIDs) {
 	var numSorted = itemIDs ? itemIDs.length : this._rows.length;
 	Zotero.debug(`Sorted ${numSorted} ${Zotero.Utilities.pluralize(numSorted, ['item', 'items'])} `
 		+ `in ${new Date - t} ms`);
+};
+
+
+/**
+ * Show intro text in middle pane for some views when no items
+ */
+Zotero.ItemTreeView.prototype._updateIntroText = function() {
+	if (!this._ownerDocument.defaultView.ZoteroPane) {
+		return;
+	}
+	
+	if (this.collectionTreeRow && !this.rowCount) {
+		let doc = this._ownerDocument;
+		let ns = 'http://www.w3.org/1999/xhtml'
+		let div;
+		
+		// My Library and no groups
+		if (this.collectionTreeRow.isLibrary() && !Zotero.Groups.getAll().length) {
+			div = doc.createElementNS(ns, 'div');
+			let p = doc.createElementNS(ns, 'p');
+			let html = Zotero.getString(
+				'pane.items.intro.text1',
+				[
+					Zotero.clientName
+				]
+			);
+			// Encode special chars, which shouldn't exist
+			html = Zotero.Utilities.htmlSpecialChars(html);
+			html = `<b>${html}</b>`;
+			p.innerHTML = html;
+			div.appendChild(p);
+			
+			p = doc.createElementNS(ns, 'p');
+			html = Zotero.getString(
+				'pane.items.intro.text2',
+				[
+					Zotero.getString('connector.name', Zotero.clientName),
+					Zotero.clientName
+				]
+			);
+			// Encode special chars, which shouldn't exist
+			html = Zotero.Utilities.htmlSpecialChars(html);
+			html = html.replace(
+				/\[([^\]]+)](.+)\[([^\]]+)]/,
+				`<span class="text-link" data-href="${ZOTERO_CONFIG.QUICK_START_URL}">$1</span>`
+					+ '$2'
+					+ `<span class="text-link" data-href="${ZOTERO_CONFIG.CONNECTORS_URL}">$3</span>`
+			);
+			p.innerHTML = html;
+			div.appendChild(p);
+			
+			p = doc.createElementNS(ns, 'p');
+			html = Zotero.getString('pane.items.intro.text3', [Zotero.clientName]);
+			// Encode special chars, which shouldn't exist
+			html = Zotero.Utilities.htmlSpecialChars(html);
+			html = html.replace(
+				/\[([^\]]+)]/,
+				'<span class="text-link" '
+					+ `onclick="Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync')">$1</span>`
+			);
+			p.innerHTML = html;
+			div.appendChild(p);
+			
+			// Activate text links
+			for (let span of div.getElementsByTagName('span')) {
+				if (span.classList.contains('text-link') && !span.hasAttribute('onclick')) {
+					span.onclick = function () {
+						doc.defaultView.ZoteroPane.loadURI(this.getAttribute('data-href'));
+					};
+				}
+			}
+		}
+		// My Publications
+		else if (this.collectionTreeRow.isPublications()) {
+			div = doc.createElementNS(ns, 'div');
+			div.className = 'publications';
+			let p = doc.createElementNS(ns, 'p');
+			p.textContent = Zotero.getString('publications.intro.text1', ZOTERO_CONFIG.DOMAIN_NAME);
+			div.appendChild(p);
+			
+			p = doc.createElementNS(ns, 'p');
+			p.textContent = Zotero.getString('publications.intro.text2');
+			div.appendChild(p);
+			
+			p = doc.createElementNS(ns, 'p');
+			let html = Zotero.getString('publications.intro.text3');
+			// Convert <b> tags to placeholders
+			html = html.replace('<b>', ':b:').replace('</b>', ':/b:');
+			// Encode any other special chars, which shouldn't exist
+			html = Zotero.Utilities.htmlSpecialChars(html);
+			// Restore bold text
+			html = html.replace(':b:', '<strong>').replace(':/b:', '</strong>');
+			p.innerHTML = html; // AMO note: markup from hard-coded strings and filtered above
+			div.appendChild(p);
+		}
+		if (div) {
+			this._introText = true;
+			doc.defaultView.ZoteroPane_Local.setItemsPaneMessage(div);
+			return;
+		}
+		this._introText = null;
+	}
+	
+	if (this._introText || this._introText === null) {
+		this._ownerDocument.defaultView.ZoteroPane_Local.clearItemsPaneMessage();
+		this._introText = false;
+	}
 };
 
 

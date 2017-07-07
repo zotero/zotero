@@ -17,6 +17,7 @@ var ZOTERO_CONFIG = {
 	HTTP_BOOKMARKLET_ORIGIN: 'http://www.zotero.org',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
 	START_URL: "https://www.zotero.org/start_standalone",
+	QUICK_START_URL: "https://www.zotero.org/support/quick_start_guide",
 	PDF_TOOLS_URL: "https://www.zotero.org/download/xpdf/",
 	SUPPORT_URL: "https://www.zotero.org/support/",
 	TROUBLESHOOTING_URL: "https://www.zotero.org/support/getting_help",
