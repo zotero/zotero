@@ -1494,8 +1494,10 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	
 	this.serial = function (fn) {
 		Components.utils.import("resource://zotero/concurrentCaller.js");
-		var caller = new ConcurrentCaller(1);
-		caller.setLogger(Zotero.debug);
+		var caller = new ConcurrentCaller({
+			numConcurrent: 1,
+			onError: e => Zotero.logError(e)
+		});
 		return function () {
 			var args = arguments;
 			return caller.start(function () {
