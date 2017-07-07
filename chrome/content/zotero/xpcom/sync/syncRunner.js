@@ -1005,7 +1005,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 							);
 							
 							if (index == 0) {
-								win.ZoteroPane.openPreferences("zotero-prefpane-sync");
+								Zotero.Utilities.Internal.openPreferences("zotero-prefpane-sync");
 								return;
 							}
 						}, 1);
