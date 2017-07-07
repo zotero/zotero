@@ -1430,9 +1430,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				continue;
 			}
 			if (Array.isArray(arg)) {
-				for (var j=0; j<arg.length; j++){
-					returns.push(arg[j]);
-				}
+				returns.push(...arg);
 			}
 			else {
 				returns.push(arg);
