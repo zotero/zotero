@@ -156,7 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Wczytywanie znaczników...">
 <!ENTITY zotero.tagSelector.showAutomatic "Wyświetl etykiety automatyczne">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Wyświetl wszystkie etykiety w tej bibliotece">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Usuń automatycznie nadane etykiety w tej bibliotece...">
 <!ENTITY zotero.tagSelector.clearAll "Odznacz wszystkie">
 <!ENTITY zotero.tagSelector.assignColor "Przypisz kolor...">
 <!ENTITY zotero.tagSelector.renameTag "Zmień nazwę etykiety...">
