@@ -11,6 +11,15 @@ dialog
 	padding: 10px;
 }
 
+#column1 {
+	width: 33em;
+	padding-right: 2em;
+}
+
+#column2 {
+	margin-right: 1em;
+}
+
 #name
 {
 	font-size: large;
@@ -38,21 +47,25 @@ dialog
 	margin-bottom: 5px;
 }
 
-#zotero-translators-list {
-	margin: .3em 0;
-	height: 9em;
-	overflow: -moz-scrollbars-vertical;
+#about-text > p {
+	margin-left: .5em;
+	line-height: 1.4em;
 }
 
-#zotero-translators-list label.locale {
-	font-weight: bold;
-	margin-top: .5em;
+span.text-link {
+	cursor: pointer;
+	color: -moz-nativehyperlinktext;
 }
 
-#zotero-translators-list label.locale:first-child {
-	margin-top: 0;
+span.text-link:hover {
+	text-decoration: underline;
 }
 
-#zotero-translators-list label:not(.locale) {
-	margin-left: 1.25em;
+/* Remove default underline from XUL links */
+label.zotero-text-link {
+	text-decoration: none;
+}
+
+label.zotero-text-link:hover {
+	text-decoration: underline;
 }

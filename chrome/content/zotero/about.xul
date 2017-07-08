@@ -18,9 +18,6 @@
 	<vbox id="aboutcontent">
 		<label id="name" value="Zotero"/>
 		<hbox>
-			<label class="zotero-text-link" href="https://www.zotero.org" value="https://www.zotero.org"/>
-		</hbox>
-		<hbox>
 			<label id="version"/>
 			<label class="zotero-text-link" href="https://www.zotero.org/support/changelog" value="&zotero.whatsNew;"/>
 		</hbox>
@@ -29,29 +26,44 @@
 		</script>
 		<hbox>
 			<vbox id="column1">
-				<label class="subhead" value="&zotero.createdby;"/>
-				<vbox class="subcontent">
-					<label class="zotero-text-link" href="https://rrchnm.org/" value="Roy Rosenzweig Center for History and New Media"/>
-					<label value="George Mason University"/>
-					<label value="Fairfax, VA, USA"/>
-				</vbox>
-				<label class="subhead" value="&zotero.director;"/>
-				<vbox class="subcontent">
-					<label value="Sean Takats"/>
-				</vbox>
-				<label class="subhead" value="&zotero.developers;"/>
-				<vbox class="subcontent">
-					<label value="Dan Stillman"/>
-					<label value="Simon Kornblith"/>
-					<label value="Faolan Cheslack-Postava"/>
-				</vbox>
+				<div id="about-text" xmlns="http://www.w3.org/1999/xhtml">
+					<p id="created-by"></p>
+					<p id="get-involved"></p>
+					<script><![CDATA[
+						// Replace [links] in localized strings with spans with onclick handlers
+						//
+						// TODO: Use helper function in common with intro text in itemTreeView.js
+						document.getElementById('created-by').innerHTML =
+							Zotero.Utilities.htmlSpecialChars(Zotero.getString('about.createdBy'))
+							.replace(
+								/\[([^\]]+)](.+)\[([^\]]+)]/,
+								`<span data-href="https://rrchnm.org/">$1</span>`
+									+ '$2'
+									+ `<span data-href="https://www.zotero.org/support/credits_and_acknowledgments">$3</span>`
+							);
+						
+						document.getElementById('get-involved').innerHTML =
+							Zotero.Utilities.htmlSpecialChars(Zotero.getString('about.getInvolved'))
+							.replace(
+								/\[([^\]]+)]/,
+								`<span data-href="https://www.zotero.org/getinvolved/">$1</span>`
+							);
+						
+						// Activate text links
+						for (let span of document.getElementById('about-text').getElementsByTagName('span')) {
+							span.className = 'text-link';
+							span.onclick = function () {
+								window.opener.ZoteroPane.loadURI(this.getAttribute('data-href'));
+							};
+						}
+					]]></script>
+				</div>
 				<label class="subhead" value="&zotero.thanks;"/>
 				<vbox class="subcontent">
 					<label class="zotero-text-link" href="http://www.mellon.org/" value="Andrew W. Mellon Foundation"/>
 					<label class="zotero-text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
 					<label class="zotero-text-link" href="http://www.sloan.org/" value="Alfred P. Sloan Foundation"/>
 				</vbox>
-				<label class="zotero-text-link" href="https://www.zotero.org/support/credits_and_acknowledgments" value="&zotero.moreCreditsAndAcknowledgements;"/>
 			</vbox>
 			<vbox id="column2">
 				<label class="subhead" value="&zotero.citationProcessing;"/>
