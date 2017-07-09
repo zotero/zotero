@@ -240,24 +240,13 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			this.locale = this.locale + '-' + this.locale.toUpperCase();
 		}
 		
-		// Load in the localization stringbundle for use by getString(name)
-		if (Services.locale.getAppLocale) {
-			var appLocale = Services.locale.getAppLocale();
-		}
-		// Fx <=53
-		else {
-			var appLocale = Services.locale.getApplicationLocale();
-		}
-		
-		_localizedStringBundle = Services.strings.createBundle(
-			"chrome://zotero/locale/zotero.properties", appLocale);
+		_localizedStringBundle = Services.strings.createBundle("chrome://zotero/locale/zotero.properties");
 		// Fix logged error in PluralForm.jsm when numForms() is called before get(), as it is in
 		// getString() when a number is based
 		PluralForm.get(1, '1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16')
 		
 		// Also load the brand as appName
-		var brandBundle = Services.strings.createBundle(
-			"chrome://branding/locale/brand.properties", appLocale);
+		var brandBundle = Services.strings.createBundle("chrome://branding/locale/brand.properties");
 		this.appName = brandBundle.GetStringFromName("brandShortName");
 		
 		// Set the locale direction to Zotero.dir
@@ -1313,19 +1302,33 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			return this.collation;
 		}
 		
-		if (Services.locale.getAppLocale) {
-			var locale = Services.locale.getAppLocale();
-		}
-		// Fx <=53
-		else {
-			var locale = Services.locale.getApplicationLocale();
-			locale = locale.getCategory('NSILOCALE_COLLATE');
-		}
-		
 		try {
-			// Extract a valid language tag
-			locale = locale.match(/^[a-z]{2}(\-[A-Z]{2})?/)[0];
-			var collator = new Intl.Collator(locale, {
+			// DEBUG: Is this necessary, or will Intl.Collator just default to the same locales we're
+			// passing manually?
+			
+			let locales;
+			// Fx55+
+			if (Services.locale.getAppLocalesAsBCP47) {
+				locales = Services.locale.getAppLocalesAsBCP47();
+			}
+			else {
+				let locale;
+				// Fx54
+				if (Services.locale.getAppLocale) {
+					locale = Services.locale.getAppLocale();
+				}
+				// Fx <=53
+				else {
+					locale = Services.locale.getApplicationLocale();
+					locale = locale.getCategory('NSILOCALE_COLLATE');
+				}
+				
+				// Extract a valid language tag
+				locale = locale.match(/^[a-z]{2}(\-[A-Z]{2})?/)[0];
+				locales = [locale];
+			}
+			
+			var collator = new Intl.Collator(locales, {
 				ignorePunctuation: true,
 				numeric: true,
 				sensitivity: 'base'

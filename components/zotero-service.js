@@ -378,18 +378,10 @@ function ZoteroService() {
 							let quitStr = "Quit";
 							let checkForUpdateStr = "Check for Update";
 							try {
-								let appLocale;
-								if (Services.locale.getAppLocale) {
-									appLocale = Services.locale.getAppLocale();
-								}
-								// Fx <=53
-								else {
-									appLocale = Services.locale.getApplicationLocale();
-								}
 								let src = 'chrome://zotero/locale/zotero.properties';
 								let stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
 									.getService(Components.interfaces.nsIStringBundleService);
-								let stringBundle = stringBundleService.createBundle(src, appLocale);
+								let stringBundle = stringBundleService.createBundle(src);
 								errorStr = stringBundle.GetStringFromName('general.error');
 								checkForUpdateStr = stringBundle.GetStringFromName('general.checkForUpdate');
 								quitStr = stringBundle.GetStringFromName('general.quit');
