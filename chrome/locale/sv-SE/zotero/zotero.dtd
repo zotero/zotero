@@ -156,7 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Laddar etiketter…">
 <!ENTITY zotero.tagSelector.showAutomatic "Visa automatiskt">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Visa alla etiketter i detta bibliotek">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Ta bort automatiska etiketter i detta bibliotek…">
 <!ENTITY zotero.tagSelector.clearAll "Avmarkera alla">
 <!ENTITY zotero.tagSelector.assignColor "Ange färg…">
 <!ENTITY zotero.tagSelector.renameTag "Ändra namn på etikett...">
@@ -238,7 +238,7 @@
 
 <!ENTITY zotero.integration.references.label "Referenser i källförteckningen">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "Stoppa synkronisering">
 <!ENTITY zotero.sync.error "Synkroniseringsfel">
 <!ENTITY zotero.sync.storage.progress "Förlopp:">
 <!ENTITY zotero.sync.storage.downloads "Nedladdningar:">

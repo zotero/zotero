@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Återställ till Zotero-server">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Byt ut allt innehåll på Zotero-server mot lokala Zoterodata.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Återställ filsynkroniseringshistorik">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Jämför alla bilagda filer med lagringstjänsten">
 <!ENTITY zotero.preferences.sync.reset "Återställ">
 <!ENTITY zotero.preferences.sync.reset.button "Återställ...">
 

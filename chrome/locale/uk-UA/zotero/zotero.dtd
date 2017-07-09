@@ -12,7 +12,7 @@
 <!ENTITY zotero.general.saveAs "Зберегти як...">
 <!ENTITY zotero.general.advancedOptions.label "Розширені налаштування">
 <!ENTITY zotero.general.more "Більше">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.loading "Завантаження">
 
 <!ENTITY zotero.errorReport.title "Звіт про помилку в Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Це може включати повідомлення, які не відносяться до Zotero.">
@@ -156,7 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Завантажуємо теги...">
 <!ENTITY zotero.tagSelector.showAutomatic "Показувати автоматичні">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Показувати всі теги в бібліотеці">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Видалити всі автоматичні теги в бібліотеці...">
 <!ENTITY zotero.tagSelector.clearAll "Відмінити вибір">
 <!ENTITY zotero.tagSelector.assignColor "Призначити колір...">
 <!ENTITY zotero.tagSelector.renameTag "Перейменувати тег...">
@@ -225,20 +225,20 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Виноски">
 <!ENTITY zotero.integration.prefs.endnotes.label "Кінцеві виноски">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Зберегти цитування як:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Закладки">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Закладки можна поширювати між Word та LibreOffice, але це може викликати помилки в разі випадкого редагування та неможливість вставки у виноски.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Використовувати абревіатуру журналу в MEDLINE">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Поле &quot;Журнал скор.&quot; буде проігнороване.">
 
 <!ENTITY zotero.integration.showEditor.label "Покзати редактор">
 <!ENTITY zotero.integration.classicView.label "Класичний вигляд">
 
 <!ENTITY zotero.integration.references.label "Посилання в списку літератури">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "Зупинити синхронізацію">
 <!ENTITY zotero.sync.error "Помилка сінхронізації">
 <!ENTITY zotero.sync.storage.progress "Хід виконання:">
 <!ENTITY zotero.sync.storage.downloads "Завантаження:">
@@ -270,10 +270,10 @@
 <!ENTITY zotero.feedSettings.title.label "Назва:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Оновлювати стрічку кожні">
 <!ENTITY zotero.feedSettings.refresh.label2 "годин">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Видалити непрочитані записи зі стрічки через">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "днів">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Видалити прочитані записи зі стрічки через">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "днів">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Отримання метаданих...">

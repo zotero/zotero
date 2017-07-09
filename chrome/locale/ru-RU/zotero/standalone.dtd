@@ -25,7 +25,7 @@
 <!ENTITY closeCmd.accesskey "C">
 <!ENTITY importCmd.label "Import…">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY importFromClipboardCmd.label "Импортировать из буфера обмена">
 <!ENTITY quitApplicationCmdWin.label "Выход">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Выйти">

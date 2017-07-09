@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaurare în serverul Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Șterge toate datele de pe server și suprascrie cu datele locale din Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Resetează istoria sincronizării fișierelor">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compară toate fișierele anexate cu serviciul de stocare">
 <!ENTITY zotero.preferences.sync.reset "Resetare">
 <!ENTITY zotero.preferences.sync.reset.button "Resetare...">
 

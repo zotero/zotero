@@ -23,9 +23,9 @@
 <!ENTITY closeCmd.label "Закрити">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.label "Імпорт...">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY importFromClipboardCmd.label "Імпорт з буферу обміну">
 <!ENTITY quitApplicationCmdWin.label "Вихід">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Вийти">
@@ -44,7 +44,7 @@
 
 <!ENTITY toolsMenu.label "Інструменти">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Встановити браузерний конектор">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Надбудови">
 

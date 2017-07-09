@@ -10,14 +10,14 @@
 <!ENTITY zotero.general.cancel "Отменить">
 <!ENTITY zotero.general.refresh "Обновить">
 <!ENTITY zotero.general.saveAs "Сохранить как">
-<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
+<!ENTITY zotero.general.advancedOptions.label "Расширенные настройки">
 <!ENTITY zotero.general.more "More">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.loading "Загрузка...">
 
 <!ENTITY zotero.errorReport.title "Отчет об ошибке Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
-<!ENTITY zotero.errorReport.submissionInProgress "Подождите, пока отчет об ошибке будет отослан.">
-<!ENTITY zotero.errorReport.submitted "Отчет об ошибке отослан.">
+<!ENTITY zotero.errorReport.submissionInProgress "Подождите, пока отчет об ошибке будет отправлен.">
+<!ENTITY zotero.errorReport.submitted "Отчет об ошибке отправлен.">
 <!ENTITY zotero.errorReport.reportID "Номер отчета:">
 <!ENTITY zotero.errorReport.postToForums "Пожалуйста, оставьте сообщение на форуме Zotero (forums.zotero.org), указав этот номер отчета, описание проблемы, и какие шаги нужно предпринять чтобы повторить ее.">
 <!ENTITY zotero.errorReport.notReviewed "Отчеты об ошибках не рассматриваются, пока на них не сослались в форуме.">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Показать неподшитые документы">
 
 <!ENTITY zotero.items.itemType "Тип документа">
-<!ENTITY zotero.items.type_column "Item Type">
+<!ENTITY zotero.items.type_column "Тип документа">
 <!ENTITY zotero.items.title_column "Название">
 <!ENTITY zotero.items.creator_column "Создатель">
 <!ENTITY zotero.items.date_column "Дата">
@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Создать новый документ с текущей страницы">
 <!ENTITY zotero.toolbar.lookup.label "Добавить документ по идентификатору">
 <!ENTITY zotero.toolbar.removeItem.label "Удалить документ">
-<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
+<!ENTITY zotero.toolbar.newLibrary.label "Новая библиотека...">
 <!ENTITY zotero.toolbar.newCollection.label "Новая подборка…">
 <!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "Новая группа…">
@@ -225,7 +225,7 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Сноски">
 <!ENTITY zotero.integration.prefs.endnotes.label "Концевые сноски">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Сохранить цитаты как:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Закладки">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
@@ -238,7 +238,7 @@
 
 <!ENTITY zotero.integration.references.label "Ссылки в библиографии">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "Прекратить синхронизацию">
 <!ENTITY zotero.sync.error "Ошибка синхронизации">
 <!ENTITY zotero.sync.storage.progress "Ход выполнения:">
 <!ENTITY zotero.sync.storage.downloads "Загрузки:">
@@ -271,9 +271,9 @@
 <!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
 <!ENTITY zotero.feedSettings.refresh.label2 "час(-а)">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "дня(-ей)">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "дня(-ей)">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Извлечение метаданных…">
@@ -289,7 +289,7 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Неоднозначные цитаты">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Определённые цитаты">
 <!ENTITY zotero.rtfScan.introPage.label "Введение">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero может автоматически извлечь и переформатировать цитаты и вставить библиографию в файл RTF. В настоящее время функция сканирования RTF распознаёт цитаты в следующих форматах:">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero может автоматически извлекать и переформатировать цитаты, а также вставить библиографию в файл RTF. В настоящее время функция сканирования RTF распознаёт цитаты в следующих форматах:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Чтобы начать, выберите ниже входной файл RTF и выходной файл:">
 <!ENTITY zotero.rtfScan.scanPage.label "Сканирование на наличие цитат">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero сканирует ваш документ на наличие цитат. Пожалуйста, подождите.">
@@ -312,4 +312,4 @@
 
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
+<!ENTITY zotero.attachLink.label.title "Заголовок:">

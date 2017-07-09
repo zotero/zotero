@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "Nafn:">
 
-<!ENTITY zotero.search.searchInLibrary "Leita í safni:">
+<!ENTITY zotero.search.searchInLibrary "Leita í færslusafni:">
 
 <!ENTITY zotero.search.joinMode.prefix "Leita að">
 <!ENTITY zotero.search.joinMode.any "einhverju">

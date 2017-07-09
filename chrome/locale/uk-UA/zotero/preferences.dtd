@@ -54,7 +54,7 @@
 <!ENTITY zotero.preferences.sync.password "Пароль:">
 <!ENTITY zotero.preferences.sync.syncServer "Синхронізація даних">
 <!ENTITY zotero.preferences.sync.setUpSync "Налаштувати синхронізацію">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Від'єднати обліковий запис...">
 <!ENTITY zotero.preferences.sync.createAccount "Створити обліковий запис">
 <!ENTITY zotero.preferences.sync.lostPassword "Забули пароль?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Синхронізувати автоматично">
@@ -71,13 +71,13 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Використовуючи сховище Zotero, ви погоджуєтесь бути пов'язаним його">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "умвами використання">
 <!ENTITY zotero.preferences.sync.librariesToSync "Бібліотеки для синхронізації">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Вибрати бібліотеки...">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Синхронізація">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Бібліотека">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Наступні операції призначені для використання тільки в рідкісних, специфічних ситуаціях і не повинні використовуватися для загального пошуку та усунення несправностей. У багатьох випадках скидання буде викликати додаткові проблеми. Подивитися">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Параметри скидання налаштувань синхронізаії">
 <!ENTITY zotero.preferences.sync.reset.warning3 "для додаткової інформації.">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Скинути історію синхронізації даних">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Відновити з серверу Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Видалити всі локальні дані Zotero та відновити з серверу">
@@ -189,7 +189,7 @@
 <!ENTITY zotero.preferences.dataDir "Розташування каталогу з даними">
 <!ENTITY zotero.preferences.dataDir.useProfile "Використовувати каталог профілю">
 <!ENTITY zotero.preferences.dataDir.custom "Користувацька:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose…">
+<!ENTITY zotero.preferences.dataDir.choose "Вибрати...">
 <!ENTITY zotero.preferences.dataDir.reveal "Показати каталог з даними">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
