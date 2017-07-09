@@ -12,7 +12,7 @@ dialog
 }
 
 #column1 {
-	width: 33em;
+	width: 23em;
 	padding-right: 2em;
 }
 
@@ -45,6 +45,11 @@ dialog
 {
 	margin-left: 10px;
 	margin-bottom: 5px;
+}
+
+#about-text {
+	margin-top: .7em;
+	margin-bottom: .7em;
 }
 
 #about-text > p {
