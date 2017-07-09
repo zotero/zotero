@@ -328,7 +328,17 @@ Zotero.LibraryTreeView.prototype = {
 		
 		var target = event.target;
 		if (target.tagName != 'treechildren') {
-			return false;
+			let doc = target.ownerDocument;
+			// Consider a drop on the items pane message box (e.g., when showing the welcome text)
+			// a drop on the items tree
+			let msgBox = doc.getElementById('zotero-items-pane-message-box');
+			if (msgBox.contains(target) && msgBox.firstChild.hasAttribute('allowdrop')) {
+				target = doc.querySelector('#zotero-items-tree treechildren');
+			}
+			else {
+				this._setDropEffect(event, "none");
+				return false;
+			}
 		}
 		var tree = target.parentNode;
 		let row = {}, col = {}, obj = {};

@@ -565,7 +565,10 @@
 
 							<!-- Label for displaying messages when items pane is hidden
 							 (e.g. "Advanced search mode — press Enter to search.")-->
-							<vbox id="zotero-items-pane-message-box" pack="center" align="center"/>
+							<vbox id="zotero-items-pane-message-box" pack="center" align="center"
+								ondragenter="return ZoteroPane.itemsView.onDragEnter(event)"
+								ondragover="return ZoteroPane.itemsView.onDragOver(event)"
+								ondrop="ZoteroPane.itemsView.onDrop(event); ZoteroPane.itemsView.drop(-1, -1, event.dataTransfer)"/>
 						</deck>
 					</vbox>
 

@@ -1765,6 +1765,8 @@ Zotero.ItemTreeView.prototype._updateIntroText = function() {
 					};
 				}
 			}
+			
+			div.setAttribute('allowdrop', true);
 		}
 		// My Publications
 		else if (this.collectionTreeRow.isPublications()) {
