@@ -30,7 +30,7 @@
  * @class Utility functions not made available to translators
  */
 Zotero.Utilities.Internal = {
-	SNAPSHOT_SAVE_TIMEOUT: 15000,
+	SNAPSHOT_SAVE_TIMEOUT: 30000,
 	
 	/**
 	 * Run a function on chunks of a given size of an array's elements.
