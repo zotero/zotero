@@ -538,8 +538,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 						
 						deferred.resolve(201);
 					} catch(e) {
-						Zotero.debug("ERROR");
-						Zotero.debug(e);
+						Zotero.debug(e, 1);
 						deferred.resolve(500);
 						throw e;
 					}

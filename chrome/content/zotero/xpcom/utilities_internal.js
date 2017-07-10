@@ -30,6 +30,8 @@
  * @class Utility functions not made available to translators
  */
 Zotero.Utilities.Internal = {
+	SNAPSHOT_SAVE_TIMEOUT: 15000,
+	
 	/**
 	 * Run a function on chunks of a given size of an array's elements.
 	 *
@@ -427,6 +429,7 @@ Zotero.Utilities.Internal = {
 			| nsIWBP.PERSIST_FLAGS_FORCE_ALLOW_COOKIES
 			| nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION
 			| nsIWBP.PERSIST_FLAGS_FROM_CACHE
+			| nsIWBP.PERSIST_FLAGS_CLEANUP_ON_FAILURE
 			// Mostly ads
 			| nsIWBP.PERSIST_FLAGS_IGNORE_IFRAMES
 			| nsIWBP.PERSIST_FLAGS_IGNORE_REDIRECTED_DATA;
@@ -447,9 +450,10 @@ Zotero.Utilities.Internal = {
 		const wrapColumn = 80;
 		
 		var deferred = Zotero.Promise.defer();
-		wbp.progressListener = new Zotero.WebProgressFinishListener(function () {
+		var listener = new Zotero.WebProgressFinishListener(function () {
 			deferred.resolve();
 		});
+		wbp.progressListener = listener;
 		
 		wbp.saveDocument(
 			document,
@@ -459,6 +463,18 @@ Zotero.Utilities.Internal = {
 			encodingFlags,
 			wrapColumn
 		);
+		
+		// Cancel save after timeout has passed, so we return an error to the connector and don't stay
+		// saving forever
+		var timeoutID = setTimeout(function () {
+			if (deferred.promise.isPending()) {
+				Zotero.debug("Stopping save for " + document.location.href, 2);
+				//Zotero.debug(listener.getRequest());
+				deferred.reject("Snapshot save timeout");
+				wbp.cancelSave();
+			}
+		}, this.SNAPSHOT_SAVE_TIMEOUT);
+		deferred.promise.then(() => clearTimeout(timeoutID));
 		
 		return deferred.promise;
 	},

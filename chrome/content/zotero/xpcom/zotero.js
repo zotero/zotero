@@ -2488,11 +2488,21 @@ Zotero.Browser = new function() {
  * Implements nsIWebProgressListener
  */
 Zotero.WebProgressFinishListener = function(onFinish) {
+	var _request;
+	
+	this.getRequest = function () {
+		return _request;
+	};
+	
 	this.onStateChange = function(wp, req, stateFlags, status) {
 		//Zotero.debug('onStageChange: ' + stateFlags);
 		if (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP
 				&& stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK) {
+			_request = null;
 			onFinish();
+		}
+		else {
+			_request = req;
 		}
 	}
 	
