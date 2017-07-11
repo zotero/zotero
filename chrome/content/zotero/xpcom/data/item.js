@@ -3612,9 +3612,6 @@ Zotero.Item.prototype.removeFromCollection = function (collectionIDOrKey) {
 		throw new Error("Invalid collection '" + collectionIDOrKey + "'");
 	}
 	
-	Zotero.debug("REMOVING FROM COLLECTION");
-	Zotero.debug(this._collections);
-	
 	this._requireData('collections');
 	var pos = this._collections.indexOf(collectionID);
 	if (pos == -1) {
