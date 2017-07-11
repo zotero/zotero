@@ -4002,11 +4002,9 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	
 	// Remove item from parent collections
 	var parentCollectionIDs = this._collections;
-	if (parentCollectionIDs) {
-		for (var i=0; i<parentCollectionIDs.length; i++) {
-			let parentCollection = yield Zotero.Collections.getAsync(parentCollectionIDs[i]);
-			yield parentCollection.removeItem(this.id);
-		}
+	for (let parentCollectionID of parentCollectionIDs) {
+		let parentCollection = yield Zotero.Collections.getAsync(parentCollectionID);
+		yield parentCollection.removeItem(this.id);
 	}
 	
 	var parentItem = this.parentKey;
