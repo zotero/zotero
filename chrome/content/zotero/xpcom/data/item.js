@@ -496,7 +496,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 	if (oldItemTypeID) {
 		// Reset custom creator types to the default
 		let creators = this.getCreators();
-		if (creators) {
+		if (creators.length) {
 			let removeAll = !Zotero.CreatorTypes.itemTypeHasCreators(itemTypeID);
 			for (let i=0; i<creators.length; i++) {
 				// Remove all creators if new item type doesn't have any
