@@ -119,12 +119,12 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		_syncInProgress = true;
 		_stopping = false;
 		
-		yield Zotero.Notifier.trigger('start', 'sync', []);
-		
-		// Purge deleted objects so they don't cause sync errors (e.g., long tags)
-		yield Zotero.purgeDataObjects(true);
-		
 		try {
+			yield Zotero.Notifier.trigger('start', 'sync', []);
+			
+			// Purge deleted objects so they don't cause sync errors (e.g., long tags)
+			yield Zotero.purgeDataObjects(true);
+			
 			let apiKey = yield _getAPIKey();
 			if (!apiKey) {
 				throw new Zotero.Error("API key not set", Zotero.Error.ERROR_API_KEY_NOT_SET);
@@ -801,12 +801,12 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	
 	
 	this.end = Zotero.Promise.coroutine(function* (options) {
+		_syncInProgress = false;
 		yield this.checkErrors(_errors, options);
 		if (!options.restartSync) {
 			this.updateIcons(_errors);
 		}
 		_errors = [];
-		_syncInProgress = false;
 	});
 	
 	
