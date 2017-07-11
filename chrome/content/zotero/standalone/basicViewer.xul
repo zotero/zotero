@@ -56,7 +56,7 @@
 	<commandset id="mainCommandSet">
 		<!--FILE-->
 		<command id="cmd_close" oncommand="window.close();"/>
-		<command id="cmd_save" oncommand="saveDocument(window.content.document);"/>
+		<command id="cmd_save" oncommand="saveDocument(browser.contentDocument);"/>
 		<command id="cmd_print" oncommand="browser.contentWindow.print()"/>
 		<command id="cmd_quitApplication" oncommand="goQuitApplication();"/>
 		
