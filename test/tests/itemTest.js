@@ -1448,6 +1448,22 @@ describe("Zotero.Item", function () {
 			assert.strictEqual(item.getField('accessDate'), '');
 		});
 		
+		it("should remove child item from collection if 'collections' property not provided", function* () {
+			var collection = yield createDataObject('collection');
+			// Create standalone attachment in collection
+			var attachment = yield importFileAttachment('test.png', { collections: [collection.id] });
+			var item = yield createDataObject('item', { collections: [collection.id] });
+			
+			var json = attachment.toJSON();
+			json.path = 'storage:test2.png';
+			// Add to parent, which implicitly removes from collection
+			json.parentItem = item.key;
+			delete json.collections;
+			Zotero.debug(json);
+			attachment.fromJSON(json);
+			yield attachment.save();
+		});
+		
 		it("should ignore unknown fields", function* () {
 			var json = {
 				itemType: "journalArticle",
