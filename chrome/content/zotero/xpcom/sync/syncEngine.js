@@ -765,6 +765,8 @@ Zotero.Sync.Data.Engine.prototype._restoreRestoredCollectionItems = async functi
  * @return {Promise<Integer>} - A download result code (this.DOWNLOAD_RESULT_*)
  */
 Zotero.Sync.Data.Engine.prototype._downloadDeletions = Zotero.Promise.coroutine(function* (since, newLibraryVersion) {
+	const batchSize = 50;
+	
 	let results = yield this.apiClient.getDeleted(
 		this.library.libraryType,
 		this.libraryTypeID,
@@ -856,10 +858,9 @@ Zotero.Sync.Data.Engine.prototype._downloadDeletions = Zotero.Promise.coroutine(
 				Zotero.debug("Cancelling sync");
 				throw new Zotero.Sync.UserCancelledException();
 			}
-			let concurrentObjects = 50;
 			yield Zotero.Utilities.Internal.forEachChunkAsync(
 				mergeData,
-				concurrentObjects,
+				batchSize,
 				function (chunk) {
 					return Zotero.DB.executeTransaction(function* () {
 						for (let json of chunk) {
@@ -882,14 +883,20 @@ Zotero.Sync.Data.Engine.prototype._downloadDeletions = Zotero.Promise.coroutine(
 		}
 		
 		if (toDelete.length) {
-			yield Zotero.DB.executeTransaction(function* () {
-				for (let obj of toDelete) {
-					yield obj.erase({
-						skipEditCheck: true,
-						skipDeleteLog: true
+			yield Zotero.Utilities.Internal.forEachChunkAsync(
+				toDelete,
+				batchSize,
+				function (chunk) {
+					return Zotero.DB.executeTransaction(function* () {
+						for (let obj of chunk) {
+							yield obj.erase({
+								skipEditCheck: true,
+								skipDeleteLog: true
+							});
+						}
 					});
 				}
-			});
+			);
 		}
 	}
 	
