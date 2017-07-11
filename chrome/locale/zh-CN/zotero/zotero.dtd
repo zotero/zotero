@@ -63,7 +63,7 @@
 <!ENTITY zotero.items.language_column "语言">
 <!ENTITY zotero.items.accessDate_column "访问时间">
 <!ENTITY zotero.items.libraryCatalog_column "馆藏目录">
-<!ENTITY zotero.items.callNumber_column "引用次数">
+<!ENTITY zotero.items.callNumber_column "索取号">
 <!ENTITY zotero.items.rights_column "版权">
 <!ENTITY zotero.items.dateAdded_column "添加日期">
 <!ENTITY zotero.items.dateModified_column "修改日期">
