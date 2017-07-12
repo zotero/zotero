@@ -4113,6 +4113,8 @@ Zotero.Item.prototype.fromJSON = function (json) {
 		// Use?
 		case 'md5':
 		case 'mtime':
+		// Handled below
+		case 'collections':
 			break;
 		
 		case 'accessDate':
