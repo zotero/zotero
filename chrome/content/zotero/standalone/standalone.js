@@ -156,6 +156,8 @@ const ZoteroStandalone = new function() {
 	 * Handles help menu requests
 	 */
 	this.openHelp = function(type) {
+		Components.utils.import("resource://zotero/config.js");
+		
 		switch (type) {
 		case "troubleshooting":
 			ZoteroPane.loadURI(ZOTERO_CONFIG.TROUBLESHOOTING_URL);
