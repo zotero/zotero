@@ -470,31 +470,72 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		if (result.some(r => r)) {
 			[Zotero.restoreFromServer, Zotero.resetDataDir] = result;
 			try {
+				yield Zotero.DB.closeDatabase();
+				
 				// TODO: better error handling
 				
 				// TODO: prompt for location
 				// TODO: Back up database
+				// TODO: Reset translators and styles
 				
 				
-				var dbfile = Zotero.DataDirectory.getDatabase();
-				yield OS.File.remove(dbfile, {ignoreAbsent: true});
 				
 				if (Zotero.restoreFromServer) {
+					let dbfile = Zotero.DataDirectory.getDatabase();
+					Zotero.debug("Deleting " + dbfile);
+					yield OS.File.remove(dbfile, { ignoreAbsent: true });
+					let storageDir = OS.Path.join(dataDir, 'storage');
+					Zotero.debug("Deleting " + storageDir.path);
+					OS.File.removeDir(storageDir, { ignoreAbsent: true }),
 					yield OS.File.remove(restoreFile);
 					Zotero.restoreFromServer = true;
-				} else if (Zotero.resetDataDir) {
-					Zotero.initAutoSync = true;
-					var storageDir = OS.Path.join(dataDir, 'storage');
-					yield Zotero.Promise.all([
-						OS.File.removeDir(storageDir, {ignoreAbsent: true}), 
-						OS.File.remove(resetDataDirFile)
-					]);
 				}
+				else if (Zotero.resetDataDir) {
+					Zotero.initAutoSync = true;
+					
+					// Clear some user prefs
+					[
+						'sync.server.username',
+						'sync.storage.username'
+					].forEach(p => Zotero.Prefs.clear(p));
+					
+					// Clear data directory
+					Zotero.debug("Deleting data directory files");
+					let lastError;
+					// Delete all files in directory rather than removing directory, in case it's
+					// a symlink
+					yield Zotero.File.iterateDirectory(dataDir, function* (iterator) {
+						while (true) {
+							let entry = yield iterator.next();
+							// Don't delete some files
+							if (entry.name == 'pipes'
+									|| entry.name.startsWith(Zotero.Fulltext.pdfInfoName)
+									|| entry.name.startsWith(Zotero.Fulltext.pdfConverterName)) {
+								continue;
+							}
+							Zotero.debug("Deleting " + entry.path);
+							try {
+								if (entry.isDir) {
+									yield OS.File.removeDir(entry.path);
+								}
+								else {
+									yield OS.File.remove(entry.path);
+								}
+							}
+							// Keep trying to delete as much as we can
+							catch (e) {
+								lastError = e;
+								Zotero.logError(e);
+							}
+						}
+					});
+					if (lastError) {
+						throw lastError;
+					}
+				}
+				Zotero.debug("Done with reset");
 				
-				// Recreate database with no quick start guide
-				Zotero.Schema.skipDefaultData = true;
-				yield Zotero.Schema.updateSchema();
-				
+				if (!(yield _initDB())) return false;
 			}
 			catch (e) {
 				// Restore from backup?
