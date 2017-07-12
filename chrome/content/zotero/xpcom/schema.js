@@ -24,7 +24,6 @@
 */
 
 Zotero.Schema = new function(){
-	this.skipDefaultData = false;
 	this.dbInitialized = false;
 	this.goToChangeLog = false;
 	
