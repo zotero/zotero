@@ -23,9 +23,9 @@
 <!ENTITY closeCmd.label "Schließen">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.label "Importieren...">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY importFromClipboardCmd.label "Importieren aus Zwischenablage">
 <!ENTITY quitApplicationCmdWin.label "Beenden">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Beenden">
@@ -44,7 +44,7 @@
 
 <!ENTITY toolsMenu.label "Werkzeuge">
 <!ENTITY toolsMenu.accesskey "W">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Browsererweiterungen installieren">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Add-ons">
 

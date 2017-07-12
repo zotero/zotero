@@ -12,7 +12,7 @@
 <!ENTITY zotero.general.saveAs "Speichern als...">
 <!ENTITY zotero.general.advancedOptions.label "Erweiterte Einstellungen">
 <!ENTITY zotero.general.more "Mehr">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.loading "Lade...">
 
 <!ENTITY zotero.errorReport.title "Zotero Fehlerbericht">
 <!ENTITY zotero.errorReport.unrelatedMessages "Unter Umständen sind Nachrichten enthalten, die nicht mit Zotero in Verbindung stehen.">
@@ -156,7 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Lade Tags...">
 <!ENTITY zotero.tagSelector.showAutomatic "Automatische Tags anzeigen">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Alle Tags dieser Bibliothek anzeigen">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Lösche automatische Tags in dieser Bibliothek...">
 <!ENTITY zotero.tagSelector.clearAll "Alle abwählen">
 <!ENTITY zotero.tagSelector.assignColor "Farbe zuweisen...">
 <!ENTITY zotero.tagSelector.renameTag "Tag umbenennen...">
@@ -225,20 +225,20 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Fußnoten">
 <!ENTITY zotero.integration.prefs.endnotes.label "Endnoten">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Literaturangaben speichern als:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Lesezeichen">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Lesezeichen können zwischen Microsoft Word und OpenOffice.org geteilt werden, aber dies ist fehleranfällig falls diese versehentlich verändert werden und können nicht als Fußnoten benutzt werden.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abgekürzte Zeitschriftentitel von MEDLINE verwenden">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Das Feld &quot;Zeitschriften-Abkürzung&quot; wird ignoriert.">
 
 <!ENTITY zotero.integration.showEditor.label "Editor anzeigen">
 <!ENTITY zotero.integration.classicView.label "Klassische Ansicht">
 
 <!ENTITY zotero.integration.references.label "Literaturangaben in Bibliographie">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "Synchronisation stoppen">
 <!ENTITY zotero.sync.error "Sync-Fehler">
 <!ENTITY zotero.sync.storage.progress "Fortschritt:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
@@ -270,10 +270,10 @@
 <!ENTITY zotero.feedSettings.title.label "Titel:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Feed aktualisieren alle">
 <!ENTITY zotero.feedSettings.refresh.label2 "Stunde(n)">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Lösche ungelesene Feed Einträge nach">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "Tag(en)">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Lösche gelesene Feed Einträge nach">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "Tag(en)">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Abruf der Metadaten...">

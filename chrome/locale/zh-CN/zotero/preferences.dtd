@@ -54,7 +54,7 @@
 <!ENTITY zotero.preferences.sync.password "密码:">
 <!ENTITY zotero.preferences.sync.syncServer "数据同步">
 <!ENTITY zotero.preferences.sync.setUpSync "设置同步">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
+<!ENTITY zotero.preferences.sync.unlinkAccount "取消账户关联">
 <!ENTITY zotero.preferences.sync.createAccount "创建账户">
 <!ENTITY zotero.preferences.sync.lostPassword "忘记密码?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自动同步">
@@ -84,9 +84,9 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "恢复到 Zotero 服务器">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "删除服务器所有数据并用本地数据覆盖.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重置文件同步历史">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "将所有附件与存储设备中的文件相比较">
 <!ENTITY zotero.preferences.sync.reset "重置">
-<!ENTITY zotero.preferences.sync.reset.button "Reset…">
+<!ENTITY zotero.preferences.sync.reset.button "重置……">
 
 
 <!ENTITY zotero.preferences.prefpane.search "搜索">
@@ -123,7 +123,7 @@
 <!ENTITY zotero.preferences.cite.styles "样式">
 <!ENTITY zotero.preferences.cite.wordProcessors "文字处理软件">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "当前尚未安装文字处理软件的插件.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "获取用于文字处理器的插件">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用添加引用的经典对话框">
 
@@ -131,7 +131,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "标题">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "最后更新">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "获取更多样式……">
 
 <!ENTITY zotero.preferences.keys.openZotero "开/关 Zotero 面板">
 <!ENTITY zotero.preferences.keys.saveToZotero "保存到Zotero (地址栏图标)">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "复制选定条目的引文到剪贴板">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "复制选定的条目到剪贴板">
 <!ENTITY zotero.preferences.keys.importFromClipboard "从剪贴板导入">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "所做更改会在重启后生效">
 
 <!ENTITY zotero.preferences.prefpane.proxies "代理">
 
@@ -179,7 +179,7 @@
 <!ENTITY zotero.preferences.locate.description "描述">
 <!ENTITY zotero.preferences.locate.name "名称">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "文章检索引擎可以扩展信息栏中“定位”下拉列表的功能. 启用下面列表中的检索引擎, 它们将添加到下拉列表中, 它们可以让您在 Web 中定位您的文献资源.">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
+<!ENTITY zotero.preferences.locate.addDescription "若要添加一个列表中不存在的搜索引擎，请先在浏览器中访问该搜索引擎，然后在 Zotero 的菜单中点击“添加”。">
 <!ENTITY zotero.preferences.locate.restoreDefaults "恢复默认">
 
 <!ENTITY zotero.preferences.charset "字符编码">
@@ -189,9 +189,9 @@
 <!ENTITY zotero.preferences.dataDir "数据存储位置">
 <!ENTITY zotero.preferences.dataDir.useProfile "使用配置目录">
 <!ENTITY zotero.preferences.dataDir.custom "自定义:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose…">
+<!ENTITY zotero.preferences.dataDir.choose "选择……">
 <!ENTITY zotero.preferences.dataDir.reveal "打开数据文件夹">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
+<!ENTITY zotero.preferences.dataDir.migrate "迁移到新的默认位置……">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "链接附件的根目录">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "在根目录中, Zotero 对链接附件使用相对路径, 因此只要文件结构相同, 您可以在不同的电脑上访问这些附件.">
@@ -201,9 +201,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "数据库维护">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "数据库完整性检查">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "重置翻译器和样式……">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重置翻译器……">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "重置样式……">
 
 <!ENTITY zotero.preferences.debugOutputLogging "调试输出记录">
 <!ENTITY zotero.preferences.debugOutputLogging.message "调试日志可以帮助 Zotero 开发人员诊断问题. 记录调试日志会拖慢 Zotero, 所以除非 Zotero 开发人员请求获取调试日志, 否则请禁用此项.">
