@@ -257,7 +257,9 @@
 			</toolbar>
 			
 			<popupset>
-				<menupopup id="zotero-collectionmenu" onpopupshowing="ZoteroPane_Local.buildCollectionContextMenu();">
+				<menupopup id="zotero-collectionmenu"
+						onpopupshowing="ZoteroPane_Local.buildCollectionContextMenu();"
+						oncommand="ZoteroPane.onCollectionContextMenuSelect(event)">
 					<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->
 					<menuitem class="zotero-menuitem-sync"/>
 					<menuseparator/>

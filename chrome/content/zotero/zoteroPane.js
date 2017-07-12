@@ -2345,127 +2345,127 @@ var ZoteroPane = new function()
 	}
 	
 	
+	// menuitem configuration
+	//
+	// This has to be kept in sync with zotero-collectionmenu in zoteroPane.xul. We could do this
+	// entirely in JS, but various localized strings are only in zotero.dtd, and they're used in
+	// standalone.xul as well, so for now they have to remain as XML entities.
+	var _collectionContextMenuOptions = [
+		{
+			id: "sync",
+			label: Zotero.getString('sync.sync'),
+			oncommand: () => {
+				Zotero.Sync.Runner.sync({
+					libraries: [libraryID],
+				});
+			}
+		},
+		{
+			id: "sep1",
+		},
+		{
+			id: "newCollection",
+			command: "cmd_zotero_newCollection"
+		},
+		{
+			id: "newSavedSearch",
+			command: "cmd_zotero_newSavedSearch"
+		},
+		{
+			id: "newSubcollection",
+			oncommand: () => {
+				this.newCollection(this.getSelectedCollection().key);
+			}
+		},
+		{
+			id: "refreshFeed",
+			oncommand: () => this.refreshFeed()
+		},
+		{
+			id: "sep2",
+		},
+		{
+			id: "showDuplicates",
+			oncommand: () => {
+				this.setVirtual(libraryID, 'duplicates', true);
+			}
+		},
+		{
+			id: "showUnfiled",
+			oncommand: () => {
+				this.setVirtual(libraryID, 'unfiled', true);
+			}
+		},
+		{
+			id: "editSelectedCollection",
+			oncommand: () => this.editSelectedCollection()
+		},
+		{
+			id: "markReadFeed",
+			oncommand: () => this.markFeedRead()
+		},
+		{
+			id: "editSelectedFeed",
+			oncommand: () => this.editSelectedFeed()
+		},
+		{
+			id: "deleteCollection",
+			oncommand: () => this.deleteSelectedCollection()
+		},
+		{
+			id: "deleteCollectionAndItems",
+			oncommand: () => this.deleteSelectedCollection(true)
+		},
+		{
+			id: "sep3",
+		},
+		{
+			id: "exportCollection",
+			oncommand: () => Zotero_File_Interface.exportCollection()
+		},
+		{
+			id: "createBibCollection",
+			oncommand: () => Zotero_File_Interface.bibliographyFromCollection()
+		},
+		{
+			id: "exportFile",
+			oncommand: () => Zotero_File_Interface.exportFile()
+		},
+		{
+			id: "loadReport",
+			oncommand: event => Zotero_Report_Interface.loadCollectionReport(event)
+		},
+		{
+			id: "emptyTrash",
+			oncommand: () => this.emptyTrash()
+		},
+		{
+			id: "removeLibrary",
+			label: Zotero.getString('pane.collections.menu.remove.library'),
+			oncommand: () => {
+				let library = Zotero.Libraries.get(libraryID);
+				let ps = Services.prompt;
+				let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+				let index = ps.confirmEx(
+					null,
+					Zotero.getString('pane.collections.removeLibrary'),
+					Zotero.getString('pane.collections.removeLibrary.text', library.name),
+					buttonFlags,
+					Zotero.getString('general.remove'),
+					null,
+					null, null, {}
+				);
+				if (index == 0) {
+					library.eraseTx();
+				}
+			}
+		},
+	];
+	
 	this.buildCollectionContextMenu = function (noRepeat) {
 		var libraryID = this.getSelectedLibraryID();
-		
-		// menuitem configuration
-		//
-		// This has to be kept in sync with zotero-collectionmenu in zoteroPane.xul. We could do this
-		// entirely in JS, but various localized strings are only in zotero.dtd, and they're used in
-		// standalone.xul as well, so for now they have to remain as XML entities.
-		var options = [
-			{
-				id: "sync",
-				label: Zotero.getString('sync.sync'),
-				onclick: () => {
-					Zotero.Sync.Runner.sync({
-						libraries: [libraryID],
-					});
-				}
-			},
-			{
-				id: "sep1",
-			},
-			{
-				id: "newCollection",
-				command: "cmd_zotero_newCollection"
-			},
-			{
-				id: "newSavedSearch",
-				command: "cmd_zotero_newSavedSearch"
-			},
-			{
-				id: "newSubcollection",
-				onclick: () => {
-					this.newCollection(this.getSelectedCollection().key);
-				}
-			},
-			{
-				id: "refreshFeed",
-				onclick: () => this.refreshFeed()
-			},
-			{
-				id: "sep2",
-			},
-			{
-				id: "showDuplicates",
-				onclick: () => {
-					this.setVirtual(libraryID, 'duplicates', true);
-				}
-			},
-			{
-				id: "showUnfiled",
-				onclick: () => {
-					this.setVirtual(libraryID, 'unfiled', true);
-				}
-			},
-			{
-				id: "editSelectedCollection",
-				onclick: () => this.editSelectedCollection()
-			},
-			{
-				id: "markReadFeed",
-				onclick: () => this.markFeedRead()
-			},
-			{
-				id: "editSelectedFeed",
-				onclick: () => this.editSelectedFeed()
-			},
-			{
-				id: "deleteCollection",
-				onclick: () => this.deleteSelectedCollection()
-			},
-			{
-				id: "deleteCollectionAndItems",
-				onclick: () => this.deleteSelectedCollection(true)
-			},
-			{
-				id: "sep3",
-			},
-			{
-				id: "exportCollection",
-				onclick: () => Zotero_File_Interface.exportCollection()
-			},
-			{
-				id: "createBibCollection",
-				onclick: () => Zotero_File_Interface.bibliographyFromCollection()
-			},
-			{
-				id: "exportFile",
-				onclick: () => Zotero_File_Interface.exportFile()
-			},
-			{
-				id: "loadReport",
-				onclick: event => Zotero_Report_Interface.loadCollectionReport(event)
-			},
-			{
-				id: "emptyTrash",
-				onclick: () => this.emptyTrash()
-			},
-			{
-				id: "removeLibrary",
-				label: Zotero.getString('pane.collections.menu.remove.library'),
-				onclick: () => {
-					let library = Zotero.Libraries.get(libraryID);
-					let ps = Services.prompt;
-					let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
-					let index = ps.confirmEx(
-						null,
-						Zotero.getString('pane.collections.removeLibrary'),
-						Zotero.getString('pane.collections.removeLibrary.text', library.name),
-						buttonFlags,
-						Zotero.getString('general.remove'),
-						null,
-						null, null, {}
-					);
-					if (index == 0) {
-						library.eraseTx();
-					}
-				}
-			},
-		];
-		
+		var options = _collectionContextMenuOptions;
 		
 		var collectionTreeRow = this.collectionsView.selectedTreeRow;
 		// This can happen if selection is changing during delayed second call below
@@ -2498,9 +2498,6 @@ var ZoteroPane = new function()
 			}
 			if (option.command) {
 				menuitem.setAttribute('command', option.command);
-			}
-			else if (option.onclick) {
-				menuitem.onclick = option.onclick;
 			}
 		}
 		
@@ -2659,7 +2656,15 @@ var ZoteroPane = new function()
 		for (let id of disable) {
 			m[id].setAttribute('disabled', true);
 		}
-	}
+	};
+	
+	this.onCollectionContextMenuSelect = function (event) {
+		event.stopPropagation();
+		var o = _collectionContextMenuOptions.find(o => o.id == event.target.id)
+		if (o.oncommand) {
+			o.oncommand();
+		}
+	};
 	
 	this.buildItemContextMenu = Zotero.Promise.coroutine(function* () {
 		var options = [
