@@ -2106,6 +2106,20 @@ Zotero.Prefs = new function(){
 	}
 	
 	
+	this.resetBranch = function (exclude = []) {
+		var keys = this.prefBranch.getChildList("", {});
+		for (let key of keys) {
+			if (this.prefBranch.prefHasUserValue(key)) {
+				if (exclude.includes(key)) {
+					continue;
+				}
+				Zotero.debug("Clearing " + key);
+				this.prefBranch.clearUserPref(key);
+			}
+		}
+	};
+	
+	
 	// Import settings bundles
 	this.importSettings = function (str, uri) {
 		var ps = Services.prompt;
