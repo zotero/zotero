@@ -546,7 +546,7 @@ ZoteroCommandLineHandler.prototype = {
 					if(win) {
 						win.focus();
 						Components.classes["@mozilla.org/network/protocol;1?name=zotero"]
-							.createInstance(Components.interfaces.nsIProtocolHandler).newChannel(uri);
+							.getService().newChannel(uri);
 					}
 				}
 				// See below
