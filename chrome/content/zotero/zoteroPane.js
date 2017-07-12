@@ -3262,7 +3262,7 @@ var ZoteroPane = new function()
 				if (uri.startsWith('zotero:')) {
 					let nsIURI = Services.io.newURI(uri, null, null);
 					let handler = Components.classes["@mozilla.org/network/protocol;1?name=zotero"]
-						.createInstance(Components.interfaces.nsIProtocolHandler);
+						.getService();
 					let extension = handler.wrappedJSObject.getExtension(nsIURI);
 					if (extension.noContent) {
 						extension.doAction(nsIURI);
