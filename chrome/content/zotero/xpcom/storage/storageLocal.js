@@ -380,28 +380,36 @@ Zotero.Sync.Storage.Local = {
 		catch (e) {
 			if (e instanceof OS.File.Error) {
 				let missing = e.becauseNoSuchFile
-					// This can happen if a path is too long on Windows,
-					// e.g. a file is being accessed on a VM through a share
-					// (and probably in other cases).
-					|| (e.winLastError && e.winLastError == 3)
-					// Handle long filenames on OS X/Linux
-					|| (e.unixErrno && e.unixErrno == 63);
+					// ERROR_PATH_NOT_FOUND: This can happen if a path is too long on Windows, e.g. a
+					// file is being accessed on a VM through a share (and probably in other cases)
+					|| e.winLastError == 3
+					// ERROR_INVALID_NAME: This can happen if there's a colon in the name from before
+					// we were filtering
+					|| e.winLastError == 123
+					// ERROR_BAD_PATHNAME
+					|| e.winLastError == 161;
 				if (!missing) {
 					Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
 						.getService(Components.interfaces.nsIOSFileConstantsService)
 						.init();
-					missing = (e.unixErrno !== undefined && e.unixErrno == OS.Constants.libc.ENOTDIR)
-						|| (e.winLastError !== undefined && e.winLastError == OS.Constants.libc.ENOTDIR);
+					missing = e.unixErrno == OS.Constants.libc.ENOTDIR
+						// Handle long filenames on OS X/Linux
+						|| e.unixErrno == OS.Constants.libc.ENAMETOOLONG;
 				}
 				if (missing) {
+					if (!e.becauseNoSuchFile) {
+						Zotero.debug(e, 1);
+					}
 					Zotero.debug("Marking attachment " + lk + " as missing");
 					return this.SYNC_STATE_TO_DOWNLOAD;
 				}
 				if (e.becauseClosed) {
 					Zotero.debug("File was closed", 2);
 				}
-				Zotero.debug(e);
-				throw new Error(`Error for operation '${e.operation}' for ${path}`);
+				Zotero.debug(e, 1);
+				Zotero.debug(e.unixErrno, 1);
+				Zotero.debug(e.winLastError, 1);
+				throw new Error(`Error for operation '${e.operation}' for ${path}: ${e}`);
 			}
 			throw e;
 		}
