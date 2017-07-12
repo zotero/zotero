@@ -146,14 +146,14 @@ Zotero.ItemTreeView.prototype.setTree = async function (treebox) {
 			
 			// Handle arrow keys specially on multiple selection, since
 			// otherwise the tree just applies it to the last-selected row
-			if (event.keyCode == 39 || event.keyCode == 37) {
+			if (event.keyCode == event.DOM_VK_RIGHT || event.keyCode == event.DOM_VK_LEFT) {
 				if (self._treebox.view.selection.count > 1) {
 					switch (event.keyCode) {
-						case 39:
+						case event.DOM_VK_RIGHT:
 							self.expandSelectedRows();
 							break;
 							
-						case 37:
+						case event.DOM_VK_LEFT:
 							self.collapseSelectedRows();
 							break;
 					}
