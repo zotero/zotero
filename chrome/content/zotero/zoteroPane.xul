@@ -285,7 +285,7 @@
 				</menupopup>
 				<menupopup id="zotero-itemmenu">
 					<!-- Keep order in sync with buildItemContextMenu -->
-					<menuitem class="menuitem-iconic zotero-menuitem-show-in-library" label="&zotero.items.menu.showInLibrary;" oncommand="ZoteroPane_Local.selectItem(this.parentNode.getAttribute('itemID'), true)"/>
+					<menuitem class="menuitem-iconic zotero-menuitem-show-in-library" label="&zotero.items.menu.showInLibrary;" oncommand="ZoteroPane.selectItem(parseInt(this.parentNode.getAttribute('itemID')), true)"/>
 					<menuseparator/>
 					<!-- with icon: <menuitem class="menuitem-iconic" id="zotero-menuitem-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemID'))"/>-->
 					<menuitem class="menuitem-iconic zotero-menuitem-attach-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemKey'))"/>
