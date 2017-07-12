@@ -19,7 +19,7 @@
 		<label id="name" value="Zotero"/>
 		<hbox>
 			<label id="version"/>
-			<label class="zotero-text-link" href="https://www.zotero.org/support/changelog" value="&zotero.whatsNew;"/>
+			<label id="changelog" class="zotero-text-link" href="https://www.zotero.org/support/changelog" value="&zotero.whatsNew;"/>
 		</hbox>
 		<script>
 			document.getElementById('version').textContent = Zotero.version;

@@ -35,6 +35,10 @@ dialog
 	cursor: text;
 }
 
+#changelog {
+	border: 0;
+}
+
 .subhead
 {
 	margin-top: 5px;
