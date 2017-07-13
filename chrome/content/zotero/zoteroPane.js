@@ -2666,6 +2666,18 @@ var ZoteroPane = new function()
 		}
 	};
 	
+	/**
+	 * Show context menu once it's ready
+	 */
+	this.onItemsContextMenuOpen = function (event) {
+		ZoteroPane.buildItemContextMenu()
+		.then(function () {
+			document.getElementById('zotero-itemmenu').openPopup(
+				null, null, event.clientX + 1, event.clientY + 1, true, false, event
+			);
+		})
+	};
+	
 	this.buildItemContextMenu = Zotero.Promise.coroutine(function* () {
 		var options = [
 			'showInLibrary',
@@ -3011,20 +3023,6 @@ var ZoteroPane = new function()
 			}
 		}
 		else if (tree.id == 'zotero-items-tree') {
-			// Show context menu once it's ready
-			if (event.button == 2) {
-				// Allow item to be selected first
-				setTimeout(function () {
-					ZoteroPane_Local.buildItemContextMenu()
-					.then(function () {
-						document.getElementById('zotero-itemmenu').openPopup(
-							null, null, event.clientX + 1, event.clientY + 1, true, false, event
-						);
-					})
-				});
-				return;
-			}
-			
 			let collectionTreeRow = ZoteroPane_Local.getCollectionTreeRow();
 			
 			// Automatically select all equivalent items when clicking on an item
