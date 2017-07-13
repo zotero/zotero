@@ -33,6 +33,11 @@ const ZoteroStandalone = new function() {
 	 * Run when standalone window first opens
 	 */
 	this.onLoad = function() {
+		// Fix window without menubar/titlebar when Zotero is closed in full-screen mode in OS X 10.11+
+		if (Zotero.isMac && window.document.documentElement.getAttribute('sizemode') == 'fullscreen') {
+			window.document.documentElement.setAttribute('sizemode', 'normal');
+		}
+		
 		Zotero.Promise.try(function () {
 			if(!Zotero) {
 				throw true;

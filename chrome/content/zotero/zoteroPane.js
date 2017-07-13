@@ -73,13 +73,6 @@ var ZoteroPane = new function()
 	this.init = function () {
 		Zotero.debug("Initializing Zotero pane");
 		
-		// Fix window without menubar/titlebar when Standalone is closed in full-screen mode
-		// in OS X 10.11
-		if (Zotero.isMac && Zotero.isStandalone
-				&& window.document.documentElement.getAttribute('sizemode') == 'fullscreen') {
-			window.document.documentElement.setAttribute('sizemode', 'normal');
-		}
-		
 		// For now, keep actions menu in the DOM and show it in Firefox for development
 		if (!Zotero.isStandalone) {
 			document.getElementById('zotero-tb-actions-menu-separator').hidden = false;
