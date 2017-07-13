@@ -470,7 +470,7 @@ Zotero.Utilities.Internal = {
 			if (deferred.promise.isPending()) {
 				Zotero.debug("Stopping save for " + document.location.href, 2);
 				//Zotero.debug(listener.getRequest());
-				deferred.reject("Snapshot save timeout");
+				deferred.reject("Snapshot save timeout on " + document.location.href);
 				wbp.cancelSave();
 			}
 		}, this.SNAPSHOT_SAVE_TIMEOUT);
