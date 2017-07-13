@@ -156,7 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "태그 불러오는 중...">
 <!ENTITY zotero.tagSelector.showAutomatic "자동 표시">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "이 라이브러리 내 모든 태그 표시">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "이 라이브러리의 자동 태그 삭제...">
 <!ENTITY zotero.tagSelector.clearAll "선택 모두 해제">
 <!ENTITY zotero.tagSelector.assignColor "색상 지정...">
 <!ENTITY zotero.tagSelector.renameTag "태그 이름 변경...">
@@ -238,7 +238,7 @@
 
 <!ENTITY zotero.integration.references.label "참고문헌 목록 내 참조">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "동기화 중지">
 <!ENTITY zotero.sync.error "동기화 오류">
 <!ENTITY zotero.sync.storage.progress "진행률:">
 <!ENTITY zotero.sync.storage.downloads "다운로드:">
