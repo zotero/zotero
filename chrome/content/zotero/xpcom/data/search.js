@@ -1203,6 +1203,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 								id: 0
 							};
 						}
+						if (objectType == 'search' && obj == this) {
+							Zotero.warn(`Search "${this.name}" references itself -- skipping condition`);
+							continue;
+						}
 						
 						if (objectType == 'collection') {
 							let ids = [obj.id];
