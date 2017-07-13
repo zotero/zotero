@@ -121,23 +121,25 @@
 			
 			<field name="_hasScope">false</field>
 			<field name="_scope">null</field>
-			<property name="scope" onget="return this._scope">
+			<property name="scope">
 				<setter>
 				<![CDATA[
 					if (val.length) {
 						this._hasScope = true;
-						this._scope = {};
+						this._scope = new Map();
 						for (let i=0; i<val.length; i++) {
 							let tag = val[i];
-							if (!this._scope[tag.tag]) {
-								this._scope[tag.tag] = [];
+							let types = this._scope.get(tag.tag);
+							if (!types) {
+								types = []
 							}
-							this._scope[tag.tag].push(tag.type || 0);
+							types.push(tag.type || 0);
+							this._scope.set(tag.tag, types);
 						}
 					}
 					else {
 						this._hasScope = false;
-						this._scope = {};
+						this._scope = new Map();
 					}
 					
 					this.refresh();
@@ -268,21 +270,21 @@
 						// Otherwise just update based on visibility
 						else {
 							// If only a few tags, regenerate buttons from scratch
-							if (this.filterToScope && Object.keys(this.scope).length <= 100) {
+							if (this.filterToScope && this._scope.size <= 100) {
 								// If full set is currently displayed, store it for later
 								if (!this._tagsDiv) {
 									this._tagsDiv = tagsBox.firstChild;
 								}
 								
 								let tags = [];
-								for (let name in this.scope) {
-									tags.push(...this.scope[name].map(type => {
+								this._scope.forEach(function (types, name) {
+									tags.push(...types.map(type => {
 										return {
 											tag: name,
-											type: type
+											type
 										};
 									}));
-								}
+								});
 								let { div, emptyRegular } = this.createTagsList(tags);
 								tagsBox.replaceChild(div, tagsBox.firstChild);
 								this._emptyRegular = emptyRegular;
@@ -944,7 +946,7 @@
 					
 					// Check tags against scope
 					if (this._hasScope) {
-						var inScope = !!this._scope[name];
+						var inScope = this._scope.has(name);
 					}
 					
 					// If not in search, hide
