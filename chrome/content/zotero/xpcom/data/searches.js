@@ -123,6 +123,11 @@ Zotero.Searches = function() {
 				// Parse "condition[/mode]"
 				let [conditionName, mode] = Zotero.SearchConditions.parseCondition(condition.condition);
 				
+				// Not sure how this can happen, but prevent an error if it does
+				if (condition.value === null) {
+					condition.value = '';
+				}
+				
 				let cond = Zotero.SearchConditions.get(conditionName);
 				if (!cond || cond.noLoad) {
 					Zotero.debug("Invalid saved search condition '" + conditionName + "' -- skipping", 2);
