@@ -2349,7 +2349,7 @@ var ZoteroPane = new function()
 			label: Zotero.getString('sync.sync'),
 			oncommand: () => {
 				Zotero.Sync.Runner.sync({
-					libraries: [libraryID],
+					libraries: [this.getSelectedLibraryID()],
 				});
 			}
 		},
@@ -2380,13 +2380,13 @@ var ZoteroPane = new function()
 		{
 			id: "showDuplicates",
 			oncommand: () => {
-				this.setVirtual(libraryID, 'duplicates', true);
+				this.setVirtual(this.getSelectedLibraryID(), 'duplicates', true);
 			}
 		},
 		{
 			id: "showUnfiled",
 			oncommand: () => {
-				this.setVirtual(libraryID, 'unfiled', true);
+				this.setVirtual(this.getSelectedLibraryID(), 'unfiled', true);
 			}
 		},
 		{
@@ -2436,7 +2436,7 @@ var ZoteroPane = new function()
 			id: "removeLibrary",
 			label: Zotero.getString('pane.collections.menu.remove.library'),
 			oncommand: () => {
-				let library = Zotero.Libraries.get(libraryID);
+				let library = Zotero.Libraries.get(this.getSelectedLibraryID());
 				let ps = Services.prompt;
 				let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
