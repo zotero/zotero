@@ -1538,8 +1538,8 @@ Zotero.Integration.Fields.prototype.updateSession = Zotero.Promise.coroutine(fun
 		try {
 			yield this._session.loadBibliographyData(this._bibliographyData);
 		} catch(e) {
-			var exception = new Zotero.Integration.CorruptBibliographyException(me, e);
-			exception.setContext(me);
+			var exception = new Zotero.Integration.CorruptBibliographyException(this, e);
+			exception.setContext(this);
 			throw exception;
 		}
 	}
