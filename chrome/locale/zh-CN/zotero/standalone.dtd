@@ -72,7 +72,7 @@
 <!ENTITY helpFeedbackPage.label "提交反馈…">
 <!ENTITY helpFeedbackPage.accesskey "S">
 
-<!ENTITY helpReportErrors.label "向 Zotero 报告错误…">
+<!ENTITY helpReportErrors.label "报告错误…">
 <!ENTITY helpReportErrors.accesskey "R">
 <!ENTITY helpCheckForUpdates.label "检查更新…">
 <!ENTITY helpCheckForUpdates.accesskey "U">

@@ -12,7 +12,7 @@
 <!ENTITY zotero.general.saveAs "另存为...">
 <!ENTITY zotero.general.advancedOptions.label "高级选项">
 <!ENTITY zotero.general.more "更多">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.loading "加载…">
 
 <!ENTITY zotero.errorReport.title "Zotero 错误报告">
 <!ENTITY zotero.errorReport.unrelatedMessages "这里可能包括和Zotero无关的消息。">
@@ -156,7 +156,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "加载标记…">
 <!ENTITY zotero.tagSelector.showAutomatic "自动显示">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "显示文献库里的所有标签">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "删除此文献库中的自动标签...">
 <!ENTITY zotero.tagSelector.clearAll "取消全部选择">
 <!ENTITY zotero.tagSelector.assignColor "指派颜色…">
 <!ENTITY zotero.tagSelector.renameTag "重命名标签...">
@@ -225,20 +225,20 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "脚注">
 <!ENTITY zotero.integration.prefs.endnotes.label "尾注">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "引文存储为:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "书签">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "书签可以在 Word 与 LibreOffice 之间共享，但如果不小心被修改，可能会导致错误，并且不能插入脚注。">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "使用 MEDLINE 期刊缩写">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "“期刊缩写”字段将被忽略。">
 
 <!ENTITY zotero.integration.showEditor.label "显示编辑器">
 <!ENTITY zotero.integration.classicView.label "经典视图">
 
 <!ENTITY zotero.integration.references.label "引文目录中的参考文献">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "停止同步">
 <!ENTITY zotero.sync.error "同步错误">
 <!ENTITY zotero.sync.storage.progress "进度:">
 <!ENTITY zotero.sync.storage.downloads "下载:">
@@ -270,10 +270,10 @@
 <!ENTITY zotero.feedSettings.title.label "标题:">
 <!ENTITY zotero.feedSettings.refresh.label1 "更新订阅 每">
 <!ENTITY zotero.feedSettings.refresh.label2 "小时">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "删除未读提要条目于之后">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "天">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "删除已读提要条目于之后">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "天">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "重新抓取元数据...">

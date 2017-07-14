@@ -44,7 +44,7 @@
 
 <!ENTITY toolsMenu.label "Eszközök">
 <!ENTITY toolsMenu.accesskey "E">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Böngészőmodul telepítése">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Kiegészítők">
 
