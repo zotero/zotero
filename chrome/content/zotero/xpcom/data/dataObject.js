@@ -633,10 +633,11 @@ Zotero.DataObject.prototype.reload = Zotero.Promise.coroutine(function* (dataTyp
 		for (let i=0; i<dataTypes.length; i++) {
 			let dataType = dataTypes[i];
 			if (!this._loaded[dataType] || this._skipDataTypeLoad[dataType]
-					|| (!reloadUnchanged && !this._changed[dataType])) {
+					|| (!reloadUnchanged && !this._changed[dataType] && !this._dataTypesToReload.has(dataType))) {
 				continue;
 			}
 			yield this.loadDataType(dataType, true);
+			this._dataTypesToReload.delete(dataType);
 		}
 	}
 });
@@ -701,6 +702,17 @@ Zotero.DataObject.prototype._markAllDataTypeLoadStates = function (loaded) {
  * @param {} oldValue
  */
 Zotero.DataObject.prototype._markFieldChange = function (field, oldValue) {
+	// New method (changedData)
+	if (field == 'tags') {
+		if (Array.isArray(oldValue)) {
+			this._changedData[field] = [...oldValue];
+		}
+		else {
+			this._changedData[field] = oldValue;
+		}
+		return;
+	}
+	
 	// Only save if object already exists and field not already changed
 	if (!this.id || this._previousData[field] !== undefined) {
 		return;
@@ -716,7 +728,10 @@ Zotero.DataObject.prototype._markFieldChange = function (field, oldValue) {
 
 
 Zotero.DataObject.prototype.hasChanged = function() {
-	var changed = Object.keys(this._changed).filter(dataType => this._changed[dataType]);
+	var changed = Object.keys(this._changed).filter(dataType => this._changed[dataType])
+		.concat(
+			Object.keys(this._changedData).filter(dataType => this._changedData[dataType])
+		);
 	if (changed.length == 1
 			&& changed[0] == 'primaryData'
 			&& Object.keys(this._changed.primaryData).length == 1
@@ -736,10 +751,13 @@ Zotero.DataObject.prototype._clearChanged = function (dataType) {
 	if (dataType) {
 		delete this._changed[dataType];
 		delete this._previousData[dataType];
+		delete this._changedData[dataType];
 	}
 	else {
 		this._changed = {};
 		this._previousData = {};
+		this._changedData = {};
+		this._dataTypesToReload = new Set();
 	}
 }
 
@@ -749,6 +767,17 @@ Zotero.DataObject.prototype._clearChanged = function (dataType) {
  */
 Zotero.DataObject.prototype._clearFieldChange = function (field) {
 	delete this._previousData[field];
+	delete this._changedData[field];
+}
+
+
+/**
+ * Mark a data type as requiring a reload when the current save finishes. The changed state is cleared
+ * before the new data is saved to the database (so that further updates during the save process don't
+ * get lost), so we need to separately keep track of what changed.
+ */
+Zotero.DataObject.prototype._markForReload = function (dataType) {
+	this._dataTypesToReload.add(dataType);
 }
 
 

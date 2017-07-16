@@ -241,7 +241,8 @@ describe("Zotero.DataObject", function() {
 				assert.isTrue(obj.hasChanged());
 			}
 		})
-	})
+	});
+	
 	
 	describe("#save()", function () {
 		it("should add new identifiers to cache", function* () {
@@ -263,6 +264,33 @@ describe("Zotero.DataObject", function() {
 				assert.isFalse(obj.hasChanged());
 			}
 		})
+		
+		it("should handle additional tag change in the middle of a save", function* () {
+			var item = yield createDataObject('item');
+			item.setTags(['a']);
+			
+			var deferred = new Zotero.Promise.defer();
+			var origFunc = Zotero.Notifier.queue.bind(Zotero.Notifier);
+			sinon.stub(Zotero.Notifier, "queue").callsFake(function (event, type, ids, extraData) {
+				// Add a new tag after the first one has been added to the DB and before the save is
+				// finished. The changed state should've cleared before saving to the DB the first
+				// time, so the second setTags() should mark the item as changed and allow the new tag
+				// to be saved in the second saveTx().
+				if (event == 'add' && type == 'item-tag') {
+					item.setTags(['a', 'b']);
+					Zotero.Notifier.queue.restore();
+					deferred.resolve(item.saveTx());
+				}
+				origFunc(...arguments);
+			});
+			
+			yield Zotero.Promise.all([item.saveTx(), deferred.promise]);
+			assert.sameMembers(item.getTags().map(o => o.tag), ['a', 'b']);
+			var tags = yield Zotero.DB.columnQueryAsync(
+				"SELECT name FROM tags JOIN itemTags USING (tagID) WHERE itemID=?", item.id
+			);
+			assert.sameMembers(tags, ['a', 'b']);
+		});
 		
 		describe("Edit Check", function () {
 			var group;
