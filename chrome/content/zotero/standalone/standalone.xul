@@ -45,7 +45,7 @@
 				xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 				windowtype="navigator:browser" 
 				title="&brandShortName;"
-				width="915" height="500"
+				width="1000" height="600"
 				persist="screenX screenY width height sizemode"> 
 	<script type="application/javascript" src="standalone.js"/>
 	<script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
