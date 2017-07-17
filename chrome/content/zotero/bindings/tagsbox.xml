@@ -858,6 +858,16 @@
 			</method>
 			
 			
+			<method name="removeAll">
+				<body><![CDATA[
+					if (Services.prompt.confirm(null, "", Zotero.getString('pane.item.tags.removeAll'))) {
+						this.item.setTags([]);
+						this.item.saveTx();
+					}
+				]]></body>
+			</method>
+			
+			
 			<method name="updateCount">
 				<parameter name="count"/>
 				<body>
@@ -984,6 +994,14 @@
 			</method>
 			
 			
+			<method name="_onBackgroundContextMenuShowing">
+				<body><![CDATA[
+					var removeAllTags = this.id('remove-all-item-tags');
+					removeAllTags.disabled = this.count == 0;
+				]]></body>
+			</method>
+			
+			
 			<!-- unused -->
 			<method name="getTagIndex">
 				<parameter name="id"/>
@@ -1051,7 +1069,15 @@
 			</method>
 		</implementation>
 		<content>
-			<xul:scrollbox xbl:inherits="flex" orient="vertical" style="overflow:auto" class="zotero-box">
+			<xul:scrollbox xbl:inherits="flex" orient="vertical" style="overflow:auto" class="zotero-box"
+					context="tags-context-menu">
+				<xul:popupset>
+					<xul:menupopup id="tags-context-menu"
+							onpopupshowing="document.getBindingParent(this)._onBackgroundContextMenuShowing()">
+						<xul:menuitem id="remove-all-item-tags" label="&zotero.item.tags.removeAll;"
+							oncommand="document.getBindingParent(this).removeAll()"/>
+					</xul:menupopup>
+				</xul:popupset>
 				<xul:hbox align="center">
 					<xul:label id="tagsNum"/>
 					<xul:button id="addButton" label="&zotero.item.add;"
