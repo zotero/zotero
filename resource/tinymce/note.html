@@ -19,55 +19,156 @@
 		
 		plugins: "autolink,code,contextmenu,directionality,link,lists,paste,searchreplace,textcolor",
 		
-		toolbar1: "bold italic underline strikethrough | subscript superscript | forecolor backcolor | blockquote link | removeformat",
-		toolbar2: "formatselect | alignleft aligncenter alignright | bullist numlist outdent indent |  %DIR% | searchreplace",
+		toolbar1: "bold italic underline strikethrough | subscript superscript | forecolor backcolor | removeformat | blockquote link",
+		toolbar2: "formatselect | alignleft aligncenter alignright | bullist numlist outdent indent | %DIR% | searchreplace",
 		toolbar_items_size: 'small',
 		menubar: false,
 		resize: false,
 		statusbar: false,
 		
-		contextmenu: "link | dir | code",
+		contextmenu: "link | alignmentmenu | dir | code",
 		
 		link_context_toolbar: true,
 		link_assume_external_targets: true,
 		
 		target_list: false,
 		
-		setup: function (ed) {
-			setLocale(ed);
+		setup: function (editor) {
+			setLocale(editor);
+			
+			// Add alignment submenu to context menu
+			editor.addMenuItem(
+				'alignmentmenu',
+				{
+					icon: 'alignleft',
+					text: 'Alignment',
+					menu: [
+						{
+							icon: 'alignleft',
+							text: 'Align Left',
+							onclick: function () {
+								tinyMCE.execCommand('JustifyLeft');
+							},
+							context: 'insert'
+						},
+						{
+							icon: 'aligncenter',
+							text: 'Align Center',
+							onclick: function () {
+								tinyMCE.execCommand('JustifyCenter');
+							},
+							context: 'insert'
+						},
+						{
+							icon: 'alignright',
+							text: 'Align Right',
+							onclick: function () {
+								tinyMCE.execCommand('JustifyRight');
+							},
+							context: 'insert'
+						},
+						{
+							icon: 'alignjustify',
+							text: 'Justify',
+							onclick: function () {
+								tinyMCE.execCommand('JustifyFull');
+							},
+							context: 'insert'
+						}
+					]
+				}
+			);
+			
+			// Add alignment split-button menu
+			//
+			// https://codepen.io/alangill/pen/oLJAOd
+			//
+			// Not currently used, but useful if we need more toolbar space
+			/*editor.addButton(
+				'alignmentsplit', {
+					type: 'splitbutton',
+					text: '',
+					icon: 'alignleft',
+					onclick: function(e) {
+						tinyMCE.execCommand(this.value);
+					},
+					menu: [
+						{
+							icon: 'alignleft',
+							text: 'Align Left',
+							onclick: function() {
+							tinyMCE.execCommand('JustifyLeft');
+								this.parent().parent().icon('alignleft');
+								this.parent().parent().value = 'JustifyLeft';
+							}
+						},
+						{
+							icon: 'aligncenter',
+							text: 'Align Center',
+							onclick: function() {
+								tinyMCE.execCommand('JustifyCenter');
+								this.parent().parent().icon('aligncenter');
+								this.parent().parent().value = 'JustifyCenter';
+							}
+						},
+						{
+							icon: 'alignright',
+							text: 'Align Right',
+							onclick: function() {
+								tinyMCE.execCommand('JustifyRight');
+								this.parent().parent().icon('alignright');
+								this.parent().parent().value = 'JustifyRight';
+							}
+						},
+						{
+							icon: 'alignjustify',
+							text: 'Justify',
+							onclick: function() {
+								tinyMCE.execCommand('JustifyFull');
+								this.parent().parent().icon('alignjustify');
+								this.parent().parent().value = 'JustifyFull';
+							}
+						}
+					],
+					onPostRender: function() {
+						// Select the first item by default
+						this.value ='JustifyLeft';
+					}
+				}
+			);*/
 			
 			// Set text direction
 			var dir = window.location.href.match(/dir=(ltr|rtl)/)[1];
 			var opDir = dir.split("").reverse().join("");
-			ed.settings.directionality = dir;
-			ed.addMenuItem('dir', {
+			editor.settings.directionality = dir;
+			editor.addMenuItem('dir', {
 				icon: opDir,
 				// TODO: Show correct label based on current line
 				text: opDir == 'rtl' ? "Right to left" : "Left to right",
 				onclick: function () {
-					ed.execCommand('mceDirection' + opDir.toUpperCase());
+					editor.execCommand('mceDirection' + opDir.toUpperCase());
 				},
 				context: 'insert',
 				prependToContext: true
 			});
 		},
 		
-		init_instance_callback: function (ed) {
-			zoteroInit(ed);
+		init_instance_callback: function (editor) {
+			zoteroInit(editor);
 			
 			['Change', 'KeyDown', 'KeyPress', 'Undo', 'Redo'].forEach(eventName =>
-				ed.on(eventName, event => zoteroHandleEvent(event))
+				editor.on(eventName, event => zoteroHandleEvent(event))
 			);
 			
 			["Cut", "Copy", "Paste"].forEach(function (command) {
 				let cmd = command;
-				ed.addCommand(command, function (ui, value) {
-					zoteroExecCommand(ed.getDoc(), cmd, ui, value);
+				editor.addCommand(command, function (ui, value) {
+					zoteroExecCommand(editor.getDoc(), cmd, ui, value);
 				});
 			});
 			
 			["ZoteroLinkClick"].forEach(function (command) {
-				ed.addCommand(command, function (ui, value) {
+				editor.addCommand(command, function (ui, value) {
 					zoteroHandleEvent({
 						type: command,
 						value
