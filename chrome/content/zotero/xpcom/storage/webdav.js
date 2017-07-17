@@ -898,6 +898,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 * @param {Integer} libraryID
 	 */
 	purgeDeletedStorageFiles: Zotero.Promise.coroutine(function* (libraryID) {
+		var d = new Date();
+		
 		Zotero.debug("Purging deleted storage files");
 		var files = yield Zotero.Sync.Storage.Local.getDeletedFiles(libraryID);
 		if (!files.length) {
@@ -930,7 +932,9 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			);
 		}
 		
+		Zotero.debug(`Purged deleted storage files in ${new Date() - d} ms`);
 		Zotero.debug(results);
+		
 		return results;
 	}),
 	
@@ -939,6 +943,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 * Delete orphaned storage files older than a week before last sync time
 	 */
 	purgeOrphanedStorageFiles: Zotero.Promise.coroutine(function* () {
+		var d = new Date();
 		const libraryID = Zotero.Libraries.userLibraryID;
 		const library = Zotero.Libraries.get(libraryID);
 		const daysBeforeSyncTime = 7;
@@ -947,9 +952,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		var lastPurge = Zotero.Prefs.get('lastWebDAVOrphanPurge');
 		if (lastPurge) {
 			try {
-				lastPurge = new Date(lastPurge * 1000);
-				let purgeAfter = lastPurge + (daysBeforeSyncTime * 24 * 60 * 60 * 1000);
-				if (new Date() > purgeAfter) {
+				let purgeAfter = lastPurge + (daysBeforeSyncTime * 24 * 60 * 60);
+				if (new Date() < new Date(purgeAfter * 1000)) {
 					return false;
 				}
 			}
@@ -1089,6 +1093,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		
 		var results = yield this._deleteStorageFiles(deleteFiles);
 		Zotero.Prefs.set("lastWebDAVOrphanPurge", Math.round(new Date().getTime() / 1000));
+		
+		Zotero.debug(`Purged orphaned storage files in ${new Date() - d} ms`);
 		Zotero.debug(results);
 		
 		return results;
