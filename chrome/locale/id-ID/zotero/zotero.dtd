@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "Copy as URL">
 <!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "Catatan Baru">
 <!ENTITY zotero.toolbar.note.standalone "Catatan Mandiri Baru">
 <!ENTITY zotero.toolbar.note.child "Tambahkan Catatan Anak">

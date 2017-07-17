@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "Copy as URL">
 <!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "หมายเหตุใหม่">
 <!ENTITY zotero.toolbar.note.standalone "หมายเหตุแบบสแตนด์อะโลนใหม่">
 <!ENTITY zotero.toolbar.note.child "เพิ่มหมายเหตุลูก">

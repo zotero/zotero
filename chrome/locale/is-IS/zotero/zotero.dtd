@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "Afrita sem URL-slóð">
 <!ENTITY zotero.item.deletePermanently "Eyða endanlega…">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "Ný athugasemd">
 <!ENTITY zotero.toolbar.note.standalone "Ný athugasemd í sjálfstæða forritinu">
 <!ENTITY zotero.toolbar.note.child "Bæta við undirathugasemd">

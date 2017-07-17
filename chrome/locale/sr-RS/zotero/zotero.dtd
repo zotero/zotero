@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "Копирај као адресу">
 <!ENTITY zotero.item.deletePermanently "Трајно изриши…">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "Нова белешка">
 <!ENTITY zotero.toolbar.note.standalone "Нова самостална белешка">
 <!ENTITY zotero.toolbar.note.child "Додај подбелешку">

@@ -72,7 +72,7 @@
 <!ENTITY helpFeedbackPage.label "Envoyer un commentaire ou un retour d'expérience…">
 <!ENTITY helpFeedbackPage.accesskey "E">
 
-<!ENTITY helpReportErrors.label "Signaler les erreurs à Zotero…">
-<!ENTITY helpReportErrors.accesskey "Z">
+<!ENTITY helpReportErrors.label "Rapport d'erreurs…">
+<!ENTITY helpReportErrors.accesskey "R">
 <!ENTITY helpCheckForUpdates.label "Vérifier les mises à jour…">
 <!ENTITY helpCheckForUpdates.accesskey "V">

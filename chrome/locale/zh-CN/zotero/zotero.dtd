@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "复制为 URL">
 <!ENTITY zotero.item.deletePermanently "永久删除…">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "新建笔记">
 <!ENTITY zotero.toolbar.note.standalone "新建独立笔记">
 <!ENTITY zotero.toolbar.note.child "添加子笔记">

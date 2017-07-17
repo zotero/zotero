@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "Kopijuoti URL">
 <!ENTITY zotero.item.deletePermanently "Pašalinti negrįžtamai...">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "Nauja pastaba">
 <!ENTITY zotero.toolbar.note.standalone "Nauja nesusieta pastaba">
 <!ENTITY zotero.toolbar.note.child "Nauja įrašo pastaba">

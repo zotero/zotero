@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "Copy as URL">
 <!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "Νέα σημείωση">
 <!ENTITY zotero.toolbar.note.standalone "Νέα αυτόνομη σημείωση">
 <!ENTITY zotero.toolbar.note.child "Προσθήκη θυγατρικής σημείωσης">

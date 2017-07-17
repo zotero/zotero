@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "Kopiér som URL">
 <!ENTITY zotero.item.deletePermanently "Slet permanent...">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "Ny note">
 <!ENTITY zotero.toolbar.note.standalone "Ny selvstændig note">
 <!ENTITY zotero.toolbar.note.child "Tilføj under-note">

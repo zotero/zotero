@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "نسخ كمسار انترنت">
 <!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "ملاحظة جديدة">
 <!ENTITY zotero.toolbar.note.standalone "ملاحظة جديدة مستقلة بذاتها">
 <!ENTITY zotero.toolbar.note.child "إضافة ملاحظة تابعة">

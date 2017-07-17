@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "Копіювати у вигляді URL">
 <!ENTITY zotero.item.deletePermanently "Видалити остаточно...">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "Нова примітка">
 <!ENTITY zotero.toolbar.note.standalone "Нова окрема примітка">
 <!ENTITY zotero.toolbar.note.child "Додати дочірню примітку">

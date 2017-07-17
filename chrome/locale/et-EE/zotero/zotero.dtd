@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "Kopeerida URL kujul">
 <!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "Uus märkus">
 <!ENTITY zotero.toolbar.note.standalone "Uus sõltumatu märkus">
 <!ENTITY zotero.toolbar.note.child "Lisada alammärkus">

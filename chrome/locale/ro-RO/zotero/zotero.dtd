@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "Copiază ca URL">
 <!ENTITY zotero.item.deletePermanently "Șterge permanent...">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "Notă nouă">
 <!ENTITY zotero.toolbar.note.standalone "Notă independentă nouă">
 <!ENTITY zotero.toolbar.note.child "Adaugă notă copil">

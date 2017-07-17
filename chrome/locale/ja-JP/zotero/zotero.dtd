@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "URLとしてコピーする">
 <!ENTITY zotero.item.deletePermanently "永久に削除する...">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "新しいメモ">
 <!ENTITY zotero.toolbar.note.standalone "新しく独立メモを作成">
 <!ENTITY zotero.toolbar.note.child "子メモを追加する">

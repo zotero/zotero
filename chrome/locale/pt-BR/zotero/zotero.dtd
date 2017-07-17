@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "Copiar como URL">
 <!ENTITY zotero.item.deletePermanently "Excluir permanentemente">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "Nova nota">
 <!ENTITY zotero.toolbar.note.standalone "Nova nota isolada">
 <!ENTITY zotero.toolbar.note.child "Adicionar nota filha">

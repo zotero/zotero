@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "Sao chép thành URL">
 <!ENTITY zotero.item.deletePermanently "Xóa hoàn toàn...">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "Ghi chú mới">
 <!ENTITY zotero.toolbar.note.standalone "Ghi chép Độc lập mới">
 <!ENTITY zotero.toolbar.note.child "Thêm một ghi chú con">

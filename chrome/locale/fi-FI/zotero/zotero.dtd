@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "Copy as URL">
 <!ENTITY zotero.item.deletePermanently "Poista lopullisesti">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "Uusi muistiinpano">
 <!ENTITY zotero.toolbar.note.standalone "Uusi itsenäinen muistiinpano">
 <!ENTITY zotero.toolbar.note.child "Uusi alamuistiinpano">

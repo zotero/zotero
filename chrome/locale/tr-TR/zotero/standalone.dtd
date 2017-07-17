@@ -72,7 +72,7 @@
 <!ENTITY helpFeedbackPage.label "Geri Bildirim Gönder...">
 <!ENTITY helpFeedbackPage.accesskey "S">
 
-<!ENTITY helpReportErrors.label "Hataları Zotero'ya Bildir">
+<!ENTITY helpReportErrors.label "Hataları Bildir...">
 <!ENTITY helpReportErrors.accesskey "R">
 <!ENTITY helpCheckForUpdates.label "Güncellemeleri Denetle">
 <!ENTITY helpCheckForUpdates.accesskey "U">

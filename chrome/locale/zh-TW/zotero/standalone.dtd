@@ -1,4 +1,4 @@
-<!ENTITY preferencesCmdMac.label "偏好設定…">
+<!ENTITY preferencesCmdMac.label "偏好設定...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "服務">
 <!ENTITY hideThisAppCmdMac.label "隱藏 &brandShortName;">
@@ -23,9 +23,9 @@
 <!ENTITY closeCmd.label "關閉 (C)">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.label "匯入…">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY importFromClipboardCmd.label "從剪貼簿匯入">
 <!ENTITY quitApplicationCmdWin.label "退出 (X)">
 <!ENTITY quitApplicationCmdWin.accesskey "X">
 <!ENTITY quitApplicationCmd.label "結束 (Q)">
@@ -33,7 +33,7 @@
 
 
 <!ENTITY copyCitationCmd.label "複製成引用文獻條">
-<!ENTITY copyBibliographyCmd.label "複製成參考文獻條">
+<!ENTITY copyBibliographyCmd.label "複製參考文獻表">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "切換頁面方向 (G)">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "G">
@@ -44,7 +44,7 @@
 
 <!ENTITY toolsMenu.label "工具 (T)">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "安裝瀏覽器資料庫連結器">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "附加元件">
 
@@ -72,7 +72,7 @@
 <!ENTITY helpFeedbackPage.label "回饋 (S)…">
 <!ENTITY helpFeedbackPage.accesskey "S">
 
-<!ENTITY helpReportErrors.label "向 Zotero 回報錯誤 (R)…">
+<!ENTITY helpReportErrors.label "回報錯誤…">
 <!ENTITY helpReportErrors.accesskey "R">
 <!ENTITY helpCheckForUpdates.label "檢查更新 (U)…">
 <!ENTITY helpCheckForUpdates.accesskey "U">

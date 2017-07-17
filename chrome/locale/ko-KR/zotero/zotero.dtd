@@ -143,6 +143,8 @@
 <!ENTITY zotero.item.copyAsURL "URL로 복사">
 <!ENTITY zotero.item.deletePermanently "완전히 삭제...">
 
+<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+
 <!ENTITY zotero.toolbar.newNote "새 노트">
 <!ENTITY zotero.toolbar.note.standalone "새로운 독립 노트">
 <!ENTITY zotero.toolbar.note.child "하위 노트 추가">
