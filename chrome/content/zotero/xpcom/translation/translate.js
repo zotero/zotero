@@ -1276,7 +1276,7 @@ Zotero.Translate.Base.prototype = {
 				if(!translators.length) {
 					me.complete(false, "Could not find an appropriate translator");
 				} else {
-					me.setTranslator(translators[0]);
+					me.setTranslator(translators);
 					deferred.resolve(Zotero.Translate.Base.prototype.translate.call(me, options));
 				}
 			});
