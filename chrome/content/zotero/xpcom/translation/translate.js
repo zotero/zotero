@@ -2568,18 +2568,12 @@ Zotero.Translate.Search.prototype.getTranslators = function() {
  * @param {Zotero.Translator|string} Translator object or ID
  */
 Zotero.Translate.Search.prototype.setTranslator = function(translator) {
-	if(typeof translator == "object" && !translator.translatorID) {
-		// we have an array of translators
-		
-		// accept a list of objects
-		this.translator = [];
-		for(var i=0, n=translator.length; i<n; i++) {
-			this.translator.push(translator[i]);
-		}
+	// Accept an array of translators
+	if (Array.isArray(translator)) {
+		this.translator = translator;
 		return true;
-	} else {
-		return Zotero.Translate.Base.prototype.setTranslator.apply(this, [translator]);
 	}
+	return Zotero.Translate.Base.prototype.setTranslator.apply(this, [translator]);
 }
 
 /**
