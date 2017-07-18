@@ -47,11 +47,11 @@
 				key="key_quitApplication"
 				command="cmd_quitApplication"/>
     </menupopup>
-    <menupopup id="menu_ToolsPopup">
+    <menupopup id="menu_EditPopup">
 		<menuseparator/>
         <menuitem id="menu_preferences"
-				label="&preferencesCmd2.label;"
-				accesskey="&preferencesCmd2.accesskey;"
+				label="&preferencesCmdUnix.label;"
+				accesskey="&preferencesCmdUnix.accesskey;"
 				oncommand="Zotero.Utilities.Internal.openPreferences();"/>
     </menupopup>
 </overlay>
