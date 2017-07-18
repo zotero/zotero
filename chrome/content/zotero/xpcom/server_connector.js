@@ -776,6 +776,31 @@ Zotero.Server.Connector.GetClientHostnames.prototype = {
 	})
 };
 
+/**
+ * Get a list of stored proxies
+ *
+ * Accepts:
+ *		Nothing
+ * Returns:
+ * 		{Array} hostnames
+ */
+Zotero.Server.Connector.Proxies = {};
+Zotero.Server.Connector.Proxies = function() {};
+Zotero.Server.Endpoints["/connector/proxies"] = Zotero.Server.Connector.Proxies;
+Zotero.Server.Connector.Proxies.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["application/json"],
+	permitBookmarklet: false,
+	
+	/**
+	 * Returns a 200 response to say the server is alive
+	 */
+	init: Zotero.Promise.coroutine(function* () {
+		let proxies = Zotero.Proxies.proxies.map((p) => Object.assign(p.toJSON(), {hosts: p.hosts}));
+		return [200, "application/json", JSON.stringify(proxies)];
+	})
+};
+
 
 /**
  * Test connection
