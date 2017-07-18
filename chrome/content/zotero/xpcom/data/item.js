@@ -3372,11 +3372,14 @@ Zotero.Item.prototype.getTagType = function (tagName) {
  *
  * A separate save() is required to update the database.
  *
- * @param {Array} tags  Tag data in API JSON format (e.g., [{tag: 'tag', type: 1}])
+ * @param {String[]|Object[]} tags - Array of strings or object in API JSON format
+ *                                   (e.g., [{tag: 'tag', type: 1}])
  */
 Zotero.Item.prototype.setTags = function (tags) {
 	var oldTags = this.getTags();
-	var newTags = tags.concat();
+	var newTags = tags.concat()
+		// Allow array of strings
+		.map(tag => typeof tag == 'string' ? { tag } : tag);
 	for (let i=0; i<oldTags.length; i++) {
 		oldTags[i] = Zotero.Tags.cleanData(oldTags[i]);
 	}
