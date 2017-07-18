@@ -389,6 +389,7 @@ Zotero.Item.prototype._parseRowData = function(row) {
 Zotero.Item.prototype._finalizeLoadFromRow = function(row) {
 	this._loaded.primaryData = true;
 	this._clearChanged('primaryData');
+	this._clearChanged('attachmentData');
 	this._identified = true;
 }
 
