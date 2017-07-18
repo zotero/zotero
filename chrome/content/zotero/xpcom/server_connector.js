@@ -348,16 +348,8 @@ Zotero.Server.Connector.SaveItem.prototype = {
 		// My Library if present and editable, and otherwise fail
 		var library = Zotero.Libraries.get(libraryID);
 		if (!library.editable || library.libraryType == 'publications') {
-			let userLibrary = Zotero.Libraries.userLibrary;
-			if (userLibrary && userLibrary.editable) {
-				yield zp.collectionsView.selectLibrary(userLibrary.id);
-				libraryID = userLibrary.id;
-				collection = null;
-			}
-			else {
-				Zotero.logError("Can't add item to read-only library " + library.name);
-				return 500;
-			}
+			Zotero.logError("Can't add item to read-only library " + library.name);
+			return [500, "application/json", JSON.stringify({libraryEditable: false})];
 		}
 		
 		var cookieSandbox = data.uri
@@ -729,8 +721,10 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 			libraryID: libraryID
 		};
 		
-		if(libraryID) {
-			response.libraryName = Zotero.Libraries.getName(libraryID);
+		if (libraryID) {
+			let library = Zotero.Libraries.get(libraryID);
+			response.libraryName = library.name;
+			response.libraryEditable = library.editable;
 		} else {
 			response.libraryName = Zotero.getString("pane.collections.library");
 		}
