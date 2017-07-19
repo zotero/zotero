@@ -91,7 +91,7 @@ Zotero.QuickCopy = new function() {
 	
 	
 	this.hasSiteSettings = function () {
-		return _siteSettings.length > 0;
+		return _siteSettings && _siteSettings.length > 0;
 	};
 	
 	
