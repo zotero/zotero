@@ -26,6 +26,8 @@
 "use strict";
 
 Zotero.QuickCopy = new function() {
+	this.lastActiveURL = null;
+	
 	var _initTimeoutID
 	var _initPromise;
 	var _initialized = false;
@@ -36,15 +38,13 @@ Zotero.QuickCopy = new function() {
 	this.init = Zotero.Promise.coroutine(function* () {
 		Zotero.debug("Initializing Quick Copy");
 		
-		yield this.loadSiteSettings();
-		
 		if (!_initialized) {
 			// Make sure export translator code is loaded whenever the output format changes
 			Zotero.Prefs.registerObserver("export.quickCopy.setting", _loadOutputFormat);
 			_initialized = true;
 		}
 		
-		// Load code for selected export translator ahead of time
+		// Load code for selected export translators ahead of time
 		// (in the background, because it requires translator initialization)
 		Zotero.Schema.schemaUpdatePromise
 		.then(function () {
@@ -54,8 +54,14 @@ Zotero.QuickCopy = new function() {
 			// if an export format is selected
 			if (Zotero.test) return;
 			
-			_initPromise = _loadOutputFormat();
-		});
+			_initPromise = Zotero.Promise.each(
+				[
+					() => _loadOutputFormat(),
+					() => this.loadSiteSettings()
+				],
+				f => f()
+			);
+		}.bind(this));
 	});
 	
 	
@@ -80,7 +86,13 @@ Zotero.QuickCopy = new function() {
 				format: row.format 
 			};
 		});
+		yield Zotero.Promise.map(rows, row => _preloadFormat(row.format));
 	});
+	
+	
+	this.hasSiteSettings = function () {
+		return _siteSettings.length > 0;
+	};
 	
 	
 	/*
@@ -174,26 +186,11 @@ Zotero.QuickCopy = new function() {
 		}
 		
 		var matches = [];
-		// Match last one or two sections of domain, not counting trailing period
-		var urlDomain = urlHostPort.match(/(?:[^.]+\.)?[^.]+(?=\.?$)/);
-		// Hopefully can't happen, but until we're sure
-		if (!urlDomain) {
-			Zotero.logError("Quick Copy host '" + urlHostPort + "' not matched");
-			return quickCopyPref;
-		}
 		for (let i=0; i<_siteSettings.length; i++) {
 			let row = _siteSettings[i];
-			
-			// Only concern ourselves with entries containing the current domain
-			// or paths that apply to all domains
-			if (!row.domainPath.indexOf(urlDomain[0]) != -1 && !row.domainPath.startsWith('/')) {
-				continue;
-			}
-			
 			let domain = row.domainPath.split('/',1)[0];
 			let path = row.domainPath.substr(domain.length) || '/';
-			let re = new RegExp('(^|[./])' + Zotero.Utilities.quotemeta(domain) + '$', 'i');
-			if (re.test(urlHostPort) && urlPath.indexOf(path) === 0) {
+			if (urlHostPort.endsWith(domain) && urlPath.startsWith(path)) {
 				matches.push({
 					format: JSON.stringify(this.unserializeSetting(row.format)),
 					domainLength: domain.length,
@@ -449,18 +446,25 @@ Zotero.QuickCopy = new function() {
 	/**
 	 * If an export translator is the selected output format, load its code (which must be done
 	 * asynchronously) ahead of time, since drag-and-drop requires synchronous operation
+	 *
+	 * @return {Promise}
 	 */
 	var _loadOutputFormat = Zotero.Promise.coroutine(function* () {
 		var format = Zotero.Prefs.get("export.quickCopy.setting");
+		return _preloadFormat(format);
+	});
+	
+	
+	var _preloadFormat = async function (format) {
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		if (format.mode == 'export') {
-			Zotero.debug("Preloading code for Quick Copy export format");
-			yield Zotero.Translators.init();
+			Zotero.debug(`Preloading ${format.id} for Quick Copy`);
+			await Zotero.Translators.init();
 			let translator = Zotero.Translators.get(format.id);
 			translator.cacheCode = true;
-			yield translator.getCode();
+			await translator.getCode();
 		}
-	});
+	};
 	
 	
 	var _loadFormattedNames = Zotero.Promise.coroutine(function* () {

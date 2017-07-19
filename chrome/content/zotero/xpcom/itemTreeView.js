@@ -2720,10 +2720,8 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 		}
 	}
 	
-	// Get Quick Copy format for current URL
-	var url = this._ownerDocument.defaultView.content && this._ownerDocument.defaultView.content.location ?
-				this._ownerDocument.defaultView.content.location.href : null;
-	var format = Zotero.QuickCopy.getFormatFromURL(url);
+	// Get Quick Copy format for current URL (set via /ping from connector)
+	var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
 	
 	Zotero.debug("Dragging with format " + format);
 	

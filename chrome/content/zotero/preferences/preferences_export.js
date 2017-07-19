@@ -66,9 +66,7 @@ Zotero_Preferences.Export = {
 		this._lastSelectedLocale = Zotero.Prefs.get("export.quickCopy.locale");
 		this.updateQuickCopyUI();
 		
-		if (!Zotero.isStandalone) {
-			yield this.refreshQuickCopySiteList();
-		}
+		yield this.refreshQuickCopySiteList();
 	}),
 	
 	

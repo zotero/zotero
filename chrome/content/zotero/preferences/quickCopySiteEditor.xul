@@ -45,30 +45,9 @@
 	<script src="preferences.js"/>
 	<script src="preferences_export.js"/>
 	
-	<script>
-	<![CDATA[
-		var Zotero_QuickCopySiteEditor = new function () {
-			this.onAccept = onAccept;
-			
-			function onAccept() {
-				var io = window.arguments[0];
-				io.domain = document.getElementById('zotero-quickCopy-domain').value;
-				io.format = document.getElementById('zotero-quickCopy-menu').value;
-				
-				io.locale = '';
-				if (!document.getElementById('zotero-quickCopy-locale-menu').disabled) {
-					io.locale = document.getElementById('zotero-quickCopy-locale-menu').value;
-				}
-				
-				io.ok = true;
-			}
-		}
-	]]>
-	</script>
-	
 	<vbox id="zotero-preferences-quickCopySiteEditor">
 		<label value="&zotero.preferences.quickCopy.siteEditor.domainPath; &zotero.preferences.quickCopy.siteEditor.domainPath.example;" control="zotero-quickCopy-domain"/>
-		<textbox id="zotero-quickCopy-domain"/>
+		<textbox id="zotero-quickCopy-domain" oninput="Zotero_QuickCopySiteEditor.onDomainInput(event)"/>
 		
 		<separator class="thin"/>
 		
@@ -95,6 +74,31 @@
 	
 	<script>
 	<![CDATA[
+		var Zotero_QuickCopySiteEditor = new function () {
+			var menu = document.getElementById('zotero-quickCopy-menu');
+			
+			this.onAccept = function () {
+				var io = window.arguments[0];
+				io.domain = document.getElementById('zotero-quickCopy-domain').value;
+				io.format = menu.value;
+				
+				io.locale = '';
+				if (!document.getElementById('zotero-quickCopy-locale-menu').disabled) {
+					io.locale = document.getElementById('zotero-quickCopy-locale-menu').value;
+				}
+				
+				io.ok = true;
+			}
+			
+			this.onDomainInput = function (event) {
+				if (event.target.value == 'wikipedia.org') {
+					Zotero.debug("SETTING TO WIKI");
+					menu.value = 'export=3f50aaac-7acc-4350-acd0-59cb77faf620';
+					Zotero_Preferences.Export.updateQuickCopyUI();
+				}
+			};
+		}
+		
 		var io = window.arguments[0];
 		var contentType = io.asHTML ? 'html' : '';
 		document.getElementById('zotero-quickCopy-domain').value = io.domain ? io.domain : '';

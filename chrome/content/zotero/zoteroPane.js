@@ -2146,8 +2146,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		var url = (window.content && window.content.location ? window.content.location.href : null);
-		var format = Zotero.QuickCopy.getFormatFromURL(url);
+		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		
 		// determine locale preference

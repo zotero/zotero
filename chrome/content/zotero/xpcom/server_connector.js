@@ -821,12 +821,27 @@ Zotero.Server.Connector.Ping.prototype = {
 	 * Sends 200 and HTML status on GET requests
 	 * @param data {Object} request information defined in connector.js
 	 */
-	init: function(data) {
-		if (data.method == 'GET') {
+	init: function (req) {
+		if (req.method == 'GET') {
 			return [200, "text/html", '<!DOCTYPE html><html><head>' +
 				'<title>Zotero Connector Server is Available</title></head>' +
 				'<body>Zotero Connector Server is Available</body></html>'];
 		} else {
+			// Store the active URL so it can be used for site-specific Quick Copy
+			if (req.data.activeURL) {
+				//Zotero.debug("Setting active URL to " + req.data.activeURL);
+				Zotero.QuickCopy.lastActiveURL = req.data.activeURL;
+			}
+			
+			if (Zotero.QuickCopy.hasSiteSettings()) {
+				let response = {
+					prefs: {
+						reportActiveURL: true
+					}
+				};
+				return [200, 'application/json', JSON.stringify(response)];
+			}
+			
 			return [200, 'text/plain', ''];
 		}
 	}
