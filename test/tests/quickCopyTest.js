@@ -2,7 +2,8 @@ describe("Zotero.QuickCopy", function() {
 	var quickCopyPref;
 	var prefName = "export.quickCopy.setting";
 	
-	before(function () {
+	before(function* () {
+		yield Zotero.QuickCopy.loadSiteSettings();
 		Zotero.Prefs.clear(prefName);
 		quickCopyPref = Zotero.Prefs.get(prefName);
 		quickCopyPref = JSON.stringify(Zotero.QuickCopy.unserializeSetting(quickCopyPref));
