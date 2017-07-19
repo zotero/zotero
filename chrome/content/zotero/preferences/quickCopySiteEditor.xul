@@ -51,7 +51,7 @@
 		
 		<separator class="thin"/>
 		
-		<label value="&zotero.preferences.quickCopy.siteEditor.outputFormat;" control="zotero-quickCopy-menu"/>
+		<label value="&zotero.preferences.quickCopy.siteEditor.format;" control="zotero-quickCopy-menu"/>
 		<menulist id="zotero-quickCopy-menu"/>
 		
 		<separator class="thin"/>

@@ -94,7 +94,7 @@ Zotero_Preferences.Export = {
 		menulist.appendChild(popup);
 		
 		var itemNode = document.createElement("menuitem");
-		itemNode.setAttribute("label", Zotero.getString('zotero.preferences.export.quickCopy.bibStyles'));
+		itemNode.setAttribute("label", Zotero.getString('zotero.preferences.export.quickCopy.citationStyles'));
 		itemNode.setAttribute("disabled", true);
 		popup.appendChild(itemNode);
 		

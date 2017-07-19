@@ -51,7 +51,7 @@
 			
 			<separator/>
 			
-			<label value="&zotero.preferences.quickCopy.defaultOutputFormat;" control="quickCopy-menu"/>
+			<label value="&zotero.preferences.quickCopy.defaultFormat;" control="quickCopy-menu"/>
 			<menulist id="zotero-quickCopy-menu" label="&zotero.general.loading;"/>
 			
 			<hbox align="center">
@@ -73,7 +73,7 @@
 					onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { Zotero_Preferences.Export.deleteSelectedQuickCopySite(); }">
 				<treecols>
 					<treecol id="quickCopy-urlColumn" label="&zotero.preferences.quickCopy.siteEditor.domainPath;" flex="1"/>
-					<treecol id="quickCopy-formatColumn" label="&zotero.preferences.quickCopy.siteEditor.outputFormat;" flex="2"/>
+					<treecol id="quickCopy-formatColumn" label="&zotero.preferences.quickCopy.siteEditor.format;" flex="2"/>
 					<treecol id="quickCopy-localeColumn" label="&zotero.preferences.quickCopy.siteEditor.locale;"/>
 					<treecol id="quickCopy-copyAsHTML" label="HTML"/>
 				</treecols>
