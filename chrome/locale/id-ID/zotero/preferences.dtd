@@ -109,13 +109,12 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Ketika opsi ini dimatikan, Zotero hanya akan memasukkan URL pada saat mengutip artikel  jurnal, majalah, dan koran yang tidak memiliki rentang halaman spesifik.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Salin Cepat">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Format Ouput Default:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Salin sebagai HTML">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Catatan: Pemformatan rich-text akan hilang pada Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Pengaturan Spesifik-Situs">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Rute">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(misalnya, wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Format Ouput">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Matikan fitur Salin Cepat saat menarik lebih dari">
 

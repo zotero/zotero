@@ -109,13 +109,12 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Quando essa opção está desabilitada, o Zotero inclui URLs ao citar artigos de periódicos, revistas e jornais apenas quando o artigo não tem a paginação especificada.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Cópia rápida">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Formato de saída padrão:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copiar como HTML">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Nota: a formatação Rich-text será perdida no Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Configurações específicas do site:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domínio/Caminho">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(ex. wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Formato de saída">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Idioma">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Desabilitar cópia rápida ao arrastar mais do que">
 

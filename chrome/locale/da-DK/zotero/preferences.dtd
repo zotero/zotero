@@ -109,13 +109,12 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Når denne mulighed er valgt fra, medtager Zotero kun URL'er for artikler i tidsskrifter, blade og aviser hvis der ikke er anført sidetal (første og sidste side).">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Hurtig kopi">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Standardformat for output:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopier som HTML">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Bemærk:RTF- formattering vil gå tabt på Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "site-specikke indstillinger">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domæne/Sti">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(dvs. wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output-format">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Sprog">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Slå Quick Copy fra hvis du trækker mere end">
 

@@ -109,13 +109,12 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "停用此選項，則引用期刊、雜誌、報紙文章時，只在沒有指定文章的頁數範圍時，Zotero 才包含 URL。">
 
 <!ENTITY zotero.preferences.quickCopy.caption "快速複製">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "預設輸出格式：">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "複製成 HTML">
-<!ENTITY zotero.preferences.quickCopy.macWarning "注意！在 Mac OS X 會損失 Rich-text 格式。">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "針對特定網站的設定：">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "網域/路徑">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(例如 wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "輸出格式">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "語言">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "拖放超過多少項目時，停用快速複製：">
 

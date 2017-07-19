@@ -109,13 +109,12 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Когда эта опция отключена, при цитировании журнальных и газетных статей Zotero добавляет URL только при отсутвии у статьи диапазона страниц.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Быстрое копирование">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Выходящий формат по умолчанию:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Копировать в виде HTML">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Примечание: форматирование RTF будет утрачено в Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Установки для сайта:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Домен/путь">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(например wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Выходной формат">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Язык">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Выключить быстрое копирование при перетаскивании более">
 

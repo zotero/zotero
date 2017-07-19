@@ -109,13 +109,12 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Jei parinktis nepasirinkta, Zotero URL adresus įtrauks tik jei cituojamas žurnalo, laikraščio ar periodinio leidinio straipsnyje nenurodyti puslapiai.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Greitas kopijavimas">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Numatytasis išvedimo formatas:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopijuoti HTML formatu">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Pastaba: raiškiojo teksto formatavimas nebus išlaikomas Mac OS X sistemoje.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Parinktys atskiroms svetainėms:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Sritis/kelias">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(pvz., vikipedija.lt)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Išvedimo formatas">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Kalba">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Neleisti greitai kopijuoti, jei tempiama daugiau kaip">
 

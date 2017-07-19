@@ -72,7 +72,7 @@
 <!ENTITY helpFeedbackPage.label "Trimite feedback...">
 <!ENTITY helpFeedbackPage.accesskey "S">
 
-<!ENTITY helpReportErrors.label "Raportează erorile la Zotero...">
+<!ENTITY helpReportErrors.label "Raportează erori…">
 <!ENTITY helpReportErrors.accesskey "R">
 <!ENTITY helpCheckForUpdates.label "Caută actualizări...">
 <!ENTITY helpCheckForUpdates.accesskey "U">
