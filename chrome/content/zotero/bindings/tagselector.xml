@@ -1166,8 +1166,8 @@
 				<vbox id="tag-controls">
 					<hbox>
 						<textbox id="tags-search" flex="1" type="search" timeout="250" dir="reverse"
-							onkeypress="document.getBindingParent(this).onKeyPress(event)"
-							oncommand="document.getBindingParent(this).onCommand(event)"
+							oncommand="document.getBindingParent(this).handleKeyPress(); event.stopPropagation()"
+							onkeypress="if (event.keyCode == event.DOM_VK_ESCAPE) { document.getBindingParent(this).handleKeyPress(true); }"
 							tabindex="-1"/>
 						<toolbarbutton id="view-settings-menu" tooltiptext="&zotero.toolbar.actions.label;"
 								image="chrome://zotero/skin/tag-selector-menu.png" type="menu">
