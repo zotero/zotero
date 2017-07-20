@@ -914,6 +914,9 @@
 					if (tagObj.type) {
 						elem.setAttribute('tagType', tagObj.type);
 					}
+					// Take the tags out of the tab order so that tabbing moves from the collections
+					// pane to the items pane
+					elem.setAttribute('tabindex', "-1");
 					return elem;
 				]]></body>
 			</method>
@@ -1157,14 +1160,15 @@
 						<label value="&zotero.tagSelector.noTagsToDisplay;"/>
 					</box>
 					
-					<html:div id="tags-box"/>
+					<html:div id="tags-box" tabindex="-1"/>
 				</deck>
 				
 				<vbox id="tag-controls">
 					<hbox>
 						<textbox id="tags-search" flex="1" type="search" timeout="250" dir="reverse"
-							oncommand="document.getBindingParent(this).handleKeyPress(); event.stopPropagation()"
-							onkeypress="if (event.keyCode == event.DOM_VK_ESCAPE) { document.getBindingParent(this).handleKeyPress(true); }"/>
+							onkeypress="document.getBindingParent(this).onKeyPress(event)"
+							oncommand="document.getBindingParent(this).onCommand(event)"
+							tabindex="-1"/>
 						<toolbarbutton id="view-settings-menu" tooltiptext="&zotero.toolbar.actions.label;"
 								image="chrome://zotero/skin/tag-selector-menu.png" type="menu">
 							<menupopup id="view-settings-popup"
