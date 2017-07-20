@@ -1,7 +1,7 @@
 "use strict";
 
 describe("Tag Selector", function () {
-	var win, doc, collectionsView;
+	var win, doc, collectionsView, tagSelector;
 	
 	var clearTagColors = Zotero.Promise.coroutine(function* (libraryID) {
 		var tagColors = Zotero.Tags.getColors(libraryID);
@@ -11,7 +11,6 @@ describe("Tag Selector", function () {
 	});
 	
 	function getColoredTags() {
-		var tagSelector = doc.getElementById('zotero-tag-selector');
 		var tagsBox = tagSelector.id('tags-box');
 		var elems = tagsBox.getElementsByTagName('button');
 		var names = [];
@@ -24,7 +23,6 @@ describe("Tag Selector", function () {
 	}
 	
 	function getRegularTags() {
-		var tagSelector = doc.getElementById('zotero-tag-selector');
 		var tagsBox = tagSelector.id('tags-box');
 		var elems = tagsBox.getElementsByTagName('button');
 		var names = [];
@@ -41,20 +39,45 @@ describe("Tag Selector", function () {
 		win = yield loadZoteroPane();
 		doc = win.document;
 		collectionsView = win.ZoteroPane.collectionsView;
+		tagSelector = doc.getElementById('zotero-tag-selector');
 		
 		// Wait for things to settle
 		yield Zotero.Promise.delay(100);
 	});
+	
 	beforeEach(function* () {
 		var libraryID = Zotero.Libraries.userLibraryID;
 		yield clearTagColors(libraryID);
-		var tagSelector = doc.getElementById('zotero-tag-selector');
 		// Default "Display All Tags in This Library" off
 		tagSelector.filterToScope = true;
+		tagSelector.setSearch('');
 		yield tagSelector.refresh(true);
 	})
+	
 	after(function () {
 		win.close();
+	});
+	
+	describe("#setSearch()", function () {
+		it("should filter to tags matching the search", function* () {
+			var collection = yield createDataObject('collection');
+			var item = createUnsavedDataObject('item', { collections: [collection.id] });
+			item.setTags(['a', 'b', 'c']);
+			var promise = waitForTagSelector(win);
+			yield item.saveTx();
+			yield promise;
+			
+			var tagsSearch = doc.getElementById('tags-search');
+			tagsSearch.value = 'a';
+			tagsSearch.doCommand();
+			
+			var tags = getRegularTags();
+			assert.sameMembers(tags, ['a']);
+			
+			tagsSearch.value = '';
+			tagsSearch.doCommand();
+			yield item.eraseTx();
+		});
 	});
 	
 	describe("#refresh()", function () {
@@ -89,7 +112,6 @@ describe("Tag Selector", function () {
 			});
 			yield promise;
 			
-			var tagSelector = doc.getElementById('zotero-tag-selector');
 			var buttons = tagSelector.id('tags-box').getElementsByTagName('button');
 			var spy = sinon.spy(win.ZoteroPane, "updateTagFilter");
 			buttons[0].click();
@@ -106,7 +128,6 @@ describe("Tag Selector", function () {
 	
 	describe("#filterToScope", function () {
 		it("should show all tags in library when false", function* () {
-			var tagSelector = doc.getElementById('zotero-tag-selector');
 			tagSelector.filterToScope = false;
 			
 			var collection = yield createDataObject('collection');
@@ -229,14 +250,12 @@ describe("Tag Selector", function () {
 			yield promise;
 			
 			// Tag selector should show the new item's tag
-			tagSelector = doc.getElementById('zotero-tag-selector');
 			assert.equal(getRegularTags().length, 1);
 		})
 		
 		it("should show a colored tag at the top of the list even when linked to no items", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
-			var tagSelector = doc.getElementById('zotero-tag-selector');
 			var tagElems = tagSelector.id('tags-box').getElementsByTagName('button');
 			var count = tagElems.length;
 			
@@ -270,7 +289,6 @@ describe("Tag Selector", function () {
 			yield item.saveTx();
 			yield promise;
 			
-			var tagSelector = doc.getElementById('zotero-tag-selector');
 			var tagElems = tagSelector.id('tags-box').getElementsByTagName('button');
 			
 			// Make sure the colored tags are still in the right position
@@ -362,7 +380,6 @@ describe("Tag Selector", function () {
 			// Remove tag from library
 			promise = waitForTagSelector(win);
 			var dialogPromise = waitForDialog();
-			var tagSelector = doc.getElementById('zotero-tag-selector');
 			yield tagSelector.deleteTag("A");
 			yield promise;
 			
@@ -387,7 +404,6 @@ describe("Tag Selector", function () {
 			yield item.saveTx();
 			yield promise;
 			
-			var tagSelector = doc.getElementById('zotero-tag-selector');
 			promise = waitForTagSelector(win);
 			var promptPromise = waitForWindow("chrome://global/content/commonDialog.xul", function (dialog) {
 				dialog.document.getElementById('loginTextbox').value = newTag;
@@ -411,7 +427,6 @@ describe("Tag Selector", function () {
 			yield Zotero.Tags.setColor(libraryID, oldTag, "#F3F3F3");
 			yield promise;
 			
-			var tagSelector = doc.getElementById('zotero-tag-selector');
 			promise = waitForTagSelector(win);
 			var promptPromise = waitForWindow("chrome://global/content/commonDialog.xul", function (dialog) {
 				dialog.document.getElementById('loginTextbox').value = newTag;
@@ -443,7 +458,6 @@ describe("Tag Selector", function () {
 			yield item.saveTx();
 			yield promise;
 			
-			var tagSelector = doc.getElementById('zotero-tag-selector');
 			
 			assert.include(getRegularTags(), "a");
 			
