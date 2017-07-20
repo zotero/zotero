@@ -104,17 +104,17 @@
 
 <!ENTITY zotero.preferences.prefpane.export "匯出">
 
-<!ENTITY zotero.preferences.citationOptions.caption "引用文獻條之選項">
+<!ENTITY zotero.preferences.citationOptions.caption "引用文獻選項">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "包括參考文獻中論文文章的 URL">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "停用此選項，則引用期刊、雜誌、報紙文章時，只在沒有指定文章的頁數範圍時，Zotero 才包含 URL。">
 
 <!ENTITY zotero.preferences.quickCopy.caption "快速複製">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "預設格式:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "複製成 HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "針對特定網站的設定：">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "網域/路徑">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(例如 wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "格式">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "語言">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "拖放超過多少項目時，停用快速複製：">
 
@@ -124,7 +124,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "目前未安裝文書處理器外掛。">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "取得文書處理器外掛...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用傳統新增引用文獻條對話框">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用傳統新增引用文獻對話框">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "樣式管理器">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "標題">
@@ -141,7 +141,7 @@
 <!ENTITY zotero.preferences.keys.newNote "新增筆記">
 <!ENTITY zotero.preferences.keys.toggleAllRead "標示所有 Feed 的項目為已讀或未讀">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "切換標籤選擇器">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "複製所選項目的引用部分到剪貼簿">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "複製選擇項目的引用文獻到剪貼簿">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "複製所選項目到剪貼簿">
 <!ENTITY zotero.preferences.keys.importFromClipboard "從剪貼簿匯入">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "重新啟動後改變才會生效">

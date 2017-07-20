@@ -179,7 +179,7 @@
 <!ENTITY zotero.selectitems.select.label "確定">
 
 <!ENTITY zotero.bibliography.title "建立引用/參考文獻表">
-<!ENTITY zotero.bibliography.style.label "引用文獻條之樣式：">
+<!ENTITY zotero.bibliography.style.label "引用文獻樣式:">
 <!ENTITY zotero.bibliography.manageStyles "管理樣式...">
 <!ENTITY zotero.bibliography.locale.label "語言：">
 <!ENTITY zotero.bibliography.outputMode "＊輸出模式:">
@@ -191,9 +191,9 @@
 <!ENTITY zotero.bibliography.print.label "列印">
 
 <!ENTITY zotero.integration.docPrefs.title "文件的偏好設定">
-<!ENTITY zotero.integration.addEditCitation.title "新增/編輯引用文獻條">
+<!ENTITY zotero.integration.addEditCitation.title "新增/編輯引用文獻">
 <!ENTITY zotero.integration.editBibliography.title "編輯參考文獻表">
-<!ENTITY zotero.integration.quickFormatDialog.title "~快速格式化引用文獻">
+<!ENTITY zotero.integration.quickFormatDialog.title "快速格式化引用文獻">
 
 <!ENTITY zotero.progress.title "進度">
 
@@ -209,7 +209,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "不顯示作者">
 <!ENTITY zotero.citation.prefix.label "前綴：">
 <!ENTITY zotero.citation.suffix.label "後綴：">
-<!ENTITY zotero.citation.editorWarning.label "警告：若是在編輯器中編輯引用文獻條，Zotero 就不會更新以反應文獻庫或引用文獻條樣式中的變更。">
+<!ENTITY zotero.citation.editorWarning.label "警告：若是在編輯器中編輯引用文獻，Zotero 就不會更新以反應文獻庫或引用文獻樣式中的變更。">
 
 <!ENTITY zotero.richText.italic.label "斜體">
 <!ENTITY zotero.richText.bold.label "粗體">
@@ -223,11 +223,11 @@
 <!ENTITY zotero.annotate.toolbar.highlight.label "高亮標示文字">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "去除文字的高亮標示">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "將引用文獻條顯示成：">
+<!ENTITY zotero.integration.prefs.displayAs.label "將引用文獻顯示成：">
 <!ENTITY zotero.integration.prefs.footnotes.label "頁末註">
 <!ENTITY zotero.integration.prefs.endnotes.label "文末註">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "將引用文獻條儲存成：">
+<!ENTITY zotero.integration.prefs.formatUsing.label "將引用文獻儲存成：">
 <!ENTITY zotero.integration.prefs.bookmarks.label "書籤">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
@@ -285,20 +285,20 @@
 
 <!ENTITY zotero.rtfScan.title "RTF 掃描">
 <!ENTITY zotero.rtfScan.cancel.label "取消">
-<!ENTITY zotero.rtfScan.citation.label "引用文獻條">
+<!ENTITY zotero.rtfScan.citation.label "引用文獻">
 <!ENTITY zotero.rtfScan.itemName.label "項目名稱">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "無對映的引用文獻條">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "不明的引用文獻條">
-<!ENTITY zotero.rtfScan.mappedCitations.label "有對映的引用文獻條">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "無對映的引用文獻">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "不明的引用文獻">
+<!ENTITY zotero.rtfScan.mappedCitations.label "有對映的引用文獻">
 <!ENTITY zotero.rtfScan.introPage.label "說明">
-<!ENTITY zotero.rtfScan.introPage.description "otero 能自動取出及重格式化引用文獻條，並將參考書目插到 RTF 檔中。RTF 檔掃描功能目前支援以下引用文獻條格式的一些變化：">
+<!ENTITY zotero.rtfScan.introPage.description "otero 能自動取出及重格式化引用文獻，並將參考書目插入 RTF 檔中。RTF 檔掃描功能目前支援以下引用文獻格式的一些變化：">
 <!ENTITY zotero.rtfScan.introPage.description2 "要開始的話，在下方選一個 RTF 輸入檔及一個輸出檔：">
-<!ENTITY zotero.rtfScan.scanPage.label "掃描引用文獻條">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero 在掃描文件中的引用文獻條。請耐心等候。">
+<!ENTITY zotero.rtfScan.scanPage.label "掃描引用文獻">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero 在掃描文件中的引用文獻。請耐心等候。">
 <!ENTITY zotero.rtfScan.citationsPage.label "查證引用的項目">
-<!ENTITY zotero.rtfScan.citationsPage.description "請檢閱下列辨識出的引用文獻條來確定 Zotero 正確的選出了相關的項目。在進到下一步前所有無對映或是不明的引用文獻條都須被解決。">
+<!ENTITY zotero.rtfScan.citationsPage.description "請檢閱下列辨識出的引用文獻來確定 Zotero 正確的選出了相關的項目。在進到下一步前所有無對映或是不明的引用文獻都須被解決。">
 <!ENTITY zotero.rtfScan.stylePage.label "文件格式化">
-<!ENTITY zotero.rtfScan.formatPage.label "格式化引用文獻條">
+<!ENTITY zotero.rtfScan.formatPage.label "格式化引用文獻">
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero 正在處理並格式化 RTF 檔。請耐心等候。">
 <!ENTITY zotero.rtfScan.completePage.label "RTF 掃描完畢">
 <!ENTITY zotero.rtfScan.completePage.description "文件已掃描及處理完畢。請確認其格式正確。">

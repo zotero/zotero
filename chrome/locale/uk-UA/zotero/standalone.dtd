@@ -72,7 +72,7 @@
 <!ENTITY helpFeedbackPage.label "Надіслати відгук...">
 <!ENTITY helpFeedbackPage.accesskey "S">
 
-<!ENTITY helpReportErrors.label "Поскаржитися на помилки в Zotero...">
+<!ENTITY helpReportErrors.label "Повідомити про помилки...">
 <!ENTITY helpReportErrors.accesskey "R">
 <!ENTITY helpCheckForUpdates.label "Перевірити оновлення...">
 <!ENTITY helpCheckForUpdates.accesskey "U">
