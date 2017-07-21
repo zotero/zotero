@@ -23,7 +23,12 @@
     
     ***** END LICENSE BLOCK *****
 -->
-<!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
+<!DOCTYPE window [
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd">
+	%zoteroDTD;
+	<!ENTITY % preferencesDTD SYSTEM "chrome://zotero/locale/preferences.dtd">
+	%preferencesDTD;
+]>
 
 <overlay id="zotero-prefpane-cite-overlay"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -75,6 +80,19 @@
 						<label id="export-citePaperJournalArticleURL" width="45em">
 							&zotero.preferences.export.citePaperJournalArticleURL.description;
 						</label>
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.general.tools;"/>
+						
+						<hbox>
+							<button id="openCSLEdit"
+								label="&zotero.preferences.styleEditor;"
+								oncommand="Zotero_Preferences.openInViewer('chrome://zotero/content/tools/csledit.xul', true)"/>
+							<button id="openCSLPreview"
+								label="&zotero.preferences.stylePreview;"
+								oncommand="Zotero_Preferences.openInViewer('chrome://zotero/content/tools/cslpreview.xul', true)"/>
+						</hbox>
 					</groupbox>
 				</tabpanel>
 				<tabpanel orient="vertical" id="wordProcessors">

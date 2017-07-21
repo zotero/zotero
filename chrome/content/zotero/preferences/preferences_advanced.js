@@ -33,6 +33,11 @@ Zotero_Preferences.Advanced = {
 		Zotero_Preferences.Debug_Output.init();
 		Zotero_Preferences.Keys.init();
 		
+		// Show Memory Info button if the Error Console menu option is enabled
+		if (Zotero.Prefs.get('devtools.errorconsole.enabled', true)) {
+			document.getElementById('memory-info').hidden = false;
+		}
+		
 		this.onDataDirLoad();
 		this.refreshLocale();
 	},
