@@ -628,6 +628,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		}
 		
 		var headers = { Depth: 0 };
+		var contentTypeXML = { "Content-Type": "text/xml; charset=utf-8" };
 		
 		// Get the Authorization header used in case we need to do a request
 		// on the parent below
@@ -640,7 +641,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		// Test whether Zotero directory exists
 		req = yield Zotero.HTTP.request("PROPFIND", uri, {
 			body: xmlstr,
-			headers,
+			headers: Object.assign({}, headers, contentTypeXML),
 			successCodes: [207, 404],
 			requestObserver,
 			debug: true
@@ -721,7 +722,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			// Zotero directory wasn't found, so see if at least
 			// the parent directory exists
 			req = yield Zotero.HTTP.request("PROPFIND", parentURI, {
-				headers,
+				headers: Object.assign({}, headers, contentTypeXML),
 				body: xmlstr,
 				requestObserver,
 				successCodes: [207, 404]
@@ -982,9 +983,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			uri,
 			{
 				body: xmlstr,
-				headers: {
-					Depth: 1
-				},
+				headers: Object.assign({ Depth: 1 }, contentTypeXML),
 				successCodes: [207],
 				debug: true
 			}
