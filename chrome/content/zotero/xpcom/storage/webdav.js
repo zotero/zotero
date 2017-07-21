@@ -968,6 +968,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		var uri = this.rootURI;
 		var path = uri.path;
 		
+		var contentTypeXML = { "Content-Type": "text/xml; charset=utf-8" };
 		var xmlstr = "<propfind xmlns='DAV:'><prop>"
 			+ "<getlastmodified/>"
 			+ "</prop></propfind>";
