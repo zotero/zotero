@@ -96,6 +96,32 @@ describe("Zotero.File", function () {
 		});
 	});
 	
+	
+	describe("#getClosestDirectory()", function () {
+		it("should return directory for file that exists", function* () {
+			var tmpDir = yield getTempDirectory();
+			var closest = yield Zotero.File.getClosestDirectory(tmpDir);
+			assert.equal(closest, tmpDir);
+		});
+		
+		it("should return parent directory for missing file", function* () {
+			var tmpDir = yield getTempDirectory();
+			var closest = yield Zotero.File.getClosestDirectory(OS.Path.join(tmpDir, 'a'));
+			assert.equal(closest, tmpDir);
+		});
+		
+		it("should find an existing directory three levels up from a missing file", function* () {
+			var tmpDir = yield getTempDirectory();
+			var closest = yield Zotero.File.getClosestDirectory(OS.Path.join(tmpDir, 'a', 'b', 'c'));
+			assert.equal(closest, tmpDir);
+		});
+		
+		it("should return false for a path that doesn't exist at all", function* () {
+			assert.isFalse(yield Zotero.File.getClosestDirectory('/a/b/c'));
+		});
+	});
+	
+	
 	describe("#copyDirectory()", function () {
 		it("should copy all files within a directory", function* () {
 			var tmpDir = Zotero.getTempDirectory().path;

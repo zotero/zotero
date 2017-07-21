@@ -32,7 +32,6 @@ Zotero.File = new function(){
 	Components.utils.import("resource://gre/modules/FileUtils.jsm");
 	
 	this.getExtension = getExtension;
-	this.getClosestDirectory = getClosestDirectory;
 	this.getContentsFromURL = getContentsFromURL;
 	this.putContents = putContents;
 	this.getValidFileName = getValidFileName;
@@ -88,21 +87,31 @@ Zotero.File = new function(){
 	}
 	
 	
-	/*
+	/**
 	 * Traverses up the filesystem from a file until it finds an existing
 	 *  directory, or false if it hits the root
 	 */
-	function getClosestDirectory(file) {
-		var dir = file.parent;
-		
-		while (dir && !dir.exists()) {
-			var dir = dir.parent;
+	this.getClosestDirectory = async function (file) {
+		try {
+			let stat = await OS.File.stat(file);
+			// If file is an existing directory, return it
+			if (stat.isDir) {
+				return file;
+			}
+		}
+		catch (e) {
+			if (e.becauseNoSuchFile) {}
+			else {
+				throw e;
+			}
 		}
 		
-		if (dir && dir.exists()) {
-			return dir;
+		var dir = OS.Path.dirname(file);
+		while (dir && !await OS.File.exists(dir)) {
+			dir = OS.Path.dirname(dir);
 		}
-		return false;
+		
+		return dir || false;
 	}
 	
 	

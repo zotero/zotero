@@ -4569,10 +4569,10 @@ var ZoteroPane = new function()
 				Zotero.debug("Invalid path", 2);
 				break;
 			}
-			var dir = Zotero.File.getClosestDirectory(file);
+			
+			var dir = yield Zotero.File.getClosestDirectory(file);
 			if (dir) {
-				dir.QueryInterface(Components.interfaces.nsILocalFile);
-				fp.displayDirectory = dir;
+				fp.displayDirectory = Zotero.File.pathToFile(dir);
 			}
 			
 			fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
