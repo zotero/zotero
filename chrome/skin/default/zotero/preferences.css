@@ -26,7 +26,8 @@ radio[pane]
 
 .statusLine
 {
-	margin: .75em 0;
+	margin-top: .75em;
+	margin-bottom: .75em;
 	font-size: .85em;
 }
 

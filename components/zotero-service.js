@@ -96,6 +96,7 @@ const xpcomFilesLocal = [
 	'id',
 	'integration',
 	'itemTreeView',
+	'locale',
 	'locateManager',
 	'mime',
 	'notifier',
@@ -297,7 +298,7 @@ function makeZoteroContext(isConnector) {
 	// Load xpcomFiles for specific mode
 	for (let xpcomFile of (isConnector ? xpcomFilesConnector : xpcomFilesLocal)) {
 		try {
-			subscriptLoader.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFile + ".js", zContext);
+			subscriptLoader.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFile + ".js", zContext, "UTF-8");
 		}
 		catch (e) {
 			dump("Error loading " + xpcomFile + ".js\n\n");

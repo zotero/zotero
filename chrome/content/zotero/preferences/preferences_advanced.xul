@@ -133,6 +133,17 @@
 					
 					<groupbox id="zotero-prefpane-advanced-miscellaneous">
 						<caption label="&zotero.preferences.miscellaneous;"/>
+						
+						<hbox align="center">
+							<label value="&zotero.bibliography.locale.label;"/>
+							<menulist id="locale-menu"
+									oncommand="Zotero_Preferences.Advanced.onLocaleChange()">
+								<menupopup/>
+							</menulist>
+						</hbox>
+						
+						<separator/>
+						
 						<hbox id="zotero-prefpane-advanced-openbuttons" align="center" style="display: block">
 							<button id="openAboutConfig"
 								label="&zotero.preferences.openAboutConfig;"
