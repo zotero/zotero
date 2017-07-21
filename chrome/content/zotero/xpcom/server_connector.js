@@ -827,16 +827,16 @@ Zotero.Server.Connector.Ping.prototype = {
 				Zotero.QuickCopy.lastActiveURL = req.data.activeURL;
 			}
 			
+			let response = {
+				prefs: {
+					automaticSnapshots: Zotero.Prefs.get('automaticSnapshots')
+				}
+			};
 			if (Zotero.QuickCopy.hasSiteSettings()) {
-				let response = {
-					prefs: {
-						reportActiveURL: true
-					}
-				};
-				return [200, 'application/json', JSON.stringify(response)];
+				response.prefs.reportActiveURL = true;
 			}
 			
-			return [200, 'text/plain', ''];
+			return [200, 'application/json', JSON.stringify(response)];
 		}
 	}
 }
