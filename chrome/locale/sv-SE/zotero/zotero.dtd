@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Uppdatera">
 <!ENTITY zotero.general.saveAs "Spara som…">
 <!ENTITY zotero.general.advancedOptions.label "Avancerade alternativ">
+<!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Mera">
 <!ENTITY zotero.general.loading "Laddar...">
 

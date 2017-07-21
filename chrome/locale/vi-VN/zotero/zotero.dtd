@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Cập nhật">
 <!ENTITY zotero.general.saveAs "Lưu là...">
 <!ENTITY zotero.general.advancedOptions.label "Các tùy chỉnh nâng cao">
+<!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "More">
 <!ENTITY zotero.general.loading "Đang nạp...">
 

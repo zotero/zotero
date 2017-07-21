@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Использовать стандартный способ Добавления Цитаты">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Диспетчер стилей">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Название">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Очистить запись">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Отправить на сервер Zotero">
 
-<!ENTITY zotero.preferences.openAboutConfig "Открыть about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Открыть редактор стилей">
-<!ENTITY zotero.preferences.openCSLPreview "Открыть просмотр стилей">
-<!ENTITY zotero.preferences.openAboutMemory "Открыть страницу about:memory">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

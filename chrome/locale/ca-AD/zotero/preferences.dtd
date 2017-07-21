@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Obtén connectors de processadors de textos">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Utilitza el diàleg clàssic Afegeix cita">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Gestor d'estils">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Títol">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Neteja el resultat de sortida">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Tramet al servidor del Zotero">
 
-<!ENTITY zotero.preferences.openAboutConfig "Obri about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
-<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "取得文書處理器外掛...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用傳統新增引用文獻對話框">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "樣式管理器">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "標題">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "清除輸出">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "提交到 Zotero 伺服器">
 
-<!ENTITY zotero.preferences.openAboutConfig "開啟 about:config">
-<!ENTITY zotero.preferences.openCSLEdit "開啟文獻格式編輯器">
-<!ENTITY zotero.preferences.openCSLPreview "預覽文獻格式">
-<!ENTITY zotero.preferences.openAboutMemory "開啟 about:memory">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

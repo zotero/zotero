@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Gebruik het klassieke &quot;Citaat Toevoegen&quot;-dialoogvenster">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Stijlmanager">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Uitvoer wissen">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Naar Zotero-server opsturen">
 
-<!ENTITY zotero.preferences.openAboutConfig "about:config openen">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL-stijl bewerker">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL-stijl voorbeeld">
-<!ENTITY zotero.preferences.openAboutMemory "about:memory openen">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Obține extensia pentru procesorul de texte...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Folosește caseta clasică de dialog Adaugă citare">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Manager de stiluri">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titlu">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Ștergere ieșire">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Trimitere către serverul Zotero">
 
-<!ENTITY zotero.preferences.openAboutConfig "Deschide about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Deschide Editorul de stil">
-<!ENTITY zotero.preferences.openCSLPreview "Deschide Previzualizare stil">
-<!ENTITY zotero.preferences.openAboutMemory "Deschide about:memory">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

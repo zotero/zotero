@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Újratöltés">
 <!ENTITY zotero.general.saveAs "Mentés másként…">
 <!ENTITY zotero.general.advancedOptions.label "Haladó beállítások">
+<!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more " Egyéb...">
 <!ENTITY zotero.general.loading "Loading…">
 

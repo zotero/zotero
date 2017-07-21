@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Oppdater">
 <!ENTITY zotero.general.saveAs "Lagre som...">
 <!ENTITY zotero.general.advancedOptions.label "Avanserte valg">
+<!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Mer">
 <!ENTITY zotero.general.loading "Laster inn...">
 

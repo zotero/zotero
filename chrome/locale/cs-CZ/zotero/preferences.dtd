@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Získat doplňky pro textové procesory.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Použít pomocí klasického dialogu &quot;Přidat citaci&quot;">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Správce stylů">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Název">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Vymazat výstup">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Odeslat na Zotero Server">
 
-<!ENTITY zotero.preferences.openAboutConfig "Otevřít about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Otevřít Editor stylů">
-<!ENTITY zotero.preferences.openCSLPreview "Otevřít Náhled stylů">
-<!ENTITY zotero.preferences.openAboutMemory "Otevřít about:memory">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Ανανέωση">
 <!ENTITY zotero.general.saveAs "Αποθήκευση ως...">
 <!ENTITY zotero.general.advancedOptions.label "Προχωρημένες επιλογές">
+<!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Περισσότερα">
 <!ENTITY zotero.general.loading "Loading…">
 

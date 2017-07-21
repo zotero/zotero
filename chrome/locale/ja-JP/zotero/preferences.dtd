@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "旧式の出典表記追加ダイアログを使用する">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "スタイル管理">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "スタイル名">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "デバッグ出力を消去する">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Zotero サーバに報告する">
 
-<!ENTITY zotero.preferences.openAboutConfig "about:config を開く">
-<!ENTITY zotero.preferences.openCSLEdit "スタイルエディタを開く">
-<!ENTITY zotero.preferences.openCSLPreview "スタイルのプレビューを開く">
-<!ENTITY zotero.preferences.openAboutMemory "about:memory 画面を開く">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Erweiterungen für Textverarbeitungsprogramme herunterladen...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Alten Zitations-Dialog nutzen">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Stil Manager">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Ausgabe löschen">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Zum Zotero-Server übertragen">
 
-<!ENTITY zotero.preferences.openAboutConfig "about:config öffnen">
-<!ENTITY zotero.preferences.openCSLEdit "Zitierstil Editor öffnen">
-<!ENTITY zotero.preferences.openCSLPreview "Zitierstil Vorschau öffnen">
-<!ENTITY zotero.preferences.openAboutMemory "about:memory öffnen">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Parsisiųsti papildinius tekstų rengyklėms...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Naudoti klasikinį citatų įdėjimo langą">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Stilių tvarkytuvė">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Pavadinimas">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Išvalyti išvedimą">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Išsiųsti į Zotero serverį">
 
-<!ENTITY zotero.preferences.openAboutConfig "Atverti about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Atverti stilių rengyklę">
-<!ENTITY zotero.preferences.openCSLPreview "Stilių peržiūra">
-<!ENTITY zotero.preferences.openAboutMemory "Atverti about:memory">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

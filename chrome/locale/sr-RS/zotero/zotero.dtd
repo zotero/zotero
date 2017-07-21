@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Освежи">
 <!ENTITY zotero.general.saveAs "Сачувај као…">
 <!ENTITY zotero.general.advancedOptions.label "Напредне опције">
+<!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Више">
 <!ENTITY zotero.general.loading "Учитавам…">
 

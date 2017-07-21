@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "워드 프로세서 플러그인 받기...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "클래식 인용추가 대화창 사용">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "스타일 매니저">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "제목">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "출력 지우기">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Zotero 서버에 제출">
 
-<!ENTITY zotero.preferences.openAboutConfig "about:config 열기">
-<!ENTITY zotero.preferences.openCSLEdit "스타일 편집기 열기">
-<!ENTITY zotero.preferences.openCSLPreview "스타일 미리보기 열기">
-<!ENTITY zotero.preferences.openAboutMemory "about:memory 열기">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

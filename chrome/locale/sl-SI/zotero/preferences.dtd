@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Pridobi vstavke za urejevalnike besedil ...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Uporabi klasično pogovorno okno Dodaj citat">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Upravitelj slogov">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Naslov">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Počisti izhod">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Objavi na strežniku Zotero">
 
-<!ENTITY zotero.preferences.openAboutConfig "Odpri about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Odpri urejevalnik sloga">
-<!ENTITY zotero.preferences.openCSLPreview "Odpri predogled sloga">
-<!ENTITY zotero.preferences.openAboutMemory "Odprite about:memory">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "استخدم المربع الحواري التقليدي لاضافة استشهاد">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "مدير الانماط">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "اسم النمط">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "مسح سجل اخطاء البرنامج">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "ارسال سجل الاخطاء لخادم زوتيرو">
 
-<!ENTITY zotero.preferences.openAboutConfig "فتح about:config">
-<!ENTITY zotero.preferences.openCSLEdit "افتح محرر الانماط">
-<!ENTITY zotero.preferences.openCSLPreview "افتح عرض النمط">
-<!ENTITY zotero.preferences.openAboutMemory "افتح about:memory">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "刷新">
 <!ENTITY zotero.general.saveAs "另存为...">
 <!ENTITY zotero.general.advancedOptions.label "高级选项">
+<!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "更多">
 <!ENTITY zotero.general.loading "加载…">
 

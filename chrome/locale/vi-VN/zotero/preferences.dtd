@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Lấy plug-in cho trình soạn thảo...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Dùng màn hình Thêm trích dẫn kiểu cũ">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Bộ quản lý kiểu trích dẫn">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Tiêu đề">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Xóa thông tin gỡ rối">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Gửi tới máy chủ Zotero">
 
-<!ENTITY zotero.preferences.openAboutConfig "Mở about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Mở Bộ soạn thảo kiểu trích dẫn">
-<!ENTITY zotero.preferences.openCSLPreview "Mở trình xem kiểu trích dẫn">
-<!ENTITY zotero.preferences.openAboutMemory "Mở about:memory">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

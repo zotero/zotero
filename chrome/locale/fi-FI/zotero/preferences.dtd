@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Käytä perinteistä &quot;Lisää sitaatti&quot; -ikkunaa">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Tyylien hallinta">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Nimi">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Tyhjennä päiväkirja">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Lähetä Zotero-palvelimelle">
 
-<!ENTITY zotero.preferences.openAboutConfig "Avaa about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Avaa tyylimuokkain">
-<!ENTITY zotero.preferences.openCSLPreview "Avaa tyylin esikatselu">
-<!ENTITY zotero.preferences.openAboutMemory "Avaa about:memory">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

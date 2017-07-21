@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Kelime işlemcisi eklentilerini al...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Klasik Gönderme Ekleme İletişim Kutusunu kullan">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Stil Yöneticisi">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Başlık">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Çıktıyı Temizle">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Zotero Sunucusuna Gönder">
 
-<!ENTITY zotero.preferences.openAboutConfig "about:config'i Aç">
-<!ENTITY zotero.preferences.openCSLEdit "Stil Düzenleyicisini Aç">
-<!ENTITY zotero.preferences.openCSLPreview "Stil Önizleyicisini Aç">
-<!ENTITY zotero.preferences.openAboutMemory "about:memory'yi Aç.">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

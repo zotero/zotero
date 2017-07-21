@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Odśwież">
 <!ENTITY zotero.general.saveAs "Zapisz jako...">
 <!ENTITY zotero.general.advancedOptions.label "Zaawansowane ustawienia">
+<!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Więcej">
 <!ENTITY zotero.general.loading "Wczytywanie...">
 

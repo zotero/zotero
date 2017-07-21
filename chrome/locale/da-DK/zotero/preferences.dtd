@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Hent plug-ins til tekstbehandling...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Brug den klassiske dialog til Tilføj Henvisning">
+<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Manager til bibliografiske formater">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">
@@ -212,7 +214,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Ryd output">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Fremsend til Zotero Server">
 
-<!ENTITY zotero.preferences.openAboutConfig "Åbn about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Åbn formatredigering">
-<!ENTITY zotero.preferences.openCSLPreview "Åbn formatforhåndsvisning">
-<!ENTITY zotero.preferences.openAboutMemory "Åben about:memory">
+<!ENTITY zotero.preferences.configEditor "Config Editor">

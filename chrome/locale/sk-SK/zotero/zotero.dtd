@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "Obnoviť">
 <!ENTITY zotero.general.saveAs "Uložiť ako...">
 <!ENTITY zotero.general.advancedOptions.label "Rozšírené možnosti">
+<!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Viac">
 <!ENTITY zotero.general.loading "Nahrávam...">
 

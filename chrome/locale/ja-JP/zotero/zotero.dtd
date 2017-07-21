@@ -11,6 +11,7 @@
 <!ENTITY zotero.general.refresh "再読み込み">
 <!ENTITY zotero.general.saveAs "名前をつけて保存...">
 <!ENTITY zotero.general.advancedOptions.label "高度なオプション">
+<!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "その他">
 <!ENTITY zotero.general.loading "読み込み中...">
 
