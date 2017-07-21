@@ -224,21 +224,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		// Browser
 		Zotero.browser = "g";
 		
-		// Locale
-		var uaPrefs = Services.prefs.getBranch("general.useragent.");
-		try {
-			this.locale = uaPrefs.getComplexValue("locale", Components.interfaces.nsIPrefLocalizedString);
-		} catch (e) {}
-		
-		if(this.locale) {
-			this.locale = this.locale.toString();
-		} else {
-			this.locale = uaPrefs.getCharPref("locale");
-		}
-		
-		if (this.locale.length == 2) {
-			this.locale = this.locale + '-' + this.locale.toUpperCase();
-		}
+		// Get resolved locale
+		this.locale = Services.strings.createBundle("chrome://zotero/locale/mozilla/intl.properties")
+			.GetStringFromName("general.useragent.locale");
 		
 		_localizedStringBundle = Services.strings.createBundle("chrome://zotero/locale/zotero.properties");
 		// Fix logged error in PluralForm.jsm when numForms() is called before get(), as it is in
