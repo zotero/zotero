@@ -126,27 +126,25 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 		// Only trigger sync for certain types
 		//
 		// TODO: settings, full text
-		if (Zotero.DataObjectUtilities.getTypes().indexOf(type) == -1) {
+		if (!Zotero.DataObjectUtilities.getTypes().includes(type)) {
 			return;
 		}
 		
 		// Determine affected libraries so only those can be synced
-		let libraryIDs = new Set();
-		if (Zotero.DataObjectUtilities.getTypes().indexOf(type) != -1) {
-			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
-			ids.forEach(id => {
-				let lk = objectsClass.getLibraryAndKeyFromID(id);
-				if (lk && Zotero.Libraries.get(lk.libraryID).syncable) {
-					libraryIDs.add(lk.libraryID);
+		let libraries = [];
+		let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+		ids.forEach(id => {
+			let lk = objectsClass.getLibraryAndKeyFromID(id);
+			if (lk) {
+				let library = Zotero.Libraries.get(lk.libraryID);
+				if (library.syncable) {
+					libraries.push(library);
 				}
-			});
-		}
+			}
+		});
 		
-		// Don't include skipped libraries
-		var skipped = new Set(Zotero.Sync.Data.Local.getSkippedLibraries());
-		libraryIDs = Array.from(libraryIDs.values()).filter(id => !skipped.has(id));
-		
-		if (!libraryIDs.length) {
+		libraries = Zotero.Sync.Data.Local.filterSkippedLibraries(libraries);
+		if (!libraries.length) {
 			return;
 		}
 		
@@ -154,7 +152,7 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 			this._editTimeout,
 			false,
 			{
-				libraries: libraryIDs
+				libraries: libraries.map(library => library.libraryID)
 			}
 		);
 	},

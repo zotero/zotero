@@ -333,6 +333,24 @@ Zotero.Sync.Data.Local = {
 	
 	
 	/**
+	 * @param {Zotero.Library[]} libraries
+	 * @return {Zotero.Library[]}
+	 */
+	filterSkippedLibraries: function (libraries) {
+		var skippedLibraries = this.getSkippedLibraries();
+		var skippedGroups = this.getSkippedGroups();
+		
+		return libraries.filter((library) => {
+			var libraryType = library.libraryType;
+			if (libraryType == 'group') {
+				return !skippedGroups.includes(library.groupID);
+			}
+			return !skippedLibraries.includes(library.libraryID);
+		});
+	},
+	
+	
+	/**
 	 * @return {nsILoginInfo|false}
 	 */
 	_getAPIKeyLoginInfo: function () {

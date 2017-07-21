@@ -38,7 +38,7 @@ describe("Zotero.Sync.EventListeners", function () {
 			var expectation = mock.expects("setSyncTimeout").never();
 			
 			var group = yield createGroup();
-			Zotero.Prefs.set('sync.librariesToSkip', JSON.stringify(["L" + group.libraryID]));
+			Zotero.Prefs.set('sync.librariesToSkip', JSON.stringify(["G" + group.groupID]));
 			yield createDataObject('item', { libraryID: group.libraryID });
 			
 			yield Zotero.Promise.delay(10);
