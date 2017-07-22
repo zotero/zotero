@@ -212,8 +212,13 @@ ZoteroPluginInstaller.prototype = {
 				Zotero.getString('zotero.preferences.wordProcessors.reinstall', this._addon.APP) :
 				Zotero.getString('zotero.preferences.wordProcessors.install', this._addon.APP)));
 		button.addEventListener("command", function() {
-			var zpi = new ZoteroPluginInstaller(addon, false, true);
-			zpi.showPreferences(document);
+			Zotero.debug(`Install button pressed for ${addon.APP} plugin`);
+			try {
+				var zpi = new ZoteroPluginInstaller(addon, false, true);
+				zpi.showPreferences(document);
+			} catch (e) {
+				Zotero.logError(e);
+			}
 		}, false);
 		hbox.appendChild(button);
 		groupbox.appendChild(hbox);
