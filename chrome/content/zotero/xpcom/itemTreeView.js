@@ -1073,50 +1073,19 @@ Zotero.ItemTreeView.prototype.getCellText = function (row, column)
 				break;
 			}
 			if (val) {
-				var order = Zotero.Date.getLocaleDateOrder();
-				if (order == 'mdy') {
-					order = 'mdy';
-					var join = '/';
-				}
-				else if (order == 'dmy') {
-					order = 'dmy';
-					var join = '/';
-				}
-				else if (order == 'ymd') {
-					order = 'YMD';
-					var join = '-';
-				}
-				var date = Zotero.Date.sqlToDate(val, true);
-				var parts = [];
-				for (var i=0; i<3; i++) {
-					switch (order[i]) {
-						case 'y':
-							parts.push(date.getFullYear().toString().substr(2));
-							break;
-							
-						case 'Y':
-							parts.push(date.getFullYear());
-							break;
-						
-						case 'm':
-							parts.push((date.getMonth() + 1));
-							break;
-						
-						case 'M':
-							parts.push(Zotero.Utilities.lpad((date.getMonth() + 1).toString(), '0', 2));
-							break;
-						
-						case 'd':
-							parts.push(date.getDate());
-							break;
-						
-						case 'D':
-							parts.push(Zotero.Utilities.lpad(date.getDate().toString(), '0', 2));
-							break;
+				let date = Zotero.Date.sqlToDate(val, true);
+				if (date) {
+					// If no time, interpret as local, not UTC
+					if (Zotero.Date.isSQLDate(val)) {
+						date = Zotero.Date.sqlToDate(val);
+						val = date.toLocaleDateString();
 					}
-					
-					val = parts.join(join);
-					val += ' ' + date.toLocaleTimeString();
+					else {
+						val = date.toLocaleString();
+					}
+				}
+				else {
+					val = '';
 				}
 			}
 	}
