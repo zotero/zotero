@@ -1,6 +1,10 @@
+#zotero-bibliography-container {
+	font-size: 1.15em !important;
+}
+
 #style-listbox
 {
-	height: 180pt;
+	height: 19em;
 	width: 300pt;
 }
 
