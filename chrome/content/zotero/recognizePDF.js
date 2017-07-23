@@ -697,7 +697,7 @@ var Zotero_RecognizePDF = new function() {
 			
 			Zotero.debug("RecognizePDF: Query string " + queryString);
 			
-			var url = "http://scholar.google.com/scholar?q="+encodeURIComponent(queryString)+"&hl=en&lr=&btnG=Search",
+			var url = "https://scholar.google.com/scholar?q="+encodeURIComponent(queryString)+"&hl=en&lr=&btnG=Search",
 				delay = GOOGLE_SCHOLAR_QUERY_DELAY - (Date.now() - Zotero.HTTP.lastGoogleScholarQueryTime);
 
 			// Delay 
@@ -897,7 +897,7 @@ var Zotero_RecognizePDF = new function() {
 				formData.input[inputs[i].name] = inputs[i].value;
 			}
 			
-			formData.continue = "http://scholar.google.com";
+			formData.continue = "https://scholar.google.com";
 			
 			return formData;
 		}
