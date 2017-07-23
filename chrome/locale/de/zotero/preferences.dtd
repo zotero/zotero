@@ -109,7 +109,7 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Wenn diese Option deaktiviert ist, führt Zotero URLs bei der Zitierung von Zeitschriften-, Magazin-, oder Zeitungsartikeln nur dann auf, wenn bei dem Artikel kein Seitenbereich angegeben ist.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Quick-Copy">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Standardformat">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Als HTML kopieren">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Website-spezifische Einstellungen:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Pfad">

@@ -72,7 +72,7 @@
 <!ENTITY helpFeedbackPage.label "Feedback senden...">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Fehlerbericht an Zotero senden">
+<!ENTITY helpReportErrors.label "Fehler melden...">
 <!ENTITY helpReportErrors.accesskey "e">
 <!ENTITY helpCheckForUpdates.label "Auf Updates überprüfen">
 <!ENTITY helpCheckForUpdates.accesskey "U">
