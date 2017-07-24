@@ -85,7 +85,8 @@ Zotero.DataDirectory = {
 				// directory specified in the marker file.
 				let migrationMarker = OS.Path.join(prefVal, this.MIGRATION_MARKER);
 				let dbFile = OS.Path.join(prefVal, this.getDatabaseFilename());
-				if ((yield OS.File.exists(migrationMarker)) && !(OS.File.exists(dbFile))) {
+				
+				if ((yield OS.File.exists(migrationMarker)) && !(yield OS.File.exists(dbFile))) {
 					let contents = yield Zotero.File.getContentsAsync(migrationMarker);
 					try {
 						let { sourceDir } = JSON.parse(contents);
@@ -431,26 +432,27 @@ Zotero.DataDirectory = {
 	
 	
 	isNewDirOnDifferentDrive: Zotero.Promise.coroutine(function* (oldDir, newDir) {
-		yield this.markForMigration(oldDir, true);
-		let oldMarkerFile = OS.Path.join(oldDir, this.MIGRATION_MARKER);
-		let testPath = OS.Path.join(newDir, '..', this.MIGRATION_MARKER);
+		var filename = 'zotero-migration.tmp';
+		var tmpFile = OS.Path.join(Zotero.getTempDirectory().path, filename);
+		yield Zotero.File.putContentsAsync(tmpFile, ' ');
+		var testPath = OS.Path.normalize(OS.Path.join(newDir, '..', filename));
 		try {
 			// Attempt moving the marker with noCopy
-			yield OS.File.move(oldMarkerFile, testPath, {noCopy: true});
+			yield OS.File.move(tmpFile, testPath, { noCopy: true });
 		} catch(e) {
-			yield OS.File.remove(oldMarkerFile);
+			yield OS.File.remove(tmpFile);
 			
 			Components.classes["@mozilla.org/net/osfileconstantsservice;1"].
 				getService(Components.interfaces.nsIOSFileConstantsService).
 				init();	
 			if (e instanceof OS.File.Error) {
-				if (typeof e.unixErrno != "undefined") {
-					return e.unixErrno == OS.Constants.libc.EXDEV;
+				if (e.unixErrno != undefined && e.unixErrno == OS.Constants.libc.EXDEV) {
+					return true;
 				}
-				if (typeof e.winLastError != "undefined") {
-					// ERROR_NOT_SAME_DEVICE is undefined
-					// return e.winLastError == OS.Constants.Win.ERROR_NOT_SAME_DEVICE;
-					return e.winLastError == 17;
+				// ERROR_NOT_SAME_DEVICE is undefined
+				// e.winLastError == OS.Constants.Win.ERROR_NOT_SAME_DEVICE
+				if (e.winLastError != undefined && e.winLastError == 17) {
+					return true;
 				}
 			}
 			throw e;
@@ -489,8 +491,10 @@ Zotero.DataDirectory = {
 	
 	
 	markForMigration: function (dir, automatic = false) {
+		var path = OS.Path.join(dir, this.MIGRATION_MARKER);
+		Zotero.debug("Creating migration marker at " + path);
 		return Zotero.File.putContentsAsync(
-			OS.Path.join(dir, this.MIGRATION_MARKER),
+			path,
 			JSON.stringify({
 				sourceDir: dir,
 				automatic
@@ -657,11 +661,19 @@ Zotero.DataDirectory = {
 			
 			let error = Zotero.getString(`dataDir.migration.failure.full.${mode}.text1`, Zotero.clientName)
 				+ "\n\n"
-				+ e;
+				+ e
 				+ "\n\n"
 				+ Zotero.getString(`dataDir.migration.failure.full.${mode}.text2`, Zotero.appName);
+			yield this.fullMigrationFailurePrompt(oldDir, newDir, error);
 			
-			return this.fullMigrationFailurePrompt(oldDir, newDir, error);
+			// Clear status line from progress meter
+			try {
+				Zotero.showZoteroPaneProgressMeter("", false, null, Zotero.isStandalone);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			return;
 		}
 		
 		// Set data directory again
@@ -811,14 +823,40 @@ Zotero.DataDirectory = {
 			yield OS.File.copy(oldMarkerFile, OS.Path.join(newDir, this.MIGRATION_MARKER));
 		}
 		
-		// Update the data directory setting first. If moving the database fails, get() will continue
-		// to use the old directory based on the migration marker
+		// Update the data directory setting first so that a failure immediately after the move won't
+		// leave the database stranded
 		this.set(newDir);
 		
 		// Move database
 		if (!partial) {
 			Zotero.debug("Moving " + dbName);
-			yield OS.File.move(OS.Path.join(oldDir, dbName), OS.Path.join(newDir, dbName));
+			try {
+				yield OS.File.move(OS.Path.join(oldDir, dbName), OS.Path.join(newDir, dbName));
+			}
+			// If moving the database failed, revert to the old data directory and clear marker files
+			catch (e) {
+				if (this.isLegacy(oldDir)) {
+					Zotero.Prefs.clear('dataDir');
+					Zotero.Prefs.clear('useDataDir');
+				}
+				else {
+					this.set(oldDir);
+				}
+				try {
+					yield OS.File.remove(oldMarkerFile, { ignoreAbsent: true });
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				try {
+					yield OS.File.remove(OS.Path.join(newDir, this.MIGRATION_MARKER));
+					yield OS.File.removeEmptyDir(newDir);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				throw e;
+			}
 		}
 		
 		// Once the database has been moved, we can clear the migration marker from the old directory.

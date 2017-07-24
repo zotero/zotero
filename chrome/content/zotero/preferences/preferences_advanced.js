@@ -55,6 +55,19 @@ Zotero_Preferences.Advanced = {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 			.getService(Components.interfaces.nsIPromptService);
 		
+		// If there's a migration marker, point data directory back to the current location and remove
+		// it to trigger the migration again
+		var marker = OS.Path.join(defaultDir, Zotero.DataDirectory.MIGRATION_MARKER);
+		if (yield OS.File.exists(marker)) {
+			Zotero.Prefs.clear('dataDir');
+			Zotero.Prefs.clear('useDataDir');
+			yield OS.File.remove(marker);
+			try {
+				yield OS.File.remove(OS.Path.join(defaultDir, '.DS_Store'));
+			}
+			catch (e) {}
+		}
+		
 		// ~/Zotero exists and is non-empty
 		if ((yield OS.File.exists(defaultDir)) && !(yield Zotero.File.directoryIsEmpty(defaultDir))) {
 			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
