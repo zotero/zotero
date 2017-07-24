@@ -72,7 +72,7 @@
 <!ENTITY helpFeedbackPage.label "フィードバックを送る...">
 <!ENTITY helpFeedbackPage.accesskey "S">
 
-<!ENTITY helpReportErrors.label "エラーを Zotero に送信する...">
+<!ENTITY helpReportErrors.label "Report Errors…">
 <!ENTITY helpReportErrors.accesskey "R">
 <!ENTITY helpCheckForUpdates.label "更新を確認...">
 <!ENTITY helpCheckForUpdates.accesskey "U">
