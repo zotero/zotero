@@ -1163,11 +1163,17 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
+	quitZotero: function(restart=false) {
+		Zotero.debug("Zotero.Utilities.Internal.quitZotero() is deprecated -- use quit()");
+		this.quit(restart);
+	},
+	
+	
 	/**
-	 * Quits Zotero, optionally restarting.
+	 * Quits the program, optionally restarting.
 	 * @param {Boolean} [restart=false]
 	 */
-	quitZotero: function(restart=false) {
+	quit: function(restart=false) {
 		var startup = Services.startup;
 		if (restart) {
 			Zotero.restarting = true;
