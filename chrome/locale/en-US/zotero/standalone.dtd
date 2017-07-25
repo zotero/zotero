@@ -70,8 +70,8 @@
 <!ENTITY productHelp.accesskey    "D">
 <!ENTITY helpTroubleshootingInfo.label      "Troubleshooting Information">
 <!ENTITY helpTroubleshootingInfo.accesskey  "T">
-<!ENTITY helpFeedbackPage.label      "Submit Feedback…">
-<!ENTITY helpFeedbackPage.accesskey  "S">
+<!ENTITY helpFeedbackPage.label      "Discussion Forums">
+<!ENTITY helpFeedbackPage.accesskey  "F">
 
 <!ENTITY helpReportErrors.label      "Report Errors…">
 <!ENTITY helpReportErrors.accesskey  "R">
