@@ -225,17 +225,17 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		Zotero.browser = "g";
 		
 		// Get resolved locale
-		this.locale = Services.strings.createBundle("chrome://zotero/locale/mozilla/intl.properties")
-			.GetStringFromName("general.useragent.locale");
-		
-		_localizedStringBundle = Services.strings.createBundle("chrome://zotero/locale/zotero.properties");
-		// Fix logged error in PluralForm.jsm when numForms() is called before get(), as it is in
-		// getString() when a number is based
-		PluralForm.get(1, '1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16')
+		var intlProps = Services.strings.createBundle("chrome://zotero/locale/mozilla/intl.properties");
+		this.locale = intlProps.GetStringFromName("general.useragent.locale");
+		let [get, numForms] = PluralForm.makeGetter(intlProps.GetStringFromName("pluralRule"));
+		this.pluralFormGet = get;
+		this.pluralFormNumForms = numForms;
 		
 		// Also load the brand as appName
 		var brandBundle = Services.strings.createBundle("chrome://branding/locale/brand.properties");
 		this.appName = brandBundle.GetStringFromName("brandShortName");
+		
+		_localizedStringBundle = Services.strings.createBundle("chrome://zotero/locale/zotero.properties");
 		
 		// Set the locale direction to Zotero.dir
 		// DEBUG: is there a better way to get the entity from JS?
@@ -1239,11 +1239,11 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				// If not enough available forms, use last one -- PluralForm.get() uses first by
 				// default, but it's more likely that a localizer will translate the two English
 				// strings with some plural form as the second one, so we might as well use that
-				if (availableForms.length < PluralForm.numForms()) {
+				if (availableForms.length < this.pluralFormNumForms()) {
 					l10n = availableForms[availableForms.length - 1];
 				}
 				else {
-					l10n = PluralForm.get(num, l10n);
+					l10n = this.pluralFormGet(num, l10n);
 				}
 			}
 		}
