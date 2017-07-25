@@ -3,8 +3,18 @@
 var interval = 1000;
 var intervalID;
 var stopping = false;
+var scrolling = false;
+var autoscroll = true;
 
 function start() {
+	// If scrolled to the bottom of the page, stay there
+	document.body.onscroll = function (event) {
+		if (!scrolling) {
+			autoscroll = atPageBottom();
+		}
+		scrolling = false;
+	};
+	
 	updateErrors().then(function () {
 		if (stopping) return;
 		
@@ -31,13 +41,9 @@ function updateErrors() {
 		var errors = Zotero.getErrors(true);
 		var errorStr = errors.length ? errors.join('\n\n') + '\n\n' : '';
 		
-		var scroll = atPageBottom();
-		
 		document.getElementById('errors').textContent = errorStr + sysInfo;
 		
-		// TODO: This doesn't seem to work for some reason -- when errors are logged, it doesn't stay
-		// at the bottom
-		if (scroll) {
+		if (autoscroll) {
 			scrollToPageBottom();
 		}
 	});
@@ -50,15 +56,12 @@ function addInitialOutput() {
 }
 
 function addLine(line) {
-	var scroll = atPageBottom()
-	
 	var p = document.createElement('p');
 	p.textContent = line;
 	var output = document.getElementById('output');
 	output.appendChild(p);
 	
-	// If scrolled to the bottom of the page, stay there
-	if (scroll) {
+	if (autoscroll) {
 		scrollToPageBottom();
 	}
 	
@@ -71,6 +74,8 @@ function atPageBottom() {
 }
 
 function scrollToPageBottom() {
+	// Set a flag when auto-scrolling to differentiate from manual scrolls
+	scrolling = true;
 	window.scrollTo(0, document.body.scrollHeight);
 }
 
@@ -180,6 +185,7 @@ function clearSubmitStatus() {
 }
 
 function clearOutput(button) {
+	document.getElementById('submit-button').setAttribute('disabled', '');
 	button.setAttribute('disabled', '');
 	document.getElementById('output').textContent = '';
 	clearSubmitStatus();

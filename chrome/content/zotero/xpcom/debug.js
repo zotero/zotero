@@ -151,6 +151,13 @@ Zotero.Debug = new function () {
 				}
 				// Console window
 				if (_consoleViewer) {
+					// Remove ANSI color codes. We could replace this with HTML, but it's probably
+					// unnecessarily distracting/alarming to show the red in the viewer. Devs who care
+					// about times should just use a terminal.
+					if (slowPrefix) {
+						output = output.replace(slowPrefix, '').replace(slowSuffix, '');
+					}
+					
 					// If there's a listener, pass line immediately
 					if (_consoleViewerListener) {
 						_consoleViewerListener(output);
