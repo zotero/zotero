@@ -147,7 +147,6 @@
 	<wizardpage onpageshow="Zotero_Error_Report.init()" label=" ">
 		<description id="zotero-failure-message"/>
 		<textbox id="zotero-error-message" class="plain" readonly="true" multiline="true" flex="1"/>
-		<description id="zotero-unrelated-message">&zotero.general.note; &zotero.errorReport.unrelatedMessages;</description>
 		<description id="zotero-advance-message"/>
 	</wizardpage>
 	
