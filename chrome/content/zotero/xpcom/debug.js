@@ -198,11 +198,9 @@ Zotero.Debug = new function () {
 		if (maxChars) {
 			output = output.substr(maxChars * -1);
 			// Cut at two newlines
-			for (var i=1, len=output.length; i<len; i++) {
-				if (output[i] == '\n' && output[i-1] == '\n') {
-					output = output.substr(i + 1);
-					break;
-				}
+			let matches = output.match(/^[\n]*\n\n/);
+			if (matches) {
+				output = output.substr(matches[0].length);
 			}
 		}
 
