@@ -207,6 +207,34 @@
 									  accesskey="&helpReportErrors.accesskey;"
 									  label="&helpReportErrors.label;"
 									  command="cmd_zotero_reportErrors"/>
+							<menu id="debug-output-menu"
+									accesskey="&debugOutputLogging.accesskey;"
+									label="&debugOutputLogging.label;"
+									hidden="true">
+								<menupopup id="debug-output-popup"
+										onpopupshowing="ZoteroStandalone.DebugOutput.update()">
+									<menuitem id="debug-output-submit"
+											label="&debugOutputLogging.submit;"
+											oncommand="ZoteroStandalone.DebugOutput.submit()"
+											hidden="true"/>
+									<menuitem id="debug-output-enable-disable"
+											oncommand="ZoteroStandalone.DebugOutput.toggleStore()"/>
+									<menuseparator/>
+									<menuitem id="debug-output-status" disabled="true"/>
+									<menuseparator/>
+									<menuitem id="debug-output-view"
+											label="&debugOutputLogging.view;"
+											oncommand="ZoteroStandalone.DebugOutput.view()"/>
+									<menuitem id="debug-output-clear"
+											label="&debugOutputLogging.clear;"
+											oncommand="ZoteroStandalone.DebugOutput.clear()"/>
+									<menuseparator/>
+									<menuitem id="debug-output-restart-enabled"
+											label="&debugOutputLogging.restartWithLoggingEnabled;"
+											oncommand="ZoteroStandalone.DebugOutput.restartEnabled()"/>
+								</menupopup>
+							</menu>
+							<menuseparator/>
 							<menuitem id="checkForUpdates"
 									  accesskey="&helpCheckForUpdates.accesskey;"
 									  label="&helpCheckForUpdates.label;"

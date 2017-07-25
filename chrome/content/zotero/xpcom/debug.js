@@ -38,7 +38,7 @@ Zotero.Debug = new function () {
 	 * Debug logging can be set in several different ways:
 	 *
 	 *   - via the debug.log pref in the client or connector
-	 *   - by enabling debug output logging in the Advanced prefs in the client
+	 *   - by enabling debug output logging from the Help menu
 	 *   - by passing -ZoteroDebug or -ZoteroDebugText on the command line
 	 *
 	 * In the client, debug.log and -ZoteroDebugText enable logging via the terminal, while -ZoteroDebug
@@ -231,13 +231,14 @@ Zotero.Debug = new function () {
 	
 	
 	this.getConsoleViewerOutput = function () {
-		var queue = _consoleViewerQueue;
+		var queue = _output.concat(_consoleViewerQueue);
 		_consoleViewerQueue = [];
 		return queue;
 	}
 	
 	
 	this.addConsoleViewerListener = function (listener) {
+		this.enabled = _consoleViewer = true;
 		_consoleViewerListener = listener;
 	};
 	
