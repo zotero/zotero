@@ -2089,8 +2089,14 @@ Zotero.Prefs = new function(){
 	}
 	
 	
-	this.clear = function (pref) {
-		this.prefBranch.clearUserPref(pref);
+	this.clear = function (pref, global) {
+		if (global) {
+			var branch = Services.prefs.getBranch("");
+		}
+		else {
+			var branch = this.prefBranch;
+		}
+		branch.clearUserPref(pref);
 	}
 	
 	
