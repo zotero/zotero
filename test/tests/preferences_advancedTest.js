@@ -1,5 +1,7 @@
 describe("Advanced Preferences", function () {
-	describe("General", function () {
+	// TODO: Debug output logging is now in the application menus, and we test in Firefox...
+	// Maybe add the debug output menu to Firefox for the purposes of testing?
+	describe.skip("General", function () {
 		var server;
 		
 		before(function () {
