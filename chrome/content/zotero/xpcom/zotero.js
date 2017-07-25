@@ -224,12 +224,36 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		// Browser
 		Zotero.browser = "g";
 		
-		// Get resolved locale
+		//
+		// Get settings from language pack (extracted by zotero-build/locale/merge_mozilla_files)
+		//
+		function getIntlProp(name, fallback = null) {
+			try {
+				return intlProps.GetStringFromName(name);
+			}
+			catch (e) {
+				Zotero.logError(`Couldn't load ${name} from intl.properties`);
+				return fallback;
+			}
+		}
+		function setOrClearIntlPref(name, type) {
+			var val = getIntlProp(name);
+			if (val !== null) {
+				if (type == 'boolean') {
+					val = val == 'true';
+				}
+				Zotero.Prefs.set(name, val, 1);
+			}
+			else {
+				Zotero.Prefs.clear(name, 1);
+			}
+		}
 		var intlProps = Services.strings.createBundle("chrome://zotero/locale/mozilla/intl.properties");
-		this.locale = intlProps.GetStringFromName("general.useragent.locale");
-		let [get, numForms] = PluralForm.makeGetter(intlProps.GetStringFromName("pluralRule"));
+		this.locale = getIntlProp('general.useragent.locale', 'en-US');
+		let [get, numForms] = PluralForm.makeGetter(parseInt(getIntlProp('pluralRule', 1)));
 		this.pluralFormGet = get;
 		this.pluralFormNumForms = numForms;
+		setOrClearIntlPref('intl.accept_languages', 'string');
 		
 		// Also load the brand as appName
 		var brandBundle = Services.strings.createBundle("chrome://branding/locale/brand.properties");
