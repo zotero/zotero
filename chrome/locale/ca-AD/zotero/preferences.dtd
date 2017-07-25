@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Fitxers i carpetes">
 <!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Localitza">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestor del motor de cerca d'articles">
 <!ENTITY zotero.preferences.locate.description "Descripció">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reinicialitza els traductors i els estils...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reinicialitza els traductors...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reinicialitza els estils...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Enregistrament del resultat de la depuració">
-<!ENTITY zotero.preferences.debugOutputLogging.message "El resultat de la depuració pot ajudar els desenvolupadors del Zotero a diagnosticar problemes. L'enregistrament de la depuració alentirà el Zotero, per això hauríeu de deixar-la deshabilitada si no és que un desenvolupador del Zotero us sol·licita el resultat de la depuració.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "línies registrades">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Activa després de reiniciar">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Visualitza el resultat de sortida">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Neteja el resultat de sortida">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Tramet al servidor del Zotero">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

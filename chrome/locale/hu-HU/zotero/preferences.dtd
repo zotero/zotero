@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Fájlok és mappák">
 <!ENTITY zotero.preferences.advanced.keys "Billentyűparancsok">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Elhelyezni">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
 <!ENTITY zotero.preferences.locate.description "Leírás">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Hibakeresés a naplófájlban">
-<!ENTITY zotero.preferences.debugOutputLogging.message "A naplófájl segíthet a fejlesztőknek a problémákat beazonosítani. A naplózás lelassítja a Zoterot, ezért általában ki kell kapcsolni, kivéve, ha a fejlesztők kérik a naplófájlt.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "naplózott sorok">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Bekapcsolás az újraindítás után">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Kimenet megtekintése">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Output törlése">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Elküldés a Zotero szervernek">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

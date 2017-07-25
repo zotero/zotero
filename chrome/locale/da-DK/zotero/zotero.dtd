@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Indlæser...">
 
 <!ENTITY zotero.errorReport.title "Zotero fejlrapport">
-<!ENTITY zotero.errorReport.unrelatedMessages "Dette kan inkludere beskeder, som ikke har noget med Zotero at gøre.">
 <!ENTITY zotero.errorReport.submissionInProgress "Vent venligst mens fejlrapporten registreres.">
 <!ENTITY zotero.errorReport.submitted "Din fejlrapport er registreret.">
 <!ENTITY zotero.errorReport.reportID "Rapport-ID:">

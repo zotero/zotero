@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Nahrává se...">
 
 <!ENTITY zotero.errorReport.title "Chybová zpráva Zotera">
-<!ENTITY zotero.errorReport.unrelatedMessages "Může obsahovat zprávy nesouvisející se Zoterem.">
 <!ENTITY zotero.errorReport.submissionInProgress "Čekejte, prosím, dokud nebude zpráva o chybách odeslána.">
 <!ENTITY zotero.errorReport.submitted "Zpráva o chybách byla odeslána.">
 <!ENTITY zotero.errorReport.reportID "ID hlášení:">

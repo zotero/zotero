@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "پرونده‌ها و پوشه‌ها">
 <!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "مکان‌یابی">
 <!ENTITY zotero.preferences.locate.locateEngineManager "سامان‌دهی مکان‌یاب مقالات">
 <!ENTITY zotero.preferences.locate.description "توضیح">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "ثبت وقایع برای اشکال‌زدایی">
-<!ENTITY zotero.preferences.debugOutputLogging.message "ثبت وقایع برای اشکال‌زدایی، به توسعه‌دهندگان زوترو برای یافتن اشکالات کمک می‌کند. ثبت وقایع زوترو را کند می‌کند. بنابراین بهتر است این گزینه را غیرفعال کنید مگر اینکه یک توسعه‌دهنده زوترو، اطلاعات اشکال‌زدایی را درخواست کرده باشد.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "تعداد خطوط ثبت شده">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "فعال‌سازی پس از راه‌اندازی مجدد">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "نمایش خروجی">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "پاک کردن خروجی">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "ارسال به کارگزار زوترو">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

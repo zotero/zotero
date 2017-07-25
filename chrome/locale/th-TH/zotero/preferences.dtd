@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "แฟ้มและโฟลเดอร์">
 <!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "หาที่ตั้ง">
 <!ENTITY zotero.preferences.locate.locateEngineManager "ตัวจัดการเครื่องมือค้นหาบทความ">
 <!ENTITY zotero.preferences.locate.description "รายละเอียด">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "บันทึกการส่งออกการแก้จุดบกพร่อง">
-<!ENTITY zotero.preferences.debugOutputLogging.message "การส่งออกการแก้จุดบกพร่องสามารถช่วยผู้พัฒนา Zotero ให้รู้ถึงปัญหา การบันทึกแก้จุดบอกพร่องจะทำให้ Zotero ช้าลง ดังนั้นคุณไม่ควรใช้ตัวเลือกนี้เว้นแต่ผู้พัฒนา Zotero จะร้องขอให้ส่งออกการแก้จุดบกพร่อง">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "ลงบันทึกจำนวนบรรทัด">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "ใช้งานได้หลังจากเริ่มโปรแกรมใหม่">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "ดูผลลัพธ์">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "ล้างผลลัพธ์">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "ส่งไปเครื่องบริการของ Zotero">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

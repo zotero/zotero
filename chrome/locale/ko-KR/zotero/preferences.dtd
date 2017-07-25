@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "파일 및 폴더">
 <!ENTITY zotero.preferences.advanced.keys "바로가기">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "위치">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article 검색 엔진 메니저">
 <!ENTITY zotero.preferences.locate.description "설명">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "중계기 및 스타일 재설정...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "중계기 재설정...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "스타일 재설정...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "디버그 출력 로그">
-<!ENTITY zotero.preferences.debugOutputLogging.message "디버그 출력은 Zotero 개발자가 문제를 해결하는데 도움을 줍니다. 디버그 로깅은 Zotero의 실행속도를 저하시킵니다. 따라서 Zotero 개발자가 디버그 출력을 요구하지 않는한 사용하지 마십시오.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "줄 기록됨">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "재시작 후 사용">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "출력 보기">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "출력 지우기">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Zotero 서버에 제출">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

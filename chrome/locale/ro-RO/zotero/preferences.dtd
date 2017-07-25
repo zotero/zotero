@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Fișiere și dosare">
 <!ENTITY zotero.preferences.advanced.keys "Scurtături">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Localizează">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Manager pentru motorul de căutare a articolelor">
 <!ENTITY zotero.preferences.locate.description "Descriere">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Resetează traducătorii și stilurile...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Resetează traducători...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Resetează stiluri...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Depanare jurnal de ieșire">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Datele de ieșire de la depanare pot ajuta dezvoltatorii Zotero să diagnosticheze problemele din Zotero. Jurnalul de depanare va încetini Zotero, așa încât va trebui să-l păstrați dezactivat până când un dezvoltator Zotero cere datele de ieșire de la depanare.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "linii înregistrate">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Activare după restart">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Vizualizare ieșire">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Ștergere ieșire">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Trimitere către serverul Zotero">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

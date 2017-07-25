@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Soubory a Složky">
 <!ENTITY zotero.preferences.advanced.keys "Klávesové zkratky">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Najít">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Správce mechanismu pro vyhledávání článků">
 <!ENTITY zotero.preferences.locate.description "Popis">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Resetovat překladače a styly">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Resetovat překladače">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Resetovat styly...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Záznam z výstupu ladění (Debug log)">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Záznam z výstupu ladění (Debug log) může pomoci vývojářům Zotera diagnostikovat problémy. Zápis záznamu (logování) ovšem může Zotero zpomalit. Obecně byste jej proto neměli zapínat, pokud o to vývojář Zotera nepožádá.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "zalogovaných řádků">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Zapnout po restartu">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Prohlédnout výstup">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Vymazat výstup">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Odeslat na Zotero Server">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

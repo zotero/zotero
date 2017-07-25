@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Loading…">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
-<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "សូមរង់ចាំ ខណៈពេលកំពុងធ្វើរបាយការណ៍អំពីកំហុស។">
 <!ENTITY zotero.errorReport.submitted "កំហុសបានធ្វើរបាយការណ៍រួចហើយ។">
 <!ENTITY zotero.errorReport.reportID "អត្តលេខរបាយការណ៍:">

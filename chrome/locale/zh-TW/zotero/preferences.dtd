@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "檔案與資料夾">
 <!ENTITY zotero.preferences.advanced.keys "快捷鍵">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "查詢">
 <!ENTITY zotero.preferences.locate.locateEngineManager "論文查詢引擎管理器">
 <!ENTITY zotero.preferences.locate.description "描述">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "重設轉譯器與樣式...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重設轉譯器...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "重設樣式...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "偵錯輸出紀錄">
-<!ENTITY zotero.preferences.debugOutputLogging.message "偵錯輸出可幫助 Zotero 開發人員診斷 Zotero 的問題。偵錯記錄會拖慢 Zotero，所以除非 Zotero 開發人員要求偵錯輸出，否則一般來說請關閉它。">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "行記錄">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "重新啟動後啟用">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "檢視輸出">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "清除輸出">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "提交到 Zotero 伺服器">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

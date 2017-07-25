@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Loading…">
 
 <!ENTITY zotero.errorReport.title "Informe d'error de Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "Això pot incloure missatges no relacionats amb el Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Espereu mentre s&apos;envia l&apos;informe d&apos;error.">
 <!ENTITY zotero.errorReport.submitted "L&apos;informe d&apos;error ha estat enviat correctament.">
 <!ENTITY zotero.errorReport.reportID "Número de referència de l&apos;informe:">

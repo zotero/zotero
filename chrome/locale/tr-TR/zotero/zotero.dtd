@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Yükleniyor...">
 
 <!ENTITY zotero.errorReport.title "Zotero Hata Raporu">
-<!ENTITY zotero.errorReport.unrelatedMessages "Bu, Zotero ile ilgili olmayan mesajlar içerebilir.">
 <!ENTITY zotero.errorReport.submissionInProgress "Lütfen hata raporu gönderilene kadar bekleyiniz.">
 <!ENTITY zotero.errorReport.submitted "Hata raporu gönderilmiştir.">
 <!ENTITY zotero.errorReport.reportID "Rapor Kimlik Numarası:">

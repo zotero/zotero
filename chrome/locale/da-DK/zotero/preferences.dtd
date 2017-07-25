@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Filer og mapper">
 <!ENTITY zotero.preferences.advanced.keys "Genvejstaster">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Lokalisér">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Håndtering af søgemaskiner for artikler">
 <!ENTITY zotero.preferences.locate.description "Beskrivelse">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Nulstil oversættere og bibliografiske formater...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Nulstil oversættere...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Nulstil bibliografiske formater...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Debug logning af output">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Debug-output kan hjælpe Zoteros udviklere med at diagnosticere problemer i Zotero. Debug-logning få Zotero til at reagere langsommere, så du bør have det slået fra medmindre en Zotero-udvikler kræver om det.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "linjer som er logget">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Slå til efter genstart">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Vis output">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Ryd output">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Fremsend til Zotero Server">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

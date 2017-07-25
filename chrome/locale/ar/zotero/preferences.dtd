@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "الملفات والمجلدات">
 <!ENTITY zotero.preferences.advanced.keys "اختصارات">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "تحديد موقع المقتنى">
 <!ENTITY zotero.preferences.locate.locateEngineManager "إدارة محرك البحث">
 <!ENTITY zotero.preferences.locate.description "الوصف">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "تسجيل اخطاء تشغيل البرنامج">
-<!ENTITY zotero.preferences.debugOutputLogging.message "سجل اخطاء تشغيل البرنامج تساعد المطورين للتعرف على المشاكل في برنامج زوتيرو. سجل اخطاء تشغيل البرنامج سوف تبطئ عمل برنامج زوتيرو، لذا يجب عليك تركها معطلة مالم يطلب منك احد المطورين سجل الاخطاء لديك.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "عدد سطور سجل الاخطاء">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "التمكين بعد اعادة التشغيل">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "عرض سجل اخطاء البرنامج">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "مسح سجل اخطاء البرنامج">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "ارسال سجل الاخطاء لخادم زوتيرو">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

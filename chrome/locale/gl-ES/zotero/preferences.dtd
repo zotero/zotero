@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Ficheiros e cartafois">
 <!ENTITY zotero.preferences.advanced.keys "Atallos">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Localizador">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Xestor do motor de busca de artigos">
 <!ENTITY zotero.preferences.locate.description "Descrición">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Recuperar tradutores e estilos">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Recuperar tradutores...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Recuperar os estilos">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Depurar a saída de rexistro">
-<!ENTITY zotero.preferences.debugOutputLogging.message "A saída de depuración pode axudar aos desenvolvedores de Zotero a identificar erros. A proceso de depuración desacelera Zotero de xeito que, en xeral, sóese deixar desactivada agás que un desenvolvedor lle solicite a saída de depuración.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "liñas rexistradas">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Activar despois de reiniciar">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Ver a saída">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Borrar a saída">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Enviar ao servidor de Zotero">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

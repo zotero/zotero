@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Carregando…">
 
 <!ENTITY zotero.errorReport.title "Relatório de Erros do Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "Pode incluir mensagens sem relação com o Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Por favor aguarde enquanto o relatório de erro é enviado.">
 <!ENTITY zotero.errorReport.submitted "O relatório de erro foi enviado.">
 <!ENTITY zotero.errorReport.reportID "ID de Relatório:">

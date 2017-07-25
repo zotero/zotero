@@ -74,5 +74,13 @@
 
 <!ENTITY helpReportErrors.label "Zotero 오류 보고서 보내기...">
 <!ENTITY helpReportErrors.accesskey "R">
+
+<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Submit Output">
+<!ENTITY debugOutputLogging.view "View Output">
+<!ENTITY debugOutputLogging.clear "Clear Output">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled">
+
 <!ENTITY helpCheckForUpdates.label "업데이트 확인...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

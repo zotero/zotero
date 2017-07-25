@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "文件和文件夹">
 <!ENTITY zotero.preferences.advanced.keys "快捷键">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "定位">
 <!ENTITY zotero.preferences.locate.locateEngineManager "文章检索引擎管理器">
 <!ENTITY zotero.preferences.locate.description "描述">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "重置翻译器和样式……">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重置翻译器……">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "重置样式……">
-
-<!ENTITY zotero.preferences.debugOutputLogging "调试输出记录">
-<!ENTITY zotero.preferences.debugOutputLogging.message "调试日志可以帮助 Zotero 开发人员诊断问题. 记录调试日志会拖慢 Zotero, 所以除非 Zotero 开发人员请求获取调试日志, 否则请禁用此项.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "行被记录了">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "重启后启用">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "查看输出">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "清除输出">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "提交到 Zotero 服务器">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

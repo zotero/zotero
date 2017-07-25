@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Loading…">
 
 <!ENTITY zotero.errorReport.title "تقرير خطأ لزوتيرو">
-<!ENTITY zotero.errorReport.unrelatedMessages "قد يتضمن هذا على رسائل ليس لها علاقة بزوتيرو.">
 <!ENTITY zotero.errorReport.submissionInProgress "برجاء الانتظار لحين الانتهاء من ارسال التقرير عن الخطأ.">
 <!ENTITY zotero.errorReport.submitted "تم ارسال التقرير عن الخطأ.">
 <!ENTITY zotero.errorReport.reportID "رقم التقرير:">

@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "加载…">
 
 <!ENTITY zotero.errorReport.title "Zotero 错误报告">
-<!ENTITY zotero.errorReport.unrelatedMessages "这里可能包括和Zotero无关的消息。">
 <!ENTITY zotero.errorReport.submissionInProgress "正在提交错误报告, 请稍候.">
 <!ENTITY zotero.errorReport.submitted "错误报告已经提交.">
 <!ENTITY zotero.errorReport.reportID "报告ID:">

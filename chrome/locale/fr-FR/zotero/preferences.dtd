@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Fichiers et dossiers">
 <!ENTITY zotero.preferences.advanced.keys "Raccourcis clavier">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Localiser">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestion des moteurs de recherche d'articles">
 <!ENTITY zotero.preferences.locate.description "Description">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Réinitialiser les convertisseurs et les styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Réinitialiser les convertisseurs…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Réinitialiser les styles…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Journalisation de la sortie de débogage">
-<!ENTITY zotero.preferences.debugOutputLogging.message "La sortie de débogage peut aider les développeurs de Zotero à diagnostiquer des problèmes au sein de l'extension. La journalisation du débogage ralentira Zotero, il est donc préférable de la laisser désactivée sauf si un développeur de Zotero demande une sortie de débogage.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "lignes consignées">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Activer après le redémarrage">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Afficher la sortie">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Effacer la sortie">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Transmettre au serveur de Zotero">
 
 <!ENTITY zotero.preferences.configEditor "Éditeur de configuration">

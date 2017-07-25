@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Файлы и папки">
 <!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Обнаружение">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Диспетчер систем поиска статей">
 <!ENTITY zotero.preferences.locate.description "Описание">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Запись отладочной информации">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Отладочная информация может помочь разработчикам Zotero диагностировать возникшие проблемы. Запись отладочной информации замедлит Zotero, поэтому обычно её следует включать, только если об этом попросит разработчик.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "строк записано">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Включить после перезапуска">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Посмотреть запись">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Очистить запись">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Отправить на сервер Zotero">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

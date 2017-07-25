@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Failid ja kataloogid">
 <!ENTITY zotero.preferences.advanced.keys "Kiirvaliku klahvid">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Otsing">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikli otsingumootori haldaja">
 <!ENTITY zotero.preferences.locate.description "Kirjeldus">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Veateadete logimine">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Veateadete logimine aitab Zotero arendajatel diagnoosida Zoteroga esinevaid probleeme. Veateadete logimine aeglustab Zotero tegevust, niisiis ei ole seda üldjuhul tarvis sisse lülitada.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "ridu logitud">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Lülitada pärast taaskäivitamist sisse">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Logi vaatamine">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Logi tühjendamine">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Saata Zotero serverisse">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

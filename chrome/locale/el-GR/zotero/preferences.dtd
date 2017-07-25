@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Αρχεία και Φάκελοι">
 <!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Εντοπισμός">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Διαχειριστής Μηχανής Αναζήτησης Άρθρων">
 <!ENTITY zotero.preferences.locate.description "Περιγραφή">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Καταγραφές αποσφαλμάτωσης αποτελεσμάτων">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Η έξοδος ή αποτέλεσμα προς αποσφαλμάτωση μπορεί να βοηθήσει τους προγραμματιστές του Zotero να διαγιγνώσκουν προβλήματα. Οι καταγραφές αποσφαλμάτωσης θα επιβραδύνουν το Zotero, γι' αυτό εν γένει πρέπει να μην τις ενεργοποιείτε, εκτός κι αν κάποιος προγραμματιστής του Zotero ζητά εξόδους αποσφαλμάτωσης.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "καταγεγραμμένες γραμμές">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Ενεργοποίηση μετά από επανεκκίνηση">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Προβολή εξόδου">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Εκκαθάριση εξόδου">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Να υποβληθούν στον διακομιστή Zotero">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

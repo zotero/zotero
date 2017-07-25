@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Dosyalar ve Klasörler">
 <!ENTITY zotero.preferences.advanced.keys "Kısayollar">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Yerini Bul">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Makale Bakma Motoru Yöneticisi">
 <!ENTITY zotero.preferences.locate.description "Tanım">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Çevirmenleri ve Stilleri Sıfırla...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Çevirmenleri Sıfırla...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stilleri Sıfırla...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Hata Ayıklaması Çıktısının Kaydı">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Hata ayıklama çıktısı, Zotero geliştiricilerine Zotero'daki sorunların düzeltilmesinde yardım eder. Hata ayıklama özelliği Zotero'yu yavaşlatacaktır. Bir Zotero geliştiricisi hata ayıklama kaydı istemediği sürece bu özelliği seçilmemiş olarak bırakınız.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "satır kaydedilmiş">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Tekrar başladıktan sonra etkinleştir">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Çıktıyı Göster">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Çıktıyı Temizle">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Zotero Sunucusuna Gönder">
 
 <!ENTITY zotero.preferences.configEditor "Yapılandırma Düzenleyicisi">

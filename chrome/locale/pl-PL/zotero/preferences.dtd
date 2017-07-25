@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Pliki i katalogi">
 <!ENTITY zotero.preferences.advanced.keys "Skróty klawiaturowe">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Wyszukaj">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Zarządzanie silnikami wyszukiwania">
 <!ENTITY zotero.preferences.locate.description "Opis">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Przywróć translatory i style...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Przywróć translatory...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Przywróć style...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Logowanie informacji debugowania">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Informacje debugowania mogą pomóć programistom Zotero wykryć problemy w Zotero. Zapisywanie informacji debugowania spowalnia pracę Zotero, więc zwykle powinno sie zostawić tą opcję wyłączoną, chyba że programista Zotero zażądał takiej informacji.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "wierszy zapisano">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Włącz po ponownym uruchomieniu">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Pokaż wyjście">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Wyczyść wyjście">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Wyślij na serwer Zotero">
 
 <!ENTITY zotero.preferences.configEditor "Edytor ustawień">

@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Skrár og möppur">
 <!ENTITY zotero.preferences.advanced.keys "Flýtivísanir">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Staðsetja">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Stýring á uppflettikerfi greina">
 <!ENTITY zotero.preferences.locate.description "Lýsing">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Endurræsa þýðendur og stíla…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Endurræsa þýðendur…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Endurstilla stíla…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Kemba útkeyrslu eftirlitsskrár">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Kembun á útkeyrslu getur hjálpað Zotero forriturum og hönnuðum að greina vandamál í Zotero. Aðgerðaskráning mun hægja á Zotero og því er best að afvirkja slíka skráningu nema forritunaraðili frá Zotero biðji um kembunar útkeyrslu.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "skráðar línur">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Virkja eftir endurræsingu">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Sýna útkeyrslu">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Hreinsa útkeyrslu">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Senda til Zotero netþjóns">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

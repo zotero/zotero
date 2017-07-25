@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "ファイルとフォルダ">
 <!ENTITY zotero.preferences.advanced.keys "ショートカット">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "所在確認">
 <!ENTITY zotero.preferences.locate.locateEngineManager "所在確認エンジンの管理">
 <!ENTITY zotero.preferences.locate.description "詳細">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "トランスレータと引用スタイルをリセットする...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "トランスレータをリセットする...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "引用スタイルをリセットする...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "デバッグ出力の記録">
-<!ENTITY zotero.preferences.debugOutputLogging.message "デバッグ出力は Zotero 開発者が Zotero 内部の問題を診断する際に役立ちます。デバッグ出力の記録は Zotero の動作を重くするので、Zotero 開発者からデバッグ出力の要求があった場合を除き、通常はこの機能を無効のままにしてください。">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "行が記録されました。">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "再起動の後で有効化">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "デバッグ出力を閲覧する">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "デバッグ出力を消去する">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Zotero サーバに報告する">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

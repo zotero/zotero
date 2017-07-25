@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Lade...">
 
 <!ENTITY zotero.errorReport.title "Zotero Fehlerbericht">
-<!ENTITY zotero.errorReport.unrelatedMessages "Unter Umständen sind Nachrichten enthalten, die nicht mit Zotero in Verbindung stehen.">
 <!ENTITY zotero.errorReport.submissionInProgress "Bitte warten Sie, während der Fehlerbericht übermittelt wird.">
 <!ENTITY zotero.errorReport.submitted "Der Fehlerbericht wurde übermittelt.">
 <!ENTITY zotero.errorReport.reportID "Bericht-ID:">

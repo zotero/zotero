@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Įkeliama...">
 
 <!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Zotero programoje">
-<!ENTITY zotero.errorReport.unrelatedMessages "Čia gali būti pranešimų, visai nesusijusių su Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Prašome palaukti kol siunčiamas klaidų sąrašas.">
 <!ENTITY zotero.errorReport.submitted "Jūsų klaidų sąrašas buvo nusiųstas.">
 <!ENTITY zotero.errorReport.reportID "Pranešimo ID:">

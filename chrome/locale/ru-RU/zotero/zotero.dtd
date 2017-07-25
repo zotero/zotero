@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Загрузка...">
 
 <!ENTITY zotero.errorReport.title "Отчет об ошибке Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Подождите, пока отчет об ошибке будет отправлен.">
 <!ENTITY zotero.errorReport.submitted "Отчет об ошибке отправлен.">
 <!ENTITY zotero.errorReport.reportID "Номер отчета:">

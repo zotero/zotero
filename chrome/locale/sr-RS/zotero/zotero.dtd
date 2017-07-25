@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Учитавам…">
 
 <!ENTITY zotero.errorReport.title "Пријављивање грешака у Зотеру">
-<!ENTITY zotero.errorReport.unrelatedMessages "Ово може да обухвати поруке које немају везе са Зотером.">
 <!ENTITY zotero.errorReport.submissionInProgress "Сачекајте док пошаљемо извештај о грешци.">
 <!ENTITY zotero.errorReport.submitted "Извештај о грешци је послат.">
 <!ENTITY zotero.errorReport.reportID "Број извештаја:">

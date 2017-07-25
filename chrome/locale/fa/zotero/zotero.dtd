@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Loading…">
 
 <!ENTITY zotero.errorReport.title "گزارش خطا در زوترو">
-<!ENTITY zotero.errorReport.unrelatedMessages "این ممکن است شامل پیام‌هایی غیرمرتبط با زوترو باشد.">
 <!ENTITY zotero.errorReport.submissionInProgress "لطفا تا پایان ارسال گزارش خطا، صبر کنید.">
 <!ENTITY zotero.errorReport.submitted "گزارش خطا ارسال شد.">
 <!ENTITY zotero.errorReport.reportID "شناسه گزارش:">

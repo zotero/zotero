@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Завантаження">
 
 <!ENTITY zotero.errorReport.title "Звіт про помилку в Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "Це може включати повідомлення, які не відносяться до Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Почекайте, поки звіт про помилку буде передано.">
 <!ENTITY zotero.errorReport.submitted "Ваш звіт про помилку був переданий.">
 <!ENTITY zotero.errorReport.reportID "Номер звіту:">

@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Datoteke in mape">
 <!ENTITY zotero.preferences.advanced.keys "Tipke za bližnjice">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Lociraj">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Upravitelj pogona iskanja člankov">
 <!ENTITY zotero.preferences.locate.description "Opis">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Ponastavi prevajalnike in sloge ...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Ponastavi prevajalnike ...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Ponastavi sloge ...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Beleženje izhoda razhroščevanja">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Izhod razhroščevanja lahko pomaga razvijalcem Zotera pri diagnostiki težav v Zoteru. Beleženje razhroščevanja upočasni Zotero, zato ga v splošnem pustite onemogočenega, razen če razvijalec Zotera zaprosi za izhod razhroščevanja.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "zabeleženih vrstic">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Omogoči po ponovnem zagonu">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Pokaži izhod">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Počisti izhod">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Objavi na strežniku Zotero">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

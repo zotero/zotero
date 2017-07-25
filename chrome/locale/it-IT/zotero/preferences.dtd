@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "File e cartelle">
 <!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Trova">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestore dei motori di ricerca di articoli">
 <!ENTITY zotero.preferences.locate.description "Descrizione">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Registrazione dell'output di debug">
-<!ENTITY zotero.preferences.debugOutputLogging.message "L'output di debug può aiutare gli sviluppatori di Zotero a diagnosticare problemi nel software. La registrazione del debug causa un rallentamento di Zotero, quindi in generale deve rimanere disattivata a meno che uno sviluppatore di Zotero non richieda l'output di debug.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "righe registrate">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Attiva dopo il riavvio">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Visualizza output">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Cancella l'output">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Invia al server Zotero">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "読み込み中...">
 
 <!ENTITY zotero.errorReport.title "Zotero エラーレポート">
-<!ENTITY zotero.errorReport.unrelatedMessages "エラーの記録にはZotero に無関係のメッセージが含まれている恐れがあります。">
 <!ENTITY zotero.errorReport.submissionInProgress "エラーレポートが送信されるまでお待ちください。">
 <!ENTITY zotero.errorReport.submitted "エラーレポートが送信されました。">
 <!ENTITY zotero.errorReport.reportID "レポート ID:">

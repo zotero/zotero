@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Súbory a adresáre">
 <!ENTITY zotero.preferences.advanced.keys "Klávesové skratky">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Nájsť">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Správca motora vyhľadávania článkov">
 <!ENTITY zotero.preferences.locate.description "Popis">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Obnoviť konvertory a citačné štýly...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Obnoviť konvertory...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Obnoviť citačné štýly...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Záznam protokolu ladenia chýb">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Protokol ladenia môže pomôcť vývojárom rozpoznať problémy v Zotere. Zaznamenávanie protokolu spomalí Zotero, takže túto možnosť by ste mali povoliť iba vtedy, keď si od vás protokol ladenia vyžiada niekto z vývojárskeho tímu Zotera.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "zaznamenaných riadkov">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Povoliť pri novom spustení">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Zobraziť protokol">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Vymazať protokol">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Odoslať na server Zotero">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

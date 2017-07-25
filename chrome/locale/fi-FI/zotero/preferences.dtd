@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Tiedostot ja kansiot">
 <!ENTITY zotero.preferences.advanced.keys "Pikanäppäimet">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Paikanna">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikkelihakumoottorin hallinta">
 <!ENTITY zotero.preferences.locate.description "Kuvaus">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Virheenjäljityksen päiväkirja">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Virheenjäljityksen päiväkirja voi auttaa Zoteron kehittäjiä diagnosoimaan Zoteron ongelmia. Virheenjäljitys hidastaa Zoteron toimintaa, joten sen tulisi yleisesti ottaen olla poissa päältä ellei Zoteron kehittäjä erikseen pyydää virheenjäljityksen päiväkirjaa.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "riviä päiväkirjassa">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Laita päälle uudelleenkäynnistyksen jälkeen">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Katso päiväkirjaa">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Tyhjennä päiväkirja">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Lähetä Zotero-palvelimelle">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

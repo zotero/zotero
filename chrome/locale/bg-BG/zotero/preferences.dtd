@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 <!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Locate">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
 <!ENTITY zotero.preferences.locate.description "Description">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Запис на грешките в журнал">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Журнала с грешките може да помогне за разработчитците на Зотеро да диагностицират проблемите. Записа на грешките забавя Зотеро, така че е по-добре да го държите изключен освен ако някой от разработчиците не го поиска.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "редове в журнала">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Остава включен след рестартиране">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Разглежда изведените дани">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Изчиства изведените дани">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Изпраща до сървъра на Зотеро">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

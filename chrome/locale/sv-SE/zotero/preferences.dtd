@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Filer och kataloger">
 <!ENTITY zotero.preferences.advanced.keys "Genvägar">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Hitta">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Hantera söktjänst för artiklar">
 <!ENTITY zotero.preferences.locate.description "Beskrivning">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Återställ översättare och stilar...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Återställ översättare...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Återställ stilar...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Logga utdata för felsökning">
-<!ENTITY zotero.preferences.debugOutputLogging.message "En logg kan hjälpa Zoteros utvecklare att diagnosticera problem i Zotero. Att skapa loggar kommer att sakta ner Zotero, så det bör inte vara påslaget om man inte vill felsöka Zotero.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "loggade rader">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Aktivera efter omstart">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Visa utdata">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Rensa utdata">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Skicka till Zotero-server">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

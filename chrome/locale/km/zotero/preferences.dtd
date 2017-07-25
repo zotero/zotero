@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "ឯកសារនិងថតឯកសារ">
 <!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "ទីតាំងឯកសារ">
 <!ENTITY zotero.preferences.locate.locateEngineManager "ម៉ាស៊ីនគ្រប់គ្រងស្វែងរកអត្ថបទ">
 <!ENTITY zotero.preferences.locate.description "ពិពណ៌នា">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "ចុះកំណត់ហេតុកំហុស">
-<!ENTITY zotero.preferences.debugOutputLogging.message "កំណត់ហេតុកំហុសអាចជួយឲអ្នកបង្កើតហ្ស៊ូតេរ៉ូវិភាគបញ្ហាដែលមាននៅក្នុងហ្ស៊ូតេរ៉ូ។ ការចុះកំណត់ហេតុកំហុសអាចពន្យឺតហ្ស៊ូតេរ៉ូរបស់អ្នក ដូច្នេះហើយ អ្នកគួរតែទុកវាមិនឲដំណើរការ លុះត្រាតែអ្នកបង្កើតហ្ស៊ូតេរ៉ូ ស្នើសុំកំណត់ហេតុទិន្នផលកំហុស។">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "បន្ទាត់បានចុះកំណត់ហេតុកំហុស">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "អាចដំណើរការបាន បន្ទាប់ពីចាប់ផ្តើមជាថ្មី">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "មើលទិន្នផល">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "សម្អាតទិន្នផល">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "ដាក់ជូនម៉ាស៊ីនបម្រើហ្ស៊ូតេរ៉ូ">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

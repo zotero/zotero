@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Loading…">
 
 <!ENTITY zotero.errorReport.title "Zotero-foutrapportage">
-<!ENTITY zotero.errorReport.unrelatedMessages "Dit bevat mogelijk berichten die niet gerelateerd zijn aan Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Even geduld a.u.b. totdat het foutenrapport is verstuurd.">
 <!ENTITY zotero.errorReport.submitted "Het foutenrapport is verstuurd.">
 <!ENTITY zotero.errorReport.reportID "Rapport ID:">

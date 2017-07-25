@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Bestanden en mappen">
 <!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Opzoeken">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Manager voor artikel-zoekmachines">
 <!ENTITY zotero.preferences.locate.description "Beschrijving">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Foutopsporingsberichten bewaren">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Foutopsporingsberichten kunnen Zotero-ontwikkelaars helpen met de diagnose van problemen met Zotero. Het bewaren van foutopsporingsberichten vertraagd Zotero en moet eigenlijk uitgeschakeld blijven totdat een Zotero-ontwikkelaar om foutopsporingsberichten vraagt.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "regels bewaard">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Aanzetten na herstart">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Uitvoer bekijken">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Uitvoer wissen">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Naar Zotero-server opsturen">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

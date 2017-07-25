@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Файли та каталоги">
 <!ENTITY zotero.preferences.advanced.keys "Гарячі клавіши">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Виявлені">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Диспетчер систем пошуку статей">
 <!ENTITY zotero.preferences.locate.description "Опис">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Скинути тарнслятори та стилі...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Скинути транслятори...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Скинути стилі...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Запис інформації відладки">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Інформація відладки може допомогти розробникам Zotero діагностувати помилки, що виникли. Записк інфрмації відладки сповільнить роботу Zotero, тому зазвичай її варто включати, тільки якщо про це просить розробник.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "рядків записано">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Включити після перезапуску">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Подивитись запис">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Очистити запис">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Відправити на сервер Zotero">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

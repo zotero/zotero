@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Loading…">
 
 <!ENTITY zotero.errorReport.title "Zotero hibajelentés">
-<!ENTITY zotero.errorReport.unrelatedMessages "Tartalmazhat a Zotero-tól független üzeneteket.">
 <!ENTITY zotero.errorReport.submissionInProgress "Várjon a hibajelentés elküldéséig.">
 <!ENTITY zotero.errorReport.submitted "A hibajelentés elküldve.">
 <!ENTITY zotero.errorReport.reportID "Jelentés azonosítója:">

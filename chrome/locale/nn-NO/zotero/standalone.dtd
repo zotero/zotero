@@ -74,5 +74,13 @@
 
 <!ENTITY helpReportErrors.label "Meld feil i Zotero …">
 <!ENTITY helpReportErrors.accesskey "M">
+
+<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Submit Output">
+<!ENTITY debugOutputLogging.view "View Output">
+<!ENTITY debugOutputLogging.clear "Clear Output">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled">
+
 <!ENTITY helpCheckForUpdates.label "Sjå etter oppdateringar …">
 <!ENTITY helpCheckForUpdates.accesskey "O">

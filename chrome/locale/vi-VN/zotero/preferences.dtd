@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Các tập tin và thư mục">
 <!ENTITY zotero.preferences.advanced.keys "Các lối tắt">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Tìm kiếm">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Bộ quản lý cơ chế tìm bài viết">
 <!ENTITY zotero.preferences.locate.description "Mô tả">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Thiết lập lại các bộ chuyển đổi và style">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Thiết lập lại bộ chuyển đổi">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Thiết lập lại style">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Xem log cho gỡ rối">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Thông tin gỡ rối có thể giúp các nhà phát triển Zotero chẩn đoán lỗi của Zotero. Ghi nhận thông tin gỡ rối làm chậm Zotero nên thông thường bạn nên tắt nó trừ khi một nhà phát triển Zotero yêu cầu Thông tin gỡ rối.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "dòng được ghi nhận">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Cho phép sau khi khởi động lại">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Xem thông tin gỡ rối">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Xóa thông tin gỡ rối">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Gửi tới máy chủ Zotero">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

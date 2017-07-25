@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Đang nạp...">
 
 <!ENTITY zotero.errorReport.title "Báo cáo lỗi Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "Có thể gồm các thông báo không liên quan tới Zotero">
 <!ENTITY zotero.errorReport.submissionInProgress "Xin vui lòng chờ trong khi báo cáo lỗi được gửi đi.">
 <!ENTITY zotero.errorReport.submitted "Báo cáo lỗi đã được gửi đi">
 <!ENTITY zotero.errorReport.reportID "ID của Báo cáo:">

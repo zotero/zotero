@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 <!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Temukan">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Pengelola Mesin Pencarian Artikel">
 <!ENTITY zotero.preferences.locate.description "Deskripsi">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Pencatatan Output Debug">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Output debug dapat membantu pengembang Zotero untuk mendiagnosis masalah yang terjadi pada Zotero.  Pencatatan debug akan memperlambat Zotero, sehingga Anda sebaiknya tetap menonaktifkannya, kecuali bila pengembang Zotero meminta output debug.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "baris tercatat">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Aktifkan setelah restart">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Lihat Output">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Bersihkan Output">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Kirimkan ke Server Zotero">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

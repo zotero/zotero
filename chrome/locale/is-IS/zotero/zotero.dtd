@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Hleð inn…">
 
 <!ENTITY zotero.errorReport.title "Zotero villutilkynning">
-<!ENTITY zotero.errorReport.unrelatedMessages "Hér gætu einnig verið skilaboð ótengd Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Bíddu aðeins á meðan villuskýrsla er send.">
 <!ENTITY zotero.errorReport.submitted "Villuskýrsla þín hefur verið send.">
 <!ENTITY zotero.errorReport.reportID "Auðkennisnúmer (ID) skýrslu:">

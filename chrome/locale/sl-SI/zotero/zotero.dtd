@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Nalaganje ...">
 
 <!ENTITY zotero.errorReport.title "Poročilo o napaki Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "Vključuje lahko sporočila, ki se ne nanašajo na Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Počakajte, da je poročilo o napaki oddano.">
 <!ENTITY zotero.errorReport.submitted "Poročilo o napaki je bilo oddano.">
 <!ENTITY zotero.errorReport.reportID "ID poročila:">

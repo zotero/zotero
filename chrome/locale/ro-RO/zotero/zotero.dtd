@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Se încarcă...">
 
 <!ENTITY zotero.errorReport.title "Raportul de erori Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "Aceasta ar putea include mesaje fără legătură cu Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Așteaptă, te rog, ca raportul de eroare să fie trimis.">
 <!ENTITY zotero.errorReport.submitted "Raportul de eroare a fost trimis.">
 <!ENTITY zotero.errorReport.reportID "ID raport:">

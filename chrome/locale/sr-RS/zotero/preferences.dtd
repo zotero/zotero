@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Датотеке и фасцикле">
 <!ENTITY zotero.preferences.advanced.keys "Пречице">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Лоцирај">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Управник позадинским програмима за претрагу научних радова">
 <!ENTITY zotero.preferences.locate.description "Опис">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Поново постави преводиоце и стилове…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Поново постави преводиоце…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Поново постави стилове…">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Испис за отклањање грешака">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Испис намењен отклањању грешака може да помогне Зотеровим програмерима да увиде проблеме у Зотеру. Дневник за грешкама ће успорити Зотеро, тако да је препоручљиво да га не користите осим уколико вам програмери не затраже испис са грешком ради отклањања одређеног проблема.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "линија у дневнику">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Омогући након поновног покретања">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Прикажи излаз">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Очисти излаз">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Пошаљи на Зотеров сервер">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

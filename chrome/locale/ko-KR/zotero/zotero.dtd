@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "불러오는 중...">
 
 <!ENTITY zotero.errorReport.title "Zotero 오류 보고">
-<!ENTITY zotero.errorReport.unrelatedMessages "Zotero와 관련 없는 메시지가 포함될 수 있습니다.">
 <!ENTITY zotero.errorReport.submissionInProgress "오류 보고가 제출되는 동안 기다려 주세요.">
 <!ENTITY zotero.errorReport.submitted "오류 보고가 제출되었습니다.">
 <!ENTITY zotero.errorReport.reportID "보고서 ID:">

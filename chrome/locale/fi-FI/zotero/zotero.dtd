@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Loading…">
 
 <!ENTITY zotero.errorReport.title "Zoteron virheraportti">
-<!ENTITY zotero.errorReport.unrelatedMessages "Mukana saattaa olla Zoteroon liittymättömiä viestejä.">
 <!ENTITY zotero.errorReport.submissionInProgress "Odota, kunnes virheraportti on toimitettu.">
 <!ENTITY zotero.errorReport.submitted "Virheraporttisi on toimitettu.">
 <!ENTITY zotero.errorReport.reportID "Raportin tunnus:">

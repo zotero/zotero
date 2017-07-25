@@ -175,6 +175,8 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Failai ir katalogai">
 <!ENTITY zotero.preferences.advanced.keys "Spartieji klavišai">
 
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+
 <!ENTITY zotero.preferences.prefpane.locate "Rasti vietą">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Straipsnių paieškos variklių tvarkytuvė">
 <!ENTITY zotero.preferences.locate.description "Aprašas">
@@ -205,13 +207,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Atkurti transliatorius ir stilius...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Atkurti transliatorius...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Atkurti stilius...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Derinimo pranešimų žurnalas">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Derinimo pranešimai Zotero programuotojams gali padėti aptikti Zotero nesklandumus. Derinimo pranešimų rašymas į žurnalą gali sulėtinti Zotero darbą, tad šią funkciją siūlome naudoti tik tuomet, jei Zotero programuotojai paprašo pateikti derinimo išvedimą.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "eilutė(s)(-ių) įrašyta ">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Įgalinti paleidus iš naujo">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Rodyti išvedimą">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Išvalyti išvedimą">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Išsiųsti į Zotero serverį">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

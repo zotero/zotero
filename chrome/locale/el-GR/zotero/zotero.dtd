@@ -16,7 +16,6 @@
 <!ENTITY zotero.general.loading "Loading…">
 
 <!ENTITY zotero.errorReport.title "Αναφορά σφάλματος Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "Πιθανόν να συμπεριληφθούν μηνύματα άσχετα με το Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Περιμένετε μέχρι να υποβληθεί η αναφορά σφάλματος.">
 <!ENTITY zotero.errorReport.submitted "Η αναφορά σας σφάλματος υποβλήθηκε.">
 <!ENTITY zotero.errorReport.reportID "Ταυτότητα αναφοράς:">
