@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "A">
 <!ENTITY helpTroubleshootingInfo.label "Aide en cas de problème">
 <!ENTITY helpTroubleshootingInfo.accesskey "i">
-<!ENTITY helpFeedbackPage.label "Envoyer un commentaire ou un retour d'expérience…">
-<!ENTITY helpFeedbackPage.accesskey "E">
+<!ENTITY helpFeedbackPage.label "Forum Zotero">
+<!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "Rapport d'erreurs…">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
-<!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled">
+<!ENTITY debugOutputLogging.label "Journal de débogage">
+<!ENTITY debugOutputLogging.accesskey "J">
+<!ENTITY debugOutputLogging.submit "Envoyer le journal">
+<!ENTITY debugOutputLogging.view "Voir le journal">
+<!ENTITY debugOutputLogging.clear "Effacer le journal">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Redémarrer avec le journal activé">
 
 <!ENTITY helpCheckForUpdates.label "Vérifier les mises à jour…">
 <!ENTITY helpCheckForUpdates.accesskey "V">

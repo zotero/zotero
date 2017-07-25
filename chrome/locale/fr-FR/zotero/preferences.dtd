@@ -175,7 +175,7 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Fichiers et dossiers">
 <!ENTITY zotero.preferences.advanced.keys "Raccourcis clavier">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Configuration avancée">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localiser">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestion des moteurs de recherche d'articles">

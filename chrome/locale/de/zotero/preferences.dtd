@@ -125,8 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Erweiterungen für Textverarbeitungsprogramme herunterladen...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Alten Zitations-Dialog nutzen">
-<!ENTITY zotero.preferences.styleEditor "Style Editor">
-<!ENTITY zotero.preferences.stylePreview "Style Preview">
+<!ENTITY zotero.preferences.styleEditor "Zitierstil Editor">
+<!ENTITY zotero.preferences.stylePreview "Zitierstil Vorschau">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Stil Manager">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">
@@ -143,7 +143,7 @@
 <!ENTITY zotero.preferences.keys.newNote "Neue Notiz erstellen">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Alle Feed-Einträge alls Gelesen/Ungelesen markieren">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Tag-Selector an/aus">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Ausgewählte Eintragszitationen in die Zwischenablage kopieren">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Ausgewählte Einträge als In-Text-Zitationen in die Zwischenablage kopieren">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Ausgewählte Einträge in die Zwischenablage kopieren">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import aus der Zwischenablage">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Änderungen werden nach Neustart wirksam">
@@ -208,4 +208,4 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Übersetzer zurücksetzen...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stile zurücksetzen...">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "Konfigurationseditor">

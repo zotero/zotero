@@ -175,7 +175,7 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Dosyalar ve Klasörler">
 <!ENTITY zotero.preferences.advanced.keys "Kısayollar">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Gelişmiş Yapılandırma">
 
 <!ENTITY zotero.preferences.prefpane.locate "Yerini Bul">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Makale Bakma Motoru Yöneticisi">

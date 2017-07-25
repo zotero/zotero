@@ -69,7 +69,7 @@
 <!ENTITY productHelp.accesskey "S">
 <!ENTITY helpTroubleshootingInfo.label "Problembehebung">
 <!ENTITY helpTroubleshootingInfo.accesskey "P">
-<!ENTITY helpFeedbackPage.label "Feedback senden...">
+<!ENTITY helpFeedbackPage.label "Discussion Forums">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "Fehler melden...">

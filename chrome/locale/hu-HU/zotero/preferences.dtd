@@ -113,7 +113,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Másolás HTML-ként">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Weboldal-specifikus beállítások:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domén/Útvonal">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(pl: wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Nyelv">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "A gyorsmásolás kikapcsolása, amikor az elemek száma több, mint">

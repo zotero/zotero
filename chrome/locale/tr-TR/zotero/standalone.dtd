@@ -1,7 +1,7 @@
 <!ENTITY preferencesCmdMac.label "Tercihler...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Hizmetler">
-<!ENTITY hideThisAppCmdMac.label "&brandShortName;'i Sakla">
+<!ENTITY hideThisAppCmdMac.label "&brandShortName;'yu Sakla">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
 <!ENTITY hideOtherAppsCmdMac.label "Diğerlerini Sakla">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "?">
 <!ENTITY helpTroubleshootingInfo.label "Sorun Giderme Bilgisi">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Geri Bildirim Gönder...">
-<!ENTITY helpFeedbackPage.accesskey "S">
+<!ENTITY helpFeedbackPage.label "Tartışma Forumları">
+<!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "Hataları Bildir...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Hata Ayıklaması Çıktısının Kaydı">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled">
+<!ENTITY debugOutputLogging.submit "Çıktıyı Gönder">
+<!ENTITY debugOutputLogging.view "Çıktıyı Göster">
+<!ENTITY debugOutputLogging.clear "Çıktıyı Temizle">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Günlüğü Etkinleştirerek Yeniden Başlat">
 
 <!ENTITY helpCheckForUpdates.label "Güncellemeleri Denetle">
 <!ENTITY helpCheckForUpdates.accesskey "U">
