@@ -279,6 +279,15 @@ Zotero.LibraryTreeView.prototype = {
 	},
 	
 	
+	_removeRows: function (rows) {
+		rows = Zotero.Utilities.arrayUnique(rows);
+		rows.sort((a, b) => a - b);
+		for (let i = rows.length - 1; i >= 0; i--) {
+			this._removeRow(rows[i]);
+		}
+	},
+	
+	
 	getLevel: function (row) {
 		return this._rows[row].level;
 	},

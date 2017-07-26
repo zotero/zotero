@@ -593,6 +593,20 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			this._cellTextCache = {};
 		}
 		
+		// For a refresh on an item in the trash, check if the item still belongs
+		if (type == 'item' && collectionTreeRow.isTrash()) {
+			let rows = [];
+			for (let id of ids) {
+				let row = this.getRowIndexByID(id);
+				if (row === false) continue;
+				let item = Zotero.Items.get(id);
+				if (!item.deleted && !item.numChildren()) {
+					rows.push(row);
+				}
+			}
+			this._removeRows(rows);
+		}
+		
 		return;
 	}
 	
@@ -664,14 +678,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		}
 		
 		if (rows.length > 0) {
-			// Child items might have been added more than once
-			rows = Zotero.Utilities.arrayUnique(rows);
-			rows.sort(function(a,b) { return a-b });
-			
-			for (let i = rows.length - 1; i >= 0; i--) {
-				this._removeRow(rows[i]);
-			}
-			
+			this._removeRows(rows);
 			madeChanges = true;
 		}
 	}

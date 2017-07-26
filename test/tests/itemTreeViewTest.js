@@ -530,6 +530,23 @@ describe("Zotero.ItemTreeView", function() {
 			assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
 		});
 		
+		describe("Trash", function () {
+			it("should remove untrashed parent item when last trashed child is deleted", function* () {
+				var userLibraryID = Zotero.Libraries.userLibraryID;
+				var item = yield createDataObject('item');
+				var note = yield createDataObject(
+					'item', { itemType: 'note', parentID: item.id, deleted: true }
+				);
+				yield cv.selectByID("T" + userLibraryID);
+				yield waitForItemsLoad(win);
+				assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+				var promise = waitForDialog();
+				yield zp.emptyTrash();
+				yield promise;
+				assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
+			});
+		});
+		
 		describe("My Publications", function () {
 			before(function* () {
 				var libraryID = Zotero.Libraries.userLibraryID;
