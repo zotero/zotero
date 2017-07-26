@@ -116,7 +116,10 @@ Zotero.ItemTreeView.prototype.setTree = async function (treebox) {
 			return;
 		}
 		
-		await this.refresh(true);
+		// Don't expand to show search matches in My Publications
+		var skipExpandMatchParents = this.collectionTreeRow.isPublications();
+		
+		await this.refresh(skipExpandMatchParents);
 		if (!this._treebox.treeBody) {
 			return;
 		}
