@@ -649,16 +649,21 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 				};
 				
 				// Regexp mode -- don't use fulltext word index
-				if (condition.mode && condition.mode.indexOf('regexp') == 0) {
-					// In an ANY search, only bother scanning items that
-					// haven't already been found by the main search
-					if (joinMode == 'any') {
+				if (condition.mode && condition.mode.startsWith('regexp')) {
+					// In an ANY search with other conditions that alter the results, only bother
+					// scanning items that haven't already been found by the main search, as long as
+					// they're in the right library
+					if (joinMode == 'any' && this._hasPrimaryConditions) {
 						if (!tmpTable) {
 							tmpTable = yield Zotero.Search.idsToTempTable(ids);
 						}
 						
 						var sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE "
 							+ "itemID NOT IN (SELECT itemID FROM " + tmpTable + ")";
+						if (this.libraryID) {
+							sql += " AND libraryID=" + parseInt(this.libraryID);
+						}
+						
 						var res = yield Zotero.DB.valueQueryAsync(sql);
 						var scopeIDs = res ? res.split(",").map(id => parseInt(id)) : [];
 					}
@@ -672,6 +677,9 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 				else {
 					Zotero.debug('Running subsearch against fulltext word index');
 					var s = new Zotero.Search();
+					if (this.libraryID) {
+						s.libraryID = this.libraryID;
+					}
 					
 					// Add any necessary conditions to the fulltext word search --
 					// those that are required in an ANY search and any outside the
@@ -748,8 +756,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 				//
 				// We only do this if there are primary conditions that alter the
 				// main search, since otherwise all items will match
-				if (this._hasPrimaryConditions &&
-						(joinMode == 'any' || hasQuicksearch) && ids) {
+				if (this._hasPrimaryConditions && (joinMode == 'any' || hasQuicksearch)) {
 					//Zotero.debug("Adding filtered IDs to main set");
 					for (let i=0; i<filteredIDs.length; i++) {
 						let id = filteredIDs[i];
@@ -900,13 +907,21 @@ Zotero.Search.idsToTempTable = Zotero.Promise.coroutine(function* (ids) {
 	var tmpTable = "tmpSearchResults_" + Zotero.randomString(8);
 	
 	Zotero.debug(`Creating ${tmpTable} with ${ids.length} item${ids.length != 1 ? 's' : ''}`);
-	var sql = "CREATE TEMPORARY TABLE " + tmpTable + " AS "
+	var sql = "CREATE TEMPORARY TABLE " + tmpTable;
+	if (ids.length) {
+		sql += " AS "
 		+ "WITH cte(itemID) AS ("
 			+ "VALUES " + ids.map(id => "(" + parseInt(id) + ")").join(',')
 		+ ") "
 		+ "SELECT * FROM cte";
+	}
+	else {
+		sql += " (itemID INTEGER PRIMARY KEY)";
+	}
 	yield Zotero.DB.queryAsync(sql, false, { debug: false });
-	yield Zotero.DB.queryAsync(`CREATE UNIQUE INDEX ${tmpTable}_itemID ON ${tmpTable}(itemID)`);
+	if (ids.length) {
+		yield Zotero.DB.queryAsync(`CREATE UNIQUE INDEX ${tmpTable}_itemID ON ${tmpTable}(itemID)`);
+	}
 	
 	return tmpTable;
 });

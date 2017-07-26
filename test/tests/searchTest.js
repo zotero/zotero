@@ -116,9 +116,12 @@ describe("Zotero.Search", function() {
 	});
 
 	describe("#search()", function () {
-		let win;
-		let fooItem;
-		let foobarItem;
+		var win;
+		var userLibraryID;
+		var fooItem;
+		var foobarItem;
+		var fooItemGroup;
+		var foobarItemGroup;
 
 		before(function* () {
 			// Hidden browser, which requires a browser window, needed for charset detection
@@ -126,6 +129,11 @@ describe("Zotero.Search", function() {
 			win = yield loadBrowserWindow();
 			fooItem = yield importFileAttachment("search/foo.html");
 			foobarItem = yield importFileAttachment("search/foobar.html");
+			userLibraryID = fooItem.libraryID;
+			
+			let group = yield getGroup();
+			fooItemGroup = yield importFileAttachment("search/foo.html", { libraryID: group.libraryID });
+			foobarItemGroup = yield importFileAttachment("search/foobar.html", { libraryID: group.libraryID });
 		});
 
 		after(function* () {
@@ -134,31 +142,11 @@ describe("Zotero.Search", function() {
 			}
 			yield fooItem.eraseTx();
 			yield foobarItem.eraseTx();
+			yield fooItemGroup.eraseTx();
+			yield foobarItemGroup.eraseTx();
 		});
 		
 		describe("Conditions", function () {
-			describe("attachmentContent", function () {
-				it("should find text in HTML files", function* () {
-					var s = new Zotero.Search();
-					s.libraryID = foobarItem.libraryID;
-					s.addCondition('fulltextContent', 'contains', 'foo bar');
-					var matches = yield s.search();
-					assert.sameMembers(matches, [foobarItem.id]);
-				});
-				
-				it("should work in subsearch", function* () {
-					var s = new Zotero.Search();
-					s.libraryID = foobarItem.libraryID;
-					s.addCondition('fulltextContent', 'contains', 'foo bar');
-					
-					var s2 = new Zotero.Search();
-					s2.setScope(s);
-					s2.addCondition('title', 'contains', 'foobar');
-					var matches = yield s2.search();
-					assert.sameMembers(matches, [foobarItem.id]);
-				});
-			});
-			
 			describe("collection", function () {
 				it("should find item in collection", function* () {
 					var col = yield createDataObject('collection');
@@ -210,15 +198,89 @@ describe("Zotero.Search", function() {
 			describe("fileTypeID", function () {
 				it("should search by attachment file type", function* () {
 					let s = new Zotero.Search();
+					s.libraryID = userLibraryID;
 					s.addCondition('fileTypeID', 'is', Zotero.FileTypes.getID('webpage'));
 					let matches = yield s.search();
 					assert.sameMembers(matches, [fooItem.id, foobarItem.id]);
 				});
 			});
 			
+			describe("fulltextContent", function () {
+				it("should find text in HTML files", function* () {
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('fulltextContent', 'contains', 'foo bar');
+					var matches = yield s.search();
+					assert.sameMembers(matches, [foobarItem.id]);
+				});
+				
+				it("should work in subsearch", function* () {
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('fulltextContent', 'contains', 'foo bar');
+					
+					var s2 = new Zotero.Search();
+					s2.setScope(s);
+					s2.addCondition('title', 'contains', 'foobar');
+					var matches = yield s2.search();
+					assert.sameMembers(matches, [foobarItem.id]);
+				});
+				
+				it("should find matching item with joinMode=ANY and non-matching other condition", function* () {
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('joinMode', 'any');
+					s.addCondition('fulltextContent', 'contains', 'foo bar');
+					s.addCondition('title', 'contains', 'nomatch');
+					var matches = yield s.search();
+					assert.sameMembers(matches, [foobarItem.id]);
+				});
+				
+				it("should find matching items in regexp mode with joinMode=ANY with matching other condition", function* () {
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('joinMode', 'any');
+					s.addCondition('fulltextContent/regexp', 'contains', 'foo.+bar');
+					s.addCondition('title', 'is', fooItem.getField('title'));
+					var matches = yield s.search();
+					assert.sameMembers(matches, [fooItem.id, foobarItem.id]);
+				});
+				
+				it("should find matching item in regexp mode with joinMode=ANY and non-matching other condition", function* () {
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('joinMode', 'any');
+					s.addCondition('fulltextContent/regexp', 'contains', 'foo.+bar');
+					s.addCondition('title', 'contains', 'nomatch');
+					var matches = yield s.search();
+					assert.sameMembers(matches, [foobarItem.id]);
+				});
+				
+				it("should find item matching other condition in regexp mode when joinMode=ANY", function* () {
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('joinMode', 'any');
+					s.addCondition('fulltextContent/regexp', 'contains', 'nomatch');
+					s.addCondition('title', 'is', foobarItem.getField('title'));
+					var matches = yield s.search();
+					assert.sameMembers(matches, [foobarItem.id]);
+				});
+				
+				it("should find matching item in regexp mode with joinMode=ANY and recursive mode flag", function* () {
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('joinMode', 'any');
+					s.addCondition('fulltextContent/regexp', 'contains', 'foo.+bar');
+					s.addCondition('recursive', 'true');
+					var matches = yield s.search();
+					assert.sameMembers(matches, [foobarItem.id]);
+				});
+			});
+			
 			describe("fulltextWord", function () {
 				it("should return matches with full-text conditions", function* () {
 					let s = new Zotero.Search();
+					s.libraryID = userLibraryID;
 					s.addCondition('fulltextWord', 'contains', 'foo');
 					let matches = yield s.search();
 					assert.lengthOf(matches, 2);
@@ -227,6 +289,7 @@ describe("Zotero.Search", function() {
 		
 				it("should not return non-matches with full-text conditions", function* () {
 					let s = new Zotero.Search();
+					s.libraryID = userLibraryID;
 					s.addCondition('fulltextWord', 'contains', 'baz');
 					let matches = yield s.search();
 					assert.lengthOf(matches, 0);
@@ -234,6 +297,7 @@ describe("Zotero.Search", function() {
 		
 				it("should return matches for full-text conditions in ALL mode", function* () {
 					let s = new Zotero.Search();
+					s.libraryID = userLibraryID;
 					s.addCondition('joinMode', 'all');
 					s.addCondition('fulltextWord', 'contains', 'foo');
 					s.addCondition('fulltextWord', 'contains', 'bar');
@@ -243,6 +307,7 @@ describe("Zotero.Search", function() {
 		
 				it("should not return non-matches for full-text conditions in ALL mode", function* () {
 					let s = new Zotero.Search();
+					s.libraryID = userLibraryID;
 					s.addCondition('joinMode', 'all');
 					s.addCondition('fulltextWord', 'contains', 'mjktkiuewf');
 					s.addCondition('fulltextWord', 'contains', 'zijajkvudk');
@@ -252,6 +317,7 @@ describe("Zotero.Search", function() {
 		
 				it("should return a match that satisfies only one of two full-text condition in ANY mode", function* () {
 					let s = new Zotero.Search();
+					s.libraryID = userLibraryID;
 					s.addCondition('joinMode', 'any');
 					s.addCondition('fulltextWord', 'contains', 'bar');
 					s.addCondition('fulltextWord', 'contains', 'baz');
