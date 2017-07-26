@@ -844,8 +844,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			let contentType = item.attachmentContentType;
 			if (isCachedMIMEType(contentType) || Zotero.MIME.isTextType(contentType)) {
 				try {
-					let cacheFile = this.getItemCacheFile(item);
-					if (cacheFile.exists()) {
+					let cacheFile = this.getItemCacheFile(item).path;
+					if (yield OS.File.exists(cacheFile)) {
 						Zotero.debug("Getting full-text content from cache "
 							+ "file for item " + libraryKey);
 						content = yield Zotero.File.getContentsAsync(cacheFile);
@@ -988,18 +988,18 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		var itemID = item.id;
 		var currentVersion = yield this.getItemVersion(itemID)
 		
-		var processorCacheFile = this.getItemProcessorCacheFile(item); // .zotero-ft-unprocessed
-		var itemCacheFile = this.getItemCacheFile(item); // .zotero-ft-cache
+		var processorCacheFile = this.getItemProcessorCacheFile(item).path; // .zotero-ft-unprocessed
+		var itemCacheFile = this.getItemCacheFile(item).path; // .zotero-ft-cache
 		
 		// If a storage directory doesn't exist, create it
-		if (!processorCacheFile.parent.exists()) {
+		if (!(yield OS.File.exists(OS.Path.dirname(processorCacheFile)))) {
 			yield Zotero.Attachments.createDirectoryForItem(item);
 		}
 		
 		// If indexed previously and the existing extracted text matches the new text,
 		// just update the version
 		if (currentVersion !== false
-				&& itemCacheFile.exists()
+				&& (yield OS.File.exists(itemCacheFile))
 				&& (yield Zotero.File.getContentsAsync(itemCacheFile)) == data.content) {
 			Zotero.debug("Current full-text content matches remote for item "
 				+ libraryKey + " -- updating version");
@@ -1011,7 +1011,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		
 		// Otherwise save data to -unprocessed file
 		Zotero.debug("Writing full-text content and data for item " + libraryKey
-			+ " to " + processorCacheFile.path);
+			+ " to " + processorCacheFile);
 		yield Zotero.File.putContentsAsync(processorCacheFile, JSON.stringify({
 			indexedChars: data.indexedChars,
 			totalChars: data.totalChars,
@@ -1154,8 +1154,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	this.indexFromProcessorCache = Zotero.Promise.coroutine(function* (itemID) {
 		try {
 			var item = yield Zotero.Items.getAsync(itemID);
-			var cacheFile = this.getItemProcessorCacheFile(item);
-			if (!cacheFile.exists())  {
+			var cacheFile = this.getItemProcessorCacheFile(item).path;
+			if (!(yield OS.File.exists(cacheFile)))  {
 				Zotero.debug("Full-text content processor cache file doesn't exist for item " + itemID);
 				yield Zotero.DB.queryAsync(
 					"UPDATE fulltextItems SET synced=? WHERE itemID=?", [SYNC_STATE_UNSYNCED, itemID]
@@ -1168,8 +1168,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			
 			// Write the text content to the regular cache file
 			var item = yield Zotero.Items.getAsync(itemID);
-			cacheFile = this.getItemCacheFile(item);
-			Zotero.debug("Writing full-text content to " + cacheFile.path);
+			cacheFile = this.getItemCacheFile(item).path;
+			Zotero.debug("Writing full-text content to " + cacheFile);
 			yield Zotero.File.putContentsAsync(cacheFile, data.text);
 			
 			yield indexString(
@@ -1298,12 +1298,12 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			let binaryMode = mode && mode.indexOf('Binary') != -1;
 			
 			if (isCachedMIMEType(mimeType)) {
-				let file = this.getItemCacheFile(item);
-				if (!file.exists()) {
+				let file = this.getItemCacheFile(item).path;
+				if (!(yield OS.File.exists(file))) {
 					continue;
 				}
 				
-				Zotero.debug("Searching for text '" + searchText + "' in " + file.path);
+				Zotero.debug("Searching for text '" + searchText + "' in " + file);
 				content = yield Zotero.File.getContentsAsync(file, 'utf-8', maxLength);
 			}
 			else {
@@ -1316,9 +1316,9 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 				}
 				
 				// Check for a cache file
-				let cacheFile = this.getItemCacheFile(item);
-				if (cacheFile.exists()) {
-					Zotero.debug("Searching for text '" + searchText + "' in " + cacheFile.path);
+				let cacheFile = this.getItemCacheFile(item).path;
+				if (yield OS.File.exists(cacheFile)) {
+					Zotero.debug("Searching for text '" + searchText + "' in " + cacheFile);
 					content = yield Zotero.File.getContentsAsync(cacheFile, 'utf-8', maxLength);
 				}
 				else {
@@ -1398,9 +1398,11 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	 * @return {Promise}
 	 */
 	var getTotalPagesFromFile = Zotero.Promise.coroutine(function* (itemID) {
-		var file = Zotero.Attachments.getStorageDirectoryByID(itemID);
-		file.append(Zotero.Fulltext.pdfInfoCacheFile);
-		if (!file.exists()) {
+		var file = OS.Path.join(
+			Zotero.Attachments.getStorageDirectoryByID(itemID).path,
+			Zotero.Fulltext.pdfInfoCacheFile
+		);
+		if (!(yield OS.File.exists(file))) {
 			return false;
 		}
 		var contents = yield Zotero.File.getContentsAsync(file);
@@ -1435,15 +1437,17 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		var item = yield Zotero.Items.getAsync(itemID);
 		switch (item.attachmentContentType) {
 			case 'application/pdf':
-				var file = Zotero.Attachments.getStorageDirectory(item);
-				file.append(this.pdfConverterCacheFile);
-				if (!file.exists()) {
+				var file = OS.Path.join(
+					Zotero.Attachments.getStorageDirectory(item).path,
+					this.pdfConverterCacheFile
+				);
+				if (!(yield OS.File.exists(file))) {
 					return false;
 				}
 				break;
 				
 			default:
-				var file = item.getFile();
+				var file = yield item.getFilePathAsync();
 				if (!file) {
 					return false;
 				}
@@ -1762,9 +1766,9 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		
 		// Write the converted text to a cache file
 		var item = yield Zotero.Items.getAsync(itemID);
-		var cacheFile = Zotero.Fulltext.getItemCacheFile(item);
-		Zotero.debug("Writing converted full-text HTML content to " + cacheFile.path);
-		if (!cacheFile.parent.exists()) {
+		var cacheFile = Zotero.Fulltext.getItemCacheFile(item).path;
+		Zotero.debug("Writing converted full-text HTML content to " + cacheFile);
+		if (!(yield OS.File.exists(OS.Path.dirname(cacheFile)))) {
 			yield Zotero.Attachments.createDirectoryForItem(item);
 		}
 		yield Zotero.File.putContentsAsync(cacheFile, text)
