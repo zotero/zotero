@@ -65,7 +65,9 @@ var ZoteroPluginInstaller = function(addon, failSilently, force) {
 	
 	var me = this;
 	var extensionIDs = [this._addon.EXTENSION_ID].concat(this._addon.REQUIRED_ADDONS.map(req => req.id));
+	Zotero.debug("PluginInstaller: fetching addon info");
 	AddonManager.getAddonsByIDs(extensionIDs, function(addons) {
+		Zotero.debug("PluginInstaller: addon info fetched");
 		me._addons = addons;
 		me._addonInfoAvailable();
 	});
