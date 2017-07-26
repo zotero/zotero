@@ -242,11 +242,15 @@ describe("Zotero.Fulltext", function () {
 			var sql = "SELECT synced FROM fulltextItems WHERE itemID=?";
 			var synced = yield Zotero.DB.valueQueryAsync(sql, item.id);
 			assert.equal(synced, Zotero.Fulltext.SYNC_STATE_UNSYNCED);
+			var indexed = yield Zotero.Fulltext.getIndexedState(item);
+			assert.equal(indexed, Zotero.Fulltext.INDEX_STATE_INDEXED);
 			
 			yield Zotero.Fulltext.getUnsyncedContent(item.libraryID);
 			
 			synced = yield Zotero.DB.valueQueryAsync(sql, item.id);
 			assert.equal(synced, Zotero.Fulltext.SYNC_STATE_MISSING);
+			indexed = yield Zotero.Fulltext.getIndexedState(item);
+			assert.equal(indexed, Zotero.Fulltext.INDEX_STATE_UNINDEXED);
 		});
 	})
 	

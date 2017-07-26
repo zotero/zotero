@@ -1506,6 +1506,14 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			throw new Error('Item is not an attachment');
 		}
 		
+		// If the file or cache file wasn't available during syncing, mark as unindexed
+		var synced = yield Zotero.DB.valueQueryAsync(
+			"SELECT synced FROM fulltextItems WHERE itemID=?", item.id
+		);
+		if (synced === false || synced == this.SYNC_STATE_MISSING) {
+			return this.INDEX_STATE_UNINDEXED;
+		}
+		
 		var itemID = item.id;
 		switch (item.attachmentContentType) {
 			// Use pages for PDFs
@@ -1570,10 +1578,10 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	 * @return {Promise}
 	 */
 	this.getIndexStats = Zotero.Promise.coroutine(function* () {
-		var sql = "SELECT COUNT(*) FROM fulltextItems WHERE "
-			+ "(indexedPages IS NOT NULL AND indexedPages=totalPages) OR "
-			+ "(indexedChars IS NOT NULL AND indexedChars=totalChars)"
-		var indexed = yield Zotero.DB.valueQueryAsync(sql);
+		var sql = "SELECT COUNT(*) FROM fulltextItems WHERE synced != ? AND "
+			+ "((indexedPages IS NOT NULL AND indexedPages=totalPages) OR "
+			+ "(indexedChars IS NOT NULL AND indexedChars=totalChars))"
+		var indexed = yield Zotero.DB.valueQueryAsync(sql, this.SYNC_STATE_MISSING);
 		
 		var sql = "SELECT COUNT(*) FROM fulltextItems WHERE "
 			+ "(indexedPages IS NOT NULL AND indexedPages<totalPages) OR "
@@ -1581,19 +1589,14 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		var partial = yield Zotero.DB.valueQueryAsync(sql);
 		
 		var sql = "SELECT COUNT(*) FROM itemAttachments WHERE itemID NOT IN "
-			+ "(SELECT itemID FROM fulltextItems WHERE "
-			+ "indexedPages IS NOT NULL OR indexedChars IS NOT NULL)";
-		var unindexed = yield Zotero.DB.valueQueryAsync(sql);
+			+ "(SELECT itemID FROM fulltextItems WHERE synced != ? AND "
+			+ "(indexedPages IS NOT NULL OR indexedChars IS NOT NULL))";
+		var unindexed = yield Zotero.DB.valueQueryAsync(sql, this.SYNC_STATE_MISSING);
 		
 		var sql = "SELECT COUNT(*) FROM fulltextWords";
 		var words = yield Zotero.DB.valueQueryAsync(sql);
 		
-		return {
-			indexed: indexed,
-			partial: partial,
-			unindexed: unindexed,
-			words: words
-		};
+		return { indexed, partial, unindexed, words };
 	});
 	
 	
@@ -1639,11 +1642,13 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		// Get all attachments other than web links
 		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode!="
 			+ Zotero.Attachments.LINK_MODE_LINKED_URL;
+		var params = [];
 		if (unindexedOnly) {
 			sql += " AND itemID NOT IN (SELECT itemID FROM fulltextItems "
-				+ "WHERE indexedChars IS NOT NULL OR indexedPages IS NOT NULL)";
+				+ "WHERE synced != ? AND (indexedChars IS NOT NULL OR indexedPages IS NOT NULL))";
+			params.push(this.SYNC_STATE_MISSING);
 		}
-		var items = yield Zotero.DB.columnQueryAsync(sql);
+		var items = yield Zotero.DB.columnQueryAsync(sql, params);
 		if (items) {
 			yield Zotero.DB.executeTransaction(function* () {
 				yield Zotero.DB.queryAsync("DELETE FROM fulltextItemWords WHERE itemID IN (" + sql + ")");
