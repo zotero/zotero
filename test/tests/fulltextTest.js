@@ -229,7 +229,25 @@ describe("Zotero.Fulltext", function () {
 				assert.equal(d.indexedChars, toSync[pos].indexedChars);
 				assert.equal(d.indexedPages, toSync[pos].indexedPages);
 			}
-		})
+		});
+		
+		it("should mark PDF attachment content as missing if cache file doesn't exist", function* () {
+			var item = yield importFileAttachment('test.pdf');
+			item.synced = true;
+			yield item.saveTx();
+			
+			yield Zotero.Fulltext.indexItems([item.id]);
+			yield OS.File.remove(Zotero.Fulltext.getItemCacheFile(item).path);
+			
+			var sql = "SELECT synced FROM fulltextItems WHERE itemID=?";
+			var synced = yield Zotero.DB.valueQueryAsync(sql, item.id);
+			assert.equal(synced, Zotero.Fulltext.SYNC_STATE_UNSYNCED);
+			
+			yield Zotero.Fulltext.getUnsyncedContent(item.libraryID);
+			
+			synced = yield Zotero.DB.valueQueryAsync(sql, item.id);
+			assert.equal(synced, Zotero.Fulltext.SYNC_STATE_MISSING);
+		});
 	})
 	
 	describe("#setItemContent()", function () {

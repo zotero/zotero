@@ -43,6 +43,12 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	this.__defineGetter__("INDEX_STATE_PARTIAL", function () { return 2; });
 	this.__defineGetter__("INDEX_STATE_INDEXED", function () { return 3; });
 	
+	this.SYNC_STATE_UNSYNCED = 0;
+	this.SYNC_STATE_IN_SYNC = 1;
+	this.SYNC_STATE_TO_PROCESS = 2;
+	this.SYNC_STATE_TO_DOWNLOAD = 3;
+	this.SYNC_STATE_MISSING = 4;
+	
 	const _processorCacheFile = '.zotero-ft-unprocessed';
 	
 	const kWbClassSpace =            0;
@@ -70,11 +76,6 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	var _processorBlacklist = {};
 	var _upgradeCheck = true;
 	var _syncLibraryVersion = 0;
-	
-	const SYNC_STATE_UNSYNCED = 0;
-	const SYNC_STATE_IN_SYNC = 1;
-	const SYNC_STATE_TO_PROCESS = 2;
-	const SYNC_STATE_TO_DOWNLOAD = 3;
 	
 	this.init = Zotero.Promise.coroutine(function* () {
 		yield Zotero.DB.queryAsync("ATTACH ':memory:' AS 'indexing'");
@@ -163,7 +164,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	this.setItemSynced = function (itemID, version) {
 		return Zotero.DB.queryAsync(
 			"UPDATE fulltextItems SET synced=?, version=? WHERE itemID=?",
-			[SYNC_STATE_IN_SYNC, version, itemID]
+			[this.SYNC_STATE_IN_SYNC, version, itemID]
 		);
 	};
 	
@@ -518,7 +519,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			yield indexWords(itemID, words, stats, version, synced);
 			
 			var sql = "UPDATE fulltextItems SET synced=?";
-			var params = [synced ? parseInt(synced) : SYNC_STATE_UNSYNCED];
+			var params = [synced ? parseInt(synced) : this.SYNC_STATE_UNSYNCED];
 			if (stats) {
 				for (let stat in stats) {
 					sql += ", " + stat + "=?";
@@ -827,7 +828,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		var sql = "SELECT itemID, indexedChars, totalChars, indexedPages, totalPages "
 			+ "FROM fulltextItems FI JOIN items I USING (itemID) WHERE libraryID=? AND "
 			+ "FI.synced=? AND I.synced=1 ";
-		var params = [libraryID, SYNC_STATE_UNSYNCED];
+		var params = [libraryID, this.SYNC_STATE_UNSYNCED];
 		if (options.lastItemID) {
 			sql += "AND itemID>?";
 			params.push(options.lastItemID);
@@ -851,16 +852,22 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 						content = yield Zotero.File.getContentsAsync(cacheFile);
 					}
 					else {
+						// If there should be a cache file and isn't, mark the full text as missing
 						if (!Zotero.MIME.isTextType(contentType)) {
 							Zotero.debug("Full-text content cache file doesn't exist for item "
 								+ libraryKey, 2);
+							let sql = "UPDATE fulltextItems SET synced=? WHERE itemID=?";
+							yield Zotero.DB.queryAsync(sql, [this.SYNC_STATE_MISSING, item.id]);
 							continue;
 						}
 						
+						// Same for missing attachments
 						let path = yield item.getFilePathAsync();
 						if (!path) {
 							Zotero.debug("File doesn't exist getting full-text content for item "
 								+ libraryKey, 2);
+							let sql = "UPDATE fulltextItems SET synced=? WHERE itemID=?";
+							yield Zotero.DB.queryAsync(sql, [this.SYNC_STATE_MISSING, item.id]);
 							continue;
 						}
 						
@@ -936,8 +943,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			return "&ftkeys=all";
 		}
 		
-		var sql = "SELECT itemID FROM fulltextItems WHERE synced="
-			+ SYNC_STATE_TO_DOWNLOAD;
+		var sql = "SELECT itemID FROM fulltextItems WHERE synced=" + this.SYNC_STATE_TO_DOWNLOAD;
 		var itemIDs = yield Zotero.DB.columnQueryAsync(sql);
 		if (!itemIDs) {
 			return "";
@@ -1005,7 +1011,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 				+ libraryKey + " -- updating version");
 			return Zotero.DB.queryAsync(
 				"REPLACE INTO fulltextItems (itemID, version, synced) VALUES (?, ?, ?)",
-				[itemID, version, SYNC_STATE_IN_SYNC]
+				[itemID, version, this.SYNC_STATE_IN_SYNC]
 			);
 		}
 		
@@ -1020,7 +1026,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			version,
 			text: data.content
 		}));
-		var synced = SYNC_STATE_TO_PROCESS;
+		var synced = this.SYNC_STATE_TO_PROCESS;
 		
 		// If indexed previously, update the sync state
 		if (currentVersion !== false) {
@@ -1083,8 +1089,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	this.processUnprocessedContent = Zotero.Promise.coroutine(function* (itemIDs) {
 		if (!itemIDs) {
 			Zotero.debug("Checking for unprocessed full-text content");
-			let sql = "SELECT itemID FROM fulltextItems WHERE synced="
-				+ SYNC_STATE_TO_PROCESS;
+			let sql = "SELECT itemID FROM fulltextItems WHERE synced=" + this.SYNC_STATE_TO_PROCESS;
 			itemIDs = yield Zotero.DB.columnQueryAsync(sql);
 		}
 		
@@ -1158,7 +1163,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			if (!(yield OS.File.exists(cacheFile)))  {
 				Zotero.debug("Full-text content processor cache file doesn't exist for item " + itemID);
 				yield Zotero.DB.queryAsync(
-					"UPDATE fulltextItems SET synced=? WHERE itemID=?", [SYNC_STATE_UNSYNCED, itemID]
+					"UPDATE fulltextItems SET synced=? WHERE itemID=?",
+					[this.SYNC_STATE_UNSYNCED, itemID]
 				);
 				return false;
 			}
