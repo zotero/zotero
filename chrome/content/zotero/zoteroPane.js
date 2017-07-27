@@ -1472,6 +1472,12 @@ var ZoteroPane = new function()
 					
 					document.getElementById('zotero-item-pane-content').selectedIndex = 1;
 					var tabBox = document.getElementById('zotero-view-tabbox');
+					
+					// Reset tab when viewing a feed item, which only has the info tab
+					if (item.isFeedItem) {
+						tabBox.selectedIndex = 0;
+					}
+					
 					var pane = tabBox.selectedIndex;
 					tabBox.firstChild.hidden = isCommons;
 					
