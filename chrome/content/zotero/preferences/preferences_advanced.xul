@@ -54,6 +54,7 @@
 			<preference id="pref-keys-toggleAllRead" name="extensions.zotero.keys.toggleAllRead" type="string"/>
 			<preference id="pref-keys-copySelectedItemCitationsToClipboard" name="extensions.zotero.keys.copySelectedItemCitationsToClipboard" type="string"/>
 			<preference id="pref-keys-copySelectedItemsToClipboard" name="extensions.zotero.keys.copySelectedItemsToClipboard" type="string"/>
+			<preference id="pref-keys-openPreferences" name="extensions.zotero.keys.openPreferences" type="string"/>
 
 			<preference id="pref-feeds-sortAscending" name="extensions.zotero.feeds.sortAscending" type="bool"/>
 			<preference id="pref-feeds-defaultTTL" name="extensions.zotero.feeds.defaultTTL" type="int"/>
@@ -268,6 +269,12 @@
 								<label value="&zotero.preferences.keys.toggleAllRead;" control="textbox-toggleAllRead"/>
 								<label class="modifier"/>
 								<textbox id="textbox-toggleAllRead" maxlength="1" size="1" preference="pref-keys-toggleAllRead"/>
+							</row>
+							
+							<row>
+								<label value="&zotero.preferences.keys.openPreferences;" control="textbox-openPreferences"/>
+								<label class="modifier"/>
+								<textbox id="textbox-openPreferences" maxlength="1" size="1" preference="pref-keys-openPreferences"/>
 							</row>
 						</rows>
 					</grid>
