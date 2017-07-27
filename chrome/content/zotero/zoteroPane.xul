@@ -53,8 +53,12 @@
 		<command id="cmd_zotero_importFromClipboard" oncommand="Zotero_File_Interface.importFromClipboard();"/>
 		<command id="cmd_zotero_exportLibrary" oncommand="Zotero_File_Interface.exportFile();"/>
 		<command id="cmd_zotero_advancedSearch" oncommand="ZoteroPane_Local.openAdvancedSearchWindow();"/>
-		<command id="cmd_zotero_copyCitation" oncommand="ZoteroPane_Local.copySelectedItemsToClipboard(true);"/>
-		<command id="cmd_zotero_copyBibliography" oncommand="ZoteroPane_Local.copySelectedItemsToClipboard();"/>
+		<command id="cmd_zotero_copyCitation"
+			oncommand="ZoteroPane_Local.copySelectedItemsToClipboard(true);"
+			disabled="true"/>
+		<command id="cmd_zotero_copyBibliography"
+			oncommand="ZoteroPane_Local.copySelectedItemsToClipboard();"
+			disabled="true"/>
 		<command id="cmd_zotero_createTimeline" oncommand="Zotero_Timeline_Interface.loadTimeline();"/>
 		<command id="cmd_zotero_rtfScan" oncommand="window.openDialog('chrome://zotero/content/rtfScan.xul', 'rtfScan', 'chrome,centerscreen')"/>
 		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane_Local.newCollection()"/>

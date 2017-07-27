@@ -73,6 +73,12 @@
 				key="&importCmd.key;"
 				command="cmd_zotero_importFromClipboard"
 				modifiers="accel shift alt"/>
+		<key id="key_copyCitation"
+				command="cmd_zotero_copyCitation"
+				modifiers="accel shift"/>
+		<key id="key_copyBibliography"
+				command="cmd_zotero_copyBibliography"
+				modifiers="accel shift"/>
 	</keyset>
 	<keyset id="editMenuKeys"/>
 	
@@ -136,17 +142,28 @@
 						</menupopup>
 					</menu>
 					
-					<menu id="menu_edit">
+					<menu id="menu_edit"
+							onpopupshowing="ZoteroStandalone.updateQuickCopyOptions()">
 						<menupopup id="menu_EditPopup">
 							<menuitem id="menu_undo"/>
 							<menuitem id="menu_redo"/>
 							<menuseparator/>
 							<menuitem id="menu_cut"/>
 							<menuitem id="menu_copy"/>
-							<menuitem id="menu_copyCitation" label="&copyCitationCmd.label;"
-									command="cmd_zotero_copyCitation"/>
-							<menuitem id="menu_copyBibliography" label="&copyBibliographyCmd.label;"
-									command="cmd_zotero_copyBibliography"/>
+							<menuitem id="menu_copyCitation"
+									label="&copyCitationCmd.label;"
+									command="cmd_zotero_copyCitation"
+									key="key_copyCitation"
+									hidden="true"/>
+							<menuitem id="menu_copyBibliography"
+									label="&copyBibliographyCmd.label;"
+									command="cmd_zotero_copyBibliography"
+									key="key_copyBibliography"
+									hidden="true"/>
+							<menuitem id="menu_copyExport"
+									key="key_copyBibliography"
+									command="cmd_zotero_copyBibliography"
+									hidden="true"/>
 							<menuitem id="menu_paste"/>
 							<menuitem id="menu_delete"/>
 							<menuseparator/>

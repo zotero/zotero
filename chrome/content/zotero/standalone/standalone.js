@@ -52,6 +52,11 @@ const ZoteroStandalone = new function() {
 				document.getElementById('menu_errorConsole').hidden = false;
 			}
 			
+			document.getElementById('key_copyCitation')
+				.setAttribute('key', Zotero.Keys.getKeyForCommand('copySelectedItemCitationsToClipboard'));
+			document.getElementById('key_copyBibliography')
+				.setAttribute('key', Zotero.Keys.getKeyForCommand('copySelectedItemsToClipboard'));
+			
 			ZoteroStandalone.DebugOutput.init();
 			
 			Zotero.hideZoteroPaneOverlays();
@@ -131,6 +136,31 @@ const ZoteroStandalone = new function() {
 			}
 		}
 	}
+	
+	
+	this.updateQuickCopyOptions = function () {
+		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
+		format = Zotero.QuickCopy.unserializeSetting(format);
+		
+		var copyCitation = document.getElementById('menu_copyCitation');
+		var copyBibliography = document.getElementById('menu_copyBibliography');
+		var copyExport = document.getElementById('menu_copyExport');
+		
+		copyCitation.hidden = format.mode != 'bibliography';
+		copyBibliography.hidden = format.mode != 'bibliography';
+		copyExport.hidden = format.mode != 'export';
+		if (format.mode == 'export') {
+			try {
+				let obj = Zotero.Translators.get(format.id);
+				copyExport.label = Zotero.getString('quickCopy.copyAs', obj.label);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				copyExport.hidden = true;
+			}
+		}
+	};
+	
 	
 	this.updateAddonsPane = function (doc) {
 		// Hide unsigned add-on verification warnings
