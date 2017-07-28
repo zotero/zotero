@@ -11,7 +11,7 @@
 <!ENTITY zotero.general.refresh "새로고침">
 <!ENTITY zotero.general.saveAs "다른 이름으로 저장...">
 <!ENTITY zotero.general.advancedOptions.label "고급 ">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "도구">
 <!ENTITY zotero.general.more "더 보기">
 <!ENTITY zotero.general.loading "불러오는 중...">
 
@@ -143,7 +143,7 @@
 <!ENTITY zotero.item.copyAsURL "URL로 복사">
 <!ENTITY zotero.item.deletePermanently "완전히 삭제...">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "모든 태그 제거...">
 
 <!ENTITY zotero.toolbar.newNote "새 노트">
 <!ENTITY zotero.toolbar.note.standalone "새로운 독립 노트">

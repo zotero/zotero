@@ -175,7 +175,7 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Dateien und Ordner">
 <!ENTITY zotero.preferences.advanced.keys "Tastenkombinationen">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Erweiterte Konfiguration">
 
 <!ENTITY zotero.preferences.prefpane.locate "Finden">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikel Finder verwalten">

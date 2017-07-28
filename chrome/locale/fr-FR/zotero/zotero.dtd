@@ -274,7 +274,7 @@
 <!ENTITY zotero.feedSettings.refresh.label2 "heure(s)">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Retirer les documents non lus après">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "jour(s)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Retirer les documents lus">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Retirer les documents lus après">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "jour(s)">
 
 

@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "S">
 <!ENTITY helpTroubleshootingInfo.label "Problembehebung">
 <!ENTITY helpTroubleshootingInfo.accesskey "P">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Diskussionsforum">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "Fehler melden...">
 <!ENTITY helpReportErrors.accesskey "e">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Logging des Debug-Outputs">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled">
+<!ENTITY debugOutputLogging.submit "Ausgabe übertragen">
+<!ENTITY debugOutputLogging.view "Ausgabe anzeigen">
+<!ENTITY debugOutputLogging.clear "Ausgabe löschen">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Neustarten mit aktiviertem Logging">
 
 <!ENTITY helpCheckForUpdates.label "Auf Updates überprüfen">
 <!ENTITY helpCheckForUpdates.accesskey "U">

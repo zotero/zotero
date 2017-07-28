@@ -109,12 +109,12 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "이 선택사항을 사용안함으로 할 경우, 기사의 페이지 범위를 지정하고 있지 않는 인용된 잡지 및 신문 기사의 경우에만 Zotero에 URL을 삽입합니다.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "빠른 복사">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "기본 형식:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "HTML로 복사">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "사이트별 설정:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "도메인/경로">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(예. wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "형식">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "언어">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "다음 이상 끌을 경우 빠른 복사 동작 안함:">
 
@@ -125,8 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "워드 프로세서 플러그인 받기...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "클래식 인용추가 대화창 사용">
-<!ENTITY zotero.preferences.styleEditor "Style Editor">
-<!ENTITY zotero.preferences.stylePreview "Style Preview">
+<!ENTITY zotero.preferences.styleEditor "스타일 편집기">
+<!ENTITY zotero.preferences.stylePreview "스타일 미리보기">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "스타일 매니저">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "제목">
@@ -175,7 +175,7 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "파일 및 폴더">
 <!ENTITY zotero.preferences.advanced.keys "바로가기">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "고급 설정">
 
 <!ENTITY zotero.preferences.prefpane.locate "위치">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article 검색 엔진 메니저">
@@ -208,4 +208,4 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "중계기 재설정...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "스타일 재설정...">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "설정 편집기">

@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "문제 해결 정보">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "의견 제출...">
-<!ENTITY helpFeedbackPage.accesskey "S">
+<!ENTITY helpFeedbackPage.label "토론 포럼">
+<!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Zotero 오류 보고서 보내기...">
+<!ENTITY helpReportErrors.label "오류 보고...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "디버그 출력 로그">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled">
+<!ENTITY debugOutputLogging.submit "출력 제출">
+<!ENTITY debugOutputLogging.view "출력 보기">
+<!ENTITY debugOutputLogging.clear "출력 지우기">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "로깅 활성화하여 재시작">
 
 <!ENTITY helpCheckForUpdates.label "업데이트 확인...">
 <!ENTITY helpCheckForUpdates.accesskey "U">
