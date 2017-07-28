@@ -117,7 +117,11 @@ Zotero_Preferences.Cite = {
 		
 		var rv = fp.show();
 		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
-			Zotero.Styles.install(fp.file);
+			Zotero.Styles.install({ file: fp.file }, fp.file.path, true)
+			.catch(function (e) {
+				(new Zotero.Exception.Alert("styles.install.unexpectedError",
+					fp.file.path, "styles.install.title", e)).present()
+			});
 		}
 	},
 	
