@@ -525,8 +525,7 @@ Zotero.HTTP = new function() {
 	
 	
 	/**
-	 * Make a foreground HTTP request in order to trigger a proxy authentication
-	 * dialog in Standalone
+	 * Make a foreground HTTP request in order to trigger a proxy authentication dialog
 	 *
 	 * Other Zotero.HTTP requests are background requests by default, and
 	 * background requests don't trigger a proxy auth prompt, so we make a
@@ -551,8 +550,7 @@ Zotero.HTTP = new function() {
 			uris.unshift(ZOTERO_CONFIG.PROXY_AUTH_URL);
 			
 			return Zotero.spawn(function* () {
-				let max = 3; // how many URIs to try after the general Zotero one
-				for (let i = 0; i <= max; i++) {
+				for (let i = 0; i <= uris.length; i++) {
 					let uri = uris.shift();
 					if (!uri) {
 						break;
@@ -589,7 +587,7 @@ Zotero.HTTP = new function() {
 					let proxyInfo = yield _proxyAsyncResolve(uri);
 					if (proxyInfo) {
 						Zotero.debug("Proxy required for " + uri + " -- making HEAD request to trigger auth prompt");
-						yield Zotero.HTTP.promise("HEAD", uri, {
+						yield Zotero.HTTP.request("HEAD", uri, {
 							foreground: true,
 							dontCache: true
 						})

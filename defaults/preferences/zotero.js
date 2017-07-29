@@ -23,7 +23,7 @@ pref("extensions.zotero.automaticScraperUpdates",true);
 pref("extensions.zotero.zoteroDotOrgVersionHeader", true);
 pref("extensions.zotero.triggerProxyAuthentication", true);
 // Proxy auth URLs should respond successfully to HEAD requests over HTTP and HTTPS (in case of forced HTTPS requests)
-pref("extensions.zotero.proxyAuthenticationURLs", 'http://www.acm.org,http://www.ebscohost.com,http://www.elsevier.com,http://www.ieee.org,http://www.jstor.org,http://www.ovid.com,http://www.springer.com,http://www.tandfonline.com');
+pref("extensions.zotero.proxyAuthenticationURLs", 'https://www.acm.org,https://www.ebscohost.com,https://www.sciencedirect.com,https://ieeexplore.ieee.org,https://www.jstor.org,http://www.ovid.com,https://link.springer.com,https://www.tandfonline.com');
 pref("extensions.zotero.browserContentContextMenu", true);
 pref("extensions.zotero.openURL.resolver","http://worldcatlibraries.org/registry/gateway");
 pref("extensions.zotero.openURL.version","1.0");
