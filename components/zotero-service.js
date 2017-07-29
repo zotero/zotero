@@ -540,15 +540,19 @@ ZoteroCommandLineHandler.prototype = {
 			if (param) {
 				var uri = cmdLine.resolveURI(param);
 				if(uri.schemeIs("zotero")) {
-					// Check for existing window and focus it
-					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						.getService(Components.interfaces.nsIWindowMediator);
-					var win = wm.getMostRecentWindow("navigator:browser");
-					if(win) {
-						win.focus();
-						Components.classes["@mozilla.org/network/protocol;1?name=zotero"]
-							.getService().newChannel(uri);
-					}
+					addInitCallback(function (Zotero) {
+						Zotero.uiReadyPromise
+						.then(function () {
+							// Check for existing window and focus it
+							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+								.getService(Components.interfaces.nsIWindowMediator);
+							var win = wm.getMostRecentWindow("navigator:browser");
+							if (win) {
+								win.focus();
+								win.ZoteroPane.loadURI(uri.spec)
+							}
+						});
+					});
 				}
 				// See below
 				else if (uri.schemeIs("file")) {
