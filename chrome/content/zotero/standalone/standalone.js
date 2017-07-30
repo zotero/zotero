@@ -225,7 +225,6 @@ const ZoteroStandalone = new function() {
 	 */
 	this.onUnload = function() {
 		ZoteroPane.destroy();
-		goQuitApplication();
 	}
 }
 
