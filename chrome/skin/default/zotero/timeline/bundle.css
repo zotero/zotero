@@ -118,6 +118,7 @@
     left: 0px;
     z-index: 1000;
     cursor: pointer;
+    display:none;
 }
 
 .timeline-message-container {
