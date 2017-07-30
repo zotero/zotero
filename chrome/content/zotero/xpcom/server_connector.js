@@ -24,8 +24,54 @@
 */
 const CONNECTOR_API_VERSION = 2;
 
-Zotero.Server.Connector = function() {};
-Zotero.Server.Connector._waitingForSelection = {};
+Zotero.Server.Connector = {
+	_waitingForSelection: {},
+	
+	getSaveTarget: function () {
+		var zp = Zotero.getActiveZoteroPane(),
+			library = null,
+			collection = null,
+			editable = true;
+		try {
+			library = Zotero.Libraries.get(zp.getSelectedLibraryID());
+			collection = zp.getSelectedCollection();
+			editable = zp.collectionsView.editable;
+		}
+		catch (e) {
+			let id = Zotero.Prefs.get('lastViewedFolder');
+			if (id) {
+				let type = id[0];
+				Zotero.debug(type);
+				id = parseInt(('' + id).substr(1));
+				
+				switch (type) {
+					case 'L':
+						library = Zotero.Libraries.get(id);
+						editable = library.editable;
+						Zotero.debug("LIB IS " + editable);
+						break;
+					
+					case 'C':
+						collection = Zotero.Collections.get(id);
+						library = collection.library;
+						editable = collection.editable;
+						break;
+					}
+			}
+		}
+		
+		// Default to My Library if present if pane not yet opened
+		// (which should never be the case anymore)
+		if (!library) {
+			let userLibrary = Zotero.Libraries.userLibrary;
+			if (userLibrary) {
+				library = userLibrary;
+			}
+		}
+		
+		return { library, collection, editable };
+	}
+};
 Zotero.Server.Connector.Data = {};
 Zotero.Server.Connector.AttachmentProgressManager = new function() {
 	var attachmentsInProgress = new WeakMap(),
@@ -265,14 +311,8 @@ Zotero.Server.Connector.SavePage.prototype = {
 			return;
 		}
 		
-		// figure out where to save
-		var libraryID = null;
-		var collectionID = null;
-		var zp = Zotero.getActiveZoteroPane();
-		try {
-			var libraryID = zp.getSelectedLibraryID();
-			var collection = zp.getSelectedCollection();
-		} catch(e) {}
+		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
+		var libaryID = library.libraryID;
 		
 		// set handlers for translation
 		var me = this;
@@ -329,24 +369,11 @@ Zotero.Server.Connector.SaveItem.prototype = {
 	init: Zotero.Promise.coroutine(function* (options) {
 		var data = options.data;
 		
-		// figure out where to save
-		var zp = Zotero.getActiveZoteroPane();
-		try {
-			var libraryID = zp.getSelectedLibraryID();
-			var collection = zp.getSelectedCollection();
-		} catch(e) {}
-		
-		// Default to My Library if present if pane not yet opened
-		if (!libraryID) {
-			let userLibrary = Zotero.Libraries.userLibrary;
-			if (userLibrary) {
-				libraryID = userLibrary.id;
-			}
-		}
+		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
+		var libraryID = library.libraryID;
 		
 		// If library isn't editable (or directly editable, in the case of My Publications), switch to
 		// My Library if present and editable, and otherwise fail
-		var library = Zotero.Libraries.get(libraryID);
 		if (!library.editable || library.libraryType == 'publications') {
 			Zotero.logError("Can't add item to read-only library " + library.name);
 			return [500, "application/json", JSON.stringify({libraryEditable: false})];
@@ -431,27 +458,19 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 		
 		Zotero.Server.Connector.Data[data["url"]] = "<html>"+data["html"]+"</html>";
 		
-		var zp = Zotero.getActiveZoteroPane();
-		try {
-			var libraryID = zp.getSelectedLibraryID();
-			var collection = zp.getSelectedCollection();
-		} catch(e) {}
-		
-		// Default to My Library if present if pane not yet opened
-		if (!libraryID) {
-			let userLibrary = Zotero.Libraries.userLibrary;
-			if (userLibrary) {
-				libraryID = userLibrary.id;
-			}
-		}
+		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
+		var libraryID = library.libraryID;
 		
 		// If library isn't editable (or directly editable, in the case of My Publications), switch to
 		// My Library if present and editable, and otherwise fail
-		var library = Zotero.Libraries.get(libraryID);
 		if (!library.editable || library.libraryType == 'publications') {
 			let userLibrary = Zotero.Libraries.userLibrary;
 			if (userLibrary && userLibrary.editable) {
-				yield zp.collectionsView.selectLibrary(userLibrary.id);
+				let zp = Zotero.getActiveZoteroPane();
+				if (zp) {
+					yield zp.collectionsView.selectLibrary(userLibrary.id);
+				}
+				library = userLibrary;
 				libraryID = userLibrary.id;
 				collection = null;
 			}
@@ -705,29 +724,16 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
 	init: function(postData, sendResponseCallback) {
-		var zp = Zotero.getActiveZoteroPane(),
-			libraryID = null,
-			collection = null,
-			editable = true;
-		
-		try {
-			libraryID = zp.getSelectedLibraryID();
-			collection = zp.getSelectedCollection();
-			editable = zp.collectionsView.editable;
-		} catch(e) {}
-		
+		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
 		var response = {
-			editable: editable,
-			libraryID: libraryID
+			libraryID: library.libraryID,
+			libraryName: library.name,
+			libraryEditable: library.editable,
+			editable
 		};
 		
-		if (libraryID) {
-			let library = Zotero.Libraries.get(libraryID);
-			response.libraryName = library.name;
-			response.libraryEditable = library.editable;
-		} else {
-			response.libraryName = Zotero.getString("pane.collections.library");
-		}
+		response.libraryName = library.name;
+		response.libraryEditable = library.editable;
 		
 		if(collection && collection.id) {
 			response.id = collection.id;
