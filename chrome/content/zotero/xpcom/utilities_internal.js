@@ -639,10 +639,6 @@ Zotero.Utilities.Internal = {
 	 * @return {nsIAsyncInputStream}
 	 */
 	getAsyncInputStream: function (gen, onError) {
-		const funcName = 'getAsyncInputStream';
-		const maxOutOfSequenceSeconds = 10;
-		const outOfSequenceDelay = 50;
-		
 		// Initialize generator if necessary
 		var g = gen.next ? gen : gen();
 		var seq = 0;
@@ -656,92 +652,56 @@ Zotero.Utilities.Internal = {
 		os.init(pipe.outputStream, 'utf-8', 0, 0x0000);
 		
 		
-		pipe.outputStream.asyncWait({
-			onOutputStreamReady: function (aos) {
-				//Zotero.debug("Output stream is ready");
-				
-				let currentSeq = seq++;
-				
-				Zotero.spawn(function* () {
-					var lastVal;
-					var error = false;
-					
-					while (true) {
-						var data;
-						
-						try {
-							let result = g.next(lastVal);
-							
-							if (result.done) {
-								Zotero.debug("No more data to write");
-								aos.close();
-								return;
-							}
-							// If a promise is yielded, wait for it and pass on its value
-							if (result.value.then) {
-								lastVal = yield result.value;
-								continue;
-							}
-							// Otherwise use the return value
-							data = result.value;
-							break;
-						}
-						catch (e) {
-							Zotero.debug(e, 1);
-							
-							if (onError) {
-								error = e;
-								data = onError();
-								break;
-							}
-							
-							Zotero.debug("Closing input stream");
-							aos.close();
-							throw e;
-						}
-					}
-					
-					if (error) {
-						Zotero.debug("Closing input stream");
-						aos.close();
-						throw error;
-					}
-					
-					if (typeof data != 'string') {
-						throw new Error("Yielded value is not a string or promise in " + funcName
-							+ " ('" + data + "')");
-					}
-					
-					// Make sure that we're writing to the stream in order, in case
-					// onOutputStreamReady is called again before the last promise completes.
-					// If not in order, wait a bit and try again.
-					var maxTries = Math.floor(maxOutOfSequenceSeconds * 1000 / outOfSequenceDelay);
-					while (currentSeq != seq - 1) {
-						if (maxTries <= 0) {
-							throw new Error("Next promise took too long to finish in " + funcName);
-						}
-						Zotero.debug("Promise finished out of sequence in " + funcName
-							+ "-- waiting " + outOfSequenceDelay + " ms");
-						yield Zotero.Promise.delay(outOfSequenceDelay);
-						maxTries--;
-					}
-					
-					// Write to stream
-					Zotero.debug("Writing " + data.length + " characters");
-					os.writeString(data);
-					
-					// Wait until stream is ready for more
-					aos.asyncWait(this, 0, 0, null);
-				}, this)
-				.catch(function (e) {
-					Zotero.debug("Error getting data for async stream", 1);
-					Components.utils.reportError(e);
-					Zotero.debug(e, 1);
-					os.close();
-				});
+		function onOutputStreamReady(aos) {
+			let currentSeq = seq++;
+			
+			var maybePromise = processNextValue();
+			// If generator returns a promise, wait for it
+			if (maybePromise.then) {
+				maybePromise.then(() => onOutputStreamReady(aos));
 			}
-		}, 0, 0, null);
+			// If more data, tell stream we're ready
+			else if (maybePromise) {
+				aos.asyncWait({ onOutputStreamReady }, 0, 0, Zotero.mainThread);
+			}
+			// Otherwise close the stream
+			else {
+				aos.close();
+			}
+		};
 		
+		function processNextValue(lastVal) {
+			try {
+				var result = g.next(lastVal);
+				if (result.done) {
+					Zotero.debug("No more data to write");
+					return false;
+				}
+				if (result.value.then) {
+					return result.value.then(val => processNextValue(val));
+				}
+				if (typeof result.value != 'string') {
+					throw new Error("Data is not a string or promise (" + result.value + ")");
+				}
+				os.writeString(result.value);
+				return true;
+			}
+			catch (e) {
+				Zotero.logError(e);
+				if (onError) {
+					try {
+						os.writeString(onError(e));
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+				}
+				os.close();
+				return false;
+			}
+		}
+		
+		pipe.outputStream.asyncWait({ onOutputStreamReady }, 0, 0, Zotero.mainThread);
 		return pipe.inputStream;
 	},
 	
