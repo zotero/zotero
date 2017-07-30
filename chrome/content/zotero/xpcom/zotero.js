@@ -618,7 +618,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			
 			try {
 				var updated = yield Zotero.Schema.updateSchema({
-					onBeforeUpdate: () => {
+					onBeforeUpdate: (options = {}) => {
+						if (options.minor) return;
 						try {
 							Zotero.showZoteroPaneProgressMeter(
 								Zotero.getString('upgrade.status')

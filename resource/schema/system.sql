@@ -1223,6 +1223,7 @@ INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.oasis.opendocument.te
 INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/powerpoint');
 INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/vnd.oasis.opendocument.presentation');
 INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/x-kpresenter');
+INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/vnd.ms-powerpoint');
 
 INSERT INTO "syncObjectTypes" VALUES(1, 'collection');
 INSERT INTO "syncObjectTypes" VALUES(2, 'creator');
