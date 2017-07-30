@@ -42,6 +42,14 @@
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
     
     <script type="application/javascript" src="chrome://global/content/macWindowMenu.js"/>
+	<script>
+		function openPrefs() {
+			var Zotero = Components.classes['@zotero.org/Zotero;1']
+				.getService(Components.interfaces.nsISupports)
+				.wrappedJSObject;
+			Zotero.Utilities.Internal.openPreferences();
+		}
+	</script>
 
 	<commandset id="mainCommandSet">
 		<command id="minimizeWindow"
@@ -83,7 +91,7 @@
         <menuitem id="menu_preferences"
 				label="&preferencesCmdMac.label;"
 				key="key_preferencesCmdMac"
-				oncommand="Components.classes['@mozilla.org/appshell/window-mediator;1'].getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow('navigator:browser').Zotero.Utilities.Internal.openPreferences();"/>
+				oncommand="openPrefs()"/>
         <menuitem id="menu_mac_services"
 				label="&servicesMenuMac.label;"/>
         <menuitem id="menu_mac_hide_app"
