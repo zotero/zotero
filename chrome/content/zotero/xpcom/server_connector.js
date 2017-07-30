@@ -312,7 +312,7 @@ Zotero.Server.Connector.SavePage.prototype = {
 		}
 		
 		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
-		var libaryID = library.libraryID;
+		var libraryID = library.libraryID;
 		
 		// set handlers for translation
 		var me = this;
