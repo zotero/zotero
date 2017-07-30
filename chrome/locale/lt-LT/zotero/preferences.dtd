@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Atkurti perrašant Zotero serverio duomenis">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Ištrinti visus serverio duomenis, po to vietinius Zotero duomenis nusiųsti į serverį.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Perrašyti failų sinchronizavimo žurnalą">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Visus prisegtus failus palyginti su nuotoliniais">
 <!ENTITY zotero.preferences.sync.reset "Atkūrimas">
 <!ENTITY zotero.preferences.sync.reset.button "Atkurti...">
 
@@ -109,12 +109,12 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Jei parinktis nepasirinkta, Zotero URL adresus įtrauks tik jei cituojamas žurnalo, laikraščio ar periodinio leidinio straipsnyje nenurodyti puslapiai.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Greitas kopijavimas">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Numatytasis formatas:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopijuoti HTML formatu">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Parinktys atskiroms svetainėms:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Sritis/kelias">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(pvz., vikipedija.lt)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(pvz., wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Formatas">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Kalba">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Neleisti greitai kopijuoti, jei tempiama daugiau kaip">
 
@@ -125,8 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Parsisiųsti papildinius tekstų rengyklėms...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Naudoti klasikinį citatų įdėjimo langą">
-<!ENTITY zotero.preferences.styleEditor "Style Editor">
-<!ENTITY zotero.preferences.stylePreview "Style Preview">
+<!ENTITY zotero.preferences.styleEditor "Stilių rengyklė">
+<!ENTITY zotero.preferences.stylePreview "Stilių peržiūra">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Stilių tvarkytuvė">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Pavadinimas">
@@ -175,7 +175,7 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Failai ir katalogai">
 <!ENTITY zotero.preferences.advanced.keys "Spartieji klavišai">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Išsamesnė konfigūracija">
 
 <!ENTITY zotero.preferences.prefpane.locate "Rasti vietą">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Straipsnių paieškos variklių tvarkytuvė">
@@ -208,4 +208,4 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Atkurti transliatorius...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Atkurti stilius...">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "Konfigūracijos rengyklė">

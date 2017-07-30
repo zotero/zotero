@@ -11,9 +11,9 @@
 <!ENTITY zotero.general.refresh "Actualizar">
 <!ENTITY zotero.general.saveAs "Guardar como…">
 <!ENTITY zotero.general.advancedOptions.label "Opciones avanzadas">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Herramientas">
 <!ENTITY zotero.general.more "Más">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.loading "Cargando...">
 
 <!ENTITY zotero.errorReport.title "Informe de errores de Zotero">
 <!ENTITY zotero.errorReport.submissionInProgress "Por favor, espera mientras se envía el informe de error.">
@@ -143,7 +143,7 @@
 <!ENTITY zotero.item.copyAsURL "Copiar como URL">
 <!ENTITY zotero.item.deletePermanently "Eliminar permanentemente....">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "Eliminar todas las etiquetas...">
 
 <!ENTITY zotero.toolbar.newNote "Nueva nota">
 <!ENTITY zotero.toolbar.note.standalone "Nueva nota independiente">
@@ -158,7 +158,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Cargando etiquetas...">
 <!ENTITY zotero.tagSelector.showAutomatic "Mostrar las automáticas">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Mostrar todas las marcas en esta biblioteca">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Eliminar las etiquetas automáticas en esta biblioteca...">
 <!ENTITY zotero.tagSelector.clearAll "Sin selección">
 <!ENTITY zotero.tagSelector.assignColor "Asignar color...">
 <!ENTITY zotero.tagSelector.renameTag "Cambiar nombre...">
@@ -227,20 +227,20 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "notas al pie">
 <!ENTITY zotero.integration.prefs.endnotes.label "notas al final">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Guardar citaciones como:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Marcadores">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Los marcadores se pueden compartir entre Word y LibreOffice, pero pueden causar errores si se modifican accidentalmente y no se pueden insertar en notas a pie de página.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Usar abreviaturas de la revista MEDLINE">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "El campo &quot;Abrev. de la revista&quot; será ignorado.">
 
 <!ENTITY zotero.integration.showEditor.label "Mostrar editor">
 <!ENTITY zotero.integration.classicView.label "Vista clásica">
 
 <!ENTITY zotero.integration.references.label "Referencias en la bibliografía">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "Detener sincronización">
 <!ENTITY zotero.sync.error "Error de sincronización">
 <!ENTITY zotero.sync.storage.progress "Progreso:">
 <!ENTITY zotero.sync.storage.downloads "Descargas:">
@@ -272,10 +272,10 @@
 <!ENTITY zotero.feedSettings.title.label "Título:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Actualizar fuente cada">
 <!ENTITY zotero.feedSettings.refresh.label2 "hora(s)">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Eliminar elementos no leídos después de">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "día(s)">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Eliminar elementos leídos después de">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "día(s)">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Recuperando Metadatos...">

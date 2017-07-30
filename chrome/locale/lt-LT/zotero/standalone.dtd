@@ -69,10 +69,10 @@
 <!ENTITY productHelp.accesskey "P">
 <!ENTITY helpTroubleshootingInfo.label "Informacija nesklandumų šalinimui">
 <!ENTITY helpTroubleshootingInfo.accesskey "I">
-<!ENTITY helpFeedbackPage.label "Siųsti atsiliepimą...">
-<!ENTITY helpFeedbackPage.accesskey "S">
+<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Pranešti apie Zotero klaidą...">
+<!ENTITY helpReportErrors.label "Pranešti apie klaidas...">
 <!ENTITY helpReportErrors.accesskey "r">
 
 <!ENTITY debugOutputLogging.label "Debug Output Logging">

@@ -23,9 +23,9 @@
 <!ENTITY closeCmd.label "Cerrar">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.label "Importar...">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY importFromClipboardCmd.label "Importar desde el portapapeles">
 <!ENTITY quitApplicationCmdWin.label "Salida">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Salir">
@@ -44,9 +44,9 @@
 
 <!ENTITY toolsMenu.label "Herramientas">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Instalar conector de navegador">
 <!ENTITY installConnector.accesskey "C">
-<!ENTITY addons.label "Anexos">
+<!ENTITY addons.label "Complementos">
 
 
 <!ENTITY minimizeWindow.key "m">
@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Información de resolución de problemas">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Someter a consulta...">
-<!ENTITY helpFeedbackPage.accesskey "S">
+<!ENTITY helpFeedbackPage.label "Foros de discusión">
+<!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Notificar errores a Zotero...">
+<!ENTITY helpReportErrors.label "Informa de errores...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Registro de resultados de depuración">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled">
+<!ENTITY debugOutputLogging.submit "Enviar resultados">
+<!ENTITY debugOutputLogging.view "Ver resultados">
+<!ENTITY debugOutputLogging.clear "Limpiar resultados">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Reiniciar con el registro habilitado">
 
 <!ENTITY helpCheckForUpdates.label "Comprobar actualizaciones...">
 <!ENTITY helpCheckForUpdates.accesskey "U">
