@@ -666,9 +666,6 @@ function ZoteroProtocolHandler() {
 					var dateParts=timelineDate.toString().split(' ');
 					timelineDate=dateParts[1]+'.'+dateParts[2]+'.'+dateParts[3];
 				}
-				Zotero.debug('=');
-				Zotero.debug(params.i);
-				Zotero.debug(intervals);
 				if (!intervals || intervals.length < 3) {
 					intervals += "mye".substr(intervals.length);
 				}

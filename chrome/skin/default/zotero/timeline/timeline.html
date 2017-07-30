@@ -85,7 +85,7 @@
 				var win = wm.getMostRecentWindow('navigator:browser');
 				var zp = win.ZoteroPane;
 				zp.show();
-				zp.selectItem(evt.getDescription());
+				zp.selectItem(parseInt(evt.getDescription()));
 			}
 			
 			document.write("<title>" + getString("general.title") + "</title>");
