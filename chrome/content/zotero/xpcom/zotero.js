@@ -292,33 +292,82 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		catch (e) {
 			// Zotero dir not found
 			if (e.name == 'NS_ERROR_FILE_NOT_FOUND') {
-				Zotero.startupError = Zotero.getString('dataDir.notFound');
+				let foundInDefault = false;
+				try {
+					foundInDefault = (yield OS.File.exists(Zotero.DataDirectory.defaultDir))
+						&& (yield OS.File.exists(
+							OS.Path.join(
+								Zotero.DataDirectory.defaultDir,
+								Zotero.DataDirectory.getDatabaseFilename()
+							)
+						));
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				
+				let previousDir = Zotero.Prefs.get('lastDataDir') || Zotero.Prefs.get('dataDir');
+				Zotero.startupError = foundInDefault
+					? Zotero.getString(
+						'dataDir.notFound.defaultFound',
+						[
+							Zotero.clientName,
+							previousDir,
+							Zotero.DataDirectory.defaultDir
+						]
+					)
+					: Zotero.getString('dataDir.notFound', Zotero.clientName);
 				_startupErrorHandler = function() {
 					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 							createInstance(Components.interfaces.nsIPromptService);
-					var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
-						+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
+					var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+						+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING
+						+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
 					// TEMP: lastDataDir can be removed once old persistent descriptors have been
 					// converted, which they are in getZoteroDirectory() in 5.0
-					var previousDir = Zotero.Prefs.get('lastDataDir') || Zotero.Prefs.get('dataDir');
-					var index = ps.confirmEx(null,
-						Zotero.getString('general.error'),
-						Zotero.startupError + '\n\n' +
-						Zotero.getString('dataDir.previousDir') + ' ' + previousDir,
-						buttonFlags,
-						Zotero.getString('general.quit'),
-						Zotero.getString('dataDir.useDefaultLocation'),
-						Zotero.getString('general.locate'),
-						null, {});
-					
-					// Revert to home directory
-					if (index == 1) {
-						Zotero.DataDirectory.choose(true, true);
+					if (foundInDefault) {
+						let index = ps.confirmEx(null,
+							Zotero.getString('general.error'),
+							Zotero.startupError,
+							buttonFlags,
+							Zotero.getString('dataDir.useNewLocation'),
+							Zotero.getString('general.quit'),
+							Zotero.getString('general.locate'),
+							null, {}
+						);
+						// Revert to home directory
+						if (index == 0) {
+							Zotero.DataDirectory.set(Zotero.DataDirectory.defaultDir);
+							Zotero.Utilities.Internal.quit(true);
+							return;
+						}
+						// Locate data directory
+						else if (index == 2) {
+							Zotero.DataDirectory.choose(true);
+						}
+
 					}
-					// Locate data directory
-					else if (index == 2) {
-						Zotero.DataDirectory.choose(true);
+					else {
+						let index = ps.confirmEx(null,
+							Zotero.getString('general.error'),
+							Zotero.startupError + '\n\n' +
+							Zotero.getString('dataDir.previousDir') + ' ' + previousDir,
+							buttonFlags,
+							Zotero.getString('general.quit'),
+							Zotero.getString('dataDir.useDefaultLocation'),
+							Zotero.getString('general.locate'),
+							null, {}
+						);
+						// Revert to home directory
+						if (index == 1) {
+							Zotero.DataDirectory.set(Zotero.DataDirectory.defaultDir);
+							Zotero.Utilities.Internal.quit(true);
+							return;
+						}
+						// Locate data directory
+						else if (index == 2) {
+							Zotero.DataDirectory.choose(true);
+						}
 					}
 				}
 				return;
@@ -351,13 +400,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			Zotero.IPC.init();
 		}
 		catch (e) {
-			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
-				var msg = Zotero.localeJoin([
-					Zotero.getString('startupError.databaseCannotBeOpened'),
-					Zotero.getString('startupError.checkPermissions')
-				]);
-				Zotero.startupError = msg;
-				Zotero.logError(e);
+			if (_checkDataDirAccessError(e)) {
 				return false;
 			}
 			throw (e);
@@ -847,20 +890,15 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			}
 		}
 		catch (e) {
-			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
-				var msg = Zotero.localeJoin([
-					Zotero.getString('startupError.databaseCannotBeOpened'),
-					Zotero.getString('startupError.checkPermissions')
-				]);
-				Zotero.startupError = msg;
-			}
+			if (_checkDataDirAccessError(e)) {}
 			// Storage busy
-			else if (e.message.endsWith('2153971713')) {
+			else if (e.message.includes('2153971713')) {
 				Zotero.startupError = Zotero.getString('startupError.databaseInUse') + "\n\n"
 					+ Zotero.getString(
 						"startupError.close" + (Zotero.isStandalone ? 'Firefox' : 'Standalone')
 					);
-			} else {
+			}
+			else {
 				Zotero.startupError = Zotero.getString('startupError') + "\n\n" + (e.stack || e);
 			}
 			
@@ -872,6 +910,39 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		
 		return true;
 	});
+	
+	
+	function _checkDataDirAccessError(e) {
+		if (e.name != 'NS_ERROR_FILE_ACCESS_DENIED' && !e.message.includes('2152857621')) {
+			return false;
+		}
+		
+		var msg = Zotero.getString('dataDir.databaseCannotBeOpened', Zotero.clientName)
+			+ "\n\n"
+			+ Zotero.getString('dataDir.checkPermissions', Zotero.clientName);
+		// If already using default directory, just show it
+		if (Zotero.DataDirectory.dir == Zotero.DataDirectory.defaultDir) {
+			msg += "\n\n" + Zotero.getString('dataDir.location', Zotero.DataDirectory.dir);
+		}
+		// Otherwise suggest moving to default, since there's a good chance this is due to security
+		// software preventing Zotero from accessing the selected directory (particularly if it's
+		// a Firefox profile)
+		else {
+			msg += "\n\n"
+				+ Zotero.getString('dataDir.moveToDefaultLocation', Zotero.clientName)
+				+ "\n\n"
+				+ Zotero.getString(
+					'dataDir.migration.failure.full.current', Zotero.DataDirectory.dir
+				)
+				+ "\n"
+				+ Zotero.getString(
+					'dataDir.migration.failure.full.recommended', Zotero.DataDirectory.defaultDir
+				);
+		}
+		Zotero.startupError = msg;
+		return true;
+	}
+	
 	
 	/**
 	 * Called when the DB has been released by another Zotero process to perform necessary 
