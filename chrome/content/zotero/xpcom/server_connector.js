@@ -490,10 +490,10 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			filesEditable = true;
 		}
 		
-		var cookieSandbox = data.uri
+		var cookieSandbox = data.url
 			? new Zotero.CookieSandbox(
 				null,
-				data.uri,
+				data.url,
 				data.detailedCookies ? "" : data.cookie || "",
 				options.headers["User-Agent"]
 			)
