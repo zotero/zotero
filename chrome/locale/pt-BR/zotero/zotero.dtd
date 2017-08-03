@@ -11,7 +11,7 @@
 <!ENTITY zotero.general.refresh "Atualizar">
 <!ENTITY zotero.general.saveAs "Salvar como...">
 <!ENTITY zotero.general.advancedOptions.label "Opções avançadas">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Ferramentas">
 <!ENTITY zotero.general.more "Mais">
 <!ENTITY zotero.general.loading "Carregando...">
 
@@ -143,7 +143,7 @@
 <!ENTITY zotero.item.copyAsURL "Copiar como URL">
 <!ENTITY zotero.item.deletePermanently "Excluir permanentemente">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "Remover todas as etiquetas">
 
 <!ENTITY zotero.toolbar.newNote "Nova nota">
 <!ENTITY zotero.toolbar.note.standalone "Nova nota isolada">
@@ -158,7 +158,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Carregando etiquetas...">
 <!ENTITY zotero.tagSelector.showAutomatic "Exibir automaticamente">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Exibir todas as etiquetas dessa biblioteca">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Excluir as etiquetas automáticas nesta biblioteca...">
 <!ENTITY zotero.tagSelector.clearAll "Desmarcar todas">
 <!ENTITY zotero.tagSelector.assignColor "Atribuir cor...">
 <!ENTITY zotero.tagSelector.renameTag "Renomear a etiqueta...">
@@ -240,7 +240,7 @@
 
 <!ENTITY zotero.integration.references.label "Referências na bibliografia">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "Parar a sincronização">
 <!ENTITY zotero.sync.error "Erro na sincronização">
 <!ENTITY zotero.sync.storage.progress "Progresso:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">

@@ -44,7 +44,7 @@
 
 <!ENTITY toolsMenu.label "Verktyg">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Installera webbläsaranslutning">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Tillägg">
 
@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Felsökningsinformation">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Skicka återkoppling...">
-<!ENTITY helpFeedbackPage.accesskey "S">
+<!ENTITY helpFeedbackPage.label "Diskussionsforum">
+<!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "Rapportera fel…">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Logga felsökningsutmatning">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled">
+<!ENTITY debugOutputLogging.submit "Skicka utmatning">
+<!ENTITY debugOutputLogging.view "Visa utmatning">
+<!ENTITY debugOutputLogging.clear "Töm utmatning">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Starta om med loggning aktiverad">
 
 <!ENTITY helpCheckForUpdates.label "Sök efter uppdateringar...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

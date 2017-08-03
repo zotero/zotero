@@ -11,7 +11,7 @@
 <!ENTITY zotero.general.refresh "Uppdatera">
 <!ENTITY zotero.general.saveAs "Spara som…">
 <!ENTITY zotero.general.advancedOptions.label "Avancerade alternativ">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Verktyg">
 <!ENTITY zotero.general.more "Mera">
 <!ENTITY zotero.general.loading "Laddar...">
 
@@ -143,7 +143,7 @@
 <!ENTITY zotero.item.copyAsURL "Kopiera som URL">
 <!ENTITY zotero.item.deletePermanently "Radera permanent…">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "Radera alla etiketter…">
 
 <!ENTITY zotero.toolbar.newNote "Ny anteckning">
 <!ENTITY zotero.toolbar.note.standalone "Ny fristående anteckning">

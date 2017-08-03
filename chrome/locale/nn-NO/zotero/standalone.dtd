@@ -69,10 +69,10 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Feilsøking">
 <!ENTITY helpTroubleshootingInfo.accesskey "F">
-<!ENTITY helpFeedbackPage.label "Send tilbakemelding …">
-<!ENTITY helpFeedbackPage.accesskey "S">
+<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Meld feil i Zotero …">
+<!ENTITY helpReportErrors.label "Report Errors…">
 <!ENTITY helpReportErrors.accesskey "M">
 
 <!ENTITY debugOutputLogging.label "Debug Output Logging">

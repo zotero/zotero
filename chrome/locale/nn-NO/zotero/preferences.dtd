@@ -113,7 +113,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopier som HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Innstillingar">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domene/stig">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(t.d. wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Språk">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Slå av rask kopiering når du drar fleire enn">
