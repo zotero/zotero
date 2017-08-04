@@ -105,7 +105,12 @@ Zotero.Schema = new function(){
 				.then(async function () {
 					await this.updateBundledFiles();
 					if (Zotero.Prefs.get('automaticScraperUpdates')) {
-						await this.updateFromRepository(this.REPO_UPDATE_UPGRADE);
+						try {
+							await this.updateFromRepository(this.REPO_UPDATE_UPGRADE);
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
 					}
 					_schemaUpdateDeferred.resolve(true);
 				}.bind(this))
@@ -220,7 +225,12 @@ Zotero.Schema = new function(){
 		.then(async function () {
 			await this.updateBundledFiles();
 			if (Zotero.Prefs.get('automaticScraperUpdates')) {
-				await this.updateFromRepository(this.REPO_UPDATE_STARTUP);
+				try {
+					await this.updateFromRepository(this.REPO_UPDATE_STARTUP);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 			}
 			_schemaUpdateDeferred.resolve(true);
 		}.bind(this));
