@@ -269,7 +269,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		var json = yield client.getKeyInfo(options);
 		Zotero.debug(json);
 		if (!json) {
-			throw new Zotero.Error("API key not set", Zotero.Error.ERROR_API_KEY_NOT_SET);
+			throw new Zotero.Error("API key not set", Zotero.Error.ERROR_API_KEY_INVALID);
 		}
 		
 		// Sanity check

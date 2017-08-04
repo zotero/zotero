@@ -51,9 +51,7 @@ Zotero_Preferences.Sync = {
 			}
 			catch (e) {
 				// API key wrong/invalid
-				if (!(e instanceof Zotero.HTTP.UnexpectedStatusException)
-						&& !(e instanceof Zotero.HTTP.TimeoutException)
-						&& !(e instanceof Zotero.HTTP.BrowserOfflineException)) {
+				if (e instanceof Zotero.Error && e.error == Zotero.Error.ERROR_API_KEY_INVALID) {
 					Zotero.alert(
 						window,
 						Zotero.getString('general.error'),
