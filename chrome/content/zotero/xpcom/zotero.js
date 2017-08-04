@@ -768,8 +768,10 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					throw e;
 				}
 				
-				Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError') + "\n\n"
-					+ (e.stack || e);
+				let stack = e.stack ? Zotero.Utilities.Internal.filterStack(e.stack) : null;
+				Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError')
+					+ "\n\n"
+					+ (stack || e);
 				throw e;
 			}
 			
@@ -899,7 +901,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					);
 			}
 			else {
-				Zotero.startupError = Zotero.getString('startupError') + "\n\n" + (e.stack || e);
+				let stack = e.stack ? Zotero.Utilities.Internal.filterStack(e.stack) : null;
+				Zotero.startupError = Zotero.getString('startupError') + "\n\n" + (stack || e);
 			}
 			
 			Zotero.debug(e.toString(), 1);

@@ -1123,6 +1123,13 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
+	filterStack: function (stack) {
+		return stack.split(/\n/)
+			.filter(line => !line.includes('resource://zotero/bluebird'))
+			.join('\n');
+	},
+	
+	
 	quitZotero: function(restart=false) {
 		Zotero.debug("Zotero.Utilities.Internal.quitZotero() is deprecated -- use quit()");
 		this.quit(restart);
