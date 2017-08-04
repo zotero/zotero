@@ -1020,6 +1020,13 @@ describe("Zotero.Sync.Runner", function () {
 			win = yield loadZoteroPane();
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
+			setResponse({
+				method: "GET",
+				url: "keys/current",
+				status: 403,
+				headers: {},
+				text: "Invalid Key"
+			});
 			yield runner.sync({
 				background: true
 			});
