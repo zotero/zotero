@@ -400,8 +400,24 @@ ZoteroStandalone.DebugOutput = {
 	
 	
 	restartEnabled: function () {
-		Zotero.Prefs.set('debug.store', true);
-		Zotero.Utilities.Internal.quit(true);
+		var ps = Services.prompt;
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+				+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+		var index = ps.confirmEx(
+			null,
+			Zotero.getString('zotero.debugOutputLogging'),
+			Zotero.getString('zotero.debugOutputLogging.enabledAfterRestart', [Zotero.clientName]),
+			buttonFlags,
+			Zotero.getString('general.restartNow'),
+			null, Zotero.getString('general.restartLater'), null, {}
+		);
+		if (index != 1) {
+			Zotero.Prefs.set('debug.store', true);
+		}
+		if (index == 0) {
+			Zotero.Utilities.Internal.quit(true);
+		}
 	},
 	
 	
