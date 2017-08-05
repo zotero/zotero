@@ -61,7 +61,7 @@
 				<separator orient="vertical" width="15px"/>
 				
 				<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
-					oncommand="Zotero_Preferences.Export.buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : '');"/>
+					oncommand="Zotero_Preferences.Export.onCopyAsHTMLChange(this.checked)"/>
 			</hbox>
 			
 			<separator/>

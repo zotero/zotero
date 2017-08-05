@@ -38,6 +38,17 @@ Zotero_Preferences.Export = {
 	}),
 	
 	
+	getQuickCopyTranslators: async function () {
+		var translation = new Zotero.Translate("export");
+		var translators = await translation.getTranslators();
+		translators.sort((a, b) => {
+			var collation = Zotero.getLocaleCollation();
+			return collation.compareString(1, a.label, b.label);
+		});
+		return translators;
+	},
+	
+	
 	/*
 	 * Builds the main Quick Copy drop-down from the current global pref
 	 */
@@ -47,12 +58,7 @@ Zotero_Preferences.Export = {
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		var menulist = document.getElementById("zotero-quickCopy-menu");
 		yield Zotero.Styles.init();
-		var translation = new Zotero.Translate("export");
-		var translators = yield translation.getTranslators();
-		translators.sort((a, b) => {
-			var collation = Zotero.getLocaleCollation();
-			return collation.compareString(1, a.label, b.label);
-		});
+		var translators = yield this.getQuickCopyTranslators();
 		this.buildQuickCopyFormatDropDown(
 			menulist, format.contentType, format, translators
 		);
@@ -140,6 +146,13 @@ Zotero_Preferences.Export = {
 		});
 		
 		menulist.click();
+	},
+	
+	
+	onCopyAsHTMLChange: async function (checked) {
+		var menulist = document.getElementById('zotero-quickCopy-menu');
+		var translators = await this.getQuickCopyTranslators();
+		this.buildQuickCopyFormatDropDown(menulist, checked ? 'html' : '', null, translators);
 	},
 	
 	
