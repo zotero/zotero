@@ -94,13 +94,9 @@ zoteromergepane {
 }
 
 zoteromergepane div[anonid=parent-row] {
-	margin-bottom: 5px;
+	margin: 7px 5px;
 }
 
 zoteromergepane div[anonid=parent-row] span {
 	font-weight: bold;
-}
-
-zoteromergepane zoteronoteeditor {
-	margin: 10px 0 0;
 }
