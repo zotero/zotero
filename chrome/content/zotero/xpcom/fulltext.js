@@ -38,10 +38,11 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	this.__defineGetter__("pdfConverterCacheFile", function () { return '.zotero-ft-cache'; });
 	this.__defineGetter__("pdfInfoCacheFile", function () { return '.zotero-ft-info'; });
 	
-	this.__defineGetter__("INDEX_STATE_UNAVAILABLE", function () { return 0; });
-	this.__defineGetter__("INDEX_STATE_UNINDEXED", function () { return 1; });
-	this.__defineGetter__("INDEX_STATE_PARTIAL", function () { return 2; });
-	this.__defineGetter__("INDEX_STATE_INDEXED", function () { return 3; });
+	this.INDEX_STATE_UNAVAILABLE = 0;
+	this.INDEX_STATE_UNINDEXED = 1;
+	this.INDEX_STATE_PARTIAL = 2;
+	this.INDEX_STATE_INDEXED = 3;
+	this.INDEX_STATE_QUEUED = 4;
 	
 	this.SYNC_STATE_UNSYNCED = 0;
 	this.SYNC_STATE_IN_SYNC = 1;
@@ -789,8 +790,13 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			
 			var path = yield item.getFilePathAsync();
 			if (!path) {
-				Zotero.debug("No file to index for item " + item.libraryKey
-					+ " in Zotero.FullText.indexItems()");
+				if (yield OS.File.exists(this.getItemProcessorCacheFile(item).path)) {
+					yield Zotero.Fulltext.indexFromProcessorCache(itemID);
+				}
+				else {
+					Zotero.debug("No file to index for item " + item.libraryKey
+						+ " in Zotero.FullText.indexItems()");
+				}
 				continue;
 			}
 			
@@ -1515,57 +1521,51 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		}
 		
 		var itemID = item.id;
+		var state = this.INDEX_STATE_UNINDEXED;
 		switch (item.attachmentContentType) {
 			// Use pages for PDFs
 			case 'application/pdf':
-				var pages = yield this.getPages(itemID);
-				if (pages) {
-					var indexedPages = pages.indexedPages;
-					var totalPages = pages.total;
-					
-					if (!totalPages && !indexedPages) {
-						var status = this.INDEX_STATE_UNAVAILABLE;
-					}
-					else if (!indexedPages) {
-						var status = this.INDEX_STATE_UNINDEXED;
-					}
-					else if (indexedPages < totalPages) {
-						var status = this.INDEX_STATE_PARTIAL;
-					}
-					else {
-						var status = this.INDEX_STATE_INDEXED;
-					}
-				}
-				else {
-					var status = this.INDEX_STATE_UNINDEXED;
+				var o = yield this.getPages(itemID);
+				if (o) {
+					var stats = {
+						indexed: o.indexedPages,
+						total: o.total
+					};
 				}
 				break;
 			
-			// Use chars
 			default:
-				var chars = yield getChars(itemID);
-				if (chars) {
-					var indexedChars = chars.indexedChars;
-					var totalChars = chars.total;
-					
-					if (!totalChars && !indexedChars) {
-						var status = this.INDEX_STATE_UNAVAILABLE;
-					}
-					else if (!indexedChars) {
-						var status = this.INDEX_STATE_UNINDEXED;
-					}
-					else if (indexedChars < totalChars) {
-						var status = this.INDEX_STATE_PARTIAL;
-					}
-					else {
-						var status = this.INDEX_STATE_INDEXED;
-					}
-				}
-				else {
-					var status = this.INDEX_STATE_UNINDEXED;
+				var o = yield getChars(itemID);
+				if (o) {
+					var stats = {
+						indexed: o.indexedChars,
+						total: o.total
+					};
 				}
 		}
-		return status;
+		
+		if (stats) {
+			if (!stats.total && !stats.indexed) {
+				let queued = false;
+				try {
+					queued = yield OS.File.exists(this.getItemProcessorCacheFile(item).path);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				state = queued ? this.INDEX_STATE_QUEUED : this.INDEX_STATE_UNAVAILABLE;
+			}
+			else if (!stats.indexed) {
+				state = this.INDEX_STATE_UNINDEXED;
+			}
+			else if (stats.indexed < stats.total) {
+				state = this.INDEX_STATE_PARTIAL;
+			}
+			else {
+				state = this.INDEX_STATE_INDEXED;
+			}
+		}
+		return state;
 	});
 	
 	
@@ -1625,6 +1625,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 				case this.INDEX_STATE_UNAVAILABLE:
 				case this.INDEX_STATE_UNINDEXED:
 				case this.INDEX_STATE_PARTIAL:
+				case this.INDEX_STATE_QUEUED:
 				
 				// TODO: automatically reindex already-indexed attachments?
 				case this.INDEX_STATE_INDEXED:

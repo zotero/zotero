@@ -525,6 +525,9 @@
 							case Zotero.Fulltext.INDEX_STATE_PARTIAL:
 								str += 'partial';
 								break;
+							case Zotero.Fulltext.INDEX_STATE_QUEUED:
+								str += 'queued';
+								break;
 							case Zotero.Fulltext.INDEX_STATE_INDEXED:
 								str = 'general.yes';
 								break;
