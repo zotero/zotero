@@ -210,7 +210,7 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
  * Stop the sync process
  */
 Zotero.Sync.Data.Engine.prototype.stop = function () {
-	Zotero.debug("Stopping sync for " + this.library.name);
+	Zotero.debug("Stopping data sync for " + this.library.name);
 	this._stopping = true;
 }
 

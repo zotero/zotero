@@ -79,6 +79,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	var _currentLastSyncLabel;
 	var _errors = [];
 	
+	Zotero.addShutdownListener(() => this.stop());
+	
 	this.getAPIClient = function (options = {}) {
 		return new Zotero.Sync.APIClient({
 			baseURL: this.baseURL,
