@@ -293,17 +293,13 @@ Zotero.Sync.Storage.Engine.prototype.queueItem = Zotero.Promise.coroutine(functi
 		case Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD:
 		case Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_DOWNLOAD:
 			var type = 'download';
-			var onStart = Zotero.Promise.method(function (request) {
-				return this.controller.downloadFile(request);
-			}.bind(this));
+			var fn = 'downloadFile';
 			break;
 		
 		case Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD:
 		case Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_UPLOAD:
 			var type = 'upload';
-			var onStart = Zotero.Promise.method(function (request) {
-				return this.controller.uploadFile(request);
-			}.bind(this));
+			var fn = 'uploadFile';
 			break;
 		
 		case false:
@@ -314,18 +310,20 @@ Zotero.Sync.Storage.Engine.prototype.queueItem = Zotero.Promise.coroutine(functi
 			throw new Error("Invalid sync state " + item.attachmentSyncState);
 	}
 	
-	var request = new Zotero.Sync.Storage.Request({
-		type,
-		libraryID: this.libraryID,
-		name: item.libraryKey,
-		onStart,
-		onProgress: this.onProgress
-	});
 	if (type == 'upload') {
 		if (!(yield item.fileExists())) {
 			Zotero.debug("File " + item.libraryKey + " not yet available to upload -- skipping");
 			return;
 		}
 	}
-	this.queues[type].add(request.start.bind(request));
+	this.queues[type].add(() => {
+		var request = new Zotero.Sync.Storage.Request({
+			type,
+			libraryID: this.libraryID,
+			name: item.libraryKey,
+			onStart: request => this.controller[fn](request),
+			onProgress: this.onProgress
+		});
+		return request.start();
+	});
 })
