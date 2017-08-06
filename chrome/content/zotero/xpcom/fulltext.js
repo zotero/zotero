@@ -839,7 +839,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			sql += "AND itemID>?";
 			params.push(options.lastItemID);
 		}
-		sql += "ORDER BY itemID DESC";
+		sql += "ORDER BY itemID";
 		var rows = yield Zotero.DB.queryAsync(sql, params);
 		var contentSize = 0;
 		for (let i = 0; i < rows.length; i++) {
