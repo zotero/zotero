@@ -97,7 +97,10 @@ ZoteroPluginInstaller.prototype = {
 				)) {
 					
 				var me = this;
-				if(installationInProgress) return;
+				if (installationInProgress) {
+					Zotero.debug(`${this._addon.APP} extension installation is already in progress`);
+					return;
+				}
 				
 				installationInProgress = true;
 				if(!this._addon.DISABLE_PROGRESS_WINDOW) {
@@ -112,6 +115,8 @@ ZoteroPluginInstaller.prototype = {
 			}
 		} catch(e) {
 			Zotero.logError(e);
+		} finally {
+			installationInProgress = false;
 		}
 	},
 	
