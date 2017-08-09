@@ -69,10 +69,10 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Informação de Resolução de Problemas">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Submeter Comentários...">
-<!ENTITY helpFeedbackPage.accesskey "S">
+<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Reportar Erros ao Zotero...">
+<!ENTITY helpReportErrors.label "Report Errors…">
 <!ENTITY helpReportErrors.accesskey "R">
 
 <!ENTITY debugOutputLogging.label "Debug Output Logging">
@@ -80,7 +80,7 @@
 <!ENTITY debugOutputLogging.submit "Submit Output">
 <!ENTITY debugOutputLogging.view "View Output">
 <!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
 
 <!ENTITY helpCheckForUpdates.label "Verificar Actualizações...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

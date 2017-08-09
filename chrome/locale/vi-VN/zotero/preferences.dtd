@@ -113,7 +113,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy theo dạng HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Những thiết lập đặc thù cho từng Website:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Tên miền/Đường dẫn">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(vd: wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Ngôn ngữ">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Tắt copy nhanh khi kéo nhiều hơn">

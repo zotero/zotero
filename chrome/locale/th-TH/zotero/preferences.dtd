@@ -113,7 +113,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "ทำสำเนาเป็น HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "ตั้งค่าที่ตั้งเฉพาะ:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "โดเมน/พาธ">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(เช่น wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "ไม่ใช้การสำเนาแบบเร็วเมื่อลากรายการมากกว่า ">

@@ -80,7 +80,7 @@
 <!ENTITY debugOutputLogging.submit "Enviar resultados">
 <!ENTITY debugOutputLogging.view "Ver resultados">
 <!ENTITY debugOutputLogging.clear "Limpiar resultados">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Reiniciar con el registro habilitado">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Reiniciar con Registro Deshabilitado...">
 
 <!ENTITY helpCheckForUpdates.label "Comprobar actualizaciones...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

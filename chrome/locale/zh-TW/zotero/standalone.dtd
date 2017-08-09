@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "診斷之資訊 (T)">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "回饋 (S)…">
-<!ENTITY helpFeedbackPage.accesskey "S">
+<!ENTITY helpFeedbackPage.label "討論論壇">
+<!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "回報錯誤…">
 <!ENTITY helpReportErrors.accesskey "R">
 
 <!ENTITY debugOutputLogging.label "Debug Output Logging">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled">
+<!ENTITY debugOutputLogging.submit "送出輸出">
+<!ENTITY debugOutputLogging.view "檢視輸出">
+<!ENTITY debugOutputLogging.clear "清除輸出">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
 
 <!ENTITY helpCheckForUpdates.label "檢查更新 (U)…">
 <!ENTITY helpCheckForUpdates.accesskey "U">

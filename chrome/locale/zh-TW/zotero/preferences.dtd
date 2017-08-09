@@ -125,8 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "取得文書處理器外掛...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用傳統新增引用文獻對話框">
-<!ENTITY zotero.preferences.styleEditor "Style Editor">
-<!ENTITY zotero.preferences.stylePreview "Style Preview">
+<!ENTITY zotero.preferences.styleEditor "格式編輯器">
+<!ENTITY zotero.preferences.stylePreview "格式預覽">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "樣式管理器">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "標題">
@@ -175,7 +175,7 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "檔案與資料夾">
 <!ENTITY zotero.preferences.advanced.keys "快捷鍵">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "進階設定">
 
 <!ENTITY zotero.preferences.prefpane.locate "查詢">
 <!ENTITY zotero.preferences.locate.locateEngineManager "論文查詢引擎管理器">
@@ -208,4 +208,4 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重設轉譯器...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "重設樣式...">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "設定編輯器">

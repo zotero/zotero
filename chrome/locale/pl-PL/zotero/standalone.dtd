@@ -69,7 +69,7 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Informacje dla pomocy technicznej">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Forum dyskusyjne">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "Zgłoś błędy...">
@@ -80,7 +80,7 @@
 <!ENTITY debugOutputLogging.submit "Submit Output">
 <!ENTITY debugOutputLogging.view "Pokaż wyjście">
 <!ENTITY debugOutputLogging.clear "Wyczyść wyjście">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
 
 <!ENTITY helpCheckForUpdates.label "Sprawdź uaktualnienia...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

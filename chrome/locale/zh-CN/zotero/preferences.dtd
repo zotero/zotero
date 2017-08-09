@@ -113,7 +113,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "复制为 HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "网站专属性设置:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "域/路径">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(例如 wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "语言">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "禁用便捷复制, 当拖动项超过">

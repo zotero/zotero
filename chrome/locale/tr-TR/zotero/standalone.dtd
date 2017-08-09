@@ -75,12 +75,12 @@
 <!ENTITY helpReportErrors.label "Hataları Bildir...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Hata Ayıklaması Çıktısının Kaydı">
+<!ENTITY debugOutputLogging.label "Hata Ayıklama Çıktısının Kaydı">
 <!ENTITY debugOutputLogging.accesskey "L">
 <!ENTITY debugOutputLogging.submit "Çıktıyı Gönder">
 <!ENTITY debugOutputLogging.view "Çıktıyı Göster">
 <!ENTITY debugOutputLogging.clear "Çıktıyı Temizle">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Günlüğü Etkinleştirerek Yeniden Başlat">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Kayıt Tutmayı Etkinleştirerek Yeniden Başlat...">
 
 <!ENTITY helpCheckForUpdates.label "Güncellemeleri Denetle">
 <!ENTITY helpCheckForUpdates.accesskey "U">

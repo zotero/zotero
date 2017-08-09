@@ -69,10 +69,10 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Probleemoplossingsinformatie">
 <!ENTITY helpTroubleshootingInfo.accesskey "P">
-<!ENTITY helpFeedbackPage.label "Feedback versturen…">
-<!ENTITY helpFeedbackPage.accesskey "v">
+<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Foutrapportage opsturen…">
+<!ENTITY helpReportErrors.label "Report Errors…">
 <!ENTITY helpReportErrors.accesskey "F">
 
 <!ENTITY debugOutputLogging.label "Debug Output Logging">
@@ -80,7 +80,7 @@
 <!ENTITY debugOutputLogging.submit "Submit Output">
 <!ENTITY debugOutputLogging.view "View Output">
 <!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
 
 <!ENTITY helpCheckForUpdates.label "Controleren op updates…">
 <!ENTITY helpCheckForUpdates.accesskey "u">
