@@ -1,5 +1,11 @@
 content	zotero				chrome/content/zotero/
-content	zotero-platform		chrome/content/zotero-platform/		platform
+content	zotero-platform		chrome/content/zotero-platform/mac/       os=Darwin
+content	zotero-platform		chrome/content/zotero-platform/win/       os=WINNT
+content	zotero-platform		chrome/content/zotero-platform/unix/      os=Linux
+content	zotero-platform		chrome/content/zotero-platform/unix/      os=SunOS
+content	zotero-platform		chrome/content/zotero-platform/unix/      os=FreeBSD
+content	zotero-platform		chrome/content/zotero-platform/unix/      os=OpenBSD
+
 resource zotero				resource/
 
 locale	zotero	en-US		chrome/locale/en-US/zotero/
