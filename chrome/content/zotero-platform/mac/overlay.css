@@ -85,12 +85,6 @@
 	border: 0 !important;
 }
 
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover .dropmarker-icon,
-#zotero-toolbar-save-button[cui-areatype="toolbar"]:hover .dropmarker-icon {
-	padding-top: calc(var(--toolbarbutton-inner-padding) + 5px);
-	padding-bottom: calc(var(--toolbarbutton-inner-padding) + 5px);
-}
-
 /*
  * Alterations for overflow menu
  */
