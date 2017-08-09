@@ -2209,9 +2209,10 @@ Zotero.Item.prototype.getFilePath = function () {
 	// Imported file with relative path
 	if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
 			linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
-		if (path.indexOf("storage:") == -1) {
-			Zotero.debug("Invalid attachment path '" + path + "'", 2);
-			throw new Error("Invalid path");
+		if (!path.includes("storage:")) {
+			Zotero.logError("Invalid attachment path '" + path + "'");
+			this._updateAttachmentStates(false);
+			return false;
 		}
 		// Strip "storage:"
 		path = path.substr(8);
@@ -2294,9 +2295,10 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 	// Imported file with relative path
 	if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
 			linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
-		if (path.indexOf("storage:") == -1) {
-			Zotero.debug("Invalid attachment path '" + path + "'", 2);
-			throw new Error("Invalid path");
+		if (!path.includes("storage:")) {
+			Zotero.logError("Invalid attachment path '" + path + "'");
+			this._updateAttachmentStates(false);
+			return false;
 		}
 		
 		// Strip "storage:"
