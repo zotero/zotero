@@ -4076,14 +4076,9 @@ var ZoteroPane = new function()
 			}
 			
 			if (!errMsg) {
-				// Get the stringbundle manually
-				var src = 'chrome://zotero/locale/zotero.properties';
-				var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
-						getService(Components.interfaces.nsILocaleService);
-				var appLocale = localeService.getApplicationLocale();
 				var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
 					.getService(Components.interfaces.nsIStringBundleService);
-				var stringBundle = stringBundleService.createBundle(src, appLocale);
+				var stringBundle = stringBundleService.createBundle(src);
 				
 				var errMsg = stringBundle.GetStringFromName('startupError');
 			}

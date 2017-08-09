@@ -249,16 +249,9 @@ function getTooltipText(button) {
 				let localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1']
 					.getService(Components.interfaces.nsILocaleService);
 				Components.utils.import("resource://gre/modules/Services.jsm");
-				if (Services.locale.getAppLocale) {
-					var appLocale = Services.locale.getAppLocale();
-				}
-				// Fx <=53
-				else {
-					var appLocale = Services.locale.getApplicationLocale();
-				}
 				let stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
 					.getService(Components.interfaces.nsIStringBundleService);
-				let stringBundle = stringBundleService.createBundle(src, appLocale);
+				let stringBundle = stringBundleService.createBundle(src);
 				text = stringBundle.GetStringFromName('startupError');
 			}
 		}
