@@ -1034,10 +1034,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					// character in the URL and the server (e.g., Sakai) is
 					// encoding the value
 					&& decodeURIComponent(href).indexOf(path) == -1) {
-				throw new Error(
-					"DAV:href '" + href + "' does not begin with path '"
-						+ path + "' in " + funcName
-				);
+				throw new Error(`DAV:href '${href}' does not begin with path '${path}'`);
 			}
 			
 			var matches = href.match(/[^\/]+$/);
