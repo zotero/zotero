@@ -52,7 +52,8 @@ Zotero.DataDirectory = {
 	
 	
 	init: Zotero.Promise.coroutine(function* () {
-		var file;
+		var dataDir;
+		var dbFilename = this.getDatabaseFilename();
 		if (Zotero.Prefs.get('useDataDir')) {
 			let prefVal = Zotero.Prefs.get('dataDir');
 			// Convert old persistent descriptor pref to string path and clear obsolete lastDataDir pref
@@ -84,61 +85,57 @@ Zotero.DataDirectory = {
 				// interrupted before the database could be moved (or moving failed), so use the source
 				// directory specified in the marker file.
 				let migrationMarker = OS.Path.join(prefVal, this.MIGRATION_MARKER);
-				let dbFile = OS.Path.join(prefVal, this.getDatabaseFilename());
+				let dbFile = OS.Path.join(prefVal, dbFilename);
 				
 				if ((yield OS.File.exists(migrationMarker)) && !(yield OS.File.exists(dbFile))) {
 					let contents = yield Zotero.File.getContentsAsync(migrationMarker);
 					try {
 						let { sourceDir } = JSON.parse(contents);
-						file = OS.Path.normalize(sourceDir);
+						dataDir = OS.Path.normalize(sourceDir);
 					}
 					catch (e) {
 						Zotero.logError(e);
 						Zotero.debug(`Invalid marker file:\n\n${contents}`, 1);
-						e = { name: "NS_ERROR_FILE_NOT_FOUND" };
-						throw e;
+						throw { name: "NS_ERROR_FILE_NOT_FOUND" };
 					}
 				}
 				else {
 					try {
-						file = OS.Path.normalize(prefVal);
+						dataDir = OS.Path.normalize(prefVal);
 					}
 					catch (e) {
 						Zotero.logError(e);
 						Zotero.debug(`Invalid path '${prefVal}' in dataDir pref`, 1);
-						e = { name: "NS_ERROR_FILE_NOT_FOUND" };
-						throw e;
+						throw { name: "NS_ERROR_FILE_NOT_FOUND" };
 					}
 				}
 			}
 			
-			if (!(yield OS.File.exists(file)) && file != this.defaultDir) {
+			if (!(yield OS.File.exists(dataDir)) && dataDir != this.defaultDir) {
 				// If set to a legacy directory that doesn't exist, forget about it and just use the
 				// new default location, which will either exist or be created below. The most likely
 				// cause of this is a migration, so don't bother looking in other-app profiles.
-				if (this.isLegacy(file)) {
+				if (this.isLegacy(dataDir)) {
 					let newDefault = this.defaultDir;
-					Zotero.debug(`Legacy data directory ${file} from pref not found `
+					Zotero.debug(`Legacy data directory ${dataDir} from pref not found `
 						+ `-- reverting to ${newDefault}`, 1);
-					file = newDefault;
+					dataDir = newDefault;
 					this.set(newDefault);
 				}
 				// For other custom directories that don't exist, show not-found dialog
 				else {
-					Zotero.debug(`Custom data directory ${file} not found`, 1);
+					Zotero.debug(`Custom data directory ${dataDir} not found`, 1);
 					throw { name: "NS_ERROR_FILE_NOT_FOUND" };
 				}
 			}
 		}
+		// New installation of 5.0+ with no data directory specified, so check all the places the data
+		// could be
 		else {
-			let dataDir = this.defaultDir;
-			
-			//
-			// TODO: asyncify
-			//
+			dataDir = this.defaultDir;
 			
 			// Check for ~/Zotero/zotero.sqlite
-			let dbFile = OS.Path.join(dataDir, this.getDatabaseFilename());
+			let dbFile = OS.Path.join(dataDir, dbFilename);
 			if (yield OS.File.exists(dbFile)) {
 				Zotero.debug("Using data directory " + dataDir);
 				this._cache(dataDir);
@@ -149,36 +146,47 @@ Zotero.DataDirectory = {
 				return dataDir;
 			}
 			
-			// Check for 'zotero' dir in profile dir
-			let profileSubdir = OS.Path.join(Zotero.Profile.dir, this.legacyDirName);
-			if (yield OS.File.exists(profileSubdir)) {
-				Zotero.debug("Using data directory " + profileSubdir);
-				this._cache(profileSubdir);
-				return profileSubdir;
+			let useProfile = false;
+			let useFirefoxProfile = false;
+			let useFirefoxProfileCustom = false;
+			
+			// Check for <profile dir>/zotero/zotero.sqlite
+			let profileSubdirModTime;
+			try {
+				let dir = OS.Path.join(Zotero.Profile.dir, this.legacyDirName);
+				let dbFile = OS.Path.join(dir, dbFilename);
+				profileSubdirModTime = (yield OS.File.stat(dbFile)).lastModificationDate;
+				Zotero.debug(`Database found at ${dbFile}, last modified ${profileSubdirModTime}`);
+				dataDir = dir;
+				useProfile = true;
+			}
+			catch (e) {
+				if (!(e instanceof OS.File.Error && e.becauseNoSuchFile)) {
+					throw e;
+				}
 			}
 			
 			//
-			// If Standalone and no directory yet, check Firefox directory, or vice versa
+			// Check Firefox directory
 			//
 			let profilesParent = OS.Path.dirname(Zotero.Profile.getOtherAppProfilesDir());
-			Zotero.debug("Looking for existing profile in " + profilesParent);
+			Zotero.debug("Looking for Firefox profile in " + profilesParent);
 			
 			// get default profile
 			var defProfile;
 			try {
 				defProfile = yield Zotero.Profile.getDefaultInProfilesDir(profilesParent);
-			} catch(e) {
-				Zotero.debug("An error occurred locating the Firefox profile; not "+
-					"attempting to migrate from Zotero for Firefox");
+			}
+			catch (e) {
+				Zotero.debug("An error occurred locating the Firefox profile; "
+					+ "not attempting to migrate from Zotero for Firefox");
 				Zotero.logError(e);
 			}
-			
-			if(defProfile) {
-				// get Zotero directory
+			if (defProfile) {
 				let profileDir = defProfile[0];
 				Zotero.debug("Found default profile at " + profileDir);
 				
-				// copy prefs
+				// Read in prefs
 				let prefsFile = OS.Path.join(profileDir, "prefs.js");
 				if (yield OS.File.exists(prefsFile)) {
 					// build sandbox
@@ -197,35 +205,95 @@ Zotero.DataDirectory = {
 					// evaluate
 					Components.utils.evalInSandbox(prefsJs, sandbox);
 					var prefs = sandbox.prefs;
-					for(var key in prefs) {
-						if(key.substr(0, ZOTERO_CONFIG.PREF_BRANCH.length) === ZOTERO_CONFIG.PREF_BRANCH
-								&& key !== "extensions.zotero.firstRun2") {
-							Zotero.Prefs.set(key.substr(ZOTERO_CONFIG.PREF_BRANCH.length), prefs[key]);
+					
+					// Check for data dir pref
+					if (prefs['extensions.zotero.dataDir'] && prefs['extensions.zotero.useDataDir']) {
+						Zotero.debug(`Found custom dataDir of ${prefs['extensions.zotero.dataDir']}`);
+						let nsIFile;
+						try {
+							nsIFile = Components.classes["@mozilla.org/file/local;1"]
+								.createInstance(Components.interfaces.nsILocalFile);
+							nsIFile.persistentDescriptor = prefs['extensions.zotero.dataDir'];
+						}
+						catch (e) {
+							Zotero.logError(e);
+							if (!useProfile) {
+								Zotero.debug("Persistent descriptor in extensions.zotero.dataDir "
+									+ "did not resolve", 1);
+								throw { name: "NS_ERROR_FILE_NOT_FOUND" };
+							}
+						}
+						if (nsIFile) {
+							try {
+								let dbFile = OS.Path.join(nsIFile.path, dbFilename);
+								let mtime = (yield OS.File.stat(dbFile)).lastModificationDate;
+								Zotero.debug(`Database found at ${dbFile}, last modified ${mtime}`);
+								// If custom location has a newer DB, use that
+								if (useProfile && mtime > profileSubdirModTime) {
+									dataDir = nsIFile.path;
+									useFirefoxProfileCustom = true;
+									useProfile = false;
+								}
+							}
+							catch (e) {
+								Zotero.logError(e);
+								// If we have a DB in the Zotero profile and get an error trying to
+								// access the custom location in Firefox, use the Zotero profile, since
+								// there's at least some chance it's right. Otherwise, throw an error.
+								if (!useProfile) {
+									throw e;
+								}
+							}
+						}
+					}
+					// If no custom dir specified, check for a subdirectory
+					else {
+						try {
+							let dir = OS.Path.join(profileDir, this.legacyDirName);
+							let dbFile = OS.Path.join(dir, dbFilename);
+							let mtime = (yield OS.File.stat(dbFile)).lastModificationDate;
+							Zotero.debug(`Database found at ${dbFile}, last modified ${mtime}`);
+							// If newer than Zotero profile directory, use this one
+							if (useProfile && mtime > profileSubdirModTime) {
+								dataDir = dir;
+								useFirefoxProfile = true;
+								useProfile = false;
+							}
+						}
+						catch (e) {
+							Zotero.logError(e);
+							// Same as above -- throw error if we don't already have a DB
+							if (!useProfile) {
+								throw e;
+							}
 						}
 					}
 					
-					// If data directory setting was transferred, use that
-					if (Zotero.Prefs.get('useDataDir')) {
-						return this.init();
+					// If using data directory from Zotero for Firefox, transfer those prefs, because
+					// the fact that that DB was more recent and wasn't set in the Zotero profile prefs
+					// means that they were using Firefox.
+					if (useFirefoxProfile || useFirefoxProfileCustom) {
+						for (let key in prefs) {
+							if (key.substr(0, ZOTERO_CONFIG.PREF_BRANCH.length) === ZOTERO_CONFIG.PREF_BRANCH
+									&& key !== "extensions.zotero.firstRun2") {
+								Zotero.Prefs.set(key.substr(ZOTERO_CONFIG.PREF_BRANCH.length), prefs[key]);
+							}
+						}
+						
+						// If data directory setting was transferred, use that
+						if (Zotero.Prefs.get('useDataDir')) {
+							return this.init();
+						}
 					}
-				}
-				
-				// If there's a data directory in the default profile for the alternative app, use that
-				let zoteroDir = OS.Path.join(profileDir, this.legacyDirName);
-				if (yield OS.File.exists(zoteroDir)) {
-					this.set(zoteroDir);
-					file = zoteroDir;
 				}
 			}
 			
-			if (!file) {
-				file = dataDir;
-			}
+			this.set(dataDir);
 		}
 		
-		Zotero.debug("Using data directory " + file);
-		yield Zotero.File.createDirectoryIfMissingAsync(file);
-		this._cache(file);
+		Zotero.debug("Using data directory " + dataDir);
+		yield Zotero.File.createDirectoryIfMissingAsync(dataDir);
+		this._cache(dataDir);
 	}),
 	
 	

@@ -291,7 +291,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 		catch (e) {
 			// Zotero dir not found
-			if (e.name == 'NS_ERROR_FILE_NOT_FOUND') {
+			if ((e instanceof OS.File.Error && e.becauseNoSuchFile) || e.name == 'NS_ERROR_FILE_NOT_FOUND') {
 				let foundInDefault = false;
 				try {
 					foundInDefault = (yield OS.File.exists(Zotero.DataDirectory.defaultDir))
