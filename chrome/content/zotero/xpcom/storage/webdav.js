@@ -1013,46 +1013,40 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			
 			// Absolute
 			if (href.match(/^https?:\/\//)) {
-				var ios = Components.classes["@mozilla.org/network/io-service;1"].
-							getService(Components.interfaces.nsIIOService);
-				var href = ios.newURI(href, null, null);
-				href = href.path;
+				let ios = Components.classes["@mozilla.org/network/io-service;1"]
+					.getService(Components.interfaces.nsIIOService);
+				href = ios.newURI(href, null, null).path;
 			}
 			
+			let decodedHref = decodeURIComponent(href).normalize();
+			let decodedPath = decodeURIComponent(path).normalize();
+			
 			// Skip root URI
-			if (href == path
+			if (decodedHref == decodedPath
 					// Some Apache servers respond with a "/zotero" href
 					// even for a "/zotero/" request
-					|| (trailingSlash && href + '/' == path)
-					// Try URL-encoded as well, as above
-					|| decodeURIComponent(href) == path) {
+					|| (trailingSlash && decodedHref + '/' == decodedPath)) {
 				continue;
 			}
 			
-			if (href.indexOf(path) == -1
-					// Try URL-encoded as well, in case there's a '~' or similar
-					// character in the URL and the server (e.g., Sakai) is
-					// encoding the value
-					&& decodeURIComponent(href).indexOf(path) == -1) {
+			if (!decodedHref.startsWith(decodedPath)) {
 				throw new Error(`DAV:href '${href}' does not begin with path '${path}'`);
 			}
 			
 			var matches = href.match(/[^\/]+$/);
 			if (!matches) {
-				throw new Error(
-					"Unexpected href '" + href + "' in " + funcName
-				);
+				throw new Error(`Unexpected href '${href}'`);
 			}
 			var file = matches[0];
 			
-			if (file.indexOf('.') == 0) {
+			if (file.startsWith('.')) {
 				Zotero.debug("Skipping hidden file " + file);
 				continue;
 			}
 			
 			var isLastSyncFile = file == 'lastsync.txt' || file == 'lastsync';
 			if (!isLastSyncFile) {
-				if (!file.match(/\.zip$/) && !file.match(/\.prop$/)) {
+				if (!file.endsWith('.zip') && !file.endsWith('.prop')) {
 					Zotero.debug("Skipping file " + file);
 					continue;
 				}

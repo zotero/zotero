@@ -862,6 +862,75 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			Zotero.Prefs.set("lastWebDAVOrphanPurge", Math.round(new Date().getTime() / 1000) - 3600);
 			yield assert.eventually.equal(controller.purgeOrphanedStorageFiles(), false);
 			assertRequestCount(0);
+		});
+		
+		
+		it("should handle unnormalized Unicode characters", function* () {
+			var library = Zotero.Libraries.userLibrary;
+			library.updateLastSyncTime();
+			yield library.saveTx();
+			
+			const daysBeforeSyncTime = 7;
+			
+			var beforeTime = new Date(Date.now() - (daysBeforeSyncTime * 86400 * 1000 + 1)).toUTCString();
+			var currentTime = new Date(Date.now() - 3600000).toUTCString();
+			
+			var strC = '\u1E9B\u0323';
+			var encodedStrC = encodeURIComponent(strC);
+			var strD = '\u1E9B\u0323'.normalize('NFD');
+			var encodedStrD = encodeURIComponent(strD);
+			
+			setResponse({
+				method: "PROPFIND",
+				url: `${encodedStrC}/zotero/`,
+				status: 207,
+				headers: {
+					"Content-Type": 'text/xml; charset="utf-8"'
+				},
+				text: '<?xml version="1.0" encoding="utf-8"?>'
+					+ '<D:multistatus xmlns:D="DAV:" xmlns:ns0="DAV:">'
+						+ '<D:response xmlns:lp1="DAV:" xmlns:lp2="http://apache.org/dav/props/">'
+							+ `<D:href>${davBasePath}${encodedStrD}/zotero/</D:href>`
+							+ '<D:propstat>'
+								+ '<D:prop>'
+								+ `<lp1:getlastmodified>${beforeTime}</lp1:getlastmodified>`
+								+ '</D:prop>'
+								+ '<D:status>HTTP/1.1 200 OK</D:status>'
+							+ '</D:propstat>'
+						+ '</D:response>'
+						+ '<D:response xmlns:lp1="DAV:" xmlns:lp2="http://apache.org/dav/props/">'
+							+ `<D:href>${davBasePath}${encodedStrD}/zotero/lastsync</D:href>`
+							+ '<D:propstat>'
+								+ '<D:prop>'
+								+ `<lp1:getlastmodified>${beforeTime}</lp1:getlastmodified>`
+								+ '</D:prop>'
+								+ '<D:status>HTTP/1.1 200 OK</D:status>'
+							+ '</D:propstat>'
+						+ '</D:response>'
+						
+						+ '<D:response xmlns:lp1="DAV:" xmlns:lp2="http://apache.org/dav/props/">'
+							+ `<D:href>${davBasePath}${encodedStrD}/zotero/AAAAAAAA.zip</D:href>`
+							+ '<D:propstat>'
+								+ '<D:prop>'
+								+ `<lp1:getlastmodified>${beforeTime}</lp1:getlastmodified>`
+								+ '</D:prop>'
+								+ '<D:status>HTTP/1.1 200 OK</D:status>'
+							+ '</D:propstat>'
+						+ '</D:response>'
+						+ '<D:response xmlns:lp1="DAV:" xmlns:lp2="http://apache.org/dav/props/">'
+							+ `<D:href>${davBasePath}${encodedStrD}/zotero/AAAAAAAA.prop</D:href>`
+							+ '<D:propstat>'
+								+ '<D:prop>'
+								+ `<lp1:getlastmodified>${beforeTime}</lp1:getlastmodified>`
+								+ '</D:prop>'
+								+ '<D:status>HTTP/1.1 200 OK</D:status>'
+							+ '</D:propstat>'
+						+ '</D:response>'
+					+ '</D:multistatus>'
+			});
+			
+			Zotero.Prefs.set("sync.storage.url", davHostPath + strC + "/");
+			yield controller.purgeOrphanedStorageFiles();
 		})
 	})
 })
