@@ -53,7 +53,7 @@
 						for (let span of document.getElementById('about-text').getElementsByTagName('span')) {
 							span.className = 'text-link';
 							span.onclick = function () {
-								window.opener.ZoteroPane.loadURI(this.getAttribute('data-href'));
+								Zotero.launchURL(this.getAttribute('data-href'));
 							};
 						}
 					]]></script>
