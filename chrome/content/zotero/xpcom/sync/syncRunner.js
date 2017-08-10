@@ -609,12 +609,27 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	 */
 	var _doFileSync = Zotero.Promise.coroutine(function* (libraries, options) {
 		Zotero.debug("Starting file syncing");
-		this.setSyncStatus(Zotero.getString('sync.status.syncingFiles'));
 		var resyncLibraries = []
 		for (let libraryID of libraries) {
 			_stopCheck();
+			this.setSyncStatus(
+				Zotero.getString(
+					'sync.status.syncingFilesInLibrary', Zotero.Libraries.get(libraryID).name
+				)
+			);
 			try {
-				let opts = {};
+				let opts = {
+					onProgress: (progress, progressMax) => {
+						var remaining = progressMax - progress;
+						this.setSyncStatus(
+							Zotero.getString(
+								'sync.status.syncingFilesInLibraryWithRemaining',
+								[Zotero.Libraries.get(libraryID).name, remaining],
+								remaining
+							)
+						);
+					}
+				};
 				Object.assign(opts, options);
 				opts.libraryID = libraryID;
 				

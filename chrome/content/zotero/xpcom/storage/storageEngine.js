@@ -34,6 +34,7 @@ if (!Zotero.Sync.Storage) {
  * @param {Object} options
  * @param {Integer} options.libraryID
  * @param {Object} options.controller - Storage controller instance (ZFS_Controller/WebDAV_Controller)
+ * @param {Function} [onProgress] - Function to run when a request finishes: f(progress, progressMax)
  * @param {Function} [onError] - Function to run on error
  * @param {Boolean} [stopOnError]
  */
@@ -52,11 +53,15 @@ Zotero.Sync.Storage.Engine = function (options) {
 	this.library = Zotero.Libraries.get(options.libraryID);
 	this.controller = options.controller;
 	
+	this.numRequests = 0;
+	this.requestsRemaining = 0;
+	
 	this.local = Zotero.Sync.Storage.Local;
 	this.utils = Zotero.Sync.Storage.Utilities;
 	
 	this.setStatus = options.setStatus || function () {};
 	this.onError = options.onError || function (e) {};
+	this.onProgress = options.onProgress || function (progress, progressMax) {};
 	this.stopOnError = options.stopOnError || false;
 	
 	this.queues = [];
@@ -136,6 +141,7 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	}
 	
 	var filesEditable = Zotero.Libraries.get(libraryID).filesEditable;
+	this.requestsRemaining = 0;
 	
 	// Check for updated files to upload
 	if (!filesEditable) {
@@ -322,8 +328,13 @@ Zotero.Sync.Storage.Engine.prototype.queueItem = Zotero.Promise.coroutine(functi
 			libraryID: this.libraryID,
 			name: item.libraryKey,
 			onStart: request => this.controller[fn](request),
-			onProgress: this.onProgress
+			onStop: () => {
+				this.requestsRemaining--;
+				this.onProgress(this.numRequests - this.requestsRemaining, this.numRequests);
+			}
 		});
 		return request.start();
 	});
+	this.numRequests++;
+	this.requestsRemaining++;
 })
