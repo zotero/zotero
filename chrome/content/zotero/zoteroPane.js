@@ -4165,50 +4165,11 @@ var ZoteroPane = new function()
 	
 	
 	/**
-	 * Launch an HTTP URL externally, the best way we can
-	 *
-	 * Used only by Standalone
+	 * @deprecated
 	 */
 	this.launchURL = function (url) {
-		if (!url.match(/^https?/)) {
-			throw new Error("launchURL() requires an HTTP(S) URL");
-		}
-		
-		try {
-			var io = Components.classes['@mozilla.org/network/io-service;1']
-						.getService(Components.interfaces.nsIIOService);
-			var uri = io.newURI(url, null, null);
-			var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
-							.getService(Components.interfaces.nsIExternalProtocolService)
-							.getProtocolHandlerInfo('http');
-			handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
-			handler.launchWithURI(uri, null);
-		}
-		catch (e) {
-			Zotero.debug("launchWithURI() not supported -- trying fallback executable");
-			
-			if (Zotero.isWin) {
-				var pref = "fallbackLauncher.windows";
-			}
-			else {
-				var pref = "fallbackLauncher.unix";
-			}
-			var path = Zotero.Prefs.get(pref);
-			
-			var exec = Components.classes["@mozilla.org/file/local;1"]
-						.createInstance(Components.interfaces.nsILocalFile);
-			exec.initWithPath(path);
-			if (!exec.exists()) {
-				throw ("Fallback executable not found -- check extensions.zotero." + pref + " in about:config");
-			}
-			
-			var proc = Components.classes["@mozilla.org/process/util;1"]
-							.createInstance(Components.interfaces.nsIProcess);
-			proc.init(exec);
-			
-			var args = [url];
-			proc.runw(false, args, args.length);
-		}
+		Zotero.debug("ZoteroPane.launchURI() is deprecated -- use Zotero.launchURI()", 2);
+		Zotero.launchURI(launchURI);
 	}
 	
 	
