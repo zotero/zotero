@@ -41,6 +41,56 @@ describe("Zotero.Sync.Data.Engine", function () {
 		setHTTPResponse(server, baseURL, response, responses);
 	}
 	
+	function setDefaultResponses(options = {}) {
+		var target = options.target || 'users/1';
+		var headers = {
+			"Last-Modified-Version": options.libraryVersion || 5
+		};
+		var lastLibraryVersion = options.lastLibraryVersion || 4;
+		setResponse({
+			method: "GET",
+			url: `${target}/settings?since=${lastLibraryVersion}`,
+			status: 200,
+			headers,
+			json: {}
+		});
+		setResponse({
+			method: "GET",
+			url: `${target}/collections?format=versions&since=${lastLibraryVersion}`,
+			status: 200,
+			headers,
+			json: {}
+		});
+		setResponse({
+			method: "GET",
+			url: `${target}/searches?format=versions&since=${lastLibraryVersion}`,
+			status: 200,
+			headers,
+			json: {}
+		});
+		setResponse({
+			method: "GET",
+			url: `${target}/items/top?format=versions&since=${lastLibraryVersion}&includeTrashed=1`,
+			status: 200,
+			headers,
+			json: {}
+		});
+		setResponse({
+			method: "GET",
+			url: `${target}/items?format=versions&since=${lastLibraryVersion}&includeTrashed=1`,
+			status: 200,
+			headers,
+			json: {}
+		});
+		setResponse({
+			method: "GET",
+			url: `${target}/deleted?since=${lastLibraryVersion}`,
+			status: 200,
+			headers,
+			json: {}
+		});
+	}
+	
 	function makeCollectionJSON(options) {
 		return {
 			key: options.key,
@@ -476,7 +526,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var library = Zotero.Libraries.userLibrary;
 			var libraryID = library.id;
 			var lastLibraryVersion = 5;
-			library.libraryVersion = lastLibraryVersion;
+			library.libraryVersion = library.storageVersion = lastLibraryVersion;
 			yield library.saveTx();
 			
 			yield Zotero.SyncedSettings.set(libraryID, "testSetting1", { foo: "bar" });
@@ -559,7 +609,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			yield Zotero.SyncedSettings.set(libraryID, "testSetting2", { bar: "bar" });
 			
-			assert.equal(Zotero.Libraries.getVersion(libraryID), lastLibraryVersion);
+			assert.equal(library.libraryVersion, lastLibraryVersion);
+			assert.equal(library.storageVersion, lastLibraryVersion);
 			for (let type of types) {
 				// Make sure objects were set to the correct version and marked as synced
 				assert.lengthOf((yield Zotero.Sync.Data.Local.getUnsynced(type, libraryID)), 0);
@@ -657,7 +708,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			yield engine.start();
 			
-			assert.equal(Zotero.Libraries.getVersion(libraryID), lastLibraryVersion);
+			assert.equal(library.libraryVersion, lastLibraryVersion);
+			assert.equal(library.storageVersion, lastLibraryVersion);
 			for (let type of types) {
 				// Make sure objects were set to the correct version and marked as synced
 				assert.lengthOf((yield Zotero.Sync.Data.Local.getUnsynced(type, libraryID)), 0);
@@ -803,7 +855,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var library = Zotero.Libraries.userLibrary;
 			var libraryID = library.id;
 			var lastLibraryVersion = 5;
-			library.libraryVersion = lastLibraryVersion;
+			library.libraryVersion = library.storageVersion = lastLibraryVersion;
 			yield library.saveTx();
 			
 			yield Zotero.SyncedSettings.set(libraryID, "testSetting", { foo: "bar" });
@@ -832,7 +884,94 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			assert.isAbove(library.libraryVersion, 5);
 			assert.equal(library.libraryVersion, lastLibraryVersion);
-		})
+			assert.equal(library.storageVersion, lastLibraryVersion);
+		});
+		
+		
+		it("shouldn't update library storage version after settings upload if storage version was already behind", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			var lastLibraryVersion = 5;
+			library.libraryVersion = lastLibraryVersion;
+			library.storageVersion = 4;
+			yield library.saveTx();
+			
+			yield Zotero.SyncedSettings.set(libraryID, "testSetting", { foo: "bar" });
+			
+			server.respond(function (req) {
+				if (req.method == "POST") {
+					assert.equal(
+						req.requestHeaders["If-Unmodified-Since-Version"], lastLibraryVersion
+					);
+					
+					if (req.url == baseURL + "users/1/settings") {
+						let json = JSON.parse(req.requestBody);
+						req.respond(
+							204,
+							{
+								"Last-Modified-Version": ++lastLibraryVersion
+							},
+							""
+						);
+						return;
+					}
+				}
+			})
+			
+			yield engine.start();
+			
+			assert.isAbove(library.libraryVersion, 5);
+			assert.equal(library.libraryVersion, lastLibraryVersion);
+			assert.equal(library.storageVersion, 4);
+		});
+		
+		
+		it("shouldn't update library storage version after item upload if storage version was already behind", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			var lastLibraryVersion = 5;
+			library.libraryVersion = lastLibraryVersion;
+			library.storageVersion = 4;
+			yield library.saveTx();
+			
+			var item = yield createDataObject('item');
+			var itemResponseJSON = item.toResponseJSON();
+			
+			server.respond(function (req) {
+				if (req.method == "POST") {
+					assert.equal(
+						req.requestHeaders["If-Unmodified-Since-Version"], lastLibraryVersion
+					);
+					
+					if (req.url == baseURL + "users/1/items") {
+						req.respond(
+							200,
+							{
+								"Content-Type": "application/json",
+								"Last-Modified-Version": lastLibraryVersion
+							},
+							JSON.stringify({
+								successful: {
+									"0": itemResponseJSON
+								},
+								unchanged: {},
+								failed: {}
+							})
+						);
+						return;
+					}
+				}
+			})
+			
+			yield engine.start();
+			
+			assert.equal(library.libraryVersion, lastLibraryVersion);
+			assert.equal(library.storageVersion, 4);
+		});
 		
 		
 		it("should process downloads after upload failure", function* () {
@@ -885,6 +1024,120 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.ok(stub.called);
 			
 			stub.restore();
+		});
+		
+		
+		it("shouldn't update library storage version if there were storage metadata changes", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var library = Zotero.Libraries.userLibrary;
+			var lastLibraryVersion = 2;
+			library.libraryVersion = lastLibraryVersion;
+			library.storageVersion = lastLibraryVersion;
+			yield library.saveTx();
+			
+			var target = 'users/1';
+			var newLibraryVersion = 5;
+			var headers = {
+				"Last-Modified-Version": newLibraryVersion
+			};
+			
+			// Create an attachment response with storage metadata
+			var item = new Zotero.Item('attachment');
+			item.attachmentLinkMode = 'imported_file';
+			item.attachmentFilename = 'test.txt';
+			item.attachmentContentType = 'text/plain';
+			item.attachmentCharset = 'utf-8';
+			var itemResponseJSON = item.toResponseJSON();
+			itemResponseJSON.key = itemResponseJSON.data.key = Zotero.DataObjectUtilities.generateKey();
+			itemResponseJSON.version = itemResponseJSON.data.version = newLibraryVersion;
+			itemResponseJSON.data.mtime = new Date().getTime();
+			itemResponseJSON.data.md5 = '57f8a4fda823187b91e1191487b87fe6';
+			
+			setDefaultResponses({
+				target,
+				lastLibraryVersion: lastLibraryVersion,
+				libraryVersion: newLibraryVersion
+			});
+			
+			setResponse({
+				method: "GET",
+				url: `${target}/items?format=versions&since=${lastLibraryVersion}&includeTrashed=1`,
+				status: 200,
+				headers,
+				json: {
+					[item.key]: newLibraryVersion
+				}
+			});
+			
+			setResponse({
+				method: "GET",
+				url: `${target}/items?format=json&itemKey=${item.key}&includeTrashed=1`,
+				status: 200,
+				headers,
+				json: [itemResponseJSON]
+			});
+			
+			yield engine.start();
+			
+			assert.equal(library.libraryVersion, newLibraryVersion);
+			assert.equal(library.storageVersion, lastLibraryVersion);
+		});
+		
+		
+		it("should update library storage version if there were no storage metadata changes and storage version wasn't already behind", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var library = Zotero.Libraries.userLibrary;
+			var lastLibraryVersion = 2;
+			library.libraryVersion = lastLibraryVersion;
+			library.storageVersion = lastLibraryVersion;
+			yield library.saveTx();
+			
+			var target = 'users/1';
+			var newLibraryVersion = 5;
+			var headers = {
+				"Last-Modified-Version": newLibraryVersion
+			};
+			
+			setDefaultResponses({
+				target,
+				lastLibraryVersion: lastLibraryVersion,
+				libraryVersion: newLibraryVersion
+			});
+			
+			yield engine.start();
+			
+			assert.equal(library.libraryVersion, newLibraryVersion);
+			assert.equal(library.storageVersion, newLibraryVersion);
+		});
+		
+		
+		it("shouldn't update library storage version if there were no storage metadata changes but storage version was already behind", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var library = Zotero.Libraries.userLibrary;
+			var lastLibraryVersion = 2;
+			library.libraryVersion = lastLibraryVersion;
+			library.storageVersion = 1;
+			yield library.saveTx();
+			
+			var target = 'users/1';
+			var newLibraryVersion = 5;
+			var headers = {
+				"Last-Modified-Version": newLibraryVersion
+			};
+			
+			setDefaultResponses({
+				target,
+				lastLibraryVersion: lastLibraryVersion,
+				libraryVersion: newLibraryVersion
+			});
+			
+			yield engine.start();
+			
+			assert.equal(library.libraryVersion, newLibraryVersion);
+			assert.equal(library.storageVersion, 1);
 		});
 		
 		
@@ -1151,7 +1404,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var { engine, client, caller } = yield setup();
 			var library = Zotero.Libraries.userLibrary;
 			var lastLibraryVersion = 5;
-			library.libraryVersion = lastLibraryVersion;
+			library.libraryVersion = library.storageVersion = lastLibraryVersion;
 			yield library.saveTx();
 			
 			
@@ -1204,6 +1457,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 				);
 			}
 			assert.equal(library.libraryVersion, lastLibraryVersion);
+			assert.equal(library.storageVersion, lastLibraryVersion);
 		})
 		
 		it("should make only one request if in sync", function* () {

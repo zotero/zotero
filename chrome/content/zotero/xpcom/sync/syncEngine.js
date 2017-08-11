@@ -300,7 +300,23 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 	}
 	
 	if (newLibraryVersion) {
+		// After data is downloaded, the library version is updated to match the remote version. We
+		// track a library version for file syncing separately, so that even if Zotero is closed or
+		// interrupted between a data sync and a file sync, we know that file syncing has to be
+		// performed for any files marked for download during data sync (based on outdated mtime/md5).
+		// Files may be missing remotely, though, so it's only necessary to try to download them once
+		// every time there are remote storage changes, which we indicate with a 'storageDownloadNeeded'
+		// flag set in syncLocal. If the storage version was already behind, though, a storage download
+		// is needed, regardless of whether storage metadata was updated.
+		if (this.library.storageVersion < this.library.libraryVersion) {
+			this.library.storageDownloadNeeded = true;
+		}
+		// Update library version to match remote
 		this.library.libraryVersion = newLibraryVersion;
+		// Skip storage downloads if not needed
+		if (!this.library.storageDownloadNeeded) {
+			this.library.storageVersion = newLibraryVersion;
+		}
 		yield this.library.saveTx();
 	}
 	
@@ -1078,6 +1094,9 @@ Zotero.Sync.Data.Engine.prototype._uploadSettings = Zotero.Promise.coroutine(fun
 		Object.keys(settings),
 		libraryVersion
 	);
+	if (this.library.libraryVersion == this.library.storageVersion) {
+		this.library.storageVersion = libraryVersion;
+	}
 	this.library.libraryVersion = libraryVersion;
 	yield this.library.saveTx({
 		skipNotifier: true
@@ -1252,6 +1271,9 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 						skipDateModifiedUpdate: true
 					});
 				}
+				if (this.library.libraryVersion == this.library.storageVersion) {
+					this.library.storageVersion = libraryVersion;
+				}
 				this.library.libraryVersion = libraryVersion;
 				yield this.library.save();
 				objectsClass.updateVersion(updateVersionIDs, libraryVersion);
@@ -1343,6 +1365,9 @@ Zotero.Sync.Data.Engine.prototype._uploadDeletions = Zotero.Promise.coroutine(fu
 		keys.splice(0, batch.length);
 		
 		// Update library version
+		if (this.library.libraryVersion == this.library.storageVersion) {
+			this.library.storageVersion = libraryVersion;
+		}
 		this.library.libraryVersion = libraryVersion;
 		yield this.library.saveTx({
 			skipNotifier: true
