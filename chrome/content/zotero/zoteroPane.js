@@ -4168,8 +4168,8 @@ var ZoteroPane = new function()
 	 * @deprecated
 	 */
 	this.launchURL = function (url) {
-		Zotero.debug("ZoteroPane.launchURI() is deprecated -- use Zotero.launchURI()", 2);
-		Zotero.launchURI(launchURI);
+		Zotero.debug("ZoteroPane.launchURL() is deprecated -- use Zotero.launchURL()", 2);
+		return Zotero.launchURL(url);
 	}
 	
 	
