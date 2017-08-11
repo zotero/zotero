@@ -253,7 +253,7 @@ Zotero.HTTP = new function() {
 				deferred.resolve(xmlhttp);
 			} else {
 				let msg = "HTTP " + method + " " + dispURL + " failed with status code " + xmlhttp.status;
-				if (xmlhttp.responseText) {
+				if (!xmlhttp.responseType && xmlhttp.responseText) {
 					msg += ":\n\n" + xmlhttp.responseText;
 				}
 				Zotero.debug(msg, 1);
