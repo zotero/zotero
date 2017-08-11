@@ -164,6 +164,40 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.equal(library.storageVersion, library.libraryVersion);
 		})
 		
+		it("shouldn't update storageVersion if stopped", function* () {
+			var { engine, client, caller } = yield setup();
+			
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 5;
+			yield library.saveTx();
+			library.storageDownloadNeeded = true;
+			
+			var items = [];
+			for (let i = 0; i < 5; i++) {
+				let item = new Zotero.Item("attachment");
+				item.attachmentLinkMode = 'imported_file';
+				item.attachmentPath = 'storage:test.txt';
+				item.attachmentSyncState = "to_download";
+				yield item.saveTx();
+				items.push(item);
+			}
+			
+			var call = 0;
+			var stub = sinon.stub(engine.controller, 'downloadFile').callsFake(function () {
+				call++;
+				if (call == 1) {
+					engine.stop();
+				}
+				return new Zotero.Sync.Storage.Result;
+			});
+			
+			var result = yield engine.start();
+			
+			stub.restore();
+			
+			assert.equal(library.storageVersion, 0);
+		});
+		
 		it("should handle a remotely failing file", function* () {
 			var { engine, client, caller } = yield setup();
 			

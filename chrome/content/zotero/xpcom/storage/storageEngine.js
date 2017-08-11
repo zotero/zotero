@@ -222,7 +222,7 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 			if (p.isFulfilled()) {
 				succeeded++;
 			}
-			else {
+			else if (!p.isPending()) {
 				if (this.stopOnError) {
 					let e = p.reason();
 					Zotero.debug(`File ${type} sync failed for ${this.library.name}`);
@@ -237,7 +237,11 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 		
 		changes.updateFromResults(results.filter(p => p.isFulfilled()).map(p => p.value()));
 		
-		if (type == 'download' && results.every(p => !p.isRejected())) {
+		if (type == 'download'
+				// Not stopped
+				&& this.requestsRemaining == 0
+				// No errors
+				&& results.every(p => !p.isRejected())) {
 			downloadSuccessful = true;
 		}
 	}
