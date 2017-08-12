@@ -1301,15 +1301,23 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Show an item in the library it came from
 	 */
-	this.showInLibrary = function() {
+	this.showInLibrary = async function() {
 		var id = panelRefersToBubble.citationItem.id;
 		var pane = Zotero.getActiveZoteroPane();
-		if(pane) {
-			pane.show();
-			pane.selectItem(id);
-		} else {
-			var win = window.open('zotero://select/item/'+id);
+		// Open main window if it's not open (Mac)
+		if (!pane) {
+			let win = Zotero.openMainWindow();
+			await new Zotero.Promise((resolve) => {
+				let onOpen = function () {
+					win.removeEventListener('load', onOpen);
+					resolve();
+				};
+				win.addEventListener('load', onOpen);
+			});
+			pane = win.ZoteroPane;
 		}
+		pane.show();
+		pane.selectItem(id);
 		
 		// Pull window to foreground
 		Zotero.Integration.activate(pane.document.defaultView);
