@@ -1061,6 +1061,17 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	}
 	
 	
+	this.openMainWindow = function () {
+		var prefService = Components.classes["@mozilla.org/preferences-service;1"]
+			.getService(Components.interfaces.nsIPrefBranch);
+		var chromeURI = prefService.getCharPref('toolkit.defaultChromeURI');
+		var flags = prefService.getCharPref("toolkit.defaultChromeFeatures", "chrome,dialog=no,all");
+		var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
+			.getService(Components.interfaces.nsIWindowWatcher);
+		return ww.openWindow(null, chromeURI, '_blank', flags, null);
+	}
+	
+	
 	/**
 	 * Launch a file, the best way we can
 	 */
