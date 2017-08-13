@@ -78,7 +78,7 @@ Zotero.DataDirectory = {
 				}
 				// This removes lastDataDir
 				this.set(nsIFile.path);
-				file = nsIFile.path;
+				dataDir = nsIFile.path;
 			}
 			else {
 				// If there's a migration marker in this directory and no database, migration was
