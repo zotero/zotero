@@ -23,9 +23,9 @@
 <!ENTITY closeCmd.label "إغلاق">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "ق">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.label "استيراد...">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY importFromClipboardCmd.label "استيراد من الحافظة">
 <!ENTITY quitApplicationCmdWin.label "خروج">
 <!ENTITY quitApplicationCmdWin.accesskey "خ">
 <!ENTITY quitApplicationCmd.label "إنهاء">
@@ -44,7 +44,7 @@
 
 <!ENTITY toolsMenu.label "أدوات">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "ثبت موصل المتصفح">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "ملحقات">
 
@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "معلومات المساعدة والتنويه">
 <!ENTITY helpTroubleshootingInfo.accesskey "م">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "منتديات المناقشة">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "الإبلاغ عن أخطاء...">
 <!ENTITY helpReportErrors.accesskey "ب">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "سجل تصويب المخرجات">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.submit "إرسال المخرجات">
+<!ENTITY debugOutputLogging.view "عرض المخرجات">
+<!ENTITY debugOutputLogging.clear "مسح المخرجات">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "أعاده التشغيل مع تمكين التسجيل...">
 
 <!ENTITY helpCheckForUpdates.label "تحقق من التحديثات">
 <!ENTITY helpCheckForUpdates.accesskey "ت">

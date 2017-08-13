@@ -80,7 +80,7 @@
 <!ENTITY debugOutputLogging.submit "Skicka utmatning">
 <!ENTITY debugOutputLogging.view "Visa utmatning">
 <!ENTITY debugOutputLogging.clear "Töm utmatning">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Starta om med loggning aktiverad…">
 
 <!ENTITY helpCheckForUpdates.label "Sök efter uppdateringar...">
 <!ENTITY helpCheckForUpdates.accesskey "U">
