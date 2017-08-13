@@ -612,10 +612,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		var resyncLibraries = []
 		for (let libraryID of libraries) {
 			_stopCheck();
+			let libraryName = Zotero.Libraries.get(libraryID).name;
 			this.setSyncStatus(
-				Zotero.getString(
-					'sync.status.syncingFilesInLibrary', Zotero.Libraries.get(libraryID).name
-				)
+				Zotero.getString('sync.status.syncingFilesInLibrary', libraryName)
 			);
 			try {
 				let opts = {
@@ -624,7 +623,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 						this.setSyncStatus(
 							Zotero.getString(
 								'sync.status.syncingFilesInLibraryWithRemaining',
-								[Zotero.Libraries.get(libraryID).name, remaining],
+								[libraryName, remaining],
 								remaining
 							)
 						);
