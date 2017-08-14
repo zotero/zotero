@@ -1777,8 +1777,8 @@ Zotero.Utilities = {
 					var cslAuthor = nameMappings[i];
 					let creator = {};
 					if(cslAuthor.family || cslAuthor.given) {
-						if(cslAuthor.family) creator.lastName = cslAuthor.family;
-						if(cslAuthor.given) creator.firstName = cslAuthor.given;
+						creator.lastName = cslAuthor.family || '';
+						creator.firstName = cslAuthor.given || '';
 					} else if(cslAuthor.literal) {
 						creator.lastName = cslAuthor.literal;
 						creator.fieldMode = 1;
