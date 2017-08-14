@@ -55,3 +55,11 @@ window.addEventListener("keypress", function (event) {
 		browser.reloadWithFlags(browser.webNavigation.LOAD_FLAGS_BYPASS_CACHE);
 	}
 });
+
+// Handle <label class="text-link />
+window.addEventListener("click", function (event) {
+	if (event.originalTarget.localName == 'label'
+			&& event.originalTarget.classList.contains('text-link')) {
+		Zotero.launchURL(event.originalTarget.getAttribute('href'));
+	}
+});
