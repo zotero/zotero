@@ -643,7 +643,12 @@ Zotero.Server.Connector.Import.prototype = {
 			return 400;
 		}
 		translate.setTranslator(translators[0]);
-		let items = yield translate.translate();
+		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
+		let arg = {};
+		if (editable) {
+			arg = {libraryID: library.libraryID, collections: [collection.id]};
+		}
+		let items = yield translate.translate(arg);
 		return [201, "application/json", JSON.stringify(items)];
 	})
 }

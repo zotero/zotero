@@ -513,7 +513,11 @@ describe("Connector Server", function () {
 			assert.equal(error.xmlhttp.status, 400);
 		});
 		
-		it('should import resources (BibTeX)', function* () {
+		it('should import resources (BibTeX) into selected collection', function* () {
+			var collection = yield createDataObject('collection');
+			yield waitForItemsLoad(win);
+			
+			var addedItemIDPromise = waitForItemEvent('add');
 			var resource = `@book{test1,
   title={Test1},
   author={Owl},
@@ -530,6 +534,9 @@ describe("Connector Server", function () {
 			);	
 			assert.equal(response.status, 201);
 			assert.equal(JSON.parse(response.responseText)[0].title, 'Test1');
+			
+			let itemId = yield addedItemIDPromise;
+			assert.isTrue(collection.hasItem(itemId[0]));
 		});
 	});
 });
