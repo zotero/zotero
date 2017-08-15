@@ -634,7 +634,6 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		// on the parent below
 		if (channel) {
 			var channelAuthorization = Zotero.HTTP.getChannelAuthorization(channel);
-			Zotero.debug(channelAuthorization);
 			channel = null;
 		}
 		
