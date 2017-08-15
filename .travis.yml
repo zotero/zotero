@@ -18,6 +18,10 @@ matrix:
     #    - env: FX_CHANNEL="beta"
 notifications:
     email: false
+addons:
+  apt:
+    packages:
+    - dbus-x11
 install:
     - if [ $FX_VERSION = "52.0.3" ]; then
         wget -O tarball "https://archive.mozilla.org/pub/firefox/tinderbox-builds/mozilla-release-linux64-add-on-devel/1491732920/firefox-52.0.3.en-US.linux-x86_64-add-on-devel.tar.bz2";
@@ -49,5 +53,7 @@ before_script:
             --skip_cleanup=true;
       fi
     - unset AWS_SECRET_ACCESS_KEY
+    # Fix warnings in output
+    - dbus-launch
 script:
     - test/runtests.sh -x firefox/firefox -f
