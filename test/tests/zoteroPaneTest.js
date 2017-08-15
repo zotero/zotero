@@ -147,6 +147,7 @@ describe("ZoteroPane", function() {
 		var baseURL = `http://localhost:${port}/`;
 		var server;
 		var responses = {};
+		var httpd;
 		
 		var setup = Zotero.Promise.coroutine(function* (options = {}) {
 			server = sinon.fakeServer.create();
@@ -157,80 +158,89 @@ describe("ZoteroPane", function() {
 			setHTTPResponse(server, baseURL, response, responses);
 		}
 		
+		async function downloadOnDemand() {
+			var item = new Zotero.Item("attachment");
+			item.attachmentLinkMode = 'imported_file';
+			item.attachmentPath = 'storage:test.txt';
+			// TODO: Test binary data
+			var text = Zotero.Utilities.randomString();
+			item.attachmentSyncState = "to_download";
+			await item.saveTx();
+			
+			var mtime = "1441252524000";
+			var md5 = Zotero.Utilities.Internal.md5(text)
+			
+			var s3Path = `pretend-s3/${item.key}`;
+			httpd.registerPathHandler(
+				`/users/1/items/${item.key}/file`,
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 302, "Found");
+						response.setHeader("Zotero-File-Modification-Time", mtime, false);
+						response.setHeader("Zotero-File-MD5", md5, false);
+						response.setHeader("Zotero-File-Compressed", "No", false);
+						response.setHeader("Location", baseURL + s3Path, false);
+					}
+				}
+			);
+			httpd.registerPathHandler(
+				"/" + s3Path,
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.write(text);
+					}
+				}
+			);
+			
+			// Disable loadURI() so viewAttachment() doesn't trigger translator loading
+			var stub = sinon.stub(zp, "loadURI");
+			
+			await zp.viewAttachment(item.id);
+			
+			assert.ok(stub.calledOnce);
+			assert.ok(stub.calledWith(OS.Path.toFileURI(item.getFilePath())));
+			stub.restore();
+			
+			assert.equal(await item.attachmentHash, md5);
+			assert.equal(await item.attachmentModificationTime, mtime);
+			var path = await item.getFilePathAsync();
+			assert.equal(await Zotero.File.getContentsAsync(path), text);
+		};
+		
 		before(function () {
 			Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
-			
-			Zotero.Prefs.set("api.url", baseURL);
-			Zotero.Sync.Runner.apiKey = apiKey;
 		})
 		beforeEach(function* () {
-			this.httpd = new HttpServer();
-			this.httpd.start(port);
+			Zotero.Prefs.set("api.url", baseURL);
+			Zotero.Sync.Runner.apiKey = apiKey;
+				
+			httpd = new HttpServer();
+			httpd.start(port);
 			
 			yield Zotero.Users.setCurrentUserID(1);
 			yield Zotero.Users.setCurrentUsername("testuser");
 		})
 		afterEach(function* () {
 			var defer = new Zotero.Promise.defer();
-			this.httpd.stop(() => defer.resolve());
+			httpd.stop(() => defer.resolve());
 			yield defer.promise;
 		})
+		after(function () {
+			Zotero.HTTP.mock = null;
+		});
 		
-		it("should download an attachment on-demand", function* () {
-			for (let fn of ['downloadAsNeeded', 'downloadOnSync']) {
-				yield setup();
-				
-				Zotero.Sync.Storage.Local[fn](Zotero.Libraries.userLibraryID, true);
-				
-				var item = new Zotero.Item("attachment");
-				item.attachmentLinkMode = 'imported_file';
-				item.attachmentPath = 'storage:test.txt';
-				// TODO: Test binary data
-				var text = Zotero.Utilities.randomString();
-				item.attachmentSyncState = "to_download";
-				yield item.saveTx();
-				
-				var mtime = "1441252524000";
-				var md5 = Zotero.Utilities.Internal.md5(text)
-				
-				var s3Path = `pretend-s3/${item.key}`;
-				this.httpd.registerPathHandler(
-					`/users/1/items/${item.key}/file`,
-					{
-						handle: function (request, response) {
-							response.setStatusLine(null, 302, "Found");
-							response.setHeader("Zotero-File-Modification-Time", mtime, false);
-							response.setHeader("Zotero-File-MD5", md5, false);
-							response.setHeader("Zotero-File-Compressed", "No", false);
-							response.setHeader("Location", baseURL + s3Path, false);
-						}
-					}
-				);
-				this.httpd.registerPathHandler(
-					"/" + s3Path,
-					{
-						handle: function (request, response) {
-							response.setStatusLine(null, 200, "OK");
-							response.write(text);
-						}
-					}
-				);
-				
-				// Disable loadURI() so viewAttachment() doesn't trigger translator loading
-				var stub = sinon.stub(zp, "loadURI");
-				
-				yield zp.viewAttachment(item.id);
-				
-				assert.ok(stub.calledOnce);
-				assert.ok(stub.calledWith(OS.Path.toFileURI(item.getFilePath())));
-				stub.restore();
-				
-				assert.equal((yield item.attachmentHash), md5);
-				assert.equal((yield item.attachmentModificationTime), mtime);
-				var path = yield item.getFilePathAsync();
-				assert.equal((yield Zotero.File.getContentsAsync(path)), text);
-			}
-		})
+		it("should download an attachment on-demand in as-needed mode", function* () {
+			yield setup();
+			Zotero.Sync.Storage.Local.downloadAsNeeded(Zotero.Libraries.userLibraryID, true);
+			yield downloadOnDemand();
+		});
+		
+		it("should download an attachment on-demand in at-sync-time mode", function* () {
+			yield setup();
+			Zotero.Sync.Storage.Local.downloadOnSync(Zotero.Libraries.userLibraryID, true);
+			yield downloadOnDemand();
+		});
 	})
 	
 	
