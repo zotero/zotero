@@ -41,7 +41,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.debug = debug;
 	this.log = log;
 	this.logError = logError;
-	this.getErrors = getErrors;
 	this.localeJoin = localeJoin;
 	this.setFontSize = setFontSize;
 	this.flattenArguments = flattenArguments;
@@ -1297,21 +1296,22 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	}
 	
 	
-	function getErrors(asStrings) {
+	this.getErrors = function (asStrings) {
 		var errors = [];
 		
 		for (let msg of _startupErrors.concat(_recentErrors)) {
-			// Remove password in malformed XML messages
+			let altMessage;
+			// Remove password in malformed XML errors
 			if (msg.category == 'malformed-xml') {
 				try {
 					// msg.message is read-only, so store separately
-					var altMessage = msg.message.replace(/(file: "https?:\/\/[^:]+:)([^@]+)(@[^"]+")/, "$1********$3");
+					altMessage = msg.message.replace(/(https?:\/\/[^:]+:)([^@]+)(@[^"]+)/, "$1****$3");
 				}
 				catch (e) {}
 			}
 			
 			if (asStrings) {
-				errors.push(altMessage ? altMessage : msg.message)
+				errors.push(altMessage || msg.message)
 			}
 			else {
 				errors.push(msg);
