@@ -77,7 +77,7 @@
 
 <!ENTITY debugOutputLogging.label "Debug Output Logging">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
+<!ENTITY debugOutputLogging.submit "Kimenet elküldése">
 <!ENTITY debugOutputLogging.view "View Output">
 <!ENTITY debugOutputLogging.clear "Clear Output">
 <!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">

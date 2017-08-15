@@ -44,7 +44,7 @@
 
 <!ENTITY toolsMenu.label "Nástroje">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Nainstalovat Konektory do prohlížečů">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Doplňky">
 
@@ -69,17 +69,17 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Informace o řešení potíží">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Diskusní fórum">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Nahlásit chyby...">
 <!ENTITY helpReportErrors.accesskey "R">
 
 <!ENTITY debugOutputLogging.label "Debug Output Logging">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
+<!ENTITY debugOutputLogging.submit "Zaslat výstup">
+<!ENTITY debugOutputLogging.view "Prohlédnout výstup">
+<!ENTITY debugOutputLogging.clear "Vymazat výstup">
 <!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
 
 <!ENTITY helpCheckForUpdates.label "Zkontrolovat aktualizace...">

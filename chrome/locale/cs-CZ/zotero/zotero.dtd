@@ -11,7 +11,7 @@
 <!ENTITY zotero.general.refresh "Obnovit">
 <!ENTITY zotero.general.saveAs "Uložit jako...">
 <!ENTITY zotero.general.advancedOptions.label "Pokročilé možnosti">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Nástroje">
 <!ENTITY zotero.general.more "Více">
 <!ENTITY zotero.general.loading "Nahrává se...">
 
@@ -143,7 +143,7 @@
 <!ENTITY zotero.item.copyAsURL "Kopírovat jako URL">
 <!ENTITY zotero.item.deletePermanently "Definitivně smazat...">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "Odstranit všechny štítky...">
 
 <!ENTITY zotero.toolbar.newNote "Nová poznámka">
 <!ENTITY zotero.toolbar.note.standalone "Nová samostatná poznámka">
@@ -158,7 +158,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Nahrávám štítky...">
 <!ENTITY zotero.tagSelector.showAutomatic "Ukazovat automaticky přidané">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Smazat všechny automatické štítky v této knihovně... ">
 <!ENTITY zotero.tagSelector.clearAll "Zrušit výběr všech">
 <!ENTITY zotero.tagSelector.assignColor "Nastavit barvu...">
 <!ENTITY zotero.tagSelector.renameTag "Přejmenovat štítek...">
@@ -232,15 +232,15 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Použít zkrácené názvy časopisů MEDLINE">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Pole &quot;Zkrácený název časopisu&quot; bude ignorováno">
 
 <!ENTITY zotero.integration.showEditor.label "Zobrazit editor">
 <!ENTITY zotero.integration.classicView.label "Standardní zobrazení">
 
 <!ENTITY zotero.integration.references.label "Reference v bibliografii">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "Zastavit synchronizaci">
 <!ENTITY zotero.sync.error "Chyba synchronizace">
 <!ENTITY zotero.sync.storage.progress "Průběh:">
 <!ENTITY zotero.sync.storage.downloads "Stahování:">
