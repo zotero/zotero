@@ -1956,7 +1956,12 @@ Zotero.Translate.Web.prototype.Sandbox = Zotero.Translate.Sandbox._inheritFromBa
  */
 Zotero.Translate.Web.prototype.setDocument = function(doc) {
 	this.document = doc;
-	this.rootDocument = doc.defaultView.top.document || doc;
+	try {
+		this.rootDocument = doc.defaultView.top.document;
+	} catch (e) {
+		// Cross-origin frames won't be able to access top.document and will throw an error
+		this.rootDocument = doc;
+	}
 	this.setLocation(doc.location.href, this.rootDocument.location.href);
 }
 
