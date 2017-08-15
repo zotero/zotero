@@ -656,6 +656,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					missingFileURI,
 					{
 						successCodes: [404],
+						responseType: 'text',
 						requestObserver,
 						debug: true
 					}
@@ -685,6 +686,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				testFileURI,
 				{
 					successCodes: [200, 404],
+					responseType: 'text',
 					requestObserver,
 					debug: true
 				}
@@ -1110,6 +1112,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				uri,
 				{
 					successCodes: [200, 300, 404],
+					responseType: 'text',
 					requestObserver: xmlhttp => request.setChannel(xmlhttp.channel),
 					dontCache: true,
 					debug: true
