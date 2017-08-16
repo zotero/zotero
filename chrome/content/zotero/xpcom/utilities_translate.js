@@ -279,7 +279,7 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 	}
 	
 	translate.incrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
-	var hiddenBrowser = Zotero.HTTP.processDocuments(urls, function(doc) {
+	var hiddenBrowser = Zotero.HTTP.processDocuments(urls, function (doc, url) {
 		if(!processor) return;
 		
 		var newLoc = doc.location;
@@ -289,10 +289,10 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 				// DEBUG: Is there a better fix for this?
 				|| Zotero.isServer) {
 			// Cross-site; need to wrap
-			processor(translate._sandboxManager.wrap(doc), newLoc.toString());
+			processor(translate._sandboxManager.wrap(doc), url);
 		} else {
 			// Not cross-site; no need to wrap
-			processor(doc, newLoc.toString());
+			processor(doc, url);
 		}
 	},
 	function() {
