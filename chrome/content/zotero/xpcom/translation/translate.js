@@ -1960,6 +1960,8 @@ Zotero.Translate.Web.prototype.setDocument = function(doc) {
 		this.rootDocument = doc.defaultView.top.document;
 	} catch (e) {
 		// Cross-origin frames won't be able to access top.document and will throw an error
+	}
+	if (!this.rootDocument) {
 		this.rootDocument = doc;
 	}
 	this.setLocation(doc.location.href, this.rootDocument.location.href);
