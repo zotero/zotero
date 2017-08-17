@@ -188,4 +188,27 @@ describe("Zotero.File", function () {
 			assert.propertyVal(files, 'sub/b.txt', 'B');
 		});
 	});
+	
+	
+	describe("#checkFileAccessError()", function () {
+		it("should catch OS.File access-denied errors", function* () {
+			// We can't modify a real OS.File.Error, but we also don't do an instanceof check in
+			// checkFileAccessError, so just set the expected properties.
+			var e = {
+				operation: 'open',
+				becauseAccessDenied: true,
+				path: '/tmp/test'
+			};
+			try {
+				Zotero.File.checkFileAccessError(e, e.path, 'create');
+			}
+			catch (e) {
+				if (e instanceof Zotero.Error) {
+					return;
+				}
+				throw e;
+			}
+			throw new Error("Error not thrown");
+		});
+	});
 })

@@ -1168,76 +1168,17 @@ Zotero.File = new function(){
 		
 		if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED' || e.name == 'NS_ERROR_FILE_IS_LOCKED'
 				// These show up on some Windows systems
-				|| e.name == 'NS_ERROR_FAILURE' || e.name == 'NS_ERROR_FILE_NOT_FOUND') {
-			str = str + " " + Zotero.getString('file.accessError.cannotBe') + " " + opWord + ".";
-			var checkFileWindows = Zotero.getString('file.accessError.message.windows');
-			var checkFileOther = Zotero.getString('file.accessError.message.other');
-			var msg = str + "\n\n"
-					+ (Zotero.isWin ? checkFileWindows : checkFileOther)
-					+ "\n\n"
-					+ Zotero.getString('file.accessError.restart');
-			
-			var e = new Zotero.Error(
-				msg,
-				0,
-				{
-					dialogButtonText: Zotero.getString('file.accessError.showParentDir'),
-					dialogButtonCallback: function () {
-						try {
-							file.parent.QueryInterface(Components.interfaces.nsILocalFile);
-							file.parent.reveal();
-						}
-						// Unsupported on some platforms
-						catch (e2) {
-							Zotero.launchFile(file.parent);
-						}
-					}
-				}
-			);
-		}
-		
-		throw (e);
-	}
-	
-	
-	this.checkPathAccessError = function (e, path, operation) {
-		var str = 'file.accessError.';
-		if (path) {
-			str += 'theFile'
-		}
-		else {
-			str += 'aFile'
-		}
-		str += 'CannotBe';
-		
-		switch (operation) {
-			case 'create':
-				str += 'Created';
-				break;
-				
-			case 'delete':
-				str += 'Deleted';
-				break;
-				
-			default:
-				str += 'Updated';
-		}
-		str = Zotero.getString(str, path ? path : undefined);
-		
-		Zotero.debug(path);
-		Zotero.debug(e, 1);
-		Components.utils.reportError(e);
-		
-		// TODO: Check for specific errors?
-		if (e instanceof OS.File.Error) {
+				|| e.name == 'NS_ERROR_FAILURE' || e.name == 'NS_ERROR_FILE_NOT_FOUND'
+				// OS.File.Error
+				|| e.becauseAccessDenied || e.becauseNoSuchFile) {
 			let checkFileWindows = Zotero.getString('file.accessError.message.windows');
 			let checkFileOther = Zotero.getString('file.accessError.message.other');
-			var msg = str + "\n\n"
+			let msg = str + "\n\n"
 					+ (Zotero.isWin ? checkFileWindows : checkFileOther)
 					+ "\n\n"
 					+ Zotero.getString('file.accessError.restart');
 			
-			var e = new Zotero.Error(
+			e = new Zotero.Error(
 				msg,
 				0,
 				{
@@ -1248,7 +1189,7 @@ Zotero.File = new function(){
 							file.parent.reveal();
 						}
 						// Unsupported on some platforms
-						catch (e2) {
+						catch (e) {
 							Zotero.launchFile(file.parent);
 						}
 					}
@@ -1258,8 +1199,8 @@ Zotero.File = new function(){
 		
 		throw e;
 	}
-
-
+	
+	
 	this.isDropboxDirectory = function(path) {
 		return path.toLowerCase().indexOf('dropbox') != -1;
 	}

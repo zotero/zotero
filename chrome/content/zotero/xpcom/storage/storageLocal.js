@@ -367,7 +367,7 @@ Zotero.Sync.Storage.Local = {
 					yield OS.File.setDates(path, null, mtime);
 				}
 				catch (e) {
-					Zotero.File.checkPathAccessError(e, path, 'update');
+					Zotero.File.checkFileAccessError(e, path, 'update');
 				}
 				return false;
 			}
