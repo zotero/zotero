@@ -74,9 +74,9 @@
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Kitaplıkları Seç...">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Eşitle">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Kitaplık">
-<!ENTITY zotero.preferences.sync.reset.warning1 "Aşağıdaki işlemler, yalnızca ender ve özel durumlar altında kullanılmalı, ve genel sorun giderme amaçlı kullanılmamalıdırlar. Birçok durumda, sıfırlama ek sorunlara neden olacaktır. Bakınız:">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Eşitlemeyi Sıfırlama Seçenekleri ">
-<!ENTITY zotero.preferences.sync.reset.warning3 "maddesinde daha fazla bilgi bulabilirsiniz.">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Aşağıdaki işlemler, yalnızca ender ve özel durumlar altında kullanılmalı, ve genel sorun giderme amaçlı kullanılmamalıdırlar. Birçok durumda, sıfırlama ek sorunlara neden olacaktır. Daha fazla bilgi için ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Eşitlemeyi Sıfırlama Seçenekleri'ne">
+<!ENTITY zotero.preferences.sync.reset.warning3 " bakınız.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Veri Eşitleme Geçmişini Sıfırla">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Eşitleme geçmişini yok sayarak, yerel verileri uzaktaki verilerle birleştir">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zotero Sunucusundan Geri Yükle">
@@ -130,7 +130,7 @@
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Stil Yöneticisi">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Başlık">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Güncelleştirilme">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Güncellenme">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Ek stiller indir...">
 

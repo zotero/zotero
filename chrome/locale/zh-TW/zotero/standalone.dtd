@@ -75,12 +75,12 @@
 <!ENTITY helpReportErrors.label "回報錯誤…">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "偵錯輸出紀錄">
 <!ENTITY debugOutputLogging.accesskey "L">
 <!ENTITY debugOutputLogging.submit "送出輸出">
 <!ENTITY debugOutputLogging.view "檢視輸出">
 <!ENTITY debugOutputLogging.clear "清除輸出">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "以紀錄模式重新啟動程式...">
 
 <!ENTITY helpCheckForUpdates.label "檢查更新 (U)…">
 <!ENTITY helpCheckForUpdates.accesskey "U">

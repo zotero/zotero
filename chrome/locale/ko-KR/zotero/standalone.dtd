@@ -1,4 +1,4 @@
-<!ENTITY preferencesCmdMac.label "Preferences…">
+<!ENTITY preferencesCmdMac.label "환경설정...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "서비스">
 <!ENTITY hideThisAppCmdMac.label "&brandShortName; 감추기">
@@ -80,7 +80,7 @@
 <!ENTITY debugOutputLogging.submit "출력 제출">
 <!ENTITY debugOutputLogging.view "출력 보기">
 <!ENTITY debugOutputLogging.clear "출력 지우기">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "로깅 활성화하여 재시작...">
 
 <!ENTITY helpCheckForUpdates.label "업데이트 확인...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

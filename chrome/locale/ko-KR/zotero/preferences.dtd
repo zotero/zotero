@@ -116,7 +116,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(예. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "형식">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "언어">
-<!ENTITY zotero.preferences.quickCopy.dragLimit "다음 이상 끌을 경우 빠른 복사 동작 안함:">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "다음 항목 이상을 끌어넣을 경우 빠른 복사 동작 안함:">
 
 <!ENTITY zotero.preferences.prefpane.cite "인용">
 <!ENTITY zotero.preferences.cite.styles "스타일">
@@ -146,7 +146,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "선택된 항목 인용을 클립보드에 복사">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "선택된 항목을 클립보드에 복사">
 <!ENTITY zotero.preferences.keys.importFromClipboard "클립보드에서 불러오기">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "재시작 후에 변경 사항이 ">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "재시작 후 변경 사항 적용">
 
 <!ENTITY zotero.preferences.prefpane.proxies "프록시">
 

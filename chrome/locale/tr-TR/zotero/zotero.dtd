@@ -156,7 +156,7 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Gösterilecek etiket yok">
 <!ENTITY zotero.tagSelector.loadingTags "Etiketleri yüklüyor...">
-<!ENTITY zotero.tagSelector.showAutomatic "Otomatik göster">
+<!ENTITY zotero.tagSelector.showAutomatic "Otomatik Etiketleri Göster">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Bu Kitaplık İçindeki Tüm Etiketleri Göster">
 <!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Bu Kitaplık İçindeki Otomatik Etiketleri Sil...">
 <!ENTITY zotero.tagSelector.clearAll "Hiçbirini Seçme">
