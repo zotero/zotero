@@ -882,14 +882,15 @@ Zotero.Attachments = new function(){
 		}
 		
 		if (Zotero.File.directoryContains(basePath, path)) {
-			basePath = OS.Path.normalize(basePath);
-			path = OS.Path.normalize(path);
-			path = this.BASE_PATH_PLACEHOLDER
-				+ path.substr(basePath.length + 1)
-				// Since stored paths can be synced to other platforms, use
-				// forward slashes for consistency. resolveRelativePath() will
-				// convert to the appropriate platform-specific slash on use.
-				.replace(/\\/g, "/");
+			// Since stored paths can be synced to other platforms, use forward slashes for consistency.
+			// resolveRelativePath() will convert to the appropriate platform-specific slash on use.
+			basePath = OS.Path.normalize(basePath).replace(/\\/g, "/");
+			path = OS.Path.normalize(path).replace(/\\/g, "/");
+			// Normalize D:\ vs. D:\foo
+			if (!basePath.endsWith('/')) {
+				basePath += '/';
+			}
+			path = this.BASE_PATH_PLACEHOLDER + path.substr(basePath.length)
 		}
 		
 		return path;

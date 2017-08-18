@@ -210,6 +210,12 @@ describe("Zotero.Attachments", function() {
 	});
 	
 	describe("#getBaseDirectoryRelativePath()", function () {
+		it("should handle base directory at Windows drive root", function () {
+			Zotero.Prefs.set('baseAttachmentPath', "C:\\");
+			var path = Zotero.Attachments.getBaseDirectoryRelativePath("C:\\file.txt");
+			assert.equal(path, Zotero.Attachments.BASE_PATH_PLACEHOLDER + "file.txt");
+		});
+		
 		it("should convert backslashes to forward slashes", function () {
 			Zotero.Prefs.set('baseAttachmentPath', "C:\\foo\\bar");
 			var path = Zotero.Attachments.getBaseDirectoryRelativePath("C:\\foo\\bar\\test\\file.txt");
