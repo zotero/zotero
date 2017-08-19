@@ -588,7 +588,6 @@ Zotero.DataDirectory = {
 				Zotero.debug(`Legacy database found at ${dbFile}, last modified ${mtime}`);
 			}
 			catch (e) {
-				Zotero.logError(e);
 				if (e.becauseNoSuchFile) {
 					return;
 				}
