@@ -486,11 +486,15 @@ describe("Zotero.Translate", function() {
 			checkTestTags(pdf, true);
 		});
 
-		it('web translators should save attachment from document', function* () {
+		it('web translators should save attachment from browser document', function* () {
 			let deferred = Zotero.Promise.defer();
-			let browser = Zotero.HTTP.processDocuments("http://127.0.0.1:23119/test/translate/test.html",
-				                                       function (doc) { deferred.resolve(doc) }, undefined,
-				                                       undefined, true);
+			let browser = Zotero.HTTP.loadDocuments(
+				"http://127.0.0.1:23119/test/translate/test.html",
+				doc => deferred.resolve(doc),
+				undefined,
+				undefined,
+				true
+			);
 			let doc = yield deferred.promise;
 
 			let translate = new Zotero.Translate.Web();
@@ -510,7 +514,7 @@ describe("Zotero.Translate", function() {
 				'}'));
 			let newItems = yield translate.translate();
 			assert.equal(newItems.length, 1);
-			let containedAttachments = yield Zotero.Items.getAsync(newItems[0].getAttachments());
+			let containedAttachments = Zotero.Items.get(newItems[0].getAttachments());
 			assert.equal(containedAttachments.length, 1);
 
 			let snapshot = containedAttachments[0];
@@ -521,6 +525,40 @@ describe("Zotero.Translate", function() {
 			checkTestTags(snapshot, true);
 
 			Zotero.Browser.deleteHiddenBrowser(browser);
+		});
+		
+		it('web translators should save attachment from non-browser document', function* () {
+			return Zotero.HTTP.processDocuments(
+				"http://127.0.0.1:23119/test/translate/test.html",
+				async function (doc) {
+					let translate = new Zotero.Translate.Web();
+					translate.setDocument(doc);
+					translate.setTranslator(buildDummyTranslator(4,
+						'function detectWeb() {}\n'+
+						'function doWeb(doc) {\n'+
+						'	var item = new Zotero.Item("book");\n'+
+						'	item.title = "Container Item";\n'+
+						'	item.attachments = [{\n'+
+						'		"document":doc,\n'+
+						'		"title":"Snapshot from Document",\n'+
+						'		"note":"attachment note",\n'+
+						'		"tags":'+JSON.stringify(TEST_TAGS)+'\n'+
+						'	}];\n'+
+						'	item.complete();\n'+
+						'}'));
+					let newItems = await translate.translate();
+					assert.equal(newItems.length, 1);
+					let containedAttachments = Zotero.Items.get(newItems[0].getAttachments());
+					assert.equal(containedAttachments.length, 1);
+		
+					let snapshot = containedAttachments[0];
+					assert.equal(snapshot.getField("url"), "http://127.0.0.1:23119/test/translate/test.html");
+					assert.equal(snapshot.getNote(), "attachment note");
+					assert.equal(snapshot.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_URL);
+					assert.equal(snapshot.attachmentContentType, "text/html");
+					checkTestTags(snapshot, true);
+				}
+			);
 		});
 
 		it('web translators should ignore attachments that return error codes', function* () {
@@ -625,6 +663,117 @@ describe("Zotero.Translate", function() {
 			assert.deepEqual([{tag: 'owl'}, {tag: 'tag'}], items[0].getTags());
 			
 			Zotero.Translators.get.restore();
+		});
+	});
+	
+	
+	describe("#processDocuments()", function () {
+		var url = "http://127.0.0.1:23119/test/translate/test.html";
+		var doc;
+		
+		beforeEach(function* () {
+			// This is the main processDocuments, not the translation sandbox one being tested
+			doc = (yield Zotero.HTTP.processDocuments(url, doc => doc))[0];
+		});
+		
+		it("should provide document object", function* () {
+			var translate = new Zotero.Translate.Web();
+			translate.setDocument(doc);
+			translate.setTranslator(
+				buildDummyTranslator(
+					4,
+					`function detectWeb() {}
+					function doWeb(doc) {
+						ZU.processDocuments(
+							doc.location.href + '?t',
+							function (doc) {
+								var item = new Zotero.Item("book");
+								item.title = "Container Item";
+								// document.location
+								item.url = doc.location.href;
+								// document.evaluate()
+								item.extra = doc
+									.evaluate('//p', doc, null, XPathResult.ANY_TYPE, null)
+									.iterateNext()
+									.textContent;
+								item.attachments = [{
+									document: doc,
+									title: "Snapshot from Document",
+									note: "attachment note",
+									tags: ${JSON.stringify(TEST_TAGS)}
+								}];
+								item.complete();
+							}
+						);
+					}`
+				)
+			);
+			var newItems = yield translate.translate();
+			assert.equal(newItems.length, 1);
+			
+			var item = newItems[0];
+			assert.equal(item.getField('url'), url + '?t');
+			assert.include(item.getField('extra'), 'your research sources');
+			
+			var containedAttachments = Zotero.Items.get(newItems[0].getAttachments());
+			assert.equal(containedAttachments.length, 1);
+			
+			var snapshot = containedAttachments[0];
+			assert.equal(snapshot.getField("url"), url + '?t');
+			assert.equal(snapshot.getNote(), "attachment note");
+			assert.equal(snapshot.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_URL);
+			assert.equal(snapshot.attachmentContentType, "text/html");
+			checkTestTags(snapshot, true);
+		});
+		
+		it("should use loaded document instead of reloading if possible", function* () {
+			var translate = new Zotero.Translate.Web();
+			translate.setDocument(doc);
+			translate.setTranslator(
+				buildDummyTranslator(
+					4,
+					`function detectWeb() {}
+					function doWeb(doc) {
+						ZU.processDocuments(
+							doc.location.href,
+							function (doc) {
+								var item = new Zotero.Item("book");
+								item.title = "Container Item";
+								// document.location
+								item.url = doc.location.href;
+								// document.evaluate()
+								item.extra = doc
+									.evaluate('//p', doc, null, XPathResult.ANY_TYPE, null)
+									.iterateNext()
+									.textContent;
+								item.attachments = [{
+									document: doc,
+									title: "Snapshot from Document",
+									note: "attachment note",
+									tags: ${JSON.stringify(TEST_TAGS)}
+								}];
+								item.complete();
+							}
+						);
+					}`
+				)
+			);
+			var newItems = yield translate.translate();
+			assert.equal(newItems.length, 1);
+			
+			var item = newItems[0];
+			assert.equal(item.getField('url'), url);
+			assert.include(item.getField('extra'), 'your research sources');
+			
+			var containedAttachments = Zotero.Items.get(newItems[0].getAttachments());
+			assert.equal(containedAttachments.length, 1);
+			
+			var snapshot = containedAttachments[0];
+			assert.equal(snapshot.getField("url"), url);
+			assert.equal(snapshot.getNote(), "attachment note");
+			assert.equal(snapshot.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_URL);
+			assert.equal(snapshot.attachmentContentType, "text/html");
+			checkTestTags(snapshot, true);
 		});
 	});
 	

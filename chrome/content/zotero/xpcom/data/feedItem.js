@@ -234,10 +234,12 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	}
 	
 	// Load document
-	let hiddenBrowser = Zotero.HTTP.processDocuments(
-		this.getField('url'), 
-		item => deferred.resolve(item),
-		()=>{}, error, true
+	let hiddenBrowser = Zotero.HTTP.loadDocuments(
+		this.getField('url'),
+		doc => deferred.resolve(doc),
+		() => {},
+		error,
+		true
 	);
 	let doc = yield deferred.promise;
 

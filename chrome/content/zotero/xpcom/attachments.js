@@ -265,7 +265,7 @@ Zotero.Attachments = new function(){
 		// Save using a hidden browser
 		var nativeHandlerImport = function () {
 			return new Zotero.Promise(function (resolve, reject) {
-				var browser = Zotero.HTTP.processDocuments(
+				var browser = Zotero.HTTP.loadDocuments(
 					url,
 					Zotero.Promise.coroutine(function* () {
 						let channel = browser.docShell.currentDocumentChannel;
@@ -591,7 +591,9 @@ Zotero.Attachments = new function(){
 				}
 			}
 			
-			if (contentType === 'text/html' || contentType === 'application/xhtml+xml') {
+			if ((contentType === 'text/html' || contentType === 'application/xhtml+xml')
+					// Documents from XHR don't work here
+					&& document instanceof Ci.nsIDOMDocument) {
 				Zotero.debug('Saving document with saveDocument()');
 				yield Zotero.Utilities.Internal.saveDocument(document, tmpFile);
 			}

@@ -156,7 +156,14 @@ Zotero.Translate.Sandbox = {
 						item = translate._sandboxManager.copyObject(item);
 						item.complete = oldItem.complete;
 					}
-					return translate._runHandler("itemDone", item, item);
+					let maybePromise = translate._runHandler("itemDone", item, item);
+					if (maybePromise) {
+						return resolve ? maybePromise.then(resolve) : maybePromise;
+					}
+					if (resolve) {
+						resolve();
+					}
+					return;
 				}
 				
 				// We use this within the connector to keep track of items as they are saved
