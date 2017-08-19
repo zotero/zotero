@@ -400,6 +400,20 @@ describe("Zotero.Translate", function() {
 			assert.isAbove(delta, -500);
 			assert.isBelow(delta, 5000);
 		});
+		
+		it('web translators should set accessDate to current date for CURRENT_TIMESTAMP', function* () {
+			let myItem = {
+				itemType: "webpage",
+				title: "Test Item",
+				url: "https://www.zotero.org/",
+				accessDate: 'CURRENT_TIMESTAMP'
+			};
+			let newItems = yield saveItemsThroughTranslator("web", [myItem]);
+			let currentDate = new Date();
+			let delta = currentDate - Zotero.Date.sqlToDate(newItems[0].getField("accessDate"), true);
+			assert.isAbove(delta, -500);
+			assert.isBelow(delta, 5000);
+		});
 
 		it('web translators should save attachments', function* () {
 			let myItems = [

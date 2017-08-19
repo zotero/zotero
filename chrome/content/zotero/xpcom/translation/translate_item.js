@@ -107,6 +107,10 @@ Zotero.Translate.ItemSaver.prototype = {
 					newItem.libraryID = this._libraryID;
 					if (item.creators) this._cleanCreators(item.creators);
 					if(item.tags) item.tags = this._cleanTags(item.tags);
+					
+					if (item.accessDate == 'CURRENT_TIMESTAMP') {
+						item.accessDate = Zotero.Date.dateToISO(new Date());
+					}
 
 					// Need to handle these specially. Put them in a separate object to
 					// avoid a warning from fromJSON()
