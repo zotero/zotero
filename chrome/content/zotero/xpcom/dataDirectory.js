@@ -581,7 +581,7 @@ Zotero.DataDirectory = {
 					return;
 				}
 				mtime = info.lastModificationDate;
-				if (mtime < new Date(2016, 5, 1)) {
+				if (mtime < new Date(2017, 6, 1)) {
 					Zotero.debug(`Legacy database was last modified on ${mtime.toString()} -- ignoring`);
 					return;
 				}
