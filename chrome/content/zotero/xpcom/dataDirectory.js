@@ -229,7 +229,7 @@ Zotero.DataDirectory = {
 								let mtime = (yield OS.File.stat(dbFile)).lastModificationDate;
 								Zotero.debug(`Database found at ${dbFile}, last modified ${mtime}`);
 								// If custom location has a newer DB, use that
-								if (useProfile && mtime > profileSubdirModTime) {
+								if (!useProfile || mtime > profileSubdirModTime) {
 									dataDir = nsIFile.path;
 									useFirefoxProfileCustom = true;
 									useProfile = false;
@@ -254,7 +254,7 @@ Zotero.DataDirectory = {
 							let mtime = (yield OS.File.stat(dbFile)).lastModificationDate;
 							Zotero.debug(`Database found at ${dbFile}, last modified ${mtime}`);
 							// If newer than Zotero profile directory, use this one
-							if (useProfile && mtime > profileSubdirModTime) {
+							if (!useProfile || mtime > profileSubdirModTime) {
 								dataDir = dir;
 								useFirefoxProfile = true;
 								useProfile = false;
