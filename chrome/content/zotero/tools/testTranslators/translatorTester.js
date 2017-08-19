@@ -416,7 +416,7 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
 			testDoneCallback(obj, test, status, message);
 		});
 	};
-	var hiddenBrowser = Zotero.HTTP.processDocuments(test.url,
+	var hiddenBrowser = Zotero.HTTP.loadDocuments(test.url,
 		function(doc) {
 			if(test.defer) {
 				me._debug(this, "TranslatorTesting: Waiting "

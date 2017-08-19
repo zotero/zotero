@@ -191,13 +191,22 @@ Zotero.Utilities.Translate.prototype.loadDocument = function(url, succeeded, fai
 }
 
 /**
- * Already documented in Zotero.HTTP
+ * Already documented in Zotero.HTTP, except this optionally takes noCompleteOnError, which prevents
+ * the translation process from being cancelled automatically on error, as it is normally. The promise
+ * is still rejected on error for handling by the calling function.
  * @ignore
  */
-Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor, done, exception) {
+Zotero.Utilities.Translate.prototype.processDocuments = async function (urls, processor, noCompleteOnError) {
+	// Handle old signature: urls, processor, onDone, onError
+	if (arguments.length > 3 || typeof arguments[2] == 'function') {
+		Zotero.debug("ZU.processDocuments() now takes only 3 arguments -- update your code");
+		var onDone = arguments[2];
+		var onError = arguments[3];
+	}
+	
 	var translate = this._translate;
 
-	if(typeof(urls) == "string") {
+	if (typeof urls == "string") {
 		urls = [translate.resolveURL(urls)];
 	} else {
 		for(var i in urls) {
@@ -205,109 +214,89 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 		}
 	}
 	
-	// Unless the translator has proposed some way to handle an error, handle it
-	// by throwing a "scraping error" message
-	if(exception) {
-		var myException = function(e) {
-			var browserDeleted;
-			try {
-				exception(e);
-			} catch(e) {
-				if(hiddenBrowser) {
-					try {
-						Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-					} catch(e) {}
-				}
-				browserDeleted = true;
-				translate.complete(false, e);
-			}
-			
-			if(!browserDeleted) {
-				try {
-					Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-				} catch(e) {}
-			}
+	var processDoc = function (doc) {
+		if (Zotero.isFx) {
+			let newLoc = doc.location;
+			let url = Services.io.newURI(newLoc.href, null, null);
+			return processor(
+				// Rewrap document for the sandbox
+				translate._sandboxManager.wrap(
+					Zotero.Translate.DOMWrapper.unwrap(doc),
+					null,
+					// Duplicate overrides from Zotero.HTTP.wrapDocument()
+					{
+						documentURI: newLoc.spec,
+						URL: newLoc.spec,
+						location: new Zotero.HTTP.Location(url),
+						defaultView: new Zotero.HTTP.Window(url)
+					}
+				),
+				newLoc.href
+			);
 		}
-	} else {
-		var myException = function(e) {
-			if(hiddenBrowser) {
-				try {
-					Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-				} catch(e) {}
-			}
-			translate.complete(false, e);
-		}
-	}
+		
+		return processor(doc, doc.location.href);
+	};
 	
-	if(Zotero.isFx) {
-		if(typeof translate._sandboxLocation === "object") {
-			var protocol = translate._sandboxLocation.location.protocol,
-				host = translate._sandboxLocation.location.host;
-        } else {
-			var url = Components.classes["@mozilla.org/network/io-service;1"] 
-					.getService(Components.interfaces.nsIIOService)
-					.newURI(translate._sandboxLocation, null, null),
-				protocol = url.scheme+":",
-				host = url.host;
-		}
-	}
-	
-	for(var i=0; i<urls.length; i++) {
+	var funcs = [];
+	// If current URL passed, use loaded document instead of reloading
+	for (var i = 0; i < urls.length; i++) {
 		if(translate.document && translate.document.location
 				&& translate.document.location.toString() === urls[i]) {
-			// Document is attempting to reload itself
 			Zotero.debug("Translate: Attempted to load the current document using processDocuments; using loaded document instead");
-			// This fixes document permissions issues in translation-server when translators call
-			// processDocuments() on the original URL (e.g., AOSIC)
-			// DEBUG: Why is this necessary? (see below also)
-			if (Zotero.isServer) {
-				processor(
-					translate._sandboxManager.wrap(
-						Zotero.Translate.DOMWrapper.unwrap(
-							this._translate.document
-						)
-					),
-					urls[i]
-				);
-			}
-			else {
-				processor(this._translate.document, urls[i]);
-			}
+			funcs.push(() => processDoc(this._translate.document, urls[i]));
 			urls.splice(i, 1);
 			i--;
 		}
 	}
 	
 	translate.incrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
-	var hiddenBrowser = Zotero.HTTP.processDocuments(urls, function (doc, url) {
-		if(!processor) return;
-		
-		var newLoc = doc.location;
-		if((Zotero.isFx && !Zotero.isBookmarklet && (protocol != newLoc.protocol || host != newLoc.host))
-				// This fixes document permissions issues in translation-server when translators call
-				// processDocuments() on same-domain URLs (e.g., some of the Code4Lib tests).
-				// DEBUG: Is there a better fix for this?
-				|| Zotero.isServer) {
-			// Cross-site; need to wrap
-			processor(translate._sandboxManager.wrap(doc), url);
-		} else {
-			// Not cross-site; no need to wrap
-			processor(doc, url);
-		}
-	},
-	function() {
-		if(done) done();
-		var handler = function() {
-			if(hiddenBrowser) {
-				try {
-					Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-				} catch(e) {}
+	
+	if (urls.length) {
+		funcs.push(
+			() => Zotero.HTTP.processDocuments(
+				urls,
+				function (doc) {
+					if (!processor) return;
+					return processDoc(doc);
+				},
+				translate.cookieSandbox
+			)
+		);
+	}
+	
+	var f;
+	while (f = funcs.shift()) {
+		try {
+			let maybePromise = f();
+			// The processor may or may not return a promise
+			if (maybePromise) {
+				await maybePromise;
 			}
-			translate.removeHandler("done", handler);
-		};
-		translate.setHandler("done", handler);
-		translate.decrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
-	}, myException, true, translate.cookieSandbox);
+		}
+		catch (e) {
+			if (onError) {
+				try {
+					onError(e);
+				}
+				catch (e) {
+					translate.complete(false, e);
+				}
+			}
+			// Unless instructed otherwise, end the translation on error
+			else if (!noCompleteOnError) {
+				translate.complete(false, e);
+			}
+			throw e;
+		}
+	}
+	
+	// Deprecated
+	if (onDone) {
+		onDone();
+	}
+	
+	translate.decrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
 }
 
 /**

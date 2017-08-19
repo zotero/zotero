@@ -3885,18 +3885,17 @@ var ZoteroPane = new function()
 			var deferred = Zotero.Promise.defer();
 			
 			var processor = function (doc) {
-				ZoteroPane_Local.addItemFromDocument(doc, itemType, saveSnapshot, row)
+				return ZoteroPane_Local.addItemFromDocument(doc, itemType, saveSnapshot, row)
 				.then(function () {
 					deferred.resolve()
-				})
+				});
 			};
-			// TODO: processDocuments should wait for the processor promise to be resolved
 			var done = function () {}
 			var exception = function (e) {
 				Zotero.debug(e, 1);
 				deferred.reject(e);
 			}
-			Zotero.HTTP.processDocuments([url], processor, done, exception);
+			Zotero.HTTP.loadDocuments([url], processor, done, exception);
 			
 			return deferred.promise;
 		}

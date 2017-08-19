@@ -505,7 +505,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 		}
 		else {
 			let deferred = Zotero.Promise.defer();
-			Zotero.HTTP.processDocuments(
+			Zotero.HTTP.loadDocuments(
 				["zotero://connector/" + encodeURIComponent(data.url)],
 				Zotero.Promise.coroutine(function* (doc) {
 					delete Zotero.Server.Connector.Data[data.url];
