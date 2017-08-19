@@ -378,6 +378,11 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 		
 		if (!Zotero.isConnector) {
+			yield Zotero.DataDirectory.checkForLostLegacy();
+			if (this.restarting) {
+				return;
+			}
+			
 			yield Zotero.DataDirectory.checkForMigration(
 				dataDir, Zotero.DataDirectory.defaultDir
 			);

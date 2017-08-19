@@ -128,6 +128,22 @@ Zotero.DataDirectory = {
 					throw { name: "NS_ERROR_FILE_NOT_FOUND" };
 				}
 			}
+			
+			try {
+				if (dataDir != this.defaultDir
+						&& this.isLegacy(dataDir)
+						&& (yield OS.File.exists(OS.Path.join(this.defaultDir, 'move-to-old')))) {
+					let newPath = this.defaultDir + '-Old';
+					if (yield OS.File.exists(newPath)) {
+						newPath += "-1";
+					}
+					yield Zotero.File.moveDirectory(this.defaultDir, newPath);
+					yield OS.File.remove(OS.Path.join(newPath, 'move-to-old'));
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
 		// New installation of 5.0+ with no data directory specified, so check all the places the data
 		// could be
@@ -528,6 +544,104 @@ Zotero.DataDirectory = {
 		yield OS.File.remove(testPath);
 		return false;
 	}),
+	
+	
+	// TODO: Remove after 5.0 upgrades
+	checkForLostLegacy: async function () {
+		var currentDir = this.dir;
+		if (currentDir != this.defaultDir) return;
+		if (Zotero.Prefs.get('ignoreLegacyDataDir')) return;
+		try {
+			let profilesParent = OS.Path.dirname(Zotero.Profile.getOtherAppProfilesDir());
+			Zotero.debug("Looking for Firefox profile in " + profilesParent);
+			
+			// get default profile
+			var defProfile;
+			try {
+				defProfile = await Zotero.Profile.getDefaultInProfilesDir(profilesParent);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				return;
+			}
+			if (!defProfile) {
+				return;
+			}
+			let profileDir = defProfile[0];
+			Zotero.debug("Found default profile at " + profileDir);
+			
+			let dir;
+			let mtime;
+			try {
+				dir = OS.Path.join(profileDir, this.legacyDirName);
+				let dbFile = OS.Path.join(dir, this.getDatabaseFilename());
+				let info = await OS.File.stat(dbFile);
+				if (info.size < 1200000) {
+					Zotero.debug(`Legacy database is ${info.size} bytes -- ignoring`);
+					return;
+				}
+				mtime = info.lastModificationDate;
+				if (mtime < new Date(2016, 5, 1)) {
+					Zotero.debug(`Legacy database was last modified on ${mtime.toString()} -- ignoring`);
+					return;
+				}
+				Zotero.debug(`Legacy database found at ${dbFile}, last modified ${mtime}`);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				if (e.becauseNoSuchFile) {
+					return;
+				}
+				throw e;
+			}
+			
+			let ps = Services.prompt;
+			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+				+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
+			let dontAskAgain = {};
+			let index = ps.confirmEx(null,
+				"Other Data Directory Found",
+				"Zotero found a previous data directory within your Firefox profile directory, "
+					+ `last modified on ${mtime.toLocaleDateString()}. `
+					+ "If items or files are missing from Zotero that were present in Zotero for Firefox, "
+					+ "your previous data directory may not have been properly migrated to the new default location "
+					+ `in ${this.defaultDir}.\n\n`
+					+ `Do you wish to continue using the current data directory or switch to the previous one?\n\n`
+					+ `If you switch, your current data directory will be moved to ${this.defaultDir + '-Old'}, `
+					+ `and the previous directory will be migrated to ${this.defaultDir}.`,
+				buttonFlags,
+				"Use Current Directory",
+				null,
+				"Switch to Previous Directory",
+				"Don\u0027t ask me again",
+				dontAskAgain
+			);
+			if (index == 1) {
+				return;
+			}
+			if (dontAskAgain.value) {
+				Zotero.Prefs.set('ignoreLegacyDataDir', true);
+			}
+			if (index == 0) {
+				return;
+			}
+			
+			// Switch to previous directory
+			this.set(dir);
+			// Set a marker to rename the current ~/Zotero directory
+			try {
+				await Zotero.File.putContentsAsync(OS.Path.join(this.defaultDir, 'move-to-old'), '');
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			Zotero.Utilities.Internal.quit(true);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	},
 	
 	
 	/**
