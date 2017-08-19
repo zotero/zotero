@@ -550,7 +550,7 @@ Zotero.DataDirectory = {
 	checkForLostLegacy: async function () {
 		var currentDir = this.dir;
 		if (currentDir != this.defaultDir) return;
-		if (Zotero.Prefs.get('ignoreLegacyDataDir')) return;
+		if (Zotero.Prefs.get('ignoreLegacyDataDir.auto') || Zotero.Prefs.get('ignoreLegacyDataDir.explicit')) return;
 		try {
 			let profilesParent = OS.Path.dirname(Zotero.Profile.getOtherAppProfilesDir());
 			Zotero.debug("Looking for Firefox profile in " + profilesParent);
@@ -578,16 +578,19 @@ Zotero.DataDirectory = {
 				let info = await OS.File.stat(dbFile);
 				if (info.size < 1200000) {
 					Zotero.debug(`Legacy database is ${info.size} bytes -- ignoring`);
+					Zotero.Prefs.set('ignoreLegacyDataDir.auto', true);
 					return;
 				}
 				mtime = info.lastModificationDate;
 				if (mtime < new Date(2017, 6, 1)) {
 					Zotero.debug(`Legacy database was last modified on ${mtime.toString()} -- ignoring`);
+					Zotero.Prefs.set('ignoreLegacyDataDir.auto', true);
 					return;
 				}
 				Zotero.debug(`Legacy database found at ${dbFile}, last modified ${mtime}`);
 			}
 			catch (e) {
+				Zotero.Prefs.set('ignoreLegacyDataDir.auto', true);
 				if (e.becauseNoSuchFile) {
 					return;
 				}
@@ -620,7 +623,7 @@ Zotero.DataDirectory = {
 				return;
 			}
 			if (dontAskAgain.value) {
-				Zotero.Prefs.set('ignoreLegacyDataDir', true);
+				Zotero.Prefs.set('ignoreLegacyDataDir.explicit', true);
 			}
 			if (index == 0) {
 				return;
