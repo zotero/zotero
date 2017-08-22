@@ -200,7 +200,7 @@ Zotero.Utilities.Translate.prototype.processDocuments = function (urls, processo
 	return new Zotero.Promise(function (resolve, reject) {
 		// Handle old signature: urls, processor, onDone, onError
 		if (arguments.length > 3 || typeof arguments[2] == 'function') {
-			Zotero.debug("Zotero.HTTP.processDocuments() now takes only 3 arguments -- update your code");
+			Zotero.debug("ZU.processDocuments() now takes only 3 arguments -- update your code");
 			var onDone = arguments[2];
 			var onError = arguments[3];
 		}
