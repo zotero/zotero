@@ -391,54 +391,25 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
 
 /**
  * Fetches the page for a given test and runs it
+ *
  * This function is only applicable in Firefox; it is overridden in translator_global.js in Chrome
- * and Safari
- * @param {Object} test Test to execute
- * @param {Document} doc DOM document to test against
- * @param {Function} testDoneCallback A callback to be executed when test is complete
+ * and Safari.
+ *
+ * @param {Object} test - Test to execute
+ * @param {Function} testDoneCallback - A callback to be executed when test is complete
  */
-Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneCallback) {
-	var timer = Components.classes["@mozilla.org/timer;1"].
-		createInstance(Components.interfaces.nsITimer);
-	timer.initWithCallback({"notify":function() {
-		try {
-			if (hiddenBrowser) Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-		} catch(e) {}
-	}}, TEST_RUN_TIMEOUT, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-	
-	var me = this;
-	var runTest = function(doc) {
-		me.runTest(test, doc, function(obj, test, status, message) {
-			try {
-				timer.cancel();
-			} catch(e) {};
-			if(hiddenBrowser) Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-			testDoneCallback(obj, test, status, message);
-		});
-	};
-	var hiddenBrowser = Zotero.HTTP.loadDocuments(test.url,
-		function(doc) {
-			if(test.defer) {
-				me._debug(this, "TranslatorTesting: Waiting "
-					+ (Zotero_TranslatorTester.DEFER_DELAY/1000)
-					+ " second(s) for page content to settle"
-				);
-				Zotero.setTimeout(() => runTest(doc), Zotero_TranslatorTester.DEFER_DELAY);
-			} else {
-				runTest(doc);
-			}
-		},
-		null,
-		function(e) {
-			testDoneCallback(this, test, "failed", "Translation failed to initialize: "+e);
-		},
-		true
-	);
-	
-	// No hidden browser returned from translation-server processDocuments()
-	if (hiddenBrowser) {
-		hiddenBrowser.docShell.allowMetaRedirects = true;
-	}
+Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function (test, testDoneCallback) {
+	Zotero.HTTP.processDocuments(
+		test.url,
+		(doc) => {
+			this.runTest(test, doc, function (obj, test, status, message) {
+				testDoneCallback(obj, test, status, message);
+			});
+		}
+	)
+	.catch(function (e) {
+		testDoneCallback(this, test, "failed", "Translation failed to initialize: " + e);
+	}.bind(this))
 };
 
 /**
