@@ -1113,7 +1113,9 @@ Zotero.Translate.Base.prototype = {
 			
 			var handlers = this._handlers[type].slice();
 			for(var i=0, n=handlers.length; i<n; i++) {
-				Zotero.debug("Translate: Running handler "+i+" for "+type, 5);
+				if (type != 'debug') {
+					Zotero.debug(`Translate: Running handler ${i} for ${type}`, 5);
+				}
 				try {
 					returnValue = handlers[i].apply(null, args);
 				} catch(e) {
