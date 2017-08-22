@@ -22,7 +22,6 @@
  *     this program.  If not, see <https://opensource.org/licenses/> or
  *     <http://www.gnu.org/licenses/> respectively.
  */
-'use strict'
 var CSL = {
     PROCESSOR_VERSION: "1.1.175",
     CONDITION_LEVEL_TOP: 1,
