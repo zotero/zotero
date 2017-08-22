@@ -502,7 +502,9 @@ Zotero_TranslatorTester.prototype._runTestTranslate = function(translate, transl
 	}
 	
 	translate.setTranslator(this.translator);
-	translate.translate(false);
+	translate.translate({
+		libraryID: false
+	});
 };
 
 /**
@@ -599,7 +601,9 @@ Zotero_TranslatorTester.prototype.newTest = function(doc, testReadyCallback) {
 	});
 	translate.setHandler("done", function(obj, returnValue) { me._createTest(obj, multipleMode, returnValue, testReadyCallback) });
 	translate.capitalizeTitles = false;
-	translate.translate(false);
+	translate.translate({
+		libraryID: false
+	});
 };
 
 /**
