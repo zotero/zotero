@@ -63,7 +63,7 @@ var Zotero_TranslatorTesters = new function() {
 					try {
 						for(var i=0; i<translators.length; i++) {
 							if (includeTranslators.length
-									&& !includeTranslators.includes(translators[i].label)) continue;
+									&& !includeTranslators.some(x => translators[i].label.includes(x))) continue;
 							if (skipTranslators && skipTranslators[translators[i].translatorID]) continue;
 							testers.push(new Zotero_TranslatorTester(translators[i], type));
 						};
