@@ -298,10 +298,18 @@ Zotero_TranslatorTester._sanitizeItem = function(item, testItem, keepValidFields
 	
 	// remove fields to be ignored
 	if(!keepValidFields && "accessDate" in item) delete item.accessDate;
-
-	//sort tags, if they're still there
-	if(item.tags && typeof item.tags === "object" && "sort" in item.tags) {
-		item.tags = Zotero.Utilities.arrayUnique(item.tags).sort();
+	
+	// Sort tags
+	if (item.tags && Array.isArray(item.tags)) {
+		// Normalize tags -- necessary until tests are updated for 5.0
+		if (testItem) {
+			item.tags = Zotero.Translate.Base.prototype._cleanTags(item.tags);
+		}
+		item.tags.sort((a, b) => {
+			if (a.tag < b.tag) return -1;
+			if (b.tag < a.tag) return 1;
+			return 0;
+		});
 	}
 	
 	return item;
