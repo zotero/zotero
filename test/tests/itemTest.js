@@ -916,6 +916,24 @@ describe("Zotero.Item", function () {
 			
 			assert.isTrue(yield OS.File.exists(tmpFile));
 		});
+		
+		it("should handle normalized filenames", function* () {
+			var item = yield importFileAttachment('test.png');
+			var path = yield item.getFilePathAsync();
+			var dir = OS.Path.dirname(path);
+			var filename = 'tést.pdf'.normalize('NFKD');
+			
+			// Make sure we're actually testing something -- the test string should be differently
+			// normalized from what's done in getValidFileName
+			assert.notEqual(filename, Zotero.File.getValidFileName(filename));
+			
+			var newPath = OS.Path.join(dir, filename);
+			yield OS.File.move(path, newPath);
+			
+			assert.isFalse(yield item.fileExists());
+			yield item.relinkAttachmentFile(newPath);
+			assert.isTrue(yield item.fileExists());
+		});
 	});
 	
 	

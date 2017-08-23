@@ -2599,7 +2599,17 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 		// Rename file to filtered name if necessary
 		if (fileName != newName) {
 			Zotero.debug("Renaming file '" + fileName + "' to '" + newName + "'");
-			yield OS.File.move(path, newPath, { noOverwrite: true });
+			try {
+				yield OS.File.move(path, newPath, { noOverwrite: true });
+			}
+			catch (e) {
+				if (e instanceof OS.File.Error && e.becauseExists && fileName.normalize() == newName) {
+					// Ignore normalization differences that the filesystem ignores
+				}
+				else {
+					throw e;
+				}
+			}
 		}
 	}
 	
