@@ -22,8 +22,9 @@
  *     this program.  If not, see <https://opensource.org/licenses/> or
  *     <http://www.gnu.org/licenses/> respectively.
  */
+
 var CSL = {
-    PROCESSOR_VERSION: "1.1.175",
+    PROCESSOR_VERSION: "1.1.177",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -6356,9 +6357,10 @@ CSL.Engine.prototype.localeConfigure = function (langspec, beShy) {
     if (beShy && this.locale[langspec.best]) {
         return;
     }
-    localexml = CSL.setupXml(this.sys.retrieveLocale("en-US"));
-    this.localeSet(localexml, "en-US", langspec.best);
-    if (langspec.best !== "en-US") {
+    if (langspec.best === "en-US") {
+        localexml = CSL.setupXml(this.sys.retrieveLocale("en-US"));
+        this.localeSet(localexml, "en-US", langspec.best);
+    } else if (langspec.best !== "en-US") {
         if (langspec.base !== langspec.best) {
             localexml = CSL.setupXml(this.sys.retrieveLocale(langspec.base));
             this.localeSet(localexml, langspec.base, langspec.best);
@@ -12972,11 +12974,6 @@ CSL.Util.Names.unInitialize = function (state, name) {
     punctlist = name.match(/(\-|\s+)/g);
     ret = "";
     for (i = 0, ilen = namelist.length; i < ilen; i += 1) {
-        if (CSL.ALL_ROMANESQUE_REGEXP.exec(namelist[i].slice(0,-1)) 
-            && namelist[i] 
-            && namelist[i] !== namelist[i].toUpperCase()) {
-            namelist[i] = namelist[i].slice(0, 1) + namelist[i].slice(1, 2).toLowerCase() + namelist[i].slice(2);
-        }
         ret += namelist[i];
         if (i < ilen - 1) {
             ret += punctlist[i];
@@ -14725,7 +14722,7 @@ CSL.Util.FlipFlopper = function(state) {
     }
     function _apostropheForce(tag, str) {
         if (tag === "\'") {
-            if (str && str.match(/^[^\.\?\:\;\ ]/)) {
+            if (str && str.match(/^[^\,\.\?\:\;\ ]/)) {
                 return true;
             }
         } else if (tag === " \'" && str && str.match(/^[\ ]/)) {
