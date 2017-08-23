@@ -95,7 +95,7 @@
 <!ENTITY zotero.preferences.search.indexStats "색인 상태">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "색인됨:">
-<!ENTITY zotero.preferences.search.indexStats.partial "부분적:">
+<!ENTITY zotero.preferences.search.indexStats.partial "일부:">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "색인 안됨:">
 <!ENTITY zotero.preferences.search.indexStats.words "단어:">
 
