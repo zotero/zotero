@@ -1604,6 +1604,18 @@ Zotero.Integration.Session.prototype.writeDelayedCitation = Zotero.Promise.corou
 	field.code = citation.serialize();
 	field.text = text;
 	field.writeToDoc();
+	
+	// Update bibliography with a static string
+	var fields = yield this.fields.get();
+	var bibliographyField;
+	for (let i = fields.length-1; i >= 0; i--) {
+		let field = Zotero.Integration.Field.loadExisting(fields[i]);
+		if (field.type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
+			field.setText(Zotero.getString('integration.delayCitationUpdates.bibliography'), false)
+			break;
+		}
+	}
+	
 });
 
 
