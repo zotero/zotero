@@ -500,6 +500,10 @@
 			<!-- Sets or returns contents of rich text box -->
 			<property name="value">
 				<getter><![CDATA[
+					if (!this._editor) {
+						return null;
+					}
+					
 					var output = this._editor.getContent().trim();
 					
 					if(this._format == "RTF") {

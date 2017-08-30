@@ -251,8 +251,14 @@
 								return;
 							}
 							
-							// Update note
 							var noteField = this._id('noteField');
+							var value = noteField.value;
+							if (value === null) {
+								Zotero.debug("Note value not available -- not saving", 2);
+								return;
+							}
+							
+							// Update note
 							if (this.item) {
 								// If note field doesn't match item, abort save and run error handler
 								if (noteField.getAttribute('itemID') != this.item.id) {
@@ -263,7 +269,7 @@
 									throw new Error("Note field doesn't match current item");
 								}
 								
-								let changed = this.item.setNote(noteField.value);
+								let changed = this.item.setNote(value);
 								if (changed && this.saveOnEdit) {
 									this.noteField.changed = false;
 									yield this.item.saveTx({
@@ -280,7 +286,7 @@
 							if (this.parentItem) {
 								item.libraryID = this.parentItem.libraryID;
 							}
-							item.setNote(noteField.value);
+							item.setNote(value);
 							if (this.parentItem) {
 								item.parentKey = this.parentItem.key;
 							}
