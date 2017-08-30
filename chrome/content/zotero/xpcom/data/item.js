@@ -1834,8 +1834,7 @@ Zotero.Item.prototype.isTopLevelItem = function () {
 
 
 Zotero.Item.prototype.numChildren = function(includeTrashed) {
-	this._requireData('childItems');
-	return this._notes.rows.length + this._attachments.rows.length;
+	return this.numNotes(includeTrashed) + this.numAttachments(includeTrashed);
 }
 
 
