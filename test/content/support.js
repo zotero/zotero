@@ -844,7 +844,8 @@ function importFileAttachment(filename, options = {}) {
 	let file = getTestDataDirectory();
 	filename.split('/').forEach((part) => file.append(part));
 	let importOptions = {
-		file
+		file,
+		parentItemID: options.parentID
 	};
 	Object.assign(importOptions, options);
 	return Zotero.Attachments.importFromFile(importOptions);
