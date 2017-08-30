@@ -40,12 +40,6 @@ Zotero.Item = function(itemTypeOrID) {
 	this._itemTypeID = null;
 	this._firstCreator = null;
 	this._sortCreator = null;
-	this._numNotes = null;
-	this._numNotesTrashed = null;
-	this._numNotesEmbedded = null;
-	this._numNotesEmbeddedTrashed = null;
-	this._numAttachments = null;
-	this._numAttachmentsTrashed = null;
 	this._attachmentCharset = null;
 	this._attachmentLinkMode = null;
 	this._attachmentContentType = null;
@@ -341,12 +335,6 @@ Zotero.Item.prototype._parseRowData = function(row) {
 			
 			// Integer or 0
 			case 'version':
-			case 'numNotes':
-			case 'numNotesTrashed':
-			case 'numNotesEmbedded':
-			case 'numNotesEmbeddedTrashed':
-			case 'numAttachments':
-			case 'numAttachmentsTrashed':
 				val = val ? parseInt(val) : 0;
 				break;
 			
@@ -1846,7 +1834,8 @@ Zotero.Item.prototype.isTopLevelItem = function () {
 
 
 Zotero.Item.prototype.numChildren = function(includeTrashed) {
-	return this.numNotes(includeTrashed) + this.numAttachments(includeTrashed);
+	this._requireData('childItems');
+	return this._notes.rows.length + this._attachments.rows.length;
 }
 
 
@@ -1870,39 +1859,6 @@ Zotero.Item.prototype.setSourceKey = function(sourceItemKey) {
 // Methods dealing with note items
 //
 ////////////////////////////////////////////////////////
-Zotero.Item.prototype.incrementNumNotes = function () {
-	this._numNotes++;
-}
-
-Zotero.Item.prototype.incrementNumNotesTrashed = function () {
-	this._numNotesTrashed++;
-}
-
-Zotero.Item.prototype.incrementNumNotesEmbedded = function () {
-	this._numNotesEmbedded++;
-}
-
-Zotero.Item.prototype.incrementNumNotesTrashed = function () {
-	this._numNotesEmbeddedTrashed++;
-}
-
-Zotero.Item.prototype.decrementNumNotes = function () {
-	this._numNotes--;
-}
-
-Zotero.Item.prototype.decrementNumNotesTrashed = function () {
-	this._numNotesTrashed--;
-}
-
-Zotero.Item.prototype.decrementNumNotesEmbedded = function () {
-	this._numNotesEmbedded--;
-}
-
-Zotero.Item.prototype.decrementNumNotesTrashed = function () {
-	this._numNotesEmbeddedTrashed--;
-}
-
-
 /**
 * Determine if an item is a note
 **/
@@ -1929,20 +1885,15 @@ Zotero.Item.prototype.updateNote = function(text) {
  * @return	{Integer}
  */
 Zotero.Item.prototype.numNotes = function(includeTrashed, includeEmbedded) {
-	if (this.isNote()) {
-		throw ("numNotes() cannot be called on items of type 'note'");
+	this._requireData('childItems');
+	var notes = Zotero.Items.get(this.getNotes(includeTrashed));
+	var num = notes.length;
+	if (includeEmbedded) {
+		// Include embedded attachment notes that aren't empty
+		num += Zotero.Items.get(this.getAttachments(includeTrashed))
+			.filter(x => x.getNote() !== '').length;
 	}
-	var cacheKey = '_numNotes';
-	if (includeTrashed && includeEmbedded) {
-		return this[cacheKey] + this[cacheKey + "EmbeddedTrashed"];
-	}
-	else if (includeTrashed) {
-		return this[cacheKey] + this[cacheKey + "Trashed"];
-	}
-	else if (includeEmbedded) {
-		return this[cacheKey] + this[cacheKey + "Embedded"];
-	}
-	return this[cacheKey];
+	return num;
 }
 
 
@@ -2153,16 +2104,9 @@ Zotero.Item.prototype.isFileAttachment = function() {
  * @param	{Boolean}	includeTrashed		Include trashed child items in count
  * @return	<Integer>
  */
-Zotero.Item.prototype.numAttachments = function(includeTrashed) {
-	if (this.isAttachment()) {
-		throw ("numAttachments() cannot be called on attachment items");
-	}
-	
-	var cacheKey = '_numAttachments';
-	if (includeTrashed) {
-		return this[cacheKey] + this[cacheKey + "Trashed"];
-	}
-	return this[cacheKey];
+Zotero.Item.prototype.numAttachments = function (includeTrashed) {
+	this._requireData('childItems');
+	return this.getAttachments(includeTrashed).length;
 }
 
 

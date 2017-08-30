@@ -52,33 +52,6 @@ Zotero.Items = function() {
 				deleted: "DI.itemID IS NOT NULL AS deleted",
 				inPublications: "PI.itemID IS NOT NULL AS inPublications",
 				
-				numNotes: "(SELECT COUNT(*) FROM itemNotes INo "
-					+ "WHERE parentItemID=O.itemID AND "
-					+ "INo.itemID NOT IN (SELECT itemID FROM deletedItems)) AS numNotes",
-				
-				numNotesTrashed: "(SELECT COUNT(*) FROM itemNotes INo "
-					+ "WHERE parentItemID=O.itemID AND "
-					+ "INo.itemID IN (SELECT itemID FROM deletedItems)) AS numNotesTrashed",
-				
-				numNotesEmbedded: "(SELECT COUNT(*) FROM itemAttachments IA "
-					+ "JOIN itemNotes USING (itemID) "
-					+ "WHERE IA.parentItemID=O.itemID AND "
-					+ "note!='' AND note!='" + Zotero.Notes.defaultNote + "' AND "
-					+ "IA.itemID NOT IN (SELECT itemID FROM deletedItems)) AS numNotesEmbedded",
-				
-				numNotesEmbeddedTrashed: "(SELECT COUNT(*) FROM itemAttachments IA "
-					+ "JOIN itemNotes USING (itemID) "
-					+ "WHERE IA.parentItemID=O.itemID AND "
-					+ "note!='' AND note!='" + Zotero.Notes.defaultNote + "' AND "
-					+ "IA.itemID IN (SELECT itemID FROM deletedItems)) "
-					+ "AS numNotesEmbeddedTrashed",
-				
-				numAttachments: "(SELECT COUNT(*) FROM itemAttachments IA WHERE parentItemID=O.itemID AND "
-					+ "IA.itemID NOT IN (SELECT itemID FROM deletedItems)) AS numAttachments",
-				
-				numAttachmentsTrashed: "(SELECT COUNT(*) FROM itemAttachments IA WHERE parentItemID=O.itemID AND "
-					+ "IA.itemID IN (SELECT itemID FROM deletedItems)) AS numAttachmentsTrashed",
-				
 				parentID: "(CASE O.itemTypeID WHEN 14 THEN IAP.itemID WHEN 1 THEN INoP.itemID END) AS parentID",
 				parentKey: "(CASE O.itemTypeID WHEN 14 THEN IAP.key WHEN 1 THEN INoP.key END) AS parentKey",
 				

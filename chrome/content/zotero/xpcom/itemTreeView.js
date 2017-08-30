@@ -1060,6 +1060,9 @@ Zotero.ItemTreeView.prototype.getCellText = function (row, column)
 	}
 	else if (column.id === "zotero-items-column-numNotes") {
 		val = obj.numNotes();
+		if (!val) {
+			val = '';
+		}
 	}
 	else {
 		var col = column.id.substring(20);
@@ -3371,7 +3374,10 @@ Zotero.ItemTreeRow.prototype.getField = function(field, unformatted)
 
 Zotero.ItemTreeRow.prototype.numNotes = function() {
 	if (this.ref.isNote()) {
-		return '';
+		return 0;
 	}
-	return this.ref.numNotes(false, true) || '';
+	if (this.ref.isAttachment()) {
+		return this.ref.getNote() !== '' ? 1 : 0;
+	}
+	return this.ref.numNotes(false, true) || 0;
 }
