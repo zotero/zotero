@@ -126,7 +126,6 @@ var Zotero_File_Interface = new function() {
 	this.exportCollection = exportCollection;
 	this.exportItemsToClipboard = exportItemsToClipboard;
 	this.exportItems = exportItems;
-	this.bibliographyFromCollection = bibliographyFromCollection;
 	this.bibliographyFromItems = bibliographyFromItems;
 	
 	/**
@@ -392,33 +391,26 @@ var Zotero_File_Interface = new function() {
 		progressWin.startCloseTimer(5000);
 	});
 	
-	/*
+	/**
 	 * Creates a bibliography from a collection or saved search
 	 */
-	function bibliographyFromCollection() {
-		// find sorted items
-		var items = Zotero.Items.get(ZoteroPane_Local.getSortedItems(true));
-		if(!items) return;
+	this.bibliographyFromCollection = function () {
+		var items = ZoteroPane.getSortedItems();
 		
-		// find name
+		// Find collection name
 		var name = false;
-		
-		var collection = ZoteroPane_Local.getSelectedCollection();
-		if(collection) {
-			name = collection.getName();
-		} else {
-			var searchRef = ZoteroPane_Local.getSelectedSavedSearch();
-			if(searchRef) {
-				var search = new Zotero.Search();
-				search.id = searchRef.id;
+		var collection = ZoteroPane.getSelectedCollection();
+		if (collection) {
+			name = collection.name;
+		}
+		else {
+			let search = ZoteroPane.getSelectedSavedSearch();
+			if (search) {
 				name = search.name;
 			}
 		}
 		
 		_doBibliographyOptions(name, items);
-		return;
-		
-		throw ("No collection or saved search currently selected");
 	}
 	
 	/*
