@@ -2308,20 +2308,11 @@ Zotero.ItemTreeView.prototype.getVisibleFields = function() {
 /**
  * Returns an array of items of visible items in current sort order
  *
- * @param	bool	asIDs		Return itemIDs
- * @return	array				An array of Zotero.Item objects or itemIDs
+ * @param {Boolean} asIDs - Return itemIDs
+ * @return {Zotero.Item[]|Integer[]} - An array of Zotero.Item objects or itemIDs
  */
 Zotero.ItemTreeView.prototype.getSortedItems = function(asIDs) {
-	var items = [];
-	for (let item of this._rows) {
-		if (asIDs) {
-			items.push(item.ref.id);
-		}
-		else {
-			items.push(item.ref);
-		}
-	}
-	return items;
+	return this._rows.map(row => asIDs ? row.ref.id : row.ref);
 }
 
 
