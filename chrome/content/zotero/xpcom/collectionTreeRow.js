@@ -343,6 +343,7 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	
 	// Create the outer (filter) search
 	var s2 = new Zotero.Search();
+	s2.addCondition('libraryID', 'is', this.ref.libraryID);
 	
 	if (this.isTrash()) {
 		s2.addCondition('deleted', 'true');
