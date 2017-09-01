@@ -414,11 +414,6 @@ var ZoteroPane = new function()
 			searchBar.inputField.select();
 		}, 1);
 		
-		var d = new Date();
-		yield Zotero.purgeDataObjects();
-		var d2 = new Date();
-		Zotero.debug("Purged data tables in " + (d2 - d) + " ms");
-		
 		// Auto-sync on pane open or if new account
 		if (Zotero.Prefs.get('sync.autoSync') || Zotero.initAutoSync) {
 			yield Zotero.proxyAuthComplete;

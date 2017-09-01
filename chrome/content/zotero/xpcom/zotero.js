@@ -848,6 +848,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			Zotero.Feeds.init();
 			Zotero.addShutdownListener(() => Zotero.Feeds.uninit());
 			
+			Zotero.Schema.schemaUpdatePromise.then(Zotero.purgeDataObjects.bind(Zotero));
+			
 			return true;
 		}
 		catch (e) {
@@ -1987,6 +1989,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 * Clear entries that no longer exist from various tables
 	 */
 	this.purgeDataObjects = Zotero.Promise.coroutine(function* () {
+		var d = new Date();
+		
 		yield Zotero.DB.executeTransaction(function* () {
 			return Zotero.Creators.purge();
 		});
@@ -2001,6 +2005,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		//yield Zotero.DB.executeTransaction(function* () {
 		//	return Zotero.Relations.purge();
 		//});
+		
+		Zotero.debug("Purged data tables in " + (new Date() - d) + " ms");
 	});
 	
 	
