@@ -774,8 +774,6 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 		
 		if (this.hasPostSearchFilter() &&
 				(includeParentsAndChildren || includeParents || includeChildren)) {
-		Zotero.debug('b');
-		Zotero.debug(ids);
 			var tmpTable = yield Zotero.Search.idsToTempTable(ids);
 			
 			if (includeParentsAndChildren || includeParents) {
@@ -829,8 +827,6 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 	}
 	
 	if (asTempTable) {
-		Zotero.debug('c');
-		Zotero.debug(ids);
 		return Zotero.Search.idsToTempTable(ids);
 	}
 	return ids;
