@@ -317,7 +317,6 @@ Zotero.Attachments = new function(){
 			const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
 			var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
 				.createInstance(nsIWBP);
-			wbp.persistFlags = nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
 			if(cookieSandbox) cookieSandbox.attachToInterfaceRequestor(wbp);
 			var encodingFlags = false;
 			
@@ -609,8 +608,7 @@ Zotero.Attachments = new function(){
 				const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
 				var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
 					.createInstance(nsIWBP);
-				wbp.persistFlags = nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION
-					| nsIWBP.PERSIST_FLAGS_FROM_CACHE;
+				wbp.persistFlags = nsIWBP.PERSIST_FLAGS_FROM_CACHE;
 				var ioService = Components.classes["@mozilla.org/network/io-service;1"]
 					.getService(Components.interfaces.nsIIOService);
 				var nsIURL = ioService.newURI(url, null, null);

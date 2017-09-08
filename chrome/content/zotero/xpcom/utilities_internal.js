@@ -405,7 +405,11 @@ Zotero.Utilities.Internal = {
 	 */
 	saveURI: function (wbp, uri, target, headers) {
 		// Handle gzip encoding
-		wbp.persistFlags |= Ci.nsIWebBrowserPersist.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
+		wbp.persistFlags |= wbp.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
+		// If not explicitly using cache, skip it
+		if (!(wbp.persistFlags & wbp.PERSIST_FLAGS_FROM_CACHE)) {
+			wbp.persistFlags |= wbp.PERSIST_FLAGS_BYPASS_CACHE;
+		}
 		
 		if (typeof uri == 'string') {
 			uri = Services.io.newURI(uri, null, null);
