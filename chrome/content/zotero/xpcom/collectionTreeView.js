@@ -38,6 +38,7 @@ Zotero.CollectionTreeView = function()
 {
 	Zotero.LibraryTreeView.apply(this);
 	
+	this.itemTreeView = null;
 	this.itemToSelect = null;
 	this.hideSources = [];
 	
@@ -1179,11 +1180,9 @@ Zotero.CollectionTreeView.prototype.selectItem = Zotero.Promise.coroutine(functi
 		yield this.selectLibrary(item.libraryID);
 	}
 	
-	var itemsView = this.selectedTreeRow.itemTreeView;
+	yield this.itemTreeView.waitForLoad();
 	
-	yield itemsView.waitForLoad();
-	
-	var selected = yield itemsView.selectItem(itemID, expand);
+	var selected = yield this.itemTreeView.selectItem(itemID, expand);
 	if (selected) {
 		return true;
 	}
@@ -1197,10 +1196,9 @@ Zotero.CollectionTreeView.prototype.selectItem = Zotero.Promise.coroutine(functi
 		yield this.selectLibrary(item.libraryID);
 	}
 	
-	itemsView = this.selectedTreeRow.itemTreeView;
-	yield itemsView.waitForLoad();
+	yield this.itemTreeView.waitForLoad();
 	
-	return itemsView.selectItem(itemID, expand);
+	return this.itemTreeView.selectItem(itemID, expand);
 });
 
 

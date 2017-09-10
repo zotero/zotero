@@ -1225,7 +1225,7 @@ var ZoteroPane = new function()
 			
 			this._updateToolbarIconsForRow(collectionTreeRow);
 			
-			this.itemsView = new Zotero.ItemTreeView(collectionTreeRow);
+			this.itemsView = this.collectionsView.itemTreeView = new Zotero.ItemTreeView(collectionTreeRow);
 			if (collectionTreeRow.isPublications()) {
 				this.itemsView.collapseAll = true;
 			}

@@ -62,6 +62,14 @@ describe("Zotero.CollectionTreeView", function() {
 			assert.isTrue(cv.isContainerOpen(group1Row));
 			assert.isFalse(cv.isContainerOpen(group2Row));
 		});
+		
+		it("should update associated item tree view", function* () {
+			var collection = yield createDataObject('collection');
+			var item = yield createDataObject('item', { collections: [collection.id] });
+			yield cv.reload();
+			yield cv.selectCollection(collection.id);
+			yield cv.selectItem(item.id);
+		});
 	});
 	
 	describe("collapse/expand", function () {
