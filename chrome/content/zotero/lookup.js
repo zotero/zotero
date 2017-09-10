@@ -36,16 +36,19 @@ var Zotero_Lookup = new function () {
 		var identifier = textBox.value;
 		//first look for DOIs
 		var ids = identifier.split(/[\s\u00A0]+/);	//whitespace + non-breaking space
-		var items = [], doi;
+		var searches = [], doi;
 		for(var i=0, n=ids.length; i<n; i++) {
 			if((doi = Zotero.Utilities.cleanDOI(ids[i])) && foundIDs.indexOf(doi) == -1) {
-				items.push({itemType:"journalArticle", DOI:doi});
+				searches.push({
+					itemType: "journalArticle",
+					DOI: doi
+				});
 				foundIDs.push(doi);
 			}
 		}
 
 		//then try ISBNs
-		if(!items.length) {
+		if (!searches.length) {
 			//first try replacing dashes
 			ids = identifier.replace(/[\u002D\u00AD\u2010-\u2015\u2212]+/g, "")	//hyphens and dashes
 											.toUpperCase();
@@ -56,18 +59,24 @@ var Zotero_Lookup = new function () {
 			while(isbn = ISBN_RE.exec(ids)) {
 				isbn = Zotero.Utilities.cleanISBN(isbn[1]);
 				if(isbn && foundIDs.indexOf(isbn) == -1) {
-					items.push({itemType:"book", ISBN:isbn});
+					searches.push({
+						itemType: "book",
+						ISBN: isbn
+					});
 					foundIDs.push(isbn);
 				}
 			}
 
 			//now try spaces
-			if(!items.length) {
+			if (!searches.length) {
 				ids = ids.replace(/[ \u00A0]+/g, "");	//space + non-breaking space
 				while(isbn = ISBN_RE.exec(ids)) {
 					isbn = Zotero.Utilities.cleanISBN(isbn[1]);
 					if(isbn && foundIDs.indexOf(isbn) == -1) {
-						items.push({itemType:"book", ISBN:isbn});
+						searches.push({
+							itemType: "book",
+							ISBN: isbn
+						});
 						foundIDs.push(isbn);
 					}
 				}
@@ -75,18 +84,21 @@ var Zotero_Lookup = new function () {
 		}
 
 		//finally try for PMID
-		if(!items.length) {
+		if (!searches.length) {
 			// PMID; right now, the longest PMIDs are 8 digits, so it doesn't 
 			// seem like we will need to discriminate for a fairly long time
 			var PMID_RE = /(?:\D|^)(\d{1,9})(?!\d)/g;
 			var pmid;
 			while((pmid = PMID_RE.exec(identifier)) && foundIDs.indexOf(pmid) == -1) {
-				items.push({itemType:"journalArticle", contextObject:"rft_id=info:pmid/"+pmid[1]});
+				searches.push({
+					itemType: "journalArticle",
+					contextObject: "rft_id=info:pmid/" + pmid[1]
+				});
 				foundIDs.push(pmid);
 			}
 		}
 
-		if(!items.length) {
+		if (!searches.length) {
 			Zotero.alert(
 				window,
 				Zotero.getString("lookup.failure.title"),
@@ -104,44 +116,44 @@ var Zotero_Lookup = new function () {
 			/** TODO: handle this **/
 		}
 
-		var notDone = items.length;	 //counter for asynchronous fetching
 		var successful = 0;					//counter for successful retrievals
 
 		Zotero_Lookup.toggleProgress(true);
 
-		var item;
-		while(item = items.pop()) {
+		for (let search of searches) {
 			var translate = new Zotero.Translate.Search();
-			translate.setSearch(item);
+			translate.setSearch(search);
 
 			// be lenient about translators
 			let translators = yield translate.getTranslators();
 			translate.setTranslator(translators);
 
-			translate.setHandler("done", function(translate, success) {
-				notDone--;
-				successful += success;
-
-				if(!notDone) {	//i.e. done
-					Zotero_Lookup.toggleProgress(false);
-					if(successful) {
-						document.getElementById("zotero-lookup-panel").hidePopup();
-					} else {
-						Zotero.alert(
-							window,
-							Zotero.getString("lookup.failure.title"),
-							Zotero.getString("lookup.failure.description")
-						);
-					}
-				}
-			});
-
-			yield translate.translate({
-				libraryID,
-				collections: collection ? [collection.id] : false
-			});
+			try {
+				yield translate.translate({
+					libraryID,
+					collections: collection ? [collection.id] : false
+				})
+				successful++;
+			}
+			// Continue with other ids on failure
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
-
+		
+		Zotero_Lookup.toggleProgress(false);
+		// TODO: Give indication if some failed
+		if (successful) {
+			document.getElementById("zotero-lookup-panel").hidePopup();
+		}
+		else {
+			Zotero.alert(
+				window,
+				Zotero.getString("lookup.failure.title"),
+				Zotero.getString("lookup.failure.description")
+			);
+		}
+		
 		return false;
 	});
 	
