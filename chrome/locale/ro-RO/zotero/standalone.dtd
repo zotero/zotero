@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Informații pentru probleme">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Forumuri de discuție">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "Raportează erori…">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Înregistrare date de depanare">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.submit "Trimite date de ieșire">
+<!ENTITY debugOutputLogging.view "Vizualizare date de ieșire">
+<!ENTITY debugOutputLogging.clear "Șterge datele de ieșire">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Repornește cu înregistrarea activată...">
 
 <!ENTITY helpCheckForUpdates.label "Caută actualizări...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

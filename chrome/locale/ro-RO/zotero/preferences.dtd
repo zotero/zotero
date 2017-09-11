@@ -109,11 +109,11 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Când această opțiune nu este funcțională, Zotero include URL-urile în timp ce citează articole de jurnale, reviste și ziare doar dacă pentru articol nu a s-a specificat un interval de pagini.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Copiere rapidă">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Format implicit:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copiază ca HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Setări specifice site:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domeniu/Cale">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(de ex., wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Limbă">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Dezactivează Copierea rapidă în timpul tragerii a mai mult de">
@@ -125,8 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Obține extensia pentru procesorul de texte...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Folosește caseta clasică de dialog Adaugă citare">
-<!ENTITY zotero.preferences.styleEditor "Style Editor">
-<!ENTITY zotero.preferences.stylePreview "Style Preview">
+<!ENTITY zotero.preferences.styleEditor "Editor de stil">
+<!ENTITY zotero.preferences.stylePreview "Previzualizare stil">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Manager de stiluri">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titlu">
@@ -175,7 +175,7 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Fișiere și dosare">
 <!ENTITY zotero.preferences.advanced.keys "Scurtături">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Configurare avansată">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localizează">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Manager pentru motorul de căutare a articolelor">
@@ -208,4 +208,4 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Resetează traducători...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Resetează stiluri...">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "Editor de configurare">

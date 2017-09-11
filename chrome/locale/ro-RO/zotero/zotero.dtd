@@ -11,7 +11,7 @@
 <!ENTITY zotero.general.refresh "Reîmprospătare">
 <!ENTITY zotero.general.saveAs "Salvare ca...">
 <!ENTITY zotero.general.advancedOptions.label "Opțiuni avansate">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Instrumente">
 <!ENTITY zotero.general.more "Mai mult">
 <!ENTITY zotero.general.loading "Se încarcă...">
 
@@ -143,7 +143,7 @@
 <!ENTITY zotero.item.copyAsURL "Copiază ca URL">
 <!ENTITY zotero.item.deletePermanently "Șterge permanent...">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "Șterge toate etichetele...">
 
 <!ENTITY zotero.toolbar.newNote "Notă nouă">
 <!ENTITY zotero.toolbar.note.standalone "Notă independentă nouă">

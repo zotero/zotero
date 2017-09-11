@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Upplýsingar um lausn vandamála">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Spjallrásir">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Tilkynna villur...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Kemba útkeyrslu eftirlitsskrár">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.submit "Senda útkeyrslu">
+<!ENTITY debugOutputLogging.view "Sýna útkeyrslu">
+<!ENTITY debugOutputLogging.clear "Hreinsa útkeyrslu">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Endurræsa með virka eftirlitsskrá...">
 
 <!ENTITY helpCheckForUpdates.label "Athuga með uppfærslur…">
 <!ENTITY helpCheckForUpdates.accesskey "U">
