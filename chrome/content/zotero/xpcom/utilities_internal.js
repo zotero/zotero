@@ -1130,6 +1130,7 @@ Zotero.Utilities.Internal = {
 	filterStack: function (stack) {
 		return stack.split(/\n/)
 			.filter(line => !line.includes('resource://zotero/bluebird'))
+			.filter(line => !line.includes('XPCOMUtils.jsm'))
 			.join('\n');
 	},
 	
