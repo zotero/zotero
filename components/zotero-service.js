@@ -357,7 +357,7 @@ function ZoteroService() {
 				dump(e + "\n\n");
 				Components.utils.reportError(e);
 				if (!zContext.Zotero.startupError) {
-					zContext.Zotero.startupError = e.stack || e + "\n\n" + e.stack;
+					zContext.Zotero.startupError = e.stack || e;
 				}
 				if (!isStandalone()) {
 					throw e;
