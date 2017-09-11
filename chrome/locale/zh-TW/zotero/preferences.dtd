@@ -193,6 +193,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "使用 Zotero 的個人設定檔目錄">
 <!ENTITY zotero.preferences.dataDir.custom "自訂：">
 <!ENTITY zotero.preferences.dataDir.choose "選擇…">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
 <!ENTITY zotero.preferences.dataDir.reveal "顯示資料目錄">
 <!ENTITY zotero.preferences.dataDir.migrate "轉移到新的預設位置...">
 

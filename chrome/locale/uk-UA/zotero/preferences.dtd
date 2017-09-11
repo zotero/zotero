@@ -193,6 +193,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Використовувати каталог профілю">
 <!ENTITY zotero.preferences.dataDir.custom "Користувацька:">
 <!ENTITY zotero.preferences.dataDir.choose "Вибрати...">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
 <!ENTITY zotero.preferences.dataDir.reveal "Показати каталог з даними">
 <!ENTITY zotero.preferences.dataDir.migrate "Мігрувати до нового розташування за замовчуванням...">
 

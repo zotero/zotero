@@ -193,6 +193,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "ប្រើថតទម្រង់ហ្វៃអ៊ើហ្វក់ស៍">
 <!ENTITY zotero.preferences.dataDir.custom "ធម្មតា:">
 <!ENTITY zotero.preferences.dataDir.choose "Choose…">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
 <!ENTITY zotero.preferences.dataDir.reveal "បង្ហាញថតទិន្នន័យ">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 

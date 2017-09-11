@@ -193,6 +193,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "استخدم مجلد الملف الشخصي لفايرفوكس">
 <!ENTITY zotero.preferences.dataDir.custom "تخصيص:">
 <!ENTITY zotero.preferences.dataDir.choose "اختر...">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
 <!ENTITY zotero.preferences.dataDir.reveal "عرض مجلد البيانات">
 <!ENTITY zotero.preferences.dataDir.migrate "الترحيل إلى الموقع الافتراضي الجديد...">
 

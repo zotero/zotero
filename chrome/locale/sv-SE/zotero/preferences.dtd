@@ -193,6 +193,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Använd profilkatalog">
 <!ENTITY zotero.preferences.dataDir.custom "Egen:">
 <!ENTITY zotero.preferences.dataDir.choose "Välj...">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
 <!ENTITY zotero.preferences.dataDir.reveal "Visa Datakatalog">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrera till ny standardplats...">
 

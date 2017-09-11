@@ -193,6 +193,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Brug profil-mappen">
 <!ENTITY zotero.preferences.dataDir.custom "Tilpas:">
 <!ENTITY zotero.preferences.dataDir.choose "Vælg...">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
 <!ENTITY zotero.preferences.dataDir.reveal "Vis data-mappen">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrér til ny standardplacering">
 

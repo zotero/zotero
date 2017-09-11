@@ -193,6 +193,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Použiť priečinok, do ktorého Firefox ukladá používateľské dáta">
 <!ENTITY zotero.preferences.dataDir.custom "Vlastné umiestnenie:">
 <!ENTITY zotero.preferences.dataDir.choose "Zvoliť...">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
 <!ENTITY zotero.preferences.dataDir.reveal "Zobraziť priečinok s dátami">
 <!ENTITY zotero.preferences.dataDir.migrate "Presunúť na nové predvolené umiestnenie...">
 

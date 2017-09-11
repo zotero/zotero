@@ -193,6 +193,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "ใช้ไดเรคทอรีของโพรไฟล์">
 <!ENTITY zotero.preferences.dataDir.custom "กำหนดเอง:">
 <!ENTITY zotero.preferences.dataDir.choose "Choose…">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
 <!ENTITY zotero.preferences.dataDir.reveal "แสดงไดเรคทอรีข้อมูล">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
