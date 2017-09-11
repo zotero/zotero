@@ -370,6 +370,14 @@ function ZoteroService() {
 							zContext.Zotero.startupErrorHandler();
 						}
 						else if (zContext.Zotero.startupError) {
+							try {
+								zContext.Zotero.startupError =
+									zContext.Zotero.Utilities.Internal.filterStack(
+										zContext.Zotero.startupError
+									);
+							}
+							catch (e) {}
+							
 							let ps = Cc["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Ci.nsIPromptService);
 							let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
