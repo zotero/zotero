@@ -503,6 +503,8 @@ ZoteroCommandLineHandler.prototype = {
 			zInitOptions.forceDebugLog = 1;
 		}
 		
+		zInitOptions.forceDataDir = cmdLine.handleFlagWithParam("datadir", false);
+		
 		// handler to open Zotero pane at startup in Zotero for Firefox
 		if (!isStandalone() && cmdLine.handleFlag("ZoteroPaneOpen", false)) {
 			zInitOptions.openPane = true;

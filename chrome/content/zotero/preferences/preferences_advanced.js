@@ -298,6 +298,12 @@ Zotero_Preferences.Advanced = {
 		var currentDir = Zotero.DataDirectory.dir;
 		var defaultDataDir = Zotero.DataDirectory.defaultDir;
 		
+		if (Zotero.forceDataDir) {
+			document.getElementById('command-line-data-dir-path').textContent = currentDir;
+			document.getElementById('command-line-data-dir').hidden = false;
+			document.getElementById('data-dir').hidden = true;
+		}
+		
 		// Change "Use profile directory" label to home directory location unless using profile dir
 		if (useDataDir || currentDir == defaultDataDir) {
 			document.getElementById('default-data-dir').setAttribute(

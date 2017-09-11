@@ -289,3 +289,17 @@ treechildren::-moz-tree-checkbox(checked){
      in your extension or elsewhere. */
   list-style-image: url("chrome://global/skin/checkbox/cbox-check.gif");
 }
+
+/* Advanced pane */
+#command-line-data-dir description {
+	font-size: 12px;
+	cursor: text;
+	-moz-user-select: text;
+}
+
+#command-line-data-dir label {
+	font-size: 11px;
+	font-style: italic;
+	padding-top: .4em;
+	padding-bottom: .4em;
+}

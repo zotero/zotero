@@ -180,6 +180,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				'skipBundledFiles'
 			];
 			opts.filter(opt => options[opt]).forEach(opt => this[opt] = true);
+			
+			this.forceDataDir = options.forceDataDir;
 		}
 		
 		this.mainThread = Services.tm.mainThread;
@@ -378,16 +380,18 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 		
 		if (!Zotero.isConnector) {
-			yield Zotero.DataDirectory.checkForLostLegacy();
-			if (this.restarting) {
-				return;
-			}
-			
-			yield Zotero.DataDirectory.checkForMigration(
-				dataDir, Zotero.DataDirectory.defaultDir
-			);
-			if (this.skipLoading) {
-				return;
+			if (!this.forceDataDir) {
+				yield Zotero.DataDirectory.checkForLostLegacy();
+				if (this.restarting) {
+					return;
+				}
+				
+				yield Zotero.DataDirectory.checkForMigration(
+					dataDir, Zotero.DataDirectory.defaultDir
+				);
+				if (this.skipLoading) {
+					return;
+				}
 			}
 			
 			// Make sure data directory isn't in Dropbox, etc.

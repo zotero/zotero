@@ -184,6 +184,11 @@
 							</hbox>
 						</radiogroup>
 						
+						<vbox id="command-line-data-dir" hidden="true">
+							<description id="command-line-data-dir-path"/>
+							<label value="&zotero.preferences.dataDir.viaCommandLine;"/>
+						</vbox>
+						
 						<hbox>
 							<button label="&zotero.preferences.dataDir.reveal;"
 								oncommand="Zotero.DataDirectory.reveal()"/>

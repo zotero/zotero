@@ -54,7 +54,37 @@ Zotero.DataDirectory = {
 	init: Zotero.Promise.coroutine(function* () {
 		var dataDir;
 		var dbFilename = this.getDatabaseFilename();
-		if (Zotero.Prefs.get('useDataDir')) {
+		// Handle directory specified on command line
+		if (Zotero.forceDataDir) {
+			let dir = Zotero.forceDataDir;
+			// Profile subdirectory
+			if (dir == 'profile') {
+				dataDir = OS.Path.join(Zotero.Profile.dir, this.legacyDirName);
+			}
+			// Absolute path
+			else {
+				// Ignore non-absolute paths
+				if ("winIsAbsolute" in OS.Path) {
+					if (!OS.Path.winIsAbsolute(dir)) {
+						dir = false;
+					}
+				}
+				else if (!dir.startsWith('/')) {
+					dir = false;
+				}
+				if (!dir) {
+					throw `-datadir requires an absolute path or 'profile' ('${Zotero.forceDataDir}' given)`;
+				}
+				
+				// Require parent directory to exist
+				if (!(yield OS.File.exists(OS.Path.dirname(dir)))) {
+					throw `Parent directory of -datadir ${dir} not found`;
+				}
+				
+				dataDir = dir;
+			}
+		}
+		else if (Zotero.Prefs.get('useDataDir')) {
 			let prefVal = Zotero.Prefs.get('dataDir');
 			// Convert old persistent descriptor pref to string path and clear obsolete lastDataDir pref
 			//
@@ -657,6 +687,10 @@ Zotero.DataDirectory = {
 		}
 		
 		if (this.newDirOnDifferentDrive) {
+			return false;
+		}
+		
+		if (Zotero.forceDataDir) {
 			return false;
 		}
 		
