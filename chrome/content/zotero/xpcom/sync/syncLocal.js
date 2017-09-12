@@ -122,6 +122,8 @@ Zotero.Sync.Data.Local = {
 		var lastUsername = Zotero.Users.getCurrentUsername();
 		
 		if (lastUserID && lastUserID != userID) {
+			Zotero.debug(`Last user id ${lastUserID}, current user id ${userID}, `
+				+ `last username '${lastUsername}', current username '${username}'`, 2);
 			var io = {
 				title: Zotero.getString('general.warning'),
 				text: [Zotero.getString('account.lastSyncWithDifferentAccount', [ZOTERO_CONFIG.CLIENT_NAME, lastUsername, username])],
