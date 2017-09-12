@@ -29,6 +29,9 @@ Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.utils.import("resource://gre/modules/PluralForm.jsm");
+Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
+	.getService(Components.interfaces.nsIOSFileConstantsService)
+	.init();
 
 Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 
@@ -288,6 +291,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		
 		try {
 			yield Zotero.DataDirectory.init();
+			if (this.restarting) {
+				return;
+			}
 			var dataDir = Zotero.DataDirectory.dir;
 		}
 		catch (e) {

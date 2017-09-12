@@ -338,7 +338,75 @@ Zotero.DataDirectory = {
 		}
 		
 		Zotero.debug("Using data directory " + dataDir);
-		yield Zotero.File.createDirectoryIfMissingAsync(dataDir);
+		try {
+			yield Zotero.File.createDirectoryIfMissingAsync(dataDir);
+		}
+		catch (e) {
+			if (e instanceof OS.File.Error
+					&& (('unixErrno' in e && e.unixErrno == OS.Constants.libc.EACCES)
+						|| ('winLastError' in e && e.winLastError == OS.Constants.Win.ERROR_ACCESS_DENIED))) {
+				Zotero.restarting = true;
+				let isDefaultDir = dataDir == Zotero.DataDirectory.defaultDir;
+				let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+					.createInstance(Components.interfaces.nsIPromptService);
+				let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
+				if (!isDefaultDir) {
+					buttonFlags += ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+				}
+				let title = Zotero.getString('general.accessDenied');
+				let msg = Zotero.getString('dataDir.dirCannotBeCreated', [Zotero.appName, dataDir])
+					+ "\n\n"
+					+ Zotero.getString('dataDir.checkDirWriteAccess', Zotero.appName);
+				
+				let index;
+				if (isDefaultDir) {
+					index = ps.confirmEx(null,
+						title,
+						msg,
+						buttonFlags,
+						Zotero.getString('dataDir.chooseNewDataDirectory'),
+						Zotero.getString('general.quit'),
+						null, null, {}
+					);
+					if (index == 0) {
+						let changed = yield Zotero.DataDirectory.choose(true);
+						if (!changed) {
+							Zotero.Utilities.Internal.quit();
+						}
+					}
+					else if (index == 1) {
+						Zotero.Utilities.Internal.quit();
+					}
+				}
+				else {
+					index = ps.confirmEx(null,
+						title,
+						msg,
+						buttonFlags,
+						Zotero.getString('dataDir.useDefaultLocation'),
+						Zotero.getString('general.quit'),
+						Zotero.getString('dataDir.chooseNewDataDirectory'),
+						null, {}
+					);
+					if (index == 0) {
+						Zotero.DataDirectory.set(Zotero.DataDirectory.defaultDir);
+						Zotero.Utilities.Internal.quit(true);
+					}
+					else if (index == 1) {
+						Zotero.Utilities.Internal.quit();
+					}
+					else if (index == 2) {
+						let changed = yield Zotero.DataDirectory.choose(true);
+						if (!changed) {
+							Zotero.Utilities.Internal.quit();
+							return;
+						}
+					}
+				}
+				return;
+			}
+		}
 		this._cache(dataDir);
 	}),
 	
