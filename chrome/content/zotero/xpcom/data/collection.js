@@ -569,6 +569,7 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 	
 	var descendents = this.getDescendents(false, null, true);
 	var items = [];
+	var libraryHasTrash = Zotero.Libraries.hasTrash(this.libraryID);
 	
 	var del = [];
 	var itemsToUpdate = [];
@@ -586,19 +587,23 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 		}
 		// Descendent items
 		else {
-			// Delete items from DB
+			// Trash/delete items
 			if (env.options.deleteItems) {
 				del.push(descendents[i].id);
 			}
-			else {
+			
+			// If item isn't being removed or is just moving to the trash, mark for update
+			if (!env.options.deleteItems || libraryHasTrash) {
 				itemsToUpdate.push(descendents[i].id);
 			}
 		}
 	}
 	if (del.length) {
-		if (Zotero.Libraries.hasTrash(this.libraryID)) {
+		if (libraryHasTrash) {
 			yield this.ChildObjects.trash(del);
-		} else {
+		}
+		// If library doesn't have trash, just erase
+		else {
 			Zotero.debug(Zotero.Libraries.getName(this.libraryID) + " library does not have trash. "
 				+ this.ChildObjects._ZDO_Objects + " will be erased");
 			let options = {};
@@ -638,7 +643,7 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 	env.deletedObjectIDs = collections;
 	
 	// Update collection cache for descendant items
-	if (!env.options.deleteItems) {
+	if (itemsToUpdate.length) {
 		let deletedCollections = new Set(env.deletedObjectIDs);
 		itemsToUpdate.forEach(itemID => {
 			let item = Zotero.Items.get(itemID);

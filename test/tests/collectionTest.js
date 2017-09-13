@@ -53,6 +53,14 @@ describe("Zotero.Collection", function() {
 			yield collection.eraseTx();
 			assert.lengthOf(item.getCollections(), 0);
 		});
+		
+		it("should clear collection from item cache in deleteItems mode", function* () {
+			var collection = yield createDataObject('collection');
+			var item = yield createDataObject('item', { collections: [collection.id] });
+			assert.lengthOf(item.getCollections(), 1);
+			yield collection.eraseTx({ deleteItems: true });
+			assert.lengthOf(item.getCollections(), 0);
+		});
 	})
 	
 	describe("#version", function () {
