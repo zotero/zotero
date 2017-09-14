@@ -313,7 +313,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					Zotero.logError(e);
 				}
 				
-				let previousDir = Zotero.Prefs.get('lastDataDir') || Zotero.Prefs.get('dataDir');
+				let previousDir = Zotero.Prefs.get('lastDataDir')
+					|| Zotero.Prefs.get('dataDir')
+					|| e.dataDir;
 				Zotero.startupError = foundInDefault
 					? Zotero.getString(
 						'dataDir.notFound.defaultFound',
@@ -357,8 +359,10 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					else {
 						let index = ps.confirmEx(null,
 							Zotero.getString('general.error'),
-							Zotero.startupError + '\n\n' +
-							Zotero.getString('dataDir.previousDir') + ' ' + previousDir,
+							Zotero.startupError
+								+ (previousDir
+									? '\n\n' + Zotero.getString('dataDir.previousDir') + ' ' + previousDir
+									: ''),
 							buttonFlags,
 							Zotero.getString('general.quit'),
 							Zotero.getString('dataDir.useDefaultLocation'),

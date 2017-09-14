@@ -300,6 +300,9 @@ Zotero.DataDirectory = {
 								// access the custom location in Firefox, use the Zotero profile, since
 								// there's at least some chance it's right. Otherwise, throw an error.
 								if (!useProfile) {
+									// The error message normally gets the path from the pref, but
+									// we got it from the prefs file, so include it here
+									e.dataDir = nsIFile.path;
 									throw e;
 								}
 							}
