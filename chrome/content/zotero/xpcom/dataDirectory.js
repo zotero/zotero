@@ -244,12 +244,25 @@ Zotero.DataDirectory = {
 						"}"
 					, sandbox);
 					
-					// remove comments
-					var prefsJs = yield Zotero.File.getContentsAsync(prefsFile);
-					prefsJs = prefsJs.replace(/^#[^\r\n]*$/mg, "");
+					(yield Zotero.File.getContentsAsync(prefsFile))
+						.split(/\n/)
+						.filter((line) => {
+							// Strip comments
+							return !line.startsWith('#')
+								// Only process lines in our pref branch
+								&& line.includes(ZOTERO_CONFIG.PREF_BRANCH);
+						})
+						// Process each line individually
+						.forEach((line) => {
+							try {
+								Zotero.debug("Processing " + line);
+								Components.utils.evalInSandbox(line, sandbox);
+							}
+							catch (e) {
+								Zotero.logError("Error processing prefs line: " + line);
+							}
+						});
 					
-					// evaluate
-					Components.utils.evalInSandbox(prefsJs, sandbox);
 					var prefs = sandbox.prefs;
 					
 					// Check for data dir pref
