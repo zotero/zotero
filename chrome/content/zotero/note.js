@@ -75,6 +75,17 @@ function onLoad() {
 	});
 }
 
+// If there's an error saving a note, close the window and crash the app
+function onError() {
+	try {
+		window.opener.ZoteroPane.displayErrorMessage();
+	}
+	catch (e) {
+		Zotero.logError(e);
+	}
+	window.close();
+}
+
 function onUnload()
 {
 	if(noteEditor && noteEditor.value)

@@ -113,7 +113,7 @@
 				-->
 				<zoteronoteeditor id="zotero-note-editor" flex="1" notitle="1"
 					previousfocus="zotero-items-tree"
-					onerror="ZoteroPane.displayErrorMessage()"/>
+					onerror="ZoteroPane.displayErrorMessage(); this.mode = 'view'"/>
 				<button id="zotero-view-note-button" label="&zotero.notes.separate;" oncommand="ZoteroPane_Local.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ZoteroPane_Local.selectItem(this.getAttribute('sourceID'));"/>
 			</groupbox>
 			
