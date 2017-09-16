@@ -2127,7 +2127,11 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			'Sync.Engine.Tabs',
 			'content-sessionStore.js',
 			'org.mozilla.appSessions',
-			'bad script XDR magic number'
+			'bad script XDR magic number',
+			'BindInt32Parameter is deprecated and will be removed soon',
+			'BindInt64Parameter is deprecated and will be removed soon',
+			'BindUTF8StringParameter is deprecated and will be removed soon',
+			'BindNullParameter is deprecated and will be removed soon'
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
