@@ -82,7 +82,7 @@ Zotero.Sync.EventListeners.ChangeListener = new function () {
 							syncSets
 						);
 						yield Zotero.DB.queryAsync(
-							storageSQL + Array(storageSets.length / 3).fill('(?, ?)').join(', '),
+							storageSQL + Array(storageSets.length / 2).fill('(?, ?)').join(', '),
 							storageSets
 						);
 					});
