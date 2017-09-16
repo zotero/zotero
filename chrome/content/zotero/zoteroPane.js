@@ -2042,7 +2042,21 @@ var ZoteroPane = new function()
 				+ Zotero.getString('general.actionCannotBeUndone')
 		);
 		if (result) {
-			let deleted = yield Zotero.Items.emptyTrash(libraryID);
+			Zotero.showZoteroPaneProgressMeter(null, true);
+			try {
+				let deleted = yield Zotero.Items.emptyTrash(
+					libraryID,
+					{
+						onProgress: (progress, progressMax) => {
+							var percentage = Math.round((progress / progressMax) * 100);
+							Zotero.updateZoteroPaneProgressMeter(percentage);
+						}
+					}
+				);
+			}
+			finally {
+				Zotero.hideZoteroPaneOverlays();
+			}
 			yield Zotero.purgeDataObjects();
 		}
 	});

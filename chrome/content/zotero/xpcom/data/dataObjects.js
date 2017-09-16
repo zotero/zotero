@@ -909,6 +909,7 @@ Zotero.DataObjects.prototype.getPrimaryDataSQLPart = function (part) {
  *
  * @param {Integer|Integer[]} ids - Object ids
  * @param {Object} [options] - See Zotero.DataObject.prototype.erase
+ * @param {Function} [options.onProgress] - f(progress, progressMax)
  * @return {Promise}
  */
 Zotero.DataObjects.prototype.erase = Zotero.Promise.coroutine(function* (ids, options = {}) {
@@ -920,6 +921,9 @@ Zotero.DataObjects.prototype.erase = Zotero.Promise.coroutine(function* (ids, op
 				continue;
 			}
 			yield obj.erase(options);
+			if (options.onProgress) {
+				options.onProgress(i + 1, ids.length);
+			}
 		}
 		this.unload(ids);
 	}.bind(this));

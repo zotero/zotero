@@ -1160,7 +1160,7 @@ Zotero.DataObject.prototype.updateSynced = Zotero.Promise.coroutine(function* (s
  */
 Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* (options = {}) {
 	if (!options || typeof options != 'object') {
-		throw new Error("'options' must be an object");
+		throw new Error("'options' must be an object (" + typeof options + ")");
 	}
 	
 	var env = {

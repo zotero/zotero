@@ -3972,13 +3972,13 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 		? (yield this.ObjectsClass.getByLibraryAndKeyAsync(this.libraryID, parentItem))
 		: null;
 	
-	if (parentItem) {
+	if (parentItem && !env.options.skipParentRefresh) {
 		Zotero.Notifier.queue('refresh', 'item', parentItem.id);
 	}
 	
 	// // Delete associated attachment files
 	if (this.isAttachment()) {
-		let linkMode = this.getAttachmentLinkMode();
+		let linkMode = this.attachmentLinkMode;
 		// If link only, nothing to delete
 		if (linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
 			try {
@@ -4005,7 +4005,9 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 		for (let i=0; i<toDelete.length; i++) {
 			let obj = yield this.ObjectsClass.getAsync(toDelete[i]);
 			// Copy all options other than 'tx', which would cause a deadlock
-			let options = {};
+			let options = {
+				skipParentRefresh: true
+			};
 			Object.assign(options, env.options);
 			delete options.tx;
 			yield obj.erase(options);
@@ -4029,7 +4031,7 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	
 	yield Zotero.DB.queryAsync('DELETE FROM items WHERE itemID=?', this.id);
 	
-	if (parentItem) {
+	if (parentItem && !env.options.skipParentRefresh) {
 		yield parentItem.reload(['primaryData', 'childItems'], true);
 		parentItem.clearBestAttachmentState();
 	}

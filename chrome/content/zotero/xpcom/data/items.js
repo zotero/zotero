@@ -869,32 +869,56 @@ Zotero.Items = function() {
 	
 	/**
 	 * @param {Integer} libraryID - Library to delete from
-	 * @param {Integer} [days] - Only delete items deleted more than this many days ago
-	 * @param {Integer} [limit]
+	 * @param {Object} [options]
+	 * @param {Function} [options.onProgress] - fn(progress, progressMax)
+	 * @param {Integer} [options.days] - Only delete items deleted more than this many days ago
 	 */
-	this.emptyTrash = Zotero.Promise.coroutine(function* (libraryID, days, limit) {
+	this.emptyTrash = async function (libraryID, options = {}) {
+		if (typeof arguments[1] == 'number') {
+			Zotero.warn("Zotero.Items.emptyTrash() has changed -- update your code");
+			options.days = arguments[1];
+		}
+		
 		if (!libraryID) {
 			throw new Error("Library ID not provided");
 		}
 		
 		var t = new Date();
 		
-		var deletedIDs = [];
-		
-		deletedIDs = yield this.getDeleted(libraryID, true, days);
-		if (deletedIDs.length) {
-			yield Zotero.Utilities.Internal.forEachChunkAsync(deletedIDs, 50, Zotero.Promise.coroutine(function* (chunk) {
-				yield this.erase(chunk);
-				yield Zotero.Notifier.trigger('refresh', 'trash', libraryID);
-			}.bind(this)));
+		var deleted = await this.getDeleted(libraryID, false, options.days);
+		var processed = 0;
+		if (deleted.length) {
+			let toDelete = {
+				top: [],
+				child: []
+			};
+			deleted.forEach((item) => {
+				item.isTopLevelItem() ? toDelete.top.push(item.id) : toDelete.child.push(item.id)
+			});
+			
+			// Show progress meter during deletions
+			let eraseOptions = options.onProgress
+				? {
+					onProgress: function (progress, progressMax) {
+						options.onProgress(processed + progress, deleted.length);
+					}
+				}
+				: undefined;
+			for (let x of ['top', 'child']) {
+				await Zotero.Utilities.Internal.forEachChunkAsync(
+					toDelete[x],
+					1000,
+					async function (chunk) {
+						await this.erase(chunk, eraseOptions);
+						processed += chunk.length;
+					}.bind(this)
+				);
+			}
+			Zotero.debug("Emptied " + deleted.length + " item(s) from trash in " + (new Date() - t) + " ms");
 		}
 		
-		if (deletedIDs.length) {
-			Zotero.debug("Emptied " + deletedIDs.length + " item(s) from trash in " + (new Date() - t) + " ms");
-		}
-		
-		return deletedIDs.length;
-	});
+		return deleted.length;
+	};
 	
 	
 	/**

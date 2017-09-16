@@ -702,7 +702,11 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			yield this.refresh(skipExpandMatchParents);
 			refreshed = true;
 			madeChanges = true;
-			sort = true;
+			// Don't bother re-sorting in trash, since it's probably just a modification of a parent
+			// item that's about to be deleted
+			if (!collectionTreeRow.isTrash()) {
+				sort = true;
+			}
 		}
 		
 		else if (collectionTreeRow.isFeed()) {

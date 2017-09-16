@@ -39,41 +39,30 @@ Zotero.Sync.EventListeners.ChangeListener = new function () {
 			return;
 		}
 		
-		var syncSQL = "REPLACE INTO syncDeleteLog (syncObjectTypeID, libraryID, key) "
-			+ "VALUES (?, ?, ?)";
-		var storageSQL = "REPLACE INTO storageDeleteLog (libraryID, key) VALUES (?, ?)";
+		var syncSQL = "REPLACE INTO syncDeleteLog (syncObjectTypeID, libraryID, key) VALUES ";
+		var storageSQL = "REPLACE INTO storageDeleteLog (libraryID, key) VALUES ";
 		
 		var storageForLibrary = {};
 		
 		return Zotero.Utilities.Internal.forEachChunkAsync(
 			ids,
 			100,
-			function (chunk) {
-				return Zotero.DB.executeTransaction(function* () {
-					for (let id of chunk) {
-						if (extraData[id] && extraData[id].skipDeleteLog) {
-							continue;
-						}
-						
+			async function (chunk) {
+				var syncSets = [];
+				var storageSets = [];
+				chunk
+					.filter(id => !extraData[id] || !extraData[id].skipDeleteLog)
+					.forEach(id => {
 						if (type == 'setting') {
 							var [libraryID, key] = id.split("/");
 						}
 						else {
 							var { libraryID, key } = extraData[id];
 						}
-						
 						if (!key) {
 							throw new Error("Key not provided in notifier object");
 						}
-						
-						yield Zotero.DB.queryAsync(
-							syncSQL,
-							[
-								syncObjectTypeID,
-								libraryID,
-								key
-							]
-						);
+						syncSets.push(syncObjectTypeID, libraryID, key);
 						
 						if (type == 'item') {
 							if (storageForLibrary[libraryID] === undefined) {
@@ -81,17 +70,28 @@ Zotero.Sync.EventListeners.ChangeListener = new function () {
 									Zotero.Sync.Storage.Local.getModeForLibrary(libraryID) == 'webdav';
 							}
 							if (storageForLibrary[libraryID] && extraData[id].storageDeleteLog) {
-								yield Zotero.DB.queryAsync(
-									storageSQL,
-									[
-										libraryID,
-										key
-									]
-								);
+								storageSets.push(libraryID, key);
 							}
 						}
-					}
-				});
+					});
+				
+				if (storageSets.length) {
+					return Zotero.DB.executeTransaction(function* () {
+						yield Zotero.DB.queryAsync(
+							syncSQL + Array(syncSets.length / 3).fill('(?, ?, ?)').join(', '),
+							syncSets
+						);
+						yield Zotero.DB.queryAsync(
+							storageSQL + Array(storageSets.length / 3).fill('(?, ?)').join(', '),
+							storageSets
+						);
+					});
+				}
+				else if (syncSets.length) {
+					await Zotero.DB.queryAsync(
+						syncSQL + Array(syncSets.length / 3).fill('(?, ?, ?)').join(', '), syncSets
+					);
+				}
 			}
 		);
 	});
