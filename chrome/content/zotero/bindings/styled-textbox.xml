@@ -48,7 +48,6 @@
 			<constructor><![CDATA[
 				this.mode = this.getAttribute('mode');
 				
-				this._onInitCallbacks = [];
 				this._iframe = document.getAnonymousElementByAttribute(this, "anonid", "rt-view");
 				
 				// Atomic units, HTML -> RTF (cleanup)
@@ -624,6 +623,9 @@
 						callback(this._editor);
 					}
 					else {
+						if (!this._onInitCallbacks) {
+							this._onInitCallbacks = [];
+						}
 						this._onInitCallbacks.push(callback);
 					}
 				]]></body>
@@ -730,8 +732,10 @@
 								}
 								
 								let cb;
-								while (cb = this._onInitCallbacks.shift()) {
-									cb(this._editor);
+								if (this._onInitCallbacks) {
+									while (cb = this._onInitCallbacks.shift()) {
+										cb(this._editor);
+									}
 								}
 							}.bind(this);
 						}
