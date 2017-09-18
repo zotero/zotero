@@ -11,7 +11,7 @@
 <!ENTITY zotero.general.refresh "再読み込み">
 <!ENTITY zotero.general.saveAs "名前をつけて保存...">
 <!ENTITY zotero.general.advancedOptions.label "高度なオプション">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "ツール">
 <!ENTITY zotero.general.more "その他">
 <!ENTITY zotero.general.loading "読み込み中...">
 
@@ -138,12 +138,12 @@
 <!ENTITY zotero.item.textTransform "テキストの大文字・小文字を指定する">
 <!ENTITY zotero.item.textTransform.titlecase "各単語の先頭を大文字に">
 <!ENTITY zotero.item.textTransform.sentencecase "各文の先頭を大文字に">
-<!ENTITY zotero.item.creatorTransform.nameSwap "姓と名を置き替える">
+<!ENTITY zotero.item.creatorTransform.nameSwap "姓と名を入れ替える">
 <!ENTITY zotero.item.viewOnline "オンラインで閲覧する">
 <!ENTITY zotero.item.copyAsURL "URLとしてコピーする">
 <!ENTITY zotero.item.deletePermanently "永久に削除する...">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "すべてのタグを削除する...">
 
 <!ENTITY zotero.toolbar.newNote "新しいメモ">
 <!ENTITY zotero.toolbar.note.standalone "新しく独立メモを作成">
@@ -158,7 +158,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "タグを読込中...">
 <!ENTITY zotero.tagSelector.showAutomatic "自動生成タグも表示">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "このライブラリの全タグを表示">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "このライブラリから自動生成されたタグを削除する...">
 <!ENTITY zotero.tagSelector.clearAll "選択をすべて解除">
 <!ENTITY zotero.tagSelector.assignColor "色を指定...">
 <!ENTITY zotero.tagSelector.renameTag "タグ名の変更...">
@@ -240,7 +240,7 @@
 
 <!ENTITY zotero.integration.references.label "参考文献目録に含まれる文献">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "同期を停止">
 <!ENTITY zotero.sync.error "同期エラー">
 <!ENTITY zotero.sync.storage.progress "進捗:">
 <!ENTITY zotero.sync.storage.downloads "ダウンロード:">

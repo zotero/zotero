@@ -44,7 +44,7 @@
 
 <!ENTITY toolsMenu.label "ツール">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "ブラウザ・コネクタをインストールする">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "アドオン">
 
@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "トラブルシューティング情報...">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "ディスカッション・フォーラム">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "エラーを報告する...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "デバッグ出力のログ">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.submit "出力を提出する">
+<!ENTITY debugOutputLogging.view "出力を表示">
+<!ENTITY debugOutputLogging.clear "出力を消去する">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "ログを有効化して再起動する...">
 
 <!ENTITY helpCheckForUpdates.label "更新を確認...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

@@ -10,7 +10,7 @@
 <!ENTITY zotero.preferences.userInterface "ユーザーインターフェース">
 <!ENTITY zotero.preferences.layout "レイアウト:">
 <!ENTITY zotero.preferences.layout.standard "標準">
-<!ENTITY zotero.preferences.layout.stacked "Stacked">
+<!ENTITY zotero.preferences.layout.stacked "積み上げレイアウト">
 <!ENTITY zotero.preferences.fontSize "文字サイズ:">
 <!ENTITY zotero.preferences.fontSize.small "小">
 <!ENTITY zotero.preferences.fontSize.medium "中">
@@ -45,7 +45,7 @@
 <!ENTITY zotero.preferences.feeds.feedDefaults "デフォルトのフィード">
 
 <!ENTITY zotero.preferences.openurl.search "リンク・リゾルバを検索">
-<!ENTITY zotero.preferences.openurl.custom "Custom…">
+<!ENTITY zotero.preferences.openurl.custom "カスタム...">
 <!ENTITY zotero.preferences.openurl.server "リンク・リゾルバ:">
 <!ENTITY zotero.preferences.openurl.version "バージョン:">
 
@@ -78,13 +78,13 @@
 <!ENTITY zotero.preferences.sync.reset.warning2 "同期リセットの設定">
 <!ENTITY zotero.preferences.sync.reset.warning3 "により詳しい情報があります。">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "データ同期の履歴をリセットする">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "ローカルのデータをリモートのデータと統合し、同期の履歴は無視する">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zotero サーバーから復元（リストア）する">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "ローカル（手元）の Zotero データを全て消去して、同期サーバのデータで復元する。">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zotero サーバのデータに復元する。">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "サーバのデータを全て消去して、ローカル（手元）の Zotero データで上書きする。">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "ファイル同期の履歴を削除する">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "すべての添付ファイルを保存サービスと比較する">
 <!ENTITY zotero.preferences.sync.reset "リセット">
 <!ENTITY zotero.preferences.sync.reset.button "リセットする...">
 
@@ -175,14 +175,14 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "ファイルとフォルダ">
 <!ENTITY zotero.preferences.advanced.keys "ショートカット">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "高度な設定">
 
 <!ENTITY zotero.preferences.prefpane.locate "所在確認">
 <!ENTITY zotero.preferences.locate.locateEngineManager "所在確認エンジンの管理">
 <!ENTITY zotero.preferences.locate.description "詳細">
 <!ENTITY zotero.preferences.locate.name "名称">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "所在確認エンジンは、所在確認ドロップダウンメニューの機能を拡張するものです。所在確認エンジンを有効化すると、それがドロップダウンメニューに追加され、ウェブ上での資料の所在確認に利用することができます。">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
+<!ENTITY zotero.preferences.locate.addDescription "リストにないルックアップ・エンジンを追加するには、ブラウザで希望のサーチエンジンを訪れて、Zotero の場所メニューから「追加」を選んでください">
 <!ENTITY zotero.preferences.locate.restoreDefaults "初期設定に戻す">
 
 <!ENTITY zotero.preferences.charset "文字コード">
@@ -193,9 +193,9 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Firefox プロファイルのディレクトリを使用する">
 <!ENTITY zotero.preferences.dataDir.custom "個人設定:">
 <!ENTITY zotero.preferences.dataDir.choose "選択する...">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "（コマンドライン経由で指定）">
 <!ENTITY zotero.preferences.dataDir.reveal "データ・ディレクトリを表示する">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
+<!ENTITY zotero.preferences.dataDir.migrate "新しい規定の場所へ移動する...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "リンク付き添付ファイルの基本ディレクトリ">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero は、基本ディレクトリの中のリンク付き添付ファイルについて相対パスを使用します。これにより、基本ディレクトリのファイル構造が同じである限り、異なるコンピューター上のファイルへのアクセスが可能になります。">
@@ -209,4 +209,4 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "トランスレータをリセットする...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "引用スタイルをリセットする...">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "設定エディタ">
