@@ -1465,7 +1465,7 @@ Zotero.CollectionTreeView.prototype._saveOpenStates = Zotero.Promise.coroutine(f
 		for (var id in state) {
 			var m = id.match(/^C([0-9]+)$/);
 			if (m) {
-				if (!(yield Zotero.Collections.getAsync(m[1]))) {
+				if (!(yield Zotero.Collections.getAsync(parseInt(m[1])))) {
 					delete state[id];
 				}
 				continue;
@@ -1473,7 +1473,7 @@ Zotero.CollectionTreeView.prototype._saveOpenStates = Zotero.Promise.coroutine(f
 			
 			var m = id.match(/^G([0-9]+)$/);
 			if (m) {
-				if (!Zotero.Groups.get(m[1])) {
+				if (!Zotero.Groups.get(parseInt(m[1]))) {
 					delete state[id];
 				}
 				continue;
