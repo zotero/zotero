@@ -628,6 +628,13 @@ describe("Zotero.CollectionTreeView", function() {
 			
 			describe("My Publications", function () {
 				it("should add an item to My Publications", function* () {
+					// Remove other items in My Publications
+					var s = new Zotero.Search();
+					s.addCondition('libraryID', 'is', Zotero.Libraries.userLibraryID);
+					s.addCondition('publications', 'true');
+					var ids = yield s.search();
+					yield Zotero.Items.erase(ids);
+					
 					var item = yield createDataObject('item', false, { skipSelect: true });
 					var libraryID = item.libraryID;
 					
