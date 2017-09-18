@@ -35,17 +35,23 @@ Zotero.LocateManager = new function() {
 	/**
 	 * Read locateEngines JSON file to initialize locate manager
 	 */
-	this.init = function() {
+	this.init = async function() {
 		_ios = Components.classes["@mozilla.org/network/io-service;1"].
 				  getService(Components.interfaces.nsIIOService);
 		
 		_jsonFile = _getLocateFile();
 		
-		if(_jsonFile.exists()) {
-			_locateEngines = JSON.parse(Zotero.File.getContents(_jsonFile))
-				.map(engine => new LocateEngine(engine));
-		} else {
-			this.restoreDefaultEngines();
+		try {
+			if (await OS.File.exists(_jsonFile)) {
+				_locateEngines = JSON.parse(await Zotero.File.getContentsAsync(_jsonFile))
+					.map(engine => new LocateEngine(engine));
+			}
+			else {
+				await this.restoreDefaultEngines();
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
 		}
 	}
 	
@@ -124,22 +130,24 @@ Zotero.LocateManager = new function() {
 	/**
 	 * Restore default engines by copying file from extension dir
 	 */
-	this.restoreDefaultEngines = function() {
+	this.restoreDefaultEngines = async function () {
 		// get locate dir
 		var locateDir = _getLocateDirectory();
 		
 		// remove old locate dir
-		if(locateDir.exists()) locateDir.remove(true);
+		await OS.File.removeDir(locateDir, { ignoreAbsent: true, ignorePermissions: true });
 		
 		// create new locate dir
-		locateDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0o700);
+		await OS.File.makeDir(locateDir, { unixMode: 0o755 });
 		
 		// copy default file to new locate dir
-		Zotero.File.putContents(_jsonFile,
-			Zotero.File.getContentsFromURL(_getDefaultFile()));
+		await Zotero.File.putContentsAsync(
+			_jsonFile,
+			await Zotero.File.getContentsFromURLAsync(_getDefaultFile())
+		);
 		
 		// reread locate engines
-		this.init();
+		await this.init();
 		
 		// reload icons for default locate engines
 		for (let engine of this.getEngines()) engine._updateIcon();
@@ -148,8 +156,8 @@ Zotero.LocateManager = new function() {
 	/**
 	 * Writes the engines to disk; called from the nsITimer spawned by _serializeLocateEngines
 	 */
-	this.notify = function() {
-		Zotero.File.putContents(_jsonFile, JSON.stringify(_locateEngines, null, "\t"));
+	this.notify = async function () {
+		await Zotero.File.putContentsAsync(_jsonFile, JSON.stringify(_locateEngines, null, "\t"));
 		_timer = undefined;
 	}
 	
@@ -157,18 +165,14 @@ Zotero.LocateManager = new function() {
 	 * Gets the JSON file containing engine info
 	 */
 	function _getLocateFile() {
-		var locateDir = _getLocateDirectory();
-		locateDir.append(LOCATE_FILE_NAME);
-		return locateDir;
+		return OS.Path.join(_getLocateDirectory(), LOCATE_FILE_NAME);
 	}
 	
 	/**
 	 * Gets the dir containing the JSON file and engine icons
 	 */
 	function _getLocateDirectory() {
-		var locateDir = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
-		locateDir.append(LOCATE_DIR_NAME);
-		return locateDir;
+		return OS.Path.join(Zotero.DataDirectory.dir, LOCATE_DIR_NAME);
 	}
 	
 	/**
@@ -195,53 +199,6 @@ Zotero.LocateManager = new function() {
 	function _watchLocateEngineProperties(id, oldval, newval) {
 		if(oldval !== newval) _serializeLocateEngines();
 		return newval;
-	}
-	
-	/**
-	 * Called when an engine icon is downloaded to write it to disk
-	 */
-	function _engineIconLoaded(iconBytes, engine, contentType) {
-		const iconExtensions = {
-			"image/png":"png",
-			"image/jpeg":"jpg",
-			"image/gif":"gif",
-			"image/x-icon":"ico",
-			"image/vnd.microsoft.icon":"ico"
-		};
-		
-		// ensure there is an icon
-		if(!iconBytes) throw "Icon could not be retrieved for "+engine.name;
-		
-		// ensure there is an extension
-		var extension = iconExtensions[contentType.toLowerCase()];
-		if(!extension) throw "Invalid MIME type "+contentType+" for icon for engine "+engine.name;
-		
-		// remove old icon
-		engine._removeIcon();
-		
-		// find a good place to put the icon file
-		var sanitizedAlias = engine.name.replace(/[^\w _]/g, "");
-		var iconFile = _getLocateDirectory();
-		iconFile.append(sanitizedAlias + "." + extension);
-		if(iconFile.exists()) {
-			for(var i=0; iconFile.exists(); i++) {
-				iconFile = iconFile.parent;
-				iconFile.append(sanitizedAlias + "_" + i + "." + extension);
-			}
-		}
-		
-		// write the icon to the file
-		var fos = Components.classes["@mozilla.org/network/file-output-stream;1"].
-				createInstance(Components.interfaces.nsIFileOutputStream);
-		fos.init(iconFile, 0x02 | 0x08 | 0x20, 0o664, 0);  // write, create, truncate
-		var bos = Components.classes["@mozilla.org/binaryoutputstream;1"].
-				createInstance(Components.interfaces.nsIBinaryOutputStream);
-		bos.setOutputStream(fos);
-		bos.writeByteArray(iconBytes, iconBytes.length);
-		bos.close();
-		
-		// get the URI of the icon
-		engine.icon = _ios.newFileURI(iconFile).spec;
 	}
 	
 	/**
@@ -495,108 +452,44 @@ Zotero.LocateManager = new function() {
 			if(file.exists()) file.remove(null);
 		},
 		
-		"_updateIcon":function() {
-			// create new channel
-			var uri = _ios.newURI(this._iconSourceURI, null, null);
-			if(uri.scheme !== "http" && uri.scheme !== "https" && uri.scheme !== "ftp") return;
-			var chan = _ios.newChannelFromURI(uri);
-			var listener = new loadListener(chan, this, _engineIconLoaded);
-			chan.notificationCallbacks = listener;
-			chan.asyncOpen(listener, null);
+		_updateIcon: async function () {
+			const iconExtensions = {
+				"image/png": "png",
+				"image/jpeg": "jpg",
+				"image/gif": "gif",
+				"image/vnd.microsoft.icon": "ico"
+			};
+			
+			if (!this._iconSourceURI.startsWith('http') && !this._iconSourceURI.startsWith('https')) {
+				return;
+			}
+			
+			var tmpPath = OS.Path.join(Zotero.getTempDirectory().path, Zotero.Utilities.randomString());
+			await Zotero.File.download(this._iconSourceURI, tmpPath);
+			
+			var sample = await Zotero.File.getSample(tmpPath);
+			var contentType = Zotero.MIME.getMIMETypeFromData(sample);
+			
+			// ensure there is an extension
+			var extension = iconExtensions[contentType.toLowerCase()];
+			if (!extension) {
+				throw new Error(`Invalid content type ${contentType} for icon for engine ${this.name}`);
+			}
+			
+			// Find a good place to put the icon file
+			var sanitizedAlias = this.name.replace(/[^\w _]/g, "");
+			var iconFile = OS.Path.join(_getLocateDirectory(), sanitizedAlias + "." + extension);
+			if (await OS.File.exists(iconFile)) {
+				for (let i = 0; await OS.File.exists(iconFile); i++) {
+					iconFile = OS.Path.join(
+						OS.Path.dirname(iconFile),
+						sanitizedAlias + "_" + i + "." + extension
+					);
+				}
+			}
+			
+			await OS.File.move(tmpPath, iconFile);
+			this.icon = OS.Path.toFileURI(iconFile);
 		}
-	}
-	
-	/**
-	 * Ripped from nsSearchService.js
-	 */
-	function loadListener(aChannel, aEngine, aCallback) {
-		this._channel = aChannel;
-		this._bytes = [];
-		this._engine = aEngine;
-		this._callback = aCallback;
-	}
-	
-	loadListener.prototype = {
-		_callback: null,
-		_channel: null,
-		_countRead: 0,
-		_engine: null,
-		_stream: null,
-		
-		QueryInterface: function SRCH_loadQI(aIID) {
-			if (aIID.equals(Ci.nsISupports)           ||
-				aIID.equals(Ci.nsIRequestObserver)    ||
-				aIID.equals(Ci.nsIStreamListener)     ||
-				aIID.equals(Ci.nsIChannelEventSink)   ||
-				aIID.equals(Ci.nsIInterfaceRequestor) ||
-				aIID.equals(Ci.nsIBadCertListener2)   ||
-				aIID.equals(Ci.nsISSLErrorListener)   ||
-				// See FIXME comment below
-				aIID.equals(Ci.nsIHttpEventSink)      ||
-				aIID.equals(Ci.nsIProgressEventSink)  ||
-				false)
-			  return this;
-			
-			throw Components.results.NS_ERROR_NO_INTERFACE;
-		},
-		
-		// nsIRequestObserver
-		onStartRequest: function SRCH_loadStartR(aRequest, aContext) {
-			this._stream = Cc["@mozilla.org/binaryinputstream;1"].
-						   createInstance(Ci.nsIBinaryInputStream);
-		},
-		
-		onStopRequest: function SRCH_loadStopR(aRequest, aContext, aStatusCode) {
-			var requestFailed = !Components.isSuccessCode(aStatusCode);
-			if (!requestFailed && (aRequest instanceof Ci.nsIHttpChannel))
-				requestFailed = !aRequest.requestSucceeded;
-			
-			if (requestFailed || this._countRead == 0) {
-				// send null so the callback can deal with the failure
-				this._callback(null, this._engine, this._channel.contentType);
-			} else
-				this._callback(this._bytes, this._engine, this._channel.contentType);
-			this._channel = null;
-			this._engine  = null;
-		},
-		
-		// nsIStreamListener
-		onDataAvailable: function SRCH_loadDAvailable(aRequest, aContext,
-													aInputStream, aOffset,
-													aCount) {
-			this._stream.setInputStream(aInputStream);
-			
-			// Get a byte array of the data
-			this._bytes = this._bytes.concat(this._stream.readByteArray(aCount));
-			this._countRead += aCount;
-		},
-		
-		// nsIChannelEventSink
-		onChannelRedirect: function SRCH_loadCRedirect(aOldChannel, aNewChannel,
-													 aFlags) {
-			this._channel = aNewChannel;
-		},
-		
-		// nsIInterfaceRequestor
-		getInterface: function SRCH_load_GI(aIID) {
-			return this.QueryInterface(aIID);
-		},
-		
-		// nsIBadCertListener2
-		notifyCertProblem: function SRCH_certProblem(socketInfo, status, targetSite) {
-			return true;
-		},
-		
-		// nsISSLErrorListener
-		notifySSLError: function SRCH_SSLError(socketInfo, error, targetSite) {
-			return true;
-		},
-		
-		// FIXME: bug 253127
-		// nsIHttpEventSink
-		onRedirect: function (aChannel, aNewChannel) {},
-		// nsIProgressEventSink
-		onProgress: function (aRequest, aContext, aProgress, aProgressMax) {},
-		onStatus: function (aRequest, aContext, aStatus, aStatusArg) {}
 	}
 }
