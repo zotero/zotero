@@ -427,7 +427,7 @@ Zotero.Collection.prototype.removeItems = Zotero.Promise.coroutine(function* (it
 		return;
 	}
 	
-	var current = this.getChildItems(true);
+	var current = this.getChildItems(true, true);
 	
 	Zotero.DB.requireTransaction();
 	for (let i=0; i<itemIDs.length; i++) {

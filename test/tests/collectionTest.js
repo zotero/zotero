@@ -251,7 +251,13 @@ describe("Zotero.Collection", function() {
 			var item = yield createDataObject('item', { collections: [ col.id ] });
 			assert.lengthOf(col.getChildItems(), 1);
 			yield item.erase();
-			Zotero.debug(col.getChildItems());
+			assert.lengthOf(col.getChildItems(), 0);
+		});
+		
+		it("should not include items emptied from trash", function* () {
+			var col = yield createDataObject('collection');
+			var item = yield createDataObject('item', { collections: [ col.id ], deleted: true });
+			yield item.erase();
 			assert.lengthOf(col.getChildItems(), 0);
 		});
 	})
