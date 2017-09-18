@@ -47,7 +47,8 @@ Zotero.MIME = new function(){
 		["GIF8", 'image/gif', 0],
 		["\uFFFDPNG", 'image/png', 0],
 		["JFIF", 'image/jpeg'],
-		["FLV", "video/x-flv", 0]
+		["FLV", "video/x-flv", 0],
+		["\u0000\u0000\u0001\u0000", "image/vnd.microsoft.icon", 0]
 		
 	];
 	
