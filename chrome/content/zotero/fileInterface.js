@@ -365,6 +365,7 @@ var Zotero_File_Interface = new function() {
 				collections: importCollection ? [importCollection.id] : null
 			});
 		} catch(e) {
+			progressWin.close();
 			Zotero.logError(e);
 			Zotero.alert(
 				null,
