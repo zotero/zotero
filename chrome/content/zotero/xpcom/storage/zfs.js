@@ -643,6 +643,11 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			);
 		}
 		catch (e) {
+			// Certificate error
+			if (e instanceof Zotero.Error) {
+				throw e;
+			}
+			
 			// For timeouts and failures from S3, which happen intermittently,
 			// wait a little and try again
 			let timeoutMessage = "Your socket connection to the server was not read from or "

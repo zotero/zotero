@@ -58,6 +58,16 @@ Zotero.HTTP = new function() {
 	};
 	this.TimeoutException.prototype = Object.create(Error.prototype);
 
+	this.SecurityException = function (msg, options = {}) {
+		this.message = msg;
+		this.stack = new Error().stack;
+		for (let i in options) {
+			this[i] = options[i];
+		}
+	};
+	this.SecurityException.prototype = Object.create(Zotero.Error.prototype);
+	
+	
 	this.promise = function () {
 		Zotero.debug("Zotero.HTTP.promise() is deprecated -- use Zotero.HTTP.request()", 2);
 		return this.request.apply(this, arguments);
@@ -257,6 +267,15 @@ Zotero.HTTP = new function() {
 					msg += ":\n\n" + xmlhttp.responseText;
 				}
 				Zotero.debug(msg, 1);
+				
+				try {
+					_checkSecurity(xmlhttp, channel);
+				}
+				catch (e) {
+					deferred.reject(e);
+					return;
+				}
+				
 				deferred.reject(new Zotero.HTTP.UnexpectedStatusException(xmlhttp, msg));
 			}
 		};
@@ -932,6 +951,50 @@ Zotero.HTTP = new function() {
 					callback(xmlhttp, data);
 				}
 			break;
+		}
+	}
+	
+	function _checkSecurity(xmlhttp, channel) {
+		if (xmlhttp.status != 0 || !channel) {
+			return;
+		}
+		
+		let secInfo = channel.securityInfo;
+		if (secInfo instanceof Ci.nsITransportSecurityInfo) {
+			secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
+			if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE)
+					== Ci.nsIWebProgressListener.STATE_IS_INSECURE) {
+				let url = channel.name;
+				let ios = Components.classes["@mozilla.org/network/io-service;1"]
+					.getService(Components.interfaces.nsIIOService);
+				try {
+					var uri = ios.newURI(url, null, null);
+					var host = uri.host;
+				}
+				catch (e) {
+					Zotero.debug(e);
+				}
+				let kbURL = 'https://www.zotero.org/support/kb/ssl_certificate_error';
+				msg = Zotero.getString('sync.storage.error.webdav.sslCertificateError', host);
+				dialogButtonText = Zotero.getString('general.moreInformation');
+				dialogButtonCallback = function () {
+					let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+						.getService(Components.interfaces.nsIWindowMediator);
+					let win = wm.getMostRecentWindow("navigator:browser");
+					win.ZoteroPane.loadURI(kbURL, { metaKey: true, shiftKey: true });
+				};
+			}
+			else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN)
+					== Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
+				msg = Zotero.getString('sync.error.sslConnectionError');
+			}
+			throw new Zotero.HTTP.SecurityException(
+				msg,
+				{
+					dialogButtonText,
+					dialogButtonCallback
+				}
+			);
 		}
 	}
 

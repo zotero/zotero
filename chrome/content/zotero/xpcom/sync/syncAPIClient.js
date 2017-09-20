@@ -799,40 +799,7 @@ Zotero.Sync.APIClient.prototype = {
 			let dialogButtonText = null;
 			let dialogButtonCallback = null;
 			
-			// Check SSL cert
-			if (channel) {
-				let secInfo = channel.securityInfo;
-				if (secInfo instanceof Ci.nsITransportSecurityInfo) {
-					secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
-					if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE)
-							== Ci.nsIWebProgressListener.STATE_IS_INSECURE) {
-						let url = channel.name;
-						let ios = Components.classes["@mozilla.org/network/io-service;1"]
-							.getService(Components.interfaces.nsIIOService);
-						try {
-							var uri = ios.newURI(url, null, null);
-							var host = uri.host;
-						}
-						catch (e) {
-							Zotero.debug(e);
-						}
-						let kbURL = 'https://www.zotero.org/support/kb/ssl_certificate_error';
-						msg = Zotero.getString('sync.storage.error.webdav.sslCertificateError', host);
-						dialogButtonText = Zotero.getString('general.moreInformation');
-						dialogButtonCallback = function () {
-							let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								.getService(Components.interfaces.nsIWindowMediator);
-							let win = wm.getMostRecentWindow("navigator:browser");
-							win.ZoteroPane.loadURI(kbURL, { metaKey: true, shiftKey: true });
-						};
-					}
-					else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN)
-							== Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
-						msg = Zotero.getString('sync.error.sslConnectionError');
-					}
-				}
-			}
-			if (!msg && xmlhttp.status === 0) {
+			if (xmlhttp.status === 0) {
 				msg = Zotero.getString('sync.error.checkConnection');
 			}
 			if (!msg) {
