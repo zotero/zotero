@@ -178,7 +178,7 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 	//
 	this._addRowToArray(
 		newRows,
-		new Zotero.CollectionTreeRow('library', { libraryID: Zotero.Libraries.userLibraryID }),
+		new Zotero.CollectionTreeRow(this, 'library', { libraryID: Zotero.Libraries.userLibraryID }),
 		added++
 	);
 	added += yield this._expandRow(newRows, 0);
@@ -190,12 +190,12 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 	if (groups.length) {
 		this._addRowToArray(
 			newRows,
-			new Zotero.CollectionTreeRow('separator', false),
+			new Zotero.CollectionTreeRow(this, 'separator', false),
 			added++
 		);
 		this._addRowToArray(
 			newRows,
-			new Zotero.CollectionTreeRow('header', {
+			new Zotero.CollectionTreeRow(this, 'header', {
 				id: "group-libraries-header",
 				label: Zotero.getString('pane.collections.groupLibraries'),
 				libraryID: -1
@@ -205,7 +205,7 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 		for (let group of groups) {
 			this._addRowToArray(
 				newRows,
-				new Zotero.CollectionTreeRow('group', group),
+				new Zotero.CollectionTreeRow(this, 'group', group),
 				added++
 			);
 			added += yield this._expandRow(newRows, added - 1);
@@ -225,12 +225,12 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 		if (feeds.length) {
 			this._addRowToArray(
 				newRows,
-				new Zotero.CollectionTreeRow('separator', false),
+				new Zotero.CollectionTreeRow(this, 'separator', false),
 				added++
 			);
 			this._addRowToArray(
 				newRows,
-				new Zotero.CollectionTreeRow('header', {
+				new Zotero.CollectionTreeRow(this, 'header', {
 					id: "feed-libraries-header",
 					label: Zotero.getString('pane.collections.feedLibraries'),
 					libraryID: -1
@@ -240,7 +240,7 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 			for (let feed of feeds) {
 				this._addRowToArray(
 					newRows,
-					new Zotero.CollectionTreeRow('feed', feed),
+					new Zotero.CollectionTreeRow(this, 'feed', feed),
 					added++
 				);
 			}
@@ -594,7 +594,7 @@ Zotero.CollectionTreeView.prototype._addSortedRow = Zotero.Promise.coroutine(fun
 			}
 		}
 		this._addRow(
-			new Zotero.CollectionTreeRow('collection', collection, level),
+			new Zotero.CollectionTreeRow(this, 'collection', collection, level),
 			beforeRow
 		);
 	}
@@ -634,7 +634,7 @@ Zotero.CollectionTreeView.prototype._addSortedRow = Zotero.Promise.coroutine(fun
 			}
 		}
 		this._addRow(
-			new Zotero.CollectionTreeRow('search', search, level),
+			new Zotero.CollectionTreeRow(this, 'search', search, level),
 			beforeRow
 		);
 	}
@@ -1180,9 +1180,10 @@ Zotero.CollectionTreeView.prototype.selectItem = Zotero.Promise.coroutine(functi
 		yield this.selectLibrary(item.libraryID);
 	}
 	
-	yield this.itemTreeView.waitForLoad();
+	var itemTreeView = this.itemTreeView;
+	yield itemTreeView.waitForLoad();
 	
-	var selected = yield this.itemTreeView.selectItem(itemID, expand);
+	var selected = yield itemTreeView.selectItem(itemID, expand);
 	if (selected) {
 		return true;
 	}
@@ -1196,9 +1197,9 @@ Zotero.CollectionTreeView.prototype.selectItem = Zotero.Promise.coroutine(functi
 		yield this.selectLibrary(item.libraryID);
 	}
 	
-	yield this.itemTreeView.waitForLoad();
+	yield itemTreeView.waitForLoad();
 	
-	return this.itemTreeView.selectItem(itemID, expand);
+	return itemTreeView.selectItem(itemID, expand);
 });
 
 
@@ -1332,7 +1333,7 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 		let beforeRow = row + 1 + newRows;
 		this._addRowToArray(
 			rows,
-			new Zotero.CollectionTreeRow('collection', collections[i], level + 1),
+			new Zotero.CollectionTreeRow(this, 'collection', collections[i], level + 1),
 			beforeRow
 		);
 		newRows++;
@@ -1348,7 +1349,7 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 	for (var i = 0, len = savedSearches.length; i < len; i++) {
 		this._addRowToArray(
 			rows,
-			new Zotero.CollectionTreeRow('search', savedSearches[i], level + 1),
+			new Zotero.CollectionTreeRow(this, 'search', savedSearches[i], level + 1),
 			row + 1 + newRows
 		);
 		newRows++;
@@ -1358,7 +1359,7 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 		// Add "My Publications"
 		this._addRowToArray(
 			rows,
-			new Zotero.CollectionTreeRow(
+			new Zotero.CollectionTreeRow(this,
 				'publications',
 				{
 					libraryID,
@@ -1376,7 +1377,7 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 		let d = new Zotero.Duplicates(libraryID);
 		this._addRowToArray(
 			rows,
-			new Zotero.CollectionTreeRow('duplicates', d, level + 1),
+			new Zotero.CollectionTreeRow(this, 'duplicates', d, level + 1),
 			row + 1 + newRows
 		);
 		newRows++;
@@ -1391,7 +1392,7 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 		s.addCondition('unfiled', 'true');
 		this._addRowToArray(
 			rows,
-			new Zotero.CollectionTreeRow('unfiled', s, level + 1),
+			new Zotero.CollectionTreeRow(this, 'unfiled', s, level + 1),
 			row + 1 + newRows
 		);
 		newRows++;
@@ -1405,7 +1406,7 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 			};
 			this._addRowToArray(
 				rows,
-				new Zotero.CollectionTreeRow('trash', ref, level + 1),
+				new Zotero.CollectionTreeRow(this, 'trash', ref, level + 1),
 				row + 1 + newRows
 			);
 			newRows++;

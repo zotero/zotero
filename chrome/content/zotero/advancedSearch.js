@@ -59,6 +59,7 @@ var ZoteroAdvancedSearch = new function() {
 		
 		// A minimal implementation of Zotero.CollectionTreeRow
 		var collectionTreeRow = {
+			view: {},
 			ref: _searchBox.search,
 			isSearchMode: function() { return true; },
 			getItems: Zotero.Promise.coroutine(function* () {
