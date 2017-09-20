@@ -1243,7 +1243,7 @@ Zotero.CollectionTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(f
 			}
 		}
 		else if (treeRow.isSearch()) {
-			yield Zotero.Searches.eraseTx(treeRow.ref.id);
+			yield Zotero.Searches.erase(treeRow.ref.id);
 		}
 	}
 	//this._treebox.endUpdateBatch();
