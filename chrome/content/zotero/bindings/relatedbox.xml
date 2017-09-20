@@ -183,7 +183,7 @@
 							
 							var box = document.createElement('box');
 							box.setAttribute('onclick',
-								"document.getBindingParent(this).showItem('" + id + "')");
+								"document.getBindingParent(this).showItem(" + id + ")");
 							box.setAttribute('class','zotero-clicky');
 							box.setAttribute('flex','1');
 							box.appendChild(icon);
