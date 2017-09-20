@@ -3505,7 +3505,7 @@ Zotero.Item.prototype.setCollections = function (collectionIDsOrKeys) {
 		var id = this.ContainerObjectsClass.getIDFromLibraryAndKey(this.libraryID, val);
 		if (!id) {
 			let e = new Error("Collection " + val + " not found for item " + this.libraryKey);
-			e.name = "ZoteroObjectNotFoundError";
+			e.name = "ZoteroMissingObjectError";
 			throw e;
 		}
 		return id;

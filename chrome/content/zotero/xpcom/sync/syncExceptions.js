@@ -30,7 +30,7 @@
  *     sync completely
  */
 Zotero.Sync.UserCancelledException = function (advanceToNextLibrary) {
-	this.message = "Sync cancelled";
+	this.message = "User cancelled sync";
 	this.advanceToNextLibrary = advanceToNextLibrary;
 }
 

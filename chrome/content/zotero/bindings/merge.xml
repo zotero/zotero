@@ -380,10 +380,15 @@
 					// Store JSON
 					this._data = val;
 					
+					// Create a copy of the JSON that we can clean for display, since the remote object
+					// might reference things that don't exist locally
+					var displayJSON = Object.assign({}, val);
+					displayJSON.collections = [];
+					
 					// Create item from JSON for metadata box
 					var item = new Zotero.Item(val.itemType);
 					item.libraryID = this.libraryID;
-					item.fromJSON(val);
+					item.fromJSON(displayJSON);
 					objbox.item = item;
 				]]>
 				</setter>

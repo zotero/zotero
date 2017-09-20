@@ -694,9 +694,9 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = async function (objectType,
 		let results = await Zotero.Sync.Data.Local.processConflicts(
 			objectType, this.libraryID, conflicts, this._getOptions()
 		);
-		// Keys can be unprocessed if conflict resolution is cancelled
 		let keys = results.filter(x => x.processed).map(x => x.key);
-		if (!keys.length) {
+		// If all keys are unprocessed and didn't fail from an error, conflict resolution was cancelled
+		if (results.every(x => !x.processed && !x.error)) {
 			throw new Zotero.Sync.UserCancelledException();
 		}
 		await Zotero.Sync.Data.Local.removeObjectsFromSyncQueue(objectType, this.libraryID, keys);
