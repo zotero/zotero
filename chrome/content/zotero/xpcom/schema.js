@@ -2479,6 +2479,10 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("DELETE FROM relationPredicates " + where);
 			}
 			
+			else if (i == 98) {
+				yield Zotero.DB.queryAsync("DELETE FROM itemRelations WHERE predicateID=(SELECT predicateID FROM relationPredicates WHERE predicate='owl:sameAs') AND object LIKE ?", 'http://www.archive.org/%');
+			}
+			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
 		
