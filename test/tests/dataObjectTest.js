@@ -512,6 +512,17 @@ describe("Zotero.DataObject", function() {
 			})
 		})
 		
+		describe("#setRelations()", function () {
+			it("shouldn't allow invalid 'relations' predicates", function* () {
+				var item = new Zotero.Item("book");
+				assert.throws(() => {
+					item.setRelations({
+						"0": ["http://example.com/foo"]
+					});
+				});
+			});
+		});
+		
 		describe("#_getLinkedObject()", function () {
 			it("should return a linked object in another library", function* () {
 				var group = yield getGroup();

@@ -404,6 +404,13 @@ Zotero.DataObject.prototype.setRelations = function (newRelations) {
 	
 	var oldRelations = this._relations;
 	
+	// Limit predicates to letters and colons for now
+	for (let p in newRelations) {
+		if (!/[a-z]+:[a-z]+/.test(p)) {
+			throw new Error(`Invalid relation predicate '${p}'`);
+		}
+	}
+	
 	// Relations are stored internally as a flat array with individual predicate-object pairs,
 	// so convert the incoming relations to that
 	var newRelationsFlat = this.ObjectsClass.flattenRelations(newRelations);
