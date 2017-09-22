@@ -2469,6 +2469,16 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("REPLACE INTO fileTypeMIMETypes VALUES(7, 'application/vnd.ms-powerpoint')");
 			}
 			
+			else if (i == 97) {
+				let where = "WHERE predicate IN (" + Array.from(Array(20).keys()).map(i => `'${i}'`).join(', ') + ")";
+				let rows = yield Zotero.DB.queryAsync("SELECT * FROM relationPredicates " + where);
+				for (let row of rows) {
+					yield Zotero.DB.columnQueryAsync("UPDATE items SET synced=0 WHERE itemID IN (SELECT itemID FROM itemRelations WHERE predicateID=?)", row.predicateID);
+					yield Zotero.DB.queryAsync("DELETE FROM itemRelations WHERE predicateID=?", row.predicateID);
+				}
+				yield Zotero.DB.queryAsync("DELETE FROM relationPredicates " + where);
+			}
+			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
 		
