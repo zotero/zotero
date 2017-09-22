@@ -646,7 +646,7 @@ Zotero.Server.Connector.Import.prototype = {
 		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
 		let arg = {};
 		if (editable) {
-			arg = {libraryID: library.libraryID, collections: [collection.id]};
+			arg = { libraryID: library.libraryID, collections: collection ? [collection.id] : null };
 		}
 		let items = yield translate.translate(arg);
 		return [201, "application/json", JSON.stringify(items)];
