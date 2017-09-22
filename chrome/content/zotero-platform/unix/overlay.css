@@ -198,12 +198,12 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 }
 
 /* Fixes tabs missing styling on (GTK 3.20) Ubuntu 16.10. See https://bugzilla.mozilla.org/show_bug.cgi?id=1306425 */
-#zotero-pane tabpanels, #zotero-prefs tabpanels {
+tabpanels {
 	-moz-appearance: none;
 	border: 1px solid hsla(0, 0%, 0%, 0.2);
 	
 }
-#zotero-pane tab, #zotero-prefs tab {
+tab {
 	-moz-appearance: none;
 	border-top: 1px solid hsla(0, 0%, 0%, 0.2);
 	border-right: 1px solid hsla(0, 0%, 0%, 0.2);
