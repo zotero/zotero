@@ -221,7 +221,24 @@ describe("Zotero.Translate", function() {
 			assert.equal(note3.getNote(), "standalone note");
 			checkTestTags(note3);
 		});
-
+		
+		it('should save relations', async function () {
+			var item = await createDataObject('item');
+			var itemURI = Zotero.URI.getItemURI(item);
+			let myItem = {
+				itemType: "book",
+				title: "Test Item",
+				relations: {
+					"dc:relation": [itemURI]
+				}
+			};
+			let newItems = await saveItemsThroughTranslator("import", [myItem]);
+			var relations = newItems[0].getRelations();
+			assert.lengthOf(Object.keys(relations), 1);
+			assert.lengthOf(relations["dc:relation"], 1);
+			assert.equal(relations["dc:relation"][0], itemURI);
+		});
+		
 		it('should save collections', function* () {
 			let translate = new Zotero.Translate.Import();
 			translate.setString("");

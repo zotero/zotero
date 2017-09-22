@@ -94,7 +94,16 @@ Zotero.Translate.Sandbox = {
 					Zotero.debug("Translate: WARNING: Zotero.Item#complete() called after Zotero.done(); please fix your code", 2);
 				}
 					
-				const allowedObjects = ["complete", "attachments", "seeAlso", "creators", "tags", "notes"];
+				const allowedObjects = [
+					"complete",
+					"attachments",
+					"creators",
+					"tags",
+					"notes",
+					"relations",
+					// Is this still needed?
+					"seeAlso"
+				];
 				
 				// Create a new object here, so that we strip the "complete" property
 				var newItem = {};
