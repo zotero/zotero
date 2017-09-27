@@ -338,22 +338,14 @@ describe("Connector Server", function () {
 			assert.isTrue(collection.hasItem(item.id));
 		});
 		
-		it("should save a webpage item to My Library if a read-only library is selected", function* () {
+		it("should respond with 500 if a read-only library is selected", function* () {
 			var group = yield createGroup({
 				editable: false
 			});
 			yield selectLibrary(win, group.libraryID);
 			yield waitForItemsLoad(win);
 			
-			// saveSnapshot saves parent and child before returning
-			var ids1, ids2;
-			var promise = waitForItemEvent('add').then(function (ids) {
-				ids1 = ids;
-				return waitForItemEvent('add').then(function (ids) {
-					ids2 = ids;
-				});
-			});
-			yield Zotero.HTTP.request(
+			var req = yield Zotero.HTTP.request(
 				'POST',
 				connectorServerPath + "/connector/saveSnapshot",
 				{
@@ -363,29 +355,27 @@ describe("Connector Server", function () {
 					body: JSON.stringify({
 						url: "http://example.com",
 						html: "<html><head><title>Title</title><body>Body</body></html>"
-					})
+					}),
+					successCodes: false
 				}
 			);
 			
-			assert.isTrue(promise.isFulfilled());
+			assert.equal(req.status, 500);
+			assert.isFalse(JSON.parse(req.responseText).libraryEditable);
 			
-			// Check parent item
-			assert.lengthOf(ids1, 1);
-			var item = Zotero.Items.get(ids1[0]);
-			assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'webpage');
-			assert.equal(item.getField('title'), 'Title');
-			assert.equal(item.libraryID, Zotero.Libraries.userLibraryID);
-			// Item should've been saved to My Library
-			assert.equal(item.libraryID, Zotero.Libraries.userLibraryID);
-			
-			// My Library should've been selected
+			// The selection should remain
 			assert.equal(
-				win.ZoteroPane.collectionsView.getSelectedLibraryID(), Zotero.Libraries.userLibraryID
+				win.ZoteroPane.collectionsView.getSelectedLibraryID(), group.libraryID
 			);
 		});
 	});
 	
 	describe("/connector/savePage", function() {
+		before(async function () {
+			await selectLibrary(win);
+			await waitForItemsLoad(win);
+		});
+		
 		// TEMP: Wait for indexing to complete, which happens after a 1-second delay, after a 201 has
 		// been returned to the connector. Would be better to make sure indexing has completed.
 		afterEach(function* () {
@@ -537,6 +527,38 @@ describe("Connector Server", function () {
 			
 			let itemId = yield addedItemIDPromise;
 			assert.isTrue(collection.hasItem(itemId[0]));
+		});
+		
+		
+		it('should respond with 500 if read-only library is selected', function* () {
+			var group = yield createGroup({
+				editable: false
+			});
+			yield selectLibrary(win, group.libraryID);
+			yield waitForItemsLoad(win);
+			
+			var resource = `@book{test1,
+  title={Test1},
+  author={Owl},
+  year={1000},
+  publisher={Curly Braces Publishing}
+}`;
+			var req = yield Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: { "Content-Type": "application/x-bibtex" },
+					body: resource,
+					successCodes: false
+				}
+			);
+			assert.equal(req.status, 500);
+			assert.isFalse(JSON.parse(req.responseText).libraryEditable);
+			
+			// The selection should remain
+			assert.equal(
+				win.ZoteroPane.collectionsView.getSelectedLibraryID(), group.libraryID
+			);
 		});
 	});
 });
