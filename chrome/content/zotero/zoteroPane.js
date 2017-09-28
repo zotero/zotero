@@ -4076,6 +4076,8 @@ var ZoteroPane = new function()
 			}
 			
 			if (!errMsg) {
+				// Get the stringbundle manually
+				var src = 'chrome://zotero/locale/zotero.properties';
 				var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
 					.getService(Components.interfaces.nsIStringBundleService);
 				var stringBundle = stringBundleService.createBundle(src);
