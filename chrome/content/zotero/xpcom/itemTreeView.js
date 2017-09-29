@@ -878,6 +878,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		}
 	}
 	
+	var reselect = false;
 	if(madeChanges)
 	{
 		// If we made individual changes, we have to clear the cache
@@ -932,6 +933,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				// Reset to Info tab
 				this._ownerDocument.getElementById('zotero-view-tabbox').selectedIndex = 0;
 				yield this.selectItem(singleSelect);
+				reselect = true;
 			}
 		}
 		// If single item is selected and was modified
@@ -939,9 +941,11 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				savedSelection.length == 1 && savedSelection[0] == ids[0]) {
 			if (activeWindow) {
 				yield this.selectItem(ids[0]);
+				reselect = true;
 			}
 			else {
 				this.rememberSelection(savedSelection);
+				reselect = true;
 			}
 		}
 		// On removal of a selected row, select item at previous position
@@ -955,6 +959,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 						var itemID = this._rows[previousFirstSelectedRow].ref.id;
 						var setItemIDs = collectionTreeRow.ref.getSetItemsByItemID(itemID);
 						this.selectItems(setItemIDs);
+						reselect = true;
 					}
 				}
 				else {
@@ -973,15 +978,18 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 					
 					if (previousFirstSelectedRow !== undefined && this._rows[previousFirstSelectedRow]) {
 						this.selection.select(previousFirstSelectedRow);
+						reselect = true;
 					}
 					// If no item at previous position, select last item in list
 					else if (this._rows[this._rows.length - 1]) {
 						this.selection.select(this._rows.length - 1);
+						reselect = true;
 					}
 				}
 			}
 			else {
 				this.rememberSelection(savedSelection);
+				reselect = true;
 			}
 		}
 		
@@ -998,11 +1006,15 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	
 	//this._treebox.endUpdateBatch();
 	let selectPromise;
-	if (madeChanges) {
+	// If we made changes to the selection (including reselecting the same item, which will register as
+	// a selection when selectEventsSuppressed is set to false), wait for selection handlers to be run
+	// before returning. This guarantees that changes are reflected in the middle and right-hand panes
+	// before returning from the save transaction.
+	if (reselect) {
 		selectPromise = this.waitForSelect();
 	}
 	this.selection.selectEventsSuppressed = false;
-	if (madeChanges) {
+	if (reselect) {
 		Zotero.debug("Yielding for select promise"); // TEMP
 		return selectPromise;
 	}
