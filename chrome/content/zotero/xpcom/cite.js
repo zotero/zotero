@@ -556,21 +556,13 @@ Zotero.Cite.System.prototype = {
 	 * @return {String|Boolean} The locale as a string if it exists, or false if it doesn't
 	 */
 	"retrieveLocale":function retrieveLocale(lang) {
-		var protHandler = Components.classes["@mozilla.org/network/protocol;1?name=chrome"]
-			.createInstance(Components.interfaces.nsIProtocolHandler);
 		try {
-			var channel = protHandler.newChannel(protHandler.newURI("chrome://zotero/content/locale/csl/locales-"+lang+".xml", "UTF-8", null));
-			var rawStream = channel.open();
-		} catch(e) {
+			return Zotero.File.getContentsFromURL(
+				`chrome://zotero/content/locale/csl/locales-${lang}.xml`
+			);
+		}
+		catch (e) {
 			return false;
 		}
-		var converterStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
-							   .createInstance(Components.interfaces.nsIConverterInputStream);
-		converterStream.init(rawStream, "UTF-8", 65535,
-			Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
-		var str = {};
-		converterStream.readString(channel.contentLength, str);
-		converterStream.close();
-		return str.value;
 	}
 };
