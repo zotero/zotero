@@ -1979,12 +1979,12 @@ Zotero.ItemTreeView.prototype.getSelectedItems = function(asIDs)
 	{
 		this.selection.getRangeAt(i,start,end);
 		for (var j=start.value; j<=end.value; j++) {
-			if (asIDs) {
-				items.push(this.getRow(j).id);
+			let row = this.getRow(j);
+			if (!row) {
+				Zotero.logError(`Row ${j} not found`);
+				continue;
 			}
-			else {
-				items.push(this.getRow(j).ref);
-			}
+			items.push(asIDs ? row.id : row.ref);
 		}
 	}
 	return items;
