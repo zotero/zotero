@@ -2101,6 +2101,7 @@ Zotero.ItemTreeView.prototype._refreshItemRowMap = function()
 
 
 Zotero.ItemTreeView.prototype.saveSelection = function () {
+	Zotero.debug("Zotero.ItemTreeView::saveSelection() is deprecated -- use getSelectedItems(true)");
 	return this.getSelectedItems(true);
 }
 
