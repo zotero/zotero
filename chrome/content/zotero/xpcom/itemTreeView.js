@@ -138,7 +138,7 @@ Zotero.ItemTreeView.prototype.setTree = async function (treebox) {
 		this._refreshItemRowMap();
 		
 		// Add a keypress listener for expand/collapse
-		var tree = this._treebox.treeBody.parentNode;
+		var tree = this._getTreeElement();
 		var self = this;
 		var coloredTagsRE = new RegExp("^[1-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1}$");
 		var listener = function(event) {
@@ -1005,18 +1005,26 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	this._updateIntroText();
 	
 	//this._treebox.endUpdateBatch();
-	let selectPromise;
+	
 	// If we made changes to the selection (including reselecting the same item, which will register as
-	// a selection when selectEventsSuppressed is set to false), wait for selection handlers to be run
+	// a selection when selectEventsSuppressed is set to false), wait for a select event on the tree
+	// view (e.g., as triggered by itemsView.runListeners('select') in ZoteroPane::itemSelected())
 	// before returning. This guarantees that changes are reflected in the middle and right-hand panes
 	// before returning from the save transaction.
-	if (reselect) {
+	//
+	// If no onselect handler is set on the tree element, as is the case in the Advanced Search window,
+	// the select listeners never get called, so don't wait.
+	let selectPromise;
+	var tree = this._getTreeElement();
+	var hasOnSelectHandler = tree.getAttribute('onselect') != '';
+	if (reselect && hasOnSelectHandler) {
 		selectPromise = this.waitForSelect();
-	}
-	this.selection.selectEventsSuppressed = false;
-	if (reselect) {
+		this.selection.selectEventsSuppressed = false;
 		Zotero.debug("Yielding for select promise"); // TEMP
 		return selectPromise;
+	}
+	else {
+		this.selection.selectEventsSuppressed = false;
 	}
 });
 
@@ -1034,7 +1042,7 @@ Zotero.ItemTreeView.prototype.unregister = async function() {
 			this.listener = null;
 			return;
 		}
-		let tree = this._treebox.treeBody.parentNode;
+		let tree = this._getTreeElement();
 		tree.removeEventListener('keypress', this.listener, false);
 		this.listener = null;
 	}
@@ -2596,6 +2604,11 @@ Zotero.ItemTreeView.prototype.onColumnPickerHidden = function (event) {
 			i--;
 		}
 	}
+}
+
+
+Zotero.ItemTreeView.prototype._getTreeElement = function () {
+	return this._treebox.treeBody && this._treebox.treeBody.parentNode;
 }
 
 
