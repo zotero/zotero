@@ -244,6 +244,22 @@ describe("ZoteroPane", function() {
 	})
 	
 	
+	describe("#duplicateSelectedItem()", function () {
+		it("should add reverse relations", async function () {
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item');
+			item1.addRelatedItem(item2);
+			await item1.saveTx();
+			item2.addRelatedItem(item1);
+			await item2.saveTx();
+			var item3 = await zp.duplicateSelectedItem();
+			assert.sameMembers(item3.relatedItems, [item1.key]);
+			assert.sameMembers(item2.relatedItems, [item1.key]);
+			assert.sameMembers(item1.relatedItems, [item2.key, item3.key]);
+		});
+	});
+	
+	
 	describe("#deleteSelectedItems()", function () {
 		it("should remove an item from My Publications", function* () {
 			var item = createUnsavedDataObject('item');
