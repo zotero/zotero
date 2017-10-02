@@ -126,6 +126,7 @@ echo "$ZOTERO_UNIT_PATH" > "$PROFILE/extensions/zotero-unit@zotero.org"
 mkdir "$TEMPDIR/Zotero"
 
 cat <<EOF > "$PROFILE/prefs.js"
+user_pref("app.update.enabled", false);
 user_pref("extensions.autoDisableScopes", 0);
 user_pref("browser.uitour.enabled", false);
 user_pref("browser.shell.checkDefaultBrowser", false);
