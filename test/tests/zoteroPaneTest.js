@@ -246,6 +246,7 @@ describe("ZoteroPane", function() {
 	
 	describe("#duplicateSelectedItem()", function () {
 		it("should add reverse relations", async function () {
+			await selectLibrary(win);
 			var item1 = await createDataObject('item');
 			var item2 = await createDataObject('item');
 			item1.addRelatedItem(item2);
