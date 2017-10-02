@@ -1373,7 +1373,9 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	
 	// Parent item (DB update is done below after collection removals)
 	var parentItemKey = this.parentKey;
-	var parentItemID = this.ObjectsClass.getIDFromLibraryAndKey(this.libraryID, parentItemKey) || null;
+	var parentItemID = parentItemKey
+		? (this.ObjectsClass.getIDFromLibraryAndKey(this.libraryID, parentItemKey) || null)
+		: null;
 	if (this._changed.parentKey) {
 		if (isNew) {
 			if (!parentItemID) {
