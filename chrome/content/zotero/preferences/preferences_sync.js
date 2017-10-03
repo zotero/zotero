@@ -47,7 +47,6 @@ Zotero_Preferences.Sync = {
 					{timeout: 5000}
 				);
 				this.displayFields(keyInfo.username);
-				Zotero.Users.setCurrentUsername(keyInfo.username);
 			}
 			catch (e) {
 				// API key wrong/invalid
