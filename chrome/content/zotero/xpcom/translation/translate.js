@@ -86,7 +86,7 @@ Zotero.Translate.Sandbox = {
 				&& translate.translator[0].configOptions
 				&& translate.translator[0].configOptions.async;
 			
-			var run = function (resolve) {
+			var run = async function (async) {
 				Zotero.debug("Translate: Saving item");
 				
 				// warn if itemDone called after translation completed
@@ -156,14 +156,7 @@ Zotero.Translate.Sandbox = {
 						item = translate._sandboxManager.copyObject(item);
 						item.complete = oldItem.complete;
 					}
-					let maybePromise = translate._runHandler("itemDone", item, item);
-					if (maybePromise) {
-						return resolve ? maybePromise.then(resolve) : maybePromise;
-					}
-					if (resolve) {
-						resolve();
-					}
-					return;
+					return translate._runHandler("itemDone", item, item);
 				}
 				
 				// We use this within the connector to keep track of items as they are saved
@@ -223,12 +216,9 @@ Zotero.Translate.Sandbox = {
 				
 				// For synchronous import (when Promise isn't available in the sandbox or the do*
 				// function doesn't use it) and web translators, queue saves
-				if (!resolve || !asyncTranslator) {
+				if (!async || !asyncTranslator) {
 					Zotero.debug("Translate: Saving via queue");
 					translate.saveQueue.push(item);
-					if (resolve) {
-						resolve();
-					}
 				}
 				// For async import, save items immediately
 				else {
@@ -247,11 +237,9 @@ Zotero.Translate.Sandbox = {
 			
 			return new translate._sandboxManager.sandbox.Promise(function (resolve, reject) {
 				try {
-					let maybePromise = run(resolve);
-					if (maybePromise) {
-						maybePromise
-						.then(resolve)
-						.catch(function (e) {
+					run(true).then(
+						resolve,
+						function (e) {
 							// Fix wrapping error from sandbox when error is thrown from _saveItems()
 							if (Zotero.isFx) {
 								reject(translate._sandboxManager.copyObject(e));
@@ -259,8 +247,8 @@ Zotero.Translate.Sandbox = {
 							else {
 								reject(e);
 							}
-						});
-					}
+						}
+					);
 				}
 				catch (e) {
 					reject(e);

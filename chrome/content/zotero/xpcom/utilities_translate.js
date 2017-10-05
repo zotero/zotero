@@ -196,86 +196,85 @@ Zotero.Utilities.Translate.prototype.loadDocument = function(url, succeeded, fai
  * is still rejected on error for handling by the calling function.
  * @ignore
  */
-Zotero.Utilities.Translate.prototype.processDocuments = function (urls, processor, noCompleteOnError) {
-	return new Zotero.Promise(function (resolve, reject) {
-		// Handle old signature: urls, processor, onDone, onError
-		if (arguments.length > 3 || typeof arguments[2] == 'function') {
-			Zotero.debug("ZU.processDocuments() now takes only 3 arguments -- update your code");
-			var onDone = arguments[2];
-			var onError = arguments[3];
-		}
-		
-		var translate = this._translate;
+Zotero.Utilities.Translate.prototype.processDocuments = async function (urls, processor, noCompleteOnError) {
+	// Handle old signature: urls, processor, onDone, onError
+	if (arguments.length > 3 || typeof arguments[2] == 'function') {
+		Zotero.debug("ZU.processDocuments() now takes only 3 arguments -- update your code");
+		var onDone = arguments[2];
+		var onError = arguments[3];
+	}
 	
-		if (typeof urls == "string") {
-			urls = [translate.resolveURL(urls)];
-		} else {
-			for(var i in urls) {
-				urls[i] = translate.resolveURL(urls[i]);
-			}
+	var translate = this._translate;
+
+	if (typeof urls == "string") {
+		urls = [translate.resolveURL(urls)];
+	} else {
+		for(var i in urls) {
+			urls[i] = translate.resolveURL(urls[i]);
 		}
-		
-		var processDoc = function (doc) {
-			if (Zotero.isFx) {
-				let newLoc = doc.location;
-				let url = Services.io.newURI(newLoc.href, null, null);
-				processor(
-					// Rewrap document for the sandbox
-					translate._sandboxManager.wrap(
-						Zotero.Translate.DOMWrapper.unwrap(doc),
-						null,
-						// Duplicate overrides from Zotero.HTTP.wrapDocument()
-						{
-							documentURI: newLoc.spec,
-							URL: newLoc.spec,
-							location: new Zotero.HTTP.Location(url),
-							defaultView: new Zotero.HTTP.Window(url)
-						}
-					),
-					newLoc.href
-				);
-			}
-			else {
-				processor(doc, doc.location.href);
-			}
-		};
-		
-		var promises = [];
-		// If current URL passed, use loaded document instead of reloading
-		for (var i = 0; i < urls.length; i++) {
-			if(translate.document && translate.document.location
-					&& translate.document.location.toString() === urls[i]) {
-				Zotero.debug("Translate: Attempted to load the current document using processDocuments; using loaded document instead");
-				promises.push(processDoc(this._translate.document, urls[i]));
-				urls.splice(i, 1);
-				i--;
-			}
-		}
-		
-		translate.incrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
-		
-		if (urls.length) {
-			promises.push(
-				Zotero.HTTP.processDocuments(
-					urls,
-					function (doc) {
-						if (!processor) return;
-						processDoc(doc);
-					},
-					translate.cookieSandbox
-				)
+	}
+	
+	var processDoc = function (doc) {
+		if (Zotero.isFx) {
+			let newLoc = doc.location;
+			let url = Services.io.newURI(newLoc.href, null, null);
+			return processor(
+				// Rewrap document for the sandbox
+				translate._sandboxManager.wrap(
+					Zotero.Translate.DOMWrapper.unwrap(doc),
+					null,
+					// Duplicate overrides from Zotero.HTTP.wrapDocument()
+					{
+						documentURI: newLoc.spec,
+						URL: newLoc.spec,
+						location: new Zotero.HTTP.Location(url),
+						defaultView: new Zotero.HTTP.Window(url)
+					}
+				),
+				newLoc.href
 			);
 		}
 		
-		var promise = Zotero.Promise.all(promises);
-		if (onDone) {
-			promise = promise.then(onDone);
+		return processor(doc, doc.location.href);
+	};
+	
+	var funcs = [];
+	// If current URL passed, use loaded document instead of reloading
+	for (var i = 0; i < urls.length; i++) {
+		if(translate.document && translate.document.location
+				&& translate.document.location.toString() === urls[i]) {
+			Zotero.debug("Translate: Attempted to load the current document using processDocuments; using loaded document instead");
+			funcs.push(() => processDoc(this._translate.document, urls[i]));
+			urls.splice(i, 1);
+			i--;
 		}
-		promise.then(function () {
-			translate.decrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
-			resolve();
-		})
-		.catch(function (e) {
+	}
+	
+	translate.incrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
+	
+	if (urls.length) {
+		funcs.push(
+			() => Zotero.HTTP.processDocuments(
+				urls,
+				function (doc) {
+					if (!processor) return;
+					return processDoc(doc);
+				},
+				translate.cookieSandbox
+			)
+		);
+	}
+	
+	var f;
+	while (f = funcs.shift()) {
+		try {
+			let maybePromise = f();
+			// The processor may or may not return a promise
+			if (maybePromise) {
+				await maybePromise;
+			}
+		}
+		catch (e) {
 			if (onError) {
 				try {
 					onError(e);
@@ -288,9 +287,16 @@ Zotero.Utilities.Translate.prototype.processDocuments = function (urls, processo
 			else if (!noCompleteOnError) {
 				translate.complete(false, e);
 			}
-			reject(e);
-		});
-	}.bind(this));
+			throw e;
+		}
+	}
+	
+	// Deprecated
+	if (onDone) {
+		onDone();
+	}
+	
+	translate.decrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
 }
 
 /**

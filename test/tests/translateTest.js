@@ -676,7 +676,7 @@ describe("Zotero.Translate", function() {
 			doc = (yield Zotero.HTTP.processDocuments(url, doc => doc))[0];
 		});
 		
-		it("should provide document object", function* () {
+		it("should provide document object", async function () {
 			var translate = new Zotero.Translate.Web();
 			translate.setDocument(doc);
 			translate.setTranslator(
@@ -708,7 +708,7 @@ describe("Zotero.Translate", function() {
 					}`
 				)
 			);
-			var newItems = yield translate.translate();
+			var newItems = await translate.translate();
 			assert.equal(newItems.length, 1);
 			
 			var item = newItems[0];
