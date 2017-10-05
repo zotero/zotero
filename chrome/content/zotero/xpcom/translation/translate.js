@@ -86,7 +86,7 @@ Zotero.Translate.Sandbox = {
 				&& translate.translator[0].configOptions
 				&& translate.translator[0].configOptions.async;
 			
-			var run = function (resolve) {
+			var run = async function (async) {
 				Zotero.debug("Translate: Saving item");
 				
 				// warn if itemDone called after translation completed
@@ -152,7 +152,7 @@ Zotero.Translate.Sandbox = {
 				if(translate._libraryID === false || translate._parentTranslator) {
 					translate.newItems.push(item);
 					if(translate._parentTranslator && Zotero.isFx && !Zotero.isBookmarklet) {
-						// Copy object so it is accessible to child translator
+						// Copy object so it is accessible to parent translator
 						item = translate._sandboxManager.copyObject(item);
 						item.complete = oldItem.complete;
 					}
@@ -216,12 +216,9 @@ Zotero.Translate.Sandbox = {
 				
 				// For synchronous import (when Promise isn't available in the sandbox or the do*
 				// function doesn't use it) and web translators, queue saves
-				if (!resolve || !asyncTranslator) {
+				if (!async || !asyncTranslator) {
 					Zotero.debug("Translate: Saving via queue");
 					translate.saveQueue.push(item);
-					if (resolve) {
-						resolve();
-					}
 				}
 				// For async import, save items immediately
 				else {
@@ -240,11 +237,9 @@ Zotero.Translate.Sandbox = {
 			
 			return new translate._sandboxManager.sandbox.Promise(function (resolve, reject) {
 				try {
-					let maybePromise = run(resolve);
-					if (maybePromise) {
-						maybePromise
-						.then(resolve)
-						.catch(function (e) {
+					run(true).then(
+						resolve,
+						function (e) {
 							// Fix wrapping error from sandbox when error is thrown from _saveItems()
 							if (Zotero.isFx) {
 								reject(translate._sandboxManager.copyObject(e));
@@ -252,8 +247,8 @@ Zotero.Translate.Sandbox = {
 							else {
 								reject(e);
 							}
-						});
-					}
+						}
+					);
 				}
 				catch (e) {
 					reject(e);
@@ -1106,7 +1101,9 @@ Zotero.Translate.Base.prototype = {
 			
 			var handlers = this._handlers[type].slice();
 			for(var i=0, n=handlers.length; i<n; i++) {
-				Zotero.debug("Translate: Running handler "+i+" for "+type, 5);
+				if (type != 'debug') {
+					Zotero.debug(`Translate: Running handler ${i} for ${type}`, 5);
+				}
 				try {
 					returnValue = handlers[i].apply(null, args);
 				} catch(e) {

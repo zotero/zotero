@@ -30,7 +30,6 @@
     "babel-plugin-syntax-flow": "^6.13.0",
     "babel-plugin-syntax-jsx": "^6.13.0",
     "babel-plugin-syntax-object-rest-spread": "^6.13.0",
-    "babel-plugin-transform-async-to-module-method": "^6.16.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.18.0",
     "babel-preset-react": "^6.16.0",
     "browserify": "^14.3.0",

@@ -65,7 +65,10 @@ Zotero.HTTP = new function() {
 			this[i] = options[i];
 		}
 	};
-	this.SecurityException.prototype = Object.create(Zotero.Error.prototype);
+	this.SecurityException.prototype = Object.create(
+		// Zotero.Error not available in the connector
+		Zotero.Error ? Zotero.Error.prototype : Error.prototype
+	);
 	
 	
 	this.promise = function () {
@@ -797,20 +800,81 @@ Zotero.HTTP = new function() {
 			.getService(Components.interfaces.nsIIOService).offline;
 	}
 	
+	
+	/**
+	 * Load one or more documents using XMLHttpRequest
+	 *
+	 * This should stay in sync with the equivalent function in the connector
+	 *
+	 * @param {String|String[]} urls URL(s) of documents to load
+	 * @param {Function} processor - Callback to be executed for each document loaded; if function returns
+	 *     a promise, it's waited for before continuing
+	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
+	 * @return {Promise<Array>} - A promise for an array of results from the processor runs
+	 */
+	this.processDocuments = async function (urls, processor, cookieSandbox) {
+		// Handle old signature: urls, processor, onDone, onError, dontDelete, cookieSandbox
+		if (arguments.length > 3) {
+			Zotero.debug("Zotero.HTTP.processDocuments() now takes only 3 arguments -- update your code");
+			var onDone = arguments[2];
+			var onError = arguments[3];
+			var cookieSandbox = arguments[5];
+		}
+		
+		if (typeof urls == "string") urls = [urls];
+		var funcs = urls.map(url => () => {
+			return Zotero.HTTP.request(
+				"GET",
+				url,
+				{
+					responseType: 'document'
+				}
+			)
+			.then((xhr) => {
+				var doc = this.wrapDocument(xhr.response, url);
+				return processor(doc, url);
+			});
+		});
+		
+		// Run processes serially
+		// TODO: Add some concurrency?
+		var f;
+		var results = [];
+		while (f = funcs.shift()) {
+			try {
+				results.push(await f());
+			}
+			catch (e) {
+				if (onError) {
+					onError(e);
+				}
+				throw e;
+			}
+		}
+		
+		// Deprecated
+		if (onDone) {
+			onDone();
+		}
+		
+		return results;
+	};
+	
+	
 	/**
 	 * Load one or more documents in a hidden browser
 	 *
 	 * @param {String|String[]} urls URL(s) of documents to load
 	 * @param {Function} processor - Callback to be executed for each document loaded; if function returns
 	 *     a promise, it's waited for before continuing
-	 * @param {Function} done Callback to be executed after all documents have been loaded
-	 * @param {Function} exception Callback to be executed if an exception occurs
+	 * @param {Function} onDone - Callback to be executed after all documents have been loaded
+	 * @param {Function} onError - Callback to be executed if an error occurs
 	 * @param {Boolean} dontDelete Don't delete the hidden browser upon completion; calling function
 	 *                             must call deleteHiddenBrowser itself.
 	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
 	 * @return {browser} Hidden browser used for loading
 	 */
-	this.processDocuments = function(urls, processor, done, exception, dontDelete, cookieSandbox) {
+	this.loadDocuments = function (urls, processor, onDone, onError, dontDelete, cookieSandbox) {
 		// (Approximately) how many seconds to wait if the document is left in the loading state and
 		// pageshow is called before we call pageshow with an incomplete document
 		const LOADING_STATE_TIMEOUT = 120;
@@ -827,11 +891,11 @@ Zotero.HTTP = new function() {
 				firedLoadEvent = 0;
 				currentURL++;
 				try {
-					Zotero.debug("Zotero.HTTP.processDocuments: Loading "+url);
+					Zotero.debug("Zotero.HTTP.loadDocuments: Loading " + url);
 					hiddenBrowser.loadURI(url);
 				} catch(e) {
-					if(exception) {
-						exception(e);
+					if (onError) {
+						onError(e);
 						return;
 					} else {
 						if(!dontDelete) Zotero.Browser.deleteHiddenBrowser(hiddenBrowsers);
@@ -840,7 +904,7 @@ Zotero.HTTP = new function() {
 				}
 			} else {
 				if(!dontDelete) Zotero.Browser.deleteHiddenBrowser(hiddenBrowsers);
-				if(done) done();
+				if (onDone) onDone();
 			}
 		};
 		
@@ -861,7 +925,7 @@ Zotero.HTTP = new function() {
 				return;
 			}
 			
-			Zotero.debug("Zotero.HTTP.processDocuments: "+url+" loaded");
+			Zotero.debug("Zotero.HTTP.loadDocuments: " + url + " loaded");
 			hiddenBrowser.removeEventListener("pageshow", onLoad, true);
 			hiddenBrowser.zotero_loaded = true;
 			
@@ -878,8 +942,8 @@ Zotero.HTTP = new function() {
 			if (maybePromise && maybePromise.then) {
 				maybePromise.then(() => doLoad())
 				.catch(e => {
-					if (exception) {
-						exception(e);
+					if (onError) {
+						onError(e);
 					}
 					else {
 						throw e;
@@ -890,8 +954,8 @@ Zotero.HTTP = new function() {
 			
 			try {
 				if (error) {
-					if (exception) {
-						exception(error);
+					if (onError) {
+						onError(error);
 					}
 					else {
 						throw error;
