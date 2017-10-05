@@ -28,13 +28,6 @@
     "transform-react-jsx",
     "transform-react-display-name",
     [
-      "transform-async-to-module-method",
-      {
-        "module": "resource://zotero/bluebird.js",
-        "method": "coroutine"
-      }
-    ],
-    [
       "transform-es2015-modules-commonjs",
       {
         "strictMode": false
