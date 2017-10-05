@@ -170,6 +170,7 @@ Zotero.Attachments = new function(){
 		Zotero.debug('Importing snapshot from file');
 		
 		var file = Zotero.File.pathToFile(options.file);
+		var fileName = file.leafName;
 		var url = options.url;
 		var title = options.title;
 		var contentType = options.contentType;
@@ -193,6 +194,7 @@ Zotero.Attachments = new function(){
 				attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_URL;
 				attachmentItem.attachmentContentType = contentType;
 				attachmentItem.attachmentCharset = charset;
+				attachmentItem.attachmentPath = 'storage:' + fileName;
 				
 				// DEBUG: this should probably insert access date too so as to
 				// create a proper item, but at the moment this is only called by
@@ -207,9 +209,6 @@ Zotero.Attachments = new function(){
 				// Point to copied file
 				newFile = destDir.clone();
 				newFile.append(file.leafName);
-				
-				attachmentItem.attachmentPath = newFile.path;
-				yield attachmentItem.save();
 			}.bind(this));
 			yield _postProcessFile(attachmentItem, newFile, contentType, charset);
 		}
@@ -323,9 +322,8 @@ Zotero.Attachments = new function(){
 			// Create a temporary directory to save to within the storage directory.
 			// We don't use the normal temp directory because people might have 'storage'
 			// symlinked to another volume, which makes moving complicated.
-			var tmpDir = yield this.createTemporaryStorageDirectory();
-			var tmpFile = tmpDir.clone();
-			tmpFile.append(fileName);
+			var tmpDir = (yield this.createTemporaryStorageDirectory()).path;
+			var tmpFile = OS.Path.join(tmpDir, fileName);
 			
 			// Save to temp dir
 			var deferred = Zotero.Promise.defer();
@@ -373,25 +371,20 @@ Zotero.Attachments = new function(){
 					if (collections) {
 						attachmentItem.setCollections(collections);
 					}
+					attachmentItem.attachmentPath = 'storage:' + fileName;
 					var itemID = yield attachmentItem.save(saveOptions);
-
-					// Create a new folder for this item in the storage directory
-					destDir = this.getStorageDirectory(attachmentItem);
-					yield OS.File.move(tmpDir.path, destDir.path);
-					var destFile = destDir.clone();
-					destFile.append(fileName);
-
-					// Refetch item to update path
-					attachmentItem.attachmentPath = destFile.path;
-					yield attachmentItem.save(saveOptions);
+					
+					// DEBUG: Does this fail if 'storage' is symlinked to another drive?
+					destDir = this.getStorageDirectory(attachmentItem).path;
+					yield OS.File.move(tmpDir, destDir);
 				}.bind(this));
 			} catch (e) {
 				try {
-					if (tmpDir && tmpDir.exists()) {
-						tmpDir.remove(true);
+					if (tmpDir) {
+						yield OS.File.removeDir(tmpDir, { ignoreAbsent: true });
 					}
-					if (destDir && destDir.exists()) {
-						destDir.remove(true);
+					if (destDir) {
+						yield OS.File.removeDir(destDir, { ignoreAbsent: true });
 					}
 				}
 				catch (e) {
@@ -580,11 +573,10 @@ Zotero.Attachments = new function(){
 			contentType = "application/pdf";
 		}
 		
-		var tmpDir = yield this.createTemporaryStorageDirectory();
+		var tmpDir = (yield this.createTemporaryStorageDirectory()).path;
 		try {
-			var tmpFile = tmpDir.clone();
 			var fileName = Zotero.File.truncateFileName(_getFileNameFromURL(url, contentType), 100);
-			tmpFile.append(fileName);
+			var tmpFile = OS.Path.join(tmpDir, fileName);
 			
 			// If we're using the title from the document, make some adjustments
 			if (!options.title) {
@@ -601,7 +593,7 @@ Zotero.Attachments = new function(){
 			
 			if (contentType === 'text/html' || contentType === 'application/xhtml+xml') {
 				Zotero.debug('Saving document with saveDocument()');
-				yield Zotero.Utilities.Internal.saveDocument(document, tmpFile.path);
+				yield Zotero.Utilities.Internal.saveDocument(document, tmpFile);
 			}
 			else {
 				Zotero.debug("Saving file with saveURI()");
@@ -643,16 +635,12 @@ Zotero.Attachments = new function(){
 				if (collections && collections.length) {
 					attachmentItem.setCollections(collections);
 				}
+				attachmentItem.attachmentPath = 'storage:' + fileName;
 				var itemID = yield attachmentItem.save();
 				
-				// Create a new folder for this item in the storage directory
-				destDir = this.getStorageDirectory(attachmentItem);
-				yield OS.File.move(tmpDir.path, destDir.path);
-				var destFile = destDir.clone();
-				destFile.append(fileName);
-				
-				attachmentItem.attachmentPath = destFile.path;
-				yield attachmentItem.save();
+				// DEBUG: Does this fail if 'storage' is symlinked to another drive?
+				destDir = this.getStorageDirectory(attachmentItem).path;
+				yield OS.File.move(tmpDir, destDir);
 			}.bind(this));
 		}
 		catch (e) {
@@ -660,11 +648,11 @@ Zotero.Attachments = new function(){
 			
 			// Clean up
 			try {
-				if (tmpDir && tmpDir.exists()) {
-					tmpDir.remove(true);
+				if (tmpDir) {
+					yield OS.File.removeDir(tmpDir, { ignoreAbsent: true });
 				}
-				if (destDir && destDir.exists()) {
-					destDir.remove(true);
+				if (destDir) {
+					yield OS.File.removeDir(destDir, { ignoreAbsent: true });
 				}
 			}
 			catch (e) {
