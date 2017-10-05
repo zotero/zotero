@@ -337,7 +337,7 @@ Zotero.Attachments = new function(){
 			Zotero.Utilities.Internal.saveURI(wbp, nsIURL, tmpFile);
 
 			yield deferred.promise;
-			let sample = yield Zotero.File.getSample(tmpFile);
+			let sample = yield Zotero.File.getContentsAsync(tmpFile, null, 1000);
 			try {
 				if (contentType == 'application/pdf' &&
 					Zotero.MIME.sniffForMIMEType(sample) != 'application/pdf') {
