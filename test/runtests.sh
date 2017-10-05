@@ -128,6 +128,8 @@ mkdir "$TEMPDIR/Zotero"
 cat <<EOF > "$PROFILE/prefs.js"
 user_pref("app.update.enabled", false);
 user_pref("extensions.autoDisableScopes", 0);
+user_pref("browser.tabs.remote.autostart", false);
+user_pref("browser.tabs.remote.autostart.2", false);
 user_pref("browser.uitour.enabled", false);
 user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("dom.max_chrome_script_run_time", 0);
