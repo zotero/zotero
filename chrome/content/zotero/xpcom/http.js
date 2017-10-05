@@ -65,7 +65,10 @@ Zotero.HTTP = new function() {
 			this[i] = options[i];
 		}
 	};
-	this.SecurityException.prototype = Object.create(Zotero.Error.prototype);
+	this.SecurityException.prototype = Object.create(
+		// Zotero.Error not available in the connector
+		Zotero.Error ? Zotero.Error.prototype : Error.prototype
+	);
 	
 	
 	this.promise = function () {
