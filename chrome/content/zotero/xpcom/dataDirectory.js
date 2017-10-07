@@ -282,29 +282,27 @@ Zotero.DataDirectory = {
 								throw { name: "NS_ERROR_FILE_NOT_FOUND" };
 							}
 						}
-						if (nsIFile) {
-							try {
-								let dbFile = OS.Path.join(nsIFile.path, dbFilename);
-								let mtime = (yield OS.File.stat(dbFile)).lastModificationDate;
-								Zotero.debug(`Database found at ${dbFile}, last modified ${mtime}`);
-								// If custom location has a newer DB, use that
-								if (!useProfile || mtime > profileSubdirModTime) {
-									dataDir = nsIFile.path;
-									useFirefoxProfileCustom = true;
-									useProfile = false;
-								}
+						try {
+							let dbFile = OS.Path.join(nsIFile.path, dbFilename);
+							let mtime = (yield OS.File.stat(dbFile)).lastModificationDate;
+							Zotero.debug(`Database found at ${dbFile}, last modified ${mtime}`);
+							// If custom location has a newer DB, use that
+							if (!useProfile || mtime > profileSubdirModTime) {
+								dataDir = nsIFile.path;
+								useFirefoxProfileCustom = true;
+								useProfile = false;
 							}
-							catch (e) {
-								Zotero.logError(e);
-								// If we have a DB in the Zotero profile and get an error trying to
-								// access the custom location in Firefox, use the Zotero profile, since
-								// there's at least some chance it's right. Otherwise, throw an error.
-								if (!useProfile) {
-									// The error message normally gets the path from the pref, but
-									// we got it from the prefs file, so include it here
-									e.dataDir = nsIFile.path;
-									throw e;
-								}
+						}
+						catch (e) {
+							Zotero.logError(e);
+							// If we have a DB in the Zotero profile and get an error trying to
+							// access the custom location in Firefox, use the Zotero profile, since
+							// there's at least some chance it's right. Otherwise, throw an error.
+							if (!useProfile) {
+								// The error message normally gets the path from the pref, but
+								// we got it from the prefs file, so include it here
+								e.dataDir = nsIFile.path;
+								throw e;
 							}
 						}
 					}
