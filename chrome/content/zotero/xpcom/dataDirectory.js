@@ -322,11 +322,11 @@ Zotero.DataDirectory = {
 								useProfile = false;
 							}
 						}
+						// Legacy subdirectory doesn't exist or there was a problem accessing it, so
+						// just fall through to default location
 						catch (e) {
-							Zotero.logError(e);
-							// Same as above -- throw error if we don't already have a DB
-							if (!useProfile) {
-								throw e;
+							if (!(e instanceof OS.File.Error && e.becauseNoSuchFile)) {
+								Zotero.logError(e);
 							}
 						}
 					}
