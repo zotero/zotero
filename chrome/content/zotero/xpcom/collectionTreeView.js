@@ -1180,10 +1180,9 @@ Zotero.CollectionTreeView.prototype.selectItem = Zotero.Promise.coroutine(functi
 		yield this.selectLibrary(item.libraryID);
 	}
 	
-	var itemTreeView = this.itemTreeView;
-	yield itemTreeView.waitForLoad();
+	yield this.itemTreeView.waitForLoad();
 	
-	var selected = yield itemTreeView.selectItem(itemID, expand);
+	var selected = yield this.itemTreeView.selectItem(itemID, expand);
 	if (selected) {
 		return true;
 	}
@@ -1197,9 +1196,9 @@ Zotero.CollectionTreeView.prototype.selectItem = Zotero.Promise.coroutine(functi
 		yield this.selectLibrary(item.libraryID);
 	}
 	
-	yield itemTreeView.waitForLoad();
+	yield this.itemTreeView.waitForLoad();
 	
-	return itemTreeView.selectItem(itemID, expand);
+	return this.itemTreeView.selectItem(itemID, expand);
 });
 
 

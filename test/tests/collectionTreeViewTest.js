@@ -481,8 +481,18 @@ describe("Zotero.CollectionTreeView", function() {
 			yield win.ZoteroPane.deleteSelectedCollection();
 			assert.isFalse(cv.getRowIndexByID(id))
 		})
-		
-	})
+	});
+	
+	describe("#selectItem()", function () {
+		it("should switch to library root if item isn't in collection", async function () {
+			var item = await createDataObject('item');
+			var collection = await createDataObject('collection');
+			await cv.selectItem(item.id);
+			await waitForItemsLoad(win);
+			assert.equal(cv.selection.currentIndex, 0);
+			assert.sameMembers(zp.itemsView.getSelectedItems(), [item]);
+		});
+	});
 	
 	describe("#drop()", function () {
 		/**
