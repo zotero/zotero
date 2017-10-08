@@ -1652,8 +1652,12 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		var items = yield Zotero.DB.columnQueryAsync(sql, params);
 		if (items) {
 			yield Zotero.DB.executeTransaction(function* () {
-				yield Zotero.DB.queryAsync("DELETE FROM fulltextItemWords WHERE itemID IN (" + sql + ")");
-				yield Zotero.DB.queryAsync("DELETE FROM fulltextItems WHERE itemID IN (" + sql + ")");
+				yield Zotero.DB.queryAsync(
+					"DELETE FROM fulltextItemWords WHERE itemID IN (" + sql + ")", params
+				);
+				yield Zotero.DB.queryAsync(
+					"DELETE FROM fulltextItems WHERE itemID IN (" + sql + ")", params
+				);
 			});
 			
 			yield this.indexItems(items, false, true);
