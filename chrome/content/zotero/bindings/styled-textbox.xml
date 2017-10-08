@@ -404,7 +404,10 @@
 								
 								var commandEvent = false;
 								
-								//Zotero.debug(event.type);
+								if (Zotero.Prefs.get('debugNoteEvents')) {
+									Zotero.debug(event.type);
+									Zotero.debug(event.which);
+								}
 								switch (event.type) {
 									case 'keydown':
 										// Intercept and manually trigger redo for Cmd-Shift-Z,
