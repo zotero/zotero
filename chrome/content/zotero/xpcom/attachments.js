@@ -24,6 +24,7 @@
 */
 
 Zotero.Attachments = new function(){
+	// Keep in sync with Zotero.Schema.integrityCheck()
 	this.LINK_MODE_IMPORTED_FILE = 0;
 	this.LINK_MODE_IMPORTED_URL = 1;
 	this.LINK_MODE_LINKED_FILE = 2;

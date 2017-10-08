@@ -349,7 +349,10 @@ Zotero.Item.prototype._parseRowData = function(row) {
 				break;
 			
 			case 'attachmentLinkMode':
-				val = val !== null ? parseInt(val) : false;
+				val = val !== null
+					? parseInt(val)
+					// Shouldn't happen
+					: Zotero.Attachments.LINK_MODE_IMPORTED_URL;
 				break;
 			
 			case 'attachmentPath':

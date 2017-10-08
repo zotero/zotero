@@ -1329,6 +1329,11 @@ Zotero.Schema = new function(){
 			[
 				"SELECT COUNT(*) > 1 FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=14)",
 				"DELETE FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=14)"
+			],
+			// Invalid link mode -- set to imported url
+			[
+				"SELECT COUNT(*) > 1 FROM itemAttachments WHERE linkMode NOT IN (0,1,2,3)",
+				"UPDATE itemAttachments SET linkMode=1 WHERE linkMode NOT IN (0,1,2,3)"
 			]
 		];
 		
