@@ -416,6 +416,12 @@
 											this.redo();
 											return;
 										}
+										// Handle forward-delete, which doesn't register as a keypress
+										// when a selection is cleared
+										if (event.which == event.DOM_VK_DELETE) {
+											this._changed = true;
+											commandEvent = true;
+										}
 										break;
 									
 									case 'keypress':
