@@ -556,12 +556,40 @@ Zotero.Cite.System.prototype = {
 	 * @return {String|Boolean} The locale as a string if it exists, or false if it doesn't
 	 */
 	"retrieveLocale":function retrieveLocale(lang) {
+		return Zotero.Cite.Locale.get(lang);
+	}
+};
+
+Zotero.Cite.Locale = {
+	_cache: new Map(),
+	
+	get: function (locale) {
+		var str = this._cache.get(locale);
+		if (str) {
+			return str;
+		}
+		var uri = `chrome://zotero/content/locale/csl/locales-${locale}.xml`;
 		try {
-			return Zotero.File.getContentsFromURL(
-				`chrome://zotero/content/locale/csl/locales-${lang}.xml`
-			);
+			let protHandler = Components.classes["@mozilla.org/network/protocol;1?name=chrome"]
+				.createInstance(Components.interfaces.nsIProtocolHandler);
+			let channel = protHandler.newChannel(protHandler.newURI(uri));
+			let cstream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+				.createInstance(Components.interfaces.nsIConverterInputStream);
+			cstream.init(channel.open(), "UTF-8", 0, 0);
+			let obj = {};
+			let read = 0;
+			let str = "";
+			do {
+				// Read as much as we can and put it in obj.value
+				read = cstream.readString(0xffffffff, obj);
+				str += obj.value;
+			} while (read != 0);
+			cstream.close();
+			this._cache.set(locale, str);
+			return str;
 		}
 		catch (e) {
+			//Zotero.debug(e);
 			return false;
 		}
 	}
