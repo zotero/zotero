@@ -303,7 +303,7 @@ Zotero.Cite = {
 				session = Zotero.Integration.sessions[sessionID],
 				item;
 			if(session) {
-				item = session.embeddedZoteroItems[id.substr(slashIndex+1)];
+				item = session.embeddedItems[id.substr(slashIndex+1)];
 			}
 			
 			if(!item) {

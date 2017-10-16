@@ -231,6 +231,8 @@ Zotero.Integration = new function() {
 				// TODO: this is pretty awful
 				session.fields = new Zotero.Integration.Fields(session, document);
 				session._doc = document;
+				// TODO: figure this out
+				// Zotero.Notifier.trigger('delete', 'collection', 'document');
 				yield (new Zotero.Integration.Interface(application, document, session))[command]();
 				document.setDocumentData(session.data.serialize());
 			}
@@ -304,8 +306,7 @@ Zotero.Integration = new function() {
 				
 				inProgress =
 					Zotero.Integration.currentDoc =
-					Zotero.Integration.currentWindow =
-					Zotero.Integration.currentSession = false;
+					Zotero.Integration.currentWindow = false;
 			}
 		});
 	};
@@ -906,6 +907,8 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
 		this._session.bibliography = new Zotero.Integration.Bibliography(this._bibliographyFields[0]);
 		yield this._session.bibliography.loadItemData();
 	}
+	// TODO: figure this out
+	// Zotero.Notifier.trigger('add', 'collection', 'document');
 });
 
 /**
@@ -1263,7 +1266,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 			return indexB - indexA;
 		});
 		
-		return Zotero.Cite.getItem(ids);	
+		return Zotero.Cite.getItem(ids);
 	}),
 }
 
@@ -1271,10 +1274,8 @@ Zotero.Integration.CitationEditInterface.prototype = {
  * Keeps track of all session-specific variables
  */
 Zotero.Integration.Session = function(doc, app) {
-	// holds items not in document that should be in bibliography
 	this.embeddedItems = {};
-	this.embeddedZoteroItems = {};
-	this.embeddedZoteroItemsByURI = {};
+	this.embeddedItemsByURI = {};
 	this.resetRequest(doc);
 	this.primaryFieldType = app.primaryFieldType;
 	this.secondaryFieldType = app.secondaryFieldType;
@@ -1619,6 +1620,11 @@ Zotero.Integration.Session.prototype.writeDelayedCitation = Zotero.Promise.corou
 });
 
 
+Zotero.Integration.Session.prototype.getItems = function() {
+	return Zotero.Cite.getItem(Object.keys(this.citationsByItemID));
+}
+
+
 /**
  * Edits integration bibliography
  * @param {Zotero.Integration.Bibliography} bibliography
@@ -1903,8 +1909,8 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = Zotero.Promise.corout
 		var uri = uris[i];
 		
 		// First try embedded URI
-		if(this.session.embeddedZoteroItemsByURI[uri]) {
-			embeddedItem = this.session.embeddedZoteroItemsByURI[uri];
+		if(this.session.embeddedItemsByURI[uri]) {
+			embeddedItem = this.session.embeddedItemsByURI[uri];
 		}
 		
 		// Next try getting URI directly
@@ -2316,17 +2322,16 @@ Zotero.Integration.Citation = class {
 						// assign a random string as an item ID
 						var anonymousID = Zotero.randomString();
 						var globalID = itemData.id = citationItem.id = Zotero.Integration.currentSession.data.sessionID+"/"+anonymousID;
-						Zotero.Integration.currentSession.embeddedItems[anonymousID] = itemData;
 						
 						// assign a Zotero item
-						var surrogateItem = Zotero.Integration.currentSession.embeddedZoteroItems[anonymousID] = new Zotero.Item();
+						var surrogateItem = Zotero.Integration.currentSession.embeddedItems[anonymousID] = new Zotero.Item();
 						Zotero.Utilities.itemFromCSLJSON(surrogateItem, itemData);
 						surrogateItem.cslItemID = globalID;
 						surrogateItem.cslURIs = citationItem.uris;
 						surrogateItem.cslItemData = itemData;
 						
 						for(var j=0, m=citationItem.uris.length; j<m; j++) {
-							Zotero.Integration.currentSession.embeddedZoteroItemsByURI[citationItem.uris[j]] = surrogateItem;
+							Zotero.Integration.currentSession.embeddedItemsByURI[citationItem.uris[j]] = surrogateItem;
 						}
 					} else if (promptToReselect) {
 						zoteroItem = yield this.handleMissingItem(i);
@@ -2583,7 +2588,7 @@ Zotero.Integration.Bibliography = class {
 		citeproc.updateUncitedItems(Array.from(this.uncitedItemIDs.values()));
 		citeproc.setOutputFormat("rtf");
 		let bibliography = citeproc.makeBibliography();
-			Zotero.Cite.removeFromBibliography(bibliography, this.omittedItemIDs);
+		Zotero.Cite.removeFromBibliography(bibliography, this.omittedItemIDs);
 	
 		for (let i in bibliography[0].entry_ids) {
 			if (bibliography[0].entry_ids[i].length != 1) continue;
