@@ -84,7 +84,17 @@ toolbarbutton.zotero-clicky
 	height:1em;
 }
 
-#view-settings-menu .toolbarbutton-menu-dropmarker
-{
-	margin-left: -12px !important;
+#view-settings-menu {
+	list-style-image: url(chrome://zotero/skin/tag-selector-menu.png);
+}
+
+#view-settings-menu .toolbarbutton-icon {
+	width: 16px;
+	margin-right: 12px; /* leave room for dropmarker */
+}
+
+
+/* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
+@media (min-resolution: 1.5dppx) {
+	#view-settings-menu  { list-style-image: url(chrome://zotero/skin/tag-selector-menu@2x.png); }
 }

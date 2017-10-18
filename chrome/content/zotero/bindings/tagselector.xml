@@ -1169,8 +1169,10 @@
 							oncommand="document.getBindingParent(this).handleKeyPress(); event.stopPropagation()"
 							onkeypress="if (event.keyCode == event.DOM_VK_ESCAPE) { document.getBindingParent(this).handleKeyPress(true); }"
 							tabindex="-1"/>
-						<toolbarbutton id="view-settings-menu" tooltiptext="&zotero.toolbar.actions.label;"
-								image="chrome://zotero/skin/tag-selector-menu.png" type="menu">
+						<toolbarbutton
+								id="view-settings-menu"
+								tooltiptext="&zotero.toolbar.actions.label;"
+								type="menu">
 							<menupopup id="view-settings-popup"
 									onpopupshowing="document.getBindingParent(this)._updateDeleteAutomaticMenuOption()"
 									onpopupshown="/*

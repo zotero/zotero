@@ -188,21 +188,13 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 
 #zotero-tb-search-menu-button {
 	margin: 0 -1px 0 -4px;
+	padding: 5px 0 5px 5px;
 	border: 0;
 	background: transparent;
-	/* Mozilla file copied from chrome://browser/skin/mainwindow-dropdown-arrow.png
-	   for availability in Standalone */
-	list-style-image: url("chrome://zotero/skin/win/mainwindow-dropdown-arrow.png");
-	-moz-image-region: rect(0, 13px, 11px, 0);
 }
 
 #zotero-tb-search-menu-button .button-menu-dropmarker {
 	display: none;
-}
-
-#zotero-tb-search-menu-button:hover:active,
-#zotero-tb-search-menu-button[open="true"] {
-	-moz-image-region: rect(0, 26px, 11px, 13px);
 }
 
 #zotero-tb-search .textbox-search-icon {

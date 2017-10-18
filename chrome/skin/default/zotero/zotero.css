@@ -465,8 +465,10 @@ label.zotero-text-link {
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.5dppx) {
 	#zotero-toolbar-save-button,#zotero-toolbar-save-button-single  { list-style-image: url("chrome://zotero/skin/treeitem-webpage@2x.png"); }
-	#zotero-toolbar-save-button[cui-areatype="menu-panel"],#zotero-toolbar-save-button-single[cui-areatype="menu-panel"],toolbarpaletteitem[place="palette"] #zotero-toolbar-save-button,toolbarpaletteitem[place="palette"] #zotero-toolbar-save-button-single  { list-style-image: url("chrome://zotero/skin/treeitem-webpage@2x.png"); }
+	.zotero-clicky-minus  { background-image: url('chrome://zotero/skin/minus@2x.png') !important; }
+	.zotero-clicky-plus  { background-image: url('chrome://zotero/skin/plus@2x.png') !important; }
+	.zotero-clicky-minus:not([disabled=true]):active  { background-image: url('chrome://zotero/skin/minus-active@2x.png') !important; }
+	.zotero-clicky-plus:not([disabled=true]):active  { background-image: url('chrome://zotero/skin/plus-active@2x.png') !important; }
 	.zotero-scrape-popup-library { list-style-image: url('chrome://zotero/skin/treesource-library@2x.png'); }
 	.zotero-scrape-popup-collection { list-style-image: url('chrome://zotero/skin/treesource-collection@2x.png'); }
-	.zotero-spinner  { list-style-image: url(chrome://zotero/skin/spinner-14px@2x.png); height: 14px; width: 14px; margin-right: 2px; }
 }

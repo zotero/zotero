@@ -552,7 +552,6 @@
 										id="zotero-items-column-hasAttachment" default-in="default" disabled-in="feed" 
 										class="treecol-image"
 										label="&zotero.tabs.attachments.label;"
-										src="chrome://zotero/skin/attach-small.png"
 										fixed="true"
 										zotero-persist="ordinal hidden sortActive sortDirection"/>
 									<splitter class="tree-splitter"/>
