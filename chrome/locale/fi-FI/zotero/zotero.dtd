@@ -9,7 +9,7 @@
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Peruuta">
 <!ENTITY zotero.general.refresh "Päivitä">
-<!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.saveAs "Tallenna nimellä...">
 <!ENTITY zotero.general.advancedOptions.label "Lisäasetukset">
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "More">
@@ -266,16 +266,16 @@
 <!ENTITY zotero.proxy.recognized.disable.label "Älä automaattisesti uudelleenohjaa pyyntöjä aiemmin tunnistettujen välitystyspalvelinten kautta">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ohita">
 
-<!ENTITY zotero.feedSettings.title "Feed Settings">
+<!ENTITY zotero.feedSettings.title "Syötteen asetukset">
 <!ENTITY zotero.feedSettings.saveButton.label "Tallenna">
 <!ENTITY zotero.feedSettings.url.label "URL:">
 <!ENTITY zotero.feedSettings.title.label "Title:">
-<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
+<!ENTITY zotero.feedSettings.refresh.label1 "Päivitä syötettä joka">
 <!ENTITY zotero.feedSettings.refresh.label2 "tunti">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Poista lukemattomat kohteet syötteestä">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "päivän jälkeen">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Poista luetut kohteet syötteestä">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "päivän jälkeen">
 
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Haetaan metatietoja...">

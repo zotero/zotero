@@ -11,7 +11,7 @@
 <!ENTITY zotero.general.refresh "Osveži">
 <!ENTITY zotero.general.saveAs "Shrani kot ...">
 <!ENTITY zotero.general.advancedOptions.label "Napredne možnosti">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Orodja">
 <!ENTITY zotero.general.more "Dodatno">
 <!ENTITY zotero.general.loading "Nalaganje ...">
 
@@ -143,7 +143,7 @@
 <!ENTITY zotero.item.copyAsURL "Kopiraj kot URL">
 <!ENTITY zotero.item.deletePermanently "Izbriši trajno ...">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "Odstrani vse značke ...">
 
 <!ENTITY zotero.toolbar.newNote "Nova opomba">
 <!ENTITY zotero.toolbar.note.standalone "Nova samostojna opomba">
@@ -158,7 +158,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Nalaganje značk ...">
 <!ENTITY zotero.tagSelector.showAutomatic "Pokaži samodejno">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Prikaži vse značke v tej knjižnici">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Izbriši samodejne značke v tej knjižnici ...">
 <!ENTITY zotero.tagSelector.clearAll "Ne izberi ničesar">
 <!ENTITY zotero.tagSelector.assignColor "Dodeli barvo ...">
 <!ENTITY zotero.tagSelector.renameTag "Preimenuj značko ...">
@@ -240,7 +240,7 @@
 
 <!ENTITY zotero.integration.references.label "Sklici v bibliografiji">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "Ustavi usklajevanje">
 <!ENTITY zotero.sync.error "Napaka usklajevanja">
 <!ENTITY zotero.sync.storage.progress "Napredek:">
 <!ENTITY zotero.sync.storage.downloads "Prenosi s strežnika:">

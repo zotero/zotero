@@ -44,8 +44,8 @@
 
 <!ENTITY toolsMenu.label "Orodja">
 <!ENTITY toolsMenu.accesskey "d">
-<!ENTITY installConnector.label "Install Browser Connector">
-<!ENTITY installConnector.accesskey "C">
+<!ENTITY installConnector.label "Namesti konektor za brskalnk">
+<!ENTITY installConnector.accesskey "K">
 <!ENTITY addons.label "Dodatki">
 
 
@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "d">
 <!ENTITY helpTroubleshootingInfo.label "Reševanje težav ...">
 <!ENTITY helpTroubleshootingInfo.accesskey "R">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Forumi za razprave">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Poročaj o napakah ...">
 <!ENTITY helpReportErrors.accesskey "P">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
-<!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.label "Beleženje izhoda razhroščevanja">
+<!ENTITY debugOutputLogging.accesskey "B">
+<!ENTITY debugOutputLogging.submit "Oddaj izhod">
+<!ENTITY debugOutputLogging.view "Pokaži izhod">
+<!ENTITY debugOutputLogging.clear "Počisti izhod">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Ponovno zaženi z omogočenim beleženjem ...">
 
 <!ENTITY helpCheckForUpdates.label "Poišči posodobitve ...">
 <!ENTITY helpCheckForUpdates.accesskey "s">

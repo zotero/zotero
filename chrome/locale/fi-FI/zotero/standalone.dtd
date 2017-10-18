@@ -23,9 +23,9 @@
 <!ENTITY closeCmd.label "Sulje">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.label "Tuo...">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY importFromClipboardCmd.label "Tuo leikepöydältä">
 <!ENTITY quitApplicationCmdWin.label "Poistu">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Lopeta">
@@ -44,7 +44,7 @@
 
 <!ENTITY toolsMenu.label "Työkalut">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Asenna selainlisäosa">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Lisäosat">
 
@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Vianetsintä">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Keskustelufoorumit">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Raportoi virheistä...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Virheenjäljityksen tulostuksen kirjaus">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.submit "Lähetä tulostus">
+<!ENTITY debugOutputLogging.view "Näytä tulostus">
+<!ENTITY debugOutputLogging.clear "Tyhjennä tulostus">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Käynnistä uudelleen kirjaus päällä...">
 
 <!ENTITY helpCheckForUpdates.label "Tarkista päivitykset...">
 <!ENTITY helpCheckForUpdates.accesskey "U">
