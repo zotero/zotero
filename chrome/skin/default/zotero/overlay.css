@@ -663,6 +663,10 @@
 	padding-right: 6px;
 }
 
+#zotero-tb-sync .toolbarbutton-icon {
+	max-width: 28px;
+}
+
 #zotero-tb-sync[status=animate] {
 	list-style-image: url(chrome://zotero/skin/arrow_rotate_animated.png);
 }
