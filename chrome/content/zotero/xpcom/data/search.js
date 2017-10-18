@@ -101,7 +101,7 @@ Zotero.defineProperty(Zotero.Search.prototype, 'treeViewID', {
 Zotero.defineProperty(Zotero.Search.prototype, 'treeViewImage', {
 	get: function () {
 		if (Zotero.isMac) {
-			return "chrome://zotero-platform/content/treesource-search.png";
+			return `chrome://zotero-platform/content/treesource-search${Zotero.hiDPISuffix}.png`;
 		}
 		return "chrome://zotero/skin/treesource-search" + Zotero.hiDPISuffix + ".png";
 	}

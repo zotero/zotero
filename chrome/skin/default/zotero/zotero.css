@@ -273,16 +273,12 @@ label.zotero-text-link {
 }
 
 .zotero-clicky-minus {
-	background-image: url('chrome://zotero/skin/minus.png') !important;
-	background-position: center !important;
-	background-repeat: no-repeat !important;
+	background: url(chrome://zotero/skin/minus.png) center/auto 18px no-repeat !important;
 	border: 0px !important;
 }
 
 .zotero-clicky-plus {
-	background-image: url('chrome://zotero/skin/plus.png') !important;
-	background-position: center !important;
-	background-repeat: no-repeat !important;
+	background: url(chrome://zotero/skin/plus.png) center/auto 18px no-repeat !important;
 	border: 0px !important;
 }
 
@@ -465,8 +461,8 @@ label.zotero-text-link {
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.5dppx) {
 	#zotero-toolbar-save-button,#zotero-toolbar-save-button-single  { list-style-image: url("chrome://zotero/skin/treeitem-webpage@2x.png"); }
-	.zotero-clicky-minus  { background-image: url('chrome://zotero/skin/minus@2x.png') !important; }
-	.zotero-clicky-plus  { background-image: url('chrome://zotero/skin/plus@2x.png') !important; }
+	.zotero-clicky-minus  { background: url(chrome://zotero/skin/minus@2x.png) center/auto 18px no-repeat !important; }
+	.zotero-clicky-plus  { background: url(chrome://zotero/skin/plus@2x.png) center/auto 18px no-repeat !important; }
 	.zotero-clicky-minus:not([disabled=true]):active  { background-image: url('chrome://zotero/skin/minus-active@2x.png') !important; }
 	.zotero-clicky-plus:not([disabled=true]):active  { background-image: url('chrome://zotero/skin/plus-active@2x.png') !important; }
 	.zotero-scrape-popup-library { list-style-image: url('chrome://zotero/skin/treesource-library@2x.png'); }

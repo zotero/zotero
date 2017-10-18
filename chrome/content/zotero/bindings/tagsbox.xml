@@ -321,7 +321,7 @@
 						iconFile += '-automatic';
 						icon.setAttribute('tooltiptext', Zotero.getString('pane.item.tags.icon.automatic'));
 					}
-					icon.setAttribute('src', 'chrome://zotero/skin/' + iconFile + '.png');
+					icon.setAttribute('src', `chrome://zotero/skin/${iconFile}${Zotero.hiDPISuffix}.png`);
 					
 					// "-" button
 					if (this.editable) {

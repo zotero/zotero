@@ -769,7 +769,7 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 		case 'search':
 			// Keep in sync with Zotero.(Collection|Search).prototype.treeViewImage
 			if (Zotero.isMac) {
-				return "chrome://zotero-platform/content/treesource-" + collectionType + ".png";
+				return `chrome://zotero-platform/content/treesource-${collectionType}${Zotero.hiDPISuffix}.png`;
 			}
 			break;
 		

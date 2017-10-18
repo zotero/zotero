@@ -137,7 +137,7 @@ var ZoteroItemPane = new function() {
 					
 					var icon = document.createElement('image');
 					icon.className = "zotero-box-icon";
-					icon.setAttribute('src','chrome://zotero/skin/treeitem-note.png');
+					icon.setAttribute('src', `chrome://zotero/skin/treeitem-note${Zotero.hiDPISuffix}.png`);
 					
 					var label = document.createElement('label');
 					label.className = "zotero-box-label";

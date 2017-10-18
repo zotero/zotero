@@ -559,7 +559,6 @@
 										id="zotero-items-column-numNotes" disabled-in="feed"
 										class="treecol-image"
 										label="&zotero.tabs.notes.label;"
-										src="chrome://zotero/skin/treeitem-note-small.png"
 										zotero-persist="width ordinal hidden sortActive sortDirection"/>
 								</treecols>
 								<treechildren ondragstart="ZoteroPane_Local.itemsView.onDragStart(event)"

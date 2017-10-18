@@ -91,8 +91,9 @@ Zotero.defineProperty(Zotero.Collection.prototype, 'treeViewID', {
 
 Zotero.defineProperty(Zotero.Collection.prototype, 'treeViewImage', {
 	get: function () {
+		// Keep in sync with collectionTreeView::getImageSrc()
 		if (Zotero.isMac) {
-			return "chrome://zotero-platform/content/treesource-collection.png";
+			return `chrome://zotero-platform/content/treesource-collection${Zotero.hiDPISuffix}.png`;
 		}
 		return "chrome://zotero/skin/treesource-collection" + Zotero.hiDPISuffix + ".png";
 	}
