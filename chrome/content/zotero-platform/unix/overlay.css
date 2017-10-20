@@ -179,6 +179,11 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 	}
 }
 
+/* Dropmarker added automatically on Linux */
+.toolbarbutton-menu-dropmarker, #zotero-tb-search-menu-button {
+	list-style-image: none;
+}
+
 .zotero-tb-button:not([type=menu]) {
 	margin-right: 4px;
 }
