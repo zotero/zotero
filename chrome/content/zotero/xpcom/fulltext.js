@@ -73,7 +73,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	
 	var _idleObserverIsRegistered = false;
 	var _idleObserverDelay = 30;
-	var _processorTimer = null;
+	var _processorTimeoutID = null;
 	var _processorBlacklist = {};
 	var _upgradeCheck = true;
 	var _syncLibraryVersion = 0;
@@ -102,16 +102,16 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		yield this.registerPDFTool('info');
 		
 		Zotero.uiReadyPromise.delay(30000).then(() => {
-			this.startContentProcessor();
-			Zotero.addShutdownListener(this.stopContentProcessor.bind(this));
+			this.registerContentProcessor();
+			Zotero.addShutdownListener(this.unregisterContentProcessor.bind(this));
 			
 			// Start/stop content processor with full-text content syncing pref
 			Zotero.Prefs.registerObserver('sync.fulltext.enabled', (enabled) => {
 				if (enabled) {
-					this.startContentProcessor();
+					this.registerContentProcessor();
 				}
 				else {
-					this.stopContentProcessor();
+					this.unregisterContentProcessor();
 				}
 			});
 			
@@ -120,10 +120,10 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 				{
 					notify: Zotero.Promise.method(function (event, type, ids, extraData) {
 						if (event == 'start') {
-							this.stopContentProcessor();
+							this.unregisterContentProcessor();
 						}
 						else if (event == 'stop') {
-							this.startContentProcessor();
+							this.registerContentProcessor();
 						}
 					}.bind(this))
 				},
@@ -1046,14 +1046,14 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			);
 		}
 		
-		this.startContentProcessor();
+		this.registerContentProcessor();
 	});
 	
 	
 	/**
 	 * Start the idle observer for the background content processor
 	 */
-	this.startContentProcessor = function () {
+	this.registerContentProcessor = function () {
 		if (!Zotero.Prefs.get('sync.fulltext.enabled')) return;
 		
 		if (!_idleObserverIsRegistered) {
@@ -1065,21 +1065,28 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		}
 	}
 	
-	/**
-	 * Stop the idle observer and a running timer, if there is one
-	 */
-	this.stopContentProcessor = function () {
+	
+	this.unregisterContentProcessor = function () {
 		if (_idleObserverIsRegistered) {
-			Zotero.debug("Stopping full-text content processor");
+			Zotero.debug("Unregistering full-text content processor idle observer");
 			var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
 				.getService(Components.interfaces.nsIIdleService);
 			idleService.removeIdleObserver(this.idleObserver, _idleObserverDelay);
 			_idleObserverIsRegistered = false;
 		}
 		
-		if (_processorTimer) {
-			_processorTimer.cancel();
-			_processorTimer = null;
+		this.stopContentProcessor();
+	}
+	
+	
+	/**
+	 * Stop the idle observer and a running timer, if there is one
+	 */
+	this.stopContentProcessor = function () {
+		Zotero.debug("Stopping full-text content processor");
+		if (_processorTimeoutID) {
+			clearTimeout(_processorTimeoutID);
+			_processorTimeoutID = null;
 		}
 	}
 	
@@ -1093,6 +1100,14 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	 * @return {Boolean}  TRUE if there's more content to process; FALSE otherwise
 	 */
 	this.processUnprocessedContent = Zotero.Promise.coroutine(function* (itemIDs) {
+		// Idle observer can take a little while to trigger and may not cancel the setTimeout()
+		// in time, so check idle time directly
+		var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
+			.getService(Components.interfaces.nsIIdleService);
+		if (idleService.idleTime < _idleObserverDelay * 1000) {
+			return;
+		}
+		
 		if (!itemIDs) {
 			Zotero.debug("Checking for unprocessed full-text content");
 			let sql = "SELECT itemID FROM fulltextItems WHERE synced=" + this.SYNC_STATE_TO_PROCESS;
@@ -1112,7 +1127,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		// If there's no more unprocessed content, stop the idle observer
 		if (!itemIDs.length) {
 			Zotero.debug("No unprocessed full-text content found");
-			this.stopContentProcessor();
+			this.unregisterContentProcessor();
 			return;
 		}
 		
@@ -1123,38 +1138,27 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		
 		yield Zotero.Fulltext.indexFromProcessorCache(itemID);
 		
-		// If there are remaining items, call self again after a short delay. The delay allows for
-		// processing to be interrupted if the user returns from idle
-		if (itemIDs.length) {
-			if (!_processorTimer) {
-				_processorTimer = Components.classes["@mozilla.org/timer;1"]
-					.createInstance(Components.interfaces.nsITimer);
-			}
-			_processorTimer.initWithCallback(
-				function () {
-					Zotero.Fulltext.processUnprocessedContent(itemIDs);
-				},
-				200,
-				Components.interfaces.nsITimer.TYPE_ONE_SHOT
-			);
+		if (!itemIDs.length || idleService.idleTime < _idleObserverDelay * 1000) {
+			return;
 		}
+		
+		// If there are remaining items, call self again after a short delay. The delay allows
+		// for processing to be interrupted if the user returns from idle. At least on macOS,
+		// when Zotero is in the background this can be throttled to 10 seconds.
+		_processorTimeoutID = setTimeout(() => this.processUnprocessedContent(itemIDs), 200);
 	});
 	
 	this.idleObserver = {
 		observe: function (subject, topic, data) {
 			// On idle, start the background processor
 			if (topic == 'idle') {
-				Zotero.Fulltext.processUnprocessedContent();
+				this.processUnprocessedContent();
 			}
-			// When back from idle, stop the processor (but keep the idle
-			// observer registered)
+			// When back from idle, stop the processor (but keep the idle observer registered)
 			else if (topic == 'active') {
-				if (_processorTimer) {
-					Zotero.debug("Stopping full-text content processor");
-					_processorTimer.cancel();
-				}
+				this.stopContentProcessor();
 			}
-		}
+		}.bind(this)
 	};
 	
 	
