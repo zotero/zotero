@@ -80,7 +80,7 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			yield attachment.saveTx();
 			
 			var content = generateContent()
-			var spy = sinon.spy(Zotero.Fulltext, "startContentProcessor")
+			var spy = sinon.spy(Zotero.Fulltext, "registerContentProcessor")
 			
 			var itemFullTextVersion = 10;
 			var libraryVersion = 15;
@@ -146,7 +146,7 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			yield attachment.saveTx();
 			
 			content = generateContent()
-			spy = sinon.spy(Zotero.Fulltext, "startContentProcessor")
+			spy = sinon.spy(Zotero.Fulltext, "registerContentProcessor")
 			
 			itemFullTextVersion = 17;
 			var lastLibraryVersion = libraryVersion;
