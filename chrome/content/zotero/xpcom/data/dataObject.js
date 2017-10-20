@@ -402,6 +402,10 @@ Zotero.DataObject.prototype.removeRelation = function (predicate, object) {
 Zotero.DataObject.prototype.setRelations = function (newRelations) {
 	this._requireData('relations');
 	
+	if (typeof newRelations != 'object') {
+		throw new Error(`Relations must be an object (${typeof newRelations} given)`);
+	}
+	
 	var oldRelations = this._relations;
 	
 	// Limit predicates to letters and colons for now
