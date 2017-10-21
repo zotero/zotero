@@ -2569,6 +2569,37 @@ Zotero.Translate.Search.prototype.setSearch = function(search) {
 }
 
 /**
+ * Set an identifier to use for searching
+ *
+ * @param {Object} identifier - An object with 'DOI', 'ISBN', or 'PMID'
+ */
+Zotero.Translate.Search.prototype.setIdentifier = function (identifier) {
+	var search;
+	if (identifier.DOI) {
+		search = {
+			itemType: "journalArticle",
+			DOI: identifier.DOI
+		};
+	}
+	else if (identifier.ISBN) {
+		search = {
+			itemType: "book",
+			ISBN: identifier.ISBN
+		};
+	}
+	else if (identifier.PMID) {
+		search = {
+			itemType: "journalArticle",
+			contextObject: "rft_id=info:pmid/" + identifier.PMID
+		};
+	}
+	else {
+		throw new Error("Unrecognized identifier");
+	}
+	this.setSearch(search);
+}
+
+/**
  * Overloads {@link Zotero.Translate.Base#getTranslators} to always return all potential translators
  */
 Zotero.Translate.Search.prototype.getTranslators = function() {

@@ -32,73 +32,8 @@ var Zotero_Lookup = new function () {
 	 * Performs a lookup by DOI, PMID, or ISBN
 	 */
 	this.accept = Zotero.Promise.coroutine(function* (textBox) {
-		var foundIDs = [];	//keep track of identifiers to avoid duplicates
-		var identifier = textBox.value;
-		//first look for DOIs
-		var ids = identifier.split(/[\s\u00A0]+/);	//whitespace + non-breaking space
-		var searches = [], doi;
-		for(var i=0, n=ids.length; i<n; i++) {
-			if((doi = Zotero.Utilities.cleanDOI(ids[i])) && foundIDs.indexOf(doi) == -1) {
-				searches.push({
-					itemType: "journalArticle",
-					DOI: doi
-				});
-				foundIDs.push(doi);
-			}
-		}
-
-		//then try ISBNs
-		if (!searches.length) {
-			//first try replacing dashes
-			ids = identifier.replace(/[\u002D\u00AD\u2010-\u2015\u2212]+/g, "")	//hyphens and dashes
-											.toUpperCase();
-
-			var ISBN_RE = /(?:\D|^)(97[89]\d{10}|\d{9}[\dX])(?!\d)/g;
-			var isbn;
-
-			while(isbn = ISBN_RE.exec(ids)) {
-				isbn = Zotero.Utilities.cleanISBN(isbn[1]);
-				if(isbn && foundIDs.indexOf(isbn) == -1) {
-					searches.push({
-						itemType: "book",
-						ISBN: isbn
-					});
-					foundIDs.push(isbn);
-				}
-			}
-
-			//now try spaces
-			if (!searches.length) {
-				ids = ids.replace(/[ \u00A0]+/g, "");	//space + non-breaking space
-				while(isbn = ISBN_RE.exec(ids)) {
-					isbn = Zotero.Utilities.cleanISBN(isbn[1]);
-					if(isbn && foundIDs.indexOf(isbn) == -1) {
-						searches.push({
-							itemType: "book",
-							ISBN: isbn
-						});
-						foundIDs.push(isbn);
-					}
-				}
-			}
-		}
-
-		//finally try for PMID
-		if (!searches.length) {
-			// PMID; right now, the longest PMIDs are 8 digits, so it doesn't 
-			// seem like we will need to discriminate for a fairly long time
-			var PMID_RE = /(?:\D|^)(\d{1,9})(?!\d)/g;
-			var pmid;
-			while((pmid = PMID_RE.exec(identifier)) && foundIDs.indexOf(pmid) == -1) {
-				searches.push({
-					itemType: "journalArticle",
-					contextObject: "rft_id=info:pmid/" + pmid[1]
-				});
-				foundIDs.push(pmid);
-			}
-		}
-
-		if (!searches.length) {
+		var identifiers = Zotero.Utilities.Internal.extractIdentifiers(textBox.value);
+		if (!identifiers.length) {
 			Zotero.alert(
 				window,
 				Zotero.getString("lookup.failure.title"),
@@ -120,9 +55,9 @@ var Zotero_Lookup = new function () {
 
 		Zotero_Lookup.toggleProgress(true);
 
-		for (let search of searches) {
+		for (let identifier of identifiers) {
 			var translate = new Zotero.Translate.Search();
-			translate.setSearch(search);
+			translate.setIdentifier(identifier);
 
 			// be lenient about translators
 			let translators = yield translate.getTranslators();

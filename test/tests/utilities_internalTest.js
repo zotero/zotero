@@ -1,6 +1,14 @@
 "use strict";
 
 describe("Zotero.Utilities.Internal", function () {
+	var ZUI;
+		
+	before(function () {
+		ZUI = Zotero.Utilities.Internal;
+	});
+	
+	
+	
 	describe("#md5()", function () {
 		it("should generate hex string given file path", function* () {
 			var file = OS.Path.join(getTestDataDirectory().path, 'test.png');
@@ -102,5 +110,48 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.isFalse(val);
 			assert.isFalse(spy.called);
 		});
-	})
+	});
+	
+	
+	describe("#extractIdentifiers()", function () {
+		it("should extract ISBN-10", async function () {
+			var id = "0838985890";
+			var identifiers = ZUI.extractIdentifiers(id);
+			assert.lengthOf(identifiers, 1);
+			assert.lengthOf(Object.keys(identifiers[0]), 1);
+			assert.propertyVal(identifiers[0], "ISBN", id);
+		});
+		
+		it("should extract ISBN-13", async function () {
+			var identifiers = ZUI.extractIdentifiers("978-0838985892");
+			assert.lengthOf(identifiers, 1);
+			assert.lengthOf(Object.keys(identifiers[0]), 1);
+			assert.propertyVal(identifiers[0], "ISBN", "9780838985892");
+		});
+		
+		it("should extract multiple ISBN-13s", async function () {
+			var identifiers = ZUI.extractIdentifiers("978-0838985892 9781479347711 ");
+			assert.lengthOf(identifiers, 2);
+			assert.lengthOf(Object.keys(identifiers[0]), 1);
+			assert.lengthOf(Object.keys(identifiers[1]), 1);
+			assert.propertyVal(identifiers[0], "ISBN", "9780838985892");
+			assert.propertyVal(identifiers[1], "ISBN", "9781479347711");
+		});
+		
+		it("should extract DOI", async function () {
+			var id = "10.4103/0976-500X.85940";
+			var identifiers = ZUI.extractIdentifiers(id);
+			assert.lengthOf(identifiers, 1);
+			assert.lengthOf(Object.keys(identifiers[0]), 1);
+			assert.propertyVal(identifiers[0], "DOI", id);
+		});
+		
+		it("should extract PMID", async function () {
+			var id = "24297125";
+			var identifiers = ZUI.extractIdentifiers(id);
+			assert.lengthOf(identifiers, 1);
+			assert.lengthOf(Object.keys(identifiers[0]), 1);
+			assert.propertyVal(identifiers[0], "PMID", id);
+		});
+	});
 })
