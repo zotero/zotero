@@ -333,6 +333,9 @@ Zotero.Items = function() {
 			Zotero.debug("Fixing incorrect creator indexes for item " + item.libraryKey
 				+ " (" + numCreators + ", " + maxOrderIndex + ")", 2);
 			var i = numCreators;
+			if (!item._changed.creators) {
+				item._changed.creators = {};
+			}
 			while (i <= maxOrderIndex) {
 				item._changed.creators[i] = true;
 				i++;
