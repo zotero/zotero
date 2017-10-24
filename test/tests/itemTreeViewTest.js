@@ -137,6 +137,28 @@ describe("Zotero.ItemTreeView", function() {
 			assert.equal(selected[0], existingItemID);
 		});
 		
+		it("should clear search and select new item if non-matching quick search is active", async function () {
+			await createDataObject('item');
+			
+			var quicksearch = win.document.getElementById('zotero-tb-search');
+			quicksearch.value = Zotero.randomString();
+			quicksearch.doCommand();
+			await itemsView._refreshPromise;
+			
+			assert.equal(itemsView.rowCount, 0);
+			
+			// Create item
+			var item = await createDataObject('item');
+			
+			assert.isAbove(itemsView.rowCount, 0);
+			assert.equal(quicksearch.value, '');
+			
+			// New item should be selected
+			var selected = itemsView.getSelectedItems();
+			assert.lengthOf(selected, 1);
+			assert.equal(selected[0].id, item.id);
+		});
+		
 		it("shouldn't clear quicksearch if skipSelect is passed", function* () {
 			var searchString = Zotero.Items.get(existingItemID).getField('title');
 			

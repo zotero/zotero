@@ -811,8 +811,14 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			}
 			
 			if (!allDeleted) {
-				// DEBUG: Search is async, so this might not work properly
 				quicksearch.doCommand();
+				// See _refreshPromise note below
+				if (this._refreshPromise) {
+					try {
+						yield this._refreshPromise;
+					}
+					catch (e) {}
+				}
 				madeChanges = true;
 				sort = true;
 			}
@@ -873,6 +879,15 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				}
 			}
 			quicksearch.doCommand();
+			// We have to wait for the search in order to select new items properly, but doCommand()
+			// doesn't provide the return value from the oncommand handler, so we can't wait for an
+			// asynchronous handler. But really they just end up calling refresh(), so we wait for that.
+			if (this._refreshPromise) {
+				try {
+					yield this._refreshPromise;
+				}
+				catch (e) {}
+			}
 			madeChanges = true;
 			sort = true;
 		}
