@@ -1536,7 +1536,12 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				}
 				
 				// Extract a valid language tag
-				locale = locale.match(/^[a-z]{2}(\-[A-Z]{2})?/)[0];
+				try {
+					locale = locale.match(/^[a-z]{2}(\-[A-Z]{2})?/)[0];
+				}
+				catch (e) {
+					throw new Error(`Error parsing locale ${locale}`);
+				}
 				locales = [locale];
 			}
 			
@@ -1549,12 +1554,25 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		catch (e) {
 			Zotero.logError(e);
 			
-			// If there's an error, just skip sorting
-			collator = {
-				compare: function (a, b) {
-					return 0;
-				}
-			};
+			// Fall back to en-US sorting
+			try {
+				Zotero.logError("Falling back to en-US sorting");
+				collator = new Intl.Collator(['en-US'], {
+					ignorePunctuation: true,
+					numeric: true,
+					sensitivity: 'base'
+				});
+			}
+			catch (e) {
+				Zotero.logError(e);
+				
+				// If there's still an error, just skip sorting
+				collator = {
+					compare: function (a, b) {
+						return 0;
+					}
+				};
+			}
 		}
 		
 		// Grab all ASCII punctuation and space at the begining of string
