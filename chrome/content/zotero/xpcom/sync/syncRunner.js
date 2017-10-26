@@ -371,10 +371,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 			
 			let remoteGroupVersions = yield client.getGroupVersions(keyInfo.userID);
-			Zotero.debug(remoteGroupVersions);
 			let remoteGroupIDs = Object.keys(remoteGroupVersions).map(id => parseInt(id));
 			let skippedGroups = Zotero.Sync.Data.Local.getSkippedGroups();
-			Zotero.debug(skippedGroups);
 			
 			// Remove skipped groups
 			if (syncAllLibraries) {
@@ -456,9 +454,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			//
 			// TODO: Localize
 			for (let group of remotelyMissingGroups) {
-				// Ignore archived groups
+				// Ignore remotely missing archived groups
 				if (group.archived) {
-					groupsToDownload.splice(groupsToDownload.indexOf(group.id), 1);
+					groupsToDownload = groupsToDownload.filter(groupID => groupID != group.id);
 					continue;
 				}
 				

@@ -296,12 +296,12 @@ describe("Zotero.Sync.Runner", function () {
 		});
 		
 		it("should filter out remotely missing archived libraries if library list not provided", function* () {
-			var syncedGroupID = responses.groups.ownerGroup.json.id;
+			var ownerGroupID = responses.groups.ownerGroup.json.id;
 			var archivedGroupID = 162512451; // nonexistent group id
 			
-			var syncedGroup = yield createGroup({
-				id: syncedGroupID,
-				version: responses.groups.ownerGroup.json.version - 1
+			var ownerGroup = yield createGroup({
+				id: ownerGroupID,
+				version: responses.groups.ownerGroup.json.version
 			});
 			var archivedGroup = yield createGroup({
 				id: archivedGroupID,
@@ -310,15 +310,23 @@ describe("Zotero.Sync.Runner", function () {
 			});
 			
 			setResponse('userGroups.groupVersions');
-			setResponse('groups.ownerGroup');
+			setResponse('groups.memberGroup');
 			var libraries = yield runner.checkLibraries(
 				runner.getAPIClient({ apiKey }),
 				false,
 				responses.keyInfo.fullAccess.json
 			);
 			
-			assert.lengthOf(libraries, 2);
-			assert.sameMembers(libraries, [userLibraryID, syncedGroup.libraryID]);
+			assert.lengthOf(libraries, 3);
+			assert.sameMembers(
+				libraries,
+				[
+					userLibraryID,
+					ownerGroup.libraryID,
+					// Nonexistent group should've been created
+					Zotero.Groups.getLibraryIDFromGroupID(responses.groups.memberGroup.json.id)
+				]
+			);
 		});
 		
 		it("should unarchive library if available remotely", function* () {
