@@ -620,7 +620,9 @@
 			<method name="clearUndo">
 				<body>
 				<![CDATA[
-					this._editor.undoManager.clear();
+					if (this._editor) {
+						this._editor.undoManager.clear();
+					}
 				]]>
 				</body>
 			</method>
