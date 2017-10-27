@@ -3694,7 +3694,6 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var userLibraryID = Zotero.Libraries.userLibraryID;
 			({ engine, client, caller } = yield setup());
 			
-			yield Zotero.Items.erase([1, 2], { skipDeleteLog: true });
 			var types = Zotero.DataObjectUtilities.getTypes();
 			var objects = {};
 			
