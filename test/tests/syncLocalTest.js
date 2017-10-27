@@ -440,15 +440,13 @@ describe("Zotero.Sync.Data.Local", function() {
 			var type = 'item';
 			let obj = yield createDataObject(type, { version: 5 });
 			let data = obj.toJSON();
-			yield Zotero.Sync.Data.Local.saveCacheObjects(
-				type, libraryID, [data]
-			);
+			yield Zotero.Sync.Data.Local.saveCacheObjects(type, libraryID, [data]);
 			
 			// Change local title
 			yield modifyDataObject(obj)
 			var changedTitle = obj.getField('title');
 			
-			// Save remote version to cache without title but with changed place
+			// Create remote version without title but with changed place
 			data.key = obj.key;
 			data.version = 10;
 			var changedPlace = data.place = 'New York';
@@ -465,14 +463,14 @@ describe("Zotero.Sync.Data.Local", function() {
 			assert.equal(obj.getField('place'), changedPlace);
 		})
 		
-		it("should save item with overriding local conflict as unsynced", function* () {
+		it("should save item with overriding local conflict as unsynced", async function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
 			var isbn = '978-0-335-22006-9';
 			var type = 'item';
 			let obj = createUnsavedDataObject(type, { version: 5 });
 			obj.setField('ISBN', isbn);
-			yield obj.saveTx();
+			await obj.saveTx();
 			let data = obj.toJSON();
 			
 			data.key = obj.key;
@@ -483,7 +481,7 @@ describe("Zotero.Sync.Data.Local", function() {
 				version: 10,
 				data
 			};
-			var results = yield Zotero.Sync.Data.Local.processObjectsFromJSON(
+			var results = await Zotero.Sync.Data.Local.processObjectsFromJSON(
 				type, libraryID, [json], { stopOnError: true }
 			);
 			assert.isTrue(results[0].processed);
@@ -492,6 +490,9 @@ describe("Zotero.Sync.Data.Local", function() {
 			assert.equal(obj.version, 10);
 			assert.equal(obj.getField('ISBN'), isbn);
 			assert.isFalse(obj.synced);
+			// Sync cache should match remote
+			var cacheJSON = await Zotero.Sync.Data.Local.getCacheObject(type, libraryID, data.key, data.version);
+			assert.propertyVal(cacheJSON.data, "ISBN", data.ISBN);
 		});
 		
 		it("should restore locally deleted collections and searches that changed remotely", async function () {

@@ -880,10 +880,9 @@ Zotero.Sync.Data.Engine.prototype._downloadDeletions = Zotero.Promise.coroutine(
 				function (chunk) {
 					return Zotero.DB.executeTransaction(function* () {
 						for (let json of chunk) {
-							if (!json.deleted) continue;
-							let obj = objectsClass.getByLibraryAndKey(
-								this.libraryID, json.key
-							);
+							let data = json.data;
+							if (!data.deleted) continue;
+							let obj = objectsClass.getByLibraryAndKey(this.libraryID, data.key);
 							if (!obj) {
 								Zotero.logError("Remotely deleted " + objectType
 									+ " didn't exist after conflict resolution");

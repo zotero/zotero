@@ -835,7 +835,6 @@ Zotero.Sync.Data.Local = {
 								let cachedJSON = yield this.getCacheObject(
 									objectType, obj.libraryID, obj.key, obj.version
 								);
-								
 								let result = this._reconcileChanges(
 									objectType,
 									cachedJSON.data,
@@ -844,20 +843,21 @@ Zotero.Sync.Data.Local = {
 									['mtime', 'md5', 'dateAdded', 'dateModified']
 								);
 								
-								// If no changes, update local version number and mark as synced
+								// If no changes, just update local version number and mark as synced
 								if (!result.changes.length && !result.conflicts.length) {
 									Zotero.debug("No remote changes to apply to local "
 										+ objectType + " " + obj.libraryKey);
-									
+									saveOptions.skipData = true;
+									// If local object is different but we ignored the changes
+									// (e.g., ISBN hyphenation), save as unsynced. Since we're skipping
+									// data, the local version won't be overwritten.
+									if (result.localChanged) {
+										saveOptions.saveAsUnsynced = true;
+									}
 									let saveResults = yield this._saveObjectFromJSON(
 										obj,
 										jsonObject,
-										{
-											skipData: true,
-											notifierQueue,
-											// Save as unsynced
-											saveAsChanged: !!result.localChanged
-										}
+										saveOptions
 									);
 									results.push(saveResults);
 									if (!saveResults.processed) {
@@ -902,11 +902,6 @@ Zotero.Sync.Data.Local = {
 									jsonDataLocal[x] = jsonData[x];
 								})
 								jsonObject.data = jsonDataLocal;
-								
-								// Save as unsynced
-								if (results.localChanged) {
-									saveOptions.saveAsChanged = true;
-								}
 							}
 						}
 						// Object doesn't exist locally
@@ -1190,19 +1185,26 @@ Zotero.Sync.Data.Local = {
 		let notifierQueues = [];
 		try {
 			for (let i = 0; i < mergeData.length; i++) {
-				// Batch notifier updates
+				// Batch notifier updates, despite multiple transactions
 				if (notifierQueues.length == batchSize) {
 					yield Zotero.Notifier.commit(notifierQueues);
 					notifierQueues = [];
 				}
 				let notifierQueue = new Zotero.Notifier.Queue;
 				
-				let json = mergeData[i];
+				let json = mergeData[i].data;
 				
 				let saveOptions = {};
 				Object.assign(saveOptions, options);
-				// Tell _saveObjectFromJSON() to save as unsynced
-				saveOptions.saveAsChanged = true;
+				// If choosing local object, save as unsynced with remote version (or 0 if remote is
+				// deleted) and remote object in cache, to simulate a save and edit
+				if (mergeData[i].selected == 'left') {
+					json.version = conflicts[i].right.version || 0;
+					saveOptions.saveAsUnsynced = true;
+					if (conflicts[i].right.version) {
+						saveOptions.cacheObject = conflicts[i].right;
+					}
+				}
 				saveOptions.notifierQueue = notifierQueue;
 				
 				// Errors have to be thrown in order to roll back the transaction, so catch
@@ -1259,9 +1261,7 @@ Zotero.Sync.Data.Local = {
 							saveOptions.skipCache = true;
 						}
 						
-						let saveResults = yield this._saveObjectFromJSON(
-							obj, json, saveOptions
-						);
+						let saveResults = yield this._saveObjectFromJSON(obj, json, saveOptions);
 						results.push(saveResults);
 						if (!saveResults.processed) {
 							throw saveResults.error;
@@ -1360,7 +1360,7 @@ Zotero.Sync.Data.Local = {
 				yield this._checkAttachmentForDownload(obj, json.data.mtime, options.isNewObject);
 			}
 			obj.version = json.data.version;
-			if (!options.saveAsChanged) {
+			if (!options.saveAsUnsynced) {
 				obj.synced = true;
 			}
 			yield obj.save({
@@ -1374,13 +1374,17 @@ Zotero.Sync.Data.Local = {
 					return;
 				}
 			});
-			yield this.saveCacheObject(obj.objectType, obj.libraryID, json.data);
-			results.processed = true;
-			
+			let cacheJSON = options.cacheObject ? options.cacheObject : json.data;
+			yield this.saveCacheObject(obj.objectType, obj.libraryID, cacheJSON);
 			// Delete older versions of the object in the cache
 			yield this.deleteCacheObjectVersions(
-				obj.objectType, obj.libraryID, json.key, null, json.version - 1
+				obj.objectType,
+				obj.libraryID,
+				json.key,
+				null,
+				cacheJSON.version - 1
 			);
+			results.processed = true;
 			
 			// Delete from sync queue
 			yield this._removeObjectFromSyncQueue(obj.objectType, obj.libraryID, json.key);
@@ -1519,7 +1523,7 @@ Zotero.Sync.Data.Local = {
 		
 		return {
 			changes: changeset2,
-			conflicts: conflicts
+			conflicts
 		};
 	},
 	

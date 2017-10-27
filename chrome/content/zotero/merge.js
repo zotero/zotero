@@ -168,7 +168,6 @@ var Zotero_Merge_Window = new function () {
 			if (x.data) {
 				x.data.version = _conflicts[i][x.selected].version;
 			}
-			a[i] = x.data;
 		})
 		
 		_io.dataOut = _merged;
