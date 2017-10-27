@@ -142,7 +142,7 @@ Zotero.defineProperty(Zotero.Library.prototype, 'libraryTypeID', {
 			return Zotero.Groups.getGroupIDFromLibraryID(this._libraryID);
 		
 		default:
-			throw new Error(`Cannot return library type id for ${this._libraryType} library`);
+			throw new Error(`Tried to get library type id for ${this._libraryType} library`);
 		}
 	}
 });
@@ -169,6 +169,7 @@ Zotero.defineProperty(Zotero.Library.prototype, 'name', {
 			return Zotero.getString('pane.collections.library');
 		}
 		
+		// This property is provided by the extending objects (Group, Feed) for other library types
 		throw new Error('Unhandled library type "' + this._libraryType + '"');
 	}
 });

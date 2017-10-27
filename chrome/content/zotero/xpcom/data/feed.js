@@ -114,6 +114,11 @@ Zotero.defineProperty(Zotero.Feed.prototype, 'isFeed', {
 Zotero.defineProperty(Zotero.Feed.prototype, 'libraryTypes', {
 	value: Object.freeze(Zotero.Feed._super.prototype.libraryTypes.concat(['feed']))
 });
+
+Zotero.defineProperty(Zotero.Feed.prototype, 'libraryTypeID', {
+	get: () => undefined
+});
+
 Zotero.defineProperty(Zotero.Feed.prototype, 'unreadCount', {
 	get: function() { return this._feedUnreadCount; }
 });

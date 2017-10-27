@@ -80,7 +80,8 @@ Zotero.defineProperty(Zotero.Collection.prototype, 'parent', {
 	set: function(val) {
 		Zotero.debug("WARNING: Zotero.Collection.prototype.parent has been deprecated -- use .parentID or .parentKey", 2);
 		this.parentID = val;
-	}
+	},
+	enumerable: false
 });
 
 Zotero.defineProperty(Zotero.Collection.prototype, 'treeViewID', {

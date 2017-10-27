@@ -105,7 +105,8 @@ Zotero.defineProperty(Zotero.Item.prototype, 'itemID', {
 	get: function() {
 		Zotero.debug("Item.itemID is deprecated -- use Item.id");
 		return this._id;
-	}
+	},
+	enumerable: false
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'libraryID', {
 	get: function() { return this._libraryID; },
@@ -2685,7 +2686,8 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentMIMEType', {
 	get: function() {
 		Zotero.debug(".attachmentMIMEType deprecated -- use .attachmentContentType");
 		return this.attachmentContentType;
-	}
+	},
+	enumerable: false
 });
 
 /**

@@ -50,6 +50,13 @@ describe("Zotero.Feed", function() {
 		});
 	});
 	
+	describe("#libraryTypeID", function () {
+		it("should be undefind", function* () {
+			let feed = yield createFeed();
+			assert.isUndefined(feed.libraryTypeID);
+		});
+	});
+	
 	describe("#url", function() {
 		it("should throw if trying to set an invalid URL", function *() {
 			let feed = new Zotero.Feed({ name: 'Test ' + Zotero.randomString() });
