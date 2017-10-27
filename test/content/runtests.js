@@ -243,20 +243,28 @@ if(run && ZoteroUnit.tests) {
 		let stopFile = ZoteroUnit.stopAt ? getTestFilename(ZoteroUnit.stopAt) : false;
 		while(enumerator.hasMoreElements()) {
 			var file = enumerator.getNext().QueryInterface(Components.interfaces.nsIFile);
-			if(file.leafName.endsWith(".js")) {
-				if (started || file.leafName == startFile) {
-					testFiles.push(file.leafName);
-					started = true;
-				}
-				if (file.leafName == stopFile) {
-					break;
-				}
+			if (file.leafName.endsWith(".js")) {
+				testFiles.push(file.leafName);
 			}
 		}
-		if (!started) {
+		testFiles.sort();
+		
+		// Find the start and stop files
+		let startPos = 0;
+		let stopPos = testFiles.length - 1;
+		for (let i = 0; i < testFiles.length; i++) {
+			if (testFiles[i] == startFile) {
+				startPos = i;
+			}
+			if (testFiles[i] == stopFile) {
+				stopPos = i;
+				break;
+			}
+		}
+		if (startFile && startPos == 0 && startFile != testFiles[0]) {
 			dump(`Invalid start file ${startFile}\n`);
 		}
-		testFiles.sort();
+		testFiles = testFiles.slice(startPos, stopPos + 1);
 	} else {
 		var specifiedTests = ZoteroUnit.tests.split(",");
 		for (let test of specifiedTests) {
