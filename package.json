@@ -34,7 +34,7 @@
     "babel-preset-react": "^6.16.0",
     "browserify": "^14.3.0",
     "chai": "^4.1.2",
-    "chai-as-promised": "^6.0.0",
+    "chai-as-promised": "^7.1.1",
     "chokidar": "^1.7.0",
     "co-mocha": "^1.2.0",
     "colors": "^1.1.2",
