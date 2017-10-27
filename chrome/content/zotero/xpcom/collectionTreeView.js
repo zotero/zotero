@@ -2192,6 +2192,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 				lastWin.openDialog('chrome://zotero/content/merge.xul', '', 'chrome,modal,centerscreen', io);
 				
 				yield Zotero.DB.executeTransaction(function* () {
+					// DEBUG: This probably needs to be updated if this starts being used
 					for (let obj of io.dataOut) {
 						yield obj.ref.save();
 					}

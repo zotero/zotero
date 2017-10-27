@@ -1026,11 +1026,12 @@ Zotero.Sync.Storage.Local = {
 		if (!io.dataOut) {
 			return false;
 		}
+		
 		yield Zotero.DB.executeTransaction(function* () {
 			for (let i = 0; i < conflicts.length; i++) {
 				let conflict = conflicts[i];
 				let item = Zotero.Items.getByLibraryAndKey(libraryID, conflict.left.key);
-				let mtime = io.dataOut[i].dateModified;
+				let mtime = io.dataOut[i].data.dateModified;
 				// Local
 				if (mtime == conflict.left.dateModified) {
 					syncState = this.SYNC_STATE_FORCE_UPLOAD;
