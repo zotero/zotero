@@ -168,7 +168,7 @@ if [[ "$TRAVIS" != true ]] && ! ps | grep scripts/build.js | grep -v grep > /dev
 	echo
 	echo "Running JS build process"
 	cd "$CWD/.."
-	npm run build
+	npm run build || exit $?
 	echo
 fi
 
