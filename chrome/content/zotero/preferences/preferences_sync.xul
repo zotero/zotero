@@ -68,12 +68,16 @@
 											<textbox id="sync-username-textbox"
 												preference="pref-sync-username"
 												onblur="Zotero_Preferences.Sync.trimUsername()"
-												onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event);"/>
+												oninput="Zotero_Preferences.Sync.credentialsChange(event)"
+												onchange="Zotero_Preferences.Sync.credentialsChange(event)"
+												onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event)"/>
 										</row>
 										<row>
 											<label value="&zotero.preferences.sync.password;"/>
 											<textbox id="sync-password" type="password"
-												onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event);"/>
+												oninput="Zotero_Preferences.Sync.credentialsChange(event)"
+												onchange="Zotero_Preferences.Sync.credentialsChange(event)"
+												onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event)"/>
 										</row>
 										<row>
 											<box/>

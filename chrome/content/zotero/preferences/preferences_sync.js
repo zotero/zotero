@@ -81,7 +81,7 @@ Zotero_Preferences.Sync = {
 	},
 
 
-	credentialsKeyPress: function (event) {
+	credentialsChange: function (event) {
 		var username = document.getElementById('sync-username-textbox');
 		var password = document.getElementById('sync-password');
 
@@ -95,9 +95,12 @@ Zotero_Preferences.Sync = {
 				syncAuthButton.setAttribute('disabled', 'false');
 			}
 		});
-
+	},
+	
+	
+	credentialsKeyPress: function (event) {
 		if (event.keyCode == 13) {
-			Zotero_Preferences.Sync.linkAccount(event);
+			this.linkAccount(event);
 			event.preventDefault();
 		}
 	},
