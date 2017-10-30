@@ -225,7 +225,8 @@ Zotero_Preferences.Sync = {
 		var row = {}, col = {}, child = {};
 		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, child);
 		
-		if (col.value.element.id == 'libraries-to-sync-checked') {
+		// Below the list or on checkmark column
+		if (!col.value || col.value.element.id == 'libraries-to-sync-checked') {
 			return;
 		}
 		// if dblclicked anywhere but the checkbox update pref
@@ -238,7 +239,8 @@ Zotero_Preferences.Sync = {
 		var row = {}, col = {}, child = {};
 		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, child);
 		
-		if (col.value.element.id != 'libraries-to-sync-checked') {
+		// Below the list or not on checkmark column
+		if (!col.value || col.value.element.id != 'libraries-to-sync-checked') {
 			return;
 		}
 		// if clicked on checkbox update pref
