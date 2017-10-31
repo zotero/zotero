@@ -407,9 +407,12 @@ Zotero.FeedReader._getFeedItem = function(feedEntry, feedInfo) {
 	
 	let date = Zotero.FeedReader._getFeedField(feedEntry, 'publicationDate', 'prism')
 		|| Zotero.FeedReader._getFeedField(feedEntry, 'date', 'dc')
+		// DEBUG: Why not get these from the feedEntry?
 		|| Zotero.FeedReader._getFeedField(feedEntry, 'pubDate') // RSS
-		|| Zotero.FeedReader._getFeedField(feedEntry, 'published') // Atom
-		|| Zotero.FeedReader._getFeedField(feedEntry, 'updated'); // Atom
+		|| Zotero.FeedReader._getFeedField(feedEntry, 'updated', 'atom') // Atom
+		|| Zotero.FeedReader._getFeedField(feedEntry, 'published', 'atom'); // Atom
+		
+	
 	if (date) item.date = date;
 	
 	let publicationTitle = Zotero.FeedReader._getFeedField(feedEntry, 'publicationName', 'prism')
