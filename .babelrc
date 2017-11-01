@@ -15,16 +15,7 @@
     "test/resource/*.js"
   ],
   "plugins": [
-    "syntax-flow",
     "syntax-jsx",
-    "syntax-async-generators",
-    "syntax-class-properties",
-    "syntax-decorators",
-    "syntax-do-expressions",
-    "syntax-export-extensions",
-    "syntax-flow",
-    "syntax-jsx",
-    "syntax-object-rest-spread",
     "transform-react-jsx",
     "transform-react-display-name",
     [
