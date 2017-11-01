@@ -2416,14 +2416,18 @@ Zotero.Item.prototype.fileExistsCached = function () {
 
 
 
-/*
+/**
  * Rename file associated with an attachment
  *
- * -1   		Destination file exists -- use _force_ to overwrite
- * -2		Error renaming
- * false		Attachment file not found
+ * @param {String} newName
+ * @param {Boolean} [overwrite=false] - Overwrite file if one exists
+ * @param {Boolean} [unique=false] - Add suffix to create unique filename if necessary
+ * @return {Number|false} -- true - Rename successful
+ *                           -1 - Destination file exists; use _force_ to overwrite
+ *                           -2 - Error renaming
+ *                           false - Attachment file not found
  */
-Zotero.Item.prototype.renameAttachmentFile = Zotero.Promise.coroutine(function* (newName, overwrite) {
+Zotero.Item.prototype.renameAttachmentFile = Zotero.Promise.coroutine(function* (newName, overwrite=false, unique=false) {
 	var origPath = yield this.getFilePathAsync();
 	if (!origPath) {
 		Zotero.debug("Attachment file not found in renameAttachmentFile()", 2);
@@ -2442,21 +2446,57 @@ Zotero.Item.prototype.renameAttachmentFile = Zotero.Promise.coroutine(function* 
 			return true;
 		}
 		
-		var destPath = OS.Path.join(OS.Path.dirname(origPath), newName);
+		var parentDir = OS.Path.dirname(origPath);
+		var destPath = OS.Path.join(parentDir, newName);
 		var destName = OS.Path.basename(destPath);
+		// Get root + extension, if there is one
+		var pos = destName.lastIndexOf('.');
+		if (pos > 0) {
+			var root = destName.substr(0, pos);
+			var ext = destName.substr(pos + 1);
+		}
+		else {
+			var root = destName;
+		}
 		
 		// Update mod time and clear hash so the file syncs
 		// TODO: use an integer counter instead of mod time for change detection
 		// Update mod time first, because it may fail for read-only files on Windows
 		yield OS.File.setDates(origPath, null, null);
-		var result = yield OS.File.move(origPath, destPath, { noOverwrite: !overwrite })
-		// If no overwriting and file exists, return -1
-		.catch(OS.File.Error, function (e) {
-			if (e.becauseExists) {
-				return -1;
+		var result;
+		var incr = 0;
+		while (true) {
+			// If filename already exists, add a numeric suffix to the end of the root, before
+			// the extension if there is one
+			if (incr) {
+				if (ext) {
+					destName = root + ' ' + (incr + 1) + '.' + ext;
+				}
+				else {
+					destName = root + ' ' + (incr + 1);
+				}
+				destPath = OS.Path.join(parentDir, destName);
 			}
-			throw e;
-		});
+			
+			try {
+				result = yield OS.File.move(origPath, destPath, { noOverwrite: !overwrite })
+			}
+			catch (e) {
+				if (e instanceof OS.File.Error) {
+					if (e.becauseExists) {
+						// Increment number to create unique suffix
+						if (unique) {
+							incr++;
+							continue;
+						}
+						// If no overwriting or making unique and file exists, return -1
+						return -1;
+					}
+				}
+				throw e;
+			}
+			break;
+		}
 		if (result) {
 			return result;
 		}

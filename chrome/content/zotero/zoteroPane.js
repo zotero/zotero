@@ -4541,7 +4541,7 @@ var ZoteroPane = new function()
 				newName = newName + ext;
 			}
 			
-			var renamed = yield item.renameAttachmentFile(newName);
+			var renamed = yield item.renameAttachmentFile(newName, false, true);
 			if (renamed !== true) {
 				Zotero.debug("Could not rename file (" + renamed + ")");
 				continue;
