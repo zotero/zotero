@@ -2191,13 +2191,21 @@ Zotero.Item.prototype.getFilePath = function () {
 	//
 	// These should only exist if they weren't converted in the 80 DB upgrade step because
 	// the file couldn't be found.
-	if (Zotero.isMac && path.startsWith('AAAA')) {
+	if (path.startsWith('AAAA')) {
+		// These can only be resolved on Macs
+		if (!Zotero.isMac) {
+			Zotero.debug(`Can't resolve old-style attachment path '${path}' on non-Mac platform`);
+			this._updateAttachmentStates(false);
+			return false;
+		}
+		
 		let file = Components.classes["@mozilla.org/file/local;1"]
 			.createInstance(Components.interfaces.nsILocalFile);
 		try {
 			file.persistentDescriptor = path;
 		}
 		catch (e) {
+			Zotero.debug(`Can't resolve old-style attachment path '${path}'`);
 			this._updateAttachmentStates(false);
 			return false;
 		}
@@ -2205,7 +2213,7 @@ Zotero.Item.prototype.getFilePath = function () {
 		// If valid, convert this to a regular string in the background
 		Zotero.DB.queryAsync(
 			"UPDATE itemAttachments SET path=? WHERE itemID=?",
-			[file.leafName, this._id]
+			[file.path, this._id]
 		);
 		
 		return file.path;
