@@ -274,11 +274,19 @@ describe("Item pane", function () {
 	
 	describe("Feed buttons", function() {
 		describe("Mark as Read/Unread", function() {
-			it("Updates label when state of an item changes", function* () {
+			it("should update label when state of an item changes", function* () {
 				let feed = yield createFeed();
 				yield selectLibrary(win, feed.libraryID);
-				let item = yield createDataObject('feedItem', {libraryID: feed.libraryID});
-				yield itemsView.selectItem(item.id);
+				yield waitForItemsLoad(win);
+				
+				var stub = sinon.stub(win.ZoteroPane, 'startItemReadTimeout');
+				var item = yield createDataObject('feedItem', { libraryID: feed.libraryID });
+				// Skip timed mark-as-read
+				assert.ok(stub.called);
+				stub.restore();
+				item.isRead = true;
+				yield item.saveTx();
+				
 				let button = doc.getElementById('zotero-feed-item-toggleRead-button');
 				
 				assert.equal(button.getAttribute('label'), Zotero.getString('pane.item.markAsUnread'));
