@@ -185,6 +185,7 @@ Zotero.ItemTreeView.prototype.setTree = async function (treebox) {
 			}
 			
 			event.preventDefault();
+			event.stopPropagation();
 			
 			Zotero.spawn(function* () {
 				if (coloredTagsRE.test(key)) {
@@ -711,7 +712,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		}
 		
 		else if (collectionTreeRow.isFeed()) {
-			this._ownerDocument.defaultView.ZoteroItemPane.setToggleReadLabel();
+			this._ownerDocument.defaultView.ZoteroPane.updateReadLabel();
 		}
 		
 		// If no quicksearch, process modifications manually
