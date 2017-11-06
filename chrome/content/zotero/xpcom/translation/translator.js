@@ -91,9 +91,8 @@ Zotero.Translator.prototype.init = function(info) {
 	
 	this.browserSupport = info["browserSupport"] ? info["browserSupport"] : "g";
 	
-	var supported = this.browserSupport.indexOf(Zotero.browser) !== -1 && 
-		(!Zotero.isBookmarklet || this.browserSupport.indexOf("b") !== -1 || 
-			/(?:^|; ?)bookmarklet-debug-mode=1(?:$|; ?)/.test(document.cookie));
+	var supported = !Zotero.isBookmarklet || this.browserSupport.includes("b") ||
+			/(?:^|; ?)bookmarklet-debug-mode=1(?:$|; ?)/.test(document.cookie);
 
 	if (supported) {
 		this.runMode = Zotero.Translator.RUN_MODE_IN_BROWSER;
