@@ -37,9 +37,14 @@ describe("Zotero.Utilities", function() {
 	describe("#cleanDOI()", function () {
 		var cleanDOI = Zotero.Utilities.cleanDOI;
 		var doi = '10.1088/1748-9326/11/4/048002';
+		var shortDOI = '10/aabbe';
 		
 		it("should parse a DOI", function () {
 			assert.equal(cleanDOI(`${doi}`), doi);
+		});
+		
+		it("should parse a short DOI", function () {
+			assert.equal(cleanDOI(`${shortDOI}`), shortDOI);
 		});
 		
 		it("should parse a DOI at the end of a sentence", function () {
