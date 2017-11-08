@@ -1012,10 +1012,6 @@ Zotero.HTTP = new function() {
 			// Download complete
 			case 4:
 				if (callback) {
-					// Override the content charset
-					if (responseCharset) {
-						xmlhttp.channel.contentCharset = responseCharset;
-					}
 					callback(xmlhttp, data);
 				}
 			break;
