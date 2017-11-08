@@ -298,7 +298,7 @@ var ZoteroOverlay = new function()
 		}
 		var io = {};
 		var win = window.openDialog(
-			"chrome://zotero/content/zotero5upgrade.xul",
+			"chrome://zotero/content/zotero5Upgrade.xul",
 			"zotero5-upgrade",
 			"centerscreen,modal,width=620,height=570",
 			io
