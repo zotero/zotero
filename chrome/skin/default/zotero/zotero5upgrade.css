@@ -1,0 +1,23 @@
+.dialog-content-box {
+	overflow-y: auto;
+	background: white;
+}
+
+div {
+	padding-left: 15px;
+	padding-right: 15px;
+}
+
+h1 {
+	font-size: 24px;
+}
+
+p {
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+a {
+	color: blue;
+	text-decoration: underline;
+}

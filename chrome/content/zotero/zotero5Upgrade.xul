@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero5upgrade.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/about.dtd">
+
+<dialog
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	orient="vertical"
+	buttons="accept"
+	buttonlabelaccept="OK"
+	onload="document.documentElement.getButton('accept').focus();"
+	ondialogaccept="var io = window.arguments[0]; io.dontShowAgain = document.getElementById('dont-show-again').checked; io.ok = true;">
+	
+	<script src="include.js"/>
+	
+	<div xmlns="http://www.w3.org/1999/xhtml">
+		<h1>The way you use Zotero is changing</h1>
+		
+		<p>Zotero 5.0, the next major version of Zotero, is now available, and along with many new features and improvements, it brings some important changes that you’ll need to be aware of as a user of Zotero for Firefox.</p>
+		
+		<p>With the release of Firefox 57 on November 14, 2017, Mozilla will be removing the powerful extension framework on which Zotero for Firefox is based in favor of a new, more limited extension system similar to the one in Chrome. Because of this change, Zotero 5.0 is available only as a standalone program, which you’ll need to install to continue accessing your Zotero data locally. Instead of clicking a “Z” button in the Firefox toolbar, you’ll open Zotero as you would any other program. A new extension, the Zotero Connector for Firefox, replaces this one and provides the same “Save to Zotero” button that you’re used to.</p>
+		
+		<p>You’ll soon be automatically upgraded to the Zotero Connector for Firefox, at which point you’ll need to install Zotero 5.0 as well to access your library. To avoid any unexpected disruption, we recommend installing Zotero 5.0 and the Zotero Connector for Firefox from the <a href="https://www.zotero.org/download/">download page</a> as soon as possible.</p>
+		
+		<p>See our <a href="https://www.zotero.org/blog/a-unified-zotero-experience/">blog post</a> for more details on this change and what it means for you.</p>
+		
+		<p>
+			<input id="dont-show-again" type="checkbox"/>
+			<label for="dont-show-again">Don’t show again</label>
+		</p>
+	</div>
+	
+	<script type="text/javascript">
+	<![CDATA[
+		var links = document.querySelectorAll('a');
+		for (let link of links) {
+			link.onclick = function (event) {
+				window.close();
+				var gb = window.opener.gBrowser;
+				gb.selectedTab = gb.addTab(event.target.getAttribute('href'));
+				event.preventDefault();
+			}
+		}
+	]]>
+	</script>
+</dialog>

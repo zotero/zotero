@@ -176,6 +176,10 @@ var ZoteroOverlay = new function()
 		*/
 		
 		if(makeVisible) {
+			if (!this.show5UpgradeMessage()) {
+				return false;
+			}
+			
 			if (Zotero.locked) {
 				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 										.getService(Components.interfaces.nsIPromptService);
@@ -287,6 +291,23 @@ var ZoteroOverlay = new function()
 			this.loadZoteroTab();
 		}
 	}
+	
+	this.show5UpgradeMessage = function () {
+		if (Zotero.Prefs.get('skipUpgradeWarning')) {
+			return true;
+		}
+		var io = {};
+		var win = window.openDialog(
+			"chrome://zotero/content/zotero5upgrade.xul",
+			"zotero5-upgrade",
+			"centerscreen,modal,width=620,height=570",
+			io
+		);
+		if (io.dontShowAgain) {
+			Zotero.Prefs.set('skipUpgradeWarning', true);
+		}
+		return io.ok;
+	};
 }
 
 window.addEventListener("load", function(e) { ZoteroOverlay.onLoad(e); }, false);
