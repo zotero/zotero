@@ -69,6 +69,8 @@ overlay chrome://zotero/content/preferences/preferences_advanced.xul chrome://zo
 overlay chrome://mozapps/content/downloads/unknownContentType.xul chrome://zotero/content/downloadOverlay.xul
 
 style	chrome://browser/content/browser.xul	chrome://zotero/skin/zotero.css
+style	chrome://browser/content/browser.xul	chrome://zotero/skin/zotero-fx55.css platformversion>=55
+
 style	chrome://global/content/customizeToolbar.xul	chrome://zotero/skin/zotero.css
 
 component	{e4c61080-ec2d-11da-8ad9-0800200c9a66}			components/zotero-service.js

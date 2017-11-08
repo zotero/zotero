@@ -1,0 +1,12 @@
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover .dropmarker-icon,
+#zotero-toolbar-save-button[cui-areatype="toolbar"]:hover .dropmarker-icon {
+       padding-top: calc(var(--toolbarbutton-inner-padding) + 5px);
+       padding-bottom: calc(var(--toolbarbutton-inner-padding) + 5px);
+}
+
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover .toolbarbutton-menubutton-button,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover .toolbarbutton-menubutton-dropmarker,
+#zotero-toolbar-save-button[cui-areatype="toolbar"]:hover > .toolbarbutton-menubutton-button,
+#zotero-toolbar-save-button[cui-areatype="toolbar"]:hover > .toolbarbutton-menubutton-dropmarker {
+       border: 0 !important;
+}

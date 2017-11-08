@@ -128,13 +128,6 @@ toolbarpaletteitem[place="palette"] #zotero-toolbar-buttons #zotero-toolbar-save
 }
 
 
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover .dropmarker-icon,
-#zotero-toolbar-save-button[cui-areatype="toolbar"]:hover .dropmarker-icon {
-	padding-top: calc(var(--toolbarbutton-inner-padding) + 5px);
-	padding-bottom: calc(var(--toolbarbutton-inner-padding) + 5px);
-}
-
-
 /* Show webpage icon in gray when no translators */
 #zotero-toolbar-save-button:not(.translate),
 #zotero-toolbar-save-button-single:not(.translate),
