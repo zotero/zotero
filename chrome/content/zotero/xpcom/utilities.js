@@ -311,7 +311,11 @@ Zotero.Utilities = {
 			throw "cleanDOI: argument must be a string";
 		}
 
-		var doi = x.match(/10\.[0-9]{4,}\/[^\s]*[^\s\.,]/);
+		if(/10\/[^\s]*[^\s\.,]/.test(x)) {
+			var doi = /10\/([^\s]*[^\s\.,])/.exec(x);
+		} else {
+			var doi = x.match(/10\.[0-9]{4,}\/[^\s]*[^\s\.,]/);
+		}
 		return doi ? doi[0] : null;
 	},
 
