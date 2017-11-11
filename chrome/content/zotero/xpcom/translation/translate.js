@@ -2193,7 +2193,7 @@ Zotero.Translate.Web.prototype._translateServerComplete = function(statusCode, r
 /**
  * Overload complete to report translation failure
  */
-Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
+Zotero.Translate.Web.prototype.complete = async function(returnValue, error) {
 	// call super
 	var oldState = this._currentState;
 	var errorString = Zotero.Translate.Base.prototype.complete.apply(this, [returnValue, error]);
@@ -2204,30 +2204,24 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 	} else {
 		promise = Zotero.Promise.resolve(Zotero.Prefs.get("reportTranslationFailure"));
 	}
-	
-	return promise.then(function(reportTranslationFailure) {
-		// Report translation failure if we failed
-		if(oldState == "translate" && errorString && !this._parentTranslator && this.translator.length
-			&& this.translator[0].inRepository && reportTranslationFailure) {
-			// Don't report failure if in private browsing mode
-			if(Zotero.isFx && !Zotero.isBookmarklet && !Zotero.isStandalone && Components.classes["@mozilla.org/privatebrowsing;1"]) {
-				var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
-							.getService(Components.interfaces.nsIPrivateBrowsingService);
-				if (pbs.privateBrowsingEnabled) {
-					return;
-				}
-			}
-			
-			var translator = this.translator[0];
-			return Zotero.getSystemInfo().then(function(info) {
-				var postBody = "id=" + encodeURIComponent(translator.translatorID) +
-							   "&lastUpdated=" + encodeURIComponent(translator.lastUpdated) +
-							   "&diagnostic=" + encodeURIComponent(info) +
-							   "&errorData=" + encodeURIComponent(errorString);
-				return Zotero.HTTP.doPost(ZOTERO_CONFIG.REPOSITORY_URL + "report", postBody);
-			});
-		}	
-	}.bind(this));
+	var reportTranslationFailure = await promise;
+	// Report translation failure if we failed
+	if(oldState == "translate" && errorString && !this._parentTranslator && this.translator.length
+		&& this.translator[0].inRepository && reportTranslationFailure) {
+		// Don't report failure if in private browsing mode
+		if (Zotero.isConnector && await Zotero.Connector_Browser.isIncognito()) {
+			return
+		}
+		
+		var translator = this.translator[0];
+		var info = await Zotero.getSystemInfo();
+		
+		var postBody = "id=" + encodeURIComponent(translator.translatorID) +
+					   "&lastUpdated=" + encodeURIComponent(translator.lastUpdated) +
+					   "&diagnostic=" + encodeURIComponent(info) +
+					   "&errorData=" + encodeURIComponent(errorString);
+		return Zotero.HTTP.doPost(ZOTERO_CONFIG.REPOSITORY_URL + "report", postBody);
+	}
 }
 
 /**

@@ -32,7 +32,38 @@ describe("Zotero.Utilities", function() {
 			assert.equal(author.lastName, 'Žolynas');
 		})
 	});
-	describe("cleanISBN", function() {
+	
+	
+	describe("#cleanDOI()", function () {
+		var cleanDOI = Zotero.Utilities.cleanDOI;
+		var doi = '10.1088/1748-9326/11/4/048002';
+		var shortDOI = '10/aabbe';
+		
+		it("should parse a DOI", function () {
+			assert.equal(cleanDOI(`${doi}`), doi);
+		});
+		
+		it("should parse a short DOI", function () {
+			assert.equal(cleanDOI(`${shortDOI}`), shortDOI);
+		});
+		
+		it("should parse a DOI at the end of a sentence", function () {
+			assert.equal(cleanDOI(`Foo bar ${doi}. Foo bar`), doi);
+		});
+		
+		// FIXME
+		it.skip("should parse a DOI in parentheses", function () {
+			assert.equal(cleanDOI(`Foo bar (${doi}) foo bar`), doi);
+		});
+		
+		// FIXME
+		it.skip("should parse a DOI in brackets", function () {
+			assert.equal(cleanDOI(`Foo bar [${doi}] foo bar`), doi);
+		});
+	});
+	
+	
+	describe("#cleanISBN()", function() {
 		let cleanISBN = Zotero.Utilities.cleanISBN;
 		it("should return false for non-ISBN string", function() {
 			assert.isFalse(cleanISBN(''), 'returned false for empty string');

@@ -174,8 +174,13 @@ Zotero.HTTP = new function() {
 			channel.forceAllowThirdPartyCookie = true;
 			
 			// Set charset
+			//
+			// This is the method used in the connector, but as noted there, this parameter is a
+			// legacy of XPCOM functionality (where it could be set on the nsIChannel, which
+			// doesn't seem to work anymore), and we should probably allow responseContentType to
+			// be set instead
 			if (options.responseCharset) {
-				channel.contentCharset = responseCharset;
+				xmlhttp.overrideMimeType(`text/plain; charset=${responseCharset}`);
 			}
 			
 			// Disable caching if requested
@@ -342,9 +347,9 @@ Zotero.HTTP = new function() {
 		channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
 		channel.forceAllowThirdPartyCookie = true;
 		
-		// Set charset
+		// Set charset -- see note in request() above
 		if (responseCharset) {
-			channel.contentCharset = responseCharset;
+			xmlhttp.overrideMimeType(`text/plain; charset=${responseCharset}`);
 		}
 		
 		// Set request headers
@@ -360,7 +365,7 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			_stateChange(xmlhttp, onDone, responseCharset);
+			_stateChange(xmlhttp, onDone);
 		};
 		
 		if(cookieSandbox) cookieSandbox.attachToInterfaceRequestor(xmlhttp.getInterface(Components.interfaces.nsIInterfaceRequestor));
@@ -414,9 +419,9 @@ Zotero.HTTP = new function() {
 		channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
 		channel.forceAllowThirdPartyCookie = true;
 		
-		// Set charset
+		// Set charset -- see note in request() above
 		if (responseCharset) {
-			channel.contentCharset = responseCharset;
+			xmlhttp.overrideMimeType(`text/plain; charset=${responseCharset}`);
 		}
 		
 		if (headers) {
@@ -444,7 +449,7 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			_stateChange(xmlhttp, onDone, responseCharset);
+			_stateChange(xmlhttp, onDone);
 		};
 		
 		if(cookieSandbox) cookieSandbox.attachToInterfaceRequestor(xmlhttp.getInterface(Components.interfaces.nsIInterfaceRequestor));
@@ -988,11 +993,10 @@ Zotero.HTTP = new function() {
 	 *
 	 * @param {nsIXMLHttpRequest} xmlhttp XMLHttpRequest whose state just changed
 	 * @param {Function} [callback] Callback for request completion
-	 * @param {String} [responseCharset] Character set to force on the response
 	 * @param {*} [data] Data to be passed back to callback as the second argument
 	 * @private
 	 */
-	function _stateChange(xmlhttp, callback, responseCharset, data) {
+	function _stateChange(xmlhttp, callback, data) {
 		switch (xmlhttp.readyState){
 			// Request not yet made
 			case 1:
@@ -1008,10 +1012,6 @@ Zotero.HTTP = new function() {
 			// Download complete
 			case 4:
 				if (callback) {
-					// Override the content charset
-					if (responseCharset) {
-						xmlhttp.channel.contentCharset = responseCharset;
-					}
 					callback(xmlhttp, data);
 				}
 			break;

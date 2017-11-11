@@ -24,7 +24,7 @@
  */
 
 var CSL = {
-    PROCESSOR_VERSION: "1.1.178",
+    PROCESSOR_VERSION: "1.1.180",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -4992,6 +4992,9 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
     }
     var update_items = [];
     for (var i = 0, ilen = citationByIndex.length; i < ilen; i += 1) {
+        if (!citationByIndex[i].properties) {
+            citationByIndex[i].properties = {};
+        }
         citationByIndex[i].properties.index = i;
         for (j = 0, jlen = citationByIndex[i].sortedItems.length; j < jlen; j += 1) {
             item = citationByIndex[i].sortedItems[j];
@@ -13076,13 +13079,19 @@ CSL.Util.Names.doNormalize = function (state, namelist, terminator, mode) {
         if (isAbbrev[i]) {
             if (i < namelist.length - 2) {
                 namelist[i + 1] = "";
-                if ((!terminator || terminator.slice(-1) && terminator.slice(-1) !== " ")
-                    && namelist[i].length && namelist[i].match(CSL.ALL_ROMANESQUE_REGEXP)
-                    && (namelist[i].length > 1 || namelist[i + 2].length > 1)) {
+                var onlySpace = terminator.match(/^[\u0009\u000a\u000b\u000c\u000d\u0020\u00a0]+$/)
+                if (
+                    onlySpace
+                    || (
+                        (!terminator || (terminator.slice(-1) && !terminator.slice(-1).match(/[\u0009\u000a\u000b\u000c\u000d\u0020\u00a0]/)))
+                        && namelist[i].length && namelist[i].match(CSL.ALL_ROMANESQUE_REGEXP)
+                        && (namelist[i].length > 1 || namelist[i + 2].length > 1)
+                    )
+                ) {
                     namelist[i + 1] = " ";
                 }
                 if (namelist[i + 2].length > 1) {
-                    namelist[i] = namelist[i] + terminator.replace(/[\u0009\u000a\u000b\u000c\u000d\u0020\ufeff\u00a0]+$/, "");
+                    namelist[i] = namelist[i] + terminator.replace(/\ufeff$/, "");
                 } else {
                     namelist[i] = namelist[i] + terminator;
                 }

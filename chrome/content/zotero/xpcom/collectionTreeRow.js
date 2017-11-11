@@ -381,8 +381,8 @@ Zotero.CollectionTreeRow.prototype.getChildTags = Zotero.Promise.coroutine(funct
 		case 'bucket':
 			return [];
 	}
-	var results = yield this.getSearchResults();
-	return Zotero.Tags.getAllWithinItemsList(results);
+	var results = yield this.getSearchResults(true);
+	return Zotero.Tags.getAllWithinSearchResults(results);
 });
 
 
