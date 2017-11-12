@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Predvoľby Zotero">
+<!ENTITY zotero.preferences.title "Možnosti Zotera">
 
 <!ENTITY zotero.preferences.default "Predvolené:">
 <!ENTITY zotero.preferences.items "položiek">
@@ -19,9 +19,9 @@
 <!ENTITY zotero.preferences.fontSize.notes "Veľkosť písma v poznámkach:">
 
 <!ENTITY zotero.preferences.miscellaneous "Rôzne">
-<!ENTITY zotero.preferences.autoUpdate "Automaticky skontrolovať aktualizácie konvertorov a štýlov ">
+<!ENTITY zotero.preferences.autoUpdate "Automaticky hľadať aktualizácie konvertorov a štýlov ">
 <!ENTITY zotero.preferences.updateNow "Aktualizovať teraz">
-<!ENTITY zotero.preferences.reportTranslationFailure "hlásiť chybné konvertory">
+<!ENTITY zotero.preferences.reportTranslationFailure "Nahlásiť chybné konvertory">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "povoliť stránke zotero.org, aby prispôsobovala svoj obsah podľa aktuálnej verzie Zotera">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Ak je táto voľba povolená, informácia o nainštalovanej verzii Zotera bude pridávaná do hlavičky HTTP požiadaviek zasielaných na zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Použiť Zotero ako predvolený program pre prevzaté BibTeX/RIS/Refer súbory">
@@ -109,12 +109,12 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Keď táto voľba nie je vybraná, Zotero vloží URL adresy pri citovaní článkov (z odborných a populárnych časopisov alebo novín) iba v prípade, ak článok nemá špecifikovaný rozsah strán.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Rýchle kopírovanie">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Predvolený formát:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopírovať ako HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Nastavenia pre jednotlivé sídla:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "doména/cesta">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(napr. wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Formát">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Jazyk">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Zakázať rýchle kopírovanie pri presúvaní viac než">
 
@@ -125,8 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Získať zásuvné moduly textových editorov...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Použiť klasické okno pridávania citácií">
-<!ENTITY zotero.preferences.styleEditor "Style Editor">
-<!ENTITY zotero.preferences.stylePreview "Style Preview">
+<!ENTITY zotero.preferences.styleEditor "Editor štýlov">
+<!ENTITY zotero.preferences.stylePreview "Ukážka štýlov">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Správca štýlov">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Názov">
@@ -134,7 +134,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Získať ďalšie štýly...">
 
-<!ENTITY zotero.preferences.keys.openZotero "Otvoriť/zatvoriť Zotero">
+<!ENTITY zotero.preferences.keys.openZotero "Tabla otvoriť/zatvoriť Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Uložiť do Zotera (ikona v lište pre adresu)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Prepnúť Zotero do celého okna">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Tabla knižníc Focus">
@@ -175,13 +175,13 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Súbory a adresáre">
 <!ENTITY zotero.preferences.advanced.keys "Klávesové skratky">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Rozšírená konfigurácia">
 
 <!ENTITY zotero.preferences.prefpane.locate "Nájsť">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Správca motora vyhľadávania článkov">
 <!ENTITY zotero.preferences.locate.description "Popis">
 <!ENTITY zotero.preferences.locate.name "Meno">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Vyhľadávací motor rozširuje schopnosť rozbaľovacej ponuky lokalizácie v paneli informácií. Aktivované vyhľadávacie motory v zozname dole sa pridajú do rozbaľovacej ponuky a použijú sa na lokalizáciu zdrojov z vašej knižnice na webe.">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "Vyhľadávací motor rozširuje schopnosť rozbaľovacej ponuky lokalizácie v table informácií. Aktivované vyhľadávacie motory v zozname dole sa pridajú do rozbaľovacej ponuky a použijú sa na lokalizáciu zdrojov z vašej knižnice na webe.">
 <!ENTITY zotero.preferences.locate.addDescription "Na pridanie vyhľadávacieho motora, ktorý nie je v zozname, navštívte želaný vyhľadávací motor vo svojom prehliadači a vyberte &quot;Pridať&quot; z ponuky Zotera Nájsť.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Obnoviť predvolené">
 
@@ -193,7 +193,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Použiť priečinok, do ktorého Firefox ukladá používateľské dáta">
 <!ENTITY zotero.preferences.dataDir.custom "Vlastné umiestnenie:">
 <!ENTITY zotero.preferences.dataDir.choose "Zvoliť...">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(určený v príkazovom riadku)">
 <!ENTITY zotero.preferences.dataDir.reveal "Zobraziť priečinok s dátami">
 <!ENTITY zotero.preferences.dataDir.migrate "Presunúť na nové predvolené umiestnenie...">
 
@@ -205,8 +205,8 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Údržba databázy">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Skontrolovať integritu databázy">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Obnoviť konvertory a citačné štýly...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Obnoviť konvertory a štýly...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Obnoviť konvertory...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Obnoviť citačné štýly...">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "Editor konfigurácie">

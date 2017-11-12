@@ -11,7 +11,7 @@
 <!ENTITY zotero.general.refresh "刷新">
 <!ENTITY zotero.general.saveAs "另存为...">
 <!ENTITY zotero.general.advancedOptions.label "高级选项">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "工具">
 <!ENTITY zotero.general.more "更多">
 <!ENTITY zotero.general.loading "加载…">
 
@@ -143,7 +143,7 @@
 <!ENTITY zotero.item.copyAsURL "复制为 URL">
 <!ENTITY zotero.item.deletePermanently "永久删除…">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "移除所有标签...">
 
 <!ENTITY zotero.toolbar.newNote "新建笔记">
 <!ENTITY zotero.toolbar.note.standalone "新建独立笔记">

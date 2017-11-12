@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Agochar os outros">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Mostrar todos">
-<!ENTITY quitApplicationCmdMac.label "Saír de Zotero">
+<!ENTITY quitApplicationCmdMac.label "Pechar Zotero">
 <!ENTITY quitApplicationCmdMac.key "S">
 
 
@@ -44,7 +44,7 @@
 
 <!ENTITY toolsMenu.label "Ferramentas">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Instalar engadido para o navegador">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Engadidos">
 
@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Información de solución de problemas">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Foro de debate">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Informar de erros...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Saída de depuración do logging">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.submit "Enviar a saída">
+<!ENTITY debugOutputLogging.view "Ver a saída">
+<!ENTITY debugOutputLogging.clear "Borrar a saída">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Reiniciar co acceso activado">
 
 <!ENTITY helpCheckForUpdates.label "Comprobar se hai actualizacións...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

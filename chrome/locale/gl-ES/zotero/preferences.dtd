@@ -84,7 +84,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaurar no servidor de Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Borrar todos os datos do servidor e substituír con datos locais de Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reiniciar o historial de sincronización de ficheiros">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Comparar as copias remotas de todos os ficheiros cos adxuntos locais">
 <!ENTITY zotero.preferences.sync.reset "Reiniciar">
 <!ENTITY zotero.preferences.sync.reset.button "Reiniciar">
 
@@ -109,12 +109,12 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Cando esta opción está desactivada, Zotero só inclúe os URL cando se citan publicacións, revistas ou artigos de prensa que non teñen especificado un rango de páxinas.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Copia rápida">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Formato predefinido:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copiar como HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Axustes específicos do sitio:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Dominio/Ruta">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(p.ex. trasno.gal)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Formato">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Lingua">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Desactivar a copia rápida cando se arrastran máis de">
 
@@ -125,8 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Conseguir o engadido para o editor de texto...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Empregar a caixa de diálogo clásica para engadir citas">
-<!ENTITY zotero.preferences.styleEditor "Style Editor">
-<!ENTITY zotero.preferences.stylePreview "Style Preview">
+<!ENTITY zotero.preferences.styleEditor "Editor de estilos">
+<!ENTITY zotero.preferences.stylePreview "Visor de estilos">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Xestor de estilos">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Título">
@@ -175,7 +175,7 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Ficheiros e cartafois">
 <!ENTITY zotero.preferences.advanced.keys "Atallos">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Configuración avanzada">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localizador">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Xestor do motor de busca de artigos">
@@ -193,7 +193,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Usar o cartafol de perfís">
 <!ENTITY zotero.preferences.dataDir.custom "Personalizado:">
 <!ENTITY zotero.preferences.dataDir.choose "Escoller...">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(especificado coa liña de comandos)">
 <!ENTITY zotero.preferences.dataDir.reveal "Mostrar o cartafol de datos">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrar ao novo aloxamento....">
 
@@ -209,4 +209,4 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Recuperar tradutores...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Recuperar os estilos">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "Editor de configuración">

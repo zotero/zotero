@@ -1,4 +1,4 @@
-<!ENTITY preferencesCmdMac.label "Predvoľby...">
+<!ENTITY preferencesCmdMac.label "Možnosti...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Služby">
 <!ENTITY hideThisAppCmdMac.label "Skryť &brandShortName;">
@@ -44,7 +44,7 @@
 
 <!ENTITY toolsMenu.label "Nástroje">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Nainštalovať prepájač prehliadača">
+<!ENTITY installConnector.label "Nainštalovať konektor prehliadača">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Doplnky">
 
@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Informácie o riešení problémov">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Diskusné fóra">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Nahlásiť chyby...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Záznam protokolu ladenia chýb">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.submit "Odoslať protokol">
+<!ENTITY debugOutputLogging.view "Zobraziť protokol">
+<!ENTITY debugOutputLogging.clear "Vymazať protokol">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Reštartovať a povoliť záznam...">
 
-<!ENTITY helpCheckForUpdates.label "Overiť aktualizácie...">
+<!ENTITY helpCheckForUpdates.label "Hľadať aktualizácie...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

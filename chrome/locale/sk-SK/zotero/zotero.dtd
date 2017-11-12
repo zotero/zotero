@@ -11,7 +11,7 @@
 <!ENTITY zotero.general.refresh "Obnoviť">
 <!ENTITY zotero.general.saveAs "Uložiť ako...">
 <!ENTITY zotero.general.advancedOptions.label "Rozšírené možnosti">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Nástroje">
 <!ENTITY zotero.general.more "Viac">
 <!ENTITY zotero.general.loading "Nahrávam...">
 
@@ -119,7 +119,7 @@
 <!ENTITY zotero.toolbar.export.label "Exportovať knižnicu...">
 <!ENTITY zotero.toolbar.rtfScan.label "Spracovať RTF...">
 <!ENTITY zotero.toolbar.timeline.label "Vytvoriť časovú os">
-<!ENTITY zotero.toolbar.preferences.label "Predvoľby...">
+<!ENTITY zotero.toolbar.preferences.label "Možnosti...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Podpora a dokumentácia">
 <!ENTITY zotero.toolbar.about.label "O Zotere">
 <!ENTITY zotero.toolbar.advancedSearch "Pokročilé vyhľadávanie">
@@ -143,7 +143,7 @@
 <!ENTITY zotero.item.copyAsURL "Kopírovať ako URL">
 <!ENTITY zotero.item.deletePermanently "Odstrániť natrvalo...">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "Odstrániť všetky značky">
 
 <!ENTITY zotero.toolbar.newNote "Nová poznámka">
 <!ENTITY zotero.toolbar.note.standalone "Nová samostatná poznámka">
@@ -190,7 +190,7 @@
 <!ENTITY zotero.bibliography.copyToClipboard.label "Skopírovať do schránky">
 <!ENTITY zotero.bibliography.print.label "Tlačiť">
 
-<!ENTITY zotero.integration.docPrefs.title "Vlastnosti dokumentu">
+<!ENTITY zotero.integration.docPrefs.title "Možnosti dokumentu">
 <!ENTITY zotero.integration.addEditCitation.title "Pridať/Upraviť citáciu">
 <!ENTITY zotero.integration.editBibliography.title "Upraviť bibliografiu">
 <!ENTITY zotero.integration.quickFormatDialog.title "Rýchle formátovanie citácie">
@@ -199,17 +199,17 @@
 
 <!ENTITY zotero.exportOptions.title "Export...">
 <!ENTITY zotero.exportOptions.format.label "Formát:">
-<!ENTITY zotero.exportOptions.translatorOptions.label "Možnosti konvertora">
+<!ENTITY zotero.exportOptions.translatorOptions.label "Možnosti konvertorov">
 
 <!ENTITY zotero.charset.label "Kódovanie">
 <!ENTITY zotero.moreEncodings.label "Viac">
 
 <!ENTITY zotero.citation.keepSorted.label "Zachovať zoradenie zdrojov">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Vynechaj autora">
+<!ENTITY zotero.citation.suppressAuthor.label "Vynechať autora">
 <!ENTITY zotero.citation.prefix.label "Predpona:">
 <!ENTITY zotero.citation.suffix.label "Prípona:">
-<!ENTITY zotero.citation.editorWarning.label "Pozor: Ak upravujete citáciu v editore, nebude sa viac aktualizovať a zohľadňovať zmeny vo vašej databáze alebo v citačnom štýle.">
+<!ENTITY zotero.citation.editorWarning.label "Pozor: Ak citáciu upravíte v editore, nebude už aktualizovaná s ohľadom na neskoršie zmeny vo vašej databáze alebo v citačnom štýle.">
 
 <!ENTITY zotero.richText.italic.label "Kurzíva">
 <!ENTITY zotero.richText.bold.label "Tučné">
@@ -236,9 +236,9 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Pole &quot;skratiek časopisov&quot; bude ignorované.">
 
 <!ENTITY zotero.integration.showEditor.label "Zobraziť editor">
-<!ENTITY zotero.integration.classicView.label "Klasický náhľad">
+<!ENTITY zotero.integration.classicView.label "Štandardné zobrazenie">
 
-<!ENTITY zotero.integration.references.label "Referencie v bibliografii">
+<!ENTITY zotero.integration.references.label "Odkazy v bibliografii">
 
 <!ENTITY zotero.sync.stop "Zastaviť synchronizáciu">
 <!ENTITY zotero.sync.error "Chyba pri synchronizácii">
@@ -310,7 +310,7 @@
 
 <!ENTITY zotero.downloadManager.label "Uložiť do Zotera">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Prílohy nemožno uložiť do práve vybranej knižnice. Tento exemplár sa preto uloží do vašej knižnice.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Pre použitie tejto funkcie musíte najprv nainštalovať nástroje PDF v predvoľbách Zotera.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "Pre použitie tejto funkcie musíte najprv nainštalovať nástroje PDF v table Hľadania v možnostiach Zotera.">
 
 <!ENTITY zotero.attachLink.title "Priložiť odkaz k URI">
 <!ENTITY zotero.attachLink.label.link "Odkaz:">

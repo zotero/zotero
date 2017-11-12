@@ -141,7 +141,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Pikahaku">
 <!ENTITY zotero.preferences.keys.newItem "Luo uusi nimike">
 <!ENTITY zotero.preferences.keys.newNote "Luo uusi muistiinpanot">
-<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Merkitse kaikki syötteen kohteet luetuiksi/lukemattomiksi">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Aiheenvalitsin päälle/pois">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopioi valittujen nimikkeiden sitaatit leikepöydälle">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopioi valitut nimikkeet leikepöydälle">

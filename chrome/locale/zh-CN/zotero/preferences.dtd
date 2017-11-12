@@ -109,12 +109,12 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "禁用此项后, Zotero 引用期刊, 杂志和报纸文章时仅当这些文章没有指定页码范围时才会包含 URL 链接.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "便捷复制">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "默认格式：">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "复制为 HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "网站专属性设置:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "域/路径">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(比如 wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "格式">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "语言">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "禁用便捷复制, 当拖动项超过">
 
@@ -125,8 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "获取用于文字处理器的插件">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用添加引用的经典对话框">
-<!ENTITY zotero.preferences.styleEditor "Style Editor">
-<!ENTITY zotero.preferences.stylePreview "Style Preview">
+<!ENTITY zotero.preferences.styleEditor "样式编辑器">
+<!ENTITY zotero.preferences.stylePreview "样式预览">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "样式管理器">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "标题">
@@ -175,7 +175,7 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "文件和文件夹">
 <!ENTITY zotero.preferences.advanced.keys "快捷键">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "高级设置">
 
 <!ENTITY zotero.preferences.prefpane.locate "定位">
 <!ENTITY zotero.preferences.locate.locateEngineManager "文章检索引擎管理器">
@@ -193,7 +193,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "使用配置目录">
 <!ENTITY zotero.preferences.dataDir.custom "自定义:">
 <!ENTITY zotero.preferences.dataDir.choose "选择……">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(通过 command line 指定)">
 <!ENTITY zotero.preferences.dataDir.reveal "打开数据文件夹">
 <!ENTITY zotero.preferences.dataDir.migrate "迁移到新的默认位置……">
 
@@ -209,4 +209,4 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重置翻译器……">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "重置样式……">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "设置编辑器">
