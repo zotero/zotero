@@ -1334,6 +1334,11 @@ Zotero.Schema = new function(){
 			[
 				"SELECT COUNT(*) > 0 FROM itemAttachments WHERE linkMode NOT IN (0,1,2,3)",
 				"UPDATE itemAttachments SET linkMode=1 WHERE linkMode NOT IN (0,1,2,3)"
+			],
+			// Creators with first name can't be fieldMode 1
+			[
+				"SELECT COUNT(*) > 0 FROM creators WHERE fieldMode = 1 AND firstName != ''",
+				"UPDATE creators SET fieldMode = 0 WHERE fieldMode = 1 AND firstName != ''"
 			]
 		];
 		

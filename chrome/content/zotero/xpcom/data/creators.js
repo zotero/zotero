@@ -31,16 +31,33 @@ Zotero.Creators = new function() {
 	var _cache = {};
 	
 	this.init = Zotero.Promise.coroutine(function* () {
+		var repaired = false;
 		var sql = "SELECT * FROM creators";
 		var rows = yield Zotero.DB.queryAsync(sql);
 		for (let i = 0; i < rows.length; i++) {
 			let row = rows[i];
-			_cache[row.creatorID] = this.cleanData({
-				// Avoid "DB column 'name' not found" warnings from the DB row Proxy
-				firstName: row.firstName,
-				lastName: row.lastName,
-				fieldMode: row.fieldMode
-			});
+			try {
+				_cache[row.creatorID] = this.cleanData({
+					// Avoid "DB column 'name' not found" warnings from the DB row Proxy
+					firstName: row.firstName,
+					lastName: row.lastName,
+					fieldMode: row.fieldMode
+				});
+			}
+			catch (e) {
+				// Automatically fix DB errors and try again
+				if (!repaired) {
+					Zotero.logError(e);
+					Zotero.logError("Trying integrity check to fix creator error");
+					yield Zotero.Schema.integrityCheck(true);
+					repaired = true;
+					rows = yield Zotero.DB.queryAsync(sql);
+					i = -1;
+					continue;
+				}
+				
+				throw e;
+			}
 		}
 	});
 	
