@@ -16,4 +16,15 @@ describe("Zotero", function() {
 			assert.equal(str1, str2);
 		});
 	});
+	
+	
+	describe("#localeCompare", function () {
+		it("shouldn't ignore whitespace", function () {
+			assert.equal(Zotero.localeCompare("Chang", "Chan H"), 1);
+		});
+		
+		it("shouldn't ignore leading punctuation", function () {
+			assert.equal(Zotero.localeCompare("_Abcd", "Abcd"), -1);
+		});
+	});
 });

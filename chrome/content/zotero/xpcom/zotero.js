@@ -1546,7 +1546,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			}
 			
 			var collator = new Intl.Collator(locales, {
-				ignorePunctuation: true,
 				numeric: true,
 				sensitivity: 'base'
 			});
@@ -1558,7 +1557,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			try {
 				Zotero.logError("Falling back to en-US sorting");
 				collator = new Intl.Collator(['en-US'], {
-					ignorePunctuation: true,
 					numeric: true,
 					sensitivity: 'base'
 				});
@@ -1602,6 +1600,11 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				
 				// If initial punctuation is equivalent, use collator comparison
 				// that ignores all punctuation
+				//
+				// Update: Intl.Collator's ignorePunctuation also ignores whitespace, so we're
+				// no longer using it, meaning we could take out most of the code to handle
+				// initial punctuation separately, unless we think we'll at some point switch to
+				// a collation function that ignores punctuation but not whitespace.
 				if (aInitP == bInitP || !aInitP && !bInitP) return collator.compare(a, b);
 				
 				// Otherwise consider "attached" words as well, e.g. the order should be
