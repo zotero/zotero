@@ -1407,15 +1407,20 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 *     separated by semicolons
 	 */
 	this.getString = function (name, params, num) {
+		return this.getStringFromBundle(_localizedStringBundle, ...arguments);
+	}
+	
+	
+	this.getStringFromBundle = function (bundle, name, params, num) {
 		try {
 			if (params != undefined) {
 				if (typeof params != 'object'){
 					params = [params];
 				}
-				var l10n = _localizedStringBundle.formatStringFromName(name, params, params.length);
+				var l10n = bundle.formatStringFromName(name, params, params.length);
 			}
 			else {
-				var l10n = _localizedStringBundle.GetStringFromName(name);
+				var l10n = bundle.GetStringFromName(name);
 			}
 			if (num !== undefined) {
 				let availableForms = l10n.split(/;/);
@@ -1435,10 +1440,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				Zotero.debug(params, 1);
 			}
 			else if (e.name != 'NS_ERROR_FAILURE') {
-				Components.utils.reportError(e);
-				Zotero.debug(e, 1);
+				Zotero.logError(e);
 			}
-			throw ('Localized string not available for ' + name);
+			throw new Error('Localized string not available for ' + name);
 		}
 		return l10n;
 	}
