@@ -1338,7 +1338,23 @@ Zotero.Schema = new function(){
 			// Creators with first name can't be fieldMode 1
 			[
 				"SELECT COUNT(*) > 0 FROM creators WHERE fieldMode = 1 AND firstName != ''",
-				"UPDATE creators SET fieldMode = 0 WHERE fieldMode = 1 AND firstName != ''"
+				function () {
+					return Zotero.DB.executeTransaction(function* () {
+						var rows = yield Zotero.DB.queryAsync("SELECT * FROM creators WHERE fieldMode = 1 AND firstName != ''");
+						for (let row of rows) {
+							// Find existing fieldMode 0 row and use that if available
+							let newID = yield Zotero.DB.valueQueryAsync("SELECT creatorID FROM creators WHERE firstName=? AND lastName=? AND fieldMode=0", [row.firstName, row.lastName]);
+							if (newID) {
+								yield Zotero.DB.queryAsync("UPDATE itemCreators SET creatorID=? WHERE creatorID=?", [newID, row.creatorID]);
+								yield Zotero.DB.queryAsync("DELETE FROM creators WHERE creatorID=?", row.creatorID);
+							}
+							// Otherwise convert this one to fieldMode 0
+							else {
+								yield Zotero.DB.queryAsync("UPDATE creators SET fieldMode=0 WHERE creatorID=?", row.creatorID);
+							}
+						}
+					});
+				}
 			]
 		];
 		
