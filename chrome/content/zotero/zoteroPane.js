@@ -414,6 +414,31 @@ var ZoteroPane = new function()
 			searchBar.inputField.select();
 		}, 1);
 		
+		if (Zotero.fxProfileAccessError) {
+			Zotero.uiReadyPromise.delay(2000).then(function () {
+				var ps = Services.prompt;
+				var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
+				var text = "Zotero was unable to access your Firefox profile directory.\n\n"
+					+ "If you’re upgrading from Zotero 4.0 for Firefox and don’t see the data "
+					+ "you expect, it may be located elsewhere on your computer. "
+					+ "Click “More Information” for help restoring your previous data.\n\n"
+					+ "If you’re new to Zotero, you can ignore this message.";
+				var url = 'https://www.zotero.org/support/kb/data_missing_after_zotero_5_upgrade';
+				let index = ps.confirmEx(null,
+					Zotero.getString('general.warning'),
+					text,
+					buttonFlags,
+					Zotero.getString('general.moreInformation'),
+					"Ignore",
+					null, null, {}
+				);
+				if (index == 0) {
+					this.loadURI(url);
+				}
+			}.bind(this));
+		}
+		
 		// Auto-sync on pane open or if new account
 		if (Zotero.Prefs.get('sync.autoSync') || Zotero.initAutoSync) {
 			yield Zotero.proxyAuthComplete;
@@ -427,6 +452,9 @@ var ZoteroPane = new function()
 			}
 			else if (Zotero.Sync.Server.manualSyncRequired) {
 				Zotero.debug('Manual sync required -- skipping auto-sync', 4);
+			}
+			else if (Zotero.fxProfileAccessError) {
+				Zotero.debug('Firefox profile access error -- skipping initial auto-sync', 4);
 			}
 			else {
 				Zotero.Sync.Runner.sync({

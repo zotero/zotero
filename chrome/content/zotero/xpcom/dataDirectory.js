@@ -227,6 +227,7 @@ Zotero.DataDirectory = {
 				Zotero.debug("An error occurred locating the Firefox profile; "
 					+ "not attempting to migrate from Zotero for Firefox");
 				Zotero.logError(e);
+				Zotero.fxProfileAccessError = true;
 			}
 			if (defProfile) {
 				let profileDir = defProfile[0];
@@ -304,6 +305,7 @@ Zotero.DataDirectory = {
 								e.dataDir = nsIFile.path;
 								throw e;
 							}
+							Zotero.fxProfileAccessError = true;
 						}
 					}
 					// If no custom dir specified, check for a subdirectory
@@ -325,6 +327,7 @@ Zotero.DataDirectory = {
 						catch (e) {
 							if (!(e instanceof OS.File.Error && e.becauseNoSuchFile)) {
 								Zotero.logError(e);
+								Zotero.fxProfileAccessError = true;
 							}
 						}
 					}
