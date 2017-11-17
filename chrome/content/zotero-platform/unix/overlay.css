@@ -168,6 +168,10 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 	background-color: Highlight;
 }
 
+#zotero-collections-tree treechildren::-moz-tree-row {
+	height: 1.3em;
+}
+
 
 @media (min-resolution: 1.5dppx) {
 	#zotero-pane .toolbarbutton-icon {
