@@ -178,6 +178,8 @@ Zotero.DataDirectory = {
 		// New installation of 5.0+ with no data directory specified, so check all the places the data
 		// could be
 		else {
+			Zotero.fxProfileAccessError = false;
+			
 			dataDir = this.defaultDir;
 			
 			// Check for ~/Zotero/zotero.sqlite
@@ -719,7 +721,7 @@ Zotero.DataDirectory = {
 			let dontAskAgain = {};
 			let index = ps.confirmEx(null,
 				"Other Data Directory Found",
-				"Zotero found a previous data directory within your Firefox profile directory, "
+				"Zotero found a previous data directory within your Firefox profile, "
 					+ `last modified on ${mtime.toLocaleDateString()}. `
 					+ "If items or files are missing from Zotero that were present in Zotero for Firefox, "
 					+ "your previous data directory may not have been properly migrated to the new default location "

@@ -136,6 +136,7 @@ user_pref("dom.max_chrome_script_run_time", 0);
 user_pref("extensions.zotero.debug.log", $DEBUG);
 user_pref("extensions.zotero.debug.level", $DEBUG_LEVEL);
 user_pref("extensions.zotero.debug.time", $DEBUG);
+user_pref("extensions.zotero.firstRun.skipFirefoxProfileAccessCheck", true);
 user_pref("extensions.zotero.firstRunGuidance", false);
 user_pref("extensions.zotero.firstRun2", false);
 user_pref("extensions.zotero.reportTranslationFailure", false);
