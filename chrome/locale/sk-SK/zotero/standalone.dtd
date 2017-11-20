@@ -63,7 +63,7 @@
 <!ENTITY helpMenuWin.label "Pomoc">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "O &brandShortName;">
+<!ENTITY aboutProduct.label "O Zotere">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "Podpora a dokumentácia">
 <!ENTITY productHelp.accesskey "H">

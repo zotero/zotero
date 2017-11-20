@@ -1,7 +1,7 @@
 <!ENTITY zotero.preferences.title "Možnosti Zotera">
 
 <!ENTITY zotero.preferences.default "Predvolené:">
-<!ENTITY zotero.preferences.items "položiek">
+<!ENTITY zotero.preferences.items "exemplárov">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Nastavenia">
 
@@ -25,14 +25,14 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "povoliť stránke zotero.org, aby prispôsobovala svoj obsah podľa aktuálnej verzie Zotera">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Ak je táto voľba povolená, informácia o nainštalovanej verzii Zotera bude pridávaná do hlavičky HTTP požiadaviek zasielaných na zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Použiť Zotero ako predvolený program pre prevzaté BibTeX/RIS/Refer súbory">
-<!ENTITY zotero.preferences.automaticSnapshots "pri vytváraní položiek z webových stránok automaticky urobiť snímku danej stránky">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "pri ukladaní položiek automaticky priložiť prepojené PDF a ostatné súbory">
+<!ENTITY zotero.preferences.automaticSnapshots "pri vytváraní exemplárov z webových stránok automaticky urobiť snímku danej stránky">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "pri ukladaní exemplárov automaticky priložiť prepojené PDF a ostatné súbory">
 <!ENTITY zotero.preferences.automaticTags "automaticky aplikovať kľúčové slová a predmetové heslá ako značky">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaticky odstrániť položky zmazané pred viac ako">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaticky odstrániť exempláre zmazané pred viac ako">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dňami">
 
 <!ENTITY zotero.preferences.groups "Skupiny">
-<!ENTITY zotero.preferences.groups.whenCopyingInclude "Pri kopírovaní položiek medzi knižnicami, zahrnúť:">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "Pri kopírovaní exemplárov medzi knižnicami, zahrnúť:">
 <!ENTITY zotero.preferences.groups.childNotes "vložené poznámky">
 <!ENTITY zotero.preferences.groups.childFiles "vložené snímky a importované súbory">
 <!ENTITY zotero.preferences.groups.childLinks "vložené odkazy">
@@ -40,8 +40,8 @@
 
 <!ENTITY zotero.preferences.feeds "RSS správy">
 <!ENTITY zotero.preferences.feeds.sorting.label "Triedenie:">
-<!ENTITY zotero.preferences.feeds.sorting.newest "Najnovšie položky ako prvé">
-<!ENTITY zotero.preferences.feeds.sorting.oldest "Najstaršie položky ako prvé">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Najnovšie exempláre ako prvé">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Najstaršie exempláre ako prvé">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Predvolené RSS správy">
 
 <!ENTITY zotero.preferences.openurl.search "Hľadať resolvery">
@@ -139,12 +139,12 @@
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Prepnúť Zotero do celého okna">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Tabla knižníc Focus">
 <!ENTITY zotero.preferences.keys.quicksearch "Rýchle vyhľadávanie">
-<!ENTITY zotero.preferences.keys.newItem "Vytvoriť novú položku">
+<!ENTITY zotero.preferences.keys.newItem "Vytvoriť nový exemplár">
 <!ENTITY zotero.preferences.keys.newNote "Vytvoriť novú poznámku">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Označiť všetky RSS správy ako prečítané/neprečítané">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Zobraziť/skryť značky">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopírovať vybrané citácie do schránky">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopírovať vybrané položky do schránky">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopírovať vybrané exempláre do schránky">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importovať zo schránky">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Zmeny sa prejavia po reštarte">
 
@@ -167,7 +167,7 @@
 <!ENTITY zotero.preferences.proxies.variables "Vo vašej proxy schéme môžete použiť nasledujúce premenné:">
 <!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Názov sídla, ku ktorému sa má pripájať cez proxy server (napr. www.zotero.org)">
 <!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Cesta k stránke, ku ktorej sa má pripájať cez proxy bez úvodnej lomky (napr. about/index.html)">
-<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - cesta k priečinku (napr. about/)">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - cesta k adresáru (napr. about/)">
 <!ENTITY zotero.preferences.proxies.f_variable "&#37;f - meno súboru (napr. index.html)">
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - ľubovoľný reťazec">
 
@@ -189,12 +189,12 @@
 <!ENTITY zotero.preferences.charset.importCharset "Kódovanie pri importovaní">
 <!ENTITY zotero.preferences.charset.displayExportOption "Zobraziť voľbu kódovania pri exportovaní">
 
-<!ENTITY zotero.preferences.dataDir "Umiestnenie priečinku s dátami">
-<!ENTITY zotero.preferences.dataDir.useProfile "Použiť priečinok, do ktorého Firefox ukladá používateľské dáta">
+<!ENTITY zotero.preferences.dataDir "Umiestnenie adresára s dátami">
+<!ENTITY zotero.preferences.dataDir.useProfile "Použiť adresár, do ktorého Firefox ukladá používateľské dáta">
 <!ENTITY zotero.preferences.dataDir.custom "Vlastné umiestnenie:">
 <!ENTITY zotero.preferences.dataDir.choose "Zvoliť...">
 <!ENTITY zotero.preferences.dataDir.viaCommandLine "(určený v príkazovom riadku)">
-<!ENTITY zotero.preferences.dataDir.reveal "Zobraziť priečinok s dátami">
+<!ENTITY zotero.preferences.dataDir.reveal "Zobraziť adresár s dátami">
 <!ENTITY zotero.preferences.dataDir.migrate "Presunúť na nové predvolené umiestnenie...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Základný adresár prepojených príloh">
