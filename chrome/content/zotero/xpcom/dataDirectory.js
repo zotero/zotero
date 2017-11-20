@@ -840,14 +840,21 @@ Zotero.DataDirectory = {
 		}
 		
 		// Skip migration if new dir on different drive and prompt
-		if (yield this.isNewDirOnDifferentDrive(dataDir, newDir)) {
-			Zotero.debug(`New dataDir ${newDir} is on a different drive from ${dataDir} -- skipping migration`);
-			Zotero.DataDirectory.newDirOnDifferentDrive = true;
-			
-			let error = Zotero.getString(`dataDir.migration.failure.full.automatic.newDirOnDifferentDrive`, Zotero.clientName)
-				+ "\n\n"
-				+ Zotero.getString(`dataDir.migration.failure.full.automatic.text2`, Zotero.appName);
-			return this.fullMigrationFailurePrompt(dataDir, newDir, error);
+		try {
+			if (yield this.isNewDirOnDifferentDrive(dataDir, newDir)) {
+				Zotero.debug(`New dataDir ${newDir} is on a different drive from ${dataDir} -- skipping migration`);
+				Zotero.DataDirectory.newDirOnDifferentDrive = true;
+				
+				let error = Zotero.getString(`dataDir.migration.failure.full.automatic.newDirOnDifferentDrive`, Zotero.clientName)
+					+ "\n\n"
+					+ Zotero.getString(`dataDir.migration.failure.full.automatic.text2`, Zotero.appName);
+				return this.fullMigrationFailurePrompt(dataDir, newDir, error);
+			}
+		}
+		catch (e) {
+			Zotero.logError("Error checking whether data directory is on different drive "
+				+ "-- skipping migration:\n\n" + e);
+			return false;
 		}
 		
 		// Check for an existing pipe from other running versions of Zotero pointing at the same data
