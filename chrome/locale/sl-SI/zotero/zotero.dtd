@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Ustvari nov vnos iz trenutne strani">
 <!ENTITY zotero.toolbar.lookup.label "Dodaj vnos po identifikatorju">
 <!ENTITY zotero.toolbar.removeItem.label "Odstrani vnos ...">
-<!ENTITY zotero.toolbar.newLibrary.label "Nova knjižnica ...">
+<!ENTITY zotero.toolbar.newLibrary.label "Nova knjižnica ">
 <!ENTITY zotero.toolbar.newCollection.label "Nova zbirka ...">
 <!ENTITY zotero.toolbar.markFeedRead.label "Označi vir kot prebran">
 <!ENTITY zotero.toolbar.newGroup "Nova skupina ...">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.toolbar.openURL.label "Najdi">
 <!ENTITY zotero.toolbar.openURL.tooltip "Poišči v krajevni knjižnici">
 
-<!ENTITY zotero.toolbar.feeds.new "Nov vir ...">
+<!ENTITY zotero.toolbar.feeds.new "Nov vir ">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Z URL ...">
 <!ENTITY zotero.toolbar.feeds.new.fromPage "S strani ...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Iz OPML ...">

@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Item berria sortu, oraingo orrialdetik abiatuta">
 <!ENTITY zotero.toolbar.lookup.label "Item bat identifikatzaile baten bidez gehitu">
 <!ENTITY zotero.toolbar.removeItem.label "Itema bildumatik kendu">
-<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
+<!ENTITY zotero.toolbar.newLibrary.label "New Library">
 <!ENTITY zotero.toolbar.newCollection.label "Bilduma berria...">
 <!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "Talde berria...">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.toolbar.openURL.label "Aurkitu">
 <!ENTITY zotero.toolbar.openURL.tooltip "Liburutegi publikoan bilatu">
 
-<!ENTITY zotero.toolbar.feeds.new "New Feed…">
+<!ENTITY zotero.toolbar.feeds.new "New Feed">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
 <!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">

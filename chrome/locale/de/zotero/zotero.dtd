@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Neuen Eintrag aus aktueller Webseite erstellen">
 <!ENTITY zotero.toolbar.lookup.label "Eintrag per Identifier hinzufügen">
 <!ENTITY zotero.toolbar.removeItem.label "Eintrag entfernen...">
-<!ENTITY zotero.toolbar.newLibrary.label "Neue Bibliothek...">
+<!ENTITY zotero.toolbar.newLibrary.label "Neue Bibliothek">
 <!ENTITY zotero.toolbar.newCollection.label "Neue Sammlung...">
 <!ENTITY zotero.toolbar.markFeedRead.label "Feed as gelesen markieren">
 <!ENTITY zotero.toolbar.newGroup "Neue Gruppe...">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.toolbar.openURL.label "Finden">
 <!ENTITY zotero.toolbar.openURL.tooltip "In lokaler Bibliothek finden">
 
-<!ENTITY zotero.toolbar.feeds.new "Neuer Feed...">
+<!ENTITY zotero.toolbar.feeds.new "Neuer Feed">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Von URL...">
 <!ENTITY zotero.toolbar.feeds.new.fromPage "Von Seite...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Von OPML...">

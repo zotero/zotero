@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Направи веб страницу од тренутне странице">
 <!ENTITY zotero.toolbar.lookup.label "Додај ставку(е) на основу идентификатора">
 <!ENTITY zotero.toolbar.removeItem.label "Уклони ставку…">
-<!ENTITY zotero.toolbar.newLibrary.label "Нова библиотека…">
+<!ENTITY zotero.toolbar.newLibrary.label "Нова библиотека">
 <!ENTITY zotero.toolbar.newCollection.label "Нова збирка…">
 <!ENTITY zotero.toolbar.markFeedRead.label "Означи довод прочитаним…">
 <!ENTITY zotero.toolbar.newGroup "Нова група…">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.toolbar.openURL.label "Пронађи">
 <!ENTITY zotero.toolbar.openURL.tooltip "Налази ставу у вашој локалној библиотеци">
 
-<!ENTITY zotero.toolbar.feeds.new "Нови довод…">
+<!ENTITY zotero.toolbar.feeds.new "Нови довод">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Из адресе…">
 <!ENTITY zotero.toolbar.feeds.new.fromPage "Са странице…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Са ОПМЛ-а…">

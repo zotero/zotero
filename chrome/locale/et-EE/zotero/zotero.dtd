@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Uue kirje loomine käesolevast leheküljest">
 <!ENTITY zotero.toolbar.lookup.label "Identifitseerija abil uue kirje loomine">
 <!ENTITY zotero.toolbar.removeItem.label "Kirje eemaldamine...">
-<!ENTITY zotero.toolbar.newLibrary.label "New Library…">
+<!ENTITY zotero.toolbar.newLibrary.label "New Library">
 <!ENTITY zotero.toolbar.newCollection.label "Uus teema...">
 <!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "Uus grupp...">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.toolbar.openURL.label "Otsida">
 <!ENTITY zotero.toolbar.openURL.tooltip "Otsida kohalikus raamatukogus">
 
-<!ENTITY zotero.toolbar.feeds.new "New Feed…">
+<!ENTITY zotero.toolbar.feeds.new "New Feed">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
 <!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">

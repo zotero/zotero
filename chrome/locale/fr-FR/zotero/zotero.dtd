@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Créer un document Page Web à partir de la page courante">
 <!ENTITY zotero.toolbar.lookup.label "Ajouter un document par son identifiant">
 <!ENTITY zotero.toolbar.removeItem.label "Supprimer le document…">
-<!ENTITY zotero.toolbar.newLibrary.label "Nouvelle bibliothèque…">
+<!ENTITY zotero.toolbar.newLibrary.label "Nouvelle bibliothèque">
 <!ENTITY zotero.toolbar.newCollection.label "Nouvelle collection…">
 <!ENTITY zotero.toolbar.markFeedRead.label "Marquer le flux comme lu">
 <!ENTITY zotero.toolbar.newGroup "Nouveau groupe…">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.toolbar.openURL.label "Localiser">
 <!ENTITY zotero.toolbar.openURL.tooltip "Chercher dans votre bibliothèque locale">
 
-<!ENTITY zotero.toolbar.feeds.new "Nouveau flux…">
+<!ENTITY zotero.toolbar.feeds.new "Nouveau flux">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "À partir de l'URI…">
 <!ENTITY zotero.toolbar.feeds.new.fromPage "À partir de la page courante…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "À partir d'un fichier OPML…">

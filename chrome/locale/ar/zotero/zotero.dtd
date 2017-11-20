@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "إنشاء عنصر جديد من الصفحة الحالية">
 <!ENTITY zotero.toolbar.lookup.label "إضافة العنصر بواسطة معرف">
 <!ENTITY zotero.toolbar.removeItem.label "ازالة العنصر...">
-<!ENTITY zotero.toolbar.newLibrary.label "مكتبة جديدة...">
+<!ENTITY zotero.toolbar.newLibrary.label "مكتبة جديدة">
 <!ENTITY zotero.toolbar.newCollection.label "مجموعة عناصر جديدة...">
 <!ENTITY zotero.toolbar.markFeedRead.label "علم الخلاصة كمقروءة">
 <!ENTITY zotero.toolbar.newGroup "مجموعة مشاركة جديدة...">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.toolbar.openURL.label "تحديد موقع العنصر">
 <!ENTITY zotero.toolbar.openURL.tooltip "البحث في مكتبتك المحلية">
 
-<!ENTITY zotero.toolbar.feeds.new "خلاصة جديدة...">
+<!ENTITY zotero.toolbar.feeds.new "خلاصة جديدة">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "من رابط...">
 <!ENTITY zotero.toolbar.feeds.new.fromPage "من صفحة...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "من OPML...">

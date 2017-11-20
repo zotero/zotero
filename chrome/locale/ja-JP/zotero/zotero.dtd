@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "現在のページから新規ウェブページ・アイテムを作成">
 <!ENTITY zotero.toolbar.lookup.label "識別子によってアイテムを追加する">
 <!ENTITY zotero.toolbar.removeItem.label "アイテムを削除...">
-<!ENTITY zotero.toolbar.newLibrary.label "新しいライブラリ...">
+<!ENTITY zotero.toolbar.newLibrary.label "新しいライブラリ">
 <!ENTITY zotero.toolbar.newCollection.label "新規コレクション...">
 <!ENTITY zotero.toolbar.markFeedRead.label "フィードを既読にする">
 <!ENTITY zotero.toolbar.newGroup "新規グループ...">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.toolbar.openURL.label "所在確認">
 <!ENTITY zotero.toolbar.openURL.tooltip "あなたの所属機関の図書館を通じて所在確認">
 
-<!ENTITY zotero.toolbar.feeds.new "新しいフィード...">
+<!ENTITY zotero.toolbar.feeds.new "新しいフィード">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "URLから...">
 <!ENTITY zotero.toolbar.feeds.new.fromPage "ページから...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "OPMLから...">

@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "현재 페이지로부터 새 항목 생성">
 <!ENTITY zotero.toolbar.lookup.label "식별자로 항목 추가">
 <!ENTITY zotero.toolbar.removeItem.label "항목 삭제...">
-<!ENTITY zotero.toolbar.newLibrary.label "새 라이브러리...">
+<!ENTITY zotero.toolbar.newLibrary.label "새 라이브러리">
 <!ENTITY zotero.toolbar.newCollection.label "새 컬렉션...">
 <!ENTITY zotero.toolbar.markFeedRead.label "피드를 읽은 것으로 표시">
 <!ENTITY zotero.toolbar.newGroup "새 그룹...">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.toolbar.openURL.label "위치">
 <!ENTITY zotero.toolbar.openURL.tooltip "로컬 라이브러리에서 검색">
 
-<!ENTITY zotero.toolbar.feeds.new "새 피드...">
+<!ENTITY zotero.toolbar.feeds.new "새 피드">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "URL에서...">
 <!ENTITY zotero.toolbar.feeds.new.fromPage "페이지에서...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "OPML에서...">

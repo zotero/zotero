@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Vytvoriť nový exemplár z aktuálnej stránky">
 <!ENTITY zotero.toolbar.lookup.label "Vložiť exemplár podľa identifikátora">
 <!ENTITY zotero.toolbar.removeItem.label "Odstrániť exemplár...">
-<!ENTITY zotero.toolbar.newLibrary.label "Nová knižnica...">
+<!ENTITY zotero.toolbar.newLibrary.label "Nová knižnica">
 <!ENTITY zotero.toolbar.newCollection.label "Nová kolekcia...">
 <!ENTITY zotero.toolbar.markFeedRead.label "Označiť RSS správy ako prečítané">
 <!ENTITY zotero.toolbar.newGroup "Nová skupina...">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.toolbar.openURL.label "Nájsť">
 <!ENTITY zotero.toolbar.openURL.tooltip "Nájdi v miestnej knižnici">
 
-<!ENTITY zotero.toolbar.feeds.new "Nová RSS správa...">
+<!ENTITY zotero.toolbar.feeds.new "Nová RSS správa">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Z URL...">
 <!ENTITY zotero.toolbar.feeds.new.fromPage "Zo stránky...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Z OPML...">

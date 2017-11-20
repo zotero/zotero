@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Útbúa vefsíðufærslu úr síðunni sem nú er opin">
 <!ENTITY zotero.toolbar.lookup.label "Bæta við færslu(m) samkvæmt auðkenni">
 <!ENTITY zotero.toolbar.removeItem.label "Fjarlægja færslu…">
-<!ENTITY zotero.toolbar.newLibrary.label "Nýtt færslusafn…">
+<!ENTITY zotero.toolbar.newLibrary.label "Nýtt færslusafn">
 <!ENTITY zotero.toolbar.newCollection.label "Nýtt safn…">
 <!ENTITY zotero.toolbar.markFeedRead.label "Merkja streymi sem lesið">
 <!ENTITY zotero.toolbar.newGroup "Nýr hópur…">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.toolbar.openURL.label "Staðsetja">
 <!ENTITY zotero.toolbar.openURL.tooltip "Finna í næsta færslusafni">
 
-<!ENTITY zotero.toolbar.feeds.new "Nýtt streymi…">
+<!ENTITY zotero.toolbar.feeds.new "Nýtt streymi">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Úr slóð…">
 <!ENTITY zotero.toolbar.feeds.new.fromPage "Úr síðu…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Úr OPML…">

@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Iš dabartinio puslapio sukurti interneto puslapį">
 <!ENTITY zotero.toolbar.lookup.label "Įrašą(-us) pridėti pagal identifikatorių">
 <!ENTITY zotero.toolbar.removeItem.label "Pašalinti įrašą...">
-<!ENTITY zotero.toolbar.newLibrary.label "Nauja biblioteka...">
+<!ENTITY zotero.toolbar.newLibrary.label "Nauja biblioteka">
 <!ENTITY zotero.toolbar.newCollection.label "Naujas rinkinys...">
 <!ENTITY zotero.toolbar.markFeedRead.label "Žymėti naujienų kanalą skaitytu">
 <!ENTITY zotero.toolbar.newGroup "Nauja grupė...">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.toolbar.openURL.label "Rasti vietą">
 <!ENTITY zotero.toolbar.openURL.tooltip "Ieškoti vietinėje bibliotekoje">
 
-<!ENTITY zotero.toolbar.feeds.new "Naujas naujienų kanalas...">
+<!ENTITY zotero.toolbar.feeds.new "Naujas naujienų kanalas">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "URL…">
 <!ENTITY zotero.toolbar.feeds.new.fromPage "puslapis...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "OPML…">

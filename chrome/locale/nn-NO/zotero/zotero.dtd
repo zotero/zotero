@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Lag nytt element frå gjeldande side">
 <!ENTITY zotero.toolbar.lookup.label "Legg til objekt med identifikator">
 <!ENTITY zotero.toolbar.removeItem.label "Fjern element …">
-<!ENTITY zotero.toolbar.newLibrary.label "Nytt bibliotek …">
+<!ENTITY zotero.toolbar.newLibrary.label "Nytt bibliotek ">
 <!ENTITY zotero.toolbar.newCollection.label "Ny samling …">
 <!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "New Group …">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.toolbar.openURL.label "Lokaliser">
 <!ENTITY zotero.toolbar.openURL.tooltip "Finn gjennom det lokale biblioteket ditt">
 
-<!ENTITY zotero.toolbar.feeds.new "New Feed…">
+<!ENTITY zotero.toolbar.feeds.new "New Feed">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Frå URI …">
 <!ENTITY zotero.toolbar.feeds.new.fromPage "Frå side …">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Frå OPML …">
