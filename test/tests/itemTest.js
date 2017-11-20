@@ -1369,10 +1369,17 @@ describe("Zotero.Item", function () {
 				assert.notProperty(json, "inPublications");
 			});
 			
-			it("should include inPublications=false for items not in My Publications in full mode", function* () {
-				var item = createUnsavedDataObject('item');
+			it("should include inPublications=false for personal-library items not in My Publications in full mode", async function () {
+				var item = createUnsavedDataObject('item', { libraryID: Zotero.Libraries.userLibraryID });
 				var json = item.toJSON({ mode: 'full' });
 				assert.property(json, "inPublications", false);
+			});
+			
+			it("shouldn't include inPublications=false for group items not in My Publications in full mode", function* () {
+				var group = yield getGroup();
+				var item = createUnsavedDataObject('item', { libraryID: group.libraryID });
+				var json = item.toJSON({ mode: 'full' });
+				assert.notProperty(json, "inPublications");
 			});
 		})
 		

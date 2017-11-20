@@ -4347,7 +4347,9 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 	}
 	
 	// My Publications
-	if (this._inPublications || mode == 'full') {
+	if (this._inPublications
+			// Include in 'full' mode, but only in My Library
+			|| (mode == 'full' && this.library && this.library.libraryType == 'user')) {
 		obj.inPublications = this._inPublications;
 	}
 	
