@@ -219,7 +219,7 @@
 									<row>
 										<box/>
 										<hbox>
-											<button id="storage-verify" label="Verify Server"
+											<button id="storage-verify" label="&zotero.preferences.sync.fileSyncing.verifyServer;"
 												oncommand="Zotero_Preferences.Sync.verifyStorageServer()"/>
 											<button id="storage-abort" label="Stop" hidden="true"/>
 											<progressmeter id="storage-progress" hidden="true"
