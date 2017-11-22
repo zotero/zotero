@@ -849,7 +849,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			let item = yield Zotero.Items.getAsync(itemID);
 			let libraryKey = item.libraryKey;
 			let contentType = item.attachmentContentType;
-			if (isCachedMIMEType(contentType) || Zotero.MIME.isTextType(contentType)) {
+			if (contentType && (isCachedMIMEType(contentType) || Zotero.MIME.isTextType(contentType))) {
 				try {
 					let cacheFile = this.getItemCacheFile(item).path;
 					if (yield OS.File.exists(cacheFile)) {
@@ -904,7 +904,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			}
 			else {
 				Zotero.debug("Skipping non-text file getting full-text content for item "
-					+ libraryKey, 2);
+					+ `${libraryKey} (contentType: ${contentType})`, 2);
 				
 				// Delete rows for items that weren't supposed to be indexed
 				yield Zotero.DB.executeTransaction(function* () {
