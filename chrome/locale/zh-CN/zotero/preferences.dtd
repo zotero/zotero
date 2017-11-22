@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "下载文件">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "在同步时">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "在需要时">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "若使用Zotero云存储, 你接受它的">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "条款和条件">
 <!ENTITY zotero.preferences.sync.librariesToSync "要同步的文献库">

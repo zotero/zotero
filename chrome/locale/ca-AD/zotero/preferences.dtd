@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Descarrega els fitxers">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "quan es sincronitzi">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "segons sigui necessari">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Amb l'ús de l'emmagatzematge del Zotero, accepteu quedar obligat pels">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "termes i condicions">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">

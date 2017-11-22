@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Ladda ner filer">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "vid synkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "efter behov">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Genom att använda Zotero Storage godtar du tjänstens">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "avtalsvillkor">
 <!ENTITY zotero.preferences.sync.librariesToSync "Bibliotek att synkronisera">

@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "بارگیری پرونده‌ها">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "در زمان همگام‌سازی">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "در صورت نیاز">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "با استفاده از سامانه ذخیره زوترو (Zotero storage) می‌پذیرید که تابع">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "شرایط و قوانین آن باشید ">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">

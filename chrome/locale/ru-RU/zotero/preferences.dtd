@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Загрузить файлы">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "во время синхронизации">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "по мере необходимости">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Используя хранилище Zotero, вы соглашаетесь быть связанными его">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "условиями использования">
 <!ENTITY zotero.preferences.sync.librariesToSync "Бибиотеки для синхронизации">

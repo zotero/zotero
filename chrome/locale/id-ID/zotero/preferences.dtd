@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Dengan menggunakan penyimpanan Zotero, Anda sepakat untuk terikat dengan ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "syarat dan ketentuan di dalamnya">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">

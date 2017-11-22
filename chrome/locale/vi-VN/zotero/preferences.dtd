@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Tải các tập tin xuống">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "vào lúc đồng bộ">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "khi cần thiết">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Bằng cách dùng vùng lưu trữ của Zotero, bạn chấp nhận ràng buộc bởi">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "các điều khoản và điều kiện">
 <!ENTITY zotero.preferences.sync.librariesToSync "Đồng bộ các thư viện">

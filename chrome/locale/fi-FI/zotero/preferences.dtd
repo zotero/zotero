@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Lataa tiedostot">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "synkronoinnin yhteydessä">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "tarvittaessa">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Käyttämällä Zoteron tallennustilaa sitoudut samalla siihen liittyviin">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "käyttöehtoihin">
 <!ENTITY zotero.preferences.sync.librariesToSync "Synkronoitavat kirjastot">

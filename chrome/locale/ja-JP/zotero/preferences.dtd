@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "必要に応じて">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "同期する際に">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "ファイルをダウンロードする">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero ストレジをお使いになると、次の使用許諾条件に同意したことになります。">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "使用許諾条件">
 <!ENTITY zotero.preferences.sync.librariesToSync "同期するライブラリ">

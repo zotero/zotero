@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "파일 다운로드 시점: ">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "동기화할 때">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "필요할 때">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero 스토리지 이용시 다음 약관에 동의하는 것으로 간주합니다: ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "이용 약관">
 <!ENTITY zotero.preferences.sync.librariesToSync "동기화할 라이브러리">

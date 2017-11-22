@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Descarregar ficheiros">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "em tempo de sincronização">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "à medida que é necessário">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Ao usar a armazenagem Zotero, concorda ter de se reger pelos seus">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "termos e condições">
 <!ENTITY zotero.preferences.sync.librariesToSync "Bibliotecas a Sincronizar">

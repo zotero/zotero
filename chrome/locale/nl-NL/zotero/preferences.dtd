@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Gedownloade bestanden">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "op het synchronisatietijdstip">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "wanneer nodig">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Door het gebruiken van Zotero-opslag gaat u akkoord met de bijbehorende">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "voorwaarden">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">

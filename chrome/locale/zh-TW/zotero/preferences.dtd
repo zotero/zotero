@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "下載檔案">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "於同步時間">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "依所需">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "使用 Zotero 本機儲存時，您同意遵守它的">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "條款與條件">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">

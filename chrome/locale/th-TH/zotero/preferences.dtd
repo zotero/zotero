@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "ดาวน์โหลดแฟ้ม">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "ที่ช่วงการประสานข้อมูล">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "ตามที่ต้องการ">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "คุณยอมรับเงื่อนไขการใช้ที่เก็บของ Zotero">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "เงื่อนไขและข้อกำหนด">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">

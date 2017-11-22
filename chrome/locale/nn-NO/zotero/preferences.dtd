@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Last ned filer">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "ved synkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "når dei trengst">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Ved å bruka Zotero-lagring godtek du ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "vilkåra for bruk">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">

@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Hlaða niður skrám">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "um leið og gagnasamhæfing verður">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "eftir þörfum">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Með notkun Zotero-gagnageymslu samþykkir þú">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "skilmála">
 <!ENTITY zotero.preferences.sync.librariesToSync "Söfn sem á að samstilla">

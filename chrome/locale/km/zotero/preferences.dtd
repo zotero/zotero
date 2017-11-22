@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "ទាញយកឯកសារ">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "តាមការចាំបាច់">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "តាមរយៈការប្រើបន្ទុកហ្ស៊ូតេរ៉ូ អ្នកត្រូវគោរពទៅតាម">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "លក្ខខណ្ឌ​ និង ខសន្យា។">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">

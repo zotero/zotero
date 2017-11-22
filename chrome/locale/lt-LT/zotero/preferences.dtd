@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Failus parsiųsti">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "sinchronizuojant">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "pagal poreikį">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Naudodamiesi Zotero saugykla Jūs savaime sutinkate su jos">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "naudojimosi taisyklėmis ir sąlygomis">
 <!ENTITY zotero.preferences.sync.librariesToSync "Sinchronizuotinos bibliotekos">

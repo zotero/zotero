@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Stiahnuť súbory">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "počas synchronizácie">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "podľa potreby">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Používaním Úložiska Zotero súhlasíte s uvedenými">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "pravidlami a podmienkami">
 <!ENTITY zotero.preferences.sync.librariesToSync "Synchronizovať knižnice">

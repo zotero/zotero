@@ -68,6 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "تحميل الملفات">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "في وقت التزامن">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "عند الحاجة">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "باستخدامك مساحة تخزين زوتيرو، فإنك توافق على الالتزام بكافة">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "الشروط والأحكام">
 <!ENTITY zotero.preferences.sync.librariesToSync "المكتبات المراد تزامنها">

@@ -77,10 +77,10 @@
 
 <!ENTITY debugOutputLogging.label "Logowanie informacji debugowania">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
+<!ENTITY debugOutputLogging.submit "Wyślij informacje">
 <!ENTITY debugOutputLogging.view "Pokaż wyjście">
 <!ENTITY debugOutputLogging.clear "Wyczyść wyjście">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Uruchom ponownie z włączonym logowaniem...">
 
 <!ENTITY helpCheckForUpdates.label "Sprawdź uaktualnienia...">
 <!ENTITY helpCheckForUpdates.accesskey "U">
