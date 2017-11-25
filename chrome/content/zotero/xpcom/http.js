@@ -877,9 +877,10 @@ Zotero.HTTP = new function() {
 	 * @param {Boolean} dontDelete Don't delete the hidden browser upon completion; calling function
 	 *                             must call deleteHiddenBrowser itself.
 	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
+	 * @param {String} [http_referer] Referer for the HTTP request
 	 * @return {browser} Hidden browser used for loading
 	 */
-	this.loadDocuments = function (urls, processor, onDone, onError, dontDelete, cookieSandbox) {
+	this.loadDocuments = function (urls, processor, onDone, onError, dontDelete, cookieSandbox, http_referer) {
 		// (Approximately) how many seconds to wait if the document is left in the loading state and
 		// pageshow is called before we call pageshow with an incomplete document
 		const LOADING_STATE_TIMEOUT = 120;
@@ -897,7 +898,16 @@ Zotero.HTTP = new function() {
 				currentURL++;
 				try {
 					Zotero.debug("Zotero.HTTP.loadDocuments: Loading " + url);
-					hiddenBrowser.loadURI(url);
+					
+					if (http_referer) {
+						Zotero.debug("Zotero.HTTP.loadDocuments: Referer " + http_referer);
+						var referer_uri = Components.classes["@mozilla.org/network/io-service;1"].
+											getService(Components.interfaces.nsIIOService).newURI(http_referer, null, null);
+						hiddenBrowser.loadURI(url, referer_uri);
+					} else {
+						hiddenBrowser.loadURI(url);
+					}
+
 				} catch(e) {
 					if (onError) {
 						onError(e);
