@@ -1461,9 +1461,10 @@ Zotero.ItemTreeView.prototype.sort = function (itemIDs) {
 		
 		for (let i = parentRows.length - 1; i >= 0; i--) {
 			let row = parentRows[i];
-			this._closeContainer(row);
-			this.toggleOpenState(row);
+			this._closeContainer(row, true);
+			this.toggleOpenState(row, true);
 		}
+		this._refreshItemRowMap();
 		
 		let numSorted = itemIDs.length - skipped.length;
 		if (numSorted) {
