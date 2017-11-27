@@ -1714,6 +1714,13 @@ Zotero.Integration.Fields.prototype._updateDocument = function* (forceCitations,
 		var fieldCode = this._session.getCitationField(citation);
 		if(fieldCode != citation.properties.field) {
 			field.setCode(`ITEM CSL_CITATION ${fieldCode}`);
+			if(this._session.data.prefs.fieldType === "ReferenceMark"
+					&& this._session.data.prefs.noteType != 0 && isRich
+					&& !citation.properties.dontUpdate) {
+				// For ReferenceMarks with formatting, we need to set the text again, because
+				// setting the field code removes formatting from the mark. I don't like this.
+				field.setText(formattedCitation, isRich);
+			}
 		}
 		nUpdated++;
 	}
