@@ -99,7 +99,7 @@ var NotifyCallback = {
 		if (noteEditor.item && ids.indexOf(noteEditor.item.id) != -1) {
 			// If the document title hasn't yet been set, reset undo so
 			// undoing to empty isn't possible
-			var noteTitle = noteEditor.note.getNoteTitle();
+			var noteTitle = noteEditor.item.getNoteTitle();
 			if (!document.title && noteTitle != '') {
 				noteEditor.clearUndo();
 				document.title = noteTitle;
