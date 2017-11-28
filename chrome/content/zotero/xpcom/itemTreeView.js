@@ -649,7 +649,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	}
 	
 	this.selection.selectEventsSuppressed = true;
-	//this._treebox.beginUpdateBatch();
+	this._treebox.beginUpdateBatch();
 	
 	if ((action == 'remove' && !collectionTreeRow.isLibrary(true))
 			|| action == 'delete' || action == 'trash'
@@ -1020,7 +1020,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	
 	this._updateIntroText();
 	
-	//this._treebox.endUpdateBatch();
+	this._treebox.endUpdateBatch();
 	
 	// If we made changes to the selection (including reselecting the same item, which will register as
 	// a selection when selectEventsSuppressed is set to false), wait for a select event on the tree
