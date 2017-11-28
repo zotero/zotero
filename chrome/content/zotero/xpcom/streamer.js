@@ -219,6 +219,11 @@ Zotero.Streamer_Module.prototype = {
 							let skipped = Zotero.Sync.Data.Local.getSkippedLibraries();
 							if (skipped.includes(library.libraryID)) return;
 							
+							if (data.version && data.version == library.libraryVersion) {
+								Zotero.debug("Library is already up to date");
+								return;
+							}
+							
 							await Zotero.Sync.Runner.sync({
 								background: true,
 								libraries: [library.libraryID]
