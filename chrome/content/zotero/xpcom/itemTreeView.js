@@ -622,7 +622,8 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	var zp = Zotero.getActiveZoteroPane();
 	var activeWindow = zp && zp.itemsView == this;
 	
-	var quicksearch = this._ownerDocument.getElementById('zotero-tb-search');
+	var quickSearch = this._ownerDocument.getElementById('zotero-tb-search');
+	var hasQuickSearch = quickSearch && quickSearch.value != '';
 	
 	// 'collection-item' ids are in the form collectionID-itemID
 	if (type == 'collection-item') {
@@ -699,7 +700,8 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		// If saved search, publications, or trash, just re-run search
 		if (collectionTreeRow.isSearch()
 				|| collectionTreeRow.isPublications()
-				|| collectionTreeRow.isTrash()) {
+				|| collectionTreeRow.isTrash()
+				|| hasQuickSearch) {
 			let skipExpandMatchParents = collectionTreeRow.isPublications();
 			yield this.refresh(skipExpandMatchParents);
 			refreshed = true;
@@ -710,14 +712,11 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				sort = true;
 			}
 		}
-		
 		else if (collectionTreeRow.isFeed()) {
 			this._ownerDocument.defaultView.ZoteroPane.updateReadLabel();
 		}
-		
-		// If no quicksearch, process modifications manually
-		else if (!quicksearch || quicksearch.value == '')
-		{
+		// If not a search, process modifications manually
+		else {
 			var items = Zotero.Items.get(ids);
 			
 			for (let i = 0; i < items.length; i++) {
@@ -797,33 +796,6 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				sort = true;
 			}
 		}
-		
-		// If quicksearch, re-run it, since the results may have changed
-		else
-		{
-			var allDeleted = true;
-			var isTrash = collectionTreeRow.isTrash();
-			var items = Zotero.Items.get(ids);
-			for (let item of items) {
-				// If not viewing trash and all items were deleted, ignore modify
-				if (allDeleted && !isTrash && !item.deleted) {
-					allDeleted = false;
-				}
-			}
-			
-			if (!allDeleted) {
-				quicksearch.doCommand();
-				// See _refreshPromise note below
-				if (this._refreshPromise) {
-					try {
-						yield this._refreshPromise;
-					}
-					catch (e) {}
-				}
-				madeChanges = true;
-				sort = true;
-			}
-		}
 	}
 	else if(type == 'item' && action == 'add')
 	{
@@ -833,16 +805,32 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		if (collectionTreeRow.isSearch()
 				|| collectionTreeRow.isPublications()
 				|| collectionTreeRow.isTrash()
-				|| collectionTreeRow.isUnfiled()) {
+				|| collectionTreeRow.isUnfiled()
+				|| hasQuickSearch) {
+			if (hasQuickSearch) {
+				// For item adds, clear the quick search, unless all the new items have
+				// skipSelect or are child items
+				if (activeWindow && type == 'item') {
+					let clear = false;
+					for (let i=0; i<items.length; i++) {
+						if (!extraData[items[i].id].skipSelect && items[i].isTopLevelItem()) {
+							clear = true;
+							break;
+						}
+					}
+					if (clear) {
+						quickSearch.value = '';
+						collectionTreeRow.setSearch('');
+					}
+				}
+			}
 			yield this.refresh();
 			refreshed = true;
 			madeChanges = true;
 			sort = true;
 		}
-		
-		// If not a quicksearch, process new items manually
-		else if (!quicksearch || quicksearch.value == '')
-		{
+		// Otherwise process new items manually
+		else {
 			for (let i=0; i<items.length; i++) {
 				let item = items[i];
 				// if the item belongs in this collection
@@ -861,36 +849,6 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			if (madeChanges) {
 				sort = (items.length == 1) ? items[0].id : true;
 			}
-		}
-		// Otherwise re-run the quick search, which refreshes the item list
-		else
-		{
-			// For item adds, clear the quicksearch, unless all the new items have skipSelect or are
-			// child items
-			if (activeWindow && type == 'item') {
-				let clear = false;
-				for (let i=0; i<items.length; i++) {
-					if (!extraData[items[i].id].skipSelect && items[i].isTopLevelItem()) {
-						clear = true;
-						break;
-					}
-				}
-				if (clear) {
-					quicksearch.value = '';
-				}
-			}
-			quicksearch.doCommand();
-			// We have to wait for the search in order to select new items properly, but doCommand()
-			// doesn't provide the return value from the oncommand handler, so we can't wait for an
-			// asynchronous handler. But really they just end up calling refresh(), so we wait for that.
-			if (this._refreshPromise) {
-				try {
-					yield this._refreshPromise;
-				}
-				catch (e) {}
-			}
-			madeChanges = true;
-			sort = true;
 		}
 	}
 	
@@ -1324,7 +1282,7 @@ Zotero.ItemTreeView.prototype.toggleOpenState = function (row, skipRowMapRefresh
 	this._treebox.invalidateRow(row);
 	
 	if (!skipRowMapRefresh) {
-		Zotero.debug('Refreshing hash map');
+		Zotero.debug('Refreshing item row map');
 		this._refreshItemRowMap();
 	}
 }
@@ -1357,7 +1315,7 @@ Zotero.ItemTreeView.prototype._closeContainer = function (row, skipRowMapRefresh
 	this._treebox.invalidateRow(row);
 	
 	if (!skipRowMapRefresh) {
-		Zotero.debug('Refreshing hash map');
+		Zotero.debug('Refreshing item row map');
 		this._refreshItemRowMap();
 	}
 }
@@ -1882,7 +1840,7 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 		if (!parent || parentRow === null) {
 			// No parent -- it's not here
 			
-			// Clear the quicksearch and tag selection and try again (once)
+			// Clear the quick search and tag selection and try again (once)
 			if (!noRecurse && this._ownerDocument.defaultView.ZoteroPane_Local) {
 				let cleared1 = yield this._ownerDocument.defaultView.ZoteroPane_Local.clearQuicksearch();
 				let cleared2 = this._ownerDocument.defaultView.ZoteroPane_Local.clearTagSelection();
