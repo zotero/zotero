@@ -219,7 +219,6 @@ Zotero.CreatorTypes = new function() {
 	Zotero.CachedTypes.apply(this, arguments);
 	this.constructor.prototype = new Zotero.CachedTypes();
 	
-	this.getTypesForItemType = getTypesForItemType;
 	this.isValidForItemType = isValidForItemType;
 	
 	this._typeDesc = 'creator type';
@@ -267,11 +266,10 @@ Zotero.CreatorTypes = new function() {
 	});
 	
 	
-	function getTypesForItemType(itemTypeID) {
+	this.getTypesForItemType = function (itemTypeID) {
 		if (!_creatorTypesByItemType[itemTypeID]) {
-			throw new Error("Creator types not loaded for itemTypeID " + itemTypeID);
+			return [];
 		}
-		
 		return _creatorTypesByItemType[itemTypeID];
 	}
 	
