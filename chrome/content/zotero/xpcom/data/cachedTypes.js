@@ -236,11 +236,8 @@ Zotero.CreatorTypes = new function() {
 	this.init = Zotero.Promise.coroutine(function* () {
 		yield this.constructor.prototype.init.apply(this);
 		
-		var sql = "SELECT itemTypeID, creatorTypeID AS id, creatorType AS name "
-			+ "FROM itemTypeCreatorTypes NATURAL JOIN creatorTypes "
-			// DEBUG: sort needs to be on localized strings in itemPane.js
-			// (though still put primary field at top)
-			+ "ORDER BY primaryField=1 DESC, name";
+		var sql = "SELECT itemTypeID, creatorTypeID AS id, creatorType AS name, primaryField "
+			+ "FROM itemTypeCreatorTypes NATURAL JOIN creatorTypes";
 		var rows = yield Zotero.DB.queryAsync(sql);
 		for (let i=0; i<rows.length; i++) {
 			let row = rows[i];
@@ -250,7 +247,20 @@ Zotero.CreatorTypes = new function() {
 			}
 			_creatorTypesByItemType[itemTypeID].push({
 				id: row.id,
-				name: row.name
+				name: row.name,
+				primaryField: row.primaryField,
+				localizedName: this.getLocalizedString(row.name)
+			});
+		}
+		// Sort primary field first, then by localized name
+		for (let itemTypeID in _creatorTypesByItemType) {
+			_creatorTypesByItemType[itemTypeID].sort((a, b) => {
+				if (a.primaryField != b.primaryField) return b.primaryField - a.primaryField;
+				return Zotero.localeCompare(a.localizedName, b.localizedName);
+			});
+			_creatorTypesByItemType[itemTypeID].forEach((x) => {
+				delete x.primaryField;
+				delete x.localizedName;
 			});
 		}
 		
