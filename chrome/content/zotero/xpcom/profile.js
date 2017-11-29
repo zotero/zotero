@@ -213,14 +213,14 @@ Zotero.Profile = {
 				await Zotero.File.getContentsAsync(prefsFile);
 				let dir = OS.Path.join(profileDir, Zotero.DataDirectory.legacyDirName);
 				Zotero.debug("Checking for 'zotero' subdirectory");
-				if (await OS.File.exists(dir)) {
+				if ((await OS.File.stat(dir)).isDir) {
 					let dbFilename = Zotero.DataDirectory.getDatabaseFilename();
 					let dbFile = OS.Path.join(dir, dbFilename);
 					Zotero.debug("Checking database access within 'zotero' subdirectory");
 					(await OS.File.stat(dbFile)).lastModificationDate;
 				}
 				else {
-					Zotero.debug("'zotero' subdirectory not found");
+					Zotero.debug("'zotero' is not a directory!");
 				}
 			}
 			else {
@@ -228,6 +228,9 @@ Zotero.Profile = {
 			}
 		}
 		catch (e) {
+			if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
+				return true;
+			}
 			Zotero.debug(e, 2)
 			return false
 		}
