@@ -241,7 +241,7 @@ describe("Zotero.FeedItem", function () {
 			win.close()
 		});
 		
-		it('translates and saves items', function* () {
+		it('should translate and save items', function* () {
 			var feedItem = yield createDataObject('feedItem', {libraryID});
 			var url = getTestDataUrl('metadata/journalArticle-single.html');
 			feedItem.setField('url', url);
@@ -251,7 +251,7 @@ describe("Zotero.FeedItem", function () {
 			
 			assert.equal(feedItem.getField('title'), 'Scarcity or Abundance? Preserving the Past in a Digital Era');
 		});
-		it('translates and saves items to corresponding library and collection', function* () {
+		it('should translate and save items to corresponding library and collection', function* () {
 			let group = yield createGroup();
 			let collection = yield createDataObject('collection', {libraryID: group.libraryID});
 			
@@ -265,6 +265,21 @@ describe("Zotero.FeedItem", function () {
 			let item = collection.getChildItems(false, false)[0];
 						
 			assert.equal(item.getField('title'), 'Scarcity or Abundance? Preserving the Past in a Digital Era');	
+		});
+		it('should clone the item to corresponding library and collection if no translators available', function* () {
+			let group = yield createGroup();
+			let collection = yield createDataObject('collection', {libraryID: group.libraryID});
+			
+			var feedItem = yield createDataObject('feedItem', {libraryID, title: 'test'});
+			var url = getTestDataUrl('test.html');
+			feedItem.setField('url', url);
+			yield feedItem.saveTx();
+			
+			yield feedItem.translate(group.libraryID, collection.id);
+			
+			let item = collection.getChildItems(false, false)[0];
+						
+			assert.equal(item.getField('title'), 'test');
 		});
 	});
 });
