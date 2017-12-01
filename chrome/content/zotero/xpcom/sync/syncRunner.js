@@ -1111,7 +1111,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					});
 				}
 				// Note too long
-				else if (object.isNote()) {
+				else if (object.isNote() || object.isAttachment()) {
 					// Throw an error that adds a button for selecting the item to the sync error dialog
 					if (e.message.includes('<img src="data:image')) {
 						// TODO: Localize
