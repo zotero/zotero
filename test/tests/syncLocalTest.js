@@ -281,6 +281,10 @@ describe("Zotero.Sync.Data.Local", function() {
 			var deletedItemKey = deletedItem.key;
 			yield deletedItem.eraseTx();
 			
+			// Make group read-only
+			group.editable = false;
+			yield group.saveTx();
+			
 			yield Zotero.Sync.Data.Local.resetUnsyncedLibraryData(libraryID);
 			
 			assert.isNull(Zotero.SyncedSettings.get(group.libraryID, "testSetting"));

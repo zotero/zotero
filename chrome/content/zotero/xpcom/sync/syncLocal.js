@@ -277,7 +277,13 @@ Zotero.Sync.Data.Local = {
 				}
 			}
 			if (toDelete.length) {
-				yield objectsClass.erase(toDelete, { skipDeleteLog: true });
+				yield objectsClass.erase(
+					toDelete,
+					{
+						skipEditCheck: true,
+						skipDeleteLog: true
+					}
+				);
 			}
 			
 			// Deleted objects
