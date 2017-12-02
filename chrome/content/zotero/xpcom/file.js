@@ -690,6 +690,21 @@ Zotero.File = new function(){
 	}
 	
 	
+	this.setNormalFilePermissions = function (file) {
+		return OS.File.setPermissions(
+			file,
+			{
+				unixMode: 0o644,
+				winAttributes: {
+					readOnly: false,
+					hidden: false,
+					system: false
+				}
+			}
+		);
+	}
+	
+	
 	this.createShortened = function (file, type, mode, maxBytes) {
 		file = this.pathToFile(file);
 		

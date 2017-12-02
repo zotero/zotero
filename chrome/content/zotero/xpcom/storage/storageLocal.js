@@ -932,7 +932,7 @@ Zotero.Sync.Storage.Local = {
 				Zotero.File.checkFileAccessError(e, destPath, 'create');
 			}
 			
-			yield OS.File.setPermissions(destPath, { unixMode: 0o644 });
+			yield Zotero.File.setNormalFilePermissions(destPath);
 			
 			// If we're renaming the main file, processDownload() needs to know
 			if (renamed) {
