@@ -650,13 +650,13 @@ Zotero.Sync.Storage.Local = {
 			if (!md5) {
 				md5 = yield item.attachmentHash;
 			}
+			
+			// Set the file mtime to the time from the server
+			yield OS.File.setDates(path, null, new Date(parseInt(mtime)));
 		}
 		catch (e) {
 			Zotero.File.checkFileAccessError(e, path, 'update');
 		}
-		
-		// Set the file mtime to the time from the server
-		yield OS.File.setDates(path, null, new Date(parseInt(mtime)));
 		
 		item.attachmentSyncedModificationTime = mtime;
 		item.attachmentSyncedHash = md5;
