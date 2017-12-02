@@ -95,6 +95,8 @@ Zotero.Attachments = new function(){
 				// Copy file to unique filename, which automatically shortens long filenames
 				newFile = Zotero.File.copyToUnique(file, newFile);
 				
+				yield Zotero.File.setNormalFilePermissions(newFile.path);
+				
 				if (!contentType) {
 					contentType = yield Zotero.MIME.getMIMETypeFromFile(newFile);
 				}
