@@ -44,8 +44,8 @@
 
 <!ENTITY toolsMenu.label "Værktøj">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
-<!ENTITY installConnector.accesskey "C">
+<!ENTITY installConnector.label "Installér browserforbindelseskomponent">
+<!ENTITY installConnector.accesskey "K">
 <!ENTITY addons.label "Tilføjelser">
 
 
@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Oplysninger til problemløsning">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Diskussionsfora">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Rapportér fejl...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Logning af fejlsøgningsoutput">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.submit "Send output">
+<!ENTITY debugOutputLogging.view "Vis output">
+<!ENTITY debugOutputLogging.clear "Ryd output">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Genstart med logning aktiveret...">
 
 <!ENTITY helpCheckForUpdates.label "Tjek for opdateringer...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

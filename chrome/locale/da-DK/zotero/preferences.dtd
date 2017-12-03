@@ -19,7 +19,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Skriftstørrelse i noter:">
 
 <!ENTITY zotero.preferences.miscellaneous "Forskelligt">
-<!ENTITY zotero.preferences.autoUpdate "Kontroller automatisk for opdaterede oversættere og typografier">
+<!ENTITY zotero.preferences.autoUpdate "Kontroller automatisk for opdaterede oversættere og bibliografiske formater">
 <!ENTITY zotero.preferences.updateNow "Opdater nu">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapporter om &quot;oversættere&quot; uden forbindelse">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Tillad zotero.org at tilpasse indhold baseret på den aktuelle Zotero-version">
@@ -68,7 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Hent filer">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "under synkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "efter behov">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Bekræft server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Når du anvender Zoteros online-lager, er du forpligtet på dets">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "betingelser">
 <!ENTITY zotero.preferences.sync.librariesToSync "Biblioteker der skal synkroniseres">
@@ -85,7 +85,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Gendan på Zotero Server">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Slet alle server-data og overskriv med lokale data fra Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Nulstil historik for fil-synkronisering">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Sammenlign alle vedhæftede filer med lagertjenesten">
 <!ENTITY zotero.preferences.sync.reset "Nulstil">
 <!ENTITY zotero.preferences.sync.reset.button "Nulstil...">
 
@@ -110,11 +110,11 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Når denne mulighed er valgt fra, medtager Zotero kun URL'er for artikler i tidsskrifter, blade og aviser hvis der ikke er anført sidetal (første og sidste side).">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Hurtig kopi">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Standardformat:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopier som HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "site-specikke indstillinger">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domæne/Sti">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(f.eks. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Sprog">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Slå Quick Copy fra hvis du trækker mere end">
@@ -126,10 +126,10 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Hent plug-ins til tekstbehandling...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Brug den klassiske dialog til Tilføj Henvisning">
-<!ENTITY zotero.preferences.styleEditor "Style Editor">
-<!ENTITY zotero.preferences.stylePreview "Style Preview">
+<!ENTITY zotero.preferences.styleEditor "Håndtering af bibliografiske formater">
+<!ENTITY zotero.preferences.stylePreview "Forhåndsvisning af bibliografisk format">
 
-<!ENTITY zotero.preferences.cite.styles.styleManager "Manager til bibliografiske formater">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Håndtering af bibliografiske formater">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Opdateret">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
@@ -176,7 +176,7 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Filer og mapper">
 <!ENTITY zotero.preferences.advanced.keys "Genvejstaster">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Avanceret konfiguration">
 
 <!ENTITY zotero.preferences.prefpane.locate "Lokalisér">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Håndtering af søgemaskiner for artikler">
@@ -194,7 +194,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Brug profil-mappen">
 <!ENTITY zotero.preferences.dataDir.custom "Tilpas:">
 <!ENTITY zotero.preferences.dataDir.choose "Vælg...">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specificeret via kommandolinjen)">
 <!ENTITY zotero.preferences.dataDir.reveal "Vis data-mappen">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrér til ny standardplacering">
 
@@ -210,4 +210,4 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Nulstil oversættere...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Nulstil bibliografiske formater...">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "Redigering af konfiguration">

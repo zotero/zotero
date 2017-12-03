@@ -37,9 +37,9 @@
 <!ENTITY zotero.upgrade.changeLogAfterLink "aby ste sa dozvedeli o novinkách a zmenách v tejto verzii.">
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Pridať výber do Zotera ako poznámku">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Pridať výber do Zotera ako nový exemplár a poznámku">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Uložiť odkaz ako nový exemplár">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Uložiť obrázok ako nový exemplár">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Pridať výber do Zotera ako nový záznam a poznámku">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Uložiť odkaz ako nový záznam">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Uložiť obrázok ako nový záznam">
 
 <!ENTITY zotero.tabs.info.label "Informácie">
 <!ENTITY zotero.tabs.notes.label "Poznámky">
@@ -49,10 +49,10 @@
 <!ENTITY zotero.notes.separate "Upraviť v samostatnom okne">
 
 <!ENTITY zotero.toolbar.duplicate.label "Zobraziť duplicity">
-<!ENTITY zotero.collections.showUnfiledItems "Zobraziť nezaradené exempláre">
+<!ENTITY zotero.collections.showUnfiledItems "Zobraziť nezaradené záznam">
 
-<!ENTITY zotero.items.itemType "Typ exemplára">
-<!ENTITY zotero.items.type_column "Typ exemplára">
+<!ENTITY zotero.items.itemType "Typ záznamu">
+<!ENTITY zotero.items.type_column "Typ záznamu">
 <!ENTITY zotero.items.title_column "Názov">
 <!ENTITY zotero.items.creator_column "Autor">
 <!ENTITY zotero.items.date_column "Dátum">
@@ -65,8 +65,8 @@
 <!ENTITY zotero.items.libraryCatalog_column "Knižničný katalóg">
 <!ENTITY zotero.items.callNumber_column "Signatúra">
 <!ENTITY zotero.items.rights_column "Práva">
-<!ENTITY zotero.items.dateAdded_column "Pridané dňa">
-<!ENTITY zotero.items.dateModified_column "Upravené dňa">
+<!ENTITY zotero.items.dateAdded_column "Pridané">
+<!ENTITY zotero.items.dateModified_column "Zmenené">
 <!ENTITY zotero.items.extra_column "Extra">
 <!ENTITY zotero.items.archive_column "Archív">
 <!ENTITY zotero.items.archiveLocation_column "Umiestnenie v archíve">
@@ -90,21 +90,21 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Vložiť snímku aktuálnej stránky">
 <!ENTITY zotero.items.menu.attach.link "Vložiť odkaz na aktuálnu stránku">
 <!ENTITY zotero.items.menu.attach.link.uri "Vložiť odkaz na URI...">
-<!ENTITY zotero.items.menu.attach.file "Vložiť kópiu miestneho súboru...">
+<!ENTITY zotero.items.menu.attach.file "Vložiť kópiu lokálneho súboru...">
 <!ENTITY zotero.items.menu.attach.fileLink "Vložiť odkaz na súbor...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Vrátiť do knižnice">
-<!ENTITY zotero.items.menu.duplicateItem "Duplikovať vybraný exemplár">
-<!ENTITY zotero.items.menu.mergeItems "Zlúčiť exempláre...">
+<!ENTITY zotero.items.menu.duplicateItem "Duplikovať vybraný záznam">
+<!ENTITY zotero.items.menu.mergeItems "Zlúčiť záznamy...">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Zvoľte verziu exemplára, ktorý chcete použiť ako hlavný exemplár:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Vyberte polia, ktoré chcete zachovať z ostatných verzií exemplára:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Zvoľte verziu záznamu, ktorý chcete použiť ako hlavný záznam:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Vyberte polia, ktoré chcete zachovať z ostatných verzií záznamu:">
 
-<!ENTITY zotero.toolbar.newItem.label "Nový exemplár">
+<!ENTITY zotero.toolbar.newItem.label "Nový záznam">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Viac">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Vytvoriť nový exemplár z aktuálnej stránky">
-<!ENTITY zotero.toolbar.lookup.label "Vložiť exemplár podľa identifikátora">
-<!ENTITY zotero.toolbar.removeItem.label "Odstrániť exemplár...">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Vytvoriť nový záznam z aktuálnej stránky">
+<!ENTITY zotero.toolbar.lookup.label "Vložiť záznam(y) podľa identifikátora">
+<!ENTITY zotero.toolbar.removeItem.label "Odstrániť záznam...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nová knižnica">
 <!ENTITY zotero.toolbar.newCollection.label "Nová kolekcia...">
 <!ENTITY zotero.toolbar.markFeedRead.label "Označiť RSS správy ako prečítané">
@@ -124,7 +124,7 @@
 <!ENTITY zotero.toolbar.about.label "O Zotere">
 <!ENTITY zotero.toolbar.advancedSearch "Pokročilé vyhľadávanie">
 <!ENTITY zotero.toolbar.openURL.label "Nájsť">
-<!ENTITY zotero.toolbar.openURL.tooltip "Nájdi v miestnej knižnici">
+<!ENTITY zotero.toolbar.openURL.tooltip "Nájdi v lokálnej knižnici">
 
 <!ENTITY zotero.toolbar.feeds.new "Nová RSS správa">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Z URL...">
@@ -173,8 +173,8 @@
 <!ENTITY zotero.lookup.description "Zadajte do poľa ISBN, DOI alebo PMID podľa ktorého chcete vyhľadávať.">
 <!ENTITY zotero.lookup.button.search "Hľadať">
 
-<!ENTITY zotero.selectitems.title "Označiť exempláre">
-<!ENTITY zotero.selectitems.intro.label "Označte, ktoré exempláre chcete pridať do vašej knižnice">
+<!ENTITY zotero.selectitems.title "Označiť záznamy">
+<!ENTITY zotero.selectitems.intro.label "Označte, ktoré záznamy chcete pridať do vašej knižnice">
 <!ENTITY zotero.selectitems.cancel.label "Zrušiť">
 <!ENTITY zotero.selectitems.select.label "OK">
 
@@ -254,7 +254,7 @@
 <!ENTITY zotero.sync.longTagFixer.character "znaku">
 <!ENTITY zotero.sync.longTagFixer.characters "znakoch">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Nevybrané značky nebudú uložené.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Značka bude odstránená zo všetkých exemplárov.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Značka bude odstránená zo všetkých záznamov.">
 
 <!ENTITY zotero.merge.title "Riešenie konfliktov">
 <!ENTITY zotero.merge.of "z">
@@ -281,12 +281,12 @@
 <!ENTITY zotero.recognizePDF.recognizing.label "Vyhľadávam metadáta...">
 <!ENTITY zotero.recognizePDF.cancel.label "Zrušiť">
 <!ENTITY zotero.recognizePDF.pdfName.label "Názov PDF">
-<!ENTITY zotero.recognizePDF.itemName.label "Názov exemplára">
+<!ENTITY zotero.recognizePDF.itemName.label "Názov záznamu">
 
 <!ENTITY zotero.rtfScan.title "Spracovať RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Zrušiť">
 <!ENTITY zotero.rtfScan.citation.label "Citácia">
-<!ENTITY zotero.rtfScan.itemName.label "Názov exemplára">
+<!ENTITY zotero.rtfScan.itemName.label "Názov záznamu">
 <!ENTITY zotero.rtfScan.unmappedCitations.label "Nepriradené citácie">
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Nezaraditeľné citácie">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Priradené citácie">
@@ -295,8 +295,8 @@
 <!ENTITY zotero.rtfScan.introPage.description2 "Na začiatok si vyberte vstupný RTF súbor a výstupný súbor:">
 <!ENTITY zotero.rtfScan.scanPage.label "Vyhľadávanie citácií">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero vyhľadáva citácie vo vybranom dokumente. Čakajte prosím.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Skontrolovať citované exempláre">
-<!ENTITY zotero.rtfScan.citationsPage.description "Prezrite si zoznam rozpoznaných citácií a uistite sa, že Zotero správne označilo korešpondujúce exempláre. Pred ďalším krokom je potrebné priradiť všetky nepriradené alebo nejednoznačné citácie.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Skontrolovať citované záznamy">
+<!ENTITY zotero.rtfScan.citationsPage.description "Prezrite si zoznam rozpoznaných citácií a uistite sa, že Zotero správne označilo korešpondujúce záznamy. Pred ďalším krokom je potrebné priradiť všetky nepriradené alebo nejednoznačné citácie.">
 <!ENTITY zotero.rtfScan.stylePage.label "Formátovanie dokumentu">
 <!ENTITY zotero.rtfScan.formatPage.label "Formátovanie citácií">
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero spracovávaa a formátuje dokument. Čakajte prosím.">
@@ -309,7 +309,7 @@
 <!ENTITY zotero.file.noneSelected.label "Nie je označený žiaden súbor">
 
 <!ENTITY zotero.downloadManager.label "Uložiť do Zotera">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Prílohy nemožno uložiť do práve vybranej knižnice. Tento exemplár sa preto uloží do vašej knižnice.">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Prílohy nemožno uložiť do práve vybranej knižnice. Tento záznam sa preto uloží do vašej knižnice.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Pre použitie tejto funkcie musíte najprv nainštalovať nástroje PDF v table Hľadania v možnostiach Zotera.">
 
 <!ENTITY zotero.attachLink.title "Priložiť odkaz k URI">

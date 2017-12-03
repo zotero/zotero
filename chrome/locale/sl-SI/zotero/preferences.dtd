@@ -68,7 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Datoteke prenesi">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "ob usklajevanju">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "po potrebi">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Preveri strežnik">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Če uporabljate shrambo Zotero, se strinjate z njenimi">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "pravili, omejitvami in pogoji">
 <!ENTITY zotero.preferences.sync.librariesToSync "Knjižnice za usklajevanje">
@@ -183,7 +183,7 @@
 <!ENTITY zotero.preferences.locate.description "Opis">
 <!ENTITY zotero.preferences.locate.name "Ime">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Iskalnik razširi zmogljivost spustnega polja Lociraj v podoknu Podatki. Če omogočite iskalnike na spodnjem seznamu, bodo dodani v spustno polje in boste z njimi lahko na spletu našli vire iz svoje knjižnice.">
-<!ENTITY zotero.preferences.locate.addDescription "Če želite dodati iskalnik, ki ni na seznamu, obiščite želeni iskalnik v svojem brskalniku in izberite &quot;Dodaj&quot; v Zoterovem meniju Lociraj.">
+<!ENTITY zotero.preferences.locate.addDescription "Če želite dodati iskalnik, ki ni na seznamu, obiščite želeni iskalnik v svojem brskalniku in izberite »Dodaj« v Zoterovem meniju Lociraj.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Obnovi privzeto">
 
 <!ENTITY zotero.preferences.charset "Kodiranje znakov">

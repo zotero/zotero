@@ -5,5 +5,5 @@
 <!ENTITY styles.preview.citationFormat.author "autor">
 <!ENTITY styles.preview.citationFormat.authorDate "autor-dátum">
 <!ENTITY styles.preview.citationFormat.label "etiketa">
-<!ENTITY styles.preview.citationFormat.note "poznámka">
-<!ENTITY styles.preview.citationFormat.numeric "číselná">
+<!ENTITY styles.preview.citationFormat.note "poznámka pod čiarou">
+<!ENTITY styles.preview.citationFormat.numeric "číselný">

@@ -8,8 +8,8 @@
 <!ENTITY zotero.search.joinMode.suffix "z nasledujúcich pravidiel">
 
 <!ENTITY zotero.search.recursive.label "Hľadať v podadresároch">
-<!ENTITY zotero.search.noChildren "Zobrazovať iba exempláre najvyššej úrovne">
-<!ENTITY zotero.search.includeParentsAndChildren "U zhodných exemplárov zobraziť ich nadradené aj podradené úrovne">
+<!ENTITY zotero.search.noChildren "Zobrazovať iba záznamy najvyššej úrovne">
+<!ENTITY zotero.search.includeParentsAndChildren "U zhodných záznamov zobraziť ich nadradené aj podradené úrovne">
 
 <!ENTITY zotero.search.textModes.phrase "Výraz">
 <!ENTITY zotero.search.textModes.phraseBinary "Výraz (vrátane binárnych súborov)">
