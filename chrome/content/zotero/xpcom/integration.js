@@ -474,7 +474,7 @@ Zotero.Integration.Interface.prototype.addCitation = Zotero.Promise.coroutine(fu
 	yield this._session.init(false, false);
 	
 	let [idx, field, citation] = yield this._session.fields.addEditCitation(null);
-	yield this._session.addCitation(idx, field.noteIndex, citation);
+	yield this._session.addCitation(idx, field.getNoteIndex(), citation);
 	
 	if (this._session.data.prefs.delayCitationUpdates) {
 		return this._session.writeDelayedCitation(idx, field, citation);
@@ -505,7 +505,7 @@ Zotero.Integration.Interface.prototype.addEditCitation = Zotero.Promise.coroutin
 	docField = docField || this._doc.cursorInField(this._session.data.prefs['fieldType']);
 
 	let [idx, field, citation] = yield this._session.fields.addEditCitation(docField);
-	yield this._session.addCitation(idx, field.noteIndex, citation);
+	yield this._session.addCitation(idx, field.getNoteIndex(), citation);
 	if (this._session.data.prefs.delayCitationUpdates) {
 		return this._session.writeDelayedCitation(idx, field, citation);
 	} else {
@@ -528,7 +528,6 @@ Zotero.Integration.Interface.prototype.addBibliography = Zotero.Promise.coroutin
 	
 	let field = new Zotero.Integration.BibliographyField(yield this._session.fields.addField());
 	field.clearCode();
-	field.writeToDoc();
 	if(this._session.data.prefs.delayCitationUpdates) {
 		// Refreshes citeproc state before proceeding
 		this._session.reload = true;
@@ -594,7 +593,6 @@ Zotero.Integration.Interface.prototype.addEditBibliography = Zotero.Promise.coro
 	if (!bibliographyField) {
 		bibliographyField = new Zotero.Integration.BibliographyField(yield this._session.fields.addField());
 		bibliographyField.clearCode();
-		bibliographyField.writeToDoc();
 	}
 	
 	let bibliography = new Zotero.Integration.Bibliography(bibliographyField);
@@ -881,7 +879,7 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
 	for (var i = 0; i < this._fields.length; i++) {
 		let field = Zotero.Integration.Field.loadExisting(this._fields[i]);
 		if (field.type === INTEGRATION_TYPE_ITEM) {
-			var noteIndex = field.noteIndex,
+			var noteIndex = field.getNoteIndex(),
 				citation = new Zotero.Integration.Citation(field);
 
 			let action = yield citation.loadItemData();
@@ -896,7 +894,7 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
 			
 			yield this._session.addCitation(i, noteIndex, citation);
 		} else if (field.type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
-			if (this.ignoreEmptyBibliography && field.text.trim() === "") {
+			if (this.ignoreEmptyBibliography && field.getText().trim() === "") {
 				this._removeCodeFields[i] = true;
 			} else {
 				this._bibliographyFields.push(field);
@@ -974,10 +972,11 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 		var citation = this._session.citationsByIndex[i];
 		let citationField = citation._field;
 		
+		var isRich = false;
 		if (!citation.properties.dontUpdate) {
 			var formattedCitation = citation.properties.formattedCitation && citation.properties.custom
 				? citation.properties.custom : citation.text;
-			var plainCitation = citation.properties.plainCitation && citationField.text;
+			var plainCitation = citation.properties.plainCitation && citationField.getText();
 			
 			// If we're not specifically *not* trying to regen text
 			if (forceCitations != FORCE_CITATIONS_FALSE
@@ -1002,30 +1001,25 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 				}
 				
 				if(!citation.properties.dontUpdate) {
-					// setText and getText here bypass the setter/getter abstraction
-					var isRich = formattedCitation.includes('\\');
-					if (isRich) {
-						formattedCitation = '{\\rtf' + formattedCitation + '}';
-					}
-					citationField.setText(formattedCitation, isRich);
-					citationField.text = formattedCitation;
+					isRich = citationField.setText(formattedCitation);
 					
 					citation.properties.formattedCitation = formattedCitation;
 					citation.properties.plainCitation = citationField.getText();
-
-					if (isRich) {
-						// But we still need writeToDoc to trigger RTF write for LO (see comment in writeToDoc())
-						citationField.text = formattedCitation;
-					}
 				}
 			}
 		}
 		
 		var serializedCitation = citation.serialize();
 		if (serializedCitation != citation.properties.field) {
-			citationField.code = serializedCitation;
+			citationField.setCode(serializedCitation);
+			if (this._session.data.prefs.fieldType === "ReferenceMark"
+					&& this._session.data.prefs.noteType != 0 && isRich
+					&& !citation.properties.dontUpdate) {
+				// For ReferenceMarks with formatting, we need to set the text again, because
+				// setting the field code removes formatting from the mark. I don't like this.
+				citationField.setText(formattedCitation, isRich);
+			}
 		}
-		citationField.writeToDoc();
 		nUpdated++;
 	}
 	
@@ -1038,7 +1032,7 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 		if (forceBibliography || this._session.bibliographyDataHasChanged) {
 			let code = this._session.bibliography.serialize();
 			for (let field of this._bibliographyFields) {
-				field.code = code;
+				field.setCode(code);
 			}
 		}
 		
@@ -1075,11 +1069,10 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 			await Zotero.Promise.delay();
 			
 			if (bibliographyText) {
-				field.text = bibliographyText;
+				field.setText(bibliographyText);
 			} else {
-				field.text = "{Bibliography}";
+				field.setText("{Bibliography}");
 			}
-			field.writeToDoc();
 			nUpdated += 5;
 		}
 	}
@@ -1184,11 +1177,6 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 	this._session.updateIndices[fieldIndex] = true;
 	// Make sure session updated
 	yield citationsByItemIDPromise;
-	if (newField) {
-		// For further processing this field will be properly recognised as citation
-		// instead of skipped as a temp field.
-		field.writeToDoc();
-	}
 	return [fieldIndex, field, io.citation];
 });
 
@@ -1592,19 +1580,22 @@ Zotero.Integration.Session.prototype.writeDelayedCitation = Zotero.Promise.corou
 	text = `\\uldash{${text}}`;
 	
 	// Make sure we'll prompt for manually edited citations
+	var isRich = false;
 	if(!citation.properties.dontUpdate) {
-		// setText and getText here bypass the setter/getter abstraction
-		text = '{\\rtf' + text + '}';
-		field.setText(text, true);
-		field.text = text;
+		isRich = field.setText(text);
 		
 		citation.properties.formattedCitation = text;
 		citation.properties.plainCitation = field.getText();
 	}
 	
-	field.code = citation.serialize();
-	field.text = text;
-	field.writeToDoc();
+	field.setCode(citation.serialize());
+	if (this.data.prefs.fieldType === "ReferenceMark"
+			&& this.data.prefs.noteType != 0 && isRich
+			&& !citation.properties.dontUpdate) {
+		// For ReferenceMarks with formatting, we need to set the text again, because
+		// setting the field code removes formatting from the mark. I don't like this.
+		field.setText(text, isRich);
+	}
 	
 	// Update bibliography with a static string
 	var fields = yield this.fields.get();
@@ -1964,55 +1955,21 @@ Zotero.Integration.Field = class {
 				this[prop] = field[prop].bind ? field[prop].bind(field) : field[prop];
 			}
 		}
-		this.dirty = false;
 		this._field = field;
 		this.type = INTEGRATION_TYPE_TEMP;	
 	}
 	
-	get text() {return this._text = this._text ? this._text : this.getText()}
-	set text(v) {this._text = v; this.dirty = true}
-
-	get code() {return this._code = this._code ? this._code : this.getCode()}
-	set code(v) {this._code = v; this.dirty = true}
-
-	get noteIndex() {return this._noteIndex = this._noteIndex ? this._noteIndex : this.getNoteIndex()}
-	
-	clearCode() {
-		this.code = '{}';
-	};
-	
-	writeToDoc() {
-		if (!this.dirty) return;
+	setCode(code) {
 		// Boo. Inconsistent order.
 		if (this.type == INTEGRATION_TYPE_ITEM) {
-			this._field.setCode(`ITEM CSL_CITATION ${this.code}`);
+			this._field.setCode(`ITEM CSL_CITATION ${code}`);
 		} else if (this.type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
-			this._field.setCode(`BIBL ${this.code} CSL_BIBLIOGRAPHY`);
+			this._field.setCode(`BIBL ${code} CSL_BIBLIOGRAPHY`);
 		} else {
 			this._field.setCode(`TEMP`);
 		}
-		
-		// NB: Setting code in LO removes rtf formatting, so the order here is important
-		let text = this._text;
-		if (text) {
-			let isRich = false;
-			// If RTF wrap with RTF tags
-			if (text.includes("\\")) {
-				if (text.substr(0,5) != "{\\rtf") {
-					text = "{\\rtf "+text+"}";
-				}
-				isRich = true;
-			}
-			this._field.setText(text, isRich);
-		}
+	}
 
-		this.dirty = false;
-		// Retrigger retrieval from doc.
-		this._text = null;
-		this._code = null;
-		this._noteIndex = null;
-	};
-	
 	getCode() {
 		let code = this._field.getCode();
 		let start = code.indexOf('{');
@@ -2020,7 +1977,24 @@ Zotero.Integration.Field = class {
 			return '{}';
 		}
 		return code.substring(start, code.lastIndexOf('}')+1);
-	};
+	}
+
+	clearCode() {
+		this.setCode('{}');
+	}
+		
+	setText(text) {
+		var isRich = false;
+		// If RTF wrap with RTF tags
+		if (text.includes("\\")) {
+			if (text.substr(0,5) != "{\\rtf") {
+				text = "{\\rtf "+text+"}";
+			}
+			isRich = true;
+		}
+		this._field.setText(text, isRich);
+		return isRich;
+	}
 };
 
 /**
@@ -2176,24 +2150,24 @@ Zotero.Integration.CitationField = class extends Zotero.Integration.Field {
 		
 
 		try {
-			if (this.code[0] == '{') {		// JSON field
-				return upgradeCruft(unserialize(this.code), this.code);
+			let code = this.getCode();
+			if (code[0] == '{') {		// JSON field
+				return upgradeCruft(unserialize(code), code);
 			} else {				// ye olde style field
-				return unserializePreZotero1_0(this.code);
+				return unserializePreZotero1_0(code);
 			}
 		} catch (e) {
-			return this.resolveCorrupt();
+			return this.resolveCorrupt(code);
 		}
 	}
 	
 	clearCode() {
-		this.code = JSON.stringify({citationItems: [], properties: {}});
-		this.writeToDoc();
+		this.setCode(JSON.stringify({citationItems: [], properties: {}}));
 	}
 		
-	resolveCorrupt() {
+	resolveCorrupt(code) {
 		return Zotero.Promise.coroutine(function* () {
-			Zotero.debug(`Integration: handling corrupt citation field ${this.code}`);
+			Zotero.debug(`Integration: handling corrupt citation field ${code}`);
 			var msg = Zotero.getString("integration.corruptField")+'\n\n'+
 					  Zotero.getString('integration.corruptField.description');
 			this.select();
@@ -2228,16 +2202,17 @@ Zotero.Integration.BibliographyField = class extends Zotero.Integration.Field {
 	};
 	
 	unserialize() {
+		var code = this.getCode();
 		try {
-			return JSON.parse(this.code);
+			return JSON.parse(code);
 		} catch(e) {
-			return this.resolveCorrupt();
+			return this.resolveCorrupt(code);
 		}
 	}
 			
 	resolveCorrupt() {
 		return Zotero.Promise.coroutine(function* () {
-			Zotero.debug(`Integration: handling corrupt bibliography field ${this.code}`);
+			Zotero.debug(`Integration: handling corrupt bibliography field ${code}`);
 			var msg = Zotero.getString("integration.corruptBibliography")+'\n\n'+
 					  Zotero.getString('integration.corruptBibliography.description');
 			var result = Zotero.Integration.currentDoc.displayAlert(msg, DIALOG_ICON_CAUTION, DIALOG_BUTTONS_OK_CANCEL);
@@ -2257,7 +2232,7 @@ Zotero.Integration.Citation = class {
 		this.citationID = data.citationID;
 		this.citationItems = data.citationItems;
 		this.properties = data.properties;
-		this.properties.noteIndex = citationField.noteIndex;
+		this.properties.noteIndex = citationField.getNoteIndex();
 
 		this._field = citationField;
 	}
@@ -2399,14 +2374,15 @@ Zotero.Integration.Citation = class {
 	prepareForEditing() {
 		return Zotero.Promise.coroutine(function *(){
 			// Check for modified field text or dontUpdate flag
+			var fieldText = this._field.getText();
 			if (this.properties.dontUpdate
 					|| (this.properties.plainCitation
-						&& this._field.text !== this.properties.plainCitation)) {
+						&& fieldText !== this.properties.plainCitation)) {
 				Zotero.Integration.currentDoc.activate();
 				Zotero.debug("[addEditCitation] Attempting to update manually modified citation.\n"
 					+ "citaion.properties.dontUpdate: " + this.properties.dontUpdate + "\n"
 					+ "Original: " + this.properties.plainCitation + "\n"
-					+ "Current:  " + this._field.text
+					+ "Current:  " + fieldText
 				);
 				if (!Zotero.Integration.currentDoc.displayAlert(Zotero.getString("integration.citationChanged.edit"),
 						DIALOG_ICON_WARNING, DIALOG_BUTTONS_OK_CANCEL)) {
