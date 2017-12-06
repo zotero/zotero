@@ -741,7 +741,7 @@ Zotero.Integration.Fields.prototype.addField = function(note) {
 	
 	var field = this._doc.cursorInField(this._session.data.prefs['fieldType']);
 	if (field) {
-		if (!this._doc.displayAlert(Zotero.getString("integration.replace"),
+		if (!this._session.displayAlert(Zotero.getString("integration.replace"),
 				DIALOG_ICON_STOP,
 				DIALOG_BUTTONS_OK_CANCEL)) {
 			return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("inserting citation"));
@@ -919,17 +919,19 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
  */
 Zotero.Integration.Fields.prototype.updateDocument = Zotero.Promise.coroutine(function* (forceCitations, forceBibliography,
 		ignoreCitationChanges) {
-	var startTime = (new Date()).getTime();
+	this._session.timer = new Zotero.Integration.Timer();
+	this._session.timer.start();
 	
 	yield this._session._updateCitations()
 	yield this._updateDocument(forceCitations, forceBibliography, ignoreCitationChanges)
 
-	var diff = ((new Date()).getTime() - startTime)/1000;
+	var diff = this._session.timer.stop();
+	this._session.timer = null;
 	Zotero.debug(`Integration: updateDocument complete in ${diff}s`)
 	// If the update takes longer than 5s suggest delaying citation updates
 	if (diff > DELAY_CITATIONS_PROMPT_TIMEOUT && !this._session.data.prefs.dontAskDelayCitationUpdates && !this._session.data.prefs.delayCitationUpdates) {
 		this._doc.activate();
-		var result = this._doc.displayAlert(Zotero.getString('integration.delayCitationUpdates.alert'),
+		var result = this._session.displayAlert(Zotero.getString('integration.delayCitationUpdates.alert'),
 			DIALOG_ICON_WARNING, DIALOG_BUTTONS_YES_NO_CANCEL);
 		if (result == 2) {
 			this._session.data.prefs.delayCitationUpdates = true;
@@ -992,7 +994,7 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 						+ "Current:  " + plainCitation
 					);
 					citationField.select();
-					var result = this._doc.displayAlert(
+					var result = this._session.displayAlert(
 						Zotero.getString("integration.citationChanged")+"\n\n"+Zotero.getString("integration.citationChanged.description"), 
 						DIALOG_ICON_CAUTION, DIALOG_BUTTONS_YES_NO);
 					if (result) {
@@ -1344,6 +1346,17 @@ Zotero.Integration.Session.prototype.init = Zotero.Promise.coroutine(function *(
 	}
 	return true;
 });
+
+Zotero.Integration.Session.prototype.displayAlert = function() {
+	if (this.timer) {
+		this.timer.pause();
+	}
+	var result = this._doc.displayAlert.apply(this._doc, arguments);
+	if (this.timer) {
+		this.timer.resume();
+	}
+	return result;
+}
 
 /**
  * Changes the Session style and data
@@ -2172,7 +2185,7 @@ Zotero.Integration.CitationField = class extends Zotero.Integration.Field {
 					  Zotero.getString('integration.corruptField.description');
 			this.select();
 			Zotero.Integration.currentDoc.activate();
-			var result = Zotero.Integration.currentDoc.displayAlert(msg, DIALOG_ICON_CAUTION, DIALOG_BUTTONS_YES_NO_CANCEL); 
+			var result = Zotero.Integration.currentSession.displayAlert(msg, DIALOG_ICON_CAUTION, DIALOG_BUTTONS_YES_NO_CANCEL);
 			if (result == 0) { // Cancel
 				return new Zotero.Exception.UserCancelled("corrupt citation resolution");
 			} else if (result == 1) {		// No
@@ -2215,7 +2228,7 @@ Zotero.Integration.BibliographyField = class extends Zotero.Integration.Field {
 			Zotero.debug(`Integration: handling corrupt bibliography field ${code}`);
 			var msg = Zotero.getString("integration.corruptBibliography")+'\n\n'+
 					  Zotero.getString('integration.corruptBibliography.description');
-			var result = Zotero.Integration.currentDoc.displayAlert(msg, DIALOG_ICON_CAUTION, DIALOG_BUTTONS_OK_CANCEL);
+			var result = Zotero.Integration.currentSession.displayAlert(msg, DIALOG_ICON_CAUTION, DIALOG_BUTTONS_OK_CANCEL);
 			if (result == 0) {
 				throw new Zotero.Exception.UserCancelled("corrupt bibliography resolution");
 			} else {
@@ -2350,7 +2363,8 @@ Zotero.Integration.Citation = class {
 			msg += '\n\n'+Zotero.getString('integration.missingItem.description');
 			this._field.select();
 			Zotero.Integration.currentDoc.activate();
-			var result = Zotero.Integration.currentDoc.displayAlert(msg, 1, 3);
+			var result = Zotero.Integration.currentSession.displayAlert(msg,
+				DIALOG_ICON_WARNING, DIALOG_BUTTONS_YES_NO_CANCEL);
 			if (result == 0) {			// Cancel
 				throw new Zotero.Exception.UserCancelled("document update");
 			} else if(result == 1) {	// No
@@ -2384,7 +2398,7 @@ Zotero.Integration.Citation = class {
 					+ "Original: " + this.properties.plainCitation + "\n"
 					+ "Current:  " + fieldText
 				);
-				if (!Zotero.Integration.currentDoc.displayAlert(Zotero.getString("integration.citationChanged.edit"),
+				if (!Zotero.Integration.currentSession.displayAlert(Zotero.getString("integration.citationChanged.edit"),
 						DIALOG_ICON_WARNING, DIALOG_BUTTONS_OK_CANCEL)) {
 					throw new Zotero.Exception.UserCancelled("editing citation");
 				}
@@ -2599,5 +2613,28 @@ Zotero.Integration.Bibliography = class {
 		
 		
 		return JSON.stringify(bibliography);
+	}
+}
+
+// perhaps not the best place for a timer
+Zotero.Integration.Timer = class {
+	start() {
+		this.startTime = (new Date()).getTime();
+	}
+	
+	stop() {
+		this.resume();
+		return ((new Date()).getTime() - this.startTime)/1000;
+	}
+	
+	pause() {
+		this.pauseTime = (new Date()).getTime();
+	}
+	
+	resume() {
+		if (this.pauseTime) {
+			this.startTime += (this.pauseTime - this.startTime);
+			this.pauseTime = null;
+		}
 	}
 }
