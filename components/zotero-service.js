@@ -623,7 +623,7 @@ ZoteroCommandLineHandler.prototype = {
 						if(file.leafName.substr(-4).toLowerCase() === ".csl"
 								|| file.leafName.substr(-8).toLowerCase() === ".csl.txt") {
 							// Install CSL file
-							Zotero.Styles.install(file);
+							Zotero.Styles.install({ file: file.path }, file.path);
 						} else {
 							// Ask before importing
 							var checkState = {

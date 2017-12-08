@@ -269,10 +269,11 @@ Zotero.Styles = new function() {
 	/**
 	 * Installs a style file, getting the contents of an nsIFile and showing appropriate
 	 * error messages
-	 * @param {Object} style An object with one of the following properties
-	 * 		- file: An nsIFile representing a style on disk
-	 * 		- url: A url of the location of the style (local or remote)
-	 * 		- string: A string containing the style data
+	 * @param {Object} style - An object with one of the following properties
+	 *      - file: An nsIFile or string path representing a style on disk
+	 *      - path: A string path
+	 *      - url: A url of the location of the style (local or remote)
+	 *      - string: A string containing the style data
 	 * @param {String} origin The origin of the style, either a filename or URL, to be
 	 *     displayed in dialogs referencing the style
 	 * @param {Boolean} [silent=false] Skip prompts
