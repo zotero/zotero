@@ -1285,6 +1285,9 @@ Zotero.DataObject.prototype._postToJSON = function (env) {
 	if (env.mode == 'patch') {
 		env.obj = Zotero.DataObjectUtilities.patch(env.options.patchBase, env.obj);
 	}
+	if (env.options.includeVersion === false) {
+		delete env.obj.version;
+	}
 	return env.obj;
 }
 

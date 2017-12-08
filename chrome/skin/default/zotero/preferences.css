@@ -173,44 +173,72 @@ grid row hbox:first-child
 }
 
 /* Reset tab */
-#zotero-reset row
-{
-	margin: 0;
-	padding: 8px;
+#sync-reset-form {
+	margin-left: 1em;
 }
 
-#zotero-reset row:not(:last-child)
-{
+#sync-reset-form {
+	margin-top: 1em;
 }
 
-#zotero-reset row vbox
-{
-	-moz-box-align: start;
-}
-
-#zotero-reset row[selected="true"]
-{
-}
-
-
-#zotero-reset row vbox label
-{
-	margin-left: 3px;
+#sync-reset-library-menu-container {
 	font-weight: bold;
-	font-size: 14px;
+	font-size: 16px;
 }
 
-#zotero-reset description
-{
-	margin-left: 3px;
-	margin-top: 1px;
+#sync-reset-library-menu {
+	width: 14em;
+	margin-left: .25em;
+	font-size: 15px;
+	height: 1.6em;
+}
+
+#sync-reset-list {
+	margin: 0;
+	padding: 0;
+	height: 9em;
+}
+
+#sync-reset-list li {
+	margin: 0;
+	margin-top: 1.6em;
+	padding: 0;
+	list-style: none;
+	height: 2.8em;
+}
+
+/* Allow a click between lines to select the radio */
+#sync-reset-list li label {
+	display: block;
+}
+
+#sync-reset-list li:first-child {
+	margin-top: 1.4em;
+}
+
+#sync-reset-list li .sync-reset-option-name {
+	font-weight: bold;
+	display: block;
+	font-size: 15px;
+	margin-bottom: .2em;
+}
+
+#sync-reset-list li .sync-reset-option-desc {
 	font-size: 12px;
 }
 
-/* Reset button */
-#zotero-reset > hbox
-{
-	margin-top: 5px;
+#sync-reset-list li input {
+	float: left;
+	margin-top: 1em;
+	margin-right: 1.05em;
+}
+
+#sync-reset-list li[disabled] span {
+	color: gray;
+}
+
+#sync-reset button {
+	font-size: 14px;
 }
 
 

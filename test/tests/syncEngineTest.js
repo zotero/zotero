@@ -4033,5 +4033,236 @@ describe("Zotero.Sync.Data.Engine", function () {
 				assert.strictEqual(objects[type][1].synced, false);
 			}
 		});
-	})
+	});
+	
+	
+	describe("#_restoreToServer()", function () {
+		it("should delete remote objects that don't exist locally and upload all local objects", async function () {
+			({ engine, client, caller } = await setup());
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			var lastLibraryVersion = 10;
+			library.libraryVersion = library.storageVersion = lastLibraryVersion;
+			await library.saveTx();
+			lastLibraryVersion = 20;
+			
+			var postData = {};
+			var deleteData = {};
+			
+			var types = Zotero.DataObjectUtilities.getTypes();
+			var objects = {};
+			var objectJSON = {};
+			for (let type of types) {
+				objectJSON[type] = [];
+			}
+			
+			var obj;
+			for (let type of types) {
+				objects[type] = [null];
+				// Create JSON for object that exists remotely and not locally,
+				// which should be deleted
+				objectJSON[type].push(makeJSONFunctions[type]({
+					key: Zotero.DataObjectUtilities.generateKey(),
+					version: lastLibraryVersion,
+					name: Zotero.Utilities.randomString()
+				}));
+				
+				// All other objects should be uploaded
+				
+				// Object with outdated version
+				obj = await createDataObject(type, { synced: true, version: 5 });
+				objects[type].push(obj);
+				objectJSON[type].push(makeJSONFunctions[type]({
+					key: obj.key,
+					version: lastLibraryVersion,
+					name: Zotero.Utilities.randomString()
+				}));
+				
+				// Object marked as synced that doesn't exist remotely
+				obj = await createDataObject(type, { synced: true, version: 10 });
+				objects[type].push(obj);
+				objectJSON[type].push(makeJSONFunctions[type]({
+					key: obj.key,
+					version: lastLibraryVersion,
+					name: Zotero.Utilities.randomString()
+				}));
+				
+				// Object marked as synced that doesn't exist remotely
+				// but is in the remote delete log
+				obj = await createDataObject(type, { synced: true, version: 10 });
+				objects[type].push(obj);
+				objectJSON[type].push(makeJSONFunctions[type]({
+					key: obj.key,
+					version: lastLibraryVersion,
+					name: Zotero.Utilities.randomString()
+				}));
+			}
+			
+			// Child attachment
+			obj = await importFileAttachment(
+				'test.png',
+				{
+					parentID: objects.item[1].id,
+					synced: true,
+					version: 5
+				}
+			);
+			obj.attachmentSyncedModificationTime = new Date().getTime();
+			obj.attachmentSyncedHash = 'b32e33f529942d73bea4ed112310f804';
+			obj.attachmentSyncState = Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC;
+			await obj.saveTx();
+			objects.item.push(obj);
+			objectJSON.item.push(makeJSONFunctions.item({
+				key: obj.key,
+				version: lastLibraryVersion,
+				name: Zotero.Utilities.randomString(),
+				itemType: 'attachment'
+			}));
+			
+			for (let type of types) {
+				let plural = Zotero.DataObjectUtilities.getObjectTypePlural(type);
+				let suffix = type == 'item' ? '&includeTrashed=1' : '';
+				
+				let json = {};
+				json[objectJSON[type][0].key] = objectJSON[type][0].version;
+				json[objectJSON[type][1].key] = objectJSON[type][1].version;
+				setResponse({
+					method: "GET",
+					url: `users/1/${plural}?format=versions${suffix}`,
+					status: 200,
+					headers: {
+						"Last-Modified-Version": lastLibraryVersion
+					},
+					json
+				});
+				
+				deleteData[type] = {
+					expectedVersion: lastLibraryVersion++,
+					keys: [objectJSON[type][0].key]
+				};
+			}
+			
+			await Zotero.SyncedSettings.set(libraryID, "testSetting", { foo: 2 });
+			var settingsJSON = { testSetting: { value: { foo: 2 } } }
+			postData.setting = {
+				expectedVersion: lastLibraryVersion++
+			};
+			
+			for (let type of types) {
+				postData[type] = {
+					expectedVersion: lastLibraryVersion++
+				};
+			}
+			
+			server.respond(function (req) {
+				try {
+				
+				let plural = req.url.match(/users\/\d+\/([a-z]+e?s)/)[1];
+				let type = Zotero.DataObjectUtilities.getObjectTypeSingular(plural);
+				// Deletions
+				if (req.method == "DELETE") {
+					let data = deleteData[type];
+					let version = data.expectedVersion + 1;
+					if (req.url == baseURL + `users/1/${plural}?${type}Key=${data.keys.join(',')}`) {
+						req.respond(
+							204,
+							{
+								"Last-Modified-Version": version
+							},
+							""
+						);
+					}
+				}
+				// Settings
+				else if (req.method == "POST" && req.url.match(/users\/\d+\/settings/)) {
+					let data = postData.setting;
+					assert.equal(
+						req.requestHeaders["If-Unmodified-Since-Version"],
+						data.expectedVersion
+					);
+					let version = data.expectedVersion + 1;
+					let json = JSON.parse(req.requestBody);
+					assert.deepEqual(json, settingsJSON);
+					req.respond(
+						204,
+						{
+							"Last-Modified-Version": version
+						},
+						""
+					);
+				}
+				// Uploads
+				else if (req.method == "POST") {
+					let data = postData[type];
+					assert.equal(
+						req.requestHeaders["If-Unmodified-Since-Version"],
+						data.expectedVersion
+					);
+					let version = data.expectedVersion + 1;
+					let json = JSON.parse(req.requestBody);
+					let o1 = json.find(o => o.key == objectJSON[type][1].key);
+					assert.notProperty(o1, 'version');
+					let o2 = json.find(o => o.key == objectJSON[type][2].key);
+					assert.notProperty(o2, 'version');
+					let o3 = json.find(o => o.key == objectJSON[type][3].key);
+					assert.notProperty(o3, 'version');
+					let response = {
+						successful: {
+							"0": Object.assign(objectJSON[type][1], { version }),
+							"1": Object.assign(objectJSON[type][2], { version }),
+							"2": Object.assign(objectJSON[type][3], { version })
+						},
+						unchanged: {},
+						failed: {}
+					};
+					if (type == 'item') {
+						let o = json.find(o => o.key == objectJSON.item[4].key);
+						assert.notProperty(o, 'version');
+						// Attachment items should include storage properties
+						assert.propertyVal(o, 'mtime', objects.item[4].attachmentSyncedModificationTime);
+						assert.propertyVal(o, 'md5', objects.item[4].attachmentSyncedHash);
+						response.successful["3"] = Object.assign(objectJSON[type][4], { version })
+					}
+					req.respond(
+						200,
+						{
+							"Last-Modified-Version": version
+						},
+						JSON.stringify(response)
+					);
+				}
+				
+				}
+				catch (e) {
+					Zotero.logError(e);
+					throw e;
+				}
+			});
+			
+			await engine._restoreToServer();
+			
+			// Check settings
+			var setting = Zotero.SyncedSettings.get(libraryID, "testSetting");
+			assert.deepEqual(setting, { foo: 2 });
+			var settingMetadata = Zotero.SyncedSettings.getMetadata(libraryID, "testSetting");
+			assert.equal(settingMetadata.version, postData.setting.expectedVersion + 1);
+			assert.isTrue(settingMetadata.synced);
+			
+			// Objects should all be marked as synced and in the cache
+			for (let type of types) {
+				let version = postData[type].expectedVersion + 1;
+				for (let i = 1; i <= 3; i++) {
+					assert.equal(objects[type][i].version, version);
+					assert.isTrue(objects[type][i].synced);
+					await assertInCache(objects[type][i]);
+				}
+			}
+			
+			// Files should be marked as unsynced
+			assert.equal(
+				objects.item[4].attachmentSyncState,
+				Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD
+			);
+		});
+	});
 })

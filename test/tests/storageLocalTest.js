@@ -122,7 +122,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield attachment.saveTx();
 			
 			var local = Zotero.Sync.Storage.Local;
-			yield local.resetAllSyncStates()
+			yield local.resetAllSyncStates(attachment.libraryID)
 			assert.strictEqual(attachment.attachmentSyncState, local.SYNC_STATE_TO_UPLOAD);
 			var state = yield Zotero.DB.valueQueryAsync(
 				"SELECT syncState FROM itemAttachments WHERE itemID=?", attachment.id

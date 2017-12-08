@@ -161,7 +161,6 @@ Zotero.SyncedSettings = (function () {
 		}),
 		
 		markAsSynced: Zotero.Promise.coroutine(function* (libraryID, settings, version) {
-				Zotero.debug(settings);
 			var sql = "UPDATE syncedSettings SET synced=1, version=? WHERE libraryID=? AND setting IN "
 				+ "(" + settings.map(x => '?').join(', ') + ")";
 			yield Zotero.DB.queryAsync(sql, [version, libraryID].concat(settings));
@@ -171,6 +170,19 @@ Zotero.SyncedSettings = (function () {
 				setting.version = version;
 			}
 		}),
+		
+		/**
+		 * Used for restore-to-server
+		 */
+		markAllAsUnsynced: async function (libraryID) {
+			var sql = "UPDATE syncedSettings SET synced=0, version=0 WHERE libraryID=?";
+			await Zotero.DB.queryAsync(sql, libraryID);
+			for (let key in _cache[libraryID]) {
+				let setting = _cache[libraryID][key];
+				setting.synced = false;
+				setting.version = 0;
+			}
+		},
 		
 		set: Zotero.Promise.coroutine(function* (libraryID, setting, value, version = 0, synced) {
 			if (typeof value == undefined) {

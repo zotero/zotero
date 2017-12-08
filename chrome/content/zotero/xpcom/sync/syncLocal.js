@@ -1150,6 +1150,11 @@ Zotero.Sync.Data.Local = {
 	}),
 	
 	
+	clearCacheForLibrary: async function (libraryID) {
+		await Zotero.DB.queryAsync("DELETE FROM syncCache WHERE libraryID=?", libraryID);
+	},
+	
+	
 	processConflicts: Zotero.Promise.coroutine(function* (objectType, libraryID, conflicts, options = {}) {
 		if (!conflicts.length) return [];
 		
@@ -1700,6 +1705,11 @@ Zotero.Sync.Data.Local = {
 	},
 	
 	
+	clearDeleteLogForLibrary: async function (libraryID) {
+		await Zotero.DB.queryAsync("DELETE FROM syncDeleteLog WHERE libraryID=?", libraryID);
+	},
+	
+	
 	addObjectsToSyncQueue: Zotero.Promise.coroutine(function* (objectType, libraryID, keys) {
 		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
 		var now = Zotero.Date.getUnixTimestamp();
@@ -1819,6 +1829,11 @@ Zotero.Sync.Data.Local = {
 				);
 			})
 		);
+	},
+	
+	
+	clearQueueForLibrary: async function (libraryID) {
+		await Zotero.DB.queryAsync("DELETE FROM syncQueue WHERE libraryID=?", libraryID);
 	},
 	
 	

@@ -41,6 +41,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	Zotero.defineProperty(this, 'syncInProgress', { get: () => _syncInProgress });
 	Zotero.defineProperty(this, 'lastSyncStatus', { get: () => _lastSyncStatus });
 	
+	Zotero.defineProperty(this, 'RESET_MODE_FROM_SERVER', { value: 1 });
+	Zotero.defineProperty(this, 'RESET_MODE_TO_SERVER', { value: 2 });
+	
 	Zotero.defineProperty(this, 'baseURL', {
 		get: () => {
 			let url = options.baseURL || Zotero.Prefs.get("api.url") || ZOTERO_CONFIG.API_URL;
@@ -172,7 +175,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					}
 				}.bind(this),
 				background: !!options.background,
-				firstInSession: _firstInSession
+				firstInSession: _firstInSession,
+				resetMode: options.resetMode
 			};
 			
 			var librariesToSync = options.libraries = yield this.checkLibraries(

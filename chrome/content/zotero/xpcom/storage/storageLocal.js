@@ -552,23 +552,29 @@ Zotero.Sync.Storage.Local = {
 	 * This is used when switching between storage modes in the preferences so that all existing files
 	 * are uploaded via the new mode if necessary.
 	 */
-	resetAllSyncStates: Zotero.Promise.coroutine(function* () {
-		var sql = "SELECT itemID FROM items JOIN itemAttachments USING (itemID) "
-			+ "WHERE libraryID=? AND itemTypeID=? AND linkMode IN (?, ?)";
-		var params = [
-			Zotero.Libraries.userLibraryID,
-			Zotero.ItemTypes.getID('attachment'),
-			Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
-			Zotero.Attachments.LINK_MODE_IMPORTED_URL,
-		];
-		var itemIDs = yield Zotero.DB.columnQueryAsync(sql, params);
-		for (let itemID of itemIDs) {
-			let item = Zotero.Items.get(itemID);
-			item._attachmentSyncState = this.SYNC_STATE_TO_UPLOAD;
+	resetAllSyncStates: async function (libraryID) {
+		if (!libraryID) {
+			throw new Error("libraryID not provided");
 		}
-		sql = "UPDATE itemAttachments SET syncState=? WHERE itemID IN (" + sql + ")";
-		yield Zotero.DB.queryAsync(sql, [this.SYNC_STATE_TO_UPLOAD].concat(params));
-	}),
+		
+		return Zotero.DB.executeTransaction(async function () {
+			var sql = "SELECT itemID FROM items JOIN itemAttachments USING (itemID) "
+				+ "WHERE libraryID=? AND itemTypeID=? AND linkMode IN (?, ?)";
+			var params = [
+				libraryID,
+				Zotero.ItemTypes.getID('attachment'),
+				Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
+				Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+			];
+			var itemIDs = await Zotero.DB.columnQueryAsync(sql, params);
+			for (let itemID of itemIDs) {
+				let item = Zotero.Items.get(itemID);
+				item._attachmentSyncState = this.SYNC_STATE_TO_UPLOAD;
+			}
+			sql = "UPDATE itemAttachments SET syncState=? WHERE itemID IN (" + sql + ")";
+			await Zotero.DB.queryAsync(sql, [this.SYNC_STATE_TO_UPLOAD].concat(params));
+		}.bind(this));
+	},
 	
 	
 	/**
@@ -987,7 +993,9 @@ Zotero.Sync.Storage.Local = {
 				continue;
 			}
 			remoteItemJSON = remoteItemJSON.data;
-			remoteItemJSON.dateModified = Zotero.Date.dateToISO(new Date(remoteItemJSON.mtime));
+			if (remoteItemJSON.mtime) {
+				remoteItemJSON.dateModified = Zotero.Date.dateToISO(new Date(remoteItemJSON.mtime));
+			}
 			items.push({
 				libraryID,
 				left: localItemJSON,

@@ -271,82 +271,47 @@
 					</vbox>
 				</tabpanel>
 
-				<tabpanel id="zotero-reset" orient="vertical">
+				<tabpanel id="sync-reset" orient="vertical">
 					<!-- This doesn't wrap without an explicit width, for some reason -->
 					<description width="45em">&zotero.preferences.sync.reset.warning1;<label style="margin-left: 0; margin-right: 0" class="zotero-text-link" href="http://zotero.org/support/kb/sync_reset_options">&zotero.preferences.sync.reset.warning2;</label>&zotero.preferences.sync.reset.warning3;</description>
 					
-					<groupbox>
-						<caption label="&zotero.preferences.sync.syncServer;"/>
+					<div id="sync-reset-form" xmlns="http://www.w3.org/1999/xhtml">
+						<div id="sync-reset-library-menu-container">
+							<label>Library: <select id="sync-reset-library-menu"/></label>
+						</div>
 						
-						<radiogroup oncommand="Zotero_Preferences.Sync.handleSyncResetSelect(this)">
-							<grid>
-								<columns>
-									<column/>
-									<column align="start" pack="start" flex="1"/>
-								</columns>
-								
-								<rows id="sync-reset-rows">
-									<!--
-									<row id="zotero-restore-from-server" selected="true">
-										<radio/>
-										<vbox onclick="this.previousSibling.click()">
-											<label value="&zotero.preferences.sync.reset.restoreFromServer;"/>
-											<description>&zotero.preferences.sync.reset.restoreFromServer.desc;</description>
-										</vbox>
-									</row>
-									
-									<row id="zotero-restore-to-server">
-										<radio/>
-										<vbox onclick="this.previousSibling.click()">
-											<label value="&zotero.preferences.sync.reset.restoreToServer;"/>
-											<description>&zotero.preferences.sync.reset.restoreToServer.desc;</description>
-										</vbox>
-									</row>
-									-->
-									<row id="zotero-reset-data-sync-history">
-										<radio hidden="true"/>
-										<vbox onclick="this.previousSibling.click()">
-											<label value="&zotero.preferences.sync.reset.resetDataSyncHistory;"/>
-											<description>&zotero.preferences.sync.reset.resetDataSyncHistory.desc;</description>
-										</vbox>
-									</row>
-								</rows>
-							</grid>
-						</radiogroup>
+						<ul id="sync-reset-list">
+							<!--<li>
+								<p>&zotero.preferences.sync.reset.restoreFromServer;</p>
+								<p>&zotero.preferences.sync.reset.restoreFromServer.desc;</p>
+							</li>-->
+							
+							<li id="restore-to-server">
+								<label>
+									<input name="sync-reset-radiogroup" value="restore-to-server" type="radio"/>
+									<span class="sync-reset-option-name">&zotero.preferences.sync.reset.restoreToServer;</span>
+									<span class="sync-reset-option-desc">&zotero.preferences.sync.reset.restoreToServer.desc;</span>
+								</label>
+							</li>
+							
+							<!--<li>
+								<h2>&zotero.preferences.sync.reset.resetDataSyncHistory;</h2>
+								<description>&zotero.preferences.sync.reset.resetDataSyncHistory.desc;</p>
+							</li>-->
+							
+							<li id="reset-file-sync-history">
+								<label>
+									<input name="sync-reset-radiogroup" value="reset-file-sync-history" type="radio"/>
+									<span class="sync-reset-option-name">&zotero.preferences.sync.reset.resetFileSyncHistory;</span>
+									<span class="sync-reset-option-desc">&zotero.preferences.sync.reset.resetFileSyncHistory.desc;</span>
+								</label>
+							</li>
+						</ul>
 						
-						<hbox>
-							<button label="&zotero.preferences.sync.reset.button;"
-								oncommand="document.getElementById('sync-reset-rows').firstChild.firstChild.click(); Zotero_Preferences.Sync.handleSyncReset('full-sync')"/>
-						</hbox>
-					</groupbox>
-					
-					<groupbox>
-						<caption label="&zotero.preferences.sync.fileSyncing;"/>
-						
-						<radiogroup oncommand="Zotero_Preferences.Sync.handleSyncResetSelect(this)">
-							<grid>
-								<columns>
-									<column/>
-									<column align="start" pack="start" flex="1"/>
-								</columns>
-								
-								<rows id="storage-reset-rows">
-									<row id="zotero-reset-storage-history">
-										<radio hidden="true"/>
-										<vbox onclick="this.previousSibling.click()">
-											<label value="&zotero.preferences.sync.reset.resetFileSyncHistory;"/>
-											<description>&zotero.preferences.sync.reset.resetFileSyncHistory.desc;</description>
-										</vbox>
-									</row>
-								</rows>
-							</grid>
-						</radiogroup>
-						
-						<hbox>
-							<button label="&zotero.preferences.sync.reset.button;"
-								oncommand="document.getElementById('storage-reset-rows').firstChild.firstChild.click(); Zotero_Preferences.Sync.handleSyncReset('reset-storage-history')"/>
-						</hbox>
-					</groupbox>
+						<button id="sync-reset-button"
+							disabled="disabled"
+							onclick="Zotero_Preferences.Sync.reset()">&zotero.preferences.sync.reset.button;</button>
+					</div>
 				</tabpanel>
 			</tabpanels>
 		</tabbox>

@@ -231,6 +231,12 @@ Zotero.DataObjects.prototype.getLoaded = function () {
 }
 
 
+Zotero.DataObjects.prototype.getAllIDs = function (libraryID) {
+	var sql = `SELECT ${this._ZDO_id} FROM ${this._ZDO_table} WHERE libraryID=?`;
+	return Zotero.DB.columnQueryAsync(sql, [libraryID]);
+};
+
+
 Zotero.DataObjects.prototype.getAllKeys = function (libraryID) {
 	var sql = "SELECT key FROM " + this._ZDO_table + " WHERE libraryID=?";
 	return Zotero.DB.columnQueryAsync(sql, [libraryID]);
@@ -316,6 +322,11 @@ Zotero.DataObjects.prototype.getByLibraryAndKeyAsync = Zotero.Promise.method(fun
 
 Zotero.DataObjects.prototype.exists = function (id) {
 	return !!this.getLibraryAndKeyFromID(id);
+}
+
+
+Zotero.DataObjects.prototype.existsByKey = function (key) {
+	return !!this.getIDFromLibraryAndKey(id);
 }
 
 
