@@ -986,7 +986,52 @@ Zotero.Utilities.Internal = {
 		return parts.join('-');
 	},
 	
-
+	
+	buildLibraryMenu: function (menulist, libraries, selectedLibraryID) {
+		var menupopup = menulist.firstChild;
+		while (menupopup.hasChildNodes()) {
+			menupopup.removeChild(menupopup.firstChild);
+		}
+		var selectedIndex = 0;
+		var i = 0;
+		for (let library of libraries) {
+			let menuitem = menulist.ownerDocument.createElement('menuitem');
+			menuitem.value = library.libraryID;
+			menuitem.setAttribute('label', library.name);
+			menupopup.appendChild(menuitem);
+			if (library.libraryID == selectedLibraryID) {
+				selectedIndex = i;
+			}
+			i++;
+		}
+		
+		menulist.appendChild(menupopup);
+		menulist.selectedIndex = selectedIndex;
+	},
+	
+	
+	buildLibraryMenuHTML: function (select, libraries, selectedLibraryID) {
+		var namespaceURI = 'http://www.w3.org/1999/xhtml';
+		while (select.hasChildNodes()) {
+			select.removeChild(select.firstChild);
+		}
+		var selectedIndex = 0;
+		var i = 0;
+		for (let library of libraries) {
+			let option = select.ownerDocument.createElementNS(namespaceURI, 'option');
+			option.setAttribute('value', library.libraryID);
+			option.setAttribute('data-editable', library.editable ? 'true' : 'false');
+			option.setAttribute('data-filesEditable', library.filesEditable ? 'true' : 'false');
+			option.textContent = library.name;
+			select.appendChild(option);
+			if (library.libraryID == selectedLibraryID) {
+				option.setAttribute('selected', 'selected');
+			}
+			i++;
+		}
+	},
+	
+	
 	/**
 	 * Create a libraryOrCollection DOM tree to place in <menupopup> element.
 	 * If has no children, returns a <menuitem> element, otherwise <menu>.

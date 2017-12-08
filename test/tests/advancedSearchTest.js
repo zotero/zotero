@@ -202,7 +202,7 @@ describe("Advanced Search", function () {
 				for (let i = 0; i < libraryMenu.itemCount; i++) {
 					let menuitem = libraryMenu.getItemAtIndex(i);
 					// Switch to group library
-					if (menuitem.getAttribute('libraryID') == groupLibraryID) {
+					if (menuitem.value == groupLibraryID) {
 						menuitem.click();
 						break;
 					}

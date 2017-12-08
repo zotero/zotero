@@ -49,7 +49,16 @@
 					<![CDATA[
 						this.searchRef = val;
 						
-						this.buildLibraryMenu();
+						var libraryMenu = this.id('libraryMenu');
+						var libraries = Zotero.Libraries.getAll();
+						Zotero.Utilities.Internal.buildLibraryMenu(
+							libraryMenu, libraries, this.searchRef.libraryID
+						);
+						if (this.searchRef.id) {
+							libraryMenu.disabled = true;
+						}
+						this.updateLibrary();
+						
 						
 						var conditionsBox = this.id('conditions');
 						while(conditionsBox.hasChildNodes())
@@ -80,43 +89,6 @@
 					]]>
 				</setter>
 			</property>
-			
-			<method name="buildLibraryMenu">
-				<body><![CDATA[
-					var menulist = this.id('libraryMenu');
-					var menupopup = menulist.firstChild;
-					
-					while (menupopup.hasChildNodes()) {
-						menupopup.removeChild(menupopup.firstChild);
-					}
-					
-					var libraryID = this.searchRef.libraryID;
-					var libraryIndex = 0;
-					
-					var libraries = Zotero.Libraries.getAll();
-					var selectedIndex = 0;
-					var i = 0;
-					for (let library of libraries) {
-						let menuitem = document.createElement('menuitem');
-						menuitem.setAttribute('label', library.name);
-						menuitem.setAttribute('libraryID', library.libraryID);
-						menupopup.appendChild(menuitem);
-						if (library.libraryID == libraryID) {
-							selectedIndex = i;
-						}
-						i++
-					}
-					
-					menulist.appendChild(menupopup);
-					menulist.selectedIndex = selectedIndex;
-					
-					if (this.searchRef.id) {
-						this.id('libraryMenu').disabled = true;
-					}
-					
-					this.updateLibrary();
-				]]></body>
-			</method>
 			
 			<method name="addCondition">
 				<parameter name="ref"/>
@@ -170,7 +142,7 @@
 			<method name="updateLibrary">
 				<body><![CDATA[
 					var menu = this.id('libraryMenu');
-					var libraryID = parseInt(menu.selectedItem.getAttribute('libraryID'));
+					var libraryID = parseInt(menu.selectedItem.value);
 					
 				 	if (this.onLibraryChange) {
 				 		this.onLibraryChange(libraryID);
