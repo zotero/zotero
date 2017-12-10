@@ -60,7 +60,7 @@
 		<!--EDIT-->
 		<commandset id="editMenuCommands"/>
 		<command id="cmd_find"
-			oncommand="document.getElementById('zotero-tb-search').focus();"/>
+			oncommand="document.getElementById('zotero-tb-search').select()"/>
 	</commandset>
 	
 	<keyset id="mainKeyset">
