@@ -2960,6 +2960,70 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.equal(result, engine.UPLOAD_RESULT_SUCCESS);
 			assert.equal(called, 2);
 		});
+		
+		
+		it("shouldn't retry failed child item if parent item failed during this sync", async function () {
+			({ engine, client, caller } = await setup({
+				stopOnError: false
+			}));
+			
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			var libraryVersion = 5;
+			library.libraryVersion = libraryVersion;
+			await library.saveTx();
+			
+			var item1 = await createDataObject('item');
+			var item1JSON = item1.toResponseJSON();
+			var tag = "A".repeat(300);
+			var item2 = await createDataObject('item', { tags: [{ tag }] });
+			var note = await createDataObject('item', { itemType: 'note', parentID: item2.id });
+			
+			var called = 0;
+			server.respond(function (req) {
+				let requestJSON = JSON.parse(req.requestBody);
+				if (called == 0) {
+					assert.lengthOf(requestJSON, 3);
+					assert.equal(requestJSON[0].key, item1.key);
+					assert.equal(requestJSON[1].key, item2.key);
+					assert.equal(requestJSON[2].key, note.key);
+					req.respond(
+						200,
+						{
+							"Last-Modified-Version": ++libraryVersion
+						},
+						JSON.stringify({
+							successful: {
+								"0": Object.assign(item1JSON, { version: libraryVersion })
+							},
+							unchanged: {},
+							failed: {
+								1: {
+									code: 413,
+									message: `Tag '${"A".repeat(50)}…' too long`,
+									data: {
+										tag
+									}
+								},
+								// Normally this would retry, but that might result in a 409
+								// without the parent
+								2: {
+									code: 500,
+									message: `An error occurred`
+								}
+							}
+						})
+					);
+				}
+				called++;
+			});
+			
+			var spy = sinon.spy(engine, "onError");
+			var result = await engine._startUpload();
+			assert.equal(result, engine.UPLOAD_RESULT_SUCCESS);
+			assert.equal(called, 1);
+			assert.equal(spy.callCount, 2);
+		});
 	});
 	
 	

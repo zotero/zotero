@@ -51,6 +51,7 @@ Zotero.Sync.Data.Engine = function (options) {
 	this.libraryTypeID = this.library.libraryTypeID;
 	this.uploadBatchSize = 25;
 	this.uploadDeletionBatchSize = 50;
+	this.maxUploadTries = 5;
 	
 	this.failed = false;
 	this.failedItems = [];
@@ -1172,8 +1173,8 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 			let numSkipped = 0;
 			for (let i = 0; i < queue.length && i < this.uploadBatchSize; i++) {
 				let o = queue[i];
-				// Skip requests that failed with 4xx
-				if (o.failed) {
+				// Skip requests that failed with 4xx or that have been retried too many times
+				if (o.failed || o.tries >= this.maxUploadTries) {
 					numSkipped++;
 					continue;
 				}
@@ -1198,6 +1199,7 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 			
 			// No more non-failed requests
 			if (!batch.length) {
+				Zotero.debug(`No more ${objectTypePlural} to upload`);
 				break;
 			}
 			
@@ -1334,10 +1336,24 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 				}
 				batch[index].tries++;
 				// Mark 400 errors as permanently failed
-				if (e.code >= 400 && e.code < 500) {
+				if (e.code < 500) {
 					batch[index].failed = true;
 				}
-				// 500 errors should stay in queue and be retried
+				// 500 errors should stay in queue and be retried, unless a dependency also failed
+				else if (objectType == 'item') {
+					// Check parent item
+					let parentItem = batch[index].json.parentItem;
+					if (parentItem) {
+						for (let i in batch) {
+							if (i == index) break;
+							let o = batch[i];
+							if (o.failed && o.json.key) {
+								Zotero.debug(`Not retrying child of failed parent ${parentItem}`);
+								batch[index].failed = true;
+							}
+						}
+					}
+				}
 			}
 			
 			// Add failed objects back to end of queue
