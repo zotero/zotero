@@ -117,7 +117,10 @@ var Zotero_Lookup = new function () {
 	/**
 	 * Focuses the field
 	 */
-	this.onShowing = function() {
+	this.onShowing = function (event) {
+		// Ignore context menu
+		if (event.originalTarget.id != 'zotero-lookup-panel') return;
+		
 		document.getElementById("zotero-lookup-panel").style.padding = "10px";
 		
 		// Workaround for field being truncated in middle
@@ -132,7 +135,10 @@ var Zotero_Lookup = new function () {
 	/**
 	 * Cancels the popup and resets fields
 	 */
-	this.onHidden = function() {
+	this.onHidden = function (event) {
+		// Ignore context menu to prevent blanking on paste
+		if (event.originalTarget.id != 'zotero-lookup-panel') return;
+		
 		var txtBox = Zotero_Lookup.toggleMultiline(false);
 		var mlTextbox = document.getElementById("zotero-lookup-multiline-textbox");
 		txtBox.value = "";

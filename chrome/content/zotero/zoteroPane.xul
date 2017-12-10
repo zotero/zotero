@@ -161,7 +161,7 @@
 						</menupopup>
 					</toolbarbutton>
 					<toolbarbutton id="zotero-tb-lookup" class="zotero-tb-button" tooltiptext="&zotero.toolbar.lookup.label;" type="panel">
-						<panel id="zotero-lookup-panel" type="arrow" onpopupshown="Zotero_Lookup.onShowing()"
+						<panel id="zotero-lookup-panel" type="arrow" onpopupshown="Zotero_Lookup.onShowing(event)"
 								onpopuphidden="Zotero_Lookup.onHidden(event)">
 							<vbox>
 								<description>&zotero.lookup.description;</description>
