@@ -53,7 +53,6 @@ var ZoteroPane = new function()
 	this.setItemsPaneMessage = setItemsPaneMessage;
 	this.clearItemsPaneMessage = clearItemsPaneMessage;
 	this.contextPopupShowing = contextPopupShowing;
-	this.openNoteWindow = openNoteWindow;
 	this.viewSelectedAttachment = viewSelectedAttachment;
 	this.reportErrors = reportErrors;
 	this.displayErrorMessage = displayErrorMessage;
@@ -1479,37 +1478,7 @@ var ZoteroPane = new function()
 				var item = selectedItems[0];
 				
 				if (item.isNote()) {
-					var noteEditor = document.getElementById('zotero-note-editor');
-					noteEditor.mode = this.collectionsView.editable ? 'edit' : 'view';
-					
-					var clearUndo = noteEditor.item ? noteEditor.item.id != item.id : false;
-					
-					noteEditor.parent = null;
-					noteEditor.item = item;
-					
-					// If loading new or different note, disable undo while we repopulate the text field
-					// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
-					// undo content from another note into the current one.
-					if (clearUndo) {
-						noteEditor.clearUndo();
-					}
-					
-					var viewButton = document.getElementById('zotero-view-note-button');
-					if (this.collectionsView.editable) {
-						viewButton.hidden = false;
-						viewButton.setAttribute('noteID', item.id);
-						if (!item.isTopLevelItem()) {
-							viewButton.setAttribute('parentItemID', item.parentItemID);
-						}
-						else {
-							viewButton.removeAttribute('parentItemID');
-						}
-					}
-					else {
-						viewButton.hidden = true;
-					}
-					
-					document.getElementById('zotero-item-pane-content').selectedIndex = 2;
+					ZoteroItemPane.onNoteSelected(item, this.collectionsView.editable);
 				}
 				
 				else if (item.isAttachment()) {
@@ -3640,8 +3609,7 @@ var ZoteroPane = new function()
 	
 	
 	
-	function openNoteWindow(itemID, col, parentKey)
-	{
+	this.openNoteWindow = function (itemID, col, parentKey) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -3650,27 +3618,48 @@ var ZoteroPane = new function()
 		var name = null;
 		
 		if (itemID) {
+			let w = this.findNoteWindow(itemID);
+			if (w) {
+				w.focus();
+				return;
+			}
+			
 			// Create a name for this window so we can focus it later
 			//
 			// Collection is only used on new notes, so we don't need to
 			// include it in the name
 			name = 'zotero-note-' + itemID;
-			
-			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-					.getService(Components.interfaces.nsIWindowMediator);
-			var e = wm.getEnumerator('zotero:note');
-			while (e.hasMoreElements()) {
-				var w = e.getNext();
-				if (w.name == name) {
-					w.focus();
-					return;
-				}
-			}
 		}
 		
 		var io = { itemID: itemID, collectionID: col, parentItemKey: parentKey };
 		window.openDialog('chrome://zotero/content/note.xul', name, 'chrome,resizable,centerscreen,dialog=false', io);
 	}
+	
+	
+	this.findNoteWindow = function (itemID) {
+		var name = 'zotero-note-' + itemID;
+		var wm = Services.wm;
+		var e = wm.getEnumerator('zotero:note');
+		while (e.hasMoreElements()) {
+			var w = e.getNext();
+			if (w.name == name) {
+				return w;
+			}
+		}
+	};
+	
+	
+	this.onNoteWindowClosed = async function (itemID, noteText) {
+		var item = Zotero.Items.get(itemID);
+		item.setNote(noteText);
+		await item.saveTx();
+		
+		// If note is still selected, show the editor again when the note window closes
+		var selectedItems = this.getSelectedItems(true);
+		if (selectedItems.length == 1 && itemID == selectedItems[0]) {
+			ZoteroItemPane.onNoteSelected(item, this.collectionsView.editable);
+		}
+	};
 	
 	
 	this.addAttachmentFromURI = Zotero.Promise.method(function (link, itemID) {

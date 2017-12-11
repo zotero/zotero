@@ -26,7 +26,7 @@
 var noteEditor;
 var notifierUnregisterID;
 
-function onLoad() {
+async function onLoad() {
 	noteEditor = document.getElementById('zotero-note-editor');
 	noteEditor.mode = 'edit';
 	noteEditor.focus();
@@ -37,42 +37,41 @@ function onLoad() {
 	if (window.arguments) {
 		var io = window.arguments[0];
 	}
+	
 	var itemID = parseInt(io.itemID);
 	var collectionID = parseInt(io.collectionID);
 	var parentItemKey = io.parentItemKey;
 	
-	return Zotero.spawn(function* () {
-		if (itemID) {
-			var ref = yield Zotero.Items.getAsync(itemID);
-			
-			var clearUndo = noteEditor.item ? noteEditor.item.id != ref.id : false;
-			
-			noteEditor.item = ref;
-			
-			// If loading new or different note, disable undo while we repopulate the text field
-			// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
-			// undo content from another note into the current one.
-			if (clearUndo) {
-				noteEditor.clearUndo();
-			}
-			
-			document.title = ref.getNoteTitle();
-		}
-		else {
-			if (parentItemKey) {
-				var ref = Zotero.Items.getByLibraryAndKey(parentItemKey);
-				noteEditor.parentItem = ref;
-			}
-			else {
-				if (collectionID && collectionID != '' && collectionID != 'undefined') {
-					noteEditor.collection = Zotero.Collections.get(collectionID);
-				}
-			}
-			noteEditor.refresh();
+	if (itemID) {
+		var ref = await Zotero.Items.getAsync(itemID);
+		
+		var clearUndo = noteEditor.item ? noteEditor.item.id != ref.id : false;
+		
+		noteEditor.item = ref;
+		
+		// If loading new or different note, disable undo while we repopulate the text field
+		// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
+		// undo content from another note into the current one.
+		if (clearUndo) {
+			noteEditor.clearUndo();
 		}
 		
-		notifierUnregisterID = Zotero.Notifier.registerObserver(NotifyCallback, 'item');
-	});
+		document.title = ref.getNoteTitle();
+	}
+	else {
+		if (parentItemKey) {
+			var ref = Zotero.Items.getByLibraryAndKey(parentItemKey);
+			noteEditor.parentItem = ref;
+		}
+		else {
+			if (collectionID && collectionID != '' && collectionID != 'undefined') {
+				noteEditor.collection = Zotero.Collections.get(collectionID);
+			}
+		}
+		noteEditor.refresh();
+	}
+	
+	notifierUnregisterID = Zotero.Notifier.registerObserver(NotifyCallback, 'item', 'noteWindow');
 }
 
 // If there's an error saving a note, close the window and crash the app
@@ -86,12 +85,13 @@ function onError() {
 	window.close();
 }
 
-function onUnload()
-{
-	if(noteEditor && noteEditor.value)
-		noteEditor.save();
-	
+
+function onUnload() {
 	Zotero.Notifier.unregisterObserver(notifierUnregisterID);
+	
+	if (noteEditor.item) {
+		window.opener.ZoteroPane.onNoteWindowClosed(noteEditor.item.id, noteEditor.value);
+	}
 }
 
 var NotifyCallback = {
