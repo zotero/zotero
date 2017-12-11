@@ -160,27 +160,34 @@
 							</menu>
 						</menupopup>
 					</toolbarbutton>
-					<toolbarbutton id="zotero-tb-lookup" class="zotero-tb-button" tooltiptext="&zotero.toolbar.lookup.label;" type="panel">
-						<panel id="zotero-lookup-panel" type="arrow" onpopupshown="Zotero_Lookup.onShowing(event)"
-								onpopuphidden="Zotero_Lookup.onHidden(event)">
-							<vbox>
-								<description>&zotero.lookup.description;</description>
-								<vbox id="zotero-lookup-singleLine">
-									<stack>
-										<progressmeter id="zotero-lookup-progress" mode="undetermined" collapsed="true"/>
-										<textbox id="zotero-lookup-textbox" onkeypress="return Zotero_Lookup.onKeyPress(event, this)" oninput="Zotero_Lookup.adjustTextbox(this)" flex="1" newlines="pasteintact"/>
-									</stack>
-								</vbox>
-								<vbox id="zotero-lookup-multiline" collapsed="true">
-									<textbox id="zotero-lookup-multiline-textbox" onkeypress="return Zotero_Lookup.onKeyPress(event, this)" multiline="true" rows="5" wrap="off" flex="1"/>
-									<hbox align="start" id="zotero-lookup-buttons" class="zotero-button-clear-image">
-										<button label="&zotero.lookup.button.search;" align="start" oncommand="Zotero_Lookup.accept(document.getElementById('zotero-lookup-multiline-textbox'))"/>
-										<progressmeter id="zotero-lookup-multiline-progress" mode="undetermined" collapsed="true" flex="1"/>
-									</hbox>
-								</vbox>
+					
+					<toolbarbutton id="zotero-tb-lookup" class="zotero-tb-button" tooltiptext="&zotero.toolbar.lookup.label;" type="panel"
+							onmousedown="Zotero_Lookup.showPanel(this)"/>
+					
+					<panel id="zotero-lookup-panel" type="arrow" onpopupshown="Zotero_Lookup.onShowing(event)"
+							onpopuphidden="Zotero_Lookup.onHidden(event)">
+						<vbox>
+							<description>&zotero.lookup.description;</description>
+							<vbox id="zotero-lookup-singleLine">
+								<stack>
+									<progressmeter id="zotero-lookup-progress" mode="undetermined" collapsed="true"/>
+									<textbox id="zotero-lookup-textbox"
+										onkeypress="return Zotero_Lookup.onKeyPress(event, this)"
+										oninput="Zotero_Lookup.onInput(event, this)"
+										flex="1"
+										newlines="pasteintact"/>
+								</stack>
 							</vbox>
-						</panel>
-					</toolbarbutton>
+							<vbox id="zotero-lookup-multiline" collapsed="true">
+								<textbox id="zotero-lookup-multiline-textbox" onkeypress="return Zotero_Lookup.onKeyPress(event, this)" multiline="true" rows="5" wrap="off" flex="1"/>
+								<hbox align="start" id="zotero-lookup-buttons" class="zotero-button-clear-image">
+									<button label="&zotero.lookup.button.search;" align="start" oncommand="Zotero_Lookup.accept(document.getElementById('zotero-lookup-multiline-textbox'))"/>
+									<progressmeter id="zotero-lookup-multiline-progress" mode="undetermined" collapsed="true" flex="1"/>
+								</hbox>
+							</vbox>
+						</vbox>
+					</panel>
+					
 					<!--<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>-->
 					<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;" type="menu">
 						<menupopup onpopupshowing="ZoteroPane_Local.updateNoteButtonMenu()">

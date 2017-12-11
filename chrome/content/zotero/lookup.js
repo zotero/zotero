@@ -92,6 +92,45 @@ var Zotero_Lookup = new function () {
 		return false;
 	});
 	
+	
+	this.showPanel = function (button) {
+		var panel = document.getElementById('zotero-lookup-panel');
+		panel.openPopup(button, "after_start", 16, -2, false, false);
+	}
+	
+	
+	/**
+	 * Focuses the field
+	 */
+	this.onShowing = function (event) {
+		// Ignore context menu
+		if (event.originalTarget.id != 'zotero-lookup-panel') return;
+		
+		document.getElementById("zotero-lookup-panel").style.padding = "10px";
+		this.getActivePanel().getElementsByTagName('textbox')[0].focus();
+	}
+	
+	
+	/**
+	 * Cancels the popup and resets fields
+	 */
+	this.onHidden = function (event) {
+		// Ignore context menu
+		if (event.originalTarget.id != 'zotero-lookup-panel') return;
+		
+		document.getElementById("zotero-lookup-textbox").value = "";
+		document.getElementById("zotero-lookup-multiline-textbox").value = "";
+		Zotero_Lookup.toggleProgress(false);
+	}
+	
+	
+	this.getActivePanel = function() {
+		var mlPanel = document.getElementById("zotero-lookup-multiline");
+		if (mlPanel.collapsed) return document.getElementById("zotero-lookup-singleLine");
+		return mlPanel;
+	}
+	
+	
 	/**
 	 * Handles a key press
 	 */
@@ -114,50 +153,27 @@ var Zotero_Lookup = new function () {
 		return true;
 	}
 	
-	/**
-	 * Focuses the field
-	 */
-	this.onShowing = function (event) {
-		// Ignore context menu
-		if (event.originalTarget.id != 'zotero-lookup-panel') return;
-		
-		document.getElementById("zotero-lookup-panel").style.padding = "10px";
-		
-		// Workaround for field being truncated in middle
-		// https://github.com/zotero/zotero/issues/343
-		this.toggleMultiline(true);
-		
-		var identifierElement = Zotero_Lookup.toggleMultiline(false);
-		Zotero_Lookup.toggleProgress(false);
-		identifierElement.focus();
-	}
 	
-	/**
-	 * Cancels the popup and resets fields
-	 */
-	this.onHidden = function (event) {
-		// Ignore context menu to prevent blanking on paste
-		if (event.originalTarget.id != 'zotero-lookup-panel') return;
-		
-		var txtBox = Zotero_Lookup.toggleMultiline(false);
-		var mlTextbox = document.getElementById("zotero-lookup-multiline-textbox");
-		txtBox.value = "";
-		mlTextbox.value = "";
-	}
-
+	this.onInput = function (event, textbox) {
+		this.adjustTextbox(textbox);
+	};
+	
+	
 	/**
 	 * Converts the textbox to multiline if newlines are detected
 	 */
-	this.adjustTextbox = function(txtBox) {
-		if(txtBox.value.trim().match(/[\r\n]/)) {
+	this.adjustTextbox = function (textbox) {
+		if (textbox.value.trim().match(/[\r\n]/)) {
 			Zotero_Lookup.toggleMultiline(true);
-		} else {
-			//since we ignore trailing and leading newlines, we should also trim them for display
-			//can't use trim, because then we cannot add leading/trailing spaces to the single line textbox
-			txtBox.value = txtBox.value.replace(/^([ \t]*[\r\n]+[ \t]*)+|([ \t]*[\r\n]+[ \t]*)+$/g,"");
+		}
+		// Since we ignore trailing and leading newlines, we should also trim them for display
+		// can't use trim, because then we cannot add leading/trailing spaces to the single line textbox
+		else {
+			textbox.value = textbox.value.replace(/^([ \t]*[\r\n]+[ \t]*)+|([ \t]*[\r\n]+[ \t]*)+$/g,"");
 		}
 	}
-
+	
+	
 	/**
 	 * Performs the switch to multiline textbox and returns that textbox
 	 */
@@ -199,12 +215,5 @@ var Zotero_Lookup = new function () {
 		//multiline
 		document.getElementById("zotero-lookup-multiline-textbox").disabled = !!on;
 		document.getElementById("zotero-lookup-multiline-progress").setAttribute("collapsed", !on);
-	}
-
-	this.getActivePanel = function() {
-		var mlPanel = document.getElementById("zotero-lookup-multiline");
-		if(mlPanel.collapsed) return document.getElementById("zotero-lookup-singleLine");
-
-		return mlPanel;
 	}
 }
