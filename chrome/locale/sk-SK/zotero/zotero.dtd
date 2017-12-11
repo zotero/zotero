@@ -147,7 +147,7 @@
 
 <!ENTITY zotero.toolbar.newNote "Nová poznámka">
 <!ENTITY zotero.toolbar.note.standalone "Nová samostatná poznámka">
-<!ENTITY zotero.toolbar.note.child "Pridať dcérsku poznámku">
+<!ENTITY zotero.toolbar.note.child "Pridať podradenú poznámku">
 <!ENTITY zotero.toolbar.lookup "Nájsť podľa identifikátora...">
 <!ENTITY zotero.toolbar.attachment.linked "Odkaz na súbor...">
 <!ENTITY zotero.toolbar.attachment.add "Uložiť kópiu súboru...">
