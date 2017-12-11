@@ -177,13 +177,17 @@ grid row hbox:first-child
 	margin-left: 1em;
 }
 
+#reset-sync-warning {
+	font-size: 12px;
+}
+
 #sync-reset-form {
 	margin-top: 1em;
 }
 
 #sync-reset-library-menu-container {
 	font-weight: bold;
-	font-size: 16px;
+	font-size: 15px;
 }
 
 #sync-reset-library-menu {
