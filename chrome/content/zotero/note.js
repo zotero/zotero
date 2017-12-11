@@ -29,7 +29,6 @@ var notifierUnregisterID;
 async function onLoad() {
 	noteEditor = document.getElementById('zotero-note-editor');
 	noteEditor.mode = 'edit';
-	noteEditor.focus();
 	
 	// Set font size from pref
 	Zotero.setFontSize(noteEditor);
