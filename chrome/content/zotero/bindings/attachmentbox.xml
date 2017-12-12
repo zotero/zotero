@@ -160,12 +160,21 @@
 				<parameter name="event"/>
 				<parameter name="type"/>
 				<parameter name="ids"/>
+				<parameter name="extraData"/>
 				<body><![CDATA[
 					if (event != 'modify' || !this.item || !this.item.id) return;
-					for (let i = 0; i < ids.length; i++) {
-						if (ids[i] != this.item.id) {
+					for (let id of ids) {
+						if (id != this.item.id) {
 							continue;
 						}
+						
+						var noteEditor = this._id('attachment-note-editor')
+						if (extraData && extraData[id]
+								&& extraData[id].noteEditorID == noteEditor.instanceID) {
+							//Zotero.debug("Skipping notification from current attachment note field");
+							continue;
+						}
+						
 						this.refresh();
 						break;
 					}
