@@ -757,6 +757,7 @@ Zotero.Style.prototype.getCiteProc = function(locale, automaticJournalAbbreviati
 			overrideLocale
 		);
 		
+		citeproc.opt.development_extensions.wrap_url_and_doi = true;
 		// Don't try to parse author names. We parse them in itemToCSLJSON
 		citeproc.opt.development_extensions.parse_names = false;
 		
