@@ -52,6 +52,8 @@ const INTEGRATION_TYPE_BIBLIOGRAPHY = 2;
 const INTEGRATION_TYPE_TEMP = 3;
 
 const DELAY_CITATIONS_PROMPT_TIMEOUT = 5/*seconds*/;
+const DELAYED_CITATION_STYLING = "\\uldash";
+const DELAYED_CITATION_STYLING_CLEAR = "\\ulclear";
 
 
 Zotero.Integration = new function() {
@@ -1003,7 +1005,13 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 				}
 				
 				if(!citation.properties.dontUpdate) {
-					isRich = citationField.setText(formattedCitation);
+					// Word will preserve previous text styling, so we need to force remove it
+					// for citations that were inserted with delay styling
+					if (citation.properties.formattedCitation && citation.properties.formattedCitation.includes(DELAYED_CITATION_STYLING)) {
+						isRich = citationField.setText(`${DELAYED_CITATION_STYLING_CLEAR}{${formattedCitation}}`);
+					} else {
+						isRich = citationField.setText(formattedCitation);
+					}
 					
 					citation.properties.formattedCitation = formattedCitation;
 					citation.properties.plainCitation = citationField.getText();
@@ -1590,7 +1598,7 @@ Zotero.Integration.Session.prototype.writeDelayedCitation = Zotero.Promise.corou
 	} catch(e) {
 		throw e;
 	}
-	text = `\\uldash{${text}}`;
+	text = `${DELAYED_CITATION_STYLING}{${text}}`;
 	
 	// Make sure we'll prompt for manually edited citations
 	var isRich = false;
@@ -2223,7 +2231,7 @@ Zotero.Integration.BibliographyField = class extends Zotero.Integration.Field {
 		}
 	}
 			
-	resolveCorrupt() {
+	resolveCorrupt(code) {
 		return Zotero.Promise.coroutine(function* () {
 			Zotero.debug(`Integration: handling corrupt bibliography field ${code}`);
 			var msg = Zotero.getString("integration.corruptBibliography")+'\n\n'+
