@@ -3,7 +3,7 @@
 <!ENTITY styles.preview.citationFormat "Citation Format:">
 <!ENTITY styles.preview.citationFormat.all "όλα">
 <!ENTITY styles.preview.citationFormat.author "συγγραφέας">
-<!ENTITY styles.preview.citationFormat.authorDate "author-date">
+<!ENTITY styles.preview.citationFormat.authorDate "συγγραφέας-ημερομηνία">
 <!ENTITY styles.preview.citationFormat.label "label">
 <!ENTITY styles.preview.citationFormat.note "note">
 <!ENTITY styles.preview.citationFormat.numeric "numeric">
