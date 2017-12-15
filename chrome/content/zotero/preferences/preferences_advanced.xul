@@ -202,7 +202,7 @@
 						
 						<hbox style="display: block">
 							<button label="&zotero.preferences.dbMaintenance.integrityCheck;"
-								oncommand="Zotero_Preferences.Advanced.runIntegrityCheck()"/>
+								oncommand="Zotero_Preferences.Advanced.runIntegrityCheck(this)"/>
 							<button id="reset-translators-button"
 								label="&zotero.preferences.dbMaintenance.resetTranslators;"
 								oncommand="Zotero_Preferences.Advanced.resetTranslators()"/>

@@ -133,78 +133,84 @@ Zotero_Preferences.Advanced = {
 	}),
 	
 	
-	runIntegrityCheck: Zotero.Promise.coroutine(function* () {
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
+	runIntegrityCheck: async function (button) {
+		button.disabled = true;
 		
-		var ok = yield Zotero.DB.integrityCheck();
-		if (ok) {
-			ok = yield Zotero.Schema.integrityCheck();
-			if (!ok) {
-				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
-				var index = ps.confirmEx(window,
-					Zotero.getString('general.failed'),
-					Zotero.getString('db.integrityCheck.failed') + "\n\n" +
-						Zotero.getString('db.integrityCheck.repairAttempt') + " " +
-						Zotero.getString('db.integrityCheck.appRestartNeeded', Zotero.appName),
-					buttonFlags,
-					Zotero.getString('db.integrityCheck.fixAndRestart', Zotero.appName),
-					null, null, null, {}
-				);
-				
-				if (index == 0) {
-					// Safety first
-					yield Zotero.DB.backupDatabase();
-					
-					// Fix the errors
-					yield Zotero.Schema.integrityCheck(true);
-					
-					// And run the check again
-					ok = yield Zotero.Schema.integrityCheck();
-					var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING);
-					if (ok) {
-						var str = 'success';
-						var msg = Zotero.getString('db.integrityCheck.errorsFixed');
-					}
-					else {
-						var str = 'failed';
-						var msg = Zotero.getString('db.integrityCheck.errorsNotFixed')
-									+ "\n\n" + Zotero.getString('db.integrityCheck.reportInForums');
-					}
-					
-					ps.confirmEx(window,
-						Zotero.getString('general.' + str),
-						msg,
+		try {
+			let ps = Services.prompt;
+			
+			var ok = await Zotero.DB.integrityCheck();
+			if (ok) {
+				ok = await Zotero.Schema.integrityCheck();
+				if (!ok) {
+					var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+					var index = ps.confirmEx(window,
+						Zotero.getString('general.failed'),
+						Zotero.getString('db.integrityCheck.failed') + "\n\n" +
+							Zotero.getString('db.integrityCheck.repairAttempt') + " " +
+							Zotero.getString('db.integrityCheck.appRestartNeeded', Zotero.appName),
 						buttonFlags,
-						Zotero.getString('general.restartApp', Zotero.appName),
+						Zotero.getString('db.integrityCheck.fixAndRestart', Zotero.appName),
 						null, null, null, {}
 					);
 					
-					var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
-							.getService(Components.interfaces.nsIAppStartup);
-					appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit
-						| Components.interfaces.nsIAppStartup.eRestart);
+					if (index == 0) {
+						// Safety first
+						await Zotero.DB.backupDatabase();
+						
+						// Fix the errors
+						await Zotero.Schema.integrityCheck(true);
+						
+						// And run the check again
+						ok = await Zotero.Schema.integrityCheck();
+						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING);
+						if (ok) {
+							var str = 'success';
+							var msg = Zotero.getString('db.integrityCheck.errorsFixed');
+						}
+						else {
+							var str = 'failed';
+							var msg = Zotero.getString('db.integrityCheck.errorsNotFixed')
+										+ "\n\n" + Zotero.getString('db.integrityCheck.reportInForums');
+						}
+						
+						ps.confirmEx(window,
+							Zotero.getString('general.' + str),
+							msg,
+							buttonFlags,
+							Zotero.getString('general.restartApp', Zotero.appName),
+							null, null, null, {}
+						);
+						
+						var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
+								.getService(Components.interfaces.nsIAppStartup);
+						appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit
+							| Components.interfaces.nsIAppStartup.eRestart);
+					}
+					
+					return;
 				}
 				
-				return;
+				try {
+					await Zotero.DB.vacuum();
+				}
+				catch (e) {
+					Zotero.logError(e);
+					ok = false;
+				}
 			}
+			var str = ok ? 'passed' : 'failed';
 			
-			try {
-				yield Zotero.DB.vacuum();
-			}
-			catch (e) {
-				Zotero.logError(e);
-				ok = false;
-			}
+			ps.alert(window,
+				Zotero.getString('general.' + str),
+				Zotero.getString('db.integrityCheck.' + str)
+				+ (!ok ? "\n\n" + Zotero.getString('db.integrityCheck.dbRepairTool') : ''));
 		}
-		var str = ok ? 'passed' : 'failed';
-		
-		ps.alert(window,
-			Zotero.getString('general.' + str),
-			Zotero.getString('db.integrityCheck.' + str)
-			+ (!ok ? "\n\n" + Zotero.getString('db.integrityCheck.dbRepairTool') : ''));
-	}),
+		finally {
+			button.disabled = false;
+		}
+	},
 	
 	
 	resetTranslatorsAndStyles: function () {
