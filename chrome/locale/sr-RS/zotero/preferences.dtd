@@ -80,12 +80,12 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "за више података.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Поништи историју усклађивања податка">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Споји локалне податке са подацима на серверу, занемарујући историју усклађивања.">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Врати са Зотеровог сервера">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Брише све Зотерове локалне податке и поново их преузима са сервера.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Пошаљи на Зотеров сервер">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Брише све податке са сервера и преписује их локалним подацима из Зотера.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Поништи историју усклађивања">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Упореди све датотеке прилога са складиштем на серверу">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
 <!ENTITY zotero.preferences.sync.reset "Врати">
 <!ENTITY zotero.preferences.sync.reset.button "Врати…">
 

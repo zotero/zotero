@@ -80,12 +80,12 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "for mere information">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Nulstil historikken for datasynkronisering">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Flet lokale data med fjerndata og ignorér synkroniseringshistorikken">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Gendan fra Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Slet alle lokale Zotero-data og gendan fra synkroniserings-serveren.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Gendan på Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Slet alle server-data og overskriv med lokale data fra Zotero.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Nulstil historik for fil-synkronisering">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Sammenlign alle vedhæftede filer med lagertjenesten">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
 <!ENTITY zotero.preferences.sync.reset "Nulstil">
 <!ENTITY zotero.preferences.sync.reset.button "Nulstil...">
 

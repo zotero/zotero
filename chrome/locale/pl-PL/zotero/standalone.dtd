@@ -14,7 +14,7 @@
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Zapisz...">
 <!ENTITY saveCmd.key "S">
-<!ENTITY saveCmd.accesskey "A">
+<!ENTITY saveCmd.accesskey "O">
 <!ENTITY pageSetupCmd.label "Ustawienia strony...">
 <!ENTITY pageSetupCmd.accesskey "U">
 <!ENTITY printCmd.label "Drukuj...">

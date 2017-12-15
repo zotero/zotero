@@ -80,12 +80,12 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "för mer information.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Återställ datasynkroniseringshistorik">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Sammanfoga lokala data med fjärrdata, strunta i synkroniseringshistorik">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Återställ från Zotero-server">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Radera alla lokala Zotero-data och återställ från synkroniseringsservern.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Återställ till Zotero-server">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Byt ut allt innehåll på Zotero-server mot lokala Zoterodata.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Återställ filsynkroniseringshistorik">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Jämför alla bilagda filer med lagringstjänsten">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
 <!ENTITY zotero.preferences.sync.reset "Återställ">
 <!ENTITY zotero.preferences.sync.reset.button "Återställ...">
 

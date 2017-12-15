@@ -80,12 +80,12 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "을 참고하세요.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "데이터 동기화 기록 재설정">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "로컬 데이터와 원격 데이터 병합. 기존 동기화 기록 무시">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zotero 서버로부터 복원">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "모든 지역 Zotero 자료를 지우고 동기화 서버로부터 복원">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Zotero Server로 복원">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "모든 서버 자료를 지우고 지역 Zotero 자료로 덮어 씁니다.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "파일 동기화 기록 재설정">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "모든 첨부 파일을 저장소 서비스의 파일과 비교">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
 <!ENTITY zotero.preferences.sync.reset "재설정">
 <!ENTITY zotero.preferences.sync.reset.button "재설정...">
 

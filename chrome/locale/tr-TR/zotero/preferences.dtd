@@ -63,8 +63,8 @@
 <!ENTITY zotero.preferences.sync.about "Eşitleme Hakkında">
 <!ENTITY zotero.preferences.sync.fileSyncing "Dosya Eşitlemesi">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Kitaplığımda kullanılan eklenti dosyalarını bununla eşitle:">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Kitaplık gruplarının eklenti dosyalarını Zotero deposunu kullanarak eşitle">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Kitaplığımda kullanılan ek dosyalarını bununla eşitle:">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Kitaplık gruplarının ek dosyalarını Zotero deposunu kullanarak eşitle">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Dosyaları bu anlarda indir:">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "Eşitleme anında">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "Gerek duyulduğunda">
@@ -80,12 +80,12 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 " bakınız.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Veri Eşitleme Geçmişini Sıfırla">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Eşitleme geçmişini yok sayarak, yerel verileri uzaktaki verilerle birleştir">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zotero Sunucusundan Geri Yükle">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Bütün yerel Zotero verilerini sil ve eşitleme sunucusundaki verileri yükle.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Zotero Sunucusuna Yükle">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Sunucudaki tüm verileri sil ve yerel Zotero verisini üzerine yaz.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Çevrimiçi Kitaplıktan Geri Yükle">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Yerel Zotero verilerinin üzerine çevrimiçi kitaplıktaki verileri yaz.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Çevrimiçi Kitaplığa Geri Döndür">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Çevrimiçi kitaplıktaki verilerin üzerine yerel Zotero verilerini yaz.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Dosya Eşitleme Geçmişini Sıfırla">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tüm ek dosyaları depolama hizmetindekiler ile karşılaştır">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tüm ek dosyaları depolama hizmetindekilerle karşılaştır">
 <!ENTITY zotero.preferences.sync.reset "Sıfırla">
 <!ENTITY zotero.preferences.sync.reset.button "Sıfırla...">
 
@@ -198,8 +198,8 @@
 <!ENTITY zotero.preferences.dataDir.reveal "Veri Dizinini Göster">
 <!ENTITY zotero.preferences.dataDir.migrate "Yeni Varsayılan Konuma Geç...">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Bağlantılanmış Eklenti Temel Dizini">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero, bağlantılanmış dosya eklentileri için göreceli yollar kullanacaktır. Bu, temel dizininizdeki dosya yapınız aynı kaldığı sürece, dosyalarınıza değişik bilgisayarlarda ulaşımınızı sağlamaktadır.">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Bağlantılanmış Eklenti Temel DiziniBağlantılanmış Ek Temel Dizini">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero, bağlantılanmış dosya ekleri için göreceli yollar kullanacaktır. Bu, temel dizininizdeki dosya yapınız aynı kaldığı sürece, dosyalarınıza değişik bilgisayarlarda ulaşımınızı sağlamaktadır.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Temel dizin:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Seç...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Mutlak Yollara Geri Döndür...">

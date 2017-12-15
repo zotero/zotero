@@ -80,12 +80,12 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "για περισσότερες πληροφορίες.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Αποκατάσταση από τον διακομιστή του Zotero">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Διαγραφή όλων των τοπικών δεδομένων Zotero και αποκατάστασή τους από τον διακομιστή συγχρονισμού.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Αποκατάσταση στον διακομιστή Zotero">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Διαγραφή όλων των δεδομένων στον διακομιστή και αντικατάστασή τους με τα τοπικά δεδομένα Zotero.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Μηδενισμός του ιστορικού συγχρονισμού αρχείων">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
 <!ENTITY zotero.preferences.sync.reset "Μηδενισμός/Επαναφορά">
 <!ENTITY zotero.preferences.sync.reset.button "Reset…">
 
