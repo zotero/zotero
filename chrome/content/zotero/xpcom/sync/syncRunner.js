@@ -340,10 +340,14 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		if (syncAllLibraries) {
 			if (access.user && access.user.library) {
 				libraries = [Zotero.Libraries.userLibraryID];
+				let skippedLibraries = Zotero.Sync.Data.Local.getSkippedLibraries();
+				
 				// If syncing all libraries, remove skipped libraries
-				libraries = Zotero.Utilities.arrayDiff(
-					libraries, Zotero.Sync.Data.Local.getSkippedLibraries()
-				);
+				if (skippedLibraries.length) {
+					Zotero.debug("Skipped libraries:");
+					Zotero.debug(skippedLibraries);
+					libraries = Zotero.Utilities.arrayDiff(libraries, skippedLibraries);
+				}
 			}
 		}
 		else {
