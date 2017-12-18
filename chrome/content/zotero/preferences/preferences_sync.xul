@@ -40,7 +40,7 @@
 			<preference id="pref-storage-username" name="extensions.zotero.sync.storage.username" type="string"/>
 			<preference id="pref-storage-downloadMode-personal" name="extensions.zotero.sync.storage.downloadMode.personal" type="string"/>
 			<preference id="pref-storage-downloadMode-groups" name="extensions.zotero.sync.storage.downloadMode.groups" type="string"/>
-			<preference id="pref-group-storage-enabled" name="extensions.zotero.sync.storage.groups.enabled" type="bool"/>
+			<preference id="pref-storage-groups-enabled" name="extensions.zotero.sync.storage.groups.enabled" type="bool"/>
 		</preferences>
 		
 		<tabbox>
@@ -233,7 +233,10 @@
 
 							<hbox class="storage-settings-download-options" align="center">
 								<label value="&zotero.preferences.sync.fileSyncing.download;"/>
-								<menulist class="storage-mode" preference="pref-storage-downloadMode-personal" style="margin-left: 0">
+								<menulist id="storage-user-download-mode"
+										class="storage-mode"
+										preference="pref-storage-downloadMode-personal"
+										style="margin-left: 0">
 									<menupopup>
 										<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
 										<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
@@ -245,12 +248,15 @@
 
 							<!-- Group Libraries -->
 							<checkbox label="&zotero.preferences.sync.fileSyncing.groups;"
-									preference="pref-group-storage-enabled"
-										oncommand="Zotero_Preferences.Sync.updateStorageSettingsGroups(this.checked)"/>
+									preference="pref-storage-groups-enabled"
+										oncommand="Zotero_Preferences.Sync.updateStorageSettingsGroupsUI()"/>
 
 							<hbox class="storage-settings-download-options" align="center">
 								<label value="&zotero.preferences.sync.fileSyncing.download;"/>
-								<menulist class="storage-mode" preference="pref-storage-downloadMode-groups" style="margin-left: 0">
+								<menulist id="storage-groups-download-mode"
+										class="storage-mode"
+										preference="pref-storage-downloadMode-groups"
+										style="margin-left: 0">
 									<menupopup>
 										<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
 										<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
@@ -260,8 +266,8 @@
 
 							<separator class="thin"/>
 
-							<vbox>
-								<hbox id="storage-terms" style="margin-top: .4em; display: block" align="center">
+							<vbox id="storage-terms">
+								<hbox style="margin-top: .4em; display: block" align="center">
 									<label>&zotero.preferences.sync.fileSyncing.tos1;</label>
 									<label class="zotero-text-link" href="https://www.zotero.org/support/terms/terms_of_service" value="&zotero.preferences.sync.fileSyncing.tos2;"/>
 									<label>&zotero.preferences.period;</label>
