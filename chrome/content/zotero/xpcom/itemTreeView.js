@@ -2103,30 +2103,40 @@ Zotero.ItemTreeView.prototype.rememberSelection = function (selection) {
 		var unsuppress = this.selection.selectEventsSuppressed = true;
 		this._treebox.beginUpdateBatch();
 	}
-	for(var i=0; i < selection.length; i++)
-	{
-		if (this._rowMap[selection[i]] != null) {
-			this.selection.toggleSelect(this._rowMap[selection[i]]);
-		}
-		// Try the parent
-		else {
-			var item = Zotero.Items.get(selection[i]);
-			if (!item) {
-				continue;
-			}
-			
-			var parent = item.parentItemID;
-			if (!parent) {
-				continue;
-			}
-			
-			if (this._rowMap[parent] != null) {
-				this._closeContainer(this._rowMap[parent]);
-				this.toggleOpenState(this._rowMap[parent]);
+	
+	// Use try/catch to work around NS_ERROR_UNEXPECTED from nsITreeSelection::toggleSelect(),
+	// apparently when the tree disappears before it's called (though I can't reproduce it):
+	//
+	// https://forums.zotero.org/discussion/69226/papers-become-invisible-in-the-middle-pane
+	try {
+		for (let i = 0; i < selection.length; i++) {
+			if (this._rowMap[selection[i]] != null) {
 				this.selection.toggleSelect(this._rowMap[selection[i]]);
+			}
+			// Try the parent
+			else {
+				var item = Zotero.Items.get(selection[i]);
+				if (!item) {
+					continue;
+				}
+				
+				var parent = item.parentItemID;
+				if (!parent) {
+					continue;
+				}
+				
+				if (this._rowMap[parent] != null) {
+					this._closeContainer(this._rowMap[parent]);
+					this.toggleOpenState(this._rowMap[parent]);
+					this.selection.toggleSelect(this._rowMap[selection[i]]);
+				}
 			}
 		}
 	}
+	catch (e) {
+		Zotero.logError(e);
+	}
+	
 	if (unsuppress) {
 		this._treebox.endUpdateBatch();
 		this.selection.selectEventsSuppressed = false;
