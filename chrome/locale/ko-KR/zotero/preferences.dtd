@@ -68,7 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "파일 다운로드 시점: ">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "동기화할 때">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "필요할 때">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "서버 검증">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero 스토리지 이용시 다음 약관에 동의하는 것으로 간주합니다: ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "이용 약관">
 <!ENTITY zotero.preferences.sync.librariesToSync "동기화할 라이브러리">
@@ -80,12 +80,12 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "을 참고하세요.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "데이터 동기화 기록 재설정">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "로컬 데이터와 원격 데이터 병합. 기존 동기화 기록 무시">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "온라인 라이브러리에서 복원">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "로컬 Zotero 데이터를 온라인 라이브러리 데이터로 덮어씁니다">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "온라인 라이브러리로 복원">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "온라인 라이브러리 데이터를 로컬 Zotero 데이터로 덮어씁니다">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "파일 동기화 기록 재설정">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "모든 첨부 파일을 저장소 서비스의 파일과 비교합니다">
 <!ENTITY zotero.preferences.sync.reset "재설정">
 <!ENTITY zotero.preferences.sync.reset.button "재설정...">
 
@@ -107,7 +107,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "인용 선택사항">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "참조 내 신문 기사의 URL포함">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "이 선택사항을 사용안함으로 할 경우, 기사의 페이지 범위를 지정하고 있지 않는 인용된 잡지 및 신문 기사의 경우에만 Zotero에 URL을 삽입합니다.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "이 기능을 선택하지 않으면, 페이지 범위가 지정되어 있지 않은 경우에만 저널, 잡지, 신문 기사 인용문에 URL을 넣습니다.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "빠른 복사">
 <!ENTITY zotero.preferences.quickCopy.defaultFormat "기본 형식:">
@@ -194,7 +194,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Firefox 프로필 디렉토리 이용">
 <!ENTITY zotero.preferences.dataDir.custom "사용자 지정:">
 <!ENTITY zotero.preferences.dataDir.choose "선택...">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(명령줄을 통해 지정됨)">
 <!ENTITY zotero.preferences.dataDir.reveal "자료 디렉토리 표시">
 <!ENTITY zotero.preferences.dataDir.migrate "새로운 기본 위치로 이주...">
 

@@ -46,7 +46,7 @@
 <!ENTITY zotero.tabs.attachments.label "첨부">
 <!ENTITY zotero.tabs.tags.label "태그">
 <!ENTITY zotero.tabs.related.label "관련 페이지">
-<!ENTITY zotero.notes.separate "분리 창에서 편집">
+<!ENTITY zotero.notes.separate "새 창에서 편집">
 
 <!ENTITY zotero.toolbar.duplicate.label "중복 보기">
 <!ENTITY zotero.collections.showUnfiledItems "미분류 항목 보기">
