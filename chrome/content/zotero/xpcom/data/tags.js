@@ -431,9 +431,11 @@ Zotero.Tags = new function() {
 		
 		Zotero.DB.requireTransaction();
 		
+		var sql;
+		
 		// Use given tags, as long as they're orphaned
 		if (tagIDs) {
-			let sql = "CREATE TEMPORARY TABLE tagDelete (tagID INT PRIMARY KEY)";
+			sql = "CREATE TEMPORARY TABLE tagDelete (tagID INT PRIMARY KEY)";
 			yield Zotero.DB.queryAsync(sql);
 			yield Zotero.Utilities.Internal.forEachChunkAsync(
 				tagIDs,
@@ -446,13 +448,17 @@ Zotero.Tags = new function() {
 					);
 				}
 			);
-			sql = "SELECT tagID AS id, name FROM tagDelete JOIN tags USING (tagID) "
-				+ "WHERE tagID NOT IN (SELECT tagID FROM itemTags)";
+			
+			// Skip tags that are still linked to items
+			sql = "DELETE FROM tagDelete WHERE tagID IN (SELECT tagID FROM itemTags)";
+			yield Zotero.DB.queryAsync(sql);
+			
+			sql = "SELECT tagID AS id, name FROM tagDelete JOIN tags USING (tagID)";
 			var toDelete = yield Zotero.DB.queryAsync(sql);
 		}
 		// Look for orphaned tags
 		else {
-			var sql = "CREATE TEMPORARY TABLE tagDelete AS "
+			sql = "CREATE TEMPORARY TABLE tagDelete AS "
 				+ "SELECT tagID FROM tags WHERE tagID NOT IN (SELECT tagID FROM itemTags)";
 			yield Zotero.DB.queryAsync(sql);
 			
@@ -461,11 +467,10 @@ Zotero.Tags = new function() {
 			
 			sql = "SELECT tagID AS id, name FROM tagDelete JOIN tags USING (tagID)";
 			var toDelete = yield Zotero.DB.queryAsync(sql);
-			
-			if (!toDelete.length) {
-				sql = "DROP TABLE tagDelete";
-				return Zotero.DB.queryAsync(sql);
-			}
+		}
+		
+		if (!toDelete.length) {
+			return Zotero.DB.queryAsync("DROP TABLE tagDelete");
 		}
 		
 		var ids = [];

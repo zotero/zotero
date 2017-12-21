@@ -39,35 +39,46 @@ describe("Zotero.Tags", function () {
 	});
 	
 	describe("#removeFromLibrary()", function () {
-		it("should remove tags in given library", function* () {
+		it("should remove tags in given library", async function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
-			var groupLibraryID = (yield getGroup()).libraryID;
+			var groupLibraryID = (await getGroup()).libraryID;
 			
 			var tags = [];
 			var items = [];
-			yield Zotero.DB.executeTransaction(function* () {
+			await Zotero.DB.executeTransaction(async function () {
 				for (let i = 0; i < 10; i++) {
 					let tagName = Zotero.Utilities.randomString();
 					tags.push(tagName);
-					let item = createUnsavedDataObject('item');
-					item.addTag(tagName);
-					yield item.save();
+					let item = createUnsavedDataObject('item', { tags: [tagName] });
+					await item.save();
 					items.push(item);
 				}
 			});
 			
-			var groupTagName = Zotero.Utilities.randomString();
-			var groupItem = createUnsavedDataObject('item', { libraryID: groupLibraryID });
-			groupItem.addTag(groupTagName);
-			yield groupItem.saveTx();
+			var groupTagName = tags[0];
+			var groupItem = await createDataObject(
+				'item',
+				{
+					libraryID: groupLibraryID,
+					tags: [groupTagName]
+				}
+			);
 			
 			var tagIDs = tags.map(tag => Zotero.Tags.getID(tag));
-			yield Zotero.Tags.removeFromLibrary(libraryID, tagIDs);
+			await Zotero.Tags.removeFromLibrary(libraryID, tagIDs);
 			items.forEach(item => assert.lengthOf(item.getTags(), 0));
 			
 			// Group item should still have the tag
-			assert.lengthOf(groupItem.getTags(), 1);
-		})
+			assert.sameDeepMembers(groupItem.getTags(), [{ tag: groupTagName }]);
+			assert.equal(
+				await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM itemTags WHERE itemID=?",
+					groupItem.id
+				),
+				1
+			);
+		});
+		
 		
 		it("should reload tags of associated items", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
