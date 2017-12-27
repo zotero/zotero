@@ -44,13 +44,13 @@ async function onLoad() {
 	if (itemID) {
 		var ref = await Zotero.Items.getAsync(itemID);
 		
-		var clearUndo = noteEditor.item ? noteEditor.item.id != ref.id : false;
-		
-		noteEditor.item = ref;
-		
 		// If loading new or different note, disable undo while we repopulate the text field
 		// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
 		// undo content from another note into the current one.
+		let clearUndo = noteEditor.item ? noteEditor.item.id != itemID : false;
+		
+		noteEditor.item = ref;
+		
 		if (clearUndo) {
 			noteEditor.clearUndo();
 		}
