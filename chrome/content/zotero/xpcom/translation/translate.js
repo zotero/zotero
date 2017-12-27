@@ -1866,6 +1866,44 @@ Zotero.Translate.Base.prototype = {
 		this._sandboxManager.sandbox.Z = this._sandboxZotero;
 		this._sandboxManager.sandbox.ZU = this._sandboxZotero.Utilities;
 		this._transferItem = this._sandboxZotero._transferItem;
+		
+		// Add web helper functions
+		if (this.type == 'web') {
+			this._sandboxManager.sandbox.attr = this._attr.bind(this);
+			this._sandboxManager.sandbox.text = this._text.bind(this);
+		}
+	},
+	
+	/**
+	 * Helper function to extract HTML attribute text
+	 */
+	_attr: function (selector, attr, index) {
+		if (typeof arguments[0] == 'string') {
+			var doc = this.document;
+		}
+		// Support legacy polyfill signature
+		else {
+			this._debug("WARNING: attr() no longer requires a document as the first argument");
+			[doc, selector, attr, index] = arguments;
+		}
+		var elem = index ? doc.querySelectorAll(selector).item(index) : doc.querySelector(selector);
+		return elem ? elem.getAttribute(attr) : null;
+	},
+	
+	/**
+	 * Helper function to extract HTML element text
+	 */
+	_text: function (selector, index) {
+		if (typeof arguments[0] == 'string') {
+			var doc = this.document;
+		}
+		// Support legacy polyfill signature
+		else {
+			this._debug("WARNING: text() no longer requires a document as the first argument");
+			[doc, selector, attr, index] = arguments;
+		}
+		var elem = index ? doc.querySelectorAll(selector).item(index) : doc.querySelector(selector);
+		return elem ? elem.textContent : null;
 	},
 	
 	/**
