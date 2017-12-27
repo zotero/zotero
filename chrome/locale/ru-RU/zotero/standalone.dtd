@@ -23,7 +23,7 @@
 <!ENTITY closeCmd.label "Закрыть">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.label "Импорт…">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Импортировать из буфера обмена">
 <!ENTITY quitApplicationCmdWin.label "Выход">
@@ -44,7 +44,7 @@
 
 <!ENTITY toolsMenu.label "Инструменты">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Установить адаптер в браузер">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Дополнения">
 
@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Информация об устранении ошибок">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Обсуждения на формах">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Сообщить об ошибке…">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Вывод отладочных сообщений">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.submit "Отправить вывод">
+<!ENTITY debugOutputLogging.view "Просмотреть вывод">
+<!ENTITY debugOutputLogging.clear "Очистить вывод">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Перезапустить с включенной записью журнала…">
 
 <!ENTITY helpCheckForUpdates.label "Поиск обновлений...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

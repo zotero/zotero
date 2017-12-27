@@ -110,7 +110,7 @@
 <!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "Новая группа…">
 <!ENTITY zotero.toolbar.newSubcollection.label "Новая субподборка…">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Новый сохраненный поиск…">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Новый отбор…">
 <!ENTITY zotero.toolbar.emptyTrash.label "Очистить корзину">
 <!ENTITY zotero.toolbar.tagSelector.label "Показать/спрятать панель выбора тегов">
 <!ENTITY zotero.toolbar.actions.label "Действия">
