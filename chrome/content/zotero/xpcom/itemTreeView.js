@@ -1869,19 +1869,28 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 	// refreshed. To get around this, we wait for a select event that's triggered by
 	// itemSelected() when it's done.
 	let promise;
-	if (this.selection.selectEventsSuppressed) {
+	try {
+		if (this.selection.selectEventsSuppressed) {
+			this.selection.select(row);
+		}
+		else {
+			promise = this.waitForSelect();
+			this.selection.select(row);
+		}
+		
+		// If |expand|, open row if container
+		if (expand && this.isContainer(row) && !this.isContainerOpen(row)) {
+			this.toggleOpenState(row);
+		}
 		this.selection.select(row);
 	}
-	else {
-		promise = this.waitForSelect();
-		this.selection.select(row);
+	// Ignore NS_ERROR_UNEXPECTED from nsITreeSelection::select(), apparently when the tree
+	// disappears before it's called (though I can't reproduce it):
+	//
+	// https://forums.zotero.org/discussion/comment/297039/#Comment_297039
+	catch (e) {
+		Zotero.logError(e);
 	}
-	
-	// If |expand|, open row if container
-	if (expand && this.isContainer(row) && !this.isContainerOpen(row)) {
-		this.toggleOpenState(row);
-	}
-	this.selection.select(row);
 	
 	if (promise) {
 		yield promise;
@@ -2104,10 +2113,6 @@ Zotero.ItemTreeView.prototype.rememberSelection = function (selection) {
 		this._treebox.beginUpdateBatch();
 	}
 	
-	// Use try/catch to work around NS_ERROR_UNEXPECTED from nsITreeSelection::toggleSelect(),
-	// apparently when the tree disappears before it's called (though I can't reproduce it):
-	//
-	// https://forums.zotero.org/discussion/69226/papers-become-invisible-in-the-middle-pane
 	try {
 		for (let i = 0; i < selection.length; i++) {
 			if (this._rowMap[selection[i]] != null) {
@@ -2133,6 +2138,10 @@ Zotero.ItemTreeView.prototype.rememberSelection = function (selection) {
 			}
 		}
 	}
+	// Ignore NS_ERROR_UNEXPECTED from nsITreeSelection::toggleSelect(), apparently when the tree
+	// disappears before it's called (though I can't reproduce it):
+	//
+	// https://forums.zotero.org/discussion/69226/papers-become-invisible-in-the-middle-pane
 	catch (e) {
 		Zotero.logError(e);
 	}
