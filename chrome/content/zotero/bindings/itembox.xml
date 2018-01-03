@@ -313,7 +313,6 @@
 						this.itemTypeMenu.parentNode.hidden = true;
 					}
 					
-					
 					//
 					// Clear and rebuild metadata fields
 					//
@@ -602,10 +601,11 @@
 					}
 					
 					// Move to next or previous field if (shift-)tab was pressed
-					if (this._lastTabIndex && this._tabDirection)
-					{
-						this._focusNextField(this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
+					if (this._lastTabIndex && this._lastTabIndex != -1) {
+						this._focusNextField(this._lastTabIndex);
 					}
+					
+					this._refreshed = true;
 				]]>
 				</body>
 			</method>
@@ -1046,6 +1046,10 @@
 						var fields = this.getCreatorFields(row);
 						fields.fieldMode = fieldMode;
 						this.modifyCreator(index, fields);
+						if (this.saveOnEdit) {
+							// See note in transformText()
+							this.blurOpenField().then(() => this.item.saveTx());
+						}
 					}
 				]]>
 				</body>
@@ -1144,7 +1148,8 @@
 						this.item.setType(itemTypeID);
 						
 						if (this.saveOnEdit) {
-							this.item.saveTx();
+							// See note in transformText()
+							this.blurOpenField().then(() => this.item.saveTx());
 						}
 						else {
 							this.refresh();
@@ -1412,11 +1417,25 @@
 			
 			<method name="showEditor">
 				<parameter name="elem"/>
-				<body>
-				<![CDATA[
-					// Blur any active fields
-					if (this._dynamicFields) {
-						this._dynamicFields.focus();
+				<body><![CDATA[
+				return (async function () {
+					Zotero.debug(`Showing editor for ${elem.getAttribute('fieldname')}`);
+					
+					var lastTabIndex = this._lastTabIndex = parseInt(elem.getAttribute('ztabindex'));
+					
+					// If a field is open, hide it before selecting the new field, which might
+					// trigger a refresh
+					var activeField = this._dynamicFields.querySelector('textbox');
+					if (activeField) {
+						this._refreshed = false;
+						await this.blurOpenField();
+						this._lastTabIndex = lastTabIndex;
+						// If the box was refreshed, the clicked element is no longer valid,
+						// so just focus by tab index
+						if (this._refreshed) {
+							this._focusNextField(this._lastTabIndex);
+							return;
+						}
 					}
 					
 					// In Firefox 45, when clicking a multiline field such as Extra, the event is
@@ -1424,8 +1443,6 @@
 					if (elem.tagName == 'description') {
 						elem = elem.parentNode;
 					}
-					
-					Zotero.debug('Showing editor');
 					
 					var fieldName = elem.getAttribute('fieldname');
 					var tabindex = elem.getAttribute('ztabindex');
@@ -1552,12 +1569,9 @@
 					});
 					t.setAttribute('onkeypress', "return document.getBindingParent(this).handleKeyPress(event)");
 					
-					this._tabDirection = false;
-					this._lastTabIndex = tabindex;
-					
 					return t;
-				]]>
-				</body>
+				}.bind(this))();
+				]]></body>
 			</method>
 			
 			
@@ -1634,11 +1648,13 @@
 						fields[creatorField] = creator[creatorField];
 						fields[otherField] = creator[otherField];
 						
-						this.ignoreBlur = true;
-						this.modifyCreator(creatorIndex, fields)
-						.then(function () {
-							this.ignoreBlur = false;
-						}.bind(this));
+						this.modifyCreator(creatorIndex, fields);
+						if (this.saveOnEdit) {
+							this.ignoreBlur = true;
+							this.item.saveTx().then(() => {
+								this.ignoreBlur = false;
+							});
+						}
 					}
 					
 					// Otherwise let the autocomplete popup handle matters
@@ -1662,7 +1678,6 @@
 								break;
 							}
 							
-							
 							// Prevent blur on containing textbox
 							// DEBUG: what happens if this isn't present?
 							event.preventDefault();
@@ -1674,7 +1689,7 @@
 									Zotero.debug("Value hasn't changed");
 									// If + button is disabled, just focus next creator row
 									if (Zotero.getAncestorByTagName(target, 'row').lastChild.lastChild.disabled) {
-										this._focusNextField(this._dynamicFields, this._lastTabIndex, false);
+										this._focusNextField(this._lastTabIndex);
 									}
 									else {
 										var creatorFields = this.getCreatorFields(Zotero.getAncestorByTagName(target, 'row'));
@@ -1714,10 +1729,12 @@
 							return false;
 							
 						case event.DOM_VK_TAB:
-							this._tabDirection = event.shiftKey ? -1 : 1;
-							// Blur the old manually -- not sure why this is necessary,
-							// but it prevents an immediate blur() on the next tag
-							focused.blur();
+							if (event.shiftKey) {
+								this._focusNextField(this._lastTabIndex, true);
+							}
+							else {
+								this._focusNextField(++this._lastTabIndex);
+							}
 							return false;
 					}
 					
@@ -1747,8 +1764,10 @@
 			<method name="hideEditor">
 				<parameter name="textbox"/>
 				<body><![CDATA[
-				return Zotero.spawn(function* () {
-					Zotero.debug('Hiding editor');
+				return (async function () {
+					Zotero.debug(`Hiding editor for ${textbox.getAttribute('fieldname')}`);
+					
+					this._lastTabIndex = -1;
 					
 					// Prevent autocomplete breakage in Firefox 3
 					if (textbox.mController) {
@@ -1763,6 +1782,7 @@
 					
 					var elem;
 					var [field, creatorIndex, creatorField] = fieldName.split('-');
+					var newVal;
 					
 					// Creator fields
 					if (field == 'creator') {
@@ -1793,7 +1813,7 @@
 							if (creatorsToShift > 0) { 
 								//Add extra creators
 								for (var i=0;i<nameArray.length;i++) {
-									yield this.modifyCreator(i + initNumCreators, otherFields, true);
+									this.modifyCreator(i + initNumCreators, otherFields);
 								}
 								
 								//Shift existing creators
@@ -1815,7 +1835,7 @@
 									otherFields.lastName=tempName;
 									otherFields.firstName='';
 								}
-								yield this.modifyCreator(creatorIndex, otherFields, true);
+								this.modifyCreator(creatorIndex, otherFields);
 								creatorIndex++;
 							}
 							this._tabDirection = tabDirectionBuffer;
@@ -1828,11 +1848,7 @@
 							}
 						}
 						else {
-							yield this.modifyCreator(creatorIndex, otherFields);
-						}
-						
-						if (this.saveOnEdit) {
-							yield this.item.saveTx();
+							this.modifyCreator(creatorIndex, otherFields);
 						}
 						
 						var val = this.item.getCreator(creatorIndex);
@@ -1849,7 +1865,17 @@
 							}
 						}
 						
-						var newVal = val;
+						newVal = val;
+						
+						// Reset creator mode settings here so that flex attribute gets reset
+						this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), true);
+						if (Zotero.ItemTypes.getName(this.item.itemTypeID) === "bookSection") {
+							var creatorTypeLabels = document.getAnonymousNodes(this)[0].getElementsByClassName("creator-type-label");
+							Zotero.debug(creatorTypeLabels[creatorTypeLabels.length-1] + "");
+							document.getElementById("zotero-author-guidance").show({
+								forEl: creatorTypeLabels[creatorTypeLabels.length-1]
+							});
+						}
 					}
 					
 					// Fields
@@ -1914,40 +1940,23 @@
 							}
 						}
 						
-						yield this._modifyField(fieldName, value, this.saveOnEdit);
-						
-						var newVal = this.item.getField(fieldName);
+						this._modifyField(fieldName, value);
+						newVal = this.item.getField(fieldName);
 					}
 					
-					// If box is still open (due to field not being modified and there not being
-					// a refresh), close it manually
-					if (textbox && textbox.parentNode) {
-						elem = this.createValueElement(
-							newVal,
-							fieldName,
-							tabindex
-						);
-						var box = textbox.parentNode;
-						box.replaceChild(elem,textbox);
-					}
+					// Close box
+					elem = this.createValueElement(
+						newVal,
+						fieldName,
+						tabindex
+					);
+					var box = textbox.parentNode;
+					box.replaceChild(elem, textbox);
 					
-					if(field === 'creator') {
-						// Reset creator mode settings here so that flex attribute gets reset
-						this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), true);
-						if(Zotero.ItemTypes.getName(this.item.itemTypeID) === "bookSection") {
-							var creatorTypeLabels = document.getAnonymousNodes(this)[0].getElementsByClassName("creator-type-label");
-							Zotero.debug(creatorTypeLabels[creatorTypeLabels.length-1] + "");
-							document.getElementById("zotero-author-guidance").show({
-								forEl: creatorTypeLabels[creatorTypeLabels.length-1]
-							});
-						}
+					if (this.saveOnEdit) {
+						await this.item.saveTx();
 					}
-					
-					if (this._tabDirection) {
-						var focusBox = this._dynamicFields;
-						this._focusNextField(focusBox, this._lastTabIndex, this._tabDirection == -1);
-					}
-				}, this);
+				}.bind(this))();
 				]]></body>
 			</method>
 			
@@ -1978,14 +1987,8 @@
 			<method name="_modifyField">
 				<parameter name="field"/>
 				<parameter name="value"/>
-				<parameter name="save"/>
 				<body><![CDATA[
-					return Zotero.spawn(function* () {
-						this.item.setField(field, value);
-						if (save) {
-							yield this.item.saveTx();
-						}
-					}, this);
+					this.item.setField(field, value);
 				]]></body>
 			</method>
 			
@@ -2022,7 +2025,7 @@
 				<parameter name="label"/>
 				<parameter name="mode"/>
 				<body><![CDATA[
-					return Zotero.spawn(function* () {
+					return (async function () {
 						var val = this._getFieldValue(label);
 						switch (mode) {
 							case 'title':
@@ -2040,12 +2043,14 @@
 								throw ("Invalid transform mode '" + mode + "' in zoteroitembox.textTransform()");
 						}
 						this._setFieldValue(label, newVal);
+						this._modifyField(label.getAttribute('fieldname'), newVal);
 						if (this.saveOnEdit) {
-							// See note in modifyCreator()
-							yield this.blurOpenField();
+							// If a field is open, blur it, which will trigger a save and cause
+							// the saveTx() to be a no-op
+							await this.blurOpenField();
+							await this.item.saveTx();
 						}
-						return this._modifyField(label.getAttribute('fieldname'), newVal, this.saveOnEdit);
-					}, this);
+					}.bind(this))();
 				]]></body>
 			</method>
 			
@@ -2085,9 +2090,7 @@
 			<method name="modifyCreator">
 				<parameter name="index"/>
 				<parameter name="fields"/>
-				<parameter name="skipSave"/>
 				<body><![CDATA[
-				return Zotero.spawn(function* () {
 					var libraryID = this.item.libraryID;
 					var firstName = fields.firstName;
 					var lastName = fields.lastName;
@@ -2099,28 +2102,12 @@
 					// Don't save empty creators
 					if (!firstName && !lastName){
 						if (!oldCreator) {
-							return;
+							return false;
 						}
-						this.item.removeCreator(index);
-						if (this.saveOnEdit && !skipSave) {
-							// Make sure any open field is saved, since a blur() isn't otherwise
-							// triggered clicking directly to a popup menu. (If a field is open, the
-							// saveTx() below will become a no-op.)
-							yield this.blurOpenField();
-							
-							return this.item.saveTx();
-						}
-						return;
+						return this.item.removeCreator(index);
 					}
 					
-					var changed = this.item.setCreator(index, fields);
-					if (changed && this.saveOnEdit && !skipSave) {
-						// See note above
-						yield this.blurOpenField();
-						
-						return this.item.saveTx();
-					}
-				}, this);
+					return this.item.setCreator(index, fields);
 				]]></body>
 			</method>
 			
@@ -2131,7 +2118,7 @@
 			<method name="swapNames">
 				<parameter name="event"/>
 				<body><![CDATA[
-				return Zotero.Promise.try(function () {
+				return (async function () {
 					var row = Zotero.getAncestorByTagName(document.popupNode, 'row');
 					var typeBox = row.getElementsByAttribute('popup', 'creator-type-menu')[0];
 					var creatorIndex = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
@@ -2140,8 +2127,13 @@
 					var firstName = fields.firstName;
 					fields.lastName = firstName;
 					fields.firstName = lastName;
-					return this.modifyCreator(creatorIndex, fields);
-				}.bind(this));
+					this.modifyCreator(creatorIndex, fields);
+					if (this.saveOnEdit) {
+						// See note in transformText()
+						await this.blurOpenField();
+						await this.item.saveTx();
+					}
+				}.bind(this))();
 				]]></body>
 			</method>
 			
@@ -2168,9 +2160,8 @@
 					this.item.setCreator(newIndex, a);
 					this.item.setCreator(index, b);
 					if (this.saveOnEdit) {
-						// See note in modifyCreator()
+						// See note in transformText()
 						yield this.blurOpenField();
-						
 						return this.item.saveTx();
 					}
 				}, this);
@@ -2200,7 +2191,7 @@
 			<method name="focusFirstField">
 				<body>
 				<![CDATA[
-					this._focusNextField(this._dynamicFields, 0, false);
+					this._focusNextField(1);
 				]]>
 				</body>
 			</method>
@@ -2215,11 +2206,11 @@
 				completes, so it doesn't know where it's supposed to go next.)
 			-->
 			<method name="_focusNextField">
-				<parameter name="box"/>
 				<parameter name="tabindex"/>
 				<parameter name="back"/>
 				<body>
 				<![CDATA[
+					var box = this._dynamicFields;
 					tabindex = parseInt(tabindex);
 					
 					// Get all fields with ztabindex attributes
@@ -2241,9 +2232,9 @@
 						}
 					}
 					else {
-						Zotero.debug('Looking for next tabindex after ' + tabindex, 4);
+						Zotero.debug('Looking for tabindex ' + tabindex, 4);
 						for (var pos = 0; pos < tabbableFields.length; pos++) {
-							if (parseInt(tabbableFields[pos].getAttribute('ztabindex')) > tabindex) {
+							if (parseInt(tabbableFields[pos].getAttribute('ztabindex')) >= tabindex) {
 								next = tabbableFields[pos];
 								break;
 							}
@@ -2278,12 +2269,13 @@
 			
 			<method name="blurOpenField">
 				<body><![CDATA[
-					return Zotero.spawn(function* () {
-						var textboxes = document.getAnonymousNodes(this)[0].getElementsByTagName('textbox');
-						if (textboxes && textboxes.length) {
-							yield this.blurHandler(textboxes[0]);
+					return (async function () {
+						var activeField = this._dynamicFields.querySelector('textbox');
+						if (!activeField) {
+							return false;
 						}
-					}, this);
+						return this.blurHandler(activeField);
+					}.bind(this))();
 				]]></body>
 			</method>
 			
@@ -2385,7 +2377,11 @@
 							};
 							itemBox._updateAutoCompleteParams(row, changedParams);
 							
-							itemBox.modifyCreator(index, fields);"/>
+							itemBox.modifyCreator(index, fields);
+							if (itemBox.saveOnEdit) {
+								itemBox.item.saveTx();
+							}
+							"/>
 					<menupopup id="zotero-field-transform-menu">
 						<menu label="&zotero.item.textTransform;">
 							<menupopup>
