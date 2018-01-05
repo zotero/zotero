@@ -1884,8 +1884,12 @@
 						if (value != '') {
 							switch (fieldName) {
 								case 'accessDate':
+									// Allow "now" to use current time
+									if (value == 'now') {
+										value = Zotero.Date.dateToSQL(new Date(), true);
+									}
 									// If just date, don't convert to UTC
-									if (Zotero.Date.isSQLDate(value)) {
+									else if (Zotero.Date.isSQLDate(value)) {
 										var localDate = Zotero.Date.sqlToDate(value);
 										value = Zotero.Date.dateToSQL(localDate).replace(' 00:00:00', '');
 									}

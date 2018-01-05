@@ -110,6 +110,27 @@ describe("Item pane", function () {
 			// Wait for no-op saveTx()
 			yield Zotero.Promise.delay(1);
 		});
+		
+		it("should accept 'now' for Accessed", async function () {
+			var item = await createDataObject('item');
+			
+			var itemBox = doc.getElementById('zotero-editpane-item-box');
+			var box = doc.getAnonymousNodes(itemBox)[0];
+			var label = box.querySelector('label[fieldname="accessDate"][class="zotero-clicky"]');
+			label.click();
+			var textbox = box.querySelector('textbox[fieldname="accessDate"]');
+			textbox.value = 'now';
+			// Blur events don't necessarily trigger if window doesn't have focus
+			itemBox.hideEditor(textbox);
+			
+			await waitForItemEvent('modify');
+			
+			assert.approximately(
+				Zotero.Date.sqlToDate(item.getField('accessDate'), true).getTime(),
+				Date.now(),
+				1000
+			);
+		});
 	})
 	
 	
