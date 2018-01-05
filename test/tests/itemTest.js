@@ -438,6 +438,18 @@ describe("Zotero.Item", function () {
 			assert.isFalse(item.hasChanged());
 		});
 		
+		it("should not be marked as changed after a save", async function () {
+			var item = await createDataObject('item');
+			var attachment = new Zotero.Item('attachment');
+			attachment.attachmentLinkMode = 'linked_url';
+			await attachment.saveTx();
+			
+			attachment.parentKey = item.key;
+			assert.isTrue(attachment._changed.parentKey);
+			await attachment.saveTx();
+			assert.isUndefined(attachment._changed.parentKey);
+		});
+		
 		it("should move a top-level note under another item", function* () {
 			var noteItem = new Zotero.Item('note');
 			var id = yield noteItem.saveTx()

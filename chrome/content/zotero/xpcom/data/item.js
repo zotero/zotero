@@ -1623,6 +1623,11 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		yield Zotero.DB.queryAsync(sql, [parentItemID, this.id]);
 	}
 	
+	// There's no reload for parentKey, so clear it here
+	if (this._changed.parentKey) {
+		this._clearChanged('parentKey');
+	}
+	
 	// Note
 	if ((isNew && this.isNote()) || this._changed.note) {
 		if (!isNew) {
