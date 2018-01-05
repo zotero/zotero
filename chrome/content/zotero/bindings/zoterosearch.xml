@@ -409,6 +409,7 @@
 				case 'dateModified':
 				case 'itemType':
 				case 'fileTypeID':
+				case 'publicationTitle':
 				case 'tag':
 				case 'note':
 				case 'childNote':
