@@ -128,7 +128,7 @@ describe("Item pane", function () {
 			assert.approximately(
 				Zotero.Date.sqlToDate(item.getField('accessDate'), true).getTime(),
 				Date.now(),
-				1000
+				5000
 			);
 		});
 	})
