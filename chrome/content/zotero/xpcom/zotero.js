@@ -2110,7 +2110,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			'Sync.Engine.Tabs',
 			'content-sessionStore.js',
 			'org.mozilla.appSessions',
-			'bad script XDR magic number'
+			'bad script XDR magic number',
+			'did not contain an updates property',
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
