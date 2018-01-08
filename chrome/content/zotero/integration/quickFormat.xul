@@ -62,6 +62,9 @@
 					</toolbarbutton>
 					<iframe id="quick-format-iframe" ondragstart="event.stopPropagation()" src="data:application/xhtml+xml,%3C!DOCTYPE%20html%20PUBLIC%20%22-//W3C//DTD%20XHTML%201.0%20Strict//EN%22%20%22http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd%22%3E%3Chtml%20xmlns=%22http://www.w3.org/1999/xhtml%22%3E%3Chead%3E%3Clink%20rel=%22stylesheet%22%20type=%22text/css%22%20href=%22chrome://zotero/skin/integration.css%22/%3E%3Clink%20rel=%22stylesheet%22%20type=%22text/css%22%20href=%22chrome://zotero-platform/content/integration.css%22/%3E%3C/head%3E%3Cbody%20contenteditable=%22true%22%20spellcheck=%22false%22%20id=%22quick-format-editor%22/%3E%3C/html%3E"
 						tabindex="1" flex="1"/>
+					<vbox id="quick-format-spinner" style="visibility: hidden">
+						<image class="zotero-spinner-16"/>
+					</vbox>
 				</hbox>
 			</hbox>
 			<progressmeter id="quick-format-progress-meter" mode="undetermined" value="0" flex="1"/>

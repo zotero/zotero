@@ -149,6 +149,11 @@ body {
 	overflow: hidden;
 }
 
+#quick-format-spinner {
+	margin-top: 2px;
+	margin-right: 8px;
+}
+
 .quick-format-item {
 	font-size: 12px;
 	font: -moz-field;

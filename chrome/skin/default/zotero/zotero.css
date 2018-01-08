@@ -450,11 +450,17 @@ label.zotero-text-link {
 	-moz-box-pack: end;
 }
 
-.zotero-spinner {
-	list-style-image: url(chrome://zotero/skin/spinner-14px@2x.png);
+.zotero-spinner-14 {
+	list-style-image: url(chrome://zotero/skin/spinner-14px.png);
 	height: 14px;
 	width: 14px;
 	margin-right: 2px;
+}
+
+.zotero-spinner-16 {
+	list-style-image: url(chrome://zotero/skin/spinner-16px.png);
+	height: 16px;
+	width: 16px;
 }
 
 
@@ -467,4 +473,6 @@ label.zotero-text-link {
 	.zotero-clicky-plus:not([disabled=true]):active  { background-image: url('chrome://zotero/skin/plus-active@2x.png') !important; }
 	.zotero-scrape-popup-library { list-style-image: url('chrome://zotero/skin/treesource-library@2x.png'); }
 	.zotero-scrape-popup-collection { list-style-image: url('chrome://zotero/skin/treesource-collection@2x.png'); }
+	.zotero-spinner-14  { list-style-image: url(chrome://zotero/skin/spinner-14px@2x.png); }
+	.zotero-spinner-16  { list-style-image: url(chrome://zotero/skin/spinner-16px@2x.png); }
 }

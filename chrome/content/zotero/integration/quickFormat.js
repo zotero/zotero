@@ -37,9 +37,10 @@ var Zotero_QuickFormat = new function () {
 		keepSorted,  showEditor, referencePanel, referenceBox, referenceHeight = 0,
 		separatorHeight = 0, currentLocator, currentLocatorLabel, currentSearchTime, dragging,
 		panel, panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator,
-		panelLibraryLink, panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false,
-		searchTimeout;
+		panelLibraryLink, panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false;
+	var _searchPromise;
 	
+	const SEARCH_TIMEOUT = 250;
 	const SHOWN_REFERENCES = 7;
 	
 	/**
@@ -1051,8 +1052,20 @@ var Zotero_QuickFormat = new function () {
 	 * keypress, since searches can be slow.
 	 */
 	function _resetSearchTimer() {
-		if(searchTimeout) clearTimeout(searchTimeout);
-		searchTimeout = setTimeout(_quickFormat, 250);
+		// Show spinner
+		var spinner = document.getElementById('quick-format-spinner');
+		spinner.style.visibility = '';
+		// Cancel current search if active
+		if (_searchPromise && _searchPromise.isPending()) {
+			_searchPromise.cancel();
+		}
+		// Start new search
+		_searchPromise = Zotero.Promise.delay(SEARCH_TIMEOUT)
+			.then(() => _quickFormat())
+			.then(() => {
+				_searchPromise = null;
+				spinner.style.visibility = 'hidden';
+			});
 	}
 	
 	/**
