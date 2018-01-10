@@ -872,5 +872,122 @@ describe("Zotero.ItemTreeView", function() {
 				(yield Zotero.File.getBinaryContentsAsync(pdfPath))
 			);
 		});
+		
+		it("should rename a child attachment using parent metadata if no existing file attachments", async function () {
+			var view = zp.itemsView;
+			var parentTitle = Zotero.Utilities.randomString();
+			var parentItem = await createDataObject('item', { title: parentTitle });
+			await Zotero.Attachments.linkFromURL({
+				url: 'https://example.com',
+				title: 'Example',
+				parentItemID: parentItem.id
+			});
+			var parentRow = view.getRowIndexByID(parentItem.id);
+			
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			
+			var promise = waitForItemEvent('add');
+			
+			itemsView.drop(parentRow, 0, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: {
+					contains: function (type) {
+						return type == 'application/x-moz-file';
+					}
+				},
+				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
+			})
+			
+			var itemIDs = await promise;
+			var item = Zotero.Items.get(itemIDs[0]);
+			assert.equal(item.parentItemID, parentItem.id);
+			var title = item.getField('title');
+			var path = await item.getFilePathAsync();
+			assert.equal(title, parentTitle + '.png');
+			assert.equal(OS.Path.basename(path), parentTitle + '.png');
+		});
+		
+		it("shouldn't rename a child attachment using parent metadata if existing file attachments", async function () {
+			var view = zp.itemsView;
+			var parentTitle = Zotero.Utilities.randomString();
+			var parentItem = await createDataObject('item', { title: parentTitle });
+			await Zotero.Attachments.linkFromFile({
+				file: OS.Path.join(getTestDataDirectory().path, 'test.png'),
+				parentItemID: parentItem.id
+			});
+			var parentRow = view.getRowIndexByID(parentItem.id);
+			
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			
+			var promise = waitForItemEvent('add');
+			
+			itemsView.drop(parentRow, 0, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: {
+					contains: function (type) {
+						return type == 'application/x-moz-file';
+					}
+				},
+				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
+			})
+			
+			var itemIDs = await promise;
+			var item = Zotero.Items.get(itemIDs[0]);
+			assert.equal(item.parentItemID, parentItem.id);
+			var title = item.getField('title');
+			var path = await item.getFilePathAsync();
+			assert.equal(title, 'test.png');
+			assert.equal(OS.Path.basename(path), 'test.png');
+		});
+		
+		it("shouldn't rename a child attachment using parent metadata if drag includes multiple files", async function () {
+			var view = zp.itemsView;
+			var parentTitle = Zotero.Utilities.randomString();
+			var parentItem = await createDataObject('item', { title: parentTitle });
+			var parentRow = view.getRowIndexByID(parentItem.id);
+			
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			
+			var promise = waitForItemEvent('add');
+			
+			itemsView.drop(parentRow, 0, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: {
+					contains: function (type) {
+						return type == 'application/x-moz-file';
+					}
+				},
+				mozItemCount: 2,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i <= 1) {
+						return file;
+					}
+				}
+			})
+			
+			var itemIDs = await promise;
+			var item = Zotero.Items.get(itemIDs[0]);
+			assert.equal(item.parentItemID, parentItem.id);
+			var title = item.getField('title');
+			var path = await item.getFilePathAsync();
+			assert.equal(title, 'test.png');
+			assert.equal(OS.Path.basename(path), 'test.png');
+		});
 	});
 })

@@ -3233,8 +3233,25 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 		
 		var notifierQueue = new Zotero.Notifier.Queue;
 		try {
+			let parentItem;
+			let numExistingFileAttachments;
+			if (parentItemID) {
+				parentItem = Zotero.Items.get(parentItemID);
+				numExistingFileAttachments = parentItem.getAttachments()
+					.map(itemID => Zotero.Items.get(itemID))
+					.filter(item => item.isFileAttachment())
+					.length;
+			}
+			
 			for (var i=0; i<data.length; i++) {
 				var file = data[i];
+				
+				let fileBaseName;
+				// If only one item is being dragged and it's the only attachment, run
+				// "Rename File from Parent Metadata" automatically
+				if (data.length == 1 && parentItem && !numExistingFileAttachments) {
+					fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentItem);
+				}
 				
 				if (dataType == 'text/x-moz-url') {
 					var url = data[i];
@@ -3270,6 +3287,7 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 							yield Zotero.Attachments.importFromURL({
 								libraryID: targetLibraryID,
 								url,
+								fileBaseName,
 								parentItemID,
 								saveOptions: {
 									notifierQueue
@@ -3306,8 +3324,10 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 						win.ZoteroPane.displayCannotAddShortcutMessage(file.path);
 						continue;
 					}
+					
 					yield Zotero.Attachments.importFromFile({
 						file,
+						fileBaseName,
 						libraryID: targetLibraryID,
 						parentItemID,
 						collections: parentCollectionID ? [parentCollectionID] : undefined,

@@ -40,6 +40,7 @@ Zotero.Attachments = new function(){
 	 * @param {Integer} [options.libraryID]
 	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
 	 * @param {Integer[]} [options.collections] - Collection keys or ids to add new item to
+	 * @param {String} [options.fileBaseName]
 	 * @param {String} [options.contentType]
 	 * @param {String} [options.charset]
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
@@ -50,15 +51,24 @@ Zotero.Attachments = new function(){
 		
 		var libraryID = options.libraryID;
 		var file = Zotero.File.pathToFile(options.file);
+		var path = file.path;
+		var leafName = file.leafName;
 		var parentItemID = options.parentItemID;
 		var collections = options.collections;
+		var fileBaseName = options.fileBaseName;
 		var contentType = options.contentType;
 		var charset = options.charset;
 		var saveOptions = options.saveOptions;
 		
-		var newName = Zotero.File.getValidFileName(file.leafName);
+		if (fileBaseName) {
+			let ext = Zotero.File.getExtension(path);
+			var newName = fileBaseName + (ext != '' ? '.' + ext : '');
+		}
+		else {
+			var newName = Zotero.File.getValidFileName(OS.Path.basename(leafName));
+		}
 		
-		if (file.leafName.endsWith(".lnk")) {
+		if (leafName.endsWith(".lnk")) {
 			throw new Error("Cannot add Windows shortcut");
 		}
 		if (parentItemID && collections) {
