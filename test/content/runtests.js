@@ -293,47 +293,6 @@ if(run) {
 	window.onload = function() {
 		Zotero.spawn(function* () {
 			yield Zotero.Schema.schemaUpdatePromise;
-			
-			// Download and cache PDF tools for this platform
-			//
-			// To reset, delete test/tests/data/pdf/ directory
-			var cachePDFTools = Zotero.Promise.coroutine(function* () {
-				var path = OS.Path.join(getTestDataDirectory().path, 'pdf');
-				yield OS.File.makeDir(path, { ignoreExisting: true });
-				
-				var baseURL = Zotero.Fulltext.pdfToolsDownloadBaseURL;
-				// Point full-text code to the cache directory, so downloads come from there
-				Zotero.Fulltext.pdfToolsDownloadBaseURL = OS.Path.toFileURI(path) + "/";
-				
-				// Get latest tools version for the current platform
-				yield Zotero.File.download(baseURL + 'latest.json', OS.Path.join(path, 'latest.json'));
-				
-				var platform = Zotero.platform.replace(/\s/g, '-');
-				var version = yield Zotero.Fulltext.getLatestPDFToolsVersion();
-				
-				// Create version directory (e.g., data/pdf/3.04) and download tools to it if
-				// they don't exist
-				yield OS.File.makeDir(OS.Path.join(path, version), { ignoreExisting: true });
-				
-				var fileName = "pdfinfo-" + platform + (Zotero.isWin ? ".exe" : "");
-				var execPath = OS.Path.join(path, version, fileName);
-				if (!(yield OS.File.exists(execPath))) {
-					yield Zotero.File.download(baseURL + version + "/" + fileName, execPath);
-				}
-				fileName = "pdftotext-" + platform + (Zotero.isWin ? ".exe" : "");;
-				execPath = OS.Path.join(path, version, fileName);
-				if (!(yield OS.File.exists(execPath))) {
-					yield Zotero.File.download(baseURL + version + "/" + fileName, execPath);
-				}
-			});
-			
-			try {
-				yield cachePDFTools();
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
-			
 			return mocha.run();
 		})
 	};

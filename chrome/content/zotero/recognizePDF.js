@@ -49,11 +49,6 @@ var Zotero_RecognizePDF = new function() {
 	 * of the new items
 	 */
 	this.recognizeSelected = function() {
-		var installed = ZoteroPane_Local.checkPDFConverter();
-		if (!installed) {
-			return;
-		}
-		
 		var items = ZoteroPane_Local.getSelectedItems();
 		if (!items) return;
 		var itemRecognizer = new Zotero_RecognizePDF.ItemRecognizer();

@@ -581,9 +581,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 						while (true) {
 							let entry = yield iterator.next();
 							// Don't delete some files
-							if (entry.name == 'pipes'
-									|| entry.name.startsWith(Zotero.Fulltext.pdfInfoName)
-									|| entry.name.startsWith(Zotero.Fulltext.pdfConverterName)) {
+							if (entry.name == 'pipes') {
 								continue;
 							}
 							Zotero.debug("Deleting " + entry.path);

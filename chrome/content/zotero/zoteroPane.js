@@ -1735,30 +1735,6 @@ var ZoteroPane = new function()
 	};
 	
 	
-	this.checkPDFConverter = function () {
-		if (Zotero.Fulltext.pdfConverterIsRegistered()) {
-			return true;
-		}
-		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
-		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
-		var index = ps.confirmEx(
-			null,
-			Zotero.getString('pane.item.attachments.PDF.installTools.title'),
-			Zotero.getString('pane.item.attachments.PDF.installTools.text'),
-			buttonFlags,
-			Zotero.getString('general.openPreferences'),
-			null, null, null, {}
-		);
-		if (index == 0) {
-			ZoteroPane_Local.openPreferences('zotero-prefpane-search', { action: 'pdftools-install' });
-		}
-		return false;
-	}
-	
-	
 	/**
 	 * @return {Promise}
 	 */
@@ -1769,22 +1745,9 @@ var ZoteroPane = new function()
 		}
 		
 		var itemIDs = [];
-		var checkPDF = false;
+
 		for (var i=0; i<items.length; i++) {
-			// If any PDFs, we need to make sure the converter is installed and
-			// prompt for installation if not
-			if (!checkPDF && items[i].attachmentContentType && items[i].attachmentContentType == "application/pdf") {
-				checkPDF = true;
-			}
 			itemIDs.push(items[i].id);
-		}
-		
-		if (checkPDF) {
-			var installed = this.checkPDFConverter();
-			if (!installed) {
-				yield document.getElementById('zotero-attachment-box').updateItemIndexedState();
-				return;
-			}
 		}
 		
 		yield Zotero.Fulltext.indexItems(itemIDs, true);
@@ -2810,10 +2773,6 @@ var ZoteroPane = new function()
 				var canMarkRead = collectionTreeRow.isFeed();
 				var markUnread = true;
 				
-				if (!Zotero.Fulltext.pdfConverterIsRegistered()) {
-					canIndex = false;
-				}
-				
 				for (let i = 0; i < items.length; i++) {
 					let item = items[i];
 					if (canMerge && !item.isRegularItem() || item.isFeedItem || collectionTreeRow.isDuplicates()) {
@@ -2935,8 +2894,7 @@ var ZoteroPane = new function()
 						}
 						
 						// If not linked URL, show reindex line
-						if (Zotero.Fulltext.pdfConverterIsRegistered()
-								&& (yield Zotero.Fulltext.canReindex(item))) {
+						if (yield Zotero.Fulltext.canReindex(item)) {
 							show.push(m.reindexItem);
 							showSep4 = true;
 						}
