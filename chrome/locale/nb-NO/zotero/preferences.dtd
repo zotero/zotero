@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Søk">
 <!ENTITY zotero.preferences.search.fulltextCache "Fulltekst-mellomlager">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF-registrering">
 <!ENTITY zotero.preferences.search.indexStats "Registerstatistikk">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indeksert:">

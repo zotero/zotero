@@ -314,7 +314,6 @@
 
 <!ENTITY zotero.downloadManager.label "احفظ في زوتيرو">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "لا يمكن حفظ المرفقات في المكتبة المحددة حاليا. عوضاً عن ذلك سيتم حفظ هذا العنصر في مكتبتك.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "لاستخدام هذه الخاصية، يجب تنصيب اداة PDF والموجودة في تبويب البحث بتفضيلات زوتيرو.">
 
 <!ENTITY zotero.attachLink.title "ارفاق رابط لمحتوى على الانترنت">
 <!ENTITY zotero.attachLink.label.link "رابط:">

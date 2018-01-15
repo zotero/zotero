@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Претражи">
 <!ENTITY zotero.preferences.search.fulltextCache "Текст кеш">
-<!ENTITY zotero.preferences.search.pdfIndexing "Индексирање ПДФ датотека">
 <!ENTITY zotero.preferences.search.indexStats "Статистика индекса">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Индексирано:">

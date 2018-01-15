@@ -314,7 +314,6 @@
 
 <!ENTITY zotero.downloadManager.label "Uložiť do Zotera">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Prílohy nemožno uložiť do práve vybranej knižnice. Tento záznam sa preto uloží do vašej knižnice.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Pre použitie tejto funkcie musíte najprv nainštalovať nástroje PDF v table Hľadania v možnostiach Zotera.">
 
 <!ENTITY zotero.attachLink.title "Priložiť odkaz k URI">
 <!ENTITY zotero.attachLink.label.link "Odkaz:">

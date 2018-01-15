@@ -314,7 +314,6 @@
 
 <!ENTITY zotero.downloadManager.label "Сачувај у Зотеро">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Не можете да сачувате прилоге унутар изабране библиотеке. Ова ставка ће зато бити сачувана у вашу личну библиотеку.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "За употребу ових могућности морате најпре инсталирати ПДФ алате из поставки претраге Зотера.">
 
 <!ENTITY zotero.attachLink.title "Додај везу до УРИ адресе">
 <!ENTITY zotero.attachLink.label.link "Веза:">

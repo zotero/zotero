@@ -314,7 +314,6 @@
 
 <!ENTITY zotero.downloadManager.label "Salvar no Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Não foi possível salvar os anexos na biblioteca atualmente selecionada. Esse documento será salvo em sua biblioteca.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Para utilizar esse recurso você deve primeiro instalar as ferramentas de PDF no painel Pesquisa, das preferências do Zotero.">
 
 <!ENTITY zotero.attachLink.title "Anexar link para URI">
 <!ENTITY zotero.attachLink.label.link "Link:">

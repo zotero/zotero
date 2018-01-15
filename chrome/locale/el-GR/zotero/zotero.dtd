@@ -314,7 +314,6 @@
 
 <!ENTITY zotero.downloadManager.label "Αποθήκευση στο Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Στην επιλεγμένη βιβλιοθήκη δεν μπορούν να αποθηκευτούν προσαρτήματα. Αντ' αυτής, το στοιχείο θα αποθηκευτεί στην βιβλιοθήκη σας.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Για να χρησιμοποιήσετε τη λειτουργία αυτή πρώτα πρέπει να εγκαταστήσετε τα εργαλεία PDF στο πλαίσιο Αναζήτησης των Προτιμήσεων του Zotero.">
 
 <!ENTITY zotero.attachLink.title "Προσάρτηση συνδέσμου στο URI">
 <!ENTITY zotero.attachLink.label.link "Σύνδεσμος:">

@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "بحث">
 <!ENTITY zotero.preferences.search.fulltextCache "الذاكرة المخبأة للنص الكامل">
-<!ENTITY zotero.preferences.search.pdfIndexing "تكشيف ملفات PDF">
 <!ENTITY zotero.preferences.search.indexStats "احصائيات التكشيف">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "مكشف:">

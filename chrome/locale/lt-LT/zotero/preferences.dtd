@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Paieška">
 <!ENTITY zotero.preferences.search.fulltextCache "Visatekstinis podėlis">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF indeksavimas">
 <!ENTITY zotero.preferences.search.indexStats "Indeksavimo statistika">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Suindeksuota:">

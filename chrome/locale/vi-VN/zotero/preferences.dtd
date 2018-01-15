@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Tìm kiếm">
 <!ENTITY zotero.preferences.search.fulltextCache "Bộ nhớ đệm cho văn bản toàn văn">
-<!ENTITY zotero.preferences.search.pdfIndexing "Tạo chỉ mục cho PDF">
 <!ENTITY zotero.preferences.search.indexStats "Các Số liệu thống kê về Chỉ mục">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Đã được tạo chỉ mục toàn phần:">

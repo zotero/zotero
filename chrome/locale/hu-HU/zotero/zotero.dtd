@@ -314,7 +314,6 @@
 
 <!ENTITY zotero.downloadManager.label "Mentés Zotero-ba">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "A csatolmányok nem menthetőek a jelenleg kiválasztott könyvtárba. Ez az elem a saját könyvtárába lesz mentve.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Ahhoz, hogy ezt a tulajdonságot használja, először telepítenie kell a PDF tools-t a Zotero beállítások keresőpaneljén.">
 
 <!ENTITY zotero.attachLink.title "Link csatolása az URI-hoz">
 <!ENTITY zotero.attachLink.label.link "Link:">

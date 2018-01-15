@@ -314,7 +314,6 @@
 
 <!ENTITY zotero.downloadManager.label "Salvează în Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Anexele nu pot fi salvate în biblioteca selectată. Această înregistrare va fi salvată în schimb în biblioteca ta.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Pentru a folosi această facilitate, trebuie să instalezi mai întâi uneletele PDF în preferințele Zotero.">
 
 <!ENTITY zotero.attachLink.title "Anexează link la URI">
 <!ENTITY zotero.attachLink.label.link "Link:">

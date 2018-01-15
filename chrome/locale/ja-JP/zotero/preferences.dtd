@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "検索">
 <!ENTITY zotero.preferences.search.fulltextCache "フルテキストのキャッシュ">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF 索引作成">
 <!ENTITY zotero.preferences.search.indexStats "索引統計">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "索引作成済">

@@ -314,7 +314,6 @@
 
 <!ENTITY zotero.downloadManager.label "Desa al Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Els adjunts no es poden desar a la biblioteca seleccionada. Aquest element es desarà a la biblioteca.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Per utilitzar aquesta funció, primer cal instal·lar les eines de PDF en les preferències del Zotero.">
 
 <!ENTITY zotero.attachLink.title "Adjunta l'enllaç a l'URI">
 <!ENTITY zotero.attachLink.label.link "Enllaç:">
