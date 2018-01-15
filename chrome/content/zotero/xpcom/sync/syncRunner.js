@@ -127,9 +127,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		try {
 			yield Zotero.Notifier.trigger('start', 'sync', []);
 			
-			// Purge deleted objects so they don't cause sync errors (e.g., long tags)
-			yield Zotero.purgeDataObjects(true);
-			
 			let apiKey = yield _getAPIKey();
 			if (!apiKey) {
 				throw new Zotero.Error("API key not set", Zotero.Error.ERROR_API_KEY_NOT_SET);
@@ -141,6 +138,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 			
 			this.updateIcons('animate');
+			
+			// Purge deleted objects so they don't cause sync errors (e.g., long tags)
+			yield Zotero.purgeDataObjects(true);
 			
 			let client = this.getAPIClient({ apiKey });
 			let keyInfo = yield this.checkAccess(client, options);
