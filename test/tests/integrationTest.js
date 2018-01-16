@@ -2,6 +2,9 @@
 
 describe("Zotero.Integration", function () {
 	Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+	const INTEGRATION_TYPE_ITEM = 1;
+	const INTEGRATION_TYPE_BIBLIOGRAPHY = 2;
+	const INTEGRATION_TYPE_TEMP = 3;
 	/**
 	 * To be used as a reference for Zotero-Word Integration plugins
 	 */
@@ -235,6 +238,7 @@ describe("Zotero.Integration", function () {
 		if (typeof docID === "undefined") {
 			throw new Error(`docID cannot be undefined`)
 		}
+		Zotero.debug(`execCommand '${command}': ${docID}`, 2);
 		return Zotero.Integration.execCommand("dummy", command, docID);
 	}
 	
@@ -273,21 +277,13 @@ describe("Zotero.Integration", function () {
 	
 	function setAddEditItems(items) {
 		if (items.length == undefined) items = [items];
-		dialogResults.quickFormat = function(doc, dialogName) {
-			var citationItems = items.map((i) => {return {id: i.id} });
-			var field = doc.insertField("Field", 0);
-			field.setCode('TEMP');
-			var integrationDoc = addEditCitationSpy.lastCall.thisValue;
-			var fieldGetter = new Zotero.Integration.Fields(integrationDoc._session, integrationDoc._doc, () => 0);
-			var io = new Zotero.Integration.CitationEditInterface(
-				{ citationItems, properties: {} },
-				field,
-				fieldGetter,
-				integrationDoc._session
-			);
-			io._acceptDeferred.resolve();
-			return io;
-		}
+		dialogResults.quickFormat = function(dialogName, io) {
+			io.citation.citationItems = items.map(function(item) {
+				item = Zotero.Cite.getItem(item.id);
+				return {id: item.id, uris: item.cslURIs, itemData: item.cslItemData};
+			});
+			io._acceptDeferred.resolve(() => {});
+		};
 	}
 	
 	before(function* () {
@@ -296,7 +292,10 @@ describe("Zotero.Integration", function () {
 
 		testItems = [];
 		for (let i = 0; i < 5; i++) {
-			testItems.push(yield createDataObject('item', {libraryID: Zotero.Libraries.userLibraryID}));
+			let testItem = yield createDataObject('item', {libraryID: Zotero.Libraries.userLibraryID});
+			testItem.setField('title', `title${1}`);
+			testItem.setCreator(0, {creatorType: 'author', name: `Author No${i}`});
+			testItems.push(testItem);
 		}
 		setAddEditItems(testItems[0]);
 		
@@ -313,16 +312,18 @@ describe("Zotero.Integration", function () {
 		// possible bug that reset() erases callsFake.
 		// @NOTE: https://github.com/sinonjs/sinon/issues/1341
 		// displayDialogStub.callsFake(function(doc, dialogName, prefs, io) {
-		function(doc, dialogName, prefs, io) {
+		function(dialogName, prefs, io) {
+			Zotero.debug(`Display dialog: ${dialogName}`, 2);
 			var ioResult = dialogResults[dialogName.substring(dialogName.lastIndexOf('/')+1, dialogName.length-4)];
 			if (typeof ioResult == 'function') {
-				ioResult = ioResult(doc, dialogName);
+				ioResult(dialogName, io);
+			} else {
+				Object.assign(io, ioResult);
 			}
-			Object.assign(io, ioResult);
 			return Zotero.Promise.resolve();
 		});
 		
-		addEditCitationSpy = sinon.spy(Zotero.Integration.Document.prototype, 'addEditCitation');
+		addEditCitationSpy = sinon.spy(Zotero.Integration.Interface.prototype, 'addEditCitation');
 	});
 	
 	after(function() {
@@ -331,8 +332,8 @@ describe("Zotero.Integration", function () {
 		addEditCitationSpy.restore();
 	});
 	
-	describe('Document', function() {
-		describe('#addEditCitation', function() {
+	describe('Interface', function() {
+		describe('#execCommand', function() {
 			var setDocumentDataSpy;
 			var docID = this.fullTitle();
 			
@@ -348,18 +349,7 @@ describe("Zotero.Integration", function () {
 				setDocumentDataSpy.restore();
 			});
 			
-			it('should call doc.setDocumentData on a fresh document', function* () {
-				yield execCommand('addEditCitation', docID);
-				assert.isTrue(setDocumentDataSpy.calledOnce);
-			});
-			
-			it('should not call doc.setDocumentData on subsequent invocations', function* () {
-				yield execCommand('addEditCitation', docID);
-				assert.isFalse(setDocumentDataSpy.called);
-			});
-			
-			it('should call doc.setDocumentData when document communicates for first time since restart to write new sessionID', function* () {
-				Zotero.Integration.sessions = {};
+			it('should call doc.setDocumentData once', function* () {
 				yield execCommand('addEditCitation', docID);
 				assert.isTrue(setDocumentDataSpy.calledOnce);
 			});
@@ -390,8 +380,7 @@ describe("Zotero.Integration", function () {
 				});
 			
 				describe('when the style is not from a trusted source', function() {
-					it('should download the style and not call doc.setDocumentData if user clicks YES', function* () {
-						setDocumentDataSpy.reset();
+					it('should download the style and if user clicks YES', function* () {
 						var styleInstallStub = sinon.stub(Zotero.Styles, "install").resolves();
 						var style = Zotero.Styles.get(styleID);
 						var styleGetCalledOnce = false;
@@ -407,7 +396,6 @@ describe("Zotero.Integration", function () {
 						assert.isTrue(displayAlertStub.calledOnce);
 						assert.isFalse(displayDialogStub.calledWith(applications[docID].doc, 'chrome://zotero/content/integration/integrationDocPrefs.xul'));
 						assert.isTrue(styleInstallStub.calledOnce);
-						assert.isFalse(setDocumentDataSpy.called);
 						assert.isOk(Zotero.Styles.get(style.styleID));
 						styleInstallStub.restore();
 						styleGetStub.restore();
@@ -447,6 +435,194 @@ describe("Zotero.Integration", function () {
 			});
 		});
 		
+		describe('#addEditCitation', function() {
+			var insertMultipleCitations = Zotero.Promise.coroutine(function *() {
+				var docID = this.test.fullTitle();
+				if (!(docID in applications)) initDoc(docID);
+				var doc = applications[docID].doc;
+
+				setAddEditItems(testItems[0]);
+				yield execCommand('addEditCitation', docID);
+				assert.equal(doc.fields.length, 1);
+				var citation = (new Zotero.Integration.CitationField(doc.fields[0])).unserialize();
+				assert.equal(citation.citationItems.length, 1);
+				assert.equal(citation.citationItems[0].id, testItems[0].id);
+
+				setAddEditItems(testItems.slice(1, 3));
+				yield execCommand('addEditCitation', docID);
+				assert.equal(doc.fields.length, 2);
+				citation = (new Zotero.Integration.CitationField(doc.fields[1])).unserialize();
+				assert.equal(citation.citationItems.length, 2);
+				for (let i = 1; i < 3; i++) {
+					assert.equal(citation.citationItems[i-1].id, testItems[i].id);
+				}
+			});
+			it('should insert citation if not in field', insertMultipleCitations);
+			
+			it('should edit citation if in citation field', function* () {
+				yield insertMultipleCitations.call(this);
+				var docID = this.test.fullTitle();
+				var doc = applications[docID].doc;
+
+				sinon.stub(doc, 'cursorInField').returns(doc.fields[0]);
+				sinon.stub(doc, 'canInsertField').returns(false);
+
+				setAddEditItems(testItems.slice(3, 5));
+				yield execCommand('addEditCitation', docID);
+				assert.equal(doc.fields.length, 2);
+				var citation = (new Zotero.Integration.CitationField(doc.fields[0])).unserialize();
+				assert.equal(citation.citationItems.length, 2);
+				assert.equal(citation.citationItems[0].id, testItems[3].id);
+			});
+			
+			it('should update bibliography if present', function* () {
+				yield insertMultipleCitations.call(this);
+				var docID = this.test.fullTitle();
+				var doc = applications[docID].doc;
+				
+				let getCiteprocBibliographySpy =
+					sinon.spy(Zotero.Integration.Bibliography.prototype, 'getCiteprocBibliography');
+					
+				yield execCommand('addEditBibliography', docID);
+				assert.isTrue(getCiteprocBibliographySpy.calledOnce);
+				
+				assert.equal(getCiteprocBibliographySpy.lastCall.returnValue[0].entry_ids.length, 3);
+				getCiteprocBibliographySpy.reset();
+
+				setAddEditItems(testItems[3]);
+				yield execCommand('addEditCitation', docID);
+				assert.equal(getCiteprocBibliographySpy.lastCall.returnValue[0].entry_ids.length, 4);
+
+				getCiteprocBibliographySpy.restore();
+			});
+			
+			describe('when original citation text has been modified', function() {
+				var displayAlertStub;
+				before(function* () {
+					displayAlertStub = sinon.stub(DocumentPluginDummy.Document.prototype, 'displayAlert').returns(0);
+				});	
+				beforeEach(function() {
+					displayAlertStub.reset();
+				});
+				after(function() {
+					displayAlertStub.restore();
+				});
+				it('should keep modification if "Cancel" selected in editCitation triggered alert', async function () {
+					await insertMultipleCitations.call(this);
+					var docID = this.test.fullTitle();
+					var doc = applications[docID].doc;
+
+					doc.fields[0].text = "modified";
+					sinon.stub(doc, 'cursorInField').returns(doc.fields[0]);
+					sinon.stub(doc, 'canInsertField').returns(false);
+
+					await execCommand('addEditCitation', docID);
+					assert.equal(doc.fields.length, 2);
+					assert.equal(doc.fields[0].text, "modified");
+				});
+				it('should display citation dialog if "OK" selected in editCitation triggered alert', async function () {
+					await insertMultipleCitations.call(this);
+					var docID = this.test.fullTitle();
+					var doc = applications[docID].doc;
+
+					let origText = doc.fields[0].text;
+					doc.fields[0].text = "modified";
+					// Return OK
+					displayAlertStub.returns(1);
+					sinon.stub(doc, 'cursorInField').returns(doc.fields[0]);
+					sinon.stub(doc, 'canInsertField').returns(false);
+					setAddEditItems(testItems[0]);
+
+					await execCommand('addEditCitation', docID);
+					assert.isTrue(displayAlertStub.called);
+					assert.equal(doc.fields.length, 2);
+					assert.equal(doc.fields[0].text, origText);
+				});
+				it('should set dontUpdate: true if "yes" selected in refresh prompt', async function() {
+					await insertMultipleCitations.call(this);
+					var docID = this.test.fullTitle();
+					var doc = applications[docID].doc;
+
+					var citation = (new Zotero.Integration.CitationField(doc.fields[0])).unserialize();
+					assert.isNotOk(citation.properties.dontUpdate);
+					doc.fields[0].text = "modified";
+					// Return Yes
+					displayAlertStub.returns(1);
+
+					await execCommand('refresh', docID);
+					assert.isTrue(displayAlertStub.called);
+					assert.equal(doc.fields.length, 2);
+					assert.equal(doc.fields[0].text, "modified");
+					var citation = (new Zotero.Integration.CitationField(doc.fields[0])).unserialize();
+					assert.isOk(citation.properties.dontUpdate);
+				});
+				it('should reset citation text if "no" selected in refresh prompt', async function() {
+					await insertMultipleCitations.call(this);
+					var docID = this.test.fullTitle();
+					var doc = applications[docID].doc;
+
+					var citation = (new Zotero.Integration.CitationField(doc.fields[0])).unserialize();
+					assert.isNotOk(citation.properties.dontUpdate);
+					let origText = doc.fields[0].text;
+					doc.fields[0].text = "modified";
+					// Return No
+					displayAlertStub.returns(0);
+
+					await execCommand('refresh', docID);
+					assert.isTrue(displayAlertStub.called);
+					assert.equal(doc.fields.length, 2);
+					assert.equal(doc.fields[0].text, origText);
+					var citation = (new Zotero.Integration.CitationField(doc.fields[0])).unserialize();
+					assert.isNotOk(citation.properties.dontUpdate);
+				});
+			});
+			
+			describe('when delayCitationUpdates is set', function() {
+				it('should insert a citation with wave underlining', function* (){
+					yield insertMultipleCitations.call(this);
+					var docID = this.test.fullTitle();
+					var doc = applications[docID].doc;
+					var data = new Zotero.Integration.DocumentData(doc.data);
+					data.prefs.delayCitationUpdates = true;
+					doc.data = data.serialize();
+					
+					var setTextSpy = sinon.spy(DocumentPluginDummy.Field.prototype, 'setText');
+					setAddEditItems(testItems[3]);
+					yield execCommand('addEditCitation', docID);
+					assert.isTrue(setTextSpy.lastCall.args[0].includes('\\uldash'));
+					
+					setTextSpy.restore();
+				});
+				
+				it('should not write to any other fields besides the one being updated', function* () {
+					yield insertMultipleCitations.call(this);
+					var docID = this.test.fullTitle();
+					var doc = applications[docID].doc;
+					var data = new Zotero.Integration.DocumentData(doc.data);
+					data.prefs.delayCitationUpdates = true;
+					doc.data = data.serialize();
+
+					var setTextSpy = sinon.spy(DocumentPluginDummy.Field.prototype, 'setText');
+					var setCodeSpy = sinon.spy(DocumentPluginDummy.Field.prototype, 'setCode');
+					
+					setAddEditItems(testItems[3]);
+					yield execCommand('addEditCitation', docID);
+					var field = setTextSpy.firstCall.thisValue;
+					
+					for (let i = 0; i < setTextSpy.callCount; i++) {
+						assert.isTrue(field.equals(setTextSpy.getCall(i).thisValue));
+					}
+
+					for (let i = 0; i < setCodeSpy.callCount; i++) {
+						assert.isTrue(field.equals(setCodeSpy.getCall(i).thisValue));
+					}
+
+					setTextSpy.restore();
+					setCodeSpy.restore();
+				})
+			});
+		});
+		
 		describe('#addEditBibliography', function() {
 			var docID = this.fullTitle();
 			beforeEach(function* () {
@@ -455,12 +631,13 @@ describe("Zotero.Integration", function () {
 			});
 			
 			it('should insert bibliography if no bibliography field present', function* () {
+				displayDialogStub.reset();
 				yield execCommand('addEditBibliography', docID);
+				assert.isFalse(displayDialogStub.called);
 				var biblPresent = false;
 				for (let i = applications[docID].doc.fields.length-1; i >= 0; i--) {
-					let field = applications[docID].doc.fields[i];
-					Zotero.debug(field.getCode(), 1);
-					if (field.getCode().includes("CSL_BIBLIOGRAPHY")) {
+					let field = Zotero.Integration.Field.loadExisting(applications[docID].doc.fields[i]);
+					if (field.type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
 						biblPresent = true;
 						break;
 					}
@@ -473,7 +650,7 @@ describe("Zotero.Integration", function () {
 				displayDialogStub.reset();
 				yield execCommand('addEditBibliography', docID);
 				assert.isTrue(displayDialogStub.calledOnce);
-				assert.isTrue(displayDialogStub.lastCall.args[1].includes('editBibliographyDialog'));
+				assert.isTrue(displayDialogStub.lastCall.args[0].includes('editBibliographyDialog'));
 			});
 		});
 	});

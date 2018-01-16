@@ -59,10 +59,8 @@ var Zotero_Citation_Dialog = new function () {
 	this.listItemSelected = listItemSelected;
 	this.up = up;
 	this.down = down;
-	this.add = add;
 	this.remove = remove;
 	this.setSortToggle = setSortToggle;
-	this.citationSortUnsort = citationSortUnsort;
 	this.confirmRegenerate = confirmRegenerate;
 	this.accept = accept;
 	this.cancel = cancel;
@@ -373,13 +371,13 @@ var Zotero_Citation_Dialog = new function () {
 	/*
 	 * Adds an item to the multipleSources list
 	 */
-	function add(first_item) {
+	this.add = Zotero.Promise.coroutine(function* (first_item) {
 		
 		var pos, len;
 		var item = itemsView.getSelectedItems()[0]; // treeview from xpcom/itemTreeView.js
 		
 		if (!item) {
-			sortCitation();
+			yield sortCitation();
 			_updateAccept();
 			_updatePreview();
 			return;
@@ -412,11 +410,11 @@ var Zotero_Citation_Dialog = new function () {
 		_citationList.ensureElementIsVisible(selectionNode);
 
 		// allow user to press OK
-		selectionNode = sortCitation(selectionNode);
+		selectionNode = yield sortCitation(selectionNode);
 		_citationList.selectItem(selectionNode);
 		_updateAccept();
 		_updatePreview();
-	}
+	});
 	
 	/*
 	 * Deletes a citation from the multipleSources list
@@ -446,11 +444,11 @@ var Zotero_Citation_Dialog = new function () {
 	/*
 	 * Sorts preview citations, if preview is open.
 	 */
-	function citationSortUnsort() {
+	this.citationSortUnsort = Zotero.Promise.coroutine(function* () {
 		setSortToggle();
-		sortCitation();
+		yield sortCitation();
 		_updatePreview();
-	}
+	});
 
 	/*
 	 * Sets the current sort toggle state persistently on the citation.
@@ -468,7 +466,7 @@ var Zotero_Citation_Dialog = new function () {
 	/*
 	 * Sorts the list of citations
  	 */
-	function sortCitation(scrollToItem) {
+	var sortCitation = Zotero.Promise.coroutine(function* (scrollToItem) {
  		if(!_sortCheckbox) return scrollToItem;
  		if(!_sortCheckbox.checked) {
  			io.citation.properties.unsorted = true;
@@ -485,7 +483,7 @@ var Zotero_Citation_Dialog = new function () {
 		
 		// run preview function to re-sort, if it hasn't already been
 		// run
-		io.sort();
+		yield io.sort();
 		
 		// add items back to list
 		scrollToItem = null;
@@ -502,7 +500,7 @@ var Zotero_Citation_Dialog = new function () {
 		
 		if(scrollToItem) _citationList.ensureElementIsVisible(scrollToItem);
 		return scrollToItem;
-	}
+	});
 	
 	/*
 	 * Ask whether to modifiy the preview

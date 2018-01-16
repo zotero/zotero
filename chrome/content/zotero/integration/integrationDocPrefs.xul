@@ -31,10 +31,11 @@
 <dialog
 	id="zotero-doc-prefs-dialog"
 	orient="vertical"
-	buttons="accept,cancel"
+	buttons="accept,cancel,help"
 	title="&zotero.integration.docPrefs.title;"
 	onload="Zotero_File_Interface_Bibliography.init();"
 	ondialogaccept="Zotero_File_Interface_Bibliography.acceptSelection();"
+	ondialoghelp="Zotero_File_Interface_Bibliography.openHelpLink();"
 	onclose="document.documentElement.cancelDialog(); event.preventDefault(); event.stopPropagation();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY"
@@ -83,6 +84,11 @@
 		<vbox id="automaticJournalAbbreviations-vbox">
 			<checkbox id="automaticJournalAbbreviations-checkbox" label="&zotero.integration.prefs.automaticJournalAbbeviations.label;"/>
 			<description class="radioDescription">&zotero.integration.prefs.automaticJournalAbbeviations.caption;</description>
+		</vbox>
+		
+		<vbox id="delayCitationUpdates-vbox">
+			<checkbox id="delayCitationUpdates-checkbox" label="&zotero.integration.prefs.delayCitationUpdates.label;" tooltiptext="&zotero.integration.prefs.delayCitationUpdates.tooltip;"/>
+			<description class="radioDescription">&zotero.integration.prefs.delayCitationUpdates.description;</description>
 		</vbox>
 	</vbox>
 </dialog>

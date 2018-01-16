@@ -167,10 +167,23 @@ var Zotero_File_Interface_Bibliography = new function() {
 				document.getElementById("automaticJournalAbbreviations-checkbox").checked = true;
 			}
 		}
+		if (document.getElementById("delayCitationUpdates-checkbox")) {
+			if (_io.delayCitationUpdates) {
+				document.getElementById("delayCitationUpdates-checkbox").checked = true;
+			}
+		}
 		
 		// set style to false, in case this is cancelled
 		_io.style = false;
 	});
+	
+	this.openHelpLink = function() {
+		var url = "https://www.zotero.org/support/word_processor_plugin_usage";
+		var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+						.getService(Components.interfaces.nsIWindowMediator)
+						.getMostRecentWindow("navigator:browser");
+		Zotero.launchURL(url);
+	};
 
 	/*
 	 * Called when locale is changed
@@ -210,6 +223,13 @@ var Zotero_File_Interface_Bibliography = new function() {
 		if(document.getElementById("automaticJournalAbbreviations-vbox")) {
 			document.getElementById("automaticJournalAbbreviations-vbox").hidden =
 				!selectedStyleObj.usesAbbreviation;
+		}
+		// Hide the delayCitationUpdates checkbox before the prompt is shown
+		document.getElementById("delayCitationUpdates-vbox").hidden = _io.dontAskDelayCitationUpdates == undefined;
+		// Highlight delay citations checkbox after displaying the alert
+		// NOTE: Currently unused
+		if (_io.highlightDelayCitations) {
+			document.getElementById("delayCitationUpdates-vbox").style.border = "1px dashed #e52e2e"
 		}
 		
 		//
@@ -266,6 +286,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 			}
 			_io.useEndnotes = document.getElementById("displayAs").selectedIndex;
 			_io.fieldType = (document.getElementById("formatUsing").selectedIndex == 0 ? _io.primaryFieldType : _io.secondaryFieldType);
+			_io.delayCitationUpdates = document.getElementById("delayCitationUpdates-checkbox").checked;
 		}
 		
 		// remember style and locale if user selected these explicitly
@@ -283,8 +304,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		document.documentElement.getButton('cancel').click();
 		var win = Zotero.Utilities.Internal.openPreferences('zotero-prefpane-cite', { tab: 'styles-tab' });
 		if (isDocPrefs) {
-			// TODO: Move activate() code elsewhere
-			Zotero.Integration.activate(win);
+			Zotero.Utilities.Internal.activate(win);
 		}
 	};
 }

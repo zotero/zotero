@@ -711,7 +711,7 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Converts the selected item to a bubble
 	 */
-	function _bubbleizeSelected() {
+	var _bubbleizeSelected = Zotero.Promise.coroutine(function* () {
 		if(!referenceBox.hasChildNodes() || !referenceBox.selectedItem) return false;
 		
 		var citationItem = {"id":referenceBox.selectedItem.getAttribute("zotero-item")};
@@ -734,11 +734,11 @@ var Zotero_QuickFormat = new function () {
 		node.nodeValue = "";
 		var bubble = _insertBubble(citationItem, node);
 		_clearEntryList();
-		_previewAndSort();
+		yield _previewAndSort();
 		_refocusQfe();
 		
 		return true;
-	}
+	});
 	
 	/**
 	 * Ignores clicks (for use on separators in the rich list box)
@@ -902,13 +902,13 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Generates the preview and sorts citations
 	 */
-	function _previewAndSort() {
+	var _previewAndSort = Zotero.Promise.coroutine(function* () {
 		var shouldKeepSorted = keepSorted.hasAttribute("checked"),
 			editorShowing = showEditor.hasAttribute("checked");
 		if(!shouldKeepSorted && !editorShowing) return;
 		
 		_updateCitationObject();
-		io.sort();
+		yield io.sort();
 		if(shouldKeepSorted) {
 			// means we need to resort citations
 			_clearCitation();
@@ -920,7 +920,7 @@ var Zotero_QuickFormat = new function () {
 			
 			_moveCursorToEnd();
 		}
-	}
+	});
 	
 	/**
 	 * Shows the citation properties panel for a given bubble
@@ -1071,7 +1071,7 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Handle return or escape
 	 */
-	function _onQuickSearchKeyPress(event) {
+	var _onQuickSearchKeyPress = Zotero.Promise.coroutine(function* (event) {
 		// Prevent hang if another key is pressed after Enter
 		// https://forums.zotero.org/discussion/59157/
 		if (accepted) {
@@ -1083,7 +1083,7 @@ var Zotero_QuickFormat = new function () {
 		var keyCode = event.keyCode;
 		if (keyCode === event.DOM_VK_RETURN) {
 			event.preventDefault();
-			if(!_bubbleizeSelected() && !_getEditorContent()) {
+			if(!(yield _bubbleizeSelected()) && !_getEditorContent()) {
 				_accept();
 			}
 		} else if(keyCode === event.DOM_VK_TAB || event.charCode === 59 /* ; */) {
@@ -1162,7 +1162,7 @@ var Zotero_QuickFormat = new function () {
 		} else {
 			_resetSearchTimer();
 		}
-	}
+	});
 	
 	/**
 	 * Adds a dummy element to make dragging work
@@ -1190,7 +1190,7 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Replaces the dummy element with a node to make dropping work
 	 */
-	function _onBubbleDrop(event) {
+	var _onBubbleDrop = Zotero.Promise.coroutine(function* (event) {
 		event.preventDefault();
 		event.stopPropagation();
 
@@ -1208,9 +1208,9 @@ var Zotero_QuickFormat = new function () {
 			keepSorted.removeAttribute("checked");
 		}
 
-		_previewAndSort();
+		yield _previewAndSort();
 		_moveCursorToEnd();
-	}
+	});
 	
 	/**
 	 * Handle a click on a bubble
@@ -1333,7 +1333,7 @@ var Zotero_QuickFormat = new function () {
 		pane.selectItem(id);
 		
 		// Pull window to foreground
-		Zotero.Integration.activate(pane.document.defaultView);
+		Zotero.Utilities.Internal.activate(pane.document.defaultView);
 	}
 	
 	/**

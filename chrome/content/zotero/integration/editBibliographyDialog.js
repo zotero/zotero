@@ -74,8 +74,8 @@ var Zotero_Bibliography_Dialog = new function () {
 		if(selectedItemIDs.length) {
 			for (let itemID of selectedItemIDs) {
 				var itemIndexToSelect = false;
-				for(var i in bibEditInterface.bibliography[0].entry_ids) {
-					if(bibEditInterface.bibliography[0].entry_ids[i].indexOf(itemID) !== -1) {
+				for(var i in bibEditInterface.bib[0].entry_ids) {
+					if(bibEditInterface.bib[0].entry_ids[i].indexOf(itemID) !== -1) {
 						itemIndexToSelect = i;
 						continue;
 					}
@@ -254,7 +254,7 @@ var Zotero_Bibliography_Dialog = new function () {
 	 */
 	function _getSelectedListItemIDs() {
 		return Array.from(_itemList.selectedItems)
-			.map(item => bibEditInterface.bibliography[0].entry_ids[item.value][0]);
+			.map(item => bibEditInterface.bib[0].entry_ids[item.value][0]);
 	}
 	
 	/**
@@ -287,8 +287,8 @@ var Zotero_Bibliography_Dialog = new function () {
 		
 		editor.readonly = index === undefined;
 		if(index !== undefined) {
-			var itemID = bibEditInterface.bibliography[0].entry_ids[index];
-			editor.value = bibEditInterface.bibliography[1][index];
+			var itemID = bibEditInterface.bib[0].entry_ids[index];
+			editor.value = bibEditInterface.bib[1][index];
 			_lastSelectedIndex = index;
 			_lastSelectedItemID = itemID;
 			_lastSelectedValue = editor.value;
@@ -304,7 +304,7 @@ var Zotero_Bibliography_Dialog = new function () {
 	 * loads items from itemSet
 	 */
 	function _loadItems() {
-		var itemIDs = bibEditInterface.bibliography[0].entry_ids;
+		var itemIDs = bibEditInterface.bib[0].entry_ids;
 		var items = itemIDs.map(itemID => Zotero.Cite.getItem(itemID[0]));
 		
 		// delete all existing items from list
