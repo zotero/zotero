@@ -231,6 +231,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Semne de carte">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Semnele de carte pot fi partajate între Word și LibreOffice, dar pot cauza erori dacă sunt modificate accidental și nu pot fi introduse în notele de subsol.">
 
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Folosește abrevierile de reviste MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Câmpul „Abrev. revistă” va fi ignorat.">

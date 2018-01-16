@@ -231,6 +231,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Adreces d&apos;interès">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Les adreces d&apos;interès es conserven entre el Microsoft Word i l'OpenOffice però es poden veure modificades accidentalment.">
 
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abrevia automàticament els títols de les publicacions">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Les abreviacions de la revista MEDLINE es generaràn automàticament ambs els noms de les revistes. S'ignorarà el camp &quot;Revista abr.”.">

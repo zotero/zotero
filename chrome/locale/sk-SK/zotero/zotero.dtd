@@ -231,6 +231,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "záložiek">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Záložky sa dajú zdieľať medzi Wordom a LibreOffice, ale môžu zapríčiniť chyby, ak sa náhodne upravia a nedajú sa vložiť do poznámok pod čiarou.">
 
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Použiť skratky časopisu MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Pole &quot;skratiek časopisov&quot; bude ignorované.">
