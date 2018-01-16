@@ -530,12 +530,14 @@ Zotero.Integration.Interface.prototype.addBibliography = Zotero.Promise.coroutin
 	
 	let field = new Zotero.Integration.BibliographyField(yield this._session.fields.addField());
 	field.clearCode();
+	var citationsMode = FORCE_CITATIONS_FALSE;
 	if(this._session.data.prefs.delayCitationUpdates) {
 		// Refreshes citeproc state before proceeding
 		this._session.reload = true;
+		citationsMode = FORCE_CITATIONS_REGENERATE;
 	}
-	yield this._session.fields.updateSession(FORCE_CITATIONS_FALSE);
-	yield this._session.fields.updateDocument(FORCE_CITATIONS_FALSE, true, false);
+	yield this._session.fields.updateSession(citationsMode);
+	yield this._session.fields.updateDocument(citationsMode, true, false);
 })
 
 /**
@@ -561,13 +563,15 @@ Zotero.Integration.Interface.prototype.editBibliography = Zotero.Promise.corouti
 			[], "integration.error.title");
 	}
 	let bibliography = new Zotero.Integration.Bibliography(bibliographyField);
+	var citationsMode = FORCE_CITATIONS_FALSE;
 	if(this._session.data.prefs.delayCitationUpdates) {
 		// Refreshes citeproc state before proceeding
 		this._session.reload = true;
+		citationsMode = FORCE_CITATIONS_REGENERATE;
 	}
-	yield this._session.fields.updateSession(FORCE_CITATIONS_FALSE);
+	yield this._session.fields.updateSession(citationsMode);
 	yield this._session.editBibliography(bibliography);
-	yield this._session.fields.updateDocument(FORCE_CITATIONS_FALSE, true, false);
+	yield this._session.fields.updateDocument(citationsMode, true, false);
 });
 
 
@@ -598,13 +602,15 @@ Zotero.Integration.Interface.prototype.addEditBibliography = Zotero.Promise.coro
 	}
 	
 	let bibliography = new Zotero.Integration.Bibliography(bibliographyField);
+	var citationsMode = FORCE_CITATIONS_FALSE;
 	if(this._session.data.prefs.delayCitationUpdates) {
 		// Refreshes citeproc state before proceeding
 		this._session.reload = true;
+		citationsMode = FORCE_CITATIONS_REGENERATE;
 	}
-	yield this._session.fields.updateSession(FORCE_CITATIONS_FALSE);
+	yield this._session.fields.updateSession(citationsMode);
 	if (!newBibliography) yield this._session.editBibliography(bibliography);
-	yield this._session.fields.updateDocument(FORCE_CITATIONS_FALSE, true, false);
+	yield this._session.fields.updateDocument(citationsMode, true, false);
 });
 
 /**
