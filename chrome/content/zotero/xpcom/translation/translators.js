@@ -116,9 +116,22 @@ Zotero.Translators = new function() {
 					
 					// Get JSON from cache if possible
 					if (memCacheJSON || dbCacheEntry) {
-						var translator = Zotero.Translators.load(
-							memCacheJSON || dbCacheEntry.metadataJSON, path
-						);
+						try {
+							var translator = Zotero.Translators.load(
+								memCacheJSON || dbCacheEntry.metadataJSON, path
+							);
+						}
+						catch (e) {
+							Zotero.logError(e);
+							Zotero.debug(memCacheJSON || dbCacheEntry.metadataJSON, 1);
+							
+							// If JSON is invalid, clear from cache
+							yield Zotero.DB.queryAsync(
+								"DELETE FROM translatorCache WHERE fileName=?",
+								fileName
+							);
+							continue;
+						}
 					}
 					// Otherwise, load from file
 					else {

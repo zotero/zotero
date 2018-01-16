@@ -744,16 +744,29 @@ Zotero.Schema = new function(){
 					index[id].extract = true;
 				}
 				
-				let sql = "SELECT metadataJSON FROM translatorCache";
-				let dbCache = yield Zotero.DB.columnQueryAsync(sql);
+				let sql = "SELECT fileName, metadataJSON FROM translatorCache";
+				let rows = yield Zotero.DB.queryAsync(sql);
 				// If there's anything in the cache, see what we actually need to extract
-				if (dbCache) {
-					for (let i = 0; i < dbCache.length; i++) {
-						let metadata = JSON.parse(dbCache[i]);
-						let id = metadata.translatorID;
-						if (index[id] && index[id].lastUpdated <= metadata.lastUpdated) {
-							index[id].extract = false;
-						}
+				for (let i = 0; i < rows.length; i++) {
+					let json = rows[i].metadataJSON;
+					let metadata;
+					try {
+						metadata = JSON.parse(json);
+					}
+					catch (e) {
+						Zotero.logError(e);
+						Zotero.debug(json, 1);
+						
+						// // If JSON is invalid, clear from cache
+						yield Zotero.DB.queryAsync(
+							"DELETE FROM translatorCache WHERE fileName=?",
+							rows[i].fileName
+						);
+						continue;
+					}
+					let id = metadata.translatorID;
+					if (index[id] && index[id].lastUpdated <= metadata.lastUpdated) {
+						index[id].extract = false;
 					}
 				}
 				
