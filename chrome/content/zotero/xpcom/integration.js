@@ -939,8 +939,15 @@ Zotero.Integration.Fields.prototype.updateDocument = Zotero.Promise.coroutine(fu
 	// If the update takes longer than 5s suggest delaying citation updates
 	if (diff > DELAY_CITATIONS_PROMPT_TIMEOUT && !this._session.data.prefs.dontAskDelayCitationUpdates && !this._session.data.prefs.delayCitationUpdates) {
 		this._doc.activate();
-		var result = this._session.displayAlert(Zotero.getString('integration.delayCitationUpdates.alert'),
-			DIALOG_ICON_WARNING, DIALOG_BUTTONS_YES_NO_CANCEL);
+		var result = this._session.displayAlert(
+				Zotero.getString('integration.delayCitationUpdates.alert.text1')
+					+ "\n\n"
+					+ Zotero.getString('integration.delayCitationUpdates.alert.text2')
+					+ "\n\n"
+					+ Zotero.getString('integration.delayCitationUpdates.alert.text3'),
+				DIALOG_ICON_WARNING,
+				DIALOG_BUTTONS_YES_NO_CANCEL
+		);
 		if (result == 2) {
 			this._session.data.prefs.delayCitationUpdates = true;
 		}

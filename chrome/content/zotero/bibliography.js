@@ -146,8 +146,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 			if(_io.useEndnotes && _io.useEndnotes == 1) document.getElementById("displayAs").selectedIndex = 1;
 			let dialog = document.getElementById("zotero-doc-prefs-dialog");
 			dialog.setAttribute('title', `${Zotero.clientName} - ${dialog.getAttribute('title')}`);
-		}
-		if(document.getElementById("formatUsing")) {
+			
 			if(_io.fieldType == "Bookmark") document.getElementById("formatUsing").selectedIndex = 1;
 			var formatOption = (_io.primaryFieldType == "ReferenceMark" ? "referenceMarks" : "fields");
 			document.getElementById("fields").label =
@@ -158,19 +157,16 @@ var Zotero_File_Interface_Bibliography = new function() {
 				Zotero.getString("integration."+formatOption+".fileFormatNotice");
 			document.getElementById("bookmarks-file-format-notice").textContent =
 				Zotero.getString("integration.fields.fileFormatNotice");
-		}
-		if(document.getElementById("automaticJournalAbbreviations-checkbox")) {
+			
+			
 			if(_io.automaticJournalAbbreviations === undefined) {
 				_io.automaticJournalAbbreviations = Zotero.Prefs.get("cite.automaticJournalAbbreviations");
 			}
 			if(_io.automaticJournalAbbreviations) {
 				document.getElementById("automaticJournalAbbreviations-checkbox").checked = true;
 			}
-		}
-		if (document.getElementById("delayCitationUpdates-checkbox")) {
-			if (_io.delayCitationUpdates) {
-				document.getElementById("delayCitationUpdates-checkbox").checked = true;
-			}
+			
+			document.getElementById("automaticCitationUpdates-checkbox").checked = !_io.delayCitationUpdates;
 		}
 		
 		// set style to false, in case this is cancelled
@@ -205,31 +201,29 @@ var Zotero_File_Interface_Bibliography = new function() {
 		//
 		// For integrationDocPrefs.xul
 		//
-		
-		// update status of displayAs box based on style class
-		if(document.getElementById("displayAs-groupbox")) {
+		if (isDocPrefs) {
+			// update status of displayAs box based on style class
 			var isNote = selectedStyleObj.class == "note";
 			document.getElementById("displayAs-groupbox").hidden = !isNote;
 			
 			// update status of formatUsing box based on style class
-			if(document.getElementById("formatUsing")) {
-				if(isNote) document.getElementById("formatUsing").selectedIndex = 0;
-				document.getElementById("bookmarks").disabled = isNote;
-				document.getElementById("bookmarks-caption").disabled = isNote;
-			}
-		}
-
-		// update status of displayAs box based on style class
-		if(document.getElementById("automaticJournalAbbreviations-vbox")) {
+			if(isNote) document.getElementById("formatUsing").selectedIndex = 0;
+			document.getElementById("bookmarks").disabled = isNote;
+			document.getElementById("bookmarks-caption").disabled = isNote;
+	
+			// update status of displayAs box based on style class
 			document.getElementById("automaticJournalAbbreviations-vbox").hidden =
 				!selectedStyleObj.usesAbbreviation;
-		}
-		// Hide the delayCitationUpdates checkbox before the prompt is shown
-		document.getElementById("delayCitationUpdates-vbox").hidden = _io.dontAskDelayCitationUpdates == undefined;
-		// Highlight delay citations checkbox after displaying the alert
-		// NOTE: Currently unused
-		if (_io.highlightDelayCitations) {
-			document.getElementById("delayCitationUpdates-vbox").style.border = "1px dashed #e52e2e"
+			
+			// Hide the automaticCitationUpdates checkbox before the prompt is shown
+			document.getElementById("automaticCitationUpdates-vbox").hidden
+				= _io.dontAskDelayCitationUpdates == undefined;
+			
+			// Highlight delay citations checkbox after displaying the alert
+			// NOTE: Currently unused
+			if (_io.highlightDelayCitations) {
+				document.getElementById("automaticCitationUpdates-vbox").style.border = "1px dashed #e52e2e"
+			}
 		}
 		
 		//
@@ -286,7 +280,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 			}
 			_io.useEndnotes = document.getElementById("displayAs").selectedIndex;
 			_io.fieldType = (document.getElementById("formatUsing").selectedIndex == 0 ? _io.primaryFieldType : _io.secondaryFieldType);
-			_io.delayCitationUpdates = document.getElementById("delayCitationUpdates-checkbox").checked;
+			_io.delayCitationUpdates = !document.getElementById("automaticCitationUpdates-checkbox").checked;
 		}
 		
 		// remember style and locale if user selected these explicitly

@@ -231,9 +231,9 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label		"Bookmarks">
 <!ENTITY zotero.integration.prefs.bookmarks.caption		"Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
-<!ENTITY zotero.integration.prefs.delayCitationUpdates.label		"Delay citation updates until manual refresh">
-<!ENTITY zotero.integration.prefs.delayCitationUpdates.tooltip		"Citations with pending updates are visually highlighted">
-<!ENTITY zotero.integration.prefs.delayCitationUpdates.description	"Delaying updates can speed up citation insertion in large documents.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label       "Automatically update citations">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip     "Citations with pending updates will be highlighted in the document">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label 		"Use MEDLINE journal abbreviations">

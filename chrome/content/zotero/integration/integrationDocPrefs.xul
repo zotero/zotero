@@ -86,9 +86,9 @@
 			<description class="radioDescription">&zotero.integration.prefs.automaticJournalAbbeviations.caption;</description>
 		</vbox>
 		
-		<vbox id="delayCitationUpdates-vbox">
-			<checkbox id="delayCitationUpdates-checkbox" label="&zotero.integration.prefs.delayCitationUpdates.label;" tooltiptext="&zotero.integration.prefs.delayCitationUpdates.tooltip;"/>
-			<description class="radioDescription">&zotero.integration.prefs.delayCitationUpdates.description;</description>
+		<vbox id="automaticCitationUpdates-vbox">
+			<checkbox id="automaticCitationUpdates-checkbox" label="&zotero.integration.prefs.automaticCitationUpdates.label;" tooltiptext="&zotero.integration.prefs.automaticCitationUpdates.tooltip;"/>
+			<description class="radioDescription">&zotero.integration.prefs.automaticCitationUpdates.description;</description>
 		</vbox>
 	</vbox>
 </dialog>
