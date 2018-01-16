@@ -4,6 +4,15 @@
 	width: 325pt;
 }
 
+#locale-box .groupbox-body {
+	padding-top: 3px;
+}
+
+#locale-box caption {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
 radio:not(:first-child)
 {
 	margin-top: .5em;
@@ -13,4 +22,9 @@ radio:not(:first-child)
 {
 	margin: 0 0 3px 20px;
 	font-size: .85em;
+}
+
+
+#automaticJournalAbbreviations-vbox, #automaticCitationUpdates-vbox {
+	padding: 0 14px;
 }
