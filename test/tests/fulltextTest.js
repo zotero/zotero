@@ -176,6 +176,16 @@ describe("Zotero.Fulltext", function () {
 	})
 	
 	describe("#setItemContent()", function () {
+		before(() => {
+			// Disable PDF indexing
+			Zotero.Prefs.set('fulltext.pdfMaxPages', 0);
+		});
+		
+		after(() => {
+			// Re-enable PDF indexing
+			Zotero.Prefs.clear('fulltext.pdfMaxPages');
+		});
+		
 		it("should store data in .zotero-ft-unprocessed file", function* () {
 			var item = yield importFileAttachment('test.pdf');
 			
