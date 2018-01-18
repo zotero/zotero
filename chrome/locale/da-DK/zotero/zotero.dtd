@@ -314,7 +314,6 @@
 
 <!ENTITY zotero.downloadManager.label "Gem til Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Vedhæftede filer kan ikke gemmes i det aktuelle bibliotek. I stedet gemmes hele elementet  i dit bibliotek.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "For at bruge denne funktion skal du først installere PDF-værktøjerne i Zoteros indstillinger.">
 
 <!ENTITY zotero.attachLink.title "Tilføj link til URI">
 <!ENTITY zotero.attachLink.label.link "Link:">

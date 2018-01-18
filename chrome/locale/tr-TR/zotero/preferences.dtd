@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Arama">
 <!ENTITY zotero.preferences.search.fulltextCache "Tüm-Metin Önbellek">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF İndeksleme">
 <!ENTITY zotero.preferences.search.indexStats "İndeks İstatistikleri">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "İndeklenmiş:">

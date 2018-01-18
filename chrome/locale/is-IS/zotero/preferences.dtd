@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Leita">
 <!ENTITY zotero.preferences.search.fulltextCache "Geymslupláss fyrir textaskrár">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF innihaldsskráning">
 <!ENTITY zotero.preferences.search.indexStats "Tölfræði gagnaskráa">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Skráð:">

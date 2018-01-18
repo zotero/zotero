@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Keresés">
 <!ENTITY zotero.preferences.search.fulltextCache "Teljesszövegű gyorsítótár">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF indexelés">
 <!ENTITY zotero.preferences.search.indexStats "Index statisztikák">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indexelve:">

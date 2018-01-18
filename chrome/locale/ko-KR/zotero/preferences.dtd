@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "검색">
 <!ENTITY zotero.preferences.search.fulltextCache "전문(全文) 캐쉬">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF 색인">
 <!ENTITY zotero.preferences.search.indexStats "색인 상태">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "색인됨:">

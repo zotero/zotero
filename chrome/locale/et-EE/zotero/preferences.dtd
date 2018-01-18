@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Otsing">
 <!ENTITY zotero.preferences.search.fulltextCache "Täistekst puhvrist">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF indekseerimine">
 <!ENTITY zotero.preferences.search.indexStats "Indekseerimise statistika">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indekseeritud:">

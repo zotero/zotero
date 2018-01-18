@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Vyhľadávanie">
 <!ENTITY zotero.preferences.search.fulltextCache "Index pre plnotextové vyhľadávanie">
-<!ENTITY zotero.preferences.search.pdfIndexing "Indexovanie PDF súborov">
 <!ENTITY zotero.preferences.search.indexStats "Štatistiky indexu pre plnotextové vyhľadávanie">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indexovaných:">

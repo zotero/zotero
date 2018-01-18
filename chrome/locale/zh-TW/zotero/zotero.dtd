@@ -314,7 +314,6 @@
 
 <!ENTITY zotero.downloadManager.label "儲存到 Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "附件檔不能被存到目前選定的文獻庫。這個項目會被改存到您的文獻庫。">
-<!ENTITY zotero.downloadManager.noPDFTools.description "要使用這個功能，得先至 Zotero 的偏好設定之搜尋框，安裝 PDF 工具。">
 
 <!ENTITY zotero.attachLink.title "附加連結到 URI…">
 <!ENTITY zotero.attachLink.label.link "連結：">

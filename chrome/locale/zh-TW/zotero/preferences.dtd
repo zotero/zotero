@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "搜尋">
 <!ENTITY zotero.preferences.search.fulltextCache "全文快取">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF 索引">
 <!ENTITY zotero.preferences.search.indexStats "索引之統計">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "已建立索引：">

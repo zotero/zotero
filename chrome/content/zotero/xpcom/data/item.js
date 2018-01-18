@@ -3140,7 +3140,6 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentHash', {
  *
  * - Currently works on HTML, PDF and plaintext attachments
  * - Paragraph breaks will be lost in PDF content
- * - For PDFs, will return empty string if Zotero.Fulltext.pdfConverterIsRegistered() is false
  *
  * @return {Promise<String>} - A promise for attachment text or empty string if unavailable
  */
@@ -3194,10 +3193,6 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentText', {
 			}
 			
 			if (reindex) {
-				if (!Zotero.Fulltext.pdfConverterIsRegistered()) {
-					Zotero.debug("PDF converter is unavailable -- returning empty .attachmentText", 3);
-					return '';
-				}
 				yield Zotero.Fulltext.indexItems(this.id, false);
 			}
 			

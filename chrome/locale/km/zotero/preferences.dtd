@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "ស្វែងរក">
 <!ENTITY zotero.preferences.search.fulltextCache "បន្ទុកពេញអត្ថបទ">
-<!ENTITY zotero.preferences.search.pdfIndexing "ដាក់លិបិក្រមអ៊ែរឌីអែហ្វ">
 <!ENTITY zotero.preferences.search.indexStats "ដាក់លិបិក្រមស្ថិតិ">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "បានដាក់លិបិក្រម">

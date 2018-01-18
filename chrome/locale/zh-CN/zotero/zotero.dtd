@@ -314,7 +314,6 @@
 
 <!ENTITY zotero.downloadManager.label "保存到 Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "附件无法保存到当前选中的文献库. 不过, 该条目将被保存到您的文献库中.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "要使用该功能, 您必须在 Zotero 首选项中的搜索选项卡里安装 PDF 工具.">
 
 <!ENTITY zotero.attachLink.title "将链接附加到 URI">
 <!ENTITY zotero.attachLink.label.link "链接:">

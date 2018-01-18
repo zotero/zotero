@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Iskanje">
 <!ENTITY zotero.preferences.search.fulltextCache "Predpomnilnik s polnim besedilom">
-<!ENTITY zotero.preferences.search.pdfIndexing "Indeksiranje PDF">
 <!ENTITY zotero.preferences.search.indexStats "Statistika indeksa">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indeksirano:">

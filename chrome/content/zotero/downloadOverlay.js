@@ -145,15 +145,7 @@ var Zotero_DownloadOverlay = new function() {
 		// to happen automatically
 		if(zoteroSelected) document.getElementById('rememberChoice').selected = false;
 		document.getElementById('rememberChoice').disabled = zoteroSelected;
-		
-		// disable recognizePDF checkbox as necessary
-		if(!Zotero.Fulltext.pdfConverterIsRegistered()) {
-			document.getElementById('zotero-noPDFTools-description').hidden = !zoteroSelected;
-			document.getElementById('zotero-recognizePDF').disabled = true;
-			window.sizeToContent();
-		} else {
-			document.getElementById('zotero-recognizePDF').disabled = !zoteroSelected;
-		}
+		document.getElementById('zotero-recognizePDF').disabled = !zoteroSelected;
 		
 		Zotero_DownloadOverlay.updateLibraryNote();
 	};
@@ -212,9 +204,6 @@ var Zotero_DownloadOverlay = new function() {
 			recognizePDF.label = Zotero.getString("pane.items.menu.recognizePDF");
 			recognizePDF.hidden = false;
 			recognizePDF.disabled = true;
-			if(!Zotero.Fulltext.pdfConverterIsRegistered()) {
-				recognizePDF.checked = false;
-			}
 		}
 	};
 }

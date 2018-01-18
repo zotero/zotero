@@ -314,7 +314,6 @@
 
 <!ENTITY zotero.downloadManager.label "Įrašyti į Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Priedų negalima įrašyti pasirinktoje bibliotekoje. Šį įrašą įrašysime jūsų bibliotekoje.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Norėdami naudotis šia funkcija, turite įdiegti PDF įrankius per Zotero nuostatų paieškos skydelį.">
 
 <!ENTITY zotero.attachLink.title "Įtraukti nuorodą (URI)">
 <!ENTITY zotero.attachLink.label.link "Nuoroda:">

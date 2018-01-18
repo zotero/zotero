@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Zoeken">
 <!ENTITY zotero.preferences.search.fulltextCache "Volledige Tekst cache">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF-indexering">
 <!ENTITY zotero.preferences.search.indexStats "Statistieken indexering">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Geïndexeerd:">

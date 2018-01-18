@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Sök">
 <!ENTITY zotero.preferences.search.fulltextCache "Fulltext-cache">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF-indexering">
 <!ENTITY zotero.preferences.search.indexStats "Index-statistik">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indexerat:">

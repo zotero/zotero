@@ -474,27 +474,6 @@ function getPromiseError(promise) {
 }
 
 /**
- * Ensures that the PDF tools are installed, or installs them if not.
- *
- * @return {Promise}
- */
-var installPDFTools = Zotero.Promise.coroutine(function* () {
-	if(Zotero.Fulltext.pdfConverterIsRegistered() && Zotero.Fulltext.pdfInfoIsRegistered()) {
-		return;
-	}
-	var version = yield Zotero.Fulltext.getLatestPDFToolsVersion();
-	yield Zotero.Fulltext.downloadPDFTool('info', version);
-	yield Zotero.Fulltext.downloadPDFTool('converter', version);
-});
-
-/**
- * @return {Promise}
- */
-function uninstallPDFTools() {
-	return Zotero.Fulltext.uninstallPDFTools();
-}
-
-/**
  * Returns the nsIFile corresponding to the test data directory
  * (i.e., test/tests/data)
  */

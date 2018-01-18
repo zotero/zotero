@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Etsi">
 <!ENTITY zotero.preferences.search.fulltextCache "Kokosanahaun välimuisti">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF-tiedostojen indeksointi">
 <!ENTITY zotero.preferences.search.indexStats "Indeksointitilastot">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indeksoitu:">

@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "جستجو">
 <!ENTITY zotero.preferences.search.fulltextCache "جستجو درون متن">
-<!ENTITY zotero.preferences.search.pdfIndexing "نمایه‌سازی از PDF">
 <!ENTITY zotero.preferences.search.indexStats "آمار نمایه‌سازی">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "نمایه‌سازی شده:">

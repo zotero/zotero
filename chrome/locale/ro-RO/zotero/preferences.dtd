@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Căutare">
 <!ENTITY zotero.preferences.search.fulltextCache "Căutare text complet">
-<!ENTITY zotero.preferences.search.pdfIndexing "Indexare PDF">
 <!ENTITY zotero.preferences.search.indexStats "Statistici index">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indexate:">

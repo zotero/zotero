@@ -314,7 +314,6 @@
 
 <!ENTITY zotero.downloadManager.label "Guardar no Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Não é possível guardar anexos na biblioteca seleccionada neste momento. Este item será por isso guardado na sua biblioteca.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Para usar esta funcionalidade, tem de instalar primeiro as ferramentas PDF no painel Procurar das suas preferências do Zotero.">
 
 <!ENTITY zotero.attachLink.title "Anexar Ligação a URI">
 <!ENTITY zotero.attachLink.label.link "Ligação:">

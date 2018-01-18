@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Cerca">
 <!ENTITY zotero.preferences.search.fulltextCache "Memòria cau de text complet">
-<!ENTITY zotero.preferences.search.pdfIndexing "Indexació dels PDF">
 <!ENTITY zotero.preferences.search.indexStats "Estadístiques de l'índex">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indexació:">

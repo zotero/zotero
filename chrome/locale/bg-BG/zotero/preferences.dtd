@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Търсене">
 <!ENTITY zotero.preferences.search.fulltextCache "Кеш на цялостният текст">
-<!ENTITY zotero.preferences.search.pdfIndexing "Индексира на PDF">
 <!ENTITY zotero.preferences.search.indexStats "Статистика на индекса">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Индексирани:">

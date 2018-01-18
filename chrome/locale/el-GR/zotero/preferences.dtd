@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Αναζήτηση">
 <!ENTITY zotero.preferences.search.fulltextCache "Προσωρινή μνήμη πλήρους κειμένου">
-<!ENTITY zotero.preferences.search.pdfIndexing "Καταλογοποίηση PDF">
 <!ENTITY zotero.preferences.search.indexStats "Καταλογοποίηση στατιστικών">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Έχουν καταλογοποιηθεί:">

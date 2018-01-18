@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "ค้นหา">
 <!ENTITY zotero.preferences.search.fulltextCache "แคชข้อความทั้งหมด">
-<!ENTITY zotero.preferences.search.pdfIndexing "ทำดัชนี PDF">
 <!ENTITY zotero.preferences.search.indexStats "สถิติดัชนี">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "ทำดัชนีแล้ว:">

@@ -92,7 +92,6 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Soektog">
 <!ENTITY zotero.preferences.search.fulltextCache "Volteks-kas">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF-indeksering">
 <!ENTITY zotero.preferences.search.indexStats "Indekseerstatus">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
