@@ -5,6 +5,7 @@ describe("Zotero.Fulltext", function () {
 		// Hidden browser, which requires a browser window, needed for charset detection
 		// (until we figure out a better way)
 		win = yield loadBrowserWindow();
+		initPDFToolsPath();
 	});
 	after(function () {
 		if (win) {
@@ -133,7 +134,7 @@ describe("Zotero.Fulltext", function () {
 			toSync.push({
 				item: pdfAttachment,
 				content: "Zotero [zoh-TAIR-oh] is a free, easy-to-use tool to help you collect, "
-					+ "organize, cite, and share your research sources.\n\n",
+					+ "organize, cite, and share\nyour research sources.\n\n",
 				indexedChars: 0,
 				indexedPages: 1
 			});
