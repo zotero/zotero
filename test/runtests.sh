@@ -125,6 +125,15 @@ echo "$ZOTERO_UNIT_PATH" > "$PROFILE/extensions/zotero-unit@zotero.org"
 # Create data directory
 mkdir "$TEMPDIR/Zotero"
 
+# Download PDF tools
+PDF_TOOLS_VERSION="0.0.1"
+PDF_TOOLS_URL="https://zotero-download.s3.amazonaws.com/pdftools/pdftools-$PDF_TOOLS_VERSION.tar.gz"
+
+PDF_TOOLS_DIR="$PROFILE/pdftools"
+mkdir $PDF_TOOLS_DIR
+curl -o "$PDF_TOOLS_DIR/pdftools.tar.gz" $PDF_TOOLS_URL
+tar -zxf "$PDF_TOOLS_DIR/pdftools.tar.gz" -C $PDF_TOOLS_DIR
+
 cat <<EOF > "$PROFILE/prefs.js"
 user_pref("app.update.enabled", false);
 user_pref("extensions.autoDisableScopes", 0);
