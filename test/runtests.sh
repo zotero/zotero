@@ -1,5 +1,6 @@
 #!/bin/bash
-CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$( cd "$( dirname "$SCRIPT_DIR" )" && pwd )"
 
 case "$OSTYPE" in
   msys*|mingw*|cygwin*) IS_CYGWIN=1 ;;
@@ -116,7 +117,7 @@ TEMPDIR="`mktemp -d 2>/dev/null || mktemp -d -t 'zotero-unit'`"
 PROFILE="$TEMPDIR/profile"
 mkdir -p "$PROFILE/extensions"
 
-makePath ZOTERO_PATH "`dirname "$CWD"`/build"
+makePath ZOTERO_PATH "$ROOT_DIR/build"
 echo "$ZOTERO_PATH" > "$PROFILE/extensions/zotero@chnm.gmu.edu"
 
 makePath ZOTERO_UNIT_PATH "$ZOTERO_PATH/test"
@@ -125,14 +126,23 @@ echo "$ZOTERO_UNIT_PATH" > "$PROFILE/extensions/zotero-unit@zotero.org"
 # Create data directory
 mkdir "$TEMPDIR/Zotero"
 
-# Download PDF tools
+# Download PDF tools if not cached in the source directory and copy to profile directory
 PDF_TOOLS_VERSION="0.0.1"
 PDF_TOOLS_URL="https://zotero-download.s3.amazonaws.com/pdftools/pdftools-$PDF_TOOLS_VERSION.tar.gz"
-
+PDF_TOOLS_CACHE_DIR="$ROOT_DIR/tmp/pdftools"
 PDF_TOOLS_DIR="$PROFILE/pdftools"
-mkdir $PDF_TOOLS_DIR
-curl -o "$PDF_TOOLS_DIR/pdftools.tar.gz" $PDF_TOOLS_URL
-tar -zxf "$PDF_TOOLS_DIR/pdftools.tar.gz" -C $PDF_TOOLS_DIR
+if [ ! -f "$PDF_TOOLS_CACHE_DIR/$PDF_TOOLS_VERSION" ]; then
+	echo "Fetching PDF tools version $PDF_TOOLS_VERSION"
+	echo
+	rm -rf "$PDF_TOOLS_CACHE_DIR"
+	mkdir -p "$PDF_TOOLS_CACHE_DIR"
+	curl -o "$PDF_TOOLS_CACHE_DIR/pdftools.tar.gz" $PDF_TOOLS_URL
+	tar -zxf "$PDF_TOOLS_CACHE_DIR/pdftools.tar.gz" -C $PDF_TOOLS_CACHE_DIR
+	rm "$PDF_TOOLS_CACHE_DIR/pdftools.tar.gz"
+	touch "$PDF_TOOLS_CACHE_DIR/$PDF_TOOLS_VERSION"
+	echo
+fi
+cp -R $PDF_TOOLS_CACHE_DIR $PDF_TOOLS_DIR
 
 cat <<EOF > "$PROFILE/prefs.js"
 user_pref("app.update.enabled", false);
@@ -179,7 +189,7 @@ trap "{ rm -rf \"$TEMPDIR\"; }" EXIT
 if [[ "$TRAVIS" != true ]] && ! ps | grep scripts/build.js | grep -v grep > /dev/null; then
 	echo
 	echo "Running JS build process"
-	cd "$CWD/.."
+	cd "$ROOT_DIR"
 	npm run build || exit $?
 	echo
 fi
