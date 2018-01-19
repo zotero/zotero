@@ -26,8 +26,6 @@
 Zotero.Fulltext = Zotero.FullText = new function(){
 	this.isCachedMIMEType = isCachedMIMEType;
 	
-	this.__defineGetter__("pdfConverterName", function() { return 'pdftotext'; });
-	this.__defineGetter__("pdfInfoName", function() { return 'pdfinfo'; });
 	this.__defineGetter__("pdfConverterCacheFile", function () { return '.zotero-ft-cache'; });
 	this.__defineGetter__("pdfInfoCacheFile", function () { return '.zotero-ft-info'; });
 	
@@ -54,11 +52,9 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	const kWbClassHWKatakanaLetter = 6;
 	const kWbClassThaiLetter =       7;
 	
-	var _pdfConverterFileName = null;
 	var _pdfConverter = null; // nsIFile to executable
-	var _pdfInfoFileName = null;
 	var _pdfInfo = null; // nsIFile to executable
-	var _popplerDatadir = null;
+	var _pdfData = null;
 	
 	var _idleObserverIsRegistered = false;
 	var _idleObserverDelay = 30;
@@ -74,19 +70,19 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		this.decoder = Components.classes["@mozilla.org/intl/utf8converterservice;1"].
 			getService(Components.interfaces.nsIUTF8ConverterService);
 		
-		_pdfConverterFileName = this.pdfConverterName;
-		_pdfInfoFileName = this.pdfInfoName;
+		let pdfConverterFileName = "pdftotext";
+		let pdfInfoFileName = "pdfinfo";
 		
 		if (Zotero.isWin) {
-			_pdfConverterFileName += '.exe';
-			_pdfInfoFileName += '.exe';
+			pdfConverterFileName += '.exe';
+			pdfInfoFileName += '.exe';
 		}
 		
 		let dir = FileUtils.getFile('AChrom', []).parent;
 		
-		_popplerDatadir = dir.clone();
-		_popplerDatadir.append('poppler-data');
-		_popplerDatadir = _popplerDatadir.path;
+		_pdfData = dir.clone();
+		_pdfData.append('poppler-data');
+		_pdfData = _pdfData.path;
 		
 		_pdfConverter = dir.clone();
 		_pdfInfo = dir.clone();
@@ -99,8 +95,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			_pdfInfo.append('MacOS');
 		}
 
-		_pdfConverter.append(_pdfConverterFileName);
-		_pdfInfo.append(_pdfInfoFileName);
+		_pdfConverter.append(pdfConverterFileName);
+		_pdfInfo.append(pdfInfoFileName);
 		
 		Zotero.uiReadyPromise.delay(30000).then(() => {
 			this.registerContentProcessor();
@@ -133,6 +129,22 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			);
 		});
 	});
+	
+	
+	this.setPDFConverterPath = function(path) {
+		_pdfConverter = Zotero.File.pathToFile(path);
+	};
+	
+	
+	this.setPDFInfoPath = function(path) {
+		_pdfInfo = Zotero.File.pathToFile(path);
+		
+	};
+	
+	
+	this.setPDFDataPath = function(path) {
+		_pdfData = path;
+	};
 	
 	
 	this.getLibraryVersion = function (libraryID) {
@@ -201,7 +213,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	this.getPDFConverterExecAndArgs = function () {
 		return {
 			exec: _pdfConverter,
-			args: ['-datadir', _popplerDatadir]
+			args: ['-datadir', _pdfData]
 		}
 	};
 	

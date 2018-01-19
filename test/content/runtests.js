@@ -293,6 +293,9 @@ if(run) {
 	window.onload = function() {
 		Zotero.spawn(function* () {
 			yield Zotero.Schema.schemaUpdatePromise;
+			
+			initPDFToolsPath();
+			
 			return mocha.run();
 		})
 	};
