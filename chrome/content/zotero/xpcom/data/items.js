@@ -415,21 +415,31 @@ Zotero.Items = function() {
 					
 					// Convert non-HTML notes on-the-fly
 					if (note !== "") {
-						if (!note.substr(0, 36).match(/^<div class="zotero-note znv[0-9]+">/)) {
-							note = Zotero.Utilities.htmlSpecialChars(note);
-							note = Zotero.Notes.notePrefix + '<p>'
-								+ note.replace(/\n/g, '</p><p>')
-								.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
-								.replace(/  /g, '&nbsp;&nbsp;')
-								+ '</p>' + Zotero.Notes.noteSuffix;
-							note = note.replace(/<p>\s*<\/p>/g, '<p>&nbsp;</p>');
-							notesToUpdate.push([item.id, note]);
+						if (typeof note == 'number') {
+							note = '' + note;
 						}
-						
-						// Don't include <div> wrapper when returning value
-						let startLen = note.substr(0, 36).match(/^<div class="zotero-note znv[0-9]+">/)[0].length;
-						let endLen = 6; // "</div>".length
-						note = note.substr(startLen, note.length - startLen - endLen);
+						if (typeof note == 'string') {
+							if (!note.substr(0, 36).match(/^<div class="zotero-note znv[0-9]+">/)) {
+								note = Zotero.Utilities.htmlSpecialChars(note);
+								note = Zotero.Notes.notePrefix + '<p>'
+									+ note.replace(/\n/g, '</p><p>')
+									.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+									.replace(/  /g, '&nbsp;&nbsp;')
+									+ '</p>' + Zotero.Notes.noteSuffix;
+								note = note.replace(/<p>\s*<\/p>/g, '<p>&nbsp;</p>');
+								notesToUpdate.push([item.id, note]);
+							}
+							
+							// Don't include <div> wrapper when returning value
+							let startLen = note.substr(0, 36).match(/^<div class="zotero-note znv[0-9]+">/)[0].length;
+							let endLen = 6; // "</div>".length
+							note = note.substr(startLen, note.length - startLen - endLen);
+						}
+						// Clear null notes
+						else {
+							note = '';
+							notesToUpdate.push([item.id, '']);
+						}
 					}
 					
 					item._noteText = note ? note : '';
