@@ -42,7 +42,7 @@
 	<script src="fileInterface.js"/>
 	<script src="reportInterface.js"/>
 	<script src="timelineInterface.js"/>
-	<script src="recognizePDF.js"/>
+	<script src="recognizePDFDialog.js"/>
 	<script src="browser.js" type="application/javascript;version=1.8"/>
 	<script src="lookup.js"/>
 	<script src="locateMenu.js" type="application/javascript;version=1.8"/>
@@ -242,6 +242,10 @@
 							</tooltip>
 						</hbox>
 					</hbox>
+
+					<toolbarbutton id="zotero-tb-recognize" hidden="true"
+						oncommand="Zotero_RecognizePDF_Dialog.open()"/>
+
 					<toolbarbutton id="zotero-tb-sync-error" hidden="true"/>
 					
 					<!--
@@ -322,7 +326,7 @@
 					<menuitem class="menuitem-iconic zotero-menuitem-create-bibliography" oncommand="Zotero_File_Interface.bibliographyFromItems();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-create-report" oncommand="Zotero_Report_Interface.loadItemReport(event)"/>
 					<menuseparator/>
-					<menuitem class="menuitem-iconic zotero-menuitem-retrieve-metadata" oncommand="Zotero_RecognizePDF.recognizeSelected();"/>
+					<menuitem class="menuitem-iconic zotero-menuitem-retrieve-metadata" oncommand="ZoteroPane.recognizeSelected();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-create-parent" oncommand="ZoteroPane_Local.createParentItemsFromSelected();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-rename-from-parent" oncommand="ZoteroPane_Local.renameSelectedAttachmentsFromParents()"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-reindex" oncommand="ZoteroPane_Local.reindexItem();"/>

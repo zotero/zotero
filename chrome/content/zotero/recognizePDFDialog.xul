@@ -6,10 +6,12 @@
 	title="&zotero.progress.title;" width="550" height="230"
 	id="zotero-progress">
 	<vbox style="padding:10px" flex="1">
-		<label id="label" control="progress-indicator" value="&zotero.recognizePDF.recognizing.label;"/>
+		<label id="label" control="progress-indicator" value=""/>
 		<hbox align="center">
 			<progressmeter id="progress-indicator" mode="determined" flex="1"/>
-			<button id="cancel-button" label="&zotero.recognizePDF.cancel.label;"/>
+			<button id="cancel-button" label="&zotero.general.cancel;"/>
+			<button id="minimize-button" label="&zotero.general.minimize;"/>
+			<button id="close-button" label="&zotero.general.close;"/>
 		</hbox>
 		<tree flex="1" id="tree" hidecolumnpicker="true">
 			<treecols>
