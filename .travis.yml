@@ -35,10 +35,10 @@ before_script:
     - sh -e /etc/init.d/xvfb start
     - npm i
     - npm run build
-    - if [ $FX_VERSION = "54.0" ] &&
-         [ $TRAVIS_REPO_SLUG = "zotero/zotero" ] &&
-         [ $TRAVIS_BRANCH = "master" ] &&
-         [ $TRAVIS_PULL_REQUEST = "false" ]; then
+    - if [[ $FX_VERSION = "54.0" &&
+            $TRAVIS_REPO_SLUG = "zotero/zotero" &&
+            ($TRAVIS_BRANCH = "master" || $TRAVIS_BRANCH = *-hotfix) &&
+            $TRAVIS_PULL_REQUEST = "false" ]]; then
         mkdir build-zip;
         cd build;
         zip -r ../build-zip/$TRAVIS_COMMIT.zip *;
