@@ -37,7 +37,7 @@ before_script:
     - npm run build
     - if [ $FX_VERSION = "54.0" ] &&
          [ $TRAVIS_REPO_SLUG = "zotero/zotero" ] &&
-         [ $TRAVIS_BRANCH = "5.0.34.1-hotfix" ] &&
+         [ $TRAVIS_BRANCH = "5.0.34.2-hotfix" ] &&
          [ $TRAVIS_PULL_REQUEST = "false" ]; then
         mkdir build-zip;
         cd build;
