@@ -291,9 +291,10 @@ Zotero.Cite = {
 	 * Get an item by ID, either by retrieving it from the library or looking for the document it
 	 * belongs to.
 	 * @param {String|Number|Array} id
+	 * @param {Boolean} [getZoteroItems=false] - whether to get CSL or Zotero items for embedded items
 	 * @return {Zotero.Item} item
 	 */
-	"getItem":function getItem(id) {
+	"getItem":function getItem(id, getZoteroItems=false) {
 		var slashIndex;
 		
 		if(id instanceof Array) {
@@ -303,7 +304,11 @@ Zotero.Cite = {
 				session = Zotero.Integration.sessions[sessionID],
 				item;
 			if(session) {
-				item = session.embeddedItems[id.substr(slashIndex+1)];
+				if (getZoteroItems) {
+					item = session.embeddedZoteroItems[id.substr(slashIndex+1)];
+				} else {
+					item = session.embeddedItems[id.substr(slashIndex+1)];
+				}
 			}
 			
 			if(!item) {
@@ -498,7 +503,7 @@ Zotero.Cite.System.prototype = {
 	/**
 	 * citeproc-js system function for getting items
 	 * See http://gsl-nagoya-u.net/http/pub/citeproc-doc.html#retrieveitem
-	 * @param {String|Integer} Item ID, or string item for embedded citations
+	 * @param {String|Integer} item - Item ID, or string item for embedded citations
 	 * @return {Object} citeproc-js item
 	 */
 	"retrieveItem":function retrieveItem(item) {
@@ -509,10 +514,10 @@ Zotero.Cite.System.prototype = {
 		} else if(typeof item === "string" && (slashIndex = item.indexOf("/")) !== -1) {
 			// is an embedded item
 			var sessionID = item.substr(0, slashIndex);
-			var session = Zotero.Integration.sessions[sessionID]
+			var session = Zotero.Integration.sessions[sessionID];
 			if(session) {
 				var embeddedCitation = session.embeddedItems[item.substr(slashIndex+1)];
-				if(embeddedCitation) {
+				if (embeddedCitation) {
 					embeddedCitation.id = item;
 					return embeddedCitation;
 				}

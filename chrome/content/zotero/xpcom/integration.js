@@ -888,7 +888,7 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
 		let field = Zotero.Integration.Field.loadExisting(this._fields[i]);
 		if (field.type === INTEGRATION_TYPE_ITEM) {
 			var noteIndex = field.getNoteIndex(),
-				citation = new Zotero.Integration.Citation(field);
+				citation = new Zotero.Integration.Citation(field, noteIndex);
 
 			let action = yield citation.loadItemData();
 			
@@ -1130,35 +1130,31 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 
 	// -------------------
 	// Preparing stuff to pass into CitationEditInterface
-	var fieldIndexPromise = this.get().then(function(fields) {
-		for (var i=0, n=fields.length; i<n; i++) {
-			if (fields[i].equals(field._field)) {
-				// This is needed, because LibreOffice integration plugin caches the field code instead of asking
-				// the document every time when calling #getCode().
-				fields[i] = field._field;
-				return i;
-			}
+	var fields = yield this.get();
+	for (var fieldIndex = 0; fieldIndex < fields.length; fieldIndex++) {
+		if (fields[fieldIndex].equals(field._field)) {
+			// This is needed, because LibreOffice integration plugin caches the field code instead of asking
+			// the document every time when calling #getCode().
+			fields[fieldIndex] = field._field;
+			break;
 		}
-	});
+	}
 	
 	var citationsByItemIDPromise;
 	if (this._session.data.prefs.delayCitationUpdates) {
 		citationsByItemIDPromise = Zotero.Promise.resolve(this._session.citationsByItemID);
 	} else {
-		citationsByItemIDPromise = fieldIndexPromise.then(function() {
-			return this.updateSession(FORCE_CITATIONS_FALSE);
-		}.bind(this)).then(function() {
+		citationsByItemIDPromise = this.updateSession(FORCE_CITATIONS_FALSE).then(function() {
 			return this._session.citationsByItemID;
 		}.bind(this));
 	}
 
 	var previewFn = Zotero.Promise.coroutine(function* (citation) {
-		let idx = yield fieldIndexPromise;
 		yield citationsByItemIDPromise;
 		
 		let citations = this._session.getCiteprocLists();
-		let citationsPre = citations.slice(0, idx);
-		let citationsPost = citations.slice(idx+1);
+		let citationsPre = citations.slice(0, fieldIndex);
+		let citationsPost = citations.slice(fieldIndex+1);
 		try {
 			return this._session.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
 		} catch(e) {
@@ -1167,9 +1163,8 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 	}.bind(this));
 		
 	var io = new Zotero.Integration.CitationEditInterface(
-		citation,
-		this._session.style.opt.sort_citations, fieldIndexPromise, citationsByItemIDPromise,
-		previewFn
+		citation, this._session.style.opt.sort_citations,
+		fieldIndex, citationsByItemIDPromise, previewFn
 	);
 	
 	if (Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
@@ -1190,15 +1185,14 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 		// Try to delete new field on cancel
 		if (newField) {
 			try {
-				field.delete();
+				yield field.delete();
 			} catch(e) {}
 		}
 		throw new Zotero.Exception.UserCancelled("inserting citation");
 	}
 
-	let fieldIndex = yield fieldIndexPromise;
 	this._session.updateIndices[fieldIndex] = true;
-	// Make sure session updated
+	// Make sure session is updated
 	yield citationsByItemIDPromise;
 	return [fieldIndex, field, io.citation];
 });
@@ -1206,11 +1200,11 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 /**
  * Citation editing functions and propertiesaccessible to quickFormat.js and addCitationDialog.js
  */
-Zotero.Integration.CitationEditInterface = function(citation, sortable, fieldIndexPromise, citationsByItemIDPromise, previewFn) {
+Zotero.Integration.CitationEditInterface = function(citation, sortable, fieldIndex, citationsByItemIDPromise, previewFn) {
 	this.citation = citation;
 	this.sortable = sortable;
 	this.previewFn = previewFn;
-	this._fieldIndexPromise = fieldIndexPromise;
+	this._fieldIndex = fieldIndex;
 	this._citationsByItemIDPromise = citationsByItemIDPromise;
 	
 	// Not available in quickFormat.js if this unspecified
@@ -1263,17 +1257,16 @@ Zotero.Integration.CitationEditInterface.prototype = {
 		});
 		
 		// Sort all previously cited items at top, and all items cited later at bottom
-		var fieldIndex = yield this._fieldIndexPromise;
 		ids.sort(function(a, b) {
 			var indexA = citationsByItemID[a][0].properties.zoteroIndex,
 				indexB = citationsByItemID[b][0].properties.zoteroIndex;
 			
-			if(indexA >= fieldIndex){
-				if(indexB < fieldIndex) return 1;
+			if(indexA >= this._fieldIndex){
+				if(indexB < this._fieldIndex) return 1;
 				return indexA - indexB;
 			}
 			
-			if(indexB > fieldIndex) return -1;
+			if(indexB > this._fieldIndex) return -1;
 			return indexB - indexA;
 		});
 		
@@ -1286,6 +1279,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
  */
 Zotero.Integration.Session = function(doc, app) {
 	this.embeddedItems = {};
+	this.embeddedZoteroItems = {};
 	this.embeddedItemsByURI = {};
 	this.resetRequest(doc);
 	this.primaryFieldType = app.primaryFieldType;
@@ -1646,7 +1640,7 @@ Zotero.Integration.Session.prototype.writeDelayedCitation = Zotero.Promise.corou
 
 
 Zotero.Integration.Session.prototype.getItems = function() {
-	return Zotero.Cite.getItem(Object.keys(this.citationsByItemID));
+	return Zotero.Cite.getItem(Object.keys(this.citationsByItemID), true);
 }
 
 
@@ -1979,7 +1973,7 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = Zotero.Promise.corout
 });
 
 Zotero.Integration.Field = class {
-	constructor(field) {
+	constructor(field, rawCode) {
 		if (field instanceof Zotero.Integration.Field) {
 			throw new Error("Trying to instantiate Integration.Field with Integration.Field, not doc field");
 		}
@@ -1990,6 +1984,7 @@ Zotero.Integration.Field = class {
 			}
 		}
 		this._field = field;
+		this._code = rawCode;
 		this.type = INTEGRATION_TYPE_TEMP;	
 	}
 	
@@ -2002,15 +1997,18 @@ Zotero.Integration.Field = class {
 		} else {
 			this._field.setCode(`TEMP`);
 		}
+		this._code = code;
 	}
 
 	getCode() {
-		let code = this._field.getCode();
-		let start = code.indexOf('{');
+		if (!this._code) {
+			ths._code = this._field.getCode();
+		}
+		let start = this._code.indexOf('{');
 		if (start == -1) {
 			return '{}';
 		}
-		return code.substring(start, code.lastIndexOf('}')+1);
+		return this._code.substring(start, this._code.lastIndexOf('}')+1);
 	}
 
 	clearCode() {
@@ -2042,37 +2040,29 @@ Zotero.Integration.Field.loadExisting = function(docField) {
 	var field;
 	// Already loaded
 	if (docField instanceof Zotero.Integration.Field) return docField;
-	let rawCode = docField.getCode();
+	var rawCode = docField.getCode();
 	
 	// ITEM/CITATION CSL_ITEM {json: 'data'} 
 	for (let type of ["ITEM", "CITATION"]) {
 		if (rawCode.substr(0, type.length) === type) {
-			field = new Zotero.Integration.CitationField(docField);
+			field = new Zotero.Integration.CitationField(docField, rawCode);
 		}
 	}
 	// BIBL {json: 'data'} CSL_BIBLIOGRAPHY
 	if (rawCode.substr(0, 4) === "BIBL") {
-		field = new Zotero.Integration.BibliographyField(docField);
+		field = new Zotero.Integration.BibliographyField(docField, rawCode);
 	}
 	
 	if (!field) {
-		field = new Zotero.Integration.Field(docField);
+		field = new Zotero.Integration.Field(docField, rawCode);
 	}
-	if (field) {
-		let start = rawCode.indexOf('{');
-		if (start != -1) {
-			field._code = rawCode.substring(start, rawCode.lastIndexOf('}')+1);
-		} else {
-			field._code = rawCode.substr(rawCode.indexOf(' ')+1);
-		}
-	};
 	
 	return field;
 };
 
 Zotero.Integration.CitationField = class extends Zotero.Integration.Field {
-	constructor(field) {
-		super(field);
+	constructor(field, rawCode) {
+		super(field, rawCode);
 		this.type = INTEGRATION_TYPE_ITEM;
 	}
 	
@@ -2230,8 +2220,8 @@ Zotero.Integration.CitationField = class extends Zotero.Integration.Field {
 
 
 Zotero.Integration.BibliographyField = class extends Zotero.Integration.Field {
-	constructor(field) {
-		super(field);
+	constructor(field, rawCode) {
+		super(field, rawCode);
 		this.type = INTEGRATION_TYPE_BIBLIOGRAPHY;
 	};
 	
@@ -2261,12 +2251,12 @@ Zotero.Integration.BibliographyField = class extends Zotero.Integration.Field {
 };
 
 Zotero.Integration.Citation = class {
-	constructor(citationField) {
+	constructor(citationField, noteIndex) {
 		let data = citationField.unserialize();
 		this.citationID = data.citationID;
 		this.citationItems = data.citationItems;
 		this.properties = data.properties;
-		this.properties.noteIndex = citationField.getNoteIndex();
+		this.properties.noteIndex = noteIndex;
 
 		this._field = citationField;
 	}
@@ -2331,9 +2321,10 @@ Zotero.Integration.Citation = class {
 						// assign a random string as an item ID
 						var anonymousID = Zotero.randomString();
 						var globalID = itemData.id = citationItem.id = Zotero.Integration.currentSession.data.sessionID+"/"+anonymousID;
+						Zotero.Integration.currentSession.embeddedItems[anonymousID] = itemData;
 						
 						// assign a Zotero item
-						var surrogateItem = Zotero.Integration.currentSession.embeddedItems[anonymousID] = new Zotero.Item();
+						var surrogateItem = Zotero.Integration.currentSession.embeddedZoteroItems[anonymousID] = new Zotero.Item();
 						Zotero.Utilities.itemFromCSLJSON(surrogateItem, itemData);
 						surrogateItem.cslItemID = globalID;
 						surrogateItem.cslURIs = citationItem.uris;
