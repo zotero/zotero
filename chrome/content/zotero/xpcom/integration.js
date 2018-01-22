@@ -837,7 +837,7 @@ Zotero.Integration.Fields.prototype.get = new function() {
 					};
 				}
 			} else if(topic === "fields-error") {
-				deferred.reject(e);
+				deferred.reject(data);
 				deferred = null;
 			}
 		}, QueryInterface:XPCOMUtils.generateQI([Components.interfaces.nsIObserver, Components.interfaces.nsISupports])});
@@ -912,6 +912,8 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
 	if (this._bibliographyFields.length) {
 		this._session.bibliography = new Zotero.Integration.Bibliography(this._bibliographyFields[0]);
 		yield this._session.bibliography.loadItemData();
+	} else {
+		delete this._session.bibliography;
 	}
 	// TODO: figure this out
 	// Zotero.Notifier.trigger('add', 'collection', 'document');
@@ -991,10 +993,11 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 		
 		var isRich = false;
 		if (!citation.properties.dontUpdate) {
-			var formattedCitation = citation.properties.formattedCitation && citation.properties.custom
+			var formattedCitation = citation.properties.custom
 				? citation.properties.custom : citation.text;
 			var plainCitation = citation.properties.plainCitation && citationField.getText();
 			
+			// Update citation text:
 			// If we're not specifically *not* trying to regen text
 			if (forceCitations != FORCE_CITATIONS_FALSE
 					// Or metadata has changed thus changing the formatted citation
