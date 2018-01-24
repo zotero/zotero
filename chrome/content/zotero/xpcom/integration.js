@@ -1138,7 +1138,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 		if (fields[fieldIndex].equals(field._field)) {
 			// This is needed, because LibreOffice integration plugin caches the field code instead of asking
 			// the document every time when calling #getCode().
-			fields[fieldIndex] = field._field;
+			field._field = fields[fieldIndex];
 			break;
 		}
 	}
