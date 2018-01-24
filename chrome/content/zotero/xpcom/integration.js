@@ -1133,26 +1133,30 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 
 	// -------------------
 	// Preparing stuff to pass into CitationEditInterface
-	var fields = yield this.get();
-	for (var fieldIndex = 0; fieldIndex < fields.length; fieldIndex++) {
-		if (fields[fieldIndex].equals(field._field)) {
-			// This is needed, because LibreOffice integration plugin caches the field code instead of asking
-			// the document every time when calling #getCode().
-			field._field = fields[fieldIndex];
-			break;
+	var fieldIndexPromise = this.get().then(function(fields) {
+		for (var i=0, n=fields.length; i<n; i++) {
+			if (fields[i].equals(field._field)) {
+				// This is needed, because LibreOffice integration plugin caches the field code instead of asking
+				// the document every time when calling #getCode().
+				field._field = fields[i];
+				return i;
+			}
 		}
-	}
+	});
 	
 	var citationsByItemIDPromise;
 	if (this._session.data.prefs.delayCitationUpdates) {
 		citationsByItemIDPromise = Zotero.Promise.resolve(this._session.citationsByItemID);
 	} else {
-		citationsByItemIDPromise = this.updateSession(FORCE_CITATIONS_FALSE).then(function() {
+		citationsByItemIDPromise = fieldIndexPromise.then(function() {
+			return this.updateSession(FORCE_CITATIONS_FALSE);
+		}.bind(this)).then(function() {
 			return this._session.citationsByItemID;
 		}.bind(this));
 	}
 
 	var previewFn = Zotero.Promise.coroutine(function* (citation) {
+		let idx = yield fieldIndexPromise;
 		yield citationsByItemIDPromise;
 		
 		let citations = this._session.getCiteprocLists();
@@ -1167,7 +1171,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 		
 	var io = new Zotero.Integration.CitationEditInterface(
 		citation, this._session.style.opt.sort_citations,
-		fieldIndex, citationsByItemIDPromise, previewFn
+		fieldIndexPromise, citationsByItemIDPromise, previewFn
 	);
 	
 	if (Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
@@ -1194,6 +1198,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 		throw new Zotero.Exception.UserCancelled("inserting citation");
 	}
 
+	var fieldIndex = yield fieldIndexPromise;
 	this._session.updateIndices[fieldIndex] = true;
 	// Make sure session is updated
 	yield citationsByItemIDPromise;
@@ -1203,11 +1208,11 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 /**
  * Citation editing functions and propertiesaccessible to quickFormat.js and addCitationDialog.js
  */
-Zotero.Integration.CitationEditInterface = function(citation, sortable, fieldIndex, citationsByItemIDPromise, previewFn) {
+Zotero.Integration.CitationEditInterface = function(citation, sortable, fieldIndexPromise, citationsByItemIDPromise, previewFn) {
 	this.citation = citation;
 	this.sortable = sortable;
 	this.previewFn = previewFn;
-	this._fieldIndex = fieldIndex;
+	this._fieldIndexPromise = fieldIndexPromise;
 	this._citationsByItemIDPromise = citationsByItemIDPromise;
 	
 	// Not available in quickFormat.js if this unspecified
@@ -1250,13 +1255,14 @@ Zotero.Integration.CitationEditInterface.prototype = {
 	 * @return {Promise} A promise resolved by the items
 	 */
 	getItems: Zotero.Promise.coroutine(function* () {
+		var fieldIndex = yield this._fieldIndexPromise;
 		var citationsByItemID = yield this._citationsByItemIDPromise;
 		var ids = Object.keys(citationsByItemID).filter(itemID => {
 			return citationsByItemID[itemID]
 				&& citationsByItemID[itemID].length
 				// Exclude the present item
 				&& (citationsByItemID[itemID].length > 1
-					|| citationsByItemID[itemID][0].properties.zoteroIndex !== this._fieldIndex);
+					|| citationsByItemID[itemID][0].properties.zoteroIndex !== fieldIndex);
 		});
 		
 		// Sort all previously cited items at top, and all items cited later at bottom
@@ -1264,12 +1270,12 @@ Zotero.Integration.CitationEditInterface.prototype = {
 			var indexA = citationsByItemID[a][0].properties.zoteroIndex,
 				indexB = citationsByItemID[b][0].properties.zoteroIndex;
 			
-			if(indexA >= this._fieldIndex){
-				if(indexB < this._fieldIndex) return 1;
+			if (indexA >= fieldIndex){
+				if(indexB < fieldIndex) return 1;
 				return indexA - indexB;
 			}
 			
-			if(indexB > this._fieldIndex) return -1;
+			if (indexB > fieldIndex) return -1;
 			return indexB - indexA;
 		});
 		
