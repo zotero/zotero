@@ -459,6 +459,7 @@ Zotero.ItemTypes = new function() {
 			
 			// HiDPI images available
 			case 'attachment-link':
+			case 'attachment-pdf':
 			case 'attachment-web-link':
 			case 'artwork':
 			case 'audioRecording':
@@ -481,7 +482,6 @@ Zotero.ItemTypes = new function() {
 			
 			// No HiDPI images available
 			case 'attachment-snapshot':
-			case 'attachment-pdf':
 			case 'blogPost':
 			case 'case':
 			case 'conferencePaper':
