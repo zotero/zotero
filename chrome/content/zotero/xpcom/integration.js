@@ -2180,10 +2180,10 @@ Zotero.Integration.CitationField = class extends Zotero.Integration.Field {
 
 			return {"citationItems":citationItems, properties:{}};
 		}
-		
 
+
+		let code = this.getCode();
 		try {
-			let code = this.getCode();
 			if (code[0] == '{') {		// JSON field
 				return upgradeCruft(unserialize(code), code);
 			} else {				// ye olde style field

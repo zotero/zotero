@@ -444,14 +444,14 @@ describe("Zotero.Integration", function () {
 				setAddEditItems(testItems[0]);
 				yield execCommand('addEditCitation', docID);
 				assert.equal(doc.fields.length, 1);
-				var citation = (new Zotero.Integration.CitationField(doc.fields[0])).unserialize();
+				var citation = (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
 				assert.equal(citation.citationItems.length, 1);
 				assert.equal(citation.citationItems[0].id, testItems[0].id);
 
 				setAddEditItems(testItems.slice(1, 3));
 				yield execCommand('addEditCitation', docID);
 				assert.equal(doc.fields.length, 2);
-				citation = (new Zotero.Integration.CitationField(doc.fields[1])).unserialize();
+				citation = (new Zotero.Integration.CitationField(doc.fields[1], doc.fields[1].code)).unserialize();
 				assert.equal(citation.citationItems.length, 2);
 				for (let i = 1; i < 3; i++) {
 					assert.equal(citation.citationItems[i-1].id, testItems[i].id);
@@ -470,7 +470,7 @@ describe("Zotero.Integration", function () {
 				setAddEditItems(testItems.slice(3, 5));
 				yield execCommand('addEditCitation', docID);
 				assert.equal(doc.fields.length, 2);
-				var citation = (new Zotero.Integration.CitationField(doc.fields[0])).unserialize();
+				var citation = (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
 				assert.equal(citation.citationItems.length, 2);
 				assert.equal(citation.citationItems[0].id, testItems[3].id);
 			});
@@ -543,7 +543,7 @@ describe("Zotero.Integration", function () {
 					var docID = this.test.fullTitle();
 					var doc = applications[docID].doc;
 
-					var citation = (new Zotero.Integration.CitationField(doc.fields[0])).unserialize();
+					var citation = (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
 					assert.isNotOk(citation.properties.dontUpdate);
 					doc.fields[0].text = "modified";
 					// Return Yes
@@ -553,7 +553,7 @@ describe("Zotero.Integration", function () {
 					assert.isTrue(displayAlertStub.called);
 					assert.equal(doc.fields.length, 2);
 					assert.equal(doc.fields[0].text, "modified");
-					var citation = (new Zotero.Integration.CitationField(doc.fields[0])).unserialize();
+					var citation = (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
 					assert.isOk(citation.properties.dontUpdate);
 				});
 				it('should reset citation text if "no" selected in refresh prompt', async function() {
@@ -561,7 +561,7 @@ describe("Zotero.Integration", function () {
 					var docID = this.test.fullTitle();
 					var doc = applications[docID].doc;
 
-					var citation = (new Zotero.Integration.CitationField(doc.fields[0])).unserialize();
+					var citation = (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
 					assert.isNotOk(citation.properties.dontUpdate);
 					let origText = doc.fields[0].text;
 					doc.fields[0].text = "modified";
@@ -572,7 +572,7 @@ describe("Zotero.Integration", function () {
 					assert.isTrue(displayAlertStub.called);
 					assert.equal(doc.fields.length, 2);
 					assert.equal(doc.fields[0].text, origText);
-					var citation = (new Zotero.Integration.CitationField(doc.fields[0])).unserialize();
+					var citation = (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
 					assert.isNotOk(citation.properties.dontUpdate);
 				});
 			});
