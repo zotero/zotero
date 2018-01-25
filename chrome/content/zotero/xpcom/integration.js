@@ -897,7 +897,7 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
 				// Mark for removal and continue
 				continue;
 			} else if (action == Zotero.Integration.UPDATE) {
-				this._session.updateIndices[index] = true;
+				this._session.updateIndices[i] = true;
 			}
 			
 			yield this._session.addCitation(i, noteIndex, citation);
