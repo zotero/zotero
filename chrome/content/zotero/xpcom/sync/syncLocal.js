@@ -239,6 +239,8 @@ Zotero.Sync.Data.Local = {
 	
 	
 	_libraryHasUnsyncedFiles: Zotero.Promise.coroutine(function* (libraryID) {
+		// TODO: Check for modified file attachment items, which also can't be uploaded
+		// (and which are corrected by resetUnsyncedLibraryFiles())
 		yield Zotero.Sync.Storage.Local.checkForUpdatedFiles(libraryID);
 		return !!(yield Zotero.Sync.Storage.Local.getFilesToUpload(libraryID)).length;
 	}),
@@ -253,42 +255,9 @@ Zotero.Sync.Data.Local = {
 		}
 		
 		for (let objectType of Zotero.DataObjectUtilities.getTypesForLibrary(libraryID)) {
-			let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
-			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
-			
 			// New/modified objects
-			let ids = yield Zotero.Sync.Data.Local.getUnsynced(objectType, libraryID);
-			let keys = ids.map(id => objectsClass.getLibraryAndKeyFromID(id).key);
-			let cacheVersions = yield this.getLatestCacheObjectVersions(objectType, libraryID, keys);
-			let toDelete = [];
-			for (let key of keys) {
-				let obj = objectsClass.getByLibraryAndKey(libraryID, key);
-				
-				// If object is in cache, overwrite with pristine data
-				if (cacheVersions[key]) {
-					let json = yield this.getCacheObject(objectType, libraryID, key, cacheVersions[key]);
-					yield Zotero.DB.executeTransaction(function* () {
-						yield this._saveObjectFromJSON(obj, json, {});
-					}.bind(this));
-				}
-				// Otherwise, erase
-				else {
-					toDelete.push(objectsClass.getIDFromLibraryAndKey(libraryID, key));
-				}
-			}
-			if (toDelete.length) {
-				yield objectsClass.erase(
-					toDelete,
-					{
-						skipEditCheck: true,
-						skipDeleteLog: true
-					}
-				);
-			}
-			
-			// Deleted objects
-			keys = yield Zotero.Sync.Data.Local.getDeleted(objectType, libraryID);
-			yield this.removeObjectsFromDeleteLog(objectType, libraryID, keys);
+			let ids = yield this.getUnsynced(objectType, libraryID);
+			yield this._resetObjects(libraryID, objectType, ids);
 		}
 		
 		// Mark library for full sync
@@ -305,13 +274,62 @@ Zotero.Sync.Data.Local = {
 	 *
 	 * _libraryHasUnsyncedFiles(), which checks for updated files, must be called first.
 	 */
-	resetUnsyncedLibraryFiles: Zotero.Promise.coroutine(function* (libraryID) {
-		var itemIDs = yield Zotero.Sync.Storage.Local.getFilesToUpload(libraryID);
+	resetUnsyncedLibraryFiles: async function (libraryID) {
+		// Reset unsynced file attachments
+		var itemIDs = await Zotero.Sync.Data.Local.getUnsynced('item', libraryID);
+		var toReset = [];
 		for (let itemID of itemIDs) {
 			let item = Zotero.Items.get(itemID);
-			yield item.deleteAttachmentFile();
+			if (item.isFileAttachment()) {
+				toReset.push(item.id);
+			}
 		}
-	}),
+		await this._resetObjects(libraryID, 'item', toReset);
+		
+		// Delete unsynced files
+		var itemIDs = await Zotero.Sync.Storage.Local.getFilesToUpload(libraryID);
+		for (let itemID of itemIDs) {
+			let item = Zotero.Items.get(itemID);
+			await item.deleteAttachmentFile();
+		}
+	},
+	
+	
+	_resetObjects: async function (libraryID, objectType, ids) {
+		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
+		
+		var keys = ids.map(id => objectsClass.getLibraryAndKeyFromID(id).key);
+		var cacheVersions = await this.getLatestCacheObjectVersions(objectType, libraryID, keys);
+		var toDelete = [];
+		for (let key of keys) {
+			let obj = objectsClass.getByLibraryAndKey(libraryID, key);
+			
+			// If object is in cache, overwrite with pristine data
+			if (cacheVersions[key]) {
+				let json = await this.getCacheObject(objectType, libraryID, key, cacheVersions[key]);
+				await Zotero.DB.executeTransaction(async function () {
+					await this._saveObjectFromJSON(obj, json, {});
+				}.bind(this));
+			}
+			// Otherwise, erase
+			else {
+				toDelete.push(objectsClass.getIDFromLibraryAndKey(libraryID, key));
+			}
+		}
+		if (toDelete.length) {
+			await objectsClass.erase(
+				toDelete,
+				{
+					skipEditCheck: true,
+					skipDeleteLog: true
+				}
+			);
+		}
+		
+		// Deleted objects
+		keys = await Zotero.Sync.Data.Local.getDeleted(objectType, libraryID);
+		await this.removeObjectsFromDeleteLog(objectType, libraryID, keys);
+	},
 	
 	
 	getSkippedLibraries: function () {

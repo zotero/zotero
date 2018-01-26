@@ -3024,6 +3024,67 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.equal(called, 1);
 			assert.equal(spy.callCount, 2);
 		});
+		
+		
+		it("should show file-write-access-lost dialog on 403 for attachment upload in group", async function () {
+			var group = await createGroup();
+			var libraryID = group.libraryID;
+			var libraryVersion = 5;
+			group.libraryVersion = libraryVersion;
+			await group.saveTx();
+			
+			({ engine, client, caller } = await setup({
+				libraryID,
+				stopOnError: false
+			}));
+			
+			var item1 = await createDataObject('item', { libraryID });
+			var item2 = await importFileAttachment(
+				'test.png',
+				{
+					libraryID,
+					parentID: item1.id,
+					version: 5
+				}
+			);
+			
+			var called = 0;
+			server.respond(function (req) {
+				let requestJSON = JSON.parse(req.requestBody);
+				if (called == 0) {
+					req.respond(
+						200,
+						{
+							"Last-Modified-Version": ++libraryVersion
+						},
+						JSON.stringify({
+							successful: {
+								0: item1.toResponseJSON({ version: libraryVersion })
+							},
+							unchanged: {},
+							failed: {
+								1: {
+									code: 403,
+									message: "File editing access denied"
+								}
+							}
+						})
+					);
+				}
+				called++;
+			});
+			
+			var promise = waitForDialog();
+			var spy = sinon.spy(engine, "onError");
+			var result = await engine._startUpload();
+			assert.isTrue(promise.isResolved());
+			assert.equal(result, engine.UPLOAD_RESULT_SUCCESS);
+			assert.equal(called, 1);
+			assert.equal(spy.callCount, 1);
+			
+			assert.ok(Zotero.Items.get(item1.id));
+			assert.isFalse(Zotero.Items.get(item2.id));
+		});
 	});
 	
 	
