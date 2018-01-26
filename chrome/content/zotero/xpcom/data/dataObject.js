@@ -1252,12 +1252,16 @@ Zotero.DataObject.prototype._finalizeErase = Zotero.Promise.coroutine(function* 
 Zotero.DataObject.prototype.toResponseJSON = function (options) {
 	// TODO: library block?
 	
-	return {
+	var json = {
 		key: this.key,
 		version: this.version,
 		meta: {},
 		data: this.toJSON(options)
 	};
+	if (options.version) {
+		json.version = json.data.version = options.version;
+	}
+	return json;
 }
 
 

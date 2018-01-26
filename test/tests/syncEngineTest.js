@@ -782,9 +782,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 						},
 						JSON.stringify({
 							successful: {
-								"0": item2.toResponseJSON(),
-								"1": item1.toResponseJSON(),
-								"2": item3.toResponseJSON()
+								"0": item2.toResponseJSON({ version: lastLibraryVersion }),
+								"1": item1.toResponseJSON({ version: lastLibraryVersion }),
+								"2": item3.toResponseJSON({ version: lastLibraryVersion })
 							},
 							unchanged: {},
 							failed: {}
