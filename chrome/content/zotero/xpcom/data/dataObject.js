@@ -1249,7 +1249,7 @@ Zotero.DataObject.prototype._finalizeErase = Zotero.Promise.coroutine(function* 
 });
 
 
-Zotero.DataObject.prototype.toResponseJSON = function (options) {
+Zotero.DataObject.prototype.toResponseJSON = function (options = {}) {
 	// TODO: library block?
 	
 	var json = {
