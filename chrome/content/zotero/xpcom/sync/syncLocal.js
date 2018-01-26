@@ -1056,6 +1056,12 @@ Zotero.Sync.Data.Local = {
 			Zotero.debug(json, 1);
 			throw new Error("Missing 'version' property in JSON");
 		}
+		if (json.version === 0) {
+			Zotero.debug(json, 1);
+			// TODO: Fix tests so this doesn't happen
+			Zotero.warn("'version' cannot be 0 in cache JSON");
+			//throw new Error("'version' cannot be 0 in cache JSON");
+		}
 		// If direct data object passed, wrap in fake response object
 		return json.data === undefined ? {
 			key: json.key,
