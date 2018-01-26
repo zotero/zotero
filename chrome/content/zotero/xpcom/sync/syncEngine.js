@@ -1983,6 +1983,21 @@ Zotero.Sync.Data.Engine.prototype._checkObjectUploadError = Zotero.Promise.corou
 			}
 		}
 	}
+	else if (code == 403) {
+		// Prompt to reset local group files on 403 for file attachment upload
+		if (objectType == 'item') {
+			let item = Zotero.Items.getByLibraryAndKey(this.libraryID, key);
+			if (this.library.libraryType == 'group' && item.isFileAttachment()) {
+				let index = Zotero.Sync.Storage.Utilities.showFileWriteAccessLostPrompt(
+					null, this.library
+				);
+				if (index === 0) {
+					yield Zotero.Sync.Data.Local.resetUnsyncedLibraryFiles(this.libraryID);
+				}
+				return false;
+			}
+		}
+	}
 	// This shouldn't happen, because the upload request includes a library version and should
 	// prevent an outdated upload before the object version is checked. If it does, we need to
 	// do a full sync. This error is checked in handleUploadError().

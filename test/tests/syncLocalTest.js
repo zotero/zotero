@@ -313,26 +313,87 @@ describe("Zotero.Sync.Data.Local", function() {
 				});
 				var libraryID = group.libraryID;
 				
+				// File attachment that's totally in sync -- leave alone
 				var attachment1 = yield importFileAttachment('test.png', { libraryID });
 				attachment1.attachmentSyncState = "in_sync";
-				attachment1.attachmentSyncedModificationTime = 1234567890000;
-				attachment1.attachmentSyncedHash = "8caf2ee22919d6725eb0648b98ef6bad";
-				var attachment2 = yield importFileAttachment('test.pdf', { libraryID });
+				attachment1.attachmentSyncedModificationTime = yield attachment1.attachmentModificationTime;
+				attachment1.attachmentSyncedHash = yield attachment1.attachmentHash;
+				attachment1.synced = true;
+				yield attachment1.saveTx({
+					skipSyncedUpdate: true
+				});
+				
+				// File attachment that's in sync with changed file -- delete file and mark for download
+				var attachment2 = yield importFileAttachment('test.png', { libraryID });
+				attachment2.synced = true;
+				yield attachment2.saveTx({
+					skipSyncedUpdate: true
+				});
+				
+				// File attachment that's unsynced -- delete item and file
+				var attachment3 = yield importFileAttachment('test.pdf', { libraryID });
 				
 				// Has to be called before resetUnsyncedLibraryFiles()
 				assert.isTrue(yield Zotero.Sync.Data.Local._libraryHasUnsyncedFiles(libraryID));
 				
 				yield Zotero.Sync.Data.Local.resetUnsyncedLibraryFiles(libraryID);
 				
-				assert.isFalse(yield attachment1.fileExists());
+				assert.isTrue(yield attachment1.fileExists());
 				assert.isFalse(yield attachment2.fileExists());
+				assert.isFalse(yield attachment3.fileExists());
 				assert.equal(
-					attachment1.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
+					attachment1.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC
 				);
 				assert.equal(
 					attachment2.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
 				);
+				assert.isFalse(Zotero.Items.get(attachment3.id));
 			});
+		});
+		
+		it("should revert modified file attachment item", async function () {
+			var group = await createGroup({
+				version: 1,
+				libraryVersion: 2
+			});
+			var libraryID = group.libraryID;
+			
+			// File attachment that's changed but file is in sync -- reset item, keep file
+			var attachment = await importFileAttachment('test.png', { libraryID });
+			var originalTitle = attachment.getField('title');
+			attachment.attachmentSyncedModificationTime = await attachment.attachmentModificationTime;
+			attachment.attachmentSyncedHash = await attachment.attachmentHash;
+			attachment.attachmentSyncState = "in_sync";
+			attachment.synced = true;
+			attachment.version = 2;
+			await attachment.saveTx({
+				skipSyncedUpdate: true
+			});
+			// Save original in cache
+			await Zotero.Sync.Data.Local.saveCacheObject(
+				'item',
+				libraryID,
+				Object.assign(
+					attachment.toJSON(),
+					// TEMP: md5 and mtime aren't currently included in JSON, and without it the
+					// file gets marked for download when the item gets reset from the cache
+					{
+						md5: attachment.attachmentHash,
+						mtime: attachment.attachmentSyncedModificationTime
+					}
+				)
+			);
+			// Modify title
+			attachment.setField('title', "New Title");
+			await attachment.saveTx();
+			
+			await Zotero.Sync.Data.Local.resetUnsyncedLibraryFiles(libraryID);
+			
+			assert.isTrue(await attachment.fileExists());
+			assert.equal(attachment.getField('title'), originalTitle);
+			assert.equal(
+				attachment.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC
+			);
 		});
 	});
 	
