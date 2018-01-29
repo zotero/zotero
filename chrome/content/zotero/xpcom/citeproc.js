@@ -24,7 +24,7 @@
  */
 
 var CSL = {
-    PROCESSOR_VERSION: "1.1.182",
+    PROCESSOR_VERSION: "1.1.183",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -1353,15 +1353,17 @@ CSL.parseXml = function(str) {
         for (var i=lst.length-2;i>-1;i--) {
             if (lst[i].slice(1).indexOf("<") === -1) {
                 var stub = lst[i].slice(0, 5);
-                if (stub === "<term") {
-                    if (lst[i+1].slice(0, 6) === "</term") {
-                        lst[i] = lst[i] + lst[i+1];
-                        lst = lst.slice(0, i+1).concat(lst.slice(i+2));
-                    }
-                } else if (["<sing", "<mult"].indexOf(stub) > -1) {
-                    if (lst[i].slice(-2) !== "/>" && lst[i+1].slice(0, 1) === "<") {
-                        lst[i] = lst[i] + lst[i+1];
-                        lst = lst.slice(0, i+1).concat(lst.slice(i+2));
+                if (lst[i].slice(-2) !== "/>") {
+                    if (stub === "<term") {
+                        if (lst[i+1].slice(0, 6) === "</term") {
+                            lst[i] = lst[i] + lst[i+1];
+                            lst = lst.slice(0, i+1).concat(lst.slice(i+2));
+                        }
+                    } else if (["<sing", "<mult"].indexOf(stub) > -1) {
+                        if (lst[i].slice(-2) !== "/>" && lst[i+1].slice(0, 1) === "<") {
+                            lst[i] = lst[i] + lst[i+1];
+                            lst = lst.slice(0, i+1).concat(lst.slice(i+2));
+                        }
                     }
                 }
             }
@@ -4732,7 +4734,7 @@ CSL.Engine.Opt = function () {
     this.development_extensions.static_statute_locator = false;
     this.development_extensions.csl_reverse_lookup_support = false;
     this.development_extensions.clobber_locator_if_no_statute_section = false;
-    this.development_extensions.wrap_url_and_doi = true;
+    this.development_extensions.wrap_url_and_doi = false;
     this.development_extensions.allow_force_lowercase = false;
     this.development_extensions.handle_parallel_articles = false;
     this.development_extensions.thin_non_breaking_space_html_hack = false;
@@ -10608,7 +10610,7 @@ CSL.Node.text = {
                                                     var clonetoken = CSL.Util.cloneToken(this);
                                                     var groupblob = new CSL.Blob(null, null, "url-wrapper");
                                                     groupblob.decorations.push(["@DOI", "true"]);
-                                                    value = value.replace(/^https?:\/\/doi.org\//, "");
+                                                    value = value.replace(/^https?:\/\/doi\.org\//, "");
                                                     if (value.match(/^https?:\/\//)) {
                                                         var prefix = "";
                                                     } else {
