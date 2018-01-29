@@ -160,7 +160,7 @@
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Bu Kitaplık İçindeki Tüm Etiketleri Göster">
 <!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Bu Kitaplık İçindeki Otomatik Etiketleri Sil...">
 <!ENTITY zotero.tagSelector.clearAll "Hiçbirini Seçme">
-<!ENTITY zotero.tagSelector.assignColor "Renk Belirle...">
+<!ENTITY zotero.tagSelector.assignColor "Etikete Renk Ata...">
 <!ENTITY zotero.tagSelector.renameTag "Etiketi Yeniden Adlandır...">
 <!ENTITY zotero.tagSelector.deleteTag "Etiketi Sil...">
 

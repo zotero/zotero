@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Informação de Resolução de Problemas">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Fóruns de Discussão">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Reportar Erros…">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
-<!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.label "Depurar o Registo de Saída">
+<!ENTITY debugOutputLogging.accesskey "R">
+<!ENTITY debugOutputLogging.submit "Submeter Saída">
+<!ENTITY debugOutputLogging.view "Ver Saída">
+<!ENTITY debugOutputLogging.clear "Limpar a Saída">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Reiniciar com o Registo Activado…">
 
 <!ENTITY helpCheckForUpdates.label "Verificar Actualizações...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

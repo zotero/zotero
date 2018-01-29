@@ -68,7 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Descarregar ficheiros">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "em tempo de sincronização">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "à medida que é necessário">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verificar Servidor">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Ao usar a armazenagem Zotero, concorda ter de se reger pelos seus">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "termos e condições">
 <!ENTITY zotero.preferences.sync.librariesToSync "Bibliotecas a Sincronizar">
@@ -80,12 +80,12 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "para mais informação.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Repor Histórico da Sincronização de Dados">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Fundir dados locais com dados remotos, ignorando o histórico de sincronização">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurar a partir da Biblioteca em Linha">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Sobrepor os dados locais do Zotero com os dados da biblioteca em linha.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaurar para a Biblioteca em Linha">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Sobrepor a biblioteca em linha com os dados locais do Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reiniciar o Histórico de Sincronização de Arquivos">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Comparar todos os ficheiros de anexo com o serviço de armazenamento">
 <!ENTITY zotero.preferences.sync.reset "Restabelecer">
 <!ENTITY zotero.preferences.sync.reset.button "Repor…">
 
@@ -109,12 +109,12 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Quando esta opção está inactiva, o Zotero inclui URL ao citar artigos de revistas científicas, de revistas e de jornais apenas se o artigo não especificar uma sequência de páginas.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Cópia Rápida">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Formato por Omissão:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copiar como HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Opções Específicas do Sítio Web:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domínio/Caminho">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Formato">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Língua">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Desactivar a Cópia Rápida ao arrastar mais do que">
 
@@ -125,8 +125,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Obter extensões de processadores de texto…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Usar a caixa de diálogo Adicionar Citação clássica">
-<!ENTITY zotero.preferences.styleEditor "Style Editor">
-<!ENTITY zotero.preferences.stylePreview "Style Preview">
+<!ENTITY zotero.preferences.styleEditor "Editor de Estilos">
+<!ENTITY zotero.preferences.stylePreview "Previsão de Estilos">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Gestor de Estilos">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Título">
@@ -175,7 +175,7 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Ficheiros e Pastas">
 <!ENTITY zotero.preferences.advanced.keys "Atalhos">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Configuração Avançada">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localizar">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestor do Motor de Localização de Artigos">
@@ -193,7 +193,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Usar a pasta de perfil">
 <!ENTITY zotero.preferences.dataDir.custom "Personalizada:">
 <!ENTITY zotero.preferences.dataDir.choose "Escolher…">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(especificado através da linha de comandos)">
 <!ENTITY zotero.preferences.dataDir.reveal "Mostrar Pasta de Dados">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrar Para Nova Localização Por Omissão…">
 
@@ -209,4 +209,4 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Repor Tradutores…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Repor Estilos…">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "Editor de Configurações">
