@@ -136,7 +136,7 @@ var Zotero_RecognizePDF = new function() {
 	 * @return {Promise}
 	 */
 	function _extractText(file, pages) {
-		var cacheFile = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
+		var cacheFile = Zotero.getTempDirectory();
 		cacheFile.append("recognizePDFcache.txt");
 		if(cacheFile.exists()) {
 			cacheFile.remove(false);
