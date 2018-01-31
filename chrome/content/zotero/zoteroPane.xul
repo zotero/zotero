@@ -393,7 +393,7 @@
 								<treecols id="zotero-items-columns-header">
 									<treecol
 										id="zotero-items-column-title" primary="true" default-in="default feed"
-										label="&zotero.items.title_column;"
+										label="&zotero.items.title_column;" ignoreincolumnpicker="true"
 										flex="4" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 									<splitter class="tree-splitter"/>
 									<treecol
