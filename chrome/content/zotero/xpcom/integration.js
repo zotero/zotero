@@ -1160,8 +1160,8 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 		yield citationsByItemIDPromise;
 		
 		let citations = this._session.getCiteprocLists();
-		let citationsPre = citations.slice(0, fieldIndex);
-		let citationsPost = citations.slice(fieldIndex+1);
+		let citationsPre = citations.slice(0, idx);
+		let citationsPost = citations.slice(idx+1);
 		try {
 			return this._session.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
 		} catch(e) {
