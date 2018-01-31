@@ -1174,6 +1174,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 		fieldIndexPromise, citationsByItemIDPromise, previewFn
 	);
 	
+	Zotero.debug('Integration: Displaying citation dialogue');
 	if (Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
 		Zotero.Integration.displayDialog('chrome://zotero/content/integration/addCitationDialog.xul',
 			'alwaysRaised,resizable', io);
@@ -1350,23 +1351,10 @@ Zotero.Integration.Session.prototype.init = Zotero.Promise.coroutine(function *(
 				Zotero.debug("Integration: No document preferences found, but found "+data.prefs.fieldType+" fields");
 			}
 		}
-
-		if (haveFields && !Object.keys(this.citationsByIndex).length) {
-			// We should load up the fields on the first interaction with the document, so
-			// that we can display a list of existing citations, etc.
-			yield this.fields.get();
-			yield this.fields.updateSession(FORCE_CITATIONS_FALSE);
-		}
 		
 		if (dontRunSetDocPrefs) return false;
 		
 		yield this.setDocPrefs();
-	}
-	if (!Object.keys(this.citationsByIndex).length) {
-		// We should load up the fields on the first interaction with the document, so
-		// that we can display a list of existing citations, etc.
-		yield this.fields.get();
-		yield this.fields.updateSession(FORCE_CITATIONS_FALSE);
 	}
 	return true;
 });
