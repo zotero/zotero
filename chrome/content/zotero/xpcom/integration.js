@@ -1038,13 +1038,6 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 		var serializedCitation = citation.serialize();
 		if (serializedCitation != citation.properties.field) {
 			citationField.setCode(serializedCitation);
-			if (this._session.data.prefs.fieldType === "ReferenceMark"
-					&& this._session.data.prefs.noteType != 0 && isRich
-					&& !citation.properties.dontUpdate) {
-				// For ReferenceMarks with formatting, we need to set the text again, because
-				// setting the field code removes formatting from the mark. I don't like this.
-				citationField.setText(formattedCitation, isRich);
-			}
 		}
 		nUpdated++;
 	}
@@ -1614,13 +1607,6 @@ Zotero.Integration.Session.prototype.writeDelayedCitation = Zotero.Promise.corou
 	}
 	
 	field.setCode(citation.serialize());
-	if (this.data.prefs.fieldType === "ReferenceMark"
-			&& this.data.prefs.noteType != 0 && isRich
-			&& !citation.properties.dontUpdate) {
-		// For ReferenceMarks with formatting, we need to set the text again, because
-		// setting the field code removes formatting from the mark. I don't like this.
-		field.setText(text, isRich);
-	}
 	
 	// Update bibliography with a static string
 	var fields = yield this.fields.get();
@@ -1976,7 +1962,7 @@ Zotero.Integration.Field = class {
 		}
 		// This is not the best solution in terms of performance
 		for (let prop in field) {
-			if (!(prop in this)) {
+			if (prop[0] != '_' && !(prop in this)) {
 				this[prop] = field[prop].bind ? field[prop].bind(field) : field[prop];
 			}
 		}
