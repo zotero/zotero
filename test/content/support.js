@@ -411,6 +411,10 @@ function createUnsavedDataObject(objectType, params = {}) {
 	switch (objectType) {
 	case 'item':
 	case 'feedItem':
+		if (params.parentItemID) {
+			params.parentID = params.parentItemID;
+			delete params.parentItemID;
+		}
 		if (params.title !== undefined || params.setTitle) {
 			obj.setField('title', params.title !== undefined ? params.title : Zotero.Utilities.randomString());
 		}
