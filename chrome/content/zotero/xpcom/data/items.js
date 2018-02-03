@@ -1186,6 +1186,25 @@ Zotero.Items = function() {
 	};
 	
 	
+	/**
+	 * Returns an array of items with children of selected parents removed
+	 *
+	 * @return {Zotero.Item[]}
+	 */
+	this.keepParents = function (items) {
+		var parentItems = new Set(
+			items
+				.filter(item => item.isTopLevelItem())
+				.map(item => item.id)
+		);
+		return items.filter(item => {
+			var parentItemID = item.parentItemID;
+			// Not a child item or not a child of one of the passed items
+			return !parentItemID || !parentItems.has(parentItemID);
+		});
+	}
+	
+	
 	/*
 	 * Generate SQL to retrieve firstCreator field
 	 *

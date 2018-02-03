@@ -480,4 +480,23 @@ describe("Zotero.Items", function () {
 			assert.instanceOf(feedItem, Zotero.FeedItem);
 		});
 	});
+	
+	describe("#keepParents()", function () {
+		it("should remove child items of passed items", async function () {
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item', { itemType: 'note', parentItemID: item1.id });
+			var item3 = await createDataObject('item', { itemType: 'note', parentItemID: item1.id });
+			var item4 = await createDataObject('item');
+			var item5 = await createDataObject('item', { itemType: 'note', parentItemID: item4.id });
+			var otherItem = await createDataObject('item');
+			var item6 = await createDataObject('item', { itemType: 'note', parentItemID: otherItem.id });
+			
+			var items = Zotero.Items.keepParents([item1, item2, item3, item4, item5, item6]);
+			assert.sameMembers(
+				// Convert to ids for clearer output
+				items.map(item => item.id),
+				[item1, item4, item6].map(item => item.id)
+			);
+		});
+	});
 });

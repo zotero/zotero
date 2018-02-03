@@ -1606,6 +1606,7 @@ Zotero.CollectionTreeView.prototype.canDropCheck = function (row, orient, dataTr
 		if (dataType == 'zotero/item') {
 			var ids = data;
 			var items = Zotero.Items.get(ids);
+			items = Zotero.Items.keepParents(items);
 			var skip = true;
 			for (let item of items) {
 				// Can only drag top-level items
@@ -2115,6 +2116,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		}
 		
 		if (targetTreeRow.isPublications()) {
+			items = Zotero.Items.keepParents(items);
 			let io = this._treebox.treeBody.ownerDocument.defaultView
 				.ZoteroPane.showPublicationsWizard(items);
 			if (!io) {
