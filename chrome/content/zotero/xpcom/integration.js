@@ -1001,11 +1001,9 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 			// If we're not specifically *not* trying to regen text
 			if (forceCitations != FORCE_CITATIONS_FALSE
 					// Or metadata has changed thus changing the formatted citation
-					|| (citation.properties.formattedCitation !== formattedCitation)
-					// Or we shouldn't ignore citation changes and the citation text has changed
-					|| (!ignoreCitationChanges && plainCitation !== citation.properties.plainCitation)) {
+					|| (citation.properties.formattedCitation !== formattedCitation)) {
 					
-				if (plainCitation !== citation.properties.plainCitation) {
+				if (!ignoreCitationChanges && plainCitation !== citation.properties.plainCitation) {
 					// Citation manually modified; ask user if they want to save changes
 					Zotero.debug("[_updateDocument] Attempting to update manually modified citation.\n"
 						+ "Original: " + citation.properties.plainCitation + "\n"
