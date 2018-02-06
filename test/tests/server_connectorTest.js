@@ -427,6 +427,206 @@ describe("Connector Server", function () {
 		});
 	});
 	
+	describe("/connector/updateSession", function () {
+		it("should update collections and tags of item saved via /saveItems", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection');
+			await waitForItemsLoad(win);
+			
+			var sessionID = Zotero.Utilities.randomString();
+			var body = {
+				sessionID,
+				items: [
+					{
+						itemType: "newspaperArticle",
+						title: "Title",
+						creators: [
+							{
+								firstName: "First",
+								lastName: "Last",
+								creatorType: "author"
+							}
+						],
+						attachments: [
+							{
+								title: "Attachment",
+								url: `${testServerPath}/attachment`,
+								mimeType: "text/html"
+							}
+						]
+					}
+				],
+				uri: "http://example.com"
+			};
+			
+			httpd.registerPathHandler(
+				"/attachment",
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.write("<html><head><title>Title</title><body>Body</body></html>");
+					}
+				}
+			);
+			
+			var reqPromise = Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(body)
+				}
+			);
+			
+			var ids = await waitForItemEvent('add');
+			var item = Zotero.Items.get(ids[0]);
+			assert.isTrue(collection2.hasItem(item.id));
+			await waitForItemEvent('add');
+			// Wait until indexing is done
+			await waitForItemEvent('refresh');
+			
+			var req = await reqPromise;
+			assert.equal(req.status, 201);
+			
+			// Update saved item
+			var req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: collection1.treeViewID,
+						tags: "A, B"
+					})
+				}
+			);
+			
+			assert.equal(req.status, 200);
+			assert.isTrue(collection1.hasItem(item.id));
+			assert.isTrue(item.hasTag("A"));
+			assert.isTrue(item.hasTag("B"));
+		});
+		
+		it("should update collections and tags of PDF saved via /saveSnapshot", async function () {
+			var sessionID = Zotero.Utilities.randomString();
+			
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection');
+			await waitForItemsLoad(win);
+			
+			var file = getTestDataDirectory();
+			file.append('test.pdf');
+			httpd.registerFile("/test.pdf", file);
+			
+			var ids;
+			var promise = waitForItemEvent('add');
+			var reqPromise = Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSnapshot",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						url: testServerPath + "/test.pdf",
+						pdf: true
+					})
+				}
+			);
+			
+			var ids = await promise;
+			var item = Zotero.Items.get(ids[0]);
+			assert.isTrue(collection2.hasItem(item.id));
+			// Wait until indexing is done
+			await waitForItemEvent('refresh');
+			var req = await reqPromise;
+			assert.equal(req.status, 201);
+			
+			// Update saved item
+			var req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: collection1.treeViewID,
+						tags: "A, B"
+					})
+				}
+			);
+			
+			assert.equal(req.status, 200);
+			assert.isTrue(collection1.hasItem(item.id));
+			assert.isTrue(item.hasTag("A"));
+			assert.isTrue(item.hasTag("B"));
+		});
+		
+		it("should update collections and tags of webpage saved via /saveSnapshot", async function () {
+			var sessionID = Zotero.Utilities.randomString();
+			
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection');
+			await waitForItemsLoad(win);
+			
+			// saveSnapshot saves parent and child before returning
+			var ids1, ids2;
+			var promise = waitForItemEvent('add').then(function (ids) {
+				ids1 = ids;
+				return waitForItemEvent('add').then(function (ids) {
+					ids2 = ids;
+				});
+			});
+			await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSnapshot",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						url: "http://example.com",
+						html: "<html><head><title>Title</title><body>Body</body></html>"
+					})
+				}
+			);
+			
+			assert.isTrue(promise.isFulfilled());
+			
+			var item = Zotero.Items.get(ids1[0]);
+			
+			// Update saved item
+			var req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: collection1.treeViewID,
+						tags: "A, B"
+					})
+				}
+			);
+			
+			assert.equal(req.status, 200);
+			assert.isTrue(collection1.hasItem(item.id));
+			assert.isTrue(item.hasTag("A"));
+			assert.isTrue(item.hasTag("B"));
+		});
+	});
+	
 	describe('/connector/installStyle', function() {
 		var endpoint;
 		
