@@ -161,21 +161,6 @@ function Reporter(runner) {
 	});
 }
 
-// Monkey-patch Mocha to check instanceof Error using compartment-local
-// Error object
-Mocha.Runner.prototype.fail = function(test, err){
-	++this.failures;
-	test.state = 'failed';
-
-	if ('string' == typeof err) {
-		err = new Error('the string "' + err + '" was thrown, throw an Error :)');
-	} else if (!(err instanceof Components.utils.getGlobalForObject(err).Error)) {
-		err = new Error('the ' + Mocha.utils.type(err) + ' ' + Mocha.utils.stringify(err) + ' was thrown, throw an Error :)');
-	}
-
-	this.emit('fail', test, err);
-};
-
 // Setup Mocha
 mocha.setup({
 	ui: "bdd",
