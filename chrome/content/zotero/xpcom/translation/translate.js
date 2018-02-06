@@ -1292,6 +1292,7 @@ Zotero.Translate.Base.prototype = {
 		
 		this._currentState = "translate";
 		
+		this._sessionID = options.sessionID;
 		this._libraryID = options.libraryID;
 		if (options.collections && !Array.isArray(options.collections)) {
 			throw new Error("'collections' must be an array");
@@ -2082,6 +2083,7 @@ Zotero.Translate.Web.prototype._prepareTranslation = Zotero.Promise.method(funct
 		collections: this._collections,
 		attachmentMode: Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_DOWNLOAD" : "ATTACHMENT_MODE_IGNORE")],
 		forceTagType: 1,
+		sessionID: this._sessionID,
 		cookieSandbox: this._cookieSandbox,
 		proxy: this._proxy,
 		baseURI: this.location
