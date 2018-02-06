@@ -1517,7 +1517,7 @@ Zotero.Integration.Session.prototype.getCiteprocLists = function() {
 	var fieldToCitationIdxMapping = [];
 	var citationToFieldIdxMapping = {};
 	var i = 0;
-	// This relies on the order of citationsByIndex keys being stable and sorted by insertion order
+	// This relies on the order of citationsByIndex keys being stable and sorted in ascending order
 	// Which it seems to currently be true for every modern JS engine, so we're probably fine
 	for(let idx in this.citationsByIndex) {
 		citations.push([this.citationsByIndex[idx].citationID, this.citationsByIndex[idx].properties.noteIndex]);
