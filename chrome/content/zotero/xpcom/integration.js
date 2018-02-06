@@ -686,7 +686,7 @@ Zotero.Integration.Interface.prototype.setDocPrefs = Zotero.Promise.coroutine(fu
 				fieldNoteTypes.push(this._session.data.prefs.noteType);
 			}
 		} else if(convertBibliographies
-				&& type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
+				&& field.type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
 			fieldsToConvert.push(fields[i]);
 			fieldNoteTypes.push(0);
 		}
@@ -1516,10 +1516,17 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 
 Zotero.Integration.Session.prototype.getCiteprocLists = function() {
 	var citations = [];
-	for(let i in this.citationsByIndex) {
-		citations.push([this.citationsByIndex[i].citationID, this.citationsByIndex[i].properties.noteIndex]);
+	var fieldToCitationIdxMapping = [];
+	var citationToFieldIdxMapping = {};
+	var i = 0;
+	// This relies on the order of citationsByIndex keys being stable and sorted by insertion order
+	// Which it seems to currently be true for every modern JS engine, so we're probably fine
+	for(let idx in this.citationsByIndex) {
+		citations.push([this.citationsByIndex[idx].citationID, this.citationsByIndex[idx].properties.noteIndex]);
+		fieldToCitationIdxMapping[i] = idx;
+		citationToFieldIdxMapping[idx] = i++;
 	}
-	return citations;
+	return [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping];
 }
 
 /**
@@ -1531,7 +1538,7 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
 	Zotero.debug("Integration: Indices of updated citations");
 	Zotero.debug(Object.keys(this.updateIndices));
 	
-	var citations = this.getCiteprocLists();
+	var [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this.getCiteprocLists();
 	
 	for (let indexList of [this.newIndices, this.updateIndices]) {
 		for (let index in indexList) {
@@ -1543,12 +1550,12 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
 			if (!citation) continue;
 			citation = citation.toJSON();
 			
-			let citationsPre = citations.slice(0, index);
+			let citationsPre = citations.slice(0, citationToFieldIdxMapping[index]);
 			var citationsPost;
 			if (index in this.newIndices) {
 				citationsPost = [];
 			} else {
-				citationsPost = citations.slice(index+1);
+				citationsPost = citations.slice(citationToFieldIdxMapping[index]+1);
 			}
 			
 			Zotero.debug("Integration: style.processCitationCluster("+citation.toSource()+", "+citationsPre.toSource()+", "+citationsPost.toSource());
@@ -1557,7 +1564,7 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
 			this.bibliographyHasChanged |= info.bibchange;
 			
 			for (let citationInfo of newCitations) {
-				let idx = citationInfo[0], text = citationInfo[1];
+				let idx = fieldToCitationIdxMapping[citationInfo[0]], text = citationInfo[1];
 				this.updateIndices[idx] = true;
 				this.citationsByIndex[idx].text = text;
 			}
