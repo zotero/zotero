@@ -9,7 +9,6 @@ describe("PDF Recognition", function() {
 		yield Zotero.Promise.all([
 			loadZoteroPane().then(w => win = w)
 		]);
-		initPDFToolsPath();
 	});
 	
 	beforeEach(function* () {

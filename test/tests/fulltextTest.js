@@ -5,7 +5,6 @@ describe("Zotero.Fulltext", function () {
 		// Hidden browser, which requires a browser window, needed for charset detection
 		// (until we figure out a better way)
 		win = yield loadBrowserWindow();
-		initPDFToolsPath();
 	});
 	after(function () {
 		if (win) {

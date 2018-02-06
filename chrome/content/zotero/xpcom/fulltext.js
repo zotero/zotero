@@ -446,7 +446,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			var totalPages = yield getTotalPagesFromFile(itemID);
 		}
 		catch (e) {
-			Zotero.debug("Error running pdfinfo");
+			Zotero.debug("Error running " + _pdfInfo.path, 1);
+			Zotero.logError(e);
 		}
 
 		
@@ -468,9 +469,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			yield Zotero.Utilities.Internal.exec(exec, args);
 		}
 		catch (e) {
-			Components.utils.reportError(e);
-			Zotero.debug("Error running pdftotext", 1);
-			Zotero.debug(e, 1);
+			Zotero.debug("Error running " + exec.path, 1);
+			Zotero.logError(e);
 			return false;
 		}
 		

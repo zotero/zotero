@@ -566,7 +566,7 @@ var removeDir = Zotero.Promise.coroutine(function* (dir) {
  * @param {Object} [options] - Initialization options, as passed to Zotero.init(), overriding
  *                             any that were set at startup
  */
-function resetDB(options = {}) {
+async function resetDB(options = {}) {
 	// Hack to avoid CustomizableUI warnings in console from icon.js
 	var toolbarIconAdded = Zotero.toolbarIconAdded;
 	resetPrefs();
@@ -575,18 +575,17 @@ function resetDB(options = {}) {
 		options.thisArg.timeout(60000);
 	}
 	var db = Zotero.DataDirectory.getDatabase();
-	return Zotero.reinit(
+	await Zotero.reinit(
 		Zotero.Promise.coroutine(function* () {
 			yield OS.File.remove(db);
 			_defaultGroup = null;
 		}),
 		false,
 		options
-	)
-	.then(() => {
-		Zotero.toolbarIconAdded = toolbarIconAdded;
-		return Zotero.Schema.schemaUpdatePromise;
-	});
+	);
+	Zotero.toolbarIconAdded = toolbarIconAdded;
+	await Zotero.Schema.schemaUpdatePromise;
+	initPDFToolsPath();
 }
 
 /**
