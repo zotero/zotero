@@ -744,7 +744,7 @@ Zotero.Schema = new function(){
 					index[id].extract = true;
 				}
 				
-				let sql = "SELECT fileName, metadataJSON FROM translatorCache";
+				let sql = "SELECT rowid, fileName, metadataJSON FROM translatorCache";
 				let rows = yield Zotero.DB.queryAsync(sql);
 				// If there's anything in the cache, see what we actually need to extract
 				for (let i = 0; i < rows.length; i++) {
@@ -757,10 +757,10 @@ Zotero.Schema = new function(){
 						Zotero.logError(e);
 						Zotero.debug(json, 1);
 						
-						// // If JSON is invalid, clear from cache
+						// If JSON is invalid, clear from cache
 						yield Zotero.DB.queryAsync(
-							"DELETE FROM translatorCache WHERE fileName=?",
-							rows[i].fileName
+							"DELETE FROM translatorCache WHERE rowid=?",
+							rows[i].rowid
 						);
 						continue;
 					}
