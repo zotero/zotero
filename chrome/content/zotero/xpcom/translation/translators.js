@@ -68,7 +68,7 @@ Zotero.Translators = new function() {
 		_cache = {"import":[], "export":[], "web":[], "webWithTargetAll":[], "search":[]};
 		_translators = {};
 		
-		var sql = "SELECT fileName, metadataJSON, lastModifiedTime FROM translatorCache";
+		var sql = "SELECT rowid, fileName, metadataJSON, lastModifiedTime FROM translatorCache";
 		var dbCacheResults = yield Zotero.DB.queryAsync(sql);
 		var dbCache = {};
 		for (let i = 0; i < dbCacheResults.length; i++) {
@@ -211,7 +211,8 @@ Zotero.Translators = new function() {
 		for (let fileName in dbCache) {
 			if (!filesInCache[fileName]) {
 				yield Zotero.DB.queryAsync(
-					"DELETE FROM translatorCache WHERE fileName = ?", fileName
+					"DELETE FROM translatorCache WHERE rowid=?",
+					dbCache[fileName].rowid
 				);
 			}
 		}
