@@ -32,7 +32,7 @@ Zotero.Notifier = new function(){
 		'collection-item', 'item-tag', 'tag', 'setting', 'group', 'trash',
 		'bucket', 'relation', 'feed', 'feedItem', 'sync', 'api-key'
 	];
-	var _inTransaction;
+	var _transactionID = false;
 	var _queue = {};
 
 
@@ -106,7 +106,7 @@ Zotero.Notifier = new function(){
 	* - New events and types should be added to the order arrays in commit()
 	**/
 	this.trigger = Zotero.Promise.coroutine(function* (event, type, ids, extraData, force) {
-		if (_inTransaction && !force) {
+		if (_transactionID && !force) {
 			return this.queue(event, type, ids, extraData);
 		}
 		
@@ -173,7 +173,7 @@ Zotero.Notifier = new function(){
 			queue = queue._queue;
 		}
 		else {
-			if (!_inTransaction) {
+			if (!_transactionID) {
 				throw new Error("Can't queue event outside of a transaction");
 			}
 			queue = _queue;
@@ -278,11 +278,11 @@ Zotero.Notifier = new function(){
 	 *
 	 * Note: Be sure the matching commit() gets called (e.g. in a finally{...} block) or
 	 * notifications will break until Firefox is restarted or commit(true)/reset() is called manually
+	 *
+	 * @param {String} [transactionID]
 	 */
-	this.begin = function () {
-		if (!_inTransaction) {
-			_inTransaction = true;
-		}
+	this.begin = function (transactionID = true) {
+		_transactionID = transactionID;
 	}
 	
 	
@@ -291,8 +291,9 @@ Zotero.Notifier = new function(){
 	 *
 	 * @param {Zotero.Notifier.Queue|Zotero.Notifier.Queue[]} [queues] - One or more queues to use
 	 *     instead of the internal queue
+	 * @param {String} [transactionID]
 	 */
-	this.commit = Zotero.Promise.coroutine(function* (queues) {
+	this.commit = Zotero.Promise.coroutine(function* (queues, transactionID = true) {
 		if (queues) {
 			if (!Array.isArray(queues)) {
 				queues = [queues];
@@ -308,7 +309,7 @@ Zotero.Notifier = new function(){
 				}
 			}
 		}
-		else if (!_inTransaction) {
+		else if (!_transactionID) {
 			throw new Error("Can't commit outside of transaction");
 		}
 		else {
@@ -375,7 +376,7 @@ Zotero.Notifier = new function(){
 		}
 		
 		if (!queues) {
-			this.reset();
+			this.reset(transactionID);
 		}
 		
 		if (totals) {
@@ -407,10 +408,13 @@ Zotero.Notifier = new function(){
 	/*
 	 * Reset the event queue
 	 */
-	this.reset = function () {
+	this.reset = function (transactionID = true) {
+		if (transactionID != _transactionID) {
+			return;
+		}
 		//Zotero.debug("Resetting notifier event queue");
 		_queue = {};
-		_inTransaction = false;
+		_transactionID = false;
 	}
 }
 

@@ -57,4 +57,25 @@ describe("Zotero.Notifier", function () {
 			Zotero.Notifier.unregisterObserver(id);
 		});
 	});
+	
+	describe("#queue", function () {
+		it("should handle notification after DB timeout from another transaction", async function () {
+			var promise1 = Zotero.DB.executeTransaction(async function () {
+				var item = createUnsavedDataObject('item');
+				await item.save();
+				
+				await Zotero.Promise.delay(2000);
+				
+				Zotero.Notifier.queue('refresh', 'item', item.id);
+			}.bind(this));
+			
+			var promise2 = Zotero.DB.executeTransaction(async function () {
+				var item = createUnsavedDataObject('item');
+				await item.save();
+			}.bind(this), { waitTimeout: 1000 });
+			
+			await promise1;
+			assert.isTrue(promise2.isRejected());
+		});
+	});
 });
