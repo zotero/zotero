@@ -618,9 +618,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		Zotero.HTTP.triggerProxyAuth();
 		
 		// Add notifier queue callbacks to the DB layer
-		Zotero.DB.addCallback('begin', function () { return Zotero.Notifier.begin(); });
-		Zotero.DB.addCallback('commit', function () { return Zotero.Notifier.commit(); });
-		Zotero.DB.addCallback('rollback', function () { return Zotero.Notifier.reset(); });
+		Zotero.DB.addCallback('begin', id => Zotero.Notifier.begin(id));
+		Zotero.DB.addCallback('commit', id => Zotero.Notifier.commit(null, id));
+		Zotero.DB.addCallback('rollback', id => Zotero.Notifier.reset(id));
 		
 		try {
 			// Require >=2.1b3 database to ensure proper locking

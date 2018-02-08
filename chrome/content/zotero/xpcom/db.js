@@ -485,7 +485,7 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 		// Run begin callbacks
 		for (var i=0; i<this._callbacks.begin.length; i++) {
 			if (this._callbacks.begin[i]) {
-				this._callbacks.begin[i]();
+				this._callbacks.begin[i](id);
 			}
 		}
 		var conn = this._getConnection(options) || (yield this._getConnectionAsync(options));
@@ -516,13 +516,13 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 		// Run temporary commit callbacks
 		var f;
 		while (f = this._callbacks.current.commit.shift()) {
-			yield Zotero.Promise.resolve(f());
+			yield Zotero.Promise.resolve(f(id));
 		}
 		
 		// Run commit callbacks
 		for (var i=0; i<this._callbacks.commit.length; i++) {
 			if (this._callbacks.commit[i]) {
-				yield this._callbacks.commit[i]();
+				yield this._callbacks.commit[i](id);
 			}
 		}
 		
@@ -549,13 +549,13 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 		// Run temporary commit callbacks
 		var f;
 		while (f = this._callbacks.current.rollback.shift()) {
-			yield Zotero.Promise.resolve(f());
+			yield Zotero.Promise.resolve(f(id));
 		}
 		
 		// Run rollback callbacks
 		for (var i=0; i<this._callbacks.rollback.length; i++) {
 			if (this._callbacks.rollback[i]) {
-				yield Zotero.Promise.resolve(this._callbacks.rollback[i]());
+				yield Zotero.Promise.resolve(this._callbacks.rollback[i](id));
 			}
 		}
 		
