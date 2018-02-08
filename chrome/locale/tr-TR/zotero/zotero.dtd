@@ -178,19 +178,19 @@
 <!ENTITY zotero.selectitems.cancel.label "İptal et">
 <!ENTITY zotero.selectitems.select.label "Tamam">
 
-<!ENTITY zotero.bibliography.title "Bibliyografya Oluştur">
+<!ENTITY zotero.bibliography.title "Gönderme/Kaynakça Yarat">
 <!ENTITY zotero.bibliography.style.label "Gönderme Stili:">
 <!ENTITY zotero.bibliography.manageStyles "Stilleri Yönet...">
 <!ENTITY zotero.bibliography.locale.label "Dil:">
 <!ENTITY zotero.bibliography.outputMode "Çıktı Biçimi">
-<!ENTITY zotero.bibliography.bibliography "Bibliyografya">
+<!ENTITY zotero.bibliography.bibliography "Kaynakça">
 <!ENTITY zotero.bibliography.outputMethod "Çıktı Metodu:">
-<!ENTITY zotero.bibliography.saveAsRTF.label "RTF olarak Kaydet">
+<!ENTITY zotero.bibliography.saveAsRTF.label "RTF Olarak Kaydet">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML olarak Kaydet">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Panoya Kopyala">
 <!ENTITY zotero.bibliography.print.label "Yazdır">
 
-<!ENTITY zotero.integration.docPrefs.title "Döküman Tercihleri">
+<!ENTITY zotero.integration.docPrefs.title "Belge Tercihleri">
 <!ENTITY zotero.integration.addEditCitation.title "Gönderme Ekle/Düzenle">
 <!ENTITY zotero.integration.editBibliography.title "Kaynakça Düzenle">
 <!ENTITY zotero.integration.quickFormatDialog.title "Çabuk Gönderme Biçimle">
@@ -229,11 +229,11 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Göndermeleri bu şekilde kaydet:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Yer imleri">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Yer imleri Word ve LibreOffice arasında paylaşılabilirler, ama yanlışlıkla değiştirilirlerse hatalara neden olabilirler ve dipnotlara eklenemezler.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Yer imleri Word ve LibreOffice arasında paylaşılabilirler, ama yanlışlıkla değiştirilirlerse hatalara neden olabilirler ve dipnotlara konulamazlar.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Göndermeleri otomatik olarak güncelle">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Bekleyen güncellemeleri olan göndermeler belgede vurgulanacaktırlar.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Güncellemeleri devre dışı bırakmak, büyük belgelerde gönderme koymayı hızlandırabilir. Göndermeleri güncellemek için Yenile'ye tıklayınız.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "MEDLINE dergi kısaltmalarını kullan">
@@ -295,19 +295,19 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Belirsiz Gönderme">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Eşlenmiş Gönderme">
 <!ENTITY zotero.rtfScan.introPage.label "Giriş">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero göndermeleri otomatik olarak çıkarabilir ve tekrar düzenleyerek RTF dosyası içine kaynakça olarak koyabilir. Başlamak için aşağıdan bir RTF dosyası seçiniz.">
-<!ENTITY zotero.rtfScan.introPage.description2 "Başlamak için bir RTF giriş dosyası ve altında bir çıkış dosyası seçiniz:">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero, göndermeleri otomatik olarak ayıklayıp düzenleyebilir ve RTF dosyalarının içine kaynakça olarak koyabilir. RTF tarama özelliği, halen aşağıdaki biçimlendirme şekillerinde yaratılmış göndermeleri desteklemektedir:">
+<!ENTITY zotero.rtfScan.introPage.description2 "Başlamak için, aşağıdan bir RTF girdi dosyası ve bir çıktı dosyası seçiniz:">
 <!ENTITY zotero.rtfScan.scanPage.label "Göndermeler için Tarama">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero belgenizi gönderme bulmak için tarıyor. Lütfen bekleyiniz.">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero, belgenizi gönderme bulmak için tarıyor. Lütfen bekleyiniz.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Göndermelerin Onaylanması">
 <!ENTITY zotero.rtfScan.citationsPage.description "Lütfen aşağıdaki listede tanınan göndermeleri Zotero'nun doğru olarak eşleştirip eşleştirmediğini gözden geçiriniz. Bir sonraki adıma geçmeden önce eşleşmemiş veya belirsiz alıntılar çözümlenmelidir.">
 <!ENTITY zotero.rtfScan.stylePage.label "Belge Biçimlendirme">
 <!ENTITY zotero.rtfScan.formatPage.label "Gönderme Biçimlendirme">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero RTF dosyanızı biçimlendiriyor. Lütfen bekleyiniz.">
-<!ENTITY zotero.rtfScan.completePage.label "RTF Tarama Tamamlandı">
-<!ENTITY zotero.rtfScan.completePage.description "Belgeniz tarandı ve işlendi. Lütfnen biçimlendirmenin doğruluğunu kontrol ediniz.">
-<!ENTITY zotero.rtfScan.inputFile.label "Giriş Dosyası">
-<!ENTITY zotero.rtfScan.outputFile.label "Çıkış Dosyası">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero, RTF dosyanızı işliyor ve biçimlendiriyor. Lütfen bekleyiniz.">
+<!ENTITY zotero.rtfScan.completePage.label "RTF Taraması Tamamlandı">
+<!ENTITY zotero.rtfScan.completePage.description "Belgenizin taranması ve işlenmesi tamamlandı. Lütfen biçimlendirmesinin doğruluğunu kontrol ediniz.">
+<!ENTITY zotero.rtfScan.inputFile.label "Girdi Dosyası">
+<!ENTITY zotero.rtfScan.outputFile.label "Çıktı Dosyası">
 
 <!ENTITY zotero.file.choose.label "Dosya Seçiniz...">
 <!ENTITY zotero.file.noneSelected.label "Dosya seçilmedi">

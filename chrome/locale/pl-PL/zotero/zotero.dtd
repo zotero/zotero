@@ -231,9 +231,9 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Zakładki">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Zakładki mogą być współdzielone między edytorami Word i LibreOffice Writer, ale w razie ich przypadkowej modyfikacji mogą wystąpić błędy i nie mogą być one wstawiane do przypisów dolnych.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatycznie aktualizuj cytowania">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Cytowania z oczekującymi aktualizacjami będą podświetlone w dokumencie">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Wyłączenie aktualizacji cytować może przyspieszyć wstawianie cytowań w dużych dokumentach. Wciśnij Odśwież aby ręcznie zaktualizować cytowania.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Użyj skrótów czasopism w formacie MEDLINE">

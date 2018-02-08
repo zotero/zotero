@@ -11,7 +11,7 @@
 <!ENTITY zotero.general.refresh "Recarregar">
 <!ENTITY zotero.general.saveAs "Guardar Como…">
 <!ENTITY zotero.general.advancedOptions.label "Opções Avançadas">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Ferramentas">
 <!ENTITY zotero.general.more "Mais">
 <!ENTITY zotero.general.loading "Carregando…">
 
@@ -143,7 +143,7 @@
 <!ENTITY zotero.item.copyAsURL "Copiar como URL">
 <!ENTITY zotero.item.deletePermanently "Remover Permanentemente…">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "Remover Todas as Etiquetas…">
 
 <!ENTITY zotero.toolbar.newNote "Nova Nota">
 <!ENTITY zotero.toolbar.note.standalone "Nova Nota Isolada">
@@ -158,7 +158,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Carregando etiquetas…">
 <!ENTITY zotero.tagSelector.showAutomatic "Mostrar Etiquetas Automáticas">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Mostrar Todas as Etiquetas Nesta Biblioteca">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Remover Etiquetas Automáticas Nesta Biblioteca…">
 <!ENTITY zotero.tagSelector.clearAll "Desseleccionar Todas">
 <!ENTITY zotero.tagSelector.assignColor "Atribuir Cor...">
 <!ENTITY zotero.tagSelector.renameTag "Renomear a Etiqueta...">
@@ -231,9 +231,9 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Marcadores">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Os marcadores podem ser partilhados entre o Word e o LibreOffice, mas podem causar erros se forem acidentalmente modificados e não podem ser inseridos em notas de rodapé.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Actualizar citações automaticamente">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citações com actualizações pendentes serão destacadas no documento">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Desactivar actualizações pode acelerar a inserção de citações em documentos grandes. Clique em Refrescar para actualizar as citações manualmente.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Usar abreviaturas de publicações periódicas do MEDLINE">
@@ -244,7 +244,7 @@
 
 <!ENTITY zotero.integration.references.label "Referências na Bibliografia">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "Parar Sincronização">
 <!ENTITY zotero.sync.error "Erro de Sincronização">
 <!ENTITY zotero.sync.storage.progress "Progresso:">
 <!ENTITY zotero.sync.storage.downloads "Descarregamentos:">

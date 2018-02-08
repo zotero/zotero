@@ -68,7 +68,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Baixar os arquivos">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "no momento da sincronização">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "quando necessário">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verificar Servidor">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Ao utilizar o armazenamento Zotero, você concorda em aderir a seus">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "termos e condições">
 <!ENTITY zotero.preferences.sync.librariesToSync "Bibliotecas para sincronizar">
@@ -80,12 +80,12 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "para maiores informações.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Redefinir o histórico de sincronização de dados">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Mesclar os dados locais e remotos, ignorando o histórico de sincronização">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurar da Biblioteca Online">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Sobrescrever dados locais a partir das informações da biblioteca online.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaurar para a Biblioteca Online">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Sobrescrever biblioteca online a partir de informações locais de Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reconfigurar o histórico de sincronização de arquivo">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Comparar todos os arquivos de anexo com o serviço de armazenamento">
 <!ENTITY zotero.preferences.sync.reset "Reconfigurar">
 <!ENTITY zotero.preferences.sync.reset.button "Redefinir...">
 
@@ -193,7 +193,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Usar o diretório do perfil">
 <!ENTITY zotero.preferences.dataDir.custom "Personalizar:">
 <!ENTITY zotero.preferences.dataDir.choose "Selecionar...">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(especificado por linha de comando)">
 <!ENTITY zotero.preferences.dataDir.reveal "Exibir o diretório de dados">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrar para a nova localização padrão...">
 

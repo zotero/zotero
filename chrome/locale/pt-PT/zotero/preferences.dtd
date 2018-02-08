@@ -85,7 +85,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaurar para a Biblioteca em Linha">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Sobrepor a biblioteca em linha com os dados locais do Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reiniciar o Histórico de Sincronização de Arquivos">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Comparar todos os ficheiros de anexo com o serviço de armazenamento">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Comparar todos os ficheiros anexos com o serviço de armazenamento">
 <!ENTITY zotero.preferences.sync.reset "Restabelecer">
 <!ENTITY zotero.preferences.sync.reset.button "Repor…">
 
@@ -126,7 +126,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Usar a caixa de diálogo Adicionar Citação clássica">
 <!ENTITY zotero.preferences.styleEditor "Editor de Estilos">
-<!ENTITY zotero.preferences.stylePreview "Previsão de Estilos">
+<!ENTITY zotero.preferences.stylePreview "Antevisão de Estilos">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Gestor de Estilos">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Título">
