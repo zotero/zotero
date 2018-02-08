@@ -139,6 +139,19 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			
 			this.updateIcons('animate');
 			
+			// purgeDataObjects() starts a transaction, so if there's an active one then show a
+			// nice message and wait until there's not. Another transaction could still start
+			// before purgeDataObjects() and result in a wait timeout, but this should reduce the
+			// frequency of that.
+			while (Zotero.DB.inTransaction()) {
+				this.setSyncStatus(Zotero.getString('sync.status.waiting'));
+				Zotero.debug("Transaction in progress -- waiting to sync");
+				yield Zotero.DB.waitForTransaction('sync');
+				_stopCheck();
+			}
+			
+			this.setSyncStatus(Zotero.getString('sync.status.preparing'));
+			
 			// Purge deleted objects so they don't cause sync errors (e.g., long tags)
 			yield Zotero.purgeDataObjects(true);
 			
