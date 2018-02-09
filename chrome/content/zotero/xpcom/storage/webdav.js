@@ -866,7 +866,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					break;
 				
 				case "NONEXISTENT_FILE_NOT_MISSING":
-					var errorTitle = Zotero.getString('sync.storage.error.webdav.serverConfig.title');
+					errorTitle = Zotero.getString('sync.storage.error.webdav.serverConfig.title');
 					errorMsg = Zotero.getString('sync.storage.error.webdav.nonexistentFileNotMissing');
 					break;
 				
@@ -877,18 +877,25 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			}
 		}
 		
-		// TEMP
-		if (!errorMsg) {
-			errorMsg = err;
+		var e;
+		if (errorMsg) {
+			e = {
+				message: errorMsg,
+				// Prevent Report Errors button for known errors
+				dialogButtonText: null
+			};
+			Zotero.logError(errorMsg);
 		}
-		
-		Zotero.logError(errorMsg);
+		else {
+			e = err;
+			Zotero.logError(err);
+		}
 		
 		if (!skipSuccessMessage) {
 			if (!errorTitle) {
-				var errorTitle = Zotero.getString("general.error");
+				errorTitle = Zotero.getString("general.error");
 			}
-			promptService.alert(window, errorTitle, errorMsg);
+			Zotero.Utilities.Internal.errorPrompt(errorTitle, e);
 		}
 		return false;
 	}),
