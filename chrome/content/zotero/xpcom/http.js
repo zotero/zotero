@@ -1024,6 +1024,7 @@ Zotero.HTTP = new function() {
 		}
 		
 		let secInfo = channel.securityInfo;
+		let msg;
 		if (secInfo instanceof Ci.nsITransportSecurityInfo) {
 			secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
 			if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE)
@@ -1050,6 +1051,10 @@ Zotero.HTTP = new function() {
 			}
 			else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN)
 					== Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
+				msg = Zotero.getString('sync.error.sslConnectionError');
+			}
+			else {
+				Zotero.debug(secInfo.securityState, 1);
 				msg = Zotero.getString('sync.error.sslConnectionError');
 			}
 			throw new Zotero.HTTP.SecurityException(
