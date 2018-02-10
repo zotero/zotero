@@ -4054,8 +4054,12 @@ var ZoteroPane = new function()
 					if (doi) {
 						// Pull out DOI, in case there's a prefix
 						doi = Zotero.Utilities.cleanDOI(doi);
-						if (doi) {
-							uri = "http://dx.doi.org/" + encodeURIComponent(doi);
+						if(doi) {
+							if(/10\/[^\s]*[^\s\.,]/.test(x)) {
+								uri = "https://doi.org/" + doi;
+							} else {
+								uri = "https://doi.org/" + encodeURIComponent(doi);
+							}
 						}
 					}
 				}

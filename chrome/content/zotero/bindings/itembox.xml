@@ -426,7 +426,11 @@
 							// Pull out DOI, in case there's a prefix
 							var doi = Zotero.Utilities.cleanDOI(val);
 							if (doi) {
-								doi = "https://doi.org/" + encodeURIComponent(doi);
+								if(/10\/[^\s]*[^\s\.,]/.test(x)) {
+									doi = "https://doi.org/" + doi;
+								} else {
+									doi = "https://doi.org/" + encodeURIComponent(doi);
+								}
 								label.classList.add("pointer");
 								label.setAttribute("onclick", "ZoteroPane_Local.loadURI('" + doi + "', event)");
 								label.setAttribute("tooltiptext", Zotero.getString('locate.online.tooltip'));

@@ -223,7 +223,7 @@ Zotero.Report.HTML = new function () {
 			}
 			// Hyperlink DOI
 			else if (i == 'DOI') {
-				fieldText = '<a href="' + escapeXML('http://doi.org/' + obj[i]) + '">'
+				fieldText = '<a href="' + escapeXML('https://doi.org/' + obj[i]) + '">'
 					+ escapeXML(obj[i]) + '</a>';
 			}
 			// Remove SQL date from multipart dates
