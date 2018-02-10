@@ -398,7 +398,6 @@ Zotero_Preferences.Sync = {
 	
 	onStorageSettingsKeyPress: Zotero.Promise.coroutine(function* (event) {
 		if (event.keyCode == 13) {
-			yield this.onStorageSettingsChange();
 			yield this.verifyStorageServer();
 		}
 	}),
@@ -480,6 +479,11 @@ Zotero_Preferences.Sync = {
 	
 	
 	verifyStorageServer: Zotero.Promise.coroutine(function* () {
+		// onchange weirdly isn't triggered when clicking straight from a field to the button,
+		// so we have to trigger this here (and we don't trigger it for Enter in
+		// onStorageSettingsKeyPress()).
+		yield this.onStorageSettingsChange();
+		
 		Zotero.debug("Verifying storage");
 		
 		var verifyButton = document.getElementById("storage-verify");
