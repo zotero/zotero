@@ -8,9 +8,9 @@
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
 
 <!ENTITY zotero.preferences.userInterface "Brukargrensesnitt">
-<!ENTITY zotero.preferences.layout "Layout:">
+<!ENTITY zotero.preferences.layout "Stil:">
 <!ENTITY zotero.preferences.layout.standard "Standard">
-<!ENTITY zotero.preferences.layout.stacked "Stacked">
+<!ENTITY zotero.preferences.layout.stacked "Stabla">
 <!ENTITY zotero.preferences.fontSize "Skriftstorleik">
 <!ENTITY zotero.preferences.fontSize.small "Liten">
 <!ENTITY zotero.preferences.fontSize.medium "Middels">
@@ -19,7 +19,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Skriftstorleik på notat:">
 
 <!ENTITY zotero.preferences.miscellaneous "Diverse">
-<!ENTITY zotero.preferences.autoUpdate "Sjekk automatisk for oppdaterte omsetjarar og stilar">
+<!ENTITY zotero.preferences.autoUpdate "Sjekk automatisk etter oppdaterte omsetjarar og stilar">
 <!ENTITY zotero.preferences.updateNow "Oppdater no">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapporter øydelagte nettstadomsetjarar">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "La zotero.org justera innhald ut frå installert versjon av Zotero">
@@ -36,13 +36,13 @@
 <!ENTITY zotero.preferences.groups.childNotes "undernotat">
 <!ENTITY zotero.preferences.groups.childFiles "undernotat og importerte filer">
 <!ENTITY zotero.preferences.groups.childLinks "underlenkjer">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "taggar">
 
-<!ENTITY zotero.preferences.feeds "Feeds">
-<!ENTITY zotero.preferences.feeds.sorting.label "Sorting:">
-<!ENTITY zotero.preferences.feeds.sorting.newest "Newest items first">
-<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
-<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+<!ENTITY zotero.preferences.feeds "Nyheitskjelder">
+<!ENTITY zotero.preferences.feeds.sorting.label "Sorter:">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Nyaste element først">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Eldste element først">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Standardar for nyheitskjelder">
 
 <!ENTITY zotero.preferences.openurl.search "Leit etter &quot;resolvers&quot;">
 <!ENTITY zotero.preferences.openurl.custom "Custom…">
@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
 <!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "Lag konto">
-<!ENTITY zotero.preferences.sync.lostPassword "Mista passordet?">
+<!ENTITY zotero.preferences.sync.lostPassword "Gløymt passordet?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkroniser automatisk">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Synkroniser fulltekst-innhald">
 <!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero kan synkronisera all teksten i filene i Zotero-biblioteka dine med zotero.org og andre tilknytta einingar, slik at du lett kan søka etter filene kor du enn er. Tekst og anna innhald i filene dine vert ikkje delt offentleg.">

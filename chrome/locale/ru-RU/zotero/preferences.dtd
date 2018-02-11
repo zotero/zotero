@@ -19,9 +19,9 @@
 <!ENTITY zotero.preferences.fontSize.notes "Размер шрифта заметок:">
 
 <!ENTITY zotero.preferences.miscellaneous "Разное">
-<!ENTITY zotero.preferences.autoUpdate "Автоматически проверять на наличие обновленных трансляторов и стилей">
+<!ENTITY zotero.preferences.autoUpdate "Автоматически проверять на наличие обновленных импóртеров и стилей">
 <!ENTITY zotero.preferences.updateNow "Обновить сейчас">
-<!ENTITY zotero.preferences.reportTranslationFailure "Сообщить о неработающих трансляторах сайта">
+<!ENTITY zotero.preferences.reportTranslationFailure "Сообщить о неработающих импóртерах сайта">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Разрешить zotero.org модифицировать содержание на основе текущей версии Zotero">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Если включено, текущая версия Zotero будет добавляться к HTTP запросам на zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Использовать Zotero для загруженных файлов RIS/Refer">
@@ -87,7 +87,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Сбросить историю синхронизации файлов">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Сравнить все связанные файлы с данными в хранилище">
 <!ENTITY zotero.preferences.sync.reset "Сбросить">
-<!ENTITY zotero.preferences.sync.reset.button "Сбросить настройки…">
+<!ENTITY zotero.preferences.sync.reset.button "Сбросить…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Поиск">
@@ -206,8 +206,8 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Поддержка БД">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Проверить целостность БД">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Сбросить настройки конвертеров и стилей…">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Сбросить настройки конвертеров…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Сбросить настройки импóртеров и стилей…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Сбросить настройки импóртеров…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Сбросить настройки стилей…">
 
 <!ENTITY zotero.preferences.configEditor "Редактор конфигурации">
