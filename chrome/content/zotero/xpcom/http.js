@@ -12,6 +12,8 @@ Zotero.HTTP = new function() {
 	this.UnexpectedStatusException = function(xmlhttp, msg) {
 		this.xmlhttp = xmlhttp;
 		this.status = xmlhttp.status;
+		this.channelStatus = null;
+		this.responseStatus = null;
 		this.channel = xmlhttp.channel;
 		this.message = msg;
 		this.stack = new Error().stack;
@@ -32,6 +34,24 @@ Zotero.HTTP = new function() {
 		}
 		catch (e) {
 			Zotero.debug(e, 1);
+		}
+		
+		// If the connection failed, try to find out what really happened
+		if (!this.status) {
+			try {
+				if (xmlhttp.channel.status) {
+					this.channelStatus = xmlhttp.channel.status;
+					Zotero.debug("Channel status was " + this.channelStatus, 2);
+				}
+			}
+			catch (e) {}
+			try {
+				if (xmlhttp.channel.responseStatus) {
+					this.responseStatus = xmlhttp.channel.responseStatus;
+					Zotero.debug("Response status was " + this.responseStatus, 2);
+				}
+			}
+			catch (e) {}
 		}
 	};
 	this.UnexpectedStatusException.prototype = Object.create(Error.prototype);
@@ -248,6 +268,18 @@ Zotero.HTTP = new function() {
 		xmlhttp.onloadend = function() {
 			var status = xmlhttp.status;
 			
+			// If an invalid HTTP response (e.g., NS_ERROR_INVALID_CONTENT_ENCODING) includes a
+			// 4xx or 5xx HTTP response code, swap it in, since it might be enough info to do
+			// what we need (e.g., verify a 404 from a WebDAV server)
+			try {
+				if (!status && xmlhttp.channel.responseStatus >= 400) {
+					Zotero.warn(`Overriding status for invalid response for ${dispURL} `
+						+ `(${xmlhttp.channel.status})`);
+					status = xmlhttp.channel.responseStatus;
+				}
+			}
+			catch (e) {}
+			
 			if (options.successCodes) {
 				var success = options.successCodes.indexOf(status) != -1;
 			}
@@ -264,13 +296,13 @@ Zotero.HTTP = new function() {
 			
 			if(success) {
 				Zotero.debug("HTTP " + method + " " + dispURL
-					+ " succeeded with " + xmlhttp.status);
+					+ " succeeded with " + status);
 				if (options.debug) {
 					Zotero.debug(xmlhttp.responseText);
 				}
 				deferred.resolve(xmlhttp);
 			} else {
-				let msg = "HTTP " + method + " " + dispURL + " failed with status code " + xmlhttp.status;
+				let msg = "HTTP " + method + " " + dispURL + " failed with status code " + status;
 				if (!xmlhttp.responseType && xmlhttp.responseText) {
 					msg += ":\n\n" + xmlhttp.responseText;
 				}
@@ -1025,6 +1057,8 @@ Zotero.HTTP = new function() {
 		
 		let secInfo = channel.securityInfo;
 		let msg;
+		let dialogButtonText;
+		let dialogButtonCallback;
 		if (secInfo instanceof Ci.nsITransportSecurityInfo) {
 			secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
 			if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE)
@@ -1053,17 +1087,15 @@ Zotero.HTTP = new function() {
 					== Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
 				msg = Zotero.getString('sync.error.sslConnectionError');
 			}
-			else {
-				Zotero.debug(secInfo.securityState, 1);
-				msg = Zotero.getString('sync.error.sslConnectionError');
+			if (msg) {
+				throw new Zotero.HTTP.SecurityException(
+					msg,
+					{
+						dialogButtonText,
+						dialogButtonCallback
+					}
+				);
 			}
-			throw new Zotero.HTTP.SecurityException(
-				msg,
-				{
-					dialogButtonText,
-					dialogButtonCallback
-				}
-			);
 		}
 	}
 
