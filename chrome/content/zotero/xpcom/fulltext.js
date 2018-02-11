@@ -78,7 +78,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			pdfInfoFileName += '.exe';
 		}
 		
-		let dir = FileUtils.getFile('AChrom', []).parent;
+		let dir = FileUtils.getDir('AChrom', []).parent;
 		
 		_pdfData = dir.clone();
 		_pdfData.append('poppler-data');
