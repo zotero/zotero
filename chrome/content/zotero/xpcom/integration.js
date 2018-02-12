@@ -490,6 +490,7 @@ Zotero.Integration.Interface.prototype.addCitation = Zotero.Promise.coroutine(fu
  * @return {Promise}
  */
 Zotero.Integration.Interface.prototype.editCitation = Zotero.Promise.coroutine(function* () {
+	yield this._session.init(true, false);
 	var docField = this._doc.cursorInField(this._session.data.prefs['fieldType']);
 	if(!docField) {
 		throw new Zotero.Exception.Alert("integration.error.notInCitation", [],
@@ -1317,36 +1318,35 @@ Zotero.Integration.Session.prototype.resetRequest = function(doc) {
  */
 Zotero.Integration.Session.prototype.init = Zotero.Promise.coroutine(function *(require, dontRunSetDocPrefs) {
 	var data = this.data;
-	// If no data, show doc prefs window
-	if (!data.prefs.fieldType) {
-		var haveFields = false;
-		data = new Zotero.Integration.DocumentData();
-		
-		if (require) {
-			// check to see if fields already exist
-			for (let fieldType of [this.primaryFieldType, this.secondaryFieldType]) {
-				var fields = this._doc.getFields(fieldType);
-				if (fields.hasMoreElements()) {
-					data.prefs.fieldType = fieldType;
-					haveFields = true;
-					break;
-				}
-			}
-			
-			// if no fields, throw an error
-			if (!haveFields) {
-				return Zotero.Promise.reject(new Zotero.Exception.Alert(
-				"integration.error.mustInsertCitation",
-				[], "integration.error.title"));
-			} else {
-				Zotero.debug("Integration: No document preferences found, but found "+data.prefs.fieldType+" fields");
+	var haveFields = false;
+	
+	// If prefs exist
+	if (require && data.prefs.fieldType) {
+		// check to see if fields already exist
+		for (let fieldType of [this.primaryFieldType, this.secondaryFieldType]) {
+			var fields = this._doc.getFields(fieldType);
+			if (fields.hasMoreElements()) {
+				data.prefs.fieldType = fieldType;
+				haveFields = true;
+				break;
 			}
 		}
+	}
 		
+	if (require && (!haveFields || !data.prefs.fieldType)) {
+		// If required but no fields and preferences exist throw an error
+		return Zotero.Promise.reject(new Zotero.Exception.Alert(
+		"integration.error.mustInsertCitation",
+		[], "integration.error.title"));
+	} else if (!data.prefs.fieldType) {
+		Zotero.debug("Integration: No document preferences found, but found "+data.prefs.fieldType+" fields");
+		// Unless explicitly disabled
 		if (dontRunSetDocPrefs) return false;
-		
+
+		// Show the doc prefs dialogue
 		yield this.setDocPrefs();
 	}
+	
 	return true;
 });
 
@@ -1506,7 +1506,7 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 			Zotero.debug("Integration: "+citation.citationID+" ("+index+") needs new citationID");
 			citation.citationID = Zotero.randomString();
 		}
-		this.updateIndices[index] = true;
+		this.newIndices[index] = true;
 	}
 	Zotero.debug("Integration: Adding citationID "+citation.citationID);
 	this.documentCitationIDs[citation.citationID] = citation.citationID;
@@ -1552,6 +1552,7 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
 			var citationsPost;
 			if (index in this.newIndices) {
 				citationsPost = [];
+				delete this.newIndices[index];
 			} else {
 				citationsPost = citations.slice(citationToFieldIdxMapping[index]+1);
 			}
@@ -1567,7 +1568,6 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
 				this.citationsByIndex[idx].text = text;
 			}
 			
-			delete this.newIndices[index];
 		}
 	}
 }
