@@ -216,8 +216,9 @@ var Zotero_File_Interface_Bibliography = new function() {
 				!selectedStyleObj.usesAbbreviation;
 			
 			// Hide the automaticCitationUpdates checkbox before the prompt is shown
-			document.getElementById("automaticCitationUpdates-vbox").hidden
-				= _io.dontAskDelayCitationUpdates == undefined;
+			var showAutomaticUpdatesOption = Zotero.Prefs.get('integration.alwaysShowAutomaticUpdatesOption')
+				|| _io.dontAskDelayCitationUpdates !== undefined;
+			document.getElementById("automaticCitationUpdates-vbox").hidden = !showAutomaticUpdatesOption;
 			
 			// Highlight delay citations checkbox after displaying the alert
 			// NOTE: Currently unused
