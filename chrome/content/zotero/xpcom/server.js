@@ -33,7 +33,7 @@ Zotero.Server = new function() {
 		404:"Not Found",
 		412:"Precondition Failed",
 		500:"Internal Server Error",
-		501:"Method Not Implemented",
+		501:"Not Implemented",
 		504:"Gateway Timeout"
 	};
 	
