@@ -202,6 +202,7 @@ Zotero.Utilities.Translate.prototype.processDocuments = async function (urls, pr
 		Zotero.debug("ZU.processDocuments() now takes only 3 arguments -- update your code");
 		var onDone = arguments[2];
 		var onError = arguments[3];
+		noCompleteOnError = false;
 	}
 	
 	var translate = this._translate;
