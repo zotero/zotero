@@ -2587,6 +2587,7 @@ Zotero.Translate.Search.prototype = new Zotero.Translate.Base();
 Zotero.Translate.Search.prototype.type = "search";
 Zotero.Translate.Search.prototype._entryFunctionSuffix = "Search";
 Zotero.Translate.Search.prototype.Sandbox = Zotero.Translate.Sandbox._inheritFromBase(Zotero.Translate.Sandbox.Search);
+Zotero.Translate.Search.prototype.ERROR_NO_RESULTS = "No items returned from any translator";
 
 /**
  * @borrows Zotero.Translate.Web#setCookieSandbox
@@ -2664,7 +2665,8 @@ Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
 			&& !this._savingItems
 			//length is 0 only when translate was called without translators
 			&& this.translator.length) {
-		Zotero.debug("Translate: Could not find a result using "+this.translator[0].label, 3);
+		Zotero.debug("Translate: Could not find a result using " + this.translator[0].label
+			+ (this.translator.length > 1 ? " -- trying next translator" : ""), 3);
 		if(error) Zotero.debug(this._generateErrorString(error), 3);
 		if(this.translator.length > 1) {
 			this.translator.shift();
@@ -2675,7 +2677,8 @@ Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
 			});
 			return;
 		} else {
-			error = "No items returned from any translator";
+			Zotero.debug("No more translators to try");
+			error = this.ERROR_NO_RESULTS;
 			returnValue = false;
 		}
 	}
