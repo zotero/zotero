@@ -127,7 +127,7 @@ echo "$ZOTERO_UNIT_PATH" > "$PROFILE/extensions/zotero-unit@zotero.org"
 mkdir "$TEMPDIR/Zotero"
 
 # Download PDF tools if not cached in the source directory and copy to profile directory
-PDF_TOOLS_VERSION="0.0.1"
+PDF_TOOLS_VERSION="0.0.3"
 PDF_TOOLS_URL="https://zotero-download.s3.amazonaws.com/pdftools/pdftools-$PDF_TOOLS_VERSION.tar.gz"
 PDF_TOOLS_CACHE_DIR="$ROOT_DIR/tmp/pdftools"
 PDF_TOOLS_DIR="$PROFILE/pdftools"
