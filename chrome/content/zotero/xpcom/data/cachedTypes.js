@@ -464,39 +464,39 @@ Zotero.ItemTypes = new function() {
 			case 'artwork':
 			case 'audioRecording':
 			case 'bill':
+			case 'blogPost':
 			case 'book':
 			case 'bookSection':
+			case 'case':
 			case 'computerProgram':
+			case 'dictionaryEntry':
+			case 'email':
+			case 'encyclopediaArticle':
 			case 'film':
 			case 'forumPost':
+			case 'hearing':
 			case 'instantMessage':
 			case 'interview':
 			case 'journalArticle':
 			case 'letter':
 			case 'magazineArticle':
+			case 'manuscript':
 			case 'newspaperArticle':
 			case 'note':
+			case 'patent':
+			case 'presentation':
 			case 'report':
+			case 'statute':
 			case 'thesis':
 			case 'webpage':
 				return "chrome://zotero/skin/treeitem-" + itemType + suffix + ".png";
 			
 			// No HiDPI images available
 			case 'attachment-snapshot':
-			case 'blogPost':
-			case 'case':
 			case 'conferencePaper':
-			case 'dictionaryEntry':
-			case 'email':
-			case 'encyclopediaArticle':
-			case 'hearing':
-			case 'manuscript':
 			case 'map':
-			case 'patent':
 			case 'podcast':
-			case 'presentation':
 			case 'radioBroadcast':
-			case 'statute':
 			case 'tvBroadcast':
 			case 'videoRecording':
 				return "chrome://zotero/skin/treeitem-" + itemType + ".png";
