@@ -1929,29 +1929,21 @@ Zotero.Translate.Base.prototype = {
 	 * Generates a string from an exception
 	 * @param {String|Exception} error
 	 */
-	"_generateErrorString":function(error) {
-		var errorString = "";
-		if(typeof(error) == "string") {
-			errorString = "\nthrown exception => "+error;
-		} else {
-			var haveStack = false;
-			for(var i in error) {
-				if(typeof(error[i]) != "object") {
-					if(i === "stack") haveStack = true;
-					errorString += "\n"+i+' => '+error[i];
-				}
-			}
-			errorString += "\nstring => "+error.toString();
-			if(!haveStack && error.stack) {
-				// In case the stack is not enumerable
-				errorString += "\nstack => "+error.stack.toString();
-			}
+	_generateErrorString: function (error) {
+		var errorString = error;
+		if (error.stack && error) {
+			errorString += "\n\n" + error.stack;
 		}
-		
-		errorString += "\nurl => "+this.path
-			+ "\ndownloadAssociatedFiles => "+Zotero.Prefs.get("downloadAssociatedFiles")
-			+ "\nautomaticSnapshots => "+Zotero.Prefs.get("automaticSnapshots");
-		return errorString.substr(1);
+		if (this.path) {
+			errorString += `\nurl => ${this.path}`;
+		}
+		if (Zotero.Prefs.get("downloadAssociatedFiles")) {
+			errorString += "\ndownloadAssociatedFiles => true";
+		}
+		if (Zotero.Prefs.get("automaticSnapshots")) {
+			errorString += "\nautomaticSnapshots => true";
+		}
+		return errorString;
 	},
 	
 	/**
