@@ -477,6 +477,7 @@ Zotero.ItemTypes = new function() {
 			case 'newspaperArticle':
 			case 'note':
 			case 'report':
+			case 'thesis':
 			case 'webpage':
 				return "chrome://zotero/skin/treeitem-" + itemType + suffix + ".png";
 			
@@ -496,7 +497,6 @@ Zotero.ItemTypes = new function() {
 			case 'presentation':
 			case 'radioBroadcast':
 			case 'statute':
-			case 'thesis':
 			case 'tvBroadcast':
 			case 'videoRecording':
 				return "chrome://zotero/skin/treeitem-" + itemType + ".png";
