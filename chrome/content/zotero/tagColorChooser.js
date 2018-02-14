@@ -52,9 +52,9 @@ var Zotero_Tag_Color_Chooser = new function() {
 			colorPicker.setAttribute('tileWidth', 24);
 			colorPicker.setAttribute('tileHeight', 24);
 			colorPicker.colors = [
-				'#990000', '#CC9933', '#FF9900',
-				'#FFCC00', '#007439', '#1049A9',
-				'#9999FF', '#CC66CC', '#993399'
+				'#FF6666', '#FF8C19', '#999999',
+				'#5FB236', '#009980', '#2EA8E5',
+				'#576DD9', '#A28AE5', '#A6507B'
 			];
 			
 			var maxTags = document.getElementById('max-tags');
