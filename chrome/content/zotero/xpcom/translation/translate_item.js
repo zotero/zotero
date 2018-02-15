@@ -635,7 +635,8 @@ Zotero.Translate.ItemSaver.prototype = {
 			fileBaseName,
 			contentType: mimeType,
 			cookieSandbox: this._cookieSandbox,
-			collections: !parentItemID ? this._collections : undefined
+			collections: !parentItemID ? this._collections : undefined,
+			http_referer: attachment.http_referer
 		});
 	}),
 	
