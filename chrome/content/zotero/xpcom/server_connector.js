@@ -539,6 +539,7 @@ Zotero.Server.Connector.SaveItem.prototype = {
 			collections: collection ? [collection.id] : undefined,
 			attachmentMode: Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD,
 			forceTagType: 1,
+			referrer: data.uri,
 			cookieSandbox,
 			proxy
 		});

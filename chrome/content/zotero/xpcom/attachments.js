@@ -246,7 +246,8 @@ Zotero.Attachments = new function(){
 	
 	/**
 	 * @param {Object} options - 'libraryID', 'url', 'parentItemID', 'collections', 'title',
-	 *                           'fileBaseName', 'contentType', 'cookieSandbox', 'saveOptions'
+	 *                           'fileBaseName', 'contentType', 'referrer', 'cookieSandbox',
+	 *                           'saveOptions'
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
 	this.importFromURL = Zotero.Promise.coroutine(function* (options) {
@@ -257,6 +258,7 @@ Zotero.Attachments = new function(){
 		var title = options.title;
 		var fileBaseName = options.fileBaseName;
 		var contentType = options.contentType;
+		var referrer = options.referrer;
 		var cookieSandbox = options.cookieSandbox;
 		var saveOptions = options.saveOptions;
 		
@@ -347,7 +349,12 @@ Zotero.Attachments = new function(){
 			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
 				.createInstance(Components.interfaces.nsIURL);
 			nsIURL.spec = url;
-			Zotero.Utilities.Internal.saveURI(wbp, nsIURL, tmpFile);
+			var headers = {};
+			if (referrer) {
+				headers.Referer = referrer;
+			}
+			Zotero.Utilities.Internal.saveURI(wbp, nsIURL, tmpFile, headers);
+
 
 			yield deferred.promise;
 			let sample = yield Zotero.File.getContentsAsync(tmpFile, null, 1000);

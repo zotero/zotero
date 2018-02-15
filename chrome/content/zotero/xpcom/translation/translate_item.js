@@ -54,6 +54,7 @@ Zotero.Translate.ItemSaver = function(options) {
 	this.attachmentMode = Zotero.Libraries.get(this._libraryID).filesEditable ? options.attachmentMode :
 	                      Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE;
 	this._forceTagType = options.forceTagType;
+	this._referrer = options.referrer;
 	this._cookieSandbox = options.cookieSandbox;
 	this._proxy = options.proxy;
 	
@@ -634,6 +635,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			title,
 			fileBaseName,
 			contentType: mimeType,
+			referrer: this._referrer,
 			cookieSandbox: this._cookieSandbox,
 			collections: !parentItemID ? this._collections : undefined
 		});
