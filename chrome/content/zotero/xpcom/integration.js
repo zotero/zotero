@@ -1553,6 +1553,8 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
 			if (index in this.newIndices) {
 				citationsPost = [];
 				delete this.newIndices[index];
+				// If this item will need updating later citation processing will reset this index later in the loop
+				delete this.updateIndices[index];
 			} else {
 				citationsPost = citations.slice(citationToFieldIdxMapping[index]+1);
 			}
