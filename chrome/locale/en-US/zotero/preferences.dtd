@@ -121,8 +121,6 @@
 <!ENTITY zotero.preferences.prefpane.cite					"Cite">
 <!ENTITY zotero.preferences.cite.styles			"Styles">
 <!ENTITY zotero.preferences.cite.wordProcessors	"Word Processors">
-<!ENTITY zotero.preferences.cite.wordProcessors.somePluginsDisabled "Some word processor plugins are disabled.">
-<!ENTITY zotero.preferences.cite.wordProcessors.enablePlugins "Enable Plugins and Restart Zotero">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog		"Use classic Add Citation dialog">
 <!ENTITY zotero.preferences.styleEditor                  "Style Editor">
 <!ENTITY zotero.preferences.stylePreview                 "Style Preview">
