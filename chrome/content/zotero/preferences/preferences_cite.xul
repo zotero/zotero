@@ -96,11 +96,17 @@
 					</groupbox>
 				</tabpanel>
 				<tabpanel orient="vertical" id="wordProcessors">
-					<label id="wordProcessors-noWordProcessorPluginsInstalled" width="45em" hidden="true">
-							&zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled;
-					</label>
+					<vbox id="wordProcessors-somePluginsDisabled" hidden="true">
+						<label>
+								&zotero.preferences.cite.wordProcessors.somePluginsDisabled;
+						</label>
+						<hbox pack="center">
+							<button id="wordProcessors-enablePlugins"
+								label="&zotero.preferences.cite.wordProcessors.enablePlugins;"
+								oncommand="Zotero_Preferences.Cite.enableWordPlugins()"/>
+						</hbox>
+					</vbox>
 					<checkbox label="&zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog;" preference="pref-cite-useClassicAddCitationDialog"/>
-					<label id="wordProcessors-getWordProcessorPlugins" class="zotero-text-link" href="&zotero.preferences.cite.wordProcessors.getPlugins.url;" value="&zotero.preferences.cite.wordProcessors.getPlugins;"/>
 				</tabpanel>
 			</tabpanels>
 		</tabbox>

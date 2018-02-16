@@ -121,9 +121,8 @@
 <!ENTITY zotero.preferences.prefpane.cite					"Cite">
 <!ENTITY zotero.preferences.cite.styles			"Styles">
 <!ENTITY zotero.preferences.cite.wordProcessors	"Word Processors">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins	"Get word processor plug-ins…">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url	"http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
+<!ENTITY zotero.preferences.cite.wordProcessors.somePluginsDisabled "Some word processor plugins are disabled.">
+<!ENTITY zotero.preferences.cite.wordProcessors.enablePlugins "Enable Plugins and Restart Zotero">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog		"Use classic Add Citation dialog">
 <!ENTITY zotero.preferences.styleEditor                  "Style Editor">
 <!ENTITY zotero.preferences.stylePreview                 "Style Preview">

@@ -26,22 +26,48 @@
 "use strict";
 
 Zotero_Preferences.Cite = {
+	wordPluginIDs: new Set([
+		'zoteroOpenOfficeIntegration@zotero.org',
+		'zoteroMacWordIntegration@zotero.org',
+		'zoteroWinWordIntegration@zotero.org'
+	]),
+
 	init: Zotero.Promise.coroutine(function* () {
+		Components.utils.import("resource://gre/modules/AddonManager.jsm");
 		this.updateWordProcessorInstructions();
 		yield this.refreshStylesList();
 	}),
 	
 	
 	/**
-	 * Determines if there are word processors, and if not, enables no word processor message
+	 * Determines if any word processors are disabled and if so, shows a message in the pref pane
 	 */
-	updateWordProcessorInstructions: function () {
-		if(document.getElementById("wordProcessors").childNodes.length == 2) {
-			document.getElementById("wordProcessors-noWordProcessorPluginsInstalled").hidden = undefined;
+	updateWordProcessorInstructions: async function () {
+		var someDisabled = false;
+		await new Promise(function(resolve) {
+			AddonManager.getAllAddons(function(addons) {
+				for (let addon of addons) {
+					if (Zotero_Preferences.Cite.wordPluginIDs.has(addon.id) && addon.userDisabled) {
+						someDisabled = true;
+					}
+				}
+				resolve();
+			});
+		});
+		if (someDisabled) {
+			document.getElementById("wordProcessors-somePluginsDisabled").hidden = undefined;
 		}
-		if(Zotero.isStandalone) {
-			document.getElementById("wordProcessors-getWordProcessorPlugins").hidden = true;
-		}
+	},
+	
+	enableWordPlugins: function () {
+		AddonManager.getAllAddons(function(addons) {
+			for (let addon of addons) {
+				if (Zotero_Preferences.Cite.wordPluginIDs.has(addon.id) && addon.userDisabled) {
+					addon.userDisabled = false;
+				}
+			}
+			return Zotero.Utilities.Internal.quit(true);
+		});
 	},
 	
 	
