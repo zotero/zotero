@@ -622,7 +622,7 @@ var Zotero_QuickFormat = new function () {
 	 * Builds the string to go inside a bubble
 	 */
 	function _buildBubbleString(citationItem) {
-		var item = Zotero.Cite.getItem(citationItem.id);
+		var item = Zotero.Cite.getItem(citationItem.id, true);
 		// create text for bubble
 		
 		// Creator
@@ -944,7 +944,7 @@ var Zotero_QuickFormat = new function () {
 		
 		Zotero.Cite.getItem(panelRefersToBubble.citationItem.id).key;
 
-		var item = Zotero.Cite.getItem(target.citationItem.id);
+		var item = Zotero.Cite.getItem(target.citationItem.id, true);
 		document.getElementById("citation-properties-title").textContent = item.getDisplayTitle();
 		while(panelInfo.hasChildNodes()) panelInfo.removeChild(panelInfo.firstChild);
 		_buildItemDescription(item, panelInfo);
