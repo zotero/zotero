@@ -1059,94 +1059,132 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		else if (e.name && e.name == 'ZoteroObjectUploadError') {
 			let { code, data, objectType, object } = e;
 			
-			// Tag too long
-			if (code == 413 && objectType == 'item') {
-				if (data && data.tag !== undefined) {
-					// Show long tag fixer and handle result
-					e.dialogButtonText = Zotero.getString('general.fix');
-					e.dialogButtonCallback = Zotero.Promise.coroutine(function* () {
-						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						   .getService(Components.interfaces.nsIWindowMediator);
-						var lastWin = wm.getMostRecentWindow("navigator:browser");
-						
-						// Open long tag fixer for every long tag in every editable library we're syncing
-						var editableLibraries = options.libraries
-							.filter(x => Zotero.Libraries.get(x).editable);
-						for (let libraryID of editableLibraries) {
-							let oldTagIDs = yield Zotero.Tags.getLongTagsInLibrary(libraryID);
-							for (let oldTagID of oldTagIDs) {
-								let oldTag = Zotero.Tags.getName(oldTagID);
-								let dataOut = { result: null };
-								lastWin.openDialog(
-									'chrome://zotero/content/longTagFixer.xul',
-									'',
-									'chrome,modal,centerscreen',
-									oldTag,
-									dataOut
-								);
-								// If dialog was cancelled, stop
-								if (!dataOut.result) {
-									return;
-								}
-								switch (dataOut.result.op) {
-								case 'split':
-									for (let libraryID of editableLibraries) {
-										let itemIDs = yield Zotero.Tags.getTagItems(libraryID, oldTagID);
-										yield Zotero.DB.executeTransaction(function* () {
-											for (let itemID of itemIDs) {
-												let item = yield Zotero.Items.getAsync(itemID);
-												for (let tag of dataOut.result.tags) {
-													item.addTag(tag);
-												}
-												item.removeTag(oldTag);
-												yield item.save();
-											}
-											yield Zotero.Tags.purge(oldTagID);
-										});
-									}
-									break;
-								
-								case 'edit':
-									for (let libraryID of editableLibraries) {
-										let itemIDs = yield Zotero.Tags.getTagItems(libraryID, oldTagID);
-										yield Zotero.DB.executeTransaction(function* () {
-											for (let itemID of itemIDs) {
-												let item = yield Zotero.Items.getAsync(itemID);
-												item.replaceTag(oldTag, dataOut.result.tag);
-												yield item.save();
-											}
-										});
-									}
-									break;
-								
-								case 'delete':
-									for (let libraryID of editableLibraries) {
-										yield Zotero.Tags.removeFromLibrary(libraryID, oldTagID);
-									}
-									break;
-								}
-							}
-						}
-						
-						options.restartSync = true;
-					});
-				}
-				// Note too long
-				else if (object.isNote() || object.isAttachment()) {
-					// Throw an error that adds a button for selecting the item to the sync error dialog
-					if (e.message.includes('<img src="data:image')) {
-						// TODO: Localize
-						e.message = "Notes with embedded images cannot currently be synced to "
-							+ `${ZOTERO_CONFIG.DOMAIN_NAME}.`
-					}
+			if (code == 413) {
+				// Collection name too long
+				if (objectType == 'collection' && data && data.value) {
+					e.message = Zotero.getString('sync.error.collectionTooLong', [data.value]);
 					
-					e.dialogButtonText = Zotero.getString('pane.items.showItemInLibrary');
+					e.dialogButtonText = Zotero.getString('pane.collections.showCollectionInLibrary');
 					e.dialogButtonCallback = () => {
 						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 							.getService(Components.interfaces.nsIWindowMediator);
 						var win = wm.getMostRecentWindow("navigator:browser");
-						win.ZoteroPane.selectItem(object.id);
+						win.ZoteroPane.collectionsView.selectCollection(object.id);
 					};
+				}
+				else if (objectType == 'item') {
+					// Tag too long
+					if (data && data.tag !== undefined) {
+						// Show long tag fixer and handle result
+						e.dialogButtonText = Zotero.getString('general.fix');
+						e.dialogButtonCallback = Zotero.Promise.coroutine(function* () {
+							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+							   .getService(Components.interfaces.nsIWindowMediator);
+							var lastWin = wm.getMostRecentWindow("navigator:browser");
+							
+							// Open long tag fixer for every long tag in every editable library we're syncing
+							var editableLibraries = options.libraries
+								.filter(x => Zotero.Libraries.get(x).editable);
+							for (let libraryID of editableLibraries) {
+								let oldTagIDs = yield Zotero.Tags.getLongTagsInLibrary(libraryID);
+								for (let oldTagID of oldTagIDs) {
+									let oldTag = Zotero.Tags.getName(oldTagID);
+									let dataOut = { result: null };
+									lastWin.openDialog(
+										'chrome://zotero/content/longTagFixer.xul',
+										'',
+										'chrome,modal,centerscreen',
+										oldTag,
+										dataOut
+									);
+									// If dialog was cancelled, stop
+									if (!dataOut.result) {
+										return;
+									}
+									switch (dataOut.result.op) {
+									case 'split':
+										for (let libraryID of editableLibraries) {
+											let itemIDs = yield Zotero.Tags.getTagItems(libraryID, oldTagID);
+											yield Zotero.DB.executeTransaction(function* () {
+												for (let itemID of itemIDs) {
+													let item = yield Zotero.Items.getAsync(itemID);
+													for (let tag of dataOut.result.tags) {
+														item.addTag(tag);
+													}
+													item.removeTag(oldTag);
+													yield item.save();
+												}
+												yield Zotero.Tags.purge(oldTagID);
+											});
+										}
+										break;
+									
+									case 'edit':
+										for (let libraryID of editableLibraries) {
+											let itemIDs = yield Zotero.Tags.getTagItems(libraryID, oldTagID);
+											yield Zotero.DB.executeTransaction(function* () {
+												for (let itemID of itemIDs) {
+													let item = yield Zotero.Items.getAsync(itemID);
+													item.replaceTag(oldTag, dataOut.result.tag);
+													yield item.save();
+												}
+											});
+										}
+										break;
+									
+									case 'delete':
+										for (let libraryID of editableLibraries) {
+											yield Zotero.Tags.removeFromLibrary(libraryID, oldTagID);
+										}
+										break;
+									}
+								}
+							}
+							
+							options.restartSync = true;
+						});
+					}
+					else {
+						// Note too long
+						if (object.isNote() || object.isAttachment()) {
+							// Throw an error that adds a button for selecting the item to the sync error dialog
+							if (e.message.includes('<img src="data:image')) {
+								e.message = Zotero.getString('sync.error.noteEmbeddedImage');
+							}
+							else if (e.message.match(/^Note '.*' too long for item/)) {
+								e.message = Zotero.getString(
+									'sync.error.noteTooLong',
+									Zotero.Utilities.ellipsize(object.getNoteTitle(), 40)
+								);
+							}
+						}
+						// Field or creator too long
+						else if (data && data.field) {
+							e.message = (data.field == 'creator'
+								? Zotero.getString(
+									'sync.error.creatorTooLong',
+									[data.value]
+								)
+								: Zotero.getString(
+									'sync.error.fieldTooLong',
+									[data.field, data.value]
+								))
+								+ '\n\n'
+								+ Zotero.getString(
+									'sync.error.reportSiteIssuesToForums',
+									Zotero.clientName
+								);
+						}
+						
+						// Include "Show Item in Library" button
+						e.dialogButtonText = Zotero.getString('pane.items.showItemInLibrary');
+						e.dialogButtonCallback = () => {
+							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+								.getService(Components.interfaces.nsIWindowMediator);
+							var win = wm.getMostRecentWindow("navigator:browser");
+							win.ZoteroPane.selectItem(object.id);
+						};
+					}
 				}
 				
 				// If not a background sync, show dialog immediately
