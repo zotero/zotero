@@ -239,6 +239,7 @@
 						if (this.displayURL) {
 							var urlSpec = this.item.getField('url');
 							urlField.setAttribute('value', urlSpec);
+							urlField.setAttribute('tooltiptext', urlSpec);
 							urlField.setAttribute('hidden', false);
 							if (this.clickableLink) {
 								 urlField.onclick = function (event) {
