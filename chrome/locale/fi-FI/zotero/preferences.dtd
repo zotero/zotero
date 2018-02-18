@@ -121,9 +121,6 @@
 <!ENTITY zotero.preferences.prefpane.cite "Siteeraus">
 <!ENTITY zotero.preferences.cite.styles "Tyylit">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstinkäsittelyohjelmat">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Tekstinkäsittelyohjelmaliitännäisiä ei ole tällä hetkellä asennettuna.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Käytä perinteistä &quot;Lisää sitaatti&quot; -ikkunaa">
 <!ENTITY zotero.preferences.styleEditor "Tyylieditori">
 <!ENTITY zotero.preferences.stylePreview "Tyylin esikatselu">

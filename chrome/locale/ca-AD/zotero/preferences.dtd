@@ -121,9 +121,6 @@
 <!ENTITY zotero.preferences.prefpane.cite "Cita">
 <!ENTITY zotero.preferences.cite.styles "Estils">
 <!ENTITY zotero.preferences.cite.wordProcessors "Processadors de textos">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Actualment no hi ha instal·lat cap connector.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Obtén connectors de processadors de textos">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Utilitza el diàleg clàssic Afegeix cita">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">
 <!ENTITY zotero.preferences.stylePreview "Style Preview">

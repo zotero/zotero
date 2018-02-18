@@ -121,9 +121,6 @@
 <!ENTITY zotero.preferences.prefpane.cite "Цитат">
 <!ENTITY zotero.preferences.cite.styles "Стилови">
 <!ENTITY zotero.preferences.cite.wordProcessors "Програм за уређивање текста">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Нису инсталирани додатци уређивача текста.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Преузми додатак програма за текст…">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Користи класични прозорчић за цитирање">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">
 <!ENTITY zotero.preferences.stylePreview "Style Preview">

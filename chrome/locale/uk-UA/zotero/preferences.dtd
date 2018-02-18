@@ -121,9 +121,6 @@
 <!ENTITY zotero.preferences.prefpane.cite "Цитування">
 <!ENTITY zotero.preferences.cite.styles "Стилі">
 <!ENTITY zotero.preferences.cite.wordProcessors "Текстові редактори">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Плагіни для текстових процесорів не встановлені.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Отримати плагіни для текстових процесорів...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Використовувати стандартний спосіб Додавання цитат">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">
 <!ENTITY zotero.preferences.stylePreview "Style Preview">

@@ -121,9 +121,6 @@
 <!ENTITY zotero.preferences.prefpane.cite "Källhänvisa">
 <!ENTITY zotero.preferences.cite.styles "Stilar">
 <!ENTITY zotero.preferences.cite.wordProcessors "Ordbehandlare">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Inget insticksprogram för ordbehandlare är installerat.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Få ordbehandlare insticksfiler...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Använd äldre dialogruta för att lägga till nya källor">
 <!ENTITY zotero.preferences.styleEditor "Stilredigerare">
 <!ENTITY zotero.preferences.stylePreview "Förhandsvisa stil">
@@ -173,7 +170,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avancerat">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Filer och kataloger">
-<!ENTITY zotero.preferences.advanced.keys "Genvägar">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "Avancerad konfiguration">
 

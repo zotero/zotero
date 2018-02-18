@@ -121,9 +121,6 @@
 <!ENTITY zotero.preferences.prefpane.cite "Citiraj">
 <!ENTITY zotero.preferences.cite.styles "Slogi">
 <!ENTITY zotero.preferences.cite.wordProcessors "Urejevalniki besedil">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Trenutno ni nameščen noben vstavek za urejevalnike besedil.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Pridobi vstavke za urejevalnike besedil ...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Uporabi klasično pogovorno okno Dodaj citat">
 <!ENTITY zotero.preferences.styleEditor "Urejevalnik sloga">
 <!ENTITY zotero.preferences.stylePreview "Predogled sloga">

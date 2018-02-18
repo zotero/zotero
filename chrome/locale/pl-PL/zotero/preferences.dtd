@@ -121,9 +121,6 @@
 <!ENTITY zotero.preferences.prefpane.cite "Cytowanie">
 <!ENTITY zotero.preferences.cite.styles "Style">
 <!ENTITY zotero.preferences.cite.wordProcessors "Procesory tekstu">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Brak aktualnie zainstalowanych wtyczek procesorów tekstu.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Pobierz wtyczki dla procesorów tekstu...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Użyj klasycznego okna Dodaj cytowanie">
 <!ENTITY zotero.preferences.styleEditor "Edytor stylów">
 <!ENTITY zotero.preferences.stylePreview "Podgląd stylu">

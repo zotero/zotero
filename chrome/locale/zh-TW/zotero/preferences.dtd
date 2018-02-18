@@ -121,9 +121,6 @@
 <!ENTITY zotero.preferences.prefpane.cite "引用">
 <!ENTITY zotero.preferences.cite.styles "樣式">
 <!ENTITY zotero.preferences.cite.wordProcessors "文書處理器">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "目前未安裝文書處理器外掛。">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "取得文書處理器外掛...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用傳統新增引用文獻對話框">
 <!ENTITY zotero.preferences.styleEditor "格式編輯器">
 <!ENTITY zotero.preferences.stylePreview "格式預覽">

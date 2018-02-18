@@ -121,9 +121,6 @@
 <!ENTITY zotero.preferences.prefpane.cite "Tilvísun">
 <!ENTITY zotero.preferences.cite.styles "Leturstílar">
 <!ENTITY zotero.preferences.cite.wordProcessors "Ritvinnslur">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Engin tenging við ritvinnslu hefur verið sett upp.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Ná í viðbætur fyrir ritvinnslu…">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Nota hefðbundið viðmót við að bæta við tilvísunum">
 <!ENTITY zotero.preferences.styleEditor "Breyta stíl">
 <!ENTITY zotero.preferences.stylePreview "Forskoðun stíls">

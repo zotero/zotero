@@ -121,9 +121,6 @@
 <!ENTITY zotero.preferences.prefpane.cite "Cita">
 <!ENTITY zotero.preferences.cite.styles "Stili">
 <!ENTITY zotero.preferences.cite.wordProcessors "Elaboratori di testo">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Non ci sono plug-in per elaboratori di testo installati.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Usa la classica finestra &quot;Inserisci citazione&quot;">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">
 <!ENTITY zotero.preferences.stylePreview "Style Preview">

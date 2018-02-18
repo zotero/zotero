@@ -121,9 +121,6 @@
 <!ENTITY zotero.preferences.prefpane.cite "Mengutip">
 <!ENTITY zotero.preferences.cite.styles "Gaya">
 <!ENTITY zotero.preferences.cite.wordProcessors "Pengolah Kata">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Tidak ada plugin pengolah kata yang terinstal saat ini.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins…">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Gunakan kotak dialog Tambahkan Sitasi klasik">
 <!ENTITY zotero.preferences.styleEditor "Style Editor">
 <!ENTITY zotero.preferences.stylePreview "Style Preview">

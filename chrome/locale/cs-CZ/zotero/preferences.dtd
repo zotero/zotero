@@ -121,9 +121,6 @@
 <!ENTITY zotero.preferences.prefpane.cite "Citování">
 <!ENTITY zotero.preferences.cite.styles "Styly">
 <!ENTITY zotero.preferences.cite.wordProcessors "Textové procesory">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "V současné době nejsou nainstalovány žádné doplňky pro textové procesory.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Získat doplňky pro textové procesory.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Použít pomocí klasického dialogu &quot;Přidat citaci&quot;">
 <!ENTITY zotero.preferences.styleEditor "Editor stylu">
 <!ENTITY zotero.preferences.stylePreview "Náhled stylu">

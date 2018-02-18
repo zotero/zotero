@@ -121,9 +121,6 @@
 <!ENTITY zotero.preferences.prefpane.cite "استشهاد">
 <!ENTITY zotero.preferences.cite.styles "الأنماط">
 <!ENTITY zotero.preferences.cite.wordProcessors "معالجات النصوص">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "الوظائف الاضافية لمعالجات النصوص غير مثبته حالياً">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "احصل على المكونات الإضافية لمعالج النصوص...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "استخدم المربع الحواري التقليدي لاضافة استشهاد">
 <!ENTITY zotero.preferences.styleEditor "محرر النمط">
 <!ENTITY zotero.preferences.stylePreview "عرض النمط">
