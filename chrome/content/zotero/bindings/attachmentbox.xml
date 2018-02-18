@@ -260,10 +260,17 @@
 						if (this.displayAccessed) {
 							this._id("accessed-label").value = Zotero.getString('itemFields.accessDate')
 								+ Zotero.getString('punctuation.colon');
-							this._id("accessed").value = Zotero.Date.sqlToDate(
-									this.item.getField('accessDate'), true
-								).toLocaleString();
-							accessed.hidden = false;
+							let val = this.item.getField('accessDate');
+							if (val) {
+								val = Zotero.Date.sqlToDate(val, true);
+							}
+							if (val) {
+								this._id("accessed").value = val.toLocaleString();
+								accessed.hidden = false;
+							}
+							else {
+								accessed.hidden = true;
+							}
 						}
 						else {
 							accessed.hidden = true;
