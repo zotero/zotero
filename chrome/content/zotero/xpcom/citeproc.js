@@ -24,7 +24,7 @@
  */
 
 var CSL = {
-    PROCESSOR_VERSION: "1.1.183",
+    PROCESSOR_VERSION: "1.1.186",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -259,6 +259,36 @@ var CSL = {
         }
         return lst.join("-");
     },
+    isDatePart: function(str, less, more) {
+        if (str.length > less && str.length < more && parseInt(str)) {
+            return true
+        } else {
+            return false;
+        }
+    },
+    isDateString: function(str) {
+        if (!str) return false;
+        var strLst = str.split("-");
+        if (strLst.length > 0) {
+            if (!isDatePart(strLst[0], 3, 5)) {
+                return false;
+            }
+        }
+        if (strLst.length > 1) {
+            if (!isDatePart(strLst[1], 0, 3)) {
+                return false
+            }
+        }
+        if (strLst.length > 2) {
+            if (!isDatePart(strLst[2], 0, 3)) {
+                return false
+            }
+        }
+        if (strLst.length > 3) {
+            return false;
+        }
+        return true;
+    },
     parseNoteFieldHacks: function(Item, validFieldsForType, allowDateOverride) {
         if ("string" !== typeof Item.note) return;
         var elems = [];
@@ -309,7 +339,7 @@ var CSL = {
             } else if (CSL.DATE_VARIABLES.indexOf(key) > -1) {
                 if (allowDateOverride) {
                     Item[key] = {raw: val};
-                    if (!validFieldsForType || (validFieldsForType[key] && val.match(/^[0-9]{4}(?:-[0-9]{1,2}(?:-[0-9]{1,2})*)*$/))) {
+                    if (!validFieldsForType || (validFieldsForType[key] && isDateString(val))) {
                         lines[i] = "";
                     }
                 }
@@ -8796,11 +8826,11 @@ CSL.NameOutput.prototype._runDisambigNames = function (lst, pos) {
         }
         chk = this.state.tmp.disambig_settings.givens[pos][i];
         if ("undefined" === typeof chk) {
-            myform = this.state.inheritOpt(this.name, "form", "name-form");
+            myform = this.state.inheritOpt(this.name, "form", "name-form", "long");
             param = this.state.registry.namereg.evalname("" + this.Item.id, lst[i], i, 0, myform, myinitials);
             this.state.tmp.disambig_settings.givens[pos].push(param);
         }
-        myform = this.state.inheritOpt(this.name, "form", "name-form");
+        myform = this.state.inheritOpt(this.name, "form", "name-form", "long");
         paramx = this.state.registry.namereg.evalname("" + this.Item.id, lst[i], i, 0, myform, myinitials);
         if (this.state.tmp.disambig_request) {
             var val = this.state.tmp.disambig_settings.givens[pos][i];
@@ -8812,7 +8842,7 @@ CSL.NameOutput.prototype._runDisambigNames = function (lst, pos) {
             }
             param = val;
             if (this.state.opt["disambiguate-add-givenname"] && lst[i].given) {
-                param = this.state.registry.namereg.evalname("" + this.Item.id, lst[i], i, param, this.state.inheritOpt(this.name, "form", "name-form"), this.state.inheritOpt(this.name, "initialize-with"));
+                param = this.state.registry.namereg.evalname("" + this.Item.id, lst[i], i, param, this.state.inheritOpt(this.name, "form", "name-form", "long"), this.state.inheritOpt(this.name, "initialize-with"));
             }
         } else {
             param = paramx;
@@ -9288,9 +9318,8 @@ CSL.NameOutput.prototype._renderOnePersonalName = function (value, pos, i, j) {
     var non_dropping_particle = this._nonDroppingParticle(name);
     var given = this._givenName(name, pos, i);
     var suffix = this._nameSuffix(name);
-    if (this._isShort(pos, i) && !name["full-form-always"]) {
+    if (given === false) {
         dropping_particle = false;
-        given = false;
         suffix = false;
     }
     var sort_sep = this.state.inheritOpt(this.name, "sort-separator");
@@ -9411,13 +9440,6 @@ CSL.NameOutput.prototype._renderOnePersonalName = function (value, pos, i, j) {
     this.state.tmp.name_node.children.push(blob);
     return blob;
 };
-CSL.NameOutput.prototype._isShort = function (pos, i) {
-    if (0 === this.state.tmp.disambig_settings.givens[pos][i]) {
-        return true;
-    } else {
-        return false;
-    }
-};
 CSL.NameOutput.prototype._normalizeNameInput = function (value) {
     var name = {
         literal:value.literal,
@@ -9502,18 +9524,44 @@ CSL.NameOutput.prototype._familyName = function (name) {
 };
 CSL.NameOutput.prototype._givenName = function (name, pos, i) {
     var ret;
-    if (this.state.inheritOpt(this.name, "initialize") === false) {
-        if (name.family && name.given && this.state.inheritOpt(this.name, "initialize") === false) {
-            name.given = CSL.Util.Names.initializeWith(this.state, name.given, this.state.inheritOpt(this.name, "initialize-with"), true);
-        }
-        name.given = CSL.Util.Names.unInitialize(this.state, name.given);
+    var formIsShort = this.state.inheritOpt(this.name, "form", "name-form", "long") !== "long";
+    var initializeIsTurnedOn = !(this.state.inheritOpt(this.name, "initialize") === false);
+    var hasInitializeWith = "string" === typeof this.state.inheritOpt(this.name, "initialize-with") && !name.block_initialize;
+    var inBibliography = this.state.tmp.area.slice(0, 12) === "bibliography";
+    var defaultLevel;
+    var useLevel;
+    if (name["full-form-always"]) {
+        useLevel = 2;
     } else {
-        if (name.family && 1 === this.state.tmp.disambig_settings.givens[pos][i] && !name.block_initialize) {
-            var initialize_with = this.state.inheritOpt(this.name, "initialize-with");
-            name.given = CSL.Util.Names.initializeWith(this.state, name.given, initialize_with);
+        if (formIsShort) {
+            defaultLevel = 0;
+        } else if (hasInitializeWith) {
+            defaultLevel = 1;
+        } else {
+            defaultLevel = 2;
+        }
+        var requestedLevel = this.state.tmp.disambig_settings.givens[pos][i];
+        if (requestedLevel > defaultLevel) {
+            useLevel = requestedLevel;
+        } else {
+            useLevel = defaultLevel;
+        }
+    }
+    var gdropt = this.state.citation.opt["givenname-disambiguation-rule"];
+   if (gdropt && gdropt.slice(-14) === "-with-initials") {
+        hasInitializeWith = true;
+    }
+    if (name.family && useLevel === 1) {
+        if (hasInitializeWith) {
+            var initialize_with = this.state.inheritOpt(this.name, "initialize-with", false, "");
+            name.given = CSL.Util.Names.initializeWith(this.state, name.given, initialize_with, !initializeIsTurnedOn);
         } else {
             name.given = CSL.Util.Names.unInitialize(this.state, name.given);
         }
+    } else if (useLevel === 0) {
+        return false;
+    } else if (useLevel === 2) {
+        name.given = CSL.Util.Names.unInitialize(this.state, name.given);
     }
     var str = this._stripPeriods("given", name.given);
     var rendered = this.state.output.append(str, this.given_decor, true);
@@ -10707,11 +10755,18 @@ CSL.Attributes["@disambiguate"] = function (state, arg) {
     if (arg === "true") {
         state.opt.has_disambiguate = true;
         var func = function (Item, item) {
-            state.tmp.disambiguate_maxMax += 1;
-            if (state.tmp.disambig_settings.disambiguate
-                && state.tmp.disambiguate_count < state.tmp.disambig_settings.disambiguate) {
-                state.tmp.disambiguate_count += 1;
-                return true;
+            if (state.tmp.area === "bibliography") {
+                if (state.tmp.disambiguate_count < state.registry.registry[Item.id].disambig.disambiguate) {
+                    state.tmp.disambiguate_count += 1;
+                    return true;
+                }
+            } else {
+                state.tmp.disambiguate_maxMax += 1;
+                if (state.tmp.disambig_settings.disambiguate
+                    && state.tmp.disambiguate_count < state.tmp.disambig_settings.disambiguate) {
+                    state.tmp.disambiguate_count += 1;
+                    return true;
+                }
             }
             return false;
         };
