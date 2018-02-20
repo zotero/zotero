@@ -1051,8 +1051,7 @@ Zotero.Item.prototype.setCreator = function (orderIndex, data) {
 		var msg = "Creator type '" + Zotero.CreatorTypes.getName(data.creatorTypeID) + "' "
 			+ "isn't valid for " + Zotero.ItemTypes.getName(itemTypeID)
 			+ " -- changing to primary creator";
-		Zotero.debug(msg, 2);
-		Components.utils.reportError(msg);
+		Zotero.warn(msg);
 		data.creatorTypeID = Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID);
 	}
 	
