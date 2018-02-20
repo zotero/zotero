@@ -1095,6 +1095,13 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 */
 	this.launchFile = function (file) {
 		file = Zotero.File.pathToFile(file);
+
+		var customPDFReaderPath  = Zotero.Prefs.get("extensions.zotero.pdf.launcher");
+		if(file.path.toUpperCase().endsWith(".PDF") && customPDFReaderPath){
+            launchFileWithGivenApplication(customPDFReaderPath, file);
+            return;
+        }
+
 		try {
 			Zotero.debug("Launching " + file.path);
 			file.launch();
@@ -1111,20 +1118,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					var pref = "fallbackLauncher.unix";
 				}
 				var path = Zotero.Prefs.get(pref);
-				
-				var exec = Components.classes["@mozilla.org/file/local;1"]
-							.createInstance(Components.interfaces.nsILocalFile);
-				exec.initWithPath(path);
-				if (!exec.exists()) {
-					throw new Error(path + " does not exist");
-				}
-				
-				var proc = Components.classes["@mozilla.org/process/util;1"]
-								.createInstance(Components.interfaces.nsIProcess);
-				proc.init(exec);
-				
-				var args = [file.path];
-				proc.runw(true, args, args.length);
+
+                launchFileWithGivenApplication(path, file);
 			}
 			catch (e) {
 				Zotero.debug(e);
@@ -1142,7 +1137,25 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				nsIEPS.loadUrl(uri);
 			}
 		}
-	}
+	};
+     /**
+      * Launch a file with the given application
+      */
+     this.launchFileWithGivenApplication = function (applicationPath, file) {
+         var exec = Components.classes["@mozilla.org/file/local;1"]
+             .createInstance(Components.interfaces.nsILocalFile);
+         exec.initWithPath(applicationPath);
+         if (!exec.exists()) {
+             throw new Error("'" + applicationPath + "' does not exist");
+         }
+
+         var proc = Components.classes["@mozilla.org/process/util;1"]
+             .createInstance(Components.interfaces.nsIProcess);
+         proc.init(exec);
+
+         var args = [file.path];
+         proc.runw(true, args, args.length);
+     };
 	
 	
 	/**

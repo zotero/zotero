@@ -186,6 +186,9 @@ pref("extensions.zotero.connector.repo.lastCheck.repoTime", 0);
 pref("extensions.zotero.fallbackLauncher.unix", "/usr/bin/xdg-open");
 pref("extensions.zotero.fallbackLauncher.windows", "");
 
+// Custom pdf reader
+pref("extensions.zotero.pdf.launcher", "");
+
 //Translators
 pref("extensions.zotero.translators.attachSupplementary", false);
 pref("extensions.zotero.translators.supplementaryAsLink", false);
