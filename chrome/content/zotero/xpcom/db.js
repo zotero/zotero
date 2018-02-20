@@ -879,7 +879,7 @@ Zotero.DBConnection.prototype.vacuum = function () {
 // TEMP
 Zotero.DBConnection.prototype.info = Zotero.Promise.coroutine(function* () {
 	var info = {};
-	var pragmas = ['auto_vacuum', 'cache_size', 'locking_mode', 'page_size'];
+	var pragmas = ['auto_vacuum', 'cache_size', 'main.locking_mode', 'page_size'];
 	for (let p of pragmas) {
 		info[p] = yield Zotero.DB.valueQueryAsync(`PRAGMA ${p}`);
 	}
@@ -1038,7 +1038,7 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 		// the lock is lost
 		try {
 			if (DB_LOCK_EXCLUSIVE) {
-				yield this.queryAsync("PRAGMA locking_mode=NORMAL", false, { inBackup: true });
+				yield this.queryAsync("PRAGMA main.locking_mode=NORMAL", false, { inBackup: true });
 			}
 			storageService.backupDatabaseFile(file, OS.Path.basename(tmpFile), file.parent);
 		}
@@ -1049,7 +1049,7 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 		}
 		finally {
 			if (DB_LOCK_EXCLUSIVE) {
-				yield this.queryAsync("PRAGMA locking_mode=EXCLUSIVE", false, { inBackup: true });
+				yield this.queryAsync("PRAGMA main.locking_mode=EXCLUSIVE", false, { inBackup: true });
 			}
 		}
 		
@@ -1288,10 +1288,10 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 	}
 	
 	if (DB_LOCK_EXCLUSIVE) {
-		yield this.queryAsync("PRAGMA locking_mode=EXCLUSIVE");
+		yield this.queryAsync("PRAGMA main.locking_mode=EXCLUSIVE");
 	}
 	else {
-		yield this.queryAsync("PRAGMA locking_mode=NORMAL");
+		yield this.queryAsync("PRAGMA main.locking_mode=NORMAL");
 	}
 	
 	// Set page cache size to 8MB
