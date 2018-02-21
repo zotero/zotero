@@ -125,8 +125,7 @@ var Zotero_DownloadOverlay = new function() {
 				try {
 				if (item && item.getFile()) {
 					timer.cancel();
-					var recognizer = new win.Zotero_RecognizePDF.ItemRecognizer();
-					recognizer.recognizeItems([item]);
+					Zotero.RecognizePDF.recognizeItems([item]);
 				}
 				} catch(e) { dump(e.toSource()) };
 			}, 1000, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);

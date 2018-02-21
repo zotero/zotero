@@ -85,6 +85,14 @@ var ZoteroPane = new function()
 		// Set key down handler
 		document.getElementById('appcontent').addEventListener('keydown', ZoteroPane_Local.handleKeyDown, true);
 		
+		Zotero.RecognizePDF.addListener('empty', function (row) {
+			document.getElementById('zotero-tb-recognize').hidden = true;
+		});
+		
+		Zotero.RecognizePDF.addListener('nonempty', function (row) {
+			document.getElementById('zotero-tb-recognize').hidden = false;
+		});
+		
 		_loaded = true;
 		
 		var zp = document.getElementById('zotero-pane');
@@ -2783,7 +2791,7 @@ var ZoteroPane = new function()
 						canIndex = false;
 					}
 					
-					if (canRecognize && !Zotero_RecognizePDF.canRecognize(item)) {
+					if (canRecognize && !Zotero.RecognizePDF.canRecognize(item)) {
 						canRecognize = false;
 					}
 					
@@ -2876,7 +2884,7 @@ var ZoteroPane = new function()
 					if (item.isAttachment()) {
 						var showSep4 = false;
 						
-						if (Zotero_RecognizePDF.canRecognize(item)) {
+						if (Zotero.RecognizePDF.canRecognize(item)) {
 							show.push(m.recognizePDF);
 							showSep4 = true;
 						}
@@ -4907,6 +4915,11 @@ var ZoteroPane = new function()
 	this.addBeforeReloadListener = function(/** @param {Function} **/func) {
 		if(_beforeReloadFunctions.indexOf(func) === -1) _beforeReloadFunctions.push(func);
 	}
+	
+	this.recognizeSelected = function() {
+		Zotero.RecognizePDF.recognizeItems(ZoteroPane.getSelectedItems());
+		Zotero_RecognizePDF_Dialog.open();
+	};
 	
 	/**
 	 * Implements nsIObserver for Zotero reload

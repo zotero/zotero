@@ -622,6 +622,10 @@
 	text-align: right;
 }
 
+#zotero-tb-recognize {
+	list-style-image: url(chrome://zotero/skin/document-search-result.png);
+}
+
 /* Sync error icon */
 #zotero-tb-sync-error {
 	list-style-image: url(chrome://zotero/skin/error.png);
