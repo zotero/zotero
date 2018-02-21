@@ -190,11 +190,13 @@ Zotero.Utilities.Internal = {
 		var path = (file instanceof Components.interfaces.nsIFile) ? file.path : file;
 		var hash;
 		try {
-			file = await OS.File.open(path);
-			hash = await readChunk(file);
+			var osFile = await OS.File.open(path);
+			hash = await readChunk(osFile);
 		}
 		finally {
-			await file.close();
+			if (osFile) {
+				await osFile.close();
+			}
 		}
 		return hash;
 	},
