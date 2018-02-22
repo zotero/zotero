@@ -207,7 +207,7 @@ Zotero.RecognizePDF = new function () {
 			let itemID = _queue.shift();
 			if (!itemID) break;
 			
-			_updateRow(itemID, Zotero.RecognizePDF.ROW_PROCESSING, Zotero.getString('recognizePDF.processing'));
+			_updateRow(itemID, Zotero.RecognizePDF.ROW_PROCESSING, Zotero.getString('general.processing'));
 			
 			try {
 				let newItem = await _processItem(itemID);
