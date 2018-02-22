@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "Nástroje">
 <!ENTITY zotero.general.more "Viac">
 <!ENTITY zotero.general.loading "Nahrávam...">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Výkaz chýb Zotera">
 <!ENTITY zotero.errorReport.submissionInProgress "Počkajte, prosím, kým sa neodošle hlásenie o chybe.">
@@ -231,9 +234,9 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "záložiek">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Záložky sa dajú zdieľať medzi Wordom a LibreOffice, ale môžu zapríčiniť chyby, ak sa náhodne upravia a nedajú sa vložiť do poznámok pod čiarou.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automaticky aktualizovať citácie">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citácie s nedokončenými aktualizáciami budú v dokumente zvýraznené">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Vypnutie aktualizácií môže urýchliť vkladanie citácií do veľkých dokumentov. Kliknutím na Obnoviť môžete citácie aktualizovať manuálne.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Použiť skratky časopisu MEDLINE">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Odstrániť prečítané RSS správy po">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dňoch">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Vyhľadávam metadáta...">
-<!ENTITY zotero.recognizePDF.cancel.label "Zrušiť">
 <!ENTITY zotero.recognizePDF.pdfName.label "Názov PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Názov záznamu">
 

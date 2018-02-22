@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Περισσότερα">
 <!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Αναφορά σφάλματος Zotero">
 <!ENTITY zotero.errorReport.submissionInProgress "Περιμένετε μέχρι να υποβληθεί η αναφορά σφάλματος.">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "ημέρα(/ες)">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Ανάκτηση μεταδεδομένων...">
-<!ENTITY zotero.recognizePDF.cancel.label "Ακύρωση">
 <!ENTITY zotero.recognizePDF.pdfName.label "Όνομα PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Όνομα στοιχείου">
 

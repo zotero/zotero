@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "Nom:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Cerca a la biblioteca:">
 
 <!ENTITY zotero.search.joinMode.prefix "Coincideix">
 <!ENTITY zotero.search.joinMode.any "qualsevol">

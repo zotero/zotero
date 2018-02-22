@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Більше">
 <!ENTITY zotero.general.loading "Завантаження">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Звіт про помилку в Zotero">
 <!ENTITY zotero.errorReport.submissionInProgress "Почекайте, поки звіт про помилку буде передано.">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Видалити прочитані записи зі стрічки через">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "днів">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Отримання метаданих...">
-<!ENTITY zotero.recognizePDF.cancel.label "Відміна">
 <!ENTITY zotero.recognizePDF.pdfName.label "Ім'я PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Ім'я документу">
 

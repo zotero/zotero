@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "Instrumente">
 <!ENTITY zotero.general.more "Mai mult">
 <!ENTITY zotero.general.loading "Se încarcă...">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Raportul de erori Zotero">
 <!ENTITY zotero.errorReport.submissionInProgress "Așteaptă, te rog, ca raportul de eroare să fie trimis.">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Șterge itemii feed citiți după">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "zi(le)">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Extrage metadatele...">
-<!ENTITY zotero.recognizePDF.cancel.label "Anulare">
 <!ENTITY zotero.recognizePDF.pdfName.label "Nume PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Nume înregistrare">
 

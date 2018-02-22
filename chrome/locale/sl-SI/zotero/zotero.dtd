@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "Orodja">
 <!ENTITY zotero.general.more "Dodatno">
 <!ENTITY zotero.general.loading "Nalaganje ...">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Poročilo o napaki Zotero">
 <!ENTITY zotero.errorReport.submissionInProgress "Počakajte, da je poročilo o napaki oddano.">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Odstrani prebrane objave vira po">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dneh">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Pridobivanje metapodatkov ...">
-<!ENTITY zotero.recognizePDF.cancel.label "Prekliči">
 <!ENTITY zotero.recognizePDF.pdfName.label "Ime PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Ime vnosa">
 

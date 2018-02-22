@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "Verktyg">
 <!ENTITY zotero.general.more "Mera">
 <!ENTITY zotero.general.loading "Laddar...">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Zotero-felrapporting">
 <!ENTITY zotero.errorReport.submissionInProgress "Var vänlig vänta medan felrapporten skickas.">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Ta bort lästa flödesobjekt efter">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dag(ar)">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Läser av metadata...">
-<!ENTITY zotero.recognizePDF.cancel.label "Ångra">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF-namn">
 <!ENTITY zotero.recognizePDF.itemName.label "Källnamn">
 

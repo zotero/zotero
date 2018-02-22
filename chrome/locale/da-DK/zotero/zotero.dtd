@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Mere">
 <!ENTITY zotero.general.loading "Indlæser...">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Zotero fejlrapport">
 <!ENTITY zotero.errorReport.submissionInProgress "Vent venligst mens fejlrapporten registreres.">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Fjern læste nyhedsstrømme efter">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dage(e)">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Henter metadata...">
-<!ENTITY zotero.recognizePDF.cancel.label "Fortryd">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF-filens navn">
 <!ENTITY zotero.recognizePDF.itemName.label "Elementets navn">
 

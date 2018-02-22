@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "More">
 <!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Zoteron virheraportti">
 <!ENTITY zotero.errorReport.submissionInProgress "Odota, kunnes virheraportti on toimitettu.">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Poista luetut kohteet syötteestä">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "päivän jälkeen">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Haetaan metatietoja...">
-<!ENTITY zotero.recognizePDF.cancel.label "Peruuta">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF:n nimi">
 <!ENTITY zotero.recognizePDF.itemName.label "Nimikkeen nimi">
 

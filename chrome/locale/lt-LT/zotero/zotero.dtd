@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "Priemonės">
 <!ENTITY zotero.general.more "Daugiau">
 <!ENTITY zotero.general.loading "Įkeliama...">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Zotero programoje">
 <!ENTITY zotero.errorReport.submissionInProgress "Prašome palaukti kol siunčiamas klaidų sąrašas.">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Perskaitytus naujienų kanalo įrašus pašalinti po">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "d.">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Gaunami meta duomenys...">
-<!ENTITY zotero.recognizePDF.cancel.label "Atšaukti">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF pavadinimas">
 <!ENTITY zotero.recognizePDF.itemName.label "Įrašo pavainimas">
 

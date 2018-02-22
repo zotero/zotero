@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "Ferramentas">
 <!ENTITY zotero.general.more "Mais">
 <!ENTITY zotero.general.loading "Carregando...">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Relatório de erros do Zotero">
 <!ENTITY zotero.errorReport.submissionInProgress "Por favor, aguarde enquanto o relatório de erros é enviado.">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remover itens lidos da fonte após">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dia(s)">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Recuperando metadados...">
-<!ENTITY zotero.recognizePDF.cancel.label "Cancelar">
 <!ENTITY zotero.recognizePDF.pdfName.label "Nome do PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Nome do item">
 

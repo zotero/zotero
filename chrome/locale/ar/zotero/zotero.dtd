@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "أدوات">
 <!ENTITY zotero.general.more "المزيد">
 <!ENTITY zotero.general.loading "التحميل">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "تقرير خطأ لزوتيرو">
 <!ENTITY zotero.errorReport.submissionInProgress "برجاء الانتظار لحين الانتهاء من ارسال التقرير عن الخطأ.">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "أزل الخلاصات المقروءة بعد">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "يوم">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "جاري استرجاع البيانات الوصفية...">
-<!ENTITY zotero.recognizePDF.cancel.label "إلغاء">
 <!ENTITY zotero.recognizePDF.pdfName.label "اسم ملف PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "اسم العنصر">
 

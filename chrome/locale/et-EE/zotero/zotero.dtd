@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "More">
 <!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Zotero vearaport">
 <!ENTITY zotero.errorReport.submissionInProgress "Palun oodake kuni veateadet saadetakse.">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Metaandmete laadimine...">
-<!ENTITY zotero.recognizePDF.cancel.label "Tühistada">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDFi nimi">
 <!ENTITY zotero.recognizePDF.itemName.label "Kirje nimi">
 

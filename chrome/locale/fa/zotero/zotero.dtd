@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "More">
 <!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "گزارش خطا در زوترو">
 <!ENTITY zotero.errorReport.submissionInProgress "لطفا تا پایان ارسال گزارش خطا، صبر کنید.">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "در حال بازیابی فراداده‌ها...">
-<!ENTITY zotero.recognizePDF.cancel.label "انصراف">
 <!ENTITY zotero.recognizePDF.pdfName.label "نام PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "نام آیتم‌">
 

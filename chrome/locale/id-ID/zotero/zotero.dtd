@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "More">
 <!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.submissionInProgress "Mohon tunggu sampai laporan kesalahan dikirimkan.">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Menerima Metadata...">
-<!ENTITY zotero.recognizePDF.cancel.label "Batalkan">
 <!ENTITY zotero.recognizePDF.pdfName.label "Nama PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Nama Item">
 

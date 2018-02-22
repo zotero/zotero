@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "工具">
 <!ENTITY zotero.general.more "更多">
 <!ENTITY zotero.general.loading "載入中...">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Zotero 錯誤報告">
 <!ENTITY zotero.errorReport.submissionInProgress "正送出錯誤報告，請稍等。">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "移除已讀取的 feed 項目，當超過">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "日(s)">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "取回屬性資料中…">
-<!ENTITY zotero.recognizePDF.cancel.label "取消">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF 名稱">
 <!ENTITY zotero.recognizePDF.itemName.label "項目名稱">
 

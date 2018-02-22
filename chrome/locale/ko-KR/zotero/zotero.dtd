@@ -14,6 +14,9 @@
 <!ENTITY zotero.general.tools "도구">
 <!ENTITY zotero.general.more "더 보기">
 <!ENTITY zotero.general.loading "불러오는 중...">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Zotero 오류 보고">
 <!ENTITY zotero.errorReport.submissionInProgress "오류 보고가 제출되는 동안 기다려 주세요.">
@@ -281,9 +284,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "다음 이후 읽은 피드 항목 제거: ">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "일">
 
-
-<!ENTITY zotero.recognizePDF.recognizing.label "메타데이터 검색...">
-<!ENTITY zotero.recognizePDF.cancel.label "취소">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF 명">
 <!ENTITY zotero.recognizePDF.itemName.label "항목 명">
 
