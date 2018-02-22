@@ -329,7 +329,9 @@ Zotero.RecognizePDF = new function () {
 	}
 	
 	async function _query(json) {
-		let uri = Zotero.Prefs.get("api.url") || ZOTERO_CONFIG.API_URL;
+		// TODO: Use main API URL for recognizer server
+		//let uri = Zotero.Prefs.get("api.url") || ZOTERO_CONFIG.API_URL;
+		let uri = Zotero.Prefs.get("api.url") || ZOTERO_CONFIG.RECOGNIZE_URL;
 		
 		if (!uri.endsWith('/')) {
 			uri += '/';
