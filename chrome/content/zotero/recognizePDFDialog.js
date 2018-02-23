@@ -135,7 +135,13 @@ let Zotero_RecognizePDF_Dialog = new function () {
 			}, false);
 		
 		_progressWindow.addEventListener('keypress', function (e) {
-			if (e.keyCode === KeyEvent.DOM_VK_ESCAPE) close();
+			if (e.keyCode === KeyEvent.DOM_VK_ESCAPE) {
+				// If done processing, Esc is equivalent to Close rather than Minimize
+				if (Zotero.RecognizePDF.getTotal() == Zotero.RecognizePDF.getProcessedTotal()) {
+					Zotero.RecognizePDF.cancel();
+				}
+				close();
+			}
 		});
 		_progressWindow.addEventListener('close', close.bind(this), false);
 		
