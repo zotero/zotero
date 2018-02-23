@@ -46,6 +46,7 @@ Zotero.Sync.Data.Engine = function (options) {
 	}
 	
 	this.apiClient = options.apiClient;
+	this.userID = options.userID;
 	this.libraryID = options.libraryID;
 	this.library = Zotero.Libraries.get(options.libraryID);
 	this.libraryTypeID = this.library.libraryTypeID;
@@ -1924,6 +1925,12 @@ Zotero.Sync.Data.Engine.prototype._handleUploadError = Zotero.Promise.coroutine(
 			return this.UPLOAD_RESULT_OBJECT_CONFLICT;
 		}
 	}
+	else if (e.name == "ZoteroUploadRestartError") {
+		return this.UPLOAD_RESULT_RESTART;
+	}
+	else if (e.name == "ZoteroUploadCancelError") {
+		return this.UPLOAD_RESULT_CANCEL;
+	}
 	throw e;
 });
 
@@ -1984,17 +1991,44 @@ Zotero.Sync.Data.Engine.prototype._checkObjectUploadError = Zotero.Promise.corou
 		}
 	}
 	else if (code == 403) {
-		// Prompt to reset local group files on 403 for file attachment upload
+		// If we get a 403 for a local group attachment, check the group permissions to confirm
+		// that we no longer have file-editing access and prompt to reset local group files
 		if (objectType == 'item') {
 			let item = Zotero.Items.getByLibraryAndKey(this.libraryID, key);
 			if (this.library.libraryType == 'group' && item.isFileAttachment()) {
-				let index = Zotero.Sync.Storage.Utilities.showFileWriteAccessLostPrompt(
-					null, this.library
-				);
-				if (index === 0) {
-					yield Zotero.Sync.Data.Local.resetUnsyncedLibraryFiles(this.libraryID);
+				let reset = false;
+				let groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
+				let info = yield this.apiClient.getGroup(groupID);
+				if (info) {
+					Zotero.debug(info);
+					let { editable, filesEditable } = Zotero.Groups.getPermissionsFromJSON(
+						info.data, this.userID
+					);
+					// If we do still have file-editing access, something else went wrong,
+					// and we should just fail without resetting
+					if (!filesEditable) {
+						let index = Zotero.Sync.Storage.Utilities.showFileWriteAccessLostPrompt(
+							null, this.library
+						);
+						
+						let e = new Error(message);
+						if (index === 0) {
+							let group = Zotero.Groups.get(groupID);
+							group.filesEditable = false;
+							yield group.saveTx();
+							
+							yield Zotero.Sync.Data.Local.resetUnsyncedLibraryFiles(this.libraryID);
+							e.name = "ZoteroUploadRestartError";
+						}
+						else {
+							e.name = "ZoteroUploadCancelError";
+						}
+						throw e;
+					}
 				}
-				return false;
+				else {
+					Zotero.logError("Couldn't get metadata for group " + groupID);
+				}
 			}
 		}
 	}

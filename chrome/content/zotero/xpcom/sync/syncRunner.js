@@ -175,6 +175,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 			
 			let engineOptions = {
+				userID: keyInfo.userID,
 				apiClient: client,
 				caller: this.caller,
 				setStatus: this.setSyncStatus.bind(this),

@@ -6,6 +6,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 	var apiKey = Zotero.Utilities.randomString(24);
 	var baseURL = "http://local.zotero/";
 	var engine, server, client, caller, stub, spy;
+	var userID = 1;
 	
 	var responses = {};
 	
@@ -29,6 +30,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 		});
 		
 		var engine = new Zotero.Sync.Data.Engine({
+			userID,
 			apiClient: client,
 			libraryID: options.libraryID || Zotero.Libraries.userLibraryID,
 			stopOnError
@@ -171,7 +173,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 		
 		Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
 		
-		yield Zotero.Users.setCurrentUserID(1);
+		yield Zotero.Users.setCurrentUserID(userID);
 		yield Zotero.Users.setCurrentUsername("testuser");
 	})
 	
@@ -3027,7 +3029,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 		
 		
 		it("should show file-write-access-lost dialog on 403 for attachment upload in group", async function () {
-			var group = await createGroup();
+			var group = await createGroup({
+				filesEditable: true
+			});
 			var libraryID = group.libraryID;
 			var libraryVersion = 5;
 			group.libraryVersion = libraryVersion;
@@ -3071,6 +3075,30 @@ describe("Zotero.Sync.Data.Engine", function () {
 						})
 					);
 				}
+				else if (called == 1 && req.url == baseURL + `groups/${group.id}`) {
+					req.respond(
+						200,
+						{
+							"Last-Modified-Version": group.libraryVersion
+						},
+						JSON.stringify({
+							id: group.id,
+							version: group.libraryVersion,
+							data: {
+								id: group.id,
+								version: group.libraryVersion,
+								name: group.name,
+								owner: 10,
+								type: "Private",
+								description: "",
+								url: "",
+								libraryEditing: "members",
+								libraryReading: "all",
+								fileEditing: "admins"
+							}
+						})
+					);
+				}
 				called++;
 			});
 			
@@ -3078,9 +3106,11 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var spy = sinon.spy(engine, "onError");
 			var result = await engine._startUpload();
 			assert.isTrue(promise.isResolved());
-			assert.equal(result, engine.UPLOAD_RESULT_SUCCESS);
-			assert.equal(called, 1);
-			assert.equal(spy.callCount, 1);
+			assert.equal(result, engine.UPLOAD_RESULT_RESTART);
+			assert.equal(called, 2);
+			assert.equal(spy.callCount, 0);
+			
+			assert.isFalse(group.filesEditable);
 			
 			assert.ok(Zotero.Items.get(item1.id));
 			assert.isFalse(Zotero.Items.get(item2.id));
