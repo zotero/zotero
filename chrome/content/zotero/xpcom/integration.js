@@ -83,9 +83,7 @@ Zotero.Integration = new function() {
 		// on OS X, first try /Users/Shared for those who can't put pipes in their home
 		// directories
 		var pipe = null;
-		var sharedDir = Components.classes["@mozilla.org/file/local;1"].
-			createInstance(Components.interfaces.nsILocalFile);
-		sharedDir.initWithPath("/Users/Shared");
+		var sharedDir = Zotero.File.pathToFile('/Users/Shared');
 		
 		if(sharedDir.exists() && sharedDir.isDirectory()) {
 			var logname = Components.classes["@mozilla.org/process/environment;1"].

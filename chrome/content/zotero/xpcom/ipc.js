@@ -229,7 +229,7 @@ Zotero.IPC = new function() {
 			if(pipeDir.exists()) {
 				var dirEntries = pipeDir.directoryEntries;
 				while (dirEntries.hasMoreElements()) {
-					var pipe = dirEntries.getNext().QueryInterface(Ci.nsILocalFile);
+					var pipe = dirEntries.getNext().QueryInterface(Ci.nsIFile);
 					if(pipe.leafName[0] !== "." && (!_instancePipe || !pipe.equals(_instancePipe))) {
 						pipes.push(pipe);
 					}
