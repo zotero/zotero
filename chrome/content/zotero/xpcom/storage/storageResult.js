@@ -38,10 +38,10 @@ Zotero.Sync.Storage.Result.prototype.updateFromResults = function (results) {
 }
 
 
-Zotero.Sync.Storage.Result.prototype.toString = function () {
+/*Zotero.Sync.Storage.Result.prototype.toString = function () {
 	var obj = {};
 	for (let prop of this._props) {
 		obj[prop] = this[prop] || false;
 	}
 	return JSON.stringify(obj, null, "    ");
-}
+}*/
