@@ -111,6 +111,6 @@
 		<separator/>
 		<separator/>
 		
-		<script src="preferences_export.js" type="application/javascript;version=1.8"/>
+		<script src="preferences_export.js" type="application/javascript"/>
 	</prefpane>
 </overlay>

@@ -341,5 +341,5 @@
 		<separator/>
 	</prefpane>
 	
-	<script src="preferences_advanced.js" type="application/javascript;version=1.8"/>
+	<script src="preferences_advanced.js" type="application/javascript"/>
 </overlay>

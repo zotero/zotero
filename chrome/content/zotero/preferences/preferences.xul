@@ -83,5 +83,5 @@
 		observerService.notifyObservers(null, "charsetmenu-selected", "other");
 	]]>
 	</script>
-	<script src="preferences.js" type="application/javascript;version=1.8"/>
+	<script src="preferences.js" type="application/javascript"/>
 </prefwindow>

@@ -104,5 +104,5 @@
 		<separator/>
 	</prefpane>
 	
-	<script src="preferences_general.js" type="application/javascript;version=1.8"/>
+	<script src="preferences_general.js" type="application/javascript"/>
 </overlay>
