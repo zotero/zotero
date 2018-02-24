@@ -1,4 +1,4 @@
-Components.utils.import("resource://zotero/pathparser.js", Zotero);
+Components.utils.import("resource://zotero/pathparser.jsm", Zotero);
 Zotero.Router = Zotero.PathParser;
 delete Zotero.PathParser;
 

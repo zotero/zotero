@@ -161,7 +161,7 @@ Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Components.interfaces.mozIJSSubScriptLoader)
 	.loadSubScript('resource://zotero/require.js');
 
-ZoteroContext = function() {}
+var ZoteroContext = function() {}
 ZoteroContext.prototype = {
 	require,
 	

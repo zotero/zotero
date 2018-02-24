@@ -5,7 +5,7 @@
  * License: MIT
  * https://github.com/dstillman/pathparser.js
  */
-(function (factory) {
+(function (root, factory) {
 	// AMD/RequireJS
 	if (typeof define === 'function' && define.amd) {
 		define(factory);
@@ -13,14 +13,16 @@
 	} else if (typeof exports === 'object') {
 		module.exports = factory();
 	// Mozilla JSM
-    } else if (~String(this).indexOf('BackstagePass')) {
-    	EXPORTED_SYMBOLS = ["PathParser"];
-    	PathParser = factory();
+	} else if (typeof Components != 'undefined'
+			&& typeof Components.utils != 'undefined'
+			&& typeof Components.utils.import == 'function') {
+		root.EXPORTED_SYMBOLS = ["PathParser"];
+		root.PathParser = factory();
 	// Browser global
 	} else {
-		PathParser = factory();
+		root.PathParser = factory();
 	}
-}(function () {
+}(this, function () {
 	"use strict";
 	
 	var PathParser = function (params) {

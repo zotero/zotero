@@ -2,7 +2,7 @@
 
 var require = (function() {
 	var win, Zotero;
-	var { Loader, Require, Module } = Components.utils.import('resource://gre/modules/commonjs/toolkit/loader.js');
+	Components.utils.import('resource://zotero/loader.jsm');
 	var requirer = Module('/', '/');
 	var _runningTimers = {};
 	if (typeof window != 'undefined') {
