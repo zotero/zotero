@@ -461,7 +461,12 @@ Zotero.IPC.Pipe.DeferredOpen.prototype = {
 		
 		var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"].
 			createInstance(Components.interfaces.nsIInputStreamPump);
-		pump.init(fifoStream, -1, -1, 4096, 1, true);
+		try {
+			pump.init(fifoStream, 0, 0, true);
+		}
+		catch (e) {
+			pump.init(fifoStream, -1, -1, 4096, 1, true);
+		}
 		pump.asyncRead(this, null);
 		
 		this._openTime = Date.now();

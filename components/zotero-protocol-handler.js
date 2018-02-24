@@ -1397,7 +1397,12 @@ AsyncChannel.prototype = {
 				//Zotero.debug("AsyncChannel: Got input stream from generator");
 				
 				var pump = Cc["@mozilla.org/network/input-stream-pump;1"].createInstance(Ci.nsIInputStreamPump);
-				pump.init(data, -1, -1, 0, 0, true);
+				try {
+					pump.init(data, 0, 0, true);
+				}
+				catch (e) {
+					pump.init(data, -1, -1, 0, 0, true);
+				}
 				pump.asyncRead(listenerWrapper, context);
 			}
 			else if (data instanceof Ci.nsIFile || data instanceof Ci.nsIURI) {

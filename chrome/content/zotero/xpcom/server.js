@@ -140,7 +140,12 @@ Zotero.Server.SocketListener = new function() {
 		var dataListener = new Zotero.Server.DataListener(iStream, oStream);
 		var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"]
 							 .createInstance(Components.interfaces.nsIInputStreamPump);
-		pump.init(iStream, -1, -1, 0, 0, false);
+		try {
+			pump.init(iStream, 0, 0, false);
+		}
+		catch (e) {
+			pump.init(iStream, -1, -1, 0, 0, false);
+		}
 		pump.asyncRead(dataListener, null);
 	}
 	

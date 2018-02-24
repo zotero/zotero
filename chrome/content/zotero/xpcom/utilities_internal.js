@@ -283,7 +283,12 @@ Zotero.Utilities.Internal = {
 		// Send input stream to stream converter
 		var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"]
 			.createInstance(Components.interfaces.nsIInputStreamPump);
-		pump.init(is, -1, -1, 0, 0, true);
+		try {
+			pump.init(is, 0, 0, true);
+		}
+		catch (e) {
+			pump.init(is, -1, -1, 0, 0, true);
+		}
 		pump.asyncRead(converter, null);
 		
 		return deferred.promise;
@@ -343,7 +348,12 @@ Zotero.Utilities.Internal = {
 		// Send input stream to stream converter
 		var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"]
 			.createInstance(Components.interfaces.nsIInputStreamPump);
-		pump.init(bis, -1, -1, 0, 0, true);
+		try {
+			pump.init(bis, 0, 0, true);
+		}
+		catch (e) {
+			pump.init(bis, -1, -1, 0, 0, true);
+		}
 		pump.asyncRead(converter, null);
 		
 		return deferred.promise;
