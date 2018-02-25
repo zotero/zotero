@@ -39,6 +39,13 @@ const symlinkFiles = [
 // these files will be browserified during the build
 const browserifyConfigs = [
 	{
+		src: 'node_modules/url/url.js',
+		dest: 'resource/url.js',
+		config: {
+			standalone: 'url'
+		}
+	},
+	{
 		src: 'node_modules/sinon/lib/sinon.js',
 		dest: 'test/resource/sinon.js',
 		config: {

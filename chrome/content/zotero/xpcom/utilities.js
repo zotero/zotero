@@ -1913,6 +1913,21 @@ Zotero.Utilities = {
 		}
 	},
 	
+	
+	parseURL: function (url) {
+		var parts = require('url').parse(url);
+		// fileName
+		parts.fileName = parts.pathname.split('/').pop();
+		// fileExtension
+		var pos = parts.fileName.lastIndexOf('.');
+		parts.fileExtension = pos == -1 ? '' : parts.fileName.substr(pos + 1);
+		// fileBaseName
+		parts.fileBaseName = parts.fileName
+			 // filename up to the period before the file extension, if there is one
+			.substr(0, parts.fileName.length - (parts.fileExtension ? parts.fileExtension.length + 1 : 0));
+		return parts;
+	},
+	
 	/**
 	 * Get the real target URL from an intermediate URL
 	 */
