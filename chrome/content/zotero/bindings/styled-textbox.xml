@@ -644,14 +644,12 @@
 					// for read-only mode
 					var htmlFile = this.mode + (this.getAttribute('readonly') != 'true' ? "" : "view");
 					
-					var ios = Components.classes["@mozilla.org/network/io-service;1"].
-						getService(Components.interfaces.nsIIOService);
-					var uri = ios.newURI("resource://zotero/tinymce/" + htmlFile + ".html", null, null);
-					
-					// Pass directionality (LTR/RTL) and locale in URL
-					uri.spec += "?locale=" + encodeURIComponent(Zotero.locale)
+					var url = `resource://zotero/tinymce/${htmlFile}.html`
+						// Pass directionality (LTR/RTL) and locale in URL
+						+ "?locale=" + encodeURIComponent(Zotero.locale)
 						+ "&dir=" + Zotero.dir;
-					
+					Components.utils.import("resource://gre/modules/Services.jsm");
+					var uri = Services.io.newURI(url, null, null);
 					
 					Zotero.debug("Loading " + uri.spec);
 					
