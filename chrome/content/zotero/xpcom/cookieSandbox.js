@@ -221,7 +221,7 @@ Zotero.CookieSandbox.prototype = {
 	 */
 	"getCookiesForURI": function(uri) {
 		var hostParts = Zotero.CookieSandbox.normalizeHost(uri.host).split('.'),
-			pathParts = Zotero.CookieSandbox.normalizePath(uri.path).split('/'),
+			pathParts = Zotero.CookieSandbox.normalizePath(uri.filePath || uri.path).split('/'),
 			cookies = {}, found = false, secure = uri.scheme.toUpperCase() == 'HTTPS';
 		
 		// Fetch cookies starting from the highest level domain
