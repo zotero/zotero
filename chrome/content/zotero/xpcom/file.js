@@ -333,8 +333,7 @@ Zotero.File = new function(){
 	 * Runs synchronously, so should only be run on local (e.g. chrome) URLs
 	 */
 	function getContentsFromURL(url) {
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-						.createInstance();
+		var xmlhttp = new XMLHttpRequest();
 		xmlhttp.open('GET', url, false);
 		xmlhttp.overrideMimeType("text/plain");
 		xmlhttp.send(null);

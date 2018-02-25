@@ -24,6 +24,7 @@
 */
 
 // Commonly used imports accessible anywhere
+Components.utils.importGlobalProperties(["XMLHttpRequest"]);
 Components.utils.import("resource://zotero/config.js");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
@@ -239,7 +240,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		Zotero.browser = "g";
 		
 		Zotero.Intl.init();
-
+		
 		Zotero.Prefs.init();
 		Zotero.Debug.init(options && options.forceDebugLog);
 		

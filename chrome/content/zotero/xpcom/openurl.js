@@ -47,7 +47,7 @@ Zotero.OpenURL = new function() {
 	 * Queries OCLC's OpenURL resolver registry and returns an address and version
 	 */
 	function discoverResolvers() {
-		var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+		var req = new XMLHttpRequest();
 		req.open("GET", "http://worldcatlibraries.org/registry/lookup?IP=requestor", false);
 		req.send(null);
 		
