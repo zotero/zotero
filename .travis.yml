@@ -10,7 +10,6 @@ env:
     global:
         secure: "NxvkbZ7/Op7BTGQRR3C4q8lLoO29f8WtyNN27NSH7AO3H0vBr1Vp5xO8gn+H2qHEug5HvM+YrZ/xAkNXaZVbOInmBmKVMxqVvdpKp9JM1Amf+gzsXWQphfySvs6iqzyP6cwU/jspdvX/WSakgU5v7PWXxtUIaKxdANt6Rw7W+Pc="
     matrix:
-        - FX_VERSION="54.0"
         - FX_VERSION="52.0.3"
 matrix:
     fast_finish: true
@@ -26,17 +25,13 @@ install:
     - if [ $FX_VERSION = "52.0.3" ]; then
         wget -O tarball "https://archive.mozilla.org/pub/firefox/tinderbox-builds/mozilla-release-linux64-add-on-devel/1491732920/firefox-52.0.3.en-US.linux-x86_64-add-on-devel.tar.bz2";
       fi
-    - if [ $FX_VERSION = "54.0" ]; then
-        wget -O tarball "https://archive.mozilla.org/pub/firefox/tinderbox-builds/mozilla-release-linux64-add-on-devel/1496944705/firefox-54.0.en-US.linux-x86_64-add-on-devel.tar.bz2";
-      fi
     - tar xf tarball
 before_script:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
     - npm i
     - npm run build
-    - if [[ $FX_VERSION = "54.0" &&
-            $TRAVIS_REPO_SLUG = "zotero/zotero" &&
+    - if [[ $TRAVIS_REPO_SLUG = "zotero/zotero" &&
             ($TRAVIS_BRANCH = "master" || $TRAVIS_BRANCH = *-hotfix) &&
             $TRAVIS_PULL_REQUEST = "false" ]]; then
         mkdir build-zip;
