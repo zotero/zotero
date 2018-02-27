@@ -2188,9 +2188,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 				}
 				*/
 				
-				let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						   .getService(Components.interfaces.nsIWindowMediator);
-				let lastWin = wm.getMostRecentWindow("navigator:browser");
+				let lastWin = Services.wm.getMostRecentWindow("navigator:browser");
 				lastWin.openDialog('chrome://zotero/content/merge.xul', '', 'chrome,modal,centerscreen', io);
 				
 				yield Zotero.DB.executeTransaction(function* () {
@@ -2244,9 +2242,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 				var url = data[i];
 				
 				if (url.indexOf('file:///') == 0) {
-					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-							   .getService(Components.interfaces.nsIWindowMediator);
-					var win = wm.getMostRecentWindow("navigator:browser");
+					let win = Services.wm.getMostRecentWindow("navigator:browser");
 					// If dragging currently loaded page, only convert to
 					// file if not an HTML document
 					if (win.content.location.href != url ||
@@ -2264,9 +2260,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 				
 				// Still string, so remote URL
 				if (typeof file == 'string') {
-					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-							   .getService(Components.interfaces.nsIWindowMediator);
-					var win = wm.getMostRecentWindow("navigator:browser");
+					let win = Services.wm.getMostRecentWindow("navigator:browser");
 					win.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack', null, row); // TODO: don't do this
 					continue;
 				}

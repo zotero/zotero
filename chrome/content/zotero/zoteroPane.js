@@ -3310,9 +3310,7 @@ var ZoteroPane = new function()
 			else if (openInNewTab || !window.loadURI || uris.length > 1) {
 				// if no gBrowser, find it
 				if(!gBrowser) {
-					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-									   .getService(Components.interfaces.nsIWindowMediator);
-					var browserWindow = wm.getMostRecentWindow("navigator:browser");
+					let browserWindow = Services.wm.getMostRecentWindow("navigator:browser");
 					var gBrowser = browserWindow.gBrowser;
 				}
 				

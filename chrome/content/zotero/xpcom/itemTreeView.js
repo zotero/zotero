@@ -3211,9 +3211,7 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 	else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
 		// Disallow drop into read-only libraries
 		if (!collectionTreeRow.editable) {
-			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-					   .getService(Components.interfaces.nsIWindowMediator);
-			var win = wm.getMostRecentWindow("navigator:browser");
+			let win = Services.wm.getMostRecentWindow("navigator:browser");
 			win.ZoteroPane.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -3256,9 +3254,7 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 				if (dataType == 'text/x-moz-url') {
 					var url = data[i];
 					if (url.indexOf('file:///') == 0) {
-						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								   .getService(Components.interfaces.nsIWindowMediator);
-						var win = wm.getMostRecentWindow("navigator:browser");
+						let win = Services.wm.getMostRecentWindow("navigator:browser");
 						// If dragging currently loaded page, only convert to
 						// file if not an HTML document
 						if (win.content.location.href != url ||
@@ -3278,9 +3274,7 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 					if (typeof file == 'string') {
 						if (parentItemID) {
 							if (!collectionTreeRow.filesEditable) {
-								var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-										   .getService(Components.interfaces.nsIWindowMediator);
-								var win = wm.getMostRecentWindow("navigator:browser");
+								let win = Services.wm.getMostRecentWindow("navigator:browser");
 								win.ZoteroPane.displayCannotEditLibraryFilesMessage();
 								return;
 							}
@@ -3295,9 +3289,7 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 							});
 						}
 						else {
-							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-									   .getService(Components.interfaces.nsIWindowMediator);
-							var win = wm.getMostRecentWindow("navigator:browser");
+							let win = Services.wm.getMostRecentWindow("navigator:browser");
 							win.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack'); // TODO: don't do this
 						}
 						continue;
@@ -3318,9 +3310,7 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 				}
 				else {
 					if (file.leafName.endsWith(".lnk")) {
-						let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						   .getService(Components.interfaces.nsIWindowMediator);
-						let win = wm.getMostRecentWindow("navigator:browser");
+						let win = Services.wm.getMostRecentWindow("navigator:browser");
 						win.ZoteroPane.displayCannotAddShortcutMessage(file.path);
 						continue;
 					}
