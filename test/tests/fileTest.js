@@ -97,6 +97,42 @@ describe("Zotero.File", function () {
 	});
 	
 	
+	describe("#rename()", function () {
+		it("should rename a file", async function () {
+			var tmpDir = await getTempDirectory();
+			var sourceFile = OS.Path.join(tmpDir, 'a');
+			var destFile = OS.Path.join(tmpDir, 'b');
+			await Zotero.File.putContentsAsync(sourceFile, '');
+			await Zotero.File.rename(sourceFile, 'b');
+			assert.isTrue(await OS.File.exists(destFile));
+		});
+		
+		it("should overwrite an existing file if `overwrite` is true", async function () {
+			var tmpDir = await getTempDirectory();
+			var sourceFile = OS.Path.join(tmpDir, 'a');
+			var destFile = OS.Path.join(tmpDir, 'b');
+			await Zotero.File.putContentsAsync(sourceFile, 'a');
+			await Zotero.File.putContentsAsync(destFile, 'b');
+			await Zotero.File.rename(sourceFile, 'b', { overwrite: true });
+			assert.isTrue(await OS.File.exists(destFile));
+			assert.equal(await Zotero.File.getContentsAsync(destFile), 'a');
+		});
+		
+		it("should get a unique name if target file exists and `unique` is true", async function () {
+			var tmpDir = await getTempDirectory();
+			var sourceFile = OS.Path.join(tmpDir, 'a');
+			var destFile = OS.Path.join(tmpDir, 'b');
+			await Zotero.File.putContentsAsync(sourceFile, 'a');
+			await Zotero.File.putContentsAsync(destFile, 'b');
+			var newFilename = await Zotero.File.rename(sourceFile, 'b', { unique: true });
+			var realDestFile = OS.Path.join(tmpDir, newFilename);
+			assert.equal(newFilename, 'b 2');
+			assert.isTrue(await OS.File.exists(realDestFile));
+			assert.equal(await Zotero.File.getContentsAsync(realDestFile), 'a');
+		});
+	});
+	
+	
 	describe("#getClosestDirectory()", function () {
 		it("should return directory for file that exists", function* () {
 			var tmpDir = yield getTempDirectory();

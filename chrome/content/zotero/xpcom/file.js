@@ -428,6 +428,82 @@ Zotero.File = new function(){
 	
 	
 	/**
+	 * Rename file within its parent directory
+	 *
+	 * @param {String} file - File path
+	 * @param {String} newName
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.overwrite=false] - Overwrite file if one exists
+	 * @param {Boolean} [options.unique=false] - Add suffix to create unique filename if necessary
+	 * @return {String|false} - New filename, or false if destination file exists and `overwrite` not set
+	 */
+	this.rename = async function (file, newName, options = {}) {
+		var overwrite = options.overwrite || false;
+		var unique = options.unique || false;
+		
+		var origPath = file;
+		var origName = OS.Path.basename(origPath);
+		newName = Zotero.File.getValidFileName(newName);
+		
+		// Ignore if no change
+		if (origName === newName) {
+			Zotero.debug("Filename has not changed");
+			return origName;
+		}
+		
+		var parentDir = OS.Path.dirname(origPath);
+		var destPath = OS.Path.join(parentDir, newName);
+		var destName = OS.Path.basename(destPath);
+		// Get root + extension, if there is one
+		var pos = destName.lastIndexOf('.');
+		if (pos > 0) {
+			var root = destName.substr(0, pos);
+			var ext = destName.substr(pos + 1);
+		}
+		else {
+			var root = destName;
+		}
+		
+		var incr = 0;
+		while (true) {
+			// If filename already exists, add a numeric suffix to the end of the root, before
+			// the extension if there is one
+			if (incr) {
+				if (ext) {
+					destName = root + ' ' + (incr + 1) + '.' + ext;
+				}
+				else {
+					destName = root + ' ' + (incr + 1);
+				}
+				destPath = OS.Path.join(parentDir, destName);
+			}
+			
+			try {
+				Zotero.debug(`Renaming ${origPath} to ${OS.Path.basename(destPath)}`);
+				Zotero.debug(destPath);
+				await OS.File.move(origPath, destPath, { noOverwrite: !overwrite })
+			}
+			catch (e) {
+				if (e instanceof OS.File.Error) {
+					if (e.becauseExists) {
+						// Increment number to create unique suffix
+						if (unique) {
+							incr++;
+							continue;
+						}
+						// No overwriting or making unique and file exists
+						return false;
+					}
+				}
+				throw e;
+			}
+			break;
+		}
+		return destName;
+	};
+	
+	
+	/**
 	 * Delete a file if it exists, asynchronously
 	 *
 	 * @return {Promise<Boolean>} A promise for TRUE if file was deleted, FALSE if missing

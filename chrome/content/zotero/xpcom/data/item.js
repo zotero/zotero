@@ -2432,102 +2432,67 @@ Zotero.Item.prototype.fileExistsCached = function () {
  *                           -2 - Error renaming
  *                           false - Attachment file not found
  */
-Zotero.Item.prototype.renameAttachmentFile = Zotero.Promise.coroutine(function* (newName, overwrite=false, unique=false) {
-	var origPath = yield this.getFilePathAsync();
+Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite = false, unique = false) {
+	var origPath = await this.getFilePathAsync();
 	if (!origPath) {
 		Zotero.debug("Attachment file not found in renameAttachmentFile()", 2);
 		return false;
 	}
 	
 	try {
-		var origName = OS.Path.basename(origPath);
-		var origModDate = (yield OS.File.stat(origPath)).lastModificationDate;
+		let origName = OS.Path.basename(origPath);
+		if (this.isImportedAttachment()) {
+			var origModDate = (await OS.File.stat(origPath)).lastModificationDate;
+		}
 		
-		newName = Zotero.File.getValidFileName(newName);
-		
-		// Ignore if no change
+		// No change
 		if (origName === newName) {
 			Zotero.debug("Filename has not changed");
 			return true;
 		}
 		
-		var parentDir = OS.Path.dirname(origPath);
-		var destPath = OS.Path.join(parentDir, newName);
-		var destName = OS.Path.basename(destPath);
-		// Get root + extension, if there is one
-		var pos = destName.lastIndexOf('.');
-		if (pos > 0) {
-			var root = destName.substr(0, pos);
-			var ext = destName.substr(pos + 1);
-		}
-		else {
-			var root = destName;
-		}
-		
 		// Update mod time and clear hash so the file syncs
 		// TODO: use an integer counter instead of mod time for change detection
 		// Update mod time first, because it may fail for read-only files on Windows
-		yield OS.File.setDates(origPath, null, null);
-		var result;
-		var incr = 0;
-		while (true) {
-			// If filename already exists, add a numeric suffix to the end of the root, before
-			// the extension if there is one
-			if (incr) {
-				if (ext) {
-					destName = root + ' ' + (incr + 1) + '.' + ext;
-				}
-				else {
-					destName = root + ' ' + (incr + 1);
-				}
-				destPath = OS.Path.join(parentDir, destName);
-			}
-			
-			try {
-				result = yield OS.File.move(origPath, destPath, { noOverwrite: !overwrite })
-			}
-			catch (e) {
-				if (e instanceof OS.File.Error) {
-					if (e.becauseExists) {
-						// Increment number to create unique suffix
-						if (unique) {
-							incr++;
-							continue;
-						}
-						// If no overwriting or making unique and file exists, return -1
-						return -1;
-					}
-				}
-				throw e;
-			}
-			break;
-		}
-		if (result) {
-			return result;
+		if (this.isImportedAttachment()) {
+			await OS.File.setDates(origPath, null, null);
 		}
 		
-		yield this.relinkAttachmentFile(destPath);
+		newName = await Zotero.File.rename(
+			origPath,
+			newName,
+			{
+				overwrite,
+				unique
+			}
+		);
+		let destPath = OS.Path.join(OS.Path.dirname(origPath), newName);
+		
+		await this.relinkAttachmentFile(destPath);
 		
 		if (this.isImportedAttachment()) {
 			this.attachmentSyncedHash = null;
 			this.attachmentSyncState = "to_upload";
-			yield this.saveTx({ skipAll: true });
+			await this.saveTx({ skipAll: true });
 		}
 		
 		return true;
 	}
 	catch (e) {
+		Zotero.logError(e);
+		
 		// Restore original modification date in case we managed to change it
-		try {
-			OS.File.setDates(origPath, null, origModDate);
-		} catch (e) {
-			Zotero.debug(e, 2);
+		if (this.isImportedAttachment()) {
+			try {
+				OS.File.setDates(origPath, null, origModDate);
+			} catch (e) {
+				Zotero.debug(e, 2);
+			}
 		}
-		Zotero.debug(e);
-		Components.utils.reportError(e);
+		
 		return -2;
 	}
-});
+};
 
 
 /**
