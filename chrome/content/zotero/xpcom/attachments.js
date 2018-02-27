@@ -245,9 +245,18 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * @param {Object} options - 'libraryID', 'url', 'parentItemID', 'collections', 'title',
-	 *                           'fileBaseName', 'contentType', 'referrer', 'cookieSandbox',
-	 *                           'saveOptions'
+	 * @param {Object} options
+	 * @param {Integer} options.libraryID
+	 * @param {String} options.url
+	 * @param {Integer} [options.parentItemID]
+	 * @param {Integer[]} [options.collections]
+	 * @param {String} [options.title]
+	 * @param {String} [options.fileBaseName]
+	 * @param {Boolean} [options.renameIfAllowedType=false]
+	 * @param {String} [options.contentType]
+	 * @param {String} [options.referrer]
+	 * @param {CookieSandbox} [options.cookieSandbox]
+	 * @param {Object} [options.saveOptions]
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
 	this.importFromURL = Zotero.Promise.coroutine(function* (options) {
@@ -257,6 +266,7 @@ Zotero.Attachments = new function(){
 		var collections = options.collections;
 		var title = options.title;
 		var fileBaseName = options.fileBaseName;
+		var renameIfAllowedType = options.renameIfAllowedType;
 		var contentType = options.contentType;
 		var referrer = options.referrer;
 		var cookieSandbox = options.cookieSandbox;
@@ -320,6 +330,11 @@ Zotero.Attachments = new function(){
 		
 		// Save using remote web browser persist
 		var externalHandlerImport = Zotero.Promise.coroutine(function* (contentType) {
+			// Rename attachment
+			if (renameIfAllowedType && !fileBaseName && this.getRenamedFileTypes().includes(contentType)) {
+				let parentItem = Zotero.Items.get(parentItemID);
+				fileBaseName = this.getFileBaseNameFromItem(parentItem);
+			}
 			if (fileBaseName) {
 				let ext = _getExtensionFromURL(url, contentType);
 				var fileName = fileBaseName + (ext != '' ? '.' + ext : '');
@@ -801,6 +816,30 @@ Zotero.Attachments = new function(){
 		
 		formatString = Zotero.File.getValidFileName(formatString);
 		return formatString;
+	}
+	
+	
+	this.getRenamedFileTypes = function () {
+		try {
+			var types = Zotero.Prefs.get('renameAttachmentFiles.automatic.fileTypes');
+			return types ? types.split(',') : [];
+		}
+		catch (e) {
+			return [];
+		}
+	};
+	
+	
+	this.getRenamedFileBaseNameIfAllowedType = async function (parentItem, file) {
+		var types = this.getRenamedFileTypes();
+		var contentType = file.endsWith('.pdf')
+			// Don't bother reading file if there's a .pdf extension
+			? 'application/pdf'
+			: await Zotero.MIME.getMIMETypeFromFile(file);
+		if (!types.includes(contentType)) {
+			return false;
+		}
+		return this.getFileBaseNameFromItem(parentItem);
 	}
 	
 	

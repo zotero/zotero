@@ -241,30 +241,48 @@ Zotero.RecognizePDF = new function () {
 	 * @return {Promise}
 	 */
 	async function _processItem(itemID) {
-		let item = await Zotero.Items.getAsync(itemID);
+		let attachment = await Zotero.Items.getAsync(itemID);
 		
-		if (!item || item.parentItemID) throw new Zotero.Exception.Alert('recognizePDF.fileNotFound');
-		
-		let newItem = await _recognize(item);
-		
-		if (newItem) {
-			// put new item in same collections as the old one
-			let itemCollections = item.getCollections();
-			await Zotero.DB.executeTransaction(async function () {
-				for (let itemCollection of itemCollections) {
-					let collection = Zotero.Collections.get(itemCollection);
-					await collection.addItem(newItem.id);
-				}
-				
-				// put old item as a child of the new item
-				item.parentID = newItem.id;
-				await item.save();
-			});
-			
-			return newItem
+		if (!attachment || attachment.parentItemID) {
+			throw new Zotero.Exception.Alert('recognizePDF.error');
 		}
 		
-		return null;
+		let parentItem = await _recognize(attachment);
+		if (!parentItem) {
+			return null;
+		}
+		
+		// Put new item in same collections as the old one
+		let collections = attachment.getCollections();
+		await Zotero.DB.executeTransaction(async function () {
+			if (collections.length) {
+				for (let collection of collections) {
+					parentItem.addToCollection(collection.id);
+				}
+				await parentItem.save();
+			}
+			
+			// Put old item as a child of the new item
+			attachment.parentID = parentItem.id;
+			await attachment.save();
+		});
+		
+		// Rename attachment file to match new metadata
+		if (Zotero.Prefs.get('renameAttachmentFiles')) {
+			let path = attachment.getFilePath();
+			let ext = Zotero.File.getExtension(path);
+			let fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentItem);
+			let newName = fileBaseName + (ext ? '.' + ext : '');
+			let result = await attachment.renameAttachmentFile(newName, false, true);
+			if (result !== true) {
+				throw new Error("Error renaming " + path);
+			}
+			// Rename attachment title
+			attachment.setField('title', newName);
+			await attachment.saveTx();
+		}
+		
+		return parentItem;
 	}
 	
 	/**

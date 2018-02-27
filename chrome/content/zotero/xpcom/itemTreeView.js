@@ -3231,25 +3231,21 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 		
 		var notifierQueue = new Zotero.Notifier.Queue;
 		try {
+			// If there's a single file being added to a parent, automatic renaming is enabled,
+			// and there are no other non-HTML attachments, we'll rename the file as long as it's
+			// an allowed type. The dragged data could be a URL, so we don't yet know the file type.
+			// This should be kept in sync with ZoteroPane.addAttachmentFromDialog().
+			let renameIfAllowedType = false;
 			let parentItem;
-			let numExistingFileAttachments;
-			if (parentItemID) {
+			if (parentItemID && data.length == 1 && Zotero.Prefs.get('renameAttachmentFiles.automatic')) {
 				parentItem = Zotero.Items.get(parentItemID);
-				numExistingFileAttachments = parentItem.getAttachments()
-					.map(itemID => Zotero.Items.get(itemID))
-					.filter(item => item.isFileAttachment())
-					.length;
+				if (!parentItem.numNonHTMLFileAttachments()) {
+					renameIfAllowedType = true;
+				}
 			}
 			
 			for (var i=0; i<data.length; i++) {
 				var file = data[i];
-				
-				let fileBaseName;
-				// If only one item is being dragged and it's the only attachment, run
-				// "Rename File from Parent Metadata" automatically
-				if (data.length == 1 && parentItem && !numExistingFileAttachments) {
-					fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentItem);
-				}
 				
 				if (dataType == 'text/x-moz-url') {
 					var url = data[i];
@@ -3281,7 +3277,7 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 							yield Zotero.Attachments.importFromURL({
 								libraryID: targetLibraryID,
 								url,
-								fileBaseName,
+								renameIfAllowedType,
 								parentItemID,
 								saveOptions: {
 									notifierQueue
@@ -3298,7 +3294,36 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 					// Otherwise file, so fall through
 				}
 				
+				file = file.path;
+				
+				// Rename file if it's an allowed type
+				let fileBaseName = false;
+				if (renameIfAllowedType) {
+					 fileBaseName = yield Zotero.Attachments.getRenamedFileBaseNameIfAllowedType(
+						parentItem, file
+					);
+				}
+				
 				if (dropEffect == 'link') {
+					// Rename linked file, with unique suffix if necessary
+					try {
+						if (fileBaseName) {
+							let ext = Zotero.File.getExtension(file);
+							let newName = yield Zotero.File.rename(
+								file,
+								fileBaseName + (ext ? '.' + ext : ''),
+								{
+									unique: true
+								}
+							);
+							// Update path in case the name was changed to be unique
+							file = OS.Path.join(OS.Path.dirname(file), newName);
+						}
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+					
 					yield Zotero.Attachments.linkFromFile({
 						file,
 						parentItemID,
@@ -3309,9 +3334,9 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 					});
 				}
 				else {
-					if (file.leafName.endsWith(".lnk")) {
+					if (file.endsWith(".lnk")) {
 						let win = Services.wm.getMostRecentWindow("navigator:browser");
-						win.ZoteroPane.displayCannotAddShortcutMessage(file.path);
+						win.ZoteroPane.displayCannotAddShortcutMessage(file);
 						continue;
 					}
 					
@@ -3328,10 +3353,10 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 					// If moving, delete original file
 					if (dragData.dropEffect == 'move') {
 						try {
-							file.remove(false);
+							yield OS.File.remove(file);
 						}
 						catch (e) {
-							Components.utils.reportError("Error deleting original file " + file.path + " after drag");
+							Zotero.logError("Error deleting original file " + file + " after drag");
 						}
 					}
 				}

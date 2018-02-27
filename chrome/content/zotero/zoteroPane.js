@@ -3678,41 +3678,81 @@ var ZoteroPane = new function()
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
         					.createInstance(nsIFilePicker);
 		fp.init(window, Zotero.getString('pane.item.attachments.select'), nsIFilePicker.modeOpenMultiple);
-		fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
+		fp.appendFilters(nsIFilePicker.filterAll);
 		
-		if(fp.show() == nsIFilePicker.returnOK)
-		{
-			if (!parentItemID) {
-				var collection = this.getSelectedCollection(true);
+		if (fp.show() != nsIFilePicker.returnOK) {
+			return;
+		}
+		
+		var enumerator = fp.files;
+		var files = [];
+		while (enumerator.hasMoreElements()) {
+			let file = enumerator.getNext();
+			file.QueryInterface(Components.interfaces.nsIFile);
+			files.push(file.path);
+		}
+		
+		var collection;
+		var fileBaseName;
+		if (parentItemID) {
+			// If only one item is being added, automatic renaming is enabled, and the parent item
+			// doesn't have any other non-HTML file attachments, rename the file.
+			// This should be kept in sync with itemTreeView::drop().
+			if (files.length == 1 && Zotero.Prefs.get('renameAttachmentFiles.automatic')) {
+				let parentItem = Zotero.Items.get(parentItemID);
+				if (!parentItem.numNonHTMLFileAttachments()) {
+					fileBaseName = await Zotero.Attachments.getRenamedFileBaseNameIfAllowedType(
+						parentItem, files[0]
+					);
+				}
 			}
-			
-			var files = fp.files;
-			while (files.hasMoreElements()){
-				var file = files.getNext();
-				file.QueryInterface(Components.interfaces.nsILocalFile);
-				var attachmentID;
-				if (link) {
-					yield Zotero.Attachments.linkFromFile({
-						file: file,
-						parentItemID: parentItemID,
-						collections: collection ? [collection] : undefined
-					});
-				}
-				else {
-					if (file.leafName.endsWith(".lnk")) {
-						let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						.getService(Components.interfaces.nsIWindowMediator);
-						let win = wm.getMostRecentWindow("navigator:browser");
-						win.ZoteroPane.displayCannotAddShortcutMessage(file.path);
-						continue;
+		}
+		// If not adding to an item, add to the current collection
+		else {
+			collection = this.getSelectedCollection(true);
+		}
+		
+		for (let file of files) {
+			if (link) {
+				// Rename linked file, with unique suffix if necessary
+				try {
+					if (fileBaseName) {
+						let ext = Zotero.File.getExtension(file);
+						let newName = yield Zotero.File.rename(
+							file,
+							fileBaseName + (ext ? '.' + ext : ''),
+							{
+								unique: true
+							}
+						);
+						// Update path in case the name was changed to be unique
+						file = OS.Path.join(OS.Path.dirname(file), newName);
 					}
-					yield Zotero.Attachments.importFromFile({
-						file: file,
-						libraryID: libraryID,
-						parentItemID: parentItemID,
-						collections: collection ? [collection] : undefined
-					});
 				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				
+				let item = yield Zotero.Attachments.linkFromFile({
+					file,
+					parentItemID,
+					collections: collection ? [collection] : undefined
+				});
+			}
+			else {
+				if (file.endsWith(".lnk")) {
+					let win = Services.wm.getMostRecentWindow("navigator:browser");
+					win.ZoteroPane.displayCannotAddShortcutMessage(file);
+					continue;
+				}
+				
+				yield Zotero.Attachments.importFromFile({
+					file,
+					libraryID,
+					fileBaseName,
+					parentItemID,
+					collections: collection ? [collection] : undefined
+				});
 			}
 		}
 	});

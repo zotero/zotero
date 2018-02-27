@@ -27,31 +27,36 @@ describe("PDF Recognition", function() {
 		}
 	});
 
-	it("should recognize a PDF", function* () {
+	it("should recognize a PDF", async function () {
 		this.timeout(30000);
 		// Import the PDF
 		var testdir = getTestDataDirectory();
 		testdir.append("recognizePDF_test_GS.pdf");
-		var item = yield Zotero.Attachments.importFromFile({
+		var attachment = await Zotero.Attachments.importFromFile({
 			file: testdir
 		});
 		
 		// Recognize the PDF
 		win.ZoteroPane.recognizeSelected();
 		
-		var addedIDs = yield waitForItemEvent("add");
-		var modifiedIDs = yield waitForItemEvent("modify");
+		var addedIDs = await waitForItemEvent("add");
+		var modifiedIDs = await waitForItemEvent("modify");
 		assert.lengthOf(addedIDs, 1);
 		var item = Zotero.Items.get(addedIDs[0]);
 		assert.equal(item.getField("title"), "Scaling study of an improved fermion action on quenched lattices");
 		assert.lengthOf(modifiedIDs, 2);
 		
-		yield Zotero.Promise.delay(0);
-		
+		// Wait for status to show as complete
 		var progressWindow = getWindows("chrome://zotero/content/recognizePDFDialog.xul")[0];
+		var completeStr = Zotero.getString("recognizePDF.complete.label");
+		while (progressWindow.document.getElementById("label").value != completeStr) {
+			await Zotero.Promise.delay(20);
+		}
+		
+		// The file should have been renamed
 		assert.equal(
-			progressWindow.document.getElementById("label").value,
-			Zotero.getString("recognizePDF.complete.label")
+			attachment.attachmentFilename,
+			Zotero.Attachments.getFileBaseNameFromItem(item) + '.pdf'
 		);
 	});
 });
