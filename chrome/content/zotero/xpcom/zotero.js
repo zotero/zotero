@@ -1,25 +1,25 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
-    
+
     Copyright © 2009 Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
-    
+
     This file is part of Zotero.
-    
+
     Zotero is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
+
     Zotero is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Affero General Public License for more details.
-    
+
     You should have received a copy of the GNU Affero General Public License
     along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     ***** END LICENSE BLOCK *****
 */
 
@@ -1096,12 +1096,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.launchFile = function (file) {
 		file = Zotero.File.pathToFile(file);
 
-		var customPDFReaderPath  = Zotero.Prefs.get("extensions.zotero.pdf.launcher");
-		if(file.path.toUpperCase().endsWith(".PDF") && customPDFReaderPath){
-            launchFileWithGivenApplication(customPDFReaderPath, file);
-            return;
-        }
-
 		try {
 			Zotero.debug("Launching " + file.path);
 			file.launch();
@@ -1119,7 +1113,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				}
 				var path = Zotero.Prefs.get(pref);
 
-                launchFileWithGivenApplication(path, file);
+				launchFileWithGivenApplication(path, file.path);
 			}
 			catch (e) {
 				Zotero.debug(e);
@@ -1138,24 +1132,23 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			}
 		}
 	};
-     /**
-      * Launch a file with the given application
-      */
-     this.launchFileWithGivenApplication = function (applicationPath, file) {
-         var exec = Components.classes["@mozilla.org/file/local;1"]
-             .createInstance(Components.interfaces.nsILocalFile);
-         exec.initWithPath(applicationPath);
-         if (!exec.exists()) {
-             throw new Error("'" + applicationPath + "' does not exist");
-         }
+	 /**
+	  * Launch a filePath with the given application
+	  */
+	 this.launchFileWithGivenApplication = function (applicationPath, filePath) {
+		 var exec = Zotero.File.pathToFile(applicationPath);
 
-         var proc = Components.classes["@mozilla.org/process/util;1"]
-             .createInstance(Components.interfaces.nsIProcess);
-         proc.init(exec);
+		 if (!exec.exists()) {
+			 throw new Error("'" + applicationPath + "' does not exist");
+		 }
 
-         var args = [file.path];
-         proc.runw(true, args, args.length);
-     };
+		 var proc = Components.classes["@mozilla.org/process/util;1"]
+			 .createInstance(Components.interfaces.nsIProcess);
+		 proc.init(exec);
+
+		 var args = [filePath];
+		 proc.runw(true, args, args.length);
+	 };
 	
 	
 	/**
