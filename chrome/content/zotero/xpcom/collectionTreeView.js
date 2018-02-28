@@ -76,6 +76,14 @@ Object.defineProperty(Zotero.CollectionTreeView.prototype, "selectedTreeRow", {
 });
 
 
+Object.defineProperty(Zotero.CollectionTreeView.prototype, 'window', {
+	get: function () {
+		return this._ownerDocument.defaultView;
+	},
+	enumerable: true
+});
+
+
 /*
  *  Called by the tree itself
  */
@@ -86,6 +94,13 @@ Zotero.CollectionTreeView.prototype.setTree = Zotero.Promise.coroutine(function*
 			return;
 		}
 		this._treebox = treebox;
+		
+		if (!this._ownerDocument) {
+			try {
+				this._ownerDocument = treebox.treeBody.ownerDocument;
+			}
+			catch (e) {}
+		}
 		
 		// Add a keypress listener for expand/collapse
 		var tree = this._treebox.treeBody.parentNode;

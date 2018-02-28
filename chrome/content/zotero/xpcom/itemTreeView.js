@@ -67,22 +67,18 @@ Zotero.ItemTreeView.prototype.regularOnly = false;
 Zotero.ItemTreeView.prototype.expandAll = false;
 Zotero.ItemTreeView.prototype.collapseAll = false;
 
+Object.defineProperty(Zotero.ItemTreeView.prototype, 'window', {
+	get: function () {
+		return this._ownerDocument.defaultView;
+	},
+	enumerable: true
+});
 
 /**
  * Called by the tree itself
  */
 Zotero.ItemTreeView.prototype.setTree = async function (treebox) {
 	try {
-		Zotero.debug("Setting tree for " + this.collectionTreeRow.id + " items view " + this.id);
-		var start = Date.now();
-		// Try to set the window document if not yet set
-		if (treebox && !this._ownerDocument) {
-			try {
-				this._ownerDocument = treebox.treeBody.ownerDocument;
-			}
-			catch (e) {}
-		}
-		
 		if (this._treebox) {
 			if (this._needsSort) {
 				this.sort();
@@ -90,28 +86,39 @@ Zotero.ItemTreeView.prototype.setTree = async function (treebox) {
 			return;
 		}
 		
+		var start = Date.now();
+		
+		Zotero.debug("Setting tree for " + this.collectionTreeRow.id + " items view " + this.id);
+		
 		if (!treebox) {
 			Zotero.debug("Treebox not passed in setTree()", 2);
 			return;
 		}
+		this._treebox = treebox;
 		
 		if (!this._ownerDocument) {
-			Zotero.debug("No owner document in setTree()", 2);
-			return;
+			try {
+				this._ownerDocument = treebox.treeBody.ownerDocument;
+			}
+			catch (e) {}
+			
+			if (!this._ownerDocument) {
+				Zotero.debug("No owner document in setTree()", 2);
+				return;
+			}
 		}
 		
-		this._treebox = treebox;
 		this.setSortColumn();
 		
-		if (this._ownerDocument.defaultView.ZoteroPane_Local) {
-			this._ownerDocument.defaultView.ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
+		if (this.window.ZoteroPane) {
+			this.window.ZoteroPane.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 		}
 		
 		if (Zotero.locked) {
 			Zotero.debug("Zotero is locked -- not loading items tree", 2);
 			
-			if (this._ownerDocument.defaultView.ZoteroPane_Local) {
-				this._ownerDocument.defaultView.ZoteroPane_Local.clearItemsPaneMessage();
+			if (this.window.ZoteroPane) {
+				this.window.ZoteroPane.clearItemsPaneMessage();
 			}
 			return;
 		}
@@ -465,7 +472,7 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 		
 		// Clear My Publications intro text on a refresh with items
 		if (this.collectionTreeRow.isPublications() && this.rowCount) {
-			this._ownerDocument.defaultView.ZoteroPane_Local.clearItemsPaneMessage();
+			this.window.ZoteroPane.clearItemsPaneMessage();
 		}
 		
 		yield this.runListeners('refresh');
@@ -713,7 +720,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			}
 		}
 		else if (collectionTreeRow.isFeed()) {
-			this._ownerDocument.defaultView.ZoteroPane.updateReadLabel();
+			this.window.ZoteroPane.updateReadLabel();
 		}
 		// If not a search, process modifications manually
 		else {
@@ -1682,7 +1689,7 @@ Zotero.ItemTreeView.prototype.sort = function (itemIDs) {
  * Show intro text in middle pane for some views when no items
  */
 Zotero.ItemTreeView.prototype._updateIntroText = function() {
-	if (!this._ownerDocument.defaultView.ZoteroPane) {
+	if (!this.window.ZoteroPane) {
 		return;
 	}
 	
@@ -1781,7 +1788,7 @@ Zotero.ItemTreeView.prototype._updateIntroText = function() {
 	}
 	
 	if (this._introText || this._introText === null) {
-		this._ownerDocument.defaultView.ZoteroPane_Local.clearItemsPaneMessage();
+		this.window.ZoteroPane.clearItemsPaneMessage();
 		this._introText = false;
 	}
 };
@@ -1841,9 +1848,9 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 			// No parent -- it's not here
 			
 			// Clear the quick search and tag selection and try again (once)
-			if (!noRecurse && this._ownerDocument.defaultView.ZoteroPane_Local) {
-				let cleared1 = yield this._ownerDocument.defaultView.ZoteroPane_Local.clearQuicksearch();
-				let cleared2 = this._ownerDocument.defaultView.ZoteroPane_Local.clearTagSelection();
+			if (!noRecurse && this.window.ZoteroPane) {
+				let cleared1 = yield this.window.ZoteroPane.clearQuicksearch();
+				let cleared2 = this.window.ZoteroPane.clearTagSelection();
 				if (cleared1 || cleared2) {
 					return this.selectItem(id, expand, true);
 				}
