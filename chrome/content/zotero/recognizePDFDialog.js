@@ -51,14 +51,7 @@ var Zotero_RecognizePDF_Dialog = new function () {
 	};
 	
 	function close() {
-		if (!_progressWindow) return;
-		Zotero.RecognizePDF.removeListener('rowadded');
-		Zotero.RecognizePDF.removeListener('rowupdated');
-		Zotero.RecognizePDF.removeListener('rowdeleted');
 		_progressWindow.close();
-		_progressWindow = null;
-		_progressIndicator = null;
-		_rowIDs = [];
 	}
 	
 	function _getImageByStatus(status) {
@@ -143,7 +136,15 @@ var Zotero_RecognizePDF_Dialog = new function () {
 				close();
 			}
 		});
-		_progressWindow.addEventListener('close', close.bind(this), false);
+		
+		_progressWindow.addEventListener('unload', function () {
+			Zotero.RecognizePDF.removeListener('rowadded');
+			Zotero.RecognizePDF.removeListener('rowupdated');
+			Zotero.RecognizePDF.removeListener('rowdeleted');
+			_progressWindow = null;
+			_progressIndicator = null;
+			_rowIDs = [];
+		});
 		
 		_updateProgress();
 		

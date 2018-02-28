@@ -19,6 +19,7 @@ describe("PDF Recognition", function() {
 		for(let win of getWindows("chrome://zotero/content/recognizePDFDialog.xul")) {
 			win.close();
 		}
+		Zotero.RecognizePDF.cancel();
 	});
 	
 	after(function() {
