@@ -32,7 +32,7 @@
  * @namespace
  */
 
-let Zotero_RecognizePDF_Dialog = new function () {
+var Zotero_RecognizePDF_Dialog = new function () {
 	const SUCCESS_IMAGE = 'chrome://zotero/skin/tick.png';
 	const FAILURE_IMAGE = 'chrome://zotero/skin/cross.png';
 	const LOADING_IMAGE = 'chrome://zotero/skin/arrow_refresh.png';
