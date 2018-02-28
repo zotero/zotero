@@ -3701,7 +3701,7 @@ var ZoteroPane = new function()
 			if (files.length == 1 && Zotero.Prefs.get('renameAttachmentFiles.automatic')) {
 				let parentItem = Zotero.Items.get(parentItemID);
 				if (!parentItem.numNonHTMLFileAttachments()) {
-					fileBaseName = await Zotero.Attachments.getRenamedFileBaseNameIfAllowedType(
+					fileBaseName = yield Zotero.Attachments.getRenamedFileBaseNameIfAllowedType(
 						parentItem, files[0]
 					);
 				}
