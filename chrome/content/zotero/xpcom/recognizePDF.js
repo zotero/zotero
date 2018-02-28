@@ -256,8 +256,8 @@ Zotero.RecognizePDF = new function () {
 		let collections = attachment.getCollections();
 		await Zotero.DB.executeTransaction(async function () {
 			if (collections.length) {
-				for (let collection of collections) {
-					parentItem.addToCollection(collection.id);
+				for (let collectionID of collections) {
+					parentItem.addToCollection(collectionID);
 				}
 				await parentItem.save();
 			}
