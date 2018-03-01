@@ -1445,6 +1445,7 @@ Zotero.Items = function() {
 		return title.replace(/^[\[\'\"](.*)[\'\"\]]?$/, '$1')
 	}
 	
+	
 	Zotero.DataObjects.call(this);
 	
 	return this;

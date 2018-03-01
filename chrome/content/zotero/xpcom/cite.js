@@ -320,6 +320,104 @@ Zotero.Cite = {
 		} else {
 			return Zotero.Items.get(id);
 		}
+	},
+	
+	extraToCSL: function (extra) {
+		return extra.replace(/^([A-Za-z \-]+)(:\s*.+)/gm, function (_, field, value) {
+			var originalField = field;
+			var field = field.toLowerCase().replace(/ /g, '-');
+			// Fields from https://aurimasv.github.io/z2csl/typeMap.xml
+			switch (field) {
+			// Standard fields
+			case 'abstract':
+			case 'accessed':
+			case 'annote':
+			case 'archive':
+			case 'archive-place':
+			case 'author':
+			case 'authority':
+			case 'call-number':
+			case 'chapter-number':
+			case 'citation-label':
+			case 'citation-number':
+			case 'collection-editor':
+			case 'collection-number':
+			case 'collection-title':
+			case 'composer':
+			case 'container':
+			case 'container-author':
+			case 'container-title':
+			case 'container-title-short':
+			case 'dimensions':
+			case 'director':
+			case 'edition':
+			case 'editor':
+			case 'editorial-director':
+			case 'event':
+			case 'event-date':
+			case 'event-place':
+			case 'first-reference-note-number':
+			case 'genre':
+			case 'illustrator':
+			case 'interviewer':
+			case 'issue':
+			case 'issued':
+			case 'jurisdiction':
+			case 'keyword':
+			case 'language':
+			case 'locator':
+			case 'medium':
+			case 'note':
+			case 'number':
+			case 'number-of-pages':
+			case 'number-of-volumes':
+			case 'original-author':
+			case 'original-date':
+			case 'original-publisher':
+			case 'original-publisher-place':
+			case 'original-title':
+			case 'page':
+			case 'page-first':
+			case 'publisher':
+			case 'publisher-place':
+			case 'recipient':
+			case 'references':
+			case 'reviewed-author':
+			case 'reviewed-title':
+			case 'scale':
+			case 'section':
+			case 'source':
+			case 'status':
+			case 'submitted':
+			case 'title':
+			case 'title-short':
+			case 'translator':
+			case 'version':
+			case 'volume':
+			case 'year-suffix':
+				break;
+			
+			// Uppercase fields
+			case 'doi':
+			case 'isbn':
+			case 'issn':
+			case 'pmcid':
+			case 'pmid':
+			case 'url':
+				field = field.toUpperCase();
+				break;
+			
+			// Weirdo
+			case 'archive-location':
+				field = 'archive_location';
+				break;
+			
+			// Don't change other lines
+			default:
+				field = originalField;
+			}
+			return field + value;
+		});
 	}
 };
 
