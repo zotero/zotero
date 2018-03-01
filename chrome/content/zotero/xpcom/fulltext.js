@@ -261,6 +261,10 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	var indexString = Zotero.Promise.coroutine(function* (text, charset, itemID, stats, version, synced) {
 		var words = this.semanticSplitter(text, charset);
 		
+		while (Zotero.DB.inTransaction()) {
+			yield Zotero.DB.waitForTransaction('indexString()');
+		}
+		
 		yield Zotero.DB.executeTransaction(function* () {
 			this.clearItemWords(itemID, true);
 			yield indexWords(itemID, words, stats, version, synced);
