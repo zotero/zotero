@@ -820,6 +820,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	 * Start the idle observer for the background content processor
 	 */
 	this.registerContentProcessor = function () {
+		// Don't start idle observer during tests
+		if (Zotero.test) return;
 		if (!Zotero.Prefs.get('sync.fulltext.enabled')) return;
 		
 		if (!_idleObserverIsRegistered) {
