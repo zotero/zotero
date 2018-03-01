@@ -13,6 +13,7 @@ const dirs = [
 
 // list of folders from which all files are symlinked
 const symlinkDirs = [
+	'resource/tinymce',
 	'styles',
 	'translators'
 ];
