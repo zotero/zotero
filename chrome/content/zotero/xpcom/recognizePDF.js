@@ -89,9 +89,9 @@ Zotero.RecognizePDF = new function () {
 			return;
 		}
 		this.recognizeItems(pdfs);
-		let pane = Zotero.getActiveZoteroPane();
-		if (pane) {
-			Zotero_RecognizePDF_Dialog.open();
+		var win = Services.wm.getMostRecentWindow("navigator:browser");
+		if (win) {
+			win.Zotero_RecognizePDF_Dialog.open();
 		}
 	};
 	
