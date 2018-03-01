@@ -605,6 +605,7 @@
 				<![CDATA[
 					if (this._editor) {
 						this._editor.undoManager.clear();
+						this._editor.undoManager.add();
 					}
 				]]>
 				</body>
@@ -690,6 +691,10 @@
 								}
 								if (self._value) {
 									self.value = self._value;
+									
+									// Prevent undoing to empty note after initialization
+									self._editor.undoManager.clear();
+									self._editor.undoManager.add();
 								}
 								if (self._focus) {
 									setTimeout(function () {

@@ -43,18 +43,7 @@ async function onLoad() {
 	
 	if (itemID) {
 		var ref = await Zotero.Items.getAsync(itemID);
-		
-		// If loading new or different note, disable undo while we repopulate the text field
-		// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
-		// undo content from another note into the current one.
-		let clearUndo = noteEditor.item ? noteEditor.item.id != itemID : false;
-		
 		noteEditor.item = ref;
-		
-		if (clearUndo) {
-			noteEditor.clearUndo();
-		}
-		
 		document.title = ref.getNoteTitle();
 	}
 	else {
@@ -96,12 +85,9 @@ function onUnload() {
 
 var NotifyCallback = {
 	notify: function(action, type, ids){
-		if (noteEditor.item && ids.indexOf(noteEditor.item.id) != -1) {
-			// If the document title hasn't yet been set, reset undo so
-			// undoing to empty isn't possible
+		if (noteEditor.item && ids.includes(noteEditor.item.id)) {
 			var noteTitle = noteEditor.item.getNoteTitle();
 			if (!document.title && noteTitle != '') {
-				noteEditor.clearUndo();
 				document.title = noteTitle;
 			}
 			
