@@ -539,6 +539,45 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	});
 	
 	
+	// TEMP: Temporary mechanism to serialize indexing of new attachments
+	//
+	// This should instead save the itemID to a table that's read by the content processor
+	var _queue = [];
+	var _indexing = false;
+	var _nextIndexTime;
+	var _indexDelay = 5000;
+	var _indexInterval = 500;
+	this.queueItem = function (item) {
+		// Don't index files in the background during tests
+		if (Zotero.test) return;
+		
+		_queue.push(item.id);
+		_nextIndexTime = Date.now() + _indexDelay;
+		setTimeout(() => {
+			_processNextItem()
+		}, _indexDelay);
+	};
+	
+	async function _processNextItem() {
+		if (!_queue.length) return;
+		// Another _processNextItem() was scheduled
+		if (Date.now() < _nextIndexTime) return;
+		// If indexing is already running, _processNextItem() will be called when it's done
+		if (_indexing) return;
+		_indexing = true;
+		var itemID = _queue.shift();
+		try {
+			await Zotero.Fulltext.indexItems([itemID], false, true);
+		}
+		finally {
+			_indexing = false;
+		}
+		setTimeout(() => {
+			_processNextItem();
+		}, _indexInterval);
+	};
+	
+	
 	//
 	// Full-text content syncing
 	//

@@ -409,6 +409,8 @@ Zotero.Attachments = new function(){
 					attachmentItem.attachmentPath = 'storage:' + fileName;
 					var itemID = yield attachmentItem.save(saveOptions);
 					
+					Zotero.Fulltext.queueItem(attachmentItem);
+					
 					// DEBUG: Does this fail if 'storage' is symlinked to another drive?
 					destDir = this.getStorageDirectory(attachmentItem).path;
 					yield OS.File.move(tmpDir, destDir);
@@ -427,16 +429,6 @@ Zotero.Attachments = new function(){
 				}
 				throw e;
 			}
-			
-			// We don't have any way of knowing that the file is flushed to disk,
-			// so we just wait a second before indexing and hope for the best.
-			// We'll index it later if it fails. (This may not be necessary.)
-			//
-			// If this is removed, the afterEach() delay in the server_connector /connector/saveSnapshot
-			// tests can also be removed.
-			setTimeout(function () {
-				Zotero.Fulltext.indexItems([attachmentItem.id]);
-			}, 1000);
 			
 			return attachmentItem;
 		}.bind(this));
@@ -675,6 +667,8 @@ Zotero.Attachments = new function(){
 				attachmentItem.attachmentPath = 'storage:' + fileName;
 				var itemID = yield attachmentItem.save();
 				
+				Zotero.Fulltext.queueItem(attachmentItem);
+				
 				// DEBUG: Does this fail if 'storage' is symlinked to another drive?
 				destDir = this.getStorageDirectory(attachmentItem).path;
 				yield OS.File.move(tmpDir, destDir);
@@ -697,21 +691,6 @@ Zotero.Attachments = new function(){
 			}
 			
 			throw e;
-		}
-		
-		// We don't have any way of knowing that the file is flushed to disk,
-		// so we just wait a second before indexing and hope for the best.
-		// We'll index it later if it fails. (This may not be necessary.)
-		if (contentType == 'application/pdf') {
-			setTimeout(function () {
-				Zotero.Fulltext.indexPDF(attachmentItem.getFilePath(), attachmentItem.id);
-			}, 1000);
-		}
-		else if (Zotero.MIME.isTextType(contentType)) {
-			// wbp.saveDocument consumes the document context (in Zotero.Utilities.Internal.saveDocument)
-			// Seems like a mozilla bug, but nothing on bugtracker.
-			// Either way, we don't rely on Zotero.Fulltext.indexDocument here anymore
-			yield Zotero.Fulltext.indexItems(attachmentItem.id, true, true);
 		}
 		
 		return attachmentItem;

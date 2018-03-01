@@ -158,9 +158,6 @@ describe("Connector Server", function () {
 			item = Zotero.Items.get(ids[0]);
 			assert.isTrue(item.isImportedAttachment());
 			
-			// Wait until indexing is done
-			yield waitForItemEvent('refresh');
-			
 			var req = yield reqPromise;
 			assert.equal(req.status, 201);
 		});
@@ -257,12 +254,6 @@ describe("Connector Server", function () {
 	});
 	
 	describe("/connector/saveSnapshot", function () {
-		// TEMP: Wait for indexing to complete, which happens after a 1-second delay, after a 201 has
-		// been returned to the connector. Would be better to make sure indexing has completed.
-		afterEach(function* () {
-			yield Zotero.Promise.delay(1050);
-		});
-		
 		it("should save a webpage item and snapshot to the current selected collection", function* () {
 			var collection = yield createDataObject('collection');
 			yield waitForItemsLoad(win);
@@ -402,12 +393,6 @@ describe("Connector Server", function () {
 			await waitForItemsLoad(win);
 		});
 		
-		// TEMP: Wait for indexing to complete, which happens after a 1-second delay, after a 201 has
-		// been returned to the connector. Would be better to make sure indexing has completed.
-		afterEach(function* () {
-			yield Zotero.Promise.delay(1050);
-		});
-		
 		it("should return 500 if no translator available for page", function* () {
 			var xmlhttp = yield Zotero.HTTP.request(
 				'POST',
@@ -510,8 +495,6 @@ describe("Connector Server", function () {
 			var item = Zotero.Items.get(ids[0]);
 			assert.isTrue(collection2.hasItem(item.id));
 			await waitForItemEvent('add');
-			// Wait until indexing is done
-			await waitForItemEvent('refresh');
 			
 			var req = await reqPromise;
 			assert.equal(req.status, 201);
@@ -569,8 +552,6 @@ describe("Connector Server", function () {
 			var ids = await promise;
 			var item = Zotero.Items.get(ids[0]);
 			assert.isTrue(collection2.hasItem(item.id));
-			// Wait until indexing is done
-			await waitForItemEvent('refresh');
 			var req = await reqPromise;
 			assert.equal(req.status, 201);
 			
