@@ -27,6 +27,7 @@
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "เก็บภาพหน้าจอโดยอัตโนมัติเมื่อสร้างรายการจากหน้าเว็บ">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "แนบแฟ้ม PDF และแฟ้มอื่นโดยอัตโนมัติเมื่อบันทึกรายการ">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
 <!ENTITY zotero.preferences.renameAttachmentFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "สร้างแท็กด้วยคำสำคัญและหัวเรื่องโดยอัตโนมัติ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "ล้างรายการในถังขยะที่เคยลบนานกว่า ">

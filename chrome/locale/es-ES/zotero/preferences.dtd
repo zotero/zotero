@@ -27,6 +27,7 @@
 <!ENTITY zotero.preferences.parseRISRefer "Utilizar Zotero para los archivos descargados en formato BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "Tomar instantáneas automáticamente al crear elementos a partir de páginas Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Adjuntar automáticamente los archivos PDF y de otros tipos al guardar elementos">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
 <!ENTITY zotero.preferences.renameAttachmentFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Marcar elementos automáticamente con palabras clave y cabeceras de asunto">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Eliminar automáticamente elementos de la papelera que se eliminaron hace más de ">

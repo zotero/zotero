@@ -27,6 +27,7 @@
 <!ENTITY zotero.preferences.parseRISRefer "استفاده از زوترو برای پرونده‌های BibTeX/RIS/Refer بارگیری شده">
 <!ENTITY zotero.preferences.automaticSnapshots "ساخت خودکار «تصویر لحظه‌ای» در زمان ذخیره صفحات وب">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "پیوست خودکار پی‌دی‌اف‌ها و سایر پرونده‌های وابسته در زمان ذخیره آیتم‌ها">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
 <!ENTITY zotero.preferences.renameAttachmentFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "برچسب زدن خودکار به آیتم‌ها با استفاده از کلمات کلیدی و موضوع‌ها">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "حذف خودکار آیتم‌های موجود در سطل بازیافت پس از">

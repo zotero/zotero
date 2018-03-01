@@ -27,6 +27,7 @@
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "Gorde kaptura-irudiak web-orri batetik item bat sortzen duzuenetan">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Itema sortzen duzunean, gorde erlaziodun PDF eta bestelako fitxategiak automatikoki ">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
 <!ENTITY zotero.preferences.renameAttachmentFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
