@@ -1347,7 +1347,12 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	 * Item must be a non-web-link attachment that isn't already fully indexed
 	 */
 	this.canReindex = Zotero.Promise.coroutine(function* (item) {
-		if (item.isAttachment() && item.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
+		if (item.isAttachment()
+				&& item.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
+			let contentType = item.attachmentContentType;
+			if (!contentType || contentType != 'application/pdf' && !Zotero.MIME.isTextType(contentType)) {
+				return false;
+			}
 			switch (yield this.getIndexedState(item)) {
 				case this.INDEX_STATE_UNAVAILABLE:
 				case this.INDEX_STATE_UNINDEXED:
