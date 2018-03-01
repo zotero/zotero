@@ -695,11 +695,11 @@ describe("Zotero.ItemTreeView", function() {
 			file.append(pdfFilename);
 			pdfPath = file.path;
 			httpd.registerFile("/" + pdfFilename, file);
-			
-			Zotero.Prefs.clear('renameAttachmentFiles.automatic');
 		});
 		
-		afterEach(() => {
+		beforeEach(() => {
+			// Don't run recognize on every file
+			Zotero.Prefs.set('autoRecognizeFiles', false);
 			Zotero.Prefs.clear('renameAttachmentFiles.automatic');
 		});
 		
@@ -707,6 +707,9 @@ describe("Zotero.ItemTreeView", function() {
 			var defer = new Zotero.Promise.defer();
 			httpd.stop(() => defer.resolve());
 			yield defer.promise;
+			
+			Zotero.Prefs.clear('autoRecognizeFiles');
+			Zotero.Prefs.clear('renameAttachmentFiles.automatic');
 		});
 		
 		it("should move a child item from one item to another", function* () {
@@ -877,6 +880,62 @@ describe("Zotero.ItemTreeView", function() {
 				(yield Zotero.File.getBinaryContentsAsync(yield item.getFilePathAsync())),
 				(yield Zotero.File.getBinaryContentsAsync(pdfPath))
 			);
+		});
+		
+		it("should automatically retrieve metadata for top-level PDF if pref is enabled", async function () {
+			Zotero.Prefs.set('autoRecognizeFiles', true);
+			
+			var view = zp.itemsView;
+			
+			var promise = waitForItemEvent('add');
+			var recognizerPromise = waitForRecognizer();
+			
+			// Fake recognizer response
+			Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
+			var server = sinon.fakeServer.create();
+			server.autoRespond = true;
+			setHTTPResponse(
+				server,
+				ZOTERO_CONFIG.RECOGNIZE_URL,
+				{
+					method: 'POST',
+					url: 'recognize',
+					status: 200,
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					json: {
+						title: 'Test',
+						authors: []
+					}
+				}
+			);
+			
+			itemsView.drop(0, -1, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: {
+					contains: function (type) {
+						return type == 'text/x-moz-url';
+					}
+				},
+				getData: function (type) {
+					if (type == 'text/x-moz-url') {
+						return pdfURL;
+					}
+				},
+				mozItemCount: 1,
+			})
+			
+			var itemIDs = await promise;
+			var item = Zotero.Items.get(itemIDs[0]);
+			
+			var progressWindow = await recognizerPromise;
+			progressWindow.close();
+			Zotero.RecognizePDF.cancel();
+			assert.isFalse(item.isTopLevelItem());
+			
+			Zotero.HTTP.mock = null;
 		});
 		
 		it("should rename a stored child attachment using parent metadata if no existing file attachments and pref enabled", async function () {

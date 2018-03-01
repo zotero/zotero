@@ -3236,6 +3236,7 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 			var parentCollectionID = collectionTreeRow.ref.id;
 		}
 		
+		let addedItems = [];
 		var notifierQueue = new Zotero.Notifier.Queue;
 		try {
 			// If there's a single file being added to a parent, automatic renaming is enabled,
@@ -3275,13 +3276,14 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 					
 					// Still string, so remote URL
 					if (typeof file == 'string') {
+						let item;
 						if (parentItemID) {
 							if (!collectionTreeRow.filesEditable) {
 								let win = Services.wm.getMostRecentWindow("navigator:browser");
 								win.ZoteroPane.displayCannotEditLibraryFilesMessage();
 								return;
 							}
-							yield Zotero.Attachments.importFromURL({
+							item = yield Zotero.Attachments.importFromURL({
 								libraryID: targetLibraryID,
 								url,
 								renameIfAllowedType,
@@ -3293,7 +3295,10 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 						}
 						else {
 							let win = Services.wm.getMostRecentWindow("navigator:browser");
-							win.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack'); // TODO: don't do this
+							item = yield win.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack'); // TODO: don't do this
+						}
+						if (item) {
+							addedItems.push(item);
 						}
 						continue;
 					}
@@ -3311,6 +3316,7 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 					);
 				}
 				
+				let item;
 				if (dropEffect == 'link') {
 					// Rename linked file, with unique suffix if necessary
 					try {
@@ -3331,7 +3337,7 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 						Zotero.logError(e);
 					}
 					
-					yield Zotero.Attachments.linkFromFile({
+					item = yield Zotero.Attachments.linkFromFile({
 						file,
 						parentItemID,
 						collections: parentCollectionID ? [parentCollectionID] : undefined,
@@ -3347,7 +3353,7 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 						continue;
 					}
 					
-					yield Zotero.Attachments.importFromFile({
+					item = yield Zotero.Attachments.importFromFile({
 						file,
 						fileBaseName,
 						libraryID: targetLibraryID,
@@ -3367,10 +3373,19 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 						}
 					}
 				}
+				
+				if (item) {
+					addedItems.push(item);
+				}
 			}
 		}
 		finally {
 			yield Zotero.Notifier.commit(notifierQueue);
+		}
+		
+		// Automatically retrieve metadata for PDFs
+		if (!parentItemID) {
+			Zotero.RecognizePDF.autoRecognizeItems(addedItems);
 		}
 	}
 });

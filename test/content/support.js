@@ -19,6 +19,16 @@ function waitForDOMEvent(target, event, capture) {
 	return deferred.promise;
 }
 
+async function waitForRecognizer() {
+	var win = await waitForWindow('chrome://zotero/content/recognizePDFDialog.xul')
+	// Wait for status to show as complete
+	var completeStr = Zotero.getString("recognizePDF.complete.label");
+	while (win.document.getElementById("label").value != completeStr) {
+		await Zotero.Promise.delay(20);
+	}
+	return win;
+}
+
 /**
  * Open a chrome window and return a promise for the window
  *

@@ -2242,19 +2242,20 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 	}
 	else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
 		var targetLibraryID = targetTreeRow.ref.libraryID;
-		
 		if (targetTreeRow.isCollection()) {
 			var parentCollectionID = targetTreeRow.ref.id;
 		}
 		else {
 			var parentCollectionID = false;
 		}
+		var addedItems = [];
 		
 		for (var i=0; i<data.length; i++) {
 			var file = data[i];
 			
 			if (dataType == 'text/x-moz-url') {
 				var url = data[i];
+				let item;
 				
 				if (url.indexOf('file:///') == 0) {
 					let win = Services.wm.getMostRecentWindow("navigator:browser");
@@ -2284,13 +2285,13 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			}
 			
 			if (dropEffect == 'link') {
-				yield Zotero.Attachments.linkFromFile({
+				item = yield Zotero.Attachments.linkFromFile({
 					file: file,
 					collections: parentCollectionID ? [parentCollectionID] : undefined
 				});
 			}
 			else {
-				yield Zotero.Attachments.importFromFile({
+				item = yield Zotero.Attachments.importFromFile({
 					file: file,
 					libraryID: targetLibraryID,
 					collections: parentCollectionID ? [parentCollectionID] : undefined
@@ -2305,7 +2306,12 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 					}
 				}
 			}
+			
+			addedItems.push(item);
 		}
+		
+		// Automatically retrieve metadata for PDFs
+		Zotero.RecognizePDF.autoRecognizeItems(addedItems);
 	}
 });
 

@@ -76,6 +76,25 @@ Zotero.RecognizePDF = new function () {
 		_processQueue();
 	};
 	
+	
+	this.autoRecognizeItems = function (items) {
+		if (!Zotero.Prefs.get('autoRecognizeFiles')) return;
+		
+		var pdfs = items.filter((item) => {
+			return item
+				&& item.isFileAttachment()
+				&& item.attachmentContentType == 'application/pdf';
+		});
+		if (!pdfs.length) {
+			return;
+		}
+		this.recognizeItems(pdfs);
+		let pane = Zotero.getActiveZoteroPane();
+		if (pane) {
+			Zotero_RecognizePDF_Dialog.open();
+		}
+	};
+	
 	/**
 	 * Returns all rows
 	 * @return {Array}

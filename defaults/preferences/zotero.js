@@ -35,6 +35,7 @@ pref("extensions.zotero.automaticTags",true);
 pref("extensions.zotero.fontSize", "1.0");
 pref("extensions.zotero.layout", "standard");
 pref("extensions.zotero.recursiveCollections", false);
+pref("extensions.zotero.autoRecognizeFiles", true);
 pref("extensions.zotero.renameAttachmentFiles.automatic", true);
 pref("extensions.zotero.renameAttachmentFiles.automatic.fileTypes", "application/pdf");
 pref("extensions.zotero.attachmentRenameFormatString", '{%c - }{%y - }{%t{50}}');

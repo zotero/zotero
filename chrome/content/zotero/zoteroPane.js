@@ -85,6 +85,7 @@ var ZoteroPane = new function()
 		// Set key down handler
 		document.getElementById('appcontent').addEventListener('keydown', ZoteroPane_Local.handleKeyDown, true);
 		
+		// Hide or show the PDF recognizer button
 		Zotero.RecognizePDF.addListener('empty', function (row) {
 			document.getElementById('zotero-tb-recognize').hidden = true;
 		});
@@ -3692,6 +3693,7 @@ var ZoteroPane = new function()
 			files.push(file.path);
 		}
 		
+		var addedItems = [];
 		var collection;
 		var fileBaseName;
 		if (parentItemID) {
@@ -3713,6 +3715,8 @@ var ZoteroPane = new function()
 		}
 		
 		for (let file of files) {
+			let item;
+			
 			if (link) {
 				// Rename linked file, with unique suffix if necessary
 				try {
@@ -3733,7 +3737,7 @@ var ZoteroPane = new function()
 					Zotero.logError(e);
 				}
 				
-				let item = yield Zotero.Attachments.linkFromFile({
+				item = yield Zotero.Attachments.linkFromFile({
 					file,
 					parentItemID,
 					collections: collection ? [collection] : undefined
@@ -3746,7 +3750,7 @@ var ZoteroPane = new function()
 					continue;
 				}
 				
-				yield Zotero.Attachments.importFromFile({
+				item = yield Zotero.Attachments.importFromFile({
 					file,
 					libraryID,
 					fileBaseName,
@@ -3754,6 +3758,13 @@ var ZoteroPane = new function()
 					collections: collection ? [collection] : undefined
 				});
 			}
+			
+			addedItems.push(item);
+		}
+		
+		// Automatically retrieve metadata for top-level PDFs
+		if (!parentItemID) {
+			Zotero.RecognizePDF.autoRecognizeItems(addedItems);
 		}
 	});
 	
@@ -3917,6 +3928,9 @@ var ZoteroPane = new function()
 	});
 	
 	
+	/**
+	 * @return {Zotero.Item|false} - The saved item, or false if item can't be saved
+	 */
 	this.addItemFromURL = Zotero.Promise.coroutine(function* (url, itemType, saveSnapshot, row) {
 		if (window.content && url == window.content.document.location.href) {
 			return this.addItemFromPage(itemType, saveSnapshot, row);
@@ -3932,8 +3946,8 @@ var ZoteroPane = new function()
 			
 			var processor = function (doc) {
 				return ZoteroPane_Local.addItemFromDocument(doc, itemType, saveSnapshot, row)
-				.then(function () {
-					deferred.resolve()
+				.then(function (item) {
+					deferred.resolve(item)
 				});
 			};
 			var done = function () {}
@@ -3966,7 +3980,7 @@ var ZoteroPane = new function()
 					
 					if (!ZoteroPane_Local.canEdit(row)) {
 						ZoteroPane_Local.displayCannotEditLibraryMessage();
-						return;
+						return false;
 					}
 					
 					if (row !== undefined) {
@@ -3983,7 +3997,7 @@ var ZoteroPane = new function()
 					
 					if (!ZoteroPane_Local.canEditFiles(row)) {
 						ZoteroPane_Local.displayCannotEditLibraryFilesMessage();
-						return;
+						return false;
 					}
 					
 					if (collectionTreeRow && collectionTreeRow.isCollection()) {
@@ -4000,7 +4014,7 @@ var ZoteroPane = new function()
 						contentType: mimeType
 					});
 					this.selectItem(attachmentItem.id)
-					return;
+					return attachmentItem;
 				}
 			}
 			
@@ -4033,7 +4047,7 @@ var ZoteroPane = new function()
 				}
 			}
 			
-			return item.id;
+			return item;
 		}
 	});
 	
@@ -4521,6 +4535,12 @@ var ZoteroPane = new function()
 	};
 	
 	
+	this.recognizeSelected = function() {
+		Zotero.RecognizePDF.recognizeItems(ZoteroPane.getSelectedItems());
+		Zotero_RecognizePDF_Dialog.open();
+	};
+	
+	
 	this.createParentItemsFromSelected = Zotero.Promise.coroutine(function* () {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
@@ -4953,11 +4973,6 @@ var ZoteroPane = new function()
 	this.addBeforeReloadListener = function(/** @param {Function} **/func) {
 		if(_beforeReloadFunctions.indexOf(func) === -1) _beforeReloadFunctions.push(func);
 	}
-	
-	this.recognizeSelected = function() {
-		Zotero.RecognizePDF.recognizeItems(ZoteroPane.getSelectedItems());
-		Zotero_RecognizePDF_Dialog.open();
-	};
 	
 	/**
 	 * Implements nsIObserver for Zotero reload

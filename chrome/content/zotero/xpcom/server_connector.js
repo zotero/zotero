@@ -649,7 +649,13 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 					contentType: "application/pdf",
 					cookieSandbox
 				});
-				yield session.addItem(item);
+				if (item) {
+					yield session.addItem(item);
+					
+					// Automatically recognize PDF
+					Zotero.RecognizePDF.autoRecognizeItems([item]);
+				}
+				
 				return 201;
 			}
 			catch (e) {

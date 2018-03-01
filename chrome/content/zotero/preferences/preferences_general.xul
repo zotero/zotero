@@ -37,6 +37,7 @@
 			<preference id="pref-reportTranslationFailure" name="extensions.zotero.reportTranslationFailure" type="bool"/>
 			<preference id="pref-automaticSnapshots" name="extensions.zotero.automaticSnapshots" type="bool"/>
 			<preference id="pref-downloadAssociatedFiles" name="extensions.zotero.downloadAssociatedFiles" type="bool"/>
+			<preference id="pref-autoRecognizeFiles" name="extensions.zotero.autoRecognizeFiles" type="bool"/>
 			<preference id="pref-renameAttachmentFiles" name="extensions.zotero.renameAttachmentFiles.automatic" type="bool"/>
 			<preference id="pref-automaticTags" name="extensions.zotero.automaticTags" type="bool"/>
 			<preference id="pref-trashAutoEmptyDays" name="extensions.zotero.trashAutoEmptyDays" type="int"/>
@@ -123,6 +124,7 @@
 				label="&zotero.preferences.automaticSnapshots;"
 				preference="pref-automaticSnapshots"/>
 			<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="pref-downloadAssociatedFiles"/>
+			<checkbox label="&zotero.preferences.autoRecognizeFiles;" preference="pref-autoRecognizeFiles"/>
 			<checkbox label="&zotero.preferences.renameAttachmentFiles;" preference="pref-renameAttachmentFiles"/>
 			<checkbox label="&zotero.preferences.automaticTags;" preference="pref-automaticTags"/>
 			<hbox align="center">
