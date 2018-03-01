@@ -527,17 +527,17 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 				continue;
 			}
 			
-			if (ignoreErrors) {
-				try {
-					yield indexFile(path, item.attachmentContentType, item.attachmentCharset, itemID, complete);
-				}
-				catch (e) {
+			try {
+				yield indexFile(path, item.attachmentContentType, item.attachmentCharset, itemID, complete);
+			}
+			catch (e) {
+				if (ignoreErrors) {
 					Components.utils.reportError("Error indexing " + path);
 					Zotero.logError(e);
 				}
-			}
-			else {
-				yield indexFile(path, item.attachmentContentType, item.attachmentCharset, itemID, complete);
+				else {
+					throw e;
+				}
 			}
 		}
 	});
