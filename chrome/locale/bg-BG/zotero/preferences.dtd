@@ -28,7 +28,7 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Автоматично прави снимки при се създават записи от интернет страници">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматично прикачва асоциираните PDF и други файлове при съхранение на записите">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.renameAttachmentFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Автоматично маркира записите с ключови думи и заглавие на темата">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">

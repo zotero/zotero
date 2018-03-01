@@ -1,4 +1,0 @@
-dataDir.migration.defaultLocationHasChanged = The default %1$S data directory location has changed. %1$S can migrate your data to the new location.
-dataDir.migration.appMustBeRestarted = %S must be restarted to complete the migration.
-
-

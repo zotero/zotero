@@ -28,7 +28,7 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Automatisch einen Schnappschuss erstellen, sobald ein Eintrag aus einer Webseite erstellt wird">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatisch zugehörige PDFs und andere Dateien beim Speichern von Einträgen anhängen">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.renameAttachmentFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Automatisch Tags aus Schlüsselwörtern und Schlagwörtern erstellen">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Einträge im Papierkorb automatisch löschen nach mehr als">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "Tagen">

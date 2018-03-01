@@ -3700,7 +3700,7 @@ var ZoteroPane = new function()
 			// If only one item is being added, automatic renaming is enabled, and the parent item
 			// doesn't have any other non-HTML file attachments, rename the file.
 			// This should be kept in sync with itemTreeView::drop().
-			if (files.length == 1 && Zotero.Prefs.get('renameAttachmentFiles.automatic')) {
+			if (files.length == 1 && Zotero.Prefs.get('autoRenameFiles')) {
 				let parentItem = Zotero.Items.get(parentItemID);
 				if (!parentItem.numNonHTMLFileAttachments()) {
 					fileBaseName = yield Zotero.Attachments.getRenamedFileBaseNameIfAllowedType(

@@ -28,7 +28,7 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Cando se crean elementos a partir de páxinas web facer capturas automaticamente">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Anexar automaticamente os PDFs e outros ficheiros asociados ao gardar os elementos">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.renameAttachmentFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Etiquetar automaticamente os elementos con palabras clave e epígrafes temáticos">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Eliminar automaticamente os elementos que leven no lixo máis de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "días">

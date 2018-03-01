@@ -287,7 +287,7 @@ Zotero.RecognizePDF = new function () {
 		});
 		
 		// Rename attachment file to match new metadata
-		if (Zotero.Prefs.get('renameAttachmentFiles.automatic')) {
+		if (Zotero.Prefs.get('autoRenameFiles')) {
 			let path = attachment.getFilePath();
 			let ext = Zotero.File.getExtension(path);
 			let fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentItem);

@@ -28,7 +28,7 @@
 <!ENTITY zotero.preferences.automaticSnapshots "pri vytváraní záznamov z webstránok automaticky urobiť snímku danej stránky">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "pri ukladaní záznamov automaticky priložiť prepojené PDF a ostatné súbory">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.renameAttachmentFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "automaticky aplikovať kľúčové slová a predmetové heslá ako značky">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaticky odstrániť záznamy vymazané pred viac ako">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dňami">

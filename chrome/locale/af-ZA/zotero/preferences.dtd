@@ -28,7 +28,7 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Neem outomaties kiekies wanneer items uit webbladsye geskep word">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Heg geassosieerde PDF's en ander lêers outomaties aan wanneer items gestoor word">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.renameAttachmentFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Merk items outomaties met sleutelwoorde en onderwerpopskrifte aan">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">

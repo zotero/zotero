@@ -700,7 +700,7 @@ describe("Zotero.ItemTreeView", function() {
 		beforeEach(() => {
 			// Don't run recognize on every file
 			Zotero.Prefs.set('autoRecognizeFiles', false);
-			Zotero.Prefs.clear('renameAttachmentFiles.automatic');
+			Zotero.Prefs.clear('autoRenameFiles');
 		});
 		
 		after(function* () {
@@ -709,7 +709,7 @@ describe("Zotero.ItemTreeView", function() {
 			yield defer.promise;
 			
 			Zotero.Prefs.clear('autoRecognizeFiles');
-			Zotero.Prefs.clear('renameAttachmentFiles.automatic');
+			Zotero.Prefs.clear('autoRenameFiles');
 		});
 		
 		it("should move a child item from one item to another", function* () {
@@ -1025,7 +1025,7 @@ describe("Zotero.ItemTreeView", function() {
 		});
 		
 		it("shouldn't rename a stored child attachment using parent metadata if pref disabled", async function () {
-			Zotero.Prefs.set('renameAttachmentFiles.automatic', false);
+			Zotero.Prefs.set('autoRenameFiles', false);
 			
 			var view = zp.itemsView;
 			var parentTitle = Zotero.Utilities.randomString();

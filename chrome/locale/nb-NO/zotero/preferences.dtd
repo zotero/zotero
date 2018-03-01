@@ -28,7 +28,7 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Ta snapshot automatisk når du genererer elementer fra nettsider">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Lagre assosierte PDF-filer og andre filer når du lagrer elementer">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.renameAttachmentFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Legg til tagger automatisk når elementer inneholder nøkkel- og emneord i hodeteksten">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dager siden">

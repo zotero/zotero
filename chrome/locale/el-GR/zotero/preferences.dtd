@@ -28,7 +28,7 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Αυτόματη λήψη φωτογραφικού στιγμιότυπου όταν δημιουργείτε στοιχεία από ιστοσελίδες">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Αυτόματη προσάρτηση των συνοδευτικών αρχείων PDF και άλλων όταν αποθηκεύετε στοιχεία">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.renameAttachmentFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Αυτόματη επισήμανση των στοιχείων με λέξεις κλειδιά και κεφαλίδες θέματος">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Να απομακρύνονται αυτόματα από τον κάδο ανακύκλωσης στοιχεία που έχουν διαγραφεί για περισσότερο από">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ημέρες πριν">

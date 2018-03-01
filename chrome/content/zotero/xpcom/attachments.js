@@ -800,7 +800,7 @@ Zotero.Attachments = new function(){
 	
 	this.getRenamedFileTypes = function () {
 		try {
-			var types = Zotero.Prefs.get('renameAttachmentFiles.automatic.fileTypes');
+			var types = Zotero.Prefs.get('autoRenameFiles.fileTypes');
 			return types ? types.split(',') : [];
 		}
 		catch (e) {
