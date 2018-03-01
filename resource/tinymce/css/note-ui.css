@@ -168,6 +168,10 @@ html, body {
 	height: 29px !important;
 }
 
+.mce-top-part::before {
+	box-shadow: none !important;
+}
+
 /* Fix 100% width of link toolbar */
 div.mce-tinymce-inline {
 	width: initial !important;
