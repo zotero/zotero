@@ -70,6 +70,7 @@ async function onLoad() {
 		noteEditor.refresh();
 	}
 	
+	noteEditor.focus();
 	notifierUnregisterID = Zotero.Notifier.registerObserver(NotifyCallback, 'item', 'noteWindow');
 }
 

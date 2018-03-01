@@ -709,8 +709,10 @@
 									self.value = self._value;
 								}
 								if (self._focus) {
-									self._iframe.focus();
-									self._editor.focus();
+									setTimeout(function () {
+										self._iframe.focus();
+										self._editor.focus();
+									});
 									self._focus = false;
 								}
 								
