@@ -83,6 +83,7 @@ Zotero.Server.Connector.SessionManager = {
 	create: function (id) {
 		// Legacy client
 		if (!id) {
+			Zotero.debug("No session id provided by client", 2);
 			id = Zotero.Utilities.randomString();
 		}
 		if (this._sessions.has(id)) {
@@ -767,6 +768,7 @@ Zotero.Server.Connector.UpdateSession.prototype = {
 		
 		var session = Zotero.Server.Connector.SessionManager.get(data.sessionID);
 		if (!session) {
+			Zotero.debug("Can't find session " + data.sessionID, 1);
 			return [400, "application/json", JSON.stringify({ error: "SESSION_NOT_FOUND" })];
 		}
 		
