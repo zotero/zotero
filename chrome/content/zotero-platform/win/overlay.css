@@ -1,3 +1,18 @@
+:root {
+	--theme-border-color: #cecece;
+}
+
+/* Hide horrible blue effect for menu bar and toolbar */
+#navigator-toolbox {
+	-moz-appearance: none;
+}
+
+#zotero-pane #zotero-toolbar {
+	-moz-appearance: none !important;
+	margin-top: -4px;
+	border-bottom-color: var(--theme-border-color);
+}
+
 /*
  As of Fx36, the built-in styles don't properly handle a menu-button within combined buttons.
  
@@ -230,6 +245,46 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 	border-color: #818790;
 }
 
+#zotero-collections-splitter:not([state=collapsed]),
+#zotero-items-splitter:not([state=collapsed]),
+#zotero-tags-splitter:not([state=collapsed]) {
+	border: 0;
+	background-color: transparent;
+	position: relative;
+	/* Positive z-index positions the splitter on top of its siblings and makes
+	it clickable on both sides. */
+	z-index: 1;
+}
+
+#zotero-collections-splitter:not([state=collapsed]),
+#zotero-items-splitter:not([state=collapsed]):not([orient=vertical]),
+#zotero-tags-splitter:not([state=collapsed]) {
+	border-inline-end: 1px solid var(--theme-border-color);
+	min-width: 0;
+	width: 3px;
+	margin-inline-start: -3px;
+}
+
+#zotero-tags-splitter:not([state=collapsed]),
+#zotero-items-splitter:not([state=collapsed])[orient=vertical] {
+	border-block-end: 1px solid var(--theme-border-color);
+	min-height: 0;
+	height: 3px;
+	margin-block-start: -3px;
+}
+
+#zotero-collections-splitter > grippy,
+#zotero-items-splitter > grippy,
+#zotero-tags-splitter > grippy {
+	border: 0;
+}
+
+#zotero-collections-splitter:not([state=collapsed]) > grippy,
+#zotero-items-splitter:not([state=collapsed]) > grippy,
+#zotero-tags-splitter:not([state=collapsed]) > grippy {
+	display: none;
+}
+
 #zotero-collections-tree, #zotero-items-tree, #zotero-view-item {
 	-moz-appearance: none;
 	border-style: solid;
@@ -242,6 +297,10 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 	-moz-border-left-colors: none;
 }
 
+treechildren::-moz-tree-twisty {
+	padding: 0 4px;
+}
+
 /* Undo tree row spacing change in Fx25 on Windows */
 #zotero-collections-tree treechildren::-moz-tree-row,
 #zotero-items-tree treechildren::-moz-tree-row,
@@ -249,8 +308,8 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 	height: 1.6em;
 }
 
-#zotero-collections-tree {
-	border-width: 0 1px 1px 0;
+tree {
+	border-width: 0;
 }
 
 /* Restore row highlighting on drag over, though I'm not sure how we're losing it to begin with. */
@@ -258,15 +317,31 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 	background-color: Highlight;
 }
 
-#zotero-items-tree {
-	border-width: 0 1px;
+#zotero-tag-selector groupbox {
+	-moz-appearance: none;
+	padding: 0;
+	border: 0;
+}
+
+#tags-box {
+	padding-top: 0.1em;
+	padding-left: 0.05em;
+}
+
+#tags-box button {
+	margin: .04em 0 0 .15em !important;
+}
+
+#zotero-editpane-tabs spacer {
+	border: 0;
 }
 
 #zotero-view-item {
 	padding: 0 !important;
 	-moz-appearance: none;
 	background-color: -moz-field;
-	border-width: 1px 0 0  1px;
+	border-width: 1px 0 0  0;
+	border-color: var(--theme-border-color);
 }
 
 #zotero-view-tabbox > tabs {
@@ -275,10 +350,7 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 
 #zotero-item-pane-groupbox {
 	-moz-appearance: none !important;
-	border-radius: 0;
-	border-width: 0 0 0 1px;
-	border-color: #818790;
-	border-style: solid;
+	border-width: 0;
 }
 
 #zotero-editpane-item-box > scrollbox, #zotero-view-item > tabpanel > vbox, 

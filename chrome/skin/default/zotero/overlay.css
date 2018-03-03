@@ -50,14 +50,6 @@
 	background: #FFFF99 !important;
 }
 
-#zotero-pane splitter
-{
-	border: 0;
-	width: 10px;
-	background-color: transparent;
-	background-image: none;
-}
-
 #zotero-items-column-hasAttachment, #zotero-items-column-numNotes {
 	min-width: 21px;
 }

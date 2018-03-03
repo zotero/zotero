@@ -228,8 +228,10 @@ tab {
 #zotero-prefs .numberbox-input-box{
 	-moz-appearance: textfield;
 }
-/* Grippy icon missing anyway */
-#zotero-pane splitter{
-	width: 6px;
-}
 
+#zotero-pane splitter {
+	border: 0;
+	width: 6px;
+	background-color: transparent;
+	background-image: none;
+}
