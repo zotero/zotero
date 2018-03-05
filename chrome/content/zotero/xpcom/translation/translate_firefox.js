@@ -368,7 +368,16 @@ Zotero.Translate.DOMWrapper = new function() {
  */
 Zotero.Translate.SandboxManager = function(sandboxLocation) {
 	// sandboxLocation = Components.classes["@mozilla.org/systemprincipal;1"].createInstance(Components.interfaces.nsIPrincipal);
-	var sandbox = this.sandbox = new Components.utils.Sandbox(sandboxLocation, {wantComponents:false, wantGlobalProperties:["XMLHttpRequest"]});
+	var sandbox = this.sandbox = new Components.utils.Sandbox(
+		sandboxLocation,
+		{
+			wantComponents: false,
+			wantGlobalProperties: [
+				'atob',
+				'XMLHttpRequest'
+			]
+		}
+	);
 	this.sandbox.Zotero = {};
 	
 	// import functions missing from global scope into Fx sandbox
