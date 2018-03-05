@@ -1363,7 +1363,7 @@ Zotero.Utilities.Internal.activate = new function() {
 		}
 		XFree(res[0]);
 		
-		return foundWindow;
+		return false;
 	}
 	
 	/**
