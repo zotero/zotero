@@ -14,8 +14,8 @@
 <!ENTITY zotero.general.tools "Werkzeuge">
 <!ENTITY zotero.general.more "Mehr">
 <!ENTITY zotero.general.loading "Lade...">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Schließen">
+<!ENTITY zotero.general.minimize "Minimieren">
 
 
 <!ENTITY zotero.errorReport.title "Zotero Fehlerbericht">
@@ -74,7 +74,7 @@
 <!ENTITY zotero.items.archive_column "Archiv">
 <!ENTITY zotero.items.archiveLocation_column "Standort im Archiv">
 <!ENTITY zotero.items.place_column "Ort">
-<!ENTITY zotero.items.volume_column "Volumen">
+<!ENTITY zotero.items.volume_column "Band">
 <!ENTITY zotero.items.edition_column "Auflage">
 <!ENTITY zotero.items.pages_column "Seiten">
 <!ENTITY zotero.items.issue_column "Ausgabe">
@@ -234,9 +234,9 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Lesezeichen">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Lesezeichen können zwischen Microsoft Word und OpenOffice.org geteilt werden, aber dies ist fehleranfällig falls diese versehentlich verändert werden und können nicht als Fußnoten benutzt werden.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatisch Zitationen aktualisieren">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Zitationen mit anstehenden Aktualisierungen werden im Dokument hervorgehoben">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Das Deaktivieren von automatischen Aktualisierungen kann das Einfügen von Zitationen in großen Dokumenten beschleunigen. Zitationen können dann manuell aktualisiert werden durch das Klicken Sie auf Aktualisieren.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abgekürzte Zeitschriftentitel von MEDLINE verwenden">

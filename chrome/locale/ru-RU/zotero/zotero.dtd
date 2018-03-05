@@ -14,8 +14,8 @@
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "More">
 <!ENTITY zotero.general.loading "Загрузка...">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Закрыть">
+<!ENTITY zotero.general.minimize "Свернуть">
 
 
 <!ENTITY zotero.errorReport.title "Отчет об ошибке Zotero">

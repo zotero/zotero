@@ -14,8 +14,8 @@
 <!ENTITY zotero.general.tools "Araçlar">
 <!ENTITY zotero.general.more "Daha Başka">
 <!ENTITY zotero.general.loading "Yükleniyor...">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Kapat">
+<!ENTITY zotero.general.minimize "Küçült">
 
 
 <!ENTITY zotero.errorReport.title "Zotero Hata Raporu">

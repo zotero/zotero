@@ -14,8 +14,8 @@
 <!ENTITY zotero.general.tools "Orodja">
 <!ENTITY zotero.general.more "Dodatno">
 <!ENTITY zotero.general.loading "Nalaganje ...">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Zapri">
+<!ENTITY zotero.general.minimize "Skrči">
 
 
 <!ENTITY zotero.errorReport.title "Poročilo o napaki Zotero">
@@ -234,9 +234,9 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Zaznamki">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Zaznamki se lahko skupno rabijo v Microsoft Word in LibreOffice, vendar lahko povzročijo napako, če se ponesreči spremenijo,  ter jih ni mogoče vstavljati v sprotne opombe.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Samodejno posodobi navedke">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Navedki s čakajočimi posodobitvami bodo v dokumentu poudarjeni">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Onemogočanje posodobitev lahko pohitri vstavljanje navedkov v večjih dokumentih. Za ročno posodobitev navedkov kliknite Osveži.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Uporabi okrajšave revij MEDLINE">

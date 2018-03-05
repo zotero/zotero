@@ -14,8 +14,8 @@
 <!ENTITY zotero.general.tools "Nástroje">
 <!ENTITY zotero.general.more "Viac">
 <!ENTITY zotero.general.loading "Nahrávam...">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Zavrieť">
+<!ENTITY zotero.general.minimize "Minimalizovať">
 
 
 <!ENTITY zotero.errorReport.title "Výkaz chýb Zotera">
