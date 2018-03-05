@@ -1,25 +1,25 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
-    
+
     Copyright © 2009 Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
-    
+
     This file is part of Zotero.
-    
+
     Zotero is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
+
     Zotero is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Affero General Public License for more details.
-    
+
     You should have received a copy of the GNU Affero General Public License
     along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     ***** END LICENSE BLOCK *****
 */
 
@@ -1095,6 +1095,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 */
 	this.launchFile = function (file) {
 		file = Zotero.File.pathToFile(file);
+
 		try {
 			Zotero.debug("Launching " + file.path);
 			file.launch();
@@ -1111,20 +1112,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					var pref = "fallbackLauncher.unix";
 				}
 				var path = Zotero.Prefs.get(pref);
-				
-				var exec = Components.classes["@mozilla.org/file/local;1"]
-							.createInstance(Components.interfaces.nsILocalFile);
-				exec.initWithPath(path);
-				if (!exec.exists()) {
-					throw new Error(path + " does not exist");
-				}
-				
-				var proc = Components.classes["@mozilla.org/process/util;1"]
-								.createInstance(Components.interfaces.nsIProcess);
-				proc.init(exec);
-				
-				var args = [file.path];
-				proc.runw(true, args, args.length);
+
+				launchFileWithGivenApplication(path, file.path);
 			}
 			catch (e) {
 				Zotero.debug(e);
@@ -1142,7 +1131,24 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				nsIEPS.loadUrl(uri);
 			}
 		}
-	}
+	};
+	 /**
+	  * Launch a filePath with the given application
+	  */
+	 this.launchFileWithGivenApplication = function (applicationPath, filePath) {
+		 var exec = Zotero.File.pathToFile(applicationPath);
+
+		 if (!exec.exists()) {
+			 throw new Error("'" + applicationPath + "' does not exist");
+		 }
+
+		 var proc = Components.classes["@mozilla.org/process/util;1"]
+			 .createInstance(Components.interfaces.nsIProcess);
+		 proc.init(exec);
+
+		 var args = [filePath];
+		 proc.runw(true, args, args.length);
+	 };
 	
 	
 	/**
