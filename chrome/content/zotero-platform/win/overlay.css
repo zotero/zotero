@@ -236,15 +236,6 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 	padding-left: 2px;
 }
 
-#zotero-toolbar:-moz-system-metric(windows-compositor) {
-	-moz-appearance: none !important;
-	background-image: -moz-linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
-	background-color: rgb(207, 219, 236) !important;
-	border-width: 0 0 1px 0;
-	border-style: solid;
-	border-color: #818790;
-}
-
 #zotero-collections-splitter:not([state=collapsed]),
 #zotero-items-splitter:not([state=collapsed]),
 #zotero-tags-splitter:not([state=collapsed]) {
