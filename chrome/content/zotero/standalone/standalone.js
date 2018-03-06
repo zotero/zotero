@@ -139,6 +139,15 @@ const ZoteroStandalone = new function() {
 	
 	
 	this.updateQuickCopyOptions = function () {
+		var selected = false;
+		try {
+			selected = Zotero.getActiveZoteroPane()
+				.getSelectedItems()
+				.filter(item => item.isRegularItem())
+				.length;
+		}
+		catch (e) {}
+		
 		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		
@@ -146,16 +155,18 @@ const ZoteroStandalone = new function() {
 		var copyBibliography = document.getElementById('menu_copyBibliography');
 		var copyExport = document.getElementById('menu_copyExport');
 		
-		copyCitation.hidden = format.mode != 'bibliography';
-		copyBibliography.hidden = format.mode != 'bibliography';
-		copyExport.hidden = format.mode != 'export';
+		copyCitation.hidden = !selected || format.mode != 'bibliography';
+		copyBibliography.hidden = !selected || format.mode != 'bibliography';
+		copyExport.hidden = !selected || format.mode != 'export';
 		if (format.mode == 'export') {
 			try {
 				let obj = Zotero.Translators.get(format.id);
 				copyExport.label = Zotero.getString('quickCopy.copyAs', obj.label);
 			}
 			catch (e) {
-				Zotero.logError(e);
+				if (!(e instanceof Zotero.Exception.UnloadedDataException && e.dataType == 'translators')) {
+					Zotero.logError(e);
+				}
 				copyExport.hidden = true;
 			}
 		}
