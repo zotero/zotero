@@ -1110,21 +1110,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				else {
 					var pref = "fallbackLauncher.unix";
 				}
-				var path = Zotero.Prefs.get(pref);
-				
-				var exec = Components.classes["@mozilla.org/file/local;1"]
-							.createInstance(Components.interfaces.nsILocalFile);
-				exec.initWithPath(path);
-				if (!exec.exists()) {
-					throw new Error(path + " does not exist");
-				}
-				
-				var proc = Components.classes["@mozilla.org/process/util;1"]
-								.createInstance(Components.interfaces.nsIProcess);
-				proc.init(exec);
-				
-				var args = [file.path];
-				proc.runw(true, args, args.length);
+				let launcher = Zotero.Prefs.get(pref);
+				this.launchFileWithApplication(file.path, launcher);
 			}
 			catch (e) {
 				Zotero.debug(e);
@@ -1142,7 +1129,21 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				nsIEPS.loadUrl(uri);
 			}
 		}
-	}
+	};
+	
+	
+	/**
+	 * Launch a file with the given application
+	 */
+	this.launchFileWithApplication = function (filePath, applicationPath) {
+		var exec = Zotero.File.pathToFile(applicationPath);
+		if (!exec.exists()) {
+			throw new Error("'" + applicationPath + "' does not exist");
+		}
+		
+		// Async, but we don't want to block
+		Zotero.Utilities.Internal.exec(applicationPath, [filePath]);
+	};
 	
 	
 	/**

@@ -4199,6 +4199,21 @@ var ZoteroPane = new function()
 				}
 				else {
 					Zotero.Notifier.trigger('open', 'file', itemID);
+					
+					// Custom PDF handler
+					if (item.attachmentContentType === 'application/pdf') {
+						let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
+						if (pdfHandler) {
+							if (yield OS.File.exists(pdfHandler)) {
+								Zotero.launchFileWithApplication(file.path, pdfHandler);
+								continue;
+							}
+							else {
+								Zotero.logError(`${pdfHandler} not found -- launching file normally`);
+							}
+						}
+					}
+					
 					Zotero.launchFile(file);
 				}
 			}

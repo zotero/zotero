@@ -184,6 +184,9 @@ pref("extensions.zotero.ingester.allowedSites", "");
 pref("extensions.zotero.connector.repo.lastCheck.localTime", 0);
 pref("extensions.zotero.connector.repo.lastCheck.repoTime", 0);
 
+// Custom file handlers
+pref("extensions.zotero.fileHandler.pdf", "");
+
 // File/URL opening executable if launch() fails
 pref("extensions.zotero.fallbackLauncher.unix", "/usr/bin/xdg-open");
 pref("extensions.zotero.fallbackLauncher.windows", "");
