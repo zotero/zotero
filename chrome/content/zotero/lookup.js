@@ -206,14 +206,20 @@ var Zotero_Lookup = new function () {
 	}
 
 	this.toggleProgress = function(on) {
+		// In Firefox 52.6.0, progressmeters burn CPU at idle on Linux when undetermined, even
+		// if they're hidden. (Being hidden is enough on macOS.)
+		var mode = on ? 'undetermined' : 'determined';
+		
 		//single line
 		var txtBox = document.getElementById("zotero-lookup-textbox");
 		txtBox.style.opacity = on ? 0.5 : 1;
 		txtBox.disabled = !!on;
-		document.getElementById("zotero-lookup-progress").setAttribute("collapsed", !on);
+		var p1 = document.getElementById("zotero-lookup-progress");
+		p1.mode = mode;
 
 		//multiline
 		document.getElementById("zotero-lookup-multiline-textbox").disabled = !!on;
-		document.getElementById("zotero-lookup-multiline-progress").setAttribute("collapsed", !on);
+		var p2 = document.getElementById("zotero-lookup-multiline-progress");
+		p2.mode = mode;
 	}
 }

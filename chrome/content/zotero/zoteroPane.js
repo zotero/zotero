@@ -2256,10 +2256,10 @@ var ZoteroPane = new function()
 			return;
 		}
 		var spinner = document.getElementById('zotero-tb-search-spinner');
-		spinner.style.visibility = 'visible';
+		spinner.style.display = 'inline';
 		var searchVal = search.value;
 		yield this.itemsView.setFilter('search', searchVal);
-		spinner.style.visibility = 'hidden';
+		spinner.style.display = 'none';
 		if (runAdvanced) {
 			this.clearItemsPaneMessage();
 		}
