@@ -1474,6 +1474,8 @@ Zotero.Integration._oldCitationLocatorMap = {
  */
 Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(function* (index, noteIndex, citation) {
 	var index = parseInt(index, 10);
+	
+	yield citation.loadItemData();
 
 	citation.properties.added = true;
 	citation.properties.zoteroIndex = index;
