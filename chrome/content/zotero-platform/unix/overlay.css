@@ -229,6 +229,10 @@ tab {
 	-moz-appearance: textfield;
 }
 
+#zotero-prefs #noteFontSize {
+	min-width: 3.8em;
+}
+
 #zotero-pane splitter {
 	border: 0;
 	width: 6px;
