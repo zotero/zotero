@@ -25,6 +25,9 @@
 
 "use strict";
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+Components.utils.import("resource://gre/modules/osfile.jsm");
+
 Zotero_Preferences.General = {
 	init: function () {
 		// JS-based strings
@@ -36,27 +39,89 @@ Zotero_Preferences.General = {
 		}
 		
 		document.getElementById('noteFontSize').value = Zotero.Prefs.get('note.fontSize');
+		
+		this._updateFileHandlerUI();
 	},
 	
+	//
+	// File handlers
+	//
+	chooseFileHandler: function (type) {
+		var pref = this._getFileHandlerPref(type);
+		var currentPath = Zotero.Prefs.get(pref);
+		
+		var nsIFilePicker = Components.interfaces.nsIFilePicker;
+		var fp = Components.classes["@mozilla.org/filepicker;1"]
+			.createInstance(nsIFilePicker);
+		if (currentPath) {
+			fp.displayDirectory = Zotero.File.pathToFile(OS.Path.dirname(currentPath));
+		}
+		fp.init(
+			window,
+			Zotero.getString('zotero.preferences.chooseFileHandler'),
+			nsIFilePicker.modeOpen
+		);
+		fp.appendFilters(nsIFilePicker.filterApps);
+		if (fp.show() != nsIFilePicker.returnOK) {
+			this._updateFileHandlerUI();
+			return false;
+		}
+		var newPath = OS.Path.normalize(fp.file.path);
+		this.setFileHandler(type, newPath);
+	},
 	
-	updateTranslators: Zotero.Promise.coroutine(function* () {
-		var updated = yield Zotero.Schema.updateFromRepository(Zotero.Schema.REPO_UPDATE_MANUAL);
-		var button = document.getElementById('updateButton');
-		if (button) {
-			if (updated===-1) {
-				var label = Zotero.getString('zotero.preferences.update.upToDate');
+	setFileHandler: function (type, handler) {
+		var pref = this._getFileHandlerPref(type);
+		if (handler) {
+			Zotero.Prefs.set(pref, handler);
+		}
+		else {
+			Zotero.Prefs.clear(pref);
+		}
+		this._updateFileHandlerUI();
+	},
+	
+	_updateFileHandlerUI: function () {
+		var handler = Zotero.Prefs.get('fileHandler.pdf');
+		var menulist = document.getElementById('fileHandler-pdf');
+		var customMenuItem = document.getElementById('fileHandler-custom');
+		if (handler) {
+			let icon;
+			try {
+				let fph = Services.io.getProtocolHandler("file")
+					.QueryInterface(Components.interfaces.nsIFileProtocolHandler);
+				let urlspec = fph.getURLSpecFromFile(Zotero.File.pathToFile(handler));
+				icon = "moz-icon://" + urlspec + "?size=16";
 			}
-			else if (updated) {
-				var label = Zotero.getString('zotero.preferences.update.updated');
+			catch (e) {
+				Zotero.logError(e);
+			}
+			
+			let handlerFilename = OS.Path.basename(handler);
+			if (Zotero.isMac) {
+				handlerFilename = handlerFilename.replace(/\.app$/, '');
+			}
+			customMenuItem.setAttribute('label', handlerFilename);
+			if (icon) {
+				customMenuItem.className = 'menuitem-iconic';
+				customMenuItem.setAttribute('image', icon);
 			}
 			else {
-				var label = Zotero.getString('zotero.preferences.update.error');
+				customMenuItem.className = '';
 			}
-			button.setAttribute('label', label);
-			
-			if (updated && Zotero_Preferences.Cite) {
-				yield Zotero_Preferences.Cite.refreshStylesList();
-			}
+			customMenuItem.hidden = false;
+			menulist.selectedIndex = 0;
 		}
-	})
+		else {
+			customMenuItem.hidden = true;
+			menulist.selectedIndex = 1;
+		}
+	},
+	
+	_getFileHandlerPref: function (type) {
+		if (type != 'pdf') {
+			throw new Error(`Unknown file type ${type}`);
+		}
+		return 'fileHandler.pdf';
+	}
 }

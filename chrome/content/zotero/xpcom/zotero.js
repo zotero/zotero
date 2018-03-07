@@ -1141,8 +1141,18 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			throw new Error("'" + applicationPath + "' does not exist");
 		}
 		
+		var args;
+		// On macOS, if we only have an .app, launch it using 'open'
+		if (Zotero.isMac && applicationPath.endsWith('.app')) {
+			args = [filePath, '-a', applicationPath];
+			applicationPath = '/usr/bin/open';
+		}
+		else {
+			args = [filePath];
+		}
+		
 		// Async, but we don't want to block
-		Zotero.Utilities.Internal.exec(applicationPath, [filePath]);
+		Zotero.Utilities.Internal.exec(applicationPath, args);
 	};
 	
 	

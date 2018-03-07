@@ -42,6 +42,28 @@ Zotero_Preferences.Advanced = {
 	},
 	
 	
+	updateTranslators: Zotero.Promise.coroutine(function* () {
+		var updated = yield Zotero.Schema.updateFromRepository(Zotero.Schema.REPO_UPDATE_MANUAL);
+		var button = document.getElementById('updateButton');
+		if (button) {
+			if (updated===-1) {
+				var label = Zotero.getString('zotero.preferences.update.upToDate');
+			}
+			else if (updated) {
+				var label = Zotero.getString('zotero.preferences.update.updated');
+			}
+			else {
+				var label = Zotero.getString('zotero.preferences.update.error');
+			}
+			button.setAttribute('label', label);
+			
+			if (updated && Zotero_Preferences.Cite) {
+				yield Zotero_Preferences.Cite.refreshStylesList();
+			}
+		}
+	}),
+	
+	
 	migrateDataDirectory: Zotero.Promise.coroutine(function* () {
 		var currentDir = Zotero.DataDirectory.dir;
 		var defaultDir = Zotero.DataDirectory.defaultDir;
