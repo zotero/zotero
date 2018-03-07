@@ -4,6 +4,7 @@
 <!ENTITY zotero.preferences.items "vnosov">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Nastavitve">
+<!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "Splošno">
 
@@ -18,6 +19,14 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "ogromna">
 <!ENTITY zotero.preferences.fontSize.notes "Velikost pisave opomb:">
 
+<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.automaticSnapshots "Samodejno naredi posnetek pri ustvarjanju vnosov s spletnih strani">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Samodejno pripni pridružene PDF-je in druge datoteke pri shranjevanju vnosov">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Samodejno pridobi metapodatke za PDF-je">
+<!ENTITY zotero.preferences.autoRenameFiles "Samodejno preimenuj datoteke priponk z uporabo metapodatkov nadrejenih">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+
 <!ENTITY zotero.preferences.miscellaneous "Razno">
 <!ENTITY zotero.preferences.autoUpdate "Samodejno preveri posodobitve prevajalnikov in slogov">
 <!ENTITY zotero.preferences.updateNow "Posodobi zdaj">
@@ -25,10 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Dovoli zotero.org prilagoditi vsebino glede na trenutno različico Zotera">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Če je potrjeno, bo trenutna različica Zotera dodana zahtevam HTTP na zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Uporabi Zotero za prenesene datoteke BibTeX/RIS/Refer">
-<!ENTITY zotero.preferences.automaticSnapshots "Samodejno naredi posnetek pri ustvarjanju vnosov s spletnih strani">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Samodejno pripni pridružene PDF-je in druge datoteke pri shranjevanju vnosov">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Samodejno pridobi metapodatke za PDF-je">
-<!ENTITY zotero.preferences.autoRenameFiles "Samodejno preimenuj datoteke priponk z uporabo metapodatkov nadrejenih">
 <!ENTITY zotero.preferences.automaticTags "Samodejno označi vnose s ključnimi besedami in predmetnimi naslovi">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Samodejno odstrani iz koša vse izbrisano pred več kot">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dnevi">

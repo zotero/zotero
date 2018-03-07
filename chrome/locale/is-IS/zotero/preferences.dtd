@@ -4,6 +4,7 @@
 <!ENTITY zotero.preferences.items "færslur">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Stillingar">
+<!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "Almennt">
 
@@ -18,6 +19,14 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Risastórt">
 <!ENTITY zotero.preferences.fontSize.notes "Gefið upp leturstærð:">
 
+<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.automaticSnapshots "Taka sjálfkrafa mynd af skjá þegar vefsíðufærslur eru búnar til">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Hengja sjálfkrafa PDF skjöl og önnur gögn við færslur þegar þær eru vistaðar">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+
 <!ENTITY zotero.preferences.miscellaneous "Ýmislegt">
 <!ENTITY zotero.preferences.autoUpdate "Sjálfvirkt fylgjast með uppfærslum á þýðendum og leturstílum">
 <!ENTITY zotero.preferences.updateNow "Uppfæra núna">
@@ -25,10 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Heimila zotero.org að aðlaga innihald fengið frá þeirri útgáfu Zotero sem nú er í notkun">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Ef virkjað, þá mun sú útgáfa Zotero sem nú er í notkun verða tekin með í HTTP beiðnum til zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Nota Zotero fyrir BibTex/RIS/Refer skrár sem hlaðið er niður">
-<!ENTITY zotero.preferences.automaticSnapshots "Taka sjálfkrafa mynd af skjá þegar vefsíðufærslur eru búnar til">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Hengja sjálfkrafa PDF skjöl og önnur gögn við færslur þegar þær eru vistaðar">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Sjálfvirkt bæta við merkjum í færslur í samræmi við stikkorð og fyrirsagnir þeirra">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Sjálfvirkt fjarlæja færslur í ruslakörfu sem voru settar þar fyrir meira en">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dögum síðan">

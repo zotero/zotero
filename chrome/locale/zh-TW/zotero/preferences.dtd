@@ -4,6 +4,7 @@
 <!ENTITY zotero.preferences.items "項目">
 <!ENTITY zotero.preferences.period "。">
 <!ENTITY zotero.preferences.settings "設定">
+<!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "一般">
 
@@ -18,6 +19,14 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "特大">
 <!ENTITY zotero.preferences.fontSize.notes "筆記字型大小：">
 
+<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.automaticSnapshots "從網頁建立項目時自動建立快照">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "儲存項目時自動附加相關的 PDF 檔與其他檔">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+
 <!ENTITY zotero.preferences.miscellaneous "雜項">
 <!ENTITY zotero.preferences.autoUpdate "自動檢查更新轉譯器與樣式">
 <!ENTITY zotero.preferences.updateNow "立刻更新">
@@ -25,10 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "允許 zotero.org 依目前的 Zotero 版本來調整內容。">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "啟用後會將 Zotero 的目前版本資訊加到針對 zotero.org 的 HTTP 請求中。">
 <!ENTITY zotero.preferences.parseRISRefer "用 Zotero 處理下載的 BibTeX/RIS/Refer 檔">
-<!ENTITY zotero.preferences.automaticSnapshots "從網頁建立項目時自動建立快照">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "儲存項目時自動附加相關的 PDF 檔與其他檔">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "自動以關鍵字與主標題作為項目的標籤">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "自動移除刪入垃圾筒且超過">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "天的項目">

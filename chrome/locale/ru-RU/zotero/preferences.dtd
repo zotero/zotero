@@ -4,6 +4,7 @@
 <!ENTITY zotero.preferences.items "документа(-ов)">
 <!ENTITY zotero.preferences.period ",">
 <!ENTITY zotero.preferences.settings "Настройки">
+<!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "Общие">
 
@@ -18,6 +19,14 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Огромный">
 <!ENTITY zotero.preferences.fontSize.notes "Размер шрифта заметок:">
 
+<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.automaticSnapshots "Автоматически делать снимки при создании документов из веб-страниц">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматически прикреплять связанные PDF и другие файлы при сохранении">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Автоматически получиать метаданные PDF-файлов">
+<!ENTITY zotero.preferences.autoRenameFiles "Автоматически именовать файлы на основе метаданных записи-родителя">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+
 <!ENTITY zotero.preferences.miscellaneous "Разное">
 <!ENTITY zotero.preferences.autoUpdate "Автоматически проверять на наличие обновленных импóртеров и стилей">
 <!ENTITY zotero.preferences.updateNow "Обновить сейчас">
@@ -25,10 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Разрешить zotero.org модифицировать содержание на основе текущей версии Zotero">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Если включено, текущая версия Zotero будет добавляться к HTTP запросам на zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Использовать Zotero для загруженных файлов RIS/Refer">
-<!ENTITY zotero.preferences.automaticSnapshots "Автоматически делать снимки при создании документов из веб-страниц">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматически прикреплять связанные PDF и другие файлы при сохранении">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Автоматически получиать метаданные PDF-файлов">
-<!ENTITY zotero.preferences.autoRenameFiles "Автоматически именовать файлы на основе метаданных записи-родителя">
 <!ENTITY zotero.preferences.automaticTags "Автоматически помечать документы ключевыми словами и предметными заголовками">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Автоматически убирать документы из корзины, удалённые более">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "дня(-ей) назад">

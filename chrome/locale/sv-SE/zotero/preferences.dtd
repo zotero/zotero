@@ -4,6 +4,7 @@
 <!ENTITY zotero.preferences.items "källor">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Inställningar">
+<!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "Allmänt">
 
@@ -18,6 +19,14 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Större">
 <!ENTITY zotero.preferences.fontSize.notes "Teckenstorlek för anteckningar">
 
+<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.automaticSnapshots "Ta automatiskt lokala kopior när källor skapas av hemsidor">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Bifoga automatiskt associerade PDF:er och andra filer när källor sparas">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+
 <!ENTITY zotero.preferences.miscellaneous "Övrigt">
 <!ENTITY zotero.preferences.autoUpdate "Kolla automatiskt efter uppdaterade källfångare och stilar">
 <!ENTITY zotero.preferences.updateNow "Uppdatera nu">
@@ -25,10 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Tillåt zotero.org att justera innehåll beroende på installerad Zotero-version">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Visa för zotero.org vilken version av programmet jag använder">
 <!ENTITY zotero.preferences.parseRISRefer "Använd Zotero för nedladdade BibTeX/RIS/Refer-filer">
-<!ENTITY zotero.preferences.automaticSnapshots "Ta automatiskt lokala kopior när källor skapas av hemsidor">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Bifoga automatiskt associerade PDF:er och andra filer när källor sparas">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Lägg automatiskt till etiketter med nyckelord och ämnesord">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Ta automatiskt bort källor från papperskorgen som lagts dit för mer än">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dagar sen">

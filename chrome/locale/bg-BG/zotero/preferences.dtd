@@ -4,6 +4,7 @@
 <!ENTITY zotero.preferences.items "записи">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Settings">
+<!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "Общи">
 
@@ -18,6 +19,14 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "Размер на шрифта в бележките:">
 
+<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.automaticSnapshots "Автоматично прави снимки при се създават записи от интернет страници">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматично прикачва асоциираните PDF и други файлове при съхранение на записите">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+
 <!ENTITY zotero.preferences.miscellaneous "Разни">
 <!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Oсъвременява веднага">
@@ -25,10 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Разрешава на zotero.org да персонализира съдържанието според настоящата версия на Зотеро">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Когато е включен, натоящата версия на Зотеро ще бъде добавена в HTTP поискванията към zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
-<!ENTITY zotero.preferences.automaticSnapshots "Автоматично прави снимки при се създават записи от интернет страници">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматично прикачва асоциираните PDF и други файлове при съхранение на записите">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Автоматично маркира записите с ключови думи и заглавие на темата">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">

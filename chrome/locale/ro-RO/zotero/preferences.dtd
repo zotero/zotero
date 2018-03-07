@@ -4,6 +4,7 @@
 <!ENTITY zotero.preferences.items "înregistrări">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Setări">
+<!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "Generale">
 
@@ -18,6 +19,14 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "X-Mare">
 <!ENTITY zotero.preferences.fontSize.notes "Mărimea fontului pentru notă:">
 
+<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.automaticSnapshots "Creează automat instantanee, atunci când sunt create înregistrări din paginile web">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Anexează automat fișierele PDF asociate, precum și alte fișiere, atunci când sunt salvate înregistrările">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+
 <!ENTITY zotero.preferences.miscellaneous "Diverse">
 <!ENTITY zotero.preferences.autoUpdate "Verifică în mod automat dacă există translatori și stiluri actualizate">
 <!ENTITY zotero.preferences.updateNow "Actualizează acum">
@@ -25,10 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Permite zotero.org să modifice conținutul pe bază versiunii curente de Zotero">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Dacă e activată, versiunea curentă de Zotero va fi adăugată la cererile HTTP de la zotero.org">
 <!ENTITY zotero.preferences.parseRISRefer "Folosește Zotero pentru fișierele descărcate de tip BibTeX/RIS/Refer">
-<!ENTITY zotero.preferences.automaticSnapshots "Creează automat instantanee, atunci când sunt create înregistrări din paginile web">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Anexează automat fișierele PDF asociate, precum și alte fișiere, atunci când sunt salvate înregistrările">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Creează automat etichetele pentru înregistrări, împreună cu cuvintele cheie și cu titlurile">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Șterge automat din coșul de gunoi înregistrările mai vechi de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "zile în urmă">

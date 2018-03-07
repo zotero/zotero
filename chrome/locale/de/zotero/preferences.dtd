@@ -4,6 +4,7 @@
 <!ENTITY zotero.preferences.items "Einträge">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Einstellungen">
+<!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "Allgemein">
 
@@ -18,6 +19,14 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Extra Groß">
 <!ENTITY zotero.preferences.fontSize.notes "Schriftgröße Notizen:">
 
+<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.automaticSnapshots "Automatisch einen Schnappschuss erstellen, sobald ein Eintrag aus einer Webseite erstellt wird">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Automatisch zugehörige PDFs und andere Dateien beim Speichern von Einträgen anhängen">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatisch Metadaten für PDF-Dateien abrufen">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatisch angehängte Dateien unter Verwendung von übergeordneten Metadaten umbenennen">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+
 <!ENTITY zotero.preferences.miscellaneous "Verschiedenes">
 <!ENTITY zotero.preferences.autoUpdate "Automatisch auf Übersetzer- und Style-Updates überprüfen">
 <!ENTITY zotero.preferences.updateNow "Jetzt aktualisieren">
@@ -25,10 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Zotero.org erlauben, Inhalte auf Basis der aktuellen Zotero-Version anzupassen">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Wenn aktiv, wird die aktuelle Zotero-Version bei HTTP-Anfragen zu zotero.org mit übertragen.">
 <!ENTITY zotero.preferences.parseRISRefer "Zotero für heruntergeladene BibTeX/RIS/Refer-Dateien verwenden">
-<!ENTITY zotero.preferences.automaticSnapshots "Automatisch einen Schnappschuss erstellen, sobald ein Eintrag aus einer Webseite erstellt wird">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Automatisch zugehörige PDFs und andere Dateien beim Speichern von Einträgen anhängen">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatisch Metadaten für PDF-Dateien abrufen">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatisch angehängte Dateien unter Verwendung von übergeordneten Metadaten umbenennen">
 <!ENTITY zotero.preferences.automaticTags "Automatisch Tags aus Schlüsselwörtern und Schlagwörtern erstellen">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Einträge im Papierkorb automatisch löschen nach mehr als">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "Tagen">

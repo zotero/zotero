@@ -4,6 +4,7 @@
 <!ENTITY zotero.preferences.items "Item">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Settings">
+<!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "General">
 
@@ -18,6 +19,14 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Ekstra besar">
 <!ENTITY zotero.preferences.fontSize.notes "Ukuran font catatan:">
 
+<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.automaticSnapshots "Ambil foto secara automatis ketika menyusun item dari laman web">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Lampirkan PDF dan berkas terkait lainnya secara automatis saat menyimpan item">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+
 <!ENTITY zotero.preferences.miscellaneous "Lain-lain">
 <!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Mutakhirkan sekarang">
@@ -25,10 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Izinkan zotero.org untuk menyusun konten berdasarkan versi Zotero sekarang">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Jika dibolehkan, versi Zotero sekarang akan dimasukkan dalam permintaan HTTP kepada zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
-<!ENTITY zotero.preferences.automaticSnapshots "Ambil foto secara automatis ketika menyusun item dari laman web">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Lampirkan PDF dan berkas terkait lainnya secara automatis saat menyimpan item">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Berikan tag pada item dengan kata kunci dan bagian utama subjek secara automatis">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Buang item-item di dalam kantung sampah yang telah dihapus lebih dari">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "hari yang lalu secara automatis">

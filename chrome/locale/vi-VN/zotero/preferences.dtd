@@ -4,6 +4,7 @@
 <!ENTITY zotero.preferences.items "các mục tài liệu">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Các thiết lập">
+<!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "Các tùy chọn chung">
 
@@ -18,6 +19,14 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Rất lớn">
 <!ENTITY zotero.preferences.fontSize.notes "Cỡ chữ ghi chú:">
 
+<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.automaticSnapshots "Tự động tạo ảnh chụp khi lưu tài liệu từ web">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Tự động đính kèm các tập tin PDF và các tập tin liên quan khác khi lưu tài liệu mới">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+
 <!ENTITY zotero.preferences.miscellaneous "Các tùy chọn khác">
 <!ENTITY zotero.preferences.autoUpdate "Tự động kiểm tra các bộ chuyển đổi và kiểu trích dẫn có được cập nhật">
 <!ENTITY zotero.preferences.updateNow "Cập nhật ngay bây giờ">
@@ -25,10 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Cho phép zotero.org điều chỉnh nội dung dựa trên phiên bản Zotero hiện tại">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Nếu cho phép, số hiệu phiên bản Zotero hiện tại sẽ được gộp vào các yêu cầu HTTP gửi tới zotero.org">
 <!ENTITY zotero.preferences.parseRISRefer "Dùng Zotero để tải các tập tin Bib TeX/RIS/Refer">
-<!ENTITY zotero.preferences.automaticSnapshots "Tự động tạo ảnh chụp khi lưu tài liệu từ web">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Tự động đính kèm các tập tin PDF và các tập tin liên quan khác khi lưu tài liệu mới">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Tự động tạo tag cho các tài liệu bằng các từ khóa và các đề mục">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Tự động loại bỏ các tài liệu trong Thùng rác đã xóa hơn">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ngày trước đây">

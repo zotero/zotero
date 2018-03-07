@@ -4,6 +4,7 @@
 <!ENTITY zotero.preferences.items "Elementer">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Indstillinger">
+<!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
 
@@ -18,6 +19,14 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Ekstra stor">
 <!ENTITY zotero.preferences.fontSize.notes "Skriftstørrelse i noter:">
 
+<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.automaticSnapshots "Tag automatisk et &quot;Snapshot&quot; når der oprettes Elementer for web-sider">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Vedhæft automatisk tilhørende PDF-filer og andre filer når Elementer gemmes">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+
 <!ENTITY zotero.preferences.miscellaneous "Forskelligt">
 <!ENTITY zotero.preferences.autoUpdate "Kontroller automatisk for opdaterede oversættere og bibliografiske formater">
 <!ENTITY zotero.preferences.updateNow "Opdater nu">
@@ -25,10 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Tillad zotero.org at tilpasse indhold baseret på den aktuelle Zotero-version">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Hvis den er slået til, vil den aktuelle Zotero-version blive medtaget ved  HTTP-forespørgsler til zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Brug Zotero til at hente BibTeX/RIS/Refer -filer">
-<!ENTITY zotero.preferences.automaticSnapshots "Tag automatisk et &quot;Snapshot&quot; når der oprettes Elementer for web-sider">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Vedhæft automatisk tilhørende PDF-filer og andre filer når Elementer gemmes">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Mærk automatisk Elementer med stikord og emne-grupper">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Fjern automatisk Elementer fra papirkurven hvis de er slettet for mere end">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dage siden">

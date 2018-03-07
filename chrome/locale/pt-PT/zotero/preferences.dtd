@@ -4,6 +4,7 @@
 <!ENTITY zotero.preferences.items "itens">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Preferências">
+<!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "Gerais">
 
@@ -18,6 +19,14 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Extra-Grande">
 <!ENTITY zotero.preferences.fontSize.notes "Tamanho da fonte tipográfica das notas:">
 
+<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.automaticSnapshots "Capturar automaticamente ao criar itens a partir de páginas Web">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Anexar automaticamente arquivos PDF e de outros tipos associados a um item quando este é guardado">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+
 <!ENTITY zotero.preferences.miscellaneous "Variadas">
 <!ENTITY zotero.preferences.autoUpdate "Verificar automaticamente actualizações de tradutores e estilos">
 <!ENTITY zotero.preferences.updateNow "Actualizar agora">
@@ -25,10 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Autorizar zotero.org a personalizar o conteúdo com base na versão actual do Zotero">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Se activada, a versão actual do Zotero será adicionada aos pedidos HTTP feitos a zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Usar o Zotero para arquivos BibTeX/RIS/Refer descarregados">
-<!ENTITY zotero.preferences.automaticSnapshots "Capturar automaticamente ao criar itens a partir de páginas Web">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Anexar automaticamente arquivos PDF e de outros tipos associados a um item quando este é guardado">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Etiquetar automaticamente os itens com as palavras-chave e cabeçalhos de assunto">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Remover automaticamente itens no lixo há mais de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dias">

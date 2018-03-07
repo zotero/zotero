@@ -4,6 +4,7 @@
 <!ENTITY zotero.preferences.items "항목">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "설정">
+<!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "일반">
 
@@ -18,6 +19,14 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "매우 크게">
 <!ENTITY zotero.preferences.fontSize.notes "노트 글꼴 크기:">
 
+<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.automaticSnapshots "웹 페이지  항목을 생성할 때 자동으로 스냅샷 저장">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "항목 저장시 연관된 PDF 및 다른 파일을 자동으로 첨부">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+
 <!ENTITY zotero.preferences.miscellaneous "기타">
 <!ENTITY zotero.preferences.autoUpdate "중계기 및 스타일 업데이트를 자동으로 확인">
 <!ENTITY zotero.preferences.updateNow "지금 업데이트">
@@ -25,10 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "zotero.org가 현재 Zotero 버전의 정보를 사용하여 기능을 개선하도록 허락">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "이 기능을 선택하면, zotero.org로 보내는 HTTP 요청에 현재 Zotero 버전을 덧붙입니다.">
 <!ENTITY zotero.preferences.parseRISRefer "다운로드한 BibTeX/RIS/Refer 파일에 Zotero 사용">
-<!ENTITY zotero.preferences.automaticSnapshots "웹 페이지  항목을 생성할 때 자동으로 스냅샷 저장">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "항목 저장시 연관된 PDF 및 다른 파일을 자동으로 첨부">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "핵심어와 주제어가 첨부된 항목 저장시 자동으로 태그 생성">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "휴지통에서 자동 삭제되는 시점 : 휴지통으로 이동 후">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "일 경과">

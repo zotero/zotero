@@ -4,6 +4,7 @@
 <!ENTITY zotero.preferences.items "elemek">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Beállítások">
+<!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "Általános">
 
@@ -18,6 +19,14 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Óriási">
 <!ENTITY zotero.preferences.fontSize.notes "Jegyzet betűmérete:">
 
+<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.automaticSnapshots "Weboldalon alapuló elem létrehozásakor automatikus pillanatfelvétel készítése">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "A kapcsolódó PDF és más fájlok automatikus csatolása">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+
 <!ENTITY zotero.preferences.miscellaneous "Egyéb">
 <!ENTITY zotero.preferences.autoUpdate "Fordítók- és stílusfrissítések automatikus ellenőrzése">
 <!ENTITY zotero.preferences.updateNow "Frissítés indítása">
@@ -25,10 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "A Zotero verziójának megfelelő tartalmak mutatása a zotero.org oldalon">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Ha ez be van kapcsolva, a zotero.orgra küldött HTTP kérésekhez hozzáfűzi a Zotero verzióját.">
 <!ENTITY zotero.preferences.parseRISRefer "A Zotero használata BibTeX/RIS/Refer fájlok letöltésére">
-<!ENTITY zotero.preferences.automaticSnapshots "Weboldalon alapuló elem létrehozásakor automatikus pillanatfelvétel készítése">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "A kapcsolódó PDF és más fájlok automatikus csatolása">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Kulcsszavak és tárgyszavak automatikus hozzárendelése címkeként">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatikusan törölje a kukából azokat az elemeket, amelyek">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "napnál régebbiek">

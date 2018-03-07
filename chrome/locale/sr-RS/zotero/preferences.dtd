@@ -4,6 +4,7 @@
 <!ENTITY zotero.preferences.items "ставке">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Подешавања">
+<!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "Опште">
 
@@ -18,6 +19,14 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Веома велики">
 <!ENTITY zotero.preferences.fontSize.notes "Величина фонта за белешке:">
 
+<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.automaticSnapshots "Самостално узми снимак када се прави ставка са веб странице">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Самостално приложи повезане PDF и друге датотека када чуваш ставке">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+
 <!ENTITY zotero.preferences.miscellaneous "Остале поставке">
 <!ENTITY zotero.preferences.autoUpdate "Аутоматски потражи нова ажурирања превода и стилова">
 <!ENTITY zotero.preferences.updateNow "Ажурирај сада">
@@ -25,10 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Дозволи страници zotero.org да доставља прилагођен садржај на основу ваше верзији Зотера">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Уколико је омогућено, тренутна верзија Зотера ће бити укључена у ХТТП захтев који се шаље страници zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Користи Зотеро за преузимање BibTeX/RIS/Refer датотека">
-<!ENTITY zotero.preferences.automaticSnapshots "Самостално узми снимак када се прави ставка са веб странице">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Самостално приложи повезане PDF и друге датотека када чуваш ставке">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.automaticTags "Самостално стави назнаку на ставке са кључним речима и насловом субјекта">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Уклони ставке из смећа које су обрисане пре">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "дана">
