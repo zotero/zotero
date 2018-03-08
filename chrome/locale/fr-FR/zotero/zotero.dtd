@@ -14,8 +14,8 @@
 <!ENTITY zotero.general.tools "Outils">
 <!ENTITY zotero.general.more "Plus">
 <!ENTITY zotero.general.loading "Chargement…">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Fermer">
+<!ENTITY zotero.general.minimize "Minimiser">
 
 
 <!ENTITY zotero.errorReport.title "Rapport d'erreur Zotero">
@@ -99,6 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaurer vers la bibliothèque">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliquer le document">
 <!ENTITY zotero.items.menu.mergeItems "Fusionner les documents…">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Choisissez la version du document à utiliser comme document maître :">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Sélectionnez les champs à conserver depuis les autres versions du document :">

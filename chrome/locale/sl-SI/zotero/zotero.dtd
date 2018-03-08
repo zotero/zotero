@@ -99,6 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Obnovi v knjižnico">
 <!ENTITY zotero.items.menu.duplicateItem "Podvoji izbrani vnos">
 <!ENTITY zotero.items.menu.mergeItems "Spoji vnose ...">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Izberite različico vnosa, ki naj bo osrednja:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Izberite polja, ki jih želite izvzeti iz drugih različic vnosa:">

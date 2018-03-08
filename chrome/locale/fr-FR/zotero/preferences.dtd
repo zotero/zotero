@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.items "documents">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Paramètres">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "Personnaliser…">
 
 <!ENTITY zotero.preferences.prefpane.general "Générales">
 
@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "Faire une capture automatique de la page lors de la création de documents à partir de pages Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Joindre automatiquement les fichiers PDF associés lors de l'enregistrement d'un document">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Récupérer automatiquement les métadonnées des PDF">
 <!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">

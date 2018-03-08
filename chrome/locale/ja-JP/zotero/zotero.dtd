@@ -99,6 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "ライブラリへ復帰させる">
 <!ENTITY zotero.items.menu.duplicateItem "選択されたアイテムを複製">
 <!ENTITY zotero.items.menu.mergeItems "アイテムを統合する...">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "土台として用いるアイテムのヴァージョンを選んでください:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "このアイテムの重複するヴァージョンから維持したいフィールドを選択してください:">

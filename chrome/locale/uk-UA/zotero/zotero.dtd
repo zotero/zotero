@@ -99,6 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Відновити в бібліотеці">
 <!ENTITY zotero.items.menu.duplicateItem "Дублювати документ">
 <!ENTITY zotero.items.menu.mergeItems "Об'єднати документи...">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Виберіть версію документа для використання в якості головної:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Виберіть поля для збереження з іншої версії документа:">

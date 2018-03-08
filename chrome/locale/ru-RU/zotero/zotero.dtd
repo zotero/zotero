@@ -99,6 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Восстановить в библиотеке">
 <!ENTITY zotero.items.menu.duplicateItem "Сделать дубликат выбранного документа">
 <!ENTITY zotero.items.menu.mergeItems "Объединить документы...">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Выберите версию документа для использования в качестве главной">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Выберите поля для сохранения из других версий документа">

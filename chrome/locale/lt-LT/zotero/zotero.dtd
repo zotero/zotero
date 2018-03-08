@@ -99,6 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Atkurti į biblioteką">
 <!ENTITY zotero.items.menu.duplicateItem "Sukurti įrašo kopiją">
 <!ENTITY zotero.items.menu.mergeItems "Apjungti įrašus...">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Pasirinkite pagrindinę įrašo versiją:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Pasirinkite senesnių įrašo versijų laukus:">

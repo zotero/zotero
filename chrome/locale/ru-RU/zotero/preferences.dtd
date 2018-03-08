@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.items "документа(-ов)">
 <!ENTITY zotero.preferences.period ",">
 <!ENTITY zotero.preferences.settings "Настройки">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "Особо…">
 
 <!ENTITY zotero.preferences.prefpane.general "Общие">
 
@@ -19,13 +19,13 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Огромный">
 <!ENTITY zotero.preferences.fontSize.notes "Размер шрифта заметок:">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.fileHandling "Обработка файлов">
 <!ENTITY zotero.preferences.automaticSnapshots "Автоматически делать снимки при создании документов из веб-страниц">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматически прикреплять связанные PDF и другие файлы при сохранении">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Автоматически получиать метаданные PDF-файлов">
 <!ENTITY zotero.preferences.autoRenameFiles "Автоматически именовать файлы на основе метаданных записи-родителя">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Открывать PDF-файлы используя">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "По умолчанию для данной системы">
 
 <!ENTITY zotero.preferences.miscellaneous "Разное">
 <!ENTITY zotero.preferences.autoUpdate "Автоматически проверять на наличие обновленных импóртеров и стилей">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.feeds.feedDefaults "Настройки ленты по умолчанию">
 
 <!ENTITY zotero.preferences.openurl.search "Поиск ресолверов">
-<!ENTITY zotero.preferences.openurl.custom "Пользовательский…">
+<!ENTITY zotero.preferences.openurl.custom "Особо…">
 <!ENTITY zotero.preferences.openurl.server "Сервер">
 <!ENTITY zotero.preferences.openurl.version "Версия">
 
@@ -195,7 +195,7 @@
 
 <!ENTITY zotero.preferences.dataDir "Расположение папки с данными">
 <!ENTITY zotero.preferences.dataDir.useProfile "Использовать папку профиля Firefox">
-<!ENTITY zotero.preferences.dataDir.custom "Пользовательская:">
+<!ENTITY zotero.preferences.dataDir.custom "Особая:">
 <!ENTITY zotero.preferences.dataDir.choose "Выбрать...">
 <!ENTITY zotero.preferences.dataDir.viaCommandLine "(указанные в командной строке)">
 <!ENTITY zotero.preferences.dataDir.reveal "Показать папку с данными">

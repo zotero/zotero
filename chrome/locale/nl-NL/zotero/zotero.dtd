@@ -99,6 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Terugzetten in bibliotheek">
 <!ENTITY zotero.items.menu.duplicateItem "Maak kopie van geselecteerd item">
 <!ENTITY zotero.items.menu.mergeItems "Items samenvoegen">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Kies de versie van het item om te gebruiken als het meest voornaamste item:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Selecteer velden om te behouden ten opzichte van andere versie van het item:">

@@ -99,6 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Palauta kirjastoon">
 <!ENTITY zotero.items.menu.duplicateItem "Monista valittu nimike">
 <!ENTITY zotero.items.menu.mergeItems "Yhdistä kohteet...">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Valitse se nimikkeen pääversio:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Valise kentät, jotka säilytetään muista versioista:">

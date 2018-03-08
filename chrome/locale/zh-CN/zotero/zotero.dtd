@@ -99,6 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "还原到文献库中">
 <!ENTITY zotero.items.menu.duplicateItem "创建条目副本">
 <!ENTITY zotero.items.menu.mergeItems "合并条目…">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "选择作为主条目的条目版本.">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "选择需要保留的域, 防止被其它版本的域覆盖.">

@@ -99,6 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Taasta raamatukokku">
 <!ENTITY zotero.items.menu.duplicateItem "Valitud kirje duplitseerimine">
 <!ENTITY zotero.items.menu.mergeItems "Kirjete liitmine...">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Palun valida aluskirje, millele liidetakse teise kirje andmed:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Valida väljad, mida säilitada teistest versioonidest:">

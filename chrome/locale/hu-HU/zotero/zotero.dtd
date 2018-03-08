@@ -99,6 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Visszaállítás könyvtárba">
 <!ENTITY zotero.items.menu.duplicateItem "Kiválasztott elem duplikálása">
 <!ENTITY zotero.items.menu.mergeItems "Elemek összefésülése…">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Válassza ki azt az elemverziót, amit mester elemnek kíván használni: ">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">

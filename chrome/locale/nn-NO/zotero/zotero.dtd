@@ -99,6 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Gjenopprett til bibliotek">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliser det valde elementet">
 <!ENTITY zotero.items.menu.mergeItems "Slå saman element…">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Velj kva versjon som skal vere utgangspunkt:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Velj felt som skal behaldast frå andre versjonar av elementet:">

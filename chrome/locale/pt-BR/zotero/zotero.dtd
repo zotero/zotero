@@ -99,6 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaurar para a biblioteca">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicar item">
 <!ENTITY zotero.items.menu.mergeItems "Mesclar itens...">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Escolha a versão do item a ser utilizada como mestre:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Selecione os campos a serem mantidos das outras versões do item:">
