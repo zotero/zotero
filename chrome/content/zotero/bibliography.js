@@ -214,16 +214,6 @@ var Zotero_File_Interface_Bibliography = new function() {
 			// update status of displayAs box based on style class
 			document.getElementById("automaticJournalAbbreviations-vbox").hidden =
 				!selectedStyleObj.usesAbbreviation;
-			
-			// Hide the automaticCitationUpdates checkbox the first time document preferences are open
-			var showAutomaticUpdatesOption = !!_io.fieldType;
-			document.getElementById("automaticCitationUpdates-vbox").hidden = !showAutomaticUpdatesOption;
-			
-			// Highlight delay citations checkbox after displaying the alert
-			// NOTE: Currently unused
-			if (_io.highlightDelayCitations) {
-				document.getElementById("automaticCitationUpdates-vbox").style.border = "1px dashed #e52e2e"
-			}
 		}
 		
 		//
