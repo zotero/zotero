@@ -35,6 +35,7 @@ groupbox
 	overflow: hidden;
 	text-overflow: ellipsis;
 	background-color: transparent;
+	font-size: 1em; /* Scale with font size pref */
 	text-align: left;
 	white-space: nowrap;
 	border: 1px solid transparent; /* always include border so height is same as zotero-clicky */
