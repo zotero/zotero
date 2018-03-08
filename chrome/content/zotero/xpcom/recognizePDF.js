@@ -26,11 +26,14 @@
 Zotero.RecognizePDF = new function () {
 	const OFFLINE_RECHECK_DELAY = 60 * 1000;
 	const MAX_PAGES = 5;
+	const UNRECOGNIZE_TIMEOUT = 3600 * 1000;
 	
 	this.ROW_QUEUED = 1;
 	this.ROW_PROCESSING = 2;
 	this.ROW_FAILED = 3;
 	this.ROW_SUCCEEDED = 4;
+	
+	let _newItems = new WeakMap();
 	
 	let _listeners = {};
 	let _rows = [];
@@ -129,6 +132,72 @@ Zotero.RecognizePDF = new function () {
 			_listeners['empty']();
 		}
 	};
+	
+	
+	this.canUnrecognize = function (item) {
+		var threshold = UNRECOGNIZE_TIMEOUT;
+		var added = _newItems.get(item);
+		// Item must have been recognized recently, must not have been modified since it was
+		// created, and must have only one attachment and no other children
+		if (!added
+				|| Zotero.Date.sqlToDate(added, true) < new Date() - threshold
+				|| item.dateModified != added
+				|| item.numAttachments(true) != 1
+				|| item.numChildren(true) != 1) {
+			_newItems.delete(item);
+			return false;
+		}
+		
+		// Child attachment must be not be in trash and must be a PDF
+		var attachments = Zotero.Items.get(item.getAttachments());
+		if (!attachments.length || attachments[0].attachmentContentType != 'application/pdf') {
+			_newItems.delete(item);
+			return false;
+		}
+		
+		return true;
+	};
+	
+	
+	this.unrecognize = async function (item) {
+		var attachment = Zotero.Items.get(item.getAttachments()[0]);
+		return Zotero.DB.executeTransaction(async function () {
+			let collections = item.getCollections();
+			attachment.parentItemID = null
+			attachment.setCollections(collections);
+			await attachment.save();
+			
+			await item.erase();
+		}.bind(this));
+	};
+	
+	
+	this.report = async function (item) {
+		var attachment = Zotero.Items.get(item.getAttachments()[0]);
+		var filePath = await attachment.getFilePath();
+		if (!filePath || !await OS.File.exists(filePath)) {
+			throw new Error("File not found when reporting metadata");
+		}
+		
+		var version = Zotero.version;
+		var json = await extractJSON(filePath, MAX_PAGES);
+		var metadata = item.toJSON();
+		
+		var data = { version, json, metadata };
+		var uri = ZOTERO_CONFIG.RECOGNIZE_URL + 'report';
+		return Zotero.HTTP.request(
+			"POST",
+			uri,
+			{
+				successCodes: [200, 204],
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(data)
+			}
+		);
+	};
+	
 	
 	/**
 	 * Add item for processing
@@ -301,6 +370,7 @@ Zotero.RecognizePDF = new function () {
 			await attachment.saveTx();
 		}
 		
+		_newItems.set(parentItem, parentItem.dateModified);
 		return parentItem;
 	}
 	
