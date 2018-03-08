@@ -1632,7 +1632,7 @@ Zotero.Integration.Session.prototype.writeDelayedCitation = Zotero.Promise.corou
 
 
 Zotero.Integration.Session.prototype.getItems = function() {
-	return Zotero.Cite.getItem(Object.keys(this.citationsByItemID), true);
+	return Zotero.Cite.getItem(Object.keys(this.citationsByItemID));
 }
 
 

@@ -291,10 +291,9 @@ Zotero.Cite = {
 	 * Get an item by ID, either by retrieving it from the library or looking for the document it
 	 * belongs to.
 	 * @param {String|Number|Array} id
-	 * @param {Boolean} [getZoteroItems=false] - whether to get CSL or Zotero items for embedded items
 	 * @return {Zotero.Item} item
 	 */
-	"getItem":function getItem(id, getZoteroItems=false) {
+	"getItem":function getItem(id) {
 		var slashIndex;
 		
 		if(id instanceof Array) {
@@ -303,12 +302,8 @@ Zotero.Cite = {
 			var sessionID = id.substr(0, slashIndex),
 				session = Zotero.Integration.sessions[sessionID],
 				item;
-			if(session) {
-				if (getZoteroItems) {
-					item = session.embeddedZoteroItems[id.substr(slashIndex+1)];
-				} else {
-					item = session.embeddedItems[id.substr(slashIndex+1)];
-				}
+			if (session) {
+				item = session.embeddedZoteroItems[id.substr(slashIndex+1)];
 			}
 			
 			if(!item) {
