@@ -26,7 +26,7 @@
 Zotero.RecognizePDF = new function () {
 	const OFFLINE_RECHECK_DELAY = 60 * 1000;
 	const MAX_PAGES = 5;
-	const UNRECOGNIZE_TIMEOUT = 3600 * 1000;
+	const UNRECOGNIZE_TIMEOUT = 86400 * 1000;
 	
 	this.ROW_QUEUED = 1;
 	this.ROW_PROCESSING = 2;
