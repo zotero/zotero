@@ -25,6 +25,7 @@
 
 var ZoteroItemPane = new function() {
 	var _lastItem, _itemBox, _notesLabel, _notesButton, _notesList, _tagsBox, _relatedBox;
+	var _selectedNote;
 	var _translationTarget;
 	var _noteIDs;
 	
@@ -60,6 +61,8 @@ var ZoteroItemPane = new function() {
 	 * Load a top-level item
 	 */
 	this.viewItem = Zotero.Promise.coroutine(function* (item, mode, index) {
+		_selectedNote = null;
+		
 		if (!index) {
 			index = 0;
 		}
@@ -223,6 +226,8 @@ var ZoteroItemPane = new function() {
 	
 	
 	this.onNoteSelected = function (item, editable) {
+		_selectedNote = item;
+		
 		// If an external note window is open for this item, don't show the editor
 		if (ZoteroPane.findNoteWindow(item.id)) {
 			this.showNoteWindowMessage();
@@ -258,20 +263,18 @@ var ZoteroItemPane = new function() {
 	 * Select the parent item and open the note editor
 	 */
 	this.openNoteWindow = async function () {
-		var noteEditor = document.getElementById('zotero-note-editor');
-		var item = noteEditor.item;
 		// We don't want to show the note in two places, since it causes unnecessary UI updates
 		// and can result in weird bugs where note content gets lost.
 		//
 		// If this is a child note, select the parent
-		if (item.parentID) {
-			await ZoteroPane.selectItem(item.parentID);
+		if (_selectedNote.parentID) {
+			await ZoteroPane.selectItem(_selectedNote.parentID);
 		}
 		// Otherwise, hide note and replace with a message that we're editing externally
 		else {
 			this.showNoteWindowMessage();
 		}
-		ZoteroPane.openNoteWindow(item.id);
+		ZoteroPane.openNoteWindow(_selectedNote.id);
 	};
 	
 	
