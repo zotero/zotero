@@ -263,6 +263,7 @@ var ZoteroItemPane = new function() {
 	 * Select the parent item and open the note editor
 	 */
 	this.openNoteWindow = async function () {
+		var noteID = _selectedNote.id;
 		// We don't want to show the note in two places, since it causes unnecessary UI updates
 		// and can result in weird bugs where note content gets lost.
 		//
@@ -274,7 +275,7 @@ var ZoteroItemPane = new function() {
 		else {
 			this.showNoteWindowMessage();
 		}
-		ZoteroPane.openNoteWindow(_selectedNote.id);
+		ZoteroPane.openNoteWindow(noteID);
 	};
 	
 	
