@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.items "vnosov">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Nastavitve">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "Po meri ...">
 
 <!ENTITY zotero.preferences.prefpane.general "Splošno">
 
@@ -19,13 +19,13 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "ogromna">
 <!ENTITY zotero.preferences.fontSize.notes "Velikost pisave opomb:">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.fileHandling "Ravnanje z datotekami">
 <!ENTITY zotero.preferences.automaticSnapshots "Samodejno naredi posnetek pri ustvarjanju vnosov s spletnih strani">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Samodejno pripni pridružene PDF-je in druge datoteke pri shranjevanju vnosov">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Samodejno pridobi metapodatke za PDF-je">
 <!ENTITY zotero.preferences.autoRenameFiles "Samodejno preimenuj datoteke priponk z uporabo metapodatkov nadrejenih">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Dokumente PDF odpri s/z">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "Sistemsko privzeto">
 
 <!ENTITY zotero.preferences.miscellaneous "Razno">
 <!ENTITY zotero.preferences.autoUpdate "Samodejno preveri posodobitve prevajalnikov in slogov">
