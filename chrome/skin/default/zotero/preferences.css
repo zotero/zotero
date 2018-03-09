@@ -83,6 +83,10 @@ grid row hbox:first-child
 	margin-left: .75em;
 }
 
+.fileHandler-menu .menulist-icon {
+	height: 16px;
+}
+
 /*
  * Sync pane
  */

@@ -122,7 +122,7 @@
 			
 			<hbox align="center">
 				<label value="&zotero.preferences.fileHandler.openPDFsUsing;" control="file-handler-pdf"/>
-				<menulist id="fileHandler-pdf">
+				<menulist id="fileHandler-pdf" class="fileHandler-menu">
 					<menupopup>
 						<menuitem id="fileHandler-custom"/>
 						<menuitem label="&zotero.preferences.fileHandler.systemDefault;"
