@@ -2780,7 +2780,7 @@ var ZoteroPane = new function()
 			if (items.length > 1) {
 				var multiple =  '.multiple';
 				
-				var canMerge = true, canIndex = true, canRecognize = true, canRename = true;
+				var canMerge = true, canIndex = true, canRecognize = true, canUnrecognize = true, canRename = true;
 				var canMarkRead = collectionTreeRow.isFeed();
 				var markUnread = true;
 				
