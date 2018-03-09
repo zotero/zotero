@@ -19,13 +19,13 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Très grande">
 <!ENTITY zotero.preferences.fontSize.notes "Taille des caractères des notes :">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.fileHandling "Gestion des fichiers">
 <!ENTITY zotero.preferences.automaticSnapshots "Faire une capture automatique de la page lors de la création de documents à partir de pages Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Joindre automatiquement les fichiers PDF associés lors de l'enregistrement d'un document">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Récupérer automatiquement les métadonnées des PDF">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.autoRenameFiles "Renommer automatiquement les pièces jointes en utilisant les métadonnées parentes">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Ouvrir les PDF avec">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "Par défaut">
 
 <!ENTITY zotero.preferences.miscellaneous "Divers">
 <!ENTITY zotero.preferences.autoUpdate "Vérifier automatiquement les mises à jour des convertisseurs et des styles">
