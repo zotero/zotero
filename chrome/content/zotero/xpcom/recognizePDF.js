@@ -349,6 +349,16 @@ Zotero.RecognizePDF = new function () {
 			throw new Zotero.Exception.Alert('recognizePDF.error');
 		}
 		
+		var zp = Zotero.getActiveZoteroPane();
+		var selectParent = false;
+		if (zp) {
+			let selected = zp.getSelectedItems();
+			if (selected.length) {
+				// If only the PDF was selected, select the parent when we're done
+				selectParent = selected.length == 1 && selected[0] == attachment;
+			}
+		}
+		
 		let parentItem = await _recognize(attachment);
 		if (!parentItem) {
 			return null;
@@ -385,6 +395,18 @@ Zotero.RecognizePDF = new function () {
 			// Rename attachment title
 			attachment.setField('title', newName);
 			await attachment.saveTx();
+		}
+		
+		try {
+			zp = Zotero.getActiveZoteroPane();
+			if (zp) {
+				if (selectParent) {
+					await zp.selectItem(parentItem.id);
+				}
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
 		}
 		
 		_newItems.set(
