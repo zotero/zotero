@@ -191,9 +191,13 @@ Zotero.Server.Connector.SaveSession.prototype._updateObjects = async function (o
 				if (object.libraryID != libraryID) {
 					throw new Error("Can't move objects between libraries");
 				}
-				// Assign tags and collections to top-level items
+				
+				// Keep automatic tags
+				let originalTags = object.getTags().filter(tag => tag.type == 1);
+				
+				// Assign manual tags and collections to top-level items
 				if (objectType == 'item' && object.isTopLevelItem()) {
-					object.setTags(tags);
+					object.setTags(originalTags.concat(tags));
 					object.setCollections(collectionID ? [collectionID] : []);
 					await object.save();
 				}
