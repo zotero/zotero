@@ -854,7 +854,11 @@ Zotero.Server.Connector.Import.prototype = {
 		}
 		let items = yield translate.translate({
 			libraryID: library.libraryID,
-			collections: collection ? [collection.id] : null
+			collections: collection ? [collection.id] : null,
+			// Import translation skips selection by default, so force it to occur
+			saveOptions: {
+				skipSelect: false
+			}
 		});
 		return [201, "application/json", JSON.stringify(items)];
 	})

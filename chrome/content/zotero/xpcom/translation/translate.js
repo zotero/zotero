@@ -1299,6 +1299,7 @@ Zotero.Translate.Base.prototype = {
 		}
 		this._collections = options.collections;
 		this._saveAttachments = options.saveAttachments === undefined || options.saveAttachments;
+		this._saveOptions = options.saveOptions;
 		
 		this._savingAttachments = [];
 		this._savingItems = 0;
@@ -2369,9 +2370,12 @@ Zotero.Translate.Import.prototype._prepareTranslation = Zotero.Promise.method(fu
 		collections: this._collections,
 		attachmentMode: Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_FILE" : "ATTACHMENT_MODE_IGNORE")],
 		baseURI,
-		saveOptions: {
-			skipSelect: true
-		}
+		saveOptions: Object.assign(
+			{
+				skipSelect: true
+			},
+			this._saveOptions || {}
+		)
 	});
 	this.newItems = [];
 	this.newCollections = [];
