@@ -541,11 +541,15 @@ Zotero.RecognizePDF = new function () {
 		
 		if (res.doi) {
 			Zotero.debug('RecognizePDF: Getting metadata by DOI');
-			let translateDOI = new Zotero.Translate.Search();
-			translateDOI.setTranslator('11645bd1-0420-45c1-badb-53fb41eeb753');
-			translateDOI.setSearch({'itemType': 'journalArticle', 'DOI': res.doi});
+			let translate = new Zotero.Translate.Search();
+			translate.setIdentifier({
+				DOI: res.doi
+			});
+			let translators = await translate.getTranslators();
+			translate.setTranslator(translators);
+			
 			try {
-				let newItem = await _promiseTranslate(translateDOI, libraryID);
+				let newItem = await _promiseTranslate(translate, libraryID);
 				if (!newItem.abstractNote && res.abstract) {
 					newItem.setField('abstractNote', res.abstract);
 				}
