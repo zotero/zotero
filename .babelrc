@@ -5,7 +5,6 @@
   "ignore": [
     "resource/require.js",
     "chrome/content/zotero/include.js",
-    "resource/tinymce/tinymce.js",
     "chrome/content/zotero/xpcom/citeproc.js",
     "resource/csl-validator.js",
     "resource/react.js",
