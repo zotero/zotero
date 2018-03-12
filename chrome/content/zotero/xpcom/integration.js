@@ -2638,7 +2638,7 @@ Zotero.Integration.Timer = class {
 	
 	resume() {
 		if (this.pauseTime) {
-			this.startTime += (this.pauseTime - this.startTime);
+			this.startTime += ((new Date()).getTime() - this.pauseTime);
 			this.pauseTime = null;
 		}
 	}
