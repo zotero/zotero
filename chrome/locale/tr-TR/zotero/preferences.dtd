@@ -97,7 +97,7 @@
 <!ENTITY zotero.preferences.sync.reset.button "Sıfırla...">
 
 
-<!ENTITY zotero.preferences.prefpane.search "Arama">
+<!ENTITY zotero.preferences.prefpane.search "Ara">
 <!ENTITY zotero.preferences.search.fulltextCache "Tüm-Metin Önbellek">
 <!ENTITY zotero.preferences.search.indexStats "İndeks İstatistikleri">
 
@@ -125,7 +125,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Dil">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Bu kadardan daha fazlası sürüklendiğinde Çabuk Kopyalamayı devre dışı bırak:">
 
-<!ENTITY zotero.preferences.prefpane.cite "Gönderme Yapmak">
+<!ENTITY zotero.preferences.prefpane.cite "Gönderme Yap">
 <!ENTITY zotero.preferences.cite.styles "Stiller">
 <!ENTITY zotero.preferences.cite.wordProcessors "Sözcük İşlemcileri">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Klasik Gönderme Ekleme İletişim Kutusunu kullan">

@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.items "elementów">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Ustawienia">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "Określ...">
 
 <!ENTITY zotero.preferences.prefpane.general "Ogólne">
 
@@ -19,13 +19,13 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "bardzo duża">
 <!ENTITY zotero.preferences.fontSize.notes "Wielkość czcionki w notatkach:">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.fileHandling "Obsługa plików">
 <!ENTITY zotero.preferences.automaticSnapshots "Podczas tworzenia elementów ze stron internetowych automatycznie wykonaj zrzut ekranu">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Zapisując element dołączaj powiązane pliki PDF i inne">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatycznie pobierz metadane dla plików PDF">
 <!ENTITY zotero.preferences.autoRenameFiles "Automatycznie zmień nazwy plików załączników na podstawie metadanych rodzica">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Otwórz pliki PDF za pomocą">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "Domyślny w systemie">
 
 <!ENTITY zotero.preferences.miscellaneous "Różne">
 <!ENTITY zotero.preferences.autoUpdate "Automatycznie sprawdzaj, czy są dostępne aktualizacje translatorów i stylów">

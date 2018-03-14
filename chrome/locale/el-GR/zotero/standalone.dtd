@@ -72,7 +72,7 @@
 <!ENTITY helpFeedbackPage.label "Discussion Forums">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Αναφορά Λαθών...">
 <!ENTITY helpReportErrors.accesskey "R">
 
 <!ENTITY debugOutputLogging.label "Debug Output Logging">
@@ -80,7 +80,7 @@
 <!ENTITY debugOutputLogging.submit "Submit Output">
 <!ENTITY debugOutputLogging.view "View Output">
 <!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Επανεκκίνηση με καταγραφή...">
 
 <!ENTITY helpCheckForUpdates.label "Έλεγχος για ενημερώσεις...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

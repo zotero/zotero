@@ -238,7 +238,7 @@
 
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Mettre à jour automatiquement les citations">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Les citations en attente de mise à jour seront surlignées dans le document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Désactiver les mises à jour peut accélérer l'insertion de citation dans les documents longs. Cliquez sur Rafraichir pour mettre à jour les citations manuellement.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Désactiver les mises à jour peut accélérer l'insertion de citation dans les documents longs. Cliquez sur Actualiser pour mettre à jour les citations manuellement.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Utiliser les abréviations MEDLINE des titres de revues">
