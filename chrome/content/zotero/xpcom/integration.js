@@ -1007,8 +1007,8 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 			var plainCitation = citation.properties.plainCitation && citationField.getText();
 			
 			// Update citation text:
-			// If we're not specifically *not* trying to regen text
-			if (forceCitations != FORCE_CITATIONS_FALSE
+			// If we're looking to reset the text even if it matches previous text
+			if (forceCitations == FORCE_CITATIONS_RESET_TEXT
 					// Or metadata has changed thus changing the formatted citation
 					|| (citation.properties.formattedCitation !== formattedCitation)) {
 					
