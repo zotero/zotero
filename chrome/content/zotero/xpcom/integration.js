@@ -229,7 +229,7 @@ Zotero.Integration = new function() {
 				var application = Zotero.Integration.getApplication(agent, command, docId);
 				
 				Zotero.Integration.currentDoc = document = (application.getDocument && docId ? application.getDocument(docId) : application.getActiveDocument());
-				Zotero.Integration.currentSession = session = yield Zotero.Integration.getSession(application, document);
+				Zotero.Integration.currentSession = session = yield Zotero.Integration.getSession(application, document, agent);
 				// TODO: this is pretty awful
 				session.fields = new Zotero.Integration.Fields(session, document);
 				session._doc = document;
@@ -358,7 +358,7 @@ Zotero.Integration = new function() {
 	 * Either loads a cached session if doc communicated since restart or creates a new one
 	 * @return {Zotero.Integration.Session} Promise
 	 */
-	this.getSession = Zotero.Promise.coroutine(function *(app, doc) {
+	this.getSession = Zotero.Promise.coroutine(function *(app, doc, agent) {
 		var dataString = doc.getDocumentData(),
 			data, session;
 		
@@ -439,6 +439,7 @@ Zotero.Integration = new function() {
 				throw e;
 			}
 		}
+		session.agent = agent;
 		return session;
 	});
 	
@@ -942,8 +943,15 @@ Zotero.Integration.Fields.prototype.updateDocument = Zotero.Promise.coroutine(fu
 	// If the update takes longer than 5s suggest delaying citation updates
 	if (diff > DELAY_CITATIONS_PROMPT_TIMEOUT && !this._session.data.prefs.dontAskDelayCitationUpdates && !this._session.data.prefs.delayCitationUpdates) {
 		this._doc.activate();
+		
+		var interfaceType = 'tab';
+		if (['MacWord2008', 'OpenOffice'].includes(this._session.agent)) {
+			interfaceType = 'toolbar';
+		}
+		
 		var result = this._session.displayAlert(
-				Zotero.getString('integration.delayCitationUpdates.alert.text1')
+				Zotero.getString('integration.delayCitationUpdates.alert.text1', 
+					Zotero.getString(`integration.interfaceType.${interfaceType}`))
 					+ "\n\n"
 					+ Zotero.getString('integration.delayCitationUpdates.alert.text2')
 					+ "\n\n"
@@ -1623,7 +1631,13 @@ Zotero.Integration.Session.prototype.writeDelayedCitation = Zotero.Promise.corou
 	for (let i = fields.length-1; i >= 0; i--) {
 		let field = Zotero.Integration.Field.loadExisting(fields[i]);
 		if (field.type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
-			field.setText(Zotero.getString('integration.delayCitationUpdates.bibliography'), false)
+			var interfaceType = 'tab';
+			if (['MacWord2008', 'OpenOffice'].includes(this.agent)) {
+				interfaceType = 'toolbar';
+			}
+		
+			field.setText(Zotero.getString('integration.delayCitationUpdates.bibliography',
+				Zotero.getString(`integration.interfaceType.${interfaceType}`)), false)
 			break;
 		}
 	}
