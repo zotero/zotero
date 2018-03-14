@@ -950,10 +950,9 @@ Zotero.Integration.Fields.prototype.updateDocument = Zotero.Promise.coroutine(fu
 		}
 		
 		var result = this._session.displayAlert(
-				Zotero.getString('integration.delayCitationUpdates.alert.text1', 
-					Zotero.getString(`integration.interfaceType.${interfaceType}`))
+				Zotero.getString('integration.delayCitationUpdates.alert.text1')
 					+ "\n\n"
-					+ Zotero.getString('integration.delayCitationUpdates.alert.text2')
+					+ Zotero.getString(`integration.delayCitationUpdates.alert.text2.${interfaceType}`)
 					+ "\n\n"
 					+ Zotero.getString('integration.delayCitationUpdates.alert.text3'),
 				DIALOG_ICON_WARNING,
@@ -1636,8 +1635,7 @@ Zotero.Integration.Session.prototype.writeDelayedCitation = Zotero.Promise.corou
 				interfaceType = 'toolbar';
 			}
 		
-			field.setText(Zotero.getString('integration.delayCitationUpdates.bibliography',
-				Zotero.getString(`integration.interfaceType.${interfaceType}`)), false)
+			field.setText(Zotero.getString(`integration.delayCitationUpdates.bibliography.${interfaceType}`), false)
 			break;
 		}
 	}
