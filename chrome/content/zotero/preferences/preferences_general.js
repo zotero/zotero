@@ -58,7 +58,7 @@ Zotero_Preferences.General = {
 		}
 		fp.init(
 			window,
-			Zotero.getString('zotero.preferences.chooseFileHandler'),
+			Zotero.getString('zotero.preferences.chooseApplication'),
 			nsIFilePicker.modeOpen
 		);
 		fp.appendFilters(nsIFilePicker.filterApps);
