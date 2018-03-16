@@ -553,6 +553,9 @@ Zotero.RecognizePDF = new function () {
 				if (!newItem.abstractNote && res.abstract) {
 					newItem.setField('abstractNote', res.abstract);
 				}
+				if (!newItem.language && res.language) {
+					newItem.setField('language', res.language);
+				}
 				newItem.saveTx();
 				return newItem;
 			}
@@ -578,6 +581,9 @@ Zotero.RecognizePDF = new function () {
 					newItem.libraryID = libraryID;
 					if (!newItem.abstractNote && res.abstract) {
 						newItem.setField('abstractNote', res.abstract);
+					}
+					if (!newItem.language && res.language) {
+						newItem.setField('language', res.language);
 					}
 					newItem.saveTx();
 					return newItem;
@@ -615,6 +621,7 @@ Zotero.RecognizePDF = new function () {
 			if (res.pages) newItem.setField('pages', res.pages);
 			if (res.volume) newItem.setField('volume', res.volume);
 			if (res.url) newItem.setField('url', res.url);
+			if (res.language) newItem.setField('language', res.language);
 			
 			if (type === 'journalArticle') {
 				if (res.issue) newItem.setField('issue', res.issue);
