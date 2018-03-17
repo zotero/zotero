@@ -997,40 +997,43 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 			var formattedCitation = citation.properties.custom
 				? citation.properties.custom : citation.text;
 			var plainCitation = citation.properties.plainCitation && citationField.getText();
+			var plaintextChanged = citation.properties.plainCitation 
+					&& plainCitation !== citation.properties.plainCitation;
+								
+			if (!ignoreCitationChanges && plaintextChanged) {
+				// Citation manually modified; ask user if they want to save changes
+				Zotero.debug("[_updateDocument] Attempting to update manually modified citation.\n"
+					+ "Original: " + citation.properties.plainCitation + "\n"
+					+ "Current:  " + plainCitation
+				);
+				citationField.select();
+				var result = this._session.displayAlert(
+					Zotero.getString("integration.citationChanged")+"\n\n"+Zotero.getString("integration.citationChanged.description"), 
+					DIALOG_ICON_CAUTION, DIALOG_BUTTONS_YES_NO);
+				if (result) {
+					citation.properties.dontUpdate = true;
+				}
+			}
 			
 			// Update citation text:
 			// If we're looking to reset the text even if it matches previous text
 			if (forceCitations == FORCE_CITATIONS_RESET_TEXT
 					// Or metadata has changed thus changing the formatted citation
-					|| (citation.properties.formattedCitation !== formattedCitation)) {
-					
-				if (!ignoreCitationChanges && plainCitation !== citation.properties.plainCitation) {
-					// Citation manually modified; ask user if they want to save changes
-					Zotero.debug("[_updateDocument] Attempting to update manually modified citation.\n"
-						+ "Original: " + citation.properties.plainCitation + "\n"
-						+ "Current:  " + plainCitation
-					);
-					citationField.select();
-					var result = this._session.displayAlert(
-						Zotero.getString("integration.citationChanged")+"\n\n"+Zotero.getString("integration.citationChanged.description"), 
-						DIALOG_ICON_CAUTION, DIALOG_BUTTONS_YES_NO);
-					if (result) {
-						citation.properties.dontUpdate = true;
-					}
+					|| (citation.properties.formattedCitation !== formattedCitation)
+					// Or plaintext has changed and user does not want to keep the change
+					|| (plaintextChanged && !citation.properties.dontUpdate)) {
+
+				
+				// Word will preserve previous text styling, so we need to force remove it
+				// for citations that were inserted with delay styling
+				if (citation.properties.formattedCitation && citation.properties.formattedCitation.includes(DELAYED_CITATION_STYLING)) {
+					isRich = citationField.setText(`${DELAYED_CITATION_STYLING_CLEAR}{${formattedCitation}}`);
+				} else {
+					isRich = citationField.setText(formattedCitation);
 				}
 				
-				if(!citation.properties.dontUpdate) {
-					// Word will preserve previous text styling, so we need to force remove it
-					// for citations that were inserted with delay styling
-					if (citation.properties.formattedCitation && citation.properties.formattedCitation.includes(DELAYED_CITATION_STYLING)) {
-						isRich = citationField.setText(`${DELAYED_CITATION_STYLING_CLEAR}{${formattedCitation}}`);
-					} else {
-						isRich = citationField.setText(formattedCitation);
-					}
-					
-					citation.properties.formattedCitation = formattedCitation;
-					citation.properties.plainCitation = citationField.getText();
-				}
+				citation.properties.formattedCitation = formattedCitation;
+				citation.properties.plainCitation = citationField.getText();
 			}
 		}
 		
