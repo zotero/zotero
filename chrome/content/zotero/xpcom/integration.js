@@ -458,6 +458,7 @@ Zotero.Integration.MissingItemException.prototype = {
 Zotero.Integration.NO_ACTION = 0;
 Zotero.Integration.UPDATE = 1;
 Zotero.Integration.DELETE = 2;
+Zotero.Integration.REMOVE_CODE = 3;
 
 /**
  * All methods for interacting with a document
@@ -735,6 +736,7 @@ Zotero.Integration.Fields = function(session, doc) {
 	this._doc = doc;
 
 	this._removeCodeFields = {};
+	this._deleteFields = {};
 	this._bibliographyFields = [];
 }
 
@@ -856,6 +858,7 @@ Zotero.Integration.Fields.prototype.updateSession = Zotero.Promise.coroutine(fun
 	this._session.resetRequest(this._doc);
 	
 	this._removeCodeFields = {};
+	this._deleteFields = {};
 	this._bibliographyFields = [];
 	
 	collectFieldsTime = (new Date()).getTime();
@@ -891,16 +894,6 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
 		if (field.type === INTEGRATION_TYPE_ITEM) {
 			var noteIndex = field.getNoteIndex(),
 				citation = new Zotero.Integration.Citation(field, noteIndex);
-
-			let action = yield citation.loadItemData();
-			
-			if (action == Zotero.Integration.REMOVE_CODE) {
-				this._removeCodeFields[i] = true;
-				// Mark for removal and continue
-				continue;
-			} else if (action == Zotero.Integration.UPDATE) {
-				this._session.updateIndices[i] = true;
-			}
 			
 			yield this._session.addCitation(i, noteIndex, citation);
 		} else if (field.type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
@@ -1106,6 +1099,11 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 	var removeCodeFields = Object.keys(this._removeCodeFields).sort();
 	for (var i=(removeCodeFields.length-1); i>=0; i--) {
 		this._fields[removeCodeFields[i]].removeCode();
+	}
+	
+	var deleteFields = Object.keys(this._deleteFields).sort();
+	for (var i=(deleteFields.length-1); i>=0; i--) {
+		this._fields[deleteFields[i]].delete();
 	}
 }
 
@@ -1482,7 +1480,22 @@ Zotero.Integration._oldCitationLocatorMap = {
 Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(function* (index, noteIndex, citation) {
 	var index = parseInt(index, 10);
 	
-	yield citation.loadItemData();
+	var action = yield citation.loadItemData();
+	
+	if (action == Zotero.Integration.REMOVE_CODE) {
+		// Mark for removal and return
+		this.fields._removeCodeFields[index] = true;
+		return;
+	} else if (action == Zotero.Integration.DELETE) {
+		// Mark for deletion and return
+		this.fields._deleteFields[index] = true;
+		return;
+	} else if (action == Zotero.Integration.UPDATE) {
+		this.updateIndices[index] = true;
+	}
+	// All new fields will initially be marked for deletion because they contain no
+	// citationItems
+	delete this.fields._deleteFields[index];
 
 	citation.properties.added = true;
 	citation.properties.zoteroIndex = index;
@@ -2267,18 +2280,22 @@ Zotero.Integration.Citation = class {
 	}
 
 	/**
-	 * Load item data for current item
+	 * Load citation item data
 	 * @param {Boolean} [promptToReselect=true] - will throw a MissingItemException if false
 	 * @returns {Promise{Number}}
 	 * 	- Zotero.Integration.NO_ACTION
 	 * 	- Zotero.Integration.UPDATE
 	 * 	- Zotero.Integration.REMOVE_CODE
+	 * 	- Zotero.Integration.DELETE
 	 */
 	loadItemData() {
 		return Zotero.Promise.coroutine(function *(promptToReselect=true){
 			let items = [];
 			var needUpdate = false;
 			
+			if (!this.citationItems.length) {
+				return Zotero.Integration.DELETE;
+			}
 			for (var i=0, n=this.citationItems.length; i<n; i++) {
 				var citationItem = this.citationItems[i];
 				
