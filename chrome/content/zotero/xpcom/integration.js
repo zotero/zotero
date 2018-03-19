@@ -420,7 +420,7 @@ Zotero.Integration = new function() {
 							installed = true;
 						}
 						catch (e) {
-							me._doc.displayAlert(
+							doc.displayAlert(
 								Zotero.getString(
 									'integration.error.styleNotFound', data.style.styleID
 								),
