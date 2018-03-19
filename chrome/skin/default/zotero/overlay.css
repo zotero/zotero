@@ -70,7 +70,7 @@
 	width: 12px;
 }
 
-@media (min-resolution: 1.5dppx) {
+@media (min-resolution: 1.25dppx) {
 	.tree-columnpicker-icon {
 		list-style-image: url(chrome://zotero/skin/firefox/columnpicker@2x.gif);
 		width: 14px;
@@ -763,7 +763,7 @@
 
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
-@media (min-resolution: 1.5dppx) {
+@media (min-resolution: 1.25dppx) {
 	#zotero-items-column-hasAttachment  { list-style-image: url(chrome://zotero/skin/attach-small@2x.png); }
 	#zotero-items-column-numNotes  { list-style-image: url(chrome://zotero/skin/treeitem-note-small@2x.png); }
 	.toolbarbutton-menu-dropmarker  { list-style-image: url('chrome://zotero/skin/searchbar-dropmarker@2x.png'); }

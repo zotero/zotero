@@ -491,7 +491,7 @@ treechildren::-moz-tree-image {
 
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
-@media (min-resolution: 1.5dppx) {
+@media (min-resolution: 1.25dppx) {
 	.zotero-tb-button,.zotero-tb-button:first-child,.zotero-tb-button:last-child  { background: url("chrome://zotero/skin/mac/menubutton-end@2x.png") right center/auto 24px no-repeat; }
 	.zotero-tb-button > .toolbarbutton-icon  { background: url("chrome://zotero/skin/mac/menubutton-start@2x.png") left center/auto 24px no-repeat; }
 	.zotero-tb-button:-moz-window-inactive > .toolbarbutton-icon  { background: url("chrome://zotero/skin/mac/menubutton-start-inactive-window@2x.png") left center/auto 24px no-repeat; }

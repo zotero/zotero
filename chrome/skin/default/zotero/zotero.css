@@ -35,7 +35,7 @@
 	list-style-image: url("chrome://zotero-platform/content/zotero-z-16px-australis.png");
 }
 
-@media (min-resolution: 1.5dppx) {
+@media (min-resolution: 1.25dppx) {
 	#zotero-toolbar-main-button,
 	#zotero-toolbar-main-button-single {
 		list-style-image: url("chrome://zotero-platform/content/zotero-z-32px-australis.png");
@@ -465,7 +465,7 @@ label.zotero-text-link {
 
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
-@media (min-resolution: 1.5dppx) {
+@media (min-resolution: 1.25dppx) {
 	#zotero-toolbar-save-button,#zotero-toolbar-save-button-single  { list-style-image: url("chrome://zotero/skin/treeitem-webpage@2x.png"); }
 	.zotero-clicky-minus  { background: url(chrome://zotero/skin/minus@2x.png) center/auto 18px no-repeat !important; }
 	.zotero-clicky-plus  { background: url(chrome://zotero/skin/plus@2x.png) center/auto 18px no-repeat !important; }

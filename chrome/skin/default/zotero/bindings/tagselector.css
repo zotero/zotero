@@ -96,6 +96,6 @@ toolbarbutton.zotero-clicky
 
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
-@media (min-resolution: 1.5dppx) {
+@media (min-resolution: 1.25dppx) {
 	#view-settings-menu  { list-style-image: url(chrome://zotero/skin/tag-selector-menu@2x.png); }
 }

@@ -24,7 +24,7 @@
 	list-style-image: url(chrome://zotero/skin/arrow_refresh.png);
 }
 
-@media (min-resolution: 1.5dppx) {
+@media (min-resolution: 1.25dppx) {
 	#reindex {
 		list-style-image: url(chrome://zotero/skin/arrow_refresh@2x.png);
 		width: 20px;

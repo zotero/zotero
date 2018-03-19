@@ -33,6 +33,6 @@ textbox
 
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
-@media (min-resolution: 1.5dppx) {
+@media (min-resolution: 1.25dppx) {
 	.creator-type-label > image  { list-style-image: url('chrome://zotero/skin/mac/arrow-down@2x.png'); }
 }
