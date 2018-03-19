@@ -2211,31 +2211,24 @@ Zotero.Integration.CitationField = class extends Zotero.Integration.Field {
 	}
 		
 	resolveCorrupt(code) {
-		return Zotero.Promise.coroutine(function* () {
-			Zotero.debug(`Integration: handling corrupt citation field ${code}`);
-			var msg = Zotero.getString("integration.corruptField")+'\n\n'+
-					  Zotero.getString('integration.corruptField.description');
-			this.select();
-			Zotero.Integration.currentDoc.activate();
-			var result = Zotero.Integration.currentSession.displayAlert(msg, DIALOG_ICON_CAUTION, DIALOG_BUTTONS_YES_NO_CANCEL);
-			if (result == 0) { // Cancel
-				return new Zotero.Exception.UserCancelled("corrupt citation resolution");
-			} else if (result == 1) {		// No
-				return false;
-			} else { // Yes
-				var fieldGetter = Zotero.Integration.currentSession.fields,
-					oldWindow = Zotero.Integration.currentWindow,
-					oldProgressCallback = this.progressCallback;
-				// Display reselect edit citation dialog
-				let [idx, field, citation] = yield fieldGetter.addEditCitation(this);
-				if (Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {
-					Zotero.Integration.currentWindow.close();
-				}
-				Zotero.Integration.currentWindow = oldWindow;
-				fieldGetter.progressCallback = oldProgressCallback;
-				return citation;
-			}	
-		}).apply(this, arguments);
+		Zotero.debug(`Integration: handling corrupt citation field ${code}`);
+		var msg = Zotero.getString("integration.corruptField")+'\n\n'+
+				  Zotero.getString('integration.corruptField.description');
+		this.select();
+		Zotero.Integration.currentDoc.activate();
+		var result = Zotero.Integration.currentSession.displayAlert(msg, DIALOG_ICON_CAUTION, DIALOG_BUTTONS_YES_NO_CANCEL);
+		if (result == 0) { // Cancel
+			return new Zotero.Exception.UserCancelled("corrupt citation resolution");
+		} else if (result == 1) {		// No
+			return false;
+		} else { // Yes
+			var fieldGetter = Zotero.Integration.currentSession.fields,
+				oldWindow = Zotero.Integration.currentWindow,
+				oldProgressCallback = this.progressCallback;
+			// Clear current code and subsequent addEditCitation dialog will be the reselection
+			this.clearCode();
+			return this.unserialize();
+		}
 	}
 };
 
@@ -2256,18 +2249,16 @@ Zotero.Integration.BibliographyField = class extends Zotero.Integration.Field {
 	}
 			
 	resolveCorrupt(code) {
-		return Zotero.Promise.coroutine(function* () {
-			Zotero.debug(`Integration: handling corrupt bibliography field ${code}`);
-			var msg = Zotero.getString("integration.corruptBibliography")+'\n\n'+
-					  Zotero.getString('integration.corruptBibliography.description');
-			var result = Zotero.Integration.currentSession.displayAlert(msg, DIALOG_ICON_CAUTION, DIALOG_BUTTONS_OK_CANCEL);
-			if (result == 0) {
-				throw new Zotero.Exception.UserCancelled("corrupt bibliography resolution");
-			} else {
-				this.clearCode();
-				return unserialize();
-			}
-		}).apply(this, arguments);
+		Zotero.debug(`Integration: handling corrupt bibliography field ${code}`);
+		var msg = Zotero.getString("integration.corruptBibliography")+'\n\n'+
+				  Zotero.getString('integration.corruptBibliography.description');
+		var result = Zotero.Integration.currentSession.displayAlert(msg, DIALOG_ICON_CAUTION, DIALOG_BUTTONS_OK_CANCEL);
+		if (result == 0) {
+			throw new Zotero.Exception.UserCancelled("corrupt bibliography resolution");
+		} else {
+			this.clearCode();
+			return unserialize();
+		}
 	}
 };
 
