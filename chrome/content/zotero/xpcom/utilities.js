@@ -299,6 +299,7 @@ Zotero.Utilities = {
 		}
 		
 		x = x.replace(/<br[^>]*>/gi, "\n");
+		x = x.replace(/<\/p>/gi, "\n\n");
 		return x.replace(/<[^>]+>/g, "");
 	},
 
