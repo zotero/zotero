@@ -1008,7 +1008,10 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 				);
 				citationField.select();
 				var result = this._session.displayAlert(
-					Zotero.getString("integration.citationChanged")+"\n\n"+Zotero.getString("integration.citationChanged.description"), 
+					Zotero.getString("integration.citationChanged")+"\n\n"
+						+ Zotero.getString("integration.citationChanged.description")+"\n\n"
+						+ Zotero.getString("integration.citationChanged.original", citation.properties.plainCitation)+"\n"
+						+ Zotero.getString("integration.citationChanged.modified", plainCitation)+"\n", 
 					DIALOG_ICON_CAUTION, DIALOG_BUTTONS_YES_NO);
 				if (result) {
 					citation.properties.dontUpdate = true;
@@ -2426,7 +2429,10 @@ Zotero.Integration.Citation = class {
 					+ "Original: " + this.properties.plainCitation + "\n"
 					+ "Current:  " + fieldText
 				);
-				if (!Zotero.Integration.currentSession.displayAlert(Zotero.getString("integration.citationChanged.edit"),
+				if (!Zotero.Integration.currentSession.displayAlert(
+					Zotero.getString("integration.citationChanged.edit")+"\n\n"
+						+ Zotero.getString("integration.citationChanged.original", this.properties.plainCitation)+"\n"
+						+ Zotero.getString("integration.citationChanged.modified", fieldText)+"\n",
 						DIALOG_ICON_WARNING, DIALOG_BUTTONS_OK_CANCEL)) {
 					throw new Zotero.Exception.UserCancelled("editing citation");
 				}
