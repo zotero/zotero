@@ -14,8 +14,8 @@
 <!ENTITY zotero.general.tools "Verktyg">
 <!ENTITY zotero.general.more "Mera">
 <!ENTITY zotero.general.loading "Laddar...">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Stäng">
+<!ENTITY zotero.general.minimize "Minimera">
 
 
 <!ENTITY zotero.errorReport.title "Zotero-felrapporting">
@@ -99,8 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Återställ till bibliotek">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicera vald post">
 <!ENTITY zotero.items.menu.mergeItems "Sammanfoga källor…">
-<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
+<!ENTITY zotero.items.menu.unrecognize "Ångra avläsning av metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Rapportera felaktiga metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Välj vilken version av källan som ska vara utgångspunkt:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Välj fält att behålla från andra versioner av källan:">
