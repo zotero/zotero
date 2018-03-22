@@ -321,7 +321,11 @@ Zotero.Proxy.prototype.compileRegexp = function() {
 	})
 	
 	// now replace with regexp fragment in reverse order
-	var re = "^"+Zotero.Utilities.quotemeta(this.scheme)+"$";
+	if (this.scheme.includes('://')) {
+		re = "^"+Zotero.Utilities.quotemeta(this.scheme)+"$";
+	} else {
+		re = "^https?"+Zotero.Utilities.quotemeta('://'+this.scheme)+"$";
+	}
 	for(var i=this.parameters.length-1; i>=0; i--) {
 		var param = this.parameters[i];
 		re = re.replace(Zotero_Proxy_schemeParameterRegexps[param], "$1"+parametersToCheck[param]);
