@@ -69,6 +69,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	
 	var _enabled = false;
 	var _autoSyncTimer;
+	var _delaySyncUntil;
 	var _firstInSession = true;
 	var _syncInProgress = false;
 	var _stopping = false;
@@ -138,6 +139,14 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 			
 			this.updateIcons('animate');
+			
+			// If a delay is set (e.g., from the connector target selector), wait to sync
+			while (_delaySyncUntil && new Date() < _delaySyncUntil) {
+				this.setSyncStatus(Zotero.getString('sync.status.waiting'));
+				let delay = _delaySyncUntil - new Date();
+				Zotero.debug(`Waiting ${delay} ms to sync`);
+				yield Zotero.Promise.delay(delay);
+			}
 			
 			// purgeDataObjects() starts a transaction, so if there's an active one then show a
 			// nice message and wait until there's not. Another transaction could still start
@@ -884,9 +893,18 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		
 		// Implements nsITimerCallback
 		var callback = {
-			notify: function (timer) {
+			notify: async function (timer) {
 				if (!_getAPIKey()) {
 					return;
+				}
+				
+				// If a delay is set (e.g., from the connector target selector), wait to sync.
+				// We do this in sync() too for manual syncs, but no need to start spinning if
+				// it's just an auto-sync.
+				while (_delaySyncUntil && new Date() < _delaySyncUntil) {
+					let delay = _delaySyncUntil - new Date();
+					Zotero.debug(`Waiting ${delay} ms to start auto-sync`);
+					await Zotero.Promise.delay(delay);
 				}
 				
 				if (Zotero.locked) {
@@ -933,6 +951,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			_autoSyncTimer.cancel();
 		}
 	}
+	
+	
+	this.delaySync = function (ms) {
+		_delaySyncUntil = new Date(Date.now() + ms);
+	};
 	
 	
 	/**

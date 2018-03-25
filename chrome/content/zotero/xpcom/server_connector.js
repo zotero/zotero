@@ -799,6 +799,17 @@ Zotero.Server.Connector.UpdateSession.prototype = {
 	}
 };
 
+Zotero.Server.Connector.DelaySync = function () {};
+Zotero.Server.Endpoints["/connector/delaySync"] = Zotero.Server.Connector.DelaySync;
+Zotero.Server.Connector.DelaySync.prototype = {
+	supportedMethods: ["POST"],
+	
+	init: async function (options) {
+		Zotero.Sync.Runner.delaySync(10000);
+		return [204];
+	}
+};
+
 /**
  * Gets progress for an attachment that is currently being saved
  *
