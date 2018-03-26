@@ -565,7 +565,7 @@ Zotero.Integration.Interface.prototype.editBibliography = Zotero.Promise.corouti
 		throw new Zotero.Exception.Alert("integration.error.mustInsertBibliography",
 			[], "integration.error.title");
 	}
-	let bibliography = new Zotero.Integration.Bibliography(bibliographyField);
+	let bibliography = new Zotero.Integration.Bibliography(bibliographyField, bibliographyField.unserialize());
 	var citationsMode = FORCE_CITATIONS_FALSE;
 	if(this._session.data.prefs.delayCitationUpdates) {
 		// Refreshes citeproc state before proceeding
@@ -604,7 +604,7 @@ Zotero.Integration.Interface.prototype.addEditBibliography = Zotero.Promise.coro
 		bibliographyField.clearCode();
 	}
 	
-	let bibliography = new Zotero.Integration.Bibliography(bibliographyField);
+	let bibliography = new Zotero.Integration.Bibliography(bibliographyField, bibliographyField.unserialize());
 	var citationsMode = FORCE_CITATIONS_FALSE;
 	if(this._session.data.prefs.delayCitationUpdates) {
 		// Refreshes citeproc state before proceeding
@@ -893,7 +893,8 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
 		let field = Zotero.Integration.Field.loadExisting(this._fields[i]);
 		if (field.type === INTEGRATION_TYPE_ITEM) {
 			var noteIndex = field.getNoteIndex(),
-				citation = new Zotero.Integration.Citation(field, noteIndex);
+				data = field.unserialize(),
+				citation = new Zotero.Integration.Citation(field, noteIndex, data);
 			
 			yield this._session.addCitation(i, noteIndex, citation);
 		} else if (field.type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
@@ -905,7 +906,8 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
 		}
 	}
 	if (this._bibliographyFields.length) {
-		this._session.bibliography = new Zotero.Integration.Bibliography(this._bibliographyFields[0]);
+		var data = this._bibliographyFields[0].unserialize()
+		this._session.bibliography = new Zotero.Integration.Bibliography(this._bibliographyFields[0], data);
 		yield this._session.bibliography.loadItemData();
 	} else {
 		delete this._session.bibliography;
@@ -1118,6 +1120,7 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
  */
 Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(function* (field) {
 	var newField;
+	var citation;
 	
 	if (field) {
 		field = Zotero.Integration.Field.loadExisting(field);
@@ -1125,13 +1128,13 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 		if (field.type != INTEGRATION_TYPE_ITEM) {
 			throw new Zotero.Exception.Alert("integration.error.notInCitation");
 		}
+		citation = new Zotero.Integration.Citation(field, field.getNoteIndex(), field.unserialize());
 	} else {
 		newField = true;
 		field = new Zotero.Integration.CitationField(yield this.addField(true));
-		field.clearCode();
+		citation = new Zotero.Integration.Citation(field);
 	}
 	
-	var citation = new Zotero.Integration.Citation(field);
 	yield citation.prepareForEditing();
 
 	// -------------------
@@ -1158,19 +1161,31 @@ Zotero.Integration.Fields.prototype.addEditCitation = Zotero.Promise.coroutine(f
 		}.bind(this));
 	}
 
-	var previewFn = Zotero.Promise.coroutine(function* (citation) {
-		let idx = yield fieldIndexPromise;
-		yield citationsByItemIDPromise;
+	var previewFn = async function (citation) {
+		let idx = await fieldIndexPromise;
+		await citationsByItemIDPromise;
+		var fields = await this.get();
 
-		var [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this._session.getCiteprocLists();
-		let citationsPre = citations.slice(0, fieldToCitationIdxMapping[idx]);
-		let citationsPost = citations.slice(fieldToCitationIdxMapping[idx]+1);
+		var [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this._session.getCiteprocLists(true);
+		for (var prevIdx = idx-1; prevIdx >= 0; prevIdx--) {
+			if (prevIdx in fieldToCitationIdxMapping) break;
+		}
+		for (var nextIdx = idx+1; nextIdx < fields.length; nextIdx++) {
+			if (nextIdx in fieldToCitationIdxMapping) break;
+		}
+		let citationsPre = citations.slice(0, fieldToCitationIdxMapping[prevIdx]+1);
+		let citationsPost = citations.slice(fieldToCitationIdxMapping[nextIdx]);
 		try {
-			return this._session.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
+			var result = this._session.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
 		} catch(e) {
 			throw e;
+		} finally {
+			// CSL.previewCitationCluster() sets citationID, which means that we do not mark it
+			// as a new citation in Session.addCitation() if the ID is still present
+			delete citation.citationID;
 		}
-	}.bind(this));
+		return result;
+	}.bind(this);
 		
 	var io = new Zotero.Integration.CitationEditInterface(
 		citation, this._session.style.opt.sort_citations,
@@ -1528,8 +1543,15 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 	}
 	
 	// We need a new ID if there's another citation with the same citation ID in this document
-	var needNewID = !citation.citationID || this.documentCitationIDs[citation.citationID];
+	var duplicateIndex = this.documentCitationIDs[citation.citationID];
+	var needNewID = !citation.citationID || duplicateIndex != undefined;
 	if(needNewID || this.regenAll) {
+		if (duplicateIndex != undefined) {
+			// If this is a duplicate, we need to mark both citations as "new"
+			// since we do not know which one was the "original" one
+			// and either one may need to be updated
+			this.newIndices[duplicateIndex] = true;
+		}
 		if(needNewID) {
 			Zotero.debug("Integration: "+citation.citationID+" ("+index+") needs new citationID");
 			citation.citationID = Zotero.randomString();
@@ -1537,17 +1559,21 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 		this.newIndices[index] = true;
 	}
 	Zotero.debug("Integration: Adding citationID "+citation.citationID);
-	this.documentCitationIDs[citation.citationID] = citation.citationID;
+	this.documentCitationIDs[citation.citationID] = index;
 });
 
-Zotero.Integration.Session.prototype.getCiteprocLists = function() {
+Zotero.Integration.Session.prototype.getCiteprocLists = function(excludeNew) {
 	var citations = [];
-	var fieldToCitationIdxMapping = [];
+	var fieldToCitationIdxMapping = {};
 	var citationToFieldIdxMapping = {};
 	var i = 0;
 	// This relies on the order of citationsByIndex keys being stable and sorted in ascending order
 	// Which it seems to currently be true for every modern JS engine, so we're probably fine
 	for(let idx in this.citationsByIndex) {
+		if (excludeNew && this.newIndices[idx]) {
+			i++;
+			continue;
+		}
 		citations.push([this.citationsByIndex[idx].citationID, this.citationsByIndex[idx].properties.noteIndex]);
 		fieldToCitationIdxMapping[i] = idx;
 		citationToFieldIdxMapping[idx] = i++;
@@ -2266,8 +2292,10 @@ Zotero.Integration.BibliographyField = class extends Zotero.Integration.Field {
 };
 
 Zotero.Integration.Citation = class {
-	constructor(citationField, noteIndex) {
-		let data = citationField.unserialize();
+	constructor(citationField, noteIndex, data) {
+		if (!data) {
+			data = {citationItems: [], properties: {}};
+		}
 		this.citationID = data.citationID;
 		this.citationItems = data.citationItems;
 		this.properties = data.properties;
@@ -2511,9 +2539,9 @@ Zotero.Integration.Citation = class {
 };
 
 Zotero.Integration.Bibliography = class {
-	constructor(bibliographyField) {
+	constructor(bibliographyField, data) {
 		this._field = bibliographyField;
-		this.data = bibliographyField.unserialize();
+		this.data = data;
 		
 		this.uncitedItemIDs = new Set();
 		this.omittedItemIDs = new Set();

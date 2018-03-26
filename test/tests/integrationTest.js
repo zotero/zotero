@@ -277,11 +277,12 @@ describe("Zotero.Integration", function () {
 	
 	function setAddEditItems(items) {
 		if (items.length == undefined) items = [items];
-		dialogResults.quickFormat = function(dialogName, io) {
+		dialogResults.quickFormat = async function(dialogName, io) {
 			io.citation.citationItems = items.map(function(item) {
 				item = Zotero.Cite.getItem(item.id);
 				return {id: item.id, uris: item.cslURIs, itemData: item.cslItemData};
 			});
+			await io.previewFn(io.citation);
 			io._acceptDeferred.resolve(() => {});
 		};
 	}
@@ -306,21 +307,15 @@ describe("Zotero.Integration", function () {
 			return applications[docID];
 		});
 		
-		displayDialogStub = sinon.stub(Zotero.Integration, 'displayDialog', 
-		// @TODO: This sinon.stub syntax is deprecated!
-		// However when using callsFake tests won't work. This is due to a 
-		// possible bug that reset() erases callsFake.
-		// @NOTE: https://github.com/sinonjs/sinon/issues/1341
-		// displayDialogStub.callsFake(function(doc, dialogName, prefs, io) {
-		function(dialogName, prefs, io) {
+		displayDialogStub = sinon.stub(Zotero.Integration, 'displayDialog');
+		displayDialogStub.callsFake(async function(dialogName, prefs, io) {
 			Zotero.debug(`Display dialog: ${dialogName}`, 2);
 			var ioResult = dialogResults[dialogName.substring(dialogName.lastIndexOf('/')+1, dialogName.length-4)];
 			if (typeof ioResult == 'function') {
-				ioResult(dialogName, io);
+				await ioResult(dialogName, io);
 			} else {
 				Object.assign(io, ioResult);
 			}
-			return Zotero.Promise.resolve();
 		});
 		
 		addEditCitationSpy = sinon.spy(Zotero.Integration.Interface.prototype, 'addEditCitation');
@@ -371,7 +366,7 @@ describe("Zotero.Integration", function () {
 						Zotero.Styles.get(style.styleID).remove();
 					} catch (e) {}
 					initDoc(docID, {style});
-					displayDialogStub.reset();
+					displayDialogStub.resetHistory();
 					displayAlertStub.reset();
 				});
 				
@@ -577,6 +572,38 @@ describe("Zotero.Integration", function () {
 				});
 			});
 			
+			describe('when there are duplicated citations (copy-paste)', function() {
+				it('should resolve duplicate citationIDs and mark both as new citations', async function() {
+					var docID = this.test.fullTitle();
+					if (!(docID in applications)) initDoc(docID);
+					var doc = applications[docID].doc;
+
+					setAddEditItems(testItems[0]);
+					await execCommand('addEditCitation', docID);
+					assert.equal(doc.fields.length, 1);
+					// Add a duplicate
+					doc.fields.push(new DocumentPluginDummy.Field(doc));
+					doc.fields[1].code = doc.fields[0].code;
+					doc.fields[1].text = doc.fields[0].text;
+					
+					var originalUpdateDocument = Zotero.Integration.Fields.prototype.updateDocument;
+					var stubUpdateDocument = sinon.stub(Zotero.Integration.Fields.prototype, 'updateDocument');
+					try {
+						var indicesLength;
+						stubUpdateDocument.callsFake(function() {
+							indicesLength = Object.keys(Zotero.Integration.currentSession.newIndices).length;
+							return originalUpdateDocument.apply(this, arguments);
+						});
+
+						setAddEditItems(testItems[1]);
+						await execCommand('addEditCitation', docID);
+						assert.equal(indicesLength, 3);
+					} finally {
+						stubUpdateDocument.restore();
+					}
+				});
+			});
+			
 			describe('when delayCitationUpdates is set', function() {
 				it('should insert a citation with wave underlining', function* (){
 					yield insertMultipleCitations.call(this);
@@ -631,7 +658,7 @@ describe("Zotero.Integration", function () {
 			});
 			
 			it('should insert bibliography if no bibliography field present', function* () {
-				displayDialogStub.reset();
+				displayDialogStub.resetHistory();
 				yield execCommand('addEditBibliography', docID);
 				assert.isFalse(displayDialogStub.called);
 				var biblPresent = false;
@@ -647,7 +674,7 @@ describe("Zotero.Integration", function () {
 			
 			it('should display the edit bibliography dialog if bibliography present', function* () {
 				yield execCommand('addEditBibliography', docID);
-				displayDialogStub.reset();
+				displayDialogStub.resetHistory();
 				yield execCommand('addEditBibliography', docID);
 				assert.isTrue(displayDialogStub.calledOnce);
 				assert.isTrue(displayDialogStub.lastCall.args[0].includes('editBibliographyDialog'));
