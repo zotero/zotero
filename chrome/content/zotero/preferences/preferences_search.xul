@@ -49,6 +49,14 @@
 				<textbox size="10" preference="pref-fulltext-textMaxLength"/>
 				<label value="(&zotero.preferences.default; 500000)"/>
 			</hbox>
+
+			<separator class="thin"/>
+
+			<hbox align="center">
+				<label value="&zotero.preferences.fulltext.pdfMaxPages;"/>
+				<textbox size="5" preference="pref-fulltext-pdfmaxpages"/>
+				<label value="(&zotero.preferences.default; 100)"/>
+			</hbox>
 		</groupbox>
 		
 		<groupbox id="fulltext-stats">
