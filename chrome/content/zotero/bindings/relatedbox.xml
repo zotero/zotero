@@ -152,28 +152,7 @@
 							let id = relatedItem.id;
 							let icon = document.createElement("image");
 							icon.className = "zotero-box-icon";
-							let type = Zotero.ItemTypes.getName(relatedItem.itemTypeID);
-							if (type=='attachment')
-							{
-								switch (relatedItem.attaachmentLinkMode) {
-									case Zotero.Attachments.LINK_MODE_LINKED_URL:
-										type += '-web-link';
-										break;
-									
-									case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
-										type += '-snapshot';
-										break;
-									
-									case Zotero.Attachments.LINK_MODE_LINKED_FILE:
-										type += '-link';
-										break;
-									
-									case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
-										type += '-file';
-										break;
-								}
-							}
-							icon.setAttribute('src','chrome://zotero/skin/treeitem-' + type + '.png');
+							icon.setAttribute('src', relatedItem.getImageSrc());
 					
 							var label = document.createElement("label");
 							label.className = "zotero-box-label";
