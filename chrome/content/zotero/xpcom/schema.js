@@ -2424,7 +2424,7 @@ Zotero.Schema = new function(){
 						if (matches) {
 							// Wrong libraryID
 							if (matches[1] != userID) {
-								yield Zotero.DB.queryAsync(`UPDATE itemRelations SET object='http://zotero.org/users/${userID}/items/${matches[2]}' WHERE itemID=? AND predicateID=?`, [row.itemID, predicateID]);
+								yield Zotero.DB.queryAsync(`UPDATE OR REPLACE itemRelations SET object='http://zotero.org/users/${userID}/items/${matches[2]}' WHERE itemID=? AND predicateID=?`, [row.itemID, predicateID]);
 							}
 						}
 					}
