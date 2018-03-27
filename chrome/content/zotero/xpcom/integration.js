@@ -763,6 +763,9 @@ Zotero.Integration.Fields.prototype.addField = function(note) {
 	if (!field) {
 		field = this._doc.insertField(this._session.data.prefs['fieldType'],
 			(note ? this._session.data.prefs["noteType"] : 0));
+		// Older doc plugins do not initialize the field code to anything meaningful
+		// so we ensure it here manually
+		field.setCode('TEMP');
 	}
 	// If fields already retrieved, further this.get() calls will returned the cached version
 	// So we append this field to that list
