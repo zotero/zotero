@@ -14,8 +14,8 @@
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Mere">
 <!ENTITY zotero.general.loading "Indlæser...">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Luk">
+<!ENTITY zotero.general.minimize "Minimér">
 
 
 <!ENTITY zotero.errorReport.title "Zotero fejlrapport">
@@ -99,8 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Genindlæs i bibliotek">
 <!ENTITY zotero.items.menu.duplicateItem "Duplikér valgte element">
 <!ENTITY zotero.items.menu.mergeItems "Flet elementer...">
-<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
+<!ENTITY zotero.items.menu.unrecognize "Fortryd indhentning af metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Rapportér forkerte metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Vælg den version af elementet som du vil bruge som hovedelement:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Vælg felter som skal bevares fra andre versioner af elementet">
@@ -236,9 +236,9 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bogmærker">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bogmærker kan deles mellem Word og LibreOffice, men kan skabe fejl, hvis de utilsigtet ændres, og de kan ikke indsættes i fodnoter.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Opdatér automatisk referencer">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Referencer, som afventer opdatering, vil blive fremhævet i dokumentet.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Ved at deaktivere opdateringer kan indsættelse af referencer i store dokumenter gøres hurtigere. Klik Opdatér for at opdatere referencer manuelt.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Brug MEDLINE's tidsskriftforkortelser">

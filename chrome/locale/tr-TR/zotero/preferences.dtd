@@ -104,7 +104,7 @@
 <!ENTITY zotero.preferences.search.indexStats.indexed "İndeklenmiş:">
 <!ENTITY zotero.preferences.search.indexStats.partial "Kısmi:">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "İndekslenmemiş:">
-<!ENTITY zotero.preferences.search.indexStats.words "Kelimeler:">
+<!ENTITY zotero.preferences.search.indexStats.words "Sozcükler:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Her dosyada indekslenecek en fazla karakter sayısı:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Her dosyada indekslenecek en fazla sayfa sayısı:">
@@ -127,7 +127,7 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Gönderme Yap">
 <!ENTITY zotero.preferences.cite.styles "Stiller">
-<!ENTITY zotero.preferences.cite.wordProcessors "Sözcük İşlemcileri">
+<!ENTITY zotero.preferences.cite.wordProcessors "Kelime İşlemcileri">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Klasik Gönderme Ekleme İletişim Kutusunu kullan">
 <!ENTITY zotero.preferences.styleEditor "Stil Düzenleyicisi">
 <!ENTITY zotero.preferences.stylePreview "Stil Önizleyicisi">
