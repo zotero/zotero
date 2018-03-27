@@ -2810,7 +2810,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentFilename', {
 		if (!path) {
 			return '';
 		}
-		var prefixedPath = path.match(/^(?:attachments|storage):(.+)$/);
+		var prefixedPath = path.match(/^(?:attachments|storage):(.*)$/);
 		if (prefixedPath) {
 			return prefixedPath[1];
 		}

@@ -687,7 +687,7 @@ Zotero.Sync.Storage.Local = {
 		
 		var filename = item.attachmentFilename;
 		if (!filename) {
-			throw new Error("Empty path for item " + item.key);
+			Zotero.debug("Empty filename for item " + item.key, 2);
 		}
 		// Don't save Windows aliases
 		if (filename.endsWith('.lnk')) {
