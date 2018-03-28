@@ -132,18 +132,9 @@ const xpcomFilesLocal = [
 	'users',
 	'translation/translate_item',
 	'translation/translators',
-	'server_connector'
-];
-
-/** XPCOM files to be loaded only for connector translation and DB access **/
-const xpcomFilesConnector = [
-	'connector/translate_item',
-	'connector/translator',
-	'connector/connector',
-	'connector/connector_firefox',
-	'connector/cachedTypes',
-	'connector/repo',
-	'connector/typeSchemaData'
+	'connector/httpIntegrationClient',
+	'connector/server_connector',
+	'connector/server_connectorIntegration',
 ];
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");

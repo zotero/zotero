@@ -147,26 +147,33 @@ var Zotero_File_Interface_Bibliography = new function() {
 			let dialog = document.getElementById("zotero-doc-prefs-dialog");
 			dialog.setAttribute('title', `${Zotero.clientName} - ${dialog.getAttribute('title')}`);
 			
-			if(_io.fieldType == "Bookmark") document.getElementById("formatUsing").selectedIndex = 1;
-			var formatOption = (_io.primaryFieldType == "ReferenceMark" ? "referenceMarks" : "fields");
-			document.getElementById("fields").label =
-				Zotero.getString("integration."+formatOption+".label");
-			document.getElementById("fields-caption").textContent =
-				Zotero.getString("integration."+formatOption+".caption");
-			document.getElementById("fields-file-format-notice").textContent =
-				Zotero.getString("integration."+formatOption+".fileFormatNotice");
-			document.getElementById("bookmarks-file-format-notice").textContent =
-				Zotero.getString("integration.fields.fileFormatNotice");
-			
-			
-			if(_io.automaticJournalAbbreviations === undefined) {
-				_io.automaticJournalAbbreviations = Zotero.Prefs.get("cite.automaticJournalAbbreviations");
+			if (document.getElementById("formatUsing-groupbox")) {
+				if (["Field", "ReferenceMark"].includes(_io.primaryFieldType)) {
+					if(_io.fieldType == "Bookmark") document.getElementById("formatUsing").selectedIndex = 1;
+					var formatOption = (_io.primaryFieldType == "ReferenceMark" ? "referenceMarks" : "fields");
+					document.getElementById("fields").label =
+						Zotero.getString("integration."+formatOption+".label");
+					document.getElementById("fields-caption").textContent =
+						Zotero.getString("integration."+formatOption+".caption");
+					document.getElementById("fields-file-format-notice").textContent =
+						Zotero.getString("integration."+formatOption+".fileFormatNotice");
+					document.getElementById("bookmarks-file-format-notice").textContent =
+						Zotero.getString("integration.fields.fileFormatNotice");
+				} else {
+					document.getElementById("formatUsing-groupbox").style.display = "none";
+					_io.fieldType = _io.primaryFieldType;
+				}
 			}
-			if(_io.automaticJournalAbbreviations) {
-				document.getElementById("automaticJournalAbbreviations-checkbox").checked = true;
+			if(document.getElementById("automaticJournalAbbreviations-checkbox")) {
+				if(_io.automaticJournalAbbreviations === undefined) {
+					_io.automaticJournalAbbreviations = Zotero.Prefs.get("cite.automaticJournalAbbreviations");
+				}
+				if(_io.automaticJournalAbbreviations) {
+					document.getElementById("automaticJournalAbbreviations-checkbox").checked = true;
+				}
+				
+				document.getElementById("automaticCitationUpdates-checkbox").checked = !_io.delayCitationUpdates;
 			}
-			
-			document.getElementById("automaticCitationUpdates-checkbox").checked = !_io.delayCitationUpdates;
 		}
 		
 		// set style to false, in case this is cancelled
@@ -204,7 +211,8 @@ var Zotero_File_Interface_Bibliography = new function() {
 		if (isDocPrefs) {
 			// update status of displayAs box based on style class
 			var isNote = selectedStyleObj.class == "note";
-			document.getElementById("displayAs-groupbox").hidden = !isNote;
+			var multipleNotesSupported = _io.supportedNotes.length > 1;
+			document.getElementById("displayAs-groupbox").hidden = !isNote || !multipleNotesSupported;
 			
 			// update status of formatUsing box based on style class
 			if(isNote) document.getElementById("formatUsing").selectedIndex = 0;
