@@ -850,29 +850,41 @@ Zotero.Server.Connector.Import.prototype = {
 	supportedDataTypes: '*',
 	permitBookmarklet: false,
 	
-	init: Zotero.Promise.coroutine(function* (options) {
+	init: async function (options) {
 		let translate = new Zotero.Translate.Import();
 		translate.setString(options.data);
-		let translators = yield translate.getTranslators();
+		let translators = await translate.getTranslators();
 		if (!translators || !translators.length) {
 			return 400;
 		}
 		translate.setTranslator(translators[0]);
 		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
+		var libraryID = library.libraryID;
 		if (!library.editable) {
 			Zotero.logError("Can't import into read-only library " + library.name);
 			return [500, "application/json", JSON.stringify({ libraryEditable: false })];
 		}
-		let items = yield translate.translate({
-			libraryID: library.libraryID,
+		
+		try {
+			var session = Zotero.Server.Connector.SessionManager.create(options.query.session);
+		}
+		catch (e) {
+			return [409, "application/json", JSON.stringify({ error: "SESSION_EXISTS" })];
+		}
+		await session.update(libraryID, collection ? collection.id : false);
+		
+		let items = await translate.translate({
+			libraryID,
 			collections: collection ? [collection.id] : null,
 			// Import translation skips selection by default, so force it to occur
 			saveOptions: {
 				skipSelect: false
 			}
 		});
+		session.addItems(items);
+		
 		return [201, "application/json", JSON.stringify(items)];
-	})
+	}
 }
 
 /**
