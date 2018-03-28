@@ -758,12 +758,13 @@ Zotero.Tags = new function() {
 	 * @return {Q Promise} A Q promise for a data: URL for a PNG
 	 */
 	this.generateItemsListImage = function (colors, extraImage) {
-		var multiplier = (extraImage && extraImage.indexOf('2x') != -1) ? 2 : 1;
+		var multiplier = Zotero.hiDPI ? 2 : 1;
 		
 		var swatchWidth = 8 * multiplier;
 		var separator = 3 * multiplier;
 		var extraImageSeparator = 1 * multiplier;
 		var extraImageWidth = 16 * multiplier;
+		var extraImageHeight = 16 * multiplier;
 		var canvasHeight = 16 * multiplier;
 		var swatchHeight = 8 * multiplier;
 		var prependExtraImage = true;
@@ -831,7 +832,7 @@ Zotero.Tags = new function() {
 			
 			// When extra image has loaded, draw it
 			img.onload = function () {
-				ctx.drawImage(img, x, 0);
+				ctx.drawImage(img, x, 0, extraImageWidth, extraImageHeight);
 				
 				var dataURI = canvas.toDataURL("image/png");
 				var dataURIPromise = Zotero.Promise.resolve(dataURI);
@@ -852,7 +853,7 @@ Zotero.Tags = new function() {
 		// for the composite image once it's ready
 		return _itemsListExtraImagePromises[extraImage]
 		.then(function (img) {
-			ctx.drawImage(img, x, 0);
+			ctx.drawImage(img, x, 0, extraImageWidth, extraImageHeight);
 			
 			var dataURI = canvas.toDataURL("image/png");
 			var dataURIPromise = Zotero.Promise.resolve(dataURI);
