@@ -398,7 +398,6 @@ Zotero.Integration = new function() {
 		}
 		if (!session) {
 			session = new Zotero.Integration.Session(doc, app);
-			session.reload = true;
 		}
 		try {
 			yield session.setData(data);
@@ -1312,6 +1311,7 @@ Zotero.Integration.Session = function(doc, app) {
 	this.embeddedItems = {};
 	this.embeddedZoteroItems = {};
 	this.embeddedItemsByURI = {};
+	this.citationsByIndex = {};
 	this.resetRequest(doc);
 	this.primaryFieldType = app.primaryFieldType;
 	this.secondaryFieldType = app.secondaryFieldType;
@@ -1328,9 +1328,22 @@ Zotero.Integration.Session.prototype.resetRequest = function(doc) {
 	
 	this.bibliographyHasChanged = false;
 	this.bibliographyDataHasChanged = false;
-	this.updateIndices = {};
+	// After adding fields to the session
+	// citations that are new to the document will be marked
+	// as new,  so that they are correctly loaded into and processed with citeproc
 	this.newIndices = {};
-	
+	// After the processing of new indices with citeproc, some
+	// citations require additional work (because of disambiguation, numbering changes, etc)
+	// and will be marked for an additional reprocessing with citeproc to retrieve updated text
+	this.updateIndices = {};
+
+	// When processing citations this list will be checked for citations that are new to the document
+	// (i.e. copied from somewhere else) and marked as newIndices to be processed with citeproc if
+	// not present
+	this.oldCitations = new Set();
+	for (let i in this.citationsByIndex) {
+		this.oldCitations.add(this.citationsByIndex[i].citationID);
+	}
 	this.citationsByItemID = {};
 	this.citationsByIndex = {};
 	this.documentCitationIDs = {};
@@ -1559,6 +1572,11 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 			Zotero.debug("Integration: "+citation.citationID+" ("+index+") needs new citationID");
 			citation.citationID = Zotero.randomString();
 		}
+		this.newIndices[index] = true;
+	}
+	// Deal with citations that are copied into the document from somewhere else
+	// and have not been added to the processor yet
+	if (! this.oldCitations.has(citation.citationID)) {
 		this.newIndices[index] = true;
 	}
 	Zotero.debug("Integration: Adding citationID "+citation.citationID);
