@@ -1570,7 +1570,7 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 		}
 		if(needNewID) {
 			Zotero.debug("Integration: "+citation.citationID+" ("+index+") needs new citationID");
-			citation.citationID = Zotero.randomString();
+			citation.citationID = Zotero.Utilities.randomString();
 		}
 		this.newIndices[index] = true;
 	}

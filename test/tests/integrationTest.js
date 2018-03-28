@@ -572,7 +572,7 @@ describe("Zotero.Integration", function () {
 				});
 			});
 			
-			describe('when there are duplicated citations (copy-paste)', function() {
+			describe('when there are copy-pasted citations', function() {
 				it('should resolve duplicate citationIDs and mark both as new citations', async function() {
 					var docID = this.test.fullTitle();
 					if (!(docID in applications)) initDoc(docID);
@@ -598,6 +598,42 @@ describe("Zotero.Integration", function () {
 						setAddEditItems(testItems[1]);
 						await execCommand('addEditCitation', docID);
 						assert.equal(indicesLength, 3);
+					} finally {
+						stubUpdateDocument.restore();
+					}
+				});
+				
+				it('should successfully process citations copied in from another doc', async function() {
+					var docID = this.test.fullTitle();
+					if (!(docID in applications)) initDoc(docID);
+					var doc = applications[docID].doc;
+
+					setAddEditItems(testItems[0]);
+					await execCommand('addEditCitation', docID);
+					assert.equal(doc.fields.length, 1);
+					doc.fields.push(new DocumentPluginDummy.Field(doc));
+					// Add a "citation copied from somewhere else"
+					// the content doesn't really matter, just make sure that the citationID is different
+					var newCitationID = Zotero.Utilities.randomString();
+					doc.fields[1].code = doc.fields[0].code;
+					doc.fields[1].code = doc.fields[1].code.replace(/"citationID":"[A-Za-z0-9^"]*"/,
+						`"citationID":"${newCitationID}"`);
+					doc.fields[1].text = doc.fields[0].text;
+					
+					var originalUpdateDocument = Zotero.Integration.Fields.prototype.updateDocument;
+					var stubUpdateDocument = sinon.stub(Zotero.Integration.Fields.prototype, 'updateDocument');
+					try {
+						var indices;
+						stubUpdateDocument.callsFake(function() {
+							indices = Object.keys(Zotero.Integration.currentSession.newIndices);
+							return originalUpdateDocument.apply(this, arguments);
+						});
+
+						setAddEditItems(testItems[1]);
+						await execCommand('addEditCitation', docID);
+						assert.equal(indices.length, 2);
+						assert.include(indices, '1');
+						assert.include(indices, '2');
 					} finally {
 						stubUpdateDocument.restore();
 					}
