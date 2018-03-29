@@ -145,12 +145,13 @@ Zotero.Server.Connector.SaveSession.prototype.update = async function (libraryID
 	
 	// TODO: Update active item saver
 	
-	// If a single item was saved, select it
+	// If a single item was saved, select it (or its parent, if it now has one)
 	if (win && win.collectionsView) {
 		if (this._objects && this._objects.item) {
-			let items = Array.from(this._objects.item).filter(item => item.isTopLevelItem());
-			if (items.length == 1) {
-				await win.selectItem(items[0].id);
+			if (this._objects.item.size == 1) {
+				let item = Array.from(this._objects.item)[0];
+				item = item.isTopLevelItem() ? item : item.parentItem;
+				await win.selectItem(item.id);
 			}
 		}
 	}
@@ -192,14 +193,15 @@ Zotero.Server.Connector.SaveSession.prototype._updateObjects = async function (o
 					throw new Error("Can't move objects between libraries");
 				}
 				
-				// Keep automatic tags
-				let originalTags = object.getTags().filter(tag => tag.type == 1);
-				
-				// Assign manual tags and collections to top-level items
-				if (objectType == 'item' && object.isTopLevelItem()) {
-					object.setTags(originalTags.concat(tags));
-					object.setCollections(collectionID ? [collectionID] : []);
-					await object.save();
+				// Assign manual tags and collections to the item, or the parent item if it's now
+				// a child item (e.g., from Retrieve Metadata for PDF)
+				if (objectType == 'item') {
+					let item = object.isTopLevelItem() ? object : object.parentItem;
+					// Keep automatic tags
+					let originalTags = item.getTags().filter(tag => tag.type == 1);
+					item.setTags(originalTags.concat(tags));
+					item.setCollections(collectionID ? [collectionID] : []);
+					await item.save();
 				}
 			}
 		}
