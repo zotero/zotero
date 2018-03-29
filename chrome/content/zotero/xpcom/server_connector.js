@@ -151,7 +151,10 @@ Zotero.Server.Connector.SaveSession.prototype.update = async function (libraryID
 			if (this._objects.item.size == 1) {
 				let item = Array.from(this._objects.item)[0];
 				item = item.isTopLevelItem() ? item : item.parentItem;
-				await win.selectItem(item.id);
+				// Don't select if in trash
+				if (!item.deleted) {
+					await win.selectItem(item.id);
+				}
 			}
 		}
 	}
