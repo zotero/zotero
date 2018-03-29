@@ -32,6 +32,7 @@ Zotero.Server = new function() {
 		300:"Multiple Choices",
 		400:"Bad Request",
 		404:"Not Found",
+		409:"Conflict",
 		412:"Precondition Failed",
 		500:"Internal Server Error",
 		501:"Not Implemented",
