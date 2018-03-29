@@ -164,17 +164,17 @@ Zotero.Server.Connector.SaveSession.prototype.update = async function (libraryID
 };
 
 Zotero.Server.Connector.SaveSession.prototype._addObjects = async function (objectType, objects) {
-	// Update the objects with the current target data, in case it changed since the save began
-	await this._updateObjects({
-		[objectType]: objects
-	});
-	
 	if (!this._objects[objectType]) {
 		this._objects[objectType] = new Set();
 	}
 	for (let object of objects) {
 		this._objects[objectType].add(object);
 	}
+	
+	// Update the objects with the current target data, in case it changed since the save began
+	await this._updateObjects({
+		[objectType]: objects
+	});
 };
 
 /**
