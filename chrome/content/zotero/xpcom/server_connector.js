@@ -81,7 +81,7 @@ Zotero.Server.Connector.SessionManager = {
 	},
 	
 	create: function (id) {
-		// Legacy client
+		// Legacy connector
 		if (!id) {
 			Zotero.debug("No session id provided by client", 2);
 			id = Zotero.Utilities.randomString();
@@ -124,6 +124,9 @@ Zotero.Server.Connector.SaveSession.prototype.addItems = async function (items) 
 	return this._addObjects('item', items);
 };
 
+/**
+ * Change the target data for this session and update any items that have already been saved
+ */
 Zotero.Server.Connector.SaveSession.prototype.update = async function (libraryID, collectionID, tags) {
 	this._currentLibraryID = libraryID;
 	this._currentCollectionID = collectionID;
@@ -161,20 +164,22 @@ Zotero.Server.Connector.SaveSession.prototype.update = async function (libraryID
 };
 
 Zotero.Server.Connector.SaveSession.prototype._addObjects = async function (objectType, objects) {
-	if (!this._objects[objectType]) {
-		this._objects[objectType] = new Set();
-	}
-	
-	// If target has changed since the save began, update the objects
+	// Update the objects with the current target data, in case it changed since the save began
 	await this._updateObjects({
 		[objectType]: objects
 	});
 	
+	if (!this._objects[objectType]) {
+		this._objects[objectType] = new Set();
+	}
 	for (let object of objects) {
 		this._objects[objectType].add(object);
 	}
 };
 
+/**
+ * Update the passed objects with the current target and tags
+ */
 Zotero.Server.Connector.SaveSession.prototype._updateObjects = async function (objects) {
 	if (Object.keys(objects).every(type => objects[type].length == 0)) {
 		return;
@@ -190,8 +195,6 @@ Zotero.Server.Connector.SaveSession.prototype._updateObjects = async function (o
 	return Zotero.DB.executeTransaction(async function () {
 		for (let objectType in objects) {
 			for (let object of objects[objectType]) {
-				Zotero.debug(object.libraryID);
-				Zotero.debug(libraryID);
 				if (object.libraryID != libraryID) {
 					throw new Error("Can't move objects between libraries");
 				}
