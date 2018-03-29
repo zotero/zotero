@@ -145,6 +145,9 @@ Zotero.defineProperty(Zotero.Item.prototype, 'parentItemKey', {
 	get: function() { return this.parentKey; },
 	set: function(val) { return this.parentKey = val; }
 });
+Zotero.defineProperty(Zotero.Item.prototype, 'parentItem', {
+	get: function() { return Zotero.Items.get(this.parentID) || undefined; },
+});
 
 
 Zotero.defineProperty(Zotero.Item.prototype, 'firstCreator', {
