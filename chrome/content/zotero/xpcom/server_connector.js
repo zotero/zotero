@@ -200,6 +200,10 @@ Zotero.Server.Connector.SaveSession.prototype._updateObjects = async function (o
 				// a child item (e.g., from Retrieve Metadata for PDF)
 				if (objectType == 'item') {
 					let item = object.isTopLevelItem() ? object : object.parentItem;
+					if (!Zotero.Items.exists(item.id)) {
+						Zotero.debug(`Item ${item.id} in save session no longer exists`);
+						continue;
+					}
 					// Keep automatic tags
 					let originalTags = item.getTags().filter(tag => tag.type == 1);
 					item.setTags(originalTags.concat(tags));
