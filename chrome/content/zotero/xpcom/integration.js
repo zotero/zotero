@@ -317,6 +317,12 @@ Zotero.Integration = new function() {
 					oldWindow.close();
 				});
 			}
+
+			if (Zotero.Integration.currentSession && Zotero.Integration.currentSession.progressBar) {
+				Zotero.Promise.delay(5).then(function() {
+					Zotero.Integration.currentSession.progressBar.hide();
+				});
+			}
 			
 			Zotero.Integration.currentDoc = Zotero.Integration.currentWindow = false;
 		}
@@ -331,6 +337,7 @@ Zotero.Integration = new function() {
 	 */
 	this.displayDialog = async function displayDialog(url, options, io) {
 		await Zotero.Integration.currentDoc.cleanup();
+		Zotero.Integration.currentSession && Zotero.Integration.currentSession.progressBar.hide(true);
 		
 		var allOptions = 'chrome,centerscreen';
 		// without this, Firefox gets raised with our windows under Compiz
@@ -358,8 +365,14 @@ Zotero.Integration = new function() {
 			deferred.resolve();
 		}
 		window.addEventListener("unload", listener, false);
-		
+
 		await deferred.promise;
+		// We do not want to redisplay the progress bar if this window close
+		// was the final close of the integration command
+		await Zotero.Promise.delay(10);
+		if (Zotero.Integration.currentDoc) {
+			Zotero.Integration.currentSession.progressBar.show();
+		}
 	};
 	
 	/**
@@ -439,7 +452,6 @@ Zotero.Integration = new function() {
 						if (installed) {
 							await session.setData(data, true);
 						}
-						return session;
 					}
 				}
 				await session.setDocPrefs();
@@ -449,6 +461,12 @@ Zotero.Integration = new function() {
 		}
 		session.agent = agent;
 		session._doc = doc;
+		if (session.progressBar) {
+			session.progressBar.reset();
+		} else {
+			session.progressBar = new Zotero.Integration.Progress();
+		}
+		session.progressBar.show();
 		return session;
 	};
 	
@@ -807,14 +825,16 @@ Zotero.Integration.Fields.prototype.get = new function() {
 		var promise = deferred.promise;
 		
 		// Otherwise, start getting fields
-		var getFieldsTime = (new Date()).getTime();
+		var timer = new Zotero.Integration.Timer();
+		timer.start();
+		this._session.progressBar.start();
 		try {
 			var fields = this._fields = Array.from(await this._doc.getFields(this._session.data.prefs['fieldType']));
-						
-			var endTime = (new Date()).getTime();
-			Zotero.debug("Integration: Retrieved "+fields.length+" fields in "+
-				(endTime-getFieldsTime)/1000+"; "+
-				1000/((endTime-getFieldsTime)/fields.length)+" fields/second");
+			
+			var retrieveTime = timer.stop();
+			this._session.progressBar.finishSegment();
+			Zotero.debug("Integration: Retrieved " + fields.length + " fields in " +
+				retrieveTime + "; " + fields.length/retrieveTime + " fields/second");
 			deferred.resolve(fields);
 		} catch(e) {
 			deferred.reject(e);
@@ -829,7 +849,6 @@ Zotero.Integration.Fields.prototype.get = new function() {
  * Updates Zotero.Integration.Session attached to Zotero.Integration.Fields in line with document
  */
 Zotero.Integration.Fields.prototype.updateSession = Zotero.Promise.coroutine(function* (forceCitations) {
-	var collectFieldsTime;
 	yield this.get();
 	this._session.resetRequest(this._doc);
 	
@@ -837,19 +856,19 @@ Zotero.Integration.Fields.prototype.updateSession = Zotero.Promise.coroutine(fun
 	this._deleteFields = {};
 	this._bibliographyFields = [];
 	
-	collectFieldsTime = (new Date()).getTime();
+	var timer = new Zotero.Integration.Timer();
+	timer.start();
+	this._session.progressBar.start();
 	if (forceCitations) {
 		this._session.regenAll = true;
 	}
 	yield this._processFields();
 	this._session.regenAll = false;
-	
-	var endTime = (new Date()).getTime();
-	if(Zotero.Debug.enabled) {
-		Zotero.debug("Integration: Updated session data for " + this._fields.length + " fields in "
-			+ (endTime - collectFieldsTime) / 1000 + "; "
-			+ 1000/ ((endTime - collectFieldsTime) / this._fields.length) + " fields/second");
-	}
+
+	var updateTime = timer.stop();
+	this._session.progressBar.finishSegment();
+	Zotero.debug("Integration: Updated session data for " + this._fields.length + " fields in "
+		+ updateTime + "; " + this._fields.length/updateTime + " fields/second");
 	
 	if (this._session.reload) {
 		this._session.restoreProcessorState();
@@ -905,8 +924,12 @@ Zotero.Integration.Fields.prototype.updateDocument = Zotero.Promise.coroutine(fu
 	this._session.timer = new Zotero.Integration.Timer();
 	this._session.timer.start();
 	
+	this._session.progressBar.start();
 	yield this._session._updateCitations()
+	this._session.progressBar.finishSegment();
+	this._session.progressBar.start();
 	yield this._updateDocument(forceCitations, forceBibliography, ignoreCitationChanges)
+	this._session.progressBar.finishSegment();
 
 	var diff = this._session.timer.stop();
 	this._session.timer = null;
@@ -2687,18 +2710,86 @@ Zotero.Integration.Timer = class {
 	
 	stop() {
 		this.resume();
-		return ((new Date()).getTime() - this.startTime)/1000;
+		this.finalTime = ((new Date()).getTime() - this.startTime)
+		return this.finalTime/1000;
 	}
 	
 	pause() {
 		this.pauseTime = (new Date()).getTime();
 	}
 	
+	getSplit() {
+		var pauseTime = 0;
+		if (this.pauseTime) {
+			var pauseTime = (new Date()).getTime() - this.pauseTime;
+		}
+		return ((new Date()).getTime() - this.startTime - pauseTime);
+	}
+	
 	resume() {
 		if (this.pauseTime) {
 			this.startTime += ((new Date()).getTime() - this.pauseTime);
-			this.pauseTime = null;
+			this.pauseTime;
 		}
+	}
+}
+
+Zotero.Integration.Progress = class {
+	constructor(segmentCount=4) {
+		this.segments = Array.from({length: segmentCount}, () => undefined);
+		this.timer = new Zotero.Integration.Timer();
+		this.segmentIdx = 0;
+	}
+	
+	update() {
+		if (!this.onProgress) return;
+		var currentSegment = this.segments[this.segmentIdx];
+		if (!currentSegment) return;
+		var total = this.segments.reduce((acc, val) => acc+val, 0);
+		var startProgress = 100*this.segments.slice(0, this.segmentIdx).reduce((acc, val) => acc+val, 0)/total;
+		var maxProgress = 100.0*currentSegment/total;
+		var split = this.timer.getSplit();
+		var curProgress = startProgress + maxProgress*Math.min(1, split/currentSegment);
+		this.onProgress(curProgress);
+		setTimeout(this.update.bind(this), 100);
+	}
+	
+	start() {
+		this.timer.start();
+	}
+	pause() {this.timer.pause();}
+	resume() {this.timer.resume();}
+	finishSegment() {
+		this.timer.stop();
+		this.segments[this.segmentIdx++] = this.timer.finalTime;
+	}
+	reset() {
+		this.segmentIdx = 0;
+	}
+	show() {
+		var options = 'chrome,centerscreen';
+		// without this, Firefox gets raised with our windows under Compiz
+		if (Zotero.isLinux) options += ',dialog=no';
+		if (Zotero.isMac) options += ',resizable=false';
+		
+		var io = {onLoad: function(onProgress) {
+			this.onProgress = onProgress;
+			this.update();
+		}.bind(this)};
+		io.wrappedJSObject = io;
+		var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+			.getService(Components.interfaces.nsIWindowWatcher)
+			.openWindow(null, 'chrome://zotero/content/integration/progressBar.xul', '', options, io);
+		this.window = window;
+		Zotero.Utilities.Internal.activate(window);
+	}
+	async hide(fast=false) {
+		if (!fast) {
+			this.onProgress && this.onProgress(100);
+			this.onProgress = null;
+			await Zotero.Promise.delay(300);
+		}
+		this.window.close();
 	}
 }
 

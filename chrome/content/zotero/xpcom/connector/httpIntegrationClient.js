@@ -85,8 +85,7 @@ for (let method of ["activate", "canInsertField", "displayAlert", "getDocumentDa
 
 // @NOTE Currently unused, prompts are done using the connector
 Zotero.HTTPIntegrationClient.Document.prototype._displayAlert = async function(dialogText, icon, buttons) {
-	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-		.getService(Components.interfaces.nsIPromptService);
+	var ps = Services.prompt;
 	var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
 		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
 	
@@ -172,8 +171,7 @@ Zotero.HTTPIntegrationClient.Field.prototype.getText = async function() {
 Zotero.HTTPIntegrationClient.Field.prototype.setText = async function(text, isRich) {
 	// The HTML will be stripped by Google Docs and and since we're 
 	// caching this value, we need to strip it ourselves
-	var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-		.getService(Components.interfaces.nsIWindowMediator);
+	var wm = Services.wm;
 	var win = wm.getMostRecentWindow('navigator:browser');
 	var doc = new win.DOMParser().parseFromString(text, "text/html");
 	this._text = doc.documentElement.textContent;

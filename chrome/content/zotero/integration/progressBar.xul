@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2018 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://global/skin/browser.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/integration.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<window
+	id="quick-format-dialog"
+	class="progress-bar"
+	orient="vertical"
+	title="&zotero.progress.title;"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	persist="screenX screenY">
+	
+	<script src="../include.js"/>
+	<script src="windowDraggingUtils.js" type="text/javascript"/>
+	<script src="progressBar.js" type="text/javascript"/>
+	
+	<box orient="horizontal" id="quick-format-entry"> 
+		<deck id="quick-format-deck" selectedIndex="0" flex="1">
+			<progressmeter id="quick-format-progress-meter" mode="undetermined" value="0" flex="1"/>
+		</deck>
+	</box>
+</window>
