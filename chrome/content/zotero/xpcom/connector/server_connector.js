@@ -484,6 +484,12 @@ Zotero.Server.Connector.SavePage.prototype = {
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
 	init: function(url, data, sendResponseCallback) {
+		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
+		if (!library.editable) {
+			Zotero.logError("Can't add item to read-only library " + library.name);
+			return sendResponseCallback(500, "application/json", JSON.stringify({ libraryEditable: false }));
+		}
+		
 		this.sendResponse = sendResponseCallback;
 		Zotero.Server.Connector.Detect.prototype.init.apply(this, [url, data, sendResponseCallback])
 	},
@@ -533,11 +539,7 @@ Zotero.Server.Connector.SavePage.prototype = {
 		var jsonItems = [];
 		translate.setHandler("select", function(obj, item, callback) { return me._selectItems(obj, item, callback) });
 		translate.setHandler("itemDone", function(obj, item, jsonItem) {
-			if(collection) {
-				collection.addItem(item.id);
-			}
 			Zotero.Server.Connector.AttachmentProgressManager.add(jsonItem.attachments);
-			
 			jsonItems.push(jsonItem);
 		});
 		translate.setHandler("attachmentProgress", function(obj, attachment, progress, error) {
@@ -557,7 +559,7 @@ Zotero.Server.Connector.SavePage.prototype = {
 		} else {
 			translate.setTranslator(translators[0]);
 		}
-		translate.translate(libraryID);
+		translate.translate({libraryID, collections: collection ? [collection.id] : false});
 	}
 }
 

@@ -305,9 +305,12 @@ describe("Zotero.Integration", function () {
 		});
 		
 		addEditCitationSpy = sinon.spy(Zotero.Integration.Interface.prototype, 'addEditCitation');
+		
+		sinon.stub(Zotero.Integration.Progress.prototype, 'show');
 	});
 	
 	after(function() {
+		Zotero.Integration.Progress.prototype.show.restore();
 		Zotero.Integration.getApplication.restore();
 		displayDialogStub.restore();
 		addEditCitationSpy.restore();
