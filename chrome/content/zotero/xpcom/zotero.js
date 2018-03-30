@@ -2730,14 +2730,17 @@ Zotero.DragDrop = {
 Zotero.Browser = new function() {
 	var nBrowsers = 0;
 	
-	this.createHiddenBrowser = createHiddenBrowser;
-	this.deleteHiddenBrowser = deleteHiddenBrowser;
-	
-	function createHiddenBrowser(win) {
-	 	if (!win) {
-			var win = Services.wm.getMostRecentWindow("navigator:browser");
-			if(!win) {
-				var win = Services.ww.activeWindow;
+	this.createHiddenBrowser = function (win) {
+		if (!win) {
+			win = Services.wm.getMostRecentWindow("navigator:browser");
+			if (!win) {
+				win = Services.ww.activeWindow;
+			}
+			// Use the hidden DOM window on macOS with the main window closed
+			if (!win) {
+				let appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"]
+					.getService(Components.interfaces.nsIAppShellService);
+				win = appShellService.hiddenDOMWindow;
 			}
 			if (!win) {
 				throw new Error("Parent window not available for hidden browser");
@@ -2760,7 +2763,7 @@ Zotero.Browser = new function() {
 		return hiddenBrowser;
 	}
 	
-	function deleteHiddenBrowser(myBrowsers) {
+	this.deleteHiddenBrowser = function (myBrowsers) {
 		if(!(myBrowsers instanceof Array)) myBrowsers = [myBrowsers];
 		for(var i=0; i<myBrowsers.length; i++) {
 			var myBrowser = myBrowsers[i];
