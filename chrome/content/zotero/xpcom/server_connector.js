@@ -134,14 +134,17 @@ Zotero.Server.Connector.SaveSession.prototype.update = async function (libraryID
 	
 	// Select new destination in collections pane
 	var win = Zotero.getActiveZoteroPane();
+	if (collectionID) {
+		var targetID = "C" + collectionID;
+	}
+	else {
+		var targetID = "L" + libraryID;
+	}
 	if (win && win.collectionsView) {
-		if (collectionID) {
-			var targetID = "C" + collectionID;
-		}
-		else {
-			var targetID = "L" + libraryID;
-		}
 		await win.collectionsView.selectByID(targetID);
+	}
+	else {
+		Zotero.Prefs.set('lastViewedFolder', targetID);
 	}
 	
 	await this._updateObjects(this._objects);
