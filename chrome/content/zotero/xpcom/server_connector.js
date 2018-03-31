@@ -218,7 +218,49 @@ Zotero.Server.Connector.SaveSession.prototype._updateObjects = async function (o
 				}
 			}
 		}
+		
+		this._updateRecents();
 	});
+};
+
+
+Zotero.Server.Connector.SaveSession.prototype._updateRecents = function () {
+	var libraryID = this._currentLibraryID;
+	var collectionID = this._currentCollectionID;
+	if (collectionID) {
+		var targetID = "C" + collectionID;
+	}
+	else {
+		var targetID = "L" + libraryID;
+	}
+	
+	try {
+		let numRecents = 5;
+		let recents = Zotero.Prefs.get('recentSaveTargets') || '[]';
+		recents = JSON.parse(recents);
+		let sessionFound = false;
+		// If there's already a target from this session in the list, update it
+		for (let recent of recents) {
+			if (recent.sessionID == this.id) {
+				recent.id = targetID;
+				sessionFound = true;
+				break;
+			}
+		}
+		// Otherwise add this target to the end
+		if (!sessionFound) {
+			recents.push({
+				id: targetID,
+				sessionID: this.id
+			});
+		}
+		recents = recents.slice(-1 * numRecents);
+		Zotero.Prefs.set('recentSaveTargets', JSON.stringify(recents));
+	}
+	catch (e) {
+		Zotero.logError(e);
+		Zotero.Prefs.clear('recentSaveTargets');
+	}
 };
 
 
@@ -1017,6 +1059,23 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 			);
 		}
 		response.targets = collections;
+		
+		// Mark recent targets
+		try {
+			let recents = Zotero.Prefs.get('recentSaveTargets');
+			if (recents) {
+				recents = new Set(JSON.parse(recents).map(o => o.id));
+				for (let target of response.targets) {
+					if (recents.has(target.id)) {
+						target.recent = true;
+					}
+				}
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+			Zotero.Prefs.clear('recentSaveTargets');
+		}
 		
 		// TODO: Limit debug size
 		sendResponseCallback(200, "application/json", JSON.stringify(response));
