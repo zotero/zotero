@@ -86,6 +86,10 @@ Zotero.defineProperty(Zotero.Group.prototype, 'id', {
 	set: function(v) { return this.groupID = v; }
 });
 
+Zotero.defineProperty(Zotero.Group.prototype, 'allowsLinkedFiles', {
+	value: false
+});
+
 // Create accessors
 (function() {
 let accessors = ['name', 'description', 'version'];

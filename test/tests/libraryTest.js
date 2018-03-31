@@ -126,6 +126,17 @@ describe("Zotero.Library", function() {
 		});
 	});
 	
+	describe("#allowsLinkedFiles", function () {
+		it("should return true for personal library", function () {
+			assert.isTrue(Zotero.Libraries.userLibrary.allowsLinkedFiles);
+		});
+		
+		it("should return false for group libraries", async function () {
+			var group = await getGroup();
+			assert.isFalse(group.allowsLinkedFiles);
+		});
+	});
+	
 	describe("#archived", function() {
 		it("should return archived status", function() {
 			let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);

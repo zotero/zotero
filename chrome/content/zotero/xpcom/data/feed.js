@@ -111,6 +111,10 @@ Zotero.defineProperty(Zotero.Feed.prototype, 'isFeed', {
 	value: true
 });
 
+Zotero.defineProperty(Zotero.Feed.prototype, 'allowsLinkedFiles', {
+	value: false
+});
+
 Zotero.defineProperty(Zotero.Feed.prototype, 'libraryTypes', {
 	value: Object.freeze(Zotero.Feed._super.prototype.libraryTypes.concat(['feed']))
 });

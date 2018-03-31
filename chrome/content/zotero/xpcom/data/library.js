@@ -190,6 +190,10 @@ Zotero.defineProperty(Zotero.Library.prototype, 'hasTrash', {
 	value: true
 });
 
+Zotero.defineProperty(Zotero.Library.prototype, 'allowsLinkedFiles', {
+	value: true
+});
+
 // Create other accessors
 (function() {
 	let accessors = ['editable', 'filesEditable', 'storageVersion', 'archived'];
