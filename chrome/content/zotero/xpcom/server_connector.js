@@ -40,22 +40,7 @@ Zotero.Server.Connector = {
 		catch (e) {
 			let id = Zotero.Prefs.get('lastViewedFolder');
 			if (id) {
-				let type = id[0];
-				Zotero.debug(type);
-				id = parseInt(('' + id).substr(1));
-				
-				switch (type) {
-					case 'L':
-						library = Zotero.Libraries.get(id);
-						editable = library.editable;
-						break;
-					
-					case 'C':
-						collection = Zotero.Collections.get(id);
-						library = collection.library;
-						editable = collection.editable;
-						break;
-					}
+				({ library, collection, editable } = this.resolveTarget(id));
 			}
 		}
 		
@@ -66,6 +51,33 @@ Zotero.Server.Connector = {
 			if (userLibrary) {
 				library = userLibrary;
 			}
+		}
+		
+		return { library, collection, editable };
+	},
+	
+	resolveTarget: function (targetID) {
+		var library;
+		var collection;
+		var editable;
+		
+		var type = targetID[0];
+		var id = parseInt(('' + targetID).substr(1));
+		
+		switch (type) {
+		case 'L':
+			library = Zotero.Libraries.get(id);
+			editable = library.editable;
+			break;
+		
+		case 'C':
+			collection = Zotero.Collections.get(id);
+			library = collection.library;
+			editable = collection.editable;
+			break;
+		
+		default:
+			throw new Error(`Unsupported target type '${type}'`);
 		}
 		
 		return { library, collection, editable };
@@ -80,7 +92,7 @@ Zotero.Server.Connector.SessionManager = {
 		return this._sessions.get(id);
 	},
 	
-	create: function (id) {
+	create: function (id, action, requestData) {
 		// Legacy connector
 		if (!id) {
 			Zotero.debug("No session id provided by client", 2);
@@ -90,7 +102,7 @@ Zotero.Server.Connector.SessionManager = {
 			throw new Error(`Session ID ${id} exists`);
 		}
 		Zotero.debug("Creating connector save session " + id);
-		var session = new Zotero.Server.Connector.SaveSession(id);
+		var session = new Zotero.Server.Connector.SaveSession(id, action, requestData);
 		this._sessions.set(id, session);
 		this.gc();
 		return session;
@@ -110,130 +122,132 @@ Zotero.Server.Connector.SessionManager = {
 };
 
 
-Zotero.Server.Connector.SaveSession = function (id) {
+Zotero.Server.Connector.SaveSession = function (id, action, requestData) {
 	this.id = id;
 	this.created = new Date();
-	this._objects = {};
+	this._action = action;
+	this._requestData = requestData;
+	this._items = new Set();
 };
 
 Zotero.Server.Connector.SaveSession.prototype.addItem = async function (item) {
-	return this._addObjects('item', [item]);
+	return this.addItems([item]);
 };
 
 Zotero.Server.Connector.SaveSession.prototype.addItems = async function (items) {
-	return this._addObjects('item', items);
+	for (let item of items) {
+		this._items.add(item);
+	}
+	
+	// Update the items with the current target data, in case it changed since the save began
+	await this._updateItems(items);
 };
 
 /**
  * Change the target data for this session and update any items that have already been saved
  */
-Zotero.Server.Connector.SaveSession.prototype.update = async function (libraryID, collectionID, tags) {
-	this._currentLibraryID = libraryID;
-	this._currentCollectionID = collectionID;
+Zotero.Server.Connector.SaveSession.prototype.update = async function (targetID, tags) {
+	var previousTargetID = this._currentTargetID;
+	this._currentTargetID = targetID;
 	this._currentTags = tags || "";
 	
 	// Select new destination in collections pane
 	var win = Zotero.getActiveZoteroPane();
-	if (collectionID) {
-		var targetID = "C" + collectionID;
-	}
-	else {
-		var targetID = "L" + libraryID;
-	}
 	if (win && win.collectionsView) {
 		await win.collectionsView.selectByID(targetID);
 	}
+	// If window is closed, select target collection re-open
 	else {
 		Zotero.Prefs.set('lastViewedFolder', targetID);
 	}
 	
-	await this._updateObjects(this._objects);
-	
-	// TODO: Update active item saver
-	
-	// If a single item was saved, select it (or its parent, if it now has one)
-	if (win && win.collectionsView) {
-		if (this._objects && this._objects.item) {
-			if (this._objects.item.size == 1) {
-				let item = Array.from(this._objects.item)[0];
-				item = item.isTopLevelItem() ? item : item.parentItem;
-				// Don't select if in trash
-				if (!item.deleted) {
-					await win.selectItem(item.id);
+	// If moving from a non-filesEditable library to a filesEditable library, resave from
+	// original data, since there might be files that weren't saved or were removed
+	if (previousTargetID && previousTargetID != targetID) {
+		let { library: oldLibrary } = Zotero.Server.Connector.resolveTarget(previousTargetID);
+		let { library: newLibrary } = Zotero.Server.Connector.resolveTarget(targetID);
+		if (oldLibrary != newLibrary && !oldLibrary.filesEditable && newLibrary.filesEditable) {
+			Zotero.debug("Resaving items to filesEditable library");
+			if (this._action == 'saveItems' || this._action == 'saveSnapshot') {
+				// Delete old items
+				for (let item of this._items) {
+					await item.eraseTx();
 				}
+				let actionUC = Zotero.Utilities.capitalize(this._action);
+				let newItems = await Zotero.Server.Connector[actionUC].prototype[this._action](
+					targetID, this._requestData
+				);
+				// saveSnapshot only returns a single item
+				if (this._action == 'saveSnapshot') {
+					newItems = [newItems];
+				}
+				this._items = new Set(newItems);
 			}
 		}
 	}
-};
-
-Zotero.Server.Connector.SaveSession.prototype._addObjects = async function (objectType, objects) {
-	if (!this._objects[objectType]) {
-		this._objects[objectType] = new Set();
-	}
-	for (let object of objects) {
-		this._objects[objectType].add(object);
-	}
 	
-	// Update the objects with the current target data, in case it changed since the save began
-	await this._updateObjects({
-		[objectType]: objects
-	});
+	await this._updateItems(this._items);
+	
+	// If a single item was saved, select it (or its parent, if it now has one)
+	if (win && win.collectionsView && this._items.size == 1) {
+		let item = Array.from(this._items)[0];
+		item = item.isTopLevelItem() ? item : item.parentItem;
+		// Don't select if in trash
+		if (!item.deleted) {
+			await win.selectItem(item.id);
+		}
+	}
 };
 
 /**
- * Update the passed objects with the current target and tags
+ * Update the passed items with the current target and tags
  */
-Zotero.Server.Connector.SaveSession.prototype._updateObjects = async function (objects) {
-	if (Object.keys(objects).every(type => objects[type].length == 0)) {
+Zotero.Server.Connector.SaveSession.prototype._updateItems = Zotero.serial(async function (items) {
+	if (items.length == 0) {
 		return;
 	}
 	
-	var libraryID = this._currentLibraryID;
-	var collectionID = this._currentCollectionID;
+	var { library, collection, editable } = Zotero.Server.Connector.resolveTarget(this._currentTargetID);
+	var libraryID = library.libraryID;
+	
 	var tags = this._currentTags.trim();
 	tags = tags ? tags.split(/\s*,\s*/) : [];
 	
-	Zotero.debug("Updating objects for connector save session " + this.id);
+	Zotero.debug("Updating items for connector save session " + this.id);
 	
-	return Zotero.DB.executeTransaction(async function () {
-		for (let objectType in objects) {
-			for (let object of objects[objectType]) {
-				if (object.libraryID != libraryID) {
-					throw new Error("Can't move objects between libraries");
-				}
-				
-				// Assign manual tags and collections to the item, or the parent item if it's now
-				// a child item (e.g., from Retrieve Metadata for PDF)
-				if (objectType == 'item') {
-					let item = object.isTopLevelItem() ? object : object.parentItem;
-					if (!Zotero.Items.exists(item.id)) {
-						Zotero.debug(`Item ${item.id} in save session no longer exists`);
-						continue;
-					}
-					// Keep automatic tags
-					let originalTags = item.getTags().filter(tag => tag.type == 1);
-					item.setTags(originalTags.concat(tags));
-					item.setCollections(collectionID ? [collectionID] : []);
-					await item.save();
-				}
-			}
+	for (let item of items) {
+		let newLibrary = Zotero.Libraries.get(library.libraryID);
+		
+		if (item.libraryID != libraryID) {
+			let newItem = await item.moveToLibrary(libraryID);
+			// Replace item in session
+			this._items.delete(item);
+			this._items.add(newItem);
 		}
 		
-		this._updateRecents();
-	});
-};
+		// If the item is now a child item (e.g., from Retrieve Metadata for PDF), update the
+		// parent item instead
+		if (!item.isTopLevelItem()) {
+			item = item.parentItem;
+		}
+		// Skip deleted items
+		if (!Zotero.Items.exists(item.id)) {
+			Zotero.debug(`Item ${item.id} in save session no longer exists`);
+			continue;
+		}
+		// Keep automatic tags
+		let originalTags = item.getTags().filter(tag => tag.type == 1);
+		item.setTags(originalTags.concat(tags));
+		item.setCollections(collection ? [collection.id] : []);
+		await item.saveTx();
+	}
+	
+	this._updateRecents();
+});
 
 
 Zotero.Server.Connector.SaveSession.prototype._updateRecents = function () {
-	var libraryID = this._currentLibraryID;
-	var collectionID = this._currentCollectionID;
-	if (collectionID) {
-		var targetID = "C" + collectionID;
-	}
-	else {
-		var targetID = "L" + libraryID;
-	}
-	
+	var targetID = this._currentTargetID;
 	try {
 		let numRecents = 5;
 		let recents = Zotero.Prefs.get('recentSaveTargets') || '[]';
@@ -558,19 +572,24 @@ Zotero.Server.Connector.SaveItem.prototype = {
 	 * Either loads HTML into a hidden browser and initiates translation, or saves items directly
 	 * to the database
 	 */
-	init: Zotero.Promise.coroutine(function* (options) {
-		var data = options.data;
+	init: Zotero.Promise.coroutine(function* (requestData) {
+		var data = requestData.data;
 		
 		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
 		var libraryID = library.libraryID;
+		var targetID = collection ? collection.treeViewID : library.treeViewID;
 		
 		try {
-			var session = Zotero.Server.Connector.SessionManager.create(data.sessionID);
+			var session = Zotero.Server.Connector.SessionManager.create(
+				data.sessionID,
+				'saveItems',
+				requestData
+			);
 		}
 		catch (e) {
 			return [409, "application/json", JSON.stringify({ error: "SESSION_EXISTS" })];
 		}
-		yield session.update(libraryID, collection ? collection.id : false);
+		yield session.update(targetID);
 		
 		// TODO: Default to My Library root, since it's changeable
 		if (!library.editable) {
@@ -578,26 +597,52 @@ Zotero.Server.Connector.SaveItem.prototype = {
 			return [500, "application/json", JSON.stringify({ libraryEditable: false })];
 		}
 		
+		return new Zotero.Promise((resolve) => {
+			try {
+				this.saveItems(
+					targetID,
+					requestData,
+					function (topLevelItems) {
+						resolve([201, "application/json", JSON.stringify({items: topLevelItems})]);
+					}
+				)
+				// Add items to session once all attachments have been saved
+				.then(function (items) {
+					session.addItems(items);
+				});
+			}
+			catch (e) {
+				Zotero.logError(e);
+				resolve(500);
+			}
+		});
+	}),
+	
+	saveItems: async function (target, requestData, onTopLevelItemsDone) {
+		var { library, collection, editable } = Zotero.Server.Connector.resolveTarget(target);
+		
+		var data = requestData.data;
 		var cookieSandbox = data.uri
 			? new Zotero.CookieSandbox(
 				null,
 				data.uri,
 				data.detailedCookies ? "" : data.cookie || "",
-				options.headers["User-Agent"]
+				requestData.headers["User-Agent"]
 			)
 			: null;
-		if(cookieSandbox && data.detailedCookies) {
+		if (cookieSandbox && data.detailedCookies) {
 			cookieSandbox.addCookiesFromHeader(data.detailedCookies);
 		}
 		
-		for(var i=0; i<data.items.length; i++) {
-			Zotero.Server.Connector.AttachmentProgressManager.add(data.items[i].attachments);
+		for (let item of data.items) {
+			Zotero.Server.Connector.AttachmentProgressManager.add(item.attachments);
 		}
 		
-		let proxy = data.proxy && new Zotero.Proxy(data.proxy);
-		// save items
+		var proxy = data.proxy && new Zotero.Proxy(data.proxy);
+		
+		// Save items
 		var itemSaver = new Zotero.Translate.ItemSaver({
-			libraryID,
+			libraryID: library.libraryID,
 			collections: collection ? [collection.id] : undefined,
 			attachmentMode: Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD,
 			forceTagType: 1,
@@ -605,35 +650,25 @@ Zotero.Server.Connector.SaveItem.prototype = {
 			cookieSandbox,
 			proxy
 		});
-		try {
-			var deferred = Zotero.Promise.defer();
-			itemSaver.saveItems(
-				data.items,
-				Zotero.Server.Connector.AttachmentProgressManager.onProgress,
-				function() {
-					// Remove attachments not being saved from item.attachments
-					for(var i=0; i<data.items.length; i++) {
-						var item = data.items[i];
-						for(var j=0; j<item.attachments.length; j++) {
-							if(!Zotero.Server.Connector.AttachmentProgressManager.has(item.attachments[j])) {
-								item.attachments.splice(j--, 1);
-							}
-						}
-					}
-					
-					deferred.resolve([201, "application/json", JSON.stringify({items: data.items})]);
+		return itemSaver.saveItems(
+			data.items,
+			Zotero.Server.Connector.AttachmentProgressManager.onProgress,
+			function () {
+				// Remove attachments from item.attachments that aren't being saved. We have to
+				// clone the items so that we don't mutate the data stored in the session.
+				var savedItems = [...data.items.map(item => Object.assign({}, item))];
+				for (let item of savedItems) {
+					item.attachments = item.attachments
+						.filter(attachment => {
+							return Zotero.Server.Connector.AttachmentProgressManager.has(attachment);
+						});
 				}
-			)
-			.then(function (items) {
-				session.addItems(items);
-			});
-			return deferred.promise;
-		}
-		catch (e) {
-			Zotero.logError(e);
-			return 500;
-		}
-	})
+				if (onTopLevelItemsDone) {
+					onTopLevelItemsDone(savedItems);
+				}
+			}
+		);
+	}
 }
 
 /**
@@ -656,21 +691,23 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 	/**
 	 * Save snapshot
 	 */
-	init: Zotero.Promise.coroutine(function* (options) {
-		var data = options.data;
-		
-		Zotero.Server.Connector.Data[data["url"]] = "<html>"+data["html"]+"</html>";
+	init: async function (requestData) {
+		var data = requestData.data;
 		
 		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
-		var libraryID = library.libraryID;
+		var targetID = collection ? collection.treeViewID : library.treeViewID;
 		
 		try {
-			var session = Zotero.Server.Connector.SessionManager.create(data.sessionID);
+			var session = Zotero.Server.Connector.SessionManager.create(
+				data.sessionID,
+				'saveSnapshot',
+				requestData
+			);
 		}
 		catch (e) {
 			return [409, "application/json", JSON.stringify({ error: "SESSION_EXISTS" })];
 		}
-		yield session.update(libraryID, collection ? collection.id : false);
+		await session.update(collection ? collection.treeViewID : library.treeViewID);
 		
 		// TODO: Default to My Library root, since it's changeable
 		if (!library.editable) {
@@ -678,63 +715,60 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			return [500, "application/json", JSON.stringify({ libraryEditable: false })];
 		}
 		
-		// determine whether snapshot can be saved
-		var filesEditable;
-		if (libraryID) {
-			let group = Zotero.Groups.getByLibraryID(libraryID);
-			filesEditable = group.filesEditable;
+		try {
+			let item = await this.saveSnapshot(targetID, requestData);
+			await session.addItem(item);
 		}
-		else {
-			filesEditable = true;
+		catch (e) {
+			Zotero.logError(e);
+			return 500;
 		}
+		
+		return 201;
+	},
+	
+	saveSnapshot: async function (target, requestData) {
+		var { library, collection, editable } = Zotero.Server.Connector.resolveTarget(target);
+		var libraryID = library.libraryID;
+		var data = requestData.data;
 		
 		var cookieSandbox = data.url
 			? new Zotero.CookieSandbox(
 				null,
 				data.url,
 				data.detailedCookies ? "" : data.cookie || "",
-				options.headers["User-Agent"]
+				requestData.headers["User-Agent"]
 			)
 			: null;
-		if(cookieSandbox && data.detailedCookies) {
+		if (cookieSandbox && data.detailedCookies) {
 			cookieSandbox.addCookiesFromHeader(data.detailedCookies);
 		}
 		
-		if (data.pdf && filesEditable) {
-			delete Zotero.Server.Connector.Data[data.url];
+		if (data.pdf && library.filesEditable) {
+			let item = await Zotero.Attachments.importFromURL({
+				libraryID,
+				url: data.url,
+				collections: collection ? [collection.id] : undefined,
+				contentType: "application/pdf",
+				cookieSandbox
+			});
 			
-			try {
-				let item = yield Zotero.Attachments.importFromURL({
-					libraryID,
-					url: data.url,
-					collections: collection ? [collection.id] : undefined,
-					contentType: "application/pdf",
-					cookieSandbox
-				});
-				if (item) {
-					yield session.addItem(item);
-					
-					// Automatically recognize PDF
-					Zotero.RecognizePDF.autoRecognizeItems([item]);
-				}
-				
-				return 201;
-			}
-			catch (e) {
-				Zotero.logError(e);
-				return 500;
-			}
+			// Automatically recognize PDF
+			Zotero.RecognizePDF.autoRecognizeItems([item]);
+			
+			return item;
 		}
-		else {
-			let deferred = Zotero.Promise.defer();
+		
+		return new Zotero.Promise((resolve, reject) => {
+			Zotero.Server.Connector.Data[data.url] = "<html>" + data.html + "</html>";
 			Zotero.HTTP.loadDocuments(
 				["zotero://connector/" + encodeURIComponent(data.url)],
-				Zotero.Promise.coroutine(function* (doc) {
+				async function (doc) {
 					delete Zotero.Server.Connector.Data[data.url];
 					
 					try {
-						// create new webpage item
-						var item = new Zotero.Item("webpage");
+						// Create new webpage item
+						let item = new Zotero.Item("webpage");
 						item.libraryID = libraryID;
 						item.setField("title", doc.title);
 						item.setField("url", data.url);
@@ -742,29 +776,29 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 						if (collection) {
 							item.setCollections([collection.id]);
 						}
-						var itemID = yield item.saveTx();
-						yield session.addItem(item);
+						var itemID = await item.saveTx();
 						
-						// save snapshot
-						if (filesEditable && !data.skipSnapshot) {
-							yield Zotero.Attachments.importFromDocument({
+						// Save snapshot
+						if (library.filesEditable && !data.skipSnapshot) {
+							await Zotero.Attachments.importFromDocument({
 								document: doc,
 								parentItemID: itemID
 							});
 						}
 						
-						deferred.resolve(201);
-					} catch(e) {
-						Zotero.debug(e, 1);
-						deferred.resolve(500);
-						throw e;
+						resolve(item);
 					}
-				}),
-				null, null, false, cookieSandbox
+					catch (e) {
+						reject(e);
+					}
+				},
+				null,
+				null,
+				false,
+				cookieSandbox
 			);
-			return deferred.promise;
-		}
-	})
+		});
+	}
 }
 
 /**
@@ -820,8 +854,8 @@ Zotero.Server.Connector.UpdateSession.prototype = {
 	supportedDataTypes: ["application/json"],
 	permitBookmarklet: true,
 	
-	init: async function (options) {
-		var data = options.data
+	init: async function (requestData) {
+		var data = requestData.data
 		
 		if (!data.sessionID) {
 			return [400, "application/json", JSON.stringify({ error: "SESSION_ID_NOT_PROVIDED" })];
@@ -837,20 +871,14 @@ Zotero.Server.Connector.UpdateSession.prototype = {
 		var [type, id] = [data.target[0], parseInt(data.target.substr(1))];
 		var tags = data.tags;
 		
-		if (type == 'L') {
-			let library = Zotero.Libraries.get(id);
-			await session.update(library.libraryID, null, tags);
-		}
-		else if (type == 'C') {
+		if (type == 'C') {
 			let collection = await Zotero.Collections.getAsync(id);
 			if (!collection) {
 				return [400, "application/json", JSON.stringify({ error: "COLLECTION_NOT_FOUND" })];
 			}
-			await session.update(collection.libraryID, collection.id, tags);
 		}
-		else {
-			throw new Error(`Invalid identifier '${data.target}'`);
-		}
+		
+		await session.update(data.target, tags);
 		
 		return [200, "application/json", JSON.stringify({})];
 	}
@@ -861,7 +889,7 @@ Zotero.Server.Endpoints["/connector/delaySync"] = Zotero.Server.Connector.DelayS
 Zotero.Server.Connector.DelaySync.prototype = {
 	supportedMethods: ["POST"],
 	
-	init: async function (options) {
+	init: async function (requestData) {
 		Zotero.Sync.Runner.delaySync(10000);
 		return [204];
 	}
@@ -907,9 +935,9 @@ Zotero.Server.Connector.Import.prototype = {
 	supportedDataTypes: '*',
 	permitBookmarklet: false,
 	
-	init: async function (options) {
+	init: async function (requestData) {
 		let translate = new Zotero.Translate.Import();
-		translate.setString(options.data);
+		translate.setString(requestData.data);
 		let translators = await translate.getTranslators();
 		if (!translators || !translators.length) {
 			return 400;
@@ -923,12 +951,12 @@ Zotero.Server.Connector.Import.prototype = {
 		}
 		
 		try {
-			var session = Zotero.Server.Connector.SessionManager.create(options.query.session);
+			var session = Zotero.Server.Connector.SessionManager.create(requestData.query.session);
 		}
 		catch (e) {
 			return [409, "application/json", JSON.stringify({ error: "SESSION_EXISTS" })];
 		}
-		await session.update(libraryID, collection ? collection.id : false);
+		await session.update(collection ? collection.treeViewID : library.treeViewID);
 		
 		let items = await translate.translate({
 			libraryID,
@@ -958,9 +986,11 @@ Zotero.Server.Connector.InstallStyle.prototype = {
 	supportedDataTypes: '*',
 	permitBookmarklet: false,
 	
-	init: Zotero.Promise.coroutine(function* (options) {
+	init: Zotero.Promise.coroutine(function* (requestData) {
 		try {
-			var styleName = yield Zotero.Styles.install(options.data, options.query.origin || null, true);
+			var styleName = yield Zotero.Styles.install(
+				requestData.data, requestData.query.origin || null, true
+			);
 		} catch (e) {
 			return [400, "text/plain", e.message];
 		}
@@ -1041,8 +1071,6 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 		var originalLibraryID = library.libraryID;
 		for (let library of Zotero.Libraries.getAll()) {
 			if (!library.editable) continue;
-			// TEMP: For now, don't allow library changing
-			if (library.libraryID != originalLibraryID) continue;
 			
 			// Add recent: true for recent targets
 			
@@ -1101,7 +1129,7 @@ Zotero.Server.Connector.GetClientHostnames.prototype = {
 	/**
 	 * Returns a 200 response to say the server is alive
 	 */
-	init: Zotero.Promise.coroutine(function* (options) {
+	init: Zotero.Promise.coroutine(function* (requestData) {
 		try {
 			var hostnames = yield Zotero.Proxies.DNS.getHostnames();
 		} catch(e) {

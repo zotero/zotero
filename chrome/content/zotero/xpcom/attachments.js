@@ -257,7 +257,7 @@ Zotero.Attachments = new function(){
 	 * @param {String} [options.referrer]
 	 * @param {CookieSandbox} [options.cookieSandbox]
 	 * @param {Object} [options.saveOptions]
-	 * @return {Promise<Zotero.Item|false>} - A promise for the created attachment item
+	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
 	this.importFromURL = Zotero.Promise.coroutine(function* (options) {
 		var libraryID = options.libraryID;
