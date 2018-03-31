@@ -3989,6 +3989,89 @@ Zotero.Item.prototype.clone = function (libraryID, options = {}) {
 }
 
 
+/**
+ * @param {Zotero.Item} item
+ * @param {Integer} libraryID
+ * @return {Zotero.Item} - New item
+ */
+Zotero.Item.prototype.moveToLibrary = async function (libraryID, onSkippedAttachment) {
+	if (!this.isEditable) {
+		throw new Error("Can't move item in read-only library");
+	}
+	var library = Zotero.Libraries.get(libraryID);
+	Zotero.debug("Moving item to " + library.name);
+	if (!library.editable) {
+		throw new Error("Can't move item to read-only library");
+	}
+	var filesEditable = library.filesEditable;
+	var allowsLinkedFiles = library.allowsLinkedFiles;
+	
+	var newItem = await Zotero.DB.executeTransaction(async function () {
+		// Create new clone item in target library
+		var newItem = this.clone(libraryID);
+		var newItemID = await newItem.save({
+			skipSelect: true
+		});
+		
+		if (this.isNote()) {
+			// Delete old item
+			await this.erase();
+			return newItem;
+		}
+		
+		// For regular items, add child items
+		
+		// Child notes
+		var noteIDs = this.getNotes();
+		var notes = Zotero.Items.get(noteIDs);
+		for (let note of notes) {
+			let newNote = note.clone(libraryID);
+			newNote.parentID = newItemID;
+			await newNote.save({
+				skipSelect: true
+			});
+		}
+		
+		// Child attachments
+		var attachmentIDs = this.getAttachments();
+		var attachments = Zotero.Items.get(attachmentIDs);
+		for (let attachment of attachments) {
+			let linkMode = attachment.attachmentLinkMode;
+			
+			// Skip linked files if not allowed in destination
+			if (!allowsLinkedFiles && linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				Zotero.debug("Target library doesn't support linked files -- skipping attachment");
+				if (onSkippedAttachment) {
+					await onSkippedAttachment(attachment);
+				}
+				continue;
+			}
+			
+			// Skip files if not allowed in destination
+			if (!filesEditable && linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
+				Zotero.debug("Target library doesn't allow file editing -- skipping attachment");
+				if (onSkippedAttachment) {
+					await onSkippedAttachment(attachment);
+				}
+				continue;
+			}
+			
+			await Zotero.Attachments.moveAttachmentToLibrary(
+				attachment, libraryID, newItemID
+			);
+		}
+		
+		return newItem;
+	}.bind(this));
+	
+	// Delete old item. Do this outside of a transaction so we don't leave stranded files
+	// in the target library if deleting fails.
+	await this.eraseTx();
+	
+	return newItem;
+};
+
+
 Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	Zotero.DB.requireTransaction();
 	

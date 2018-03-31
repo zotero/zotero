@@ -1115,13 +1115,75 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * Copy attachment item, including files, to another library
+	 * Move attachment item, including file, to another library
+	 */
+	this.moveAttachmentToLibrary = async function (attachment, libraryID, parentItemID) {
+		if (attachment.libraryID == libraryID) {
+			throw new Error("Attachment is already in library " + libraryID);
+		}
+		
+		Zotero.DB.requireTransaction();
+		
+		var newAttachment = attachment.clone(libraryID);
+		if (attachment.isImportedAttachment()) {
+			// Attachment path isn't copied over by clone() if libraryID is different
+			newAttachment.attachmentPath = attachment.attachmentPath;
+		}
+		if (parentItemID) {
+			newAttachment.parentID = parentItemID;
+		}
+		await newAttachment.save();
+		
+		// Move files over if they exist
+		var oldDir;
+		var newDir;
+		if (newAttachment.isImportedAttachment()) {
+			oldDir = this.getStorageDirectory(attachment).path;
+			if (await OS.File.exists(oldDir)) {
+				newDir = this.getStorageDirectory(newAttachment).path;
+				// Target directory shouldn't exist, but remove it if it does
+				//
+				// Testing for directories in OS.File, used by removeDir(), is broken on Travis,
+				// so use nsIFile
+				if (Zotero.automatedTest) {
+					let nsIFile = Zotero.File.pathToFile(newDir);
+					if (nsIFile.exists()) {
+						nsIFile.remove(true);
+					}
+				}
+				else {
+					await OS.File.removeDir(newDir, { ignoreAbsent: true });
+				}
+				await OS.File.move(oldDir, newDir);
+			}
+		}
+		
+		try {
+			await attachment.erase();
+		}
+		catch (e) {
+			// Move files back if old item can't be deleted
+			if (newAttachment.isImportedAttachment()) {
+				try {
+					await OS.File.move(newDir, oldDir);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
+			throw e;
+		}
+		
+		return newAttachment.id;
+	};
+	
+	
+	/**
+	 * Copy attachment item, including file, to another library
 	 */
 	this.copyAttachmentToLibrary = Zotero.Promise.coroutine(function* (attachment, libraryID, parentItemID) {
-		var linkMode = attachment.attachmentLinkMode;
-		
 		if (attachment.libraryID == libraryID) {
-			throw ("Attachment is already in library " + libraryID);
+			throw new Error("Attachment is already in library " + libraryID);
 		}
 		
 		Zotero.DB.requireTransaction();

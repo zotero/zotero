@@ -1258,6 +1258,66 @@ describe("Zotero.Item", function () {
 		})
 	})
 	
+	describe("#moveToLibrary()", function () {
+		it("should move items from My Library to a filesEditable group", async function () {
+			var group = await createGroup();
+			
+			var item = await createDataObject('item');
+			var attachment1 = await importFileAttachment('test.png', { parentID: item.id });
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var attachment2 = await Zotero.Attachments.linkFromFile({
+				file,
+				parentItemID: item.id
+			});
+			var note = await createDataObject('item', { itemType: 'note', parentID: item.id });
+			
+			var originalIDs = [item.id, attachment1.id, attachment2.id, note.id];
+			var originalAttachmentFile = attachment1.getFilePath();
+			var originalAttachmentHash = await attachment1.attachmentHash
+			
+			assert.isTrue(await OS.File.exists(originalAttachmentFile));
+			
+			var newItem = await item.moveToLibrary(group.libraryID);
+			
+			// Old items and file should be gone
+			assert.isTrue(originalIDs.every(id => !Zotero.Items.get(id)));
+			assert.isFalse(await OS.File.exists(originalAttachmentFile));
+			
+			// New items and stored file should exist; linked file should be gone
+			assert.equal(newItem.libraryID, group.libraryID);
+			assert.lengthOf(newItem.getAttachments(), 1);
+			var newAttachment = Zotero.Items.get(newItem.getAttachments()[0]);
+			assert.equal(await newAttachment.attachmentHash, originalAttachmentHash);
+			assert.lengthOf(newItem.getNotes(), 1);
+		});
+		
+		it("should move items from My Library to a non-filesEditable group", async function () {
+			var group = await createGroup({
+				filesEditable: false
+			});
+			
+			var item = await createDataObject('item');
+			var attachment = await importFileAttachment('test.png', { parentID: item.id });
+			
+			var originalIDs = [item.id, attachment.id];
+			var originalAttachmentFile = attachment.getFilePath();
+			var originalAttachmentHash = await attachment.attachmentHash
+			
+			assert.isTrue(await OS.File.exists(originalAttachmentFile));
+			
+			var newItem = await item.moveToLibrary(group.libraryID);
+			
+			// Old items and file should be gone
+			assert.isTrue(originalIDs.every(id => !Zotero.Items.get(id)));
+			assert.isFalse(await OS.File.exists(originalAttachmentFile));
+			
+			// Parent should exist, but attachment should not
+			assert.equal(newItem.libraryID, group.libraryID);
+			assert.lengthOf(newItem.getAttachments(), 0);
+		});
+	});
+	
 	describe("#toJSON()", function () {
 		describe("default mode", function () {
 			it("should output only fields with values", function* () {
