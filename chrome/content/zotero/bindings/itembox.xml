@@ -1087,10 +1087,15 @@
 			<method name="changeTypeTo">
 				<parameter name="itemTypeID"/>
 				<parameter name="menu"/>
-				<body>
-				<![CDATA[
+				<body><![CDATA[
+				return (async function () {
 					if (itemTypeID == this.item.itemTypeID) {
 						return true;
+					}
+					
+					if (this.saveOnEdit) {
+						await this.blurOpenField();
+						await this.item.saveTx();
 					}
 					
 					var fieldsToDelete = this.item.getFieldsNotInType(itemTypeID, true);
@@ -1149,15 +1154,15 @@
 						
 						if (this.saveOnEdit) {
 							// See note in transformText()
-							this.blurOpenField().then(() => this.item.saveTx());
+							await this.blurOpenField();
+							await this.item.saveTx();
 						}
 						else {
 							this.refresh();
 						}
 						
 						if (this.eventHandlers['itemtypechange'] && this.eventHandlers['itemtypechange'].length) {
-							var self = this;
-							this.eventHandlers['itemtypechange'].forEach(function (f) f.bind(self)());
+							this.eventHandlers['itemtypechange'].forEach(f => f.bind(this)());
 						}
 						
 						return true;
@@ -1169,8 +1174,8 @@
 					}
 					
 					return false;
-				]]>
-				</body>
+				}.bind(this))();
+				]]></body>
 			</method>
 			
 			
