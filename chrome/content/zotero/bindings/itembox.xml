@@ -1308,7 +1308,10 @@
 								if (date) {
 									// If no time, interpret as local, not UTC
 									if (Zotero.Date.isSQLDate(valueText)) {
-										date = Zotero.Date.sqlToDate(valueText);
+										// Add time to avoid showing previous day if date is in
+										// DST (including the current date at 00:00:00) and we're
+										// in standard time
+										date = Zotero.Date.sqlToDate(valueText + ' 12:00:00');
 										valueText = date.toLocaleDateString();
 									}
 									else {
