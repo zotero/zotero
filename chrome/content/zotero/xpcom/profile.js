@@ -129,10 +129,12 @@ Zotero.Profile = {
 	/**
 	 * Find other profile directories (for this app or the other app) using the given data directory
 	 *
+	 * @param {String} dataDir
+	 * @param {Boolean} [includeOtherApps=false] - Check Firefox profiles
 	 * @return {String[]}
 	 */
-	findOtherProfilesUsingDataDirectory: Zotero.Promise.coroutine(function* (dataDir) {
-		let otherAppProfiles = yield this._findOtherAppProfiles();
+	findOtherProfilesUsingDataDirectory: Zotero.Promise.coroutine(function* (dataDir, includeOtherApps = true) {
+		let otherAppProfiles = includeOtherApps ? (yield this._findOtherAppProfiles()) : [];
 		let otherProfiles = (yield this._findOtherProfiles()).concat(otherAppProfiles);
 		
 		// First get profiles pointing at this directory
