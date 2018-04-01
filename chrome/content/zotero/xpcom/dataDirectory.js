@@ -255,35 +255,7 @@ Zotero.DataDirectory = {
 				// Read in prefs
 				let prefsFile = OS.Path.join(profileDir, "prefs.js");
 				if (yield OS.File.exists(prefsFile)) {
-					// build sandbox
-					var sandbox = new Components.utils.Sandbox("http://www.example.com/");
-					Components.utils.evalInSandbox(
-						"var prefs = {};"+
-						"function user_pref(key, val) {"+
-							"prefs[key] = val;"+
-						"}"
-					, sandbox);
-					
-					(yield Zotero.File.getContentsAsync(prefsFile))
-						.split(/\n/)
-						.filter((line) => {
-							// Strip comments
-							return !line.startsWith('#')
-								// Only process lines in our pref branch
-								&& line.includes(ZOTERO_CONFIG.PREF_BRANCH);
-						})
-						// Process each line individually
-						.forEach((line) => {
-							try {
-								Zotero.debug("Processing " + line);
-								Components.utils.evalInSandbox(line, sandbox);
-							}
-							catch (e) {
-								Zotero.logError("Error processing prefs line: " + line);
-							}
-						});
-					
-					var prefs = sandbox.prefs;
+					let prefs = yield Zotero.Profile.readPrefsFromFile(prefsFile);
 					
 					// Check for data dir pref
 					if (prefs['extensions.zotero.dataDir'] && prefs['extensions.zotero.useDataDir']) {
