@@ -577,6 +577,7 @@ Zotero.RecognizePDF = new function () {
 				Zotero.debug(translatedItems);
 				if (translatedItems.length) {
 					let newItem = new Zotero.Item;
+					newItem.libraryID = libraryID;
 					// Convert tags to automatic. For other items this is done automatically in
 					// translate.js for other items, but for ISBNs we just get the data
 					// (libraryID=false) and do the saving manually.
@@ -591,7 +592,6 @@ Zotero.RecognizePDF = new function () {
 						return tag;
 					});
 					newItem.fromJSON(translatedItems[0]);
-					newItem.libraryID = libraryID;
 					if (!newItem.abstractNote && res.abstract) {
 						newItem.setField('abstractNote', res.abstract);
 					}
@@ -608,7 +608,6 @@ Zotero.RecognizePDF = new function () {
 		}
 		
 		if (res.title) {
-			
 			let type = 'journalArticle';
 			
 			if (res.type === 'book-chapter') {
@@ -616,6 +615,7 @@ Zotero.RecognizePDF = new function () {
 			}
 			
 			let newItem = new Zotero.Item(type);
+			newItem.libraryID = libraryID;
 			newItem.setField('title', res.title);
 			
 			let creators = [];
