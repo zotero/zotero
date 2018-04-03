@@ -68,7 +68,7 @@ var ZoteroPluginInstaller = function(addon, failSilently, force) {
 	Zotero.debug("PluginInstaller: fetching addon info");
 	AddonManager.getAddonsByIDs(extensionIDs, function(addons) {
 		Zotero.debug("PluginInstaller: addon info fetched");
-		me._addons = addons;
+		me._addonInfo = addons[0];
 		me._addonInfoAvailable();
 	});
 };
@@ -78,7 +78,7 @@ ZoteroPluginInstaller.prototype = {
 	
 	_addonInfoAvailable: function() {
 		try {
-			this._version = this._addons[0].version;
+			this._version = this._addonInfo.version;
 			
 			try {
 				this._addon.verifyNotCorrupt(this);
@@ -127,19 +127,8 @@ ZoteroPluginInstaller.prototype = {
 	},
 	
 	getAddonPath: function(addonID) {
-		if(AddonManager) {
-			for (var addon of this._addons) {
-				if(addon && addon.id == addonID) {
-					return addon.getResourceURI().
-						QueryInterface(Components.interfaces.nsIFileURL).file;
-				}
-			}
-		} else {
-			return Components.classes["@mozilla.org/extensions/manager;1"].
-				getService(Components.interfaces.nsIExtensionManager).
-				getInstallLocation(addonID).
-				getItemLocation(addonID);
-		}
+		return this._addonInfo.getResourceURI().
+			QueryInterface(Components.interfaces.nsIFileURL).file;
 	},
 	
 	setProgressWindowLabel: function(value) {
