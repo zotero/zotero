@@ -398,6 +398,7 @@ Zotero.Integration = new function() {
 		}
 		if (!session) {
 			session = new Zotero.Integration.Session(doc, app);
+			session.reload = true;
 		}
 		try {
 			yield session.setData(data);
@@ -1576,7 +1577,7 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 	}
 	// Deal with citations that are copied into the document from somewhere else
 	// and have not been added to the processor yet
-	if (! this.oldCitations.has(citation.citationID)) {
+	if (! this.oldCitations.has(citation.citationID) && !this.reload) {
 		this.newIndices[index] = true;
 	}
 	Zotero.debug("Integration: Adding citationID "+citation.citationID);
