@@ -24,7 +24,7 @@
  */
 
 var CSL = {
-    PROCESSOR_VERSION: "1.1.200",
+    PROCESSOR_VERSION: "1.1.201",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -2138,7 +2138,7 @@ CSL.configureMacro = function (mytarget) {
         this.configureTokenList(mytarget);
     }
 }
-CSL.XmlToToken = function (state, tokentype, explicitTarget) {
+CSL.XmlToToken = function (state, tokentype, explicitTarget, var_stack) {
     var name, txt, attrfuncs, attributes, decorations, token, key, target;
     name = state.cslXml.nodename(this);
     if (state.build.skip && state.build.skip !== name) {
@@ -2179,10 +2179,13 @@ CSL.XmlToToken = function (state, tokentype, explicitTarget) {
             }
         }
         token.decorations = decorations;
+        if (CSL.DATE_VARIABLES.indexOf(attributes['@variable']) > -1) {
+            var_stack.push(token.variables);
+        }
     } else if (tokentype === CSL.END && attributes['@variable']) {
         token.hasVariable = true;
         if (CSL.DATE_VARIABLES.indexOf(attributes['@variable']) > -1) {
-            token.variables = attributes['@variable'].split(/\s+/);
+            token.variables = var_stack.pop();
         }
     }
     if (explicitTarget) {
@@ -2730,14 +2733,15 @@ CSL.Engine.prototype.setCloseQuotesArray = function () {
     this.opt.close_quotes_array = ret;
 };
 CSL.makeBuilder = function (me, target) {
+    var var_stack = [];
     function enterFunc (node) {
-        CSL.XmlToToken.call(node, me, CSL.START, target);
+        CSL.XmlToToken.call(node, me, CSL.START, target, var_stack);
     };
     function leaveFunc (node) {
-        CSL.XmlToToken.call(node, me, CSL.END, target);
+        CSL.XmlToToken.call(node, me, CSL.END, target, var_stack);
     };
     function singletonFunc (node) {
-        CSL.XmlToToken.call(node, me, CSL.SINGLETON, target);
+        CSL.XmlToToken.call(node, me, CSL.SINGLETON, target, var_stack);
     };
     function buildStyle (node) {
         var starttag, origparent;
