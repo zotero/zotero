@@ -561,9 +561,9 @@ Zotero.Server.Connector.SavePage.prototype = {
  * Returns:
  *		201 response code with item in body.
  */
-Zotero.Server.Connector.SaveItem = function() {};
-Zotero.Server.Endpoints["/connector/saveItems"] = Zotero.Server.Connector.SaveItem;
-Zotero.Server.Connector.SaveItem.prototype = {
+Zotero.Server.Connector.SaveItems = function() {};
+Zotero.Server.Endpoints["/connector/saveItems"] = Zotero.Server.Connector.SaveItems;
+Zotero.Server.Connector.SaveItems.prototype = {
 	supportedMethods: ["POST"],
 	supportedDataTypes: ["application/json"],
 	permitBookmarklet: true,
