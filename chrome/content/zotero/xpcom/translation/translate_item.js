@@ -142,6 +142,7 @@ Zotero.Translate.ItemSaver.prototype = {
 						for (let i=0; i<specialFields.notes.length; i++) {
 							yield this._saveNote(specialFields.notes[i], myID);
 						}
+						item.notes = specialFields.notes;
 					}
 
 					// handle attachments
