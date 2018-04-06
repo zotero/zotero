@@ -252,24 +252,31 @@ Zotero.Server.Connector.SaveSession.prototype._updateRecents = function () {
 		let numRecents = 5;
 		let recents = Zotero.Prefs.get('recentSaveTargets') || '[]';
 		recents = JSON.parse(recents);
-		let sessionFound = false;
 		// If there's already a target from this session in the list, update it
 		for (let recent of recents) {
 			if (recent.sessionID == this.id) {
 				recent.id = targetID;
-				sessionFound = true;
 				break;
 			}
 		}
-		// Otherwise add this target to the end
-		if (!sessionFound) {
-			recents
-				// Remove this target from the list if it's there from another session
-				.filter(r => r.id != targetID)
-				.concat({
-					id: targetID,
-					sessionID: this.id
-				});
+		// If a session is found with the same target, move it to the end without changing
+		// the sessionID. This could be the current session that we updated above or a different
+		// one. (We need to leave the old sessionID for the same target or we'll end up removing
+		// the previous target from the history if it's changed in the current one.)
+		let pos = recents.findIndex(r => r.id == targetID);
+		if (pos != -1) {
+			recents = [
+				...recents.slice(0, pos),
+				...recents.slice(pos + 1),
+				recents[pos]
+			];
+		}
+		// Otherwise just add this one to the end
+		else {
+			recents = recents.concat([{
+				id: targetID,
+				sessionID: this.id
+			}]);
 		}
 		recents = recents.slice(-1 * numRecents);
 		Zotero.Prefs.set('recentSaveTargets', JSON.stringify(recents));
