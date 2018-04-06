@@ -249,7 +249,7 @@ Zotero.Server.Connector.SaveSession.prototype._updateItems = Zotero.serial(async
 Zotero.Server.Connector.SaveSession.prototype._updateRecents = function () {
 	var targetID = this._currentTargetID;
 	try {
-		let numRecents = 5;
+		let numRecents = 7;
 		let recents = Zotero.Prefs.get('recentSaveTargets') || '[]';
 		recents = JSON.parse(recents);
 		// If there's already a target from this session in the list, update it
