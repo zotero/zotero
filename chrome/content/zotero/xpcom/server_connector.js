@@ -263,10 +263,13 @@ Zotero.Server.Connector.SaveSession.prototype._updateRecents = function () {
 		}
 		// Otherwise add this target to the end
 		if (!sessionFound) {
-			recents.push({
-				id: targetID,
-				sessionID: this.id
-			});
+			recents
+				// Remove this target from the list if it's there from another session
+				.filter(r => r.id != targetID)
+				.concat({
+					id: targetID,
+					sessionID: this.id
+				});
 		}
 		recents = recents.slice(-1 * numRecents);
 		Zotero.Prefs.set('recentSaveTargets', JSON.stringify(recents));
