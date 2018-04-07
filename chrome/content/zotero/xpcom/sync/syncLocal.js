@@ -794,6 +794,7 @@ Zotero.Sync.Data.Local = {
 				
 				// Skip objects with unmet dependencies
 				if (objectType == 'item' || objectType == 'collection') {
+					// Missing parent collection or item
 					let parentProp = 'parent' + objectType[0].toUpperCase() + objectType.substr(1);
 					let parentKey = jsonData[parentProp];
 					if (parentKey) {
@@ -815,17 +816,37 @@ Zotero.Sync.Data.Local = {
 						}
 					}
 					
-					/*if (objectType == 'item') {
-						for (let j = 0; j < jsonData.collections.length; i++) {
-							let parentKey = jsonData.collections[j];
-							let parentCollection = Zotero.Collections.getByLibraryAndKey(
-								libraryID, parentKey, { noCache: true }
-							);
-							if (!parentCollection) {
-								// ???
+					// Missing collection -- this could happen if the collection was deleted
+					// locally and an item in it was modified remotely
+					if (objectType == 'item' && jsonData.collections) {
+						let error;
+						for (let key of jsonData.collections) {
+							let collection = Zotero.Collections.getByLibraryAndKey(libraryID, key);
+							if (!collection) {
+								error = new Error(`Collection ${libraryID}/${key} not found `
+									+ `-- skipping item`);
+								error.name = "ZoteroMissingObjectError";
+								Zotero.debug(error.message);
+								results.push({
+									key: objectKey,
+									processed: false,
+									error,
+									retry: false
+								});
+								
+								// If the collection is in the delete log, the deletion will upload
+								// after downloads are done. Otherwise, we somehow missed
+								// downloading it and should add it to the queue to try again.
+								if (!(yield this.getDateDeleted('collection', libraryID, key))) {
+									yield this.addObjectsToSyncQueue('collection', libraryID, [key]);
+								}
+								break;
 							}
 						}
-					}*/
+						if (error) {
+							continue;
+						}
+					}
 				}
 				
 				// Errors have to be thrown in order to roll back the transaction, so catch those here

@@ -2112,23 +2112,13 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = lastLibraryVersion;
 			await library.saveTx();
-			({ engine, client, caller } = await setup({
-				stopOnError: false
-			}));
+			({ engine, client, caller } = await setup());
 			
 			// Create local deleted collection
 			var collection = await createDataObject('collection');
 			var collectionKey = collection.key;
 			await collection.eraseTx();
-			// Create item JSON
-			var item = await createDataObject('item');
-			var itemResponseJSON = item.toResponseJSON();
-			// Add collection to remote item
-			itemResponseJSON.data.collections = [collectionKey];
-			var itemKey = item.key;
-			await item.eraseTx({
-				skipDeleteLog: true
-			});
+			var itemKey = "AAAAAAAA";
 			
 			var headers = {
 				"Last-Modified-Version": newLibraryVersion
@@ -2151,7 +2141,14 @@ describe("Zotero.Sync.Data.Engine", function () {
 				url: `users/1/items?format=json&itemKey=${itemKey}&includeTrashed=1`,
 				status: 200,
 				headers,
-				json: [itemResponseJSON]
+				json: [
+					makeItemJSON({
+						key: itemKey,
+						version: newLibraryVersion,
+						itemType: "book",
+						collections: [collectionKey]
+					})
+				]
 			});
 			
 			await engine._startDownload();
@@ -2159,6 +2156,67 @@ describe("Zotero.Sync.Data.Engine", function () {
 			// Item should be skipped and added to queue, which will allow collection deletion to upload
 			var keys = await Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', library.id);
 			assert.sameMembers(keys, [itemKey]);
+			
+			// Collection should not be in sync queue
+			assert.lengthOf(
+				await Zotero.Sync.Data.Local.getObjectsFromSyncQueue('collection', library.id), 0
+			);
+		});
+		
+		
+		it("should handle new remote item referencing locally missing collection", async function () {
+			var lastLibraryVersion = 5;
+			var newLibraryVersion = 6;
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = lastLibraryVersion;
+			await library.saveTx();
+			({ engine, client, caller } = await setup());
+			
+			var collectionKey = 'AAAAAAAA';
+			var itemKey = 'BBBBBBBB'
+			
+			var headers = {
+				"Last-Modified-Version": newLibraryVersion
+			};
+			setDefaultResponses({
+				lastLibraryVersion,
+				libraryVersion: newLibraryVersion
+			});
+			setResponse({
+				method: "GET",
+				url: `users/1/items?format=versions&since=${lastLibraryVersion}&includeTrashed=1`,
+				status: 200,
+				headers,
+				json: {
+					[itemKey]: newLibraryVersion
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: `users/1/items?format=json&itemKey=${itemKey}&includeTrashed=1`,
+				status: 200,
+				headers,
+				json: [
+					makeItemJSON({
+						key: itemKey,
+						version: newLibraryVersion,
+						itemType: "book",
+						collections: [collectionKey]
+					})
+				]
+			});
+			
+			await engine._startDownload();
+			
+			// Item should be skipped and added to queue
+			var keys = await Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', library.id);
+			assert.sameMembers(keys, [itemKey]);
+			
+			// Collection should be in queue
+			assert.sameMembers(
+				await Zotero.Sync.Data.Local.getObjectsFromSyncQueue('collection', library.id),
+				[collectionKey]
+			);
 		});
 		
 		
@@ -2168,9 +2226,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = lastLibraryVersion;
 			await library.saveTx();
-			({ engine, client, caller } = await setup({
-				stopOnError: false
-			}));
+			({ engine, client, caller } = await setup());
 			
 			// Create local deleted collection and item
 			var collection = await createDataObject('collection');
@@ -2207,20 +2263,6 @@ describe("Zotero.Sync.Data.Engine", function () {
 				json: [itemResponseJSON]
 			});
 			
-			// This will trigger a conflict for a remote item that references a collection that doesn't
-			// exist. The collection should be removed for display in the CR window, and then the save
-			// should fail and the item should be added to the queue so that the collection deletion
-			// can upload.
-			waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
-				var doc = dialog.document;
-				var wizard = doc.documentElement;
-				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
-				
-				// 1 (accept remote)
-				//assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
-				mergeGroup.rightpane.click();
-				wizard.getButton('finish').click();
-			});
 			await engine._startDownload();
 			
 			// Item should be skipped and added to queue, which will allow collection deletion to upload
