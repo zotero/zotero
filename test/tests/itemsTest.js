@@ -171,6 +171,55 @@ describe("Zotero.Items", function () {
 			assert.equal(rels[0], item2URI);
 		})
 		
+		it("should merge two items when servant is linked to an item absent from cache", function* () {
+			// two group libraries
+			var groupOneInfo = yield createGroup({
+				id: 25026,
+				name: "Group One"
+			});
+			var libraryOneID = Zotero.Groups.getLibraryIDFromGroupID(groupOneInfo.id);
+
+			var groupTwoInfo = yield createGroup({
+				id: 11592,
+				name: "Group Two"
+			});
+			var libraryTwoID = Zotero.Groups.getLibraryIDFromGroupID(groupTwoInfo.id);
+
+			assert.notEqual(libraryOneID, libraryTwoID);
+
+			// two items in the first library
+			var item1 = yield createDataObject('item', {libraryID: libraryOneID});
+			var item2 = yield createDataObject('item', {libraryID: libraryOneID});
+			var item2URI = Zotero.URI.getItemURI(item2);
+
+			// one item in the second library, linked to item2 as if it dragged and dropped from it
+			var itemX = yield createDataObject('item', {libraryID: libraryTwoID});
+			yield itemX.addLinkedItem(item2);
+
+			// check that the owl:sameAs relation has been registered okay
+			var rels = itemX.getRelationsByPredicate(Zotero.Relations.linkedObjectPredicate);
+			assert.lengthOf(rels, 1);
+			assert.equal(rels[0], item2URI);
+
+			// the freshly minted item is in objectCache, but it might be absent in production,
+			// so we clobber it in this test
+			assert(!!Zotero.Items._objectCache[itemX.id], "itemX is in object cache")
+			delete Zotero.Items._objectCache[itemX.id];
+
+			// merge the two items in the first library
+			yield Zotero.Items.merge(item1, [item2]);
+
+			// check that the merge completed okay
+			assert.isFalse(item1.deleted);
+			assert.isTrue(item2.deleted);
+
+			// Check for merge-tracking relation
+			assert.isFalse(item1.hasChanged());
+			var rels = item1.getRelationsByPredicate(Zotero.Relations.replacedItemPredicate);
+			assert.lengthOf(rels, 1);
+			assert.equal(rels[0], item2URI);
+		})
+
 		it("should move merge-tracking relation from replaced item to master", function* () {
 			var item1 = yield createDataObject('item');
 			var item2 = yield createDataObject('item');
