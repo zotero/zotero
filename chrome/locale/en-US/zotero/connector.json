@@ -1,0 +1,35 @@
+{
+	"general_saveTo": {
+		"message": "Save to $1"
+	},
+	"general_more": {
+		"message": "More…"
+	},
+	"general_done": {
+		"message": "Done"
+	},
+	
+	"progressWindow_savingTo": {
+		"message": "Saving to"
+	},
+	"progressWindow_tagPlaceholder": {
+		"message": "Tags (separated by commas)"
+	},
+	"progressWindow_error_translation": {
+		"message": "An error occurred while saving this item. See $1 for more information."
+	},
+	"progressWindow_error_troubleshootingTranslatorIssues": {
+		"message": "Troubleshooting Translator Issues"
+	},
+	"progressWindow_error_fallback": {
+		"message": "An error occurred saving with $1. Attempting to save using $2 instead.",
+		"description": "The placeholders will contain the names of Zotero translators (e.g., JSTOR or Embedded Metadata)."
+	},
+	"progressWindow_error_upgradeClient": {
+		"message": "This feature is not supported by your version of $1. Please upgrade to the $2.",
+		"description": "$2 will be a link with the localized text 'latest version'."
+	},
+	"progressWindow_error_upgradeClient_latestVersion": {
+		"message": "latest version"
+	}
+}
