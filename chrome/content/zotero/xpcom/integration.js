@@ -2072,7 +2072,7 @@ Zotero.Integration.Field = class {
 
 	getCode() {
 		if (!this._code) {
-			ths._code = this._field.getCode();
+			this._code = this._field.getCode();
 		}
 		let start = this._code.indexOf('{');
 		if (start == -1) {
