@@ -705,6 +705,9 @@ Zotero.Integration.Interface.prototype.setDocPrefs = Zotero.Promise.coroutine(fu
 	// Refresh contents
 	this._session.fields = new Zotero.Integration.Fields(this._session, this._doc);
 	this._session.fields.ignoreEmptyBibliography = false;
+	
+	if (this._session.data.prefs.delayCitationUpdates) return;
+	
 	yield this._session.fields.updateSession(FORCE_CITATIONS_RESET_TEXT);
 	return this._session.fields.updateDocument(FORCE_CITATIONS_RESET_TEXT, true, true);
 });
