@@ -1829,6 +1829,7 @@ Zotero.CollectionTreeView.prototype.canDropCheckAsync = Zotero.Promise.coroutine
 			if (treeRow.ref.libraryID != draggedCollection.libraryID) {
 				// Disallow if linked collection already exists
 				if (yield draggedCollection.getLinkedCollection(treeRow.ref.libraryID, true)) {
+					Zotero.debug("Linked collection already exists in library");
 					return false;
 				}
 				
@@ -1840,6 +1841,7 @@ Zotero.CollectionTreeView.prototype.canDropCheckAsync = Zotero.Promise.coroutine
 					// If this is allowed in the future for the root collection,
 					// need to allow drag only to root
 					if (yield descendent.getLinkedCollection(treeRow.ref.libraryID, true)) {
+						Zotero.debug("Linked subcollection already exists in library");
 						return false;
 					}
 				}
