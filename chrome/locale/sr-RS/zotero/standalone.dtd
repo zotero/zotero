@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Подаци о проблемима">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Форуми за дискусију">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Пријави грешке…">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Дневник излаза са грешкама">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.submit "Пошаљи излаз">
+<!ENTITY debugOutputLogging.view "Прикажи излаз">
+<!ENTITY debugOutputLogging.clear "Очисти излаз">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Поново покрени са дневником…">
 
 <!ENTITY helpCheckForUpdates.label "Потражи ажурирања…">
 <!ENTITY helpCheckForUpdates.accesskey "U">

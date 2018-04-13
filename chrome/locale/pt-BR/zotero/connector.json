@@ -1,0 +1,32 @@
+{
+  "progressWindow_error_translation": {
+    "message": "Ocorreu um erro ao salvar esse item. Veja $1para mais detalhes."
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Etiquetas (separadas por vírgula)"
+  },
+  "general_more": {
+    "message": "Mais..."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Esse recurso não é suportado pela versão $1. Por favor atualize para a versão $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "última versão"
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Resolução de problemas do tradutor"
+  },
+  "general_done": {
+    "message": "Feito"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Erro ao salvar com $1. Tentando salvar usando $2."
+  },
+  "general_saveTo": {
+    "message": "Salvar para $1"
+  },
+  "progressWindow_savingTo": {
+    "message": "Salvando para"
+  }
+}

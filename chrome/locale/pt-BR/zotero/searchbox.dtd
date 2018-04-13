@@ -9,7 +9,7 @@
 
 <!ENTITY zotero.search.recursive.label "Pesquisar subcoleções">
 <!ENTITY zotero.search.noChildren "Exibir apenas itens do nível mais alto">
-<!ENTITY zotero.search.includeParentsAndChildren "Incluir itens dos níveis acima e abaixo aos itens correspondentes">
+<!ENTITY zotero.search.includeParentsAndChildren "Incluir itens pais e filhos dos itens correspondentes">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (incluindo arquivos binários)">

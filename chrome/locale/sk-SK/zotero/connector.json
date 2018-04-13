@@ -1,0 +1,32 @@
+{
+  "progressWindow_error_translation": {
+    "message": "Pri ukladaní tohto súboru došlo k chybe. Pre viac informácií si pozrite $1."
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Značky (oddelené čiarkami)"
+  },
+  "general_more": {
+    "message": "Viac..."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Túto funkciu vaša verzia $1 nepodporuje. Aktualizujte ju, prosím, na $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "najnovšia verzia"
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Riešenie problémov s translátormi"
+  },
+  "general_done": {
+    "message": "Hotovo"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Pri ukladaní pomocou $1 došlo k chybe. Namiesto toho prebieha pokus o ukladanie pomocou $2."
+  },
+  "general_saveTo": {
+    "message": "Uložiť do $1"
+  },
+  "progressWindow_savingTo": {
+    "message": "Ukladá sa do"
+  }
+}

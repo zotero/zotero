@@ -1,0 +1,32 @@
+{
+  "progressWindow_error_translation": {
+    "message": "Παρουσιάστηκε σφάλμα κατά την αποθήκευση αυτού του στοιχείου. Δείτε 1 $1 για περισσότερες πληροφορίες."
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Ετικέτες (διαχωρισμένες με κόμμα)"
+  },
+  "general_more": {
+    "message": "Περισσότερα..."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Αυτή η λειτουργία δεν υποστηρίζεται από την έκδοση 1 $1. Παρακαλώ αναβαθμίστε στην 2 $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "τελευταία έκδοση"
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Αντιμετώπιση Προβλημάτων Μεταφραστή"
+  },
+  "general_done": {
+    "message": "Ολοκληρώθηκε"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Παρουσιάστηκε σφάλμα κατά την αποθήκευση με 1 $1. Προσπαθήστε να αποθηκεύσετε χρησιμοποιώντας 2 $2."
+  },
+  "general_saveTo": {
+    "message": "Αποθήκευση σε 1 $1"
+  },
+  "progressWindow_savingTo": {
+    "message": "Αποθήκευση σε"
+  }
+}

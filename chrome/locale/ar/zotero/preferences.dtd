@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.items "عناصر">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "اعدادات">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "مخصص...">
 
 <!ENTITY zotero.preferences.prefpane.general "عام">
 
@@ -19,13 +19,13 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "كبير جدا">
 <!ENTITY zotero.preferences.fontSize.notes "حجم خط الملاحظات:">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.fileHandling "معاملة الملف">
 <!ENTITY zotero.preferences.automaticSnapshots "أخذ لقطات تلقائية عند إنشاء العناصر من صفحات الويب">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "الارفاق التلقائي لملفات PDF والملفات الاخرى عند اضافة عنصر جديد من صفحة ويب">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.autoRecognizeFiles "استرداد البيانات الوصفية تلقائياً لملفات بي دي إف">
+<!ENTITY zotero.preferences.autoRenameFiles "إعادة تسمية الملفات المرفقة تلقائيًا مستخدماً بيانات الأصل الوصفية">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "افتح ملفات بي دي إف مستخدماً">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "افتراضي النظام">
 
 <!ENTITY zotero.preferences.miscellaneous "أخرى">
 <!ENTITY zotero.preferences.autoUpdate "التأكد التلقائي من وجود مترجمات مواقع محدثة">
@@ -75,7 +75,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "تحميل الملفات">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "في وقت التزامن">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "عند الحاجة">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "تحقق من الخادم">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "باستخدامك مساحة تخزين زوتيرو، فإنك توافق على الالتزام بكافة">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "الشروط والأحكام">
 <!ENTITY zotero.preferences.sync.librariesToSync "المكتبات المراد تزامنها">
@@ -87,12 +87,12 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "لمزيد من المعلومات.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "إعادة تعيين سجل مزامنة البيانات">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "دمج البيانات المحلية مع البيانات البعيدة، متجاهلاً سجل المزامنة">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "الاستعاد من مكتبة الشبكة">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "استبدل بيانات زوتيرو المحلية ببيانات مكتبة الشبكة.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "استعادة إلى مكتبة الشبكة">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "استبدل مكتبة الشبكة ببيانات زوتيرو المحلية">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "إعادة تعيين ملف سجل المزامنة">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "مقارنة جميع الملفات المرفقة مع خدمة التخزين">
 <!ENTITY zotero.preferences.sync.reset "اعادة ضبط">
 <!ENTITY zotero.preferences.sync.reset.button "إعادة التعيين...">
 
@@ -197,7 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "استخدم مجلد الملف الشخصي لفايرفوكس">
 <!ENTITY zotero.preferences.dataDir.custom "تخصيص:">
 <!ENTITY zotero.preferences.dataDir.choose "اختر...">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(محدد عبر سطر الأوامر)">
 <!ENTITY zotero.preferences.dataDir.reveal "عرض مجلد البيانات">
 <!ENTITY zotero.preferences.dataDir.migrate "الترحيل إلى الموقع الافتراضي الجديد...">
 

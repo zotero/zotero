@@ -51,7 +51,7 @@
 <!ENTITY zotero.tabs.related.label "İlişkili">
 <!ENTITY zotero.notes.separate "Ayrı bir pencerede düzenle">
 
-<!ENTITY zotero.toolbar.duplicate.label "Çift Girişleri Göster">
+<!ENTITY zotero.toolbar.duplicate.label "Yinelenmiş Eserleri Göster">
 <!ENTITY zotero.collections.showUnfiledItems "Dosyalanmamış Eserleri Göster">
 
 <!ENTITY zotero.items.itemType "Eser Türü">

@@ -14,8 +14,8 @@
 <!ENTITY zotero.general.tools "أدوات">
 <!ENTITY zotero.general.more "المزيد">
 <!ENTITY zotero.general.loading "التحميل">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "أغلق">
+<!ENTITY zotero.general.minimize "تصغير">
 
 
 <!ENTITY zotero.errorReport.title "تقرير خطأ لزوتيرو">
@@ -99,8 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "استعادة المكتبة">
 <!ENTITY zotero.items.menu.duplicateItem "تكرار العنصر المحدد">
 <!ENTITY zotero.items.menu.mergeItems "دمج العناصر...">
-<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
+<!ENTITY zotero.items.menu.unrecognize "تراجع عن استيراد البيانات الوصفية">
+<!ENTITY zotero.items.menu.reportMetadata "بلغ عن بيانات وصفية غير صحيحة">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "اختار اصدارة العنصر المناسبة لاستخدامه كعنصر رئيسي:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "اختار الحقول المراد الابقاء عليها من الاصدارات الاخرى للعنصر:">
@@ -236,9 +236,9 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "الاشارات المرجعية">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "حدث الاستشهادات آلياً">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "سيتم تمييز الاستشهادات ذات التحديثات المعلقة في المستند">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "يمكن أن يؤدي تعطيل التحديثات إلى تسريع إدراج الاستشهادات في المستندات الكبيرة. انقر على تحديث لتحديث الاستشهادات يدويًا.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "استخدام اختصارات دورية ميدلين">

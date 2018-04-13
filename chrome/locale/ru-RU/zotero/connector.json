@@ -1,0 +1,32 @@
+{
+  "progressWindow_error_translation": {
+    "message": "Возникла ошибка при сохранении этого элемента. Смотрите $1 для получения дополнительной информации."
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Тэги (через запятую)"
+  },
+  "general_more": {
+    "message": "Еще…"
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Эта возможность не поддерживается версией $1 установленной у вас. Пожалуйста обновитесь до $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "Последняя версия"
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Расследнование проблем с преобразователем"
+  },
+  "general_done": {
+    "message": "Завершено"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Возникла ошибка при сохранении как $1. Совершена попытка сохранить как $2."
+  },
+  "general_saveTo": {
+    "message": "Сохранить в $1"
+  },
+  "progressWindow_savingTo": {
+    "message": "Сохранение в"
+  }
+}

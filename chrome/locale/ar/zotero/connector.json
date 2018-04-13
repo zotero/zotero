@@ -1,0 +1,32 @@
+{
+  "progressWindow_error_translation": {
+    "message": "حدث خطأ أثناء حفظ هذا العنصر. راجع $1 لمزيد من المعلومات."
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "وسوم ( مفصولة بفواصل)"
+  },
+  "general_more": {
+    "message": "المزيد..."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "هذه الميزة ليست مدعومة في إصدارتك من $1. رجاءاً حدث  إلى $2"
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "الإصدار الأخير"
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "اكتشاف واصلاح مشاكل المترجمات"
+  },
+  "general_done": {
+    "message": "تم"
+  },
+  "progressWindow_error_fallback": {
+    "message": "حدث خطأ اثناء الحفظ باستخدام $1. محاولة الحفظ باستخدام $2 بدلاً من ذلك."
+  },
+  "general_saveTo": {
+    "message": "احفظ في $1"
+  },
+  "progressWindow_savingTo": {
+    "message": "الحفظ في"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "progressWindow_error_translation": {
+    "message": "Ein Fehler ist aufgetreten beim Versuch, diesen Eintrag zu speichern. Siehe $1 für weitere Informationen."
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Tags (getrennt durch Kommas)"
+  },
+  "general_more": {
+    "message": "Mehr..."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Diese Funktionalität wird nicht unterstützt mit Ihrer Version von $1. Bitte aktualisieren Sie auf die $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "neueste Version"
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Problembehebung für Translators"
+  },
+  "general_done": {
+    "message": "Erledigt"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Ein Fehler ist aufgetreten beim Speichern mit $1. Es wird versucht stattdessen $2 zu nutzen."
+  },
+  "general_saveTo": {
+    "message": "Speichern nach $1"
+  },
+  "progressWindow_savingTo": {
+    "message": "Speichern nach"
+  }
+}

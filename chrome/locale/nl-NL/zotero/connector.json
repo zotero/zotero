@@ -1,0 +1,20 @@
+{
+  "progressWindow_error_translation": {
+    "message": "Er is een fout opgetreden bij het opslaan van dit item. Bekijk $1 voor meer informatie."
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Labels (gescheiden door komma’s)"
+  },
+  "general_more": {
+    "message": "Meer…"
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "laatste versie"
+  },
+  "general_saveTo": {
+    "message": "Opslaan in $1"
+  },
+  "progressWindow_savingTo": {
+    "message": "Opslaan in"
+  }
+}

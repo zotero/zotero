@@ -11,11 +11,11 @@
 <!ENTITY zotero.general.refresh "Освежи">
 <!ENTITY zotero.general.saveAs "Сачувај као…">
 <!ENTITY zotero.general.advancedOptions.label "Напредне опције">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Алати">
 <!ENTITY zotero.general.more "Више">
 <!ENTITY zotero.general.loading "Учитавам…">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Затвори">
+<!ENTITY zotero.general.minimize "Умањи">
 
 
 <!ENTITY zotero.errorReport.title "Пријављивање грешака у Зотеру">
@@ -99,8 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Врати у библиотеку">
 <!ENTITY zotero.items.menu.duplicateItem "Умножи ставку">
 <!ENTITY zotero.items.menu.mergeItems "Споји ставке…">
-<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
+<!ENTITY zotero.items.menu.unrecognize "Опозиви преузимање метаподатака">
+<!ENTITY zotero.items.menu.reportMetadata "Пријави неисправне метаподатке">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Изаберите верзију ставке која ће постати главна ставка:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Изаберите поља која желите да преузмете из друге верзије ставке:">
@@ -148,7 +148,7 @@
 <!ENTITY zotero.item.copyAsURL "Копирај као адресу">
 <!ENTITY zotero.item.deletePermanently "Трајно изриши…">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "Уклони све ознаке…">
 
 <!ENTITY zotero.toolbar.newNote "Нова белешка">
 <!ENTITY zotero.toolbar.note.standalone "Нова самостална белешка">
@@ -236,9 +236,9 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Обележивачи">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Обележивачи се могу делити између програма Word и LibreOffice, али могу направити проблеме уколико их случајно промените и не могу бити уметнути као фусноте.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Аутоматски ажурирај цитате">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Цитати који чекају на ажурирање ће бити истакнути унутар документа">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Онемогућавање ажурирања може убрзати уметање цитата када радите са великим документима. Увек можете кликните на „Освежи“ како би ручно ажурурати цитате.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Користи скраћенице часописа из MEDLINE-а">

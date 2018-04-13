@@ -1,0 +1,32 @@
+{
+  "progressWindow_error_translation": {
+    "message": "Bu eseri kaydederken bir hata meydana geldi. Daha fazla bilgi için $1'ye bakınız."
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Etiketler (virgüllerle ayrılmış)"
+  },
+  "general_more": {
+    "message": "Daha Başka..."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Bu özellik, $1'nin sizdeki sürümü tarafından desteklenmemektedir. Lütfen $2 yükseltiniz."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "son sürüme"
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Çevirmen Sorunlarını Giderme"
+  },
+  "general_done": {
+    "message": "Tamam"
+  },
+  "progressWindow_error_fallback": {
+    "message": "$1 çevirmenini kullanarak kaydetme işlemi sırasında bir hata oldu. $2 kullanılarak kaydetme deneniyor."
+  },
+  "general_saveTo": {
+    "message": "$1'ya Kaydet"
+  },
+  "progressWindow_savingTo": {
+    "message": "Buraya Kaydediyor"
+  }
+}

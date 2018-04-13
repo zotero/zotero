@@ -1,0 +1,32 @@
+{
+  "progressWindow_error_translation": {
+    "message": "هنگام ذخیره این آیتم، خطایی رخ داد. برای کسب اطلاعات بیشتر، $1 را ببینید."
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "برچسب‌ها (با کاما جدا می‌شوند)"
+  },
+  "general_more": {
+    "message": "بیشتر..."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "این ویژگی، توسط نسخه $1 شما پشتیبانی نمیشود. لطفا به نسخه $2 ارتقا دهید."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "آخرین نسخه"
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "عیب‌یابی مشکلات مترجم"
+  },
+  "general_done": {
+    "message": "انجام شد"
+  },
+  "progressWindow_error_fallback": {
+    "message": "هنگام ذخیره کردن با $1 خطایی رخ داد. با استفاده از $2 ذخیره کنید."
+  },
+  "general_saveTo": {
+    "message": "ذخیره در $1"
+  },
+  "progressWindow_savingTo": {
+    "message": "ذخیره در"
+  }
+}

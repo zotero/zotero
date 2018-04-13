@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.items "itens">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Configurações">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "Personalizar...">
 
 <!ENTITY zotero.preferences.prefpane.general "Geral">
 
@@ -19,13 +19,13 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Extra grande">
 <!ENTITY zotero.preferences.fontSize.notes "Tamanho da fonte das notas:">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.fileHandling "Manipulação de arquivos">
 <!ENTITY zotero.preferences.automaticSnapshots "Salvar instantâneos automaticamente ao criar itens de páginas web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Anexar PDFs e outros arquivos associados automaticamente ao salvar itens">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Extrair metadados dos PDFs automaticamente">
+<!ENTITY zotero.preferences.autoRenameFiles "Renomeia os arquivos anexos automaticamente, utilizando metadados do item pai">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Abrir PDFs com">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "O padrão do sistema">
 
 <!ENTITY zotero.preferences.miscellaneous "Outras preferências">
 <!ENTITY zotero.preferences.autoUpdate "Verificar automaticamente atualizações de traduções e estilos">
@@ -36,7 +36,7 @@
 <!ENTITY zotero.preferences.parseRISRefer "Usar o Zotero para arquivos BibTeX/RIS/Refer baixados">
 <!ENTITY zotero.preferences.automaticTags "Etiquetar os itens com palavras-chaves e cabeçalhos de assunto automaticamente">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Remover automaticamente os itens que estão na lixeira há mais de">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dias atrás">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dias">
 
 <!ENTITY zotero.preferences.groups "Grupos">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Ao copiar itens entre bibliotecas, incluir:">

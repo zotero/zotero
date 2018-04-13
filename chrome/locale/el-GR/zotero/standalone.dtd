@@ -44,7 +44,7 @@
 
 <!ENTITY toolsMenu.label "Εργαλεία">
 <!ENTITY toolsMenu.accesskey "Τ">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Εγκατάσταση Σύνδεσης με πρόγραμμα πλοήγησης">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Πρόσθετα">
 
@@ -69,17 +69,17 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Πληροφορίες για αντιμετώπιση προβλημάτων">
 <!ENTITY helpTroubleshootingInfo.accesskey "Τ">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Φόρουμ συζήτησης">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "Αναφορά Λαθών...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Αποσφαλμάτωση Καταγραφή Εξόδου">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
+<!ENTITY debugOutputLogging.submit "Υποβολή Εξόδου">
+<!ENTITY debugOutputLogging.view "Επισκόπηση Εξόδου">
+<!ENTITY debugOutputLogging.clear "Καθαρισμός Εξόδου">
 <!ENTITY debugOutputLogging.restartWithLoggingEnabled "Επανεκκίνηση με καταγραφή...">
 
 <!ENTITY helpCheckForUpdates.label "Έλεγχος για ενημερώσεις...">

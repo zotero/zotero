@@ -1,0 +1,32 @@
+{
+  "progressWindow_error_translation": {
+    "message": "Ocurrió un error mientras se guardaba este elemento. Véase $1para más información."
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Etiquetas (separadas por comas)"
+  },
+  "general_more": {
+    "message": "Más…"
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Esta característica no está soportada por tu versión de $1. Por favor, actualiza a $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "última versión"
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Solución de problemas del traductor"
+  },
+  "general_done": {
+    "message": "Hecho"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Ocurrió un error al guardar con $1. Intentando guardar usando $2en su lugar."
+  },
+  "general_saveTo": {
+    "message": "Guardar a $1"
+  },
+  "progressWindow_savingTo": {
+    "message": "Guardando a"
+  }
+}
