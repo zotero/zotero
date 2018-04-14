@@ -1549,8 +1549,13 @@ Zotero.Schema = new function(){
 			return false;
 		}
 		if (dbVersion > schemaVersion) {
-			throw new Error("Zotero '" + schema + "' DB version (" + dbVersion
-				+ ") is newer than SQL file (" + schemaVersion + ")");
+			let dbClientVersion = yield Zotero.DB.valueQueryAsync(
+				"SELECT value FROM settings WHERE setting='client' AND key='lastCompatibleVersion'"
+			);
+			throw new Zotero.DB.IncompatibleVersionException(
+				`Zotero '${schema}' DB version (${dbVersion}) is newer than SQL file (${schemaVersion})`,
+				dbClientVersion
+			);
 		}
 		let sql = yield _getSchemaSQL(schema);
 		yield Zotero.DB.executeSQLFile(sql);
