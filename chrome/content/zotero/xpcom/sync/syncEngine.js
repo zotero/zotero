@@ -1691,20 +1691,12 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 			for (let key in results.versions) {
 				let version = results.versions[key];
 				let obj = objectsClass.getByLibraryAndKey(this.libraryID, key);
-				// If object already at latest version, skip
+				// If object is already at or above latest version, skip. Local version can be
+				// higher because, as explained in _uploadObjects(), we upload items in batches
+				// and only get the last version to record in the database.
 				let localVersion = localVersions[key];
-				if (localVersion && localVersion === version) {
+				if (localVersion && localVersion >= version) {
 					continue;
-				}
-				
-				// This should never happen
-				if (localVersion > version) {
-					Zotero.logError(`Local version of ${objectType} ${this.libraryID}/${key} `
-						+ `is later than remote! (${localVersion} > ${version})`);
-					// Delete cache version if it's there
-					yield Zotero.Sync.Data.Local.deleteCacheObjectVersions(
-						objectType, this.libraryID, key, localVersion, localVersion
-					);
 				}
 				
 				if (obj) {
