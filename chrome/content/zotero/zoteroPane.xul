@@ -273,7 +273,6 @@
 			
 			<popupset>
 				<menupopup id="zotero-collectionmenu"
-						onpopupshowing="ZoteroPane_Local.buildCollectionContextMenu();"
 						oncommand="ZoteroPane.onCollectionContextMenuSelect(event)">
 					<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->
 					<menuitem class="zotero-menuitem-sync"/>
@@ -344,10 +343,12 @@
 					<box id="zotero-collections-tree-shim"/>
 					<!-- This extra vbox prevents the toolbar from getting compressed when resizing
 							the tag selector to max height -->
-					<tree id="zotero-collections-tree" hidecolumnpicker="true" context="zotero-collectionmenu"
-						onmouseover="ZoteroPane_Local.collectionsView.setHighlightedRows();"
-						onselect="ZoteroPane_Local.onCollectionSelected();"
-						seltype="cell" flex="1" editable="true">
+					<tree id="zotero-collections-tree"
+							hidecolumnpicker="true"
+							oncontextmenu="ZoteroPane.onCollectionsContextMenuOpen(event)"
+							onmouseover="ZoteroPane_Local.collectionsView.setHighlightedRows();"
+							onselect="ZoteroPane_Local.onCollectionSelected();"
+							seltype="cell" flex="1" editable="true">
 						<treecols>
 							<treecol
 								id="zotero-collections-name-column"

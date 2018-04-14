@@ -2380,6 +2380,37 @@ var ZoteroPane = new function()
 	}
 	
 	
+	/**
+	 * Show context menu once it's ready
+	 */
+	this.onCollectionsContextMenuOpen = async function (event) {
+		await ZoteroPane.buildCollectionContextMenu();
+		document.getElementById('zotero-collectionmenu').openPopup(
+			null, null, event.clientX + 1, event.clientY + 1, true, false, event
+		);
+	};
+	
+	
+	/**
+	 * Show context menu once it's ready
+	 */
+	this.onItemsContextMenuOpen = async function (event) {
+		await ZoteroPane.buildItemContextMenu()
+		document.getElementById('zotero-itemmenu').openPopup(
+			null, null, event.clientX + 1, event.clientY + 1, true, false, event
+		);
+	};
+	
+	
+	this.onCollectionContextMenuSelect = function (event) {
+		event.stopPropagation();
+		var o = _collectionContextMenuOptions.find(o => o.id == event.target.id)
+		if (o.oncommand) {
+			o.oncommand();
+		}
+	};
+	
+	
 	// menuitem configuration
 	//
 	// This has to be kept in sync with zotero-collectionmenu in zoteroPane.xul. We could do this
@@ -2498,7 +2529,7 @@ var ZoteroPane = new function()
 		},
 	];
 	
-	this.buildCollectionContextMenu = function (noRepeat) {
+	this.buildCollectionContextMenu = async function () {
 		var libraryID = this.getSelectedLibraryID();
 		var options = _collectionContextMenuOptions;
 		
@@ -2508,12 +2539,16 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		// If the items view isn't initialized, this was a right-click on a different collection and
-		// the new collection's items are still loading, so update the menu after loading. This causes
-		// some menu items (e.g., export/createBib/loadReport) to appear gray in the menu at first and
-		// then turn black once there are items. Pass a flag to prevent an accidental infinite loop.
-		if (!collectionTreeRow.isHeader() && !this.itemsView.initialized && !noRepeat) {
-			this.itemsView.onLoad.addListener(() => this.buildCollectionContextMenu(true));
+		// If the items view isn't initialized, this was a right-click on a different collection
+		// and the new collection's items are still loading, so continue menu after loading is
+		// done. This causes some menu items (e.g., export/createBib/loadReport) to appear gray
+		// in the menu at first and then turn black once there are items
+		if (!collectionTreeRow.isHeader() && !this.itemsView.initialized) {
+			await new Promise((resolve) => {
+				this.itemsView.onLoad.addListener(() => {
+					resolve();
+				});
+			});
 		}
 		
 		// Set attributes on the menu from the configuration object
@@ -2554,7 +2589,12 @@ var ZoteroPane = new function()
 			];
 			
 			if (!this.itemsView.rowCount) {
-				disable = ['exportCollection', 'createBibCollection', 'loadReport'];
+				disable = ['createBibCollection', 'loadReport'];
+				
+				// If no items in subcollections either, disable export
+				if (!(await collectionTreeRow.ref.getDescendents(false, 'item', false).length)) {
+					disable.push('exportCollection');
+				}
 			}
 			
 			// Adjust labels
@@ -2693,25 +2733,6 @@ var ZoteroPane = new function()
 		}
 	};
 	
-	this.onCollectionContextMenuSelect = function (event) {
-		event.stopPropagation();
-		var o = _collectionContextMenuOptions.find(o => o.id == event.target.id)
-		if (o.oncommand) {
-			o.oncommand();
-		}
-	};
-	
-	/**
-	 * Show context menu once it's ready
-	 */
-	this.onItemsContextMenuOpen = function (event) {
-		ZoteroPane.buildItemContextMenu()
-		.then(function () {
-			document.getElementById('zotero-itemmenu').openPopup(
-				null, null, event.clientX + 1, event.clientY + 1, true, false, event
-			);
-		})
-	};
 	
 	this.buildItemContextMenu = Zotero.Promise.coroutine(function* () {
 		var options = [
