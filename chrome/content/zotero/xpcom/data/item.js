@@ -4224,15 +4224,6 @@ Zotero.Item.prototype.fromJSON = function (json) {
 			this[field] = val;
 			break;
 		
-		case 'parentItem':
-			this.parentKey = val;
-			break;
-		
-		case 'deleted':
-		case 'inPublications':
-			this[field] = !!val;
-			break;
-		
 		case 'creators':
 			this.setCreators(json.creators);
 			break;
@@ -4320,6 +4311,13 @@ Zotero.Item.prototype.fromJSON = function (json) {
 		let note = json.note;
 		this.setNote(note !== undefined ? note : "");
 	}
+	
+	// Update boolean fields that might not be present in JSON
+	['deleted', 'inPublications'].forEach(field => {
+		if (json[field] || this[field]) {
+			this[field] = !!json[field];
+		}
+	});
 }
 
 

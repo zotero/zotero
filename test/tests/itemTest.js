@@ -1616,20 +1616,62 @@ describe("Zotero.Item", function () {
 			assert.strictEqual(item.getField('accessDate'), '');
 		});
 		
-		it("should remove child item from collection if 'collections' property not provided", function* () {
+		it("should remove item from collection if 'collections' property not provided", function* () {
 			var collection = yield createDataObject('collection');
 			// Create standalone attachment in collection
 			var attachment = yield importFileAttachment('test.png', { collections: [collection.id] });
 			var item = yield createDataObject('item', { collections: [collection.id] });
 			
+			assert.isTrue(collection.hasItem(attachment.id));
 			var json = attachment.toJSON();
 			json.path = 'storage:test2.png';
 			// Add to parent, which implicitly removes from collection
 			json.parentItem = item.key;
 			delete json.collections;
-			Zotero.debug(json);
 			attachment.fromJSON(json);
-			yield attachment.save();
+			yield attachment.saveTx();
+			assert.isFalse(collection.hasItem(attachment.id));
+		});
+		
+		it("should remove child item from parent if 'parentKey' property not provided", async function () {
+			var item = await createDataObject('item');
+			var note = await createDataObject('item', { itemType: 'note', parentKey: [item.key] });
+			
+			var json = note.toJSON();
+			delete json.parentItem;
+			
+			note.fromJSON(json);
+			await note.saveTx();
+			
+			assert.lengthOf(item.getNotes(), 0);
+		});
+		
+		it("should remove item from trash if 'deleted' property not provided", async function () {
+			var item = await createDataObject('item', { deleted: true });
+			
+			assert.isTrue(item.deleted);
+			
+			var json = item.toJSON();
+			delete json.deleted;
+			
+			item.fromJSON(json);
+			await item.saveTx();
+			
+			assert.isFalse(item.deleted);
+		});
+		
+		it("should remove item from My Publications if 'inPublications' property not provided", async function () {
+			var item = await createDataObject('item', { inPublications: true });
+			
+			assert.isTrue(item.inPublications);
+			
+			var json = item.toJSON();
+			delete json.inPublications;
+			
+			item.fromJSON(json);
+			await item.saveTx();
+			
+			assert.isFalse(item.inPublications);
 		});
 		
 		it("should ignore unknown fields", function* () {
