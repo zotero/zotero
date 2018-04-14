@@ -154,6 +154,9 @@ Zotero.ProgressWindow = function(options = {}) {
 		_progressWindow.addEventListener("mouseover", _onMouseOver, false);
 		_progressWindow.addEventListener("mouseout", _onMouseOut, false);
 		_progressWindow.addEventListener("mouseup", _onMouseUp, false);
+		_window.addEventListener('close', () => {
+			this.close();
+		});
 		
 		_windowLoading = true;
 		
@@ -281,7 +284,10 @@ Zotero.ProgressWindow = function(options = {}) {
 		
 		try {
 			_progressWindow.close();
-		} catch(ex) {}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 	}
 	
 	/**
