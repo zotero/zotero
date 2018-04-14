@@ -1274,6 +1274,7 @@
 						var valueElement = document.createElement("label");
 					}
 					
+					valueElement.setAttribute('id', `itembox-field-value-${fieldName}`);
 					valueElement.setAttribute('fieldname', fieldName);
 					valueElement.setAttribute('flex', 1);
 					
@@ -1429,6 +1430,7 @@
 				return (async function () {
 					Zotero.debug(`Showing editor for ${elem.getAttribute('fieldname')}`);
 					
+					var label = Zotero.getAncestorByTagName(elem, 'row').querySelector('label');
 					var lastTabIndex = this._lastTabIndex = parseInt(elem.getAttribute('ztabindex'));
 					
 					// If a field is open, hide it before selecting the new field, which might
@@ -1493,6 +1495,7 @@
 					}
 					
 					var t = document.createElement("textbox");
+					t.setAttribute('id', `itembox-field-textbox-${fieldName}`);
 					t.setAttribute('value', value);
 					t.setAttribute('fieldname', fieldName);
 					t.setAttribute('ztabindex', tabindex);
@@ -1548,6 +1551,9 @@
 					}
 					var box = elem.parentNode;
 					box.replaceChild(t, elem);
+					
+					// Associate textbox with label
+					label.setAttribute('control', t.getAttribute('id'));
 					
 					// Prevent error when clicking between a changed field
 					// and another -- there's probably a better way
@@ -1775,6 +1781,7 @@
 				return (async function () {
 					Zotero.debug(`Hiding editor for ${textbox.getAttribute('fieldname')}`);
 					
+					var label = Zotero.getAncestorByTagName(textbox, 'row').querySelector('label');
 					this._lastTabIndex = -1;
 					
 					// Prevent autocomplete breakage in Firefox 3
@@ -1964,6 +1971,9 @@
 					);
 					var box = textbox.parentNode;
 					box.replaceChild(elem, textbox);
+					
+					// Disassociate textbox from label
+					label.setAttribute('control', elem.getAttribute('id'));
 					
 					if (this.saveOnEdit) {
 						await this.item.saveTx();
