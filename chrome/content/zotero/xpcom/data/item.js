@@ -4196,6 +4196,9 @@ Zotero.Item.prototype.fromJSON = function (json) {
 		case 'mtime':
 		// Handled below
 		case 'collections':
+		case 'parentKey':
+		case 'deleted':
+		case 'inPublications':
 			break;
 		
 		case 'accessDate':
