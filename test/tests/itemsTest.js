@@ -171,6 +171,26 @@ describe("Zotero.Items", function () {
 			assert.equal(rels[0], item2URI);
 		})
 		
+		it("should merge three items", async function () {
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item');
+			var item3 = await createDataObject('item');
+			var item2URI = Zotero.URI.getItemURI(item2);
+			var item3URI = Zotero.URI.getItemURI(item3);
+			
+			await Zotero.Items.merge(item1, [item2, item3]);
+			
+			assert.isFalse(item1.deleted);
+			assert.isTrue(item2.deleted);
+			assert.isTrue(item3.deleted);
+			
+			// Check for merge-tracking relation
+			assert.isFalse(item1.hasChanged());
+			var rels = item1.getRelationsByPredicate(Zotero.Relations.replacedItemPredicate);
+			assert.lengthOf(rels, 2);
+			assert.sameMembers(rels, [item2URI, item3URI]);
+		})
+		
 		it("should merge two items when servant is linked to an item absent from cache", function* () {
 			// two group libraries
 			var groupOneInfo = yield createGroup({
