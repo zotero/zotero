@@ -1187,6 +1187,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = async function (field) {
 		}
 		let citationsPre = citations.slice(0, fieldToCitationIdxMapping[prevIdx]+1);
 		let citationsPost = citations.slice(fieldToCitationIdxMapping[nextIdx]);
+		let citationID = citation.citationID;
 		try {
 			var result = this._session.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
 		} catch(e) {
@@ -1194,7 +1195,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = async function (field) {
 		} finally {
 			// CSL.previewCitationCluster() sets citationID, which means that we do not mark it
 			// as a new citation in Session.addCitation() if the ID is still present
-			delete citation.citationID;
+			citation.citationID = citationID;
 		}
 		return result;
 	}.bind(this);
@@ -1575,7 +1576,7 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 	// We need a new ID if there's another citation with the same citation ID in this document
 	var duplicateIndex = this.documentCitationIDs[citation.citationID];
 	var needNewID = !citation.citationID || duplicateIndex != undefined;
-	if(needNewID || this.regenAll) {
+	if(needNewID) {
 		if (duplicateIndex != undefined) {
 			// If this is a duplicate, we need to mark both citations as "new"
 			// since we do not know which one was the "original" one
@@ -1592,6 +1593,9 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 	// and have not been added to the processor yet
 	if (! this.oldCitations.has(citation.citationID) && !this.reload) {
 		this.newIndices[index] = true;
+	}
+	if (this.regenAll && !this.newIndices[index]) {
+		this.updateIndices[index] = true;
 	}
 	Zotero.debug("Integration: Adding citationID "+citation.citationID);
 	this.documentCitationIDs[citation.citationID] = index;
