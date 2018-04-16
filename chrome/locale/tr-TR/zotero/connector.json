@@ -1,6 +1,18 @@
 {
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Çevrimiçi Kitaplığa Kaydetmeyi Etkinleştir"
+  },
+  "error_connection_save": {
+    "message": "$1, $2 masaüstü uygulamasıyla iletişim kuramamaktadır. Bağlayıcı, bazı sayfaları $3 hesabınıza direk olarak kaydedebilmektedir, ancak en iyi sonuçları alabilmek için kaydetmeyi denemeden önce $2 programının açık olduğuna emin olunuz."
+  },
   "progressWindow_error_translation": {
     "message": "Bu eseri kaydederken bir hata meydana geldi. Daha fazla bilgi için $1'ye bakınız."
+  },
+  "general_tryAgain": {
+    "message": "Yeniden Dene"
+  },
+  "error_connection_isAppRunning": {
+    "message": "$1 Çalışıyor mu?"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Etiketler (virgüllerle ayrılmış)"
@@ -11,11 +23,17 @@
   "progressWindow_error_upgradeClient": {
     "message": "Bu özellik, $1'nin sizdeki sürümü tarafından desteklenmemektedir. Lütfen $2 yükseltiniz."
   },
+  "general_cancel": {
+    "message": "İptal Et"
+  },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "son sürüme"
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Çevirmen Sorunlarını Giderme"
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "<a href=\"$1\">$2 programını indirebilir</a> ya da gerekirse <a href=\"$3\">bağlantı sorununu gidermeyi</a> deneyebilirsiniz."
   },
   "general_done": {
     "message": "Tamam"
@@ -23,10 +41,22 @@
   "progressWindow_error_fallback": {
     "message": "$1 çevirmenini kullanarak kaydetme işlemi sırasında bir hata oldu. $2 kullanılarak kaydetme deneniyor."
   },
+  "upgradeApp": {
+    "message": "$1 Programını Yükselt"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Web bazlı gönderme yapmak için $1 veya yenisi gerekmektedir."
+  },
   "general_saveTo": {
     "message": "$1'ya Kaydet"
   },
+  "appConnector": {
+    "message": "$1 Bağlayıcısı"
+  },
   "progressWindow_savingTo": {
     "message": "Buraya Kaydediyor"
+  },
+  "integration_error_connection": {
+    "message": "$1, $2 masaüstü uygulamasıyla iletişim kuramamaktadır. Web bazlı gönderme yapabilmek için $2 açık olmalıdır."
   }
 }

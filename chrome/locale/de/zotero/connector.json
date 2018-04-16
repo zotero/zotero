@@ -1,6 +1,18 @@
 {
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Speichern in der Online-Bibliothek aktivieren"
+  },
+  "error_connection_save": {
+    "message": "Die $1 war nicht in der Lage mit der $2 Desktop Applikation zu kommunizieren. Die Erweiterung kann einige Seiten direkt in Ihr $3 Benutzerkonto speichern, aber für optimale Resultate sollten Sie sicherstellen, dass $2 geöffnet ist vor dem Speichern."
+  },
   "progressWindow_error_translation": {
     "message": "Ein Fehler ist aufgetreten beim Versuch, diesen Eintrag zu speichern. Siehe $1 für weitere Informationen."
+  },
+  "general_tryAgain": {
+    "message": "Versuchen Sie es erneut"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Läuft $1?"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Tags (getrennt durch Kommas)"
@@ -11,11 +23,17 @@
   "progressWindow_error_upgradeClient": {
     "message": "Diese Funktionalität wird nicht unterstützt mit Ihrer Version von $1. Bitte aktualisieren Sie auf die $2."
   },
+  "general_cancel": {
+    "message": "Abbrechen"
+  },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "neueste Version"
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Problembehebung für Translators"
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Sie können <a href=\"$1\">$2 herunterladen</a> oder <a href=\"$3\">Verbindungsprobleme beheben</a> falls nötig."
   },
   "general_done": {
     "message": "Erledigt"
@@ -23,10 +41,22 @@
   "progressWindow_error_fallback": {
     "message": "Ein Fehler ist aufgetreten beim Speichern mit $1. Es wird versucht stattdessen $2 zu nutzen."
   },
+  "upgradeApp": {
+    "message": "Upgrade $1"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Web-basiertes Zitieren benötigt $1 oder später."
+  },
   "general_saveTo": {
     "message": "Speichern nach $1"
   },
+  "appConnector": {
+    "message": "$1 Erweiterung"
+  },
   "progressWindow_savingTo": {
     "message": "Speichern nach"
+  },
+  "integration_error_connection": {
+    "message": "Die $1 war nicht in der Lage mit der $2 Desktop Applikation zu kommunizieren. $2 muss geöffnet sein zum web-basierten Zitieren."
   }
 }

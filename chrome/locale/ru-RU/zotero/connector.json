@@ -1,6 +1,18 @@
 {
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Разрешить сохранение в сетевые библиотеки"
+  },
+  "error_connection_save": {
+    "message": "$1 не может соединиться с локальным приложением $2. Соединитель может сохранять страницы напрямую в вашей учетной записи $3, но для достижения лучших результатов убедитесь что  $2 отрыто пере попыткой сохранения."
+  },
   "progressWindow_error_translation": {
     "message": "Возникла ошибка при сохранении этого элемента. Смотрите $1 для получения дополнительной информации."
+  },
+  "general_tryAgain": {
+    "message": "Попытайтесь снова"
+  },
+  "error_connection_isAppRunning": {
+    "message": "$1 запущено?"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Тэги (через запятую)"
@@ -11,11 +23,17 @@
   "progressWindow_error_upgradeClient": {
     "message": "Эта возможность не поддерживается версией $1 установленной у вас. Пожалуйста обновитесь до $2."
   },
+  "general_cancel": {
+    "message": "Оменить"
+  },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "Последняя версия"
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Расследнование проблем с преобразователем"
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Вы можете <a href=\"$1\">загрузить из сети $2</a> или <a href=\"$3\">исправить проблемы с подключением </a> если необходимо."
   },
   "general_done": {
     "message": "Завершено"
@@ -23,10 +41,22 @@
   "progressWindow_error_fallback": {
     "message": "Возникла ошибка при сохранении как $1. Совершена попытка сохранить как $2."
   },
+  "upgradeApp": {
+    "message": "Обновить $1"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Веб-цитирование требует $1 или более позднюю."
+  },
   "general_saveTo": {
     "message": "Сохранить в $1"
   },
+  "appConnector": {
+    "message": "$1 соединитель"
+  },
   "progressWindow_savingTo": {
     "message": "Сохранение в"
+  },
+  "integration_error_connection": {
+    "message": "$1 не может соединиться с локальным приложением $2. $2 должно быть запущено для использования web-цитирования."
   }
 }

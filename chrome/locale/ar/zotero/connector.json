@@ -1,6 +1,18 @@
 {
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "تمكين الحفظ إلى مكتبة الشبكة"
+  },
+  "error_connection_save": {
+    "message": " $1 غير قادر على التواصل مع $2 تطبيق سطح المكتب. الموصل يمكن أن يحفظ بعض الصفحات مباشرة إلى حسابك في $3، لكن لنتائجٍ أفضل تأكد أن $2 مفتوح  قبل محاولة الحفظ."
+  },
   "progressWindow_error_translation": {
     "message": "حدث خطأ أثناء حفظ هذا العنصر. راجع $1 لمزيد من المعلومات."
+  },
+  "general_tryAgain": {
+    "message": "حاول مرة أخرى"
+  },
+  "error_connection_isAppRunning": {
+    "message": "هل $1 يعمل؟"
   },
   "progressWindow_tagPlaceholder": {
     "message": "وسوم ( مفصولة بفواصل)"
@@ -11,11 +23,17 @@
   "progressWindow_error_upgradeClient": {
     "message": "هذه الميزة ليست مدعومة في إصدارتك من $1. رجاءاً حدث  إلى $2"
   },
+  "general_cancel": {
+    "message": "إلغاء"
+  },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "الإصدار الأخير"
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "اكتشاف واصلاح مشاكل المترجمات"
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "يمكنك <a href=\"$1\">تحميل$2</a> أو <a href=\"$3\">استصلاح الموصل</a> إذا لزم الأمر."
   },
   "general_done": {
     "message": "تم"
@@ -23,10 +41,22 @@
   "progressWindow_error_fallback": {
     "message": "حدث خطأ اثناء الحفظ باستخدام $1. محاولة الحفظ باستخدام $2 بدلاً من ذلك."
   },
+  "upgradeApp": {
+    "message": "ترقية $1"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "الاستشهاد المستند على الشبكة يتطلب $1 أو أحدث."
+  },
   "general_saveTo": {
     "message": "احفظ في $1"
   },
+  "appConnector": {
+    "message": "موصل $1"
+  },
   "progressWindow_savingTo": {
     "message": "الحفظ في"
+  },
+  "integration_error_connection": {
+    "message": " $1 غير قادر على التواصل مع  $2 تطبيق سطح المكتب. يجب فتح $2 لاستخدام الاستشهاد المستند على الشبكة."
   }
 }

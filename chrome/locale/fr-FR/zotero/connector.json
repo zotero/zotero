@@ -1,15 +1,30 @@
 {
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Activer l'enregistrement dans la bibliothèque en ligne"
+  },
+  "error_connection_save": {
+    "message": "Le $1 n'a pas pu communiquer avec l'application $2. Le Connecteur peut enregistrer certaines pages directement sur votre compte $3, mais pour de meilleurs résultats assurez-vous que $2 est ouvert avant d'essayer d'enregistrer."
+  },
   "progressWindow_error_translation": {
     "message": "Une erreur s’est produite lors de l’enregistrement de ce document. Consultez $1 pour davantage de précisions. "
   },
+  "general_tryAgain": {
+    "message": "Réessayer"
+  },
+  "error_connection_isAppRunning": {
+    "message": "$1 est-il ouvert ?"
+  },
   "progressWindow_tagPlaceholder": {
-    "message": "Mots-clés (séparés par des virgules)"
+    "message": "Marqueurs (séparés par des virgules)"
   },
   "general_more": {
     "message": "Plus…"
   },
   "progressWindow_error_upgradeClient": {
-    "message": "Cette fonctionnalité n’est pas supportée par votre version de $1. Mettez à jour vers $2 s’il vous plait."
+    "message": "Cette fonctionnalité n’est pas compatible avec votre version de $1. Veuillez mettre à niveau vers $2."
+  },
+  "general_cancel": {
+    "message": "Annuler"
   },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "dernière version"
@@ -17,16 +32,31 @@
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Résoudre les problèmes de convertisseur"
   },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Vous pouvez <a href=\"$1\">télécharger le $2</a> ou <a href=\"$3\">résoudre les problèmes de connexion</a> si nécessaire."
+  },
   "general_done": {
     "message": "Terminé"
   },
   "progressWindow_error_fallback": {
     "message": "Une erreur s’est produite lors de l’enregistrement avec $1. Tentative d’enregistrement en utilisant $2 à la place."
   },
+  "upgradeApp": {
+    "message": "Mettre à niveau $1"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "L'insertion de citations dans une application web nécessite $1 ou ultérieur."
+  },
   "general_saveTo": {
     "message": "Enregistrer dans $1"
   },
+  "appConnector": {
+    "message": "Connecteur $1"
+  },
   "progressWindow_savingTo": {
     "message": "Enregistrer dans"
+  },
+  "integration_error_connection": {
+    "message": "Le $1 n'a pas pu communiquer avec l'application $2. $2 doit être ouvert pour pouvoir insérer des citations dans une application web."
   }
 }

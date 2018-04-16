@@ -1,6 +1,18 @@
 {
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Habilitar guardar en la biblioteca en línea"
+  },
+  "error_connection_save": {
+    "message": "La $1 fue habilitada para comunicar con la aplicación de escritorio$2. El Conector puede guardar algunas páginas directamente en tu cuenta $3, pero para obtener mejores resultados deberías asegurarte de que $2 está abierto antes de intentar guardar."
+  },
   "progressWindow_error_translation": {
-    "message": "Ocurrió un error mientras se guardaba este elemento. Véase $1para más información."
+    "message": "Ocurrió un error mientras se guardaba este elemento. Véase $1 para más información."
+  },
+  "general_tryAgain": {
+    "message": "Prueba de nuevo"
+  },
+  "error_connection_isAppRunning": {
+    "message": "¿Está $1 en ejecución?"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Etiquetas (separadas por comas)"
@@ -11,22 +23,40 @@
   "progressWindow_error_upgradeClient": {
     "message": "Esta característica no está soportada por tu versión de $1. Por favor, actualiza a $2."
   },
+  "general_cancel": {
+    "message": "Cancelar"
+  },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "última versión"
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Solución de problemas del traductor"
   },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Puedes<a href=\"$1\">descargar $2</a> o <a href=\"$3\">solucionar problemas de la conexión</a> si es necesario."
+  },
   "general_done": {
     "message": "Hecho"
   },
   "progressWindow_error_fallback": {
-    "message": "Ocurrió un error al guardar con $1. Intentando guardar usando $2en su lugar."
+    "message": "Ocurrió un error al guardar con $1. Intentando guardar usando $2 en su lugar."
+  },
+  "upgradeApp": {
+    "message": "Actualizar $1"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "La citación basada en web requiere $1 o superior."
   },
   "general_saveTo": {
     "message": "Guardar a $1"
   },
+  "appConnector": {
+    "message": "$1 Conector"
+  },
   "progressWindow_savingTo": {
     "message": "Guardando a"
+  },
+  "integration_error_connection": {
+    "message": "La $1 fue habilitada para comunicar con la aplicación de escritorio $2. $2 debe estar abierto para usar la citación basada en web."
   }
 }
