@@ -896,6 +896,19 @@ Zotero.Utilities.Internal = {
 			}
 		}
 		
+		// Next try arXiv
+		if (!identifiers.length) {
+			let arXiv_RE = /((?:[^A-Za-z]|^)([A-Za-z\.]+\/\d{7})(?!\d))|((?:\D|^)(\d{4}.\d{4,5})(?!\d))/g;
+			let m;
+			while ((m = arXiv_RE.exec(text))) {
+				let arXiv = m[2] || m[4];
+				if (arXiv && !foundIDs.has(arXiv)) {
+					identifiers.push({arXiv: arXiv});
+					foundIDs.add(arXiv);
+				}
+			}
+		}
+		
 		// Finally try for PMID
 		if (!identifiers.length) {
 			// PMID; right now, the longest PMIDs are 8 digits, so it doesn't seem like we'll
