@@ -155,7 +155,7 @@ describe("Zotero.Utilities.Internal", function () {
 		});
 		
 		it("should extract multiple old and new style arXivs", async function () {
-			var identifiers = ZUI.extractIdentifiers("0706.0044 0706.00441v1 hep-ex/9809001v1 math.GT/0309135");
+			var identifiers = ZUI.extractIdentifiers("0706.0044 arXiv:0706.00441v1,hep-ex/9809001v1, math.GT/0309135.");
 			assert.lengthOf(identifiers, 4);
 			assert.lengthOf(Object.keys(identifiers[0]), 1);
 			assert.lengthOf(Object.keys(identifiers[1]), 1);
