@@ -242,17 +242,18 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 	const hostRe = /[\r\n]Host: *(localhost|127\.0\.0\.1)(:[0-9]+)?[\r\n]/i;
 	const contentTypeRe = /[\r\n]Content-Type: *([^ \r\n]+)/i;
 	
-	if(!Zotero.isServer) {
-		const originRe = /[\r\n]Origin: *([^ \r\n]+)/i;
-		var m = originRe.exec(this.header);
-		if(m) {
-			this.origin = m[1];
-		} else {
-			const bookmarkletRe = /[\r\n]Zotero-Bookmarklet: *([^ \r\n]+)/i;
-			var m = bookmarkletRe.exec(this.header);
-			if(m) this.origin = "https://www.zotero.org";
-		}
-		
+	const originRe = /[\r\n]Origin: *([^ \r\n]+)/i;
+	var m = originRe.exec(this.header);
+	if (m) {
+		this.origin = m[1];
+	}
+	else {
+		const bookmarkletRe = /[\r\n]Zotero-Bookmarklet: *([^ \r\n]+)/i;
+		var m = bookmarkletRe.exec(this.header);
+		if (m) this.origin = "https://www.zotero.org";
+	}
+	
+	if (!Zotero.isServer) {
 		// Make sure the Host header is set to localhost/127.0.0.1 to prevent DNS rebinding attacks
 		if (!hostRe.exec(this.header)) {
 			this._requestFinished(this._generateResponse(400, "text/plain", "Invalid Host header\n"));
@@ -333,12 +334,29 @@ Zotero.Server.DataListener.prototype._bodyData = function() {
  */
 Zotero.Server.DataListener.prototype._generateResponse = function(status, contentType, body) {
 	var response = "HTTP/1.0 "+status+" "+Zotero.Server.responseCodes[status]+"\r\n";
-	if(!Zotero.isServer) {
+	
+	// Translation server
+	if (Zotero.isServer) {
+		// Add CORS headers if Origin header matches the allowed origins
+		if (this.origin) {
+			let allowedOrigins = Zotero.Prefs.get('httpServer.allowedOrigins')
+				.split(/, */).filter(x => x);
+			let allAllowed = allowedOrigins.includes('*');
+			if (allAllowed || allowedOrigins.includes(this.origin)) {
+				response += "Access-Control-Allow-Origin: " + (allAllowed ? '*' : this.origin) + "\r\n";
+				response += "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n";
+				response += "Access-Control-Allow-Headers: Content-Type\r\n";
+			}
+		}
+	}
+	// Client
+	else {
 		response += "X-Zotero-Version: "+Zotero.version+"\r\n";
 		response += "X-Zotero-Connector-API-Version: "+CONNECTOR_API_VERSION+"\r\n";
-		if(this.origin === ZOTERO_CONFIG.BOOKMARKLET_ORIGIN ||
+		
+		if (this.origin === ZOTERO_CONFIG.BOOKMARKLET_ORIGIN ||
 				this.origin === ZOTERO_CONFIG.HTTP_BOOKMARKLET_ORIGIN) {
-			response += "Access-Control-Allow-Origin: "+this.origin+"\r\n";
+			response += "Access-Control-Allow-Origin: " + this.origin + "\r\n";
 			response += "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n";
 			response += "Access-Control-Allow-Headers: Content-Type,X-Zotero-Connector-API-Version,X-Zotero-Version\r\n";
 		}
