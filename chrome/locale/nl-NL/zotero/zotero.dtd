@@ -85,7 +85,7 @@
 <!ENTITY zotero.items.genre_column "Genre">
 <!ENTITY zotero.items.system_column "Systeem">
 <!ENTITY zotero.items.moreColumns.label "Meer kolommen">
-<!ENTITY zotero.items.restoreColumnOrder.label "Herstel volgorde kolommen">
+<!ENTITY zotero.items.restoreColumnOrder.label "Herstel kolomvolgorde">
 
 <!ENTITY zotero.items.menu.showInLibrary "In bibliotheek tonen">
 <!ENTITY zotero.items.menu.attach.note "Aantekening toevoegen">
@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Kies kleur">
 <!ENTITY zotero.tagColorChooser.removeColor "Verwijder kleur">
 
-<!ENTITY zotero.lookup.description "Voer hieronder een of meer ISBN's, DOI's of PMID's in om op te zoeken.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Zoeken">
 
 <!ENTITY zotero.selectitems.title "Items selecteren">

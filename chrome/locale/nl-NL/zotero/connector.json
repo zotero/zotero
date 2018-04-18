@@ -20,6 +20,9 @@
   "general_saveTo": {
     "message": "Opslaan in $1"
   },
+  "appConnector": {
+    "message": "$1 Connector"
+  },
   "progressWindow_savingTo": {
     "message": "Opslaan in"
   }

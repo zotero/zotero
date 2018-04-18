@@ -204,7 +204,7 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Gekoppelde Bijlage-Bestandsmap">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero gebruik relatieve paden voor gekoppelde bijlagebestanden binnen de standaard bestandsmap, waardoor u toegang heeft tot al uw bestanden op verschillende computers zolang de bestandsstructuur in de standaard bestandsmap hetzelfde blijft.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Standaard bestandsmap">
-<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Kies...">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Kiezen...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Terug naar Absolute paden...">
 
 <!ENTITY zotero.preferences.dbMaintenance "Database-onderhoud">

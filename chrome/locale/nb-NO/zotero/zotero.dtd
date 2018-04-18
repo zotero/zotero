@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Set Color">
 <!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
 
-<!ENTITY zotero.lookup.description "Enter one or more ISBNs, DOIs, or PMIDs to look up in the box below.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Search">
 
 <!ENTITY zotero.selectitems.title "Velg elementer">

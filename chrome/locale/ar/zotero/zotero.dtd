@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "ضبط اللون">
 <!ENTITY zotero.tagColorChooser.removeColor "ازالة اللون">
 
-<!ENTITY zotero.lookup.description "ادخل الترقيم الدولي الموحد للكتاب او معرف مقالات الميدلاين او معرف الوثيقة الرقمية.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "بحث">
 
 <!ENTITY zotero.selectitems.title "تحديد العناصر">

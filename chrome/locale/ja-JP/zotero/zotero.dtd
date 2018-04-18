@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "色を指定">
 <!ENTITY zotero.tagColorChooser.removeColor "色を取り除く">
 
-<!ENTITY zotero.lookup.description "下のボックスから検索するには、 ISBN、DOI、または PMID （複数可）を入力してください。">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "検索">
 
 <!ENTITY zotero.selectitems.title "アイテムを選択">

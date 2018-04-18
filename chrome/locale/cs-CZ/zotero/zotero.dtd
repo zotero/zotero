@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Nastavit barvu">
 <!ENTITY zotero.tagColorChooser.removeColor "Odstranit barvu">
 
-<!ENTITY zotero.lookup.description "Do políčka níže vložte ISBN, DOI nebo PMID, podle kterého chcete vyhledávat.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Hledat">
 
 <!ENTITY zotero.selectitems.title "Označit položky">

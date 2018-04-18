@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Задати колір">
 <!ENTITY zotero.tagColorChooser.removeColor "Видалити колір">
 
-<!ENTITY zotero.lookup.description "Введіть один чи більше ISBN, DOI або PMID для пошуку в наступному вікні.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Пошук">
 
 <!ENTITY zotero.selectitems.title "Вибрати документи">

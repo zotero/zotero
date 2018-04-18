@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Đặt màu">
 <!ENTITY zotero.tagColorChooser.removeColor "Bỏ màu">
 
-<!ENTITY zotero.lookup.description "Nhập một hoặc nhiều ISBN, DOI hay PMID muốn tìm trong hộp dưới đây.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Tìm">
 
 <!ENTITY zotero.selectitems.title "Chọn các Biểu ghi">

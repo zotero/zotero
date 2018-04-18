@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Sæt farve:">
 <!ENTITY zotero.tagColorChooser.removeColor "Fjern farve">
 
-<!ENTITY zotero.lookup.description "Indtast ISBN, DOI eller PMID for opslag nedenfor.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Søg">
 
 <!ENTITY zotero.selectitems.title "Vælg elementer">

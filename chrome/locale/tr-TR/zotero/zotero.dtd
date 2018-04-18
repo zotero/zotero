@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Rengi Ayarla">
 <!ENTITY zotero.tagColorChooser.removeColor "Rengi Kaldır">
 
-<!ENTITY zotero.lookup.description "Bir ya da birden çok ISBN, DOI veya PMID numarası girerek aşağıdaki kutuda ara.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Ara">
 
 <!ENTITY zotero.selectitems.title "Eser Seç">

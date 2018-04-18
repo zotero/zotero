@@ -155,7 +155,7 @@
 <!ENTITY zotero.toolbar.note.child "Adicionar nota filha">
 <!ENTITY zotero.toolbar.lookup "Procurar pelo identificador...">
 <!ENTITY zotero.toolbar.attachment.linked "Link para arquivo...">
-<!ENTITY zotero.toolbar.attachment.add "Armazenar copiar do arquivo...">
+<!ENTITY zotero.toolbar.attachment.add "Cópia armazenada do arquivo...">
 <!ENTITY zotero.toolbar.attachment.weblink "Salvar link para página atual">
 <!ENTITY zotero.toolbar.attachment.snapshot "Gerar instantâneo da página atual">
 
@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Definir a cor">
 <!ENTITY zotero.tagColorChooser.removeColor "Remover a cor">
 
-<!ENTITY zotero.lookup.description "Digite um ou mais ISBN, DOI, ou PMID para procurar na caixa abaixo.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Pesquisar">
 
 <!ENTITY zotero.selectitems.title "Selecionar itens">

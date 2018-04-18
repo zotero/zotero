@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Szín beállítása">
 <!ENTITY zotero.tagColorChooser.removeColor "Szín eltávolítása">
 
-<!ENTITY zotero.lookup.description "Adja meg az ISBN, DOI vagy PMID azonosítót az alábbi dobozban.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Keresés">
 
 <!ENTITY zotero.selectitems.title "Elemek kiválasztása">

@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Velja lit">
 <!ENTITY zotero.tagColorChooser.removeColor "Fjarlægja lit">
 
-<!ENTITY zotero.lookup.description "Sláðu inn eitt eða fleiri ISBN, DOI, eða PMID til að leita að í reitinn fyrir neðan.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Leita">
 
 <!ENTITY zotero.selectitems.title "Veldu færslur">

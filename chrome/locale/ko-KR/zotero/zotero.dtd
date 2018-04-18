@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "색상 설정">
 <!ENTITY zotero.tagColorChooser.removeColor "색상 제거">
 
-<!ENTITY zotero.lookup.description "ISBN, DOI, 또는 PMID를 입력하세요.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "검색">
 
 <!ENTITY zotero.selectitems.title "항목 선택">

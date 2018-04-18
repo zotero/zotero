@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "設定顏色">
 <!ENTITY zotero.tagColorChooser.removeColor "移除顏色">
 
-<!ENTITY zotero.lookup.description "輸入一或多個 ISBN, DOI, 或 PMID 以在下面方塊查詢。">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "搜尋">
 
 <!ENTITY zotero.selectitems.title "選取項目">

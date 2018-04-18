@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Naudoti spalvą">
 <!ENTITY zotero.tagColorChooser.removeColor "Pašalinti spalvą">
 
-<!ENTITY zotero.lookup.description "Į paieškos laukelį įveskite vieną arba kelis ISBN, DOI ar PMID kodus.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Ieškoti">
 
 <!ENTITY zotero.selectitems.title "Pasirinkti įrašus">

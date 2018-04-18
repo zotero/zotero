@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Καθορισμός χρώματος">
 <!ENTITY zotero.tagColorChooser.removeColor "Απομάκρυνση χρώματος">
 
-<!ENTITY zotero.lookup.description "Εισάγετε στο παρακάτω πεδίο ένα ή περισσότερα ISBN, DOI ή PMID για αναζήτηση.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Αναζήτηση">
 
 <!ENTITY zotero.selectitems.title "Επιλέξτε στοιχεία">

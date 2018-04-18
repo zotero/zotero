@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Aseta väri">
 <!ENTITY zotero.tagColorChooser.removeColor "Poista väri">
 
-<!ENTITY zotero.lookup.description "Kirjoita ISBN-, DOI tai PMID-koodi allaolevaan laatikkoon.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Etsi">
 
 <!ENTITY zotero.selectitems.title "Valitse nimikkeet">

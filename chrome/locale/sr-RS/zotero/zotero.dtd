@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Постави боју">
 <!ENTITY zotero.tagColorChooser.removeColor "Уклони боју">
 
-<!ENTITY zotero.lookup.description "Унесите ИСБН, ДОИ или ПМИД за тражење у приложеним пољима.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Претрага">
 
 <!ENTITY zotero.selectitems.title "Изабери ставке">

@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Ställ in färg">
 <!ENTITY zotero.tagColorChooser.removeColor "Ta bort färg">
 
-<!ENTITY zotero.lookup.description "Skriv ISBN, DOI, eller PMID i sökfältet nedan.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Sök">
 
 <!ENTITY zotero.selectitems.title "Markera källor">

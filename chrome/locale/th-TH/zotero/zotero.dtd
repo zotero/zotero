@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Set Color">
 <!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
 
-<!ENTITY zotero.lookup.description "ป้อน ISBN, DOI หรือ PMID ในกล่องด้านล่างนี้เพื่อค้นหา">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Search">
 
 <!ENTITY zotero.selectitems.title "เลือกรายการ">

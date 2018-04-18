@@ -1,6 +1,18 @@
 {
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Zapnúť ukladanie do Online knižnice"
+  },
+  "error_connection_save": {
+    "message": "$1 nedokázal komunikovať s počítačovým programom $2. Konektor dokáže uložiť niektoré stránky priamo na váš účet v$3, ale najlepší výsledok dosiahnete, keď sa uistíte, že $2 je otvorený, prv než začnete ukladať."
+  },
   "progressWindow_error_translation": {
     "message": "Pri ukladaní tohto súboru došlo k chybe. Pre viac informácií si pozrite $1."
+  },
+  "general_tryAgain": {
+    "message": "Skúste znova"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Beží $1?"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Značky (oddelené čiarkami)"
@@ -11,11 +23,17 @@
   "progressWindow_error_upgradeClient": {
     "message": "Túto funkciu vaša verzia $1 nepodporuje. Aktualizujte ju, prosím, na $2."
   },
+  "general_cancel": {
+    "message": "Zrušiť"
+  },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "najnovšia verzia"
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Riešenie problémov s translátormi"
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Môžete <a href=\"$1\">stiahnuť $2</a> alebo <a href=\"$3\">riešiť poruchu spojenia</a>, ak je to potrebné."
   },
   "general_done": {
     "message": "Hotovo"
@@ -23,10 +41,22 @@
   "progressWindow_error_fallback": {
     "message": "Pri ukladaní pomocou $1 došlo k chybe. Namiesto toho prebieha pokus o ukladanie pomocou $2."
   },
+  "upgradeApp": {
+    "message": "Aktualizovať $1"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Webové citovanie vyžaduje verziu $1 alebo vyššiu."
+  },
   "general_saveTo": {
     "message": "Uložiť do $1"
   },
+  "appConnector": {
+    "message": "Konektor $1"
+  },
   "progressWindow_savingTo": {
     "message": "Ukladá sa do"
+  },
+  "integration_error_connection": {
+    "message": "$1 nedokázal komunikovať s počítačovým programom $2. $2 musí byť pre používanie webového citovania spustený."
   }
 }

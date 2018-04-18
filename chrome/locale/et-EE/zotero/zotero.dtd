@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Värvi valimine:">
 <!ENTITY zotero.tagColorChooser.removeColor "Värvi eemaldamine">
 
-<!ENTITY zotero.lookup.description "Sisestada otsitava ISBN, DOI või PMID allolevasse lahtrisse.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Otsing">
 
 <!ENTITY zotero.selectitems.title "Kirjete valimine">

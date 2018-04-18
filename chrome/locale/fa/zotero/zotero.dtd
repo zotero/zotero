@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "تنظیم رنگ">
 <!ENTITY zotero.tagColorChooser.removeColor "حذف رنگ">
 
-<!ENTITY zotero.lookup.description "شابک،‏ DOI یا PMID را برای جستجو در کادر زیر وارد کنید.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "جستجو">
 
 <!ENTITY zotero.selectitems.title "انتخاب آیتم‌‌ها">
