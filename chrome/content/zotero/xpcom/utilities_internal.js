@@ -898,10 +898,13 @@ Zotero.Utilities.Internal = {
 		
 		// Next try arXiv
 		if (!identifiers.length) {
-			let arXiv_RE = /((?:[^A-Za-z]|^)([A-Za-z\.]+\/\d{7})(?!\d))|((?:\D|^)(\d{4}.\d{4,5})(?!\d))/g;
+			// arXiv identifiers are extracted without version number
+			// i.e. 0706.0044v1 is extracted as 0706.0044,
+			// because arXiv OAI API doesn't allow to access individual versions
+			let arXiv_RE = /((?:[^A-Za-z]|^)([\-A-Za-z\.]+\/\d{7})(?:(v[0-9]+)|)(?!\d))|((?:\D|^)(\d{4}.\d{4,5})(?:(v[0-9]+)|)(?!\d))/g;
 			let m;
 			while ((m = arXiv_RE.exec(text))) {
-				let arXiv = m[2] || m[4];
+				let arXiv = m[2] || m[5];
 				if (arXiv && !foundIDs.has(arXiv)) {
 					identifiers.push({arXiv: arXiv});
 					foundIDs.add(arXiv);
