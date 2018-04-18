@@ -896,6 +896,22 @@ Zotero.Utilities.Internal = {
 			}
 		}
 		
+		// Next try arXiv
+		if (!identifiers.length) {
+			// arXiv identifiers are extracted without version number
+			// i.e. 0706.0044v1 is extracted as 0706.0044,
+			// because arXiv OAI API doesn't allow to access individual versions
+			let arXiv_RE = /((?:[^A-Za-z]|^)([\-A-Za-z\.]+\/\d{7})(?:(v[0-9]+)|)(?!\d))|((?:\D|^)(\d{4}.\d{4,5})(?:(v[0-9]+)|)(?!\d))/g;
+			let m;
+			while ((m = arXiv_RE.exec(text))) {
+				let arXiv = m[2] || m[5];
+				if (arXiv && !foundIDs.has(arXiv)) {
+					identifiers.push({arXiv: arXiv});
+					foundIDs.add(arXiv);
+				}
+			}
+		}
+		
 		// Finally try for PMID
 		if (!identifiers.length) {
 			// PMID; right now, the longest PMIDs are 8 digits, so it doesn't seem like we'll

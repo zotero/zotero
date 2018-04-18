@@ -2624,6 +2624,12 @@ Zotero.Translate.Search.prototype.setIdentifier = function (identifier) {
 			contextObject: "rft_id=info:pmid/" + identifier.PMID
 		};
 	}
+	else if (identifier.arXiv) {
+		search = {
+			itemType: "journalArticle",
+			arXiv: identifier.arXiv
+		};
+	}
 	else {
 		throw new Error("Unrecognized identifier");
 	}

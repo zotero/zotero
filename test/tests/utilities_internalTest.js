@@ -153,5 +153,18 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.lengthOf(Object.keys(identifiers[0]), 1);
 			assert.propertyVal(identifiers[0], "PMID", id);
 		});
+		
+		it("should extract multiple old and new style arXivs", async function () {
+			var identifiers = ZUI.extractIdentifiers("0706.0044 arXiv:0706.00441v1,hep-ex/9809001v1, math.GT/0309135.");
+			assert.lengthOf(identifiers, 4);
+			assert.lengthOf(Object.keys(identifiers[0]), 1);
+			assert.lengthOf(Object.keys(identifiers[1]), 1);
+			assert.lengthOf(Object.keys(identifiers[2]), 1);
+			assert.lengthOf(Object.keys(identifiers[3]), 1);
+			assert.propertyVal(identifiers[0], "arXiv", "0706.0044");
+			assert.propertyVal(identifiers[1], "arXiv", "0706.00441");
+			assert.propertyVal(identifiers[2], "arXiv", "hep-ex/9809001");
+			assert.propertyVal(identifiers[3], "arXiv", "math.GT/0309135");
+		});
 	});
 })
