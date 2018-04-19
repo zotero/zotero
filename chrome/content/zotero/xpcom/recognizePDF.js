@@ -186,7 +186,7 @@ Zotero.RecognizePDF = new function () {
 	};
 	
 	
-	this.report = async function (item) {
+	this.report = async function (item, description) {
 		var attachment = Zotero.Items.get(item.getAttachments()[0]);
 		var filePath = attachment.getFilePath();
 		if (!filePath || !await OS.File.exists(filePath)) {
@@ -197,7 +197,7 @@ Zotero.RecognizePDF = new function () {
 		var json = await extractJSON(filePath, MAX_PAGES);
 		var metadata = item.toJSON();
 		
-		var data = { version, json, metadata };
+		var data = { description, version, json, metadata };
 		var uri = ZOTERO_CONFIG.RECOGNIZE_URL + 'report';
 		return Zotero.HTTP.request(
 			"POST",

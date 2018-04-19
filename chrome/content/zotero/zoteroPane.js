@@ -4600,27 +4600,27 @@ var ZoteroPane = new function()
 	
 	
 	this.reportMetadataForSelected = async function () {
-		var success = false;
-		var items = ZoteroPane.getSelectedItems();
-		for (let item of items) {
-			try {
-				await Zotero.RecognizePDF.report(item);
-				// If at least one report was submitted, show as success
-				success = true;
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
-		}
+		let items = ZoteroPane.getSelectedItems();
+		if(!items.length) return;
 		
-		if (success) {
+		let input = {value: ''};
+		Services.prompt.prompt(
+			null,
+			Zotero.getString('recognizePDF.reportMetadata'),
+			Zotero.getString('general.describeProblem'),
+			input, null, {}
+		);
+		
+		try {
+			await Zotero.RecognizePDF.report(items[0], input.value);
 			Zotero.alert(
 				window,
 				Zotero.getString('general.submitted'),
 				Zotero.getString('general.thanksForHelpingImprove', Zotero.clientName)
 			);
 		}
-		else {
+		catch (e) {
+			Zotero.logError(e);
 			Zotero.alert(
 				window,
 				Zotero.getString('general.error'),
