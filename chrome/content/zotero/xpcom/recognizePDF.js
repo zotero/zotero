@@ -539,6 +539,29 @@ Zotero.RecognizePDF = new function () {
 		let res = await _query(json);
 		if (!res) return null;
 		
+		if (res.arxiv) {
+			Zotero.debug('RecognizePDF: Getting metadata by arXiv');
+			let translate = new Zotero.Translate.Search();
+			translate.setIdentifier({arXiv: res.arxiv});
+			let translators = await translate.getTranslators();
+			translate.setTranslator(translators);
+			
+			try {
+				let newItem = await _promiseTranslate(translate, libraryID);
+				if (!newItem.abstractNote && res.abstract) {
+					newItem.setField('abstractNote', res.abstract);
+				}
+				if (!newItem.language && res.language) {
+					newItem.setField('language', res.language);
+				}
+				newItem.saveTx();
+				return newItem;
+			}
+			catch (e) {
+				Zotero.debug('RecognizePDF: ' + e);
+			}
+		}
+		
 		if (res.doi) {
 			Zotero.debug('RecognizePDF: Getting metadata by DOI');
 			let translate = new Zotero.Translate.Search();
