@@ -801,9 +801,8 @@ Zotero.Schema = new function(){
 					catch (e) {
 						if (e instanceof OS.File.Error && e.becauseExists) {
 							// Could overwrite automatically, but we want to log this
-							let msg = "Overwriting translator with same filename '" + entry.fileName + "'";
-							Zotero.debug(msg, 1);
-							Components.utils.reportError(msg);
+							Zotero.warn("Overwriting translator with same filename '"
+								+ entry.fileName + "'");
 							yield OS.File.move(tmpFile, destFile);
 						}
 						else {
@@ -965,10 +964,8 @@ Zotero.Schema = new function(){
 							catch (e) {
 								if (e instanceof OS.File.Error && e.becauseExists) {
 									// Could overwrite automatically, but we want to log this
-									let msg = "Overwriting " + modeType + " with same filename "
-										+ "'" + fileName + "'";
-									Zotero.debug(msg, 1);
-									Components.utils.reportError(msg);
+									Zotero.warn("Overwriting " + modeType + " with same filename "
+										+ "'" + fileName + "'", 1);
 									yield OS.File.copy(entry.path, destFile);
 								}
 								else {
