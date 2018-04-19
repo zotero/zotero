@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.items "条目">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "设置">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "自定义...">
 
 <!ENTITY zotero.preferences.prefpane.general "常规">
 
@@ -19,13 +19,13 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "超大">
 <!ENTITY zotero.preferences.fontSize.notes "笔记字体大小:">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.fileHandling "文件处理">
 <!ENTITY zotero.preferences.automaticSnapshots "从 Web 页面创建条目时自动生成快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "保存条目时自动附加相关的 PDF 文档及其它文件">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.autoRecognizeFiles "自动检索 PDF 的元数据">
+<!ENTITY zotero.preferences.autoRenameFiles "使用父类元数据自动重命名附件文件">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "打开 PDF 使用">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "系统默认">
 
 <!ENTITY zotero.preferences.miscellaneous "杂项">
 <!ENTITY zotero.preferences.autoUpdate "自动检查更新的转换器和样式">

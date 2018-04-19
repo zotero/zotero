@@ -14,8 +14,8 @@
 <!ENTITY zotero.general.tools "工具">
 <!ENTITY zotero.general.more "更多">
 <!ENTITY zotero.general.loading "加载…">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "关闭">
+<!ENTITY zotero.general.minimize "最小化">
 
 
 <!ENTITY zotero.errorReport.title "Zotero 错误报告">
@@ -99,8 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "还原到文献库中">
 <!ENTITY zotero.items.menu.duplicateItem "创建条目副本">
 <!ENTITY zotero.items.menu.mergeItems "合并条目…">
-<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
+<!ENTITY zotero.items.menu.unrecognize "撤消检索元数据">
+<!ENTITY zotero.items.menu.reportMetadata "报告不正确的元数据">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "选择作为主条目的条目版本.">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "选择需要保留的域, 防止被其它版本的域覆盖.">
@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "设置颜色">
 <!ENTITY zotero.tagColorChooser.removeColor "移除颜色">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
+<!ENTITY zotero.lookup.description "输入 ISBN，DOI，PMID 或 arXiv ID 以 添加到您的文献库：">
 <!ENTITY zotero.lookup.button.search "搜索">
 
 <!ENTITY zotero.selectitems.title "选择条目">
