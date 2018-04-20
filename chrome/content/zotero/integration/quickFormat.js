@@ -179,6 +179,7 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _getCurrentEditorTextNode() {
 		var selection = qfiWindow.getSelection();
+		if (!selection) return false;
 		var range = selection.getRangeAt(0);
 		
 		var node = range.startContainer;
