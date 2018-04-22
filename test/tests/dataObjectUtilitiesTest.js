@@ -10,6 +10,43 @@ describe("Zotero.DataObjectUtilities", function() {
 			obj = Zotero.DataObjectUtilities.patch(patchBase, obj);
 			assert.notProperty(obj, 'collections');
 		})
+		
+		it("should include modified 'conditions'", function* () {
+			var patchBase = {
+				name: "Search",
+				conditions: [
+					{
+						condition: 'title',
+						operator: 'is',
+						value: 'A'
+					},
+					{
+						condition: 'language',
+						operator: 'is',
+						value: 'en'
+					}
+				]
+			};
+			var obj = {
+				name: "Search",
+				conditions: [
+					{
+						condition: 'title',
+						operator: 'is',
+						value: 'B'
+					},
+					{
+						condition: 'language',
+						operator: 'is',
+						value: 'en'
+					}
+				]
+			};
+			obj = Zotero.DataObjectUtilities.patch(patchBase, obj);
+			assert.property(obj, 'conditions');
+			assert.equal(obj.conditions[0].value, 'B');
+			assert.equal(obj.conditions[1].value, 'en');
+		})
 	})
 	
 	describe("#diff()", function () {

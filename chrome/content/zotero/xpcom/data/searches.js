@@ -96,6 +96,13 @@ Zotero.Searches = function() {
 	}
 	
 	
+	this.conditionEquals = function (data1, data2) {
+		return data1.condition === data2.condition
+			&& data1.operator === data2.operator
+			&& data1.value === data2.value;
+	},
+	
+	
 	this._loadConditions = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
 		var sql = "SELECT savedSearchID, searchConditionID, condition, operator, value, required "
 			+ "FROM savedSearches LEFT JOIN savedSearchConditions USING (savedSearchID) "

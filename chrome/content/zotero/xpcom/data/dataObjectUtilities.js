@@ -234,14 +234,9 @@ Zotero.DataObjectUtilities = {
 	},
 	
 	_conditionsChanged: function (data1, data2) {
-		if (!data2) return true;
-		var pred1 = Object.keys(data1);
-		pred1.sort();
-		var pred2 = Object.keys(data2);
-		pred2.sort();
-		if (!Zotero.Utilities.arrayEquals(pred1, pred2)) return false;
-		for (let i in pred1) {
-			if (!Zotero.Utilities.arrayEquals(pred1[i], pred2[i])) {
+		if (!data2 || data1.length != data2.length) return true;
+		for (let i = 0; i < data1.length; i++) {
+			if (!Zotero.Searches.conditionEquals(data1[i], data2[i])) {
 				return true;
 			}
 		}
