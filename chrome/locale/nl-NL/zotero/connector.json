@@ -17,6 +17,9 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "laatste versie"
   },
+  "general_done": {
+    "message": "Klaar"
+  },
   "general_saveTo": {
     "message": "Opslaan in $1"
   },

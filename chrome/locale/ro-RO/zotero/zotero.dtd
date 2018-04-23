@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Setează culoare">
 <!ENTITY zotero.tagColorChooser.removeColor "Șterge culoare">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
+<!ENTITY zotero.lookup.description "Introdu ISBN-urile, DOI-urile, PMID-urile sau ID-urile arXiv pentru a adăuga în biblioteca ta:">
 <!ENTITY zotero.lookup.button.search "Caută">
 
 <!ENTITY zotero.selectitems.title "Selectează înregistrări">

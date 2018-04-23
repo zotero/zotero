@@ -99,8 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Kitaplığa geri yükle">
 <!ENTITY zotero.items.menu.duplicateItem "Seçili Eseri Çoğalt">
 <!ENTITY zotero.items.menu.mergeItems "Eserleri Birleştir...">
-<!ENTITY zotero.items.menu.unrecognize "üstveri alma işlemini geri al">
-<!ENTITY zotero.items.menu.reportMetadata "geçersiz üstveriyi bildir">
+<!ENTITY zotero.items.menu.unrecognize "Üstveri Alma İşlemini Geri Al">
+<!ENTITY zotero.items.menu.reportMetadata "Yanlış Üstverileri Bildir">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Eserin hangi versiyonunun asıl eser olarak kullanılacağını seç:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Eserin diğer versiyonlarından hangi alanların tutulacağını seç:">
@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Rengi Ayarla">
 <!ENTITY zotero.tagColorChooser.removeColor "Rengi Kaldır">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
+<!ENTITY zotero.lookup.description "ISBN, DOI, PMID ya da arXiv numaralarını girerek kitaplığınıza ekleyin:">
 <!ENTITY zotero.lookup.button.search "Ara">
 
 <!ENTITY zotero.selectitems.title "Eser Seç">
