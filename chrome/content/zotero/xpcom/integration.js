@@ -388,86 +388,91 @@ Zotero.Integration = new function() {
 	 * @return {Zotero.Integration.Session} Promise
 	 */
 	this.getSession = async function (app, doc, agent) {
-		var progressBar = new Zotero.Integration.Progress(4, Zotero.isMac && agent != 'http');
-		progressBar.show();
-		
-		var dataString = await doc.getDocumentData(),
-			data, session;
-		
 		try {
-			data = new Zotero.Integration.DocumentData(dataString);
-		} catch(e) {
-			data = new Zotero.Integration.DocumentData();
-		}
-		
-		if (data.prefs.fieldType) {
-			if (data.dataVersion < DATA_VERSION) {
-				if (data.dataVersion == 1
-						&& data.prefs.fieldType == "Field"
-						&& app.primaryFieldType == "ReferenceMark") {
-					// Converted OOo docs use ReferenceMarks, not fields
-					data.prefs.fieldType = "ReferenceMark";
-				}
-				
-				var warning = await doc.displayAlert(Zotero.getString("integration.upgradeWarning", [Zotero.clientName, '5.0']),
-					DIALOG_ICON_WARNING, DIALOG_BUTTONS_OK_CANCEL);
-				if (!warning) {
-					throw new Zotero.Exception.UserCancelled("document upgrade");
-				}
-			// Don't throw for version 4(JSON) during the transition from 4.0 to 5.0
-			} else if ((data.dataVersion > DATA_VERSION) && data.dataVersion != 4) {
-				throw new Zotero.Exception.Alert("integration.error.newerDocumentVersion",
-						[data.zoteroVersion, Zotero.version], "integration.error.title");
+			var progressBar = new Zotero.Integration.Progress(4, Zotero.isMac && agent != 'http');
+			progressBar.show();
+			
+			var dataString = await doc.getDocumentData(),
+				data, session;
+			
+			try {
+				data = new Zotero.Integration.DocumentData(dataString);
+			} catch(e) {
+				data = new Zotero.Integration.DocumentData();
 			}
 			
-			if (data.prefs.fieldType !== app.primaryFieldType
-					&& data.prefs.fieldType !== app.secondaryFieldType) {
-				throw new Zotero.Exception.Alert("integration.error.fieldTypeMismatch",
-						[], "integration.error.title");
+			if (data.prefs.fieldType) {
+				if (data.dataVersion < DATA_VERSION) {
+					if (data.dataVersion == 1
+							&& data.prefs.fieldType == "Field"
+							&& app.primaryFieldType == "ReferenceMark") {
+						// Converted OOo docs use ReferenceMarks, not fields
+						data.prefs.fieldType = "ReferenceMark";
+					}
+					
+					var warning = await doc.displayAlert(Zotero.getString("integration.upgradeWarning", [Zotero.clientName, '5.0']),
+						DIALOG_ICON_WARNING, DIALOG_BUTTONS_OK_CANCEL);
+					if (!warning) {
+						throw new Zotero.Exception.UserCancelled("document upgrade");
+					}
+				// Don't throw for version 4(JSON) during the transition from 4.0 to 5.0
+				} else if ((data.dataVersion > DATA_VERSION) && data.dataVersion != 4) {
+					throw new Zotero.Exception.Alert("integration.error.newerDocumentVersion",
+							[data.zoteroVersion, Zotero.version], "integration.error.title");
+				}
+				
+				if (data.prefs.fieldType !== app.primaryFieldType
+						&& data.prefs.fieldType !== app.secondaryFieldType) {
+					throw new Zotero.Exception.Alert("integration.error.fieldTypeMismatch",
+							[], "integration.error.title");
+				}
+
+				session = Zotero.Integration.sessions[data.sessionID];
 			}
+			if (!session) {
+				session = new Zotero.Integration.Session(doc, app);
+				session.reload = true;
+			}
+			try {
+				await session.setData(data);
+			} catch(e) {
+				// make sure style is defined
+				if (e instanceof Zotero.Exception.Alert && e.name === "integration.error.invalidStyle") {
+					if (data.style.styleID) {
+						let trustedSource = /^https?:\/\/(www\.)?(zotero\.org|citationstyles\.org)/.test(data.style.styleID);
+						let errorString = Zotero.getString("integration.error.styleMissing", data.style.styleID);
+						if (trustedSource || 
+							await doc.displayAlert(errorString, DIALOG_ICON_WARNING, DIALOG_BUTTONS_YES_NO)) {
 
-			session = Zotero.Integration.sessions[data.sessionID];
-		}
-		if (!session) {
-			session = new Zotero.Integration.Session(doc, app);
-			session.reload = true;
-		}
-		try {
-			await session.setData(data);
-		} catch(e) {
-			// make sure style is defined
-			if (e instanceof Zotero.Exception.Alert && e.name === "integration.error.invalidStyle") {
-				if (data.style.styleID) {
-					let trustedSource = /^https?:\/\/(www\.)?(zotero\.org|citationstyles\.org)/.test(data.style.styleID);
-					let errorString = Zotero.getString("integration.error.styleMissing", data.style.styleID);
-					if (trustedSource || 
-						await doc.displayAlert(errorString, DIALOG_ICON_WARNING, DIALOG_BUTTONS_YES_NO)) {
-
-						let installed = false;
-						try {
-							await Zotero.Styles.install(
-								{url: data.style.styleID}, data.style.styleID, true
-							);
-							installed = true;
-						}
-						catch (e) {
-							await doc.displayAlert(
-								Zotero.getString(
-									'integration.error.styleNotFound', data.style.styleID
-								),
-								DIALOG_ICON_WARNING,
-								DIALOG_BUTTONS_OK
-							);
-						}
-						if (installed) {
-							await session.setData(data, true);
+							let installed = false;
+							try {
+								await Zotero.Styles.install(
+									{url: data.style.styleID}, data.style.styleID, true
+								);
+								installed = true;
+							}
+							catch (e) {
+								await doc.displayAlert(
+									Zotero.getString(
+										'integration.error.styleNotFound', data.style.styleID
+									),
+									DIALOG_ICON_WARNING,
+									DIALOG_BUTTONS_OK
+								);
+							}
+							if (installed) {
+								await session.setData(data, true);
+							}
 						}
 					}
+					await session.setDocPrefs();
+				} else {
+					throw e;
 				}
-				await session.setDocPrefs();
-			} else {
-				throw e;
 			}
+		} catch (e) {
+			progressBar.hide(true);
+			throw e;
 		}
 		session.agent = agent;
 		session._doc = doc;
