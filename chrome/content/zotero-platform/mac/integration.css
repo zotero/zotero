@@ -14,6 +14,10 @@ body[multiline="true"] {
 	width: 800px;
 }
 
+#quick-format-dialog.progress-bar #quick-format-deck {
+	height: 37px;
+}
+
 #quick-format-search {
 	background: white;
 	-moz-appearance: searchfield;

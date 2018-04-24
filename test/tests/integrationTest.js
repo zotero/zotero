@@ -7,6 +7,9 @@ describe("Zotero.Integration", function () {
 	const INTEGRATION_TYPE_TEMP = 3;
 	/**
 	 * To be used as a reference for Zotero-Word Integration plugins
+	 * 
+	 * NOTE: Functions must return promises instead of values!
+	 * The functions defined for the dummy are promisified below
 	 */
 	var DocumentPluginDummy = {};
 
@@ -17,6 +20,7 @@ describe("Zotero.Integration", function () {
 		this.doc = new DocumentPluginDummy.Document();
 		this.primaryFieldType = "Field";
 		this.secondaryFieldType = "Bookmark";
+		this.supportedNotes = ['footnotes', 'endnotes'];
 		this.fields = [];
 	};
 	DocumentPluginDummy.Application.prototype = {
@@ -87,26 +91,15 @@ describe("Zotero.Integration", function () {
 				throw new Error("noteType must be an integer");
 			}
 			var field = new DocumentPluginDummy.Field(this); 
-			this.fields.push(field); 
-			return field 
+			this.fields.push(field);
+			return field;
 		},
 		/**
 		 * Gets all fields present in the document.
 		 * @param {String} fieldType
-		 * @returns {DocumentPluginDummy.FieldEnumerator}
+		 * @returns {DocumentPluginDummy.Field[]}
 		 */
-		getFields: function(fieldType) {return new DocumentPluginDummy.FieldEnumerator(this)},
-		/**
-		 * Gets all fields present in the document. The observer will receive notifications for two
-		 * topics: "fields-progress", with the document as the subject and percent progress as data, and
-		 * "fields-available", with an nsISimpleEnumerator of fields as the subject and the length as
-		 * data
-		 * @param {String} fieldType
-		 * @param {nsIObserver} observer
-		 */
-		getFieldsAsync: function(fieldType, observer) {
-			observer.observe(this.getFields(fieldType), 'fields-available', null)
-		},
+		getFields: function(fieldType) {return Array.from(this.fields)},
 		/**
 		 * Sets the bibliography style, overwriting the current values for this document
 		 */
@@ -114,7 +107,7 @@ describe("Zotero.Integration", function () {
 			tabStops, tabStopsCount) => 0,
 		/**
 		 * Converts all fields in a document to a different fieldType or noteType
-		 * @params {DocumentPluginDummy.FieldEnumerator} fields
+		 * @params {DocumentPluginDummy.Field[]} fields
 		 */
 		convert: (fields, toFieldType, toNoteType, count) => 0,
 		/**
@@ -128,14 +121,6 @@ describe("Zotero.Integration", function () {
 		complete: () => 0,
 	};
 
-	DocumentPluginDummy.FieldEnumerator = function(doc) {this.doc = doc; this.idx = 0};
-	DocumentPluginDummy.FieldEnumerator.prototype = {
-		hasMoreElements: function() {return this.idx < this.doc.fields.length;},
-		getNext: function() {return this.doc.fields[this.idx++]},
-		QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsISupports,
-			Components.interfaces.nsISimpleEnumerator])
-	};
-	
 	/**
 	 * The Field class corresponds to a field containing an individual citation
 	 * or bibliography
@@ -197,11 +182,12 @@ describe("Zotero.Integration", function () {
 		getNoteIndex: () => 0,
 	};
 
-	for (let cls of ['Application', 'Document', 'FieldEnumerator', 'Field']) {
+	// Processing functions for logging and promisification
+	for (let cls of ['Application', 'Document', 'Field']) {
 		for (let methodName in DocumentPluginDummy[cls].prototype) {
 			if (methodName !== 'QueryInterface') {
 				let method = DocumentPluginDummy[cls].prototype[methodName];
-				DocumentPluginDummy[cls].prototype[methodName] = function() {
+				DocumentPluginDummy[cls].prototype[methodName] = async function() {
 					try {
 						Zotero.debug(`DocumentPluginDummy: ${cls}.${methodName} invoked with args ${JSON.stringify(arguments)}`, 2);
 					} catch (e) {
@@ -250,7 +236,7 @@ describe("Zotero.Integration", function () {
 		editBibliographyDialog: {}
 	};
 	
-	function initDoc(docID, options={}) {
+	async function initDoc(docID, options={}) {
 		applications[docID] = new DocumentPluginDummy.Application();
 		var data = new Zotero.Integration.DocumentData();
 		data.prefs = {
@@ -261,7 +247,7 @@ describe("Zotero.Integration", function () {
 		data.style = {styleID, locale: 'en-US', hasBibliography: true, bibliographyStyleHasBeenSet: true};
 		data.sessionID = Zotero.Utilities.randomString(10);
 		Object.assign(data, options);
-		applications[docID].getActiveDocument().setDocumentData(data.serialize());
+		await (await applications[docID].getDocument(docID)).setDocumentData(data.serialize());
 	}
 	
 	function setDefaultIntegrationDocPrefs() {
@@ -319,9 +305,12 @@ describe("Zotero.Integration", function () {
 		});
 		
 		addEditCitationSpy = sinon.spy(Zotero.Integration.Interface.prototype, 'addEditCitation');
+		
+		sinon.stub(Zotero.Integration.Progress.prototype, 'show');
 	});
 	
 	after(function() {
+		Zotero.Integration.Progress.prototype.show.restore();
 		Zotero.Integration.getApplication.restore();
 		displayDialogStub.restore();
 		addEditCitationSpy.restore();
@@ -354,10 +343,10 @@ describe("Zotero.Integration", function () {
 				var displayAlertStub;
 				var style;
 				before(function* () {
-					displayAlertStub = sinon.stub(DocumentPluginDummy.Document.prototype, 'displayAlert').returns(0);
+					displayAlertStub = sinon.stub(DocumentPluginDummy.Document.prototype, 'displayAlert').resolves(0);
 				});
 				
-				beforeEach(function() {
+				beforeEach(async function () {
 					// 🦉birds?
 					style = {styleID: "http://www.example.com/csl/waterbirds", locale: 'en-US'};
 					
@@ -365,7 +354,7 @@ describe("Zotero.Integration", function () {
 					try {
 						Zotero.Styles.get(style.styleID).remove();
 					} catch (e) {}
-					initDoc(docID, {style});
+					await initDoc(docID, {style});
 					displayDialogStub.resetHistory();
 					displayAlertStub.reset();
 				});
@@ -386,7 +375,7 @@ describe("Zotero.Integration", function () {
 							}
 							return style;
 						});
-						displayAlertStub.returns(1);
+						displayAlertStub.resolves(1);
 						yield execCommand('addEditCitation', docID);
 						assert.isTrue(displayAlertStub.calledOnce);
 						assert.isFalse(displayDialogStub.calledWith(applications[docID].doc, 'chrome://zotero/content/integration/integrationDocPrefs.xul'));
@@ -397,7 +386,7 @@ describe("Zotero.Integration", function () {
 					});
 					
 					it('should prompt with the document preferences dialog if user clicks NO', function* () {
-						displayAlertStub.returns(0);
+						displayAlertStub.resolves(0);
 						yield execCommand('addEditCitation', docID);
 						assert.isTrue(displayAlertStub.calledOnce);
 						// Prefs to select a new style and quickFormat
@@ -407,7 +396,7 @@ describe("Zotero.Integration", function () {
 				});
 					
 				it('should download the style without prompting if it is from zotero.org', function* (){
-					initDoc(docID, {styleID: "http://www.zotero.org/styles/waterbirds", locale: 'en-US'});
+					yield initDoc(docID, {styleID: "http://www.zotero.org/styles/waterbirds", locale: 'en-US'});
 					var styleInstallStub = sinon.stub(Zotero.Styles, "install").resolves();
 					var style = Zotero.Styles.get(styleID);
 					var styleGetCalledOnce = false;
@@ -418,7 +407,7 @@ describe("Zotero.Integration", function () {
 						}
 						return style;
 					});
-					displayAlertStub.returns(1);
+					displayAlertStub.resolves(1);
 					yield execCommand('addEditCitation', docID);
 					assert.isFalse(displayAlertStub.called);
 					assert.isFalse(displayDialogStub.calledWith(applications[docID].doc, 'chrome://zotero/content/integration/integrationDocPrefs.xul'));
@@ -433,20 +422,20 @@ describe("Zotero.Integration", function () {
 		describe('#addEditCitation', function() {
 			var insertMultipleCitations = Zotero.Promise.coroutine(function *() {
 				var docID = this.test.fullTitle();
-				if (!(docID in applications)) initDoc(docID);
+				if (!(docID in applications)) yield initDoc(docID);
 				var doc = applications[docID].doc;
 
 				setAddEditItems(testItems[0]);
 				yield execCommand('addEditCitation', docID);
 				assert.equal(doc.fields.length, 1);
-				var citation = (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
+				var citation = yield (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
 				assert.equal(citation.citationItems.length, 1);
 				assert.equal(citation.citationItems[0].id, testItems[0].id);
 
 				setAddEditItems(testItems.slice(1, 3));
 				yield execCommand('addEditCitation', docID);
 				assert.equal(doc.fields.length, 2);
-				citation = (new Zotero.Integration.CitationField(doc.fields[1], doc.fields[1].code)).unserialize();
+				citation = yield (new Zotero.Integration.CitationField(doc.fields[1], doc.fields[1].code)).unserialize();
 				assert.equal(citation.citationItems.length, 2);
 				for (let i = 1; i < 3; i++) {
 					assert.equal(citation.citationItems[i-1].id, testItems[i].id);
@@ -459,13 +448,13 @@ describe("Zotero.Integration", function () {
 				var docID = this.test.fullTitle();
 				var doc = applications[docID].doc;
 
-				sinon.stub(doc, 'cursorInField').returns(doc.fields[0]);
-				sinon.stub(doc, 'canInsertField').returns(false);
+				sinon.stub(doc, 'cursorInField').resolves(doc.fields[0]);
+				sinon.stub(doc, 'canInsertField').resolves(false);
 
 				setAddEditItems(testItems.slice(3, 5));
 				yield execCommand('addEditCitation', docID);
 				assert.equal(doc.fields.length, 2);
-				var citation = (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
+				var citation = yield (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
 				assert.equal(citation.citationItems.length, 2);
 				assert.equal(citation.citationItems[0].id, testItems[3].id);
 			});
@@ -494,7 +483,7 @@ describe("Zotero.Integration", function () {
 			describe('when original citation text has been modified', function() {
 				var displayAlertStub;
 				before(function* () {
-					displayAlertStub = sinon.stub(DocumentPluginDummy.Document.prototype, 'displayAlert').returns(0);
+					displayAlertStub = sinon.stub(DocumentPluginDummy.Document.prototype, 'displayAlert').resolves(0);
 				});	
 				beforeEach(function() {
 					displayAlertStub.reset();
@@ -508,8 +497,8 @@ describe("Zotero.Integration", function () {
 					var doc = applications[docID].doc;
 
 					doc.fields[0].text = "modified";
-					sinon.stub(doc, 'cursorInField').returns(doc.fields[0]);
-					sinon.stub(doc, 'canInsertField').returns(false);
+					sinon.stub(doc, 'cursorInField').resolves(doc.fields[0]);
+					sinon.stub(doc, 'canInsertField').resolves(false);
 
 					await execCommand('addEditCitation', docID);
 					assert.equal(doc.fields.length, 2);
@@ -523,9 +512,9 @@ describe("Zotero.Integration", function () {
 					let origText = doc.fields[0].text;
 					doc.fields[0].text = "modified";
 					// Return OK
-					displayAlertStub.returns(1);
-					sinon.stub(doc, 'cursorInField').returns(doc.fields[0]);
-					sinon.stub(doc, 'canInsertField').returns(false);
+					displayAlertStub.resolves(1);
+					sinon.stub(doc, 'cursorInField').resolves(doc.fields[0]);
+					sinon.stub(doc, 'canInsertField').resolves(false);
 					setAddEditItems(testItems[0]);
 
 					await execCommand('addEditCitation', docID);
@@ -538,17 +527,17 @@ describe("Zotero.Integration", function () {
 					var docID = this.test.fullTitle();
 					var doc = applications[docID].doc;
 
-					var citation = (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
+					var citation = await (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
 					assert.isNotOk(citation.properties.dontUpdate);
 					doc.fields[0].text = "modified";
 					// Return Yes
-					displayAlertStub.returns(1);
+					displayAlertStub.resolves(1);
 
 					await execCommand('refresh', docID);
 					assert.isTrue(displayAlertStub.called);
 					assert.equal(doc.fields.length, 2);
 					assert.equal(doc.fields[0].text, "modified");
-					var citation = (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
+					var citation = await (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
 					assert.isOk(citation.properties.dontUpdate);
 				});
 				it('should reset citation text if "no" selected in refresh prompt', async function() {
@@ -556,18 +545,18 @@ describe("Zotero.Integration", function () {
 					var docID = this.test.fullTitle();
 					var doc = applications[docID].doc;
 
-					var citation = (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
+					var citation = await (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
 					assert.isNotOk(citation.properties.dontUpdate);
 					let origText = doc.fields[0].text;
 					doc.fields[0].text = "modified";
 					// Return No
-					displayAlertStub.returns(0);
+					displayAlertStub.resolves(0);
 
 					await execCommand('refresh', docID);
 					assert.isTrue(displayAlertStub.called);
 					assert.equal(doc.fields.length, 2);
 					assert.equal(doc.fields[0].text, origText);
-					var citation = (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
+					var citation = await (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
 					assert.isNotOk(citation.properties.dontUpdate);
 				});
 			});
@@ -673,11 +662,11 @@ describe("Zotero.Integration", function () {
 					var field = setTextSpy.firstCall.thisValue;
 					
 					for (let i = 0; i < setTextSpy.callCount; i++) {
-						assert.isTrue(field.equals(setTextSpy.getCall(i).thisValue));
+						assert.isTrue(yield field.equals(setTextSpy.getCall(i).thisValue));
 					}
 
 					for (let i = 0; i < setCodeSpy.callCount; i++) {
-						assert.isTrue(field.equals(setCodeSpy.getCall(i).thisValue));
+						assert.isTrue(yield field.equals(setCodeSpy.getCall(i).thisValue));
 					}
 
 					setTextSpy.restore();
@@ -689,7 +678,7 @@ describe("Zotero.Integration", function () {
 		describe('#addEditBibliography', function() {
 			var docID = this.fullTitle();
 			beforeEach(function* () {
-				initDoc(docID);
+				yield initDoc(docID);
 				yield execCommand('addEditCitation', docID);
 			});
 			
@@ -699,7 +688,7 @@ describe("Zotero.Integration", function () {
 				assert.isFalse(displayDialogStub.called);
 				var biblPresent = false;
 				for (let i = applications[docID].doc.fields.length-1; i >= 0; i--) {
-					let field = Zotero.Integration.Field.loadExisting(applications[docID].doc.fields[i]);
+					let field = yield Zotero.Integration.Field.loadExisting(applications[docID].doc.fields[i]);
 					if (field.type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
 						biblPresent = true;
 						break;

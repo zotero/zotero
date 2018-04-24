@@ -68,7 +68,7 @@
 			</radiogroup>
 		</groupbox>
 		
-		<groupbox>
+		<groupbox id="formatUsing-groupbox">
 			<caption label="&zotero.integration.prefs.formatUsing.label;"/>
 			
 			<radiogroup id="formatUsing" orient="vertical">

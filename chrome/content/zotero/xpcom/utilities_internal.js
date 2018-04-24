@@ -1660,6 +1660,18 @@ Zotero.Utilities.Internal.activate = new function() {
 	}
 };
 
+Zotero.Utilities.Internal.sendToBack = function() {
+	if (Zotero.isMac) {
+		Zotero.Utilities.Internal.executeAppleScript(`
+			tell application "System Events"
+				if frontmost of application id "org.zotero.zotero" then
+					set visible of process "Zotero" to false
+				end if
+			end tell
+		`);
+	}
+}
+
 /**
  *  Base64 encode / decode
  *  From http://www.webtoolkit.info/
