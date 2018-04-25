@@ -70,3 +70,14 @@ Zotero.Server.Endpoints['/connector/document/respond'].prototype = {
 		Zotero.HTTPIntegrationClient.sendResponse = sendResponse;
 	}
 };
+
+// For managing macOS integration and progress window focus
+Zotero.Server.Endpoints['/connector/sendToBack'] = function() {};
+Zotero.Server.Endpoints['/connector/sendToBack'].prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["application/json"],
+	permitBookmarklet: true,
+	init: function() {
+		Zotero.Utilities.Internal.sendToBack();
+	},
+};
