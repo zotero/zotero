@@ -439,10 +439,12 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 		}
 		
 		// set up response callback
-		var me = this;
-		var sendResponseCallback = function(code, contentType, arg) {
-			me._requestFinished(me._generateResponse(code, contentType, arg));
-		}
+		var sendResponseCallback = function (code, contentType, arg, options) {
+			this._requestFinished(
+				this._generateResponse(code, contentType, arg),
+				options
+			);
+		}.bind(this);
 		
 		// Pass to endpoint
 		//
@@ -512,7 +514,7 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 /*
  * returns HTTP data from a request
  */
-Zotero.Server.DataListener.prototype._requestFinished = function(response) {
+Zotero.Server.DataListener.prototype._requestFinished = function (response, options) {
 	if(this._responseSent) {
 		Zotero.debug("Request already finished; not sending another response");
 		return;
@@ -530,8 +532,19 @@ Zotero.Server.DataListener.prototype._requestFinished = function(response) {
 	try {
 		intlStream.init(this.oStream, "UTF-8", 1024, "?".charCodeAt(0));
 		
-		// write response
-		Zotero.debug(response, 5);
+		// Filter logged response
+		if (Zotero.Debug.enabled) {
+			let maxLogLength = 2000;
+			let str = response;
+			if (options && options.logFilter) {
+				str = options.logFilter(str);
+			}
+			if (str.length > maxLogLength) {
+				str = str.substr(0, maxLogLength) + `\u2026 (${response.length} chars)`;
+			}
+			Zotero.debug(str, 5);
+		}
+		
 		intlStream.writeString(response);
 	} finally {	
 		intlStream.close();

@@ -1115,8 +1115,24 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 			Zotero.Prefs.clear('recentSaveTargets');
 		}
 		
-		// TODO: Limit debug size
-		sendResponseCallback(200, "application/json", JSON.stringify(response));
+		sendResponseCallback(
+			200,
+			"application/json",
+			JSON.stringify(response),
+			{
+				// Filter out collection names in debug output
+				logFilter: function (str) {
+					try {
+						let json = JSON.parse(str.match(/^{"libraryID"[^]+/m)[0]);
+						json.targets.forEach(t => t.name = "\u2026");
+						return JSON.stringify(json);
+					}
+					catch (e) {
+						return str;
+					}
+				}
+			}
+		);
 	}
 }
 
