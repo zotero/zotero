@@ -51,26 +51,18 @@ var Zotero_ProgressBar = new function () {
 	};
 	
 	/**
-	 * Initialize add citation dialog
+	 * Center the window
 	 */
 	this.onLoad = function(event) {
 		if(event.target !== document) return;		
 		// make sure we are visible
-		window.setTimeout(function() {
-			// window.resizeTo(window.outerWidth, window.outerHeight);
-			var screenX = window.screenX;
-			var screenY = window.screenY;
-			var xRange = [window.screen.availLeft, window.screen.width-window.outerWidth];
-			var yRange = [window.screen.availTop, window.screen.height-window.outerHeight];
-			if (screenX < xRange[0] || screenX > xRange[1] || screenY < yRange[0] || screenY > yRange[1]) {
-				var targetX = Math.max(Math.min(screenX, xRange[1]), xRange[0]);
-				var targetY = Math.max(Math.min(screenY, yRange[1]), yRange[0]);
-				Zotero.debug("Moving window to "+targetX+", "+targetY);
-				window.moveTo(targetX, targetY);
-			}
-		}, 0);
-
 		window.focus();
+		window.setTimeout(function() {
+			var targetX = Math.floor(-window.outerWidth/2 + (window.screen.width / 2));
+			var targetY = Math.floor(-window.outerHeight/2 + (window.screen.height / 2));
+			Zotero.debug("Moving window to "+targetX+", "+targetY);
+			window.moveTo(targetX, targetY);
+		}, 0);
 	};
 	
 	/**
