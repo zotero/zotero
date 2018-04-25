@@ -171,10 +171,17 @@ Zotero.HTTPIntegrationClient.Field.prototype.getText = async function() {
 Zotero.HTTPIntegrationClient.Field.prototype.setText = async function(text, isRich) {
 	// The HTML will be stripped by Google Docs and and since we're 
 	// caching this value, we need to strip it ourselves
-	var wm = Services.wm;
-	var win = wm.getMostRecentWindow('navigator:browser');
-	var doc = new win.DOMParser().parseFromString(text, "text/html");
-	this._text = doc.documentElement.textContent;
+	if (isRich) {
+		var win = window;
+		if (!win) {
+			var wm = Services.wm;
+			var win = wm.getMostRecentWindow('navigator:browser');
+		}
+		var doc = new win.DOMParser().parseFromString(text, "text/html");
+		this._text = doc.documentElement.textContent;
+	} else {
+		this._text = text;
+	}
 	return Zotero.HTTPIntegrationClient.sendCommand("Field.setText", [this._documentID, this._id, text, isRich]);
 };
 Zotero.HTTPIntegrationClient.Field.prototype.getCode = async function() {
