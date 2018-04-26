@@ -338,7 +338,9 @@ Zotero.SearchConditions = new function(){
 					doesNotContain: true
 				},
 				table: 'itemNotes',
-				field: 'note'
+				// Exclude note prefix and suffix
+				field: `SUBSTR(note, ${1 + Zotero.Notes.notePrefix.length}, `
+					+ `LENGTH(note) - ${Zotero.Notes.notePrefix.length + Zotero.Notes.noteSuffix.length})`
 			},
 			
 			{
@@ -348,7 +350,9 @@ Zotero.SearchConditions = new function(){
 					doesNotContain: true
 				},
 				table: 'items',
-				field: 'note'
+				// Exclude note prefix and suffix
+				field: `SUBSTR(note, ${1 + Zotero.Notes.notePrefix.length}, `
+					+ `LENGTH(note) - ${Zotero.Notes.notePrefix.length + Zotero.Notes.noteSuffix.length})`
 			},
 			
 			{
