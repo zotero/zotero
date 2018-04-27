@@ -27,17 +27,17 @@ const CONNECTOR_API_VERSION = 2;
 Zotero.Server.Connector = {
 	_waitingForSelection: {},
 	
-	getSaveTarget: function () {
+	getSaveTarget: function (allowReadOnly) {
 		var zp = Zotero.getActiveZoteroPane();
 		var library = null;
 		var collection = null;
 		var editable = null;
 		
 		if (zp && zp.collectionsView) {
-			if (zp.collectionsView.editable) {
+			if (zp.collectionsView.editable || allowReadOnly) {
 				library = Zotero.Libraries.get(zp.getSelectedLibraryID());
 				collection = zp.getSelectedCollection();
-				editable = true;
+				editable = zp.collectionsView.editable;
 			}
 			// If not editable, switch to My Library if it exists and is editable
 			else {
@@ -59,7 +59,7 @@ Zotero.Server.Connector = {
 			let id = Zotero.Prefs.get('lastViewedFolder');
 			if (id) {
 				({ library, collection, editable } = this.resolveTarget(id));
-				if (!editable) {
+				if (!editable && !allowReadOnly) {
 					let userLibrary = Zotero.Libraries.userLibrary;
 					if (userLibrary && userLibrary.editable) {
 						Zotero.debug("Save target isn't editable -- switching to My Library");
@@ -1091,7 +1091,7 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
 	init: function(postData, sendResponseCallback) {
-		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
+		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget(true);
 		var response = {
 			libraryID: library.libraryID,
 			libraryName: library.name,
