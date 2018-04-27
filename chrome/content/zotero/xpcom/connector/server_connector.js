@@ -1118,7 +1118,8 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 			collections.push(
 				{
 					id: library.treeViewID,
-					name: library.name
+					name: library.name,
+					level: 0
 				},
 				...Zotero.Collections.getByLibrary(library.libraryID, true).map(c => ({
 					id: c.treeViewID,
