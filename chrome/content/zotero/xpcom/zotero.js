@@ -2606,13 +2606,26 @@ Zotero.VersionHeader = {
 	
 	observe: function (subject, topic, data) {
 		try {
-			var channel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
-			if (channel.URI.host.match(/zotero\.org$/)) {
+			// Add "Firefox/[version]" to the user agent before "Zotero/[version]"
+			let channel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
+			let ua = channel.getRequestHeader('User-Agent');
+			let info = Services.appinfo;
+			let pos = ua.indexOf(info.name + '/');
+			ua = ua.slice(0, pos) + `Firefox/${info.platformVersion.match(/^\d+/)[0]}.0 `
+				+ ZOTERO_CONFIG.CLIENT_NAME + '/';
+			// Send full Zotero version to zotero.org
+			if (channel.URI.host.endsWith(ZOTERO_CONFIG.DOMAIN_NAME)) {
+				ua += Zotero.version;
 				channel.setRequestHeader("X-Zotero-Version", Zotero.version, false);
 			}
+			// Otherwise only send major.minor version
+			else {
+				ua += Zotero.version.replace(/(\d+\.\d+).*/, '$1');
+			}
+			channel.setRequestHeader('User-Agent', ua, false);
 		}
 		catch (e) {
-			Zotero.debug(e);
+			Zotero.debug(e, 1);
 		}
 	},
 	
