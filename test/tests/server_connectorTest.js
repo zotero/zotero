@@ -163,7 +163,7 @@ describe("Connector Server", function () {
 		});
 		
 		
-		it("should respond with 500 if read-only library is selected", function* () {
+		it("should switch to My Library if read-only library is selected", function* () {
 			var group = yield createGroup({
 				editable: false
 			});
@@ -188,7 +188,8 @@ describe("Connector Server", function () {
 				uri: "http://example.com"
 			};
 			
-			var req = yield Zotero.HTTP.request(
+			var promise = waitForItemEvent('add');
+			var reqPromise = Zotero.HTTP.request(
 				'POST',
 				connectorServerPath + "/connector/saveItems",
 				{
@@ -200,13 +201,19 @@ describe("Connector Server", function () {
 				}
 			);
 			
-			assert.equal(req.status, 500);
-			assert.isFalse(JSON.parse(req.responseText).libraryEditable);
-			
-			// The selection should remain
+			// My Library be selected, and the item should be in it
+			var ids = yield promise;
 			assert.equal(
-				win.ZoteroPane.collectionsView.getSelectedLibraryID(), group.libraryID
+				win.ZoteroPane.collectionsView.getSelectedLibraryID(),
+				Zotero.Libraries.userLibraryID
 			);
+			assert.lengthOf(ids, 1);
+			var item = Zotero.Items.get(ids[0]);
+			assert.equal(item.libraryID, Zotero.Libraries.userLibraryID);
+			assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'newspaperArticle');
+			
+			var req = yield reqPromise;
+			assert.equal(req.status, 201);
 		});
 		
 		it("should use the provided proxy to deproxify item url", function* () {
@@ -355,14 +362,15 @@ describe("Connector Server", function () {
 			stub.restore();
 		});
 		
-		it("should respond with 500 if a read-only library is selected", function* () {
+		it("should switch to My Library if a read-only library is selected", function* () {
 			var group = yield createGroup({
 				editable: false
 			});
 			yield selectLibrary(win, group.libraryID);
 			yield waitForItemsLoad(win);
 			
-			var req = yield Zotero.HTTP.request(
+			var promise = waitForItemEvent('add');
+			var reqPromise = Zotero.HTTP.request(
 				'POST',
 				connectorServerPath + "/connector/saveSnapshot",
 				{
@@ -377,13 +385,18 @@ describe("Connector Server", function () {
 				}
 			);
 			
-			assert.equal(req.status, 500);
-			assert.isFalse(JSON.parse(req.responseText).libraryEditable);
-			
-			// The selection should remain
+			// My Library be selected, and the item should be in it
+			var ids = yield promise;
 			assert.equal(
-				win.ZoteroPane.collectionsView.getSelectedLibraryID(), group.libraryID
+				win.ZoteroPane.collectionsView.getSelectedLibraryID(),
+				Zotero.Libraries.userLibraryID
 			);
+			assert.lengthOf(ids, 1);
+			var item = Zotero.Items.get(ids[0]);
+			assert.equal(item.libraryID, Zotero.Libraries.userLibraryID);
+			
+			var req = yield reqPromise;
+			assert.equal(req.status, 201);
 		});
 	});
 	
@@ -714,14 +727,15 @@ describe("Connector Server", function () {
 			var collection = yield createDataObject('collection');
 			yield waitForItemsLoad(win);
 			
-			var addedItemIDPromise = waitForItemEvent('add');
 			var resource = `@book{test1,
   title={Test1},
   author={Owl},
   year={1000},
   publisher={Curly Braces Publishing}
 }`;
-			var response = yield Zotero.HTTP.request(
+			
+			var addedItemIDsPromise = waitForItemEvent('add');
+			var req = yield Zotero.HTTP.request(
 				'POST',
 				endpoint,
 				{
@@ -729,15 +743,15 @@ describe("Connector Server", function () {
 					body: resource
 				}
 			);	
-			assert.equal(response.status, 201);
-			assert.equal(JSON.parse(response.responseText)[0].title, 'Test1');
+			assert.equal(req.status, 201);
+			assert.equal(JSON.parse(req.responseText)[0].title, 'Test1');
 			
-			let itemId = yield addedItemIDPromise;
-			assert.isTrue(collection.hasItem(itemId[0]));
+			let itemIDs = yield addedItemIDsPromise;
+			assert.isTrue(collection.hasItem(itemIDs[0]));
 		});
 		
 		
-		it('should respond with 500 if read-only library is selected', function* () {
+		it('should switch to My Library if read-only library is selected', function* () {
 			var group = yield createGroup({
 				editable: false
 			});
@@ -750,6 +764,8 @@ describe("Connector Server", function () {
   year={1000},
   publisher={Curly Braces Publishing}
 }`;
+			
+			var addedItemIDsPromise = waitForItemEvent('add');
 			var req = yield Zotero.HTTP.request(
 				'POST',
 				endpoint,
@@ -759,13 +775,16 @@ describe("Connector Server", function () {
 					successCodes: false
 				}
 			);
-			assert.equal(req.status, 500);
-			assert.isFalse(JSON.parse(req.responseText).libraryEditable);
 			
-			// The selection should remain
+			assert.equal(req.status, 201);
 			assert.equal(
-				win.ZoteroPane.collectionsView.getSelectedLibraryID(), group.libraryID
+				win.ZoteroPane.collectionsView.getSelectedLibraryID(),
+				Zotero.Libraries.userLibraryID
 			);
+			
+			let itemIDs = yield addedItemIDsPromise;
+			var item = Zotero.Items.get(itemIDs[0]);
+			assert.equal(item.libraryID, Zotero.Libraries.userLibraryID);
 		});
 	});
 });

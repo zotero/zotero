@@ -28,19 +28,46 @@ Zotero.Server.Connector = {
 	_waitingForSelection: {},
 	
 	getSaveTarget: function () {
-		var zp = Zotero.getActiveZoteroPane(),
-			library = null,
-			collection = null,
-			editable = true;
-		try {
-			library = Zotero.Libraries.get(zp.getSelectedLibraryID());
-			collection = zp.getSelectedCollection();
-			editable = zp.collectionsView.editable;
+		var zp = Zotero.getActiveZoteroPane();
+		var library = null;
+		var collection = null;
+		var editable = null;
+		
+		if (zp && zp.collectionsView) {
+			if (zp.collectionsView.editable) {
+				library = Zotero.Libraries.get(zp.getSelectedLibraryID());
+				collection = zp.getSelectedCollection();
+				editable = true;
+			}
+			// If not editable, switch to My Library if it exists and is editable
+			else {
+				let userLibrary = Zotero.Libraries.userLibrary;
+				if (userLibrary && userLibrary.editable) {
+					Zotero.debug("Save target isn't editable -- switching to My Library");
+					
+					// Don't wait for this, because we don't want to slow down all conenctor
+					// requests by making this function async
+					zp.collectionsView.selectByID(userLibrary.treeViewID);
+					
+					library = userLibrary;
+					collection = null;
+					editable = true;
+				}
+			}
 		}
-		catch (e) {
+		else {
 			let id = Zotero.Prefs.get('lastViewedFolder');
 			if (id) {
 				({ library, collection, editable } = this.resolveTarget(id));
+				if (!editable) {
+					let userLibrary = Zotero.Libraries.userLibrary;
+					if (userLibrary && userLibrary.editable) {
+						Zotero.debug("Save target isn't editable -- switching to My Library");
+						let treeViewID = userLibrary.treeViewID;
+						Zotero.Prefs.set('lastViewedFolder', treeViewID);
+						({ library, collection, editable } = this.resolveTarget(treeViewID));
+					}
+				}
 			}
 		}
 		
@@ -48,7 +75,7 @@ Zotero.Server.Connector = {
 		// (which should never be the case anymore)
 		if (!library) {
 			let userLibrary = Zotero.Libraries.userLibrary;
-			if (userLibrary) {
+			if (userLibrary && userLibrary.editable) {
 				library = userLibrary;
 			}
 		}
@@ -152,9 +179,9 @@ Zotero.Server.Connector.SaveSession.prototype.update = async function (targetID,
 	this._currentTags = tags || "";
 	
 	// Select new destination in collections pane
-	var win = Zotero.getActiveZoteroPane();
-	if (win && win.collectionsView) {
-		await win.collectionsView.selectByID(targetID);
+	var zp = Zotero.getActiveZoteroPane();
+	if (zp && zp.collectionsView) {
+		await zp.collectionsView.selectByID(targetID);
 	}
 	// If window is closed, select target collection re-open
 	else {
@@ -189,12 +216,12 @@ Zotero.Server.Connector.SaveSession.prototype.update = async function (targetID,
 	await this._updateItems(this._items);
 	
 	// If a single item was saved, select it (or its parent, if it now has one)
-	if (win && win.collectionsView && this._items.size == 1) {
+	if (zp && zp.collectionsView && this._items.size == 1) {
 		let item = Array.from(this._items)[0];
 		item = item.isTopLevelItem() ? item : item.parentItem;
 		// Don't select if in trash
 		if (!item.deleted) {
-			await win.selectItem(item.id);
+			await zp.selectItem(item.id);
 		}
 	}
 };
@@ -485,6 +512,8 @@ Zotero.Server.Connector.SavePage.prototype = {
 	 */
 	init: function(url, data, sendResponseCallback) {
 		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
+		
+		// Shouldn't happen as long as My Library exists
 		if (!library.editable) {
 			Zotero.logError("Can't add item to read-only library " + library.name);
 			return sendResponseCallback(500, "application/json", JSON.stringify({ libraryEditable: false }));
@@ -601,7 +630,7 @@ Zotero.Server.Connector.SaveItems.prototype = {
 		}
 		yield session.update(targetID);
 		
-		// TODO: Default to My Library root, since it's changeable
+		// Shouldn't happen as long as My Library exists
 		if (!library.editable) {
 			Zotero.logError("Can't add item to read-only library " + library.name);
 			return [500, "application/json", JSON.stringify({ libraryEditable: false })];
@@ -719,7 +748,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 		}
 		await session.update(collection ? collection.treeViewID : library.treeViewID);
 		
-		// TODO: Default to My Library root, since it's changeable
+		// Shouldn't happen as long as My Library exists
 		if (!library.editable) {
 			Zotero.logError("Can't add item to read-only library " + library.name);
 			return [500, "application/json", JSON.stringify({ libraryEditable: false })];
@@ -955,6 +984,8 @@ Zotero.Server.Connector.Import.prototype = {
 		translate.setTranslator(translators[0]);
 		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget();
 		var libraryID = library.libraryID;
+		
+		// Shouldn't happen as long as My Library exists
 		if (!library.editable) {
 			Zotero.logError("Can't import into read-only library " + library.name);
 			return [500, "application/json", JSON.stringify({ libraryEditable: false })];
