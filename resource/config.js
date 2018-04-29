@@ -13,6 +13,7 @@ var ZOTERO_CONFIG = {
 	STREAMING_URL: 'wss://stream.zotero.org/',
 	RECOGNIZE_URL: 'https://recognize.zotero.org/',
 	API_VERSION: 3,
+	CONNECTOR_MIN_VERSION: '5.0.35', // show upgrade prompt for requests from below this version
 	PREF_BRANCH: 'extensions.zotero.',
 	BOOKMARKLET_ORIGIN: 'https://www.zotero.org',
 	HTTP_BOOKMARKLET_ORIGIN: 'http://www.zotero.org',

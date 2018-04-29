@@ -1263,7 +1263,107 @@ Zotero.Server.Connector.Ping.prototype = {
 				response.prefs.reportActiveURL = true;
 			}
 			
+			this.versionWarning(req);
+			
 			return [200, 'application/json', JSON.stringify(response)];
+		}
+	},
+	
+	
+	/**
+	 * Warn on outdated connector version
+	 *
+	 * We can remove this once the connector checks and warns on its own and most people are on
+	 * a version that does that.
+	 */
+	versionWarning: function (req) {
+		try {
+			if (!Zotero.Prefs.get('showConnectorVersionWarning')) return;
+			if (!req.headers) return;
+			
+			var minVersion = ZOTERO_CONFIG.CONNECTOR_MIN_VERSION;
+			var appName = ZOTERO_CONFIG.CLIENT_NAME;
+			var domain = ZOTERO_CONFIG.DOMAIN_NAME;
+			var origin = req.headers.Origin;
+			
+			var browser;
+			var message;
+			var showDownloadButton = false;
+			if (origin && origin.startsWith('safari-extension')) {
+				browser = 'safari';
+				message = `An update is available for the ${appName} Connector for Safari.\n\n`
+					+ 'You can upgrade from the Extensions pane of the Safari preferences.';
+			}
+			else if (origin && origin.startsWith('chrome-extension')) {
+				browser = 'chrome';
+				message = `An update is available for the ${appName} Connector for Chrome.\n\n`
+					+ `You can upgrade to the latest version from ${domain}.`;
+				showDownloadButton = true;
+			}
+			else if (req.headers['User-Agent'] && req.headers['User-Agent'].includes('Firefox/')) {
+				browser = 'firefox';
+				message = `An update is available for the ${appName} Connector for Firefox.\n\n`
+					+ `You can upgrade to the latest version from ${domain}.`;
+				showDownloadButton = true;
+			}
+			else {
+				Zotero.debug("Unknown browser");
+				return;
+			}
+			
+			if (Zotero.Server.Connector['skipVersionWarning-' + browser]) return;
+			
+			var version = req.headers['X-Zotero-Version'];
+			if (!version) return;
+			
+			// If connector is up to date, bail
+			if (Services.vc.compare(version, minVersion) >= 0) return;
+			
+			var showNextPref = `nextConnectorVersionWarning.${browser}`;
+			var showNext = Zotero.Prefs.get(showNextPref);
+			if (showNext && new Date() < new Date(showNext * 1000)) return;
+			
+			// Don't show again for this browser until restart
+			Zotero.Server.Connector['skipVersionWarning-' + browser] = true;
+			var ps = Services.prompt;
+			var buttonFlags;
+			if (showDownloadButton) {
+				buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
+			}
+			else {
+				buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK;
+			}
+			setTimeout(function () {
+				var dontShow = {};
+				var index = ps.confirmEx(null,
+					Zotero.getString('general.updateAvailable'),
+					message,
+					buttonFlags,
+					showDownloadButton ? Zotero.getString('general.upgrade') : null,
+					showDownloadButton ? Zotero.getString('general.notNow') : null,
+					null,
+					"Don\u0027t show again for a month",
+					dontShow
+				);
+				
+				var nextShowDays;
+				if (dontShow.value) {
+					nextShowDays = 30;
+				}
+				// Don't show again for at least a day, even after a restart
+				else {
+					nextShowDays = 1;
+				}
+				Zotero.Prefs.set(showNextPref, Math.round(Date.now() / 1000) + 86400 * nextShowDays);
+				
+				if (showDownloadButton && index == 0) {
+					Zotero.launchURL(ZOTERO_CONFIG.CONNECTORS_URL);
+				}
+			}, 500);
+		}
+		catch (e) {
+			Zotero.debug(e, 2);
 		}
 	}
 }
