@@ -14,8 +14,8 @@
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Altri">
 <!ENTITY zotero.general.loading "Loading…">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Chiudi">
+<!ENTITY zotero.general.minimize "Riduci a icona">
 
 
 <!ENTITY zotero.errorReport.title "Resoconto di errore Zotero">
@@ -99,8 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Ripristina nella biblioteca">
 <!ENTITY zotero.items.menu.duplicateItem "Duplica elemento selezionato">
 <!ENTITY zotero.items.menu.mergeItems "Unisci elementi...">
-<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
+<!ENTITY zotero.items.menu.unrecognize "Annulla il recupero dei metadati">
+<!ENTITY zotero.items.menu.reportMetadata "Segnala metadati errati">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Scegli la versione dell'elemento da usare come master:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Scegli i campi da mantenere dalle altre versioni dell'elemento:">
@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Imposta colore">
 <!ENTITY zotero.tagColorChooser.removeColor "Rimuovi colore">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
+<!ENTITY zotero.lookup.description "Inserire i codici ISBN, DOI, PMID o arXiv per aggiungere elementi alla libreria">
 <!ENTITY zotero.lookup.button.search "Cerca">
 
 <!ENTITY zotero.selectitems.title "Seleziona elementi">
@@ -236,9 +236,9 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Segnalibri">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Aggiorna le citazioni in maniera automatica">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Le citazioni con aggiornamenti in sospeso saranno evidenziate nel documeto">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabilitare l'aggiornamento può velocizzare l'inserimento delle citazioni nei documenti di grandi dimensioni. Fare click su Aggiorna per aggiornare le citazioni manualmente.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">

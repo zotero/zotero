@@ -23,9 +23,9 @@
 <!ENTITY closeCmd.label "Chiudi">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.label "Importa...">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY importFromClipboardCmd.label "Importa dalla Clipboard">
 <!ENTITY quitApplicationCmdWin.label "Esci">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Abbandona">
@@ -44,7 +44,7 @@
 
 <!ENTITY toolsMenu.label "Strumenti">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Installa il Connettore per il browser">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Estensioni">
 
@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Informazioni di risoluzione dei problemi">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Forum di discussione">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Segnala errori...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Debug dell'output di logging">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.submit "Invia l'output">
+<!ENTITY debugOutputLogging.view "Vedi l'output">
+<!ENTITY debugOutputLogging.clear "Cancella l'output">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Riavvia con il logging abilitato...">
 
 <!ENTITY helpCheckForUpdates.label "Controlla gli aggiornamenti...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

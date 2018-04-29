@@ -44,8 +44,8 @@
 
 <!ENTITY toolsMenu.label "Các công cụ">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
-<!ENTITY installConnector.accesskey "C">
+<!ENTITY installConnector.label "Cài bộ kết nối trình duyệt">
+<!ENTITY installConnector.accesskey "K">
 <!ENTITY addons.label "Add-ons">
 
 
@@ -69,18 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Thông tin sửa lỗi">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
-<!ENTITY helpFeedbackPage.accesskey "F">
+<!ENTITY helpFeedbackPage.label "Diễn đàn trao đổi">
+<!ENTITY helpFeedbackPage.accesskey "D">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Báo lỗi...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
-<!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.label "Thông tin output khi chạy gỡ rối">
+<!ENTITY debugOutputLogging.accesskey "R">
+<!ENTITY debugOutputLogging.submit "Gửi output">
+<!ENTITY debugOutputLogging.view "Xem output">
+<!ENTITY debugOutputLogging.clear "Xóa output">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Khởi động lại cho phép logging...">
 
 <!ENTITY helpCheckForUpdates.label "Kiểm tra cập nhật...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

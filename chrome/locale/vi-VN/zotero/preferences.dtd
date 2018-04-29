@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.items "các mục tài liệu">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Các thiết lập">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "Thiết lập...">
 
 <!ENTITY zotero.preferences.prefpane.general "Các tùy chọn chung">
 
@@ -19,13 +19,13 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Rất lớn">
 <!ENTITY zotero.preferences.fontSize.notes "Cỡ chữ ghi chú:">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.fileHandling "Xử lý tập tin">
 <!ENTITY zotero.preferences.automaticSnapshots "Tự động tạo ảnh chụp khi lưu tài liệu từ web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Tự động đính kèm các tập tin PDF và các tập tin liên quan khác khi lưu tài liệu mới">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Tự lấy metadata cho các tập tin PDF">
+<!ENTITY zotero.preferences.autoRenameFiles "Tự động đổi tên các tập tin đính kèm dùng thông tin meta từ mục cha">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Mở các tập tin PDF bằng">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "Thiết lập mặc định">
 
 <!ENTITY zotero.preferences.miscellaneous "Các tùy chọn khác">
 <!ENTITY zotero.preferences.autoUpdate "Tự động kiểm tra các bộ chuyển đổi và kiểu trích dẫn có được cập nhật">
@@ -75,7 +75,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Tải các tập tin xuống">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "vào lúc đồng bộ">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "khi cần thiết">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Kiểm tra máy chủ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Bằng cách dùng vùng lưu trữ của Zotero, bạn chấp nhận ràng buộc bởi">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "các điều khoản và điều kiện">
 <!ENTITY zotero.preferences.sync.librariesToSync "Đồng bộ các thư viện">
@@ -87,12 +87,12 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "để có thêm thông tin.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Xóa lịch sử đồng bộ dữ liệu">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Trộn dữ liệu cục bộ với dữ liệu trên máy chủ, bỏ qua lịch sử đồng bộ">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Lấy lại từ thư viện trực tuyến">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Ghi đè dữ liệu Zotero cục bộ bằng dữ liệu từ thư viện trực tuyến">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Lưu vào thư viện trực tuyến">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Ghi đè tư viện trực tuyến bằng dữ liệu từ tập tin cục bộ">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Thiết lập lại lịch sử đồng bộ tập tin">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "So sánh tất cả các tập tin đính kèm bằng dịch vụ lưu trữ">
 <!ENTITY zotero.preferences.sync.reset "Thiết lập lại">
 <!ENTITY zotero.preferences.sync.reset.button "Đang thiết lập lại...">
 
@@ -116,12 +116,12 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Khi không cho phép tùy chọn này, Zotero sẽ chỉ gộp các URL khi trích dẫn các bài journal, magazine và newspaper không có vùng trang xác định">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Sao chép nhanh">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Định dạng mặc định:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy theo dạng HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Những thiết lập đặc thù cho từng Website:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Tên miền/Đường dẫn">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(ví dụ wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Định dạng">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Ngôn ngữ">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Tắt copy nhanh khi kéo nhiều hơn">
 
@@ -129,8 +129,8 @@
 <!ENTITY zotero.preferences.cite.styles "Các kiểu trích dẫn">
 <!ENTITY zotero.preferences.cite.wordProcessors "Các phần mềm soạn thảo">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Dùng màn hình Thêm trích dẫn kiểu cũ">
-<!ENTITY zotero.preferences.styleEditor "Style Editor">
-<!ENTITY zotero.preferences.stylePreview "Style Preview">
+<!ENTITY zotero.preferences.styleEditor "Bộ soạn thảo style">
+<!ENTITY zotero.preferences.stylePreview "Xem trước style">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Bộ quản lý kiểu trích dẫn">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Tiêu đề">
@@ -179,7 +179,7 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Các tập tin và thư mục">
 <!ENTITY zotero.preferences.advanced.keys "Các lối tắt">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Cấu hình nâng cao">
 
 <!ENTITY zotero.preferences.prefpane.locate "Tìm kiếm">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Bộ quản lý cơ chế tìm bài viết">
@@ -197,7 +197,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Dùng thư mục profile của Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Tùy biến:">
 <!ENTITY zotero.preferences.dataDir.choose "Chọn...">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(xác định bằng dòng lệnh)">
 <!ENTITY zotero.preferences.dataDir.reveal "Hiển thị Thư mục dữ liệu">
 <!ENTITY zotero.preferences.dataDir.migrate "Chuyển sang vị trí mặc định mới...">
 
@@ -213,4 +213,4 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Thiết lập lại bộ chuyển đổi">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Thiết lập lại style">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "Bộ soạn thảo cấu hình">
