@@ -69,7 +69,7 @@
 				Timeline.loadXML("zotero://timeline/data/", function(xml, url) { eventSource.loadXML(xml, url); });
 				
 				setupFilterHighlightControls(document.getElementById("my-timeline-controls"), tl, [0,1,2], theme);
-				setupOtherControls(document.getElementById("my-other-controls"), tl, document.URL);
+				setupOtherControls(document.getElementById("my-other-controls"), tl, document.location.search);
 			}
 			
 			function onResize() {
@@ -85,7 +85,7 @@
 				var win = wm.getMostRecentWindow('navigator:browser');
 				var zp = win.ZoteroPane;
 				zp.show();
-				zp.selectItem(evt.getDescription());
+				zp.selectItem(parseInt(evt.getDescription()));
 			}
 			
 			document.write("<title>" + getString("general.title") + "</title>");

@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "Breyta">
+<!ENTITY editMenu.accesskey        "e">
+<!ENTITY undoCmd.label             "Afturkalla">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "u">
+<!ENTITY redoCmd.label             "Endurtaka">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "n">
+<!ENTITY cutCmd.label              "Klippa">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "K">
+<!ENTITY copyCmd.label             "Afrita">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "A">
+<!ENTITY pasteCmd.label            "Líma">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "L">
+<!ENTITY deleteCmd.label           "Eyða">
+<!ENTITY deleteCmd.accesskey       "E">
+<!ENTITY selectAllCmd.label        "Velja allt">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "j">
+<!ENTITY findCmd.label             "Leita">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "i">
+<!ENTITY findAgainCmd.label        "Leita aftur">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "t">
+<!ENTITY findPreviousCmd.label     "Leita til baka">
+<!ENTITY findPreviousCmd.accesskey "b">

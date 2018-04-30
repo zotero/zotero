@@ -92,18 +92,19 @@
 					else {
 						// Get ordered list of library names
 						var libraryNames = [];
-						for each(var libraryID in newLibraries) {
+						for (let libraryID of newLibraries) {
 							libraryNames.push({
 								libraryID: libraryID,
 								name: Zotero.Libraries.getName(libraryID)
 							});
 						}
 						var collation = Zotero.getLocaleCollation();
+						let userLibraryID = Zotero.Libraries.userLibraryID;
 						libraryNames.sort(function (a, b) {
-							if (a.libraryID == 0) {
+							if (a.libraryID == userLibraryID) {
 								return -1;
 							}
-							if (b.libraryID == 0) {
+							if (b.libraryID == userLibraryID) {
 								return 1;
 							}
 							return collation.compareString(1, a.name, b.name);

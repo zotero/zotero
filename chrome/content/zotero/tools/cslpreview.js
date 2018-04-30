@@ -30,7 +30,10 @@ var Zotero_CSL_Preview = new function() {
 	this.generateBibliography = generateBibliography;
 	
 	function init() { 
-		//refresh();
+		var menulist = document.getElementById("locale-menu");
+		
+		Zotero.Styles.populateLocaleList(menulist);
+		menulist.value = Zotero.Prefs.get('export.lastLocale');;
 		
 		var iframe = document.getElementById('zotero-csl-preview-box');
 		iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p>' + Zotero.getString('styles.preview.instructions') + '</p></body></html>';
@@ -50,10 +53,10 @@ var Zotero_CSL_Preview = new function() {
 		progressWin.show();
 		progressWin.startCloseTimer();
 		var f = function() {
-			var styles = Zotero.Styles.getAll();
+			var styles = Zotero.Styles.getVisible();
 			// XXX needs its own string really for the title!
 			var str = '<html><head><title></title></head><body>';
-			for each(var style in styles) {
+			for (let style of styles) {
 				if (style.source) {
 					continue;
 				}
@@ -86,17 +89,23 @@ var Zotero_CSL_Preview = new function() {
 			Zotero.debug("CSL IGNORE: citation format is " + style.categories);
 			return '';
 		}
-		var styleEngine = style.getCiteProc();
+		
+		var locale = document.getElementById("locale-menu").value;
+		var styleEngine = style.getCiteProc(locale);
 		
 		// Generate multiple citations
 		var citations = styleEngine.previewCitationCluster(
-		{"citationItems":[{"id":item.id} for each(item in items)], "properties":{}},
-		[], [], "html");
+			{
+				citationItems: items.map(item => ({ id: item.id })),
+				properties: {}
+			},
+			[], [], "html"
+		);
 		
 		// Generate bibliography
 		var bibliography = '';
 		if(style.hasBibliography) {
-			styleEngine.updateItems([item.id for each(item in items)]);
+			styleEngine.updateItems(items.map(item => item.id));
 			bibliography = Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
 		}
 		

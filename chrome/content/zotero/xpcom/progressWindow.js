@@ -98,6 +98,11 @@ Zotero.ProgressWindowSet = new function() {
 			_progressWindows[i].instance.startCloseTimer(null, true);
 		}
 	}
+	
+	
+	this.closeAll = function () {
+		_progressWindows.forEach(pw => pw.instance.close());
+	}
 }
 
 
@@ -106,9 +111,10 @@ Zotero.ProgressWindowSet = new function() {
  *
  * Pass the active window into the constructor
  */
-Zotero.ProgressWindow = function(_window){
+Zotero.ProgressWindow = function(options = {}) {
+	var _window = options.window || null;
+	var _closeOnClick = typeof options.closeOnClick == 'undefined' ? true : options.closeOnClick;
 	var self = this,
-		_window = null,
 		_progressWindow = null,
 		_windowLoaded = false,
 		_windowLoading = false,
@@ -148,6 +154,9 @@ Zotero.ProgressWindow = function(_window){
 		_progressWindow.addEventListener("mouseover", _onMouseOver, false);
 		_progressWindow.addEventListener("mouseout", _onMouseOut, false);
 		_progressWindow.addEventListener("mouseup", _onMouseUp, false);
+		_window.addEventListener('close', () => {
+			this.close();
+		});
 		
 		_windowLoading = true;
 		
@@ -193,10 +202,12 @@ Zotero.ProgressWindow = function(_window){
 	this.addLines = _deferUntilWindowLoad(function addLines(labels, icons) {
 		if(typeof labels === "object" && typeof icons === "object") {
 			for (var i in labels) {
-				new this.ItemProgress(icons[i], labels[i]);
+				let progress = new this.ItemProgress(icons[i], labels[i]);
+				progress.setProgress(100);
 			}
 		} else {
-			new this.ItemProgress(icons, labels);
+			let progress = new this.ItemProgress(icons, labels);
+			progress.setProgress(100);
 		}
 		
 		_move();
@@ -213,7 +224,7 @@ Zotero.ProgressWindow = function(_window){
 		var newDescription = _progressWindow.document.createElement("description");
 		
 		var parts = Zotero.Utilities.parseMarkup(text);
-		for each(var part in parts) {
+		for (let part of parts) {
 			if (part.type == 'text') {
 				var elem = _progressWindow.document.createTextNode(part.text);
 			}
@@ -273,24 +284,25 @@ Zotero.ProgressWindow = function(_window){
 		
 		try {
 			_progressWindow.close();
-		} catch(ex) {}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 	}
 	
 	/**
 	 * Creates a new object representing a line in the progressWindow. This is the OO
 	 * version of addLines() above.
 	 */
-	this.ItemProgress = _deferUntilWindowLoad(function(iconSrc, title, parentItemProgress) {
-		this._itemText = _progressWindow.document.createElement("description");
-		this._itemText.appendChild(_progressWindow.document.createTextNode(title));
-		this._itemText.setAttribute("class", "zotero-progress-item-label");
-		this._itemText.setAttribute("crop", "end");
+	this.ItemProgress = _deferUntilWindowLoad(function(iconSrc, text, parentItemProgress) {
+		this.setText(text);
 		
 		this._image = _progressWindow.document.createElement("hbox");
 		this._image.setAttribute("class", "zotero-progress-item-icon");
 		this._image.setAttribute("flex", 0);
 		this._image.style.width = "16px";
 		this._image.style.backgroundRepeat = "no-repeat";
+		this._image.style.backgroundSize = "auto 16px";
 		this.setIcon(iconSrc);
 		
 		this._hbox = _progressWindow.document.createElement("hbox");
@@ -327,10 +339,10 @@ Zotero.ProgressWindow = function(_window){
 	this.ItemProgress.prototype.setProgress = _deferUntilWindowLoad(function(percent) {
 		if(percent != 0 && percent != 100) {
 			// Indication of partial progress, so we will use the circular indicator
+			var nArcs = 20;			
 			this._image.style.backgroundImage = "url('chrome://zotero/skin/progress_arcs.png')";
 			this._image.style.backgroundPosition = "-"+(Math.round(percent/100*nArcs)*16)+"px 0";
 			this._hbox.style.opacity = percent/200+.5;
-			this._hbox.style.filter = "alpha(opacity = "+(percent/2+50)+")";
 		} else if(percent == 100) {
 			this._image.style.backgroundImage = "url('"+this._iconSrc+"')";
 			this._image.style.backgroundPosition = "";
@@ -349,6 +361,18 @@ Zotero.ProgressWindow = function(_window){
 		this._iconSrc = iconSrc;
 	});
 	
+	this.ItemProgress.prototype.setText = _deferUntilWindowLoad(function (text) {
+		if (!this._itemText) {
+			this._itemText = _progressWindow.document.createElement("description");
+		}
+		else {
+			this._itemText.textContent = '';
+		}
+		this._itemText.appendChild(_progressWindow.document.createTextNode(text));
+		this._itemText.setAttribute("class", "zotero-progress-item-label");
+		this._itemText.setAttribute("crop", "end");
+	});
+	
 	/**
 	 * Indicates that an error occurred saving this item.
 	 */
@@ -359,6 +383,98 @@ Zotero.ProgressWindow = function(_window){
 		this._hbox.style.opacity = "1";
 		this._hbox.style.filter = "";
 	});
+	
+	this.Translation = {};
+	
+	this.Translation.operationInProgress = function() {
+		var desc = Zotero.localeJoin([
+			Zotero.getString('general.operationInProgress'),
+			Zotero.getString('general.operationInProgress.waitUntilFinishedAndTryAgain')
+		]);
+		self.Translation._scrapeError(desc);
+	};
+	
+	this.Translation.cannotEditCollection = function() {
+		var desc = Zotero.getString('save.error.cannotMakeChangesToCollection');
+		self.Translation._scrapeError(desc);
+	};
+	
+	this.Translation.cannotAddToPublications = function () {
+		var desc = Zotero.getString('save.error.cannotAddToMyPublications');
+		self.Translation._scrapeError(desc);
+	};
+	
+	this.Translation.cannotAddToFeed = function() {
+		var desc = Zotero.getString('save.error.cannotAddToFeed');
+		self.Translation._scrapeError(desc);
+	};
+	
+	this.Translation.scrapingTo = function(libraryID, collection) {
+		var name;
+		if(collection) {
+			name = collection.name;
+		} else if(libraryID) {
+			name = Zotero.Libraries.getName(libraryID);
+		} else {
+			name = Zotero.getString("pane.collections.library");
+		}
+		
+		self.changeHeadline(Zotero.getString("ingester.scrapingTo"),
+			"chrome://zotero/skin/treesource-"+(collection ? "collection" : "library")+".png",
+			name+"\u2026");
+	};
+	
+	this.Translation.doneHandler = function(obj, returnValue) {		
+		if(!returnValue) {
+			// Include link to translator troubleshooting page
+			var url = "https://www.zotero.org/support/troubleshooting_translator_issues";
+			var linkText = '<a href="' + url + '" tooltiptext="' + url + '">'
+				+ Zotero.getString('ingester.scrapeErrorDescription.linkText') + '</a>';
+			var desc = Zotero.getString("ingester.scrapeErrorDescription", linkText)
+			self.Translation._scrapeError(desc);
+		} else {
+			self.startCloseTimer();
+		}
+	};
+	
+	this.Translation.itemDoneHandler = function(_attachmentsMap) {
+		_attachmentsMap = _attachmentsMap || new WeakMap();
+		return function(obj, dbItem, item) {
+			self.show();
+			var itemProgress = new self.ItemProgress(Zotero.ItemTypes.getImageSrc(item.itemType),
+				item.title);
+			itemProgress.setProgress(100);
+			for(var i=0; i<item.attachments.length; i++) {
+				var attachment = item.attachments[i];
+				_attachmentsMap.set(attachment,
+					new self.ItemProgress(
+						Zotero.Utilities.determineAttachmentIcon(attachment),
+						attachment.title, itemProgress));
+			}
+		}
+	};
+	
+	this.Translation.attachmentProgressHandler = function(_attachmentsMap) {
+		_attachmentsMap = _attachmentsMap || new WeakMap();
+		return function(obj, attachment, progress, error) {
+			var itemProgress = _attachmentsMap.get(attachment);
+			if(progress === false) {
+				itemProgress.setError();
+			} else {
+				itemProgress.setProgress(progress);
+				if(progress === 100) {
+					itemProgress.setIcon(Zotero.Utilities.determineAttachmentIcon(attachment));
+				}
+			}
+		}
+	};
+	
+	this.Translation._scrapeError = function(description) {
+		self.changeHeadline(Zotero.getString("ingester.scrapeError"));
+		self.addDescription(description);
+		self.show();
+		self.startCloseTimer(8000)	
+	}
 	
 	function _onWindowLoaded() {
 		_windowLoading = false;
@@ -429,7 +545,9 @@ Zotero.ProgressWindow = function(_window){
 	}
 	
 	function _onMouseUp(e) {
-		self.close();
+		if (_closeOnClick) {
+			self.close();
+		}
 	}
 	
 	/**

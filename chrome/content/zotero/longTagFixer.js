@@ -132,7 +132,7 @@ var Zotero_Long_Tag_Fixer = new function () {
 	
 	this.updateEditLength = function (len) {
 		document.getElementById('zotero-new-tag-character-count').value = len;
-		var invalid = len == 0 || len > 255;
+		var invalid = len == 0 || len > Zotero.Tags.MAX_SYNC_LENGTH;
 		document.getElementById('zotero-new-tag-characters').setAttribute('invalid', invalid);
 		document.getElementById('zotero-long-tag-fixer').getButton('accept').disabled = invalid;
 	}
@@ -146,11 +146,9 @@ var Zotero_Long_Tag_Fixer = new function () {
 	this.save = function () {
 		try {
 		
-		var index = document.getElementById('zotero-new-tag-actions').selectedIndex;
+		var result = {};
 		
-		// Search for all matching tags across all libraries
-		var sql = "SELECT tagID FROM tags WHERE name=?";
-		var oldTagIDs = Zotero.DB.columnQuery(sql, _oldTag);
+		var index = document.getElementById('zotero-new-tag-actions').selectedIndex;
 		
 		switch (index) {
 			// Split
@@ -166,47 +164,23 @@ var Zotero_Long_Tag_Fixer = new function () {
 					}
 				}
 				
-				Zotero.DB.beginTransaction();
-				
-				// Add new tags to all items linked to each matching old tag
-				for (var i=0; i<oldTagIDs.length; i++) {
-					var tag = Zotero.Tags.get(oldTagIDs[i]);
-					var items = tag.getLinkedItems();
-					if (items) {
-						for (var j=0; j<items.length; j++) {
-							items[j].addTags(newTags, tag.type);
-						}
-					}
-				}
-				
-				// Remove old tags
-				Zotero.Tags.erase(oldTagIDs);
-				Zotero.Tags.purge();
-				Zotero.DB.commitTransaction();
+				result.op = 'split';
+				result.tags = newTags;
 				break;
 			
 			// Edit
 			case 1:
-				var value = document.getElementById('zotero-new-tag-editor').value;
-				Zotero.DB.beginTransaction();
-				for (var i=0; i<oldTagIDs.length; i++) {
-					var tag = Zotero.Tags.get(oldTagIDs[i]);
-					tag.name = value;
-					tag.save();
-				}
-				Zotero.DB.commitTransaction();
+				result.op = 'edit';
+				result.tag = document.getElementById('zotero-new-tag-editor').value;
 				break;
 			
 			// Delete
 			case 2:
-				Zotero.DB.beginTransaction();
-				Zotero.Tags.erase(oldTagIDs);
-				Zotero.Tags.purge();
-				Zotero.DB.commitTransaction();
+				result.op = 'delete';
 				break;
 		}
 		
-		_dataOut.result = true;
+		_dataOut.result = result;
 		
 		}
 		catch (e) {

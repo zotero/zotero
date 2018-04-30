@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "Închide">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Importă...">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Importă din memoria clipboard">
 <!ENTITY quitApplicationCmdWin.label "Ieșire">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Părăsire">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Editare">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Anulare">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Refacere">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Decupare">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Copiere">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Copiază citare">
 <!ENTITY copyBibliographyCmd.label "Copiază bibliografie">
-<!ENTITY pasteCmd.label "Lipire">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Ștergere">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Selectează tot">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Preferințe">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Preferințe">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Găsește">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Schimbă direcția paginii">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Schimbă direcția textului">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Instrumente">
 <!ENTITY toolsMenu.accesskey "T">
+<!ENTITY installConnector.label "Instalează conectorul pentru browser">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Extensii">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Informații pentru probleme">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Trimite feedback...">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Raportează erorile la Zotero...">
+<!ENTITY helpFeedbackPage.label "Forumuri de discuție">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Raportează erori…">
 <!ENTITY helpReportErrors.accesskey "R">
+
+<!ENTITY debugOutputLogging.label "Înregistrare date de depanare">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Trimite date de ieșire">
+<!ENTITY debugOutputLogging.view "Vizualizare date de ieșire">
+<!ENTITY debugOutputLogging.clear "Șterge datele de ieșire">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Repornește cu înregistrarea activată...">
+
 <!ENTITY helpCheckForUpdates.label "Caută actualizări...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

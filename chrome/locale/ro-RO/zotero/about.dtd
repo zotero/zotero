@@ -1,4 +1,5 @@
 <!ENTITY zotero.version "versiune">
+<!ENTITY zotero.whatsNew "Ce este nou">
 <!ENTITY zotero.createdby "Creat de:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Directori:">
@@ -9,5 +10,5 @@
 <!ENTITY zotero.executiveProducer "Producător executiv:">
 <!ENTITY zotero.thanks "Mulțumiri speciale:">
 <!ENTITY zotero.about.close "Închide">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "Participanți și mulțumiri suplimentare">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Alți participanți și mulțumiri suplimentare">
 <!ENTITY zotero.citationProcessing "Procesare citări și bibliografie">

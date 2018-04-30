@@ -7,13 +7,9 @@ var lastJumpToYearValue;
  */
 function initLocaleBundle() {
 	var src = 'chrome://zotero/locale/timeline.properties';
-	var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1']
-		.getService(Components.interfaces.nsILocaleService);
-	var appLocale = localeService.getApplicationLocale();
-	
 	var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
-			.getService(Components.interfaces.nsIStringBundleService);
-	return stringBundleService.createBundle(src, appLocale);
+		.getService(Components.interfaces.nsIStringBundleService);
+	return stringBundleService.createBundle(src);
 }
 
 /*
@@ -145,7 +141,7 @@ function checkDate(date) {
 		}
 	}
 }
-function changeBand(path, queryString, band, intervals, selectedIndex) {
+function changeBand(queryString, band, intervals, selectedIndex) {
 	var values = new Array('d', 'm', 'y', 'e', 'c', 'i');
 	
 	var newIntervals = '';
@@ -158,7 +154,7 @@ function changeBand(path, queryString, band, intervals, selectedIndex) {
 		}
 	}
 	
-	window.location = path + queryString + 'i=' + newIntervals;
+	window.location.search = queryString + 'i=' + newIntervals;
 }
 
 function createOption(t, selected) {
@@ -192,7 +188,7 @@ function getFull(a) {
 }
 
 function createQueryString(theQueryValue, except, timeline) {
-	var temp = '?';
+	var temp = '';
 	for(var i in theQueryValue) {
 		if(except != i) {
 			temp += i + '=' + theQueryValue[i] + '&';
@@ -208,16 +204,9 @@ function createQueryString(theQueryValue, except, timeline) {
 	return temp;
 }
 
-function setupOtherControls(div, timeline, url) {
+function setupOtherControls(div, timeline, queryString) {
 	var table = document.createElement("table");
 	
-	var [path, queryString] = url.split('?');
-	if(path == 'zotero://timeline') {
-		path += '/';
-	}
-	if(path =='zotero://timeline/') {
-		path += 'library';
-	}
 	var defaultQueryValue = new Object();
 		defaultQueryValue['i'] = 'mye';
 		defaultQueryValue['t'] = 'd';
@@ -289,7 +278,7 @@ function setupOtherControls(div, timeline, url) {
 		select1.appendChild(createOption(options[i],(options[i] == selected)));
 	}
 	select1.onchange = function () {
-		changeBand(path, createQueryString(theQueryValue, 'i', timeline), 0, intervals, table.rows[1].cells[1].firstChild.selectedIndex);
+		changeBand(createQueryString(theQueryValue, 'i', timeline), 0, intervals, table.rows[1].cells[1].firstChild.selectedIndex);
 	};
 	td.appendChild(select1);
 	
@@ -301,7 +290,7 @@ function setupOtherControls(div, timeline, url) {
 		select2.appendChild(createOption(options[i],(options[i] == selected)));
 	}
 	select2.onchange = function () {
-		changeBand(path, createQueryString(theQueryValue, 'i', timeline), 1, intervals, table.rows[1].cells[2].firstChild.selectedIndex);
+		changeBand(createQueryString(theQueryValue, 'i', timeline), 1, intervals, table.rows[1].cells[2].firstChild.selectedIndex);
 	};
 	td.appendChild(select2);
 	
@@ -313,7 +302,7 @@ function setupOtherControls(div, timeline, url) {
 		select3.appendChild(createOption(options[i],(options[i] == selected)));
 	}
 	select3.onchange = function () {
-		changeBand(path, createQueryString(theQueryValue, 'i', timeline), 2, intervals, table.rows[1].cells[3].firstChild.selectedIndex);
+		changeBand(createQueryString(theQueryValue, 'i', timeline), 2, intervals, table.rows[1].cells[3].firstChild.selectedIndex);
 	};
 	td.appendChild(select3);
 	
@@ -327,7 +316,7 @@ function setupOtherControls(div, timeline, url) {
 		select4.appendChild(createOption(options[i],(values[i] == dateType)));
 	}
 	select4.onchange = function () {
-		window.location = path + createQueryString(theQueryValue, 't', timeline) + 't=' + values[table.rows[1].cells[4].firstChild.selectedIndex];
+		window.location.search = createQueryString(theQueryValue, 't', timeline) + 't=' + values[table.rows[1].cells[4].firstChild.selectedIndex];
 	};
 	td.appendChild(select4);
 	
@@ -335,7 +324,7 @@ function setupOtherControls(div, timeline, url) {
 	var fitToScreen = document.createElement("button");
 	fitToScreen.innerHTML = getString("general.fitToScreen");
 	Timeline.DOM.registerEvent(fitToScreen, "click", function () {
-		window.location = path + createQueryString(theQueryValue, false, timeline);
+		window.location.search = createQueryString(theQueryValue, false, timeline);
 	});
 	td.appendChild(fitToScreen);
 	

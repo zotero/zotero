@@ -1,4 +1,5 @@
 <!ENTITY zotero.version "versjon">
+<!ENTITY zotero.whatsNew "Kva er nytt">
 <!ENTITY zotero.createdby "Laga av:">
 <!ENTITY zotero.director "Leiar:">
 <!ENTITY zotero.directors "Regissørar:">
@@ -10,4 +11,4 @@
 <!ENTITY zotero.thanks "Spesiell takk til:">
 <!ENTITY zotero.about.close "Lukk">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Meir godskriving og takk">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.citationProcessing "Siterings- og bibliografihandsaming">

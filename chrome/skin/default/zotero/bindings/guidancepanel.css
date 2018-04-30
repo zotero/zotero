@@ -1,0 +1,52 @@
+stack {
+	max-width: 400px;
+	margin: 0;
+	padding: 0;
+}
+
+*[anonid=nav-buttons] {
+	-moz-box-align: end;
+	-moz-box-pack: end;
+}
+
+*[anonid=nav-buttons] > toolbarbutton {
+	-moz-appearance: none; /* Necessary on Linux for button to be shown */
+	width: 22px;
+	height: 22px;
+	border: 1px solid lightgray;
+	border-radius: 3px;
+	background-position: 5px 5px;
+	background-size: 10px;
+	background-repeat: no-repeat;
+	margin: 0;
+	margin-bottom: -7px;
+}
+
+*[anonid=nav-buttons] > toolbarbutton:hover {
+    border-color: var(--toolbarbutton-hover-bordercolor);
+    box-shadow: var(--toolbarbutton-hover-boxshadow);
+}
+
+*[anonid=nav-buttons] > toolbarbutton:active:hover {
+    border-color: var(--toolbarbutton-active-bordercolor);
+    box-shadow: var(--toolbarbutton-active-boxshadow);
+    transition-duration: 10ms;
+}
+
+*[anonid=back-button] {
+	background-image: url("chrome://zotero/skin/chevron-left_808080_32.png");
+}
+
+*[anonid=forward-button] {
+	margin-right: -16px;
+	background-image: url("chrome://zotero/skin/chevron-right_808080_32.png");
+}
+
+*[anonid=close-button-box] {
+	-moz-box-align: start;
+	-moz-box-pack: end;
+}
+
+*[anonid=close-button] {
+	margin: -16px -16px;
+}

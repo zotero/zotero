@@ -1,20 +1,20 @@
 <!ENTITY zotero.search.name "Nome:">
 
-<!ENTITY zotero.search.searchInLibrary "Procurar na biblioteca:">
+<!ENTITY zotero.search.searchInLibrary "Pesquisar na biblioteca:">
 
-<!ENTITY zotero.search.joinMode.prefix "Comparar">
-<!ENTITY zotero.search.joinMode.any "qualquer">
-<!ENTITY zotero.search.joinMode.all "tudo">
-<!ENTITY zotero.search.joinMode.suffix "do seguinte:">
+<!ENTITY zotero.search.joinMode.prefix "Corresponder a">
+<!ENTITY zotero.search.joinMode.any "qualquer um dos">
+<!ENTITY zotero.search.joinMode.all "todos os">
+<!ENTITY zotero.search.joinMode.suffix "seguintes:">
 
 <!ENTITY zotero.search.recursive.label "Pesquisar subcoleções">
-<!ENTITY zotero.search.noChildren "Mostrar apenas itens no nível mais alto">
-<!ENTITY zotero.search.includeParentsAndChildren "Incluir itens em níveis acima e abaixo dos items localizados">
+<!ENTITY zotero.search.noChildren "Exibir apenas itens do nível mais alto">
+<!ENTITY zotero.search.includeParentsAndChildren "Incluir itens pais e filhos dos itens correspondentes">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (incluindo arquivos binários)">
 <!ENTITY zotero.search.textModes.regexp "Expressão regular">
-<!ENTITY zotero.search.textModes.regexpCS "Expressão regular (diferenciando maiúsculas e minúsculas)">
+<!ENTITY zotero.search.textModes.regexpCS "Expressão regular (dif. maiúsculas e minúsculas)">
 
 <!ENTITY zotero.search.date.units.days "dias">
 <!ENTITY zotero.search.date.units.months "meses">

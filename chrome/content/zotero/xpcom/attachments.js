@@ -1,435 +1,489 @@
 /*
-    ***** BEGIN LICENSE BLOCK *****
-    
-    Copyright © 2009 Center for History and New Media
-                     George Mason University, Fairfax, Virginia, USA
-                     http://zotero.org
-    
-    This file is part of Zotero.
-    
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-    
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
-    
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-    
-    ***** END LICENSE BLOCK *****
+ ***** BEGIN LICENSE BLOCK *****
+ 
+ Copyright © 2009 Center for History and New Media
+ George Mason University, Fairfax, Virginia, USA
+ http://zotero.org
+ 
+ This file is part of Zotero.
+ 
+ Zotero is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ Zotero is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU Affero General Public License for more details.
+ 
+ You should have received a copy of the GNU Affero General Public License
+ along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+ 
+ ***** END LICENSE BLOCK *****
 */
 
 Zotero.Attachments = new function(){
+	// Keep in sync with Zotero.Schema.integrityCheck()
 	this.LINK_MODE_IMPORTED_FILE = 0;
 	this.LINK_MODE_IMPORTED_URL = 1;
 	this.LINK_MODE_LINKED_FILE = 2;
 	this.LINK_MODE_LINKED_URL = 3;
 	this.BASE_PATH_PLACEHOLDER = 'attachments:';
 	
-	this.importFromFile = importFromFile;
-	this.linkFromFile = linkFromFile;
-	this.importSnapshotFromFile = importSnapshotFromFile;
-	this.importFromURL = importFromURL;
-	this.linkFromDocument = linkFromDocument;
-	this.importFromDocument = importFromDocument;
-	this.createMissingAttachment = createMissingAttachment;
-	this.getFileBaseNameFromItem = getFileBaseNameFromItem;
-	this.createDirectoryForItem = createDirectoryForItem;
-	this.createDirectoryForMissingItem = createDirectoryForMissingItem;
-	this.getStorageDirectory = getStorageDirectory;
-	this.getPath = getPath;
-	
 	var self = this;
 	
 	
-	function importFromFile(file, sourceItemID, libraryID) {
+	/**
+	 * @param {Object} options
+	 * @param {nsIFile|String} [options.file] - File to add
+	 * @param {Integer} [options.libraryID]
+	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
+	 * @param {Integer[]} [options.collections] - Collection keys or ids to add new item to
+	 * @param {String} [options.fileBaseName]
+	 * @param {String} [options.contentType]
+	 * @param {String} [options.charset]
+	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
+	 * @return {Promise<Zotero.Item>}
+	 */
+	this.importFromFile = Zotero.Promise.coroutine(function* (options) {
 		Zotero.debug('Importing attachment from file');
 		
-		var newName = Zotero.File.getValidFileName(file.leafName);
+		var libraryID = options.libraryID;
+		var file = Zotero.File.pathToFile(options.file);
+		var path = file.path;
+		var leafName = file.leafName;
+		var parentItemID = options.parentItemID;
+		var collections = options.collections;
+		var fileBaseName = options.fileBaseName;
+		var contentType = options.contentType;
+		var charset = options.charset;
+		var saveOptions = options.saveOptions;
 		
-		if (!file.isFile()) {
-			throw ("'" + file.leafName + "' must be a file in Zotero.Attachments.importFromFile()");
+		if (fileBaseName) {
+			let ext = Zotero.File.getExtension(path);
+			var newName = fileBaseName + (ext != '' ? '.' + ext : '');
+		}
+		else {
+			var newName = Zotero.File.getValidFileName(OS.Path.basename(leafName));
 		}
 		
-		Zotero.DB.beginTransaction();
+		if (leafName.endsWith(".lnk")) {
+			throw new Error("Cannot add Windows shortcut");
+		}
+		if (parentItemID && collections) {
+			throw new Error("parentItemID and collections cannot both be provided");
+		}
 		
+		var attachmentItem, itemID, newFile, contentType, destDir;
 		try {
-			// Create a new attachment
-			var attachmentItem = new Zotero.Item('attachment');
-			if (sourceItemID) {
-				var parentItem = Zotero.Items.get(sourceItemID);
-				attachmentItem.libraryID = parentItem.libraryID;
-			}
-			else if (libraryID) {
-				attachmentItem.libraryID = libraryID;
-			}
-			attachmentItem.setField('title', newName);
-			attachmentItem.setSource(sourceItemID);
-			attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_FILE;
-			var itemID = attachmentItem.save();
-			attachmentItem = Zotero.Items.get(itemID);
-			
-			// Create directory for attachment files within storage directory
-			var destDir = this.createDirectoryForItem(itemID);
-			
-			// Point to copied file
-			var newFile = destDir.clone();
-			newFile.append(newName);
-			
-			// Copy file to unique filename, which automatically shortens long filenames
-			newFile = Zotero.File.copyToUnique(file, newFile);
-			
-			var mimeType = Zotero.MIME.getMIMETypeFromFile(newFile);
-			
-			attachmentItem.attachmentMIMEType = mimeType;
-			attachmentItem.attachmentPath = this.getPath(newFile, this.LINK_MODE_IMPORTED_FILE);
-			attachmentItem.save();
-			
-			Zotero.DB.commitTransaction();
-			
-			// Determine charset and build fulltext index
-			_postProcessFile(itemID, newFile, mimeType);
+			yield Zotero.DB.executeTransaction(function* () {
+				// Create a new attachment
+				attachmentItem = new Zotero.Item('attachment');
+				if (parentItemID) {
+					let {libraryID: parentLibraryID, key: parentKey} =
+						Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+					attachmentItem.libraryID = parentLibraryID;
+				}
+				else if (libraryID) {
+					attachmentItem.libraryID = libraryID;
+				}
+				attachmentItem.setField('title', newName);
+				attachmentItem.parentID = parentItemID;
+				attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_FILE;
+				if (collections) {
+					attachmentItem.setCollections(collections);
+				}
+				yield attachmentItem.save(saveOptions);
+				
+				// Create directory for attachment files within storage directory
+				destDir = yield this.createDirectoryForItem(attachmentItem);
+				
+				// Point to copied file
+				newFile = OS.Path.join(destDir, newName);
+				
+				// Copy file to unique filename, which automatically shortens long filenames
+				newFile = Zotero.File.copyToUnique(file, newFile);
+				
+				yield Zotero.File.setNormalFilePermissions(newFile.path);
+				
+				if (!contentType) {
+					contentType = yield Zotero.MIME.getMIMETypeFromFile(newFile);
+				}
+				attachmentItem.attachmentContentType = contentType;
+				if (charset) {
+					attachmentItem.attachmentCharset = charset;
+				}
+				attachmentItem.attachmentPath = newFile.path;
+				yield attachmentItem.save(saveOptions);
+			}.bind(this));
+			yield _postProcessFile(attachmentItem, newFile, contentType);
 		}
-		catch (e){
-			// hmph
-			Zotero.DB.rollbackTransaction();
+		catch (e) {
+			Zotero.logError(e);
+			Zotero.logError("Failed importing file " + file.path);
 			
-			var msg = "Failed importing file " + file.path;
-			Components.utils.reportError(msg);
-			Zotero.debug(msg, 1);
-			
+			// Clean up
 			try {
-				// Clean up
-				if (itemID) {
-					var itemDir = this.getStorageDirectory(itemID);
-					if (itemDir.exists()) {
-						itemDir.remove(true);
-					}
+				if (destDir && (yield OS.File.exists(destDir))) {
+					yield OS.File.removeDir(destDir);
 				}
 			}
-			catch (e) {}
+			catch (e) {
+				Zotero.logError(e);
+			}
 			
-			throw (e);
+			throw e;
 		}
-		return itemID;
-	}
+		
+		return attachmentItem;
+	});
 	
 	
-	function linkFromFile(file, sourceItemID){
+	/**
+	 * @param {nsIFile|String} [options.file] - File to add
+	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
+	 * @param {Integer[]} [options.collections] - Collection keys or ids to add new item to
+	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
+	 * @return {Promise<Zotero.Item>}
+	 */
+	this.linkFromFile = Zotero.Promise.coroutine(function* (options) {
 		Zotero.debug('Linking attachment from file');
 		
+		var file = Zotero.File.pathToFile(options.file);
+		var parentItemID = options.parentItemID;
+		var collections = options.collections;
+		var saveOptions = options.saveOptions;
+		
+		if (parentItemID && collections) {
+			throw new Error("parentItemID and collections cannot both be provided");
+		}
+		
 		var title = file.leafName;
-		var mimeType = Zotero.MIME.getMIMETypeFromFile(file);
-		
-		var itemID = _addToDB(file, null, title, this.LINK_MODE_LINKED_FILE, mimeType,
-			null, sourceItemID);
-		
-		// Determine charset and build fulltext index
-		_postProcessFile(itemID, file, mimeType);
-		
-		return itemID;
-	}
+		var contentType = yield Zotero.MIME.getMIMETypeFromFile(file);
+		var item = yield _addToDB({
+			file,
+			title,
+			linkMode: this.LINK_MODE_LINKED_FILE,
+			contentType,
+			parentItemID,
+			collections,
+			saveOptions
+		});
+		yield _postProcessFile(item, file, contentType);
+		return item;
+	});
 	
 	
-	function importSnapshotFromFile(file, url, title, mimeType, charset, sourceItemID){
+	/**
+	 * @param {Object} options - 'file', 'url', 'title', 'contentType', 'charset', 'parentItemID'
+	 * @return {Promise<Zotero.Item>}
+	 */
+	this.importSnapshotFromFile = Zotero.Promise.coroutine(function* (options) {
 		Zotero.debug('Importing snapshot from file');
 		
-		var charsetID = charset ? Zotero.CharacterSets.getID(charset) : null;
+		var file = Zotero.File.pathToFile(options.file);
+		var fileName = file.leafName;
+		var url = options.url;
+		var title = options.title;
+		var contentType = options.contentType;
+		var charset = options.charset;
+		var parentItemID = options.parentItemID;
 		
-		Zotero.DB.beginTransaction();
-		
-		try {
-			// Create a new attachment
-			var attachmentItem = new Zotero.Item('attachment');
-			if (sourceItemID) {
-				var parentItem = Zotero.Items.get(sourceItemID);
-				attachmentItem.libraryID = parentItem.libraryID;
-			}
-			attachmentItem.setField('title', title);
-			attachmentItem.setField('url', url);
-			attachmentItem.setSource(sourceItemID);
-			attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_URL;
-			attachmentItem.attachmentMIMEType = mimeType;
-			attachmentItem.attachmentCharset = charset;
-			
-			// DEBUG: this should probably insert access date too so as to
-			// create a proper item, but at the moment this is only called by
-			// translate.js, which sets the metadata fields itself
-			var itemID = attachmentItem.save();
-			attachmentItem = Zotero.Items.get(itemID)
-			
-			var storageDir = Zotero.getStorageDirectory();
-			var destDir = this.getStorageDirectory(itemID);
-			_moveOrphanedDirectory(destDir);
-			file.parent.copyTo(storageDir, destDir.leafName);
-			
-			// Point to copied file
-			var newFile = destDir.clone();
-			newFile.append(file.leafName);
-			
-			attachmentItem.attachmentPath = this.getPath(newFile, this.LINK_MODE_IMPORTED_URL);
-			attachmentItem.save();
-			
-			Zotero.DB.commitTransaction();
-			
-			// Determine charset and build fulltext index
-			_postProcessFile(itemID, newFile, mimeType);
+		if (!parentItemID) {
+			throw new Error("parentItemID not provided");
 		}
-		catch (e){
-			Zotero.DB.rollbackTransaction();
+		
+		var attachmentItem, itemID, destDir, newFile;
+		try {
+			yield Zotero.DB.executeTransaction(function* () {
+				// Create a new attachment
+				attachmentItem = new Zotero.Item('attachment');
+				let {libraryID, key: parentKey} = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+				attachmentItem.libraryID = libraryID;
+				attachmentItem.setField('title', title);
+				attachmentItem.setField('url', url);
+				attachmentItem.parentID = parentItemID;
+				attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_URL;
+				attachmentItem.attachmentContentType = contentType;
+				attachmentItem.attachmentCharset = charset;
+				attachmentItem.attachmentPath = 'storage:' + fileName;
+				
+				// DEBUG: this should probably insert access date too so as to
+				// create a proper item, but at the moment this is only called by
+				// translate.js, which sets the metadata fields itself
+				itemID = yield attachmentItem.save();
+				
+				var storageDir = Zotero.getStorageDirectory();
+				destDir = this.getStorageDirectory(attachmentItem);
+				yield OS.File.removeDir(destDir.path);
+				file.parent.copyTo(storageDir, destDir.leafName);
+				
+				// Point to copied file
+				newFile = destDir.clone();
+				newFile.append(file.leafName);
+			}.bind(this));
+			yield _postProcessFile(attachmentItem, newFile, contentType, charset);
+		}
+		catch (e) {
+			Zotero.logError(e);
 			
+			// Clean up
 			try {
-				// Clean up
-				if (itemID) {
-					var itemDir = this.getStorageDirectory(itemID);
-					if (itemDir.exists()) {
-						itemDir.remove(true);
-					}
+				if (destDir && destDir.exists()) {
+					destDir.remove(true);
 				}
 			}
-			catch (e) {}
+			catch (e) {
+				Zotero.logError(e, 1);
+			}
 			
-			throw (e);
+			throw e;
 		}
-		return itemID;
-	}
+		return attachmentItem;
+	});
 	
 	
-	function importFromURL(url, sourceItemID, forceTitle, forceFileBaseName, parentCollectionIDs,
-			mimeType, libraryID, callback, cookieSandbox) {
-		Zotero.debug('Importing attachment from URL');
+	/**
+	 * @param {Object} options
+	 * @param {Integer} options.libraryID
+	 * @param {String} options.url
+	 * @param {Integer} [options.parentItemID]
+	 * @param {Integer[]} [options.collections]
+	 * @param {String} [options.title]
+	 * @param {String} [options.fileBaseName]
+	 * @param {Boolean} [options.renameIfAllowedType=false]
+	 * @param {String} [options.contentType]
+	 * @param {String} [options.referrer]
+	 * @param {CookieSandbox} [options.cookieSandbox]
+	 * @param {Object} [options.saveOptions]
+	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
+	 */
+	this.importFromURL = Zotero.Promise.coroutine(function* (options) {
+		var libraryID = options.libraryID;
+		var url = options.url;
+		var parentItemID = options.parentItemID;
+		var collections = options.collections;
+		var title = options.title;
+		var fileBaseName = options.fileBaseName;
+		var renameIfAllowedType = options.renameIfAllowedType;
+		var contentType = options.contentType;
+		var referrer = options.referrer;
+		var cookieSandbox = options.cookieSandbox;
+		var saveOptions = options.saveOptions;
 		
-		if (sourceItemID && parentCollectionIDs) {
-			var msg = "parentCollectionIDs is ignored when sourceItemID is set in Zotero.Attachments.importFromURL()";
-			Zotero.debug(msg, 2);
-			Components.utils.reportError(msg);
-			parentCollectionIDs = undefined;
+		Zotero.debug('Importing attachment from URL ' + url);
+		
+		if (parentItemID && collections) {
+			throw new Error("parentItemID and collections cannot both be provided");
 		}
 		
 		// Throw error on invalid URLs
-	        //
+		//
 		// TODO: allow other schemes
 		var urlRe = /^https?:\/\/[^\s]*$/;
 		var matches = urlRe.exec(url);
 		if (!matches) {
-			if(callback) callback(false);
-			throw ("Invalid URL '" + url + "' in Zotero.Attachments.importFromURL()");
+			throw new Error("Invalid URL '" + url + "'");
 		}
 		
 		// Save using a hidden browser
 		var nativeHandlerImport = function () {
-			var browser = Zotero.HTTP.processDocuments(url, function() {
-				var importCallback = function (item) {
-					Zotero.Browser.deleteHiddenBrowser(browser);
-					if(callback) callback(item);
-				};
-				Zotero.Attachments.importFromDocument(browser.contentDocument,
-					sourceItemID, forceTitle, parentCollectionIDs, importCallback, libraryID);
-			}, undefined, undefined, true, cookieSandbox);
+			return new Zotero.Promise(function (resolve, reject) {
+				var browser = Zotero.HTTP.loadDocuments(
+					url,
+					Zotero.Promise.coroutine(function* () {
+						let channel = browser.docShell.currentDocumentChannel;
+						if (channel && (channel instanceof Components.interfaces.nsIHttpChannel)) {
+							if (channel.responseStatus < 200 || channel.responseStatus >= 400) {
+								reject(new Error("Invalid response " + channel.responseStatus + " "
+									+ channel.responseStatusText + " for '" + url + "'"));
+								return false;
+							}
+						}
+						try {
+							let attachmentItem = yield Zotero.Attachments.importFromDocument({
+								libraryID,
+								document: browser.contentDocument,
+								parentItemID,
+								title,
+								collections,
+								saveOptions
+							});
+							resolve(attachmentItem);
+						}
+						catch (e) {
+							Zotero.logError(e);
+							reject(e);
+						}
+						finally {
+							Zotero.Browser.deleteHiddenBrowser(browser);
+						}
+					}),
+					undefined,
+					undefined,
+					true,
+					cookieSandbox
+				);
+			});
 		};
 		
 		// Save using remote web browser persist
-		var externalHandlerImport = function (mimeType) {
-			if (forceFileBaseName) {
-				var ext = _getExtensionFromURL(url, mimeType);
-				var fileName = forceFileBaseName + (ext != '' ? '.' + ext : '');
+		var externalHandlerImport = Zotero.Promise.coroutine(function* (contentType) {
+			// Rename attachment
+			if (renameIfAllowedType && !fileBaseName && this.getRenamedFileTypes().includes(contentType)) {
+				let parentItem = Zotero.Items.get(parentItemID);
+				fileBaseName = this.getFileBaseNameFromItem(parentItem);
+			}
+			if (fileBaseName) {
+				let ext = _getExtensionFromURL(url, contentType);
+				var fileName = fileBaseName + (ext != '' ? '.' + ext : '');
 			}
 			else {
-				var fileName = _getFileNameFromURL(url, mimeType);
+				var fileName = _getFileNameFromURL(url, contentType);
 			}
 			
-			var title = forceTitle ? forceTitle : fileName;
-			
 			const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-			var wbp = Components
-				.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+			var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
 				.createInstance(nsIWBP);
-			wbp.persistFlags = nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
 			if(cookieSandbox) cookieSandbox.attachToInterfaceRequestor(wbp);
 			var encodingFlags = false;
 			
-			Zotero.DB.beginTransaction();
+			// Create a temporary directory to save to within the storage directory.
+			// We don't use the normal temp directory because people might have 'storage'
+			// symlinked to another volume, which makes moving complicated.
+			var tmpDir = (yield this.createTemporaryStorageDirectory()).path;
+			var tmpFile = OS.Path.join(tmpDir, fileName);
 			
-			try {
-				// Create a new attachment
-				var attachmentItem = new Zotero.Item('attachment');
-				if (libraryID) {
-					attachmentItem.libraryID = libraryID;
-				}
-				else if (sourceItemID) {
-					var parentItem = Zotero.Items.get(sourceItemID);
-					attachmentItem.libraryID = parentItem.libraryID;
-				}
-				attachmentItem.setField('title', title);
-				attachmentItem.setField('url', url);
-				attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
-				attachmentItem.setSource(sourceItemID);
-				attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
-				attachmentItem.attachmentMIMEType = mimeType;
-				var itemID = attachmentItem.save();
-				attachmentItem = Zotero.Items.get(itemID);
+			// Save to temp dir
+			var deferred = Zotero.Promise.defer();
+			wbp.progressListener = new Zotero.WebProgressFinishListener(function() {
+				deferred.resolve();
+			});
 				
-				// Add to collections
-				if (parentCollectionIDs){
-					var ids = Zotero.flattenArguments(parentCollectionIDs);
-					for each(var id in ids){
-						var col = Zotero.Collections.get(id);
-						col.addItem(itemID);
-					}
-				}
-				
-				// Create a new folder for this item in the storage directory
-				var destDir = Zotero.Attachments.createDirectoryForItem(itemID);
-				
-				var file = destDir.clone();
-				file.append(fileName);
-				
-				wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
-					try {
-						var str = Zotero.File.getSample(file);
-						
-						if (mimeType == 'application/pdf' &&
-								Zotero.MIME.sniffForMIMEType(str) != 'application/pdf') {
-							var errString = "Downloaded PDF did not have MIME type "
-								+ "'application/pdf' in Attachments.importFromURL()";
-							Zotero.debug(errString, 2);
-							Zotero.debug(str);
-							attachmentItem.erase();
-							if(callback) callback(false, new Error(errString));
-							return;
-						}
-						
-						attachmentItem.attachmentPath =
-							Zotero.Attachments.getPath(
-								file, Zotero.Attachments.LINK_MODE_IMPORTED_URL
-							);
-						attachmentItem.save();
-						
-						Zotero.Notifier.trigger('add', 'item', itemID);
-						Zotero.Notifier.trigger('modify', 'item', sourceItemID);
-				
-						if(callback) callback(attachmentItem);
-						
-						// We don't have any way of knowing that the file
-						// is flushed to disk, so we just wait a second
-						// and hope for the best -- we'll index it later
-						// if it fails
-						//
-						// TODO: index later
-						setTimeout(function() {
-							Zotero.Fulltext.indexItems([itemID]);
-						}, 1000);
-					}
-					catch (e) {
-						// Clean up
-						attachmentItem.erase();
-						if(callback) callback(false, e);
-						
-						throw (e);
-					}
-				});
-				
-				// Disable the Notifier during the commit
-				var disabled = Zotero.Notifier.disable();
-				
-				// The attachment is still incomplete here, but we can't risk
-				// leaving the transaction open if the callback never triggers
-				Zotero.DB.commitTransaction();
-				
-				if (disabled) {
-					Zotero.Notifier.enable();
-				}
-				
-				var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
-							.createInstance(Components.interfaces.nsIURL);
-				nsIURL.spec = url;
-				Zotero.Utilities.saveURI(wbp, nsIURL, file);
+			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
+				.createInstance(Components.interfaces.nsIURL);
+			nsIURL.spec = url;
+			var headers = {};
+			if (referrer) {
+				headers.Referer = referrer;
+			}
+			Zotero.Utilities.Internal.saveURI(wbp, nsIURL, tmpFile, headers);
 
-				
-				return attachmentItem;
-			}
-			catch (e){
-				Zotero.DB.rollbackTransaction();
-				
+
+			yield deferred.promise;
+			let sample = yield Zotero.File.getContentsAsync(tmpFile, null, 1000);
+			try {
+				if (contentType == 'application/pdf' &&
+					Zotero.MIME.sniffForMIMEType(sample) != 'application/pdf') {
+					let errString = "Downloaded PDF did not have MIME type "
+						+ "'application/pdf' in Attachments.importFromURL()";
+					Zotero.debug(errString, 2);
+					Zotero.debug(sample, 3);
+					throw(new Error(errString));
+				}
+
+				// Create DB item
+				var attachmentItem;
+				var destDir;
+				yield Zotero.DB.executeTransaction(function*() {
+					// Create a new attachment
+					attachmentItem = new Zotero.Item('attachment');
+					if (libraryID) {
+						attachmentItem.libraryID = libraryID;
+					}
+					else if (parentItemID) {
+						let {libraryID: parentLibraryID, key: parentKey} =
+							Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+						attachmentItem.libraryID = parentLibraryID;
+					}
+					attachmentItem.setField('title', title ? title : fileName);
+					attachmentItem.setField('url', url);
+					attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
+					attachmentItem.parentID = parentItemID;
+					attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+					attachmentItem.attachmentContentType = contentType;
+					if (collections) {
+						attachmentItem.setCollections(collections);
+					}
+					attachmentItem.attachmentPath = 'storage:' + fileName;
+					var itemID = yield attachmentItem.save(saveOptions);
+					
+					Zotero.Fulltext.queueItem(attachmentItem);
+					
+					// DEBUG: Does this fail if 'storage' is symlinked to another drive?
+					destDir = this.getStorageDirectory(attachmentItem).path;
+					yield OS.File.move(tmpDir, destDir);
+				}.bind(this));
+			} catch (e) {
 				try {
-					// Clean up
-					if (itemID) {
-						var itemDir = this.getStorageDirectory(itemID);
-						if (itemDir.exists()) {
-							itemDir.remove(true);
-						}
+					if (tmpDir) {
+						yield OS.File.removeDir(tmpDir, { ignoreAbsent: true });
+					}
+					if (destDir) {
+						yield OS.File.removeDir(destDir, { ignoreAbsent: true });
 					}
 				}
-				catch (e) {}
-				
-				throw (e);
+				catch (e) {
+					Zotero.debug(e, 1);
+				}
+				throw e;
 			}
-		}
+			
+			return attachmentItem;
+		}.bind(this));
 		
-		var process = function (mimeType, hasNativeHandler) {
+		var process = function (contentType, hasNativeHandler) {
 			// If we can load this natively, use a hidden browser
 			// (so we can get the charset and title and index the document)
 			if (hasNativeHandler) {
-				nativeHandlerImport();
+				return nativeHandlerImport();
 			}
+			
 			// Otherwise use a remote web page persist
-			else {
-				return externalHandlerImport(mimeType);
-			}
+			return externalHandlerImport(contentType);
 		}
 		
-		if (mimeType) {
-			return process(mimeType, Zotero.MIME.hasNativeHandler(mimeType));
+		if (contentType) {
+			return process(contentType, Zotero.MIME.hasNativeHandler(contentType));
 		}
-		else {
-			Zotero.MIME.getMIMETypeFromURL(url, function (mimeType, hasNativeHandler) {
-				process(mimeType, hasNativeHandler);
-			}, cookieSandbox);
-		}
-	}
-	
-	
-	this.cleanAttachmentURI = function (uri, tryHttp) {
-		uri = uri.trim();
-		if (!uri) return false;
 		
-		var ios = Components.classes["@mozilla.org/network/io-service;1"]
-			.getService(Components.interfaces.nsIIOService);
-		try {
-			return ios.newURI(uri, null, null).spec // Valid URI if succeeds
-		} catch (e) {
-			if (e instanceof Components.Exception
-				&& e.result == Components.results.NS_ERROR_MALFORMED_URI
-			) {
-				if (tryHttp && /\w\.\w/.test(uri)) {
-					// Assume it's a URL missing "http://" part
-					try {
-						return ios.newURI('http://' + uri, null, null).spec;
-					} catch (e) {}
-				}
-				
-				Zotero.debug('cleanAttachmentURI: Invalid URI: ' + uri, 2);
-				return false;
-			}
-			throw e;
-		}
-	}
+		return Zotero.MIME.getMIMETypeFromURL(url, cookieSandbox).spread(process);
+	});
 	
 	
-	/*
+	/**
 	 * Create a link attachment from a URL
 	 *
-	 * @param	{String}		url Validated URI
-	 * @param	{Integer}		sourceItemID	Parent item
-	 * @param	{String}		[mimeType]		MIME type of page
-	 * @param	{String}		[title]			Title to use for attachment
+	 * @param {Object} options - 'url', 'parentItemID', 'contentType', 'title', 'collections'
+	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
-	this.linkFromURL = function (url, sourceItemID, mimeType, title) {
-		Zotero.debug('Linking attachment from ' + url);
+	this.linkFromURL = Zotero.Promise.coroutine(function* (options) {
+		Zotero.debug('Linking attachment from URL');
+	 
+		var url = options.url;
+		var parentItemID = options.parentItemID;
+		var contentType = options.contentType;
+		var title = options.title;
+		var collections = options.collections;
+		
+		/* Throw error on invalid URLs
+		 We currently accept the following protocols:
+		 PersonalBrain (brain://)
+		 DevonThink (x-devonthink-item://)
+		 Notational Velocity (nv://)
+		 MyLife Organized (mlo://)
+		 Evernote (evernote://)
+		 OneNote (onenote://)
+		 Kindle (kindle://) 
+		 Logos (logosres:) 
+		 Zotero (zotero://) */
+
+		var urlRe = /^((https?|zotero|evernote|onenote|brain|nv|mlo|kindle|x-devonthink-item|ftp):\/\/|logosres:)[^\s]*$/;
+		var matches = urlRe.exec(url);
+		if (!matches) {
+			throw ("Invalid URL '" + url + "' in Zotero.Attachments.linkFromURL()");
+		}
 		
 		// If no title provided, figure it out from the URL
 		// Web addresses with paths will be whittled to the last element
@@ -463,414 +517,192 @@ Zotero.Attachments = new function(){
 		// invalid MIME type (https://www.zotero.org/trac/ticket/460)
 		var ext = _getExtensionFromURL(url);
 		if (ext == 'pdf') {
-			mimeType = 'application/pdf';
+			contentType = 'application/pdf';
 		}
 		
-		var itemID = _addToDB(null, url, title, this.LINK_MODE_LINKED_URL,
-			mimeType, null, sourceItemID);
-		return itemID;
-	}
+		return _addToDB({
+			url,
+			title,
+			linkMode: this.LINK_MODE_LINKED_URL,
+			contentType,
+			parentItemID,
+			collections
+		});
+	});
 	
-	// TODO: what if called on file:// document?
-	function linkFromDocument(document, sourceItemID, parentCollectionIDs){
+	
+	/**
+	 * TODO: what if called on file:// document?
+	 *
+	 * @param {Object} options - 'document', 'parentItemID', 'collections'
+	 * @return {Promise<Zotero.Item>}
+	 */
+	this.linkFromDocument = Zotero.Promise.coroutine(function* (options) {
 		Zotero.debug('Linking attachment from document');
 		
-		if (sourceItemID && parentCollectionIDs) {
-			var msg = "parentCollectionIDs is ignored when sourceItemID is set in Zotero.Attachments.linkFromDocument()";
-			Zotero.debug(msg, 2);
-			Components.utils.reportError(msg);
-			parentCollectionIDs = undefined;
+		var document = options.document;
+		var parentItemID = options.parentItemID;
+		var collections = options.collections;
+		
+		if (parentItemID && collections) {
+			throw new Error("parentItemID and collections cannot both be provided");
 		}
 		
 		var url = document.location.href;
 		var title = document.title; // TODO: don't use Mozilla-generated title for images, etc.
-		var mimeType = document.contentType;
-		var charsetID = Zotero.CharacterSets.getID(document.characterSet);
+		var contentType = document.contentType;
 		
-		Zotero.DB.beginTransaction();
+		var item = yield _addToDB({
+			url,
+			title,
+			linkMode: this.LINK_MODE_LINKED_URL,
+			contentType,
+			charset: document.characterSet,
+			parentItemID,
+			collections
+		});
 		
-		var itemID = _addToDB(null, url, title, this.LINK_MODE_LINKED_URL,
-			mimeType, charsetID, sourceItemID);
-		
-		// Add to collections
-		if (parentCollectionIDs){
-			var ids = Zotero.flattenArguments(parentCollectionIDs);
-			for each(var id in ids){
-				var col = Zotero.Collections.get(id);
-				col.addItem(itemID);
-			}
+		if (Zotero.Fulltext.isCachedMIMEType(contentType)) {
+			// No file, so no point running the PDF indexer
+			//Zotero.Fulltext.indexItems([itemID]);
+		}
+		else if (Zotero.MIME.isTextType(document.contentType)) {
+			yield Zotero.Fulltext.indexDocument(document, item.id);
 		}
 		
-		Zotero.DB.commitTransaction();
-		
-		// Run the fulltext indexer asynchronously (actually, it hangs the UI
-		// thread, but at least it lets the menu close)
-		setTimeout(function() {
-			if (Zotero.Fulltext.isCachedMIMEType(mimeType)) {
-				// No file, so no point running the PDF indexer
-				//Zotero.Fulltext.indexItems([itemID]);
-			}
-			else if (Zotero.MIME.isTextType(document.contentType)) {
-				Zotero.Fulltext.indexDocument(document, itemID);
-			}
-		}, 50);
-		
-		return itemID;
-	}
+		return item;
+	});
 	
 	
-	/*
-	 * Save a snapshot -- uses synchronous WebPageDump or asynchronous saveURI()
+	/**
+	 * Save a snapshot from a Document
+	 *
+	 * @param {Object} options - 'libraryID', 'document', 'parentItemID', 'forceTitle', 'collections'
+	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
-	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs, callback, libraryID) {
+	this.importFromDocument = Zotero.Promise.coroutine(function* (options) {
 		Zotero.debug('Importing attachment from document');
 		
-		if (sourceItemID && parentCollectionIDs) {
-			var msg = "parentCollectionIDs is ignored when sourceItemID is set in Zotero.Attachments.importFromDocument()";
-			Zotero.debug(msg, 2);
-			Components.utils.reportError(msg);
-			parentCollectionIDs = undefined;
+		var libraryID = options.libraryID;
+		var document = options.document;
+		var parentItemID = options.parentItemID;
+		var title = options.title;
+		var collections = options.collections;
+		
+		if (parentItemID && collections) {
+			throw new Error("parentItemID and parentCollectionIDs cannot both be provided");
 		}
 		
 		var url = document.location.href;
-		var title = forceTitle ? forceTitle : document.title;
-		var mimeType = document.contentType;
-		if(Zotero.Attachments.isPDFJS(document)) {
-			mimeType = "application/pdf";
+		title = title ? title : document.title;
+		var contentType = document.contentType;
+		if (Zotero.Attachments.isPDFJS(document)) {
+			contentType = "application/pdf";
 		}
 		
-		var charsetID = Zotero.CharacterSets.getID(document.characterSet);
-		
-		if (!forceTitle) {
-			// Remove e.g. " - Scaled (-17%)" from end of images saved from links,
-			// though I'm not sure why it's getting added to begin with
-			if (mimeType.indexOf('image/') === 0) {
-				title = title.replace(/(.+ \([^,]+, [0-9]+x[0-9]+[^\)]+\)) - .+/, "$1" );
-			}
-			// If not native type, strip mime type data in parens
-			else if (!Zotero.MIME.hasNativeHandler(mimeType, _getExtensionFromURL(url))) {
-				title = title.replace(/(.+) \([a-z]+\/[^\)]+\)/, "$1" );
-			}
-		}
-		
-		Zotero.DB.beginTransaction();
-		
+		var tmpDir = (yield this.createTemporaryStorageDirectory()).path;
 		try {
-			// Create a new attachment
-			var attachmentItem = new Zotero.Item('attachment');
-			if (libraryID) {
-				attachmentItem.libraryID = libraryID;
+			var fileName = Zotero.File.truncateFileName(_getFileNameFromURL(url, contentType), 100);
+			var tmpFile = OS.Path.join(tmpDir, fileName);
+			
+			// If we're using the title from the document, make some adjustments
+			if (!options.title) {
+				// Remove e.g. " - Scaled (-17%)" from end of images saved from links,
+				// though I'm not sure why it's getting added to begin with
+				if (contentType.indexOf('image/') === 0) {
+					title = title.replace(/(.+ \([^,]+, [0-9]+x[0-9]+[^\)]+\)) - .+/, "$1" );
+				}
+				// If not native type, strip mime type data in parens
+				else if (!Zotero.MIME.hasNativeHandler(contentType, _getExtensionFromURL(url))) {
+					title = title.replace(/(.+) \([a-z]+\/[^\)]+\)/, "$1" );
+				}
 			}
-			else if (sourceItemID) {
-				var parentItem = Zotero.Items.get(sourceItemID);
-				attachmentItem.libraryID = parentItem.libraryID;
-			}
-			attachmentItem.setField('title', title);
-			attachmentItem.setField('url', url);
-			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
-			attachmentItem.setSource(sourceItemID);
-			attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
-			attachmentItem.attachmentCharset = charsetID;
-			attachmentItem.attachmentMIMEType = mimeType;
-			var itemID = attachmentItem.save();
-			attachmentItem = Zotero.Items.get(itemID);
 			
-			// Create a new folder for this item in the storage directory
-			var destDir = this.createDirectoryForItem(itemID);
-			
-			var file = Components.classes["@mozilla.org/file/local;1"].
-					createInstance(Components.interfaces.nsILocalFile);
-			file.initWithFile(destDir);
-
-			var fileName = Zotero.File.truncateFileName(
-				_getFileNameFromURL(url, mimeType),
-				100 //make sure this matches WPD settings in webpagedump/common.js
-			);
-			file.append(fileName)
-			
-			var f = function() {
-				if (mimeType == 'application/pdf') {
-					Zotero.Fulltext.indexPDF(file, itemID);
-				}
-				else if (Zotero.MIME.isTextType(mimeType)) {
-					Zotero.Fulltext.indexDocument(document, itemID);
-				}
-				if (callback) {
-					callback(attachmentItem);
-				}
-			};
-			
-			if (mimeType === 'text/html' || mimeType === 'application/xhtml+xml') {
-				var sync = true;
-				
-				// Load WebPageDump code
-				var wpd = {"Zotero":Zotero};
-				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-					.getService(Components.interfaces.mozIJSSubScriptLoader)
-					.loadSubScript("chrome://zotero/content/webpagedump/common.js", wpd);
-				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-					.getService(Components.interfaces.mozIJSSubScriptLoader)
-					.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js", wpd);
-
-				wpd.wpdDOMSaver.init(file.path, document);
-				wpd.wpdDOMSaver.saveHTMLDocument();
-
-				attachmentItem.attachmentPath = this.getPath(
-					file, Zotero.Attachments.LINK_MODE_IMPORTED_URL
-				);
-				attachmentItem.save();
+			if ((contentType === 'text/html' || contentType === 'application/xhtml+xml')
+					// Documents from XHR don't work here
+					&& document instanceof Ci.nsIDOMDocument) {
+				Zotero.debug('Saving document with saveDocument()');
+				yield Zotero.Utilities.Internal.saveDocument(document, tmpFile);
 			}
 			else {
-				Zotero.debug('Saving with saveURI()');
+				Zotero.debug("Saving file with saveURI()");
 				const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-				var wbp = Components
-					.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+				var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
 					.createInstance(nsIWBP);
-				wbp.persistFlags = nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION
-					| nsIWBP.PERSIST_FLAGS_FROM_CACHE;
+				wbp.persistFlags = nsIWBP.PERSIST_FLAGS_FROM_CACHE;
 				var ioService = Components.classes["@mozilla.org/network/io-service;1"]
 					.getService(Components.interfaces.nsIIOService);
 				var nsIURL = ioService.newURI(url, null, null);
+				var deferred = Zotero.Promise.defer();
 				wbp.progressListener = new Zotero.WebProgressFinishListener(function () {
-					try {
-						attachmentItem.attachmentPath = Zotero.Attachments.getPath(
-							file,
-							Zotero.Attachments.LINK_MODE_IMPORTED_URL
-						);
-						attachmentItem.save();
-						
-						Zotero.Notifier.trigger('add', 'item', itemID);
-						
-						// We don't have any way of knowing that the file is flushed to
-						// disk, so we just wait a second and hope for the best --
-						// we'll index it later if it fails
-						//
-						// TODO: index later
-						setTimeout(function () {
-							f();
-						}, 1000);
-					}
-					catch (e) {
-						// Clean up
-						var item = Zotero.Items.get(itemID);
-						item.erase();
-						if(callback) callback(false, e);
-						
-						throw (e);
-					}
+					deferred.resolve();
 				});
-				Zotero.Utilities.Internal.saveURI(wbp, nsIURL, file);
+				Zotero.Utilities.Internal.saveURI(wbp, nsIURL, tmpFile);
+				yield deferred.promise;
 			}
 			
-			// Add to collections
-			if (parentCollectionIDs){
-				var ids = Zotero.flattenArguments(parentCollectionIDs);
-				for each(var id in ids){
-					var col = Zotero.Collections.get(id);
-					col.addItem(itemID);
+			var attachmentItem;
+			var destDir;
+			yield Zotero.DB.executeTransaction(function* () {
+				// Create a new attachment
+				attachmentItem = new Zotero.Item('attachment');
+				if (libraryID) {
+					attachmentItem.libraryID = libraryID;
 				}
-			}
-			
-			// Disable the Notifier during the commit if this is async
-			if (!sync) {
-				var disabled = Zotero.Notifier.disable();
-			}
-			
-			Zotero.DB.commitTransaction();
-			
-			if (disabled) {
-				Zotero.Notifier.enable();
-			}
-			
-			if (sync) {
-				Zotero.Notifier.trigger('add', 'item', itemID);
+				else if (parentItemID) {
+					let {libraryID: parentLibraryID, key: parentKey} =
+						Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+					attachmentItem.libraryID = parentLibraryID;
+				}
+				attachmentItem.setField('title', title);
+				attachmentItem.setField('url', url);
+				attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
+				attachmentItem.parentID = parentItemID;
+				attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+				attachmentItem.attachmentCharset = 'utf-8'; // WPD will output UTF-8
+				attachmentItem.attachmentContentType = contentType;
+				if (collections && collections.length) {
+					attachmentItem.setCollections(collections);
+				}
+				attachmentItem.attachmentPath = 'storage:' + fileName;
+				var itemID = yield attachmentItem.save();
 				
-				// Wait a second before indexing (see note above)
-				setTimeout(function () {
-					f();
-				}, 1000);
-			}
-			
-			// Caution: Take care using this itemID. The notifier may not yet have been called,
-			// so the attachment may not be available in, for example, the items list
-			return itemID;
+				Zotero.Fulltext.queueItem(attachmentItem);
+				
+				// DEBUG: Does this fail if 'storage' is symlinked to another drive?
+				destDir = this.getStorageDirectory(attachmentItem).path;
+				yield OS.File.move(tmpDir, destDir);
+			}.bind(this));
 		}
 		catch (e) {
-			Zotero.DB.rollbackTransaction();
+			Zotero.debug(e, 1);
 			
+			// Clean up
 			try {
-				// Clean up
-				if (itemID) {
-					var itemDir = this.getStorageDirectory(itemID);
-					if (itemDir.exists()) {
-						itemDir.remove(true);
-					}
+				if (tmpDir) {
+					yield OS.File.removeDir(tmpDir, { ignoreAbsent: true });
+				}
+				if (destDir) {
+					yield OS.File.removeDir(destDir, { ignoreAbsent: true });
 				}
 			}
-			catch (e) {}
+			catch (e) {
+				Zotero.debug(e, 1);
+			}
 			
-			throw (e);
+			throw e;
 		}
-	}
-	
-	
-	/*
-	 * Previous asynchronous snapshot method -- disabled in favor of WebPageDump
+		
+		return attachmentItem;
+	});
+
+
+	/**
+	 * @deprecated Use Zotero.Utilities.cleanURL instead
 	 */
-	 /*
-	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs, callback){
-		Zotero.debug('Importing attachment from document');
-		
-		var url = document.location.href;
-		var title = forceTitle ? forceTitle : document.title;
-		var mimeType = document.contentType;
-		var charsetID = Zotero.CharacterSets.getID(document.characterSet);
-		
-		if (!forceTitle) {
-			// Remove e.g. " - Scaled (-17%)" from end of images saved from links,
-			// though I'm not sure why it's getting added to begin with
-			if (mimeType.indexOf('image/') === 0) {
-				title = title.replace(/(.+ \([^,]+, [0-9]+x[0-9]+[^\)]+\)) - .+/, "$1" );
-			}
-			// If not native type, strip mime type data in parens
-			else if (!Zotero.MIME.hasNativeHandler(mimeType, _getExtensionFromURL(url))) {
-				title = title.replace(/(.+) \([a-z]+\/[^\)]+\)/, "$1" );
-			}
-		}
-		
-		const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-		var wbp = Components
-			.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
-			.createInstance(nsIWBP);
-		wbp.persistFlags = nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
-		var encodingFlags = false;
-		
-		Zotero.DB.beginTransaction();
-		
-		try {
-			// Create a new attachment
-			var attachmentItem = new Zotero.Item('attachment');
-			attachmentItem.setField('title', title);
-			attachmentItem.setField('url', url);
-			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
-			// Don't send a Notifier event on the incomplete item
-			var disabled = Zotero.Notifier.disable();
-			attachmentItem.save();
-			if (disabled) {
-				Zotero.Notifier.enable();
-			}
-			var itemID = attachmentItem.getID();
-			
-			// Create a new folder for this item in the storage directory
-			var destDir = this.createDirectoryForItem(itemID);
-			
-			var file = Components.classes["@mozilla.org/file/local;1"].
-					createInstance(Components.interfaces.nsILocalFile);
-			file.initWithFile(destDir);
-			
-			var fileName = _getFileNameFromURL(url, mimeType);
-			
-			file.append(fileName);
-			
-			wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
-				try {
-					Zotero.DB.beginTransaction();
-					
-					_addToDB(file, url, title, Zotero.Attachments.LINK_MODE_IMPORTED_URL, mimeType,
-						charsetID, sourceItemID, itemID);
-					
-					Zotero.Notifier.trigger('add', 'item', itemID);
-					
-					// Add to collections
-					if (parentCollectionIDs){
-						var ids = Zotero.flattenArguments(parentCollectionIDs);
-						for each(var id in ids){
-							var col = Zotero.Collections.get(id);
-							col.addItem(itemID);
-						}
-					}
-					
-					Zotero.DB.commitTransaction();
-				}
-				catch (e) {
-					Zotero.DB.rollbackTransaction();
-					
-					// Clean up
-					if (itemID) {
-						var item = Zotero.Items.get(itemID);
-						if (item) {
-							item.erase();
-						}
-						
-						try {
-							var destDir = Zotero.getStorageDirectory();
-							destDir.append(itemID);
-							if (destDir.exists()) {
-								destDir.remove(true);
-							}
-						}
-						catch (e) {}
-					}
-					
-					throw (e);
-				}
-				
-				Zotero.Fulltext.indexDocument(document, itemID);
-				
-				if (callback) {
-					callback();
-				}
-			});
-			
-			// The attachment is still incomplete here, but we can't risk
-			// leaving the transaction open if the callback never triggers
-			Zotero.DB.commitTransaction();
-			
-			if (mimeType == 'text/html') {
-				Zotero.debug('Saving with saveDocument() to ' + destDir.path);
-				wbp.saveDocument(document, file, destDir, mimeType, encodingFlags, false);
-			}
-			else {
-				Zotero.debug('Saving with saveURI()');
-				var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-					.getService(Components.interfaces.nsIIOService);
-				var nsIURL = ioService.newURI(url, null, null);
-				wbp.saveURI(nsIURL, null, null, null, null, file);
-			}
-		}
-		catch (e) {
-			Zotero.DB.rollbackTransaction();
-			
-			try {
-				// Clean up
-				if (itemID) {
-					var destDir = Zotero.getStorageDirectory();
-					destDir.append(itemID);
-					if (destDir.exists()) {
-						destDir.remove(true);
-					}
-				}
-			}
-			catch (e) {}
-			
-			throw (e);
-		}
-	}
-	*/
-	
-	
-	/*
-	 * Create a new attachment with a missing file
-	 */
-	function createMissingAttachment(linkMode, file, url, title, mimeType, charset, sourceItemID) {
-		if (linkMode == this.LINK_MODE_LINKED_URL) {
-			throw ('Zotero.Attachments.createMissingAttachment() cannot be used to create linked URLs');
-		}
-		
-		var charsetID = charset ? Zotero.CharacterSets.getID(charset) : null;
-		
-		return _addToDB(file, url, title, linkMode, mimeType,
-				charsetID, sourceItemID);
+	this.cleanAttachmentURI = function (uri, tryHttp) {
+		Zotero.debug("Zotero.Attachments.cleanAttachmentURI() is deprecated -- use Zotero.Utilities.cleanURL");
+		return Zotero.Utilities.cleanURL(uri, tryHttp);
 	}
 	
 	
@@ -879,25 +711,27 @@ Zotero.Attachments = new function(){
 	 * based on the metadata of the specified item and a format string
 	 *
 	 * (Optional) |formatString| specifies the format string -- otherwise
-	 *     the 'attachmentRenameFormatString' pref is used
+	 * the 'attachmentRenameFormatString' pref is used
 	 *
 	 * Valid substitution markers:
 	 *
-	 *  %c -- firstCreator
-	 *  %y -- year (extracted from Date field)
-	 *  %t -- title
+	 * %c -- firstCreator
+	 * %y -- year (extracted from Date field)
+	 * %t -- title
 	 *
 	 * Fields can be truncated to a certain length by appending an integer
 	 * within curly brackets -- e.g. %t{50} truncates the title to 50 characters
+	 *
+	 * @param {Zotero.Item} item
+	 * @param {String} formatString
 	 */
-	function getFileBaseNameFromItem(itemID, formatString) {
-		if (!formatString) {
-			formatString = Zotero.Prefs.get('attachmentRenameFormatString');
+	this.getFileBaseNameFromItem = function (item, formatString) {
+		if (!(item instanceof Zotero.Item)) {
+			throw new Error("'item' must be a Zotero.Item");
 		}
 		
-		var item = Zotero.Items.get(itemID);
-		if (!item) {
-			throw ('Invalid itemID ' + itemID + ' in Zotero.Attachments.getFileBaseNameFromItem()');
+		if (!formatString) {
+			formatString = Zotero.Prefs.get('attachmentRenameFormatString');
 		}
 		
 		// Replaces the substitution marker with the field value,
@@ -964,58 +798,73 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	/*
+	this.getRenamedFileTypes = function () {
+		try {
+			var types = Zotero.Prefs.get('autoRenameFiles.fileTypes');
+			return types ? types.split(',') : [];
+		}
+		catch (e) {
+			return [];
+		}
+	};
+	
+	
+	this.getRenamedFileBaseNameIfAllowedType = async function (parentItem, file) {
+		var types = this.getRenamedFileTypes();
+		var contentType = file.endsWith('.pdf')
+			// Don't bother reading file if there's a .pdf extension
+			? 'application/pdf'
+			: await Zotero.MIME.getMIMETypeFromFile(file);
+		if (!types.includes(contentType)) {
+			return false;
+		}
+		return this.getFileBaseNameFromItem(parentItem);
+	}
+	
+	
+	/**
 	 * Create directory for attachment files within storage directory
 	 *
-	 * @param	integer		itemID		Item id
+	 * If a directory exists, delete and recreate
 	 *
-	 * If a directory exists with the same name, move it to orphaned-files
+	 * @param {Number} itemID - Item id
+	 * @return {Promise<String>} - Path of new directory
 	 */
-	function createDirectoryForItem(itemID) {
-		var dir = this.getStorageDirectory(itemID);
-		_moveOrphanedDirectory(dir);
-		if (!dir.exists()) {
-			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+	this.createDirectoryForItem = Zotero.Promise.coroutine(function* (item) {
+		if (!(item instanceof Zotero.Item)) {
+			throw new Error("'item' must be a Zotero.Item");
 		}
+		var dir = this.getStorageDirectory(item).path;
+		// Testing for directories in OS.File, used by removeDir(), is broken on Travis, so use nsIFile
+		if (Zotero.automatedTest) {
+			let nsIFile = Zotero.File.pathToFile(dir);
+			if (nsIFile.exists()) {
+				nsIFile.remove(true);
+			}
+		}
+		else {
+			yield OS.File.removeDir(dir, { ignoreAbsent: true });
+		}
+		yield Zotero.File.createDirectoryIfMissingAsync(dir);
 		return dir;
+	});
+	
+	
+	this.getStorageDirectory = function (item) {
+		if (!(item instanceof Zotero.Item)) {
+			throw new Error("'item' must be a Zotero.Item");
+		}
+		return this.getStorageDirectoryByLibraryAndKey(item.libraryID, item.key);
 	}
 	
 	
-	/*
-	 * Create directory for missing attachment files within storage directory
-	 *
-	 * @param	string	key		Item secondary lookup key
-	 */
-	function createDirectoryForMissingItem(key) {
-		var dir = this.getStorageDirectoryByKey(key);
-		if (!dir.exists()) {
-			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
-		}
-		return dir;
-	}
-	
-	
-	function getStorageDirectory(itemID) {
+	this.getStorageDirectoryByID = function (itemID) {
 		if (!itemID) {
-			throw new Error("itemID not provided in Zotero.Attachments.getStorageDirectory()");
+			throw new Error("itemID not provided");
 		}
-		var item = Zotero.Items.get(itemID);
-		if (!item) {
-			throw ("Item " + itemID + " not found in Zotero.Attachments.getStorageDirectory()");
-		}
-		if (!item.key) {
-			throw ("No item key in Zotero.Attachments.getStorageDirectory()");
-		}
-		var dir = Zotero.getStorageDirectory();
-		dir.append(item.key);
-		return dir;
-	}
-	
-	
-	this.getStorageDirectoryByKey = function (key) {
-		if (typeof key != 'string' || !key.match(/^[A-Z0-9]{8}$/)) {
-			throw ('key must be an 8-character string in '
-				+ 'Zotero.Attachments.getStorageDirectoryByKey()')
+		var {libraryID, key} = Zotero.Items.getLibraryAndKeyFromID(itemID);
+		if (!key) {
+			throw new Error("Item " + itemID + " not found");
 		}
 		var dir = Zotero.getStorageDirectory();
 		dir.append(key);
@@ -1023,27 +872,33 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	/*
-	 * Gets a relative descriptor for imported attachments and a persistent
-	 * descriptor for files outside the storage directory
-	 */
-	function getPath(file, linkMode) {
-		file.QueryInterface(Components.interfaces.nsILocalFile);
-		if (linkMode == self.LINK_MODE_IMPORTED_URL ||
-				linkMode == self.LINK_MODE_IMPORTED_FILE) {
-			var fileName = file.getRelativeDescriptor(file.parent);
-			return 'storage:' + fileName;
+	this.getStorageDirectoryByLibraryAndKey = function (libraryID, key) {
+		if (typeof key != 'string' || !key.match(/^[A-Z0-9]{8}$/)) {
+			throw ('key must be an 8-character string in '
+				+ 'Zotero.Attachments.getStorageDirectoryByLibraryAndKey()')
 		}
-		return file.persistentDescriptor;
+		var dir = Zotero.getStorageDirectory();
+		dir.append(key);
+		return dir;
 	}
 	
 	
+	this.createTemporaryStorageDirectory = Zotero.Promise.coroutine(function* () {
+		var tmpDir = Zotero.getStorageDirectory();
+		tmpDir.append("tmp-" + Zotero.Utilities.randomString(6));
+		yield OS.File.makeDir(tmpDir.path, {
+			unixMode: 0o755
+		});
+		return tmpDir;
+	});
+	
+	
 	/**
-	 * If file is within the attachment base directory, return a relative
+	 * If path is within the attachment base directory, return a relative
 	 * path prefixed by BASE_PATH_PLACEHOLDER. Otherwise, return unchanged.
 	 */
 	this.getBaseDirectoryRelativePath = function (path) {
-		if (!path || path.indexOf(this.BASE_PATH_PLACEHOLDER) == 0) {
+		if (!path || path.startsWith(this.BASE_PATH_PLACEHOLDER)) {
 			return path;
 		}
 		
@@ -1052,55 +907,30 @@ Zotero.Attachments = new function(){
 			return path;
 		}
 		
-		// Get nsIFile for base directory
-		var baseDir = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
-		try {
-			baseDir.persistentDescriptor = basePath;
-		}
-		catch (e) {
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
-			return path;
-		}
-		
-		if (!baseDir.exists()) {
-			Zotero.debug("Base directory '" + baseDir.path + "' doesn't exist", 2);
-			return path;
-		}
-		
-		// Get nsIFile for file
-		var attachmentFile = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
-		try {
-			attachmentFile.persistentDescriptor = path;
-		}
-		catch (e) {
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
-			return path;
-		}
-		
-		if (Zotero.File.directoryContains(baseDir, attachmentFile)) {
-			path = this.BASE_PATH_PLACEHOLDER
-				+ attachmentFile.getRelativeDescriptor(baseDir);
+		if (Zotero.File.directoryContains(basePath, path)) {
+			// Since stored paths can be synced to other platforms, use forward slashes for consistency.
+			// resolveRelativePath() will convert to the appropriate platform-specific slash on use.
+			basePath = OS.Path.normalize(basePath).replace(/\\/g, "/");
+			path = OS.Path.normalize(path).replace(/\\/g, "/");
+			// Normalize D:\ vs. D:\foo
+			if (!basePath.endsWith('/')) {
+				basePath += '/';
+			}
+			path = this.BASE_PATH_PLACEHOLDER + path.substr(basePath.length)
 		}
 		
 		return path;
-	}
+	};
 	
 	
 	/**
-	 * Get a file from this path, if we can
+	 * Get an absolute path from this base-dir relative path, if we can
 	 *
-	 * @param {String} path  Absolute path or relative path prefixed
-	 *                       by BASE_PATH_PLACEHOLDER
-	 * @param {Boolean} asFile Return nsIFile instead of path
-	 * @return {String|nsIFile|FALSE} Persistent descriptor string, file,
-	 *                                of FALSE if no path
+	 * @param {String} path - Absolute path or relative path prefixed by BASE_PATH_PLACEHOLDER
+	 * @return {String|false} - Absolute path, or FALSE if no path
 	 */
 	this.resolveRelativePath = function (path) {
-		if (path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) != 0) {
+		if (!path.startsWith(Zotero.Attachments.BASE_PATH_PLACEHOLDER)) {
 			return false;
 		}
 		
@@ -1110,49 +940,21 @@ Zotero.Attachments = new function(){
 			return false;
 		}
 		
-		// Get file from base directory
-		var baseDir = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
-		try {
-			baseDir.persistentDescriptor = basePath;
-		}
-		catch (e) {
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
-			Zotero.debug("Invalid base attachment path -- can't resolve'" + row.path + "'", 2);
-			return false;
-		}
-		
-		// Get file from relative path
-		var relativePath = path.substr(
-			Zotero.Attachments.BASE_PATH_PLACEHOLDER.length
-		);
-		var file = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
-		try {
-			file.setRelativeDescriptor(baseDir, relativePath);
-		}
-		catch (e) {
-			Zotero.debug("Invalid relative descriptor '" + relativePath + "'", 2);
-			return false;
-		}
-		
-		return file;
+		return this.fixPathSlashes(OS.Path.join(
+			OS.Path.normalize(basePath),
+			path.substr(Zotero.Attachments.BASE_PATH_PLACEHOLDER.length)
+		));
 	}
 	
 	
-	/**
-	 * Returns the number of files in the attachment directory
-	 *
-	 * Only counts if MIME type is text/html
-	 *
-	 * @param	{Zotero.Item}	item	Attachment item
-	 */
-	this.getNumFiles = function (item) {
-		var funcName = "Zotero.Attachments.getNumFiles()";
-		
+	this.fixPathSlashes = function (path) {
+		return path.replace(Zotero.isWin ? /\//g : /\\/g, Zotero.isWin ? "\\" : "/");
+	}
+	
+	
+	this.hasMultipleFiles = Zotero.Promise.coroutine(function* (item) {
 		if (!item.isAttachment()) {
-			throw ("Item is not an attachment in " + funcName);
+			throw new Error("Item is not an attachment");
 		}
 		
 		var linkMode = item.attachmentLinkMode;
@@ -1162,43 +964,102 @@ Zotero.Attachments = new function(){
 				break;
 			
 			default:
-				throw ("Invalid attachment link mode in " + funcName);
+				throw new Error("Invalid attachment link mode");
 		}
 		
-		if (item.attachmentMIMEType != 'text/html') {
-			return 1;
+		if (item.attachmentContentType != 'text/html') {
+			return false;
 		}
 		
-		var file = item.getFile();
-		if (!file) {
-			throw ("File not found in " + funcName);
+		var path = yield item.getFilePathAsync();
+		if (!path) {
+			throw new Error("File not found");
 		}
 		
 		var numFiles = 0;
-		var parentDir = file.parent;
-		var files = parentDir.directoryEntries;
-		while (files.hasMoreElements()) {
-			file = files.getNext();
-			file.QueryInterface(Components.interfaces.nsIFile);
-			if (file.leafName.indexOf('.') == 0) {
-				continue;
+		var parent = OS.Path.dirname(path);
+		var iterator = new OS.File.DirectoryIterator(parent);
+		try {
+			while (true) {
+				let entry = yield iterator.next();
+				if (entry.name.startsWith('.')) {
+					continue;
+				}
+				numFiles++;
+				if (numFiles > 1) {
+					break;
+				}
 			}
-			numFiles++;
 		}
-		return numFiles;
-	}
+		catch (e) {
+			if (e != StopIteration) {
+				throw e;
+			}
+		}
+		finally {
+			iterator.close();
+		}
+		return numFiles > 1;
+	});
 	
 	
 	/**
-	 * @param	{Zotero.Item}	item
-	 * @param	{Boolean}		[skipHidden=FALSE]	Don't count hidden files
-	 * @return	{Integer}							Total file size in bytes
+	 * Returns the number of files in the attachment directory
+	 *
+	 * Only counts if MIME type is text/html
+	 *
+	 * @param	{Zotero.Item}	item	Attachment item
 	 */
-	this.getTotalFileSize = function (item, skipHidden) {
-		var funcName = "Zotero.Attachments.getTotalFileSize()";
-		
+	this.getNumFiles = Zotero.Promise.coroutine(function* (item) {
 		if (!item.isAttachment()) {
-			throw ("Item is not an attachment in " + funcName);
+			throw new Error("Item is not an attachment");
+		}
+		
+		var linkMode = item.attachmentLinkMode;
+		switch (linkMode) {
+			case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
+			case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
+				break;
+			
+			default:
+				throw new Error("Invalid attachment link mode");
+		}
+		
+		if (item.attachmentContentType != 'text/html') {
+			return 1;
+		}
+		
+		var path = yield item.getFilePathAsync();
+		if (!path) {
+			throw new Error("File not found");
+		}
+		
+		var numFiles = 0;
+		var parent = OS.Path.dirname(path);
+		var iterator = new OS.File.DirectoryIterator(parent);
+		try {
+			yield iterator.forEach(function (entry) {
+				if (entry.name.startsWith('.')) {
+					return;
+				}
+				numFiles++;
+			})
+		}
+		finally {
+			iterator.close();
+		}
+		return numFiles;
+	});
+	
+	
+	/**
+	 * @param {Zotero.Item} item
+	 * @param {Boolean} [skipHidden=true] - Don't count hidden files
+	 * @return {Promise<Integer>} - Promise for the total file size in bytes
+	 */
+	this.getTotalFileSize = Zotero.Promise.coroutine(function* (item, skipHidden = true) {
+		if (!item.isAttachment()) {
+			throw new Error("Item is not an attachment");
 		}
 		
 		var linkMode = item.attachmentLinkMode;
@@ -1209,78 +1070,152 @@ Zotero.Attachments = new function(){
 				break;
 			
 			default:
-				throw ("Invalid attachment link mode in " + funcName);
+				throw new Error("Invalid attachment link mode");
 		}
 		
-		var file = item.getFile();
-		if (!file) {
-			throw ("File not found in " + funcName);
+		var path = yield item.getFilePathAsync();
+		if (!path) {
+			throw new Error("File not found");
 		}
 		
 		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-			return item.fileSize;
+			return (yield OS.File.stat(path)).size;
 		}
 		
-		var parentDir = file.parent;
-		var files = parentDir.directoryEntries;
 		var size = 0;
-		while (files.hasMoreElements()) {
-			file = files.getNext();
-			file.QueryInterface(Components.interfaces.nsIFile);
-			if (skipHidden && file.leafName.indexOf('.') == 0) {
-				continue;
-			}
-			size += file.fileSize;
+		var parent = OS.Path.dirname(path);
+		let iterator = new OS.File.DirectoryIterator(parent);
+		try {
+			yield iterator.forEach(function (entry) {
+				if (skipHidden && entry.name.startsWith('.')) {
+					return;
+				}
+				return OS.File.stat(entry.path)
+				.then(
+					function (info) {
+						size += info.size;
+					},
+					function (e) {
+						// Can happen if there's a symlink to a missing file
+						if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
+							return;
+						}
+						else {
+							throw e;
+						}
+					}
+				);
+			})
+		}
+		finally {
+			iterator.close();
 		}
 		return size;
-	}
+	});
 	
 	
 	/**
-	 * Copy attachment item, including files, to another library
+	 * Move attachment item, including file, to another library
 	 */
-	this.copyAttachmentToLibrary = function (attachment, libraryID, sourceItemID) {
-		var linkMode = attachment.attachmentLinkMode;
-		
+	this.moveAttachmentToLibrary = async function (attachment, libraryID, parentItemID) {
 		if (attachment.libraryID == libraryID) {
-			throw ("Attachment is already in library " + libraryID);
+			throw new Error("Attachment is already in library " + libraryID);
 		}
 		
-		var newAttachment = new Zotero.Item('attachment');
-		newAttachment.libraryID = libraryID;
-		// Link mode needs to be set when saving new attachment
-		newAttachment.attachmentLinkMode = linkMode;
+		Zotero.DB.requireTransaction();
+		
+		var newAttachment = attachment.clone(libraryID);
 		if (attachment.isImportedAttachment()) {
 			// Attachment path isn't copied over by clone() if libraryID is different
 			newAttachment.attachmentPath = attachment.attachmentPath;
 		}
-		// DEBUG: save here because clone() doesn't currently work on unsaved tagged items
-		var id = newAttachment.save();
-		newAttachment = Zotero.Items.get(id);
-		attachment.clone(false, newAttachment);
-		if (sourceItemID) {
-			newAttachment.setSource(sourceItemID);
+		if (parentItemID) {
+			newAttachment.parentID = parentItemID;
 		}
-		newAttachment.save();
+		await newAttachment.save();
+		
+		// Move files over if they exist
+		var oldDir;
+		var newDir;
+		if (newAttachment.isImportedAttachment()) {
+			oldDir = this.getStorageDirectory(attachment).path;
+			if (await OS.File.exists(oldDir)) {
+				newDir = this.getStorageDirectory(newAttachment).path;
+				// Target directory shouldn't exist, but remove it if it does
+				//
+				// Testing for directories in OS.File, used by removeDir(), is broken on Travis,
+				// so use nsIFile
+				if (Zotero.automatedTest) {
+					let nsIFile = Zotero.File.pathToFile(newDir);
+					if (nsIFile.exists()) {
+						nsIFile.remove(true);
+					}
+				}
+				else {
+					await OS.File.removeDir(newDir, { ignoreAbsent: true });
+				}
+				await OS.File.move(oldDir, newDir);
+			}
+		}
+		
+		try {
+			await attachment.erase();
+		}
+		catch (e) {
+			// Move files back if old item can't be deleted
+			if (newAttachment.isImportedAttachment()) {
+				try {
+					await OS.File.move(newDir, oldDir);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
+			throw e;
+		}
+		
+		return newAttachment.id;
+	};
+	
+	
+	/**
+	 * Copy attachment item, including file, to another library
+	 */
+	this.copyAttachmentToLibrary = Zotero.Promise.coroutine(function* (attachment, libraryID, parentItemID) {
+		if (attachment.libraryID == libraryID) {
+			throw new Error("Attachment is already in library " + libraryID);
+		}
+		
+		Zotero.DB.requireTransaction();
+		
+		var newAttachment = attachment.clone(libraryID);
+		if (attachment.isImportedAttachment()) {
+			// Attachment path isn't copied over by clone() if libraryID is different
+			newAttachment.attachmentPath = attachment.attachmentPath;
+		}
+		if (parentItemID) {
+			newAttachment.parentID = parentItemID;
+		}
+		yield newAttachment.save();
 		
 		// Copy over files if they exist
-		if (newAttachment.isImportedAttachment() && attachment.getFile()) {
-			var dir = Zotero.Attachments.getStorageDirectory(attachment.id);
-			var newDir = Zotero.Attachments.createDirectoryForItem(newAttachment.id);
-			Zotero.File.copyDirectory(dir, newDir);
+		if (newAttachment.isImportedAttachment() && (yield attachment.fileExists())) {
+			let dir = Zotero.Attachments.getStorageDirectory(attachment);
+			let newDir = yield Zotero.Attachments.createDirectoryForItem(newAttachment);
+			yield Zotero.File.copyDirectory(dir, newDir);
 		}
 		
-		newAttachment.addLinkedItem(attachment);
+		yield newAttachment.addLinkedItem(attachment);
 		return newAttachment.id;
-	}
+	});
 	
 	
-	function _getFileNameFromURL(url, mimeType){
+	function _getFileNameFromURL(url, contentType){
 		var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
 					.createInstance(Components.interfaces.nsIURL);
 		nsIURL.spec = url;
 		
-		var ext = Zotero.MIME.getPrimaryExtension(mimeType, nsIURL.fileExtension);
+		var ext = Zotero.MIME.getPrimaryExtension(contentType, nsIURL.fileExtension);
 		
 		if (!nsIURL.fileName) {
 			var matches = nsIURL.directory.match(/\/([^\/]+)\/$/);
@@ -1326,190 +1261,154 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	function _getExtensionFromURL(url, mimeType) {
+	function _getExtensionFromURL(url, contentType) {
 		var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
 					.createInstance(Components.interfaces.nsIURL);
 		nsIURL.spec = url;
-		return Zotero.MIME.getPrimaryExtension(mimeType, nsIURL.fileExtension);
+		return Zotero.MIME.getPrimaryExtension(contentType, nsIURL.fileExtension);
 	}
 	
 	
 	/**
-	 * If directory exists and is non-empty, move it to orphaned-files directory
+	 * Create a new item of type 'attachment' and add to the itemAttachments table
 	 *
-	 * If empty, just remove it
+	 * @param {Object} options - 'file', 'url', 'title', 'linkMode', 'contentType', 'charsetID',
+	 *     'parentItemID', 'saveOptions'
+	 * @return {Promise<Zotero.Item>} - A promise for the new attachment
 	 */
-	function _moveOrphanedDirectory(dir) {
-		if (!dir.exists()) {
-			return;
-		}
+	function _addToDB(options) {
+		var file = options.file;
+		var url = options.url;
+		var title = options.title;
+		var linkMode = options.linkMode;
+		var contentType = options.contentType;
+		var charset = options.charset;
+		var parentItemID = options.parentItemID;
+		var collections = options.collections;
+		var saveOptions = options.saveOptions;
 		
-		dir = dir.clone();
-		
-		// If directory is empty or has only hidden files, delete it
-		var files = dir.directoryEntries;
-		files.QueryInterface(Components.interfaces.nsIDirectoryEnumerator);
-		var empty = true;
-		while (files.hasMoreElements()) {
-			var file = files.getNext();
-			file.QueryInterface(Components.interfaces.nsIFile);
-			if (file.leafName[0] == '.') {
-				continue;
-			}
-			empty = false;
-			break;
-		}
-		files.close();
-		if (empty) {
-			dir.remove(true);
-			return;
-		}
-		
-		// Create orphaned-files directory if it doesn't exist
-		var orphaned = Zotero.getZoteroDirectory();
-		orphaned.append('orphaned-files');
-		if (!orphaned.exists()) {
-			orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
-		}
-		
-		// Find unique filename for orphaned file
-		var orphanTarget = orphaned.clone();
-		orphanTarget.append(dir.leafName);
-		var newName = null;
-		if (orphanTarget.exists()) {
-			try {
-				orphanTarget.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
-				newName = orphanTarget.leafName;
-			}
-			catch (e) {
-				// DEBUG: Work around createUnique() brokenness on Windows
-				// as of Fx3.0.3 (https://bugzilla.mozilla.org/show_bug.cgi?id=452217)
-				//
-				// We just delete the conflicting file
-				if (Zotero.isWin && e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
-					orphanTarget.remove(true);
+		return Zotero.DB.executeTransaction(function* () {
+			var attachmentItem = new Zotero.Item('attachment');
+			if (parentItemID) {
+				let {libraryID: parentLibraryID, key: parentKey} =
+					Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+				if (parentLibraryID != Zotero.Libraries.userLibraryID
+						&& linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+					throw new Error("Cannot save linked file in non-local library");
 				}
-				else {
-					throw (e);
-				}
+				attachmentItem.libraryID = parentLibraryID;
 			}
-			if (newName) {
-				orphanTarget.remove(false);
+			attachmentItem.setField('title', title);
+			if (linkMode == self.LINK_MODE_IMPORTED_URL || linkMode == self.LINK_MODE_LINKED_URL) {
+				attachmentItem.setField('url', url);
+				attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
 			}
-		}
-		
-		// Move target to orphaned files directory
-		dir.moveTo(orphaned, newName);
+			
+			attachmentItem.parentID = parentItemID;
+			attachmentItem.attachmentLinkMode = linkMode;
+			attachmentItem.attachmentContentType = contentType;
+			attachmentItem.attachmentCharset = charset;
+			if (file) {
+				attachmentItem.attachmentPath = file.path;
+			}
+			
+			if (collections) {
+				attachmentItem.setCollections(collections);
+			}
+			yield attachmentItem.save(saveOptions);
+			
+			return attachmentItem;
+		}.bind(this));
 	}
 	
 	
 	/**
-	* Create a new item of type 'attachment' and add to the itemAttachments table
-	*
-	* Returns the itemID of the new attachment
-	**/
-	function _addToDB(file, url, title, linkMode, mimeType, charsetID, sourceItemID) {
-		Zotero.DB.beginTransaction();
-		
-		var attachmentItem = new Zotero.Item('attachment');
-		if (sourceItemID) {
-			var parentItem = Zotero.Items.get(sourceItemID);
-			if (parentItem.libraryID && linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-				throw ("Cannot save linked file in non-local library");
-			}
-			attachmentItem.libraryID = parentItem.libraryID;
-		}
-		attachmentItem.setField('title', title);
-		if (linkMode == self.LINK_MODE_IMPORTED_URL
-				|| linkMode == self.LINK_MODE_LINKED_URL) {
-			attachmentItem.setField('url', url);
-			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
-		}
-		
-		// Get path
-		if (file) {
-			attachmentItem.attachmentPath
-				= Zotero.Attachments.getPath(file, linkMode);
-		}
-		
-		attachmentItem.setSource(sourceItemID);
-		attachmentItem.attachmentLinkMode = linkMode;
-		attachmentItem.attachmentMIMEType = mimeType;
-		attachmentItem.attachmentCharset = charsetID;
-		attachmentItem.save();
-		
-		Zotero.DB.commitTransaction();
-		
-		return attachmentItem.id;
-	}
-	
-	
-	/*
+	 * If necessary/possible, detect the file charset and index the file
+	 *
 	 * Since we have to load the content into the browser to get the
 	 * character set (at least until we figure out a better way to get
 	 * at the native detectors), we create the item above and update
 	 * asynchronously after the fact
+	 *
+	 * @return {Promise}
 	 */
-	function _postProcessFile(itemID, file, mimeType){
+	var _postProcessFile = Zotero.Promise.coroutine(function* (item, file, contentType) {
 		// Don't try to process if MIME type is unknown
-		if (!mimeType) {
+		if (!contentType) {
 			return;
 		}
 		
-		// MIME types that get cached by the fulltext indexer can just be
-		// indexed directly
-		if (Zotero.Fulltext.isCachedMIMEType(mimeType)) {
-			Zotero.Fulltext.indexItems([itemID]);
-			return;
+		// Items with content types that get cached by the fulltext indexer can just be indexed,
+		// since a charset isn't necessary
+		if (Zotero.Fulltext.isCachedMIMEType(contentType)) {
+			return Zotero.Fulltext.indexItems([item.id]);
 		}
 		
+		// Ignore non-text types
 		var ext = Zotero.File.getExtension(file);
-		if (!Zotero.MIME.hasInternalHandler(mimeType, ext) || !Zotero.MIME.isTextType(mimeType)) {
+		if (!Zotero.MIME.hasInternalHandler(contentType, ext) || !Zotero.MIME.isTextType(contentType)) {
 			return;
 		}
 		
+		// If the charset is already set, index item directly
+		if (item.attachmentCharset) {
+			return Zotero.Fulltext.indexItems([item.id]);
+		}
+		
+		// Otherwise, load in a hidden browser to get the charset, and then index the document
+		var deferred = Zotero.Promise.defer();
 		var browser = Zotero.Browser.createHiddenBrowser();
 		
-		var callback = function(charset, args) {
-			// ignore spurious about:blank loads
-			if(browser.contentDocument.location.href == "about:blank") return;
-			
-			var writeCallback = function () {
-				var charsetID = Zotero.CharacterSets.getID(charset);
-				if (charsetID) {
-					var disabled = Zotero.Notifier.disable();
-					
-					var item = Zotero.Items.get(itemID);
-					item.attachmentCharset = charsetID;
-					item.save();
-					
-					if (disabled) {
-						Zotero.Notifier.enable();
-					}
-				}
+		if (item.attachmentCharset) {
+			var onpageshow = function(){
+				// ignore spurious about:blank loads
+				if(browser.contentDocument.location.href == "about:blank") return;
 				
-				// Chain fulltext indexer inside the charset callback,
-				// since it's asynchronous and a prerequisite
-				Zotero.Fulltext.indexDocument(browser.contentDocument, itemID);
-				Zotero.Browser.deleteHiddenBrowser(browser);
-			}
-			
-			// Since the callback can be called during an import process that uses
-			// Zotero.wait(), try to queue the callback to run at the end,
-			// or run now if not queued
-			var queued = Zotero.addUnlockCallback(writeCallback);
-			if (!queued) {
-				writeCallback();
-			}
-		};
-		
-		Zotero.File.addCharsetListener(browser, callback, itemID);
+				browser.removeEventListener("pageshow", onpageshow, false);
+				
+				Zotero.Fulltext.indexDocument(browser.contentDocument, itemID)
+				.then(deferred.resolve, deferred.reject)
+				.finally(function () {
+					Zotero.Browser.deleteHiddenBrowser(browser);
+				});
+			};
+			browser.addEventListener("pageshow", onpageshow, false);
+		}
+		else {
+			let callback = Zotero.Promise.coroutine(function* (charset, args) {
+				// ignore spurious about:blank loads
+				if(browser.contentDocument.location.href == "about:blank") return;
+				
+				try {
+					if (charset) {
+						charset = Zotero.CharacterSets.toCanonical(charset);
+						if (charset) {
+							item.attachmentCharset = charset;
+							yield item.saveTx({
+								skipNotifier: true
+							});
+						}
+					}
+					
+					yield Zotero.Fulltext.indexDocument(browser.contentDocument, item.id);
+					Zotero.Browser.deleteHiddenBrowser(browser);
+					
+					deferred.resolve();
+				}
+				catch (e) {
+					deferred.reject(e);
+				}
+			});
+			Zotero.File.addCharsetListener(browser, callback, item.id);
+		}
 		
 		var url = Components.classes["@mozilla.org/network/protocol;1?name=file"]
 					.getService(Components.interfaces.nsIFileProtocolHandler)
 					.getURLSpecFromFile(file);
 		browser.loadURI(url);
-	}
+		
+		return deferred.promise;
+	});
 	
 	/**
 	 * Determines if a given document is an instance of PDFJS
@@ -1528,5 +1427,30 @@ Zotero.Attachments = new function(){
 			}
 		}
 		return false;
+	}
+	
+	
+	this.linkModeToName = function (linkMode) {
+		switch (linkMode) {
+		case this.LINK_MODE_IMPORTED_FILE:
+			return 'imported_file';
+		case this.LINK_MODE_IMPORTED_URL:
+			return 'imported_url';
+		case this.LINK_MODE_LINKED_FILE:
+			return 'linked_file';
+		case this.LINK_MODE_LINKED_URL:
+			return 'linked_url';
+		default:
+			throw new Error(`Invalid link mode ${linkMode}`);
+		}
+	}
+	
+	
+	this.linkModeFromName = function (linkModeName) {
+		var prop = "LINK_MODE_" + linkModeName.toUpperCase();
+		if (this[prop] !== undefined) {
+			return this[prop];
+		}
+		throw new Error(`Invalid link mode name '${linkModeName}'`);
 	}
 }

@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "Lukk">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "L">
+<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
 <!ENTITY quitApplicationCmdWin.label "Avslutt">
 <!ENTITY quitApplicationCmdWin.accesskey "A">
 <!ENTITY quitApplicationCmd.label "Avslutt">
 <!ENTITY quitApplicationCmd.accesskey "A">
 
 
-<!ENTITY editMenu.label "Rediger">
-<!ENTITY editMenu.accesskey "R">
-<!ENTITY undoCmd.label "Angra">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "A">
-<!ENTITY redoCmd.label "Gjer om">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "G">
-<!ENTITY cutCmd.label "Klipp ut">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Kopier">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "K">
 <!ENTITY copyCitationCmd.label "Kopier sitering">
 <!ENTITY copyBibliographyCmd.label "Kopier bibliografi">
-<!ENTITY pasteCmd.label "Lim inn">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "L">
-<!ENTITY deleteCmd.label "Slett">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "S">
-<!ENTITY selectAllCmd.label "Merk alt">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Preferences">
-<!ENTITY preferencesCmd.accesskey "I">
-<!ENTITY preferencesCmdUnix.label "Innstillingar">
-<!ENTITY preferencesCmdUnix.accesskey "I">
-<!ENTITY findCmd.label "Finn">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Byt sideretning">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Byt tekstretning">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Verktøy">
 <!ENTITY toolsMenu.accesskey "V">
+<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Tillegg">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Feilsøking">
 <!ENTITY helpTroubleshootingInfo.accesskey "F">
-<!ENTITY helpFeedbackPage.label "Send tilbakemelding …">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Meld feil i Zotero …">
+<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Report Errors…">
 <!ENTITY helpReportErrors.accesskey "M">
+
+<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Submit Output">
+<!ENTITY debugOutputLogging.view "View Output">
+<!ENTITY debugOutputLogging.clear "Clear Output">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+
 <!ENTITY helpCheckForUpdates.label "Sjå etter oppdateringar …">
 <!ENTITY helpCheckForUpdates.accesskey "O">

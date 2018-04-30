@@ -24,7 +24,12 @@
     ***** END LICENSE BLOCK *****
 -->
 
-<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/searchbox.dtd">
+<!DOCTYPE window [
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd">
+	%zoteroDTD;
+	<!ENTITY % searchboxDTD SYSTEM "chrome://zotero/locale/searchbox.dtd">
+	%searchboxDTD;
+]>
 
 <bindings xmlns="http://www.mozilla.org/xbl"
 		  xmlns:xbl="http://www.mozilla.org/xbl"
@@ -36,88 +41,54 @@
 		</resources>
 		
 		<implementation>
+			<property name="groups"/>
+			
 			<field name="searchRef"/>
 			<property name="search" onget="return this.searchRef;">
 				<setter>
 					<![CDATA[
 						this.searchRef = val;
 						
-						this.buildLibraryMenu();
+						var libraryMenu = this.id('libraryMenu');
+						var libraries = Zotero.Libraries.getAll();
+						Zotero.Utilities.Internal.buildLibraryMenu(
+							libraryMenu, libraries, this.searchRef.libraryID
+						);
+						if (this.searchRef.id) {
+							libraryMenu.disabled = true;
+						}
+						this.updateLibrary();
+						
 						
 						var conditionsBox = this.id('conditions');
 						while(conditionsBox.hasChildNodes())
 							conditionsBox.removeChild(conditionsBox.firstChild);
 						
-						var conditions = this.search.getSearchConditions();
-						
-						for(var id in conditions)
-						{
+						var conditions = this.search.getConditions();
+						for (let id in conditions) {
+							let condition = conditions[id];
 							// Checkboxes
-							switch (conditions[id]['condition']) {
+							switch (condition.condition) {
 								case 'recursive':
 								case 'noChildren':
 								case 'includeParentsAndChildren':
-									var checkbox = conditions[id]['condition'] + 'Checkbox';
-									this.id(checkbox).setAttribute('condition',id);
-									this.id(checkbox).checked = (conditions[id]['operator']=='true');
+									let checkbox = condition.condition + 'Checkbox';
+									this.id(checkbox).setAttribute('condition', id);
+									this.id(checkbox).checked = condition.operator == 'true';
 									continue;
 							}
 							
-							if(conditions[id]['condition'] == 'joinMode')
-							{
-								this.id('joinModeMenu').setAttribute('condition',id);
-								this.id('joinModeMenu').value = conditions[id]['operator'];
+							if(condition.condition == 'joinMode') {
+								this.id('joinModeMenu').setAttribute('condition', id);
+								this.id('joinModeMenu').value = condition.operator;
 							}
-							else
-							{
-								this.addCondition(conditions[id]);
+							else {
+								this.addCondition(condition);
 							}
 						}
 					]]>
 				</setter>
 			</property>
-			
-			<method name="buildLibraryMenu">
-				<body><![CDATA[
-					var menulist = this.id('libraryMenu');
-					var menupopup = menulist.firstChild;
-					
-					while (menupopup.hasChildNodes()) {
-						menupopup.removeChild(menupopup.firstChild);
-					}
-					
-					var libraryID = this.searchRef.libraryID;
-					var libraryIndex = 0;
-					
-					// Add My Library
-					var menuitem = document.createElement('menuitem');
-					menuitem.setAttribute('label', Zotero.getString('pane.collections.library'));
-					menuitem.setAttribute('libraryID', 0);
-					menupopup.appendChild(menuitem);
-					
-					// Add groups
-					var groups = Zotero.Groups.getAll();
-					for (let i=0; i<groups.length; i++) {
-						let group = groups[i];
-						let menuitem = document.createElement('menuitem');
-						menuitem.setAttribute('label', group.name);
-						menuitem.setAttribute('libraryID', group.libraryID);
-						if (group.libraryID == libraryID) {
-							libraryIndex = i + 1;
-						}
-						menupopup.appendChild(menuitem);
-					}
-					
-					menulist.appendChild(menupopup);
-					menulist.selectedIndex = libraryIndex;
-					
-					if (this.searchRef.id) {
-						this.id('libraryMenu').disabled = true;
-					}
-					
-					this.updateLibrary();
-				]]></body>
-			</method>
 			
 			<method name="addCondition">
 				<parameter name="ref"/>
@@ -131,7 +102,7 @@
 						
 						// Default to an empty 'title' condition
 						if (!ref) {
-							ref = this.search.getSearchCondition(this.search.addCondition("title","contains",""))
+							ref = this.search.getCondition(this.search.addCondition("title","contains",""))
 						}
 						
 						condition.initWithParentAndCondition(this, ref);
@@ -171,14 +142,16 @@
 			<method name="updateLibrary">
 				<body><![CDATA[
 					var menu = this.id('libraryMenu');
-					var libraryID = parseInt(menu.selectedItem.getAttribute('libraryID'));
+					var libraryID = parseInt(menu.selectedItem.value);
 					
 				 	if (this.onLibraryChange) {
 				 		this.onLibraryChange(libraryID);
 					}
+					if (!this.searchRef.id) {
+						this.searchRef.libraryID = libraryID;
+					}
 					
-					// TODO: libraryIDInt
-					this.searchRef.libraryID = libraryID ? libraryID : null;
+					[...this.id('conditions').childNodes].forEach(x => x.onLibraryChange());
 				]]></body>
 			</method>
 			
@@ -228,22 +201,12 @@
 				</body>
 			</method>
 			
-			<method name="save">
-				<body>
-					<![CDATA[
-						this.updateSearch();
-						return this.search.save(true);
-					]]>
-				</body>
-			</method>
-			
 			<method name="handleKeyPress">
 				<parameter name="event"/>
 				<body>
 				<![CDATA[
 					switch (event.keyCode) {
 						case event.DOM_VK_RETURN:
-						case event.DOM_VK_ENTER:
 							this.active = true;
 							
 							if (event.shiftKey) {
@@ -318,34 +281,59 @@
 			<field name="dontupdate"/>
 			<constructor>
 				<![CDATA[
-					var operators = new Array('is', 'isNot', 'beginsWith', 'contains', 'doesNotContain', 'isLessThan', 'isGreaterThan', 'isBefore', 'isAfter', 'isInTheLast');
+					var operators = [
+						'is',
+						'isNot',
+						'beginsWith',
+						'contains',
+						'doesNotContain',
+						'isLessThan',
+						'isGreaterThan',
+						'isBefore',
+						'isAfter',
+						'isInTheLast'
+					];
 					var operatorsList = this.id('operatorsmenu');
 					
 					// Build operator menu
-					for(var i in operators)
-					{
-						operatorsList.appendItem(Zotero.getString('searchOperator.'+operators[i]),operators[i]);
+					for (let operator of operators) {
+						operatorsList.appendItem(
+							Zotero.getString('searchOperator.' + operator),
+							operator
+						);
 					}
 					
 					// Build conditions menu
-					var conditionsList = this.id('conditionsmenu');
+					var conditionsMenu = this.id('conditionsmenu');
+					var moreConditionsMenu = this.id('more-conditions-menu');
 					var conditions = Zotero.SearchConditions.getStandardConditions();
 					
-					for (var i=0, len=conditions.length; i<len; i++) {
-						var menuitem = conditionsList.appendItem(conditions[i]['localized'], conditions[i]['name']);
+					var lastInsertPos = 0;
+					
+					for (let condition of conditions) {
+						if (this.isPrimaryCondition(condition.name)) {
+							var menuitem = conditionsMenu.insertItemAt(
+								lastInsertPos++, condition.localized, condition.name
+							);
+						}
+						else {
+							var menuitem = moreConditionsMenu.appendItem(
+								condition.localized, condition.name
+							);
+						}
 						
 						var baseFields = null;
 						try {
-							baseFields = Zotero.ItemFields.getTypeFieldsFromBase(conditions[i]['name']);
+							baseFields = Zotero.ItemFields.getTypeFieldsFromBase(condition.name);
 						}
 						catch (e) {}
 						
 						// Add tooltip, building it if it doesn't exist
 						if (baseFields) {
-							if (!this.id(conditions[i]['name'] + '-tooltip')) {
+							if (!this.id(condition.name + '-tooltip')) {
 								var fieldName = null;
 								try {
-									fieldName = Zotero.ItemFields.getLocalizedString(null, conditions[i].name);
+									fieldName = Zotero.ItemFields.getLocalizedString(null, condition.name);
 								}
 								catch (e) {}
 								
@@ -356,8 +344,10 @@
 									var localized = [];
 								}
 								
-								for (var j in baseFields) {
-									var str = Zotero.SearchConditions.getLocalizedName(Zotero.ItemFields.getName(baseFields[j]));
+								for (let baseField of baseFields) {
+									var str = Zotero.SearchConditions.getLocalizedName(
+										Zotero.ItemFields.getName(baseField)
+									);
 									
 									if (localized.indexOf(str) == -1) {
 										localized.push(str);
@@ -366,7 +356,7 @@
 								localized.sort();
 								
 								var tt = document.createElement('tooltip');
-								tt.setAttribute('id', conditions[i]['name'] + '-tooltip');
+								tt.setAttribute('id', condition.name + '-tooltip');
 								tt.setAttribute('orient', 'vertical');
 								tt.setAttribute('noautohide', true);
 								
@@ -385,7 +375,7 @@
 								label.setAttribute('value', Zotero.getString('searchConditions.tooltip.fields'));
 								fieldRow.appendChild(label);
 								var vbox = document.createElement('vbox');
-								for each(var str in localized) {
+								for (let str of localized) {
 									var label = document.createElement('label')
 									label.setAttribute('value', str);
 									vbox.appendChild(label);
@@ -400,27 +390,67 @@
 								this.id('condition-tooltips').appendChild(tt);
 							}
 							
-							menuitem.setAttribute('tooltip', conditions[i]['name'] + '-tooltip');
+							menuitem.setAttribute('tooltip', condition.name + '-tooltip');
 						}
 					}
-					conditionsList.selectedIndex = 0;
+					conditionsMenu.selectedIndex = 0;
 				]]>
 			</constructor>
+			
+			<method name="isPrimaryCondition">
+				<parameter name="condition"/>
+				<body><![CDATA[
+				switch (condition) {
+				case 'collection':
+				case 'creator':
+				case 'title':
+				case 'date':
+				case 'dateAdded':
+				case 'dateModified':
+				case 'itemType':
+				case 'fileTypeID':
+				case 'publicationTitle':
+				case 'tag':
+				case 'note':
+				case 'childNote':
+				case 'fulltextContent':
+					return true;
+				}
+				
+				return false;
+				]]></body>
+			</method>
+			
 			<method name="onConditionSelected">
-				<body>
-					<![CDATA[
-					// Skip if correct condition already selected
-					if (this.id('conditionsmenu').value==this.selectedCondition){
-						return;
-					}
+				<parameter name="conditionName"/>
+				<parameter name="reload"/>
+				<body><![CDATA[
 					var conditionsMenu = this.id('conditionsmenu');
 					var operatorsList = this.id('operatorsmenu');
 					
-					this.selectedCondition = conditionsMenu.value;
+					// Skip if no condition or correct condition already selected
+					if (!conditionName || (conditionName == this.selectedCondition && !reload)) {
+						return;
+					}
+					
+					this.selectedCondition = conditionName;
 					this.selectedOperator = operatorsList.value;
 					
-					var condition = Zotero.SearchConditions.get(conditionsMenu.value);
-					var operators = condition['operators'];
+					var condition = Zotero.SearchConditions.get(conditionName);
+					var operators = condition.operators;
+					
+					conditionsMenu.value = conditionName;
+					
+					// Parent state isn't set automatically for submenu selections
+					if (!this.isPrimaryCondition(conditionName)) {
+						conditionsMenu.selectedIndex = -1;
+						conditionsMenu.setAttribute(
+							'label',
+							Zotero.SearchConditions.getLocalizedName(conditionName)
+						);
+					}
+					
+					this.updateSubmenuCheckboxes(conditionsMenu);
 					
 					// Display appropriate operators for condition
 					var selectThis;
@@ -437,75 +467,68 @@
 					operatorsList.selectedIndex = selectThis;
 					
 					// Generate drop-down menu instead of textbox for certain conditions
-					switch (conditionsMenu.value){
+					switch (conditionName) {
 						case 'collection':
 							var rows = [];
 							
 							var libraryID = this.parent.search.libraryID;
-							libraryID = libraryID ? libraryID : null;
-							var cols = Zotero.getCollections(false, true, libraryID);
-							for (var i in cols) {
+							
+							// Add collections
+							let cols = Zotero.Collections.getByLibrary(libraryID, true);
+							for (let col of cols) {
 								// Indent subcollections
 								var indent = '';
-								if (cols[i].level) {
-									for (var j=1; j<cols[i].level; j++) {
+								if (col.level) {
+									for (let j = 1; j < col.level; j++) {
 										indent += '    ';
 									}
 									indent += '- ';
 								}
-								rows.push([indent + cols[i].name, 'C' + Zotero.Collections.getLibraryKeyHash(cols[i])]);
+								rows.push({
+									name: indent + col.name,
+									value: 'C' + col.key,
+									image: Zotero.Collection.prototype.treeViewImage
+								});
 							}
-							this.createValueMenu(rows);
-							break;
-						
-						case 'savedSearch':
-							var rows = [];
-							var libraryID = this.parent.search.libraryID;
-							libraryID = libraryID ? libraryID : null;
-							var searches = Zotero.Searches.getAll(libraryID);
-							for (var i in searches) {
-								if (searches[i].id != this.parent.search.id) {
-									rows.push([searches[i].name, 'S' + Zotero.Searches.getLibraryKeyHash(searches[i])]);
+							
+							// Add saved searches
+							let searches = Zotero.Searches.getByLibrary(libraryID);
+							for (let search of searches) {
+								if (search.id != this.parent.search.id) {
+									rows.push({
+										name: search.name,
+										value: 'S' + search.key,
+										image: Zotero.Search.prototype.treeViewImage
+									});
 								}
 							}
 							this.createValueMenu(rows);
 							break;
 						
 						case 'itemType':
-							var t = Zotero.ItemTypes.getTypes();
+							var rows = Zotero.ItemTypes.getTypes().map(type => ({
+								name: Zotero.ItemTypes.getLocalizedString(type.id),
+								value: type.name
+							}));
 							
 							// Sort by localized name
-							var types = [];
-							for (var i=0; i<t.length; i++) {
-								types.push({
-									id: t[i].id,
-									name: t[i].name,
-									localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
-								});
-							}
 							var collation = Zotero.getLocaleCollation();
-							types.sort(function(a, b) {
-								return collation.compareString(1, a.localized, b.localized);
-							});
+							rows.sort((a, b) => collation.compareString(1, a.name, b.name));
 							
-							for (var i in types) {
-								types[i][0] = types[i].localized;
-								types[i][1] = types[i].name;
-								delete types[i]['name'];
-								delete types[i]['id'];
-							}
-							this.createValueMenu(types);
+							this.createValueMenu(rows);
 							break;
 						
 						case 'fileTypeID':
-							var types = Zotero.FileTypes.getTypes();
-							for (var i in types) {
-								types[i][0] = Zotero.getString('fileTypes.' + types[i]['name']);
-								types[i][1] = types[i]['id'];
-								delete types[i]['name'];
-								delete types[i]['id'];
-							}
-							this.createValueMenu(types);
+							var rows = Zotero.FileTypes.getTypes().map(type => ({
+								name: Zotero.getString('fileTypes.' + type.name),
+								value: type.id
+							}));
+							
+							// Sort by localized name
+							var collation = Zotero.getLocaleCollation();
+							rows.sort((a, b) => collation.compareString(1, a.name, b.name));
+							
+							this.createValueMenu(rows);
 							break;
 						
 						default:
@@ -526,25 +549,22 @@
 								}
 								
 								// Update field drop-down if applicable
-								this.id('valuefield').update(conditionsMenu.value, this.mode);
+								this.id('valuefield').update(conditionName, this.mode);
 							}
 					}
 					
 					this.onOperatorSelected();
-					]]>
-				</body>
+				]]></body>
 			</method>
 			<method name="onOperatorSelected">
 				<body>
 					<![CDATA[
-					var conditionsMenu = this.id('conditionsmenu');
 					var operatorsList = this.id('operatorsmenu');
 					
 					// Drop-down menu
-					if (conditionsMenu.value == 'collection'
-							|| conditionsMenu.value == 'savedSearch'
-							|| conditionsMenu.value == 'itemType'
-							|| conditionsMenu.value == 'fileTypeID') {
+					if (this.selectedCondition == 'collection'
+							|| this.selectedCondition == 'itemType'
+							|| this.selectedCondition == 'fileTypeID') {
 						this.id('valuefield').hidden = true;
 						this.id('valuemenu').hidden = false;
 						this.id('value-date-age').hidden = true;
@@ -577,19 +597,21 @@
 				</body>
 			</method>
 			<method name="createValueMenu">
-				<parameter name="values"/>
+				<parameter name="rows"/>
 				<body>
 					<![CDATA[
 						while (this.id('valuemenu').hasChildNodes()){
 							this.id('valuemenu').removeChild(this.id('valuemenu').firstChild);
 						}
 						
-						if (values.length){
-							for (var i in values){
-								this.id('valuemenu').appendItem(values[i][0], values[i][1]);
+						for (let row of rows) {
+							let menuitem = this.id('valuemenu').appendItem(row.name, row.value);
+							if (row.image) {
+								menuitem.className = 'menuitem-iconic';
+								menuitem.setAttribute('image', row.image);
 							}
-							this.id('valuemenu').selectedIndex = 0;
 						}
+						this.id('valuemenu').selectedIndex = 0;
 						
 						if (this.value)
 						{
@@ -601,60 +623,67 @@
 			<method name="initWithParentAndCondition">
 				<parameter name="parent"/>
 				<parameter name="condition"/>
-				<body>
-					<![CDATA[
-						this.parent = parent;
-						this.conditionID = condition['id'];
+				<body><![CDATA[
+					this.parent = parent;
+					this.conditionID = condition['id'];
+					var menu = this.id('conditionsmenu');
+					
+					if(this.parent.search)
+					{
+						this.dontupdate = true;	//so that the search doesn't get updated while we are creating controls.
+						var prefix = '';
 						
-						if(this.parent.search)
-						{
-							this.dontupdate = true;	//so that the search doesn't get updated while we are creating controls.
-							var prefix = '';
+						// Handle special conditions
+						switch (condition.condition) {
+							case 'savedSearch':
+								prefix = 'S';
+								break;
 							
-							// Handle special conditions
-							switch (condition.condition) {
-								case 'savedSearch':
-									prefix = 'S';
-									break;
-								
-								case 'collection':
-									prefix = 'C';
-									break;
-							}
-							
-							this.id('conditionsmenu').value = condition.condition;
-							
-							// Convert datetimes from UTC to localtime
-							if ((condition['condition']=='accessDate' ||
-									condition['condition']=='dateAdded' ||
-									condition['condition']=='dateModified') &&
-									Zotero.Date.isSQLDateTime(condition['value'])){
-								
-								condition['value'] =
-									Zotero.Date.dateToSQL(Zotero.Date.sqlToDate(condition['value'], true));
-							}
-							
-							this.mode = condition['mode'];
-							this.id('operatorsmenu').value = condition['operator'];
-							this.value = prefix +
-								(condition.value ? condition.value : '');
-
-							this.dontupdate = false;
+							case 'collection':
+								prefix = 'C';
+								break;
 						}
 						
-						this.onConditionSelected();
+						// Map certain conditions to other menu items
+						let uiCondition = condition.condition;
+						switch (condition.condition) {
+							case 'savedSearch':
+								uiCondition = 'collection';
+								break;
+						}
 						
-						this.id('conditionsmenu').focus();
-					]]>
-				</body>
+						menu.setAttribute('value', uiCondition);
+						
+						// Convert datetimes from UTC to localtime
+						if ((condition['condition']=='accessDate' ||
+								condition['condition']=='dateAdded' ||
+								condition['condition']=='dateModified') &&
+								Zotero.Date.isSQLDateTime(condition['value'])){
+							
+							condition['value'] =
+								Zotero.Date.dateToSQL(Zotero.Date.sqlToDate(condition['value'], true));
+						}
+						
+						this.mode = condition['mode'];
+						this.id('operatorsmenu').value = condition['operator'];
+						this.value = prefix +
+							(condition.value ? condition.value : '');
+
+						this.dontupdate = false;
+					}
+					
+					this.onConditionSelected(menu.value);
+					
+					this.id('conditionsmenu').focus();
+				]]></body>
 			</method>
-			<!-- Gets the value from the field and updates the associated search condition -->
+			<!-- Gets the value from the UI and updates the associated condition on the Zotero.Search object -->
 			<method name="updateSearch">
 				<body>
 					<![CDATA[
 						if(this.parent && this.parent.search && !this.dontupdate)
 						{
-							var condition = this.id('conditionsmenu').value;
+							var condition = this.selectedCondition;
 							var operator = this.id('operatorsmenu').value;
 							
 							// Regular text field
@@ -663,7 +692,7 @@
 								var value = this.id('valuefield').value;
 								
 								// Convert datetimes to UTC before saving
-								switch (this.id('conditionsmenu').value) {
+								switch (condition) {
 									case 'accessDate':
 									case 'dateAdded':
 									case 'dateModified':
@@ -686,8 +715,7 @@
 							
 							// Handle special C1234 and S5678 form for
 							// collections and searches
-							else if (this.id('conditionsmenu').value == 'collection' || this.id('conditionsmenu').value == 'savedSearch')
-							{
+							else if (condition == 'collection') {
 								var letter = this.id('valuemenu').value.substr(0,1);
 								if (letter=='C')
 								{
@@ -710,6 +738,66 @@
 					]]>
 				</body>
 			</method>
+			
+			<method name="updateSubmenuCheckboxes">
+			<parameter name="menu"/>
+			<body><![CDATA[
+				for (let i = 0; i < menu.itemCount; i++) {
+					let item = menu.getItemAtIndex(i);
+					if (item.localName == 'menuitem') {
+						if (item.getAttribute('value') == this.selectedCondition) {
+							item.setAttribute('checked', true);
+						}
+						else {
+							item.removeAttribute('checked');
+						}
+					}
+					else {
+						this.updateSubmenuCheckboxes(item);
+					}
+				}
+			]]></body>
+			</method>
+			
+			<method name="revealSelectedCondition">
+			<parameter name="menu"/>
+			<body><![CDATA[
+				if (!this.selectedCondition || this.isPrimaryCondition(this.selectedCondition)) {
+					return;
+				}
+				
+				if (!menu) {
+					menu = this.id('conditionsmenu');
+				}
+				for (let i = 0; i < menu.itemCount; i++) {
+					let item = menu.getItemAtIndex(i);
+					if (item.localName == 'menuitem') {
+						if (item.getAttribute('value') == this.selectedCondition) {
+							menu.open = true;
+							return true;
+						}
+					}
+					else {
+						var opened = this.revealSelectedCondition(item);
+						if (opened) {
+							return true;
+						}
+					}
+				}
+				
+				return false;
+			]]></body></method>
+			
+			<method name="onLibraryChange">
+				<body><![CDATA[
+					switch (this.selectedCondition) {
+					case 'collection':
+						this.onConditionSelected(this.selectedCondition, true);
+						break;
+					}
+				]]></body>
+			</method>
+			
 			<method name="onRemoveClicked">
 				<body>
 					<![CDATA[
@@ -763,8 +851,12 @@
 			<xul:hbox id="search-condition" xbl:inherits="flex">
 				<xul:popupset id="condition-tooltips"/>
 				
-				<xul:menulist id="conditionsmenu" oncommand="document.getBindingParent(this).onConditionSelected(); event.stopPropagation()">
-					<xul:menupopup/>
+				<xul:menulist id="conditionsmenu" oncommand="document.getBindingParent(this).onConditionSelected(event.target.value); event.stopPropagation()">
+					<xul:menupopup onpopupshown="document.getBindingParent(this).revealSelectedCondition()">
+						<xul:menu id="more-conditions-menu" label="&zotero.general.more;">
+							<xul:menupopup/>
+						</xul:menu>
+					</xul:menupopup>
 				</xul:menulist>
 				<xul:menulist id="operatorsmenu" oncommand="document.getBindingParent(this).onOperatorSelected(); event.stopPropagation()">
 					<xul:menupopup/>

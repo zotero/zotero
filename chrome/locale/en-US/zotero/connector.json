@@ -1,0 +1,70 @@
+{
+	"general_saveTo": {
+		"message": "Save to $1"
+	},
+	"general_more": {
+		"message": "More…"
+	},
+	"general_done": {
+		"message": "Done"
+	},
+	"general_tryAgain": {
+		"message": "Try Again"
+	},
+	"general_cancel": {
+		"message": "Cancel"
+	},
+	
+	"progressWindow_savingTo": {
+		"message": "Saving to"
+	},
+	"progressWindow_tagPlaceholder": {
+		"message": "Tags (separated by commas)"
+	},
+	"progressWindow_error_translation": {
+		"message": "An error occurred while saving this item. See $1 for more information."
+	},
+	"progressWindow_error_troubleshootingTranslatorIssues": {
+		"message": "Troubleshooting Translator Issues"
+	},
+	"progressWindow_error_fallback": {
+		"message": "An error occurred saving with $1. Attempting to save using $2 instead.",
+		"description": "The placeholders will contain the names of Zotero translators (e.g., JSTOR or Embedded Metadata)."
+	},
+	"progressWindow_error_upgradeClient": {
+		"message": "This feature is not supported by your version of $1. Please upgrade to the $2.",
+		"description": "$2 will be a link with the localized text 'latest version'."
+	},
+	"progressWindow_error_upgradeClient_latestVersion": {
+		"message": "latest version"
+	},
+	
+	"appConnector": {
+		"message": "$1 Connector"
+	},
+	"upgradeApp": {
+		"message": "Upgrade $1"
+	},
+	
+	"error_connection_isAppRunning": {
+		"message": "Is $1 Running?"
+	},
+	"error_connection_save": {
+		"message": "The $1 was unable to communicate with the $2 desktop application. The Connector can save some pages directly to your $3 account, but for best results you should make sure $2 is open before attempting to save.",
+		"description": "$1 will contain the localized string 'Zotero Connector'. $2 will contain the app name. $3 will contain the domain name."
+	},
+	"error_connection_downloadOrTroubleshoot": {
+		"message": "You can <a href=\"$1\">download $2</a> or <a href=\"$3\">troubleshoot the connection</a> if necessary."
+	},
+	"error_connection_enableSavingToOnlineLibrary": {
+		"message": "Enable Saving to Online Library"
+	},
+	
+	"integration_error_clientUpgrade": {
+		"message": "Web-based citing requires $1 or later."
+	},
+	"integration_error_connection": {
+		"message": "The $1 was unable to communicate with the $2 desktop application. $2 must be open to use web-based citing.",
+		"description": "$1 will be the localized string for the extension (e.g., Zotero Connector). $2 will be the app name (e.g., Zotero)."
+	}
+}

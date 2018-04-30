@@ -32,10 +32,13 @@
 		
 		<preferences id="zotero-prefpane-general-preferences">
 			<preference id="pref-fontSize" name="extensions.zotero.fontSize" type="string"/>
-			<preference id="pref-automaticScraperUpdates" name="extensions.zotero.automaticScraperUpdates" type="bool"/>
-			<preference id="pref-reportTranslationFailure" name="extensions.zotero.reportTranslationFailure" type="bool"/>
+			<preference id="pref-layout" name="extensions.zotero.layout" type="string"/>
+			
 			<preference id="pref-automaticSnapshots" name="extensions.zotero.automaticSnapshots" type="bool"/>
 			<preference id="pref-downloadAssociatedFiles" name="extensions.zotero.downloadAssociatedFiles" type="bool"/>
+			<preference id="pref-autoRecognizeFiles" name="extensions.zotero.autoRecognizeFiles" type="bool"/>
+			<preference id="pref-autoRenameFiles" name="extensions.zotero.autoRenameFiles" type="bool"/>
+			
 			<preference id="pref-automaticTags" name="extensions.zotero.automaticTags" type="bool"/>
 			<preference id="pref-trashAutoEmptyDays" name="extensions.zotero.trashAutoEmptyDays" type="int"/>
 			
@@ -43,6 +46,7 @@
 			<preference id="pref-groups-copyChildFileAttachments" name="extensions.zotero.groups.copyChildFileAttachments" type="bool"/>
 			<preference id="pref-groups-copyChildLinks" name="extensions.zotero.groups.copyChildLinks" type="bool"/>
 			<preference id="pref-groups-copyTags" name="extensions.zotero.groups.copyTags" type="bool"/>
+			
 		</preferences>
 		
 		<groupbox id="zotero-prefpane-general-groupbox">
@@ -55,6 +59,16 @@
 				</columns>
 			
 				<rows id="zotero-prefpane-general-rows">
+					<row>
+						<hbox align="center">
+							<label value="&zotero.preferences.layout;" control="layout"/>
+						</hbox>
+						<radiogroup id="layout" orient="horizontal" align="center" preference="pref-layout">
+							<radio id="horizontal" label="&zotero.preferences.layout.standard;" value="standard"/>
+							<radio id="vertical" label="&zotero.preferences.layout.stacked;" value="stacked"/>
+						</radiogroup>
+					</row>
+
 					<row>
 						<hbox align="center">
 							<label value="&zotero.preferences.fontSize;" control="fontSize"/>
@@ -88,28 +102,41 @@
 									<menuitem label="96"/>
 								</menupopup>
 							</menulist>
+							
+							<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
 						</hbox>
 					</row>
 				</rows>
 			</grid>
+		</groupbox>
+		
+		<groupbox id="zotero-prefpane-file-handling-groupbox">
+			<caption label="&zotero.preferences.fileHandling;"/>
 			
-			<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
+			<checkbox id="automaticSnapshots-checkbox"
+				label="&zotero.preferences.automaticSnapshots;"
+				preference="pref-automaticSnapshots"/>
+			<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="pref-downloadAssociatedFiles"/>
+			<checkbox label="&zotero.preferences.autoRecognizeFiles;" preference="pref-autoRecognizeFiles"/>
+			<checkbox label="&zotero.preferences.autoRenameFiles;" preference="pref-autoRenameFiles"/>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.fileHandler.openPDFsUsing;" control="file-handler-pdf"/>
+				<menulist id="fileHandler-pdf" class="fileHandler-menu">
+					<menupopup>
+						<menuitem id="fileHandler-custom"/>
+						<menuitem label="&zotero.preferences.fileHandler.systemDefault;"
+								oncommand="Zotero_Preferences.General.setFileHandler('pdf', false)"/>
+						<menuitem label="&zotero.preferences.custom;"
+								oncommand="Zotero_Preferences.General.chooseFileHandler('pdf')"/>
+					</menupopup>
+				</menulist>
+			</hbox>
 		</groupbox>
 		
 		<groupbox id="zotero-prefpane-miscellaneous-groupbox">
 			<caption label="&zotero.preferences.miscellaneous;"/>
 			
-			<hbox align="center">
-				<checkbox label="&zotero.preferences.autoUpdate;" preference="pref-automaticScraperUpdates"/>
-				<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;"
-					oncommand="Zotero_Preferences.General.updateTranslators()"/>
-			</hbox>
-			
-			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="pref-reportTranslationFailure"/>
-			<checkbox id="automaticSnapshots-checkbox"
-				label="&zotero.preferences.automaticSnapshots;"
-				preference="pref-automaticSnapshots"/>
-			<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="pref-downloadAssociatedFiles"/>
 			<checkbox label="&zotero.preferences.automaticTags;" preference="pref-automaticTags"/>
 			<hbox align="center">
 				<label value="&zotero.preferences.trashAutoEmptyDaysPre;"/>

@@ -89,9 +89,12 @@ To add a new preference:
 		
 			<separator class="thin"/>
 			
+			<!--
+			TODO: Restore a way to add these
 			<label id="addLocateEngineDescription" style="font-size: 10px; width: 45em; height: 6em">
 				&zotero.preferences.locate.addDescription;
 			</label>
+			-->
 		</groupbox>
 	</prefpane>
 	
@@ -151,7 +154,7 @@ To add a new preference:
 			// repopulate tree with available engines
 			var engines = Zotero.LocateManager.getEngines();
 			var i = 0;
-			for each(var engine in engines) {
+			for (let engine of engines) {
 				var treeitem = document.createElement('treeitem');
 				var treerow = document.createElement('treerow');
 				var checkboxCell = document.createElement('treecell');
@@ -175,7 +178,7 @@ To add a new preference:
 			}
 			
 			// restore ranges
-			for each(var range in ranges) {
+			for (let range of ranges) {
 				if(range[1] <= engines.length-1) {
 					tree.view.selection.rangedSelect(range[0], range[1], true);
 				}
@@ -231,7 +234,7 @@ To add a new preference:
 				hidden = false;
 			}
 			
-			[engine.hidden = hidden for each(engine in Zotero.LocateManager.getEngines())];
+			Zotero.LocateManager.getEngines().forEach(engine => engine.hidden = hidden);
 
 			refreshLocateEnginesList();
 		}

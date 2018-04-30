@@ -43,7 +43,6 @@
 			<vbox style="margin-left: 15px">
 				<description id="zotero-saveToLibrary-description" style="font: small-caption; font-weight: normal" hidden="true">&zotero.downloadManager.saveToLibrary.description;</description>
 				<checkbox id="zotero-recognizePDF" hidden="true" persist="checked" disabled="true"/>
-				<description style="margin-left: 20px; font: small-caption; font-weight: normal" id="zotero-noPDFTools-description" hidden="true">&zotero.downloadManager.noPDFTools.description;</description>
 			</vbox>
 		</vbox>
 	</radiogroup>

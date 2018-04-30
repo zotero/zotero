@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "Sulje">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Tuo...">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Tuo leikepöydältä">
 <!ENTITY quitApplicationCmdWin.label "Poistu">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Lopeta">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Muokkaa">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Peru">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Tee uudelleen">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Leikkaa">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Kopioi">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Kopioi sitaatti">
 <!ENTITY copyBibliographyCmd.label "Kopioi kirjallisuusluettelo">
-<!ENTITY pasteCmd.label "Liitä">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Poista">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Valitse kaikki">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Asetukset">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Asetukset">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Etsi">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Vaihda sivun suuntaa">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Vaihda tekstin suuntaa">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Työkalut">
 <!ENTITY toolsMenu.accesskey "T">
+<!ENTITY installConnector.label "Asenna selainlisäosa">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Lisäosat">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Vianetsintä">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Lähetä palautetta...">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Ilmoita virheistä Zoterolle...">
+<!ENTITY helpFeedbackPage.label "Keskustelufoorumit">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Raportoi virheistä...">
 <!ENTITY helpReportErrors.accesskey "R">
+
+<!ENTITY debugOutputLogging.label "Virheenjäljityksen tulostuksen kirjaus">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Lähetä tulostus">
+<!ENTITY debugOutputLogging.view "Näytä tulostus">
+<!ENTITY debugOutputLogging.clear "Tyhjennä tulostus">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Käynnistä uudelleen kirjaus päällä...">
+
 <!ENTITY helpCheckForUpdates.label "Tarkista päivitykset...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

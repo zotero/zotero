@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Agochar os outros">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Mostrar todos">
-<!ENTITY quitApplicationCmdMac.label "Saír de Zotero">
+<!ENTITY quitApplicationCmdMac.label "Pechar Zotero">
 <!ENTITY quitApplicationCmdMac.key "S">
 
 
@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "Pechar">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Importar...">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Importar do portaretallos">
 <!ENTITY quitApplicationCmdWin.label "Saír">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Saír">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Editar">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Desfacer">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Refacer">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Cortar">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Copiar">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Copiar a cita">
 <!ENTITY copyBibliographyCmd.label "Copiar a bibliografía">
-<!ENTITY pasteCmd.label "Pegar">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "p">
-<!ENTITY deleteCmd.label "Eliminar">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Escoller todo">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Preferencias">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Preferencias">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Buscar">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "F">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Cambiar a dirección de páxina">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Cambiar a dirección do texto">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Ferramentas">
 <!ENTITY toolsMenu.accesskey "T">
+<!ENTITY installConnector.label "Instalar engadido para o navegador">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Engadidos">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Información de solución de problemas">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Dar suxestións">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Informar de erros a Zotero">
+<!ENTITY helpFeedbackPage.label "Foro de debate">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Informar de erros...">
 <!ENTITY helpReportErrors.accesskey "R">
+
+<!ENTITY debugOutputLogging.label "Saída de depuración do logging">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Enviar a saída">
+<!ENTITY debugOutputLogging.view "Ver a saída">
+<!ENTITY debugOutputLogging.clear "Borrar a saída">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Reiniciar co acceso activado">
+
 <!ENTITY helpCheckForUpdates.label "Comprobar se hai actualizacións...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

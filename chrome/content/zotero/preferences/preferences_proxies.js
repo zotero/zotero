@@ -31,6 +31,7 @@ Zotero_Preferences.Proxies = {
 	
 	init: function () {
 		this.refreshProxyList();
+		this.updateCheckboxState();
 	},
 	
 	/**
@@ -40,20 +41,38 @@ Zotero_Preferences.Proxies = {
 		var transparent = document.getElementById('zotero-proxies-transparent').checked;
 		Zotero.Prefs.set("proxies.transparent", transparent);
 		Zotero.Prefs.set("proxies.autoRecognize", document.getElementById('zotero-proxies-autoRecognize').checked);	
+		Zotero.Prefs.set("proxies.showRedirectNotification", document.getElementById('zotero-proxies-showRedirectNotification').checked);
 		Zotero.Prefs.set("proxies.disableByDomainString", document.getElementById('zotero-proxies-disableByDomain-textbox').value);
 		Zotero.Prefs.set("proxies.disableByDomain", document.getElementById('zotero-proxies-disableByDomain-checkbox').checked &&
 				document.getElementById('zotero-proxies-disableByDomain-textbox').value != "");
 		
 		Zotero.Proxies.init();
 		
-		document.getElementById('proxyTree-add').disabled =
-			document.getElementById('proxyTree-delete').disabled =
-			document.getElementById('proxyTree').disabled = 
-			document.getElementById('zotero-proxies-autoRecognize').disabled = 
-			document.getElementById('zotero-proxies-disableByDomain-checkbox').disabled = 
-			document.getElementById('zotero-proxies-disableByDomain-textbox').disabled = !transparent;
+		this.updateCheckboxState();
 	},
 	
+	
+	updateCheckboxState: function() {
+		var transparent = document.getElementById('zotero-proxies-transparent').checked;
+
+		document.getElementById('proxyTree-add').disabled =
+			document.getElementById('proxyTree-delete').disabled =
+			document.getElementById('proxyTree').disabled =
+			document.getElementById('zotero-proxies-autoRecognize').disabled =
+			document.getElementById('zotero-proxies-showRedirectNotification').disabled =
+			document.getElementById('zotero-proxies-disableByDomain-checkbox').disabled =
+			document.getElementById('zotero-proxies-disableByDomain-textbox').disabled =
+				!transparent;
+	},
+	
+	
+	/**
+	 * Enables UI buttons when proxy is selected
+	 */
+	enableProxyButtons: function () {
+		document.getElementById('proxyTree-edit').disabled = false;
+		document.getElementById('proxyTree-delete').disabled = false;
+	},
 	
 	/**
 	 * Adds a proxy to the proxy pane
@@ -61,7 +80,8 @@ Zotero_Preferences.Proxies = {
 	showProxyEditor: function (index) {
 		if(index == -1) return;
 		window.openDialog('chrome://zotero/content/preferences/proxyEditor.xul',
-			"zotero-preferences-proxyEditor", "chrome, modal", index !== undefined ? this._proxies[index] : null);
+			"zotero-preferences-proxyEditor", "chrome,modal,centerscreen",
+			index !== undefined ? this._proxies[index] : null);
 		this.refreshProxyList();
 	},
 	
@@ -138,9 +158,11 @@ Zotero_Preferences.Proxies = {
 		}
 		
 		document.getElementById('proxyTree').currentIndex = -1;
+		document.getElementById('proxyTree-edit').disabled = true;
 		document.getElementById('proxyTree-delete').disabled = true;
 		document.getElementById('zotero-proxies-transparent').checked = Zotero.Prefs.get("proxies.transparent");
 		document.getElementById('zotero-proxies-autoRecognize').checked = Zotero.Prefs.get("proxies.autoRecognize");
+		document.getElementById('zotero-proxies-showRedirectNotification').checked = Zotero.Prefs.get("proxies.showRedirectNotification");
 		document.getElementById('zotero-proxies-disableByDomain-checkbox').checked = Zotero.Prefs.get("proxies.disableByDomain");
 		document.getElementById('zotero-proxies-disableByDomain-textbox').value = Zotero.Prefs.get("proxies.disableByDomainString");
 	}

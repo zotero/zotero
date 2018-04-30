@@ -23,36 +23,33 @@
     ***** END LICENSE BLOCK *****
 */
 
+"use strict";
+
 Zotero.Notifier = new function(){
 	var _observers = {};
-	var _disabled = false;
 	var _types = [
-		'collection', 'creator', 'search', 'share', 'share-items', 'item', 'file',
-		'collection-item', 'item-tag', 'tag', 'setting', 'group', 'trash', 'bucket', 'relation'
+		'collection', 'search', 'share', 'share-items', 'item', 'file',
+		'collection-item', 'item-tag', 'tag', 'setting', 'group', 'trash',
+		'bucket', 'relation', 'feed', 'feedItem', 'sync', 'api-key'
 	];
-	var _inTransaction;
-	var _locked = false;
-	var _queue = [];
-	
-	this.registerObserver = registerObserver;
-	this.unregisterObserver = unregisterObserver;
-	this.trigger = trigger;
-	this.untrigger = untrigger;
-	this.begin = begin;
-	this.commit = commit;
-	this.reset = reset;
-	this.disable = disable;
-	this.enable = enable;
-	this.isEnabled = isEnabled;
-	
-	
-	function registerObserver(ref, types){
+	var _transactionID = false;
+	var _queue = {};
+
+
+	/**
+	 * @param {Object} [ref] signature {notify: function(event, type, ids, extraData) {}}
+	 * @param {Array} [types] a list of types of events observer should be triggered on
+	 * @param {String} [id] an id of the observer used in debug output
+	 * @param {Integer} [priority] lower numbers correspond to higher priority of observer execution
+	 * @returns {string}
+	 */
+	this.registerObserver = function (ref, types, id, priority) {
 		if (types){
 			types = Zotero.flattenArguments(types);
 			
 			for (var i=0; i<types.length; i++){
 				if (_types.indexOf(types[i]) == -1){
-					throw ('Invalid type ' + types[i] + ' in registerObserver()');
+					throw new Error("Invalid type '" + types[i] + "'");
 				}
 			}
 		}
@@ -66,22 +63,29 @@ Zotero.Notifier = new function(){
 				tries = 10;
 			}
 			
-			var hash = Zotero.randomString(len);
+			var hash = (id ? id + '_' : '') + Zotero.randomString(len);
 			tries--;
 		}
 		while (_observers[hash]);
 		
-		Zotero.debug('Registering observer for '
-			+ (types ? '[' + types.join() + ']' : 'all types')
-			+ ' in notifier with hash ' + hash + "'", 4);
-		_observers[hash] = {ref: ref, types: types};
+		var msg = "Registering notifier observer '" + hash + "' for "
+			+ (types ? '[' + types.join() + ']' : 'all types');
+		if (priority) {
+			msg += " with priority " + priority;
+		}
+		_observers[hash] = {
+			ref: ref,
+			types: types,
+			priority: priority || false
+		};
 		return hash;
 	}
 	
-	function unregisterObserver(hash){
-		Zotero.debug("Unregistering observer in notifier with hash '" + hash + "'", 4);
-		delete _observers[hash];
+	this.unregisterObserver = function (id) {
+		Zotero.debug("Unregistering notifier observer in notifier with id '" + id + "'", 4);
+		delete _observers[id];
 	}
+	
 	
 	/**
 	* Trigger a notification to the appropriate observers
@@ -89,8 +93,9 @@ Zotero.Notifier = new function(){
 	* Possible values:
 	*
 	* 	event: 'add', 'modify', 'delete', 'move' ('c', for changing parent),
-	*		'remove' (ci, it), 'refresh', 'redraw', 'trash'
-	* 	type - 'collection', 'search', 'item', 'collection-item', 'item-tag', 'tag', 'group', 'relation'
+	*		'remove' (ci, it), 'refresh', 'redraw', 'trash', 'unreadCountUpdated'
+	* 	type - 'collection', 'search', 'item', 'collection-item', 'item-tag', 'tag',
+	*		'group', 'relation', 'feed', 'feedItem'
 	* 	ids - single id or array of ids
 	*
 	* Notes:
@@ -100,182 +105,267 @@ Zotero.Notifier = new function(){
 	*
 	* - New events and types should be added to the order arrays in commit()
 	**/
-	function trigger(event, type, ids, extraData, force){
-		if (_disabled){
-			Zotero.debug("Notifications are disabled");
-			return false;
+	this.trigger = Zotero.Promise.coroutine(function* (event, type, ids, extraData, force) {
+		if (_transactionID && !force) {
+			return this.queue(event, type, ids, extraData);
 		}
 		
-		if (_types && _types.indexOf(type) == -1){
-			throw ('Invalid type ' + type + ' in Notifier.trigger()');
+		if (_types && _types.indexOf(type) == -1) {
+			throw new Error("Invalid type '" + type + "'");
 		}
 		
 		ids = Zotero.flattenArguments(ids);
 		
-		var queue = _inTransaction && !force;
-		
-		Zotero.debug("Notifier.trigger('" + event + "', '" + type + "', " + '[' + ids.join() + '])'
-			+ (queue ? " queued" : " called " + "[observers: " + Object.keys(_observers).length + "]"));
-		
-		// Merge with existing queue
-		if (queue) {
-			if (!_queue[type]) {
-				_queue[type] = [];
-			}
-			if (!_queue[type][event]) {
-				_queue[type][event] = {};
-			}
-			if (!_queue[type][event].ids) {
-				_queue[type][event].ids = [];
-				_queue[type][event].data = {};
-			}
-			
-			// Merge ids
-			_queue[type][event].ids = _queue[type][event].ids.concat(ids);
-			
-			// Merge extraData keys
-			if (extraData) {
-				for (var dataID in extraData) {
-					if (extraData[dataID]) {
-						_queue[type][event].data[dataID] = extraData[dataID];
-					}
-				}
-			}
-			
-			return true;
+		if (Zotero.Debug.enabled) {
+			_logTrigger(event, type, ids, extraData);
 		}
 		
-		for (var i in _observers){
-			Zotero.debug("Calling notify('" + event + "') on observer with hash '" + i + "'", 4);
+		var order = _getObserverOrder(type);
+		for (let id of order) {
+			//Zotero.debug("Calling notify() with " + event + "/" + type
+			//	+ " on observer with id '" + id + "'", 5);
 			
-			if (!_observers[i]) {
+			if (!_observers[id]) {
 				Zotero.debug("Observer no longer exists");
 				continue;
 			}
 			
-			// Find observers that handle notifications for this type (or all types)
-			if (!_observers[i].types || _observers[i].types.indexOf(type)!=-1){
-				// Catch exceptions so all observers get notified even if
-				// one throws an error
-				try {
-					_observers[i].ref.notify(event, type, ids, extraData);
+			// Catch exceptions so all observers get notified even if
+			// one throws an error
+			try {
+				let t = new Date;
+				yield Zotero.Promise.resolve(_observers[id].ref.notify(event, type, ids, extraData));
+				t = new Date - t;
+				if (t > 5) {
+					//Zotero.debug(id + " observer finished in " + t + " ms", 5);
 				}
-				catch (e) {
-					Zotero.debug(e);
-					Components.utils.reportError(e);
-				}
+			}
+			catch (e) {
+				Zotero.logError(e);
 			}
 		}
 		
 		return true;
-	}
+	});
 	
 	
-	function untrigger(event, type, ids) {
-		if (!_inTransaction) {
-			throw ("Zotero.Notifier.untrigger() called with no active event queue")
+	/**
+	 * Queue an event until the end of the current notifier transaction
+	 *
+	 * Takes the same parameters as trigger()
+	 *
+	 * @throws If a notifier transaction isn't currently open
+	 */
+	this.queue = function (event, type, ids, extraData, queue) {
+		if (_types && _types.indexOf(type) == -1) {
+			throw new Error("Invalid type '" + type + "'");
 		}
 		
 		ids = Zotero.flattenArguments(ids);
 		
-		for each(var id in ids) {
-			var index = _queue[type][event].ids.indexOf(id);
-			if (index == -1) {
-				Zotero.debug(event + '-' + type + ' id ' + id +
-					' not found in queue in Zotero.Notifier.untrigger()');
-				continue;
+		if (Zotero.Debug.enabled) {
+			_logTrigger(event, type, ids, extraData, true, queue ? queue.id : null);
+		}
+		
+		// Use a queue if one is provided, or else use main queue
+		if (queue) {
+			queue.size++;
+			queue = queue._queue;
+		}
+		else {
+			if (!_transactionID) {
+				throw new Error("Can't queue event outside of a transaction");
 			}
-			_queue[type][event].ids.splice(index, 1);
-			delete _queue[type][event].data[id];
+			queue = _queue;
+		}
+		
+		_mergeEvent(queue, event, type, ids, extraData);
+	}
+	
+	
+	function _mergeEvent(queue, event, type, ids, extraData) {
+		// Merge with existing queue
+		if (!queue[type]) {
+			queue[type] = [];
+		}
+		if (!queue[type][event]) {
+			queue[type][event] = {};
+		}
+		if (!queue[type][event].ids) {
+			queue[type][event].ids = [];
+			queue[type][event].data = {};
+		}
+		
+		// Merge ids
+		queue[type][event].ids = queue[type][event].ids.concat(ids);
+		
+		// Merge extraData keys
+		if (extraData) {
+			// If just a single id, extra data can be keyed by id or passed directly
+			if (ids.length == 1) {
+				let id = ids[0];
+				queue[type][event].data[id] = extraData[id] ? extraData[id] : extraData;
+			}
+			// For multiple ids, check for data keyed by the id
+			else {
+				for (let i = 0; i < ids.length; i++) {
+					let id = ids[i];
+					if (extraData[id]) {
+						queue[type][event].data[id] = extraData[id];
+					}
+				}
+			}
 		}
 	}
 	
 	
-	/*
+	function _logTrigger(event, type, ids, extraData, queueing, queueID) {
+		Zotero.debug("Notifier.trigger("
+			+ "'" + event + "', "
+			+ "'" + type + "', "
+			+ "[" + ids.join() + "]"
+			+ (extraData ? ", " + JSON.stringify(extraData) : "")
+			+ ")"
+			+ (queueing
+				? " " + (queueID ? "added to queue " + queueID : "queued") + " "
+				: " called "
+			+ "[observers: " + _countObserversForType(type) + "]")
+		);
+	}
+	
+	
+	/**
+	 * Get order of observer by priority, with lower numbers having higher priority.
+	 * If an observer doesn't have a priority, sort it last.
+	 */
+	function _getObserverOrder(type) {
+		var order = [];
+		for (let i in _observers) {
+			// Skip observers that don't handle notifications for this type (or all types)
+			if (_observers[i].types && _observers[i].types.indexOf(type) == -1) {
+				continue;
+			}
+			order.push({
+				id: i,
+				priority: _observers[i].priority || false
+			});
+		}
+		order.sort((a, b) => {
+			if (a.priority === false && b.priority === false) return 0;
+			if (a.priority === false) return 1;
+			if (b.priority === false) return -1;
+			return a.priority - b.priority;
+		});
+		return order.map(o => o.id);
+	}
+	
+	
+	function _countObserversForType(type) {
+		var num = 0;
+		for (let i in _observers) {
+			// Skip observers that don't handle notifications for this type (or all types)
+			if (_observers[i].types && _observers[i].types.indexOf(type) == -1) {
+				continue;
+			}
+			num++;
+		}
+		return num;
+	}
+	
+	
+	/**
 	 * Begin queueing event notifications (i.e. don't notify the observers)
-	 *
-	 * _lock_ will prevent subsequent commits from running the queue until commit() is called
-	 * with the _unlock_ being true
 	 *
 	 * Note: Be sure the matching commit() gets called (e.g. in a finally{...} block) or
 	 * notifications will break until Firefox is restarted or commit(true)/reset() is called manually
+	 *
+	 * @param {String} [transactionID]
 	 */
-	function begin(lock) {
-		if (lock && !_locked) {
-			_locked = true;
-			var unlock = true;
-		}
-		else {
-			var unlock = false;
-		}
-		
-		if (_inTransaction) {
-			//Zotero.debug("Notifier queue already open", 4);
-		}
-		else {
-			Zotero.debug("Beginning Notifier event queue");
-			_inTransaction = true;
-		}
-		
-		return unlock;
+	this.begin = function (transactionID = true) {
+		_transactionID = transactionID;
 	}
 	
 	
-	/*
+	/**
 	 * Send notifications for ids in the event queue
 	 *
-	 * If the queue is locked, notifications will only run if _unlock_ is true
+	 * @param {Zotero.Notifier.Queue|Zotero.Notifier.Queue[]} [queues] - One or more queues to use
+	 *     instead of the internal queue
+	 * @param {String} [transactionID]
 	 */
-	function commit(unlock) {
-		// If there's a lock on the event queue and _unlock_ isn't given, don't commit
-		if ((unlock == undefined && _locked) || (unlock != undefined && !unlock)) {
-			//Zotero.debug("Keeping Notifier event queue open", 4);
-			return;
+	this.commit = Zotero.Promise.coroutine(function* (queues, transactionID = true) {
+		if (queues) {
+			if (!Array.isArray(queues)) {
+				queues = [queues];
+			}
+			
+			var queue = {};
+			for (let q of queues) {
+				q = q._queue;
+				for (let type in q) {
+					for (let event in q[type]) {
+						_mergeEvent(queue, event, type, q[type][event].ids, q[type][event].data);
+					}
+				}
+			}
+		}
+		else if (!_transactionID) {
+			throw new Error("Can't commit outside of transaction");
+		}
+		else {
+			var queue = _queue;
 		}
 		
 		var runQueue = [];
 		
-		function sorter(a, b) {
-			return order.indexOf(b) - order.indexOf(a);
-		}
-		var order = ['collection', 'search', 'item', 'collection-item', 'item-tag', 'tag'];
-		_queue.sort();
+		// Sort using order from array, unless missing, in which case sort after
+		var getSorter = function (orderArray) {
+			return function (a, b) {
+				var posA = orderArray.indexOf(a);
+				var posB = orderArray.indexOf(b);
+				if (posA == -1) posA = 100;
+				if (posB == -1) posB = 100;
+				return posA - posB;
+			}
+		};
 		
-		var order = ['add', 'modify', 'remove', 'move', 'delete', 'trash'];
+		var typeOrder = ['collection', 'search', 'item', 'collection-item', 'item-tag', 'tag'];
+		var eventOrder = ['add', 'modify', 'remove', 'move', 'delete', 'trash'];
+		
+		var queueTypes = Object.keys(queue);
+		queueTypes.sort(getSorter(typeOrder));
+		
 		var totals = '';
-		for (var type in _queue) {
+		for (let type of queueTypes) {
 			if (!runQueue[type]) {
 				runQueue[type] = [];
 			}
 			
-			_queue[type].sort();
+			let typeEvents = Object.keys(queue[type]);
+			typeEvents.sort(getSorter(eventOrder));
 			
-			for (var event in _queue[type]) {
+			for (let event of typeEvents) {
 				runQueue[type][event] = {
 					ids: [],
-					data: {}
+					data: queue[type][event].data
 				};
 				
 				// Remove redundant ids
-				for (var i=0; i<_queue[type][event].ids.length; i++) {
-					var id = _queue[type][event].ids[i];
-					var data = _queue[type][event].data[id];
+				for (let i = 0; i < queue[type][event].ids.length; i++) {
+					let id = queue[type][event].ids[i];
 					
 					// Don't send modify on nonexistent items or tags
 					if (event == 'modify') {
-						if (type == 'item' && !Zotero.Items.get(id)) {
+						if (type == 'item' && !(yield Zotero.Items.getAsync(id))) {
 							continue;
 						}
-						else if (type == 'tag' && !Zotero.Tags.get(id)) {
+						else if (type == 'tag' && !(yield Zotero.Tags.getAsync(id))) {
 							continue;
 						}
 					}
 					
 					if (runQueue[type][event].ids.indexOf(id) == -1) {
 						runQueue[type][event].ids.push(id);
-						if (data) {
-							runQueue[type][event].data[id] = data;
-						}
 					}
 				}
 				
@@ -285,61 +375,53 @@ Zotero.Notifier = new function(){
 			}
 		}
 		
-		reset();
+		if (!queues) {
+			this.reset(transactionID);
+		}
 		
 		if (totals) {
-			Zotero.debug("Committing Notifier event queue" + totals);
+			if (queues) {
+				Zotero.debug("Committing notifier event queues" + totals
+					+ " [queues: " + queues.map(q => q.id).join(", ") + "]");
+			}
+			else {
+				Zotero.debug("Committing notifier event queue" + totals);
+			}
 			
-			for (var type in runQueue) {
-				for (var event in runQueue[type]) {
+			for (let type in runQueue) {
+				for (let event in runQueue[type]) {
 					if (runQueue[type][event].ids.length || event == 'refresh') {
-						trigger(event, type, runQueue[type][event].ids,
-							runQueue[type][event].data, true);
+						yield this.trigger(
+							event,
+							type,
+							runQueue[type][event].ids,
+							runQueue[type][event].data,
+							true
+						);
 					}
 				}
 			}
 		}
-	}
+	});
 	
 	
 	/*
 	 * Reset the event queue
 	 */
-	function reset() {
-		Zotero.debug("Resetting Notifier event queue");
-		_locked = false;
-		_queue = [];
-		_inTransaction = false;
-	}
-	
-	
-	// 
-	// These should rarely be used now that we have event queuing
-	//
-	
-	/*
-	 * Disables Notifier notifications
-	 *
-	 * Returns false if the Notifier was already disabled, true otherwise
-	 */
-	function disable() {
-		if (_disabled) {
-			Zotero.debug('Notifier notifications are already disabled');
-			return false;
+	this.reset = function (transactionID = true) {
+		if (transactionID != _transactionID) {
+			return;
 		}
-		Zotero.debug('Disabling Notifier notifications'); 
-		_disabled = true;
-		return true;
-	}
-	
-	
-	function enable() {
-		Zotero.debug('Enabling Notifier notifications');
-		_disabled = false; 
-	}
-	
-	
-	function isEnabled() {
-		return !_disabled;
+		//Zotero.debug("Resetting notifier event queue");
+		_queue = {};
+		_transactionID = false;
 	}
 }
+
+
+Zotero.Notifier.Queue = function () {
+	this.id = Zotero.Utilities.randomString();
+	Zotero.debug("Creating notifier queue " + this.id);
+	this._queue = {};
+	this.size = 0;
+};

@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "Schließen">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Importieren...">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Importieren aus Zwischenablage">
 <!ENTITY quitApplicationCmdWin.label "Beenden">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Beenden">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Bearbeiten">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Rückgängig">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Wiederholen">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Ausschneiden">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "A">
-<!ENTITY copyCmd.label "Kopieren">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Zitation kopieren">
 <!ENTITY copyBibliographyCmd.label "Literaturverzeichnis kopieren">
-<!ENTITY pasteCmd.label "Einfügen">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Löschen">
-<!ENTITY deleteCmd.key "L">
-<!ENTITY deleteCmd.accesskey "L">
-<!ENTITY selectAllCmd.label "Alle auswählen">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "u">
-<!ENTITY preferencesCmd.label "Einstellungen">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Einstellungen">
-<!ENTITY preferencesCmdUnix.accesskey "E">
-<!ENTITY findCmd.label "Suchen">
-<!ENTITY findCmd.accesskey "S">
-<!ENTITY findCmd.commandkey "S">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Seitenrichtung ändern">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Schreibrichtung ändern">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Werkzeuge">
 <!ENTITY toolsMenu.accesskey "W">
+<!ENTITY installConnector.label "Browsererweiterungen installieren">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Add-ons">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "S">
 <!ENTITY helpTroubleshootingInfo.label "Problembehebung">
 <!ENTITY helpTroubleshootingInfo.accesskey "P">
-<!ENTITY helpFeedbackPage.label "Feedback senden...">
+<!ENTITY helpFeedbackPage.label "Diskussionsforum">
 <!ENTITY helpFeedbackPage.accesskey "F">
-<!ENTITY helpReportErrors.label "Fehlerbericht an Zotero senden">
+
+<!ENTITY helpReportErrors.label "Fehler melden...">
 <!ENTITY helpReportErrors.accesskey "e">
+
+<!ENTITY debugOutputLogging.label "Logging des Debug-Outputs">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Ausgabe übertragen">
+<!ENTITY debugOutputLogging.view "Ausgabe anzeigen">
+<!ENTITY debugOutputLogging.clear "Ausgabe löschen">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Mit aktiviertem Logging neustarten...">
+
 <!ENTITY helpCheckForUpdates.label "Auf Updates überprüfen">
 <!ENTITY helpCheckForUpdates.accesskey "U">

@@ -1,0 +1,50 @@
+{
+  "name": "zotero",
+  "private": "private",
+  "version": "5.0.0",
+  "description": "Zotero",
+  "main": "",
+  "scripts": {
+    "start": "node ./scripts/build.js && node ./scripts/watch.js",
+    "build": "node ./scripts/build.js",
+    "sass": "node ./scripts/sass.js",
+    "js": "node ./scripts/js.js",
+    "clean": "node ./scripts/clean.js",
+    "clean-build": "node ./scripts/clean.js && node ./scripts/build.js",
+    "clean-start": "node ./scripts/clean.js && node ./scripts/build.js && node ./scripts/watch.js"
+  },
+  "license": "",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "react": "^15.6.2",
+    "react-dom": "^15.6.2",
+    "zotero-web-library": "^0.9.4-alpha"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-plugin-syntax-async-generators": "^6.13.0",
+    "babel-plugin-syntax-class-properties": "^6.13.0",
+    "babel-plugin-syntax-decorators": "^6.13.0",
+    "babel-plugin-syntax-do-expressions": "^6.13.0",
+    "babel-plugin-syntax-export-extensions": "^6.13.0",
+    "babel-plugin-syntax-flow": "^6.13.0",
+    "babel-plugin-syntax-jsx": "^6.13.0",
+    "babel-plugin-syntax-object-rest-spread": "^6.13.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
+    "babel-preset-react": "^6.16.0",
+    "browserify": "^14.5.0",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "chokidar": "^1.7.0",
+    "co-mocha": "^1.2.1",
+    "colors": "^1.1.2",
+    "eslint-plugin-react": "^7.5.1",
+    "fs-extra": "^3.0.1",
+    "globby": "^6.1.0",
+    "mocha": "^3.5.3",
+    "multimatch": "^2.1.0",
+    "node-sass": "^4.7.2",
+    "sinon": "^4.5.0",
+    "universalify": "^0.1.1"
+  }
+}

@@ -47,7 +47,7 @@
 			<menulist id="zotero-csl-page-type" style="min-height: 1.6em; min-width: 50px" oncommand="Zotero_CSL_Editor.refresh()" />
 			<label value=":" />
 			<textbox size="5" id="preview-pages" type="timed" timeout="250" oncommand="Zotero_CSL_Editor.refresh()"/>
-			<checkbox oncommand="Zotero_CSL_Editor.refresh()" id="preview-suppress-author" label="&styles.editor.suppressAuthor;" />
+			<checkbox oncommand="Zotero_CSL_Editor.refresh()" id="preview-suppress-author" label="&zotero.citation.suppressAuthor.label;" />
 			<label value="&styles.editor.citePosition;" />
 			<menulist id="zotero-ref-position" oncommand="Zotero_CSL_Editor.refresh()">
 				<menupopup>
@@ -58,12 +58,13 @@
 					<menuitem label="near-note" value="4"/>
 				</menupopup>
 			</menulist>
-			<menulist id="zotero-csl-list" style="min-height: 1.6em; min-width: 100px" initialized="false" flex="1" oncommand="Zotero_CSL_Editor.loadCSL(this.selectedItem.value)"/>
+			<menulist id="locale-menu" oncommand="Zotero.Prefs.set('export.lastLocale', this.value); Zotero_CSL_Editor.refresh()"/>
+			<menulist id="zotero-csl-list" style="min-height: 1.6em; min-width: 100px" flex="1" oncommand="Zotero_CSL_Editor.onStyleSelected(this.value)"/>
 		</hbox>
 		<textbox id="zotero-csl-editor" type="timed" timeout="250" multiline="true"
 			flex="1"
 			onkeypress="Zotero_CSL_Editor.handleKeyPress(event)"
-			oncommand="document.getElementById('zotero-csl-list').selectedIndex = -1; Zotero_CSL_Editor.generateBibliography(this.value)"/>
+			oncommand="Zotero_CSL_Editor.onStyleModified()"/>
 		<splitter id="csledit-splitter" collapse="before" persist="state">
 			<grippy/>
 		</splitter>

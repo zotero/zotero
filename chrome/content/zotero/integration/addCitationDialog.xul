@@ -74,173 +74,179 @@
 							</treecols>
 							<treechildren/>
 						</tree>
-					
-						<tree id="zotero-items-tree"
-								enableColumnDrag="true" flex="1" seltype="single"
-								onselect="Zotero_Citation_Dialog.treeItemSelected();">
-							<treecols id="zotero-items-columns-header">
-								<treecol
-									id="zotero-items-column-title" primary="true"
-									label="&zotero.items.title_column;"
-									flex="4" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-firstCreator"
-									label="&zotero.items.creator_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-itemType" hidden="true"
-									label="&zotero.items.type_column;"
-									width="40" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-date" hidden="true"
-									label="&zotero.items.date_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-year" hidden="true"
-									label="&zotero.items.year_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-publisher" hidden="true"
-									label="&zotero.items.publisher_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-publicationTitle" hidden="true"
-									label="&zotero.items.publication_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-journalAbbreviation" hidden="true"
-									label="&zotero.items.journalAbbr_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-language" hidden="true"
-									label="&zotero.items.language_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-accessDate" hidden="true"
-									label="&zotero.items.accessDate_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-libraryCatalog" hidden="true"
-									label="&zotero.items.libraryCatalog_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-callNumber" hidden="true"
-									submenu="true"
-									label="&zotero.items.callNumber_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-rights" hidden="true"
-									submenu="true"
-									label="&zotero.items.rights_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-dateAdded" hidden="true"
-									label="&zotero.items.dateAdded_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-dateModified" hidden="true"
-									label="&zotero.items.dateModified_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-archive" hidden="true"
-									submenu="true"
-									label="&zotero.items.archive_column;"
-									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>								
-								<treecol
-									id="zotero-items-column-archiveLocation" hidden="true"
-									submenu="true"
-									label="&zotero.items.archiveLocation_column;"
-									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-place" hidden="true"
-									submenu="true"
-									label="&zotero.items.place_column;"
-									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-volume" hidden="true"
-									submenu="true"
-									label="&zotero.items.volume_column;"
-									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-edition" hidden="true"
-									submenu="true"
-									label="&zotero.items.edition_column;"
-									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-pages" hidden="true"
-									submenu="true"
-									label="&zotero.items.pages_column;"
-									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-issue" hidden="true"
-									submenu="true"
-									label="&zotero.items.issue_column;"
-									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-series" hidden="true"
-									submenu="true"
-									label="&zotero.items.series_column;"
-									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-seriesTitle" hidden="true"
-									submenu="true"
-									label="&zotero.items.seriesTitle_column;"
-									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-court" hidden="true"
-									submenu="true"
-									label="&zotero.items.court_column;"
-									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-medium" hidden="true"
-									submenu="true"
-									label="&zotero.items.medium_column;"
-									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-genre" hidden="true"
-									submenu="true"
-									label="&zotero.items.genre_column;"
-									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-system" hidden="true"
-									submenu="true"
-									label="&zotero.items.system_column;"
-									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-extra" hidden="true"
-									label="&zotero.items.extra_column;"
-									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
-							</treecols>	
-							<treechildren/>
-						</tree>
+						
+						<deck id="zotero-items-pane-content" selectedIndex="0" flex="1">
+							<tree id="zotero-items-tree"
+									enableColumnDrag="true" flex="1" seltype="single"
+									onselect="onItemSelected(); Zotero_Citation_Dialog.treeItemSelected();">
+								<treecols id="zotero-items-columns-header">
+									<treecol
+										id="zotero-items-column-title" primary="true"
+										label="&zotero.items.title_column;"
+										flex="4" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-firstCreator"
+										label="&zotero.items.creator_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-itemType" hidden="true"
+										label="&zotero.items.type_column;"
+										width="40" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-date" hidden="true"
+										label="&zotero.items.date_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-year" hidden="true"
+										label="&zotero.items.year_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-publisher" hidden="true"
+										label="&zotero.items.publisher_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-publicationTitle" hidden="true"
+										label="&zotero.items.publication_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-journalAbbreviation" hidden="true"
+										label="&zotero.items.journalAbbr_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-language" hidden="true"
+										label="&zotero.items.language_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-accessDate" hidden="true"
+										label="&zotero.items.accessDate_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-libraryCatalog" hidden="true"
+										label="&zotero.items.libraryCatalog_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-callNumber" hidden="true"
+										submenu="true"
+										label="&zotero.items.callNumber_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-rights" hidden="true"
+										submenu="true"
+										label="&zotero.items.rights_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-dateAdded" hidden="true"
+										label="&zotero.items.dateAdded_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-dateModified" hidden="true"
+										label="&zotero.items.dateModified_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-archive" hidden="true"
+										submenu="true"
+										label="&zotero.items.archive_column;"
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-archiveLocation" hidden="true"
+										submenu="true"
+										label="&zotero.items.archiveLocation_column;"
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-place" hidden="true"
+										submenu="true"
+										label="&zotero.items.place_column;"
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-volume" hidden="true"
+										submenu="true"
+										label="&zotero.items.volume_column;"
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-edition" hidden="true"
+										submenu="true"
+										label="&zotero.items.edition_column;"
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-pages" hidden="true"
+										submenu="true"
+										label="&zotero.items.pages_column;"
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-issue" hidden="true"
+										submenu="true"
+										label="&zotero.items.issue_column;"
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-series" hidden="true"
+										submenu="true"
+										label="&zotero.items.series_column;"
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-seriesTitle" hidden="true"
+										submenu="true"
+										label="&zotero.items.seriesTitle_column;"
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-court" hidden="true"
+										submenu="true"
+										label="&zotero.items.court_column;"
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-medium" hidden="true"
+										submenu="true"
+										label="&zotero.items.medium_column;"
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-genre" hidden="true"
+										submenu="true"
+										label="&zotero.items.genre_column;"
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-system" hidden="true"
+										submenu="true"
+										label="&zotero.items.system_column;"
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-extra" hidden="true"
+										label="&zotero.items.extra_column;"
+										flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								</treecols>
+								<treechildren/>
+							</tree>
+						
+							<!-- Label for displaying messages when items pane is hidden
+							 (e.g. "Advanced search mode — press Enter to search.")-->
+							<vbox id="zotero-items-pane-message-box" pack="center" align="center"/>
+						</deck>
 					</hbox>
 				</vbox>
 						

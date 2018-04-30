@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "Edita">
+<!ENTITY editMenu.accesskey        "E">
+<!ENTITY undoCmd.label             "Desfés">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "D">
+<!ENTITY redoCmd.label             "Refés">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "R">
+<!ENTITY cutCmd.label              "Retalla">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "t">
+<!ENTITY copyCmd.label             "Copia">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "C">
+<!ENTITY pasteCmd.label            "Enganxa">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "x">
+<!ENTITY deleteCmd.label           "Suprimeix">
+<!ENTITY deleteCmd.accesskey       "u">
+<!ENTITY selectAllCmd.label        "Selecciona-ho tot">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "a">
+<!ENTITY findCmd.label             "Cerca">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "r">
+<!ENTITY findAgainCmd.label        "Torna a cercar">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "o">
+<!ENTITY findPreviousCmd.label     "Cerca l'anterior">
+<!ENTITY findPreviousCmd.accesskey "r">

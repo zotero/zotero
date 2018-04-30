@@ -4,22 +4,28 @@
 <!ENTITY zotero.preferences.items "Eser">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Ayarlar">
+<!ENTITY zotero.preferences.custom "Özel...">
 
 <!ENTITY zotero.preferences.prefpane.general "Genel">
 
 <!ENTITY zotero.preferences.userInterface "Kullanıcı Arabirimi">
-<!ENTITY zotero.preferences.showIn "Zotero'yu Bunda Aç:">
-<!ENTITY zotero.preferences.showIn.browserPane "Tarayıcı bölmesi">
-<!ENTITY zotero.preferences.showIn.separateTab "Ayrı sekme">
-<!ENTITY zotero.preferences.showIn.appTab "Uygulama sekmesi">
-<!ENTITY zotero.preferences.statusBarIcon "Durum çubuğu simgesi:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Hiçbiri">
+<!ENTITY zotero.preferences.layout "Düzen:">
+<!ENTITY zotero.preferences.layout.standard "Standart">
+<!ENTITY zotero.preferences.layout.stacked "Üst üste yığılmış">
 <!ENTITY zotero.preferences.fontSize "Yazıtipi boyutu:">
 <!ENTITY zotero.preferences.fontSize.small "Küçük">
 <!ENTITY zotero.preferences.fontSize.medium "Orta">
 <!ENTITY zotero.preferences.fontSize.large "Büyük">
 <!ENTITY zotero.preferences.fontSize.xlarge "Çok büyük">
 <!ENTITY zotero.preferences.fontSize.notes "Not yazıtipi boyutu:">
+
+<!ENTITY zotero.preferences.fileHandling "Dosya Kullanımı">
+<!ENTITY zotero.preferences.automaticSnapshots "Web sayfalarından eserler yaratılırken sayfa görünümü otomatik olarak kaydet">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Eserleri kaydederken ilişkilendirilen PDF ve diğer dosyaları da otomatik olarak ekle">
+<!ENTITY zotero.preferences.autoRecognizeFiles "PDF'ler için otomatik olarak üstveri al ">
+<!ENTITY zotero.preferences.autoRenameFiles "Ana üstverileri kullanarak ve otomatik olarak ek dosyaları yeniden adlandır">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF'leri bu ile Aç:">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "Sistem Varsayılanı">
 
 <!ENTITY zotero.preferences.miscellaneous "Diğer Ayarlar">
 <!ENTITY zotero.preferences.autoUpdate "Güncellenmiş çevirmen ve stilleri otomatik olarak ara">
@@ -28,10 +34,8 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Zotero.org'a, kullanılan Zotero sürümüne göre içeriği özelleştirme yetkisi ver.">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Etkinleştirilirse, varolan Zotero sürümü zotero.org'a yapılan HTTP isteklerine eklenecektir.">
 <!ENTITY zotero.preferences.parseRISRefer "İndirilmiş BibTeX/RIS/Refer dosyaları için, Zotero'yu kullan">
-<!ENTITY zotero.preferences.automaticSnapshots "Web sayfalarından eserler yaratılırken sayfa görünümü otomatik olarak kaydet">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Eserleri kaydederken ilişkilendirilen PDF ve diğer dosyaları da otomatik olarak ekle">
 <!ENTITY zotero.preferences.automaticTags "Anahtar kelimeler ve konu başlıkları ile eserleri otomatik olarak etiketle">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Bu kadar zaman önce çöpe gönderilmiş eserleri otomatik olarak sil:">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Bu kadar zaman önce Çöp Sepetine gönderilmiş eserleri otomatik olarak sil:">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "gün">
 
 <!ENTITY zotero.preferences.groups "Gruplar">
@@ -39,9 +43,13 @@
 <!ENTITY zotero.preferences.groups.childNotes "alt notlar">
 <!ENTITY zotero.preferences.groups.childFiles "alt görüntüler ve içeri aktarılan dosyalar">
 <!ENTITY zotero.preferences.groups.childLinks "alt bağlantılar">
-<!ENTITY zotero.preferences.groups.tags "Etiketler">
+<!ENTITY zotero.preferences.groups.tags "etiketler">
 
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+<!ENTITY zotero.preferences.feeds "Beslemeler">
+<!ENTITY zotero.preferences.feeds.sorting.label "Sıralama:">
+<!ENTITY zotero.preferences.feeds.sorting.newest "En yeni eserler ilk">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "En eski eserler ilk">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Besleme Varsayılanları">
 
 <!ENTITY zotero.preferences.openurl.search "Çözücü ara">
 <!ENTITY zotero.preferences.openurl.custom "Özel...">
@@ -51,7 +59,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Eşitle">
 <!ENTITY zotero.preferences.sync.username "Kullanıcı:">
 <!ENTITY zotero.preferences.sync.password "Şifre:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero Eşitleme Sunucusu">
+<!ENTITY zotero.preferences.sync.syncServer "Veri Eşitleme">
+<!ENTITY zotero.preferences.sync.setUpSync "Eşitlemeyi Kur">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Hesabı İlişkisizlendir...">
 <!ENTITY zotero.preferences.sync.createAccount "Hesap Oluştur">
 <!ENTITY zotero.preferences.sync.lostPassword "Unutulan Şifre?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Kendiliğinden eşitle">
@@ -60,37 +70,41 @@
 <!ENTITY zotero.preferences.sync.about "Eşitleme Hakkında">
 <!ENTITY zotero.preferences.sync.fileSyncing "Dosya Eşitlemesi">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Kitaplığımda kullanılan eklenti dosyalarını bununla eşitle:">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Kitaplık gruplarının eklenti dosyalarını Zotero deposunu kullanarak eşitle">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Kitaplığımda kullanılan ek dosyalarını bununla eşitle:">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Kitaplık gruplarının ek dosyalarını Zotero deposunu kullanarak eşitle">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Dosyaları bu anlarda indir:">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "Eşitleme anında">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "Gerek duyulduğunda">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Sunucuyu Doğrula">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero deposunu kullandığınızda, bu koşulları kabul etmiş oluyorsunuz:">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "Şartlar ve Koşullar">
-<!ENTITY zotero.preferences.sync.reset.warning1 "Aşağıdaki işlemler, yalnızca ender ve özel durumlar altında kullanılmalı, ve genel sorun giderme amaçlı kullanılmamalıdırlar. Birçok durumda, sıfırlama ek sorunlara neden olacaktır. Bakınız:">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Eşitlemeyi Sıfırlama Seçenekleri">
-<!ENTITY zotero.preferences.sync.reset.warning3 "Daha fazla bilgi için">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Zetoro Sunucusu ile Tam Eşitleme">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Eşitleme geçmişini gözetmeksinizin, yerel Zotero verilerini sunucudaki veri ile birleştir.">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zotero Sunucusundan Geri Yükle">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Bütün yerel Zotero verilerini sil ve eşitleme sunucusundaki verileri yükle.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Zotero Sunucusuna Yükle">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Sunucudaki tüm verileri sil ve yerel Zotero verisini üzerine yaz.">
+<!ENTITY zotero.preferences.sync.librariesToSync "Eşitlenecek Kitaplıklar">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Kitaplıkları Seç...">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "Eşitle">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "Kitaplık">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Aşağıdaki işlemler, yalnızca ender ve özel durumlar altında kullanılmalı, ve genel sorun giderme amaçlı kullanılmamalıdırlar. Birçok durumda, sıfırlama ek sorunlara neden olacaktır. Daha fazla bilgi için ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Eşitlemeyi Sıfırlama Seçenekleri'ne">
+<!ENTITY zotero.preferences.sync.reset.warning3 " bakınız.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Veri Eşitleme Geçmişini Sıfırla">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Eşitleme geçmişini yok sayarak, yerel verileri uzaktaki verilerle birleştir">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Çevrimiçi Kitaplıktan Geri Yükle">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Yerel Zotero verilerinin üzerine çevrimiçi kitaplıktaki verileri yaz.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Çevrimiçi Kitaplığa Geri Döndür">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Çevrimiçi kitaplıktaki verilerin üzerine yerel Zotero verilerini yaz.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Dosya Eşitleme Geçmişini Sıfırla">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tüm yerel eklenti dosyaları için depolama sunucusunun kontrol edilmesini zorla.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tüm ek dosyaları depolama hizmetindekilerle karşılaştır">
 <!ENTITY zotero.preferences.sync.reset "Sıfırla">
 <!ENTITY zotero.preferences.sync.reset.button "Sıfırla...">
 
 
-<!ENTITY zotero.preferences.prefpane.search "Arama">
+<!ENTITY zotero.preferences.prefpane.search "Ara">
 <!ENTITY zotero.preferences.search.fulltextCache "Tüm-Metin Önbellek">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF İndeksleme">
 <!ENTITY zotero.preferences.search.indexStats "İndeks İstatistikleri">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "İndeklenmiş:">
 <!ENTITY zotero.preferences.search.indexStats.partial "Kısmi:">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "İndekslenmemiş:">
-<!ENTITY zotero.preferences.search.indexStats.words "Kelimeler:">
+<!ENTITY zotero.preferences.search.indexStats.words "Sozcükler:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Her dosyada indekslenecek en fazla karakter sayısı:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Her dosyada indekslenecek en fazla sayfa sayısı:">
@@ -99,33 +113,30 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Kaynakça Seçenekleri">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Kaynakçalara makale URL'leri dahil edilsin">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Bu seçenek iptal edildiğinde, bilimsel dergi, magazin ve gazete makaleleri kaynak gösterilirken eğer bir sayfa aralığı belirtilmezse Zotero URL'leri dahil eder.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Bu seçenek devre dışı bırakıldığında, Zotero, bilimsel dergi, magazin ve gazete makalelerine göndermelere URL'leri, yalnızca bir sayfa aralığı belirtilmediği halde ekleyecektir.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Çabuk Kopyala">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Varsayılan Çıktı Biçimi:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Varsayılan Biçim:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "HTML olarak kopyala">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Uyarı: Zengin-metin biçimi Mac OS X'de kaybolacaktır.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Siteye Özgü Ayarlar:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Etki alanı/Yol">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(ör. wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Çıktı Biçimi">
-<!ENTITY zotero.preferences.quickCopy.dragLimit "Bu kadardan daha fazla sürüklendiğinde Çabuk Kopyalamayı seçilemez kıl:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Biçim">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Dil">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "Bu kadardan daha fazlası sürüklendiğinde Çabuk Kopyalamayı devre dışı bırak:">
 
-<!ENTITY zotero.preferences.prefpane.cite "Gönderme Yapmak">
+<!ENTITY zotero.preferences.prefpane.cite "Gönderme Yap">
 <!ENTITY zotero.preferences.cite.styles "Stiller">
-<!ENTITY zotero.preferences.cite.wordProcessors "Sözcük İşlemcileri">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Hiçbir sözcük işlemcisi eklentisi kurulu değildir.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Sözcük İşlemcisi Eklentilerini Al...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
+<!ENTITY zotero.preferences.cite.wordProcessors "Kelime İşlemcileri">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Klasik Gönderme Ekleme İletişim Kutusunu kullan">
+<!ENTITY zotero.preferences.styleEditor "Stil Düzenleyicisi">
+<!ENTITY zotero.preferences.stylePreview "Stil Önizleyicisi">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Stil Yöneticisi">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Başlık">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Güncelleştirilme">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Güncellenme">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Ek stiller indir...">
-
-<!ENTITY zotero.preferences.prefpane.keys "Kısayol Tuşları">
 
 <!ENTITY zotero.preferences.keys.openZotero "Zotero Bölmesini Aç/Kapa">
 <!ENTITY zotero.preferences.keys.saveToZotero "Zotero'ya Kaydet (adres çubuğu ikonu)">
@@ -134,11 +145,12 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Çabuk Arama">
 <!ENTITY zotero.preferences.keys.newItem "Yeni Eser Oluştur">
 <!ENTITY zotero.preferences.keys.newNote "Yeni Not Oluştur">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Konu Seçiciyi Aç">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Tüm Besleme Eserlerini Okunmuş/Okunmamış İşaretle">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Etiket Seçiciyi Aç">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Seçili Eserin Göndermelerini Panoya Kopyala">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Seçilen Eserleri Panoya Kopyala">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Panodan İçeri Aktar">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Değişiklikler yeni açılan pencerelerde etkili olacaktır.">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Değişiklikler, Zotero tekrar başlatıldıktan sonra etkinleşir">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Vekil Sunucular">
 
@@ -146,9 +158,10 @@
 <!ENTITY zotero.preferences.proxies.desc_before_link "Zotero, istekleri kayıtlı vekil sunucular aracılığı ile açık bir şekilde yönlendirecektir. Daha fazla bilgi için">
 <!ENTITY zotero.preferences.proxies.desc_link "vekil sunucu belgelerine">
 <!ENTITY zotero.preferences.proxies.desc_after_link "bakınız.">
-<!ENTITY zotero.preferences.proxies.transparent "Vekil sunucu kaynaklarını kendiliğinden hatırla">
+<!ENTITY zotero.preferences.proxies.transparent "Vekil sunucu yönlendirmelerini etkinleştir">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Vekil sunuculu kaynakları kendiliğinden tanı">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Etki alanı adı bunları içeriyorsa vekil sunucuya yönlendirme: ">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Bir vekil sunucu aracılığıyla yönlendirirken mesaj göster.">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Etki alanı adı bunları içeriyorsa vekil sunucuya yönlendirmeyi devre dışı bırak: ">
 <!ENTITY zotero.preferences.proxies.configured "Ayarlanmış Vekil Sunucular">
 <!ENTITY zotero.preferences.proxies.hostname "Ana Sunucu">
 <!ENTITY zotero.preferences.proxies.scheme "Düzen">
@@ -164,13 +177,16 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Gelişmiş">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Dosyalar ve Klasörler">
+<!ENTITY zotero.preferences.advanced.keys "Kısayollar">
 
-<!ENTITY zotero.preferences.prefpane.locate "Yerini Belirle">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Gelişmiş Yapılandırma">
+
+<!ENTITY zotero.preferences.prefpane.locate "Yerini Bul">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Makale Bakma Motoru Yöneticisi">
 <!ENTITY zotero.preferences.locate.description "Tanım">
 <!ENTITY zotero.preferences.locate.name "Ad">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Bir Bakma Motoru, Bilgi bölmesindeki Yerini Bul açılırının yeteneklerini genişletir. Bakma Motorlarını aşağıdaki listede etkinleştirerek bu açılıra ekleyebilir ve onları kitaplığınızdaki kaynakların yerlerini bulmak amacıyla webde kullanabilirsiniz.">
-<!ENTITY zotero.preferences.locate.addDescription "Listenizde olmayan bir Bakma Motoru eklemek için, tarayıcınızda arzuladığınız arama motoruna gidin ve Zotero'nun Yerini Bul menüsünde &#34;Add&#34;'yi seçin.">
+<!ENTITY zotero.preferences.locate.addDescription "Listede olmayan bir Bakma Motoru eklemek için, tarayıcınızda istediğiniz arama moturunu ziyaret edip Zotero'nun Yerini Bul menüsünden &quot;Ekle&quot;yi seçiniz.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Varsayılanları Geri Yükle">
 
 <!ENTITY zotero.preferences.charset "Karakter Kodlaması">
@@ -181,29 +197,20 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Firefox profil dizinini kullan">
 <!ENTITY zotero.preferences.dataDir.custom "Özel:">
 <!ENTITY zotero.preferences.dataDir.choose "Seç...">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(komut satırı kullanarak belirlenir)">
 <!ENTITY zotero.preferences.dataDir.reveal "Veri Dizinini Göster">
+<!ENTITY zotero.preferences.dataDir.migrate "Yeni Varsayılan Konuma Geç...">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Bağlantılanmış Eklenti Temel Dizini">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero, bağlantılanmış dosya eklentileri için göreceli yollar kullanacaktır. Bu, temel dizininizdeki dosya yapınız aynı kaldığı sürece, dosyalarınıza değişik bilgisayarlarda ulaşımınızı sağlamaktadır.">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Bağlantılanmış Ek Taban Dizini">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero, bağlantılanmış dosya ekleri için göreceli yollar kullanacaktır. Bu, temel dizininizdeki dosya yapınız aynı kaldığı sürece, dosyalarınıza değişik bilgisayarlarda ulaşımınızı sağlamaktadır.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Temel dizin:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Seç...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Mutlak Yollara Geri Döndür...">
 
 <!ENTITY zotero.preferences.dbMaintenance "Veritabanı Bakımı">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Veritabanı Bütünlüğünü Denetle">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Çevirmenleri ve Stilleri Sıfırla">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Çevirmenleri ve Stilleri Sıfırla...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Çevirmenleri Sıfırla...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stilleri Sıfırla...">
 
-<!ENTITY zotero.preferences.debugOutputLogging "Hata Ayıklaması Çıktısının Kaydı">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Hata ayıklama çıktısı, Zotero geliştiricilerine Zotero'daki sorunların düzeltilmesinde yardım eder. Hata ayıklama özelliği Zotero'yu yavaşlatacaktır. Bir Zotero geliştiricisi hata ayıklama kaydı istemediği sürece bu özelliği seçilmemiş olarak bırakınız.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "satır kaydedilmiş">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Tekrar başladıktan sonra etkinleştir">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Çıktıyı Göster">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Çıktıyı Temizle">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Zotero Sunucusuna Gönder">
-
-<!ENTITY zotero.preferences.openAboutConfig "about:config'i Aç">
-<!ENTITY zotero.preferences.openCSLEdit "CSL Düzenleyicisini Aç">
-<!ENTITY zotero.preferences.openCSLPreview "CSL Ön İzlemesini Aç">
-<!ENTITY zotero.preferences.openAboutMemory "about:memory'yi Aç.">
+<!ENTITY zotero.preferences.configEditor "Yapılandırma Düzenleyicisi">

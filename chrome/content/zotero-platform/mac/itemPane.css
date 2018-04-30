@@ -1,0 +1,9 @@
+#zotero-feed-item-addTo-button {
+	margin: 5px 6px 3px;
+	padding-left: 8px;
+}
+
+#zotero-feed-item-addTo-button button {
+	margin: 0;
+	-moz-appearance: none;
+}

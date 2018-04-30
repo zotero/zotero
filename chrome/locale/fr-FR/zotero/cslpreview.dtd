@@ -1,9 +1,9 @@
-<!ENTITY styles.preview "Zotero Style Preview">
+<!ENTITY styles.preview "Aperçu des styles Zotero">
 
-<!ENTITY styles.preview.citationFormat "Citation Format:">
-<!ENTITY styles.preview.citationFormat.all "all">
-<!ENTITY styles.preview.citationFormat.author "author">
-<!ENTITY styles.preview.citationFormat.authorDate "author-date">
-<!ENTITY styles.preview.citationFormat.label "label">
+<!ENTITY styles.preview.citationFormat "Format de citation :">
+<!ENTITY styles.preview.citationFormat.all "tous">
+<!ENTITY styles.preview.citationFormat.author "auteur">
+<!ENTITY styles.preview.citationFormat.authorDate "auteur-date">
+<!ENTITY styles.preview.citationFormat.label "étiquette (label)">
 <!ENTITY styles.preview.citationFormat.note "note">
-<!ENTITY styles.preview.citationFormat.numeric "numeric">
+<!ENTITY styles.preview.citationFormat.numeric "numérique">

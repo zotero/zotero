@@ -1,0 +1,7 @@
+content	zotero-unit			content/
+resource zotero-unit		resource/
+resource zotero-unit-tests  tests/
+
+component {b8570031-be5e-46e8-9785-38cd50a5d911} components/zotero-unit.js
+contract @mozilla.org/commandlinehandler/general-startup;1?type=zotero-unit {b8570031-be5e-46e8-9785-38cd50a5d911}
+category command-line-handler m-zotero-unit @mozilla.org/commandlinehandler/general-startup;1?type=zotero-unit

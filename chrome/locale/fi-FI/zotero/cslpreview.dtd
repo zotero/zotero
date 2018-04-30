@@ -1,9 +1,9 @@
-<!ENTITY styles.preview "Zotero Style Preview">
+<!ENTITY styles.preview "Sitaattityylin esikatselu">
 
-<!ENTITY styles.preview.citationFormat "Citation Format:">
-<!ENTITY styles.preview.citationFormat.all "all">
-<!ENTITY styles.preview.citationFormat.author "author">
-<!ENTITY styles.preview.citationFormat.authorDate "author-date">
-<!ENTITY styles.preview.citationFormat.label "label">
+<!ENTITY styles.preview.citationFormat "Sitaatin muoto:">
+<!ENTITY styles.preview.citationFormat.all "kaikki">
+<!ENTITY styles.preview.citationFormat.author "tekijä">
+<!ENTITY styles.preview.citationFormat.authorDate "tekijä-päivämäärä">
+<!ENTITY styles.preview.citationFormat.label "otsake">
 <!ENTITY styles.preview.citationFormat.note "note">
-<!ENTITY styles.preview.citationFormat.numeric "numeric">
+<!ENTITY styles.preview.citationFormat.numeric "numeerinen">

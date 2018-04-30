@@ -1,0 +1,1292 @@
+{
+	"en-US": {
+		"short": [
+			"Jan",
+			"Feb",
+			"Mar",
+			"Apr",
+			"May",
+			"Jun",
+			"Jul",
+			"Aug",
+			"Sep",
+			"Oct",
+			"Nov",
+			"Dec"
+		],
+		"long": [
+			"January",
+			"February",
+			"March",
+			"April",
+			"May",
+			"June",
+			"July",
+			"August",
+			"September",
+			"October",
+			"November",
+			"December"
+		]
+	},
+	"af-ZA": {
+		"short": [
+			"Jan",
+			"Feb",
+			"Mrt",
+			"Apr",
+			"Mei",
+			"Jun",
+			"Jul",
+			"Aug",
+			"Sep",
+			"Okt",
+			"Nov",
+			"Des"
+		],
+		"long": [
+			"Januarie",
+			"Februarie",
+			"Maart",
+			"April",
+			"Mei",
+			"Junie",
+			"Julie",
+			"Augustus",
+			"September",
+			"Oktober",
+			"November",
+			"Desember"
+		]
+	},
+	"ar": {
+		"short": [
+			"يناير",
+			"فبراير",
+			"مارس",
+			"أبريل",
+			"مايو",
+			"يونيو",
+			"يوليو",
+			"أغسطس",
+			"سبتمبر",
+			"أكتوبر",
+			"نوفمبر",
+			"ديسمبر"
+		],
+		"long": [
+			"يناير",
+			"فبراير",
+			"مارس",
+			"أبريل",
+			"مايو",
+			"يونيو",
+			"يوليو",
+			"أغسطس",
+			"سبتمبر",
+			"أكتوبر",
+			"نوفمبر",
+			"ديسمبر"
+		]
+	},
+	"bg-BG": {
+		"short": [
+			"Яну",
+			"Фев",
+			"Мар",
+			"Апр",
+			"Май",
+			"Юни",
+			"Юли",
+			"Авг",
+			"Сеп",
+			"Окт",
+			"Ное",
+			"Дек"
+		],
+		"long": [
+			"Януари",
+			"Февруари",
+			"Март",
+			"Април",
+			"Май",
+			"Юни",
+			"Юли",
+			"Август",
+			"Септември",
+			"Октомври",
+			"Ноември",
+			"Декември"
+		]
+	},
+	"ca-AD": {
+		"short": [
+			"gen",
+			"febr",
+			"març",
+			"abr",
+			"maig",
+			"juny",
+			"jul",
+			"ag",
+			"set",
+			"oct",
+			"nov",
+			"des"
+		],
+		"long": [
+			"gener",
+			"febrer",
+			"març",
+			"abril",
+			"maig",
+			"juny",
+			"juliol",
+			"agost",
+			"setembre",
+			"octubre",
+			"novembre",
+			"desembre"
+		]
+	},
+	"cs-CZ": {
+		"short": [
+			"Led",
+			"Úno",
+			"Bře",
+			"Dub",
+			"Kvě",
+			"Čvn",
+			"Čnc",
+			"Srp",
+			"Zář",
+			"Říj",
+			"Lis",
+			"Pro"
+		],
+		"long": [
+			"leden",
+			"únor",
+			"březen",
+			"duben",
+			"květen",
+			"červen",
+			"červenec",
+			"srpen",
+			"září",
+			"říjen",
+			"listopad",
+			"prosinec"
+		]
+	},
+	"da-DK": {
+		"short": [
+			"Jan",
+			"Feb",
+			"Mar",
+			"Apr",
+			"Maj",
+			"Jun",
+			"Jul",
+			"Aug",
+			"Sep",
+			"Okt",
+			"Nov",
+			"Dec"
+		],
+		"long": [
+			"Januar",
+			"Februar",
+			"Marts",
+			"April",
+			"Maj",
+			"Juni",
+			"Juli",
+			"August",
+			"September",
+			"Oktober",
+			"November",
+			"December"
+		]
+	},
+	"de": {
+		"short": [
+			"Jan",
+			"Feb",
+			"Mär",
+			"Apr",
+			"Mai",
+			"Jun",
+			"Jul",
+			"Aug",
+			"Sep",
+			"Okt",
+			"Nov",
+			"Dez"
+		],
+		"long": [
+			"Januar",
+			"Februar",
+			"März",
+			"April",
+			"Mai",
+			"Juni",
+			"Juli",
+			"August",
+			"September",
+			"Oktober",
+			"November",
+			"Dezember"
+		]
+	},
+	"el-GR": {
+		"short": [
+			"Ιαν",
+			"Φεβ",
+			"Μαρ",
+			"Απρ",
+			"Ιουν",
+			"Ιουλ",
+			"Αυγ",
+			"Σεπ",
+			"Οκτ",
+			"Νοε",
+			"Δεκ",
+			"May"
+		],
+		"long": [
+			"January",
+			"October",
+			"November",
+			"December",
+			"February",
+			"March",
+			"April",
+			"May",
+			"June",
+			"July",
+			"August",
+			"September"
+		]
+	},
+	"es-ES": {
+		"short": [
+			"Ene",
+			"Feb",
+			"Mar",
+			"Abr",
+			"May",
+			"Jun",
+			"Jul",
+			"Ago",
+			"Sep",
+			"Oct",
+			"Nov",
+			"Dic"
+		],
+		"long": [
+			"Enero",
+			"Febrero",
+			"Marzo",
+			"Abril",
+			"Mayo",
+			"Junio",
+			"Julio",
+			"Agosto",
+			"Septiembre",
+			"Octubre",
+			"Noviembre",
+			"Diciembre"
+		]
+	},
+	"fr-FR": {
+		"short": [
+			"jan",
+			"fév",
+			"mar",
+			"avr",
+			"mai",
+			"juin",
+			"juil",
+			"aoû",
+			"sep",
+			"oct",
+			"nov",
+			"déc"
+		],
+		"long": [
+			"janvier",
+			"février",
+			"mars",
+			"avril",
+			"mai",
+			"juin",
+			"juillet",
+			"août",
+			"septembre",
+			"octobre",
+			"novembre",
+			"décembre"
+		]
+	},
+	"et-EE": {
+		"short": [
+			"jaan",
+			"veebr",
+			"märts",
+			"apr",
+			"mai",
+			"juun",
+			"juul",
+			"aug",
+			"sept",
+			"okt",
+			"nov",
+			"dets"
+		],
+		"long": [
+			"jaanuar",
+			"veebruar",
+			"märts",
+			"aprill",
+			"mai",
+			"juuni",
+			"juuli",
+			"august",
+			"september",
+			"oktoober",
+			"november",
+			"detsember"
+		]
+	},
+	"eu-ES": {
+		"short": [
+			"urt",
+			"ots",
+			"mar",
+			"api",
+			"mai",
+			"eka",
+			"uzt",
+			"abu",
+			"ira",
+			"urr",
+			"aza",
+			"abe"
+		],
+		"long": [
+			"urtarrila",
+			"otsaila",
+			"martxoa",
+			"apirila",
+			"maiatza",
+			"ekaina",
+			"uztaila",
+			"abuztua",
+			"iraila",
+			"urria",
+			"azaroa",
+			"abendua"
+		]
+	},
+	"fa": {
+		"short": [
+			"ژانویه",
+			"فوریه",
+			"مارس",
+			"آوریل",
+			"مه",
+			"ژوئن",
+			"ژوئیه",
+			"اوت",
+			"سپتامبر",
+			"اکتبر",
+			"نوامبر",
+			"دسامبر"
+		],
+		"long": [
+			"ژانویه",
+			"فوریه",
+			"مارس",
+			"آوریل",
+			"مه",
+			"ژوئن",
+			"ژوئیه",
+			"اوت",
+			"سپتامبر",
+			"اکتبر",
+			"نوامبر",
+			"دسامبر"
+		]
+	},
+	"fi-FI": {
+		"short": [
+			"tammi",
+			"helmi",
+			"maalis",
+			"huhti",
+			"touko",
+			"kesä",
+			"heinä",
+			"elo",
+			"syys",
+			"loka",
+			"marras",
+			"joulu"
+		],
+		"long": [
+			"tammikuu",
+			"helmikuu",
+			"maaliskuu",
+			"huhtikuu",
+			"toukokuu",
+			"kesäkuu",
+			"heinäkuu",
+			"elokuu",
+			"syyskuu",
+			"lokakuu",
+			"marraskuu",
+			"joulukuu"
+		]
+	},
+	"he-IL": {
+		"short": [
+			"ינ'",
+			"פב'",
+			"מרץ",
+			"אפ'",
+			"מאי",
+			"יוני",
+			"יולי",
+			"אוג'",
+			"ספט'",
+			"אוק'",
+			"נוב'",
+			"דצ'"
+		],
+		"long": [
+			"ינואר",
+			"פברואר",
+			"מרץ",
+			"אפריל",
+			"מאי",
+			"יוני",
+			"יולי",
+			"אוגוסט",
+			"ספטמבר",
+			"אוקטובר",
+			"נובמבר",
+			"דצמבר"
+		]
+	},
+	"hr-HR": {
+		"short": [
+			"Sij",
+			"Vel",
+			"Ožu",
+			"Tra",
+			"Svi",
+			"Lip",
+			"Srp",
+			"Kol",
+			"Ruj",
+			"Lis",
+			"Stu",
+			"Pro"
+		],
+		"long": [
+			"Siječanj",
+			"Veljača",
+			"Ožujak",
+			"Travanj",
+			"Svibanj",
+			"Lipanj",
+			"Srpanj",
+			"Kolovoz",
+			"Rujan",
+			"Listopad",
+			"Studeni",
+			"Prosinac"
+		]
+	},
+	"hu-HU": {
+		"short": [
+			"Jan.",
+			"Febr.",
+			"Márc.",
+			"Ápr.",
+			"Máj.",
+			"Jún.",
+			"Júl.",
+			"Aug.",
+			"Szept.",
+			"Okt.",
+			"Nov.",
+			"Dec."
+		],
+		"long": [
+			"Január",
+			"Február",
+			"Március",
+			"Április",
+			"Május",
+			"Június",
+			"Július",
+			"Augusztus",
+			"Szeptember",
+			"Október",
+			"November",
+			"December"
+		]
+	},
+	"id-ID": {
+		"short": [
+			"Jan",
+			"Feb",
+			"Mar",
+			"Apr",
+			"Mei",
+			"Jun",
+			"Jul",
+			"Agu",
+			"Sep",
+			"Okt",
+			"Nov",
+			"Des"
+		],
+		"long": [
+			"Januari",
+			"Februari",
+			"Maret",
+			"April",
+			"Mei",
+			"Juni",
+			"Juli",
+			"Agustus",
+			"September",
+			"Oktober",
+			"November",
+			"Desember"
+		]
+	},
+	"is-IS": {
+		"short": [
+			"Jan",
+			"Feb",
+			"Mar",
+			"Apr",
+			"Maí",
+			"Jún",
+			"Júl",
+			"Ágú",
+			"Sep",
+			"Okt",
+			"Nóv",
+			"Des"
+		],
+		"long": [
+			"Janúar",
+			"Febrúar",
+			"Mars",
+			"Apríl",
+			"Maí",
+			"Júní",
+			"Júlí",
+			"Ágúst",
+			"September",
+			"Október",
+			"Nóvember",
+			"Desember"
+		]
+	},
+	"it-IT": {
+		"short": [
+			"Gen",
+			"Feb",
+			"Mar",
+			"Apr",
+			"Mag",
+			"Giu",
+			"Lug",
+			"Ago",
+			"Set",
+			"Ott",
+			"Nov",
+			"Dic"
+		],
+		"long": [
+			"Gennaio",
+			"Febbraio",
+			"Marzo",
+			"Aprile",
+			"Maggio",
+			"Giugno",
+			"Luglio",
+			"Agosto",
+			"Settembre",
+			"Ottobre",
+			"Novembre",
+			"Dicembre"
+		]
+	},
+	"ja-JP": {
+		"short": [
+			"(1月)",
+			"(2月)",
+			"(3月)",
+			"(4月)",
+			"(5月)",
+			"(6月)",
+			"(7月)",
+			"(8月)",
+			"(9月)",
+			"(10月)",
+			"(11月)",
+			"(12月)"
+		],
+		"long": [
+			"1月",
+			"2月",
+			"3月",
+			"4月",
+			"5月",
+			"6月",
+			"7月",
+			"8月",
+			"9月",
+			"10月",
+			"11月",
+			"12月"
+		]
+	},
+	"km": {
+		"short": [
+			"មករា",
+			"កុម្ភៈ",
+			"មីនា",
+			"មេសា",
+			"ឧសភា",
+			"មិថុនា",
+			"កក្កដា",
+			"សីហា",
+			"កញ្ញា",
+			"តុលា",
+			"វិច្ឆិកា",
+			"ធ្នូ"
+		],
+		"long": [
+			"មករា",
+			"កុម្ភៈ",
+			"មីនា",
+			"មេសា",
+			"ឧសភា",
+			"មិថុនា",
+			"កក្កដា",
+			"សីហា",
+			"កញ្ញា",
+			"តុលា",
+			"វិច្ឆិកា",
+			"ធ្នូ"
+		]
+	},
+	"ko-KR": {
+		"short": [
+			"1월",
+			"2월",
+			"3월",
+			"4월",
+			"5월",
+			"6월",
+			"7월",
+			"8월",
+			"9월",
+			"10월",
+			"11월",
+			"12월"
+		],
+		"long": [
+			"1월",
+			"2월",
+			"3월",
+			"4월",
+			"5월",
+			"6월",
+			"7월",
+			"8월",
+			"9월",
+			"10월",
+			"11월",
+			"12월"
+		]
+	},
+	"lt-LT": {
+		"short": [
+			"Sau",
+			"Vas",
+			"Kov",
+			"Bal",
+			"Geg",
+			"Bir",
+			"Lie",
+			"Rgp",
+			"Rgs",
+			"Spl",
+			"Lap",
+			"Grd"
+		],
+		"long": [
+			"sausio",
+			"vasario",
+			"kovo",
+			"balandžio",
+			"gegužės",
+			"birželio",
+			"liepos",
+			"rugpjūčio",
+			"rugsėjo",
+			"spalio",
+			"lapkričio",
+			"gruodžio"
+		]
+	},
+	"nb-NO": {
+		"short": [
+			"Jan",
+			"Feb",
+			"Mar",
+			"Apr",
+			"Mai",
+			"Jun",
+			"Jul",
+			"Aug",
+			"Sep",
+			"Okt",
+			"Nov",
+			"Des"
+		],
+		"long": [
+			"Januar",
+			"Februar",
+			"Mars",
+			"April",
+			"Mai",
+			"Juni",
+			"Juli",
+			"August",
+			"September",
+			"Oktober",
+			"November",
+			"Desember"
+		]
+	},
+	"nn-NO": {
+		"short": [
+			"jan",
+			"feb",
+			"mar",
+			"apr",
+			"mai",
+			"jun",
+			"jul",
+			"aug",
+			"sep",
+			"okt",
+			"nov",
+			"des"
+		],
+		"long": [
+			"Januar",
+			"Februar",
+			"Mars",
+			"April",
+			"Mai",
+			"Juni",
+			"Juli",
+			"August",
+			"September",
+			"Oktober",
+			"November",
+			"Desember"
+		]
+	},
+	"nl-NL": {
+		"short": [
+			"jan",
+			"feb",
+			"mrt",
+			"apr",
+			"mei",
+			"jun",
+			"jul",
+			"aug",
+			"sep",
+			"okt",
+			"nov",
+			"dec"
+		],
+		"long": [
+			"januari",
+			"februari",
+			"maart",
+			"april",
+			"mei",
+			"juni",
+			"juli",
+			"augustus",
+			"september",
+			"oktober",
+			"november",
+			"december"
+		]
+	},
+	"pl-PL": {
+		"short": [
+			"Sty",
+			"Lut",
+			"Mar",
+			"Kwi",
+			"Maj",
+			"Cze",
+			"Lip",
+			"Sie",
+			"Wrz",
+			"Paź",
+			"Lis",
+			"Gru"
+		],
+		"long": [
+			"Styczeń",
+			"Luty",
+			"Marzec",
+			"Kwiecień",
+			"Maj",
+			"Czerwiec",
+			"Lipiec",
+			"Sierpień",
+			"Wrzesień",
+			"Październik",
+			"Listopad",
+			"Grudzień"
+		]
+	},
+	"pt-BR": {
+		"short": [
+			"Jan",
+			"Fev",
+			"Mar",
+			"Abr",
+			"Mai",
+			"Jun",
+			"Jul",
+			"Ago",
+			"Set",
+			"Out",
+			"Nov",
+			"Dez"
+		],
+		"long": [
+			"Janeiro",
+			"Fevereiro",
+			"Março",
+			"Abril",
+			"Maio",
+			"Junho",
+			"Julho",
+			"Agosto",
+			"Setembro",
+			"Outubro",
+			"Novembro",
+			"Dezembro"
+		]
+	},
+	"pt-PT": {
+		"short": [
+			"Jan",
+			"Fev",
+			"Mar",
+			"Abr",
+			"Mai",
+			"Jun",
+			"Jul",
+			"Ago",
+			"Set",
+			"Out",
+			"Nov",
+			"Dez"
+		],
+		"long": [
+			"janeiro",
+			"fevereiro",
+			"março",
+			"abril",
+			"maio",
+			"junho",
+			"julho",
+			"agosto",
+			"setembro",
+			"outubro",
+			"novembro",
+			"dezembro"
+		]
+	},
+	"ro-RO": {
+		"short": [
+			"Ian",
+			"Feb",
+			"Mar",
+			"Apr",
+			"Mai",
+			"Iun",
+			"Iul",
+			"Aug",
+			"Sep",
+			"Oct",
+			"Noi",
+			"Dec"
+		],
+		"long": [
+			"Ianuarie",
+			"Februarie",
+			"Martie",
+			"Aprilie",
+			"Mai",
+			"Iunie",
+			"Iulie",
+			"August",
+			"Septembrie",
+			"Octombrie",
+			"Noiembrie",
+			"Decembrie"
+		]
+	},
+	"ru-RU": {
+		"short": [
+			"Январь",
+			"Февраль",
+			"Март",
+			"Апрель",
+			"Май",
+			"Июнь",
+			"Июль",
+			"Август",
+			"Сентябрь",
+			"Октябрь",
+			"Ноябрь",
+			"Декабрь"
+		],
+		"long": [
+			"Январь",
+			"Февраль",
+			"Март",
+			"Апрель",
+			"Май",
+			"Июнь",
+			"Июль",
+			"Август",
+			"Сентябрь",
+			"Октябрь",
+			"Ноябрь",
+			"Декабрь"
+		]
+	},
+	"sk-SK": {
+		"short": [
+			"Jan",
+			"Feb",
+			"Mar",
+			"Apr",
+			"Máj",
+			"Jún",
+			"Júl",
+			"Aug",
+			"Sep",
+			"Okt",
+			"Nov",
+			"Dec"
+		],
+		"long": [
+			"Január",
+			"Február",
+			"Marec",
+			"Apríl",
+			"Máj",
+			"Jún",
+			"Júl",
+			"August",
+			"September",
+			"Október",
+			"November",
+			"December"
+		]
+	},
+	"sl-SI": {
+		"short": [
+			"Jan",
+			"Feb",
+			"Mar",
+			"Apr",
+			"Maj",
+			"Jun",
+			"Jul",
+			"Avg",
+			"Sep",
+			"Okt",
+			"Nov",
+			"Dec"
+		],
+		"long": [
+			"Januar",
+			"Februar",
+			"Marec",
+			"April",
+			"Maj",
+			"Junij",
+			"Julij",
+			"Avgust",
+			"September",
+			"Oktober",
+			"November",
+			"December"
+		]
+	},
+	"sr-RS": {
+		"short": [
+			"Јан",
+			"Феб",
+			"Мар",
+			"Апр",
+			"Мај",
+			"Јун",
+			"Јул",
+			"Авг",
+			"Сеп",
+			"Окт",
+			"Нов",
+			"Дец"
+		],
+		"long": [
+			"Јануар",
+			"Фебруар",
+			"Март",
+			"Април",
+			"Мај",
+			"Јун",
+			"Јул",
+			"Август",
+			"Септембар",
+			"Октобар",
+			"Новембар",
+			"Децембар"
+		]
+	},
+	"sv-SE": {
+		"short": [
+			"Jan",
+			"Feb",
+			"Mar",
+			"Apr",
+			"Maj",
+			"Jun",
+			"Jul",
+			"Aug",
+			"Sep",
+			"Okt",
+			"Nov",
+			"Dec"
+		],
+		"long": [
+			"Januari",
+			"Februari",
+			"Mars",
+			"April",
+			"Maj",
+			"Juni",
+			"Juli",
+			"Augusti",
+			"September",
+			"Oktober",
+			"November",
+			"December"
+		]
+	},
+	"th-TH": {
+		"short": [
+			"ม.ค.",
+			"ก.พ.",
+			"มี.ค.",
+			"เม.ย.",
+			"พ.ค.",
+			"มิ.ย.",
+			"ก.ค.",
+			"ส.ค.",
+			"ก.ย.",
+			"ต.ค.",
+			"พ.ย.",
+			"ธ.ค."
+		],
+		"long": [
+			"มกราคม",
+			"กุมภาพันธ์",
+			"มีนาคม",
+			"เมษายน",
+			"พฤษภาคม",
+			"มิถุนายน",
+			"กรกฎาคม",
+			"สิงหาคม",
+			"กันยายน",
+			"ตุลาคม",
+			"พฤศจิกายน",
+			"ธันวาคม"
+		]
+	},
+	"tr-TR": {
+		"short": [
+			"Oca",
+			"Şub",
+			"Mar",
+			"Nis",
+			"May",
+			"Haz",
+			"Tem",
+			"Ağu",
+			"Eyl",
+			"Eki",
+			"Kas",
+			"Ara"
+		],
+		"long": [
+			"Ocak",
+			"Şubat",
+			"Mart",
+			"Nisan",
+			"Mayıs",
+			"Haziran",
+			"Temmuz",
+			"Ağustos",
+			"Eylül",
+			"Ekim",
+			"Kasım",
+			"Aralık"
+		]
+	},
+	"uk-UA": {
+		"short": [
+			"Січ",
+			"Лют",
+			"Бер",
+			"Кві",
+			"Тра",
+			"Чер",
+			"Лип",
+			"Сер",
+			"Вер",
+			"Жов",
+			"Лис",
+			"Гру"
+		],
+		"long": [
+			"Січень",
+			"Лютий",
+			"Березень",
+			"Квітень",
+			"Травень",
+			"Червень",
+			"Липень",
+			"Серпень",
+			"Вересень",
+			"Жовтень",
+			"Листопад",
+			"Грудень"
+		]
+	},
+	"vi-VN": {
+		"short": [
+			"Thg01",
+			"Thg02",
+			"Thg03",
+			"Thg04",
+			"Thg05",
+			"Thg06",
+			"Thg07",
+			"Thg08",
+			"Thg09",
+			"Thg10",
+			"Thg11",
+			"Thg12"
+		],
+		"long": [
+			"Tháng Một",
+			"Tháng Hai",
+			"Tháng Ba",
+			"Tháng Tư",
+			"Tháng Năm",
+			"Tháng Sáu",
+			"Tháng Bảy",
+			"Tháng Tám",
+			"Tháng Chín",
+			"Tháng Mười",
+			"Tháng Mười Một",
+			"Tháng Mười Hai"
+		]
+	},
+	"zh-CN": {
+		"short": [
+			"一月",
+			"二月",
+			"三月",
+			"四月",
+			"五月",
+			"六月",
+			"七月",
+			"八月",
+			"九月",
+			"十月",
+			"十一月",
+			"十二月"
+		],
+		"long": [
+			"一月",
+			"二月",
+			"三月",
+			"四月",
+			"五月",
+			"六月",
+			"七月",
+			"八月",
+			"九月",
+			"十月",
+			"十一月",
+			"十二月"
+		]
+	},
+	"zh-TW": {
+		"short": [
+			"1 月",
+			"2 月",
+			"3 月",
+			"4 月",
+			"5 月",
+			"6 月",
+			"7 月",
+			"8 月",
+			"9 月",
+			"10 月",
+			"11 月",
+			"12 月"
+		],
+		"long": [
+			"1 月",
+			"2 月",
+			"3 月",
+			"4 月",
+			"5 月",
+			"6 月",
+			"7 月",
+			"8 月",
+			"9 月",
+			"10 月",
+			"11 月",
+			"12 月"
+		]
+	}
+}

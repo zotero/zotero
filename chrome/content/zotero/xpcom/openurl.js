@@ -74,7 +74,7 @@ Zotero.OpenURL = new function() {
 			
 			if(resolver.getElementsByTagName("Z39.88-2004").length > 0) {
 				var version = "1.0";
-			} else if(resolver.getElementsByTagName("OpenUrl 0.1").length > 0) {
+			} else if(resolver.getElementsByTagName("OpenURL_0.1").length > 0) {
 				var version = "0.1";
 			} else {
 				continue;
@@ -105,8 +105,8 @@ Zotero.OpenURL = new function() {
 			}
 		}
 		
-		if(item.toArray) {
-			item = item.toArray();
+		if (item.toJSON) {
+			item = item.toJSON();
 		}
 		
 		// find pmid
@@ -205,7 +205,7 @@ Zotero.OpenURL = new function() {
 		
 		if(item.creators && item.creators.length) {
 			// encode first author as first and last
-			var firstCreator = item.creators[0];
+			let firstCreator = Zotero.Items.getFirstCreatorFromJSON(item);
 			if(item.itemType == "patent") {
 				_mapTag(firstCreator.firstName, "invfirst");
 				_mapTag(firstCreator.lastName, "invlast");
@@ -245,7 +245,7 @@ Zotero.OpenURL = new function() {
 	}
 
 	function _cloneIfNecessary(obj1, obj2) {
-		if(Zotero.isFx && !Zotero.isBookmarklet && Zotero.platformMajorVersion >= 32) {
+		if (Zotero.isFx && !Zotero.isBookmarklet) {
 			return Components.utils.cloneInto(obj1, obj2);
 		}
 		return obj1;
@@ -438,7 +438,10 @@ Zotero.OpenURL = new function() {
 				} else if(key == "rft.appldate") {
 					item.date = value;
 				}
-			} else if(format == "info:ofi/fmt:kev:mtx:dc") {
+			} else {
+				// The following keys are technically only valid in Dublin Core
+				// (i.e., format == "info:ofi/fmt:kev:mtx:dc") but in practice
+				// 'format' is not always set
 				if(key == "rft.identifier") {
 					if(value.length > 8) {	// we could check length separately for
 											// each type, but all of these identifiers

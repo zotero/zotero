@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "Cerrar">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Importar...">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Importar desde el portapapeles">
 <!ENTITY quitApplicationCmdWin.label "Salida">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Salir">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Editar">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Deshacer">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Rehacer">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Cortar">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Copiar">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Copiar cita">
 <!ENTITY copyBibliographyCmd.label "Copiar bibliografía">
-<!ENTITY pasteCmd.label "Pegar">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Borrar">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Seleccionar todo">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Preferencias">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Preferencias">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Encontrar">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "F">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Cambiar dirección de la página">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Cambiar dirección del texto">
@@ -70,7 +44,9 @@
 
 <!ENTITY toolsMenu.label "Herramientas">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY addons.label "Anexos">
+<!ENTITY installConnector.label "Instalar conector de navegador">
+<!ENTITY installConnector.accesskey "C">
+<!ENTITY addons.label "Complementos">
 
 
 <!ENTITY minimizeWindow.key "m">
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Información de resolución de problemas">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Someter a consulta...">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Notificar errores a Zotero...">
+<!ENTITY helpFeedbackPage.label "Foros de discusión">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Informa de errores...">
 <!ENTITY helpReportErrors.accesskey "R">
+
+<!ENTITY debugOutputLogging.label "Registro de resultados de depuración">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Enviar resultados">
+<!ENTITY debugOutputLogging.view "Ver resultados">
+<!ENTITY debugOutputLogging.clear "Limpiar resultados">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Reiniciar con Registro Deshabilitado...">
+
 <!ENTITY helpCheckForUpdates.label "Comprobar actualizaciones...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

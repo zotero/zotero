@@ -1,4 +1,5 @@
 <!ENTITY zotero.version "버전">
+<!ENTITY zotero.whatsNew "새로워진 점">
 <!ENTITY zotero.createdby "제작자:">
 <!ENTITY zotero.director "책임자:">
 <!ENTITY zotero.directors "책임자:">
@@ -10,4 +11,4 @@
 <!ENTITY zotero.thanks "감사드릴 분들:">
 <!ENTITY zotero.about.close "닫기">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Zotero 프로젝트에 기여한 분들">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.citationProcessing "인용 &amp; 서지 처리">

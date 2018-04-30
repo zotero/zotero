@@ -72,7 +72,7 @@ var Zotero_LocateMenu = new function() {
 		}
 		
 		if(installableLocateEngines.length) {
-			for each(var locateEngine in installableLocateEngines) {
+			for (let locateEngine of installableLocateEngines) {
 				var menuitem = document.createElement("menuitem");
 				menuitem.setAttribute("label", locateEngine.label);
 				menuitem.setAttribute("class", "menuitem-iconic");
@@ -94,8 +94,9 @@ var Zotero_LocateMenu = new function() {
 	 * Clear the bottom part of the context menu and add locate options
 	 * @param {menupopup} menu The menu to add context menu items to
 	 * @param {Boolean} showIcons Whether menu items should have associated icons
+	 * @return {Promise}
 	 */
-	this.buildContextMenu = function(menu, showIcons) {
+	this.buildContextMenu = Zotero.Promise.coroutine(function* (menu, showIcons) {
 		// get selected items
 		var selectedItems = _getSelectedItems();
 		
@@ -103,7 +104,7 @@ var Zotero_LocateMenu = new function() {
 		if(!selectedItems.length || selectedItems.length > 20) return;
 		
 		// add view options
-		_addViewOptions(menu, selectedItems, showIcons);
+		yield _addViewOptions(menu, selectedItems, showIcons);
 		
 		/*// look for locate engines
 		var availableEngines = _getAvailableLocateEngines(selectedItems);
@@ -119,7 +120,7 @@ var Zotero_LocateMenu = new function() {
 			submenu.appendChild(submenuPopup);
 			menu.appendChild(submenu);
 		}*/
-	}
+	});
 	
 	function _addViewOption(selectedItems, optionName, optionObject, showIcons) {
 		var menuitem = _createMenuItem(Zotero.getString("locate."+optionName+".label"),
@@ -143,14 +144,14 @@ var Zotero_LocateMenu = new function() {
 	 * @param {Boolean} showIcons Whether menu items should have associated icons
 	 * @param {Boolean} addExtraOptions Whether to add options that start with "_" below the separator
 	 */
-	function _addViewOptions(locateMenu, selectedItems, showIcons, addExtraOptions) {
+	var _addViewOptions = Zotero.Promise.coroutine(function* (locateMenu, selectedItems, showIcons, addExtraOptions) {
 		var optionsToShow = {};
 		
 		// check which view options are available
-		for each(var item in selectedItems) {
+		for (let item of selectedItems) {
 			for(var viewOption in ViewOptions) {
 				if(!optionsToShow[viewOption]) {
-					optionsToShow[viewOption] = ViewOptions[viewOption].canHandleItem(item);
+					optionsToShow[viewOption] = yield ViewOptions[viewOption].canHandleItem(item);
 				}
 			}
 		}
@@ -172,13 +173,13 @@ var Zotero_LocateMenu = new function() {
 		}
 		
 		if(addExtraOptions) {
-			for each(var viewOption in [key for(key in optionsToShow) if(key[0] === "_")]) {
+			for (let viewOption in optionsToShow) {
 				if(viewOption[0] !== "_" || !optionsToShow[viewOption]) continue;
 				locateMenu.insertBefore(_addViewOption(selectedItems, viewOption.substr(1),
 					ViewOptions[viewOption], showIcons), lastNode);
 			}
 		}
-	}
+	});
 	
 	/**
 	 * Get available locate engines that can handle a set of items 
@@ -192,9 +193,9 @@ var Zotero_LocateMenu = new function() {
 		var availableEngines = [];
 		
 		// check which engines can translate an item
-		for each(var engine in customEngines) {
+		for (let engine of customEngines) {
 			// require a submission for at least one selected item
-			for each(var item in selectedItems) {
+			for (let item of selectedItems) {
 				if(engine.getItemSubmission(item)) {
 					availableEngines.push(engine);
 					break;
@@ -217,7 +218,7 @@ var Zotero_LocateMenu = new function() {
 			locateFn = this.locateItem;
 		}
 		
-		for each(var engine in engines) {
+		for (let engine of engines) {
 			var menuitem = _createMenuItem(engine.name, null, engine.description);
 			menuitem.setAttribute("class", "menuitem-iconic");
 			menuitem.setAttribute("image", engine.icon);
@@ -246,7 +247,7 @@ var Zotero_LocateMenu = new function() {
 		if(!window.Zotero_Browser || !window.Zotero_Browser.tabbrowser) return locateEngines;
 		
 		var links = Zotero_Browser.tabbrowser.selectedBrowser.contentDocument.getElementsByTagName("link");
-		for each(var link in links) {
+		for (let link of links) {
 			if(!link.getAttribute) continue;
 			var rel = link.getAttribute("rel");
 			if(rel && rel === "search") {
@@ -287,7 +288,7 @@ var Zotero_LocateMenu = new function() {
 		
 		var urls = [];
 		var postDatas = [];
-		for each(var item in selectedItems) {
+		for (let item of selectedItems) {
 			var submission = selectedEngine.getItemSubmission(item);
 			if(submission) {
 				urls.push(submission.uri.spec);
@@ -343,26 +344,32 @@ var Zotero_LocateMenu = new function() {
 	ViewOptions.pdf = new function() {
 		this.icon = "chrome://zotero/skin/treeitem-attachment-pdf.png";
 		this._mimeTypes = ["application/pdf"];
-		this.canHandleItem = function(item) !!_getFirstAttachmentWithMIMEType(item, this._mimeTypes);
 		
-		this.handleItems = function(items, event) {
+		this.canHandleItem = function (item) {
+			return _getFirstAttachmentWithMIMEType(item, this._mimeTypes).then((item) => !!item);
+		}
+		
+		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
 			var attachments = [];
-			for each(var item in items) {
-				var attachment = _getFirstAttachmentWithMIMEType(item, this._mimeTypes);
+			for (let item of items) {
+				var attachment = yield _getFirstAttachmentWithMIMEType(item, this._mimeTypes);
 				if(attachment) attachments.push(attachment.id);
 			}
 			
 			ZoteroPane_Local.viewAttachment(attachments, event);
-		}
+		});
 		
-		function _getFirstAttachmentWithMIMEType(item, mimeTypes) {
-			var attachments = (item.isAttachment() ? [item] : Zotero.Items.get(item.getBestAttachments()));
-			for each(var attachment in attachments) {
-				if(mimeTypes.indexOf(attachment.attachmentMIMEType) !== -1
-					&& attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) return attachment;
+		var _getFirstAttachmentWithMIMEType = Zotero.Promise.coroutine(function* (item, mimeTypes) {
+			var attachments = item.isAttachment() ? [item] : (yield item.getBestAttachments());
+			for (let i = 0; i < attachments.length; i++) {
+				let attachment = attachments[i];
+				if (mimeTypes.indexOf(attachment.attachmentContentType) !== -1
+						&& attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) {
+					return attachment;
+				}
 			}
 			return false;
-		}
+		});
 	};
 	
 	/**
@@ -372,14 +379,16 @@ var Zotero_LocateMenu = new function() {
 	 */
 	ViewOptions.online = new function() {
 		this.icon = "chrome://zotero/skin/locate-view-online.png";
-		this.canHandleItem = function(item) _getURL(item) !== false;
 		
-		this.handleItems = function(items, event) {
-			var urls = [_getURL(item) for each(item in items)];
-			ZoteroPane_Local.loadURI([url for each(url in urls) if(url)], event);
+		this.canHandleItem = function (item) {
+			return _getURL(item).then((val) => val !== false);
 		}
+		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
+			var urls = yield Zotero.Promise.all(items.map(item => _getURL(item)));
+			ZoteroPane_Local.loadURI(urls.filter(url => !!url), event);
+		});
 		
-		function _getURL(item) {
+		var _getURL = Zotero.Promise.coroutine(function* (item) {
 			// try url field for item and for attachments
 			var urlField = item.getField('url');
 			if(urlField) {
@@ -394,7 +403,7 @@ var Zotero_LocateMenu = new function() {
 				var attachments = item.getAttachments();
 				if(attachments) {
 					// look through url fields for non-file:/// attachments
-					for each(var attachment in Zotero.Items.get(attachments)) {
+					for (let attachment of Zotero.Items.get(attachments)) {
 						var urlField = attachment.getField('url');
 						if(urlField) return urlField;
 					}
@@ -412,7 +421,7 @@ var Zotero_LocateMenu = new function() {
 			}
 			
 			return false;
-		}
+		});
 	};
 	
 	/**
@@ -436,29 +445,33 @@ var Zotero_LocateMenu = new function() {
 	 */
 	ViewOptions.file = new function() {
 		this.icon = "chrome://zotero/skin/treeitem-attachment-file.png";
-		this.canHandleItem = function(item) !!_getFile(item);
 		
-		this.handleItems = function(items, event) {
+		this.canHandleItem = function (item) {
+			return _getFile(item).then((item) => !!item);
+		}
+		
+		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
 			var attachments = [];
-			for each(var item in items) {
-				var attachment = _getFile(item);
+			for (let item of items) {
+				var attachment = yield _getFile(item);
 				if(attachment) attachments.push(attachment.id);
 			}
 			
 			ZoteroPane_Local.viewAttachment(attachments, event);
-		}
+		});
 		
-		function _getFile(item) {
-			var attachments = (item.isAttachment() ? [item] : Zotero.Items.get(item.getBestAttachments()));
-			for each(var attachment in attachments) {
-				if(!ViewOptions.snapshot.canHandleItem(attachment)
-						&& !ViewOptions.pdf.canHandleItem(attachment)
+		var _getFile = Zotero.Promise.coroutine(function* (item) {
+			var attachments = item.isAttachment() ? [item] : (yield item.getBestAttachments());
+			for (let i = 0; i < attachments.length; i++) {
+				let attachment = attachments[i];
+				if (!(yield ViewOptions.snapshot.canHandleItem(attachment))
+						&& !(yield ViewOptions.pdf.canHandleItem(attachment))
 						&& attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) {
 					return attachment;
 				}
 			}
 			return false;
-		}
+		});
 	};
 	
 	/**
@@ -471,31 +484,32 @@ var Zotero_LocateMenu = new function() {
 		this.icon = "chrome://zotero/skin/locate-external-viewer.png";
 		this.useExternalViewer = true;
 		
-		this.canHandleItem = function(item) {
+		this.canHandleItem = Zotero.Promise.coroutine(function* (item) {
 			return (this.useExternalViewer ^ Zotero.Prefs.get('launchNonNativeFiles'))
-				&& _getBestNonNativeAttachment(item);
-		}
+				&& (yield _getBestNonNativeAttachment(item));
+		});
 		
-		this.handleItems = function(items, event) {
+		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
 			var attachments = [];
-			for each(var item in items) {
-				var attachment = _getBestNonNativeAttachment(item);
+			for (let item of items) {
+				var attachment = yield _getBestNonNativeAttachment(item);
 				if(attachment) attachments.push(attachment.id);
 			}
 			
 			ZoteroPane_Local.viewAttachment(attachments, event, false, this.useExternalViewer);
-		}
+		});
 		
-		function _getBestNonNativeAttachment(item) {
-			var attachments = (item.isAttachment() ? [item] : Zotero.Items.get(item.getBestAttachments()));
-			for each(var attachment in attachments) {
+		var _getBestNonNativeAttachment = Zotero.Promise.coroutine(function* (item) {
+			var attachments = item.isAttachment() ? [item] : (yield item.getBestAttachments());
+			for (let i = 0; i < attachments.length; i++) {
+				let attachment = attachments[i];
 				if(attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) {
-					var file = attachment.getFile();
-					if(file) {
-						var ext = Zotero.File.getExtension(file);
-						if(!attachment.attachmentMIMEType || 
-							Zotero.MIME.hasNativeHandler(attachment.attachmentMIMEType, ext) ||
-							!Zotero.MIME.hasInternalHandler(attachment.attachmentMIMEType, ext)) {
+					var path = yield attachment.getFilePathAsync();
+					if (path) {
+						var ext = Zotero.File.getExtension(Zotero.File.pathToFile(path));
+						if(!attachment.attachmentContentType ||
+							Zotero.MIME.hasNativeHandler(attachment.attachmentContentType, ext) ||
+							!Zotero.MIME.hasInternalHandler(attachment.attachmentContentType, ext)) {
 							return false;
 						}
 						return attachment;
@@ -503,7 +517,7 @@ var Zotero_LocateMenu = new function() {
 				}
 			}
 			return false;
-		}
+		});
 	};
 	
 	/**
@@ -529,27 +543,27 @@ var Zotero_LocateMenu = new function() {
 		this.icon = "chrome://zotero/skin/locate-show-file.png";
 		this.useExternalViewer = true;
 		
-		this.canHandleItem = function(item) {
-			return !!_getBestFile(item);
+		this.canHandleItem = function (item) {
+			return _getBestFile(item).then(item => !!item);
 		}
 		
-		this.handleItems = function(items, event) {
-			for each(var item in items) {
-				var attachment = _getBestFile(item);
+		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
+			for (let item of items) {
+				var attachment = yield _getBestFile(item);
 				if(attachment) {
 					ZoteroPane_Local.showAttachmentInFilesystem(attachment.id);
 				}
 			}
-		}
+		});
 		
-		function _getBestFile(item) {
+		var _getBestFile = Zotero.Promise.coroutine(function* (item) {
 			if(item.isAttachment()) {
 				if(item.attachmentLinkMode === Zotero.Attachments.LINK_MODE_LINKED_URL) return false;
 				return item;
 			} else {
-				return Zotero.Items.get(item.getBestAttachment());
+				return yield item.getBestAttachment();
 			}
-		}
+		});
 	};
 	
 	/**
@@ -559,15 +573,15 @@ var Zotero_LocateMenu = new function() {
 	 */
 	ViewOptions._libraryLookup = new function() {
 		this.icon = "chrome://zotero/skin/locate-library-lookup.png";
-		this.canHandleItem = function(item) item.isRegularItem();
-		this.handleItems = function(items, event) {
+		this.canHandleItem = function (item) { return Zotero.Promise.resolve(item.isRegularItem()); };
+		this.handleItems = Zotero.Promise.method(function (items, event) {
 			var urls = [];
-			for each(var item in items) {
+			for (let item of items) {
 				if(!item.isRegularItem()) continue;
 				var url = Zotero.OpenURL.resolve(item);
 				if(url) urls.push(url);
 			}
 			ZoteroPane_Local.loadURI(urls, event);
-		}
+		});
 	};
 }

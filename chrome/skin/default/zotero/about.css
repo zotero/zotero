@@ -11,6 +11,15 @@ dialog
 	padding: 10px;
 }
 
+#column1 {
+	width: 23em;
+	padding-right: 2em;
+}
+
+#column2 {
+	margin-right: 1em;
+}
+
 #name
 {
 	font-size: large;
@@ -21,6 +30,13 @@ dialog
 {
 	color: gray;
 	margin-bottom: 5px;
+	-moz-user-select: text;
+	-moz-user-focus: normal;
+	cursor: text;
+}
+
+#changelog {
+	border: 0;
 }
 
 .subhead
@@ -35,21 +51,30 @@ dialog
 	margin-bottom: 5px;
 }
 
-#zotero-translators-list {
-	margin: .3em 0;
-	height: 9em;
-	overflow: -moz-scrollbars-vertical;
+#about-text {
+	margin-top: .7em;
+	margin-bottom: .7em;
 }
 
-#zotero-translators-list label.locale {
-	font-weight: bold;
-	margin-top: .5em;
+#about-text > p {
+	margin-left: .5em;
+	line-height: 1.4em;
 }
 
-#zotero-translators-list label.locale:first-child {
-	margin-top: 0;
+span.text-link {
+	cursor: pointer;
+	color: -moz-nativehyperlinktext;
 }
 
-#zotero-translators-list label:not(.locale) {
-	margin-left: 1.25em;
+span.text-link:hover {
+	text-decoration: underline;
+}
+
+/* Remove default underline from XUL links */
+label.zotero-text-link {
+	text-decoration: none;
+}
+
+label.zotero-text-link:hover {
+	text-decoration: underline;
 }

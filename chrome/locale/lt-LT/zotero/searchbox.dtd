@@ -13,8 +13,8 @@
 
 <!ENTITY zotero.search.textModes.phrase "Frazė">
 <!ENTITY zotero.search.textModes.phraseBinary "Frazė (įsk. skaitmeninius failus)">
-<!ENTITY zotero.search.textModes.regexp "Regexp">
-<!ENTITY zotero.search.textModes.regexpCS "Regexp (skiriant didž. ir maž. raides)">
+<!ENTITY zotero.search.textModes.regexp "Reguliarusis reiškinys">
+<!ENTITY zotero.search.textModes.regexpCS "Reguliarusis reiškinys (skiriant didž. ir maž. raides)">
 
 <!ENTITY zotero.search.date.units.days "d.">
 <!ENTITY zotero.search.date.units.months "mėn.">

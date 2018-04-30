@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "Sluiten">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "S">
+<!ENTITY importCmd.label "Importeren...">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Importeren van klembord">
 <!ENTITY quitApplicationCmdWin.label "Afsluiten">
 <!ENTITY quitApplicationCmdWin.accesskey "A">
 <!ENTITY quitApplicationCmd.label "Afsluiten">
 <!ENTITY quitApplicationCmd.accesskey "A">
 
 
-<!ENTITY editMenu.label "Bewerken">
-<!ENTITY editMenu.accesskey "e">
-<!ENTITY undoCmd.label "Ongedaan maken">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "O">
-<!ENTITY redoCmd.label "Opnieuw uitvoeren">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "u">
-<!ENTITY cutCmd.label "Knippen">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "n">
-<!ENTITY copyCmd.label "Kopiëren">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "K">
 <!ENTITY copyCitationCmd.label "Verwijzing kopiëren">
 <!ENTITY copyBibliographyCmd.label "Bibliografie kopiëren">
-<!ENTITY pasteCmd.label "Plakken">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Wissen">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "W">
-<!ENTITY selectAllCmd.label "Alles selecteren">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Voorkeuren">
-<!ENTITY preferencesCmd.accesskey "V">
-<!ENTITY preferencesCmdUnix.label "Voorkeuren">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Zoeken">
-<!ENTITY findCmd.accesskey "Z">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Paginarichting wijzigen">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Tekstrichting wijzigen">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Opties">
 <!ENTITY toolsMenu.accesskey "O">
+<!ENTITY installConnector.label "Installeer Browser Connector">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Add-ons">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Probleemoplossingsinformatie">
 <!ENTITY helpTroubleshootingInfo.accesskey "P">
-<!ENTITY helpFeedbackPage.label "Feedback versturen…">
-<!ENTITY helpFeedbackPage.accesskey "v">
-<!ENTITY helpReportErrors.label "Foutrapportage opsturen…">
+<!ENTITY helpFeedbackPage.label "Discussieforums">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Fouten rapporteren…">
 <!ENTITY helpReportErrors.accesskey "F">
+
+<!ENTITY debugOutputLogging.label "Foutopsporingsberichten bewaren">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Uitvoer versturen">
+<!ENTITY debugOutputLogging.view "Uitvoer bekijken">
+<!ENTITY debugOutputLogging.clear "Uitvoer wissen">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+
 <!ENTITY helpCheckForUpdates.label "Controleren op updates…">
 <!ENTITY helpCheckForUpdates.accesskey "u">

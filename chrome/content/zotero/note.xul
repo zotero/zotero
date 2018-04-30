@@ -15,7 +15,6 @@
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 	<script src="include.js"/>
-	<script src="itemPane.js"/>
 	<script src="note.js"/>
 
 	<keyset>
@@ -23,5 +22,5 @@
 	</keyset>
 	<command id="cmd_close" oncommand="window.close();"/>
 	
-	<zoteronoteeditor id="zotero-note-editor" flex="1"/>
+	<zoteronoteeditor id="zotero-note-editor" flex="1" onerror="onError()"/>
 </window>

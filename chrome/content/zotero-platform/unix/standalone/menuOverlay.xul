@@ -33,10 +33,9 @@
 
 
 <!DOCTYPE overlay [
-<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd">
-%brandDTD;
-<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" >
-%standaloneDTD;
+	<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd"> %brandDTD;
+	<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd"> %standaloneDTD;
+	<!ENTITY % browserDTD SYSTEM "chrome://zotero/locale/mozilla/browser.dtd"> %browserDTD;
 ]>
 <overlay id="menuOverlay"
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -51,7 +50,8 @@
     <menupopup id="menu_EditPopup">
 		<menuseparator/>
         <menuitem id="menu_preferences"
-				label="&preferencesCmd.label;"
-				oncommand="ZoteroPane.openPreferences();"/>
+				label="&preferencesCmdUnix.label;"
+				accesskey="&preferencesCmdUnix.accesskey;"
+				oncommand="Zotero.Utilities.Internal.openPreferences();"/>
     </menupopup>
 </overlay>

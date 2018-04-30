@@ -191,13 +191,23 @@ Zotero.Utilities.Translate.prototype.loadDocument = function(url, succeeded, fai
 }
 
 /**
- * Already documented in Zotero.HTTP
+ * Already documented in Zotero.HTTP, except this optionally takes noCompleteOnError, which prevents
+ * the translation process from being cancelled automatically on error, as it is normally. The promise
+ * is still rejected on error for handling by the calling function.
  * @ignore
  */
-Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor, done, exception) {
+Zotero.Utilities.Translate.prototype.processDocuments = async function (urls, processor, noCompleteOnError) {
+	// Handle old signature: urls, processor, onDone, onError
+	if (arguments.length > 3 || typeof arguments[2] == 'function') {
+		Zotero.debug("ZU.processDocuments() now takes only 3 arguments -- update your code");
+		var onDone = arguments[2];
+		var onError = arguments[3];
+		noCompleteOnError = false;
+	}
+	
 	var translate = this._translate;
 
-	if(typeof(urls) == "string") {
+	if (typeof urls == "string") {
 		urls = [translate.resolveURL(urls)];
 	} else {
 		for(var i in urls) {
@@ -205,90 +215,89 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 		}
 	}
 	
-	// Unless the translator has proposed some way to handle an error, handle it
-	// by throwing a "scraping error" message
-	if(exception) {
-		var myException = function(e) {
-			var browserDeleted;
-			try {
-				exception(e);
-			} catch(e) {
-				if(hiddenBrowser) {
-					try {
-						Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-					} catch(e) {}
-				}
-				browserDeleted = true;
-				translate.complete(false, e);
-			}
-			
-			if(!browserDeleted) {
-				try {
-					Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-				} catch(e) {}
-			}
+	var processDoc = function (doc) {
+		if (Zotero.isFx) {
+			let newLoc = doc.location;
+			let url = Services.io.newURI(newLoc.href, null, null);
+			return processor(
+				// Rewrap document for the sandbox
+				translate._sandboxManager.wrap(
+					Zotero.Translate.DOMWrapper.unwrap(doc),
+					null,
+					// Duplicate overrides from Zotero.HTTP.wrapDocument()
+					{
+						documentURI: newLoc.spec,
+						URL: newLoc.spec,
+						location: new Zotero.HTTP.Location(url),
+						defaultView: new Zotero.HTTP.Window(url)
+					}
+				),
+				newLoc.href
+			);
 		}
-	} else {
-		var myException = function(e) {
-			if(hiddenBrowser) {
-				try {
-					Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-				} catch(e) {}
-			}
-			translate.complete(false, e);
-		}
-	}
+		
+		return processor(doc, doc.location.href);
+	};
 	
-	if(Zotero.isFx) {
-		if(typeof translate._sandboxLocation === "object") {
-			var protocol = translate._sandboxLocation.location.protocol,
-				host = translate._sandboxLocation.location.host;
-        } else {
-			var url = Components.classes["@mozilla.org/network/io-service;1"] 
-					.getService(Components.interfaces.nsIIOService)
-					.newURI(translate._sandboxLocation, null, null),
-				protocol = url.scheme+":",
-				host = url.host;
-		}
-	}
-	
-	for(var i=0; i<urls.length; i++) {
-		if(this._translate.document && this._translate.document.location
-				&& this._translate.document.location.toString() === urls[i]) {
-			// Document is attempting to reload itself
+	var funcs = [];
+	// If current URL passed, use loaded document instead of reloading
+	for (var i = 0; i < urls.length; i++) {
+		if(translate.document && translate.document.location
+				&& translate.document.location.toString() === urls[i]) {
 			Zotero.debug("Translate: Attempted to load the current document using processDocuments; using loaded document instead");
-			processor(this._translate.document, urls[i]);
+			funcs.push(() => processDoc(this._translate.document, urls[i]));
 			urls.splice(i, 1);
 			i--;
 		}
 	}
 	
 	translate.incrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
-	var hiddenBrowser = Zotero.HTTP.processDocuments(urls, function(doc) {
-		if(!processor) return;
-		
-		var newLoc = doc.location;
-		if(Zotero.isFx && !Zotero.isBookmarklet && (protocol != newLoc.protocol || host != newLoc.host)) {
-			// Cross-site; need to wrap
-			processor(translate._sandboxManager.wrap(doc), newLoc.toString());
-		} else {
-			// Not cross-site; no need to wrap
-			processor(doc, newLoc.toString());
-		}
-	},
-	function() {
-		if(done) done();
-		var handler = function() {
-			if(hiddenBrowser) {
-				try {
-					Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-				} catch(e) {}
+	
+	if (urls.length) {
+		funcs.push(
+			() => Zotero.HTTP.processDocuments(
+				urls,
+				function (doc) {
+					if (!processor) return;
+					return processDoc(doc);
+				},
+				translate.cookieSandbox
+			)
+		);
+	}
+	
+	var f;
+	while (f = funcs.shift()) {
+		try {
+			let maybePromise = f();
+			// The processor may or may not return a promise
+			if (maybePromise) {
+				await maybePromise;
 			}
-			translate.removeHandler("done", handler);
-		};
-		translate.setHandler("done", handler);
-		translate.decrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
-	}, myException, true, translate.cookieSandbox);
+		}
+		catch (e) {
+			if (onError) {
+				try {
+					onError(e);
+				}
+				catch (e) {
+					translate.complete(false, e);
+				}
+			}
+			// Unless instructed otherwise, end the translation on error
+			else if (!noCompleteOnError) {
+				translate.complete(false, e);
+			}
+			throw e;
+		}
+	}
+	
+	// Deprecated
+	if (onDone) {
+		onDone();
+	}
+	
+	translate.decrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
 }
 
 /**
@@ -298,9 +307,10 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 * @param {Function} processor Callback to be executed for each document loaded
 * @param {Function} done Callback to be executed after all documents have been loaded
 * @param {String} responseCharset Character set to force on the response
+* @param {Object} requestHeaders HTTP headers to include with request
 * @return {Boolean} True if the request was sent, or false if the browser is offline
 */
-Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, responseCharset) {
+Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, responseCharset, requestHeaders) {
 	var callAgain = false,
 		me = this,
 		translate = this._translate;
@@ -332,7 +342,7 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 		} catch(e) {
 			translate.complete(false, e);
 		}
-	}, responseCharset, this._translate.cookieSandbox);
+	}, responseCharset, this._translate.cookieSandbox, requestHeaders);
 }
 
 /**
@@ -353,6 +363,18 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
 		}
 	}, headers, responseCharset, translate.cookieSandbox ? translate.cookieSandbox : undefined);
 }
+
+Zotero.Utilities.Translate.prototype.urlToProxy = function(url) {
+	var proxy = this._translate._proxy;
+	if (proxy) return proxy.toProxy(url);
+	return url;
+};
+
+Zotero.Utilities.Translate.prototype.urlToProper = function(url) {
+	var proxy = this._translate._proxy;
+	if (proxy) return proxy.toProper(url);
+	return url;
+};
 
 Zotero.Utilities.Translate.prototype.__exposedProps__ = {"HTTP":"r"};
 for(var j in Zotero.Utilities.Translate.prototype) {

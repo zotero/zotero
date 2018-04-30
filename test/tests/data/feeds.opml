@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<opml version="1.0">
+    <head>
+        <title>An OPML file with a list of rss/atom feeds</title>
+        <docs>The OPML format is fairly poorly spec'ed out here http://dev.opml.org/spec2.html</docs>
+    </head>
+    <body>
+        <outline text="Standard format">
+            <outline type="rss" text="A title 1" title="A title 1" xmlUrl="http://example.com/feed1.rss"/>
+            <outline type="rss" text="A title 2" title="A title 2" xmlUrl="http://example.com/feed2.rss"/>
+        </outline>
+        <outline text="Non-standard format">
+            <outline type="rss" text="A title 3" title="A title 3" url="http://example.com/feed3.rss"/>
+            <outline type="rss" text="A title 4" title="A title 4" url="http://example.com/feed4.rss"/>
+        </outline>
+    </body>
+</opml>

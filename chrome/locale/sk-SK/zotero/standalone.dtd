@@ -1,4 +1,4 @@
-<!ENTITY preferencesCmdMac.label "Predvoľby...">
+<!ENTITY preferencesCmdMac.label "Možnosti...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Služby">
 <!ENTITY hideThisAppCmdMac.label "Skryť &brandShortName;">
@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "Zatvoriť">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Importovať...">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Importovať zo schránky">
 <!ENTITY quitApplicationCmdWin.label "Zavrieť">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Zavrieť">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Upraviť">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Krok späť">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Krok vpred">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Vystrihnúť">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Kopírovať">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Kopírovať citáciu">
 <!ENTITY copyBibliographyCmd.label "Kopírovať bibliografiu">
-<!ENTITY pasteCmd.label "Vložiť">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Zmazať">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Vybrať všetko">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Predvoľby">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Nastavenia">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Hľadať">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Prepnúť smer stránky">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Prepnúť smer textu">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Nástroje">
 <!ENTITY toolsMenu.accesskey "T">
+<!ENTITY installConnector.label "Nainštalovať konektor prehliadača">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Doplnky">
 
 
@@ -87,15 +63,24 @@
 <!ENTITY helpMenuWin.label "Pomoc">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "O &brandShortName;">
+<!ENTITY aboutProduct.label "O Zotere">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "Podpora a dokumentácia">
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Informácie o riešení problémov">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Poslať odozvu...">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Nahlásiť chyby do Zotera…">
+<!ENTITY helpFeedbackPage.label "Diskusné fóra">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Nahlásiť chyby...">
 <!ENTITY helpReportErrors.accesskey "R">
-<!ENTITY helpCheckForUpdates.label "Overiť aktualizácie...">
+
+<!ENTITY debugOutputLogging.label "Záznam protokolu ladenia chýb">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Odoslať protokol">
+<!ENTITY debugOutputLogging.view "Zobraziť protokol">
+<!ENTITY debugOutputLogging.clear "Vymazať protokol">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Reštartovať a povoliť záznam...">
+
+<!ENTITY helpCheckForUpdates.label "Hľadať aktualizácie...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

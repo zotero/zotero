@@ -24,32 +24,27 @@
 */
 
 
-Zotero.Timeline = new function () {
-	this.generateXMLDetails = generateXMLDetails;
-	this.generateXMLList = generateXMLList;
-
-	function generateXMLDetails(items, dateType) {
+Zotero.Timeline = {
+	generateXMLDetails: function* (items, dateType) {
 		var escapeXML = Zotero.Utilities.htmlSpecialChars;
 		
-		var content = '<data>\n';
-		for each(var item in items) {
+		yield '<data>\n';
+		for (let i=0; i<items.length; i++) {
+			let item = items[i];
 			var date = item.getField(dateType, true, true);
 			if (date) {
-				var sqlDate = (dateType == 'date') ? Zotero.Date.multipartToSQL(date) : date;
-				sqlDate = sqlDate.replace("00-00", "01-01");
-				content += '<event start="' + Zotero.Date.sqlToDate(sqlDate) + '" ';
-				var title = item.getField('title');
-				content += 'title=" ' + (title ? escapeXML(title) : '') + '" ';
+				let sqlDate = (dateType == 'date') ? Zotero.Date.multipartToSQL(date) : date;
+				sqlDate = sqlDate.replace("-00-", "-01-").replace(/-00$/, "-01");
+				let content = '<event start="' + Zotero.Date.sqlToDate(sqlDate) + '" ';
+				let title = item.getField('title');
+				content += 'title="' + (title ? escapeXML(title) : '') + '" ';
 				content += 'icon="' + item.getImageSrc() + '" ';			
 				content += 'color="black">';
 				content += item.id;
 				content += '</event>\n';
+				yield content;
 			}
 		}
-		content += '</data>';
-		return content;
+		yield '</data>';
 	}
-	
-	function generateXMLList(items) {
-	}
-}
+};

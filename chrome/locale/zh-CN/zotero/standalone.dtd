@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "关闭">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "导入…">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "从剪贴板导入">
 <!ENTITY quitApplicationCmdWin.label "退出">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "退出">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "编辑">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "撤销">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "恢复">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "剪切">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "复制">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "复制引文">
 <!ENTITY copyBibliographyCmd.label "复制引文目录">
-<!ENTITY pasteCmd.label "粘贴">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "删除">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "全选">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "首选项">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "首选项">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "查找">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "切换页面方向">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "切换文字方向">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "工具">
 <!ENTITY toolsMenu.accesskey "T">
+<!ENTITY installConnector.label "安装浏览器插件">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "插件">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "故障排除信息">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "提交反馈…">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "向 Zotero 报告错误…">
+<!ENTITY helpFeedbackPage.label "论坛">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "报告错误…">
 <!ENTITY helpReportErrors.accesskey "R">
+
+<!ENTITY debugOutputLogging.label "输出日志排错">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "提交输出文件">
+<!ENTITY debugOutputLogging.view "查看输出文件">
+<!ENTITY debugOutputLogging.clear "清除输出文件">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "重新启动时启用登录">
+
 <!ENTITY helpCheckForUpdates.label "检查更新…">
 <!ENTITY helpCheckForUpdates.accesskey "U">

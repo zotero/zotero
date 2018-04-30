@@ -30,3 +30,9 @@ textbox
 	margin: -1px 5px -1px 0;
 	padding: 0;
 }
+
+
+/* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
+@media (min-resolution: 1.25dppx) {
+	.creator-type-label > image  { list-style-image: url('chrome://zotero/skin/mac/arrow-down@2x.png'); }
+}

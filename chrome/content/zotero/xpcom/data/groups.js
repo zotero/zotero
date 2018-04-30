@@ -25,60 +25,122 @@
 
 
 Zotero.Groups = new function () {
-	this.__defineGetter__('addGroupURL', function () ZOTERO_CONFIG.WWW_BASE_URL + 'groups/new/');
+	Zotero.defineProperty(this, 'addGroupURL', {
+		value: ZOTERO_CONFIG.WWW_BASE_URL + 'groups/new/'
+	});
 	
+	this._cache = null;
+	
+	this._makeCache = function() {
+		return {
+			groupIDByLibraryID: {},
+			libraryIDByGroupID: {}
+		};
+	}
+	
+	this.register = function (group) {
+		if (!this._cache) throw new Error("Zotero.Groups cache is not initialized");
+		Zotero.debug("Registering group " + group.id + " (" + group.libraryID + ")", 5);
+		this._addToCache(this._cache, group);
+	}
+	
+	this._addToCache = function (cache, group) {
+		cache.libraryIDByGroupID[group.id] = group.libraryID;
+		cache.groupIDByLibraryID[group.libraryID] = group.id;
+	}
+	
+	this.unregister = function (groupID) {
+		if (!this._cache) throw new Error("Zotero.Groups cache is not initialized");
+		let libraryID = this._cache.libraryIDByGroupID[groupID];
+		Zotero.debug("Unregistering group " + groupID + " (" + libraryID + ")", 5);
+		delete this._cache.groupIDByLibraryID[libraryID];
+		delete this._cache.libraryIDByGroupID[groupID];
+	}
+	
+	this.init = Zotero.Promise.method(function() {
+		// Cache initialized in Zotero.Libraries
+	})
+	
+	/**
+	 * @param {Integer} id - Group id
+	 * @return {Zotero.Group}
+	 */
 	this.get = function (id) {
-		if (!id) {
-			throw ("groupID not provided in Zotero.Groups.get()");
-		}
-		var group = new Zotero.Group;
-		group.id = id;
-		if (!group.exists()) {
-			return false;
-		}
-		return group;
+		return Zotero.Libraries.get(this.getLibraryIDFromGroupID(id));
 	}
 	
 	
+	/**
+	 * Get all groups, sorted by name
+	 *
+	 * @return {Zotero.Group[]}
+	 */
 	this.getAll = function () {
-		var groups = [];
-		var sql = "SELECT groupID FROM groups ORDER BY name COLLATE locale";
-		var groupIDs = Zotero.DB.columnQuery(sql);
-		if (!groupIDs) {
-			return groups;
-		}
-		for each(var groupID in groupIDs) {
-			var group = this.get(groupID);
-			groups.push(group);
-		}
+		if (!this._cache) throw new Error("Zotero.Groups cache is not initialized");
+		
+		var groups = Object.keys(this._cache.groupIDByLibraryID)
+			.map(id => Zotero.Libraries.get(id));
+		var collation = Zotero.getLocaleCollation();
+		groups.sort(function(a, b) {
+			return collation.compareString(1, a.name, b.name);
+		});
 		return groups;
 	}
 	
 	
 	this.getByLibraryID = function (libraryID) {
-		var groupID = this.getGroupIDFromLibraryID(libraryID);
-		return this.get(groupID);
+		return Zotero.Libraries.get(libraryID);
+	}
+	
+	
+	this.exists = function (groupID) {
+		if (!this._cache) throw new Error("Zotero.Groups cache is not initialized");
+		
+		return !!this._cache.libraryIDByGroupID[groupID];
 	}
 	
 	
 	this.getGroupIDFromLibraryID = function (libraryID) {
-		var sql = "SELECT groupID FROM groups WHERE libraryID=?";
-		var groupID = Zotero.DB.valueQuery(sql, libraryID);
+		if (!this._cache) throw new Error("Zotero.Groups cache is not initialized");
+		
+		var groupID = this._cache.groupIDByLibraryID[libraryID];
 		if (!groupID) {
-			throw ("Group with libraryID " + libraryID + " does not exist "
-					+ "in Zotero.Groups.getGroupIDFromLibraryID()");
+			throw new Error("Group with libraryID " + libraryID + " does not exist");
 		}
 		return groupID;
 	}
 	
 	
 	this.getLibraryIDFromGroupID = function (groupID) {
-		var sql = "SELECT libraryID FROM groups WHERE groupID=?";
-		var libraryID = Zotero.DB.valueQuery(sql, groupID);
-		if (!libraryID) {
-			throw ("Group with groupID " + groupID + " does not exist "
-					+ "in Zotero.Groups.getLibraryIDFromGroupID()");
-		}
-		return libraryID;
+		if (!this._cache) throw new Error("Zotero.Groups cache is not initialized");
+		
+		return this._cache.libraryIDByGroupID[groupID] || false;
 	}
+	
+	
+	this.getPermissionsFromJSON = function (json, userID) {
+		if (!json.owner) throw new Error("Invalid JSON provided for group data");
+		if (!userID) throw new Error("userID not provided");
+		
+		var editable = false;
+		var filesEditable = false;
+		// If user is owner or admin, make library editable, and make files editable unless they're
+		// disabled altogether
+		if (json.owner == userID || (json.admins && json.admins.indexOf(userID) != -1)) {
+			editable = true;
+			if (json.fileEditing != 'none') {
+				filesEditable = true;
+			}
+		}
+		// If user is member, make library and files editable if they're editable by all members
+		else if (json.members && json.members.indexOf(userID) != -1) {
+			if (json.libraryEditing == 'members') {
+				editable = true;
+				if (json.fileEditing == 'members') {
+					filesEditable = true;
+				}
+			}
+		}
+		return { editable, filesEditable };
+	};
 }

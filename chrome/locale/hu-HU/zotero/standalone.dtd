@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "Bezárás">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "B">
+<!ENTITY importCmd.label "Importálás...">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Importálás Vágólapról">
 <!ENTITY quitApplicationCmdWin.label "Kilépés">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Bezárás">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Szerkesztés">
-<!ENTITY editMenu.accesskey "S">
-<!ENTITY undoCmd.label "Visszavonás">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "F">
-<!ENTITY redoCmd.label "Mégis">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Kivágás">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Másolás">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Hivatkozás másolása">
 <!ENTITY copyBibliographyCmd.label "Bibliográfia másolása">
-<!ENTITY pasteCmd.label "Beillesztés">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Törlés">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Mindet kijelöli">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Beállítások">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Beállítások">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Keresés">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Oldal irányának megfordítása">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Szöveg irányának megfordítása">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Eszközök">
 <!ENTITY toolsMenu.accesskey "E">
+<!ENTITY installConnector.label "Böngészőmodul telepítése">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Kiegészítők">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Hibaelhárítás">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Visszajelzés küldése…">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Hiba jelentése a Zotero-nak…">
+<!ENTITY helpFeedbackPage.label "Vitafórum">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label " Hibák jelentése...">
 <!ENTITY helpReportErrors.accesskey "R">
+
+<!ENTITY debugOutputLogging.label " Hibakeresés a naplófájlban">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Kimenet elküldése">
+<!ENTITY debugOutputLogging.view " Kimenet megtekintése">
+<!ENTITY debugOutputLogging.clear " Output törlése">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+
 <!ENTITY helpCheckForUpdates.label "Frissítések keresése…">
 <!ENTITY helpCheckForUpdates.accesskey "F">

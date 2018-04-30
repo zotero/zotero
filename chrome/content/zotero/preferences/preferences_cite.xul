@@ -23,7 +23,12 @@
     
     ***** END LICENSE BLOCK *****
 -->
-<!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
+<!DOCTYPE window [
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd">
+	%zoteroDTD;
+	<!ENTITY % preferencesDTD SYSTEM "chrome://zotero/locale/preferences.dtd">
+	%preferencesDTD;
+]>
 
 <overlay id="zotero-prefpane-cite-overlay"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -39,17 +44,10 @@
 		
 		<tabbox>
 			<tabs>
-				<tab label="&zotero.preferences.cite.wordProcessors;"/>
-				<tab label="&zotero.preferences.cite.styles;"/>
+				<tab id="styles-tab" label="&zotero.preferences.cite.styles;"/>
+				<tab id="wordProcessors-tab" label="&zotero.preferences.cite.wordProcessors;"/>
 			</tabs>
 			<tabpanels>
-				<tabpanel orient="vertical" id="wordProcessors">
-					<label id="wordProcessors-noWordProcessorPluginsInstalled" width="45em" hidden="true">
-							&zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled;
-					</label>
-					<checkbox label="&zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog;" preference="pref-cite-useClassicAddCitationDialog"/>
-					<label id="wordProcessors-getWordProcessorPlugins" class="zotero-text-link" href="&zotero.preferences.cite.wordProcessors.getPlugins.url;" value="&zotero.preferences.cite.wordProcessors.getPlugins;"/>
-				</tabpanel>
 				<tabpanel orient="vertical" id="styles">
 					<groupbox flex="1">
 						<caption label="&zotero.preferences.cite.styles.styleManager;"/>
@@ -65,9 +63,12 @@
 						</tree>
 						<separator class="thin"/>
 						<hbox align="center" flex="1" height="40">
-							<label class="zotero-text-link" href="http://www.zotero.org/styles/" value="&zotero.preferences.export.getAdditionalStyles;" flex="1"/>
-							<button disabled="true" id="styleManager-delete" label="-" onclick="Zotero_Preferences.Cite.deleteStyle()"/>
-							<button label="+" onclick="Zotero_Preferences.Cite.addStyle()"/>
+							<label class="zotero-text-link"
+									value="&zotero.preferences.export.getAdditionalStyles;" flex="1"
+									onclick="Zotero_Preferences.Cite.openStylesPage(); event.preventDefault()"/>
+							<button disabled="true" id="styleManager-delete" label="-"
+								oncommand="Zotero_Preferences.Cite.deleteStyle()"/>
+							<button label="+" oncommand="Zotero_Preferences.Cite.addStyle()"/>
 						</hbox>
 					</groupbox>
 					
@@ -80,6 +81,30 @@
 							&zotero.preferences.export.citePaperJournalArticleURL.description;
 						</label>
 					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.general.tools;"/>
+						
+						<hbox>
+							<button id="openCSLEdit"
+								label="&zotero.preferences.styleEditor;"
+								oncommand="Zotero_Preferences.openInViewer('chrome://zotero/content/tools/csledit.xul', true)"/>
+							<button id="openCSLPreview"
+								label="&zotero.preferences.stylePreview;"
+								oncommand="Zotero_Preferences.openInViewer('chrome://zotero/content/tools/cslpreview.xul', true)"/>
+						</hbox>
+					</groupbox>
+				</tabpanel>
+				<tabpanel orient="vertical" id="wordProcessors">
+					<vbox id="wordProcessors-somePluginsDisabled" hidden="true">
+						<label style="font-weight: bold; margin-top: 1em; text-align: center">Some word processor plugins are disabled.</label>
+						<hbox pack="center" style="margin-bottom: 2em">
+							<button id="wordProcessors-enablePlugins"
+								label="Enable Plugins and Restart Zotero"
+								oncommand="Zotero_Preferences.Cite.enableWordPlugins()"/>
+						</hbox>
+					</vbox>
+					<checkbox label="&zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog;" preference="pref-cite-useClassicAddCitationDialog"/>
 				</tabpanel>
 			</tabpanels>
 		</tabbox>

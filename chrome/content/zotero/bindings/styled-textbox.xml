@@ -34,6 +34,7 @@
 			<field name="_editable"/>
 			<field name="_mode"/>
 			<field name="_format"/>
+			<field name="_changed"/>
 			<field name="_loadHandler"/>
 			<field name="_commandString"/>
 			<field name="_eventHandler"/>
@@ -49,57 +50,332 @@
 				
 				this._iframe = document.getAnonymousElementByAttribute(this, "anonid", "rt-view");
 				
-				this._rtfMap = {
-					"\\":"\\\\",
-					"<em>":"\\i ",
-					"</em>":"\\i0{}",
-					"<i>":"\\i ",
-					"</i>":"\\i0{}",
-					"<strong>":"\\b ",
-					"</strong>":"\\b0{}",
-					"<b>":"\\b ",
-					"</b>":"\\b0{}",
-					"<br />":"\x0B",
-					// there's no way to mimic a tab stop in CSS without
-					// tables, which wouldn't work here.
-					'<span class="tab">&nbsp;</span>':"\\tab{}"
-				};
+				// Atomic units, HTML -> RTF (cleanup)
+				//[/<\/p>(?!\s*$)/g, "\\par{}"],
+				//[/ /g, "&nbsp;"],
+				//[/\u00A0/g, " "],
+				this._htmlRTFmap = [
+					[/<br \/>/g, "\x0B"],
+					[/<span class=\"tab\">&nbsp;<\/span>/g, "\\tab{}"],
+					[/&lsquo;/g, "‘"],
+					[/&rsquo;/g, "’"],
+					[/&ldquo;/g, "“"],
+					[/&rdquo;/g, "”"],
+					[/&nbsp;/g, "\u00A0"],
+					[/"(\w)/g, "“$1"],
+					[/([\w,.?!])"/g, "$1”"],
+					[/<p>/g, ""],
+					[/<\/?div[^>]*>/g, ""]
+				];
 				
-				this._rtfToHtmlMap = [
+				// Atomic units, RTF -> HTML (cleanup)
+				this._rtfHTMLmap = [
 					[/\\uc0\{?\\u([0-9]+)\}?(?:{}| )?/g, function(wholeStr, aCode) { return String.fromCharCode(aCode) }],
 					[/\\tab(?:\{\}| )/g, '<span class="tab">&nbsp;</span>'],
-					[/(?:\\par{}|\\\r?\n)/g, "</p><p>"],
-					[/\\super (.*?)\\nosupersub{}/g, "<sup>$1</sup>"],
-					[/\\sub (.*?)\\nosupersub{}/g, "<sub>$1</sub>"],
-					// for backwards compatibility with Zotero < 2.1
-					["\\i0 ", "</em>"],
-					["\\b0 ", "</strong>"]
+					[/(?:\\par{}|\\\r?\n)/g, "</p><p>"]
 				];
 				
-				this._htmlToRtfMap = [
-					[/"(\w)/, "“$1"],
-					[/([\w,.?!])"/, "$1”"],
-					["<p>", ""],
-					//[/<\/p>(?!\s*$)/g, "\\par{}"],
-					[/<\/?div[^>]*>/g, ""],
-					["<sup>", "\\super "],
-					["</sup>", "\\nosupersub{}"],
-					["<sub>", "\\sub "],
-					["</sub>", "\\nosupersub{}"]
-				];
+				this.prepare = function() {
+					// DEBUG: Does this actually happen?
+					if (this.prepared) return;
+					
+					// Tag data
+					var _rexData = [
+						[
+							[
+								["<span +style=\"font-variant: *small-caps;\">"],
+								["{\\scaps ", "{\\scaps{}"]
+							],
+							[
+								["<\/span>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<span +style=\"text-decoration: *underline;\">"],
+								["{\\ul{}", "{\\ul "]
+							],
+							[
+								["<\/span>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<sup>"],
+								["\\super ", "\\super{}"]
+							],
+							[
+								["</sup>"],
+								["\\nosupersub{}", "\\nosupersub "]
+							]
+						],
+						[
+							[
+								["<sub>"],
+								["\\sub ", "\\sub{}"]
+							],
+							[
+								["</sub>"],
+								["\\nosupersub{}", "\\nosupersub "]
+							]
+						],
+						[
+							[
+								["<em>"],
+								["{\\i{}", "{\\i "]
+							],
+							[
+								["</em>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<i>"],
+								["{\\i{}", "{\\i "]
+							],
+							[
+								["</i>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<b>"],
+								["{\\b{}", "{\\b "]
+							],
+							[
+								["</b>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<strong>"],
+								["{\\b{}", "{\\b "]
+							],
+							[
+								["</strong>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<span +style=\"font-variant: *normal;\">"],
+								["{\\scaps0{}", "{\\scaps0 "]
+							],
+							[
+								["</span>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<span +style=\"font-style: *normal;\">"],
+								["{\\i0{}", "{\\i0 "]
+							],
+							[
+								["</span>"],
+								["}"]
+							]
+						],
+						[
+							[
+								["<span +style=\"font-weight: *normal;\">"],
+								["{\\b0{}", "{\\b0 "]
+							],
+							[
+								["</span>"],
+								["}"]
+							]
+						]
+					];
+					
+					function longestFirst(a, b) {
+						if (a.length < b.length) {
+							return 1;
+						} else if (a.length > b.length) {
+							return -1;
+						} else {
+							return 0;
+						}
+					}
+					
+					function normalizeRegExpString(str) {
+						if (!str) return str;
+						return str.replace(/\s+/g, " ")
+									.replace(/(?:[\+]|\s[\*])/g, "")
+									.replace(/[\']/g, '\"')
+									.replace(/:\s/g, ":");
+					}
+
+					this.normalizeRegExpString = normalizeRegExpString;
+					
+					function composeRex(rexes, noGlobal) {
+						var lst = [];
+						for (var rex in rexes) {
+							lst.push(rex);
+						}
+						lst.sort(longestFirst);
+						var rexStr = "(?:" + lst.join("|") + ")";
+						return new RegExp(rexStr, "g");
+					}
+					
+					// Create splitting regexps
+					function splitRexMaker(segment) {
+						var rexes = {};
+						for (var i=0,ilen=_rexData.length; i < ilen; i++) {
+							for (var j=0,jlen=_rexData[i].length; j < jlen; j++) {
+								for (var k=0,klen=_rexData[i][j][segment].length; k < klen; k++) {
+									rexes[_rexData[i][j][segment][k].replace("\\", "\\\\")] = true;
+								}
+							}
+						}
+						var ret = composeRex(rexes, true);
+						return ret;
+					}
+					this.rtfHTMLsplitRex = splitRexMaker(1);
+					this.htmlRTFsplitRex = splitRexMaker(0);
+					
+					// Create open-tag sniffing regexp
+					function openSniffRexMaker(segment) {
+						var rexes = {};
+						for (var i=0,ilen=_rexData.length; i < ilen; i++) {
+							for (var j=0,jlen=_rexData[i][0][segment].length; j < jlen; j++) {
+								rexes[_rexData[i][0][segment][j].replace("\\", "\\\\")] = true;
+							}
+						}
+						return composeRex(rexes);
+					}
+					this.rtfHTMLopenSniffRex = openSniffRexMaker(1);
+					this.htmlRTFopenSniffRex = openSniffRexMaker(0);
+					
+					// Create open-tag remapper
+					function openTagRemapMaker(segment) {
+						var ret = {};
+						for (var i=0,ilen=_rexData.length; i < ilen; i++) {
+							var primaryVal = normalizeRegExpString(_rexData[i][0][segment][0]);
+							for (var j=0,jlen=_rexData[i][0][segment].length; j < jlen; j++) {
+								var key = normalizeRegExpString(_rexData[i][0][segment][j]);
+								ret[key] = primaryVal;
+							}
+						}
+						return ret;
+					}
+
+					this.rtfHTMLopenTagRemap = openTagRemapMaker(1);
+					this.htmlRTFopenTagRemap = openTagRemapMaker(0);
+					
+					// Create open-tag-keyed close-tag sniffing regexps
+					function closeTagRexMaker(segment) {
+						var ret = {};
+						var rexes = {};
+						for (var i=0,ilen=_rexData.length; i < ilen; i++) {
+							var primaryVal = _rexData[i][0][segment][0];
+							for (var j=0,jlen=_rexData[i][1][segment].length; j < jlen; j++) {
+								rexes[_rexData[i][1][segment][j]] = true;
+							}
+							ret[primaryVal] = composeRex(rexes);
+						}
+						return ret;
+					}
+					this.rtfHTMLcloseTagRex = closeTagRexMaker(1);
+					this.htmlRTFcloseTagRex = closeTagRexMaker(0);
+					
+					// Create open-tag-keyed open/close tag registry
+					function tagRegistryMaker(segment) {
+						var antisegment = 1;
+						if (segment == 1) {
+							antisegment = 0;
+						}
+						var ret = {};
+						for (var i=0,ilen=_rexData.length; i < ilen; i++) {
+							var primaryVal = normalizeRegExpString(_rexData[i][0][segment][0]);
+							ret[primaryVal] = {
+								open: normalizeRegExpString(_rexData[i][0][antisegment][0]),
+								close: _rexData[i][1][antisegment][0]
+							}
+						}
+						return ret;
+					}
+					
+					this.rtfHTMLtagRegistry = tagRegistryMaker(1);
+					this.htmlRTFtagRegistry = tagRegistryMaker(0);
+
+                    this.prepared = true;
+				}
+				this.prepare();
 				
-				this._rtfRexMap = [
-					["<span style=\"font-variant:small-caps;\">",
-					 /small-caps/,
-					 "\\scaps ",
-					 "\\scaps0{}"
-					],
-					["<span style=\"text-decoration:underline;\">",
-					 /underline/,
-					 "\\ul ",
-					 "\\ul0{}"
-					]
-				]
+				this.getSplit = function(mode, txt) {
+					if (!txt) return [];
+					var splt = txt.split(this[mode + "splitRex"]);
+					var mtch = txt.match(this[mode + "splitRex"]);
+					var lst = [splt[0]];
+					for (var i=1,ilen=splt.length; i < ilen; i++) {
+						lst.push(mtch[i-1]);
+						lst.push(splt[i]);
+					}
+					return lst;
+				}
+				
+				this.getOpenTag = function(mode, str) {
+					var m = str.match(this[mode + "openSniffRex"]);
+					if (m) {
+						m = this[mode + "openTagRemap"][this.normalizeRegExpString(m[0])];
+					}
+					return m;
+				}
+				
+				this.convert = function(mode, txt) {
+					var lst = this.getSplit(mode, txt);
+					var sdepth = 0;
+					var depth = 0;
+					for (var i=1,ilen=lst.length; i < ilen; i += 2) {
+						var openTag = this.getOpenTag(mode, lst[i]);
+						if (openTag) {
+							sdepth++;
+							depth = sdepth;
+							for (var j=(i+2),jlen=lst.length; j < jlen; j += 2) {
+								var closeTag = !this.getOpenTag(mode, lst[j]);
+								if (closeTag) {
+									if (depth === sdepth && lst[j].match(this[mode + "closeTagRex"][openTag])) {
+										lst[i] = this[mode + "tagRegistry"][openTag].open;
+										lst[j] = this[mode + "tagRegistry"][openTag].close;
+										break;
+									}
+									depth--;
+								} else {
+									depth++;
+								}
+							}
+						} else {
+							sdepth--;
+						}
+					}
+					return lst.join("");
+				}
+				
+				this.htmlToRTF = function(txt) {
+					txt = this.convert("htmlRTF", txt);
+					for (var i=0,ilen=this._htmlRTFmap.length; i < ilen; i++) {
+						var entry = this._htmlRTFmap[i];
+						txt = txt.replace(entry[0], entry[1]);
+					}
+					txt = Zotero.Utilities.unescapeHTML(txt);
+					txt = txt.replace(/[\x7F-\uFFFF]/g, function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+"{}"});
+					return txt.trim();
+				}
+				
+				this.rtfToHTML = function(txt) {
+					for (var i=0,ilen=this._rtfHTMLmap.length; i < ilen; i++) {
+						var entry = this._rtfHTMLmap[i];
+						txt = txt.replace(entry[0], entry[1]);
+					}
+					txt = this.convert("rtfHTML", txt);
+					return txt.trim();
+				}
 
 				this._constructed = true;
 				
@@ -120,67 +396,77 @@
 					Zotero.debug("Setting mode to " + val);
 					switch (val) {
 						case 'note':
-							var self = this;
-							
 							this._eventHandler = function (event) {
 								// Necessary in Fx32+
 								if (event.wrappedJSObject) {
 									event = event.wrappedJSObject;
 								}
 								
-								//Zotero.debug(event.type);
+								var commandEvent = false;
+								
+								if (Zotero.Prefs.get('debugNoteEvents')) {
+									Zotero.debug(event.type);
+									Zotero.debug(event.which);
+								}
 								switch (event.type) {
 									case 'keydown':
-										// Intercept and manually trigger redo for Cmd-Shift-Z,
-										// which keeps it from toggling the Zotero pane instead
-										if (Zotero.isMac && event.metaKey && event.shiftKey && !event.ctrlKey
-												&& !event.altKey && event.keyCode == 90) {
-											event.stopPropagation();
-											event.preventDefault();
-											self.redo();
-											return;
+										// Handle forward-delete, which doesn't register as a keypress
+										// when a selection is cleared
+										if (event.which == event.DOM_VK_DELETE) {
+											this._changed = true;
+											commandEvent = true;
 										}
 										break;
 									
 									case 'keypress':
 										// Ignore keypresses that don't change
 										// any text
+										//Zotero.debug(event.which);
 										if (!event.which &&
 												event.keyCode != event.DOM_VK_DELETE &&
 												event.keyCode != event.DOM_VK_BACK_SPACE) {
 											//Zotero.debug("Not a char");
 											return;
 										}
+										this._changed = true;
+										commandEvent = true;
 										break;
 									
+									// 'change' includes text added via drag-and-drop
 									case 'change':
+									case 'undo':
+									case 'redo':
+										this._changed = true;
+										commandEvent = true;
 										break;
-
-									case 'openlink':
-										var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-											.getService(Components.interfaces.nsIWindowMediator);
-										win = wm.getMostRecentWindow('navigator:browser');
-										win.ZoteroPane.loadURI(event.target.href, event.modifierKeys);
+									
+									case 'ZoteroLinkClick':
+										var zp = typeof ZoteroPane != 'undefined'
+											? ZoteroPane
+											: window.opener.ZoteroPane;
+										zp.loadURI(event.value);
 										break;
 									
 									default:
 										return;
 								}
 								
-								if (self._timer) {
-									clearTimeout(self._timer);
+								// Trigger command on change
+								if (commandEvent && this.timeout) {
+									if (this._timer) {
+										clearTimeout(this._timer);
+									}
+									
+									this._timer = setTimeout(function () {
+										var attr = this.getAttribute('oncommand');
+										attr = attr.replace('this', 'thisObj');
+										var func = new Function('thisObj', 'event', attr);
+										func(this, event);
+									}.bind(this), this.timeout);
 								}
 								
-								// Get the command event
-								self._timer = self.timeout && setTimeout(function () {
-									var attr = self.getAttribute('oncommand');
-									attr = attr.replace('this', 'thisObj');
-									var func = new Function('thisObj', 'event', attr);
-									func(self, event);
-								}, self.timeout);
-								
 								return true;
-							};
+							}.bind(this);
 							break;
 						
 						case 'integration':
@@ -213,52 +499,18 @@
 			<!-- Sets or returns contents of rich text box -->
 			<property name="value">
 				<getter><![CDATA[
-					const highcharRe = /[\x7F-\uFFFF]/g;
-					var output = this._editor.getContent();
+					if (!this._editor) {
+						return null;
+					}
+					
+					var output = this._editor.getContent().trim();
 					
 					if(this._format == "RTF") {
 						// strip divs
 						if(output.substr(0, 5) == "<div>" && output.substr(-6) == "</div>") {
-							output = output.substr(5, output.length-6);
+							output = output.slice(0, output.length-6).slice(5).trim();
 						}
-						
-						// do appropriate replacement operations
-						for(var needle in this._rtfMap) {
-							output = output.replace(needle, this._rtfMap[needle], "g"); 
-						}
-						
-						// Preserve small caps and underlining
-						for each (var tagspec in this._rtfRexMap){
-							var l = output.split(/(<\/?span[^>]*>)/);
-							var current_level = 0;
-							var tag_level = [];
-							for (var pos=1; pos<l.length; pos+=2) {
-								var tag = l[pos];
-								if (tag[1] == "/") {
-									current_level--;
-									if (current_level == tag_level[tag_level.length-1]) {
-										tag_level.pop();
-										l[pos] = tagspec[3];
-									}
-								} else {
-									if (l[pos].match(tagspec[1])) {
-										l[pos] = tagspec[2];
-										tag_level.push(current_level);
-									}
-									current_level++;
-								};
-							};
-							output = l.join("");
-						}
-						
-						for each(var entry in this._htmlToRtfMap) {
-							output = output.replace(entry[0], entry[1], "g");
-						}
-						
-						output = Zotero.Utilities.unescapeHTML(output.replace(" ", "&nbsp;", "g"))
-							.replace("\u00A0", " ", "g")
-							.replace(highcharRe, function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+"{}" });
-						output = Zotero.Utilities.trim(output);
+						output = this.htmlToRTF(output)
 					}
 					
 					return output;
@@ -284,6 +536,7 @@
 					
 					if (this.value == val) {
 						Zotero.debug("Textbox value hasn't changed");
+						this._changed = false;
 						return;
 					}
 					
@@ -313,23 +566,15 @@
 							bodyStyle = "margin-left:"+(li/20+6)+"pt;text-indent:"+(fi/20)+"pt;";
 						}
 						
-						// do appropriate replacement operations
-						for(var needle in this._rtfMap) {
-							if(this._rtfMap[needle]) {
-								html = html.replace(this._rtfMap[needle], needle, "g");
-							}
-						}
-						for each (var tagspec in this._rtfRexMap){
-							html = html.replace(tagspec[2], tagspec[0], "g");
-							html = html.replace(tagspec[3], "</span>", "g");
-						}
-						for each(var entry in this._rtfToHtmlMap) {
-							html = html.replace(entry[0], entry[1], "g");
-						}
+						html = this.rtfToHTML(html);
+						
 						html = '<div style="'+bodyStyle+'"><p>'+html+"</p></div>";
 					}
 					
+					Zotero.debug("Setting content to " + html);
+					
 					this._editor.setContent(html);
+					this._changed = false;
 					return val;
 				]]></setter>
 			</property>
@@ -337,6 +582,8 @@
 			<property name="timeout"
 					onset="this.setAttribute('timeout', val); return val;"
 					onget="return parseInt(this.getAttribute('timeout')) || 0;"/>
+			
+			<property name="changed" onget="return this._changed;" onset="this._changed = !!val;"/>
 			
 			<method name="focus">
 				<body>
@@ -353,20 +600,30 @@
 				</body>
 			</method>
 			
-			<method name="redo">
+			<method name="clearUndo">
 				<body>
 				<![CDATA[
-					this._editor.undoManager.redo();
+					if (this._editor) {
+						this._editor.undoManager.clear();
+						this._editor.undoManager.add();
+					}
 				]]>
 				</body>
 			</method>
 			
-			<method name="clearUndo">
-				<body>
-				<![CDATA[
-					this._editor.undoManager.clear();
-				]]>
-				</body>
+			<method name="onInit">
+				<parameter name="callback"/>
+				<body><![CDATA[
+					if (this.initialized) {
+						callback(this._editor);
+					}
+					else {
+						if (!this._onInitCallbacks) {
+							this._onInitCallbacks = [];
+						}
+						this._onInitCallbacks.push(callback);
+					}
+				]]></body>
 			</method>
 			
 			<field name="_loaded"/>
@@ -383,8 +640,10 @@
 						getService(Components.interfaces.nsIIOService);
 					var uri = ios.newURI("resource://zotero/tinymce/" + htmlFile + ".html", null, null);
 					
-					// Pass directionality (LTR/RTL) in URL
-					uri.spec += "?dir=" + Zotero.dir;
+					// Pass directionality (LTR/RTL) and locale in URL
+					uri.spec += "?locale=" + encodeURIComponent(Zotero.locale)
+						+ "&dir=" + Zotero.dir;
+					
 					
 					Zotero.debug("Loading " + uri.spec);
 					
@@ -401,8 +660,8 @@
 							&& (!SJOW._zoteroMatchTo || SJOW._zoteroMatchTo !== matchTo)) return;
 						
 						if (!SJOW.tinyMCE) {
-							var exts = Zotero.getInstalledExtensions(function(exts) {
-								for each(var ext in exts) {
+							Zotero.getInstalledExtensions().then(function(exts) {
+								for (let ext of exts) {
 									if (ext.indexOf('NoScript') != -1 && ext.indexOf('disabled') == -1) {
 										var doc = win.document;
 										var div = doc.getElementById('tinymce');
@@ -432,10 +691,16 @@
 								}
 								if (self._value) {
 									self.value = self._value;
+									
+									// Prevent undoing to empty note after initialization
+									self._editor.undoManager.clear();
+									self._editor.undoManager.add();
 								}
 								if (self._focus) {
-									self._iframe.focus();
-									self._editor.focus();
+									setTimeout(function () {
+										self._iframe.focus();
+										self._editor.focus();
+									});
 									self._focus = false;
 								}
 								
@@ -446,15 +711,15 @@
 									if (fontSize < 6) {
 										fontSize = 11;
 									}
-									var css = "body#zotero-tinymce-note.mceContentBody, "
-										+ "body#zotero-tinymce-note.mceContentBody p, "
-										+ "body#zotero-tinymce-note.mceContentBody th, "
-										+ "body#zotero-tinymce-note.mceContentBody td, "
-										+ "body#zotero-tinymce-note.mceContentBody pre { "
+									var css = "body#zotero-tinymce-note, "
+										+ "body#zotero-tinymce-note p, "
+										+ "body#zotero-tinymce-note th, "
+										+ "body#zotero-tinymce-note td, "
+										+ "body#zotero-tinymce-note pre { "
 											+ "font-size: " + fontSize + "px; "
 										+ "} "
-										+ "body#zotero-tinymce-note.mceContentBody, "
-										+ "body#zotero-tinymce-note.mceContentBody p { "
+										+ "body#zotero-tinymce-note, "
+										+ "body#zotero-tinymce-note p { "
 											+ "font-family: "
 											+ Zotero.Prefs.get('note.fontFamily') + "; "
 										+ "}"
@@ -467,11 +732,13 @@
 									head.appendChild(style);
 								}
 								
-								// Dispatch a tinymceInitialized event
-								var ev = document.createEvent('HTMLEvents');
-								ev.initEvent('tinymceInitialized', true, true);
-								self.dispatchEvent(ev);
-							};
+								let cb;
+								if (this._onInitCallbacks) {
+									while (cb = this._onInitCallbacks.shift()) {
+										cb(this._editor);
+									}
+								}
+							}.bind(this);
 						}
 						
 						var editor = SJOW.tinyMCE.get("tinymce");
@@ -487,11 +754,7 @@
 							return;
 						}
 						
-						if(window.ZoteroTab) {
-							ZoteroTab.containerWindow.gBrowser.removeEventListener("DOMContentLoaded", listener, true);
-						} else {
-							self._iframe.removeEventListener("DOMContentLoaded", listener, false);
-						}
+						self._iframe.removeEventListener("DOMContentLoaded", listener, false);
 						
 						if (self._eventHandler) {
 							win.wrappedJSObject.zoteroHandleEvent = self._eventHandler;
@@ -501,20 +764,9 @@
 						win.wrappedJSObject.zoteroExecCommand = function (doc, command, ui, value) {
 							return doc.execCommand(command, ui, value);
 						}
-						
-						win.wrappedJSObject.zoteroFixWindow = function (win) {
-							win.locationbar.visible = false;
-							win.statusbar.visible = false;
-						}
-					};
+					}.bind(this);
 					
-					if(window.ZoteroTab) {
-						// I'm not sure why it's necessary to attach the event listener to the 
-						// container window to get it to fire on the tab, but apparently it is...
-						ZoteroTab.containerBrowser.addEventListener("DOMContentLoaded", listener, true);
-					} else {
-						this._iframe.addEventListener("DOMContentLoaded", listener, false);
-					}
+					this._iframe.addEventListener("DOMContentLoaded", listener, false);
 					
 					this._iframe.webNavigation.loadURI(uri.spec,
 						Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, null, null);

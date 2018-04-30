@@ -1,0 +1,7 @@
+.zotero-advanced-options > .zotero-advanced-options-label > dropmarker {
+	transform: rotate(270deg) translateX(4px);
+}
+
+.zotero-advanced-options[state="open"] > .zotero-advanced-options-label > dropmarker {
+	transform: translateX(4px);
+}

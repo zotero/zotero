@@ -1,6 +1,6 @@
-<!ENTITY zotero.search.name "Название">
+<!ENTITY zotero.search.name "Название:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Искать в библиотеке:">
 
 <!ENTITY zotero.search.joinMode.prefix "Совпадающее с">
 <!ENTITY zotero.search.joinMode.any "любым">

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <link href="http://arxiv.org/api/query?search_query%3Dcat%3Amath.MG%26id_list%3D%26start%3D0%26max_results%3D99" rel="self" type="application/atom+xml"/>
+  <title type="html">ArXiv Query: search_query=cat:math.MG&amp;id_list=&amp;start=0&amp;max_results=99</title>
+  <id>http://arxiv.org/api/t16YHIbuctl2Omz/1ISTPDEQFkU</id>
+  <updated>2017-10-30T00:00:00-04:00</updated>
+  <opensearch:totalResults xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">6030</opensearch:totalResults>
+  <opensearch:startIndex xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">0</opensearch:startIndex>
+  <opensearch:itemsPerPage xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">99</opensearch:itemsPerPage>
+  <entry>
+    <id>http://www.example.com/item1</id>
+    <updated>2017-10-27T12:27:09Z</updated>
+    <published>2016-02-15T11:36:40Z</published>
+    <title>Title 1</title>
+    <summary>  Abstract 1</summary>
+    <author>
+      <name>Author1 A. T. Rohtua</name>
+    </author>
+    <author>
+      <name>Author2 A. Auth</name>
+    </author>
+    <arxiv:doi xmlns:arxiv="http://arxiv.org/schemas/atom">10.12345/example</arxiv:doi>
+    <link title="doi" href="http://dx.doi.org/10.12345/example" rel="related"/>
+    <arxiv:comment xmlns:arxiv="http://arxiv.org/schemas/atom">33 pages, 24 Figures</arxiv:comment>
+    <link href="http://www.example.com/item1" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://example.com/pdf/12345679" rel="related" type="application/pdf"/>
+    <arxiv:primary_category xmlns:arxiv="http://arxiv.org/schemas/atom" term="math.MG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="math.MG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="math.DG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="51A05, 51B15, 52C35" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+</feed>

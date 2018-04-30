@@ -1,4 +1,5 @@
 <!ENTITY zotero.version "phiên bản">
+<!ENTITY zotero.whatsNew "Các điểm mới">
 <!ENTITY zotero.createdby "Một sản phẩm của:">
 <!ENTITY zotero.director "Giám đốc điều hành:">
 <!ENTITY zotero.directors "Giám đốc điều hành:">
@@ -9,5 +10,5 @@
 <!ENTITY zotero.executiveProducer "Chủ nhiệm:">
 <!ENTITY zotero.thanks "Xin gửi lời cảm ơn đặc biệt tới:">
 <!ENTITY zotero.about.close "Đóng">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Những người tham gia &amp; Lời cảm ơn">
+<!ENTITY zotero.citationProcessing "Xử lý trích dẫn &amp; danh mục tài liệu tham khảo">

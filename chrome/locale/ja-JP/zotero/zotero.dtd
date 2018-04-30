@@ -1,3 +1,5 @@
+<!ENTITY zotero.general.yes "はい">
+<!ENTITY zotero.general.no "いいえ">
 <!ENTITY zotero.general.optional "（任意）">
 <!ENTITY zotero.general.note "メモ:">
 <!ENTITY zotero.general.selectAll "すべて選択">
@@ -6,11 +8,17 @@
 <!ENTITY zotero.general.delete "削除">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "キャンセル">
-<!ENTITY zotero.general.refresh "Refresh">
-<!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.refresh "再読み込み">
+<!ENTITY zotero.general.saveAs "名前をつけて保存...">
+<!ENTITY zotero.general.advancedOptions.label "高度なオプション">
+<!ENTITY zotero.general.tools "ツール">
+<!ENTITY zotero.general.more "その他">
+<!ENTITY zotero.general.loading "読み込み中...">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Zotero エラーレポート">
-<!ENTITY zotero.errorReport.unrelatedMessages "エラーの記録にはZotero に無関係のメッセージが含まれている恐れがあります。">
 <!ENTITY zotero.errorReport.submissionInProgress "エラーレポートが送信されるまでお待ちください。">
 <!ENTITY zotero.errorReport.submitted "エラーレポートが送信されました。">
 <!ENTITY zotero.errorReport.reportID "レポート ID:">
@@ -91,6 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "ライブラリへ復帰させる">
 <!ENTITY zotero.items.menu.duplicateItem "選択されたアイテムを複製">
 <!ENTITY zotero.items.menu.mergeItems "アイテムを統合する...">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "土台として用いるアイテムのヴァージョンを選んでください:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "このアイテムの重複するヴァージョンから維持したいフィールドを選択してください:">
@@ -100,7 +110,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "現在のページから新規ウェブページ・アイテムを作成">
 <!ENTITY zotero.toolbar.lookup.label "識別子によってアイテムを追加する">
 <!ENTITY zotero.toolbar.removeItem.label "アイテムを削除...">
+<!ENTITY zotero.toolbar.newLibrary.label "新しいライブラリ">
 <!ENTITY zotero.toolbar.newCollection.label "新規コレクション...">
+<!ENTITY zotero.toolbar.markFeedRead.label "フィードを既読にする">
 <!ENTITY zotero.toolbar.newGroup "新規グループ...">
 <!ENTITY zotero.toolbar.newSubcollection.label "新規サブコレクション...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "新規検索条件の保存...">
@@ -116,16 +128,27 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "サポートとヘルプ">
 <!ENTITY zotero.toolbar.about.label "Zotero について">
 <!ENTITY zotero.toolbar.advancedSearch "高度な検索">
-<!ENTITY zotero.toolbar.tab.tooltip "タブのモードを切り替える">
 <!ENTITY zotero.toolbar.openURL.label "所在確認">
 <!ENTITY zotero.toolbar.openURL.tooltip "あなたの所属機関の図書館を通じて所在確認">
+
+<!ENTITY zotero.toolbar.feeds.new "新しいフィード">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "URLから...">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "ページから...">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "OPMLから...">
+<!ENTITY zotero.toolbar.feeds.refresh "フィードを更新する">
+<!ENTITY zotero.toolbar.feeds.edit "フィードを編集する...">
 
 <!ENTITY zotero.item.add "追加">
 <!ENTITY zotero.item.attachment.file.show "ファイルを表示">
 <!ENTITY zotero.item.textTransform "テキストの大文字・小文字を指定する">
 <!ENTITY zotero.item.textTransform.titlecase "各単語の先頭を大文字に">
 <!ENTITY zotero.item.textTransform.sentencecase "各文の先頭を大文字に">
-<!ENTITY zotero.item.creatorTransform.nameSwap "姓と名の順を入れ替える">
+<!ENTITY zotero.item.creatorTransform.nameSwap "姓と名を入れ替える">
+<!ENTITY zotero.item.viewOnline "オンラインで閲覧する">
+<!ENTITY zotero.item.copyAsURL "URLとしてコピーする">
+<!ENTITY zotero.item.deletePermanently "永久に削除する...">
+
+<!ENTITY zotero.item.tags.removeAll "すべてのタグを削除する...">
 
 <!ENTITY zotero.toolbar.newNote "新しいメモ">
 <!ENTITY zotero.toolbar.note.standalone "新しく独立メモを作成">
@@ -137,11 +160,10 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "現在のページのスナップショットを撮る">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "表示するタグがありません">
-<!ENTITY zotero.tagSelector.filter "フィルター:">
+<!ENTITY zotero.tagSelector.loadingTags "タグを読込中...">
 <!ENTITY zotero.tagSelector.showAutomatic "自動生成タグも表示">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "このライブラリの全タグを表示">
-<!ENTITY zotero.tagSelector.selectVisible "可視タグを選択">
-<!ENTITY zotero.tagSelector.clearVisible "可視タグの選択を解除">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "このライブラリから自動生成されたタグを削除する...">
 <!ENTITY zotero.tagSelector.clearAll "選択をすべて解除">
 <!ENTITY zotero.tagSelector.assignColor "色を指定...">
 <!ENTITY zotero.tagSelector.renameTag "タグ名の変更...">
@@ -153,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "色を指定">
 <!ENTITY zotero.tagColorChooser.removeColor "色を取り除く">
 
-<!ENTITY zotero.lookup.description "下のボックスから検索するには、 ISBN、DOI、または PMID （複数可）を入力してください。">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "検索">
 
 <!ENTITY zotero.selectitems.title "アイテムを選択">
@@ -163,6 +185,8 @@
 
 <!ENTITY zotero.bibliography.title "出典表記／参考文献目録を作成">
 <!ENTITY zotero.bibliography.style.label "引用スタイル:">
+<!ENTITY zotero.bibliography.manageStyles "スタイルを管理する...">
+<!ENTITY zotero.bibliography.locale.label "言語:">
 <!ENTITY zotero.bibliography.outputMode "出力モード:">
 <!ENTITY zotero.bibliography.bibliography "参考文献目録">
 <!ENTITY zotero.bibliography.outputMethod "出力方法:">
@@ -187,9 +211,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "参考文献の順序を維持">
 
-<!ENTITY zotero.citation.page "ページ">
-<!ENTITY zotero.citation.paragraph "段落">
-<!ENTITY zotero.citation.line "行">
 <!ENTITY zotero.citation.suppressAuthor.label "著者名の非表示">
 <!ENTITY zotero.citation.prefix.label "接頭辞:">
 <!ENTITY zotero.citation.suffix.label "接尾辞:">
@@ -211,23 +232,24 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "脚注">
 <!ENTITY zotero.integration.prefs.endnotes.label "文末注">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "スタイル:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "出典表記の保存形式:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "ブックマーク">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "ブックマークは Microsoft Word、LibreOffice 双方で保存されますが、誤って変更されてしまう場合があります。 &#xA; 互換性上の理由により、この機能を選んだ場合、出典表記を脚注や巻末注に挿入することができません。">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "ブックマークはWordとLibreOfficeの間で共有できますが、意図せずに変更された場合にエラーを生じる場合があり、また脚注に挿入することが出来ません。">
+
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "雑誌名を自動的に簡略化する">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE の雑誌略誌名が雑誌名から自動的に生成されます。「雑誌略誌名」欄の内容は無視されます。">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "文献情報を文書中に保存">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "文献情報をあなたの文書中に保存するとわずかにファイルサイズが大きくなりますが、あなたは Zotero グループを使わなくても他人とその文書を共有することが可能になります。このオプションで作成された文書を更新するには Zotero 3.0 以降が必要です。">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "MEDLINEの略誌名を使用する">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "「雑誌略誌名」のフィールドは無視されます。">
 
 <!ENTITY zotero.integration.showEditor.label "エディタを表示">
 <!ENTITY zotero.integration.classicView.label "クラシック表示">
 
 <!ENTITY zotero.integration.references.label "参考文献目録に含まれる文献">
 
-<!ENTITY zotero.sync.button "Zotero サーバーと同期する">
+<!ENTITY zotero.sync.stop "同期を停止">
 <!ENTITY zotero.sync.error "同期エラー">
 <!ENTITY zotero.sync.storage.progress "進捗:">
 <!ENTITY zotero.sync.storage.downloads "ダウンロード:">
@@ -253,8 +275,17 @@
 <!ENTITY zotero.proxy.recognized.disable.label "以前に認識されたプロキシを通じて、要求を自動転送しないでください。">
 <!ENTITY zotero.proxy.recognized.ignore.label "無視する">
 
-<!ENTITY zotero.recognizePDF.recognizing.label "メタデータの抽出中...">
-<!ENTITY zotero.recognizePDF.cancel.label "取り消し">
+<!ENTITY zotero.feedSettings.title "フィードの設定">
+<!ENTITY zotero.feedSettings.saveButton.label "保存">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "題名:">
+<!ENTITY zotero.feedSettings.refresh.label1 "フィードを">
+<!ENTITY zotero.feedSettings.refresh.label2 "時間おきに更新する">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "未読フィードアイテムを">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "日後に除去する">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "既読フィードアイテムを">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "日後に除去する">
+
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF 名">
 <!ENTITY zotero.recognizePDF.itemName.label "アイテム名">
 
@@ -285,7 +316,6 @@
 
 <!ENTITY zotero.downloadManager.label "Zotero に保存する">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "添付ファイルは現在選択中のライブラリに保存することができません。その代わり、このアイテムはあなたのライブラリに保存されます。">
-<!ENTITY zotero.downloadManager.noPDFTools.description "この機能を利用するには、まず Zotero 環境設定の検索ペインで PDF ツールをインストールする必要があります。">
 
 <!ENTITY zotero.attachLink.title "URIへのリンクを添付する">
 <!ENTITY zotero.attachLink.label.link "リンク:">

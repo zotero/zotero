@@ -23,381 +23,234 @@
     ***** END LICENSE BLOCK *****
 */
 
+"use strict";
 
-Zotero.Group = function () {
-	if (arguments[0]) {
-		throw ("Zotero.Group constructor doesn't take any parameters");
-	}
+Zotero.Group = function (params = {}) {
+	params.libraryType = 'group';
+	Zotero.Group._super.call(this, params);
 	
-	this._init();
-}
-
-
-Zotero.Group.prototype._init = function () {
-	this._id = null;
-	this._libraryID = null;
-	this._name = null;
-	this._description = null;
-	this._editable = null;
-	this._filesEditable = null;
+	Zotero.Utilities.assignProps(this, params, ['groupID', 'name', 'description',
+		'version']);
 	
-	this._loaded = false;
-	this._changed = false;
-	this._hasCollections = null;
-	this._hasSearches = null;
-}
-
-
-Zotero.Group.prototype.__defineGetter__('objectType', function () { return 'group'; });
-Zotero.Group.prototype.__defineGetter__('id', function () { return this._get('id'); });
-Zotero.Group.prototype.__defineSetter__('id', function (val) { this._set('id', val); });
-Zotero.Group.prototype.__defineGetter__('libraryID', function () { return this._get('libraryID'); });
-Zotero.Group.prototype.__defineSetter__('libraryID', function (val) { return this._set('libraryID', val); });
-Zotero.Group.prototype.__defineGetter__('name', function () { return this._get('name'); });
-Zotero.Group.prototype.__defineSetter__('name', function (val) { this._set('name', val); });
-Zotero.Group.prototype.__defineGetter__('description', function () { return this._get('description'); });
-Zotero.Group.prototype.__defineSetter__('description', function (val) { this._set('description', val); });
-Zotero.Group.prototype.__defineGetter__('editable', function () { return this._get('editable'); });
-Zotero.Group.prototype.__defineSetter__('editable', function (val) { this._set('editable', val); });
-Zotero.Group.prototype.__defineGetter__('filesEditable', function () { if (!this.editable) { return false; } return this._get('filesEditable'); });
-Zotero.Group.prototype.__defineSetter__('filesEditable', function (val) { this._set('filesEditable', val); });
-
-
-Zotero.Group.prototype._get = function (field) {
-	if (this._id && !this._loaded) {
-		this.load();
-	}
-	return this['_' + field];
-}
-
-
-Zotero.Group.prototype._set = function (field, val) {
-	switch (field) {
-		case 'id':
-		case 'libraryID':
-			if (val == this['_' + field]) {
-				return;
+	// Return a proxy so that we can disable the object once it's deleted
+	return new Proxy(this, {
+		get: function(obj, prop) {
+			if (obj._disabled && !(prop == 'libraryID' || prop == 'id')) {
+				throw new Error("Group (" + obj.libraryID + ") has been disabled");
 			}
-			
-			if (this._loaded) {
-				throw ("Cannot set " + field + " after object is already loaded in Zotero.Group._set()");
-			}
-			//this._checkValue(field, val);
-			this['_' + field] = val;
-			return;
-	}
-	
-	if (this.id) {
-		if (!this._loaded) {
-			this.load();
+			return obj[prop];
 		}
-	}
-	else {
-		this._loaded = true;
-	}
-	
-	if (this['_' + field] != val) {
-		this._prepFieldChange(field);
-		
-		switch (field) {
-			default:
-				this['_' + field] = val;
-		}
-	}
+	});
 }
 
 
-
-
-
-/*
- * Build group from database
+/**
+ * Non-prototype properties
  */
-Zotero.Group.prototype.load = function() {
-	var id = this._id;
-	
-	if (!id) {
-		throw ("ID not set in Zotero.Group.load()");
-	}
-	
-	var sql = "SELECT G.* FROM groups G WHERE groupID=?";
-	var data = Zotero.DB.rowQuery(sql, id);
-	
-	this._loaded = true;
-	
-	if (!data) {
-		return;
-	}
-	
-	this.loadFromRow(data);
+
+Zotero.defineProperty(Zotero.Group, '_dbColumns', {
+	value: Object.freeze(['name', 'description', 'version'])
+});
+
+Zotero.Group._colToProp = function(c) {
+	return "_group" + Zotero.Utilities.capitalize(c);
 }
 
+Zotero.defineProperty(Zotero.Group, '_rowSQLSelect', {
+	value: Zotero.Library._rowSQLSelect + ", G.groupID, "
+		+ Zotero.Group._dbColumns.map(c => "G." + c + " AS " + Zotero.Group._colToProp(c)).join(", ")
+});
+
+Zotero.defineProperty(Zotero.Group, '_rowSQL', {
+	value: "SELECT " + Zotero.Group._rowSQLSelect
+		+ " FROM groups G JOIN libraries L USING (libraryID)"
+});
+
+Zotero.extendClass(Zotero.Library, Zotero.Group);
+
+Zotero.defineProperty(Zotero.Group.prototype, '_objectType', {
+	value: 'group'
+});
+
+Zotero.defineProperty(Zotero.Group.prototype, 'libraryTypes', {
+	value: Object.freeze(Zotero.Group._super.prototype.libraryTypes.concat(['group']))
+});
+
+Zotero.defineProperty(Zotero.Group.prototype, 'groupID', {
+	get: function() { return this._groupID; },
+	set: function(v) { return this._groupID = v; }
+});
+
+Zotero.defineProperty(Zotero.Group.prototype, 'id', {
+	get: function() { return this.groupID; },
+	set: function(v) { return this.groupID = v; }
+});
+
+Zotero.defineProperty(Zotero.Group.prototype, 'allowsLinkedFiles', {
+	value: false
+});
+
+// Create accessors
+(function() {
+let accessors = ['name', 'description', 'version'];
+for (let i=0; i<accessors.length; i++) {
+	let name = accessors[i];
+	let prop = Zotero.Group._colToProp(name);
+	Zotero.defineProperty(Zotero.Group.prototype, name, {
+		get: function() { return this._get(prop); },
+		set: function(v) { return this._set(prop, v); }
+	})
+}
+})();
+
+Zotero.Group.prototype._isValidGroupProp = function(prop) {
+	let preffix = '_group';
+	if (prop.indexOf(preffix) !== 0 || prop.length == preffix.length) {
+		return false;
+	}
+	
+	let col = prop.substr(preffix.length);
+	col =  col.charAt(0).toLowerCase() + col.substr(1);
+	
+	return Zotero.Group._dbColumns.indexOf(col) != -1;
+}
+
+Zotero.Group.prototype._isValidProp = function(prop) {
+	return this._isValidGroupProp(prop)
+		|| Zotero.Group._super.prototype._isValidProp.call(this, prop);
+}
 
 /*
  * Populate group data from a database row
  */
-Zotero.Group.prototype.loadFromRow = function(row) {
-	this._loaded = true;
-	this._changed = false;
-	this._hasCollections = null;
-	this._hasSearches = null;
+Zotero.Group.prototype._loadDataFromRow = function(row) {
+	Zotero.Group._super.prototype._loadDataFromRow.call(this, row);
 	
-	this._id = row.groupID;
-	this._libraryID = row.libraryID;
-	this._name = row.name;
-	this._description = row.description;
-	this._editable = !!row.editable;
-	this._filesEditable = !!row.filesEditable;
+	this._groupID = row.groupID;
+	this._groupName = row._groupName;
+	this._groupDescription = row._groupDescription;
+	this._groupVersion = row._groupVersion;
 }
 
-
-/**
- * Check if group exists in the database
- *
- * @return	bool			TRUE if the group exists, FALSE if not
- */
-Zotero.Group.prototype.exists = function() {
-	if (!this.id) {
-		throw ('groupID not set in Zotero.Group.exists()');
-	}
-	
-	var sql = "SELECT COUNT(*) FROM groups WHERE groupID=?";
-	return !!Zotero.DB.valueQuery(sql, this.id);
-}
-
-
-Zotero.Group.prototype.hasCollections = function () {
-	if (this._hasCollections !== null) {
-		return this._hasCollections;
-	}
-	
-	this._hasCollections = !!this.getCollections().length;
-	return this._hasCollections;
-}
-
-
-Zotero.Group.prototype.hasSearches = function () {
-	if (this._hasSearches !== null) {
-		return this._hasSearches;
-	}
-	
-	this._hasSearches = !!Zotero.Searches.getAll(this.id).length;
-	return this._hasSearches;
-}
-
-
-Zotero.Group.prototype.clearCollectionCache = function () {
-	this._hasCollections = null;
-}
-
-Zotero.Group.prototype.clearSearchCache = function () {
-	this._hasSearches = null;
-}
-
-/**
- * Returns collections of this group
- *
- * @param	{Boolean}		asIDs				Return as collectionIDs
- * @return	{Zotero.Collection[]}				Array of Zotero.Collection instances
- */
-Zotero.Group.prototype.getCollections = function (parent) {
-	var sql = "SELECT collectionID FROM collections WHERE libraryID=? AND "
-				+ "parentCollectionID " + (parent ? '=' + parent : 'IS NULL');
-	var ids = Zotero.DB.columnQuery(sql, this.libraryID);
-	
-	// Return Zotero.Collection objects
-	var objs = [];
-	for each(var id in ids) {
-		var col = Zotero.Collections.get(id);
-		objs.push(col);
-	}
-	
-	// Do proper collation sort
-	var collation = Zotero.getLocaleCollation();
-	objs.sort(function (a, b) {
-		return collation.compareString(1, a.name, b.name);
-	});
-	
-	return objs;
-}
-
-
-Zotero.Group.prototype.hasItem = function (itemID) {
-	var item = Zotero.Items.get(itemID);
-	return item.libraryID == this.libraryID;
-}
-
-
-Zotero.Group.prototype.save = function () {
-	if (!this.id) {
-		throw ("ID not set in Zotero.Group.save()");
-	}
-	
-	if (!this.libraryID) {
-		throw ("libraryID not set in Zotero.Group.save()");
-	}
-	
-	if (!this._changed) {
-		Zotero.debug("Group " + this.id + " has not changed");
-		return false;
-	}
-	
-	Zotero.DB.beginTransaction();
-	
-	var isNew = !this.exists();
-	
-	try {
-		Zotero.debug("Saving group " + this.id);
-		
-		var columns = [
-			'groupID',
-			'libraryID',
-			'name',
-			'description',
-			'editable',
-			'filesEditable'
-		];
-		var placeholders = ['?', '?', '?', '?', '?', '?'];
-		var sqlValues = [
-			this.id,
-			this.libraryID,
-			this.name,
-			this.description,
-			this.editable ? 1 : 0,
-			this.filesEditable ? 1 : 0
-		];
-		
-		if (isNew) {
-			if (!Zotero.Libraries.exists(this.libraryID)) {
-				Zotero.Libraries.add(this.libraryID, 'group');
+Zotero.Group.prototype._set = function(prop, val) {
+	switch(prop) {
+		case '_groupVersion':
+			let newVal = Number.parseInt(val, 10);
+			if (newVal != val) {
+				throw new Error(prop + ' must be an integer');
+			}
+			val = newVal
+			
+			if (val < 0) {
+				throw new Error(prop + ' must be non-negative');
 			}
 			
-			var sql = "INSERT INTO groups (" + columns.join(', ') + ") "
-						+ "VALUES (" + placeholders.join(', ') + ")";
-			Zotero.DB.query(sql, sqlValues);
-		}
-		else {
-			columns.shift();
-			sqlValues.shift();
+			// Ensure that it is never decreasing
+			if (val < this._groupVersion) {
+				throw new Error(prop + ' cannot decrease');
+			}
 			
-			var sql = "UPDATE groups SET "
-				+ columns.map(function (val) val + '=?').join(', ')
-				+ " WHERE groupID=?";
-			sqlValues.push(this.id);
-			Zotero.DB.query(sql, sqlValues);
-		}
+			break;
+		case '_groupName':
+		case '_groupDescription':
+			if (typeof val != 'string') {
+				throw new Error(prop + ' must be a string');
+			}
+			break;
+	}
+	
+	return Zotero.Group._super.prototype._set.call(this, prop, val);
+}
+
+Zotero.Group.prototype._reloadFromDB = Zotero.Promise.coroutine(function* () {
+	let sql = Zotero.Group._rowSQL + " WHERE G.groupID=?";
+	let row = yield Zotero.DB.rowQueryAsync(sql, [this.groupID]);
+	this._loadDataFromRow(row);
+});
+
+Zotero.Group.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
+	let proceed = yield Zotero.Group._super.prototype._initSave.call(this, env);
+	if (!proceed) return false;
+	
+	if (!this._groupName) throw new Error("Group name not set");
+	if (typeof this._groupDescription != 'string') throw new Error("Group description not set");
+	if (!(this._groupVersion >= 0)) throw new Error("Group version not set");
+	if (!this._groupID) throw new Error("Group ID not set");
+	
+	return true;
+});
+
+Zotero.Group.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
+	yield Zotero.Group._super.prototype._saveData.call(this, env);
+	
+	let changedCols = [], params = [];
+	for (let i=0; i<Zotero.Group._dbColumns.length; i++) {
+		let col = Zotero.Group._dbColumns[i];
+		let prop = Zotero.Group._colToProp(col);
 		
-		Zotero.DB.commitTransaction();
+		if (!this._changed[prop]) continue;
+		
+		changedCols.push(col);
+		params.push(this[prop]);
 	}
-	catch (e) {
-		Zotero.DB.rollbackTransaction();
-		throw (e);
+	
+	if (env.isNew) {
+		changedCols.push('groupID', 'libraryID');
+		params.push(this.groupID, this.libraryID);
+		
+		let sql = "INSERT INTO groups (" + changedCols.join(', ') + ") "
+			+ "VALUES (" + Array(params.length).fill('?').join(', ') + ")";
+		yield Zotero.DB.queryAsync(sql, params);
+		
+		Zotero.Notifier.queue('add', 'group', this.groupID, env.notifierData);
 	}
-	
-	//Zotero.Groups.reload(this.id);
-	
-	Zotero.Notifier.trigger('add', 'group', this.id);
-}
-
-
-/**
-* Deletes group and all descendant objects
-**/
-Zotero.Group.prototype.erase = function() {
-	// Don't send notifications for items and other groups objects that are deleted,
-	// since we're really only removing the group from the client
-	var notifierDisabled = Zotero.Notifier.disable();
-	
-	Zotero.DB.beginTransaction();
-	
-	var sql, ids, obj;
-	
-	// Delete items
-	sql = "SELECT itemID FROM items WHERE libraryID=?";
-	ids = Zotero.DB.columnQuery(sql, this.libraryID);
-	Zotero.Items.erase(ids);
-	
-	// Delete collections
-	sql = "SELECT collectionID FROM collections WHERE libraryID=?";
-	ids = Zotero.DB.columnQuery(sql, this.libraryID);
-	for each(var id in ids) {
-		obj = Zotero.Collections.get(id);
-		// Subcollections might've already been deleted
-		if (obj) {
-			obj.erase();
+	else if (changedCols.length) {
+		let sql = "UPDATE groups SET " + changedCols.map(v => v + '=?').join(', ')
+			+ " WHERE groupID=?";
+		params.push(this.groupID);
+		yield Zotero.DB.queryAsync(sql, params);
+		
+		if (!env.options.skipNotifier) {
+			Zotero.Notifier.queue('modify', 'group', this.groupID, env.notifierData);
 		}
 	}
-	
-	// Delete creators
-	sql = "SELECT creatorID FROM creators WHERE libraryID=?";
-	ids = Zotero.DB.columnQuery(sql, this.libraryID);
-	for each(var id in ids) {
-		obj = Zotero.Creators.get(id);
-		obj.erase();
+	else {
+		Zotero.debug("Group data did not change for group " + this.groupID, 5);
 	}
-	
-	// Delete saved searches
-	sql = "SELECT savedSearchID FROM savedSearches WHERE libraryID=?";
-	ids = Zotero.DB.columnQuery(sql, this.libraryID);
-	if (ids) {
-		Zotero.Searches.erase(ids);
-	}
-	
-	// Delete tags
-	sql = "SELECT tagID FROM tags WHERE libraryID=?";
-	ids = Zotero.DB.columnQuery(sql, this.libraryID);
-	Zotero.Tags.erase(ids);
-	
-	// Delete delete log entries
-	sql = "DELETE FROM syncDeleteLog WHERE libraryID=?";
-	Zotero.DB.query(sql, this.libraryID);
-	
-	var prefix = "groups/" + this.id;
-	Zotero.Relations.eraseByURIPrefix(Zotero.URI.defaultPrefix + prefix);
-	
-	// Delete settings
-	sql = "DELETE FROM syncedSettings WHERE libraryID=?";
-	Zotero.DB.query(sql, this.libraryID ? parseInt(this.libraryID) : 0);
-	
-	// Delete group
-	sql = "DELETE FROM groups WHERE groupID=?";
-	Zotero.DB.query(sql, this.id)
-	
-	// Delete library
-	sql = "DELETE FROM libraries WHERE libraryID=?";
-	Zotero.DB.query(sql, this.libraryID)
-	
-	Zotero.purgeDataObjects();
-	
-	var notifierData = {};
-	notifierData[this.id] = this.serialize();
-	
-	Zotero.DB.commitTransaction();
-	
-	if (notifierDisabled) {
-		Zotero.Notifier.enable();
-	}
-	
-	Zotero.Notifier.trigger('delete', 'group', this.id, notifierData);
-}
+});
 
+Zotero.Group.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
+	yield Zotero.Group._super.prototype._finalizeSave.call(this, env);
+	
+	if (env.isNew) {
+		Zotero.Groups.register(this);
+	}
+});
 
-Zotero.Group.prototype.serialize = function() {
-	var obj = {
-		primary: {
-			groupID: this.id,
-			libraryID: this.libraryID
-		},
-		fields: {
-			name: this.name,
-			description: this.description,
-			editable: this.editable,
-			filesEditable: this.filesEditable
-		}
+Zotero.Group.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env) {
+	let notifierData = {};
+	notifierData[this.groupID] = {
+		libraryID: this.libraryID
 	};
-	return obj;
-}
+	Zotero.Notifier.queue('delete', 'group', this.groupID, notifierData);
+	
+	Zotero.Groups.unregister(this.groupID);
+	
+	yield Zotero.Group._super.prototype._finalizeErase.call(this, env);
+});
 
+Zotero.Group.prototype.fromJSON = function (json, userID) {
+	if (json.name !== undefined) this.name = json.name;
+	if (json.description !== undefined) this.description = json.description;
+	
+	var editable = false;
+	var filesEditable = false;
+	if (userID) {
+		({ editable, filesEditable } = Zotero.Groups.getPermissionsFromJSON(json, userID));
+	}
+	this.editable = editable;
+	this.filesEditable = filesEditable;
+}
 
 Zotero.Group.prototype._prepFieldChange = function (field) {
 	if (!this._changed) {

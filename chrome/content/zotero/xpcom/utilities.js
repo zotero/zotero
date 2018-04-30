@@ -31,7 +31,7 @@
  * Note that this is the reverse of the text variable map, since all mappings should be one to one
  * and it makes the code cleaner
  */
-const CSL_NAMES_MAPPINGS = {
+var CSL_NAMES_MAPPINGS = {
 	"author":"author",
 	"editor":"editor",
 	"bookAuthor":"container-author",
@@ -47,7 +47,7 @@ const CSL_NAMES_MAPPINGS = {
 /*
  * Mappings for text variables
  */
-const CSL_TEXT_MAPPINGS = {
+var CSL_TEXT_MAPPINGS = {
 	"title":["title"],
 	"container-title":["publicationTitle",  "reporter", "code"], /* reporter and code should move to SQL mapping tables */
 	"collection-title":["seriesTitle", "series"],
@@ -61,7 +61,7 @@ const CSL_TEXT_MAPPINGS = {
 	"number-of-volumes":["numberOfVolumes"],
 	"number-of-pages":["numPages"],	
 	"edition":["edition"],
-	"version":["version"],
+	"version":["versionNumber"],
 	"section":["section", "committee"],
 	"genre":["type", "programmingLanguage"],
 	"source":["libraryCatalog"],
@@ -91,7 +91,7 @@ const CSL_TEXT_MAPPINGS = {
 /*
  * Mappings for dates
  */
-const CSL_DATE_MAPPINGS = {
+var CSL_DATE_MAPPINGS = {
 	"issued":"date",
 	"accessed":"accessDate",
 	"submitted":"filingDate"
@@ -99,8 +99,9 @@ const CSL_DATE_MAPPINGS = {
 
 /*
  * Mappings for types
+ * Also see itemFromCSLJSON
  */
-const CSL_TYPE_MAPPINGS = {
+var CSL_TYPE_MAPPINGS = {
 	'book':"book",
 	'bookSection':'chapter',
 	'journalArticle':"article-journal",
@@ -133,7 +134,10 @@ const CSL_TYPE_MAPPINGS = {
 	'tvBroadcast':"broadcast",
 	'radioBroadcast':"broadcast",
 	'podcast':"song",			// ??
-	'computerProgram':"book"		// ??
+	'computerProgram':"book",		// ??
+	'document':"article",
+	'note':"article",
+	'attachment':"article"
 };
 
 /**
@@ -175,9 +179,13 @@ Zotero.Utilities = {
 				var lastName = author;
 			}
 		} else {
-			var spaceIndex = author.lastIndexOf(" ");
-			var lastName = author.substring(spaceIndex+1);
-			var firstName = author.substring(0, spaceIndex);
+			// Don't parse "Firstname Lastname [Country]" as "[Country], Firstname Lastname"
+			var spaceIndex = author.length;
+			do {
+				spaceIndex = author.lastIndexOf(" ", spaceIndex-1);
+				var lastName = author.substring(spaceIndex + 1);
+				var firstName = author.substring(0, spaceIndex);
+			} while (!Zotero.Utilities.XRegExp('\\pL').test(lastName[0]) && spaceIndex > 0)
 		}
 
 		if(firstName && allCapsRe.test(firstName) &&
@@ -248,6 +256,38 @@ Zotero.Utilities = {
 		var x = x.replace(/^[\x00-\x27\x29-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F\s]+/, "");
 		return x.replace(/[\x00-\x28\x2A-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F\s]+$/, "");
 	},
+
+	/**
+	 * Cleans a http url string
+	 * @param url {String}
+	 * @params tryHttp {Boolean} Attempt prepending 'http://' to the url
+	 * @returns {String}
+	 */
+	cleanURL: function(url, tryHttp=false) {
+		url = url.trim();
+		if (!url) return false;
+		
+		var ios = Components.classes["@mozilla.org/network/io-service;1"]
+			.getService(Components.interfaces.nsIIOService);
+		try {
+			return ios.newURI(url, null, null).spec; // Valid URI if succeeds
+		} catch (e) {
+			if (e instanceof Components.Exception
+				&& e.result == Components.results.NS_ERROR_MALFORMED_URI
+			) {
+				if (tryHttp && /\w\.\w/.test(url)) {
+					// Assume it's a URL missing "http://" part
+					try {
+						return ios.newURI('http://' + url, null, null).spec;
+					} catch (e) {}
+				}
+				
+				Zotero.debug('cleanURL: Invalid URI: ' + url, 2);
+				return false;
+			}
+			throw e;
+		}
+	},
 	
 	/**
 	 * Eliminates HTML tags, replacing &lt;br&gt;s with newlines
@@ -259,6 +299,7 @@ Zotero.Utilities = {
 		}
 		
 		x = x.replace(/<br[^>]*>/gi, "\n");
+		x = x.replace(/<\/p>/gi, "\n\n");
 		return x.replace(/<[^>]+>/g, "");
 	},
 
@@ -271,66 +312,112 @@ Zotero.Utilities = {
 			throw "cleanDOI: argument must be a string";
 		}
 
-		var doi = x.match(/10\.[0-9]{4,}\/[^\s]*[^\s\.,]/);
+		var doi = x.match(/10(?:\.[0-9]{4,})?\/[^\s]*[^\s\.,]/);
 		return doi ? doi[0] : null;
 	},
 
 	/**
 	 * Clean and validate ISBN.
 	 * Return isbn if valid, otherwise return false
+	 * @param {String} isbn
+	 * @param {Boolean} [dontValidate=false] Do not validate check digit
+	 * @return {String|Boolean} Valid ISBN or false
 	 */
-	"cleanISBN":function(/**String*/ isbn) {
-		isbn = isbn.replace(/[^0-9a-z]+/ig, '').toUpperCase()	//we only want to ignore punctuation, spaces
-						.match(/(?:97[89][0-9]{10}|[0-9]{9}[0-9X])/);	//13 digit or 10 digit
-		if(!isbn) return false;
-		isbn = isbn[0];
-
-		if(isbn.length == 10) {
-			// Verify ISBN-10 checksum
-			var sum = 0;
-			for (var i = 0; i < 9; i++) {
-				if(isbn[i] == 'X') return false;	//X can only be a check digit
-				sum += isbn[i] * (10-i);
+	"cleanISBN":function(isbnStr, dontValidate) {
+		isbnStr = isbnStr.toUpperCase()
+			.replace(/[\x2D\xAD\u2010-\u2015\u2043\u2212]+/g, ''); // Ignore dashes
+		var isbnRE = /\b(?:97[89]\s*(?:\d\s*){9}\d|(?:\d\s*){9}[\dX])\b/g,
+			isbnMatch;
+		while(isbnMatch = isbnRE.exec(isbnStr)) {
+			var isbn = isbnMatch[0].replace(/\s+/g, '');
+			
+			if (dontValidate) {
+				return isbn;
 			}
-			//check digit might be 'X'
-			sum += (isbn[9] == 'X')? 10 : isbn[9]*1;
-
-			return (sum % 11 == 0) ? isbn : false;
+			
+			if(isbn.length == 10) {
+				// Verify ISBN-10 checksum
+				var sum = 0;
+				for (var i = 0; i < 9; i++) {
+					sum += isbn[i] * (10-i);
+				}
+				//check digit might be 'X'
+				sum += (isbn[9] == 'X')? 10 : isbn[9]*1;
+	
+				if (sum % 11 == 0) return isbn;
+			} else {
+				// Verify ISBN 13 checksum
+				var sum = 0;
+				for (var i = 0; i < 12; i+=2) sum += isbn[i]*1;	//to make sure it's int
+				for (var i = 1; i < 12; i+=2) sum += isbn[i]*3;
+				sum += isbn[12]*1; //add the check digit
+	
+				if (sum % 10 == 0 ) return isbn;
+			}
+			
+			isbnRE.lastIndex = isbnMatch.index + 1; // Retry the same spot + 1
 		}
-
-		if(isbn.length == 13) {
-			// Verify checksum
-			var sum = 0;
-			for (var i = 0; i < 12; i+=2) sum += isbn[i]*1;	//to make sure it's int
-			for (var i = 1; i < 12; i+=2) sum += isbn[i]*3;
-			sum += isbn[12]*1; //add the check digit
-
-			return (sum % 10 == 0 )? isbn : false;
-		}
-
+		
 		return false;
+	},
+	
+	/*
+	 * Convert ISBN 10 to ISBN 13
+	 * @param {String} isbn ISBN 10 or ISBN 13
+	 *   cleanISBN
+	 * @return {String} ISBN-13
+	 */
+	"toISBN13": function(isbnStr) {
+		var isbn;
+		if (!(isbn = Zotero.Utilities.cleanISBN(isbnStr, true))) {
+			throw new Error('ISBN not found in "' + isbnStr + '"');
+		}
+		
+		if (isbn.length == 13) {
+			isbn = isbn.substr(0,12); // Strip off check digit and re-calculate it
+		} else {
+			isbn = '978' + isbn.substr(0,9);
+		}
+		
+		var sum = 0;
+		for (var i = 0; i < 12; i++) {
+			sum += isbn[i] * (i%2 ? 3 : 1);
+		}
+		
+		var checkDigit = 10 - (sum % 10);
+		if (checkDigit == 10) checkDigit = 0;
+		
+		return isbn + checkDigit;
 	},
 
 	/**
 	 * Clean and validate ISSN.
 	 * Return issn if valid, otherwise return false
 	 */
-	"cleanISSN":function(/**String*/ issn) {
-		issn = issn.replace(/[^0-9a-z]+/ig, '').toUpperCase()	//we only want to ignore punctuation, spaces
-						.match(/[0-9]{7}[0-9X]/);
-		if(!issn) return false;
-		issn = issn[0];
-
-		// Verify ISSN checksum
-		var sum = 0;
-		for (var i = 0; i < 7; i++) {
-			if(issn[i] == 'X') return false;	//X can only be a check digit
-			sum += issn[i] * (8-i);
+	"cleanISSN":function(/**String*/ issnStr) {
+		issnStr = issnStr.toUpperCase()
+			.replace(/[\x2D\xAD\u2010-\u2015\u2043\u2212]+/g, ''); // Ignore dashes
+		var issnRE = /\b(?:\d\s*){7}[\dX]\b/g,
+			issnMatch;
+		while (issnMatch = issnRE.exec(issnStr)) {
+			var issn = issnMatch[0].replace(/\s+/g, '');
+			
+			// Verify ISSN checksum
+			var sum = 0;
+			for (var i = 0; i < 7; i++) {
+				sum += issn[i] * (8-i);
+			}
+			//check digit might be 'X'
+			sum += (issn[7] == 'X')? 10 : issn[7]*1;
+	
+			if (sum % 11 == 0) {
+				return issn.substring(0,4) + '-' + issn.substring(4);
+			}
+			
+			issnRE.lastIndex = issnMatch.index + 1; // Retry same spot + 1
 		}
-		//check digit might be 'X'
-		sum += (issn[7] == 'X')? 10 : issn[7]*1;
-
-		return (sum % 11 == 0) ? issn.substring(0,4) + '-' + issn.substring(4) : false;
+		
+		return false;
 	},
 	
 	/**
@@ -364,19 +451,22 @@ Zotero.Utilities = {
 	},
 
 	/**
-	 * Encode special XML/HTML characters<br/>
-	 * <br/>
-	 * Certain entities can be inserted manually:<br/>
-	 * <pre> &lt;ZOTEROBREAK/&gt; =&gt; &lt;br/&gt;
-	 * &lt;ZOTEROHELLIP/&gt; =&gt; &amp;#8230;</pre>
-	 * @type String
+	 * Encode special XML/HTML characters
+	 * Certain entities can be inserted manually:
+	 *   <ZOTEROBREAK/> => <br/>
+	 *   <ZOTEROHELLIP/> => &#8230;
+	 *
+	 * @param {String} str
+	 * @return {String}
 	 */
-	 "htmlSpecialChars":function(/**String*/ str) {
-		if (typeof str != 'string') str = str.toString();
-		
-		if (!str) {
-			return '';
+	"htmlSpecialChars":function(str) {
+		if (str && typeof str != 'string') {
+			Zotero.debug('#htmlSpecialChars: non-string arguments are deprecated. Update your code',
+				1, undefined, true);
+			str = str.toString();
 		}
+		
+		if (!str) return '';
 		
 		return str
 			.replace(/&/g, '&amp;')
@@ -411,11 +501,7 @@ Zotero.Utilities = {
 				// Create a node and use the textContent property to do unescaping where
 				// possible, because this approach preserves line endings in the HTML
 				if(node === undefined) {
-					var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-						 .createInstance(Components.interfaces.nsIDOMParser);
-					var domDocument = parser.parseFromString("<!DOCTYPE html><html></html>",
-						"text/html");
-					node = domDocument.createElement("div");
+					node = Zotero.Utilities.Internal.getDOMDocument().createElement("div");
 				}
 				
 				node.innerHTML = str;
@@ -438,6 +524,20 @@ Zotero.Utilities = {
 				return ("textContent" in node ? node.textContent : node.innerText).replace(/ {2,}/g, " ");
 			}
 		};
+	},
+	
+	/**
+	 * Converts text inside a DOM object to plain text preserving text formatting
+	 * appropriate for given field
+	 * 
+	 * @param {DOMNode} rootNode Node containing all the text that needs to be extracted
+	 * @param {String} targetField Zotero item field that the text is meant for
+	 *
+	 * @return {String} Zotero formatted string
+	 */
+	"dom2text": function(rootNode, targetField) {
+		// TODO: actually do this
+		return Zotero.Utilities.trimInternal(rootNode.textContent);
 	},
 	
 	/**
@@ -561,10 +661,10 @@ Zotero.Utilities = {
 	 */
 	"arrayDiff":function(array1, array2, useIndex) {
 		if (!Array.isArray(array1)) {
-			throw ("array1 is not an array (" + array1 + ")");
+			throw new Error("array1 is not an array (" + array1 + ")");
 		}
 		if (!Array.isArray(array2)) {
-			throw ("array2 is not an array (" + array2 + ")");
+			throw new Error("array2 is not an array (" + array2 + ")");
 		}
 		
 		var val, pos, vals = [];
@@ -577,6 +677,40 @@ Zotero.Utilities = {
 		}
 		return vals;
 	},
+	
+	
+	/**
+	 * Determine whether two arrays are identical
+	 *
+	 * Modified from http://stackoverflow.com/a/14853974
+	 *
+	 * @return {Boolean} 
+	 */
+	"arrayEquals": function (array1, array2) {
+		// If either array is a falsy value, return
+		if (!array1 || !array2)
+			return false;
+	
+		// Compare lengths - can save a lot of time
+		if (array1.length != array2.length)
+			return false;
+	
+		for (var i = 0, l=array1.length; i < l; i++) {
+			// Check if we have nested arrays
+			if (array1[i] instanceof Array && array2[i] instanceof Array) {
+				// Recurse into the nested arrays
+				if (!this.arrayEquals(array1[i], array2[i])) {
+					return false;
+				}
+			}
+			else if (array1[i] != array2[i]) {
+				// Warning - two different object instances will never be equal: {x:20} != {x:20}
+				return false;
+			}
+		}
+		return true;
+	},
+	
 	
 	/**
 	 * Return new array with values shuffled
@@ -607,21 +741,51 @@ Zotero.Utilities = {
 	/**
 	 * Return new array with duplicate values removed
 	 *
-	 * From http://stackoverflow.com/a/1961068
-	 *
 	 * @param	{Array}		array
 	 * @return	{Array}
 	 */
-	"arrayUnique":function(arr) {
-		var u = {}, a = [];
-		for (var i=0, l=arr.length; i<l; ++i){
-			if (u.hasOwnProperty(arr[i])) {
-				continue;
-			}
-			a.push(arr[i]);
-			u[arr[i]] = 1;
+	arrayUnique: function (arr) {
+		return [...new Set(arr)];
+	},
+	
+	/**
+	 * Run a function on chunks of a given size of an array's elements.
+	 *
+	 * @param {Array} arr
+	 * @param {Integer} chunkSize
+	 * @param {Function} func
+	 * @return {Array} The return values from the successive runs
+	 */
+	"forEachChunk":function(arr, chunkSize, func) {
+		var retValues = [];
+		var tmpArray = arr.concat();
+		var num = arr.length;
+		var done = 0;
+		
+		do {
+			var chunk = tmpArray.splice(0, chunkSize);
+			done += chunk.length;
+			retValues.push(func(chunk));
 		}
-		return a;
+		while (done < num);
+		
+		return retValues;
+	},
+	
+	/**
+	 * Assign properties to an object
+	 *
+	 * @param {Object} target
+	 * @param {Object} source
+	 * @param {String[]} [props] Properties to assign. Assign all otherwise
+	 */
+	"assignProps": function(target, source, props) {
+		if (!props) props = Object.keys(source);
+		
+		for (var i=0; i<props.length; i++) {
+			if (source[props[i]] === undefined) continue;
+			target[props[i]] = source[props[i]];
+		}
 	},
 	
 	/**
@@ -675,19 +839,53 @@ Zotero.Utilities = {
 	/**
 	 * Shorten and add an ellipsis to a string if necessary
 	 *
-	 * @param	{String}	str
-	 * @param	{Integer}	len
-	 * @param	{Boolean}	[countChars=false]
+	 * @param {String}	str
+	 * @param {Integer}	len
+	 * @param {Boolean} [wordBoundary=false]
+	 * @param {Boolean} [countChars=false]
 	 */
-	"ellipsize":function (str, len, countChars) {
+	ellipsize: function (str, len, wordBoundary = false, countChars) {
 		if (!len) {
 			throw ("Length not specified in Zotero.Utilities.ellipsize()");
 		}
-		if (str.length > len) {
-			return str.substr(0, len) + '\u2026' + (countChars ? ' (' + str.length + ' chars)' : '');
+		if (str.length <= len) {
+			return str;
 		}
-		return str;
+		let radius = Math.min(len, 5);
+		if (wordBoundary) {
+			let min = len - radius;
+			// If next character is a space, include that so we stop at len
+			if (str.charAt(len).match(/\s/)) {
+				radius++;
+			}
+			// Remove trailing characters and spaces, up to radius
+			str = str.substr(0, min) + str.substr(min, radius).replace(/\W*\s\S*$/, "");
+		}
+		else {
+			str = str.substr(0, len)
+		}
+		return str + '\u2026' + (countChars ? ' (' + str.length + ' chars)' : '');
 	},
+	
+	
+	/**
+	 * Return the proper plural form of a string
+	 *
+	 * For now, this is only used for debug output in English.
+	 *
+	 * @param {Integer} num
+	 * @param {String[]|String} forms - If an array, an array of plural forms (e.g., ['object', 'objects']);
+	 *     currently only the two English forms are supported, for 1 and 0/many. If a single string,
+	 *     's' is added automatically for 0/many.
+	 * @return {String}
+	 */
+	pluralize: function (num, forms) {
+		if (typeof forms == 'string') {
+			forms = [forms, forms + 's'];
+		}
+		return num == 1 ? forms[0] : forms[1];
+	},
+	
 	
 	/**
 	  * Port of PHP's number_format()
@@ -779,6 +977,12 @@ Zotero.Utilities = {
 		return newString;
 	},
 	
+	"capitalize": function (str) {
+		if (typeof str != 'string') throw new Error("Argument must be a string");
+		if (!str) return str; // Empty string
+		return str[0].toUpperCase() + str.substr(1);
+	},
+	
 	/**
 	 * Replaces accented characters in a string with ASCII equivalents
 	 *
@@ -837,6 +1041,7 @@ Zotero.Utilities = {
 			{'base':'NJ','letters':/[\u01CA]/g},
 			{'base':'Nj','letters':/[\u01CB]/g},
 			{'base':'O', 'letters':/[\u004F\u24C4\uFF2F\u00D2\u00D3\u00D4\u1ED2\u1ED0\u1ED6\u1ED4\u00D5\u1E4C\u022C\u1E4E\u014C\u1E50\u1E52\u014E\u022E\u0230\u00D6\u022A\u1ECE\u0150\u01D1\u020C\u020E\u01A0\u1EDC\u1EDA\u1EE0\u1EDE\u1EE2\u1ECC\u1ED8\u01EA\u01EC\u00D8\u01FE\u0186\u019F\uA74A\uA74C]/g},
+			{'base':'OE','letters':/[\u0152]/g},
 			{'base':'OI','letters':/[\u01A2]/g},
 			{'base':'OO','letters':/[\uA74E]/g},
 			{'base':'OU','letters':/[\u0222]/g},
@@ -881,6 +1086,7 @@ Zotero.Utilities = {
 			{'base':'n', 'letters':/[\u006E\u24DD\uFF4E\u01F9\u0144\u00F1\u1E45\u0148\u1E47\u0146\u1E4B\u1E49\u019E\u0272\u0149\uA791\uA7A5]/g},
 			{'base':'nj','letters':/[\u01CC]/g},
 			{'base':'o', 'letters':/[\u006F\u24DE\uFF4F\u00F2\u00F3\u00F4\u1ED3\u1ED1\u1ED7\u1ED5\u00F5\u1E4D\u022D\u1E4F\u014D\u1E51\u1E53\u014F\u022F\u0231\u00F6\u022B\u1ECF\u0151\u01D2\u020D\u020F\u01A1\u1EDD\u1EDB\u1EE1\u1EDF\u1EE3\u1ECD\u1ED9\u01EB\u01ED\u00F8\u01FF\u0254\uA74B\uA74D\u0275]/g},
+			{'base':'oe','letters':/[\u0153]/g},
 			{'base':'oi','letters':/[\u01A3]/g},
 			{'base':'ou','letters':/[\u0223]/g},
 			{'base':'oo','letters':/[\uA74F]/g},
@@ -977,6 +1183,7 @@ Zotero.Utilities = {
 	 * @return {String[]} Creator types
 	 */
 	"getCreatorsForType":function(type) {
+		if(type === "attachment" || type === "note") return [];
 		var types = Zotero.CreatorTypes.getTypesForItemType(Zotero.ItemTypes.getID(type));
 		var cleanTypes = new Array();
 		for(var i=0; i<types.length; i++) {
@@ -1090,15 +1297,15 @@ Zotero.Utilities = {
 				// document, we need to use selectNodes
 				if(namespaces) {
 					var ieNamespaces = [];
-					for(var i in namespaces) {
-						if(!i) continue;
-						ieNamespaces.push('xmlns:'+i+'="'+Zotero.Utilities.htmlSpecialChars(namespaces[i])+'"');
+					for(var j in namespaces) {
+						if(!j) continue;
+						ieNamespaces.push('xmlns:'+j+'="'+Zotero.Utilities.htmlSpecialChars(namespaces[j])+'"');
 					}
 					rootDoc.setProperty("SelectionNamespaces", ieNamespaces.join(" "));
 				}
 				var nodes = element.selectNodes(xpath);
-				for(var i=0; i<nodes.length; i++) {
-					results.push(nodes[i]);
+				for(var j=0; j<nodes.length; j++) {
+					results.push(nodes[j]);
 				}
 			} else {
 				throw new Error("XPath functionality not available");
@@ -1196,13 +1403,18 @@ Zotero.Utilities = {
 			return '<<Unknown type: ' + type + '>> ' + obj;
 		}
 		
+		// Don't descend into global object cache for data objects
+		if (Zotero.isClient && typeof obj == 'object' && obj instanceof Zotero.DataObject) {
+			maxLevel = 1;
+		}
+		
 		// More complex dump with indentation for objects
 		if (level === undefined) {
 			level = 0;
 		}
 		
 		if (maxLevel === undefined) {
-			maxLevel = 4;
+			maxLevel = 5;
 		}
 		
 		var objType = Object.prototype.toString.call(obj);
@@ -1217,31 +1429,46 @@ Zotero.Utilities = {
 			level_padding += "    ";
 		}
 		
-		//Special handling for Error
+		//Special handling for Error or Exception
+		var isException = Zotero.isFx && !Zotero.isBookmarklet && obj instanceof Components.interfaces.nsIException;
 		var isError = obj instanceof Error;
-		if (!isError && obj.constructor) {
-			switch (obj.constructor.name) {
-				case 'Error':
-				case 'EvalError':
-				case 'RangeError':
-				case 'ReferenceError':
-				case 'SyntaxError':
-				case 'TypeError':
-				case 'URIError':
-					isError = true;
-			}
+		if (!isException && !isError && obj.message !== undefined && obj.stack !== undefined) {
+			isError = true;
 		}
-		if (isError) {
-			return (obj.constructor.name ? obj.constructor.name : 'Error') + ': '
-				+ (obj.message ? ('' + obj.message).replace(/^/gm, level_padding).trim() : '')
-				+ '\n' + level_padding + "===== Stack Trace =====\n"
-				+ (obj.stack ? obj.stack.trim().replace(/^(?=.)/gm, level_padding) : '')
-				+ '\n' + level_padding + "=======================";
+		
+		if (isError || isException) {
+			var header = '';
+			if (isError) {
+				header = (obj.constructor && obj.constructor.name) ? obj.constructor.name : 'Error';
+			} else {
+				header = (obj.name ? obj.name + ' ' : '') + 'Exception';
+			}
+			
+			let msg = (obj.message ? ('' + obj.message).replace(/^/gm, level_padding).trim() : '');
+			if (obj.stack) {
+				let stack = obj.stack.trim().replace(/^(?=.)/gm, level_padding);
+				stack = Zotero.Utilities.Internal.filterStack(stack);
+				
+				msg += '\n\n';
+				
+				// At least with Zotero.HTTP.UnexpectedStatusException, the stack contains "Error:"
+				// and the message in addition to the trace. I'm not sure what's causing that
+				// (Bluebird?), but fix it here.
+				if (stack.startsWith('Error:')) {
+					msg += stack.replace('Error: ' + obj.message + '\n', '');
+				}
+				else {
+					msg += stack;
+				}
+			}
+			
+			return header + ': ' + msg;
 		}
 		
 		// Only dump single level for nsIDOMNode objects (including document)
 		if (Zotero.isFx && !Zotero.isBookmarklet
-			&& obj instanceof Components.interfaces.nsIDOMNode
+			&& (obj instanceof Components.interfaces.nsIDOMNode
+				|| obj instanceof Components.interfaces.nsIDOMWindow)
 		) {
 			level = maxLevel;
 		}
@@ -1253,7 +1480,15 @@ Zotero.Utilities = {
 		}
 		
 		var isArray = objType == '[object Array]'
-		var dumpedText = isArray ? '[' : objType + ' {';
+		if (isArray) {
+			var dumpedText = '[';
+		}
+		else if (objType == '[object Object]') {
+			var dumpedText = '{';
+		}
+		else {
+			var dumpedText = objType + ' {';
+		}
 		for (var prop in obj) {
 			dumpedText += '\n' + level_padding + JSON.stringify(prop) + ": ";
 			
@@ -1291,252 +1526,113 @@ Zotero.Utilities = {
 	},
 	
 	/**
-	 * Adds all fields to an item in toArray() format and adds a unique (base) fields to 
-	 * uniqueFields array
-	 */
-	"itemToExportFormat":function(item) {
-		const CREATE_ARRAYS = ['creators', 'notes', 'tags', 'seeAlso', 'attachments'];
-		for(var i=0; i<CREATE_ARRAYS.length; i++) {
-			var createArray = CREATE_ARRAYS[i];
-			if(!item[createArray]) item[createArray] = [];
-		}
-		
-		item.uniqueFields = {};
-		
-		// get base fields, not just the type-specific ones
-		var itemTypeID = (item.itemTypeID ? item.itemTypeID : Zotero.ItemTypes.getID(item.itemType));
-		var allFields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
-		for(var i in allFields) {
-			var field = allFields[i];
-			var fieldName = Zotero.ItemFields.getName(field);
-			
-			if(item[fieldName] !== undefined) {
-				var baseField = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, field);
-				
-				var baseName = null;
-				if(baseField && baseField != field) {
-					baseName = Zotero.ItemFields.getName(baseField);
-				}
-				
-				if(baseName) {
-					item[baseName] = item[fieldName];
-					item.uniqueFields[baseName] = item[fieldName];
-				} else {
-					item.uniqueFields[fieldName] = item[fieldName];
-				}
-			}
-		}
-		
-		// preserve notes
-		if(item.note) item.uniqueFields.note = item.note;
-		
-		return item;
-	},
-	
-	/**
-	 * Converts an item from toArray() format to an array of items in
-	 * the content=json format used by the server
-	 */
-	"itemToServerJSON":function(item) {
-		var newItem = {
-				"itemKey":Zotero.Utilities.generateObjectKey(),
-				"itemVersion":0
-			},
-			newItems = [newItem];
-		
-		var typeID = Zotero.ItemTypes.getID(item.itemType);
-		if(!typeID) {
-			Zotero.debug("itemToServerJSON: Invalid itemType "+item.itemType+"; using webpage");
-			item.itemType = "webpage";
-			typeID = Zotero.ItemTypes.getID(item.itemType);
-		}
-		
-		var fieldID, itemFieldID;
-		for(var field in item) {
-			if(field === "complete" || field === "itemID" || field === "attachments"
-					|| field === "seeAlso") continue;
-			
-			var val = item[field];
-			
-			if(field === "itemType") {
-				newItem[field] = val;
-			} else if(field === "creators") {
-				// normalize creators
-				var n = val.length;
-				var newCreators = newItem.creators = [];
-				for(var j=0; j<n; j++) {
-					var creator = val[j];
-					
-					if(!creator.firstName && !creator.lastName) {
-						Zotero.debug("itemToServerJSON: Silently dropping empty creator");
-						continue;
-					}
-					
-					// Single-field mode
-					if (!creator.firstName || (creator.fieldMode && creator.fieldMode == 1)) {
-						var newCreator = {
-							name: creator.lastName
-						};
-					}
-					// Two-field mode
-					else {
-						var newCreator = {
-							firstName: creator.firstName,
-							lastName: creator.lastName
-						};
-					}
-					
-					// ensure creatorType is present and valid
-					if(creator.creatorType) {
-						if(Zotero.CreatorTypes.getID(creator.creatorType)) {
-							newCreator.creatorType = creator.creatorType;
-						} else {
-							Zotero.debug("itemToServerJSON: Invalid creator type "+creator.creatorType+"; falling back to author");
-						}
-					}
-					if(!newCreator.creatorType) newCreator.creatorType = "author";
-					
-					newCreators.push(newCreator);
-				}
-			} else if(field === "tags") {
-				// normalize tags
-				var n = val.length;
-				var newTags = newItem.tags = [];
-				for(var j=0; j<n; j++) {
-					var tag = val[j];
-					if(typeof tag === "object") {
-						if(tag.tag) {
-							tag = tag.tag;
-						} else if(tag.name) {
-							tag = tag.name;
-						} else {
-							Zotero.debug("itemToServerJSON: Discarded invalid tag");
-							continue;
-						}
-					} else if(tag === "") {
-						continue;
-					}
-					newTags.push({"tag":tag.toString(), "type":1});
-				}
-			} else if(field === "notes") {
-				// normalize notes
-				var n = val.length;
-				for(var j=0; j<n; j++) {
-					var note = val[j];
-					if(typeof note === "object") {
-						if(!note.note) {
-							Zotero.debug("itemToServerJSON: Discarded invalid note");
-							continue;
-						}
-						note = note.note;
-					}
-					newItems.push({"itemType":"note", "parentItem":newItem.itemKey,
-						"note":note.toString()});
-				}
-			} else if((fieldID = Zotero.ItemFields.getID(field))) {
-				// if content is not a string, either stringify it or delete it
-				if(typeof val !== "string") {
-					if(val || val === 0) {
-						val = val.toString();
-					} else {
-						continue;
-					}
-				}
-				
-				// map from base field if possible
-				if((itemFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, fieldID))) {
-					var fieldName = Zotero.ItemFields.getName(itemFieldID);
-					// Only map if item field does not exist
-					if(fieldName !== field && !newItem[fieldName]) newItem[fieldName] = val;
-					continue;	// already know this is valid
-				}
-				
-				// if field is valid for this type, set field
-				if(Zotero.ItemFields.isValidForType(fieldID, typeID)) {
-					newItem[field] = val;
-				} else {
-					Zotero.debug("itemToServerJSON: Discarded field "+field+": field not valid for type "+item.itemType, 3);
-				}
-			} else {
-				Zotero.debug("itemToServerJSON: Discarded unknown field "+field, 3);
-			}
-		}
-		
-		return newItems;
-	},
-	
-	/**
 	 * Converts an item from toArray() format to citeproc-js JSON
-	 * @param {Zotero.Item} item
-	 * @return {Object} The CSL item
+	 * @param {Zotero.Item} zoteroItem
+	 * @return {Object|Promise<Object>} A CSL item, or a promise for a CSL item if a Zotero.Item
+	 *     is passed
 	 */
-	"itemToCSLJSON":function(item) {
-		if(item instanceof Zotero.Item) {
-			item = item.toArray();
+	"itemToCSLJSON":function(zoteroItem) {
+		// If a Zotero.Item was passed, convert it to the proper format (skipping child items) and
+		// call this function again with that object
+		//
+		// (Zotero.Item won't be defined in translation-server)
+		if (typeof Zotero.Item !== 'undefined' && zoteroItem instanceof Zotero.Item) {
+			return this.itemToCSLJSON(
+				Zotero.Utilities.Internal.itemToExportFormat(zoteroItem, false, true)
+			);
 		}
 		
-		var itemType = item.itemType;
-		var cslType = CSL_TYPE_MAPPINGS[itemType];
-		if(!cslType) cslType = "article";
+		var cslType = CSL_TYPE_MAPPINGS[zoteroItem.itemType];
+		if (!cslType) {
+			throw new Error('Unexpected Zotero Item type "' + zoteroItem.itemType + '"');
+		}
+		
+		var itemTypeID = Zotero.ItemTypes.getID(zoteroItem.itemType);
 		
 		var cslItem = {
-			'id':item.itemID,
+			'id':zoteroItem.uri,
 			'type':cslType
 		};
 		
-		// Map text fields
-		var itemTypeID = Zotero.ItemTypes.getID(itemType);
+		// get all text variables (there must be a better way)
 		for(var variable in CSL_TEXT_MAPPINGS) {
 			var fields = CSL_TEXT_MAPPINGS[variable];
 			for(var i=0, n=fields.length; i<n; i++) {
-				var field = fields[i], value = undefined;
+				var field = fields[i],
+					value = null;
 				
-				if(field in item) {
-					value = item[field];
+				if(field in zoteroItem) {
+					value = zoteroItem[field];
 				} else {
+					if (field == 'versionNumber') field = 'version'; // Until https://github.com/zotero/zotero/issues/670
 					var fieldID = Zotero.ItemFields.getID(field),
-						baseMapping
-					if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)
-							&& (baseMapping = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, fieldID))) {
-						value = item[Zotero.ItemTypes.getName(baseMapping)];
+						typeFieldID;
+					if(fieldID
+						&& (typeFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID))
+					) {
+						value = zoteroItem[Zotero.ItemFields.getName(typeFieldID)];
 					}
 				}
 				
-				if(!value) continue;
+				if (!value) continue;
 				
-				var valueLength = value.length;
-				if(valueLength) {
+				if (typeof value == 'string') {
+					if (field == 'ISBN') {
+						// Only use the first ISBN in CSL JSON
+						var isbn = value.match(/^(?:97[89]-?)?(?:\d-?){9}[\dx](?!-)\b/i);
+						if (isbn) value = isbn[0];
+					}
+					else if (field == 'extra') {
+						value = Zotero.Cite.extraToCSL(value);
+					}
+					
 					// Strip enclosing quotes
-					if(value[0] === '"' && value[valueLength-1] === '"') {
-						value = value.substr(1, valueLength-2);
+					if(value.charAt(0) == '"' && value.indexOf('"', 1) == value.length - 1) {
+						value = value.substring(1, value.length-1);
 					}
+					cslItem[variable] = value;
+					break;
 				}
-				
-				cslItem[variable] = value;
-				break;
 			}
 		}
 		
 		// separate name variables
-		var authorID = Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID);
-		var authorFieldName = Zotero.CreatorTypes.getName(authorID);
-		var creators = item.creators;
-		if(creators) {
-			for(var i=0, n=creators.length; i<n; i++) {
+		if (zoteroItem.type != "attachment" && zoteroItem.type != "note") {
+			var author = Zotero.CreatorTypes.getName(Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID));
+			var creators = zoteroItem.creators;
+			for(var i=0; creators && i<creators.length; i++) {
 				var creator = creators[i];
-				
-				if(creator.creatorType == authorFieldName) {
-					var creatorType = "author";
-				} else {
-					var creatorType = CSL_NAMES_MAPPINGS[creator.creatorType]
+				var creatorType = creator.creatorType;
+				if(creatorType == author) {
+					creatorType = "author";
 				}
 				
+				creatorType = CSL_NAMES_MAPPINGS[creatorType];
 				if(!creatorType) continue;
 				
-				if(creator.fieldMode == 1) {
-					var nameObj = {'literal':creator.lastName};
-				} else {
-					var nameObj = {'family':creator.lastName, 'given':creator.firstName};
+				var nameObj;
+				if (creator.lastName || creator.firstName) {
+					nameObj = {
+						family: creator.lastName || '',
+						given: creator.firstName || ''
+					};
+					
+					// Parse name particles
+					// Replicate citeproc-js logic for what should be parsed so we don't
+					// break current behavior.
+					if (nameObj.family && nameObj.given) {
+						// Don't parse if last name is quoted
+						if (nameObj.family.length > 1
+							&& nameObj.family.charAt(0) == '"'
+							&& nameObj.family.charAt(nameObj.family.length - 1) == '"'
+						) {
+							nameObj.family = nameObj.family.substr(1, nameObj.family.length - 2);
+						} else {
+							Zotero.CiteProc.CSL.parseParticles(nameObj, true);
+						}
+					}
+				} else if (creator.name) {
+					nameObj = {'literal': creator.name};
 				}
 				
 				if(cslItem[creatorType]) {
@@ -1549,7 +1645,14 @@ Zotero.Utilities = {
 		
 		// get date variables
 		for(var variable in CSL_DATE_MAPPINGS) {
-			var date = item[CSL_DATE_MAPPINGS[variable]];
+			var date = zoteroItem[CSL_DATE_MAPPINGS[variable]];
+			if (!date) {
+				var typeSpecificFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, CSL_DATE_MAPPINGS[variable]);
+				if (typeSpecificFieldID) {
+					date = zoteroItem[Zotero.ItemFields.getName(typeSpecificFieldID)];
+				}
+			}
+			
 			if(date) {
 				var dateObj = Zotero.Date.strToDate(date);
 				// otherwise, use date-parts
@@ -1558,6 +1661,7 @@ Zotero.Utilities = {
 					// add year, month, and day, if they exist
 					dateParts.push(dateObj.year);
 					if(dateObj.month !== undefined) {
+						// strToDate() returns a JS-style 0-indexed month, so we add 1 to it
 						dateParts.push(dateObj.month+1);
 						if(dateObj.day) {
 							dateParts.push(dateObj.day);
@@ -1566,7 +1670,7 @@ Zotero.Utilities = {
 					cslItem[variable] = {"date-parts":[dateParts]};
 					
 					// if no month, use season as month
-					if(dateObj.part && !dateObj.month) {
+					if(dateObj.part && dateObj.month === undefined) {
 						cslItem[variable].season = dateObj.part;
 					}
 				} else {
@@ -1576,7 +1680,12 @@ Zotero.Utilities = {
 			}
 		}
 		
-		//this._cache[item.id] = cslItem;
+		// Special mapping for note title
+		if (zoteroItem.itemType == 'note' && zoteroItem.note) {
+			cslItem.title = Zotero.Notes.noteToTitle(zoteroItem.note);
+		}
+		
+		//this._cache[zoteroItem.id] = cslItem;
 		return cslItem;
 	},
 	
@@ -1586,14 +1695,44 @@ Zotero.Utilities = {
 	 * @param {Object} cslItem
 	 */
 	"itemFromCSLJSON":function(item, cslItem) {
-		var isZoteroItem = item instanceof Zotero.Item, zoteroType;
+		var isZoteroItem = !!item.setType,
+			zoteroType;
 		
-		for(var type in CSL_TYPE_MAPPINGS) {
-			if(CSL_TYPE_MAPPINGS[type] == cslItem.type) {
-				zoteroType = type;
-				break;
+		// Some special cases to help us map item types correctly
+		// This ensures that we don't lose data on import. The fields
+		// we check are incompatible with the alternative item types
+		if (cslItem.type == 'book') {
+			zoteroType = 'book';
+			if (cslItem.version) {
+				zoteroType = 'computerProgram';
+			}
+		} else if (cslItem.type == 'bill') {
+			zoteroType = 'bill';
+			if (cslItem.publisher || cslItem['number-of-volumes']) {
+				zoteroType = 'hearing';
+			}
+		} else if (cslItem.type == 'song') {
+			zoteroType = 'audioRecording';
+			if (cslItem.number) {
+				zoteroType = 'podcast';
+			}
+		} else if (cslItem.type == 'motion_picture') {
+			zoteroType = 'film';
+			if (cslItem['collection-title'] || cslItem['publisher-place']
+				|| cslItem['event-place'] || cslItem.volume
+				|| cslItem['number-of-volumes'] || cslItem.ISBN
+			) {
+				zoteroType = 'videoRecording';
+			}
+		} else {
+			for(var type in CSL_TYPE_MAPPINGS) {
+				if(CSL_TYPE_MAPPINGS[type] == cslItem.type) {
+					zoteroType = type;
+					break;
+				}
 			}
 		}
+		
 		if(!zoteroType) zoteroType = "document";
 		
 		var itemTypeID = Zotero.ItemTypes.getID(zoteroType);
@@ -1608,20 +1747,26 @@ Zotero.Utilities = {
 		for(var variable in CSL_TEXT_MAPPINGS) {
 			if(variable in cslItem) {
 				var textMappings = CSL_TEXT_MAPPINGS[variable];
-				for(var i in textMappings) {
-					var field = textMappings[i],
-						fieldID = Zotero.ItemFields.getID(field);
+				for(var i=0; i<textMappings.length; i++) {
+					var field = textMappings[i];
+					var fieldID = Zotero.ItemFields.getID(field);
+
 					if(Zotero.ItemFields.isBaseField(fieldID)) {
 						var newFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID);
 						if(newFieldID) fieldID = newFieldID;
 					}
 					
 					if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
+						// TODO: Convert restrictive Extra cheater syntax ('original-date: 2018')
+						// to nicer format we allow ('Original Date: 2018'), unless we've added
+						// those fields before we get to that
 						if(isZoteroItem) {
-							item.setField(fieldID, cslItem[variable], true);
+							item.setField(fieldID, cslItem[variable]);
 						} else {
 							item[field] = cslItem[variable];
 						}
+						
+						break;
 					}
 				}
 			}
@@ -1637,23 +1782,24 @@ Zotero.Utilities = {
 				
 				var nameMappings = cslItem[CSL_NAMES_MAPPINGS[field]];
 				for(var i in nameMappings) {
-					var cslAuthor = nameMappings[i],
-						creator = isZoteroItem ? new Zotero.Creator() : {};
+					var cslAuthor = nameMappings[i];
+					let creator = {};
 					if(cslAuthor.family || cslAuthor.given) {
-						if(cslAuthor.family) creator.lastName = cslAuthor.family;
-						if(cslAuthor.given) creator.firstName = cslAuthor.given;
+						creator.lastName = cslAuthor.family || '';
+						creator.firstName = cslAuthor.given || '';
 					} else if(cslAuthor.literal) {
 						creator.lastName = cslAuthor.literal;
 						creator.fieldMode = 1;
 					} else {
 						continue;
 					}
+					creator.creatorTypeID = creatorTypeID;
 					
 					if(isZoteroItem) {
-						item.setCreator(item.getCreators().length, creator, creatorTypeID);
+						item.setCreator(item.getCreators().length, creator);
 					} else {
 						creator.creatorType = Zotero.CreatorTypes.getName(creatorTypeID);
-						if(Zotero.isFx && !Zotero.isBookmarklet && Zotero.platformMajorVersion >= 32) {
+						if (Zotero.isFx && !Zotero.isBookmarklet) {
 							creator = Components.utils.cloneInto(creator, item);
 						}
 						item.creators.push(creator);
@@ -1808,16 +1954,26 @@ Zotero.Utilities = {
 		return Zotero.ItemTypes.getImageSrc(attachment.mimeType === "application/pdf"
 							? "attachment-pdf" : "attachment-snapshot");
 	},
-
+	
+	"allowedKeyChars": "23456789ABCDEFGHIJKLMNPQRSTUVWXYZ",
+	
 	/**
 	 * Generates a valid object key for the server API
 	 */
 	"generateObjectKey":function generateObjectKey() {
-		// TODO: add 'L' and 'Y' after 3.0.11 cut-off
-		var baseString = "23456789ABCDEFGHIJKMNPQRSTUVWXZ";
-		return Zotero.Utilities.randomString(8, baseString);
+		return Zotero.Utilities.randomString(8, Zotero.Utilities.allowedKeyChars);
 	},
-
+	
+	/**
+	 * Check if an object key is in a valid format
+	 */
+	"isValidObjectKey":function(key) {
+		if (!Zotero.Utilities.objectKeyRegExp) {
+			Zotero.Utilities.objectKeyRegExp = new RegExp('^[' + Zotero.Utilities.allowedKeyChars + ']{8}$');
+		}
+		return Zotero.Utilities.objectKeyRegExp.test(key);
+	},
+	
 	/**
 	 * Provides unicode support and other additional features for regular expressions
 	 * See https://github.com/slevithan/xregexp for usage

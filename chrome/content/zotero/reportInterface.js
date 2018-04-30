@@ -25,70 +25,53 @@
 
 
 var Zotero_Report_Interface = new function() {
-	this.loadCollectionReport = loadCollectionReport;
-	this.loadItemReport = loadItemReport;
-	this.loadItemReportByIds = loadItemReportByIds;
-	
-	
 	/*
 	 * Load a report for the currently selected collection
 	 */
-	function loadCollectionReport(event) {
-		var queryString = '';
-		
-		var col = ZoteroPane_Local.getSelectedCollection();
+	this.loadCollectionReport = function (event) {
 		var sortColumn = ZoteroPane_Local.getSortField();
 		var sortDirection = ZoteroPane_Local.getSortDirection();
-		if (sortColumn != 'title' || sortDirection != 'ascending') {
-			queryString = '?sort=' + sortColumn + (sortDirection == 'ascending' ? '' : '/d');
+		var queryString = '?sort=' + sortColumn
+			+ '&direction=' + (sortDirection == 'ascending' ? 'asc' : 'desc');
+		
+		var url = 'zotero://report/';
+		
+		var source = ZoteroPane_Local.getSelectedCollection();
+		if (!source) {
+			source = ZoteroPane_Local.getSelectedSavedSearch();
+		}
+		if (!source) {
+			throw new Error('No collection currently selected');
 		}
 		
-		if (col) {
-			ZoteroPane_Local.loadURI('zotero://report/collection/'
-				+ Zotero.Collections.getLibraryKeyHash(col)
-				+ '/html/report.html' + queryString, event);
-			return;
+		url += Zotero.API.getLibraryPrefix(source.libraryID) + '/';
+		
+		if (source instanceof Zotero.Collection) {
+			url += 'collections/' + source.key;
+		}
+		else {
+			url += 'searches/' + source.key;
 		}
 		
-		var s = ZoteroPane_Local.getSelectedSavedSearch();
-		if (s) {
-			ZoteroPane_Local.loadURI('zotero://report/search/'
-				+ Zotero.Searches.getLibraryKeyHash(s)
-				+ '/html/report.html' + queryString, event);
-			return;
-		}
+		url += '/items' + queryString;
 		
-		throw ('No collection currently selected');
+		ZoteroPane_Local.loadURI(url, event);
 	}
 	
 	
 	/*
 	 * Load a report for the currently selected items
 	 */
-	function loadItemReport(event) {
+	this.loadItemReport = function (event) {
+		var libraryID = ZoteroPane_Local.getSelectedLibraryID();
 		var items = ZoteroPane_Local.getSelectedItems();
 		
 		if (!items || !items.length) {
-			throw ('No items currently selected');
+			throw new Error('No items currently selected');
 		}
 		
-		var keyHashes = [];
-		for each(var item in items) {
-			keyHashes.push(Zotero.Items.getLibraryKeyHash(item));
-		}
-		
-		ZoteroPane_Local.loadURI('zotero://report/items/' + keyHashes.join('-') + '/html/report.html', event);
-	}
-	
-	
-	/*
-	 * Load a report for the specified items
-	 */
-	function loadItemReportByIds(ids) {
-		if (!ids || !ids.length) {
-			throw ('No itemIDs provided to loadItemReportByIds()');
-		}
-		
-		ZoteroPane_Local.loadURI('zotero://report/items/' + ids.join('-') + '/html/report.html');
+		var url = 'zotero://report/' + Zotero.API.getLibraryPrefix(libraryID) + '/items'
+			+ '?itemKey=' + items.map(item => item.key).join(',');
+		ZoteroPane_Local.loadURI(url, event);
 	}
 }

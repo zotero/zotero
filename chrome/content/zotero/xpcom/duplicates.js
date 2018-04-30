@@ -29,16 +29,15 @@ Zotero.Duplicates = function (libraryID) {
 	}
 	
 	if (!libraryID) {
-		libraryID = null;
+		libraryID = Zotero.Libraries.userLibraryID;
 	}
 	
 	this._libraryID = libraryID;
 }
 
 
-Zotero.Duplicates.prototype.__defineGetter__('name', function () Zotero.getString('pane.collections.duplicate'));
-Zotero.Duplicates.prototype.__defineGetter__('libraryID', function () this._libraryID);
-
+Zotero.Duplicates.prototype.__defineGetter__('name', function () { return Zotero.getString('pane.collections.duplicate'); });
+Zotero.Duplicates.prototype.__defineGetter__('libraryID', function () { return this._libraryID; });
 
 /**
  * Get duplicates, populate a temporary table, and return a search based
@@ -46,40 +45,39 @@ Zotero.Duplicates.prototype.__defineGetter__('libraryID', function () this._libr
  *
  * @return {Zotero.Search}
  */
-Zotero.Duplicates.prototype.getSearchObject = function () {
-	Zotero.DB.beginTransaction();
+Zotero.Duplicates.prototype.getSearchObject = async function () {
+	var table = 'tmpDuplicates_' + Zotero.Utilities.randomString();
 	
-	var sql = "DROP TABLE IF EXISTS tmpDuplicates";
-	Zotero.DB.query(sql);
-	
-	var sql = "CREATE TEMPORARY TABLE tmpDuplicates "
-				+ "(id INTEGER PRIMARY KEY)";
-	Zotero.DB.query(sql);
-	
-	this._findDuplicates();
+	await this._findDuplicates();
 	var ids = this._sets.findAll(true);
 	
-	sql = "INSERT INTO tmpDuplicates VALUES (?)";
-	var insertStatement = Zotero.DB.getStatement(sql);
+	// Zotero.CollectionTreeRow::getSearchObject() extracts the table name and creates an
+	// unload listener that drops the table when the ItemTreeView is unregistered
+	var sql = `CREATE TEMPORARY TABLE ${table} (id INTEGER PRIMARY KEY)`;
+	await Zotero.DB.queryAsync(sql);
 	
-	for each(var id in ids) {
-		insertStatement.bindInt32Parameter(0, id);
-		
-		try {
-			insertStatement.execute();
-		}
-		catch(e) {
-			throw (e + ' [ERROR: ' + Zotero.DB.getLastErrorString() + ']');
-		}
+	if (ids.length) {
+		Zotero.debug("Inserting rows into temp table");
+		sql = `INSERT INTO ${table} VALUES `;
+		await Zotero.Utilities.Internal.forEachChunkAsync(
+			ids,
+			Zotero.DB.MAX_BOUND_PARAMETERS,
+			async function (chunk) {
+				let idStr = '(' + chunk.join('), (') + ')';
+				await Zotero.DB.queryAsync(sql + idStr, false, { debug: false });
+			}
+		);
+		Zotero.debug("Done");
 	}
-	
-	Zotero.DB.commitTransaction();
+	else {
+		Zotero.debug("No duplicates found");
+	}
 	
 	var s = new Zotero.Search;
 	s.libraryID = this._libraryID;
-	s.addCondition('tempTable', 'is', 'tmpDuplicates');
+	s.addCondition('tempTable', 'is', table);
 	return s;
-}
+};
 
 
 /**
@@ -100,7 +98,9 @@ Zotero.Duplicates.prototype._getObjectFromID = function (id) {
 }
 
 
-Zotero.Duplicates.prototype._findDuplicates = function () {
+Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function* () {
+	Zotero.debug("Finding duplicates");
+	
 	var start = Date.now();
 	
 	var self = this;
@@ -148,8 +148,8 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	 *                                    set and the next start row would be a
 	 *                                    different title.
 	 */
-	function processRows(compareRows, reprocessMatches) {
-		if (!rows) {
+	function processRows(rows, compareRows, reprocessMatches) {
+		if (!rows.length) {
 			return;
 		}
 		
@@ -196,7 +196,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 				+ "JOIN itemDataValues USING (valueID) "
 				+ "WHERE libraryID=? AND itemTypeID=? AND fieldID=? "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
-	var rows = Zotero.DB.query(
+	var rows = yield Zotero.DB.queryAsync(
 		sql,
 		[
 			this._libraryID,
@@ -205,29 +205,50 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 		]
 	);
 	var isbnCache = {};
-	if (rows) {
-		for each(var row in rows) {
-			row.value = Zotero.Utilities.cleanISBN('' + row.value);
-			if (row.value) isbnCache[row.itemID] = row.value;
+	if (rows.length) {
+		let newRows = [];
+		for (let i = 0; i < rows.length; i++) {
+			let row = rows[i];
+			let newVal = Zotero.Utilities.cleanISBN('' + row.value);
+			if (!newVal) continue;
+			isbnCache[row.itemID] = newVal;
+			newRows.push({
+				itemID: row.itemID,
+				value: newVal
+			});
 		}
-		rows.sort(sortByValue);
-		processRows();
+		newRows.sort(sortByValue);
+		processRows(newRows);
 	}
 	
 	// DOI
 	var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND fieldID=? AND REGEXP('^10\\.', value) "
+				+ "WHERE libraryID=? AND fieldID=? AND value LIKE ? "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
-	var rows = Zotero.DB.query(sql, [this._libraryID, Zotero.ItemFields.getID('DOI')]);
+	var rows = yield Zotero.DB.queryAsync(
+		sql,
+		[
+			this._libraryID,
+			Zotero.ItemFields.getID('DOI'),
+			'10.%'
+		]
+	);
 	var doiCache = {};
-	if (rows) {
-		for each(var row in rows) {
-			row.value = (row.value+'').trim().toUpperCase(); //DOIs are case insensitive
-			doiCache[row.itemID] = row.value;
+	if (rows.length) {
+		let newRows = [];
+		for (let i = 0; i < rows.length; i++) {
+			let row = rows[i];
+			// DOIs are case insensitive
+			let newVal = (row.value + '').trim().toUpperCase();
+			doiCache[row.itemID] = newVal;
+			newRows.push({
+				itemID: row.itemID,
+				value: newVal
+			});
 		}
-		rows.sort(sortByValue);
-		processRows();
+		newRows.sort(sortByValue);
+		processRows(newRows);
 	}
 	
 	// Get years
@@ -238,37 +259,74 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 				+ "JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
 				+ "WHERE libraryID=? AND fieldID IN ("
-				+ dateFields.map(function () '?').join() + ") "
+				+ dateFields.map(() => '?').join() + ") "
 				+ "AND SUBSTR(value, 1, 4) != '0000' "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
 				+ "ORDER BY value";
-	var rows = Zotero.DB.query(sql, [this._libraryID].concat(dateFields));
+	var rows = yield Zotero.DB.queryAsync(sql, [this._libraryID].concat(dateFields));
 	var yearCache = {};
-	if (rows) {
-		for each(var row in rows) {
-			yearCache[row.itemID] = row.year;
-		}
+	for (let i = 0; i < rows.length; i++) {
+		let row = rows[i];
+		yearCache[row.itemID] = row.year;
 	}
 	
-	var creatorRowsCache = {};
-	
 	// Match on normalized title
+	var titleIDs = Zotero.ItemFields.getTypeFieldsFromBase('title');
+	titleIDs.push(Zotero.ItemFields.getID('title'));
 	var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND fieldID BETWEEN 110 AND 113 "
+				+ "WHERE libraryID=? AND fieldID IN "
+				+ "(" + titleIDs.join(', ') + ") "
 				+ "AND itemTypeID NOT IN (1, 14) "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
-	var rows = Zotero.DB.query(sql, [this._libraryID]);
-	if(rows) {
+	var rows = yield Zotero.DB.queryAsync(sql, [this._libraryID]);
+	if (rows.length) {
 		//normalize all values ahead of time
 		rows = rows.map(function(row) {
-			row.value = normalizeString(row.value);
-			return row;
+			return {
+				itemID: row.itemID,
+				value: normalizeString(row.value)
+			};
 		});
 		//sort rows by normalized values
 		rows.sort(sortByValue);
 		
-		processRows(function (a, b) {
+		// Get all creators and separate by itemID
+		//
+		// We won't need all of these, but otherwise we would have to make processRows()
+		// asynchronous, which would be too slow
+		let creatorRowsCache = {};
+		let sql = "SELECT itemID, lastName, firstName, fieldMode FROM items "
+			+ "JOIN itemCreators USING (itemID) "
+			+ "JOIN creators USING (creatorID) "
+			+ "WHERE libraryID=? AND itemTypeID NOT IN (1, 14) AND "
+			+ "itemID NOT IN (SELECT itemID FROM deletedItems)"
+			+ "ORDER BY itemID, orderIndex";
+		let creatorRows = yield Zotero.DB.queryAsync(sql, this._libraryID);
+		let lastItemID;
+		let itemCreators = [];
+		for (let i = 0; i < creatorRows.length; i++) {
+			let row = creatorRows[i];
+			if (lastItemID && row.itemID != lastItemID) {
+				if (itemCreators.length) {
+					creatorRowsCache[lastItemID] = itemCreators;
+					itemCreators = [];
+				}
+			}
+			
+			lastItemID = row.itemID;
+			
+			itemCreators.push({
+				lastName: normalizeString(row.lastName),
+				firstInitial: row.fieldMode == 0 ? normalizeString(row.firstName).charAt(0) : false
+			});
+		}
+		// Add final item creators
+		if (itemCreators.length) {
+			creatorRowsCache[lastItemID] = itemCreators;
+		}
+		
+		processRows(rows, function (a, b) {
 			var aTitle = a.value;
 			var bTitle = b.value;
 			
@@ -307,26 +365,8 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 			if (typeof creatorRowsCache[a.itemID] != 'undefined') {
 				aCreatorRows = creatorRowsCache[a.itemID];
 			}
-			else {
-				var sql = "SELECT lastName, firstName, fieldMode FROM itemCreators "
-							+ "JOIN creators USING (creatorID) "
-							+ "JOIN creatorData USING (creatorDataID) "
-							+ "WHERE itemID=? ORDER BY orderIndex LIMIT 10";
-				aCreatorRows = Zotero.DB.query(sql, a.itemID);
-				creatorRowsCache[a.itemID] = aCreatorRows;
-			}
-			
-			// Check for at least one match on last name + first initial of first name
 			if (typeof creatorRowsCache[b.itemID] != 'undefined') {
 				bCreatorRows = creatorRowsCache[b.itemID];
-			}
-			else {
-				var sql = "SELECT lastName, firstName, fieldMode FROM itemCreators "
-							+ "JOIN creators USING (creatorID) "
-							+ "JOIN creatorData USING (creatorDataID) "
-							+ "WHERE itemID=? ORDER BY orderIndex LIMIT 10";
-				bCreatorRows = Zotero.DB.query(sql, b.itemID);
-				creatorRowsCache[b.itemID] = bCreatorRows;
 			}
 			
 			// Match if no creators
@@ -338,13 +378,15 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 				return 0;
 			}
 			
-			for each(var aCreatorRow in aCreatorRows) {
-				var aLastName = normalizeString(aCreatorRow.lastName);
-				var aFirstInitial = aCreatorRow.fieldMode == 0 ? normalizeString(aCreatorRow.firstName).charAt(0) : false;
+			for (let i = 0; i < aCreatorRows.length; i++) {
+				let aCreatorRow = aCreatorRows[i];
+				let aLastName = aCreatorRow.lastName;
+				let aFirstInitial = aCreatorRow.firstInitial;
 				
-				for each(var bCreatorRow in bCreatorRows) {
-					var bLastName = normalizeString(bCreatorRow.lastName);
-					var bFirstInitial = bCreatorRow.fieldMode == 0 ? normalizeString(bCreatorRow.firstName).charAt(0) : false;
+				for (let j = 0; j < bCreatorRows.length; j++) {
+					let bCreatorRow = bCreatorRows[j];
+					let bLastName = bCreatorRow.lastName;
+					let bFirstInitial = bCreatorRow.firstInitial;
 					
 					if (aLastName === bLastName && aFirstInitial === bFirstInitial) {
 						return 1;
@@ -358,18 +400,18 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	
 	// Match on exact fields
 	/*var fields = [''];
-	for each(var field in fields) {
+	for (let field of fields) {
 		var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
 					+ "JOIN itemDataValues USING (valueID) "
 					+ "WHERE libraryID=? AND fieldID=? "
 					+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
 					+ "ORDER BY value";
-		var rows = Zotero.DB.query(sql, [this._libraryID, Zotero.ItemFields.getID(field)]);
-		processRows();
+		var rows = yield Zotero.DB.queryAsync(sql, [this._libraryID, Zotero.ItemFields.getID(field)]);
+		processRows(rows);
 	}*/
 	
 	Zotero.debug("Found duplicates in " + (Date.now() - start) + " ms");
-}
+});
 
 
 
@@ -439,7 +481,8 @@ Zotero.DisjointSetForest.prototype.sameSet = function (x, y) {
 
 Zotero.DisjointSetForest.prototype.findAll = function (asIDs) {
 	var objects = [];
-	for each(var obj in this._objects) {
+	for (let i in this._objects) {
+		let obj = this._objects[i];
 		objects.push(asIDs ? obj.id : obj);
 	}
 	return objects;
@@ -449,7 +492,8 @@ Zotero.DisjointSetForest.prototype.findAll = function (asIDs) {
 Zotero.DisjointSetForest.prototype.findAllInSet = function (x, asIDs) {
 	var xRoot = this.find(x);
 	var objects = [];
-	for each(var obj in this._objects) {
+	for (let i in this._objects) {
+		let obj = this._objects[i];
 		if (this.find(obj) == xRoot) {
 			objects.push(asIDs ? obj.id : obj);
 		}

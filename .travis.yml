@@ -1,0 +1,54 @@
+sudo: false
+language: node_js
+node_js:
+    - "8"
+cache:
+    directories:
+        - "build"
+        - "node_modules"
+env:
+    global:
+        secure: "NxvkbZ7/Op7BTGQRR3C4q8lLoO29f8WtyNN27NSH7AO3H0vBr1Vp5xO8gn+H2qHEug5HvM+YrZ/xAkNXaZVbOInmBmKVMxqVvdpKp9JM1Amf+gzsXWQphfySvs6iqzyP6cwU/jspdvX/WSakgU5v7PWXxtUIaKxdANt6Rw7W+Pc="
+    matrix:
+        - FX_VERSION="52.0.3"
+matrix:
+    fast_finish: true
+    #allow_failures:
+    #    - env: FX_CHANNEL="beta"
+notifications:
+    email: false
+addons:
+  apt:
+    packages:
+    - dbus-x11
+install:
+    - if [ $FX_VERSION = "52.0.3" ]; then
+        wget -O tarball "https://archive.mozilla.org/pub/firefox/tinderbox-builds/mozilla-release-linux64-add-on-devel/1491732920/firefox-52.0.3.en-US.linux-x86_64-add-on-devel.tar.bz2";
+      fi
+    - tar xf tarball
+before_script:
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
+    - npm i
+    - npm run build
+    - if [[ $TRAVIS_REPO_SLUG = "zotero/zotero" &&
+            ($TRAVIS_BRANCH = "master" || $TRAVIS_BRANCH = *-hotfix) &&
+            $TRAVIS_PULL_REQUEST = "false" ]]; then
+        mkdir build-zip;
+        cd build;
+        zip -r ../build-zip/$TRAVIS_COMMIT.zip *;
+        cd ..;
+        gem install dpl;
+        dpl --provider=s3
+            --access-key-id=AKIAJFDVJ54MCAEXPQ5Q
+            --bucket=zotero-download
+            --local-dir=build-zip
+            --upload-dir=ci/client
+            --acl=public-read
+            --skip_cleanup=true;
+      fi
+    - unset AWS_SECRET_ACCESS_KEY
+    # Fix warnings in output
+    - dbus-launch
+script:
+    - test/runtests.sh -x firefox/firefox -f

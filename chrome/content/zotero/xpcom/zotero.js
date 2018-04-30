@@ -25,35 +25,32 @@
 
 // Commonly used imports accessible anywhere
 Components.utils.import("resource://zotero/config.js");
-Components.utils.import("resource://zotero/q.js");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
+Components.utils.import("resource://gre/modules/osfile.jsm");
+Components.utils.import("resource://gre/modules/PluralForm.jsm");
+Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
+	.getService(Components.interfaces.nsIOSFileConstantsService)
+	.init();
+
+Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 
 /*
  * Core functions
  */
  (function(){
 	// Privileged (public) methods
-	this.init = init;
-	this.stateCheck = stateCheck;
-	this.getProfileDirectory = getProfileDirectory;
-	this.getZoteroDirectory = getZoteroDirectory;
 	this.getStorageDirectory = getStorageDirectory;
-	this.getZoteroDatabase = getZoteroDatabase;
-	this.chooseZoteroDirectory = chooseZoteroDirectory;
 	this.debug = debug;
 	this.log = log;
 	this.logError = logError;
-	this.getErrors = getErrors;
-	this.getSystemInfo = getSystemInfo;
-	this.getString = getString;
 	this.localeJoin = localeJoin;
 	this.setFontSize = setFontSize;
 	this.flattenArguments = flattenArguments;
 	this.getAncestorByTagName = getAncestorByTagName;
-	this.join = join;
 	this.randomString = randomString;
 	this.moveToUnique = moveToUnique;
+	this.reinit = reinit; // defined in zotero-service.js
 	
 	// Public properties
 	this.initialized = false;
@@ -67,104 +64,51 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	this.isMac;
 	this.isWin;
 	this.initialURL; // used by Schema to show the changelog on upgrades
-	
-	
-	this.__defineGetter__('userID', function () {
-		if (_userID !== undefined) return _userID;
-		var sql = "SELECT value FROM settings WHERE "
-					+ "setting='account' AND key='userID'";
-		return _userID = Zotero.DB.valueQuery(sql);
-	});
-	
-	this.__defineSetter__('userID', function (val) {
-		var sql = "REPLACE INTO settings VALUES ('account', 'userID', ?)";
-		Zotero.DB.query(sql, parseInt(val));
-		_userID = val;
-	});
-	
-	this.__defineGetter__('libraryID', function () {
-		if (_libraryID !== undefined) return _libraryID;
-		var sql = "SELECT value FROM settings WHERE "
-					+ "setting='account' AND key='libraryID'";
-		return _libraryID = Zotero.DB.valueQuery(sql);
-	});
-	
-	this.__defineSetter__('libraryID', function (val) {
-		var sql = "REPLACE INTO settings VALUES ('account', 'libraryID', ?)";
-		Zotero.DB.query(sql, parseInt(val));
-		_libraryID = val;
-	});
-	
-	this.__defineGetter__('username', function () {
-		var sql = "SELECT value FROM settings WHERE "
-					+ "setting='account' AND key='username'";
-		return Zotero.DB.valueQuery(sql);
-	});
-	
-	this.__defineSetter__('username', function (val) {
-		var sql = "REPLACE INTO settings VALUES ('account', 'username', ?)";
-		Zotero.DB.query(sql, val);
-	});
+	this.Promise = require('resource://zotero/bluebird.js');
 	
 	this.getActiveZoteroPane = function() {
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-			.getService(Components.interfaces.nsIWindowMediator);
-		var win = wm.getMostRecentWindow("navigator:browser");
-		return win.ZoteroPane;
+		var win = Services.wm.getMostRecentWindow("navigator:browser");
+		return win ? win.ZoteroPane : null;
 	};
-	
-	this.getLocalUserKey = function (generate) {
-		if (_localUserKey) {
-			return _localUserKey;
-		}
-		
-		var sql = "SELECT value FROM settings WHERE "
-					+ "setting='account' AND key='localUserKey'";
-		var key = Zotero.DB.valueQuery(sql);
-		
-		// Generate a local user key if we don't have a global library id
-		if (!key && generate) {
-			key = Zotero.randomString(8);
-			var sql = "INSERT INTO settings VALUES ('account', 'localUserKey', ?)";
-			Zotero.DB.query(sql, key);
-		}
-		_localUserKey = key;
-		return key;
-	};
-	
-	/**
-	 * @property	{Boolean}	waiting		Whether Zotero is waiting for other
-	 *										main thread events to be processed
-	 */
-	this.__defineGetter__('waiting', function () _waiting);
 	
 	/**
 	 * @property	{Boolean}	locked		Whether all Zotero panes are locked
 	 *										with an overlay
 	 */
-	this.__defineGetter__('locked', function () _locked);
-	
-	/**
-	 * @property	{Boolean}	suppressUIUpdates	Don't update UI on Notifier triggers
-	 */
-	this.suppressUIUpdates = false;
+	this.__defineGetter__('locked', function () { return _locked; });
+	this.__defineSetter__('locked', function (lock) {
+		var wasLocked = _locked;
+		_locked = lock;
+		
+		if (!wasLocked && lock) {
+			this.unlockDeferred = Zotero.Promise.defer();
+			this.unlockPromise = this.unlockDeferred.promise;
+		}
+		else if (wasLocked && !lock) {
+			Zotero.debug("Running unlock callbacks");
+			this.unlockDeferred.resolve();
+		}
+	});
 	
 	/**
 	 * @property	{Boolean}	closing		True if the application is closing.
 	 */
 	this.closing = false;
 	
-	var _startupErrorHandler;
-	var _zoteroDirectory = false;
-	var _localizedStringBundle;
-	var _userID;
-	var _libraryID;
-	var _localUserKey;
-	var _waiting = 0;
 	
-	var _locked;
-	var _unlockCallbacks = [];
+	this.unlockDeferred;
+	this.unlockPromise;
+	this.initializationDeferred;
+	this.initializationPromise;
+	
+	this.hiDPISuffix = "";
+	
+	var _startupErrorHandler;
+	var _localizedStringBundle;
+	
+	var _locked = false;
 	var _shutdownListeners = [];
+	var _progressMessage;
 	var _progressMeters;
 	var _progressPopup;
 	var _lastPercentage;
@@ -186,8 +130,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	/**
 	 * Maintains running nsITimers in global scope, so that they don't disappear randomly
 	 */
-	var _runningTimers = [];
+	var _runningTimers = new Map();
 	
+	var _startupTime = new Date();
 	// Errors that were in the console at startup
 	var _startupErrors = [];
 	// Number of errors to maintain in the recent errors buffer
@@ -197,39 +142,78 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	
 	/**
 	 * Initialize the extension
+	 *
+	 * @return {Promise<Boolean>}
 	 */
-	function init(options) {
+	this.init = Zotero.Promise.coroutine(function* (options) {
 		if (this.initialized || this.skipLoading) {
 			return false;
 		}
 		
-		// Load in the preferences branch for the extension
-		Zotero.Prefs.init();
-		Zotero.Debug.init(options && options.forceDebugLog);
+		this.locked = true;
+		this.initializationDeferred = Zotero.Promise.defer();
+		this.initializationPromise = this.initializationDeferred.promise;
+		this.uiReadyDeferred = Zotero.Promise.defer();
+		this.uiReadyPromise = this.uiReadyDeferred.promise;
+		
+		// Add a function to Zotero.Promise to check whether a value is still defined, and if not
+		// to throw a specific error that's ignored by the unhandled rejection handler in
+		// bluebird.js. This allows for easily cancelling promises when they're no longer
+		// needed, for example after a binding is destroyed.
+		//
+		// Example usage:
+		//
+		// getAsync.tap(() => Zotero.Promise.check(this.mode))
+		//
+		// If the binding is destroyed while getAsync() is being resolved and this.mode no longer
+		// exists, subsequent lines won't be run, and nothing will be logged to the console.
+		this.Promise.check = function (val) {
+			if (!val && val !== 0) {
+				let e = new Error;
+				e.name = "ZoteroPromiseInterrupt";
+				throw e;
+			}
+		};
 		
 		if (options) {
-			if (options.openPane) this.openPane = true;
+			let opts = [
+				'openPane',
+				'test',
+				'automatedTest',
+				'skipBundledFiles'
+			];
+			opts.filter(opt => options[opt]).forEach(opt => this[opt] = true);
+			
+			this.forceDataDir = options.forceDataDir;
 		}
 		
-		this.mainThread = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
+		this.mainThread = Services.tm.mainThread;
+		
+		this.clientName = ZOTERO_CONFIG.CLIENT_NAME;
 		
 		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
 			.getService(Components.interfaces.nsIXULAppInfo);
 		this.platformVersion = appInfo.platformVersion;
 		this.platformMajorVersion = parseInt(appInfo.platformVersion.match(/^[0-9]+/)[0]);
 		this.isFx = true;
+		this.isClient = true;
+		this.isStandalone = Services.appinfo.ID == ZOTERO_CONFIG['GUID'];
 		
-		this.isStandalone = appInfo.ID == ZOTERO_CONFIG['GUID'];
-		if(this.isStandalone) {
-			this.version = appInfo.version;
-		} else {
-			// Use until we collect version from extension manager
-			this.version = ZOTERO_CONFIG['VERSION'];
-			
-			Components.utils.import("resource://gre/modules/AddonManager.jsm");
-			AddonManager.getAddonByID(ZOTERO_CONFIG['GUID'],
-				function(addon) { Zotero.version = addon.version; });
+		if (Zotero.isStandalone) {
+			var version = Services.appinfo.version;
 		}
+		else {
+			let deferred = Zotero.Promise.defer();
+			Components.utils.import("resource://gre/modules/AddonManager.jsm");
+			AddonManager.getAddonByID(
+				ZOTERO_CONFIG.GUID,
+				function (addon) {
+					deferred.resolve(addon.version);
+				}
+			);
+			var version = yield deferred.promise;
+		}
+		Zotero.version = version;
 		
 		// OS platform
 		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
@@ -244,39 +228,42 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		// Browser
 		Zotero.browser = "g";
 		
-		// Locale
-		var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-						.getService(Components.interfaces.nsIPrefService),
-			uaPrefs = prefs.getBranch("general.useragent.");
-		try {
-			this.locale = uaPrefs.getComplexValue("locale", Components.interfaces.nsIPrefLocalizedString);
-		} catch (e) {}
-		
-		if(this.locale) {
-			this.locale = this.locale.toString();
-		} else {
-			this.locale = uaPrefs.getCharPref("locale");
+		//
+		// Get settings from language pack (extracted by zotero-build/locale/merge_mozilla_files)
+		//
+		function getIntlProp(name, fallback = null) {
+			try {
+				return intlProps.GetStringFromName(name);
+			}
+			catch (e) {
+				Zotero.logError(`Couldn't load ${name} from intl.properties`);
+				return fallback;
+			}
 		}
-		
-		if (this.locale.length == 2) {
-			this.locale = this.locale + '-' + this.locale.toUpperCase();
+		function setOrClearIntlPref(name, type) {
+			var val = getIntlProp(name);
+			if (val !== null) {
+				if (type == 'boolean') {
+					val = val == 'true';
+				}
+				Zotero.Prefs.set(name, val, 1);
+			}
+			else {
+				Zotero.Prefs.clear(name, 1);
+			}
 		}
-		
-		// Load in the localization stringbundle for use by getString(name)
-		var stringBundleService =
-			Components.classes["@mozilla.org/intl/stringbundle;1"]
-			.getService(Components.interfaces.nsIStringBundleService);
-		var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
-							getService(Components.interfaces.nsILocaleService);
-		var appLocale = localeService.getApplicationLocale();
-		
-		_localizedStringBundle = stringBundleService.createBundle(
-			"chrome://zotero/locale/zotero.properties", appLocale);
+		var intlProps = Services.strings.createBundle("chrome://zotero/locale/mozilla/intl.properties");
+		this.locale = getIntlProp('general.useragent.locale', 'en-US');
+		let [get, numForms] = PluralForm.makeGetter(parseInt(getIntlProp('pluralRule', 1)));
+		this.pluralFormGet = get;
+		this.pluralFormNumForms = numForms;
+		setOrClearIntlPref('intl.accept_languages', 'string');
 		
 		// Also load the brand as appName
-		var brandBundle = stringBundleService.createBundle(
-			"chrome://branding/locale/brand.properties", appLocale);
+		var brandBundle = Services.strings.createBundle("chrome://branding/locale/brand.properties");
 		this.appName = brandBundle.GetStringFromName("brandShortName");
+		
+		_localizedStringBundle = Services.strings.createBundle("chrome://zotero/locale/zotero.properties");
 		
 		// Set the locale direction to Zotero.dir
 		// DEBUG: is there a better way to get the entity from JS?
@@ -292,113 +279,134 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		else {
 			Zotero.dir = 'ltr';
 		}
-
+		Zotero.rtl = Zotero.dir == 'rtl';
+		
+		Zotero.Prefs.init();
+		Zotero.Debug.init(options && options.forceDebugLog);
+		
 		// Make sure that Zotero Standalone is not running as root
 		if(Zotero.isStandalone && !Zotero.isWin) _checkRoot();
 		
+		_addToolbarIcon();
+		
 		try {
-			var dataDir = Zotero.getZoteroDirectory();
+			yield Zotero.DataDirectory.init();
+			if (this.restarting) {
+				return;
+			}
+			var dataDir = Zotero.DataDirectory.dir;
 		}
 		catch (e) {
 			// Zotero dir not found
-			if (e.name == 'NS_ERROR_FILE_NOT_FOUND') {
-				Zotero.startupError = Zotero.getString('dataDir.notFound');
+			if ((e instanceof OS.File.Error && e.becauseNoSuchFile) || e.name == 'NS_ERROR_FILE_NOT_FOUND') {
+				let foundInDefault = false;
+				try {
+					foundInDefault = (yield OS.File.exists(Zotero.DataDirectory.defaultDir))
+						&& (yield OS.File.exists(
+							OS.Path.join(
+								Zotero.DataDirectory.defaultDir,
+								Zotero.DataDirectory.getDatabaseFilename()
+							)
+						));
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				
+				let previousDir = Zotero.Prefs.get('lastDataDir')
+					|| Zotero.Prefs.get('dataDir')
+					|| e.dataDir;
+				Zotero.startupError = foundInDefault
+					? Zotero.getString(
+						'dataDir.notFound.defaultFound',
+						[
+							Zotero.clientName,
+							previousDir,
+							Zotero.DataDirectory.defaultDir
+						]
+					)
+					: Zotero.getString('dataDir.notFound', Zotero.clientName);
 				_startupErrorHandler = function() {
 					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 							createInstance(Components.interfaces.nsIPromptService);
-					var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
-						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
-						+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
-					var index = ps.confirmEx(null,
-						Zotero.getString('general.error'),
-						Zotero.startupError + '\n\n' +
-						Zotero.getString('dataDir.previousDir') + ' '
-							+ Zotero.Prefs.get('lastDataDir'),
-						buttonFlags, null,
-						Zotero.getString('dataDir.useProfileDir', Zotero.appName),
-						Zotero.getString('general.locate'),
-						null, {});
-					
-					// Revert to profile directory
-					if (index == 1) {
-						Zotero.chooseZoteroDirectory(false, true);
+					var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+						+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING
+						+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+					// TEMP: lastDataDir can be removed once old persistent descriptors have been
+					// converted, which they are in getZoteroDirectory() in 5.0
+					if (foundInDefault) {
+						let index = ps.confirmEx(null,
+							Zotero.getString('general.error'),
+							Zotero.startupError,
+							buttonFlags,
+							Zotero.getString('dataDir.useNewLocation'),
+							Zotero.getString('general.quit'),
+							Zotero.getString('general.locate'),
+							null, {}
+						);
+						// Revert to home directory
+						if (index == 0) {
+							Zotero.DataDirectory.set(Zotero.DataDirectory.defaultDir);
+							Zotero.Utilities.Internal.quit(true);
+							return;
+						}
+						// Locate data directory
+						else if (index == 2) {
+							Zotero.DataDirectory.choose(true);
+						}
+
 					}
-					// Locate data directory
-					else if (index == 2) {
-						Zotero.chooseZoteroDirectory();
+					else {
+						let index = ps.confirmEx(null,
+							Zotero.getString('general.error'),
+							Zotero.startupError
+								+ (previousDir
+									? '\n\n' + Zotero.getString('dataDir.previousDir') + ' ' + previousDir
+									: ''),
+							buttonFlags,
+							Zotero.getString('general.quit'),
+							Zotero.getString('dataDir.useDefaultLocation'),
+							Zotero.getString('general.locate'),
+							null, {}
+						);
+						// Revert to home directory
+						if (index == 1) {
+							Zotero.DataDirectory.set(Zotero.DataDirectory.defaultDir);
+							Zotero.Utilities.Internal.quit(true);
+							return;
+						}
+						// Locate data directory
+						else if (index == 2) {
+							Zotero.DataDirectory.choose(true);
+						}
 					}
 				}
 				return;
-			} else if(e.name == "ZOTERO_DIR_MAY_EXIST") {
-				var app = Zotero.isStandalone ? Zotero.getString('app.standalone') : Zotero.getString('app.firefox');
-				var altApp = !Zotero.isStandalone ? Zotero.getString('app.standalone') : Zotero.getString('app.firefox');
-				
-				var message = Zotero.getString("dataDir.standaloneMigration.description", [app, altApp]);
-				if(e.multipleProfiles) {
-					message += "\n\n"+Zotero.getString("dataDir.standaloneMigration.multipleProfiles", [app, altApp]);
-				}
-				
-				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
-						createInstance(Components.interfaces.nsIPromptService);
-				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_YES)
-					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_NO)
-					+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
-				var index = ps.confirmEx(null, Zotero.getString("dataDir.standaloneMigration.title"), message,
-					buttonFlags, null, null,
-					Zotero.getString('dataDir.standaloneMigration.selectCustom'),
-					null, {});
-				
-				// Migrate data directory
-				if (index == 0) {
-					// copy prefs
-					var prefsFile = e.profile.clone();
-					prefsFile.append("prefs.js");
-					if(prefsFile.exists()) {
-						// build sandbox
-						var sandbox = new Components.utils.Sandbox("http://www.example.com/");
-						Components.utils.evalInSandbox(
-							"var prefs = {};"+
-							"function user_pref(key, val) {"+
-								"prefs[key] = val;"+
-							"}"
-						, sandbox);
-						
-						// remove comments
-						var prefsJs = Zotero.File.getContents(prefsFile);
-						prefsJs = prefsJs.replace(/^#[^\r\n]*$/mg, "");
-						
-						// evaluate
-						Components.utils.evalInSandbox(prefsJs, sandbox);
-						var prefs = sandbox.prefs;
-						for(var key in prefs) {
-							if(key.substr(0, ZOTERO_CONFIG.PREF_BRANCH.length) === ZOTERO_CONFIG.PREF_BRANCH
-									&& key !== "extensions.zotero.firstRun2") {
-								Zotero.Prefs.set(key.substr(ZOTERO_CONFIG.PREF_BRANCH.length), prefs[key]);
-							}
-						}
-					}
-					
-					// also set data dir if no custom data dir is now defined
-					if(!Zotero.Prefs.get("useDataDir")) {
-						var dir = e.dir.QueryInterface(Components.interfaces.nsILocalFile);
-						Zotero.Prefs.set('dataDir', dir.persistentDescriptor);
-						Zotero.Prefs.set('lastDataDir', dir.path);
-						Zotero.Prefs.set('useDataDir', true);
-					}
-				}
-				// Create new data directory
-				else if (index == 1) {
-					Zotero.File.createDirectoryIfMissing(e.curDir);
-				}
-				// Locate new data directory
-				else if (index == 2) {
-					Zotero.chooseZoteroDirectory(true);
-				}
 			}
 			// DEBUG: handle more startup errors
 			else {
-				throw (e);
-				return false;
+				throw e;
+			}
+		}
+		
+		if (!Zotero.isConnector) {
+			if (!this.forceDataDir) {
+				yield Zotero.DataDirectory.checkForMigration(
+					dataDir, Zotero.DataDirectory.defaultDir
+				);
+				if (this.skipLoading) {
+					return;
+				}
+				
+				yield Zotero.DataDirectory.checkForLostLegacy();
+				if (this.restarting) {
+					return;
+				}
+			}
+			
+			// Make sure data directory isn't in Dropbox, etc.
+			if (Zotero.isStandalone) {
+				yield Zotero.DataDirectory.checkForUnsafeLocation(dataDir);
 			}
 		}
 		
@@ -410,43 +418,35 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			Zotero.IPC.init();
 		}
 		catch (e) {
-			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
-				var msg = Zotero.localeJoin([
-					Zotero.getString('startupError.databaseCannotBeOpened'),
-					Zotero.getString('startupError.checkPermissions')
-				]);
-				Zotero.startupError = msg;
-				Zotero.debug(e);
-				Components.utils.reportError(e);
+			if (_checkDataDirAccessError(e)) {
 				return false;
 			}
 			throw (e);
 		}
 		
-		var cs = Components.classes["@mozilla.org/consoleservice;1"].
-			getService(Components.interfaces.nsIConsoleService);
 		// Get startup errors
 		try {
 			var messages = {};
-			cs.getMessageArray(messages, {});
-			_startupErrors = [msg for each(msg in messages.value) if(_shouldKeepError(msg))];
+			Services.console.getMessageArray(messages, {});
+			_startupErrors = Object.keys(messages.value).map(i => messages[i])
+				.filter(msg => _shouldKeepError(msg));
 		} catch(e) {
 			Zotero.logError(e);
 		}
 		// Register error observer
-		cs.registerListener(ConsoleListener);
+		Services.console.registerListener(ConsoleListener);
 		
 		// Add shutdown listener to remove quit-application observer and console listener
 		this.addShutdownListener(function() {
 			Services.obs.removeObserver(_shutdownObserver, "quit-application", false);
-			cs.unregisterListener(ConsoleListener);
+			Services.console.unregisterListener(ConsoleListener);
 		});
 		
 		// Load additional info for connector or not
 		if(Zotero.isConnector) {
 			Zotero.debug("Loading in connector mode");
 			Zotero.Connector_Types.init();
-
+			
 			// Store a startupError until we get information from Zotero Standalone
 			Zotero.startupError = Zotero.getString("connector.loadInProgress")
 			
@@ -459,24 +459,34 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			}
 		} else {
 			Zotero.debug("Loading in full mode");
-			if(!_initFull()) return false;
-			if(Zotero.isStandalone) Zotero.Standalone.init();
-			Zotero.initComplete();
+			return _initFull()
+			.then(function (success) {
+				if (!success) {
+					return false;
+				}
+				
+				if(Zotero.isStandalone) Zotero.Standalone.init();
+				Zotero.initComplete();
+			})
 		}
 		
 		return true;
-	}
+	});
 	
 	/**
 	 * Triggers events when initialization finishes
 	 */
 	this.initComplete = function() {
 		if(Zotero.initialized) return;
-		this.initialized = true;
+		
+		Zotero.debug("Running initialization callbacks");
 		delete this.startupError;
+		this.initialized = true;
+		this.initializationDeferred.resolve();
 		
 		if(Zotero.isConnector) {
 			Zotero.Repo.init();
+			Zotero.locked = false;
 		}
 		
 		if(!Zotero.isFirstLoadThisSession) {
@@ -489,135 +499,217 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		Services.obs.notifyObservers(Zotero, "zotero-loaded", null);
 	}
 	
+	
+	this.uiIsReady = function () {
+		if (this.uiReadyPromise.isPending()) {
+			Zotero.debug("User interface ready in " + (new Date() - _startupTime) + " ms");
+			this.uiReadyDeferred.resolve();
+		}
+	};
+	
+	
+	var _addToolbarIcon = function () {
+		if (Zotero.isStandalone) return;
+		
+		// Add toolbar icon
+		try {
+			Services.scriptloader.loadSubScript("chrome://zotero/content/icon.js", {}, "UTF-8");
+		}
+		catch (e) {
+			if (Zotero) {
+				Zotero.debug(e, 1);
+			}
+			Components.utils.reportError(e);
+		}
+	};
+	
+	
 	/**
 	 * Initialization function to be called only if Zotero is in full mode
+	 *
+	 * @return {Promise:Boolean}
 	 */
-	function _initFull() {
-		var dataDir = Zotero.getZoteroDirectory();
+	var _initFull = Zotero.Promise.coroutine(function* () {
+		if (!(yield _initDB())) return false;
+		
 		Zotero.VersionHeader.init();
 		
-		// Check for DB restore
-		var restoreFile = dataDir.clone();
-		restoreFile.append('restore-from-server');
-		if (restoreFile.exists()) {
+		// Check for data reset/restore
+		var dataDir = Zotero.DataDirectory.dir;
+		var restoreFile = OS.Path.join(dataDir, 'restore-from-server');
+		var resetDataDirFile = OS.Path.join(dataDir, 'reset-data-directory');
+		
+		var result = yield Zotero.Promise.all([OS.File.exists(restoreFile), OS.File.exists(resetDataDirFile)]);
+		if (result.some(r => r)) {
+			[Zotero.restoreFromServer, Zotero.resetDataDir] = result;
 			try {
+				yield Zotero.DB.closeDatabase();
+				
 				// TODO: better error handling
 				
 				// TODO: prompt for location
 				// TODO: Back up database
+				// TODO: Reset translators and styles
 				
-				restoreFile.remove(false);
 				
-				var dbfile = Zotero.getZoteroDatabase();
-				dbfile.remove(false);
 				
-				// Recreate database with no quick start guide
-				Zotero.Schema.skipDefaultData = true;
-				Zotero.Schema.updateSchema();
+				if (Zotero.restoreFromServer) {
+					let dbfile = Zotero.DataDirectory.getDatabase();
+					Zotero.debug("Deleting " + dbfile);
+					yield OS.File.remove(dbfile, { ignoreAbsent: true });
+					let storageDir = OS.Path.join(dataDir, 'storage');
+					Zotero.debug("Deleting " + storageDir.path);
+					OS.File.removeDir(storageDir, { ignoreAbsent: true }),
+					yield OS.File.remove(restoreFile);
+					Zotero.restoreFromServer = true;
+				}
+				else if (Zotero.resetDataDir) {
+					Zotero.initAutoSync = true;
+					
+					// Clear some user prefs
+					[
+						'sync.server.username',
+						'sync.storage.username'
+					].forEach(p => Zotero.Prefs.clear(p));
+					
+					// Clear data directory
+					Zotero.debug("Deleting data directory files");
+					let lastError;
+					// Delete all files in directory rather than removing directory, in case it's
+					// a symlink
+					yield Zotero.File.iterateDirectory(dataDir, function* (iterator) {
+						while (true) {
+							let entry = yield iterator.next();
+							// Don't delete some files
+							if (entry.name == 'pipes') {
+								continue;
+							}
+							Zotero.debug("Deleting " + entry.path);
+							try {
+								if (entry.isDir) {
+									yield OS.File.removeDir(entry.path);
+								}
+								else {
+									yield OS.File.remove(entry.path);
+								}
+							}
+							// Keep trying to delete as much as we can
+							catch (e) {
+								lastError = e;
+								Zotero.logError(e);
+							}
+						}
+					});
+					if (lastError) {
+						throw lastError;
+					}
+				}
+				Zotero.debug("Done with reset");
 				
-				Zotero.restoreFromServer = true;
+				if (!(yield _initDB())) return false;
 			}
 			catch (e) {
 				// Restore from backup?
 				alert(e);
+				return false;
 			}
 		}
-		
-		if(!_initDB()) return false;
 		
 		Zotero.HTTP.triggerProxyAuth();
 		
 		// Add notifier queue callbacks to the DB layer
-		Zotero.DB.addCallback('begin', Zotero.Notifier.begin);
-		Zotero.DB.addCallback('commit', Zotero.Notifier.commit);
-		Zotero.DB.addCallback('rollback', Zotero.Notifier.reset);
+		Zotero.DB.addCallback('begin', id => Zotero.Notifier.begin(id));
+		Zotero.DB.addCallback('commit', id => Zotero.Notifier.commit(null, id));
+		Zotero.DB.addCallback('rollback', id => Zotero.Notifier.reset(id));
 		
-		// Require >=2.1b3 database to ensure proper locking
-		if (Zotero.isStandalone && Zotero.Schema.getDBVersion('system') > 0 && Zotero.Schema.getDBVersion('system') < 31) {
-			var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
-					.getService(Components.interfaces.nsIAppStartup);
-			
-			var dir = Zotero.getProfileDirectory();
-			dir.append('zotero');
-
-			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-						.createInstance(Components.interfaces.nsIPromptService);
-			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
-				+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
-				+ ps.BUTTON_POS_2_DEFAULT;
-			var index = ps.confirmEx(
-				null,
-				Zotero.getString('dataDir.incompatibleDbVersion.title'),
-				Zotero.getString('dataDir.incompatibleDbVersion.text'),
-				buttonFlags,
-				Zotero.getString('general.useDefault'),
-				Zotero.getString('dataDir.standaloneMigration.selectCustom'),
-				Zotero.getString('general.quit'),
-				null,
-				{}
-			);
-			
-			var quit = false;
-			
-			// Default location
-			if (index == 0) {
-				Zotero.File.createDirectoryIfMissing(dir);
-				
-				Zotero.Prefs.set("useDataDir", false)
-				
-				appStartup.quit(
-					Components.interfaces.nsIAppStartup.eAttemptQuit
-						| Components.interfaces.nsIAppStartup.eRestart
-				);
-			}
-			// Select new data directory
-			else if (index == 1) {
-				var dir = Zotero.chooseZoteroDirectory(true);
-				if (!dir) {
-					quit = true;
+		try {
+			// Require >=2.1b3 database to ensure proper locking
+			if (Zotero.isStandalone) {
+				let dbSystemVersion = yield Zotero.Schema.getDBVersion('system');
+				if (dbSystemVersion > 0 && dbSystemVersion < 31) {
+					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.createInstance(Components.interfaces.nsIPromptService);
+					var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
+						+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
+						+ ps.BUTTON_POS_2_DEFAULT;
+					var index = ps.confirmEx(
+						null,
+						Zotero.getString('dataDir.incompatibleDbVersion.title'),
+						Zotero.getString('dataDir.incompatibleDbVersion.text'),
+						buttonFlags,
+						Zotero.getString('general.useDefault'),
+						Zotero.getString('dataDir.chooseNewDataDirectory'),
+						Zotero.getString('general.quit'),
+						null,
+						{}
+					);
+					
+					var quit = false;
+					
+					// Default location
+					if (index == 0) {
+						Zotero.Prefs.set("useDataDir", false)
+						
+						Services.startup.quit(
+							Components.interfaces.nsIAppStartup.eAttemptQuit
+								| Components.interfaces.nsIAppStartup.eRestart
+						);
+					}
+					// Select new data directory
+					else if (index == 1) {
+						let dir = yield Zotero.DataDirectory.choose(true);
+						if (!dir) {
+							quit = true;
+						}
+					}
+					else {
+						quit = true;
+					}
+					
+					if (quit) {
+						Services.startup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
+					}
+					
+					throw true;
 				}
 			}
-			else {
-				quit = true;
-			}
 			
-			if (quit) {
-				appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
-			}
-			
-			Zotero.skipLoading = true;
-			return false;
-		}
-		
-		// Trigger updating of schema and scrapers
-		if (Zotero.Schema.userDataUpgradeRequired()) {
-			var upgraded = Zotero.Schema.showUpgradeWizard();
-			if (!upgraded) {
-				Zotero.skipLoading = true;
-				return false;
-			}
-		}
-		// If no userdata upgrade, still might need to process system
-		else {
 			try {
-				var updated = Zotero.Schema.updateSchema();
+				var updated = yield Zotero.Schema.updateSchema({
+					onBeforeUpdate: (options = {}) => {
+						if (options.minor) return;
+						try {
+							Zotero.showZoteroPaneProgressMeter(
+								Zotero.getString('upgrade.status')
+							)
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
+					}
+				});
 			}
 			catch (e) {
-				if (typeof e == 'string' && e.match('newer than SQL file')) {
-					var kbURL = "http://zotero.org/support/kb/newer_db_version";
-					var msg = Zotero.localeJoin([
-							Zotero.getString('startupError.zoteroVersionIsOlder'),
-							Zotero.getString('startupError.zoteroVersionIsOlder.upgrade')
-						]) + "\n\n"
-						+ Zotero.getString('startupError.zoteroVersionIsOlder.current', Zotero.version) + "\n\n"
-						+ Zotero.getString('general.seeForMoreInformation', kbURL);
+				Zotero.logError(e);
+				
+				if (e instanceof Zotero.DB.IncompatibleVersionException) {
+					let kbURL = "https://www.zotero.org/support/kb/newer_db_version";
+					let msg = (e.dbClientVersion
+						? Zotero.getString('startupError.incompatibleDBVersion',
+							[Zotero.clientName, e.dbClientVersion])
+						: Zotero.getString('startupError.zoteroVersionIsOlder')) + "\n\n"
+						+ Zotero.getString('startupError.zoteroVersionIsOlder.current', Zotero.version)
+							+ "\n\n"
+						+ Zotero.getString('startupError.zoteroVersionIsOlder.upgrade',
+							ZOTERO_CONFIG.DOMAIN_NAME);
 					Zotero.startupError = msg;
 					_startupErrorHandler = function() {
 						var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 							.getService(Components.interfaces.nsIPromptService);
 						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+							+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
 							+ ps.BUTTON_POS_0_DEFAULT;
 						
 						var index = ps.confirmEx(
@@ -626,16 +718,19 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 							Zotero.startupError,
 							buttonFlags,
 							Zotero.getString('general.checkForUpdate'),
-							null, null, null, {}
+							null,
+							Zotero.getString('general.moreInformation'),
+							null,
+							{}
 						);
 						
-						// "Check for updates" button
+						// "Check for Update" button
 						if(index === 0) {
 							if(Zotero.isStandalone) {
 								Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 									.getService(Components.interfaces.nsIWindowWatcher)
 									.openWindow(null, 'chrome://mozapps/content/update/updates.xul',
-										'updateChecker', 'chrome,centerscreen', null);
+										'updateChecker', 'chrome,centerscreen,modal', null);
 							} else {
 								// In Firefox, show the add-on manager
 								Components.utils.import("resource://gre/modules/AddonManager.jsm");
@@ -674,75 +769,132 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 								);
 							}
 						}
+						// Load More Info page
+						else if (index == 2) {
+							let io = Components.classes['@mozilla.org/network/io-service;1']
+								.getService(Components.interfaces.nsIIOService);
+							let uri = io.newURI(kbURL, null, null);
+							let handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
+								.getService(Components.interfaces.nsIExternalProtocolService)
+								.getProtocolHandlerInfo('http');
+							handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
+							handler.launchWithURI(uri, null);
+						}
 					};
+					throw e;
 				}
-				else {
-					Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError') + "\n\n" + e;
-				}
-				Zotero.skipLoading = true;
-				Components.utils.reportError(e);
-				return false;
+				
+				let stack = e.stack ? Zotero.Utilities.Internal.filterStack(e.stack) : null;
+				Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError')
+					+ "\n\n"
+					+ (stack || e);
+				throw e;
 			}
+			
+			yield Zotero.Users.init();
+			yield Zotero.Libraries.init();
+			
+			yield Zotero.ItemTypes.init();
+			yield Zotero.ItemFields.init();
+			yield Zotero.CreatorTypes.init();
+			yield Zotero.FileTypes.init();
+			yield Zotero.CharacterSets.init();
+			yield Zotero.RelationPredicates.init();
+			
+			Zotero.locked = false;
+			
+			// Initialize various services
+			Zotero.Integration.init();
+			
+			if(Zotero.Prefs.get("httpServer.enabled")) {
+				Zotero.Server.init();
+			}
+			
+			yield Zotero.Fulltext.init();
+			
+			Zotero.Notifier.registerObserver(Zotero.Tags, 'setting', 'tags');
+			
+			yield Zotero.Sync.Data.Local.init();
+			yield Zotero.Sync.Data.Utilities.init();
+			Zotero.Sync.Runner = new Zotero.Sync.Runner_Module;
+			Zotero.Sync.EventListeners.init();
+			Zotero.Streamer = new Zotero.Streamer_Module;
+			Zotero.Streamer.init();
+			
+			Zotero.MIMETypeHandler.init();
+			yield Zotero.Proxies.init();
+			
+			// Initialize keyboard shortcuts
+			Zotero.Keys.init();
+			
+			yield Zotero.Date.init();
+			Zotero.LocateManager.init();
+			yield Zotero.ID.init();
+			yield Zotero.Collections.init();
+			yield Zotero.Items.init();
+			yield Zotero.Searches.init();
+			yield Zotero.Tags.init();
+			yield Zotero.Creators.init();
+			yield Zotero.Groups.init();
+			yield Zotero.Relations.init();
+			
+			// Load all library data except for items, which are loaded when libraries are first
+			// clicked on or if otherwise necessary
+			yield Zotero.Promise.each(
+				Zotero.Libraries.getAll(),
+				library => Zotero.Promise.coroutine(function* () {
+					yield Zotero.SyncedSettings.loadAll(library.libraryID);
+					if (library.libraryType != 'feed') {
+						yield Zotero.Collections.loadAll(library.libraryID);
+						yield Zotero.Searches.loadAll(library.libraryID);
+					}
+				})()
+			);
+
+			
+			Zotero.Items.startEmptyTrashTimer();
+			
+			yield Zotero.QuickCopy.init();
+			Zotero.addShutdownListener(() => Zotero.QuickCopy.uninit());
+			
+			Zotero.Feeds.init();
+			Zotero.addShutdownListener(() => Zotero.Feeds.uninit());
+			
+			Zotero.Schema.schemaUpdatePromise.then(Zotero.purgeDataObjects.bind(Zotero));
+			
+			return true;
 		}
-		
-		Zotero.Fulltext.init();
-		
-		Zotero.DB.startDummyStatement();
-		
-		// Populate combined tables for custom types and fields -- this is likely temporary
-		if (!upgraded && !updated) {
-			Zotero.Schema.updateCustomTables();
+		catch (e) {
+			Zotero.logError(e);
+			if (!Zotero.startupError) {
+				Zotero.startupError = Zotero.getString('startupError') + "\n\n" + (e.stack || e);
+			}
+			return false;
 		}
-		
-		// Initialize various services
-		Zotero.Styles.preinit();
-		Zotero.Integration.init();
-		
-		if(Zotero.Prefs.get("httpServer.enabled")) {
-			Zotero.Server.init();
-		}
-		
-		Zotero.Notifier.registerObserver(Zotero.Tags, 'setting');
-		
-		Zotero.Sync.init();
-		Zotero.Sync.Runner.init();
-		
-		Zotero.MIMETypeHandler.init();
-		Zotero.Proxies.init();
-		
-		// Initialize keyboard shortcuts
-		Zotero.Keys.init();
-		
-		// Initialize Locate Manager
-		Zotero.LocateManager.init();
-		
-		Zotero.Items.startEmptyTrashTimer();
-		
-		return true;
-	}
+	});
 	
 	/**
 	 * Initializes the DB connection
 	 */
-	function _initDB(haveReleasedLock) {
+	var _initDB = Zotero.Promise.coroutine(function* (haveReleasedLock) {
 		try {
 			// Test read access
-			Zotero.DB.test();
+			yield Zotero.DB.test();
 			
-			var dbfile = Zotero.getZoteroDatabase();
+			let dbfile = Zotero.DataDirectory.getDatabase();
 
 			// Tell any other Zotero instances to release their lock,
 			// in case we lost the lock on the database (how?) and it's
 			// now open in two places at once
-			Zotero.IPC.broadcast("releaseLock "+dbfile.persistentDescriptor);
+			Zotero.IPC.broadcast("releaseLock " + dbfile);
 			
 			// Test write access on Zotero data directory
-			if (!dbfile.parent.isWritable()) {
-				var msg = 'Cannot write to ' + dbfile.parent.path + '/';
+			if (!Zotero.File.pathToFile(OS.Path.dirname(dbfile)).isWritable()) {
+				var msg = 'Cannot write to ' + OS.Path.dirname(dbfile) + '/';
 			}
 			// Test write access on Zotero database
-			else if (!dbfile.isWritable()) {
-				var msg = 'Cannot write to ' + dbfile.path;
+			else if (!Zotero.File.pathToFile(dbfile).isWritable()) {
+				var msg = 'Cannot write to ' + dbfile;
 			}
 			else {
 				var msg = false;
@@ -752,59 +904,66 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				var e = {
 					name: 'NS_ERROR_FILE_ACCESS_DENIED',
 					message: msg,
-					toString: function () {
-						return Zotero.name + ': ' + Zotero.message; 
-					}
+					toString: function () { return this.message; }
 				};
 				throw (e);
 			}
 		}
 		catch (e) {
-			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
-				var msg = Zotero.localeJoin([
-					Zotero.getString('startupError.databaseCannotBeOpened'),
-					Zotero.getString('startupError.checkPermissions')
-				]);
-				Zotero.startupError = msg;
-			} else if(e.name == "NS_ERROR_STORAGE_BUSY" || e.result == 2153971713) {
-				if(Zotero.isStandalone) {
-					// Standalone should force Fx to release lock 
-					if(!haveReleasedLock && Zotero.IPC.broadcast("releaseLock")) {
-						_waitingForDBLock = true;
-						
-						var timeout = Date.now() + 5000; // 5 second timeout
-						while(_waitingForDBLock && !Zotero.closing && Date.now() < timeout) {
-							// AMO Reviewer: This is used by Zotero Standalone, not Zotero for Firefox.
-							Zotero.mainThread.processNextEvent(true);
-						}
-						if(Zotero.closing) return false;
-						
-						// Run a second init with haveReleasedLock = true, so that
-						// if we still can't acquire a DB lock, we will give up
-						return _initDB(true);
-					}
-				} else {
-					// Fx should start as connector if Standalone is running
-					var haveStandalone = Zotero.IPC.broadcast("test");
-					if(haveStandalone) {
-						throw "ZOTERO_SHOULD_START_AS_CONNECTOR";
-					}
-				}
-				
-				var msg = Zotero.localeJoin([
-					Zotero.getString('startupError.databaseInUse'),
-					Zotero.getString(Zotero.isStandalone ? 'startupError.closeFirefox' : 'startupError.closeStandalone')
-				]);
-				Zotero.startupError = msg;
+			if (_checkDataDirAccessError(e)) {}
+			// Storage busy
+			else if (e.message.includes('2153971713')) {
+				Zotero.startupError = Zotero.getString('startupError.databaseInUse') + "\n\n"
+					+ Zotero.getString(
+						"startupError.close" + (Zotero.isStandalone ? 'Firefox' : 'Standalone')
+					);
+			}
+			else {
+				let stack = e.stack ? Zotero.Utilities.Internal.filterStack(e.stack) : null;
+				Zotero.startupError = Zotero.getString('startupError') + "\n\n" + (stack || e);
 			}
 			
-			Components.utils.reportError(e);
+			Zotero.debug(e.toString(), 1);
+			Components.utils.reportError(e); // DEBUG: doesn't always work
 			Zotero.skipLoading = true;
 			return false;
 		}
 		
 		return true;
+	});
+	
+	
+	function _checkDataDirAccessError(e) {
+		if (e.name != 'NS_ERROR_FILE_ACCESS_DENIED' && !e.message.includes('2152857621')) {
+			return false;
+		}
+		
+		var msg = Zotero.getString('dataDir.databaseCannotBeOpened', Zotero.clientName)
+			+ "\n\n"
+			+ Zotero.getString('dataDir.checkPermissions', Zotero.clientName);
+		// If already using default directory, just show it
+		if (Zotero.DataDirectory.dir == Zotero.DataDirectory.defaultDir) {
+			msg += "\n\n" + Zotero.getString('dataDir.location', Zotero.DataDirectory.dir);
+		}
+		// Otherwise suggest moving to default, since there's a good chance this is due to security
+		// software preventing Zotero from accessing the selected directory (particularly if it's
+		// a Firefox profile)
+		else {
+			msg += "\n\n"
+				+ Zotero.getString('dataDir.moveToDefaultLocation', Zotero.clientName)
+				+ "\n\n"
+				+ Zotero.getString(
+					'dataDir.migration.failure.full.current', Zotero.DataDirectory.dir
+				)
+				+ "\n"
+				+ Zotero.getString(
+					'dataDir.migration.failure.full.recommended', Zotero.DataDirectory.defaultDir
+				);
+		}
+		Zotero.startupError = msg;
+		return true;
 	}
+	
 	
 	/**
 	 * Called when the DB has been released by another Zotero process to perform necessary 
@@ -820,22 +979,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		}
 	}
 	
-	/*
-	 * Check if a DB transaction is open and, if so, disable Zotero
-	 */
-	function stateCheck() {
-		if(!Zotero.isConnector && Zotero.DB.transactionInProgress()) {
-			Zotero.logError("State check failed due to transaction in progress");
-			this.initialized = false;
-			this.skipLoading = true;
-			return false;
-		}
-		
-		return true;
-	}
-	
-	
-	this.shutdown = function() {
+	this.shutdown = Zotero.Promise.coroutine(function* () {
 		Zotero.debug("Shutting down Zotero");
 		
 		try {
@@ -843,7 +987,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			Zotero.closing = true;
 			
 			// run shutdown listener
-			for each(var listener in _shutdownListeners) {
+			for (let listener of _shutdownListeners) {
 				try {
 					listener();
 				} catch(e) {
@@ -854,192 +998,45 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			// remove temp directory
 			Zotero.removeTempDirectory();
 			
-			if(Zotero.DB && Zotero.DB._connection) {
-				Zotero.debug("Closing database");
-				
-				// run GC to finalize open statements
-				// TODO remove this and finalize statements created with
-				// Zotero.DBConnection.getStatement() explicitly
-				Components.utils.forceGC();
-				
+			if (Zotero.DB) {
 				// close DB
-				return Zotero.DB.closeDatabase(true).then(function() {				
+				yield Zotero.DB.closeDatabase(true)
+				
+				if (!Zotero.restarting) {
 					// broadcast that DB lock has been released
 					Zotero.IPC.broadcast("lockReleased");
-				});
+				}
 			}
-			
-			return Q();
 		} catch(e) {
-			Zotero.debug(e);
-			return Q.reject(e);
+			Zotero.logError(e);
+			throw e;
 		}
+	});
+	
+	
+	this.getProfileDirectory = function () {
+		Zotero.warn("Zotero.getProfileDirectory() is deprecated -- use Zotero.Profile.dir");
+		return Zotero.File.pathToFile(Zotero.Profile.dir);
 	}
 	
 	
-	function getProfileDirectory(){
-		return Components.classes["@mozilla.org/file/directory_service;1"]
-			 .getService(Components.interfaces.nsIProperties)
-			 .get("ProfD", Components.interfaces.nsIFile);
-	}
-	
-	function getDefaultProfile(prefDir) {
-		// find profiles.ini file
-		var profilesIni = prefDir.clone();
-		profilesIni.append("profiles.ini");
-		if(!profilesIni.exists()) return false;
-		var iniContents = Zotero.File.getContents(profilesIni);
-		
-		// cheap and dirty ini parser
-		var curSection = null;
-		var defaultSection = null;
-		var nSections = 0;
-		for each(var line in iniContents.split(/(?:\r?\n|\r)/)) {
-			let tline = line.trim();
-			if(tline[0] == "[" && tline[tline.length-1] == "]") {
-				curSection = {};
-				if(tline != "[General]") nSections++;
-			} else if(curSection && tline != "") {
-				let equalsIndex = tline.indexOf("=");
-				let key = tline.substr(0, equalsIndex);
-				let val = tline.substr(equalsIndex+1);
-				curSection[key] = val;
-				if(key == "Default" && val == "1") {
-					defaultSection = curSection;
-				}
-			}
-		}
-		if(!defaultSection && curSection) defaultSection = curSection;
-		
-		// parse out ini to reveal profile
-		if(!defaultSection || !defaultSection.Path) return false;
-		
-		
-		if(defaultSection.IsRelative === "1") {
-			var defaultProfile = prefDir.clone().QueryInterface(Components.interfaces.nsILocalFile);
-			try {
-				for each(var dir in defaultSection.Path.split("/")) defaultProfile.append(dir);
-			} catch(e) {
-				Zotero.logError("Could not find profile at "+defaultSection.Path);
-				throw e;
-			}
-		} else {
-			var defaultProfile = Components.classes["@mozilla.org/file/local;1"]
-				.createInstance(Components.interfaces.nsILocalFile);
-			defaultProfile.initWithPath(defaultSection.Path);
-		}
-		
-		if(!defaultProfile.exists()) return false;
-		return [defaultProfile, nSections > 1];
-	}
-	
-	function getZoteroDirectory(){
-		if (_zoteroDirectory != false) {
-			// Return a clone of the file pointer so that callers can modify it
-			return _zoteroDirectory.clone();
-		}
-		
-		if (Zotero.Prefs.get('useDataDir')) {
-			var file = Components.classes["@mozilla.org/file/local;1"].
-				createInstance(Components.interfaces.nsILocalFile);
-			try {
-				file.persistentDescriptor = Zotero.Prefs.get('dataDir');
-			}
-			catch (e) {
-				Zotero.debug("Persistent descriptor in extensions.zotero.dataDir did not resolve", 1);
-				e = { name: "NS_ERROR_FILE_NOT_FOUND" };
-				throw (e);
-			}
-			if (!file.exists()) {
-				var e = { name: "NS_ERROR_FILE_NOT_FOUND" };
-				throw (e);
-			}
-		}
-		else {
-			var file = Zotero.getProfileDirectory();
-			file.append('zotero');
-			
-			// if standalone and no directory yet, check Firefox directory
-			// or if in Firefox and no directory yet, check standalone Zotero directory
-			if(!file.exists()) {
-				var prefDir = Components.classes["@mozilla.org/file/directory_service;1"]
-					.getService(Components.interfaces.nsIProperties)
-					.get("DefProfRt", Components.interfaces.nsILocalFile).parent.parent;
-				
-				if(Zotero.isStandalone) {
-					if(Zotero.isWin) {
-						prefDir = prefDir.parent;
-						prefDir.append("Mozilla");
-						prefDir.append("Firefox");
-					} else if(Zotero.isMac) {
-						prefDir.append("Firefox");
-					} else {
-						prefDir.append(".mozilla");
-						prefDir.append("firefox");
-					}
-				} else {
-					if(Zotero.isWin) {
-						prefDir = prefDir.parent;
-						prefDir.append("Zotero");
-						prefDir.append("Zotero");
-					} else if(Zotero.isMac) {
-						prefDir.append("Zotero");
-					} else {
-						prefDir.append(".zotero");
-						prefDir.append("zotero");
-					}
-				}
-				
-				Zotero.debug("Looking for existing profile in "+prefDir.path);
-				
-				// get default profile
-				var defProfile;
-				try {
-					defProfile = getDefaultProfile(prefDir);
-				} catch(e) {
-					Zotero.debug("An error occurred locating the Firefox profile; not "+
-						"attempting to migrate from Zotero for Firefox");
-					Zotero.logError(e);
-				}
-				
-				if(defProfile) {
-					// get Zotero directory
-					var zoteroDir = defProfile[0].clone();
-					zoteroDir.append("zotero");
-					
-					if(zoteroDir.exists()) {
-						// if Zotero directory exists in default profile for alternative app, ask
-						// whether to use
-						var e = { name:"ZOTERO_DIR_MAY_EXIST", curDir:file, profile:defProfile[0], dir:zoteroDir, multipleProfiles:defProfile[1] };
-						throw (e);
-					}
-				}
-			}
-			
-			Zotero.File.createDirectoryIfMissing(file);
-		}
-		Zotero.debug("Using data directory " + file.path);
-		
-		_zoteroDirectory = file;
-		return file.clone();
+	this.getZoteroDirectory = function () {
+		Zotero.warn("Zotero.getZoteroDirectory() is deprecated -- use Zotero.DataDirectory.dir");
+		return Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 	}
 	
 	
 	function getStorageDirectory(){
-		var file = Zotero.getZoteroDirectory();
-		
-		file.append('storage');
+		var file = OS.Path.join(Zotero.DataDirectory.dir, 'storage');
+		file = Zotero.File.pathToFile(file);
 		Zotero.File.createDirectoryIfMissing(file);
 		return file;
 	}
 	
-	function getZoteroDatabase(name, ext){
-		name = name ? name + '.sqlite' : 'zotero.sqlite';
-		ext = ext ? '.' + ext : '';
-		
-		var file = Zotero.getZoteroDirectory();
-		file.append(name + ext);
-		return file;
+	
+	this.getZoteroDatabase = function (name, ext) {
+		Zotero.warn("Zotero.getZoteroDatabase() is deprecated -- use Zotero.DataDirectory.getDatabase()");
+		return Zotero.File.pathToFile(Zotero.DataDirectory.getDatabase(name, ext));
 	}
 	
 	
@@ -1047,7 +1044,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 * @return	{nsIFile}
 	 */
 	this.getTempDirectory = function () {
-		var tmp = this.getZoteroDirectory();
+		var tmp = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 		tmp.append('tmp');
 		Zotero.File.createDirectoryIfMissing(tmp);
 		return tmp;
@@ -1055,7 +1052,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	
 	
 	this.removeTempDirectory = function () {
-		var tmp = this.getZoteroDirectory();
+		var tmp = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 		tmp.append('tmp');
 		if (tmp.exists()) {
 			try {
@@ -1067,7 +1064,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	
 	
 	this.getStylesDirectory = function () {
-		var dir = this.getZoteroDirectory();
+		var dir = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 		dir.append('styles');
 		Zotero.File.createDirectoryIfMissing(dir);
 		return dir;
@@ -1075,127 +1072,21 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	
 	
 	this.getTranslatorsDirectory = function () {
-		var dir = this.getZoteroDirectory();
+		var dir = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 		dir.append('translators');
 		Zotero.File.createDirectoryIfMissing(dir);
 		return dir;
 	}
 	
 	
-	function chooseZoteroDirectory(forceQuitNow, useProfileDir, moreInfoCallback) {
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-			.getService(Components.interfaces.nsIWindowMediator);
-		var win = wm.getMostRecentWindow('navigator:browser');
-		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
-		
-		if (useProfileDir) {
-			Zotero.Prefs.set('useDataDir', false);
-		}
-		else {
-			var nsIFilePicker = Components.interfaces.nsIFilePicker;
-			while (true) {
-				var fp = Components.classes["@mozilla.org/filepicker;1"]
-							.createInstance(nsIFilePicker);
-				fp.init(win, Zotero.getString('dataDir.selectDir'), nsIFilePicker.modeGetFolder);
-				fp.appendFilters(nsIFilePicker.filterAll);
-				if (fp.show() == nsIFilePicker.returnOK) {
-					var file = fp.file;
-					
-					if (file.directoryEntries.hasMoreElements()) {
-						var dbfile = file.clone();
-						dbfile.append('zotero.sqlite');
-						
-						// Warn if non-empty and no zotero.sqlite
-						if (!dbfile.exists()) {
-							var buttonFlags = ps.STD_YES_NO_BUTTONS;
-							if (moreInfoCallback) {
-								buttonFlags += ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
-							}
-							var index = ps.confirmEx(null,
-								Zotero.getString('dataDir.selectedDirNonEmpty.title'),
-								Zotero.getString('dataDir.selectedDirNonEmpty.text'),
-								buttonFlags,
-								null,
-								null,
-								moreInfoCallback ? Zotero.getString('general.help') : null,
-								null, {});
-							
-							// Not OK -- return to file picker
-							if (index == 1) {
-								continue;
-							}
-							else if (index == 2) {
-								setTimeout(function () {
-									moreInfoCallback();
-								}, 1);
-								return false;
-							}
-						}
-					}
-					else {
-						var buttonFlags = ps.STD_YES_NO_BUTTONS;
-						if (moreInfoCallback) {
-							buttonFlags += ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
-						}
-						var index = ps.confirmEx(null,
-							Zotero.getString('dataDir.selectedDirEmpty.title'),
-							Zotero.getString('dataDir.selectedDirEmpty.text', Zotero.appName) + '\n\n'
-								+ Zotero.getString('dataDir.selectedDirEmpty.useNewDir'),
-							buttonFlags,
-							null,
-							null,
-							moreInfoCallback ? Zotero.getString('general.moreInformation') : null,
-							null, {});
-						
-						// Not OK -- return to file picker
-						if (index == 1) {
-							continue;
-						}
-						else if (index == 2) {
-							setTimeout(function () {
-								moreInfoCallback();
-							}, 1);
-							return false;
-						}
-					}
-					
-					
-					// Set new data directory
-					Zotero.Prefs.set('dataDir', file.persistentDescriptor);
-					Zotero.Prefs.set('lastDataDir', file.path);
-					Zotero.Prefs.set('useDataDir', true);
-					
-					break;
-				}
-				else {
-					return false;
-				}
-			}
-		}
-		
-		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING);
-		if (!forceQuitNow) {
-			buttonFlags += (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
-		}
-		var app = Zotero.appName;
-		var index = ps.confirmEx(null,
-			Zotero.getString('general.restartRequired'),
-			Zotero.getString('general.restartRequiredForChange', app)
-				+ "\n\n" + Zotero.getString('dataDir.moveFilesToNewLocation', app),
-			buttonFlags,
-			Zotero.getString('general.quitApp', app),
-			forceQuitNow ? null : Zotero.getString('general.restartLater'),
-			null, null, {});
-		
-		if (index == 0) {
-			var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
-					.getService(Components.interfaces.nsIAppStartup);
-			appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
-		}
-		
-		return useProfileDir ? true : file;
+	this.openMainWindow = function () {
+		var prefService = Components.classes["@mozilla.org/preferences-service;1"]
+			.getService(Components.interfaces.nsIPrefBranch);
+		var chromeURI = prefService.getCharPref('toolkit.defaultChromeURI');
+		var flags = prefService.getCharPref("toolkit.defaultChromeFeatures", "chrome,dialog=no,all");
+		var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
+			.getService(Components.interfaces.nsIWindowWatcher);
+		return ww.openWindow(null, chromeURI, '_blank', flags, null);
 	}
 	
 	
@@ -1203,11 +1094,14 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 * Launch a file, the best way we can
 	 */
 	this.launchFile = function (file) {
+		file = Zotero.File.pathToFile(file);
 		try {
+			Zotero.debug("Launching " + file.path);
 			file.launch();
 		}
 		catch (e) {
-			Zotero.debug("launch() not supported -- trying fallback executable");
+			Zotero.debug(e, 2);
+			Zotero.debug("launch() not supported -- trying fallback executable", 2);
 			
 			try {
 				if (Zotero.isWin) {
@@ -1216,21 +1110,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				else {
 					var pref = "fallbackLauncher.unix";
 				}
-				var path = Zotero.Prefs.get(pref);
-				
-				var exec = Components.classes["@mozilla.org/file/local;1"]
-							.createInstance(Components.interfaces.nsILocalFile);
-				exec.initWithPath(path);
-				if (!exec.exists()) {
-					throw (path + " does not exist");
-				}
-				
-				var proc = Components.classes["@mozilla.org/process/util;1"]
-								.createInstance(Components.interfaces.nsIProcess);
-				proc.init(exec);
-				
-				var args = [file.path];
-				proc.runw(true, args, args.length);
+				let launcher = Zotero.Prefs.get(pref);
+				this.launchFileWithApplication(file.path, launcher);
 			}
 			catch (e) {
 				Zotero.debug(e);
@@ -1248,7 +1129,115 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				nsIEPS.loadUrl(uri);
 			}
 		}
+	};
+	
+	
+	/**
+	 * Launch a file with the given application
+	 */
+	this.launchFileWithApplication = function (filePath, applicationPath) {
+		var exec = Zotero.File.pathToFile(applicationPath);
+		if (!exec.exists()) {
+			throw new Error("'" + applicationPath + "' does not exist");
+		}
+		
+		var args;
+		// On macOS, if we only have an .app, launch it using 'open'
+		if (Zotero.isMac && applicationPath.endsWith('.app')) {
+			args = [filePath, '-a', applicationPath];
+			applicationPath = '/usr/bin/open';
+		}
+		else {
+			args = [filePath];
+		}
+		
+		// Async, but we don't want to block
+		Zotero.Utilities.Internal.exec(applicationPath, args);
+	};
+	
+	
+	/**
+	 * Launch an HTTP URL externally, the best way we can
+	 *
+	 * Used only by Standalone
+	 */
+	this.launchURL = function (url) {
+		if (!url.match(/^https?/)) {
+			throw new Error("launchURL() requires an HTTP(S) URL");
+		}
+		
+		try {
+			var io = Components.classes['@mozilla.org/network/io-service;1']
+						.getService(Components.interfaces.nsIIOService);
+			var uri = io.newURI(url, null, null);
+			var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
+							.getService(Components.interfaces.nsIExternalProtocolService)
+							.getProtocolHandlerInfo('http');
+			handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
+			handler.launchWithURI(uri, null);
+		}
+		catch (e) {
+			Zotero.debug("launchWithURI() not supported -- trying fallback executable");
+			
+			if (Zotero.isWin) {
+				var pref = "fallbackLauncher.windows";
+			}
+			else {
+				var pref = "fallbackLauncher.unix";
+			}
+			var path = Zotero.Prefs.get(pref);
+			
+			var exec = Components.classes["@mozilla.org/file/local;1"]
+						.createInstance(Components.interfaces.nsILocalFile);
+			exec.initWithPath(path);
+			if (!exec.exists()) {
+				throw ("Fallback executable not found -- check extensions.zotero." + pref + " in about:config");
+			}
+			
+			var proc = Components.classes["@mozilla.org/process/util;1"]
+							.createInstance(Components.interfaces.nsIProcess);
+			proc.init(exec);
+			
+			var args = [url];
+			proc.runw(false, args, args.length);
+		}
 	}
+	
+	
+	/**
+	 * Opens a URL in the basic viewer, and optionally run a callback on load
+	 *
+	 * @param {String} uri
+	 * @param {Function} [onLoad] - Function to run once URI is loaded; passed the loaded document
+	 */
+	this.openInViewer = function (uri, onLoad) {
+		var wm = Services.wm;
+		var win = wm.getMostRecentWindow("zotero:basicViewer");
+		if (win) {
+			win.loadURI(uri);
+		} else {
+			let ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
+				.getService(Components.interfaces.nsIWindowWatcher);
+			let arg = Components.classes["@mozilla.org/supports-string;1"]
+				.createInstance(Components.interfaces.nsISupportsString);
+			arg.data = uri;
+			win = ww.openWindow(null, "chrome://zotero/content/standalone/basicViewer.xul",
+				"basicViewer", "chrome,dialog=yes,resizable,centerscreen,menubar,scrollbars", arg);
+		}
+		if (onLoad) {
+			let browser
+			let func = function () {
+				win.removeEventListener("load", func);
+				browser = win.document.documentElement.getElementsByTagName('browser')[0];
+				browser.addEventListener("pageshow", innerFunc);
+			};
+			let innerFunc = function () {
+				browser.removeEventListener("pageshow", innerFunc);
+				onLoad(browser.contentDocument);
+			};
+			win.addEventListener("load", func);
+		}
+	};
 	
 	
 	/*
@@ -1256,10 +1245,22 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 *
 	 * Uses prefs e.z.debug.log and e.z.debug.level (restart required)
 	 *
-	 * Defaults to log level 3 if level not provided
+	 * @param {} message
+	 * @param {Integer} [level=3]
+	 * @param {Integer} [maxDepth]
+	 * @param {Boolean|Integer} [stack] Whether to display the calling stack.
+	 *   If true, stack is displayed starting from the caller. If an integer,
+	 *   that many stack levels will be omitted starting from the caller.
 	 */
-	function debug(message, level) {
-		Zotero.Debug.log(message, level);
+	function debug(message, level, maxDepth, stack) {
+		// Account for this alias
+		if (stack === true) {
+			stack = 1;
+		} else if (stack >= 0) {
+			stack++;
+		}
+		
+		Zotero.Debug.log(message, level, maxDepth, stack);
 	}
 	
 	
@@ -1270,8 +1271,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 *    'error', 'warning', 'exception', 'strict'
 	 */
 	function log(message, type, sourceName, sourceLine, lineNumber, columnNumber) {
-		var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
-			.getService(Components.interfaces.nsIConsoleService);
 		var scriptError = Components.classes["@mozilla.org/scripterror;1"]
 			.createInstance(Components.interfaces.nsIScriptError);
 		
@@ -1289,11 +1288,11 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			flags,
 			'component javascript'
 		);
-		consoleService.logMessage(scriptError);
+		Services.console.logMessage(scriptError);
 	}
 	
 	/**
-	 * Log a JS error to Mozilla JS error console and debug output
+	 * Log a JS error to the Mozilla error console and debug output
 	 * @param {Exception} err
 	 */
 	function logError(err) {
@@ -1303,21 +1302,46 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			err.lineNumber ? err.lineNumber : null, null);
 	}
 	
-	function getErrors(asStrings) {
+	
+	this.warn = function (err) {
+		Zotero.debug(err, 2);
+		log(err.message ? err.message : err.toString(), "warning",
+			err.fileName ? err.fileName : (err.filename ? err.filename : null), null,
+			err.lineNumber ? err.lineNumber : null, null);
+	}
+	
+	
+	/**
+	 * Display an alert in a given window
+	 *
+	 * @param {Window}
+	 * @param {String} title
+	 * @param {String} msg
+	 */
+	this.alert = function (window, title, msg) {
+		this.debug(`Alert:\n\n${msg}`);
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
+		ps.alert(window, title, msg);
+	}
+	
+	
+	this.getErrors = function (asStrings) {
 		var errors = [];
 		
-		for each(var msg in _startupErrors.concat(_recentErrors)) {
-			// Remove password in malformed XML messages
+		for (let msg of _startupErrors.concat(_recentErrors)) {
+			let altMessage;
+			// Remove password in malformed XML errors
 			if (msg.category == 'malformed-xml') {
 				try {
 					// msg.message is read-only, so store separately
-					var altMessage = msg.message.replace(/(file: "https?:\/\/[^:]+:)([^@]+)(@[^"]+")/, "$1********$3");
+					altMessage = msg.message.replace(/(https?:\/\/[^:]+:)([^@]+)(@[^"]+)/, "$1****$3");
 				}
 				catch (e) {}
 			}
 			
 			if (asStrings) {
-				errors.push(altMessage ? altMessage : msg.message)
+				errors.push(altMessage || msg.message)
 			}
 			else {
 				errors.push(msg);
@@ -1329,35 +1353,19 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	
 	/**
 	 * Get versions, platform, etc.
-	 *
-	 * Can be used synchronously or asynchronously; info on other add-ons
-	 * is available only in async mode
 	 */
-	function getSystemInfo(callback) {
-		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
-			getService(Components.interfaces.nsIXULAppInfo);
-		
+	this.getSystemInfo = Zotero.Promise.coroutine(function* () {
 		var info = {
 			version: Zotero.version,
 			platform: Zotero.platform,
 			oscpu: Zotero.oscpu,
 			locale: Zotero.locale,
-			appName: appInfo.name,
-			appVersion: appInfo.version
+			appName: Services.appinfo.name,
+			appVersion: Services.appinfo.version
 		};
 		
-		if (callback) {
-			Zotero.getInstalledExtensions(function(extensions) {
-				info.extensions = extensions.join(', ');
-					
-				var str = '';
-				for (var key in info) {
-					str += key + ' => ' + info[key] + ', ';
-				}
-				str = str.substr(0, str.length - 2);
-				callback(str);
-			});
-		}
+		var extensions = yield Zotero.getInstalledExtensions();
+		info.extensions = extensions.join(', ');
 		
 		var str = '';
 		for (var key in info) {
@@ -1365,20 +1373,21 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		}
 		str = str.substr(0, str.length - 2);
 		return str;
-	}
+	});
 	
 	
 	/**
-	 * @return	{String[]}		Array of extension names and versions
+	 * @return {Promise<String[]>} - Promise for an array of extension names and versions
 	 */
-	this.getInstalledExtensions = function(callback) {
+	this.getInstalledExtensions = Zotero.Promise.method(function () {
+		var deferred = Zotero.Promise.defer();
 		function onHaveInstalledAddons(installed) {
 			installed.sort(function(a, b) {
 				return ((a.appDisabled || a.userDisabled) ? 1 : 0) -
 					((b.appDisabled || b.userDisabled) ? 1 : 0);
 			});
 			var addons = [];
-			for each(var addon in installed) {
+			for (let addon of installed) {
 				switch (addon.id) {
 					case "zotero@chnm.gmu.edu":
 					case "{972ce4c6-7e08-4474-a285-3208198ce6fd}": // Default theme
@@ -1390,23 +1399,49 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 					+ ((addon.appDisabled || addon.userDisabled) ? ", disabled" : "")
 					+ ")");
 			}
-			callback(addons);
+			deferred.resolve(addons);
 		}
 		
 		Components.utils.import("resource://gre/modules/AddonManager.jsm");
 		AddonManager.getAllAddons(onHaveInstalledAddons);
+		return deferred.promise;
+	});
+	
+	/**
+	 * @param {String} name
+	 * @param {String[]} [params=[]] - Strings to substitute for placeholders
+	 * @param {Number} [num] - Number (also appearing in `params`) to use when determining which plural
+	 *     form of the string to use; localized strings should include all forms in the order specified
+	 *     in https://developer.mozilla.org/en-US/docs/Mozilla/Localization/Localization_and_Plurals,
+	 *     separated by semicolons
+	 */
+	this.getString = function (name, params, num) {
+		return this.getStringFromBundle(_localizedStringBundle, ...arguments);
 	}
 	
-	function getString(name, params){
+	
+	this.getStringFromBundle = function (bundle, name, params, num) {
 		try {
-			if (params != undefined){
+			if (params != undefined) {
 				if (typeof params != 'object'){
 					params = [params];
 				}
-				var l10n = _localizedStringBundle.formatStringFromName(name, params, params.length);
+				var l10n = bundle.formatStringFromName(name, params, params.length);
 			}
 			else {
-				var l10n = _localizedStringBundle.GetStringFromName(name);
+				var l10n = bundle.GetStringFromName(name);
+			}
+			if (num !== undefined) {
+				let availableForms = l10n.split(/;/);
+				// If not enough available forms, use last one -- PluralForm.get() uses first by
+				// default, but it's more likely that a localizer will translate the two English
+				// strings with some plural form as the second one, so we might as well use that
+				if (availableForms.length < this.pluralFormNumForms()) {
+					l10n = availableForms[availableForms.length - 1];
+				}
+				else {
+					l10n = this.pluralFormGet(num, l10n);
+				}
 			}
 		}
 		catch (e){
@@ -1414,12 +1449,60 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				Zotero.debug(params, 1);
 			}
 			else if (e.name != 'NS_ERROR_FAILURE') {
-				Components.utils.reportError(e);
-				Zotero.debug(e, 1);
+				Zotero.logError(e);
 			}
-			throw ('Localized string not available for ' + name);
+			throw new Error('Localized string not available for ' + name);
 		}
 		return l10n;
+	}
+	
+	
+	/**
+	 * Defines property on the object
+	 * More compact way to do Object.defineProperty
+	 *
+	 * @param {Object} obj Target object
+	 * @param {String} prop Property to be defined
+	 * @param {Object} desc Propery descriptor. If not overriden, "enumerable" is true
+	 * @param {Object} opts Options:
+	 *   lazy {Boolean} If true, the _getter_ is intended for late
+	 *     initialization of the property. The getter is replaced with a simple
+	 *     property once initialized.
+	 */
+	this.defineProperty = function(obj, prop, desc, opts) {
+		if (typeof prop != 'string') throw new Error("Property must be a string");
+		var d = { __proto__: null, enumerable: true, configurable: true }; // Enumerable by default
+		for (let p in desc) {
+			if (!desc.hasOwnProperty(p)) continue;
+			d[p] = desc[p];
+		}
+		
+		if (opts) {
+			if (opts.lazy && d.get) {
+				let getter = d.get;
+				d.configurable = true; // Make sure we can change the property later
+				d.get = function() {
+					let val = getter.call(this);
+					
+					// Redefine getter on this object as non-writable value
+					delete d.set;
+					delete d.get;
+					d.writable = false;
+					d.value = val;
+					Object.defineProperty(this, prop, d);
+					
+					return val;
+				}
+			}
+		}
+		
+		Object.defineProperty(obj, prop, d);
+	}
+	
+	this.extendClass = function(superClass, newClass) {
+		newClass._super = superClass;
+		newClass.prototype = Object.create(superClass.prototype);
+		newClass.prototype.constructor = newClass;
 	}
 	
 	
@@ -1444,38 +1527,63 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			return this.collation;
 		}
 		
-		var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
-				.getService(Components.interfaces.nsILocaleService);
-		var appLocale = localeService.getApplicationLocale();
-		
-		// Use nsICollation before Fx30
-		if (Zotero.platformMajorVersion < 30) {
-			var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
-				.getService(Components.interfaces.nsILocaleService);
-			var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
-				.getService(Components.interfaces.nsICollationFactory);
-			return this.collation = collationFactory.CreateCollation(appLocale);
-		}
-		
 		try {
-			var locale = appLocale.getCategory('NSILOCALE_COLLATE');
-			// Extract a valid language tag
-			locale = locale.match(/^[a-z]{2}(\-[A-Z]{2})?/)[0];
-			var collator = new Intl.Collator(locale, {
-				ignorePunctuation: true,
+			// DEBUG: Is this necessary, or will Intl.Collator just default to the same locales we're
+			// passing manually?
+			
+			let locales;
+			// Fx55+
+			if (Services.locale.getAppLocalesAsBCP47) {
+				locales = Services.locale.getAppLocalesAsBCP47();
+			}
+			else {
+				let locale;
+				// Fx54
+				if (Services.locale.getAppLocale) {
+					locale = Services.locale.getAppLocale();
+				}
+				// Fx <=53
+				else {
+					locale = Services.locale.getApplicationLocale();
+					locale = locale.getCategory('NSILOCALE_COLLATE');
+				}
+				
+				// Extract a valid language tag
+				try {
+					locale = locale.match(/^[a-z]{2}(\-[A-Z]{2})?/)[0];
+				}
+				catch (e) {
+					throw new Error(`Error parsing locale ${locale}`);
+				}
+				locales = [locale];
+			}
+			
+			var collator = new Intl.Collator(locales, {
 				numeric: true,
 				sensitivity: 'base'
 			});
 		}
 		catch (e) {
-			Zotero.debug(e, 1);
+			Zotero.logError(e);
 			
-			// If there's an error, just skip sorting
-			collator = {
-				compare: function (a, b) {
-					return 0;
-				}
-			};
+			// Fall back to en-US sorting
+			try {
+				Zotero.logError("Falling back to en-US sorting");
+				collator = new Intl.Collator(['en-US'], {
+					numeric: true,
+					sensitivity: 'base'
+				});
+			}
+			catch (e) {
+				Zotero.logError(e);
+				
+				// If there's still an error, just skip sorting
+				collator = {
+					compare: function (a, b) {
+						return 0;
+					}
+				};
+			}
 		}
 		
 		// Grab all ASCII punctuation and space at the begining of string
@@ -1505,6 +1613,11 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				
 				// If initial punctuation is equivalent, use collator comparison
 				// that ignores all punctuation
+				//
+				// Update: Intl.Collator's ignorePunctuation also ignores whitespace, so we're
+				// no longer using it, meaning we could take out most of the code to handle
+				// initial punctuation separately, unless we think we'll at some point switch to
+				// a collation function that ignores punctuation but not whitespace.
 				if (aInitP == bInitP || !aInitP && !bInitP) return collator.compare(a, b);
 				
 				// Otherwise consider "attached" words as well, e.g. the order should be
@@ -1520,6 +1633,12 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		};
 	}
 	
+	this.defineProperty(this, "localeCompare", {
+		get: function() {
+			var collation = this.getLocaleCollation();
+			return collation.compareString.bind(collation, 1);
+		}
+	}, {lazy: true});
 	
 	/*
 	 * Sets font size based on prefs -- intended for use on root element
@@ -1560,9 +1679,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				continue;
 			}
 			if (Array.isArray(arg)) {
-				for (var j=0; j<arg.length; j++){
-					returns.push(arg[j]);
-				}
+				returns.push(...arg);
 			}
 			else {
 				returns.push(arg);
@@ -1583,21 +1700,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	}
 	
 	
-	/*
-	 * A version of join() that operates externally for use on objects other
-	 * than arrays (e.g. _arguments_)
-	 *
-	 * Note that this is safer than extending Object()
-	 */
-	function join(obj, delim){
-		var a = [];
-		for (var i=0, len=obj.length; i<len; i++){
-			a.push(obj[i]);
-		}
-		return a.join(delim);
-	}
-	
-	
 	/**
 	* Generate a random string of length 'len' (defaults to 8)
 	**/
@@ -1607,7 +1709,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	
 	
 	function moveToUnique(file, newFile){
-		newFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+		newFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0o644);
 		var newName = newFile.leafName;
 		newFile.remove(null);
 		
@@ -1618,157 +1720,101 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	
 	
 	/**
-	 * Allow other events (e.g., UI updates) on main thread to be processed if necessary
+	 * Generate a function that produces a static output
 	 *
-	 * @param	{Integer}	[timeout=50]		Maximum number of milliseconds to wait
+	 * Zotero.lazy(fn) returns a function. The first time this function
+	 * is called, it calls fn() and returns its output. Subsequent
+	 * calls return the same output as the first without calling fn()
+	 * again.
 	 */
-	this.wait = function (timeout) {
-		if (timeout === undefined) {
-			timeout = 50;
+	this.lazy = function(fn) {
+		var x, called = false;
+		return function() {
+			if(!called) {
+				x = fn.apply(this);
+				called = true;
+			}
+			return x;
+		};
+	};
+	
+	
+	this.serial = function (fn) {
+		Components.utils.import("resource://zotero/concurrentCaller.js");
+		var caller = new ConcurrentCaller({
+			numConcurrent: 1,
+			onError: e => Zotero.logError(e)
+		});
+		return function () {
+			var args = arguments;
+			return caller.start(function () {
+				return fn.apply(this, args);
+			}.bind(this));
+		};
+	}
+	
+	
+	this.spawn = function (generator, thisObject) {
+		if (thisObject) {
+			return Zotero.Promise.coroutine(generator.bind(thisObject))();
 		}
-		var mainThread = Zotero.mainThread;
-		var endTime = Date.now() + timeout;
-		var more;
-		//var cycles = 0;
-		
-		_waiting++;
-		
-		Zotero.debug("Spinning event loop ("+_waiting+")", 5);
-		do {
-			more = mainThread.processNextEvent(false);
-			//cycles++;
-		} while (more && Date.now() < endTime);
-		
-		_waiting--;
-		
-		// requeue nsITimerCallbacks that came up during Zotero.wait() but couldn't execute
-		for(var i in _waitTimers) {
-			_waitTimers[i].initWithCallback(_waitTimerCallbacks[i], 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-		}
-		_waitTimers = [];
-		_waitTimerCallbacks = [];
-		
-		//Zotero.debug("Waited " + cycles + " cycles");
-		return;
-	};
+		return Zotero.Promise.coroutine(generator)();
+	}
+	
 	
 	/**
-	 * Pumps a generator until it yields false. See itemTreeView.js for an example.
-	 *
-	 * If errorHandler is specified, exceptions in the generator will be caught
-	 * and passed to the callback
-	 */
-	this.pumpGenerator = function(generator, ms, errorHandler, doneHandler) {
-		_waiting++;
-		
-		var timer = Components.classes["@mozilla.org/timer;1"].
-			createInstance(Components.interfaces.nsITimer),
-			yielded,
-			useJIT = Components.utils.methodjit;
-		var timerCallback = {"notify":function() {
-			// XXX Remove when we drop support for Fx <24
-			if(useJIT !== undefined) Components.utils.methodjit = useJIT;
-			
-			var err = false;
-			_waiting--;
-			try {
-				if((yielded = generator.next()) !== false) {
-					_waiting++;
-					return;
-				}
-			} catch(e if e.toString() === "[object StopIteration]") {
-				// There must be a better way to perform this check
-			} catch(e) {
-				err = e;
-			}
-			
-			timer.cancel();
-			_runningTimers.splice(_runningTimers.indexOf(timer), 1);
-			
-			// requeue nsITimerCallbacks that came up during generator pumping but couldn't execute
-			for(var i in _waitTimers) {
-				_waitTimers[i].initWithCallback(_waitTimerCallbacks[i], 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-			}
-			_waitTimers = [];
-			_waitTimerCallbacks = [];
-			
-			if(err) {
-				if(errorHandler) {
-					errorHandler(err);
-				} else {
-					throw err;
-				}
-			} else if(doneHandler) {
-				doneHandler(yielded);
-			}
-		}}
-		timer.initWithCallback(timerCallback, ms ? ms : 0, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
-		// add timer to global scope so that it doesn't get garbage collected before it completes
-		_runningTimers.push(timer);
-	};
-	
-	/**
-	 * Pumps a generator until it yields false. Unlike the above, this returns a promise.
-	 */
-	this.promiseGenerator = function(generator, ms) {
-		var deferred = Q.defer();
-		this.pumpGenerator(generator, ms,
-			function(e) { deferred.reject(e); },
-			function(data) { deferred.resolve(data) });
-		return deferred.promise;
-	};
-	
-	/**
-	 * Emulates the behavior of window.setTimeout, but ensures that callbacks do not get called
-	 * during Zotero.wait()
+	 * Emulates the behavior of window.setTimeout
 	 *
 	 * @param {Function} func			The function to be called
 	 * @param {Integer} ms				The number of milliseconds to wait before calling func
-	 * @param {Boolean} runWhenWaiting	True if the callback should be run even if Zotero.wait()
-	 *                                  is executing
+	 * @return {Integer} - ID of timer to be passed to clearTimeout()
 	 */
-	this.setTimeout = function(func, ms, runWhenWaiting) {
-		var timer = Components.classes["@mozilla.org/timer;1"].
-			createInstance(Components.interfaces.nsITimer),
-			useJIT = Components.utils.methodjit;
-		var timerCallback = {"notify":function() {
-			// XXX Remove when we drop support for Fx <24
-			if(useJIT !== undefined) Components.utils.methodjit = useJIT;
-			
-			if(_waiting && !runWhenWaiting) {
-				// if our callback gets called during Zotero.wait(), queue it to be set again
-				// when Zotero.wait() completes
-				_waitTimers.push(timer);
-				_waitTimerCallbacks.push(timerCallback);
-			} else {
-				// execute callback function
+	var _lastTimeoutID = 0;
+	this.setTimeout = function (func, ms) {
+		var id = ++_lastTimeoutID;
+		
+		var timer = Components.classes["@mozilla.org/timer;1"]
+			.createInstance(Components.interfaces.nsITimer);
+		var timerCallback = {
+			"notify": function () {
 				func();
-				// remove timer from global scope, so it can be garbage collected
-				_runningTimers.splice(_runningTimers.indexOf(timer), 1);
+				_runningTimers.delete(id);
 			}
-		}}
+		};
 		timer.initWithCallback(timerCallback, ms, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-		// add timer to global scope so that it doesn't get garbage collected before it completes
-		_runningTimers.push(timer);
-	}
+		_runningTimers.set(id, timer);
+		return id;
+	};
+	
+	
+	this.clearTimeout = function (id) {
+		var timer = _runningTimers.get(id);
+		if (timer) {
+			timer.cancel();
+			_runningTimers.delete(id);
+		}
+	};
+	
 	
 	/**
 	 * Show Zotero pane overlay and progress bar in all windows
 	 *
-	 * @param	{String}		msg
-	 * @param	{Boolean}		[determinate=false]
+	 * @param {String} msg
+	 * @param {Boolean} [determinate=false]
+	 * @param {Boolean} [modalOnly=false] - Don't use popup if Zotero pane isn't showing
 	 * @return	void
 	 */
-	this.showZoteroPaneProgressMeter = function (msg, determinate, icon) {
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-					.getService(Components.interfaces.nsIWindowMediator);
-		var currentWindow = wm.getMostRecentWindow("navigator:browser");
-		var enumerator = wm.getEnumerator("navigator:browser");
+	this.showZoteroPaneProgressMeter = function (msg, determinate, icon, modalOnly) {
+		// If msg is undefined, keep any existing message. If false/null/"", clear.
+		// The message is also cleared when the meters are hidden.
+		_progressMessage = msg = (msg === undefined ? _progressMessage : msg) || "";
+		var currentWindow = Services.wm.getMostRecentWindow("navigator:browser");
+		var enumerator = Services.wm.getEnumerator("navigator:browser");
 		var progressMeters = [];
 		while (enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
 			if(!win.ZoteroPane) continue;
-			if(!win.ZoteroPane.isShowing()) {
+			if (!win.ZoteroPane.isShowing() && !modalOnly) {
 				if (win != currentWindow) {
 					continue;
 				}
@@ -1786,8 +1832,30 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				continue;
 			}
 			
-			win.ZoteroPane.document.getElementById('zotero-pane-progress-label').value = msg;
-			var progressMeter = win.ZoteroPane.document.getElementById('zotero-pane-progressmeter')
+			var label = win.ZoteroPane.document.getElementById('zotero-pane-progress-label');
+			if (!label) {
+				Components.utils.reportError("label not found in " + win.document.location.href);
+			}
+			if (msg) {
+				label.hidden = false;
+				label.value = msg;
+			}
+			else {
+				label.hidden = true;
+			}
+			// This is the craziest thing. In Firefox 52.6.0, the very presence of this line
+			// causes Zotero on Linux to burn 5% CPU at idle, even if everything below it in
+			// the block is commented out. Same if the progressmeter itself is hidden="true".
+			// For some reason it also doesn't seem to work to set the progressmeter to
+			// 'determined' when hiding, which we're doing in lookup.js. So instead, create a new
+			// progressmeter each time and delete it in _hideWindowZoteroPaneOverlay().
+			//
+			//let progressMeter = win.ZoteroPane.document.getElementById('zotero-pane-progressmeter');
+			let doc = win.ZoteroPane.document;
+			let container = doc.getElementById('zotero-pane-progressmeter-container');
+			let progressMeter = doc.createElement('progressmeter');
+			progressMeter.id = 'zotero-pane-progressmeter';
+			progressMeter.setAttribute('mode', 'undetermined');
 			if (determinate) {
 				progressMeter.mode = 'determined';
 				progressMeter.value = 0;
@@ -1796,13 +1864,14 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			else {
 				progressMeter.mode = 'undetermined';
 			}
+			container.appendChild(progressMeter);
 			
 			_showWindowZoteroPaneOverlay(win.ZoteroPane.document);
 			win.ZoteroPane.document.getElementById('zotero-pane-overlay-deck').selectedIndex = 0;
 			
 			progressMeters.push(progressMeter);
 		}
-		_locked = true;
+		this.locked = true;
 		_progressMeters = progressMeters;
 	}
 	
@@ -1821,7 +1890,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		if (percentage === _lastPercentage) {
 			return;
 		}
-		for each(var pm in _progressMeters) {
+		for (let pm of _progressMeters) {
 			if (percentage !== null) {
 				if (pm.mode == 'undetermined') {
 					pm.max = 1000;
@@ -1839,18 +1908,10 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	/**
 	 * Hide Zotero pane overlay in all windows
 	 */
-	this.hideZoteroPaneOverlay = function () {
-		// Run any queued callbacks
-		if (_unlockCallbacks.length) {
-			var func;
-			while (func = _unlockCallbacks.shift()) {
-				func();
-			}
-		}
+	this.hideZoteroPaneOverlays = function () {
+		this.locked = false;
 		
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-					.getService(Components.interfaces.nsIWindowMediator);
-		var enumerator = wm.getEnumerator("navigator:browser");
+		var enumerator = Services.wm.getEnumerator("navigator:browser");
 		while (enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
 			if(win.ZoteroPane && win.ZoteroPane.document) {
@@ -1862,25 +1923,12 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			_progressPopup.close();
 		}
 		
-		_locked = false;
+		_progressMessage = null;
 		_progressMeters = [];
 		_progressPopup = null;
 		_lastPercentage = null;
 	}
 	
-	
-	/**
-	 * Adds a callback to be called when the Zotero pane overlay closes
-	 *
-	 * @param	{Boolean}	TRUE if added, FALSE if not locked
-	 */
-	this.addUnlockCallback = function (callback) {
-		if (!_locked) {
-			return false;
-		}
-		_unlockCallbacks.push(callback);
-		return true;
-	}
 	
 	/**
 	 * Adds a listener to be called when Zotero shuts down (even if Firefox is not shut down)
@@ -1904,6 +1952,12 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		doc.getElementById('zotero-pane-tab-catcher-top').hidden = true;
 		doc.getElementById('zotero-pane-tab-catcher-bottom').hidden = true;
 		doc.getElementById('zotero-pane-overlay').hidden = true;
+		
+		// See note in showZoteroPaneProgressMeter()
+		let pm = doc.getElementById('zotero-pane-progressmeter');
+		if (pm) {
+			pm.parentNode.removeChild(pm);
+		}
 	}
 	
 	
@@ -1933,11 +1987,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			Zotero.Prefs.set("search.quicksearch-mode", "fields");
 			mode = 'fields';
 		}
-		// TEMP -- pre-3.0b3
-		else if (modes[mode] == 'titlesAndCreators') {
-			Zotero.Prefs.set("search.quicksearch-mode", "titleCreatorYear");
-			mode = 'titleCreatorYear'
-		}
 		
 		var hbox = document.getAnonymousNodes(searchBox)[0];
 		var input = hbox.getElementsByAttribute('class', 'textbox-input')[0];
@@ -1945,10 +1994,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		// Already initialized, so just update selection
 		var button = hbox.getElementsByAttribute('id', 'zotero-tb-search-menu-button');
 		if (button.length) {
-			Zotero.debug("already initialized search menu");
 			button = button[0];
 			var menupopup = button.firstChild;
-			for each(var menuitem in menupopup.childNodes) {
+			for (let menuitem of menupopup.childNodes) {
 				if (menuitem.id.substr(prefixLen) == mode) {
 					menuitem.setAttribute('checked', true);
 					searchBox.placeholder = modes[mode].label;
@@ -2007,22 +2055,34 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	/*
 	 * Clear entries that no longer exist from various tables
 	 */
-	this.purgeDataObjects = function (skipStoragePurge) {
-		Zotero.Creators.purge();
-		Zotero.Tags.purge();
-		// TEMP: Disabled until we have async DB (and maybe SQLite FTS)
-		//Zotero.Fulltext.purgeUnusedWords();
-		Zotero.Items.purge();
+	this.purgeDataObjects = Zotero.Promise.coroutine(function* () {
+		var d = new Date();
+		
+		yield Zotero.DB.executeTransaction(function* () {
+			return Zotero.Creators.purge();
+		});
+		yield Zotero.DB.executeTransaction(function* () {
+			return Zotero.Tags.purge();
+		});
+		yield Zotero.Fulltext.purgeUnusedWords();
+		yield Zotero.DB.executeTransaction(function* () {
+			return Zotero.Items.purge();
+		});
 		// DEBUG: this might not need to be permanent
-		Zotero.Relations.purge();
-	}
+		//yield Zotero.DB.executeTransaction(function* () {
+		//	return Zotero.Relations.purge();
+		//});
+		
+		Zotero.debug("Purged data tables in " + (new Date() - d) + " ms");
+	});
 	
 	
 	this.reloadDataObjects = function () {
-		Zotero.Tags.reloadAll();
-		Zotero.Collections.reloadAll();
-		Zotero.Creators.reloadAll();
-		Zotero.Items.reloadAll();
+		return Zotero.Promise.all([
+			Zotero.Collections.reloadAll(),
+			Zotero.Creators.reloadAll(),
+			Zotero.Items.reloadAll()
+		]);
 	}
 	
 	
@@ -2030,9 +2090,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 * Brings Zotero Standalone to the foreground
 	 */
 	this.activateStandalone = function() {
-		var io = Components.classes['@mozilla.org/network/io-service;1']
-					.getService(Components.interfaces.nsIIOService);
-		var uri = io.newURI('zotero://select', null, null);
+		var uri = Services.io.newURI('zotero://select', null, null);
 		var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
 					.getService(Components.interfaces.nsIExternalProtocolService)
 					.getProtocolHandlerInfo('zotero');
@@ -2079,7 +2137,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			'nsLivemarkService.js',
 			'Sync.Engine.Tabs',
 			'content-sessionStore.js',
-			'org.mozilla.appSessions'
+			'org.mozilla.appSessions',
+			'bad script XDR magic number',
+			'did not contain an updates property',
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
@@ -2150,19 +2210,22 @@ Zotero.Prefs = new function(){
 	this.prefBranch;
 	
 	function init(){
-		var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-						.getService(Components.interfaces.nsIPrefService);
-		this.prefBranch = prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
+		this.prefBranch = Services.prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
 		
 		// Register observer to handle pref changes
 		this.register();
-		
+
+		// Unregister observer handling pref changes
+		if (Zotero.addShutdownListener) {
+			Zotero.addShutdownListener(this.unregister.bind(this));
+		}
+
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
 		if (!fromVersion) {
 			fromVersion = 0;
 		}
-		var toVersion = 1;
+		var toVersion = 2;
 		if (fromVersion < toVersion) {
 			for (var i = fromVersion + 1; i <= toVersion; i++) {
 				switch (i) {
@@ -2178,6 +2241,14 @@ Zotero.Prefs = new function(){
 								this.set('sync.storage.downloadMode.groups', 'on-sync');
 							}
 						}
+						break;
+					
+					case 2:
+						// Re-show saveButton guidance panel (and clear old saveIcon pref).
+						// The saveButton guidance panel initially could auto-hide too easily.
+						this.clear('firstRunGuidanceShown.saveIcon');
+						this.clear('firstRunGuidanceShown.saveButton');
+						break;
 				}
 			}
 			this.set('prefVersion', toVersion);
@@ -2191,9 +2262,7 @@ Zotero.Prefs = new function(){
 	function get(pref, global){
 		try {
 			if (global) {
-				var service = Components.classes["@mozilla.org/preferences-service;1"]
-								.getService(Components.interfaces.nsIPrefService);
-				var branch = service.getBranch("");
+				var branch = Services.prefs.getBranch("");
 			}
 			else {
 				var branch = this.prefBranch;
@@ -2217,58 +2286,78 @@ Zotero.Prefs = new function(){
 	/**
 	* Set a preference
 	**/
-	function set(pref, value) {
+	function set(pref, value, global) {
 		try {
-			switch (this.prefBranch.getPrefType(pref)){
-				case this.prefBranch.PREF_BOOL:
-					return this.prefBranch.setBoolPref(pref, value);
-				case this.prefBranch.PREF_STRING:
+			if (global) {
+				var branch = Services.prefs.getBranch("");
+			}
+			else {
+				var branch = this.prefBranch;
+			}
+			
+			switch (branch.getPrefType(pref)) {
+				case branch.PREF_BOOL:
+					return branch.setBoolPref(pref, value);
+				case branch.PREF_STRING:
 					let str = Cc["@mozilla.org/supports-string;1"]
 						.createInstance(Ci.nsISupportsString);
 					str.data = value;
-					return this.prefBranch.setComplexValue(pref, Ci.nsISupportsString, str);
-				case this.prefBranch.PREF_INT:
-					return this.prefBranch.setIntPref(pref, value);
+					return branch.setComplexValue(pref, Ci.nsISupportsString, str);
+				case branch.PREF_INT:
+					return branch.setIntPref(pref, value);
 				
 				// If not an existing pref, create appropriate type automatically
 				case 0:
 					if (typeof value == 'boolean') {
 						Zotero.debug("Creating boolean pref '" + pref + "'");
-						return this.prefBranch.setBoolPref(pref, value);
+						return branch.setBoolPref(pref, value);
 					}
 					if (typeof value == 'string') {
 						Zotero.debug("Creating string pref '" + pref + "'");
-						return this.prefBranch.setCharPref(pref, value);
+						return branch.setCharPref(pref, value);
 					}
 					if (parseInt(value) == value) {
 						Zotero.debug("Creating integer pref '" + pref + "'");
-						return this.prefBranch.setIntPref(pref, value);
+						return branch.setIntPref(pref, value);
 					}
-					throw ("Invalid preference value '" + value + "' for pref '" + pref + "'");
+					throw new Error("Invalid preference value '" + value + "' for pref '" + pref + "'");
 			}
 		}
 		catch (e) {
-			Components.utils.reportError(e);
-			Zotero.debug(e, 1);
-			throw ("Invalid preference '" + pref + "'");
+			Zotero.logError(e);
+			throw new Error("Invalid preference '" + pref + "'");
 		}
 	}
 	
 	
-	this.clear = function (pref) {
-		try {
-			this.prefBranch.clearUserPref(pref);
+	this.clear = function (pref, global) {
+		if (global) {
+			var branch = Services.prefs.getBranch("");
 		}
-		catch (e) {
-			throw ("Invalid preference '" + pref + "'");
+		else {
+			var branch = this.prefBranch;
 		}
+		branch.clearUserPref(pref);
 	}
+	
+	
+	this.resetBranch = function (exclude = []) {
+		var keys = this.prefBranch.getChildList("", {});
+		for (let key of keys) {
+			if (this.prefBranch.prefHasUserValue(key)) {
+				if (exclude.includes(key)) {
+					continue;
+				}
+				Zotero.debug("Clearing " + key);
+				this.prefBranch.clearUserPref(key);
+			}
+		}
+	};
 	
 	
 	// Import settings bundles
 	this.importSettings = function (str, uri) {
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		
 		if (!uri.match(/https:\/\/([^\.]+\.)?zotero.org\//)) {
 			Zotero.debug("Ignoring settings file not from https://zotero.org");
@@ -2295,11 +2384,19 @@ Zotero.Prefs = new function(){
 	var _handlers = [
 		[ "automaticScraperUpdates", function(val) {
 			if (val){
-				Zotero.Schema.updateFromRepository();
+				Zotero.Schema.updateFromRepository(1);
 			}
 			else {
 				Zotero.Schema.stopRepositoryTimer();
 			}
+		}],
+		["fontSize", function (val) {
+			Zotero.setFontSize(
+				Zotero.getActiveZoteroPane().document.getElementById('zotero-pane')
+			);
+		}],
+		[ "layout", function(val) {
+			Zotero.getActiveZoteroPane().updateLayout();
 		}],
 		[ "note.fontSize", function(val) {
 			if (val < 6) {
@@ -2314,29 +2411,14 @@ Zotero.Prefs = new function(){
 				Zotero.VersionHeader.unregister();
 			}
 		}],
-		[ "zoteroDotOrgVersionHeader", function(val) {
-			if (val) {
-				Zotero.VersionHeader.register();
-			}
-			else {
-				Zotero.VersionHeader.unregister();
-			}
-		}],
 		[ "sync.autoSync", function(val) {
 			if (val) {
-				Zotero.Sync.Runner.IdleListener.register();
+				Zotero.Sync.EventListeners.AutoSyncListener.register();
+				Zotero.Sync.EventListeners.IdleListener.register();
 			}
 			else {
-				Zotero.Sync.Runner.IdleListener.unregister();
-			}
-		}],
-		[ "sync.fulltext.enabled", function(val) {
-			if (val) {
-				// Disable downgrades if full-text sync is enabled, since otherwise
-				// we could miss full-text content updates
-				if (Zotero.DB.valueQuery("SELECT version FROM version WHERE schema='userdata'") < 77) {
-					Zotero.DB.query("UPDATE version SET version=77 WHERE schema='userdata'");
-				}
+				Zotero.Sync.EventListeners.AutoSyncListener.unregister();
+				Zotero.Sync.EventListeners.IdleListener.unregister();
 			}
 		}],
 		[ "search.quicksearch-mode", function(val) {
@@ -2445,7 +2527,7 @@ Zotero.Keys = new function() {
 		var cmds = Zotero.Prefs.prefBranch.getChildList('keys', {}, {});
 		
 		// Get the key=>command mappings from the prefs
-		for each(var cmd in cmds) {
+		for (let cmd of cmds) {
 			cmd = cmd.substr(5); // strips 'keys.'
 			// Remove old pref
 			if (cmd == 'overrideGlobal') {
@@ -2524,13 +2606,26 @@ Zotero.VersionHeader = {
 	
 	observe: function (subject, topic, data) {
 		try {
-			var channel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
-			if (channel.URI.host.match(/zotero\.org$/)) {
+			// Add "Firefox/[version]" to the user agent before "Zotero/[version]"
+			let channel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
+			let ua = channel.getRequestHeader('User-Agent');
+			let info = Services.appinfo;
+			let pos = ua.indexOf(info.name + '/');
+			ua = ua.slice(0, pos) + `Firefox/${info.platformVersion.match(/^\d+/)[0]}.0 `
+				+ ZOTERO_CONFIG.CLIENT_NAME + '/';
+			// Send full Zotero version to zotero.org
+			if (channel.URI.host.endsWith(ZOTERO_CONFIG.DOMAIN_NAME)) {
+				ua += Zotero.version;
 				channel.setRequestHeader("X-Zotero-Version", Zotero.version, false);
 			}
+			// Otherwise only send major.minor version
+			else {
+				ua += Zotero.version.replace(/(\d+\.\d+).*/, '$1');
+			}
+			channel.setRequestHeader('User-Agent', ua, false);
 		}
 		catch (e) {
-			Zotero.debug(e);
+			Zotero.debug(e, 1);
 		}
 	},
 	
@@ -2540,9 +2635,9 @@ Zotero.VersionHeader = {
 }
 
 Zotero.DragDrop = {
-	currentDragEvent: null,
-	currentTarget: null,
+	currentEvent: null,
 	currentOrientation: 0,
+	currentSourceNode: null,
 	
 	getDataFromDataTransfer: function (dataTransfer, firstOnly) {
 		var dt = dataTransfer;
@@ -2557,71 +2652,76 @@ Zotero.DragDrop = {
 		
 		if (dt.types.contains('zotero/collection')) {
 			dragData.dataType = 'zotero/collection';
-			var ids = dt.getData('zotero/collection').split(",");
+			let ids = dt.getData('zotero/collection').split(",").map(id => parseInt(id));
 			dragData.data = ids;
 		}
 		else if (dt.types.contains('zotero/item')) {
 			dragData.dataType = 'zotero/item';
-			var ids = dt.getData('zotero/item').split(",");
+			let ids = dt.getData('zotero/item').split(",").map(id => parseInt(id));
 			dragData.data = ids;
 		}
-		else if (dt.types.contains('application/x-moz-file')) {
-			dragData.dataType = 'application/x-moz-file';
-			var files = [];
-			for (var i=0; i<len; i++) {
-				var file = dt.mozGetDataAt("application/x-moz-file", i);
-				file.QueryInterface(Components.interfaces.nsIFile);
-				// Don't allow folder drag
-				if (file.isDirectory()) {
-					continue;
+		else {
+			if (dt.types.contains('application/x-moz-file')) {
+				dragData.dataType = 'application/x-moz-file';
+				var files = [];
+				for (var i=0; i<len; i++) {
+					var file = dt.mozGetDataAt("application/x-moz-file", i);
+					if (!file) {
+						continue;
+					}
+					file.QueryInterface(Components.interfaces.nsIFile);
+					// Don't allow folder drag
+					if (file.isDirectory()) {
+						continue;
+					}
+					files.push(file);
 				}
-				files.push(file);
+				dragData.data = files;
 			}
-			dragData.data = files;
-		}
-		else if (dt.types.contains('text/x-moz-url')) {
-			dragData.dataType = 'text/x-moz-url';
-			var urls = [];
-			for (var i=0; i<len; i++) {
-				var url = dt.getData("text/x-moz-url").split("\n")[0];
-				urls.push(url);
+			// This isn't an else because on Linux a link drag contains an empty application/x-moz-file too
+			if (!dragData.data || !dragData.data.length) {
+				if (dt.types.contains('text/x-moz-url')) {
+					dragData.dataType = 'text/x-moz-url';
+					var urls = [];
+					for (var i=0; i<len; i++) {
+						var url = dt.getData("text/x-moz-url").split("\n")[0];
+						urls.push(url);
+					}
+					dragData.data = urls;
+				}
 			}
-			dragData.data = urls;
 		}
 		
 		return dragData;
 	},
 	
 	
-	getDragSource: function () {
-		var dt = this.currentDragEvent.dataTransfer;
-		if (!dt) {
-			Zotero.debug("Drag data not available", 2);
+	getDragSource: function (dataTransfer) {
+		if (!dataTransfer) {
+			//Zotero.debug("Drag data not available", 2);
 			return false;
 		}
 		
-		// For items, the drag source is the ItemGroup of the parent window
+		// For items, the drag source is the CollectionTreeRow of the parent window
 		// of the source tree
-		if (dt.types.contains("zotero/item")) {
-			var sourceNode = dt.mozSourceNode;
+		if (dataTransfer.types.contains("zotero/item")) {
+			let sourceNode = dataTransfer.mozSourceNode || this.currentSourceNode;
 			if (!sourceNode || sourceNode.tagName != 'treechildren'
 					|| sourceNode.parentElement.id != 'zotero-items-tree') {
 				return false;
 			}
 			var win = sourceNode.ownerDocument.defaultView;
 			if (win.document.documentElement.getAttribute('windowtype') == 'zotero:search') {
-				return win.ZoteroAdvancedSearch.itemsView.itemGroup;
+				return win.ZoteroAdvancedSearch.itemsView.collectionTreeRow;
 			}
-			return win.ZoteroPane.collectionsView.itemGroup;
+			return win.ZoteroPane.collectionsView.selectedTreeRow;
 		}
-		else {
-			return false;
-		}
+		
+		return false;
 	},
 	
 	
-	getDragTarget: function () {
-		var event = this.currentDragEvent;
+	getDragTarget: function (event) {
 		var target = event.target;
 		if (target.tagName == 'treechildren') {
 			var tree = target.parentNode;
@@ -2629,7 +2729,7 @@ Zotero.DragDrop = {
 				let row = {}, col = {}, obj = {};
 				tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
 				let win = tree.ownerDocument.defaultView;
-				return win.ZoteroPane.collectionsView.getItemGroupAtRow(row.value);
+				return win.ZoteroPane.collectionsView.getRow(row.value);
 			}
 		}
 		return false;
@@ -2643,18 +2743,20 @@ Zotero.DragDrop = {
 Zotero.Browser = new function() {
 	var nBrowsers = 0;
 	
-	this.createHiddenBrowser = createHiddenBrowser;
-	this.deleteHiddenBrowser = deleteHiddenBrowser;
-	
-	function createHiddenBrowser(win) {
-	 	if (!win) {
-			var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-							.getService(Components.interfaces.nsIWindowMediator)
-							.getMostRecentWindow("navigator:browser");
-			if(!win) {
-				var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								.getService(Components.interfaces.nsIWindowWatcher)
-								.activeWindow;
+	this.createHiddenBrowser = function (win) {
+		if (!win) {
+			win = Services.wm.getMostRecentWindow("navigator:browser");
+			if (!win) {
+				win = Services.ww.activeWindow;
+			}
+			// Use the hidden DOM window on macOS with the main window closed
+			if (!win) {
+				let appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"]
+					.getService(Components.interfaces.nsIAppShellService);
+				win = appShellService.hiddenDOMWindow;
+			}
+			if (!win) {
+				throw new Error("Parent window not available for hidden browser");
 			}
 		}
 		
@@ -2674,7 +2776,7 @@ Zotero.Browser = new function() {
 		return hiddenBrowser;
 	}
 	
-	function deleteHiddenBrowser(myBrowsers) {
+	this.deleteHiddenBrowser = function (myBrowsers) {
 		if(!(myBrowsers instanceof Array)) myBrowsers = [myBrowsers];
 		for(var i=0; i<myBrowsers.length; i++) {
 			var myBrowser = myBrowsers[i];
@@ -2687,57 +2789,26 @@ Zotero.Browser = new function() {
 	}
 }
 
-/**
- * Functions for disabling and enabling the unresponsive script indicator
- **/
-Zotero.UnresponsiveScriptIndicator = new function() {
-	this.disable = disable;
-	this.enable = enable;
-	
-	// stores the state of the unresponsive script preference prior to disabling
-	var _unresponsiveScriptPreference, _isDisabled;
-	
-	/**
-	 * disables the "unresponsive script" warning; necessary for import and
-	 * export, which can take quite a while to execute
-	 **/
-	function disable() {
-		// don't do anything if already disabled
-		if (_isDisabled) {
-			return false;
-		}
-		
-		var prefService = Components.classes["@mozilla.org/preferences-service;1"].
-		                  getService(Components.interfaces.nsIPrefBranch);
-		_unresponsiveScriptPreference = prefService.getIntPref("dom.max_chrome_script_run_time");
-		prefService.setIntPref("dom.max_chrome_script_run_time", 0);
-		
-		_isDisabled = true;
-		return true;
-	}
-	 
-	/**
-	 * restores the "unresponsive script" warning
-	 **/
-	function enable() {
-		var prefService = Components.classes["@mozilla.org/preferences-service;1"].
-		                  getService(Components.interfaces.nsIPrefBranch);
-		prefService.setIntPref("dom.max_chrome_script_run_time", _unresponsiveScriptPreference);
-		
-		_isDisabled = false;
-	}
-}
-
 
 /*
  * Implements nsIWebProgressListener
  */
 Zotero.WebProgressFinishListener = function(onFinish) {
+	var _request;
+	
+	this.getRequest = function () {
+		return _request;
+	};
+	
 	this.onStateChange = function(wp, req, stateFlags, status) {
 		//Zotero.debug('onStageChange: ' + stateFlags);
-		if ((stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP)
-				&& (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK)) {
+		if (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP
+				&& stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK) {
+			_request = null;
 			onFinish();
+		}
+		else {
+			_request = req;
 		}
 	}
 	

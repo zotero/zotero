@@ -1,13 +1,13 @@
 <!ENTITY zotero.search.name "Име:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Потражи у библиотеци:">
 
-<!ENTITY zotero.search.joinMode.prefix "Преклапај">
+<!ENTITY zotero.search.joinMode.prefix "Поклопи">
 <!ENTITY zotero.search.joinMode.any "било шта">
 <!ENTITY zotero.search.joinMode.all "све">
 <!ENTITY zotero.search.joinMode.suffix "од следећег:">
 
-<!ENTITY zotero.search.recursive.label "Претражи подфасцикле">
+<!ENTITY zotero.search.recursive.label "Претражи подзбирке">
 <!ENTITY zotero.search.noChildren "Прикажи само ставке на највишем нивоу">
 <!ENTITY zotero.search.includeParentsAndChildren "Укључи родитеља и дете ставке која се преклапа са нађеним ставкама">
 

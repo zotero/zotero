@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "Stäng">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Importera…">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Importera från urklipp">
 <!ENTITY quitApplicationCmdWin.label "Avsluta">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Avsluta">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Redigera">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Ångra">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Gör om">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Klipp ut">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Kopiera">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
-<!ENTITY copyCitationCmd.label "Kopiera citering">
+<!ENTITY copyCitationCmd.label "Kopiera referens">
 <!ENTITY copyBibliographyCmd.label "Kopiera källförteckning">
-<!ENTITY pasteCmd.label "Klistra in">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Radera">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Markera allt">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Inställningar">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Inställningar">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Sök">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Växla sidans läge">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Växla textflöde">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Verktyg">
 <!ENTITY toolsMenu.accesskey "T">
+<!ENTITY installConnector.label "Installera webbläsaranslutning">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Tillägg">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Felsökningsinformation">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Skicka återkoppling...">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Rapportera fel till Zotero...">
+<!ENTITY helpFeedbackPage.label "Diskussionsforum">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Rapportera fel…">
 <!ENTITY helpReportErrors.accesskey "R">
+
+<!ENTITY debugOutputLogging.label "Logga felsökningsutmatning">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Skicka utmatning">
+<!ENTITY debugOutputLogging.view "Visa utmatning">
+<!ENTITY debugOutputLogging.clear "Töm utmatning">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Starta om med loggning aktiverad…">
+
 <!ENTITY helpCheckForUpdates.label "Sök efter uppdateringar...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

@@ -1,9 +1,9 @@
-<!ENTITY styles.preview "Zotero Style Preview">
+<!ENTITY styles.preview "Zotoero stilförhandsgranskning">
 
-<!ENTITY styles.preview.citationFormat "Citation Format:">
-<!ENTITY styles.preview.citationFormat.all "all">
-<!ENTITY styles.preview.citationFormat.author "author">
-<!ENTITY styles.preview.citationFormat.authorDate "author-date">
-<!ENTITY styles.preview.citationFormat.label "label">
-<!ENTITY styles.preview.citationFormat.note "note">
-<!ENTITY styles.preview.citationFormat.numeric "numeric">
+<!ENTITY styles.preview.citationFormat "Referensformat:">
+<!ENTITY styles.preview.citationFormat.all "alla">
+<!ENTITY styles.preview.citationFormat.author "författare">
+<!ENTITY styles.preview.citationFormat.authorDate "författare-datum">
+<!ENTITY styles.preview.citationFormat.label "etikett">
+<!ENTITY styles.preview.citationFormat.note "anteckning">
+<!ENTITY styles.preview.citationFormat.numeric "numerisk">

@@ -1,3 +1,5 @@
+<!ENTITY zotero.general.yes "Ano">
+<!ENTITY zotero.general.no "Ne">
 <!ENTITY zotero.general.optional "(Volitelné)">
 <!ENTITY zotero.general.note "Poznámka:">
 <!ENTITY zotero.general.selectAll "Vybrat vše">
@@ -6,11 +8,17 @@
 <!ENTITY zotero.general.delete "Smazat">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Zrušit">
-<!ENTITY zotero.general.refresh "Refresh">
-<!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.refresh "Obnovit">
+<!ENTITY zotero.general.saveAs "Uložit jako...">
+<!ENTITY zotero.general.advancedOptions.label "Pokročilé možnosti">
+<!ENTITY zotero.general.tools "Nástroje">
+<!ENTITY zotero.general.more "Více">
+<!ENTITY zotero.general.loading "Nahrává se...">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+
 
 <!ENTITY zotero.errorReport.title "Chybová zpráva Zotera">
-<!ENTITY zotero.errorReport.unrelatedMessages "Může obsahovat zprávy nesouvisející se Zoterem.">
 <!ENTITY zotero.errorReport.submissionInProgress "Čekejte, prosím, dokud nebude zpráva o chybách odeslána.">
 <!ENTITY zotero.errorReport.submitted "Zpráva o chybách byla odeslána.">
 <!ENTITY zotero.errorReport.reportID "ID hlášení:">
@@ -91,6 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Obnovit do knihovny">
 <!ENTITY zotero.items.menu.duplicateItem "Duplikovat vybranou položku">
 <!ENTITY zotero.items.menu.mergeItems "Sloučit položky...">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Vyberte verzi položky, jež bude použita jako hlavní položka:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Vyberte pole z jiných verzí položky, která se mají zachovat:">
@@ -100,7 +110,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Vytvořit novou položku z aktuální stránky">
 <!ENTITY zotero.toolbar.lookup.label "Přidat položku podle identifikátoru">
 <!ENTITY zotero.toolbar.removeItem.label "Odstranit položku...">
+<!ENTITY zotero.toolbar.newLibrary.label "Nová knihovna">
 <!ENTITY zotero.toolbar.newCollection.label "Nová kolekce...">
+<!ENTITY zotero.toolbar.markFeedRead.label "Označit vlákno jako přečtené">
 <!ENTITY zotero.toolbar.newGroup "Nová skupina...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nová podkolekce...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nové Uložené hledání...">
@@ -116,16 +128,27 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Podpora a dokumentace">
 <!ENTITY zotero.toolbar.about.label "O Zoteru">
 <!ENTITY zotero.toolbar.advancedSearch "Pokročilé vyhledávání">
-<!ENTITY zotero.toolbar.tab.tooltip "Přepnout tabulkové zobrazení">
 <!ENTITY zotero.toolbar.openURL.label "Najít">
 <!ENTITY zotero.toolbar.openURL.tooltip "Najít prostřednictvím vaší místní knihovny">
+
+<!ENTITY zotero.toolbar.feeds.new "Nové vlákno">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "Z URL...">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "Ze stránky...">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "Z OPML...">
+<!ENTITY zotero.toolbar.feeds.refresh "Obnovit vlákno">
+<!ENTITY zotero.toolbar.feeds.edit "Editovat vlákno">
 
 <!ENTITY zotero.item.add "Přidat">
 <!ENTITY zotero.item.attachment.file.show "Ukázat soubor">
 <!ENTITY zotero.item.textTransform "Převést text">
 <!ENTITY zotero.item.textTransform.titlecase "Velká Písmena">
 <!ENTITY zotero.item.textTransform.sentencecase "Velké první písmeno">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Přehodit jméno/příjmení">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Zaměnit křestní jména / přijmení">
+<!ENTITY zotero.item.viewOnline "Zobrazit online">
+<!ENTITY zotero.item.copyAsURL "Kopírovat jako URL">
+<!ENTITY zotero.item.deletePermanently "Definitivně smazat...">
+
+<!ENTITY zotero.item.tags.removeAll "Odstranit všechny štítky...">
 
 <!ENTITY zotero.toolbar.newNote "Nová poznámka">
 <!ENTITY zotero.toolbar.note.standalone "Nová samostatná poznámka">
@@ -137,11 +160,10 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Vytvořit snímek aktuální stránky">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Žádné štítky k zobrazení">
-<!ENTITY zotero.tagSelector.filter "Filtr:">
+<!ENTITY zotero.tagSelector.loadingTags "Nahrávám štítky...">
 <!ENTITY zotero.tagSelector.showAutomatic "Ukazovat automaticky přidané">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
-<!ENTITY zotero.tagSelector.selectVisible "Vybrat viditelné">
-<!ENTITY zotero.tagSelector.clearVisible "Zrušit výběr viditelných">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Smazat všechny automatické štítky v této knihovně... ">
 <!ENTITY zotero.tagSelector.clearAll "Zrušit výběr všech">
 <!ENTITY zotero.tagSelector.assignColor "Nastavit barvu...">
 <!ENTITY zotero.tagSelector.renameTag "Přejmenovat štítek...">
@@ -153,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Nastavit barvu">
 <!ENTITY zotero.tagColorChooser.removeColor "Odstranit barvu">
 
-<!ENTITY zotero.lookup.description "Do políčka níže vložte ISBN, DOI nebo PMID, podle kterého chcete vyhledávat.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Hledat">
 
 <!ENTITY zotero.selectitems.title "Označit položky">
@@ -163,6 +185,8 @@
 
 <!ENTITY zotero.bibliography.title "Vytvořit bibliografii">
 <!ENTITY zotero.bibliography.style.label "Citační styl:">
+<!ENTITY zotero.bibliography.manageStyles "Správa stylů...">
+<!ENTITY zotero.bibliography.locale.label "Jazyk:">
 <!ENTITY zotero.bibliography.outputMode "Výstupní režim:">
 <!ENTITY zotero.bibliography.bibliography "Bibligrafie">
 <!ENTITY zotero.bibliography.outputMethod "Výstupní metoda:">
@@ -187,9 +211,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Ponechat zdroje seřazené">
 
-<!ENTITY zotero.citation.page "Stránka">
-<!ENTITY zotero.citation.paragraph "Odstavec">
-<!ENTITY zotero.citation.line "Řádek">
 <!ENTITY zotero.citation.suppressAuthor.label "Potlačit autora">
 <!ENTITY zotero.citation.prefix.label "Předpona:">
 <!ENTITY zotero.citation.suffix.label "Přípona:">
@@ -211,23 +232,24 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Poznámky pod čarou">
 <!ENTITY zotero.integration.prefs.endnotes.label "Koncové poznámky">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Formátovat použitím:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Záložky">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Záložky jsou zachovány u Microsoft Word i OpenOffice, ale mohou být náhodně modifikovány. Kvůli kompatibilitě nemohou být citace vkládány do poznámek pod čarou nebo koncových poznámek, pokud je tato možnost zvolena.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
+
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automaticky zkracovat názvy časopisů">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Budou se automaticky používat zkrácené názvů časopisů z MEDLINE. Pole &quot;zkrácený název časopisu&quot; bude ignorováno.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Uložit reference v dokumentu">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Uložení referencí do dokumentu mírně zvětší velikost souboru, ale umožní sdílet dokument s ostatními pomocí Zotero skupiny. K updatu dokumentů vytvořených s touto možností je potřeba Zotero 3.0 a vyšší.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Použít zkrácené názvy časopisů MEDLINE">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Pole &quot;Zkrácený název časopisu&quot; bude ignorováno">
 
 <!ENTITY zotero.integration.showEditor.label "Zobrazit editor">
 <!ENTITY zotero.integration.classicView.label "Standardní zobrazení">
 
 <!ENTITY zotero.integration.references.label "Reference v bibliografii">
 
-<!ENTITY zotero.sync.button "Synchronizovat se Zotero Serverem">
+<!ENTITY zotero.sync.stop "Zastavit synchronizaci">
 <!ENTITY zotero.sync.error "Chyba synchronizace">
 <!ENTITY zotero.sync.storage.progress "Průběh:">
 <!ENTITY zotero.sync.storage.downloads "Stahování:">
@@ -253,8 +275,17 @@
 <!ENTITY zotero.proxy.recognized.disable.label "Nepřesměrovávat požadavky skrze dříve rozpoznané proxy servery">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorovat">
 
-<!ENTITY zotero.recognizePDF.recognizing.label "Získávají se metadata...">
-<!ENTITY zotero.recognizePDF.cancel.label "Zrušit">
+<!ENTITY zotero.feedSettings.title "Nastavení vlákna">
+<!ENTITY zotero.feedSettings.saveButton.label "Uložit">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "Název:">
+<!ENTITY zotero.feedSettings.refresh.label1 "Obnovit vlákno každých">
+<!ENTITY zotero.feedSettings.refresh.label2 "hodin(a)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Odstranit nepřečtené položky z kanálu po">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "dnech">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Odstranit přečtené položky z kanálu po">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dnech">
+
 <!ENTITY zotero.recognizePDF.pdfName.label "Jméno PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Jméno položky">
 
@@ -285,7 +316,6 @@
 
 <!ENTITY zotero.downloadManager.label "Uložit do Zotera">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Do zvolené knihovny nemohou být uloženy přílohy. Tato položka bude místo toho uložena do vaší knihovny.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Pokud chcete využít této funkce, musíte nejdříve v nastavení Zotera nainstalovat nástroje pro práci s PDF.">
 
 <!ENTITY zotero.attachLink.title "Připojit odkaz na URI">
 <!ENTITY zotero.attachLink.label.link "Odkaz:">

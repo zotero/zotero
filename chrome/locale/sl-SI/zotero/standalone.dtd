@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "Zapri">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "Z">
+<!ENTITY importCmd.label "Uvozi ...">
+<!ENTITY importCmd.key "U">
+<!ENTITY importFromClipboardCmd.label "Uvozi z odložišča">
 <!ENTITY quitApplicationCmdWin.label "Izhod">
 <!ENTITY quitApplicationCmdWin.accesskey "h">
 <!ENTITY quitApplicationCmd.label "Izhod">
 <!ENTITY quitApplicationCmd.accesskey "z">
 
 
-<!ENTITY editMenu.label "Uredi">
-<!ENTITY editMenu.accesskey "R">
-<!ENTITY undoCmd.label "Razveljavi">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "R">
-<!ENTITY redoCmd.label "Ponovi">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "P">
-<!ENTITY cutCmd.label "Izreži">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "z">
-<!ENTITY copyCmd.label "Kopiraj">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "K">
 <!ENTITY copyCitationCmd.label "Kopiraj citat">
 <!ENTITY copyBibliographyCmd.label "Kopiraj bibliografijo">
-<!ENTITY pasteCmd.label "Prilepi">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Izbriši">
-<!ENTITY deleteCmd.key "b">
-<!ENTITY deleteCmd.accesskey "b">
-<!ENTITY selectAllCmd.label "Izberi vse">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "z">
-<!ENTITY preferencesCmd.label "Nastavitve">
-<!ENTITY preferencesCmd.accesskey "M">
-<!ENTITY preferencesCmdUnix.label "Nastavitve">
-<!ENTITY preferencesCmdUnix.accesskey "N">
-<!ENTITY findCmd.label "Najdi">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "N">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Preklopi smer strani">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "t">
 <!ENTITY bidiSwitchTextDirectionItem.label "Preklopi smer besedila">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Orodja">
 <!ENTITY toolsMenu.accesskey "d">
+<!ENTITY installConnector.label "Namesti konektor za brskalnik">
+<!ENTITY installConnector.accesskey "K">
 <!ENTITY addons.label "Dodatki">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "d">
 <!ENTITY helpTroubleshootingInfo.label "Reševanje težav ...">
 <!ENTITY helpTroubleshootingInfo.accesskey "R">
-<!ENTITY helpFeedbackPage.label "Povratne informacije ...">
-<!ENTITY helpFeedbackPage.accesskey "I">
-<!ENTITY helpReportErrors.label "Poročaj o napakah Zoteru ...">
+<!ENTITY helpFeedbackPage.label "Forumi za razprave">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Poročaj o napakah ...">
 <!ENTITY helpReportErrors.accesskey "P">
+
+<!ENTITY debugOutputLogging.label "Beleženje izhoda razhroščevanja">
+<!ENTITY debugOutputLogging.accesskey "B">
+<!ENTITY debugOutputLogging.submit "Oddaj izhod">
+<!ENTITY debugOutputLogging.view "Pokaži izhod">
+<!ENTITY debugOutputLogging.clear "Počisti izhod">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Ponovno zaženi z omogočenim beleženjem ...">
+
 <!ENTITY helpCheckForUpdates.label "Poišči posodobitve ...">
 <!ENTITY helpCheckForUpdates.accesskey "s">
