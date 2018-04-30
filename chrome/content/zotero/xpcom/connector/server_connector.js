@@ -1314,7 +1314,7 @@ Zotero.Server.Connector.Ping.prototype = {
 			if (Zotero.Server.Connector['skipVersionWarning-' + browser]) return;
 			
 			var version = req.headers['X-Zotero-Version'];
-			if (!version) return;
+			if (!version || version == '4.999.0') return;
 			
 			// If connector is up to date, bail
 			if (Services.vc.compare(version, minVersion) >= 0) return;
