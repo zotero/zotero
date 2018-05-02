@@ -238,7 +238,8 @@ Zotero.Integration = new function() {
 				Zotero.debug('Synchronous integration plugin functions are deprecated -- ' +
 					'update to asynchronous methods');
 				application = Zotero.Integration.LegacyPluginWrapper(application);
-				documentPromise = (application.getDocument && docId ? application.getDocument(docId) : application.getActiveDocument());
+				documentPromise = new Zotero.Promise(resolve =>
+					resolve(Zotero.Integration.LegacyPluginWrapper.wrapDocument(documentPromise)));
 			}
 			Zotero.Integration.currentDoc = document = await documentPromise;
 			
@@ -2823,117 +2824,124 @@ Zotero.Integration.Progress = class {
 }
 
 Zotero.Integration.LegacyPluginWrapper = function(application) {
-	function wrapField(field) {
-		var wrapped = {rawField: field};
-		var fns = ['getNoteIndex', 'setCode', 'getCode', 'setText',
-			'getText', 'removeCode', 'delete', 'select'];
-		for (let fn of fns) {
-			wrapped[fn] = async function() {
-				return field[fn].apply(field, arguments);
-			}
-		}
-		wrapped.equals = async function(other) {
-			return field.equals(other.rawField);
-		}
-		return wrapped;
-	}
-	function wrapDocument(doc) {
-		var wrapped = {};
-		var fns = ['complete', 'cleanup', 'setBibliographyStyle', 'setDocumentData',
-			'getDocumentData', 'canInsertField', 'activate', 'displayAlert'];
-		for (let fn of fns) {
-			wrapped[fn] = async function() {
-				return doc[fn].apply(doc, arguments);
-			}
-		}
-		// Should return an async array
-		wrapped.getFields = async function(fieldType, progressCallback) {
-			if ('getFieldsAsync' in doc) {
-				var deferred = Zotero.Promise.defer();
-				var promise = deferred.promise;
-				
-				var me = this;
-				doc.getFieldsAsync(fieldType,
-				{"observe":function(subject, topic, data) {
-					if(topic === "fields-available") {
-						if(progressCallback) {
-							try {
-								progressCallback(75);
-							} catch(e) {
-								Zotero.logError(e);
-							};
-						}
-						
-						try {
-							// Add fields to fields array
-							var fieldsEnumerator = subject.QueryInterface(Components.interfaces.nsISimpleEnumerator);
-							var fields = [];
-							while (fieldsEnumerator.hasMoreElements()) {
-								let field = fieldsEnumerator.getNext();
-								try {
-									fields.push(wrapField(field.QueryInterface(Components.interfaces.zoteroIntegrationField)));
-								} catch (e) {
-									fields.push(wrapField(field));
-								}
-							}
-						} catch(e) {
-							deferred.reject(e);
-							deferred = null;
-							return;
-						}
-						
-						deferred.resolve(fields);
-						deferred = null;
-					} else if(topic === "fields-progress") {
-						if(progressCallback) {
-							try {
-								progressCallback((data ? parseInt(data, 10)*(3/4) : null));
-							} catch(e) {
-								Zotero.logError(e);
-							};
-						}
-					} else if(topic === "fields-error") {
-						deferred.reject(data);
-						deferred = null;
-					}
-				}, QueryInterface:XPCOMUtils.generateQI([Components.interfaces.nsIObserver, Components.interfaces.nsISupports])});
-				return promise;
-			} else {
-				var result = doc.getFields.apply(doc, arguments);
-				var fields = [];
-				if (result.hasMoreElements) {
-					while (result.hasMoreElements()) {
-						fields.push(wrapField(result.getNext()));
-						await Zotero.Promise.delay();
-					}
-				} else {
-					fields = result;
-				}
-				return fields;
-			}
-		}
-		wrapped.insertField = async function() {
-			return wrapField(doc.insertField.apply(doc, arguments));
-		}
-		wrapped.cursorInField = async function() {
-			var result = doc.cursorInField.apply(doc, arguments);
-			return !result ? result : wrapField(result);
-		}
-		// Should take an arrayOfFields instead of an enumerator
-		wrapped.convert = async function(arrayOfFields) {
-			arguments[0] = new Zotero.Integration.JSEnumerator(arrayOfFields.map(f => f.rawField));
-			return doc.convert.apply(doc, arguments);
-		}
-		return wrapped;
-	}
 	return {
-		getDocument: 
-			async function() {return wrapDocument(application.getDocument.apply(application, arguments))},
-		getActiveDocument: 
-			async function() {return wrapDocument(application.getActiveDocument.apply(application, arguments))},
+		getDocument:
+			async function() {
+				return Zotero.Integration.LegacyPluginWrapper.wrapDocument(
+					application.getDocument.apply(application, arguments))
+			},
+		getActiveDocument:
+			async function() {
+				return Zotero.Integration.LegacyPluginWrapper.wrapDocument(
+					application.getActiveDocument.apply(application, arguments))
+			},
 		primaryFieldType: application.primaryFieldType,
 		secondaryFieldType: application.secondaryFieldType,
 		outputFormat: 'rtf',
 		supportedNotes: ['footnotes', 'endnotes']
 	}
+}
+Zotero.Integration.LegacyPluginWrapper.wrapField = function (field) {
+	var wrapped = {rawField: field};
+	var fns = ['getNoteIndex', 'setCode', 'getCode', 'setText',
+		'getText', 'removeCode', 'delete', 'select'];
+	for (let fn of fns) {
+		wrapped[fn] = async function() {
+			return field[fn].apply(field, arguments);
+		}
+	}
+	wrapped.equals = async function(other) {
+		return field.equals(other.rawField);
+	}
+	return wrapped;
+}
+Zotero.Integration.LegacyPluginWrapper.wrapDocument = function wrapDocument(doc) {
+	var wrapped = {};
+	var fns = ['complete', 'cleanup', 'setBibliographyStyle', 'setDocumentData',
+		'getDocumentData', 'canInsertField', 'activate', 'displayAlert'];
+	for (let fn of fns) {
+		wrapped[fn] = async function() {
+			return doc[fn].apply(doc, arguments);
+		}
+	}
+	// Should return an async array
+	wrapped.getFields = async function(fieldType, progressCallback) {
+		if ('getFieldsAsync' in doc) {
+			var deferred = Zotero.Promise.defer();
+			var promise = deferred.promise;
+			
+			var me = this;
+			doc.getFieldsAsync(fieldType,
+			{"observe":function(subject, topic, data) {
+				if(topic === "fields-available") {
+					if(progressCallback) {
+						try {
+							progressCallback(75);
+						} catch(e) {
+							Zotero.logError(e);
+						};
+					}
+					
+					try {
+						// Add fields to fields array
+						var fieldsEnumerator = subject.QueryInterface(Components.interfaces.nsISimpleEnumerator);
+						var fields = [];
+						while (fieldsEnumerator.hasMoreElements()) {
+							let field = fieldsEnumerator.getNext();
+							try {
+								fields.push(Zotero.Integration.LegacyPluginWrapper.wrapField(
+									field.QueryInterface(Components.interfaces.zoteroIntegrationField)));
+							} catch (e) {
+								fields.push(Zotero.Integration.LegacyPluginWrapper.wrapField(field));
+							}
+						}
+					} catch(e) {
+						deferred.reject(e);
+						deferred = null;
+						return;
+					}
+					
+					deferred.resolve(fields);
+					deferred = null;
+				} else if(topic === "fields-progress") {
+					if(progressCallback) {
+						try {
+							progressCallback((data ? parseInt(data, 10)*(3/4) : null));
+						} catch(e) {
+							Zotero.logError(e);
+						};
+					}
+				} else if(topic === "fields-error") {
+					deferred.reject(data);
+					deferred = null;
+				}
+			}, QueryInterface:XPCOMUtils.generateQI([Components.interfaces.nsIObserver, Components.interfaces.nsISupports])});
+			return promise;
+		} else {
+			var result = doc.getFields.apply(doc, arguments);
+			var fields = [];
+			if (result.hasMoreElements) {
+				while (result.hasMoreElements()) {
+					fields.push(Zotero.Integration.LegacyPluginWrapper.wrapField(result.getNext()));
+					await Zotero.Promise.delay();
+				}
+			} else {
+				fields = result;
+			}
+			return fields;
+		}
+	}
+	wrapped.insertField = async function() {
+		return Zotero.Integration.LegacyPluginWrapper.wrapField(doc.insertField.apply(doc, arguments));
+	}
+	wrapped.cursorInField = async function() {
+		var result = doc.cursorInField.apply(doc, arguments);
+		return !result ? result : Zotero.Integration.LegacyPluginWrapper.wrapField(result);
+	}
+	// Should take an arrayOfFields instead of an enumerator
+	wrapped.convert = async function(arrayOfFields) {
+		arguments[0] = new Zotero.Integration.JSEnumerator(arrayOfFields.map(f => f.rawField));
+		return doc.convert.apply(doc, arguments);
+	}
+	return wrapped;
 }
