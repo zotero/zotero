@@ -100,6 +100,7 @@ const xpcomFilesLocal = [
 	'locateManager',
 	'mime',
 	'notifier',
+	'openPDF',
 	'quickCopy',
 	'recognizePDF',
 	'report',

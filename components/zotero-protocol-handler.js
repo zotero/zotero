@@ -1000,6 +1000,119 @@ function ZoteroProtocolHandler() {
 		}
 	};
 	
+	
+	/**
+	 * Open a PDF at a given page (or try to)
+	 *
+	 * zotero://open-pdf/library/items/[itemKey]?page=[page]
+	 * zotero://open-pdf/groups/[groupID]/items/[itemKey]?page=[page]
+	 *
+	 * Also supports ZotFile format:
+	 * zotero://open-pdf/[libraryID]_[key]/[page]
+	 */
+	var OpenPDFExtension = {
+		noContent: true,
+		
+		doAction: async function (uri) {
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			
+			var uriPath = uri.path;
+			if (!uriPath) {
+				return 'Invalid URL';
+			}
+			// Strip leading '/'
+			uriPath = uriPath.substr(1);
+			var mimeType, content = '';
+			
+			var params = {
+				objectType: 'item'
+			};
+			var router = new Zotero.Router(params);
+			
+			// All items
+			router.add('library/items/:objectKey/:pathPage', function () {
+				params.libraryID = userLibraryID;
+			});
+			router.add('groups/:groupID/items/:objectKey/:pathPage');
+			
+			// ZotFile URLs
+			router.add(':id/:pathPage', function () {
+				var lkh = Zotero.Items.parseLibraryKeyHash(params.id);
+				if (!lkh) {
+					Zotero.warn(`Invalid URL ${url}`);
+					return;
+				}
+				params.libraryID = lkh.libraryID || userLibraryID;
+				params.objectKey = lkh.key;
+				delete params.id;
+			});
+			router.run(uriPath);
+			
+			Zotero.API.parseParams(params);
+			var results = await Zotero.API.getResultsFromParams(params);
+			var page = params.pathPage || params.page;
+			if (parseInt(page) != page) {
+				page = null;
+			}
+			
+			if (!results.length) {
+				Zotero.warn(`No item found for ${uriPath}`);
+				return;
+			}
+			
+			var item = results[0];
+			
+			if (!item.isFileAttachment()) {
+				Zotero.warn(`Item for ${uriPath} is not a file attachment`);
+				return;
+			}
+			
+			var path = await item.getFilePathAsync();
+			if (!path) {
+				Zotero.warn(`${path} not found`);
+				return;
+			}
+			
+			if (!path.toLowerCase().endsWith('.pdf')
+					&& Zotero.MIME.sniffForMIMEType(await Zotero.File.getSample(path)) != 'application/pdf') {
+				Zotero.warn(`${path} is not a PDF`);
+				return;
+			}
+			
+			// If no page number, just open normally
+			if (!page) {
+				let zp = Zotero.getActiveZoteroPane();
+				// TODO: Open pane if closed (macOS)
+				if (zp) {
+					zp.viewAttachment([item.id]);
+				}
+				return;
+			}
+			
+			try {
+				var opened = Zotero.OpenPDF.openToPage(path, page);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			// If something went wrong, just open PDF without page
+			if (!opened) {
+				let zp = Zotero.getActiveZoteroPane();
+				// TODO: Open pane if closed (macOS)
+				if (zp) {
+					zp.viewAttachment([item.id]);
+				}
+				return;
+			}
+			Zotero.Notifier.trigger('open', 'file', item.id);
+		},
+		
+		
+		newChannel: function (uri) {
+			this.doAction(uri);
+		}
+	};
+	
 	this._extensions[ZOTERO_SCHEME + "://data"] = DataExtension;
 	this._extensions[ZOTERO_SCHEME + "://report"] = ReportExtension;
 	this._extensions[ZOTERO_SCHEME + "://timeline"] = TimelineExtension;
@@ -1008,6 +1121,7 @@ function ZoteroProtocolHandler() {
 	this._extensions[ZOTERO_SCHEME + "://fullscreen"] = FullscreenExtension;
 	this._extensions[ZOTERO_SCHEME + "://debug"] = DebugExtension;
 	this._extensions[ZOTERO_SCHEME + "://connector"] = ConnectorExtension;
+	this._extensions[ZOTERO_SCHEME + "://open-pdf"] = OpenPDFExtension;
 }
 
 
