@@ -818,9 +818,10 @@ Zotero.DBConnection.prototype.logQuery = function (sql, params = [], options) {
 }
 
 
-Zotero.DBConnection.prototype.tableExists = Zotero.Promise.coroutine(function* (table) {
+Zotero.DBConnection.prototype.tableExists = Zotero.Promise.coroutine(function* (table, db) {
 	yield this._getConnectionAsync();
-	var sql = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND tbl_name=?";
+	var prefix = db ? db + '.' : '';
+	var sql = `SELECT COUNT(*) FROM ${prefix}sqlite_master WHERE type='table' AND tbl_name=?`;
 	var count = yield this.valueQueryAsync(sql, [table]);
 	return !!count;
 });
