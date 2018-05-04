@@ -42,10 +42,10 @@ describe("PDF Recognition", function() {
 		
 		var addedIDs = await waitForItemEvent("add");
 		var modifiedIDs = await waitForItemEvent("modify");
-		assert.lengthOf(addedIDs, 1);
+		assert.lengthOf(addedIDs, 2);
 		var item = Zotero.Items.get(addedIDs[0]);
 		assert.equal(item.getField("title"), "Scaling study of an improved fermion action on quenched lattices");
-		assert.lengthOf(modifiedIDs, 2);
+		assert.lengthOf(modifiedIDs, 1);
 		
 		// Wait for status to show as complete
 		var progressWindow = getWindows("chrome://zotero/content/recognizePDFDialog.xul")[0];
@@ -76,9 +76,9 @@ describe("PDF Recognition", function() {
 		
 		var addedIDs = await waitForItemEvent("add");
 		var modifiedIDs = await waitForItemEvent("modify");
-		assert.lengthOf(addedIDs, 1);
+		assert.lengthOf(addedIDs, 2);
 		var item = Zotero.Items.get(addedIDs[0]);
-		assert.lengthOf(modifiedIDs, 2);
+		assert.lengthOf(modifiedIDs, 1);
 		
 		// Wait for status to show as complete
 		var progressWindow = getWindows("chrome://zotero/content/recognizePDFDialog.xul")[0];
@@ -106,9 +106,9 @@ describe("PDF Recognition", function() {
 		
 		var addedIDs = await waitForItemEvent("add");
 		var modifiedIDs = await waitForItemEvent("modify");
-		assert.lengthOf(addedIDs, 1);
+		assert.lengthOf(addedIDs, 2);
 		var item = Zotero.Items.get(addedIDs[0]);
-		assert.lengthOf(modifiedIDs, 2);
+		assert.lengthOf(modifiedIDs, 1);
 		
 		// Wait for status to show as complete
 		var progressWindow = getWindows("chrome://zotero/content/recognizePDFDialog.xul")[0];
