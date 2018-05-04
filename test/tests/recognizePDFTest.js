@@ -28,7 +28,40 @@ describe("PDF Recognition", function() {
 		}
 	});
 	
-	it.skip("should recognize a PDF by DOI");
+	it("should recognize a PDF by DOI", async function () {
+		this.timeout(30000);
+		// Import the PDF
+		var testdir = getTestDataDirectory();
+		testdir.append("recognizePDF_test_DOI.pdf");
+		var collection = await createDataObject('collection');
+		var attachment = await Zotero.Attachments.importFromFile({
+			file: testdir,
+			collections: [collection.id]
+		});
+		
+		win.ZoteroPane.recognizeSelected();
+		
+		var addedIDs = await waitForItemEvent("add");
+		var modifiedIDs = await waitForItemEvent("modify");
+		assert.lengthOf(addedIDs, 1);
+		var item = Zotero.Items.get(addedIDs[0]);
+		assert.equal(item.getField("title"), "Shaping the Research Agenda");
+		assert.equal(item.getField("libraryCatalog"), "Crossref");
+		assert.lengthOf(modifiedIDs, 2);
+		
+		// Wait for status to show as complete
+		var progressWindow = getWindows("chrome://zotero/content/recognizePDFDialog.xul")[0];
+		var completeStr = Zotero.getString("recognizePDF.complete.label");
+		while (progressWindow.document.getElementById("label").value != completeStr) {
+			await Zotero.Promise.delay(20);
+		}
+		
+		// The file should have been renamed
+		assert.equal(
+			attachment.attachmentFilename,
+			Zotero.Attachments.getFileBaseNameFromItem(item) + '.pdf'
+		);
+	});
 	
 	it("should recognize a PDF by arXiv ID", async function () {
 		this.timeout(30000);
