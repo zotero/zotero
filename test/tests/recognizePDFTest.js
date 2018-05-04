@@ -27,12 +27,14 @@ describe("PDF Recognition", function() {
 			win.close();
 		}
 	});
-
-	it("should recognize a PDF by DOI", async function () {
+	
+	it.skip("should recognize a PDF by DOI");
+	
+	it("should recognize a PDF by arXiv ID", async function () {
 		this.timeout(30000);
 		// Import the PDF
 		var testdir = getTestDataDirectory();
-		testdir.append("recognizePDF_test_DOI.pdf");
+		testdir.append("recognizePDF_test_arXiv.pdf");
 		var attachment = await Zotero.Attachments.importFromFile({
 			file: testdir
 		});
@@ -42,10 +44,11 @@ describe("PDF Recognition", function() {
 		
 		var addedIDs = await waitForItemEvent("add");
 		var modifiedIDs = await waitForItemEvent("modify");
-		assert.lengthOf(addedIDs, 1);
+		// Item and note
+		assert.lengthOf(addedIDs, 2);
 		var item = Zotero.Items.get(addedIDs[0]);
 		assert.equal(item.getField("title"), "Scaling study of an improved fermion action on quenched lattices");
-		assert.lengthOf(modifiedIDs, 2);
+		assert.lengthOf(modifiedIDs, 1);
 		
 		// Wait for status to show as complete
 		var progressWindow = getWindows("chrome://zotero/content/recognizePDFDialog.xul")[0];
@@ -65,7 +68,7 @@ describe("PDF Recognition", function() {
 		this.timeout(30000);
 		// Import the PDF
 		var testdir = getTestDataDirectory();
-		testdir.append("recognizePDF_test_DOI.pdf");
+		testdir.append("recognizePDF_test_arXiv.pdf");
 		var collection = await createDataObject('collection');
 		var attachment = await Zotero.Attachments.importFromFile({
 			file: testdir,
@@ -76,9 +79,10 @@ describe("PDF Recognition", function() {
 		
 		var addedIDs = await waitForItemEvent("add");
 		var modifiedIDs = await waitForItemEvent("modify");
-		assert.lengthOf(addedIDs, 1);
+		// Item and note
+		assert.lengthOf(addedIDs, 2);
 		var item = Zotero.Items.get(addedIDs[0]);
-		assert.lengthOf(modifiedIDs, 2);
+		assert.lengthOf(modifiedIDs, 1);
 		
 		// Wait for status to show as complete
 		var progressWindow = getWindows("chrome://zotero/content/recognizePDFDialog.xul")[0];
@@ -90,10 +94,10 @@ describe("PDF Recognition", function() {
 		assert.isTrue(collection.hasItem(item.id));
 	});
 	
-	it("should recognize PDF by DOI and put new item in same collection in group library", async function () {
+	it("should recognize PDF by arXiv ID and put new item in same collection in group library", async function () {
 		this.timeout(30000);
 		var testdir = getTestDataDirectory();
-		testdir.append("recognizePDF_test_DOI.pdf");
+		testdir.append("recognizePDF_test_arXiv.pdf");
 		var group = await getGroup();
 		var collection = await createDataObject('collection', { libraryID: group.libraryID });
 		var attachment = await Zotero.Attachments.importFromFile({
@@ -106,9 +110,10 @@ describe("PDF Recognition", function() {
 		
 		var addedIDs = await waitForItemEvent("add");
 		var modifiedIDs = await waitForItemEvent("modify");
-		assert.lengthOf(addedIDs, 1);
+		// Item and note
+		assert.lengthOf(addedIDs, 2);
 		var item = Zotero.Items.get(addedIDs[0]);
-		assert.lengthOf(modifiedIDs, 2);
+		assert.lengthOf(modifiedIDs, 1);
 		
 		// Wait for status to show as complete
 		var progressWindow = getWindows("chrome://zotero/content/recognizePDFDialog.xul")[0];
