@@ -1036,7 +1036,7 @@ function ZoteroProtocolHandler() {
 			router.add('groups/:groupID/items/:objectKey');
 			
 			// ZotFile URLs
-			router.add(':id/:pathPage', function () {
+			router.add(':id/:page', function () {
 				var lkh = Zotero.Items.parseLibraryKeyHash(params.id);
 				if (!lkh) {
 					Zotero.warn(`Invalid URL ${url}`);
@@ -1050,7 +1050,7 @@ function ZoteroProtocolHandler() {
 			
 			Zotero.API.parseParams(params);
 			var results = await Zotero.API.getResultsFromParams(params);
-			var page = params.pathPage || params.page;
+			var page = params.page;
 			if (parseInt(page) != page) {
 				page = null;
 			}
