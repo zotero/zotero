@@ -26,7 +26,6 @@
 Zotero.MIME = new function(){
 	this.isTextType = isTextType;
 	this.getPrimaryExtension = getPrimaryExtension;
-	this.sniffForMIMEType = sniffForMIMEType;
 	this.sniffForBinary = sniffForBinary;
 	this.hasNativeHandler = hasNativeHandler;
 	this.hasInternalHandler = hasInternalHandler;
@@ -228,12 +227,12 @@ Zotero.MIME = new function(){
 	/*
 	 * Searches string for magic numbers
 	 */
-	function sniffForMIMEType(str){
-		for (var i in _snifferEntries){
-			var match = false;
+	this.sniffForMIMEType = function (str) {
+		for (let i in _snifferEntries) {
+			let match = false;
 			// If an offset is defined, match only from there
-			if (typeof _snifferEntries[i][2] != 'undefined') {
-				if (str.substr(i[2]).indexOf(_snifferEntries[i][0]) == 0) {
+			if (_snifferEntries[i][2] != undefined) {
+				if (str.substr(_snifferEntries[i][2]).indexOf(_snifferEntries[i][0]) == 0) {
 					match = true;
 				}
 			}
@@ -274,7 +273,7 @@ Zotero.MIME = new function(){
 	 * ext is an optional file extension hint if data sniffing is unsuccessful
 	 */
 	this.getMIMETypeFromData = function (str, ext){
-		var mimeType = sniffForMIMEType(str);
+		var mimeType = this.sniffForMIMEType(str);
 		if (mimeType){
 			Zotero.debug('Detected MIME type ' + mimeType);
 			return mimeType;
