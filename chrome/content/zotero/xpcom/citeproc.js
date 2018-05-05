@@ -24,7 +24,7 @@
  */
 
 var CSL = {
-    PROCESSOR_VERSION: "1.1.201",
+    PROCESSOR_VERSION: "1.1.206",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -461,12 +461,12 @@ var CSL = {
     PREFIX_PUNCTUATION: /[.;:]\s*$/,
     SUFFIX_PUNCTUATION: /^\s*[.;:,\(\)]/,
     NUMBER_REGEXP: /(?:^\d+|\d+$)/,
-    NAME_INITIAL_REGEXP: /^([A-Z\u0590-\u05ff\u00c0-\u017f\u0400-\u042f\u0600-\u06ff\u0370\u0372\u0376\u0386\u0388-\u03ab\u03e2\u03e4\u03e6\u03e8\u03ea\u03ec\u03ee\u03f4\u03f7\u03fd-\u03ff])([a-zA-Z\u00c0-\u017f\u0400-\u052f\u0600-\u06ff\u0370-\u03ff\u1f00-\u1fff]*|)/,
-    ROMANESQUE_REGEXP: /[-0-9a-zA-Z\u0590-\u05d4\u05d6-\u05ff\u0080-\u017f\u0400-\u052f\u0370-\u03ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]/,
-    ROMANESQUE_NOT_REGEXP: /[^a-zA-Z\u0590-\u05ff\u00c0-\u017f\u0400-\u052f\u0370-\u03ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]/g,
-    STARTSWITH_ROMANESQUE_REGEXP: /^[&a-zA-Z\u0590-\u05d4\u05d6-\u05ff\u00c0-\u017f\u0400-\u052f\u0370-\u03ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]/,
-    ENDSWITH_ROMANESQUE_REGEXP: /[.;:&a-zA-Z\u0590-\u05d4\u05d6-\u05ff\u00c0-\u017f\u0400-\u052f\u0370-\u03ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]$/,
-    ALL_ROMANESQUE_REGEXP: /^[a-zA-Z\u0590-\u05ff\u00c0-\u017f\u0400-\u052f\u0370-\u03ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]+$/,
+    NAME_INITIAL_REGEXP: /^([A-Z\u00c0-\u017f\u0400-\u042f\u0590-\u05d4\u05d6-\u05ff\u0600-\u06ff\u0370\u0372\u0376\u0386\u0388-\u03ab\u03e2\u03e4\u03e6\u03e8\u03ea\u03ec\u03ee\u03f4\u03f7\u03fd-\u03ff])([a-zA-Z\u00c0-\u017f\u0400-\u052f\u0600-\u06ff\u0370-\u03ff\u1f00-\u1fff]*|)/,
+    ROMANESQUE_REGEXP: /[-0-9a-zA-Z\u00c0-\u017f\u0370-\u03ff\u0400-\u052f\u0590-\u05d4\u05d6-\u05ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]/,
+    ROMANESQUE_NOT_REGEXP: /[^a-zA-Z\u00c0-\u017f\u0370-\u03ff\u0400-\u052f\u0590-\u05d4\u05d6-\u05ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]/g,
+    STARTSWITH_ROMANESQUE_REGEXP: /^[&a-zA-Z\u00c0-\u017f\u0370-\u03ff\u0400-\u052f\u0590-\u05d4\u05d6-\u05ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]/,
+    ENDSWITH_ROMANESQUE_REGEXP: /[.;:&a-zA-Z\u00c0-\u017f\u0370-\u03ff\u0400-\u052f\u0590-\u05d4\u05d6-\u05ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]$/,
+    ALL_ROMANESQUE_REGEXP: /^[a-zA-Z\u00c0-\u017f\u0370-\u03ff\u0400-\u052f\u0590-\u05d4\u05d6-\u05ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]+$/,
     VIETNAMESE_SPECIALS: /[\u00c0-\u00c3\u00c8-\u00ca\u00cc\u00cd\u00d2-\u00d5\u00d9\u00da\u00dd\u00e0-\u00e3\u00e8-\u00ea\u00ec\u00ed\u00f2-\u00f5\u00f9\u00fa\u00fd\u0101\u0103\u0110\u0111\u0128\u0129\u0168\u0169\u01a0\u01a1\u01af\u01b0\u1ea0-\u1ef9]/,
     VIETNAMESE_NAMES: /^(?:(?:[.AaBbCcDdEeGgHhIiKkLlMmNnOoPpQqRrSsTtUuVvXxYy \u00c0-\u00c3\u00c8-\u00ca\u00cc\u00cd\u00d2-\u00d5\u00d9\u00da\u00dd\u00e0-\u00e3\u00e8-\u00ea\u00ec\u00ed\u00f2-\u00f5\u00f9\u00fa\u00fd\u0101\u0103\u0110\u0111\u0128\u0129\u0168\u0169\u01a0\u01a1\u01af\u01b0\u1ea0-\u1ef9]{2,6})(\s+|$))+$/,
     NOTE_FIELDS_REGEXP: /\{:(?:[\-_a-z]+|[A-Z]+):[^\}]+\}/g,
@@ -2999,23 +2999,14 @@ CSL.Engine.prototype.retrieveItem = function (id) {
             }
         }
     }
-    if (this.sys.getLanguageName && Item.language) {
-		if (Item.language) {
-            Item.language = Item.language.toLowerCase();
-			var lst = Item.language.split("<");
-            if (lst.length > 0) {
-                var languageName = this.sys.getLanguageName(lst[0]);
-                if (languageName) {
-                    Item["language-name"] = languageName;
-                }
-            }
-			if (lst.length === 2) {
-				var originalLanguage = this.sys.getLanguageName(lst[1]);
-				if (originalLanguage) {
-					Item["language-name-original"] = originalLanguage;
-				}
-			}
-		}
+    if (Item.language) {
+        var lst = Item.language.split("<");
+        if (lst.length > 0) {
+            Item["language-name"] = lst[0];
+        }
+        if (lst.length === 2) {
+            Item["language-name-original"] = lst[1];
+        }
     }
     if (Item.page) {
         Item["page-first"] = Item.page;
@@ -12418,6 +12409,23 @@ CSL.Transform = function (state) {
     this.abbrevs = {};
     this.abbrevs["default"] = new state.sys.AbbreviationSegments();
     this.getTextSubField = getTextSubField;
+    function getCountryOrJurisdiction(variable, normalizedKey, quashCountry) {
+        var value = "";
+        if (state.sys.getHumanForm) {
+            if (variable === "country") {
+                value = state.sys.getHumanForm(normalizedKey.toLowerCase(), false, true);
+                value = value.split("|")[0];
+            } else if (variable === "jurisdiction") {
+                value = state.sys.getHumanForm(normalizedKey.toLowerCase(), false, true);
+                if (!quashCountry) {
+                    value = value.split("|").slice(1).join(", ");
+                } else {
+                    value = "";
+                }
+            }
+	    }
+	    return value;
+    }
     function abbreviate(state, tok, Item, altvar, basevalue, family_var, use_field, form) {
         var value = "";
         var myabbrev_family = CSL.FIELD_CATEGORY_REMAP[family_var];
@@ -12425,12 +12433,16 @@ CSL.Transform = function (state) {
             return basevalue;
         }
         var variable = family_var;
+        var normalizedKey = basevalue;
+        if (state.sys.normalizeAbbrevsKey) {
+            normalizedKey = state.sys.normalizeAbbrevsKey(family_var, basevalue);
+        }
+        var quashCountry = false;
+        if (variable === "jurisdiction" && normalizedKey) {
+            quashCountry = normalizedKey.indexOf(":") === -1;
+        }
         if (state.sys.getAbbreviation) {
-            var normalizedKey = basevalue;
-            if (state.sys.normalizeAbbrevsKey) {
-                normalizedKey = state.sys.normalizeAbbrevsKey(family_var, basevalue);
-            }
-            if (["jurisdiction", "country"].indexOf(variable) > -1) {
+            if (["jurisdiction", "country", "language-name", "language-name-original"].indexOf(variable) > -1) {
                 var loadJurisdiction = "default";
             } else if (Item.jurisdiction) {
                 var loadJurisdiction = Item.jurisdiction;
@@ -12441,23 +12453,13 @@ CSL.Transform = function (state) {
             if (state.transform.abbrevs[jurisdiction][myabbrev_family] && normalizedKey) {
                 var abbrev = state.transform.abbrevs[jurisdiction][myabbrev_family][normalizedKey];
                 if (tok.strings.form === "short" && abbrev) {
-                    value = abbrev;
-                } else {
-                    if (variable === "country") {
-                        if (state.sys.getHumanForm) {
-                            value = state.sys.getHumanForm(normalizedKey.toLowerCase(), false, true);
-                            value = value.split("|")[0];
-                        }
-                    } else if (variable === "jurisdiction") {
-                        if (state.sys.getHumanForm) {
-                            value = state.sys.getHumanForm(normalizedKey.toLowerCase(), false, true);
-                            if (normalizedKey.indexOf(":") > -1) {
-                                value = value.split("|").slice(1).join(", ");
-                            } else {
-                                value = "";
-                            }
-                        }
+                    if (quashCountry) {
+                        value = "";
+                    } else {
+                        value = abbrev;
                     }
+                } else {
+	                value = getCountryOrJurisdiction(variable, normalizedKey, quashCountry);
                 }
             }
         }
@@ -12466,7 +12468,10 @@ CSL.Transform = function (state) {
             && altvar && Item[altvar] && use_field) {
             value = Item[altvar];
         }
-        if (!value && (!state.sys.getHumanForm || variable !== "jurisdiction")) {
+        if (!value && !state.sys.getAbbreviation && state.sys.getHumanForm) {
+	        value = getCountryOrJurisdiction(variable, normalizedKey, quashCountry);
+	    }
+        if (!value && !quashCountry && (!state.sys.getHumanForm || variable !== "jurisdiction")) {
             value = basevalue;
         }
         return value;
@@ -12676,8 +12681,12 @@ CSL.Transform = function (state) {
                 if (primary) {
                     primary = quashCheck(primary);
                 }
-                secondary = abbreviate(state, secondary_tok, Item, false, secondary, family_var, true);
-                tertiary = abbreviate(state, tertiary_tok, Item, false, tertiary, family_var, true);
+                if (secondary) {
+                    secondary = abbreviate(state, secondary_tok, Item, false, secondary, family_var, true);
+                }
+                if (tertiary) {
+                    tertiary = abbreviate(state, tertiary_tok, Item, false, tertiary, family_var, true);
+                }
             }
             var primaryPrefix;
             if (slot.primary === "locale-translit") {
@@ -15137,7 +15146,7 @@ CSL.Output.Formatters = new function () {
     this.title = title;
     this["capitalize-first"] = capitalizeFirst;
     this["capitalize-all"] = capitalizeAll;
-    var rexStr = "(?:\u2018|\u2019|\u201C|\u201D| \"| \'|\"|\'|[-\–\—\/.,;?!:]|\\[|\\]|\\(|\\)|<span style=\"font-variant: small-caps;\">|<span class=\"no(?:case|decor)\">|<\/span>|<\/?(?:i|sc|b|sub|sup)>)";
+    var rexStr = "(?:\u2018|\u2019|\u201C|\u201D| \"| \'|\"|\'|[-\u2013\u2014\/.,;?!:]|\\[|\\]|\\(|\\)|<span style=\"font-variant: small-caps;\">|<span class=\"no(?:case|decor)\">|<\/span>|<\/?(?:i|sc|b|sub|sup)>)";
     var tagDoppel = new CSL.Doppeler(rexStr, function(str) {
         return str.replace(/(<span)\s+(class=\"no(?:case|decor)\")[^>]*(>)/g, "$1 $2$3").replace(/(<span)\s+(style=\"font-variant:)\s*(small-caps);?(\")[^>]*(>)/g, "$1 $2 $3;$4$5");
     });
