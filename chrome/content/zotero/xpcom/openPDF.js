@@ -30,11 +30,9 @@ Zotero.OpenPDF = {
 		if (Zotero.isMac) {
 			if (handler.includes('Preview')) {
 				this._openWithPreview(path, page);
-				opened = true;
 			}
 			else if (handler.includes('Skim')) {
 				this._openWithSkim(path, page);
-				opened = true;
 			}
 			else {
 				// Try to detect default app
@@ -85,7 +83,6 @@ Zotero.OpenPDF = {
 				}
 			}
 		}
-		
 		return opened;
 	},
 	
