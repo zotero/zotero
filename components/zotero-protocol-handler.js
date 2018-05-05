@@ -1030,10 +1030,10 @@ function ZoteroProtocolHandler() {
 			var router = new Zotero.Router(params);
 			
 			// All items
-			router.add('library/items/:objectKey/:pathPage', function () {
+			router.add('library/items/:objectKey', function () {
 				params.libraryID = userLibraryID;
 			});
-			router.add('groups/:groupID/items/:objectKey/:pathPage');
+			router.add('groups/:groupID/items/:objectKey');
 			
 			// ZotFile URLs
 			router.add(':id/:pathPage', function () {
