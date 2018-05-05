@@ -11,6 +11,9 @@
   "general_more": {
     "message": "Meer…"
   },
+  "progressWindow_error_upgradeClient": {
+    "message": "Deze functie wordt niet ondersteund door jouw versie van $1. Upgrade naar $2."
+  },
   "general_cancel": {
     "message": "Annuleren"
   },
@@ -19,6 +22,12 @@
   },
   "general_done": {
     "message": "Klaar"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Opslaan mislukt met $1. Probeer het opnieuw op te slaan met $2."
+  },
+  "upgradeApp": {
+    "message": "Bijwerken $1"
   },
   "general_saveTo": {
     "message": "Opslaan in $1"

@@ -43,13 +43,13 @@
 
 
 <!ENTITY toolsMenu.label "Ferramentas">
-<!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Instalar engadido para o navegador">
+<!ENTITY toolsMenu.accesskey "F">
+<!ENTITY installConnector.label "Instalar conector para o navegador">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Engadidos">
 
 
-<!ENTITY minimizeWindow.key "m">
+<!ENTITY minimizeWindow.key "e">
 <!ENTITY minimizeWindow.label "Minimizar">
 <!ENTITY bringAllToFront.label "Traer todo a diante">
 <!ENTITY zoomWindow.label "Ampliar">
@@ -57,7 +57,7 @@
 
 
 <!ENTITY helpMenu.label "Axuda">
-<!ENTITY helpMenu.accesskey "H">
+<!ENTITY helpMenu.accesskey "A">
 
 
 <!ENTITY helpMenuWin.label "Axuda">
@@ -65,15 +65,15 @@
 <!ENTITY helpMac.commandkey "?">
 <!ENTITY aboutProduct.label "Acerca de &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "Soporte e documentación">
-<!ENTITY productHelp.accesskey "H">
+<!ENTITY productHelp.label "Axuda e documentación">
+<!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Información de solución de problemas">
-<!ENTITY helpTroubleshootingInfo.accesskey "T">
+<!ENTITY helpTroubleshootingInfo.accesskey "P">
 <!ENTITY helpFeedbackPage.label "Foro de debate">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "Informar de erros...">
-<!ENTITY helpReportErrors.accesskey "R">
+<!ENTITY helpReportErrors.accesskey "E">
 
 <!ENTITY debugOutputLogging.label "Saída de depuración do logging">
 <!ENTITY debugOutputLogging.accesskey "L">
@@ -83,4 +83,4 @@
 <!ENTITY debugOutputLogging.restartWithLoggingEnabled "Reiniciar co acceso activado">
 
 <!ENTITY helpCheckForUpdates.label "Comprobar se hai actualizacións...">
-<!ENTITY helpCheckForUpdates.accesskey "U">
+<!ENTITY helpCheckForUpdates.accesskey "Z">

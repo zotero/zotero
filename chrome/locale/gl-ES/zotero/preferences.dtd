@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.items "Elementos">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Configuracións">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "Personalizado...">
 
 <!ENTITY zotero.preferences.prefpane.general "Xeral">
 
@@ -19,13 +19,13 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Extra grande">
 <!ENTITY zotero.preferences.fontSize.notes "Tamaño da tipografía das notas:">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.fileHandling "Xestión de ficheiros">
 <!ENTITY zotero.preferences.automaticSnapshots "Cando se crean elementos a partir de páxinas web facer capturas automaticamente">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Anexar automaticamente os PDFs e outros ficheiros asociados ao gardar os elementos">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Obter os metadados dos PDFs de xeito automático">
+<!ENTITY zotero.preferences.autoRenameFiles "Mudarlle o nome aos ficheiros anexos de xeito automático empregando os metadatos dos elementos ligados.">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Abrir os PDFs con">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "Predefinido no sistema">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscelánea">
 <!ENTITY zotero.preferences.autoUpdate "Comprobar de xeito automático a actualización de tradutores e estilos">
@@ -75,7 +75,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Descargar os ficheiros">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "no momento de sincronización">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "cando se precisen">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verificar o servidor">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Ao usar o almacenamento de Zotero estas a aceptar as obrigas establecidas nos seus">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "Termos e Condicións">
 <!ENTITY zotero.preferences.sync.librariesToSync "Bibliotecas sincronizadas">
@@ -87,12 +87,12 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "para máis información.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reiniciar o historial de sincronización de datos">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Xunguir os datos locais cos datos do servidor, esquecéndose do historial de sincronización.">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurar a partir da librería en liña">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Sobreescribir a librería local de Zotero cos datos da libraría en liña.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaurar a libraría en liña">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Sobreescribir a librería en liña cos datos locais de Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reiniciar o historial de sincronización de ficheiros">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Comparar todos os ficheiros anexos co servizo de almacenamento">
 <!ENTITY zotero.preferences.sync.reset "Reiniciar">
 <!ENTITY zotero.preferences.sync.reset.button "Reiniciar">
 
