@@ -34,12 +34,18 @@ Zotero.OpenPDF = {
 			else if (handler.includes('Skim')) {
 				this._openWithSkim(path, page);
 			}
+			else if (handler.includes('PDF Expert')) {
+				this._openWithPDFExpert(path, page);
+			}
 			else {
 				// Try to detect default app
 				handler = this._getPDFHandlerName();
 				Zotero.debug(`Handler is ${handler}`);
 				if (handler && handler == 'Skim') {
 					this._openWithSkim(path, page);
+				}
+				else if (handler && handler == 'PDF Expert') {
+					this._openWithPDFExpert(path, page);
 				}
 				// Fall back to Preview
 				else {
@@ -150,6 +156,18 @@ Zotero.OpenPDF = {
 			'-e', `tell app "Skim" to open "${filePath}"`
 		];
 		args.push('-e', `tell document "${filename}" of application "Skim" to go to page ${page}`);
+		await Zotero.Utilities.Internal.exec('/usr/bin/osascript', args);
+	},
+	
+	_openWithPDFExpert: async function (filePath, page) {
+		await Zotero.Utilities.Internal.exec('/usr/bin/open', ['-a', 'PDF Expert', filePath]);
+		// Go to page using AppleScript (same as Preview)
+		let args = [
+			'-e', 'tell app "PDF Expert" to activate',
+			'-e', 'tell app "System Events" to keystroke "g" using {option down, command down}',
+			'-e', `tell app "System Events" to keystroke "${page}"`,
+			'-e', 'tell app "System Events" to keystroke return'
+		];
 		await Zotero.Utilities.Internal.exec('/usr/bin/osascript', args);
 	},
 	
