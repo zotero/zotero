@@ -147,15 +147,20 @@ describe("Zotero.Utilities.Internal", function () {
 		});
 		
 		it("should extract PMID", async function () {
-			var id = "24297125";
-			var identifiers = ZUI.extractIdentifiers(id);
-			assert.lengthOf(identifiers, 1);
+			var identifiers = ZUI.extractIdentifiers("1 PMID:24297125,222 3-4 1234567890, 123456789");
+			assert.lengthOf(identifiers, 4);
 			assert.lengthOf(Object.keys(identifiers[0]), 1);
-			assert.propertyVal(identifiers[0], "PMID", id);
+			assert.lengthOf(Object.keys(identifiers[1]), 1);
+			assert.lengthOf(Object.keys(identifiers[2]), 1);
+			assert.lengthOf(Object.keys(identifiers[3]), 1);
+			assert.propertyVal(identifiers[0], "PMID", "1");
+			assert.propertyVal(identifiers[1], "PMID", "24297125");
+			assert.propertyVal(identifiers[2], "PMID", "222");
+			assert.propertyVal(identifiers[3], "PMID", "123456789");
 		});
 		
 		it("should extract multiple old and new style arXivs", async function () {
-			var identifiers = ZUI.extractIdentifiers("0706.0044 arXiv:0706.00441v1,hep-ex/9809001v1, math.GT/0309135.");
+			var identifiers = ZUI.extractIdentifiers("0706.0044 arXiv:0706.00441v1,12345678,hep-ex/9809001v1, math.GT/0309135.");
 			assert.lengthOf(identifiers, 4);
 			assert.lengthOf(Object.keys(identifiers[0]), 1);
 			assert.lengthOf(Object.keys(identifiers[1]), 1);
