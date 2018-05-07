@@ -901,7 +901,7 @@ Zotero.Utilities.Internal = {
 			// arXiv identifiers are extracted without version number
 			// i.e. 0706.0044v1 is extracted as 0706.0044,
 			// because arXiv OAI API doesn't allow to access individual versions
-			let arXiv_RE = /((?:[^A-Za-z]|^)([\-A-Za-z\.]+\/\d{7})(?:(v[0-9]+)|)(?!\d))|((?:\D|^)(\d{4}.\d{4,5})(?:(v[0-9]+)|)(?!\d))/g;
+			let arXiv_RE = /((?:[^A-Za-z]|^)([\-A-Za-z\.]+\/\d{7})(?:(v[0-9]+)|)(?!\d))|((?:\D|^)(\d{4}\.\d{4,5})(?:(v[0-9]+)|)(?!\d))/g;
 			let m;
 			while ((m = arXiv_RE.exec(text))) {
 				let arXiv = m[2] || m[5];
@@ -916,11 +916,11 @@ Zotero.Utilities.Internal = {
 		if (!identifiers.length) {
 			// PMID; right now, the longest PMIDs are 8 digits, so it doesn't seem like we'll
 			// need to discriminate for a fairly long time
-			let PMID_RE = /(?:\D|^)(\d{1,9})(?!\d)/g;
+			let PMID_RE = /(^|\s|,|:)(\d{1,9})(?=\s|,|$)/g;
 			let pmid;
 			while ((pmid = PMID_RE.exec(text)) && !foundIDs.has(pmid)) {
 				identifiers.push({
-					PMID: pmid[1]
+					PMID: pmid[2]
 				});
 				foundIDs.add(pmid);
 			}
