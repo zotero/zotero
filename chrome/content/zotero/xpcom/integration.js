@@ -2458,7 +2458,7 @@ Zotero.Integration.Citation = class {
 		}).apply(this, arguments);
 	}
 		
-	async handleMissingItem() {
+	async handleMissingItem(idx) {
 		// Ask user what to do with this item
 		if (this.citationItems.length == 1) {
 			var msg = Zotero.getString("integration.missingItem.single");
