@@ -339,3 +339,10 @@ treechildren::-moz-tree-checkbox(checked){
 	padding-top: .4em;
 	padding-bottom: .4em;
 }
+
+
+/* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
+@media (min-resolution: 1.25dppx) {
+	#zotero-prefpane-sync #sync-status-indicator[verified=true] { background-image: url("chrome://zotero/skin/tick@2x.png") }
+	#zotero-prefpane-sync #sync-status-indicator[animated] { background-image: url("chrome://zotero/skin/arrow_rotate_animated@2x.png") }
+}
