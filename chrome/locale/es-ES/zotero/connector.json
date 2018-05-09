@@ -3,7 +3,7 @@
     "message": "Habilitar guardar en la biblioteca en línea"
   },
   "error_connection_save": {
-    "message": "La $1 fue habilitada para comunicar con la aplicación de escritorio$2. El Conector puede guardar algunas páginas directamente en tu cuenta $3, pero para obtener mejores resultados deberías asegurarte de que $2 está abierto antes de intentar guardar."
+    "message": "El $1 fue habilitado para comunicar con la aplicación de escritorio de $2. El Conector puede guardar algunas páginas directamente en tu cuenta $3, pero para obtener mejores resultados debería asegurarse de que $2 está abierto antes de intentar guardar."
   },
   "progressWindow_error_translation": {
     "message": "Ocurrió un error mientras se guardaba este elemento. Véase $1 para más información."
@@ -33,7 +33,7 @@
     "message": "Solución de problemas del traductor"
   },
   "error_connection_downloadOrTroubleshoot": {
-    "message": "Puedes<a href=\"$1\">descargar $2</a> o <a href=\"$3\">solucionar problemas de la conexión</a> si es necesario."
+    "message": "Puedes <a href=\"$1\">descargar $2</a> o <a href=\"$3\">solucionar problemas de la conexión</a> si es necesario."
   },
   "general_done": {
     "message": "Hecho"
@@ -57,6 +57,6 @@
     "message": "Guardando a"
   },
   "integration_error_connection": {
-    "message": "La $1 fue habilitada para comunicar con la aplicación de escritorio $2. $2 debe estar abierto para usar la citación basada en web."
+    "message": "El $1 fue habilitado para comunicar con la aplicación de escritorio de $2. $2 debe estar abierto para usar la citación basada en web."
   }
 }
