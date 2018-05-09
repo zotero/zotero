@@ -1885,14 +1885,17 @@ Zotero.Translate.Base.prototype = {
 	 */
 	_attr: function (selector, attr, index) {
 		if (typeof arguments[0] == 'string') {
-			var doc = this.document;
+			var docOrElem = this.document;
 		}
-		// Support legacy polyfill signature
+		// Document or element passed as first argument
 		else {
-			this._debug("WARNING: attr() no longer requires a document as the first argument");
-			[doc, selector, attr, index] = arguments;
+			// TODO: Warn if Document rather than Element is passed once we drop 4.0 translator
+			// support
+			[docOrElem, selector, attr, index] = arguments;
 		}
-		var elem = index ? doc.querySelectorAll(selector).item(index) : doc.querySelector(selector);
+		var elem = index
+			? docOrElem.querySelectorAll(selector).item(index)
+			: docOrElem.querySelector(selector);
 		return elem ? elem.getAttribute(attr) : null;
 	},
 	
@@ -1901,14 +1904,17 @@ Zotero.Translate.Base.prototype = {
 	 */
 	_text: function (selector, index) {
 		if (typeof arguments[0] == 'string') {
-			var doc = this.document;
+			var docOrElem = this.document;
 		}
-		// Support legacy polyfill signature
+		// Document or element passed as first argument
 		else {
-			this._debug("WARNING: text() no longer requires a document as the first argument");
-			[doc, selector, attr, index] = arguments;
+			// TODO: Warn if Document rather than Element is passed once we drop 4.0 translator
+			// support
+			[docOrElem, selector, index] = arguments;
 		}
-		var elem = index ? doc.querySelectorAll(selector).item(index) : doc.querySelector(selector);
+		var elem = index
+			? docOrElem.querySelectorAll(selector).item(index)
+			: docOrElem.querySelector(selector);
 		return elem ? elem.textContent : null;
 	},
 	
