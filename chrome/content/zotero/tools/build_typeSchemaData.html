@@ -30,7 +30,7 @@
 		for (let type of types) {
 			var fieldIDs = Zotero.ItemFields.getItemTypeFields(type.id);
 			var baseFields = {};
-			for (let fieldID in fieldIDs) {
+			for (let fieldID of fieldIDs) {
 				if (baseMappedFields.includes(fieldID)) {
 					baseFields[fieldID] = Zotero.ItemFields.getBaseIDFromTypeAndField(type.id, fieldID);
 				}
