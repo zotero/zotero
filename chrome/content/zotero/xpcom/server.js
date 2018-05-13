@@ -333,7 +333,7 @@ Zotero.Server.DataListener.prototype._bodyData = function() {
 /**
  * Generates the response to an HTTP request
  */
-Zotero.Server.DataListener.prototype._generateResponse = function(status, contentType, body) {
+Zotero.Server.DataListener.prototype._generateResponse = function (status, contentTypeOrHeaders, body) {
 	var response = "HTTP/1.0 "+status+" "+Zotero.Server.responseCodes[status]+"\r\n";
 	
 	// Translation server
@@ -363,8 +363,15 @@ Zotero.Server.DataListener.prototype._generateResponse = function(status, conten
 		}
 	}
 	
-	if(contentType) {
-		response += "Content-Type: "+contentType+"\r\n";
+	if (contentTypeOrHeaders) {
+		if (typeof contentTypeOrHeaders == 'string') {
+			contentTypeOrHeaders = {
+				'Content-Type': contentTypeOrHeaders
+			};
+		}
+		for (let header in contentTypeOrHeaders) {
+			response += `${header}: ${contentTypeOrHeaders[header]}\r\n`;
+		}
 	}
 	
 	if(body) {
@@ -439,9 +446,9 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 		}
 		
 		// set up response callback
-		var sendResponseCallback = function (code, contentType, arg, options) {
+		var sendResponseCallback = function (code, contentTypeOrHeaders, arg, options) {
 			this._requestFinished(
-				this._generateResponse(code, contentType, arg),
+				this._generateResponse(code, contentTypeOrHeaders, arg),
 				options
 			);
 		}.bind(this);
