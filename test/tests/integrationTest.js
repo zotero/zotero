@@ -21,6 +21,7 @@ describe("Zotero.Integration", function () {
 		this.primaryFieldType = "Field";
 		this.secondaryFieldType = "Bookmark";
 		this.supportedNotes = ['footnotes', 'endnotes'];
+		this.supportsImportExport = true;
 		this.fields = [];
 	};
 	DocumentPluginDummy.Application.prototype = {
@@ -119,6 +120,31 @@ describe("Zotero.Integration", function () {
 		 * Informs the document processor that the operation is complete
 		 */
 		complete: () => 0,
+		
+		/**
+		 * Converts field text in document to their underlying codes and appends
+		 * document preferences and bibliography style as paragraphs at the end
+		 * of the document. Prefixes:
+		 * 	- Bibliography style: "BIBLIOGRAPHY_STYLE "
+		 * 	- Document preferences: "DOCUMENT_PREFERENCES "
+		 * 	
+		 * 	All Zotero exported text must be converted to a hyperlink
+		 * 	(with any url, e.g. http://www.zotero.org)
+		 */
+		exportDocument: (fieldType) => 0,
+		
+		/**
+		 * Converts a document from an exported form described in #exportDocument()
+		 * to a Zotero editable form. Bibliography Style and Document Preferences
+		 * text is removed and stored internally within the doc. The citation codes are
+		 * also stored within the doc in appropriate representation. 
+		 * 
+		 * Note that no citation text updates are needed. Zotero will issue field updates 
+		 * manually.
+		 * 
+		 * @returns {Boolean} whether the document contained importable data
+		 */
+		importDocument: (fieldType) => 0,
 	};
 
 	/**

@@ -74,7 +74,7 @@ Zotero.Server.Endpoints['/connector/document/respond'].prototype = {
 // For managing macOS integration and progress window focus
 Zotero.Server.Endpoints['/connector/sendToBack'] = function() {};
 Zotero.Server.Endpoints['/connector/sendToBack'].prototype = {
-	supportedMethods: ["POST"],
+	supportedMethods: ["POST", "GET"],
 	supportedDataTypes: ["application/json"],
 	permitBookmarklet: true,
 	init: function() {

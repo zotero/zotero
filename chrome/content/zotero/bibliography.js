@@ -32,6 +32,7 @@
 // Class to provide options for bibliography
 // Used by rtfScan.xul, integrationDocPrefs.xul, and bibliography.xul
 
+Components.utils.import("resource://gre/modules/Services.jsm");
 var Zotero_File_Interface_Bibliography = new function() {
 	var _io;
 	
@@ -174,6 +175,10 @@ var Zotero_File_Interface_Bibliography = new function() {
 				
 				document.getElementById("automaticCitationUpdates-checkbox").checked = !_io.delayCitationUpdates;
 			}
+			
+			if (_io.showImportExport) {
+				document.querySelector('#exportImport').hidden = false;
+			}
 		}
 		
 		// set style to false, in case this is cancelled
@@ -237,7 +242,38 @@ var Zotero_File_Interface_Bibliography = new function() {
 
 		window.sizeToContent();
 	};
-
+	
+	this.toggleAdvanced = function() {
+		var advancedSettings = document.querySelector("#advanced-settings");
+		advancedSettings.hidden = !advancedSettings.hidden;
+		var chevron = document.querySelector('.chevron');
+		chevron.classList.toggle('chevron-down');
+		chevron.classList.toggle('chevron-up');
+		window.sizeToContent();
+	};
+	
+	this.exportDocument = function() {
+		const importExportWikiURL = "https://www.zotero.org/support/kb/export_import_document";
+		
+		var ps = Services.prompt;
+		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+			+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
+		var result = ps.confirmEx(null,
+			Zotero.getString('integration.exportDocument'),
+			Zotero.getString('integration.exportDocument.description'),
+			buttonFlags,
+			null,
+			null,
+			Zotero.getString('general.moreInformation'), null, {});
+		if (result == 0) {
+			_io.exportDocument = true;
+			document.documentElement.acceptDialog();
+		} else if (result == 2) {
+			Zotero.launchURL(importExportWikiURL);
+		}
+	}
+	
 	/*
 	 * Update locale menulist when style is changed
 	 */
