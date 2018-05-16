@@ -347,6 +347,7 @@ Zotero.Server.DataListener.prototype._generateResponse = function (status, conte
 				response += "Access-Control-Allow-Origin: " + (allAllowed ? '*' : this.origin) + "\r\n";
 				response += "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n";
 				response += "Access-Control-Allow-Headers: Content-Type\r\n";
+				response += "Access-Control-Expose-Headers: Link\r\n";
 			}
 		}
 	}
