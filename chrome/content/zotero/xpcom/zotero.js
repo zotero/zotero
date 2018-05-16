@@ -2606,27 +2606,49 @@ Zotero.VersionHeader = {
 	
 	observe: function (subject, topic, data) {
 		try {
-			// Add "Firefox/[version]" to the user agent before "Zotero/[version]"
 			let channel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
-			let ua = channel.getRequestHeader('User-Agent');
-			let info = Services.appinfo;
-			let pos = ua.indexOf(info.name + '/');
-			ua = ua.slice(0, pos) + `Firefox/${info.platformVersion.match(/^\d+/)[0]}.0 `
-				+ ZOTERO_CONFIG.CLIENT_NAME + '/';
-			// Send full Zotero version to zotero.org
-			if (channel.URI.host.endsWith(ZOTERO_CONFIG.DOMAIN_NAME)) {
-				ua += Zotero.version;
+			let domain = channel.URI.host;
+			if (domain.endsWith(ZOTERO_CONFIG.DOMAIN_NAME)) {
 				channel.setRequestHeader("X-Zotero-Version", Zotero.version, false);
 			}
-			// Otherwise only send major.minor version
 			else {
-				ua += Zotero.version.replace(/(\d+\.\d+).*/, '$1');
+				let ua = channel.getRequestHeader('User-Agent');
+				ua = this.update(domain, ua);
+				channel.setRequestHeader('User-Agent', ua, false);
 			}
-			channel.setRequestHeader('User-Agent', ua, false);
 		}
 		catch (e) {
 			Zotero.debug(e, 1);
 		}
+	},
+	
+	/**
+	 * Add Firefox/[version] to the default user agent and replace Zotero/[version] with
+	 * Zotero/[major.minor] (except for requests to zotero.org, where we include the full version)
+	 *
+	 * @param {String} domain
+	 * @param {String} ua - User Agent
+	 * @param {String} [testAppName] - App name to look for (necessary in tests, which are
+	 *     currently run in Firefox)
+	 */
+	update: function (domain, ua, testAppName) {
+		var info = Services.appinfo;
+		var appName = testAppName || info.name;
+		
+		var pos = ua.indexOf(appName + '/');
+		
+		// Default UA
+		if (pos != -1) {
+			ua = ua.slice(0, pos) + `Firefox/${info.platformVersion.match(/^\d+/)[0]}.0 `
+				+ appName + '/';
+		}
+		// Fake UA from connector
+		else {
+			ua += ' ' + appName + '/';
+		}
+		ua += Zotero.version.replace(/(\d+\.\d+).*/, '$1');
+		
+		return ua;
 	},
 	
 	unregister: function () {
