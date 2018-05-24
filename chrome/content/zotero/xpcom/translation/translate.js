@@ -1299,6 +1299,7 @@ Zotero.Translate.Base.prototype = {
 		}
 		this._collections = options.collections;
 		this._saveAttachments = options.saveAttachments === undefined || options.saveAttachments;
+		this._forceTagType = options.forceTagType;
 		this._saveOptions = options.saveOptions;
 		
 		this._savingAttachments = [];
@@ -2378,6 +2379,7 @@ Zotero.Translate.Import.prototype._prepareTranslation = Zotero.Promise.method(fu
 	this._itemSaver = new Zotero.Translate.ItemSaver({
 		libraryID: this._libraryID,
 		collections: this._collections,
+		forceTagType: this._forceTagType,
 		attachmentMode: Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_FILE" : "ATTACHMENT_MODE_IGNORE")],
 		baseURI,
 		saveOptions: Object.assign(

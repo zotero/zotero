@@ -1002,6 +1002,7 @@ Zotero.Server.Connector.Import.prototype = {
 		let items = await translate.translate({
 			libraryID,
 			collections: collection ? [collection.id] : null,
+			forceTagType: 1,
 			// Import translation skips selection by default, so force it to occur
 			saveOptions: {
 				skipSelect: false

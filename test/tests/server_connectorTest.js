@@ -731,7 +731,8 @@ describe("Connector Server", function () {
   title={Test1},
   author={Owl},
   year={1000},
-  publisher={Curly Braces Publishing}
+  publisher={Curly Braces Publishing},
+  keywords={A, B}
 }`;
 			
 			var addedItemIDsPromise = waitForItemEvent('add');
@@ -748,6 +749,8 @@ describe("Connector Server", function () {
 			
 			let itemIDs = yield addedItemIDsPromise;
 			assert.isTrue(collection.hasItem(itemIDs[0]));
+			var item = Zotero.Items.get(itemIDs[0]);
+			assert.sameDeepMembers(item.getTags(), [{ tag: 'A', type: 1 }, { tag: 'B', type: 1 }]);
 		});
 		
 		
