@@ -2,9 +2,9 @@
 
 ## Bug Reports and Feature Requests
 
-In order to keep product discussions open to as many people as possible, Zotero does not use GitHub Issues for bug reports or feature requests. Please use the [Zotero Forums](https://forums.zotero.org) to report problems and suggest changes.
+Zotero does not use GitHub Issues for bug reports or feature requests. Please post all such requests to the [Zotero Forums](https://forums.zotero.org), where Zotero developers and many others can help. Keeping product discussions in the Zotero Forums allows the entire Zotero community to participate, including domain experts that can address many questions better than Zotero developers.
 
-For confirmed bugs or agreed-upon changes, new issues will be created in the relevant repositories on GitHub by Zotero developers.
+For confirmed bugs or agreed-upon changes, Zotero developers will create new issues in the relevant repositories.
 
 ## Working with Zotero Code
 
