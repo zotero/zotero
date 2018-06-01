@@ -378,7 +378,8 @@ Zotero.Integration = new function() {
 		// We do not want to redisplay the progress bar if this window close
 		// was the final close of the integration command
 		await Zotero.Promise.delay(10);
-		if (Zotero.Integration.currentDoc) {
+		if (Zotero.Integration.currentDoc && Zotero.Integration.currentSession
+				&& Zotero.Integration.currentSession.progressBar) {
 			Zotero.Integration.currentSession.progressBar.show();
 		}
 	};
