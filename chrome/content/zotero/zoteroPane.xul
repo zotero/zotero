@@ -49,7 +49,7 @@
 	
 	<commandset id="mainCommandSet">
 		<command id="cmd_zotero_reportErrors" oncommand="ZoteroPane_Local.reportErrors();"/>
-		<command id="cmd_zotero_import" oncommand="Zotero_File_Interface.importFile();"/>
+		<command id="cmd_zotero_import" oncommand="Zotero_File_Interface.startImport();"/>
 		<command id="cmd_zotero_importFromClipboard" oncommand="Zotero_File_Interface.importFromClipboard();"/>
 		<command id="cmd_zotero_exportLibrary" oncommand="Zotero_File_Interface.exportFile();"/>
 		<command id="cmd_zotero_advancedSearch" oncommand="ZoteroPane_Local.openAdvancedSearchWindow();"/>

@@ -202,6 +202,14 @@
 
 <!ENTITY zotero.progress.title							"Progress">
 
+<!ENTITY zotero.import                                 "Import">
+<!ENTITY zotero.import.whereToImportFrom               "Where do you want to import from?">
+<!ENTITY zotero.import.source.file                     "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing                       "Importing…">
+<!ENTITY zotero.import.database                        "Database">
+<!ENTITY zotero.import.lastModified                    "Last Modified">
+<!ENTITY zotero.import.size                            "Size">
+
 <!ENTITY zotero.exportOptions.title						"Export…">
 <!ENTITY zotero.exportOptions.format.label				"Format:">
 <!ENTITY zotero.exportOptions.translatorOptions.label	"Translator Options">
