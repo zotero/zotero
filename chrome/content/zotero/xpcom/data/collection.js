@@ -712,7 +712,7 @@ Zotero.Collection.prototype.toJSON = function (options = {}) {
 	
 	obj.name = this.name;
 	obj.parentCollection = this.parentKey ? this.parentKey : false;
-	obj.relations = {}; // TEMP
+	obj.relations = this.getRelations();
 	
 	return this._postToJSON(env);
 }

@@ -285,7 +285,7 @@ Zotero.DataObject.prototype._setParentKey = function(key) {
 /**
  * Returns all relations of the object
  *
- * @return {Object} - Object with predicates as keys and arrays of URIs as values
+ * @return {Object} - Object with predicates as keys and arrays of values
  */
 Zotero.DataObject.prototype.getRelations = function () {
 	this._requireData('relations');
@@ -410,7 +410,7 @@ Zotero.DataObject.prototype.setRelations = function (newRelations) {
 	
 	// Limit predicates to letters and colons for now
 	for (let p in newRelations) {
-		if (!/[a-z]+:[a-z]+/.test(p)) {
+		if (!/^[a-z]+:[a-z]+$/i.test(p)) {
 			throw new Error(`Invalid relation predicate '${p}'`);
 		}
 	}

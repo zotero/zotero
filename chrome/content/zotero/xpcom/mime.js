@@ -47,8 +47,9 @@ Zotero.MIME = new function(){
 		["\uFFFDPNG", 'image/png', 0],
 		["JFIF", 'image/jpeg'],
 		["FLV", "video/x-flv", 0],
-		["\u0000\u0000\u0001\u0000", "image/vnd.microsoft.icon", 0]
-		
+		["\u0000\u0000\u0001\u0000", "image/vnd.microsoft.icon", 0],
+		["\u0053\u0051\u004C\u0069\u0074\u0065\u0020\u0066"
+			+ "\u006F\u0072\u006D\u0061\u0074\u0020\u0033\u0000", "application/x-sqlite3", 0]
 	];
 	
 	var _extensions = {

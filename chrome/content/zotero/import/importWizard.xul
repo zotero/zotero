@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/importWizard.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<wizard id="import-wizard"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		title="&zotero.import;"
+		onload="Zotero_Import_Wizard.init()">
+	
+	<script src="../include.js"/>
+	<script src="../fileInterface.js"/>
+	<script src="importWizard.js"/>
+	
+	<wizardpage pageid="page-start"
+			label="&zotero.import.whereToImportFrom;"
+			next="page-progress"
+			onpageadvanced="Zotero_Import_Wizard.onModeChosen(); return false;">
+		<radiogroup id="import-source">
+			<radio id="radio-import-source-file" label="&zotero.import.source.file;"/>
+			<radio id="radio-import-source-mendeley" label="Mendeley"/>
+		</radiogroup>
+	</wizardpage>
+	
+	<wizardpage pageid="page-file-options"
+			next="page-progress"
+			onpagerewound="var w = document.getElementById('import-wizard'); w.goTo('page-start'); w.canAdvance = true; return false;"
+			onpageadvanced="Zotero_Import_Wizard.onFileChosen()">
+		<description id="file-options-header"/>
+		<listbox id="file-list" onselect="Zotero_Import_Wizard.onFileSelected()">
+			<listhead>
+				<listheader label="&zotero.import.database;"/>
+				<listheader label="&zotero.import.lastModified;"/>
+				<listheader label="&zotero.import.size;"/>
+			</listhead>
+			
+			<listcols>
+				<listcol flex="1"/>
+				<listcol/>
+				<listcol/>
+			</listcols>
+		</listbox>
+	</wizardpage>
+	
+	<wizardpage pageid="page-progress"
+			label="&zotero.import.importing;"
+			onpageshow="document.getElementById('import-wizard').canRewind = false;"
+			next="page-done">
+		<progressmeter id="import-progressmeter" mode="determined"/>
+	</wizardpage>
+	
+	<wizardpage pageid="page-done">
+		<description id="result-description"/>
+		<hbox>
+			<button id="result-report-error"
+				oncommand="Zotero_Import_Wizard.reportError()"
+				hidden="true"/>
+		</hbox>
+	</wizardpage>
+</wizard>

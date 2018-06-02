@@ -32,7 +32,8 @@ Zotero.Relations = new function () {
 	
 	this._namespaces = {
 		dc: 'http://purl.org/dc/elements/1.1/',
-		owl: 'http://www.w3.org/2002/07/owl#'
+		owl: 'http://www.w3.org/2002/07/owl#',
+		mendeleyDB: 'http://zotero.org/namespaces/mendeleyDB#'
 	};
 	
 	var _types = ['collection', 'item'];
