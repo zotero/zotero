@@ -154,7 +154,7 @@ Zotero.API = {
 			return 'groups/' + Zotero.Groups.getGroupIDFromLibraryID(libraryID);
 		
 		default:
-			throw new Error(`Invalid type '${type}`);
+			throw new Error(`Invalid type '${type}'`);
 		}
 	}
 };
