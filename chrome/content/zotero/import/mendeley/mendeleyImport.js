@@ -201,12 +201,10 @@ Zotero_Import_Mendeley.prototype._getFolderDescendents = function (folderID, fol
 				name: f.name,
 				parentCollection: folderKey
 			};
-			// Store local id and remote UUID
-			c.relations = {
-				"mendeleyDB:folderID": f.id.toString()
-			};
 			if (f.remoteUuid) {
-				c.relations['mendeleyDB:remoteFolderUUID'] = f.remoteUuid;
+				c.relations = {
+					'mendeleyDB:remoteFolderUUID': f.remoteUuid
+				};
 			}
 			return c;
 		});
