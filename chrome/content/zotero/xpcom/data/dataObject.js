@@ -285,7 +285,7 @@ Zotero.DataObject.prototype._setParentKey = function(key) {
 /**
  * Returns all relations of the object
  *
- * @return {Object} - Object with predicates as keys and arrays of URIs as values
+ * @return {Object} - Object with predicates as keys and arrays of values
  */
 Zotero.DataObject.prototype.getRelations = function () {
 	this._requireData('relations');
