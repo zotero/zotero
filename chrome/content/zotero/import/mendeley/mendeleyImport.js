@@ -203,10 +203,10 @@ Zotero_Import_Mendeley.prototype._getFolderDescendents = function (folderID, fol
 			};
 			// Store local id and remote UUID
 			c.relations = {
-				"z:mendeleyFolderID": f.id.toString()
+				"mendeleyDB:folderID": f.id.toString()
 			};
 			if (f.remoteUuid) {
-				c.relations['z:mendeleyRemoteFolderUUID'] = f.remoteUuid;
+				c.relations['mendeleyDB:remoteFolderUUID'] = f.remoteUuid;
 			}
 			return c;
 		});
@@ -566,10 +566,10 @@ Zotero_Import_Mendeley.prototype._documentToAPIJSON = async function (map, docum
 	}
 	
 	parent.relations = {
-		'z:mendeleyDocumentUUID': documentRow.uuid.replace(/^\{/, '').replace(/\}$/, '')
+		'mendeleyDB:documentUUID': documentRow.uuid.replace(/^\{/, '').replace(/\}$/, '')
 	};
 	if (documentRow.remoteUuid) {
-		parent.relations['z:mendeleyRemoteDocumentUUID'] = documentRow.remoteUuid;
+		parent.relations['mendeleyDB:remoteDocumentUUID'] = documentRow.remoteUuid;
 	}
 	
 	parent.documentID = documentRow.id;
@@ -764,8 +764,8 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 					attachment = await Zotero.Attachments.linkFromFile(options);
 				}
 				attachment.relations = {
-					'z:mendeleyFileHash': file.hash,
-					'z:mendeleyFileUUID': file.uuid
+					'mendeleyDB:fileHash': file.hash,
+					'mendeleyDB:fileUUID': file.uuid
 				};
 				await attachment.saveTx({
 					skipSelect: true

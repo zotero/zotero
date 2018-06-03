@@ -427,6 +427,8 @@ var Zotero_File_Interface = new function() {
 	
 	
 	var _finishImport = Zotero.Promise.coroutine(function* (options) {
+		var t = performance.now();
+		
 		var translation = options.translation;
 		var createNewCollection = options.createNewCollection;
 		var defaultNewCollectionPrefix = options.defaultNewCollectionPrefix;
@@ -538,9 +540,10 @@ var Zotero_File_Interface = new function() {
 			return false;
 		}
 		
+		var numItems = translation.newItems.length;
+		
 		// Show popup on completion
 		if (showProgressWindow) {
-			let numItems = translation.newItems.length;
 			progressWin.changeHeadline(Zotero.getString('fileInterface.importComplete'));
 			let icon;
 			if (numItems == 1) {
@@ -556,6 +559,8 @@ var Zotero_File_Interface = new function() {
 			progress.setProgress(100);
 			progressWin.startCloseTimer(5000);
 		}
+		
+		Zotero.debug(`Imported ${numItems} item(s) in ${performance.now() - t} ms`);
 		
 		return true;
 	});

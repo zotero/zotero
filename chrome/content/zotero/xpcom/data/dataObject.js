@@ -410,7 +410,7 @@ Zotero.DataObject.prototype.setRelations = function (newRelations) {
 	
 	// Limit predicates to letters and colons for now
 	for (let p in newRelations) {
-		if (!/[a-z]+:[a-z]+/.test(p)) {
+		if (!/^[a-z]+:[a-z]+$/i.test(p)) {
 			throw new Error(`Invalid relation predicate '${p}'`);
 		}
 	}
