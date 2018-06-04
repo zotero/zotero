@@ -281,6 +281,8 @@ ZoteroStandalone.DebugOutput = {
 	submit: function () {
 		// 'Zotero' isn't defined yet when this function is created, so do it inline
 		return Zotero.Promise.coroutine(function* () {
+			Zotero.debug("Submitting debug output");
+			
 			Components.utils.import("resource://zotero/config.js");
 			
 			var url = ZOTERO_CONFIG.REPOSITORY_URL + "report?debug=1";
