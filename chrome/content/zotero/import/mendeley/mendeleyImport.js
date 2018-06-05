@@ -740,21 +740,37 @@ Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
  * Saves attachments and extracted annotations for a given document
  */
 Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (files, libraryID, parentItemID, annotations) {
+	var dataDir = OS.Path.dirname(this._file);
 	for (let file of files) {
 		try {
 			if (!file.fileURL) continue;
 			
 			let path = OS.Path.fromFileURI(file.fileURL);
+			let isDownloadedFile = this._isDownloadedFile(path);
+			let fileExists = false;
+			
+			if (await OS.File.exists(path)) {
+				fileExists = true;
+			}
+			// For file paths in Downloaded folder, try relative to database if not found at the
+			// absolute location, in case this is a DB backup
+			else if (isDownloadedFile) {
+				let altPath = OS.Path.join(dataDir, 'Downloaded', OS.Path.basename(path));
+				if (altPath != path && await OS.File.exists(altPath)) {
+					path = altPath;
+					fileExists = true;
+				}
+			}
 			
 			let attachment;
-			if (await OS.File.exists(path)) {
+			if (fileExists) {
 				let options = {
 					libraryID,
 					parentItemID,
 					file: path
 				};
 				// If file is in Mendeley downloads folder, import it
-				if (OS.Path.dirname(path).endsWith(OS.Path.join('Mendeley Desktop', 'Downloaded'))) {
+				if (isDownloadedFile) {
 					attachment = await Zotero.Attachments.importFromFile(options);
 				}
 				// Otherwise link it
@@ -787,6 +803,13 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 			Zotero.logError(e);
 		}
 	}
+}
+
+Zotero_Import_Mendeley.prototype._isDownloadedFile = async function (path) {
+	var parentDir = OS.Path.dirname(path);
+	return parentDir.endsWith(OS.Path.join('Application Support', 'Mendeley Desktop', 'Downloaded'))
+		|| parentDir.endsWith(OS.Path.join('Local', 'Mendeley Ltd', 'Desktop', 'Downloaded'))
+		|| parentDir.endsWith(OS.Path.join('data', 'Mendeley Ltd.', 'Mendeley Desktop', 'Downloaded'));
 }
 
 Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations, parentItemID, attachmentItemID) {
