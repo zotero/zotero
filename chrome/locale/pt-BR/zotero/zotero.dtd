@@ -14,8 +14,8 @@
 <!ENTITY zotero.general.tools "Ferramentas">
 <!ENTITY zotero.general.more "Mais">
 <!ENTITY zotero.general.loading "Carregando...">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Fechar">
+<!ENTITY zotero.general.minimize "Minimizar">
 
 
 <!ENTITY zotero.errorReport.title "Relatório de erros do Zotero">
@@ -100,7 +100,7 @@
 <!ENTITY zotero.items.menu.duplicateItem "Duplicar item">
 <!ENTITY zotero.items.menu.mergeItems "Mesclar itens...">
 <!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Denunciar metadados incorretos">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Escolha a versão do item a ser utilizada como mestre:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Selecione os campos a serem mantidos das outras versões do item:">
@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Definir a cor">
 <!ENTITY zotero.tagColorChooser.removeColor "Remover a cor">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
+<!ENTITY zotero.lookup.description "Inserir ISBNs, DOIs, PMIDs ou IDs de arXIv para adicionar à sua biblioteca:">
 <!ENTITY zotero.lookup.button.search "Pesquisar">
 
 <!ENTITY zotero.selectitems.title "Selecionar itens">

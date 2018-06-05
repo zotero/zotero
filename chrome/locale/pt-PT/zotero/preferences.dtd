@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.items "itens">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Preferências">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "Personalizado...">
 
 <!ENTITY zotero.preferences.prefpane.general "Gerais">
 
@@ -19,13 +19,13 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Extra-Grande">
 <!ENTITY zotero.preferences.fontSize.notes "Tamanho da fonte tipográfica das notas:">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.fileHandling "Manuseio de Ficheiros">
 <!ENTITY zotero.preferences.automaticSnapshots "Capturar automaticamente ao criar itens a partir de páginas Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Anexar automaticamente arquivos PDF e de outros tipos associados a um item quando este é guardado">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Obter automaticamente metadados dos PDF">
+<!ENTITY zotero.preferences.autoRenameFiles "Renomear automaticamente ficheiros anexos utilizando os metadados parentes">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Abrir PDF utilizando">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "Predefinição do Sistema">
 
 <!ENTITY zotero.preferences.miscellaneous "Variadas">
 <!ENTITY zotero.preferences.autoUpdate "Verificar automaticamente actualizações de tradutores e estilos">

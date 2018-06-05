@@ -14,8 +14,8 @@
 <!ENTITY zotero.general.tools "Ferramentas">
 <!ENTITY zotero.general.more "Mais">
 <!ENTITY zotero.general.loading "Carregando…">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Fechar">
+<!ENTITY zotero.general.minimize "Minimizar">
 
 
 <!ENTITY zotero.errorReport.title "Relatório de Erros do Zotero">
@@ -99,8 +99,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaurar para a Biblioteca">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicar o Item Seleccionado">
 <!ENTITY zotero.items.menu.mergeItems "Fundir itens...">
-<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
+<!ENTITY zotero.items.menu.unrecognize "Anular Obtenção de Metadados">
+<!ENTITY zotero.items.menu.reportMetadata "Reportar Metadados Incorretos">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Escolha a versão do item a usar como item principal:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Seleccione os campos a manter de outras versões do item:">
@@ -175,7 +175,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Estabelecer Cor">
 <!ENTITY zotero.tagColorChooser.removeColor "Remover Cor">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
+<!ENTITY zotero.lookup.description "Introduzir ISBN, DOI, PMID ou arXiv ID para adicionar à biblioteca:">
 <!ENTITY zotero.lookup.button.search "Procurar">
 
 <!ENTITY zotero.selectitems.title "Seleccionar Itens">

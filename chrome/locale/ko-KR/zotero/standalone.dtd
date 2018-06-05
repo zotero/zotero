@@ -12,12 +12,12 @@
 
 <!ENTITY fileMenu.label "파일">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "저장…">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
 <!ENTITY pageSetupCmd.label "페이지 …">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.label "인쇄…">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "닫기">

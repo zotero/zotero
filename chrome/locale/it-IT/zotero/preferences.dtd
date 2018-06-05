@@ -59,8 +59,8 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sincronizzazione">
 <!ENTITY zotero.preferences.sync.username "Nome utente:">
 <!ENTITY zotero.preferences.sync.password "Password:">
-<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
-<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
+<!ENTITY zotero.preferences.sync.syncServer "Sincronizzazione dei dati">
+<!ENTITY zotero.preferences.sync.setUpSync "Impostare la sincronizzazione">
 <!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "Crea un account">
 <!ENTITY zotero.preferences.sync.lostPassword "Hai perso la password?">
@@ -116,7 +116,7 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Se l&apos;opzione è disattivata, Zotero includerà gli URL soltanto nelle citazioni degli articoli di giornale, rivista e quotidiano che non contengono un intervallo di pagine specificato.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Copia veloce">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Formato predefinito:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copia in formato HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Impostazioni specifiche per sito:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Dominio o percorso">

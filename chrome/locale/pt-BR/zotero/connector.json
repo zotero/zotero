@@ -2,6 +2,9 @@
   "progressWindow_error_translation": {
     "message": "Ocorreu um erro ao salvar esse item. Veja $1para mais detalhes."
   },
+  "general_tryAgain": {
+    "message": "Tentar novamente"
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Etiquetas (separadas por vírgula)"
   },
@@ -10,6 +13,9 @@
   },
   "progressWindow_error_upgradeClient": {
     "message": "Esse recurso não é suportado pela versão $1. Por favor atualize para a versão $2."
+  },
+  "general_cancel": {
+    "message": "Cancelar"
   },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "última versão"
@@ -22,6 +28,9 @@
   },
   "progressWindow_error_fallback": {
     "message": "Erro ao salvar com $1. Tentando salvar usando $2."
+  },
+  "upgradeApp": {
+    "message": "Atualização $1"
   },
   "general_saveTo": {
     "message": "Salvar para $1"
