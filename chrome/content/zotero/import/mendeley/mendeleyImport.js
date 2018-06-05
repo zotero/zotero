@@ -104,11 +104,35 @@ Zotero_Import_Mendeley.prototype.translate = async function (options) {
 		let files = await this._getDocumentFiles(mendeleyGroupID);
 		let annotations = await this._getDocumentAnnotations(mendeleyGroupID);
 		for (let document of documents) {
+			let docURLs = urls.get(document.id);
+			let docFiles = files.get(document.id);
+			
+			// If there's a single PDF file and a single PDF URL and the file exists, make an
+			// imported_url attachment instead of separate file and linked_url attachments
+			if (docURLs && docFiles) {
+				let pdfFiles = docFiles.filter(x => x.fileURL.endsWith('.pdf'));
+				let pdfURLs = docURLs.filter(x => x.includes('pdf'));
+				if (pdfFiles.length == 1
+						&& pdfURLs.length == 1
+						&& await this._getRealFilePath(OS.Path.fromFileURI(pdfFiles[0].fileURL))) {
+					// Add URL to PDF attachment
+					docFiles.forEach((x) => {
+						if (x.fileURL.endsWith('.pdf')) {
+							x.title = 'PDF';
+							x.url = pdfURLs[0];
+							x.contentType = 'application/pdf';
+						}
+					});
+					// Remove PDF URL from URLs array
+					docURLs = docURLs.filter(x => !x.includes('pdf'));
+				}
+			}
+			
 			// Save each document with its attributes
 			let itemJSON = await this._documentToAPIJSON(
 				map,
 				document,
-				urls.get(document.id),
+				docURLs,
 				creators.get(document.id),
 				tags.get(document.id),
 				collections.get(document.id),
@@ -116,7 +140,6 @@ Zotero_Import_Mendeley.prototype.translate = async function (options) {
 			);
 			let documentIDMap = await this._saveItems(libraryID, itemJSON);
 			// Save the document's attachments and extracted annotations for any of them
-			let docFiles = files.get(document.id);
 			if (docFiles) {
 				await this._saveFilesAndAnnotations(
 					docFiles,
@@ -269,6 +292,8 @@ Zotero_Import_Mendeley.prototype._getDocuments = async function (groupID) {
 
 /**
  * Get a Map of document ids to arrays of URLs
+ *
+ * @return {Map<Number,String[]>}
  */
 Zotero_Import_Mendeley.prototype._getDocumentURLs = async function (groupID) {
 	var rows = await this._db.queryAsync(
@@ -366,7 +391,9 @@ Zotero_Import_Mendeley.prototype._getDocumentCollections = async function (group
 };
 
 /**
- * Get a Map of document ids to file metadata
+ * Get a Map of document ids to arrays of file metadata
+ *
+ * @return {Map<Number,Object[]>}
  */
 Zotero_Import_Mendeley.prototype._getDocumentFiles = async function (groupID) {
 	var rows = await this._db.queryAsync(
@@ -740,38 +767,31 @@ Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
  * Saves attachments and extracted annotations for a given document
  */
 Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (files, libraryID, parentItemID, annotations) {
-	var dataDir = OS.Path.dirname(this._file);
 	for (let file of files) {
 		try {
 			if (!file.fileURL) continue;
 			
 			let path = OS.Path.fromFileURI(file.fileURL);
-			let isDownloadedFile = this._isDownloadedFile(path);
-			let fileExists = false;
-			
-			if (await OS.File.exists(path)) {
-				fileExists = true;
-			}
-			// For file paths in Downloaded folder, try relative to database if not found at the
-			// absolute location, in case this is a DB backup
-			else if (isDownloadedFile) {
-				let altPath = OS.Path.join(dataDir, 'Downloaded', OS.Path.basename(path));
-				if (altPath != path && await OS.File.exists(altPath)) {
-					path = altPath;
-					fileExists = true;
-				}
-			}
+			let realPath = await this._getRealFilePath(path);
 			
 			let attachment;
-			if (fileExists) {
+			if (realPath) {
 				let options = {
 					libraryID,
 					parentItemID,
-					file: path
+					file: realPath
 				};
 				// If file is in Mendeley downloads folder, import it
-				if (isDownloadedFile) {
-					attachment = await Zotero.Attachments.importFromFile(options);
+				if (this._isDownloadedFile(path)) {
+					if (file.url) {
+						options.title = file.title;
+						options.url = file.url;
+						options.contentType = file.contentType;
+						attachment = await Zotero.Attachments.importSnapshotFromFile(options);
+					}
+					else {
+						attachment = await Zotero.Attachments.importFromFile(options);
+					}
 				}
 				// Otherwise link it
 				else {
@@ -805,11 +825,37 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 	}
 }
 
-Zotero_Import_Mendeley.prototype._isDownloadedFile = async function (path) {
+Zotero_Import_Mendeley.prototype._isDownloadedFile = function (path) {
 	var parentDir = OS.Path.dirname(path);
 	return parentDir.endsWith(OS.Path.join('Application Support', 'Mendeley Desktop', 'Downloaded'))
 		|| parentDir.endsWith(OS.Path.join('Local', 'Mendeley Ltd', 'Desktop', 'Downloaded'))
 		|| parentDir.endsWith(OS.Path.join('data', 'Mendeley Ltd.', 'Mendeley Desktop', 'Downloaded'));
+}
+
+/**
+ * Get the path to use for a file that exists, or false if none
+ *
+ * This can be either the original path or, for a file in the Downloaded directory, in a directory
+ * relative to the database.
+ *
+ * @return {String|false}
+ */
+Zotero_Import_Mendeley.prototype._getRealFilePath = async function (path) {
+	if (await OS.File.exists(path)) {
+		return path;
+	}
+	var isDownloadedFile = this._isDownloadedFile(path);
+	if (!isDownloadedFile) {
+		return false;
+	}
+	// For file paths in Downloaded folder, try relative to database if not found at the
+	// absolute location, in case this is a DB backup
+	var dataDir = OS.Path.dirname(this._file);
+	var altPath = OS.Path.join(dataDir, 'Downloaded', OS.Path.basename(path));
+	if (altPath != path && await OS.File.exists(altPath)) {
+		return altPath;
+	}
+	return false;
 }
 
 Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations, parentItemID, attachmentItemID) {
