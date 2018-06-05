@@ -877,6 +877,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 * Initializes the DB connection
 	 */
 	var _initDB = Zotero.Promise.coroutine(function* (haveReleasedLock) {
+		// Initialize main database connection
+		Zotero.DB = new Zotero.DBConnection('zotero');
+		
 		try {
 			// Test read access
 			yield Zotero.DB.test();

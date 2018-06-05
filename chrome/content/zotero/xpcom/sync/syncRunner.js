@@ -70,6 +70,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	var _enabled = false;
 	var _autoSyncTimer;
 	var _delaySyncUntil;
+	var _delayPromises = [];
 	var _firstInSession = true;
 	var _syncInProgress = false;
 	var _stopping = false;
@@ -146,6 +147,21 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				let delay = _delaySyncUntil - new Date();
 				Zotero.debug(`Waiting ${delay} ms to sync`);
 				yield Zotero.Promise.delay(delay);
+			}
+			
+			// If paused, wait until we're done
+			while (true) {
+				if (_delayPromises.some(p => p.isPending())) {
+					this.setSyncStatus(Zotero.getString('sync.status.waiting'));
+					Zotero.debug("Syncing is paused -- waiting to sync");
+					yield Zotero.Promise.all(_delayPromises);
+					// If more were added, continue
+					if (_delayPromises.some(p => p.isPending())) {
+						continue;
+					}
+					_delayPromises = [];
+				}
+				break;
 			}
 			
 			// purgeDataObjects() starts a transaction, so if there's an active one then show a
@@ -955,6 +971,21 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	
 	this.delaySync = function (ms) {
 		_delaySyncUntil = new Date(Date.now() + ms);
+	};
+	
+	
+	/**
+	 * Delay syncs until the returned function is called
+	 *
+	 * @return {Function} - Resolve function
+	 */
+	this.delayIndefinite = function () {
+		var resolve;
+		var promise = new Zotero.Promise(function () {
+			resolve = arguments[0];
+		});
+		_delayPromises.push(promise);
+		return resolve;
 	};
 	
 	

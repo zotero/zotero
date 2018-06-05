@@ -260,6 +260,11 @@ Zotero.ItemFields = new function() {
 			throw new Error("Invalid field '" + baseField + '" for base field');
 		}
 		
+		// If field isn't a base field, return it if it's valid for the type
+		if (!this.isBaseField(baseFieldID)) {
+			return this.isValidForType(baseFieldID, itemTypeID) ? baseFieldID : false;
+		}
+		
 		return _baseTypeFields[itemTypeID][baseFieldID];
 	}
 	
