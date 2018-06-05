@@ -42,6 +42,9 @@
 				<listcol/>
 			</listcols>
 		</listbox>
+		<hbox>
+			<button label="&zotero.general.other;" oncommand="Zotero_Import_Wizard.chooseMendeleyDB()"/>
+		</hbox>
 	</wizardpage>
 	
 	<wizardpage pageid="page-progress"

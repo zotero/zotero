@@ -16,6 +16,7 @@
 <!ENTITY zotero.general.loading "Loading…">
 <!ENTITY zotero.general.close                              "Close">
 <!ENTITY zotero.general.minimize                           "Minimize">
+<!ENTITY zotero.general.other                              "Other…">
 
 
 <!ENTITY zotero.errorReport.title							"Zotero Error Report">

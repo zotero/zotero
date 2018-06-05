@@ -57,14 +57,38 @@ var Zotero_Import_Wizard = {
 	},
 	
 	
+	/**
+	 * When a file is clicked on in the file list
+	 */
 	onFileSelected: async function () {
 		this._wizard.canAdvance = true;
 	},
 	
 	
+	/**
+	 * When the user clicks "Other…" to choose a file not in the list
+	 */
+	chooseMendeleyDB: async function () {
+		const nsIFilePicker = Components.interfaces.nsIFilePicker;
+		var fp = Components.classes["@mozilla.org/filepicker;1"]
+			.createInstance(nsIFilePicker);
+		fp.init(window, Zotero.getString('fileInterface.import'), nsIFilePicker.modeOpen);
+		fp.appendFilter("Mendeley Database", "*.sqlite"); // TODO: Localize
+		var rv = fp.show();
+		if (rv != nsIFilePicker.returnOK) {
+			return false;
+		}
+		this._file = fp.file.path;
+		this._wizard.canAdvance = true;
+		this._wizard.advance();
+	},
+	
+	
 	onFileChosen: async function () {
-		var index = document.getElementById('file-list').selectedIndex;
-		this._file = this._dbs[index].path;
+		if (!this._file) {
+			let index = document.getElementById('file-list').selectedIndex;
+			this._file = this._dbs[index].path;
+		}
 		this._disableCancel();
 		this._wizard.canRewind = false;
 		this._wizard.canAdvance = false;

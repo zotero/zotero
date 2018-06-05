@@ -37,8 +37,11 @@ listbox, #result-description {
 	font-size: 13px;
 }
 
+button {
+	font-size: 13px;
+}
+
 #result-report-error {
 	margin-top: 13px;
 	margin-left: 0;
-	font-size: 13px;
 }
