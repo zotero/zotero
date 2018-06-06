@@ -5,8 +5,13 @@ var Zotero_Import_Wizard = {
 	_translation: null,
 	
 	
-	init: function () {
+	init: async function () {
 		this._wizard = document.getElementById('import-wizard');
+		
+		var dbs = await Zotero_File_Interface.findMendeleyDatabases();
+		if (dbs.length) {
+			document.getElementById('radio-import-source-mendeley').hidden = false;
+		}
 		
 		Zotero.Translators.init(); // async
 	},
@@ -15,15 +20,11 @@ var Zotero_Import_Wizard = {
 	onModeChosen: async function () {
 		var wizard = this._wizard;
 		
-		this._disableCancel();
-		wizard.canRewind = false;
-		wizard.canAdvance = false;
-		
 		var mode = document.getElementById('import-source').selectedItem.id;
 		try {
 			switch (mode) {
 			case 'radio-import-source-file':
-				await this.doImport();
+				await this.chooseFile();
 				break;
 				
 			case 'radio-import-source-mendeley':
@@ -36,7 +37,7 @@ var Zotero_Import_Wizard = {
 					this._populateFileList(this._dbs);
 					document.getElementById('file-options-header').textContent
 						= Zotero.getString('fileInterface.chooseAppDatabaseToImport', 'Mendeley')
-					wizard.goTo('page-file-options');
+					wizard.goTo('page-file-list');
 					wizard.canRewind = true;
 					this._enableCancel();
 				}
@@ -57,11 +58,64 @@ var Zotero_Import_Wizard = {
 	},
 	
 	
+	goToStart: function () {
+		this._wizard.goTo('page-start');
+		this._wizard.canAdvance = true;
+		return false;
+	},
+	
+	
+	chooseFile: async function (translation) {
+		var translation = new Zotero.Translate.Import();
+		var translators = await translation.getTranslators();
+		const nsIFilePicker = Components.interfaces.nsIFilePicker;
+		var fp = Components.classes["@mozilla.org/filepicker;1"]
+				.createInstance(nsIFilePicker);
+		fp.init(window, Zotero.getString("fileInterface.import"), nsIFilePicker.modeOpen);
+		
+		fp.appendFilters(nsIFilePicker.filterAll);
+		
+		var collation = Zotero.getLocaleCollation();
+		
+		// Add Mendeley DB, which isn't a translator
+		var mendeleyFilter = {
+			label: "Mendeley Database", // TODO: Localize
+			target: "*.sqlite"
+		};
+		var filters = [...translators];
+		filters.push(mendeleyFilter);
+		
+		filters.sort((a, b) => collation.compareString(1, a.label, b.label));
+		for (let filter of filters) {
+			fp.appendFilter(filter.label, "*." + filter.target);
+		}
+		
+		var rv = fp.show();
+		if (rv !== nsIFilePicker.returnOK && rv !== nsIFilePicker.returnReplace) {
+			return false;
+		}
+		
+		Zotero.debug(`File is ${fp.file.path}`);
+		
+		this._file = fp.file.path;
+		this._wizard.canAdvance = true;
+		this._wizard.goTo('page-options');
+	},
+	
+	
 	/**
 	 * When a file is clicked on in the file list
 	 */
 	onFileSelected: async function () {
-		this._wizard.canAdvance = true;
+		var index = document.getElementById('file-list').selectedIndex;
+		if (index != -1) {
+			this._file = this._dbs[index].path;
+			this._wizard.canAdvance = true;
+		}
+		else {
+			this._file = null;
+			this._wizard.canAdvance = false;
+		}
 	},
 	
 	
@@ -69,6 +123,7 @@ var Zotero_Import_Wizard = {
 	 * When the user clicks "Other…" to choose a file not in the list
 	 */
 	chooseMendeleyDB: async function () {
+		document.getElementById('file-list').selectedIndex = -1;
 		const nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
 			.createInstance(nsIFilePicker);
@@ -84,7 +139,12 @@ var Zotero_Import_Wizard = {
 	},
 	
 	
-	onFileChosen: async function () {
+	onOptionsShown: function () {
+		
+	},
+	
+	
+	onImportStart: async function () {
 		if (!this._file) {
 			let index = document.getElementById('file-list').selectedIndex;
 			this._file = this._dbs[index].path;
@@ -92,7 +152,9 @@ var Zotero_Import_Wizard = {
 		this._disableCancel();
 		this._wizard.canRewind = false;
 		this._wizard.canAdvance = false;
-		await this.doImport();
+		await this.doImport({
+			createNewCollection: document.getElementById('create-collection-checkbox').hasAttribute('checked')
+		});
 	},
 	
 	
@@ -118,11 +180,12 @@ var Zotero_Import_Wizard = {
 	},
 	
 	
-	doImport: async function () {
+	doImport: async function (options) {
 		try {
 			let result = await Zotero_File_Interface.importFile({
 				file: this._file,
-				onBeforeImport: this.onBeforeImport.bind(this)
+				onBeforeImport: this.onBeforeImport.bind(this),
+				addToLibraryRoot: !options.createNewCollection
 			});
 			
 			// Cancelled by user or due to error

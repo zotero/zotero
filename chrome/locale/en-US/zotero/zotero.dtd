@@ -10,6 +10,7 @@
 <!ENTITY zotero.general.cancel								"Cancel">
 <!ENTITY zotero.general.refresh								"Refresh">
 <!ENTITY zotero.general.saveAs								"Save As…">
+<!ENTITY zotero.general.options                            "Options">
 <!ENTITY zotero.general.advancedOptions.label				"Advanced Options">
 <!ENTITY zotero.general.tools                             "Tools">
 <!ENTITY zotero.general.more                              "More">
@@ -210,6 +211,7 @@
 <!ENTITY zotero.import.database                        "Database">
 <!ENTITY zotero.import.lastModified                    "Last Modified">
 <!ENTITY zotero.import.size                            "Size">
+<!ENTITY zotero.import.createCollection                "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title						"Export…">
 <!ENTITY zotero.exportOptions.format.label				"Format:">

@@ -16,18 +16,17 @@
 	
 	<wizardpage pageid="page-start"
 			label="&zotero.import.whereToImportFrom;"
-			next="page-progress"
+			next="page-options"
 			onpageadvanced="Zotero_Import_Wizard.onModeChosen(); return false;">
 		<radiogroup id="import-source">
 			<radio id="radio-import-source-file" label="&zotero.import.source.file;"/>
-			<radio id="radio-import-source-mendeley" label="Mendeley"/>
+			<radio id="radio-import-source-mendeley" label="Mendeley" hidden="true"/>
 		</radiogroup>
 	</wizardpage>
 	
-	<wizardpage pageid="page-file-options"
-			next="page-progress"
-			onpagerewound="var w = document.getElementById('import-wizard'); w.goTo('page-start'); w.canAdvance = true; return false;"
-			onpageadvanced="Zotero_Import_Wizard.onFileChosen()">
+	<wizardpage pageid="page-file-list"
+			next="page-options"
+			onpagerewound="return Zotero_Import_Wizard.goToStart()">
 		<description id="file-options-header"/>
 		<listbox id="file-list" onselect="Zotero_Import_Wizard.onFileSelected()">
 			<listhead>
@@ -45,6 +44,15 @@
 		<hbox>
 			<button label="&zotero.general.other;" oncommand="Zotero_Import_Wizard.chooseMendeleyDB()"/>
 		</hbox>
+	</wizardpage>
+	
+	<wizardpage pageid="page-options"
+			label="&zotero.general.options;"
+			next="page-progress"
+			onpageshow="Zotero_Import_Wizard.onOptionsShown()"
+			onpagerewound="return Zotero_Import_Wizard.goToStart()"
+			onpageadvanced="Zotero_Import_Wizard.onImportStart()">
+		<checkbox id="create-collection-checkbox" label="&zotero.import.createCollection;" checked="true" />
 	</wizardpage>
 	
 	<wizardpage pageid="page-progress"

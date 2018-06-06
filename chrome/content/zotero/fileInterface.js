@@ -209,20 +209,6 @@ var Zotero_File_Interface = new function() {
 	}
 	
 	
-	this.startImport = async function () {
-		// Show the wizard if a Mendeley database is found
-		var mendeleyDBs = await this.findMendeleyDatabases();
-		var showWizard = !!mendeleyDBs.length;
-		if (showWizard) {
-			this.showImportWizard();
-		}
-		// Otherwise just show the filepicker
-		else {
-			await this.importFile(null, true);
-		}
-	}
-	
-	
 	this.getMendeleyDirectory = function () {
 		Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
 			.getService(Components.interfaces.nsIOSFileConstantsService)
@@ -301,7 +287,8 @@ var Zotero_File_Interface = new function() {
 	 *
 	 * @param {Object} options
 	 * @param {nsIFile|string|null} [options.file=null] - File to import, or none to show a filepicker
-	 * @param {Boolean} [options.createNewCollection=false] - Put items in a new collection
+	 * @param {Boolean} [options.addToLibraryRoot=false]
+	 * @param {Boolean} [options.createNewCollection=true] - Put items in a new collection
 	 * @param {Function} [options.onBeforeImport] - Callback to receive translation object, useful
 	 *     for displaying progress in a different way. This also causes an error to be throw
 	 *     instead of shown in the main window.
@@ -317,11 +304,13 @@ var Zotero_File_Interface = new function() {
 		
 		var file = options.file ? Zotero.File.pathToFile(options.file) : null;
 		var createNewCollection = options.createNewCollection;
+		var addToLibraryRoot = options.addToLibraryRoot;
 		var onBeforeImport = options.onBeforeImport;
 		
-		if(createNewCollection === undefined) {
+		if (createNewCollection === undefined && !addToLibraryRoot) {
 			createNewCollection = true;
-		} else if(!createNewCollection) {
+		}
+		else if (!createNewCollection) {
 			try {
 				if (!ZoteroPane.collectionsView.editable) {
 					ZoteroPane.collectionsView.selectLibrary(null);
@@ -329,44 +318,9 @@ var Zotero_File_Interface = new function() {
 			} catch(e) {}
 		}
 		
-		var translation = new Zotero.Translate.Import();
-		if (!file) {
-			let translators = yield translation.getTranslators();
-			const nsIFilePicker = Components.interfaces.nsIFilePicker;
-			var fp = Components.classes["@mozilla.org/filepicker;1"]
-					.createInstance(nsIFilePicker);
-			fp.init(window, Zotero.getString("fileInterface.import"), nsIFilePicker.modeOpen);
-			
-			fp.appendFilters(nsIFilePicker.filterAll);
-			
-			var collation = Zotero.getLocaleCollation();
-			
-			// Add Mendeley DB, which isn't a translator
-			let mendeleyFilter = {
-				label: "Mendeley Database", // TODO: Localize
-				target: "*.sqlite"
-			};
-			let filters = [...translators];
-			filters.push(mendeleyFilter);
-			
-			filters.sort((a, b) => collation.compareString(1, a.label, b.label));
-			for (let filter of filters) {
-				fp.appendFilter(filter.label, "*." + filter.target);
-			}
-			
-			var rv = fp.show();
-			Zotero.debug(rv);
-			if (rv !== nsIFilePicker.returnOK && rv !== nsIFilePicker.returnReplace) {
-				return false;
-			}
-			
-			file = fp.file;
-			
-			Zotero.debug(`File is ${file.path}`);
-		}
-		
 		var defaultNewCollectionPrefix = Zotero.getString("fileInterface.imported");
 		
+		var translation;
 		// Check if the file is an SQLite database
 		var sample = yield Zotero.File.getSample(file.path);
 		if (Zotero.MIME.sniffForMIMEType(sample) == 'application/x-sqlite3'
@@ -377,11 +331,15 @@ var Zotero_File_Interface = new function() {
 			translation = yield _getMendeleyTranslation();
 			defaultNewCollectionPrefix = "Mendeley Import";
 		}
+		else {
+			translation = new Zotero.Translate.Import();
+		}
 		
 		translation.setLocation(file);
 		return _finishImport({
 			translation,
 			createNewCollection,
+			addToLibraryRoot,
 			defaultNewCollectionPrefix,
 			onBeforeImport
 		});
@@ -430,9 +388,14 @@ var Zotero_File_Interface = new function() {
 		var t = performance.now();
 		
 		var translation = options.translation;
+		var addToLibraryRoot = options.addToLibraryRoot;
 		var createNewCollection = options.createNewCollection;
 		var defaultNewCollectionPrefix = options.defaultNewCollectionPrefix;
 		var onBeforeImport = options.onBeforeImport;
+		
+		if (addToLibraryRoot && createNewCollection) {
+			throw new Error("Can't add to library root and create new collection");
+		}
 		
 		var showProgressWindow = !onBeforeImport;
 		
@@ -468,7 +431,12 @@ var Zotero_File_Interface = new function() {
 		try {
 			let zp = Zotero.getActiveZoteroPane();
 			libraryID = zp.getSelectedLibraryID();
-			importCollection = zp.getSelectedCollection();
+			if (addToLibraryRoot) {
+				yield zp.collectionsView.selectLibrary(libraryID);
+			}
+			else if (!createNewCollection) {
+				importCollection = zp.getSelectedCollection();
+			}
 		}
 		catch (e) {
 			Zotero.logError(e);
