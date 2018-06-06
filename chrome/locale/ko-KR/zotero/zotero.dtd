@@ -10,12 +10,14 @@
 <!ENTITY zotero.general.cancel "취소">
 <!ENTITY zotero.general.refresh "새로고침">
 <!ENTITY zotero.general.saveAs "다른 이름으로 저장...">
+<!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "고급 ">
 <!ENTITY zotero.general.tools "도구">
 <!ENTITY zotero.general.more "더 보기">
 <!ENTITY zotero.general.loading "불러오는 중...">
 <!ENTITY zotero.general.close "Close">
 <!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.other "Other…">
 
 
 <!ENTITY zotero.errorReport.title "Zotero 오류 보고">
@@ -201,6 +203,15 @@
 <!ENTITY zotero.integration.quickFormatDialog.title "빠른 인용 형식">
 
 <!ENTITY zotero.progress.title "진행">
+
+<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
+<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.database "Database">
+<!ENTITY zotero.import.lastModified "Last Modified">
+<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "내보내기...">
 <!ENTITY zotero.exportOptions.format.label "형식:">

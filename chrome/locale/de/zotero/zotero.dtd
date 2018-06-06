@@ -10,12 +10,14 @@
 <!ENTITY zotero.general.cancel "Abbrechen">
 <!ENTITY zotero.general.refresh "Aktualisieren">
 <!ENTITY zotero.general.saveAs "Speichern als...">
+<!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "Erweiterte Einstellungen">
 <!ENTITY zotero.general.tools "Werkzeuge">
 <!ENTITY zotero.general.more "Mehr">
 <!ENTITY zotero.general.loading "Lade...">
 <!ENTITY zotero.general.close "Schließen">
 <!ENTITY zotero.general.minimize "Minimieren">
+<!ENTITY zotero.general.other "Other…">
 
 
 <!ENTITY zotero.errorReport.title "Zotero Fehlerbericht">
@@ -201,6 +203,15 @@
 <!ENTITY zotero.integration.quickFormatDialog.title "Schnellformatierung Zitation">
 
 <!ENTITY zotero.progress.title "Fortschritt">
+
+<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
+<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.database "Database">
+<!ENTITY zotero.import.lastModified "Last Modified">
+<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "Exportieren...">
 <!ENTITY zotero.exportOptions.format.label "Format:">

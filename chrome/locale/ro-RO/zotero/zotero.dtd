@@ -10,12 +10,14 @@
 <!ENTITY zotero.general.cancel "Anulare">
 <!ENTITY zotero.general.refresh "Reîmprospătare">
 <!ENTITY zotero.general.saveAs "Salvare ca...">
+<!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "Opțiuni avansate">
 <!ENTITY zotero.general.tools "Instrumente">
 <!ENTITY zotero.general.more "Mai mult">
 <!ENTITY zotero.general.loading "Se încarcă...">
 <!ENTITY zotero.general.close "Închide">
 <!ENTITY zotero.general.minimize "Minimizare">
+<!ENTITY zotero.general.other "Other…">
 
 
 <!ENTITY zotero.errorReport.title "Raportul de erori Zotero">
@@ -201,6 +203,15 @@
 <!ENTITY zotero.integration.quickFormatDialog.title "Formatare rapidă a citării">
 
 <!ENTITY zotero.progress.title "Progres">
+
+<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
+<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.database "Database">
+<!ENTITY zotero.import.lastModified "Last Modified">
+<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "Export...">
 <!ENTITY zotero.exportOptions.format.label "Formatare:">

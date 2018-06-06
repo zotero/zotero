@@ -10,12 +10,14 @@
 <!ENTITY zotero.general.cancel "Відміна">
 <!ENTITY zotero.general.refresh "Оновити">
 <!ENTITY zotero.general.saveAs "Зберегти як...">
+<!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "Розширені налаштування">
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Більше">
 <!ENTITY zotero.general.loading "Завантаження">
 <!ENTITY zotero.general.close "Close">
 <!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.other "Other…">
 
 
 <!ENTITY zotero.errorReport.title "Звіт про помилку в Zotero">
@@ -201,6 +203,15 @@
 <!ENTITY zotero.integration.quickFormatDialog.title "Швидке форматування цитати">
 
 <!ENTITY zotero.progress.title "Хід виконання">
+
+<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
+<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.database "Database">
+<!ENTITY zotero.import.lastModified "Last Modified">
+<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "Експорт...">
 <!ENTITY zotero.exportOptions.format.label "Формат:">

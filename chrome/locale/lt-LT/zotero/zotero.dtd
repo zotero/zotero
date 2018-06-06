@@ -10,12 +10,14 @@
 <!ENTITY zotero.general.cancel "Atšaukti">
 <!ENTITY zotero.general.refresh "Atnaujinti">
 <!ENTITY zotero.general.saveAs "Įrašyti kaip...">
+<!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "Kitos parinktys">
 <!ENTITY zotero.general.tools "Priemonės">
 <!ENTITY zotero.general.more "Daugiau">
 <!ENTITY zotero.general.loading "Įkeliama...">
 <!ENTITY zotero.general.close "Close">
 <!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.other "Other…">
 
 
 <!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Zotero programoje">
@@ -201,6 +203,15 @@
 <!ENTITY zotero.integration.quickFormatDialog.title "Greitasis citavimo formatavimas">
 
 <!ENTITY zotero.progress.title "Eiga">
+
+<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
+<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.database "Database">
+<!ENTITY zotero.import.lastModified "Last Modified">
+<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "Eksportuoti...">
 <!ENTITY zotero.exportOptions.format.label "Formatas:">

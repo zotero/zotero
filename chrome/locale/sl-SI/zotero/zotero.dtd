@@ -10,12 +10,14 @@
 <!ENTITY zotero.general.cancel "Prekliči">
 <!ENTITY zotero.general.refresh "Osveži">
 <!ENTITY zotero.general.saveAs "Shrani kot ...">
+<!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "Napredne možnosti">
 <!ENTITY zotero.general.tools "Orodja">
 <!ENTITY zotero.general.more "Dodatno">
 <!ENTITY zotero.general.loading "Nalaganje ...">
 <!ENTITY zotero.general.close "Zapri">
 <!ENTITY zotero.general.minimize "Skrči">
+<!ENTITY zotero.general.other "Other…">
 
 
 <!ENTITY zotero.errorReport.title "Poročilo o napaki Zotero">
@@ -201,6 +203,15 @@
 <!ENTITY zotero.integration.quickFormatDialog.title "Hitro oblikovanje citata">
 
 <!ENTITY zotero.progress.title "Napredek">
+
+<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
+<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.database "Database">
+<!ENTITY zotero.import.lastModified "Last Modified">
+<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "Izvozi ...">
 <!ENTITY zotero.exportOptions.format.label "Vrsta datoteke:">

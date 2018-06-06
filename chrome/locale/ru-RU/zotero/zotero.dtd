@@ -10,12 +10,14 @@
 <!ENTITY zotero.general.cancel "Отменить">
 <!ENTITY zotero.general.refresh "Обновить">
 <!ENTITY zotero.general.saveAs "Сохранить как">
+<!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "Расширенные настройки">
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "More">
 <!ENTITY zotero.general.loading "Загрузка...">
 <!ENTITY zotero.general.close "Закрыть">
 <!ENTITY zotero.general.minimize "Свернуть">
+<!ENTITY zotero.general.other "Other…">
 
 
 <!ENTITY zotero.errorReport.title "Отчет об ошибке Zotero">
@@ -201,6 +203,15 @@
 <!ENTITY zotero.integration.quickFormatDialog.title "Быстрое форматирование цитаты">
 
 <!ENTITY zotero.progress.title "Ход выполнения">
+
+<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
+<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.database "Database">
+<!ENTITY zotero.import.lastModified "Last Modified">
+<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "Экспорт…">
 <!ENTITY zotero.exportOptions.format.label "Формат:">

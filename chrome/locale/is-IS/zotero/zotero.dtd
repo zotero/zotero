@@ -10,12 +10,14 @@
 <!ENTITY zotero.general.cancel "Hætta við">
 <!ENTITY zotero.general.refresh "Endurnýja">
 <!ENTITY zotero.general.saveAs "Vista sem…">
+<!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "Ítarlegir valkostir">
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Meira">
 <!ENTITY zotero.general.loading "Hleð inn…">
 <!ENTITY zotero.general.close "Close">
 <!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.other "Other…">
 
 
 <!ENTITY zotero.errorReport.title "Zotero villutilkynning">
@@ -201,6 +203,15 @@
 <!ENTITY zotero.integration.quickFormatDialog.title "Flýtiformun tilvitnana">
 
 <!ENTITY zotero.progress.title "Framvinda">
+
+<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
+<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.database "Database">
+<!ENTITY zotero.import.lastModified "Last Modified">
+<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "Flytja út…">
 <!ENTITY zotero.exportOptions.format.label "Snið:">

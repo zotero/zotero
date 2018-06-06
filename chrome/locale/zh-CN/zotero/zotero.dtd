@@ -10,12 +10,14 @@
 <!ENTITY zotero.general.cancel "取消">
 <!ENTITY zotero.general.refresh "刷新">
 <!ENTITY zotero.general.saveAs "另存为...">
+<!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "高级选项">
 <!ENTITY zotero.general.tools "工具">
 <!ENTITY zotero.general.more "更多">
 <!ENTITY zotero.general.loading "加载…">
 <!ENTITY zotero.general.close "关闭">
 <!ENTITY zotero.general.minimize "最小化">
+<!ENTITY zotero.general.other "Other…">
 
 
 <!ENTITY zotero.errorReport.title "Zotero 错误报告">
@@ -201,6 +203,15 @@
 <!ENTITY zotero.integration.quickFormatDialog.title "快速格式化引文">
 
 <!ENTITY zotero.progress.title "进度">
+
+<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
+<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.database "Database">
+<!ENTITY zotero.import.lastModified "Last Modified">
+<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "导出...">
 <!ENTITY zotero.exportOptions.format.label "格式:">

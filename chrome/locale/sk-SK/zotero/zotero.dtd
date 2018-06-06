@@ -10,12 +10,14 @@
 <!ENTITY zotero.general.cancel "Zrušiť">
 <!ENTITY zotero.general.refresh "Obnoviť">
 <!ENTITY zotero.general.saveAs "Uložiť ako...">
+<!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "Rozšírené možnosti">
 <!ENTITY zotero.general.tools "Nástroje">
 <!ENTITY zotero.general.more "Viac">
 <!ENTITY zotero.general.loading "Nahrávam...">
 <!ENTITY zotero.general.close "Zavrieť">
 <!ENTITY zotero.general.minimize "Minimalizovať">
+<!ENTITY zotero.general.other "Other…">
 
 
 <!ENTITY zotero.errorReport.title "Výkaz chýb Zotera">
@@ -201,6 +203,15 @@
 <!ENTITY zotero.integration.quickFormatDialog.title "Rýchle formátovanie citácie">
 
 <!ENTITY zotero.progress.title "Postup">
+
+<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
+<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.database "Database">
+<!ENTITY zotero.import.lastModified "Last Modified">
+<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "Export...">
 <!ENTITY zotero.exportOptions.format.label "Formát:">
