@@ -698,7 +698,7 @@ Zotero.Collection.prototype.fromJSON = function (json) {
 	this.name = json.name;
 	this.parentKey = json.parentCollection ? json.parentCollection : false;
 	
-	this.setRelations(json.relations);
+	this.setRelations(json.relations || {});
 }
 
 
