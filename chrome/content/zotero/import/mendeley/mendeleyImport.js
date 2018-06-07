@@ -397,7 +397,7 @@ Zotero_Import_Mendeley.prototype._getDocumentCollections = async function (group
  */
 Zotero_Import_Mendeley.prototype._getDocumentFiles = async function (groupID) {
 	var rows = await this._db.queryAsync(
-		`SELECT documentId, hash, remoteFileUuid, localUrl FROM DocumentFiles `
+		`SELECT documentId, hash, localUrl FROM DocumentFiles `
 			+ `JOIN Files USING (hash) `
 			+ `JOIN RemoteDocuments USING (documentId) `
 			+ `WHERE groupId=?`,
@@ -409,7 +409,6 @@ Zotero_Import_Mendeley.prototype._getDocumentFiles = async function (groupID) {
 		if (!docFiles) docFiles = [];
 		docFiles.push({
 			hash: row.hash,
-			uuid: row.remoteFileUuid,
 			fileURL: row.localUrl
 		});
 		map.set(row.documentId, docFiles);
@@ -590,11 +589,25 @@ Zotero_Import_Mendeley.prototype._documentToAPIJSON = async function (map, docum
 		delete parent.key;
 	}
 	
+	var documentUUID = documentRow.uuid.replace(/^\{/, '').replace(/\}$/, '');
 	parent.relations = {
-		'mendeleyDB:documentUUID': documentRow.uuid.replace(/^\{/, '').replace(/\}$/, '')
+		'mendeleyDB:documentUUID': documentUUID
 	};
 	if (documentRow.remoteUuid) {
 		parent.relations['mendeleyDB:remoteDocumentUUID'] = documentRow.remoteUuid;
+	}
+	
+	for (let child of children) {
+		// Add relation to child note
+		if (child.itemType == 'note') {
+			child.relations = {
+				'mendeleyDB:relatedDocumentUUID': documentUUID
+			};
+			if (documentRow.remoteUuid) {
+				child.relations['mendeleyDB:relatedRemoteDocumentUUID'] = documentRow.remoteUuid;
+			}
+			break;
+		}
 	}
 	
 	parent.documentID = documentRow.id;
@@ -738,12 +751,35 @@ Zotero_Import_Mendeley.prototype._convertNote = function (note) {
 Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
 	var idMap = new Map();
 	await Zotero.DB.executeTransaction(async function () {
-		for (let itemJSON of json) {
-			let item = new Zotero.Item;
-			item.libraryID = libraryID;
-			if (itemJSON.key) {
-				item.key = itemJSON.key;
-				await item.loadPrimaryData();
+		var lastExistingParentItem;
+		for (let i = 0; i < json.length; i++) {
+			let itemJSON = json[i];
+			
+			// Check if the item has been previously imported
+			let item = await this._findExistingItem(libraryID, itemJSON, lastExistingParentItem);
+			if (item) {
+				if (item.isRegularItem()) {
+					lastExistingParentItem = item;
+					
+					// Update any child items to point to the existing item's key instead of the
+					// new generated one
+					this._updateParentItemKey(json, i + 1, itemJSON.key, item.key);
+					
+					// Leave item in any collections it's in
+					itemJSON.collections = item.getCollections()
+						.map(id => Zotero.Collections.getLibraryAndKeyFromID(id).key)
+						.concat(itemJSON.collections || []);
+				}
+			}
+			else {
+				lastExistingParentItem = null;
+				
+				item = new Zotero.Item;
+				item.libraryID = libraryID;
+				if (itemJSON.key) {
+					item.key = itemJSON.key;
+					await item.loadPrimaryData();
+				}
 			}
 			
 			// Remove external id before save
@@ -763,6 +799,120 @@ Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
 	return idMap;
 };
 
+
+Zotero_Import_Mendeley.prototype._findExistingItem = async function (libraryID, itemJSON, existingParentItem) {
+	var predicate;
+	
+	//
+	// Child item
+	//
+	if (existingParentItem) {
+		if (itemJSON.itemType == 'note') {
+			if (!itemJSON.relations) {
+				return false;
+			}
+			
+			// Main note
+			let parentUUID = itemJSON.relations['mendeleyDB:relatedDocumentUUID'];
+			let parentRemoteUUID = itemJSON.relations['mendeleyDB:relatedRemoteDocumentUUID'];
+			if (parentUUID) {
+				let notes = existingParentItem.getNotes().map(id => Zotero.Items.get(id));
+				for (let note of notes) {
+					predicate = 'mendeleyDB:relatedDocumentUUID';
+					let rels = note.getRelationsByPredicate(predicate);
+					if (rels.length && rels[0] == parentUUID) {
+						Zotero.debug(`Found existing item ${note.libraryKey} for `
+								+ `${predicate} ${parentUUID}`);
+						return note;
+					}
+					if (parentRemoteUUID) {
+						predicate = 'mendeleyDB:relatedRemoteDocumentUUID';
+						rels = note.getRelationsByPredicate(predicate);
+						if (rels.length && rels[0] == parentRemoteUUID) {
+							Zotero.debug(`Found existing item ${note.libraryKey} for `
+								+ `${predicate} ${parentRemoteUUID}`);
+							return note;
+						}
+					}
+				}
+				return false;
+			}
+		}
+		else if (itemJSON.itemType == 'attachment') {
+			// Linked-URL attachments (other attachments are handled in _saveFilesAndAnnotations())
+			if (itemJSON.linkMode == 'linked_url') {
+				let attachments = existingParentItem.getAttachments().map(id => Zotero.Items.get(id));
+				for (let attachment of attachments) {
+					if (attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL
+							&& attachment.getField('url') == itemJSON.url) {
+						Zotero.debug(`Found existing link attachment ${attachment.libraryKey}`);
+						return attachment;
+					}
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	//
+	// Parent item
+	//
+	if (!itemJSON.relations) {
+		return false;
+	}
+	var existingItem;
+	predicate = 'mendeleyDB:documentUUID';
+	if (itemJSON.relations[predicate]) {
+		existingItem = this._getItemByRelation(
+			libraryID,
+			predicate,
+			itemJSON.relations[predicate]
+		);
+	}
+	if (!existingItem) {
+		predicate = 'mendeleyDB:remoteDocumentUUID';
+		if (itemJSON.relations[predicate]) {
+			existingItem = this._getItemByRelation(
+				libraryID,
+				predicate,
+				itemJSON.relations[predicate]
+			);
+		}
+	}
+	// If not found or in trash
+	if (!existingItem) {
+		return false;
+	}
+	Zotero.debug(`Found existing item ${existingItem.libraryKey} for `
+		+ `${predicate} ${itemJSON.relations[predicate]}`);
+	return existingItem;
+}
+
+
+Zotero_Import_Mendeley.prototype._updateParentItemKey = function (json, i, oldKey, newKey) {
+	for (; i < json.length; i++) {
+		let x = json[i];
+		if (x.parentItem == oldKey) {
+			x.parentItem = newKey;
+		}
+		else {
+			break;
+		}
+	}
+}
+
+
+Zotero_Import_Mendeley.prototype._getItemByRelation = function (libraryID, predicate, object) {
+	var items = Zotero.Relations.getByPredicateAndObject('item', predicate, object);
+	items = items.filter(item => item.libraryID == libraryID && !item.deleted);
+	if (!items.length) {
+		return false;
+	}
+	return items[0];
+};
+
+
 /**
  * Saves attachments and extracted annotations for a given document
  */
@@ -776,6 +926,10 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 			
 			let attachment;
 			if (realPath) {
+				if (this._findExistingFile(parentItemID, file)) {
+					continue;
+				}
+				
 				let options = {
 					libraryID,
 					parentItemID,
@@ -797,10 +951,9 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 				else {
 					attachment = await Zotero.Attachments.linkFromFile(options);
 				}
-				attachment.relations = {
-					'mendeleyDB:fileHash': file.hash,
-					'mendeleyDB:fileUUID': file.uuid
-				};
+				attachment.setRelations({
+					'mendeleyDB:fileHash': file.hash
+				});
 				await attachment.saveTx({
 					skipSelect: true
 				});
@@ -815,7 +968,8 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 					// this file
 					annotations.filter(a => a.hash == file.hash),
 					parentItemID,
-					attachment ? attachment.id : null
+					attachment ? attachment.id : null,
+					file.hash
 				);
 			}
 		}
@@ -823,6 +977,23 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 			Zotero.logError(e);
 		}
 	}
+}
+
+
+Zotero_Import_Mendeley.prototype._findExistingFile = function (parentItemID, file) {
+	var item = Zotero.Items.get(parentItemID);
+	var attachmentIDs = item.getAttachments();
+	for (let attachmentID of attachmentIDs) {
+		let attachment = Zotero.Items.get(attachmentID);
+		let predicate = 'mendeleyDB:fileHash';
+		let rels = attachment.getRelationsByPredicate(predicate);
+		if (rels.includes(file.hash)) {
+			Zotero.debug(`Found existing file ${attachment.libraryKey} for `
+				+ `${predicate} ${file.hash}`);
+			return attachment;
+		}
+	}
+	return false;
 }
 
 Zotero_Import_Mendeley.prototype._isDownloadedFile = function (path) {
@@ -858,7 +1029,7 @@ Zotero_Import_Mendeley.prototype._getRealFilePath = async function (path) {
 	return false;
 }
 
-Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations, parentItemID, attachmentItemID) {
+Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations, parentItemID, attachmentItemID, fileHash) {
 	if (!annotations.length) return;
 	var noteStrings = [];
 	var parentItem = Zotero.Items.get(parentItemID);
@@ -889,9 +1060,29 @@ Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations,
 	
 	if (!noteStrings.length) return;
 	
-	let note = new Zotero.Item('note');
-	note.libraryID = libraryID;
-	note.parentItemID = parentItemID;
+	// Look for an existing note
+	var existingNotes = parentItem.getNotes().map(id => Zotero.Items.get(id));
+	var predicate = 'mendeleyDB:relatedFileHash';
+	var note;
+	for (let n of existingNotes) {
+		let rels = n.getRelationsByPredicate(predicate);
+		if (rels.length && rels[0] == fileHash) {
+			Zotero.debug(`Found existing note ${n.libraryKey} for ${predicate} ${fileHash}`);
+			note = n;
+			break;
+		}
+	}
+	// If not found, create new one
+	if (!note) {
+		note = new Zotero.Item('note');
+		note.libraryID = libraryID;
+		note.parentItemID = parentItemID;
+		
+		// Add relation to associated file
+		note.setRelations({
+			'mendeleyDB:relatedFileHash': fileHash
+		});
+	}
 	note.setNote('<h1>' + Zotero.getString('extractedAnnotations') + '</h1>\n' + noteStrings.join('\n'));
 	return note.saveTx({
 		skipSelect: true
