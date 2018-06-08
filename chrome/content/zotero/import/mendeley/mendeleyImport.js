@@ -5,6 +5,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 Services.scriptloader.loadSubScript("chrome://zotero/content/include.js");
 
 var Zotero_Import_Mendeley = function () {
+	this.createNewCollection = null;
 	this.newItems = [];
 	
 	this._db;
@@ -84,7 +85,7 @@ Zotero_Import_Mendeley.prototype.translate = async function (options) {
 		let folders = await this._getFolders(mendeleyGroupID);
 		let collectionJSON = this._foldersToAPIJSON(folders, rootCollectionKey);
 		let folderKeys = this._getFolderKeys(collectionJSON);
-		await this._saveCollections(libraryID, collectionJSON);
+		await this._saveCollections(libraryID, collectionJSON, folderKeys);
 		
 		//
 		// Items
@@ -253,14 +254,31 @@ Zotero_Import_Mendeley.prototype._getFolderKeys = function (collections) {
  * @param {Integer} libraryID
  * @param {Object[]} json
  */
-Zotero_Import_Mendeley.prototype._saveCollections = async function (libraryID, json) {
-	var idMap = new Map();
-	for (let collectionJSON of json) {
-		let collection = new Zotero.Collection;
-		collection.libraryID = libraryID;
-		if (collectionJSON.key) {
-			collection.key = collectionJSON.key;
-			await collection.loadPrimaryData();
+Zotero_Import_Mendeley.prototype._saveCollections = async function (libraryID, json, folderKeys) {
+	var keyMap = new Map();
+	for (let i = 0; i < json.length; i++) {
+		let collectionJSON = json[i];
+		
+		// Check if the collection was previously imported
+		let collection = this._findExistingCollection(
+			libraryID,
+			collectionJSON,
+			collectionJSON.parentCollection ? keyMap.get(collectionJSON.parentCollection) : null
+		);
+		if (collection) {
+			// Update any child collections to point to the existing collection's key instead of
+			// the new generated one
+			this._updateParentKeys('collection', json, i + 1, collectionJSON.key, collection.key);
+			// And update the map of Mendeley folderIDs to Zotero collection keys
+			folderKeys.set(collectionJSON.folderID, collection.key);
+		}
+		else {
+			collection = new Zotero.Collection;
+			collection.libraryID = libraryID;
+			if (collectionJSON.key) {
+				collection.key = collectionJSON.key;
+				await collection.loadPrimaryData();
+			}
 		}
 		
 		// Remove external ids before saving
@@ -272,10 +290,35 @@ Zotero_Import_Mendeley.prototype._saveCollections = async function (libraryID, j
 		await collection.saveTx({
 			skipSelect: true
 		});
-		idMap.set(collectionJSON.folderID, collection.id);
 	}
-	return idMap;
 };
+
+
+Zotero_Import_Mendeley.prototype._findExistingCollection = function (libraryID, collectionJSON, parentCollection) {
+	// Don't use existing collections if the import is creating a top-level collection
+	if (this.createNewCollection || !collectionJSON.relations) {
+		return false;
+	}
+	
+	var predicate = 'mendeleyDB:remoteFolderUUID';
+	var uuid = collectionJSON.relations[predicate];
+	
+	var collections = Zotero.Relations.getByPredicateAndObject('collection', predicate, uuid)
+		.filter((c) => {
+			if (c.libraryID != libraryID) {
+				return false;
+			}
+			// If there's a parent collection it has to be the one we've already used
+			return parentCollection ? c.parentID == parentCollection.id : true;
+		});
+	if (!collections.length) {
+		return false;
+	}
+	
+	Zotero.debug(`Found existing collection ${collections[0].libraryKey} for `
+		+ `${predicate} ${collectionJSON.relations[predicate]}`);
+	return collections[0];
+}
 
 
 //
@@ -756,14 +799,14 @@ Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
 			let itemJSON = json[i];
 			
 			// Check if the item has been previously imported
-			let item = await this._findExistingItem(libraryID, itemJSON, lastExistingParentItem);
+			let item = this._findExistingItem(libraryID, itemJSON, lastExistingParentItem);
 			if (item) {
 				if (item.isRegularItem()) {
 					lastExistingParentItem = item;
 					
 					// Update any child items to point to the existing item's key instead of the
 					// new generated one
-					this._updateParentItemKey(json, i + 1, itemJSON.key, item.key);
+					this._updateParentKeys('item', json, i + 1, itemJSON.key, item.key);
 					
 					// Leave item in any collections it's in
 					itemJSON.collections = item.getCollections()
@@ -800,7 +843,7 @@ Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
 };
 
 
-Zotero_Import_Mendeley.prototype._findExistingItem = async function (libraryID, itemJSON, existingParentItem) {
+Zotero_Import_Mendeley.prototype._findExistingItem = function (libraryID, itemJSON, existingParentItem) {
 	var predicate;
 	
 	//
@@ -890,22 +933,9 @@ Zotero_Import_Mendeley.prototype._findExistingItem = async function (libraryID, 
 }
 
 
-Zotero_Import_Mendeley.prototype._updateParentItemKey = function (json, i, oldKey, newKey) {
-	for (; i < json.length; i++) {
-		let x = json[i];
-		if (x.parentItem == oldKey) {
-			x.parentItem = newKey;
-		}
-		else {
-			break;
-		}
-	}
-}
-
-
 Zotero_Import_Mendeley.prototype._getItemByRelation = function (libraryID, predicate, object) {
-	var items = Zotero.Relations.getByPredicateAndObject('item', predicate, object);
-	items = items.filter(item => item.libraryID == libraryID && !item.deleted);
+	var items = Zotero.Relations.getByPredicateAndObject('item', predicate, object)
+		.filter(item => item.libraryID == libraryID && !item.deleted);
 	if (!items.length) {
 		return false;
 	}
@@ -1088,3 +1118,28 @@ Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations,
 		skipSelect: true
 	});
 };
+
+
+Zotero_Import_Mendeley.prototype._updateParentKeys = function (objectType, json, i, oldKey, newKey) {
+	var prop = 'parent' + objectType[0].toUpperCase() + objectType.substr(1);
+	
+	for (; i < json.length; i++) {
+		let x = json[i];
+		if (x[prop] == oldKey) {
+			x[prop] = newKey;
+		}
+		// Child items are grouped together, so we can stop as soon as we stop seeing the prop
+		else if (objectType == 'item') {
+			break;
+		}
+	}
+}
+
+Zotero_Import_Mendeley.prototype._updateItemCollectionKeys = function (json, oldKey, newKey) {
+	for (; i < json.length; i++) {
+		let x = json[i];
+		if (x[prop] == oldKey) {
+			x[prop] = newKey;
+		}
+	}
+}

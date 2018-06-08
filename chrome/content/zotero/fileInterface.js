@@ -336,6 +336,7 @@ var Zotero_File_Interface = new function() {
 			// Mendeley import doesn't use the real translation architecture, but we create a
 			// translation object with the same interface
 			translation = yield _getMendeleyTranslation();
+			translation.createNewCollection = createNewCollection;
 			defaultNewCollectionPrefix = "Mendeley Import";
 		}
 		else {
