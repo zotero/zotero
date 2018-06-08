@@ -10,14 +10,14 @@
 <!ENTITY zotero.general.cancel "İptal Et">
 <!ENTITY zotero.general.refresh "Yenile">
 <!ENTITY zotero.general.saveAs "Farklı Kaydet...">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "Seçenekler">
 <!ENTITY zotero.general.advancedOptions.label "Gelişmiş Seçenekler">
 <!ENTITY zotero.general.tools "Araçlar">
 <!ENTITY zotero.general.more "Daha Başka">
 <!ENTITY zotero.general.loading "Yükleniyor...">
 <!ENTITY zotero.general.close "Kapat">
 <!ENTITY zotero.general.minimize "Küçült">
-<!ENTITY zotero.general.other "Other…">
+<!ENTITY zotero.general.other "Diğerleri...">
 
 
 <!ENTITY zotero.errorReport.title "Zotero Hata Raporu">
@@ -204,14 +204,14 @@
 
 <!ENTITY zotero.progress.title "İşlem">
 
-<!ENTITY zotero.import "Import">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
-<!ENTITY zotero.import.database "Database">
-<!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
-<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
+<!ENTITY zotero.import "İçeri Aktar">
+<!ENTITY zotero.import.whereToImportFrom "Nereden içeri aktarmak istiyorsunuz?">
+<!ENTITY zotero.import.source.file "Bir dosya (BibTeX, RIS, Zotero RDF, vb.)">
+<!ENTITY zotero.import.importing "İçeri aktarılıyor...">
+<!ENTITY zotero.import.database "Veritabanı">
+<!ENTITY zotero.import.lastModified "Son Değiştirilmesi">
+<!ENTITY zotero.import.size "Boyut">
+<!ENTITY zotero.import.createCollection "İçeri aktarılmış dermeler ve eserleri yeni bir dermeye yerleştir">
 
 <!ENTITY zotero.exportOptions.title "Dışarı Aktar...">
 <!ENTITY zotero.exportOptions.format.label "Biçim">
