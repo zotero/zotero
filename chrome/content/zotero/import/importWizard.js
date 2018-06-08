@@ -13,10 +13,19 @@ var Zotero_Import_Wizard = {
 			document.getElementById('radio-import-source-mendeley').hidden = false;
 		}
 		
-		// If no existing collections in the library, don't create a new collection by default
+		// If no existing collections or non-trash items in the library, don't create a new
+		// collection by default
 		var args = window.arguments[0].wrappedJSObject;
 		if (args && args.libraryID) {
-			let sql = "SELECT ROWID FROM collections WHERE libraryID=? LIMIT 1";
+			let sql = "SELECT ROWID FROM collections WHERE libraryID=?1 "
+				+ "UNION "
+				+ "SELECT ROWID FROM items WHERE libraryID=?1 "
+				// Not in trash
+				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
+				// And not a child item (which doesn't necessarily show up in the trash)
+				+ "AND itemID NOT IN (SELECT itemID FROM itemNotes WHERE parentItemID IS NOT NULL) "
+				+ "AND itemID NOT IN (SELECT itemID FROM itemAttachments WHERE parentItemID IS NOT NULL) "
+				+ "LIMIT 1";
 			if (!await Zotero.DB.valueQueryAsync(sql, args.libraryID)) {
 				document.getElementById('create-collection-checkbox').removeAttribute('checked');
 			}
