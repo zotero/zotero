@@ -271,14 +271,21 @@ var Zotero_File_Interface = new function() {
 	
 	
 	this.showImportWizard = function () {
+		var libraryID = Zotero.Libraries.userLibraryID;
 		try {
-			let win = Services.ww.openWindow(null, "chrome://zotero/content/import/importWizard.xul",
-				"importFile", "chrome,dialog=yes,centerscreen,width=600,height=400", null);
+			let zp = Zotero.getActiveZoteroPane();
+			libraryID = zp.getSelectedLibraryID();
 		}
 		catch (e) {
-			Zotero.debug(e, 1);
-			throw e;
+			Zotero.logError(e);
 		}
+		var args = {
+			libraryID
+		};
+		args.wrappedJSObject = args;
+		
+		Services.ww.openWindow(null, "chrome://zotero/content/import/importWizard.xul",
+			"importFile", "chrome,dialog=yes,centerscreen,width=600,height=400", args);
 	};
 	
 	

@@ -13,6 +13,15 @@ var Zotero_Import_Wizard = {
 			document.getElementById('radio-import-source-mendeley').hidden = false;
 		}
 		
+		// If no existing collections in the library, don't create a new collection by default
+		var args = window.arguments[0].wrappedJSObject;
+		if (args && args.libraryID) {
+			let sql = "SELECT ROWID FROM collections WHERE libraryID=? LIMIT 1";
+			if (!await Zotero.DB.valueQueryAsync(sql, args.libraryID)) {
+				document.getElementById('create-collection-checkbox').removeAttribute('checked');
+			}
+		}
+		
 		Zotero.Translators.init(); // async
 	},
 	
