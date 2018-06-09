@@ -51,14 +51,12 @@ var Zotero_Import_Wizard = {
 				if (!this._dbs.length) {
 					throw new Error("No databases found");
 				}
-				if (this._dbs.length > 1 || true) {
-					this._populateFileList(this._dbs);
-					document.getElementById('file-options-header').textContent
-						= Zotero.getString('fileInterface.chooseAppDatabaseToImport', 'Mendeley')
-					wizard.goTo('page-file-list');
-					wizard.canRewind = true;
-					this._enableCancel();
-				}
+				this._populateFileList(this._dbs);
+				document.getElementById('file-options-header').textContent
+					= Zotero.getString('fileInterface.chooseAppDatabaseToImport', 'Mendeley')
+				wizard.goTo('page-file-list');
+				wizard.canRewind = true;
+				this._enableCancel();
 				break;
 			
 			default:
