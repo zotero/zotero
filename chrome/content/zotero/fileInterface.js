@@ -340,6 +340,14 @@ var Zotero_File_Interface = new function() {
 			defaultNewCollectionPrefix = "Mendeley Import";
 		}
 		else {
+			// TEMP
+			if (file.path.endsWith('.sqlite')) {
+				let codes = [];
+				for (let i = 0; i < sample.length; i++) {
+					codes.push(sample.charCodeAt(i));
+				}
+				Zotero.debug(codes.join(' '));
+			}
 			translation = new Zotero.Translate.Import();
 		}
 		
