@@ -378,7 +378,10 @@ var Zotero_File_Interface = new function() {
 			}
 		} catch(e) {}
 		
-		yield _finishImport(translation, false);
+		yield _finishImport({
+			translation,
+			createNewCollection: false
+		});
 		
 		// Select imported items
 		try {
