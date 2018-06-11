@@ -43,7 +43,7 @@
     "globby": "^6.1.0",
     "mocha": "^3.5.3",
     "multimatch": "^2.1.0",
-    "node-sass": "^4.7.2",
+    "node-sass": "^4.9.0",
     "sinon": "^4.5.0",
     "universalify": "^0.1.1"
   }
