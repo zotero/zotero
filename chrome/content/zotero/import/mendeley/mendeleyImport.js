@@ -428,7 +428,12 @@ Zotero_Import_Mendeley.prototype._getDocumentCollections = async function (group
 	for (let row of rows) {
 		let keys = map.get(row.documentId);
 		if (!keys) keys = [];
-		keys.push(folderKeys.get(row.folderId));
+		let key = folderKeys.get(row.folderId);
+		if (!key) {
+			Zotero.debug(`Document folder ${row.folderId} not found -- skipping`, 2);
+			continue;
+		}
+		keys.push(key);
 		map.set(row.documentId, keys);
 	}
 	return map;
