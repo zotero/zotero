@@ -617,7 +617,14 @@ Zotero_Import_Mendeley.prototype._documentToAPIJSON = async function (map, docum
 			}
 		}
 	}
-	if (tags) parent.tags = tags;
+	parent.tags = [];
+	// Add star tag for favorites
+	if (documentRow.favourite == 'true') {
+		parent.tags.push('\u2605');
+	}
+	if (tags) {
+		parent.tags.push(...tags);
+	}
 	if (collections) parent.collections = collections;
 	
 	// Copy date added/modified to child item
