@@ -218,7 +218,7 @@ var Zotero_File_Interface = new function() {
 			path = OS.Path.join(path, 'Library', 'Application Support', 'Mendeley Desktop');
 		}
 		else if (Zotero.isWin) {
-			path = OS.Path.join(path, 'AppData', 'Local', 'Mendeley Ltd', 'Desktop');
+			path = OS.Path.join(path, 'AppData', 'Local', 'Mendeley Ltd', 'Mendeley Desktop');
 		}
 		else if (Zotero.isLinux) {
 			path = OS.Path.join(path, '.local', 'share', 'data', 'Mendeley Ltd.', 'Mendeley Desktop');

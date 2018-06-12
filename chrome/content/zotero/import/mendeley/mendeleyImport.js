@@ -1042,7 +1042,7 @@ Zotero_Import_Mendeley.prototype._findExistingFile = function (parentItemID, fil
 Zotero_Import_Mendeley.prototype._isDownloadedFile = function (path) {
 	var parentDir = OS.Path.dirname(path);
 	return parentDir.endsWith(OS.Path.join('Application Support', 'Mendeley Desktop', 'Downloaded'))
-		|| parentDir.endsWith(OS.Path.join('Local', 'Mendeley Ltd', 'Desktop', 'Downloaded'))
+		|| parentDir.endsWith(OS.Path.join('Local', 'Mendeley Ltd', 'Mendeley Desktop', 'Downloaded'))
 		|| parentDir.endsWith(OS.Path.join('data', 'Mendeley Ltd.', 'Mendeley Desktop', 'Downloaded'));
 }
 
