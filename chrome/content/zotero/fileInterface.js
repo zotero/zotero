@@ -330,27 +330,27 @@ var Zotero_File_Interface = new function() {
 		var translation;
 		// Check if the file is an SQLite database
 		var sample = yield Zotero.File.getSample(file.path);
-		if (Zotero.MIME.sniffForMIMEType(sample) == 'application/x-sqlite3'
-				// Blacklist the current Zotero database, which would cause a hang
-				&& file.path != Zotero.DataDirectory.getDatabase()) {
+		if (file.path == Zotero.DataDirectory.getDatabase()) {
+			// Blacklist the current Zotero database, which would cause a hang
+		}
+		else if (Zotero.MIME.sniffForMIMEType(sample) == 'application/x-sqlite3') {
 			// Mendeley import doesn't use the real translation architecture, but we create a
 			// translation object with the same interface
 			translation = yield _getMendeleyTranslation();
 			translation.createNewCollection = createNewCollection;
-			defaultNewCollectionPrefix = "Mendeley Import";
+			defaultNewCollectionPrefix = Zotero.getString(
+				'fileInterface.appImportCollection', 'Mendeley'
+			);
 		}
-		else {
-			// TEMP
-			if (file.path.endsWith('.sqlite')) {
-				let codes = [];
-				for (let i = 0; i < sample.length; i++) {
-					codes.push(sample.charCodeAt(i));
-				}
-				Zotero.debug(codes.join(' '));
-			}
-			translation = new Zotero.Translate.Import();
+		else if (file.path.endsWith('@www.mendeley.com.sqlite')
+				|| file.path.endsWith('online.sqlite')) {
+			// Keep in sync with importWizard.js
+			throw new Error('Encrypted Mendeley database');
 		}
 		
+		if (!translation) {
+			translation = new Zotero.Translate.Import();
+		}
 		translation.setLocation(file);
 		return _finishImport({
 			translation,

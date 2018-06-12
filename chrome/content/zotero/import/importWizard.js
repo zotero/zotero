@@ -217,11 +217,23 @@ var Zotero_Import_Wizard = {
 			);
 		}
 		catch (e) {
-			this._onDone(
-				Zotero.getString('general.error'),
-				Zotero.getString('fileInterface.importError'),
-				true
-			);
+			if (e.message == 'Encrypted Mendeley database') {
+				let url = 'https://www.zotero.org/support/kb/mendeley_import';
+				this._onDone(
+					Zotero.getString('general.error'),
+					// TODO: Localize
+					`The selected Mendeley database cannot be read, likely because it is encrypted. `
+						+ `See <a href="${url}" class="text-link">How do I import a Mendeley library `
+						+ `into Zotero?</a> for more information.`
+				);
+			}
+			else {
+				this._onDone(
+					Zotero.getString('general.error'),
+					Zotero.getString('fileInterface.importError'),
+					true
+				);
+			}
 			throw e;
 		}
 	},
@@ -289,7 +301,22 @@ var Zotero_Import_Wizard = {
 	_onDone: function (label, description, showReportErrorButton) {
 		var wizard = this._wizard;
 		wizard.getPageById('page-done').setAttribute('label', label);
-		document.getElementById('result-description').textContent = description;
+		
+		var xulElem = document.getElementById('result-description');
+		var htmlElem = document.getElementById('result-description-html');
+		
+		if (description.includes('href')) {
+			htmlElem.innerHTML = description;
+			Zotero.Utilities.Internal.updateHTMLInXUL(htmlElem);
+			xulElem.hidden = true;
+			htmlElem.setAttribute('display', 'block');
+		}
+		else {
+			xulElem.textContent = description;
+			xulElem.hidden = false;
+			htmlElem.setAttribute('display', 'none');
+		}
+		document.getElementById('result-description')
 		
 		if (showReportErrorButton) {
 			let button = document.getElementById('result-report-error');

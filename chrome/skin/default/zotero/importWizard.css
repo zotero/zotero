@@ -33,8 +33,12 @@ wizard[currentpageid="page-file-list"] .wizard-header {
 	margin-bottom: 6px;
 }
 
-listbox, #result-description {
+listbox, #result-description, #result-description-html {
 	font-size: 13px;
+}
+
+#result-description-html a {
+	text-decoration: underline;
 }
 
 button, checkbox {

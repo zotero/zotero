@@ -7,6 +7,7 @@
 
 <wizard id="import-wizard"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml"
 		title="&zotero.import;"
 		onload="Zotero_Import_Wizard.init()">
 	
@@ -64,6 +65,7 @@
 	
 	<wizardpage pageid="page-done">
 		<description id="result-description"/>
+		<html:div id="result-description-html"/>
 		<hbox>
 			<button id="result-report-error"
 				oncommand="Zotero_Import_Wizard.reportError()"
