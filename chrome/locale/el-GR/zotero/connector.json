@@ -1,6 +1,18 @@
 {
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Ενεργοποίηση αποθήκευσης στη Βιβλιοθήκη με απευθείας σύνδεση "
+  },
+  "error_connection_save": {
+    "message": "Το $1 δεν μπόρεσε να επικοινωνήσει με την εφαρμογή γραφείου $2. Ο Σύνδεσμος μπορεί να αποθηκεύσει κάποιες σελίδες απευθείας στο λογαριασμό σας $3, αλλά για καλύτερα αποτελέσματα θα πρέπει να βεβαιωθείτε ότι η εφαρμογή $2 είναι ανοιχτή πριν επιχειρήσετε να το αποθηκεύσετε."
+  },
   "progressWindow_error_translation": {
     "message": "Παρουσιάστηκε σφάλμα κατά την αποθήκευση αυτού του στοιχείου. Δείτε 1 $1 για περισσότερες πληροφορίες."
+  },
+  "general_tryAgain": {
+    "message": "Ξαναπροσπάθηστε"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Εκτελείτε η $1;"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Ετικέτες (διαχωρισμένες με κόμμα)"
@@ -11,11 +23,17 @@
   "progressWindow_error_upgradeClient": {
     "message": "Αυτή η λειτουργία δεν υποστηρίζεται από την έκδοση 1 $1. Παρακαλώ αναβαθμίστε στην 2 $2."
   },
+  "general_cancel": {
+    "message": "Άκυρο"
+  },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "τελευταία έκδοση"
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Αντιμετώπιση Προβλημάτων Μεταφραστή"
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Μπορείτε <a href=\"$1\">να κατεβάσετε $2</a> ή <a href=\"$3\"> αντιμετωπίστε τα προβλήματα της σύνδεση</a> αν είναι απαραίτητο."
   },
   "general_done": {
     "message": "Ολοκληρώθηκε"
@@ -23,10 +41,22 @@
   "progressWindow_error_fallback": {
     "message": "Παρουσιάστηκε σφάλμα κατά την αποθήκευση με 1 $1. Προσπαθήστε να αποθηκεύσετε χρησιμοποιώντας 2 $2."
   },
+  "upgradeApp": {
+    "message": "Αναβάθμιση $1"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Η αναφορά Ιστού απαιτεί $1 ή νεότερη έκδοση."
+  },
   "general_saveTo": {
     "message": "Αποθήκευση σε 1 $1"
   },
+  "appConnector": {
+    "message": "$1 Συνδετήρας"
+  },
   "progressWindow_savingTo": {
     "message": "Αποθήκευση σε"
+  },
+  "integration_error_connection": {
+    "message": "Το $1 δεν μπόρεσε να επικοινωνήσει με την $2 εφαρμογή γραφείου. Το $2 πρέπει να είναι ανοικτό για να χρησιμοποιηθεί μια αναφορά ιστού."
   }
 }

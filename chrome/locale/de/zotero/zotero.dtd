@@ -10,14 +10,14 @@
 <!ENTITY zotero.general.cancel "Abbrechen">
 <!ENTITY zotero.general.refresh "Aktualisieren">
 <!ENTITY zotero.general.saveAs "Speichern als...">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "Optionen">
 <!ENTITY zotero.general.advancedOptions.label "Erweiterte Einstellungen">
 <!ENTITY zotero.general.tools "Werkzeuge">
 <!ENTITY zotero.general.more "Mehr">
 <!ENTITY zotero.general.loading "Lade...">
 <!ENTITY zotero.general.close "Schließen">
 <!ENTITY zotero.general.minimize "Minimieren">
-<!ENTITY zotero.general.other "Other…">
+<!ENTITY zotero.general.other "Andere...">
 
 
 <!ENTITY zotero.errorReport.title "Zotero Fehlerbericht">
@@ -204,14 +204,14 @@
 
 <!ENTITY zotero.progress.title "Fortschritt">
 
-<!ENTITY zotero.import "Import">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
-<!ENTITY zotero.import.database "Database">
-<!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
-<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
+<!ENTITY zotero.import "Importieren">
+<!ENTITY zotero.import.whereToImportFrom "Von wo aus möchten Sie importieren?">
+<!ENTITY zotero.import.source.file "Einer Datei (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "Importieren...">
+<!ENTITY zotero.import.database "Datenbank">
+<!ENTITY zotero.import.lastModified "Zuletzt geändert">
+<!ENTITY zotero.import.size "Größe">
+<!ENTITY zotero.import.createCollection "Importierte Sammlungen und Einträge in neue Sammlungen einstellen">
 
 <!ENTITY zotero.exportOptions.title "Exportieren...">
 <!ENTITY zotero.exportOptions.format.label "Format:">
