@@ -820,7 +820,7 @@ Zotero.Sync.APIClient.prototype = {
 	
 	_checkBackoff: function (xmlhttp) {
 		var backoff = xmlhttp.getResponseHeader("Backoff");
-		if (backoff && Number.isInteger(backoff)) {
+		if (backoff && parseInt(backoff) == backoff) {
 			// TODO: Update status?
 			this.caller.pause(backoff * 1000);
 		}
@@ -831,7 +831,7 @@ Zotero.Sync.APIClient.prototype = {
 		var retryAfter = xmlhttp.getResponseHeader("Retry-After");
 		var delay;
 		if (!retryAfter) return false;
-		if (!Number.isInteger(retryAfter)) {
+		if (parseInt(retryAfter) != retryAfter) {
 			Zotero.logError(`Invalid Retry-After delay ${retryAfter}`);
 			return false;
 		}

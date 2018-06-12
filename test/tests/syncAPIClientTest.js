@@ -174,7 +174,7 @@ describe("Zotero.Sync.APIClient", function () {
 							req.respond(
 								503,
 								{
-									"Retry-After": 5
+									"Retry-After": "5"
 								},
 								""
 							);
@@ -183,7 +183,7 @@ describe("Zotero.Sync.APIClient", function () {
 							req.respond(
 								503,
 								{
-									"Retry-After": 10
+									"Retry-After": "10"
 								},
 								""
 							);
