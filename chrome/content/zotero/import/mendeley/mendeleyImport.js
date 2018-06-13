@@ -806,52 +806,51 @@ Zotero_Import_Mendeley.prototype._convertNote = function (note) {
 
 Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
 	var idMap = new Map();
-	await Zotero.DB.executeTransaction(async function () {
-		var lastExistingParentItem;
-		for (let i = 0; i < json.length; i++) {
-			let itemJSON = json[i];
-			
-			// Check if the item has been previously imported
-			let item = this._findExistingItem(libraryID, itemJSON, lastExistingParentItem);
-			if (item) {
-				if (item.isRegularItem()) {
-					lastExistingParentItem = item;
-					
-					// Update any child items to point to the existing item's key instead of the
-					// new generated one
-					this._updateParentKeys('item', json, i + 1, itemJSON.key, item.key);
-					
-					// Leave item in any collections it's in
-					itemJSON.collections = item.getCollections()
-						.map(id => Zotero.Collections.getLibraryAndKeyFromID(id).key)
-						.concat(itemJSON.collections || []);
-				}
-			}
-			else {
-				lastExistingParentItem = null;
+	
+	var lastExistingParentItem;
+	for (let i = 0; i < json.length; i++) {
+		let itemJSON = json[i];
+		
+		// Check if the item has been previously imported
+		let item = this._findExistingItem(libraryID, itemJSON, lastExistingParentItem);
+		if (item) {
+			if (item.isRegularItem()) {
+				lastExistingParentItem = item;
 				
-				item = new Zotero.Item;
-				item.libraryID = libraryID;
-				if (itemJSON.key) {
-					item.key = itemJSON.key;
-					await item.loadPrimaryData();
-				}
-			}
-			
-			// Remove external id before save
-			let toSave = Object.assign({}, itemJSON);
-			delete toSave.documentID;
-			
-			item.fromJSON(toSave);
-			await item.save({
-				skipSelect: true,
-				skipDateModifiedUpdate: true
-			});
-			if (itemJSON.documentID) {
-				idMap.set(itemJSON.documentID, item.id);
+				// Update any child items to point to the existing item's key instead of the
+				// new generated one
+				this._updateParentKeys('item', json, i + 1, itemJSON.key, item.key);
+				
+				// Leave item in any collections it's in
+				itemJSON.collections = item.getCollections()
+					.map(id => Zotero.Collections.getLibraryAndKeyFromID(id).key)
+					.concat(itemJSON.collections || []);
 			}
 		}
-	}.bind(this));
+		else {
+			lastExistingParentItem = null;
+			
+			item = new Zotero.Item;
+			item.libraryID = libraryID;
+			if (itemJSON.key) {
+				item.key = itemJSON.key;
+				await item.loadPrimaryData();
+			}
+		}
+		
+		// Remove external id before save
+		let toSave = Object.assign({}, itemJSON);
+		delete toSave.documentID;
+		
+		item.fromJSON(toSave);
+		await item.saveTx({
+			skipSelect: true,
+			skipDateModifiedUpdate: true
+		});
+		if (itemJSON.documentID) {
+			idMap.set(itemJSON.documentID, item.id);
+		}
+	}
 	return idMap;
 };
 
