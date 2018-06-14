@@ -636,7 +636,10 @@ ZoteroCommandLineHandler.prototype = {
 								var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 								   .getService(Components.interfaces.nsIWindowMediator);
 								var browserWindow = wm.getMostRecentWindow("navigator:browser");
-								browserWindow.Zotero_File_Interface.importFile(file, checkState.value);
+								browserWindow.Zotero_File_Interface.importFile({
+									file,
+									createNewCollection: checkState.value
+								});
 							}
 						}
 					});

@@ -306,7 +306,10 @@ var Zotero_File_Interface = new function() {
 		}
 		if (typeof options == 'string' || options instanceof Components.interfaces.nsIFile) {
 			Zotero.debug("WARNING: importFile() now takes a single options object -- update your code");
-			options = { file: options };
+			options = {
+				file: options,
+				createNewCollection: arguments[1]
+			};
 		}
 		
 		var file = options.file ? Zotero.File.pathToFile(options.file) : null;
