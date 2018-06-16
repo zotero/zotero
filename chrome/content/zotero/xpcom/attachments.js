@@ -343,7 +343,7 @@ Zotero.Attachments = new function(){
 		};
 		
 		// Save using remote web browser persist
-		var externalHandlerImport = Zotero.Promise.coroutine(function* (contentType) {
+		var externalHandlerImport = async function (contentType) {
 			// Rename attachment
 			if (renameIfAllowedType && !fileBaseName && this.getRenamedFileTypes().includes(contentType)) {
 				let parentItem = Zotero.Items.get(parentItemID);
@@ -351,91 +351,47 @@ Zotero.Attachments = new function(){
 			}
 			if (fileBaseName) {
 				let ext = _getExtensionFromURL(url, contentType);
-				var fileName = fileBaseName + (ext != '' ? '.' + ext : '');
+				var filename = fileBaseName + (ext != '' ? '.' + ext : '');
 			}
 			else {
-				var fileName = _getFileNameFromURL(url, contentType);
+				var filename = _getFileNameFromURL(url, contentType);
 			}
-			
-			const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-			var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
-				.createInstance(nsIWBP);
-			if(cookieSandbox) cookieSandbox.attachToInterfaceRequestor(wbp);
-			var encodingFlags = false;
 			
 			// Create a temporary directory to save to within the storage directory.
 			// We don't use the normal temp directory because people might have 'storage'
-			// symlinked to another volume, which makes moving complicated.
-			var tmpDir = (yield this.createTemporaryStorageDirectory()).path;
-			var tmpFile = OS.Path.join(tmpDir, fileName);
+			// symlinked to another volume, which would make the save slower.
+			var tmpDir = (await this.createTemporaryStorageDirectory()).path;
+			var tmpFile = OS.Path.join(tmpDir, filename);
 			
-			// Save to temp dir
-			var deferred = Zotero.Promise.defer();
-			wbp.progressListener = new Zotero.WebProgressFinishListener(function() {
-				deferred.resolve();
-			});
-				
-			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
-				.createInstance(Components.interfaces.nsIURL);
-			nsIURL.spec = url;
-			var headers = {};
-			if (referrer) {
-				headers.Referer = referrer;
-			}
-			Zotero.Utilities.Internal.saveURI(wbp, nsIURL, tmpFile, headers);
-
-
-			yield deferred.promise;
-			let sample = yield Zotero.File.getContentsAsync(tmpFile, null, 1000);
+			var attachmentItem;
+			
 			try {
-				if (contentType == 'application/pdf' &&
-					Zotero.MIME.sniffForMIMEType(sample) != 'application/pdf') {
-					let errString = "Downloaded PDF did not have MIME type "
-						+ "'application/pdf' in Attachments.importFromURL()";
-					Zotero.debug(errString, 2);
-					Zotero.debug(sample, 3);
-					throw(new Error(errString));
-				}
-
-				// Create DB item
-				var attachmentItem;
-				var destDir;
-				yield Zotero.DB.executeTransaction(function*() {
-					// Create a new attachment
-					attachmentItem = new Zotero.Item('attachment');
-					if (libraryID) {
-						attachmentItem.libraryID = libraryID;
+				await this.downloadFile(
+					url,
+					tmpFile,
+					{
+						cookieSandbox,
+						referrer,
+						isPDF: contentType == 'application/pdf'
 					}
-					else if (parentItemID) {
-						let {libraryID: parentLibraryID, key: parentKey} =
-							Zotero.Items.getLibraryAndKeyFromID(parentItemID);
-						attachmentItem.libraryID = parentLibraryID;
-					}
-					attachmentItem.setField('title', title ? title : fileName);
-					attachmentItem.setField('url', url);
-					attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
-					attachmentItem.parentID = parentItemID;
-					attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
-					attachmentItem.attachmentContentType = contentType;
-					if (collections) {
-						attachmentItem.setCollections(collections);
-					}
-					attachmentItem.attachmentPath = 'storage:' + fileName;
-					var itemID = yield attachmentItem.save(saveOptions);
-					
-					Zotero.Fulltext.queueItem(attachmentItem);
-					
-					// DEBUG: Does this fail if 'storage' is symlinked to another drive?
-					destDir = this.getStorageDirectory(attachmentItem).path;
-					yield OS.File.move(tmpDir, destDir);
-				}.bind(this));
-			} catch (e) {
+				);
+				
+				attachmentItem = await this.createURLAttachmentFromTemporaryStorageDirectory({
+					directory: tmpDir,
+					libraryID,
+					parentItemID,
+					title,
+					filename,
+					url,
+					contentType,
+					collections,
+					saveOptions
+				});
+			}
+			catch (e) {
 				try {
 					if (tmpDir) {
-						yield OS.File.removeDir(tmpDir, { ignoreAbsent: true });
-					}
-					if (destDir) {
-						yield OS.File.removeDir(destDir, { ignoreAbsent: true });
+						await OS.File.removeDir(tmpDir, { ignoreAbsent: true });
 					}
 				}
 				catch (e) {
@@ -445,7 +401,7 @@ Zotero.Attachments = new function(){
 			}
 			
 			return attachmentItem;
-		}.bind(this));
+		}.bind(this);
 		
 		var process = function (contentType, hasNativeHandler) {
 			// If we can load this natively, use a hidden browser
@@ -464,6 +420,83 @@ Zotero.Attachments = new function(){
 		
 		return Zotero.MIME.getMIMETypeFromURL(url, cookieSandbox).spread(process);
 	});
+	
+	
+	/**
+	 * Create an imported-URL attachment using a file downloaded to a temporary directory
+	 * in 'storage', moving the directory into place
+	 *
+	 * We download files to temporary 'storage' directories rather than the normal temporary
+	 * directory because people might have their storage directory on another device, which
+	 * would make the move a copy.
+	 *
+	 * @param {Object} options
+	 * @param {String} options.directory
+	 * @param {Number} options.libraryID
+	 * @param {String} options.filename
+	 * @param {String} options.url
+	 * @param {Number} [options.parentItemID]
+	 * @param {String} [options.title]
+	 * @param {String} options.contentType
+	 * @param {String[]} [options.collections]
+	 * @param {Object} [options.saveOptions]
+	 * @return {Zotero.Item}
+	 */
+	this.createURLAttachmentFromTemporaryStorageDirectory = async function (options) {
+		if (!options.directory) throw new Error("'directory' not provided");
+		if (!options.libraryID) throw new Error("'libraryID' not provided");
+		if (!options.filename) throw new Error("'filename' not provided");
+		if (!options.url) throw new Error("'directory' not provided");
+		if (!options.contentType) throw new Error("'contentType' not provided");
+		
+		var notifierQueue = (options.saveOptions && options.saveOptions.notifierQueue)
+				|| new Zotero.Notifier.Queue;
+		var attachmentItem = new Zotero.Item('attachment');
+		try {
+			// Create DB item
+			if (options.libraryID) {
+				attachmentItem.libraryID = options.libraryID;
+			}
+			else if (options.parentItemID) {
+				let {libraryID: parentLibraryID, key: parentKey} =
+					Zotero.Items.getLibraryAndKeyFromID(options.parentItemID);
+				attachmentItem.libraryID = parentLibraryID;
+			}
+			attachmentItem.setField('title', options.title != undefined ? options.title : options.filename);
+			attachmentItem.setField('url', options.url);
+			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
+			attachmentItem.parentID = options.parentItemID;
+			attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+			attachmentItem.attachmentContentType = options.contentType;
+			if (options.collections) {
+				attachmentItem.setCollections(options.collections);
+			}
+			attachmentItem.attachmentPath = 'storage:' + options.filename;
+			await attachmentItem.saveTx(
+				Object.assign(
+					options.saveOptions || {},
+					{ notifierQueue }
+				)
+			);
+			
+			// Move file to final location
+			let destDir = this.getStorageDirectory(attachmentItem).path;
+			try {
+				await OS.File.move(options.directory, destDir);
+			}
+			catch (e) {
+				await attachmentItem.eraseTx({ notifierQueue });
+				throw e;
+			}
+		}
+		finally {
+			await Zotero.Notifier.commit(notifierQueue);
+		}
+		
+		Zotero.Fulltext.queueItem(attachmentItem);
+		
+		return attachmentItem;
+	};
 	
 	
 	/**
@@ -709,8 +742,140 @@ Zotero.Attachments = new function(){
 		
 		return attachmentItem;
 	});
-
-
+	
+	
+	/**
+	 * @param {String} url
+	 * @param {String} path
+	 * @param {Object} [options]
+	 * @param {Object} [options.cookieSandbox]
+	 * @param {String} [options.referrer]
+	 * @param {Boolean} [options.isPDF] - Delete file if not PDF
+	 */
+	this.downloadFile = async function (url, path, options = {}) {
+		Zotero.debug(`Downloading ${url}`);
+		
+		try {
+			await new Zotero.Promise(function (resolve) {
+				var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+					.createInstance(Components.interfaces.nsIWebBrowserPersist);
+				if (options.cookieSandbox) {
+					options.cookieSandbox.attachToInterfaceRequestor(wbp);
+				}
+				
+				wbp.progressListener = new Zotero.WebProgressFinishListener(() => resolve());
+					
+				var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
+					.createInstance(Components.interfaces.nsIURL);
+				nsIURL.spec = url;
+				var headers = {};
+				if (options.referrer) {
+					headers.Referer = options.referrer;
+				}
+				Zotero.Utilities.Internal.saveURI(wbp, nsIURL, path, headers);
+			});
+			
+			// If the file is supposed to be a PDF directory, fail if it's not
+			let sample = await Zotero.File.getContentsAsync(path, null, 1000);
+			if (options.isPDF && Zotero.MIME.sniffForMIMEType(sample) != 'application/pdf') {
+				let errString = "Downloaded PDF was not a PDF";
+				Zotero.debug(errString, 2);
+				Zotero.debug(sample, 3);
+				throw new Error(errString);
+			}
+		}
+		catch (e) {
+			try {
+				await OS.File.remove(path, { ignoreAbsent: true });
+			}
+			catch (e) {
+				Zotero.debug(e, 1);
+			}
+			throw e;
+		}
+	};
+	
+	
+	/**
+	 * Try to download a file from a list of URLs, keeping the first one that succeeds
+	 *
+	 *
+	 * @param {String[]} urls
+	 * @param {String} path
+	 * @param {Object} [options] - Options to pass to this.downloadFile()
+	 * @return {String|false} - URL that succeeded, or false if none
+	 */
+	this.downloadFirstAvailableFile = async function (urls, path, options) {
+		var url;
+		while (url = urls.shift()) {
+			try {
+				await this.downloadFile(url, path, options);
+				return url;
+			}
+			catch (e) {
+				Zotero.debug(`Error downloading ${url}: ${e}`);
+			}
+		}
+		return false;
+	};
+	
+	
+	/**
+	 * Look for an open-access PDF for an item and add it as an attachment
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {Zotero.Item|false} - New attachment item, or false if unsuccessful
+	 */
+	this.addOpenAccessPDF = async function (item) {
+		if (!Zotero.Prefs.get('downloadAssociatedFiles')) {
+			return false;
+		}
+		
+		var doi = item.getField('DOI');
+		if (!doi) {
+			return false;
+		}
+		
+		var urls = await Zotero.Utilities.Internal.getOpenAccessPDFURLs(doi);
+		if (!urls.length) {
+			return false;
+		}
+		
+		var fileBaseName = this.getFileBaseNameFromItem(item);
+		var tmpDir;
+		var tmpFile;
+		var attachmentItem = false;
+		try {
+			tmpDir = (await this.createTemporaryStorageDirectory()).path;
+			tmpFile = OS.Path.join(tmpDir, fileBaseName + '.pdf');
+			let url = await this.downloadFirstAvailableFile(
+				urls, tmpFile, { isPDF: true }
+			);
+			if (url) {
+				attachmentItem = await this.createURLAttachmentFromTemporaryStorageDirectory({
+					directory: tmpDir,
+					libraryID: item.libraryID,
+					filename: OS.Path.basename(tmpFile),
+					url,
+					contentType: 'application/pdf',
+					parentItemID: item.id
+				});
+			}
+			else {
+				await OS.File.removeDir(tmpDir);
+			}
+		}
+		catch (e) {
+			if (tmpDir) {
+				await OS.File.removeDir(tmpDir, { ignoreAbsent: true });
+			}
+			throw e;
+		}
+		
+		return attachmentItem;
+	};
+	
+	
 	/**
 	 * @deprecated Use Zotero.Utilities.cleanURL instead
 	 */

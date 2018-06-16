@@ -931,6 +931,35 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
+	 * Look for open-access PDFs for a given DOI using Zotero's Unpaywall mirror
+	 *
+	 * Note: This uses a private API. Please use Unpaywall directly for non-Zotero projects.
+	 *
+	 * @param {String} doi
+	 * @return {String[]} - An array of PDF URLs
+	 */
+	getOpenAccessPDFURLs: async function (doi) {
+		doi = Zotero.Utilities.cleanDOI(doi);
+		if (!doi) {
+			throw new Error(`Invalid DOI '${doi}'`);
+		}
+		Zotero.debug(`Looking for open-access PDFs for ${doi}`);
+		
+		var url = ZOTERO_CONFIG.SERVICES_URL + 'oa/search';
+		var req = await Zotero.HTTP.request('POST', url, {
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ doi }),
+			responseType: 'json'
+		});
+		var urls = req.response;
+		Zotero.debug(`Found ${urls.length} ${Zotero.Utilities.pluralize(urls.length, ['URL', 'URLs'])}`);
+		return urls;
+	},
+	
+	
+	/**
 	 * Hyphenate an ISBN based on the registrant table available from
 	 * https://www.isbn-international.org/range_file_generation
 	 * See isbn.js

@@ -49,6 +49,11 @@ describe("Add Item by Identifier", function() {
 		});
 	});
 	
+	it.skip("should add a DOI with an open-access PDF");
+	
+	// e.g., arXiv
+	it.skip("should not add a PDF if a DOI already retrieves one");
+	
 	it("should add a PMID", function() {
 		this.timeout(10000);
 		return lookupIdentifier(win, "24297125").then(function(ids) {
