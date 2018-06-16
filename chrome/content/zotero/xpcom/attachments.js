@@ -176,14 +176,18 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * @param {Object} options - 'file', 'url', 'title', 'contentType', 'charset', 'parentItemID'
+	 * @param {Object} options - 'file', 'url', 'title', 'contentType', 'charset', 'parentItemID', 'singleFile'
 	 * @return {Promise<Zotero.Item>}
 	 */
 	this.importSnapshotFromFile = Zotero.Promise.coroutine(function* (options) {
 		Zotero.debug('Importing snapshot from file');
 		
 		var file = Zotero.File.pathToFile(options.file);
-		var fileName = file.leafName;
+		// TODO: Fix main filename when copying directory, though in that case it's probably
+		// from our own export and already clean
+		var fileName = options.singleFile
+			? Zotero.File.getValidFileName(file.leafName)
+			: file.leafName;
 		var url = options.url;
 		var title = options.title;
 		var contentType = options.contentType;
@@ -194,7 +198,7 @@ Zotero.Attachments = new function(){
 			throw new Error("parentItemID not provided");
 		}
 		
-		var attachmentItem, itemID, destDir, newFile;
+		var attachmentItem, itemID, destDir, newPath;
 		try {
 			yield Zotero.DB.executeTransaction(function* () {
 				// Create a new attachment
@@ -217,13 +221,23 @@ Zotero.Attachments = new function(){
 				var storageDir = Zotero.getStorageDirectory();
 				destDir = this.getStorageDirectory(attachmentItem);
 				yield OS.File.removeDir(destDir.path);
-				file.parent.copyTo(storageDir, destDir.leafName);
-				
-				// Point to copied file
-				newFile = destDir.clone();
-				newFile.append(file.leafName);
+				newPath = OS.Path.join(destDir.path, fileName);
+				// Copy single file to new directory
+				if (options.singleFile) {
+					yield this.createDirectoryForItem(attachmentItem);
+					yield OS.File.copy(file.path, newPath);
+				}
+				// Copy entire parent directory (for HTML snapshots)
+				else {
+					file.parent.copyTo(storageDir, destDir.leafName);
+				}
 			}.bind(this));
-			yield _postProcessFile(attachmentItem, newFile, contentType, charset);
+			yield _postProcessFile(
+				attachmentItem,
+				Zotero.File.pathToFile(newPath),
+				contentType,
+				charset
+			);
 		}
 		catch (e) {
 			Zotero.logError(e);

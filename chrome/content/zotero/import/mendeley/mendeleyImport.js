@@ -983,6 +983,7 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 						options.title = file.title;
 						options.url = file.url;
 						options.contentType = file.contentType;
+						options.singleFile = true;
 						attachment = await Zotero.Attachments.importSnapshotFromFile(options);
 					}
 					else {
