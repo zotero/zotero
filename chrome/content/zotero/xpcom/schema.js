@@ -2433,6 +2433,14 @@ Zotero.Schema = new function(){
 				}
 			}
 			
+			else if (i == 101) {
+				Components.utils.import("chrome://zotero/content/import/mendeley/mendeleyImport.js");
+				let importer = new Zotero_Import_Mendeley();
+				if (yield importer.hasImportedFiles()) {
+					yield importer.queueFileCleanup();
+				}
+			}
+			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
 		

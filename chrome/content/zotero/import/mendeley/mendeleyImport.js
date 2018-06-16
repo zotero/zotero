@@ -1156,3 +1156,55 @@ Zotero_Import_Mendeley.prototype._updateItemCollectionKeys = function (json, old
 		}
 	}
 }
+
+
+//
+// Clean up extra files created <5.0.51
+//
+Zotero_Import_Mendeley.prototype.hasImportedFiles = async function () {
+	return !!(await Zotero.DB.valueQueryAsync(
+		"SELECT itemID FROM itemRelations JOIN relationPredicates USING (predicateID) "
+			+ "WHERE predicate='mendeleyDB:fileHash' LIMIT 1"
+	));
+};
+
+Zotero_Import_Mendeley.prototype.queueFileCleanup = async function () {
+	await Zotero.DB.queryAsync("INSERT INTO settings VALUES ('mImport', 'cleanup', 1)");
+};
+
+Zotero_Import_Mendeley.prototype.deleteNonPrimaryFiles = async function () {
+	var rows = await Zotero.DB.queryAsync(
+		"SELECT key, path FROM itemRelations "
+			+ "JOIN relationPredicates USING (predicateID) "
+			+ "JOIN items USING (itemID) "
+			+ "JOIN itemAttachments USING (itemID) "
+			+ "WHERE predicate='mendeleyDB:fileHash' AND linkMode=1" // imported_url
+	);
+	for (let row of rows) {
+		let dir = (Zotero.Attachments.getStorageDirectoryByLibraryAndKey(1, row.key)).path;
+		if (!row.path.startsWith('storage:')) {
+			Zotero.logError(row.path + " does not start with 'storage:'");
+			continue;
+		}
+		let filename = row.path.substr(8);
+		
+		Zotero.debug(`Checking for extra files in ${dir}`);
+		await Zotero.File.iterateDirectory(dir, function* (iterator) {
+			while (true) {
+				let entry = yield iterator.next();
+				if (entry.name.startsWith('.zotero') || entry.name == filename) {
+					continue;
+				}
+				Zotero.debug(`Deleting ${entry.path}`);
+				try {
+					yield OS.File.remove(entry.path);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
+		});
+	}
+	
+	await Zotero.DB.queryAsync("DELETE FROM settings WHERE setting='mImport' AND key='cleanup'");
+};

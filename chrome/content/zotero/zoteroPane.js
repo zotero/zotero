@@ -260,6 +260,18 @@ var ZoteroPane = new function()
 				ZoteroPane_Local.show();
 			}, 0);
 		}
+		
+		// TEMP: Clean up extra files from Mendeley imports <5.0.51
+		setTimeout(async function () {
+			var needsCleanup = await Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM settings WHERE setting='mImport' AND key='cleanup'"
+			)
+			if (!needsCleanup) return;
+			
+			Components.utils.import("chrome://zotero/content/import/mendeley/mendeleyImport.js");
+			var importer = new Zotero_Import_Mendeley();
+			importer.deleteNonPrimaryFiles();
+		}, 10000)
 	}
 	
 	
