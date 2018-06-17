@@ -1217,7 +1217,7 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function (options) {
 				// Save damaged filed
 				this._debug('Saving damaged DB file with .damaged extension', 1);
 				let damagedFile = this._dbPath + '.damaged';
-				Zotero.moveToUnique(file, damagedFile);
+				await Zotero.File.moveToUnique(file, damagedFile);
 				
 				// Create new main database
 				this._connection = store.openDatabase(file);
@@ -1237,7 +1237,7 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function (options) {
 			// Save damaged file
 			this._debug('Saving damaged DB file with .damaged extension', 1);
 			let damagedFile = this._dbPath + '.damaged';
-			Zotero.moveToUnique(file, damagedFile);
+			await Zotero.File.moveToUnique(file, damagedFile);
 			
 			// Test the backup file
 			try {
