@@ -49,7 +49,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.flattenArguments = flattenArguments;
 	this.getAncestorByTagName = getAncestorByTagName;
 	this.randomString = randomString;
-	this.moveToUnique = moveToUnique;
 	this.reinit = reinit; // defined in zotero-service.js
 	
 	// Public properties
@@ -1711,7 +1710,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	}
 	
 	
-	function moveToUnique(file, newFile){
+	this.moveToUnique = function (file, newFile) {
+		Zotero.debug("Zotero.moveToUnique() is deprecated -- use Zotero.File.moveToUnique()", 2);
 		newFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0o644);
 		var newName = newFile.leafName;
 		newFile.remove(null);

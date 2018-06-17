@@ -158,6 +158,21 @@ describe("Zotero.File", function () {
 	});
 	
 	
+	describe("#moveToUnique", function () {
+		it("should move a file to a unique filename", async function () {
+			var tmpDir = Zotero.getTempDirectory().path;
+			var sourceFile = OS.Path.join(tmpDir, "1");
+			var tmpTargetDir = OS.Path.join(tmpDir, "targetDirectory")
+			var targetFile = OS.Path.join(tmpTargetDir, "file.txt");
+			await OS.File.makeDir(tmpTargetDir);
+			await Zotero.File.putContentsAsync(sourceFile, "");
+			await Zotero.File.putContentsAsync(targetFile, "");
+			var newFile = await Zotero.File.moveToUnique(sourceFile, targetFile);
+			assert.equal(OS.Path.join(tmpTargetDir, 'file-1.txt'), newFile);
+		});
+	});
+	
+	
 	describe("#copyDirectory()", function () {
 		it("should copy all files within a directory", function* () {
 			var tmpDir = Zotero.getTempDirectory().path;

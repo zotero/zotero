@@ -894,6 +894,25 @@ Zotero.File = new function(){
 	}
 	
 	
+	/**
+	 * @param {String} file
+	 * @param {String} newFile
+	 * @return {String} - Path of new file
+	 */
+	this.moveToUnique = async function (file, newFile) {
+		var targetDir = OS.Path.dirname(newFile);
+		
+		var newNSIFile = this.pathToFile(newFile);
+		newNSIFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0o644);
+		var newName = newNSIFile.leafName;
+		newNSIFile.remove(null);
+		
+		newFile = OS.Path.join(targetDir, newName);
+		await OS.File.move(file, newFile);
+		return newFile;
+	}
+	
+	
 	this.copyToUnique = function (file, newFile) {
 		file = this.pathToFile(file);
 		newFile = this.pathToFile(newFile);
