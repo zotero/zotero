@@ -1550,63 +1550,83 @@ Zotero.Attachments = new function(){
 		}
 		
 		// Otherwise, load in a hidden browser to get the charset, and then index the document
-		var deferred = Zotero.Promise.defer();
-		var browser = Zotero.Browser.createHiddenBrowser(
-			null,
-			// Disable JavaScript, since it can cause imports that include HTML files to hang
-			// (from network requests that fail?)
-			{ allowJavaScript: false }
-		);
-		
-		if (item.attachmentCharset) {
-			var onpageshow = function(){
-				// ignore spurious about:blank loads
-				if(browser.contentDocument.location.href == "about:blank") return;
-				
-				browser.removeEventListener("pageshow", onpageshow, false);
-				
-				Zotero.Fulltext.indexDocument(browser.contentDocument, itemID)
-				.then(deferred.resolve, deferred.reject)
-				.finally(function () {
-					Zotero.Browser.deleteHiddenBrowser(browser);
-				});
-			};
-			browser.addEventListener("pageshow", onpageshow, false);
-		}
-		else {
-			let callback = Zotero.Promise.coroutine(function* (charset, args) {
-				// ignore spurious about:blank loads
-				if(browser.contentDocument.location.href == "about:blank") return;
-				
-				try {
-					if (charset) {
-						charset = Zotero.CharacterSets.toCanonical(charset);
-						if (charset) {
-							item.attachmentCharset = charset;
-							yield item.saveTx({
-								skipNotifier: true
-							});
-						}
+		return new Zotero.Promise(function (resolve, reject) {
+			var browser = Zotero.Browser.createHiddenBrowser(
+				null,
+				// Disable JavaScript, since it can cause imports that include HTML files to hang
+				// (from network requests that fail?)
+				{ allowJavaScript: false }
+			);
+			
+			var pageshown = false;
+			
+			if (item.attachmentCharset) {
+				var onpageshow = async function () {
+					// ignore spurious about:blank loads
+					if(browser.contentDocument.location.href == "about:blank") return;
+					
+					pageshown = true;
+					
+					browser.removeEventListener("pageshow", onpageshow, false);
+					
+					try {
+						await Zotero.Fulltext.indexDocument(browser.contentDocument, itemID);
+						resolve();
 					}
+					catch (e) {
+						reject(e);
+					}
+					finally {
+						Zotero.Browser.deleteHiddenBrowser(browser);
+					}
+				};
+				browser.addEventListener("pageshow", onpageshow, false);
+			}
+			else {
+				let callback = async function (charset, args) {
+					// ignore spurious about:blank loads
+					if(browser.contentDocument.location.href == "about:blank") return;
 					
-					yield Zotero.Fulltext.indexDocument(browser.contentDocument, item.id);
-					Zotero.Browser.deleteHiddenBrowser(browser);
+					pageshown = true;
 					
-					deferred.resolve();
+					try {
+						if (charset) {
+							charset = Zotero.CharacterSets.toCanonical(charset);
+							if (charset) {
+								item.attachmentCharset = charset;
+								await item.saveTx({
+									skipNotifier: true
+								});
+							}
+						}
+						
+						await Zotero.Fulltext.indexDocument(browser.contentDocument, item.id);
+						resolve();
+					}
+					catch (e) {
+						reject(e);
+					}
+					finally {
+						Zotero.Browser.deleteHiddenBrowser(browser);
+					}
+				};
+				Zotero.File.addCharsetListener(browser, callback, item.id);
+			}
+			
+			var url = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+						.getService(Components.interfaces.nsIFileProtocolHandler)
+						.getURLSpecFromFile(file);
+			browser.loadURI(url);
+			
+			// Avoid a hang if a pageshow is never called on the hidden browser (which can happen
+			// if a .pdf file is really HTML, which can also result in the file being launched,
+			// which we should try to fix)
+			setTimeout(function () {
+				if (!pageshown) {
+					reject(new Error("pageshow not called in hidden browser"));
 				}
-				catch (e) {
-					deferred.reject(e);
-				}
-			});
-			Zotero.File.addCharsetListener(browser, callback, item.id);
-		}
-		
-		var url = Components.classes["@mozilla.org/network/protocol;1?name=file"]
-					.getService(Components.interfaces.nsIFileProtocolHandler)
-					.getURLSpecFromFile(file);
-		browser.loadURI(url);
-		
-		return deferred.promise;
+			}, 5000);
+		});
 	});
 	
 	/**
