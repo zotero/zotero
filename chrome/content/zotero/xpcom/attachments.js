@@ -117,7 +117,12 @@ Zotero.Attachments = new function(){
 				attachmentItem.attachmentPath = newFile.path;
 				yield attachmentItem.save(saveOptions);
 			}.bind(this));
-			yield _postProcessFile(attachmentItem, newFile, contentType);
+			try {
+				yield _postProcessFile(attachmentItem, newFile, contentType);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -170,7 +175,12 @@ Zotero.Attachments = new function(){
 			collections,
 			saveOptions
 		});
-		yield _postProcessFile(item, file, contentType);
+		try {
+			yield _postProcessFile(item, file, contentType);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 		return item;
 	});
 	
@@ -232,12 +242,17 @@ Zotero.Attachments = new function(){
 					file.parent.copyTo(storageDir, destDir.leafName);
 				}
 			}.bind(this));
-			yield _postProcessFile(
-				attachmentItem,
-				Zotero.File.pathToFile(newPath),
-				contentType,
-				charset
-			);
+			try {
+				yield _postProcessFile(
+					attachmentItem,
+					Zotero.File.pathToFile(newPath),
+					contentType,
+					charset
+				);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
 		catch (e) {
 			Zotero.logError(e);
