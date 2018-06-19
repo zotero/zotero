@@ -1536,7 +1536,12 @@ Zotero.Attachments = new function(){
 		
 		// Otherwise, load in a hidden browser to get the charset, and then index the document
 		var deferred = Zotero.Promise.defer();
-		var browser = Zotero.Browser.createHiddenBrowser();
+		var browser = Zotero.Browser.createHiddenBrowser(
+			null,
+			// Disable JavaScript, since it can cause imports that include HTML files to hang
+			// (from network requests that fail?)
+			{ allowJavaScript: false }
+		);
 		
 		if (item.attachmentCharset) {
 			var onpageshow = function(){

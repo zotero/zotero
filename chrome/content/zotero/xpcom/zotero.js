@@ -2768,7 +2768,7 @@ Zotero.DragDrop = {
 Zotero.Browser = new function() {
 	var nBrowsers = 0;
 	
-	this.createHiddenBrowser = function (win) {
+	this.createHiddenBrowser = function (win, options = {}) {
 		if (!win) {
 			win = Services.wm.getMostRecentWindow("navigator:browser");
 			if (!win) {
@@ -2794,7 +2794,7 @@ Zotero.Browser = new function() {
 		hiddenBrowser.docShell.allowAuth = false;
 		hiddenBrowser.docShell.allowDNSPrefetch = false;
 		hiddenBrowser.docShell.allowImages = false;
-		hiddenBrowser.docShell.allowJavascript = true;
+		hiddenBrowser.docShell.allowJavascript = options.allowJavaScript !== false
 		hiddenBrowser.docShell.allowMetaRedirects = false;
 		hiddenBrowser.docShell.allowPlugins = false;
 		Zotero.debug("Created hidden browser (" + (nBrowsers++) + ")");

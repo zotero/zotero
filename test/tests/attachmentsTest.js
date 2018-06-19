@@ -149,6 +149,25 @@ describe("Zotero.Attachments", function() {
 			assert.lengthOf(matches, 1);
 			assert.propertyVal(matches[0], 'id', attachment.id);
 		});
+		
+		// This isn't particularly the behavior we want, but it documents the expected behavior
+		it("shouldn't index JavaScript-created text in an HTML file when the charset isn't known in advance", async function () {
+			var item = await createDataObject('item');
+			var file = getTestDataDirectory();
+			file.append('test-js.html');
+			var attachment = await Zotero.Attachments.importSnapshotFromFile({
+				title: 'Snapshot',
+				url: 'http://example.com',
+				file,
+				parentItemID: item.id,
+				contentType: 'text/html'
+			});
+			
+			assert.equal(attachment.attachmentCharset, 'utf-8');
+			
+			var matches = await Zotero.Fulltext.findTextInItems([attachment.id], 'test');
+			assert.lengthOf(matches, 0);
+		});
 	});
 	
 	describe("#linkFromDocument", function () {
