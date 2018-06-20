@@ -69,14 +69,14 @@ var Zotero_Lookup = new function () {
 					collections: collection ? [collection.id] : false
 				});
 				// If there's a DOI and we don't yet have a file, check for open-access PDFs
-				if (identifier.DOI && !newItems.find(x => x.isImportedAttachment())) {
+				/*if (identifier.DOI && !newItems.find(x => x.isImportedAttachment())) {
 					try {
 						yield Zotero.Attachments.addOpenAccessPDF(newItems[0]);
 					}
 					catch (e) {
 						Zotero.logError(e);
 					}
-				}
+				}*/
 				successful++;
 			}
 			// Continue with other ids on failure
