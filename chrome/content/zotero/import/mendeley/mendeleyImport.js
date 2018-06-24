@@ -400,6 +400,8 @@ Zotero_Import_Mendeley.prototype._getDocumentTags = async function (groupID) {
 	);
 	var map = new Map();
 	for (let row of rows) {
+		// Skip empty tags
+		if (!row.tag.trim()) continue;
 		let docTags = map.get(row.documentId);
 		if (!docTags) docTags = [];
 		docTags.push({
