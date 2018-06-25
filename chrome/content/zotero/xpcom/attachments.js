@@ -539,9 +539,10 @@ Zotero.Attachments = new function(){
 		 OneNote (onenote://)
 		 Kindle (kindle://) 
 		 Logos (logosres:) 
+		 Bear (bear://)
 		 Zotero (zotero://) */
 
-		var urlRe = /^((https?|zotero|evernote|onenote|brain|nv|mlo|kindle|x-devonthink-item|ftp):\/\/|logosres:)[^\s]*$/;
+		var urlRe = /^((https?|zotero|evernote|onenote|brain|nv|mlo|kindle|x-devonthink-item|bear|ftp):\/\/|logosres:)[^\s]*$/;
 		var matches = urlRe.exec(url);
 		if (!matches) {
 			throw ("Invalid URL '" + url + "' in Zotero.Attachments.linkFromURL()");
