@@ -1244,7 +1244,11 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							// -- should probably use a temporary table instead
 							if (hasFilter){
 								let subids = yield obj.search();
-								condSQL += subids.join();
+								condSQL += "itemID ";
+								if (condition.operator == 'isNot') {
+									condSQL += "NOT ";
+								}
+								condSQL += "IN (" + subids.join();
 							}
 							// Otherwise just put the SQL in a subquery
 							else {
