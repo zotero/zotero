@@ -259,7 +259,7 @@ Zotero.Collection.prototype._initSave = Zotero.Promise.coroutine(function* (env)
 		}
 		
 		if (this.id && this.hasDescendent('collection', newParent.id)) {
-			throw ('Cannot move collection "' + this.name + '" into one of its own descendents');
+			throw new Error(`Cannot move collection '${this.name}' into one of its own descendents`);
 		}
 		
 		env.parent = newParent.id;
