@@ -195,7 +195,11 @@ Zotero_Import_Mendeley.prototype._isValidDatabase = async function () {
 //
 Zotero_Import_Mendeley.prototype._getFolders = async function (groupID) {
 	return this._db.queryAsync(
-		`SELECT F.*, RF.remoteUuid FROM Folders F `
+		`SELECT F.id, F.uuid, F.name, `
+			// Top-level folders can have a parentId of 0 instead of -1 (by mistake?)
+			+ `CASE WHEN F.parentId=0 THEN -1 ELSE F.parentId END AS parentId, `
+			+ `RF.remoteUuid `
+			+ `FROM Folders F `
 			+ `JOIN RemoteFolders RF ON (F.id=RF.folderId) `
 			+ `WHERE groupId=?`,
 		groupID
