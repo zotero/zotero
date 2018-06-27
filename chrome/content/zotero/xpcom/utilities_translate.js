@@ -382,3 +382,7 @@ for(var j in Zotero.Utilities.Translate.prototype) {
 		Zotero.Utilities.Translate.prototype.__exposedProps__[j] = "r";
 	}
 }
+
+if (typeof process === 'object' && process + '' === '[object process]'){
+	module.exports = Zotero.Utilities.Translate;
+}

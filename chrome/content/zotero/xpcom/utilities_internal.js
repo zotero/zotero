@@ -40,7 +40,7 @@ Zotero.Utilities.Internal = {
 	 * @param {Function} func - A promise-returning function
 	 * @return {Array} The return values from the successive runs
 	 */
-	"forEachChunkAsync": Zotero.Promise.coroutine(function* (arr, chunkSize, func) {
+	"forEachChunkAsync": async function (arr, chunkSize, func) {
 		var retValues = [];
 		var tmpArray = arr.concat();
 		var num = arr.length;
@@ -49,12 +49,12 @@ Zotero.Utilities.Internal = {
 		do {
 			var chunk = tmpArray.splice(0, chunkSize);
 			done += chunk.length;
-			retValues.push(yield func(chunk));
+			retValues.push(await func(chunk));
 		}
 		while (done < num);
 		
 		return retValues;
-	}),
+	},
 	
 	
 	/**
@@ -202,7 +202,7 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
-	gzip: Zotero.Promise.coroutine(function* (data) {
+	gzip: async function (data) {
 		var deferred = Zotero.Promise.defer();
 		
 		// Get input stream from POST data
@@ -258,10 +258,10 @@ Zotero.Utilities.Internal = {
 		pump.asyncRead(converter, null);
 		
 		return deferred.promise;
-	}),
+	},
 	
 	
-	gunzip: Zotero.Promise.coroutine(function* (data) {
+	gunzip: async function (data) {
 		var deferred = Zotero.Promise.defer();
 		
 		Components.utils.import("resource://gre/modules/NetUtil.jsm");
@@ -318,7 +318,7 @@ Zotero.Utilities.Internal = {
 		pump.asyncRead(converter, null);
 		
 		return deferred.promise;
-	}),
+	},
 	
 	
 	/**
@@ -1838,3 +1838,6 @@ Zotero.Utilities.Internal.Base64 = {
 		 return string;
 	 }
  }
+if (typeof process === 'object' && process + '' === '[object process]'){
+    module.exports = Zotero.Utilities.Internal;
+}

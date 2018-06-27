@@ -147,6 +147,25 @@ Zotero.Translate.Sandbox = {
 					if(item.tags) item.tags = translate._cleanTags(item.tags);
 				}
 				
+				if(item.attachments) {
+					var attachments = item.attachments;
+					for(var j=0; j<attachments.length; j++) {
+						var attachment = attachments[j];
+	
+						// Don't save documents as documents in connector, since we can't pass them around
+						if((Zotero.isConnector || Zotero.isServer) && attachment.document) {
+							attachment.url = attachment.document.documentURI || attachment.document.URL;
+							attachment.mimeType = "text/html";
+							delete attachment.document;
+						}
+	
+						// If we're not in a child translator, canonicalize tags
+						if (!translate._parentTranslator) {
+							if(attachment.tags !== undefined) attachment.tags = translate._cleanTags(attachment.tags);
+						}
+					}
+				}
+				
 				// if we're not supposed to save the item or we're in a child translator,
 				// just return the item array
 				if(translate._libraryID === false || translate._parentTranslator) {
@@ -161,25 +180,6 @@ Zotero.Translate.Sandbox = {
 				
 				// We use this within the connector to keep track of items as they are saved
 				if(!item.id) item.id = Zotero.Utilities.randomString();
-				
-				if(item.attachments) {
-					var attachments = item.attachments;
-					for(var j=0; j<attachments.length; j++) {
-						var attachment = attachments[j];
-	
-						// Don't save documents as documents in connector, since we can't pass them around
-						if(Zotero.isConnector && attachment.document) {
-							attachment.url = attachment.document.documentURI || attachment.document.URL;
-							attachment.mimeType = "text/html";
-							delete attachment.document;
-						}
-	
-						// If we're not in a child translator, canonicalize tags
-						if (!translate._parentTranslator) {
-							if(attachment.tags !== undefined) attachment.tags = translate._cleanTags(attachment.tags);
-						}
-					}
-				}
 	
 				if(item.notes) {
 					var notes = item.notes;
@@ -954,9 +954,14 @@ Zotero.Translate.Base.prototype = {
 	/**
 	 * Sets the translator to be used for import/export
 	 *
-	 * @param {Zotero.Translator|string} Translator object or ID
+	 * @param {Array{Zotero.Translator}|Zotero.Translator|string} Translator object or ID
 	 */
 	"setTranslator":function(translator) {
+		// Accept an array of translators
+		if (Array.isArray(translator)) {
+			this.translator = translator;
+			return true;
+		}
 		if(!translator) {
 			throw new Error("No translator specified");
 		}
@@ -2656,20 +2661,6 @@ Zotero.Translate.Search.prototype.getTranslators = function() {
 }
 
 /**
- * Sets the translator or translators to be used for search
- *
- * @param {Zotero.Translator|string} Translator object or ID
- */
-Zotero.Translate.Search.prototype.setTranslator = function(translator) {
-	// Accept an array of translators
-	if (Array.isArray(translator)) {
-		this.translator = translator;
-		return true;
-	}
-	return Zotero.Translate.Base.prototype.setTranslator.apply(this, [translator]);
-}
-
-/**
  * Overload Zotero.Translate.Base#complete to move onto the next translator if
  * translation fails
  */
@@ -3204,3 +3195,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		return returnArray;
 	}
 };
+
+if (typeof process === 'object' && process + '' === '[object process]'){
+    module.exports = Zotero.Translate;
+}

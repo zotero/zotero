@@ -911,3 +911,7 @@ Zotero.Date = new function(){
 		return _localeDateOrder;
 	}
 }
+
+if (typeof process === 'object' && process + '' === '[object process]'){
+    module.exports = Zotero.Date;
+}

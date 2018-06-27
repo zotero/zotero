@@ -1978,5 +1978,9 @@ Zotero.Utilities = {
 	 * Provides unicode support and other additional features for regular expressions
 	 * See https://github.com/slevithan/xregexp for usage
 	 */
-	 "XRegExp": XRegExp
+	 "XRegExp": typeof XRegExp !== "undefined" ? XRegExp : null
+}
+
+if (typeof process === 'object' && process + '' === '[object process]'){
+    module.exports = Zotero.Utilities;
 }

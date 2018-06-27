@@ -505,3 +505,7 @@ Zotero.OpenURL = new function() {
 		return item;
 	}
 }
+
+if (typeof process === 'object' && process + '' === '[object process]'){
+    module.exports = Zotero.OpenURL;
+}

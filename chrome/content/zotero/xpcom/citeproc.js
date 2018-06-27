@@ -17029,3 +17029,9 @@ CSL.parseParticles = function(){
         }
     }
 }();
+
+
+if (typeof process === 'object' && process + '' === '[object process]'){
+    module.exports = CSL;
+}
+
