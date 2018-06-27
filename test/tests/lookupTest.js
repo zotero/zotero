@@ -77,7 +77,7 @@ describe("Add Item by Identifier", function() {
 		// Fallback translator
 		var ids = yield lookupIdentifier(win, "10.5281/zenodo.55073");
 		var item = Zotero.Items.get(ids[0]);
-		assert.equal(item.getField("title"), "Comparison of Spectral Methods Through the Adjacency Matrix and the Laplacian of a Graph");
+		assert.equal(item.getField("title"), "Comparison Of Spectral Methods Through The Adjacency Matrix And The Laplacian Of A Graph");
 		assert.isTrue(item.inCollection(col.id));
 	});
 });
