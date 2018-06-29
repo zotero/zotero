@@ -871,8 +871,7 @@ Zotero.DBConnection.prototype.checkException = function (e) {
 		
 		this._dbIsCorrupt = true;
 		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
@@ -886,8 +885,7 @@ Zotero.DBConnection.prototype.checkException = function (e) {
 			null, null, {});
 		
 		if (index == 0) {
-			var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
-					.getService(Components.interfaces.nsIAppStartup);
+			var appStartup = Services.startup;
 			appStartup.quit(Components.interfaces.nsIAppStartup.eRestart);
 			appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
 		}
@@ -922,8 +920,7 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 		return false;
 	}
 	
-	var storageService = Components.classes["@mozilla.org/storage/service;1"]
-		.getService(Components.interfaces.mozIStorageService);
+	var storageService = Services.storage;
 	
 	if (!suffix) {
 		var numBackups = Zotero.Prefs.get("backup.numBackups");
@@ -1130,8 +1127,7 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function (options) {
 	Zotero.debug(this._dbPath);
 	
 	// Get the storage service
-	var store = Components.classes["@mozilla.org/storage/service;1"].
-		getService(Components.interfaces.mozIStorageService);
+	var store = Services.storage;
 	
 	var file = this._dbPath;
 	var backupFile = this._dbPath + '.bak';
