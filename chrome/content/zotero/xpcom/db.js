@@ -126,21 +126,6 @@ Zotero.DBConnection.prototype.test = function () {
 	return this._getConnectionAsync().then(() => {});
 }
 
-Zotero.DBConnection.prototype.getAsyncStatement = Zotero.Promise.coroutine(function* (sql) {
-	var conn = yield this._getConnectionAsync();
-	conn = conn._connection;
-	
-	try {
-		this._debug(sql, 4);
-		return conn.createAsyncStatement(sql);
-	}
-	catch (e) {
-		var dberr = (conn.lastErrorString != 'not an error')
-			? ' [ERROR: ' + conn.lastErrorString + ']' : '';
-		throw new Error(e + ' [QUERY: ' + sql + ']' + dberr); 
-	}
-});
-
 
 Zotero.DBConnection.prototype.parseQueryAndParams = function (sql, params) {
 	// If single scalar value, wrap in an array
@@ -265,44 +250,6 @@ Zotero.DBConnection.prototype.parseQueryAndParams = function (sql, params) {
 	
 	return [sql, params];
 };
-
-
-/**
- * Execute an asynchronous statement with previously bound parameters
- *
- * Warning: This will freeze if used with a write statement within executeTransaction()!
- *
- * @param {mozIStorageAsyncStatement} statement - Statement to run
- * @param {Function} [progressHandler] - Function to pass each available row to for SELECT queries
- * @return {Promise} - Resolved on completion, rejected with a reason on error
- */
-Zotero.DBConnection.prototype.executeAsyncStatement = Zotero.Promise.method(function (statement, progressHandler) {
-	var resolve;
-	var reject;
-	statement.executeAsync({
-		handleResult: function (resultSet) {
-			if (progressHandler) {
-				progressHandler(resultSet.getNextRow());
-			}
-		},
-		
-		handleError: function (e) {
-			reject(e);
-		},
-		
-		handleCompletion: function (reason) {
-			if (reason != Components.interfaces.mozIStorageStatementCallback.REASON_FINISHED) {
-				reject(reason);
-			}
-			resolve();
-		}
-	});
-	return new Zotero.Promise(function () {
-		resolve = arguments[0];
-		reject = arguments[1];
-	});
-});
-
 
 
 Zotero.DBConnection.prototype.addCallback = function (type, cb) {
