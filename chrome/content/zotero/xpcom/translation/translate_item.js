@@ -340,6 +340,18 @@ Zotero.Translate.ItemSaver.prototype = {
 		}
 		
 		if (attachment.path) {
+			// If we have an explicit "attachments:" value, just save that as a linked file
+			if (attachment.path.startsWith(Zotero.Attachments.BASE_PATH_PLACEHOLDER)) {
+				attachment.linkMode = "linked_file";
+				return Zotero.Attachments.linkFromFileWithRelativePath({
+					path: attachment.path.substr(Zotero.Attachments.BASE_PATH_PLACEHOLDER.length),
+					title: attachment.title,
+					contentType: attachment.mimeType,
+					parentItemID,
+					collections: !parentItemID ? this._collections : undefined
+				});
+			}
+			
 			var url = Zotero.Attachments.cleanAttachmentURI(attachment.path, false);
 			if (url && /^(?:https?|ftp):/.test(url)) {
 				// A web URL. Don't bother parsing it as path below

@@ -112,6 +112,115 @@ describe("Zotero.Attachments", function() {
 		})
 	})
 	
+	
+	describe("#linkFromFileWithRelativePath()", function () {
+		afterEach(function () {
+			Zotero.Prefs.clear('baseAttachmentPath');
+		});
+		
+		it("should link to a file using a relative path with no base directory set", async function () {
+			Zotero.Prefs.clear('baseAttachmentPath');
+			
+			var item = await createDataObject('item');
+			var spy = sinon.spy(Zotero.Fulltext, 'indexPDF');
+			var relPath = 'a/b/test.pdf';
+			
+			var attachment = await Zotero.Attachments.linkFromFileWithRelativePath({
+				path: relPath,
+				title: 'test.pdf',
+				parentItemID: item.id,
+				contentType: 'application/pdf'
+			});
+			
+			assert.ok(spy.notCalled);
+			spy.restore();
+			assert.equal(
+				attachment.attachmentPath,
+				Zotero.Attachments.BASE_PATH_PLACEHOLDER + relPath
+			);
+		});
+		
+		
+		it("should link to a file using a relative path within the base directory", async function () {
+			var baseDir = await getTempDirectory();
+			Zotero.Prefs.set('baseAttachmentPath', baseDir);
+			Zotero.Prefs.set('saveRelativeAttachmentPath', true);
+			
+			var subDir = OS.Path.join(baseDir, 'foo');
+			await OS.File.makeDir(subDir);
+			
+			var file = OS.Path.join(subDir, 'test.pdf');
+			await OS.File.copy(OS.Path.join(getTestDataDirectory().path, 'test.pdf'), file);
+			
+			var item = await createDataObject('item');
+			var spy = sinon.spy(Zotero.Fulltext, 'indexPDF');
+			var relPath = 'foo/test.pdf';
+			
+			var attachment = await Zotero.Attachments.linkFromFileWithRelativePath({
+				path: relPath,
+				title: 'test.pdf',
+				parentItemID: item.id,
+				contentType: 'application/pdf'
+			});
+			
+			assert.ok(spy.called);
+			spy.restore();
+			assert.equal(
+				attachment.attachmentPath,
+				Zotero.Attachments.BASE_PATH_PLACEHOLDER + relPath
+			);
+			
+			assert.ok(await attachment.fileExists());
+		});
+		
+		
+		it("should link to a nonexistent file using a relative path within the base directory", async function () {
+			var baseDir = await getTempDirectory();
+			Zotero.Prefs.set('baseAttachmentPath', baseDir);
+			Zotero.Prefs.set('saveRelativeAttachmentPath', true);
+			
+			var subDir = OS.Path.join(baseDir, 'foo');
+			await OS.File.makeDir(subDir);
+			
+			var item = await createDataObject('item');
+			var spy = sinon.spy(Zotero.Fulltext, 'indexPDF');
+			var relPath = 'foo/test.pdf';
+			
+			var attachment = await Zotero.Attachments.linkFromFileWithRelativePath({
+				path: relPath,
+				title: 'test.pdf',
+				parentItemID: item.id,
+				contentType: 'application/pdf'
+			});
+			
+			assert.ok(spy.notCalled);
+			spy.restore();
+			assert.equal(
+				attachment.attachmentPath,
+				Zotero.Attachments.BASE_PATH_PLACEHOLDER + relPath
+			);
+			
+			assert.isFalse(await attachment.fileExists());
+		});
+		
+		
+		it("should reject absolute paths", async function () {
+			try {
+				await Zotero.Attachments.linkFromFileWithRelativePath({
+					path: '/a/b/test.pdf',
+					title: 'test.pdf',
+					contentType: 'application/pdf'
+				});
+			}
+			catch (e) {
+				return;
+			}
+			
+			assert.fail();
+		});
+	});
+	
+	
 	describe("#importSnapshotFromFile()", function () {
 		it("should import an HTML file", function* () {
 			var item = yield createDataObject('item');

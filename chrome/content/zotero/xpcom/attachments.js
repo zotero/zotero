@@ -146,7 +146,7 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * @param {nsIFile|String} [options.file] - File to add
+	 * @param {nsIFile|String} options.file - File to add
 	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
 	 * @param {Integer[]} [options.collections] - Collection keys or ids to add new item to
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
@@ -183,6 +183,72 @@ Zotero.Attachments = new function(){
 		}
 		return item;
 	});
+	
+	
+	/**
+	 * @param {String} options.path - Relative path to file
+	 * @param {String} options.title
+	 * @param {String} options.contentType
+	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
+	 * @param {Integer[]} [options.collections] - Collection keys or ids to add new item to
+	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
+	 * @return {Promise<Zotero.Item>}
+	 */
+	this.linkFromFileWithRelativePath = async function (options) {
+		Zotero.debug('Linking attachment from file in base directory');
+		
+		var path = options.path;
+		var title = options.title;
+		var contentType = options.contentType;
+		var parentItemID = options.parentItemID;
+		var collections = options.collections;
+		var saveOptions = options.saveOptions;
+		
+		if (!path) {
+			throw new Error("'path' not provided");
+		}
+		
+		if (path.startsWith('/') || path.match(/^[A-Z]:\\/)) {
+			throw new Error("'path' must be a relative path");
+		}
+		
+		if (!title) {
+			throw new Error("'title' not provided");
+		}
+		
+		if (!contentType) {
+			throw new Error("'contentType' not provided");
+		}
+		
+		if (parentItemID && collections) {
+			throw new Error("parentItemID and collections cannot both be provided");
+		}
+		
+		path = Zotero.Attachments.BASE_PATH_PLACEHOLDER + path;
+		var item = await _addToDB({
+			file: path,
+			title,
+			linkMode: this.LINK_MODE_LINKED_FILE,
+			contentType,
+			parentItemID,
+			collections,
+			saveOptions
+		});
+		
+		// If the file is found (which requires a base directory being set and the file existing),
+		// index it
+		var file = this.resolveRelativePath(path);
+		if (file && await OS.File.exists(file)) {
+			try {
+				await _postProcessFile(item, file, contentType);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+		
+		return item;
+	};
 	
 	
 	/**
@@ -1467,8 +1533,16 @@ Zotero.Attachments = new function(){
 	/**
 	 * Create a new item of type 'attachment' and add to the itemAttachments table
 	 *
-	 * @param {Object} options - 'file', 'url', 'title', 'linkMode', 'contentType', 'charsetID',
-	 *     'parentItemID', 'saveOptions'
+	 * @param {Object} options
+	 * @param {nsIFile|String} [file]
+	 * @param {String} [url]
+	 * @param {String} title
+	 * @param {Number} linkMode
+	 * @param {String} contentType
+	 * @param {String} [charset]
+	 * @param {Number} [parentItemID]
+	 * @param {String[]|Number[]} [collections]
+	 * @param {Object} [saveOptions]
 	 * @return {Promise<Zotero.Item>} - A promise for the new attachment
 	 */
 	function _addToDB(options) {
@@ -1504,7 +1578,7 @@ Zotero.Attachments = new function(){
 			attachmentItem.attachmentContentType = contentType;
 			attachmentItem.attachmentCharset = charset;
 			if (file) {
-				attachmentItem.attachmentPath = file.path;
+				attachmentItem.attachmentPath = typeof file == 'string' ? file : file.path;
 			}
 			
 			if (collections) {
