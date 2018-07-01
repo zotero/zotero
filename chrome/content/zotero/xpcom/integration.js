@@ -1039,9 +1039,9 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 			// If we're looking to reset the text even if it matches previous text
 			if (forceCitations == FORCE_CITATIONS_RESET_TEXT
 					// Or metadata has changed thus changing the formatted citation
-					|| (citation.properties.formattedCitation !== formattedCitation)
+					|| ((citation.properties.formattedCitation !== formattedCitation
 					// Or plaintext has changed and user does not want to keep the change
-					|| (plaintextChanged && !citation.properties.dontUpdate)) {
+					|| plaintextChanged) && !citation.properties.dontUpdate)) {
 
 				
 				// Word will preserve previous text styling, so we need to force remove it
