@@ -443,7 +443,7 @@ var Zotero_File_Interface = new function() {
 				null, null, {}
 			);
 			if (index == 1) {
-				Zotero.launchURL("https://www.zotero.org/support/kb/importing");
+				Zotero.launchURL("https://www.zotero.org/support/kb/importing_standardized_formats");
 			}
 			return false;
 		}
