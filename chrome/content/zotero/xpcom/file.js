@@ -339,6 +339,13 @@ Zotero.File = new function(){
 		xmlhttp.send(null);
 		return xmlhttp.responseText;
 	}
+
+	/*
+	 * Returns the contents of the given local resource.
+	 */
+	this.getResource = function (res) {
+		return getContentsFromURL(`resource://zotero/${res}`);
+	}
 	
 	
 	/*

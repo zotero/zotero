@@ -47,46 +47,41 @@ Zotero.Date = new function(){
 			throw new Error("Unimplemented");
 		}
 		
-		return Zotero.HTTP.request(
-			'GET', 'resource://zotero/schema/dateFormats.json', { responseType: 'json' }
-		).then(function(xmlhttp) {
-			var json = xmlhttp.response;
-			
-			var locale = Zotero.locale;
-			var english = locale.startsWith('en');
-			// If no exact match, try first two characters ('de')
-			if (!json[locale]) {
-				locale = locale.substr(0, 2);
+		var json = JSON.parse(Zotero.File.getResource('schema/dateFormats.json'));
+		var locale = Zotero.locale;
+		var english = locale.startsWith('en');
+		// If no exact match, try first two characters ('de')
+		if (!json[locale]) {
+			locale = locale.substr(0, 2);
+		}
+		// Try first two characters repeated ('de-DE')
+		if (!json[locale]) {
+			locale = locale + "-" + locale.toUpperCase();
+		}
+		// Look for another locale with same first two characters
+		if (!json[locale]) {
+			let sameLang = Object.keys(json).filter(l => l.startsWith(locale.substr(0, 2)));
+			if (sameLang.length) {
+				locale = sameLang[0];
 			}
-			// Try first two characters repeated ('de-DE')
-			if (!json[locale]) {
-				locale = locale + "-" + locale.toUpperCase();
-			}
-			// Look for another locale with same first two characters
-			if (!json[locale]) {
-				let sameLang = Object.keys(json).filter(l => l.startsWith(locale.substr(0, 2)));
-				if (sameLang.length) {
-					locale = sameLang[0];
-				}
-			}
-			// If all else fails, use English
-			if (!json[locale]) {
-				locale = 'en-US';
-				english = true;
-			}
-			_months = json[locale];
+		}
+		// If all else fails, use English
+		if (!json[locale]) {
+			locale = 'en-US';
+			english = true;
+		}
+		_months = json[locale];
 
-			// Add English versions if not already added
-			if (english) {
-				_monthsWithEnglish = _months;
+		// Add English versions if not already added
+		if (english) {
+			_monthsWithEnglish = _months;
+		}
+		else {
+			_monthsWithEnglish = {};
+			for (let key in _months) {
+				_monthsWithEnglish[key] = _months[key].concat(json['en-US'][key]);
 			}
-			else {
-				_monthsWithEnglish = {};
-				for (let key in _months) {
-					_monthsWithEnglish[key] = _months[key].concat(json['en-US'][key]);
-				}
-			}
-		});
+		}
 	};
 	
 	

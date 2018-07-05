@@ -28,7 +28,7 @@ describe("Zotero.Date", function() {
 			beforeEach(function* () {
 				if (Zotero.locale != 'en-US') {
 					Zotero.locale = 'en-US';
-					yield Zotero.Date.init();
+					Zotero.Date.init();
 				}
 			});
 			
@@ -52,7 +52,7 @@ describe("Zotero.Date", function() {
 			
 			it("should resolve to English from unknown locale", function* () {
 				Zotero.locale = 'zz';
-				yield Zotero.Date.init();
+				Zotero.Date.init();
 				let months = Zotero.Date.getMonths().short;
 				assert.lengthOf(months, 12);
 				assert.sameMembers(months, englishShort);
@@ -60,7 +60,7 @@ describe("Zotero.Date", function() {
 			
 			it("shouldn't repeat English with unknown locale", function* () {
 				Zotero.locale = 'zz';
-				yield Zotero.Date.init();
+				Zotero.Date.init();
 				let months = Zotero.Date.getMonths(true).short;
 				assert.lengthOf(months, 12);
 				assert.sameMembers(months, englishShort);
@@ -71,7 +71,7 @@ describe("Zotero.Date", function() {
 			beforeEach(function* () {
 				if (Zotero.locale != 'fr-FR') {
 					Zotero.locale = 'fr-FR';
-					yield Zotero.Date.init();
+					Zotero.Date.init();
 				}
 			});
 			
@@ -101,7 +101,7 @@ describe("Zotero.Date", function() {
 			
 			it("should resolve from two-letter locale", function* () {
 				Zotero.locale = 'fr';
-				yield Zotero.Date.init();
+				Zotero.Date.init();
 				let months = Zotero.Date.getMonths().short;
 				assert.lengthOf(months, 12);
 				assert.sameMembers(months, frenchShort);
@@ -109,7 +109,7 @@ describe("Zotero.Date", function() {
 			
 			it("should resolve from unknown four-letter locale with common prefix", function* () {
 				Zotero.locale = 'fr-ZZ';
-				yield Zotero.Date.init();
+				Zotero.Date.init();
 				let months = Zotero.Date.getMonths().short;
 				assert.lengthOf(months, 12);
 				assert.sameMembers(months, frenchShort);
