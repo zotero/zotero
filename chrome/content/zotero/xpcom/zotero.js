@@ -190,10 +190,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		
 		this.clientName = ZOTERO_CONFIG.CLIENT_NAME;
 		
-		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
-			.getService(Components.interfaces.nsIXULAppInfo);
-		this.platformVersion = appInfo.platformVersion;
-		this.platformMajorVersion = parseInt(appInfo.platformVersion.match(/^[0-9]+/)[0]);
+		this.platformVersion = Services.appinfo.platformVersion;
+		this.platformMajorVersion = parseInt(this.platformVersion.match(/^[0-9]+/)[0]);
 		this.isFx = true;
 		this.isClient = true;
 		this.isStandalone = Services.appinfo.ID == ZOTERO_CONFIG['GUID'];
