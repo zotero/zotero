@@ -1402,8 +1402,8 @@
 			<method name="removeCreator">
 				<parameter name="index"/>
 				<parameter name="labelToDelete"/>
-				<body>
-				<![CDATA[
+				<body><![CDATA[
+				return (async function () {
 					// If unsaved row, just remove element
 					if (!this.item.hasCreatorAt(index)) {
 						labelToDelete.parentNode.removeChild(labelToDelete);
@@ -1418,9 +1418,10 @@
 						return;
 					}
 					this.item.removeCreator(index);
-					this.item.saveTx();
-				]]>
-				</body>
+					await this.blurOpenField();
+					await this.item.saveTx();
+				}.bind(this))();
+				]]></body>
 			</method>
 			
 			
@@ -2368,20 +2369,19 @@
 								document.getElementById('zotero-creator-move-sep').setAttribute('hidden', hideMoveSep);
 								document.getElementById('zotero-creator-move-up').setAttribute('hidden', hideMoveUp);
 								document.getElementById('zotero-creator-move-down').setAttribute('hidden', hideMoveDown);"
-						oncommand="var typeBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
+						oncommand="return async function () {
+							var typeBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
 							var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
-							
-							var itemBox = document.getBindingParent(this);
 							
 							if (event.explicitOriginalTarget.className == 'zotero-creator-move') {
 								var up = event.explicitOriginalTarget.id == 'zotero-creator-move-up';
-								itemBox.moveCreator(index, up);
+								this.moveCreator(index, up);
 								return;
 							}
 							
 							var typeID = event.explicitOriginalTarget.getAttribute('typeid');
 							var row = typeBox.parentNode;
-							var fields = itemBox.getCreatorFields(row);
+							var fields = this.getCreatorFields(row);
 							fields.creatorTypeID = typeID;
 							typeBox.getElementsByTagName('label')[0].setAttribute(
 								'value',
@@ -2397,13 +2397,14 @@
 							var changedParams = {
 								creatorTypeID: typeID
 							};
-							itemBox._updateAutoCompleteParams(row, changedParams);
+							this._updateAutoCompleteParams(row, changedParams);
 							
-							itemBox.modifyCreator(index, fields);
-							if (itemBox.saveOnEdit) {
-								itemBox.item.saveTx();
+							this.modifyCreator(index, fields);
+							if (this.saveOnEdit) {
+								await this.blurOpenField();
+								await this.item.saveTx();
 							}
-							"/>
+						}.bind(document.getBindingParent(this))();"/>
 					<menupopup id="zotero-field-transform-menu">
 						<menu label="&zotero.item.textTransform;">
 							<menupopup>
