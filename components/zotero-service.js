@@ -33,6 +33,7 @@ const Ci = Components.interfaces;
 /** XPCOM files to be loaded for all modes **/
 const xpcomFilesAll = [
 	'zotero',
+	'prefs',
 	'dataDirectory',
 	'date',
 	'debug',
