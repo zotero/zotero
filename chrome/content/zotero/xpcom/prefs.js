@@ -104,7 +104,7 @@ Zotero.Prefs = new function(){
 			}
 		}
 		catch (e){
-			throw ("Invalid preference '" + pref + "'");
+			throw new Error("Invalid preference '" + pref + "'");
 		}
 	}
 	
