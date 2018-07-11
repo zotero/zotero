@@ -270,7 +270,6 @@ Zotero.Prefs = new function(){
 	// Methods to register a preferences observer
 	//
 	function register(){
-		this.prefBranch.QueryInterface(Components.interfaces.nsIPrefBranch2);
 		this.prefBranch.addObserver("", this, false);
 		
 		// Register pre-set handlers
