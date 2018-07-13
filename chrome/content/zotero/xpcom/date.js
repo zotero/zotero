@@ -43,7 +43,7 @@ Zotero.Date = new function(){
 	var _monthsWithEnglish;
 	
 	this.init = function () {
-		if (!Zotero.isFx || Zotero.isBookmarklet) {
+		if (!(Zotero.isFx || Zotero.isElectron) || Zotero.isBookmarklet) {
 			throw new Error("Unimplemented");
 		}
 		
