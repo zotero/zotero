@@ -621,11 +621,43 @@ Zotero.Library.prototype._initErase = Zotero.Promise.method(function(env) {
 	return true;
 });
 
-Zotero.Library.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
-	yield Zotero.DB.queryAsync("DELETE FROM libraries WHERE libraryID=?", this.libraryID);
+Zotero.Library.prototype._eraseData = async function (env) {
+	// Delete attachment files
+	var attachmentKeys = await Zotero.DB.columnQueryAsync(
+		"SELECT key FROM items WHERE libraryID=? AND itemID IN "
+			+ "(SELECT itemID FROM itemAttachments WHERE linkMode IN (?, ?))",
+		[
+			this.libraryID,
+			Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
+			Zotero.Attachments.LINK_MODE_IMPORTED_URL
+		]
+	);
+	if (attachmentKeys.length) {
+		Zotero.DB.addCurrentCallback('commit', async function () {
+			for (let key of attachmentKeys) {
+				try {
+					let dir = Zotero.Attachments.getStorageDirectoryByLibraryAndKey(
+						this.libraryID, key
+					).path;
+					await OS.File.removeDir(
+						dir,
+						{
+							ignoreAbsent: true,
+							ignorePermissions: true
+						}
+					);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
+		}.bind(this));
+	}
+	
+	await Zotero.DB.queryAsync("DELETE FROM libraries WHERE libraryID=?", this.libraryID);
 	// TODO: Emit event so this doesn't have to be here
-	yield Zotero.Fulltext.clearLibraryVersion(this.libraryID);
-});
+	await Zotero.Fulltext.clearLibraryVersion(this.libraryID);
+};
 
 Zotero.Library.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env) {
 	Zotero.Libraries.unregister(this.libraryID);

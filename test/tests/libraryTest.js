@@ -262,7 +262,32 @@ describe("Zotero.Library", function() {
 			assert.notOk((yield Zotero.Collections.getAsync(collection.id)), 'collection was unloaded');
 			assert.notOk((yield Zotero.Items.getAsync(item.id)), 'item was unloaded');
 		});
+		
+		it("should delete attachment files", async function () {
+			// My Library
+			var item1 = await createDataObject('item');
+			var attachment1 = await importFileAttachment('test.png', { parentID: item1.id });
+			var path1 = attachment1.getFilePath();
+			
+			// Group
+			var group = await createGroup();
+			var libraryID = group.libraryID;
+			var item2 = await createDataObject('item', { libraryID });
+			var attachment2 = await importFileAttachment('test.png', { libraryID, parentID: item2.id });
+			var path2 = attachment2.getFilePath();
+			
+			assert.isTrue(await OS.File.exists(path1));
+			assert.isTrue(await OS.File.exists(path2));
+			
+			await group.eraseTx();
+			
+			// My Library file should still exist, but group file should be deleted
+			assert.isTrue(await OS.File.exists(path1));
+			assert.isFalse(await OS.File.exists(path2));
+		});
 	});
+	
+	
 	describe("#hasCollections()", function() {
 		it("should throw if called before saving a library", function() {
 			let library = new Zotero.Library();
