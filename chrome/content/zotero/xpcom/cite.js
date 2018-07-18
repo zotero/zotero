@@ -113,7 +113,7 @@ Zotero.Cite = {
 				output.push("}");
 				return output.join("");
 			} else {
-				throw "Unimplemented bibliography format "+format;
+				throw new Error("Unimplemented bibliography format "+format);
 			}
 		} else {
 			if(format == "html") {
@@ -176,9 +176,9 @@ Zotero.Cite = {
 			var secondFieldAlign = bib[0]["second-field-align"];
 			
 			// Validate input
-			if(maxOffset == NaN) throw "Invalid maxoffset";
-			if(entrySpacing == NaN) throw "Invalid entryspacing";
-			if(lineSpacing == NaN) throw "Invalid linespacing";
+			if(maxOffset == NaN) throw new Error("Invalid maxoffset");
+			if(entrySpacing == NaN) throw new Error("Invalid entryspacing");
+			if(lineSpacing == NaN) throw new Error("Invalid linespacing");
 			
 			var str;
 			var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
@@ -283,7 +283,7 @@ Zotero.Cite = {
 			
 			return bib[0].bibstart+preamble+bib[1].join("\\\r\n")+"\\\r\n"+bib[0].bibend;
 		} else {
-			throw "Unimplemented bibliography format "+format;
+			throw new Error("Unimplemented bibliography format "+format);
 		}
 	},
 

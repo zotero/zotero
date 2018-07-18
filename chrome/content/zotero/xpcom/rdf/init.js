@@ -14,7 +14,7 @@ var $rdf = {
 					return;
 				}
 			}
-			throw "RDFArrayRemove: Array did not contain " + x;
+			throw new Error("RDFArrayRemove: Array did not contain " + x);
 		}
 	},
 	log: {

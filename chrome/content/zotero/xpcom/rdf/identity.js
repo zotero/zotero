@@ -253,7 +253,7 @@ We replace the bigger with the smaller.
       if(typeof val == 'undefined')
         return undefined;
       else // @@ add converting of dates and numbers
-      throw "Can't make Term from " + val + " of type " + typeof val;
+      throw new Error("Can't make Term from " + val + " of type " + typeof val);
     }
     return val;
   }

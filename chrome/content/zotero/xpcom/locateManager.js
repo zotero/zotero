@@ -61,7 +61,7 @@ Zotero.LocateManager = new function() {
 	 */
 	this.addEngine = function(engineURL, dataType, iconURL, confirm) {
 		if(dataType !== Components.interfaces.nsISearchEngine.TYPE_OPENSEARCH) {
-			throw "LocateManager supports only OpenSearch engines";
+			throw new Error("LocateManager supports only OpenSearch engines");
 		}
 		
 		Zotero.HTTP.doGet(engineURL, function(xmlhttp) {
@@ -121,7 +121,7 @@ Zotero.LocateManager = new function() {
 	 */
 	this.removeEngine = function(engine) {
 		var oldIndex = _locateEngines.indexOf(engine);
-		if(oldIndex === -1) throw "Engine is not currently listed";
+		if(oldIndex === -1) throw new Error("Engine is not currently listed");
 		_locateEngines.splice(oldIndex, 1);
 		engine._removeIcon();
 		_serializeLocateEngines();
@@ -316,7 +316,7 @@ Zotero.LocateManager = new function() {
 				xns = {"s":doc.documentElement.namespaceURI,
 					"xmlns":"http://www.w3.org/2000/xmlns"};
 			if(OPENSEARCH_NAMESPACES.indexOf(ns) === -1) {
-				throw "Invalid namespace";
+				throw new Error("Invalid namespace");
 			}
 			
 			// get simple attributes
@@ -331,7 +331,7 @@ Zotero.LocateManager = new function() {
 				i = 0;
 			while(urlTags[i].hasAttribute("rel") && urlTags[i].getAttribute("rel") != "results") {
 				i++;
-				if(i == urlTags.length) throw "No Url tag found";
+				if(i == urlTags.length) throw new Error("No Url tag found");
 			}
 			
 			// TODO: better error handling
@@ -383,7 +383,7 @@ Zotero.LocateManager = new function() {
 		
 		"getItemSubmission":function(item, responseType) {
 			if(responseType && responseType !== "text/html") {
-				throw "LocateManager supports only responseType text/html";
+				throw new Error("LocateManager supports only responseType text/html");
 			}
 			
 			if (item.toJSON) {

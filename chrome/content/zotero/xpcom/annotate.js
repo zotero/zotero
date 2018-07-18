@@ -94,7 +94,7 @@ Zotero.Annotate = new function() {
 			}
 			return colorArray;
 		} catch(e) {
-			throw "Annotate: parseColor passed invalid color";
+			throw new Error("Annotate: parseColor passed invalid color");
 		}
 	}
 	
@@ -173,9 +173,9 @@ Zotero.Annotate = new function() {
 			} else if(offset < node.childNodes.length) {
 				node = node.childNodes[offset];
 			} else {
-				throw "Annotate: dereferenceNodeOffset called with invalid offset "+offset;
+				throw new Error("Annotate: dereferenceNodeOffset called with invalid offset "+offset);
 			}
-			if(!node) throw "Annotate: dereferenceNodeOffset resolved to invalid node";
+			if(!node) throw new Error("Annotate: dereferenceNodeOffset resolved to invalid node");
 		}
 		
 		return node;
@@ -308,7 +308,7 @@ Zotero.Annotate.Path = function(document, nsResolver, parent, textNode, offset) 
  * @param {Integer} offset The text offset, if the DOM node is a text node
  */
 Zotero.Annotate.Path.prototype.fromNode = function(node, offset) {
-	if(!node) throw "Annotate: Path() called with invalid node";
+	if(!node) throw new Error("Annotate: Path() called with invalid node");
 	Zotero.debug("Annotate: Path() called with node "+node.tagName+" offset "+offset);
 	
 	this.parent = "";
@@ -345,7 +345,7 @@ Zotero.Annotate.Path.prototype.fromNode = function(node, offset) {
 			this.offset = 0;
 		}
 	}
-	if(!node) throw "Annotate: Path() handled Zotero <span> inappropriately";
+	if(!node) throw new Error("Annotate: Path() handled Zotero <span> inappropriately");
 	
 	lastWasTextNode = lastWasTextNode || node.nodeType == TEXT_TYPE;
 	
@@ -387,7 +387,7 @@ Zotero.Annotate.Path.prototype.fromNode = function(node, offset) {
 		
 		node = node.parentNode;
 	}
-	if(!node) throw "Annotate: Path() resolved text offset inappropriately";
+	if(!node) throw new Error("Annotate: Path() resolved text offset inappropriately");
 	
 	while(node && node !== this._document) {
 		var number = 1;
@@ -928,7 +928,7 @@ Zotero.Annotation.prototype.save = function() {
  * Displays annotation
  */
 Zotero.Annotation.prototype.display = function() {
-	if(!this.node) throw "Annotation not initialized!";
+	if(!this.node) throw new Error("Annotation not initialized!");
 	
 	var x = 0, y = 0;
 	
@@ -946,7 +946,7 @@ Zotero.Annotation.prototype.display = function() {
  * Displays annotation given absolute coordinates for its position
  */
 Zotero.Annotation.prototype.displayWithAbsoluteCoordinates = function(absX, absY, select) {
-	if(!this.node) throw "Annotation not initialized!";
+	if(!this.node) throw new Error("Annotation not initialized!");
 	
 	var startScroll = this.window.scrollMaxX;
 	

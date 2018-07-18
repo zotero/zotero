@@ -680,7 +680,7 @@ Zotero.Style = function (style, path) {
 		'/csl:style/csl:info[1]/csl:link[@rel="source" or @rel="independent-parent"][1]/@href',
 		Zotero.Styles.ns);
 	if(this.source === this.styleID) {
-		throw "Style with ID "+this.styleID+" references itself as source";
+		throw new Error("Style with ID "+this.styleID+" references itself as source");
 	}
 }
 

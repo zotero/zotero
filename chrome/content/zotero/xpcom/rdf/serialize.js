@@ -192,7 +192,7 @@ $rdf.Serializer = function () {
         if (obj.termType == 'bnode' && (subjects[sz.toStr(obj)]  &&
             (force || (rootsHash[obj.toNT()] == undefined )))) {// and there are statements
             if (doneBnodesNT[obj.toNT()]) { // Ah-ha! a loop
-                throw "Serializer: Should be no loops "+obj;
+                throw new Error("Serializer: Should be no loops "+obj);
             }
             doneBnodesNT[obj.toNT()] = true;
             return  dummyPropertyTree(obj, subjects, rootsHash);
@@ -258,7 +258,7 @@ $rdf.Serializer = function () {
             for (var i=0; i<sts.length; i++) {
                 // dump('\t'+sts[i]+'\n');
             }
-            throw "Isolated node should be a subject" +found;
+            throw new Error("Isolated node should be a subject" +found);
         }
         dummySubjectTree(root, subjects, rootsHash); // trace out the ring
     }
@@ -456,7 +456,7 @@ $rdf.Serializer = function () {
         return res;
 
       default:
-        throw "Internal: termToN3 cannot handle " + expr + " of termType+" + expr.termType
+        throw new Error("Internal: termToN3 cannot handle " + expr + " of termType+" + expr.termType);
         return '' + expr;
       }
     }
@@ -767,7 +767,7 @@ $rdf.Serializer = function () {
                                                   '</' + t + '>']);
             break;
           default:
-            throw "Can't serialize object of type " + st.object.termType + " into XML";
+            throw new Error("Can't serialize object of type " + st.object.termType + " into XML");
           } // switch
         }
       }
@@ -830,7 +830,7 @@ $rdf.Serializer = function () {
                                     '</' + qname(st.predicate) + '>']);
           break;
         default:
-          throw "Can't serialize object of type " + st.object.termType + " into XML";
+          throw new Error("Can't serialize object of type " + st.object.termType + " into XML");
 
         } // switch
       }

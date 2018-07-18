@@ -379,7 +379,7 @@ Zotero.Proxy.prototype.validate = function() {
 Zotero.Proxy.prototype.save = Zotero.Promise.coroutine(function* (transparent) {
 	// ensure this proxy is valid
 	var hasErrors = this.validate();
-	if(hasErrors) throw "Proxy: could not be saved because it is invalid: error "+hasErrors[0];
+	if(hasErrors) throw new Error("Proxy: could not be saved because it is invalid: error "+hasErrors[0]);
 	
 	// we never save any changes to non-persisting proxies, so this works
 	var newProxy = !this.proxyID;
@@ -420,7 +420,7 @@ Zotero.Proxy.prototype.save = Zotero.Promise.coroutine(function* (transparent) {
 		Zotero.Proxies.save(this);
 	} else {
 		Zotero.Proxies.refreshHostMap(this);
-		if(!transparent) throw "Proxy: cannot save transparent proxy without transparent param";
+		if(!transparent) throw new Error("Proxy: cannot save transparent proxy without transparent param");
 	}
 });
 
