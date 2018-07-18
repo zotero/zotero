@@ -463,6 +463,10 @@ label.zotero-text-link {
 	width: 16px;
 }
 
+#zotero-edit-bibliography-dialog #item-list .listcell-icon {
+	max-width: 16px;
+}
+
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.25dppx) {
