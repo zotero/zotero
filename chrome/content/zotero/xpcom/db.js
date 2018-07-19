@@ -584,22 +584,18 @@ Zotero.DBConnection.prototype.queryAsync = Zotero.Promise.coroutine(function* (s
 		}
 		var failed = false;
 		if (options && options.onRow) {
-			// Errors in onRow don't stop the query unless StopIteration is thrown
-			onRow = function (row) {
+			// Wrap onRow to cancel iteration by default and reject the promise
+			// on any error, which Sqlite.jsm does not do.
+			onRow = function (row, cancel) {
 				try {
-					options.onRow(row);
+					options.onRow(row, () => {
+						Zotero.debug("Query cancelled", 3);
+						cancel();
+					});
 				}
 				catch (e) {
-					// If the onRow throws a StopIteration, stop gracefully
-					if (e instanceof StopIteration) {
-						Zotero.debug("Query cancelled", 3);
-					}
-					// Otherwise, mark the promise as rejected, which Sqlite.jsm doesn't do
-					// on a StopIteration by default
-					else {
-						failed = e;
-					}
-					throw StopIteration;
+					failed = e;
+					cancel();
 				}
 			}
 		}

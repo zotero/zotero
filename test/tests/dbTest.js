@@ -151,16 +151,16 @@ describe("Zotero.DB", function() {
 			assert.equal(e.message, "Failed");
 		});
 		
-		it("should stop gracefully if onRow throws a StopIteration", function* () {
+		it("should stop gracefully if onRow is cancelled", function* () {
 			var i = 0;
 			var rows = [];
 			yield Zotero.DB.queryAsync(
 				"SELECT * FROM " + tmpTable,
 				false,
 				{
-					onRow: function (row) {
+					onRow: function (row, cancel) {
 						if (i > 0) {
-							throw StopIteration;
+							return cancel();
 						}
 						rows.push(row.getResultByIndex(0));
 						i++;
