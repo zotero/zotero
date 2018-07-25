@@ -107,11 +107,11 @@ Zotero.File = new function(){
 		}
 		
 		var dir = OS.Path.dirname(file);
-		while (dir && !await OS.File.exists(dir)) {
+		while (dir && dir != '/' && !await OS.File.exists(dir)) {
 			dir = OS.Path.dirname(dir);
 		}
 		
-		return dir || false;
+		return (dir && dir != '/') ? dir : false;
 	}
 	
 	

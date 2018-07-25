@@ -181,10 +181,10 @@ Zotero.Translators = new function() {
 					
 					// add to cache
 					_translators[translator.translatorID] = translator;
-					for (let type in TRANSLATOR_TYPES) {
-						if (translator.translatorType & TRANSLATOR_TYPES[type]) {
+					for (let type in Zotero.Translator.TRANSLATOR_TYPES) {
+						if (translator.translatorType & Zotero.Translator.TRANSLATOR_TYPES[type]) {
 							_cache[type].push(translator);
-							if ((translator.translatorType & TRANSLATOR_TYPES.web) && translator.targetAll) {
+							if ((translator.translatorType & Zotero.Translator.TRANSLATOR_TYPES.web) && translator.targetAll) {
 								_cache.webWithTargetAll.push(translator);
 							}
 						}
@@ -193,8 +193,8 @@ Zotero.Translators = new function() {
 					if (!dbCacheEntry) {
 						yield Zotero.Translators.cacheInDB(
 							fileName,
-							translator.serialize(TRANSLATOR_REQUIRED_PROPERTIES.
-												 concat(TRANSLATOR_OPTIONAL_PROPERTIES)),
+							translator.serialize(Zotero.Translator.TRANSLATOR_REQUIRED_PROPERTIES.
+												 concat(Zotero.Translator.TRANSLATOR_OPTIONAL_PROPERTIES)),
 							lastModifiedTime
 						);
 					}
