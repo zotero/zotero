@@ -1,15 +1,15 @@
 <!ENTITY zotero.search.name "Име:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Търсене в библиотеката:">
 
-<!ENTITY zotero.search.joinMode.prefix "Съвпадение на">
+<!ENTITY zotero.search.joinMode.prefix "Съвпадение с">
 <!ENTITY zotero.search.joinMode.any "каквото и да е">
 <!ENTITY zotero.search.joinMode.all "всички">
 <!ENTITY zotero.search.joinMode.suffix "от изброените:">
 
 <!ENTITY zotero.search.recursive.label "Търси в подпапките">
-<!ENTITY zotero.search.noChildren "Показва само на основните записи">
-<!ENTITY zotero.search.includeParentsAndChildren "Включва основните и дъщерните записи на намерените записи">
+<!ENTITY zotero.search.noChildren "Показване само на основните записи">
+<!ENTITY zotero.search.includeParentsAndChildren "Включи основните и дъщерните записи на намерените">
 
 <!ENTITY zotero.search.textModes.phrase "Фраза">
 <!ENTITY zotero.search.textModes.phraseBinary "Фраза (вкл. двоичните файлове)">
@@ -21,5 +21,5 @@
 <!ENTITY zotero.search.date.units.years "години">
 
 <!ENTITY zotero.search.search "Търси">
-<!ENTITY zotero.search.clear "Изчиства">
-<!ENTITY zotero.search.saveSearch "Записва на търсенето">
+<!ENTITY zotero.search.clear "Изчисти">
+<!ENTITY zotero.search.saveSearch "Запис на търсенето">

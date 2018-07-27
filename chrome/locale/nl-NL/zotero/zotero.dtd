@@ -10,14 +10,14 @@
 <!ENTITY zotero.general.cancel "Annuleren">
 <!ENTITY zotero.general.refresh "Vernieuwen">
 <!ENTITY zotero.general.saveAs "Opslaan als...">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "Opties">
 <!ENTITY zotero.general.advancedOptions.label "Geavanceerde opties">
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Meer">
 <!ENTITY zotero.general.loading "Laden…">
 <!ENTITY zotero.general.close "Sluiten">
 <!ENTITY zotero.general.minimize "Minimaliseren">
-<!ENTITY zotero.general.other "Other…">
+<!ENTITY zotero.general.other "Andere...">
 
 
 <!ENTITY zotero.errorReport.title "Zotero-foutrapportage">
@@ -204,14 +204,14 @@
 
 <!ENTITY zotero.progress.title "Voortgang">
 
-<!ENTITY zotero.import "Import">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import "Importeren">
+<!ENTITY zotero.import.whereToImportFrom "Waaruit wilt u importeren?">
+<!ENTITY zotero.import.source.file "Een bestand (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "Importeren...">
 <!ENTITY zotero.import.database "Database">
-<!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
-<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
+<!ENTITY zotero.import.lastModified "Laatst gewijzigd">
+<!ENTITY zotero.import.size "Grootte">
+<!ENTITY zotero.import.createCollection "Geïmporteerde verzamelingen en items in een nieuwe verzameling plaatsen">
 
 <!ENTITY zotero.exportOptions.title "Exporteren…">
 <!ENTITY zotero.exportOptions.format.label "Formaat:">

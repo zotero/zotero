@@ -10,14 +10,14 @@
 <!ENTITY zotero.general.cancel "Peruuta">
 <!ENTITY zotero.general.refresh "Päivitä">
 <!ENTITY zotero.general.saveAs "Tallenna nimellä...">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "Asetukset">
 <!ENTITY zotero.general.advancedOptions.label "Lisäasetukset">
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "More">
 <!ENTITY zotero.general.loading "Loading…">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
-<!ENTITY zotero.general.other "Other…">
+<!ENTITY zotero.general.close "Sulje">
+<!ENTITY zotero.general.minimize "Pienennä">
+<!ENTITY zotero.general.other "Muu...">
 
 
 <!ENTITY zotero.errorReport.title "Zoteron virheraportti">
@@ -27,7 +27,7 @@
 <!ENTITY zotero.errorReport.postToForums "Lähetä Zoteron keskustelualueelle (forums.zotero.org) viesti, joka sisältää raportin tunnuksen, ongelman kuvauksen sekä toimenpiteet, joilla virhe saadaan toistettua.">
 <!ENTITY zotero.errorReport.notReviewed "Virheraportteja ei yleensä käsitellä, jos niihin ei ole viitattu keskustelualueella.">
 
-<!ENTITY zotero.upgrade.title "Zoteron päivitysvelho">
+<!ENTITY zotero.upgrade.title "Zoteron ohjattu päivitystoiminto">
 <!ENTITY zotero.upgrade.newVersionInstalled "Olet asentanut Zoteron uuden version.">
 <!ENTITY zotero.upgrade.upgradeRequired "Zotero-tietokantasi täytyy päivittää, jotta se toimisi uuden version kanssa.">
 <!ENTITY zotero.upgrade.autoBackup "Tietokantasi varmuuskopioidaan automaattisesti ennen muutosten tekemistä.">
@@ -96,7 +96,7 @@
 <!ENTITY zotero.items.menu.attach.link "Liitä linkki nykyiselle sivulle">
 <!ENTITY zotero.items.menu.attach.link.uri "Liitä linkki URIin...">
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
-<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+<!ENTITY zotero.items.menu.attach.fileLink "Liitä linkki tiedostoon...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Palauta kirjastoon">
 <!ENTITY zotero.items.menu.duplicateItem "Monista valittu nimike">
@@ -137,15 +137,15 @@
 <!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
 <!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
-<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
-<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+<!ENTITY zotero.toolbar.feeds.refresh "Päivitä syöte">
+<!ENTITY zotero.toolbar.feeds.edit "Muokkaa syötettä...">
 
 <!ENTITY zotero.item.add "Lisää">
 <!ENTITY zotero.item.attachment.file.show "Näytä tiedosto">
 <!ENTITY zotero.item.textTransform "Muunna teksti">
 <!ENTITY zotero.item.textTransform.titlecase "Otsikon aakkoslaji">
-<!ENTITY zotero.item.textTransform.sentencecase "Lauseenkaltainen">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
+<!ENTITY zotero.item.textTransform.sentencecase "Lauseen aakkoslaji">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Vaihda etu- ja sukunimien järjestys">
 <!ENTITY zotero.item.viewOnline "Katso verkossa">
 <!ENTITY zotero.item.copyAsURL "Copy as URL">
 <!ENTITY zotero.item.deletePermanently "Poista lopullisesti">
@@ -206,11 +206,11 @@
 
 <!ENTITY zotero.import "Import">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
-<!ENTITY zotero.import.database "Database">
-<!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.source.file "Tiedosto (BibTeX, RIS, Zotero RDF, jne.)">
+<!ENTITY zotero.import.importing "Tuodaan...">
+<!ENTITY zotero.import.database "Tietokanta">
+<!ENTITY zotero.import.lastModified "Viimeksi muokattu">
+<!ENTITY zotero.import.size "Koko">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "Vie...">
@@ -328,6 +328,6 @@
 <!ENTITY zotero.downloadManager.label "Tallenna Zoteroon">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Liitteitä ei voi tallentaa valittuun kirjastoon. Nimike sen sijaan tallennetaan kirjastoon.">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.title "Liitä linkki URI:in">
 <!ENTITY zotero.attachLink.label.link "Linkki:">
 <!ENTITY zotero.attachLink.label.title "Otsikko:">

@@ -22,9 +22,9 @@
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "Scatta un&apos;istantanea degli elementi estratti dalle pagine web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Allega automaticamente file PDF o di altro tipo durante il salvataggio degli elementi">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Recupera automaticamente i metadati per i PDF">
+<!ENTITY zotero.preferences.autoRenameFiles "Rinomina automaticamente i file allegati utilizzando i metadati della citazione">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Apri i PDF utilizzando">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
 
 <!ENTITY zotero.preferences.miscellaneous "Varie">
@@ -61,7 +61,7 @@
 <!ENTITY zotero.preferences.sync.password "Password:">
 <!ENTITY zotero.preferences.sync.syncServer "Sincronizzazione dei dati">
 <!ENTITY zotero.preferences.sync.setUpSync "Impostare la sincronizzazione">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Disconnetti account">
 <!ENTITY zotero.preferences.sync.createAccount "Crea un account">
 <!ENTITY zotero.preferences.sync.lostPassword "Hai perso la password?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronizza automaticamente">
@@ -78,9 +78,9 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Utilizzando Zotero storage, ne accetti implicitamente le">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "condizioni d'uso">
-<!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
+<!ENTITY zotero.preferences.sync.librariesToSync "Librerie da sincronizzare">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Scegli le librerie">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sincronizza">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Libreria">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Le operazioni elencate si seguito sono da utilizzare solo in situazioni specifiche e rare. Non dovrebbero essere usate per risolvere problemi generici. In molti casi, un reset compoterà ulteriori problemi. Vedi">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Opzioni di reset della sincronizzazione">
@@ -94,7 +94,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Azzera la cronologia della sincronizzazione file">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
 <!ENTITY zotero.preferences.sync.reset "Reset">
-<!ENTITY zotero.preferences.sync.reset.button "Reset…">
+<!ENTITY zotero.preferences.sync.reset.button "Reset...">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Ricerca">
@@ -120,8 +120,8 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copia in formato HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Impostazioni specifiche per sito:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Dominio o percorso">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(es. wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Formato">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Lingua">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Disabilita la copia veloce quando si trascinano più di">
 
@@ -136,9 +136,9 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titolo">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Aggiornato">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Ottieni stili aggiuntivi...">
 
-<!ENTITY zotero.preferences.keys.openZotero "Apri o chiudi pannello di Zotero">
+<!ENTITY zotero.preferences.keys.openZotero "Apri/Chiudi pannello di Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Salva in Zotero (icona nella barra degli indirizzi)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Attiva o disattiva schermo intero">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Sposta il focus nel pannello laterale delle raccolte">
@@ -179,14 +179,14 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "File e cartelle">
 <!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Configurazione avanzata">
 
 <!ENTITY zotero.preferences.prefpane.locate "Trova">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestore dei motori di ricerca di articoli">
 <!ENTITY zotero.preferences.locate.description "Descrizione">
 <!ENTITY zotero.preferences.locate.name "Nome">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Un motore di ricerca amplia le funzionalità del menu Trova nella barra degli strumenti Informazioni. Attivando motori di ricerca dalla lista seguente, questi saranno aggiunti al menu e potranno essere usati per rintracciare risorse della propria biblioteca sul web.">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
+<!ENTITY zotero.preferences.locate.addDescription "Per aggiungere un motore di ricerca non presente nella lista, visitalo con il tuo browser e seleziona &#34;Aggiungi&#34; dal menu Trova di Zotero">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Ripristina le impostazioni predefinite">
 
 <!ENTITY zotero.preferences.charset "Codifica dei caratteri">
@@ -196,7 +196,7 @@
 <!ENTITY zotero.preferences.dataDir "Posizione salvataggio">
 <!ENTITY zotero.preferences.dataDir.useProfile "Utilizza la cartella del profilo di Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Personalizza:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose…">
+<!ENTITY zotero.preferences.dataDir.choose "Scegli...">
 <!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
 <!ENTITY zotero.preferences.dataDir.reveal "Visualizza la cartella dati">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
@@ -213,4 +213,4 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "Editor">

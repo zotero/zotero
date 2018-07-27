@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.items "документа(-ов)">
 <!ENTITY zotero.preferences.period ",">
 <!ENTITY zotero.preferences.settings "Настройки">
-<!ENTITY zotero.preferences.custom "Особо…">
+<!ENTITY zotero.preferences.custom "Особые…">
 
 <!ENTITY zotero.preferences.prefpane.general "Общие">
 
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.feeds.feedDefaults "Настройки ленты по умолчанию">
 
 <!ENTITY zotero.preferences.openurl.search "Поиск ресолверов">
-<!ENTITY zotero.preferences.openurl.custom "Особо…">
+<!ENTITY zotero.preferences.openurl.custom "Особый…">
 <!ENTITY zotero.preferences.openurl.server "Сервер">
 <!ENTITY zotero.preferences.openurl.version "Версия">
 
@@ -195,7 +195,7 @@
 
 <!ENTITY zotero.preferences.dataDir "Расположение папки с данными">
 <!ENTITY zotero.preferences.dataDir.useProfile "Использовать папку профиля Firefox">
-<!ENTITY zotero.preferences.dataDir.custom "Особая:">
+<!ENTITY zotero.preferences.dataDir.custom "Особое:">
 <!ENTITY zotero.preferences.dataDir.choose "Выбрать...">
 <!ENTITY zotero.preferences.dataDir.viaCommandLine "(указанные в командной строке)">
 <!ENTITY zotero.preferences.dataDir.reveal "Показать папку с данными">

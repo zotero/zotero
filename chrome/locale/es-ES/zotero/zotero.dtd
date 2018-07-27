@@ -114,7 +114,7 @@
 <!ENTITY zotero.toolbar.removeItem.label "Eliminar ítem...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nueva Biblioteca">
 <!ENTITY zotero.toolbar.newCollection.label "Nueva colección...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Marcar Fuente RSS como leída">
+<!ENTITY zotero.toolbar.markFeedRead.label "Marcar fuente RSS como leída">
 <!ENTITY zotero.toolbar.newGroup "Nuevo grupo...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nueva subcolección...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nueva búsqueda guardada...">
@@ -133,12 +133,12 @@
 <!ENTITY zotero.toolbar.openURL.label "Localizar">
 <!ENTITY zotero.toolbar.openURL.tooltip "Encontrar mediante tu biblioteca local">
 
-<!ENTITY zotero.toolbar.feeds.new "Nueva Fuente">
+<!ENTITY zotero.toolbar.feeds.new "Nueva fuente">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Desde la URL...">
 <!ENTITY zotero.toolbar.feeds.new.fromPage "Desde la página...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Desde el OPML...">
-<!ENTITY zotero.toolbar.feeds.refresh "Actualizar Fuente">
-<!ENTITY zotero.toolbar.feeds.edit "Editar Fuente...">
+<!ENTITY zotero.toolbar.feeds.refresh "Actualizar fuente">
+<!ENTITY zotero.toolbar.feeds.edit "Editar fuente...">
 
 <!ENTITY zotero.item.add "Añadir">
 <!ENTITY zotero.item.attachment.file.show "Mostar archivo">
@@ -286,7 +286,7 @@
 <!ENTITY zotero.proxy.recognized.disable.label "No redireccione automáticamente peticiones a través de proxies previamente reconocidos">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorar">
 
-<!ENTITY zotero.feedSettings.title "Ajustes de Fuente">
+<!ENTITY zotero.feedSettings.title "Ajustes de fuente">
 <!ENTITY zotero.feedSettings.saveButton.label "Guardar">
 <!ENTITY zotero.feedSettings.url.label "URL:">
 <!ENTITY zotero.feedSettings.title.label "Título:">

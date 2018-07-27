@@ -108,7 +108,7 @@
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Выберите поля для сохранения из других версий документа">
 
 <!ENTITY zotero.toolbar.newItem.label "Новый документ">
-<!ENTITY zotero.toolbar.moreItemTypes.label "Далее">
+<!ENTITY zotero.toolbar.moreItemTypes.label "Прочие типы публикаций">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Создать новый документ с текущей страницы">
 <!ENTITY zotero.toolbar.lookup.label "Добавить документ по идентификатору">
 <!ENTITY zotero.toolbar.removeItem.label "Удалить документ">

@@ -49,7 +49,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.label "Ordenando:">
 <!ENTITY zotero.preferences.feeds.sorting.newest "Elementos más nuevos primeros">
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Elementos más longevos primeros">
-<!ENTITY zotero.preferences.feeds.feedDefaults "Predeterminados de las Fuentes">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Predeterminados de las fuentes">
 
 <!ENTITY zotero.preferences.openurl.search "Buscar servidores">
 <!ENTITY zotero.preferences.openurl.custom "Personalizar...">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Búsqueda rápida">
 <!ENTITY zotero.preferences.keys.newItem "Crear un nuevo elemento">
 <!ENTITY zotero.preferences.keys.newNote "Crear una Nueva nota">
-<!ENTITY zotero.preferences.keys.toggleAllRead "Marcar todos los elementos de las Fuentes como leídos/no leídos">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Marcar todos los elementos de las fuentes como leídos/no leídos">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Conmutar el selector de etiquetas">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar las citas para los elementos seleccionados al portapapeles">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiar los elementos seleccionados al portapapeles">
