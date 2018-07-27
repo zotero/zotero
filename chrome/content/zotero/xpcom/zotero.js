@@ -768,9 +768,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 						}
 						// Load More Info page
 						else if (index == 2) {
-							let io = Components.classes['@mozilla.org/network/io-service;1']
-								.getService(Components.interfaces.nsIIOService);
-							let uri = io.newURI(kbURL, null, null);
+							let uri = Services.io.newURI(kbURL, null, null);
 							let handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
 								.getService(Components.interfaces.nsIExternalProtocolService)
 								.getProtocolHandlerInfo('http');
@@ -1167,9 +1165,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 		
 		try {
-			var io = Components.classes['@mozilla.org/network/io-service;1']
-						.getService(Components.interfaces.nsIIOService);
-			var uri = io.newURI(url, null, null);
+			var uri = Services.io.newURI(url, null, null);
 			var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
 							.getService(Components.interfaces.nsIExternalProtocolService)
 							.getProtocolHandlerInfo('http');

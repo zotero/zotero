@@ -267,10 +267,8 @@ Zotero.Utilities = {
 		url = url.trim();
 		if (!url) return false;
 		
-		var ios = Components.classes["@mozilla.org/network/io-service;1"]
-			.getService(Components.interfaces.nsIIOService);
 		try {
-			return ios.newURI(url, null, null).spec; // Valid URI if succeeds
+			return Services.io.newURI(url, null, null).spec; // Valid URI if succeeds
 		} catch (e) {
 			if (e instanceof Components.Exception
 				&& e.result == Components.results.NS_ERROR_MALFORMED_URI
@@ -278,7 +276,7 @@ Zotero.Utilities = {
 				if (tryHttp && /\w\.\w/.test(url)) {
 					// Assume it's a URL missing "http://" part
 					try {
-						return ios.newURI('http://' + url, null, null).spec;
+						return Services.io.newURI('http://' + url, null, null).spec;
 					} catch (e) {}
 				}
 				

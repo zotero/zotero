@@ -59,9 +59,7 @@ Zotero.File = new function(){
 	
 	this.pathToFileURI = function (path) {
 		var file = new FileUtils.File(path);
-		var ios = Components.classes["@mozilla.org/network/io-service;1"]
-			.getService(Components.interfaces.nsIIOService);
-		return ios.newFileURI(file).spec;
+		return Services.io.newFileURI(file).spec;
 	}
 	
 	

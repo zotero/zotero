@@ -833,8 +833,7 @@ Zotero.HTTP = new function() {
 	 * @type Boolean
 	 */
 	this.browserIsOffline = function() { 
-		return Components.classes["@mozilla.org/network/io-service;1"]
-			.getService(Components.interfaces.nsIIOService).offline;
+		return Services.io.offline;
 	}
 	
 	
@@ -1064,10 +1063,8 @@ Zotero.HTTP = new function() {
 			if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE)
 					== Ci.nsIWebProgressListener.STATE_IS_INSECURE) {
 				let url = channel.name;
-				let ios = Components.classes["@mozilla.org/network/io-service;1"]
-					.getService(Components.interfaces.nsIIOService);
 				try {
-					var uri = ios.newURI(url, null, null);
+					var uri = Services.io.newURI(url, null, null);
 					var host = uri.host;
 				}
 				catch (e) {
