@@ -889,6 +889,7 @@ Zotero.Attachments = new function(){
 	 */
 	this.downloadFirstAvailableFile = async function (urls, path, options) {
 		var url;
+		urls = [...urls];
 		while (url = urls.shift()) {
 			try {
 				await this.downloadFile(url, path, options);
@@ -918,15 +919,34 @@ Zotero.Attachments = new function(){
 			return false;
 		}
 		
-		var urls = await Zotero.Utilities.Internal.getOpenAccessPDFURLs(doi);
-		if (!urls.length) {
+		try {
+			var urlObjects = await Zotero.Utilities.Internal.getOpenAccessPDFURLs(doi);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return false;
+		}
+		if (!urlObjects.length) {
 			return false;
 		}
 		
+		return this.addPDFFromURLs(item, urlObjects);
+	};
+	
+	
+	/**
+	 * Try to add a PDF to an item from a set of possible URLs
+	 *
+	 * @param {Zotero.Item} item
+	 * @param {Object[]} urlObjects - Array of objects with 'url' and 'version'
+	 * @return {Zotero.Item|false} - New attachment item, or false if unsuccessful
+	 */
+	this.addPDFFromURLs = async function (item, urlObjects) {
 		var fileBaseName = this.getFileBaseNameFromItem(item);
 		var tmpDir;
 		var tmpFile;
 		var attachmentItem = false;
+		var urls = urlObjects.map(o => o.url);
 		try {
 			tmpDir = (await this.createTemporaryStorageDirectory()).path;
 			tmpFile = OS.Path.join(tmpDir, fileBaseName + '.pdf');
@@ -934,13 +954,15 @@ Zotero.Attachments = new function(){
 				urls, tmpFile, { isPDF: true }
 			);
 			if (url) {
+				let version = urlObjects[urls.indexOf(url)].version;
 				attachmentItem = await this.createURLAttachmentFromTemporaryStorageDirectory({
 					directory: tmpDir,
 					libraryID: item.libraryID,
 					filename: OS.Path.basename(tmpFile),
 					url,
 					contentType: 'application/pdf',
-					parentItemID: item.id
+					parentItemID: item.id,
+					articleVersion: version
 				});
 			}
 			else {

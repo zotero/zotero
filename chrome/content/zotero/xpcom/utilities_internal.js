@@ -955,6 +955,8 @@ Zotero.Utilities.Internal = {
 		});
 		var urls = req.response;
 		Zotero.debug(`Found ${urls.length} ${Zotero.Utilities.pluralize(urls.length, ['URL', 'URLs'])}`);
+		// Handle older URL-only format
+		urls = urls.map(o => typeof o == 'string' ? { url: o } : o);
 		return urls;
 	},
 	
