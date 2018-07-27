@@ -33,6 +33,7 @@ Zotero.File = new function(){
 	
 	this.getExtension = getExtension;
 	this.getContentsFromURL = getContentsFromURL;
+	this.getContentsFromURLAsync = getContentsFromURLAsync;
 	this.putContents = putContents;
 	this.getValidFileName = getValidFileName;
 	this.truncateFileName = truncateFileName;
@@ -346,12 +347,16 @@ Zotero.File = new function(){
 	this.getResource = function (res) {
 		return getContentsFromURL(`resource://zotero/${res}`);
 	}
+
+	this.getResourceAsync = function (res) {
+		return getContentsFromURLAsync(`resource://zotero/${res}`);
+	}
 	
 	
 	/*
 	 * Return a promise for the contents of a URL as a string
 	 */
-	this.getContentsFromURLAsync = function (url, options={}) {
+	function getContentsFromURLAsync (url, options={}) {
 		return Zotero.HTTP.request("GET", url, Object.assign(options, { responseType: "text" }))
 		.then(function (xmlhttp) {
 			return xmlhttp.response;
