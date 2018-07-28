@@ -225,59 +225,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		// Browser
 		Zotero.browser = "g";
 		
-		//
-		// Get settings from language pack (extracted by zotero-build/locale/merge_mozilla_files)
-		//
-		function getIntlProp(name, fallback = null) {
-			try {
-				return intlProps.GetStringFromName(name);
-			}
-			catch (e) {
-				Zotero.logError(`Couldn't load ${name} from intl.properties`);
-				return fallback;
-			}
-		}
-		function setOrClearIntlPref(name, type) {
-			var val = getIntlProp(name);
-			if (val !== null) {
-				if (type == 'boolean') {
-					val = val == 'true';
-				}
-				Zotero.Prefs.set(name, val, 1);
-			}
-			else {
-				Zotero.Prefs.clear(name, 1);
-			}
-		}
-		var intlProps = Services.strings.createBundle("chrome://zotero/locale/mozilla/intl.properties");
-		this.locale = getIntlProp('general.useragent.locale', 'en-US');
-		let [get, numForms] = PluralForm.makeGetter(parseInt(getIntlProp('pluralRule', 1)));
-		this.pluralFormGet = get;
-		this.pluralFormNumForms = numForms;
-		setOrClearIntlPref('intl.accept_languages', 'string');
-		
-		// Also load the brand as appName
-		var brandBundle = Services.strings.createBundle("chrome://branding/locale/brand.properties");
-		this.appName = brandBundle.GetStringFromName("brandShortName");
-		
-		_localizedStringBundle = Services.strings.createBundle("chrome://zotero/locale/zotero.properties");
-		
-		// Set the locale direction to Zotero.dir
-		// DEBUG: is there a better way to get the entity from JS?
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-						.createInstance();
-		xmlhttp.open('GET', 'chrome://global/locale/global.dtd', false);
-		xmlhttp.overrideMimeType('text/plain');
-		xmlhttp.send(null);
-		var matches = xmlhttp.responseText.match(/(ltr|rtl)/);
-		if (matches && matches[0] == 'rtl') {
-			Zotero.dir = 'rtl';
-		}
-		else {
-			Zotero.dir = 'ltr';
-		}
-		Zotero.rtl = Zotero.dir == 'rtl';
-		
+		Zotero.intl.init();
+
 		Zotero.Prefs.init();
 		Zotero.Debug.init(options && options.forceDebugLog);
 		
@@ -1412,46 +1361,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 *     separated by semicolons
 	 */
 	this.getString = function (name, params, num) {
-		return this.getStringFromBundle(_localizedStringBundle, ...arguments);
+		return Zotero.intl.getString(...arguments);
 	}
-	
-	
-	this.getStringFromBundle = function (bundle, name, params, num) {
-		try {
-			if (params != undefined) {
-				if (typeof params != 'object'){
-					params = [params];
-				}
-				var l10n = bundle.formatStringFromName(name, params, params.length);
-			}
-			else {
-				var l10n = bundle.GetStringFromName(name);
-			}
-			if (num !== undefined) {
-				let availableForms = l10n.split(/;/);
-				// If not enough available forms, use last one -- PluralForm.get() uses first by
-				// default, but it's more likely that a localizer will translate the two English
-				// strings with some plural form as the second one, so we might as well use that
-				if (availableForms.length < this.pluralFormNumForms()) {
-					l10n = availableForms[availableForms.length - 1];
-				}
-				else {
-					l10n = this.pluralFormGet(num, l10n);
-				}
-			}
-		}
-		catch (e){
-			if (e.name == 'NS_ERROR_ILLEGAL_VALUE') {
-				Zotero.debug(params, 1);
-			}
-			else if (e.name != 'NS_ERROR_FAILURE') {
-				Zotero.logError(e);
-			}
-			throw new Error('Localized string not available for ' + name);
-		}
-		return l10n;
-	}
-	
 	
 	/**
 	 * Defines property on the object
