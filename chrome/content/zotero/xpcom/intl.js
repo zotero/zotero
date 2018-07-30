@@ -47,21 +47,7 @@ Zotero.Intl = new function () {
 			.GetStringFromName('brandShortName');
 		
 		// Set the locale direction to Zotero.dir
-		Zotero.dir = 'ltr';
-
-		// TODO: is there a better way to get the entity from JS?
-		if (!(Zotero.isNode || Zotero.isElectron)) {
-			let xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-						.createInstance();
-			xmlhttp.open('GET', 'chrome://global/locale/global.dtd', false);
-			xmlhttp.overrideMimeType('text/plain');
-			xmlhttp.send(null);
-			let matches = xmlhttp.responseText.match(/(ltr|rtl)/);
-			if (matches && matches[0] == 'rtl') {
-				Zotero.dir = 'rtl';
-			}
-		}
-
+		Zotero.dir = Zotero.Locale.defaultScriptDirection(Zotero.locale);
 		Zotero.rtl = (Zotero.dir === 'rtl');
 	};
 
