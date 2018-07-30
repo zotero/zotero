@@ -43,7 +43,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.debug = debug;
 	this.log = log;
 	this.logError = logError;
-	this.localeJoin = localeJoin;
 	this.setFontSize = setFontSize;
 	this.flattenArguments = flattenArguments;
 	this.getAncestorByTagName = getAncestorByTagName;
@@ -1409,22 +1408,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		newClass._super = superClass;
 		newClass.prototype = Object.create(superClass.prototype);
 		newClass.prototype.constructor = newClass;
-	}
-	
-	
-	/*
-	 * This function should be removed
-	 *
-	 * |separator| defaults to a space (not a comma like Array.join()) if
-	 *   not specified
-	 *
-	 * TODO: Substitute localized characters (e.g. Arabic comma and semicolon)
-	 */
-	function localeJoin(arr, separator) {
-		if (typeof separator == 'undefined') {
-			separator = ' ';
-		}
-		return arr.join(separator);
 	}
 	
 	

@@ -108,9 +108,9 @@
 			
 			
 			function _setStartupError() {
-				Zotero.startupError = Zotero.localeJoin([
+				Zotero.startupError = [
 					Zotero.getString('upgrade.dbUpdateRequired'), Zotero.getString('general.restartFirefox')
-				]);
+				].join(' ');
 			}
 			
 			

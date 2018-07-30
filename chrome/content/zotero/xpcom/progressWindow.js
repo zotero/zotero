@@ -387,10 +387,10 @@ Zotero.ProgressWindow = function(options = {}) {
 	this.Translation = {};
 	
 	this.Translation.operationInProgress = function() {
-		var desc = Zotero.localeJoin([
+		var desc = [
 			Zotero.getString('general.operationInProgress'),
 			Zotero.getString('general.operationInProgress.waitUntilFinishedAndTryAgain')
-		]);
+		].join(' ');
 		self.Translation._scrapeError(desc);
 	};
 	
