@@ -225,7 +225,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		// Browser
 		Zotero.browser = "g";
 		
-		Zotero.intl.init();
+		Zotero.Intl.init();
 
 		Zotero.Prefs.init();
 		Zotero.Debug.init(options && options.forceDebugLog);
@@ -1361,7 +1361,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 *     separated by semicolons
 	 */
 	this.getString = function (name, params, num) {
-		return Zotero.intl.getString(...arguments);
+		return Zotero.Intl.getString(...arguments);
 	}
 	
 	/**

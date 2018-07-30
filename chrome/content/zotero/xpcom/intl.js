@@ -22,7 +22,7 @@
 	
 	***** END LICENSE BLOCK *****
 */
-Zotero.intl = new function () {
+Zotero.Intl = new function () {
 	let bundle;
 	let intlProps;
 	let pluralFormGet;
