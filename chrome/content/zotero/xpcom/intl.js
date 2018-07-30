@@ -30,6 +30,8 @@ Zotero.Intl = new function () {
 
 	// Get settings from language pack (extracted by zotero-build/locale/merge_mozilla_files)
 	this.init = function () {
+		Components.utils.import("resource://gre/modules/PluralForm.jsm");
+
 		bundle = Services.strings.createBundle('chrome://zotero/locale/zotero.properties');
 		intlProps = Services.strings.createBundle('chrome://zotero/locale/mozilla/intl.properties');
 
