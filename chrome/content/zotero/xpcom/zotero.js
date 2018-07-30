@@ -1410,12 +1410,13 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		newClass.prototype.constructor = newClass;
 	}
 	
-	
 	this.getLocaleCollation = function () {
 		return Zotero.Intl.collation;
 	};
 
-	this.localeCompare = Zotero.Intl.compare;
+	this.localeCompare = function (...args) {
+		return Zotero.Intl.compare(...args);
+	};
 	
 	/*
 	 * Sets font size based on prefs -- intended for use on root element
