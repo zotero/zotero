@@ -1377,69 +1377,21 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		return Zotero.Intl.compare(...args);
 	};
 	
-	/*
-	 * Sets font size based on prefs -- intended for use on root element
-	 *  (zotero-pane, note window, etc.)
-	 */
 	function setFontSize(rootElement) {
-		var size = Zotero.Prefs.get('fontSize');
-		rootElement.style.fontSize = size + 'em';
-		if (size <= 1) {
-			size = 'small';
-		}
-		else if (size <= 1.25) {
-			size = 'medium';
-		}
-		else {
-			size = 'large';
-		}
-		// Custom attribute -- allows for additional customizations in zotero.css
-		rootElement.setAttribute('zoteroFontSize', size);
+		return Zotero.Utilities.setFontSize(rootElement);
 	}
 	
 	
-	/*
-	 * Flattens mixed arrays/values in a passed _arguments_ object and returns
-	 * an array of values -- allows for functions to accept both arrays of
-	 * values and/or an arbitrary number of individual values
-	 */
 	function flattenArguments(args){
-		// Put passed scalar values into an array
-		if (args === null || typeof args == 'string' || typeof args.length == 'undefined') {
-			args = [args];
-		}
-		
-		var returns = [];
-		for (var i=0; i<args.length; i++){
-			var arg = args[i];
-			if (!arg && arg !== 0) {
-				continue;
-			}
-			if (Array.isArray(arg)) {
-				returns.push(...arg);
-			}
-			else {
-				returns.push(arg);
-			}
-		}
-		return returns;
+		return Zotero.Utilities.flattenArguments(args);
 	}
 	
 	
 	function getAncestorByTagName(elem, tagName){
-		while (elem.parentNode){
-			elem = elem.parentNode;
-			if (elem.localName == tagName) {
-				return elem;
-			}
-		}
-		return false;
+		return Zotero.Utilities.getAncestorByTagName(elem, tagName);
 	}
 	
 	
-	/**
-	* Generate a random string of length 'len' (defaults to 8)
-	**/
 	function randomString(len, chars) {
 		return Zotero.Utilities.randomString(len, chars);
 	}
