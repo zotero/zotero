@@ -101,7 +101,7 @@ Zotero.Schema = new function(){
 			return _initializeSchema()
 			.then(function() {
 				(Zotero.isStandalone ? Zotero.uiReadyPromise : Zotero.initializationPromise)
-				.then(1000)
+				.delay(1000)
 				.then(async function () {
 					await this.updateBundledFiles();
 					if (Zotero.Prefs.get('automaticScraperUpdates')) {
@@ -221,7 +221,7 @@ Zotero.Schema = new function(){
 		// In Standalone, don't load bundled files until after UI is ready. In Firefox, load them as
 		// soon initialization is done so that translation works before the Zotero pane is opened.
 		(Zotero.isStandalone ? Zotero.uiReadyPromise : Zotero.initializationPromise)
-		.then(1000)
+		.delay(1000)
 		.then(async function () {
 			await this.updateBundledFiles();
 			if (Zotero.Prefs.get('automaticScraperUpdates')) {
