@@ -962,6 +962,7 @@ Zotero.File = new function(){
 	
 	
 	this.createDirectoryIfMissing = function (dir) {
+		dir = this.pathToFile(dir);
 		if (!dir.exists() || !dir.isDirectory()) {
 			if (dir.exists() && !dir.isDirectory()) {
 				dir.remove(null);
