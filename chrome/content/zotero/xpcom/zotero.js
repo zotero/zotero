@@ -941,7 +941,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			}
 			
 			// remove temp directory
-			Zotero.removeTempDirectory();
+			yield Zotero.removeTempDirectory();
 			
 			if (Zotero.DB) {
 				// close DB
@@ -964,63 +964,34 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		return Zotero.File.pathToFile(Zotero.Profile.dir);
 	}
 	
-	
 	this.getZoteroDirectory = function () {
 		Zotero.warn("Zotero.getZoteroDirectory() is deprecated -- use Zotero.DataDirectory.dir");
 		return Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 	}
-	
-	
-	function getStorageDirectory(){
-		var file = OS.Path.join(Zotero.DataDirectory.dir, 'storage');
-		file = Zotero.File.pathToFile(file);
-		Zotero.File.createDirectoryIfMissing(file);
-		return file;
-	}
-	
 	
 	this.getZoteroDatabase = function (name, ext) {
 		Zotero.warn("Zotero.getZoteroDatabase() is deprecated -- use Zotero.DataDirectory.getDatabase()");
 		return Zotero.File.pathToFile(Zotero.DataDirectory.getDatabase(name, ext));
 	}
 	
-	
-	/**
-	 * @return	{nsIFile}
-	 */
-	this.getTempDirectory = function () {
-		var tmp = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
-		tmp.append('tmp');
-		Zotero.File.createDirectoryIfMissing(tmp);
-		return tmp;
+	function getStorageDirectory() {
+		return Zotero.DataDirectory.getSubdirectory('storage', true);
 	}
-	
-	
-	this.removeTempDirectory = function () {
-		var tmp = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
-		tmp.append('tmp');
-		if (tmp.exists()) {
-			try {
-				tmp.remove(true);
-			}
-			catch (e) {}
-		}
-	}
-	
-	
+
 	this.getStylesDirectory = function () {
-		var dir = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
-		dir.append('styles');
-		Zotero.File.createDirectoryIfMissing(dir);
-		return dir;
+		return Zotero.DataDirectory.getSubdirectory('styles', true);
 	}
-	
 	
 	this.getTranslatorsDirectory = function () {
-		var dir = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
-		dir.append('translators');
-		Zotero.File.createDirectoryIfMissing(dir);
-		return dir;
+		return Zotero.DataDirectory.getSubdirectory('translators', true);
+	}
+
+	this.getTempDirectory = function () {
+		return Zotero.DataDirectory.getSubdirectory('tmp', true);
+	}
+	
+	this.removeTempDirectory = function () {
+		return Zotero.DataDirectory.removeSubdirectory('tmp');
 	}
 	
 	
