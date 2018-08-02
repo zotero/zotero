@@ -1340,7 +1340,63 @@ Zotero.Utilities.Internal = {
 		newClass.prototype = Object.create(superClass.prototype);
 		newClass.prototype.constructor = newClass;
 	},
-	
+
+	/*
+	 * Flattens mixed arrays/values in a passed _arguments_ object and returns
+	 * an array of values -- allows for functions to accept both arrays of
+	 * values and/or an arbitrary number of individual values
+	 */
+	flattenArguments: function (args){
+		// Put passed scalar values into an array
+		if (args === null || typeof args == 'string' || typeof args.length == 'undefined') {
+			args = [args];
+		}
+			
+		var returns = [];
+		for (var i=0; i<args.length; i++){
+			var arg = args[i];
+			if (!arg && arg !== 0) {
+				continue;
+			}
+			if (Array.isArray(arg)) {
+				returns.push(...arg);
+			}
+			else {
+				returns.push(arg);
+			}
+		}
+		return returns;
+	},
+
+	/*
+	 * Sets font size based on prefs -- intended for use on root element
+	 *  (zotero-pane, note window, etc.)
+	 */
+	setFontSize: function (rootElement) {
+		var size = Zotero.Prefs.get('fontSize');
+		rootElement.style.fontSize = size + 'em';
+		if (size <= 1) {
+			size = 'small';
+		}
+		else if (size <= 1.25) {
+			size = 'medium';
+		}
+		else {
+			size = 'large';
+		}
+		// Custom attribute -- allows for additional customizations in zotero.css
+		rootElement.setAttribute('zoteroFontSize', size);
+	},
+
+	getAncestorByTagName: function (elem, tagName){
+		while (elem.parentNode){
+			elem = elem.parentNode;
+			if (elem.localName == tagName) {
+				return elem;
+			}
+		}
+		return false;
+	},
 	
 	quitZotero: function(restart=false) {
 		Zotero.debug("Zotero.Utilities.Internal.quitZotero() is deprecated -- use quit()");

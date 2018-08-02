@@ -1350,50 +1350,36 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		return deferred.promise;
 	});
 	
-	/**
-	 * @param {String} name
-	 * @param {String[]} [params=[]] - Strings to substitute for placeholders
-	 * @param {Number} [num] - Number (also appearing in `params`) to use when determining which plural
-	 *     form of the string to use; localized strings should include all forms in the order specified
-	 *     in https://developer.mozilla.org/en-US/docs/Mozilla/Localization/Localization_and_Plurals,
-	 *     separated by semicolons
-	 */
 	this.getString = function (name, params, num) {
 		return Zotero.Intl.getString(...arguments);
 	}
 	
-	/**
-	 * @alias Zotero.Utilities.Internal.defineProperty;
-	 */
 	this.defineProperty = (...args) => Zotero.Utilities.Internal.defineProperty(...args);
-	
+
 	this.extendClass = (...args) => Zotero.Utilities.Internal.extendClass(...args);
-	
+
 	this.getLocaleCollation = function () {
-		return Zotero.Intl.collation;
-	};
+	  return Zotero.Intl.collation;
+	}
 
 	this.localeCompare = function (...args) {
 		return Zotero.Intl.compare(...args);
-	};
+	}
 	
 	function setFontSize(rootElement) {
 		return Zotero.Utilities.setFontSize(rootElement);
 	}
 	
-	
 	function flattenArguments(args){
-		return Zotero.Utilities.flattenArguments(args);
+		return Zotero.Utilities.Internal.flattenArguments(args);
 	}
-	
 	
 	function getAncestorByTagName(elem, tagName){
-		return Zotero.Utilities.getAncestorByTagName(elem, tagName);
+		return Zotero.Utilities.Internal.getAncestorByTagName(elem, tagName);
 	}
 	
-	
 	function randomString(len, chars) {
-		return Zotero.Utilities.randomString(len, chars);
+		return Zotero.Utilities.Internal.randomString(len, chars);
 	}
 	
 	
