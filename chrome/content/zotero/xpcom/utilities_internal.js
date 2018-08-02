@@ -1294,6 +1294,46 @@ Zotero.Utilities.Internal = {
 	},
 	
 	/**
+	 * Generate a function that produces a static output
+	 *
+	 * Zotero.lazy(fn) returns a function. The first time this function
+	 * is called, it calls fn() and returns its output. Subsequent
+	 * calls return the same output as the first without calling fn()
+	 * again.
+	 */
+	lazy: function (fn) {
+		var x, called = false;
+		return function() {
+			if(!called) {
+				x = fn.apply(this);
+				called = true;
+			}
+			return x;
+		};
+	},
+	
+	serial: function (fn) {
+		Components.utils.import("resource://zotero/concurrentCaller.js");
+		var caller = new ConcurrentCaller({
+			numConcurrent: 1,
+			onError: e => Zotero.logError(e)
+		});
+		return function () {
+			var args = arguments;
+			return caller.start(function () {
+				return fn.apply(this, args);
+			}.bind(this));
+		};
+	},
+	
+	spawn: function (generator, thisObject) {
+		if (thisObject) {
+			return Zotero.Promise.coroutine(generator.bind(thisObject))();
+		}
+		return Zotero.Promise.coroutine(generator)();
+	},
+
+	/**
 	 * Defines property on the object
 	 * More compact way to do Object.defineProperty
 	 *

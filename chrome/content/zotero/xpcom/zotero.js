@@ -1365,47 +1365,16 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		return file;
 	}
 	
-	
-	/**
-	 * Generate a function that produces a static output
-	 *
-	 * Zotero.lazy(fn) returns a function. The first time this function
-	 * is called, it calls fn() and returns its output. Subsequent
-	 * calls return the same output as the first without calling fn()
-	 * again.
-	 */
 	this.lazy = function(fn) {
-		var x, called = false;
-		return function() {
-			if(!called) {
-				x = fn.apply(this);
-				called = true;
-			}
-			return x;
-		};
-	};
-	
-	
-	this.serial = function (fn) {
-		Components.utils.import("resource://zotero/concurrentCaller.js");
-		var caller = new ConcurrentCaller({
-			numConcurrent: 1,
-			onError: e => Zotero.logError(e)
-		});
-		return function () {
-			var args = arguments;
-			return caller.start(function () {
-				return fn.apply(this, args);
-			}.bind(this));
-		};
+		return Zotero.Utilities.Internal.lazy(fn);
 	}
 	
+	this.serial = function (fn) {
+		return Zotero.Utilities.Internal.serial(fn);
+	}
 	
 	this.spawn = function (generator, thisObject) {
-		if (thisObject) {
-			return Zotero.Promise.coroutine(generator.bind(thisObject))();
-		}
-		return Zotero.Promise.coroutine(generator)();
+		return Zotero.Utilities.Internal.spawn(generator, thisObject);
 	}
 	
 	
