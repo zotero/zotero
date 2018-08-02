@@ -975,19 +975,19 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	}
 	
 	function getStorageDirectory() {
-		return Zotero.DataDirectory.getSubdirectory('storage', true);
+		return Zotero.File.pathToFile(Zotero.DataDirectory.getSubdirectory('storage', true));
 	}
 
 	this.getStylesDirectory = function () {
-		return Zotero.DataDirectory.getSubdirectory('styles', true);
+		return Zotero.File.pathToFile(Zotero.DataDirectory.getSubdirectory('styles', true));
 	}
 	
 	this.getTranslatorsDirectory = function () {
-		return Zotero.DataDirectory.getSubdirectory('translators', true);
+		return Zotero.File.pathToFile(Zotero.DataDirectory.getSubdirectory('translators', true));
 	}
 
 	this.getTempDirectory = function () {
-		return Zotero.DataDirectory.getSubdirectory('tmp', true);
+		return Zotero.File.pathToFile(Zotero.DataDirectory.getSubdirectory('tmp', true));
 	}
 	
 	this.removeTempDirectory = function () {
