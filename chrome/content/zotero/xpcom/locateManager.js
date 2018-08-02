@@ -29,16 +29,12 @@ Zotero.LocateManager = new function() {
 	
 	var _jsonFile;
 	var _locateEngines;
-	var _ios;
 	var _timer;
 	
 	/**
 	 * Read locateEngines JSON file to initialize locate manager
 	 */
 	this.init = async function() {
-		_ios = Components.classes["@mozilla.org/network/io-service;1"].
-				  getService(Components.interfaces.nsIIOService);
-		
 		_jsonFile = _getLocateFile();
 		
 		try {
@@ -271,7 +267,7 @@ Zotero.LocateManager = new function() {
 	 * Theoretically implements nsISearchSubmission
 	 */
 	var LocateSubmission = function(uri, postData) {
-		this.uri = _ios.newURI(uri, null, null);
+		this.uri = Services.io.newURI(uri, null, null);
 		this.postData = postData;
 	}
 	
@@ -447,7 +443,7 @@ Zotero.LocateManager = new function() {
 		
 		"_removeIcon":function() {
 			if(!this.icon) return;
-			var uri = _ios.newURI(this.icon, null, null);
+			var uri = Services.io.newURI(this.icon, null, null);
 			var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
 			if(file.exists()) file.remove(null);
 		},
