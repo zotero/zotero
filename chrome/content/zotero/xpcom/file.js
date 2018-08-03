@@ -130,6 +130,8 @@ Zotero.File = new function(){
 	 * Get contents of a binary file
 	 */
 	this.getBinaryContents = function(file) {
+		Zotero.debug("Zotero.File.getBinaryContents() is deprecated -- "
+			+ "use Zotero.File.getBinaryContentsAsync() when possible", 2);
 		var iStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
 					 .createInstance(Components.interfaces.nsIFileInputStream);
 		iStream.init(file, 0x01, 0o664, 0);
