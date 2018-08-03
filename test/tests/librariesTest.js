@@ -62,7 +62,7 @@ describe("Zotero.Libraries", function() {
 		});
 		it("should return false for a non-existing ID", function() {
 			assert.isFalse(Zotero.Libraries.exists(-1), "returns boolean false for a negative ID");
-			let badID = Zotero.Libraries.getAll().map(library => library.libraryID).sort().pop() + 1;
+			let badID = Zotero.Libraries.getAll().map(lib => lib.libraryID).reduce((a, b) => (a < b ? b : a)) + 1;
 			assert.isFalse(Zotero.Libraries.exists(badID), "returns boolean false for a non-existent positive ID");
 		});
 	});
