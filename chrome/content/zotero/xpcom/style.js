@@ -488,9 +488,7 @@ Zotero.Styles = new function() {
 		yield Zotero.Styles.reinit();
 		
 		// Refresh preferences windows
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"].
-			getService(Components.interfaces.nsIWindowMediator);
-		var enumerator = wm.getEnumerator("zotero:pref");
+		var enumerator = Services.wm.getEnumerator("zotero:pref");
 		while(enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
 			if(win.Zotero_Preferences.Cite) {
