@@ -574,7 +574,7 @@ Zotero.Schema = new function(){
 		var ModeType = Zotero.Utilities.capitalize(modeType);
 		var Mode = Zotero.Utilities.capitalize(mode);
 		
-		var repotime = yield Zotero.File.getResourceAsync("schema/repotime.txt");
+		var repotime = yield Zotero.File.getResourceAsync("resource://zotero/schema/repotime.txt");
 		var date = Zotero.Date.sqlToDate(repotime.trim(), true);
 		repotime = Zotero.Date.toUnixTimestamp(date);
 		
@@ -1446,7 +1446,7 @@ Zotero.Schema = new function(){
 			throw ('Schema type not provided to _getSchemaSQL()');
 		}
 		
-		return Zotero.File.getResourceAsync(`schema/${schema}.sql`);
+		return Zotero.File.getResourceAsync(`resource://zotero/schema/${schema}.sql`);
 	}
 	
 	

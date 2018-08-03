@@ -47,7 +47,7 @@ Zotero.Date = new function(){
 			throw new Error("Unimplemented");
 		}
 		
-		var json = JSON.parse(Zotero.File.getResource('schema/dateFormats.json'));
+		var json = JSON.parse(Zotero.File.getResource('resource://zotero/schema/dateFormats.json'));
 		var locale = Zotero.locale;
 		var english = locale.startsWith('en');
 		// If no exact match, try first two characters ('de')

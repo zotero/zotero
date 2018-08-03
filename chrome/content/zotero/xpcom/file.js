@@ -339,15 +339,25 @@ Zotero.File = new function(){
 		return xmlhttp.responseText;
 	}
 
-	/*
-	 * Returns the contents of the given local resource.
+	/**
+	 * Return the contents of resource. Use this for loading
+	 * resource/chrome URLs.
+	 *
+	 * @param {String} url - the resource url
+	 * @return {String} the resource contents as a string
 	 */
-	this.getResource = function (res) {
-		return getContentsFromURL(`resource://zotero/${res}`);
+	this.getResource = function (url) {
+		return getContentsFromURL(url);
 	}
 
-	this.getResourceAsync = function (res) {
-		return getContentsFromURLAsync(`resource://zotero/${res}`);
+	/**
+	 * Return a promise for the contents of resource.
+	 *
+	 * @param {String} url - the resource url
+	 * @return {Promise<String>} the resource contents as a string
+	 */
+	this.getResourceAsync = function (url) {
+		return getContentsFromURLAsync(url);
 	}
 	
 	
