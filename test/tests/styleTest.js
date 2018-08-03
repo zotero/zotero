@@ -27,8 +27,8 @@ describe("Zotero.Styles", function() {
 
 		it("should install the style from url", function* () {
 			var getContentsFromURLAsync = Zotero.File.getContentsFromURLAsync;
-			sinon.stub(Zotero.File, 'getContentsFromURLAsync').callsFake(function(style) {
-				if (style.url == styleID) {
+			sinon.stub(Zotero.File, 'getContentsFromURLAsync').callsFake(function(url) {
+				if (url === styleID) {
 					return Zotero.Promise.resolve(style);
 				} else {
 					return getContentsFromURLAsync.apply(Zotero.File, arguments);
