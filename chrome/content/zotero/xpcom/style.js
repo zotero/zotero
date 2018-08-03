@@ -103,8 +103,9 @@ Zotero.Styles = new function() {
 		var localeFile = {};
 		var locales = {};
 		var primaryDialects = {};
-		var localesLocation = "chrome://zotero/content/locale/csl/locales.json";
-		localeFile = JSON.parse(yield Zotero.File.getContentsFromURLAsync(localesLocation));
+		localeFile = JSON.parse(
+			yield Zotero.File.getResourceAsync("chrome://zotero/content/locale/csl/locales.json")
+		);
 		
 		primaryDialects = localeFile["primary-dialects"];
 		
@@ -117,19 +118,10 @@ Zotero.Styles = new function() {
 		this.primaryDialects = primaryDialects;
 		
 		// Load renamed styles
-		_renamedStyles = {};
-		var xmlhttp = yield Zotero.HTTP.request(
-			"GET",
-			"resource://zotero/schema/renamed-styles.json",
-			{
-				responseType: 'json'
-			}
+		_renamedStyles = JSON.parse(
+			yield Zotero.File.getResourceAsync("resource://zotero/schema/renamed-styles.json")
 		);
-		// Map some obsolete styles to current ones
-		if (xmlhttp.response) {
-			_renamedStyles = xmlhttp.response;
-		}
-		
+
 		_initializationDeferred.resolve();
 		_initialized = true;
 		
