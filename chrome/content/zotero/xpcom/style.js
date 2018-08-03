@@ -37,6 +37,8 @@ Zotero.Styles = new function() {
 	this.ns = {
 		"csl":"http://purl.org/net/xbiblio/csl"
 	};
+
+	this.CSL_VALIDATOR_URL = "resource://zotero/csl-validator.js";
 	
 	
 	/**
@@ -252,18 +254,18 @@ Zotero.Styles = new function() {
 	 * @return {Promise} A promise representing the style file. This promise is rejected
 	 *    with the validation error if validation fails, or resolved if it is not.
 	 */
-	this.validate = function(style) {
-		var deferred = Zotero.Promise.defer(),
-			worker = new Worker("resource://zotero/csl-validator.js"); 
-		worker.onmessage = function(event) {
-			if(event.data) {
-				deferred.reject(event.data);
-			} else {
-				deferred.resolve();
-			}
-		};
-		worker.postMessage(style);
-		return deferred.promise;
+	this.validate = function (style) {
+		return new Zotero.Promise((resolve, reject) => {
+			let worker = new Worker(this.CSL_VALIDATOR_URL);
+			worker.onmessage = function (event) {
+				if (event.data) {
+					reject(event.data);
+				} else {
+					resolve();
+				}
+			};
+			worker.postMessage(style);
+		});
 	}
 	
 	/**
