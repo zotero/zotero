@@ -67,7 +67,7 @@ describe("Zotero.Utilities.Internal", function () {
 		});
 		
 		afterEach(function () {
-			spy.reset();
+			spy.resetHistory();
 		});
 		
 		after(function () {
@@ -86,7 +86,7 @@ describe("Zotero.Utilities.Internal", function () {
 				let val = yield gen.next().value;
 				assert.isTrue(val);
 				assert.isTrue(spy.calledWith(i));
-				spy.reset();
+				spy.resetHistory();
 			}
 		});
 		
@@ -102,7 +102,7 @@ describe("Zotero.Utilities.Internal", function () {
 				let val = yield gen.next().value;
 				assert.isTrue(val);
 				assert.isTrue(spy.calledWith(i));
-				spy.reset();
+				spy.resetHistory();
 			}
 			
 			// Another interval would put us over maxTime, so return false immediately
