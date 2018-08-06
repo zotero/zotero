@@ -39,6 +39,8 @@ const xpcomFilesAll = [
 	'date',
 	'debug',
 	'error',
+	'utilities',
+	'utilities_internal',
 	'file',
 	'http',
 	'mimeTypeHandler',
@@ -51,9 +53,7 @@ const xpcomFilesAll = [
 	'translation/translate_firefox',
 	'translation/translator',
 	'translation/tlds',
-	'utilities',
 	'isbn',
-	'utilities_internal',
 	'utilities_translate'
 ];
 

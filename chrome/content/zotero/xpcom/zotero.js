@@ -46,7 +46,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.setFontSize = setFontSize;
 	this.flattenArguments = flattenArguments;
 	this.getAncestorByTagName = getAncestorByTagName;
-	this.randomString = randomString;
 	this.reinit = reinit; // defined in zotero-service.js
 	
 	// Public properties
@@ -1338,7 +1337,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	}
 	
 	function setFontSize(rootElement) {
-		return Zotero.Utilities.setFontSize(rootElement);
+		return Zotero.Utilities.Internal.setFontSize(rootElement);
 	}
 	
 	function flattenArguments(args){
@@ -1349,8 +1348,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		return Zotero.Utilities.Internal.getAncestorByTagName(elem, tagName);
 	}
 	
-	function randomString(len, chars) {
-		return Zotero.Utilities.Internal.randomString(len, chars);
+	this.randomString = function(len, chars) {
+		return Zotero.Utilities.randomString(len, chars);
 	}
 	
 	
