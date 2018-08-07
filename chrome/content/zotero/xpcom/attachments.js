@@ -835,7 +835,7 @@ Zotero.Attachments = new function(){
 	 * @param {Boolean} [options.isPDF] - Delete file if not PDF
 	 */
 	this.downloadFile = async function (url, path, options = {}) {
-		Zotero.debug(`Downloading ${url}`);
+		Zotero.debug(`Downloading file from ${url}`);
 		
 		try {
 			await new Zotero.Promise(function (resolve) {
@@ -879,53 +879,56 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * Try to download a file from a list of URLs, keeping the first one that succeeds
-	 *
-	 *
-	 * @param {String[]} urls
-	 * @param {String} path
-	 * @param {Object} [options] - Options to pass to this.downloadFile()
-	 * @return {String|false} - URL that succeeded, or false if none
-	 */
-	this.downloadFirstAvailableFile = async function (urls, path, options) {
-		var url;
-		urls = [...urls];
-		while (url = urls.shift()) {
-			try {
-				await this.downloadFile(url, path, options);
-				return url;
-			}
-			catch (e) {
-				Zotero.debug(`Error downloading ${url}: ${e}`);
-			}
-		}
-		return false;
-	};
-	
-	
-	/**
-	 * Look for an open-access PDF for an item and add it as an attachment
+	 * Look for an available PDF for an item and add it as an attachment
 	 *
 	 * @param {Zotero.Item} item
 	 * @return {Zotero.Item|false} - New attachment item, or false if unsuccessful
 	 */
-	this.addOpenAccessPDF = async function (item) {
-		if (!Zotero.Prefs.get('downloadAssociatedFiles')) {
-			return false;
+	this.addAvailablePDF = async function (item, modes = ['doi', 'url', 'oa']) {
+		Zotero.debug("Looking for available PDFs");
+		
+		var useDOI = modes.includes('doi');
+		var useURL = modes.includes('url');
+		var useOA = modes.includes('oa');
+		
+		var urlObjects = [];
+		
+		if (useDOI) {
+			let doi = item.getField('DOI');
+			if (doi) {
+				doi = Zotero.Utilities.cleanDOI(doi);
+				if (doi) {
+					urlObjects.push({ pageURL: 'https://doi.org/' + doi });
+				}
+			}
 		}
 		
-		var doi = item.getField('DOI');
-		if (!doi) {
-			return false;
+		if (useURL) {
+			let url = item.getField('url');
+			if (url) {
+				url = Zotero.Utilities.cleanURL(url);
+				if (url) {
+					urlObjects.push({ pageURL: url });
+				}
+			}
 		}
 		
-		try {
-			var urlObjects = await Zotero.Utilities.Internal.getOpenAccessPDFURLs(doi);
+		if (useOA) {
+			urlObjects.push(async function () {
+				var doi = item.getField('DOI');
+				if (!doi) {
+					return [];
+				}
+				try {
+					return await Zotero.Utilities.Internal.getOpenAccessPDFURLs(doi);
+				}
+				catch (e) {
+					Zotero.logError(e);
+					return [];
+				}
+			});
 		}
-		catch (e) {
-			Zotero.logError(e);
-			return false;
-		}
+		
 		if (!urlObjects.length) {
 			return false;
 		}
@@ -938,7 +941,7 @@ Zotero.Attachments = new function(){
 	 * Try to add a PDF to an item from a set of possible URLs
 	 *
 	 * @param {Zotero.Item} item
-	 * @param {Object[]} urlObjects - Array of objects with 'url' and 'version'
+	 * @param {(String|Object|Function)[]} urlObjects - See downloadFirstAvailableFile()
 	 * @return {Zotero.Item|false} - New attachment item, or false if unsuccessful
 	 */
 	this.addPDFFromURLs = async function (item, urlObjects) {
@@ -946,15 +949,13 @@ Zotero.Attachments = new function(){
 		var tmpDir;
 		var tmpFile;
 		var attachmentItem = false;
-		var urls = urlObjects.map(o => o.url);
 		try {
 			tmpDir = (await this.createTemporaryStorageDirectory()).path;
 			tmpFile = OS.Path.join(tmpDir, fileBaseName + '.pdf');
-			let url = await this.downloadFirstAvailableFile(
-				urls, tmpFile, { isPDF: true }
+			let { url, index } = await this.downloadFirstAvailableFile(
+				urlObjects, tmpFile, { isPDF: true }
 			);
 			if (url) {
-				let version = urlObjects[urls.indexOf(url)].version;
 				attachmentItem = await this.createURLAttachmentFromTemporaryStorageDirectory({
 					directory: tmpDir,
 					libraryID: item.libraryID,
@@ -962,7 +963,7 @@ Zotero.Attachments = new function(){
 					url,
 					contentType: 'application/pdf',
 					parentItemID: item.id,
-					articleVersion: version
+					articleVersion: urlObjects[index].version
 				});
 			}
 			else {
@@ -977,6 +978,121 @@ Zotero.Attachments = new function(){
 		}
 		
 		return attachmentItem;
+	};
+	
+	
+	/**
+	 * Try to download a file from a list of URLs, keeping the first one that succeeds
+	 *
+	 * URLs are only tried once.
+	 *
+	 * @param {(String|Object|Function)[]} urlObjects - An array of URLs, objects, or functions
+	 *    that return arrays of objects. Objects can contain 'url' and/or 'pageURL', which is a
+	 *    webpage that might contain a translatable PDF link. Functions that return promises are
+	 *    waited for, and functions aren't called unless a file hasn't yet been found from an
+	 *    earlier entry.
+	 * @param {String} path - Path to save file to
+	 * @param {Object} [options] - Options to pass to this.downloadFile()
+	 * @return {Object|false} - Object with successful 'url' and 'index' from original array, or
+	 *     false if no file could be downloaded
+	 */
+	this.downloadFirstAvailableFile = async function (urlObjects, path, options) {
+		// Operate on copy, since we might change things
+		urlObjects = [...urlObjects];
+		
+		// Don't try the same URL more than once
+		var triedURLs = new Set();
+		var triedPages = new Set();
+		for (let i = 0; i < urlObjects.length; i++) {
+			let urlObject = urlObjects[i];
+			
+			if (typeof urlObject == 'function') {
+				urlObject = await urlObject();
+				urlObjects.splice(i, 1, ...urlObject);
+				urlObject = urlObjects[i];
+				// No URLs returned from last function
+				if (!urlObject) {
+					break;
+				}
+			}
+			
+			// Accept URL strings in addition to objects
+			if (typeof urlObject == 'string') {
+				urlObject = { url: urlObject };
+			}
+			
+			let url = urlObject.url;
+			let pageURL = urlObject.pageURL;
+			let fromPage = false;
+			
+			// Ignore URLs we've already tried
+			if (url && triedURLs.has(url)) {
+				Zotero.debug(`PDF at ${url} was already tried -- skipping`);
+				url = null;
+			}
+			if (pageURL && triedPages.has(pageURL)) {
+				Zotero.debug(`Page at ${pageURL} was already tried -- skipping`);
+				pageURL = null;
+			}
+			
+			// Try URL first if available
+			if (url) {
+				triedURLs.add(url);
+				try {
+					await this.downloadFile(url, path, options);
+					return { url, index: i };
+				}
+				catch (e) {
+					Zotero.debug(`Error downloading ${url}: ${e}`);
+				}
+			}
+			
+			// If URL wasn't available or failed, try to get a URL from a page
+			if (pageURL) {
+				triedPages.add(pageURL);
+				url = null;
+				let responseURL;
+				try {
+					Zotero.debug(`Looking for PDF on ${pageURL}`);
+					
+					// TODO: Handle redirects manually so we can avoid loading a page we've already
+					// tried
+					let xmlhttp = await Zotero.HTTP.request("GET", pageURL, { responseType: 'document' });
+					responseURL = xmlhttp.responseURL;
+					if (pageURL != responseURL) {
+						Zotero.debug("Redirected to " + responseURL);
+					}
+					triedPages.add(responseURL);
+					let doc = Zotero.HTTP.wrapDocument(xmlhttp.response, responseURL);
+					
+					url = await Zotero.Utilities.Internal.getPDFFromDocument(doc);
+				}
+				catch (e) {
+					Zotero.debug(`Error getting PDF from ${pageURL}: ${e}`);
+					continue;
+				}
+				if (!url) {
+					Zotero.debug(`No PDF found on ${responseURL}`);
+					continue;
+				}
+				if (triedURLs.has(url)) {
+					Zotero.debug(`PDF at ${url} was already tried -- skipping`);
+					continue;
+				}
+				triedURLs.add(url);
+				
+				// Use the page we loaded as the referrer
+				let downloadOptions = Object.assign({}, options, { referrer: responseURL });
+				try {
+					await this.downloadFile(url, path, downloadOptions);
+					return { url, index: i };
+				}
+				catch (e) {
+					Zotero.debug(`Error downloading ${url}: ${e}`);
+				}
+			}
+		}
+		return false;
 	};
 	
 	

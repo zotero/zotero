@@ -2130,6 +2130,15 @@ Zotero.Item.prototype.numNonHTMLFileAttachments = function () {
 };
 
 
+Zotero.Item.prototype.numPDFAttachments = function () {
+	this._requireData('childItems');
+	return this.getAttachments()
+		.map(itemID => Zotero.Items.get(itemID))
+		.filter(item => item.isFileAttachment() && item.attachmentContentType == 'application/pdf')
+		.length;
+};
+
+
 Zotero.Item.prototype.getFile = function () {
 	Zotero.debug("Zotero.Item.prototype.getFile() is deprecated -- use getFilePath[Async]()", 2);
 	

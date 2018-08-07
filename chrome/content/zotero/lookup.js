@@ -68,12 +68,13 @@ var Zotero_Lookup = new function () {
 					libraryID,
 					collections: collection ? [collection.id] : false
 				});
-				// If there's a DOI and we don't yet have a file, check for open-access PDFs
-				// TEMP: Limit to dev builds
-				if ((Zotero.version.includes('beta') || Zotero.version.includes('SOURCE'))
-						&& identifier.DOI && !newItems.find(x => x.isImportedAttachment())) {
+				// If we don't yet have a file, check for available PDFs
+				if (Zotero.Prefs.get('downloadAssociatedFiles')
+						&& !newItems.find(x => x.isImportedAttachment())
+						// TEMP: Limit to dev builds
+						&& (Zotero.version.includes('beta') || Zotero.version.includes('SOURCE'))) {
 					try {
-						yield Zotero.Attachments.addOpenAccessPDF(newItems[0]);
+						yield Zotero.Attachments.addAvailablePDF(newItems[0]);
 					}
 					catch (e) {
 						Zotero.logError(e);

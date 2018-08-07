@@ -930,6 +930,13 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
+	canFindPDFForItem: function (item) {
+		return item.isRegularItem()
+			&& (!!item.getField('DOI') || !!item.getField('url'))
+			&& item.numPDFAttachments() == 0;
+	},
+	
+	
 	/**
 	 * Look for open-access PDFs for a given DOI using Zotero's Unpaywall mirror
 	 *
@@ -954,10 +961,42 @@ Zotero.Utilities.Internal = {
 			responseType: 'json'
 		});
 		var urls = req.response;
-		Zotero.debug(`Found ${urls.length} ${Zotero.Utilities.pluralize(urls.length, ['URL', 'URLs'])}`);
+		Zotero.debug(`Found ${urls.length} open-access PDF ${Zotero.Utilities.pluralize(urls.length, ['URL', 'URLs'])}`);
 		// Handle older URL-only format
 		urls = urls.map(o => typeof o == 'string' ? { url: o } : o);
 		return urls;
+	},
+	
+	
+	/**
+	 * Run translation on a Document to try to find a PDF URL
+	 *
+	 * @param {doc} Document
+	 * @return {String|false} - PDF URL, or false if none found
+	 */
+	getPDFFromDocument: async function (doc) {
+		let translate = new Zotero.Translate.Web();
+		translate.setDocument(doc);
+		var translators = await translate.getTranslators();
+		// TEMP: Until there's a generic webpage translator
+		if (!translators.length) {
+			return false;
+		}
+		translate.setTranslator(translators[0]);
+		var options = {
+			libraryID: false,
+			saveAttachments: true
+		};
+		let newItems = await translate.translate(options);
+		if (!newItems.length) {
+			return false;
+		}
+		for (let attachment of newItems[0].attachments) {
+			if (attachment.mimeType == 'application/pdf') {
+				return attachment.url;
+			}
+		}
+		return false;
 	},
 	
 	
