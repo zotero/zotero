@@ -930,13 +930,6 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
-	canFindPDFForItem: function (item) {
-		return item.isRegularItem()
-			&& (!!item.getField('DOI') || !!item.getField('url'))
-			&& item.numPDFAttachments() == 0;
-	},
-	
-	
 	/**
 	 * Look for open-access PDFs for a given DOI using Zotero's Unpaywall mirror
 	 *

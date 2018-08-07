@@ -878,6 +878,13 @@ Zotero.Attachments = new function(){
 	};
 	
 	
+	this.canFindPDFForItem = function (item) {
+		return item.isRegularItem()
+			&& (!!item.getField('DOI') || !!item.getField('url'))
+			&& item.numPDFAttachments() == 0;
+	};
+	
+	
 	/**
 	 * Look for an available PDF for an item and add it as an attachment
 	 *

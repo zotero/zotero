@@ -313,7 +313,7 @@
 						</menupopup>
 					</menu>
 					<menuseparator/>
-					<menuitem class="menuitem-iconic zotero-menuitem-find-pdf" oncommand="ZoteroPane.addPDFForSelectedItems()"/>
+					<menuitem class="menuitem-iconic zotero-menuitem-find-pdf" oncommand="ZoteroPane.findPDFForSelectedItems()"/>
 					<menuseparator/>
 					<menuitem class="menuitem-iconic zotero-menuitem-toggle-read-item" oncommand="ZoteroPane_Local.toggleSelectedItemsRead();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-duplicate-item" label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane_Local.duplicateSelectedItem().done();"/>

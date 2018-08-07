@@ -3836,7 +3836,7 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.addPDFForSelectedItems = async function () {
+	this.findPDFForSelectedItems = async function () {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -3859,7 +3859,7 @@ var ZoteroPane = new function()
 		
 		for (let i = 0; i < items.length; i++) {
 			let item = items[i];
-			if (Zotero.Utilities.Internal.canFindPDFForItem(item)) {
+			if (Zotero.Attachments.canFindPDFForItem(item)) {
 				let attachment = await Zotero.Attachments.addAvailablePDF(item);
 				if (attachment) {
 					successful++;
