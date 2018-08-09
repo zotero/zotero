@@ -1021,7 +1021,7 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 		if (!suffix && !force) {
 			let backupFile = this._dbPath + '.bak';
 			if (yield OS.File.exists(backupFile)) {
-				let currentDBTime = (yield OS.File.stat(file.path)).lastModificationDate;
+				let currentDBTime = (yield OS.File.stat(file)).lastModificationDate;
 				let lastBackupTime = (yield OS.File.stat(backupFile)).lastModificationDate;
 				if (currentDBTime == lastBackupTime) {
 					Zotero.debug("Database '" + this._dbName + "' hasn't changed -- skipping backup");
