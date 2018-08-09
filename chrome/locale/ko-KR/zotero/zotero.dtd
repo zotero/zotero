@@ -10,14 +10,14 @@
 <!ENTITY zotero.general.cancel "취소">
 <!ENTITY zotero.general.refresh "새로고침">
 <!ENTITY zotero.general.saveAs "다른 이름으로 저장...">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "환경설정">
 <!ENTITY zotero.general.advancedOptions.label "고급 ">
 <!ENTITY zotero.general.tools "도구">
 <!ENTITY zotero.general.more "더 보기">
 <!ENTITY zotero.general.loading "불러오는 중...">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
-<!ENTITY zotero.general.other "Other…">
+<!ENTITY zotero.general.close "닫기">
+<!ENTITY zotero.general.minimize "최소화">
+<!ENTITY zotero.general.other "기타...">
 
 
 <!ENTITY zotero.errorReport.title "Zotero 오류 보고">
@@ -101,8 +101,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "라이브러리로 복원">
 <!ENTITY zotero.items.menu.duplicateItem "선택된 항목 복제">
 <!ENTITY zotero.items.menu.mergeItems "항목 병합...">
-<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
+<!ENTITY zotero.items.menu.unrecognize "메타데이터 검색 실행취소">
+<!ENTITY zotero.items.menu.reportMetadata "잘못된 메타데이터 보고">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "원본 항목으로 사용할 항목의 버전 선택:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "항목의 다른 버전과 무관하게 유지할 필드 선택:">
@@ -177,7 +177,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "색상 설정">
 <!ENTITY zotero.tagColorChooser.removeColor "색상 제거">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
+<!ENTITY zotero.lookup.description "라이브러리에 추가할 ISBN, DOI, PMID 또는 arXiv ID를 입력하세요:">
 <!ENTITY zotero.lookup.button.search "검색">
 
 <!ENTITY zotero.selectitems.title "항목 선택">
@@ -204,14 +204,14 @@
 
 <!ENTITY zotero.progress.title "진행">
 
-<!ENTITY zotero.import "Import">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
-<!ENTITY zotero.import.database "Database">
-<!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
-<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
+<!ENTITY zotero.import "불러오기">
+<!ENTITY zotero.import.whereToImportFrom "어디서 불러올까요?">
+<!ENTITY zotero.import.source.file "파일 (BiBTeX, RIS, Zotero RDF 등)">
+<!ENTITY zotero.import.importing "불러오는 중...">
+<!ENTITY zotero.import.database "데이터베이스">
+<!ENTITY zotero.import.lastModified "마지막 수정 시간">
+<!ENTITY zotero.import.size "크기">
+<!ENTITY zotero.import.createCollection "컬렉션 및 항목을 새 컬렉션으로 불러오기">
 
 <!ENTITY zotero.exportOptions.title "내보내기...">
 <!ENTITY zotero.exportOptions.format.label "형식:">
@@ -247,9 +247,9 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "북마크">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "책갈피가 Word와 LibreOffice 사이에 공유될 수 있습니다, 단 우연히 변경될 때 오류를 일으킬 수 있으며 각주로 넣을 수 없습니다.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "인용 항목 자동 업데이트">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "업데이트 대기 중인 인용 항목이 문서에서 강조 표시됩니다">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "큰 문서라면 업데이트를 중지하여 인용 삽입 속도를 높일 수 있습니다. 새로고침을 클릭하여 수동으로 인용 정보를 업데이트하세요.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "MEDLINE 저널 약자 사용">
