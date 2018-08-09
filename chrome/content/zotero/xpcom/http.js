@@ -1074,7 +1074,10 @@ Zotero.HTTP = new function() {
 					Zotero.debug(e);
 				}
 				let kbURL = 'https://www.zotero.org/support/kb/ssl_certificate_error';
-				msg = Zotero.getString('sync.storage.error.webdav.sslCertificateError', host);
+				msg = Zotero.getString(
+					'sync.storage.error.webdav.sslCertificateError',
+					'https://' + host
+				);
 				dialogButtonText = Zotero.getString('general.moreInformation');
 				dialogButtonCallback = function () {
 					let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
