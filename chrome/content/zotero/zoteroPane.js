@@ -481,6 +481,18 @@ var ZoteroPane = new function()
 			Zotero.Prefs.set(pref, true);
 		}
 		
+		if (Zotero.proxyFailure) {
+			try {
+				Zotero.proxyFailure.message += "\n\n"
+					+ Zotero.getString('startupError.internetFunctionalityMayNotWork');
+				Zotero.Sync.Runner.updateIcons(Zotero.proxyFailure);
+				Zotero.proxyFailure = null;
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+		
 		// Auto-sync on pane open or if new account
 		if (Zotero.Prefs.get('sync.autoSync') || Zotero.initAutoSync) {
 			yield Zotero.proxyAuthComplete;

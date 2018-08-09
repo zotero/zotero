@@ -651,10 +651,13 @@ Zotero.HTTP = new function() {
 							dontCache: true
 						})
 						.catch(function (e) {
-							Components.utils.reportError(e);
-							var msg = "Error connecting to proxy -- proxied requests may not work";
-							Zotero.log(msg, 'error');
-							Zotero.debug(msg, 1);
+							// Show error icon at startup
+							if (e instanceof Zotero.HTTP.SecurityException) {
+								Zotero.proxyFailure = e;
+							}
+							Zotero.logError(e);
+							let msg = "Error connecting to proxy -- proxied requests may not work";
+							Zotero.logError(msg);
 						});
 						break;
 					}
