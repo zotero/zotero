@@ -12,13 +12,13 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	var davHostPath = `localhost:${davPort}${davBasePath}`;
 	var davUsername = "user";
 	var davPassword = "password";
-	var davURL = `${davScheme}://${davUsername}:${davPassword}@${davHostPath}`;
+	var davURL = `${davScheme}://${davHostPath}`;
 	
 	var win, controller, server, requestCount;
 	var responses = {};
 	
 	function setResponse(response) {
-		setHTTPResponse(server, davURL, response, responses);
+		setHTTPResponse(server, davURL, response, responses, davUsername, davPassword);
 	}
 	
 	function resetRequestCount() {
@@ -366,6 +366,9 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			// https://github.com/cjohansen/Sinon.JS/issues/607
 			let fixSinonBug = ";charset=utf-8";
 			server.respond(function (req) {
+				if (req.username != davUsername) return;
+				if (req.password != davPassword) return;
+				
 				if (req.method == "PUT" && req.url == `${davURL}zotero/${item.key}.zip`) {
 					assert.equal(req.requestHeaders["Content-Type"], "application/zip" + fixSinonBug);
 					
