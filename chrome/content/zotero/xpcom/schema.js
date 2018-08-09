@@ -1365,6 +1365,14 @@ Zotero.Schema = new function(){
 						}
 					});
 				}
+			],
+			// TEXT userID
+			[
+				"SELECT COUNT(*) > 0 FROM settings WHERE setting='account' AND key='userID' AND TYPEOF(value)='text'",
+				async function () {
+					let userID = await Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='account' AND key='userID'");
+					await Zotero.DB.queryAsync("UPDATE settings SET value=? WHERE setting='account' AND key='userID'", parseInt(userID.trim()));
+				}
 			]
 		];
 		
