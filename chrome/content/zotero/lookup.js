@@ -72,7 +72,7 @@ var Zotero_Lookup = new function () {
 				if (Zotero.Prefs.get('downloadAssociatedFiles')
 						&& !newItems.find(x => x.isImportedAttachment())
 						// TEMP: Limit to dev builds
-						&& (Zotero.version.includes('beta') || Zotero.version.includes('SOURCE'))) {
+						&& Zotero.isDevBuild) {
 					try {
 						yield Zotero.Attachments.addAvailablePDF(newItems[0]);
 					}

@@ -2881,7 +2881,8 @@ var ZoteroPane = new function()
 					}
 				}
 				
-				if (canFindPDF) {
+				// TEMP: Limit to dev builds
+				if (canFindPDF && Zotero.isDevBuild) {
 					show.push(m.findPDF, m.sep3);
 				}
 				
@@ -2940,7 +2941,8 @@ var ZoteroPane = new function()
 						show.push(m.addNote, m.addAttachments, m.sep2);
 					}
 					
-					if (Zotero.Utilities.Internal.canFindPDFForItem(item)) {
+					// TEMP: Limit to dev builds
+					if (Zotero.Attachments.canFindPDFForItem(item) && Zotero.isDevBuild) {
 						show.push(m.findPDF, m.sep3);
 					}
 					
