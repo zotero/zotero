@@ -1868,6 +1868,14 @@ Zotero.Schema = new function(){
 			if (i == 80) {
 				yield _updateCompatibility(1);
 				
+				let userID = yield Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='account' AND key='userID'");
+				if (userID && typeof userID == 'string') {
+					userID = userID.trim();
+					if (userID) {
+						yield Zotero.DB.queryAsync("UPDATE settings SET value=? WHERE setting='account' AND key='userID'", parseInt(userID));
+					}
+				}
+				
 				// Delete 'libraries' rows not in 'groups', which shouldn't exist
 				yield Zotero.DB.queryAsync("DELETE FROM libraries WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM groups)");
 				
