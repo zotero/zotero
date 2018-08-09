@@ -8,7 +8,7 @@ var ZOTERO_CONFIG = {
 	REPOSITORY_RETRY_INTERVAL: 3600, // 1 hour
 	BASE_URI: 'http://zotero.org/',
 	WWW_BASE_URL: 'https://www.zotero.org/',
-	PROXY_AUTH_URL: 'https://s3.amazonaws.com/zotero.org/proxy-auth',
+	PROXY_AUTH_URL: 'https://zoteroproxycheck.s3.amazonaws.com/test',
 	API_URL: 'https://api.zotero.org/',
 	STREAMING_URL: 'wss://stream.zotero.org/',
 	RECOGNIZE_URL: 'https://recognize.zotero.org/',
