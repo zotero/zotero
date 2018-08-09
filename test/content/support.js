@@ -924,12 +924,17 @@ function setHTTPResponse(server, baseURL, response, responses, username, passwor
 		responseArray[1][i] = response.headers[i];
 	}
 	
-	server.respondWith(function (req) {
-		if (username && req.username != username) return;
-		if (password && req.password != password) return;
-		
-		if (req.method == response.method && req.url == baseURL + response.url) {
-			req.respond(...responseArray);
-		}
-	});
+	if (username || password) {
+		server.respondWith(function (req) {
+			if (username && req.username != username) return;
+			if (password && req.password != password) return;
+			
+			if (req.method == response.method && req.url == baseURL + response.url) {
+				req.respond(...responseArray);
+			}
+		});
+	}
+	else {
+		server.respondWith(response.method, baseURL + response.url, responseArray);
+	}
 }
