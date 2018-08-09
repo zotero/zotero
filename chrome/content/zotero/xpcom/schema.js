@@ -2441,6 +2441,16 @@ Zotero.Schema = new function(){
 				}
 			}
 			
+			else if (i == 102) {
+				let userID = yield Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='account' AND key='userID'");
+				if (userID && typeof userID == 'string') {
+					userID = userID.trim();
+					if (userID) {
+						yield Zotero.DB.queryAsync("UPDATE settings SET value=? WHERE setting='account' AND key='userID'", parseInt(userID));
+					}
+				}
+			}
+			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
 		
