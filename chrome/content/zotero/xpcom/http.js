@@ -123,12 +123,23 @@ Zotero.HTTP = new function() {
 	 */
 	this.request = Zotero.Promise.coroutine(function* (method, url, options = {}) {
 		if (url instanceof Components.interfaces.nsIURI) {
-			// Don't display password in console
-			var dispURL = this.getDisplayURI(url).spec;
+			// Extract username and password from URI and undo Mozilla's excessive percent-encoding
+			options.username = url.username || null;
+			if (options.username) {
+				options.username = options.username.replace(/%2E/, '.');
+				options.password = url.password || null;
+				url = url.clone();
+				url.userPass = '';
+			}
+			
 			url = url.spec;
 		}
-		else {
-			var dispURL = url;
+		
+		var dispURL = url;
+		
+		// Add username:******** to display URL
+		if (options.username) {
+			dispURL = dispURL.replace(/^(https?:\/\/)/, `$1${options.username}:********@`);
 		}
 		
 		// Don't display API key in console
@@ -173,7 +184,7 @@ Zotero.HTTP = new function() {
 		if (!options.foreground) {
 			xmlhttp.mozBackgroundRequest = true;
 		}
-		xmlhttp.open(method, url, true);
+		xmlhttp.open(method, url, true, options.username, options.password);
 		
 		// Pass the request to a callback
 		if (options.requestObserver) {
