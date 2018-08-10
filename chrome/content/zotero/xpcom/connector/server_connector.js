@@ -1030,7 +1030,7 @@ Zotero.Server.Connector.InstallStyle.prototype = {
 	
 	init: Zotero.Promise.coroutine(function* (requestData) {
 		try {
-			var styleName = yield Zotero.Styles.install(
+			var { styleName, styleID } = yield Zotero.Styles.install(
 				requestData.data, requestData.query.origin || null, true
 			);
 		} catch (e) {

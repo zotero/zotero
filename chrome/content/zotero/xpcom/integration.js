@@ -448,9 +448,10 @@ Zotero.Integration = new function() {
 
 							let installed = false;
 							try {
-								await Zotero.Styles.install(
+								let { styleTitle, styleID } = await Zotero.Styles.install(
 									{url: data.style.styleID}, data.style.styleID, true
 								);
+								data.style.styleID = styleID;
 								installed = true;
 							}
 							catch (e) {
@@ -464,10 +465,15 @@ Zotero.Integration = new function() {
 							}
 							if (installed) {
 								await session.setData(data, true);
+							} else {
+								await session.setDocPrefs();
 							}
+						} else {
+							await session.setDocPrefs();
 						}
+					} else {
+						await session.setDocPrefs();
 					}
-					await session.setDocPrefs();
 				} else {
 					throw e;
 				}

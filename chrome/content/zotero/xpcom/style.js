@@ -279,7 +279,6 @@ Zotero.Styles = new function() {
 	 * @param {Boolean} [silent=false] Skip prompts
 	 */
 	this.install = Zotero.Promise.coroutine(function* (style, origin, silent=false) {
-		var styleTitle;
 		var warnDeprecated;
 		if (style instanceof Components.interfaces.nsIFile) {
 			warnDeprecated = true;
@@ -299,7 +298,7 @@ Zotero.Styles = new function() {
 			else if (style.url) {
 				style.string = yield Zotero.File.getContentsFromURLAsync(style.url);
 			}
-			styleTitle = yield _install(style.string, origin, false, silent);
+			var { styleTitle, styleID } = yield _install(style.string, origin, false, silent);
 		}
 		catch (error) {
 			// Unless user cancelled, show an alert with the error
@@ -321,7 +320,7 @@ Zotero.Styles = new function() {
 				}
 			}
 		}
-		return styleTitle;
+		return { styleTitle, styleID };
 	});
 	
 	/**
@@ -503,7 +502,10 @@ Zotero.Styles = new function() {
 				yield win.Zotero_Preferences.Cite.refreshStylesList(styleID);
 			}
 		}
-		return existingTitle || title;
+		return {
+			styleTitle: existingTitle || title,
+			styleID: styleID
+		};
 	});
 	
 	/**
