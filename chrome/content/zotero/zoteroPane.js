@@ -3874,9 +3874,14 @@ var ZoteroPane = new function()
 		for (let i = 0; i < items.length; i++) {
 			let item = items[i];
 			if (Zotero.Attachments.canFindPDFForItem(item)) {
-				let attachment = await Zotero.Attachments.addAvailablePDF(item);
-				if (attachment) {
-					successful++;
+				try {
+					let attachment = await Zotero.Attachments.addAvailablePDF(item);
+					if (attachment) {
+						successful++;
+					}
+				}
+				catch (e) {
+					Zotero.logError(e);
 				}
 			}
 			itemProgress.setProgress(((i + 1) / items.length) * 100);
