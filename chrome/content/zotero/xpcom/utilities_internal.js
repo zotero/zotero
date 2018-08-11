@@ -957,6 +957,15 @@ Zotero.Utilities.Internal = {
 		Zotero.debug(`Found ${urls.length} open-access PDF ${Zotero.Utilities.pluralize(urls.length, ['URL', 'URLs'])}`);
 		// Handle older URL-only format
 		urls = urls.map(o => typeof o == 'string' ? { url: o } : o);
+		
+		// Only try a small number of URLs, and ignore Unpaywall rows that have a huge number of
+		// URLs by mistake (as of August 2018)
+		let maxURLs = 6;
+		if (urls.length > maxURLs) {
+			Zotero.debug(`Keeping ${maxURLs} URLs`);
+			urls = urls.slice(0, maxURLs);
+		}
+		
 		return urls;
 	},
 	
