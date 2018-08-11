@@ -1638,6 +1638,7 @@ var ZoteroPane = new function()
 			return true;
 		}.bind(this))()
 		.catch(function (e) {
+			Zotero.logError(e);
 			this.displayErrorMessage();
 			throw e;
 		}.bind(this))
@@ -4963,6 +4964,7 @@ var ZoteroPane = new function()
 			self.setItemsPaneMessage(msg, true);
 		}
 		Zotero.debug(msg, 1);
+		Zotero.debug(new Error().stack, 1);
 	}
 	
 	this.displayStartupError = function(asPaneMessage) {
