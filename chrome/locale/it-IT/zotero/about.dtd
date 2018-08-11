@@ -1,9 +1,10 @@
 <!ENTITY zotero.version "Versione">
+<!ENTITY zotero.whatsNew "Novità">
 <!ENTITY zotero.createdby "Creata da:">
 <!ENTITY zotero.director "Direttore:">
 <!ENTITY zotero.directors "Direttori:">
 <!ENTITY zotero.developers "Sviluppatori:">
-<!ENTITY zotero.alumni "Alumni:">
+<!ENTITY zotero.alumni "Alunni:">
 <!ENTITY zotero.about.localizations "Traduzioni:">
 <!ENTITY zotero.about.additionalSoftware "Software e modelli di terze parti:">
 <!ENTITY zotero.executiveProducer "Produttore esecutivo:">

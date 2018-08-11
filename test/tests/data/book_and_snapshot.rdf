@@ -1,0 +1,26 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:link="http://purl.org/rss/1.0/modules/link/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:dcterms="http://purl.org/dc/terms/">
+    <bib:Book rdf:about="#item_1">
+        <z:itemType>book</z:itemType>
+        <link:link rdf:resource="#item_2"/>
+        <dc:title>Test</dc:title>
+    </bib:Book>
+    <z:Attachment rdf:about="#item_2">
+        <z:itemType>attachment</z:itemType>
+        <rdf:resource rdf:resource="files/2/test.html"/>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>http://example.com/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-03-22 04:55:27</dcterms:dateSubmitted>
+        <dc:title>Test</dc:title>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+</rdf:RDF>

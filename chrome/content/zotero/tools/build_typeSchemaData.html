@@ -1,0 +1,90 @@
+<html>
+<head>
+	<title>Build schemaData.js</title>
+</head>
+<body>
+<p>This script builds typeSchemaData.js, which contains Zotero schema information for the connector.</p>
+<p id="result"></p>
+<script src="../include.js"></script>
+<script type="text/javascript">
+	Zotero.Promise.coroutine(function* (){
+		// Create schema
+		var schema = {"itemTypes":{}, "creatorTypes":{}, "fields":{}};
+		var types = Zotero.ItemTypes.getTypes();
+
+		var fieldIDs = yield Zotero.DB.columnQueryAsync("SELECT fieldID FROM fieldsCombined");
+		var baseMappedFields = Zotero.ItemFields.getBaseMappedFields();
+		
+		for (let fieldID of fieldIDs) {
+			var fieldObj = [/* name */Zotero.ItemFields.getName(fieldID)];
+			try {
+				fieldObj.push(/* localizedString */Zotero.getString("itemFields." + fieldObj.name));
+			} catch(e) {
+				fieldObj.push(/* name -> localizedString */fieldObj[0]);
+			}
+			fieldObj.push(/* isBaseField */ !baseMappedFields.includes(fieldID));
+			schema.fields[fieldID] = fieldObj;
+		}
+
+		// names, localizedStrings, creatorTypes, and fields for each item type
+		for (let type of types) {
+			var fieldIDs = Zotero.ItemFields.getItemTypeFields(type.id);
+			var baseFields = {};
+			for (let fieldID of fieldIDs) {
+				if (baseMappedFields.includes(fieldID)) {
+					baseFields[fieldID] = Zotero.ItemFields.getBaseIDFromTypeAndField(type.id, fieldID);
+				}
+			}
+
+			var icon = Zotero.ItemTypes.getImageSrc(type.name);
+			icon = icon.substr(icon.lastIndexOf("/")+1);
+
+			try {
+				var creatorTypes = Zotero.CreatorTypes.getTypesForItemType(type.id).map((creatorType) => creatorType.id);
+			} catch (e) {
+				creatorTypes = [];
+			}
+			var primaryCreatorType = Zotero.CreatorTypes.getPrimaryIDForType(type.id);
+			if(creatorTypes[0] != primaryCreatorType) {
+				creatorTypes.splice(creatorTypes.indexOf(primaryCreatorType), 1);
+				creatorTypes.unshift(primaryCreatorType);
+			}
+
+			schema.itemTypes[type.id] = [
+							/* name */type.name,
+							/* localizedString */Zotero.ItemTypes.getLocalizedString(type.name),
+							/* creatorTypes */creatorTypes,
+							/* fields */ fieldIDs,
+							/* baseFields */baseFields,
+							/* icon */icon
+			];
+
+		}
+
+		var types = Zotero.CreatorTypes.getTypes();
+		for (let type of types) {
+			schema.creatorTypes[type.id] = [
+							/* name */type.name,
+							/* localizedString */Zotero.CreatorTypes.getLocalizedString(type.name)
+			];
+		}
+
+		// Write to file
+		var nsIFilePicker = Components.interfaces.nsIFilePicker;
+		var fp = Components.classes["@mozilla.org/filepicker;1"]
+			.createInstance(nsIFilePicker);
+		fp.init(window, Zotero.getString('dataDir.selectDir'), nsIFilePicker.modeGetFolder);
+		
+		let resultElem = document.getElementById('result');
+		if (fp.show() != nsIFilePicker.returnOK) {
+			result.innerHTML = '<p>Failed.</p>';
+		} else {
+			let schemaFile = fp.file;
+			schemaFile.append("connectorTypeSchemaData.js");
+			Zotero.File.putContents(schemaFile, `Zotero.Connector_Types.schema = ${JSON.stringify(schema)}`);
+			result.innerHTML = `<p>Wrote ${schemaFile.path} successfully.</p>`;
+		}
+	})();
+</script>
+</body>
+</html>

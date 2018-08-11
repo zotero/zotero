@@ -41,6 +41,7 @@ var Zotero_Citation_Dialog = new function () {
 	var _previewShown = false;
 	var _suppressNextTreeSelect = false;
 	var _suppressNextListSelect = false;
+	var _customHTML = false;
 	var _locatorIndexArray = {};
 	var _locatorNameArray = {};
 	var _autoRegeneratePref;
@@ -52,17 +53,14 @@ var Zotero_Citation_Dialog = new function () {
 	var serial_number;
 	var io;
 	
-	this.load = load;
 	this.toggleMultipleSources = toggleMultipleSources;
 	this.toggleEditor = toggleEditor;
 	this.treeItemSelected = treeItemSelected;
 	this.listItemSelected = listItemSelected;
 	this.up = up;
 	this.down = down;
-	this.add = add;
 	this.remove = remove;
 	this.setSortToggle = setSortToggle;
-	this.citationSortUnsort = citationSortUnsort;
 	this.confirmRegenerate = confirmRegenerate;
 	this.accept = accept;
 	this.cancel = cancel;
@@ -70,7 +68,7 @@ var Zotero_Citation_Dialog = new function () {
 	/*
 	 * initialize add citation dialog
 	 */
-	function load() {
+	this.load = Zotero.Promise.coroutine(function* () {
 		// make sure we are visible
 		window.setTimeout(function() {
 			var screenX = window.screenX;
@@ -129,7 +127,7 @@ var Zotero_Citation_Dialog = new function () {
 		menu.selectedIndex = 0;
 		
 		// load (from selectItemsDialog.js)
-		doLoad();
+		yield doLoad();
 		
 		// if we already have a citation, load data from it
 		document.getElementById('editor').format = "RTF";
@@ -139,20 +137,12 @@ var Zotero_Citation_Dialog = new function () {
 				toggleMultipleSources(false);
 				_suppressNextTreeSelect = true;
 				
-				// If we're in a different library, switch libraries
+				// DEBUG: When editing a citation before the library data has been loaded (i.e., in
+				// Firefox before the pane has been opened), this is the citation id, not the item id,
+				// and this fails. It works on subsequent attempts. Since this won't happen in
+				// Standalone, we can ignore.
 				var id = io.citation.citationItems[0].id;
-				var itemGroup = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
-				var item = Zotero.Items.get(id);
-				if(item.libraryID != itemGroup.ref.libraryID) {
-					collectionsView.selectLibrary(item.libraryID);
-				}
-				var selected = itemsView.selectItem(id);
-				if(!selected) {
-					// If item wasn't found in current view, select library root
-					// and try again (in case we were in a collection of correct library)
-					collectionsView.selectLibrary(item.libraryID);
-					itemsView.selectItem(id);
-				}
+				let selected = yield collectionsView.selectItem(id);
 				
 				for(var box in _preserveData) {
 					var property = _preserveData[box][0];
@@ -209,7 +199,7 @@ var Zotero_Citation_Dialog = new function () {
 		} else {
 			toggleMultipleSources(false);
 		}
-	}
+	});
 	
 	/*
 	 * turn on/off multiple sources item list
@@ -265,7 +255,7 @@ var Zotero_Citation_Dialog = new function () {
 
 			// refresh
 			if (itemID) {
-				itemsView.wrappedJSObject.selectItem(itemID);
+				collectionsView.selectItem(itemID);
 			}
 			_updateAccept();
 			_updatePreview();
@@ -381,13 +371,13 @@ var Zotero_Citation_Dialog = new function () {
 	/*
 	 * Adds an item to the multipleSources list
 	 */
-	function add(first_item) {
+	this.add = Zotero.Promise.coroutine(function* (first_item) {
 		
 		var pos, len;
 		var item = itemsView.getSelectedItems()[0]; // treeview from xpcom/itemTreeView.js
 		
 		if (!item) {
-			sortCitation();
+			yield sortCitation();
 			_updateAccept();
 			_updatePreview();
 			return;
@@ -420,11 +410,11 @@ var Zotero_Citation_Dialog = new function () {
 		_citationList.ensureElementIsVisible(selectionNode);
 
 		// allow user to press OK
-		selectionNode = sortCitation(selectionNode);
+		selectionNode = yield sortCitation(selectionNode);
 		_citationList.selectItem(selectionNode);
 		_updateAccept();
 		_updatePreview();
-	}
+	});
 	
 	/*
 	 * Deletes a citation from the multipleSources list
@@ -454,11 +444,11 @@ var Zotero_Citation_Dialog = new function () {
 	/*
 	 * Sorts preview citations, if preview is open.
 	 */
-	function citationSortUnsort() {
+	this.citationSortUnsort = Zotero.Promise.coroutine(function* () {
 		setSortToggle();
-		sortCitation();
+		yield sortCitation();
 		_updatePreview();
-	}
+	});
 
 	/*
 	 * Sets the current sort toggle state persistently on the citation.
@@ -476,7 +466,7 @@ var Zotero_Citation_Dialog = new function () {
 	/*
 	 * Sorts the list of citations
  	 */
-	function sortCitation(scrollToItem) {
+	var sortCitation = Zotero.Promise.coroutine(function* (scrollToItem) {
  		if(!_sortCheckbox) return scrollToItem;
  		if(!_sortCheckbox.checked) {
  			io.citation.properties.unsorted = true;
@@ -493,7 +483,7 @@ var Zotero_Citation_Dialog = new function () {
 		
 		// run preview function to re-sort, if it hasn't already been
 		// run
-		io.sort();
+		yield io.sort();
 		
 		// add items back to list
 		scrollToItem = null;
@@ -510,7 +500,7 @@ var Zotero_Citation_Dialog = new function () {
 		
 		if(scrollToItem) _citationList.ensureElementIsVisible(scrollToItem);
 		return scrollToItem;
-	}
+	});
 	
 	/*
 	 * Ask whether to modifiy the preview
@@ -565,6 +555,9 @@ var Zotero_Citation_Dialog = new function () {
 		
 		if(_previewShown) {
 			document.documentElement.getButton("extra2").label = Zotero.getString("citation.hideEditor");		
+			if (!text && _customHTML) {
+				text = _customHTML;
+			}
 			if(text) {
 				io.preview().then(function(preview) {
 					_originalHTML = preview;
@@ -574,6 +567,11 @@ var Zotero_Citation_Dialog = new function () {
 				_updatePreview();
 			}
 		} else {
+			if (editor.initialized) {
+				if (editor.value) {
+					_customHTML = editor.value;
+				}
+			}
 			document.documentElement.getButton("extra2").label = Zotero.getString("citation.showEditor");		
 		}
 	}
@@ -632,14 +630,11 @@ var Zotero_Citation_Dialog = new function () {
 				io.preview().then(function(preview) {
 					editor.value = preview;
 					
-					if(editor.initialized) {
+					if (editor.initialized) {
 						_originalHTML = editor.value;
-					} else {
-						var eventListener = function() {
-							_originalHTML = editor.value;
-							editor.removeEventListener("tinymceInitialized", eventListener, false);
-						};
-						editor.addEventListener("tinymceInitialized", eventListener, false);
+					}
+					else {
+						editor.onInit(() => _originalHTML = editor.value);
 					}
 				});
 			} else {
@@ -652,7 +647,7 @@ var Zotero_Citation_Dialog = new function () {
 	/*
 	 * Controls whether the accept (OK) button should be enabled
 	 */
-	function _updateAccept(status) {
+	function _updateAccept() {
 		if(_multipleSourcesOn) {
 			_acceptButton.disabled = !_citationList.getRowCount();
 			// To prevent accidental data loss, do not allow change to
@@ -664,7 +659,12 @@ var Zotero_Citation_Dialog = new function () {
 				_multipleSourceButton.disabled = false;
 			}
 		} else {
-			_acceptButton.disabled = !itemsView.getSelectedItems().length; // treeview from xpcom/itemTreeView.js
+			collectionsView.onLoad.addListener(Zotero.Promise.coroutine(function* () {
+				if (itemsView) {
+					yield itemsView.waitForLoad();
+					_acceptButton.disabled = !itemsView.getSelectedItems().length;
+				}
+			}));
 		}
 	}
 	

@@ -39,16 +39,36 @@ var Zotero_Charset_Menu = new function() {
 		// get charset popup and charset RDF
 		var charsetPopup = document.createElement("menupopup");
 		charsetMenu.appendChild(charsetPopup);
-		var charsetSeparator = document.createElement("menuseparator");
-		charsetPopup.appendChild(charsetSeparator);
 		
 		var charsets = [];
-
-		if(Zotero.platformMajorVersion >= 32) {
+		
+		// Only list UTF-8 and Western for export
+		if (exportMenu) {
+			charsets.push(
+				{ label: "Unicode (UTF-8)", value: "UTF-8" },
+				{ label: Zotero.getString("charset.UTF8withoutBOM"), value: "UTF-8xBOM" },
+				{ label: "Western", value: "windows-1252" }
+			);
+			
+			for (let charset of charsets) {
+				let { label, value } = charset;
+	
+				let itemNode = document.createElement("menuitem");
+				itemNode.setAttribute("label", label);
+				itemNode.setAttribute("value", value);
+				
+				charsetMap[value] = itemNode;
+				charsetPopup.appendChild(itemNode);
+			}
+		}
+		else {
+			var charsetSeparator = document.createElement("menuseparator");
+			charsetPopup.appendChild(charsetSeparator);
+			
 			Components.utils.import("resource://gre/modules/CharsetMenu.jsm");
 			var cmData = CharsetMenu.getData();
-			for each(var charsetList in [cmData.pinnedCharsets, cmData.otherCharsets]) {
-				for each(var charsetInfo in charsetList) {
+			for (let charsetList of [cmData.pinnedCharsets, cmData.otherCharsets]) {
+				for (let charsetInfo of charsetList) {
 					if(charsetInfo.value == "UTF-8") {
 						charsets.push({
 							"label":"Unicode (UTF-8)",
@@ -68,69 +88,27 @@ var Zotero_Charset_Menu = new function() {
 				{"label":"Western (IBM-850)", "value":"IBM850"},
 				{"label":"Western (MacRoman)", "value":"macintosh"}
 			]);
-		} else {
-			var charsetConverter = Components.classes["@mozilla.org/charset-converter-manager;1"].
-				getService(Components.interfaces.nsICharsetConverterManager);
-			var ccCharsets = charsetConverter.getEncoderList();
-			// add charsets to popup in order
-			while(ccCharsets.hasMore()) {
-				var charset = ccCharsets.getNext();
-				try {
-					var label = charsetConverter.getCharsetTitle(charset);
-				} catch(e) {
-					continue;
-				}
-
-				var isUTF16 = charset.length >= 6 && charset.substr(0, 6) == "UTF-16";
-
-				// Show UTF-16 element appropriately depending on exportMenu
-				if(isUTF16 && exportMenu == (charset == "UTF-16") ||
-						(!exportMenu && charset == "UTF-32LE")) {
-					continue;
-				} else if(charset == "x-mac-roman") {
-					// use the IANA name
-					charset = "macintosh";
-				} else if(!exportMenu && charset == "UTF-32BE") {
-					label = "Unicode (UTF-32)";
-					charset = "UTF-32";
-				}
-				charsets.push({
-					"label":label,
-					"value":charset
-				});
-			}
-		}
-
-		for(var i=0; i<charsets.length; i++) {
-			var charset = charsets[i].value,
-			    label = charsets[i].label;
-
-			// add element
-			var itemNode = document.createElement("menuitem");
-			itemNode.setAttribute("label", label);
-			itemNode.setAttribute("value", charset);
-			
-			charsetMap[charset] = itemNode;
-			if(isUTF16 || (label.length >= 7 &&
-					label.substr(0, 7) == "Western")) {
-				charsetPopup.insertBefore(itemNode, charsetSeparator);
-			} else if(charset == "UTF-8") {
-				var oldFirst = (charsetPopup.firstChild ? charsetPopup.firstChild : null);
-				charsetPopup.insertBefore(itemNode, oldFirst);
-				// also add (without BOM) if requested
-				if(exportMenu) {
-					var itemNode = document.createElement("menuitem");
-					itemNode.setAttribute("label", Zotero.getString("charset.UTF8withoutBOM"));
-					itemNode.setAttribute("value", charset+"xBOM");
-					charsetMap[charset+"xBOM"] = itemNode;
-					charsetPopup.insertBefore(itemNode, oldFirst);
-				}
-			} else {
-				charsetPopup.appendChild(itemNode);
-			}
-		}
 		
-		if(!exportMenu) {
+			for(var i=0; i<charsets.length; i++) {
+				var charset = charsets[i].value,
+					label = charsets[i].label;
+	
+				// add element
+				var itemNode = document.createElement("menuitem");
+				itemNode.setAttribute("label", label);
+				itemNode.setAttribute("value", charset);
+				
+				charsetMap[charset] = itemNode;
+				if (label.length >= 7 && label.substr(0, 7) == "Western") {
+					charsetPopup.insertBefore(itemNode, charsetSeparator);
+				} else if(charset == "UTF-8") {
+					var oldFirst = (charsetPopup.firstChild ? charsetPopup.firstChild : null);
+					charsetPopup.insertBefore(itemNode, oldFirst);
+				} else {
+					charsetPopup.appendChild(itemNode);
+				}
+			}
+			
 			var itemNode = document.createElement("menuitem");
 			itemNode.setAttribute("label", Zotero.getString("charset.autoDetect"));
 			itemNode.setAttribute("value", "auto");

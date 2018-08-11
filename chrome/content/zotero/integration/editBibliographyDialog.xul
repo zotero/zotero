@@ -73,32 +73,38 @@
 							<treechildren/>
 						</tree>
 					
-						<tree id="zotero-items-tree"
-							flex="1" hidecolumnpicker="true" seltype="multiple"
-							onselect="Zotero_Bibliography_Dialog.treeItemSelected();">
-							<treecols>
-								<treecol
-									id="zotero-items-column-title" primary="true"
-									label="&zotero.items.title_column;"
-									flex="4" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-firstCreator"
-									label="&zotero.items.creator_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-dateAdded" hidden="true"
-									label="&zotero.items.dateAdded_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-								<splitter class="tree-splitter"/>
-								<treecol
-									id="zotero-items-column-dateModified" hidden="true"
-									label="&zotero.items.dateModified_column;"
-									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-							</treecols>				
-							<treechildren/>
-						</tree>
+						<deck id="zotero-items-pane-content" selectedIndex="0" flex="1">
+							<tree id="zotero-items-tree"
+								flex="1" hidecolumnpicker="true" seltype="multiple"
+								onselect="Zotero_Bibliography_Dialog.treeItemSelected();">
+								<treecols>
+									<treecol
+										id="zotero-items-column-title" primary="true"
+										label="&zotero.items.title_column;"
+										flex="4" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-firstCreator"
+										label="&zotero.items.creator_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-dateAdded" hidden="true"
+										label="&zotero.items.dateAdded_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+									<splitter class="tree-splitter"/>
+									<treecol
+										id="zotero-items-column-dateModified" hidden="true"
+										label="&zotero.items.dateModified_column;"
+										flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+								</treecols>				
+								<treechildren/>
+							</tree>
+							
+							<!-- Label for displaying messages when items pane is hidden
+							 (e.g. "Advanced search mode — press Enter to search.")-->
+							<vbox id="zotero-items-pane-message-box" pack="center" align="center"/>
+						</deck>
 					</hbox>
 				</vbox>
 						

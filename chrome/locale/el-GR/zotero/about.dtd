@@ -1,6 +1,7 @@
 <!ENTITY zotero.version "έκδοση">
+<!ENTITY zotero.whatsNew "Τι νέο υπάρχει">
 <!ENTITY zotero.createdby "Δημιουργήθηκε Από:">
-<!ENTITY zotero.director "Director:">
+<!ENTITY zotero.director "Διευθυντής:">
 <!ENTITY zotero.directors "Διευθυντές:">
 <!ENTITY zotero.developers "Προγραμματιστές:">
 <!ENTITY zotero.alumni "Απόφοιτοι:">

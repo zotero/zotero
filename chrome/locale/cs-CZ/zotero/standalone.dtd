@@ -19,57 +19,33 @@
 <!ENTITY pageSetupCmd.accesskey "U">
 <!ENTITY printCmd.label "Tisk...">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "Zavřít">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Importovat...">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Vložit ze schránky">
 <!ENTITY quitApplicationCmdWin.label "Zavřít">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Zavřít">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Upravit">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Zpět">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Znovu">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Vyjmout">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Kopírovat">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Kopírovat citaci">
 <!ENTITY copyBibliographyCmd.label "Kopírovat bibliografii">
-<!ENTITY pasteCmd.label "Vložit">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Smazat">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Vybrat vše">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Nastavení">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Nastavení">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Najít">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Přepnout směr stránky">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Přepnout směr textu">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
-<!ENTITY bidiSwitchTextDirectionItem.commandkey "x">
+<!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
 <!ENTITY toolsMenu.label "Nástroje">
 <!ENTITY toolsMenu.accesskey "T">
+<!ENTITY installConnector.label "Nainstalovat Konektory do prohlížečů">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Doplňky">
 
 
@@ -90,12 +66,21 @@
 <!ENTITY aboutProduct.label "O &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "Podpora a dokumentace">
-<!ENTITY productHelp.accesskey "H">
+<!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Informace o řešení potíží">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Poslat zpětnou vazbu...">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Nahlásit chyby do Zotera...">
+<!ENTITY helpFeedbackPage.label "Diskusní fórum">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Nahlásit chyby...">
 <!ENTITY helpReportErrors.accesskey "R">
+
+<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Zaslat výstup">
+<!ENTITY debugOutputLogging.view "Prohlédnout výstup">
+<!ENTITY debugOutputLogging.clear "Vymazat výstup">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+
 <!ENTITY helpCheckForUpdates.label "Zkontrolovat aktualizace...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

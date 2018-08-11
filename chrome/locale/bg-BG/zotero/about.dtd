@@ -1,6 +1,7 @@
 <!ENTITY zotero.version "версия">
+<!ENTITY zotero.whatsNew "Какво е новото?">
 <!ENTITY zotero.createdby "Създаден от:">
-<!ENTITY zotero.director "Director:">
+<!ENTITY zotero.director "Директор:">
 <!ENTITY zotero.directors "Директори:">
 <!ENTITY zotero.developers "Разработчици:">
 <!ENTITY zotero.alumni "Възпитаници:">
@@ -9,5 +10,5 @@
 <!ENTITY zotero.executiveProducer "Изпълнителен продуцент:">
 <!ENTITY zotero.thanks "Специални благодарности:">
 <!ENTITY zotero.about.close "Затваряне">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Още благодарности и признания">
+<!ENTITY zotero.citationProcessing "Обработка на бележки под линия и библиография">

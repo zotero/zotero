@@ -41,7 +41,7 @@
 	height="140">
 	
 	<script src="include.js"/>
-	<script src="tagColorChooser.js" type="text/javascript;version=1.8"/>
+	<script src="tagColorChooser.js"/>
 	
 	<vbox id="tag-color-chooser-container">
 		<hbox align="center">

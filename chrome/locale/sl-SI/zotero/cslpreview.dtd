@@ -1,9 +1,9 @@
-<!ENTITY styles.preview "Zotero Style Preview">
+<!ENTITY styles.preview "Predogled sloga Zotero">
 
-<!ENTITY styles.preview.citationFormat "Citation Format:">
-<!ENTITY styles.preview.citationFormat.all "all">
-<!ENTITY styles.preview.citationFormat.author "author">
-<!ENTITY styles.preview.citationFormat.authorDate "author-date">
-<!ENTITY styles.preview.citationFormat.label "label">
-<!ENTITY styles.preview.citationFormat.note "note">
-<!ENTITY styles.preview.citationFormat.numeric "numeric">
+<!ENTITY styles.preview.citationFormat "Oblika navedka:">
+<!ENTITY styles.preview.citationFormat.all "vse">
+<!ENTITY styles.preview.citationFormat.author "avtor">
+<!ENTITY styles.preview.citationFormat.authorDate "avtor-datum">
+<!ENTITY styles.preview.citationFormat.label "oznaka">
+<!ENTITY styles.preview.citationFormat.note "opomba">
+<!ENTITY styles.preview.citationFormat.numeric "številsko">

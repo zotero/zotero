@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2016 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://global/content/commonDialog.css" type="text/css"?>
+<?xml-stylesheet href="chrome://global/skin/commonDialog.css" type="text/css"?>
+
+<!DOCTYPE overlay [ <!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD; ]>
+
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	title="" buttons="cancel,accept"
+	id="zotero-hardConfirmationDialog"
+	onload="Zotero.HardConfirmationDialog.init(); sizeToContent();"
+	ondialogaccept="Zotero.HardConfirmationDialog.onAccept();"
+	ondialogextra1="Zotero.HardConfirmationDialog.onExtra1();">
+	
+	<script src="chrome://zotero/content/include.js"/>
+	<script src="hardConfirmationDialog.js"/>
+	
+	<grid>
+		<columns>
+			<column/>
+			<column flex="1"/>
+		</columns>
+		<rows>
+			<row>
+				<hbox id="iconContainer" align="start"><image id="info.icon" class="spaced alert-icon"/></hbox>
+				<vbox id="infoContainer">
+					<separator class="thin"/>
+
+					<checkbox id="zotero-hardConfirmationDialog-checkbox" hidden="true" oncommand="Zotero.HardConfirmationDialog.onCheckbox(event)"/>
+					<textbox id="zotero-hardConfirmationDialog-textbox" hidden="true" onkeyup="Zotero.HardConfirmationDialog.onKeyUp(event)"/>
+				</vbox>
+			</row>
+		</rows>
+	</grid>
+	
+</dialog>

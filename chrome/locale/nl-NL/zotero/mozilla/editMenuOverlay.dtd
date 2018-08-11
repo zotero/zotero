@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "Bewerken">
+<!ENTITY editMenu.accesskey        "w">
+<!ENTITY undoCmd.label             "Ongedaan maken">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "O">
+<!ENTITY redoCmd.label             "Opnieuw uitvoeren">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "u">
+<!ENTITY cutCmd.label              "Knippen">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "n">
+<!ENTITY copyCmd.label             "Kopiëren">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "K">
+<!ENTITY pasteCmd.label            "Plakken">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "P">
+<!ENTITY deleteCmd.label           "Verwijderen">
+<!ENTITY deleteCmd.accesskey       "w">
+<!ENTITY selectAllCmd.label        "Alles selecteren">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "A">
+<!ENTITY findCmd.label             "Zoeken">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "Z">
+<!ENTITY findAgainCmd.label        "Opnieuw zoeken">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "e">
+<!ENTITY findPreviousCmd.label     "Vorige zoeken">
+<!ENTITY findPreviousCmd.accesskey "V">

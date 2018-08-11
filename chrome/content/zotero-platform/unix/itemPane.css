@@ -1,0 +1,30 @@
+/* Some distros have icons disabled by default at the OS level and
+ * mozilla is a respectful gent.
+ */
+#zotero-feed-item-addTo-button .button-icon {
+	display: block;
+	margin-right: 5px
+}
+
+/* Set to hidden in user-agent css for some reason. */
+#zotero-feed-item-addTo-button .menu-iconic-left {
+	visibility: visible;
+}
+
+#zotero-item-pane-content {
+	margin-right: 6px;
+}
+
+/* Make the item pane appear white (same colour as treeview), making the UI more consistent */
+#zotero-item-pane-content tab, #zotero-item-pane-content tabpanels {
+	background-color: -moz-Field; /* Same as background colour for treeview */
+}
+
+/* Possibly irrelevant if mozilla fixes https://bugzilla.mozilla.org/show_bug.cgi?id=1306425 */
+#zotero-view-tabbox tabs tab[visuallyselected=true] {
+	margin-top: 0px !important; /* Importanter than ./itemPane.css:20 */
+	margin-bottom: -2px !important; /* Importanter than skin/itemPane.css:12 */
+}
+#zotero-view-tabbox tabs tab {
+	margin-top: 2px !important; /* Importanter than skin/itemPane.css:11 */
+}

@@ -24,42 +24,44 @@
 */
 
 "use strict";
-var _io;
 
 var Zotero_Tag_Color_Chooser = new function() {
+	var _io;
+	
 	this.init = function () {
-		// Set font size from pref
-		Zotero.setFontSize(document.getElementById("tag-color-chooser-container"));
-		
-		if (window.arguments && window.arguments.length) {
-			_io = window.arguments[0];
-			if (_io.wrappedJSObject) _io = _io.wrappedJSObject;
-		}
-		if (typeof _io.libraryID == 'undefined') throw new Error("libraryID not set");
-		if (typeof _io.name == 'undefined' || _io.name === "") throw new Error("name not set");
-		
-		window.sizeToContent();
-		
 		var dialog = document.getElementById('tag-color-chooser');
-		var colorPicker = document.getElementById('color-picker');
-		var tagPosition = document.getElementById('tag-position');
 		
-		colorPicker.setAttribute('cols', 3);
-		colorPicker.setAttribute('tileWidth', 24);
-		colorPicker.setAttribute('tileHeight', 24);
-		colorPicker.colors = [
-			'#990000', '#CC9933', '#FF9900',
-			'#FFCC00', '#007439', '#1049A9',
-			'#9999FF', '#CC66CC', '#993399'
-		];
-		
-		var maxTags = document.getElementById('max-tags');
-		maxTags.value = Zotero.getString('tagColorChooser.maxTags', Zotero.Tags.MAX_COLORED_TAGS);
-		
-		var self = this;
-		Zotero.Tags.getColors(_io.libraryID)
-		.then(function (tagColors) {
-			var colorData = tagColors[_io.name];
+		try {
+			// Set font size from pref
+			Zotero.setFontSize(document.getElementById("tag-color-chooser-container"));
+			
+			if (window.arguments && window.arguments.length) {
+				_io = window.arguments[0];
+				if (_io.wrappedJSObject) _io = _io.wrappedJSObject;
+			}
+			if (typeof _io.libraryID == 'undefined') throw new Error("libraryID not set");
+			if (typeof _io.name == 'undefined' || _io.name === "") throw new Error("name not set");
+			if (_io.tagColors === undefined) throw new Error("tagColors not provided");
+			
+			window.sizeToContent();
+			
+			var colorPicker = document.getElementById('color-picker');
+			var tagPosition = document.getElementById('tag-position');
+			
+			colorPicker.setAttribute('cols', 3);
+			colorPicker.setAttribute('tileWidth', 24);
+			colorPicker.setAttribute('tileHeight', 24);
+			colorPicker.colors = [
+				'#FF6666', '#FF8C19', '#999999',
+				'#5FB236', '#009980', '#2EA8E5',
+				'#576DD9', '#A28AE5', '#A6507B'
+			];
+			
+			var maxTags = document.getElementById('max-tags');
+			maxTags.value = Zotero.getString('tagColorChooser.maxTags', Zotero.Tags.MAX_COLORED_TAGS);
+			
+			var tagColors = _io.tagColors;
+			var colorData = tagColors.get(_io.name);
 			
 			// Color
 			if (colorData) {
@@ -69,8 +71,8 @@ var Zotero_Tag_Color_Chooser = new function() {
 			else {
 				// Get unused color at random
 				var usedColors = [];
-				for (var i in tagColors) {
-					usedColors.push(tagColors[i].color);
+				for (let x of tagColors.values()) {
+					usedColors.push(x.color);
 				}
 				var unusedColors = Zotero.Utilities.arrayDiff(
 					colorPicker.colors, usedColors
@@ -81,7 +83,7 @@ var Zotero_Tag_Color_Chooser = new function() {
 			}
 			colorPicker.setAttribute('disabled', 'false');
 			
-			var numColors = Object.keys(tagColors).length;
+			var numColors = tagColors.size;
 			var max = colorData ? numColors : numColors + 1;
 			
 			// Position
@@ -103,15 +105,15 @@ var Zotero_Tag_Color_Chooser = new function() {
 				tagPosition.selectedIndex = 0;
 			}
 			
-			self.onPositionChange();
+			this.onPositionChange();
 			window.sizeToContent();
-		})
-		.catch(function (e) {
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
-			dialog.cancelDialog();
-		})
-		.done();
+		}
+		catch (e) {
+			Zotero.logError(e);
+			if (dialog.cancelDialog) {
+				dialog.cancelDialog();
+			}
+		}
 	};
 	
 	

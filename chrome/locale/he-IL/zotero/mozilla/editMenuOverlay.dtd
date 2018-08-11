@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "עריכה">
+<!ENTITY editMenu.accesskey        "ע">
+<!ENTITY undoCmd.label             "בטל">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "ל">
+<!ENTITY redoCmd.label             "בצע שוב">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "צ">
+<!ENTITY cutCmd.label              "גזור">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "ג">
+<!ENTITY copyCmd.label             "העתק">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "ת">
+<!ENTITY pasteCmd.label            "הדבק">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "ה">
+<!ENTITY deleteCmd.label           "מחק">
+<!ENTITY deleteCmd.accesskey       "מ">
+<!ENTITY selectAllCmd.label        "בחר הכול">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "ב">
+<!ENTITY findCmd.label             "חפש">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "פ">
+<!ENTITY findAgainCmd.label        "מצא שוב">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "ש">
+<!ENTITY findPreviousCmd.label     "מצא את הקודם">
+<!ENTITY findPreviousCmd.accesskey "v">

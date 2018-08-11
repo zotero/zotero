@@ -1,7 +1,7 @@
 {
 	"artwork": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"artworkSize": "Artwork size",
@@ -16,6 +16,11 @@
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "artist",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -32,7 +37,7 @@
 	"audioRecording": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -56,6 +61,11 @@
 				"creatorType": "wordsBy",
 				"firstName": "wordsByFirst",
 				"lastName": "wordsByLast"
+			},
+			{
+				"creatorType": "performer",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -77,7 +87,7 @@
 	},
 	"bill": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"code": "Code",
 		"creators": [
 			{
@@ -94,6 +104,11 @@
 				"creatorType": "cosponsor",
 				"firstName": "cosponsorFirst",
 				"lastName": "cosponsorLast"
+			},
+			{
+				"creatorType": "sponsor",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -114,7 +129,7 @@
 	},
 	"blogPost": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"creators": [
 			{
 				"creatorType": "author",
@@ -130,6 +145,11 @@
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -146,7 +166,7 @@
 	"book": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -175,6 +195,11 @@
 				"creatorType": "translator",
 				"firstName": "translatorFirst",
 				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -198,7 +223,7 @@
 	"bookSection": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -232,6 +257,11 @@
 				"creatorType": "translator",
 				"firstName": "translatorFirst",
 				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -255,7 +285,7 @@
 	},
 	"case": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"court": "Court",
 		"creators": [
 			{
@@ -272,6 +302,11 @@
 				"creatorType": "counsel",
 				"firstName": "counselFirst",
 				"lastName": "counselLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -291,7 +326,7 @@
 	"computerProgram": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -305,6 +340,11 @@
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "programmer",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -320,13 +360,13 @@
 		"system": "System",
 		"title": "Title",
 		"url": "http://www.example.com",
-		"version": "Version"
+		"versionNumber": "Version number"
 	},
 	"conferencePaper": {
 		"DOI": "10.1234/example.doi",
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -356,6 +396,11 @@
 				"creatorType": "translator",
 				"firstName": "translatorFirst",
 				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -377,7 +422,7 @@
 	"dictionaryEntry": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -406,6 +451,11 @@
 				"creatorType": "translator",
 				"firstName": "translatorFirst",
 				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -429,7 +479,7 @@
 	},
 	"document": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -458,6 +508,11 @@
 				"creatorType": "translator",
 				"firstName": "translatorFirst",
 				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -473,7 +528,7 @@
 	},
 	"email": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"creators": [
 			{
 				"creatorType": "author",
@@ -489,6 +544,11 @@
 				"creatorType": "recipient",
 				"firstName": "recipientFirst",
 				"lastName": "recipientLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -503,7 +563,7 @@
 	"encyclopediaArticle": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -532,6 +592,11 @@
 				"creatorType": "translator",
 				"firstName": "translatorFirst",
 				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -555,7 +620,7 @@
 	},
 	"film": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -579,6 +644,11 @@
 				"creatorType": "scriptwriter",
 				"firstName": "scriptwriterFirst",
 				"lastName": "scriptwriterLast"
+			},
+			{
+				"creatorType": "director",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -597,7 +667,7 @@
 	},
 	"forumPost": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"creators": [
 			{
 				"creatorType": "author",
@@ -608,6 +678,11 @@
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -623,13 +698,18 @@
 	},
 	"hearing": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"committee": "Committee",
 		"creators": [
 			{
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "contributor",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -651,7 +731,7 @@
 	},
 	"instantMessage": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"creators": [
 			{
 				"creatorType": "author",
@@ -667,6 +747,11 @@
 				"creatorType": "recipient",
 				"firstName": "recipientFirst",
 				"lastName": "recipientLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -680,7 +765,7 @@
 	},
 	"interview": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -704,6 +789,11 @@
 				"creatorType": "translator",
 				"firstName": "translatorFirst",
 				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "interviewee",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -721,7 +811,7 @@
 		"DOI": "10.1234/example.doi",
 		"ISSN": "1234-5679",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -750,6 +840,11 @@
 				"creatorType": "translator",
 				"firstName": "translatorFirst",
 				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -772,7 +867,7 @@
 	},
 	"letter": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -791,6 +886,11 @@
 				"creatorType": "recipient",
 				"firstName": "recipientFirst",
 				"lastName": "recipientLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -807,7 +907,7 @@
 	"magazineArticle": {
 		"ISSN": "1234-5679",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -831,6 +931,11 @@
 				"creatorType": "translator",
 				"firstName": "translatorFirst",
 				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -849,7 +954,7 @@
 	},
 	"manuscript": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -868,6 +973,11 @@
 				"creatorType": "translator",
 				"firstName": "translatorFirst",
 				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -886,7 +996,7 @@
 	"map": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -905,6 +1015,11 @@
 				"creatorType": "seriesEditor",
 				"firstName": "seriesEditorFirst",
 				"lastName": "seriesEditorLast"
+			},
+			{
+				"creatorType": "cartographer",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -926,7 +1041,7 @@
 	"newspaperArticle": {
 		"ISSN": "1234-5679",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -950,6 +1065,11 @@
 				"creatorType": "translator",
 				"firstName": "translatorFirst",
 				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -969,7 +1089,7 @@
 	},
 	"patent": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"applicationNumber": "Application number",
 		"assignee": "Assignee",
 		"country": "Country",
@@ -988,6 +1108,11 @@
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "inventor",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -1009,7 +1134,7 @@
 	},
 	"podcast": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"creators": [
 			{
 				"creatorType": "podcaster",
@@ -1025,6 +1150,11 @@
 				"creatorType": "guest",
 				"firstName": "guestFirst",
 				"lastName": "guestLast"
+			},
+			{
+				"creatorType": "podcaster",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"extra": "Extra",
@@ -1041,7 +1171,7 @@
 	},
 	"presentation": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"creators": [
 			{
 				"creatorType": "presenter",
@@ -1052,6 +1182,11 @@
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "presenter",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -1068,7 +1203,7 @@
 	},
 	"radioBroadcast": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -1102,6 +1237,11 @@
 				"creatorType": "scriptwriter",
 				"firstName": "scriptwriterFirst",
 				"lastName": "scriptwriterLast"
+			},
+			{
+				"creatorType": "director",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -1122,7 +1262,7 @@
 	},
 	"report": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -1146,6 +1286,11 @@
 				"creatorType": "translator",
 				"firstName": "translatorFirst",
 				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -1166,7 +1311,7 @@
 	},
 	"statute": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"code": "Code",
 		"codeNumber": "Code number",
 		"creators": [
@@ -1179,6 +1324,11 @@
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -1197,7 +1347,7 @@
 	},
 	"thesis": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -1211,6 +1361,11 @@
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -1229,7 +1384,7 @@
 	},
 	"tvBroadcast": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -1263,6 +1418,11 @@
 				"creatorType": "scriptwriter",
 				"firstName": "scriptwriterFirst",
 				"lastName": "scriptwriterLast"
+			},
+			{
+				"creatorType": "director",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -1284,7 +1444,7 @@
 	"videoRecording": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -1313,6 +1473,11 @@
 				"creatorType": "scriptwriter",
 				"firstName": "scriptwriterFirst",
 				"lastName": "scriptwriterLast"
+			},
+			{
+				"creatorType": "director",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
@@ -1334,7 +1499,7 @@
 	},
 	"webpage": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"creators": [
 			{
 				"creatorType": "author",
@@ -1350,6 +1515,11 @@
 				"creatorType": "translator",
 				"firstName": "translatorFirst",
 				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",

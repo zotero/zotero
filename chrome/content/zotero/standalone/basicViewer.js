@@ -46,3 +46,20 @@ window.addEventListener("load", function() {
 		document.getElementById("my-browser").style.overflow = "auto";
 	}, 0);
 }, false);
+
+window.addEventListener("keypress", function (event) {
+	// Cmd-R/Ctrl-R (with or without Shift) to reload
+	if (((Zotero.isMac && event.metaKey && !event.ctrlKey)
+			|| (!Zotero.isMac && event.ctrlKey))
+			&& !event.altKey && event.which == 114) {
+		browser.reloadWithFlags(browser.webNavigation.LOAD_FLAGS_BYPASS_CACHE);
+	}
+});
+
+// Handle <label class="text-link />
+window.addEventListener("click", function (event) {
+	if (event.originalTarget.localName == 'label'
+			&& event.originalTarget.classList.contains('text-link')) {
+		Zotero.launchURL(event.originalTarget.getAttribute('href'));
+	}
+});

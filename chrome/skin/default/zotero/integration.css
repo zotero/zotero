@@ -139,6 +139,7 @@
 }
 
 #quick-format-iframe {
+	margin-left: 4px;
 	height: 9999px;
 }
 
@@ -147,6 +148,11 @@ body {
 	padding: 0;
 	font: -moz-field;
 	overflow: hidden;
+}
+
+#quick-format-spinner {
+	margin-top: 2px;
+	margin-right: 8px;
 }
 
 .quick-format-item {
@@ -207,11 +213,6 @@ richlistitem[selected="true"] {
 	margin: 0;
 }
 
-#zotero-icon .toolbarbutton-menu-dropmarker {
-	margin-left: 0;
-	padding-left: 0;
-}
-
 #citation-properties #suppress-author {
 	-moz-user-focus: normal;
 }
@@ -238,4 +239,8 @@ richlistitem[selected="true"] {
 
 panel button .button-text {
 	margin: 0 !important;
+}
+
+#quick-format-dialog {
+	width: 600px;
 }

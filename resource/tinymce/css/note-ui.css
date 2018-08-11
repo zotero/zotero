@@ -2,40 +2,183 @@ html, body {
 	height: 100%;
 	margin: 0;
 }
-#tinymce_parent {
-	display: block;
-	height: 100%;
-}
-#tinymce_tbl {
+
+/* Stretch editor to fit frame */
+#tinymce_ifr, .mce-tinymce:not(.mce-floatpanel) {
 	height: 100% !important;
+	border: 0 !important;
+}
+
+.mce-container-body {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.mce-container-body .mce-edit-area {
+    position: absolute;
+    top: 57px;
+    bottom: 1px;
+    left: 0;
+    right: 0;
+}
+
+/* Adjustments for read-only mode */
+.mce-container.readonly .mce-container-body .mce-edit-area {
+	top: 0;
+}
+
+.mce-container.readonly .mce-panel {
+	border: 0;
+}
+
+/* Shrink the buttons a bit */
+.mce-btn-small button {
+	padding-left: 3px !important;
+	padding-right: 3px !important;
+}
+
+.mce-listbox button {
+	padding-right: 12px !important;
+}
+
+/* Tighten some padding */
+.mce-toolbar:first-child > div > :nth-child(3) {
+	margin-left: 0;
+}
+
+.mce-toolbar:last-child > div > :nth-child(2) {
+	margin-left: 0;
+}
+
+/*
+ * Keep popups within frame
+ *
+ * Modified from http://stackoverflow.com/a/34627616
+ */
+#mce-modal-block {
+}
+
+.mce-window {
+	width: auto !important;
+	background: none !important;
+}
+
+/* This is unfortunate, but without it the Search/Replace window runs off the left side when the
+   pane is too narrow */
+.mce-window:not([role=alertdialog]) {
+	left: 0 !important;
+}
+
+.mce-window-head {
+	background: #fff !important;
+}
+
+.mce-window-body {
+	background: #fff !important;
+}
+
+.mce-foot {
+}
+
+.mce-foot > .mce-container-body {
+	padding: 10px !important;
+}
+
+.mce-foot button {
+}
+
+.mce-panel {
+	max-width: 100% !important;
+}
+
+.mce-container {
+	max-width: 100% !important;
+	height: auto !important;
+}
+
+.mce-container-body {
+	max-width: 100% !important;
+	height: auto !important;
+}
+
+.mce-form {
+	padding: 10px !important;
+}
+
+.mce-tabs {
+	max-width: 100% !important;
+}
+
+.mce-tabs .mce-tab, .mce-tabs .mce-tab.mce-active {
+}
+
+.mce-formitem {
+	margin: 10px 0 !important;
+}
+
+/* Keep button sizes consistent */
+.mce-window .mce-menubtn {
+	min-width: 150px
+}
+
+.mce-foot .mce-primary {
+
+}
+
+/* Space out buttons */
+.mce-foot .mce-btn {
+  margin-right: 6px;
+	margin-top: 5px;
+	min-width: 75px !important;;
+}
+
+/* Correct for margin on buttons */
+.mce-foot .mce-container-body {
+	margin-top: -5px;
+}
+
+/* Space out alerts (e.g., string not found in search) */
+.mce-floatpanel[role=alertdialog] .mce-window-body .mce-first {
+	padding: 20px 40px 0;
+}
+
+.mce-abs-layout-item {
+	position: static !important;
+	width: auto !important;
+}
+
+.mce-abs-layout-item.mce-label {
+	display: block !important;
+}
+
+.mce-abs-layout-item.mce-textbox {
+	box-sizing: border-box !important;
+	display: block !important;
 	width: 100% !important;
 }
 
-table.mceLayout > tbody > tr.mceLast {
-	position: absolute;
-	display: block;
-	top: 54px;
-	bottom: 2px;
-	left: 1px;
-	right: 1px;
+.mce-abs-layout-item.mce-combobox {
+	display: flex !important;
 }
 
-td.mceIframeContainer {
-	display: block;
-	height: 100% !important;
-	width: 100% !important;
-}
-#tinymce_ifr {
-	height: 100% !important;
-	width: 100% !important;
+.mce-abs-layout-item.mce-combobox > .mce-textbox {
+	flex: 1 1 auto;
+	height: 29px !important;
 }
 
-#tinymce_formatselect_text {
-	width: 65px;
+.mce-top-part::before {
+	box-shadow: none !important;
+}
+
+/* Fix 100% width of link toolbar */
+div.mce-tinymce-inline {
+	width: initial !important;
 }
 
 #noScriptWarning {
 	padding: 4px;
-	font-family: "Lucida Sans Unicode", "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+	font-family: sans-serif;
 	font-size: 12px;
 }

@@ -24,6 +24,7 @@
     ***** END LICENSE BLOCK *****
 -->
 <?xml-stylesheet href="chrome://zotero/skin/itemPane.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/itemPane.css" type="text/css"?>
 
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
@@ -31,12 +32,29 @@
 	<script src="include.js"/>
 	<script src="itemPane.js" type="application/javascript;version=1.8"/>
 	
-	<vbox id="zotero-item-pane" zotero-persist="width">
+	<vbox id="zotero-item-pane" zotero-persist="width height">
+		<!-- My Publications -->
+		<hbox id="zotero-item-pane-top-buttons-my-publications" class="zotero-item-pane-top-buttons" hidden="true">
+			<button id="zotero-item-collection-show-hide"/>
+		</hbox>
+		
 		<!-- Trash -->
-		<vbox id="zotero-item-restore-button-holder">
+		<hbox id="zotero-item-pane-top-buttons-trash" class="zotero-item-pane-top-buttons" hidden="true">
 			<button id="zotero-item-restore-button" label="&zotero.items.menu.restoreToLibrary;"
-				oncommand="ZoteroPane_Local.restoreSelectedItems()" hidden="true"/>
-		</vbox>
+				oncommand="ZoteroPane_Local.restoreSelectedItems()"/>
+			<button id="zotero-item-delete-button" label="&zotero.item.deletePermanently;"
+				oncommand="ZoteroPane_Local.deleteSelectedItems()"/>
+		</hbox>
+		
+		<!-- Feed -->
+		<hbox id="zotero-item-pane-top-buttons-feed" class="zotero-item-pane-top-buttons" hidden="true">
+			<button id="zotero-feed-item-toggleRead-button"
+				oncommand="ZoteroPane_Local.toggleSelectedItemsRead();"/>
+			<button id="zotero-feed-item-addTo-button" type="menu-button"
+				oncommand="ZoteroItemPane.translateSelectedItems()">
+				<menupopup id="zotero-item-addTo-menu" onpopupshowing="ZoteroItemPane.buildTranslateSelectContextMenu(event);"/>
+			</button>
+		</hbox>
 		
 		<!-- Commons -->
 		<button id="zotero-item-show-original" label="Show Original"
@@ -45,52 +63,60 @@
 		<deck id="zotero-item-pane-content" selectedIndex="0" flex="1">
 			<!-- Center label (for zero or multiple item selection) -->
 			<groupbox id="zotero-item-pane-groupbox" pack="center" align="center">
-				<label id="zotero-item-pane-message"/>
+				<vbox id="zotero-item-pane-message-box"/>
 			</groupbox>
 			
 			<!-- Regular item -->
 			<tabbox id="zotero-view-tabbox" flex="1" onselect="if (!ZoteroPane_Local.collectionsView.selection || event.originalTarget.localName != 'tabpanels') { return; }; ZoteroItemPane.viewItem(ZoteroPane_Local.getSelectedItems()[0], ZoteroPane_Local.collectionsView.editable ? 'edit' : 'view', this.selectedIndex)">
-				<tabs>
-					<tab label="&zotero.tabs.info.label;"/>
-					<tab label="&zotero.tabs.notes.label;"/>
-					<tab label="&zotero.tabs.tags.label;"/>
-					<tab label="&zotero.tabs.related.label;"/>
+				<tabs id="zotero-editpane-tabs">
+					<tab id="zotero-editpane-info-tab" label="&zotero.tabs.info.label;"/>
+					<tab id="zotero-editpane-notes-tab" label="&zotero.tabs.notes.label;"/>
+					<tab id="zotero-editpane-tags-tab" label="&zotero.tabs.tags.label;"/>
+					<tab id="zotero-editpane-related-tab" label="&zotero.tabs.related.label;"/>
 				</tabs>
-					<tabpanels id="zotero-view-item" flex="1">
-						<tabpanel>
-							<zoteroitembox id="zotero-editpane-item-box" flex="1"/>
-						</tabpanel>
-						
-						<tabpanel flex="1" orient="vertical">
-							<vbox flex="1" class="zotero-box">
-								<hbox align="center">
-									<label id="zotero-editpane-notes-label"/>
-									<button id="zotero-editpane-notes-add" label="&zotero.item.add;" oncommand="ZoteroItemPane.addNote(event.shiftKey);"/>
-								</hbox>
-								<grid flex="1">
-									<columns>
-										<column flex="1"/>
-										<column/>
-									</columns>
-									<rows id="zotero-editpane-dynamic-notes" flex="1"/>
-								</grid>
-							</vbox>
-						</tabpanel>
-						
-						<tabpanel>
-							<tagsbox id="zotero-editpane-tags" flex="1"/>
-						</tabpanel>
-						
-						<tabpanel>
-							<seealsobox id="zotero-editpane-related" flex="1"/>
-						</tabpanel>
-					</tabpanels>
+				<tabpanels id="zotero-view-item" flex="1">
+					<tabpanel>
+						<zoteroitembox id="zotero-editpane-item-box" flex="1"/>
+					</tabpanel>
+					
+					<tabpanel flex="1" orient="vertical">
+						<vbox flex="1" id="zotero-editpane-notes" class="zotero-box">
+							<hbox align="center">
+								<label id="zotero-editpane-notes-label"/>
+								<button id="zotero-editpane-notes-add" label="&zotero.item.add;" oncommand="ZoteroItemPane.addNote(event.shiftKey);"/>
+							</hbox>
+							<grid flex="1">
+								<columns>
+									<column flex="1"/>
+									<column/>
+								</columns>
+								<rows id="zotero-editpane-dynamic-notes" flex="1"/>
+							</grid>
+						</vbox>
+					</tabpanel>
+					
+					<tabpanel>
+						<tagsbox id="zotero-editpane-tags" flex="1"/>
+					</tabpanel>
+					
+					<tabpanel>
+						<relatedbox id="zotero-editpane-related" flex="1"/>
+					</tabpanel>
+				</tabpanels>
 			</tabbox>
 			
 			<!-- Note item -->
 			<groupbox id="zotero-view-note" flex="1">
-				<zoteronoteeditor id="zotero-note-editor" flex="1" notitle="1" previousfocus="zotero-items-tree"/>
-				<button id="zotero-view-note-button" label="&zotero.notes.separate;" oncommand="ZoteroPane_Local.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ZoteroPane_Local.selectItem(this.getAttribute('sourceID'));"/>
+				<!--
+					'onerror' handler crashes the app on a save error to prevent typing in notes
+					while they're not being saved
+				-->
+				<zoteronoteeditor id="zotero-note-editor" flex="1" notitle="1"
+					previousfocus="zotero-items-tree"
+					onerror="ZoteroPane.displayErrorMessage(); this.mode = 'view'"/>
+				<button id="zotero-view-note-button"
+						label="&zotero.notes.separate;"
+						oncommand="ZoteroItemPane.openNoteWindow()"/>
 			</groupbox>
 			
 			<!-- Attachment item -->

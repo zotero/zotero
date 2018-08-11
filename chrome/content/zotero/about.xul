@@ -18,56 +18,70 @@
 	<vbox id="aboutcontent">
 		<label id="name" value="Zotero"/>
 		<hbox>
-			<label class="zotero-text-link" href="http://zotero.org" value="http://zotero.org"/>
+			<label id="version"/>
+			<label id="changelog" class="zotero-text-link" href="https://www.zotero.org/support/changelog" value="&zotero.whatsNew;"/>
 		</hbox>
-		<label id="version" value="&zotero.version; "/>
 		<script>
-			document.getElementById('version').value += Zotero.version;
+			document.getElementById('version').textContent = Zotero.version;
 		</script>
 		<hbox>
 			<vbox id="column1">
-				<label class="subhead" value="&zotero.createdby;"/>
-				<vbox class="subcontent">
-					<label class="zotero-text-link" href="http://chnm.gmu.edu" value="Center for History and New Media"/>
-					<label value="George Mason University"/>
-					<label value="Fairfax, VA, USA"/>
-				</vbox>
-				<label class="subhead" value="&zotero.director;"/>
-				<vbox class="subcontent">
-					<label value="Sean Takats"/>
-				</vbox>
-				<label class="subhead" value="&zotero.developers;"/>
-				<vbox class="subcontent">
-					<label value="Dan Stillman"/>
-					<label value="Simon Kornblith"/>
-					<label value="Faolan Cheslack-Postava"/>
-				</vbox>
+				<div id="about-text" xmlns="http://www.w3.org/1999/xhtml">
+					<p id="created-by"></p>
+					<p id="get-involved"></p>
+					<script><![CDATA[
+						// Replace [links] in localized strings with spans with onclick handlers
+						//
+						// TODO: Use helper function in common with intro text in itemTreeView.js
+						document.getElementById('created-by').innerHTML =
+							Zotero.Utilities.htmlSpecialChars(Zotero.getString('about.createdBy'))
+							.replace(
+								/\[([^\]]+)](.+)\[([^\]]+)]/,
+								`<span data-href="https://rrchnm.org/">$1</span>`
+									+ '$2'
+									+ `<span data-href="https://www.zotero.org/support/credits_and_acknowledgments">$3</span>`
+							);
+						
+						document.getElementById('get-involved').innerHTML =
+							Zotero.Utilities.htmlSpecialChars(Zotero.getString('about.getInvolved'))
+							.replace(
+								/\[([^\]]+)]/,
+								`<span data-href="https://www.zotero.org/getinvolved/">$1</span>`
+							);
+						
+						// Activate text links
+						for (let span of document.getElementById('about-text').getElementsByTagName('span')) {
+							span.className = 'text-link';
+							span.onclick = function () {
+								Zotero.launchURL(this.getAttribute('data-href'));
+							};
+						}
+					]]></script>
+				</div>
 				<label class="subhead" value="&zotero.thanks;"/>
 				<vbox class="subcontent">
 					<label class="zotero-text-link" href="http://www.mellon.org/" value="Andrew W. Mellon Foundation"/>
 					<label class="zotero-text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
 					<label class="zotero-text-link" href="http://www.sloan.org/" value="Alfred P. Sloan Foundation"/>
 				</vbox>
-				<label class="zotero-text-link" href="http://www.zotero.org/support/credits_and_acknowledgments" value="&zotero.moreCreditsAndAcknowledgements;"/>
 			</vbox>
 			<vbox id="column2">
 				<label class="subhead" value="&zotero.citationProcessing;"/>
 				<vbox class="subcontent">
 					<label class="zotero-text-link" href="http://citationstyles.org/" value="Citation Style Language"/>
-					<label class="zotero-text-link" href="http://bitbucket.org/fbennett/citeproc-js/" value="citeproc-js (Frank Bennett)"/>
+					<label class="zotero-text-link" href="https://github.com/Juris-M/citeproc-js" value="citeproc-js (Frank Bennett)"/>
 				</vbox>
 				<label class="subhead" value="&zotero.about.additionalSoftware;"/>
 				<vbox class="subcontent">
+					<label class="zotero-text-link" href="http://bluebirdjs.com/" value="Bluebird"/>
 					<label class="zotero-text-link" href="http://p.yusukekamiyamane.com/" value="Fugue icons (by Yusuke Kamiyamane)"/>
 					<label class="zotero-text-link" href="http://www.davidashen.net/rnv.html" value="RNV (CSL validation)"/>
-					<label class="zotero-text-link" href="http://documentup.com/kriskowal/q/" value="Q (by Kristopher Michael Kowal)"/>
 					<label class="zotero-text-link" href="https://codefisher.org/pastel-svg/" value="Pastel SVG icons (by Michael Buckley)"/>
 					<label class="zotero-text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="Silk icons (by Mark James)"/>
 					<label class="zotero-text-link" href="http://simile.mit.edu/timeline/" value="SIMILE Project (Timeline)"/>
 					<label class="zotero-text-link" href="http://www.w3.org/2005/ajar/tab" value="Tabulator (RDF parser)"/>
 					<label class="zotero-text-link" href="http://tango.freedesktop.org/Tango_Desktop_Project" value="Tango Desktop Project (pref icons)"/>
-					<label class="zotero-text-link" href="http://tinymce.moxiecode.com/" value="TinyMCE (rich-text editing)"/>
-					<label class="zotero-text-link" href="http://www.dbai.tuwien.ac.at/user/pollak/webpagedump/" value="WebPageDump (snapshot code)"/>
+					<label class="zotero-text-link" href="https://www.tinymce.com/" value="TinyMCE (rich-text editing)"/>
 					<label class="zotero-text-link" href="http://www.foolabs.com/xpdf/" value="Xpdf (pdftotext)"/>
 				</vbox>
 			</vbox>

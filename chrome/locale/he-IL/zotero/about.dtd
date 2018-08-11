@@ -1,4 +1,5 @@
 <!ENTITY zotero.version "גירסה">
+<!ENTITY zotero.whatsNew "מה חדש">
 <!ENTITY zotero.createdby ":נוצר על ידי">
 <!ENTITY zotero.director "במאי:">
 <!ENTITY zotero.directors ":במאים">
@@ -9,5 +10,5 @@
 <!ENTITY zotero.executiveProducer ":מפיק בפועל">
 <!ENTITY zotero.thanks ":תודות מיוחדות">
 <!ENTITY zotero.about.close "סגור">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "עוד תודות">
+<!ENTITY zotero.citationProcessing "עיבוד ציטוטים וביבליוגרפיה">

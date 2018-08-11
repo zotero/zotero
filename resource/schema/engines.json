@@ -2,7 +2,7 @@
 	{
 		"name": "CrossRef Lookup",
 		"alias": "CrossRef",
-		"_urlTemplate": "http://crossref.org/openurl?{z:openURL}&pid=zter:zter321",
+		"_urlTemplate": "https://crossref.org/openurl?{z:openURL}&pid=zter:zter321",
 		"description": "CrossRef Search Engine",
 		"hidden": false,
 		"_urlParams": [],
@@ -10,12 +10,12 @@
 			"z": "http://www.zotero.org/namespaces/openSearch#",
 			"": "http://a9.com/-/spec/opensearch/1.1/"
 		},
-		"_iconSourceURI": "http://crossref.org/favicon.ico"
+		"_iconSourceURI": "https://crossref.org/favicon.ico"
 	},
 	{
 		"name": "Google Scholar Search",
 		"alias": "Google Scholar",
-		"_urlTemplate": "http://scholar.google.com/scholar?as_q=&as_epq={z:title}&as_occt=title&as_sauthors={rft:aufirst?}+{rft:aulast?}&as_ylo={z:year?}&as_yhi={z:year?}&as_sdt=1.&as_sdtp=on&as_sdtf=&as_sdts=22&",
+		"_urlTemplate": "https://scholar.google.com/scholar?as_q=&as_epq={z:title}&as_occt=title&as_sauthors={rft:aufirst?}+{rft:aulast?}&as_ylo={z:year?}&as_yhi={z:year?}&as_sdt=1.&as_sdtp=on&as_sdtf=&as_sdts=22&",
 		"description": "Google Scholar Search",
 		"hidden": false,
 		"_urlParams": [],
@@ -24,6 +24,6 @@
 			"z": "http://www.zotero.org/namespaces/openSearch#",
 			"": "http://a9.com/-/spec/opensearch/1.1/"
 		},
-		"_iconSourceURI": "http://scholar.google.com/favicon.ico"
+		"_iconSourceURI": "https://scholar.google.com/favicon.ico"
 	}
 ]

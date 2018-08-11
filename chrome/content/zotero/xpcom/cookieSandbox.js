@@ -48,7 +48,7 @@ Zotero.CookieSandbox = function(browser, uri, cookieData, userAgent) {
 	this._cookies = {};
 	if(cookieData) {
 		var splitCookies = cookieData.split(/;\s*/);
-		for each(var cookie in splitCookies) {
+		for (let cookie of splitCookies) {
 			this.setCookie(cookie, this.URI.host);
 		}
 	}
@@ -292,7 +292,7 @@ Zotero.CookieSandbox.Observer = new function() {
 		
 		if(!observing) {
 			Zotero.debug("CookieSandbox: Registering observers");
-			for each(var topic in observeredTopics) observerService.addObserver(this, topic, false);
+			for (let topic of observeredTopics) observerService.addObserver(this, topic, false);
 			observing = true;
 		}
 	};

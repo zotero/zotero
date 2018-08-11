@@ -24,8 +24,9 @@
 */
 
 const NUM_CONCURRENT_TESTS = 6;
-const TRANSLATOR_TYPES = ["Web", "Import", "Export", "Search"];
 const TABLE_COLUMNS = ["Translator", "Supported", "Status", "Pending", "Succeeded", "Failed", "Mismatch", "Issues"];
+// Not using const to prevent const collisions in connectors
+var TRANSLATOR_TYPES = ["Web", "Import", "Export", "Search"];
 var translatorTables = {},
 	translatorTestViews = {},
 	translatorTestViewsToRun = {},
@@ -466,12 +467,13 @@ function init() {
 		
 		// get translators, with code for unsupported translators
 		if(!viewerMode) {
-			Zotero.Translators.getAllForType(translatorType, new function() {
+			Zotero.Translators.getAllForType(translatorType, true).
+			then(new function() {
 				var type = translatorType;
 				return function(translators) {
 					haveTranslators(translators, type);
 				}
-			}, true);
+			});
 		}
 	}
 	
@@ -548,18 +550,27 @@ function haveTranslators(translators, type) {
 		return a.label.localeCompare(b.label);
 	});
 	
+	var promises = [];
 	for(var i in translators) {
-		var translatorTestView = new TranslatorTestView();
-		translatorTestView.initWithTranslatorAndType(translators[i], type);
-		if(translatorTestView.canRun) {
-			translatorTestViewsToRun[type].push(translatorTestView);
-		}
+		promises.push(translators[i].getCode());
 	}
 	
-	translatorTestStats[type].update();
-	var ev = document.createEvent('HTMLEvents');
-	ev.initEvent('ZoteroHaveTranslators-'+type, true, true);
-	document.dispatchEvent(ev);
+	return Promise.all(promises).then(function(codes) {
+		for(var i in translators) {
+			// Make sure translator code is cached on the object
+			translators[i].code = codes[i];
+			var translatorTestView = new TranslatorTestView();
+			translatorTestView.initWithTranslatorAndType(translators[i], type);
+			if(translatorTestView.canRun) {
+				translatorTestViewsToRun[type].push(translatorTestView);
+			}
+		}
+		
+		translatorTestStats[type].update();
+		var ev = document.createEvent('HTMLEvents');
+		ev.initEvent('ZoteroHaveTranslators-'+type, true, true);
+		document.dispatchEvent(ev);	
+	});
 }
 
 /**

@@ -1,9 +1,9 @@
-<!ENTITY styles.preview "Zotero Style Preview">
+<!ENTITY styles.preview "Zotero stiilide eelvaade">
 
-<!ENTITY styles.preview.citationFormat "Citation Format:">
-<!ENTITY styles.preview.citationFormat.all "all">
-<!ENTITY styles.preview.citationFormat.author "author">
-<!ENTITY styles.preview.citationFormat.authorDate "author-date">
-<!ENTITY styles.preview.citationFormat.label "label">
-<!ENTITY styles.preview.citationFormat.note "note">
-<!ENTITY styles.preview.citationFormat.numeric "numeric">
+<!ENTITY styles.preview.citationFormat "Viite formaat:">
+<!ENTITY styles.preview.citationFormat.all "kõik">
+<!ENTITY styles.preview.citationFormat.author "autor">
+<!ENTITY styles.preview.citationFormat.authorDate "autor-kuupäev">
+<!ENTITY styles.preview.citationFormat.label "silt">
+<!ENTITY styles.preview.citationFormat.note "märkus">
+<!ENTITY styles.preview.citationFormat.numeric "numbriline">

@@ -1,16 +1,16 @@
+#metadata {
+	padding: 5px 2px 2px 2px;
+}
+
 #title
 {
 	font-weight: bold;
-	margin: 4px 5px 1px 5px !important;
-	padding: 0 2px 0 2px;
 	/* Don't collapse blank attachment titles, since it prevents renaming */
 	min-height: 1.25em;
 }
 
-#url
-{
-	margin: 1px 5px 2px 5px !important;
-	padding: 0 2px 0 2px !important;
+#metadata > label {
+	margin: 6px 10px 4px !important;
 }
 
 #index-box
@@ -24,7 +24,7 @@
 	list-style-image: url(chrome://zotero/skin/arrow_refresh.png);
 }
 
-@media (min-resolution: 1.5dppx) {
+@media (min-resolution: 1.25dppx) {
 	#reindex {
 		list-style-image: url(chrome://zotero/skin/arrow_refresh@2x.png);
 		width: 20px;
@@ -63,6 +63,11 @@ row > label, row > hbox
 row > hbox
 {
 	-moz-box-align: center;
+}
+
+/* Reindex icon makes the row larger */
+#indexStatusRow > hbox {
+	margin: 0 !important;
 }
 
 row > label:first-child

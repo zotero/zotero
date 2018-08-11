@@ -14,7 +14,7 @@
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Zapisz...">
 <!ENTITY saveCmd.key "S">
-<!ENTITY saveCmd.accesskey "A">
+<!ENTITY saveCmd.accesskey "O">
 <!ENTITY pageSetupCmd.label "Ustawienia strony...">
 <!ENTITY pageSetupCmd.accesskey "U">
 <!ENTITY printCmd.label "Drukuj...">
@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "Zamknij">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Importuj...">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Importuj ze schowka">
 <!ENTITY quitApplicationCmdWin.label "Wyjdź">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Zakończ">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Edycja">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Cofnij">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Powtórz">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Wytnij">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Kopiuj">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Kopiuj cytowanie">
 <!ENTITY copyBibliographyCmd.label "Kopiuj bibliografię">
-<!ENTITY pasteCmd.label "Wklej">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Usuń">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Zaznacz wszystko">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Ustawienia">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Ustawienia">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Znajdź">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Przełącz kierunek strony">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Przełącz kierunek tekstu">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Narzędzia">
 <!ENTITY toolsMenu.accesskey "T">
+<!ENTITY installConnector.label "Zainstaluj łącznik do przeglądarki">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Dodatki">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Informacje dla pomocy technicznej">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Prześlij swoją opinię...">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Raport błędów do Zotero...">
+<!ENTITY helpFeedbackPage.label "Forum dyskusyjne">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Zgłoś błędy...">
 <!ENTITY helpReportErrors.accesskey "R">
+
+<!ENTITY debugOutputLogging.label "Logowanie informacji debugowania">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Wyślij informacje">
+<!ENTITY debugOutputLogging.view "Pokaż wyjście">
+<!ENTITY debugOutputLogging.clear "Wyczyść wyjście">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Uruchom ponownie z włączonym logowaniem...">
+
 <!ENTITY helpCheckForUpdates.label "Sprawdź uaktualnienia...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

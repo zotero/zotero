@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Debug Output</title>
+		<script src="include.js"></script>
+		<script src="debugViewer.js"></script>
+		
+		<style>
+			body {
+				margin: 0;
+			}
+			
+			header {
+				position: fixed;
+				top: 0;
+				background: lightgrey;
+				display: flex;
+				align-items: center;
+				width: calc(100% - 20px);
+				height: 18px;
+				padding: 10px;
+				margin-bottom: 10px;
+				font-family: sans-serif;
+				font-size: 11pt;
+			}
+			
+			header > * {
+				margin-right: 10px;
+			}
+			
+			progress {
+				width: 125px;
+			}
+			
+			#debug-id {
+				font-weight: bold;
+			}
+			
+			#submit-result {
+				line-height: 1.25em;
+			}
+			
+			#submit-result-copy-id {
+				cursor: pointer;
+				padding-left: 2px;
+			}
+			
+			#submit-error {
+				font-weight: bold;
+				color: red;
+			}
+			
+			#content {
+				margin-top: 38px;
+				padding: 10px 9px;
+				font-family: Monaco, Consolas, Inconsolata, monospace;
+				font-size: 8pt;
+			}
+			
+			#errors {
+				padding-bottom: 12px;
+				border-bottom: 1px lightgray solid;
+				white-space: pre-wrap;
+			}
+			
+			
+			
+			/*
+			   CSS tooltip, adapted from http://stackoverflow.com/a/25836471
+			*/
+			[data-tooltip] {
+				display: inline-block;
+				position: relative;
+				cursor: pointer;
+				padding: 2px;
+			}
+			[data-tooltip]:before {
+				content: attr(data-tooltip);
+				display: none;
+				position: absolute;
+				background: #000;
+				color: #fff;
+				padding: 4px 8px;
+				font-size: 12px;
+				font-family: sans-serif;
+				line-height: 1.4;
+				text-align: center;
+				border-radius: 4px;
+				
+				left: 50%;
+				transform: translateX(-50%);
+				
+				top: 100%;
+				margin-top: 6px;
+				
+				white-space: nowrap;
+			}
+			[data-tooltip]:after {
+				content: '';
+				display: none;
+				position: absolute;
+				width: 0;
+				height: 0;
+				border-color: transparent;
+				border-style: solid;
+				
+				left: 50%;
+				margin-left: -6px;
+				
+				top: 100%;
+				border-width: 0 6px 6px;
+				border-bottom-color: #000;
+			}
+			/* Show the tooltip when hovering */
+			[data-tooltip]:hover:before,
+			[data-tooltip]:hover:after {
+				display: block;
+				z-index: 50;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<button id="submit-button" onclick="submit(this)" disabled>Submit…</button>
+			<button id="clear-button" onclick="clearOutput(this)" disabled>Clear</button>
+			<progress id="submit-progress" hidden></progress>
+			<p id="submit-result" hidden>
+				Submitted with Debug ID <span id="debug-id"></span>
+				<span id="submit-result-copy-id" onclick="copyIDToClipboard(this)">&#128203;</span>
+			</p>
+			<p id="submit-error" hidden></p>
+		</header>
+		<div id="content">
+			<div id="errors"></div>
+			<div id="output"></div>
+		</div>
+	</body>
+</html>

@@ -14,9 +14,6 @@
 		Components.utils.import("resource://zotero/config.js");
 		
 		var Zotero_Error_Report = new function() {
-			this.init = init;
-			this.sendErrorReport = sendErrorReport;
-			
 			var obj = window.arguments[0].wrappedJSObject;
 			var Zotero = obj.Zotero;
 			var data = obj.data;
@@ -26,40 +23,37 @@
 			var diagnosticInfo = false;
 			
 			
-			function init() {
+			this.init = Zotero.Promise.coroutine(function* () {
 				var wizard = document.getElementById('zotero-error-report');
 				var continueButton = wizard.getButton('next');
 				continueButton.disabled = true;
 				
-				Zotero.getSystemInfo(function(info) {
-					var errorDataText = errorData.length
-						? data.errorData.join('\n')
-						: Zotero.getString('errorReport.noErrorsLogged', Zotero.appName);
-					
-					diagnosticInfo = info;
-					
-					var logText = errorDataText + '\n\n'
-						+ (extraData !== '' ? extraData + '\n\n' : '')
-						+ diagnosticInfo;
-					
-					if (document.getElementById('zotero-failure-message').hasChildNodes()) {
-						var textNode = document.getElementById('zotero-failure-message').firstChild;
-						document.getElementById('zotero-failure-message').removeChild(textNode);
-					}
-					
-					document.getElementById('zotero-failure-message').appendChild(document.createTextNode(msg));
-					document.getElementById('zotero-error-message').value = logText;
-					
-					continueButton.disabled = false;
-					continueButton.focus();
-					var str = Zotero.getString(
-						'errorReport.advanceMessage', continueButton.getAttribute('label')
-					);
-					document.getElementById('zotero-advance-message').setAttribute('value', str);
-				});
-			}
+				diagnosticInfo = yield Zotero.getSystemInfo();
+				var errorDataText = errorData.length
+					? data.errorData.join('\n\n')
+					: Zotero.getString('errorReport.noErrorsLogged', Zotero.appName);
+				
+				var logText = errorDataText + '\n\n'
+					+ (extraData !== '' ? extraData + '\n\n' : '')
+					+ diagnosticInfo;
+				
+				if (document.getElementById('zotero-failure-message').hasChildNodes()) {
+					var textNode = document.getElementById('zotero-failure-message').firstChild;
+					document.getElementById('zotero-failure-message').removeChild(textNode);
+				}
+				
+				document.getElementById('zotero-failure-message').appendChild(document.createTextNode(msg));
+				document.getElementById('zotero-error-message').value = logText;
+				
+				continueButton.disabled = false;
+				continueButton.focus();
+				var str = Zotero.getString(
+					'errorReport.advanceMessage', continueButton.getAttribute('label')
+				);
+				document.getElementById('zotero-advance-message').setAttribute('value', str);
+			});
 			
-			function sendErrorReport() {
+			this.sendErrorReport = Zotero.Promise.coroutine(function* () {
 				var wizard = document.getElementById('zotero-error-report');
 				var continueButton = wizard.getButton('next');
 				continueButton.disabled = true;
@@ -76,12 +70,17 @@
 					body += key + '=' + encodeURIComponent(parts[key]) + '&';
 				}
 				body = body.substr(0, body.length - 1);
-				var url = ZOTERO_CONFIG.REPOSITORY_URL + "report";
-				Zotero.HTTP.promise('POST', url,
-					{ body: body, successCodes: false, foreground: true })
-				.then(_sendErrorReportCallback)
-				.done();
-			}
+				var req = yield Zotero.HTTP.request(
+					"POST",
+					ZOTERO_CONFIG.REPOSITORY_URL + "report",
+					{
+						body,
+						successCodes: false,
+						foreground: true
+					}
+				);
+				_sendErrorReportCallback(req);
+			});
 			
 			
 			function _sendErrorReportCallback(xmlhttp) {
@@ -148,7 +147,6 @@
 	<wizardpage onpageshow="Zotero_Error_Report.init()" label=" ">
 		<description id="zotero-failure-message"/>
 		<textbox id="zotero-error-message" class="plain" readonly="true" multiline="true" flex="1"/>
-		<description id="zotero-unrelated-message">&zotero.general.note; &zotero.errorReport.unrelatedMessages;</description>
 		<description id="zotero-advance-message"/>
 	</wizardpage>
 	

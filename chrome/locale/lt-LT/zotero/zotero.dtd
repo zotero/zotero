@@ -1,3 +1,5 @@
+<!ENTITY zotero.general.yes "Taip">
+<!ENTITY zotero.general.no "Ne">
 <!ENTITY zotero.general.optional "(Neprivalomas)">
 <!ENTITY zotero.general.note "Pastaba:">
 <!ENTITY zotero.general.selectAll "Pažymėti viską">
@@ -8,9 +10,17 @@
 <!ENTITY zotero.general.cancel "Atšaukti">
 <!ENTITY zotero.general.refresh "Atnaujinti">
 <!ENTITY zotero.general.saveAs "Įrašyti kaip...">
+<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.advancedOptions.label "Kitos parinktys">
+<!ENTITY zotero.general.tools "Priemonės">
+<!ENTITY zotero.general.more "Daugiau">
+<!ENTITY zotero.general.loading "Įkeliama...">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.other "Other…">
+
 
 <!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Zotero programoje">
-<!ENTITY zotero.errorReport.unrelatedMessages "Čia gali būti pranešimų, visai nesusijusių su Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Prašome palaukti kol siunčiamas klaidų sąrašas.">
 <!ENTITY zotero.errorReport.submitted "Jūsų klaidų sąrašas buvo nusiųstas.">
 <!ENTITY zotero.errorReport.reportID "Pranešimo ID:">
@@ -60,14 +70,14 @@
 <!ENTITY zotero.items.libraryCatalog_column "Išteklius">
 <!ENTITY zotero.items.callNumber_column "Šifras">
 <!ENTITY zotero.items.rights_column "Teisės">
-<!ENTITY zotero.items.dateAdded_column "Pridėjimo laikas">
+<!ENTITY zotero.items.dateAdded_column "Pridėta">
 <!ENTITY zotero.items.dateModified_column "Keitimo laikas">
 <!ENTITY zotero.items.extra_column "Papildoma">
 <!ENTITY zotero.items.archive_column "Archyvas">
 <!ENTITY zotero.items.archiveLocation_column "Vieta archyve">
 <!ENTITY zotero.items.place_column "Vieta">
 <!ENTITY zotero.items.volume_column "Tomas">
-<!ENTITY zotero.items.edition_column "Leidimas/numeris">
+<!ENTITY zotero.items.edition_column "Leidimas, Nr.">
 <!ENTITY zotero.items.pages_column "Puslapiai">
 <!ENTITY zotero.items.issue_column "Numeris">
 <!ENTITY zotero.items.series_column "Serija">
@@ -80,17 +90,19 @@
 <!ENTITY zotero.items.restoreColumnOrder.label "Atstatyti stulpelių tvarką">
 
 <!ENTITY zotero.items.menu.showInLibrary "Rodyti bibliotekoje">
-<!ENTITY zotero.items.menu.attach.note "Įdėti pastabą">
+<!ENTITY zotero.items.menu.attach.note "Įtraukti pastabą">
 <!ENTITY zotero.items.menu.attach "Įtraukti priedą">
-<!ENTITY zotero.items.menu.attach.snapshot "Pridėti šio puslapio nuotrauką">
+<!ENTITY zotero.items.menu.attach.snapshot "Pridėti šio tinklalapio momentinę kopiją">
 <!ENTITY zotero.items.menu.attach.link "Pridėti nuorodą į šį puslapį">
 <!ENTITY zotero.items.menu.attach.link.uri "Pridėti URI nuorodą...">
-<!ENTITY zotero.items.menu.attach.file "Pridėti turimą failo kopiją...">
-<!ENTITY zotero.items.menu.attach.fileLink "Pridėti failo nuorodą...">
+<!ENTITY zotero.items.menu.attach.file "Pridėti turimo failo kopiją...">
+<!ENTITY zotero.items.menu.attach.fileLink "Pridėti nuorodą iki failo...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Atkurti į biblioteką">
 <!ENTITY zotero.items.menu.duplicateItem "Sukurti įrašo kopiją">
 <!ENTITY zotero.items.menu.mergeItems "Apjungti įrašus...">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Pasirinkite pagrindinę įrašo versiją:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Pasirinkite senesnių įrašo versijų laukus:">
@@ -100,7 +112,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Iš dabartinio puslapio sukurti interneto puslapį">
 <!ENTITY zotero.toolbar.lookup.label "Įrašą(-us) pridėti pagal identifikatorių">
 <!ENTITY zotero.toolbar.removeItem.label "Pašalinti įrašą...">
+<!ENTITY zotero.toolbar.newLibrary.label "Nauja biblioteka">
 <!ENTITY zotero.toolbar.newCollection.label "Naujas rinkinys...">
+<!ENTITY zotero.toolbar.markFeedRead.label "Žymėti naujienų kanalą skaitytu">
 <!ENTITY zotero.toolbar.newGroup "Nauja grupė...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Naujas poaplankis...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nauja įsiminta paieška...">
@@ -115,10 +129,16 @@
 <!ENTITY zotero.toolbar.preferences.label "Nuostatos...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Palaikymas ir dokumentacija">
 <!ENTITY zotero.toolbar.about.label "Apie Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Sudėtingesnė paieška">
-<!ENTITY zotero.toolbar.tab.tooltip "Keisti kortelių veikseną">
+<!ENTITY zotero.toolbar.advancedSearch "Išplėstinė paieška">
 <!ENTITY zotero.toolbar.openURL.label "Rasti vietą">
 <!ENTITY zotero.toolbar.openURL.tooltip "Ieškoti vietinėje bibliotekoje">
+
+<!ENTITY zotero.toolbar.feeds.new "Naujas naujienų kanalas">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "URL…">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "puslapis...">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "OPML…">
+<!ENTITY zotero.toolbar.feeds.refresh "Atnaujinti kanalą">
+<!ENTITY zotero.toolbar.feeds.edit "Keisti naujienų kanalo parinktis...">
 
 <!ENTITY zotero.item.add "Pridėti">
 <!ENTITY zotero.item.attachment.file.show "Atverti failo aplanką">
@@ -126,8 +146,11 @@
 <!ENTITY zotero.item.textTransform.titlecase "Antraštės raidžių lygis">
 <!ENTITY zotero.item.textTransform.sentencecase "Sakinio pavidalu">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Sukeisti vardus ir pavardes">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.viewOnline "Rodyti Internete">
+<!ENTITY zotero.item.copyAsURL "Kopijuoti URL">
+<!ENTITY zotero.item.deletePermanently "Pašalinti negrįžtamai...">
+
+<!ENTITY zotero.item.tags.removeAll "Pašalinti visas gaires...">
 
 <!ENTITY zotero.toolbar.newNote "Nauja pastaba">
 <!ENTITY zotero.toolbar.note.standalone "Nauja nesusieta pastaba">
@@ -136,14 +159,13 @@
 <!ENTITY zotero.toolbar.attachment.linked "Nuoroda iki failo...">
 <!ENTITY zotero.toolbar.attachment.add "Patalpinti failo kopiją...">
 <!ENTITY zotero.toolbar.attachment.weblink "Įrašyti nuorodą į šį puslapį">
-<!ENTITY zotero.toolbar.attachment.snapshot "Sukurti šio puslapio nuotrauką">
+<!ENTITY zotero.toolbar.attachment.snapshot "Sukurti šio tinklalapio momentinę kopiją">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Nėra rodytinų gairių">
-<!ENTITY zotero.tagSelector.filter "Filtras:">
+<!ENTITY zotero.tagSelector.loadingTags "Įkeliamos gairės...">
 <!ENTITY zotero.tagSelector.showAutomatic "Rodyti automatiškai">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Rodyti visas šios bibliotekos gaires">
-<!ENTITY zotero.tagSelector.selectVisible "Pasirinkti matomas">
-<!ENTITY zotero.tagSelector.clearVisible "Nesirinkti matomų">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Šioje bibliotekoje pašalinti visas automatines gaires...">
 <!ENTITY zotero.tagSelector.clearAll "Panaikinti pažymėjimą">
 <!ENTITY zotero.tagSelector.assignColor "Priskirti spalvą:">
 <!ENTITY zotero.tagSelector.renameTag "Pervadinti gairę...">
@@ -155,7 +177,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Naudoti spalvą">
 <!ENTITY zotero.tagColorChooser.removeColor "Pašalinti spalvą">
 
-<!ENTITY zotero.lookup.description "Į paieškos laukelį įveskite vieną arba kelis ISBN, DOI ar PMID kodus.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Ieškoti">
 
 <!ENTITY zotero.selectitems.title "Pasirinkti įrašus">
@@ -165,6 +187,8 @@
 
 <!ENTITY zotero.bibliography.title "Sukurti citavimą/bibliografiją">
 <!ENTITY zotero.bibliography.style.label "Citavimo stilius:">
+<!ENTITY zotero.bibliography.manageStyles "Tvarkyti stilius...">
+<!ENTITY zotero.bibliography.locale.label "Kalba:">
 <!ENTITY zotero.bibliography.outputMode "Išvedimo veiksena:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografija">
 <!ENTITY zotero.bibliography.outputMethod "Išvedimo būdas:">
@@ -179,6 +203,15 @@
 <!ENTITY zotero.integration.quickFormatDialog.title "Greitasis citavimo formatavimas">
 
 <!ENTITY zotero.progress.title "Eiga">
+
+<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
+<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.database "Database">
+<!ENTITY zotero.import.lastModified "Last Modified">
+<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "Eksportuoti...">
 <!ENTITY zotero.exportOptions.format.label "Formatas:">
@@ -210,23 +243,24 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Išnaša">
 <!ENTITY zotero.integration.prefs.endnotes.label "Galinė išnaša">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Naudotinas formatas:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Citavimo įrašymo pavidalas:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Žymelės">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Žymelės išlaikomos tiek „Microsoft Word“, tiek „LibreOffice“ programose, tačiau jas galite netyčia pakeisti. &#xA; Pasirinkę šią parinktį, citavimų negalite įterpti į išnašas ar galines išnašas dėl suderinamumo problemų.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Žymelės išlaikomos tiek „Word“, tiek „LibreOffice“ programose, tačiau netyčia jas pakeitus, gali atsirasti klaidų. Žymelių negalite įterpti į išnašas ar galines išnašas.">
+
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatiškai trumpinti žurnalų pavadinimus">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE žurnalų santrumpos automatiškai sukursimos naudojant žurnalų pavadinimus. Nepaisysima „žurnalo santrumpa“ laukelyje esančios reikšmės.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Nuorodas talpinti dokumente">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Patalpinus nuorodas dokumente, šiek tiek padidėja jo dydis, tačiau tai leis jums dalintis dokumentu su kitais naudotojais, nenaudodami Zotero grupės. Norint atnaujinti dokumentus, reikės Zotero 3.0 arba vėlesnės versijos.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Naudoti MEDLINE žurnalų santrumpas">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Ignoruosima reikšmė „žurnalo santrumpos“ laukelyje">
 
 <!ENTITY zotero.integration.showEditor.label "Rodyti rengyklę">
 <!ENTITY zotero.integration.classicView.label "Klasikinis rodinys">
 
 <!ENTITY zotero.integration.references.label "Nuorodos bibliogafijoje">
 
-<!ENTITY zotero.sync.button "Sinchronizavimas su Zotero serveriu">
+<!ENTITY zotero.sync.stop "Stabdyti sinchronizaciją">
 <!ENTITY zotero.sync.error "Sinchronizavimo klaida">
 <!ENTITY zotero.sync.storage.progress "Eiga:">
 <!ENTITY zotero.sync.storage.downloads "Siuntiniai:">
@@ -252,8 +286,17 @@
 <!ENTITY zotero.proxy.recognized.disable.label "Automatiškai nenukreipinėti užklausų per anksčiau aptiktus įgaliotuosius serverius">
 <!ENTITY zotero.proxy.recognized.ignore.label "Nepaisyti">
 
-<!ENTITY zotero.recognizePDF.recognizing.label "Gaunami meta duomenys...">
-<!ENTITY zotero.recognizePDF.cancel.label "Atšaukti">
+<!ENTITY zotero.feedSettings.title "Naujienų kanalo nuostatos">
+<!ENTITY zotero.feedSettings.saveButton.label "Įrašyti">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "Pavadinimas:">
+<!ENTITY zotero.feedSettings.refresh.label1 "Atnaujinti kas">
+<!ENTITY zotero.feedSettings.refresh.label2 "val.">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Neskaitytus naujienų kanalo įrašus pašalinti po">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "d.">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Perskaitytus naujienų kanalo įrašus pašalinti po">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "d.">
+
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF pavadinimas">
 <!ENTITY zotero.recognizePDF.itemName.label "Įrašo pavainimas">
 
@@ -284,7 +327,6 @@
 
 <!ENTITY zotero.downloadManager.label "Įrašyti į Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Priedų negalima įrašyti pasirinktoje bibliotekoje. Šį įrašą įrašysime jūsų bibliotekoje.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Norėdami naudotis šia funkcija, turite įdiegti PDF įrankius per Zotero nuostatų paieškos skydelį.">
 
 <!ENTITY zotero.attachLink.title "Įtraukti nuorodą (URI)">
 <!ENTITY zotero.attachLink.label.link "Nuoroda:">

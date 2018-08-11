@@ -1,23 +1,33 @@
+<!ENTITY zotero.general.yes "예">
+<!ENTITY zotero.general.no "아니오">
 <!ENTITY zotero.general.optional "(선택항목)">
 <!ENTITY zotero.general.note "노트:">
 <!ENTITY zotero.general.selectAll "모두 선택">
 <!ENTITY zotero.general.deselectAll "모두 선택 해제">
 <!ENTITY zotero.general.edit "편집">
 <!ENTITY zotero.general.delete "삭제">
-<!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
-<!ENTITY zotero.general.refresh "Refresh">
-<!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.ok "확인">
+<!ENTITY zotero.general.cancel "취소">
+<!ENTITY zotero.general.refresh "새로고침">
+<!ENTITY zotero.general.saveAs "다른 이름으로 저장...">
+<!ENTITY zotero.general.options "환경설정">
+<!ENTITY zotero.general.advancedOptions.label "고급 ">
+<!ENTITY zotero.general.tools "도구">
+<!ENTITY zotero.general.more "더 보기">
+<!ENTITY zotero.general.loading "불러오는 중...">
+<!ENTITY zotero.general.close "닫기">
+<!ENTITY zotero.general.minimize "최소화">
+<!ENTITY zotero.general.other "기타...">
 
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
-<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
+
+<!ENTITY zotero.errorReport.title "Zotero 오류 보고">
 <!ENTITY zotero.errorReport.submissionInProgress "오류 보고가 제출되는 동안 기다려 주세요.">
 <!ENTITY zotero.errorReport.submitted "오류 보고가 제출되었습니다.">
 <!ENTITY zotero.errorReport.reportID "보고서 ID:">
 <!ENTITY zotero.errorReport.postToForums "Zotero 포럼(forums.zotero.org)에 보고서 ID, 문제 설명, 및 그것을 재연하는데 필요한 순서와 함께 메시지를 게시해주시기 바랍니다.">
 <!ENTITY zotero.errorReport.notReviewed "오류 보고서는 일반적으로 포럼내에서 언급하지 않는 한 재검토하지 않습니다.">
 
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
+<!ENTITY zotero.upgrade.title "Zotero 업그레이드 마법사">
 <!ENTITY zotero.upgrade.newVersionInstalled "새 버전의 Zotero를 설치했습니다.">
 <!ENTITY zotero.upgrade.upgradeRequired "Zotero 데이터베이스는 반드시 새 버전으로 작업하기 위해 업그레이드 해야 합니다.">
 <!ENTITY zotero.upgrade.autoBackup "현재의 데이터베이스는 어떤한 변경을 하기 전에 자동으로 백업을 할 겁니다.">
@@ -27,9 +37,9 @@
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "을 참조하시기 바랍니다.">
 <!ENTITY zotero.upgrade.upgradeInProgress "업그레이드 과정이 끝나기까지 기다려 주십시오. 몇 분정도 걸릴 예정입니다.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Zotero 데이타베이스는 성공적으로 업그레이드 되었습니다.">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "새롭게 달라진 것을">
-<!ENTITY zotero.upgrade.changeLogLink "알기 원한다면">
-<!ENTITY zotero.upgrade.changeLogAfterLink "changelog를 참고하십시오.">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "새롭게 달라진 기능은 다음을 참고하십시오: ">
+<!ENTITY zotero.upgrade.changeLogLink "변경 사항">
+<!ENTITY zotero.upgrade.changeLogAfterLink "보기">
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Zotero 노트에 선택 내용 추가">
 <!ENTITY zotero.contextMenu.addTextToNewNote "선택한 내용으로 Zotero 노트 생성">
@@ -41,13 +51,13 @@
 <!ENTITY zotero.tabs.attachments.label "첨부">
 <!ENTITY zotero.tabs.tags.label "태그">
 <!ENTITY zotero.tabs.related.label "관련 페이지">
-<!ENTITY zotero.notes.separate "분리 창에서 편집">
+<!ENTITY zotero.notes.separate "새 창에서 편집">
 
 <!ENTITY zotero.toolbar.duplicate.label "중복 보기">
 <!ENTITY zotero.collections.showUnfiledItems "미분류 항목 보기">
 
-<!ENTITY zotero.items.itemType "항목 타입">
-<!ENTITY zotero.items.type_column "Item Type">
+<!ENTITY zotero.items.itemType "항목 형식">
+<!ENTITY zotero.items.type_column "항목 형식">
 <!ENTITY zotero.items.title_column "제목">
 <!ENTITY zotero.items.creator_column "창작자">
 <!ENTITY zotero.items.date_column "날짜">
@@ -62,22 +72,22 @@
 <!ENTITY zotero.items.rights_column "권리">
 <!ENTITY zotero.items.dateAdded_column "입력일">
 <!ENTITY zotero.items.dateModified_column "변경일">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archive">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.place_column "Place">
-<!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Edition">
-<!ENTITY zotero.items.pages_column "Pages">
-<!ENTITY zotero.items.issue_column "Issue">
-<!ENTITY zotero.items.series_column "Series">
-<!ENTITY zotero.items.seriesTitle_column "Series Title">
-<!ENTITY zotero.items.court_column "Court">
-<!ENTITY zotero.items.medium_column "Medium/Format">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "System">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.extra_column "추가사항">
+<!ENTITY zotero.items.archive_column "아카이브">
+<!ENTITY zotero.items.archiveLocation_column "아카이브 위치">
+<!ENTITY zotero.items.place_column "발행지">
+<!ENTITY zotero.items.volume_column "권">
+<!ENTITY zotero.items.edition_column "판본">
+<!ENTITY zotero.items.pages_column "쪽">
+<!ENTITY zotero.items.issue_column "호">
+<!ENTITY zotero.items.series_column "시리즈">
+<!ENTITY zotero.items.seriesTitle_column "시리즈 제목">
+<!ENTITY zotero.items.court_column "법원">
+<!ENTITY zotero.items.medium_column "매체/">
+<!ENTITY zotero.items.genre_column "장르">
+<!ENTITY zotero.items.system_column "시스템">
+<!ENTITY zotero.items.moreColumns.label "추가 열">
+<!ENTITY zotero.items.restoreColumnOrder.label "열 순서 복원">
 
 <!ENTITY zotero.items.menu.showInLibrary "라이브러리로 표시">
 <!ENTITY zotero.items.menu.attach.note "노트 추가">
@@ -90,17 +100,21 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "라이브러리로 복원">
 <!ENTITY zotero.items.menu.duplicateItem "선택된 항목 복제">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+<!ENTITY zotero.items.menu.mergeItems "항목 병합...">
+<!ENTITY zotero.items.menu.unrecognize "메타데이터 검색 실행취소">
+<!ENTITY zotero.items.menu.reportMetadata "잘못된 메타데이터 보고">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "원본 항목으로 사용할 항목의 버전 선택:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "항목의 다른 버전과 무관하게 유지할 필드 선택:">
 
 <!ENTITY zotero.toolbar.newItem.label "새 항목">
 <!ENTITY zotero.toolbar.moreItemTypes.label "더 보기">
 <!ENTITY zotero.toolbar.newItemFromPage.label "현재 페이지로부터 새 항목 생성">
 <!ENTITY zotero.toolbar.lookup.label "식별자로 항목 추가">
 <!ENTITY zotero.toolbar.removeItem.label "항목 삭제...">
+<!ENTITY zotero.toolbar.newLibrary.label "새 라이브러리">
 <!ENTITY zotero.toolbar.newCollection.label "새 컬렉션...">
+<!ENTITY zotero.toolbar.markFeedRead.label "피드를 읽은 것으로 표시">
 <!ENTITY zotero.toolbar.newGroup "새 그룹...">
 <!ENTITY zotero.toolbar.newSubcollection.label "새 하위 컬렉션...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "새 저장된 검색...">
@@ -116,18 +130,27 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "지원 및 도움말">
 <!ENTITY zotero.toolbar.about.label "Zotero 정보">
 <!ENTITY zotero.toolbar.advancedSearch "고급 검색">
-<!ENTITY zotero.toolbar.tab.tooltip "토글 탭 모드">
 <!ENTITY zotero.toolbar.openURL.label "위치">
 <!ENTITY zotero.toolbar.openURL.tooltip "로컬 라이브러리에서 검색">
+
+<!ENTITY zotero.toolbar.feeds.new "새 피드">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "URL에서...">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "페이지에서...">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "OPML에서...">
+<!ENTITY zotero.toolbar.feeds.refresh "피드 새로고침">
+<!ENTITY zotero.toolbar.feeds.edit "피드 편집...">
 
 <!ENTITY zotero.item.add "추가">
 <!ENTITY zotero.item.attachment.file.show "파일 보이기">
 <!ENTITY zotero.item.textTransform "글자 변형">
 <!ENTITY zotero.item.textTransform.titlecase "글차 첫머리는 대문자">
 <!ENTITY zotero.item.textTransform.sentencecase "문장 첫머리는 대문자">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.creatorTransform.nameSwap "성/이름 맞바꾸기">
+<!ENTITY zotero.item.viewOnline "온라인으로 보기">
+<!ENTITY zotero.item.copyAsURL "URL로 복사">
+<!ENTITY zotero.item.deletePermanently "완전히 삭제...">
+
+<!ENTITY zotero.item.tags.removeAll "모든 태그 제거...">
 
 <!ENTITY zotero.toolbar.newNote "새 노트">
 <!ENTITY zotero.toolbar.note.standalone "새로운 독립 노트">
@@ -139,24 +162,23 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "현재 페이지의 스냅샷을 촬영">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "표시할 태그가 없음">
-<!ENTITY zotero.tagSelector.filter "필터:">
+<!ENTITY zotero.tagSelector.loadingTags "태그 불러오는 중...">
 <!ENTITY zotero.tagSelector.showAutomatic "자동 표시">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "이 라이브러리 내 모든 태그 표시">
-<!ENTITY zotero.tagSelector.selectVisible "보이는 것들 선택">
-<!ENTITY zotero.tagSelector.clearVisible "보이는 것들 선택 해제">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "이 라이브러리의 자동 태그 삭제...">
 <!ENTITY zotero.tagSelector.clearAll "선택 모두 해제">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
+<!ENTITY zotero.tagSelector.assignColor "색상 지정...">
 <!ENTITY zotero.tagSelector.renameTag "태그 이름 변경...">
 <!ENTITY zotero.tagSelector.deleteTag "태그 지우기...">
 
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
-<!ENTITY zotero.tagColorChooser.color "Color:">
-<!ENTITY zotero.tagColorChooser.position "Position:">
-<!ENTITY zotero.tagColorChooser.setColor "Set Color">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.title "태그 색상 및 위치 선택">
+<!ENTITY zotero.tagColorChooser.color "색상:">
+<!ENTITY zotero.tagColorChooser.position "위치:">
+<!ENTITY zotero.tagColorChooser.setColor "색상 설정">
+<!ENTITY zotero.tagColorChooser.removeColor "색상 제거">
 
-<!ENTITY zotero.lookup.description "ISBN, DOI, 또는 PMID를 입력하세요.">
-<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.description "라이브러리에 추가할 ISBN, DOI, PMID 또는 arXiv ID를 입력하세요:">
+<!ENTITY zotero.lookup.button.search "검색">
 
 <!ENTITY zotero.selectitems.title "항목 선택">
 <!ENTITY zotero.selectitems.intro.label "라이브러리에 추가하고 싶은 항목 선택">
@@ -165,9 +187,11 @@
 
 <!ENTITY zotero.bibliography.title "참조 문헌 목록 생성">
 <!ENTITY zotero.bibliography.style.label "인용 형식:">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
-<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.manageStyles "스타일 관리...">
+<!ENTITY zotero.bibliography.locale.label "언어:">
+<!ENTITY zotero.bibliography.outputMode "출력 방식:">
+<!ENTITY zotero.bibliography.bibliography "참고 문헌 목록">
+<!ENTITY zotero.bibliography.outputMethod "출력 방법:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF로 저장">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML로 저장">
 <!ENTITY zotero.bibliography.copyToClipboard.label "클립보드로 복사">
@@ -176,9 +200,18 @@
 <!ENTITY zotero.integration.docPrefs.title "문서 환경설정">
 <!ENTITY zotero.integration.addEditCitation.title "인용 추가/편집">
 <!ENTITY zotero.integration.editBibliography.title "참고문헌 목록 편집">
-<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "빠른 인용 형식">
 
 <!ENTITY zotero.progress.title "진행">
+
+<!ENTITY zotero.import "불러오기">
+<!ENTITY zotero.import.whereToImportFrom "어디서 불러올까요?">
+<!ENTITY zotero.import.source.file "파일 (BiBTeX, RIS, Zotero RDF 등)">
+<!ENTITY zotero.import.importing "불러오는 중...">
+<!ENTITY zotero.import.database "데이터베이스">
+<!ENTITY zotero.import.lastModified "마지막 수정 시간">
+<!ENTITY zotero.import.size "크기">
+<!ENTITY zotero.import.createCollection "컬렉션 및 항목을 새 컬렉션으로 불러오기">
 
 <!ENTITY zotero.exportOptions.title "내보내기...">
 <!ENTITY zotero.exportOptions.format.label "형식:">
@@ -192,7 +225,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "저자 숨기기">
 <!ENTITY zotero.citation.prefix.label "접두사:">
 <!ENTITY zotero.citation.suffix.label "접미사:">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.editorWarning.label "경고: 편집기에서 인용 문구를 직접 수정하면, 더 이상 데이터베이스나 인용 형식에 대한 변경 사항이 반영되지 않습니다.">
 
 <!ENTITY zotero.richText.italic.label "이탤릭">
 <!ENTITY zotero.richText.bold.label "굵게">
@@ -210,23 +243,24 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "각주">
 <!ENTITY zotero.integration.prefs.endnotes.label "미주">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "사용 형식:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "다음으로 인용 보관:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "북마크">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "책갈피는 Microsoft Word와 OpenOffice에서 보존되지만, 경우에 따라 변경될 수도 있습니다. 이 옵션이 선택되면, 호환성 때문에 인용이 각주나 미주에 삽입되지 않게 됩니다.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "책갈피가 Word와 LibreOffice 사이에 공유될 수 있습니다, 단 우연히 변경될 때 오류를 일으킬 수 있으며 각주로 넣을 수 없습니다.">
+
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "인용 항목 자동 업데이트">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "업데이트 대기 중인 인용 항목이 문서에서 강조 표시됩니다">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "큰 문서라면 업데이트를 중지하여 인용 삽입 속도를 높일 수 있습니다. 새로고침을 클릭하여 수동으로 인용 정보를 업데이트하세요.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "문서 안에 레퍼런스 저장">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "문서 안에 레퍼런스를 저장하면 파일 크기가 다소 증가할 수 있습니다. 하지만 문서를 Zotero 그룹을 통하지 않고도 공유할 수 있습니다. Zotero 3.0이상 버전이 필요한 기능입니다.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "MEDLINE 저널 약자 사용">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "&quot;저널 약자&quot; 필드가 무시됩니다.">
 
 <!ENTITY zotero.integration.showEditor.label "편집자 보이기">
 <!ENTITY zotero.integration.classicView.label "클래식 뷰">
 
 <!ENTITY zotero.integration.references.label "참고문헌 목록 내 참조">
 
-<!ENTITY zotero.sync.button "Zotero 서버와 동기화">
+<!ENTITY zotero.sync.stop "동기화 중지">
 <!ENTITY zotero.sync.error "동기화 오류">
 <!ENTITY zotero.sync.storage.progress "진행률:">
 <!ENTITY zotero.sync.storage.downloads "다운로드:">
@@ -242,9 +276,9 @@
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "체크되지 않은 태그는 저장되지 않습니다.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "해당 태그가 모든 항목으로부터 삭제됩니다.">
 
-<!ENTITY zotero.merge.title "Conflict Resolution">
-<!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.title "충돌 해결">
+<!ENTITY zotero.merge.of "중">
+<!ENTITY zotero.merge.deleted "삭제됨">
 
 <!ENTITY zotero.proxy.recognized.title "프록시 인식완료">
 <!ENTITY zotero.proxy.recognized.warning "귀하의 도서관 · 학교 · 회사의 웹사이트에 연결된 프록시만 추가하십시오.">
@@ -252,8 +286,17 @@
 <!ENTITY zotero.proxy.recognized.disable.label "이전에 인식된 프록시를 통해 요청을 자동으로 재송신하지 마십시오.">
 <!ENTITY zotero.proxy.recognized.ignore.label "무시">
 
-<!ENTITY zotero.recognizePDF.recognizing.label "메타데이터 검색...">
-<!ENTITY zotero.recognizePDF.cancel.label "취소">
+<!ENTITY zotero.feedSettings.title "피드 설정">
+<!ENTITY zotero.feedSettings.saveButton.label "저장">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "제목:">
+<!ENTITY zotero.feedSettings.refresh.label1 "다음 간격으로 피드 업데이트: ">
+<!ENTITY zotero.feedSettings.refresh.label2 "시간">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "다음 이후 읽지 않은 피드 항목 제거: ">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "일">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "다음 이후 읽은 피드 항목 제거: ">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "일">
+
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF 명">
 <!ENTITY zotero.recognizePDF.itemName.label "항목 명">
 
@@ -284,8 +327,7 @@
 
 <!ENTITY zotero.downloadManager.label "Zotero로 저장">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "첨부물을 현재 선택한 라이브러리에 저장할 수 없습니다. 그 대신 귀하의 라이브러리에 저장됩니다.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "이 기능을 사용하려면, 먼저 Zotero 환경설정에서 PDF 도구를 인스톨해야 합니다.">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
+<!ENTITY zotero.attachLink.title "URI로 링크 걸기">
+<!ENTITY zotero.attachLink.label.link "링크:">
+<!ENTITY zotero.attachLink.label.title "제목:">

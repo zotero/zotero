@@ -1,9 +1,9 @@
-<!ENTITY styles.preview "Zotero Style Preview">
+<!ENTITY styles.preview "Zotero 스타일 미리보기">
 
-<!ENTITY styles.preview.citationFormat "Citation Format:">
-<!ENTITY styles.preview.citationFormat.all "all">
-<!ENTITY styles.preview.citationFormat.author "author">
-<!ENTITY styles.preview.citationFormat.authorDate "author-date">
-<!ENTITY styles.preview.citationFormat.label "label">
-<!ENTITY styles.preview.citationFormat.note "note">
-<!ENTITY styles.preview.citationFormat.numeric "numeric">
+<!ENTITY styles.preview.citationFormat "인용 형식:">
+<!ENTITY styles.preview.citationFormat.all "모두">
+<!ENTITY styles.preview.citationFormat.author "저자">
+<!ENTITY styles.preview.citationFormat.authorDate "저자-년도">
+<!ENTITY styles.preview.citationFormat.label "라벨">
+<!ENTITY styles.preview.citationFormat.note "노트">
+<!ENTITY styles.preview.citationFormat.numeric "숫자">

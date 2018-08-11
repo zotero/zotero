@@ -31,11 +31,16 @@ function ZoteroUnit() {
 ZoteroUnit.prototype = {
 	/* nsICommandLineHandler */
 	handle:function(cmdLine) {
-		this.tests = cmdLine.handleFlagWithParam("test", false);
-		this.noquit = cmdLine.handleFlag("noquit", false);
+        this.tests = cmdLine.handleFlagWithParam("test", false);
+        this.noquit = cmdLine.handleFlag("noquit", false);
 		this.makeTestData = cmdLine.handleFlag("makeTestData", false);
 		this.noquit = !this.makeTestData && this.noquit;
 		this.runTests = !this.makeTestData;
+		this.bail = cmdLine.handleFlag("bail", false);
+		this.startAt = cmdLine.handleFlagWithParam("startAtTestFile", false);
+		this.stopAt = cmdLine.handleFlagWithParam("stopAtTestFile", false);
+		this.grep = cmdLine.handleFlagWithParam("grep", false);
+		this.timeout = cmdLine.handleFlagWithParam("ZoteroTestTimeout", false);
 	},
 
 	dump:function(x) {

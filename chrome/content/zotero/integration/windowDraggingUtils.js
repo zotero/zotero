@@ -51,7 +51,7 @@ WindowDraggingElement.prototype = {
     if (aEvent.button != 0 ||
         this._window.fullScreen ||
         !this.mouseDownCheck.call(this._elem, aEvent) ||
-        aEvent.getPreventDefault())
+        aEvent.defaultPrevented)
       return false;
 
     let target = aEvent.originalTarget, parent = aEvent.originalTarget;

@@ -28,7 +28,7 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/standalone.css" type="text/css"?>
-<?xul-overlay href="chrome://global/content/editMenuOverlay.xul"?>
+<?xul-overlay href="chrome://zotero/content/standalone/editMenuOverlay.xul"?>
 <?xul-overlay href="chrome://zotero/content/zoteroPane.xul"?>
 <?xul-overlay href="chrome://zotero/content/itemPane.xul"?>
 <?xul-overlay href="chrome://zotero-platform/content/standalone/menuOverlay.xul"?>
@@ -45,7 +45,7 @@
 				xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 				windowtype="navigator:browser" 
 				title="&brandShortName;"
-				width="915" height="500"
+				width="1000" height="600"
 				persist="screenX screenY width height sizemode"> 
 	<script type="application/javascript" src="standalone.js"/>
 	<script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
@@ -60,11 +60,25 @@
 		<!--EDIT-->
 		<commandset id="editMenuCommands"/>
 		<command id="cmd_find"
-			oncommand="document.getElementById('zotero-tb-search').focus();"/>
+			oncommand="document.getElementById('zotero-tb-search').select()"/>
 	</commandset>
 	
 	<keyset id="mainKeyset">
 		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
+		<key id="key_import"
+				key="&importCmd.key;"
+				command="cmd_zotero_import"
+				modifiers="accel shift"/>
+		<key id="key_importFromClipboard"
+				key="&importCmd.key;"
+				command="cmd_zotero_importFromClipboard"
+				modifiers="accel shift alt"/>
+		<key id="key_copyCitation"
+				command="cmd_zotero_copyCitation"
+				modifiers="accel shift"/>
+		<key id="key_copyBibliography"
+				command="cmd_zotero_copyBibliography"
+				modifiers="accel shift"/>
 	</keyset>
 	<keyset id="editMenuKeys"/>
 	
@@ -119,28 +133,37 @@
 							<menuitem id="menu_close" label="&closeCmd.label;" key="key_close"
 									accesskey="&closeCmd.accesskey;" command="cmd_close"/>
 							<menuseparator/>
-							<menuitem id="menu_import" label="&zotero.toolbar.import.label;"
-									command="cmd_zotero_import"/>
-							<menuitem id="menu_importFromClipboard" label="&zotero.toolbar.importFromClipboard;"
-									command="cmd_zotero_importFromClipboard"/>
+							<menuitem id="menu_import" label="&importCmd.label;"
+									command="cmd_zotero_import" key="key_import"/>
+							<menuitem id="menu_importFromClipboard" label="&importFromClipboardCmd.label;"
+									command="cmd_zotero_importFromClipboard" key="key_importFromClipboard"/>
 							<menuitem id="menu_exportLibrary" label="&zotero.toolbar.export.label;"
 									command="cmd_zotero_exportLibrary"/>
 						</menupopup>
 					</menu>
 					
-					<menu id="editMenu" label="&editMenu.label;" accesskey="&editMenu.accesskey;">
+					<menu id="menu_edit"
+							onpopupshowing="ZoteroStandalone.updateQuickCopyOptions()">
 						<menupopup id="menu_EditPopup">
 							<menuitem id="menu_undo"/>
 							<menuitem id="menu_redo"/>
 							<menuseparator/>
 							<menuitem id="menu_cut"/>
-							<menuitem id="menu_copy" label="&copyCmd.label;"
-									key="key_copy" accesskey="&copyCmd.accesskey;"
-									command="cmd_copy"/>
-							<menuitem id="menu_copyCitation" label="&copyCitationCmd.label;"
-									command="cmd_zotero_copyCitation"/>
-							<menuitem id="menu_copyBibliography" label="&copyBibliographyCmd.label;"
-									command="cmd_zotero_copyBibliography"/>
+							<menuitem id="menu_copy"/>
+							<menuitem id="menu_copyCitation"
+									label="&copyCitationCmd.label;"
+									command="cmd_zotero_copyCitation"
+									key="key_copyCitation"
+									hidden="true"/>
+							<menuitem id="menu_copyBibliography"
+									label="&copyBibliographyCmd.label;"
+									command="cmd_zotero_copyBibliography"
+									key="key_copyBibliography"
+									hidden="true"/>
+							<menuitem id="menu_copyExport"
+									key="key_copyBibliography"
+									command="cmd_zotero_copyBibliography"
+									hidden="true"/>
 							<menuitem id="menu_paste"/>
 							<menuitem id="menu_delete"/>
 							<menuseparator/>
@@ -167,8 +190,13 @@
 							<menuitem id="menu_rtfScan" label="&zotero.toolbar.rtfScan.label;"
 									command="cmd_zotero_rtfScan"/>
 							<menuseparator/>
+							<menuitem id="installConnector"
+									accessKey="&installConnector.accesskey;"
+									label="&installConnector.label;"
+									oncommand="ZoteroStandalone.openHelp('connectors');"/>
 							<menuitem id="menu_addons" label="&addons.label;"
-									oncommand="ZoteroStandalone.openInViewer('chrome://mozapps/content/extensions/extensions.xul')"/>
+									oncommand="Zotero.openInViewer('chrome://mozapps/content/extensions/extensions.xul', ZoteroStandalone.updateAddonsPane)"/>
+							<menuitem id="menu_errorConsole" label="Error Console" oncommand="toJavaScriptConsole()" hidden="true"/>
 						</menupopup>
 					</menu>
 					
@@ -196,6 +224,34 @@
 									  accesskey="&helpReportErrors.accesskey;"
 									  label="&helpReportErrors.label;"
 									  command="cmd_zotero_reportErrors"/>
+							<menu id="debug-output-menu"
+									accesskey="&debugOutputLogging.accesskey;"
+									label="&debugOutputLogging.label;"
+									hidden="true">
+								<menupopup id="debug-output-popup"
+										onpopupshowing="ZoteroStandalone.DebugOutput.update()">
+									<menuitem id="debug-output-submit"
+											label="&debugOutputLogging.submit;"
+											oncommand="ZoteroStandalone.DebugOutput.submit()"
+											hidden="true"/>
+									<menuitem id="debug-output-enable-disable"
+											oncommand="ZoteroStandalone.DebugOutput.toggleStore()"/>
+									<menuseparator/>
+									<menuitem id="debug-output-status" disabled="true"/>
+									<menuseparator/>
+									<menuitem id="debug-output-view"
+											label="&debugOutputLogging.view;"
+											oncommand="ZoteroStandalone.DebugOutput.view()"/>
+									<menuitem id="debug-output-clear"
+											label="&debugOutputLogging.clear;"
+											oncommand="ZoteroStandalone.DebugOutput.clear()"/>
+									<menuseparator/>
+									<menuitem id="debug-output-restart-enabled"
+											label="&debugOutputLogging.restartWithLoggingEnabled;"
+											oncommand="ZoteroStandalone.DebugOutput.restartEnabled()"/>
+								</menupopup>
+							</menu>
+							<menuseparator/>
 							<menuitem id="checkForUpdates"
 									  accesskey="&helpCheckForUpdates.accesskey;"
 									  label="&helpCheckForUpdates.label;"

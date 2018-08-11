@@ -1,0 +1,51 @@
+.wizard-header-label {
+	font-size: 16px;
+	font-weight: bold;
+}
+
+/* Start */
+wizard[currentpageid="page-start"] .wizard-header-label {
+	padding-top: 24px;
+}
+
+wizard[currentpageid="page-start"] .wizard-page-box {
+	margin-top: -2px;
+	padding-top: 0;
+}
+
+radiogroup {
+	font-size: 14px;
+	margin-top: 4px;
+}
+
+radio {
+	padding-top: 5px;
+}
+
+/* File list */
+wizard[currentpageid="page-file-list"] .wizard-header {
+	display: none;
+}
+
+#file-options-header {
+	font-size: 15px;
+	font-weight: bold;
+	margin-bottom: 6px;
+}
+
+listbox, #result-description, #result-description-html {
+	font-size: 13px;
+}
+
+#result-description-html a {
+	text-decoration: underline;
+}
+
+button, checkbox {
+	font-size: 13px;
+}
+
+#result-report-error {
+	margin-top: 13px;
+	margin-left: 0;
+}

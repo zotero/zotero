@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "ปิด">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
 <!ENTITY quitApplicationCmdWin.label "ออกจากโปรแกรม">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "เลิกใช้">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "แก้ไข">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "เลิกทำ">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "ทำซ้ำ">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "ตัด">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "สำเนา">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "สำเนาการอ้างอิง">
 <!ENTITY copyBibliographyCmd.label "สำเนาบรรณานุกรม">
-<!ENTITY pasteCmd.label "วาง">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "ลบ">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "เลือกทั้งหมด">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Preferences">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "ตั้งค่าพึงใจ">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "ค้นหา">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "สลับทิศทางของหน้า">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "สลับทิศทางของอักษร">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "เครื่องมือ">
 <!ENTITY toolsMenu.accesskey "T">
+<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "โปรแกรมเสริม">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "ข้อมูลการแก้ปัญหา">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "ส่งกลับคำแนะนำ...">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "รายงานความผิดพลาดให้ Zotero...">
+<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Report Errors…">
 <!ENTITY helpReportErrors.accesskey "R">
+
+<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Submit Output">
+<!ENTITY debugOutputLogging.view "View Output">
+<!ENTITY debugOutputLogging.clear "Clear Output">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+
 <!ENTITY helpCheckForUpdates.label "ตรวจสอบรุ่นล่าสุด...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

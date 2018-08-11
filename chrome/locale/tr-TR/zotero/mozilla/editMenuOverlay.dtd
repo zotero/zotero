@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "Düzenle">
+<!ENTITY editMenu.accesskey        "e">
+<!ENTITY undoCmd.label             "Geri al">
+<!ENTITY undoCmd.key               "z">
+<!ENTITY undoCmd.accesskey         "G">
+<!ENTITY redoCmd.label             "Yinele">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "Y">
+<!ENTITY cutCmd.label              "Kes">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "K">
+<!ENTITY copyCmd.label             "Kopyala">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "o">
+<!ENTITY pasteCmd.label            "Yapıştır">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "a">
+<!ENTITY deleteCmd.label           "Sil">
+<!ENTITY deleteCmd.accesskey       "S">
+<!ENTITY selectAllCmd.label        "Tümünü seç">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "T">
+<!ENTITY findCmd.label             "Bul">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "B">
+<!ENTITY findAgainCmd.label        "Sonrakini bul">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "n">
+<!ENTITY findPreviousCmd.label     "Öncekini bul">
+<!ENTITY findPreviousCmd.accesskey "n">

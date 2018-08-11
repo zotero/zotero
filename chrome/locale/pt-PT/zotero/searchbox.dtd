@@ -9,7 +9,7 @@
 
 <!ENTITY zotero.search.recursive.label "Procurar nas sub-pastas">
 <!ENTITY zotero.search.noChildren "Mostrar apenas itens de topo">
-<!ENTITY zotero.search.includeParentsAndChildren "Incluir super e sub-itens das correspondências">
+<!ENTITY zotero.search.includeParentsAndChildren "Incluir itens ascendentes e descendentes dos itens correspondentes">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (inclusive em arquivos binários)">

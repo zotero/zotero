@@ -1,0 +1,116 @@
+<html>
+	<head>
+		<script src="../include.js"></script>
+		<script>
+			var generateData = Zotero.Promise.coroutine(function* (options = {}) {
+				var chunkSize = options.chunkSize;
+				var numItems = options.numItems;
+				var runs = Math.ceil(numItems / chunkSize);
+				var created = 0;
+				var itemTypes = Zotero.ItemTypes.getAll()
+					// Don't create attachments, notes, or custom item types
+					.filter(x => x.name != 'attachment' && x.name != 'note' && x.id < 10000);
+				var accessDateFieldID = Zotero.ItemFields.getID('accessDate');
+				for (let i = 0; i < runs; i++) {
+					yield Zotero.DB.executeTransaction(function* () {
+						for (let i = 0; i < chunkSize && created++ < numItems; i++) {
+							let { id: itemTypeID, name: itemType } =
+								itemTypes[Math.floor(Math.random() * itemTypes.length)];
+							let item = new Zotero.Item(itemType);
+							item.setField('title', randStr(5, 200));
+							let fieldIDs = Zotero.ItemFields.getItemTypeFields(itemTypeID);
+							// Creators
+							if (rand(1, 10) > 2) {
+								let numCreators = rand(1, 5);
+								let creators = [];
+								let primaryCreatorTypeID = Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID);
+								// Add primary type for most items
+								if (rand(1, 10) > 2) {
+									let creatorType = Zotero.CreatorTypes.getName(primaryCreatorTypeID);
+									addCreatorOfType(creators, creatorType);
+								}
+								// Add other types
+								let creatorTypes = Zotero.CreatorTypes.getTypesForItemType(itemTypeID)
+									.map(type => type.name);
+								let max = rand(0, 8);
+								for (let i = 0; i < max; i++) {
+									addCreatorOfType(
+										creators,
+										creatorTypes[Math.floor(Math.random() * creatorTypes.length)]
+									);
+								}
+								item.setCreators(creators);
+							}
+							// Fill a random set of fields with random data
+							fieldIDs = getRandomSubarray(fieldIDs, Zotero.Utilities.rand(1, 10));
+							for (let fieldID of fieldIDs) {
+								// Avoid warning from invalid access date
+								if (fieldID == accessDateFieldID) continue;
+								
+								item.setField(fieldID, randStr(1, 200));
+							}
+							// Add tags to 1 in 4 items
+							if (Zotero.Utilities.rand(1, 4) == 1) {
+								let numTags = rand(1, 10);
+								for (let i = 0; i < numTags; i++) {
+									item.addTag(
+										randStr(4, 40),
+										// Make 1/4 of tags automatic
+										rand(1, 4) == 1 ? 1 : 0
+									);
+								}
+							}
+							yield item.save();
+						}
+					});
+				}
+			});
+			
+			// From http://stackoverflow.com/a/11935263
+			function getRandomSubarray(arr, size) {
+				var shuffled = arr.slice(0), i = arr.length, temp, index;
+				while (i--) {
+					index = Math.floor((i + 1) * Math.random());
+					temp = shuffled[index];
+					shuffled[index] = shuffled[i];
+					shuffled[i] = temp;
+				}
+				return shuffled.slice(0, size);
+			}
+			
+			var rand = Zotero.Utilities.rand;
+			function randStr(min, max) {
+				var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+					+ "éØü"
+					+ "漢字"
+					+ "                    "
+				do {
+					var rnd = Zotero.Utilities.randomString(rand(min, max), chars);
+				}
+				// Make sure string isn't all spaces
+				while (rnd.trim().length == 0);
+				return rnd;
+			}
+			
+			function addCreatorOfType(creators, creatorType) {
+				if (rand(1, 2) == 1) {
+					creators.push({
+						creatorType,
+						firstName: randStr(0, 10),
+						lastName: randStr(3, 20)
+					});
+				}
+				else {
+					creators.push({
+						creatorType,
+						name: randStr(3, 40)
+					});
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<!-- TODO: Add text fields for numItems and chunkSize -->
+		<button onclick="generateData({ numItems: 10000, chunkSize: 50 })">Generate Data</button>
+	</body>
+</html>

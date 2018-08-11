@@ -1,25 +1,31 @@
 content	zotero				chrome/content/zotero/
-content	zotero-platform		chrome/content/zotero-platform/		platform
+content	zotero-platform		chrome/content/zotero-platform/mac/       os=Darwin
+content	zotero-platform		chrome/content/zotero-platform/win/       os=WINNT
+content	zotero-platform		chrome/content/zotero-platform/unix/      os=Linux
+content	zotero-platform		chrome/content/zotero-platform/unix/      os=SunOS
+content	zotero-platform		chrome/content/zotero-platform/unix/      os=FreeBSD
+content	zotero-platform		chrome/content/zotero-platform/unix/      os=OpenBSD
+
 resource zotero				resource/
 
 locale	zotero	en-US		chrome/locale/en-US/zotero/
-locale	zotero	af-ZA		chrome/locale/af-ZA/zotero/
+#locale	zotero	af-ZA		chrome/locale/af-ZA/zotero/
 locale	zotero	ar		chrome/locale/ar/zotero/
 locale	zotero	bg-BG		chrome/locale/bg-BG/zotero/
 locale	zotero	ca-AD		chrome/locale/ca-AD/zotero/
 locale	zotero	cs-CZ		chrome/locale/cs-CZ/zotero/
 locale	zotero	da-DK		chrome/locale/da-DK/zotero/
 locale	zotero	de		chrome/locale/de/zotero/
-locale	zotero	el-GR		chrome/locale/el-GR/zotero/
+#locale	zotero	el-GR		chrome/locale/el-GR/zotero/
 locale	zotero	es-ES		chrome/locale/es-ES/zotero/
 locale	zotero	et-EE		chrome/locale/et-EE/zotero/
-locale	zotero	eu-ES		chrome/locale/eu-ES/zotero/
+#locale	zotero	eu-ES		chrome/locale/eu-ES/zotero/
 locale	zotero	fa		chrome/locale/fa/zotero/
 locale	zotero	fi-FI		chrome/locale/fi-FI/zotero/
 locale	zotero	fr-FR		chrome/locale/fr-FR/zotero/
 locale	zotero	gl-ES		chrome/locale/gl-ES/zotero/
-locale	zotero	he-IL		chrome/locale/he-IL/zotero/
-locale	zotero	hr-HR		chrome/locale/hr-HR/zotero/
+#locale	zotero	he-IL		chrome/locale/he-IL/zotero/
+#locale	zotero	hr-HR		chrome/locale/hr-HR/zotero/
 locale	zotero	hu-HU		chrome/locale/hu-HU/zotero/
 locale	zotero	id-ID		chrome/locale/id-ID/zotero/
 locale	zotero	is-IS		chrome/locale/is-IS/zotero/
@@ -28,9 +34,9 @@ locale	zotero	ja-JP		chrome/locale/ja-JP/zotero/
 locale	zotero	km			chrome/locale/km/zotero/
 locale	zotero	ko-KR		chrome/locale/ko-KR/zotero/
 locale  zotero  lt-LT           chrome/locale/lt-LT/zotero/
-locale	zotero	mn-MN		chrome/locale/mn-MN/zotero/
-locale	zotero	nb-NO		chrome/locale/nb-NO/zotero/
-locale	zotero	nn-NO		chrome/locale/nn-NO/zotero/
+#locale	zotero	mn-MN		chrome/locale/mn-MN/zotero/
+#locale	zotero	nb-NO		chrome/locale/nb-NO/zotero/
+#locale	zotero	nn-NO		chrome/locale/nn-NO/zotero/
 locale	zotero	nl-NL		chrome/locale/nl-NL/zotero/
 locale	zotero	pl-PL		chrome/locale/pl-PL/zotero/
 locale	zotero	pt-BR		chrome/locale/pt-BR/zotero/
@@ -58,7 +64,6 @@ overlay chrome://zotero/content/preferences/preferences_general.xul chrome://zot
 overlay chrome://zotero/content/preferences/preferences_export.xul chrome://zotero/content/preferences/preferences_export_firefox.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
 overlay chrome://zotero/content/preferences/preferences_keys.xul chrome://zotero/content/preferences/preferences_keys_firefox.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
 overlay chrome://zotero/content/preferences/preferences_advanced.xul chrome://zotero/content/preferences/preferences_advanced_firefox.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
-overlay chrome://zotero/content/preferences/preferences_advanced.xul chrome://zotero/content/preferences/preferences_advanced_standalone.xul application=zotero@chnm.gmu.edu
 
 overlay chrome://mozapps/content/downloads/unknownContentType.xul chrome://zotero/content/downloadOverlay.xul
 

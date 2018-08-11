@@ -64,10 +64,10 @@ Zotero.Annotate = new function() {
 		if (m) {
 			var id = m[1];
 			var item = Zotero.Items.get(id);
-			var mimeType = item.attachmentMIMEType;
-			var file = item.getFile();
+			var contentType = item.attachmentContentType;
+			var file = item.getFilePath();
 			var ext = Zotero.File.getExtension(file);
-			if (mimeType == 'text/plain' || !Zotero.MIME.hasNativeHandler(mimeType, ext)) {
+			if (contentType == 'text/plain' || !Zotero.MIME.hasNativeHandler(contentType, ext)) {
 				return false;
 			}
 			return id;
@@ -141,7 +141,7 @@ Zotero.Annotate = new function() {
 			} else {
 				var browsers = win.document.getElementsByTagNameNS(XUL_NAMESPACE, "browser");
 			}
-			for each(var browser in browsers) {
+			for (let browser of browsers) {
 				if(browser.currentURI) {
 					if(browser.currentURI.spec == annotationURL) {
 						if(haveBrowser) {
@@ -364,7 +364,7 @@ Zotero.Annotate.Path.prototype.fromNode = function(node, offset) {
 					// is still part of the first text node
 					if(sibling.getAttribute) {
 						// get offset of all child nodes
-						for each(var child in sibling.childNodes) {
+						for (let child of sibling.childNodes) {
 							if(child && child.nodeType == TEXT_TYPE) {
 								this.offset += child.nodeValue.length;
 							}
@@ -711,7 +711,7 @@ Zotero.Annotations.prototype.unhighlight = function(selectedRange) {
  * Refereshes display of annotations (useful if page is reloaded)
  */
 Zotero.Annotations.prototype.refresh = function() {
-	for each(var annotation in this.annotations) {
+	for (let annotation of this.annotations) {
 		annotation.display();
 	}
 }
@@ -725,12 +725,12 @@ Zotero.Annotations.prototype.save = function() {
 		Zotero.DB.query("DELETE FROM highlights WHERE itemID = ?", [this.itemID]);
 		
 		// save highlights
-		for each(var highlight in this.highlights) {
+		for (let highlight of this.highlights) {
 			if(highlight) highlight.save();
 		}
 		
 		// save annotations
-		for each(var annotation in this.annotations) {
+		for (let annotation of this.annotations) {
 			// Don't drop all annotations if one is broken (due to ~3.0 glitch)
 			try {
 				annotation.save();
@@ -751,17 +751,17 @@ Zotero.Annotations.prototype.save = function() {
 /**
  * Loads annotations from DB
  */
-Zotero.Annotations.prototype.load = function() {
+Zotero.Annotations.prototype.load = Zotero.Promise.coroutine(function* () {
 	// load annotations
-	var rows = Zotero.DB.query("SELECT * FROM annotations WHERE itemID = ?", [this.itemID]);
-	for each(var row in rows) {
+	var rows = yield Zotero.DB.queryAsync("SELECT * FROM annotations WHERE itemID = ?", [this.itemID]);
+	for (let row of rows) {
 		var annotation = this.createAnnotation();
 		annotation.initWithDBRow(row);
 	}
 	
 	// load highlights
-	var rows = Zotero.DB.query("SELECT * FROM highlights WHERE itemID = ?", [this.itemID]);
-	for each(var row in rows) {
+	var rows = yield Zotero.DB.queryAsync("SELECT * FROM highlights WHERE itemID = ?", [this.itemID]);
+	for (let row of rows) {
 		try {
 			var highlight = new Zotero.Highlight(this);
 			highlight.initWithDBRow(row);
@@ -770,7 +770,7 @@ Zotero.Annotations.prototype.load = function() {
 			Zotero.debug("Annotate: could not load highlight");
 		}
 	}
-}
+});
 
 /**
  * Expands annotations if any are collapsed, or collapses highlights if all are expanded
@@ -778,7 +778,7 @@ Zotero.Annotations.prototype.load = function() {
 Zotero.Annotations.prototype.toggleCollapsed = function() {
 	// look to see if there are any collapsed annotations
 	var status = true;
-	for each(var annotation in this.annotations) {
+	for (let annotation of this.annotations) {
 		if(annotation.collapsed) {
 			status = false;
 			break;
@@ -786,7 +786,7 @@ Zotero.Annotations.prototype.toggleCollapsed = function() {
 	}
 	
 	// set status on all annotations
-	for each(var annotation in this.annotations) {
+	for (let annotation of this.annotations) {
 		annotation.setCollapsed(status);
 	}
 }
@@ -1621,7 +1621,7 @@ Zotero.Highlight.prototype._highlightSpaceBetween = function(start, end) {
 			node = node.nextSibling;
 		}
 		
-		for each(var textNode in textArray) {
+		for (let textNode of textArray) {
 			if(firstSpan) {
 				this._highlightTextNode(textNode);
 			} else {

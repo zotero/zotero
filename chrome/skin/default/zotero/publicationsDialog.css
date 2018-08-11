@@ -1,0 +1,20 @@
+groupbox {
+	padding: 0;
+}
+
+groupbox > .groupbox-body {
+	-moz-appearance: none;
+}
+
+checkbox, description, groupbox > .groupbox-body, radio, div:not(.license-more-info), label {
+	font-size: small;
+}
+
+a {
+	color: -moz-nativehyperlinktext;
+	text-decoration: underline;
+}
+
+#confirm-authorship-checkbox {
+	-moz-box-align: baseline;
+}

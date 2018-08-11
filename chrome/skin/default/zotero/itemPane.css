@@ -1,4 +1,4 @@
-#zotero-item-pane-message {
+.zotero-item-pane-message-box description {
 	padding: 0 2em;
 }
 
@@ -22,12 +22,21 @@
 
 #zotero-view-item
 {
-	padding: 1.5em .25em .25em;
+	padding: 0;
+}
+
+#zotero-view-item.no-tabs
+{
+	margin-top: 0;
 }
 
 #zotero-view-item > tabpanel > *
 {
 	overflow: auto;
+}
+
+#zotero-view-item:not([selectedIndex="0"]) > tabpanel > * {
+	padding-top: .25em;
 }
 
 #zotero-view-item > vbox
@@ -36,10 +45,15 @@
 	margin-left: 5px;
 }
 
-/* Restore button in trash view */
-#zotero-item-restore-button-holder
-{
+/* Buttons in trash and feed views */
+.zotero-item-pane-top-buttons {
 	-moz-appearance: toolbar;
+	-moz-box-pack: center;
+	min-height: 3em;
+}
+
+.zotero-item-pane-top-buttons > button {
+	-moz-box-flex: 1
 }
 
 /* Merge pane in duplicates view */
@@ -56,4 +70,24 @@
 #zotero-duplicates-merge-item-box row
 {
 	min-height: 20px;
+}
+
+#zotero-feed-item-toggleRead-button {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 150px;
+}
+
+#zotero-feed-item-addTo-button {
+	max-width: 250px;
+}
+
+#zotero-feed-item-addTo-button button {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#zotero-feed-item-addTo-button .button-icon {
+	margin-right: 5px;
+	height: 16px;
 }

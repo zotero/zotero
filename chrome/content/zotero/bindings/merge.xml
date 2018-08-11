@@ -28,7 +28,8 @@
 
 <bindings xmlns="http://www.mozilla.org/xbl"
 		  xmlns:xbl="http://www.mozilla.org/xbl"
-		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		  xmlns:html="http://www.w3.org/1999/xhtml">
 	
 	<binding id="merge-group">
 		<resources>
@@ -44,73 +45,38 @@
 			]]>
 			</constructor>
 			
-			<field name="_type"/>
-			<property name="type" onget="return this._type;">
-				<setter>
-				<![CDATA[
-					this._type = val;
-					var hbox = document.getAnonymousNodes(this)[0];
-					hbox.setAttribute('mergetype', val);
-				]]>
-				</setter>
-			</property>
+			<field name="libraryID"/>
 			
-			<property name="left" onget="return this._leftpane.ref;">
+			<field name="_data"/>
+			<property name="data" onget="return this._data;">
 				<setter>
 				<![CDATA[
-					// TODO: Make sure object is the correct type
-					
-					if (val == 'deleted') {
-						this._leftpane.ref = 'deleted';
-						return;
-					}
-					
-					// Check for note or attachment
-					if (val instanceof Zotero.Item) {
-						this.type = this._getTypeFromItem(val);
-					}
-					
-					// Clone object so changes in merge pane don't affect it
-					this._leftpane.ref = val.clone(true);
-					this._leftpane.original = val;
-				]]>
-				</setter>
-			</property>
-			
-			<property name="right" onget="return this._rightpane.ref;">
-				<setter>
-				<![CDATA[
-					// TODO: make sure left is set
-					if (!this._leftpane.ref) {
-						throw ("Left object must be set before setting <zoteromergegroup>.right");
-					}
-					
-					if (val == 'deleted') {
-						this._rightpane.ref = 'deleted';
-					}
-					else {
-						// TODO: Make sure object is the correct type
-						
-						// Check for note or attachment if not already set
-						if (this._leftpane.ref == 'deleted' && val instanceof Zotero.Item) {
-							this.type = this._getTypeFromItem(val);
-						}
-						
-						// Clone object so changes in merge pane don't affect it
-						this._rightpane.ref = val.clone(true);
-						this._rightpane.original = val;
-					}
-					
+					this._data = val;
 					this.refresh();
 				]]>
 				</setter>
 			</property>
 			
-			<property name="merge" onget="return this._mergepane.ref">
+			<property name="merged" onget="return this._mergepane.data"/>
+			
+			<field name="_type"/>
+			<property name="type" onget="return this._type;">
 				<setter>
 				<![CDATA[
-					// TODO: Make sure object is the correct type
-					this._mergepane.ref = val;
+					switch (val) {
+						case 'item':
+						case 'attachment':
+						case 'note':
+						case 'file':
+							break;
+						
+						default:
+							throw new Error(`Unsupported merge object type '${type}'`);
+					}
+					
+					this._type = val;
+					var hbox = document.getAnonymousNodes(this)[0];
+					hbox.setAttribute('mergetype', val);
 				]]>
 				</setter>
 			</property>
@@ -119,50 +85,46 @@
 			<property name="rightCaption" onset="this._rightpane.caption.label = val"/>
 			<property name="mergeCaption" onset="this._mergepane.caption.label = val"/>
 			
-			
+			<field name="_leftpane"/>
 			<property name="leftpane" onget="return this._leftpane"/>
+			<field name="_rightpane"/>
 			<property name="rightpane" onget="return this._rightpane"/>
+			<field name="_mergepane"/>
 			<property name="mergepane" onget="return this._mergepane"/>
 			
 			<property name="onSelectionChange"/>
 			
-			<field name="_leftpane"/>
-			<field name="_rightpane"/>
-			<field name="_mergepane"/>
-			
 			<method name="refresh">
 				<body>
 				<![CDATA[
-					// Set merge pane to most recently changed object
-					// If one object was deleted, set merge pane to other
-					// TODO: use delete timestamp
-					
-					if (this._leftpane.ref != 'deleted'
-							&& this._rightpane.ref != 'deleted') {
-						
-						var dm1 = this._leftpane.ref.getField('dateModified');
-						if (dm1) {
-							dm1 = Zotero.Date.sqlToDate(dm1);
-						}
-						
-						var dm2 = this._rightpane.ref.getField('dateModified');
-						if (dm2) {
-							dm2 = Zotero.Date.sqlToDate(dm2);
-						}
+					if (this._data.left.deleted && this._data.right.deleted) {
+						throw new Error("'left' and 'right' cannot both be deleted");
 					}
 					
-					if (this._leftpane.ref == 'deleted' || dm2 > dm1) {
-						var mergeItem = this._rightpane.original;
-						this._leftpane.removeAttribute("selected");
-						this._rightpane.setAttribute("selected", "true");
+					// Check for note or attachment
+					if (!this.type) {
+						this.type = this._getTypeFromObject(
+							this._data.left.deleted ?  this._data.right : this._data.left
+						);
+					}
+					
+					var showButton = this.type != 'item';
+					
+					this._leftpane.showButton = showButton;
+					this._rightpane.showButton = showButton;
+					this._leftpane.libraryID = this.libraryID;
+					this._rightpane.libraryID = this.libraryID;
+					this._mergepane.libraryID = this.libraryID;
+					this._leftpane.data = this._data.left;
+					this._rightpane.data = this._data.right;
+					this._mergepane.data = this._data.merge;
+					
+					if (this._data.selected == 'left') {
+						this.choosePane(this._leftpane);
 					}
 					else {
-						var mergeItem = this._leftpane.original;
-						this._rightpane.removeAttribute("selected");
-						this._leftpane.setAttribute("selected", "true");
+						this.choosePane(this._rightpane);
 					}
-					
-					this._mergepane.ref = mergeItem;
 					
 					/*
 					
@@ -224,22 +186,51 @@
 				</body>
 			</method>
 			
-			<method name="_getTypeFromItem">
+			
+			<method name="choosePane">
+				<parameter name="pane"/>
+				<body>
+				<![CDATA[
+					if (pane.getAttribute('anonid') == 'leftpane') {
+						var position = 'left';
+						var otherPane = this._rightpane;
+					}
+					else {
+						var position = 'right';
+						var otherPane = this._leftpane;
+					}
+					
+					pane.removeAttribute("selected");
+					otherPane.removeAttribute("selected");
+					pane.setAttribute("selected", "true");
+					
+					if (pane.deleted) {
+						this._mergepane.deleted = true;
+					}
+					else {
+						this._mergepane.data = pane.data;
+					}
+					
+					if (this.onSelectionChange) {
+						this.onSelectionChange();
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="_getTypeFromObject">
 				<parameter name="obj"/>
 				<body>
 				<![CDATA[
-					if (!(obj instanceof Zotero.Item)) {
-						throw ("obj is not a Zotero.Item in merge.xml");
+					if (!obj.itemType) {
+						Zotero.debug(obj, 1);
+						throw new Error("obj is not item JSON");
 					}
-					if (obj.isAttachment()) {
-						return 'attachment';
+					if (obj.itemType == 'attachment' || obj.itemType == 'note') {
+						return obj.itemType;
 					}
-					else if (obj.isNote()) {
-						return 'note';
-					}
-					else {
-						return 'item';
-					}
+					return 'item';
 				]]>
 				</body>
 			</method>
@@ -248,7 +239,7 @@
 				<parameter name="id"/>
 				<body>
 				<![CDATA[
-					return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
+					return document.getAnonymousNodes(this)[0].getElementsByAttribute('anonid',id)[0];
 				]]>
 				</body>
 			</method>
@@ -256,9 +247,9 @@
 		
 		<content>
 			<xul:hbox id="merge-group" flex="1">
-				<xul:zoteromergepane id="leftpane" flex="1"/>
-				<xul:zoteromergepane id="rightpane" flex="1"/>
-				<xul:zoteromergepane id="mergepane" flex="1"/>
+				<xul:zoteromergepane anonid="leftpane" flex="1"/>
+				<xul:zoteromergepane anonid="rightpane" flex="1"/>
+				<xul:zoteromergepane anonid="mergepane" flex="1"/>
 			</xul:hbox>
 		</content>
 	</binding>
@@ -273,11 +264,20 @@
 			<constructor>
 			<![CDATA[
 				this.parent = document.getBindingParent(this.parentNode);
+				this.isMergePane = this.getAttribute('anonid') == 'mergepane';
+				
+				if (!this.isMergePane) {
+					this.pane.onclick = function () {
+						this.parent.choosePane(this);
+					}.bind(this);
+				}
 			]]>
 			</constructor>
 			
 			<property name="type" onget="return this.parent.type" readonly="true"/>
 			<property name="caption" onget="return this._id('caption')" readonly="true"/>
+			<field name="showButton"/>
+			<property name="pane" onget="return document.getAnonymousNodes(this)[0]"/>
 			<property name="objectbox" onget="return this._id('objectbox')" readonly="true"/>
 			
 			<field name="_deleted"/>
@@ -291,7 +291,7 @@
 						placeholder.hidden = !!val;
 					}
 					else {
-						this._id('objectbox').hidden = !!true;
+						this._id('objectbox').hidden = true;
 					}
 					var deleteBox = this._id('delete-box');
 					deleteBox.hidden = !val;
@@ -299,10 +299,25 @@
 				</setter>
 			</property>
 			
-			<property name="ref" onget="return this._deleted ? 'deleted' : this.objectbox.ref;">
+			<field name="libraryID"/>
+			
+			<field name="_data"/>
+			<property name="data" onget="return this._data">
 				<setter>
 				<![CDATA[
-					if (val == 'deleted') {
+					this._data = val;
+					
+					var button = this._id('choose-button');
+					button.label = Zotero.getString('sync.conflict.chooseThisVersion');
+					if (this.showButton) {
+						button.onclick = () => this.parent.choosePane(this);
+						button.style.visibility = 'visible';
+					}
+					else {
+						button.style.visibility = 'hidden';
+					}
+					
+					if (val.deleted) {
 						this.deleted = true;
 						return;
 					}
@@ -317,6 +332,7 @@
 							break;
 						
 						case 'attachment':
+						case 'file':
 							elementName = 'zoteroattachmentbox';
 							break;
 						
@@ -324,16 +340,29 @@
 							elementName = 'zoteronoteeditor';
 							break;
 						
-						case 'storagefile':
-							elementName = 'zoterostoragefilebox';
-							break;
-						
 						default:
-							throw ("Object type '" + this.type
-								+ "' not supported in <zoteromergepane>.ref");
+							throw new Error("Object type '" + this.type + "' not supported");
 					}
 					
 					var objbox = document.createElement(elementName);
+					
+					var parentRow = this._id('parent-row');
+					if (val.parentItem) {
+						parentRow.textContent = '';
+						
+						let label = document.createElement('span');
+						label.textContent = Zotero.getString('pane.item.parentItem');
+						parentRow.appendChild(label);
+						
+						let parentItem = Zotero.Items.getByLibraryAndKey(this.libraryID, val.parentItem);
+						let text = document.createTextNode(" " + parentItem.getDisplayTitle(true));
+						parentRow.appendChild(text);
+						
+						parentRow.hidden = false;
+					}
+					else {
+						parentRow.hidden = true;
+					}
 					
 					if (this._id('object-placeholder')) {
 						var placeholder = this._id('object-placeholder');
@@ -344,149 +373,58 @@
 						oldObjBox.parentNode.replaceChild(objbox, oldObjBox);
 					}
 					
-					objbox.setAttribute("id", "objectbox");
+					objbox.setAttribute("anonid", "objectbox");
 					objbox.setAttribute("flex", "1");
+					objbox.mode = this.type == 'file' ? 'filemerge' : 'merge';
 					
-					if (this.getAttribute('id') == 'mergepane') {
-						objbox.mode = 'mergeedit';
-					}
-					else {
-						objbox.mode = 'merge';
-						objbox.clickHandler = this.chooseObj;
-					}
+					// Store JSON
+					this._data = val;
 					
-					// Type-specific settings
-					switch (this.type) {
-						case 'attachment':
-						case 'note':
-						case 'storagefile':
-							objbox.buttonCaption = Zotero.getString('sync.conflict.chooseThisVersion');
-							break;
-					}
+					// Create a copy of the JSON that we can clean for display, since the remote object
+					// might reference things that don't exist locally
+					var displayJSON = Object.assign({}, val);
+					displayJSON.collections = [];
 					
-					objbox.ref = val;
+					// Create item from JSON for metadata box
+					var item = new Zotero.Item(val.itemType);
+					item.libraryID = this.libraryID;
+					item.fromJSON(displayJSON);
+					objbox.item = item;
 				]]>
 				</setter>
 			</property>
 			
-			<field name="original"/> <!-- original object -->
 			<field name="parent"/>
 			
-			<method name="chooseObj">
-				<parameter name="obj"/>
-				<body>
-				<![CDATA[
-					var pane = Zotero.getAncestorByTagName(obj, 'zoteromergepane');
-					var mergegroup = document.getBindingParent(pane);
-					var mergepane = mergegroup.mergepane;
-					
-					if (pane.getAttribute('id') == 'leftpane') {
-						var position = 'left';
-						var otherPane = mergegroup.rightpane;
-					}
-					else {
-						var position = 'right';
-						var otherPane = mergegroup.leftpane;
-					}
-					
-					pane.removeAttribute("selected");
-					otherPane.removeAttribute("selected");
-					pane.setAttribute("selected", "true");
-					
-					if (pane.ref == 'deleted') {
-						mergepane.deleted = true;
-					}
-					else {
-						mergepane.ref = pane.original;
-					}
-					
-					if (mergegroup.onSelectionChange) {
-						mergegroup.onSelectionChange();
-					}
-				]]>
-				</body>
-			</method>
-			
-			<!-- Unused -->
-			<method name="chooseField">
-				<parameter name="row"/>
-				<body>
-				<![CDATA[
-					// If used, has to be updated to handle original item
-					
-					var fieldName = row.firstChild.getAttribute('fieldname');
-					// TODO: creator/date
-					var value = row.lastChild.firstChild.nodeValue
-					
-					var mergegroup = document.getBindingParent(this.parentNode).parent;
-					var mergepane = mergegroup.mergepane;
-					var pane = document.getBindingParent(this.parentNode);
-					
-					if (pane.getAttribute('id') == 'leftpane') {
-						var position = 'left';
-						var otherPane = mergegroup.rightpane;
-					}
-					else {
-						var position = 'right';
-						var otherPane = mergegroup.leftpane;
-					}
-					
-					// Changing item type
-					if (fieldName == 'itemType') {
-						fieldName = 'itemTypeID';
-						value = row.lastChild.getAttribute('itemTypeID');
-						
-						if (!mergepane.ref) {
-							mergepane.ref = new Zotero.Item(value);
-						}
-						else {
-							mergepane.objectbox.changeTypeTo(value, true);
-						}
-						
-						pane.objectbox.clickableFields = [];
-						pane.objectbox.clickable = true;
-						var fieldIDs = Zotero.ItemFields.getItemTypeFields(value);
-						var fieldNames = ['itemType'];
-						for each(var field in fieldIDs) {
-							fieldNames.push(Zotero.ItemFields.getName(field));
-						}
-						otherPane.objectbox.clickableFields = fieldNames;
-						otherPane.objectbox.clickable = false;
-						pane.objectbox.refresh();
-						otherPane.objectbox.refresh();
-					}
-					// Changing another field
-					else {
-						mergepane.ref.setField(fieldName, value);
-					}
-					
-					mergepane.objectbox.refresh();
-				]]>
-				</body>
+			<method name="click">
+				<body><![CDATA[
+					this.pane.click();
+				]]></body>
 			</method>
 			
 			<method name="_id">
 				<parameter name="id"/>
 				<body>
 				<![CDATA[
-					if (!document.getAnonymousNodes(this)[0].getElementsByAttribute('id', id).length) {
-						return false;
-					}
-					return document.getAnonymousNodes(this)[0].getElementsByAttribute('id', id)[0];
+					var elems = document.getAnonymousNodes(this)[0].getElementsByAttribute('anonid', id);
+					return elems.length ? elems[0] : false;
 				]]>
 				</body>
 			</method>
 		</implementation>
 		
 		<content>
-			<xul:groupbox id="merge-pane" flex="1">
-				<xul:caption id="caption"/>
-				<xul:box id="object-placeholder"/>
-				<xul:hbox id="delete-box" hidden="true" flex="1"
-						onclick="document.getBindingParent(this).chooseObj(this)">
-					<xul:label value="&zotero.merge.deleted;"/>
-				</xul:hbox>
-			</xul:groupbox>
+			<xul:vbox flex="1">
+				<xul:groupbox anonid="merge-pane" flex="1">
+					<xul:caption anonid="caption"/>
+					<html:div anonid="parent-row" hidden="true"/>
+					<xul:box anonid="object-placeholder"/>
+					<xul:hbox anonid="delete-box" hidden="true" flex="1">
+						<xul:label value="&zotero.merge.deleted;"/>
+					</xul:hbox>
+				</xul:groupbox>
+				<xul:button anonid="choose-button"/>
+			</xul:vbox>
 		</content>
 	</binding>
 </bindings>

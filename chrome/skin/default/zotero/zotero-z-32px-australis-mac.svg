@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   viewBox="-8 -8 32 32"
+   width="32px"
+   height="32px"
+   id="svg2"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="zotero-z-32px-australis.svg">
+  <metadata
+     id="metadata40">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1250"
+     inkscape:window-height="1087"
+     id="namedview38"
+     showgrid="false"
+     inkscape:zoom="1"
+     inkscape:cx="4.9830508"
+     inkscape:cy="16"
+     inkscape:window-x="587"
+     inkscape:window-y="200"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg2" />
+  <defs
+     id="defs4">
+    <style
+       type="text/css"
+       id="style6"><![CDATA[
+          /*
+           * This file is used by the make-z-icons build script to generate platform-specific
+           * PNGs for the main toolbar button.
+           */
+          
+          polygon {
+             stroke: #4d4d4d;
+          }
+          #s1 {
+             stop-color: #4d4d4d;
+          }
+          #s2 {
+	         stop-color: #4d4d4d;
+          }
+		]]></style>
+    <linearGradient
+       x1="0"
+       y1="2"
+       x2="0"
+       y2="30"
+       gradientUnits="userSpaceOnUse"
+       id="lg">
+      <stop
+         id="s1"
+         offset="0" />
+      <stop
+         id="s2"
+         offset="1" />
+    </linearGradient>
+    <filter
+       color-interpolation-filters="sRGB"
+       id="f">
+      <feGaussianBlur
+         result="r8"
+         stdDeviation="0.5"
+         id="feGaussianBlur12" />
+      <feOffset
+         result="r11"
+         dy="0.5"
+         dx="0"
+         id="feOffset14" />
+      <feComposite
+         in2="r11"
+         operator="in"
+         in="SourceGraphic"
+         result="r6"
+         id="feComposite16" />
+      <feFlood
+         flood-color="#000"
+         flood-opacity="0.75"
+         in="r6"
+         result="r10"
+         id="feFlood18" />
+      <feBlend
+         in2="r10"
+         mode="normal"
+         in="r6"
+         result="r12"
+         id="feBlend20" />
+      <feComposite
+         in2="SourceGraphic"
+         operator="in"
+         result="fbSourceGraphic"
+         id="feComposite22" />
+      <feColorMatrix
+         values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0"
+         in="fbSourceGraphic"
+         result="fbSourceGraphicAlpha"
+         id="feColorMatrix24" />
+      <feFlood
+         in="fbSourceGraphic"
+         result="flood"
+         flood-color="#fff"
+         flood-opacity="0.5"
+         id="feFlood26" />
+      <feComposite
+         in2="fbSourceGraphic"
+         operator="in"
+         in="flood"
+         result="c1"
+         id="feComposite28" />
+      <feGaussianBlur
+         result="blur"
+         stdDeviation="1.5 0.01"
+         id="feGaussianBlur30" />
+      <feOffset
+         result="offset"
+         dy="1.5"
+         dx="0"
+         id="feOffset32" />
+      <feComposite
+         in2="offset"
+         operator="over"
+         in="fbSourceGraphic"
+         result="c2"
+         id="feComposite34" />
+    </filter>
+  </defs>
+  <polygon
+     points="10.8,1.467 -2.267,1.467 -2.267,-6 18.267,-6 18.267,3.333 7.066,14.533 18.267,14.533 18.267,22 -2.267,22 -2.267,14.533 "
+     style="fill:url(#lg);stroke:#4d4d4d;stroke-width:0.2;stroke-miterlimit:4;filter:url(#f)"
+     id="polygon36"
+     transform="matrix(1.1331719,0,0,1.1331719,-1.0653754,-1.0653766)" />
+</svg>

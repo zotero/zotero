@@ -4,20 +4,28 @@
 <!ENTITY zotero.preferences.items "στοιχεία">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Ρυθμίσεις">
+<!ENTITY zotero.preferences.custom "Προσαρμογή...">
 
 <!ENTITY zotero.preferences.prefpane.general "Γενικές">
 
 <!ENTITY zotero.preferences.userInterface "Περιβάλλον χρήστη">
-<!ENTITY zotero.preferences.showIn "Φόρτωση του Zotero σε:">
-<!ENTITY zotero.preferences.showIn.browserPane "Πλαίσιο περιηγητή">
-<!ENTITY zotero.preferences.showIn.separateTab "Διαχωρισμός καρτέλας">
-<!ENTITY zotero.preferences.showIn.appTab "Καρτέλα εφαρμογών">
+<!ENTITY zotero.preferences.layout "Διάταξη:">
+<!ENTITY zotero.preferences.layout.standard "Βασική τυποποίηση">
+<!ENTITY zotero.preferences.layout.stacked "Στοιβαγμένα">
 <!ENTITY zotero.preferences.fontSize "Μέγεθος γραμματοσειράς:">
 <!ENTITY zotero.preferences.fontSize.small "Μικρό">
 <!ENTITY zotero.preferences.fontSize.medium "Μέσο">
 <!ENTITY zotero.preferences.fontSize.large "Μεγάλο">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
+<!ENTITY zotero.preferences.fontSize.xlarge "Πολύ Μεγάλο">
 <!ENTITY zotero.preferences.fontSize.notes "Μέγεθος γραμματοσειράς σημειώσεων:">
+
+<!ENTITY zotero.preferences.fileHandling "Χειρισμός Αρχείου">
+<!ENTITY zotero.preferences.automaticSnapshots "Αυτόματη λήψη φωτογραφικού στιγμιότυπου όταν δημιουργείτε στοιχεία από ιστοσελίδες">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Αυτόματη προσάρτηση των συνοδευτικών αρχείων PDF και άλλων όταν αποθηκεύετε στοιχεία">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Αυτόματη ανάκτηση μεταδεδομένων για αρχεία PDF">
+<!ENTITY zotero.preferences.autoRenameFiles "Αυτόματη μετονομασία συνημμένων αρχείων χρησιμοποιώντας μεταγενέστερα μεταδεδομένα">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Άνοιγμα χρήσης PDF">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "Προεπιλογή Συστήματος">
 
 <!ENTITY zotero.preferences.miscellaneous "Διάφορα">
 <!ENTITY zotero.preferences.autoUpdate "Αυτόματος έλεγχος για ενημερωμένους μεταφραστές και στυλ">
@@ -26,8 +34,6 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Να επιτρέπεται στο zotero.org να προσαρμόσει το περιεχόμενο, βάσει της τρέχουσας έκδοσης του Zotero">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Αν ενεργοποιηθεί, η τρέχουσα έκδοση του Zotero θα συμπεριληφθεί στα αιτήματα HTTP προς το zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Χρήση του Zotero για λήψη αρχείων Bib Tex/RIS/Refer">
-<!ENTITY zotero.preferences.automaticSnapshots "Αυτόματη λήψη φωτογραφικού στιγμιότυπου όταν δημιουργείτε στοιχεία από ιστοσελίδες">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Αυτόματη προσάρτηση των συνοδευτικών αρχείων PDF και άλλων όταν αποθηκεύετε στοιχεία">
 <!ENTITY zotero.preferences.automaticTags "Αυτόματη επισήμανση των στοιχείων με λέξεις κλειδιά και κεφαλίδες θέματος">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Να απομακρύνονται αυτόματα από τον κάδο ανακύκλωσης στοιχεία που έχουν διαγραφεί για περισσότερο από">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ημέρες πριν">
@@ -39,17 +45,23 @@
 <!ENTITY zotero.preferences.groups.childLinks "θυγατρικοί σύνδεσμοι">
 <!ENTITY zotero.preferences.groups.tags "ετικέτες">
 
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+<!ENTITY zotero.preferences.feeds "Ροή">
+<!ENTITY zotero.preferences.feeds.sorting.label "Ταξινόμηση:">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Πρώτα τα νεώτερα στοιχεία">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Πρώτα τα παλαιότερα στοιχεία">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Εξ ορισμού Ροή">
 
 <!ENTITY zotero.preferences.openurl.search "Αναζήτηση διακομιστών resolver">
-<!ENTITY zotero.preferences.openurl.custom "Προσαρμογή...">
+<!ENTITY zotero.preferences.openurl.custom "Προσαρμογή....">
 <!ENTITY zotero.preferences.openurl.server "Διακομιστή resolver:">
 <!ENTITY zotero.preferences.openurl.version "Έκδοσης:">
 
-<!ENTITY zotero.preferences.prefpane.sync "Sync">
+<!ENTITY zotero.preferences.prefpane.sync "Συγχρονισμός">
 <!ENTITY zotero.preferences.sync.username "Όνομα χρήστη:">
-<!ENTITY zotero.preferences.sync.password "Κωδικού:">
-<!ENTITY zotero.preferences.sync.syncServer "Διακομιστής συγχρονισμού Zotero">
+<!ENTITY zotero.preferences.sync.password "Κωδικός:">
+<!ENTITY zotero.preferences.sync.syncServer "Συγχρονισμός Δεδομένων">
+<!ENTITY zotero.preferences.sync.setUpSync "Ρύθμιση Συγχρονισμού">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Αποσύνδεση Λογαριασμού...">
 <!ENTITY zotero.preferences.sync.createAccount "Δημιουργία λογαριασμού">
 <!ENTITY zotero.preferences.sync.lostPassword "Χάσατε τον κωδικό;">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Αυτόματος συγχρονισμός">
@@ -63,26 +75,30 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Λήψη αρχείων">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "την ώρα συγχρονισμού">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "εφόσον χρειάζεται">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Επαλήθευση Διακομιστή">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Χρησιμοποιώντας την αποθήκευση Zotero συμφωνείτε ότι δεσμεύεστε από τους">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "όρους και τις προϋποθέσεις">
+<!ENTITY zotero.preferences.sync.librariesToSync "Βιβλιοθήκες προς Συγχρονισμό">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Επιλογή Βιβλιοθηκών...">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "Συγχρονισμός">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "Βιβλιοθήκη">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Οι λειτουργίες που ακολουθούν προορίζονται για χρήση μόνον σε σπάνιες, ειδικές συνθήκες και θα πρέπει να χρησιμοποιούνται για λόγους γενικής επίλυσης προβλημάτων. Σε πολλές περιπτώσεις η επαναφορά των ρυθμίσεων προκαλεί επιπρόσθετα προβλήματα. Δείτε">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Συγχρονισμός ρυθμίσεων επαναφοράς">
 <!ENTITY zotero.preferences.sync.reset.warning3 "για περισσότερες πληροφορίες.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Πλήρης συγχρονισμός με τους διακομιστές του Zotero">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Συνένωση των τοπικών δεδομένων Zotero με εκείνα του διακομιστή συγχρονισμού, αγνοώντας το ιστορικό συγχρονισμού.">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Αποκατάσταση από τον διακομιστή του Zotero">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Διαγραφή όλων των τοπικών δεδομένων Zotero και αποκατάστασή τους από τον διακομιστή συγχρονισμού.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Αποκατάσταση στον διακομιστή Zotero">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Διαγραφή όλων των δεδομένων στον διακομιστή και αντικατάστασή τους με τα τοπικά δεδομένα Zotero.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Επαναφορά Ιστορικού Συγχρονισμού Δεδομένων">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Συγχώνευση τοπικών δεδομένων με απομακρυσμένα δεδομένα, αγνοώντας το ιστορικό συγχρονισμού">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Επαναφορά από την Online Βιβλιοθήκη">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Αντικατάσταση των τοπικά δεδομένων Zotero με δεδομένα από την Online Ββλιοθήκη.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Επαναφορά της Online Βιβλιοθήκη">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Αντικαταστήστε την ηλεκτρονική βιβλιοθήκη με τα τοπικά δεδομένα Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Μηδενισμός του ιστορικού συγχρονισμού αρχείων">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Έλεγχος του αποθηκευτικού διακομιστή για όλα τα τοπικά προσαρτημένα αρχεία.">
-<!ENTITY zotero.preferences.sync.reset "Μηδενισμός/Επαναφορά">
-<!ENTITY zotero.preferences.sync.reset.button "Μηδενισμός...">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Συγκρίνει όλα τα συνημμένα αρχεία με την υπηρεσία αποθήκευσης">
+<!ENTITY zotero.preferences.sync.reset "Επαναφορά">
+<!ENTITY zotero.preferences.sync.reset.button "Επαναφορά...">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Αναζήτηση">
 <!ENTITY zotero.preferences.search.fulltextCache "Προσωρινή μνήμη πλήρους κειμένου">
-<!ENTITY zotero.preferences.search.pdfIndexing "Καταλογοποίηση PDF">
 <!ENTITY zotero.preferences.search.indexStats "Καταλογοποίηση στατιστικών">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Έχουν καταλογοποιηθεί:">
@@ -100,28 +116,27 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Όταν επιλέγεται αυτή η λειτουργία το Zotero συμπεριλαμβάνει τις διευθύνσεις URL κατά την παράθεση άρθρων περιοδικών και εφημερίδων, μόνο αν στα άρθρα δεν ορίζεται το εύρος των σελίδων.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Γρήγορη αντιγραφή">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Αρχική μορφή προϊόντος/εξόδου:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Αρχική Μορφή:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Αντιγραφή ως HTML">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Σημείωση: η μορφοποίηση εμπλουτισμένου κειμένου θα χαθεί στο Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Ρυθμίσεις βάσει ιστοτόπου:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Περιοχή/Διαδρομή">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(π.χ. wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Μορφή παραγόμενου αρχείου">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Μορφή">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Γλώσσα">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Απενεργοποίηση της Γρήγορης αντιγραφής όταν σύρονται περισσότερα από">
 
 <!ENTITY zotero.preferences.prefpane.cite "Παράθεση/Παραπομπή">
 <!ENTITY zotero.preferences.cite.styles "Στυλ">
 <!ENTITY zotero.preferences.cite.wordProcessors "Επεξεργαστές κειμένου">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Προς το παρόν δεν υπάρχουν εγκατεστημένα πρόσθετα επεξεργαστή κειμένου.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Λήψη πρόσθετων επεξεργαστή κειμένου...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Χρήση του κλασικού διαλόγου Προσθήκη παραπομπής">
+<!ENTITY zotero.preferences.styleEditor "Επεξεργασία Εμφάνισης">
+<!ENTITY zotero.preferences.stylePreview "Προεπισκόπιση Εμφάνισης">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Διαχειριστής στυλ">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Τίτλ">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Τίτλος">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Ενημερώθηκε">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Λήψη επιπλέον στυλ...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Αποκτήστε επιπλέον στυλ ...">
 
 <!ENTITY zotero.preferences.keys.openZotero "Άνοιγμα/Κλείσιμο του πλαισίου Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Αποθήκευση στο Zotero (εικονίδιο γραμμής διεύθυνσης)">
@@ -130,11 +145,12 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Γρήγορη αναζήτηση">
 <!ENTITY zotero.preferences.keys.newItem "Δημιουργία Νέου στοιχείου">
 <!ENTITY zotero.preferences.keys.newNote "Δημιουργία Νέας σημείωσης">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Σημειώστε όλα τα στοιχεία ροής ως αναγνωσμένα / μη αναγνωσμένα">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Εναλλαγή Επιλογέα ετικετών">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Αντιγραφή των επιλεγμένων παραπομπών στοιχείου στην προσωρινή μνήμη">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Αντιγραφή των επιλεγμένων στοιχείων στην προσωρινή μνήμη">
-<!ENTITY zotero.preferences.keys.importFromClipboard "Εισαγωγή από την προσωρινή μνήμη">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Οι αλλαγές εφαρμόζονται μόνον στα νέα παράθυρα">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Εισαγωγή από το Πρόχειρο">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Ενεργοποίηση μετά από επανεκκίνηση">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Διαμεσολαβητές">
 
@@ -144,7 +160,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "για περισσότερες πληροφορίες.">
 <!ENTITY zotero.preferences.proxies.transparent "Ενεργοποίηση της ανακατεύθυνσης διαμεσολαβητή">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Αυτόματη αναγνώριση διαμεσολαβημένων πόρων">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Εμφάνιση ειδοποίησης κατά την ανακατεύθυνση μέσω διακομιστή μεσολάβησης">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Να απενεργοποιείται η ανακατεύθυνση διαμεσολαβητή όταν η περιοχή μου περιέχει">
 <!ENTITY zotero.preferences.proxies.configured "Προσαρμοσμένους διαμεσολαβητές">
 <!ENTITY zotero.preferences.proxies.hostname "Κεντρικό όνομα διακομιστή">
@@ -161,14 +177,16 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Προχωρημένα">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Αρχεία και Φάκελοι">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "Συντομέυσεις">
+
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Προηγμένη διαμόρφωση">
 
 <!ENTITY zotero.preferences.prefpane.locate "Εντοπισμός">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Διαχειριστής Μηχανής Αναζήτησης Άρθρων">
 <!ENTITY zotero.preferences.locate.description "Περιγραφή">
 <!ENTITY zotero.preferences.locate.name "Όνομα">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Η Μηχανή Αναζήτησης επεκτείνει τις δυνατότητες της αναπτυσσόμενης λίστας Εντοπισμού, του πλαισίου Πληροφορίες. Ενεργοποιώντας τις Μηχανές Αναζήτησης στην λίστα που ακολουθεί, αυτές θα προστεθούν στην αναπτυσσόμενη λίστα και μπορούν να χρησιμοποιηθούν για τον εντοπισμό πόρων από την βιβλιοθήκη σας στο web.">
-<!ENTITY zotero.preferences.locate.addDescription "Για να προσθέσετε μια Μηχανή Αναζήτησης που δεν υπάρχει στην λίστα, επισκεφθείτε την μηχανή αναζήτησης της αρεσκείας σας μέσα από τον περιηγητή σας και επιλέξτε &#34;Add&#34; μέσα από το μενού Εντοπισμού του Zotero.">
+<!ENTITY zotero.preferences.locate.addDescription "Για να προσθέσετε μια Μηχανή Αναζήτησης που δεν περιλαμβάνεται στη λίστα, επισκεφθείτε την μηχανή αναζήτησης που επιθυμείτε και επιλέξτε &quot;Προσθήκη&quot; από το μενού εντοπισμού του Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Επαναφορά αρχικών ρυθμίσεων">
 
 <!ENTITY zotero.preferences.charset "Κωδικοποίηση χαρακτήρων">
@@ -177,11 +195,13 @@
 
 <!ENTITY zotero.preferences.dataDir "Θέση Καταλόγου δεδομένων">
 <!ENTITY zotero.preferences.dataDir.useProfile "Χρήση του καταλόγου προφίλ">
-<!ENTITY zotero.preferences.dataDir.custom "Προσαρμοσμένος:">
+<!ENTITY zotero.preferences.dataDir.custom "Προσαρμογή...">
 <!ENTITY zotero.preferences.dataDir.choose "Επιλέξτε...">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(καθορίζεται μέσω γραμμής εντολών)">
 <!ENTITY zotero.preferences.dataDir.reveal "Εμφάνιση του Καταλόγου δεδομένων">
+<!ENTITY zotero.preferences.dataDir.migrate "Μετεγκατάσταση Σε Νέα Προεπιλεγμένη Θέση ...">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Σύνδεσμος Βασικού Καταλόγου Συνημμένων">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Το Zotero θα χρησιμοποιήσει σχετικές διαδρομές για τα συνδεδεμένα προσαρτήματα αρχείων εντός του καταλόγου βάσης του, επιτρέποντας την πρόσβαση προς αρχείων σε διαφορετικούς υπολογιστές, εφόσον η δομή των αρχείων μέσα στον κατάλογο βάσης παραμένει η ίδια.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Κατάλογος βάσης:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Επιλέξτε...">
@@ -189,19 +209,8 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Συντήρηση βάσης δεδομένων">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Έλεγχος της ακεραιότητας της βάσης δεδομένων">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Μηδενισμός/Επαναφορά μεταφραστών και στυλ...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Επαναφορά/Μηδενισμός μεταφραστών...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Επαναφορά/Μηδενισμός στυλ...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Επαναφορά Μεταφράσεων και Στυλ ...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Επαναφορά Μεταφράσεων ...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Επαναφορά Στυλ ...">
 
-<!ENTITY zotero.preferences.debugOutputLogging "Καταγραφές αποσφαλμάτωσης αποτελεσμάτων">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Η έξοδος ή αποτέλεσμα προς αποσφαλμάτωση μπορεί να βοηθήσει τους προγραμματιστές του Zotero να διαγιγνώσκουν προβλήματα. Οι καταγραφές αποσφαλμάτωσης θα επιβραδύνουν το Zotero, γι' αυτό εν γένει πρέπει να μην τις ενεργοποιείτε, εκτός κι αν κάποιος προγραμματιστής του Zotero ζητά εξόδους αποσφαλμάτωσης.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "καταγεγραμμένες γραμμές">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Ενεργοποίηση μετά από επανεκκίνηση">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Προβολή εξόδου">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Εκκαθάριση εξόδου">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Να υποβληθούν στον διακομιστή Zotero">
-
-<!ENTITY zotero.preferences.openAboutConfig "Άνοιγμα about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
-<!ENTITY zotero.preferences.openAboutMemory "Άνοιγμα about:memory">
+<!ENTITY zotero.preferences.configEditor "Διαμόρφωση Συντάκτη">

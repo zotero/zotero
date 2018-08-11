@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "Закрити">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Імпорт...">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Імпорт з буферу обміну">
 <!ENTITY quitApplicationCmdWin.label "Вихід">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Вийти">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Редагувати">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Скасувати ввід">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Повторити ввод">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Вирізати">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Копіювати">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Копіювати цитату">
 <!ENTITY copyBibliographyCmd.label "Копіювати список літератури">
-<!ENTITY pasteCmd.label "Вставити">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Видалити">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Вибрати все">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Налаштування">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Налаштування">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Знайти">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Переключити напрямок сторінки">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Переключити напрямок тексту">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Інструменти">
 <!ENTITY toolsMenu.accesskey "T">
+<!ENTITY installConnector.label "Встановити браузерний конектор">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Надбудови">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Пошук і усунення несправностей">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Надіслати відгук...">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Поскаржитися на помилки в Zotero...">
+<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Повідомити про помилки...">
 <!ENTITY helpReportErrors.accesskey "R">
+
+<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Submit Output">
+<!ENTITY debugOutputLogging.view "View Output">
+<!ENTITY debugOutputLogging.clear "Clear Output">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+
 <!ENTITY helpCheckForUpdates.label "Перевірити оновлення...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

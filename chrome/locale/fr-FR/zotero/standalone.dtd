@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "Fermer">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "r">
+<!ENTITY importCmd.label "Importer…">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Importer depuis le presse-papiers">
 <!ENTITY quitApplicationCmdWin.label "Quitter">
 <!ENTITY quitApplicationCmdWin.accesskey "Q">
 <!ENTITY quitApplicationCmd.label "Quitter">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Édition">
-<!ENTITY editMenu.accesskey "n">
-<!ENTITY undoCmd.label "Annuler">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "u">
-<!ENTITY redoCmd.label "Rétablir">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Couper">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "C">
-<!ENTITY copyCmd.label "Copier">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "p">
 <!ENTITY copyCitationCmd.label "Copier la citation">
 <!ENTITY copyBibliographyCmd.label "Copier la bibliographie">
-<!ENTITY pasteCmd.label "Coller">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "o">
-<!ENTITY deleteCmd.label "Supprimer">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "S">
-<!ENTITY selectAllCmd.label "Tout sélectionner">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "T">
-<!ENTITY preferencesCmd.label "Préférences">
-<!ENTITY preferencesCmd.accesskey "i">
-<!ENTITY preferencesCmdUnix.label "Préférences">
-<!ENTITY preferencesCmdUnix.accesskey "f">
-<!ENTITY findCmd.label "Rechercher">
-<!ENTITY findCmd.accesskey "h">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Inverser le sens de la page">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Inverser le sens du texte">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Outils">
 <!ENTITY toolsMenu.accesskey "O">
+<!ENTITY installConnector.label "Installer le Connecteur Zotero dans le navigateur">
+<!ENTITY installConnector.accesskey "I">
 <!ENTITY addons.label "Extensions">
 
 
@@ -89,13 +65,22 @@
 <!ENTITY helpMac.commandkey "?">
 <!ENTITY aboutProduct.label "À propos de &brandShortName;">
 <!ENTITY aboutProduct.accesskey "p">
-<!ENTITY productHelp.label "Assistance et documentation">
+<!ENTITY productHelp.label "Assistance et documentation générales">
 <!ENTITY productHelp.accesskey "A">
-<!ENTITY helpTroubleshootingInfo.label "Informations de dépannage">
-<!ENTITY helpTroubleshootingInfo.accesskey "n">
-<!ENTITY helpFeedbackPage.label "Soumettre un commentaire ou un retour d'expérience…">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Signaler les erreurs à Zotero…">
-<!ENTITY helpReportErrors.accesskey "Z">
+<!ENTITY helpTroubleshootingInfo.label "Aide en cas de problème">
+<!ENTITY helpTroubleshootingInfo.accesskey "i">
+<!ENTITY helpFeedbackPage.label "Forum Zotero">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Rapport d'erreurs…">
+<!ENTITY helpReportErrors.accesskey "R">
+
+<!ENTITY debugOutputLogging.label "Journal de débogage">
+<!ENTITY debugOutputLogging.accesskey "J">
+<!ENTITY debugOutputLogging.submit "Envoyer le journal">
+<!ENTITY debugOutputLogging.view "Voir le journal">
+<!ENTITY debugOutputLogging.clear "Effacer le journal">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Redémarrer avec le journal activé">
+
 <!ENTITY helpCheckForUpdates.label "Vérifier les mises à jour…">
 <!ENTITY helpCheckForUpdates.accesskey "V">

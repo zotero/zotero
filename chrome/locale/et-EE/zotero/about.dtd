@@ -1,4 +1,5 @@
 <!ENTITY zotero.version "versioon">
+<!ENTITY zotero.whatsNew "What’s new">
 <!ENTITY zotero.createdby "Loodud:">
 <!ENTITY zotero.director "Juhataja:">
 <!ENTITY zotero.directors "Juhatajad:">
@@ -10,4 +11,4 @@
 <!ENTITY zotero.thanks "Tänud:">
 <!ENTITY zotero.about.close "Sulge">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Veel autoreid ja tänusõnu">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.citationProcessing "Tsiteeringute ja bibliograafia töötlemine">

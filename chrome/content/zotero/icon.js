@@ -25,163 +25,190 @@
 
 "use strict";
 
+Components.utils.import("resource://zotero/config.js");
 Components.utils.import("resource:///modules/CustomizableUI.jsm");
 
+var Zotero = Components.classes["@zotero.org/Zotero;1"]
+	.getService(Components.interfaces.nsISupports)
+	.wrappedJSObject;
 var comboButtonsID = 'zotero-toolbar-buttons';
+addIcon();
 
-CustomizableUI.addListener({
-	onWidgetAdded: function (id, area, position) {
-		if (id == comboButtonsID) {
-			// When dropping combo button into panel, add two independent buttons instead
+function addIcon() {
+	// Don't try to add icons more than once, and avoid warnings in tests
+	if (Zotero.toolbarIconAdded || CustomizableUI.getPlacementOfWidget(comboButtonsID)) {
+		return;
+	}
+	
+	CustomizableUI.addListener({
+		onWidgetAdded: function (id, area, position) {
+			if (id == comboButtonsID) {
+				// When dropping combo button into panel, add two independent buttons instead
+				if (area == CustomizableUI.AREA_PANEL) {
+					let mainID = getSingleID('main');
+					let saveID = getSingleID('save');
+					CustomizableUI.removeWidgetFromArea(id);
+					// Remove independent main and save buttons first if they're already in panel
+					CustomizableUI.removeWidgetFromArea(mainID);
+					CustomizableUI.removeWidgetFromArea(saveID);
+					CustomizableUI.addWidgetToArea(mainID, area, position);
+					let placement = CustomizableUI.getPlacementOfWidget(mainID)
+					let mainPos = placement.position;
+					CustomizableUI.addWidgetToArea(saveID, area, mainPos + 1);
+					return;
+				}
+				
+				var isUpgrade = false;
+				try {
+					isUpgrade = Zotero.Prefs.get("firstRunGuidanceShown.saveIcon");
+				} catch(e) {}
+				var property = "firstRunGuidance.toolbarButton." + (isUpgrade ? "upgrade" : "new");
+				var shortcut = Zotero.getString(
+						Zotero.isMac ? "general.keys.cmdShift" : "general.keys.ctrlShift"
+					) + Zotero.Prefs.get("keys.openZotero");
+				
+				let widget = CustomizableUI.getWidget(id);
+				for (let instance of widget.instances) {
+					let doc = instance.node.ownerDocument;
+					
+					updateItemForArea(instance.node, area);
+					
+					doc.getElementById("zotero-main-button-guidance").show({
+						text: Zotero.getString(property, shortcut)
+					});
+					doc.getElementById("zotero-save-button-guidance").show();
+				}
+			}
+			else if (id == getSingleID('save')) {
+				let widget = CustomizableUI.getWidget(id);
+				for (let instance of widget.instances) {
+					instance.node.ownerDocument.defaultView.Zotero_Browser.updateStatus();
+				}
+			}
+		},
+		
+		onWidgetOverflow: function (node, container) {
+			if (node.id == comboButtonsID) {
+				node.classList.add("toolbarbutton-1");
+			}
+		},
+		
+		onWidgetUnderflow: function (node, container) {
+			if (node.id == comboButtonsID) {
+				node.classList.remove("toolbarbutton-1");
+			}
+		},
+		
+		// Save icon in panel isn't in DOM until menu is shown once and therefore isn't updated
+		// on page loads, so update the icon status when the panel is first shown so that it
+		// doesn't remain disabled
+		onAreaNodeRegistered: function (area, node) {
 			if (area == CustomizableUI.AREA_PANEL) {
-				let mainID = getSingleID('main');
-				let saveID = getSingleID('save');
-				CustomizableUI.removeWidgetFromArea(id);
-				// Remove independent main and save buttons first if they're already in panel
-				CustomizableUI.removeWidgetFromArea(mainID);
-				CustomizableUI.removeWidgetFromArea(saveID);
-				CustomizableUI.addWidgetToArea(mainID, area, position);
-				let placement = CustomizableUI.getPlacementOfWidget(mainID)
-				let mainPos = placement.position;
-				CustomizableUI.addWidgetToArea(saveID, area, mainPos + 1);
-				return;
-			}
-			
-			var item = document.getElementById(id);
-			// Element may not exist yet if it was added to the panel
-			if (item) {
-				updateItemForArea(item, area);
-			}
-			
-			var isUpgrade = false;
-			try {
-				isUpgrade = Zotero.Prefs.get("firstRunGuidanceShown.saveIcon");
-			} catch(e) {}
-			var property = "firstRunGuidance.toolbarButton." + (isUpgrade ? "upgrade" : "new");
-			var shortcut = Zotero.getString(
-					Zotero.isMac ? "general.keys.cmdShift" : "general.keys.ctrlShift"
-				) + Zotero.Prefs.get("keys.openZotero");
-			document.getElementById("zotero-toolbar-button-guidance").show(
-				null, Zotero.getString(property, shortcut)
-			);
-		}
-		else if (id == getSingleID('save')) {
-			Zotero_Browser.updateStatus();
-		}
-	},
-	
-	onWidgetRemoved: function (id, area) {
-		if (id == comboButtonsID) {
-			var item = document.getElementById(id);
-			updateItemForArea(item, null);
-		}
-		// Clear dynamic image from save icon and revert to CSS
-		else if (id == getSingleID('save')) {
-			let button = document.getElementById(id);
-			button.image = "";
-		}
-	},
-	
-	// Save icon in panel isn't in DOM until menu is shown once and therefore isn't updated
-	// on page loads, so update the icon status when the panel is first shown so that it
-	// doesn't remain disabled
-	onAreaNodeRegistered: function (area, node) {
-		if (area == CustomizableUI.AREA_PANEL) {
-			var placement = CustomizableUI.getPlacementOfWidget(comboButtonsID)
-			var update = false;
-			if (placement && placement.area == CustomizableUI.AREA_PANEL) {
-				update = true;
-			}
-			else {
-				placement = CustomizableUI.getPlacementOfWidget(getSingleID('save'));
+				var placement = CustomizableUI.getPlacementOfWidget(comboButtonsID)
+				var update = false;
+				let singleID = getSingleID('save');
 				if (placement && placement.area == CustomizableUI.AREA_PANEL) {
 					update = true;
 				}
-			}
-			if (update) {
-				Zotero_Browser.updateStatus();
+				else {
+					placement = CustomizableUI.getPlacementOfWidget(singleID);
+					if (placement && placement.area == CustomizableUI.AREA_PANEL) {
+						update = true;
+					}
+				}
+				if (update) {
+					let widget = CustomizableUI.getWidget(singleID);
+					for (let instance of widget.instances) {
+						instance.node.ownerDocument.defaultView.Zotero_Browser.updateStatus();
+					}
+				}
 			}
 		}
-	}
-})
-
-// Create the combo buttons, which go in the toolbar by default
-CustomizableUI.createWidget({
-	id: comboButtonsID,
-	type: 'custom',
-	label: 'Zotero',
-	tooltiptext: "Zotero",
-	defaultArea: CustomizableUI.AREA_NAVBAR,
-	onBuild: function (document) {
-		const kNSXUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-		
-		var item = document.createElementNS(kNSXUL, "toolbaritem");
-		item.setAttribute("id", comboButtonsID);
-		item.setAttribute("label", "Zotero (Combo)"); // TODO: localize
-		// Set this as an attribute in addition to the property to make sure we can style correctly.
-		item.setAttribute("removable", "true");
-		item.classList.add("chromeclass-toolbar-additional");
-		
-		['main', 'save'].map(button => {
-			return {
-				name: button,
-				id: getID(button),
-				tooltiptext: getTooltipText(button),
-				oncommand: getCommand(button)
-			};
-		}).forEach(function(attribs, index) {
-			if (index != 0) {
-				item.appendChild(document.createElementNS(kNSXUL, "separator"));
-			}
-			let button = document.createElementNS(kNSXUL, "toolbarbutton");
-			if (attribs.name == 'save') {
-				button.setAttribute('disabled', 'true');
-				button.setAttribute('type', 'menu-button');
-				let menupopup = document.createElementNS(kNSXUL, "menupopup");
-				menupopup.setAttribute('onpopupshowing', "Zotero_Browser.onStatusPopupShowing(event)");
-				button.appendChild(menupopup);
-			}
-			delete attribs.name;
-			setAttributes(button, attribs);
-			item.appendChild(button);
-		});
-		
-		updateItemForArea(item, this.currentArea)
-		
-		return item;
-	}
-});
-
-// Create the independent Z button, which isn't shown by default
-CustomizableUI.createWidget({
-	id: getSingleID('main'),
-	label: Zotero.clientName,
-	tooltiptext: getTooltipText('main'),
-	defaultArea: false,
-	onCommand: function (event) {
-		ZoteroOverlay.toggleDisplay();
-	}
-});
-
-// Create the independent save button, which isn't shown by default
-CustomizableUI.createWidget({
-	id: getSingleID('save'),
-	label: Zotero.getString('ingester.saveToZotero'),
-	tooltiptext: getTooltipText('save'),
-	defaultArea: false,
-	onCommand: function (event) {
-		Zotero_Browser.scrapeThisPage(null, event);
-	},
-	onCreated: function (button) {
-		const kNSXUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-		button.setAttribute('disabled', 'true');
-		button.setAttribute('type', 'menu-button');
-		let menupopup = document.createElementNS(kNSXUL, "menupopup");
-		menupopup.setAttribute('onpopupshowing', "Zotero_Browser.onStatusPopupShowing(event)");
-		button.appendChild(menupopup);
-	}
-});
-
+	})
+	
+	// Create the combo buttons, which go in the toolbar by default
+	CustomizableUI.createWidget({
+		id: comboButtonsID,
+		type: 'custom',
+		label: ZOTERO_CONFIG.CLIENT_NAME,
+		tooltiptext: ZOTERO_CONFIG.CLIENT_NAME,
+		defaultArea: CustomizableUI.AREA_NAVBAR,
+		onBuild: function (document) {
+			const kNSXUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+			
+			var item = document.createElementNS(kNSXUL, "toolbaritem");
+			item.setAttribute("id", comboButtonsID);
+			item.setAttribute("label", "Zotero (Combo)"); // TODO: localize
+			// Set this as an attribute in addition to the property to make sure we can style correctly.
+			item.setAttribute("removable", "true");
+			item.classList.add("chromeclass-toolbar-additional");
+			
+			['main', 'save'].map(button => {
+				return {
+					name: button,
+					id: getID(button),
+					tooltiptext: getTooltipText(button),
+					oncommand: getCommand(button)
+				};
+			}).forEach(function(attribs, index) {
+				if (index != 0) {
+					item.appendChild(document.createElementNS(kNSXUL, "separator"));
+				}
+				let button = document.createElementNS(kNSXUL, "toolbarbutton");
+				if (attribs.name == 'main') {
+					button.setAttribute('label', Zotero.clientName);
+				}
+				else if (attribs.name == 'save') {
+					button.setAttribute('label', Zotero.getString('ingester.saveToZotero'));
+					button.setAttribute('disabled', 'true');
+					button.setAttribute('type', 'menu-button');
+					let menupopup = document.createElementNS(kNSXUL, "menupopup");
+					menupopup.setAttribute('onpopupshowing', "Zotero_Browser.onStatusPopupShowing(event)");
+					button.appendChild(menupopup);
+				}
+				delete attribs.name;
+				setAttributes(button, attribs);
+				item.appendChild(button);
+			});
+			
+			updateItemForArea(item, this.currentArea)
+			
+			return item;
+		}
+	});
+	
+	// Create the independent Z button, which isn't shown by default
+	CustomizableUI.createWidget({
+		id: getSingleID('main'),
+		label: Zotero.clientName,
+		tooltiptext: getTooltipText('main'),
+		defaultArea: false,
+		onCommand: function (event) {
+			event.target.ownerDocument.defaultView.ZoteroOverlay.toggleDisplay();
+		}
+	});
+	
+	// Create the independent save button, which isn't shown by default
+	CustomizableUI.createWidget({
+		id: getSingleID('save'),
+		label: Zotero.getString('ingester.saveToZotero'),
+		tooltiptext: getTooltipText('save'),
+		defaultArea: false,
+		onCommand: function (event) {
+			event.target.ownerDocument.defaultView.Zotero_Browser.scrapeThisPage(null, event);
+		},
+		onCreated: function (button) {
+			const kNSXUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+			button.setAttribute('disabled', 'true');
+			button.setAttribute('type', 'menu-button');
+			let menupopup = button.ownerDocument.createElementNS(kNSXUL, "menupopup");
+			menupopup.setAttribute('onpopupshowing', "Zotero_Browser.onStatusPopupShowing(event)");
+			button.appendChild(menupopup);
+		}
+	});
+	
+	Zotero.toolbarIconAdded = true;
+}
 
 function getID(button) {
 	switch (button) {
@@ -230,14 +257,10 @@ function getTooltipText(button) {
 			
 			// Use defaults if necessary
 			if (!text) {
-				// Get the stringbundle manually
 				let src = 'chrome://zotero/locale/zotero.properties';
-				let localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1']
-					.getService(Components.interfaces.nsILocaleService);
-				let appLocale = localeService.getApplicationLocale();
 				let stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
 					.getService(Components.interfaces.nsIStringBundleService);
-				let stringBundle = stringBundleService.createBundle(src, appLocale);
+				let stringBundle = stringBundleService.createBundle(src);
 				text = stringBundle.GetStringFromName('startupError');
 			}
 		}

@@ -27,40 +27,181 @@
  * @namespace
  */
 Zotero.SyncedSettings = (function () {
+	var _cache = {};
+	
 	//
 	// Public methods
 	//
 	var module = {
+		idColumn: "setting",
+		table: "syncedSettings",
+
+		/**
+		 * An event which allows to tap into the sync transaction and update
+		 * parts of the client which rely on synced settings.
+		 */
+		onSyncDownload: {
+			listeners: {},
+			addListener: function(libraryID, setting, fn, bindTarget=null) {
+				if (!this.listeners[libraryID]) {
+					this.listeners[libraryID] = {};
+				}
+				if (!this.listeners[libraryID][setting]) {
+					this.listeners[libraryID][setting] = [];
+				}
+				this.listeners[libraryID][setting].push([fn, bindTarget]);
+			},
+			/**
+			 * @param {Integer} libraryID
+			 * @param {String} setting - name of the setting
+			 * @param {Object} oldValue
+			 * @param {Object} newValue
+			 * @param {Boolean} conflict - true if both client and remote values had changed before sync
+			 */
+			trigger: Zotero.Promise.coroutine(function* (libraryID, setting, oldValue, newValue, conflict) {
+				var libListeners = this.listeners[libraryID] || {};
+				var settingListeners = libListeners[setting] || [];
+				Array.prototype.splice.call(arguments, 0, 2);
+				if (settingListeners) {
+					for (let listener of settingListeners) {
+						yield Zotero.Promise.resolve(listener[0].apply(listener[1], arguments));
+					}
+				}
+			})
+		},
+		
+		loadAll: Zotero.Promise.coroutine(function* (libraryID) {
+			Zotero.debug("Loading synced settings for library " + libraryID);
+			
+			if (!_cache[libraryID]) {
+				_cache[libraryID] = {};
+			}
+			
+			var invalid = [];
+			
+			var sql = "SELECT setting, value, synced, version FROM syncedSettings "
+				+ "WHERE libraryID=?";
+			yield Zotero.DB.queryAsync(
+				sql,
+				libraryID,
+				{
+					onRow: function (row) {
+						var setting = row.getResultByIndex(0);
+						
+						var value = row.getResultByIndex(1);
+						try {
+							value = JSON.parse(value);
+						}
+						catch (e) {
+							invalid.push([libraryID, setting]);
+							return;
+						}
+						
+						_cache[libraryID][setting] = {
+							value,
+							synced: !!row.getResultByIndex(2),
+							version: row.getResultByIndex(3)
+						};
+					}
+				}
+			);
+			
+			// TODO: Delete invalid settings
+		}),
+		
+		/**
+		 * Return settings object
+		 *
+		 * @return {Object|null}
+		 */
 		get: function (libraryID, setting) {
-			return Q.fcall(function () {
-				var sql = "SELECT value FROM syncedSettings WHERE setting=? AND libraryID=?";
-				return JSON.parse(Zotero.DB.valueQuery(sql, [setting, libraryID]));
-			});
+			if (!_cache[libraryID]) {
+				throw new Zotero.Exception.UnloadedDataException(
+					"Synced settings not loaded for library " + libraryID,
+					"syncedSettings"
+				);
+			}
+			
+			if (!_cache[libraryID][setting]) {
+				return null;
+			}
+			
+			return JSON.parse(JSON.stringify(_cache[libraryID][setting].value));
 		},
 		
-		
-		set: function (libraryID, setting, value, version, synced) {
-			var self = this;
-			return Q.fcall(function () {
-				return self.setSynchronous(libraryID, setting, value, version, synced);
-			});
+		/**
+		 * Used by sync and tests
+		 *
+		 * @return {Object} - Object with 'synced' and 'version' properties
+		 */
+		getMetadata: function (libraryID, setting) {
+			if (!_cache[libraryID]) {
+				throw new Zotero.Exception.UnloadedDataException(
+					"Synced settings not loaded for library " + libraryID,
+					"syncedSettings"
+				);
+			}
+			
+			var o = _cache[libraryID][setting];
+			if (!o) {
+				return null;
+			}
+			return {
+				synced: o.synced,
+				version: o.version
+			};
 		},
 		
+		getUnsynced: Zotero.Promise.coroutine(function* (libraryID) {
+			var sql = "SELECT setting, value FROM syncedSettings WHERE synced=0 AND libraryID=?";
+			var rows = yield Zotero.DB.queryAsync(sql, libraryID);
+			var obj = {};
+			rows.forEach(row => obj[row.setting] = JSON.parse(row.value));
+			return obj;
+		}),
 		
-		setSynchronous: function (libraryID, setting, value, version, synced) {
-			// TODO: get rid of this once we have proper affected rows handling
-			var sql = "SELECT value FROM syncedSettings WHERE setting=? AND libraryID=?";
-			var currentValue = Zotero.DB.valueQuery(sql, [setting, libraryID]);
+		markAsSynced: Zotero.Promise.coroutine(function* (libraryID, settings, version) {
+			var sql = "UPDATE syncedSettings SET synced=1, version=? WHERE libraryID=? AND setting IN "
+				+ "(" + settings.map(x => '?').join(', ') + ")";
+			yield Zotero.DB.queryAsync(sql, [version, libraryID].concat(settings));
+			for (let key of settings) {
+				let setting = _cache[libraryID][key];
+				setting.synced = true;
+				setting.version = version;
+			}
+		}),
+		
+		/**
+		 * Used for restore-to-server
+		 */
+		markAllAsUnsynced: async function (libraryID) {
+			var sql = "UPDATE syncedSettings SET synced=0, version=0 WHERE libraryID=?";
+			await Zotero.DB.queryAsync(sql, libraryID);
+			for (let key in _cache[libraryID]) {
+				let setting = _cache[libraryID][key];
+				setting.synced = false;
+				setting.version = 0;
+			}
+		},
+		
+		set: Zotero.Promise.coroutine(function* (libraryID, setting, value, version = 0, synced) {
+			if (typeof value == undefined) {
+				throw new Error("Value not provided");
+			}
 			
-			// Make sure we can tell the difference between a
-			// missing setting (FALSE as returned by valueQuery())
-			// and a FALSE setting (FALSE as returned by JSON.parse())
-			var hasCurrentValue = currentValue !== false;
-			var hasValue = typeof value != 'undefined';
+			// Prevents a whole bunch of headache if you continue modifying the object after calling #set()
+			if (value instanceof Array) {
+				value = Array.from(value);
+			}
+			else if (typeof value == 'object') {
+				value = Object.assign({}, value);
+			}
 			
-			currentValue = JSON.parse(currentValue);
+			var currentValue = this.get(libraryID, setting);
+			var hasCurrentValue = currentValue !== null;
 			
-			if ((!hasCurrentValue && !hasValue) || value === currentValue) {
+			// Value hasn't changed
+			if (value === currentValue) {
 				return false;
 			}
 			
@@ -76,18 +217,7 @@ Zotero.SyncedSettings = (function () {
 				};
 			}
 			
-			// Clear
-			if (typeof value == 'undefined') {
-				var sql = "DELETE FROM syncedSettings WHERE setting=? AND libraryID=?";
-				Zotero.DB.query(sql, [setting, libraryID]);
-				
-				Zotero.Notifier.trigger('delete', 'setting', [id], extraData);
-				return true;
-			}
-			
-			// Set/update
-			
-			if (currentValue === false) {
+			if (!hasCurrentValue) {
 				var event = 'add';
 				var extraData = {};
 			}
@@ -96,19 +226,67 @@ Zotero.SyncedSettings = (function () {
 			}
 			
 			synced = synced ? 1 : 0;
+			version = parseInt(version);
 			
 			if (hasCurrentValue) {
-				var sql = "UPDATE syncedSettings SET value=?, synced=? WHERE setting=? AND libraryID=?";
-				Zotero.DB.query(sql, [JSON.stringify(value), synced, setting, libraryID]);
+				var sql = "UPDATE syncedSettings SET " + (version > 0 ? "version=?, " : "") + 
+					"value=?, synced=? WHERE setting=? AND libraryID=?";
+				var args = [JSON.stringify(value), synced, setting, libraryID];
+				if (version > 0) {
+					args.unshift(version)
+				}
+				yield Zotero.DB.queryAsync(sql, args);
 			}
 			else {
 				var sql = "INSERT INTO syncedSettings "
-					+ "(setting, libraryID, value, synced) VALUES (?, ?, ?, ?)";
-				Zotero.DB.query(sql, [setting, libraryID, JSON.stringify(value), synced]);
+					+ "(setting, libraryID, value, version, synced) VALUES (?, ?, ?, ?, ?)";
+				yield Zotero.DB.queryAsync(
+					sql, [setting, libraryID, JSON.stringify(value), version, synced]
+				);
 			}
-			Zotero.Notifier.trigger(event, 'setting', [id], extraData);
+
+			var metadata = this.getMetadata(libraryID, setting);
+			
+			_cache[libraryID][setting] = {
+				value,
+				synced: !!synced,
+				version: version > 0 || !hasCurrentValue ? version : metadata.version
+			};
+			
+			var conflict = metadata && !metadata.synced && metadata.version < version;
+			if (version > 0) {
+				yield this.onSyncDownload.trigger(libraryID, setting, currentValue, value, conflict);
+			}
+			yield Zotero.Notifier.trigger(event, 'setting', [id], extraData);
 			return true;
-		}
+		}),
+		
+		clear: Zotero.Promise.coroutine(function* (libraryID, setting, options) {
+			options = options || {};
+			
+			var currentValue = this.get(libraryID, setting);
+			var hasCurrentValue = currentValue !== null;
+			
+			var id = libraryID + '/' + setting;
+			
+			var extraData = {};
+			extraData[id] = {
+				changed: {
+					value: currentValue
+				}
+			};
+			if (options.skipDeleteLog) {
+				extraData[id].skipDeleteLog = true;
+			}
+			
+			var sql = "DELETE FROM syncedSettings WHERE setting=? AND libraryID=?";
+			yield Zotero.DB.queryAsync(sql, [setting, libraryID]);
+			
+			delete _cache[libraryID][setting];
+			
+			yield Zotero.Notifier.trigger('delete', 'setting', [id], extraData);
+			return true;
+		})
 	};
 	
 	return module;

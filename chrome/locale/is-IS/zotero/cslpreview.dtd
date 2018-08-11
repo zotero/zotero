@@ -1,9 +1,9 @@
-<!ENTITY styles.preview "Zotero Style Preview">
+<!ENTITY styles.preview "Forskoðun á Zotero útliti">
 
-<!ENTITY styles.preview.citationFormat "Citation Format:">
-<!ENTITY styles.preview.citationFormat.all "all">
-<!ENTITY styles.preview.citationFormat.author "author">
-<!ENTITY styles.preview.citationFormat.authorDate "author-date">
-<!ENTITY styles.preview.citationFormat.label "label">
-<!ENTITY styles.preview.citationFormat.note "note">
-<!ENTITY styles.preview.citationFormat.numeric "numeric">
+<!ENTITY styles.preview.citationFormat "Snið tilvísunar:">
+<!ENTITY styles.preview.citationFormat.all "öll">
+<!ENTITY styles.preview.citationFormat.author "höfundur">
+<!ENTITY styles.preview.citationFormat.authorDate "höfundur-dagsetning">
+<!ENTITY styles.preview.citationFormat.label "merki">
+<!ENTITY styles.preview.citationFormat.note "athugasemd">
+<!ENTITY styles.preview.citationFormat.numeric "tölutákn">

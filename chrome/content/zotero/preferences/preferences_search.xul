@@ -49,34 +49,10 @@
 				<textbox size="10" preference="pref-fulltext-textMaxLength"/>
 				<label value="(&zotero.preferences.default; 500000)"/>
 			</hbox>
-		</groupbox>
-		
-		<groupbox id="pdftools-box">
-			<caption label="&zotero.preferences.search.pdfIndexing;"/>
-			
-			<label id="pdfconverter-status"/>
+
 			<separator class="thin"/>
-			<label id="pdfinfo-status"/>
-			
-			<separator class="thin"/>
-			
-			<!-- This doesn't wrap without an explicit width -->
-			<label id="pdftools-required" width="45em" hidden="true"/>
-			
-			<separator class="thin"/>
-			
-			<hbox>
-				<button id="pdftools-update-button" flex="1" oncommand="Zotero_Preferences.Search.checkPDFToolsDownloadVersion()"/>
-			</hbox>
-			
-			<separator class="thin"/>
-			
-			<!-- This doesn't wrap without an explicit width -->
-			<label id="pdftools-documentation-link" width="45em" hidden="true"/>
-			
-			<separator class="thin"/>
-			
-			<hbox id="pdftools-settings" align="center" hidden="true">
+
+			<hbox align="center">
 				<label value="&zotero.preferences.fulltext.pdfMaxPages;"/>
 				<textbox size="5" preference="pref-fulltext-pdfmaxpages"/>
 				<label value="(&zotero.preferences.default; 100)"/>

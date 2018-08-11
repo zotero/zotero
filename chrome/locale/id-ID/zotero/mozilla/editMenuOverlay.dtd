@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "Ubah">
+<!ENTITY editMenu.accesskey        "U">
+<!ENTITY undoCmd.label             "Urungkan">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "g">
+<!ENTITY redoCmd.label             "Ulangi">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "U">
+<!ENTITY cutCmd.label              "Potong">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "P">
+<!ENTITY copyCmd.label             "Salin">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "S">
+<!ENTITY pasteCmd.label            "Tempel">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "p">
+<!ENTITY deleteCmd.label           "Hapus">
+<!ENTITY deleteCmd.accesskey       "H">
+<!ENTITY selectAllCmd.label        "Pilih Semua">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "a">
+<!ENTITY findCmd.label             "Cari">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "C">
+<!ENTITY findAgainCmd.label        "Cari Lagi">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "i">
+<!ENTITY findPreviousCmd.label     "Cari Sebelumnya">
+<!ENTITY findPreviousCmd.accesskey "S">

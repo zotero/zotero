@@ -23,7 +23,12 @@
     
     ***** END LICENSE BLOCK *****
 -->
-<!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
+<!DOCTYPE window [
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd">
+	%zoteroDTD;
+	<!ENTITY % preferencesDTD SYSTEM "chrome://zotero/locale/preferences.dtd">
+	%preferencesDTD;
+]>
 
 <overlay id="zotero-prefpane-advanced-overlay"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -32,59 +37,66 @@
 			onpaneload="Zotero_Preferences.Advanced.init()"
 			helpTopic="advanced">
 		<preferences>
+			<preference id="pref-automaticScraperUpdates" name="extensions.zotero.automaticScraperUpdates" type="bool"/>
+			<preference id="pref-reportTranslationFailure" name="extensions.zotero.reportTranslationFailure" type="bool"/>
+			
 			<preference id="pref-baseAttachmentPath" name="extensions.zotero.baseAttachmentPath" type="string"/>
 			<preference id="pref-useDataDir" name="extensions.zotero.useDataDir" type="bool"/>
 			<preference id="pref-dataDir" name="extensions.zotero.dataDir" type="string"/>
 			<preference id="pref-debug-output-enableAfterRestart" name="extensions.zotero.debug.store" type="bool"/>
 			<preference id="pref-openURL-resolver" name="extensions.zotero.openURL.resolver" type="string"/>
 			<preference id="pref-openURL-version" name="extensions.zotero.openURL.version" type="string"/>
+			
 			<preference id="pref-keys-openZotero" name="extensions.zotero.keys.openZotero" type="string"/>
 			<preference id="pref-keys-saveToZotero" name="extensions.zotero.keys.saveToZotero" type="string"/>
-			<preference id="pref-keys-toggleFullscreen" name="extensions.zotero.keys.toggleFullscreen" type="string"/>
 			<preference id="pref-keys-library" name="extensions.zotero.keys.library" type="string"/>
 			<preference id="pref-keys-quicksearch" name="extensions.zotero.keys.quicksearch" type="string"/>
 			<preference id="pref-keys-toggleTagSelector" name="extensions.zotero.keys.toggleTagSelector" type="string"/>
 			<preference id="pref-keys-newItem" name="extensions.zotero.keys.newItem" type="string"/>
 			<preference id="pref-keys-newNote" name="extensions.zotero.keys.newNote" type="string"/>
-			<preference id="pref-keys-importFromClipboard" name="extensions.zotero.keys.importFromClipboard" type="string"/>
+			<preference id="pref-keys-toggleRead" name="extensions.zotero.keys.toggleRead" type="string"/>
+			<preference id="pref-keys-toggleAllRead" name="extensions.zotero.keys.toggleAllRead" type="string"/>
 			<preference id="pref-keys-copySelectedItemCitationsToClipboard" name="extensions.zotero.keys.copySelectedItemCitationsToClipboard" type="string"/>
 			<preference id="pref-keys-copySelectedItemsToClipboard" name="extensions.zotero.keys.copySelectedItemsToClipboard" type="string"/>
+
+			<preference id="pref-feeds-sortAscending" name="extensions.zotero.feeds.sortAscending" type="bool"/>
+			<preference id="pref-feeds-defaultTTL" name="extensions.zotero.feeds.defaultTTL" type="int"/>
+			<preference id="pref-feeds-defaultCleanupUnreadAfter" name="extensions.zotero.feeds.defaultCleanupUnreadAfter" type="int"/>
+			<preference id="pref-feeds-defaultCleanupReadAfter" name="extensions.zotero.feeds.defaultCleanupReadAfter" type="int"/>
 		</preferences>
 		
 		<tabbox id="zotero-prefpane-advanced-tabs">
 			<tabs>
 				<tab label="&zotero.preferences.prefpane.general;"/>
 				<tab label="&zotero.preferences.advanced.filesAndFolders;"/>
-				<tab label="&zotero.preferences.advanced.keys;"/> 
+				<tab label="&zotero.preferences.advanced.keys;"/>
+				<tab label="&zotero.preferences.feeds;"/> 
 			</tabs>
 			
 			<tabpanels id="zotero-prefpane-advanced-tabpanels">
 				<tabpanel id="zotero-prefpane-advanced-general-tab" orient="vertical">
-					<groupbox>
-						<caption label="&zotero.preferences.debugOutputLogging;"/>
-						
-						<!-- This doesn't wrap without an explicit width -->
-						<vbox>
-							<description width="45em">&zotero.preferences.debugOutputLogging.message;</description>
-						</vbox>
+					<groupbox id="zotero-prefpane-advanced-miscellaneous">
+						<caption label="&zotero.preferences.miscellaneous;"/>
 						
 						<hbox align="center">
-							<button id="debug-output-enable" oncommand="Zotero_Preferences.Debug_Output.toggleStore()"/>
-							<label id="debug-output-lines" style="margin-right: 0"/>
-							<label value="&zotero.preferences.debugOutputLogging.linesLogged;"/>
-							<checkbox preference="pref-debug-output-enableAfterRestart" label="&zotero.preferences.debugOutputLogging.enableAfterRestart;" style="margin-left: 1.5em"/>
+							<checkbox label="&zotero.preferences.autoUpdate;" preference="pref-automaticScraperUpdates"/>
+							<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;"
+								oncommand="Zotero_Preferences.Advanced.updateTranslators()"/>
 						</hbox>
 						
+						<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="pref-reportTranslationFailure"/>
+						
 						<hbox align="center">
-							<button id="debug-output-view" label="&zotero.preferences.debugOutputLogging.viewOutput;" oncommand="Zotero_Preferences.Debug_Output.view()"/>
-							<button id="debug-output-clear" label="&zotero.preferences.debugOutputLogging.clearOutput;" oncommand="Zotero_Preferences.Debug_Output.clear()"/>
-							<button id="debug-output-submit" label="&zotero.preferences.debugOutputLogging.submitToServer;" oncommand="Zotero_Preferences.Debug_Output.submit()"/>
-							<progressmeter id="debug-output-submit-progress" mode="undetermined" hidden="true"/>
+							<label value="&zotero.bibliography.locale.label;"/>
+							<menulist id="locale-menu"
+									oncommand="Zotero_Preferences.Advanced.onLocaleChange()">
+								<menupopup/>
+							</menulist>
 						</hbox>
 					</groupbox>
 					
 					<groupbox>
-						<caption label="&zotero.preferences.openurl.caption;"/>
+						<caption label="OpenURL"/>
 						
 						<hbox align="center">
 							<!-- vbox prevents some weird vertical stretching of the menulist -->
@@ -120,18 +132,17 @@
 						</hbox>
 					</groupbox>
 					
-					<groupbox id="zotero-prefpane-advanced-miscellaneous">
-						<caption label="&zotero.preferences.miscellaneous;"/>
+					<groupbox id="zotero-prefpane-advanced-advancedConfiguration">
+						<caption label="&zotero.preferences.advanced.advancedConfiguration;"/>
+						
 						<hbox id="zotero-prefpane-advanced-openbuttons" align="center" style="display: block">
-							<button id="openAboutConfig"
-								label="&zotero.preferences.openAboutConfig;"
+							<button id="config-editor"
+								label="&zotero.preferences.configEditor;"
 								oncommand="Zotero_Preferences.openInViewer('about:config')"/>
-							<button id="openCSLEdit"
-								label="&zotero.preferences.openCSLEdit;"
-								oncommand="Zotero_Preferences.openInViewer('chrome://zotero/content/tools/csledit.xul', true)"/>
-							<button id="openCSLPreview"
-								label="&zotero.preferences.openCSLPreview;"
-								oncommand="Zotero_Preferences.openInViewer('chrome://zotero/content/tools/cslpreview.xul', true)"/>
+							<button id="memory-info"
+								label="Memory Info"
+								oncommand="Zotero_Preferences.openInViewer('about:memory')"
+								hidden="true"/>
 						</hbox>
 					</groupbox>
 				</tabpanel>
@@ -154,7 +165,8 @@
 								readonly="true"
 								flex="1"
 								tabindex="-1"/>
-							<button label="&zotero.preferences.attachmentBaseDir.selectBasePath;"
+							<button id="baseAttachmentPathButton"
+								label="&zotero.preferences.attachmentBaseDir.selectBasePath;"
 								oncommand="Zotero_Preferences.Attachment_Base_Directory.choosePath()"/>
 						</hbox>
 						
@@ -169,27 +181,31 @@
 					<groupbox>
 						<caption label="&zotero.preferences.dataDir;"/>
 						
-						<radiogroup id="dataDir"
+						<radiogroup id="data-dir"
 								preference="pref-useDataDir"
-								onsyncfrompreference="Zotero_Preferences.Advanced.onDataDirLoad();"
-								onsynctopreference="return Zotero_Preferences.Advanced.onDataDirUpdate(event);">
-							<radio label="&zotero.preferences.dataDir.useProfile;" value="false"/>
+								onsyncfrompreference="return Zotero_Preferences.Advanced.onDataDirLoad()"
+								onsynctopreference="Zotero_Preferences.Advanced.onDataDirUpdate(event);">
+							<radio id="default-data-dir" label="&zotero.preferences.dataDir.useProfile;" value="false"/>
 							<hbox>
 								<radio label="&zotero.preferences.dataDir.custom;" value="true"/>
-								<textbox id="dataDirPath" preference="pref-dataDir"
+								<textbox id="data-dir-path" preference="pref-dataDir"
 									onsyncfrompreference="return Zotero_Preferences.Advanced.getDataDirPath();"
 									readonly="true" flex="1"/>
 								<button label="&zotero.preferences.dataDir.choose;"
-									oncommand="var file = Zotero.chooseZoteroDirectory(true);
-										if (!file) {
-											event.stopPropagation();
-										}"/>
+									oncommand="return Zotero_Preferences.Advanced.chooseDataDir(event)"/>
 							</hbox>
 						</radiogroup>
 						
+						<vbox id="command-line-data-dir" hidden="true">
+							<description id="command-line-data-dir-path"/>
+							<label value="&zotero.preferences.dataDir.viaCommandLine;"/>
+						</vbox>
+						
 						<hbox>
 							<button label="&zotero.preferences.dataDir.reveal;"
-								oncommand="Zotero_Preferences.Advanced.revealDataDirectory()"/>
+								oncommand="Zotero.DataDirectory.reveal()"/>
+							<button id="migrate-data-dir" label="&zotero.preferences.dataDir.migrate;"
+								oncommand="Zotero_Preferences.Advanced.migrateDataDirectory()" hidden="true"/>
 						</hbox>
 					</groupbox>
 					
@@ -198,10 +214,12 @@
 						
 						<hbox style="display: block">
 							<button label="&zotero.preferences.dbMaintenance.integrityCheck;"
-								oncommand="Zotero_Preferences.Advanced.runIntegrityCheck()"/>
-							<button label="&zotero.preferences.dbMaintenance.resetTranslators;"
+								oncommand="Zotero_Preferences.Advanced.runIntegrityCheck(this)"/>
+							<button id="reset-translators-button"
+								label="&zotero.preferences.dbMaintenance.resetTranslators;"
 								oncommand="Zotero_Preferences.Advanced.resetTranslators()"/>
-							<button label="&zotero.preferences.dbMaintenance.resetStyles;"
+							<button id="reset-styles-button"
+								label="&zotero.preferences.dbMaintenance.resetStyles;"
 								oncommand="Zotero_Preferences.Advanced.resetStyles()"/>
 						</hbox>
 					</groupbox>
@@ -219,37 +237,31 @@
 						<rows id="zotero-keys-rows">
 							<row id="zotero-keys-new-item">
 								<label value="&zotero.preferences.keys.newItem;" control="textbox-newItem"/>
-								<label/>
+								<label class="modifier"/>
 								<textbox id="textbox-newItem" maxlength="1" size="1" preference="pref-keys-newItem"/>
 							</row>
 				
 							<row>
 								<label value="&zotero.preferences.keys.newNote;" control="textbox-newNote"/>
-								<label/>
+								<label class="modifier"/>
 								<textbox id="textbox-newNote" maxlength="1" size="1" preference="pref-keys-newNote"/>
-							</row>
-				
-							<row>
-								<label value="&zotero.preferences.keys.importFromClipboard;" control="textbox-importFromClipboard"/>
-								<label/>
-								<textbox id="textbox-importFromClipboard" maxlength="1" size="1" preference="pref-keys-importFromClipboard"/>
 							</row>
 				
 							<row id="zotero-keys-focus-libraries-pane">
 								<label value="&zotero.preferences.keys.focusLibrariesPane;" control="textbox-library"/>
-								<label/>
+								<label class="modifier"/>
 								<textbox id="textbox-library" maxlength="1" size="1" preference="pref-keys-library"/>
 							</row>
 				
 							<row>
 								<label value="&zotero.preferences.keys.quicksearch;" control="textbox-quicksearch"/>
-								<label/>
+								<label class="modifier"/>
 								<textbox id="textbox-quicksearch" maxlength="1" size="1" preference="pref-keys-quicksearch"/>
 							</row>
 				
 							<row>
 								<label value="&zotero.preferences.keys.copySelectedItemCitationsToClipboard;" control="textbox-copySelectedItemCitationsToClipboard"/>
-								<label/>
+								<label class="modifier"/>
 								<textbox id="textbox-copySelectedItemCitationsToClipboard" maxlength="1" size="1"
 										preference="pref-keys-copySelectedItemCitationsToClipboard"
 										onchange="if (Zotero_Preferences.Export) { Zotero_Preferences.Export.updateQuickCopyInstructions(); }"/>
@@ -257,7 +269,7 @@
 							
 							<row>
 								<label value="&zotero.preferences.keys.copySelectedItemsToClipboard;" control="textbox-copySelectedItemsToClipboard"/>
-								<label/>
+								<label class="modifier"/>
 								<textbox id="textbox-copySelectedItemsToClipboard" maxlength="1" size="1"
 										preference="pref-keys-copySelectedItemsToClipboard"
 										onchange="if (Zotero_Preferences.Export) { Zotero_Preferences.Export.updateQuickCopyInstructions(); }"/>
@@ -265,8 +277,14 @@
 							
 							<row>
 								<label value="&zotero.preferences.keys.toggleTagSelector;" control="textbox-toggleTagSelector"/>
-								<label/>
+								<label class="modifier"/>
 								<textbox id="textbox-toggleTagSelector" maxlength="1" size="1" preference="pref-keys-toggleTagSelector"/>
+							</row>
+
+							<row>
+								<label value="&zotero.preferences.keys.toggleAllRead;" control="textbox-toggleAllRead"/>
+								<label class="modifier"/>
+								<textbox id="textbox-toggleAllRead" maxlength="1" size="1" preference="pref-keys-toggleAllRead"/>
 							</row>
 						</rows>
 					</grid>
@@ -274,6 +292,46 @@
 					<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
 					
 					<separator/>				
+				</tabpanel>
+				<tabpanel id="zotero-prefpane-advanced-feeds-tab" orient="vertical">
+					<groupbox>
+						<hbox>
+							<hbox align="center">
+								<label value="&zotero.preferences.feeds.sorting.label;"/>
+								<menulist id="feed-sort" preference="pref-feeds-sortAscending">
+									<menupopup>
+										<menuitem label="&zotero.preferences.feeds.sorting.newest;" value="false"/>
+										<menuitem label="&zotero.preferences.feeds.sorting.oldest;" value="true"/>
+									</menupopup>
+								</menulist>
+							</hbox>
+						</hbox>
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.preferences.feeds.feedDefaults;"/>
+						<hbox>
+							<hbox align="center">
+								<label value="&zotero.feedSettings.refresh.label1;"/>
+								<textbox type="number" min="1" increment="1" size="3" preference="pref-feeds-defaultTTL"/>
+								<label value="&zotero.feedSettings.refresh.label2;"/>
+							</hbox>
+						</hbox>
+						<hbox>
+							<hbox align="center">
+								<label value="&zotero.feedSettings.cleanupReadAfter.label1;"/>
+								<textbox type="number" min="1" increment="1" size="2" preference="pref-feeds-defaultCleanupReadAfter"/>
+								<label value="&zotero.feedSettings.cleanupReadAfter.label2;"/>
+							</hbox>
+						</hbox>
+						<hbox>
+							<hbox align="center">
+								<label value="&zotero.feedSettings.cleanupUnreadAfter.label1;"/>
+								<textbox type="number" min="1" increment="1" size="2" preference="pref-feeds-defaultCleanupUnreadAfter"/>
+								<label value="&zotero.feedSettings.cleanupUnreadAfter.label2;"/>
+							</hbox>
+						</hbox>
+					</groupbox>
 				</tabpanel>
 			</tabpanels>
 		</tabbox>

@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "Editar">
+<!ENTITY editMenu.accesskey        "E">
+<!ENTITY undoCmd.label             "Desfazer">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "D">
+<!ENTITY redoCmd.label             "Refazer">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "R">
+<!ENTITY cutCmd.label              "Cortar">
+<!ENTITY cutCmd.key                "x">
+<!ENTITY cutCmd.accesskey          "t">
+<!ENTITY copyCmd.label             "Copiar">
+<!ENTITY copyCmd.key               "c">
+<!ENTITY copyCmd.accesskey         "C">
+<!ENTITY pasteCmd.label            "Colar">
+<!ENTITY pasteCmd.key              "v">
+<!ENTITY pasteCmd.accesskey        "o">
+<!ENTITY deleteCmd.label           "Excluir">
+<!ENTITY deleteCmd.accesskey       "x">
+<!ENTITY selectAllCmd.label        "Selecionar tudo">
+<!ENTITY selectAllCmd.key          "a">
+<!ENTITY selectAllCmd.accesskey    "S">
+<!ENTITY findCmd.label             "Localizar">
+<!ENTITY findCmd.key               "f">
+<!ENTITY findCmd.accesskey         "z">
+<!ENTITY findAgainCmd.label        "Localizar próxima">
+<!ENTITY findAgainCmd.key          "g">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "L">
+<!ENTITY findPreviousCmd.label     "Localizar anterior">
+<!ENTITY findPreviousCmd.accesskey "a">

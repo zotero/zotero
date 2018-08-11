@@ -1,13 +1,13 @@
 <!ENTITY preferencesCmdMac.label "Preferências...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Serviços">
-<!ENTITY hideThisAppCmdMac.label "Esconder &brandShortName;">
-<!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "Esconder os outros">
-<!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "Mostrar tudo">
+<!ENTITY hideThisAppCmdMac.label "Ocultar &brandShortName;">
+<!ENTITY hideThisAppCmdMac.commandkey "O">
+<!ENTITY hideOtherAppsCmdMac.label "Ocultar os outros">
+<!ENTITY hideOtherAppsCmdMac.commandkey "O">
+<!ENTITY showAllAppsCmdMac.label "Exibir tudo">
 <!ENTITY quitApplicationCmdMac.label "Sair do Zotero">
-<!ENTITY quitApplicationCmdMac.key "Q">
+<!ENTITY quitApplicationCmdMac.key "S">
 
 
 <!ENTITY fileMenu.label "Arquivo">
@@ -15,52 +15,26 @@
 <!ENTITY saveCmd.label "Salvar...">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Configurar página...">
+<!ENTITY pageSetupCmd.label "Configuração da página...">
 <!ENTITY pageSetupCmd.accesskey "U">
 <!ENTITY printCmd.label "Imprimir...">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "Fechar">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Importar...">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Importar da área de transferência">
 <!ENTITY quitApplicationCmdWin.label "Sair">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Sair">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Editar">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Anular">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Refazer">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Recortar">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Copiar">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Copiar citação">
 <!ENTITY copyBibliographyCmd.label "Copiar bibliografia">
-<!ENTITY pasteCmd.label "Colar">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Remover">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Selecionar tudo">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Preferências">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Preferências">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Localizar">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Inverter direção da página">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Inverter direção do texto">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Ferramentas">
 <!ENTITY toolsMenu.accesskey "T">
+<!ENTITY installConnector.label "Instalar o conector com o navegador">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Extensões">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Informação de solução de problemas">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Submeter feedback">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Transmitir erros à Zotero...">
+<!ENTITY helpFeedbackPage.label "Fóruns de discussão">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Reportar erros...">
 <!ENTITY helpReportErrors.accesskey "R">
+
+<!ENTITY debugOutputLogging.label "Registro da saída de depuração">
+<!ENTITY debugOutputLogging.accesskey "D">
+<!ENTITY debugOutputLogging.submit "Enviar a saída">
+<!ENTITY debugOutputLogging.view "Ver a saída">
+<!ENTITY debugOutputLogging.clear "Limpar a saída">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Reiniciar com o Registro Habilitado">
+
 <!ENTITY helpCheckForUpdates.label "Buscar atualizações...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

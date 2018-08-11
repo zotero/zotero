@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "تحرير">
+<!ENTITY editMenu.accesskey        "ح">
+<!ENTITY undoCmd.label             "تراجع">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "ر">
+<!ENTITY redoCmd.label             "أعِد">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "ع">
+<!ENTITY cutCmd.label              "قصّ">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "ق">
+<!ENTITY copyCmd.label             "انسخ">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "ن">
+<!ENTITY pasteCmd.label            "ألصق">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "ل">
+<!ENTITY deleteCmd.label           "احذف">
+<!ENTITY deleteCmd.accesskey       "ذ">
+<!ENTITY selectAllCmd.label        "اختر الكل">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "ك">
+<!ENTITY findCmd.label             "ابحث">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "ب">
+<!ENTITY findAgainCmd.label        "ابحث مجددًا">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "ب">
+<!ENTITY findPreviousCmd.label     "ابحث عن السابق">
+<!ENTITY findPreviousCmd.accesskey "س">

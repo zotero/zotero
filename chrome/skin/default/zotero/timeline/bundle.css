@@ -118,6 +118,7 @@
     left: 0px;
     z-index: 1000;
     cursor: pointer;
+    display:none;
 }
 
 .timeline-message-container {
@@ -172,3 +173,8 @@
     height:     100%;
 }
 
+/* Added by Zotero for 2x icons */
+.timeline-band-layer-inner img {
+	height: 16px;
+	margin-right: 2px;
+}

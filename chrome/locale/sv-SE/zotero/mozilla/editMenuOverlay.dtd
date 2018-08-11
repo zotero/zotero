@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "Redigera">
+<!ENTITY editMenu.accesskey        "R">
+<!ENTITY undoCmd.label             "Ångra">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "Å">
+<!ENTITY redoCmd.label             "Gör om">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "G">
+<!ENTITY cutCmd.label              "Klipp ut">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "K">
+<!ENTITY copyCmd.label             "Kopiera">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "o">
+<!ENTITY pasteCmd.label            "Klistra in">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "l">
+<!ENTITY deleteCmd.label           "Ta bort">
+<!ENTITY deleteCmd.accesskey       "T">
+<!ENTITY selectAllCmd.label        "Markera allt">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "M">
+<!ENTITY findCmd.label             "Sök">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "S">
+<!ENTITY findAgainCmd.label        "Sök igen">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "ö">
+<!ENTITY findPreviousCmd.label     "Sök tidigare">
+<!ENTITY findPreviousCmd.accesskey "i">

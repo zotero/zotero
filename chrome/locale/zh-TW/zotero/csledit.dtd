@@ -1,4 +1,3 @@
-<!ENTITY styles.editor "Zotero Style Editor">
+<!ENTITY styles.editor "Zotero文獻格式編輯器">
 
-<!ENTITY styles.editor.suppressAuthor "Suppress Author">
-<!ENTITY styles.editor.citePosition "Cite Position:">
+<!ENTITY styles.editor.citePosition "引用來源：">

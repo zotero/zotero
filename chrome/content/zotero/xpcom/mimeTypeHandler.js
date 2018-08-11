@@ -62,7 +62,21 @@ Zotero.MIMETypeHandler = new function () {
 			else this.unregisterMetadataHandlers();
 		}.bind(this));
 		
-		this.addHandler("application/vnd.citationstyles.style+xml", function(a1, a2) { Zotero.Styles.install(a1, a2) });
+		this.addHandler("application/vnd.citationstyles.style+xml", Zotero.Promise.coroutine(function* (a1, a2) {
+			let win = Services.wm.getMostRecentWindow("zotero:basicViewer");
+			try {
+				yield Zotero.Styles.install(a1, a2, true);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				(new Zotero.Exception.Alert("styles.install.unexpectedError",
+					a2, "styles.install.title", e)).present();
+			}
+			// Close styles page in basic viewer after installing a style
+			if (win) {
+				win.close();
+			}
+		}));
 		this.addHandler("text/x-csl", function(a1, a2) { Zotero.Styles.install(a1, a2) }); // deprecated
 		this.addHandler("application/x-zotero-schema", Zotero.Schema.importSchema);
 		this.addHandler("application/x-zotero-settings", Zotero.Prefs.importSettings);
@@ -180,17 +194,17 @@ Zotero.MIMETypeHandler = new function () {
 		translation.setString(string);
 		
 		// attempt to retrieve translators
-		var translators = translation.getTranslators();
-		if(!translators.length) {
-			// we lied. we can't really translate this file.
-			Zotero.debug("No translator found to handle this file");
-			return false;
-		}
-		
-		// translate using first available
-		translation.setTranslator(translators[0]);
-		frontWindow.Zotero_Browser.performTranslation(translation);
-		return true;
+		return translation.getTranslators().then(function(translators) {
+			if(!translators.length) {
+				// we lied. we can't really translate this file.
+				Zotero.debug("No translator found to handle this file");
+				return false;
+			}
+			
+			// translate using first available
+			translation.setTranslator(translators[0]);
+			return frontWindow.Zotero_Browser.performTranslation(translation);
+		});
 	}
 	
 	/**
@@ -206,7 +220,7 @@ Zotero.MIMETypeHandler = new function () {
 				try {
 					// remove content-disposition headers for EndNote, etc.
 					var contentType = channel.getResponseHeader("Content-Type").toLowerCase();
-					for each(var handledType in _ignoreContentDispositionTypes) {
+					for (let handledType of _ignoreContentDispositionTypes) {
 						if(contentType.length < handledType.length) {
 							break;
 						} else {
@@ -218,7 +232,7 @@ Zotero.MIMETypeHandler = new function () {
 					}
 				} catch(e) {}
 				
-				for each(var observer in _observers) {
+				for (let observer of _observers) {
 					observer(channel);
 				}
 			}
@@ -305,7 +319,7 @@ Zotero.MIMETypeHandler = new function () {
 		if (!this._storageStream) {
 			this._storageStream = Components.classes["@mozilla.org/storagestream;1"].
 					createInstance(Components.interfaces.nsIStorageStream);
-			this._storageStream.init(4096, 4294967295, null); // PR_UINT32_MAX
+			this._storageStream.init(16384, 4294967295, null); // PR_UINT32_MAX
 			this._outputStream = this._storageStream.getOutputStream(0);
 			
 			this._binaryInputStream = Components.classes["@mozilla.org/binaryinputstream;1"].
@@ -320,7 +334,7 @@ Zotero.MIMETypeHandler = new function () {
 	/**
 	 * Called when the request is done
 	 */
-	_StreamListener.prototype.onStopRequest = function(channel, context, status) {
+	_StreamListener.prototype.onStopRequest = Zotero.Promise.coroutine(function* (channel, context, status) {
 		Zotero.debug("charset is " + channel.contentCharset);
 		
 		var inputStream = this._storageStream.newInputStream(0);
@@ -328,10 +342,10 @@ Zotero.MIMETypeHandler = new function () {
 		const replacementChar = Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
 		var convStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 					.createInstance(Components.interfaces.nsIConverterInputStream);
-		convStream.init(inputStream, charset, 1024, replacementChar);
+		convStream.init(inputStream, charset, 16384, replacementChar);
 		var readString = "";
 		var str = {};
-		while (convStream.readString(4096, str) != 0) {
+		while (convStream.readString(16384, str) != 0) {
 			readString += str.value;
 		}
 		convStream.close();
@@ -339,28 +353,37 @@ Zotero.MIMETypeHandler = new function () {
 		
 		var handled = false;
 		try {
-			handled = _typeHandlers[this._contentType](readString, (this._request.name ? this._request.name : null),
-				this._contentType, channel);
-		} catch(e) {
-			Zotero.debug(e);
+			handled = _typeHandlers[this._contentType](
+				readString,
+				this._request.name ? this._request.name : null,
+				this._contentType,
+				channel
+			);
+		}
+		catch (e) {
+			Zotero.logError(e);
 		}
 		
-		if (!handled) {
-			// handle using nsIExternalHelperAppService
-			var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"].
-				getService(Components.interfaces.nsIExternalHelperAppService);
-			var frontWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
-				getService(Components.interfaces.nsIWindowWatcher).activeWindow;
+		if (handled === false) {
+			// Handle using nsIExternalHelperAppService
+			let externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"]
+				.getService(Components.interfaces.nsIExternalHelperAppService);
+			let frontWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+				.getService(Components.interfaces.nsIWindowWatcher).activeWindow;
 			
-			var inputStream = this._storageStream.newInputStream(0);
-			var streamListener = externalHelperAppService.doContent(this._contentType, this._request, frontWindow, null);
+			let inputStream = this._storageStream.newInputStream(0);
+			let streamListener = externalHelperAppService.doContent(
+				this._contentType, this._request, frontWindow, null
+			);
 			if (streamListener) {
 				streamListener.onStartRequest(channel, context);
-				streamListener.onDataAvailable(this._request, context, inputStream, 0, this._storageStream.length);
+				streamListener.onDataAvailable(
+					this._request, context, inputStream, 0, this._storageStream.length
+				);
 				streamListener.onStopRequest(channel, context, status);
 			}
 		}
 		
 		this._storageStream.close();
-	}
+	});
 }

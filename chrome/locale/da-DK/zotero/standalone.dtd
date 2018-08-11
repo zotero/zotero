@@ -23,44 +23,18 @@
 <!ENTITY closeCmd.label "Luk">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Importér...">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Importér fra udklipsholderen">
 <!ENTITY quitApplicationCmdWin.label "Exit">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Afslut">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Rediger">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Fortryd">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Gendan">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Klip">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Kopier">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
-<!ENTITY copyCitationCmd.label "Kopier henvisning">
+<!ENTITY copyCitationCmd.label "Kopier reference">
 <!ENTITY copyBibliographyCmd.label "Kopier referenceliste">
-<!ENTITY pasteCmd.label "Indsæt">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Slet">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Vælg alle">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Indstillinger">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Indstillinger">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Find">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Byt sideorientering">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Byt tekst-orientering">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Værktøj">
 <!ENTITY toolsMenu.accesskey "T">
+<!ENTITY installConnector.label "Installér browserforbindelseskomponent">
+<!ENTITY installConnector.accesskey "K">
 <!ENTITY addons.label "Tilføjelser">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Oplysninger til problemløsning">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Feedback til projektet...">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Rapporter fejl til Zotero">
+<!ENTITY helpFeedbackPage.label "Diskussionsfora">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Rapportér fejl...">
 <!ENTITY helpReportErrors.accesskey "R">
+
+<!ENTITY debugOutputLogging.label "Logning af fejlsøgningsoutput">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Send output">
+<!ENTITY debugOutputLogging.view "Vis output">
+<!ENTITY debugOutputLogging.clear "Ryd output">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Genstart med logning aktiveret...">
+
 <!ENTITY helpCheckForUpdates.label "Tjek for opdateringer...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

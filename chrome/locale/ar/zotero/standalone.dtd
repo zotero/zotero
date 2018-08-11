@@ -1,4 +1,4 @@
-<!ENTITY preferencesCmdMac.label "تفضيلات ...">
+<!ENTITY preferencesCmdMac.label "التفضيلات...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "خدمات">
 <!ENTITY hideThisAppCmdMac.label "إخفاء اسم العلامة التجارية القصيرة؛">
@@ -12,55 +12,29 @@
 
 <!ENTITY fileMenu.label "ملف">
 <!ENTITY fileMenu.accesskey "م">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "حفظ...">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.label "ضبط الصفحة...">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.label "طباعة...">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "إغلاق">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "ق">
+<!ENTITY importCmd.label "استيراد...">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "استيراد من الحافظة">
 <!ENTITY quitApplicationCmdWin.label "خروج">
 <!ENTITY quitApplicationCmdWin.accesskey "خ">
 <!ENTITY quitApplicationCmd.label "إنهاء">
 <!ENTITY quitApplicationCmd.accesskey "ن">
 
 
-<!ENTITY editMenu.label "تحرير">
-<!ENTITY editMenu.accesskey "ح">
-<!ENTITY undoCmd.label "تراجع">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "ر">
-<!ENTITY redoCmd.label "إعادة">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "ع">
-<!ENTITY cutCmd.label "قص">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "ص">
-<!ENTITY copyCmd.label "نسخ">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "س">
 <!ENTITY copyCitationCmd.label "نسخ الاقتباس">
 <!ENTITY copyBibliographyCmd.label "نسخ قائمة المراجع">
-<!ENTITY pasteCmd.label "لصق">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "ل">
-<!ENTITY deleteCmd.label "حذف">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "ذ">
-<!ENTITY selectAllCmd.label "تحديد الكل">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "ح">
-<!ENTITY preferencesCmd.label "Preferences">
-<!ENTITY preferencesCmd.accesskey "ي">
-<!ENTITY preferencesCmdUnix.label "تفضيلات">
-<!ENTITY preferencesCmdUnix.accesskey "ف">
-<!ENTITY findCmd.label "اعثر">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "تغيير اتجاه الصفحة">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "ه">
 <!ENTITY bidiSwitchTextDirectionItem.label "تغيير اتجاه النص">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "أدوات">
 <!ENTITY toolsMenu.accesskey "T">
+<!ENTITY installConnector.label "ثبت موصل المتصفح">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "ملحقات">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "معلومات المساعدة والتنويه">
 <!ENTITY helpTroubleshootingInfo.accesskey "م">
-<!ENTITY helpFeedbackPage.label "ارسال ملاحظات">
-<!ENTITY helpFeedbackPage.accesskey "ر">
-<!ENTITY helpReportErrors.label "بلغ عن علة في Zotero…">
+<!ENTITY helpFeedbackPage.label "منتديات المناقشة">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "الإبلاغ عن أخطاء...">
 <!ENTITY helpReportErrors.accesskey "ب">
+
+<!ENTITY debugOutputLogging.label "سجل تصويب المخرجات">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "إرسال المخرجات">
+<!ENTITY debugOutputLogging.view "عرض المخرجات">
+<!ENTITY debugOutputLogging.clear "مسح المخرجات">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "أعاده التشغيل مع تمكين التسجيل...">
+
 <!ENTITY helpCheckForUpdates.label "تحقق من التحديثات">
 <!ENTITY helpCheckForUpdates.accesskey "ت">

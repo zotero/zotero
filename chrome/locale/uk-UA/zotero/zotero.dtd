@@ -1,3 +1,5 @@
+<!ENTITY zotero.general.yes "Так">
+<!ENTITY zotero.general.no "Ні">
 <!ENTITY zotero.general.optional "(Необов'язково)">
 <!ENTITY zotero.general.note "Примітка:">
 <!ENTITY zotero.general.selectAll "Вибрати все">
@@ -8,9 +10,17 @@
 <!ENTITY zotero.general.cancel "Відміна">
 <!ENTITY zotero.general.refresh "Оновити">
 <!ENTITY zotero.general.saveAs "Зберегти як...">
+<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.advancedOptions.label "Розширені налаштування">
+<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.more "Більше">
+<!ENTITY zotero.general.loading "Завантаження">
+<!ENTITY zotero.general.close "Close">
+<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.other "Other…">
+
 
 <!ENTITY zotero.errorReport.title "Звіт про помилку в Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "Це може включати повідомлення, які не відносяться до Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Почекайте, поки звіт про помилку буде передано.">
 <!ENTITY zotero.errorReport.submitted "Ваш звіт про помилку був переданий.">
 <!ENTITY zotero.errorReport.reportID "Номер звіту:">
@@ -91,6 +101,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Відновити в бібліотеці">
 <!ENTITY zotero.items.menu.duplicateItem "Дублювати документ">
 <!ENTITY zotero.items.menu.mergeItems "Об'єднати документи...">
+<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Виберіть версію документа для використання в якості головної:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Виберіть поля для збереження з іншої версії документа:">
@@ -100,7 +112,9 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "Створити новий документ з поточної веб-сторінки">
 <!ENTITY zotero.toolbar.lookup.label "Додати документ(и) за ідентифікатором">
 <!ENTITY zotero.toolbar.removeItem.label "Видалити документ...">
+<!ENTITY zotero.toolbar.newLibrary.label "Нова бібліотека">
 <!ENTITY zotero.toolbar.newCollection.label "Нова колекція...">
+<!ENTITY zotero.toolbar.markFeedRead.label "Позначити стрічку як прочитану">
 <!ENTITY zotero.toolbar.newGroup "Нова група...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Нова підколекція...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Новий збережений пошук...">
@@ -116,9 +130,15 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Підтримка і документація">
 <!ENTITY zotero.toolbar.about.label "Про Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Розширений пошук">
-<!ENTITY zotero.toolbar.tab.tooltip "Переключити режим вкладки">
 <!ENTITY zotero.toolbar.openURL.label "Знайти">
 <!ENTITY zotero.toolbar.openURL.tooltip "Знайти через місцеву бібліотеку">
+
+<!ENTITY zotero.toolbar.feeds.new "Нова стрічка">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "Новий URL...">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "Нова сторінка...">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "З OPML...">
+<!ENTITY zotero.toolbar.feeds.refresh "Оновити стрічку">
+<!ENTITY zotero.toolbar.feeds.edit "Редагувати стрічку...">
 
 <!ENTITY zotero.item.add "Додати">
 <!ENTITY zotero.item.attachment.file.show "Показати файл">
@@ -128,6 +148,9 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Поміняти місцями ім'я та прізвище">
 <!ENTITY zotero.item.viewOnline "Дивитись онлайн">
 <!ENTITY zotero.item.copyAsURL "Копіювати у вигляді URL">
+<!ENTITY zotero.item.deletePermanently "Видалити остаточно...">
+
+<!ENTITY zotero.item.tags.removeAll "Видалити всі теги...">
 
 <!ENTITY zotero.toolbar.newNote "Нова примітка">
 <!ENTITY zotero.toolbar.note.standalone "Нова окрема примітка">
@@ -139,11 +162,10 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Зробити знімок поточної сторінки">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Немає тегів для відображення">
-<!ENTITY zotero.tagSelector.filter "Фільтр:">
+<!ENTITY zotero.tagSelector.loadingTags "Завантажуємо теги...">
 <!ENTITY zotero.tagSelector.showAutomatic "Показувати автоматичні">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Показувати всі теги в бібліотеці">
-<!ENTITY zotero.tagSelector.selectVisible "Вибрати видимі">
-<!ENTITY zotero.tagSelector.clearVisible "Відмінити вибір видимих">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Видалити всі автоматичні теги в бібліотеці...">
 <!ENTITY zotero.tagSelector.clearAll "Відмінити вибір">
 <!ENTITY zotero.tagSelector.assignColor "Призначити колір...">
 <!ENTITY zotero.tagSelector.renameTag "Перейменувати тег...">
@@ -155,7 +177,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Задати колір">
 <!ENTITY zotero.tagColorChooser.removeColor "Видалити колір">
 
-<!ENTITY zotero.lookup.description "Введіть один чи більше ISBN, DOI або PMID для пошуку в наступному вікні.">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Пошук">
 
 <!ENTITY zotero.selectitems.title "Вибрати документи">
@@ -165,6 +187,8 @@
 
 <!ENTITY zotero.bibliography.title "Створити цитування/список літератури">
 <!ENTITY zotero.bibliography.style.label "Стиль цитування:">
+<!ENTITY zotero.bibliography.manageStyles "Керувати стилями">
+<!ENTITY zotero.bibliography.locale.label "Мова:">
 <!ENTITY zotero.bibliography.outputMode "Режим вводу:">
 <!ENTITY zotero.bibliography.bibliography "Список літератури">
 <!ENTITY zotero.bibliography.outputMethod "Метод вводу:">
@@ -179,6 +203,15 @@
 <!ENTITY zotero.integration.quickFormatDialog.title "Швидке форматування цитати">
 
 <!ENTITY zotero.progress.title "Хід виконання">
+
+<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
+<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.database "Database">
+<!ENTITY zotero.import.lastModified "Last Modified">
+<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "Експорт...">
 <!ENTITY zotero.exportOptions.format.label "Формат:">
@@ -210,23 +243,24 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Виноски">
 <!ENTITY zotero.integration.prefs.endnotes.label "Кінцеві виноски">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Форматувати використовуючи:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Зберегти цитування як:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Закладки">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Закладки зберігаються при переході між Microsoft Word та LibreOffice, але можуть бути випадково змінені. З поглядів сумісності, коли ця операція виконана, цитати не можуть бути вставлені в виноски.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Закладки можна поширювати між Word та LibreOffice, але це може викликати помилки в разі випадкого редагування та неможливість вставки у виноски.">
+
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Автоматичне скорочення назв жуналів">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Скорочення назв журналів для MEDLINE  будуть створені автоматично на підставі назв журналів. Параметри поля &quot;Журн. скор.&quot; будуть проігноровані.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Збепегти посилання в документі">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Зберігання посилань в вашому документі дещо збільшує розмір файлу, але дозволяє обмінюватись ними з іншими без використання групи Zotero. Для оновлення таких документів необхідно Zotero не нижче версії 3.0.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Використовувати абревіатуру журналу в MEDLINE">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Поле &quot;Журнал скор.&quot; буде проігнороване.">
 
 <!ENTITY zotero.integration.showEditor.label "Покзати редактор">
 <!ENTITY zotero.integration.classicView.label "Класичний вигляд">
 
 <!ENTITY zotero.integration.references.label "Посилання в списку літератури">
 
-<!ENTITY zotero.sync.button "Синхронізувати з сервером Zotero">
+<!ENTITY zotero.sync.stop "Зупинити синхронізацію">
 <!ENTITY zotero.sync.error "Помилка сінхронізації">
 <!ENTITY zotero.sync.storage.progress "Хід виконання:">
 <!ENTITY zotero.sync.storage.downloads "Завантаження:">
@@ -252,8 +286,17 @@
 <!ENTITY zotero.proxy.recognized.disable.label "Не перенаправляти автоматичні запроси через раніше визначені проксі">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ігнорувати">
 
-<!ENTITY zotero.recognizePDF.recognizing.label "Отримання метаданих...">
-<!ENTITY zotero.recognizePDF.cancel.label "Відміна">
+<!ENTITY zotero.feedSettings.title "Налаштування стрічки">
+<!ENTITY zotero.feedSettings.saveButton.label "Зберегти">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "Назва:">
+<!ENTITY zotero.feedSettings.refresh.label1 "Оновлювати стрічку кожні">
+<!ENTITY zotero.feedSettings.refresh.label2 "годин">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Видалити непрочитані записи зі стрічки через">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "днів">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Видалити прочитані записи зі стрічки через">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "днів">
+
 <!ENTITY zotero.recognizePDF.pdfName.label "Ім'я PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Ім'я документу">
 
@@ -284,7 +327,6 @@
 
 <!ENTITY zotero.downloadManager.label "Зберегти в Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Вкладення не можуть бути збережені в обрану бібліотеку. Натомість, цей документ буде збережений в вашу бібліотеку.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Щоб використати цю функцію, необхідно встановити PDF утиліту, вказану в налаштуваннях Zotero.">
 
 <!ENTITY zotero.attachLink.title "Прикріпити посилання на URI">
 <!ENTITY zotero.attachLink.label.link "Посилання:">

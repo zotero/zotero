@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2009 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xul-overlay href="chrome://zotero-platform/content/standalone/menuOverlay.xul"?>
+
+<!DOCTYPE window [
+	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
+	<!ENTITY % textcontextDTD SYSTEM "chrome://global/locale/textcontext.dtd" > %textcontextDTD;
+	<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" > %standaloneDTD;
+	<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd" > %brandDTD;
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
+]>
+
+<window id="main-window" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
+	<script>
+		// Equivalent to Zotero.openMainWindow()
+		function openMainWindow() {
+			var prefService = Components.classes["@mozilla.org/preferences-service;1"]
+				.getService(Components.interfaces.nsIPrefBranch);
+			var chromeURI = prefService.getCharPref('toolkit.defaultChromeURI');
+			var flags = prefService.getCharPref("toolkit.defaultChromeFeatures", "chrome,dialog=no,all");
+			
+			var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
+				.getService(Components.interfaces.nsIWindowWatcher);
+			ww.openWindow(null, chromeURI, '_blank', flags, null);
+		}
+		
+		function openAbout() {
+			var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
+				.getService(Components.interfaces.nsIWindowWatcher);
+			ww.openWindow(null, 'chrome://zotero/content/about.xul', 'about', 'chrome,dialog=yes', null);
+		}
+	</script>
+	<commandset id="mainCommandSet">
+		<command id="cmd_quitApplication" oncommand="goQuitApplication();"/>
+		<command id="cmd_close" disabled="true"/>
+		<command id="minimizeWindow" disabled="true"/>
+		<command id="zoomWindow" disabled="true"/>
+		<command id="cmd_mainWindow" oncommand="openMainWindow();"/>
+	</commandset>
+	
+	<keyset id="mainKeyset">
+		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
+		<key id="key_mainWindow" key="0" command="cmd_mainWindow" modifiers="accel"/>
+	</keyset>
+
+	<menubar id="main-menubar">
+		<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
+			<menupopup id="menu_FilePopup">
+				<!-- This gets moved to the Application menu automatically -->
+				<menuitem id="aboutName"
+					accesskey="&aboutProduct.accesskey;"
+					label="&aboutProduct.label;"
+					oncommand="openAbout()"/>
+
+				<!-- Disabled Close line in File menu, just to show something -->
+                <menuitem id="menu_close"
+					label="&closeCmd.label;"
+					key="key_close"
+					command="cmd_close"/>
+			</menupopup>
+		</menu>
+	
+		<menu id="windowMenu" onpopupshowing="">
+			<menupopup>
+				<menuitem command="minimizeWindow" key="key_minimizeWindow"/>
+				<menuitem command="zoomWindow"/>
+				<menuseparator/>
+				<menuitem command="cmd_mainWindow" label="Zotero" key="key_mainWindow"/>
+				<!--
+					Prevent error from macWindowMenuDidShow(), which is called from a built-in
+					nWindowMenuShowing(), when opening menu
+				-->
+				<menuseparator id="sep-window-list" hidden="true"/>
+			</menupopup>
+		</menu>
+	</menubar>
+</window>

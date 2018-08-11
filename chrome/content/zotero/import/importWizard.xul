@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/importWizard.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<wizard id="import-wizard"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		title="&zotero.import;"
+		onload="Zotero_Import_Wizard.init()">
+	
+	<script src="../include.js"/>
+	<script src="../fileInterface.js"/>
+	<script src="importWizard.js"/>
+	
+	<wizardpage pageid="page-start"
+			label="&zotero.import.whereToImportFrom;"
+			next="page-options"
+			onpageadvanced="Zotero_Import_Wizard.onModeChosen(); return false;">
+		<radiogroup id="import-source">
+			<radio id="radio-import-source-file" label="&zotero.import.source.file;"/>
+			<radio id="radio-import-source-mendeley" label="Mendeley" hidden="true"/>
+		</radiogroup>
+	</wizardpage>
+	
+	<wizardpage pageid="page-file-list"
+			next="page-options"
+			onpagerewound="return Zotero_Import_Wizard.goToStart()">
+		<description id="file-options-header"/>
+		<listbox id="file-list" onselect="Zotero_Import_Wizard.onFileSelected()">
+			<listhead>
+				<listheader label="&zotero.import.database;"/>
+				<listheader label="&zotero.import.lastModified;"/>
+				<listheader label="&zotero.import.size;"/>
+			</listhead>
+			
+			<listcols>
+				<listcol flex="1"/>
+				<listcol/>
+				<listcol/>
+			</listcols>
+		</listbox>
+		<hbox>
+			<button label="&zotero.general.other;" oncommand="Zotero_Import_Wizard.chooseMendeleyDB()"/>
+		</hbox>
+	</wizardpage>
+	
+	<wizardpage pageid="page-options"
+			label="&zotero.general.options;"
+			next="page-progress"
+			onpageshow="Zotero_Import_Wizard.onOptionsShown()"
+			onpagerewound="return Zotero_Import_Wizard.goToStart()"
+			onpageadvanced="Zotero_Import_Wizard.onImportStart()">
+		<checkbox id="create-collection-checkbox" label="&zotero.import.createCollection;" checked="true" />
+	</wizardpage>
+	
+	<wizardpage pageid="page-progress"
+			label="&zotero.import.importing;"
+			onpageshow="document.getElementById('import-wizard').canRewind = false;"
+			next="page-done">
+		<progressmeter id="import-progressmeter" mode="determined"/>
+	</wizardpage>
+	
+	<wizardpage pageid="page-done">
+		<description id="result-description"/>
+		<html:div id="result-description-html"/>
+		<hbox>
+			<button id="result-report-error"
+				oncommand="Zotero_Import_Wizard.reportError()"
+				hidden="true"/>
+		</hbox>
+	</wizardpage>
+</wizard>

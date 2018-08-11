@@ -1,4 +1,5 @@
 <!ENTITY zotero.version "version">
+<!ENTITY zotero.whatsNew "Hvad er nyt">
 <!ENTITY zotero.createdby "Oprettet af:">
 <!ENTITY zotero.director "Direktør:">
 <!ENTITY zotero.directors "Direktører:">
@@ -10,4 +11,4 @@
 <!ENTITY zotero.thanks "Særlig tak til:">
 <!ENTITY zotero.about.close "Luk">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Flere anerkendelser">
-<!ENTITY zotero.citationProcessing "Arbejde med reference og litteraturliste ">
+<!ENTITY zotero.citationProcessing "Arbejde med referencer og referencelister">

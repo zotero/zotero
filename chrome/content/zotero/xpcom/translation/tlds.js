@@ -269,3 +269,6 @@ const TLDS = {
 	"zm":true,
 	"zw":true
 };
+if (typeof process === 'object' && process + '' === '[object process]'){
+    module.exports = TLDS;
+}

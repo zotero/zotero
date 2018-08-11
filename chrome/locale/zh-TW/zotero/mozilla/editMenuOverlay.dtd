@@ -1,0 +1,36 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "編輯">
+<!ENTITY editMenu.accesskey        "E">
+<!ENTITY undoCmd.label             "復原">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "U">
+<!ENTITY redoCmd.label             "取消「復原」">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "R">
+<!ENTITY cutCmd.label              "剪下">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "t">
+<!ENTITY copyCmd.label             "複製">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "C">
+<!ENTITY pasteCmd.label            "貼上">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "P">
+<!ENTITY deleteCmd.label           "刪除">
+<!ENTITY deleteCmd.accesskey       "D">
+<!ENTITY selectAllCmd.label        "全選">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "A">
+<!ENTITY findCmd.label             "尋找">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "F">
+<!ENTITY findAgainCmd.label        "找下一個">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "g">
+<!ENTITY findPreviousCmd.label     "找前一個">
+<!ENTITY findPreviousCmd.accesskey "v">
+

@@ -1,4 +1,4 @@
-<!ENTITY preferencesCmdMac.label "Kjörstillingar...">
+<!ENTITY preferencesCmdMac.label "Kjörstillingar…">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Þjónusta">
 <!ENTITY hideThisAppCmdMac.label "Fela &brandShortName;">
@@ -12,55 +12,29 @@
 
 <!ENTITY fileMenu.label "Skrá">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "Vista...">
+<!ENTITY saveCmd.label "Vista…">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Uppsetning síðu...">
+<!ENTITY pageSetupCmd.label "Uppsetning síðu…">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Prenta...">
+<!ENTITY printCmd.label "Prenta…">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "Loka">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Flytja inn…">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Flytja inn af klippispjaldi">
 <!ENTITY quitApplicationCmdWin.label "Fara út">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Hætta">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Breyta">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Afturkalla">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Endurgera">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Klippa">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Afrita">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Afrita tilvísun">
 <!ENTITY copyBibliographyCmd.label "Afrita heimildaskrá">
-<!ENTITY pasteCmd.label "Líma">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Eyða">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Velja allt">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Stillingar">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Kjörstillingar">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Finna">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
+
 <!ENTITY bidiSwitchPageDirectionItem.label "Snúa við síðustefnu">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Snúa við textastefnu">
@@ -70,6 +44,8 @@
 
 <!ENTITY toolsMenu.label "Verkfæri">
 <!ENTITY toolsMenu.accesskey "T">
+<!ENTITY installConnector.label "Setja upp vafratengingu">
+<!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Viðbætur (add-ons)">
 
 
@@ -93,9 +69,18 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Upplýsingar um lausn vandamála">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Senda athugasemdir...">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Tilkynna villur til Zotero...">
+<!ENTITY helpFeedbackPage.label "Spjallrásir">
+<!ENTITY helpFeedbackPage.accesskey "F">
+
+<!ENTITY helpReportErrors.label "Tilkynna villur...">
 <!ENTITY helpReportErrors.accesskey "R">
-<!ENTITY helpCheckForUpdates.label "Kanna tilvist uppfærslna...">
+
+<!ENTITY debugOutputLogging.label "Kemba útkeyrslu eftirlitsskrár">
+<!ENTITY debugOutputLogging.accesskey "L">
+<!ENTITY debugOutputLogging.submit "Senda útkeyrslu">
+<!ENTITY debugOutputLogging.view "Sýna útkeyrslu">
+<!ENTITY debugOutputLogging.clear "Hreinsa útkeyrslu">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Endurræsa með virka eftirlitsskrá...">
+
+<!ENTITY helpCheckForUpdates.label "Athuga með uppfærslur…">
 <!ENTITY helpCheckForUpdates.accesskey "U">

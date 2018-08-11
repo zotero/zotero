@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "Nome:">
 
-<!ENTITY zotero.search.searchInLibrary "Buscar na librería:">
+<!ENTITY zotero.search.searchInLibrary "Buscar na biblioteca:">
 
 <!ENTITY zotero.search.joinMode.prefix "Comparar con">
 <!ENTITY zotero.search.joinMode.any "calquera">
@@ -14,7 +14,7 @@
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (incl. ficheiros binarios)">
 <!ENTITY zotero.search.textModes.regexp "Expr. regular">
-<!ENTITY zotero.search.textModes.regexpCS "Expr. regular (Sensible a maiúsculas e minúsculas)">
+<!ENTITY zotero.search.textModes.regexpCS "Expr. regular (sensible a maiúsculas e minúsculas)">
 
 <!ENTITY zotero.search.date.units.days "días">
 <!ENTITY zotero.search.date.units.months "meses">

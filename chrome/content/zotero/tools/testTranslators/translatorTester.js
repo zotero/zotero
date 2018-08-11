@@ -27,19 +27,27 @@
 var TEST_RUN_TIMEOUT = 600000;
 var EXPORTED_SYMBOLS = ["Zotero_TranslatorTesters"];
 
+// For debugging specific translators by label
+var includeTranslators = [];
+
 try {
 	Zotero;
 } catch(e) {
 	var Zotero;
 }
 
-Zotero_TranslatorTesters = new function() {
+var Zotero_TranslatorTesters = new function() {
 	const TEST_TYPES = ["web", "import", "export", "search"];
+	var collectedResults = {};
 	
 	/**
 	 * Runs all tests
 	 */
-	this.runAllTests = function(numConcurrentTests, skipTranslators, doneCallback) {
+	this.runAllTests = function (numConcurrentTests, skipTranslators, writeDataCallback) {
+		var id = Math.random() * (100000000 - 1) + 1;
+		
+		waitForDialog();
+		
 		if(!Zotero) {
 			Zotero = Components.classes["@zotero.org/Zotero;1"]
 				.getService(Components.interfaces.nsISupports).wrappedJSObject;
@@ -48,45 +56,36 @@ Zotero_TranslatorTesters = new function() {
 		var testers = [];
 		var waitingForTranslators = TEST_TYPES.length;
 		for(var i=0; i<TEST_TYPES.length; i++) {
-			Zotero.Translators.getAllForType(TEST_TYPES[i], new function() {
+			Zotero.Translators.getAllForType(TEST_TYPES[i], true).
+			then(new function() {
 				var type = TEST_TYPES[i];
 				return function(translators) {
 					try {
 						for(var i=0; i<translators.length; i++) {
-							if(skipTranslators && !skipTranslators[translators[i].translatorID]) {
-								testers.push(new Zotero_TranslatorTester(translators[i], type));
-							}
+							if (includeTranslators.length
+									&& !includeTranslators.some(x => translators[i].label.includes(x))) continue;
+							if (skipTranslators && skipTranslators[translators[i].translatorID]) continue;
+							testers.push(new Zotero_TranslatorTester(translators[i], type));
 						};
 						
 						if(!(--waitingForTranslators)) {
-							runTesters(testers, numConcurrentTests, doneCallback);
+							runTesters(testers, numConcurrentTests, id, writeDataCallback);
 						}
 					} catch(e) {
 						Zotero.debug(e);
 						Zotero.logError(e);
 					}
 				};
-			}, true);
+			});
 		};
 	};
 	
 	/**
 	 * Runs a specific set of tests
 	 */
-	function runTesters(testers, numConcurrentTests, doneCallback) {
+	function runTesters(testers, numConcurrentTests, id, writeDataCallback) {
 		var testersRunning = 0;
 		var results = []
-		
-		if("getLocaleCollation" in Zotero) {
-			var collation = Zotero.getLocaleCollation();
-			var strcmp = function(a, b) {
-				return collation.compareString(1, a, b);
-			};
-		} else {
-			var strcmp = function (a, b) {
-				return a.toLowerCase().localeCompare(b.toLowerCase());
-			};
-		}
 		
 		var testerDoneCallback = function(tester) {
 			try {
@@ -96,26 +95,13 @@ Zotero_TranslatorTesters = new function() {
 				
 				// Done translating, so serialize test results
 				testersRunning--;
-				results.push(tester.serialize());
+				let results = tester.serialize();
+				let last = !testers.length && !testersRunning;
+				collectData(id, results, last, writeDataCallback);
 				
 				if(testers.length) {
 					// Run next tester if one is available
 					runNextTester();
-				} else if(testersRunning === 0) {
-					// Testing is done, so sort results
-					results = results.sort(function(a, b) {
-						if(a.type !== b.type) {
-							return TEST_TYPES.indexOf(a.type) - TEST_TYPES.indexOf(b.type);
-						}
-						return strcmp(a.label, b.label);
-					});
-					
-					// Call done callback
-					doneCallback({
-						"browser":Zotero.browser,
-						"version":Zotero.version,
-						"results":results
-					});
 				}
 			} catch(e) {
 				Zotero.debug(e);
@@ -124,6 +110,9 @@ Zotero_TranslatorTesters = new function() {
 		};
 		
 		var runNextTester = function() {
+			if (!testers.length) {
+				return;
+			}
 			testersRunning++;
 			Zotero.debug("Testing "+testers[0].translator.label);
 			testers.shift().runTests(testerDoneCallback);
@@ -132,6 +121,58 @@ Zotero_TranslatorTesters = new function() {
 		for(var i=0; i<numConcurrentTests; i++) {
 			runNextTester();
 		};
+	}
+	
+	function waitForDialog() {
+		Components.utils.import("resource://gre/modules/Services.jsm");
+		var loadobserver = function (ev) {
+			ev.originalTarget.removeEventListener("load", loadobserver, false);
+			if (ev.target.location == "chrome://global/content/commonDialog.xul") {
+				let win = ev.target.docShell.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+					.getInterface(Components.interfaces.nsIDOMWindow);
+				Zotero.debug("Closing rogue dialog box!\n\n" + win.document.documentElement.textContent, 2);
+				win.document.documentElement.getButton('accept').click();
+			}
+		};
+		var winobserver = {
+			observe: function (subject, topic, data) {
+				if (topic != "domwindowopened") return;
+				var win = subject.QueryInterface(Components.interfaces.nsIDOMWindow);
+				win.addEventListener("load", loadobserver, false);
+			}
+		};
+		Services.ww.registerNotification(winobserver);
+	}
+	
+	function collectData(id, results, last, writeDataCallback) {
+		if (!collectedResults[id]) {
+			collectedResults[id] = [];
+		}
+		collectedResults[id].push(results);
+		
+		//
+		// TODO: Only do the below every x collections, or if last == true
+		//
+		// Sort results
+		if ("getLocaleCollation" in Zotero) {
+			let collation = Zotero.getLocaleCollation();
+			var strcmp = function (a, b) {
+				return collation.compareString(1, a, b);
+			};
+		}
+		else {
+			var strcmp = function (a, b) {
+				return a.toLowerCase().localeCompare(b.toLowerCase());
+			};
+		}
+		collectedResults[id].sort(function (a, b) {
+			if (a.type !== b.type) {
+				return TEST_TYPES.indexOf(a.type) - TEST_TYPES.indexOf(b.type);
+			}
+			return strcmp(a.label, b.label);
+		});
+		
+		writeDataCallback(collectedResults[id], last);
 	}
 }
 
@@ -149,7 +190,7 @@ Zotero_TranslatorTesters = new function() {
  * @param {Function} [debugCallback] A function to call to write debug output. If not present,
  *     Zotero.debug will be used.
  */
-Zotero_TranslatorTester = function(translator, type, debugCallback) {
+var Zotero_TranslatorTester = function(translator, type, debugCallback) {
 	this.type = type;
 	this.translator = translator;
 	this.output = "";
@@ -195,7 +236,7 @@ Zotero_TranslatorTester = function(translator, type, debugCallback) {
 	}
 };
 
-Zotero_TranslatorTester.DEFER_DELAY = 30000; // Delay for deferred tests
+Zotero_TranslatorTester.DEFER_DELAY = 20000; // Delay for deferred tests
 
 /**
  * Removes document objects, which contain cyclic references, and other fields to be ignored from items
@@ -257,10 +298,18 @@ Zotero_TranslatorTester._sanitizeItem = function(item, testItem, keepValidFields
 	
 	// remove fields to be ignored
 	if(!keepValidFields && "accessDate" in item) delete item.accessDate;
-
-	//sort tags, if they're still there
-	if(item.tags && typeof item.tags === "object" && "sort" in item.tags) {
-		item.tags = Zotero.Utilities.arrayUnique(item.tags).sort();
+	
+	// Sort tags
+	if (item.tags && Array.isArray(item.tags)) {
+		// Normalize tags -- necessary until tests are updated for 5.0
+		if (testItem) {
+			item.tags = Zotero.Translate.Base.prototype._cleanTags(item.tags);
+		}
+		item.tags.sort((a, b) => {
+			if (a.tag < b.tag) return -1;
+			if (b.tag < a.tag) return 1;
+			return 0;
+		});
 	}
 	
 	return item;
@@ -350,54 +399,25 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
 
 /**
  * Fetches the page for a given test and runs it
+ *
  * This function is only applicable in Firefox; it is overridden in translator_global.js in Chrome
- * and Safari
- * @param {Object} test Test to execute
- * @param {Document} doc DOM document to test against
- * @param {Function} testDoneCallback A callback to be executed when test is complete
+ * and Safari.
+ *
+ * @param {Object} test - Test to execute
+ * @param {Function} testDoneCallback - A callback to be executed when test is complete
  */
-Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneCallback) {
-	var timer = Components.classes["@mozilla.org/timer;1"].
-		createInstance(Components.interfaces.nsITimer);
-	timer.initWithCallback({"notify":function() {
-		try {
-			Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-		} catch(e) {}
-	}}, TEST_RUN_TIMEOUT, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-	
-	var me = this;
-	var runTest = function(doc) {
-		me.runTest(test, doc, function(obj, test, status, message) {
-			try {
-				timer.cancel();
-			} catch(e) {};
-			if(hiddenBrowser) Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-			testDoneCallback(obj, test, status, message);
-		});
-	};
-	var hiddenBrowser = Zotero.HTTP.processDocuments(test.url,
-		function(doc) {
-			if(test.defer) {
-				me._debug(this, "TranslatorTesting: Waiting "
-					+ (Zotero_TranslatorTester.DEFER_DELAY/1000)
-					+ " second(s) for page content to settle"
-				);
-				Zotero.setTimeout(
-					function() {runTest(hiddenBrowser.contentDocument) },
-					Zotero_TranslatorTester.DEFER_DELAY, true
-				);
-			} else {
-				runTest(doc);
-			}
-		},
-		null,
-		function(e) {
-			testDoneCallback(this, test, "failed", "Translation failed to initialize: "+e);
-		},
-		true
-	);
-	
-	hiddenBrowser.docShell.allowMetaRedirects = true;
+Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function (test, testDoneCallback) {
+	Zotero.HTTP.processDocuments(
+		test.url,
+		(doc) => {
+			this.runTest(test, doc, function (obj, test, status, message) {
+				testDoneCallback(obj, test, status, message);
+			});
+		}
+	)
+	.catch(function (e) {
+		testDoneCallback(this, test, "failed", "Translation failed to initialize: " + e);
+	}.bind(this))
 };
 
 /**
@@ -490,7 +510,9 @@ Zotero_TranslatorTester.prototype._runTestTranslate = function(translate, transl
 	}
 	
 	translate.setTranslator(this.translator);
-	translate.translate(false);
+	translate.translate({
+		libraryID: false
+	});
 };
 
 /**
@@ -587,7 +609,9 @@ Zotero_TranslatorTester.prototype.newTest = function(doc, testReadyCallback) {
 	});
 	translate.setHandler("done", function(obj, returnValue) { me._createTest(obj, multipleMode, returnValue, testReadyCallback) });
 	translate.capitalizeTitles = false;
-	translate.translate(false);
+	translate.translate({
+		libraryID: false
+	});
 };
 
 /**

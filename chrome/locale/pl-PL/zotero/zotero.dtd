@@ -1,5 +1,7 @@
+<!ENTITY zotero.general.yes "Tak">
+<!ENTITY zotero.general.no "Nie">
 <!ENTITY zotero.general.optional "(Opcjonalne)">
-<!ENTITY zotero.general.note "Notatka:">
+<!ENTITY zotero.general.note "Uwaga:">
 <!ENTITY zotero.general.selectAll "Zaznacz wszystkie">
 <!ENTITY zotero.general.deselectAll "Odznacz wszystkie">
 <!ENTITY zotero.general.edit "Edytuj">
@@ -8,9 +10,17 @@
 <!ENTITY zotero.general.cancel "Anuluj">
 <!ENTITY zotero.general.refresh "Odśwież">
 <!ENTITY zotero.general.saveAs "Zapisz jako...">
+<!ENTITY zotero.general.options "Opcje">
+<!ENTITY zotero.general.advancedOptions.label "Zaawansowane ustawienia">
+<!ENTITY zotero.general.tools "Narzędzia">
+<!ENTITY zotero.general.more "Więcej">
+<!ENTITY zotero.general.loading "Wczytywanie...">
+<!ENTITY zotero.general.close "Zamknij">
+<!ENTITY zotero.general.minimize "Minimalizuj">
+<!ENTITY zotero.general.other "Inne...">
+
 
 <!ENTITY zotero.errorReport.title "Raport błędów Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "Może zawierać informacje niezwiązane z Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Proszę czekać, informacje o błędzie są wysyłane.">
 <!ENTITY zotero.errorReport.submitted "Informacje o błędzie zostały wysłane.">
 <!ENTITY zotero.errorReport.reportID "ID raportu:">
@@ -89,8 +99,10 @@
 <!ENTITY zotero.items.menu.attach.fileLink "Dołącz odnośnik do pliku...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Przywróć do biblioteki">
-<!ENTITY zotero.items.menu.duplicateItem "Duplikuj zaznaczony element">
+<!ENTITY zotero.items.menu.duplicateItem "Duplikuj element">
 <!ENTITY zotero.items.menu.mergeItems "Złącz elementy...">
+<!ENTITY zotero.items.menu.unrecognize "Cofnij pobieranie metadanych">
+<!ENTITY zotero.items.menu.reportMetadata "Zgłoś niepoprawne metadane">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Wybierz wersję elementu, którą chcesz użyć jako element główny:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Wybierz pola, które chcesz zachować z innych wersji elementu:">
@@ -99,26 +111,34 @@
 <!ENTITY zotero.toolbar.moreItemTypes.label "Więcej">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Utwórz nowy element z aktywnej strony">
 <!ENTITY zotero.toolbar.lookup.label "Dodaj element za pomocą identyfikatora">
-<!ENTITY zotero.toolbar.removeItem.label "Usuń element">
-<!ENTITY zotero.toolbar.newCollection.label "Nowa kolekcja">
+<!ENTITY zotero.toolbar.removeItem.label "Usuń element...">
+<!ENTITY zotero.toolbar.newLibrary.label "Nowa biblioteka">
+<!ENTITY zotero.toolbar.newCollection.label "Nowa kolekcja...">
+<!ENTITY zotero.toolbar.markFeedRead.label "Oznacz kanał jako przeczytany">
 <!ENTITY zotero.toolbar.newGroup "Nowa grupa...">
-<!ENTITY zotero.toolbar.newSubcollection.label "Nowa subkolekcja">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Nowe zapisane wyszukiwanie">
+<!ENTITY zotero.toolbar.newSubcollection.label "Nowa subkolekcja...">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Nowe zapisane wyszukiwanie...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Opróżnij Kosz">
 <!ENTITY zotero.toolbar.tagSelector.label "Wyświetl/Ukryj selektor etykiet">
 <!ENTITY zotero.toolbar.actions.label "Funkcje">
-<!ENTITY zotero.toolbar.import.label "Importuj">
+<!ENTITY zotero.toolbar.import.label "Importuj...">
 <!ENTITY zotero.toolbar.importFromClipboard "Importuj ze schowka">
-<!ENTITY zotero.toolbar.export.label "Eksportuj bibliotekę">
+<!ENTITY zotero.toolbar.export.label "Eksportuj bibliotekę...">
 <!ENTITY zotero.toolbar.rtfScan.label "Skanowanie RTF...">
 <!ENTITY zotero.toolbar.timeline.label "Utwórz oś czasową">
 <!ENTITY zotero.toolbar.preferences.label "Ustawienia...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Wsparcie i dokumentacja">
 <!ENTITY zotero.toolbar.about.label "Zotero - informacje">
 <!ENTITY zotero.toolbar.advancedSearch "Wyszukiwanie zaawansowane">
-<!ENTITY zotero.toolbar.tab.tooltip "Przełącz tryb zakładki">
 <!ENTITY zotero.toolbar.openURL.label "Wyszukaj lokalnie">
 <!ENTITY zotero.toolbar.openURL.tooltip "Wyszukuje w katalogu lokalnej biblioteki">
+
+<!ENTITY zotero.toolbar.feeds.new "Nowy kanał">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "Z URL...">
+<!ENTITY zotero.toolbar.feeds.new.fromPage "Ze strony...">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "Z OPML...">
+<!ENTITY zotero.toolbar.feeds.refresh "Odśwież kanał">
+<!ENTITY zotero.toolbar.feeds.edit "Edytuj kanał...">
 
 <!ENTITY zotero.item.add "Dodaj">
 <!ENTITY zotero.item.attachment.file.show "Wyświetl plik">
@@ -128,26 +148,28 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Zamień imię i nazwisko">
 <!ENTITY zotero.item.viewOnline "Pokaż online">
 <!ENTITY zotero.item.copyAsURL "Kopiuj jako URL">
+<!ENTITY zotero.item.deletePermanently "Usuń trwale...">
+
+<!ENTITY zotero.item.tags.removeAll "Usuń wszystkie etykiety...">
 
 <!ENTITY zotero.toolbar.newNote "Nowa notatka">
 <!ENTITY zotero.toolbar.note.standalone "Nowa osobna notatka">
-<!ENTITY zotero.toolbar.note.child "Nowa potomna notatka">
-<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
-<!ENTITY zotero.toolbar.attachment.linked "Odnośnik do pliku">
-<!ENTITY zotero.toolbar.attachment.add "Zapisz kopię pliku">
+<!ENTITY zotero.toolbar.note.child "Dodaj notatkę potomną">
+<!ENTITY zotero.toolbar.lookup "Wyszukaj za pomocą identyfikatora...">
+<!ENTITY zotero.toolbar.attachment.linked "Odnośnik do pliku...">
+<!ENTITY zotero.toolbar.attachment.add "Zapisz kopię pliku...">
 <!ENTITY zotero.toolbar.attachment.weblink "Zapisz odnośnik do aktywnej strony">
 <!ENTITY zotero.toolbar.attachment.snapshot "Zrób zrzut ekranu aktywnej strony">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Brak etykiet do wyświetlenia">
-<!ENTITY zotero.tagSelector.filter "Filtr:">
-<!ENTITY zotero.tagSelector.showAutomatic "Wyświetl automatycznie">
+<!ENTITY zotero.tagSelector.loadingTags "Wczytywanie znaczników...">
+<!ENTITY zotero.tagSelector.showAutomatic "Wyświetl etykiety automatyczne">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Wyświetl wszystkie etykiety w tej bibliotece">
-<!ENTITY zotero.tagSelector.selectVisible "Zaznacz widoczne">
-<!ENTITY zotero.tagSelector.clearVisible "Odznacz widoczne">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Usuń automatycznie nadane etykiety w tej bibliotece...">
 <!ENTITY zotero.tagSelector.clearAll "Odznacz wszystkie">
 <!ENTITY zotero.tagSelector.assignColor "Przypisz kolor...">
-<!ENTITY zotero.tagSelector.renameTag "Zmień nazwę etykiety">
-<!ENTITY zotero.tagSelector.deleteTag "Usuń etykietę">
+<!ENTITY zotero.tagSelector.renameTag "Zmień nazwę etykiety...">
+<!ENTITY zotero.tagSelector.deleteTag "Usuń etykietę...">
 
 <!ENTITY zotero.tagColorChooser.title "Wybierz kolor i pozycję etykiety">
 <!ENTITY zotero.tagColorChooser.color "Kolor:">
@@ -155,7 +177,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Ustaw kolor">
 <!ENTITY zotero.tagColorChooser.removeColor "Usuń kolor">
 
-<!ENTITY zotero.lookup.description "Wprowadź ISBN, DOI lub PMID aby wyszukać w oknie poniżej.">
+<!ENTITY zotero.lookup.description "Podaj numery lub identyfikatory ISBN, DOI, PMID lub arXiv aby dodać je do twojej biblioteki:">
 <!ENTITY zotero.lookup.button.search "Wyszukiwanie">
 
 <!ENTITY zotero.selectitems.title "Zaznacz elementy">
@@ -165,6 +187,8 @@
 
 <!ENTITY zotero.bibliography.title "Utwórz bibliografię">
 <!ENTITY zotero.bibliography.style.label "Styl cytowania:">
+<!ENTITY zotero.bibliography.manageStyles "Zarządzaj stylami...">
+<!ENTITY zotero.bibliography.locale.label "Język:">
 <!ENTITY zotero.bibliography.outputMode "Tryb wyjścia:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografia">
 <!ENTITY zotero.bibliography.outputMethod "Metoda wyjścia:">
@@ -180,14 +204,23 @@
 
 <!ENTITY zotero.progress.title "Postęp">
 
-<!ENTITY zotero.exportOptions.title "Eksportuj">
+<!ENTITY zotero.import "Importuj">
+<!ENTITY zotero.import.whereToImportFrom "Skąd chcesz zaimportować?">
+<!ENTITY zotero.import.source.file "Z pliku (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "Importowanie...">
+<!ENTITY zotero.import.database "Baza danych">
+<!ENTITY zotero.import.lastModified "Ostatnia modyfikacja">
+<!ENTITY zotero.import.size "Rozmiar">
+<!ENTITY zotero.import.createCollection "Umieść zaimportowane kolekcje i elementy w nowej kolekcji">
+
+<!ENTITY zotero.exportOptions.title "Eksportuj...">
 <!ENTITY zotero.exportOptions.format.label "Format:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Opcje translacji">
 
 <!ENTITY zotero.charset.label "Kodowanie znaków">
 <!ENTITY zotero.moreEncodings.label "Więcej kodowań">
 
-<!ENTITY zotero.citation.keepSorted.label "Zachowuj źródło posortowane">
+<!ENTITY zotero.citation.keepSorted.label "Zachowuj źródła posortowane">
 
 <!ENTITY zotero.citation.suppressAuthor.label "Ukryj autora">
 <!ENTITY zotero.citation.prefix.label "Prefiks:">
@@ -207,26 +240,27 @@
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Zdejmij wyróżnienie">
 
 <!ENTITY zotero.integration.prefs.displayAs.label "Wyświetl cytowania jako:">
-<!ENTITY zotero.integration.prefs.footnotes.label "Przypis dolny">
-<!ENTITY zotero.integration.prefs.endnotes.label "Przypis końcowy">
+<!ENTITY zotero.integration.prefs.footnotes.label "Przypisy dolne">
+<!ENTITY zotero.integration.prefs.endnotes.label "Przypisy końcowe">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Używany format:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Zapisz cytowania jako:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Zakładki">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Zakładki są zabezpieczone przez programy Microsoft Word i LibreOffice, ale w wyjątkowych przypadkach mogą być modyfikowane. Z powodów zgodności, cytowania nie mogą być wstawiane do przypisów dolnych i przypisów końcowych, jeśli ta opcja jest wybrana.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Zakładki mogą być współdzielone między edytorami Word i LibreOffice Writer, ale w razie ich przypadkowej modyfikacji mogą wystąpić błędy i nie mogą być one wstawiane do przypisów dolnych.">
+
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatycznie aktualizuj cytowania">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Cytowania z oczekującymi aktualizacjami będą podświetlone w dokumencie">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Wyłączenie aktualizacji cytować może przyspieszyć wstawianie cytowań w dużych dokumentach. Wciśnij Odśwież aby ręcznie zaktualizować cytowania.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatycznie skróć tytuły czasopism">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Skróty czasopism MEDLINE zostaną automatycznie utworzone z wykorzystaniem tytułów czasopism. Pole &quot;Skrót czasopisma&quot; będzie zignorowane.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Zapisz cytowania w dokumencie">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Użyj skrótów czasopism w formacie MEDLINE">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Pole &quot;Skrót czasopisma&quot; będzie ignorowane.">
 
 <!ENTITY zotero.integration.showEditor.label "Pokaż edytor">
 <!ENTITY zotero.integration.classicView.label "Widok klasyczny">
 
 <!ENTITY zotero.integration.references.label "Pozycje w bibliografii">
 
-<!ENTITY zotero.sync.button "Synchronizuj z serwerem Zotero">
+<!ENTITY zotero.sync.stop "Zatrzymaj synchronizację">
 <!ENTITY zotero.sync.error "Błąd synchronizacji">
 <!ENTITY zotero.sync.storage.progress "Postęp:">
 <!ENTITY zotero.sync.storage.downloads "Pobrano:">
@@ -240,9 +274,9 @@
 <!ENTITY zotero.sync.longTagFixer.character "znaku">
 <!ENTITY zotero.sync.longTagFixer.characters "znakach">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Niezaznaczone etykiety nie będą zachowane.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Etykieta zostanie usunięte ze wszystkich elementów.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Etykieta zostanie usunięta ze wszystkich elementów.">
 
-<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.title "Rozwiązanie konfliktu">
 <!ENTITY zotero.merge.of "z">
 <!ENTITY zotero.merge.deleted "Usunięty">
 
@@ -252,8 +286,17 @@
 <!ENTITY zotero.proxy.recognized.disable.label "Nie przekierowuj automatycznie żądań za pomocą poprzednio rozpoznanych serwerów proxy">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignoruj">
 
-<!ENTITY zotero.recognizePDF.recognizing.label "Pobieranie metadanych...">
-<!ENTITY zotero.recognizePDF.cancel.label "Anuluj">
+<!ENTITY zotero.feedSettings.title "Ustawienia kanału">
+<!ENTITY zotero.feedSettings.saveButton.label "Zapisz">
+<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.title.label "Tytuł:">
+<!ENTITY zotero.feedSettings.refresh.label1 "Aktualizuj kanał co">
+<!ENTITY zotero.feedSettings.refresh.label2 "godzin(y)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Usuń nieprzeczytane elementy kanału po">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "dniu(ach)">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Usuń przeczytane elementy kanału po">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dniu(ach)">
+
 <!ENTITY zotero.recognizePDF.pdfName.label "Nazwa PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Nazwa elementu">
 
@@ -284,7 +327,6 @@
 
 <!ENTITY zotero.downloadManager.label "Zapisz w Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Załączniki nie mogą być zapisane w aktualnie wybranej bibliotece. Ten element zostanie zapisany zamiast tego w twojej bibliotece.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Aby użyć tej funkcji, musisz najpierw zainstalować narzędzia PDF w panelu Wyszukiwania w ustawieniach Zotero.">
 
 <!ENTITY zotero.attachLink.title "Dołącz odnośnik do URI">
 <!ENTITY zotero.attachLink.label.link "Odnośnik:">

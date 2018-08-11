@@ -26,7 +26,8 @@ radio[pane]
 
 .statusLine
 {
-	margin: .75em 0;
+	margin-top: .75em;
+	margin-bottom: .75em;
 	font-size: .85em;
 }
 
@@ -73,16 +74,18 @@ grid row hbox:first-child
 }
 
 
-#showIn radio
-{
-	width: 120px;
-}
-
 #fontSize radio
 {
 	margin-right: 20px;
 }
 
+#zotero-prefpane-general .statusLine {
+	margin-left: .75em;
+}
+
+.fileHandler-menu .menulist-icon {
+	height: 16px;
+}
 
 /*
  * Sync pane
@@ -118,6 +121,34 @@ grid row hbox:first-child
 	margin-right: 10px;
 }
 
+#zotero-prefpane-sync #sync-auth-button {
+	margin-left: 0;
+}
+
+#zotero-prefpane-sync #sync-status-indicator
+{
+	width: 1.5em;
+	height: 1.7em;
+	margin-top: 0.4em;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+#zotero-prefpane-sync #sync-status-indicator[verified=true]
+{
+	background-image: url("chrome://zotero/skin/tick.png")
+}
+
+#zotero-prefpane-sync #sync-status-indicator[verified=false]
+{
+	background-image: url("chrome://zotero/skin/cross.png")
+}
+
+#zotero-prefpane-sync #sync-status-indicator[animated]
+{
+	background-image: url("chrome://zotero/skin/arrow_rotate_animated.png")
+}
+
 .storage-settings-download-options
 {
 	margin-left: 40px;
@@ -129,61 +160,93 @@ grid row hbox:first-child
 	min-width: 8em;
 }
 
-#storage-terms > label
+#storage-terms label
 {
 	margin-left: 0;
 	font-size: .9em;
 }
 
-#storage-terms > label:first-child
+#storage-terms label:first-child
 {
 	margin-right: .25em;
 }
 
-#storage-terms > label[class=zotero-text-link]
+#storage-terms label[class=zotero-text-link]
 {
 	margin-right: 0;
 }
 
 /* Reset tab */
-#zotero-reset row
-{
-	margin: 0;
-	padding: 8px;
+#sync-reset-form {
+	margin-left: 1em;
 }
 
-#zotero-reset row:not(:last-child)
-{
-}
-
-#zotero-reset row vbox
-{
-	-moz-box-align: start;
-}
-
-#zotero-reset row[selected="true"]
-{
-}
-
-
-#zotero-reset row vbox label
-{
-	margin-left: 3px;
-	font-weight: bold;
-	font-size: 14px;
-}
-
-#zotero-reset description
-{
-	margin-left: 3px;
-	margin-top: 1px;
+#reset-sync-warning {
 	font-size: 12px;
 }
 
-/* Reset button */
-#zotero-reset > hbox
-{
-	margin-top: 5px;
+#sync-reset-form {
+	margin-top: 1em;
+}
+
+#sync-reset-library-menu-container {
+	font-weight: bold;
+	font-size: 15px;
+}
+
+#sync-reset-library-menu {
+	width: 14em;
+	margin-left: .25em;
+	font-size: 15px;
+	height: 1.6em;
+}
+
+#sync-reset-list {
+	margin: 0;
+	padding: 0;
+	height: 9em;
+}
+
+#sync-reset-list li {
+	margin: 0;
+	margin-top: 1.6em;
+	padding: 0;
+	list-style: none;
+	height: 2.8em;
+}
+
+/* Allow a click between lines to select the radio */
+#sync-reset-list li label {
+	display: block;
+}
+
+#sync-reset-list li:first-child {
+	margin-top: 1.4em;
+}
+
+#sync-reset-list li .sync-reset-option-name {
+	font-weight: bold;
+	display: block;
+	font-size: 15px;
+	margin-bottom: .2em;
+}
+
+#sync-reset-list li .sync-reset-option-desc {
+	font-size: 12px;
+}
+
+#sync-reset-list li input {
+	float: left;
+	margin-top: 1em;
+	margin-right: 1.05em;
+}
+
+#sync-reset-list li[disabled] span {
+	color: gray;
+}
+
+#sync-reset button {
+	font-size: 14px;
 }
 
 
@@ -261,4 +324,25 @@ treechildren::-moz-tree-checkbox(checked){
   /* css for checked cells. cbox-check.gif isn't available in Firefox 1, 2, and 3 on Mac OS X, so you should specify a URL to an image
      in your extension or elsewhere. */
   list-style-image: url("chrome://global/skin/checkbox/cbox-check.gif");
+}
+
+/* Advanced pane */
+#command-line-data-dir description {
+	font-size: 12px;
+	cursor: text;
+	-moz-user-select: text;
+}
+
+#command-line-data-dir label {
+	font-size: 11px;
+	font-style: italic;
+	padding-top: .4em;
+	padding-bottom: .4em;
+}
+
+
+/* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
+@media (min-resolution: 1.25dppx) {
+	#zotero-prefpane-sync #sync-status-indicator[verified=true] { background-image: url("chrome://zotero/skin/tick@2x.png") }
+	#zotero-prefpane-sync #sync-status-indicator[animated] { background-image: url("chrome://zotero/skin/arrow_rotate_animated@2x.png") }
 }

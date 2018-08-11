@@ -1,0 +1,35 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY editMenu.label            "Taisa">
+<!ENTITY editMenu.accesskey        "T">
+<!ENTITY undoCmd.label             "Atšaukti">
+<!ENTITY undoCmd.key               "Z">
+<!ENTITY undoCmd.accesskey         "A">
+<!ENTITY redoCmd.label             "Atstatyti">
+<!ENTITY redoCmd.key               "Y">
+<!ENTITY redoCmd.accesskey         "t">
+<!ENTITY cutCmd.label              "Iškirpti">
+<!ENTITY cutCmd.key                "X">
+<!ENTITY cutCmd.accesskey          "r">
+<!ENTITY copyCmd.label             "Kopijuoti">
+<!ENTITY copyCmd.key               "C">
+<!ENTITY copyCmd.accesskey         "K">
+<!ENTITY pasteCmd.label            "Įdėti">
+<!ENTITY pasteCmd.key              "V">
+<!ENTITY pasteCmd.accesskey        "d">
+<!ENTITY deleteCmd.label           "Pašalinti">
+<!ENTITY deleteCmd.accesskey       "š">
+<!ENTITY selectAllCmd.label        "Pažymėti viską">
+<!ENTITY selectAllCmd.key          "A">
+<!ENTITY selectAllCmd.accesskey    "v">
+<!ENTITY findCmd.label             "Ieškoti">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "I">
+<!ENTITY findAgainCmd.label        "Ieškoti toliau">
+<!ENTITY findAgainCmd.key          "o">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "o">
+<!ENTITY findPreviousCmd.label     "Ieškoti ankstesnio">
+<!ENTITY findPreviousCmd.accesskey "n">

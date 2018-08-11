@@ -26,7 +26,6 @@
 Zotero.MIME = new function(){
 	this.isTextType = isTextType;
 	this.getPrimaryExtension = getPrimaryExtension;
-	this.sniffForMIMEType = sniffForMIMEType;
 	this.sniffForBinary = sniffForBinary;
 	this.hasNativeHandler = hasNativeHandler;
 	this.hasInternalHandler = hasInternalHandler;
@@ -47,8 +46,10 @@ Zotero.MIME = new function(){
 		["GIF8", 'image/gif', 0],
 		["\uFFFDPNG", 'image/png', 0],
 		["JFIF", 'image/jpeg'],
-		["FLV", "video/x-flv", 0]
-		
+		["FLV", "video/x-flv", 0],
+		["\u0000\u0000\u0001\u0000", "image/vnd.microsoft.icon", 0],
+		["\u0053\u0051\u004C\u0069\u0074\u0065\u0020\u0066"
+			+ "\u006F\u0072\u006D\u0061\u0074\u0020\u0033\u0000", "application/x-sqlite3", 0]
 	];
 	
 	var _extensions = {
@@ -92,15 +93,16 @@ Zotero.MIME = new function(){
 		'application/x-javascript': true
 	};
 	
+	var _webPageTypes = [
+		'text/html',
+		'application/xhtml+xml'
+	]
+	
 	// MIME types handled natively by Gecko
 	// DEBUG: There's definitely a better way of getting these
 	var _nativeMIMETypes = {
 		'text/html': true,
 		'text/css': true,
-		'image/jpeg': true,
-		'image/gif': true,
-		'image/png': true,
-		'image/svg+xml': true,
 		'text/xml': true,
 		'application/xhtml+xml': true,
 		'application/xml': true,
@@ -122,6 +124,9 @@ Zotero.MIME = new function(){
 		return mimeType.substr(0, 5) == 'text/' || _textTypes[mimeType];
 	}
 	
+	this.isWebPageType = function(mimeType) {
+		return _webPageTypes.indexOf(mimeType) != -1;
+	}
 	
 	/*
 	 * Our own wrapper around the MIME service's getPrimaryExtension() that
@@ -223,12 +228,12 @@ Zotero.MIME = new function(){
 	/*
 	 * Searches string for magic numbers
 	 */
-	function sniffForMIMEType(str){
-		for (var i in _snifferEntries){
-			var match = false;
+	this.sniffForMIMEType = function (str) {
+		for (let i in _snifferEntries) {
+			let match = false;
 			// If an offset is defined, match only from there
-			if (typeof _snifferEntries[i][2] != 'undefined') {
-				if (str.substr(i[2]).indexOf(_snifferEntries[i][0]) == 0) {
+			if (_snifferEntries[i][2] != undefined) {
+				if (str.substr(_snifferEntries[i][2]).indexOf(_snifferEntries[i][0]) == 0) {
 					match = true;
 				}
 			}
@@ -269,7 +274,7 @@ Zotero.MIME = new function(){
 	 * ext is an optional file extension hint if data sniffing is unsuccessful
 	 */
 	this.getMIMETypeFromData = function (str, ext){
-		var mimeType = sniffForMIMEType(str);
+		var mimeType = this.sniffForMIMEType(str);
 		if (mimeType){
 			Zotero.debug('Detected MIME type ' + mimeType);
 			return mimeType;
@@ -311,16 +316,22 @@ Zotero.MIME = new function(){
 	 * Try to determine the MIME type of the file, using a few different
 	 * techniques
 	 */
-	this.getMIMETypeFromFile = function (file) {
-		var str = Zotero.File.getSample(file);
+	this.getMIMETypeFromFile = Zotero.Promise.coroutine(function* (file) {
+		var str = yield Zotero.File.getSample(file);
 		var ext = Zotero.File.getExtension(file);
 		
 		return this.getMIMETypeFromData(str, ext);
-	}
+	});
 	
 	
-	this.getMIMETypeFromURL = function (url, callback, cookieSandbox) {
-		Zotero.HTTP.doHead(url, function(xmlhttp) {
+	/**
+	 * @param {String} url
+	 * @param {Zotero.CookieSandbox} [cookieSandbox]
+	 * @return {Promise}
+	 */
+	this.getMIMETypeFromURL = function (url, cookieSandbox) {
+		return Zotero.HTTP.promise("HEAD", url, { cookieSandbox: cookieSandbox, successCodes: false })
+		.then(function (xmlhttp) {
 			if (xmlhttp.status != 200 && xmlhttp.status != 204) {
 				Zotero.debug("Attachment HEAD request returned with status code "
 					+ xmlhttp.status + " in Zotero.MIME.getMIMETypeFromURL()", 2);
@@ -331,7 +342,7 @@ Zotero.MIME = new function(){
 			}
 			
 			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
-						.createInstance(Components.interfaces.nsIURL);
+				.createInstance(Components.interfaces.nsIURL);
 			nsIURL.spec = url;
 			
 			// Override MIME type to application/pdf if extension is .pdf --
@@ -344,10 +355,10 @@ Zotero.MIME = new function(){
 			}
 			
 			var ext = nsIURL.fileExtension;
-			var hasNativeHandler = Zotero.MIME.hasNativeHandler(mimeType, ext)
+			var hasNativeHandler = Zotero.MIME.hasNativeHandler(mimeType, ext);
 			
-			callback(mimeType, hasNativeHandler);
-		}, undefined, cookieSandbox);
+			return [mimeType, hasNativeHandler];
+		});
 	}
 	
 	
@@ -407,11 +418,11 @@ Zotero.MIME = new function(){
 	}
 	
 	
-	this.fileHasInternalHandler = function (file){
-		var mimeType = this.getMIMETypeFromFile(file);
+	this.fileHasInternalHandler = Zotero.Promise.coroutine(function* (file){
+		var mimeType = yield this.getMIMETypeFromFile(file);
 		var ext = Zotero.File.getExtension(file);
 		return hasInternalHandler(mimeType, ext);
-	}
+	});
 	
 	
 	/*
