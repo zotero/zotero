@@ -1404,26 +1404,31 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				}
 				label.setAttribute('value', libraryName);
 			}
-			var content = doc.createElement('hbox');
+			var content = doc.createElement('vbox');
 			var buttons = doc.createElement('hbox');
 			buttons.pack = 'end';
 			box.appendChild(label);
 			box.appendChild(content);
 			box.appendChild(buttons);
 			
+			if (e.dialogHeader) {
+				let header = doc.createElement('description');
+				header.className = 'error-header';
+				header.textContent = e.dialogHeader;
+				content.appendChild(header);
+			}
+			
 			// Show our own error mesages directly
+			var msg;
 			if (e instanceof Zotero.Error) {
-				var msg = e.message;
+				msg = e.message;
 			}
 			// For unexpected ones, just show a generic message
+			else if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.xmlhttp.responseText) {
+				msg = Zotero.Utilities.ellipsize(e.xmlhttp.responseText, 1000, true);
+			}
 			else {
-				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					msg = Zotero.Utilities.ellipsize(e.xmlhttp.responseText, 1000, true);
-				}
-				else {
-					// TODO: Localize
-					var msg = "An error occurred during syncing:\n\n" + e.message;
-				}
+				msg = e.message;
 			}
 			
 			var desc = doc.createElement('description');

@@ -319,17 +319,19 @@ Zotero.HTTP = new function() {
 				}
 				Zotero.debug(msg, 1);
 				
-				try {
-					_checkSecurity(xmlhttp, channel);
-				}
-				catch (e) {
-					deferred.reject(e);
-					return;
+				if (xmlhttp.status == 0) {
+					try {
+						this.checkSecurity(channel);
+					}
+					catch (e) {
+						deferred.reject(e);
+						return;
+					}
 				}
 				
 				deferred.reject(new Zotero.HTTP.UnexpectedStatusException(xmlhttp, msg));
 			}
-		};
+		}.bind(this);
 		
 		if (options.cookieSandbox) {
 			options.cookieSandbox.attachToInterfaceRequestor(xmlhttp);
@@ -663,9 +665,17 @@ Zotero.HTTP = new function() {
 						})
 						.catch(function (e) {
 							// Show error icon at startup
-							if (e instanceof Zotero.HTTP.SecurityException) {
-								Zotero.proxyFailure = e;
+							if (!e.dialogHeader) {
+								e.dialogHeader = Zotero.getString('networkError.errorViaProxy');
 							}
+							e.message += "\n\n" + Zotero.getString('startupError.internetFunctionalityMayNotWork');
+							if (!e.dialogButtonText) {
+								e.dialogButtonText = Zotero.getString('general.moreInformation');
+								e.dialogButtonCallback = () => {
+									Zotero.launchURL('https://www.zotero.org/support/kb/connection_error');
+								};
+							}
+							Zotero.proxyFailure = e;
 							Zotero.logError(e);
 							let msg = "Error connecting to proxy -- proxied requests may not work";
 							Zotero.logError(msg);
@@ -992,8 +1002,8 @@ Zotero.HTTP = new function() {
 		}
 	}
 	
-	function _checkSecurity(xmlhttp, channel) {
-		if (xmlhttp.status != 0 || !channel) {
+	this.checkSecurity = function (channel) {
+		if (!channel) {
 			return;
 		}
 		
@@ -1005,37 +1015,27 @@ Zotero.HTTP = new function() {
 			secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
 			if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE)
 					== Ci.nsIWebProgressListener.STATE_IS_INSECURE) {
-				let url = channel.name;
-				let ios = Components.classes["@mozilla.org/network/io-service;1"]
-					.getService(Components.interfaces.nsIIOService);
-				try {
-					var uri = ios.newURI(url, null, null);
-					var host = uri.host;
-				}
-				catch (e) {
-					Zotero.debug(e);
-				}
-				let kbURL = 'https://www.zotero.org/support/kb/ssl_certificate_error';
-				msg = Zotero.getString(
-					'sync.storage.error.webdav.sslCertificateError',
-					'https://' + host
-				);
+				// Show actual error from the networking stack, with the hyperlink around the
+				// error code removed
+				msg = Zotero.Utilities.unescapeHTML(secInfo.errorMessage);
 				dialogButtonText = Zotero.getString('general.moreInformation');
 				dialogButtonCallback = function () {
-					let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						.getService(Components.interfaces.nsIWindowMediator);
-					let win = wm.getMostRecentWindow("navigator:browser");
-					win.ZoteroPane.loadURI(kbURL, { metaKey: true, shiftKey: true });
+					Zotero.launchURL('https://www.zotero.org/support/kb/ssl_certificate_error');
 				};
 			}
 			else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN)
 					== Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
-				msg = Zotero.getString('sync.error.sslConnectionError');
+				msg = Zotero.getString('networkError.connectionNotSecure')
+					+ Zotero.Utilities.unescapeHTML(secInfo.errorMessage);
 			}
 			if (msg) {
 				throw new Zotero.HTTP.SecurityException(
 					msg,
 					{
+						dialogHeader: Zotero.getString(
+							'networkError.connectionNotSecure',
+							Zotero.clientName
+						),
 						dialogButtonText,
 						dialogButtonCallback
 					}

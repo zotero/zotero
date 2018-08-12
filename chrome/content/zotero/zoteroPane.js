@@ -483,10 +483,7 @@ var ZoteroPane = new function()
 		
 		if (Zotero.proxyFailure) {
 			try {
-				Zotero.proxyFailure.message += "\n\n"
-					+ Zotero.getString('startupError.internetFunctionalityMayNotWork');
 				Zotero.Sync.Runner.updateIcons(Zotero.proxyFailure);
-				Zotero.proxyFailure = null;
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -4611,64 +4608,33 @@ var ZoteroPane = new function()
 	
 	this.syncAlert = function (e) {
 		e = Zotero.Sync.Runner.parseError(e);
+		var ps = Services.prompt;
+		var buttonText = e.dialogButtonText;
+		var buttonCallback = e.dialogButtonCallback;
 		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-					.getService(Components.interfaces.nsIPromptService);
-		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
-							+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
-		
-		// Warning
-		if (e.errorType == 'warning') {
-			var title = Zotero.getString('general.warning');
+		if (e.errorType == 'warning' || e.errorType == 'error') {
+			let title = Zotero.getString('general.' + e.errorType);
+			// TODO: Display header in bold
+			let msg = (e.dialogHeader ? e.dialogHeader + '\n\n' : '') + e.message;
 			
-			// If secondary button not specified, just use an alert
-			if (e.buttonText) {
-				var buttonText = e.buttonText;
-			}
-			else {
+			if (e.errorType == 'warning' || buttonText === null) {
 				ps.alert(null, title, e.message);
 				return;
 			}
 			
-			var index = ps.confirmEx(
-				null,
-				title,
-				e.message,
-				buttonFlags,
-				"",
-				buttonText,
-				"", null, {}
-			);
-			
-			if (index == 1) {
-				setTimeout(function () { buttonCallback(); }, 1);
-			}
-		}
-		// Error
-		else if (e.errorType == 'error') {
-			var title = Zotero.getString('general.error');
-			
-			// If secondary button is explicitly null, just use an alert
-			if (buttonText === null) {
-				ps.alert(null, title, e.message);
-				return;
-			}
-			
-			if (typeof buttonText == 'undefined') {
-				var buttonText = Zotero.getString('errorReport.reportError');
-				var buttonCallback = function () {
+			if (!buttonText) {
+				buttonText = Zotero.getString('errorReport.reportError');
+				buttonCallback = function () {
 					ZoteroPane.reportErrors();
 				};
 			}
-			else {
-				var buttonText = e.buttonText;
-				var buttonCallback = e.buttonCallback;
-			}
 			
-			var index = ps.confirmEx(
+			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
+				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
+			let index = ps.confirmEx(
 				null,
 				title,
-				e.message,
+				msg,
 				buttonFlags,
 				"",
 				buttonText,
@@ -4676,12 +4642,13 @@ var ZoteroPane = new function()
 			);
 			
 			if (index == 1) {
-				setTimeout(function () { buttonCallback(); }, 1);
+				setTimeout(buttonCallback, 1);
 			}
 		}
-		// Upgrade
+		// Upgrade message
 		else if (e.errorType == 'upgrade') {
 			ps.alert(null, "", e.message);
+			return;
 		}
 	};
 	

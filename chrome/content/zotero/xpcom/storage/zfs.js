@@ -158,6 +158,17 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 							return;
 						}
 						
+						// Check for SSL certificate error
+						if (status == 0) {
+							try {
+								Zotero.HTTP.checkSecurity(req);
+							}
+							catch (e) {
+								deferred.reject(e);
+								return;
+							}
+						}
+						
 						// If S3 connection is interrupted, delay and retry, or bail if too many
 						// consecutive failures
 						if (status == 0 || status == 500 || status == 503) {

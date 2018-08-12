@@ -645,6 +645,15 @@
 	margin-right: 0;
 }
 
+#zotero-sync-error-panel .error-header {
+	font-size: 14px;
+	font-weight: bold;
+	margin-bottom: 1em;
+	-moz-user-select: text;
+	user-select: text;
+	cursor: text
+}
+
 .zotero-sync-error-panel-library-name {
 	font-size: 12px;
 	font-weight: bold;

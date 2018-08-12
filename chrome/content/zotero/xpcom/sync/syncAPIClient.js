@@ -788,12 +788,9 @@ Zotero.Sync.APIClient.prototype = {
 	
 	
 	/**
-	 * Check connection for certificate errors, interruptions, and empty responses and
-	 * throw an appropriate error
+	 * Check connection for interruptions and empty responses and throw an appropriate error
 	 */
 	_checkConnection: function (xmlhttp, channel) {
-		const Ci = Components.interfaces;
-		
 		if (!xmlhttp.responseText && (xmlhttp.status == 0 || xmlhttp.status == 200)) {
 			let msg = null;
 			let dialogButtonText = null;
@@ -801,8 +798,11 @@ Zotero.Sync.APIClient.prototype = {
 			
 			if (xmlhttp.status === 0) {
 				msg = Zotero.getString('sync.error.checkConnection');
+				dialogButtonText = Zotero.getString('general.moreInformation');
+				let url = 'https://www.zotero.org/support/kb/connection_error';
+				dialogButtonCallback = () => Zotero.launchURL(url);
 			}
-			if (!msg) {
+			else if (!msg) {
 				msg = Zotero.getString('sync.error.emptyResponseServer')
 					+ Zotero.getString('general.tryAgainLater');
 			}
