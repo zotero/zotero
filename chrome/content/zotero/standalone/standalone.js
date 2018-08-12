@@ -161,7 +161,12 @@ const ZoteroStandalone = new function() {
 		if (format.mode == 'export') {
 			try {
 				let obj = Zotero.Translators.get(format.id);
-				copyExport.label = Zotero.getString('quickCopy.copyAs', obj.label);
+				if (obj) {
+					copyExport.label = Zotero.getString('quickCopy.copyAs', obj.label);
+				}
+				else {
+					copyExport.hidden = true;
+				}
 			}
 			catch (e) {
 				if (!(e instanceof Zotero.Exception.UnloadedDataException && e.dataType == 'translators')) {

@@ -182,7 +182,8 @@ Zotero.QuickCopy = new function() {
 		}
 		
 		if (!_siteSettings) {
-			throw new Zotero.Exception.UnloadedDataException("Quick Copy site settings not loaded");
+			Zotero.debug("Quick Copy site settings not loaded", 2);
+			return quickCopyPref;
 		}
 		
 		var matches = [];
@@ -461,6 +462,10 @@ Zotero.QuickCopy = new function() {
 			Zotero.debug(`Preloading ${format.id} for Quick Copy`);
 			await Zotero.Translators.init();
 			let translator = Zotero.Translators.get(format.id);
+			if (!translator) {
+				Zotero.logError(`Translator ${format.id} not found`);
+				return;
+			}
 			translator.cacheCode = true;
 			await translator.getCode();
 		}
