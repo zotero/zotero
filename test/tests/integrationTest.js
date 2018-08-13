@@ -397,7 +397,10 @@ describe("Zotero.Integration", function () {
 					
 				it('should download the style without prompting if it is from zotero.org', function* (){
 					yield initDoc(docID, {styleID: "http://www.zotero.org/styles/waterbirds", locale: 'en-US'});
-					var styleInstallStub = sinon.stub(Zotero.Styles, "install").resolves();
+					var styleInstallStub = sinon.stub(Zotero.Styles, "install").resolves({
+						styleTitle: 'Waterbirds',
+						styleID: 'waterbirds'
+					});
 					var style = Zotero.Styles.get(styleID);
 					var styleGetCalledOnce = false;
 					var styleGetStub = sinon.stub(Zotero.Styles, 'get').callsFake(function() {
