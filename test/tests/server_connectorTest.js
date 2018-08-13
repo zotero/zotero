@@ -674,10 +674,14 @@ describe("Connector Server", function () {
 					.createInstance(Components.interfaces.nsIDOMParser),
 				doc = parser.parseFromString(style, "application/xml");
 				
-				return Zotero.Promise.resolve(
-					Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:title[1]',
-						Zotero.Styles.ns)
-				);
+				return Zotero.Promise.resolve({
+					styleTitle: Zotero.Utilities.xpathText(
+						doc, '/csl:style/csl:info[1]/csl:title[1]', Zotero.Styles.ns
+					),
+					styleID: Zotero.Utilities.xpathText(
+						doc, '/csl:style/csl:info[1]/csl:id[1]', Zotero.Styles.ns
+					)
+				});
 			});
 			
 			var style = `<?xml version="1.0" encoding="utf-8"?>

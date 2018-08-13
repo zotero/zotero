@@ -1030,13 +1030,13 @@ Zotero.Server.Connector.InstallStyle.prototype = {
 	
 	init: Zotero.Promise.coroutine(function* (requestData) {
 		try {
-			var { styleName, styleID } = yield Zotero.Styles.install(
+			var { styleTitle, styleID } = yield Zotero.Styles.install(
 				requestData.data, requestData.query.origin || null, true
 			);
 		} catch (e) {
 			return [400, "text/plain", e.message];
 		}
-		return [201, "application/json", JSON.stringify({name: styleName})];
+		return [201, "application/json", JSON.stringify({name: styleTitle})];
 	})
 };
 
