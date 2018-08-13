@@ -4672,12 +4672,17 @@ var ZoteroPane = new function()
 		if(!items.length) return;
 		
 		let input = {value: ''};
-		Services.prompt.prompt(
-			null,
-			Zotero.getString('recognizePDF.reportMetadata'),
-			Zotero.getString('general.describeProblem'),
-			input, null, {}
-		);
+		let confirmed;
+		do {
+			confirmed = Services.prompt.prompt(
+				null,
+				Zotero.getString('recognizePDF.reportMetadata'),
+				Zotero.getString('general.describeProblem'),
+				input, null, {}
+			);
+		} while(confirmed && !input.value);
+		
+		if(!confirmed) return;
 		
 		try {
 			await Zotero.RecognizePDF.report(items[0], input.value);
