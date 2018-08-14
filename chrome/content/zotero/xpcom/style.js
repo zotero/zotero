@@ -302,7 +302,7 @@ Zotero.Styles = new function() {
 		}
 		catch (error) {
 			// Unless user cancelled, show an alert with the error
-			if(typeof error === "object" && error instanceof Zotero.Exception.UserCancelled) return;
+			if(typeof error === "object" && error instanceof Zotero.Exception.UserCancelled) return {};
 			if(typeof error === "object" && error instanceof Zotero.Exception.Alert) {
 				Zotero.logError(error);
 				if (silent) {

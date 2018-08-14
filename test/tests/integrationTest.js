@@ -365,7 +365,10 @@ describe("Zotero.Integration", function () {
 			
 				describe('when the style is not from a trusted source', function() {
 					it('should download the style and if user clicks YES', function* () {
-						var styleInstallStub = sinon.stub(Zotero.Styles, "install").resolves();
+						var styleInstallStub = sinon.stub(Zotero.Styles, "install").resolves({
+							styleTitle: 'Waterbirds',
+							styleID: 'waterbirds'
+						});
 						var style = Zotero.Styles.get(styleID);
 						var styleGetCalledOnce = false;
 						var styleGetStub = sinon.stub(Zotero.Styles, 'get').callsFake(function() {
