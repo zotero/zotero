@@ -3858,12 +3858,11 @@ var ZoteroPane = new function()
 		
 		var icon = 'chrome://zotero/skin/treeitem-attachment-pdf.png';
 		var progressWin = new Zotero.ProgressWindow();
-		// TODO: Localize
-		var title = items.length > 1 ? 'Searching for available PDFs…' : 'Searching for available PDF…';
+		var title = Zotero.getString('findPDF.headline');
 		progressWin.changeHeadline(title);
 		var itemProgress = new progressWin.ItemProgress(
 			icon,
-			"Checking " + items.length + " " + Zotero.Utilities.pluralize(items.length, ['item', 'items'])
+			Zotero.getString('findPDF.checkingItems', items.length, items.length)
 		);
 		progressWin.show();
 		
@@ -3888,11 +3887,8 @@ var ZoteroPane = new function()
 		itemProgress.setProgress(100);
 		itemProgress.setIcon(icon);
 		
-		// TODO: Localize
 		if (successful) {
-			itemProgress.setText(
-				successful + " " + Zotero.Utilities.pluralize(successful, ['PDF', 'PDFs']) + " added"
-			);
+			itemProgress.setText(Zotero.getString('findPDF.pdfsAdded', successful, successful));
 		}
 		else {
 			itemProgress.setText("No PDFs found")
