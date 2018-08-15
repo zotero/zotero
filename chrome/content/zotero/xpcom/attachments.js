@@ -431,11 +431,11 @@ Zotero.Attachments = new function(){
 				fileBaseName = this.getFileBaseNameFromItem(parentItem);
 			}
 			if (fileBaseName) {
-				let ext = _getExtensionFromURL(url, contentType);
+				let ext = this._getExtensionFromURL(url, contentType);
 				var filename = fileBaseName + (ext != '' ? '.' + ext : '');
 			}
 			else {
-				var filename = _getFileNameFromURL(url, contentType);
+				var filename = this._getFileNameFromURL(url, contentType);
 			}
 			
 			// Create a temporary directory to save to within the storage directory.
@@ -644,7 +644,7 @@ Zotero.Attachments = new function(){
 		// Override MIME type to application/pdf if extension is .pdf --
 		// workaround for sites that respond to the HEAD request with an
 		// invalid MIME type (https://www.zotero.org/trac/ticket/460)
-		var ext = _getExtensionFromURL(url);
+		var ext = this._getExtensionFromURL(url);
 		if (ext == 'pdf') {
 			contentType = 'application/pdf';
 		}
@@ -731,7 +731,7 @@ Zotero.Attachments = new function(){
 		
 		var tmpDir = (yield this.createTemporaryStorageDirectory()).path;
 		try {
-			var fileName = Zotero.File.truncateFileName(_getFileNameFromURL(url, contentType), 100);
+			var fileName = Zotero.File.truncateFileName(this._getFileNameFromURL(url, contentType), 100);
 			var tmpFile = OS.Path.join(tmpDir, fileName);
 			
 			// If we're using the title from the document, make some adjustments
@@ -742,7 +742,7 @@ Zotero.Attachments = new function(){
 					title = title.replace(/(.+ \([^,]+, [0-9]+x[0-9]+[^\)]+\)) - .+/, "$1" );
 				}
 				// If not native type, strip mime type data in parens
-				else if (!Zotero.MIME.hasNativeHandler(contentType, _getExtensionFromURL(url))) {
+				else if (!Zotero.MIME.hasNativeHandler(contentType, this._getExtensionFromURL(url))) {
 					title = title.replace(/(.+) \([a-z]+\/[^\)]+\)/, "$1" );
 				}
 			}
@@ -1471,7 +1471,7 @@ Zotero.Attachments = new function(){
 	});
 	
 	
-	function _getFileNameFromURL(url, contentType){
+	this._getFileNameFromURL = function(url, contentType) {
 		var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
 					.createInstance(Components.interfaces.nsIURL);
 		nsIURL.spec = url;
@@ -1522,7 +1522,7 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	function _getExtensionFromURL(url, contentType) {
+	this._getExtensionFromURL = function(url, contentType) {
 		var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
 					.createInstance(Components.interfaces.nsIURL);
 		nsIURL.spec = url;
