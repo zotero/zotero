@@ -68,9 +68,11 @@ var Zotero_Lookup = new function () {
 					libraryID,
 					collections: collection ? [collection.id] : false
 				});
+				
 				// If we don't yet have a file, check for available PDFs
 				if (Zotero.Prefs.get('downloadAssociatedFiles')
-						&& !newItems.find(x => x.isImportedAttachment())
+						&& newItems[0]
+						&& !newItems[0].numPDFAttachments()
 						// TEMP: Limit to dev builds
 						&& Zotero.isDevBuild) {
 					try {
