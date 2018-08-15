@@ -258,6 +258,493 @@ describe("Connector Server", function () {
 			var item = Zotero.Items.get(ids[0]);
 			assert.equal(item.getField('url'), 'https://www.example.com/path');
 		});
+		
+		it("shouldn't return an attachment that isn't being saved", async function () {
+			Zotero.Prefs.set('automaticSnapshots', false);
+			
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+			
+			var body = {
+				items: [
+					{
+						itemType: "webpage",
+						title: "Title",
+						creators: [],
+						attachments: [
+							{
+								url: "http://example.com/",
+								mimeType: "text/html"
+							}
+						],
+						url: "http://example.com/"
+					}
+				],
+				uri: "http://example.com/"
+			};
+			
+			var req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(body),
+					responseType: 'json'
+				}
+			);
+			
+			Zotero.Prefs.clear('automaticSnapshots');
+			
+			assert.equal(req.status, 201);
+			assert.lengthOf(req.response.items, 1);
+			assert.lengthOf(req.response.items[0].attachments, 0);
+		});
+		
+		describe("PDF retrieval", function () {
+			var oaDOI = '10.1111/abcd';
+			var nonOADOI = '10.2222/bcde';
+			var pdfURL;
+			var badPDFURL;
+			var stub;
+			
+			before(function () {
+				var origFunc = Zotero.HTTP.request.bind(Zotero.HTTP);
+				stub = sinon.stub(Zotero.HTTP, 'request');
+				stub.callsFake(function (method, url, options) {
+					// OA PDF lookup
+					if (url.startsWith(ZOTERO_CONFIG.SERVICES_URL)) {
+						let json = JSON.parse(options.body);
+						let response = [];
+						if (json.doi == oaDOI) {
+							response.push({
+								url: pdfURL,
+								version: 'submittedVersion'
+							});
+						}
+						return {
+							status: 200,
+							response
+						};
+					}
+					
+					return origFunc(...arguments);
+				});
+			});
+			
+			beforeEach(() => {
+				pdfURL = testServerPath + '/pdf';
+				badPDFURL = testServerPath + '/badpdf';
+				
+				httpd.registerFile(
+					pdfURL.substr(testServerPath.length),
+					Zotero.File.pathToFile(OS.Path.join(getTestDataDirectory().path, 'test.pdf'))
+				);
+				// PDF URL that's actually an HTML page
+				httpd.registerFile(
+					badPDFURL.substr(testServerPath.length),
+					Zotero.File.pathToFile(OS.Path.join(getTestDataDirectory().path, 'test.html'))
+				);
+			});
+			
+			afterEach(() => {
+				stub.resetHistory();
+			});
+			
+			after(() => {
+				stub.restore();
+			});
+			
+			
+			it("should download a translated PDF", async function () {
+				var collection = await createDataObject('collection');
+				await waitForItemsLoad(win);
+				
+				var sessionID = Zotero.Utilities.randomString();
+				
+				// Save item
+				var itemAddPromise = waitForItemEvent('add');
+				var saveItemsReq = await Zotero.HTTP.request(
+					'POST',
+					connectorServerPath + "/connector/saveItems",
+					{
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify({
+							sessionID,
+							items: [
+								{
+									itemType: 'journalArticle',
+									title: 'Title',
+									DOI: nonOADOI,
+									attachments: [
+										{
+											title: "PDF",
+											url: pdfURL,
+											mimeType: 'application/pdf'
+										}
+									]
+								}
+							],
+							uri: 'http://website/article'
+						}),
+						responseType: 'json'
+					}
+				);
+				assert.equal(saveItemsReq.status, 201);
+				assert.lengthOf(saveItemsReq.response.items, 1);
+				// Translated attachment should show up in the initial response
+				assert.lengthOf(saveItemsReq.response.items[0].attachments, 1);
+				assert.notProperty(saveItemsReq.response.items[0], 'DOI');
+				assert.notProperty(saveItemsReq.response.items[0].attachments[0], 'progress');
+				
+				// Check parent item
+				var ids = await itemAddPromise;
+				assert.lengthOf(ids, 1);
+				var item = Zotero.Items.get(ids[0]);
+				assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'journalArticle');
+				assert.isTrue(collection.hasItem(item.id));
+				
+				// Legacy endpoint should show 0
+				let attachmentProgressReq = await Zotero.HTTP.request(
+					'POST',
+					connectorServerPath + "/connector/attachmentProgress",
+					{
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify([saveItemsReq.response.items[0].attachments[0].id]),
+						responseType: 'json'
+					}
+				);
+				assert.equal(attachmentProgressReq.status, 200);
+				let progress = attachmentProgressReq.response;
+				assert.sameOrderedMembers(progress, [0]);
+				
+				// Wait for the attachment to finish saving
+				itemAddPromise = waitForItemEvent('add');
+				var i = 0;
+				while (i < 3) {
+					let sessionProgressReq = await Zotero.HTTP.request(
+						'POST',
+						connectorServerPath + "/connector/sessionProgress",
+						{
+							headers: {
+								"Content-Type": "application/json"
+							},
+							body: JSON.stringify({ sessionID }),
+							responseType: 'json'
+						}
+					);
+					assert.equal(sessionProgressReq.status, 200);
+					let response = sessionProgressReq.response;
+					assert.lengthOf(response.items, 1);
+					let item = response.items[0];
+					if (item.attachments.length) {
+						let attachments = item.attachments;
+						assert.lengthOf(attachments, 1);
+						let attachment = attachments[0];
+						switch (i) {
+						// Translated PDF in progress
+						case 0:
+							if (attachment.title == "PDF"
+									&& Number.isInteger(attachment.progress)
+									&& attachment.progress < 100) {
+								assert.isFalse(response.done);
+								i++;
+							}
+							continue;
+						
+						// Translated PDF finished
+						case 1:
+							if (attachment.title == "PDF" && attachment.progress == 100) {
+								i++;
+							}
+							continue;
+						
+						// done: true
+						case 2:
+							if (response.done) {
+								i++;
+							}
+							continue;
+						}
+					}
+					await Zotero.Promise.delay(10);
+				}
+				
+				// Legacy endpoint should show 100
+				attachmentProgressReq = await Zotero.HTTP.request(
+					'POST',
+					connectorServerPath + "/connector/attachmentProgress",
+					{
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify([saveItemsReq.response.items[0].attachments[0].id]),
+						responseType: 'json'
+					}
+				);
+				assert.equal(attachmentProgressReq.status, 200);
+				progress = attachmentProgressReq.response;
+				assert.sameOrderedMembers(progress, [100]);
+				
+				// Check attachment
+				var ids = await itemAddPromise;
+				assert.lengthOf(ids, 1);
+				item = Zotero.Items.get(ids[0]);
+				assert.isTrue(item.isImportedAttachment());
+				assert.equal(item.getField('title'), 'PDF');
+			});
+			
+			
+			it("should download open-access PDF if no PDF provided", async function () {
+				var collection = await createDataObject('collection');
+				await waitForItemsLoad(win);
+				
+				var sessionID = Zotero.Utilities.randomString();
+				
+				// Save item
+				var itemAddPromise = waitForItemEvent('add');
+				var saveItemsReq = await Zotero.HTTP.request(
+					'POST',
+					connectorServerPath + "/connector/saveItems",
+					{
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify({
+							sessionID,
+							items: [
+								{
+									itemType: 'journalArticle',
+									title: 'Title',
+									DOI: oaDOI,
+									attachments: []
+								}
+							],
+							uri: 'http://website/article'
+						}),
+						responseType: 'json'
+					}
+				);
+				assert.equal(saveItemsReq.status, 201);
+				assert.lengthOf(saveItemsReq.response.items, 1);
+				// Attachment shouldn't show up in the initial response
+				assert.lengthOf(saveItemsReq.response.items[0].attachments, 0);
+				
+				// Check parent item
+				var ids = await itemAddPromise;
+				assert.lengthOf(ids, 1);
+				var item = Zotero.Items.get(ids[0]);
+				assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'journalArticle');
+				assert.isTrue(collection.hasItem(item.id));
+				
+				// Wait for the attachment to finish saving
+				itemAddPromise = waitForItemEvent('add');
+				var wasZero = false;
+				var was100 = false;
+				while (true) {
+					let sessionProgressReq = await Zotero.HTTP.request(
+						'POST',
+						connectorServerPath + "/connector/sessionProgress",
+						{
+							headers: {
+								"Content-Type": "application/json"
+							},
+							body: JSON.stringify({ sessionID }),
+							responseType: 'json'
+						}
+					);
+					assert.equal(sessionProgressReq.status, 200);
+					let response = sessionProgressReq.response;
+					assert.typeOf(response.items, 'array');
+					assert.lengthOf(response.items, 1);
+					let item = response.items[0];
+					if (item.attachments.length) {
+						// 'progress' should have started at 0
+						if (item.attachments[0].progress === 0) {
+							wasZero = true;
+						}
+						else if (!was100 && item.attachments[0].progress == 100) {
+							if (response.done) {
+								break;
+							}
+							was100 = true;
+						}
+						else if (response.done) {
+							break;
+						}
+					}
+					assert.isFalse(response.done);
+					await Zotero.Promise.delay(10);
+				}
+				assert.isTrue(wasZero);
+				
+				// Check attachment
+				var ids = await itemAddPromise;
+				assert.lengthOf(ids, 1);
+				item = Zotero.Items.get(ids[0]);
+				assert.isTrue(item.isImportedAttachment());
+				assert.equal(item.getField('title'), 'Title.pdf');
+			});
+			
+			
+			it("should download open-access PDF if a translated PDF fails", async function () {
+				var collection = await createDataObject('collection');
+				await waitForItemsLoad(win);
+				
+				var sessionID = Zotero.Utilities.randomString();
+				
+				// Save item
+				var itemAddPromise = waitForItemEvent('add');
+				var saveItemsReq = await Zotero.HTTP.request(
+					'POST',
+					connectorServerPath + "/connector/saveItems",
+					{
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify({
+							sessionID,
+							items: [
+								{
+									itemType: 'journalArticle',
+									title: 'Title',
+									DOI: oaDOI,
+									attachments: [
+										{
+											title: "PDF",
+											url: badPDFURL,
+											mimeType: 'application/pdf'
+										}
+									]
+								}
+							],
+							uri: 'http://website/article'
+						}),
+						responseType: 'json'
+					}
+				);
+				assert.equal(saveItemsReq.status, 201);
+				assert.lengthOf(saveItemsReq.response.items, 1);
+				// Translated attachment should show up in the initial response
+				assert.lengthOf(saveItemsReq.response.items[0].attachments, 1);
+				assert.notProperty(saveItemsReq.response.items[0], 'DOI');
+				assert.notProperty(saveItemsReq.response.items[0].attachments[0], 'progress');
+				
+				// Check parent item
+				var ids = await itemAddPromise;
+				assert.lengthOf(ids, 1);
+				var item = Zotero.Items.get(ids[0]);
+				assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'journalArticle');
+				assert.isTrue(collection.hasItem(item.id));
+				
+				// Legacy endpoint should show 0
+				let attachmentProgressReq = await Zotero.HTTP.request(
+					'POST',
+					connectorServerPath + "/connector/attachmentProgress",
+					{
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify([saveItemsReq.response.items[0].attachments[0].id]),
+						responseType: 'json'
+					}
+				);
+				assert.equal(attachmentProgressReq.status, 200);
+				let progress = attachmentProgressReq.response;
+				assert.sameOrderedMembers(progress, [0]);
+				
+				// Wait for the attachment to finish saving
+				itemAddPromise = waitForItemEvent('add');
+				var i = 0;
+				while (i < 4) {
+					let sessionProgressReq = await Zotero.HTTP.request(
+						'POST',
+						connectorServerPath + "/connector/sessionProgress",
+						{
+							headers: {
+								"Content-Type": "application/json"
+							},
+							body: JSON.stringify({ sessionID }),
+							responseType: 'json'
+						}
+					);
+					assert.equal(sessionProgressReq.status, 200);
+					let response = sessionProgressReq.response;
+					assert.lengthOf(response.items, 1);
+					let item = response.items[0];
+					if (item.attachments.length) {
+						let attachments = item.attachments;
+						assert.lengthOf(attachments, 1);
+						let attachment = attachments[0];
+						switch (i) {
+						// Translated PDF in progress
+						case 0:
+							if (attachment.title == "PDF"
+									&& Number.isInteger(attachment.progress)
+									&& attachment.progress < 100) {
+								assert.isFalse(response.done);
+								i++;
+							}
+							continue;
+						
+						// OA PDF in progress
+						case 1:
+							if (attachment.title == Zotero.getString('findPDF.openAccessPDF')
+									&& Number.isInteger(attachment.progress)
+									&& attachment.progress < 100) {
+								assert.isFalse(response.done);
+								i++;
+							}
+							continue;
+						
+						// OA PDF finished
+						case 2:
+							if (attachment.progress === 100) {
+								assert.equal(attachment.title, Zotero.getString('findPDF.openAccessPDF'));
+								i++;
+							}
+							continue;
+						
+						// done: true
+						case 3:
+							if (response.done) {
+								i++;
+							}
+							continue;
+						}
+					}
+					await Zotero.Promise.delay(10);
+				}
+				
+				// Legacy endpoint should show 100
+				attachmentProgressReq = await Zotero.HTTP.request(
+					'POST',
+					connectorServerPath + "/connector/attachmentProgress",
+					{
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify([saveItemsReq.response.items[0].attachments[0].id]),
+						responseType: 'json'
+					}
+				);
+				assert.equal(attachmentProgressReq.status, 200);
+				progress = attachmentProgressReq.response;
+				assert.sameOrderedMembers(progress, [100]);
+				
+				// Check attachment
+				var ids = await itemAddPromise;
+				assert.lengthOf(ids, 1);
+				item = Zotero.Items.get(ids[0]);
+				assert.isTrue(item.isImportedAttachment());
+				assert.equal(item.getField('title'), 'Title.pdf');
+			});
+		});
 	});
 	
 	describe("/connector/saveSnapshot", function () {

@@ -3858,7 +3858,7 @@ var ZoteroPane = new function()
 		
 		var icon = 'chrome://zotero/skin/treeitem-attachment-pdf.png';
 		var progressWin = new Zotero.ProgressWindow();
-		var title = Zotero.getString('findPDF.headline');
+		var title = Zotero.getString('findPDF.searchingForAvailablePDFs');
 		progressWin.changeHeadline(title);
 		var itemProgress = new progressWin.ItemProgress(
 			icon,
@@ -3891,7 +3891,7 @@ var ZoteroPane = new function()
 			itemProgress.setText(Zotero.getString('findPDF.pdfsAdded', successful, successful));
 		}
 		else {
-			itemProgress.setText("No PDFs found")
+			itemProgress.setText(Zotero.getString('findPDF.noPDFsFound'))
 		}
 		
 		progressWin.startCloseTimer(4000);

@@ -152,9 +152,69 @@ Zotero.Server.Connector.SessionManager = {
 Zotero.Server.Connector.SaveSession = function (id, action, requestData) {
 	this.id = id;
 	this.created = new Date();
+	this.savingDone = false;
 	this._action = action;
 	this._requestData = requestData;
 	this._items = new Set();
+	
+	this._progressItems = {};
+	this._orderedProgressItems = [];
+};
+
+
+Zotero.Server.Connector.SaveSession.prototype.onProgress = function (item, progress, error) {
+	if (!item.id) {
+		throw new Error("ID not provided");
+	}
+	
+	// Child item
+	if (item.parent) {
+		let progressItem = this._progressItems[item.parent];
+		if (!progressItem) {
+			throw new Error(`Parent progress item ${item.parent} not found `
+				+ `for attachment ${item.id}`);
+		}
+		let a = progressItem.attachments.find(a => a.id == item.id);
+		if (!a) {
+			a = {
+				id: item.id
+			};
+			progressItem.attachments.push(a);
+		}
+		a.title = item.title;
+		a.contentType = item.mimeType;
+		a.progress = progress;
+		return;
+	}
+	
+	// Top-level item
+	var o = this._progressItems[item.id];
+	if (!o) {
+		o = {
+			id: item.id
+		};
+		this._progressItems[item.id] = o;
+		this._orderedProgressItems.push(item.id);
+	}
+	o.title = item.title;
+	// PDF being converted to a top-level item after recognition
+	if (o.itemType == 'attachment' && item.itemType != 'attachment') {
+		delete o.progress;
+		delete o.contentType;
+	}
+	o.itemType = item.itemType;
+	o.attachments = item.attachments;
+	if (item.itemType == 'attachment') {
+		o.progress = progress;
+	}
+};
+
+Zotero.Server.Connector.SaveSession.prototype.getProgressItem = function (id) {
+	return this._progressItems[id];
+};
+
+Zotero.Server.Connector.SaveSession.prototype.getAllProgress = function () {
+	return this._orderedProgressItems.map(id => this._progressItems[id]);
 };
 
 Zotero.Server.Connector.SaveSession.prototype.addItem = async function (item) {
@@ -314,44 +374,6 @@ Zotero.Server.Connector.SaveSession.prototype._updateRecents = function () {
 	}
 };
 
-
-Zotero.Server.Connector.AttachmentProgressManager = new function() {
-	var attachmentsInProgress = new WeakMap(),
-		attachmentProgress = {},
-		id = 1;
-	
-	/**
-	 * Adds attachments to attachment progress manager
-	 */
-	this.add = function(attachments) {
-		for(var i=0; i<attachments.length; i++) {
-			var attachment = attachments[i];
-			attachmentsInProgress.set(attachment, (attachment.id = id++));
-		}
-	};
-	
-	/**
-	 * Called on attachment progress
-	 */
-	this.onProgress = function(attachment, progress, error) {
-		attachmentProgress[attachmentsInProgress.get(attachment)] = progress;
-	};
-		
-	/**
-	 * Gets progress for a given progressID
-	 */
-	this.getProgressForID = function(progressID) {
-		return progressID in attachmentProgress ? attachmentProgress[progressID] : 0;
-	};
-
-	/**
-	 * Check if we have received progress for a given attachment
-	 */
-	this.has = function(attachment) {
-		return attachmentsInProgress.has(attachment)
-			&& attachmentsInProgress.get(attachment) in attachmentProgress;
-	}
-};
 
 /**
  * Lists all available translators, including code for translators that should be run on every page
@@ -568,11 +590,11 @@ Zotero.Server.Connector.SavePage.prototype = {
 		var jsonItems = [];
 		translate.setHandler("select", function(obj, item, callback) { return me._selectItems(obj, item, callback) });
 		translate.setHandler("itemDone", function(obj, item, jsonItem) {
-			Zotero.Server.Connector.AttachmentProgressManager.add(jsonItem.attachments);
+			//Zotero.Server.Connector.AttachmentProgressManager.add(jsonItem.attachments);
 			jsonItems.push(jsonItem);
 		});
 		translate.setHandler("attachmentProgress", function(obj, attachment, progress, error) {
-			Zotero.Server.Connector.AttachmentProgressManager.onProgress(attachment, progress, error);
+			//Zotero.Server.Connector.AttachmentProgressManager.onProgress(attachment, progress, error);
 		});
 		translate.setHandler("done", function(obj, item) {
 			Zotero.Browser.deleteHiddenBrowser(me._browser);
@@ -639,15 +661,36 @@ Zotero.Server.Connector.SaveItems.prototype = {
 		return new Zotero.Promise((resolve) => {
 			try {
 				this.saveItems(
+					session,
 					targetID,
 					requestData,
 					function (topLevelItems) {
+						// Only return the properties the connector needs
+						topLevelItems = topLevelItems.map((item) => {
+							return {
+								id: item.id,
+								title: item.title,
+								itemType: item.itemType,
+								contentType: item.mimeType,
+								mimeType: item.mimeType, // TODO: Remove
+								attachments: item.attachments.map((attachment) => {
+									return {
+										id: session.id + '_' + attachment.id, // TODO: Remove prefix
+										title: attachment.title,
+										contentType: attachment.contentType,
+										mimeType: attachment.mimeType,  // TODO: Remove
+									};
+								})
+							};
+						});
 						resolve([201, "application/json", JSON.stringify({items: topLevelItems})]);
 					}
 				)
 				// Add items to session once all attachments have been saved
 				.then(function (items) {
 					session.addItems(items);
+					// Return 'done: true' so the connector stops checking for updates
+					session.savingDone = true;
 				});
 			}
 			catch (e) {
@@ -657,9 +700,8 @@ Zotero.Server.Connector.SaveItems.prototype = {
 		});
 	}),
 	
-	saveItems: async function (target, requestData, onTopLevelItemsDone) {
+	saveItems: async function (session, target, requestData, onTopLevelItemsDone) {
 		var { library, collection, editable } = Zotero.Server.Connector.resolveTarget(target);
-		
 		var data = requestData.data;
 		var cookieSandbox = data.uri
 			? new Zotero.CookieSandbox(
@@ -673,8 +715,29 @@ Zotero.Server.Connector.SaveItems.prototype = {
 			cookieSandbox.addCookiesFromHeader(data.detailedCookies);
 		}
 		
+		var id = 1;
 		for (let item of data.items) {
-			Zotero.Server.Connector.AttachmentProgressManager.add(item.attachments);
+			if (!item.id) {
+				item.id = id++;
+			}
+			
+			if (item.attachments) {
+				for (let attachment of item.attachments) {
+					attachment.id = id++;
+					attachment.parent = item.id;
+				}
+			}
+			
+			// Add parent item to session progress without attachments, which are added later if
+			// they're saved.
+			let progressItem = Object.assign(
+				{},
+				item,
+				{
+					attachments: []
+				}
+			);
+			session.onProgress(progressItem, 0);
 		}
 		
 		var proxy = data.proxy && new Zotero.Proxy(data.proxy);
@@ -691,21 +754,10 @@ Zotero.Server.Connector.SaveItems.prototype = {
 		});
 		return itemSaver.saveItems(
 			data.items,
-			Zotero.Server.Connector.AttachmentProgressManager.onProgress,
-			function () {
-				// Remove attachments from item.attachments that aren't being saved. We have to
-				// clone the items so that we don't mutate the data stored in the session.
-				var savedItems = [...data.items.map(item => Object.assign({}, item))];
-				for (let item of savedItems) {
-					item.attachments = item.attachments
-						.filter(attachment => {
-							return Zotero.Server.Connector.AttachmentProgressManager.has(attachment);
-						});
-				}
-				if (onTopLevelItemsDone) {
-					onTopLevelItemsDone(savedItems);
-				}
-			}
+			function (attachment, progress, error) {
+				session.onProgress(attachment, progress, error);
+			},
+			onTopLevelItemsDone
 		);
 	}
 }
@@ -923,6 +975,56 @@ Zotero.Server.Connector.UpdateSession.prototype = {
 	}
 };
 
+Zotero.Server.Connector.SessionProgress = function() {};
+Zotero.Server.Endpoints["/connector/sessionProgress"] = Zotero.Server.Connector.SessionProgress;
+Zotero.Server.Connector.SessionProgress.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["application/json"],
+	permitBookmarklet: true,
+	
+	init: async function (requestData) {
+		var data = requestData.data
+		
+		if (!data.sessionID) {
+			return [400, "application/json", JSON.stringify({ error: "SESSION_ID_NOT_PROVIDED" })];
+		}
+		
+		var session = Zotero.Server.Connector.SessionManager.get(data.sessionID);
+		if (!session) {
+			Zotero.debug("Can't find session " + data.sessionID, 1);
+			return [400, "application/json", JSON.stringify({ error: "SESSION_NOT_FOUND" })];
+		}
+		
+		return [
+			200,
+			"application/json",
+			JSON.stringify({
+				items: session.getAllProgress()
+					.map((item) => {
+						var newItem = Object.assign({}, item);
+						if (item.attachments) {
+							newItem.attachments = item.attachments.map((attachment) => {
+								return Object.assign(
+									{},
+									attachment,
+									// Prefix id with 'sessionID_'
+									// TODO: Remove this once support for /attachmentProgress is
+									// removed and we stop prefixing the ids in the /saveItems
+									// response
+									{
+										id: session.id + '_' + attachment.id
+									}
+								);
+							});
+						}
+						return newItem;
+					}),
+				done: session.savingDone
+			})
+		];
+	}
+};
+
 Zotero.Server.Connector.DelaySync = function () {};
 Zotero.Server.Endpoints["/connector/delaySync"] = Zotero.Server.Connector.DelaySync;
 Zotero.Server.Connector.DelaySync.prototype = {
@@ -955,8 +1057,27 @@ Zotero.Server.Connector.Progress.prototype = {
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
 	init: function(data, sendResponseCallback) {
-		sendResponseCallback(200, "application/json",
-			JSON.stringify(data.map(id => Zotero.Server.Connector.AttachmentProgressManager.getProgressForID(id))));
+		sendResponseCallback(
+			200,
+			"application/json",
+			JSON.stringify(
+				data.map((id) => {
+					var [sessionID, progressID] = id.split('_');
+					var session = Zotero.Server.Connector.SessionManager.get(sessionID);
+					var items = session.getAllProgress();
+					for (let item of items) {
+						for (let attachment of item.attachments) {
+							// TODO: Change to progressID instead of id once we stop prepending
+							// the sessionID to support older connector versions
+							if (attachment.id == progressID) {
+								return attachment.progress;
+							}
+						}
+					}
+					return null;
+				})
+			)
+		);
 	}
 };
 

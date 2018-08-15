@@ -936,9 +936,12 @@ Zotero.Utilities.Internal = {
 	 * Note: This uses a private API. Please use Unpaywall directly for non-Zotero projects.
 	 *
 	 * @param {String} doi
-	 * @return {String[]} - An array of PDF URLs
+	 * @param {Object} [options]
+	 * @param {Number} [options.timeout] - Request timeout in milliseconds
+	 * @return {Object[]} - An array of objects with 'url' and/or 'pageURL' and 'version'
+	 *     ('submittedVersion', 'acceptedVersion', 'publishedVersion')
 	 */
-	getOpenAccessPDFURLs: async function (doi) {
+	getOpenAccessPDFURLs: async function (doi, options = {}) {
 		doi = Zotero.Utilities.cleanDOI(doi);
 		if (!doi) {
 			throw new Error(`Invalid DOI '${doi}'`);
@@ -946,26 +949,25 @@ Zotero.Utilities.Internal = {
 		Zotero.debug(`Looking for open-access PDFs for ${doi}`);
 		
 		var url = ZOTERO_CONFIG.SERVICES_URL + 'oa/search';
-		var req = await Zotero.HTTP.request('POST', url, {
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ doi }),
-			responseType: 'json'
-		});
+		var req = await Zotero.HTTP.request(
+			'POST',
+			url,
+			Object.assign(
+				{
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ doi }),
+					responseType: 'json'
+				},
+				options.timeout && {
+					timeout: options.timeout
+				}
+			)
+		);
 		var urls = req.response;
-		Zotero.debug(`Found ${urls.length} open-access PDF ${Zotero.Utilities.pluralize(urls.length, ['URL', 'URLs'])}`);
-		// Handle older URL-only format
-		urls = urls.map(o => typeof o == 'string' ? { url: o } : o);
-		
-		// Only try a small number of URLs, and ignore Unpaywall rows that have a huge number of
-		// URLs by mistake (as of August 2018)
-		let maxURLs = 6;
-		if (urls.length > maxURLs) {
-			Zotero.debug(`Keeping ${maxURLs} URLs`);
-			urls = urls.slice(0, maxURLs);
-		}
-		
+		Zotero.debug(`Found ${urls.length} open-access PDF `
+			+ `${Zotero.Utilities.pluralize(urls.length, ['URL', 'URLs'])}`);
 		return urls;
 	},
 	

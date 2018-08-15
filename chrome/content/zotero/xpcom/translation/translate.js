@@ -1625,7 +1625,13 @@ Zotero.Translate.Base.prototype = {
 		var attachmentsWithProgress = [];
 		
 		function attachmentCallback(attachment, progress, error) {
-			var attachmentIndex = this._savingAttachments.indexOf(attachment);
+			// Find by id if available (used in the connector)
+			if (attachment.id) {
+				var attachmentIndex = this._savingAttachments.findIndex(x => x.id == attachment.id);
+			}
+			else {
+				var attachmentIndex = this._savingAttachments.indexOf(attachment);
+			}
 			if(progress === false || progress === 100) {
 				if(attachmentIndex !== -1) {
 					this._savingAttachments.splice(attachmentIndex, 1);
