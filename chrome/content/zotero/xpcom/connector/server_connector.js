@@ -798,47 +798,33 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			return item;
 		}
 		
-		return new Zotero.Promise((resolve, reject) => {
-			Zotero.Server.Connector.Data[data.url] = "<html>" + data.html + "</html>";
-			Zotero.HTTP.loadDocuments(
-				["zotero://connector/" + encodeURIComponent(data.url)],
-				async function (doc) {
-					delete Zotero.Server.Connector.Data[data.url];
-					
-					try {
-						// Create new webpage item
-						let item = new Zotero.Item("webpage");
-						item.libraryID = libraryID;
-						item.setField("title", doc.title);
-						item.setField("url", data.url);
-						item.setField("accessDate", "CURRENT_TIMESTAMP");
-						if (collection) {
-							item.setCollections([collection.id]);
-						}
-						var itemID = await item.saveTx();
-						
-						// Save snapshot
-						if (library.filesEditable && !data.skipSnapshot) {
-							await Zotero.Attachments.importFromDocument({
-								document: doc,
-								parentItemID: itemID
-							});
-						}
-						
-						resolve(item);
-					}
-					catch (e) {
-						reject(e);
-					}
-				},
-				null,
-				null,
-				false,
-				cookieSandbox
-			);
-		});
+		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser);
+		var doc = parser.parseFromString(`<html>${data.html}</html>`, 'text/html');
+		doc = Zotero.HTTP.wrapDocument(doc, data.url);
+		
+		// Create new webpage item
+		let item = new Zotero.Item("webpage");
+		item.libraryID = libraryID;
+		item.setField("title", doc.title);
+		item.setField("url", data.url);
+		item.setField("accessDate", "CURRENT_TIMESTAMP");
+		if (collection) {
+			item.setCollections([collection.id]);
+		}
+		var itemID = await item.saveTx();
+		
+		// Save snapshot
+		if (library.filesEditable && !data.skipSnapshot) {
+			await Zotero.Attachments.importFromDocument({
+				document: doc,
+				parentItemID: itemID
+			});
+		}
+		
+		return item;
 	}
-}
+};
 
 /**
  * Handle item selection
