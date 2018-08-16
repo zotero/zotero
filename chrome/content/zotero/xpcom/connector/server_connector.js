@@ -1070,7 +1070,9 @@ Zotero.Server.Connector.Progress.prototype = {
 							// TODO: Change to progressID instead of id once we stop prepending
 							// the sessionID to support older connector versions
 							if (attachment.id == progressID) {
-								return attachment.progress;
+								// TODO: Remove
+								return attachment.progress == -1 ? false : attachment.progress;
+								//return attachment.progress;
 							}
 						}
 					}

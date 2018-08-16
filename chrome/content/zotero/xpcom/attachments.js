@@ -896,6 +896,7 @@ Zotero.Attachments = new function(){
 	 *
 	 * @param {Zotero.Item} item
 	 * @param {String[]} [methods=['doi', 'url', 'oa', 'custom']]
+	 * @param {Boolean} [automatic=false] - Only include custom resolvers with `automatic: true`
 	 * @return {Object[]} - An array of urlResolvers (see downloadFirstAvailableFile())
 	 */
 	this.getPDFResolvers = function (item, methods = ['doi', 'url', 'oa', 'custom'], automatic) {

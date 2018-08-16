@@ -196,16 +196,11 @@ Zotero.Translate.ItemSaver.prototype = {
 		// possible downloads.
 		//
 		// TODO: Separate pref?
-		var pdfResolvers = new Map();
+		var openAccessPDFURLs = new Map();
 		if (Zotero.Prefs.get('downloadAssociatedFiles')
 				// TEMP: Limit to dev builds
 				&& Zotero.isDevBuild) {
 			for (let item of items) {
-				let doi = item.getField('DOI');
-				if (!doi) {
-					continue;
-				}
-				
 				let jsonItem = jsonByItem.get(item);
 				
 				// Skip items with translated PDF attachments
@@ -215,11 +210,15 @@ Zotero.Translate.ItemSaver.prototype = {
 				}
 				
 				try {
-					let resolvers = this._getPDFResolvers(item);
-					pdfResolvers.set(item, resolvers);
+					let resolvers = Zotero.Attachments.getPDFResolvers(item, ['oa']);
+					if (!resolvers.length) {
+						continue;
+					}
+					let urlObjects = await resolvers[0]();
+					openAccessPDFURLs.set(item, urlObjects);
 					// If there are possible URLs, create a status line for the PDF
-					if (resolvers.length) {
-						let title = Zotero.getString('findPDF.searchingForAvailablePDFs');
+					if (urlObjects.length) {
+						let title = Zotero.getString('findPDF.openAccessPDF');
 						let jsonAttachment = this._makeJSONAttachment(jsonItem.id, title);
 						jsonItem.attachments.push(jsonAttachment);
 						attachmentCallback(jsonAttachment, 0);
@@ -268,28 +267,48 @@ Zotero.Translate.ItemSaver.prototype = {
 					x => x.mimeType == 'application/pdf' && x.isPrimaryPDF
 				);
 				
-				// We might already have retrieved possible OA URLs above, if there wasn't a PDF
-				// from the translator. If not, get them now.
-				let resolvers = pdfResolvers.get(item);
-				if (!resolvers) {
-					resolvers = this._getPDFResolvers(item);
-				}
-				
-				if (!resolvers.length) {
-					// If there was an existing status line, use that
-					if (jsonAttachment) {
-						attachmentCallback(jsonAttachment, false);
+				// If no translated, no OA, and no custom, don't show a line
+				// If no translated and potential OA, show "Open-Access PDF"
+				// If no translated, no OA, but custom, show custom when it starts
+				// If translated fails and potential OA, show "Open-Access PDF"
+				// If translated fails, no OA, no custom, fail original
+				// If translated fails, no OA, but custom, change to custom when it starts
+				let resolvers = openAccessPDFURLs.get(item);
+				// No translated PDF, so we checked for OA PDFs above
+				if (resolvers) {
+					// Add custom resolvers
+					resolvers.push(...Zotero.Attachments.getPDFResolvers(item, ['custom'], true));
+					
+					// No translated, no OA, no custom, no status line
+					if (!resolvers.length) {
+						continue;
 					}
-					continue;
+					
+					// No translated, no OA, just potential custom, so create a status line
+					if (!jsonAttachment) {
+						jsonAttachment = this._makeJSONAttachment(
+							jsonItem.id, Zotero.getString('findPDF.searchingForAvailablePDFs')
+						);
+					}
 				}
-				
-				// If no status line, add one, since we have something to try
-				if (!jsonAttachment) {
-					jsonAttachment = this._makeJSONAttachment(
-						jsonItem.id, Zotero.getString('findPDF.searchingForAvailablePDFs')
-					);
+				// There was a translated PDF, so we didn't check for OA PDFs yet and didn't
+				// update the status line
+				else {
+					// Look for OA PDFs now
+					resolvers = Zotero.Attachments.getPDFResolvers(item, ['oa']);
+					if (resolvers.length) {
+						resolvers = await resolvers[0]();
+					}
+					
+					// Add custom resolvers
+					resolvers.push(...Zotero.Attachments.getPDFResolvers(item, ['custom'], true));
+					
+					// Failed translated, no OA, no custom, so fail the existing translator line
+					if (!resolvers.length) {
+						attachmentCallback(jsonAttachment, false);
+						continue;
+					}
 				}
-				attachmentCallback(jsonAttachment, 0);
 				
 				let attachment;
 				try {
@@ -343,11 +362,6 @@ Zotero.Translate.ItemSaver.prototype = {
 			return Zotero.getString('findPDF.pdfWithMethod', accessMethod);
 		}
 		return "PDF";
-	},
-	
-	
-	_getPDFResolvers: function (item) {
-		return Zotero.Attachments.getPDFResolvers(item, ['oa', 'custom']);
 	},
 	
 	
