@@ -1,12 +1,24 @@
 {
-  "progressWindow_error_translation": {
-    "message": "Јавила се грешка приликом чувања ове ставке. Погледајте $1 за више података."
+  "general_more": {
+    "message": "Више…"
+  },
+  "general_done": {
+    "message": "Готово"
+  },
+  "progressWindow_savingTo": {
+    "message": "Чувам у"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Ознаке (раздвојене зарезима)"
   },
-  "general_more": {
-    "message": "Више…"
+  "progressWindow_error_translation": {
+    "message": "Јавила се грешка приликом чувања ове ставке. Погледајте $1 за више података."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Исправљање проблема у преводу"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Јавила се грешка приликом чувања помоћу $1. Покушавам да сачувам са $2."
   },
   "progressWindow_error_upgradeClient": {
     "message": "Ова могућност није подржана у верзији $1. Надоградите програм на $2."
@@ -14,19 +26,7 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "последња верзија"
   },
-  "progressWindow_error_troubleshootingTranslatorIssues": {
-    "message": "Исправљање проблема у преводу"
-  },
-  "general_done": {
-    "message": "Готово"
-  },
-  "progressWindow_error_fallback": {
-    "message": "Јавила се грешка приликом чувања помоћу $1. Покушавам да сачувам са $2."
-  },
   "general_saveTo": {
     "message": "Сачувај у $1"
-  },
-  "progressWindow_savingTo": {
-    "message": "Чувам у"
   }
 }

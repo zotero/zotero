@@ -1,41 +1,41 @@
 {
-  "progressWindow_error_translation": {
-    "message": "Er is een fout opgetreden bij het opslaan van dit item. Bekijk $1 voor meer informatie."
-  },
-  "general_tryAgain": {
-    "message": "Opnieuw proberen"
-  },
-  "progressWindow_tagPlaceholder": {
-    "message": "Labels (gescheiden door komma’s)"
-  },
   "general_more": {
     "message": "Meer…"
-  },
-  "progressWindow_error_upgradeClient": {
-    "message": "Deze functie wordt niet ondersteund door jouw versie van $1. Upgrade naar $2."
-  },
-  "general_cancel": {
-    "message": "Annuleren"
-  },
-  "progressWindow_error_upgradeClient_latestVersion": {
-    "message": "laatste versie"
   },
   "general_done": {
     "message": "Klaar"
   },
+  "general_tryAgain": {
+    "message": "Opnieuw proberen"
+  },
+  "general_cancel": {
+    "message": "Annuleren"
+  },
+  "progressWindow_savingTo": {
+    "message": "Opslaan in"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Labels (gescheiden door komma’s)"
+  },
+  "progressWindow_error_translation": {
+    "message": "Er is een fout opgetreden bij het opslaan van dit item. Bekijk $1 voor meer informatie."
+  },
   "progressWindow_error_fallback": {
     "message": "Opslaan mislukt met $1. Probeer het opnieuw op te slaan met $2."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Deze functie wordt niet ondersteund door jouw versie van $1. Upgrade naar $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "laatste versie"
+  },
+  "appConnector": {
+    "message": "$1 Connector"
   },
   "upgradeApp": {
     "message": "Bijwerken $1"
   },
   "general_saveTo": {
     "message": "Opslaan in $1"
-  },
-  "appConnector": {
-    "message": "$1 Connector"
-  },
-  "progressWindow_savingTo": {
-    "message": "Opslaan in"
   }
 }

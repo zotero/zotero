@@ -2,19 +2,19 @@
   "general_more": {
     "message": "Egyéb…"
   },
-  "progressWindow_error_upgradeClient_latestVersion": {
-    "message": "legfrissebb verzió"
+  "general_done": {
+    "message": "Rendben"
+  },
+  "progressWindow_savingTo": {
+    "message": "Mentés"
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Ismert konverter hibák"
   },
-  "general_done": {
-    "message": "Rendben"
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "legfrissebb verzió"
   },
   "general_saveTo": {
     "message": "Mentés $1-ba(n)"
-  },
-  "progressWindow_savingTo": {
-    "message": "Mentés"
   }
 }
