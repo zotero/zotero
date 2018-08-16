@@ -28,4 +28,8 @@ var ZOTERO_CONFIG = {
 	CONNECTORS_URL: "https://www.zotero.org/download/connectors"
 };
 
-EXPORTED_SYMBOLS = ["ZOTERO_CONFIG"];
+if (typeof process === 'object' && process + '' === '[object process]'){
+	module.exports = ZOTERO_CONFIG;
+} else {
+	EXPORTED_SYMBOLS = ["ZOTERO_CONFIG"];
+}

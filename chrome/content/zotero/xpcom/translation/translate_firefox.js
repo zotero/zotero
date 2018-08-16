@@ -129,7 +129,7 @@ Zotero.Translate.DOMWrapper = new function() {
 	
 		// No double wrapping.
 		if (isWrapper(obj))
-			throw "Trying to double-wrap object!";
+			throw new Error("Trying to double-wrap object!");
 	
 		let dummy;
 		if (typeof obj === "function")
@@ -151,7 +151,7 @@ Zotero.Translate.DOMWrapper = new function() {
 	
 		// If we have a wrappable type, make sure it's wrapped.
 		if (!isWrapper(x))
-			throw "Trying to unwrap a non-wrapped object!";
+			throw new Error("Trying to unwrap a non-wrapped object!");
 	
 		var obj = x.SpecialPowers_wrappedObject;
 		// unwrapped.
@@ -253,7 +253,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		},
 	
 		defineProperty(target, prop, descriptor) {
-			throw "Can't call defineProperty on SpecialPowers wrapped object";
+			throw new Error("Can't call defineProperty on SpecialPowers wrapped object");
 		},
 	
 		getOwnPropertyDescriptor(target, prop) {
@@ -316,7 +316,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		},
 	
 		preventExtensions(target) {
-			throw "Can't call preventExtensions on SpecialPowers wrapped object";
+			throw new Error("Can't call preventExtensions on SpecialPowers wrapped object");
 		}
 	};
 	
@@ -870,7 +870,7 @@ Zotero.Translate.IO.Read.prototype = {
 	
 	"setCharacterSet":function(charset) {
 		if(typeof charset !== "string") {
-			throw "Translate: setCharacterSet: charset must be a string";
+			throw new Error("Translate: setCharacterSet: charset must be a string");
 		}
 		
 		// seek back to the beginning
@@ -966,7 +966,7 @@ Zotero.Translate.IO.Write.prototype = {
 	
 	"setCharacterSet":function(charset) {
 		if(typeof charset !== "string") {
-			throw "Translate: setCharacterSet: charset must be a string";
+			throw new Error("Translate: setCharacterSet: charset must be a string");
 		}
 		
 		if(!this.outputStream) {

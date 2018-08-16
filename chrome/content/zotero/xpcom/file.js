@@ -33,6 +33,7 @@ Zotero.File = new function(){
 	
 	this.getExtension = getExtension;
 	this.getContentsFromURL = getContentsFromURL;
+	this.getContentsFromURLAsync = getContentsFromURLAsync;
 	this.putContents = putContents;
 	this.getValidFileName = getValidFileName;
 	this.truncateFileName = truncateFileName;
@@ -58,9 +59,7 @@ Zotero.File = new function(){
 	
 	this.pathToFileURI = function (path) {
 		var file = new FileUtils.File(path);
-		var ios = Components.classes["@mozilla.org/network/io-service;1"]
-			.getService(Components.interfaces.nsIIOService);
-		return ios.newFileURI(file).spec;
+		return Services.io.newFileURI(file).spec;
 	}
 	
 	
@@ -107,11 +106,11 @@ Zotero.File = new function(){
 		}
 		
 		var dir = OS.Path.dirname(file);
-		while (dir && !await OS.File.exists(dir)) {
+		while (dir && dir != '/' && !await OS.File.exists(dir)) {
 			dir = OS.Path.dirname(dir);
 		}
 		
-		return dir || false;
+		return (dir && dir != '/') ? dir : false;
 	}
 	
 	
@@ -131,6 +130,8 @@ Zotero.File = new function(){
 	 * Get contents of a binary file
 	 */
 	this.getBinaryContents = function(file) {
+		Zotero.debug("Zotero.File.getBinaryContents() is deprecated -- "
+			+ "use Zotero.File.getBinaryContentsAsync() when possible", 2);
 		var iStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
 					 .createInstance(Components.interfaces.nsIFileInputStream);
 		iStream.init(file, 0x01, 0o664, 0);
@@ -339,12 +340,33 @@ Zotero.File = new function(){
 		xmlhttp.send(null);
 		return xmlhttp.responseText;
 	}
+
+	/**
+	 * Return the contents of resource. Use this for loading
+	 * resource/chrome URLs.
+	 *
+	 * @param {String} url - the resource url
+	 * @return {String} the resource contents as a string
+	 */
+	this.getResource = function (url) {
+		return getContentsFromURL(url);
+	}
+
+	/**
+	 * Return a promise for the contents of resource.
+	 *
+	 * @param {String} url - the resource url
+	 * @return {Promise<String>} the resource contents as a string
+	 */
+	this.getResourceAsync = function (url) {
+		return getContentsFromURLAsync(url);
+	}
 	
 	
 	/*
 	 * Return a promise for the contents of a URL as a string
 	 */
-	this.getContentsFromURLAsync = function (url, options={}) {
+	function getContentsFromURLAsync (url, options={}) {
 		return Zotero.HTTP.request("GET", url, Object.assign(options, { responseType: "text" }))
 		.then(function (xmlhttp) {
 			return xmlhttp.response;
@@ -952,6 +974,7 @@ Zotero.File = new function(){
 	
 	
 	this.createDirectoryIfMissing = function (dir) {
+		dir = this.pathToFile(dir);
 		if (!dir.exists() || !dir.isDirectory()) {
 			if (dir.exists() && !dir.isDirectory()) {
 				dir.remove(null);

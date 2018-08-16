@@ -101,7 +101,7 @@ Zotero.Schema = new function(){
 			return _initializeSchema()
 			.then(function() {
 				(Zotero.isStandalone ? Zotero.uiReadyPromise : Zotero.initializationPromise)
-				.then(1000)
+				.delay(1000)
 				.then(async function () {
 					await this.updateBundledFiles();
 					if (Zotero.Prefs.get('automaticScraperUpdates')) {
@@ -221,7 +221,7 @@ Zotero.Schema = new function(){
 		// In Standalone, don't load bundled files until after UI is ready. In Firefox, load them as
 		// soon initialization is done so that translation works before the Zotero pane is opened.
 		(Zotero.isStandalone ? Zotero.uiReadyPromise : Zotero.initializationPromise)
-		.then(1000)
+		.delay(1000)
 		.then(async function () {
 			await this.updateBundledFiles();
 			if (Zotero.Prefs.get('automaticScraperUpdates')) {
@@ -574,7 +574,7 @@ Zotero.Schema = new function(){
 		var ModeType = Zotero.Utilities.capitalize(modeType);
 		var Mode = Zotero.Utilities.capitalize(mode);
 		
-		var repotime = yield Zotero.File.getContentsFromURLAsync("resource://zotero/schema/repotime.txt");
+		var repotime = yield Zotero.File.getResourceAsync("resource://zotero/schema/repotime.txt");
 		var date = Zotero.Date.sqlToDate(repotime.trim(), true);
 		repotime = Zotero.Date.toUnixTimestamp(date);
 		
@@ -1454,7 +1454,7 @@ Zotero.Schema = new function(){
 			throw ('Schema type not provided to _getSchemaSQL()');
 		}
 		
-		return Zotero.File.getContentsFromURLAsync("resource://zotero/schema/" + schema + ".sql");
+		return Zotero.File.getResourceAsync(`resource://zotero/schema/${schema}.sql`);
 	}
 	
 	

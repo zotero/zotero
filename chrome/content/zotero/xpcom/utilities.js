@@ -182,7 +182,7 @@ Zotero.Utilities = {
 		var initialRe = new RegExp('^-?[' + allCaps + ']$');
 
 		if(typeof(author) != "string") {
-			throw "cleanAuthor: author must be a string";
+			throw new Error("cleanAuthor: author must be a string");
 		}
 
 		author = author.replace(/^[\s\u00A0\.\,\/\[\]\:]+/, '')
@@ -246,7 +246,7 @@ Zotero.Utilities = {
 	 */
 	"trim":function(/**String*/ s) {
 		if (typeof(s) != "string") {
-			throw "trim: argument must be a string";
+			throw new Error("trim: argument must be a string");
 		}
 		
 		s = s.replace(/^\s+/, "");
@@ -272,7 +272,7 @@ Zotero.Utilities = {
 	 */
 	"superCleanString":function(/**String*/ x) {
 		if(typeof(x) != "string") {
-			throw "superCleanString: argument must be a string";
+			throw new Error("superCleanString: argument must be a string");
 		}
 		
 		var x = x.replace(/^[\x00-\x27\x29-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F\s]+/, "");
@@ -289,10 +289,8 @@ Zotero.Utilities = {
 		url = url.trim();
 		if (!url) return false;
 		
-		var ios = Components.classes["@mozilla.org/network/io-service;1"]
-			.getService(Components.interfaces.nsIIOService);
 		try {
-			return ios.newURI(url, null, null).spec; // Valid URI if succeeds
+			return Services.io.newURI(url, null, null).spec; // Valid URI if succeeds
 		} catch (e) {
 			if (e instanceof Components.Exception
 				&& e.result == Components.results.NS_ERROR_MALFORMED_URI
@@ -300,7 +298,7 @@ Zotero.Utilities = {
 				if (tryHttp && /\w\.\w/.test(url)) {
 					// Assume it's a URL missing "http://" part
 					try {
-						return ios.newURI('http://' + url, null, null).spec;
+						return Services.io.newURI('http://' + url, null, null).spec;
 					} catch (e) {}
 				}
 				
@@ -317,7 +315,7 @@ Zotero.Utilities = {
 	 */
 	"cleanTags":function(/**String*/ x) {
 		if(typeof(x) != "string") {
-			throw "cleanTags: argument must be a string";
+			throw new Error("cleanTags: argument must be a string");
 		}
 		
 		x = x.replace(/<br[^>]*>/gi, "\n");
@@ -331,7 +329,7 @@ Zotero.Utilities = {
 	 */
 	"cleanDOI":function(/**String**/ x) {
 		if(typeof(x) != "string") {
-			throw "cleanDOI: argument must be a string";
+			throw new Error("cleanDOI: argument must be a string");
 		}
 
 		var doi = x.match(/10(?:\.[0-9]{4,})?\/[^\s]*[^\s\.,]/);
@@ -1245,7 +1243,7 @@ Zotero.Utilities = {
 	 */
 	"quotemeta":function(literal) {
 		if(typeof literal !== "string") {
-			throw "Argument "+literal+" must be a string in Zotero.Utilities.quotemeta()";
+			throw new Error("Argument "+literal+" must be a string in Zotero.Utilities.quotemeta()");
 		}
 		const metaRegexp = /[-[\]{}()*+?.\\^$|,#\s]/g;
 		return literal.replace(metaRegexp, "\\$&");
@@ -1367,6 +1365,7 @@ Zotero.Utilities = {
 		return strings.join(delimiter !== undefined ? delimiter : ", ");
 	},
 	
+
 	/**
 	 * Generate a random string of length 'len' (defaults to 8)
 	 **/

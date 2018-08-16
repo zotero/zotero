@@ -2752,7 +2752,7 @@ Zotero.Translate.IO = {
 		}
 		
 		if(nodes.getElementsByTagName("parsererror").length) {
-			throw "DOMParser error: loading data into data store failed";
+			throw new Error("DOMParser error: loading data into data store failed");
 		}
 		
 		if("normalize" in nodes) nodes.normalize();

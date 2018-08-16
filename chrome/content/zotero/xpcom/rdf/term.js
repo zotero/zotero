@@ -215,7 +215,7 @@ $rdf.Formula.prototype.add = function (subj, pred, obj, why) {
 // Convenience methods on a formula allow the creation of new RDF terms:
 $rdf.Formula.prototype.sym = function (uri, name) {
   if(name != null) {
-    throw "This feature (kb.sym with 2 args) is removed. Do not assume prefix mappings."
+    throw new Error("This feature (kb.sym with 2 args) is removed. Do not assume prefix mappings.");
     if(!$rdf.ns[uri]) throw 'The prefix "' + uri + '" is not set in the API';
     uri = $rdf.ns[uri] + name
   }
@@ -316,7 +316,7 @@ $rdf.Formula.prototype.fromNT = function (str) {
     if(k < len - 1) {
       if(str[k + 1] == '@') lang = str.slice(k + 2, len);
       else if(str.slice(k + 1, k + 3) == '^^') dt = $rdf.fromNT(str.slice(k + 3, len));
-      else throw "Can't convert string from NT: " + str
+      else throw new Error("Can't convert string from NT: " + str);
     }
     var str = (str.slice(1, k));
     str = str.replace(/\\"/g, '"'); // unescape quotes '
@@ -334,7 +334,7 @@ $rdf.Formula.prototype.fromNT = function (str) {
     var x = new $rdf.Variable(str.slice(1));
     return x;
   }
-  throw "Can't convert from NT: " + str;
+  throw new Error("Can't convert from NT: " + str);
 
 }
 $rdf.fromNT = $rdf.Formula.prototype.fromNT; // Not for inexpert user

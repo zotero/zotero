@@ -1338,6 +1338,150 @@ Zotero.Utilities.Internal = {
 			.join('\n');
 	},
 	
+	/**
+	 * Generate a function that produces a static output
+	 *
+	 * Zotero.lazy(fn) returns a function. The first time this function
+	 * is called, it calls fn() and returns its output. Subsequent
+	 * calls return the same output as the first without calling fn()
+	 * again.
+	 */
+	lazy: function (fn) {
+		var x, called = false;
+		return function() {
+			if(!called) {
+				x = fn.apply(this);
+				called = true;
+			}
+			return x;
+		};
+	},
+	
+	serial: function (fn) {
+		Components.utils.import("resource://zotero/concurrentCaller.js");
+		var caller = new ConcurrentCaller({
+			numConcurrent: 1,
+			onError: e => Zotero.logError(e)
+		});
+		return function () {
+			var args = arguments;
+			return caller.start(function () {
+				return fn.apply(this, args);
+			}.bind(this));
+		};
+	},
+	
+	spawn: function (generator, thisObject) {
+		if (thisObject) {
+			return Zotero.Promise.coroutine(generator.bind(thisObject))();
+		}
+		return Zotero.Promise.coroutine(generator)();
+	},
+
+	/**
+	 * Defines property on the object
+	 * More compact way to do Object.defineProperty
+	 *
+	 * @param {Object} obj Target object
+	 * @param {String} prop Property to be defined
+	 * @param {Object} desc Propery descriptor. If not overriden, "enumerable" is true
+	 * @param {Object} opts Options:
+	 *   lazy {Boolean} If true, the _getter_ is intended for late
+	 *     initialization of the property. The getter is replaced with a simple
+	 *     property once initialized.
+	 */
+	defineProperty: function(obj, prop, desc, opts) {
+		if (typeof prop != 'string') throw new Error("Property must be a string");
+		var d = { __proto__: null, enumerable: true, configurable: true }; // Enumerable by default
+		for (let p in desc) {
+			if (!desc.hasOwnProperty(p)) continue;
+			d[p] = desc[p];
+		}
+		
+		if (opts) {
+			if (opts.lazy && d.get) {
+				let getter = d.get;
+				d.configurable = true; // Make sure we can change the property later
+				d.get = function() {
+					let val = getter.call(this);
+					
+					// Redefine getter on this object as non-writable value
+					delete d.set;
+					delete d.get;
+					d.writable = false;
+					d.value = val;
+					Object.defineProperty(this, prop, d);
+					
+					return val;
+				}
+			}
+		}
+		
+		Object.defineProperty(obj, prop, d);
+	},
+	
+	extendClass: function(superClass, newClass) {
+		newClass._super = superClass;
+		newClass.prototype = Object.create(superClass.prototype);
+		newClass.prototype.constructor = newClass;
+	},
+
+	/*
+	 * Flattens mixed arrays/values in a passed _arguments_ object and returns
+	 * an array of values -- allows for functions to accept both arrays of
+	 * values and/or an arbitrary number of individual values
+	 */
+	flattenArguments: function (args){
+		// Put passed scalar values into an array
+		if (args === null || typeof args == 'string' || typeof args.length == 'undefined') {
+			args = [args];
+		}
+			
+		var returns = [];
+		for (var i=0; i<args.length; i++){
+			var arg = args[i];
+			if (!arg && arg !== 0) {
+				continue;
+			}
+			if (Array.isArray(arg)) {
+				returns.push(...arg);
+			}
+			else {
+				returns.push(arg);
+			}
+		}
+		return returns;
+	},
+
+	/*
+	 * Sets font size based on prefs -- intended for use on root element
+	 *  (zotero-pane, note window, etc.)
+	 */
+	setFontSize: function (rootElement) {
+		var size = Zotero.Prefs.get('fontSize');
+		rootElement.style.fontSize = size + 'em';
+		if (size <= 1) {
+			size = 'small';
+		}
+		else if (size <= 1.25) {
+			size = 'medium';
+		}
+		else {
+			size = 'large';
+		}
+		// Custom attribute -- allows for additional customizations in zotero.css
+		rootElement.setAttribute('zoteroFontSize', size);
+	},
+
+	getAncestorByTagName: function (elem, tagName){
+		while (elem.parentNode){
+			elem = elem.parentNode;
+			if (elem.localName == tagName) {
+				return elem;
+			}
+		}
+		return false;
+	},
 	
 	quitZotero: function(restart=false) {
 		Zotero.debug("Zotero.Utilities.Internal.quitZotero() is deprecated -- use quit()");

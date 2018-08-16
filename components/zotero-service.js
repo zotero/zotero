@@ -33,10 +33,14 @@ const Ci = Components.interfaces;
 /** XPCOM files to be loaded for all modes **/
 const xpcomFilesAll = [
 	'zotero',
+	'intl',
+	'prefs',
 	'dataDirectory',
 	'date',
 	'debug',
 	'error',
+	'utilities',
+	'utilities_internal',
 	'file',
 	'http',
 	'mimeTypeHandler',
@@ -49,9 +53,7 @@ const xpcomFilesAll = [
 	'translation/translate_firefox',
 	'translation/translator',
 	'translation/tlds',
-	'utilities',
 	'isbn',
-	'utilities_internal',
 	'utilities_translate'
 ];
 
@@ -456,9 +458,7 @@ var _isStandalone = null;
  */
 function isStandalone() {
 	if(_isStandalone === null) {
-		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
-			getService(Components.interfaces.nsIXULAppInfo);
-		_isStandalone = appInfo.ID === 'zotero@chnm.gmu.edu';
+		_isStandalone = Services.appinfo.ID === 'zotero@chnm.gmu.edu';
 	}
 	return _isStandalone;
 }

@@ -164,11 +164,9 @@ Zotero.QuickCopy = new function() {
 			return quickCopyPref;
 		}
 		
-		var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-			.getService(Components.interfaces.nsIIOService);
 		var nsIURI;
 		try {
-			nsIURI = ioService.newURI(url, null, null);
+			nsIURI = Services.io.newURI(url, null, null);
 			// Accessing some properties may throw for URIs that do not support those
 			// parts. E.g. hostPort throws NS_ERROR_FAILURE for about:blank
 			var urlHostPort = nsIURI.hostPort;

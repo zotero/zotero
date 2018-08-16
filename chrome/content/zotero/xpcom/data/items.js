@@ -1001,7 +1001,7 @@ Zotero.Items = function() {
 					});
 				}
 				// When no longer idle, cancel timer
-				else if (topic == 'back') {
+				else if (topic === 'active') {
 					if (this._emptyTrashTimeoutID) {
 						clearTimeout(this._emptyTrashTimeoutID);
 						this._emptyTrashTimeoutID = null;

@@ -1228,5 +1228,27 @@ Zotero.DataDirectory = {
 		ext = ext ? '.' + ext : '';
 		
 		return OS.Path.join(this.dir, name + ext);
+	},
+
+	/**
+	 * @param {String} name - the name of the subdirectory
+	 * @param {Boolean} createIfMissing - ensure that the directory exists
+	 * @return {String} the path to the subdirectory
+	 */
+	getSubdirectory: function (name, createIfMissing = false) {
+		let dir = OS.Path.join(this.dir, name);
+		if (createIfMissing) {
+			Zotero.File.createDirectoryIfMissing(dir);
+		}
+		return dir;
+	},
+
+	/**
+	 * @param {String} name - the name of the subdirectory
+	 * @return {Promise<Boolean>} true if the subdirectory was deleted,
+	 *   or false if it did not exist
+	 */
+	removeSubdirectory: function (name) {
+		return OS.File.removeDir(OS.Path.join(this.dir, name), {ignoreAbsent: true});
 	}
 };

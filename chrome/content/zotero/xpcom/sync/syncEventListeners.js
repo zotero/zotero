@@ -224,7 +224,7 @@ Zotero.Sync.EventListeners.IdleListener = {
 	
 	_backObserver: {
 		observe: function (subject, topic, data) {
-			if (topic != 'back') {
+			if (topic !== 'active') {
 				return;
 			}
 			

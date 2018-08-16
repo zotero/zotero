@@ -24,9 +24,13 @@
 */
 
 EXPORTED_SYMBOLS = ["ConcurrentCaller"];
-Components.utils.import('resource://zotero/require.js');
 
-var Promise = require('resource://zotero/bluebird.js');
+if (!(typeof process === 'object' && process + '' === '[object process]')) {
+	Components.utils.import('resource://zotero/require.js');
+	var Promise = require('resource://zotero/bluebird.js');
+} else {
+	Promise = require('bluebird');
+}
 
 /**
  * Call a fixed number of functions at once, queueing the rest until slots
@@ -272,3 +276,7 @@ ConcurrentCaller.prototype._log = function (msg) {
 		this._logger("[ConcurrentCaller] " + (this._id ? `[${this._id}] ` : "") + msg);
 	}
 };
+
+if (typeof process === 'object' && process + '' === '[object process]'){
+    module.exports = ConcurrentCaller;
+}

@@ -215,7 +215,7 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	}
 
 	let deferred = Zotero.Promise.defer();
-	let error = function(e) { Zotero.debug(e, 1); deferred.reject(e); };
+	let error = function(e) {  };
 	let translate = new Zotero.Translate.Web();
 	var win = Services.wm.getMostRecentWindow("navigator:browser");
 	let progressWindow = win.ZoteroPane.progressWindow;
@@ -234,13 +234,12 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	}
 	
 	// Load document
-	let hiddenBrowser = Zotero.HTTP.loadDocuments(
-		this.getField('url'),
-		doc => deferred.resolve(doc),
-		() => {},
-		error,
-		true
-	);
+	try {
+		yield Zotero.HTTP.processDocuments(this.getField('url'), doc => deferred.resolve(doc));
+	} catch (e) {
+		Zotero.debug(e, 1);
+		deferred.reject(e);
+	}
 	let doc = yield deferred.promise;
 
 	// Set translate document
@@ -266,7 +265,6 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	if (libraryID) {
 		let result = yield translate.translate({libraryID, collections: collectionID ? [collectionID] : false})
 			.then(items => items ? items[0] : false);
-		Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
 		if (!result) {
 			let item = yield this.clone(libraryID, collectionID, doc);
 			progressWindow.Translation.itemDoneHandler()(null, null, item);
@@ -285,7 +283,6 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	translate.translate({libraryID: false, saveAttachments: false});
 	
 	let itemData = yield deferred.promise;
-	Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
 	
 	// clean itemData
 	const deleteFields = ['attachments', 'notes', 'id', 'itemID', 'path', 'seeAlso', 'version', 'dateAdded', 'dateModified'];

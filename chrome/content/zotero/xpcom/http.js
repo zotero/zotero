@@ -785,8 +785,7 @@ Zotero.HTTP = new function() {
 	 * @type Boolean
 	 */
 	this.browserIsOffline = function() { 
-		return Components.classes["@mozilla.org/network/io-service;1"]
-			.getService(Components.interfaces.nsIIOService).offline;
+		return Services.io.offline;
 	}
 	
 	

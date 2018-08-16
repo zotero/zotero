@@ -21,7 +21,7 @@ $rdf.N3Parser = function () {
 
   var pyjslib_Dict = function (listOfPairs) {
       if(listOfPairs.length > 0)
-        throw "missing.js: oops nnonempty dict not imp";
+        throw new Error("missing.js: oops nnonempty dict not imp");
       return [];
     }
 
@@ -57,8 +57,8 @@ $rdf.N3Parser = function () {
 
   var assertFudge = function (condition, desc) {
       if(condition) return;
-      if(desc) throw "python Assertion failed: " + desc;
-      throw "(python) Assertion failed.";
+      if(desc) throw new Error("python Assertion failed: " + desc);
+      throw new Error("(python) Assertion failed.");
     }
 
 

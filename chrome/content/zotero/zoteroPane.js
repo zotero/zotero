@@ -3899,30 +3899,6 @@ var ZoteroPane = new function()
 	
 	
 	/**
-	 * @return {Promise<Zotero.Item>|false}
-	 */
-	this.addItemFromPage = Zotero.Promise.method(function (itemType, saveSnapshot, row) {
-		if (row == undefined && this.collectionsView && this.collectionsView.selection) {
-			row = this.collectionsView.selection.currentIndex;
-		}
-		
-		if (row !== undefined) {
-			if (!this.canEdit(row)) {
-				this.displayCannotEditLibraryMessage();
-				return false;
-			}
-			
-			var collectionTreeRow = this.collectionsView.getRow(row);
-			if (collectionTreeRow.isPublications()) {
-				this.displayCannotAddToMyPublicationsMessage();
-				return false;
-			}
-		}
-		
-		return this.addItemFromDocument(window.content.document, itemType, saveSnapshot, row);
-	});
-	
-	/**
 	 * Shows progress dialog for a webpage/snapshot save request
 	 */
 	function _showPageSaveStatus(title) {
@@ -4061,10 +4037,6 @@ var ZoteroPane = new function()
 	 * @return {Zotero.Item|false} - The saved item, or false if item can't be saved
 	 */
 	this.addItemFromURL = Zotero.Promise.coroutine(function* (url, itemType, saveSnapshot, row) {
-		if (window.content && url == window.content.document.location.href) {
-			return this.addItemFromPage(itemType, saveSnapshot, row);
-		}
-		
 		url = Zotero.Utilities.resolveIntermediateURL(url);
 		
 		let [mimeType, hasNativeHandler] = yield Zotero.MIME.getMIMETypeFromURL(url);
@@ -4079,12 +4051,12 @@ var ZoteroPane = new function()
 					deferred.resolve(item)
 				});
 			};
-			var done = function () {}
-			var exception = function (e) {
+			try {
+				yield Zotero.HTTP.processDocuments([url], processor);
+			} catch (e) {
 				Zotero.debug(e, 1);
 				deferred.reject(e);
 			}
-			Zotero.HTTP.loadDocuments([url], processor, done, exception);
 			
 			return deferred.promise;
 		}

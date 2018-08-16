@@ -52,7 +52,7 @@ Zotero.OpenURL = new function() {
 		req.send(null);
 		
 		if(!req.responseXML) {
-			throw "Could not access resolver registry";
+			throw new Error("Could not access resolver registry");
 		}
 		
 		var resolverArray = new Array();
