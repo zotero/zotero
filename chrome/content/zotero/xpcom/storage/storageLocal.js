@@ -1013,6 +1013,7 @@ Zotero.Sync.Storage.Local = {
 		if (!conflicts.length) return false;
 		
 		Zotero.debug("Reconciling conflicts for " + Zotero.Libraries.get(libraryID).name);
+		Zotero.debug(conflicts);
 		
 		var io = {
 			dataIn: {
