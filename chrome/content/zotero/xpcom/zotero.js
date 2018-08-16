@@ -2815,17 +2815,36 @@ Zotero.Browser = new function() {
  */
 Zotero.WebProgressFinishListener = function(onFinish) {
 	var _request;
+	var _finished = false;
 	
 	this.getRequest = function () {
 		return _request;
 	};
 	
 	this.onStateChange = function(wp, req, stateFlags, status) {
-		//Zotero.debug('onStageChange: ' + stateFlags);
+		//Zotero.debug('onStateChange: ' + stateFlags);
 		if (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP
 				&& stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK) {
+			if (_finished) {
+				return;
+			}
+			
+			// Get status code and content ype
+			let status = null;
+			let contentType = null;
+			try {
+				let r = _request || req;
+				_request.QueryInterface(Components.interfaces.nsIHttpChannel);
+				status = r.responseStatus;
+				contentType = r.contentType;
+			}
+			catch (e) {
+				Zotero.debug(e, 2);
+			}
+			
 			_request = null;
-			onFinish();
+			onFinish({ status, contentType });
+			_finished = true;
 		}
 		else {
 			_request = req;
