@@ -197,7 +197,8 @@ Zotero.Translate.ItemSaver.prototype = {
 		//
 		// TODO: Separate pref?
 		var openAccessPDFURLs = new Map();
-		if (Zotero.Prefs.get('downloadAssociatedFiles')
+		if (this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD
+				&& Zotero.Prefs.get('downloadAssociatedFiles')
 				// TEMP: Limit to dev builds
 				&& Zotero.isDevBuild) {
 			for (let item of items) {
@@ -252,7 +253,8 @@ Zotero.Translate.ItemSaver.prototype = {
 		
 		// If a translated PDF attachment wasn't saved successfully, either because there wasn't
 		// one or there was but it failed, look for another PDF (if enabled)
-		if (Zotero.Prefs.get('downloadAssociatedFiles')
+		if (this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD
+				&& Zotero.Prefs.get('downloadAssociatedFiles')
 				// TEMP: Limit to dev builds
 				&& Zotero.isDevBuild) {
 			for (let item of items) {
