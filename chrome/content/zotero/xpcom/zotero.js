@@ -2627,8 +2627,7 @@ Zotero.VersionHeader = {
 	},
 	
 	/**
-	 * Add Firefox/[version] to the default user agent and replace Zotero/[version] with
-	 * Zotero/[major.minor] (except for requests to zotero.org, where we include the full version)
+	 * Replace Zotero/[version] with Firefox/[version] in the default user agent
 	 *
 	 * @param {String} domain
 	 * @param {String} ua - User Agent
@@ -2640,17 +2639,12 @@ Zotero.VersionHeader = {
 		var appName = testAppName || info.name;
 		
 		var pos = ua.indexOf(appName + '/');
+		var appPart = ua.substr(pos);
 		
-		// Default UA
+		// Default UA (not a faked UA from the connector
 		if (pos != -1) {
-			ua = ua.slice(0, pos) + `Firefox/${info.platformVersion.match(/^\d+/)[0]}.0 `
-				+ appName + '/';
+			ua = ua.slice(0, pos) + `Firefox/${info.platformVersion.match(/^\d+/)[0]}.0`
 		}
-		// Fake UA from connector
-		else {
-			ua += ' ' + appName + '/';
-		}
-		ua += Zotero.version.replace(/(\d+\.\d+).*/, '$1');
 		
 		return ua;
 	},
