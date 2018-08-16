@@ -145,6 +145,28 @@ var CSL_TYPE_MAPPINGS = {
  */
 Zotero.Utilities = {
 	/**
+	 * Fixes author name capitalization.
+	 * Currently for all uppercase names only
+	 *
+	 * JOHN -> John
+	 * GUTIÉRREZ-ALBILLA -> Gutiérrez-Albilla
+	 * O'NEAL -> O'Neal
+	 *
+	 * @param {String} string Uppercase author name
+	 * @return {String} Title-cased author name
+	 */
+	"capitalizeName": function (string) {
+		if (typeof string === "string" && string.toUpperCase() === string) {
+			string = Zotero.Utilities.XRegExp.replace(
+				string.toLowerCase(),
+				Zotero.Utilities.XRegExp('(^|[^\\pL])\\pL', 'g'),
+				m => m.toUpperCase()
+			);
+		}
+		return string;
+	},
+
+	/**
 	 * Cleans extraneous punctuation off a creator name and parse into first and last name
 	 *
 	 * @param {String} author Creator string
