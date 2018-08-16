@@ -212,6 +212,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				try {
 					let resolvers = Zotero.Attachments.getPDFResolvers(item, ['oa']);
 					if (!resolvers.length) {
+						openAccessPDFURLs.set(item, []);
 						continue;
 					}
 					let urlObjects = await resolvers[0]();
