@@ -147,6 +147,7 @@ cp -R $PDF_TOOLS_CACHE_DIR $PDF_TOOLS_DIR
 cat <<EOF > "$PROFILE/prefs.js"
 user_pref("app.update.enabled", false);
 user_pref("extensions.autoDisableScopes", 0);
+user_pref("browser.dom.window.dump.enabled", true);
 user_pref("browser.tabs.remote.autostart", false);
 user_pref("browser.tabs.remote.autostart.2", false);
 user_pref("browser.uitour.enabled", false);
@@ -166,6 +167,7 @@ user_pref("extensions.zotero.httpServer.enabled", true);
 user_pref("extensions.zotero.backup.numBackups", 0);
 user_pref("extensions.zotero.sync.autoSync", false);
 user_pref("xpinstall.signatures.required", false);
+user_pref("xpinstall.whitelist.required", false);
 user_pref("datareporting.healthreport.uploadEnabled", false);
 user_pref("datareporting.healthreport.service.enabled", false);
 user_pref("datareporting.healthreport.service.firstRun", false);
