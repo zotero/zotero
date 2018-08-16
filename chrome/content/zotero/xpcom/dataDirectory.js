@@ -1249,6 +1249,6 @@ Zotero.DataDirectory = {
 	 *   or false if it did not exist
 	 */
 	removeSubdirectory: function (name) {
-		return Zotero.File.removeIfExists(OS.Path.join(this.dir, name));
+		return OS.File.removeDir(OS.Path.join(this.dir, name), {ignoreAbsent: true});
 	}
 };
