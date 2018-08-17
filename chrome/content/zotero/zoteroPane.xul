@@ -43,7 +43,6 @@
 	<script src="reportInterface.js"/>
 	<script src="timelineInterface.js"/>
 	<script src="recognizePDFDialog.js"/>
-	<script src="browser.js" type="application/javascript;version=1.8"/>
 	<script src="lookup.js"/>
 	<script src="locateMenu.js" type="application/javascript;version=1.8"/>
 	
@@ -66,38 +65,9 @@
 		<command id="cmd_zotero_newSavedSearch" oncommand="ZoteroPane_Local.newSearch()"/>
 		<command id="cmd_zotero_newStandaloneNote" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
 		<command id="cmd_zotero_newChildNote" oncommand="ZoteroPane_Local.newChildNote(event.shiftKey);"/>
-		<!-- Keep in sync with browser.js::scrapeThisPage(), until that calls this directly -->
-		<command id="cmd_zotero_newItemFromCurrentPage" oncommand="ZoteroPane.addItemFromPage('temporaryPDFHack', event.shiftKey ? !Zotero.Prefs.get('automaticSnapshots') : null)"/>
 	</commandset>
 	
-	<popup id="contentAreaContextMenu">
-		<menu id="zotero-content-area-context-menu" label="Zotero">
-			<menupopup>
-				<menuitem id="zotero-context-item-from-page" class="menu-iconic"
-					label="&zotero.toolbar.newItemFromPage.label;"
-					command="cmd_zotero_newItemFromCurrentPage"/>
-				<menuitem id="zotero-context-add-to-current-note" class="menu-iconic"
-					label="&zotero.contextMenu.addTextToCurrentNote;" hidden="true"
-					oncommand="ZoteroPane.addSelectedTextToCurrentNote()"/>
-				<menuitem id="zotero-context-add-to-new-note" class="menu-iconic"
-					label="&zotero.contextMenu.addTextToNewNote;" hidden="true"
-					oncommand="ZoteroPane.createItemAndNoteFromSelectedText()"/>
-				<menuitem id="zotero-context-save-link-as-item" class="menu-iconic"
-					label="&zotero.contextMenu.saveLinkAsItem;" hidden="true"
-					oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.linkURL, 'temporaryPDFHack')"/>
-				<menuitem id="zotero-context-save-image-as-item" class="menu-iconic"
-					label="&zotero.contextMenu.saveImageAsItem;" hidden="true"
-					oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.onImage ? (window.gContextMenu.mediaURL ? window.gContextMenu.mediaURL : window.gContextMenu.imageURL) : window.gContextMenu.bgImageURL, 'artwork')"/>
-			</menupopup>
-		</menu>
-	</popup>
-	
 	<stack id="zotero-pane-stack">
-		<!-- Barrier to prevent tabbing into Zotero pane when busy -->
-		<box id="zotero-pane-tab-catcher-top" hidden="true" align="center" pack="center" style="opacity: 0">
-			<checkbox/>
-		</box>
-		
 		<vbox id="zotero-pane"
 			onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
 			onkeyup="ZoteroPane_Local.handleKeyUp(event, this.id)"
@@ -114,36 +84,10 @@
 								<menupopup>
 									<menuitem id="zotero-tb-feed-add-fromURL" label="&zotero.toolbar.feeds.new.fromURL;" 
 										command="cmd_zotero_newFeed_fromURL"/>
-									<menuitem id="zotero-tb-feed-add-fromPage" label="&zotero.toolbar.feeds.new.fromPage;"
-										oncommand="ZoteroPane_Local.newFeedFromPage()" observes="singleFeedMenuitemState"/>
-									<menu id="zotero-tb-feed-add-fromPage-menu" label="&zotero.toolbar.feeds.new.fromPage;"
-										observes="multipleFeedsMenuState">
-											<menupopup oncommand="ZoteroPane_Local.newFeedFromPage(event)" 
-												onpopupshowing="FeedHandler.buildFeedList(event.target)"/>
-									</menu>
 									<menuitem id="zotero-tb-feed-add-fromOPML" label="&zotero.toolbar.feeds.new.fromOPML;" 
 										oncommand="ZoteroPane_Local.importFeedsFromOPML()"/>
 								</menupopup>
 							</menu>
-						</menupopup>
-					</toolbarbutton>
-					<spacer id="zotero-tb-actions-menu-separator" flex="1" hidden="true"/>
-					<toolbarbutton id="zotero-tb-actions-menu" class="zotero-tb-button" tooltiptext="&zotero.toolbar.actions.label;" type="menu" hidden="true">
-						<menupopup id="zotero-tb-actions-popup">
-							<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" command="cmd_zotero_import"/>
-							<menuitem id="zotero-tb-actions-import-clipboard" label="&zotero.toolbar.importFromClipboard;" command="cmd_zotero_importFromClipboard"/>
-							<menuitem id="zotero-tb-actions-export" label="&zotero.toolbar.export.label;" command="cmd_zotero_exportLibrary"/>
-							<menuitem id="zotero-tb-actions-rtfScan" label="&zotero.toolbar.rtfScan.label;" command="cmd_zotero_rtfScan"/>
-							<menuitem hidden="true" id="zotero-tb-actions-zeroconf-update"
-								label="Search for Shared Libraries" oncommand="Zotero.Zeroconf.findInstances()"/>
-							<menuseparator id="zotero-tb-actions-plugins-separator"/>
-							<menuitem id="zotero-tb-actions-timeline" label="&zotero.toolbar.timeline.label;" command="cmd_zotero_createTimeline"/>
-							<menuseparator id="zotero-tb-actions-separator"/>
-							<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;"
-								oncommand="ZoteroPane_Local.openPreferences()"/>
-							<menuitem id="zotero-tb-actions-reportErrors" command="cmd_zotero_reportErrors" disabled="true"/>
-							<menuitem id="zotero-tb-actions-support" label="&zotero.toolbar.supportAndDocumentation;" oncommand="ZoteroPane.loadURI('http://www.zotero.org/support/', {'metaKey':true, 'shiftKey':true})"/>
-							<menuitem id="zotero-tb-actions-about" label="&zotero.toolbar.about.label;" oncommand="ZoteroPane_Local.openAboutDialog()"/>
 						</menupopup>
 					</toolbarbutton>
 				</hbox>
@@ -197,8 +141,6 @@
 					</toolbarbutton>
 					<toolbarbutton id="zotero-tb-attachment-add" class="zotero-tb-button" tooltiptext="&zotero.items.menu.attach;" type="menu">
 						<menupopup onpopupshowing="ZoteroPane_Local.updateAttachmentButtonMenu(this)">
-							<menuitem class="menuitem-iconic zotero-menuitem-attachments-snapshot standalone-no-display" label="&zotero.items.menu.attach.snapshot;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromPage(false, itemID)"/>
-							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link standalone-no-display" label="&zotero.items.menu.attach.link;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromPage(true, itemID)"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="&zotero.items.menu.attach.file;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="&zotero.items.menu.attach.fileLink;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(true, itemID);" id="zotero-tb-attachment-add-file-link"/>
@@ -305,8 +247,6 @@
 					<menuitem class="menuitem-iconic zotero-menuitem-attach-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemKey'))"/>
 					<menu class="menu-iconic zotero-menuitem-attach" label="&zotero.items.menu.attach;">
 						<menupopup id="zotero-add-attachment-popup">
-							<menuitem class="menuitem-iconic zotero-menuitem-attachments-snapshot standalone-no-display" label="&zotero.items.menu.attach.snapshot;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromPage(false, itemID)"/>
-							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link standalone-no-display" label="&zotero.items.menu.attach.link;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromPage(true, itemID)"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="&zotero.items.menu.attach.file;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="&zotero.items.menu.attach.fileLink;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromDialog(true, itemID);"/>

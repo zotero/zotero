@@ -577,8 +577,6 @@ var removeDir = Zotero.Promise.coroutine(function* (dir) {
  *                             any that were set at startup
  */
 async function resetDB(options = {}) {
-	// Hack to avoid CustomizableUI warnings in console from icon.js
-	var toolbarIconAdded = Zotero.toolbarIconAdded;
 	resetPrefs();
 	
 	if (options.thisArg) {
@@ -593,7 +591,6 @@ async function resetDB(options = {}) {
 		false,
 		options
 	);
-	Zotero.toolbarIconAdded = toolbarIconAdded;
 	await Zotero.Schema.schemaUpdatePromise;
 	initPDFToolsPath();
 }

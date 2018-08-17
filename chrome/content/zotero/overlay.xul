@@ -38,8 +38,6 @@
 	
 	<script src="overlay.js"/>
 	
-	<popup id="contentAreaContextMenu"/>
-	
 	<toolbar id="zotero-toolbar" nowindowdrag="true"/>
 	
 	<vbox id="appcontent">
@@ -48,44 +46,5 @@
 			onmouseup="ZoteroPane.updateTagSelectorSize()"/>
 		
 		<stack id="zotero-pane-stack" persist="savedHeight" savedHeight="300" hidden="true"/>
-		
-		<zoteroguidancepanel id="zotero-main-button-guidance" about="toolbarButton" for="zotero-toolbar-main-button"
-			position="bottomcenter topleft" delay="2000" foregroundonly="true" noautohide="true"
-			hideonpagechange="true" forward="zotero-save-button-guidance"/>
-		<zoteroguidancepanel id="zotero-save-button-guidance" about="saveButton" for="zotero-toolbar-save-button"
-			position="bottomcenter topleft" x="-8" delay="2000" foregroundonly="true" noautohide="true"
-			hideonpagechange="true"/>
-		
-		<!-- Annotation Toolbar -->
-		<toolbar id="zotero-annotate-tb" crop="end" insertbefore="content" hidden="true">
-			<toolbarbutton id="zotero-annotate-tb-add" tooltiptext="&zotero.annotate.toolbar.add.label;" oncommand="Zotero_Browser.toggleMode(this.id);"/>
-			<toolbarbutton id="zotero-annotate-tb-collapse" tooltiptext="&zotero.annotate.toolbar.collapse.label;" oncommand="Zotero_Browser.toggleCollapsed();"/>
-			<toolbarseparator/>
-			<toolbarbutton id="zotero-annotate-tb-highlight" tooltiptext="&zotero.annotate.toolbar.highlight.label;" oncommand="Zotero_Browser.toggleMode(this.id);"/>
-			<toolbarbutton id="zotero-annotate-tb-unhighlight" tooltiptext="&zotero.annotate.toolbar.unhighlight.label;" oncommand="Zotero_Browser.toggleMode(this.id);"/>
-		</toolbar>
 	</vbox>
-	
-	
-	<menupopup id="menu_ToolsPopup">
-		<menuseparator id="zoteroSeparator" insertbefore="devToolsSeparator"/>
-		<menuitem id="tools-zotero" insertbefore="devToolsSeparator"
-			oncommand="ZoteroOverlay.toggleDisplay();" label="Zotero"
-			key="key_openZotero"/>
-	</menupopup>
-	
-	<keyset id="mainKeyset">
-		<!--
-			The key can be changed by the pref extensions.zotero.keys.openZotero,
-			but if the values are changed here, the pref won't override them.
-		-->
-		<key id="key_openZotero"
-			 key="Z" 
-			 oncommand="ZoteroOverlay.toggleDisplay();"
-			 modifiers="accel shift" />
-		 <key id="key_saveToZotero"
-			 key="S"
-			 oncommand="Zotero_Browser.scrapeThisPage();"
-			 modifiers="accel shift" />
-	</keyset>
 </overlay>

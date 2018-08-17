@@ -445,7 +445,6 @@ ZoteroStandalone.DebugOutput = {
 };
 
 
-/** Taken from browser.js **/
 function toJavaScriptConsole() {
 	toOpenWindowByType("global:console", "chrome://global/content/console.xul");
 }

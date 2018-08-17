@@ -52,7 +52,6 @@ var ZoteroPane = new function()
 	this.getSortDirection = getSortDirection;
 	this.setItemsPaneMessage = setItemsPaneMessage;
 	this.clearItemsPaneMessage = clearItemsPaneMessage;
-	this.contextPopupShowing = contextPopupShowing;
 	this.viewSelectedAttachment = viewSelectedAttachment;
 	this.reportErrors = reportErrors;
 	this.displayErrorMessage = displayErrorMessage;
@@ -72,16 +71,6 @@ var ZoteroPane = new function()
 	this.init = function () {
 		Zotero.debug("Initializing Zotero pane");
 		
-		// For now, keep actions menu in the DOM and show it in Firefox for development
-		if (!Zotero.isStandalone) {
-			document.getElementById('zotero-tb-actions-menu-separator').hidden = false;
-			document.getElementById('zotero-tb-actions-menu').hidden = false;
-		}
-		
-		// Set "Report Errors..." label via property rather than DTD entity,
-		// since we need to reference it in script elsewhere
-		document.getElementById('zotero-tb-actions-reportErrors').setAttribute('label',
-			Zotero.getString('errorReport.reportErrors'));
 		// Set key down handler
 		document.getElementById('appcontent').addEventListener('keydown', ZoteroPane_Local.handleKeyDown, true);
 		
@@ -110,7 +99,6 @@ var ZoteroPane = new function()
 		Zotero.updateQuickSearchBox(document);
 		
 		if (Zotero.isMac) {
-			//document.getElementById('zotero-tb-actions-zeroconf-update').setAttribute('hidden', false);
 			document.getElementById('zotero-pane-stack').setAttribute('platform', 'mac');
 		} else if(Zotero.isWin) {
 			document.getElementById('zotero-pane-stack').setAttribute('platform', 'win');
@@ -122,22 +110,11 @@ var ZoteroPane = new function()
 			'sync.syncWith', ZOTERO_CONFIG.DOMAIN_NAME
 		);
 		
-		if (Zotero.isStandalone) {
-			document.getElementById('zotero-tb-feed-add-fromPage').hidden = true;
-			document.getElementById('zotero-tb-feed-add-fromPage-menu').hidden = true;
-		}
-		
 		// register an observer for Zotero reload
 		observerService = Components.classes["@mozilla.org/observer-service;1"]
 					  .getService(Components.interfaces.nsIObserverService);
 		observerService.addObserver(_reloadObserver, "zotero-reloaded", false);
 		observerService.addObserver(_reloadObserver, "zotero-before-reload", false);
-		this.addBeforeReloadListener(function(newMode) {
-			if(newMode == "connector") {
-				ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('connector.standaloneOpen'));
-			}
-			return;
-		});
 		this.addReloadListener(_loadPane);
 		
 		// continue loading pane
@@ -149,7 +126,7 @@ var ZoteroPane = new function()
 	 * mode
 	 */
 	function _loadPane() {
-		if(!Zotero || !Zotero.initialized || Zotero.isConnector) return;
+		if (!Zotero || !Zotero.initialized) return;
 		
 		// Set flags for hi-res displays
 		Zotero.hiDPI = window.devicePixelRatio > 1;
@@ -180,9 +157,6 @@ var ZoteroPane = new function()
 		itemsTree.controllers.appendController(new Zotero.ItemTreeCommandController(itemsTree));
 		itemsTree.addEventListener("mousedown", ZoteroPane_Local.onTreeMouseDown, true);
 		itemsTree.addEventListener("click", ZoteroPane_Local.onTreeClick, true);
-		
-		var menu = document.getElementById("contentAreaContextMenu");
-		menu.addEventListener("popupshowing", ZoteroPane_Local.contextPopupShowing, false);
 		
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		tagSelector.onchange = function () {
@@ -977,26 +951,6 @@ var ZoteroPane = new function()
 		}
 	});
 	
-	this.newFeedFromPage = Zotero.Promise.coroutine(function* (event) {
-		let data = {unsaved: true};
-		if (event) {
-			data.url = event.target.getAttribute('feed');
-		} else {
-			data.url = gBrowser.selectedBrowser.feeds[0].href;
-		}
-		window.openDialog('chrome://zotero/content/feedSettings.xul', 
-			null, 'centerscreen, modal', data);
-		if (!data.cancelled) {
-			let feed = new Zotero.Feed();
-			feed.url = data.url;
-			feed.name = data.title;
-			feed.refreshInterval = data.ttl;
-			feed.cleanupReadAfter = data.cleanupReadAfter;
-			feed.cleanupUnreadAfter = data.cleanupUnreadAfter;
-			yield feed.saveTx();
-			yield feed.updateFeed();
-		}
-	});
 	
 	this.newFeedFromURL = Zotero.Promise.coroutine(function* () {
 		let data = {};
@@ -1411,7 +1365,6 @@ var ZoteroPane = new function()
 			"cmd_zotero_newCollection",
 			"cmd_zotero_newSavedSearch",
 			"zotero-tb-add",
-			"cmd_zotero_newItemFromCurrentPage",
 			"zotero-tb-lookup",
 			"cmd_zotero_newStandaloneNote",
 			"zotero-tb-note-add",
@@ -1724,14 +1677,13 @@ var ZoteroPane = new function()
 		
 		for (var i=0; i<popup.childNodes.length; i++) {
 			var node = popup.childNodes[i];
-			var className = node.className.replace('standalone-no-display', '').trim();
+			var className = node.className;
 			
 			switch (className) {
 				case prefix + 'link':
 					node.disabled = collectionTreeRow.isWithinGroup();
 					break;
 				
-				case prefix + 'snapshot':
 				case prefix + 'file':
 					node.disabled = !canEditFiles;
 					break;
@@ -1741,7 +1693,7 @@ var ZoteroPane = new function()
 					break;
 				
 				default:
-					throw ("Invalid class name '" + className + "' in ZoteroPane_Local.updateAttachmentButtonMenu()");
+					throw new Error(`Invalid class name '${className}'`);
 			}
 		}
 	}
@@ -3359,54 +3311,24 @@ var ZoteroPane = new function()
 				return;
 			}
 			
-			if (Zotero.isStandalone) {
-				if(uri.match(/^https?/)) {
-					this.launchURL(uri);
-					continue;
-				}
-				
-				// Handle no-content zotero: URLs (e.g., zotero://select) without opening viewer
-				if (uri.startsWith('zotero:')) {
-					let nsIURI = Services.io.newURI(uri, null, null);
-					let handler = Components.classes["@mozilla.org/network/protocol;1?name=zotero"]
-						.getService();
-					let extension = handler.wrappedJSObject.getExtension(nsIURI);
-					if (extension.noContent) {
-						extension.doAction(nsIURI);
-						return;
-					}
-				}
-				
-				Zotero.openInViewer(uri);
-				return;
+			if(uri.match(/^https?/)) {
+				this.launchURL(uri);
+				continue;
 			}
 			
-			// Open in new tab
-			var openInNewTab = event && (event.metaKey || (!Zotero.isMac && event.ctrlKey));
-			if (event && event.shiftKey && !openInNewTab) {
-				window.open(uri, "zotero-loaded-page",
-					"menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes");
-			}
-			else if (openInNewTab || !window.loadURI || uris.length > 1) {
-				// if no gBrowser, find it
-				if(!gBrowser) {
-					let browserWindow = Services.wm.getMostRecentWindow("navigator:browser");
-					var gBrowser = browserWindow.gBrowser;
-				}
-				
-				// load in a new tab
-				var tab = gBrowser.addTab(uri);
-				var browser = gBrowser.getBrowserForTab(tab);
-				
-				if (event && event.shiftKey || !openInNewTab) {
-					// if shift key is down, or we are opening in a new tab because there is no loadURI,
-					// select new tab
-					gBrowser.selectedTab = tab;
+			// Handle no-content zotero: URLs (e.g., zotero://select) without opening viewer
+			if (uri.startsWith('zotero:')) {
+				let nsIURI = Services.io.newURI(uri, null, null);
+				let handler = Components.classes["@mozilla.org/network/protocol;1?name=zotero"]
+					.getService();
+				let extension = handler.wrappedJSObject.getExtension(nsIURI);
+				if (extension.noContent) {
+					extension.doAction(nsIURI);
+					return;
 				}
 			}
-			else {
-				window.loadURI(uri);
-			}
+			
+			Zotero.openInViewer(uri);
 		}
 	}
 	
@@ -3469,74 +3391,6 @@ var ZoteroPane = new function()
 		}
 	}
 	
-	
-	// Updates browser context menu options
-	function contextPopupShowing()
-	{
-		if (!Zotero.Prefs.get('browserContentContextMenu')) {
-			return;
-		}
-		
-		var menuitem = document.getElementById("zotero-context-add-to-current-note");
-		if (menuitem){
-			var items = ZoteroPane_Local.getSelectedItems();
-			if (ZoteroPane_Local.itemsView.selection && ZoteroPane_Local.itemsView.selection.count==1
-				&& items[0] && items[0].isNote()
-				&& window.gContextMenu.isTextSelected)
-			{
-				menuitem.hidden = false;
-			}
-			else
-			{
-				menuitem.hidden = true;
-			}
-		}
-		
-		var menuitem = document.getElementById("zotero-context-add-to-new-note");
-		if (menuitem){
-			if (window.gContextMenu.isTextSelected)
-			{
-				menuitem.hidden = false;
-			}
-			else
-			{
-				menuitem.hidden = true;
-			}
-		}
-		
-		var menuitem = document.getElementById("zotero-context-save-link-as-item");
-		if (menuitem) {
-			if (window.gContextMenu.onLink) {
-				menuitem.hidden = false;
-			}
-			else {
-				menuitem.hidden = true;
-			}
-		}
-		
-		var menuitem = document.getElementById("zotero-context-save-image-as-item");
-		if (menuitem) {
-			// Not using window.gContextMenu.hasBGImage -- if the user wants it,
-			// they can use the Firefox option to view and then import from there
-			if (window.gContextMenu.onImage) {
-				menuitem.hidden = false;
-			}
-			else {
-				menuitem.hidden = true;
-			}
-		}
-		
-		// If Zotero is locked or library is read-only, disable menu items
-		var menu = document.getElementById('zotero-content-area-context-menu');
-		var disabled = Zotero.locked;
-		if (!disabled && self.collectionsView.selection && self.collectionsView.selection.count) {
-			var collectionTreeRow = self.collectionsView.selectedTreeRow;
-			disabled = !collectionTreeRow.editable;
-		}
-		for (let menuitem of menu.firstChild.childNodes) {
-			menuitem.disabled = disabled;
-		}
-	}
 	
 	/**
 	 * @return {Promise<Integer|null|false>} - The id of the new note in non-popup mode, null in
@@ -3603,6 +3457,7 @@ var ZoteroPane = new function()
 	}
 	
 	
+	// TODO: Move to server_connector
 	this.addSelectedTextToCurrentNote = Zotero.Promise.coroutine(function* () {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
@@ -3640,17 +3495,6 @@ var ZoteroPane = new function()
 		
 		return false;
 	});
-	
-	
-	this.createItemAndNoteFromSelectedText = Zotero.Promise.coroutine(function* (event) {
-		var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString();
-		var uri = event.currentTarget.ownerDocument.popupNode.ownerDocument.location.href;
-		var item = yield ZoteroPane.addItemFromPage();
-		if (item) {
-			return ZoteroPane.newNote(false, item.key, str, uri)
-		}
-	});
-	
 	
 	
 	this.openNoteWindow = function (itemID, col, parentKey) {
@@ -4153,42 +3997,6 @@ var ZoteroPane = new function()
 	});
 	
 	
-	/*
-	 * Create an attachment from the current page
-	 *
-	 * |itemID|    -- itemID of parent item
-	 * |link|      -- create web link instead of snapshot
-	 */
-	this.addAttachmentFromPage = Zotero.Promise.coroutine(function* (link, itemID) {
-		if (Zotero.DB.inTransaction()) {
-			yield Zotero.DB.waitForTransaction();
-		}
-		
-		if (typeof itemID != 'number') {
-			throw new Error("itemID must be an integer");
-		}
-		
-		var progressWin = new Zotero.ProgressWindow();
-		progressWin.changeHeadline(Zotero.getString('save.' + (link ? 'link' : 'attachment')));
-		var type = link ? 'web-link' : 'snapshot';
-		var icon = 'chrome://zotero/skin/treeitem-attachment-' + type + '.png';
-		progressWin.addLines(window.content.document.title, icon)
-		progressWin.show();
-		progressWin.startCloseTimer();
-		
-		if (link) {
-			return Zotero.Attachments.linkFromDocument({
-				document: window.content.document,
-				parentItemID: itemID
-			});
-		}
-		return Zotero.Attachments.importFromDocument({
-			document: window.content.document,
-			parentItemID: itemID
-		});
-	});
-	
-	
 	this.viewItems = Zotero.Promise.coroutine(function* (items, event) {
 		if (items.length > 1) {
 			if (!event || (!event.metaKey && !event.shiftKey)) {
@@ -4290,8 +4098,8 @@ var ZoteroPane = new function()
 					// TODO: update DB with new info if changed?
 					
 					var ext = Zotero.File.getExtension(file);
-					var externalViewer = Zotero.isStandalone || (!Zotero.MIME.hasNativeHandler(mimeType, ext) &&
-						(!Zotero.MIME.hasInternalHandler(mimeType, ext) || Zotero.Prefs.get('launchNonNativeFiles')));
+					var externalViewer = !Zotero.MIME.hasInternalHandler(mimeType, ext)
+						|| Zotero.Prefs.get('launchNonNativeFiles');
 				}
 				
 				if (!externalViewer) {

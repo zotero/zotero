@@ -383,11 +383,6 @@
 }
 
 
-#zotero-tb-actions-menu
-{
-	list-style-image: url('chrome://zotero/skin/cog.png');
-}
-
 #zotero-tb-add
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-item-add.png');
@@ -511,11 +506,6 @@
 .zotero-menuitem-attachments-link
 {
 	list-style-image: url('chrome://zotero/skin/treeitem-attachment-link.png');
-}
-
-.zotero-menuitem-attachments-snapshot
-{
-	list-style-image: url('chrome://zotero/skin/treeitem-attachment-snapshot.png');
 }
 
 .zotero-menuitem-attachments-web-link
@@ -719,41 +709,6 @@
 	background-image: none;
 }
 
-#zotero-annotate-tb-add
-{
-	list-style-image: url('chrome://zotero/skin/annotate-add.png');
-}
-
-#zotero-annotate-tb-collapse
-{
-	list-style-image: url('chrome://zotero/skin/annotate-collapse.png');
-}
-
-#zotero-annotate-tb-highlight
-{
-	list-style-image: url('chrome://zotero/skin/annotate-highlight.png');
-}
-
-#zotero-annotate-tb-unhighlight
-{
-	list-style-image: url('chrome://zotero/skin/annotate-unhighlight.png');
-}
-
-#zotero-annotate-tb-add[tool-active=true]
-{
-	list-style-image: url('chrome://zotero/skin/annotate-add-selected.png');
-}
-
-#zotero-annotate-tb-highlight[tool-active=true]
-{
-	list-style-image: url('chrome://zotero/skin/annotate-highlight-selected.png');
-}
-
-#zotero-annotate-tb-unhighlight[tool-active=true]
-{
-	list-style-image: url('chrome://zotero/skin/annotate-unhighlight-selected.png');
-}
-
 #zotero-toolbar
 {
 	visibility: visible !important;
@@ -783,7 +738,6 @@
 	#zotero-tb-collection-add { list-style-image: url('chrome://zotero/skin/toolbar-collection-add@2x.png'); }
 	.zotero-menuitem-new-feed { list-style-image: url('chrome://zotero/skin/toolbar-feed-add@2x.png'); }
 	#zotero-tb-library-add-menu { list-style-image: url('chrome://zotero/skin/library_add@2x.png'); }
-	#zotero-tb-actions-menu { list-style-image: url('chrome://zotero/skin/cog@2x.png'); }
 	#zotero-tb-add { list-style-image: url('chrome://zotero/skin/toolbar-item-add@2x.png'); }
 	#zotero-tb-lookup { list-style-image: url('chrome://zotero/skin/toolbar-lookup@2x.png'); }
 	#zotero-tb-attachment-add { list-style-image: url('chrome://zotero/skin/attach@2x.png'); }

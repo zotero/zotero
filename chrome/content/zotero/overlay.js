@@ -31,7 +31,6 @@ var ZoteroOverlay = new function()
 	const DEFAULT_ZPANE_HEIGHT = 300;
 	var toolbarCollapseState;
 	var zoteroPane, zoteroSplitter;
-	var _stateBeforeReload = false;
 	
 	this.isTab = false;
 	
@@ -44,8 +43,6 @@ var ZoteroOverlay = new function()
 				zoteroPane = document.getElementById('zotero-pane-stack');
 				zoteroSplitter = document.getElementById('zotero-splitter');
 				
-				var iconLoaded = false;
-				
 				if (!Zotero) {
 					throw new Error("No Zotero object");
 				}
@@ -55,29 +52,8 @@ var ZoteroOverlay = new function()
 				
 				ZoteroPane_Overlay = ZoteroPane;
 				
-				// Close pane before reload
-				ZoteroPane_Local.addBeforeReloadListener(function(newMode) {
-					if(newMode == "connector") {
-						// save current state
-						_stateBeforeReload = !zoteroPane.hidden && !zoteroPane.collapsed;
-						// ensure pane is closed
-						if(!zoteroPane.collapsed) ZoteroOverlay.toggleDisplay(false, true);
-					}
-				});
-				
-				// Close pane if connector is enabled
-				ZoteroPane_Local.addReloadListener(function() {
-					if(!Zotero.isConnector) {
-						// reopen pane if it was open before
-						ZoteroOverlay.toggleDisplay(_stateBeforeReload, true);
-					}
-				});
-				
 				// TODO: Add only when progress window is open
 				document.getElementById('appcontent').addEventListener('mousemove', Zotero.ProgressWindowSet.updateTimers, false);
-				
-				// Hide browser chrome on Zotero tab
-				XULBrowserWindow.inContentWhitelist.push("chrome://zotero/content/tab.xul");
 				
 				// Perform additional initialization for full mode
 				if (!Zotero.isConnector) {
@@ -86,17 +62,6 @@ var ZoteroOverlay = new function()
 			}
 			catch (e) {
 				Zotero.debug(e, 1);
-				
-				// Add toolbar icon if still necessary
-				if (!iconLoaded) {
-					try {
-						Services.scriptloader.loadSubScript("chrome://zotero/content/icon.js", {}, "UTF-8");
-					}
-					catch (e) {
-						Zotero.logError(e);
-					}
-				}
-				
 				throw e;
 			}
 		});
@@ -127,19 +92,10 @@ var ZoteroOverlay = new function()
 								.getBranch('extensions.zotero.');
 			prefBranch.clearUserPref('statusBarIcon');
 			
-			// Add toolbar icon
-			try {
-				iconLoaded = true;
-				Services.scriptloader.loadSubScript("chrome://zotero/content/icon.js", {}, "UTF-8");
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
-			
 			// Used for loading pages from upgrade wizard
 			if (Zotero.initialURL) {
 				setTimeout(function () {
-					gBrowser.selectedTab = gBrowser.addTab(Zotero.initialURL);
+					Zotero.launchURL(ZOTERO_CONFIG.START_URL);
 					Zotero.initialURL = null;
 				}, 1);
 			}
@@ -151,11 +107,6 @@ var ZoteroOverlay = new function()
 		ZoteroPane.destroy();
 	}
 	
-	this.onBeforeUnload = function() {
-		// close Zotero as a tab, so it won't be pinned
-		var zoteroTab = ZoteroOverlay.findZoteroTab();
-		if(zoteroTab) gBrowser.removeTab(zoteroTab);
-	}
 	
 	/**
 	 * Hides/displays the Zotero interface
@@ -174,18 +125,6 @@ var ZoteroOverlay = new function()
 		// Don't do anything if pane is already showing
 		if (makeVisible && ZoteroPane.isShowing()) {
 			return;
-		}
-		
-		if(makeVisible || makeVisible === undefined) {
-			if(Zotero.isConnector) {
-				// If in connector mode, bring Zotero Standalone to foreground
-				Zotero.activateStandalone();
-				return;
-			} else if(this.isTab) {
-				// If in separate tab mode, just open the tab
-				this.loadZoteroTab();
-				return;
-			}
 		}
 		
 		if(makeVisible === undefined) makeVisible = zoteroPane.hidden || zoteroPane.collapsed;
@@ -256,4 +195,3 @@ window.addEventListener("load", function(e) {
 	}
 }, false);
 window.addEventListener("unload", function(e) { ZoteroOverlay.onUnload(e); }, false);
-window.addEventListener("beforeunload", function(e) { ZoteroOverlay.onBeforeUnload(e); }, false);

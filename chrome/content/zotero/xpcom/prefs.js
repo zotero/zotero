@@ -180,32 +180,6 @@ Zotero.Prefs = new function(){
 		}
 	};
 	
-	
-	// Import settings bundles
-	this.importSettings = function (str, uri) {
-		var ps = Services.prompt;
-		
-		if (!uri.match(/https:\/\/([^\.]+\.)?zotero.org\//)) {
-			Zotero.debug("Ignoring settings file not from https://zotero.org");
-			return;
-		}
-		
-		str = Zotero.Utilities.trim(str.replace(/<\?xml.*\?>\s*/, ''));
-		Zotero.debug(str);
-		
-		var confirm = ps.confirm(
-			null,
-			"",
-			"Apply settings from zotero.org?"
-		);
-		
-		if (!confirm) {
-			return;
-		}
-		
-		// TODO: parse settings XML
-	}
-	
 	// Handlers for some Zotero preferences
 	var _handlers = [
 		[ "automaticScraperUpdates", function(val) {
@@ -227,14 +201,6 @@ Zotero.Prefs = new function(){
 		[ "note.fontSize", function(val) {
 			if (val < 6) {
 				Zotero.Prefs.set('note.fontSize', 11);
-			}
-		}],
-		[ "zoteroDotOrgVersionHeader", function(val) {
-			if (val) {
-				Zotero.VersionHeader.register();
-			}
-			else {
-				Zotero.VersionHeader.unregister();
 			}
 		}],
 		[ "sync.autoSync", function(val) {

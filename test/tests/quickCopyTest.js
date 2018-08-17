@@ -41,7 +41,7 @@ describe("Zotero.QuickCopy", function() {
 		})
 		
 		it("should handle a chrome URL", function () {
-			assert.deepEqual(Zotero.QuickCopy.getFormatFromURL('chrome://zotero/content/tab.xul'), quickCopyPref);
+			assert.deepEqual(Zotero.QuickCopy.getFormatFromURL('chrome://zotero/content/foo.xul'), quickCopyPref);
 		})
 	})
 	

@@ -340,14 +340,6 @@ function ZoteroService() {
 			makeZoteroContext(false);
 			zContext.Zotero.init(zInitOptions)
 			.catch(function (e) {
-				if (e === "ZOTERO_SHOULD_START_AS_CONNECTOR") {
-					// if Zotero should start as a connector, reload it
-					return zContext.Zotero.shutdown()
-					.then(function() {
-						makeZoteroContext(true);
-						return zContext.Zotero.init(zInitOptions);
-					})
-				}
 				dump(e + "\n\n");
 				Components.utils.reportError(e);
 				if (!zContext.Zotero.startupError) {

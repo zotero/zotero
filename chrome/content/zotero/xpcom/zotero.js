@@ -231,8 +231,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		// Make sure that Zotero Standalone is not running as root
 		if(Zotero.isStandalone && !Zotero.isWin) _checkRoot();
 		
-		_addToolbarIcon();
-		
 		try {
 			yield Zotero.DataDirectory.init();
 			if (this.restarting) {
@@ -333,26 +331,22 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			}
 		}
 		
-		if (!Zotero.isConnector) {
-			if (!this.forceDataDir) {
-				yield Zotero.DataDirectory.checkForMigration(
-					dataDir, Zotero.DataDirectory.defaultDir
-				);
-				if (this.skipLoading) {
-					return;
-				}
-				
-				yield Zotero.DataDirectory.checkForLostLegacy();
-				if (this.restarting) {
-					return;
-				}
+		if (!this.forceDataDir) {
+			yield Zotero.DataDirectory.checkForMigration(
+				dataDir, Zotero.DataDirectory.defaultDir
+			);
+			if (this.skipLoading) {
+				return;
 			}
 			
-			// Make sure data directory isn't in Dropbox, etc.
-			if (Zotero.isStandalone) {
-				yield Zotero.DataDirectory.checkForUnsafeLocation(dataDir);
+			yield Zotero.DataDirectory.checkForLostLegacy();
+			if (this.restarting) {
+				return;
 			}
 		}
+		
+		// Make sure data directory isn't in Dropbox, etc.
+		yield Zotero.DataDirectory.checkForUnsafeLocation(dataDir);
 		
 		// Register shutdown handler to call Zotero.shutdown()
 		var _shutdownObserver = {observe:function() { Zotero.shutdown().done() }};
@@ -386,35 +380,15 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			Services.console.unregisterListener(ConsoleListener);
 		});
 		
-		// Load additional info for connector or not
-		if(Zotero.isConnector) {
-			Zotero.debug("Loading in connector mode");
-			Zotero.Connector_Types.init();
-			
-			// Store a startupError until we get information from Zotero Standalone
-			Zotero.startupError = Zotero.getString("connector.loadInProgress")
-			
-			if(!Zotero.isFirstLoadThisSession) {
-				// We want to get a checkInitComplete message before initializing if we switched to
-				// connector mode because Standalone was launched
-				Zotero.IPC.broadcast("checkInitComplete");
-			} else {
-				Zotero.initComplete();
+		return _initFull()
+		.then(function (success) {
+			if (!success) {
+				return false;
 			}
-		} else {
-			Zotero.debug("Loading in full mode");
-			return _initFull()
-			.then(function (success) {
-				if (!success) {
-					return false;
-				}
-				
-				if(Zotero.isStandalone) Zotero.Standalone.init();
-				Zotero.initComplete();
-			})
-		}
-		
-		return true;
+			
+			if (Zotero.isStandalone) Zotero.Standalone.init();
+			Zotero.initComplete();
+		})
 	});
 	
 	/**
@@ -448,22 +422,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		if (this.uiReadyPromise.isPending()) {
 			Zotero.debug("User interface ready in " + (new Date() - _startupTime) + " ms");
 			this.uiReadyDeferred.resolve();
-		}
-	};
-	
-	
-	var _addToolbarIcon = function () {
-		if (Zotero.isStandalone) return;
-		
-		// Add toolbar icon
-		try {
-			Services.scriptloader.loadSubScript("chrome://zotero/content/icon.js", {}, "UTF-8");
-		}
-		catch (e) {
-			if (Zotero) {
-				Zotero.debug(e, 1);
-			}
-			Components.utils.reportError(e);
 		}
 	};
 	
@@ -1556,8 +1514,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	function _showWindowZoteroPaneOverlay(doc) {
 		doc.getElementById('zotero-collections-tree').disabled = true;
 		doc.getElementById('zotero-items-tree').disabled = true;
-		doc.getElementById('zotero-pane-tab-catcher-top').hidden = false;
-		doc.getElementById('zotero-pane-tab-catcher-bottom').hidden = false;
 		doc.getElementById('zotero-pane-overlay').hidden = false;
 	}
 	
@@ -1565,8 +1521,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	function _hideWindowZoteroPaneOverlay(doc) {
 		doc.getElementById('zotero-collections-tree').disabled = false;
 		doc.getElementById('zotero-items-tree').disabled = false;
-		doc.getElementById('zotero-pane-tab-catcher-top').hidden = true;
-		doc.getElementById('zotero-pane-tab-catcher-bottom').hidden = true;
 		doc.getElementById('zotero-pane-overlay').hidden = true;
 		
 		// See note in showZoteroPaneProgressMeter()
@@ -1900,13 +1854,10 @@ Zotero.Keys = new function() {
  */
 Zotero.VersionHeader = {
 	init: function () {
-		if (Zotero.Prefs.get("zoteroDotOrgVersionHeader")) {
-			this.register();
-		}
+		this.register();
 		Zotero.addShutdownListener(this.unregister);
 	},
 	
-	// Called from this.init() and Zotero.Prefs.observe()
 	register: function () {
 		Services.obs.addObserver(this, "http-on-modify-request", false);
 	},
