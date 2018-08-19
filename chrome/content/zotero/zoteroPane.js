@@ -4055,7 +4055,7 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.viewAttachment = Zotero.serial(Zotero.Promise.coroutine(function* (itemIDs, event, noLocateOnMissing, forceExternalViewer) {
+	this.viewAttachment = Zotero.serial(async function (itemIDs, event, noLocateOnMissing, forceExternalViewer) {
 		// If view isn't editable, don't show Locate button, since the updated
 		// path couldn't be sent back up
 		if (!this.collectionsView.editable) {
@@ -4071,9 +4071,26 @@ var ZoteroPane = new function()
 			}
 		}
 		
+		var launchFile = async function (path, contentType) {
+			// Custom PDF handler
+			if (contentType === 'application/pdf') {
+				let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
+				if (pdfHandler) {
+					if (await OS.File.exists(pdfHandler)) {
+						Zotero.launchFileWithApplication(path, pdfHandler);
+						return;
+					}
+					else {
+						Zotero.logError(`${pdfHandler} not found -- launching file normally`);
+					}
+				}
+			}
+			Zotero.launchFile(path);
+		};
+		
 		for (let i = 0; i < itemIDs.length; i++) {
 			let itemID = itemIDs[i];
-			var item = yield Zotero.Items.getAsync(itemID);
+			let item = await Zotero.Items.getAsync(itemID);
 			if (!item.isAttachment()) {
 				throw new Error("Item " + itemID + " is not an attachment");
 			}
@@ -4083,80 +4100,100 @@ var ZoteroPane = new function()
 				continue;
 			}
 			
-			var path = yield item.getFilePathAsync();
-			if (path) {
-				let file = Zotero.File.pathToFile(path);
-				
-				Zotero.debug("Opening " + path);
-				
-				if(forceExternalViewer !== undefined) {
-					var externalViewer = forceExternalViewer;
-				} else {
-					var mimeType = yield Zotero.MIME.getMIMETypeFromFile(file);
-					
-					//var mimeType = attachment.attachmentMIMEType;
-					// TODO: update DB with new info if changed?
-					
-					var ext = Zotero.File.getExtension(file);
-					var externalViewer = !Zotero.MIME.hasInternalHandler(mimeType, ext)
-						|| Zotero.Prefs.get('launchNonNativeFiles');
-				}
-				
-				if (!externalViewer) {
-					let url = Services.io.newFileURI(file).spec;
-					this.loadURI(url, event);
-				}
-				else {
-					Zotero.Notifier.trigger('open', 'file', itemID);
-					
-					// Custom PDF handler
-					if (item.attachmentContentType === 'application/pdf') {
-						let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
-						if (pdfHandler) {
-							if (yield OS.File.exists(pdfHandler)) {
-								Zotero.launchFileWithApplication(file.path, pdfHandler);
-								continue;
+			let isLinkedFile = !item.isImportedAttachment();
+			let path = item.getFilePath();
+			let fileExists = await OS.File.exists(path);
+			let evictedICloudPath;
+			
+			// If the file is an evicted iCloud Drive file, launch that to trigger a download.
+			// As of 10.13.6, launching an .icloud file triggers the download and opens the
+			// associated program (e.g., Preview) but won't actually open the file, so we wait a bit
+			// for the original file to exist and then continue with regular file opening below.
+			//
+			// To trigger eviction for testing, use Cirrus from https://eclecticlight.co/downloads/
+			if (!fileExists && Zotero.isMac && isLinkedFile) {
+				// Get the path to the .icloud file
+				let iCloudPath = Zotero.File.getEvictedICloudPath(item.getFilePath());
+				if (await OS.File.exists(iCloudPath)) {
+					Zotero.debug("Triggering download of iCloud file");
+					await launchFile(iCloudPath, item.attachmentContentType);
+					let time = new Date();
+					let maxTime = 5000;
+					let revealed = false;
+					while (true) {
+						// If too much time has elapsed, just reveal the file in Finder instead
+						if (new Date() - time > maxTime) {
+							Zotero.debug(`File not available after ${maxTime} -- revealing instead`);
+							try {
+								Zotero.File.reveal(iCloudPath);
+								revealed = true;
 							}
-							else {
-								Zotero.logError(`${pdfHandler} not found -- launching file normally`);
+							catch (e) {
+								Zotero.logError(e);
+								// In case the main file became available
+								try {
+									Zotero.File.reveal(path);
+									revealed = true;
+								}
+								catch (e) {
+									Zotero.logError(e);
+								}
 							}
+							break;
+						}
+						
+						// Wait a bit for the download and check again
+						await Zotero.Promise.delay(250);
+						Zotero.debug("Checking for downloaded file");
+						if (await OS.File.exists(path)) {
+							Zotero.debug("File is ready");
+							fileExists = true;
+							break;
 						}
 					}
 					
-					Zotero.launchFile(file);
+					if (revealed) {
+						continue;
+					}
 				}
 			}
-			else {
-				if (!item.isImportedAttachment()
-						|| !Zotero.Sync.Storage.Local.getEnabledForLibrary(item.libraryID)) {
-					this.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
-					return;
-				}
+			
+			if (fileExists) {
+				Zotero.debug("Opening " + path);
+				Zotero.Notifier.trigger('open', 'file', item.id);
 				
-				try {
-					yield Zotero.Sync.Runner.downloadFile(item);
-				}
-				catch (e) {
-					// TODO: show error somewhere else
-					Zotero.debug(e, 1);
-					ZoteroPane_Local.syncAlert(e);
-					return;
-				}
-				
-				if (!(yield item.getFilePathAsync())) {
-					ZoteroPane_Local.showAttachmentNotFoundDialog(item.id, noLocateOnMissing, true);
-					return;
-				}
-				
-				// check if unchanged?
-				// maybe not necessary, since we'll get an error if there's an error
-				
-				Zotero.Notifier.trigger('redraw', 'item', []);
-				// Retry after download
-				i--;
+				launchFile(path, item.attachmentContentType);
+				continue;
 			}
+			
+			if (isLinkedFile || !Zotero.Sync.Storage.Local.getEnabledForLibrary(item.libraryID)) {
+				this.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
+				return;
+			}
+			
+			try {
+				await Zotero.Sync.Runner.downloadFile(item);
+			}
+			catch (e) {
+				// TODO: show error somewhere else
+				Zotero.debug(e, 1);
+				ZoteroPane_Local.syncAlert(e);
+				return;
+			}
+			
+			if (!await item.getFilePathAsync()) {
+				ZoteroPane_Local.showAttachmentNotFoundDialog(item.id, noLocateOnMissing, true);
+				return;
+			}
+			
+			// check if unchanged?
+			// maybe not necessary, since we'll get an error if there's an error
+			
+			Zotero.Notifier.trigger('redraw', 'item', []);
+			// Retry after download
+			i--;
 		}
-	}));
+	});
 	
 	
 	/**

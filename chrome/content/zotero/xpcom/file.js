@@ -1334,6 +1334,11 @@ Zotero.File = new function(){
 	}
 	
 	
+	this.getEvictedICloudPath = function (path) {
+		return OS.Path.join(OS.Path.dirname(path), '.' + OS.Path.basename(path) + '.icloud');
+	};
+	
+	
 	this.isDropboxDirectory = function(path) {
 		return path.toLowerCase().indexOf('dropbox') != -1;
 	}

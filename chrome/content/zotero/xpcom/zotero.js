@@ -1010,6 +1010,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 * Launch a file with the given application
 	 */
 	this.launchFileWithApplication = function (filePath, applicationPath) {
+		Zotero.debug(`Launching ${filePath} with ${applicationPath}`);
+		
 		var exec = Zotero.File.pathToFile(applicationPath);
 		if (!exec.exists()) {
 			throw new Error("'" + applicationPath + "' does not exist");
