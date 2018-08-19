@@ -1473,6 +1473,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		}
 		
 		await clearCacheFiles();
+		await Zotero.DB.queryAsync('VACUUM');
 	}
 	
 	
