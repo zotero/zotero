@@ -24,6 +24,7 @@
 */
 
 "use strict";
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 Zotero_Preferences.Search = {
 	init: function () {
@@ -50,12 +51,17 @@ Zotero_Preferences.Search = {
 	}),
 	
 	
-	rebuildIndexPrompt: Zotero.Promise.coroutine(function* () {
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
-				createInstance(Components.interfaces.nsIPromptService);
-		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
-			+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
+	rebuildIndexPrompt: async function () {
+		var buttons = [
+			document.getElementById('fulltext-rebuildIndex'),
+			document.getElementById('fulltext-clearIndex')
+		];
+		buttons.forEach(b => b.disabled = true);
+		
+		var ps = Services.prompt;
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
 		
 		var index = ps.confirmEx(null,
 			Zotero.getString('zotero.preferences.search.rebuildIndex'),
@@ -68,23 +74,37 @@ Zotero_Preferences.Search = {
 			Zotero.getString('zotero.preferences.search.indexUnindexed'),
 			null, {});
 		
-		if (index == 0) {
-			yield Zotero.Fulltext.rebuildIndex();
+		try {
+			if (index == 0) {
+				await Zotero.Fulltext.rebuildIndex();
+			}
+			else if (index == 2) {
+				await Zotero.Fulltext.rebuildIndex(true)
+			}
+			
+			await this.updateIndexStats();
 		}
-		else if (index == 2) {
-			yield Zotero.Fulltext.rebuildIndex(true)
+		catch (e) {
+			Zotero.alert(null, Zotero.getString('general.error'), e);
+		}
+		finally {
+			buttons.forEach(b => b.disabled = false);
 		}
 		
-		yield this.updateIndexStats();
-	}),
+	},
 	
 	
-	clearIndexPrompt: Zotero.Promise.coroutine(function* () {
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
-				createInstance(Components.interfaces.nsIPromptService);
-		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
-			+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
+	clearIndexPrompt: async function () {
+		var buttons = [
+			document.getElementById('fulltext-rebuildIndex'),
+			document.getElementById('fulltext-clearIndex')
+		];
+		buttons.forEach(b => b.disabled = true);
+		
+		var ps = Services.prompt;
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
 		
 		var index = ps.confirmEx(null,
 			Zotero.getString('zotero.preferences.search.clearIndex'),
@@ -96,13 +116,21 @@ Zotero_Preferences.Search = {
 			// Position 2 because of https://bugzilla.mozilla.org/show_bug.cgi?id=345067
 			Zotero.getString('zotero.preferences.search.clearNonLinkedURLs'), null, {});
 		
-		if (index == 0) {
-			yield Zotero.Fulltext.clearIndex();
+		try {
+			if (index == 0) {
+				await Zotero.Fulltext.clearIndex();
+			}
+			else if (index == 2) {
+				await Zotero.Fulltext.clearIndex(true);
+			}
+			
+			await this.updateIndexStats();
 		}
-		else if (index == 2) {
-			yield Zotero.Fulltext.clearIndex(true);
+		catch (e) {
+			Zotero.alert(null, Zotero.getString('general.error'), e);
 		}
-		
-		yield this.updateIndexStats();
-	})
+		finally {
+			buttons.forEach(b => b.disabled = false);
+		}
+	}
 };
