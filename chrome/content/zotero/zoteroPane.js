@@ -4103,7 +4103,6 @@ var ZoteroPane = new function()
 			let isLinkedFile = !item.isImportedAttachment();
 			let path = item.getFilePath();
 			let fileExists = await OS.File.exists(path);
-			let evictedICloudPath;
 			
 			// If the file is an evicted iCloud Drive file, launch that to trigger a download.
 			// As of 10.13.6, launching an .icloud file triggers the download and opens the
@@ -4113,7 +4112,7 @@ var ZoteroPane = new function()
 			// To trigger eviction for testing, use Cirrus from https://eclecticlight.co/downloads/
 			if (!fileExists && Zotero.isMac && isLinkedFile) {
 				// Get the path to the .icloud file
-				let iCloudPath = Zotero.File.getEvictedICloudPath(item.getFilePath());
+				let iCloudPath = Zotero.File.getEvictedICloudPath(path);
 				if (await OS.File.exists(iCloudPath)) {
 					Zotero.debug("Triggering download of iCloud file");
 					await launchFile(iCloudPath, item.attachmentContentType);
@@ -4222,29 +4221,40 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.showAttachmentInFilesystem = Zotero.Promise.coroutine(function* (itemID, noLocateOnMissing) {
-		var attachment = yield Zotero.Items.getAsync(itemID)
-		if (attachment.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
-			var path = yield attachment.getFilePathAsync();
-			if (path) {
-				let file = Zotero.File.pathToFile(path);
-				try {
-					Zotero.debug("Revealing " + file.path);
-					file.reveal();
-				}
-				catch (e) {
-					// On platforms that don't support nsILocalFile.reveal() (e.g. Linux),
-					// launch the parent directory
-					var parent = file.parent.QueryInterface(Components.interfaces.nsILocalFile);
-					Zotero.launchFile(parent);
-				}
-				Zotero.Notifier.trigger('open', 'file', attachment.id);
-			}
-			else {
-				this.showAttachmentNotFoundDialog(attachment.id, noLocateOnMissing)
+	this.showAttachmentInFilesystem = async function (itemID, noLocateOnMissing) {
+		var attachment = await Zotero.Items.getAsync(itemID)
+		if (attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) return;
+		
+		var path = attachment.getFilePath();
+		var fileExists = await OS.File.exists(path);
+		
+		// If file doesn't exist but an evicted iCloud Drive file does, reveal that instead
+		if (!fileExists && Zotero.isMac && !attachment.isImportedAttachment()) {
+			let iCloudPath = Zotero.File.getEvictedICloudPath(path);
+			if (await OS.File.exists(iCloudPath)) {
+				path = iCloudPath;
+				fileExists = true;
 			}
 		}
-	});
+		
+		if (!fileExists) {
+			this.showAttachmentNotFoundDialog(attachment.id, noLocateOnMissing);
+			return;
+		}
+		
+		let file = Zotero.File.pathToFile(path);
+		try {
+			Zotero.debug("Revealing " + file.path);
+			file.reveal();
+		}
+		catch (e) {
+			// On platforms that don't support nsILocalFile.reveal() (e.g. Linux),
+			// launch the parent directory
+			var parent = file.parent.QueryInterface(Components.interfaces.nsILocalFile);
+			Zotero.launchFile(parent);
+		}
+		Zotero.Notifier.trigger('open', 'file', attachment.id);
+	};
 	
 	
 	this.showPublicationsWizard = function (items) {
