@@ -194,12 +194,12 @@ describe("ZoteroPane", function() {
 			);
 			
 			// Disable loadURI() so viewAttachment() doesn't trigger translator loading
-			var stub = sinon.stub(zp, "loadURI");
+			var stub = sinon.stub(Zotero, "launchFile");
 			
 			await zp.viewAttachment(item.id);
 			
 			assert.ok(stub.calledOnce);
-			assert.ok(stub.calledWith(OS.Path.toFileURI(item.getFilePath())));
+			assert.ok(stub.calledWith(item.getFilePath()));
 			stub.restore();
 			
 			assert.equal(await item.attachmentHash, md5);
