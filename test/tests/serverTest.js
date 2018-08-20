@@ -4,9 +4,9 @@ describe("Zotero.Server", function () {
 	Components.utils.import("resource://zotero-unit/httpd.js");
 	var serverPath;
 	
-	before(function* () {
+	before(async function () {
 		Zotero.Prefs.set("httpServer.enabled", true);
-		Zotero.Server.init();
+		await Zotero.Server.init();
 		serverPath = 'http://127.0.0.1:' + Zotero.Prefs.get('httpServer.port');
 	});
 	
@@ -25,7 +25,7 @@ describe("Zotero.Server", function () {
 						init: function (options) {
 							called = true;
 							assert.isObject(options);
-							assert.propertyVal(options.headers, "Accept-Charset", "UTF-8");
+							assert.equal(options.headers["Accept-Charset"], "UTF-8");
 							return 204;
 						}
 					};
@@ -77,7 +77,7 @@ describe("Zotero.Server", function () {
 					
 					assert.ok(called);
 					assert.equal(req.status, 201);
-					assert.equal(req.getResponseHeader("Content-Type"), "text/plain");
+					assert.include(req.getResponseHeader("Content-Type"), "text/plain");
 					assert.equal(req.responseText, "Test");
 				});
 				
@@ -137,7 +137,7 @@ describe("Zotero.Server", function () {
 					
 					assert.ok(called);
 					assert.equal(req.status, 201);
-					assert.equal(req.getResponseHeader("Content-Type"), "text/plain");
+					assert.include(req.getResponseHeader("Content-Type"), "text/plain");
 					assert.equal(req.responseText, "Test");
 				});
 			});

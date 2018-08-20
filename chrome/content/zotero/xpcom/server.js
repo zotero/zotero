@@ -43,7 +43,7 @@ Zotero.Server = new function() {
 	/**
 	 * initializes a very rudimentary web server
 	 */
-	this.init = function(port, bindAllAddr, maxConcurrentConnections) {
+	this.init = async function(port, bindAllAddr, maxConcurrentConnections) {
 		if (Zotero.HTTP.browserIsOffline()) {
 			Zotero.debug('Browser is offline -- not initializing HTTP server');
 			_registerOnlineObserver();
