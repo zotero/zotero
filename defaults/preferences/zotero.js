@@ -27,7 +27,7 @@ pref("extensions.zotero.openURL.resolver","http://worldcatlibraries.org/registry
 pref("extensions.zotero.openURL.version","1.0");
 pref("extensions.zotero.automaticSnapshots",true);
 pref("extensions.zotero.downloadAssociatedFiles",true);
-pref("extensions.zotero.findPDFs.resolvers", '[]');
+pref("extensions.zotero.findPDFs.resolvers", "[]");
 pref("extensions.zotero.reportTranslationFailure",true);
 pref("extensions.zotero.automaticTags",true);
 pref("extensions.zotero.fontSize", "1.0");
