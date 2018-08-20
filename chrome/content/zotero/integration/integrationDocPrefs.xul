@@ -43,10 +43,10 @@
 	
 	<script src="../include.js"/>
 	<script src="../bibliography.js"/>
-	<vbox id="zotero-bibliography-container">
-		<groupbox>
+	<vbox id="zotero-bibliography-container" flex="1">
+		<groupbox flex="1">
 			<caption label="&zotero.bibliography.style.label;"/>
-			<listbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()"/>
+			<listbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()" flex="1"/>
 			<hbox align="right">
 				<label id="manage-styles" class="text-link"
 					onclick="Zotero_File_Interface_Bibliography.manageStyles()">&zotero.bibliography.manageStyles;</label>

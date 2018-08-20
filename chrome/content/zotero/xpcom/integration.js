@@ -1488,7 +1488,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = Zotero.Promise.coroutine(func
 	
 	// Make sure styles are initialized for new docs
 	yield Zotero.Styles.init();
-	yield Zotero.Integration.displayDialog('chrome://zotero/content/integration/integrationDocPrefs.xul', '', io);
+	yield Zotero.Integration.displayDialog('chrome://zotero/content/integration/integrationDocPrefs.xul', 'resizable', io);
 	
 	if (!io.style || !io.fieldType) {
 		throw new Zotero.Exception.UserCancelled("document preferences window");
