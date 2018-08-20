@@ -584,6 +584,8 @@ Zotero_Preferences.Attachment_Base_Directory = {
 	
 	
 	changePath: Zotero.Promise.coroutine(function* (basePath) {
+		Zotero.debug(`New base directory is ${basePath}`);
+		
 		// Find all current attachments with relative attachment paths
 		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=? AND path LIKE ?";
 		var params = [
@@ -634,14 +636,19 @@ Zotero_Preferences.Attachment_Base_Directory = {
 			// relative paths (or, if the new base directory is an ancestor or
 			// descendant of the old one, new relative paths)
 			if (attachmentPath && Zotero.File.directoryContains(basePath, attachmentPath)) {
+				Zotero.debug(`Converting ${attachmentPath} to relative path`);
 				newAttachmentPaths[attachmentID] = relPath ? attachmentPath : null;
 				numNewAttachments++;
 			}
 			// Existing relative attachments not within the new base directory
 			// will be converted to absolute paths
 			else if (relPath && this.getPath()) {
+				Zotero.debug(`Converting ${relPath} to absolute path`);
 				newAttachmentPaths[attachmentID] = attachmentPath;
 				numOldAttachments++;
+			}
+			else {
+				Zotero.debug(`${attachmentPath} is not within the base directory`);
 			}
 		}
 		
@@ -697,7 +704,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		}
 		
 		// Set new data directory
-		Zotero.debug("Setting new base directory");
+		Zotero.debug("Setting base directory to " + basePath);
 		Zotero.Prefs.set('baseAttachmentPath', basePath);
 		Zotero.Prefs.set('saveRelativeAttachmentPath', true);
 		// Resave all attachments on base path (so that their paths become relative)
