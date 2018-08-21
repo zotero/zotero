@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "sổ nhật ký các thay đổi (changelog)">
 <!ENTITY zotero.upgrade.changeLogAfterLink "để biết có gì mới.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Thêm phần vừa chọn vào một ghi chép Zotero">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Tạo một biểu ghi và một ghi chép Zotero cho phần vừa chọn">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Lưu liên kết thành tài liệu tham khảo trong Zotero">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Lưu hình ảnh thành tài liệu tham khảo trong Zotero">
-
 <!ENTITY zotero.tabs.info.label "Thông tin">
 <!ENTITY zotero.tabs.notes.label "Ghi chép">
 <!ENTITY zotero.tabs.attachments.label "Phần đính kèm">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Hiển thị trong Thư viện">
 <!ENTITY zotero.items.menu.attach.note "Tạo một Ghi chép">
 <!ENTITY zotero.items.menu.attach "Thêm tệp đính kèm">
-<!ENTITY zotero.items.menu.attach.snapshot "Đính kèm Bản lưu trang Web của Trang hiện tại">
-<!ENTITY zotero.items.menu.attach.link "Đính kèm Đường dẫn tới Trang hiện tại">
 <!ENTITY zotero.items.menu.attach.link.uri "Đính kèm liên kết tới URI...">
 <!ENTITY zotero.items.menu.attach.file "Đính kèm bản sao đã lưu của tệp...">
 <!ENTITY zotero.items.menu.attach.fileLink "Đính kèm liên kết đến tệp...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Tạo mục mới">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Khác">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Tạo một mục trang web mới cho Trang web hiện tại">
 <!ENTITY zotero.toolbar.lookup.label "Thêm các mục bằng định danh">
 <!ENTITY zotero.toolbar.removeItem.label "Xóa mục...">
 <!ENTITY zotero.toolbar.newLibrary.label "Thư viện mới">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "New Feed">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
 <!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Choose File...">
 <!ENTITY zotero.file.noneSelected.label "No file selected">
-
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
 
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">

@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Automatisch controleren op updates voor vertalers en verwijsstijlen">
 <!ENTITY zotero.preferences.updateNow "Nu bijwerken">
 <!ENTITY zotero.preferences.reportTranslationFailure "Defecte webpagina-vertalers rapporteren">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Sta zotero.org toe om inhoud aan te passen aan de huidige Zotero-versie">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Indien aangezet zal de Zotero-versie worden toegevoegd aan HTTP-requests naar zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Zotero gebruiken voor gedownloade BibTeX/RIS/Refer-bestanden">
 <!ENTITY zotero.preferences.automaticTags "Items automatisch labelen met trefwoorden en onderwerpen">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Items in de prullenbak automatisch wissen na">

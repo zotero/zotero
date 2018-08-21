@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "a változások listájában">
 <!ENTITY zotero.upgrade.changeLogAfterLink "az újdonságoknak.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "A kijelölés hozzáadása a Zotero jegyzethez">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Zotero elem és jegyzet létrehozása a kijelölés alapján">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "A hivatkozás elmentése Zotero elemként">
-<!ENTITY zotero.contextMenu.saveImageAsItem "A kép elmentése Zotero elemként">
-
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Jegyzetek">
 <!ENTITY zotero.tabs.attachments.label "Csatolmányok">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Megjelenítés a könyvtárban">
 <!ENTITY zotero.items.menu.attach.note "Jegyzet hozzáadása">
 <!ENTITY zotero.items.menu.attach "Csatolmány hozzáadása">
-<!ENTITY zotero.items.menu.attach.snapshot "Az aktuális oldal csatolása pillanatfelvételként">
-<!ENTITY zotero.items.menu.attach.link "Az aktuális oldal csatolása hivatkozásként">
 <!ENTITY zotero.items.menu.attach.link.uri "Link csatolása az URI-hez…">
 <!ENTITY zotero.items.menu.attach.file "Helyben tárolt példány csatolása">
 <!ENTITY zotero.items.menu.attach.fileLink "Fájlra mutató hivatkozás csatolása">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Új elem">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Egyéb...">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Új elem létrehozása az aktuális oldal alapján">
 <!ENTITY zotero.toolbar.lookup.label "Elem hozzáadása azonosító alapján">
 <!ENTITY zotero.toolbar.removeItem.label "Elem törlése...">
 <!ENTITY zotero.toolbar.newLibrary.label "New Library">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "New Feed">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
 <!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Choose File...">
 <!ENTITY zotero.file.noneSelected.label "Nincs fájl kiválasztva">
-
-<!ENTITY zotero.downloadManager.label "Mentés Zotero-ba">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "A csatolmányok nem menthetőek a jelenleg kiválasztott könyvtárba. Ez az elem a saját könyvtárába lesz mentve.">
 
 <!ENTITY zotero.attachLink.title "Link csatolása az URI-hoz">
 <!ENTITY zotero.attachLink.label.link "Link:">

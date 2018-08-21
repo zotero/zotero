@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "seznam změn">
 <!ENTITY zotero.upgrade.changeLogAfterLink ", kde jsou popsány novinky.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Přidat výběr do Zotero poznámky">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Vytvořit Zotero položku a poznámku z výběru">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Uložit odkaz jako položku Zotera">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Uložit obrázek jako položku Zotera">
-
 <!ENTITY zotero.tabs.info.label "Informace">
 <!ENTITY zotero.tabs.notes.label "Poznámky">
 <!ENTITY zotero.tabs.attachments.label "Přílohy">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Ukázat v knihovně">
 <!ENTITY zotero.items.menu.attach.note "Přidat poznámku">
 <!ENTITY zotero.items.menu.attach "Přidat přílohu">
-<!ENTITY zotero.items.menu.attach.snapshot "Připojit snímek současné stránky">
-<!ENTITY zotero.items.menu.attach.link "Připojit odkaz na současnou stránku">
 <!ENTITY zotero.items.menu.attach.link.uri "Připojit odkaz na URI..,">
 <!ENTITY zotero.items.menu.attach.file "Přiložit uloženou kopii souboru...">
 <!ENTITY zotero.items.menu.attach.fileLink "Přiložit odkaz na soubor...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Nová položka">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Více">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Vytvořit novou položku z aktuální stránky">
 <!ENTITY zotero.toolbar.lookup.label "Přidat položku podle identifikátoru">
 <!ENTITY zotero.toolbar.removeItem.label "Odstranit položku...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nová knihovna">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Nové vlákno">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Z URL...">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "Ze stránky...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Z OPML...">
 <!ENTITY zotero.toolbar.feeds.refresh "Obnovit vlákno">
 <!ENTITY zotero.toolbar.feeds.edit "Editovat vlákno">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Vybrat soubor...">
 <!ENTITY zotero.file.noneSelected.label "Nebyl vybrán žádný soubor">
-
-<!ENTITY zotero.downloadManager.label "Uložit do Zotera">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Do zvolené knihovny nemohou být uloženy přílohy. Tato položka bude místo toho uložena do vaší knihovny.">
 
 <!ENTITY zotero.attachLink.title "Připojit odkaz na URI">
 <!ENTITY zotero.attachLink.label.link "Odkaz:">

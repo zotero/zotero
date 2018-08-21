@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "ข้อมูลการเปลี่ยนแปลง">
 <!ENTITY zotero.upgrade.changeLogAfterLink "ดูว่ามีอะไรใหม่">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "เพิ่มสิ่งที่เลือกไว้เข้าในหมายเหตุของ Zotero">
-<!ENTITY zotero.contextMenu.addTextToNewNote "สร้างรายการและหมายเหตุใหม่จากสิ่งที่เลือก">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "บันทึกลิงค์เป็นรายการของ Zotero">
-<!ENTITY zotero.contextMenu.saveImageAsItem "บันทึกรูปภาพเป็นรายการของ Zotero">
-
 <!ENTITY zotero.tabs.info.label "ข้อมูลข่าวสาร">
 <!ENTITY zotero.tabs.notes.label "หมายเหตุ">
 <!ENTITY zotero.tabs.attachments.label "ไฟล์แนบ">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "แสดงในไลบรารี่">
 <!ENTITY zotero.items.menu.attach.note "เพิ่มหมายเหตุ">
 <!ENTITY zotero.items.menu.attach "เพิ่มแฟ้มแนบ">
-<!ENTITY zotero.items.menu.attach.snapshot "แนบภาพหน้าจอของหน้าเว็บปัจจุบัน">
-<!ENTITY zotero.items.menu.attach.link "แนบลิงค์ไปยังหน้าเว็บปัจจุบัน">
 <!ENTITY zotero.items.menu.attach.link.uri "แนบลิงค์ไปยัง URI…">
 <!ENTITY zotero.items.menu.attach.file "แนบแฟ้มพร้อมสำเนาจัดเก็บไว้...">
 <!ENTITY zotero.items.menu.attach.fileLink "แนบลิงค์ไปยังแฟ้มข้อมูล...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "รายการใหม่">
 <!ENTITY zotero.toolbar.moreItemTypes.label "มากกว่า">
-<!ENTITY zotero.toolbar.newItemFromPage.label "สร้างรายการใหม่จากหน้าปัจจุบัน">
 <!ENTITY zotero.toolbar.lookup.label "เพิ่มรายการโดยตัวระบุ">
 <!ENTITY zotero.toolbar.removeItem.label "ลบรายการ...">
 <!ENTITY zotero.toolbar.newLibrary.label "New Library">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "New Feed">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
 <!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "เลือกแฟ้ม...">
 <!ENTITY zotero.file.noneSelected.label "ไม่มีการเลือกแฟ้ม">
-
-<!ENTITY zotero.downloadManager.label "บันทึกไปยัง Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "ไม่สามารถบันทึกเอกสารแนบไปยังไลบรารี่ที่เลือกได้ รายการนี้จะถูกบันทึกไปยังไลบรารี่ของคุณแทน">
 
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">

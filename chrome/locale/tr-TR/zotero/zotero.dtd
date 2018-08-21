@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "değişiklik kaydına">
 <!ENTITY zotero.upgrade.changeLogAfterLink "bakınız.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Seçileni Zotero Not'a Ekle">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Seçimden Zotero öğesi ve Notu Yarat">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Bağlantıyı Zotero öğesi olarak kaydet">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Resmi Zotero öğesi olarak kaydet">
-
 <!ENTITY zotero.tabs.info.label "Bilgi">
 <!ENTITY zotero.tabs.notes.label "Notlar">
 <!ENTITY zotero.tabs.attachments.label "Ekler">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Kitaplıkta Göster">
 <!ENTITY zotero.items.menu.attach.note "Not Ekle">
 <!ENTITY zotero.items.menu.attach "Ek Ekle">
-<!ENTITY zotero.items.menu.attach.snapshot "Açılı Sayfanın Görüntüsünü Ekle">
-<!ENTITY zotero.items.menu.attach.link "Açılı Sayfaya Bağlantı Ekle">
 <!ENTITY zotero.items.menu.attach.link.uri "URI'ye Bağlantı İliştir">
 <!ENTITY zotero.items.menu.attach.file "Dosyanın Kaydedilmiş Kopyasını Ekle">
 <!ENTITY zotero.items.menu.attach.fileLink "Dosyaya Bağlantı Ekle...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Yeni Eser">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Diğer türler">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Geçerli Sayfadan Yeni Bir Eser Oluştur">
 <!ENTITY zotero.toolbar.lookup.label "Eser(ler)i Tanımlayıcılarını Kullanarak Ekle">
 <!ENTITY zotero.toolbar.removeItem.label "Eseri Kaldır...">
 <!ENTITY zotero.toolbar.newLibrary.label "Yeni Kitaplık">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Yeni Besleme">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "URL'den...">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "Sayfadan...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "OPML'den...">
 <!ENTITY zotero.toolbar.feeds.refresh "Beslemeyi Yenile">
 <!ENTITY zotero.toolbar.feeds.edit "Beslemeyi Düzenle...">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Dosya Seçiniz...">
 <!ENTITY zotero.file.noneSelected.label "Dosya seçilmedi">
-
-<!ENTITY zotero.downloadManager.label "Zotero'ya Kaydet">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Ekler şu an seçili olan kitaplığa kaydedilemedi. Bu eser kitaplığınıza kaydedilecek.">
 
 <!ENTITY zotero.attachLink.title "URI'ye Bağlantı Ekle.">
 <!ENTITY zotero.attachLink.label.link "Bağlantı">

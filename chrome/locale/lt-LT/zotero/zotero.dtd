@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "pakeitimų žurnale">
 <!ENTITY zotero.upgrade.changeLogAfterLink "apie naujoves.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Iš pažymėto teksto sukurti Zotero pastabą">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Sukurti Zotero įrašą ir pastabą jam iš pažymėto teksto">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Nuorodą išsaugoti kaip Zotero įrašą">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Paveikslėlį įrašyti kaip Zotero elementą">
-
 <!ENTITY zotero.tabs.info.label "Informacija">
 <!ENTITY zotero.tabs.notes.label "Užrašai">
 <!ENTITY zotero.tabs.attachments.label "Priedai">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Rodyti bibliotekoje">
 <!ENTITY zotero.items.menu.attach.note "Įtraukti pastabą">
 <!ENTITY zotero.items.menu.attach "Įtraukti priedą">
-<!ENTITY zotero.items.menu.attach.snapshot "Pridėti šio tinklalapio momentinę kopiją">
-<!ENTITY zotero.items.menu.attach.link "Pridėti nuorodą į šį puslapį">
 <!ENTITY zotero.items.menu.attach.link.uri "Pridėti URI nuorodą...">
 <!ENTITY zotero.items.menu.attach.file "Pridėti turimo failo kopiją...">
 <!ENTITY zotero.items.menu.attach.fileLink "Pridėti nuorodą iki failo...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Naujas įrašas">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Daugiau">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Iš dabartinio puslapio sukurti interneto puslapį">
 <!ENTITY zotero.toolbar.lookup.label "Įrašą(-us) pridėti pagal identifikatorių">
 <!ENTITY zotero.toolbar.removeItem.label "Pašalinti įrašą...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nauja biblioteka">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Naujas naujienų kanalas">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "puslapis...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "Atnaujinti kanalą">
 <!ENTITY zotero.toolbar.feeds.edit "Keisti naujienų kanalo parinktis...">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Failo pasirinkimas...">
 <!ENTITY zotero.file.noneSelected.label "Nepasirinkote failo">
-
-<!ENTITY zotero.downloadManager.label "Įrašyti į Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Priedų negalima įrašyti pasirinktoje bibliotekoje. Šį įrašą įrašysime jūsų bibliotekoje.">
 
 <!ENTITY zotero.attachLink.title "Įtraukti nuorodą (URI)">
 <!ENTITY zotero.attachLink.label.link "Nuoroda:">

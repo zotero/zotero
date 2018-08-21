@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "protokol o zmenách">
 <!ENTITY zotero.upgrade.changeLogAfterLink "aby ste sa dozvedeli o novinkách a zmenách v tejto verzii.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Pridať výber do Zotera ako poznámku">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Pridať výber do Zotera ako nový záznam a poznámku">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Uložiť odkaz ako nový záznam">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Uložiť obrázok ako nový záznam">
-
 <!ENTITY zotero.tabs.info.label "Informácie">
 <!ENTITY zotero.tabs.notes.label "Poznámky">
 <!ENTITY zotero.tabs.attachments.label "Prílohy">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Zobraziť v knižnici">
 <!ENTITY zotero.items.menu.attach.note "Pridať poznámku">
 <!ENTITY zotero.items.menu.attach "Vložiť prílohu">
-<!ENTITY zotero.items.menu.attach.snapshot "Vložiť snímku aktuálnej stránky">
-<!ENTITY zotero.items.menu.attach.link "Vložiť odkaz na aktuálnu stránku">
 <!ENTITY zotero.items.menu.attach.link.uri "Vložiť odkaz na URI...">
 <!ENTITY zotero.items.menu.attach.file "Vložiť kópiu lokálneho súboru...">
 <!ENTITY zotero.items.menu.attach.fileLink "Vložiť odkaz na súbor...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Nový záznam">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Viac">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Vytvoriť nový záznam z aktuálnej stránky">
 <!ENTITY zotero.toolbar.lookup.label "Vložiť záznam(y) podľa identifikátora">
 <!ENTITY zotero.toolbar.removeItem.label "Odstrániť záznam...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nová knižnica">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Nová RSS správa">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Z URL...">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "Zo stránky...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Z OPML...">
 <!ENTITY zotero.toolbar.feeds.refresh "Obnoviť RSS správu">
 <!ENTITY zotero.toolbar.feeds.edit "Upraviť RSS správu">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Vybrať súbor">
 <!ENTITY zotero.file.noneSelected.label "Nie je označený žiaden súbor">
-
-<!ENTITY zotero.downloadManager.label "Uložiť do Zotera">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Prílohy nemožno uložiť do práve vybranej knižnice. Tento záznam sa preto uloží do vašej knižnice.">
 
 <!ENTITY zotero.attachLink.title "Priložiť odkaz k URI">
 <!ENTITY zotero.attachLink.label.link "Odkaz:">

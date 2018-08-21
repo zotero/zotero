@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "自動檢查更新轉譯器與樣式">
 <!ENTITY zotero.preferences.updateNow "立刻更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "回報有問題的網站轉譯器">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "允許 zotero.org 依目前的 Zotero 版本來調整內容。">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "啟用後會將 Zotero 的目前版本資訊加到針對 zotero.org 的 HTTP 請求中。">
 <!ENTITY zotero.preferences.parseRISRefer "用 Zotero 處理下載的 BibTeX/RIS/Refer 檔">
 <!ENTITY zotero.preferences.automaticTags "自動以關鍵字與主標題作為項目的標籤">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "自動移除刪入垃圾筒且超過">

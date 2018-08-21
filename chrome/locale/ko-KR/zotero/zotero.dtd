@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "변경 사항">
 <!ENTITY zotero.upgrade.changeLogAfterLink "보기">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Zotero 노트에 선택 내용 추가">
-<!ENTITY zotero.contextMenu.addTextToNewNote "선택한 내용으로 Zotero 노트 생성">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Zotero 항목으로 링크 저장">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Zotero 항목으로 이미지 저장">
-
 <!ENTITY zotero.tabs.info.label "정보">
 <!ENTITY zotero.tabs.notes.label "노트">
 <!ENTITY zotero.tabs.attachments.label "첨부">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "라이브러리로 표시">
 <!ENTITY zotero.items.menu.attach.note "노트 추가">
 <!ENTITY zotero.items.menu.attach "첨부 추가">
-<!ENTITY zotero.items.menu.attach.snapshot "현재 페이지의 스냅샷 첨부">
-<!ENTITY zotero.items.menu.attach.link "현재 페이지의 링크 첨부">
 <!ENTITY zotero.items.menu.attach.link.uri "URL로 링크 걸기">
 <!ENTITY zotero.items.menu.attach.file "파일의 사본 첨부...">
 <!ENTITY zotero.items.menu.attach.fileLink "파일에 링크 첨부...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "새 항목">
 <!ENTITY zotero.toolbar.moreItemTypes.label "더 보기">
-<!ENTITY zotero.toolbar.newItemFromPage.label "현재 페이지로부터 새 항목 생성">
 <!ENTITY zotero.toolbar.lookup.label "식별자로 항목 추가">
 <!ENTITY zotero.toolbar.removeItem.label "항목 삭제...">
 <!ENTITY zotero.toolbar.newLibrary.label "새 라이브러리">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "새 피드">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "URL에서...">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "페이지에서...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "OPML에서...">
 <!ENTITY zotero.toolbar.feeds.refresh "피드 새로고침">
 <!ENTITY zotero.toolbar.feeds.edit "피드 편집...">
@@ -309,7 +300,7 @@
 <!ENTITY zotero.rtfScan.mappedCitations.label "문헌확인된 인용">
 <!ENTITY zotero.rtfScan.introPage.label "소개">
 <!ENTITY zotero.rtfScan.introPage.description "Zotero가 자동적으로 인용을 인식하여 참고문헌 목록을 작성하고 이를 RTF 파일에 삽입합니다. RTF 스캔 기능은 현재 다음 형식으로 된 인용을 인식할 수 있습니다 : ">
-<!ENTITY zotero.rtfScan.introPage.description2 "시작하려면, 입력할 RTF 파일과 출력할 RFT 파일을 선택하세요 : ">
+<!ENTITY zotero.rtfScan.introPage.description2 "시작하려면, 입력할 RTF 파일과 출력할 RTF 파일을 선택하세요 : ">
 <!ENTITY zotero.rtfScan.scanPage.label "인용 스캔중">
 <!ENTITY zotero.rtfScan.scanPage.description "인용 조사를 위해 문서 스캔 중 입니다. 잠시만 기다려주십시오.">
 <!ENTITY zotero.rtfScan.citationsPage.label "인용된 항목 확인">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "파일 선택...">
 <!ENTITY zotero.file.noneSelected.label "선택된 파일 없음">
-
-<!ENTITY zotero.downloadManager.label "Zotero로 저장">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "첨부물을 현재 선택한 라이브러리에 저장할 수 없습니다. 그 대신 귀하의 라이브러리에 저장됩니다.">
 
 <!ENTITY zotero.attachLink.title "URI로 링크 걸기">
 <!ENTITY zotero.attachLink.label.link "링크:">

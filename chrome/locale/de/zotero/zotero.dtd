@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "im Changelog">
 <!ENTITY zotero.upgrade.changeLogAfterLink "aufgelistet.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Auswahl zu Zotero-Notiz hinzufügen">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Zotero-Notiz aus Auswahl erstellen">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Link als Zotero-Eintrag speichern">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Bild als Zotero-Eintrag speichern">
-
 <!ENTITY zotero.tabs.info.label "Infos">
 <!ENTITY zotero.tabs.notes.label "Notizen">
 <!ENTITY zotero.tabs.attachments.label "Anhänge">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "In Bibliothek anzeigen">
 <!ENTITY zotero.items.menu.attach.note "Notiz hinzufügen">
 <!ENTITY zotero.items.menu.attach "Anhang hinzufügen">
-<!ENTITY zotero.items.menu.attach.snapshot "Schnappschuss von aktueller Webseite anhängen">
-<!ENTITY zotero.items.menu.attach.link "Link zu aktueller Webseite anhängen">
 <!ENTITY zotero.items.menu.attach.link.uri "Link zu URI hinzufügen...">
 <!ENTITY zotero.items.menu.attach.file "Gespeicherte Kopie der Datei anhängen...">
 <!ENTITY zotero.items.menu.attach.fileLink "Link auf Datei anhängen...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Neuer Eintrag">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mehr">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Neuen Eintrag aus aktueller Webseite erstellen">
 <!ENTITY zotero.toolbar.lookup.label "Eintrag per Identifier hinzufügen">
 <!ENTITY zotero.toolbar.removeItem.label "Eintrag entfernen...">
 <!ENTITY zotero.toolbar.newLibrary.label "Neue Bibliothek">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Neuer Feed">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Von URL...">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "Von Seite...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Von OPML...">
 <!ENTITY zotero.toolbar.feeds.refresh "Feed aktualisieren">
 <!ENTITY zotero.toolbar.feeds.edit "Feed bearbeiten...">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Datei auswählen...">
 <!ENTITY zotero.file.noneSelected.label "Keine Datei ausgewählt">
-
-<!ENTITY zotero.downloadManager.label "In Zotero speichern">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Anhänge können in der aktuell gewählten Bibliothek nicht gespeichert werden. Der Eintrag wird stattdessen in Ihrer Bibliothek gespeichert.">
 
 <!ENTITY zotero.attachLink.title "Link zu einer URI anhängen">
 <!ENTITY zotero.attachLink.label.link "Link:">

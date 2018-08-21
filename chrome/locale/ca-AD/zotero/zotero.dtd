@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "la llista de canvis">
 <!ENTITY zotero.upgrade.changeLogAfterLink "per esbrinar si hi ha novetats">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Afegeix la selecció a una nota del Zotero">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Crea un element del Zotero i una nota amb la selecció">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Desa l'enllaç com un element del Zotero">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Desa la imatge com un element del Zotero">
-
 <!ENTITY zotero.tabs.info.label "Informació">
 <!ENTITY zotero.tabs.notes.label "Notes">
 <!ENTITY zotero.tabs.attachments.label "Adjunts">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Mostra a la biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Afegeix una nota">
 <!ENTITY zotero.items.menu.attach "Afegeix un adjunt">
-<!ENTITY zotero.items.menu.attach.snapshot "Adjunta la captura de la pàgina actual">
-<!ENTITY zotero.items.menu.attach.link "Adjunta un enllaç a la pàgina actual">
 <!ENTITY zotero.items.menu.attach.link.uri "Adjunta un enllaç a l'identificador uniforme de recursos...">
 <!ENTITY zotero.items.menu.attach.file "Adjunta la còpia emmagatzemada del fitxer...">
 <!ENTITY zotero.items.menu.attach.fileLink "Adjunta un enllaç al fitxer...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Element nou">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Més">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Crea un element nou a partir de la pàgina actual">
 <!ENTITY zotero.toolbar.lookup.label "Afegeix un element segons l'identificador">
 <!ENTITY zotero.toolbar.removeItem.label "Esborra l'element...">
 <!ENTITY zotero.toolbar.newLibrary.label "New Library">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "New Feed">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
 <!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Trieu un fitxer...">
 <!ENTITY zotero.file.noneSelected.label "No heu seleccionat cap fitxer">
-
-<!ENTITY zotero.downloadManager.label "Desa al Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Els adjunts no es poden desar a la biblioteca seleccionada. Aquest element es desarà a la biblioteca.">
 
 <!ENTITY zotero.attachLink.title "Adjunta l'enllaç a l'URI">
 <!ENTITY zotero.attachLink.label.link "Enllaç:">

@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "журнал изменений">
 <!ENTITY zotero.upgrade.changeLogAfterLink "чтобы узнать что нового.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Добавить выделенное к заметкам Zotero">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Создать документ и заметку Zotero из выделенного">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Сохранить ссылку как документ Zotero">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Сохранить изображение как документ Zotero">
-
 <!ENTITY zotero.tabs.info.label "Информация">
 <!ENTITY zotero.tabs.notes.label "Заметки">
 <!ENTITY zotero.tabs.attachments.label "Приложения">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Показать в библиотеке">
 <!ENTITY zotero.items.menu.attach.note "Добавить заметку">
 <!ENTITY zotero.items.menu.attach "Добавить приложение">
-<!ENTITY zotero.items.menu.attach.snapshot "Прикрепить снимок текущей страницы">
-<!ENTITY zotero.items.menu.attach.link "Прикрепить ссылку на текущую страницу">
 <!ENTITY zotero.items.menu.attach.link.uri "Прикрепить ссылку на URI…">
 <!ENTITY zotero.items.menu.attach.file "Прикрепить копию файла…">
 <!ENTITY zotero.items.menu.attach.fileLink "Прикрепить ссылку на файл…">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Новый документ">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Прочие типы публикаций">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Создать новый документ с текущей страницы">
 <!ENTITY zotero.toolbar.lookup.label "Добавить документ по идентификатору">
 <!ENTITY zotero.toolbar.removeItem.label "Удалить документ">
 <!ENTITY zotero.toolbar.newLibrary.label "Новая библиотека">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Добавить новостную ленту">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Из URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "Со странцы…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Из OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "Обновить новостную ленту">
 <!ENTITY zotero.toolbar.feeds.edit "Редактировать новостную ленту…">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Выберите файл…">
 <!ENTITY zotero.file.noneSelected.label "Файл не выбран">
-
-<!ENTITY zotero.downloadManager.label "Сохранить в Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Вложения не могут быть сохранены в текущую выбранную библиотеку. Вместо этого данный элемент будет сохранен в вашей библиотеке.">
 
 <!ENTITY zotero.attachLink.title "Прикрепить ссылку на URI">
 <!ENTITY zotero.attachLink.label.link "Ссылка:">

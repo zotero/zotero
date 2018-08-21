@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Автоматично перевіряти на наявність оновлених трансляторів та стилів">
 <!ENTITY zotero.preferences.updateNow "Оновити зараз">
 <!ENTITY zotero.preferences.reportTranslationFailure "Повідомити про транслтори сатів, що не працюють">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Дозволити zotero.org модифікувати зміст на основі поточної версії Zotero">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Якщо включено, поточна версія Zotero  буде додаватись до HTTP запитам на  zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Використовувати Zotero для завантаження файлів BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "Автоматично помічати документи ключовими словами та предметними аголовками">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Автоматично прибирати документи з кошику, видалені наріше ніж">

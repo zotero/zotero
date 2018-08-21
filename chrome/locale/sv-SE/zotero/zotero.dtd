@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "Changelog">
 <!ENTITY zotero.upgrade.changeLogAfterLink "för att se vad som är nytt eller ändrat.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Lägg markeringen till Zotero-anteckning">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Skapa en Zotero-källa och anteckning av markeringen">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Spara länk som en Zotero-källa">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Spara bild som en Zotero-källa">
-
 <!ENTITY zotero.tabs.info.label "Information">
 <!ENTITY zotero.tabs.notes.label "Anteckningar">
 <!ENTITY zotero.tabs.attachments.label "Bilagor">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Visa i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Lägg till anteckning">
 <!ENTITY zotero.items.menu.attach "Lägg till bilaga">
-<!ENTITY zotero.items.menu.attach.snapshot "Bifoga sparad kopia av aktuell sida">
-<!ENTITY zotero.items.menu.attach.link "Bifoga länk till aktuell sida">
 <!ENTITY zotero.items.menu.attach.link.uri "Bifoga länk till URI...">
 <!ENTITY zotero.items.menu.attach.file "Bifoga sparad kopia av filen...">
 <!ENTITY zotero.items.menu.attach.fileLink "Bifoga länk till fil...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Ny post">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mer">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Skapa ny webbsidekälla från aktuell sida">
 <!ENTITY zotero.toolbar.lookup.label "Lägg till källa via referensnummer">
 <!ENTITY zotero.toolbar.removeItem.label "Radera källa...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nytt bibliotek">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Ny matning">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Från URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "Från sida…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Från OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "Uppdatera matning">
 <!ENTITY zotero.toolbar.feeds.edit "Redigera matning…">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Välj fil...">
 <!ENTITY zotero.file.noneSelected.label "Ingen fil vald">
-
-<!ENTITY zotero.downloadManager.label "Spara till Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Bilagor kan inte läggas till det valda biblioteket. Istället kommer källan att sparas i &quot;Mitt bibliotek&quot;.">
 
 <!ENTITY zotero.attachLink.title "Bifoga länk till URI">
 <!ENTITY zotero.attachLink.label.link "Länk:">

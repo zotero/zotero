@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "o registro de mudanças">
 <!ENTITY zotero.upgrade.changeLogAfterLink "para descobrir o que há de novo.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Adicionar a seleção à nota do Zotero">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Criar item e nota do Zotero a partir da seleção">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Salvar o link como um item do Zotero">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Salvar a imagem como um item do Zotero">
-
 <!ENTITY zotero.tabs.info.label "Informações">
 <!ENTITY zotero.tabs.notes.label "Notas">
 <!ENTITY zotero.tabs.attachments.label "Anexos">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Mostrar na biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Adicionar nota">
 <!ENTITY zotero.items.menu.attach "Adicionar anexo">
-<!ENTITY zotero.items.menu.attach.snapshot "Anexar instantâneo da página atual">
-<!ENTITY zotero.items.menu.attach.link "Anexar link para a página atual">
 <!ENTITY zotero.items.menu.attach.link.uri "Anexar link para URI...">
 <!ENTITY zotero.items.menu.attach.file "Anexar cópia armazenada do arquivo...">
 <!ENTITY zotero.items.menu.attach.fileLink "Anexar link para o arquivo...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Novo item">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mais">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Criar novo item de página Web a partir da página atual">
 <!ENTITY zotero.toolbar.lookup.label "Adicionar item(ns) segundo identificador">
 <!ENTITY zotero.toolbar.removeItem.label "Remover item...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nova biblioteca">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Nova fonte">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Da URL...">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "Da página...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "De OPML...">
 <!ENTITY zotero.toolbar.feeds.refresh "Atualizar a fonte">
 <!ENTITY zotero.toolbar.feeds.edit "Editar a fonte">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Selecionar arquivo...">
 <!ENTITY zotero.file.noneSelected.label "Não foi selecionado nenhum arquivo">
-
-<!ENTITY zotero.downloadManager.label "Salvar no Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Não foi possível salvar os anexos na biblioteca atualmente selecionada. Esse documento será salvo em sua biblioteca.">
 
 <!ENTITY zotero.attachLink.title "Anexar link para URI">
 <!ENTITY zotero.attachLink.label.link "Link:">

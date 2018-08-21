@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "дневника на промените">
 <!ENTITY zotero.upgrade.changeLogAfterLink "за да видите какво беше актуализирано и какво е новото.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Добавяне на избраното към бележка в Зотеро">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Създаване на запис и бележка в Зотеро от избраното.">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Съхраняване на връзката като запис в Зотеро">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Съхраняване на образа като запис в Зотеро">
-
 <!ENTITY zotero.tabs.info.label "Информация">
 <!ENTITY zotero.tabs.notes.label "Бележки">
 <!ENTITY zotero.tabs.attachments.label "Прикачени файлове">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Показване в библиотеката">
 <!ENTITY zotero.items.menu.attach.note "Добавяне на бележка">
 <!ENTITY zotero.items.menu.attach "Добавяне на прикачен файл">
-<!ENTITY zotero.items.menu.attach.snapshot "Добавяне на &quot;моментна снимка&quot; на настоящата страница">
-<!ENTITY zotero.items.menu.attach.link "Добавяне на връзка към настоящата страница">
 <!ENTITY zotero.items.menu.attach.link.uri "Добавяне на връзка към URI…">
 <!ENTITY zotero.items.menu.attach.file "Добавяне на съхранено копие на файл от твърдия диск...">
 <!ENTITY zotero.items.menu.attach.fileLink "Добавяне на връзка към файл">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Нов запис">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Още">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Създаване на нов запис от настоящата страница">
 <!ENTITY zotero.toolbar.lookup.label "Добавяне на запис(и) чрез идентификатор">
 <!ENTITY zotero.toolbar.removeItem.label "Премахване на запис...">
 <!ENTITY zotero.toolbar.newLibrary.label "Нова библиотека">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Новинарска емисия">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "От URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "От страница...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "От OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "Обновяване на емисиите">
 <!ENTITY zotero.toolbar.feeds.edit "Редактиране на емисиите">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Избиране на файл...">
 <!ENTITY zotero.file.noneSelected.label "Няма избран файл">
-
-<!ENTITY zotero.downloadManager.label "Записване в Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Прикачените файлове не могат да бъдат записани в избраната библиотека. Вместо това, записът ще бъде направен във Вашата библиотека.">
 
 <!ENTITY zotero.attachLink.title "Прикачване на линк към URI">
 <!ENTITY zotero.attachLink.label.link "Линк:">

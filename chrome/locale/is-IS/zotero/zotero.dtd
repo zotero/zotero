@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "breytingafærsluskrána">
 <!ENTITY zotero.upgrade.changeLogAfterLink "til að sjá hvað er nýtt.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Bæta vali á Zotero minnisblað">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Útbúa Zotero færslu og minnisblað út frá vali">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Vista slóð sem Zotero færslu">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Vista mynd sem Zotero færslu">
-
 <!ENTITY zotero.tabs.info.label "Upplýsingar">
 <!ENTITY zotero.tabs.notes.label "Minnisblað">
 <!ENTITY zotero.tabs.attachments.label "Viðhengi">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Sýna í færslusafni">
 <!ENTITY zotero.items.menu.attach.note "Bæta við athugasemd">
 <!ENTITY zotero.items.menu.attach "Sækja viðhengi">
-<!ENTITY zotero.items.menu.attach.snapshot "Hengja við flýtimynd af síðunni sem nú er opin">
-<!ENTITY zotero.items.menu.attach.link "Hengja slóð við síðuna sem nú er opin">
 <!ENTITY zotero.items.menu.attach.link.uri "Hengja tengil við URI-slóð…">
 <!ENTITY zotero.items.menu.attach.file "Hengja við geymt afrit af skrá…">
 <!ENTITY zotero.items.menu.attach.fileLink "Hengja við tengil á skrá…">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Ný færsla">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Meira">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Útbúa vefsíðufærslu úr síðunni sem nú er opin">
 <!ENTITY zotero.toolbar.lookup.label "Bæta við færslu(m) samkvæmt auðkenni">
 <!ENTITY zotero.toolbar.removeItem.label "Fjarlægja færslu…">
 <!ENTITY zotero.toolbar.newLibrary.label "Nýtt færslusafn">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Nýtt streymi">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Úr slóð…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "Úr síðu…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Úr OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "Endurnýja streymi">
 <!ENTITY zotero.toolbar.feeds.edit "Breyta streymi…">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Veldu skrá…">
 <!ENTITY zotero.file.noneSelected.label "Engin skrá valin">
-
-<!ENTITY zotero.downloadManager.label "Vista í Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Ekki er hægt að vista viðhengi í því safni sem nú er valið. Þessi færsla verður í staðinn vistuð í færslusafninu þínu.">
 
 <!ENTITY zotero.attachLink.title "Hengja tengil við URI-slóð">
 <!ENTITY zotero.attachLink.label.link "Slóð:">

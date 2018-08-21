@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "变更日志">
 <!ENTITY zotero.upgrade.changeLogAfterLink "以了解有哪些新的改动.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "将所选内容添加到 Zotero 笔记">
-<!ENTITY zotero.contextMenu.addTextToNewNote "由所选内容创建 Zotero 条目及笔记">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "将链接保存为 Zotero 条目">
-<!ENTITY zotero.contextMenu.saveImageAsItem "将图片保存为 Zotero 条目">
-
 <!ENTITY zotero.tabs.info.label "信息">
 <!ENTITY zotero.tabs.notes.label "笔记">
 <!ENTITY zotero.tabs.attachments.label "附件">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "在文献库中显示">
 <!ENTITY zotero.items.menu.attach.note "添加笔记">
 <!ENTITY zotero.items.menu.attach "添加附件">
-<!ENTITY zotero.items.menu.attach.snapshot "附加当前页的快照">
-<!ENTITY zotero.items.menu.attach.link "附加当前页的链接">
 <!ENTITY zotero.items.menu.attach.link.uri "附加URI的链接…">
 <!ENTITY zotero.items.menu.attach.file "附加文件副本...">
 <!ENTITY zotero.items.menu.attach.fileLink "附加文件链接...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "新建条目">
 <!ENTITY zotero.toolbar.moreItemTypes.label "更多">
-<!ENTITY zotero.toolbar.newItemFromPage.label "从当前页创建网页条目">
 <!ENTITY zotero.toolbar.lookup.label "通过标识符添加条目">
 <!ENTITY zotero.toolbar.removeItem.label "移除条目...">
 <!ENTITY zotero.toolbar.newLibrary.label "新建文献库">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "新建订阅">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "来自 URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "来自网页…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "来自 OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "刷新订阅">
 <!ENTITY zotero.toolbar.feeds.edit "编辑订阅…">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "选择文件...">
 <!ENTITY zotero.file.noneSelected.label "未选定文件">
-
-<!ENTITY zotero.downloadManager.label "保存到 Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "附件无法保存到当前选中的文献库. 不过, 该条目将被保存到您的文献库中.">
 
 <!ENTITY zotero.attachLink.title "将链接附加到 URI">
 <!ENTITY zotero.attachLink.label.link "链接:">

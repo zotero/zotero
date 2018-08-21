@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "بررسی خودکار برای به‌روزرسانی مترجم‌ها و شیوه‌ها">
 <!ENTITY zotero.preferences.updateNow "روزآمدسازی هم‌اکنون انجام شود">
 <!ENTITY zotero.preferences.reportTranslationFailure "گزارش مترجم‌های مشکل‌دار">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "اجازه به zotero.org برای تنظیم محتوا با توجه به نگارش زوترو">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "در صورت انتخاب این گزینه، نگارش زوترو در درخواست‌های HTTP به zotero.org گنجانده می‌شود.">
 <!ENTITY zotero.preferences.parseRISRefer "استفاده از زوترو برای پرونده‌های BibTeX/RIS/Refer بارگیری شده">
 <!ENTITY zotero.preferences.automaticTags "برچسب زدن خودکار به آیتم‌ها با استفاده از کلمات کلیدی و موضوع‌ها">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "حذف خودکار آیتم‌های موجود در سطل بازیافت پس از">

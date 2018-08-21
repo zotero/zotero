@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "het logboek van veranderingen">
 <!ENTITY zotero.upgrade.changeLogAfterLink "om te zien wat er in de nieuwe versie veranderd is.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Selectie toevoegen aan Zotero-aantekening">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Zotero-item en -aantekening maken van selectie">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Bewaar koppeling als Zotero-item">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Bewaar afbeelding als Zotero-item">
-
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Aantekeningen">
 <!ENTITY zotero.tabs.attachments.label "Bijlagen">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "In bibliotheek tonen">
 <!ENTITY zotero.items.menu.attach.note "Aantekening toevoegen">
 <!ENTITY zotero.items.menu.attach "Bijlage toevoegen">
-<!ENTITY zotero.items.menu.attach.snapshot "Snapshot van huidige pagina toevoegen">
-<!ENTITY zotero.items.menu.attach.link "Koppeling naar huidige pagina toevoegen">
 <!ENTITY zotero.items.menu.attach.link.uri "Koppeling naar URI toevoegen…">
 <!ENTITY zotero.items.menu.attach.file "Kopie van bestand toevoegen…">
 <!ENTITY zotero.items.menu.attach.fileLink "Koppeling naar bestand toevoegen…">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Nieuw item">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Meer">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Nieuw item aanmaken van huidige pagina">
 <!ENTITY zotero.toolbar.lookup.label "Item(s) toevoegen via identificatiecode">
 <!ENTITY zotero.toolbar.removeItem.label "Item verwijderen…">
 <!ENTITY zotero.toolbar.newLibrary.label "Nieuwe bibliotheek">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Nieuwe feed">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Van URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "Van Pagina…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Van OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "Feed vernieuwen">
 <!ENTITY zotero.toolbar.feeds.edit "Feed bewerken…">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Kies bestand…">
 <!ENTITY zotero.file.noneSelected.label "Geen bestand geselecteerd">
-
-<!ENTITY zotero.downloadManager.label "Opslaan in Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Bijlages kunnen niet in de nu geselecteerde bibliotheek worden opgeslagen. Dit item zal daarom in plaats hiervan in uw bibliotheek worden opgeslagen.">
 
 <!ENTITY zotero.attachLink.title "Koppel verwijzing aan een URI">
 <!ENTITY zotero.attachLink.label.link "Verwijzing:">

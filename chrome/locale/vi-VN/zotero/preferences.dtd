@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Tự động kiểm tra các bộ chuyển đổi và kiểu trích dẫn có được cập nhật">
 <!ENTITY zotero.preferences.updateNow "Cập nhật ngay bây giờ">
 <!ENTITY zotero.preferences.reportTranslationFailure "Báo cáo các bộ chuyển đổi bị hỏng">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Cho phép zotero.org điều chỉnh nội dung dựa trên phiên bản Zotero hiện tại">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Nếu cho phép, số hiệu phiên bản Zotero hiện tại sẽ được gộp vào các yêu cầu HTTP gửi tới zotero.org">
 <!ENTITY zotero.preferences.parseRISRefer "Dùng Zotero để tải các tập tin Bib TeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "Tự động tạo tag cho các tài liệu bằng các từ khóa và các đề mục">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Tự động loại bỏ các tài liệu trong Thùng rác đã xóa hơn">

@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Automatiškai tikrinti, ar yra transliatorių ir stilių atnaujinimų">
 <!ENTITY zotero.preferences.updateNow "Atnaujinti dabar">
 <!ENTITY zotero.preferences.reportTranslationFailure "Pranešti apie netinkamus svetainės transliatorius">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Leisti zotero.org derinti turinį pagal dabartinę Zotero versiją">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Jei parinktis įgalinta, dabartinė Zotero versija bus automatiškai įtraukta į zotero.org HTTP užklausas.">
 <!ENTITY zotero.preferences.parseRISRefer "Zotero naudoti BibTeX/RIS/Refer failų parsiuntimui">
 <!ENTITY zotero.preferences.automaticTags "Įrašams automatiškai priskirti gaires su raktažodžiais ir temomis">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatiškai šalinti šiukšlinės įrašus, senesnius nei">

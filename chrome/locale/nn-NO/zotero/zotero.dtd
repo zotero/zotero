@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "endringsloggen">
 <!ENTITY zotero.upgrade.changeLogAfterLink "for å finne ut kva som er nytt.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Legg utval til Zotero-notat">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Lag notat og element i Zotero frå utvalet">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Lagre lenkje som Zotero-objekt">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Lagre bilete som Zotero-objekt">
-
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Notat">
 <!ENTITY zotero.tabs.attachments.label "Vedlegg">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Vis i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Legg til notat">
 <!ENTITY zotero.items.menu.attach "Legg til vedlegg">
-<!ENTITY zotero.items.menu.attach.snapshot "Legg til snapshot av gjeldande side">
-<!ENTITY zotero.items.menu.attach.link "Legg til lenkje til gjeldande side">
 <!ENTITY zotero.items.menu.attach.link.uri "Legg ved lenkje til URI …">
 <!ENTITY zotero.items.menu.attach.file "Legg ved lagra kopi av fil …">
 <!ENTITY zotero.items.menu.attach.fileLink "Legg ved lenkje til fil …">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Nytt element">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Meir">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Lag nytt element frå gjeldande side">
 <!ENTITY zotero.toolbar.lookup.label "Legg til objekt med identifikator">
 <!ENTITY zotero.toolbar.removeItem.label "Fjern element …">
 <!ENTITY zotero.toolbar.newLibrary.label "Nytt bibliotek ">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "New Feed">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Frå URI …">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "Frå side …">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Frå OPML …">
 <!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
 <!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Velg fil …">
 <!ENTITY zotero.file.noneSelected.label "Inga fil vald">
-
-<!ENTITY zotero.downloadManager.label "Lagra til Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Vedlegg kan ikkje lagrast til det valde biblioteket. Lagrar til hovudbiblioteket i staden.">
 
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Lenkje:">

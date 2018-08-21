@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Автоматично проверяване за актуализирани стилове и програми за извличане на данни">
 <!ENTITY zotero.preferences.updateNow "Актуализирай сега">
 <!ENTITY zotero.preferences.reportTranslationFailure "Докладване за повредени програми за извличане на данни от интернет страници">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Разрешаване на zotero.org да персонализира съдържанието според настоящата версия на Зотеро">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Когато е включено, натоящата версия на Зотеро ще бъде добавена в HTTP поискванията към zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Използване на Зотеро за изтегляне на BibTeX/RIS/Refer файлове.">
 <!ENTITY zotero.preferences.automaticTags "Автоматично маркиране на записите с ключови думи и заглавия на темата">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Автоматично изтривай записите в кошчето, изтрити преди повече от">

@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Güncellenmiş çevirmen ve stilleri otomatik olarak ara">
 <!ENTITY zotero.preferences.updateNow "Şimdi Güncelle">
 <!ENTITY zotero.preferences.reportTranslationFailure "Bozuk site çevirmenlerini bildir">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Zotero.org'a, kullanılan Zotero sürümüne göre içeriği özelleştirme yetkisi ver.">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Etkinleştirilirse, varolan Zotero sürümü zotero.org'a yapılan HTTP isteklerine eklenecektir.">
 <!ENTITY zotero.preferences.parseRISRefer "İndirilmiş BibTeX/RIS/Refer dosyaları için, Zotero'yu kullan">
 <!ENTITY zotero.preferences.automaticTags "Anahtar kelimeler ve konu başlıkları ile eserleri otomatik olarak etiketle">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Bu kadar zaman önce Çöp Sepetine gönderilmiş eserleri otomatik olarak sil:">

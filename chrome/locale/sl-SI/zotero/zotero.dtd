@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "zapisnik sprememb,">
 <!ENTITY zotero.upgrade.changeLogAfterLink "kjer so navedene novosti.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Dodaj izbor v opombo Zotero">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Ustvari vnos in opombo Zotero iz izbora">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Shrani povezavo kot vnos Zotera">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Shrani sliko kot vnos Zotera">
-
 <!ENTITY zotero.tabs.info.label "Podatki">
 <!ENTITY zotero.tabs.notes.label "Opombe">
 <!ENTITY zotero.tabs.attachments.label "Priponke">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Pokaži v knjižnici">
 <!ENTITY zotero.items.menu.attach.note "Dodaj opombo">
 <!ENTITY zotero.items.menu.attach "Dodaj priponko">
-<!ENTITY zotero.items.menu.attach.snapshot "Pripni posnetek trenutne strani">
-<!ENTITY zotero.items.menu.attach.link "Pripni povezavo na trenutno stran">
 <!ENTITY zotero.items.menu.attach.link.uri "URI-ju pripni povezavo ...">
 <!ENTITY zotero.items.menu.attach.file "Pripni shranjeno kopijo datoteke ...">
 <!ENTITY zotero.items.menu.attach.fileLink "Pripni povezavo do datoteke ...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Nov vnos">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Dodatno">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Ustvari nov vnos iz trenutne strani">
 <!ENTITY zotero.toolbar.lookup.label "Dodaj vnos po identifikatorju">
 <!ENTITY zotero.toolbar.removeItem.label "Odstrani vnos ...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nova knjižnica ">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Nov vir ">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Z URL ...">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "S strani ...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Iz OPML ...">
 <!ENTITY zotero.toolbar.feeds.refresh "Osveži vir">
 <!ENTITY zotero.toolbar.feeds.edit "Uredi vir ...">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Izberite datoteko ...">
 <!ENTITY zotero.file.noneSelected.label "Izbrana ni nobena datoteka">
-
-<!ENTITY zotero.downloadManager.label "Shrani na Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "V trenutno izbrano knjižnico priponk ni mogoče shraniti. Vnos bo namesto tega shranjen v vašo knjižnico.">
 
 <!ENTITY zotero.attachLink.title "URI pripni povezavo">
 <!ENTITY zotero.attachLink.label.link "Povezava:">

@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Аутоматски потражи нова ажурирања превода и стилова">
 <!ENTITY zotero.preferences.updateNow "Ажурирај сада">
 <!ENTITY zotero.preferences.reportTranslationFailure "Извести о грешкама у „преводиоцу странице“">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Дозволи страници zotero.org да доставља прилагођен садржај на основу ваше верзији Зотера">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Уколико је омогућено, тренутна верзија Зотера ће бити укључена у ХТТП захтев који се шаље страници zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Користи Зотеро за преузимање BibTeX/RIS/Refer датотека">
 <!ENTITY zotero.preferences.automaticTags "Самостално стави назнаку на ставке са кључним речима и насловом субјекта">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Уклони ставке из смећа које су обрисане пре">

@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "ធ្វើទំនើបកម្មឥលូវ">
 <!ENTITY zotero.preferences.reportTranslationFailure "រាយការណ៍កូដចម្លងគេហទំព័រខូច">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "ទុកឲ zotero.org ផ្លាស់ប្តូរខ្លឹមសារដោយអនុលោមទៅតាមកំណែហ្ស៊ូតេរ៉ូថ្មី">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "ប្រសិនបើអាច កំណែហ្ស៊ូតេរ៉ូថ្មីនឹងត្រូវបញ្ចូលនៅក្នុងសំណើអេចធីធីភី​ទៅកាន់ zotero.org។">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticTags "ដាក់ស្លាកឯកសារដោយប្រើពាក្យគន្លឹះ និង ចំណងជើងអត្ថបទដោយស្វ័យ​ប្រវត្តិ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "លុបឯកសារចេញពីធុងសំរាមដោយស្វ័យប្រវត្តិ កាលណាត្រូវបានលុបយូរ​ជាង">

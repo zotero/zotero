@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Mutakhirkan sekarang">
 <!ENTITY zotero.preferences.reportTranslationFailure "Laporkan kerusakan translator situs">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Izinkan zotero.org untuk menyusun konten berdasarkan versi Zotero sekarang">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Jika dibolehkan, versi Zotero sekarang akan dimasukkan dalam permintaan HTTP kepada zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticTags "Berikan tag pada item dengan kata kunci dan bagian utama subjek secara automatis">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Buang item-item di dalam kantung sampah yang telah dihapus lebih dari">

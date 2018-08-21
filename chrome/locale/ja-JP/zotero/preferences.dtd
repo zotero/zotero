@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "トランスレータとスタイルの更新を自動的に確認する。">
 <!ENTITY zotero.preferences.updateNow "今すぐ更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "壊れたサイト・トランスレータを報告する">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "現行の Zotero のバージョンに基づいて zotero.org が内容をカスタマイズすることを許可する">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "有効化されると、現在の Zotero バージョン情報が zotero.org への HTTP リクエストへ含まれます。">
 <!ENTITY zotero.preferences.parseRISRefer "ダウンロード済みの BibTeX/RIS/Refer ファイルに対して Zotero を使用する">
 <!ENTITY zotero.preferences.automaticTags "キーワードと件名標目を含むアイテムに自動的にタグを付ける">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "ゴミ箱の中のアイテムが">

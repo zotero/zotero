@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Αυτόματος έλεγχος για ενημερωμένους μεταφραστές και στυλ">
 <!ENTITY zotero.preferences.updateNow "Ενημέρωση τώρα">
 <!ENTITY zotero.preferences.reportTranslationFailure "Αναφέρετε προβληματικούς μεταφραστές ιστοτόπου">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Να επιτρέπεται στο zotero.org να προσαρμόσει το περιεχόμενο, βάσει της τρέχουσας έκδοσης του Zotero">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Αν ενεργοποιηθεί, η τρέχουσα έκδοση του Zotero θα συμπεριληφθεί στα αιτήματα HTTP προς το zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Χρήση του Zotero για λήψη αρχείων Bib Tex/RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "Αυτόματη επισήμανση των στοιχείων με λέξεις κλειδιά και κεφαλίδες θέματος">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Να απομακρύνονται αυτόματα από τον κάδο ανακύκλωσης στοιχεία που έχουν διαγραφεί για περισσότερο από">

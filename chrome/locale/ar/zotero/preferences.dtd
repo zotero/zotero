@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "التأكد التلقائي من وجود مترجمات مواقع محدثة">
 <!ENTITY zotero.preferences.updateNow "التحديث الآن">
 <!ENTITY zotero.preferences.reportTranslationFailure "الإبلاغ عن مترجمات مواقع معطلة">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "السماح لموقع زوتيرو بتخصيص المحتوى بناء على الاصدار الحالي لزوتيرو">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "السماح لموقع زوتيرو بالتعرف على الاصدار الحالي لزوتيرو">
 <!ENTITY zotero.preferences.parseRISRefer "استخدم زوتيرو لتحميل انواع ملفات  BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "اضف اوسمة  تلقائية للعناصر بالكلمات المفتاحية ورؤوس الموضوعات">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "الافراغ التلقائي لسلة المحذوفات. ازالة اللملفات المحذوفة منذ">

@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "更新履歴">
 <!ENTITY zotero.upgrade.changeLogAfterLink "をご覧ください。">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "選択範囲を Zotero メモに追加">
-<!ENTITY zotero.contextMenu.addTextToNewNote "選択範囲から Zotero アイテムとメモを作成">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "リンクを Zotero アイテムとして保存">
-<!ENTITY zotero.contextMenu.saveImageAsItem "画像を Zotero アイテムとして保存">
-
 <!ENTITY zotero.tabs.info.label "情報">
 <!ENTITY zotero.tabs.notes.label "メモ">
 <!ENTITY zotero.tabs.attachments.label "添付ファイル">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "ライブラリの中に表示">
 <!ENTITY zotero.items.menu.attach.note "メモを追加">
 <!ENTITY zotero.items.menu.attach "添付ファイルを追加する">
-<!ENTITY zotero.items.menu.attach.snapshot "現在のページのスナップショットを添付">
-<!ENTITY zotero.items.menu.attach.link "現在のページへのリンクを添付">
 <!ENTITY zotero.items.menu.attach.link.uri "URIへのリンクを添付する...">
 <!ENTITY zotero.items.menu.attach.file "保存されたファイルのコピーを添付する...">
 <!ENTITY zotero.items.menu.attach.fileLink "リンクをファイルに添付する...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "新規アイテム">
 <!ENTITY zotero.toolbar.moreItemTypes.label "その他">
-<!ENTITY zotero.toolbar.newItemFromPage.label "現在のページから新規ウェブページ・アイテムを作成">
 <!ENTITY zotero.toolbar.lookup.label "識別子によってアイテムを追加する">
 <!ENTITY zotero.toolbar.removeItem.label "アイテムを削除...">
 <!ENTITY zotero.toolbar.newLibrary.label "新しいライブラリ">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "新しいフィード">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "URLから...">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "ページから...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "OPMLから...">
 <!ENTITY zotero.toolbar.feeds.refresh "フィードを更新する">
 <!ENTITY zotero.toolbar.feeds.edit "フィードを編集する...">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "ファイルを選択...">
 <!ENTITY zotero.file.noneSelected.label "ファイルが選択されていません">
-
-<!ENTITY zotero.downloadManager.label "Zotero に保存する">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "添付ファイルは現在選択中のライブラリに保存することができません。その代わり、このアイテムはあなたのライブラリに保存されます。">
 
 <!ENTITY zotero.attachLink.title "URIへのリンクを添付する">
 <!ENTITY zotero.attachLink.label.link "リンク:">

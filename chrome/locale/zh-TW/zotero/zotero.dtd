@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "更新記錄">
 <!ENTITY zotero.upgrade.changeLogAfterLink "來看看有什麼新事務。">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "將所選加入 Zotero 筆記">
-<!ENTITY zotero.contextMenu.addTextToNewNote "由所選建立 Zotero 項目與筆記">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "將連結儲存成 Zotero 項目">
-<!ENTITY zotero.contextMenu.saveImageAsItem "將圖片儲存成 Zotero 項目">
-
 <!ENTITY zotero.tabs.info.label "資訊">
 <!ENTITY zotero.tabs.notes.label "筆記">
 <!ENTITY zotero.tabs.attachments.label "附件檔">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "在文獻庫中顯示">
 <!ENTITY zotero.items.menu.attach.note "新增筆記">
 <!ENTITY zotero.items.menu.attach "新增附加檔案">
-<!ENTITY zotero.items.menu.attach.snapshot "附加目前網頁的快照">
-<!ENTITY zotero.items.menu.attach.link "將連結附加到目前網頁">
 <!ENTITY zotero.items.menu.attach.link.uri "附加連結到 URI…">
 <!ENTITY zotero.items.menu.attach.file "附加已儲存的檔案副本…">
 <!ENTITY zotero.items.menu.attach.fileLink "將連結附加到檔案…">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "新增項目">
 <!ENTITY zotero.toolbar.moreItemTypes.label "更多">
-<!ENTITY zotero.toolbar.newItemFromPage.label "從目前頁面建立網頁項目">
 <!ENTITY zotero.toolbar.lookup.label "依識別碼加入項目">
 <!ENTITY zotero.toolbar.removeItem.label "移除項目…">
 <!ENTITY zotero.toolbar.newLibrary.label "新的文獻庫">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "新增 Feed">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "從 URL...">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "從頁...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "從 OPML...">
 <!ENTITY zotero.toolbar.feeds.refresh "重新整理 Feed">
 <!ENTITY zotero.toolbar.feeds.edit "編輯 Feed...">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "選擇檔案…">
 <!ENTITY zotero.file.noneSelected.label "未選檔案">
-
-<!ENTITY zotero.downloadManager.label "儲存到 Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "附件檔不能被存到目前選定的文獻庫。這個項目會被改存到您的文獻庫。">
 
 <!ENTITY zotero.attachLink.title "附加連結到 URI…">
 <!ENTITY zotero.attachLink.label.link "連結：">

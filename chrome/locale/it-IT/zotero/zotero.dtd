@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "storico dei cambiamenti">
 <!ENTITY zotero.upgrade.changeLogAfterLink "per conoscere le novità.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Aggiungi la selezione alla nota di Zotero">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Crea elemento e nota in base alla selezione">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Salva il link in Zotero">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Salva l'immagine in Zotero">
-
 <!ENTITY zotero.tabs.info.label "Informazioni">
 <!ENTITY zotero.tabs.notes.label "Note">
 <!ENTITY zotero.tabs.attachments.label "Allegati">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Visualizza nella libreria">
 <!ENTITY zotero.items.menu.attach.note "Aggiungi nota">
 <!ENTITY zotero.items.menu.attach "Aggiungi un allegato">
-<!ENTITY zotero.items.menu.attach.snapshot "Allega istantanea della pagina attuale">
-<!ENTITY zotero.items.menu.attach.link "Allega collegamento alla pagina attuale">
 <!ENTITY zotero.items.menu.attach.link.uri "Aggiungi un link alla URI...">
 <!ENTITY zotero.items.menu.attach.file "Allega copia memorizzata del file...">
 <!ENTITY zotero.items.menu.attach.fileLink "Allega collegamento al File...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Nuovo elemento">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Altro">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Estrai nuovo elemento dalla pagina visualizzata">
 <!ENTITY zotero.toolbar.lookup.label "Aggiungi un oggetto usando un identificatore">
 <!ENTITY zotero.toolbar.removeItem.label "Elimina elemento...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nuova Libreria">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Nuovo Feed">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Dall' URL...">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "Dalla Pagina...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "Ricarica Feed">
 <!ENTITY zotero.toolbar.feeds.edit "Modifica Feed...">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Scegli il File...">
 <!ENTITY zotero.file.noneSelected.label "Nessun file selezionato">
-
-<!ENTITY zotero.downloadManager.label "Salva in Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "La libreria selezionata non può essere usata per salvare allegati. Questo oggetto sarà salvato nella tua libreria.">
 
 <!ENTITY zotero.attachLink.title "Aggiungi Link all' URL">
 <!ENTITY zotero.attachLink.label.link "Link:">

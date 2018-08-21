@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "записник промена">
 <!ENTITY zotero.upgrade.changeLogAfterLink "да би видели шта је ново.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Додајте означено у Зотерову белешку">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Направите Зотерову ставку и белешку из изабраног">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Сачувај везу као Зотеро ставку">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Сачувај слику као Зотеро ставку">
-
 <!ENTITY zotero.tabs.info.label "Инфо">
 <!ENTITY zotero.tabs.notes.label "Белешке">
 <!ENTITY zotero.tabs.attachments.label "Прилози">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Прикажи у библиотеци">
 <!ENTITY zotero.items.menu.attach.note "Додај белешку">
 <!ENTITY zotero.items.menu.attach "Додај прилог">
-<!ENTITY zotero.items.menu.attach.snapshot "Приложо снимак тренутне странице">
-<!ENTITY zotero.items.menu.attach.link "Приложи везу до тренутне странице">
 <!ENTITY zotero.items.menu.attach.link.uri "Приложи везу до адресе…">
 <!ENTITY zotero.items.menu.attach.file "Приложи сачувану копију датотеке…">
 <!ENTITY zotero.items.menu.attach.fileLink "Приложи везу до датотеке…">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Нова ставка">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Више">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Направи веб страницу од тренутне странице">
 <!ENTITY zotero.toolbar.lookup.label "Додај ставку(е) на основу идентификатора">
 <!ENTITY zotero.toolbar.removeItem.label "Уклони ставку…">
 <!ENTITY zotero.toolbar.newLibrary.label "Нова библиотека">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Нови довод">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Из адресе…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "Са странице…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Са ОПМЛ-а…">
 <!ENTITY zotero.toolbar.feeds.refresh "Освежи довод">
 <!ENTITY zotero.toolbar.feeds.edit "Уреди довод…">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Изабери датотеку…">
 <!ENTITY zotero.file.noneSelected.label "Није изабрана датотека">
-
-<!ENTITY zotero.downloadManager.label "Сачувај у Зотеро">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Не можете да сачувате прилоге унутар изабране библиотеке. Ова ставка ће зато бити сачувана у вашу личну библиотеку.">
 
 <!ENTITY zotero.attachLink.title "Додај везу до УРИ адресе">
 <!ENTITY zotero.attachLink.label.link "Веза:">

@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Otsida automaatsed stiile ja tõlkijaid">
 <!ENTITY zotero.preferences.updateNow "Uuendada nüüd">
 <!ENTITY zotero.preferences.reportTranslationFailure "Anda teada vigastest tõlkijatest">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Lubada zotero.org modifitseerida sisu vastavalt Zotero versioonile">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Kui valitud, siis praegune Zotero versioon lisatakse HTTP päringutele zotero.org-ist.">
 <!ENTITY zotero.preferences.parseRISRefer "Kasutada Zoterot BibTeX/RIS/Refer failide avamisel">
 <!ENTITY zotero.preferences.automaticTags "Lisada automaatselt märksõnad ja teemapealkirjad lipikutesse">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaatselt eemaldada kirjed prügikastist, mis on kustutatud rohkem kui">

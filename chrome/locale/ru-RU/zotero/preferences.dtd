@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Автоматически проверять на наличие обновленных импóртеров и стилей">
 <!ENTITY zotero.preferences.updateNow "Обновить сейчас">
 <!ENTITY zotero.preferences.reportTranslationFailure "Сообщить о неработающих импóртерах сайта">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Разрешить zotero.org модифицировать содержание на основе текущей версии Zotero">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Если включено, текущая версия Zotero будет добавляться к HTTP запросам на zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Использовать Zotero для загруженных файлов RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "Автоматически помечать документы ключевыми словами и предметными заголовками">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Автоматически убирать документы из корзины, удалённые более">

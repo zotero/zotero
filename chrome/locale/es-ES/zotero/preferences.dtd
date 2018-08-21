@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Automáticamente comprobar si hay traductores y estilos actualizados ">
 <!ENTITY zotero.preferences.updateNow "Actualizarlo">
 <!ENTITY zotero.preferences.reportTranslationFailure "Informar de fallos en los traductores de página">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Permitir que zotero.org personalice contenido basándose en la versión actual de Zotero">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Si se activa, la versión actual de Zotero se añadirá a las peticiones HTTP a zotero.org">
 <!ENTITY zotero.preferences.parseRISRefer "Utilizar Zotero para los archivos descargados en formato BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "Marcar elementos automáticamente con palabras clave y cabeceras de asunto">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Eliminar automáticamente elementos de la papelera que se eliminaron hace más de ">
@@ -144,7 +142,7 @@
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Enfocar el panel de bibliotecas">
 <!ENTITY zotero.preferences.keys.quicksearch "Búsqueda rápida">
 <!ENTITY zotero.preferences.keys.newItem "Crear un nuevo elemento">
-<!ENTITY zotero.preferences.keys.newNote "Crear una Nueva nota">
+<!ENTITY zotero.preferences.keys.newNote "Crear una nota nueva">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Marcar todos los elementos de las fuentes como leídos/no leídos">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Conmutar el selector de etiquetas">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar las citas para los elementos seleccionados al portapapeles">

@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "Sjálfvirkt fylgjast með uppfærslum á þýðendum og leturstílum">
 <!ENTITY zotero.preferences.updateNow "Uppfæra núna">
 <!ENTITY zotero.preferences.reportTranslationFailure "Tilkynna rangar vísanir í þýðingar">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Heimila zotero.org að aðlaga innihald fengið frá þeirri útgáfu Zotero sem nú er í notkun">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Ef virkjað, þá mun sú útgáfa Zotero sem nú er í notkun verða tekin með í HTTP beiðnum til zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Nota Zotero fyrir BibTex/RIS/Refer skrár sem hlaðið er niður">
 <!ENTITY zotero.preferences.automaticTags "Sjálfvirkt bæta við merkjum í færslur í samræmi við stikkorð og fyrirsagnir þeirra">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Sjálfvirkt fjarlæja færslur í ruslakörfu sem voru settar þar fyrir meira en">

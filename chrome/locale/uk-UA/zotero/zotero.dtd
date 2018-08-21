@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "журнал змін">
 <!ENTITY zotero.upgrade.changeLogAfterLink "щоб дізнатись про нові функції.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Додати вибране до Примітки Zotero">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Створити Zotero запис та примітку з вибраного">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Зберегти посилання як документ Zotero">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Зберегти зображення як документ Zotero">
-
 <!ENTITY zotero.tabs.info.label "Інформація">
 <!ENTITY zotero.tabs.notes.label "Примітки">
 <!ENTITY zotero.tabs.attachments.label "Вкладення">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Покзати в бібліотеці">
 <!ENTITY zotero.items.menu.attach.note "Додати примітку">
 <!ENTITY zotero.items.menu.attach "Додати вкладення">
-<!ENTITY zotero.items.menu.attach.snapshot "Прикріпити знімок поточної сторінки">
-<!ENTITY zotero.items.menu.attach.link "Прикріпити посилання на поточну сторінку">
 <!ENTITY zotero.items.menu.attach.link.uri "Прикріпити посилання на URI…">
 <!ENTITY zotero.items.menu.attach.file "Прикріпити копію фалу...">
 <!ENTITY zotero.items.menu.attach.fileLink "Прикріпити посилання на файл...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Новий документ">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Більше">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Створити новий документ з поточної веб-сторінки">
 <!ENTITY zotero.toolbar.lookup.label "Додати документ(и) за ідентифікатором">
 <!ENTITY zotero.toolbar.removeItem.label "Видалити документ...">
 <!ENTITY zotero.toolbar.newLibrary.label "Нова бібліотека">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Нова стрічка">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Новий URL...">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "Нова сторінка...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "З OPML...">
 <!ENTITY zotero.toolbar.feeds.refresh "Оновити стрічку">
 <!ENTITY zotero.toolbar.feeds.edit "Редагувати стрічку...">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Виберіть файл...">
 <!ENTITY zotero.file.noneSelected.label "Файл не вибрано">
-
-<!ENTITY zotero.downloadManager.label "Зберегти в Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Вкладення не можуть бути збережені в обрану бібліотеку. Натомість, цей документ буде збережений в вашу бібліотеку.">
 
 <!ENTITY zotero.attachLink.title "Прикріпити посилання на URI">
 <!ENTITY zotero.attachLink.label.link "Посилання:">

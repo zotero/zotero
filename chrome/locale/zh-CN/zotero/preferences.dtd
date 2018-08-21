@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "自动检查更新的转换器和样式">
 <!ENTITY zotero.preferences.updateNow "立刻更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "报告失效的网站转换器">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "允许 zotero.org 根据当前 Zotero 版本定制内容">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "如果启用, 当前 Zotero 的版本号会添加到发送至 zotero.org 的HTTP请求中.">
 <!ENTITY zotero.preferences.parseRISRefer "使用 Zotero 来处理下载的 RIS/Refer 文件">
 <!ENTITY zotero.preferences.automaticTags "使用关键词和标题自动给条目添加标签">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "自动删除回收站内时间超过">

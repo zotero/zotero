@@ -41,11 +41,6 @@
 <!ENTITY zotero.upgrade.changeLogLink "muutosloki">
 <!ENTITY zotero.upgrade.changeLogAfterLink "tutustuaksesi uusiin ominaisuuksiin ja päivityksiin.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Lisää valinta Zotero-muistiinpanoon">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Luo Zotero-nimike and muistiinpano valinnasta">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Tallenna linkki Zoteroon">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Tallenna kuva Zoteroon">
-
 <!ENTITY zotero.tabs.info.label "Tiedot">
 <!ENTITY zotero.tabs.notes.label "Muistiinpanot">
 <!ENTITY zotero.tabs.attachments.label "Liitteet">
@@ -92,8 +87,6 @@
 <!ENTITY zotero.items.menu.showInLibrary "Näytä kirjastossa">
 <!ENTITY zotero.items.menu.attach.note "Lisää muistiinpano">
 <!ENTITY zotero.items.menu.attach "Lisää liite">
-<!ENTITY zotero.items.menu.attach.snapshot "Liitä tilannekuva nykyisestä sivusta">
-<!ENTITY zotero.items.menu.attach.link "Liitä linkki nykyiselle sivulle">
 <!ENTITY zotero.items.menu.attach.link.uri "Liitä linkki URIin...">
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
 <!ENTITY zotero.items.menu.attach.fileLink "Liitä linkki tiedostoon...">
@@ -109,7 +102,6 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Uusi nimike">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Lisää">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Uusi nimike nykyisestä sivusta">
 <!ENTITY zotero.toolbar.lookup.label "Uusi nimike tunnisteen perusteella">
 <!ENTITY zotero.toolbar.removeItem.label "Poista nimike...">
 <!ENTITY zotero.toolbar.newLibrary.label "Uusi kirjasto">
@@ -135,7 +127,6 @@
 
 <!ENTITY zotero.toolbar.feeds.new "Uusi syöte">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromPage "From Page…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "Päivitä syöte">
 <!ENTITY zotero.toolbar.feeds.edit "Muokkaa syötettä...">
@@ -324,9 +315,6 @@
 
 <!ENTITY zotero.file.choose.label "Valitse tiedosto...">
 <!ENTITY zotero.file.noneSelected.label "Tiedostoa ei ole valittu">
-
-<!ENTITY zotero.downloadManager.label "Tallenna Zoteroon">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Liitteitä ei voi tallentaa valittuun kirjastoon. Nimike sen sijaan tallennetaan kirjastoon.">
 
 <!ENTITY zotero.attachLink.title "Liitä linkki URI:in">
 <!ENTITY zotero.attachLink.label.link "Linkki:">

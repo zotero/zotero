@@ -31,8 +31,6 @@
 <!ENTITY zotero.preferences.autoUpdate "중계기 및 스타일 업데이트를 자동으로 확인">
 <!ENTITY zotero.preferences.updateNow "지금 업데이트">
 <!ENTITY zotero.preferences.reportTranslationFailure "고장난 사이트 중계기 신고">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "zotero.org가 현재 Zotero 버전의 정보를 사용하여 기능을 개선하도록 허락">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "이 기능을 선택하면, zotero.org로 보내는 HTTP 요청에 현재 Zotero 버전을 덧붙입니다.">
 <!ENTITY zotero.preferences.parseRISRefer "다운로드한 BibTeX/RIS/Refer 파일에 Zotero 사용">
 <!ENTITY zotero.preferences.automaticTags "핵심어와 주제어가 첨부된 항목 저장시 자동으로 태그 생성">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "휴지통에서 자동 삭제되는 시점 : 휴지통으로 이동 후">
