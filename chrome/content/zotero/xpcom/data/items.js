@@ -1455,7 +1455,7 @@ Zotero.Items = function() {
 	
 	
 	this.getSortTitle = function(title) {
-		if (title === false || title === undefined) {
+		if (title === false || title === undefined || title == null) {
 			return '';
 		}
 		if (typeof title == 'number') {
