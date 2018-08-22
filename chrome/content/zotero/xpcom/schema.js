@@ -1226,6 +1226,10 @@ Zotero.Schema = new function(){
 		var sql = "DELETE FROM version WHERE schema IN "
 			+ "('translators', 'styles', 'repository', 'lastcheck')";
 		yield Zotero.DB.queryAsync(sql);
+		
+		sql = "DELETE FROM translatorCache";
+		yield Zotero.DB.queryAsync(sql);
+		
 		_dbVersions.repository = null;
 		_dbVersions.lastcheck = null;
 		
@@ -1254,6 +1258,10 @@ Zotero.Schema = new function(){
 		var sql = "DELETE FROM version WHERE schema IN "
 			+ "('translators', 'repository', 'lastcheck')";
 		yield Zotero.DB.queryAsync(sql);
+		
+		sql = "DELETE FROM translatorCache";
+		yield Zotero.DB.queryAsync(sql);
+		
 		_dbVersions.repository = null;
 		_dbVersions.lastcheck = null;
 		
