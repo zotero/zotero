@@ -221,19 +221,52 @@ Zotero.Schema = new function(){
 		// In Standalone, don't load bundled files until after UI is ready. In Firefox, load them as
 		// soon initialization is done so that translation works before the Zotero pane is opened.
 		(Zotero.isStandalone ? Zotero.uiReadyPromise : Zotero.initializationPromise)
-		.delay(1000)
-		.then(async function () {
-			await this.updateBundledFiles();
-			if (Zotero.Prefs.get('automaticScraperUpdates')) {
+		.then(() => {
+			setTimeout(async function () {
 				try {
-					await this.updateFromRepository(this.REPO_UPDATE_STARTUP);
+					await this.updateBundledFiles();
+					if (Zotero.Prefs.get('automaticScraperUpdates')) {
+						try {
+							await this.updateFromRepository(this.REPO_UPDATE_STARTUP);
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
+					}
+					_schemaUpdateDeferred.resolve(true);
 				}
 				catch (e) {
-					Zotero.logError(e);
+					let kbURL = 'https://www.zotero.org/support/kb/unable_to_load_translators_and_styles';
+					let msg = Zotero.getString('startupError.bundledFileUpdateError', Zotero.clientName);
+					
+					let ps = Services.prompt;
+					let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+						+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+						+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+					let index = ps.confirmEx(
+						null,
+						Zotero.getString('general.error'),
+						msg,
+						buttonFlags,
+						Zotero.getString('general.moreInformation'),
+						"",
+						Zotero.getString('errorReport.reportError'),
+						null, {}
+					);
+					
+					_schemaUpdateDeferred.reject(e);
+					
+					if (index == 0) {
+						Zotero.launchURL(kbURL);
+					}
+					else if (index == 2) {
+						setTimeout(function () {
+							Zotero.getActiveZoteroPane().reportErrors();
+						}, 250);
+					}
 				}
-			}
-			_schemaUpdateDeferred.resolve(true);
-		}.bind(this));
+			}.bind(this), 1000);
+		});
 		
 		return updated;
 	});
