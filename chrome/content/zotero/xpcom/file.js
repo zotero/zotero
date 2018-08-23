@@ -331,8 +331,10 @@ Zotero.File = new function(){
 	 * Return the contents of a URL as a string
 	 *
 	 * Runs synchronously, so should only be run on local (e.g. chrome) URLs
+	 * @deprecated
 	 */
 	function getContentsFromURL(url) {
+		Zotero.debug('File.getContentsFromURL() is deprecated. Use File.getContentsFromURLAsync()');
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 						.createInstance();
 		xmlhttp.open('GET', url, false);
