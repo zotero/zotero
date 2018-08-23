@@ -48,7 +48,7 @@ Zotero.Schema = new function(){
 	var _repositoryNotificationTimerID;
 	var _nextRepositoryUpdate;
 	var _remoteUpdateInProgress = false;
-	var _localUpdateInProgress = false;
+	this._localUpdateInProgress = false;
 	
 	var self = this;
 	
@@ -459,12 +459,12 @@ Zotero.Schema = new function(){
 			return;
 		}
 		
-		if (_localUpdateInProgress) {
+		if (this._localUpdateInProgress) {
 			Zotero.debug("Bundled file update already in progress", 2);
 			return;
 		}
 		
-		_localUpdateInProgress = true;
+		this._localUpdateInProgress = true;
 		
 		try {
 			yield Zotero.proxyAuthComplete.delay(1000);
@@ -512,24 +512,24 @@ Zotero.Schema = new function(){
 			switch (mode) {
 			case 'styles':
 				yield Zotero.Styles.init(initOpts);
-				var updated = yield _updateBundledFilesAtLocation(installLocation, mode);
+				var updated = yield this._updateBundledFilesAtLocation(installLocation, mode);
 				break;
 			
 			case 'translators':
 				yield Zotero.Translators.init(initOpts);
-				var updated = yield _updateBundledFilesAtLocation(installLocation, mode);
+				var updated = yield this._updateBundledFilesAtLocation(installLocation, mode);
 				break;
 			
 			default:
 				yield Zotero.Translators.init(initOpts);
-				let up1 = yield _updateBundledFilesAtLocation(installLocation, 'translators', true);
+				let up1 = yield this._updateBundledFilesAtLocation(installLocation, 'translators', true);
 				yield Zotero.Styles.init(initOpts);
-				let up2 = yield _updateBundledFilesAtLocation(installLocation, 'styles');
+				let up2 = yield this._updateBundledFilesAtLocation(installLocation, 'styles');
 				var updated = up1 || up2;
 			}
 		}
 		finally {
-			_localUpdateInProgress = false;
+			this._localUpdateInProgress = false;
 		}
 		
 		return updated;
@@ -542,7 +542,7 @@ Zotero.Schema = new function(){
 	 * @param {'translators','styles'} mode
 	 * @param {Boolean} [skipVersionUpdates=false]
 	 */
-	var _updateBundledFilesAtLocation = Zotero.Promise.coroutine(function* (installLocation, mode, skipVersionUpdates) {
+	this._updateBundledFilesAtLocation = Zotero.Promise.coroutine(function* (installLocation, mode, skipVersionUpdates) {
 		Components.utils.import("resource://gre/modules/FileUtils.jsm");
 		
 		var isUnpacked = (yield OS.File.stat(installLocation)).isDir;
@@ -1073,7 +1073,7 @@ Zotero.Schema = new function(){
 			}
 		}
 		
-		if (_localUpdateInProgress) {
+		if (this._localUpdateInProgress) {
 			Zotero.debug('A local update is already in progress -- delaying repository check', 4);
 			_setRepositoryTimer(600);
 			return false;
