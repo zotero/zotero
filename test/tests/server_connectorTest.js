@@ -472,7 +472,7 @@ describe("Connector Server", function () {
 							continue;
 						}
 					}
-					await Zotero.Promise.delay(10);
+					await Zotero.Promise.delay(100);
 				}
 				
 				// Legacy endpoint should show 100
@@ -579,7 +579,7 @@ describe("Connector Server", function () {
 						}
 					}
 					assert.isFalse(response.done);
-					await Zotero.Promise.delay(10);
+					await Zotero.Promise.delay(100);
 				}
 				assert.isTrue(wasZero);
 				
@@ -791,62 +791,64 @@ describe("Connector Server", function () {
 		});
 		
 		it("should save a PDF to the current selected collection and retrieve metadata", async function () {
-			var collection = await createDataObject('collection');
-			await waitForItemsLoad(win);
-			
-			var file = getTestDataDirectory();
-			file.append('test.pdf');
-			httpd.registerFile("/test.pdf", file);
-			
-			var promise = waitForItemEvent('add');
-			var recognizerPromise = waitForRecognizer();
-			
-			var origRequest = Zotero.HTTP.request.bind(Zotero.HTTP);
-			var called = 0;
-			var stub = sinon.stub(Zotero.HTTP, 'request').callsFake(function (method, url, options) {
-				// Forward saveSnapshot request
-				if (url.endsWith('saveSnapshot')) {
-					return origRequest(...arguments);
-				}
+			try {
+				var collection = await createDataObject('collection');
+				await waitForItemsLoad(win);
 				
-				// Fake recognizer response
-				return Zotero.Promise.resolve({
-					getResponseHeader: () => {},
-					responseText: JSON.stringify({
-						title: 'Test',
-						authors: []
-					})
+				var file = getTestDataDirectory();
+				file.append('test.pdf');
+				httpd.registerFile("/test.pdf", file);
+				
+				var promise = waitForItemEvent('add');
+				var recognizerPromise = waitForRecognizer();
+				
+				var origRequest = Zotero.HTTP.request.bind(Zotero.HTTP);
+				var called = 0;
+				var stub = sinon.stub(Zotero.HTTP, 'request').callsFake(function (method, url, options) {
+					// Forward saveSnapshot request
+					if (url.endsWith('saveSnapshot')) {
+						return origRequest(...arguments);
+					}
+					
+					// Fake recognizer response
+					return Zotero.Promise.resolve({
+						getResponseHeader: () => {},
+						responseText: JSON.stringify({
+							title: 'Test',
+							authors: []
+						})
+					});
 				});
-			});
-			
-			await Zotero.HTTP.request(
-				'POST',
-				connectorServerPath + "/connector/saveSnapshot",
-				{
-					headers: {
-						"Content-Type": "application/json"
-					},
-					body: JSON.stringify({
-						url: testServerPath + "/test.pdf",
-						pdf: true
-					})
-				}
-			);
-			
-			var ids = await promise;
-			
-			assert.lengthOf(ids, 1);
-			var item = Zotero.Items.get(ids[0]);
-			assert.isTrue(item.isImportedAttachment());
-			assert.equal(item.attachmentContentType, 'application/pdf');
-			assert.isTrue(collection.hasItem(item.id));
-			
-			var progressWindow = await recognizerPromise;
-			progressWindow.close();
-			Zotero.RecognizePDF.cancel();
-			assert.isFalse(item.isTopLevelItem());
-			
-			stub.restore();
+				
+				await Zotero.HTTP.request(
+					'POST',
+					connectorServerPath + "/connector/saveSnapshot",
+					{
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify({
+							url: testServerPath + "/test.pdf",
+							pdf: true
+						})
+					}
+				);
+				
+				var ids = await promise;
+				
+				assert.lengthOf(ids, 1);
+				var item = Zotero.Items.get(ids[0]);
+				assert.isTrue(item.isImportedAttachment());
+				assert.equal(item.attachmentContentType, 'application/pdf');
+				assert.isTrue(collection.hasItem(item.id));
+				
+				var progressWindow = await recognizerPromise;
+				progressWindow.close();
+				Zotero.RecognizePDF.cancel();
+				assert.isFalse(item.isTopLevelItem());
+			} finally {
+				stub.restore();
+			}
 		});
 		
 		it("should switch to My Library if a read-only library is selected", function* () {
@@ -912,7 +914,7 @@ describe("Connector Server", function () {
 		});
 		
 		it("should translate a page if translators are available", function* () {
-			var html = Zotero.File.getContentsFromURL(getTestDataUrl('coins.html'));
+			var html = yield Zotero.File.getContentsFromURLAsync(getTestDataUrl('coins.html'));
 			var promise = waitForItemEvent('add');
 			var xmlhttp = yield Zotero.HTTP.request(
 				'POST',
@@ -929,12 +931,12 @@ describe("Connector Server", function () {
 				}
 			);
 
+			assert.equal(xmlhttp.status, 201);
 			let ids = yield promise;
 			var item = Zotero.Items.get(ids[0]);
 			var title = "Test Page";
 			assert.equal(JSON.parse(xmlhttp.responseText).items[0].title, title);
 			assert.equal(item.getField('title'), title);
-			assert.equal(xmlhttp.status, 201);
 		});
 	});
 	
