@@ -78,6 +78,7 @@ Zotero.Notifier = new function(){
 			types: types,
 			priority: priority || false
 		};
+		Zotero.debug(msg);
 		return hash;
 	}
 	
