@@ -1132,10 +1132,10 @@ Zotero.Attachments = new function(){
 					directory: tmpDir,
 					libraryID: item.libraryID,
 					filename: OS.Path.basename(tmpFile),
+					title: _getPDFTitleFromVersion(props.articleVersion),
 					url,
 					contentType: 'application/pdf',
-					parentItemID: item.id,
-					articleVersion: props.articleVersion
+					parentItemID: item.id
 				});
 			}
 			else {
@@ -1151,6 +1151,29 @@ Zotero.Attachments = new function(){
 		
 		return attachmentItem;
 	};
+	
+	
+	function _getPDFTitleFromVersion(version) {
+		var str;
+		
+		switch (version) {
+		case 'acceptedVersion':
+		case 'accepted':
+			str = 'acceptedVersion';
+			break;
+		
+		case 'submittedVersion':
+		case 'submitted':
+			str = 'submittedVersion';
+			break;
+		
+		// 'publishedVersion' or unspecified
+		default:
+			str = 'fullText';
+		}
+		
+		return Zotero.getString('attachment.' + str);
+	}
 	
 	
 	/**

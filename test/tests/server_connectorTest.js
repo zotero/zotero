@@ -588,7 +588,7 @@ describe("Connector Server", function () {
 				assert.lengthOf(ids, 1);
 				item = Zotero.Items.get(ids[0]);
 				assert.isTrue(item.isImportedAttachment());
-				assert.equal(item.getField('title'), 'Title.pdf');
+				assert.equal(item.getField('title'), Zotero.getString('attachment.submittedVersion'));
 			});
 			
 			
@@ -742,7 +742,7 @@ describe("Connector Server", function () {
 				assert.lengthOf(ids, 1);
 				item = Zotero.Items.get(ids[0]);
 				assert.isTrue(item.isImportedAttachment());
-				assert.equal(item.getField('title'), 'Title.pdf');
+				assert.equal(item.getField('title'), Zotero.getString('attachment.submittedVersion'));
 			});
 		});
 	});
