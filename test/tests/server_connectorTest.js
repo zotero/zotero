@@ -790,66 +790,62 @@ describe("Connector Server", function () {
 			assert.equal(item.getField('title'), 'Title');
 		});
 		
-		it("should save a PDF to the current selected collection and retrieve metadata", async function () {
-			try {
-				var collection = await createDataObject('collection');
-				await waitForItemsLoad(win);
+		it("should save a PDF to the current selected collection and retrieve metadata", sinon.test(async function () {
+			var collection = await createDataObject('collection');
+			await waitForItemsLoad(win);
+			
+			var file = getTestDataDirectory();
+			file.append('test.pdf');
+			httpd.registerFile("/test.pdf", file);
+			
+			var promise = waitForItemEvent('add');
+			var recognizerPromise = waitForRecognizer();
+			
+			var origRequest = Zotero.HTTP.request.bind(Zotero.HTTP);
+			var called = 0;
+			var stub = sinon.stub(Zotero.HTTP, 'request').callsFake(function (method, url, options) {
+				// Forward saveSnapshot request
+				if (url.endsWith('saveSnapshot')) {
+					return origRequest(...arguments);
+				}
 				
-				var file = getTestDataDirectory();
-				file.append('test.pdf');
-				httpd.registerFile("/test.pdf", file);
-				
-				var promise = waitForItemEvent('add');
-				var recognizerPromise = waitForRecognizer();
-				
-				var origRequest = Zotero.HTTP.request.bind(Zotero.HTTP);
-				var called = 0;
-				var stub = sinon.stub(Zotero.HTTP, 'request').callsFake(function (method, url, options) {
-					// Forward saveSnapshot request
-					if (url.endsWith('saveSnapshot')) {
-						return origRequest(...arguments);
-					}
-					
-					// Fake recognizer response
-					return Zotero.Promise.resolve({
-						getResponseHeader: () => {},
-						responseText: JSON.stringify({
-							title: 'Test',
-							authors: []
-						})
-					});
+				// Fake recognizer response
+				return Zotero.Promise.resolve({
+					getResponseHeader: () => {},
+					responseText: JSON.stringify({
+						title: 'Test',
+						authors: []
+					})
 				});
-				
-				await Zotero.HTTP.request(
-					'POST',
-					connectorServerPath + "/connector/saveSnapshot",
-					{
-						headers: {
-							"Content-Type": "application/json"
-						},
-						body: JSON.stringify({
-							url: testServerPath + "/test.pdf",
-							pdf: true
-						})
-					}
-				);
-				
-				var ids = await promise;
-				
-				assert.lengthOf(ids, 1);
-				var item = Zotero.Items.get(ids[0]);
-				assert.isTrue(item.isImportedAttachment());
-				assert.equal(item.attachmentContentType, 'application/pdf');
-				assert.isTrue(collection.hasItem(item.id));
-				
-				var progressWindow = await recognizerPromise;
-				progressWindow.close();
-				Zotero.RecognizePDF.cancel();
-				assert.isFalse(item.isTopLevelItem());
-			} finally {
-				stub.restore();
-			}
-		});
+			});
+			
+			await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSnapshot",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						url: testServerPath + "/test.pdf",
+						pdf: true
+					})
+				}
+			);
+			
+			var ids = await promise;
+			
+			assert.lengthOf(ids, 1);
+			var item = Zotero.Items.get(ids[0]);
+			assert.isTrue(item.isImportedAttachment());
+			assert.equal(item.attachmentContentType, 'application/pdf');
+			assert.isTrue(collection.hasItem(item.id));
+			
+			var progressWindow = await recognizerPromise;
+			progressWindow.close();
+			Zotero.RecognizePDF.cancel();
+			assert.isFalse(item.isTopLevelItem());
+		}));
 		
 		it("should switch to My Library if a read-only library is selected", function* () {
 			var group = yield createGroup({

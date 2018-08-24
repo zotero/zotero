@@ -46,6 +46,7 @@
     "multimatch": "^2.1.0",
     "node-sass": "^4.9.0",
     "sinon": "^4.5.0",
+    "sinon-test": "^2.2.1",
     "universalify": "^0.1.1"
   }
 }

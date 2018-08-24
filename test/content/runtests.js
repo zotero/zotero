@@ -171,6 +171,8 @@ mocha.setup({
 
 coMocha(Mocha);
 
+sinon.test = sinonTest(sinon);
+
 before(function () {
 	// Store all prefs set in runtests.sh
 	Components.utils.import("resource://zotero/config.js");

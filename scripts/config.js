@@ -45,6 +45,13 @@ const browserifyConfigs = [
 		config: {
 			standalone: 'chaiAsPromised'
 		}
+	},
+	{
+		src: 'node_modules/sinon-test/dist/sinon-test.js',
+		dest: 'test/resource/sinon-test.js',
+		config: {
+			standalone: 'sinonTest'
+		}
 	}
 ];
 
