@@ -667,21 +667,24 @@ Zotero.Server.Connector.SaveItems.prototype = {
 					function (topLevelItems) {
 						// Only return the properties the connector needs
 						topLevelItems = topLevelItems.map((item) => {
-							return {
+							let o = {
 								id: item.id,
 								title: item.title,
 								itemType: item.itemType,
 								contentType: item.mimeType,
 								mimeType: item.mimeType, // TODO: Remove
-								attachments: item.attachments.map((attachment) => {
+							};
+							if (item.attachments) {
+								o.attachments = item.attachments.map((attachment) => {
 									return {
 										id: session.id + '_' + attachment.id, // TODO: Remove prefix
 										title: attachment.title,
 										contentType: attachment.contentType,
 										mimeType: attachment.mimeType,  // TODO: Remove
 									};
-								})
+								});
 							};
+							return o;
 						});
 						resolve([201, "application/json", JSON.stringify({items: topLevelItems})]);
 					}

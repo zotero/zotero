@@ -222,6 +222,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					if (urlObjects.length) {
 						let title = Zotero.getString('findPDF.openAccessPDF');
 						let jsonAttachment = this._makeJSONAttachment(jsonItem.id, title);
+						if (!jsonItem.attachments) jsonItem.attachments = [];
 						jsonItem.attachments.push(jsonAttachment);
 						attachmentCallback(jsonAttachment, 0);
 					}
@@ -266,7 +267,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				let jsonItem = jsonByItem.get(item);
 				// Reuse the existing status line if there is one. This could be a failed
 				// translator attachment or a possible OA PDF found above.
-				let jsonAttachment = jsonItem.attachments.find(
+				let jsonAttachment = jsonItem.attachments && jsonItem.attachments.find(
 					x => x.mimeType == 'application/pdf' && x.isPrimaryPDF
 				);
 				
