@@ -72,9 +72,7 @@ var Zotero_Lookup = new function () {
 				// If we don't yet have a file, check for available PDFs
 				if (Zotero.Prefs.get('downloadAssociatedFiles')
 						&& newItems[0]
-						&& !newItems[0].numPDFAttachments()
-						// TEMP: Limit to dev builds
-						&& Zotero.isDevBuild) {
+						&& !newItems[0].numPDFAttachments()) {
 					try {
 						yield Zotero.Attachments.addAvailablePDF(newItems[0]);
 					}

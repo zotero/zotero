@@ -2843,8 +2843,7 @@ var ZoteroPane = new function()
 					}
 				}
 				
-				// TEMP: Limit to dev builds
-				if (canFindPDF && Zotero.isDevBuild) {
+				if (canFindPDF) {
 					show.push(m.findPDF, m.sep3);
 				}
 				
@@ -2903,8 +2902,7 @@ var ZoteroPane = new function()
 						show.push(m.addNote, m.addAttachments, m.sep2);
 					}
 					
-					// TEMP: Limit to dev builds
-					if (Zotero.Attachments.canFindPDFForItem(item) && Zotero.isDevBuild) {
+					if (Zotero.Attachments.canFindPDFForItem(item)) {
 						show.push(m.findPDF, m.sep3);
 					}
 					
