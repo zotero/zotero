@@ -10,13 +10,13 @@
 <!ENTITY zotero.general.cancel "Mégse">
 <!ENTITY zotero.general.refresh "Újratöltés">
 <!ENTITY zotero.general.saveAs "Mentés másként…">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "Beállítások">
 <!ENTITY zotero.general.advancedOptions.label "Haladó beállítások">
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more " Egyéb...">
 <!ENTITY zotero.general.loading "Loading…">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Bezárás">
+<!ENTITY zotero.general.minimize "Kis méret">
 <!ENTITY zotero.general.other "Other…">
 
 
@@ -95,7 +95,7 @@
 <!ENTITY zotero.items.menu.duplicateItem "Kiválasztott elem duplikálása">
 <!ENTITY zotero.items.menu.mergeItems "Elemek összefésülése…">
 <!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
+<!ENTITY zotero.items.menu.reportMetadata "Hibás metaadatok jelentése">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Válassza ki azt az elemverziót, amit mester elemnek kíván használni: ">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
@@ -168,7 +168,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Szín beállítása">
 <!ENTITY zotero.tagColorChooser.removeColor "Szín eltávolítása">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
+<!ENTITY zotero.lookup.description "ISBN, DOI, PMID, vagy arXiv ID hozzáadása a könyvtárhoz:">
 <!ENTITY zotero.lookup.button.search "Keresés">
 
 <!ENTITY zotero.selectitems.title "Elemek kiválasztása">
@@ -195,13 +195,13 @@
 
 <!ENTITY zotero.progress.title "Folyamatban">
 
-<!ENTITY zotero.import "Import">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
-<!ENTITY zotero.import.database "Database">
-<!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import "Importálás">
+<!ENTITY zotero.import.whereToImportFrom "Honnét szeretné importálni?">
+<!ENTITY zotero.import.source.file "Egy fájl (BibTeX, RIS, Zotero RDF, stb.)">
+<!ENTITY zotero.import.importing "Importálás…">
+<!ENTITY zotero.import.database "Adatbázis">
+<!ENTITY zotero.import.lastModified "Utolsó módosítás">
+<!ENTITY zotero.import.size "Méret">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "Exportálás...">
@@ -238,7 +238,7 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Könyvjelzők">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Hivatkozások automatikus frissítése">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
 

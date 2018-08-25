@@ -5,6 +5,12 @@
   "general_done": {
     "message": "Rendben"
   },
+  "general_tryAgain": {
+    "message": "Próbálja újra"
+  },
+  "general_cancel": {
+    "message": "Mégse"
+  },
   "progressWindow_savingTo": {
     "message": "Mentés"
   },
@@ -13,6 +19,15 @@
   },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "legfrissebb verzió"
+  },
+  "upgradeApp": {
+    "message": "$1frissítése"
+  },
+  "error_connection_isAppRunning": {
+    "message": "A(z)$1fut?"
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Online könyvtárba való mentés engedélyezése"
   },
   "general_saveTo": {
     "message": "Mentés $1-ba(n)"
