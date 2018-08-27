@@ -17,10 +17,10 @@ function saveItemsThroughTranslator(translatorType, items) {
 	}
 
 	let translate = new Zotero.Translate[tyname]();
-	let browser;
 	if (translatorType == "web") {
-		browser = Zotero.Browser.createHiddenBrowser();
-		translate.setDocument(browser.contentDocument);
+		let doc = Zotero.HTTP.wrapDocument(new DOMParser().parseFromString('<html></html>', 'text/html'),
+			`http://localhost/`);
+		translate.setDocument(doc);
 	} else if (translatorType == "import") {
 		translate.setString("");
 	}
@@ -35,10 +35,7 @@ function saveItemsThroughTranslator(translatorType, items) {
 		"		item.complete();\n"+
 		"	}\n"+
 		"}"));
-	return translate.translate().then(function(items) {
-		if (browser) Zotero.Browser.deleteHiddenBrowser(browser);
-		return items;
-	});
+	return translate.translate();
 }
 
 /**
