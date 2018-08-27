@@ -11,6 +11,9 @@
 	"general_tryAgain": {
 		"message": "Try Again"
 	},
+	"general_warning": {
+		"message": "Warning"
+	},
 	"general_cancel": {
 		"message": "Cancel"
 	},
@@ -66,5 +69,15 @@
 	"integration_error_connection": {
 		"message": "The $1 was unable to communicate with the $2 desktop application. $2 must be open to use web-based citing.",
 		"description": "$1 will be the localized string for the extension (e.g., Zotero Connector). $2 will be the app name (e.g., Zotero)."
+	},
+	
+	"integration_googleDocs_unlinkBeforeSaving_warning": {
+		"message": "This document contains active Zotero citations that will appear as zotero.org links in a downloaded copy."
+	},
+	"integration_googleDocs_unlinkBeforeSaving_instructions": {
+		"message": "To generate a version suitable for sharing, select <b>Make a copy…</b> from the File menu, select <b>Unlink Citations</b> from the Zotero menu in the new document, and then download the unlinked version. Keep this original linked document in case you need to make further changes."
+	},
+	"integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+		"message": "Download Linked Version Anyway"
 	}
 }
