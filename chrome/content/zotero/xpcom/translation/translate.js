@@ -1698,7 +1698,9 @@ Zotero.Translate.Base.prototype = {
 	 */
 	"_checkIfDone":function() {
 		if(!this._savingItems && !this._savingAttachments.length && (!this._currentState || this._waitingForSave)) {
-			if(this.newCollections && this._itemSaver.saveCollections) {
+			if (this.newCollections
+					&& this._libraryID !== false
+					&& this._itemSaver.saveCollections) {
 				var me = this;
 				this._itemSaver.saveCollections(this.newCollections)
 				.then(function (newCollections) {
