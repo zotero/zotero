@@ -64,8 +64,7 @@ Zotero.Translate.ItemSaver = function(options) {
 	} else {
 		// try to convert to a URI
 		try {
-			this._baseURI = Components.classes["@mozilla.org/network/io-service;1"].
-				getService(Components.interfaces.nsIIOService).newURI(options.baseURI, null, null);
+			this._baseURI = Services.io.newURI(options.baseURI, null, null);
 		} catch(e) {};
 	}
 	this._saveOptions = options.saveOptions || {};
@@ -581,8 +580,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			}
 
 			attachment.url = url;
-			url = Components.classes["@mozilla.org/network/io-service;1"]
-				.getService(Components.interfaces.nsIIOService)
+			url = Services.io
 				.newURI(url, null, null); // This cannot fail, since we check above
 
 			// see if this is actually a file URL
@@ -791,8 +789,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			if (!cleanURI) {
 				throw new Error("Translate: Invalid attachment URL specified <" + url + ">");
 			}
-			url = Components.classes["@mozilla.org/network/io-service;1"]
-				.getService(Components.interfaces.nsIIOService)
+			url = Services.io
 				.newURI(cleanURI, null, null); // This cannot fail, since we check above
 			
 			// Only HTTP/HTTPS links are allowed
