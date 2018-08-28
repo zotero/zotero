@@ -95,7 +95,7 @@ function getTestPDF() {
  * This must happen immediately before the test, since Zotero might get
  * restarted by resetDB(), which would erase our registered endpoints.
  */
-function setupAttachmentEndpoints() {
+async function setupAttachmentEndpoints() {
 	var SnapshotTest = function() {};
 	Zotero.Server.Endpoints["/test/translate/test.html"] = SnapshotTest;
 	SnapshotTest.prototype = {
@@ -124,6 +124,8 @@ function setupAttachmentEndpoints() {
 			sendResponseCallback(404, "text/html", "File does not exist");
 		}
 	}
+	Zotero.Prefs.set("httpServer.enabled", true);
+	await Zotero.Server.init();
 }
 
 describe("Zotero.Translate", function() {
@@ -133,7 +135,7 @@ describe("Zotero.Translate", function() {
 		this.timeout(20000);
 		yield Zotero.Translators.init();
 		
-		setupAttachmentEndpoints();
+		yield setupAttachmentEndpoints();
 		win = yield loadBrowserWindow();
 	});
 	after(function () {
