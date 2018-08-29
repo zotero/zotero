@@ -125,7 +125,11 @@ async function setupAttachmentEndpoints() {
 		}
 	}
 	Zotero.Prefs.set("httpServer.enabled", true);
-	await Zotero.Server.init();
+	try {
+		await Zotero.Server.init();
+	} catch (e) {
+		// If server is already running we can ignore the error
+	}
 }
 
 describe("Zotero.Translate", function() {
