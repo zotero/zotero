@@ -180,11 +180,6 @@ Zotero.Translate.Sandbox = {
 				// just return the item array
 				if(translate._libraryID === false || translate._parentTranslator) {
 					translate.newItems.push(item);
-					if(translate._parentTranslator && Zotero.isFx && !Zotero.isBookmarklet) {
-						// Copy object so it is accessible to parent translator
-						item = translate._sandboxManager.copyObject(item);
-						item.complete = oldItem.complete;
-					}
 					return translate._runHandler("itemDone", item, item);
 				}
 				
@@ -239,31 +234,7 @@ Zotero.Translate.Sandbox = {
 				}
 			};
 			
-			if (!translate._sandboxManager.sandbox.Promise) {
-				Zotero.debug("Translate: Promise not available in sandbox in _itemDone()");
-				run();
-				return;
-			}
-			
-			return new translate._sandboxManager.sandbox.Promise(function (resolve, reject) {
-				try {
-					run(true).then(
-						resolve,
-						function (e) {
-							// Fix wrapping error from sandbox when error is thrown from _saveItems()
-							if (Zotero.isFx) {
-								reject(translate._sandboxManager.copyObject(e));
-							}
-							else {
-								reject(e);
-							}
-						}
-					);
-				}
-				catch (e) {
-					reject(e);
-				}
-			});
+			return run(asyncTranslator);
 		},
 		
 		/**
@@ -374,13 +345,6 @@ Zotero.Translate.Sandbox = {
 							item = item.wrappedJSObject ? item.wrappedJSObject : item;
 							if(arg1 == "itemDone") {
 								item.complete = translate._sandboxZotero.Item.prototype.complete;
-							} else if(arg1 == "translators" && Zotero.isFx && !Zotero.isBookmarklet) {
-								var translators = new translate._sandboxManager.sandbox.Array();
-								translators = translators.wrappedJSObject || translators;
-								for (var i=0; i<item.length; i++) {
-									translators.push(item[i]);
-								}
-								item = translators;
 							}
 							arg2(obj, item);
 						} catch(e) {
@@ -446,27 +410,6 @@ Zotero.Translate.Sandbox = {
 					return translation._loadTranslator(translator)
 				})
 				.then(function() {
-					if(Zotero.isFx && !Zotero.isBookmarklet) {
-						// do same origin check
-						var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
-							.getService(Components.interfaces.nsIScriptSecurityManager);
-						var ioService = Components.classes["@mozilla.org/network/io-service;1"] 
-							.getService(Components.interfaces.nsIIOService);
-						
-						var outerSandboxURI = ioService.newURI(typeof translate._sandboxLocation === "object" ?
-							translate._sandboxLocation.location : translate._sandboxLocation, null, null);
-						var innerSandboxURI = ioService.newURI(typeof translation._sandboxLocation === "object" ?
-							translation._sandboxLocation.location : translation._sandboxLocation, null, null);
-						
-						try {
-							secMan.checkSameOriginURI(outerSandboxURI, innerSandboxURI, false);
-						} catch(e) {
-							throw new Error("getTranslatorObject() may not be called from web or search "+
-								"translators to web or search translators from different origins.");
-							return;
-						}
-					}
-					
 					return translation._prepareTranslation();
 				})
 				.then(function () {
@@ -489,18 +432,6 @@ Zotero.Translate.Sandbox = {
 					return;
 				});
 			};
-
-			if (Zotero.isFx) {
-				for(var i in safeTranslator) {
-					if (typeof(safeTranslator[i]) === "function") {
-						safeTranslator[i] = translate._sandboxManager._makeContentForwarder(function(func) {
-							return function() {
-								func.apply(safeTranslator, this.args.wrappedJSObject || this.args);
-							}
-						}(safeTranslator[i]));
-					}
-				}
-			}
 			
 			return safeTranslator;
 		},
@@ -547,7 +478,7 @@ Zotero.Translate.Sandbox = {
 		 */
 		"selectItems":function(translate, items, callback) {
 			function transferObject(obj) {
-				return Zotero.isFx && !Zotero.isBookmarklet ? translate._sandboxManager.copyObject(obj) : obj;
+				return obj;
 			}
 			
 			if(Zotero.Utilities.isEmpty(items)) {
@@ -1887,16 +1818,9 @@ Zotero.Translate.Base.prototype = {
 	 */
 	"_generateSandbox":function() {
 		Zotero.debug("Translate: Binding sandbox to "+(typeof this._sandboxLocation == "object" ? this._sandboxLocation.document.location : this._sandboxLocation), 4);
-		if (this._parentTranslator && this._parentTranslator._sandboxManager.newChild) {
-			this._sandboxManager = this._parentTranslator._sandboxManager.newChild();
-		} else {
-			this._sandboxManager = new Zotero.Translate.SandboxManager(this._sandboxLocation);
-		}
+		this._sandboxManager = new Zotero.Translate.SandboxManager(this._sandboxLocation);
 		const createArrays = "['creators', 'notes', 'tags', 'seeAlso', 'attachments']";
 		var src = "";
-		if (Zotero.isFx && !Zotero.isBookmarklet) {
-			src = "var Zotero = {};";
-		}
 		src += "Zotero.Item = function (itemType) {"+
 				"var createArrays = "+createArrays+";"+
 				"this.itemType = itemType;"+
@@ -1918,9 +1842,6 @@ Zotero.Translate.Base.prototype = {
 
 		this._sandboxZotero = this._sandboxManager.sandbox.Zotero;
 
-		if(Zotero.isFx) {
-			if(this._sandboxZotero.wrappedJSObject) this._sandboxZotero = this._sandboxZotero.wrappedJSObject;
-		}
 		this._sandboxZotero.Utilities.HTTP = this._sandboxZotero.Utilities;
 		
 		this._sandboxZotero.isBookmarklet = Zotero.isBookmarklet || false;
@@ -2132,18 +2053,7 @@ Zotero.Translate.Web.prototype._getSandboxLocation = function() {
  * Pass document and location to detect* and do* functions
  */
 Zotero.Translate.Web.prototype._getParameters = function() {
-	if (Zotero.Translate.DOMWrapper && Zotero.Translate.DOMWrapper.isWrapped(this.document)) {
-		return [
-			this._sandboxManager.wrap(
-				Zotero.Translate.DOMWrapper.unwrap(this.document),
-				null,
-				this.document.SpecialPowers_wrapperOverrides
-			),
-			this.location
-		];
-	} else {
-		return [this.document, this.location];
-	}
+	return [this.document, this.location];
 };
 
 /**
@@ -2759,9 +2669,6 @@ Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
  * Pass search item to detect* and do* functions
  */
 Zotero.Translate.Search.prototype._getParameters = function() {
-	if(Zotero.isFx) {
-		return [this._sandboxManager.copyObject(this.search)];
-	}
 	return [this.search];
 };
 
@@ -2926,7 +2833,7 @@ Zotero.Translate.IO.String.prototype = {
 			this._xmlInvalid = true;
 			throw e;
 		}
-		return (Zotero.isFx && !Zotero.isBookmarklet ? this._sandboxManager.wrap(xml) : xml);
+		return xml;
 	},
 	
 	init: function (newMode) {
