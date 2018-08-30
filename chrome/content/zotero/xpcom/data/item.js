@@ -282,6 +282,13 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 }
 
 
+Zotero.Item.prototype.getExtraField = function (fieldName) {
+	var fields = Zotero.Utilities.Internal.extractExtraFields(this.getField('extra'));
+	var doi = fields.get(fieldName);
+	return (doi && doi.value) ? doi.value : '';
+};
+
+
 /**
  * @param	{Boolean}				asNames
  * @return	{Integer[]|String[]}

@@ -113,6 +113,34 @@ describe("Zotero.Utilities.Internal", function () {
 	});
 	
 	
+	describe("#extractExtraFields()", function () {
+		it("should extract a field", function () {
+			var val = '10.1234/abcdef';
+			var str = `DOI: ${val}`;
+			var fields = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 1);
+			assert.equal(fields.get('DOI').value, val);
+		});
+		
+		it("should extract a field with different case", function () {
+			var val = '10.1234/abcdef';
+			var str = `doi: ${val}`;
+			var fields = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 1);
+			assert.equal(fields.get('DOI').value, val);
+		});
+		
+		it("should extract a field with other fields, text, and whitespace", function () {
+			var originalDateVal = '1989';
+			var doiVal = '10.1234/abcdef';
+			var str = `\nOriginal Date: ${originalDateVal}\nDOI: ${doiVal}\n\n`;
+			var fields = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 1);
+			assert.equal(fields.get('DOI').value, doiVal);
+		});
+	});
+	
+	
 	describe("#extractIdentifiers()", function () {
 		it("should extract ISBN-10", async function () {
 			var id = "0838985890";

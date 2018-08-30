@@ -510,6 +510,24 @@ describe("Zotero.Attachments", function() {
 			assert.equal(await OS.File.stat(attachment.getFilePath()).size, pdfSize);
 		});
 		
+		it("should add a PDF from a resolved DOI from the Extra field", async function () {
+			var doi = doi1;
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('extra', 'DOI: ' + doi);
+			await item.saveTx();
+			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			
+			assert.isTrue(requestStub.calledOnce);
+			assert.isTrue(requestStub.calledWith('GET', 'https://doi.org/' + doi));
+			assert.ok(attachment);
+			var json = attachment.toJSON();
+			assert.equal(json.url, pdfURL);
+			assert.equal(json.contentType, 'application/pdf');
+			assert.equal(json.filename, 'Test.pdf');
+			assert.equal(await OS.File.stat(attachment.getFilePath()).size, pdfSize);
+		});
+		
 		it("should add a PDF from a URL", async function () {
 			var url = pageURL1;
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });

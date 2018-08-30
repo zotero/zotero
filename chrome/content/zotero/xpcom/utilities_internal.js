@@ -848,6 +848,68 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
+	/**
+	 * Find valid fields in Extra field text
+	 *
+	 * @param {String} str
+	 * @return {Map} - Map of fields to objects with 'originalField', 'field', and 'value'
+	 */
+	extractExtraFields: function (str) {
+		if (!str) {
+			return new Map();
+		}
+		
+		//
+		// Build a Map of normalized field names that might appear in Extra (including CSL variables)
+		// to arrays of built-in fields
+		//
+		// Built-in fields
+		var fieldNames = new Map(Zotero.ItemFields.getAll().map(x => [x.name.toLowerCase(), [x.name]]));
+		// CSL fields
+		for (let map of [CSL_TEXT_MAPPINGS, CSL_DATE_MAPPINGS]) {
+			for (let cslVar in map) {
+				let normalized = cslVar.toLowerCase();
+				let existing = fieldNames.get(normalized) || [];
+				fieldNames.set(normalized, new Set([...existing, ...map[cslVar]]));
+			}
+		}
+		
+		var lines = str.split(/\n+/g);
+		var fields = new Map();
+		for (let line of lines) {
+			let parts = line.match(/^([a-z \-]+):(.+)/i);
+			if (!parts) {
+				continue;
+			}
+			let [_, originalField, value] = parts;
+			
+			let field = originalField.trim().toLowerCase()
+				// Strip spaces
+				.replace(/\s+/g, '')
+				// Old citeproc.js cheater syntax
+				.replace(/{:([^:]+):([^}]+)}/);
+			value = value.trim();
+			let possibleFields = fieldNames.get(field);
+			// No valid fields
+			if (!possibleFields) {
+				continue;
+			}
+			// Create an entry for each possible field, since we don't know what type this is for
+			for (let possibleField of possibleFields) {
+				fields.set(
+					possibleField,
+					{
+						originalField,
+						field: possibleField,
+						value
+					}
+				);
+			}
+		}
+		return fields;
+	},
+	
+	
 	extractIdentifiers: function (text) {
 		var identifiers = [];
 		var foundIDs = new Set(); // keep track of identifiers to avoid duplicates

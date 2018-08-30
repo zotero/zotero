@@ -27,6 +27,7 @@
 Zotero.ItemFields = new function() {
 	// Private members
 	var _fields = {};
+	var _allFields = [];
 	var _fieldsFormats = [];
 	var _fieldsLoaded;
 	var _itemTypeFieldsLoaded;
@@ -87,6 +88,10 @@ Zotero.ItemFields = new function() {
 			};
 			// Store by name as well as id
 			_fields[field['fieldName']] = _fields[field['fieldID']];
+			_allFields.push({
+				id: field.fieldID,
+				name: field.fieldName
+			});
 		}
 		
 		_fieldsLoaded = true;
@@ -121,6 +126,11 @@ Zotero.ItemFields = new function() {
 		
 		return _fields[field] ? _fields[field]['name'] : false;
 	}
+	
+	
+	this.getAll = function () {
+		return [..._allFields];
+	};
 	
 	
 	function getLocalizedString(itemType, field) {

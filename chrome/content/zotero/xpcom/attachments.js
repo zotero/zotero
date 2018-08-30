@@ -886,7 +886,7 @@ Zotero.Attachments = new function(){
 	
 	this.canFindPDFForItem = function (item) {
 		return item.isRegularItem()
-			&& (!!item.getField('DOI') || !!item.getField('url'))
+			&& (!!item.getField('DOI') || !!item.getField('url') || !!item.getExtraField('DOI'))
 			&& item.numPDFAttachments() == 0;
 	};
 	
@@ -906,7 +906,7 @@ Zotero.Attachments = new function(){
 		var useCustom = methods.includes('custom');
 		
 		var resolvers = [];
-		var doi = item.getField('DOI');
+		var doi = item.getField('DOI') || item.getExtraField('DOI');
 		doi = Zotero.Utilities.cleanDOI(doi);
 		
 		if (useDOI && doi) {
