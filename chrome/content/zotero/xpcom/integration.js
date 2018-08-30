@@ -755,7 +755,7 @@ Zotero.Integration.Interface.prototype.setDocPrefs = Zotero.Promise.coroutine(fu
 	this._session.fields = new Zotero.Integration.Fields(this._session, this._doc);
 	this._session.fields.ignoreEmptyBibliography = false;
 	
-	if (this._session.data.prefs.delayCitationUpdates) return;
+	if (this._session.data.prefs.delayCitationUpdates && !fieldsToConvert.length) return;
 	
 	yield this._session.fields.updateSession(FORCE_CITATIONS_RESET_TEXT);
 	return this._session.fields.updateDocument(FORCE_CITATIONS_RESET_TEXT, true, true);
@@ -1038,11 +1038,17 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 					DIALOG_ICON_CAUTION, DIALOG_BUTTONS_YES_NO);
 				if (result) {
 					citation.properties.dontUpdate = true;
+					// Sigh. This hurts. setCode in LO forces a text reset. If the formattedText is rtf
+					// it is reinserted, however that breaks what properties.dontUpdate should do
+					if (this._session.primaryFieldType == "ReferenceMark"
+						&& citation.properties.formattedCitation.includes('\\')) {
+						citation.properties.formattedCitation = citation.properties.plainCitation;
+					}
 				}
 			}
 			
 			// Update citation text:
-			// If we're looking to reset the text even if it matches previous text
+			// If we're looking to reset the text even if it matches previous text (i.e. style change)
 			if (forceCitations == FORCE_CITATIONS_RESET_TEXT
 					// Or metadata has changed thus changing the formatted citation
 					|| ((citation.properties.formattedCitation !== formattedCitation
