@@ -8,6 +8,9 @@
   "general_tryAgain": {
     "message": "Prueba de nuevo"
   },
+  "general_warning": {
+    "message": "Advertencia"
+  },
   "general_cancel": {
     "message": "Cancelar"
   },
@@ -55,6 +58,15 @@
   },
   "integration_error_connection": {
     "message": "El $1 fue habilitado para comunicar con la aplicación de escritorio de $2. $2 debe estar abierto para usar la citación basada en web."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Este documento contiene citas activas de Zotero que aparecerán como enlaces a zotero.org en la copia descargada."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Para generar una versión adecuada para compartir, seleccione <b>Hacer una copia... </b>desde el menú Archivo, seleccione <b>Desvincular citas </b>desde el menú de Zotero en el nuevo documento y luego descargue la versión no enlazada. Guarde este documento original vinculado en caso de que necesite realizar más cambios."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Descargar la versión enlazada de todos modos"
   },
   "general_saveTo": {
     "message": "Guardar a $1"

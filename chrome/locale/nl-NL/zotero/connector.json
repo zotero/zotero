@@ -8,6 +8,9 @@
   "general_tryAgain": {
     "message": "Opnieuw proberen"
   },
+  "general_warning": {
+    "message": "Waarschuwing"
+  },
   "general_cancel": {
     "message": "Annuleren"
   },
@@ -19,6 +22,9 @@
   },
   "progressWindow_error_translation": {
     "message": "Er is een fout opgetreden bij het opslaan van dit item. Bekijk $1 voor meer informatie."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Probleemoplosser voor Vertaler"
   },
   "progressWindow_error_fallback": {
     "message": "Opslaan mislukt met $1. Probeer het opnieuw op te slaan met $2."

@@ -8,6 +8,9 @@
   "general_tryAgain": {
     "message": "Versuchen Sie es erneut"
   },
+  "general_warning": {
+    "message": "Warnung"
+  },
   "general_cancel": {
     "message": "Abbrechen"
   },
@@ -21,7 +24,7 @@
     "message": "Ein Fehler ist aufgetreten beim Versuch, diesen Eintrag zu speichern. Siehe $1 für weitere Informationen."
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
-    "message": "Problembehebung für Translators"
+    "message": "Problembehebung für Übersetzer"
   },
   "progressWindow_error_fallback": {
     "message": "Ein Fehler ist aufgetreten beim Speichern mit $1. Es wird versucht stattdessen $2 zu nutzen."
@@ -55,6 +58,15 @@
   },
   "integration_error_connection": {
     "message": "Die $1 war nicht in der Lage mit der $2 Desktop Applikation zu kommunizieren. $2 muss geöffnet sein zum web-basierten Zitieren."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Dieses Dokument enthält aktive Zitate aus Zotero, die als zotero.org-Links in einer heruntergeladenen Kopie erscheinen."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Um eine zum Teilen geeignete Version zu erzeugen, wählen Sie im Menü Datei den Befehl <b>Kopie erstellen…</b>, wählen Sie <b>Unlink Citations</b> aus dem Menü Zotero und laden Sie dann die unverknüpfte Version herunter. Bewahren Sie dieses Originaldokument mit den Verknüpfungen auf, falls Sie weitere Änderungen vornehmen müssen."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Verlinkte Version trotzdem herunterladen"
   },
   "general_saveTo": {
     "message": "Speichern nach $1"

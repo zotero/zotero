@@ -8,6 +8,9 @@
   "general_tryAgain": {
     "message": "Попытайтесь снова"
   },
+  "general_warning": {
+    "message": "Внимание"
+  },
   "general_cancel": {
     "message": "Оменить"
   },
@@ -55,6 +58,15 @@
   },
   "integration_error_connection": {
     "message": "$1 не может соединиться с локальным приложением $2. $2 должно быть запущено для использования web-цитирования."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Этот документ содержит активные Zitero-ссылки, которая будут отображены как гиперссылки на zotero.org в загруженной версии."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Чтобы создать версию удобную для обмена, выберите <b>Создать копию…</b> в меню «Файл», выберите <b>Отвязать цитирование</b> в меню Zotero в скопированном документе, и затем загрузите версию без активных ссылок. Сохраните оригинальный документ, если планируете его изменять в дальнейшем."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Все равно загрузить версию со ссылками"
   },
   "general_saveTo": {
     "message": "Сохранить в $1"

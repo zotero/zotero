@@ -28,7 +28,7 @@
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Systemstandard">
 
 <!ENTITY zotero.preferences.miscellaneous "Verschiedenes">
-<!ENTITY zotero.preferences.autoUpdate "Automatisch auf Übersetzer- und Style-Updates überprüfen">
+<!ENTITY zotero.preferences.autoUpdate "Automatische Suche nach aktualisierten Übersetzern und Stilen">
 <!ENTITY zotero.preferences.updateNow "Jetzt aktualisieren">
 <!ENTITY zotero.preferences.reportTranslationFailure "Fehlerhafte Übersetzungen melden">
 <!ENTITY zotero.preferences.parseRISRefer "Zotero für heruntergeladene BibTeX/RIS/Refer-Dateien verwenden">
