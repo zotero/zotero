@@ -160,6 +160,9 @@ describe("Zotero.FeedReader", function () {
 				itemType: 'journalArticle',
 				enclosedItems: []
 			};
+			if (Zotero.isElectron) {
+				expected.pages = "10–20";
+			}
 		
 			let fr = new Zotero.FeedReader(detailedRSSFeedURL);
 			yield fr.process();

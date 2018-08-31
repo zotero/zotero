@@ -96,11 +96,11 @@ describe("Zotero.FeedItems", function () {
 				yield item.saveTx();
 				items.push(item);
 			}
-			ids = Array.map(items, (i) => i.id);
+			ids = items.map((i) => i.id);
 		});
 		
 		afterEach(function* () {
-			save.reset();
+			save.resetHistory();
 			
 			yield clearFeeds();
 		});

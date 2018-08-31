@@ -218,7 +218,7 @@ describe("Zotero.FeedItem", function () {
 			yield item.toggleRead(true);
 			assert.isTrue(item.save.called, "item was saved on toggle read");
 			
-			item.save.reset();
+			item.save.resetHistory();
 			
 			yield item.toggleRead(true);
 			assert.isFalse(item.save.called, "item was not saved on toggle read to same state");

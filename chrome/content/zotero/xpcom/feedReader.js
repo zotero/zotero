@@ -197,7 +197,7 @@ Zotero.FeedReader.prototype.terminate = function(status) {
 	}
 	
 	// Close feed connection
-	if (this._channel.isPending()) {
+	if (this._channel && this._channel.isPending()) {
 		this._channel.cancel(Components.results.NS_BINDING_ABORTED);
 	}
 };
