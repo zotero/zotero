@@ -267,6 +267,12 @@ Zotero.Integration = new function() {
 					}
 					
 					if(displayError) {
+						if (Zotero.Integration.currentSession && Zotero.Integration.currentSession.progressBar) {
+							Zotero.Promise.delay(5).then(function() {
+								Zotero.Integration.currentSession.progressBar.hide();
+							});
+						}
+						
 						var showErrorInFirefox = !document;
 						
 						if(document) {
@@ -1393,20 +1399,19 @@ Zotero.Integration.Session.prototype.init = Zotero.Promise.coroutine(function *(
 	var data = this.data;
 	var haveFields = false;
 	
-	// If prefs exist
-	if (require && data.prefs.fieldType) {
+	// If prefs not present
+	if (require && !data.prefs.fieldType) {
 		// check to see if fields already exist
 		for (let fieldType of [this.primaryFieldType, this.secondaryFieldType]) {
 			var fields = yield this._doc.getFields(fieldType);
 			if (fields.length) {
-				data.prefs.fieldType = fieldType;
 				haveFields = true;
 				break;
 			}
 		}
 	}
 		
-	if (require && (!haveFields || !data.prefs.fieldType)) {
+	if (require && (!haveFields && !data.prefs.fieldType)) {
 		// If required but no fields and preferences exist throw an error
 		return Zotero.Promise.reject(new Zotero.Exception.Alert(
 		"integration.error.mustInsertCitation",
