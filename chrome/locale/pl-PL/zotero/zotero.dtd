@@ -197,7 +197,7 @@
 
 <!ENTITY zotero.import "Importuj">
 <!ENTITY zotero.import.whereToImportFrom "Skąd chcesz zaimportować?">
-<!ENTITY zotero.import.source.file "Z pliku (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.source.file "Z pliku (BibTeX, RIS, Zotero RDF itp.)">
 <!ENTITY zotero.import.importing "Importowanie...">
 <!ENTITY zotero.import.database "Baza danych">
 <!ENTITY zotero.import.lastModified "Ostatnia modyfikacja">

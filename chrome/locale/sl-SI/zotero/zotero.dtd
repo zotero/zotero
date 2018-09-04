@@ -10,14 +10,14 @@
 <!ENTITY zotero.general.cancel "Prekliči">
 <!ENTITY zotero.general.refresh "Osveži">
 <!ENTITY zotero.general.saveAs "Shrani kot ...">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "Možnosti">
 <!ENTITY zotero.general.advancedOptions.label "Napredne možnosti">
 <!ENTITY zotero.general.tools "Orodja">
 <!ENTITY zotero.general.more "Dodatno">
 <!ENTITY zotero.general.loading "Nalaganje ...">
 <!ENTITY zotero.general.close "Zapri">
 <!ENTITY zotero.general.minimize "Skrči">
-<!ENTITY zotero.general.other "Other…">
+<!ENTITY zotero.general.other "Drugo ...">
 
 
 <!ENTITY zotero.errorReport.title "Poročilo o napaki Zotero">
@@ -168,7 +168,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Določi barvo">
 <!ENTITY zotero.tagColorChooser.removeColor "Odstrani barvo">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
+<!ENTITY zotero.lookup.description "Vnesite identifikacijske kode ISBN, DOI, PMID ali arXiv za dodajanje v knjižnico:">
 <!ENTITY zotero.lookup.button.search "Išči">
 
 <!ENTITY zotero.selectitems.title "Izberi vnose">
@@ -195,14 +195,14 @@
 
 <!ENTITY zotero.progress.title "Napredek">
 
-<!ENTITY zotero.import "Import">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
-<!ENTITY zotero.import.database "Database">
-<!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
-<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
+<!ENTITY zotero.import "Uvozi">
+<!ENTITY zotero.import.whereToImportFrom "Od kod želite uvoziti?">
+<!ENTITY zotero.import.source.file "Datoteka (BibTeX, RIS, Zotero RDF itn.)">
+<!ENTITY zotero.import.importing "Uvažanje ...">
+<!ENTITY zotero.import.database "Zbirka podatkov">
+<!ENTITY zotero.import.lastModified "Nazadnje spremenjeno">
+<!ENTITY zotero.import.size "Velikost">
+<!ENTITY zotero.import.createCollection "Postavi uvožene zbirke in elemente v novo zbirko">
 
 <!ENTITY zotero.exportOptions.title "Izvozi ...">
 <!ENTITY zotero.exportOptions.format.label "Vrsta datoteke:">

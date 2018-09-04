@@ -249,7 +249,7 @@
 <!ENTITY zotero.integration.showEditor.label "Editor anzeigen">
 <!ENTITY zotero.integration.classicView.label "Klassische Ansicht">
 
-<!ENTITY zotero.integration.references.label "Literaturangaben in Bibliographie">
+<!ENTITY zotero.integration.references.label "Literaturangaben in Bibliografie">
 
 <!ENTITY zotero.sync.stop "Synchronisation stoppen">
 <!ENTITY zotero.sync.error "Sync-Fehler">
