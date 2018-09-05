@@ -111,7 +111,7 @@ Zotero_Import_Mendeley.prototype.translate = async function (options) {
 			// If there's a single PDF file and a single PDF URL and the file exists, make an
 			// imported_url attachment instead of separate file and linked_url attachments
 			if (docURLs && docFiles) {
-				let pdfFiles = docFiles.filter(x => x.fileURL.endsWith('.pdf'));
+				let pdfFiles = docFiles.filter(x => x.fileURL && x.fileURL.endsWith('.pdf'));
 				let pdfURLs = docURLs.filter(x => x.includes('pdf'));
 				if (pdfFiles.length == 1
 						&& pdfURLs.length == 1
