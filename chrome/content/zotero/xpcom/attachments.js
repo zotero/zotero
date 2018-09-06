@@ -1287,15 +1287,41 @@ Zotero.Attachments = new function(){
 					
 					// TODO: Handle redirects manually so we can avoid loading a page we've already
 					// tried
-					let xmlhttp = await Zotero.HTTP.request("GET", pageURL, { responseType: 'document' });
-					responseURL = xmlhttp.responseURL;
+					let req = await Zotero.HTTP.request("GET", pageURL, { responseType: 'blob' });
+					let blob = req.response;
+					responseURL = req.responseURL;
 					if (pageURL != responseURL) {
 						Zotero.debug("Redirected to " + responseURL);
 					}
 					triedPages.add(responseURL);
-					let doc = Zotero.HTTP.wrapDocument(xmlhttp.response, responseURL);
 					
-					url = await Zotero.Utilities.Internal.getPDFFromDocument(doc);
+					let contentType = req.getResponseHeader('Content-Type');
+					// If DOI resolves directly to a PDF, save it to disk
+					if (contentType == 'application/pdf') {
+						Zotero.debug("DOI resolves directly to PDF");
+						await Zotero.File.putContentsAsync(path, blob);
+						return { url: responseURL, props: urlResolver };
+					}
+					// Otherwise parse the Blob into a Document and translate that
+					else if (contentType.startsWith('text/html')) {
+						let charset = 'utf-8';
+						let matches = contentType.match(/charset=([a-z0-9\-_+])/i);
+						if (matches) {
+							charset = matches[1];
+						}
+						let responseText = await new Promise(function (resolve) {
+							let fr = new FileReader();
+							fr.addEventListener("loadend", function() {
+								resolve(fr.result);
+							});
+							fr.readAsText(blob, charset);
+						});
+						let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+						 .createInstance(Components.interfaces.nsIDOMParser);
+						let doc = parser.parseFromString(responseText, 'text/html');
+						doc = Zotero.HTTP.wrapDocument(doc, responseURL);
+						url = await Zotero.Utilities.Internal.getPDFFromDocument(doc);
+					}
 				}
 				catch (e) {
 					Zotero.debug(`Error getting PDF from ${pageURL}: ${e}`);

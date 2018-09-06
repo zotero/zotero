@@ -343,25 +343,67 @@ describe("Zotero.Attachments", function() {
 		var doi2 = '10.2222/bcde';
 		var doi3 = '10.3333/cdef';
 		var doi4 = '10.4444/defg';
+		var doi5 = '10.5555/efgh';
 		var pageURL1 = 'http://website/article1';
 		var pageURL2 = 'http://website/article2';
 		var pageURL3 = 'http://website/article3';
 		var pageURL4 = 'http://website/article4';
 		var pageURL5 = `http://website/${doi4}`;
 		var pageURL6 = `http://website/${doi4}/json`;
+		var pageURL7 = doiPrefix + doi5;
 		
 		Components.utils.import("resource://zotero-unit/httpd.js");
 		var httpd;
 		var port = 16213;
 		var baseURL = `http://localhost:${port}/`;
+		var pdfPath = OS.Path.join(getTestDataDirectory().path, 'test.pdf');
 		var pdfURL = `${baseURL}article1/pdf`;
 		var pdfSize;
 		var requestStub;
 		
+		function makeGetResponseHeader(headers) {
+			return function (header) {
+				if (headers[header] !== undefined) {
+					return headers[header];
+				}
+				throw new Error("Unimplemented");
+			};
+		}
+		
+		function makeHTMLResponseFromType(html, responseType, responseURL) {
+			var response;
+			if (responseType == 'document') {
+				let parser = new DOMParser();
+				let doc = parser.parseFromString(html, 'text/html');
+				doc = Zotero.HTTP.wrapDocument(doc, responseURL);
+				response = doc;
+			}
+			else if (responseType == 'blob') {
+				let blob = new Blob([html], {type: 'text/html'});
+				response = blob;
+			}
+			else {
+				throw new Error("Request not mocked");
+			}
+			
+			return {
+				status: 200,
+				response,
+				responseURL,
+				getResponseHeader: makeGetResponseHeader({
+					'Content-Type': 'text/html'
+				})
+			};
+		}
+		
 		before(async function () {
+			var pdfBlob = await File.createFromFileName(pdfPath);
+			
 			var origFunc = Zotero.HTTP.request.bind(Zotero.HTTP);
 			requestStub = sinon.stub(Zotero.HTTP, 'request');
 			requestStub.callsFake(function (method, url, options) {
+				Zotero.debug("Intercepting " + method + " " + url);
+				
 				// Page responses
 				var routes = [
 					// Page 1 contains a PDF
@@ -376,14 +418,14 @@ describe("Zotero.Attachments", function() {
 					[doiPrefix + doi3, pageURL2, false],
 					[pageURL3, pageURL3, true],
 					// DOI 4 redirects to page 4, which doesn't contain a PDF
-					[doiPrefix + doi4, pageURL4, false]
+					[doiPrefix + doi4, pageURL4, false],
 				];
 				for (let route of routes) {
 					let [expectedURL, responseURL, includePDF] = route;
 					
 					if (url != expectedURL) continue;
 					
-					var html = `<html>
+					let html = `<html>
 						<head>
 							<title>Page Title</title>
 							<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
@@ -392,19 +434,13 @@ describe("Zotero.Attachments", function() {
 						</head>
 						<body>Body</body>
 					</html>`;
-					let parser = new DOMParser();
-					let doc = parser.parseFromString(html, 'text/html');
-					doc = Zotero.HTTP.wrapDocument(doc, responseURL);
-					return {
-						status: 200,
-						response: doc,
-						responseURL
-					};
+					
+					return makeHTMLResponseFromType(html, options.responseType, responseURL);
 				}
 				
 				// HTML page with PDF download link
 				if (url == pageURL5) {
-					var html = `<html>
+					let html = `<html>
 						<head>
 							<title>Page Title</title>
 						</head>
@@ -412,31 +448,41 @@ describe("Zotero.Attachments", function() {
 							<a id="pdf-link" href="${pdfURL}">Download PDF</a>
 						</body>
 					</html>`;
-					let parser = new DOMParser();
-					let doc = parser.parseFromString(html, 'text/html');
-					doc = Zotero.HTTP.wrapDocument(doc, pageURL5);
-					return {
-						status: 200,
-						response: doc,
-						responseURL: pageURL5
-					};
+					
+					return makeHTMLResponseFromType(html, options.responseType, pageURL5);
 				}
 				
 				// JSON response with PDF download links
 				if (url == pageURL6) {
+					let response = {
+						oa_locations: [
+							{
+								url_for_landing_page: pageURL1
+							},
+							{
+								url_for_pdf: pdfURL
+							}
+						]
+					};
 					return {
 						status: 200,
-						response: {
-							oa_locations: [
-								{
-									url_for_landing_page: pageURL1
-								},
-								{
-									url_for_pdf: pdfURL
-								}
-							]
-						},
-						responseURL: pageURL6
+						response,
+						responseURL: pageURL6,
+						getResponseHeader: makeGetResponseHeader({
+							'Content-Type': 'application/json'
+						})
+					};
+				}
+				
+				// DOI that redirects directly to a PDF
+				if (url == pageURL7) {
+					return {
+						status: 200,
+						response: pdfBlob,
+						responseURL: pdfURL,
+						getResponseHeader: makeGetResponseHeader({
+							'Content-Type': 'application/pdf'
+						})
 					};
 				}
 				
@@ -458,15 +504,16 @@ describe("Zotero.Attachments", function() {
 					}
 					return {
 						status: 200,
-						response
+						response,
+						getResponseHeader: makeGetResponseHeader({
+							'Content-Type': 'application/pdf'
+						})
 					};
 				}
 				return origFunc(...arguments);
 			});
 			
-			pdfSize = await OS.File.stat(
-				OS.Path.join(getTestDataDirectory().path, 'test.pdf')
-			).size;
+			pdfSize = await OS.File.stat(pdfPath).size;
 			
 			Zotero.Prefs.clear('findPDFs.resolvers');
 		});
@@ -492,8 +539,26 @@ describe("Zotero.Attachments", function() {
 			Zotero.HTTP.request.restore();
 		});
 		
-		it("should add a PDF from a resolved DOI", async function () {
+		it("should add a PDF from a resolved DOI webpage", async function () {
 			var doi = doi1;
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('DOI', doi);
+			await item.saveTx();
+			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			
+			assert.isTrue(requestStub.calledOnce);
+			assert.isTrue(requestStub.calledWith('GET', 'https://doi.org/' + doi));
+			assert.ok(attachment);
+			var json = attachment.toJSON();
+			assert.equal(json.url, pdfURL);
+			assert.equal(json.contentType, 'application/pdf');
+			assert.equal(json.filename, 'Test.pdf');
+			assert.equal(await OS.File.stat(attachment.getFilePath()).size, pdfSize);
+		});
+		
+		it("should add a PDF from a DOI that resolves directly to the file", async function () {
+			var doi = doi5;
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
 			item.setField('title', 'Test');
 			item.setField('DOI', doi);
