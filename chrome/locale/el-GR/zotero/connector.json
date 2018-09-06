@@ -8,6 +8,9 @@
   "general_tryAgain": {
     "message": "Ξαναπροσπάθηστε"
   },
+  "general_warning": {
+    "message": "Προειδοποίηση"
+  },
   "general_cancel": {
     "message": "Άκυρο"
   },
@@ -55,6 +58,15 @@
   },
   "integration_error_connection": {
     "message": "Το $1 δεν μπόρεσε να επικοινωνήσει με την $2 εφαρμογή γραφείου. Το $2 πρέπει να είναι ανοικτό για να χρησιμοποιηθεί μια αναφορά ιστού."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Αυτό το έγγραφο περιέχει ενεργές αναφορές Zotero που θα εμφανίζονται ως σύνδεσμοι zotero.org σε ένα αντίγραφο που έχετε λάβει."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Για να δημιουργήσετε μια έκδοση κατάλληλη για κοινή χρήση, επιλέξτε <b>Δημιουργία αντιγράφου ...</b> από το μενού Αρχείο, επιλέξτε <b>Αποσύνδεση Αναφορών</b> από το μενού Zotero στο νέο έγγραφο, και στη συνέχεια, κάντε λήψη της μη συνδεδεμένης έκδοσης. Διατηρήστε αυτό το πρωτότυπο συνδεδεμένο έγγραφο σε περίπτωση που χρειαστεί να κάνετε περαιτέρω αλλαγές."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Λήψη Συνδεδεμένης Έκδοσης οπωσδήποτε"
   },
   "general_saveTo": {
     "message": "Αποθήκευση σε 1 $1"
