@@ -231,6 +231,10 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		// Make sure that Zotero Standalone is not running as root
 		if(Zotero.isStandalone && !Zotero.isWin) _checkRoot();
 		
+		if (!_checkExecutableLocation()) {
+			return;
+		}
+		
 		try {
 			yield Zotero.DataDirectory.init();
 			if (this.restarting) {
@@ -1751,6 +1755,33 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				exit(0);
 			}
 		}
+	}
+	
+	function _checkExecutableLocation() {
+		// Make sure Zotero wasn't started from a Mac disk image, which can cause bundled extensions
+		// not to load and possibly other problems
+		if (Zotero.isMac && OS.Constants.Path.libDir.includes('AppTranslocation')) {
+			let ps = Services.prompt;
+			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+				| ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
+			let index = ps.confirmEx(
+				null,
+				Zotero.getString('general.warning'),
+				Zotero.getString('startupError.startedFromDiskImage1', Zotero.clientName)
+					+ '\n\n'
+					+ Zotero.getString('startupError.startedFromDiskImage2', Zotero.clientName),
+				buttonFlags,
+				Zotero.getString('general.quitApp', Zotero.clientName),
+				Zotero.getString('general.notNow'),
+				null, null, {}
+			);
+			if (index === 0) {
+				Zotero.Utilities.Internal.quit();
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	/**
