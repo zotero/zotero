@@ -398,11 +398,11 @@ Zotero.File = new function(){
 	 * Write data to a file asynchronously
 	 *
 	 * @param {String|nsIFile} - String path or nsIFile to write to
-	 * @param {String|nsIInputStream} data - The string or nsIInputStream to write to the file
+	 * @param {String|nsIInputStream|ArrayBuffer} data - The data to write to the file
 	 * @param {String} [charset] - The character set; defaults to UTF-8
 	 * @return {Promise} - A promise that is resolved when the file has been written
 	 */
-	this.putContentsAsync = function (path, data, charset) {
+	this.putContentsAsync = async function (path, data, charset) {
 		if (path instanceof Ci.nsIFile) {
 			path = path.path;
 		}
@@ -418,16 +418,33 @@ Zotero.File = new function(){
 			));
 		}
 		
-		var deferred = Zotero.Promise.defer();
-		var os = FileUtils.openSafeFileOutputStream(new FileUtils.File(path));
-		NetUtil.asyncCopy(data, os, function(inputStream, status) {
-			if (!Components.isSuccessCode(status)) {
-				deferred.reject(new Components.Exception("File write operation failed", status));
-				return;
-			}
-			deferred.resolve();
+		// If Blob, feed that to an input stream
+		//
+		// data instanceof Blob doesn't work in XPCOM
+		if (typeof data.size != 'undefined' && typeof data.slice == 'function') {
+			let arrayBuffer = await new Zotero.Promise(function (resolve) {
+				let fr = new FileReader();
+				fr.addEventListener("loadend", function() {
+					resolve(fr.result);
+				});
+				fr.readAsArrayBuffer(data);
+			});
+			let is = Components.classes["@mozilla.org/io/arraybuffer-input-stream;1"]
+				.createInstance(Components.interfaces.nsIArrayBufferInputStream);
+			is.setData(arrayBuffer, 0, arrayBuffer.byteLength);
+			data = is;
+		}
+		
+		await new Zotero.Promise(function (resolve, reject) {
+			var os = FileUtils.openSafeFileOutputStream(new FileUtils.File(path));
+			NetUtil.asyncCopy(data, os, function(inputStream, status) {
+				if (!Components.isSuccessCode(status)) {
+					reject(new Components.Exception("File write operation failed", status));
+					return;
+				}
+				resolve();
+			});
 		});
-		return deferred.promise;
 	};
 	
 	

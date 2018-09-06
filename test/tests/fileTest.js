@@ -83,6 +83,31 @@ describe("Zotero.File", function () {
 	});
 	
 	describe("#putContentsAsync()", function () {
+		it("should save a text string", async function () {
+			var tmpDir = await getTempDirectory();
+			var destFile = OS.Path.join(tmpDir, 'test');
+			var str = 'A';
+			await Zotero.File.putContentsAsync(destFile, str);
+			assert.equal(await Zotero.File.getContentsAsync(destFile), str);
+		});
+		
+		it("should save a Blob", async function () {
+			var srcFile = OS.Path.join(getTestDataDirectory().path, 'test.pdf');
+			var tmpDir = await getTempDirectory();
+			var destFile = OS.Path.join(tmpDir, 'test.pdf');
+			
+			var blob = await File.createFromFileName(srcFile);
+			await Zotero.File.putContentsAsync(destFile, blob);
+			
+			var destContents = await Zotero.File.getBinaryContentsAsync(destFile);
+			assert.equal(
+				await Zotero.File.getBinaryContentsAsync(srcFile),
+				destContents
+			);
+			
+			assert.equal(destContents.substr(0, 4), '%PDF');
+		});
+		
 		it("should save via .tmp file", function* () {
 			var tmpDir = yield getTempDirectory();
 			var destFile = OS.Path.join(tmpDir, 'test.txt')
@@ -91,7 +116,7 @@ describe("Zotero.File", function () {
 			assert.isTrue(yield OS.File.exists(tmpFile));
 			yield Zotero.File.putContentsAsync(destFile, 'B');
 			assert.isFalse(yield OS.File.exists(tmpFile));
-			// Make sure .tmp file created when creating temp file was deleted too
+			// Make sure .tmp file was deleted
 			assert.isFalse(yield OS.File.exists(tmpFile + '.tmp'));
 		});
 	});

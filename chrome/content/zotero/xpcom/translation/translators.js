@@ -519,7 +519,7 @@ Zotero.Translators = new function() {
 		
 		Zotero.debug("Saving translator '" + metadata.label + "'");
 		Zotero.debug(metadata);
-		return Zotero.File.putContentsAsync(destFile, str).return(destFile);
+		return Zotero.File.putContentsAsync(destFile, str).then(() => destFile);
 	});
 	
 	this.cacheInDB = function(fileName, metadataJSON, lastModifiedTime) {
