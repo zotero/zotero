@@ -1298,7 +1298,7 @@ Zotero.Attachments = new function(){
 					let contentType = req.getResponseHeader('Content-Type');
 					// If DOI resolves directly to a PDF, save it to disk
 					if (contentType == 'application/pdf') {
-						Zotero.debug("DOI resolves directly to PDF");
+						Zotero.debug("URL resolves directly to PDF");
 						await Zotero.File.putContentsAsync(path, blob);
 						return { url: responseURL, props: urlResolver };
 					}
