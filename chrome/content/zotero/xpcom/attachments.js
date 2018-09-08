@@ -858,12 +858,8 @@ Zotero.Attachments = new function(){
 				Zotero.Utilities.Internal.saveURI(wbp, nsIURL, path, headers);
 			});
 			
-			// If the file is supposed to be a PDF directory, fail if it's not
-			let sample = await Zotero.File.getContentsAsync(path, null, 1000);
-			if (options.isPDF && Zotero.MIME.sniffForMIMEType(sample) != 'application/pdf') {
-				Zotero.debug("Downloaded PDF was not a PDF", 2);
-				Zotero.debug(sample, 3);
-				throw new this.InvalidPDFException();
+			if (options.isPDF) {
+				await _enforcePDF(path);
 			}
 		}
 		catch (e) {
@@ -876,6 +872,19 @@ Zotero.Attachments = new function(){
 			throw e;
 		}
 	};
+	
+	
+	/**
+	 * Make sure a file is a PDF
+	 */
+	async function _enforcePDF(path) {
+		var sample = await Zotero.File.getContentsAsync(path, null, 1000);
+		if (Zotero.MIME.sniffForMIMEType(sample) != 'application/pdf') {
+			Zotero.debug("Downloaded PDF was not a PDF", 2);
+			Zotero.debug(sample, 3);
+			throw new Zotero.Attachments.InvalidPDFException();
+		}
+	}
 	
 	
 	this.InvalidPDFException = function() {
@@ -1301,26 +1310,12 @@ Zotero.Attachments = new function(){
 					if (contentType == 'application/pdf') {
 						Zotero.debug("URL resolves directly to PDF");
 						await Zotero.File.putContentsAsync(path, blob);
+						await _enforcePDF(path);
 						return { url: responseURL, props: urlResolver };
 					}
 					// Otherwise parse the Blob into a Document and translate that
 					else if (contentType.startsWith('text/html')) {
-						let charset = 'utf-8';
-						let matches = contentType.match(/charset=([a-z0-9\-_+])/i);
-						if (matches) {
-							charset = matches[1];
-						}
-						let responseText = await new Promise(function (resolve) {
-							let fr = new FileReader();
-							fr.addEventListener("loadend", function() {
-								resolve(fr.result);
-							});
-							fr.readAsText(blob, charset);
-						});
-						let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-						 .createInstance(Components.interfaces.nsIDOMParser);
-						let doc = parser.parseFromString(responseText, 'text/html');
-						doc = Zotero.HTTP.wrapDocument(doc, responseURL);
+						let doc = await Zotero.Utilities.Internal.blobToHTMLDocument(blob, responseURL);
 						url = await Zotero.Utilities.Internal.getPDFFromDocument(doc);
 					}
 				}
