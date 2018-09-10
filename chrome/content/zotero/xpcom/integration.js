@@ -437,7 +437,9 @@ Zotero.Integration = new function() {
 
 				session = Zotero.Integration.sessions[data.sessionID];
 			}
-			if (!session) {
+			// Make sure we don't maintain the session if agent changes (i.e. LO -> Word)
+			// and display wrong field types in doc preferences.
+			if (!session || session.agent != agent) {
 				session = new Zotero.Integration.Session(doc, app);
 				session.reload = true;
 			}
