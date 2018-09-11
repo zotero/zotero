@@ -201,6 +201,8 @@ Zotero.HTTP = new function() {
 		// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
 		var channel = xmlhttp.channel,
 			isFile = channel instanceof Components.interfaces.nsIFileChannel;
+		var redirectStatus;
+		var redirectLocation;
 		if(channel instanceof Components.interfaces.nsIHttpChannelInternal) {
 			channel.forceAllowThirdPartyCookie = true;
 			
@@ -218,8 +220,22 @@ Zotero.HTTP = new function() {
 			if (options.dontCache) {
 				channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
 			}
+			
+			// Don't follow redirects
+			if (options.followRedirects === false) {
+				channel.notificationCallbacks = {
+					QueryInterface: XPCOMUtils.generateQI([Ci.nsIInterfaceRequestor, Ci.nsIChannelEventSync]),
+					getInterface: XPCOMUtils.generateQI([Ci.nsIChannelEventSink]),
+					asyncOnChannelRedirect: function (oldChannel, newChannel, flags, callback) {
+						redirectStatus = (flags & Ci.nsIChannelEventSink.REDIRECT_PERMANENT) ? 301 : 302;
+						redirectLocation = newChannel.URI.spec;
+						oldChannel.cancel(Cr.NS_BINDING_ABORTED);
+						callback.onRedirectVerifyCallback(Cr.NS_BINDING_ABORTED);
+					}
+				};
+			}
 		}
-
+		
 		// Set responseType
 		if (options.responseType) {
 			xmlhttp.responseType = options.responseType;
@@ -276,17 +292,24 @@ Zotero.HTTP = new function() {
 			deferred.reject(new Zotero.HTTP.TimeoutException(options.timeout));
 		};
 
-		xmlhttp.onloadend = function() {
-			var status = xmlhttp.status;
+		xmlhttp.onloadend = async function() {
+			var status = xmlhttp.status || redirectStatus;
 			
-			// If an invalid HTTP response (e.g., NS_ERROR_INVALID_CONTENT_ENCODING) includes a
-			// 4xx or 5xx HTTP response code, swap it in, since it might be enough info to do
-			// what we need (e.g., verify a 404 from a WebDAV server)
 			try {
-				if (!status && xmlhttp.channel.responseStatus >= 400) {
-					Zotero.warn(`Overriding status for invalid response for ${dispURL} `
-						+ `(${xmlhttp.channel.status})`);
-					status = xmlhttp.channel.responseStatus;
+				if (!status) {
+					let responseStatus = xmlhttp.channel.responseStatus;
+					// If we cancelled a redirect, get the 3xx status from the channel
+					if (responseStatus >= 300 && responseStatus < 400) {
+						status = responseStatus;
+					}
+					// If an invalid HTTP response (e.g., NS_ERROR_INVALID_CONTENT_ENCODING) includes a
+					// 4xx or 5xx HTTP response code, swap it in, since it might be enough info to do
+					// what we need (e.g., verify a 404 from a WebDAV server)
+					else if (responseStatus >= 400) {
+						Zotero.warn(`Overriding status for invalid response for ${dispURL} `
+							+ `(${xmlhttp.channel.status})`);
+						status = responseStatus;
+					}
 				}
 			}
 			catch (e) {}
@@ -300,6 +323,21 @@ Zotero.HTTP = new function() {
 			}
 			else if(isFile) {
 				var success = status == 200 || status == 0;
+			}
+			else if (redirectStatus) {
+				var success = true;
+				let channel = xmlhttp.channel;
+				xmlhttp = {
+					status,
+					getResponseHeader: function (header) {
+						if (header.toLowerCase() == 'location') {
+							return redirectLocation;
+						}
+						Zotero.debug("Warning: Attempt to get response header other than Location "
+							+ "for redirect", 2);
+						return null;
+					}
+				};
 			}
 			else {
 				var success = status >= 200 && status < 300;
