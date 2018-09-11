@@ -99,26 +99,31 @@ Zotero.HTTP = new function() {
 	/**
 	 * Get a promise for a HTTP request
 	 *
-	 * @param {String} method The method of the request ("GET", "POST", "HEAD", or "OPTIONS")
-	 * @param {nsIURI|String}	url				URL to request
-	 * @param {Object} [options] Options for HTTP request:<ul>
-	 *         <li>body - The body of a POST request</li>
-	 *         <li>headers - Object of HTTP headers to send with the request</li>
-	 *         <li>cookieSandbox - The sandbox from which cookies should be taken</li>
-	 *         <li>debug - Log response text and status code</li>
-	 *         <li>dontCache - If set, specifies that the request should not be fulfilled from the cache</li>
-	 *         <li>foreground - Make a foreground request, showing certificate/authentication dialogs if necessary</li>
-	 *         <li>headers - HTTP headers to include in the request</li>
-	 *         <li>logBodyLength - Length of request body to log (defaults to 1024)</li>
-	 *         <li>timeout - Request timeout specified in milliseconds
-	 *         <li>requestObserver - Callback to receive XMLHttpRequest after open()</li>
-	 *         <li>responseType - The type of the response. See XHR 2 documentation for legal values</li>
-	 *         <li>responseCharset - The charset the response should be interpreted as</li>
-	 *         <li>successCodes - HTTP status codes that are considered successful, or FALSE to allow all</li>
-	 *     </ul>
-	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
-	 * @return {Promise<XMLHttpRequest>} A promise resolved with the XMLHttpRequest object if the
-	 *     request succeeds, or rejected if the browser is offline or a non-2XX status response
+	 * @param {String} method - The method of the request ("GET", "POST", etc.)
+	 * @param {nsIURI|String} url - URL to request
+	 * @param {Object} [options] Options for HTTP request:
+	 * @param {String} [options.body] - The body of a POST request
+	 * @param {Object} [options.headers] - Object of HTTP headers to send with the request
+	 * @param {Boolean} [options.followRedirects = true] - Object of HTTP headers to send with the
+	 *     request
+	 * @param {Zotero.CookieSandbox} [options.cookieSandbox] - The sandbox from which cookies should
+	 *     be taken
+	 * @param {Boolean} [options.debug] - Log response text and status code
+	 * @param {Boolean} [options.dontCache] - If set, specifies that the request should not be
+	 *     fulfilled from the cache
+	 * @param {Boolean} [options.foreground] - Make a foreground request, showing
+	 *     certificate/authentication dialogs if necessary
+	 * @param {Number} [options.logBodyLength=1024] - Length of request body to log
+	 * @param {Number} [options.timeout] - Request timeout specified in milliseconds
+	 * @param {Function} [options.requestObserver] - Callback to receive XMLHttpRequest after open()
+	 * @param {String} [options.responseType] - The type of the response. See XHR 2 documentation
+	 *     for legal values
+	 * @param {String} [options.responseCharset] - The charset the response should be interpreted as
+	 * @param {Number[]|false} [options.successCodes] - HTTP status codes that are considered
+	 *     successful, or FALSE to allow all
+	 * @param {Zotero.CookieSandbox} [options.cookieSandbox] - Cookie sandbox object
+	 * @return {Promise<XMLHttpRequest>} - A promise resolved with the XMLHttpRequest object if the
+	 *     request succeeds or rejected if the browser is offline or a non-2XX status response
 	 *     code is received (or a code not in options.successCodes if provided).
 	 */
 	this.request = Zotero.Promise.coroutine(function* (method, url, options = {}) {
