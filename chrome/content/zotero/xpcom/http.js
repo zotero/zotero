@@ -355,6 +355,47 @@ Zotero.HTTP = new function() {
 				if (options.debug) {
 					Zotero.debug(xmlhttp.responseText);
 				}
+				
+				// Try to use HTTP redirect, but if url extraction fails
+				// or numRedirects is exceeded, just return the current page
+				if (options.responseType === 'document' &&
+					(!options.numRedirects || options.numRedirects < 3)) {
+					let contentType = xmlhttp.getResponseHeader('Content-Type');
+					if (contentType && contentType.startsWith('text/html')) {
+						let meta = xmlhttp.response.querySelector('meta[http-equiv="refresh"]');
+						if (meta) {
+							let content = meta.getAttribute('content');
+							if (content) {
+								// Parse URL from the content tag
+								let m = content.match(/url[ ="']+(.+?)[ "']/i);
+								if (m) {
+									let url = m[1];
+									// Resolve URL. P.S.: For unknown reason this only works
+									// if server returns 'Content-Type: text/html' header
+									let a = xmlhttp.response.createElement('a');
+									a.href = url;
+									let resolvedUrl = a.href;
+									
+									// Make sure the absolute URL is actually resolved
+									if (/^https?:\/\//.test(resolvedUrl)) {
+										if (options.numRedirects) {
+											options.numRedirects++;
+										}
+										else {
+											options.numRedirects = 1;
+										}
+										
+										// Meta redirect is always GET
+										return Zotero.HTTP.request("GET", resolvedUrl, options)
+											.then(xmlhttp => deferred.resolve(xmlhttp))
+											.catch(e => deferred.reject(e));
+									}
+								}
+							}
+						}
+					}
+				}
+				
 				deferred.resolve(xmlhttp);
 			} else {
 				let msg = "HTTP " + method + " " + dispURL + " failed with status code " + status;

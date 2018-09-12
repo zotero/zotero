@@ -29,6 +29,16 @@ describe("Zotero.HTTP", function () {
 				}
 			}
 		);
+		httpd.registerPathHandler(
+			'/test-redirect.html',
+			{
+				handle: function (request, response) {
+					response.setHeader("Content-Type", 'text/html', false);
+					response.setStatusLine(null, 200, "OK");
+					response.write("<html><head><meta http-equiv=\"refresh\" content=\"2000; url = 'test.html'\"/></head><body></body></html>");
+				}
+			}
+		);
 	});
 	
 	after(function* () {
@@ -63,6 +73,20 @@ describe("Zotero.HTTP", function () {
 					assert.equal(doc.querySelector('p').textContent, 'Test');
 					var p = doc.evaluate('//p', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 					assert.equal(p.textContent, 'Test');
+					called = true;
+				}
+			);
+			assert.isTrue(called);
+		});
+		
+		it("should follow meta redirect for a document", async function () {
+			let url1 = `http://127.0.0.1:${port}/test-redirect.html`;
+			let url2 = `http://127.0.0.1:${port}/test.html`;
+			let called = false;
+			await Zotero.HTTP.processDocuments(
+				url1,
+				function (doc) {
+					assert.equal(doc.location.href, url2);
 					called = true;
 				}
 			);
