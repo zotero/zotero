@@ -863,8 +863,8 @@ Zotero.HTTP = new function() {
 				}
 			)
 			.then((xhr) => {
-				var doc = this.wrapDocument(xhr.response, url);
-				return processor(doc, url);
+				var doc = this.wrapDocument(xhr.response, xhr.responseURL);
+				return processor(doc, xhr.responseURL);
 			});
 		});
 		
