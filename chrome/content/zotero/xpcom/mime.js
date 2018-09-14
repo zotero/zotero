@@ -174,9 +174,7 @@ Zotero.MIME = new function(){
 			
 			case 'image/tif':
 			case 'image/tiff':
-			case 'image/tif':
 			case 'image/x-tif':
-			case 'image/tiff':
 			case 'image/x-tiff':
 			case 'application/tif':
 			case 'application/x-tif':
