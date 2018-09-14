@@ -2169,16 +2169,22 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		if (!sameLibrary) {
 			let toReconcile = [];
 			
-			yield Zotero.DB.executeTransaction(function* () {
-				for (let item of newItems) {
-					var id = yield copyItem(item, targetLibraryID, copyOptions)
-					// Standalone attachments might not get copied
-					if (!id) {
-						continue;
-					}
-					newIDs.push(id);
+			yield Zotero.Utilities.Internal.forEachChunkAsync(
+				newItems,
+				100,
+				function (chunk) {
+					return Zotero.DB.executeTransaction(async function () {
+						for (let item of chunk) {
+							var id = await copyItem(item, targetLibraryID, copyOptions)
+							// Standalone attachments might not get copied
+							if (!id) {
+								continue;
+							}
+							newIDs.push(id);
+						}
+					});
 				}
-			});
+			);
 			
 			if (toReconcile.length) {
 				let sourceName = Zotero.Libraries.getName(items[0].libraryID);
