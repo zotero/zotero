@@ -802,7 +802,7 @@ Zotero.Integration.Fields = function(session, doc) {
 
 /**
  * Checks that it is appropriate to add fields to the current document at the current
- * positon, then adds one.
+ * position, then adds one.
  */
 Zotero.Integration.Fields.prototype.addField = async function(note) {
 	// Get citation types if necessary
@@ -2075,7 +2075,7 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = Zotero.Promise.corout
 	}
 	
 	if(zoteroItem) {
-		// make sure URI is up to date (in case user just began synching)
+		// make sure URI is up to date (in case user just began syncing)
 		var newURI = Zotero.URI.getItemURI(zoteroItem);
 		if(newURI != uris[i]) {
 			uris[i] = newURI;

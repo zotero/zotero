@@ -1548,7 +1548,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	 * @return {Promise}
 	 */
 	var convertItemHTMLToText = Zotero.Promise.coroutine(function* (itemID, html, maxLength) {
-		// Split elements to avoid word concatentation
+		// Split elements to avoid word concatenation
 		html = html.replace(/>/g, '> ');
 		
 		var text = HTMLToText(html);

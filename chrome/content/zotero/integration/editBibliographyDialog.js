@@ -56,7 +56,7 @@ var Zotero_Bibliography_Dialog = new function () {
 		// load (from selectItemsDialog.js)
 		doLoad();
 		
-		// load bibliography entires
+		// load bibliography entries
 		_loadItems();
 	}
 	

@@ -1656,7 +1656,7 @@ Zotero.Schema = new function(){
 	/**
 	 * Process the response from the repository
 	 *
-	 * @return {Promise:Boolean} A promise for whether the update suceeded
+	 * @return {Promise:Boolean} A promise for whether the update succeeded
 	 **/
 	async function _handleRepositoryResponse(xmlhttp, force) {
 		if (!xmlhttp.responseXML){

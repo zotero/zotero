@@ -38,7 +38,7 @@ Zotero.Translators = new function() {
 	 * Initializes translator cache, loading all translator metadata into memory
 	 *
 	 * @param {Object} [options.metadataCache] - Translator metadata keyed by filename, if already
-	 *     available (e.g., in updateBundledFiles()), to avoid unnecesary file reads
+	 *     available (e.g., in updateBundledFiles()), to avoid unnecessary file reads
 	 */
 	this.init = Zotero.Promise.coroutine(function* (options = {}) {
 		// Wait until bundled files have been updated, except when this is called by the schema update

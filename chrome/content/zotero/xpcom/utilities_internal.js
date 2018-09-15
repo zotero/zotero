@@ -1549,7 +1549,7 @@ Zotero.Utilities.Internal = {
 	 *
 	 * @param {Object} obj Target object
 	 * @param {String} prop Property to be defined
-	 * @param {Object} desc Propery descriptor. If not overriden, "enumerable" is true
+	 * @param {Object} desc Property descriptor. If not overridden, "enumerable" is true
 	 * @param {Object} opts Options:
 	 *   lazy {Boolean} If true, the _getter_ is intended for late
 	 *     initialization of the property. The getter is replaced with a simple

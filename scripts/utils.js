@@ -42,7 +42,7 @@ async function getSignatures() {
 	try {
 		signatures = await fs.readJson(signaturesFile);
 	} catch (_) {
-		// if signatures files doesn't exist, return empty object istead
+		// if signatures files doesn't exist, return empty object instead
 	}
 	return signatures;
 }

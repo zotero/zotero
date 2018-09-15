@@ -813,7 +813,7 @@ var Zotero_File_Interface = new function() {
 	
 	
 	function _saveBibliography(name, format) {	
-		// savable bibliography, using a file stream
+		// saveable bibliography, using a file stream
 		const nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
 				.createInstance(nsIFilePicker);
