@@ -176,9 +176,9 @@ Zotero.Cite = {
 			var secondFieldAlign = bib[0]["second-field-align"];
 			
 			// Validate input
-			if(maxOffset == NaN) throw new Error("Invalid maxoffset");
-			if(entrySpacing == NaN) throw new Error("Invalid entryspacing");
-			if(lineSpacing == NaN) throw new Error("Invalid linespacing");
+			if(isNaN(maxOffset)) throw new Error("Invalid maxoffset");
+			if(isNaN(entrySpacing)) throw new Error("Invalid entryspacing");
+			if(isNaN(lineSpacing)) throw new Error("Invalid linespacing");
 			
 			var str;
 			var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
