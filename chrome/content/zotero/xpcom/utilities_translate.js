@@ -245,7 +245,7 @@ Zotero.Utilities.Translate.prototype.processDocuments = async function (urls, pr
 		if(translate.document && translate.document.location
 				&& translate.document.location.toString() === urls[i]) {
 			Zotero.debug("Translate: Attempted to load the current document using processDocuments; using loaded document instead");
-			funcs.push(() => processDoc(this._translate.document, urls[i]));
+			funcs.push(() => processDoc(this._translate.document));
 			urls.splice(i, 1);
 			i--;
 		}

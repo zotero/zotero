@@ -392,7 +392,7 @@ Zotero.LocateManager = new function() {
 			var me = this;
 			var abort = false;
 			var url = this._urlTemplate.replace(/{(?:([^}:]+):)?([^}:?]+)(\?)?}/g, function(all, nsPrefix, param, required) {
-				var result = _lookupParam(item, itemAsOpenURL, me, nsPrefix, param, required);
+				var result = _lookupParam(item, itemAsOpenURL, me, nsPrefix, param);
 				if(result) {
 					return result[0];
 				} else {
