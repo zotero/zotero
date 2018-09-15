@@ -219,7 +219,6 @@ Zotero.History = new function(){
 	function undo(){
 		if (!_currentID){
 			throw('No transaction set to undo');
-			return false;
 		}
 		
 		var id = _currentID;

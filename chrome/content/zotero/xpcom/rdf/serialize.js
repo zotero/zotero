@@ -457,7 +457,6 @@ $rdf.Serializer = function () {
 
       default:
         throw new Error("Internal: termToN3 cannot handle " + expr + " of termType+" + expr.termType);
-        return '' + expr;
       }
     }
 

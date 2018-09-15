@@ -832,7 +832,6 @@ the module, including tests and test harness.
       var j = this.skipSpace(str, i);
       if((j < 0)) {
         throw BadSyntax(this._thisDoc, this.lines, str, j, "EOF found in list of objects");
-        return j;
       }
       if((pyjslib_slice(str, i, (i + 1)) != ";")) {
         return i;
@@ -852,7 +851,6 @@ the module, including tests and test harness.
     var i = this.skipSpace(str, j);
     if((i < 0)) {
       throw BadSyntax(this._thisDoc, this.lines, str, i, "EOF found expecting comma sep list");
-      return i;
     }
     if((str.charAt(i) == ".")) {
       return j;
@@ -884,7 +882,6 @@ the module, including tests and test harness.
       }
       if((i < 0)) {
         throw BadSyntax(this._thisDoc, this.lines, str, i, "bad list content");
-        return i;
       }
     }
   };
@@ -897,7 +894,6 @@ the module, including tests and test harness.
       var j = this.skipSpace(str, i);
       if((j < 0)) {
         throw BadSyntax(this._thisDoc, this.lines, str, j, "EOF found after object");
-        return j;
       }
       if((pyjslib_slice(str, j, (j + 1)) != ",")) {
         return j;
@@ -1052,7 +1048,6 @@ the module, including tests and test harness.
     var i = j;
     if(("0123456789-".indexOf(str.charAt(j)) >= 0)) {
       throw BadSyntax(this._thisDoc, this.lines, str, j, (("Varible name can't start with '" + str.charAt(j)) + "s'"));
-      return -1;
     }
     while((i < pyjslib_len(str)) && (_notNameChars.indexOf(str.charAt(i)) < 0)) {
       var i = (i + 1);

@@ -293,7 +293,6 @@ $rdf.RDFParser = function (store) {
       var root = document
     } else {
       throw new Error("RDFParser: can't find root in " + base + ". Halting. ")
-      return false
     }
 
     this['why'] = why

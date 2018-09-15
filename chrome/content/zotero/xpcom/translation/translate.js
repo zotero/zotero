@@ -265,7 +265,6 @@ Zotero.Translate.Sandbox = {
 		"getOption":function(translate, option) {
 			if(typeof option !== "string") {
 				throw(new Error("getOption: option must be a string"));
-				return;
 			}
 			
 			return translate._displayOptions[option];
@@ -314,7 +313,6 @@ Zotero.Translate.Sandbox = {
 			
 			if(typeof type !== "string") {
 				throw(new Error("loadTranslator: type must be a string"));
-				return;
 			}
 			
 			Zotero.debug("Translate: Creating translate instance of type "+type+" in sandbox");
@@ -450,7 +448,6 @@ Zotero.Translate.Sandbox = {
 						} catch(e) {
 							throw new Error("getTranslatorObject() may not be called from web or search "+
 								"translators to web or search translators from different origins.");
-							return;
 						}
 					}
 					
