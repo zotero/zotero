@@ -218,7 +218,7 @@ onmessage = function (e) {
 				}
 				domain.pop();
 			}
-			return domain.join(".")
+			return domain.join(".");
 		};
 	}
 

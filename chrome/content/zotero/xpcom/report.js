@@ -233,7 +233,7 @@ Zotero.Report.HTML = new function () {
 			}
 			// Convert dates to local format
 			else if (i=='accessDate' || i=='dateAdded' || i=='dateModified') {
-				var date = Zotero.Date.isoToDate(obj[i], true)
+				var date = Zotero.Date.isoToDate(obj[i], true);
 				fieldText = escapeXML(date.toLocaleString());
 			}
 			else {

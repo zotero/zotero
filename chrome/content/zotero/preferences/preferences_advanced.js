@@ -72,7 +72,7 @@ Zotero_Preferences.Advanced = {
 			return;
 		}
 		
-		Components.utils.import("resource://zotero/config.js")
+		Components.utils.import("resource://zotero/config.js");
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 			.getService(Components.interfaces.nsIPromptService);
 		
@@ -512,7 +512,7 @@ Zotero_Preferences.Advanced = {
 		}
 		else {
 			// Changed if moving to a locale other than the current one
-			var changed = Zotero.locale != menu.value
+			var changed = Zotero.locale != menu.value;
 			Zotero.Prefs.set('intl.locale.matchOS', false, true);
 			Zotero.Prefs.set('general.useragent.locale', menu.value, true);
 		}
@@ -604,7 +604,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		for (let i=0; i<allAttachments.length; i++) {
 			let attachmentID = allAttachments[i];
 			let attachmentPath;
-			let relPath = false
+			let relPath = false;
 			
 			try {
 				let attachment = yield Zotero.Items.getAsync(attachmentID);

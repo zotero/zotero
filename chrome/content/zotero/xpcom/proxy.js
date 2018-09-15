@@ -458,7 +458,7 @@ Zotero.Proxy.prototype.toProper = function(m) {
 	if (!Array.isArray(m)) {
 		let match = this.regexp.exec(m);
 		if (!match) {
-			return m
+			return m;
 		} else {
 			m = match;
 		}
@@ -513,7 +513,7 @@ Zotero.Proxy.prototype.toProxy = function(uri) {
 		} else if(param == "%d") {
 			value = uri.path.substr(0, uri.path.lastIndexOf("/"));
 		} else if(param == "%f") {
-			value = uri.path.substr(uri.path.lastIndexOf("/")+1)
+			value = uri.path.substr(uri.path.lastIndexOf("/")+1);
 		}
 		
 		proxyURL = proxyURL.substr(0, this.indices[param])+value+proxyURL.substr(this.indices[param]+2);

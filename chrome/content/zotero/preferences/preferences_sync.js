@@ -260,7 +260,7 @@ Zotero_Preferences.Sync = {
 		var row = treechildren.childNodes[index];
 		var val = row.firstChild.childNodes[1].getAttribute('value');
 		if (!val) {
-			return
+			return;
 		}
 		
 		var librariesToSkip = JSON.parse(Zotero.Prefs.get('sync.librariesToSkip') || '[]');

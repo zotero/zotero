@@ -16,7 +16,7 @@ if (require.main === module) {
 			const symlinks = symlinkFiles
 				.concat(dirs.map(d => `${d}/**`))
 				.concat([`!${formatDirsForMatcher(dirs)}/**/*.js`])
-				.concat([`!${formatDirsForMatcher(copyDirs)}/**`])
+				.concat([`!${formatDirsForMatcher(copyDirs)}/**`]);
 
 			const signatures = await getSignatures();
 			const results = await Promise.all([

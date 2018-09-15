@@ -49,7 +49,7 @@ Zotero_File_Exporter.prototype.save = Zotero.Promise.coroutine(function* () {
 	var translators = yield translation.getTranslators();
 	
 	// present options dialog
-	var io = {translators:translators}
+	var io = {translators:translators};
 	window.openDialog("chrome://zotero/content/exportOptions.xul",
 		"_blank", "chrome,modal,centerscreen,resizable=no", io);
 	if(!io.selectedTranslator) {
@@ -99,7 +99,7 @@ Zotero_File_Exporter.prototype.save = Zotero.Promise.coroutine(function* () {
 	Zotero_File_Interface.Progress.show(
 		Zotero.getString("fileInterface.itemsExported")
 	);
-	translation.translate()
+	translation.translate();
 });
 	
 /*

@@ -194,7 +194,7 @@ function ZoteroProtocolHandler() {
 				var itemsHash = {}; // key = itemID, val = position in |items|
 				var searchItemIDs = new Set(); // All selected items
 				var searchParentIDs = new Set(); // Parents of selected child items
-				var searchChildIDs = new Set() // Selected chlid items
+				var searchChildIDs = new Set(); // Selected chlid items
 				
 				var includeAllChildItems = Zotero.Prefs.get('report.includeAllChildItems');
 				var combineChildItems = Zotero.Prefs.get('report.combineChildItems');
@@ -758,7 +758,7 @@ function ZoteroProtocolHandler() {
 						}
 						if (fileName) {
 							Components.utils.import("resource://gre/modules/osfile.jsm");
-							path = OS.Path.join(OS.Path.dirname(path), fileName)
+							path = OS.Path.join(OS.Path.dirname(path), fileName);
 							if (!(yield OS.File.exists(path))) {
 								return self._errorChannel("File not found");
 							}
@@ -1315,7 +1315,7 @@ AsyncChannel.prototype = {
 		}
 		try {
 			if (!data) {
-				data = yield Zotero.spawn(channel._generator, channel)
+				data = yield Zotero.spawn(channel._generator, channel);
 			}
 			if (typeof data == 'string') {
 				//Zotero.debug("AsyncChannel: Got string from generator");

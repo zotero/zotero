@@ -276,7 +276,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		catch (e) {
 			if (e instanceof Zotero.HTTP.BrowserOfflineException) {
 				let msg = Zotero.getString('general.browserIsOffline', Zotero.appName);
-				e = new Zotero.Error(msg, 0, { dialogButtonText: null })
+				e = new Zotero.Error(msg, 0, { dialogButtonText: null });
 				Zotero.logError(e);
 				_errors = [];
 			}
@@ -472,7 +472,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			else {
 				localGroups = libraries
 					.filter(id => Zotero.Libraries.get(id).libraryType == 'group')
-					.map(id => Zotero.Groups.getGroupIDFromLibraryID(id))
+					.map(id => Zotero.Groups.getGroupIDFromLibraryID(id));
 			}
 			Zotero.debug("Local groups:");
 			Zotero.debug(localGroups);
@@ -662,7 +662,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	 */
 	var _doFileSync = Zotero.Promise.coroutine(function* (libraries, options) {
 		Zotero.debug("Starting file syncing");
-		var resyncLibraries = []
+		var resyncLibraries = [];
 		for (let libraryID of libraries) {
 			_stopCheck();
 			let libraryName = Zotero.Libraries.get(libraryID).name;
@@ -1464,7 +1464,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				buttons.appendChild(button);
 			}
 			
-			panel.appendChild(box)
+			panel.appendChild(box);
 			break;
 		}
 		

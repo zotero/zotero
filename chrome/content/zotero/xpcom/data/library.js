@@ -270,7 +270,7 @@ Zotero.Library.prototype._set = function(prop, val) {
 			if (newVal != val) {
 				throw new Error(`${prop} must be an integer (${typeof val} '${val}' given)`);
 			}
-			val = newVal
+			val = newVal;
 			
 			// Allow -1 to indicate that a full sync is needed
 			if (val < -1) throw new Error(prop + ' must not be less than -1');

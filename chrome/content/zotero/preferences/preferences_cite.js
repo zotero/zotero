@@ -173,7 +173,7 @@ Zotero_Preferences.Cite = {
 		if(cslIDs.length == 0) {
 			return;
 		} else if(cslIDs.length == 1) {
-			var selectedStyle = Zotero.Styles.get(cslIDs[0])
+			var selectedStyle = Zotero.Styles.get(cslIDs[0]);
 			var text = Zotero.getString('styles.deleteStyle', selectedStyle.title);
 		} else {
 			var text = Zotero.getString('styles.deleteStyles');

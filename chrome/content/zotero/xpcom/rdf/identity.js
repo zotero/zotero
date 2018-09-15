@@ -43,7 +43,7 @@ $rdf.IndexedFormula = function () {
     this.objectIndex = []; // Array of statements with this X as object
     this.whyIndex = []; // Array of statements with X as provenance
     this.index = [this.subjectIndex, this.predicateIndex, this.objectIndex, this.whyIndex];
-    this.namespaces = {} // Dictionary of namespace prefixes
+    this.namespaces = {}; // Dictionary of namespace prefixes
     if(features === undefined) features = ["sameAs",
                                 "InverseFunctionalProperty", "FunctionalProperty"];
     //    this.features = features
@@ -376,7 +376,7 @@ We replace the bigger with the smaller.
     // Ok, we have picked the shortest index but now we have to filter it
     var best_p = given[best_i];
     var possibles = this.index[best_p][hash[best_p]];
-    var check = given.slice(0, best_i).concat(given.slice(best_i + 1)) // remove best_i
+    var check = given.slice(0, best_i).concat(given.slice(best_i + 1)); // remove best_i
     var results = [];
     var parts = ['subject', 'predicate', 'object', 'why'];
     for(var j = 0; j < possibles.length; j++) {

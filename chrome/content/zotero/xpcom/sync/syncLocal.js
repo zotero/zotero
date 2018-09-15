@@ -766,7 +766,7 @@ Zotero.Sync.Data.Local = {
 					notifierQueues = [];
 					// Get the current batch size, which might have increased
 					if (options.getNotifierBatchSize) {
-						batchSize = options.getNotifierBatchSize()
+						batchSize = options.getNotifierBatchSize();
 					}
 				}
 				let notifierQueue = new Zotero.Notifier.Queue;
@@ -1678,7 +1678,7 @@ Zotero.Sync.Data.Local = {
 				}
 				catch (e) {
 					Zotero.logError(e);
-					return true
+					return true;
 				}
 			}
 			return true;

@@ -464,7 +464,7 @@ Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.corou
 		}
 		if (queuedKeys.length) {
 			Zotero.debug(`Refetching ${queuedKeys.length} queued `
-				+ (queuedKeys.length == 1 ? objectType : objectTypePlural))
+				+ (queuedKeys.length == 1 ? objectType : objectTypePlural));
 		}
 	}
 	
@@ -748,7 +748,7 @@ Zotero.Sync.Data.Engine.prototype._restoreRestoredCollectionItems = async functi
 					// (This would happen if items were moved to the trash along with the collection
 					// deletion.)
 					if (o.deleted) {
-						o.deleted = false
+						o.deleted = false;
 						await o.saveTx();
 					}
 				}
@@ -1865,7 +1865,7 @@ Zotero.Sync.Data.Engine.prototype._restoreToServer = async function () {
 		throw new Error(remoteUpdatedError);
 	
 	case this.UPLOAD_RESULT_RESTART:
-		return this._restoreToServer()
+		return this._restoreToServer();
 	
 	case this.UPLOAD_RESULT_CANCEL:
 		throw new Zotero.Sync.UserCancelledException;

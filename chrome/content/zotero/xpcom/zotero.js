@@ -555,7 +555,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					
 					// Default location
 					if (index == 0) {
-						Zotero.Prefs.set("useDataDir", false)
+						Zotero.Prefs.set("useDataDir", false);
 						
 						Services.startup.quit(
 							Components.interfaces.nsIAppStartup.eAttemptQuit
@@ -1103,7 +1103,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				"basicViewer", "chrome,dialog=yes,resizable,centerscreen,menubar,scrollbars", arg);
 		}
 		if (onLoad) {
-			let browser
+			let browser;
 			let func = function () {
 				win.removeEventListener("load", func);
 				browser = win.document.documentElement.getElementsByTagName('browser')[0];
@@ -2076,7 +2076,7 @@ Zotero.Browser = new function() {
 		hiddenBrowser.docShell.allowAuth = false;
 		hiddenBrowser.docShell.allowDNSPrefetch = false;
 		hiddenBrowser.docShell.allowImages = false;
-		hiddenBrowser.docShell.allowJavascript = options.allowJavaScript !== false
+		hiddenBrowser.docShell.allowJavascript = options.allowJavaScript !== false;
 		hiddenBrowser.docShell.allowMetaRedirects = false;
 		hiddenBrowser.docShell.allowPlugins = false;
 		Zotero.debug("Created hidden browser (" + (nBrowsers++) + ")");

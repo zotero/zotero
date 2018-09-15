@@ -249,7 +249,7 @@ var Zotero_Merge_Window = new function () {
 		var mergeInfo = {
 			data: {}
 		};
-		Object.assign(mergeInfo.data, _conflicts[pos].left)
+		Object.assign(mergeInfo.data, _conflicts[pos].left);
 		Zotero.DataObjectUtilities.applyChanges(mergeInfo.data, _conflicts[pos].changes);
 		if (_conflicts[pos].left.dateModified > _conflicts[pos].right.dateModified) {
 			var side = 0;

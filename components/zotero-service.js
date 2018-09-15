@@ -550,8 +550,8 @@ ZoteroCommandLineHandler.prototype = {
 				}
 				// See below
 				else if (uri.schemeIs("file")) {
-					Components.utils.import("resource://gre/modules/osfile.jsm")
-					fileToOpen = OS.Path.fromFileURI(uri.spec)
+					Components.utils.import("resource://gre/modules/osfile.jsm");
+					fileToOpen = OS.Path.fromFileURI(uri.spec);
 				}
 				else {
 					dump(`Not handling URL: ${uri.spec}\n\n`);

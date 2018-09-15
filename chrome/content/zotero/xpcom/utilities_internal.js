@@ -1249,7 +1249,7 @@ Zotero.Utilities.Internal = {
 		// If no subcollections, place menuitem for target directly in containing men
 		if (collections.length == 0) {
 			elem.appendChild(menuitem);
-			return menuitem
+			return menuitem;
 		}
 		
 		// Otherwise create a submenu for the target's subcollections
@@ -1719,7 +1719,7 @@ Zotero.Utilities.Internal.activate = new function() {
 				
 				var psn = new ProcessSerialNumber();
 				psn.highLongOfPSN = 0;
-				psn.lowLongOfPSN = 2 // kCurrentProcess
+				psn.lowLongOfPSN = 2; // kCurrentProcess
 				
 				win.addEventListener("load", function() {
 					var res = SetFrontProcessWithOptions(

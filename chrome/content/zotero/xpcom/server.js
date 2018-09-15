@@ -75,7 +75,7 @@ Zotero.Server = new function() {
 			serv = undefined;
 		}
 		
-		_registerOnlineObserver()
+		_registerOnlineObserver();
 	}
 	
 	/**

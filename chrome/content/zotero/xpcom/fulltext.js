@@ -724,7 +724,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		for (let i=0; i<itemIDs.length; i++) {
 			let itemID = itemIDs[i];
 			let item = yield Zotero.Items.getAsync(itemID);
-			let libraryID = item.libraryID
+			let libraryID = item.libraryID;
 			if (!undownloaded[libraryID]) {
 				undownloaded[libraryID] = [];
 			}
@@ -764,7 +764,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			return;
 		}
 		var itemID = item.id;
-		var currentVersion = yield this.getItemVersion(itemID)
+		var currentVersion = yield this.getItemVersion(itemID);
 		
 		var processorCacheFile = this.getItemProcessorCacheFile(item).path; // .zotero-ft-unprocessed
 		var itemCacheFile = this.getItemCacheFile(item).path; // .zotero-ft-cache

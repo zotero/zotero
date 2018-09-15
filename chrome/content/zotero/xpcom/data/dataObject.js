@@ -880,7 +880,7 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options =
 		}
 		
 		// Create transaction
-		let result
+		let result;
 		if (env.options.tx) {
 			result = yield Zotero.DB.executeTransaction(function* () {
 				Zotero.DataObject.prototype._saveData.call(this, env);

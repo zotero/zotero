@@ -53,7 +53,7 @@ var Zotero_Import_Wizard = {
 				}
 				this._populateFileList(this._dbs);
 				document.getElementById('file-options-header').textContent
-					= Zotero.getString('fileInterface.chooseAppDatabaseToImport', 'Mendeley')
+					= Zotero.getString('fileInterface.chooseAppDatabaseToImport', 'Mendeley');
 				wizard.goTo('page-file-list');
 				wizard.canRewind = true;
 				this._enableCancel();
@@ -316,7 +316,7 @@ var Zotero_Import_Wizard = {
 			xulElem.hidden = false;
 			htmlElem.setAttribute('display', 'none');
 		}
-		document.getElementById('result-description')
+		document.getElementById('result-description');
 		
 		if (showReportErrorButton) {
 			let button = document.getElementById('result-report-error');

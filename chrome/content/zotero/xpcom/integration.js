@@ -221,7 +221,7 @@ Zotero.Integration = new function() {
 			return;
 		}
 		Zotero.Integration.currentDoc = true;
-		Zotero.debug(`Integration: ${agent}-${command}${docId ? `:'${docId}'` : ''} invoked`)
+		Zotero.debug(`Integration: ${agent}-${command}${docId ? `:'${docId}'` : ''} invoked`);
 
 		var startTime = (new Date()).getTime();
 
@@ -301,7 +301,7 @@ Zotero.Integration = new function() {
 		}
 		finally {
 			var diff = ((new Date()).getTime() - startTime)/1000;
-			Zotero.debug(`Integration: ${agent}-${command}${docId ? `:'${docId}'` : ''} complete in ${diff}s`)
+			Zotero.debug(`Integration: ${agent}-${command}${docId ? `:'${docId}'` : ''} complete in ${diff}s`);
 			if (document) {
 				try {
 					await document.cleanup();
@@ -931,7 +931,7 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
 		}
 	}
 	if (this._bibliographyFields.length) {
-		var data = yield this._bibliographyFields[0].unserialize()
+		var data = yield this._bibliographyFields[0].unserialize();
 		this._session.bibliography = new Zotero.Integration.Bibliography(this._bibliographyFields[0], data);
 		yield this._session.bibliography.loadItemData();
 	} else {
@@ -1518,7 +1518,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = Zotero.Promise.coroutine(func
 	data.prefs = oldData ? Object.assign({}, oldData.prefs) : {};
 	data.prefs.fieldType = io.fieldType;
 	data.prefs.automaticJournalAbbreviations = io.automaticJournalAbbreviations;
-	data.prefs.delayCitationUpdates = io.delayCitationUpdates
+	data.prefs.delayCitationUpdates = io.delayCitationUpdates;
 	
 	var forceStyleReset = oldData
 		&& (
@@ -1749,7 +1749,7 @@ Zotero.Integration.Session.prototype.writeDelayedCitation = Zotero.Promise.corou
 				interfaceType = 'toolbar';
 			}
 		
-			yield field.setText(Zotero.getString(`integration.delayCitationUpdates.bibliography.${interfaceType}`), false)
+			yield field.setText(Zotero.getString(`integration.delayCitationUpdates.bibliography.${interfaceType}`), false);
 			break;
 		}
 	}
@@ -1967,7 +1967,7 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
  */
 Zotero.Integration.DocumentData.prototype.unserialize = function(input) {
 	try {
-		return Object.assign(this, JSON.parse(input))
+		return Object.assign(this, JSON.parse(input));
 	} catch (e) {
 		if (!(e instanceof SyntaxError)) {
 			throw e;

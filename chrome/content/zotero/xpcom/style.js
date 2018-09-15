@@ -307,7 +307,7 @@ Zotero.Styles = new function() {
 			} else {
 				Zotero.logError(error);
 				if (silent) {
-					throw error
+					throw error;
 				} else {
 					(new Zotero.Exception.Alert("styles.install.unexpectedError",
 						origin, "styles.install.title", error)).present();
@@ -845,7 +845,7 @@ Zotero.Style.prototype.getXML = function() {
  */
 Zotero.Style.prototype.remove = Zotero.Promise.coroutine(function* () {
 	if (!this.path) {
-		throw new Error("Cannot delete a style with no associated file")
+		throw new Error("Cannot delete a style with no associated file");
 	}
 	
 	// make sure no styles depend on this one

@@ -132,7 +132,7 @@ Zotero.CookieSandbox.prototype = {
 				var normalizedDomain = Zotero.CookieSandbox.normalizeHost(domain);
 				var substrMatch = validDomain.lastIndexOf(normalizedDomain);
 				var publicSuffix;
-				try { publicSuffix = Services.eTLD.getPublicSuffix(uri) }  catch(e) {}
+				try { publicSuffix = Services.eTLD.getPublicSuffix(uri); }  catch(e) {}
 				if(substrMatch == -1 || !publicSuffix || publicSuffix == normalizedDomain
 					|| (substrMatch + normalizedDomain.length != validDomain.length)
 					|| (validDomain.charAt(substrMatch-1) != '.')) {

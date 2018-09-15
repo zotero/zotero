@@ -271,7 +271,7 @@ Zotero.Sync.APIClient.prototype = {
 			let allKeys = objectKeys.concat();
 			let promises = [];
 			while (true)  {
-				let requestKeys = allKeys.splice(0, this.MAX_OBJECTS_PER_REQUEST)
+				let requestKeys = allKeys.splice(0, this.MAX_OBJECTS_PER_REQUEST);
 				if (!requestKeys.length) {
 					break;
 				}
@@ -639,7 +639,7 @@ Zotero.Sync.APIClient.prototype = {
 			}
 		}
 		
-		let opts = {}
+		let opts = {};
 		Object.assign(opts, options);
 		opts.headers = this.getHeaders(options.headers);
 		opts.dontCache = true;

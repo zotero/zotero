@@ -74,7 +74,7 @@ Zotero.History = new function(){
 		}
 		// If array, insert hyphen-delimited string
 		else if (typeof id=='object'){
-			sql += "'" + id.join('-') + "'"
+			sql += "'" + id.join('-') + "'";
 		}
 		else {
 			sql += id;

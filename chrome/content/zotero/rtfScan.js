@@ -498,7 +498,7 @@ var Zotero_RTFScan = new function() {
 	
 	function _formatRTF() {
 		// load style and create ItemSet with all items
-		var zStyle = Zotero.Styles.get(document.getElementById("style-listbox").value)
+		var zStyle = Zotero.Styles.get(document.getElementById("style-listbox").value);
 		var locale = document.getElementById("locale-menu").value;
 		var style = zStyle.getCiteProc(locale);
 		style.setOutputFormat("rtf");

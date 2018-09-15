@@ -334,7 +334,7 @@ $rdf.Serializer = function () {
               var line = treeToLine(branch);
               if(line.length < (width - indent * level)) {
                 branch = '   ' + line; //   @@ Hack: treat as string below
-                substr = ''
+                substr = '';
               }
             }
             if(substr) lastLength = 10000;
@@ -394,7 +394,7 @@ $rdf.Serializer = function () {
     // The property tree for a single subject or anonymous node
     function propertyTree(subject, stats) {
       // print('Proprty tree for '+subject);
-      var results = []
+      var results = [];
       var lastPred = null;
       var sts = stats.subjects[sz.toStr(subject)]; // relevant statements
       if(typeof sts == 'undefined') {
@@ -549,7 +549,7 @@ $rdf.Serializer = function () {
             res += "\\" + 'bfrtvn\\"' [k];
           } else {
             if(flags.indexOf('e') >= 0) {
-              res += '\\u' + ('000' + ch.charCodeAt(0).toString(16).toLowerCase()).slice(-4)
+              res += '\\u' + ('000' + ch.charCodeAt(0).toString(16).toLowerCase()).slice(-4);
             } else { // no 'e' flag
               res += ch;
             }
@@ -557,7 +557,7 @@ $rdf.Serializer = function () {
         }
         i = j + 1;
       }
-      return delim + res + str.slice(i) + delim
+      return delim + res + str.slice(i) + delim;
     }
 
     // Body of toN3:
@@ -641,7 +641,7 @@ $rdf.Serializer = function () {
               var line = XMLtreeToLine(branch);
               if(line.length < (width - indent * level)) {
                 branch = '   ' + line; //   @@ Hack: treat as string below
-                substr = ''
+                substr = '';
               }
             }
             if(substr) lastLength = 10000;
@@ -795,7 +795,7 @@ $rdf.Serializer = function () {
 
     // The property tree for a single subject or anonymos node
     function propertyXMLTree(subject, stats) {
-      var results = []
+      var results = [];
       var sts = stats.subjects[sz.toStr(subject)]; // relevant statements
       if(sts == undefined) return results; // No relevant statements
       sts.sort();
@@ -840,7 +840,7 @@ $rdf.Serializer = function () {
       var uri = term.uri;
 
       var j = uri.search(sz._NCNameRegExp);
-      if(j < 0) throw("Cannot make qname out of <" + uri + ">")
+      if(j < 0) throw("Cannot make qname out of <" + uri + ">");
       
       var localid = uri.substr(j);
       var namesp = uri.substr(0, j);

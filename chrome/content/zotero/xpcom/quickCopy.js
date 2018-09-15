@@ -28,7 +28,7 @@
 Zotero.QuickCopy = new function() {
 	this.lastActiveURL = null;
 	
-	var _initTimeoutID
+	var _initTimeoutID;
 	var _initPromise;
 	var _initialized = false;
 	var _initCancelled = false;

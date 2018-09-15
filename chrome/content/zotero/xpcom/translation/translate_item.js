@@ -386,7 +386,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				}
 				else {
 					newCollection.parentID = rootCollectionID;
-					topLevelCollections.push(newCollection)
+					topLevelCollections.push(newCollection);
 				}
 				yield newCollection.save(this._saveOptions);
 
@@ -776,7 +776,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				url = attachment.document.location.href;
 				mimeType = attachment.mimeType || attachment.document.contentType;
 			} else {
-				url = attachment.url
+				url = attachment.url;
 				mimeType = attachment.mimeType || undefined;
 			}
 			

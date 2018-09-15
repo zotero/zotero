@@ -189,7 +189,7 @@ Zotero.Translate.Sandbox = {
 							notes.splice(j--, 1);
 						} else if(typeof(note) != "object") {
 							// Convert to object
-							notes[j] = {"note":note.toString()}
+							notes[j] = {"note":note.toString()};
 						}
 						// If we're not in a child translator, canonicalize tags
 						if (!translate._parentTranslator) {
@@ -779,7 +779,7 @@ Zotero.Translate.Sandbox = {
 				return;
 			}
 
-			var window = translate.document.defaultView
+			var window = translate.document.defaultView;
 			var mutationObserver = window && ( window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver );
 			if(!mutationObserver) {
 				Zotero.debug("Translate: This browser does not support mutation observers.");
@@ -1276,7 +1276,7 @@ Zotero.Translate.Base.prototype = {
 		}
 		
 		var me = this;
-		var deferred = Zotero.Promise.defer()
+		var deferred = Zotero.Promise.defer();
 		
 		if(!this.translator || !this.translator.length) {
 			Zotero.debug("Translate: translate called without specifying a translator. Running detection first.");
@@ -2264,7 +2264,7 @@ Zotero.Translate.Web.prototype.complete = async function(returnValue, error) {
 		&& this.translator[0].inRepository && reportTranslationFailure) {
 		// Don't report failure if in private browsing mode
 		if (Zotero.isConnector && await Zotero.Connector_Browser.isIncognito()) {
-			return
+			return;
 		}
 		
 		var translator = this.translator[0];
@@ -2541,7 +2541,7 @@ Zotero.Translate.Export.prototype._prepareTranslation = Zotero.Promise.method(fu
 		}
 		rest.apply(this, arguments);
 	} else {
-		return loadPromise.then(() => rest.apply(this, arguments))
+		return loadPromise.then(() => rest.apply(this, arguments));
 	}
 	
 	function rest() {

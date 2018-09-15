@@ -79,7 +79,7 @@ Zotero_Preferences.Search = {
 				await Zotero.Fulltext.rebuildIndex();
 			}
 			else if (index == 2) {
-				await Zotero.Fulltext.rebuildIndex(true)
+				await Zotero.Fulltext.rebuildIndex(true);
 			}
 			
 			await this.updateIndexStats();

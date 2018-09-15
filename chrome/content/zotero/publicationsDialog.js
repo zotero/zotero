@@ -77,7 +77,7 @@ var Zotero_Publications_Dialog = new function () {
 		if (pageid == 'intro') {
 			let str = 'publications.authorship.checkbox';
 			let filesCheckbox = document.getElementById('include-files');
-			let notesCheckbox = document.getElementById('include-notes')
+			let notesCheckbox = document.getElementById('include-notes');
 			
 			// Enable the checkboxes only when relevant
 			filesCheckbox.disabled = !_hasFiles;

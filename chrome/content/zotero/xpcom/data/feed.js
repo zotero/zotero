@@ -475,7 +475,7 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 			
 			if (!feedItem.hasChanged()) {
 				Zotero.debug("Feed item " + feedItem.guid + " has not changed");
-				continue
+				continue;
 			}
 			feedItem.isRead = false;
 			toSave.push(feedItem);

@@ -321,7 +321,7 @@ Zotero.Tags = new function() {
 						// Since we're performing the DELETE query directly,
 						// get the list of items that will need their tags reloaded,
 						// and generate data for item-tag notifications
-						let itemIDs = []
+						let itemIDs = [];
 						while (i < chunkTagItems.length && chunkTagItems[i].tagID == tagID) {
 							itemIDs.push(chunkTagItems[i].itemID);
 							i++;
@@ -796,7 +796,7 @@ Zotero.Tags = new function() {
 		var x = prependExtraImage ? extraImageWidth + separator + extraImageSeparator : 0;
 		for (let i=0, len=colors.length; i<len; i++) {
 			ctx.fillStyle = colors[i];
-			_canvasRoundRect(ctx, x, swatchTop + 1, swatchWidth, swatchHeight, 2, true, false)
+			_canvasRoundRect(ctx, x, swatchTop + 1, swatchWidth, swatchHeight, 2, true, false);
 			x += swatchWidth + separator;
 		}
 		

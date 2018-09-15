@@ -935,7 +935,7 @@ Zotero.Server.Connector.UpdateSession.prototype = {
 	permitBookmarklet: true,
 	
 	init: async function (requestData) {
-		var data = requestData.data
+		var data = requestData.data;
 		
 		if (!data.sessionID) {
 			return [400, "application/json", JSON.stringify({ error: "SESSION_ID_NOT_PROVIDED" })];

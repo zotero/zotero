@@ -332,7 +332,7 @@ Zotero.LocateManager = new function() {
 			
 			// TODO: better error handling
 			var urlTag = urlTags[i];
-			this._urlTemplate = urlTag.getAttribute("template")
+			this._urlTemplate = urlTag.getAttribute("template");
 			this._method = urlTag.getAttribute("method").toString().toUpperCase() === "POST" ? "POST" : "GET";
 			
 			// get namespaces

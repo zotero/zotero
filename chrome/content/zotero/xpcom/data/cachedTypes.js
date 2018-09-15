@@ -370,7 +370,7 @@ Zotero.ItemTypes = new function() {
 		_secondaryTypes = yield this._getTypesFromDB('WHERE display IN (1,2)');
 		
 		// Hidden types
-		_hiddenTypes = yield this._getTypesFromDB('WHERE display=0')
+		_hiddenTypes = yield this._getTypesFromDB('WHERE display=0');
 		
 		// Custom labels and icons
 		var sql = "SELECT customItemTypeID AS id, label, icon FROM customItemTypes";

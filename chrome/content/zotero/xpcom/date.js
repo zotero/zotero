@@ -142,7 +142,7 @@ Zotero.Date = new function(){
 				timeparts[0], timeparts[1], timeparts[2]);
 		}
 		catch (e){
-			Zotero.debug(sqldate + ' is not a valid SQL date', 2)
+			Zotero.debug(sqldate + ' is not a valid SQL date', 2);
 			return false;
 		}
 	}
@@ -353,7 +353,7 @@ Zotero.Date = new function(){
 				if(date.month > 12) {
 					// swap day and month
 					var tmp = date.day;
-					date.day = date.month
+					date.day = date.month;
 					date.month = tmp;
 					date.order = date.order.replace('m', 'D')
 						.replace('d', 'M')
@@ -544,7 +544,7 @@ Zotero.Date = new function(){
 		}
 		temp.splice(0, 1);
 		var zone = temp.join(' ').trim();
-		return !!zone.match(/([+-]\d\d\d\d|UTC?|GMT|EST|EDT|CST|CDT|MST|MDT|PST|PDT)/)
+		return !!zone.match(/([+-]\d\d\d\d|UTC?|GMT|EST|EDT|CST|CDT|MST|MDT|PST|PDT)/);
 	};
 	
 	

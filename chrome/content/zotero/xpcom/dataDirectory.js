@@ -811,7 +811,7 @@ Zotero.DataDirectory = {
 		
 		let migrationMarker = OS.Path.join(dataDir, this.MIGRATION_MARKER);
 		try {
-			var exists = yield OS.File.exists(migrationMarker)
+			var exists = yield OS.File.exists(migrationMarker);
 		}
 		catch (e) {
 			Zotero.logError(e);

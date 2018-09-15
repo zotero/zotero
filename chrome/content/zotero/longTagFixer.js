@@ -57,7 +57,7 @@ var Zotero_Long_Tag_Fixer = new function () {
 			case 1:
 				var buttonLabel = "saveTag";
 				document.getElementById('zotero-new-tag-editor').value = _oldTag;
-				this.updateEditLength(_oldTag.length)
+				this.updateEditLength(_oldTag.length);
 				break;
 				
 			case 2:

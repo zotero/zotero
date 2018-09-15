@@ -316,7 +316,7 @@ Zotero.Items = function() {
 			
 			// Display titles
 			try {
-				item.updateDisplayTitle()
+				item.updateDisplayTitle();
 			}
 			catch (e) {
 				// A few item types need creators to be loaded. Instead of making
@@ -324,7 +324,7 @@ Zotero.Items = function() {
 				// and load on demand
 				if (e instanceof Zotero.Exception.UnloadedDataException) {
 					yield item.loadDataType('creators');
-					item.updateDisplayTitle()
+					item.updateDisplayTitle();
 				}
 				else {
 					throw e;
@@ -1184,7 +1184,7 @@ Zotero.Items = function() {
 		];
 	
 		for (let creatorTypeID of validCreatorTypes) {
-			let matches = creatorsData.filter(data => data.creatorTypeID == creatorTypeID)
+			let matches = creatorsData.filter(data => data.creatorTypeID == creatorTypeID);
 			if (!matches.length) {
 				continue;
 			}

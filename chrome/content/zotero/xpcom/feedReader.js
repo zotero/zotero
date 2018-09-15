@@ -93,7 +93,7 @@ Zotero.FeedReader = function(url) {
 		if (issn) info.ISSN = issn;
 		
 		let isbn = Zotero.FeedReader._getFeedField(feed, 'isbn', 'prism')
-			|| Zotero.FeedReader._getFeedField(feed, 'isbn')
+			|| Zotero.FeedReader._getFeedField(feed, 'isbn');
 		if (isbn) info.ISBN = isbn;
 		
 		let language = Zotero.FeedReader._getFeedField(feed, 'language', 'dc')
@@ -435,7 +435,7 @@ Zotero.FeedReader._getFeedItem = function(feedEntry, feedInfo) {
 	if (issn) item.ISSN = issn;
 	
 	let isbn = Zotero.FeedReader._getFeedField(feedEntry, 'isbn', 'prism')
-		|| Zotero.FeedReader._getFeedField(feedEntry, 'isbn')
+		|| Zotero.FeedReader._getFeedField(feedEntry, 'isbn');
 	if (isbn) item.ISBN = isbn;
 	
 	let identifier = Zotero.FeedReader._getFeedField(feedEntry, 'identifier', 'dc');

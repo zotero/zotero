@@ -284,7 +284,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			Zotero.debug("File mod time matches remote file -- skipping download of "
 				+ item.libraryKey);
 			
-			var updateItem = item.attachmentSyncState != 1
+			var updateItem = item.attachmentSyncState != 1;
 			item.attachmentSyncedModificationTime = metadata.mtime;
 			item.attachmentSyncState = "in_sync";
 			yield item.saveTx({ skipAll: true });
@@ -830,7 +830,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 							if (e.status == 403) {
 								errorTitle = Zotero.getString('general.permissionDenied');
 								let rootURI = this.rootURI;
-								let rootSpec = rootURI.scheme + '://' + rootURI.hostPort + rootURI.path
+								let rootSpec = rootURI.scheme + '://' + rootURI.hostPort + rootURI.path;
 								errorMsg = Zotero.getString('sync.storage.error.permissionDeniedAtAddress')
 									+ "\n\n" + rootSpec + "\n\n"
 									+ Zotero.getString('sync.storage.error.checkFileSyncSettings');
@@ -862,7 +862,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					break;
 				
 				default:
-					errorMsg = Zotero.getString('general.unknownErrorOccurred') + "\n\n"
+					errorMsg = Zotero.getString('general.unknownErrorOccurred') + "\n\n";
 						Zotero.getString('sync.storage.error.checkFileSyncSettings');
 					break;
 			}
@@ -910,7 +910,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		// Add .zip extension
 		var files = files.map(file => file + ".zip");
 		
-		var results = yield this._deleteStorageFiles(files)
+		var results = yield this._deleteStorageFiles(files);
 		
 		// Remove deleted and nonexistent files from storage delete log
 		var toPurge = Zotero.Utilities.arrayUnique(

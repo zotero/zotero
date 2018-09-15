@@ -130,7 +130,7 @@ Zotero.Schema = new function(){
 				+ "WHERE setting='client' AND key='lastCompatibleVersion'"
 			);
 			let msg = "Database is incompatible with this Zotero version "
-				+ `(${compatibility} > ${_maxCompatibility})`
+				+ `(${compatibility} > ${_maxCompatibility})`;
 			throw new Zotero.DB.IncompatibleVersionException(msg, dbClientVersion);
 		}
 		
@@ -812,7 +812,7 @@ Zotero.Schema = new function(){
 						continue;
 					}
 					
-					let tmpFile = OS.Path.join(tmpDir, entry.fileName)
+					let tmpFile = OS.Path.join(tmpDir, entry.fileName);
 					yield Zotero.File.removeIfExists(tmpFile);
 					xpiZipReader.extract("translators/" + entry.fileName, new FileUtils.File(tmpFile));
 					
@@ -988,7 +988,7 @@ Zotero.Schema = new function(){
 								destFile = OS.Path.join(destDir, fileName);
 							}
 							else {
-								destFile = OS.Path.join(hiddenDir, fileName)
+								destFile = OS.Path.join(hiddenDir, fileName);
 							}
 							
 							try {
@@ -1172,7 +1172,7 @@ Zotero.Schema = new function(){
 				if (!force) {
 					if (e instanceof Zotero.HTTP.UnexpectedStatusException
 							|| e instanceof Zotero.HTTP.BrowserOfflineException) {
-						let msg = " -- retrying in " + ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL
+						let msg = " -- retrying in " + ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL;
 						if (e instanceof Zotero.HTTP.BrowserOfflineException) {
 							Zotero.debug("Browser is offline" + msg, 2);
 						}
@@ -1289,7 +1289,7 @@ Zotero.Schema = new function(){
 		var stylesDir = Zotero.getStylesDirectory();
 		stylesDir.remove(true);
 		Zotero.getStylesDirectory(); // recreate directory
-		yield Zotero.Styles.reinit()
+		yield Zotero.Styles.reinit();
 		var updated = yield this.updateBundledFiles('styles');
 		if (updated && Zotero.Prefs.get('automaticScraperUpdates')) {
 			yield Zotero.Schema.updateFromRepository(this.REPO_UPDATE_MANUAL);
@@ -2539,7 +2539,7 @@ Zotero.Schema = new function(){
 			let prefix = path.match(/^(attachments|storage):/);
 			if (prefix) {
 				prefix = prefix[0];
-				let relPath = path.substr(prefix.length)
+				let relPath = path.substr(prefix.length);
 				let file = tmpDirFile.clone();
 				file.setRelativeDescriptor(file, relPath);
 				path = OS.Path.normalize(file.path).replace(/\\/g, '/');

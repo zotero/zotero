@@ -174,7 +174,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 						if (status == 0 || status == 500 || status == 503) {
 							if (++this._s3ConsecutiveFailures < this._maxS3ConsecutiveFailures) {
 								let libraryKey = item.libraryKey;
-								let msg = "S3 returned 0 for " + libraryKey + " -- retrying download"
+								let msg = "S3 returned 0 for " + libraryKey + " -- retrying download";
 								Components.utils.reportError(msg);
 								Zotero.debug(msg, 1);
 								if (this._s3Backoff < this._maxS3Backoff) {
@@ -672,7 +672,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				}
 				else {
 					let msg = "S3 returned " + e.status + " (" + item.libraryKey + ") "
-						+ "-- retrying upload"
+						+ "-- retrying upload";
 					Zotero.logError(msg);
 					Zotero.debug(e.xmlhttp.responseText, 1);
 					if (this._s3Backoff < this._maxS3Backoff) {

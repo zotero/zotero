@@ -133,7 +133,7 @@ var ZoteroAdvancedSearch = new function() {
 		s.name = name.value;
 		yield s.save();
 		
-		window.close()
+		window.close();
 	});
 	
 	

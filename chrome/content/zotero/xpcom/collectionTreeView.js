@@ -179,10 +179,10 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 	
 	if (this.hideSources.indexOf('duplicates') == -1) {
 		this._virtualCollectionLibraries.duplicates =
-			Zotero.Utilities.Internal.getVirtualCollectionState('duplicates')
+			Zotero.Utilities.Internal.getVirtualCollectionState('duplicates');
 	}
 	this._virtualCollectionLibraries.unfiled =
-			Zotero.Utilities.Internal.getVirtualCollectionState('unfiled')
+			Zotero.Utilities.Internal.getVirtualCollectionState('unfiled');
 	
 	var oldCount = this.rowCount || 0;
 	var newRows = [];
@@ -503,7 +503,7 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 				case 'feed':
 					if (type == 'groups' && ids.length != 1) {
 						Zotero.logError("WARNING: Multiple groups shouldn't currently be added "
-							+ "together in collectionTreeView::notify()")
+							+ "together in collectionTreeView::notify()");
 					}
 					yield this.reload();
 					yield this.selectByID(
@@ -976,7 +976,7 @@ Zotero.CollectionTreeView.prototype.expandLibrary = Zotero.Promise.coroutine(fun
 
 
 Zotero.CollectionTreeView.prototype.collapseLibrary = function (libraryID) {
-	var row = this._rowMap['L' + libraryID]
+	var row = this._rowMap['L' + libraryID];
 	if (row === undefined) {
 		return false;
 	}
@@ -1383,7 +1383,7 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 			),
 			row + 1 + newRows
 		);
-		newRows++
+		newRows++;
 	}
 	
 	// Duplicate items
@@ -2127,7 +2127,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			let promises = [];
 			for (let item of items) {
 				// No transaction, because most time is spent traversing urls
-				promises.push(item.translate(targetLibraryID, targetCollectionID))
+				promises.push(item.translate(targetLibraryID, targetCollectionID));
 			}
 			return Zotero.Promise.all(promises);	
 		}
@@ -2151,7 +2151,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		let newIDs = [];
 		let toMove = [];
 		// TODO: support items coming from different sources?
-		let sameLibrary = items[0].libraryID == targetLibraryID
+		let sameLibrary = items[0].libraryID == targetLibraryID;
 		
 		for (let item of items) {
 			if (!item.isTopLevelItem()) {

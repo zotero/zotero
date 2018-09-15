@@ -1319,7 +1319,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 				value = Zotero.DB.transactionDateTime;
 			}
 			
-			let valueID = yield Zotero.DB.valueQueryAsync(valueSQL, [value], { debug: true })
+			let valueID = yield Zotero.DB.valueQueryAsync(valueSQL, [value], { debug: true });
 			if (!valueID) {
 				valueID = Zotero.ID.get('itemDataValues');
 				yield Zotero.DB.queryAsync(insertValueSQL, [valueID, value], { debug: false });
@@ -4436,7 +4436,7 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 	}
 	
 	// Relations
-	obj.relations = this.getRelations()
+	obj.relations = this.getRelations();
 	
 	if (obj.accessDate) obj.accessDate = Zotero.Date.sqlToISO8601(obj.accessDate);
 	

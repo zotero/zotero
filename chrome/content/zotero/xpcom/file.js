@@ -170,7 +170,7 @@ Zotero.File = new function(){
 		}
 		
 		if (charset) {
-			charset = Zotero.CharacterSets.toLabel(charset, true)
+			charset = Zotero.CharacterSets.toLabel(charset, true);
 		}
 		charset = charset || "UTF-8";
 		
@@ -520,7 +520,7 @@ Zotero.File = new function(){
 			try {
 				Zotero.debug(`Renaming ${origPath} to ${OS.Path.basename(destPath)}`);
 				Zotero.debug(destPath);
-				await OS.File.move(origPath, destPath, { noOverwrite: !overwrite })
+				await OS.File.move(origPath, destPath, { noOverwrite: !overwrite });
 			}
 			catch (e) {
 				if (e instanceof OS.File.Error) {

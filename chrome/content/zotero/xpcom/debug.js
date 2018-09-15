@@ -115,7 +115,7 @@ Zotero.Debug = new function () {
 			slowSuffix = "\x1b[0m";
 		}
 		
-		delta = ("" + delta).padStart(7, "0")
+		delta = ("" + delta).padStart(7, "0");
 		
 		deltaStr = "(" + slowPrefix + "+" + delta + slowSuffix + ")";
 		if (_store) {

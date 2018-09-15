@@ -327,7 +327,7 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 	
 	// DEBUG: necessary?
 	try {
-		this._treebox.columns.count
+		this._treebox.columns.count;
 	}
 	// If treebox isn't ready, skip refresh
 	catch (e) {
@@ -1046,7 +1046,7 @@ Zotero.ItemTreeView.prototype.getCellText = function (row, column)
 	}
 	
 	if (!this._cellTextCache[itemID]) {
-		this._cellTextCache[itemID] = {}
+		this._cellTextCache[itemID] = {};
 	}
 	
 	var val;
@@ -1061,7 +1061,7 @@ Zotero.ItemTreeView.prototype.getCellText = function (row, column)
 	}
 	// Year column is just date field truncated
 	else if (column.id == "zotero-items-column-year") {
-		val = obj.getField('date', true).substr(0, 4)
+		val = obj.getField('date', true).substr(0, 4);
 	}
 	else if (column.id === "zotero-items-column-numNotes") {
 		val = obj.numNotes();
@@ -1474,7 +1474,7 @@ Zotero.ItemTreeView.prototype.sort = function (itemIDs) {
 	// Cache primary values while sorting, since base-field-mapped getField()
 	// calls are relatively expensive
 	var cache = {};
-	sortFields.forEach(x => cache[x] = {})
+	sortFields.forEach(x => cache[x] = {});
 	
 	// Get the display field for a row (which might be a placeholder title)
 	function getField(field, row) {
@@ -1695,7 +1695,7 @@ Zotero.ItemTreeView.prototype._updateIntroText = function() {
 	
 	if (this.collectionTreeRow && !this.rowCount) {
 		let doc = this._ownerDocument;
-		let ns = 'http://www.w3.org/1999/xhtml'
+		let ns = 'http://www.w3.org/1999/xhtml';
 		let div;
 		
 		// My Library and no groups
@@ -3230,7 +3230,7 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 		
 		if (orient == 0) {
 			let treerow = this.getRow(row);
-			parentItemID = treerow.ref.id
+			parentItemID = treerow.ref.id;
 		}
 		else if (collectionTreeRow.isCollection()) {
 			var parentCollectionID = collectionTreeRow.ref.id;

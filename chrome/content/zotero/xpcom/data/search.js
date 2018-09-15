@@ -205,7 +205,7 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			// Convert condition and mode to "condition[/mode]"
 			let conditionString = condition.mode ?
 				condition.condition + '/' + condition.mode :
-				condition.condition
+				condition.condition;
 			
 			var sqlParams = [
 				searchID,
@@ -1094,7 +1094,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 				if (condition['table']){
 					switch (condition['table']){
 						default:
-							condSelectSQL += 'itemID '
+							condSelectSQL += 'itemID ';
 							switch (condition['operator']){
 								case 'isNot':
 								case 'doesNotContain':
@@ -1288,7 +1288,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							condSQL = condSQL.substring(0, condSQL.length - 4);
 						}
 						else {
-							throw ("Invalid fileTypeID '" + condition.value + "' specified in search.js")
+							throw ("Invalid fileTypeID '" + condition.value + "' specified in search.js");
 						}
 						skipOperators = true;
 						break;
@@ -1400,7 +1400,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							// (and no year will just not find anything)
 							var sqldate = dateparts.year ?
 								Zotero.Utilities.lpad(dateparts.year, '0', 4) : '____';
-							sqldate += '-'
+							sqldate += '-';
 							sqldate += dateparts.month || dateparts.month === 0 ?
 								Zotero.Utilities.lpad(dateparts.month + 1, '0', 2) : alt;
 							sqldate += '-';
@@ -1472,7 +1472,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 									+ condition['field'] + ") = 'integer' OR "
 									+ "CAST("
 										+ "CAST(" + condition['field'] + " AS INT)"
-									+ " AS STRING) = " + condition['field'] + ")"
+									+ " AS STRING) = " + condition['field'] + ")";
 								break;
 								
 							default:

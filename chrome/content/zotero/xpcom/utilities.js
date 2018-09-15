@@ -1500,7 +1500,7 @@ Zotero.Utilities = {
 			path = ['ROOT'];
 		}
 		
-		var isArray = objType == '[object Array]'
+		var isArray = objType == '[object Array]';
 		if (isArray) {
 			var dumpedText = '[';
 		}

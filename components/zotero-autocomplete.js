@@ -100,7 +100,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 				}
 				sql += "WHERE CASE fieldMode "
 					+ "WHEN 1 THEN lastName LIKE ? "
-					+ "WHEN 0 THEN (firstName || ' ' || lastName LIKE ?) OR (lastName LIKE ?) END "
+					+ "WHEN 0 THEN (firstName || ' ' || lastName LIKE ?) OR (lastName LIKE ?) END ";
 				var sqlParams = [searchString + '%', searchString + '%', searchString + '%'];
 				if (searchParams.libraryID !== undefined) {
 					sql += " AND libraryID=?";
@@ -130,7 +130,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 						+ "ELSE 2 END AS comment";
 				}
 				
-				var fromSQL = " FROM creators "
+				var fromSQL = " FROM creators ";
 				if (searchParams.libraryID !== undefined) {
 					fromSQL += "JOIN itemCreators USING (creatorID) JOIN items USING (itemID) ";
 				}
@@ -200,7 +200,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 			var sql = "SELECT DISTINCT " + valueField + " AS val, NULL AS comment "
 				+ "FROM itemData NATURAL JOIN itemDataValues "
 				+ "WHERE fieldID=?1 AND " + valueField
-				+ " LIKE ?2 "
+				+ " LIKE ?2 ";
 			
 			var sqlParams = [fieldID, searchString + '%'];
 			if (searchParams.itemID) {

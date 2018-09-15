@@ -1451,14 +1451,14 @@ Zotero.Highlight.prototype._highlight = function() {
 			if(startNode.nextSibling) {
 				this._highlightSpaceBetween(startNode.nextSibling, startNode.parentNode.lastChild);
 			}
-			startNode = startNode.parentNode
+			startNode = startNode.parentNode;
 		}
 		// highlight nodes after end node in the DOM hierarchy not at ancestor level
 		while(endNode.parentNode && endNode.parentNode !== ancestor) {
 			if(endNode.previousSibling) {
 				this._highlightSpaceBetween(endNode.parentNode.firstChild, endNode.previousSibling);
 			}
-			endNode = endNode.parentNode
+			endNode = endNode.parentNode;
 		}
 		// highlight nodes between start node and end node at ancestor level
 		if(startNode !== endNode.previousSibling) {
@@ -1573,7 +1573,7 @@ Zotero.Highlight.prototype._highlightTextNode = function(textNode) {
 		
 		var computedColor = this.document.defaultView.getComputedStyle(parent, null).color;
 		if(computedColor) {
-			var distance1 = Zotero.Annotate.getColorDistance(computedColor, Zotero.Annotate.highlightColor)
+			var distance1 = Zotero.Annotate.getColorDistance(computedColor, Zotero.Annotate.highlightColor);
 			if(distance1 <= 180) {
 				var distance2 = Zotero.Annotate.getColorDistance(computedColor, Zotero.Annotate.alternativeHighlightColor);
 				if(distance2 > distance1) {
@@ -1610,7 +1610,7 @@ Zotero.Highlight.prototype._highlightSpaceBetween = function(start, end) {
 		} else {
 			var texts = this.document.evaluate('.//text()', node, this.nsResolver,
 				Components.interfaces.nsIDOMXPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-			var textArray = new Array()
+			var textArray = new Array();
 			while(text = texts.iterateNext()) textArray.push(text);
 		}
 		

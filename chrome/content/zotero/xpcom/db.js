@@ -98,7 +98,7 @@ Zotero.DBConnection = function(dbNameOrPath) {
 			rollback: []
 		}
 	};
-	this._dbIsCorrupt = null
+	this._dbIsCorrupt = null;
 	
 	this._transactionPromise = null;
 	
@@ -197,7 +197,7 @@ Zotero.DBConnection.prototype.parseQueryAndParams = function (sql, params) {
 					params[i] = parseInt(params[i]['int']);
 					if (isNaN(params[i])) {
 						throw new Error("Invalid bound parameter " + i + " integer value '" + params[i] + "' "
-							+ "[QUERY: " + sql + "]")
+							+ "[QUERY: " + sql + "]");
 					}
 				}
 				// String
@@ -1060,7 +1060,7 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 				var sourceNum = targetNum - 1;
 				
 				let targetFile = this._dbPath + '.' + targetNum + '.bak';
-				let sourceFile = this._dbPath + '.' + (sourceNum ? sourceNum + '.bak' : 'bak')
+				let sourceFile = this._dbPath + '.' + (sourceNum ? sourceNum + '.bak' : 'bak');
 				
 				if (!(yield OS.File.exists(sourceFile))) {
 					continue;

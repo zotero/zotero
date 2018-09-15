@@ -465,7 +465,7 @@ var Zotero_QuickFormat = new function () {
 				if (firstCreatorA !== "" && firstCreatorB === "") {
 					return -1;
 				} else if (firstCreatorA === "" && firstCreatorB !== "") {
-					return 1
+					return 1;
 				} else if (firstCreatorA) {
 					return collation.compareString(1, firstCreatorA, firstCreatorB);
 				}
@@ -649,7 +649,7 @@ var Zotero_QuickFormat = new function () {
 			} else if(/[\-–,]/.test(citationItem.locator)) {
 				var label = "pp.";
 			} else {
-				var label = "p."
+				var label = "p.";
 			}
 			
 			str += ", "+label+" "+citationItem.locator;
