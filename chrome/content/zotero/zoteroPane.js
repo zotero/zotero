@@ -74,14 +74,27 @@ var ZoteroPane = new function()
 		// Set key down handler
 		document.getElementById('appcontent').addEventListener('keydown', ZoteroPane_Local.handleKeyDown, true);
 		
-		// Hide or show the PDF recognizer button
-		Zotero.RecognizePDF.addListener('empty', function (row) {
-			document.getElementById('zotero-tb-recognize').hidden = true;
-		});
-		
-		Zotero.RecognizePDF.addListener('nonempty', function (row) {
-			document.getElementById('zotero-tb-recognize').hidden = false;
-		});
+		// Init toolbar buttons for all progress queues
+		let progressQueueButtons = document.getElementById('zotero-pq-buttons');
+		let progressQueues = Zotero.ProgressQueues.getAllQueues();
+		for (let progressQueue of progressQueues) {
+			let button = document.createElement('toolbarbutton');
+			button.id = 'zotero-tb-pq-' + progressQueue.getId();
+			button.hidden = progressQueue.getTotal() < 1;
+			button.addEventListener('command', function () {
+				Zotero_ProgressQueue_Dialogs.getDialog(progressQueue.getId()).open();
+			}, false);
+			
+			progressQueue.addListener('empty', function () {
+				button.hidden = true;
+			});
+			
+			progressQueue.addListener('nonempty', function () {
+				button.hidden = false;
+			});
+			
+			progressQueueButtons.appendChild(button);
+		}
 		
 		_loaded = true;
 		
@@ -4468,7 +4481,7 @@ var ZoteroPane = new function()
 	
 	this.recognizeSelected = function() {
 		Zotero.RecognizePDF.recognizeItems(ZoteroPane.getSelectedItems());
-		Zotero_RecognizePDF_Dialog.open();
+		Zotero_ProgressQueue_Dialogs.getDialog('recognize').open();
 	};
 	
 	

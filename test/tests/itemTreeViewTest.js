@@ -932,7 +932,7 @@ describe("Zotero.ItemTreeView", function() {
 			
 			var progressWindow = await recognizerPromise;
 			progressWindow.close();
-			Zotero.RecognizePDF.cancel();
+			Zotero.ProgressQueues.getQueue('recognize').cancel();
 			assert.isFalse(item.isTopLevelItem());
 			
 			Zotero.HTTP.mock = null;

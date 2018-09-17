@@ -24,38 +24,24 @@
 */
 
 Zotero.RecognizePDF = new function () {
-	const OFFLINE_RECHECK_DELAY = 60 * 1000;
 	const MAX_PAGES = 5;
 	const UNRECOGNIZE_TIMEOUT = 86400 * 1000;
 	
-	this.ROW_QUEUED = 1;
-	this.ROW_PROCESSING = 2;
-	this.ROW_FAILED = 3;
-	this.ROW_SUCCEEDED = 4;
+	let _progressQueue = Zotero.ProgressQueues.createQueue({
+		id: 'recognize',
+		title: 'recognizePDF.title',
+		columns: [
+			'recognizePDF.pdfName.label',
+			'recognizePDF.itemName.label'
+		],
+		processor: async function (item) {
+			let newItem = await _processItem(item);
+			// On success return status message to the progress queue
+			return newItem.getField('title');
+		}
+	});
 	
 	let _newItems = new WeakMap();
-	
-	let _listeners = {};
-	let _rows = [];
-	let _queue = [];
-	let _queueProcessing = false;
-	
-	/**
-	 * Add listener
-	 * @param name Event name
-	 * @param callback
-	 */
-	this.addListener = function (name, callback) {
-		_listeners[name] = callback;
-	};
-	
-	/**
-	 * Remove listener
-	 * @param name Event name
-	 */
-	this.removeListener = function (name) {
-		delete _listeners[name];
-	};
 	
 	/**
 	 * Checks whether a given PDF could theoretically be recognized
@@ -68,15 +54,13 @@ Zotero.RecognizePDF = new function () {
 			&& item.isTopLevelItem();
 	};
 	
+	
 	/**
 	 * Adds items to the queue and starts processing it
 	 * @param items {Zotero.Item}
 	 */
 	this.recognizeItems = function (items) {
-		for (let item of items) {
-			_addItem(item);
-		}
-		_processQueue();
+		_progressQueue.addItems(items);
 	};
 	
 	
@@ -94,42 +78,7 @@ Zotero.RecognizePDF = new function () {
 		this.recognizeItems(pdfs);
 		var win = Services.wm.getMostRecentWindow("navigator:browser");
 		if (win) {
-			win.Zotero_RecognizePDF_Dialog.open();
-		}
-	};
-	
-	/**
-	 * Returns all rows
-	 * @return {Array}
-	 */
-	this.getRows = function () {
-		return _rows;
-	};
-	
-	/**
-	 * Returns rows count
-	 * @return {Number}
-	 */
-	this.getTotal = function () {
-		return _rows.length;
-	};
-	
-	/**
-	 * Returns processed rows count
-	 * @return {Number}
-	 */
-	this.getProcessedTotal = function () {
-		return _rows.filter(row => row.status > Zotero.RecognizePDF.ROW_PROCESSING).length;
-	};
-	
-	/**
-	 * Stop processing items
-	 */
-	this.cancel = function () {
-		_queue = [];
-		_rows = [];
-		if (_listeners['empty']) {
-			_listeners['empty']();
+			win.Zotero_ProgressQueue_Dialogs.getDialog('recognize').open();
 		}
 	};
 	
@@ -214,139 +163,14 @@ Zotero.RecognizePDF = new function () {
 	
 	
 	/**
-	 * Add item for processing
-	 * @param item
-	 * @return {null}
-	 */
-	function _addItem(item) {
-		for (let row of _rows) {
-			if (row.id === item.id) {
-				if (row.status > Zotero.RecognizePDF.ROW_PROCESSING) {
-					_deleteRow(row.id);
-					break;
-				}
-				return null;
-			}
-		}
-		
-		let row = {
-			id: item.id,
-			status: Zotero.RecognizePDF.ROW_QUEUED,
-			fileName: item.getField('title'),
-			message: ''
-		};
-		
-		_rows.unshift(row);
-		_queue.unshift(item.id);
-		
-		if (_listeners['rowadded']) {
-			_listeners['rowadded'](row);
-		}
-		
-		if (_listeners['nonempty'] && _rows.length === 1) {
-			_listeners['nonempty']();
-		}
-	}
-	
-	/**
-	 * Update row status and message
-	 * @param itemID
-	 * @param status
-	 * @param message
-	 */
-	function _updateRow(itemID, status, message) {
-		for (let row of _rows) {
-			if (row.id === itemID) {
-				row.status = status;
-				row.message = message;
-				if (_listeners['rowupdated']) {
-					_listeners['rowupdated']({
-						id: row.id,
-						status,
-						message: message || ''
-					});
-				}
-				return;
-			}
-		}
-	}
-	
-	/**
-	 * Delete row
-	 * @param itemID
-	 */
-	function _deleteRow(itemID) {
-		for (let i = 0; i < _rows.length; i++) {
-			let row = _rows[i];
-			if (row.id === itemID) {
-				_rows.splice(i, 1);
-				if (_listeners['rowdeleted']) {
-					_listeners['rowdeleted']({
-						id: row.id
-					});
-				}
-				return;
-			}
-		}
-	}
-	
-	/**
-	 * Triggers queue processing and returns when all items in the queue are processed
-	 * @return {Promise}
-	 */
-	async function _processQueue() {
-		await Zotero.Schema.schemaUpdatePromise;
-		
-		if (_queueProcessing) return;
-		_queueProcessing = true;
-		
-		while (1) {
-			if (Zotero.HTTP.browserIsOffline()) {
-				await Zotero.Promise.delay(OFFLINE_RECHECK_DELAY);
-				continue;
-			}
-			
-			let itemID = _queue.shift();
-			if (!itemID) break;
-			
-			_updateRow(itemID, Zotero.RecognizePDF.ROW_PROCESSING, Zotero.getString('general.processing'));
-			
-			try {
-				let newItem = await _processItem(itemID);
-				
-				if (newItem) {
-					_updateRow(itemID, Zotero.RecognizePDF.ROW_SUCCEEDED, newItem.getField('title'));
-				}
-				else {
-					_updateRow(itemID, Zotero.RecognizePDF.ROW_FAILED, Zotero.getString('recognizePDF.noMatches'));
-				}
-			}
-			catch (e) {
-				Zotero.logError(e);
-				
-				_updateRow(
-					itemID,
-					Zotero.RecognizePDF.ROW_FAILED,
-					e instanceof Zotero.Exception.Alert
-						? e.message
-						: Zotero.getString('recognizePDF.error')
-				);
-			}
-		}
-		
-		_queueProcessing = false;
-	}
-	
-	/**
 	 * Processes the item and places it as a children of the new item
 	 * @param itemID
 	 * @return {Promise}
 	 */
-	async function _processItem(itemID) {
-		let attachment = await Zotero.Items.getAsync(itemID);
-		
-		if (!attachment || attachment.parentItemID) {
-			throw new Zotero.Exception.Alert('recognizePDF.error');
+	async function _processItem(attachment) {
+		// Make sure the attachment still doesn't have a parent
+		if (attachment.parentItemID) {
+			throw new Error('Already has parent');
 		}
 		
 		var zp = Zotero.getActiveZoteroPane();
@@ -361,7 +185,7 @@ Zotero.RecognizePDF = new function () {
 		
 		let parentItem = await _recognize(attachment);
 		if (!parentItem) {
-			return null;
+			throw new Zotero.Exception.Alert("recognizePDF.noMatches");
 		}
 		
 		// Put new item in same collections as the old one
@@ -450,7 +274,8 @@ Zotero.RecognizePDF = new function () {
 			Zotero.logError(e);
 			try {
 				cacheFile.remove(false);
-			} catch(e) {
+			}
+			catch (e) {
 				Zotero.logError(e);
 			}
 			throw new Zotero.Exception.Alert("recognizePDF.couldNotRead");

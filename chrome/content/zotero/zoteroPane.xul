@@ -42,7 +42,7 @@
 	<script src="fileInterface.js"/>
 	<script src="reportInterface.js"/>
 	<script src="timelineInterface.js"/>
-	<script src="recognizePDFDialog.js"/>
+	<script src="progressQueueDialog.js"/>
 	<script src="lookup.js"/>
 	<script src="locateMenu.js" type="application/javascript;version=1.8"/>
 	
@@ -185,8 +185,8 @@
 						</hbox>
 					</hbox>
 
-					<toolbarbutton id="zotero-tb-recognize" hidden="true"
-						oncommand="Zotero_RecognizePDF_Dialog.open()"/>
+					<hbox id="zotero-pq-buttons">
+					</hbox>
 
 					<toolbarbutton id="zotero-tb-sync-error" hidden="true"/>
 					

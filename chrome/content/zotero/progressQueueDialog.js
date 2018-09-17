@@ -23,30 +23,23 @@
     ***** END LICENSE BLOCK *****
 */
 
-/**
- * @fileOverview Tools for automatically retrieving a citation for the given PDF
- */
-
-/**
- * Front end for recognizing PDFs
- * @namespace
- */
-
-var Zotero_RecognizePDF_Dialog = new function () {
+var Zotero_ProgressQueue_Dialog = function (progressQueue) {
 	const SUCCESS_IMAGE = 'chrome://zotero/skin/tick.png';
 	const FAILURE_IMAGE = 'chrome://zotero/skin/cross.png';
 	const LOADING_IMAGE = 'chrome://zotero/skin/arrow_refresh.png';
+	
+	let _progressQueue = this.progressQueue = progressQueue;
 	
 	let _progressWindow = null;
 	let _progressIndicator = null;
 	let _rowIDs = [];
 	
-	this.open = function() {
+	this.open = function () {
 		if (_progressWindow) {
 			_progressWindow.focus();
 			return;
 		}
-		_progressWindow = window.openDialog('chrome://zotero/content/recognizePDFDialog.xul', '', 'chrome,close=yes,resizable=yes,dependent,dialog,centerscreen');
+		_progressWindow = window.openDialog('chrome://zotero/content/progressQueueDialog.xul', '', 'chrome,close=yes,resizable=yes,dependent,dialog,centerscreen');
 		_progressWindow.addEventListener('pageshow', _onWindowLoaded.bind(this), false);
 	};
 	
@@ -55,13 +48,13 @@ var Zotero_RecognizePDF_Dialog = new function () {
 	}
 	
 	function _getImageByStatus(status) {
-		if (status === Zotero.RecognizePDF.ROW_PROCESSING) {
+		if (status === Zotero.ProgressQueue.ROW_PROCESSING) {
 			return LOADING_IMAGE;
 		}
-		else if (status === Zotero.RecognizePDF.ROW_FAILED) {
+		else if (status === Zotero.ProgressQueue.ROW_FAILED) {
 			return FAILURE_IMAGE;
 		}
-		else if (status === Zotero.RecognizePDF.ROW_SUCCEEDED) {
+		else if (status === Zotero.ProgressQueue.ROW_SUCCEEDED) {
 			return SUCCESS_IMAGE;
 		}
 		return '';
@@ -93,8 +86,18 @@ var Zotero_RecognizePDF_Dialog = new function () {
 	}
 	
 	function _onWindowLoaded() {
-		let rows = Zotero.RecognizePDF.getRows();
+		let rows = _progressQueue.getRows();
 		_rowIDs = [];
+		
+		_progressWindow.document.title = Zotero.getString(_progressQueue.getTitle());
+		
+		let col1 = _progressWindow.document.getElementById('col1');
+		let col2 = _progressWindow.document.getElementById('col2');
+		
+		let columns = _progressQueue.getColumns();
+		col1.setAttribute('label', Zotero.getString(columns[0]));
+		col2.setAttribute('label', Zotero.getString(columns[1]));
+		
 		let treechildren = _progressWindow.document.getElementById('treechildren');
 		
 		for (let row of rows) {
@@ -113,7 +116,7 @@ var Zotero_RecognizePDF_Dialog = new function () {
 		_progressWindow.document.getElementById('cancel-button')
 			.addEventListener('command', function () {
 				close();
-				Zotero.RecognizePDF.cancel();
+				_progressQueue.cancel();
 			}, false);
 		
 		_progressWindow.document.getElementById('minimize-button')
@@ -124,23 +127,23 @@ var Zotero_RecognizePDF_Dialog = new function () {
 		_progressWindow.document.getElementById('close-button')
 			.addEventListener('command', function () {
 				close();
-				Zotero.RecognizePDF.cancel();
+				_progressQueue.cancel();
 			}, false);
 		
 		_progressWindow.addEventListener('keypress', function (e) {
 			if (e.keyCode === KeyEvent.DOM_VK_ESCAPE) {
 				// If done processing, Esc is equivalent to Close rather than Minimize
-				if (Zotero.RecognizePDF.getTotal() == Zotero.RecognizePDF.getProcessedTotal()) {
-					Zotero.RecognizePDF.cancel();
+				if (_progressQueue.getTotal() === _progressQueue.getProcessedTotal()) {
+					_progressQueue.cancel();
 				}
 				close();
 			}
 		});
 		
 		_progressWindow.addEventListener('unload', function () {
-			Zotero.RecognizePDF.removeListener('rowadded');
-			Zotero.RecognizePDF.removeListener('rowupdated');
-			Zotero.RecognizePDF.removeListener('rowdeleted');
+			_progressQueue.removeListener('rowadded');
+			_progressQueue.removeListener('rowupdated');
+			_progressQueue.removeListener('rowdeleted');
 			_progressWindow = null;
 			_progressIndicator = null;
 			_rowIDs = [];
@@ -148,14 +151,14 @@ var Zotero_RecognizePDF_Dialog = new function () {
 		
 		_updateProgress();
 		
-		Zotero.RecognizePDF.addListener('rowadded', function (row) {
+		_progressQueue.addListener('rowadded', function (row) {
 			_rowIDs.push(row.id);
 			let treeitem = _rowToTreeItem(row);
 			treechildren.appendChild(treeitem);
 			_updateProgress();
 		});
 		
-		Zotero.RecognizePDF.addListener('rowupdated', function (row) {
+		_progressQueue.addListener('rowupdated', function (row) {
 			let itemIcon = _progressWindow.document.getElementById('item-' + row.id + '-icon');
 			let itemTitle = _progressWindow.document.getElementById('item-' + row.id + '-title');
 			
@@ -164,7 +167,7 @@ var Zotero_RecognizePDF_Dialog = new function () {
 			_updateProgress();
 		});
 		
-		Zotero.RecognizePDF.addListener('rowdeleted', function (row) {
+		_progressQueue.addListener('rowdeleted', function (row) {
 			_rowIDs.splice(_rowIDs.indexOf(row.id), 1);
 			let treeitem = _progressWindow.document.getElementById('item-' + row.id);
 			treeitem.parentNode.removeChild(treeitem);
@@ -174,20 +177,20 @@ var Zotero_RecognizePDF_Dialog = new function () {
 	
 	function _updateProgress() {
 		if (!_progressWindow) return;
-		let total = Zotero.RecognizePDF.getTotal();
-		let processed = Zotero.RecognizePDF.getProcessedTotal();
+		let total = _progressQueue.getTotal();
+		let processed = _progressQueue.getProcessedTotal();
 		_progressIndicator.value = processed * 100 / total;
 		if (processed === total) {
 			_progressWindow.document.getElementById("cancel-button").hidden = true;
 			_progressWindow.document.getElementById("minimize-button").hidden = true;
 			_progressWindow.document.getElementById("close-button").hidden = false;
-			_progressWindow.document.getElementById("label").value = Zotero.getString('recognizePDF.complete.label');
+			_progressWindow.document.getElementById("label").value = Zotero.getString('general.finished');
 		}
 		else {
 			_progressWindow.document.getElementById("cancel-button").hidden = false;
 			_progressWindow.document.getElementById("minimize-button").hidden = false;
 			_progressWindow.document.getElementById("close-button").hidden = true;
-			_progressWindow.document.getElementById("label").value = Zotero.getString('recognizePDF.recognizing.label');
+			_progressWindow.document.getElementById("label").value = Zotero.getString('general.processing');
 		}
 	}
 	
@@ -215,5 +218,22 @@ var Zotero_RecognizePDF_Dialog = new function () {
 			window.ZoteroPane.selectItem(itemID, false, true);
 			window.focus();
 		}
+	}
+};
+
+/**
+ * Create a dialog for each progressQueue
+ */
+var Zotero_ProgressQueue_Dialogs = new function () {
+	let _dialogs = [];
+	
+	let progressQueues = Zotero.ProgressQueues.getAllQueues();
+	for (let progressQueue of progressQueues) {
+		let q = new Zotero_ProgressQueue_Dialog(progressQueue);
+		_dialogs.push(q);
+	}
+	
+	this.getDialog = function (id) {
+		return _dialogs.find(d => d.progressQueue.getId() === id);
 	}
 };
