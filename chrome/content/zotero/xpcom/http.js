@@ -9,8 +9,9 @@ Zotero.HTTP = new function() {
 	 * Exception returned for unexpected status when promise* is used
 	 * @constructor
 	 */
-	this.UnexpectedStatusException = function(xmlhttp, msg) {
+	this.UnexpectedStatusException = function (xmlhttp, url, msg) {
 		this.xmlhttp = xmlhttp;
+		this.url = url;
 		this.status = xmlhttp.status;
 		this.channelStatus = null;
 		this.responseStatus = null;
@@ -372,7 +373,7 @@ Zotero.HTTP = new function() {
 					}
 				}
 				
-				deferred.reject(new Zotero.HTTP.UnexpectedStatusException(xmlhttp, msg));
+				deferred.reject(new Zotero.HTTP.UnexpectedStatusException(xmlhttp, url, msg));
 			}
 		}.bind(this);
 		
