@@ -914,7 +914,7 @@ Zotero.HTTP = new function() {
 			}
 			
 			Zotero.debug("Zotero.HTTP.loadDocuments: " + url + " loaded");
-			hiddenBrowser.removeEventListener("pageshow", onLoad, true);
+			hiddenBrowser.removeEventListener("load", onLoad, true);
 			hiddenBrowser.zotero_loaded = true;
 			
 			var maybePromise;
@@ -962,7 +962,7 @@ Zotero.HTTP = new function() {
 		for(var i=0; i<urls.length; i++) {
 			var hiddenBrowser = Zotero.Browser.createHiddenBrowser();
 			if(cookieSandbox) cookieSandbox.attachToBrowser(hiddenBrowser);
-			hiddenBrowser.addEventListener("pageshow", onLoad, true);
+			hiddenBrowser.addEventListener("load", onLoad, true);
 			hiddenBrowsers[i] = hiddenBrowser;
 		}
 		
