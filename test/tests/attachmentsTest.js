@@ -337,13 +337,14 @@ describe("Zotero.Attachments", function() {
 		});
 	});
 	
-	describe("#addAvailablePDF()", function () {
+	describe("PDF Retrieval", function () {
 		var doiPrefix = 'https://doi.org/';
 		var doi1 = '10.1111/abcd';
 		var doi2 = '10.2222/bcde';
 		var doi3 = '10.3333/cdef';
 		var doi4 = '10.4444/defg';
 		var doi5 = '10.5555/efgh';
+		var doi6 = '10.6666/fghi';
 		var pageURL1 = 'http://website/article1';
 		var pageURL2 = 'http://website/article2';
 		var pageURL3 = 'http://website/article3';
@@ -351,6 +352,8 @@ describe("Zotero.Attachments", function() {
 		var pageURL5 = `http://website/${doi4}`;
 		var pageURL6 = `http://website/${doi4}/json`;
 		var pageURL7 = doiPrefix + doi5;
+		var pageURL8 = 'http://website2/article8';
+		var pageURL9 = 'http://website/article9';
 		
 		Components.utils.import("resource://zotero-unit/httpd.js");
 		var httpd;
@@ -360,14 +363,28 @@ describe("Zotero.Attachments", function() {
 		var pdfURL = `${baseURL}article1/pdf`;
 		var pdfSize;
 		var requestStub;
+		var requestStubCallTimes = [];
+		var return429 = true;
 		
 		function makeGetResponseHeader(headers) {
 			return function (header) {
 				if (headers[header] !== undefined) {
 					return headers[header];
 				}
-				throw new Error("Unimplemented");
+				throw new Error(`Unimplemented header '${header}'`);
 			};
+		}
+		
+		function getHTMLPage(includePDF) {
+			return `<html>
+				<head>
+					<title>Page Title</title>
+					<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
+					<meta name="citation_title" content="Title"/>
+					<meta name="${includePDF ? 'citation_pdf_url' : 'ignore'}" content="${pdfURL}"/>
+				</head>
+				<body>Body</body>
+			</html>`;
 		}
 		
 		function makeHTMLResponseFromType(html, responseType, responseURL) {
@@ -403,38 +420,44 @@ describe("Zotero.Attachments", function() {
 			requestStub = sinon.stub(Zotero.HTTP, 'request');
 			requestStub.callsFake(function (method, url, options) {
 				Zotero.debug("Intercepting " + method + " " + url);
+				requestStubCallTimes.push(new Date());
 				
 				// Page responses
 				var routes = [
-					// Page 1 contains a PDF
-					[pageURL1, pageURL1, true],
 					// DOI 1 redirects to page 1, which contains a PDF
 					[doiPrefix + doi1, pageURL1, true],
+					[pageURL1, pageURL1, true],
 					// DOI 2 redirects to page 2, which doesn't contain a PDF, but DOI 2 has an
 					// OA entry for the PDF URL
 					[doiPrefix + doi2, pageURL2, false],
+					[pageURL2, pageURL2, false],
 					// DOI 3 redirects to page 2, which doesn't contain a PDF, but DOI 3 contains
 					// an OA entry for page 3, which contains a PDF)
 					[doiPrefix + doi3, pageURL2, false],
 					[pageURL3, pageURL3, true],
 					// DOI 4 redirects to page 4, which doesn't contain a PDF
 					[doiPrefix + doi4, pageURL4, false],
+					[pageURL4, pageURL4, false],
+					// DOI 6 redirects to page 8, which is on a different domain and has a PDF
+					[doiPrefix + doi6, pageURL8, true],
+					[pageURL8, pageURL8, true],
 				];
 				for (let route of routes) {
 					let [expectedURL, responseURL, includePDF] = route;
 					
 					if (url != expectedURL) continue;
 					
-					let html = `<html>
-						<head>
-							<title>Page Title</title>
-							<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
-							<meta name="citation_title" content="Title"/>
-							<meta name="${includePDF ? 'citation_pdf_url' : 'ignore'}" content="${pdfURL}"/>
-						</head>
-						<body>Body</body>
-					</html>`;
+					// Return explicit 302 if not following redirects
+					if (expectedURL != responseURL && options.followRedirects === false) {
+						return {
+							status: 302,
+							getResponseHeader: makeGetResponseHeader({
+								Location: responseURL
+							})
+						};
+					}
 					
+					let html = getHTMLPage(includePDF);
 					return makeHTMLResponseFromType(html, options.responseType, responseURL);
 				}
 				
@@ -486,6 +509,31 @@ describe("Zotero.Attachments", function() {
 					};
 				}
 				
+				// Returns a 429 every other call
+				if (url.startsWith(pageURL9)) {
+					if (return429) {
+						return429 = false;
+						throw new Zotero.HTTP.UnexpectedStatusException(
+							{
+								status: 429,
+								response: '',
+								responseURL: pageURL9,
+								getResponseHeader: makeGetResponseHeader({
+									'Content-Type': 'text/plain',
+									'Retry-After': '2',
+								})
+							},
+							pageURL9,
+							'Failing with 429'
+						);
+					}
+					else {
+						return429 = true;
+						let html = getHTMLPage(true);
+						return makeHTMLResponseFromType(html, options.responseType, pageURL9);
+					}
+				}
+				
 				// OA PDF lookup
 				if (url.startsWith(ZOTERO_CONFIG.SERVICES_URL)) {
 					let json = JSON.parse(options.body);
@@ -525,6 +573,8 @@ describe("Zotero.Attachments", function() {
 				pdfURL.substr(baseURL.length - 1),
 				Zotero.File.pathToFile(OS.Path.join(getTestDataDirectory().path, 'test.pdf'))
 			);
+			
+			requestStubCallTimes = [];
 		});
 		
 		afterEach(async function () {
@@ -547,8 +597,8 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailablePDF(item);
 			
-			assert.isTrue(requestStub.calledOnce);
-			assert.isTrue(requestStub.calledWith('GET', 'https://doi.org/' + doi));
+			assert.isTrue(requestStub.calledTwice);
+			assert.isTrue(requestStub.getCall(0).calledWith('GET', 'https://doi.org/' + doi));
 			assert.ok(attachment);
 			var json = attachment.toJSON();
 			assert.equal(json.url, pdfURL);
@@ -583,8 +633,8 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailablePDF(item);
 			
-			assert.isTrue(requestStub.calledOnce);
-			assert.isTrue(requestStub.calledWith('GET', 'https://doi.org/' + doi));
+			assert.isTrue(requestStub.calledTwice);
+			assert.isTrue(requestStub.getCall(0).calledWith('GET', 'https://doi.org/' + doi));
 			assert.ok(attachment);
 			var json = attachment.toJSON();
 			assert.equal(json.url, pdfURL);
@@ -619,11 +669,13 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailablePDF(item);
 			
-			assert.isTrue(requestStub.calledTwice);
+			assert.isTrue(requestStub.calledThrice);
 			var call1 = requestStub.getCall(0);
 			assert.isTrue(call1.calledWith('GET', 'https://doi.org/' + doi));
 			var call2 = requestStub.getCall(1);
-			assert.isTrue(call2.calledWith('POST', ZOTERO_CONFIG.SERVICES_URL + 'oa/search'));
+			assert.isTrue(call2.calledWith('GET', pageURL2));
+			var call3 = requestStub.getCall(2);
+			assert.isTrue(call3.calledWith('POST', ZOTERO_CONFIG.SERVICES_URL + 'oa/search'));
 			
 			assert.ok(attachment);
 			var json = attachment.toJSON();
@@ -641,16 +693,18 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailablePDF(item);
 			
-			assert.isTrue(requestStub.calledThrice);
+			assert.equal(requestStub.callCount, 4);
 			// Check the DOI (and get nothing)
-			var call1 = requestStub.getCall(0);
-			assert.isTrue(call1.calledWith('GET', 'https://doi.org/' + doi));
+			var call = requestStub.getCall(0);
+			assert.isTrue(call.calledWith('GET', 'https://doi.org/' + doi));
+			call = requestStub.getCall(1);
+			assert.isTrue(call.calledWith('GET', pageURL2));
 			// Check the OA resolver and get page 3
-			var call2 = requestStub.getCall(1);
-			assert.isTrue(call2.calledWith('POST', ZOTERO_CONFIG.SERVICES_URL + 'oa/search'));
+			call = requestStub.getCall(2);
+			assert.isTrue(call.calledWith('POST', ZOTERO_CONFIG.SERVICES_URL + 'oa/search'));
 			// Check page 3 and find the download URL
-			var call3 = requestStub.getCall(2);
-			assert.isTrue(call3.calledWith('GET', pageURL3));
+			call = requestStub.getCall(3);
+			assert.isTrue(call.calledWith('GET', pageURL3));
 			
 			assert.ok(attachment);
 			var json = attachment.toJSON();
@@ -669,13 +723,103 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailablePDF(item);
 			
-			assert.isTrue(requestStub.calledTwice);
-			var call1 = requestStub.getCall(0);
-			assert.isTrue(call1.calledWith('GET', 'https://doi.org/' + doi));
-			var call2 = requestStub.getCall(1);
-			assert.isTrue(call2.calledWith('POST', ZOTERO_CONFIG.SERVICES_URL + 'oa/search'));
+			assert.equal(requestStub.callCount, 3);
+			var call = requestStub.getCall(0);
+			assert.isTrue(call.calledWith('GET', 'https://doi.org/' + doi));
+			call = requestStub.getCall(1);
+			assert.isTrue(call.calledWith('GET', pageURL4));
+			call = requestStub.getCall(2);
+			assert.isTrue(call.calledWith('POST', ZOTERO_CONFIG.SERVICES_URL + 'oa/search'));
 			
 			assert.isFalse(attachment);
+		});
+		
+		it("should wait between requests to the same domain", async function () {
+			var url1 = pageURL1;
+			var item1 = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item1.setField('title', 'Test');
+			item1.setField('url', url1);
+			await item1.saveTx();
+			
+			var url2 = pageURL3;
+			var item2 = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item2.setField('title', 'Test');
+			item2.setField('url', url2);
+			await item2.saveTx();
+			
+			var attachments = await Zotero.Attachments.addAvailablePDFs([item1, item2]);
+			
+			assert.isTrue(requestStub.calledTwice);
+			assert.isAbove(requestStubCallTimes[1] - requestStubCallTimes[0], 1000);
+			// Make sure there's an attachment for every item
+			assert.lengthOf(attachments.filter(x => x), 2);
+		});
+		
+		it("should wait between requests that resolve to the same domain", async function () {
+			// DOI URL resolves to 'website' domain with PDF
+			var url1 = doiPrefix + doi1;
+			var item1 = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item1.setField('title', 'Test');
+			item1.setField('url', url1);
+			await item1.saveTx();
+			
+			// DOI URL resolves to 'website' domain without PDF
+			var url2 = doiPrefix + doi4;
+			var item2 = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item2.setField('title', 'Test');
+			item2.setField('url', url2);
+			await item2.saveTx();
+			
+			// DOI URL resolves to 'website2' domain without PDF
+			var url3 = doiPrefix + doi6;
+			var item3 = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item3.setField('title', 'Test');
+			item3.setField('url', url3);
+			await item3.saveTx();
+			
+			var attachments = await Zotero.Attachments.addAvailablePDFs([item1, item2, item3]);
+			
+			assert.equal(requestStub.callCount, 6);
+			assert.equal(requestStub.getCall(0).args[1], doiPrefix + doi1);
+			assert.equal(requestStub.getCall(1).args[1], pageURL1);
+			assert.equal(requestStub.getCall(2).args[1], doiPrefix + doi4);
+			// Should skip ahead to the next DOI
+			assert.equal(requestStub.getCall(3).args[1], doiPrefix + doi6);
+			// which is on a new domain
+			assert.equal(requestStub.getCall(4).args[1], pageURL8);
+			// and then return to make 'website' request for DOI 4
+			assert.equal(requestStub.getCall(5).args[1], pageURL4);
+			
+			// 'website' requests should be a second apart
+			assert.isAbove(requestStubCallTimes[5] - requestStubCallTimes[1], 1000);
+			
+			assert.instanceOf(attachments[0], Zotero.Item);
+			assert.isFalse(attachments[1]);
+			assert.instanceOf(attachments[2], Zotero.Item);
+		});
+		
+		it("should wait between requests to the same domain after a 429", async function () {
+			var url1 = pageURL9;
+			var item1 = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item1.setField('title', 'Test');
+			item1.setField('url', url1);
+			await item1.saveTx();
+			
+			var url2 = pageURL3;
+			var item2 = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item2.setField('title', 'Test');
+			item2.setField('url', url2);
+			await item2.saveTx();
+			
+			var attachments = await Zotero.Attachments.addAvailablePDFs([item1, item2]);
+			
+			assert.isTrue(requestStub.calledThrice);
+			assert.equal(requestStub.getCall(0).args[1], pageURL9);
+			assert.equal(requestStub.getCall(1).args[1], pageURL9);
+			assert.equal(requestStub.getCall(2).args[1], pageURL3);
+			assert.isAbove(requestStubCallTimes[1] - requestStubCallTimes[0], 2000);
+			// Make sure there's an attachment for every item
+			assert.lengthOf(attachments.filter(x => x), 2);
 		});
 		
 		it("should handle a custom resolver in HTML mode", async function () {
@@ -697,13 +841,15 @@ describe("Zotero.Attachments", function() {
 			
 			var attachment = await Zotero.Attachments.addAvailablePDF(item);
 			
-			assert.isTrue(requestStub.calledThrice);
-			var call1 = requestStub.getCall(0);
-			assert.isTrue(call1.calledWith('GET', 'https://doi.org/' + doi));
-			var call2 = requestStub.getCall(1);
-			assert.isTrue(call2.calledWith('POST', ZOTERO_CONFIG.SERVICES_URL + 'oa/search'));
-			var call3 = requestStub.getCall(2);
-			assert.isTrue(call3.calledWith('GET', pageURL5));
+			assert.equal(requestStub.callCount, 4);
+			var call = requestStub.getCall(0);
+			assert.isTrue(call.calledWith('GET', 'https://doi.org/' + doi));
+			var call = requestStub.getCall(1);
+			assert.isTrue(call.calledWith('GET', pageURL4));
+			call = requestStub.getCall(2);
+			assert.isTrue(call.calledWith('POST', ZOTERO_CONFIG.SERVICES_URL + 'oa/search'));
+			call = requestStub.getCall(3);
+			assert.isTrue(call.calledWith('GET', pageURL5));
 			
 			assert.ok(attachment);
 			var json = attachment.toJSON();
@@ -731,13 +877,15 @@ describe("Zotero.Attachments", function() {
 			
 			var attachment = await Zotero.Attachments.addAvailablePDF(item);
 			
-			assert.isTrue(requestStub.calledThrice);
-			var call1 = requestStub.getCall(0);
-			assert.isTrue(call1.calledWith('GET', 'https://doi.org/' + doi));
-			var call2 = requestStub.getCall(1);
-			assert.isTrue(call2.calledWith('POST', ZOTERO_CONFIG.SERVICES_URL + 'oa/search'));
-			var call3 = requestStub.getCall(2);
-			assert.isTrue(call3.calledWith('GET', pageURL6));
+			assert.equal(requestStub.callCount, 4);
+			var call = requestStub.getCall(0);
+			assert.isTrue(call.calledWith('GET', 'https://doi.org/' + doi));
+			call = requestStub.getCall(1);
+			assert.isTrue(call.calledWith('GET', pageURL4));
+			call = requestStub.getCall(2);
+			assert.isTrue(call.calledWith('POST', ZOTERO_CONFIG.SERVICES_URL + 'oa/search'));
+			call = requestStub.getCall(3);
+			assert.isTrue(call.calledWith('GET', pageURL6));
 			
 			assert.ok(attachment);
 			var json = attachment.toJSON();
@@ -769,15 +917,17 @@ describe("Zotero.Attachments", function() {
 			
 			var attachment = await Zotero.Attachments.addAvailablePDF(item);
 			
-			assert.equal(requestStub.callCount, 4);
-			var call1 = requestStub.getCall(0);
-			assert.isTrue(call1.calledWith('GET', 'https://doi.org/' + doi));
-			var call2 = requestStub.getCall(1);
-			assert.isTrue(call2.calledWith('POST', ZOTERO_CONFIG.SERVICES_URL + 'oa/search'));
-			var call3 = requestStub.getCall(2);
-			assert.isTrue(call3.calledWith('GET', pageURL6));
-			var call4 = requestStub.getCall(3);
-			assert.isTrue(call4.calledWith('GET', pageURL1));
+			assert.equal(requestStub.callCount, 5);
+			var call = requestStub.getCall(0);
+			assert.isTrue(call.calledWith('GET', 'https://doi.org/' + doi));
+			call = requestStub.getCall(1);
+			assert.isTrue(call.calledWith('GET', pageURL4));
+			call = requestStub.getCall(2);
+			assert.isTrue(call.calledWith('POST', ZOTERO_CONFIG.SERVICES_URL + 'oa/search'));
+			call = requestStub.getCall(3);
+			assert.isTrue(call.calledWith('GET', pageURL6));
+			call = requestStub.getCall(4);
+			assert.isTrue(call.calledWith('GET', pageURL1));
 			
 			assert.ok(attachment);
 			var json = attachment.toJSON();

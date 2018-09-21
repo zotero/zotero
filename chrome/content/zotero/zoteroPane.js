@@ -3708,27 +3708,19 @@ var ZoteroPane = new function()
 		);
 		progressWin.show();
 		
-		var successful = 0;
-		
-		for (let i = 0; i < items.length; i++) {
-			let item = items[i];
-			if (Zotero.Attachments.canFindPDFForItem(item)) {
-				try {
-					let attachment = await Zotero.Attachments.addAvailablePDF(item);
-					if (attachment) {
-						successful++;
-					}
-				}
-				catch (e) {
-					Zotero.logError(e);
+		var results = await Zotero.Attachments.addAvailablePDFs(
+			items,
+			{
+				onProgress: (progress, progressMax) => {
+					itemProgress.setProgress((progress / progressMax) * 100);
 				}
 			}
-			itemProgress.setProgress(((i + 1) / items.length) * 100);
-		}
+		);
 		
 		itemProgress.setProgress(100);
 		itemProgress.setIcon(icon);
 		
+		var successful = results.filter(x => x).length;
 		if (successful) {
 			itemProgress.setText(Zotero.getString('findPDF.pdfsAdded', successful, successful));
 		}
