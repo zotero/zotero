@@ -6,7 +6,10 @@
     "message": "Feito"
   },
   "general_tryAgain": {
-    "message": "Tentar novamente"
+    "message": "Tente novamente"
+  },
+  "general_warning": {
+    "message": "Aviso"
   },
   "general_cancel": {
     "message": "Cancelar"
@@ -34,6 +37,15 @@
   },
   "upgradeApp": {
     "message": "Atualização $1"
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Habilite o salvamento para a biblioteca online"
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Este documento contém citações ativas do Zotero, que aparecerão como links para zotero.org em uma cópia que seja baixada."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Baixar a versão conectada mesmo assim"
   },
   "general_saveTo": {
     "message": "Salvar para $1"

@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fileHandling "Tiedostojen käsittely">
 <!ENTITY zotero.preferences.automaticSnapshots "Ota tilannekuvat automaattisesti luotaessa nimikettä web-sivusta">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Liitä automaattisesti asiaankuuluvat PDF:t ja muut tiedostot">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Nouda metadata PDF-tiedostoille automaattisesti">
 <!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Avaa PDF:t ohjelmalla">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Järjestelmän oletus">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Online Library">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Poista tiedostojen synkronointihistoria">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Vertaa kaikkia liitetiedostoja tallennuspalvelun kanssa">
 <!ENTITY zotero.preferences.sync.reset "Nollaa">
 <!ENTITY zotero.preferences.sync.reset.button "Nollaa...">
 
@@ -117,7 +117,7 @@
 <!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopioi HTML-muodossa">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Sivustokohtaiset asetukset:">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Osoite/polku">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Verkkotunnus/polku">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(esim. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Kieli">
@@ -142,7 +142,7 @@
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Kohdista kirjastonäkymään">
 <!ENTITY zotero.preferences.keys.quicksearch "Pikahaku">
 <!ENTITY zotero.preferences.keys.newItem "Luo uusi nimike">
-<!ENTITY zotero.preferences.keys.newNote "Luo uusi muistiinpanot">
+<!ENTITY zotero.preferences.keys.newNote "Luo uusi muistiinpano">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Merkitse kaikki syötteen kohteet luetuiksi/lukemattomiksi">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Aiheenvalitsin päälle/pois">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopioi valittujen nimikkeiden sitaatit leikepöydälle">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.charset.importCharset "Tuo merkistökoodaus">
 <!ENTITY zotero.preferences.charset.displayExportOption "Näytä merkistökoodaus vietäessä">
 
-<!ENTITY zotero.preferences.dataDir "Storage Location">
+<!ENTITY zotero.preferences.dataDir "Datahakemiston sijainti">
 <!ENTITY zotero.preferences.dataDir.useProfile "Käytä profiilikansiota">
 <!ENTITY zotero.preferences.dataDir.custom "Oma asetus:">
 <!ENTITY zotero.preferences.dataDir.choose "Valitse...">

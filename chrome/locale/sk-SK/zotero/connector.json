@@ -8,6 +8,9 @@
   "general_tryAgain": {
     "message": "Skúste znova"
   },
+  "general_warning": {
+    "message": "Upozornenie"
+  },
   "general_cancel": {
     "message": "Zrušiť"
   },

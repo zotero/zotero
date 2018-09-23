@@ -13,8 +13,8 @@
 <!ENTITY zotero.general.options "Asetukset">
 <!ENTITY zotero.general.advancedOptions.label "Lisäasetukset">
 <!ENTITY zotero.general.tools "Tools">
-<!ENTITY zotero.general.more "More">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.more "Lisää">
+<!ENTITY zotero.general.loading "Ladataan...">
 <!ENTITY zotero.general.close "Sulje">
 <!ENTITY zotero.general.minimize "Pienennä">
 <!ENTITY zotero.general.other "Muu...">
@@ -34,7 +34,7 @@
 <!ENTITY zotero.upgrade.majorUpgrade "Tämä on merkittävä päivitys.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Olethan tutustunut">
 <!ENTITY zotero.upgrade.majorUpgradeLink "päivitysohjeisiin">
-<!ENTITY zotero.upgrade.majorUpgradeAfterLink "ennen jatkamista.">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "ennen kuin jatkat.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Odota päivitysprosessin päättymistä. Tämä saattaa kestää muutamia minuutteja.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Zotero-tietokantasi on onnistuneesti päivitetty.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Katso">
@@ -94,10 +94,10 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Palauta kirjastoon">
 <!ENTITY zotero.items.menu.duplicateItem "Monista valittu nimike">
 <!ENTITY zotero.items.menu.mergeItems "Yhdistä kohteet...">
-<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
+<!ENTITY zotero.items.menu.unrecognize "Kumoa metadatan noutaminen">
+<!ENTITY zotero.items.menu.reportMetadata "Ilmoita virheellisestä metadatasta">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Valitse se nimikkeen pääversio:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Valitse se nimikkeen versio, jota haluat käyttää pääversiona:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Valise kentät, jotka säilytetään muista versioista:">
 
 <!ENTITY zotero.toolbar.newItem.label "Uusi nimike">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.toolbar.openURL.tooltip "Etsi paikallisen kirjaston kautta">
 
 <!ENTITY zotero.toolbar.feeds.new "Uusi syöte">
-<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "URL-osoitteesta...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "Päivitä syöte">
 <!ENTITY zotero.toolbar.feeds.edit "Muokkaa syötettä...">
@@ -138,8 +138,8 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Lauseen aakkoslaji">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Vaihda etu- ja sukunimien järjestys">
 <!ENTITY zotero.item.viewOnline "Katso verkossa">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
-<!ENTITY zotero.item.deletePermanently "Poista lopullisesti">
+<!ENTITY zotero.item.copyAsURL "Kopioi URL-osoitteena">
+<!ENTITY zotero.item.deletePermanently "Poista lopullisesti...">
 
 <!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
 
@@ -251,7 +251,7 @@
 
 <!ENTITY zotero.integration.references.label "Viitteet lähdeluettelossa">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "Pysäytä synkronointi">
 <!ENTITY zotero.sync.error "Synkronointivirhe">
 <!ENTITY zotero.sync.storage.progress "Tilanne:">
 <!ENTITY zotero.sync.storage.downloads "Lataukset:">
