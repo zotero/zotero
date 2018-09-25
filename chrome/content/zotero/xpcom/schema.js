@@ -782,9 +782,12 @@ Zotero.Schema = new function(){
 				// If there's anything in the cache, see what we actually need to extract
 				for (let i = 0; i < rows.length; i++) {
 					let json = rows[i].metadataJSON;
-					let metadata;
 					try {
-						metadata = JSON.parse(json);
+						let metadata = JSON.parse(json);
+						let id = metadata.translatorID;
+						if (index[id] && index[id].lastUpdated <= metadata.lastUpdated) {
+							index[id].extract = false;
+						}
 					}
 					catch (e) {
 						Zotero.logError(e);
@@ -795,11 +798,6 @@ Zotero.Schema = new function(){
 							"DELETE FROM translatorCache WHERE rowid=?",
 							rows[i].rowid
 						);
-						continue;
-					}
-					let id = metadata.translatorID;
-					if (index[id] && index[id].lastUpdated <= metadata.lastUpdated) {
-						index[id].extract = false;
 					}
 				}
 				
