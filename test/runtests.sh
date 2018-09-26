@@ -144,7 +144,10 @@ if [ ! -f "$PDF_TOOLS_CACHE_DIR/$PDF_TOOLS_VERSION" ]; then
 fi
 cp -R $PDF_TOOLS_CACHE_DIR $PDF_TOOLS_DIR
 
-cat <<EOF > "$PROFILE/prefs.js"
+# Add default prefs, which are apparently no longer read from extensions in Firefox 60
+cat "$ZOTERO_PATH/defaults/preferences/zotero.js" > "$PROFILE/prefs.js"
+
+cat <<EOF >> "$PROFILE/prefs.js"
 user_pref("app.update.enabled", false);
 user_pref("extensions.autoDisableScopes", 0);
 user_pref("browser.dom.window.dump.enabled", true);
