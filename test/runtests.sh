@@ -169,6 +169,7 @@ user_pref("extensions.zotero.reportTranslationFailure", false);
 user_pref("extensions.zotero.httpServer.enabled", true);
 user_pref("extensions.zotero.backup.numBackups", 0);
 user_pref("extensions.zotero.sync.autoSync", false);
+user_pref("extensions.legacy.enabled", true);
 user_pref("xpinstall.signatures.required", false);
 user_pref("xpinstall.whitelist.required", false);
 user_pref("datareporting.healthreport.uploadEnabled", false);
