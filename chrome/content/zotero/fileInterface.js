@@ -238,19 +238,16 @@ var Zotero_File_Interface = new function() {
 				Zotero.debug(`${dir} does not exist`);
 				return dbs;
 			}
-			await Zotero.File.iterateDirectory(dir, function* (iterator) {
-				while (true) {
-					let entry = yield iterator.next();
-					if (entry.isDir) continue;
-					// online.sqlite, counterintuitively, is the default database before you sign in
-					if (entry.name == 'online.sqlite' || entry.name.endsWith('@www.mendeley.com.sqlite')) {
-						dbs.push({
-							name: entry.name,
-							path: entry.path,
-							lastModified: null,
-							size: null
-						});
-					}
+			await Zotero.File.iterateDirectory(dir, function (entry) {
+				if (entry.isDir) return;
+				// online.sqlite, counterintuitively, is the default database before you sign in
+				if (entry.name == 'online.sqlite' || entry.name.endsWith('@www.mendeley.com.sqlite')) {
+					dbs.push({
+						name: entry.name,
+						path: entry.path,
+						lastModified: null,
+						size: null
+					});
 				}
 			});
 			for (let i = 0; i < dbs.length; i++) {

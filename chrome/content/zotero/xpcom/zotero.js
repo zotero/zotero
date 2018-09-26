@@ -499,27 +499,24 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					let lastError;
 					// Delete all files in directory rather than removing directory, in case it's
 					// a symlink
-					yield Zotero.File.iterateDirectory(dataDir, function* (iterator) {
-						while (true) {
-							let entry = yield iterator.next();
-							// Don't delete some files
-							if (entry.name == 'pipes') {
-								continue;
+					yield Zotero.File.iterateDirectory(dataDir, async function (entry) {
+						// Don't delete some files
+						if (entry.name == 'pipes') {
+							return;
+						}
+						Zotero.debug("Deleting " + entry.path);
+						try {
+							if (entry.isDir) {
+								await OS.File.removeDir(entry.path);
 							}
-							Zotero.debug("Deleting " + entry.path);
-							try {
-								if (entry.isDir) {
-									yield OS.File.removeDir(entry.path);
-								}
-								else {
-									yield OS.File.remove(entry.path);
-								}
+							else {
+								await OS.File.remove(entry.path);
 							}
-							// Keep trying to delete as much as we can
-							catch (e) {
-								lastError = e;
-								Zotero.logError(e);
-							}
+						}
+						// Keep trying to delete as much as we can
+						catch (e) {
+							lastError = e;
+							Zotero.logError(e);
 						}
 					});
 					if (lastError) {

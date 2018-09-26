@@ -2113,21 +2113,15 @@ Zotero.Attachments = new function(){
 		var parent = OS.Path.dirname(path);
 		var iterator = new OS.File.DirectoryIterator(parent);
 		try {
-			while (true) {
-				let entry = yield iterator.next();
+			yield iterator.forEach((entry) => {
 				if (entry.name.startsWith('.')) {
-					continue;
+					return;
 				}
 				numFiles++;
 				if (numFiles > 1) {
-					break;
+					iterator.close();
 				}
-			}
-		}
-		catch (e) {
-			if (e != StopIteration) {
-				throw e;
-			}
+			});
 		}
 		finally {
 			iterator.close();

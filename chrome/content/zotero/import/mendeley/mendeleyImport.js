@@ -1208,19 +1208,16 @@ Zotero_Import_Mendeley.prototype.deleteNonPrimaryFiles = async function () {
 		let filename = row.path.substr(8);
 		
 		Zotero.debug(`Checking for extra files in ${dir}`);
-		await Zotero.File.iterateDirectory(dir, function* (iterator) {
-			while (true) {
-				let entry = yield iterator.next();
-				if (entry.name.startsWith('.zotero') || entry.name == filename) {
-					continue;
-				}
-				Zotero.debug(`Deleting ${entry.path}`);
-				try {
-					yield OS.File.remove(entry.path);
-				}
-				catch (e) {
-					Zotero.logError(e);
-				}
+		await Zotero.File.iterateDirectory(dir, async function (entry) {
+			if (entry.name.startsWith('.zotero') || entry.name == filename) {
+				return;
+			}
+			Zotero.debug(`Deleting ${entry.path}`);
+			try {
+				await OS.File.remove(entry.path);
+			}
+			catch (e) {
+				Zotero.logError(e);
 			}
 		});
 	}

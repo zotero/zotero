@@ -1012,21 +1012,13 @@ Zotero.DataDirectory = {
 			// Focus the first file/folder in the old directory
 			else if (index == 2) {
 				try {
-					let it = new OS.File.DirectoryIterator(oldDir);
-					let entry;
-					try {
-						entry = yield it.next();
-					}
-					catch (e) {
-						if (e != StopIteration) {
-							throw e;
-						}
-					}
-					finally {
-						it.close();
-					}
-					if (entry) {
-						yield Zotero.File.reveal(entry.path);
+					let firstEntry;
+					yield Zotero.File.iterateDirectory(oldDir, function (entry, index, iterator) {
+						firstEntry = entry;
+						iterator.close();
+					});
+					if (firstEntry) {
+						yield Zotero.File.reveal(firstEntry.path);
 					}
 					// Focus the database file in the new directory
 					yield Zotero.File.reveal(OS.Path.join(newDir, this.getDatabaseFilename()));

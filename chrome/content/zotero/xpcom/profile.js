@@ -283,17 +283,14 @@ Zotero.Profile = {
 	 */
 	_getProfilesInDir: Zotero.Promise.coroutine(function* (profilesDir) {
 		var dirs = [];
-		yield Zotero.File.iterateDirectory(profilesDir, function* (iterator) {
-			while (true) {
-				let entry = yield iterator.next();
-				// entry.isDir can be false for some reason on Travis, causing spurious test failures
-				if (Zotero.automatedTest && !entry.isDir && (yield OS.File.stat(entry.path)).isDir) {
-					Zotero.debug("Overriding isDir for " + entry.path);
-					entry.isDir = true;
-				}
-				if (entry.isDir && (yield OS.File.exists(OS.Path.join(entry.path, "prefs.js")))) {
-					dirs.push(entry.path);
-				}
+		yield Zotero.File.iterateDirectory(profilesDir, async function (entry) {
+			// entry.isDir can be false for some reason on Travis, causing spurious test failures
+			if (Zotero.automatedTest && !entry.isDir && (await OS.File.stat(entry.path)).isDir) {
+				Zotero.debug("Overriding isDir for " + entry.path);
+				entry.isDir = true;
+			}
+			if (entry.isDir && (await OS.File.exists(OS.Path.join(entry.path, "prefs.js")))) {
+				dirs.push(entry.path);
 			}
 		});
 		return dirs;
