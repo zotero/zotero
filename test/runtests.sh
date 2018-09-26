@@ -17,9 +17,9 @@ function makePath {
 
 if [ -z "$FX_EXECUTABLE" ]; then
 	if [ "`uname`" == "Darwin" ]; then
-		FX_EXECUTABLE="/Applications/Firefox Unbranded.app/Contents/MacOS/firefox"
+		FX_EXECUTABLE="$( dirname "$ROOT_DIR" )/zotero-standalone-build/xulrunner/Firefox.app/Contents/MacOS/firefox"
 	else
-		FX_EXECUTABLE="firefox"
+		FX_EXECUTABLE="$( dirname "$ROOT_DIR" )/../zotero-standalone-build/xulrunner/firefox-x86_64/firefox"
 	fi
 fi
 
