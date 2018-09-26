@@ -15,7 +15,7 @@ describe("Zotero.Schema", function() {
 	describe("#updateSchema()", function () {
 		it("should set last client version", function* () {
 			var sql = "REPLACE INTO settings (setting, key, value) VALUES ('client', 'lastVersion', ?)";
-			return Zotero.DB.queryAsync(sql, "5.0old");
+			yield Zotero.DB.queryAsync(sql, "5.0old");
 			
 			yield Zotero.Schema.updateSchema();
 			
