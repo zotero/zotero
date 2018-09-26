@@ -8,6 +8,9 @@
   "general_tryAgain": {
     "message": "حاول مرة أخرى"
   },
+  "general_warning": {
+    "message": "تحذير"
+  },
   "general_cancel": {
     "message": "إلغاء"
   },
@@ -55,6 +58,15 @@
   },
   "integration_error_connection": {
     "message": " $1 غير قادر على التواصل مع  $2 تطبيق سطح المكتب. يجب فتح $2 لاستخدام الاستشهاد المستند على الشبكة."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "المستند يحتوي اقتباسات زوتيرو نشطة وستظهر كروابط  zotero.org في النسخة المحملة."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "لصنع نسخة مناسبة للمشاركة، اختر <b> انشئ نسخة...</b> من قائمة ملف، اختر <b>إلغاء ارتباط الاستشهادات</b> من قائمة زوتيرو في المستند الجديد، ثم حمل النسغير غير المرتبطة. احفظ هذا المستند المرتبط في حالة احتجت لمزيد من التغييرات."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "حمل النسخة المرتبطة على كل حال."
   },
   "general_saveTo": {
     "message": "احفظ في $1"

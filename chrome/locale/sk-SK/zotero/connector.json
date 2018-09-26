@@ -59,6 +59,15 @@
   "integration_error_connection": {
     "message": "$1 nedokázal komunikovať s počítačovým programom $2. $2 musí byť pre používanie webového citovania spustený."
   },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Tento dokument obsahuje aktívne citácie Zotera, ktoré sa objavia ako odkazy zotero.org v stiahnutej kópii."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Pre vytvorenie verzie vhodnej na zdieľaie, zvoľte <b>Vytvoriť kópiu…</b> z ponuky Súbor, zvoľte <b>Odpojiť citácie</b> z ponuky Zotero v novom dokumente a potom stiahnite neprepojenú verziu. Uschovajte tento pôvodný prepojený dokument pre prípad, že budete potrebovať urobiť ďalšie zmeny."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Každopádne stiahnuť prepojenú verziu"
+  },
   "general_saveTo": {
     "message": "Uložiť do $1"
   }
