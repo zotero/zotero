@@ -77,6 +77,12 @@ var Zotero_QuickFormat = new function () {
 				qfb.setAttribute("square", "true");
 			}
 			
+			// With fx60 and drawintitlebar=true Firefox calculates the minHeight
+			// as titlebar+maincontent, so we have hack around that here.
+			if (Zotero.isMac && Zotero.platformMajorVersion >= 60) {
+				qfb.style.marginBottom = "-22px";
+			}
+			
 			// add labels to popup
 			var locators = Zotero.Cite.labels;
 			var menu = document.getElementById("locator-label");
