@@ -36,17 +36,25 @@ Zotero.ProgressQueue = function (options) {
 	let _queue = [];
 	let _queueProcessing = false;
 	
-	
-	this.getId = function () {
+	/**
+	 * @return {Number}
+	 */
+	this.getID = function () {
 		return _id;
 	};
 	
 	
+	/**
+	 * @return {String}
+	 */
 	this.getTitle = function () {
 		return _title;
 	};
 	
 	
+	/**
+	 * @return {String[]}
+	 */
 	this.getColumns = function () {
 		return _columns;
 	};
@@ -54,7 +62,7 @@ Zotero.ProgressQueue = function (options) {
 	
 	/**
 	 * Add listener
-	 * @param name Event name
+	 * @param {String} name Event name
 	 * @param callback
 	 */
 	this.addListener = function (name, callback) {
@@ -64,7 +72,7 @@ Zotero.ProgressQueue = function (options) {
 	
 	/**
 	 * Remove listener
-	 * @param name Event name
+	 * @param {String} name Event name
 	 */
 	this.removeListener = function (name) {
 		delete _listeners[name];
@@ -73,7 +81,7 @@ Zotero.ProgressQueue = function (options) {
 	
 	/**
 	 * Adds items to the queue and triggers processing
-	 * @param items {Zotero.Item}
+	 * @param {Zotero.Item[]} items
 	 */
 	this.addItems = function (items) {
 		for (let item of items) {
@@ -85,7 +93,7 @@ Zotero.ProgressQueue = function (options) {
 	
 	/**
 	 * Returns all rows
-	 * @return {Array}
+	 * @return {Object[]}
 	 */
 	this.getRows = function () {
 		return _rows;
@@ -116,25 +124,28 @@ Zotero.ProgressQueue = function (options) {
 	this.cancel = function () {
 		_queue = [];
 		_rows = [];
-		if (_listeners['empty']) {
-			_listeners['empty']();
+		if (_listeners.empty) {
+			_listeners.empty();
 		}
 	};
 	
 	
 	/**
 	 * Add item for processing
-	 * @param item
-	 * @return {null}
+	 * @param {Zotero.Item} item
 	 */
 	function _addItem(item) {
+		// Check if item is already in the list
 		for (let row of _rows) {
 			if (row.id === item.id) {
+				// If it's already processed, delete the existing row
+				// and allow to add it again for reprocessing
 				if (row.status > Zotero.ProgressQueue.ROW_PROCESSING) {
 					_deleteRow(row.id);
 					break;
 				}
-				return null;
+				// If it's still waiting to be processed just ignore it
+				return;
 			}
 		}
 		
@@ -148,29 +159,29 @@ Zotero.ProgressQueue = function (options) {
 		_rows.unshift(row);
 		_queue.unshift(item.id);
 		
-		if (_listeners['rowadded']) {
-			_listeners['rowadded'](row);
+		if (_listeners.rowadded) {
+			_listeners.rowadded(row);
 		}
 		
-		if (_listeners['nonempty'] && _rows.length === 1) {
-			_listeners['nonempty']();
+		if (_listeners.nonempty && _rows.length === 1) {
+			_listeners.nonempty();
 		}
 	}
 	
 	
 	/**
 	 * Update row status and message
-	 * @param itemID
-	 * @param status
-	 * @param message
+	 * @param {Number} itemID
+	 * @param {Number} status
+	 * @param {String} message
 	 */
 	function _updateRow(itemID, status, message) {
 		for (let row of _rows) {
 			if (row.id === itemID) {
 				row.status = status;
 				row.message = message;
-				if (_listeners['rowupdated']) {
-					_listeners['rowupdated']({
+				if (_listeners.rowupdated) {
+					_listeners.rowupdated({
 						id: row.id,
 						status,
 						message: message || ''
@@ -184,15 +195,15 @@ Zotero.ProgressQueue = function (options) {
 	
 	/**
 	 * Delete row
-	 * @param itemID
+	 * @param {Number} itemID
 	 */
 	function _deleteRow(itemID) {
 		for (let i = 0; i < _rows.length; i++) {
 			let row = _rows[i];
 			if (row.id === itemID) {
 				_rows.splice(i, 1);
-				if (_listeners['rowdeleted']) {
-					_listeners['rowdeleted']({
+				if (_listeners.rowdeleted) {
+					_listeners.rowdeleted({
 						id: row.id
 					});
 				}
@@ -262,19 +273,27 @@ Zotero.ProgressQueue.ROW_SUCCEEDED = 4;
 Zotero.ProgressQueues = new function () {
 	let _queues = [];
 	
-	
+	/**
+	 * @param {Object} options
+	 * @return {Zotero.ProgressQueue}
+	 */
 	this.createQueue = function (options) {
 		let queue = new Zotero.ProgressQueue(options);
 		_queues.push(queue);
 		return queue;
 	};
 	
-	
+	/**
+	 * @param {Number} id
+	 * @return {Zotero.ProgressQueue}
+	 */
 	this.getQueue = function (id) {
-		return _queues.find(queue => queue.getId() === id);
+		return _queues.find(queue => queue.getID() === id);
 	};
 	
-	
+	/**
+	 * @return {Zotero.ProgressQueue[]}
+	 */
 	this.getAllQueues = function () {
 		return _queues;
 	};

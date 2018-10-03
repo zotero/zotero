@@ -79,10 +79,10 @@ var ZoteroPane = new function()
 		let progressQueues = Zotero.ProgressQueues.getAllQueues();
 		for (let progressQueue of progressQueues) {
 			let button = document.createElement('toolbarbutton');
-			button.id = 'zotero-tb-pq-' + progressQueue.getId();
+			button.id = 'zotero-tb-pq-' + progressQueue.getID();
 			button.hidden = progressQueue.getTotal() < 1;
 			button.addEventListener('command', function () {
-				Zotero_ProgressQueue_Dialogs.getDialog(progressQueue.getId()).open();
+				Zotero_ProgressQueue_Dialogs.getDialog(progressQueue.getID()).open();
 			}, false);
 			
 			progressQueue.addListener('empty', function () {

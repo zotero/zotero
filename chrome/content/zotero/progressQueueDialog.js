@@ -234,6 +234,6 @@ var Zotero_ProgressQueue_Dialogs = new function () {
 	}
 	
 	this.getDialog = function (id) {
-		return _dialogs.find(d => d.progressQueue.getId() === id);
+		return _dialogs.find(d => d.progressQueue.getID() === id);
 	}
 };
