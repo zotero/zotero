@@ -356,20 +356,21 @@ Zotero.HTTP = new function() {
 					Zotero.debug(xmlhttp.responseText);
 				}
 				
-				// Try to use HTTP redirect, but if url extraction fails
-				// or numRedirects is exceeded, just return the current page
+				// Follow meta redirects
 				if (options.responseType === 'document' &&
 					(!options.numRedirects || options.numRedirects < 3)) {
 					let contentType = xmlhttp.getResponseHeader('Content-Type');
 					if (contentType && contentType.startsWith('text/html')) {
-						let meta = xmlhttp.response.querySelector('meta[http-equiv="refresh"]');
+						let meta = xmlhttp.response.querySelector('meta[http-equiv="refresh" i]');
 						if (meta) {
 							let content = meta.getAttribute('content');
 							if (content) {
-								// Parse URL from the content tag
-								let m = content.match(/url[ ="']+(.+?)[ "']/i);
-								if (m) {
-									let url = m[1];
+								let parts = content.split(/;\s*url=/);
+								// If there's a redirect to another URL in less than 15 seconds,
+								// follow it
+								if (parts.length === 2 && parseInt(parts[0]) <= 15) {
+									let url = parts[1].trim().replace(/^'(.+)'/, '$1');
+									
 									// Resolve URL. P.S.: For unknown reason this only works
 									// if server returns 'Content-Type: text/html' header
 									let a = xmlhttp.response.createElement('a');

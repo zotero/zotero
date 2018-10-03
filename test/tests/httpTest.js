@@ -35,7 +35,7 @@ describe("Zotero.HTTP", function () {
 				handle: function (request, response) {
 					response.setHeader("Content-Type", 'text/html', false);
 					response.setStatusLine(null, 200, "OK");
-					response.write("<html><head><meta http-equiv=\"refresh\" content=\"2000; url = 'test.html'\"/></head><body></body></html>");
+					response.write("<html><head><meta http-equiv=\"refresh\" content=\"2;url=test.html\"/></head><body></body></html>");
 				}
 			}
 		);
