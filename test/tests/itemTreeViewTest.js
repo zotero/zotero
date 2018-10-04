@@ -932,7 +932,7 @@ describe("Zotero.ItemTreeView", function() {
 			
 			var progressWindow = await recognizerPromise;
 			progressWindow.close();
-			Zotero.ProgressQueues.getQueue('recognize').cancel();
+			Zotero.ProgressQueues.get('recognize').cancel();
 			assert.isFalse(item.isTopLevelItem());
 			
 			Zotero.HTTP.mock = null;

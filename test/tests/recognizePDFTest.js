@@ -19,7 +19,7 @@ describe("PDF Recognition", function() {
 		for(let win of getWindows("chrome://zotero/content/progressQueueDialog.xul")) {
 			win.close();
 		}
-		Zotero.ProgressQueues.getQueue('recognize').cancel();
+		Zotero.ProgressQueues.get('recognize').cancel();
 	});
 	
 	after(function() {

@@ -76,13 +76,13 @@ var ZoteroPane = new function()
 		
 		// Init toolbar buttons for all progress queues
 		let progressQueueButtons = document.getElementById('zotero-pq-buttons');
-		let progressQueues = Zotero.ProgressQueues.getAllQueues();
+		let progressQueues = Zotero.ProgressQueues.getAll();
 		for (let progressQueue of progressQueues) {
 			let button = document.createElement('toolbarbutton');
 			button.id = 'zotero-tb-pq-' + progressQueue.getID();
 			button.hidden = progressQueue.getTotal() < 1;
 			button.addEventListener('command', function () {
-				Zotero_ProgressQueue_Dialogs.getDialog(progressQueue.getID()).open();
+				Zotero.ProgressQueues.get(progressQueue.getID()).getDialog().open();
 			}, false);
 			
 			progressQueue.addListener('empty', function () {
@@ -4481,7 +4481,7 @@ var ZoteroPane = new function()
 	
 	this.recognizeSelected = function() {
 		Zotero.RecognizePDF.recognizeItems(ZoteroPane.getSelectedItems());
-		Zotero_ProgressQueue_Dialogs.getDialog('recognize').open();
+		Zotero.ProgressQueues.get('recognize').getDialog().open();
 	};
 	
 	

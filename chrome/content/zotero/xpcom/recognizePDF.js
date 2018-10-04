@@ -24,24 +24,102 @@
 */
 
 Zotero.RecognizePDF = new function () {
+	const OFFLINE_RECHECK_DELAY = 60 * 1000;
 	const MAX_PAGES = 5;
 	const UNRECOGNIZE_TIMEOUT = 86400 * 1000;
 	
-	let _progressQueue = Zotero.ProgressQueues.createQueue({
+	let _newItems = new WeakMap();
+	
+	let _queue = [];
+	let _queueProcessing = false;
+	let _processingItemID = null;
+	
+	let _progressQueue = Zotero.ProgressQueues.create({
 		id: 'recognize',
 		title: 'recognizePDF.title',
 		columns: [
 			'recognizePDF.pdfName.label',
 			'recognizePDF.itemName.label'
-		],
-		processor: async function (item) {
-			let newItem = await _processItem(item);
-			// On success return status message to the progress queue
-			return newItem.getField('title');
-		}
+		]
 	});
 	
-	let _newItems = new WeakMap();
+	_progressQueue.addListener('cancel', function () {
+		_queue = [];
+	});
+	
+	
+	/**
+	 * Triggers queue processing and returns when all items in the queue are processed
+	 * @return {Promise}
+	 */
+	async function _processQueue() {
+		await Zotero.Schema.schemaUpdatePromise;
+		
+		if (_queueProcessing) return;
+		_queueProcessing = true;
+		
+		while (1) {
+			// While all current progress queue usages are related with
+			// online APIs, check internet connectivity here
+			if (Zotero.HTTP.browserIsOffline()) {
+				await Zotero.Promise.delay(OFFLINE_RECHECK_DELAY);
+				continue;
+			}
+			
+			let itemID = _queue.pop();
+			if (!itemID) break;
+			
+			_processingItemID = itemID;
+			
+			_progressQueue.updateRow(itemID, Zotero.ProgressQueue.ROW_PROCESSING, Zotero.getString('general.processing'));
+			
+			try {
+				let item = await Zotero.Items.getAsync(itemID);
+				
+				if (!item) {
+					throw new Error();
+				}
+				
+				let res = await _processItem(item);
+				_progressQueue.updateRow(itemID, Zotero.ProgressQueue.ROW_SUCCEEDED, item.getField('title'));
+			}
+			catch (e) {
+				Zotero.logError(e);
+				
+				_progressQueue.updateRow(
+					itemID,
+					Zotero.ProgressQueue.ROW_FAILED,
+					e instanceof Zotero.Exception.Alert
+						? e.message
+						: Zotero.getString('general.error')
+				);
+			}
+		}
+		
+		_queueProcessing = false;
+		_processingItemID = null;
+	}
+	
+	
+	/**
+	 * Adds items to the queue and triggers processing
+	 * @param {Zotero.Item[]} items
+	 */
+	this.recognizeItems = function (items) {
+		for (let item of items) {
+			if(
+				_processingItemID === item.id ||
+				_queue.includes(item.id) ||
+				!this.canRecognize(item)
+			) {
+				continue;
+			}
+			_queue.unshift(item.id);
+			_progressQueue.addRow(item);
+		}
+		_processQueue();
+	};
+	
 	
 	/**
 	 * Checks whether a given PDF could theoretically be recognized
@@ -52,15 +130,6 @@ Zotero.RecognizePDF = new function () {
 		return item.attachmentContentType
 			&& item.attachmentContentType === 'application/pdf'
 			&& item.isTopLevelItem();
-	};
-	
-	
-	/**
-	 * Adds items to the queue and starts processing it
-	 * @param items {Zotero.Item}
-	 */
-	this.recognizeItems = function (items) {
-		_progressQueue.addItems(items);
 	};
 	
 	
@@ -76,10 +145,7 @@ Zotero.RecognizePDF = new function () {
 			return;
 		}
 		this.recognizeItems(pdfs);
-		var win = Services.wm.getMostRecentWindow("navigator:browser");
-		if (win) {
-			win.Zotero_ProgressQueue_Dialogs.getDialog('recognize').open();
-		}
+		Zotero.ProgressQueues.get('recognize').getDialog().open();
 	};
 	
 	
@@ -341,6 +407,8 @@ Zotero.RecognizePDF = new function () {
 	 * @return {Promise}
 	 */
 	async function _recognize(item) {
+		if(!item.isAttachment()) return null;
+		
 		let filePath = await item.getFilePath();
 		
 		if (!filePath || !await OS.File.exists(filePath)) throw new Zotero.Exception.Alert('recognizePDF.fileNotFound');

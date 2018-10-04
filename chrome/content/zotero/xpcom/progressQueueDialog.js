@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-var Zotero_ProgressQueue_Dialog = function (progressQueue) {
+Zotero.ProgressQueueDialog = function (progressQueue) {
 	const SUCCESS_IMAGE = 'chrome://zotero/skin/tick.png';
 	const FAILURE_IMAGE = 'chrome://zotero/skin/cross.png';
 	const LOADING_IMAGE = 'chrome://zotero/skin/arrow_refresh.png';
@@ -39,7 +39,17 @@ var Zotero_ProgressQueue_Dialog = function (progressQueue) {
 			_progressWindow.focus();
 			return;
 		}
-		_progressWindow = window.openDialog('chrome://zotero/content/progressQueueDialog.xul', '', 'chrome,close=yes,resizable=yes,dependent,dialog,centerscreen');
+		
+		let win = Services.wm.getMostRecentWindow("navigator:browser");
+		if (win) {
+			_progressWindow = win.openDialog("chrome://zotero/content/progressQueueDialog.xul",
+				"", "chrome,close=yes,resizable=yes,dependent,dialog,centerscreen");
+		}
+		else {
+			_progressWindow = Services.ww.openWindow(null, "chrome://zotero/content/progressQueueDialog.xul",
+				"", "chrome,close=yes,resizable=yes,dependent,dialog,centerscreen", null);
+		}
+		
 		_progressWindow.addEventListener('pageshow', _onWindowLoaded.bind(this), false);
 	};
 	
@@ -131,7 +141,7 @@ var Zotero_ProgressQueue_Dialog = function (progressQueue) {
 			}, false);
 		
 		_progressWindow.addEventListener('keypress', function (e) {
-			if (e.keyCode === KeyEvent.DOM_VK_ESCAPE) {
+			if (e.keyCode === _progressWindow.KeyEvent.DOM_VK_ESCAPE) {
 				// If done processing, Esc is equivalent to Close rather than Minimize
 				if (_progressQueue.getTotal() === _progressQueue.getProcessedTotal()) {
 					_progressQueue.cancel();
@@ -211,29 +221,15 @@ var Zotero_ProgressQueue_Dialog = function (progressQueue) {
 			
 			if (item.parentItemID) itemID = item.parentItemID;
 			
-			if (window.ZoteroOverlay) {
-				window.ZoteroOverlay.toggleDisplay(true);
+			let win = Services.wm.getMostRecentWindow("navigator:browser");
+			if (win) {
+				if (win.ZoteroOverlay) {
+					win.ZoteroOverlay.toggleDisplay(true);
+				}
+				
+				win.ZoteroPane.selectItem(itemID, false, true);
+				win.focus();
 			}
-			
-			window.ZoteroPane.selectItem(itemID, false, true);
-			window.focus();
 		}
-	}
-};
-
-/**
- * Create a dialog for each progressQueue
- */
-var Zotero_ProgressQueue_Dialogs = new function () {
-	let _dialogs = [];
-	
-	let progressQueues = Zotero.ProgressQueues.getAllQueues();
-	for (let progressQueue of progressQueues) {
-		let q = new Zotero_ProgressQueue_Dialog(progressQueue);
-		_dialogs.push(q);
-	}
-	
-	this.getDialog = function (id) {
-		return _dialogs.find(d => d.progressQueue.getID() === id);
 	}
 };
