@@ -1103,6 +1103,8 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
+	 * Look for available PDFs for items and add as attachments
+	 *
 	 * @param {Zotero.Item[]} items
 	 * @param {Object} [options]
 	 * @param {String[]} [options.methods] - See getPDFResolvers()
@@ -1353,7 +1355,7 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * Try to add a PDF to an item from a set of possible URLs
+	 * Try to add a PDF to an item from a set of URL resolvers
 	 *
 	 * @param {Zotero.Item} item
 	 * @param {(String|Object|Function)[]} urlResolvers - See downloadFirstAvailableFile()
@@ -1430,7 +1432,7 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * Try to download a file from a list of URLs, keeping the first one that succeeds
+	 * Try to download a file from a set of URL resolvers, keeping the first one that succeeds
 	 *
 	 * URLs are only tried once.
 	 *
