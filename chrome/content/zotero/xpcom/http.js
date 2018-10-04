@@ -355,6 +355,48 @@ Zotero.HTTP = new function() {
 				if (options.debug) {
 					Zotero.debug(xmlhttp.responseText);
 				}
+				
+				// Follow meta redirects
+				if (options.responseType === 'document' &&
+					(!options.numRedirects || options.numRedirects < 3)) {
+					let contentType = xmlhttp.getResponseHeader('Content-Type');
+					if (contentType && contentType.startsWith('text/html')) {
+						let meta = xmlhttp.response.querySelector('meta[http-equiv="refresh" i]');
+						if (meta) {
+							let content = meta.getAttribute('content');
+							if (content) {
+								let parts = content.split(/;\s*url=/);
+								// If there's a redirect to another URL in less than 15 seconds,
+								// follow it
+								if (parts.length === 2 && parseInt(parts[0]) <= 15) {
+									let url = parts[1].trim().replace(/^'(.+)'/, '$1');
+									
+									// Resolve URL. P.S.: For unknown reason this only works
+									// if server returns 'Content-Type: text/html' header
+									let a = xmlhttp.response.createElement('a');
+									a.href = url;
+									let resolvedUrl = a.href;
+									
+									// Make sure the absolute URL is actually resolved
+									if (/^https?:\/\//.test(resolvedUrl)) {
+										if (options.numRedirects) {
+											options.numRedirects++;
+										}
+										else {
+											options.numRedirects = 1;
+										}
+										
+										// Meta redirect is always GET
+										return Zotero.HTTP.request("GET", resolvedUrl, options)
+											.then(xmlhttp => deferred.resolve(xmlhttp))
+											.catch(e => deferred.reject(e));
+									}
+								}
+							}
+						}
+					}
+				}
+				
 				deferred.resolve(xmlhttp);
 			} else {
 				let msg = "HTTP " + method + " " + dispURL + " failed with status code " + status;
@@ -863,8 +905,8 @@ Zotero.HTTP = new function() {
 				}
 			)
 			.then((xhr) => {
-				var doc = this.wrapDocument(xhr.response, url);
-				return processor(doc, url);
+				var doc = this.wrapDocument(xhr.response, xhr.responseURL);
+				return processor(doc, xhr.responseURL);
 			});
 		});
 		
