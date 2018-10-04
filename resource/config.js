@@ -17,7 +17,6 @@ var ZOTERO_CONFIG = {
 	CONNECTOR_MIN_VERSION: '5.0.39', // show upgrade prompt for requests from below this version
 	PREF_BRANCH: 'extensions.zotero.',
 	BOOKMARKLET_ORIGIN: 'https://www.zotero.org',
-	HTTP_BOOKMARKLET_ORIGIN: 'http://www.zotero.org',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
 	START_URL: "https://www.zotero.org/start",
 	QUICK_START_URL: "https://www.zotero.org/support/quick_start_guide",
