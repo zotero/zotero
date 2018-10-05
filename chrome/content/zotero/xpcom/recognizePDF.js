@@ -407,8 +407,6 @@ Zotero.RecognizePDF = new function () {
 	 * @return {Promise}
 	 */
 	async function _recognize(item) {
-		if(!item.isAttachment()) return null;
-		
 		let filePath = await item.getFilePath();
 		
 		if (!filePath || !await OS.File.exists(filePath)) throw new Zotero.Exception.Alert('recognizePDF.fileNotFound');
