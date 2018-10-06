@@ -583,6 +583,12 @@ describe("Zotero.Attachments", function() {
 				httpd.stop(() => resolve());
 			});
 			Zotero.Prefs.clear('findPDFs.resolvers');
+			
+			// Close progress dialog after each run
+			var queue = Zotero.ProgressQueues.get('findPDF');
+			if (queue) {
+				queue.getDialog().close();
+			}
 		}.bind(this));
 		
 		after(() => {
@@ -751,8 +757,9 @@ describe("Zotero.Attachments", function() {
 			
 			assert.isTrue(requestStub.calledTwice);
 			assert.isAbove(requestStubCallTimes[1] - requestStubCallTimes[0], 1000);
-			// Make sure there's an attachment for every item
-			assert.lengthOf(attachments.filter(x => x), 2);
+			// Make sure both items have attachments
+			assert.equal(item1.numAttachments(), 1);
+			assert.equal(item2.numAttachments(), 1);
 		});
 		
 		it("should wait between requests that resolve to the same domain", async function () {
@@ -793,9 +800,9 @@ describe("Zotero.Attachments", function() {
 			// 'website' requests should be a second apart
 			assert.isAbove(requestStubCallTimes[5] - requestStubCallTimes[1], 1000);
 			
-			assert.instanceOf(attachments[0], Zotero.Item);
-			assert.isFalse(attachments[1]);
-			assert.instanceOf(attachments[2], Zotero.Item);
+			assert.equal(item1.numAttachments(), 1);
+			assert.equal(item2.numAttachments(), 0);
+			assert.equal(item3.numAttachments(), 1);
 		});
 		
 		it("should wait between requests to the same domain after a 429", async function () {
@@ -818,8 +825,9 @@ describe("Zotero.Attachments", function() {
 			assert.equal(requestStub.getCall(1).args[1], pageURL9);
 			assert.equal(requestStub.getCall(2).args[1], pageURL3);
 			assert.isAbove(requestStubCallTimes[1] - requestStubCallTimes[0], 2000);
-			// Make sure there's an attachment for every item
-			assert.lengthOf(attachments.filter(x => x), 2);
+			// Make sure both items have attachments
+			assert.equal(item1.numAttachments(), 1);
+			assert.equal(item2.numAttachments(), 1);
 		});
 		
 		it("should handle a custom resolver in HTML mode", async function () {

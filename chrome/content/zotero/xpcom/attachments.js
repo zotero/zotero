@@ -1228,20 +1228,19 @@ Zotero.Attachments = new function(){
 				// We reached the end of the queue
 				if (!current) {
 					// If all entries are resolved, we're done
-					if (queue.every(x => x instanceof Zotero.Item || x.result === false)) {
+					if (queue.every(x => x.result instanceof Zotero.Item || x.result === false)) {
 						resolve();
 						return;
 					}
 					
 					// Otherwise, wait until the next time a pending request is ready to process
-					// and restart
+					// and restart. If no pending requests, they're all in progress.
 					let nextStart = queue
 						.map(x => x.result === null && getDomainInfo(x.domain).nextRequestTime)
 						.filter(x => x)
 						.reduce((accumulator, currentValue) => {
 							return currentValue < accumulator ? currentValue : accumulator;
 						});
-					
 					i = 0;
 					setTimeout(processNextItem, Math.max(0, nextStart - Date.now()));
 					return;

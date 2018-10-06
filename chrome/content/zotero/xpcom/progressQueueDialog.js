@@ -69,9 +69,14 @@ Zotero.ProgressQueueDialog = function (progressQueue) {
 		_showMinimize = show;
 	};
 	
-	function close() {
+	this.close = function () {
+		// In case close() is called before open()
+		if (!_progressWindow) {
+			return;
+		}
 		_progressWindow.close();
-	}
+		_progressQueue.cancel();
+	};
 	
 	function _getImageByStatus(status) {
 		if (status === Zotero.ProgressQueue.ROW_PROCESSING) {
@@ -140,20 +145,18 @@ Zotero.ProgressQueueDialog = function (progressQueue) {
 		
 		_progressIndicator = _progressWindow.document.getElementById('progress-indicator');
 		_progressWindow.document.getElementById('cancel-button')
-			.addEventListener('command', function () {
-				close();
-				_progressQueue.cancel();
+			.addEventListener('command', () => {
+				this.close();
 			}, false);
 		
 		_progressWindow.document.getElementById('minimize-button')
 			.addEventListener('command', function () {
-				close();
+				_progressWindow.close();
 			}, false);
 		
 		_progressWindow.document.getElementById('close-button')
-			.addEventListener('command', function () {
-				close();
-				_progressQueue.cancel();
+			.addEventListener('command', () => {
+				this.close();
 			}, false);
 		
 		_progressWindow.addEventListener('keypress', function (e) {
@@ -162,7 +165,7 @@ Zotero.ProgressQueueDialog = function (progressQueue) {
 				if (_progressQueue.getTotal() === _progressQueue.getProcessedTotal()) {
 					_progressQueue.cancel();
 				}
-				close();
+				_progressWindow.close();
 			}
 		});
 		
