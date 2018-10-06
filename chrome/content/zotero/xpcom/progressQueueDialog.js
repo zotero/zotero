@@ -33,6 +33,8 @@ Zotero.ProgressQueueDialog = function (progressQueue) {
 	let _progressWindow = null;
 	let _progressIndicator = null;
 	let _rowIDs = [];
+	let _status = null;
+	let _showMinimize = true;
 	
 	this.open = function () {
 		if (_progressWindow) {
@@ -51,6 +53,20 @@ Zotero.ProgressQueueDialog = function (progressQueue) {
 		}
 		
 		_progressWindow.addEventListener('pageshow', _onWindowLoaded.bind(this), false);
+	};
+	
+	this.setStatus = function (msg) {
+		_status = msg;
+		if (_progressWindow) {
+			let label = _progressWindow.document.getElementById("label");
+			if (label) {
+				label.value = msg;
+			}
+		}
+	};
+	
+	this.showMinimizeButton = function (show) {
+		_showMinimize = show;
 	};
 	
 	function close() {
@@ -156,6 +172,8 @@ Zotero.ProgressQueueDialog = function (progressQueue) {
 			_progressQueue.removeListener('rowdeleted');
 			_progressWindow = null;
 			_progressIndicator = null;
+			_status = null;
+			_showMinimize = true;
 			_rowIDs = [];
 		});
 		
@@ -194,13 +212,13 @@ Zotero.ProgressQueueDialog = function (progressQueue) {
 			_progressWindow.document.getElementById("cancel-button").hidden = true;
 			_progressWindow.document.getElementById("minimize-button").hidden = true;
 			_progressWindow.document.getElementById("close-button").hidden = false;
-			_progressWindow.document.getElementById("label").value = Zotero.getString('general.finished');
+			_progressWindow.document.getElementById("label").value = _status || Zotero.getString('general.finished');
 		}
 		else {
 			_progressWindow.document.getElementById("cancel-button").hidden = false;
-			_progressWindow.document.getElementById("minimize-button").hidden = false;
+			_progressWindow.document.getElementById("minimize-button").hidden = !_showMinimize;
 			_progressWindow.document.getElementById("close-button").hidden = true;
-			_progressWindow.document.getElementById("label").value = Zotero.getString('general.processing');
+			_progressWindow.document.getElementById("label").value = _status || Zotero.getString('general.processing');
 		}
 	}
 	
