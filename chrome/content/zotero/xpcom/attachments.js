@@ -31,6 +31,9 @@ Zotero.Attachments = new function(){
 	this.LINK_MODE_LINKED_URL = 3;
 	this.BASE_PATH_PLACEHOLDER = 'attachments:';
 	
+	var _findPDFQueue = [];
+	var _findPDFQueuePromise = null;
+	
 	var self = this;
 	
 	
@@ -1108,25 +1111,15 @@ Zotero.Attachments = new function(){
 	 * @param {Zotero.Item[]} items
 	 * @param {Object} [options]
 	 * @param {String[]} [options.methods] - See getPDFResolvers()
-	 * @param {Function} [options.onProgress]
 	 * @param {Number} [options.sameDomainRequestDelay=1000] - Minimum number of milliseconds
 	 *     between requests to the same domain (used in tests)
+	 * @return {Promise}
 	 */
 	this.addAvailablePDFs = async function (items, options = {}) {
 		const MAX_CONSECUTIVE_DOMAIN_FAILURES = 5;
 		const SAME_DOMAIN_REQUEST_DELAY = options.sameDomainRequestDelay || 1000;
 		
 		var domains = new Map();
-		var queue = items.map((item) => {
-			return {
-				item,
-				urlResolvers: this.getPDFResolvers(item, options.methods),
-				domain: null,
-				continuation: null,
-				result: null,
-			};
-		});
-		
 		function getDomainInfo(domain) {
 			var domainInfo = domains.get(domain);
 			if (!domainInfo) {
@@ -1139,29 +1132,109 @@ Zotero.Attachments = new function(){
 			return domainInfo;
 		}
 		
-		var completed = 0;
-		var lastQueueStart = new Date();
-		var i = 0;
+		var progressQueue = Zotero.ProgressQueues.get('findPDF');
+		if (!progressQueue) {
+			progressQueue = Zotero.ProgressQueues.create({
+				id: 'findPDF',
+				title: 'findPDF.title',
+				columns: [
+					'general.item',
+					'general.pdf'
+				]
+			});
+		}
+		var queue = _findPDFQueue;
+		
+		for (let item of items) {
+			// Skip items that aren't eligible. This is sort of weird, because it means some
+			// selected items just don't appear in the list, but there are several different reasons
+			// why items might not be eligible (non-regular items, no URL or DOI, already has a PDF)
+			// and listing each one seems a little unnecessary.
+			if (!this.canFindPDFForItem(item)) {
+				continue;
+			}
+			
+			let entry = {
+				item,
+				urlResolvers: this.getPDFResolvers(item, options.methods),
+				domain: null,
+				continuation: null,
+				processing: false,
+				result: null
+			};
+			
+			let pos = queue.findIndex(x => x.item == item);
+			if (pos != -1) {
+				let current = queue[pos];
+				// Skip items that are already processing or that returned a result
+				if (current.processing || current.result) {
+					continue;
+				}
+				// Replace current queue entry
+				queue[pos] = entry;
+			}
+			else {
+				// Add new items to queue
+				queue.push(entry);
+			}
+			
+			progressQueue.addRow(item);
+		}
+		
+		// If no eligible items, just show a popup saying no PDFs were found
+		if (!queue.length) {
+			let icon = 'chrome://zotero/skin/treeitem-attachment-pdf.png';
+			let progressWin = new Zotero.ProgressWindow();
+			let title = Zotero.getString('findPDF.title');
+			progressWin.changeHeadline(title);
+			let itemProgress = new progressWin.ItemProgress(
+				icon,
+				Zotero.getString('findPDF.noPDFsFound')
+			);
+			progressWin.show();
+			itemProgress.setProgress(100);
+			itemProgress.setIcon(icon);
+			progressWin.startCloseTimer(4000);
+			return;
+		}
+		
+		var dialog = progressQueue.getDialog();
+		dialog.showMinimizeButton(false);
+		dialog.open();
+		
+		// If queue was already in progress, just wait for it to finish
+		if (_findPDFQueuePromise) {
+			return _findPDFQueuePromise;
+		}
+		
+		var queueResolve;
+		_findPDFQueuePromise = new Zotero.Promise((resolve) => {
+			queueResolve = resolve;
+		});
+		
+		// Only one listener can be added, so we just add each time
+		progressQueue.addListener('cancel', () => {
+			queue = [];
+		});
 		
 		//
 		// Process items in the queue
 		//
-		await new Promise((resolve) => {
+		var i = 0;
+		await new Zotero.Promise((resolve) => {
 			var processNextItem = function () {
-				// All items processed
-				if (completed == queue.length) {
-					resolve();
-					return;
-				}
-				
-				if (i == 0) {
-					lastQueueStart = new Date();
-				}
 				var current = queue[i++];
 				
-				// If we got to the end of the queue, wait until the next time a pending request
-				// is ready to process
+				// We reached the end of the queue
 				if (!current) {
+					// If all entries are resolved, we're done
+					if (queue.every(x => x instanceof Zotero.Item || x.result === false)) {
+						resolve();
+						return;
+					}
+					
+					// Otherwise, wait until the next time a pending request is ready to process
+					// and restart
 					let nextStart = queue
 						.map(x => x.result === null && getDomainInfo(x.domain).nextRequestTime)
 						.filter(x => x)
@@ -1192,15 +1265,19 @@ Zotero.Attachments = new function(){
 					return;
 				}
 				
-				if (!this.canFindPDFForItem(current.item)) {
+				// Currently filtered out above
+				/*if (!this.canFindPDFForItem(current.item)) {
 					current.result = false;
-					completed++;
-					if (options.onProgress) {
-						options.onProgress(completed, queue.length);
-					}
+					progressQueue.updateRow(
+						current.item.id,
+						Zotero.ProgressQueue.ROW_FAILED,
+						""
+					);
 					processNextItem();
 					return;
-				}
+				}*/
+				
+				current.processing = true;
 				
 				// Process item
 				this.addPDFFromURLs(
@@ -1220,7 +1297,6 @@ Zotero.Attachments = new function(){
 							
 							// If too many requests have failed, stop trying
 							if (domainInfo.consecutiveFailures > MAX_CONSECUTIVE_DOMAIN_FAILURES) {
-								current.result = false;
 								throw new Error(`Too many failed requests for ${urlToDomain(url)}`);
 							}
 							
@@ -1259,6 +1335,7 @@ Zotero.Attachments = new function(){
 							domainInfo.consecutiveFailures = 0;
 						},
 						
+						// Return true to retry request or false to skip
 						onRequestError: function (e) {
 							const maxDelay = 3600;
 							
@@ -1301,29 +1378,35 @@ Zotero.Attachments = new function(){
 									domainInfo.nextRequestTime = Date.now() + 10000;
 									return true;
 								}
-								
-								current.result = false;
 							}
-							else {
-								current.result = false;
-							}
+							
+							return false;
 						}
 					}
 				)
 				.then((attachment) => {
 					current.result = attachment;
+					progressQueue.updateRow(
+						current.item.id,
+						Zotero.ProgressQueue.ROW_FAILED,
+						attachment
+							? attachment.getField('title')
+							: Zotero.getString('findPDF.noPDFFound')
+					);
 				})
 				.catch((e) => {
 					Zotero.logError(e);
 					current.result = false;
+					progressQueue.updateRow(
+						current.item.id,
+						Zotero.ProgressQueue.ROW_FAILED,
+						Zotero.getString('general.failed')
+					);
 				})
 				// finally() isn't implemented until Firefox 58, but then() is the same here
 				//.finally(() => {
 				.then(function () {
-					completed++;
-					if (options.onProgress) {
-						options.onProgress(completed, queue.length);
-					}
+					current.processing = false;
 					processNextItem();
 				});
 			}.bind(this);
@@ -1331,7 +1414,17 @@ Zotero.Attachments = new function(){
 			processNextItem();
 		});
 		
-		return queue.map(x => x.result);
+		var numPDFs = queue.reduce((accumulator, currentValue) => {
+			return accumulator + (currentValue.result ? 1 : 0);
+		}, 0);
+		dialog.setStatus(
+			numPDFs
+				? Zotero.getString('findPDF.pdfsAdded', numPDFs, numPDFs)
+				: Zotero.getString('findPDF.noPDFsFound')
+		);
+		_findPDFQueue = [];
+		queueResolve();
+		_findPDFQueuePromise = null;
 	};
 	
 	

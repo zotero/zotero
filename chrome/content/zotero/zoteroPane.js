@@ -3708,40 +3708,7 @@ var ZoteroPane = new function()
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
-		
-		var items = this.getSelectedItems();
-		
-		var icon = 'chrome://zotero/skin/treeitem-attachment-pdf.png';
-		var progressWin = new Zotero.ProgressWindow();
-		var title = Zotero.getString('findPDF.searchingForAvailablePDFs');
-		progressWin.changeHeadline(title);
-		var itemProgress = new progressWin.ItemProgress(
-			icon,
-			Zotero.getString('findPDF.checkingItems', items.length, items.length)
-		);
-		progressWin.show();
-		
-		var results = await Zotero.Attachments.addAvailablePDFs(
-			items,
-			{
-				onProgress: (progress, progressMax) => {
-					itemProgress.setProgress((progress / progressMax) * 100);
-				}
-			}
-		);
-		
-		itemProgress.setProgress(100);
-		itemProgress.setIcon(icon);
-		
-		var successful = results.filter(x => x).length;
-		if (successful) {
-			itemProgress.setText(Zotero.getString('findPDF.pdfsAdded', successful, successful));
-		}
-		else {
-			itemProgress.setText(Zotero.getString('findPDF.noPDFsFound'))
-		}
-		
-		progressWin.startCloseTimer(4000);
+		await Zotero.Attachments.addAvailablePDFs(this.getSelectedItems());
 	};
 	
 	
