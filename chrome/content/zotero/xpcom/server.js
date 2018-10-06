@@ -356,8 +356,7 @@ Zotero.Server.DataListener.prototype._generateResponse = function (status, conte
 		response += "X-Zotero-Version: "+Zotero.version+"\r\n";
 		response += "X-Zotero-Connector-API-Version: "+CONNECTOR_API_VERSION+"\r\n";
 		
-		if (this.origin === ZOTERO_CONFIG.BOOKMARKLET_ORIGIN ||
-				this.origin === ZOTERO_CONFIG.HTTP_BOOKMARKLET_ORIGIN) {
+		if (this.origin === ZOTERO_CONFIG.BOOKMARKLET_ORIGIN) {
 			response += "Access-Control-Allow-Origin: " + this.origin + "\r\n";
 			response += "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n";
 			response += "Access-Control-Allow-Headers: Content-Type,X-Zotero-Connector-API-Version,X-Zotero-Version\r\n";

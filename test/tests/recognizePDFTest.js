@@ -16,10 +16,10 @@ describe("PDF Recognition", function() {
 	});
 	
 	afterEach(function() {
-		for(let win of getWindows("chrome://zotero/content/recognizePDFDialog.xul")) {
+		for(let win of getWindows("chrome://zotero/content/progressQueueDialog.xul")) {
 			win.close();
 		}
-		Zotero.RecognizePDF.cancel();
+		Zotero.ProgressQueues.get('recognize').cancel();
 	});
 	
 	after(function() {
@@ -50,8 +50,8 @@ describe("PDF Recognition", function() {
 		assert.lengthOf(modifiedIDs, 2);
 		
 		// Wait for status to show as complete
-		var progressWindow = getWindows("chrome://zotero/content/recognizePDFDialog.xul")[0];
-		var completeStr = Zotero.getString("recognizePDF.complete.label");
+		var progressWindow = getWindows("chrome://zotero/content/progressQueueDialog.xul")[0];
+		var completeStr = Zotero.getString("general.finished");
 		while (progressWindow.document.getElementById("label").value != completeStr) {
 			await Zotero.Promise.delay(20);
 		}
@@ -84,8 +84,8 @@ describe("PDF Recognition", function() {
 		assert.lengthOf(modifiedIDs, 1);
 		
 		// Wait for status to show as complete
-		var progressWindow = getWindows("chrome://zotero/content/recognizePDFDialog.xul")[0];
-		var completeStr = Zotero.getString("recognizePDF.complete.label");
+		var progressWindow = getWindows("chrome://zotero/content/progressQueueDialog.xul")[0];
+		var completeStr = Zotero.getString("general.finished");
 		while (progressWindow.document.getElementById("label").value != completeStr) {
 			await Zotero.Promise.delay(20);
 		}
@@ -118,8 +118,8 @@ describe("PDF Recognition", function() {
 		assert.lengthOf(modifiedIDs, 1);
 		
 		// Wait for status to show as complete
-		var progressWindow = getWindows("chrome://zotero/content/recognizePDFDialog.xul")[0];
-		var completeStr = Zotero.getString("recognizePDF.complete.label");
+		var progressWindow = getWindows("chrome://zotero/content/progressQueueDialog.xul")[0];
+		var completeStr = Zotero.getString("general.finished");
 		while (progressWindow.document.getElementById("label").value != completeStr) {
 			await Zotero.Promise.delay(20);
 		}
@@ -149,8 +149,8 @@ describe("PDF Recognition", function() {
 		assert.lengthOf(modifiedIDs, 1);
 		
 		// Wait for status to show as complete
-		var progressWindow = getWindows("chrome://zotero/content/recognizePDFDialog.xul")[0];
-		var completeStr = Zotero.getString("recognizePDF.complete.label");
+		var progressWindow = getWindows("chrome://zotero/content/progressQueueDialog.xul")[0];
+		var completeStr = Zotero.getString("general.finished");
 		while (progressWindow.document.getElementById("label").value != completeStr) {
 			await Zotero.Promise.delay(20);
 		}
@@ -179,8 +179,8 @@ describe("PDF Recognition", function() {
 		assert.lengthOf(modifiedIDs, 2);
 		
 		// Wait for status to show as complete
-		var progressWindow = getWindows("chrome://zotero/content/recognizePDFDialog.xul")[0];
-		var completeStr = Zotero.getString("recognizePDF.complete.label");
+		var progressWindow = getWindows("chrome://zotero/content/progressQueueDialog.xul")[0];
+		var completeStr = Zotero.getString("general.finished");
 		while (progressWindow.document.getElementById("label").value != completeStr) {
 			await Zotero.Promise.delay(20);
 		}
@@ -209,8 +209,8 @@ describe("PDF Recognition", function() {
 		assert.lengthOf(modifiedIDs, 2);
 		
 		// Wait for status to show as complete
-		var progressWindow = getWindows("chrome://zotero/content/recognizePDFDialog.xul")[0];
-		var completeStr = Zotero.getString("recognizePDF.complete.label");
+		var progressWindow = getWindows("chrome://zotero/content/progressQueueDialog.xul")[0];
+		var completeStr = Zotero.getString("general.finished");
 		while (progressWindow.document.getElementById("label").value != completeStr) {
 			await Zotero.Promise.delay(20);
 		}

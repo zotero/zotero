@@ -29,6 +29,8 @@
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const Cr = Components.results;
+const Cu = Components.utils;
 
 /** XPCOM files to be loaded for all modes **/
 const xpcomFilesAll = [
@@ -103,6 +105,8 @@ const xpcomFilesLocal = [
 	'mime',
 	'notifier',
 	'openPDF',
+	'progressQueue',
+	'progressQueueDialog',
 	'quickCopy',
 	'recognizePDF',
 	'report',

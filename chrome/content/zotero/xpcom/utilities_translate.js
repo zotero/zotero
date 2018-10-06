@@ -326,7 +326,7 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 	
 	translate.incrementAsyncProcesses("Zotero.Utilities.Translate#doGet");
 	var xmlhttp = Zotero.HTTP.doGet(url, function(xmlhttp) {
-		if (xmlhttp.status >= 400) {
+		if (xmlhttp.status >= 400 || !xmlhttp.status) {
 			translate.complete(false, `HTTP GET ${url} failed with status code ${xmlhttp.status}`);
 			return;
 		}
@@ -360,7 +360,7 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
 	
 	translate.incrementAsyncProcesses("Zotero.Utilities.Translate#doPost");
 	var xmlhttp = Zotero.HTTP.doPost(url, body, function(xmlhttp) {
-		if (xmlhttp.status >= 400) {
+		if (xmlhttp.status >= 400 || !xmlhttp.status) {
 			translate.complete(false, `HTTP POST ${url} failed with status code ${xmlhttp.status}`);
 			return;
 		}

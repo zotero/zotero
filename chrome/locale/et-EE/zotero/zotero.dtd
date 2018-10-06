@@ -288,9 +288,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
 
-<!ENTITY zotero.recognizePDF.pdfName.label "PDFi nimi">
-<!ENTITY zotero.recognizePDF.itemName.label "Kirje nimi">
-
 <!ENTITY zotero.rtfScan.title "RTF Skänn">
 <!ENTITY zotero.rtfScan.cancel.label "Tühistada">
 <!ENTITY zotero.rtfScan.citation.label "Viide">

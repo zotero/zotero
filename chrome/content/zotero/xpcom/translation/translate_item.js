@@ -177,6 +177,10 @@ Zotero.Translate.ItemSaver.prototype = {
 				jsonByItem.set(item, jsonItem);
 			}
 		}.bind(this));
+
+		if (itemsDoneCallback) {
+			itemsDoneCallback(items.map(item => jsonByItem.get(item)));
+		}
 		
 		// Save standalone attachments
 		for (let jsonItem of standaloneAttachments) {
@@ -184,10 +188,6 @@ Zotero.Translate.ItemSaver.prototype = {
 			if (item) {
 				items.push(item);
 			}
-		}
-		
-		if (itemsDoneCallback) {
-			itemsDoneCallback(items.map(item => jsonByItem.get(item)));
 		}
 		
 		// For items with DOIs and without PDFs from the translator, look for possible

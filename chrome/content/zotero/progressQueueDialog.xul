@@ -3,7 +3,7 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	title="&zotero.progress.title;" width="550" height="230"
+	width="550" height="230"
 	id="zotero-progress">
 	<vbox style="padding:10px" flex="1">
 		<label id="label" control="progress-indicator" value=""/>
@@ -17,9 +17,9 @@
 			<treecols>
 				<treecol id="success-col" style="width:20px;"/>
 				<splitter class="tree-splitter" hidden="true"/>
-				<treecol label="&zotero.recognizePDF.pdfName.label;" id="pdf-col" flex="1"/>
+				<treecol id="col1" flex="1"/>
 				<splitter class="tree-splitter"/>
-				<treecol label="&zotero.recognizePDF.itemName.label;" id="item-col" flex="2"/>
+				<treecol id="col2" flex="2"/>
 			</treecols>
 			<treechildren id="treechildren"/>
 		</tree>

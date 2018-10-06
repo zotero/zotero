@@ -31,6 +31,9 @@ Zotero.Attachments = new function(){
 	this.LINK_MODE_LINKED_URL = 3;
 	this.BASE_PATH_PLACEHOLDER = 'attachments:';
 	
+	var _findPDFQueue = [];
+	var _findPDFQueuePromise = null;
+	
 	var self = this;
 	
 	
@@ -858,12 +861,8 @@ Zotero.Attachments = new function(){
 				Zotero.Utilities.Internal.saveURI(wbp, nsIURL, path, headers);
 			});
 			
-			// If the file is supposed to be a PDF directory, fail if it's not
-			let sample = await Zotero.File.getContentsAsync(path, null, 1000);
-			if (options.isPDF && Zotero.MIME.sniffForMIMEType(sample) != 'application/pdf') {
-				Zotero.debug("Downloaded PDF was not a PDF", 2);
-				Zotero.debug(sample, 3);
-				throw new this.InvalidPDFException();
+			if (options.isPDF) {
+				await _enforcePDF(path);
 			}
 		}
 		catch (e) {
@@ -876,6 +875,19 @@ Zotero.Attachments = new function(){
 			throw e;
 		}
 	};
+	
+	
+	/**
+	 * Make sure a file is a PDF
+	 */
+	async function _enforcePDF(path) {
+		var sample = await Zotero.File.getContentsAsync(path, null, 1000);
+		if (Zotero.MIME.sniffForMIMEType(sample) != 'application/pdf') {
+			Zotero.debug("Downloaded PDF was not a PDF", 2);
+			Zotero.debug(sample, 3);
+			throw new Zotero.Attachments.InvalidPDFException();
+		}
+	}
 	
 	
 	this.InvalidPDFException = function() {
@@ -900,7 +912,11 @@ Zotero.Attachments = new function(){
 	 * @param {Boolean} [automatic=false] - Only include custom resolvers with `automatic: true`
 	 * @return {Object[]} - An array of urlResolvers (see downloadFirstAvailableFile())
 	 */
-	this.getPDFResolvers = function (item, methods = ['doi', 'url', 'oa', 'custom'], automatic) {
+	this.getPDFResolvers = function (item, methods, automatic) {
+		if (!methods) {
+			methods = ['doi', 'url', 'oa', 'custom'];
+		}
+		
 		var useDOI = methods.includes('doi');
 		var useURL = methods.includes('url');
 		var useOA = methods.includes('oa');
@@ -1090,20 +1106,348 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
+	 * Look for available PDFs for items and add as attachments
+	 *
+	 * @param {Zotero.Item[]} items
+	 * @param {Object} [options]
+	 * @param {String[]} [options.methods] - See getPDFResolvers()
+	 * @param {Number} [options.sameDomainRequestDelay=1000] - Minimum number of milliseconds
+	 *     between requests to the same domain (used in tests)
+	 * @return {Promise}
+	 */
+	this.addAvailablePDFs = async function (items, options = {}) {
+		const MAX_CONSECUTIVE_DOMAIN_FAILURES = 5;
+		const SAME_DOMAIN_REQUEST_DELAY = options.sameDomainRequestDelay || 1000;
+		
+		var domains = new Map();
+		function getDomainInfo(domain) {
+			var domainInfo = domains.get(domain);
+			if (!domainInfo) {
+				domainInfo = {
+					nextRequestTime: 0,
+					consecutiveFailures: 0
+				};
+				domains.set(domain, domainInfo);
+			}
+			return domainInfo;
+		}
+		
+		var progressQueue = Zotero.ProgressQueues.get('findPDF');
+		if (!progressQueue) {
+			progressQueue = Zotero.ProgressQueues.create({
+				id: 'findPDF',
+				title: 'findPDF.title',
+				columns: [
+					'general.item',
+					'general.pdf'
+				]
+			});
+		}
+		var queue = _findPDFQueue;
+		
+		for (let item of items) {
+			// Skip items that aren't eligible. This is sort of weird, because it means some
+			// selected items just don't appear in the list, but there are several different reasons
+			// why items might not be eligible (non-regular items, no URL or DOI, already has a PDF)
+			// and listing each one seems a little unnecessary.
+			if (!this.canFindPDFForItem(item)) {
+				continue;
+			}
+			
+			let entry = {
+				item,
+				urlResolvers: this.getPDFResolvers(item, options.methods),
+				domain: null,
+				continuation: null,
+				processing: false,
+				result: null
+			};
+			
+			let pos = queue.findIndex(x => x.item == item);
+			if (pos != -1) {
+				let current = queue[pos];
+				// Skip items that are already processing or that returned a result
+				if (current.processing || current.result) {
+					continue;
+				}
+				// Replace current queue entry
+				queue[pos] = entry;
+			}
+			else {
+				// Add new items to queue
+				queue.push(entry);
+			}
+			
+			progressQueue.addRow(item);
+		}
+		
+		// If no eligible items, just show a popup saying no PDFs were found
+		if (!queue.length) {
+			let icon = 'chrome://zotero/skin/treeitem-attachment-pdf.png';
+			let progressWin = new Zotero.ProgressWindow();
+			let title = Zotero.getString('findPDF.title');
+			progressWin.changeHeadline(title);
+			let itemProgress = new progressWin.ItemProgress(
+				icon,
+				Zotero.getString('findPDF.noPDFsFound')
+			);
+			progressWin.show();
+			itemProgress.setProgress(100);
+			itemProgress.setIcon(icon);
+			progressWin.startCloseTimer(4000);
+			return;
+		}
+		
+		var dialog = progressQueue.getDialog();
+		dialog.showMinimizeButton(false);
+		dialog.open();
+		
+		// If queue was already in progress, just wait for it to finish
+		if (_findPDFQueuePromise) {
+			return _findPDFQueuePromise;
+		}
+		
+		var queueResolve;
+		_findPDFQueuePromise = new Zotero.Promise((resolve) => {
+			queueResolve = resolve;
+		});
+		
+		// Only one listener can be added, so we just add each time
+		progressQueue.addListener('cancel', () => {
+			queue = [];
+		});
+		
+		//
+		// Process items in the queue
+		//
+		var i = 0;
+		await new Zotero.Promise((resolve) => {
+			var processNextItem = function () {
+				var current = queue[i++];
+				
+				// We reached the end of the queue
+				if (!current) {
+					// If all entries are resolved, we're done
+					if (queue.every(x => x.result instanceof Zotero.Item || x.result === false)) {
+						resolve();
+						return;
+					}
+					
+					// Otherwise, wait until the next time a pending request is ready to process
+					// and restart. If no pending requests, they're all in progress.
+					let nextStart = queue
+						.map(x => x.result === null && getDomainInfo(x.domain).nextRequestTime)
+						.filter(x => x)
+						.reduce((accumulator, currentValue) => {
+							return currentValue < accumulator ? currentValue : accumulator;
+						});
+					i = 0;
+					setTimeout(processNextItem, Math.max(0, nextStart - Date.now()));
+					return;
+				}
+				
+				// If item was already processed, skip
+				if (current.result !== null) {
+					processNextItem();
+					return;
+				}
+				
+				// If processing for a domain was paused and not enough time has passed, skip ahead
+				if (current.domain && getDomainInfo(current.domain).nextRequestTime > Date.now()) {
+					processNextItem();
+					return;
+				}
+				
+				// Resume paused item
+				if (current.continuation) {
+					current.continuation();
+					return;
+				}
+				
+				// Currently filtered out above
+				/*if (!this.canFindPDFForItem(current.item)) {
+					current.result = false;
+					progressQueue.updateRow(
+						current.item.id,
+						Zotero.ProgressQueue.ROW_FAILED,
+						""
+					);
+					processNextItem();
+					return;
+				}*/
+				
+				current.processing = true;
+				
+				// Process item
+				this.addPDFFromURLs(
+					current.item,
+					current.urlResolvers,
+					{
+						onBeforeRequest: async function (url, noDelay) {
+							var domain = urlToDomain(url);
+							
+							// Don't delay between subsequent requests to the DOI resolver or
+							// to localhost in tests
+							if (['doi.org', 'localhost'].includes(domain)) {
+								return;
+							}
+							
+							var domainInfo = getDomainInfo(domain);
+							
+							// If too many requests have failed, stop trying
+							if (domainInfo.consecutiveFailures > MAX_CONSECUTIVE_DOMAIN_FAILURES) {
+								throw new Error(`Too many failed requests for ${urlToDomain(url)}`);
+							}
+							
+							// If enough time hasn't passed since the last attempt for this domain,
+							// skip for now and process more items
+							let nextRequestTime = domainInfo.nextRequestTime;
+							if (!noDelay && nextRequestTime > Date.now()) {
+								return new Promise((resolve, reject) => {
+									Zotero.debug(`Delaying request to ${domain} for ${nextRequestTime - Date.now()} ms`);
+									current.domain = domain;
+									current.continuation = () => {
+										if (domainInfo.consecutiveFailures < MAX_CONSECUTIVE_DOMAIN_FAILURES) {
+											resolve();
+										}
+										else {
+											reject(new Error(`Too many failed requests for ${urlToDomain(url)}`));
+										}
+									};
+									processNextItem();
+								});
+							}
+							
+							domainInfo.nextRequestTime = Date.now() + SAME_DOMAIN_REQUEST_DELAY;
+						},
+						
+						// Reset consecutive failures on successful request
+						onAfterRequest: function (url) {
+							var domain = urlToDomain(url);
+							
+							// Ignore localhost in tests
+							if (domain == 'localhost') {
+								return;
+							}
+							
+							var domainInfo = getDomainInfo(domain);
+							domainInfo.consecutiveFailures = 0;
+						},
+						
+						// Return true to retry request or false to skip
+						onRequestError: function (e) {
+							const maxDelay = 3600;
+							
+							if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+								let domain = urlToDomain(e.url);
+								let domainInfo = getDomainInfo(domain);
+								domainInfo.consecutiveFailures++;
+								
+								let status = e.status;
+								
+								// Retry-After
+								if (status == 429 || status == 503) {
+									let retryAfter = e.xmlhttp.getResponseHeader('Retry-After');
+									if (retryAfter) {
+										Zotero.debug("Got Retry-After: " + retryAfter);
+										if (parseInt(retryAfter) == retryAfter) {
+											if (retryAfter > maxDelay) {
+												Zotero.debug("Retry-After is too long -- skipping request");
+												return false;
+											}
+											domainInfo.nextRequestTime = Date.now() + retryAfter * 1000;
+											return true;
+										}
+										else if (Zotero.Date.isHTTPDate(retryAfter)) {
+											let d = new Date(val);
+											if (d > Date.now() + maxDelay * 1000) {
+												Zotero.debug("Retry-After is too long -- skipping request");
+												return false;
+											}
+											domainInfo.nextRequestTime = d.getTime();
+											return true;
+										}
+										Zotero.debug("Invalid Retry-After value -- skipping request");
+										return false;
+									}
+								}
+								
+								// If not specified, wait 10 seconds before next request to domain
+								if (e.status == 429 || e.is5xx()) {
+									domainInfo.nextRequestTime = Date.now() + 10000;
+									return true;
+								}
+							}
+							
+							return false;
+						}
+					}
+				)
+				.then((attachment) => {
+					current.result = attachment;
+					progressQueue.updateRow(
+						current.item.id,
+						Zotero.ProgressQueue.ROW_FAILED,
+						attachment
+							? attachment.getField('title')
+							: Zotero.getString('findPDF.noPDFFound')
+					);
+				})
+				.catch((e) => {
+					Zotero.logError(e);
+					current.result = false;
+					progressQueue.updateRow(
+						current.item.id,
+						Zotero.ProgressQueue.ROW_FAILED,
+						Zotero.getString('general.failed')
+					);
+				})
+				// finally() isn't implemented until Firefox 58, but then() is the same here
+				//.finally(() => {
+				.then(function () {
+					current.processing = false;
+					processNextItem();
+				});
+			}.bind(this);
+			
+			processNextItem();
+		});
+		
+		var numPDFs = queue.reduce((accumulator, currentValue) => {
+			return accumulator + (currentValue.result ? 1 : 0);
+		}, 0);
+		dialog.setStatus(
+			numPDFs
+				? Zotero.getString('findPDF.pdfsAdded', numPDFs, numPDFs)
+				: Zotero.getString('findPDF.noPDFsFound')
+		);
+		_findPDFQueue = [];
+		queueResolve();
+		_findPDFQueuePromise = null;
+	};
+	
+	
+	function urlToDomain(url) {
+		return Services.io.newURI(url, null, null).host;
+	}
+	
+	
+	/**
 	 * Look for an available PDF for an item and add it as an attachment
 	 *
 	 * @param {Zotero.Item} item
-	 * @param {String[]} [methods=['doi', 'url', 'oa', 'custom']]
+	 * @param {Object} [options]
+	 * @param {String[]} [options.methods] - See getPDFResolvers()
 	 * @return {Zotero.Item|false} - New Zotero.Item, or false if unsuccessful
 	 */
-	this.addAvailablePDF = async function (item, methods = ['doi', 'url', 'oa', 'custom']) {
+	this.addAvailablePDF = async function (item, options = {}) {
 		Zotero.debug("Looking for available PDFs");
-		return this.addPDFFromURLs(item, this.getPDFResolvers(...arguments));
+		return this.addPDFFromURLs(item, this.getPDFResolvers(item, options.methods));
 	};
 	
 	
 	/**
-	 * Try to add a PDF to an item from a set of possible URLs
+	 * Try to add a PDF to an item from a set of URL resolvers
 	 *
 	 * @param {Zotero.Item} item
 	 * @param {(String|Object|Function)[]} urlResolvers - See downloadFirstAvailableFile()
@@ -1125,7 +1469,9 @@ Zotero.Attachments = new function(){
 				tmpFile,
 				{
 					isPDF: true,
-					onAccessMethodStart: options.onAccessMethodStart
+					onAccessMethodStart: options.onAccessMethodStart,
+					onBeforeRequest: options.onBeforeRequest,
+					onRequestError: options.onRequestError
 				}
 			);
 			if (url) {
@@ -1178,7 +1524,7 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * Try to download a file from a list of URLs, keeping the first one that succeeds
+	 * Try to download a file from a set of URL resolvers, keeping the first one that succeeds
 	 *
 	 * URLs are only tried once.
 	 *
@@ -1189,7 +1535,11 @@ Zotero.Attachments = new function(){
 	 *    'acceptedVersion', or 'publishedVersion'). Functions that return promises are waited for,
 	 *    and functions aren't called unless a file hasn't yet been found from an earlier entry.
 	 * @param {String} path - Path to save file to
-	 * @param {Object} [options] - Options to pass to this.downloadFile()
+	 * @param {Object} [options]
+	 * @param {Function} [options.onBeforeRequest] - Async function that runs before a request
+	 * @param {Function} [options.onAfterRequest] - Function that runs after a request
+	 * @param {Function} [options.onRequestError] - Function that runs when a request fails.
+	 *     Return true to retry request and false to skip.
 	 * @return {Object|false} - Object with successful 'url' and 'props' from the associated urlResolver,
 	 *     or false if no file could be downloaded
 	 */
@@ -1200,12 +1550,42 @@ Zotero.Attachments = new function(){
 		// Operate on copy, since we might change things
 		urlResolvers = [...urlResolvers];
 		
-		// Don't try the same URL more than once
+		// Don't try the same normalized URL more than once
 		var triedURLs = new Set();
-		var triedPages = new Set();
+		function normalizeURL(url) {
+			return url.replace(/\?.*/, '');
+		}
+		function isTriedURL(url) {
+			return triedURLs.has(normalizeURL(url));
+		}
+		function addTriedURL(url) {
+			triedURLs.add(normalizeURL(url));
+		}
+		
+		// Check a URL against options.onBeforeRequest(), which can delay or cancel the request
+		async function beforeRequest(url, noDelay) {
+			if (options.onBeforeRequest) {
+				await options.onBeforeRequest(url, noDelay);
+			}
+		}
+		
+		function afterRequest(url) {
+			if (options.onAfterRequest) {
+				options.onAfterRequest(url);
+			}
+		}
+		
+		function handleRequestError(e) {
+			if (options.onRequestError) {
+				return options.onRequestError(e);
+			}
+		}
+		
 		for (let i = 0; i < urlResolvers.length; i++) {
 			let urlResolver = urlResolvers[i];
 			
+			// If resolver is a function, run it and then replace it in the resolvers list with
+			// the results
 			if (typeof urlResolver == 'function') {
 				try {
 					urlResolver = await urlResolver();
@@ -1245,11 +1625,11 @@ Zotero.Attachments = new function(){
 			}
 			
 			// Ignore URLs we've already tried
-			if (url && triedURLs.has(url)) {
+			if (url && isTriedURL(url)) {
 				Zotero.debug(`PDF at ${url} was already tried -- skipping`);
 				url = null;
 			}
-			if (pageURL && triedPages.has(pageURL)) {
+			if (pageURL && isTriedURL(pageURL)) {
 				Zotero.debug(`Page at ${pageURL} was already tried -- skipping`);
 				pageURL = null;
 			}
@@ -1268,84 +1648,141 @@ Zotero.Attachments = new function(){
 			
 			// Try URL first if available
 			if (url) {
-				triedURLs.add(url);
-				try {
-					await this.downloadFile(url, path, options);
-					return { url, props: urlResolver };
-				}
-				catch (e) {
-					Zotero.debug(`Error downloading ${url}: ${e}`);
+				addTriedURL(url);
+				// Backoff loop
+				let tries = 3;
+				while (tries-- >= 0) {
+					try {
+						await beforeRequest(url);
+						await this.downloadFile(url, path, options);
+						afterRequest(url);
+						return { url, props: urlResolver };
+					}
+					catch (e) {
+						Zotero.debug(`Error downloading ${url}: ${e}\n\n${e.stack}`);
+						if (handleRequestError(e)) {
+							continue;
+						}
+					}
+					break;
 				}
 			}
 			
 			// If URL wasn't available or failed, try to get a URL from a page
 			if (pageURL) {
-				triedPages.add(pageURL);
+				addTriedURL(pageURL);
 				url = null;
 				let responseURL;
 				try {
 					Zotero.debug(`Looking for PDF on ${pageURL}`);
 					
-					// TODO: Handle redirects manually so we can avoid loading a page we've already
-					// tried
-					let req = await Zotero.HTTP.request("GET", pageURL, { responseType: 'blob' });
+					let redirects = 0;
+					let nextURL = pageURL;
+					let req;
+					let skip = false;
+					let domains = new Set();
+					while (true) {
+						let domain = urlToDomain(nextURL);
+						let noDelay = domains.has(domain);
+						domains.add(domain);
+						
+						// Backoff loop
+						let tries = 3;
+						while (tries-- >= 0) {
+							try {
+								await beforeRequest(nextURL, noDelay);
+								req = await Zotero.HTTP.request(
+									'GET',
+									nextURL,
+									{
+										responseType: 'blob',
+										followRedirects: false
+									}
+								);
+							}
+							catch (e) {
+								if (handleRequestError(e)) {
+									// Even if this was initially a same-domain redirect, we should
+									// now obey delays, since we just set one
+									noDelay = false;
+									continue;
+								}
+								throw e;
+							}
+							break;
+						}
+						afterRequest(nextURL);
+						if ([301, 302, 303, 307].includes(req.status)) {
+							let location = req.getResponseHeader('Location');
+							if (!location) {
+								throw new Error("Location header not provided");
+							}
+							nextURL = Services.io.newURI(nextURL, null, null).resolve(location);
+							if (isTriedURL(nextURL)) {
+								Zotero.debug("Redirect URL has already been tried -- skipping");
+								skip = true;
+								break;
+							}
+							continue;
+						}
+						break;
+					}
+					if (skip) {
+						continue;
+					}
 					let blob = req.response;
 					responseURL = req.responseURL;
 					if (pageURL != responseURL) {
 						Zotero.debug("Redirected to " + responseURL);
 					}
-					triedPages.add(responseURL);
+					addTriedURL(responseURL);
 					
 					let contentType = req.getResponseHeader('Content-Type');
 					// If DOI resolves directly to a PDF, save it to disk
 					if (contentType == 'application/pdf') {
 						Zotero.debug("URL resolves directly to PDF");
 						await Zotero.File.putContentsAsync(path, blob);
+						await _enforcePDF(path);
 						return { url: responseURL, props: urlResolver };
 					}
 					// Otherwise parse the Blob into a Document and translate that
 					else if (contentType.startsWith('text/html')) {
-						let charset = 'utf-8';
-						let matches = contentType.match(/charset=([a-z0-9\-_+])/i);
-						if (matches) {
-							charset = matches[1];
-						}
-						let responseText = await new Promise(function (resolve) {
-							let fr = new FileReader();
-							fr.addEventListener("loadend", function() {
-								resolve(fr.result);
-							});
-							fr.readAsText(blob, charset);
-						});
-						let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-						 .createInstance(Components.interfaces.nsIDOMParser);
-						let doc = parser.parseFromString(responseText, 'text/html');
-						doc = Zotero.HTTP.wrapDocument(doc, responseURL);
+						let doc = await Zotero.Utilities.Internal.blobToHTMLDocument(blob, responseURL);
 						url = await Zotero.Utilities.Internal.getPDFFromDocument(doc);
 					}
 				}
 				catch (e) {
-					Zotero.debug(`Error getting PDF from ${pageURL}: ${e}`);
+					Zotero.debug(`Error getting PDF from ${pageURL}: ${e}\n\n${e.stack}`);
 					continue;
 				}
 				if (!url) {
 					Zotero.debug(`No PDF found on ${responseURL}`);
 					continue;
 				}
-				if (triedURLs.has(url)) {
+				if (isTriedURL(url)) {
 					Zotero.debug(`PDF at ${url} was already tried -- skipping`);
 					continue;
 				}
-				triedURLs.add(url);
+				addTriedURL(url);
 				
 				// Use the page we loaded as the referrer
 				let downloadOptions = Object.assign({}, options, { referrer: responseURL });
-				try {
-					await this.downloadFile(url, path, downloadOptions);
-					return { url, props: urlResolver };
-				}
-				catch (e) {
-					Zotero.debug(`Error downloading ${url}: ${e}`);
+				// Backoff loop
+				let tries = 3;
+				while (tries-- >= 0) {
+					try {
+						await beforeRequest(url);
+						await this.downloadFile(url, path, downloadOptions);
+						afterRequest(url);
+						return { url, props: urlResolver };
+					}
+					catch (e) {
+						Zotero.debug(`Error downloading ${url}: ${e}\n\n${e.stack}`);
+						if (handleRequestError(e)) {
+							continue;
+						}
+					}
+					break;
 				}
 			}
 		}

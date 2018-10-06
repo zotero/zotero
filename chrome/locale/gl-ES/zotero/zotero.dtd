@@ -288,9 +288,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Borrar os elementos sen ler despois de">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "día(s)">
 
-<!ENTITY zotero.recognizePDF.pdfName.label "Nome do PDF">
-<!ENTITY zotero.recognizePDF.itemName.label "Nome do elemento">
-
 <!ENTITY zotero.rtfScan.title "Analizador de RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Cancelar">
 <!ENTITY zotero.rtfScan.citation.label "Cita">

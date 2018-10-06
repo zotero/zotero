@@ -843,7 +843,7 @@ describe("Connector Server", function () {
 			
 			var progressWindow = await recognizerPromise;
 			progressWindow.close();
-			Zotero.RecognizePDF.cancel();
+			Zotero.ProgressQueues.get('recognize').cancel();
 			assert.isFalse(item.isTopLevelItem());
 			
 			stub.restore();

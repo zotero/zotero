@@ -74,14 +74,27 @@ var ZoteroPane = new function()
 		// Set key down handler
 		document.getElementById('appcontent').addEventListener('keydown', ZoteroPane_Local.handleKeyDown, true);
 		
-		// Hide or show the PDF recognizer button
-		Zotero.RecognizePDF.addListener('empty', function (row) {
-			document.getElementById('zotero-tb-recognize').hidden = true;
-		});
-		
-		Zotero.RecognizePDF.addListener('nonempty', function (row) {
-			document.getElementById('zotero-tb-recognize').hidden = false;
-		});
+		// Init toolbar buttons for all progress queues
+		let progressQueueButtons = document.getElementById('zotero-pq-buttons');
+		let progressQueues = Zotero.ProgressQueues.getAll();
+		for (let progressQueue of progressQueues) {
+			let button = document.createElement('toolbarbutton');
+			button.id = 'zotero-tb-pq-' + progressQueue.getID();
+			button.hidden = progressQueue.getTotal() < 1;
+			button.addEventListener('command', function () {
+				Zotero.ProgressQueues.get(progressQueue.getID()).getDialog().open();
+			}, false);
+			
+			progressQueue.addListener('empty', function () {
+				button.hidden = true;
+			});
+			
+			progressQueue.addListener('nonempty', function () {
+				button.hidden = false;
+			});
+			
+			progressQueueButtons.appendChild(button);
+		}
 		
 		_loaded = true;
 		
@@ -3695,48 +3708,7 @@ var ZoteroPane = new function()
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
-		
-		var items = this.getSelectedItems();
-		
-		var icon = 'chrome://zotero/skin/treeitem-attachment-pdf.png';
-		var progressWin = new Zotero.ProgressWindow();
-		var title = Zotero.getString('findPDF.searchingForAvailablePDFs');
-		progressWin.changeHeadline(title);
-		var itemProgress = new progressWin.ItemProgress(
-			icon,
-			Zotero.getString('findPDF.checkingItems', items.length, items.length)
-		);
-		progressWin.show();
-		
-		var successful = 0;
-		
-		for (let i = 0; i < items.length; i++) {
-			let item = items[i];
-			if (Zotero.Attachments.canFindPDFForItem(item)) {
-				try {
-					let attachment = await Zotero.Attachments.addAvailablePDF(item);
-					if (attachment) {
-						successful++;
-					}
-				}
-				catch (e) {
-					Zotero.logError(e);
-				}
-			}
-			itemProgress.setProgress(((i + 1) / items.length) * 100);
-		}
-		
-		itemProgress.setProgress(100);
-		itemProgress.setIcon(icon);
-		
-		if (successful) {
-			itemProgress.setText(Zotero.getString('findPDF.pdfsAdded', successful, successful));
-		}
-		else {
-			itemProgress.setText(Zotero.getString('findPDF.noPDFsFound'));
-		}
-		
-		progressWin.startCloseTimer(4000);
+		await Zotero.Attachments.addAvailablePDFs(this.getSelectedItems());
 	};
 	
 	
@@ -4476,7 +4448,7 @@ var ZoteroPane = new function()
 	
 	this.recognizeSelected = function() {
 		Zotero.RecognizePDF.recognizeItems(ZoteroPane.getSelectedItems());
-		Zotero_RecognizePDF_Dialog.open();
+		Zotero.ProgressQueues.get('recognize').getDialog().open();
 	};
 	
 	

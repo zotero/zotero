@@ -10,14 +10,14 @@
 <!ENTITY zotero.general.cancel "الغاء">
 <!ENTITY zotero.general.refresh "اعادة تحميل">
 <!ENTITY zotero.general.saveAs "حفظ باسم...">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "خيارات">
 <!ENTITY zotero.general.advancedOptions.label "خيارات متقدمة">
 <!ENTITY zotero.general.tools "أدوات">
 <!ENTITY zotero.general.more "المزيد">
 <!ENTITY zotero.general.loading "التحميل">
 <!ENTITY zotero.general.close "أغلق">
 <!ENTITY zotero.general.minimize "تصغير">
-<!ENTITY zotero.general.other "Other…">
+<!ENTITY zotero.general.other "غير ذلك...">
 
 
 <!ENTITY zotero.errorReport.title "تقرير خطأ لزوتيرو">
@@ -195,14 +195,14 @@
 
 <!ENTITY zotero.progress.title "التقدم">
 
-<!ENTITY zotero.import "Import">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
-<!ENTITY zotero.import.database "Database">
-<!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
-<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
+<!ENTITY zotero.import "استيراد">
+<!ENTITY zotero.import.whereToImportFrom "من أين تريد الاستيراد؟">
+<!ENTITY zotero.import.source.file " ملف (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.importing "استيراد...">
+<!ENTITY zotero.import.database "قاعدة البيانات">
+<!ENTITY zotero.import.lastModified "آخر تعديل">
+<!ENTITY zotero.import.size "حجم">
+<!ENTITY zotero.import.createCollection "ضع المجموعات المستوردة والمواد في مجموعة جديدة">
 
 <!ENTITY zotero.exportOptions.title "تصدير...">
 <!ENTITY zotero.exportOptions.format.label "الصياغة:">
@@ -287,9 +287,6 @@
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "يوم">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "أزل الخلاصات المقروءة بعد">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "يوم">
-
-<!ENTITY zotero.recognizePDF.pdfName.label "اسم ملف PDF">
-<!ENTITY zotero.recognizePDF.itemName.label "اسم العنصر">
 
 <!ENTITY zotero.rtfScan.title "فحص ملف RTF">
 <!ENTITY zotero.rtfScan.cancel.label "إلغاء">

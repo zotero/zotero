@@ -8,6 +8,9 @@
   "general_tryAgain": {
     "message": "Yeniden Dene"
   },
+  "general_warning": {
+    "message": "Uyarı"
+  },
   "general_cancel": {
     "message": "İptal Et"
   },
@@ -55,6 +58,15 @@
   },
   "integration_error_connection": {
     "message": "$1, $2 masaüstü uygulamasıyla iletişim kuramamaktadır. Web bazlı gönderme yapabilmek için $2 açık olmalıdır."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Bu belge aktif Zotero göndermeleri içermektedir ve bu göndermeler belgenin indirilmiş kopyalarında zotero.org bağlantıları olarak görüneceklerdir."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Paylaşılmaya uygun bir versiyon üretmek için, önce <b>Kopya yarat...</b>seçeneğini, sonra da <b>Göndermeleri Bağlantısızlaştır</b> seçeneğini seçiniz ve sonra bağlantısızlaştırılmış versiyonu indiriniz. Belgenizin bağlantıları içeren asıl versiyonunu, gelecekte değişiklikler yapabilmek için tutunuz."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Yine de Bağlantılı Versiyonu İndir"
   },
   "general_saveTo": {
     "message": "$1'ya Kaydet"
