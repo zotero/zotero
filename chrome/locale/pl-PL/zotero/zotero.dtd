@@ -25,11 +25,11 @@
 <!ENTITY zotero.errorReport.submitted "Informacje o błędzie zostały wysłane.">
 <!ENTITY zotero.errorReport.reportID "ID raportu:">
 <!ENTITY zotero.errorReport.postToForums "Proszę wysłać informację na forum Zotero (forums.zotero.org) z podaniem tego ID raportu, opisem problemu oraz wszystkmi krokami niezbędnymi do powtórzenia błędu.">
-<!ENTITY zotero.errorReport.notReviewed "Raporty błędów nie są zwykle przeglądane, jeśli nie zostaną zamieszczone na forum.">
+<!ENTITY zotero.errorReport.notReviewed "Raporty błędów zwykle nie są przeglądane, jeśli nie zostaną zamieszczone na forum.">
 
 <!ENTITY zotero.upgrade.title "Kreator aktualizacji Zotero">
 <!ENTITY zotero.upgrade.newVersionInstalled "Nowa wersja Zotero została zainstalowana.">
-<!ENTITY zotero.upgrade.upgradeRequired "Baza danych Zotero musi zostać zaktualizowana, aby współpracowała z nową wersją programu.">
+<!ENTITY zotero.upgrade.upgradeRequired "Baza danych Zotero musi zostać zaktualizowana, aby mogła współpracować z nową wersją programu.">
 <!ENTITY zotero.upgrade.autoBackup "Przed wprowadzeniem zmian automatycznie zostanie utworzona kopia zapasowa istniejącej bazy danych.">
 <!ENTITY zotero.upgrade.majorUpgrade "To jest duża aktualizacja.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Upewnij się, że zapoznałeś się z">
@@ -153,7 +153,7 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Zrób zrzut ekranu aktywnej strony">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Brak etykiet do wyświetlenia">
-<!ENTITY zotero.tagSelector.loadingTags "Wczytywanie znaczników...">
+<!ENTITY zotero.tagSelector.loadingTags "Wczytywanie etykiet...">
 <!ENTITY zotero.tagSelector.showAutomatic "Wyświetl etykiety automatyczne">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Wyświetl wszystkie etykiety w tej bibliotece">
 <!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Usuń automatycznie nadane etykiety w tej bibliotece...">
@@ -162,7 +162,7 @@
 <!ENTITY zotero.tagSelector.renameTag "Zmień nazwę etykiety...">
 <!ENTITY zotero.tagSelector.deleteTag "Usuń etykietę...">
 
-<!ENTITY zotero.tagColorChooser.title "Wybierz kolor i pozycję etykiety">
+<!ENTITY zotero.tagColorChooser.title "Wybierz kolor i pozycję etykiety">
 <!ENTITY zotero.tagColorChooser.color "Kolor:">
 <!ENTITY zotero.tagColorChooser.position "Pozycja:">
 <!ENTITY zotero.tagColorChooser.setColor "Ustaw kolor">
@@ -287,9 +287,6 @@
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "dniu(ach)">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Usuń przeczytane elementy kanału po">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dniu(ach)">
-
-<!ENTITY zotero.recognizePDF.pdfName.label "Nazwa PDF">
-<!ENTITY zotero.recognizePDF.itemName.label "Nazwa elementu">
 
 <!ENTITY zotero.rtfScan.title "Skanowanie RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Anuluj">

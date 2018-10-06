@@ -288,9 +288,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Odstrani prebrane objave vira po">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dneh">
 
-<!ENTITY zotero.recognizePDF.pdfName.label "Ime PDF">
-<!ENTITY zotero.recognizePDF.itemName.label "Ime vnosa">
-
 <!ENTITY zotero.rtfScan.title "Pregled RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Prekliči">
 <!ENTITY zotero.rtfScan.citation.label "Citat">

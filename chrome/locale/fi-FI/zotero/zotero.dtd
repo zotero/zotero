@@ -12,7 +12,7 @@
 <!ENTITY zotero.general.saveAs "Tallenna nimellä...">
 <!ENTITY zotero.general.options "Asetukset">
 <!ENTITY zotero.general.advancedOptions.label "Lisäasetukset">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Työkalut">
 <!ENTITY zotero.general.more "Lisää">
 <!ENTITY zotero.general.loading "Ladataan...">
 <!ENTITY zotero.general.close "Sulje">
@@ -193,7 +193,7 @@
 <!ENTITY zotero.integration.editBibliography.title "Muokkaa lähdeluetteloa">
 <!ENTITY zotero.integration.quickFormatDialog.title "Pikainen lähteen muokkaus">
 
-<!ENTITY zotero.progress.title "Eteneminen">
+<!ENTITY zotero.progress.title "Tilanne">
 
 <!ENTITY zotero.import "Import">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
@@ -216,7 +216,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Piilota tekijä">
 <!ENTITY zotero.citation.prefix.label "Etuliite:">
 <!ENTITY zotero.citation.suffix.label "Jälkiliite:">
-<!ENTITY zotero.citation.editorWarning.label "Varoitus: Jos muokkaat viittausta tekstieditorissa, se ei enää päivity tietokannan tietojen tai viittaustyylin perusteella.">
+<!ENTITY zotero.citation.editorWarning.label "Varoitus: Jos muokkaat viittausta editorissa, se ei enää päivity tietokannan tietojen tai viittaustyylin muuttuessa.">
 
 <!ENTITY zotero.richText.italic.label "Kursiivi">
 <!ENTITY zotero.richText.bold.label "Lihavointi">
@@ -243,7 +243,7 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Käytä MEDLINEn lehtilyhenteitä">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.showEditor.label "Näytä muokkain">
@@ -287,9 +287,6 @@
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "päivän jälkeen">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Poista luetut kohteet syötteestä">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "päivän jälkeen">
-
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF:n nimi">
-<!ENTITY zotero.recognizePDF.itemName.label "Nimikkeen nimi">
 
 <!ENTITY zotero.rtfScan.title "RTF:n läpikäynti">
 <!ENTITY zotero.rtfScan.cancel.label "Peruuta">

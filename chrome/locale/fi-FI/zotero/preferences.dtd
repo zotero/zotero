@@ -54,7 +54,7 @@
 <!ENTITY zotero.preferences.openurl.server "Palvelin:">
 <!ENTITY zotero.preferences.openurl.version "Versio:">
 
-<!ENTITY zotero.preferences.prefpane.sync "Synkronoi">
+<!ENTITY zotero.preferences.prefpane.sync "Synkronointi">
 <!ENTITY zotero.preferences.sync.username "Käyttäjätunnus:">
 <!ENTITY zotero.preferences.sync.password "Salasana:">
 <!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
@@ -95,8 +95,8 @@
 <!ENTITY zotero.preferences.sync.reset.button "Nollaa...">
 
 
-<!ENTITY zotero.preferences.prefpane.search "Etsi">
-<!ENTITY zotero.preferences.search.fulltextCache "Kokosanahaun välimuisti">
+<!ENTITY zotero.preferences.prefpane.search "Haku">
+<!ENTITY zotero.preferences.search.fulltextCache "Kokotekstihaun välimuisti">
 <!ENTITY zotero.preferences.search.indexStats "Indeksointitilastot">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indeksoitu:">
@@ -104,12 +104,12 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Indeksoimatta:">
 <!ENTITY zotero.preferences.search.indexStats.words "Sanoja:">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Indeksoitavien kirjaimien enimmäismäärä tiedosto kohden:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Indeksoitavien merkkien enimmäismäärä tiedostoa kohden:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Indeksoitavien sivujen enimmäismäärä tiedostoa kohden:">
 
-<!ENTITY zotero.preferences.prefpane.export "Vie">
+<!ENTITY zotero.preferences.prefpane.export "Vienti">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Sitaattiasetukset">
+<!ENTITY zotero.preferences.citationOptions.caption "Viittausasetukset">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Liitä painettujen artikkeleiden internet-osoitteet viitteisiin">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Kun tämä valinta on pois päältä, Zotero lisää internet-osoitteet tieteellisten lehtien, aikakauslehtien ja sanomalehtien artikkeleihin vain silloin kun niiden sivunumeroja ei ole määritelty.">
 
@@ -123,7 +123,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Kieli">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Estä pikakopiointi raahattaessa yli ">
 
-<!ENTITY zotero.preferences.prefpane.cite "Siteeraus">
+<!ENTITY zotero.preferences.prefpane.cite "Viitteet">
 <!ENTITY zotero.preferences.cite.styles "Tyylit">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstinkäsittelyohjelmat">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Käytä perinteistä &quot;Lisää sitaatti&quot; -ikkunaa">

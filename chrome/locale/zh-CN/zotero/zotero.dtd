@@ -288,9 +288,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "删除已读提要条目于之后">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "天">
 
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF 名称">
-<!ENTITY zotero.recognizePDF.itemName.label "条目名称">
-
 <!ENTITY zotero.rtfScan.title "RTF 扫描">
 <!ENTITY zotero.rtfScan.cancel.label "取消">
 <!ENTITY zotero.rtfScan.citation.label "引文">

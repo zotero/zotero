@@ -288,9 +288,6 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Ta bort lästa flödesobjekt efter">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dag(ar)">
 
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF-namn">
-<!ENTITY zotero.recognizePDF.itemName.label "Källnamn">
-
 <!ENTITY zotero.rtfScan.title "RTF-scanning">
 <!ENTITY zotero.rtfScan.cancel.label "Ångra">
 <!ENTITY zotero.rtfScan.citation.label "Referens">

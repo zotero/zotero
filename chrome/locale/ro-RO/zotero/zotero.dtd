@@ -10,14 +10,14 @@
 <!ENTITY zotero.general.cancel "Anulare">
 <!ENTITY zotero.general.refresh "Reîmprospătare">
 <!ENTITY zotero.general.saveAs "Salvare ca...">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "Opțiuni">
 <!ENTITY zotero.general.advancedOptions.label "Opțiuni avansate">
 <!ENTITY zotero.general.tools "Instrumente">
 <!ENTITY zotero.general.more "Mai mult">
 <!ENTITY zotero.general.loading "Se încarcă...">
 <!ENTITY zotero.general.close "Închide">
 <!ENTITY zotero.general.minimize "Minimizare">
-<!ENTITY zotero.general.other "Other…">
+<!ENTITY zotero.general.other "Altele...">
 
 
 <!ENTITY zotero.errorReport.title "Raportul de erori Zotero">
@@ -196,13 +196,13 @@
 <!ENTITY zotero.progress.title "Progres">
 
 <!ENTITY zotero.import "Import">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
-<!ENTITY zotero.import.database "Database">
-<!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
-<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
+<!ENTITY zotero.import.whereToImportFrom "De unde vrei să imporți?">
+<!ENTITY zotero.import.source.file "Un fișier (BibTeX, RIS, Zotero RDF etc.)">
+<!ENTITY zotero.import.importing "Se importă...">
+<!ENTITY zotero.import.database "Baza de date">
+<!ENTITY zotero.import.lastModified "Ultima modificare">
+<!ENTITY zotero.import.size "Mărime">
+<!ENTITY zotero.import.createCollection "Pune colecțiile importate și itemii într-o colecție nouă">
 
 <!ENTITY zotero.exportOptions.title "Export...">
 <!ENTITY zotero.exportOptions.format.label "Formatare:">
@@ -287,9 +287,6 @@
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "zi(le)">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Șterge itemii feed citiți după">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "zi(le)">
-
-<!ENTITY zotero.recognizePDF.pdfName.label "Nume PDF">
-<!ENTITY zotero.recognizePDF.itemName.label "Nume înregistrare">
 
 <!ENTITY zotero.rtfScan.title "Scanare RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Anulare">
