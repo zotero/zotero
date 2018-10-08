@@ -105,7 +105,7 @@ Zotero.RecognizePDF = new function () {
 	 * Adds items to the queue and triggers processing
 	 * @param {Zotero.Item[]} items
 	 */
-	this.recognizeItems = function (items) {
+	this.recognizeItems = async function (items) {
 		for (let item of items) {
 			if(
 				_processingItemID === item.id ||
@@ -117,7 +117,7 @@ Zotero.RecognizePDF = new function () {
 			_queue.unshift(item.id);
 			_progressQueue.addRow(item);
 		}
-		_processQueue();
+		await _processQueue();
 	};
 	
 	
@@ -133,7 +133,7 @@ Zotero.RecognizePDF = new function () {
 	};
 	
 	
-	this.autoRecognizeItems = function (items) {
+	this.autoRecognizeItems = async function (items) {
 		if (!Zotero.Prefs.get('autoRecognizeFiles')) return;
 		
 		var pdfs = items.filter((item) => {
@@ -144,8 +144,21 @@ Zotero.RecognizePDF = new function () {
 		if (!pdfs.length) {
 			return;
 		}
-		this.recognizeItems(pdfs);
-		Zotero.ProgressQueues.get('recognize').getDialog().open();
+		var queue = Zotero.ProgressQueues.get('recognize');
+		var dialog = queue.getDialog();
+		var numInQueue = queue.getTotal();
+		var promise = this.recognizeItems(pdfs);
+		// If the queue wasn't empty or more than one file is being saved, show the dialog
+		if (numInQueue > 0 || pdfs.length > 1) {
+			dialog.open();
+			return promise;
+		}
+		await promise;
+		// If dialog wasn't opened automatically and wasn't opened manually, clear it after
+		// recognizing files
+		if (!dialog.isOpen()) {
+			queue.cancel();
+		}
 	};
 	
 	

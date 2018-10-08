@@ -69,6 +69,10 @@ Zotero.ProgressQueueDialog = function (progressQueue) {
 		_showMinimize = show;
 	};
 	
+	this.isOpen = function () {
+		return !!_progressWindow;
+	};
+	
 	this.close = function () {
 		// In case close() is called before open()
 		if (!_progressWindow) {
