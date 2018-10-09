@@ -799,7 +799,6 @@ describe("Connector Server", function () {
 			httpd.registerFile("/test.pdf", file);
 			
 			var promise = waitForItemEvent('add');
-			var recognizerPromise = waitForRecognizer();
 			
 			var origRequest = Zotero.HTTP.request.bind(Zotero.HTTP);
 			var called = 0;
@@ -836,15 +835,16 @@ describe("Connector Server", function () {
 			var ids = await promise;
 			
 			assert.lengthOf(ids, 1);
-			var item = Zotero.Items.get(ids[0]);
-			assert.isTrue(item.isImportedAttachment());
-			assert.equal(item.attachmentContentType, 'application/pdf');
-			assert.isTrue(collection.hasItem(item.id));
+			var attachment = Zotero.Items.get(ids[0]);
+			assert.isTrue(attachment.isImportedAttachment());
+			assert.equal(attachment.attachmentContentType, 'application/pdf');
+			assert.isTrue(collection.hasItem(attachment.id));
 			
-			var progressWindow = await recognizerPromise;
-			progressWindow.close();
-			Zotero.ProgressQueues.get('recognize').cancel();
-			assert.isFalse(item.isTopLevelItem());
+			await waitForItemEvent('add');
+			await waitForItemEvent('modify');
+			await waitForItemEvent('modify');
+			
+			assert.isFalse(attachment.isTopLevelItem());
 			
 			stub.restore();
 		});

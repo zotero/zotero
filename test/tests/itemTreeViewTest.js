@@ -931,6 +931,7 @@ describe("Zotero.ItemTreeView", function() {
 			// Wait for attachment item to be moved under new item
 			await waitForItemEvent('add');
 			await waitForItemEvent('modify');
+			await waitForItemEvent('modify');
 			
 			assert.isFalse(Zotero.Items.get(attachmentIDs[0]).isTopLevelItem());
 			
