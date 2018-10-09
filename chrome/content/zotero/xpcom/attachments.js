@@ -1387,7 +1387,9 @@ Zotero.Attachments = new function(){
 					current.result = attachment;
 					progressQueue.updateRow(
 						current.item.id,
-						Zotero.ProgressQueue.ROW_FAILED,
+						attachment
+							? Zotero.ProgressQueue.ROW_SUCCEEDED
+							: Zotero.ProgressQueue.ROW_FAILED,
 						attachment
 							? attachment.getField('title')
 							: Zotero.getString('findPDF.noPDFFound')
