@@ -756,7 +756,7 @@ describe("Zotero.Attachments", function() {
 			var attachments = await Zotero.Attachments.addAvailablePDFs([item1, item2]);
 			
 			assert.isTrue(requestStub.calledTwice);
-			assert.isAbove(requestStubCallTimes[1] - requestStubCallTimes[0], 1000);
+			assert.isAbove(requestStubCallTimes[1] - requestStubCallTimes[0], 999);
 			// Make sure both items have attachments
 			assert.equal(item1.numAttachments(), 1);
 			assert.equal(item2.numAttachments(), 1);
@@ -798,7 +798,7 @@ describe("Zotero.Attachments", function() {
 			assert.equal(requestStub.getCall(5).args[1], pageURL4);
 			
 			// 'website' requests should be a second apart
-			assert.isAbove(requestStubCallTimes[5] - requestStubCallTimes[1], 1000);
+			assert.isAbove(requestStubCallTimes[5] - requestStubCallTimes[1], 999);
 			
 			assert.equal(item1.numAttachments(), 1);
 			assert.equal(item2.numAttachments(), 0);
@@ -824,7 +824,7 @@ describe("Zotero.Attachments", function() {
 			assert.equal(requestStub.getCall(0).args[1], pageURL9);
 			assert.equal(requestStub.getCall(1).args[1], pageURL9);
 			assert.equal(requestStub.getCall(2).args[1], pageURL3);
-			assert.isAbove(requestStubCallTimes[1] - requestStubCallTimes[0], 2000);
+			assert.isAbove(requestStubCallTimes[1] - requestStubCallTimes[0], 1999);
 			// Make sure both items have attachments
 			assert.equal(item1.numAttachments(), 1);
 			assert.equal(item2.numAttachments(), 1);
