@@ -168,7 +168,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Ustaw kolor">
 <!ENTITY zotero.tagColorChooser.removeColor "Usuń kolor">
 
-<!ENTITY zotero.lookup.description "Podaj numery lub identyfikatory ISBN, DOI, PMID lub arXiv aby dodać je do twojej biblioteki:">
+<!ENTITY zotero.lookup.description "Podaj numery lub identyfikatory ISBN, DOI, PMID lub arXiv, aby dodać je do twojej biblioteki:">
 <!ENTITY zotero.lookup.button.search "Wyszukiwanie">
 
 <!ENTITY zotero.selectitems.title "Zaznacz elementy">
@@ -240,7 +240,7 @@
 
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatycznie aktualizuj cytowania">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Cytowania z oczekującymi aktualizacjami będą podświetlone w dokumencie">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Wyłączenie aktualizacji cytować może przyspieszyć wstawianie cytowań w dużych dokumentach. Wciśnij Odśwież aby ręcznie zaktualizować cytowania.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Wyłączenie aktualizacji cytować może przyspieszyć wstawianie cytowań w dużych dokumentach. Wciśnij Odśwież, aby ręcznie zaktualizować cytowania.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Użyj skrótów czasopism w formacie MEDLINE">
@@ -259,7 +259,7 @@
 
 <!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Poniższa etykieta w twojej bibliotece Zotero jest zbyt długa, aby ją zsynchornizować z serwerem:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synchronizowane etykiety muszą być krótsze niż 256 znaków.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Możesz podzielić etykietę na kilka, edytować ręcznie aby ją skrócić lub też po prostu ją usunąć.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Możesz podzielić etykietę na kilka osobnych, edytować ręcznie, aby ją skrócić lub też po prostu ją usunąć.">
 <!ENTITY zotero.sync.longTagFixer.split "Podziel">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Podziel na ">
 <!ENTITY zotero.sync.longTagFixer.character "znaku">
@@ -271,10 +271,10 @@
 <!ENTITY zotero.merge.of "z">
 <!ENTITY zotero.merge.deleted "Usunięty">
 
-<!ENTITY zotero.proxy.recognized.title "Rozpoznano proxy">
-<!ENTITY zotero.proxy.recognized.warning "Dodaj tylko zaufane serwery proxy, powiązane z twoją stroną biblioteki, szkoły lub organizacji. ">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Dodawanie innych serwerów proxy umożliwia złośliwym stronom internetowym podszywanie się pod zaufane.">
-<!ENTITY zotero.proxy.recognized.disable.label "Nie przekierowuj automatycznie żądań za pomocą poprzednio rozpoznanych serwerów proxy">
+<!ENTITY zotero.proxy.recognized.title "Rozpoznano serwer pośredniczący">
+<!ENTITY zotero.proxy.recognized.warning "Dodaj tylko zaufane serwery pośredniczące, powiązane z twoją stroną biblioteki, szkoły lub organizacji. ">
+<!ENTITY zotero.proxy.recognized.warning.secondary "Dodawanie innych serwerów pośredniczących umożliwia złośliwym stronom internetowym podszywanie się pod zaufane.">
+<!ENTITY zotero.proxy.recognized.disable.label "Nie przekierowuj automatycznie żądań za pomocą poprzednio rozpoznanych serwerów pośredniczących">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignoruj">
 
 <!ENTITY zotero.feedSettings.title "Ustawienia kanału">

@@ -4,13 +4,13 @@
 <!ENTITY zotero.preferences.items "elemek">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Beállítások">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "Egyedi...">
 
 <!ENTITY zotero.preferences.prefpane.general "Általános">
 
 <!ENTITY zotero.preferences.userInterface "Felhasználói felület">
 <!ENTITY zotero.preferences.layout "Layout:">
-<!ENTITY zotero.preferences.layout.standard "Standard">
+<!ENTITY zotero.preferences.layout.standard "Alapértelmezett">
 <!ENTITY zotero.preferences.layout.stacked "Stacked">
 <!ENTITY zotero.preferences.fontSize "Betűméret">
 <!ENTITY zotero.preferences.fontSize.small "Kicsi">
@@ -25,7 +25,7 @@
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
 <!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "Alapértelmezett rendszerbeállítás">
 
 <!ENTITY zotero.preferences.miscellaneous "Egyéb">
 <!ENTITY zotero.preferences.autoUpdate "Fordítók- és stílusfrissítések automatikus ellenőrzése">
@@ -76,7 +76,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "A Zotero tárhely használata esetén elfogadom a">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "felhasználási feltételeket">
-<!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
+<!ENTITY zotero.preferences.sync.librariesToSync "Könyvtárak szinkronizálása">
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Könyvtárak kiválasztása...">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Szinkronizálás">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Könyvtár">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Helyreállítás az online könyvtáramból">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Helyreállítás az online könyvtáramba">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Az online könyvtár felülírása a helyi Zotero adatokkal">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "A szinkronizációs előzmények törlése">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
 <!ENTITY zotero.preferences.sync.reset "Visszaállítás">
@@ -211,4 +211,4 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Fordítók visszaállítása">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stílusok visszaálllítása">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "Konfiguráció szerkesztése">

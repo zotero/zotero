@@ -150,23 +150,23 @@
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importuj ze schowka">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Zmiany zostaną zastosowane po ponownym uruchomieniu">
 
-<!ENTITY zotero.preferences.prefpane.proxies "Serwery proxy">
+<!ENTITY zotero.preferences.prefpane.proxies "Serwery pośredniczące">
 
-<!ENTITY zotero.preferences.proxies.proxyOptions "Opcje serwerów proxy">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero będzie niewidocznie przekierowywać żądania przez zapisane serwery proxy. Zobacz">
-<!ENTITY zotero.preferences.proxies.desc_link "dokumentację proxy">
+<!ENTITY zotero.preferences.proxies.proxyOptions "Opcje serwerów pośredniczących">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero będzie niewidocznie przekierowywać żądania przez zapisane serwery pośredniczące. Zobacz">
+<!ENTITY zotero.preferences.proxies.desc_link "dokumentację serwera pośredniczącego">
 <!ENTITY zotero.preferences.proxies.desc_after_link "aby uzyskać więcej informacji.">
-<!ENTITY zotero.preferences.proxies.transparent "Włącz przekierowania przez serwery proxy">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Automatycznie rozpoznaj zasoby proxy">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Pokaż powiadomienie podczas przekierowania przez serwer proxy">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Wyłącz przekierowanie proxy jeśli moja nazwa domeny zawiera ">
-<!ENTITY zotero.preferences.proxies.configured "Skonfigurowane serwery proxy">
+<!ENTITY zotero.preferences.proxies.transparent "Włącz przekierowania przez serwery pośredniczące">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Automatycznie rozpoznaj zasoby serwerów pośredniczących">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Pokaż powiadomienie podczas przekierowania przez serwer pośredniczący">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Wyłącz przekierowanie przez serwer pośredniczący, jeśli moja nazwa domeny zawiera ">
+<!ENTITY zotero.preferences.proxies.configured "Skonfigurowane serwery pośredniczące">
 <!ENTITY zotero.preferences.proxies.hostname "Nazwa hosta">
 <!ENTITY zotero.preferences.proxies.scheme "Schemat">
 
 <!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
 <!ENTITY zotero.preferences.proxies.autoAssociate "Automatycznie przypisz nowe hosty">
-<!ENTITY zotero.preferences.proxies.variables "Możesz użyć następujących zmiennych w swoim schemacie proxy:">
+<!ENTITY zotero.preferences.proxies.variables "Możesz użyć następujących zmiennych w swoim schemacie serwera pośredniczącego:">
 <!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Nazwa hosta dla trasowanej witryny (np. www.zotero.org)">
 <!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Ścieżka do trasowanej strony bez pierwszego ukośnika (np. about/index.html)">
 <!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Ścieżka do katalogu (np. about/)">

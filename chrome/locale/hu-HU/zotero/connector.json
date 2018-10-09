@@ -8,6 +8,9 @@
   "general_tryAgain": {
     "message": "Próbálja újra"
   },
+  "general_warning": {
+    "message": "Figyelmeztetés"
+  },
   "general_cancel": {
     "message": "Mégse"
   },
@@ -28,6 +31,9 @@
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Online könyvtárba való mentés engedélyezése"
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Mindenképpen töltse le a hivatkozott verziót"
   },
   "general_saveTo": {
     "message": "Mentés $1-ba(n)"

@@ -1136,7 +1136,7 @@ Zotero.Attachments = new function(){
 		if (!progressQueue) {
 			progressQueue = Zotero.ProgressQueues.create({
 				id: 'findPDF',
-				title: 'findPDF.title',
+				title: 'pane.items.menu.findAvailablePDF.multiple',
 				columns: [
 					'general.item',
 					'general.pdf'
