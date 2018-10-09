@@ -888,7 +888,6 @@ describe("Zotero.ItemTreeView", function() {
 			var view = zp.itemsView;
 			
 			var promise = waitForItemEvent('add');
-			var recognizerPromise = waitForRecognizer();
 			
 			// Fake recognizer response
 			Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
@@ -927,13 +926,70 @@ describe("Zotero.ItemTreeView", function() {
 				mozItemCount: 1,
 			})
 			
-			var itemIDs = await promise;
-			var item = Zotero.Items.get(itemIDs[0]);
+			// Wait for attachment item
+			var attachmentIDs = await promise;
+			// Wait for attachment item to be moved under new item
+			await waitForItemEvent('add');
+			await waitForItemEvent('modify');
+			
+			assert.isFalse(Zotero.Items.get(attachmentIDs[0]).isTopLevelItem());
+			
+			Zotero.HTTP.mock = null;
+		});
+		
+		it("should automatically retrieve metadata for multiple top-level PDFs if pref is enabled", async function () {
+			Zotero.Prefs.set('autoRecognizeFiles', true);
+			
+			var view = zp.itemsView;
+			
+			var promise = waitForItemEvent('add');
+			var recognizerPromise = waitForRecognizer();
+			
+			// Fake recognizer response
+			Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
+			var server = sinon.fakeServer.create();
+			server.autoRespond = true;
+			setHTTPResponse(
+				server,
+				ZOTERO_CONFIG.RECOGNIZE_URL,
+				{
+					method: 'POST',
+					url: 'recognize',
+					status: 200,
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					json: {
+						title: 'Test',
+						authors: []
+					}
+				}
+			);
+			
+			itemsView.drop(0, -1, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: {
+					contains: function (type) {
+						return type == 'text/x-moz-url';
+					}
+				},
+				getData: function (type) {
+					if (type == 'text/x-moz-url') {
+						return pdfURL;
+					}
+				},
+				mozItemCount: 2,
+			})
+			
+			var item1 = Zotero.Items.get((await promise)[0]);
+			var item2 = Zotero.Items.get((await waitForItemEvent('add'))[0]);
 			
 			var progressWindow = await recognizerPromise;
 			progressWindow.close();
 			Zotero.ProgressQueues.get('recognize').cancel();
-			assert.isFalse(item.isTopLevelItem());
+			assert.isFalse(item1.isTopLevelItem());
+			assert.isFalse(item2.isTopLevelItem());
 			
 			Zotero.HTTP.mock = null;
 		});
