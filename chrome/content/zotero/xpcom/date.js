@@ -452,7 +452,7 @@ Zotero.Date = new function(){
 		if(!date.day) {
 			// compile day regular expression
 			if(!_dayRe) {
-				var daySuffixes = Zotero.getString ? Zotero.getString("date.daySuffixes").replace(/, ?/g, "|") : "";
+				var daySuffixes = Zotero.isClient ? Zotero.getString("date.daySuffixes").replace(/, ?/g, "|") : "";
 				_dayRe = new RegExp("\\b([0-9]{1,2})(?:"+daySuffixes+")?\\b(.*)", "i");
 			}
 			
