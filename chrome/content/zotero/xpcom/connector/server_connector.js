@@ -302,7 +302,7 @@ Zotero.Server.Connector.SaveSession.prototype._updateItems = Zotero.serial(async
 	var libraryID = library.libraryID;
 	
 	var tags = this._currentTags.trim();
-	tags = tags ? tags.split(/\s*,\s*/) : [];
+	tags = tags ? tags.split(/\s*,\s*/).filter(x => x) : [];
 	
 	Zotero.debug("Updating items for connector save session " + this.id);
 	
