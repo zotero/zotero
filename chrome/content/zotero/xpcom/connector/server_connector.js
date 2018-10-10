@@ -1058,6 +1058,7 @@ Zotero.Server.Connector.DelaySync = function () {};
 Zotero.Server.Endpoints["/connector/delaySync"] = Zotero.Server.Connector.DelaySync;
 Zotero.Server.Connector.DelaySync.prototype = {
 	supportedMethods: ["POST"],
+	permitBookmarklet: true,
 	
 	init: async function (requestData) {
 		Zotero.Sync.Runner.delaySync(10000);
