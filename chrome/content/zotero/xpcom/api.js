@@ -35,6 +35,9 @@ Zotero.API = {
 	},
 	
 	
+	/**
+	 * @return {(Zotero.Collection|Zotero.Item)[]}
+	 */
 	getResultsFromParams: Zotero.Promise.coroutine(function* (params) {
 		if (!params.objectType) {
 			throw new Error("objectType not specified");
@@ -42,7 +45,13 @@ Zotero.API = {
 		
 		var results;
 		
-		if (params.objectType == 'item') {
+		if (params.objectType == 'collection') {
+			let col = Zotero.Collections.getByLibraryAndKey(params.libraryID, params.objectKey);
+			if (col) {
+				results = [col];
+			}
+		}
+		else if (params.objectType == 'item') {
 			switch (params.scopeObject) {
 				case 'collections':
 					if (params.scopeObjectKey) {

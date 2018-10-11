@@ -835,24 +835,42 @@ function ZoteroProtocolHandler() {
 				}
 				delete params.id;
 			});
+			
+			// Collection
+			router.add('library/collections/:objectKey', function () {
+				params.objectType = 'collection'
+				params.libraryID = userLibraryID;
+			});
+			router.add('groups/:groupID/collections/:objectKey', function () {
+				params.objectType = 'collection'
+				params.libraryID = userLibraryID;
+			});
+			
 			router.run(path);
 			
 			Zotero.API.parseParams(params);
 			var results = yield Zotero.API.getResultsFromParams(params);
 			
 			if (!results.length) {
-				var msg = "Items not found";
+				var msg = "Objects not found";
 				Zotero.debug(msg, 2);
 				Components.utils.reportError(msg);
 				return;
 			}
 			
-			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-				.getService(Components.interfaces.nsIWindowMediator);
-			var win = wm.getMostRecentWindow("navigator:browser");
+			var zp = Zotero.getActiveZoteroPane();
+			if (!zp) {
+				// TEMP
+				throw new Error("Pane not open");
+			}
 			
-			// TODO: Currently only able to select one item
-			return win.ZoteroPane.selectItem(results[0].id);
+			if (params.objectType == 'collection') {
+				return zp.collectionsView.selectCollection(results[0].id);
+			}
+			else {
+				// TODO: Currently only able to select one item
+				return zp.selectItem(results[0].id);
+			}
 		}),
 		
 		newChannel: function (uri) {
