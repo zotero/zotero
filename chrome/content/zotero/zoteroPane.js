@@ -2794,8 +2794,7 @@ var ZoteroPane = new function()
 					canIndex = true,
 					canRecognize = true,
 					canUnrecognize = true,
-					canRename = true,
-					canFindPDF = true;
+					canRename = true;
 				var canMarkRead = collectionTreeRow.isFeed();
 				var markUnread = true;
 				
@@ -2825,10 +2824,6 @@ var ZoteroPane = new function()
 					if(canMarkRead && markUnread && !item.isRead) {
 						markUnread = false;
 					}
-					
-					if (canFindPDF && (!item.isRegularItem() || item.isFeedItem || collectionTreeRow.isDuplicates())) {
-						canFindPDF = false;
-					}
 				}
 				
 				if (canMerge) {
@@ -2856,7 +2851,11 @@ var ZoteroPane = new function()
 					}
 				}
 				
-				if (canFindPDF) {
+				// "Find Available PDFs"
+				if (collectionTreeRow.filesEditable
+						&& !collectionTreeRow.isDuplicates()
+						&& !collectionTreeRow.isFeed()
+						&& items.some(item => item.isRegularItem())) {
 					show.push(m.findPDF, m.sep3);
 				}
 				
