@@ -1185,7 +1185,7 @@ Zotero.Attachments = new function(){
 		if (!queue.length) {
 			let icon = 'chrome://zotero/skin/treeitem-attachment-pdf.png';
 			let progressWin = new Zotero.ProgressWindow();
-			let title = Zotero.getString('findPDF.title');
+			let title = Zotero.getString('pane.items.menu.findAvailablePDF.multiple');
 			progressWin.changeHeadline(title);
 			let itemProgress = new progressWin.ItemProgress(
 				icon,
