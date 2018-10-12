@@ -196,9 +196,10 @@ Zotero.Translate.ItemSaver.prototype = {
 		// possible downloads.
 		//
 		// TODO: Separate pref?
+		var shouldDownloadOAPDF = this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD
+				&& Zotero.Prefs.get('downloadAssociatedFiles');
 		var openAccessPDFURLs = new Map();
-		if (this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD
-				&& Zotero.Prefs.get('downloadAssociatedFiles')) {
+		if (shouldDownloadOAPDF) {
 			for (let item of items) {
 				let jsonItem = jsonByItem.get(item);
 				
@@ -239,7 +240,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				parentItemID,
 				function (attachment, progress, error) {
 					// Don't cancel failed primary PDFs until we've tried other methods
-					if (progress === false && attachment.isPrimaryPDF) {
+					if (progress === false && attachment.isPrimaryPDF && shouldDownloadOAPDF) {
 						return;
 					}
 					attachmentCallback(...arguments);
@@ -252,8 +253,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		
 		// If a translated PDF attachment wasn't saved successfully, either because there wasn't
 		// one or there was but it failed, look for another PDF (if enabled)
-		if (this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD
-				&& Zotero.Prefs.get('downloadAssociatedFiles')) {
+		if (shouldDownloadOAPDF) {
 			for (let item of items) {
 				// Already have a PDF from translation
 				if (itemIDsWithPDFAttachments.has(item.id)) {
