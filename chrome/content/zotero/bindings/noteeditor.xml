@@ -65,14 +65,15 @@
 					switch (val) {
 						case 'view':
 						case 'merge':
-							// If there's an existing editor, mark it as read-only. This allows for
-							// disabling an existing editable note (e.g., if there's a save error).
 							if (this.noteField) {
 								this.noteField.onInit(ed => ed.setMode('readonly'));
 							}
 							break;
 						
 						case 'edit':
+							if (this.noteField) {
+								this.noteField.onInit(ed => ed.setMode('design'));
+							}
 							this.editable = true;
 							this.saveOnEdit = true;
 							this.parentClickHandler = this.selectParent;
