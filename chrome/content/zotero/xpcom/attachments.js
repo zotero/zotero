@@ -1969,8 +1969,8 @@ Zotero.Attachments = new function(){
 	
 	this.getStorageDirectoryByLibraryAndKey = function (libraryID, key) {
 		if (typeof key != 'string' || !key.match(/^[A-Z0-9]{8}$/)) {
-			throw ('key must be an 8-character string in '
-				+ 'Zotero.Attachments.getStorageDirectoryByLibraryAndKey()')
+			Zotero.debug(key, 1);
+			throw new Error('key must be an 8-character string');
 		}
 		var dir = Zotero.getStorageDirectory();
 		dir.append(key);
