@@ -181,11 +181,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 	});
 	
 	this.openHelpLink = function() {
-		var url = "https://www.zotero.org/support/word_processor_plugin_usage";
-		var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						.getService(Components.interfaces.nsIWindowMediator)
-						.getMostRecentWindow("navigator:browser");
-		Zotero.launchURL(url);
+		Zotero.launchURL("https://www.zotero.org/support/word_processor_integration");
 	};
 
 	/*
