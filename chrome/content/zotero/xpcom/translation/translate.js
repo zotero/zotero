@@ -566,7 +566,12 @@ Zotero.Translate.Sandbox = {
 						// up to pop off the async process
 						var newCallback = function(selectedItems) {
 							callbackExecuted = true;
-							callback(transferObject(selectedItems));
+							try {
+								callback(transferObject(selectedItems));
+							} catch (e) {
+								translate.complete(false, e);
+								return false;
+							}
 							if(haveAsyncHandler) translate.decrementAsyncProcesses("Zotero.selectItems()");
 						};
 					} else {
