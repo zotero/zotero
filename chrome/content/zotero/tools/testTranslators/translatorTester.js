@@ -30,11 +30,7 @@ var EXPORTED_SYMBOLS = ["Zotero_TranslatorTesters"];
 // For debugging specific translators by label
 var includeTranslators = [];
 
-try {
-	Zotero;
-} catch(e) {
-	var Zotero;
-}
+this.Zotero = Zotero;
 
 var Zotero_TranslatorTesters = new function() {
 	const TEST_TYPES = ["web", "import", "export", "search"];
@@ -46,11 +42,13 @@ var Zotero_TranslatorTesters = new function() {
 	this.runAllTests = function (numConcurrentTests, skipTranslators, writeDataCallback) {
 		var id = Math.random() * (100000000 - 1) + 1;
 		
-		waitForDialog();
+		if (!(typeof process === 'object' && process + '' === '[object process]')){
+			waitForDialog();
 		
-		if(!Zotero) {
-			Zotero = Components.classes["@zotero.org/Zotero;1"]
-				.getService(Components.interfaces.nsISupports).wrappedJSObject;
+			if(!Zotero) {
+				Zotero = Components.classes["@zotero.org/Zotero;1"]
+					.getService(Components.interfaces.nsISupports).wrappedJSObject;
+			}
 		}
 		
 		var testers = [];
@@ -760,3 +758,7 @@ Zotero_TranslatorTester._generateDiff = new function() {
 		return txt.substr(0, txt.length-1);
 	};
 };
+
+if (typeof process === 'object' && process + '' === '[object process]'){
+	module.exports = Zotero_TranslatorTesters;
+}
