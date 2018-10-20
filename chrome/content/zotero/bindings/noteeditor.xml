@@ -322,47 +322,26 @@
 				<parameter name="event"/>
 				<body>
 				<![CDATA[
+					var noteField = this._id('noteField');
+					
 					switch (event.keyCode) {
 						case 9:
-							if (event.ctrlKey || event.altKey) {
-								return;
-							}
-							
-							event.stopPropagation();
-							event.preventDefault();
-							
-							// On shift-tab, focus the element specified in
-							// the 'previousfocus' attribute
+							// On Shift-Tab, if focus was moved out of the note, focus the element
+							// specified in the 'previousfocus' attribute. We check for focus
+							// because Shift-Tab doesn't and shouldn't move focus out of the note if
+							// the cursor is in a list.
 							if (event.shiftKey) {
 								let id = this.getAttribute('previousfocus');
 								if (id) {
-									setTimeout(function () {
-										document.getElementById(id).focus();
+									setTimeout(() => {
+										if (!noteField.hasFocus()) {
+											document.getElementById(id).focus();
+										}
 									}, 0);
 								}
 								return;
 							}
 							
-							// Insert tab manually
-							//
-							// From http://kb.mozillazine.org/Inserting_text_at_cursor
-							try {
-								var command = "cmd_insertText";
-								var controller = document.commandDispatcher.getControllerForCommand(command);
-								if (controller && controller.isCommandEnabled(command)) {
-									controller = controller.QueryInterface(Components.interfaces.nsICommandController);
-									var params = Components.classes["@mozilla.org/embedcomp/command-params;1"]
-										.createInstance(Components.interfaces.nsICommandParams);
-									params.setStringValue("state_data", "\t");
-									controller.doCommandWithParams(command, params);
-								}
-							}
-							catch (e) {
-								Zotero.debug("Can't do cmd_insertText!\n" + e, 1);
-							}
-							
-							// DEBUG: is there a better way to prevent blur()?
-							setTimeout(function() { event.target.focus(); }, 1);
 							break;
 					}
 				]]>

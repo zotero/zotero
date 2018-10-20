@@ -600,6 +600,14 @@
 				</body>
 			</method>
 			
+			<method name="hasFocus">
+				<body>
+				<![CDATA[
+					return this._editor ? this._editor.hasFocus() : false;
+				]]>
+				</body>
+			</method>
+			
 			<method name="clearUndo">
 				<body>
 				<![CDATA[
