@@ -669,6 +669,8 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					Zotero.debug(this._s3ConsecutiveFailures
 						+ " consecutive S3 failures -- aborting", 1);
 					this._s3ConsecutiveFailures = 0;
+					let e = Zotero.getString('sync.storage.error.zfs.restart', Zotero.appName);
+					throw new Error(e);
 				}
 				else {
 					let msg = "S3 returned " + e.status + " (" + item.libraryKey + ") "
