@@ -1,12 +1,12 @@
 <!ENTITY zotero.version "versión">
 <!ENTITY zotero.whatsNew "Novedades">
-<!ENTITY zotero.createdby "Una creación de:">
+<!ENTITY zotero.createdby "Creado por:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Directores:">
 <!ENTITY zotero.developers "Desarrolladores:">
 <!ENTITY zotero.alumni "Eméritos:">
 <!ENTITY zotero.about.localizations "Traducciones:">
-<!ENTITY zotero.about.additionalSoftware "Programas y normativas externos:">
+<!ENTITY zotero.about.additionalSoftware "Software y estándares de terceros:">
 <!ENTITY zotero.executiveProducer "Productor ejecutivo:">
 <!ENTITY zotero.thanks "Agradecimientos especiales:">
 <!ENTITY zotero.about.close "Cerrar">

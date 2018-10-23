@@ -7,9 +7,9 @@
 <!ENTITY zotero.search.joinMode.all "todos">
 <!ENTITY zotero.search.joinMode.suffix "de los siguientes:">
 
-<!ENTITY zotero.search.recursive.label "Buscar en subcarpetas">
-<!ENTITY zotero.search.noChildren "Mostrar sólo los ítems de primer nivel">
-<!ENTITY zotero.search.includeParentsAndChildren "Incluir los ítems padres e hijos de los ítems encontrados">
+<!ENTITY zotero.search.recursive.label "Buscar en subcolecciones">
+<!ENTITY zotero.search.noChildren "Mostrar sólo los elementos de primer nivel">
+<!ENTITY zotero.search.includeParentsAndChildren "Incluir los elementos contenedores y subordinados de los elementos encontrados">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (incl. archivos binarios)">

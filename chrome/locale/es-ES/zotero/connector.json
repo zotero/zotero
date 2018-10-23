@@ -36,7 +36,7 @@
     "message": "última versión"
   },
   "appConnector": {
-    "message": "$1 Conector"
+    "message": "Conector de $1"
   },
   "upgradeApp": {
     "message": "Actualizar $1"
@@ -45,7 +45,7 @@
     "message": "¿Está $1 en ejecución?"
   },
   "error_connection_save": {
-    "message": "El $1 fue habilitado para comunicar con la aplicación de escritorio de $2. El Conector puede guardar algunas páginas directamente en tu cuenta $3, pero para obtener mejores resultados debería asegurarse de que $2 está abierto antes de intentar guardar."
+    "message": "El $1 fue habilitado para comunicar con la aplicación de escritorio de $2. El Conector puede guardar algunas páginas directamente en tu cuenta $3, pero para obtener mejores resultados debes asegurarte de que $2 está abierto antes de intentar guardar."
   },
   "error_connection_downloadOrTroubleshoot": {
     "message": "Puedes <a href=\"$1\">descargar $2</a> o <a href=\"$3\">solucionar problemas de la conexión</a> si es necesario."
@@ -63,7 +63,7 @@
     "message": "Este documento contiene citas activas de Zotero que aparecerán como enlaces a zotero.org en la copia descargada."
   },
   "integration_googleDocs_unlinkBeforeSaving_instructions": {
-    "message": "Para generar una versión adecuada para compartir, seleccione <b>Hacer una copia... </b>desde el menú Archivo, seleccione <b>Desvincular citas </b>desde el menú de Zotero en el nuevo documento y luego descargue la versión no enlazada. Guarde este documento original vinculado en caso de que necesite realizar más cambios."
+    "message": "Para generar una versión adecuada para compartir, selecciona <b>Hacer una copia... </b>desde el menú Archivo, selecciona <b>Desvincular citas </b>desde el menú de Zotero en el nuevo documento y luego descarga la versión no enlazada. Conserva este documento original vinculado en caso de que necesites realizar más cambios."
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Descargar la versión enlazada de todos modos"

@@ -19,7 +19,7 @@
 <!ENTITY pageSetupCmd.accesskey "U">
 <!ENTITY printCmd.label "Imprimir…">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "Cerrar">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
@@ -67,7 +67,7 @@
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "Soporte y documentación">
 <!ENTITY productHelp.accesskey "H">
-<!ENTITY helpTroubleshootingInfo.label "Información de resolución de problemas">
+<!ENTITY helpTroubleshootingInfo.label "Información sobre resolución de problemas">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "Foros de discusión">
 <!ENTITY helpFeedbackPage.accesskey "F">
@@ -75,12 +75,12 @@
 <!ENTITY helpReportErrors.label "Informa de errores...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Registro de resultados de depuración">
+<!ENTITY debugOutputLogging.label "Registro de salida de depuración">
 <!ENTITY debugOutputLogging.accesskey "L">
 <!ENTITY debugOutputLogging.submit "Enviar resultados">
 <!ENTITY debugOutputLogging.view "Ver resultados">
 <!ENTITY debugOutputLogging.clear "Limpiar resultados">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Reiniciar con Registro Deshabilitado...">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Reiniciar con registro habilitado...">
 
 <!ENTITY helpCheckForUpdates.label "Comprobar actualizaciones...">
 <!ENTITY helpCheckForUpdates.accesskey "U">
