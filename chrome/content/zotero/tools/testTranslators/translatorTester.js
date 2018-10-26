@@ -24,7 +24,7 @@
 */
 
 // Timeout for test to complete
-var TEST_RUN_TIMEOUT = 600000;
+var TEST_RUN_TIMEOUT = 60000;
 var EXPORTED_SYMBOLS = ["Zotero_TranslatorTesters"];
 
 // For debugging specific translators by label
@@ -410,13 +410,17 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
  * @param {Function} testDoneCallback - A callback to be executed when test is complete
  */
 Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function (test, testDoneCallback) {
+	if (typeof process === 'object' && process + '' === '[object process]'){
+		this._cookieSandbox = require('request').jar();
+	}
 	Zotero.HTTP.processDocuments(
 		test.url,
 		(doc) => {
 			this.runTest(test, doc, function (obj, test, status, message) {
 				testDoneCallback(obj, test, status, message);
 			});
-		}
+		},
+		this._cookieSandbox,
 	)
 	.catch(function (e) {
 		testDoneCallback(this, test, "failed", "Translation failed to initialize: " + e);
@@ -441,6 +445,9 @@ Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback
 		translate.setString(test.input);
 	} else if(this.type === "search") {
 		translate.setSearch(test.input);
+	}
+	if (translate.setCookieSandbox && this._cookieSandbox) {
+		translate.setCookieSandbox(this._cookieSandbox);
 	}
 	
 	translate.setHandler("translators", function(obj, translators) {
@@ -765,5 +772,8 @@ Zotero_TranslatorTester._generateDiff = new function() {
 };
 
 if (typeof process === 'object' && process + '' === '[object process]'){
-	module.exports = Zotero_TranslatorTesters;
+	module.exports = {
+		Tester: Zotero_TranslatorTesters, 
+		TranslatorTester: Zotero_TranslatorTester
+	};
 }
