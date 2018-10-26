@@ -460,6 +460,7 @@ Zotero.ItemTypes = new function() {
 			// HiDPI images available
 			case 'attachment-link':
 			case 'attachment-pdf':
+			case 'attachment-snapshot':
 			case 'attachment-web-link':
 			case 'artwork':
 			case 'audioRecording':
@@ -469,6 +470,7 @@ Zotero.ItemTypes = new function() {
 			case 'bookSection':
 			case 'case':
 			case 'computerProgram':
+			case 'conferencePaper':
 			case 'dictionaryEntry':
 			case 'email':
 			case 'encyclopediaArticle':
@@ -492,8 +494,6 @@ Zotero.ItemTypes = new function() {
 				return "chrome://zotero/skin/treeitem-" + itemType + suffix + ".png";
 			
 			// No HiDPI images available
-			case 'attachment-snapshot':
-			case 'conferencePaper':
 			case 'map':
 			case 'podcast':
 			case 'radioBroadcast':
