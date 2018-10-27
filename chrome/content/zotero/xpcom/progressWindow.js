@@ -353,7 +353,7 @@ Zotero.ProgressWindow = function(options = {}) {
 	
 	/**
 	 * Sets the icon for this item.
-	 * @param {Integer} percent A percentage from 0 to 100.
+	 * @param {String} iconSrc
 	 */
 	this.ItemProgress.prototype.setIcon = _deferUntilWindowLoad(function(iconSrc) {
 		this._image.style.backgroundImage = "url('"+iconSrc+"')";
