@@ -30,12 +30,7 @@ var EXPORTED_SYMBOLS = ["Zotero_TranslatorTesters"];
 // For debugging specific translators by label
 var includeTranslators = [];
 
-try {
-	Zotero;
-}
-catch (e) {
-	var Zotero;
-}
+this.Zotero = typeof Zotero != 'undefined' ? Zotero : null;
 
 var Zotero_TranslatorTesters = new function() {
 	const TEST_TYPES = ["web", "import", "export", "search"];
