@@ -235,7 +235,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 			document.getElementById("citations").label = label;
 		}
 
-		window.resizeTo(window.outerWidth, Math.min(650, window.screen.availHeight));
+		window.sizeToContent();
 	};
 
 	/*
