@@ -63,7 +63,7 @@
 <!ENTITY helpMenuWin.label "Ohje">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "Tietoja tuotteesta &brandShortName;">
+<!ENTITY aboutProduct.label "Tietoja &brandShortName;-ohjelmistosta">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "Ohjeet ja tuki">
 <!ENTITY productHelp.accesskey "H">

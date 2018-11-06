@@ -106,7 +106,7 @@
 <!ENTITY zotero.toolbar.removeItem.label "Eliminar elemento...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nueva biblioteca">
 <!ENTITY zotero.toolbar.newCollection.label "Nueva colección...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Marcar fuente como leída">
+<!ENTITY zotero.toolbar.markFeedRead.label "Marcar canal como leído">
 <!ENTITY zotero.toolbar.newGroup "Nuevo grupo...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nueva subcolección...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nueva búsqueda guardada...">
@@ -125,11 +125,11 @@
 <!ENTITY zotero.toolbar.openURL.label "Localizar">
 <!ENTITY zotero.toolbar.openURL.tooltip "Encontrar a través de tu biblioteca local">
 
-<!ENTITY zotero.toolbar.feeds.new "Nueva fuente">
+<!ENTITY zotero.toolbar.feeds.new "Nuevo canal">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Desde URL...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Desde OPML...">
-<!ENTITY zotero.toolbar.feeds.refresh "Actualizar fuente">
-<!ENTITY zotero.toolbar.feeds.edit "Editar fuente...">
+<!ENTITY zotero.toolbar.feeds.refresh "Actualizar canal">
+<!ENTITY zotero.toolbar.feeds.edit "Editar canal...">
 
 <!ENTITY zotero.item.add "Añadir">
 <!ENTITY zotero.item.attachment.file.show "Mostar archivo">
@@ -277,15 +277,15 @@
 <!ENTITY zotero.proxy.recognized.disable.label "No redirigir automáticamente las solicitudes a través de proxies previamente reconocidos">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorar">
 
-<!ENTITY zotero.feedSettings.title "Ajustes de fuente">
+<!ENTITY zotero.feedSettings.title "Ajustes del canal">
 <!ENTITY zotero.feedSettings.saveButton.label "Guardar">
 <!ENTITY zotero.feedSettings.url.label "URL:">
 <!ENTITY zotero.feedSettings.title.label "Título:">
-<!ENTITY zotero.feedSettings.refresh.label1 "Actualizar fuente cada">
+<!ENTITY zotero.feedSettings.refresh.label1 "Actualizar canal cada">
 <!ENTITY zotero.feedSettings.refresh.label2 "hora(s)">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Eliminar elementos no leídos después de">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Eliminar elementos del canal no leídos después de">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "día(s)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Eliminar elementos leídos después de">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Eliminar elementos del canal leídos después de">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "día(s)">
 
 <!ENTITY zotero.rtfScan.title "Escaneado RTF">

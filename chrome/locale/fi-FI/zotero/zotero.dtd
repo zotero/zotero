@@ -195,7 +195,7 @@
 
 <!ENTITY zotero.progress.title "Tilanne">
 
-<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import "Tuonti">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "Tiedosto (BibTeX, RIS, Zotero RDF, jne.)">
 <!ENTITY zotero.import.importing "Tuodaan...">

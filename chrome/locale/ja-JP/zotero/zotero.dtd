@@ -10,14 +10,14 @@
 <!ENTITY zotero.general.cancel "キャンセル">
 <!ENTITY zotero.general.refresh "再読み込み">
 <!ENTITY zotero.general.saveAs "名前をつけて保存...">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "オプション">
 <!ENTITY zotero.general.advancedOptions.label "高度なオプション">
 <!ENTITY zotero.general.tools "ツール">
 <!ENTITY zotero.general.more "その他">
 <!ENTITY zotero.general.loading "読み込み中...">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
-<!ENTITY zotero.general.other "Other…">
+<!ENTITY zotero.general.close "閉じる">
+<!ENTITY zotero.general.minimize "最小化する">
+<!ENTITY zotero.general.other "その他...">
 
 
 <!ENTITY zotero.errorReport.title "Zotero エラーレポート">
@@ -94,8 +94,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "ライブラリへ復帰させる">
 <!ENTITY zotero.items.menu.duplicateItem "選択されたアイテムを複製">
 <!ENTITY zotero.items.menu.mergeItems "アイテムを統合する...">
-<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
+<!ENTITY zotero.items.menu.unrecognize "メタデータの回収を取り消す">
+<!ENTITY zotero.items.menu.reportMetadata "不正確なメタデータを報告する">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "土台として用いるアイテムのヴァージョンを選んでください:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "このアイテムの重複するヴァージョンから維持したいフィールドを選択してください:">
@@ -168,7 +168,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "色を指定">
 <!ENTITY zotero.tagColorChooser.removeColor "色を取り除く">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
+<!ENTITY zotero.lookup.description "ライブラリに追加するためには ISBN, DOI, PMID, または arXiv ID (複数可) を入力してください。">
 <!ENTITY zotero.lookup.button.search "検索">
 
 <!ENTITY zotero.selectitems.title "アイテムを選択">
@@ -195,14 +195,14 @@
 
 <!ENTITY zotero.progress.title "進捗">
 
-<!ENTITY zotero.import "Import">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
-<!ENTITY zotero.import.database "Database">
-<!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
-<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
+<!ENTITY zotero.import "インポート">
+<!ENTITY zotero.import.whereToImportFrom "どこからインポートしますか？">
+<!ENTITY zotero.import.source.file "単一ファイル (BibTeX, RIS, Zotero RDF, など.)">
+<!ENTITY zotero.import.importing "インポート中...">
+<!ENTITY zotero.import.database "データベース">
+<!ENTITY zotero.import.lastModified "最後の更新">
+<!ENTITY zotero.import.size "サイズ">
+<!ENTITY zotero.import.createCollection "インポートされたコレクションやアイテムを新しいコレクションに格納する">
 
 <!ENTITY zotero.exportOptions.title "エクスポート...">
 <!ENTITY zotero.exportOptions.format.label "フォーマット:">
@@ -238,9 +238,9 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "ブックマーク">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "ブックマークはWordとLibreOfficeの間で共有できますが、意図せずに変更された場合にエラーを生じる場合があり、また脚注に挿入することが出来ません。">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "出典表記を自動的に更新する">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "更新待ちの出典表記は書類中でハイライト表示されます。">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "更新を無効化すれば大きな書類への出典表記の挿入が高速化できます。出典表記を手動で更新するためにはリフレッシュボタンをクリックしてください。">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "MEDLINEの略誌名を使用する">

@@ -43,11 +43,11 @@
 <!ENTITY zotero.preferences.groups.childLinks "enlaces subordinados">
 <!ENTITY zotero.preferences.groups.tags "etiquetas">
 
-<!ENTITY zotero.preferences.feeds "Fuentes">
+<!ENTITY zotero.preferences.feeds "Canales">
 <!ENTITY zotero.preferences.feeds.sorting.label "Ordenación:">
 <!ENTITY zotero.preferences.feeds.sorting.newest "Elementos más nuevos primero">
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Elementos más antiguos primero">
-<!ENTITY zotero.preferences.feeds.feedDefaults "Predeterminados de las fuentes">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Valores predeterminados del canal">
 
 <!ENTITY zotero.preferences.openurl.search "Buscar resolvedores">
 <!ENTITY zotero.preferences.openurl.custom "Personalizar...">
@@ -143,7 +143,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Búsqueda rápida">
 <!ENTITY zotero.preferences.keys.newItem "Crear un nuevo elemento">
 <!ENTITY zotero.preferences.keys.newNote "Crear una nota nueva">
-<!ENTITY zotero.preferences.keys.toggleAllRead "Marcar todos los elementos de las fuentes como leídos/no leídos">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Marcar todos los elementos del canal como leídos/no leídos">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Conmutar el selector de etiquetas">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar las citas de los elementos seleccionados al portapapeles">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiar los elementos seleccionados al portapapeles">
