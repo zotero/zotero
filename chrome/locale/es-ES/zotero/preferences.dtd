@@ -49,9 +49,9 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Elementos más antiguos primero">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Valores predeterminados del canal">
 
-<!ENTITY zotero.preferences.openurl.search "Buscar resolvedores">
+<!ENTITY zotero.preferences.openurl.search "Buscar sistemas de resolución">
 <!ENTITY zotero.preferences.openurl.custom "Personalizar...">
-<!ENTITY zotero.preferences.openurl.server "Resolvedor:">
+<!ENTITY zotero.preferences.openurl.server "Sistema de resolución:">
 <!ENTITY zotero.preferences.openurl.version "Versión:">
 
 <!ENTITY zotero.preferences.prefpane.sync "Sincronizar">
@@ -169,7 +169,7 @@
 <!ENTITY zotero.preferences.proxies.variables "Puedes usar las siguientes variables en tu esquema proxy:">
 <!ENTITY zotero.preferences.proxies.h_variable "&#37;h - El nombre del alojamiento del sitio proxy (p. e.: www.zotero.org)">
 <!ENTITY zotero.preferences.proxies.p_variable "&#37;p - La ruta de la página proxy excluyendo la barra invertida (p. e.: acerca/index.html)">
-<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - La ruta del directorio (p. e.: acerca/)">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - La ruta del directorio (p. e., acerca/)">
 <!ENTITY zotero.preferences.proxies.f_variable "&#37;f - El nombre del archivo (p. e.: index.html)">
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Cualquier cadena">
 
