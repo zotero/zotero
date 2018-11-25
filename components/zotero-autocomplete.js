@@ -71,8 +71,8 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 			break;
 		
 		case 'tag':
-			var sql = "SELECT DISTINCT name AS val, NULL AS comment FROM tags WHERE name LIKE ?";
-			var sqlParams = [searchString + '%'];
+			var sql = "SELECT DISTINCT name AS val, NULL AS comment FROM tags WHERE name LIKE ? ESCAPE '\\'";
+			var sqlParams = [Zotero.Utilities.Internal.escapeSQLExpression(searchString) + '%'];
 			if (searchParams.libraryID !== undefined) {
 				sql += " AND tagID IN (SELECT tagID FROM itemTags JOIN items USING (itemID) "
 					+ "WHERE libraryID=?)";
