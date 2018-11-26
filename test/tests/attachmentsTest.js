@@ -354,6 +354,7 @@ describe("Zotero.Attachments", function() {
 		var pageURL7 = doiPrefix + doi5;
 		var pageURL8 = 'http://website2/article8';
 		var pageURL9 = 'http://website/article9';
+		var pageURL10 = 'http://website/refresh';
 		
 		Components.utils.import("resource://zotero-unit/httpd.js");
 		var httpd;
@@ -532,6 +533,11 @@ describe("Zotero.Attachments", function() {
 						let html = getHTMLPage(true);
 						return makeHTMLResponseFromType(html, options.responseType, pageURL9);
 					}
+				}
+				
+				if (url == pageURL10) {
+					let html = `<html><head><meta http-equiv=\"refresh\" content=\"2;url=${pageURL1}\"/></head><body></body></html>`;
+					return makeHTMLResponseFromType(html, options.responseType, pageURL10);
 				}
 				
 				// OA PDF lookup
@@ -828,6 +834,25 @@ describe("Zotero.Attachments", function() {
 			// Make sure both items have attachments
 			assert.equal(item1.numAttachments(), 1);
 			assert.equal(item2.numAttachments(), 1);
+		});
+		
+		it("should follow a meta redirect", async function () {
+			var url = pageURL10;
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('url', url);
+			await item.saveTx();
+			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			
+			assert.isTrue(requestStub.calledTwice);
+			assert.equal(requestStub.getCall(0).args[1], pageURL10)
+			assert.equal(requestStub.getCall(1).args[1], pageURL1)
+			assert.ok(attachment);
+			var json = attachment.toJSON();
+			assert.equal(json.url, pdfURL);
+			assert.equal(json.contentType, 'application/pdf');
+			assert.equal(json.filename, 'Test.pdf');
+			assert.equal(await OS.File.stat(attachment.getFilePath()).size, pdfSize);
 		});
 		
 		it("should handle a custom resolver in HTML mode", async function () {

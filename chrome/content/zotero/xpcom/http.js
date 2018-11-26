@@ -361,38 +361,28 @@ Zotero.HTTP = new function() {
 					(!options.numRedirects || options.numRedirects < 3)) {
 					let contentType = xmlhttp.getResponseHeader('Content-Type');
 					if (contentType && contentType.startsWith('text/html')) {
-						let meta = xmlhttp.response.querySelector('meta[http-equiv="refresh" i]');
-						if (meta) {
-							let content = meta.getAttribute('content');
-							if (content) {
-								let parts = content.split(/;\s*url=/);
-								// If there's a redirect to another URL in less than 15 seconds,
-								// follow it
-								if (parts.length === 2 && parseInt(parts[0]) <= 15) {
-									let url = parts[1].trim().replace(/^'(.+)'/, '$1');
-									
-									// Resolve URL. P.S.: For unknown reason this only works
-									// if server returns 'Content-Type: text/html' header
-									let a = xmlhttp.response.createElement('a');
-									a.href = url;
-									let resolvedUrl = a.href;
-									
-									// Make sure the absolute URL is actually resolved
-									if (/^https?:\/\//.test(resolvedUrl)) {
-										if (options.numRedirects) {
-											options.numRedirects++;
-										}
-										else {
-											options.numRedirects = 1;
-										}
-										
-										// Meta redirect is always GET
-										return Zotero.HTTP.request("GET", resolvedUrl, options)
-											.then(xmlhttp => deferred.resolve(xmlhttp))
-											.catch(e => deferred.reject(e));
-									}
-								}
+						let doc = xmlhttp.response;
+						let url = xmlhttp.responseURL;
+						let resolvedURL;
+						try {
+							resolvedURL = this.getHTMLMetaRefreshURL(doc, url);
+						}
+						catch (e) {
+							deferred.reject(e);
+							return;
+						}
+						if (resolvedURL) {
+							if (options.numRedirects) {
+								options.numRedirects++;
 							}
+							else {
+								options.numRedirects = 1;
+							}
+							
+							// Meta redirect is always GET
+							return Zotero.HTTP.request("GET", resolvedURL, options)
+								.then(xmlhttp => deferred.resolve(xmlhttp))
+								.catch(e => deferred.reject(e));
 						}
 					}
 				}
@@ -680,6 +670,36 @@ Zotero.HTTP = new function() {
 		xmlhttp.send(null);
 		return xmlhttp;
 	}
+	
+	
+	this.getHTMLMetaRefreshURL = function (doc, url) {
+		var meta = doc.querySelector('meta[http-equiv="refresh" i]');
+		if (!meta) {
+			return false;
+		}
+		var content = meta.getAttribute('content');
+		if (!content) {
+			return false;
+		}
+		var parts = content.split(/;\s*url=/);
+		// If there's a redirect to another URL in less than 15 seconds,
+		// follow it
+		if (parts.length === 2 && parseInt(parts[0]) <= 15) {
+			let refreshURL = parts[1].trim().replace(/^'(.+)'/, '$1');
+			let resolvedURL;
+			try {
+				resolvedURL = Services.io.newURI(url, null, null).resolve(refreshURL);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			// Make sure the URL is actually resolved
+			if (resolvedURL && /^https?:\/\//.test(resolvedURL)) {
+				return resolvedURL;
+			}
+		}
+		return false;
+	};
 	
 	
 	/**
