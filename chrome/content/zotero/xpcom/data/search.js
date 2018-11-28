@@ -1171,6 +1171,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						let objKey = condition.value;
 						let objectType = condition.name == 'collection' ? 'collection' : 'search';
 						let objectTypeClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
+						let forceNoResults = false;
 						
 						// libraryID assigned on search
 						if (this.libraryID !== null) {
@@ -1202,24 +1203,24 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 								objLibraryID, objKey
 							);
 						}
-						if (!obj) {
-							var msg = objectType.charAt(0).toUpperCase() + objectType.substr(1)
+						if (obj) {
+							if (objectType == 'search' && obj == this) {
+								Zotero.warn(`Search "${this.name}" references itself -- skipping condition`);
+								continue;
+							}
+						}
+						else {
+							let msg = objectType.charAt(0).toUpperCase() + objectType.substr(1)
 								+ " " + objKey + " specified in search not found";
 							Zotero.debug(msg, 2);
 							Zotero.log(msg, 'warning', 'chrome://zotero/content/xpcom/search.js');
-							if (objectType == 'search') {
-								continue;
-							}
-							obj = {
-								id: 0
-							};
-						}
-						if (objectType == 'search' && obj == this) {
-							Zotero.warn(`Search "${this.name}" references itself -- skipping condition`);
-							continue;
+							forceNoResults = true;
 						}
 						
-						if (objectType == 'collection') {
+						if (forceNoResults) {
+							condSQL += '0=1';
+						}
+						else if (objectType == 'collection') {
 							let ids = [obj.id];
 							
 							// Search descendent collections if recursive search

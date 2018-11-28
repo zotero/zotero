@@ -193,6 +193,18 @@ describe("Zotero.Search", function() {
 					var matches = yield s.search();
 					assert.sameMembers(matches, [item.id]);
 				});
+				
+				it("should return no results for a collection that doesn't exist in recursive mode", async function () {
+					var item = await createDataObject('item');
+					
+					var s = new Zotero.Search();
+					s.libraryID = item.libraryID;
+					s.name = "Test";
+					s.addCondition('collection', 'is', Zotero.DataObjectUtilities.generateKey());
+					s.addCondition('recursive', 'true');
+					var matches = await s.search();
+					assert.lengthOf(matches, 0);
+				});
 			});
 			
 			describe("fileTypeID", function () {
@@ -360,6 +372,17 @@ describe("Zotero.Search", function() {
 					s.addCondition('savedSearch', 'isNot', search.key);
 					var matches = yield s.search();
 					assert.notInclude(matches, item.id);
+				});
+				
+				it("should return no results for a search that doesn't exist", async function () {
+					var item = await createDataObject('item');
+					
+					var s = new Zotero.Search();
+					s.libraryID = item.libraryID;
+					s.name = "Test";
+					s.addCondition('savedSearch', 'is', Zotero.DataObjectUtilities.generateKey());
+					var matches = await s.search();
+					assert.lengthOf(matches, 0);
 				});
 			});
 			
