@@ -421,7 +421,9 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function (test, testDone
 				testDoneCallback(obj, test, status, message);
 			});
 		},
-		this._cookieSandbox,
+		{
+			cookieSandbox: this._cookieSandbox
+		}
 	)
 	.catch(function (e) {
 		testDoneCallback(this, test, "failed", "Translation failed to initialize: " + e);

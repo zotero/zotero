@@ -903,16 +903,26 @@ Zotero.HTTP = new function() {
 	 * @param {String|String[]} urls URL(s) of documents to load
 	 * @param {Function} processor - Callback to be executed for each document loaded; if function returns
 	 *     a promise, it's waited for before continuing
-	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
+	 * @param {Object} [options]
+	 * @param {Zotero.CookieSandbox} [options.cookieSandbox] - Cookie sandbox object
+	 * @param {Object} [options.headers] - Headers to include in the request
 	 * @return {Promise<Array>} - A promise for an array of results from the processor runs
 	 */
-	this.processDocuments = async function (urls, processor, cookieSandbox) {
+	this.processDocuments = async function (urls, processor, options = {}) {
 		// Handle old signature: urls, processor, onDone, onError, dontDelete, cookieSandbox
 		if (arguments.length > 3) {
 			Zotero.debug("Zotero.HTTP.processDocuments() now takes only 3 arguments -- update your code");
 			var onDone = arguments[2];
 			var onError = arguments[3];
 			var cookieSandbox = arguments[5];
+		}
+		else if (options instanceof Zotero.CookieSandbox) {
+			Zotero.debug("Zotero.HTTP.processDocuments() now takes an 'options' object for its third parameter -- update your code");
+			var cookieSandbox = options;
+		}
+		else {
+			var cookieSandbox = options.cookieSandbox;
+			var headers = options.headers;
 		}
 		
 		if (typeof urls == "string") urls = [urls];
@@ -921,7 +931,9 @@ Zotero.HTTP = new function() {
 				"GET",
 				url,
 				{
-					responseType: 'document'
+					responseType: 'document',
+					cookieSandbox,
+					headers
 				}
 			)
 			.then((xhr) => {

@@ -261,7 +261,9 @@ Zotero.Utilities.Translate.prototype.processDocuments = async function (urls, pr
 					if (!processor) return;
 					return processDoc(doc);
 				},
-				translate.cookieSandbox
+				{
+					cookieSandbox: translate.cookieSandbox
+				}
 			)
 		);
 	}
