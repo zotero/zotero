@@ -2054,6 +2054,13 @@ Zotero.Translate.Web.prototype.setCookieSandbox = function(cookieSandbox) {
 }
 
 /**
+ * Sets headers to include in HTTP requests. Used by translation-server.
+ */
+Zotero.Translate.Web.prototype.setRequestHeaders = function (headers) {
+	this.requestHeaders = headers;
+};
+
+/**
  * Sets the location to operate upon
  *
  * @param {String} location The URL of the page to translate

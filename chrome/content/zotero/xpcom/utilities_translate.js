@@ -360,7 +360,7 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 		} catch(e) {
 			translate.complete(false, e);
 		}
-	}, responseCharset, this._translate.cookieSandbox, requestHeaders);
+	}, responseCharset, this._translate.cookieSandbox, Object.assign({}, this._translate.requestHeaders, requestHeaders));
 }
 
 /**
@@ -393,7 +393,7 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
 		} catch(e) {
 			translate.complete(false, e);
 		}
-	}, headers, responseCharset, translate.cookieSandbox ? translate.cookieSandbox : undefined);
+	}, Object.assign({}, translate.requestHeaders, headers), responseCharset, translate.cookieSandbox ? translate.cookieSandbox : undefined);
 }
 
 Zotero.Utilities.Translate.prototype.urlToProxy = function(url) {
