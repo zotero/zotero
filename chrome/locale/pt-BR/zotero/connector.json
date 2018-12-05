@@ -35,14 +35,35 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "última versão"
   },
+  "appConnector": {
+    "message": "Conector $1"
+  },
   "upgradeApp": {
     "message": "Atualização $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "$1 está rodando?"
+  },
+  "error_connection_save": {
+    "message": "O $1 não conseguiu se comunicar com a aplicação $2 desktop. O Conector pode gravar algumas páginas diretamente na sua conta $3, mas para ter melhores resultados você deve certificar-se de que $2 esteja aberto antes de tentar gravar."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Você pode <a href=\"$1\">baixar $2</a> ou <a href=\"$3\">verificar a conexão</a> se necessário."
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Habilite o salvamento para a biblioteca online"
   },
+  "integration_error_clientUpgrade": {
+    "message": "Citação pela web requer $1 ou mais atual."
+  },
+  "integration_error_connection": {
+    "message": "O $1 não conseguiu se comunicar com a aplicação $2 desktop. $2 deve estar aberto para utilizar a citação pela web."
+  },
   "integration_googleDocs_unlinkBeforeSaving_warning": {
     "message": "Este documento contém citações ativas do Zotero, que aparecerão como links para zotero.org em uma cópia que seja baixada."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Para gerar uma versão adequada para ser compartilhada, selecione <b>Fazer uma cópia…</b> no menu Arquivo, selecione <b>Desvincular Citações</b> no menu Zotero no novo documento, e então baixe a versão sem vinculações. Mantenha esse documento original com vinculações para caso você precise fazer outras alterações."
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Baixar a versão conectada mesmo assim"

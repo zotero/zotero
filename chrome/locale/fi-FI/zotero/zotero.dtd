@@ -176,8 +176,8 @@
 <!ENTITY zotero.selectitems.cancel.label "Peruuta">
 <!ENTITY zotero.selectitems.select.label "OK">
 
-<!ENTITY zotero.bibliography.title "Luo kirjallisuusluettelo">
-<!ENTITY zotero.bibliography.style.label "Sitaattityyli:">
+<!ENTITY zotero.bibliography.title "Luo viite/lähdeluettelo">
+<!ENTITY zotero.bibliography.style.label "Viittaustyyli:">
 <!ENTITY zotero.bibliography.manageStyles "Hallitse tyylejä...">
 <!ENTITY zotero.bibliography.locale.label "Kieli:">
 <!ENTITY zotero.bibliography.outputMode "Luettelotyyppi:">
@@ -189,9 +189,9 @@
 <!ENTITY zotero.bibliography.print.label "Tulosta">
 
 <!ENTITY zotero.integration.docPrefs.title "Asiakirjan asetukset">
-<!ENTITY zotero.integration.addEditCitation.title "Lisää/muokkaa sitaatti">
+<!ENTITY zotero.integration.addEditCitation.title "Lisää/muokkaa viitettä">
 <!ENTITY zotero.integration.editBibliography.title "Muokkaa lähdeluetteloa">
-<!ENTITY zotero.integration.quickFormatDialog.title "Pikainen lähteen muokkaus">
+<!ENTITY zotero.integration.quickFormatDialog.title "Viitteen pikamuotoilu">
 
 <!ENTITY zotero.progress.title "Tilanne">
 
@@ -238,8 +238,8 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Kirjanmerkit">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Päivitä viitteet automaattisesti">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Viitteet, joilla on odottavia päivityksiä, korostetaan asiakirjassa">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
 
 
@@ -290,7 +290,7 @@
 
 <!ENTITY zotero.rtfScan.title "RTF:n läpikäynti">
 <!ENTITY zotero.rtfScan.cancel.label "Peruuta">
-<!ENTITY zotero.rtfScan.citation.label "Sitaatti">
+<!ENTITY zotero.rtfScan.citation.label "Viite">
 <!ENTITY zotero.rtfScan.itemName.label "Nimikkeen nimi">
 <!ENTITY zotero.rtfScan.unmappedCitations.label "Paikantamattomat sitaatit">
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Monimerkityksiset sitaatit">
@@ -298,7 +298,7 @@
 <!ENTITY zotero.rtfScan.introPage.label "Johdanto">
 <!ENTITY zotero.rtfScan.introPage.description "Zotero voi automaattisesti seuloa ja uudelleenmuotoilla viittaukset ja lisätä kirjallisuusluettelon RTF-tiedostoon. Valitse aluksi RTF-tiedosto.">
 <!ENTITY zotero.rtfScan.introPage.description2 "Valitse aluksi luettava RTF-tiedosto sekä kirjoitettava tiedosto:">
-<!ENTITY zotero.rtfScan.scanPage.label "Etsitään sitaatteja">
+<!ENTITY zotero.rtfScan.scanPage.label "Etsitään viitteitä">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero etsii asiakirjasta sitaatteja. Malta vielä hetki.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Varmenna siteeratut nimikkeet">
 <!ENTITY zotero.rtfScan.citationsPage.description "Käy läpi allaoleva tunnistettujen sitaattien lista varmistaaksesi, että Zotero on valinnut sitaatteja vastaavat nimikkeet oikein. Kaikki paikantamattomat tai monimerkityksiset sitaatit täytyy selvittää ennen seuraavaa vaihetta.">

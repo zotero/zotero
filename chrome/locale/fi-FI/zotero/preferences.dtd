@@ -126,7 +126,7 @@
 <!ENTITY zotero.preferences.prefpane.cite "Viitteet">
 <!ENTITY zotero.preferences.cite.styles "Tyylit">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstinkäsittelyohjelmat">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Käytä perinteistä &quot;Lisää sitaatti&quot; -ikkunaa">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Käytä perinteistä &quot;Lisää viite&quot; -dialogia">
 <!ENTITY zotero.preferences.styleEditor "Tyylieditori">
 <!ENTITY zotero.preferences.stylePreview "Tyylin esikatselu">
 

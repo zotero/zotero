@@ -10,14 +10,14 @@
 <!ENTITY zotero.general.cancel "Zrušit">
 <!ENTITY zotero.general.refresh "Obnovit">
 <!ENTITY zotero.general.saveAs "Uložit jako...">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "Možnosti">
 <!ENTITY zotero.general.advancedOptions.label "Pokročilé možnosti">
 <!ENTITY zotero.general.tools "Nástroje">
 <!ENTITY zotero.general.more "Více">
 <!ENTITY zotero.general.loading "Nahrává se...">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
-<!ENTITY zotero.general.other "Other…">
+<!ENTITY zotero.general.close "Zavřít">
+<!ENTITY zotero.general.minimize "Minimalizovat">
+<!ENTITY zotero.general.other "Další...">
 
 
 <!ENTITY zotero.errorReport.title "Chybová zpráva Zotera">
@@ -94,8 +94,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Obnovit do knihovny">
 <!ENTITY zotero.items.menu.duplicateItem "Duplikovat vybranou položku">
 <!ENTITY zotero.items.menu.mergeItems "Sloučit položky...">
-<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
+<!ENTITY zotero.items.menu.unrecognize "Zpět Získávání metadat">
+<!ENTITY zotero.items.menu.reportMetadata "Oznámit chybná metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Vyberte verzi položky, jež bude použita jako hlavní položka:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Vyberte pole z jiných verzí položky, která se mají zachovat:">
@@ -168,7 +168,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Nastavit barvu">
 <!ENTITY zotero.tagColorChooser.removeColor "Odstranit barvu">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
+<!ENTITY zotero.lookup.description "Pro přidání do knihovny zadejte ISBN, DOI, PMID či arXiv IDs:">
 <!ENTITY zotero.lookup.button.search "Hledat">
 
 <!ENTITY zotero.selectitems.title "Označit položky">
@@ -196,12 +196,12 @@
 <!ENTITY zotero.progress.title "Postup">
 
 <!ENTITY zotero.import "Import">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
-<!ENTITY zotero.import.database "Database">
-<!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.whereToImportFrom "Odkud chcete importovat?">
+<!ENTITY zotero.import.source.file "Soubor (BibTeX, RIS, Zotero RDF, atd.)">
+<!ENTITY zotero.import.importing "Importuje...">
+<!ENTITY zotero.import.database "Databáze">
+<!ENTITY zotero.import.lastModified "Naposledy změněno">
+<!ENTITY zotero.import.size "Velikost">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "Export...">
@@ -238,7 +238,7 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Záložky">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automaticky aktualizovat citace">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
 

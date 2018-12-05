@@ -80,7 +80,7 @@
 <!ENTITY debugOutputLogging.submit "Zaslat výstup">
 <!ENTITY debugOutputLogging.view "Prohlédnout výstup">
 <!ENTITY debugOutputLogging.clear "Vymazat výstup">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restartovat se zapnutým logováním...">
 
 <!ENTITY helpCheckForUpdates.label "Zkontrolovat aktualizace...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

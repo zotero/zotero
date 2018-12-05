@@ -32,7 +32,7 @@
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY copyCitationCmd.label "Kopioi sitaatti">
+<!ENTITY copyCitationCmd.label "Kopioi viite">
 <!ENTITY copyBibliographyCmd.label "Kopioi kirjallisuusluettelo">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Vaihda sivun suuntaa">

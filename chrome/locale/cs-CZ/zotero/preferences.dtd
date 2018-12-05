@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.items "položky">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Nastavení">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "Vlastní...">
 
 <!ENTITY zotero.preferences.prefpane.general "Obecné">
 
@@ -19,13 +19,13 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Extra velká">
 <!ENTITY zotero.preferences.fontSize.notes "Velikost písma poznámek:">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.fileHandling "Nakládání se souborem">
 <!ENTITY zotero.preferences.automaticSnapshots "Automaticky udělat snímek při vytváření položky z internetových stránek">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automaticky připojit propojené PDF a ostatní soubory při ukládání položek">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Atuomaticky získat metadata pro PDF">
+<!ENTITY zotero.preferences.autoRenameFiles "Automaticky přejmenovat přiložené soubory podle rodičovských metadat">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Otevřít PDF pomocí">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "Systémové výchozí hodnoty">
 
 <!ENTITY zotero.preferences.miscellaneous "Různé">
 <!ENTITY zotero.preferences.autoUpdate "Automatický vyhledávat updaty překladačů a stylů">
@@ -73,7 +73,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Stáhnout soubory">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "při synchronizaci">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "když je potřeba">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Ověřit Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Použitím úložiště Zotera souhlasíte s">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "podmínkami a ujednáními">
 <!ENTITY zotero.preferences.sync.librariesToSync "Knihovny k synchronizeci">
@@ -85,10 +85,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "pro další informace.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Resetovat historii synchronizace dat">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Sloučit místní data s vzdálenými daty; historie synchronizace se bude ignorovat">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Obnovit z Online knihovny">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Přepsat lokální data Zotero daty z online knihovny.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Obnovit do Online knihovny">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Přepsat online knihovnu daty z lokálního Zotera">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Resetovat historii synchronizace souborů">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
 <!ENTITY zotero.preferences.sync.reset "Resetování">
@@ -195,7 +195,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Použít adresář profilu Firefoxu">
 <!ENTITY zotero.preferences.dataDir.custom "Vlastní:">
 <!ENTITY zotero.preferences.dataDir.choose "Vybrat...">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specifikováno přes příkazovou řádku)">
 <!ENTITY zotero.preferences.dataDir.reveal "Ukázat Datový adresář">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrovat do nového výchozího umístění...">
 
