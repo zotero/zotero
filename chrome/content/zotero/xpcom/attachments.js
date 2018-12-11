@@ -1762,7 +1762,7 @@ Zotero.Attachments = new function(){
 					}
 					
 					// If DOI resolves directly to a PDF, save it to disk
-					if (contentType == 'application/pdf') {
+					if (contentType.startsWith('application/pdf')) {
 						Zotero.debug("URL resolves directly to PDF");
 						await Zotero.File.putContentsAsync(path, blob);
 						await _enforcePDF(path);
