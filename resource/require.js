@@ -8,9 +8,9 @@ var require = (function() {
 	var { Loader, Require, Module } = Components.utils.import('resource://gre/modules/commonjs/toolkit/loader.js');
 	var requirer = Module('/', '/');
 	var _runningTimers = {};
-	var window = {};
+	var win = {};
 
-	window.setTimeout = function (func, ms) {
+	win.setTimeout = function (func, ms) {
 		var id = Math.floor(Math.random() * (1000000000000 - 1)) + 1
 		var useMethodjit = Components.utils.methodjit;
 		var timer = Components.classes["@mozilla.org/timer;1"]
@@ -47,7 +47,7 @@ var require = (function() {
 		return id;
 	};
 	
-	window.clearTimeout = function (id) {
+	win.clearTimeout = function (id) {
 		var timer = _runningTimers[id];
 		if (timer) {
 			timer.cancel();
@@ -55,7 +55,7 @@ var require = (function() {
 		delete _runningTimers[id];
 	};
 
-	window.debug = function (msg) {
+	win.debug = function (msg) {
 		dump(msg + "\n\n");
 	};
 	
@@ -83,15 +83,18 @@ var require = (function() {
 		document: typeof document !== 'undefined' && document || {},
 		console: cons,
 		navigator: typeof navigator !== 'undefined' && navigator || {},
-		window,
-		setTimeout: window.setTimeout,
-		clearTimeout: window.clearTimeout,
+		setTimeout: win.setTimeout,
+		clearTimeout: win.clearTimeout,
 	};
 	Object.defineProperty(globals, 'Zotero', { get: getZotero });
+	Object.defineProperty(globals, 'window', { get: function() {
+		return typeof window != 'undefined' ? window : win;
+	} });
 	var loader = Loader({
 		id: 'zotero/require',
 		paths: {
 			'': 'resource://zotero/',
+			'components/': 'chrome://zotero/content/components/'
 		},
 		globals
 	});

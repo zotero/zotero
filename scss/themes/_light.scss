@@ -7,7 +7,7 @@
 // --------------------------------------------------
 
 $red:           #cc2936;
-$blue:          #2e4de5; // 230° 80 90
+$blue:          rgb(89, 139, 236);
 $asphalt:       #7a8799;
 $asphalt-light: #dadee3;
 
@@ -69,6 +69,13 @@ $main-bg: $shade-0;
 // Sidebar
 $sidebar-bg: $shade-1;
 
+// Clicky
+$clicky-hover-bg-color: rgb(187, 206, 241);
+$clicky-active-bg-color: $secondary;
+$clicky-border-radius: 6px;
+$clicky-border-color: rgb(109, 149, 224);
+$clicky-active-color: $shade-0;
+
 
 // Components
 // --------------------------------------------------
@@ -129,20 +136,10 @@ $metadata-separator-color: $shade-3;
 // Button
 $btn-primary-color:           $shade-0;
 $btn-primary-bg:              $asphalt;
-$btn-secondary-color:         $secondary;
 $btn-default-color:           $text-color;
+$btn-border:          $shade-3;
 $btn-default-bg:              $shade-0;
 $btn-default-active-color:    rgba($btn-default-color, 0.5);
-$btn-icon-bg:                 $transparent;
-$btn-icon-focus-color:        $shade-0;
-$btn-icon-focus-bg:           $asphalt;
-$btn-icon-focus-active-color: rgba($shade-0, 0.5);
-$btn-icon-active-color:       $shade-7;
-$btn-icon-active-bg:          $shade-2;
-$twisty-color:                $shade-6;
-$twisty-focus-color:          $asphalt;
-$twisty-selected-color:       $shade-7;
-$twisty-dnd-target-color:     $shade-0;
 
 // Forms
 $input-color:        $text-color;

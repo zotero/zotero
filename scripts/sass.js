@@ -28,7 +28,8 @@ async function getSass(source, options, signatures={}) {
 			if (compareSignatures(newFileSignature, signatures[f])) {
 				try {
 					await fs.access(dest, fs.constants.F_OK);
-					continue;
+					// TODO: Doesn't recompile on partial scss file changes, so temporarily disabled
+					// continue;
 				} catch (_) {
 					// file does not exists in build, fallback to browserifing
 				}

@@ -4,7 +4,6 @@ const dirs = [
 	'components',
 	'defaults',
 	'resource',
-	'resource/web-library',
 	'test',
 	'test/resource/chai',
 	'test/resource/chai-as-promised',

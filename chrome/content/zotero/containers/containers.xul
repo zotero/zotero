@@ -23,13 +23,12 @@
     
     ***** END LICENSE BLOCK *****
 -->
-<?xml-stylesheet href="chrome://zotero/skin/zotero-react-client.css"?>
-<?xul-overlay href="chrome://zotero/content/reactUI/tagSelector.xul"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
+<?xul-overlay href="chrome://zotero/content/containers/tagSelector.xul"?>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<script src="chrome://zotero/content/include.js"></script>
 	
-	<script src="zoteroPane.js"></script>
-	
-	<script src="containers/tag-selector.js"></script>
+	<script src="containers.js"></script>
+	<script src="tagSelector.js"></script>
 </overlay>

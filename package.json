@@ -18,11 +18,12 @@
     "bluebird": "^3.5.1",
     "classnames": "^2.2.6",
     "prop-types": "^15.6.2",
-    "react": "^15.6.2",
-    "react-dom": "^15.6.2"
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "react-intl": "^2.7.2"
   },
   "devDependencies": {
-    "babel-core": "^6.26.0",
+    "babel-core": "^6.26.3",
     "babel-plugin-syntax-async-generators": "^6.13.0",
     "babel-plugin-syntax-decorators": "^6.13.0",
     "babel-plugin-syntax-do-expressions": "^6.13.0",
@@ -31,7 +32,7 @@
     "babel-plugin-syntax-jsx": "^6.13.0",
     "babel-plugin-syntax-object-rest-spread": "^6.13.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "babel-preset-react": "^6.16.0",
     "browserify": "^14.5.0",
     "chai": "^4.1.2",
@@ -45,7 +46,7 @@
     "jspath": "^0.4.0",
     "mocha": "^3.5.3",
     "multimatch": "^2.1.0",
-    "node-sass": "^4.9.0",
+    "node-sass": "^4.11.0",
     "sinon": "^4.5.0",
     "universalify": "^0.1.1"
   }

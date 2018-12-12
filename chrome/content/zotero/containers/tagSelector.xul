@@ -30,29 +30,29 @@
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<menupopup id="tag-menu">
-						<menuitem label="&zotero.tagSelector.assignColor;"
-						oncommand="ZoteroPane_Local.tagSelector.openColorPickerWindow(); event.stopPropagation();"/>
-						<menuitem label="&zotero.tagSelector.renameTag;"
-						oncommand="ZoteroPane_Local.tagSelector.openRenamePrompt(); event.stopPropagation();"/>
-						<menuitem label="&zotero.tagSelector.deleteTag;"
-						oncommand="ZoteroPane_Local.tagSelector.openDeletePrompt(); event.stopPropagation();"/>
+		<menuitem label="&zotero.tagSelector.assignColor;"
+			oncommand="ZoteroPane.tagSelector.openColorPickerWindow(); event.stopPropagation();"/>
+		<menuitem label="&zotero.tagSelector.renameTag;"
+			oncommand="ZoteroPane.tagSelector.openRenamePrompt(); event.stopPropagation();"/>
+		<menuitem label="&zotero.tagSelector.deleteTag;"
+			oncommand="ZoteroPane.tagSelector.openDeletePrompt(); event.stopPropagation();"/>
 	</menupopup>
 	<menupopup id="tag-selector-view-settings-menu"
 		onpopupshowing="
-			document.getElementById('show-automatic').setAttribute('checked', ZoteroPane_Local.tagSelector.showAutomatic);
-			document.getElementById('display-all-tags').setAttribute('checked', !ZoteroPane_Local.tagSelector.filterToScope);
-			document.getElementById('num-selected').label = ZoteroPane_Local.tagSelector.label">
+			document.getElementById('show-automatic').setAttribute('checked', ZoteroPane.tagSelector.showAutomatic);
+			document.getElementById('display-all-tags').setAttribute('checked', ZoteroPane.tagSelector.displayAllTags);
+			document.getElementById('num-selected').label = ZoteroPane.tagSelector.label">
 		<menuitem id="num-selected" disabled="true"/>
 		<menuitem id="deselect-all" label="&zotero.tagSelector.clearAll;"
-			oncommand="ZoteroPane_Local.tagSelector.deselectAll(); event.stopPropagation();"/>
+			oncommand="ZoteroPane.tagSelector.deselectAll(); event.stopPropagation();"/>
 		<menuseparator/>
 		<menuitem id="show-automatic" label="&zotero.tagSelector.showAutomatic;" type="checkbox"
-			oncommand="ZoteroPane_Local.tagSelector.toggleShowAutomatic(); event.stopPropagation();"/>
+			oncommand="ZoteroPane.tagSelector.toggleShowAutomatic(); event.stopPropagation();"/>
 		<menuitem 
 			id="display-all-tags"
 			label="&zotero.tagSelector.displayAllInLibrary;"
 			type="checkbox"
-			oncommand="ZoteroPane_Local.tagSelector.toggleFilterToScope(); event.stopPropagation();"
+			oncommand="ZoteroPane.tagSelector.toggleDisplayAllTags(); event.stopPropagation();"
 		/>
 	</menupopup>
 </overlay>

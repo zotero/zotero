@@ -2,23 +2,26 @@
 // Tag selector
 // --------------------------------------------------
 
-.library .tag-selector {
-	height: 160px;
-}
-
 .tag-selector {
 	display: flex;
-	flex: 1 0 100%;
+	flex: 1 0;
 	flex-direction: column;
 	overflow: hidden;
-	background-color: $tag-selector-bg;
 }
 
 .tag-selector-container {
 	flex: 1 1 auto;
 	justify-content: space-between;
 	overflow: auto;
-	height: auto;
+	height: 100px;
+	background-color: $tag-selector-bg;
+}
+
+.tag-selector-message {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
 }
 
 .tag-selector-filter-container {
@@ -26,7 +29,7 @@
 	flex: 0 0 1em;
 	display: flex;
 	flex-direction: row;
-	padding: 0.25em;
+	padding: 0.125em 0 0.125em 0.5em;
 }
 
 .tag-selector-list {
@@ -42,21 +45,21 @@
 }
 
 .tag-selector-actions {
-	flex: 0 0 32px;
+	flex: 0 0 42px;
+	display: block;
+	white-space: nowrap;
+	background-color: inherit;
 }
 
 .tag-selector-item {
-	border-radius: 1em;
-	border: 1px solid transparent;
 	cursor: pointer;
 	display: inline-block;
-	padding: .05em .5em;
-	margin: 0;
-
-	&.selected {
-		background-color: $secondary;
-		border: 1px solid $secondary;
-	}
+	margin: .15em .05em .15em .3em;
+	padding: 0 .25em 0 .25em;
+	max-width: 250px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 
 	&.colored {
 		font-weight: bold;
@@ -64,14 +67,17 @@
 
 	&.disabled {
 		opacity: .6;
-		cursor: auto;
-		pointer-events: none;
+		cursor: default;
 	}
+	
+	&.dragged-over {
+		color: $shade-0;
+		background: $shade-6;
+	}
+}
 
-	&:not(.disabled):hover {
-		background-color: lighten($secondary, 15%);
-		border: 1px solid $secondary;
-	}
+#zotero-tag-selector-container {
+	display: flex;
 }
 
 #zotero-tag-selector {

@@ -26,9 +26,14 @@ async function babelWorker(ev) {
 
 	try {
 		let contents = await fs.readFile(sourcefile, 'utf8');
-		if (sourcefile === 'resource/react-dom.js') {
+		if (sourcefile === 'resource/react.js') {
 			// patch react
-			transformed = contents.replace(/ownerDocument\.createElement\((.*?)\)/gi, 'ownerDocument.createElementNS(DOMNamespaces.html, $1)')
+			transformed = contents.replace('instanceof Error', '.constructor.name == "Error"')
+		} else if (sourcefile === 'resource/react-dom.js') {
+			// and react-dom
+			transformed = contents.replace(/ ownerDocument\.createElement\((.*?)\)/gi, 'ownerDocument.createElementNS(HTML_NAMESPACE, $1)')
+				.replace('element instanceof win.HTMLIFrameElement',
+					'typeof element != "undefined" && element.tagName.toLowerCase() == "iframe"')
 				.replace("isInputEventSupported = false", 'isInputEventSupported = true');
 		} else if ('ignore' in options && options.ignore.some(ignoreGlob => multimatch(sourcefile, ignoreGlob).length)) {
 			transformed = contents;

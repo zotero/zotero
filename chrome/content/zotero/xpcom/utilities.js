@@ -145,6 +145,25 @@ var CSL_TYPE_MAPPINGS = {
  */
 Zotero.Utilities = {
 	/**
+	 * Returns a function which will execute `fn` with provided arguments after `delay` milliseconds and not more
+	 * than once, if called multiple times. See
+	 * http://stackoverflow.com/questions/24004791/can-someone-explain-the-debounce-function-in-javascript
+	 * @param fn {Function} function to debounce
+	 * @param delay {Integer} number of miliseconds to delay the function execution
+	 * @returns {Function}
+	 */
+	debounce: function(fn, delay=500) {
+		var timer = null;
+		return function () {
+			let args = arguments;
+			clearTimeout(timer);
+			timer = setTimeout(function () {
+				fn.apply(this, args);
+			}.bind(this), delay);
+		};
+	},
+
+	/**
 	 * Fixes author name capitalization.
 	 * Currently for all uppercase names only
 	 *

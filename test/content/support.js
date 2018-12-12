@@ -213,12 +213,15 @@ var waitForTagSelector = function (win) {
 	var zp = win.ZoteroPane;
 	var deferred = Zotero.Promise.defer();
 	if (zp.tagSelectorShown()) {
-		var tagSelector = win.document.getElementById('zotero-tag-selector');
-		var onRefresh = () => {
-			tagSelector.removeEventListener('refresh', onRefresh);
+		let tagSelector = zp.tagSelector;
+		let componentDidUpdate = tagSelector.componentDidUpdate;
+		tagSelector.componentDidUpdate = function() {
 			deferred.resolve();
-		};
-		tagSelector.addEventListener('refresh', onRefresh);
+			tagSelector.componentDidUpdate = componentDidUpdate;
+			if (typeof componentDidUpdate == 'function') {
+				componentDidUpdate.call(this, arguments);
+			}
+		}
 	}
 	else {
 		deferred.resolve();

@@ -15,13 +15,13 @@ class Input extends React.PureComponent {
 	}
 
 	cancel(event = null) {
-		this.props.onCancel(this.hasChanged, event);
+		this.props.onCancel && this.props.onCancel(this.hasChanged, event);
 		this.hasBeenCancelled = true;
 		this.input.blur();
 	}
 
 	commit(event = null) {
-		this.props.onCommit(this.state.value, this.hasChanged, event);
+		this.props.onCommit && this.props.onCommit(this.state.value, this.hasChanged, event);
 		this.hasBeenCommitted = true;
 	}
 
@@ -40,18 +40,18 @@ class Input extends React.PureComponent {
 
 	handleChange({ target }) {
 		this.setState({ value: target.value });
-		this.props.onChange(target.value);
+		this.props.onChange && this.props.onChange(target.value);
 	}
 
 	handleBlur(event) {
-		const shouldCancel = this.props.onBlur(event);
+		const shouldCancel = this.props.onBlur && this.props.onBlur(event);
 		if (this.hasBeenCancelled || this.hasBeenCommitted) { return; }
 		shouldCancel ? this.cancel(event) : this.commit(event);
 	}
 
 	handleFocus(event) {
 		this.props.selectOnFocus && event.target.select();
-		this.props.onFocus(event);
+		this.props.onFocus && this.props.onFocus(event);
 	}
 
 	handleKeyDown(event) {
@@ -137,11 +137,11 @@ class Input extends React.PureComponent {
 		min: PropTypes.number,
 		minLength: PropTypes.number,
 		name: PropTypes.string,
-		onBlur: PropTypes.func.isRequired,
-		onCancel: PropTypes.func.isRequired,
-		onChange: PropTypes.func.isRequired,
-		onCommit: PropTypes.func.isRequired,
-		onFocus: PropTypes.func.isRequired,
+		onBlur: PropTypes.func,
+		onCancel: PropTypes.func,
+		onChange: PropTypes.func,
+		onCommit: PropTypes.func,
+		onFocus: PropTypes.func,
 		placeholder: PropTypes.string,
 		selectOnFocus: PropTypes.bool,
 		spellCheck: PropTypes.bool,

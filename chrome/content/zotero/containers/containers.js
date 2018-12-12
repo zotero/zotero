@@ -25,16 +25,35 @@
 
 'use strict';
 
-ZoteroPane.React = {
-	init() {
+const { defineMessages } = require('react-intl');
+
+ZoteroPane.Containers = {
+	async init() {
+		await this.initIntlStrings();
+	},
+	
+	loadPane() {
 		var tagSelector = document.getElementById('zotero-tag-selector');
-		ZoteroPane_Local.tagSelector = ZoteroPane.React.TagSelector.init(tagSelector, {
-			onSelection: ZoteroPane_Local.updateTagFilter.bind(ZoteroPane_Local)
+		ZoteroPane.tagSelector = Zotero.TagSelector.init(tagSelector, {
+			onSelection: ZoteroPane.updateTagFilter.bind(ZoteroPane)
 		});
 	},
 	
+	async initIntlStrings() {
+		this.intlMessages = {};
+		const intlFiles = ['zotero.dtd'];
+		for (let intlFile of intlFiles) {
+			let localeXML = await Zotero.File.getContentsFromURLAsync(`chrome://zotero/locale/${intlFile}`);
+			let regexp = /<!ENTITY ([^\s]+)\s+"([^"]+)/g;
+			let regexpResult;
+			while (regexpResult = regexp.exec(localeXML)) {
+				this.intlMessages[regexpResult[1]] = regexpResult[2];
+			}
+		}
+	},
+	
 	destroy() {
-		ZoteroPane_Local.tagSelector.unregister();
+		ZoteroPane.tagSelector.unregister();
 	}
 }
 

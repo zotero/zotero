@@ -143,6 +143,8 @@ var ZoteroPane = new function()
 		Zotero.hiDPI = window.devicePixelRatio > 1;
 		Zotero.hiDPISuffix = Zotero.hiDPI ? "@2x" : "";
 		
+		ZoteroPane_Local.Containers.loadPane();
+		
 		ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 		
 		// Add a default progress window
@@ -233,7 +235,6 @@ var ZoteroPane = new function()
 			}
 			catch (e) {}
 		}
-		ZoteroPane.React.init();
 		
 		if (Zotero.openPane) {
 			Zotero.openPane = false;
@@ -345,7 +346,7 @@ var ZoteroPane = new function()
 			this.serializePersist();
 		}
 		
-		ZoteroPane_Local.React.destroy();
+		ZoteroPane_Local.Containers.destroy();
 		
 		if(this.collectionsView) this.collectionsView.unregister();
 		if(this.itemsView) this.itemsView.unregister();
@@ -388,7 +389,6 @@ var ZoteroPane = new function()
 		this.unserializePersist();
 		this.updateLayout();
 		this.updateToolbarPosition();
-		this.updateTagSelectorSize();
 		
 		// restore saved row selection (for tab switching)
 		// TODO: Remove now that no tab mode?
@@ -1093,7 +1093,6 @@ var ZoteroPane = new function()
 		
 		var showing = tagSelector.getAttribute('collapsed') == 'true';
 		tagSelector.setAttribute('collapsed', !showing);
-		this.updateTagSelectorSize();
 		
 		// If showing, set scope to items in current view
 		// and focus filter textbox
@@ -1106,12 +1105,6 @@ var ZoteroPane = new function()
 			ZoteroPane_Local.tagSelector.uninit();
 		}
 	});
-	
-	
-	this.updateTagSelectorSize = function () {
-		
-	}
-	
 	
 	/*
 	 * Sets the tag filter on the items view
@@ -1139,7 +1132,6 @@ var ZoteroPane = new function()
 	 */
 	this.setTagScope = async function () {
 		var collectionTreeRow = self.getCollectionTreeRow();
-		var tagSelector = document.getElementById('zotero-tag-selector');
 		if (self.tagSelectorShown()) {
 			Zotero.debug('Updating tag selector with current tags');
 			if (collectionTreeRow.editable) {
@@ -1148,10 +1140,11 @@ var ZoteroPane = new function()
 			else {
 				ZoteroPane_Local.tagSelector.setMode('view');
 			}
-			ZoteroPane_Local.tagSelector.collectionTreeRow = collectionTreeRow;
-			ZoteroPane_Local.tagSelector.updateScope = self.setTagScope;
-			ZoteroPane_Local.tagSelector.libraryID = collectionTreeRow.ref.libraryID;
-			ZoteroPane_Local.tagSelector.scope = await collectionTreeRow.getChildTags();
+			ZoteroPane_Local.tagSelector.onItemViewChanged({
+				collectionTreeRow,
+				libraryID: collectionTreeRow.ref.libraryID,
+				tagsInScope: await collectionTreeRow.getChildTags()
+			});
 		}
 	};
 	
@@ -1219,17 +1212,7 @@ var ZoteroPane = new function()
 				ZoteroPane_Local.displayErrorMessage();
 			};
 			this.itemsView.onRefresh.addListener(() => this.setTagScope());
-			if (this.tagSelectorShown()) {
-				let tagSelector = document.getElementById('zotero-tag-selector')
-				let handler = function () {
-					tagSelector.removeEventListener('refresh', handler);
-					Zotero.uiIsReady();
-				};
-				tagSelector.addEventListener('refresh', handler);
-			}
-			else {
-				this.itemsView.onLoad.addListener(() => Zotero.uiIsReady());
-			}
+			this.itemsView.onLoad.addListener(() => Zotero.uiIsReady());
 			
 			// If item data not yet loaded for library, load it now.
 			// Other data types are loaded at startup
@@ -4835,8 +4818,10 @@ var ZoteroPane = new function()
 		var itemsToolbar = document.getElementById("zotero-items-toolbar");
 		var itemPane = document.getElementById("zotero-item-pane");
 		var itemToolbar = document.getElementById("zotero-item-toolbar");
+		var tagSelector = document.getElementById("zotero-tag-selector");
 		
 		collectionsToolbar.style.width = collectionsPane.boxObject.width + 'px';
+		tagSelector.style.maxWidth = collectionsPane.boxObject.width + 'px';
 		
 		if (stackedLayout || itemPane.collapsed) {
 		// The itemsToolbar and itemToolbar share the same space, and it seems best to use some flex attribute from right (because there might be other icons appearing or vanishing).

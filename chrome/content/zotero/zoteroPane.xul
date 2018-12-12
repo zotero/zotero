@@ -27,7 +27,7 @@
 
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
-<?xul-overlay href="chrome://zotero/content/reactUI/zoteroPane.xul"?>
+<?xul-overlay href="chrome://zotero/content/containers/containers.xul"?>
 
 <!DOCTYPE overlay [
 	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
@@ -316,7 +316,9 @@
 					     
 					     TODO: deal with this some other way?
 					-->
-					<html:div id="zotero-tag-selector" zotero-persist="height,collapsed,showAutomatic,filterToScope"/>
+					<vbox id="zotero-tag-selector-container" zotero-persist="height,collapsed">
+						<html:div id="zotero-tag-selector"/>
+					</vbox>
 				</vbox>
 				
 				<splitter id="zotero-collections-splitter" resizebefore="closest" resizeafter="closest" collapse="before"

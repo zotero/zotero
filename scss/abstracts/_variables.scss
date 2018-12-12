@@ -46,23 +46,27 @@ $headings-line-height:    1.2;
 // Components
 // --------------------------------------------------
 
-$padding-x-sm: $space-sm;
-$padding-x-md: $space-md;
+$padding-base-vertical: 2px;
 
-$default-padding-x:       $space-sm;
-$default-padding-x-touch: $space-md;
+$padding-base-horizontal: $space-xs;
+$padding-large-horizontal: $space-sm;
 
-$border-radius:    4px;
-$border-radius-sm: 3px;
-$border-radius-lg: 6px;
+$border-radius-small: 3px;
+$border-radius-base:  4px;
+$border-radius-large: 6px;
 
 $border-width: 1px;
 
 $separator-width: 1px;
 
-// Z-index master list
+// Buttons
 // --------------------------------------------------
 
+$btn-icon-padding: $space-min + 1px;
+$btn-disabled-opacity: 0.5;
+
+// Z-index master list
+// --------------------------------------------------
 
 $z-index-mobile-nav:     0;
 $z-index-navbar-bg:     10;

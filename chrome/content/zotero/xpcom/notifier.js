@@ -73,7 +73,6 @@ Zotero.Notifier = new function(){
 		if (priority) {
 			msg += " with priority " + priority;
 		}
-		Zotero.debug(msg);
 		_observers[hash] = {
 			ref: ref,
 			types: types,
