@@ -753,7 +753,7 @@ Zotero.Attachments = new function(){
 			
 			if ((contentType === 'text/html' || contentType === 'application/xhtml+xml')
 					// Documents from XHR don't work here
-					&& document instanceof Ci.nsIDOMDocument) {
+					&& Zotero.Translate.DOMWrapper.unwrap(document) instanceof Ci.nsIDOMDocument) {
 				Zotero.debug('Saving document with saveDocument()');
 				yield Zotero.Utilities.Internal.saveDocument(document, tmpFile);
 			}

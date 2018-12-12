@@ -2121,9 +2121,13 @@ Zotero.WebProgressFinishListener = function(onFinish) {
 			let contentType = null;
 			try {
 				let r = _request || req;
-				_request.QueryInterface(Components.interfaces.nsIHttpChannel);
-				status = r.responseStatus;
-				contentType = r.contentType;
+				if (!r) {
+					Zotero.debug("WebProgressFinishListener: finished without a valid request")
+				} else {
+					r.QueryInterface(Components.interfaces.nsIHttpChannel);
+					status = r.responseStatus;
+					contentType = r.contentType;
+				}
 			}
 			catch (e) {
 				Zotero.debug(e, 2);

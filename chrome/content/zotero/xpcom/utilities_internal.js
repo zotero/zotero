@@ -462,7 +462,7 @@ Zotero.Utilities.Internal = {
 		wbp.progressListener = listener;
 		
 		wbp.saveDocument(
-			document,
+			Zotero.Translate.DOMWrapper.unwrap(document),
 			Zotero.File.pathToFile(destFile),
 			Zotero.File.pathToFile(filesFolder),
 			null,
