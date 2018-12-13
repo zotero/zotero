@@ -692,3 +692,7 @@ Zotero.Cite.Locale = {
 		}
 	}
 };
+
+if (typeof process === 'object' && process + '' === '[object process]'){
+    module.exports = Zotero.Cite;
+}
