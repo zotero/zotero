@@ -2032,10 +2032,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 						// Collections
 						if (desc.type == 'collection') {
 							var c = yield Zotero.Collections.getAsync(desc.id);
-							
-							var newCollection = new Zotero.Collection;
-							newCollection.libraryID = targetLibraryID;
-							c.clone(false, newCollection);
+							let newCollection = c.clone(targetLibraryID);
 							if (parentID) {
 								newCollection.parentID = parentID;
 							}

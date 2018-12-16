@@ -254,18 +254,7 @@ Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env)
 Zotero.Search.prototype.clone = function (libraryID) {
 	var s = new Zotero.Search();
 	s.libraryID = libraryID === undefined ? this.libraryID : libraryID;
-	
-	var conditions = this.getConditions();
-	
-	for (let condition of Object.values(conditions)) {
-		var name = condition.mode ?
-			condition.condition + '/' + condition.mode :
-			condition.condition
-			
-		s.addCondition(name, condition.operator, condition.value,
-			condition.required);
-	}
-	
+	s.fromJSON(this.toJSON());
 	return s;
 };
 
