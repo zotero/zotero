@@ -130,6 +130,16 @@ Zotero.Translate.Sandbox = {
 					}
 				}
 				item = newItem;
+				
+				if (item.title) {
+					item.title = translate._cleanTitle(item.title, item.itemType);
+					// Short Title is added before this in the web itemDone, so if we removed
+					// a suffix (e.g., ": a novel") and the short title now matches the title,
+					// remove it
+					if (item.title == item.shortTitle) {
+						delete item.shortTitle;
+					}
+				}
 	
 				// Clean empty creators
 				if (item.creators) {
@@ -1596,7 +1606,14 @@ Zotero.Translate.Base.prototype = {
 		
 		return errorString;
 	},
-
+	
+	_cleanTitle: function (title, itemType) {
+		if (itemType == 'book' || itemType == 'bookSection') {
+			return title.replace(/\s*:\s*a novel\s*$/i, '');
+		}
+		return title;
+	},
+	
 	/**
 	 * Canonicalize an array of tags such that they are all objects with the tag stored in the
 	 * "tag" property and a type (if specified) is stored in the "type" property
