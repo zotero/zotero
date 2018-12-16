@@ -1059,6 +1059,53 @@ describe("Zotero.CollectionTreeView", function() {
 				
 				// TODO: Check deeper subcollection open states
 			})
+			
+			it("should copy a collection and its subcollection to another library", async function () {
+				var group = await createGroup();
+				
+				var collectionA = await createDataObject('collection', { name: "A" }, { skipSelect: true });
+				var collectionB = await createDataObject('collection', { name: "B", parentKey: collectionA.key });
+				var itemA = await createDataObject('item', { collections: [collectionA.key] }, { skipSelect: true });
+				var itemB = await createDataObject('item', { collections: [collectionB.key] }, { skipSelect: true });
+				
+				await cv.selectCollection(collectionA.id);
+				
+				// Add observer to wait for collection add
+				var deferred = Zotero.Promise.defer();
+				var observerID = Zotero.Notifier.registerObserver({
+					notify: function (event, type, ids, extraData) {
+						if (type == 'collection' && event == 'modify' && ids.includes(collectionB.id)) {
+							setTimeout(function () {
+								deferred.resolve();
+							}, 50);
+						}
+					}
+				}, 'collection', 'test');
+				
+				await drop(
+					'collection',
+					'L' + group.libraryID,
+					[collectionA.id],
+					deferred.promise
+				);
+				
+				Zotero.Notifier.unregisterObserver(observerID);
+				
+				var pred = Zotero.Relations.linkedObjectPredicate;
+				var newCollectionA = await Zotero.URI.getURICollection(collectionA.getRelations()[pred][0]);
+				var newCollectionB = await Zotero.URI.getURICollection(collectionB.getRelations()[pred][0]);
+				var newItemA = await Zotero.URI.getURIItem(itemA.getRelations()[pred][0]);
+				var newItemB = await Zotero.URI.getURIItem(itemB.getRelations()[pred][0]);
+				assert.equal(newCollectionA.libraryID, group.libraryID);
+				assert.equal(newCollectionB.libraryID, group.libraryID);
+				assert.equal(newCollectionB.parentID, newCollectionA.id);
+				assert.equal(newItemA.libraryID, group.libraryID);
+				assert.equal(newItemB.libraryID, group.libraryID);
+				assert.isTrue(newCollectionA.hasItem(newItemA));
+				assert.isTrue(newCollectionB.hasItem(newItemB));
+				assert.isFalse(newCollectionA.hasItem(newItemB));
+				assert.isFalse(newCollectionB.hasItem(newItemA));
+			})
 		})
 
 
