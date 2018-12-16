@@ -1164,15 +1164,6 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
-	/**
-	 * Escape '_', '%', and '\' in an SQL LIKE expression so that it can be used with ESCAPE '\' to
-	 * prevent the wildcards from having special meaning
-	 */
-	escapeSQLExpression: function (expr) {
-		return expr.replace(/([_%\\])/g, '\\$1');
-	},
-	
-	
 	buildLibraryMenu: function (menulist, libraries, selectedLibraryID) {
 		var menupopup = menulist.firstChild;
 		while (menupopup.hasChildNodes()) {

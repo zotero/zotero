@@ -1090,6 +1090,15 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 });
 
 
+/**
+ * Escape '_', '%', and '\' in an SQL LIKE expression so that it can be used with ESCAPE '\' to
+ * prevent the wildcards from having special meaning
+ */
+Zotero.DBConnection.prototype.escapeSQLExpression = function (expr) {
+	return expr.replace(/([_%\\])/g, '\\$1');
+};
+
+
 /////////////////////////////////////////////////////////////////
 //
 // Private methods
