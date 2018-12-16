@@ -280,6 +280,18 @@ Zotero.Utilities.Translate.prototype.processDocuments = async function (urls, pr
 	translate.decrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
 }
 
+Zotero.Utilities.Translate.prototype.request = async function (method, url, options = {}) {
+	options = Object.assign(
+		{},
+		options,
+		{
+			headers: Object.assign({}, this._translate.requestHeaders, options.headers),
+			cookieSandbox: this._translate.cookieSandbox
+		}
+	);
+	return Zotero.HTTP.request(method, url, options);
+};
+
 /**
 * Send an HTTP GET request via XMLHTTPRequest
 * 
