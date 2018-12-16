@@ -450,11 +450,16 @@ Zotero.Collection.prototype.removeItems = Zotero.Promise.coroutine(function* (it
 
 
 /**
-* Check if an item belongs to the collection
-**/
-Zotero.Collection.prototype.hasItem = function(itemID) {
+ * Check if an item belongs to the collection
+ *
+ * @param {Zotero.Item|Number} item - Item or itemID
+ */
+Zotero.Collection.prototype.hasItem = function (item) {
 	this._requireData('childItems');
-	return this._childItems.has(itemID);
+	if (item instanceof Zotero.Item) {
+		item = item.id;
+	}
+	return this._childItems.has(item);
 }
 
 
