@@ -200,4 +200,16 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.propertyVal(identifiers[3], "arXiv", "math.GT/0309135");
 		});
 	});
+	
+	describe("#getNextName()", function () {
+		it("should get the next available numbered name", function () {
+			var existing = ['Name (1)', 'Name (3)'];
+			assert.equal(Zotero.Utilities.Internal.getNextName('Name', existing), 'Name (4)');
+		});
+		
+		it("should return 'Name (1)' if no numbered names", function () {
+			var existing = ['Name'];
+			assert.equal(Zotero.Utilities.Internal.getNextName('Name', existing), 'Name (1)');
+		});
+	});
 })

@@ -1164,6 +1164,29 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
+	/**
+	 * Get the next available numbered name that matches a base name, for use when duplicating
+	 *
+	 * - Given 'Foo' and ['Foo'], returns 'Foo (1)'.
+	 * - Given 'Foo (1)' and ['Foo', 'Foo (1)'], returns 'Foo (2)'
+	 */
+	getNextName: function (name, existingNames) {
+		// Trim '(1)', etc.
+		var matches = name.match(/^(.+) \(\d+\)$/);
+		if (matches) {
+			name = matches[1].trim();
+		}
+		var highest = 0;
+		for (let existingName of existingNames) {
+			let matches = existingName.match(/ \((\d+)\)$/);
+			if (matches && matches[1] > highest) {
+				highest = matches[1];
+			}
+		}
+		return name + ' (' + ++highest + ')';
+	},
+	
+	
 	buildLibraryMenu: function (menulist, libraries, selectedLibraryID) {
 		var menupopup = menulist.firstChild;
 		while (menupopup.hasChildNodes()) {
