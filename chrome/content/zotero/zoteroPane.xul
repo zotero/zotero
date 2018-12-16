@@ -227,6 +227,7 @@
 					<menuitem class="zotero-menuitem-show-duplicates" label="&zotero.toolbar.duplicate.label;"/>
 					<menuitem class="zotero-menuitem-show-unfiled" label="&zotero.collections.showUnfiledItems;"/>
 					<menuitem class="zotero-menuitem-edit-collection"/>
+					<menuitem class="zotero-menuitem-duplicate-collection"/>
 					<menuitem class="zotero-menuitem-mark-read-feed" label="&zotero.toolbar.markFeedRead.label;"/>
 					<menuitem class="zotero-menuitem-edit-feed" label="&zotero.toolbar.feeds.edit;"/>
 					<menuitem class="zotero-menuitem-delete-collection"/>

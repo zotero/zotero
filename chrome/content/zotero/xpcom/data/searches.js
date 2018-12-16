@@ -103,6 +103,22 @@ Zotero.Searches = function() {
 	},
 	
 	
+	this.getNextName = async function (libraryID, name) {
+		// Trim '(1)', etc.
+		var matches = name.match(/^(.+) \(\d+\)$/);
+		if (matches) {
+			name = matches[1].trim();
+		}
+		var sql = "SELECT savedSearchName FROM savedSearches "
+			+ "WHERE libraryID=? AND savedSearchName LIKE ? ESCAPE '\\'";
+		var names = await Zotero.DB.columnQueryAsync(
+			sql,
+			[libraryID, Zotero.DB.escapeSQLExpression(name) + '%']
+		);
+		return Zotero.Utilities.Internal.getNextName(name, names);
+	};
+	
+	
 	this._loadConditions = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
 		var sql = "SELECT savedSearchID, searchConditionID, condition, operator, value, required "
 			+ "FROM savedSearches LEFT JOIN savedSearchConditions USING (savedSearchID) "

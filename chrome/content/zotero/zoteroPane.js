@@ -2056,6 +2056,24 @@ var ZoteroPane = new function()
 	});
 	
 	
+	// Currently only works on searches
+	this.duplicateSelectedCollection = async function () {
+		if (!this.canEdit()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+		
+		if (this.collectionsView.selection.count == 0) {
+			return;
+		}
+		
+		var row = this.collectionsView.selectedTreeRow;
+		let o = row.ref.clone();
+		o.name = await row.ref.ObjectsClass.getNextName(row.ref.libraryID, o.name);
+		await o.saveTx();
+	};
+	
+	
 	this.editSelectedCollection = Zotero.Promise.coroutine(function* () {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
@@ -2454,6 +2472,10 @@ var ZoteroPane = new function()
 			oncommand: () => this.editSelectedCollection()
 		},
 		{
+			id: "duplicate",
+			oncommand: () => this.duplicateSelectedCollection()
+		},
+		{
 			id: "markReadFeed",
 			oncommand: () => this.markFeedRead()
 		},
@@ -2611,6 +2633,7 @@ var ZoteroPane = new function()
 		else if (collectionTreeRow.isSearch()) {
 			show = [
 				'editSelectedCollection',
+				'duplicate',
 				'deleteCollection',
 				'sep3',
 				'exportCollection',
@@ -2618,7 +2641,6 @@ var ZoteroPane = new function()
 				'loadReport'
 			];
 			
-			m.deleteCollection.setAttribute('label', Zotero.getString('pane.collections.menu.delete.savedSearch'));
 			
 			if (!this.itemsView.rowCount) {
 				disable.push('exportCollection', 'createBibCollection', 'loadReport');
@@ -2626,6 +2648,8 @@ var ZoteroPane = new function()
 			
 			// Adjust labels
 			m.editSelectedCollection.setAttribute('label', Zotero.getString('pane.collections.menu.edit.savedSearch'));
+			m.duplicate.setAttribute('label', Zotero.getString('pane.collections.menu.duplicate.savedSearch'));
+			m.deleteCollection.setAttribute('label', Zotero.getString('pane.collections.menu.delete.savedSearch'));
 			m.exportCollection.setAttribute('label', Zotero.getString('pane.collections.menu.export.savedSearch'));
 			m.createBibCollection.setAttribute('label', Zotero.getString('pane.collections.menu.createBib.savedSearch'));
 			m.loadReport.setAttribute('label', Zotero.getString('pane.collections.menu.generateReport.savedSearch'));
@@ -2693,6 +2717,7 @@ var ZoteroPane = new function()
 			disable.push(
 				'newSubcollection',
 				'editSelectedCollection',
+				'duplicate',
 				'deleteCollection',
 				'deleteCollectionAndItems'
 			);
