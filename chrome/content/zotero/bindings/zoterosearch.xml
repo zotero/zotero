@@ -812,7 +812,14 @@
 				<body>
 					<![CDATA[
 						if (this.parent){
-							this.parent.addCondition();
+							let ref = this.parent.search.getCondition(
+								this.parent.search.addCondition(
+									this.id('conditionsmenu').value,
+									this.id('operatorsmenu').value,
+									""
+								)
+							)
+							this.parent.addCondition(ref);
 							window.sizeToContent();
 						}
 					]]>
