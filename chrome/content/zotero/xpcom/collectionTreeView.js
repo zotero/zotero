@@ -2056,8 +2056,10 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 							}
 							// Mark copied item for adding to collection
 							if (parentID) {
-								if (!addItems[parentID]) {
-									addItems[parentID] = [];
+								let parentItems = addItems.get(parentID);
+								if (!parentItems) {
+									parentItems = [];
+									addItems.set(parentID, parentItems);
 								}
 								
 								// If source item is a top-level non-regular item (which can exist in a
@@ -2071,7 +2073,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 									}
 								}
 								
-								addItems[parentID].push(id);
+								parentItems.push(id);
 							}
 						}
 					}
@@ -2083,11 +2085,11 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 					type: 'collection'
 				}];
 				
-				var addItems = {};
+				var addItems = new Map();
 				yield copyCollections(collections, targetCollectionID, addItems);
-				for (var collectionID in addItems) {
-					var collection = yield Zotero.Collections.getAsync(collectionID);
-					yield collection.addItems(addItems[collectionID]);
+				for (let [collectionID, items] of addItems.entries()) {
+					let collection = yield Zotero.Collections.getAsync(collectionID);
+					yield collection.addItems(items);
 				}
 				
 				// TODO: add subcollections and subitems, if they don't already exist,
