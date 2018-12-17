@@ -1138,7 +1138,7 @@ Zotero.Items = function() {
 	
 	this.getFirstCreatorFromJSON = function (json) {
 		Zotero.warn("Zotero.Items.getFirstCreatorFromJSON() is deprecated "
-			+ "-- use Zotero.Utilities.Internal.getFirstCreatorFromItemJSON()";
+			+ "-- use Zotero.Utilities.Internal.getFirstCreatorFromItemJSON()");
 		return Zotero.Utilities.Internal.getFirstCreatorFromItemJSON(json);
 	};
 	
