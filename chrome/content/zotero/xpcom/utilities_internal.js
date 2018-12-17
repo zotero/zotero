@@ -879,7 +879,7 @@ Zotero.Utilities.Internal = {
 	 *
 	 * @return {Object|false} - Creator in API JSON format, or false
 	 */
-	getFirstCreatorFromInternalJSON: function (json) {
+	getFirstCreatorFromItemJSON: function (json) {
 		var primaryCreatorType = Zotero.CreatorTypes.getName(
 			Zotero.CreatorTypes.getPrimaryIDForType(
 				Zotero.ItemTypes.getID(json.itemType)
