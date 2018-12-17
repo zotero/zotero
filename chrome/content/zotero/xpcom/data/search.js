@@ -828,10 +828,9 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
  * If this object is identified (has an id or library/key), loadAll() must have been called.
  */
 Zotero.Search.prototype.fromJSON = function (json) {
-	if (!json.name) {
-		throw new Error("'name' property not provided for search");
+	if (json.name) {
+		this.name = json.name;
 	}
-	this.name = json.name;
 	
 	Object.keys(this.getConditions()).forEach(id => this.removeCondition(id));
 	for (let i = 0; i < json.conditions.length; i++) {
