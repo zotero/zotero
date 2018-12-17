@@ -10,14 +10,14 @@
 <!ENTITY zotero.general.cancel "取消">
 <!ENTITY zotero.general.refresh "重新整理">
 <!ENTITY zotero.general.saveAs "另存新檔...">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "選項">
 <!ENTITY zotero.general.advancedOptions.label "進階選項">
 <!ENTITY zotero.general.tools "工具">
 <!ENTITY zotero.general.more "更多">
 <!ENTITY zotero.general.loading "載入中...">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
-<!ENTITY zotero.general.other "Other…">
+<!ENTITY zotero.general.close "關閉">
+<!ENTITY zotero.general.minimize "最小化">
+<!ENTITY zotero.general.other "其他...">
 
 
 <!ENTITY zotero.errorReport.title "Zotero 錯誤報告">
@@ -195,13 +195,13 @@
 
 <!ENTITY zotero.progress.title "進度">
 
-<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import "匯入">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
-<!ENTITY zotero.import.database "Database">
+<!ENTITY zotero.import.importing "匯入中...">
+<!ENTITY zotero.import.database "資料庫">
 <!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.size "大小">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 
 <!ENTITY zotero.exportOptions.title "匯出…">
