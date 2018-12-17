@@ -872,6 +872,33 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
+	 * Given API JSON for an item, return the best single first creator, regardless of creator order
+	 *
+	 * Note that this is just a single creator, not the firstCreator field return from the
+	 * Zotero.Item::firstCreator property or Zotero.Items.getFirstCreatorFromData()
+	 *
+	 * @return {Object|false} - Creator in API JSON format, or false
+	 */
+	getFirstCreatorFromInternalJSON: function (json) {
+		var primaryCreatorType = Zotero.CreatorTypes.getName(
+			Zotero.CreatorTypes.getPrimaryIDForType(
+				Zotero.ItemTypes.getID(json.itemType)
+			)
+		);
+		let firstCreator = json.creators.find(creator => {
+			return creator.creatorType == primaryCreatorType || creator.creatorType == 'author';
+		});
+		if (!firstCreator) {
+			firstCreator = json.creators.find(creator => creator.creatorType == 'editor');
+		}
+		if (!firstCreator) {
+			return false;
+		}
+		return firstCreator;
+	},
+	
+	
+	/**
 	 * Find valid fields in Extra field text
 	 *
 	 * @param {String} str
