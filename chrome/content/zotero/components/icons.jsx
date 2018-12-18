@@ -20,13 +20,13 @@ Icon.propTypes = {
 module.exports = { Icon }
 
 
-function i(name, svgOrSrc) {
+function i(name, svgOrSrc, hasDPI=true) {
 	const icon = class extends PureComponent {
 		render() {
 			const { className } = this.props
 			
 			if (typeof svgOrSrc == 'string') {
-				if (window.devicePixelRatio >= 1.25) {
+				if (hasDPI && window.devicePixelRatio >= 1.25) {
 					let parts = svgOrSrc.split('.');
 					parts[parts.length-2] = parts[parts.length-2] + '@2x';
 					svgOrSrc = parts.join('.')

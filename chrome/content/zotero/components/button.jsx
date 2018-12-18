@@ -57,7 +57,7 @@ class Button extends PureComponent {
 	}
 	
 	get menuMarker() {
-		if (!Zotero.isNode) {
+		if (!Zotero.isNode && !Zotero.isMac) {
 			return this.props.isMenu && <span className="menu-marker"/>
 		}
 		return this.props.isMenu && <IconDownChevron className="menu-marker"/>
