@@ -36,6 +36,8 @@ function detectImport() {
 }
 
 function doImport() {
+	parseInput();
+	if(!parsedData) item.complete(false, 'No valid items found');
     for(var itemType in parsedData) {
         var item = new Z.Item(itemType);
         for (var field in parsedData[itemType]) {
