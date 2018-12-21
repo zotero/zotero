@@ -62,3 +62,6 @@ Zotero.Notes = new function() {
 	}
 }
 
+if (typeof process === 'object' && process + '' === '[object process]'){
+    module.exports = Zotero.Notes;
+}
