@@ -107,14 +107,16 @@ var ZoteroAdvancedSearch = new function() {
 		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
 		
-		var untitled = yield Zotero.DB.getNextName(
-			_searchBox.search.libraryID,
-			'savedSearches',
-			'savedSearchName',
-			Zotero.getString('pane.collections.untitled')
+		var libraryID = _searchBox.search.libraryID;
+		
+		var searches = yield Zotero.Searches.getAll(libraryID)
+		var prefix = Zotero.getString('pane.collections.untitled');
+		var name = Zotero.Utilities.Internal.getNextName(
+			prefix,
+			searches.map(s => s.name).filter(n => n.startsWith(prefix))
 		);
 		
-		var name = { value: untitled };
+		var name = { value: name };
 		var result = promptService.prompt(window,
 			Zotero.getString('pane.collections.newSavedSeach'),
 			Zotero.getString('pane.collections.savedSearchName'), name, "", {});

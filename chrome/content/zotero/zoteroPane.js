@@ -912,17 +912,23 @@ var ZoteroPane = new function()
 		
 		var libraryID = this.getSelectedLibraryID();
 		
-		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService);
-		var untitled = yield Zotero.DB.getNextName(
-			libraryID,
-			'collections',
-			'collectionName',
-			Zotero.getString('pane.collections.untitled')
+		// Get a unique "Untitled" name for this level in the collection hierarchy
+		var collections;
+		if (parentKey) {
+			let parent = Zotero.Collections.getIDFromLibraryAndKey(libraryID, parentKey);
+			collections = Zotero.Collections.getByParent(parent);
+		}
+		else {
+			collections = Zotero.Collections.getByLibrary(libraryID);
+		}
+		var prefix = Zotero.getString('pane.collections.untitled');
+		var name = Zotero.Utilities.Internal.getNextName(
+			prefix,
+			collections.map(c => c.name).filter(n => n.startsWith(prefix))
 		);
 		
-		var newName = { value: untitled };
-		var result = promptService.prompt(window,
+		var newName = { value: name };
+		var result = Services.prompt.prompt(window,
 			Zotero.getString('pane.collections.newCollection'),
 			Zotero.getString('pane.collections.name'), newName, "", {});
 		
@@ -991,18 +997,20 @@ var ZoteroPane = new function()
 			yield Zotero.DB.waitForTransaction();
 		}
 		
+		var libraryID = this.getSelectedLibraryID();
+		
 		var s = new Zotero.Search();
-		s.libraryID = this.getSelectedLibraryID();
+		s.libraryID = libraryID;
 		s.addCondition('title', 'contains', '');
 		
-		var untitled = Zotero.getString('pane.collections.untitled');
-		untitled = yield Zotero.DB.getNextName(
-			s.libraryID,
-			'savedSearches',
-			'savedSearchName',
-			Zotero.getString('pane.collections.untitled')
+		var searches = yield Zotero.Searches.getAll(libraryID)
+		var prefix = Zotero.getString('pane.collections.untitled');
+		var name = Zotero.Utilities.Internal.getNextName(
+			prefix,
+			searches.map(s => s.name).filter(n => n.startsWith(prefix))
 		);
-		var io = {dataIn: {search: s, name: untitled}, dataOut: null};
+		
+		var io = { dataIn: { search: s, name }, dataOut: null };
 		window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
 		if (!io.dataOut) {
 			return false;

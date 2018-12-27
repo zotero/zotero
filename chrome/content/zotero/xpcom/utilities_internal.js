@@ -1194,23 +1194,51 @@ Zotero.Utilities.Internal = {
 	/**
 	 * Get the next available numbered name that matches a base name, for use when duplicating
 	 *
-	 * - Given 'Foo' and ['Foo'], returns 'Foo (1)'.
-	 * - Given 'Foo (1)' and ['Foo', 'Foo (1)'], returns 'Foo (2)'
+	 * - Given 'Foo' and ['Foo'], returns 'Foo 1'.
+	 * - Given 'Foo' and ['Foo', 'Foo 1'], returns 'Foo 2'.
+	 * - Given 'Foo' and ['Foo', 'Foo 1'], returns 'Foo 2'.
+	 * - Given 'Foo 1', ['Foo', 'Foo 1'], and trim=true, returns 'Foo 2'
+	 * - Given 'Foo' and ['Foo', 'Foo 2'], returns 'Foo 1'
 	 */
-	getNextName: function (name, existingNames) {
-		// Trim '(1)', etc.
-		var matches = name.match(/^(.+) \(\d+\)$/);
-		if (matches) {
-			name = matches[1].trim();
-		}
-		var highest = 0;
-		for (let existingName of existingNames) {
-			let matches = existingName.match(/ \((\d+)\)$/);
-			if (matches && matches[1] > highest) {
-				highest = matches[1];
+	getNextName: function (name, existingNames, trim = false) {
+		// Trim numbers at end of given name
+		if (trim) {
+			let matches = name.match(/^(.+) \d+$/);
+			if (matches) {
+				name = matches[1].trim();
 			}
 		}
-		return name + ' (' + ++highest + ')';
+		
+		if (!existingNames.includes(name)) {
+			return name;
+		}
+		
+		var suffixes = existingNames
+			// Get suffix
+			.map(x => x.substr(name.length))
+			// Get "2", "5", etc.
+			.filter(x => x.match(/^ (\d+)$/));
+		
+		suffixes.sort(function (a, b) {
+			return parseInt(a) - parseInt(b);
+		});
+		
+		// If no existing numbered names found, use 1
+		if (!suffixes.length) {
+			return name + ' ' + 1;
+		}
+		
+		// Find first available number
+		var i = 0;
+		var num = 1;
+		while (suffixes[i] == num) {
+			while (suffixes[i + 1] && suffixes[i] == suffixes[i + 1]) {
+				i++;
+			}
+			i++;
+			num++;
+		}
+		return name + ' ' + num;
 	},
 	
 	

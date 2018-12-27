@@ -104,8 +104,8 @@ Zotero.Searches = function() {
 	
 	
 	this.getNextName = async function (libraryID, name) {
-		// Trim '(1)', etc.
-		var matches = name.match(/^(.+) \(\d+\)$/);
+		// Trim '1', etc.
+		var matches = name.match(/^(.+) \d+$/);
 		if (matches) {
 			name = matches[1].trim();
 		}
@@ -115,7 +115,7 @@ Zotero.Searches = function() {
 			sql,
 			[libraryID, Zotero.DB.escapeSQLExpression(name) + '%']
 		);
-		return Zotero.Utilities.Internal.getNextName(name, names);
+		return Zotero.Utilities.Internal.getNextName(name, names, true);
 	};
 	
 	
