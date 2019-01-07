@@ -40,12 +40,12 @@
 }
 
 .tag-selector-filter {
-	flex: 1 0 40px;
+	flex: 1 0;
 	min-width: 40px;
 }
 
 .tag-selector-actions {
-	flex: 0 0 42px;
+	flex: 0 1;
 	display: block;
 	white-space: nowrap;
 	background-color: inherit;
