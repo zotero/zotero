@@ -1132,6 +1132,191 @@ describe("Connector Server", function () {
 			assert.isTrue(item.hasTag("A"));
 			assert.isTrue(item.hasTag("B"));
 		});
+		
+		it("should move item saved via /saveItems to another library", async function () {
+			var group = await createGroup({ editable: true, filesEditable: false });
+			await selectLibrary(win);
+			await waitForItemsLoad(win);
+			
+			var sessionID = Zotero.Utilities.randomString();
+			var body = {
+				sessionID,
+				items: [
+					{
+						itemType: "newspaperArticle",
+						title: "Title",
+						attachments: [
+							{
+								title: "Attachment",
+								url: `${testServerPath}/attachment`,
+								mimeType: "text/html"
+							}
+						]
+					}
+				],
+				uri: "http://example.com"
+			};
+			
+			httpd.registerPathHandler(
+				"/attachment",
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.write("<html><head><title>Title</title><body>Body</body></html>");
+					}
+				}
+			);
+			
+			var reqPromise = Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(body)
+				}
+			);
+			
+			var ids1 = await waitForItemEvent('add');
+			var item1 = Zotero.Items.get(ids1[0]);
+			await waitForItemEvent('add');
+			
+			var req = await reqPromise;
+			assert.equal(req.status, 201);
+			
+			// Move item to group without file attachment
+			reqPromise = Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: group.treeViewID
+					})
+				}
+			);
+			
+			var ids2 = await waitForItemEvent('add');
+			var item2 = Zotero.Items.get(ids2[0]);
+			
+			req = await reqPromise;
+			assert.equal(req.status, 200);
+			assert.isFalse(Zotero.Items.exists(item1.id));
+			assert.equal(item2.libraryID, group.libraryID);
+			assert.equal(item2.numAttachments(), 0);
+			
+			// Move back to My Library and resave attachment
+			reqPromise = Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: Zotero.Libraries.userLibrary.treeViewID
+					})
+				}
+			);
+			
+			var ids3 = await waitForItemEvent('add');
+			var item3 = Zotero.Items.get(ids3[0]);
+			await waitForItemEvent('add');
+			
+			req = await reqPromise;
+			assert.equal(req.status, 200);
+			assert.isFalse(Zotero.Items.exists(item2.id));
+			assert.equal(item3.libraryID, Zotero.Libraries.userLibraryID);
+			assert.equal(item3.numAttachments(), 1);
+		});
+		
+		it("should move item saved via /saveSnapshot to another library", async function () {
+			var group = await createGroup({ editable: true, filesEditable: false });
+			await selectLibrary(win);
+			await waitForItemsLoad(win);
+			var sessionID = Zotero.Utilities.randomString();
+			
+			// saveSnapshot saves parent and child before returning
+			var ids1;
+			var promise = waitForItemEvent('add').then(function (ids) {
+				ids1 = ids;
+				return waitForItemEvent('add').then(function (ids) {
+					ids1 = ids1.concat(ids);
+				});
+			});
+			await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSnapshot",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						url: "http://example.com",
+						html: "<html><head><title>Title</title><body>Body</body></html>"
+					})
+				}
+			);
+			
+			assert.isTrue(promise.isFulfilled());
+			
+			var item1 = Zotero.Items.get(ids1[0]);
+			
+			// Move item to group without file attachment
+			var reqPromise = Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: group.treeViewID
+					})
+				}
+			);
+			
+			var ids2 = await waitForItemEvent('add');
+			var item2 = Zotero.Items.get(ids2[0]);
+			
+			var req = await reqPromise;
+			assert.equal(req.status, 200);
+			assert.isFalse(Zotero.Items.exists(item1.id));
+			assert.equal(item2.libraryID, group.libraryID);
+			assert.equal(item2.numAttachments(), 0);
+			
+			// Move back to My Library and resave attachment
+			reqPromise = Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: Zotero.Libraries.userLibrary.treeViewID
+					})
+				}
+			);
+			
+			var ids3 = await waitForItemEvent('add');
+			var item3 = Zotero.Items.get(ids3[0]);
+			await waitForItemEvent('add');
+			
+			req = await reqPromise;
+			assert.equal(req.status, 200);
+			assert.isFalse(Zotero.Items.exists(item2.id));
+			assert.equal(item3.libraryID, Zotero.Libraries.userLibraryID);
+			assert.equal(item3.numAttachments(), 1);
+		});
 	});
 	
 	describe('/connector/installStyle', function() {

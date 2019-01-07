@@ -265,8 +265,13 @@ Zotero.Server.Connector.SaveSession.prototype.update = async function (targetID,
 					await item.eraseTx();
 				}
 				let actionUC = Zotero.Utilities.capitalize(this._action);
-				let newItems = await Zotero.Server.Connector[actionUC].prototype[this._action](
-					targetID, this._requestData
+				// saveItems has a different signature with the session as the first argument
+				let params = [targetID, this._requestData];
+				if (this._action == 'saveItems') {
+					params.unshift(this);
+				}
+				let newItems = await Zotero.Server.Connector[actionUC].prototype[this._action].apply(
+					Zotero.Server.Connector[actionUC], params
 				);
 				// saveSnapshot only returns a single item
 				if (this._action == 'saveSnapshot') {
