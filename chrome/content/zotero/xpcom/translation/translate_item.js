@@ -445,7 +445,11 @@ Zotero.Translate.ItemSaver.prototype = {
 	
 	
 	_canSaveAttachment: function (attachment) {
-		if (this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD) {
+		// Always save link attachments
+		var isLink = Zotero.MIME.isWebPageType(attachment.mimeType)
+			// .snapshot coming from most translators, .linkMode coming from RDF
+			&& (attachment.snapshot === false || attachment.linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL);
+		if (isLink || this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD) {
 			if (!attachment.url && !attachment.document) {
 				Zotero.debug("Translate: Not adding attachment: no URL specified");
 				return false;
@@ -489,9 +493,12 @@ Zotero.Translate.ItemSaver.prototype = {
 	_saveAttachment: Zotero.Promise.coroutine(function* (attachment, parentItemID, attachmentCallback) {
 		try {
 			let newAttachment;
-
+			
 			// determine whether to save files and attachments
-			if (this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD) {
+			let isLink = Zotero.MIME.isWebPageType(attachment.mimeType)
+				// .snapshot coming from most translators, .linkMode coming from RDF
+				&& (attachment.snapshot === false || attachment.linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL);
+			if (isLink || this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD) {
 				newAttachment = yield this._saveAttachmentDownload.apply(this, arguments);
 			} else if (this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE) {
 				newAttachment = yield this._saveAttachmentFile.apply(this, arguments);
