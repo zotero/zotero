@@ -99,6 +99,7 @@
     "edizioni-minerva-medica": "minerva-medica",
     "ethics-science-environmental-politics": "ethics-in-science-and-environmental-politics",
     "european-journal-of-population-revue-europeenne-de-demographie": "european-journal-of-population",
+    "european-journal-of-obstetrics-and-gynecology": "european-journal-of-obstetrics-and-gynecology-and-reproductive-biology",
     "expert-review-of-dermatology": "taylor-and-francis-national-library-of-medicine",
     "expert-review-of-obstetrics-and-gynecology": "taylor-and-francis-national-library-of-medicine",
     "f1000-research": "f1000research",
@@ -459,6 +460,7 @@
     "smartt": "biomed-central",
     "society-for-general-microbiology": "microbiology-society",
     "soil-biology-biochemistry": "soil-biology-and-biochemistry",
+    "harvard-southampton-solent-university": "solent-university-harvard",
     "sozialwissenschaften-teilmann": "sozialwissenschaften-heilmann",
     "sports-medicine-arthroscopy-rehabilitation-therapy-and-technology": "biomed-central",
     "springer-plasmonics": "plasmonics",
@@ -496,6 +498,7 @@
     "wirtschaftsinformatik": "springer-basic-author-date",
     "wirtschaftsuniversitat-wien-master-management": "wirtschaftsuniversitat-wien-author-date",
     "world-journal-of-biological-psychiatry": "the-world-journal-of-biological-psychiatry",
+    "world-allergy-organization-journal": "wao-journal",
     "integration-the-vlsi-journal": "integration",
     "lwt-food-science-and-technology": "lwt",
     "reach-reviews-in-human-space-exploration": "reach",
@@ -514,5 +517,6 @@
     "web-semantics-science-services-and-agents-on-the-world-wide-web": "journal-of-web-semantics",
     "investigaciones-de-historia-economica-economic-history-research": "investigaciones-de-historia-economica",
     "reach-reviews-in-human-space-exploration": "reach",
-    "journal-of-oncological-science": "journal-of-oncological-sciences"
+    "journal-of-oncological-science": "journal-of-oncological-sciences",
+    "harvard-dublin-city-university": "harvard-cite-them-right"
 }
