@@ -366,6 +366,31 @@ describe("Zotero.Utilities", function() {
 			assert.deepEqual(cslCreators[4], creators[4].expect, 'institutional author is not parsed');
 			assert.deepEqual(cslCreators[5], creators[5].expect, 'protected last name prevents parsing');
 		});
+		
+		it("should convert UTC access date to local time", async function () {
+			var offset = new Date().getTimezoneOffset();
+			var item = new Zotero.Item('webpage');
+			var localDate;
+			if (offset < 0) {
+				localDate = '2019-01-09 00:00:00';
+			}
+			else if (offset > 0) {
+				localDate = '2019-01-09 23:59:59';
+			}
+			// Can't test timezone offset if in UTC
+			else {
+				this.skip();
+				return;
+			}
+			var utcDate = Zotero.Date.sqlToDate(localDate);
+			item.setField('accessDate', Zotero.Date.dateToSQL(utcDate, true));
+			await item.saveTx();
+			let accessed = Zotero.Utilities.itemToCSLJSON(item).accessed;
+			
+			assert.equal(accessed['date-parts'][0][0], 2019);
+			assert.equal(accessed['date-parts'][0][1], 1);
+			assert.equal(accessed['date-parts'][0][2], 9);
+		});
 	});
 	describe("itemFromCSLJSON", function () {
 		it("should stably perform itemToCSLJSON -> itemFromCSLJSON -> itemToCSLJSON", function* () {

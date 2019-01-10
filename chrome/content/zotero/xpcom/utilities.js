@@ -1675,6 +1675,16 @@ Zotero.Utilities = {
 			}
 			
 			if(date) {
+				// Convert UTC timestamp to local timestamp for access date
+				if (CSL_DATE_MAPPINGS[variable] == 'accessDate') {
+					// Accept ISO date
+					if (Zotero.Date.isISODate(date) && !Zotero.Date.isSQLDate(date)) {
+						let d = Zotero.Date.isoToDate(date);
+						date = Zotero.Date.dateToSQL(d, true);
+					}
+					let localDate = Zotero.Date.sqlToDate(date, true);
+					date = Zotero.Date.dateToSQL(localDate);
+				}
 				var dateObj = Zotero.Date.strToDate(date);
 				// otherwise, use date-parts
 				var dateParts = [];
