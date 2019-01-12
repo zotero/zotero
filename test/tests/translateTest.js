@@ -1804,6 +1804,33 @@ describe("Zotero.Translate.ItemGetter", function() {
 			var exportFile = OS.Path.join(exportDir, 'export.rdf');
 			assert.isAbove((yield OS.File.stat(exportFile)).size, 0);
 		});
+		
+		it("should handle UNC paths", async function () {
+			var path = '\\\\SHARE\\test.png';
+			var attachment = await Zotero.Attachments.linkFromFile({
+				file: OS.Path.join(getTestDataDirectory().path, 'test.png')
+			});
+			attachment._attachmentPath = path;
+			assert.equal(attachment.attachmentPath, path);
+			
+			var translation = new Zotero.Translate.Export();
+			var tmpDir = await getTempDirectory();
+			var exportDir = OS.Path.join(tmpDir, 'export');
+			translation.setLocation(Zotero.File.pathToFile(exportDir));
+			translation.setItems([attachment]);
+			translation.setTranslator('14763d24-8ba0-45df-8f52-b8d1108e7ac9'); // Zotero RDF
+			translation.setDisplayOptions({
+				exportFileData: true
+			});
+			await translation.translate();
+			
+			var exportFile = OS.Path.join(exportDir, 'export.rdf');
+			assert.isAbove((await OS.File.stat(exportFile)).size, 0);
+			var rdf = Zotero.File.getContents(exportFile);
+			var dp = new DOMParser();
+			var doc = dp.parseFromString(rdf, 'text/xml');
+			assert.equal(doc.querySelector('resource').getAttribute('rdf:resource'), path);
+		});
 	});
 });
 }

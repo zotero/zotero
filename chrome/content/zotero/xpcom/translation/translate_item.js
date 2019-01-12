@@ -1014,7 +1014,12 @@ Zotero.Translate.ItemGetter.prototype = {
 				// Add path and filename if not an internet link
 				let attachFile;
 				if (attachmentArray.localPath) {
-					attachFile = Zotero.File.pathToFile(attachmentArray.localPath);
+					try {
+						attachFile = Zotero.File.pathToFile(attachmentArray.localPath);
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
 				}
 				else {
 					Zotero.logError(`Path doesn't exist for attachment ${attachment.libraryKey} `
