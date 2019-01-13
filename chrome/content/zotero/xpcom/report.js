@@ -36,9 +36,9 @@ Zotero.Report.HTML = new function () {
 			+ '	<head>\n'
 			+ '		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n'
 			+ '		<title>' + Zotero.getString('report.title.default') + '</title>\n'
-			+ '		<link rel="stylesheet" type="text/css" href="zotero://report/detail.css"/>\n'
-			+ '		<link rel="stylesheet" type="text/css" media="screen,projection" href="zotero://report/detail_screen.css"/>\n'
-			+ '		<link rel="stylesheet" type="text/css" media="print" href="zotero://report/detail_print.css"/>\n'
+			+ '		<link rel="stylesheet" type="text/css" href="' + _getCSSDataURI('detail') + '"/>\n'
+			+ '		<link rel="stylesheet" type="text/css" media="screen,projection" href="' + _getCSSDataURI('detail_screen') + '"/>\n'
+			+ '		<link rel="stylesheet" type="text/css" media="print" href="' + _getCSSDataURI('detail_print') + '"/>\n'
 			+ '	</head>\n'
 			+ '	<body>\n'
 			+ '		<ul class="report' + (combineChildItems ? ' combineChildItems' : '') + '">';
@@ -128,6 +128,14 @@ Zotero.Report.HTML = new function () {
 		
 		yield '\t\t</ul>\n\t</body>\n</html>';
 	};
+	
+	
+	function _getCSSDataURI(file) {
+		return 'data:text/css;base64,'
+			+ Zotero.Utilities.Internal.Base64.encode(
+				Zotero.File.getResource(`chrome://zotero/skin/report/${file}.css`)
+			);
+	}
 	
 	
 	function _generateMetadataTable(obj) {
