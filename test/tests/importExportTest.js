@@ -68,5 +68,31 @@ describe("Import/Export", function () {
 				'#item_' + note1.id
 			);
 		});
+		
+		// Not currently supported
+		it.skip("should import related items", async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var file = OS.Path.join(getTestDataDirectory().path, 'zotero_rdf.xml');
+			translation = new Zotero.Translate.Import();
+			translation.setLocation(Zotero.File.pathToFile(file));
+			let translators = await translation.getTranslators();
+			translation.setTranslator(translators[0]);
+			var newItems = await translation.translate({ libraryID });
+			assert.lengthOf(newItems, 2); // DEBUG: why aren't child items returned here?
+			// Parent item
+			assert.lengthOf(newItems[0].relatedItems, 1);
+			assert.lengthOf(newItems[1].relatedItems, 1);
+			assert.sameMembers(newItems[0].relatedItems, [newItems[1]]);
+			assert.sameMembers(newItems[1].relatedItems, [newItems[0]]);
+			
+			var notes = newItems[0].getNotes();
+			assert.lengthOf(notes, 2);
+			var newNote1 = Zotero.Items.get(notes[0]);
+			var newNote2 = Zotero.Items.get(notes[1]);
+			assert.lengthOf(newNote1.relatedItems, 1);
+			assert.lengthOf(newNote2.relatedItems, 1);
+			assert.sameMembers(newNote1.relatedItems, [newNote2]);
+			assert.sameMembers(newNote2.relatedItems, [newNote1]);
+		});
 	});
 });

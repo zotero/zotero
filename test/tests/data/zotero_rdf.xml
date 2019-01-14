@@ -1,0 +1,32 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:bib="http://purl.org/net/biblio#">
+    <bib:Book rdf:about="urn:isbn:1-4214-0283-1">
+        <z:itemType>book</z:itemType>
+        <dcterms:isReferencedBy rdf:resource="#item_4"/>
+        <dcterms:isReferencedBy rdf:resource="#item_5"/>
+        <dc:relation rdf:resource="http://example.com"/>
+        <dc:identifier>ISBN 1-4214-0283-1</dc:identifier>
+        <dc:title>A</dc:title>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_4">
+       <rdf:value>C</rdf:value><dc:relation rdf:resource="#item_5"/>
+    </bib:Memo>
+    <bib:Memo rdf:about="#item_5">
+       <rdf:value>D</rdf:value><dc:relation rdf:resource="#item_4"/>
+    </bib:Memo>
+    <bib:Document rdf:about="http://example.com">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+           <z:Website></z:Website>
+        </dcterms:isPartOf>
+        <dc:relation rdf:resource="urn:isbn:1-4214-0283-1"/>
+        <dc:identifier>
+           <dcterms:URI><rdf:value>http://example.com</rdf:value></dcterms:URI>
+        </dc:identifier>
+        <dc:title>B</dc:title>
+    </bib:Document>
+</rdf:RDF>
