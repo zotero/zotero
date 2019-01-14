@@ -846,8 +846,9 @@ Zotero.Utilities.Internal = {
 			item.attachments = [];
 			let attachments = zoteroItem.getAttachments();
 			for (let i=0; i<attachments.length; i++) {
-				let zoteroAttachment = Zotero.Items.get(attachments[i]),
-					attachment = zoteroAttachment.toJSON();
+				let zoteroAttachment = Zotero.Items.get(attachments[i]);
+				let attachment = zoteroAttachment.toJSON();
+				attachment.uri = Zotero.URI.getItemURI(zoteroAttachment);
 				if (legacy) addCompatibilityMappings(attachment, zoteroAttachment);
 				
 				item.attachments.push(attachment);
@@ -857,8 +858,9 @@ Zotero.Utilities.Internal = {
 			item.notes = [];
 			let notes = zoteroItem.getNotes();
 			for (let i=0; i<notes.length; i++) {
-				let zoteroNote = Zotero.Items.get(notes[i]),
-					note = zoteroNote.toJSON();
+				let zoteroNote = Zotero.Items.get(notes[i]);
+				let note = zoteroNote.toJSON();
+				note.uri = Zotero.URI.getItemURI(zoteroNote);
 				if (legacy) addCompatibilityMappings(note, zoteroNote);
 				
 				item.notes.push(note);
