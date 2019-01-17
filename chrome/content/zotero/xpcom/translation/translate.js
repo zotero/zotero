@@ -352,7 +352,7 @@ Zotero.Translate.Sandbox = {
 			};
 			
 			var translatorsHandlerSet = false;
-			safeTranslator.getTranslators = function() {
+			safeTranslator.getTranslators = async function () {
 				if(!translation._handlers["translators"] || !translation._handlers["translators"].length) {
 					throw new Error('Translator must register a "translators" handler to '+
 						'call getTranslators() in this translation environment.');
@@ -367,7 +367,7 @@ Zotero.Translate.Sandbox = {
 			};
 			
 			var doneHandlerSet = false;
-			safeTranslator.translate = function() {
+			safeTranslator.translate = async function () {
 				translate.incrementAsyncProcesses("safeTranslator#translate()");
 				setDefaultHandlers(translate, translation);
 				if(!doneHandlerSet) {
@@ -378,7 +378,7 @@ Zotero.Translate.Sandbox = {
 					errorHandlerSet = true;
 					translation.setHandler("error", function(obj, error) { translate.complete(false, error) });
 				}
-				translation.translate(false);
+				return translation.translate(false);
 			};
 			
 			safeTranslator.getTranslatorObject = function(callback) {
