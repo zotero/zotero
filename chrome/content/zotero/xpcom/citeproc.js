@@ -24,7 +24,7 @@
  */
 
 var CSL = {
-    PROCESSOR_VERSION: "1.1.210",
+    PROCESSOR_VERSION: "1.1.212",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -171,7 +171,7 @@ var CSL = {
         "genre":"titles",
         "medium":"titles",
         "container-title":"journals",
-        "collection-title":"journals",
+        "collection-title":"titles",
         "archive":"journals",
         "publisher":"publishers",
         "authority":"publishers",
@@ -179,10 +179,10 @@ var CSL = {
         "event-place": "places",
         "archive-place": "places",
         "jurisdiction": "places",
-        "number": "number",
-        "edition":"number",
-        "issue":"number",
-        "volume":"number"
+        "number": "places",
+        "edition":"places",
+        "issue":"places",
+        "volume":"places"
     },
     AbbreviationSegments: function () {
         this["container-title"] = {};
@@ -489,6 +489,21 @@ var CSL = {
         "reviewed-author",
         "translator"
     ],
+    CREATORS: [
+        "author",
+        "collection-editor",
+        "composer",
+        "container-author",
+        "director",
+        "editor",
+        "editorial-director",
+        "illustrator",
+        "interviewer",
+        "original-author",
+        "recipient",
+        "reviewed-author",
+        "translator"
+    ],
     NUMERIC_VARIABLES: [
         "call-number",
         "chapter-number",
@@ -750,7 +765,7 @@ var CSL = {
         "sv-SE":"Swedish",
         "th-TH":"Thai",
         "tr-TR":"Turkish",
-        "uk-UA":"Ukranian",
+        "uk-UA":"Ukrainian",
         "vi-VN":"Vietnamese",
         "zh-CN":"Chinese (CN)",
         "zh-TW":"Chinese (TW)"
@@ -7753,6 +7768,9 @@ CSL.Node.label = {
             };
             this.execs.push(func);
         } else {
+            if (!this.strings.form) {
+                this.strings.form = "long";
+            }
             var namevars = state.build.names_variables.slice(-1)[0];
             if (!state.build.name_label) {
                 state.build.name_label = {};
@@ -10215,6 +10233,7 @@ CSL.Node.names = {
         }
         if (this.tokentype === CSL.START) {
             state.build.names_flag = true;
+            state.build.name_flag = false;
             state.build.names_level += 1;
             if (state.build.names_level === 1) {
                 state.build.names_variables = [];
@@ -10648,7 +10667,7 @@ CSL.Node.text = {
                         var transfall = false;
                         if (form === "short" || ["country", "jurisdiction"].indexOf(this.variables_real[0]) > -1) {
                             if (this.variables_real[0] === "container-title") {
-                                altvar = "journalAbbreviation";
+                                altvar = "container-title-short";
                             } else if (this.variables_real[0] === "title") {
                                 altvar = "title-short";
                             }
@@ -10687,20 +10706,22 @@ CSL.Node.text = {
                                     if (value) {
                                         if (state.opt.development_extensions.wrap_url_and_doi) {
                                             if (!this.decorations.length || this.decorations[0][0] !== "@" + this.variables[0]) {
-                                                if (this.variables_real[0] === "DOI" && this.strings.prefix === "https://doi.org/") {
+                                                if (this.variables_real[0] === "DOI") {
                                                     var clonetoken = CSL.Util.cloneToken(this);
                                                     var groupblob = new CSL.Blob(null, null, "url-wrapper");
                                                     groupblob.decorations.push(["@DOI", "true"]);
-                                                    value = value.replace(/^https?:\/\/doi\.org\//, "");
                                                     var prefix;
-                                                    if (value.match(/^https?:\/\//)) {
-                                                        prefix = "";
-                                                    } else {
-                                                        prefix = "https://doi.org/";
+                                                    if (this.strings.prefix && this.strings.prefix.match(/^.*https:\/\/doi\.org\/$/)) {
+                                                        value = value.replace(/^https?:\/\/doi\.org\//, "");
+                                                        if (value.match(/^https?:\/\//)) {
+                                                            prefix = "";
+                                                        } else {
+                                                            prefix = "https://doi.org/";
+                                                        }
+                                                        clonetoken.strings.prefix = this.strings.prefix.slice(0, clonetoken.strings.prefix.length-16);
                                                     }
                                                     var prefixblob = new CSL.Blob(prefix);
                                                     var valueblob = new CSL.Blob(value);
-                                                    clonetoken.strings.prefix = "";
                                                     groupblob.push(prefixblob);
                                                     groupblob.push(valueblob);
                                                     state.output.append(groupblob, clonetoken, false, false, true);
@@ -11023,7 +11044,7 @@ CSL.Attributes["@variable"] = function (state, arg) {
                     if (variable === "title") {
                         variable = "title-short";
                     } else if (variable === "container-title") {
-                        variable = "journalAbbreviation";
+                        variable = "container-title-short";
                     }
                 }
                 if (variable === "year-suffix") {
@@ -13984,12 +14005,22 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
         var m = str.match(/(;\s+|,\s+|\s*\\*[\-\u2013]+\s*|\s*&\s*)/g);
         if (m) {
             var lst = str.split(/(?:;\s+|,\s+|\s*\\*[\-\u2013]+\s*|\s*&\s*)/);
-            for (var i=0,ilen=lst.length-1; i<ilen; i++) {
-                elems.push(lst[i]);
-                elems.push(m[i]);
+            var recombine = false;
+            for (var i in lst) {
+                if (lst[i].replace(/^[a-z]\.\s+/, "").match(/[^\s0-9ivxlcmIVXLCM]/)) {
+                    break;
+                }
             }
-            elems.push(lst[lst.length-1]);
-            elems = fixupSubsections(elems);
+            if (recombine) {
+                elems = [str];
+            } else {
+                for (var i=0,ilen=lst.length-1; i<ilen; i++) {
+                    elems.push(lst[i]);
+                    elems.push(m[i]);
+                }
+                elems.push(lst[lst.length-1]);
+                elems = fixupSubsections(elems);
+            }
         } else {
             var elems = [str];
         }
@@ -14199,7 +14230,7 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
         if (hasTerm && rangeDelimiter === "-") {
             if (isNumeric) {
                 if (isPage || ["locator", "issue", "volume", "edition", "number"].indexOf(variable) > -1) {
-                    rangeDelimiter = me.getTerm("page-range-delimiter")
+                    rangeDelimiter = me.getTerm("page-range-delimiter");
                     if (!rangeDelimiter) {
                         rangeDelimiter = "\u2013";
                     }
@@ -14243,7 +14274,7 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
             currentInfo.count = 1;
             return;
         }
-        if (!me.opt["page-range-format"] && parseInt(values[i-1].value, 10) > parseInt(values[i].value, 10)) {
+        if (!me.opt["page-range-format"] && (parseInt(values[i-1].value, 10) > parseInt(values[i].value, 10))) {
             values[i-1].joiningSuffix = fixupRangeDelimiter(variable, values[i], values[i-1].joiningSuffix, true);
             return;
         }
@@ -14259,7 +14290,7 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
             }
             str = values[i-1].value + stripHyphenBackslash(values[i-1].joiningSuffix) + values[i].value;
         }
-        var m = str.match(/^((?:[0-9]*[a-zA-Z]+0*))?([0-9]+)(\s*[^0-9]+\s*)([-,a-zA-Z]?0*)([0-9]+)$/);
+        var m = str.match(/^((?:[0-9]*[a-zA-Z]+0*))?([0-9]+[a-z]*)(\s*[^0-9]+\s*)([-,a-zA-Z]?0*)([0-9]+[a-z]*)$/);
         if (m) {
             var rangeDelimiter = m[3];
             rangeDelimiter = fixupRangeDelimiter(variable, val, rangeDelimiter, values[i].numeric);
@@ -14462,7 +14493,7 @@ CSL.Util.PageRangeMangler = {};
 CSL.Util.PageRangeMangler.getFunction = function (state, rangeType) {
     var rangerex, pos, len, stringify, listify, expand, minimize, minimize_internal, chicago, lst, m, b, e, ret, begin, end, ret_func, ppos, llen;
     var range_delimiter = state.getTerm(rangeType + "-range-delimiter");
-    rangerex = /([0-9]*[a-zA-Z]+0*)?([0-9]+)\s*(?:\u2013|-)\s*([0-9]*[a-zA-Z]+0*)?([0-9]+)/;
+    rangerex = /([0-9]*[a-zA-Z]+0*)?([0-9]+[a-z]*)\s*(?:\u2013|-)\s*([0-9]*[a-zA-Z]+0*)?([0-9]+[a-z]*)/;
     stringify = function (lst) {
         len = lst.length;
         for (pos = 1; pos < len; pos += 2) {
@@ -14480,8 +14511,8 @@ CSL.Util.PageRangeMangler.getFunction = function (state, rangeType) {
         var this_range_delimiter = range_delimiter === "-" ? "" : range_delimiter;
         var delimRex = new RegExp("([^\\\\])[-" + this_range_delimiter + "\\u2013]", "g");
         str = str.replace(delimRex, "$1 - ").replace(/\s+-\s+/g, " - ");
-        var rexm = new RegExp("((?:[0-9]*[a-zA-Z]+0*)?[0-9]+" + hyphens + "(?:[0-9]*[a-zA-Z]+0*)?[0-9]+)", "g");
-        var rexlst = new RegExp("(?:[0-9]*[a-zA-Z]+0*)?[0-9]+" + hyphens + "(?:[0-9]*[a-zA-Z]+0*)?[0-9]+");
+        var rexm = new RegExp("((?:[0-9]*[a-zA-Z]+0*)?[0-9]+[a-z]*" + hyphens + "(?:[0-9]*[a-zA-Z]+0*)?[0-9]+[a-z]*)", "g");
+        var rexlst = new RegExp("(?:[0-9]*[a-zA-Z]+0*)?[0-9]+[a-z]*" + hyphens + "(?:[0-9]*[a-zA-Z]+0*)?[0-9]+[a-z]*");
         m = str.match(rexm);
         lst = str.split(rexlst);
         if (lst.length === 0) {
@@ -15169,7 +15200,10 @@ CSL.Output.Formatters = new function () {
     var _tagParams = {
         "<span style=\"font-variant: small-caps;\">": "</span>",
         "<span class=\"nocase\">": "</span>",
-        "<span class=\"nodecor\">": "</span>"
+        "<span class=\"nodecor\">": "</span>",
+        "<sc>": "</sc>",
+        "<sub>": "</sub>",
+        "<sup>": "</sup>"
     }
     function _capitalise (word, force) {
         var m = word.match(/(^\s*)((?:[\0-\t\x0B\f\x0E-\u2027\u202A-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]))(.*)/);
@@ -15294,8 +15328,11 @@ CSL.Output.Formatters = new function () {
         }
         if (config.lastWordPos) {
             var lastWords = wordDoppel.split(config.doppel.strings[config.lastWordPos.strings]);
-            var lastWord = _capitalise(lastWords.strings[config.lastWordPos.words]);
-            lastWords.strings[config.lastWordPos.words] = lastWord;
+            var lastWord = lastWords.strings[config.lastWordPos.words];
+            if (lastWord.length > 1 && lastWord.toLowerCase().match(config.skipWordsRex)) {
+                lastWord = _capitalise(lastWord);
+                lastWords.strings[config.lastWordPos.words] = lastWord;
+            }
             config.doppel.strings[config.lastWordPos.strings] = wordDoppel.join(lastWords);
         }
         return tagDoppel.join(config.doppel);
@@ -15705,6 +15742,212 @@ CSL.Output.Formats.prototype.rtf = {
     },
     "@DOI/true": function (state, str) {
         return str;
+    }
+};
+CSL.Output.Formats.prototype.asciidoc = {
+    "text_escape": function (text) {
+        if (!text) {
+            text = "";
+        }
+        return text.replace("*", "pass:[*]", "g")
+            .replace("_", "pass:[_]", "g")
+            .replace("#", "pass:[#]", "g")
+            .replace("^", "pass:[^]", "g")
+            .replace("~", "pass:[~]", "g")
+            .replace("[[", "pass:[[[]", "g")
+            .replace("  ", "&#160; ", "g")
+            .replace(CSL.SUPERSCRIPTS_REGEXP, function(aChar) {
+                return "^" + CSL.SUPERSCRIPTS[aChar] + "^";
+            });
+    },
+    "bibstart": "",
+    "bibend": "",
+    "@passthrough/true": CSL.Output.Formatters.passthrough,
+    "@font-style/italic": "__%%STRING%%__",
+    "@font-style/oblique": "__%%STRING%%__",
+    "@font-style/normal": false,
+    "@font-variant/small-caps": "[small-caps]#%%STRING%%#",
+    "@font-variant/normal": false,
+    "@font-weight/bold": "**%%STRING%%**",
+    "@font-weight/normal": false,
+    "@font-weight/light": false,
+    "@text-decoration/none": false,
+    "@text-decoration/underline": "[underline]##%%STRING%%##",
+    "@vertical-align/sup": "^^%%STRING%%^^",
+    "@vertical-align/sub": "~~%%STRING%%~~",
+    "@vertical-align/baseline": false,
+    "@strip-periods/true": CSL.Output.Formatters.passthrough,
+    "@strip-periods/false": CSL.Output.Formatters.passthrough,
+    "@quotes/true": function (state, str) {
+        if ("undefined" === typeof str) {
+            return "``";
+        }
+        return "``" + str + "''";
+    },
+    "@quotes/inner": function (state, str) {
+        if ("undefined" === typeof str) {
+            return "`";
+        }
+        return "`" + str + "'";
+    },
+    "@quotes/false": false,
+    "@cite/entry": function (state, str) {
+        return state.sys.wrapCitationEntry(str, this.item_id, this.locator_txt, this.suffix_txt);
+    },
+    "@bibliography/entry": function (state, str) {
+        return str + "\n";
+    },
+    "@display/block": function (state, str) {
+        return str;
+    },
+    "@display/left-margin": function (state, str) {
+        return str;
+    },
+    "@display/right-inline": function (state, str) {
+        return " " + str;
+    },
+    "@display/indent": function (state, str) {
+        return " " + str;
+    },
+    "@showid/true": function (state, str, cslid) {
+        if (!state.tmp.just_looking && !state.tmp.suppress_decorations && this.params && "string" === typeof str) {
+            var prePunct = "";
+            if (str) {
+                var m = str.match(CSL.VARIABLE_WRAPPER_PREPUNCT_REX);
+                prePunct = m[1];
+                str = m[2];
+            }
+            var postPunct = "";
+            if (str && CSL.SWAPPING_PUNCTUATION.indexOf(str.slice(-1)) > -1) {
+                postPunct = str.slice(-1);
+                str = str.slice(0,-1);
+            }
+            return state.sys.variableWrapper(this.params, prePunct, str, postPunct);
+        } else {
+            return str;
+        }
+    },
+    "@URL/true": function (state, str) {
+        return str;
+    },
+    "@DOI/true": function (state, str) {
+        var doiurl = str;
+        if (!str.match(/^https?:\/\//)) {
+            doiurl = "https://doi.org/" + str;
+        }
+        return doiurl + "[" + str + "]";
+    }
+};
+CSL.Output.Formats.prototype.fo = {
+    "text_escape": function (text) {
+        if (!text) {
+            text = "";
+        }
+        return text.replace(/&/g, "&#38;")
+            .replace(/</g, "&#60;")
+            .replace(/>/g, "&#62;")
+            .replace("  ", "&#160; ", "g")
+            .replace(CSL.SUPERSCRIPTS_REGEXP, function(aChar) {
+                return "<fo:inline vertical-align=\"super\">" + CSL.SUPERSCRIPTS[aChar] + "</fo:inline>";
+            });
+    },
+    "bibstart": "",
+    "bibend": "",
+    "@passthrough/true": CSL.Output.Formatters.passthrough,
+    "@font-style/italic": "<fo:inline font-style=\"italic\">%%STRING%%</fo:inline>",
+    "@font-style/oblique": "<fo:inline font-style=\"oblique\">%%STRING%%</fo:inline>",
+    "@font-style/normal": "<fo:inline font-style=\"normal\">%%STRING%%</fo:inline>",
+    "@font-variant/small-caps": "<fo:inline font-variant=\"small-caps\">%%STRING%%</fo:inline>",
+    "@font-variant/normal": "<fo:inline font-variant=\"normal\">%%STRING%%</fo:inline>",
+    "@font-weight/bold": "<fo:inline font-weight=\"bold\">%%STRING%%</fo:inline>",
+    "@font-weight/normal": "<fo:inline font-weight=\"normal\">%%STRING%%</fo:inline>",
+    "@font-weight/light": "<fo:inline font-weight=\"lighter\">%%STRING%%</fo:inline>",
+    "@text-decoration/none": "<fo:inline text-decoration=\"none\">%%STRING%%</fo:inline>",
+    "@text-decoration/underline": "<fo:inline text-decoration=\"underline\">%%STRING%%</fo:inline>",
+    "@vertical-align/sup": "<fo:inline vertical-align=\"super\">%%STRING%%</fo:inline>",
+    "@vertical-align/sub": "<fo:inline vertical-align=\"sub\">%%STRING%%</fo:inline>",
+    "@vertical-align/baseline": "<fo:inline vertical-align=\"baseline\">%%STRING%%</fo:inline>",
+    "@strip-periods/true": CSL.Output.Formatters.passthrough,
+    "@strip-periods/false": CSL.Output.Formatters.passthrough,
+    "@quotes/true": function (state, str) {
+        if ("undefined" === typeof str) {
+            return state.getTerm("open-quote");
+        }
+        return state.getTerm("open-quote") + str + state.getTerm("close-quote");
+    },
+    "@quotes/inner": function (state, str) {
+        if ("undefined" === typeof str) {
+            return "\u2019";
+        }
+        return state.getTerm("open-inner-quote") + str + state.getTerm("close-inner-quote");
+    },
+    "@quotes/false": false,
+    "@cite/entry": function (state, str) {
+        return state.sys.wrapCitationEntry(str, this.item_id, this.locator_txt, this.suffix_txt);
+    },
+    "@bibliography/entry": function (state, str) {
+        var indent = "";
+        if (state.bibliography && state.bibliography.opt && state.bibliography.opt.hangingindent) {
+            var hi = state.bibliography.opt.hangingindent;
+            indent = " start-indent=\"" + hi +"em\" text-indent=\"-" + hi + "em\"";
+        }
+        var insert = "";
+        if (state.sys.embedBibliographyEntry) {
+            insert = state.sys.embedBibliographyEntry(this.item_id) + "\n";
+        }
+        return "<fo:block id=\"" + this.system_id + "\"" + indent + ">" + str + "</fo:block>\n" + insert;
+    },
+    "@display/block": function (state, str) {
+        return "\n  <fo:block>" + str + "</fo:block>\n";
+    },
+    "@display/left-margin": function (state, str) {
+        return "\n  <fo:table table-layout=\"fixed\" width=\"100%\">\n    " +
+                "<fo:table-column column-number=\"1\" column-width=\"$$$__COLUMN_WIDTH_1__$$$\"/>\n    " +
+                "<fo:table-column column-number=\"2\" column-width=\"proportional-column-width(1)\"/>\n    " +
+                "<fo:table-body>\n      " +
+                    "<fo:table-row>\n        " +
+                        "<fo:table-cell>\n          " +
+                            "<fo:block>" + str + "</fo:block>\n        " +
+                        "</fo:table-cell>\n        ";
+    },
+    "@display/right-inline": function (state, str) {
+        return "<fo:table-cell>\n          " +
+                "<fo:block>" + str + "</fo:block>\n        " +
+            "</fo:table-cell>\n      " +
+            "</fo:table-row>\n    " +
+            "</fo:table-body>\n  " +
+            "</fo:table>\n";
+    },
+    "@display/indent": function (state, str) {
+        return "<fo:block margin-left=\"2em\">" + str + "</fo:block>\n";
+    },
+    "@showid/true": function (state, str, cslid) {
+        if (!state.tmp.just_looking && !state.tmp.suppress_decorations && this.params && "string" === typeof str) {
+            var prePunct = "";
+            if (str) {
+                var m = str.match(CSL.VARIABLE_WRAPPER_PREPUNCT_REX);
+                prePunct = m[1];
+                str = m[2];
+            }
+            var postPunct = "";
+            if (str && CSL.SWAPPING_PUNCTUATION.indexOf(str.slice(-1)) > -1) {
+                postPunct = str.slice(-1);
+                str = str.slice(0,-1);
+            }
+            return state.sys.variableWrapper(this.params, prePunct, str, postPunct);
+        } else {
+            return str;
+        }
+    },
+    "@URL/true": function (state, str) {
+        return "<fo:basic-link external-destination=\"url('" + str + "')\">" + str + "</fo:basic-link>";
+    },
+    "@DOI/true": function (state, str) {
+        var doiurl = str;
+        if (!str.match(/^https?:\/\//)) {
+            doiurl = "https://doi.org/" + str;
+        }
+        return "<fo:basic-link external-destination=\"url('" + doiurl + "')\">" + str + "</fo:basic-link>";
     }
 };
 CSL.Output.Formats = new CSL.Output.Formats();
