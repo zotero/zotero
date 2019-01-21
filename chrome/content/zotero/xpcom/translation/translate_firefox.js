@@ -103,7 +103,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		return obj;
 	}
 	
-	// We can't call apply() directy on Xray-wrapped functions, so we have to be
+	// We can't call apply() directly on Xray-wrapped functions, so we have to be
 	// clever.
 	function doApply(fun, invocant, args) {
 		// We implement Xrays to pure JS [[Object]] instances that filter out tricky

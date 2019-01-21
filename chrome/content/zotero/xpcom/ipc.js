@@ -354,7 +354,7 @@ Zotero.IPC.Pipe = new function() {
 	 * Creates and listens on a pipe
 	 *
 	 * @param {nsIFile} file The location where the pipe should be created
-	 * @param {Function} callback A function to be passed any data recevied on the pipe
+	 * @param {Function} callback A function to be passed any data received on the pipe
 	 */
 	this.initPipeListener = function(file, callback) {
 		Zotero.debug("IPC: Initializing pipe at "+file.path);

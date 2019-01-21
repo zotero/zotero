@@ -139,7 +139,7 @@ Zotero.MIMETypeHandler = new function () {
 	
 	var _URIContentListener = new function() {
 		/**
-		 * Standard QI definiton
+		 * Standard QI definition
 		 */
 		this.QueryInterface = function(iid) {
 			if  (iid.equals(Components.interfaces.nsISupports)
@@ -190,7 +190,7 @@ Zotero.MIMETypeHandler = new function () {
 	}
 	
 	/**
-	 * Standard QI definiton
+	 * Standard QI definition
 	 */
 	_StreamListener.prototype.QueryInterface = function(iid) {
 		if (iid.equals(Components.interfaces.nsISupports)

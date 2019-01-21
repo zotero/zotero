@@ -203,7 +203,7 @@ Zotero.Intl = new function () {
 			}
 		}
 
-		// Grab all ASCII punctuation and space at the begining of string
+		// Grab all ASCII punctuation and space at the beginning of string
 		var initPunctuationRE = /^[\x20-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E]+/;
 		// Punctuation that should be ignored when sorting
 		var ignoreInitRE = /["'[{(]+$/;

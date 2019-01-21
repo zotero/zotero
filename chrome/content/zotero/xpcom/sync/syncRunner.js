@@ -1418,7 +1418,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				content.appendChild(header);
 			}
 			
-			// Show our own error mesages directly
+			// Show our own error messages directly
 			var msg;
 			if (e instanceof Zotero.Error) {
 				msg = e.message;

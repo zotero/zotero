@@ -592,7 +592,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				refreshed = true;
 			}
 		}
-		// If refreshing a single item, clear caches and then unselect and reselect row
+		// If refreshing a single item, clear caches and then deselect and reselect row
 		else if (savedSelection.length == 1 && savedSelection[0] == ids[0]) {
 			let row = this._rowMap[ids[0]];
 			delete this._cellTextCache[row];

@@ -1070,7 +1070,7 @@ Zotero.Translate.ItemGetter.prototype = {
 						
 						if(!inExportFileDirectory) {
 							throw new Error("Invalid path; attachment cannot be placed above export "+
-								"directory in the file hirarchy");
+								"directory in the file hierarchy");
 						}
 						
 						// Create intermediate directories if they don't exist
