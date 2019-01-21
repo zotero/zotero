@@ -1,0 +1,40 @@
+//
+// Button
+// --------------------------------------------------
+
+.btn {
+  font: {
+    family: inherit;
+    size: inherit;
+  }
+  line-height: inherit;
+  color: inherit;
+  text-align: center;
+  -moz-appearance: toolbarbutton;
+
+  &[disabled],
+  &.disabled {
+    opacity: $btn-disabled-opacity;
+  }
+}
+
+.btn-icon {
+  .icon {
+    &:first-child {
+      margin-left: -5px;
+    }
+    &:last-child {
+      margin-right: -5px;
+    }
+    svg, img {
+      vertical-align: middle;
+    }
+  }
+  span.menu-marker {
+    -moz-appearance: toolbarbutton-dropdown;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: -5px;
+  }
+}
+

@@ -1,1 +1,1 @@
-../node_modules/react/dist/react.js
+../node_modules/react/umd/react.development.js

@@ -742,9 +742,10 @@ Zotero.Server.Connector.SaveItems.prototype = {
 					session,
 					targetID,
 					requestData,
-					function (topLevelItems) {
+					function (jsonItems, items) {
+						session.addItems(items);
 						// Only return the properties the connector needs
-						topLevelItems = topLevelItems.map((item) => {
+						jsonItems = jsonItems.map((item) => {
 							let o = {
 								id: item.id,
 								title: item.title,
@@ -764,7 +765,7 @@ Zotero.Server.Connector.SaveItems.prototype = {
 							};
 							return o;
 						});
-						resolve([201, "application/json", JSON.stringify({items: topLevelItems})]);
+						resolve([201, "application/json", JSON.stringify({items: jsonItems})]);
 					}
 				)
 				// Add items to session once all attachments have been saved

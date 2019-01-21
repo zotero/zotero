@@ -69,8 +69,10 @@ pref("extensions.zotero.lastLongTagDelimiter", ";");
 pref("extensions.zotero.fallbackSort", "firstCreator,date,title,dateAdded");
 pref("extensions.zotero.sortCreatorAsString", false);
 
-//Tag Cloud
-pref("extensions.zotero.tagCloud", false);
+
+//Tag Selector
+pref("extensions.zotero.tagSelector.showAutomatic", true);
+pref("extensions.zotero.tagSelector.displayAllTags", false);
 
 // Keyboard shortcuts
 pref("extensions.zotero.keys.openZotero", "Z");

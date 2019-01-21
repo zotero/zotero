@@ -1850,7 +1850,7 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 			// Clear the quick search and tag selection and try again (once)
 			if (!noRecurse && this.window.ZoteroPane) {
 				let cleared1 = yield this.window.ZoteroPane.clearQuicksearch();
-				let cleared2 = this.window.ZoteroPane.clearTagSelection();
+				let cleared2 = this.window.ZoteroPane.tagSelector.clearTagSelection();
 				if (cleared1 || cleared2) {
 					return this.selectItem(id, expand, true);
 				}

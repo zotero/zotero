@@ -179,7 +179,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		}.bind(this));
 
 		if (itemsDoneCallback) {
-			itemsDoneCallback(items.map(item => jsonByItem.get(item)));
+			itemsDoneCallback(items.map(item => jsonByItem.get(item)), items);
 		}
 		
 		// Save standalone attachments

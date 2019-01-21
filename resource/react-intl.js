@@ -1,0 +1,1 @@
+../node_modules/react-intl/dist/react-intl.js

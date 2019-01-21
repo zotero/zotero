@@ -4,7 +4,6 @@ const dirs = [
 	'components',
 	'defaults',
 	'resource',
-	'resource/web-library',
 	'test',
 	'test/resource/chai',
 	'test/resource/chai-as-promised',
@@ -49,13 +48,20 @@ const browserifyConfigs = [
 ];
 
 // exclude mask used for js, copy, symlink and sass tasks
-const ignoreMask = ['**/#*'];
+const ignoreMask = ['**/#*', '**/_*.scss'];
 
 const jsFiles = [
 	`{${dirs.join(',')}}/**/*.js`,
-	`!{${symlinkDirs.concat(copyDirs).join(',')}}/**/*.js`
+	`{${dirs.join(',')}}/**/*.jsx`,
+	`!{${symlinkDirs.concat(copyDirs).join(',')}}/**/*.js`,
+	`!{${symlinkDirs.concat(copyDirs).join(',')}}/**/*.jsx`
+];
+
+const scssFiles = [
+	'scss/**/*.scss',
+	'chrome/skin/default/zotero/**/*.scss'
 ];
 
 module.exports = {
-	dirs, symlinkDirs, copyDirs, symlinkFiles, browserifyConfigs, jsFiles, ignoreMask
+	dirs, symlinkDirs, copyDirs, symlinkFiles, browserifyConfigs, jsFiles, scssFiles, ignoreMask
 };

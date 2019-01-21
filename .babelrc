@@ -18,6 +18,7 @@
     "syntax-jsx",
     "transform-react-jsx",
     "transform-react-display-name",
+    "transform-class-properties",
     [
       "transform-es2015-modules-commonjs",
       {

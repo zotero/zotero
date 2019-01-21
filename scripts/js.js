@@ -27,7 +27,7 @@ async function getJS(source, options, signatures) {
 	var f;
 	while ((f = matchingJSFiles.pop()) != null) {
 		const newFileSignature = await getFileSignature(f);
-		const dest = path.join('build', f);
+		const dest = path.join('build', f.replace('.jsx', '.js'));
 		f = path.normalize(f);
 		if (f in signatures) {
 			if (compareSignatures(newFileSignature, signatures[f])) {

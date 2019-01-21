@@ -1,0 +1,92 @@
+//
+// Tag selector
+// --------------------------------------------------
+
+.tag-selector {
+	display: flex;
+	flex: 1 0;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.tag-selector-container {
+	flex: 1 1 auto;
+	justify-content: space-between;
+	overflow: auto;
+	height: 100px;
+	background-color: $tag-selector-bg;
+}
+
+.tag-selector-message {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+}
+
+.tag-selector-filter-container {
+	height: auto;
+	flex: 0 0 1em;
+	display: flex;
+	flex-direction: row;
+	padding: 0.125em 0 0.125em 0.5em;
+}
+
+.tag-selector-list {
+	list-style: none;
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+}
+
+.tag-selector-filter {
+	flex: 1 0;
+	min-width: 40px;
+}
+
+.tag-selector-actions {
+	flex: 0 1;
+	display: block;
+	white-space: nowrap;
+	background-color: inherit;
+}
+
+.tag-selector-item {
+	cursor: pointer;
+	display: inline-block;
+	margin: .15em .05em .15em .3em;
+	padding: 0 .25em 0 .25em;
+	max-width: 250px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	&.colored {
+		font-weight: bold;
+	}
+
+	&.disabled {
+		opacity: .6;
+		cursor: default;
+	}
+	
+	&.dragged-over {
+		color: $shade-0;
+		background: $shade-6;
+	}
+}
+
+#zotero-tag-selector-container {
+	display: flex;
+}
+
+#zotero-tag-selector {
+	min-height: 100px;
+	width: 100%;
+	display: flex;
+}
+
+#zotero-tag-selector[collapsed=true] {
+	visibility: collapse;
+}
+

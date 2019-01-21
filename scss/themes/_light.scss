@@ -1,0 +1,176 @@
+//
+// Light theme
+// --------------------------------------------------
+
+
+// Colors
+// --------------------------------------------------
+
+$red:           #cc2936;
+$blue:          rgb(89, 139, 236);
+$asphalt:       #7a8799;
+$asphalt-light: #dadee3;
+
+$primary:   $red;
+$secondary: $blue;
+
+$blue-dark:    #333c66;
+$blue-darkest: #3d4466;
+
+$transparent: transparent;
+
+
+// Grays
+// --------------------------------------------------
+
+$shade-0:  #fff;
+$shade-1:  #f6f6f6;
+$shade-2:  #e6e6e6;
+$shade-3:  #ddd;
+$shade-4:  #ccc;
+$shade-5:  #bbb;
+$shade-6:  #777;
+$shade-7:  #555;
+$shade-8:  #444;
+$shade-9:  #222;
+$shade-10: #000;
+
+
+// Scaffolding
+// --------------------------------------------------
+
+$body-bg:    $shade-0;
+$text-color: $shade-9;
+
+$headings-color: $shade-8;
+
+$link-color:       $blue;
+$link-hover-color: $blue;
+
+$focus-color: $secondary;
+
+
+// Typography
+// --------------------------------------------------
+
+$text-selection-color: inherit;
+$text-selection-bg: rgba($secondary, 0.2);
+
+// Separator
+$separator-color: $shade-3;
+
+
+// Partials
+// --------------------------------------------------
+
+// Main
+$main-bg: $shade-0;
+
+// Sidebar
+$sidebar-bg: $shade-1;
+
+// Clicky
+$clicky-hover-bg-color: rgb(187, 206, 241);
+$clicky-active-bg-color: $secondary;
+$clicky-border-radius: 6px;
+$clicky-border-color: rgb(109, 149, 224);
+$clicky-active-color: $shade-0;
+
+
+// Components
+// --------------------------------------------------
+
+// Icon
+$icon-color: $secondary;
+$icon-active-color: $shade-9;
+
+// Collection tree
+$collection-tree-headings-color:          $shade-6;
+$collection-tree-link-color:              $shade-8;
+$collection-tree-active-link-color:       $shade-9;
+$collection-tree-active-icon-color:       $shade-7;
+$collection-tree-active-link-bg:          $shade-2;
+$collection-tree-focus-color:             $asphalt;
+$collection-tree-icon-color:              $shade-6;
+$touch-collection-tree-active-link-color: $shade-0;
+$touch-collection-tree-active-link-bg:    $blue;
+$touch-collection-tree-border:            $shade-2;
+$touch-collection-tree-separator:         $body-bg;
+$collection-tree-dnd-target-link-color:   $shade-0;
+$collection-tree-dnd-target-bg-color:     $blue;
+$collection-tree-dnd-target-icon-color:   $shade-0;
+
+// Items
+$items-bg:              $shade-0;
+$items-odd-bg:          $shade-1;
+$item-list-head-color:  $shade-8;
+$item-list-head-border: $shade-2;
+
+// Item list
+$item-odd-bg:       $shade-1;
+$item-active-color: $shade-0;
+$item-active-bg:    $secondary;
+
+// Item details
+$item-details-bg: $shade-1;
+$info-view-color: $shade-5;
+
+// Panel
+$panel-bg: $shade-1;
+$panel-header-color: $shade-8;
+$panel-header-shadow: rgba($shade-10, 0.08);
+
+// Tabs
+$tabs-border-color:  $shade-3;
+$tab-active-color:   $secondary;
+$tab-inactive-color: $headings-color;
+
+// Metadata list
+$key-color:                $shade-6;
+$editable-hover-bg:        rgba($shade-10, 0.04);
+$handle-color-touch:       $shade-4;
+$handle-color-mouse:       $shade-6;
+$metadata-heading-color:   $shade-5;
+$metadata-separator-color: $shade-3;
+
+// Button
+$btn-primary-color:           $shade-0;
+$btn-primary-bg:              $asphalt;
+$btn-default-color:           $text-color;
+$btn-border:          $shade-3;
+$btn-default-bg:              $shade-0;
+$btn-default-active-color:    rgba($btn-default-color, 0.5);
+
+// Forms
+$input-color:        $text-color;
+$input-bg:           $body-bg;
+$input-border-color: $shade-3;
+$input-focus-color:  $secondary;
+$placeholder-color:  $shade-5;
+
+// Editable
+$editable-color:        $text-color;
+$editable-bg:           $shade-0;
+$editable-border-color: $secondary;
+
+// Menu (select, dropdown, …)
+$menu-bg:               $body-bg;
+$menu-box-shadow:       0 0 0 1px rgba(0, 0, 0, 0.08), 0 3px 8px rgba(0, 0, 0, 0.2);
+$menu-item-hover-bg:    $shade-1;
+$menu-item-selected-bg: $shade-2;
+$menu-devider:          $shade-2;
+$menu-no-results-color: $shade-5;
+
+// Drag layer
+$creator-drag-preview-shadow: rgba($shade-10, 0.2);
+
+// Modal
+$modal-backdrop-bg:           rgba($shade-10, 0.4);
+$modal-content-bg:            $shade-1;
+$modal-header-bg:             $shade-0;
+$modal-footer-border-width:   1px;
+$modal-footer-border-color:   $shade-2;
+$modal-icon-spin-color:       $shade-0;
+
+// Tag selector
+$tag-selector-bg:             $shade-0;

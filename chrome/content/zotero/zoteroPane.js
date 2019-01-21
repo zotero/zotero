@@ -58,8 +58,6 @@ var ZoteroPane = new function()
 	
 	this.document = document;
 	
-	const COLLECTIONS_HEIGHT = 32; // minimum height of the collections pane and toolbar
-	
 	var self = this,
 		_loaded = false, _madeVisible = false,
 		titlebarcolorState, titleState, observerService,
@@ -145,6 +143,8 @@ var ZoteroPane = new function()
 		Zotero.hiDPI = window.devicePixelRatio > 1;
 		Zotero.hiDPISuffix = Zotero.hiDPI ? "@2x" : "";
 		
+		ZoteroPane_Local.Containers.loadPane();
+		
 		ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 		
 		// Add a default progress window
@@ -170,11 +170,6 @@ var ZoteroPane = new function()
 		itemsTree.controllers.appendController(new Zotero.ItemTreeCommandController(itemsTree));
 		itemsTree.addEventListener("mousedown", ZoteroPane_Local.onTreeMouseDown, true);
 		itemsTree.addEventListener("click", ZoteroPane_Local.onTreeClick, true);
-		
-		var tagSelector = document.getElementById('zotero-tag-selector');
-		tagSelector.onchange = function () {
-			return ZoteroPane_Local.updateTagFilter();
-		};
 		
 		Zotero.Keys.windowInit(document);
 		
@@ -351,8 +346,7 @@ var ZoteroPane = new function()
 			this.serializePersist();
 		}
 		
-		var tagSelector = document.getElementById('zotero-tag-selector');
-		tagSelector.unregister();
+		ZoteroPane_Local.Containers.destroy();
 		
 		if(this.collectionsView) this.collectionsView.unregister();
 		if(this.itemsView) this.itemsView.unregister();
@@ -395,7 +389,6 @@ var ZoteroPane = new function()
 		this.unserializePersist();
 		this.updateLayout();
 		this.updateToolbarPosition();
-		this.updateTagSelectorSize();
 		
 		// restore saved row selection (for tab switching)
 		// TODO: Remove now that no tab mode?
@@ -1100,100 +1093,25 @@ var ZoteroPane = new function()
 		
 		var showing = tagSelector.getAttribute('collapsed') == 'true';
 		tagSelector.setAttribute('collapsed', !showing);
-		this.updateTagSelectorSize();
 		
 		// If showing, set scope to items in current view
 		// and focus filter textbox
 		if (showing) {
 			yield this.setTagScope();
-			tagSelector.focusTextbox();
+			ZoteroPane_Local.tagSelector.focusTextbox();
 		}
 		// If hiding, clear selection
 		else {
-			tagSelector.uninit();
+			ZoteroPane_Local.tagSelector.uninit();
 		}
 	});
-	
-	
-	this.updateTagSelectorSize = function () {
-		//Zotero.debug('Updating tag selector size');
-		var zoteroPane = document.getElementById('zotero-pane-stack');
-		var splitter = document.getElementById('zotero-tags-splitter');
-		var tagSelector = document.getElementById('zotero-tag-selector');
-		
-		// Nothing should be bigger than appcontent's height
-		var max = document.getElementById('appcontent').boxObject.height
-					- splitter.boxObject.height;
-		
-		// Shrink tag selector to appcontent's height
-		var maxTS = max - COLLECTIONS_HEIGHT;
-		if (parseInt(tagSelector.getAttribute("height")) > maxTS) {
-			//Zotero.debug("Limiting tag selector height to appcontent");
-			tagSelector.setAttribute('height', maxTS);
-		}
-		
-		var height = tagSelector.boxObject.height;
-		
-		
-		/*Zotero.debug("tagSelector.boxObject.height: " + tagSelector.boxObject.height);
-		Zotero.debug("tagSelector.getAttribute('height'): " + tagSelector.getAttribute('height'));
-		Zotero.debug("zoteroPane.boxObject.height: " + zoteroPane.boxObject.height);
-		Zotero.debug("zoteroPane.getAttribute('height'): " + zoteroPane.getAttribute('height'));*/
-		
-		
-		// Don't let the Z-pane jump back down to its previous height
-		// (if shrinking or hiding the tag selector let it clear the min-height)
-		if (zoteroPane.getAttribute('height') < zoteroPane.boxObject.height) {
-			//Zotero.debug("Setting Zotero pane height attribute to " +  zoteroPane.boxObject.height);
-			zoteroPane.setAttribute('height', zoteroPane.boxObject.height);
-		}
-		
-		if (tagSelector.getAttribute('collapsed') == 'true') {
-			// 32px is the default Z pane min-height in overlay.css
-			height = 32;
-		}
-		else {
-			// tS.boxObject.height doesn't exist at startup, so get from attribute
-			if (!height) {
-				height = parseInt(tagSelector.getAttribute('height'));
-			}
-			// 121px seems to be enough room for the toolbar and collections
-			// tree at minimum height
-			height = height + COLLECTIONS_HEIGHT;
-		}
-		
-		//Zotero.debug('Setting Zotero pane minheight to ' + height);
-		zoteroPane.setAttribute('minheight', height);
-		
-		if (this.isShowing() && !this.isFullScreen()) {
-			zoteroPane.setAttribute('savedHeight', zoteroPane.boxObject.height);
-		}
-		
-		// Fix bug whereby resizing the Z pane downward after resizing
-		// the tag selector up and then down sometimes caused the Z pane to
-		// stay at a fixed size and get pushed below the bottom
-		tagSelector.height++;
-		tagSelector.height--;
-	}
-	
-	
-	function getTagSelection() {
-		var tagSelector = document.getElementById('zotero-tag-selector');
-		return tagSelector.selection ? tagSelector.selection : new Set();
-	}
-	
-	
-	this.clearTagSelection = function () {
-		document.getElementById('zotero-tag-selector').deselectAll();
-	}
-	
 	
 	/*
 	 * Sets the tag filter on the items view
 	 */
 	this.updateTagFilter = Zotero.Promise.coroutine(function* () {
 		if (this.itemsView) {
-			yield this.itemsView.setFilter('tags', getTagSelection());
+			yield this.itemsView.setFilter('tags', ZoteroPane_Local.tagSelector.getTagSelection());
 		}
 	});
 	
@@ -1212,23 +1130,23 @@ var ZoteroPane = new function()
 	 *
 	 * Passed to the items tree to trigger on changes
 	 */
-	this.setTagScope = Zotero.Promise.coroutine(function* () {
-		var collectionTreeRow = this.getCollectionTreeRow();
-		var tagSelector = document.getElementById('zotero-tag-selector');
-		if (this.tagSelectorShown()) {
+	this.setTagScope = async function () {
+		var collectionTreeRow = self.getCollectionTreeRow();
+		if (self.tagSelectorShown()) {
 			Zotero.debug('Updating tag selector with current tags');
 			if (collectionTreeRow.editable) {
-				tagSelector.mode = 'edit';
+				ZoteroPane_Local.tagSelector.setMode('edit');
 			}
 			else {
-				tagSelector.mode = 'view';
+				ZoteroPane_Local.tagSelector.setMode('view');
 			}
-			tagSelector.collectionTreeRow = collectionTreeRow;
-			tagSelector.updateScope = () => this.setTagScope();
-			tagSelector.libraryID = collectionTreeRow.ref.libraryID;
-			tagSelector.scope = yield collectionTreeRow.getChildTags();
+			ZoteroPane_Local.tagSelector.onItemViewChanged({
+				collectionTreeRow,
+				libraryID: collectionTreeRow.ref.libraryID,
+				tagsInScope: await collectionTreeRow.getChildTags()
+			});
 		}
-	});
+	};
 	
 	
 	this.onCollectionSelected = function () {
@@ -1280,7 +1198,7 @@ var ZoteroPane = new function()
 			}*/
 			
 			collectionTreeRow.setSearch('');
-			collectionTreeRow.setTags(getTagSelection());
+			collectionTreeRow.setTags(ZoteroPane_Local.tagSelector.getTagSelection());
 			
 			this._updateToolbarIconsForRow(collectionTreeRow);
 			
@@ -1294,17 +1212,7 @@ var ZoteroPane = new function()
 				ZoteroPane_Local.displayErrorMessage();
 			};
 			this.itemsView.onRefresh.addListener(() => this.setTagScope());
-			if (this.tagSelectorShown()) {
-				let tagSelector = document.getElementById('zotero-tag-selector')
-				let handler = function () {
-					tagSelector.removeEventListener('refresh', handler);
-					Zotero.uiIsReady();
-				};
-				tagSelector.addEventListener('refresh', handler);
-			}
-			else {
-				this.itemsView.onLoad.addListener(() => Zotero.uiIsReady());
-			}
+			this.itemsView.onLoad.addListener(() => Zotero.uiIsReady());
 			
 			// If item data not yet loaded for library, load it now.
 			// Other data types are loaded at startup
@@ -4910,8 +4818,10 @@ var ZoteroPane = new function()
 		var itemsToolbar = document.getElementById("zotero-items-toolbar");
 		var itemPane = document.getElementById("zotero-item-pane");
 		var itemToolbar = document.getElementById("zotero-item-toolbar");
+		var tagSelector = document.getElementById("zotero-tag-selector");
 		
 		collectionsToolbar.style.width = collectionsPane.boxObject.width + 'px';
+		tagSelector.style.maxWidth = collectionsPane.boxObject.width + 'px';
 		
 		if (stackedLayout || itemPane.collapsed) {
 		// The itemsToolbar and itemToolbar share the same space, and it seems best to use some flex attribute from right (because there might be other icons appearing or vanishing).

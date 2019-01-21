@@ -27,6 +27,7 @@
 
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
+<?xul-overlay href="chrome://zotero/content/containers/containers.xul"?>
 
 <!DOCTYPE overlay [
 	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
@@ -35,7 +36,8 @@
 ]>
 
 <overlay id="zotero"
-	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml">
 	
 	<script src="include.js"/>
 	<script src="zoteroPane.js" type="application/javascript;version=1.8"/>
@@ -304,7 +306,7 @@
 							ondragover="return ZoteroPane_Local.collectionsView.onDragOver(event)"
 							ondrop="return ZoteroPane_Local.collectionsView.onDrop(event)"/>
 					</tree>
-					<splitter id="zotero-tags-splitter" onmouseup="ZoteroPane_Local.updateTagSelectorSize()" collapse="after"
+					<splitter id="zotero-tags-splitter" collapse="after"
 							zotero-persist="state">
 						<grippy oncommand="ZoteroPane_Local.toggleTagSelector()"/>
 					</splitter>
@@ -314,7 +316,9 @@
 					     
 					     TODO: deal with this some other way?
 					-->
-					<zoterotagselector id="zotero-tag-selector" zotero-persist="height,collapsed,showAutomatic,filterToScope"/>
+					<vbox id="zotero-tag-selector-container" zotero-persist="height,collapsed">
+						<html:div id="zotero-tag-selector"/>
+					</vbox>
 				</vbox>
 				
 				<splitter id="zotero-collections-splitter" resizebefore="closest" resizeafter="closest" collapse="before"
