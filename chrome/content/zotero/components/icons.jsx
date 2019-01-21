@@ -26,7 +26,7 @@ function i(name, svgOrSrc) {
 			const { className } = this.props
 			
 			if (typeof svgOrSrc == 'string') {
-				if (window.devicePixelRatio >= 0.75) {
+				if (window.devicePixelRatio >= 1.25) {
 					let parts = svgOrSrc.split('.');
 					parts[parts.length-2] = parts[parts.length-2] + '@2x';
 					svgOrSrc = parts.join('.')

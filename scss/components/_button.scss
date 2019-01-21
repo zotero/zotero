@@ -28,9 +28,10 @@
     &:last-child {
       margin-right: -5px;
     }
-  }
-  svg, img {
-    vertical-align: middle;
+    svg, img {
+      vertical-align: middle;
+      width: 16px;
+    }
   }
   span.menu-marker {
     -moz-appearance: toolbarbutton-dropdown;

@@ -46,7 +46,8 @@
 				windowtype="navigator:browser" 
 				title="&brandShortName;"
 				width="1000" height="600"
-				persist="screenX screenY width height sizemode"> 
+				persist="screenX screenY width height sizemode">
+	<script type="application/javascript" src="resource://zotero/require.js"/>
 	<script type="application/javascript" src="standalone.js"/>
 	<script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
 	<script type="application/javascript" src="chrome://global/content/contentAreaUtils.js"/>
