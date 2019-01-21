@@ -1,0 +1,9 @@
+build/*
+chrome/content/zotero/xpcom/citeproc.js
+chrome/content/zotero/xpcom/rdf/*
+chrome/content/zotero/xpcom/xregexp/*
+resource/csl-validator.js
+resource/jspath.js
+resource/react*
+resource/tinymce/*
+translators/*
