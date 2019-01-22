@@ -64,7 +64,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		numConcurrent: 4,
 		stopOnError,
 		logger: msg => Zotero.debug(msg),
-		onError: e => Zotero.logError(e)
+		onError: e => Zotero.logError(e),
+		Promise: Zotero.Promise
 	});
 	
 	var _enabled = false;

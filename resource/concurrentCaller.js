@@ -66,6 +66,8 @@ if (!(typeof process === 'object' && process + '' === '[object process]')) {
  * @param {Integer} [options.interval] - Interval between the end of one function run and the
  *     beginning of another, in milliseconds
  * @param {Function} [options.logger]
+ * @param {Object} [options.Promise] The Zotero instance of Promise to allow
+ *		stubbing/spying in tests
  */
 ConcurrentCaller = function (options = {}) {
 	if (typeof options == 'number') {
@@ -76,6 +78,8 @@ ConcurrentCaller = function (options = {}) {
 	}
 	
 	if (!options.numConcurrent) throw new Error("numConcurrent must be provided");
+	
+	if (options.Promise) Promise = options.Promise;
 	
 	this.stopOnError = options.stopOnError || false;
 	this.onError = options.onError || null;
