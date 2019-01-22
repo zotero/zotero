@@ -51,6 +51,10 @@ const ZoteroStandalone = new function() {
 			if (Zotero.Prefs.get('devtools.errorconsole.enabled', true)) {
 				document.getElementById('menu_errorConsole').hidden = false;
 			}
+			if (Zotero.Prefs.get('devtools.chrome.enabled', true)) {
+				document.getElementById('menu_errorConsole').hidden = false;
+				document.getElementById('menu_runJS').hidden = false;
+			}
 			
 			document.getElementById('key_copyCitation')
 				.setAttribute('key', Zotero.Keys.getKeyForCommand('copySelectedItemCitationsToClipboard'));
@@ -448,6 +452,10 @@ ZoteroStandalone.DebugOutput = {
 
 function toJavaScriptConsole() {
 	toOpenWindowByType("global:console", "chrome://global/content/console.xul");
+}
+
+function openRunJSWindow() {
+	window.open('chrome://zotero/content/runJS.html', 'run-js', 'width=900,height=700,resizable');
 }
 
 function toOpenWindowByType(inType, uri, features)

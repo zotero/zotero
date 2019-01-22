@@ -198,6 +198,7 @@
 							<menuitem id="menu_addons" label="&addons.label;"
 									oncommand="Zotero.openInViewer('chrome://mozapps/content/extensions/extensions.xul', ZoteroStandalone.updateAddonsPane)"/>
 							<menuitem id="menu_errorConsole" label="Error Console" oncommand="toJavaScriptConsole()" hidden="true"/>
+							<menuitem id="menu_runJS" label="Run JavaScript" oncommand="openRunJSWindow()" hidden="true"/>
 						</menupopup>
 					</menu>
 					

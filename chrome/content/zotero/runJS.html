@@ -1,0 +1,26 @@
+<html>
+	<head>
+		<link href="chrome://zotero/skin/runJS.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<nav>
+			<button onclick="run()">Run</button>
+			<span id="run-label"/>
+		</nav>
+		
+		<main>
+			<div class="textbox-container">
+				<label for="code">Code:</label>
+				<textarea id="code"></textarea>
+			</div>
+			
+			<div class="textbox-container">
+				<label for="result">Result:</label>
+				<textarea id="result" readonly></textarea>
+			</div>
+		</main>
+		
+		<script src="include.js"></script>
+		<script src="runJS.js"></script>
+	</body>
+</html>
