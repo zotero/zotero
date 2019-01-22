@@ -1180,6 +1180,7 @@ describe("Connector Server", function () {
 			
 			var ids1 = await waitForItemEvent('add');
 			var item1 = Zotero.Items.get(ids1[0]);
+			// Attachment
 			await waitForItemEvent('add');
 			
 			var req = await reqPromise;
@@ -1202,6 +1203,8 @@ describe("Connector Server", function () {
 			
 			var ids2 = await waitForItemEvent('add');
 			var item2 = Zotero.Items.get(ids2[0]);
+			// Attachment
+			await waitForItemEvent('add');
 			
 			req = await reqPromise;
 			assert.equal(req.status, 200);
@@ -1226,6 +1229,7 @@ describe("Connector Server", function () {
 			
 			var ids3 = await waitForItemEvent('add');
 			var item3 = Zotero.Items.get(ids3[0]);
+			// Attachment
 			await waitForItemEvent('add');
 			
 			req = await reqPromise;
