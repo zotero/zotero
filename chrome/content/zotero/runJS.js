@@ -32,6 +32,20 @@ async function run() {
 	resultTextbox.value = Zotero.Utilities.varDump(result);
 }
 
+function handleInput() {
+	var checkbox = document.getElementById('run-as-async');
+	var isAsync = checkbox.checked;
+	if (isAsync) {
+		return;
+	}
+	var code = document.getElementById('code').value;
+	// If `await` is used, switch to async mode
+	if (/^\s*await\s/m.test(code)) {
+		checkbox.checked = true;
+		update();
+	}
+}
+
 window.addEventListener('keypress', function (event) {
 	if (Zotero.isMac) {
 		if (!event.metaKey) {
