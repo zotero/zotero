@@ -10,12 +10,20 @@
 		
 		<main>
 			<div class="textbox-container">
-				<label for="code">Code:</label>
+				<div class="textbox-header">
+					<label class="textbox-label" for="code">Code:</label>
+					<label id="run-as-async-label" for="run-as-async">
+						<input id="run-as-async" type="checkbox" onclick="update()">
+						Run as async function
+					</label>
+				</div>
 				<textarea id="code"></textarea>
 			</div>
 			
 			<div class="textbox-container">
-				<label for="result">Result:</label>
+				<div class="textbox-header">
+					<label id="result-label" class="textbox-label" for="result"/>
+				</div>
 				<textarea id="result" readonly></textarea>
 			</div>
 		</main>

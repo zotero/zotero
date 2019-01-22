@@ -1,11 +1,35 @@
-function run() {
+function update() {
+	var isAsync = document.getElementById('run-as-async').checked;
+	var resultLabel = document.getElementById('result-label');
+	var val = isAsync ? 'Return value' : 'Result';
+	resultLabel.textContent = val + ':';
+}
+
+async function run() {
 	var win = Zotero.getMainWindow();
 	if (!win) {
 		return;
 	}
 	var code = document.getElementById('code').value;
-	var result = win.eval(code);
-	document.getElementById('result').value = Zotero.Utilities.varDump(result);
+	var isAsync = document.getElementById('run-as-async').checked;
+	var result;
+	var resultTextbox = document.getElementById('result');
+	try {
+		if (isAsync) {
+			code = '(async function () {' + code + '})()';
+			result = await win.eval(code);
+		}
+		else {
+			result = win.eval(code);
+		}
+	}
+	catch (e) {
+		resultTextbox.classList.add('error');
+		resultTextbox.value = e;
+		return;
+	}
+	resultTextbox.classList.remove('error');
+	resultTextbox.value = Zotero.Utilities.varDump(result);
 }
 
 window.addEventListener('keypress', function (event) {
@@ -30,3 +54,5 @@ window.addEventListener('keypress', function (event) {
 
 var shortcut = Zotero.isMac ? 'Cmd-R' : 'Ctrl+R';
 document.getElementById('run-label').textContent = `(${shortcut})`;
+
+update();
