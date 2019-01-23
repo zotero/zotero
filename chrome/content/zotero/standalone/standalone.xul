@@ -300,7 +300,17 @@
 						</menupopup>
 					</menu>
 					
-					<menu id="windowMenu" />
+					<menu id="windowMenu"
+						  label="&windowMenu.label;"
+						  onpopupshowing="macWindowMenuDidShow();"
+						  onpopuphidden="macWindowMenuDidHide();"
+						  >
+						<menupopup id="windowPopup">
+							<menuitem command="minimizeWindow" key="key_minimizeWindow"/>
+							<menuitem command="zoomWindow"/>
+							<menuseparator id="sep-window-list"/>
+						</menupopup>
+					</menu>
 					
 					<menu id="helpMenu"
 							label="&helpMenu.label;"
