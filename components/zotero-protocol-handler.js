@@ -712,75 +712,6 @@ function ZoteroProtocolHandler() {
 	};
 	
 	
-	/*
-		zotero://attachment/[id]/
-	*/
-	var AttachmentExtension = {
-		loadAsChrome: false,
-		
-		newChannel: function (uri) {
-			var self = this;
-			
-			return new AsyncChannel(uri, function* () {
-				try {
-					var errorMsg;
-					var [id, fileName] = uri.path.substr(1).split('/');
-					
-					if (parseInt(id) != id) {
-						// Proxy annotation icons
-						if (id.match(/^annotation.*\.(png|html|css|gif)$/)) {
-							var chromeURL = 'chrome://zotero/skin/' + id;
-							let uri = ios.newURI(chromeURL, null, null);
-							var chromeReg = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
-									.getService(Components.interfaces.nsIChromeRegistry);
-							var fileURI = chromeReg.convertChromeURL(uri);
-						}
-						else {
-							return self._errorChannel("Attachment id not an integer");
-						}
-					}
-					
-					if (!fileURI) {
-						var item = yield Zotero.Items.getAsync(id);
-						if (!item) {
-							return self._errorChannel("Item not found");
-						}
-						var path = yield item.getFilePathAsync();
-						if (!path) {
-							return self._errorChannel("File not found");
-						}
-						if (fileName) {
-							Components.utils.import("resource://gre/modules/osfile.jsm");
-							path = OS.Path.join(OS.Path.dirname(path), fileName)
-							if (!(yield OS.File.exists(path))) {
-								return self._errorChannel("File not found");
-							}
-						}
-					}
-					
-					//set originalURI so that it seems like we're serving from zotero:// protocol
-					//this is necessary to allow url() links to work from within css files
-					//otherwise they try to link to files on the file:// protocol, which is not allowed
-					this.originalURI = uri;
-					
-					return Zotero.File.pathToFile(path);
-				}
-				catch (e) {
-					Zotero.debug(e);
-					throw (e);
-				}
-			});
-		},
-		
-		
-		_errorChannel: function (msg) {
-			this.status = Components.results.NS_ERROR_FAILURE;
-			this.contentType = 'text/plain';
-			return msg;
-		}
-	};
-	
-	
 	/**
 	 * zotero://select/[type]/0_ABCD1234
 	 * zotero://select/[type]/1234 (not consistent across synced machines)
@@ -913,29 +844,6 @@ function ZoteroProtocolHandler() {
 			this.doAction(uri);
 		}
 	};
-	
-	/*
-		zotero://fullscreen
-	*/
-	var FullscreenExtension = {
-		loadAsChrome: false,
-		
-		newChannel: function (uri) {
-			return new AsyncChannel(uri, function* () {
-				try {
-					var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-						.getService(Components.interfaces.nsIWindowWatcher)
-						.openWindow(null, 'chrome://zotero/content/standalone/standalone.xul', '',
-							'chrome,centerscreen,resizable', null);
-				}
-				catch (e) {
-					Zotero.debug(e, 1);
-					throw e;
-				}
-			});
-		}
-	};
-	
 	
 	/*
 		zotero://debug/
@@ -1165,9 +1073,7 @@ function ZoteroProtocolHandler() {
 	this._extensions[ZOTERO_SCHEME + "://data"] = DataExtension;
 	this._extensions[ZOTERO_SCHEME + "://report"] = ReportExtension;
 	this._extensions[ZOTERO_SCHEME + "://timeline"] = TimelineExtension;
-	this._extensions[ZOTERO_SCHEME + "://attachment"] = AttachmentExtension;
 	this._extensions[ZOTERO_SCHEME + "://select"] = SelectExtension;
-	this._extensions[ZOTERO_SCHEME + "://fullscreen"] = FullscreenExtension;
 	this._extensions[ZOTERO_SCHEME + "://debug"] = DebugExtension;
 	this._extensions[ZOTERO_SCHEME + "://connector"] = ConnectorExtension;
 	this._extensions[ZOTERO_SCHEME + "://open-pdf"] = OpenPDFExtension;
