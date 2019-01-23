@@ -2021,7 +2021,7 @@ Zotero.DragDrop = {
 			if (win.document.documentElement.getAttribute('windowtype') == 'zotero:search') {
 				return win.ZoteroAdvancedSearch.itemsView.collectionTreeRow;
 			}
-			return win.ZoteroPane.collectionsView.selectedTreeRow;
+			return win.ZoteroPane.collectionsView.focused;
 		}
 		
 		return false;

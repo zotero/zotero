@@ -1,0 +1,51 @@
+#zotero-collections-tree-container {
+  display: flex;
+  height: 100px;
+  border: 1px solid $shade-4;
+  margin-bottom: -1px;
+}
+
+#zotero-collections-tree {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  
+  .tree {
+    overflow-y: auto;
+    flex: 1 0;
+    text-overflow: ellipsis;
+    background-color: $shade-0;
+  }
+  
+  .tree-node {
+    display: flex;
+    height: 22px;
+    width: 100%;
+    
+    &.focused:not(.highlighted) {
+      background-color: highlight;
+      color: highlighttext;
+    }
+    
+    &.highlighted {
+      background: #FFFF99;
+    }
+    
+    &.drop {
+      color: $shade-0 !important;
+      background: $shade-5 !important;
+    }
+  }
+  
+  .tree-item-label {
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-left: 4px;
+  }
+  
+  .icon {
+    margin-right: 4px;
+    padding-top: 1px;
+  }
+}

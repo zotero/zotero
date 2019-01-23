@@ -20,6 +20,7 @@
     "prop-types": "^15.6.2",
     "react": "^16.8.4",
     "react-dom": "^16.6.3",
+    "react-dom-factories": "^1.0.2",
     "react-intl": "^2.7.2"
   },
   "devDependencies": {

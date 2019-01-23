@@ -25,14 +25,25 @@
 
 "use strict";
 
-Zotero.CollectionTreeRow = function (collectionTreeView, type, ref, level, isOpen) {
+Zotero.CollectionTreeRow = function (collectionTreeView, type, ref, level, parent, idx) {
 	this.view = collectionTreeView;
 	this.type = type;
 	this.ref = ref;
-	this.level = level || 0
-	this.isOpen = isOpen || false;
+	this.level = level || 0;
+	this.isOpen = false;
 	this.onUnload = null;
+	this.children = [];
+	this.parent = parent;
+	if (parent && parent.children) {
+		if (idx != undefined) {
+			parent.children.splice(idx, 0, this);
+		} else {
+			parent.children.push(this);
+		}
+	}
 }
+
+Zotero.CollectionTreeRow.IDCounter = 0;
 
 
 Zotero.CollectionTreeRow.prototype.__defineGetter__('id', function () {
@@ -70,7 +81,10 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('id', function () {
 			break;
 	}
 	
-	return '';
+	if (!this._id) {
+		this._id = 'I' + Zotero.CollectionTreeRow.IDCounter++;
+	}
+	return this._id;
 });
 
 Zotero.CollectionTreeRow.prototype.isLibrary = function (includeGlobal)

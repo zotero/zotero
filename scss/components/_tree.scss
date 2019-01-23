@@ -1,0 +1,32 @@
+/* ---------------------- tree.css -------------------------- */
+
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.tree {
+  overflow: hidden;
+  white-space: nowrap;
+  outline: none;
+  user-select: none;
+}
+
+.arrow svg {
+  fill: #444;
+  transition: transform 0.125s ease;
+  width: 5px;
+  margin-right: 2px;
+  transform: rotate(-90deg);
+  vertical-align: middle;
+  margin-top: -3px;
+}
+
+html[dir="rtl"] .arrow svg,
+.arrow svg:dir(rtl),
+.arrow svg:-moz-locale-dir(rtl) {
+  transform: rotate(90deg);
+}
+
+.arrow.open svg {
+  transform: rotate(0deg);
+}
