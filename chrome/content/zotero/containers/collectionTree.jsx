@@ -161,12 +161,16 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 		let focused;
 		if (this.focused) {
 			focused = this.focused;
-			this._focusedIdx = this._rowMap[focused.id];
+			this.focusedIdx = this._rowMap[focused.id];
+		}
+		let itemHeight = 22; //px
+		if (Zotero.isMac) {
+			itemHeight = 20;
 		}
 		return React.createElement(
 			Tree,
 			{
-				itemHeight: 22, //px
+				itemHeight,
 				
 				getRoots: () => this.getRoots(),
 				getKey: treeRow => treeRow.id,

@@ -1,0 +1,8 @@
+.arrow svg {
+  fill: #888;
+  width: 16px;
+}
+
+.focused:not(.highlighted) .arrow svg {
+  fill: #fff;
+}

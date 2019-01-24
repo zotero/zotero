@@ -1,6 +1,6 @@
 #zotero-collections-tree-container {
   display: flex;
-  height: 100px;
+  height: 5.2em;
   border: 1px solid $shade-4;
   margin-bottom: -1px;
 }
@@ -21,6 +21,7 @@
     display: flex;
     height: 22px;
     width: 100%;
+    align-items: center;
     
     &.focused:not(.highlighted) {
       background-color: highlight;

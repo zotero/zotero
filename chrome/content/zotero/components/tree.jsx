@@ -11,6 +11,8 @@ const { Component, createFactory, createElement } = require('react');
 const dom = require('react-dom-factories');
 //import PropTypes from "prop-types";
 const PropTypes = require('prop-types');
+
+const { IconTwisty } = require('components/icons');
 //import InlineSVG from "svg-inline-react";
 //import svgArrow from "./images/arrow.svg";
 
@@ -895,12 +897,8 @@ class ArrowExpanderClass extends Component {
 
 		// Modified by Zotero
 		//
-		// return dom.div(attrs);
-		// Inline the SVG to avoid needing svg-inline-react
-		attrs.dangerouslySetInnerHTML = {
-			__html: '<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 13.4c-.5 0-.9-.2-1.2-.6L.4 5.2C0 4.7-.1 4.3.2 3.7S1 3 1.6 3h12.8c.6 0 1.2.1 1.4.7.3.6.2 1.1-.2 1.6l-6.4 7.6c-.3.4-.7.5-1.2.5z"/></svg>'
-		}
-		return createElement('span', attrs);
+		// Load the arrow graphic from 'components/icons'
+		return dom.span(attrs, createElement(IconTwisty));
 	}
 }
 
