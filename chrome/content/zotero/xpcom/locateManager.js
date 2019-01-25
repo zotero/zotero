@@ -277,17 +277,14 @@ Zotero.LocateManager = new function() {
 	 * @param {Object} [obj] The locate engine, in parsed form, as it was serialized to JSON
 	 */
 	var LocateEngine = function(obj) {
-		this.alias = this.name = "Untitled";
-		this.description = this._urlTemplate = this.icon = null;
-		this.hidden = false;
+		this._alias = this._name = "Untitled";
+		this._description = null;
+		this._icon = null;
+		this._hidden = false;
+		this._urlTemplate = null;
 		this._urlParams = [];
 		
 		if(obj) for(var prop in obj) this[prop] = obj[prop];
-		
-		// Queue deferred serialization whenever a property is modified
-		for (let prop of ["alias", "name", "description", "icon", "hidden"]) {
-			this.watch(prop, _watchLocateEngineProperties);
-		}
 	}
 	
 	LocateEngine.prototype = {
@@ -487,5 +484,20 @@ Zotero.LocateManager = new function() {
 			await OS.File.move(tmpPath, iconFile);
 			this.icon = OS.Path.toFileURI(iconFile);
 		}
+	}
+	
+	// Queue deferred serialization whenever a property is modified
+	for (let prop of ["alias", "name", "description", "icon", "hidden"]) {
+		let propName = '_' + prop;
+		Object.defineProperty(LocateEngine.prototype, prop, {
+			get: function () {
+				return this[propName];
+			},
+			set: function (val) {
+				var oldVal = this[propName];
+				this[propName] = val;
+				_watchLocateEngineProperties(prop, oldVal, val);
+			}
+		});
 	}
 }
