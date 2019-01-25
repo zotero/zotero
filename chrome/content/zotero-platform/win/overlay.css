@@ -99,7 +99,7 @@
 	display: none;
 }
 
-#zotero-collections-tree, #zotero-items-tree, #zotero-view-item {
+#zotero-items-tree, #zotero-view-item {
 	-moz-appearance: none;
 	border-style: solid;
 	border-color: #818790;

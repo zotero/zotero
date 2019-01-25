@@ -63,6 +63,9 @@ i('TagSelectorMenu', "chrome://zotero/skin/tag-selector-menu.png");
 i('DownChevron', "chrome://zotero/skin/searchbar-dropmarker.png");
 i('Twisty', <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"></svg>);
 i('Twisty', (
+	/* This Source Code Form is subject to the terms of the Mozilla Public
+	 * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+	 * You can obtain one at http://mozilla.org/MPL/2.0/. */
 	<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
 		<path d="M8 13.4c-.5 0-.9-.2-1.2-.6L.4 5.2C0 4.7-.1 4.3.2 3.7S1 3 1.6 3h12.8c.6 0 1.2.1 1.4.7.3.6.2 1.1-.2 1.6l-6.4 7.6c-.3.4-.7.5-1.2.5z"/>
 	</svg>
@@ -132,8 +135,22 @@ if (Zotero.isMac) {
 	i('TreesourceCollection', 'chrome://zotero-platform/content/treesource-collection.png');
 	i('TreesourceSearch', 'chrome://zotero-platform/content/treesource-search.png');
 	i('Twisty', (
+		/* This Source Code Form is subject to the terms of the Mozilla Public
+		 * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+		 * You can obtain one at http://mozilla.org/MPL/2.0/. */
 		<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
 			<polyline points="3 4 12 4 7.5 12"/>
+		</svg>
+	));
+}
+
+if (Zotero.isWin) {
+	i('Twisty', (
+		/* This Source Code Form is subject to the terms of the Mozilla Public
+		 * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+		 * You can obtain one at http://mozilla.org/MPL/2.0/. */
+		<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1792 1792">
+			<path d="M1395 736q0 13-10 23l-466 466q-10 10-23 10t-23-10l-466-466q-10-10-10-23t10-23l50-50q10-10 23-10t23 10l393 393 393-393q10-10 23-10t23 10l50 50q10 10 10 23z"/>
 		</svg>
 	));
 }

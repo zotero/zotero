@@ -1,8 +1,7 @@
 #zotero-collections-tree-container {
   display: flex;
   height: 5.2em;
-  border: 1px solid $shade-4;
-  margin-bottom: -1px;
+  background-color: $shade-0;
 }
 
 #zotero-collections-tree {
@@ -14,12 +13,11 @@
     overflow-y: auto;
     flex: 1 0;
     text-overflow: ellipsis;
-    background-color: $shade-0;
   }
   
   .tree-node {
     display: flex;
-    height: 22px;
+    height: 20px;
     width: 100%;
     align-items: center;
     

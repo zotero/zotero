@@ -149,8 +149,15 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 			if (animationId !== null) {
 				return;
 			}
+			
+			let onNextFrame = window.requestAnimationFrame;
+			if (Zotero.isWin) {
+				// requestAnimationFrame on Windows doesn't redraw the tree fast enough
+				// so we have to redraw on next event loop turn instead
+				onNextFrame = window.setTimeout;
+			}
 
-			animationId = window.requestAnimationFrame(() => {
+			animationId = onNextFrame(() => {
 				this.forceUpdate();
 				animationId = null;
 			});
@@ -163,9 +170,9 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 			focused = this.focused;
 			this.focusedIdx = this._rowMap[focused.id];
 		}
-		let itemHeight = 22; //px
-		if (Zotero.isMac) {
-			itemHeight = 20;
+		let itemHeight = 20; //px
+		if (Zotero.isLinux) {
+			itemHeight = 22;
 		}
 		return React.createElement(
 			Tree,

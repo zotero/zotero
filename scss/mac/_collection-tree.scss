@@ -1,14 +1,8 @@
-#zotero-collections-tree-container {
-  border: none;
-}
-
 #zotero-collections-tree {
   .tree {
     background-color: #d2d8e2;
     
     .tree-node {
-      height: 20px;
-      
       &.focused:not(.highlighted) {
         background: -moz-linear-gradient(top, #6494D4, #2559AC) repeat-x;
         border-top: 1px solid #5382C5;
