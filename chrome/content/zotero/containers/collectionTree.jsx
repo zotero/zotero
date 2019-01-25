@@ -174,6 +174,7 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 		if (Zotero.isLinux) {
 			itemHeight = 22;
 		}
+		itemHeight *= Zotero.Prefs.get('fontSize');
 		return React.createElement(
 			Tree,
 			{

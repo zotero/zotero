@@ -1,4 +1,11 @@
-#zotero-collections-tree .tree:not(:focus) .tree-node.focused:not(.highlighted) {
-  background: $shade-2;
+#zotero-collections-tree .tree {
+  &:not(:focus) .tree-node.focused:not(.highlighted) {
+    color: inherit;
+    background: $shade-2;
+  }
+  
+  .tree-node {
+    height: 1.666em;
+  }
 }
 

@@ -3,12 +3,14 @@
     background-color: #d2d8e2;
     
     .tree-node {
+      height: 1.581em;
+      
       &.focused:not(.highlighted) {
         background: -moz-linear-gradient(top, #6494D4, #2559AC) repeat-x;
         border-top: 1px solid #5382C5;
         font-weight: bold !important;
         color: #ffffff !important;
-        height: 18px;
+        height: calc(1.581em - 2px);
         padding-bottom: 1px;
       }
     }
