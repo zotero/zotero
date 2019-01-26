@@ -495,7 +495,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			let newAttachment;
 			
 			// determine whether to save files and attachments
-			let isLink = Zotero.MIME.isWebPageType(attachment.mimeType)
+			var isLink = Zotero.MIME.isWebPageType(attachment.mimeType)
 				// .snapshot coming from most translators, .linkMode coming from RDF
 				&& (attachment.snapshot === false || attachment.linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL);
 			if (isLink || this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD) {
@@ -597,7 +597,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			}
 
 			// At this point, must be a valid HTTP/HTTPS url
-			attachment.linkMode = "linked_file";
+			attachment.linkMode = "linked_url";
 			newItem = yield Zotero.Attachments.linkFromURL({
 				url: attachment.url,
 				parentItemID,
@@ -775,7 +775,9 @@ Zotero.Translate.ItemSaver.prototype = {
 		// Commit to saving
 		attachmentCallback(attachment, 0);
 		
-		if(attachment.snapshot === false || this.attachmentMode === Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE) {
+		var isLink = attachment.snapshot === false
+			|| attachment.linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL;
+		if (isLink || this.attachmentMode === Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE) {
 			// if snapshot is explicitly set to false, attach as link
 			attachment.linkMode = "linked_url";
 			let url, mimeType;

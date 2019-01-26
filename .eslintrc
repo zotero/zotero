@@ -8,6 +8,7 @@
     "Zotero": false,
     "ZOTERO_CONFIG": false,
     "AddonManager": false,
+    "assert": false,
     "Cc": false,
     "Ci": false,
     "Components": false,

@@ -1,5 +1,6 @@
 new function() {
 Components.utils.import("resource://gre/modules/osfile.jsm");
+Components.utils.import("resource://zotero-unit/httpd.js");
 
 /**
  * Create a new translator that saves the specified items
@@ -403,6 +404,65 @@ describe("Zotero.Translate", function() {
 			assert.equal(newItems.length, 1);
 			assert.equal(newItems[0].getField("title"), "Container Item");
 			assert.equal(newItems[0].getAttachments().length, 0);
+		});
+		
+		it('import translators should save link attachments', async function () {
+			// Start a local server so we can make sure a web request isn't made for the URL
+			var port = 16213;
+			var baseURL = `http://127.0.0.1:${port}/`;
+			var httpd = new HttpServer();
+			httpd.start(port);
+			var callCount = 0;
+			var handler = function (_request, response) {
+				callCount++;
+				response.setStatusLine(null, 200, "OK");
+				response.write("<html><head><title>Title</title><body>Body</body></html>");
+			};
+			httpd.registerPathHandler("/1", { handle: handler });
+			httpd.registerPathHandler("/2", { handle: handler });
+			
+			var items = [{
+				itemType: "book",
+				title: "Item",
+				attachments: [
+					// With mimeType
+					{
+						itemType: "attachment",
+						linkMode: Zotero.Attachments.LINK_MODE_LINKED_URL,
+						title: "Link 1",
+						url: baseURL + "1",
+						mimeType: 'text/html'
+					},
+					// Without mimeType
+					{
+						itemType: "attachment",
+						linkMode: Zotero.Attachments.LINK_MODE_LINKED_URL,
+						title: "Link 2",
+						url: baseURL + "2"
+					}
+				]
+			}];
+			
+			var newItems = itemsArrayToObject(await saveItemsThroughTranslator("import", items));
+			
+			assert.equal(callCount, 0);
+			
+			var attachments = await Zotero.Items.getAsync(newItems.Item.getAttachments());
+			assert.equal(attachments.length, 2);
+			
+			assert.equal(attachments[0].getField("title"), "Link 1");
+			assert.equal(attachments[0].getField("url"), baseURL + "1");
+			assert.equal(attachments[0].attachmentContentType, "text/html");
+			assert.equal(attachments[0].attachmentLinkMode, Zotero.Attachments.LINK_MODE_LINKED_URL);
+			
+			assert.equal(attachments[1].getField("title"), "Link 2");
+			assert.equal(attachments[1].getField("url"), baseURL + "2");
+			assert.equal(attachments[1].attachmentLinkMode, Zotero.Attachments.LINK_MODE_LINKED_URL);
+			assert.equal(attachments[1].attachmentContentType, '');
+			
+			await new Promise(function (resolve) {
+				httpd.stop(resolve);
+			});
 		});
 		
 		it("import translators should save linked-URL attachments with savingAttachments: false", async function () {
