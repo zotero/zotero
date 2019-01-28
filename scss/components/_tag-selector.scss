@@ -80,13 +80,12 @@
 	display: flex;
 }
 
+#zotero-tag-selector-container[collapsed=true] {
+	visibility: collapse;
+}
+
 #zotero-tag-selector {
 	min-height: 100px;
 	width: 100%;
 	display: flex;
 }
-
-#zotero-tag-selector[collapsed=true] {
-	visibility: collapse;
-}
-

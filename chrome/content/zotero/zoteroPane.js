@@ -1089,7 +1089,7 @@ var ZoteroPane = new function()
 	
 	
 	this.toggleTagSelector = Zotero.Promise.coroutine(function* () {
-		var tagSelector = document.getElementById('zotero-tag-selector');
+		var tagSelector = document.getElementById('zotero-tag-selector-container');
 		
 		var showing = tagSelector.getAttribute('collapsed') == 'true';
 		tagSelector.setAttribute('collapsed', !showing);
