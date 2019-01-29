@@ -3545,8 +3545,8 @@ Zotero.Item.prototype.setCollections = function (collectionIDsOrKeys) {
 	
 	// Convert any keys to ids
 	var collectionIDs = collectionIDsOrKeys.map(function (val) {
-		if (parseInt(val) == val) {
-			return parseInt(val);
+		if (typeof val == 'number') {
+			return val;
 		}
 		var id = this.ContainerObjectsClass.getIDFromLibraryAndKey(this.libraryID, val);
 		if (!id) {

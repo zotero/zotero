@@ -568,6 +568,24 @@ describe("Zotero.Item", function () {
 	})
 	
 	
+	describe("#setCollections()", function () {
+		it("should add a collection with an all-numeric key", async function () {
+			var col = new Zotero.Collection();
+			col.libraryID = Zotero.Libraries.userLibraryID;
+			col.key = '23456789';
+			await col.loadPrimaryData();
+			col.name = 'Test';
+			var id = await col.saveTx();
+			
+			var item = createUnsavedDataObject('item');
+			item.setCollections([col.key]);
+			await item.saveTx();
+			
+			assert.isTrue(col.hasItem(item));
+		});
+	});
+	
+	
 	describe("#numAttachments()", function () {
 		it("should include child attachments", function* () {
 			var item = yield createDataObject('item');
