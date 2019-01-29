@@ -762,7 +762,7 @@ describe("Zotero.Attachments", function() {
 			var attachments = await Zotero.Attachments.addAvailablePDFs([item1, item2]);
 			
 			assert.isTrue(requestStub.calledTwice);
-			assert.isAbove(requestStubCallTimes[1] - requestStubCallTimes[0], 999);
+			assert.isAbove(requestStubCallTimes[1] - requestStubCallTimes[0], 998);
 			// Make sure both items have attachments
 			assert.equal(item1.numAttachments(), 1);
 			assert.equal(item2.numAttachments(), 1);
