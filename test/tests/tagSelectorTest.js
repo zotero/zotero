@@ -46,6 +46,25 @@ describe("Tag Selector", function () {
 		win.close();
 	});
 	
+	it("should sort colored tags by assigned number key", async function () {
+		var libraryID = Zotero.Libraries.userLibraryID;
+		var collection = await createDataObject('collection');
+		
+		await Zotero.Tags.setColor(libraryID, "B", '#AAAAAA', 1);
+		await Zotero.Tags.setColor(libraryID, "A", '#BBBBBB', 2);
+		await Zotero.Tags.setColor(libraryID, "C", '#CCCCCC', 3);
+		
+		var item = createUnsavedDataObject('item', { collections: [collection.id] });
+		var item = createUnsavedDataObject('item');
+		await item.setTags(["A", "B"]);
+		var promise = waitForTagSelector(win);
+		await item.saveTx();
+		await promise;
+		
+		var tags = getColoredTags();
+		assert.sameOrderedMembers(tags, ['B', 'A', 'C']);
+	});
+	
 	it('should not display duplicate tags when automatic and manual tag with same name exists', async function () {
 		var collection = await createDataObject('collection');
 		var item1 = createUnsavedDataObject('item', { collections: [collection.id] });

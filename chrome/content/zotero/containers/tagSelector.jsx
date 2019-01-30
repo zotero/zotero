@@ -112,12 +112,16 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 			tags.push(Zotero.Tags.cleanData({ tag: x }))
 		);
 			
-		// Sort by name
+		// Sort by name (except for colored tags, which sort by assigned number key)
 		tags.sort(function (a, b) {
-			let aColored = tagColors.has(a.tag),
-				bColored = tagColors.has(b.tag);
+			let aColored = tagColors.get(a.tag);
+			let bColored = tagColors.get(b.tag);
 			if (aColored && !bColored) return -1;
 			if (!aColored && bColored) return 1;
+			if (aColored && bColored) {
+				return aColored.position - bColored.position;
+			}
+			
 			return Zotero.getLocaleCollation().compareString(1, a.tag, b.tag);
 		});
 		
