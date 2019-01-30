@@ -295,16 +295,9 @@ describe("Tag Selector", function () {
 		it("shouldn't re-insert a new tag that matches an existing color", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
-			/*// Remove all tags in library
-			var tags = yield Zotero.Tags.getAll(libraryID);
-			tags.forEach(function (tag) {
-				var tagID = Zotero.Tags.getID(tag);
-				yield Zotero.Tags.removeFromLibrary(libraryID, tagID);
-			});*/
-			
-			// Add B and A as colored tags without any items
-			yield Zotero.Tags.setColor(libraryID, "B", '#990000');
-			yield Zotero.Tags.setColor(libraryID, "A", '#CC9933');
+			// Add A and B as colored tags without any items
+			yield Zotero.Tags.setColor(libraryID, "A", '#CC9933', 1);
+			yield Zotero.Tags.setColor(libraryID, "B", '#990000', 2);
 			
 			// Add A to an item to make it a real tag
 			var item = createUnsavedDataObject('item');
@@ -324,7 +317,6 @@ describe("Tag Selector", function () {
 			for (let i = 0; i < tagElems.length; i++) {
 				tags.set(tagElems[i].textContent, i);
 			}
-			assert.isAbove(tags.get("B"), 0);
 			assert.isAbove(tags.get("B"), tags.get("A"));
 		})
 		
