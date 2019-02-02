@@ -29,10 +29,10 @@ async function run() {
 		return;
 	}
 	resultTextbox.classList.remove('error');
-	resultTextbox.value = Zotero.Utilities.varDump(result);
+	resultTextbox.textContent = typeof result == 'string' ? result : Zotero.Utilities.varDump(result);
 }
 
-function handleInput() {
+function handleInput() { // eslint-disable-line no-unused-vars
 	var checkbox = document.getElementById('run-as-async');
 	var isAsync = checkbox.checked;
 	if (isAsync) {
@@ -40,7 +40,7 @@ function handleInput() {
 	}
 	var code = document.getElementById('code').value;
 	// If `await` is used, switch to async mode
-	if (/^\s*await\s/m.test(code)) {
+	if (/[^=([]\s*await\s/m.test(code)) {
 		checkbox.checked = true;
 		update();
 	}
