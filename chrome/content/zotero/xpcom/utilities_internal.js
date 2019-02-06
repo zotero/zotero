@@ -1625,11 +1625,14 @@ Zotero.Utilities.Internal = {
 		if (size <= 1) {
 			size = 'small';
 		}
-		else if (size <= 1.25) {
+		else if (size <= 1.15) {
 			size = 'medium';
 		}
-		else {
+		else if (size <= 1.3) {
 			size = 'large';
+		}
+		else {
+			size = 'x-large';
 		}
 		// Custom attribute -- allows for additional customizations in zotero.css
 		rootElement.setAttribute('zoteroFontSize', size);

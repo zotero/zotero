@@ -3,14 +3,14 @@
     background-color: #d2d8e2;
     
     .tree-node {
-      height: 1.581em;
+      height: 1.818em;
       
       &.focused:not(.highlighted) {
         background: -moz-linear-gradient(top, #6494D4, #2559AC) repeat-x;
         border-top: 1px solid #5382C5;
         font-weight: bold !important;
         color: #ffffff !important;
-        height: calc(1.581em - 2px);
+        height: calc(1.818em - 1px);
         padding-bottom: 1px;
       }
     }
@@ -31,3 +31,24 @@
   }
 }
 
+// IDK why, but these heights are all over the place on macOS (not a f(x)=x)
+*[zoteroFontSize=medium] #zotero-collections-tree .tree .tree-node {
+  height: 1.739em;
+  &.focused:not(.highlighted) {
+    height: calc(1.738em - 1px);
+  }
+}
+
+*[zoteroFontSize=large] #zotero-collections-tree .tree .tree-node {
+  height: 1.68em;
+  &.focused:not(.highlighted) {
+    height: calc(1.68em - 1px);
+  }
+}
+
+*[zoteroFontSize=x-large] #zotero-collections-tree .tree .tree-node {
+  height: 1.697em;
+  &.focused:not(.highlighted) {
+    height: calc(1.697em - 1px);
+  }
+}
