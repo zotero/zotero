@@ -203,7 +203,7 @@ describe("Tag Selector", function () {
 		it("should add a tag when added to an item in the library root", async function () {
 			var promise;
 			
-			if (collectionsView.selection.currentIndex != 0) {
+			if (collectionsView.focusedIdx != 0) {
 				promise = waitForTagSelector(win);
 				await collectionsView.selectLibrary();
 				await promise;

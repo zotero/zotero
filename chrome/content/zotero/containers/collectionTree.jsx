@@ -40,7 +40,7 @@ const MARGIN_LEFT = 3;
 const CHILD_INDENT = 20;
 
 Zotero.CollectionTree = class CollectionTree extends React.Component {
-	static async init(domEl, opts) {
+	static init(domEl, opts) {
 		Zotero.debug("Initializing React CollectionTree");
 		var ref;
 		let elem = (
@@ -50,12 +50,12 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 		);
 		ReactDOM.render(elem, domEl);
 		ref.domEl = domEl;
-		await ref.refresh();
 		
 		// We need to return ref before issuing select events
 		// which will trigger a ZoteroPane listener that requires
 		// ZoteroPane.collectionsView to be assigned
 		(async function() {
+			await ref.refresh();
 			var lastViewedID = Zotero.Prefs.get('lastViewedFolder');
 			if (lastViewedID) {
 				var selected = await ref.selectByID(lastViewedID);
@@ -104,21 +104,31 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 		this.onSelect = this._createEventBinding('select');
 		this.onRefresh = this._createEventBinding('refresh');
 	}
+	
+	componentDidUpdate() {
+		this.runListeners('refresh');
+	}
 
 	// Add a keypress listener for expand/collapse
-	handleKeyPress = (event) => {
+	handleKeyDown = (event) => {
 		// if (this.editingRow != -1) return; // In-line editing active
 		
 		var libraryID = this.getSelectedLibraryID();
 		if (!libraryID) return;
 		
-		var key = String.fromCharCode(event.which);
-		if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
+		if (event.key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
 			this.expandLibrary(libraryID, true);
 		}
-		else if (key == '-' && !(event.shiftKey || event.ctrlKey ||
+		else if (event.key == '-' && !(event.shiftKey || event.ctrlKey ||
 				event.altKey || event.metaKey)) {
 			this.collapseLibrary(libraryID);
+		}
+		else if ((event.key == 'Backspace' && Zotero.isMac) ||
+				event.key == 'Delete') {
+			var deleteItems = event.metaKey || (!Zotero.isMac && event.shiftKey);
+			ZoteroPane.deleteSelectedCollection(deleteItems);
+			event.preventDefault();
+			return;
 		}
 	}
 	
@@ -126,17 +136,7 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 		this.focused = treeRow;
 		if (this.selectEventsSuppressed) return;
 		this.forceUpdate();
-		ZoteroPane.onCollectionSelected();
-	}
-	
-	handleRowExpand = (treeRow) => {
-		treeRow.isOpen = true;
-		this.forceUpdate();
-	}
-	
-	handleRowCollapse = (treeRow) => {
-		treeRow.isOpen = false;
-		this.forceUpdate();
+		this.props.onFocus && this.props.onFocus();
 	}
 
 	getRoots() {
@@ -175,6 +175,8 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 			itemHeight = 22;
 		}
 		itemHeight *= Zotero.Prefs.get('fontSize');
+		
+		let toggleTreeRow = (treeRow) => this.toggleOpenState(this._rowMap[treeRow.id]);
 		return React.createElement(
 			Tree,
 			{
@@ -204,12 +206,14 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 						onContextMenu: async (e) => {
 							e.persist();
 							await this.handleRowFocus(treeRow);
-							ZoteroPane.onCollectionsContextMenuOpen(e);
+							this.props.onContext && this.props.onContext(e);
 						},
 						draggable: true,
-						onDragStart: (e) => this.onDragStart(treeRow, e),
-						onDragOver: (e) => this.onDragOver(treeRow, e),
-						onDrop: (e) => this.onDrop(treeRow, e),
+					}
+					if (this.props.dragAndDrop) {
+						props.onDragStart = e => this.onDragStart(treeRow, e);
+						props.onDragOver = e => this.onDragOver(treeRow, e);
+						props.onDrop = e => this.onDrop(treeRow, e);
 					}
 					
 					return (
@@ -227,9 +231,9 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 				
 				onDragLeave: (e) => this.props.dragAndDrop && this.onTreeDragLeave(e),
 				onFocus: this.handleRowFocus,
-				onExpand: this.handleRowExpand,
-				onCollapse: this.handleRowCollapse,
-				onKeyPress: this.handleKeyPress,
+				onExpand: toggleTreeRow,
+				onCollapse: toggleTreeRow,
+				onKeyDown: this.handleKeyDown,
 
 				autoExpandAll: false,
 				autoExpandDepth: 0,
@@ -399,33 +403,89 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 		return promise;
 	}
 	
-	async selectLibrary(libraryID) {
+	selectLibrary(libraryID) {
 		// Select local library
-		if (!libraryID) {
-			this.ensureRowIsVisible(0);
-			await this.selectWait(0);
-			return true;
+		if (libraryID == undefined) {
+			libraryID = this._rows[0].ref.libraryID;
+		}
+		return this.selectByID('L' + libraryID);
+	}
+	
+	async selectTrash(libraryID) {
+		await this.expandToRow('T'+libraryID);
+		return this.selectByID('T'+libraryID);
+	}
+	
+	async selectCollection(id) {
+		await this.expandToRow('C' + id);
+		return this.selectByID('C' + id);
+	}
+
+	selectSearch(id) {
+		return this.selectByID('S' + id);
+	}
+
+	async selectItem(itemID, inLibraryRoot) {
+		return !!(await this.selectItems([itemID], inLibraryRoot));
+	}
+	
+	/**
+	 * Find items in current collection, or, if not there, in a library root, and select it
+	 *
+	 * @param {Array{Integer}} itemID
+	 * @param {Boolean} [inLibraryRoot=false] - Always show in library root
+	 * @return {Boolean} - True if item was found, false if not
+	 */
+	async selectItems(itemIDs, inLibraryRoot) {
+		if (!itemIDs.length) {
+			return false;
 		}
 		
-		// Check if library is already selected
-		if (this.focused) {
-			var treeRow = this.focused;
-			if (treeRow.isLibrary(true) && treeRow.ref.libraryID == libraryID) {
-				this.ensureRowIsVisible(this.focusedIdx);
-				this.forceUpdate();
-				return true;
-			}
+		var items = await Zotero.Items.getAsync(itemIDs);
+		if (!items.length) {
+			return false;
 		}
 		
-		// Find library
-		var row = this._rowMap['L' + libraryID];
-		if (row !== undefined) {
-			this.ensureRowIsVisible(row);
-			await this.selectWait(row);
-			return true;
+		await this.waitForLoad();
+
+		// Check if items from multiple libraries were specified
+		if (items.length > 1 && new Set(items.map(item => item.libraryID)).size > 1) {
+			Zotero.debug("Can't select items in multiple libraries", 2);
+			return 0;
 		}
 		
-		return false;
+		var currentLibraryID = this.getSelectedLibraryID();
+		var libraryID = items[0].libraryID;
+		// If in a different library
+		if (libraryID != currentLibraryID) {
+			Zotero.debug("Library ID differs; switching library");
+			await this.selectLibrary(libraryID);
+		}
+		// Force switch to library view
+		else if (!this.focused.isLibrary() && inLibraryRoot) {
+			Zotero.debug("Told to select in library; switching to library");
+			await this.selectLibrary(libraryID);
+		}
+		
+		await this.itemTreeView.waitForLoad();
+		
+		var numSelected = await this.itemTreeView.selectItems(itemIDs);
+		if (numSelected == items.length) {
+			return numSelected;
+		}
+		
+		// If there's a single item and it's in the trash, switch to that
+		if (items.length == 1 && items[0].deleted) {
+			Zotero.debug("Item is deleted; switching to trash");
+			await this.selectTrash(libraryID);
+		}
+		else {
+			Zotero.debug("Item was not selected; switching to library");
+			await this.selectLibrary(libraryID);
+		}
+		
+		await this.itemTreeView.waitForLoad();
+		return this.itemTreeView.selectItems(itemIDs);
 	}
 	
 	// The caller has to ensure the tree is redrawn
@@ -453,6 +513,11 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 		
 		if (!this._rowMap) {
 			Zotero.debug("Row map didn't exist in collectionTree.notify()");
+			return;
+		}
+		
+		if (!ZoteroPane.isShowing()) {
+			Zotero.debug("ZoteroPane is hidden in collectionTree.notify()");
 			return;
 		}
 		
@@ -533,8 +598,6 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 					this._removeRow(row);
 					this._removeRow(row - 1);
 				}
-				
-				this._refreshRowMap();
 			}
 			
 			this.selectNextAppropriate(selectedIndex);
@@ -654,22 +717,24 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 	}
 
 	/**
-	 * N.B. Calling code must ensure the tree is redrawn
 	 * 
 	 * @param rowID {String}
 	 * @returns {Promise<boolean>}
 	 */
-	async expandToRow(rowID) {
+	expandToRow(rowID) {
 		var row = this._rowMap[rowID];
 		if (!row) {
 			Zotero.debug("Cannot expand to nonexistent row " + rowID, 2);
 			return false;
 		}
 		
-		while (row.parent) {
-			row.parent.isOpen = true;
-			row = row.parent;
+		let treeRow = this._rows[row];
+		while (treeRow.parent) {
+			treeRow.parent.isOpen = true;
+			treeRow = treeRow.parent;
 		}
+
+		this._saveOpenStates();
 		return true;
 	}
 
@@ -774,6 +839,10 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 		return this.selectWait(index);
 	}
 
+	unregister() {
+		Zotero.Notifier.unregisterObserver(this._unregisterID);
+	}
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 ///  Component data access methods
@@ -794,6 +863,16 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 	 */	
 	getRow(index) {
 		return this._rows[index];
+	}
+	
+	/**
+	 * Return the index of the row with a given ID (e.g., "C123" for collection 123)
+	 *
+	 * @param {String} - Row id
+	 * @return {Integer|false}
+	 */
+	getRowIndexByID(id) {
+		return (id in this._rowMap) && this._rowMap[id];
 	}
 	
 	/**
@@ -1725,18 +1804,20 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 	* Remove a row from the main array and parent row children arrays,
 	* delete the row from the map, and optionally update all rows above it in the map
 	*/
-	_removeRow(row, skipMapUpdate) {
+	_removeRow(row) {
 		let treeRow = this._rows[row];
 		let id = treeRow.id;
 		
+		for (let child of treeRow.children.reverse()) {
+			this._removeRow(this._rowMap[child.id]);
+		}
+		
 		this._rows.splice(row, 1);
-		treeRow.parent.children.splice(treeRow.parent.children.indexOf(treeRow), 1);
+		treeRow.parent && treeRow.parent.children.splice(treeRow.parent.children.indexOf(treeRow), 1);
 		delete this._rowMap[id];
-		if (!skipMapUpdate) {
-			for (let i in this._rowMap) {
-				if (this._rowMap[i] > row) {
-					this._rowMap[i]--;
-				}
+		for (let i in this._rowMap) {
+			if (this._rowMap[i] > row) {
+				this._rowMap[i]--;
 			}
 		}
 	}
@@ -1748,7 +1829,12 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 	
 	
 	isContainerOpen(row) {
-		return this._rows[row].isOpen;
+		return !!this._rows[row].children.length && this._rows[row].isOpen;
+	}
+
+
+	isContainerEmpty(row) {
+		return !this._rows[row].children.length;
 	}
 	
 	
@@ -1805,6 +1891,54 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 		}
 		return React.createElement(iconCls);
 	}
+
+	/**
+	 * Persist the current open/closed state of rows to a pref
+	 */
+	_saveOpenStates = Zotero.Utilities.debounce(async function() {
+		var state = this._containerState;
+		
+		// Every so often, remove obsolete rows
+		if (Math.random() < 1/20) {
+			Zotero.debug("Purging sourceList.persist");
+			for (var id in state) {
+				var m = id.match(/^C([0-9]+)$/);
+				if (m) {
+					if (!(await Zotero.Collections.getAsync(parseInt(m[1])))) {
+						delete state[id];
+					}
+					continue;
+				}
+				
+				var m = id.match(/^G([0-9]+)$/);
+				if (m) {
+					if (!Zotero.Groups.get(parseInt(m[1]))) {
+						delete state[id];
+					}
+					continue;
+				}
+			}
+		}
+		
+		for (var i = 0, len = this._rows.length; i < len; i++) {
+			var treeRow = this.getRow(i);
+			if (!treeRow.isContainer()) {
+				continue;
+			}
+			
+			var open = this.isContainerOpen(i);
+			
+			if ((!open && treeRow.isCollection())) {
+				delete state[treeRow.id];
+				continue;
+			}
+			
+			state[treeRow.id] = open;
+		}
+		
+		this._containerState = state;
+		Zotero.Prefs.set("sourceList.persist", JSON.stringify(state));
+	});
 	
 	_ensureFocusedIsNotACollapseChild() {
 		if (this.focused && this.focused.parent && !this.focused.parent.isOpen) {
@@ -1912,18 +2046,14 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 				(this._containerState[treeRow.id] === false
 					|| (isCollection && !this._containerState[treeRow.id]))) {
 			rows[row].isOpen = false;
-		}
-		
-		var startOpen = !!(collections.length || savedSearches.length || showDuplicates || showUnfiled || showTrash);
-		
-		// // If this isn't a manual open, set the initial state depending on whether
-		// // there are child nodes
-		// if (!forceOpen) {
-		// 	rows[row].isOpen = startOpen;
-		// }
-		
-		if (!startOpen) {
-			return 0;
+		} else {
+			var startOpen = !!(collections.length || savedSearches.length || showDuplicates || showUnfiled || showTrash);
+			
+			// // If this isn't a manual open, set the initial state depending on whether
+			// // there are child nodes
+			if (!forceOpen) {
+				rows[row].isOpen = startOpen;
+			}
 		}
 		
 		var newRows = 0;
@@ -2047,23 +2177,23 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 			
 			let i;
 			let level = this.getLevel(parentRow) + 1;
-			// If container is empty, just add after
-			beforeRow = parentRow + 1;
-			if (this._rows[parentRow].children.length) {
-				for (i = 0; i < this._rows[parentRow].children.length; i++) {
-					let child = this._rows[parentRow].children[i];
-					if (!child.isCollection() ||
-							Zotero.localeCompare(child.ref.name, collection.name) > 0) {
-						beforeRow = this._rowMap[child.id];
-						break;
-					}
+			for (i = 0; i < this._rows[parentRow].children.length; i++) {
+				let child = this._rows[parentRow].children[i];
+				if (!child.isCollection() ||
+						Zotero.localeCompare(child.ref.name, collection.name) > 0) {
+					beforeRow = this._rowMap[child.id];
+					break;
 				}
+			}
+			if (beforeRow == undefined) {
+				for (beforeRow = parentRow+1; this.getLevel(beforeRow) >= level; beforeRow++);
 			}
 			this._addRow(
 				new Zotero.CollectionTreeRow(
 					this, 'collection', collection, level, this._rows[parentRow], i),
 				beforeRow
 			);
+			await this._expandRow(this._rows, beforeRow)
 		}
 		else if (objectType == 'search') {
 			let search = Zotero.Searches.get(id);
@@ -2071,7 +2201,6 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 			let parentRow = this._rowMap['L' + libraryID];
 			
 			let level = this.getLevel(parentRow) + 1;
-			beforeRow = parentRow;
 			let i;
 			if (this._rows[parentRow].children.length) {
 				for (i = 0; i < this._rows[parentRow].children.length; i++) {
@@ -2085,15 +2214,20 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 					}
 					// If it's not a search and it's not a collection, stop
 					else if (!child.isCollection()) {
+						beforeRow = this._rowMap[child.id];
 						break;
 					}
 				}
+			}
+			if (beforeRow == undefined) {
+				for (beforeRow = parentRow+1; this.getLevel(beforeRow) > level; beforeRow++);
 			}
 			this._addRow(
 				new Zotero.CollectionTreeRow(this, 'search', search, level, this._rows[parentRow], i),
 				beforeRow
 			);
 		}
+		this._refreshRowMap();
 		return beforeRow;
 	}
 }

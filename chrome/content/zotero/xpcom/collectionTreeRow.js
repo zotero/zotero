@@ -149,6 +149,10 @@ Zotero.CollectionTreeRow.prototype.isShare = function()
 	return this.type == 'share';
 }
 
+Zotero.CollectionTreeRow.prototype.isContainer = function() {
+	return this.isLibrary(true) || this.isCollection() || this.isPublications() || this.isBucket();
+}
+
 
 
 // Special

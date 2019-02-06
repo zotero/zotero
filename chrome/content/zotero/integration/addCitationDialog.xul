@@ -28,6 +28,7 @@
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
@@ -43,6 +44,7 @@
 	ondialogcancel="Zotero_Citation_Dialog.cancel();"
 	onclose="Zotero_Citation_Dialog.cancel();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 	persist="screenX screenY width height"
 	resizable="true"
 	buttons="extra1,extra2,accept,cancel"
@@ -62,18 +64,9 @@
 								onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { if (this.value == '') { cancelDialog(); return false; } this.value = ''; onSearch(); return false; } return true;"/>
 					</hbox>
 					<hbox flex="1" style="margin-top: 5px">
-						<tree id="zotero-collections-tree"
-							style="width: 200px;" hidecolumnpicker="true" seltype="cell"
-							onselect="onCollectionSelected();">
-							<treecols>
-								<treecol
-									id="zotero-collections-name-column"
-									flex="1"
-									primary="true"
-									hideheader="true"/>
-							</treecols>
-							<treechildren/>
-						</tree>
+						<vbox id="zotero-collections-tree-container" flex="1">
+							<html:div id="zotero-collections-tree"></html:div>
+						</vbox>
 						
 						<deck id="zotero-items-pane-content" selectedIndex="0" flex="1">
 							<tree id="zotero-items-tree"

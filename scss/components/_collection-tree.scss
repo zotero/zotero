@@ -34,6 +34,10 @@
       color: $shade-0 !important;
       background: $shade-5 !important;
     }
+    
+    &.unread {
+      font-weight: bold;
+    }
   }
   
   .tree-item-label {

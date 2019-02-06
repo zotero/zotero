@@ -204,6 +204,8 @@ class Tree extends Component {
 			
 			onDragLeave: PropTypes.func,
 			
+			onKeyDown: PropTypes.func,
+			
 			// End Added by Zotero
 			
 
@@ -572,6 +574,9 @@ class Tree extends Component {
 		if (this.props.focused == null) {
 			return;
 		}
+		
+		// Modified by Zotero
+		this.props.onKeyDown && this.props.onKeyDown(e);
 
 		// Allow parent nodes to use navigation arrows with modifiers.
 		if (e.altKey || e.ctrlKey || e.shiftKey || e.metaKey) {

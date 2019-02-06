@@ -44,10 +44,12 @@ var doLoad = Zotero.Promise.coroutine(function* () {
 	if(io.singleSelection) document.getElementById("zotero-items-tree").setAttribute("seltype", "single");
 	
 	setItemsPaneMessage(Zotero.getString('pane.items.loading'));
-	
-	collectionsView = new Zotero.CollectionTreeView();
+
+	var collectionsTree = document.getElementById('zotero-collections-tree');
+	collectionsView = Zotero.CollectionTree.init(collectionsTree, {
+		onFocus: () => onCollectionSelected(),
+	});
 	collectionsView.hideSources = ['duplicates', 'trash', 'feeds'];
-	document.getElementById('zotero-collections-tree').view = collectionsView;
 	
 	yield collectionsView.waitForLoad();
 	
@@ -73,9 +75,9 @@ var onCollectionSelected = Zotero.Promise.coroutine(function* ()
 	if(itemsView)
 		itemsView.unregister();
 
-	if(collectionsView.selection.count == 1 && collectionsView.selection.currentIndex != -1)
+	if( collectionsView.focused)
 	{
-		var collectionTreeRow = collectionsView.getRow(collectionsView.selection.currentIndex);
+		var collectionTreeRow = collectionsView.focused;
 		collectionTreeRow.setSearch('');
 		Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
 		

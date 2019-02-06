@@ -240,6 +240,11 @@ var waitForTagSelector = function (win, numUpdates = 1) {
 	return deferred.promise;
 };
 
+var waitForCollectionTree = function(win) {
+	let cv = win.ZoteroPane.collectionsView;
+	return cv._waitForEvent('refresh');
+}
+
 /**
  * Waits for a single item event. Returns a promise for the item ID(s).
  */
