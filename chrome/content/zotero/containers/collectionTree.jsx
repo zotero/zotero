@@ -930,6 +930,7 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 			return;
 		}
 		event.dataTransfer.setData("zotero/collection", treeRow.ref.id);
+		Zotero.debug("Dragging collection " + treeRow.id);
 	}
 
 	onDragOver(treeRow, event) {
@@ -1048,7 +1049,8 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 	canDropCheck(treeRow, dataTransfer) {
 		let orient = Zotero.DragDrop.currentOrientation;
 		let row = this._rowMap[treeRow.id];
-		//Zotero.debug("Row is " + row + "; orient is " + orient);
+		// TEMP
+		Zotero.debug("Row is " + row + "; orient is " + orient);
 		
 		var dragData = Zotero.DragDrop.getDataFromDataTransfer(dataTransfer);
 		if (!dragData) {

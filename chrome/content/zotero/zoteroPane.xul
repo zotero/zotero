@@ -288,24 +288,6 @@
 					<box id="zotero-collections-tree-shim"/>
 					<!-- This extra vbox prevents the toolbar from getting compressed when resizing
 							the tag selector to max height -->
-					<!--<tree id="zotero-collections-tree"-->
-							<!--hidecolumnpicker="true"-->
-							<!--oncontextmenu="ZoteroPane.onCollectionsContextMenuOpen(event)"-->
-							<!--onmouseover="ZoteroPane_Local.collectionsView.setHighlightedRows();"-->
-							<!--onselect="ZoteroPane_Local.onCollectionSelected();"-->
-							<!--seltype="cell" flex="1" editable="true">-->
-						<!--<treecols>-->
-							<!--<treecol-->
-								<!--id="zotero-collections-name-column"-->
-								<!--flex="1"-->
-								<!--primary="true"-->
-								<!--hideheader="true"/>-->
-						<!--</treecols>-->
-						<!--<treechildren ondragstart="ZoteroPane_Local.collectionsView.onDragStart(event)"-->
-							<!--ondragenter="return ZoteroPane_Local.collectionsView.onDragEnter(event)"-->
-							<!--ondragover="return ZoteroPane_Local.collectionsView.onDragOver(event)"-->
-							<!--ondrop="return ZoteroPane_Local.collectionsView.onDrop(event)"/>-->
-					<!--</tree>-->
 					<vbox id="zotero-collections-tree-container" flex="1">
 						<html:div id="zotero-collections-tree"></html:div>
 					</vbox>
