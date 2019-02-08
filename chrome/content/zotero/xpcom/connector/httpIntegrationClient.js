@@ -140,7 +140,7 @@ Zotero.HTTPIntegrationClient.Document.prototype.getFields = async function(field
 };
 Zotero.HTTPIntegrationClient.Document.prototype.convert = async function(fields, fieldType, noteTypes) {
 	fields = fields.map((f) => f._id);
-	await Zotero.HTTPIntegrationClient.sendCommand("Field.convert", [this._documentID, fields, fieldType, noteTypes]);
+	await Zotero.HTTPIntegrationClient.sendCommand("Document.convert", [this._documentID, fields, fieldType, noteTypes]);
 };
 Zotero.HTTPIntegrationClient.Document.prototype.complete = async function() {
 	Zotero.HTTPIntegrationClient.inProgress = false;
