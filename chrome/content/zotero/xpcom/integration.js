@@ -1212,8 +1212,12 @@ Zotero.Integration.Fields.prototype.addEditCitation = async function (field) {
 		for (var nextIdx = idx+1; nextIdx < fields.length; nextIdx++) {
 			if (nextIdx in fieldToCitationIdxMapping) break;
 		}
+		var nextMappedIdx = fieldToCitationIdxMapping[nextIdx];
+		if (nextMappedIdx === undefined) {
+			nextMappedIdx = fields.length;
+		}
 		let citationsPre = citations.slice(0, fieldToCitationIdxMapping[prevIdx]+1);
-		let citationsPost = citations.slice(fieldToCitationIdxMapping[nextIdx]);
+		let citationsPost = citations.slice(nextMappedIdx);
 		let citationID = citation.citationID;
 		try {
 			var result = this._session.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
