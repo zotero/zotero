@@ -1600,7 +1600,7 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 	}
 	
 	// We need a new ID if there's another citation with the same citation ID in this document
-	var duplicateIndex = this.documentCitationIDs[citation.citationID];
+	var duplicateIndex = this.documentCitationIDs[citation.citationID] != citation.properties.zoteroIndex ? this.documentCitationIDs[citation.citationID] : undefined;
 	var needNewID = !citation.citationID || duplicateIndex != undefined;
 	if(needNewID) {
 		if (duplicateIndex != undefined) {
@@ -1656,6 +1656,12 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
 	Zotero.debug(Object.keys(this.updateIndices));
 	
 	var [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this.getCiteprocLists();
+
+	for (var index in this.newIndices) {
+		if (this.updateIndices[index] !== undefined) {
+			delete this.updateIndices[index];
+		}
+	}
 	
 	for (let indexList of [this.newIndices, this.updateIndices]) {
 		for (let index in indexList) {
