@@ -1657,14 +1657,16 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
 	
 	var [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this.getCiteprocLists();
 
-	for (var index in this.newIndices) {
-		if (this.updateIndices[index] !== undefined) {
-			delete this.updateIndices[index];
-		}
-	}
-	
+	var outerLoopCounter = 0;
+	var newIndicesCopy = JSON.parse(JSON.stringify(this.newIndices));
 	for (let indexList of [this.newIndices, this.updateIndices]) {
+		outerLoopCounter++;
 		for (let index in indexList) {
+			if (outerLoopCounter === 2) {
+				if (newIndicesCopy[index]) {
+					continue;
+				}
+			}
 			// Jump to next event loop step for UI updates
 			await Zotero.Promise.delay();
 			index = parseInt(index);
