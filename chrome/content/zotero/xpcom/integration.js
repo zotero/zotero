@@ -1657,16 +1657,9 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
 	
 	var [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this.getCiteprocLists();
 
-	var outerLoopCounter = 0;
-	var newIndicesCopy = JSON.parse(JSON.stringify(this.newIndices));
+	var updateIndices = {};
 	for (let indexList of [this.newIndices, this.updateIndices]) {
-		outerLoopCounter++;
 		for (let index in indexList) {
-			if (outerLoopCounter === 2) {
-				if (newIndicesCopy[index]) {
-					continue;
-				}
-			}
 			// Jump to next event loop step for UI updates
 			await Zotero.Promise.delay();
 			index = parseInt(index);
@@ -1693,12 +1686,13 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
 			
 			for (let citationInfo of newCitations) {
 				let idx = fieldToCitationIdxMapping[citationInfo[0]], text = citationInfo[1];
-				this.updateIndices[idx] = true;
+				updateIndices[idx] = true;
 				this.citationsByIndex[idx].text = text;
 			}
 			
 		}
 	}
+	this.updateIndices = updateIndices;
 }
 
 /**
