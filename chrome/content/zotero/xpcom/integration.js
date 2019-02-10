@@ -1661,7 +1661,7 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
 	
 	var [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this.getCiteprocLists();
 
-	var updateIndices = {};
+	var updateIndices = Object.assign({}, this.updateIndices);
 	for (let indexList of [this.newIndices, this.updateIndices]) {
 		for (let index in indexList) {
 			// Jump to next event loop step for UI updates
