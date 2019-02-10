@@ -485,6 +485,35 @@ describe("Zotero.Integration", function () {
 
 				getCiteprocBibliographySpy.restore();
 			});
+
+			it('should update bibliography sort order on change to item', function* () {
+				yield insertMultipleCitations.call(this);
+				var docID = this.test.fullTitle();
+				var doc = applications[docID].doc;
+
+				let getCiteprocBibliographySpy =
+					sinon.spy(Zotero.Integration.Bibliography.prototype, 'getCiteprocBibliography');
+
+				yield execCommand('addEditBibliography', docID);
+				assert.isTrue(getCiteprocBibliographySpy.calledOnce);
+
+				assert.equal(getCiteprocBibliographySpy.lastCall.returnValue[0].entry_ids.length, 3);
+				getCiteprocBibliographySpy.reset();
+
+				sinon.stub(doc, 'cursorInField').resolves(doc.fields[1]);
+				sinon.stub(doc, 'canInsertField').resolves(false);
+
+				testItems[1].setCreator(0, {creatorType: 'author', name: 'Aaaaa'});
+				testItems[1].setField('title', 'Bbbbb');
+
+				setAddEditItems(testItems.slice(1, 3));
+				yield execCommand('addEditCitation', docID);
+
+				assert.equal(getCiteprocBibliographySpy.lastCall.returnValue[0].entry_ids.length, 3);
+				assert.equal(getCiteprocBibliographySpy.lastCall.returnValue[1][0], "Aaaaa Bbbbb.");
+
+				getCiteprocBibliographySpy.restore();
+			});
 			
 			describe('when original citation text has been modified', function() {
 				var displayAlertStub;
