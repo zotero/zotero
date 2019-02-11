@@ -1575,25 +1575,24 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 	// citationItems
 	delete this.fields._deleteFields[index];
 
-	citation.properties.added = true;
 	citation.properties.zoteroIndex = index;
 	citation.properties.noteIndex = noteIndex;
 	this.citationsByIndex[index] = citation;
 	
 	// add to citationsByItemID and citationsByIndex
-	for(var i=0; i<citation.citationItems.length; i++) {
+	for (var i=0; i<citation.citationItems.length; i++) {
 		var citationItem = citation.citationItems[i];
-		if(!this.citationsByItemID[citationItem.id]) {
+		if (!this.citationsByItemID[citationItem.id]) {
 			this.citationsByItemID[citationItem.id] = [citation];
 			this.bibliographyHasChanged = true;
 		} else {
 			var byItemID = this.citationsByItemID[citationItem.id];
-			if(byItemID[byItemID.length-1].properties.zoteroIndex < index) {
+			if (byItemID[byItemID.length-1].properties.zoteroIndex < index) {
 				// if index is greater than the last index, add to end
 				byItemID.push(citation);
 			} else {
 				// otherwise, splice in at appropriate location
-				for(var j=0; byItemID[j].properties.zoteroIndex < index && j<byItemID.length-1; j++) {}
+				for (var j=0; byItemID[j].properties.zoteroIndex < index && j<byItemID.length-1; j++) {}
 				byItemID.splice(j++, 0, citation);
 			}
 		}
@@ -1609,7 +1608,7 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 			// and either one may need to be updated
 			this.newIndices[duplicateIndex] = true;
 		}
-		if(needNewID) {
+		if (needNewID) {
 			Zotero.debug("Integration: "+citation.citationID+" ("+index+") needs new citationID");
 			citation.citationID = Zotero.Utilities.randomString();
 		}
@@ -1617,7 +1616,7 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 	}
 	// Deal with citations that are copied into the document from somewhere else
 	// and have not been added to the processor yet
-	if (! this.oldCitations.has(citation.citationID) && !this.reload) {
+	if (!this.oldCitations.has(citation.citationID) && !this.reload) {
 		this.newIndices[index] = true;
 	}
 	if (this.regenAll && !this.newIndices[index]) {
