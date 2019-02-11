@@ -1602,8 +1602,8 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 	// We need a new ID if there's another citation with the same citation ID in this document
 	var duplicateIndex = this.documentCitationIDs[citation.citationID];
 	var needNewID = !citation.citationID || duplicateIndex != undefined;
-	if(needNewID) {
-		if (duplicateIndex != undefined) {
+	if (needNewID) {
+		if (duplicateIndex != undefined && duplicateIndex != index) {
 			// If this is a duplicate, we need to mark both citations as "new"
 			// since we do not know which one was the "original" one
 			// and either one may need to be updated
