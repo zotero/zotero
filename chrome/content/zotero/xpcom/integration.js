@@ -1209,7 +1209,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = async function (field) {
 		for (var prevIdx = idx-1; prevIdx >= 0; prevIdx--) {
 			if (prevIdx in fieldToCitationIdxMapping) break;
 		}
-		for (var nextIdx = idx+1; nextIdx < fields.length; nextIdx++) {
+		for (var nextIdx = idx; nextIdx < fields.length; nextIdx++) {
 			if (nextIdx in fieldToCitationIdxMapping) break;
 		}
 		let citationsPre = citations.slice(0, fieldToCitationIdxMapping[prevIdx]+1);
