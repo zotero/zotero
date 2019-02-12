@@ -471,7 +471,7 @@ describe("Zotero.Integration", function () {
 				var doc = applications[docID].doc;
 
 				testItems[3].setCreator(0, {creatorType: 'author', lastName: 'Smith', firstName: 'Robert'});
-				testItems[3].setField('date', 'today');
+				testItems[3].setField('date', '2019-01-01');
 
 				setAddEditItems(testItems[3]);
 				yield execCommand('addEditCitation', docID);
@@ -481,7 +481,7 @@ describe("Zotero.Integration", function () {
 				sinon.stub(doc, 'canInsertField').resolves(false);
 
 				testItems[4].setCreator(0, {creatorType: 'author', lastName: 'Smith', firstName: 'Robert'});
-				testItems[4].setField('date', 'today');
+				testItems[4].setField('date', '2019-01-01');
 
 				setAddEditItems(testItems[4]);
 				yield execCommand('addEditCitation', docID);
