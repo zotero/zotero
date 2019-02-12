@@ -448,7 +448,7 @@ describe("Zotero.Integration", function () {
 				}
 			});
 			it('should insert citation if not in field', insertMultipleCitations);
-			
+
 			it('should edit citation if in citation field', function* () {
 				yield insertMultipleCitations.call(this);
 				var docID = this.test.fullTitle();
@@ -465,6 +465,33 @@ describe("Zotero.Integration", function () {
 				assert.equal(citation.citationItems[0].id, testItems[3].id);
 			});
 			
+			it('should write an implicitly updated citation into the document', function* () {
+				yield insertMultipleCitations.call(this);
+				var docID = this.test.fullTitle();
+				var doc = applications[docID].doc;
+
+				testItems[3].setCreator(0, {creatorType: 'author', lastName: 'Smith', firstName: 'Robert'});
+				testItems[3].setField('date', '2019-01-01');
+
+				setAddEditItems(testItems[3]);
+				yield execCommand('addEditCitation', docID);
+				assert.equal(doc.fields[2].text, "(Smith, 2019)");
+
+				sinon.stub(doc, 'cursorInField').resolves(doc.fields[0]);
+				sinon.stub(doc, 'canInsertField').resolves(false);
+
+				testItems[4].setCreator(0, {creatorType: 'author', lastName: 'Smith', firstName: 'Robert'});
+				testItems[4].setField('date', '2019-01-01');
+
+				setAddEditItems(testItems[4]);
+				yield execCommand('addEditCitation', docID);
+				assert.equal(doc.fields.length, 3);
+				assert.equal(Zotero.Integration.currentSession.style.registry.registry[testItems[4].id].disambig.year_suffix, '0');
+				assert.equal(Zotero.Integration.currentSession.style.registry.registry[testItems[3].id].disambig.year_suffix, '1');
+				assert.equal(doc.fields[0].text, "(Smith, 2019a)");
+				assert.equal(doc.fields[2].text, "(Smith, 2019b)");
+			});
+
 			it('should update bibliography if present', function* () {
 				yield insertMultipleCitations.call(this);
 				var docID = this.test.fullTitle();
