@@ -486,8 +486,6 @@ describe("Zotero.Integration", function () {
 				setAddEditItems(testItems[4]);
 				yield execCommand('addEditCitation', docID);
 				assert.equal(doc.fields.length, 3);
-				assert.equal(Zotero.Integration.currentSession.style.registry.registry[testItems[4].id].disambig.year_suffix, '0');
-				assert.equal(Zotero.Integration.currentSession.style.registry.registry[testItems[3].id].disambig.year_suffix, '1');
 				assert.equal(doc.fields[0].text, "(Smith, 2019a)");
 				assert.equal(doc.fields[2].text, "(Smith, 2019b)");
 			});
@@ -516,8 +514,6 @@ describe("Zotero.Integration", function () {
 				setAddEditItems(testItems[4]);
 				yield execCommand('addEditCitation', docID);
 				assert.equal(doc.fields.length, 3);
-				assert.equal(Zotero.Integration.currentSession.style.registry.registry[testItems[4].id].disambig.year_suffix, '0');
-				assert.equal(Zotero.Integration.currentSession.style.registry.registry[testItems[3].id].disambig.year_suffix, '1');
 				assert.equal(doc.fields[0].text, "(Smith, 2019a)");
 				assert.equal(doc.fields[2].text, "(Smith, 2019b)");
 			});
