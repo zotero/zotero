@@ -1664,7 +1664,7 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
 				[citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] =
 					this.getCiteprocLists()
 				let processIndicesSorted = Object.keys(this.processIndices).sort().reverse();
-				for (let pos in processIndicesSorted) {
+				for (let pos of processIndicesSorted) {
 					if (pos >= index) {
 						this.processIndices[pos+1] = this.processIndices[pos];
 						delete this.processIndices[pos];
