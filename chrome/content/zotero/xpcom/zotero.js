@@ -1766,23 +1766,19 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		// not to load and possibly other problems
 		if (Zotero.isMac && OS.Constants.Path.libDir.includes('AppTranslocation')) {
 			let ps = Services.prompt;
-			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-				| ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
+			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING;
 			let index = ps.confirmEx(
 				null,
-				Zotero.getString('general.warning'),
+				Zotero.getString('general.error'),
 				Zotero.getString('startupError.startedFromDiskImage1', Zotero.clientName)
 					+ '\n\n'
 					+ Zotero.getString('startupError.startedFromDiskImage2', Zotero.clientName),
 				buttonFlags,
 				Zotero.getString('general.quitApp', Zotero.clientName),
-				Zotero.getString('general.notNow'),
-				null, null, {}
+				null, null, null, {}
 			);
-			if (index === 0) {
-				Zotero.Utilities.Internal.quit();
-				return false;
-			}
+			Zotero.Utilities.Internal.quit();
+			return false;
 		}
 		
 		return true;
