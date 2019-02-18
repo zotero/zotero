@@ -130,19 +130,17 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 
 	render() {
 		let tags = this.state.tags;
-		let tagMap = new Map();
-		if (!this.showAutomatic) {
-			tags = tags.filter(t => t.type != 1)
-		} else {
-			// Ensure no duplicates from auto and manual tags
-			tags.forEach(t => !tagMap.has() && t.type != 1 && tagMap.set(t.tag, t));
-			tags = Array.from(tagMap.values());
+		if (!this.state.showAutomatic) {
+			tags = tags.filter(t => t.type != 1).map(t => t.tag);
+		}
+		// Remove duplicates from auto and manual tags
+		else {
+			tags = Array.from(new Set(tags.map(t => t.tag)));
 		}
 		if (this.state.searchString) {
-			tags = tags.filter(tag => !!tag.tag.match(new RegExp(this.state.searchString, 'i')));
+			tags = tags.filter(tag => !!tag.match(new RegExp(this.state.searchString, 'i')));
 		}
-		tags = tags.map(t => {
-			let name = t.tag;
+		tags = tags.map((name) => {
 			return {
 				name,
 				selected: this.selectedTags.has(name),
