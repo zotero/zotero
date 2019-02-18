@@ -995,7 +995,6 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 		
 		// New/modified objects
 		let ids = yield Zotero.Sync.Data.Local.getUnsynced(objectType, this.libraryID);
-		let origIDs = ids; // TEMP
 		
 		// Skip objects in sync queue, because they might have unresolved conflicts.
 		// The queue only has keys, so we have to convert to keys and back.
@@ -1022,17 +1021,9 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 		});
 		if (missing.length) {
 			Zotero.debug("Missing " + objectTypePlural + ":");
-			Zotero.debug(origIDs);
-			Zotero.debug(origUnsynced);
-			Zotero.debug(ids);
-			Zotero.debug(unsyncedKeys);
+			Zotero.debug(ids.filter(id => !id));
+			Zotero.debug(ids.filter(id => !objectsClass.getLibraryAndKeyFromID(id)));
 			Zotero.debug(missing);
-			for (let key of missing) {
-				Zotero.debug(yield Zotero.DB.valueQueryAsync(
-					`SELECT ${objectsClass.idColumn} FROM ${objectsClass.table} WHERE libraryID=? AND key=?`,
-					[this.libraryID, key]
-				));
-			}
 		}
 		
 		if (ids.length) {
