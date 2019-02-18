@@ -226,10 +226,10 @@ Zotero.RecognizePDF = new function () {
 		var metadata = item.toJSON();
 		
 		var data = { description, version, json, metadata };
-		var uri = ZOTERO_CONFIG.RECOGNIZE_URL + 'report';
+		var url = _getBaseURL() + 'report';
 		return Zotero.HTTP.request(
 			"POST",
-			uri,
+			url,
 			{
 				successCodes: [200, 204],
 				headers: {
@@ -386,18 +386,8 @@ Zotero.RecognizePDF = new function () {
 	}
 	
 	async function _query(json) {
-		// TODO: Use main API URL for recognizer server
-		//let uri = Zotero.Prefs.get("api.url") || ZOTERO_CONFIG.API_URL;
-		let uri = Zotero.Prefs.get("api.url") || ZOTERO_CONFIG.RECOGNIZE_URL;
-		
-		if (!uri.endsWith('/')) {
-			uri += '/';
-		}
-		
-		uri += 'recognize';
-		
+		var uri = _getBaseURL() + 'recognize';
 		let client = Zotero.Sync.Runner.getAPIClient();
-		
 		let req = await client.makeRequest(
 			'POST',
 			uri,
@@ -410,7 +400,6 @@ Zotero.RecognizePDF = new function () {
 				noAPIKey: true
 			}
 		);
-		
 		return JSON.parse(req.responseText);
 	}
 	
@@ -580,6 +569,25 @@ Zotero.RecognizePDF = new function () {
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * To customize the recognizer endpoint, set either recognize.url (used directly)
+	 * or services.url (used with a 'recognizer/' suffix).
+	 */
+	function _getBaseURL() {
+		var url = Zotero.Prefs.get("recognize.url");
+		if (url) {
+			if (!url.endsWith('/')) {
+				url += '/';
+			}
+			return url;
+		}
+		url = Zotero.Prefs.get("services.url") || ZOTERO_CONFIG.SERVICES_URL;
+		if (!url.endsWith('/')) {
+			url += '/';
+		}
+		return url + "recognizer/";
 	}
 };
 
