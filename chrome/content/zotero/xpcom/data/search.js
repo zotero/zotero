@@ -617,148 +617,130 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 		
 		//Zotero.debug('IDs from main search or subsearch: ');
 		//Zotero.debug(ids);
-		
 		//Zotero.debug('Join mode: ' + joinMode);
 		
-		// Filter results with fulltext search
+		// Filter results with full-text search
 		//
-		// If join mode ALL, return the (intersection of main and fulltext word search)
-		// filtered by fulltext content
+		// If join mode ALL, return the (intersection of main and full-text word search)
+		// filtered by full-text content.
 		//
-		// If join mode ANY or there's a quicksearch (which we assume
-		// fulltextContent is part of), return the union of the main search and
-		// (a separate fulltext word search filtered by fulltext content)
-		for (let condition of Object.values(this._conditions)){
-			if (condition['condition']=='fulltextContent'){
-				var fulltextWordIntersectionFilter = (val, index, array) => !!hash[val];
-				var fulltextWordIntersectionConditionFilter = function(val, index, array) {
-					return hash[val] ?
-						(condition.operator == 'contains') :
-						(condition.operator == 'doesNotContain');
-				};
-				
-				// Regexp mode -- don't use fulltext word index
-				if (condition.mode && condition.mode.startsWith('regexp')) {
-					// In an ANY search with other conditions that alter the results, only bother
-					// scanning items that haven't already been found by the main search, as long as
-					// they're in the right library
-					if (joinMode == 'any' && this._hasPrimaryConditions) {
-						if (!tmpTable) {
-							tmpTable = yield Zotero.Search.idsToTempTable(ids);
-						}
-						
-						var sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE "
-							+ "itemID NOT IN (SELECT itemID FROM " + tmpTable + ")";
-						if (this.libraryID) {
-							sql += " AND libraryID=" + parseInt(this.libraryID);
-						}
-						
-						var res = yield Zotero.DB.valueQueryAsync(sql);
-						var scopeIDs = res ? res.split(",").map(id => parseInt(id)) : [];
-					}
-					// If an ALL search, scan only items from the main search
-					else {
-						var scopeIDs = ids;
-					}
-				}
-				// If not regexp mode, run a new search against the fulltext word
-				// index for words in this phrase
-				else {
-					Zotero.debug('Running subsearch against fulltext word index');
-					var s = new Zotero.Search();
+		// If join mode ANY or there's a quicksearch (which we assume fulltextContent is part of)
+		// and the main search is filtered by other conditions, return the union of the main search
+		// and (separate full-text word searches filtered by fulltext content).
+		//
+		// If join mode ANY or there's a quicksearch and the main search isn't filtered, return just
+		// the union of (separate full-text word searches filtered by full-text content).
+		var fullTextResults;
+		var joinModeAny = joinMode == 'any' || hasQuicksearch;
+		for (let condition of Object.values(this._conditions)) {
+			if (condition.condition != 'fulltextContent') continue;
+			
+			if (!fullTextResults) {
+				// For join mode ANY, if we already filtered the main set, add those as results.
+				// Otherwise, start with an empty set.
+				fullTextResults = joinModeAny && this._hasPrimaryConditions
+					? ids
+					: [];
+			}
+			
+			let scopeIDs;
+			// Regexp mode -- don't use full-text word index
+			let numSplits;
+			if (condition.mode && condition.mode.startsWith('regexp')) {
+				// In ANY mode, include items that haven't already been found, as long as they're in
+				// the right library
+				if (joinModeAny) {
+					let tmpTable = yield Zotero.Search.idsToTempTable(fullTextResults);
+					let sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE "
+						+ "itemID NOT IN (SELECT itemID FROM " + tmpTable + ")";
 					if (this.libraryID) {
-						s.libraryID = this.libraryID;
+						sql += " AND libraryID=?";
 					}
-					
-					// Add any necessary conditions to the fulltext word search --
-					// those that are required in an ANY search and any outside the
-					// quicksearch in an ALL search
-					for (let c of Object.values(this._conditions)) {
-						if (c.condition == 'blockStart') {
-							var inQS = true;
-							continue;
-						}
-						else if (c.condition == 'blockEnd') {
-							inQS = false;
-							continue;
-						}
-						else if (c.condition == 'fulltextContent' || inQS) {
-							continue;
-						}
-						else if (joinMode == 'any' && !c.required) {
-							continue;
-						}
-						s.addCondition(c.condition, c.operator, c.value);
-					}
-					
-					var splits = Zotero.Fulltext.semanticSplitter(condition.value);
-					for (let split of splits){
-						s.addCondition('fulltextWord', condition.operator, split);
-					}
-					var fulltextWordIDs = yield s.search();
-					
-					//Zotero.debug("Fulltext word IDs");
-					//Zotero.debug(fulltextWordIDs);
-					
-					// If ALL mode, set intersection of main search and fulltext word index
-					// as the scope for the fulltext content search
-					if (joinMode == 'all' && !hasQuicksearch) {
-						var hash = {};
-						for (let i=0; i<fulltextWordIDs.length; i++) {
-							hash[fulltextWordIDs[i]] = true;
-						}
-						
-						if (ids) {
-							var scopeIDs = ids.filter(fulltextWordIntersectionFilter);
-						}
-						else {
-							var scopeIDs = [];
-						}
-					}
-					// If ANY mode, just use fulltext word index hits for content search,
-					// since the main results will be added in below
-					else {
-						var scopeIDs = fulltextWordIDs;
-					}
+					let res = yield Zotero.DB.valueQueryAsync(sql, this.libraryID);
+					scopeIDs = res ? res.split(",").map(id => parseInt(id)) : [];
+					yield Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
 				}
-				
-				if (scopeIDs && scopeIDs.length) {
-					var fulltextIDs = yield Zotero.Fulltext.findTextInItems(scopeIDs,
-						condition['value'], condition['mode']);
-					
-					var hash = {};
-					for (let i=0; i<fulltextIDs.length; i++) {
-						hash[fulltextIDs[i].id] = true;
-					}
-					
-					filteredIDs = scopeIDs.filter(fulltextWordIntersectionConditionFilter);
-				}
+				// In ALL mode, include remaining items from the main search
 				else {
-					var filteredIDs = [];
-				}
-				
-				//Zotero.debug("Filtered IDs:")
-				//Zotero.debug(filteredIDs);
-				
-				// If join mode ANY, add any new items from the fulltext content
-				// search to the main search results
-				//
-				// We only do this if there are primary conditions that alter the
-				// main search, since otherwise all items will match
-				if (this._hasPrimaryConditions && (joinMode == 'any' || hasQuicksearch)) {
-					//Zotero.debug("Adding filtered IDs to main set");
-					for (let i=0; i<filteredIDs.length; i++) {
-						let id = filteredIDs[i];
-						if (ids.indexOf(id) == -1) {
-							ids.push(id);
-						}
-					}
-				}
-				else {
-					//Zotero.debug("Replacing main set with filtered IDs");
-					ids = filteredIDs;
+					scopeIDs = ids;
 				}
 			}
+			// If not regexp mode, run a new search against the full-text word index for words in
+			// this phrase
+			else {
+				//Zotero.debug('Running subsearch against full-text word index');
+				let s = new Zotero.Search();
+				if (this.libraryID) {
+					s.libraryID = this.libraryID;
+				}
+				let splits = Zotero.Fulltext.semanticSplitter(condition.value);
+				for (let split of splits){
+					s.addCondition('fulltextWord', condition.operator, split);
+				}
+				numSplits = splits.length;
+				let wordMatches = yield s.search();
+				
+				//Zotero.debug("Word index matches");
+				//Zotero.debug(wordMatches);
+				
+				// In ANY mode, include hits from word index that aren't already in the results
+				if (joinModeAny) {
+					let resultsSet = new Set(fullTextResults);
+					scopeIDs = wordMatches.filter(id => !resultsSet.has(id));
+				}
+				// In ALL mode, include the intersection of hits from word index and remaining
+				// main search matches
+				else {
+					let wordIDs = new Set(wordMatches);
+					scopeIDs = ids.filter(id => wordIDs.has(id));
+				}
+			}
+			
+			// If only one word, just use the results from the word index
+			let filteredIDs = [];
+			if (numSplits === 1) {
+				filteredIDs = scopeIDs;
+			}
+			// Search the full-text content
+			else if (scopeIDs.length) {
+				let found = new Set(
+					yield Zotero.Fulltext.findTextInItems(
+						scopeIDs,
+						condition.value,
+						condition.mode
+					).map(x => x.id)
+				);
+				// Either include or exclude the results, depending on the operator
+				filteredIDs = scopeIDs.filter((id) => {
+					return found.has(id)
+						? condition.operator == 'contains'
+						: condition.operator == 'doesNotContain';
+				});
+			}
+			
+			//Zotero.debug("Filtered IDs:")
+			//Zotero.debug(filteredIDs);
+			
+			// If join mode ANY, add any new items from the full-text content search to the results,
+			// and remove from the scope so that we don't search through items we already matched
+			if (joinModeAny) {
+				//Zotero.debug("Adding filtered IDs to results and removing from scope");
+				fullTextResults = fullTextResults.concat(filteredIDs);
+				
+				let idSet = new Set(ids);
+				for (let id of filteredIDs) {
+					idSet.delete(id);
+				}
+				ids = Array.from(idSet);
+			}
+			else {
+				//Zotero.debug("Replacing results with filtered IDs");
+				ids = filteredIDs;
+				fullTextResults = filteredIDs;
+			}
+		}
+		if (fullTextResults) {
+			ids = Array.from(new Set(fullTextResults));
 		}
 		
 		if (this.hasPostSearchFilter() &&

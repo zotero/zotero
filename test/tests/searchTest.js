@@ -120,20 +120,29 @@ describe("Zotero.Search", function() {
 		var userLibraryID;
 		var fooItem;
 		var foobarItem;
+		var bazItem;
 		var fooItemGroup;
 		var foobarItemGroup;
+		var bazItemGroup;
 
-		before(function* () {
+		before(async function () {
+			await resetDB({
+				thisArg: this,
+				skipBundledFiles: true
+			});
+			
 			// Hidden browser, which requires a browser window, needed for charset detection
 			// (until we figure out a better way)
-			win = yield loadBrowserWindow();
-			fooItem = yield importFileAttachment("search/foo.html");
-			foobarItem = yield importFileAttachment("search/foobar.html");
+			win = await loadBrowserWindow();
+			fooItem = await importFileAttachment("search/foo.html");
+			foobarItem = await importFileAttachment("search/foobar.html");
+			bazItem = await importFileAttachment("search/baz.pdf");
 			userLibraryID = fooItem.libraryID;
 			
-			let group = yield getGroup();
-			fooItemGroup = yield importFileAttachment("search/foo.html", { libraryID: group.libraryID });
-			foobarItemGroup = yield importFileAttachment("search/foobar.html", { libraryID: group.libraryID });
+			let group = await getGroup();
+			fooItemGroup = await importFileAttachment("search/foo.html", { libraryID: group.libraryID });
+			foobarItemGroup = await importFileAttachment("search/foobar.html", { libraryID: group.libraryID });
+			bazItemGroup = await importFileAttachment("search/baz.pdf", { libraryID: group.libraryID });
 		});
 
 		after(function* () {
@@ -142,8 +151,10 @@ describe("Zotero.Search", function() {
 			}
 			yield fooItem.eraseTx();
 			yield foobarItem.eraseTx();
+			yield bazItem.eraseTx();
 			yield fooItemGroup.eraseTx();
 			yield foobarItemGroup.eraseTx();
+			yield bazItemGroup.eraseTx();
 		});
 		
 		describe("Conditions", function () {
@@ -238,14 +249,25 @@ describe("Zotero.Search", function() {
 					assert.sameMembers(matches, [foobarItem.id]);
 				});
 				
-				it("should find matching item with joinMode=ANY and non-matching other condition", function* () {
+				it("should find matching items with joinMode=ANY with no other conditions", async function () {
 					var s = new Zotero.Search();
 					s.libraryID = userLibraryID;
 					s.addCondition('joinMode', 'any');
-					s.addCondition('fulltextContent', 'contains', 'foo bar');
+					s.addCondition('fulltextContent', 'contains', 'foo');
+					s.addCondition('fulltextContent', 'contains', 'bar');
+					var matches = await s.search();
+					assert.sameMembers(matches, [fooItem.id, foobarItem.id]);
+				});
+				
+				it("should find matching items with joinMode=ANY and non-matching other condition", function* () {
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('joinMode', 'any');
+					s.addCondition('fulltextContent', 'contains', 'foo');
+					s.addCondition('fulltextContent', 'contains', 'bar');
 					s.addCondition('title', 'contains', 'nomatch');
 					var matches = yield s.search();
-					assert.sameMembers(matches, [foobarItem.id]);
+					assert.sameMembers(matches, [fooItem.id, foobarItem.id]);
 				});
 				
 				it("should find matching items in regexp mode with joinMode=ANY with matching other condition", function* () {
@@ -287,6 +309,34 @@ describe("Zotero.Search", function() {
 					var matches = yield s.search();
 					assert.sameMembers(matches, [foobarItem.id]);
 				});
+				
+				it("should find items that don't contain a single word with joinMode=ANY", async function () {
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('joinMode', 'any');
+					s.addCondition('fulltextContent', 'doesNotContain', 'foo');
+					var matches = await s.search();
+					assert.notIncludeMembers(matches, [fooItem.id, foobarItem.id]);
+				});
+				
+				it("should find items that don't contain a phrase with joinMode=ANY", async function () {
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('joinMode', 'any');
+					s.addCondition('fulltextContent', 'doesNotContain', 'foo bar');
+					var matches = await s.search();
+					assert.notIncludeMembers(matches, [foobarItem.id]);
+				});
+				
+				it("should find items that don't contain a regexp pattern with joinMode=ANY", async function () {
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('joinMode', 'any');
+					s.addCondition('fulltextContent/regexp', 'doesNotContain', 'foo.+bar');
+					var matches = await s.search();
+					assert.notIncludeMembers(matches, [foobarItem.id]);
+					assert.includeMembers(matches, [fooItem.id, bazItem.id]);
+				});
 			});
 			
 			describe("fulltextWord", function () {
@@ -302,7 +352,7 @@ describe("Zotero.Search", function() {
 				it("should not return non-matches with full-text conditions", function* () {
 					let s = new Zotero.Search();
 					s.libraryID = userLibraryID;
-					s.addCondition('fulltextWord', 'contains', 'baz');
+					s.addCondition('fulltextWord', 'contains', 'nomatch');
 					let matches = yield s.search();
 					assert.lengthOf(matches, 0);
 				});
@@ -332,7 +382,7 @@ describe("Zotero.Search", function() {
 					s.libraryID = userLibraryID;
 					s.addCondition('joinMode', 'any');
 					s.addCondition('fulltextWord', 'contains', 'bar');
-					s.addCondition('fulltextWord', 'contains', 'baz');
+					s.addCondition('fulltextWord', 'contains', 'nomatch');
 					let matches = yield s.search();
 					assert.deepEqual(matches, [foobarItem.id]);
 				});
