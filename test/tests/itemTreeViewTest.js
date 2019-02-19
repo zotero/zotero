@@ -895,10 +895,10 @@ describe("Zotero.ItemTreeView", function() {
 			server.autoRespond = true;
 			setHTTPResponse(
 				server,
-				ZOTERO_CONFIG.RECOGNIZE_URL,
+				ZOTERO_CONFIG.SERVICES_URL,
 				{
 					method: 'POST',
-					url: 'recognize',
+					url: 'recognizer/recognize',
 					status: 200,
 					headers: {
 						'Content-Type': 'application/json'
@@ -952,10 +952,10 @@ describe("Zotero.ItemTreeView", function() {
 			server.autoRespond = true;
 			setHTTPResponse(
 				server,
-				ZOTERO_CONFIG.RECOGNIZE_URL,
+				ZOTERO_CONFIG.SERVICES_URL,
 				{
 					method: 'POST',
-					url: 'recognize',
+					url: 'recognizer/recognize',
 					status: 200,
 					headers: {
 						'Content-Type': 'application/json'
