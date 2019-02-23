@@ -849,6 +849,12 @@ function ZoteroProtocolHandler() {
 			router.run(path);
 			
 			Zotero.API.parseParams(params);
+			
+			if (!params.objectKey && !params.objectID && !params.itemKey) {
+				Zotero.debug("No objects specified");
+				return;
+			}
+			
 			var results = yield Zotero.API.getResultsFromParams(params);
 			
 			if (!results.length) {
@@ -868,8 +874,7 @@ function ZoteroProtocolHandler() {
 				return zp.collectionsView.selectCollection(results[0].id);
 			}
 			else {
-				// TODO: Currently only able to select one item
-				return zp.selectItem(results[0].id);
+				return zp.selectItems(results.map(x => x.id));
 			}
 		}),
 		

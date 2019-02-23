@@ -134,6 +134,20 @@ Zotero.LibraryTreeView.prototype = {
 	},
 	
 	
+	getSelectedRowIndexes: function () {
+		var rows = [];
+		var start = {};
+		var end = {};
+		for (let i = 0, len = this.selection.getRangeCount(); i < len; i++) {
+			this.selection.getRangeAt(i, start, end);
+			for (let j = start.value; j <= end.value; j++) {
+				rows.push(j);
+			}
+		}
+		return rows;
+	},
+	
+	
 	/**
 	 * Return an object describing the current scroll position to restore after changes
 	 *

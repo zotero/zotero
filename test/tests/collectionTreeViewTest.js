@@ -490,7 +490,19 @@ describe("Zotero.CollectionTreeView", function() {
 			await cv.selectItem(item.id);
 			await waitForItemsLoad(win);
 			assert.equal(cv.selection.currentIndex, 0);
-			assert.sameMembers(zp.itemsView.getSelectedItems(), [item]);
+			assert.sameMembers(zp.itemsView.getSelectedItems(true), [item.id]);
+		});
+	});
+	
+	describe("#selectItems()", function () {
+		it("should switch to library root if at least one item isn't in the current collection", async function () {
+			var collection = await createDataObject('collection');
+			var item1 = await createDataObject('item', { collections: [collection.id] });
+			var item2 = await createDataObject('item');
+			await cv.selectItems([item1.id, item2.id]);
+			await waitForItemsLoad(win);
+			assert.equal(cv.selection.currentIndex, 0);
+			assert.sameMembers(zp.itemsView.getSelectedItems(true), [item1.id, item2.id]);
 		});
 	});
 	

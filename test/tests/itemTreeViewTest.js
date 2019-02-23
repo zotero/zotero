@@ -1,7 +1,9 @@
 "use strict";
 
 describe("Zotero.ItemTreeView", function() {
-	var win, zp, cv, itemsView, existingItemID;
+	var win, zp, cv, itemsView;
+	var existingItemID;
+	var existingItemID2;
 	
 	// Load Zotero pane and select library
 	before(function* () {
@@ -9,8 +11,10 @@ describe("Zotero.ItemTreeView", function() {
 		zp = win.ZoteroPane;
 		cv = zp.collectionsView;
 		
-		var item = yield createDataObject('item', { setTitle: true });
-		existingItemID = item.id;
+		var item1 = yield createDataObject('item', { setTitle: true });
+		existingItemID = item1.id;
+		var item2 = yield createDataObject('item');
+		existingItemID2 = item2.id;
 	});
 	beforeEach(function* () {
 		yield selectLibrary(win);
@@ -30,20 +34,70 @@ describe("Zotero.ItemTreeView", function() {
 	
 	describe("#selectItem()", function () {
 		/**
-		 * Make sure that selectItem() doesn't hang if the pane's item-select handler is never
-		 * triggered due to the item already being selected
+		 * Don't hang if the pane's item-select handler is never triggered due to the item already
+		 * being selected
 		 */
-		it("should return if item is already selected", function* () {
-			yield itemsView.selectItem(existingItemID);
+		it("should return if item is already selected", async function () {
+			var numSelected = await itemsView.selectItem(existingItemID);
+			assert.equal(numSelected, 1);
 			var selected = itemsView.getSelectedItems(true);
 			assert.lengthOf(selected, 1);
 			assert.equal(selected[0], existingItemID);
-			yield itemsView.selectItem(existingItemID);
+			numSelected = await itemsView.selectItem(existingItemID);
+			assert.equal(numSelected, 1);
 			selected = itemsView.getSelectedItems(true);
 			assert.lengthOf(selected, 1);
 			assert.equal(selected[0], existingItemID);
 		});
-	})
+	});
+	
+	describe("#selectItems()", function () {
+		/**
+		 * Don't hang if the pane's item-select handler is never triggered due to the items already
+		 * being selected
+		 */
+		it("should return if all items are already selected", async function () {
+			var itemIDs = [existingItemID, existingItemID2];
+			var numSelected = await itemsView.selectItems(itemIDs);
+			assert.equal(numSelected, 2);
+			var selected = itemsView.getSelectedItems(true);
+			assert.lengthOf(selected, 2);
+			assert.sameMembers(selected, itemIDs);
+			numSelected = await itemsView.selectItems(itemIDs);
+			assert.equal(numSelected, 2);
+			selected = itemsView.getSelectedItems(true);
+			assert.lengthOf(selected, 2);
+			assert.sameMembers(selected, itemIDs);
+		});
+		
+		
+		it("should expand parent items to select children", async function () {
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item');
+			var item3 = await createDataObject('item');
+			var note1 = await createDataObject('item', { itemType: 'note', parentID: item1.id });
+			var note2 = await createDataObject('item', { itemType: 'note', parentID: item2.id });
+			var note3 = await createDataObject('item', { itemType: 'note', parentID: item3.id });
+			
+			var toSelect = [note1.id, note2.id, note3.id];
+			itemsView.collapseAllRows();
+			
+			var numSelected = await itemsView.selectItems(toSelect);
+			assert.equal(numSelected, 3);
+			var selected = itemsView.getSelectedItems(true);
+			assert.lengthOf(selected, 3);
+			assert.sameMembers(selected, toSelect);
+			
+			// Again with the ids given in reverse order
+			itemsView.collapseAllRows();
+			toSelect = toSelect.reverse();
+			var numSelected = await itemsView.selectItems(toSelect);
+			assert.equal(numSelected, 3);
+			var selected = itemsView.getSelectedItems(true);
+			assert.lengthOf(selected, 3);
+			assert.sameMembers(selected, toSelect);
+		});
+	});
 	
 	describe("#getCellText()", function () {
 		it("should return new value after edit", function* () {
@@ -720,7 +774,7 @@ describe("Zotero.ItemTreeView", function() {
 			var item3 = yield createDataObject('item', { itemType: 'note', parentID: item1.id });
 			
 			let view = zp.itemsView;
-			yield view.selectItem(item3.id, true);
+			yield view.selectItem(item3.id);
 			
 			var promise = view.waitForSelect();
 			
@@ -759,7 +813,7 @@ describe("Zotero.ItemTreeView", function() {
 			var item3 = yield createDataObject('item', { itemType: 'note', parentID: item2.id });
 			
 			let view = zp.itemsView;
-			yield view.selectItem(item3.id, true);
+			yield view.selectItem(item3.id);
 			
 			var promise = view.waitForSelect();
 			

@@ -2187,13 +2187,21 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.selectItem = Zotero.Promise.coroutine(function* (itemID, inLibraryRoot, expand) {
+	this.selectItem = async function (itemID, inLibraryRoot) {
 		if (!itemID) {
 			return false;
 		}
+		return this.selectItems([itemID], inLibraryRoot);
+	};
+	
+	
+	this.selectItems = async function (itemIDs, inLibraryRoot) {
+		if (!itemIDs.length) {
+			return false;
+		}
 		
-		var item = yield Zotero.Items.getAsync(itemID);
-		if (!item) {
+		var items = await Zotero.Items.getAsync(itemIDs);
+		if (!items.length) {
 			return false;
 		}
 		
@@ -2206,7 +2214,7 @@ var ZoteroPane = new function()
 			throw new Error("Collections view not loaded");
 		}
 		
-		var found = yield this.collectionsView.selectItem(itemID, inLibraryRoot, expand);
+		var found = await this.collectionsView.selectItems(itemIDs, inLibraryRoot);
 		
 		// Focus the items pane
 		if (found) {
@@ -2215,7 +2223,7 @@ var ZoteroPane = new function()
 		
 		// open Zotero pane
 		this.show();
-	});
+	};
 	
 	
 	this.getSelectedLibraryID = function () {

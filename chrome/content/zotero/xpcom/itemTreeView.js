@@ -259,10 +259,9 @@ Zotero.ItemTreeView.prototype.setTree = async function (treebox) {
 		
 		this._updateIntroText();
 		
-		if (this.collectionTreeRow && this.collectionTreeRow.itemToSelect) {
-			var item = this.collectionTreeRow.itemToSelect;
-			await this.selectItem(item['id'], item['expand']);
-			this.collectionTreeRow.itemToSelect = null;
+		if (this.collectionTreeRow && this.collectionTreeRow.itemsToSelect) {
+			await this.selectItems(this.collectionTreeRow.itemsToSelect);
+			this.collectionTreeRow.itemsToSelect = null;
 		}
 		
 		Zotero.debug("Set tree for items view " + this.id + " in " + (Date.now() - start) + " ms");
@@ -1804,165 +1803,203 @@ Zotero.ItemTreeView.prototype._updateIntroText = function() {
 /*
  *  Select an item
  */
-Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (id, expand, noRecurse) {
+Zotero.ItemTreeView.prototype.selectItem = async function (id) {
+	return this.selectItems([id]);
+};
+
+Zotero.ItemTreeView.prototype.selectItems = async function (ids, noRecurse) {
+	if (!ids.length) return 0;
+	
 	// If no row map, we're probably in the process of switching collections,
-	// so store the item to select on the item group for later
+	// so store the items to select on the item group for later
 	if (!this._rowMap) {
 		if (this.collectionTreeRow) {
-			this.collectionTreeRow.itemToSelect = { id: id, expand: expand };
-			Zotero.debug("_rowMap not yet set; not selecting item");
-			return false;
+			this.collectionTreeRow.itemsToSelect = ids;
+			Zotero.debug("_rowMap not yet set; not selecting items");
+			return 0;
 		}
 		
 		Zotero.debug('Item group not found and no row map in ItemTreeView.selectItem() -- discarding select', 2);
-		return false;
+		return 0;
 	}
 	
-	var row = this._rowMap[id];
-	
-	// Get the row of the parent, if there is one
-	var parentRow = null;
-	var item = yield Zotero.Items.getAsync(id);
-	
-	// Can't select a deleted item if we're not in the trash
-	if (item.deleted && !this.collectionTreeRow.isTrash()) {
-		return false;
-	}
-	
-	var parent = item.parentItemID;
-	if (parent && this._rowMap[parent] != undefined) {
-		parentRow = this._rowMap[parent];
-	}
-	
-	var selected = this.getSelectedItems(true);
-	if (selected.length == 1 && selected[0] == id) {
-		Zotero.debug("Item " + id + " is already selected");
-		this.betterEnsureRowIsVisible(row, parentRow);
-		return true;
-	}
-	
-	// If row with id not visible, check to see if it's hidden under a parent
-	if(row == undefined)
-	{
-		if (!parent || parentRow === null) {
-			// No parent -- it's not here
-			
-			// Clear the quick search and tag selection and try again (once)
-			if (!noRecurse && this.window.ZoteroPane) {
-				let cleared1 = yield this.window.ZoteroPane.clearQuicksearch();
-				let cleared2 = this.window.ZoteroPane.tagSelector.clearTagSelection();
-				if (cleared1 || cleared2) {
-					return this.selectItem(id, expand, true);
+	var idsToSelect = [];
+	for (let id of ids) {
+		let row = this._rowMap[id];
+		let item = Zotero.Items.get(id);
+		
+		// Can't select a deleted item if we're not in the trash
+		if (item.deleted && !this.collectionTreeRow.isTrash()) {
+			continue;
+		}
+		
+		// Get the row of the parent, if there is one
+		let parent = item.parentItemID;
+		let parentRow = parent && this._rowMap[parent];
+		
+		// If row with id isn't visible, check to see if it's hidden under a parent
+		if (row == undefined) {
+			if (!parent || parentRow === undefined) {
+				// No parent -- it's not here
+				
+				// Clear the quick search and tag selection and try again (once)
+				if (!noRecurse && this.window.ZoteroPane) {
+					let cleared1 = await this.window.ZoteroPane.clearQuicksearch();
+					let cleared2 = this.window.ZoteroPane.tagSelector.clearTagSelection();
+					if (cleared1 || cleared2) {
+						return this.selectItems(ids, true);
+					}
 				}
+				
+				Zotero.debug(`Couldn't find row for item ${id} -- not selecting`);
+				continue;
 			}
 			
-			Zotero.debug("Could not find row for item; not selecting item");
-			return false;
+			// If parent is already open and we haven't found the item, the child
+			// hasn't yet been added to the view, so close parent to allow refresh
+			this._closeContainer(parentRow);
+			
+			// Open the parent
+			this.toggleOpenState(parentRow);
 		}
 		
-		// If parent is already open and we haven't found the item, the child
-		// hasn't yet been added to the view, so close parent to allow refresh
-		this._closeContainer(parentRow);
+		// Since we're opening containers, we still need to reference by id
+		idsToSelect.push(id);
+	}
+	
+	// Now that all items have been expanded, get associated rows
+	var rowsToSelect = [];
+	for (let id of idsToSelect) {
+		let row = this._rowMap[id];
+		rowsToSelect.push(row);
+	}
+	
+	// If items are already selected, just scroll to the top-most one
+	var selectedRows = new Set(this.getSelectedRowIndexes());
+	if (rowsToSelect.length == selectedRows.size && rowsToSelect.every(row => selectedRows.has(row))) {
+		this.ensureRowsAreVisible(rowsToSelect);
+		return rowsToSelect.length;
+	}
+	
+	// Single item
+	if (rowsToSelect.length == 1) {
+		// this.selection.select() triggers the <tree>'s 'onselect' attribute, which calls
+		// ZoteroPane.itemSelected(), which calls ZoteroItemPane.viewItem(), which refreshes the
+		// itembox. But since the 'onselect' doesn't handle promises, itemSelected() isn't waited for
+		// here, which means that 'yield selectItem(itemID)' continues before the itembox has been
+		// refreshed. To get around this, we wait for a select event that's triggered by
+		// itemSelected() when it's done.
+		let promise;
+		try {
+			if (!this.selection.selectEventsSuppressed) {
+				promise = this.waitForSelect();
+			}
+			this.selection.select(rowsToSelect[0]);
+		}
+		// Ignore NS_ERROR_UNEXPECTED from nsITreeSelection::select(), apparently when the tree
+		// disappears before it's called (though I can't reproduce it):
+		//
+		// https://forums.zotero.org/discussion/comment/297039/#Comment_297039
+		catch (e) {
+			Zotero.logError(e);
+		}
 		
-		// Open the parent
-		this.toggleOpenState(parentRow);
-		row = this._rowMap[id];
-	}
-	
-	// this.selection.select() triggers the <tree>'s 'onselect' attribute, which calls
-	// ZoteroPane.itemSelected(), which calls ZoteroItemPane.viewItem(), which refreshes the
-	// itembox. But since the 'onselect' doesn't handle promises, itemSelected() isn't waited for
-	// here, which means that 'yield selectItem(itemID)' continues before the itembox has been
-	// refreshed. To get around this, we wait for a select event that's triggered by
-	// itemSelected() when it's done.
-	let promise;
-	try {
-		if (this.selection.selectEventsSuppressed) {
-			this.selection.select(row);
+		if (promise) {
+			await promise;
 		}
-		else {
-			promise = this.waitForSelect();
-			this.selection.select(row);
+	}
+	// Multiple items
+	else {
+		this.selection.clearSelection();
+		this.selection.selectEventsSuppressed = true;
+		
+		var lastStart = 0;
+		for (let i = 0, len = rowsToSelect.length; i < len; i++) {
+			if (i == len - 1 || rowsToSelect[i + 1] != rowsToSelect[i] + 1) {
+				this.selection.rangedSelect(rowsToSelect[lastStart], rowsToSelect[i], true);
+				lastStart = i + 1;
+			}
 		}
 		
-		// If |expand|, open row if container
-		if (expand && this.isContainer(row) && !this.isContainerOpen(row)) {
-			this.toggleOpenState(row);
-		}
-		this.selection.select(row);
-	}
-	// Ignore NS_ERROR_UNEXPECTED from nsITreeSelection::select(), apparently when the tree
-	// disappears before it's called (though I can't reproduce it):
-	//
-	// https://forums.zotero.org/discussion/comment/297039/#Comment_297039
-	catch (e) {
-		Zotero.logError(e);
+		this.selection.selectEventsSuppressed = false;
 	}
 	
-	if (promise) {
-		yield promise;
-	}
+	this.ensureRowsAreVisible(rowsToSelect);
 	
-	this.betterEnsureRowIsVisible(row, parentRow);
-	
-	return true;
-});
+	return rowsToSelect.length;
+};
 
 
-/**
- * Select multiple top-level items
- *
- * @param {Integer[]} ids	An array of itemIDs
- */
-Zotero.ItemTreeView.prototype.selectItems = function(ids) {
-	if (ids.length == 0) {
+Zotero.ItemTreeView.prototype.ensureRowsAreVisible = function (rows) {
+	const firstVisibleRow = this._treebox.getFirstVisibleRow();
+	const pageLength = this._treebox.getPageLength();
+	const lastVisibleRow = firstVisibleRow + pageLength;
+	const maxBuffer = 5;
+	
+	var isRowVisible = function (row) {
+		return row >= firstVisibleRow && row <= lastVisibleRow;
+	};
+	
+	rows = rows.concat();
+	rows.sort((a, b) => a - b);
+	
+	var rowsWithParents = [];
+	for (let row of rows) {
+		let parent = this.getParentIndex(row);
+		rowsWithParents.push(parent != -1 ? parent : row);
+	}
+	
+	// If all rows are visible, don't change anything
+	if (rows.every(row => isRowVisible(row))) {
+		//Zotero.debug("All rows are visible");
 		return;
 	}
 	
-	var rows = [];
-	for (let id of ids) {
-		if(this._rowMap[id] !== undefined) rows.push(this._rowMap[id]);
-	}
-	rows.sort(function (a, b) {
-		return a - b;
-	});
-	
-	this.selection.clearSelection();
-	
-	this.selection.selectEventsSuppressed = true;
-	
-	var lastStart = 0;
-	for (var i = 0, len = rows.length; i < len; i++) {
-		if (i == len - 1 || rows[i + 1] != rows[i] + 1) {
-			this.selection.rangedSelect(rows[lastStart], rows[i], true);
-			lastStart = i + 1;
+	// If we can fit all parent rows in view, do that
+	for (let buffer = maxBuffer; buffer >= 0; buffer--) {
+		if (rowsWithParents[rowsWithParents.length - 1] - rowsWithParents[0] - buffer < pageLength) {
+			//Zotero.debug(`We can fit all parent rows with buffer ${buffer}`);
+			this._treebox.scrollToRow(rowsWithParents[0] - buffer);
+			return;
 		}
 	}
 	
-	this.selection.selectEventsSuppressed = false;
-	// TODO: This could probably be improved to try to focus more of the selected rows
-	this.betterEnsureRowIsVisible(rows[0]);
-}
-
-
-Zotero.ItemTreeView.prototype.betterEnsureRowIsVisible = function (row, parentRow = null) {
-	// We aim for a row 5 below the target row, since ensureRowIsVisible() does
-	// the bare minimum to get the row in view
-	for (let v = row + 5; v >= row; v--) {
-		if (this._rows[v]) {
-			this._treebox.ensureRowIsVisible(v);
-			if (this._treebox.getFirstVisibleRow() <= row) {
-				break;
+	// If we can fit all rows in view, do that
+	for (let buffer = maxBuffer; buffer >= 0; buffer--) {
+		if (rows[rows.length - 1] - rows[0] - buffer < pageLength) {
+			//Zotero.debug(`We can fit all rows with buffer ${buffer}`);
+			this._treebox.scrollToRow(rows[0] - buffer);
+			return;
+		}
+	}
+	
+	// If more than half of the rows are visible, don't change anything
+	var visible = 0;
+	for (let row of rows) {
+		if (isRowVisible(row)) {
+			visible++;
+		}
+	}
+	if (visible > rows / 2) {
+		//Zotero.debug("More than half of rows are visible");
+		return;
+	}
+	
+	// If the first parent row isn't in view and we have enough room, make it visible, trying to
+	// put it five rows from the top
+	if (rows[0] != rowsWithParents[0]) {
+		for (let buffer = maxBuffer; buffer >= 0; buffer--) {
+			 if (rows[0] - rowsWithParents[0] - buffer <= pageLength) {
+				//Zotero.debug(`Scrolling to first parent minus ${buffer}`);
+				this._treebox.scrollToRow(rowsWithParents[0] - buffer);
+				return;
 			}
 		}
 	}
 	
-	// If the parent row isn't in view and we have enough room, make parent visible
-	if (parentRow !== null && this._treebox.getFirstVisibleRow() > parentRow) {
-		if ((row - parentRow) < this._treebox.getPageLength()) {
-			this._treebox.ensureRowIsVisible(parentRow);
-		}
-	}
+	// Otherwise just put the first row at the top
+	//Zotero.debug("Scrolling to first row " + Math.max(rows[0] - maxBuffer, 0));
+	this._treebox.scrollToRow(Math.max(rows[0] - maxBuffer, 0));
 };
 
 
