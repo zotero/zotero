@@ -299,7 +299,7 @@
 <!ENTITY zotero.rtfScan.introPage.description "Zotero voi automaattisesti seuloa ja uudelleenmuotoilla viittaukset ja lisätä kirjallisuusluettelon RTF-tiedostoon. Valitse aluksi RTF-tiedosto.">
 <!ENTITY zotero.rtfScan.introPage.description2 "Valitse aluksi luettava RTF-tiedosto sekä kirjoitettava tiedosto:">
 <!ENTITY zotero.rtfScan.scanPage.label "Etsitään viitteitä">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero etsii asiakirjasta sitaatteja. Malta vielä hetki.">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero etsii asiakirjasta lähdeviitteitä. Malta vielä hetki.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Varmenna siteeratut nimikkeet">
 <!ENTITY zotero.rtfScan.citationsPage.description "Käy läpi allaoleva tunnistettujen sitaattien lista varmistaaksesi, että Zotero on valinnut sitaatteja vastaavat nimikkeet oikein. Kaikki paikantamattomat tai monimerkityksiset sitaatit täytyy selvittää ennen seuraavaa vaihetta.">
 <!ENTITY zotero.rtfScan.stylePage.label "Asiakirjan muotoilu">

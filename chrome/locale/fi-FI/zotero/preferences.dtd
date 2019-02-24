@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.items "nimikkeet">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Asetukset">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "Oma asetus...">
 
 <!ENTITY zotero.preferences.prefpane.general "Yleistä">
 
@@ -50,7 +50,7 @@
 <!ENTITY zotero.preferences.feeds.feedDefaults "Syötteen oletukset">
 
 <!ENTITY zotero.preferences.openurl.search "Etsi linkkipalvelimia">
-<!ENTITY zotero.preferences.openurl.custom "Custom…">
+<!ENTITY zotero.preferences.openurl.custom "Oma asetus...">
 <!ENTITY zotero.preferences.openurl.server "Palvelin:">
 <!ENTITY zotero.preferences.openurl.version "Versio:">
 
@@ -91,8 +91,8 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Poista tiedostojen synkronointihistoria">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Vertaa kaikkia liitetiedostoja tallennuspalvelun kanssa">
-<!ENTITY zotero.preferences.sync.reset "Nollaa">
-<!ENTITY zotero.preferences.sync.reset.button "Nollaa...">
+<!ENTITY zotero.preferences.sync.reset "Palauta alkutilaan">
+<!ENTITY zotero.preferences.sync.reset.button "Palauta alkutilaan...">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Haku">
@@ -114,7 +114,7 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Kun tämä valinta on pois päältä, Zotero lisää internet-osoitteet tieteellisten lehtien, aikakauslehtien ja sanomalehtien artikkeleihin vain silloin kun niiden sivunumeroja ei ole määritelty.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Pikakopiointi">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Oletusmuoto:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopioi HTML-muodossa">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Sivustokohtaiset asetukset:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Verkkotunnus/polku">
@@ -209,6 +209,6 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Tarkista tietokannan eheys">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Palauta tyylit alkutilaan...">
 
 <!ENTITY zotero.preferences.configEditor "Asetuseditori">

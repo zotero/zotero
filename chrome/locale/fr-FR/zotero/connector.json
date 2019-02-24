@@ -8,6 +8,9 @@
   "general_tryAgain": {
     "message": "Réessayer"
   },
+  "general_warning": {
+    "message": "Avertissement"
+  },
   "general_cancel": {
     "message": "Annuler"
   },
@@ -55,6 +58,15 @@
   },
   "integration_error_connection": {
     "message": "Le $1 n'a pas pu communiquer avec l'application $2. $2 doit être ouvert pour pouvoir insérer des citations dans une application web."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Ce document contient des citations Zotero actives qui apparaîtront sous forme de liens zotero.org dans une copie téléchargée."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Pour générer une version adaptée au partage, sélectionnez <b>Faire une copie…</b> dans le menu Fichier, sélectionnez <b>Dissocier les citations</b> dans le menu Zotero du nouveau document, puis téléchargez la version non liée. Conservez ce document lié original au cas où vous auriez besoin d'apporter d'autres modifications."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Télécharger la version liée quand même"
   },
   "general_saveTo": {
     "message": "Enregistrer dans $1"

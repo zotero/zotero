@@ -24,7 +24,7 @@
 <!ENTITY zotero.preferences.downloadAssociatedFiles "A kapcsolódó PDF és más fájlok automatikus csatolása">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
 <!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "A PDF-fájlok megnyitása">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Alapértelmezett rendszerbeállítás">
 
 <!ENTITY zotero.preferences.miscellaneous "Egyéb">
@@ -73,7 +73,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Fájlok letöltése">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "szinkronizáláskor">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "szükség szerint">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Szerver ellenőrzése">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "A Zotero tárhely használata esetén elfogadom a">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "felhasználási feltételeket">
 <!ENTITY zotero.preferences.sync.librariesToSync "Könyvtárak szinkronizálása">
