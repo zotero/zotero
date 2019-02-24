@@ -525,16 +525,21 @@
 						}
 						
 						var moveSep = document.createElement("menuseparator");
+						var moveToTop = document.createElement("menuitem");
 						var moveUp = document.createElement("menuitem");
 						var moveDown = document.createElement("menuitem");
 						moveSep.id = "zotero-creator-move-sep";
+						moveToTop.id = "zotero-creator-move-to-top";
 						moveUp.id = "zotero-creator-move-up";
 						moveDown.id = "zotero-creator-move-down";
+						moveToTop.className = "zotero-creator-move";
 						moveUp.className = "zotero-creator-move";
 						moveDown.className = "zotero-creator-move";
+						moveToTop.setAttribute("label", Zotero.getString('pane.item.creator.moveToTop'));
 						moveUp.setAttribute("label", Zotero.getString('pane.item.creator.moveUp'));
 						moveDown.setAttribute("label", Zotero.getString('pane.item.creator.moveDown'));
 						this._creatorTypeMenu.appendChild(moveSep);
+						this._creatorTypeMenu.appendChild(moveToTop);
 						this._creatorTypeMenu.appendChild(moveUp);
 						this._creatorTypeMenu.appendChild(moveDown);
 					}
@@ -2165,19 +2170,32 @@
 			-->
 			<method name="moveCreator">
 				<parameter name="index"/>
-				<parameter name="moveUp"/>
+				<parameter name="dir"/>
 				<body><![CDATA[
 				return Zotero.spawn(function* () {
-					if (index == 0 && moveUp) {
+					if (index == 0 && dir == 'up') {
 						Zotero.debug("Can't move up creator 0");
 						return;
 					}
-					else if (index + 1 == this.item.numCreators() && !moveUp) {
+					else if (index + 1 == this.item.numCreators() && dir == 'down') {
 						Zotero.debug("Can't move down last creator");
 						return;
 					}
 					
-					var newIndex = moveUp ? index - 1 : index + 1;
+					var newIndex;
+					switch (dir) {
+					case 'top':
+						newIndex = 0;
+						break;
+					
+					case 'up':
+						newIndex = index - 1;
+						break;
+					
+					case 'down':
+						newIndex = index + 1;
+						break;
+					}
 					var a = this.item.getCreator(index);
 					var b = this.item.getCreator(newIndex);
 					this.item.setCreator(newIndex, a);
@@ -2362,11 +2380,13 @@
 								var exists = item.hasCreatorAt(index);
 								var moreCreators = item.numCreators() > index + 1;
 								
+								var hideMoveToTop = !exists || index &lt; 2;
 								var hideMoveUp = !exists || index == 0;
 								var hideMoveDown = !exists || !moreCreators;
 								var hideMoveSep = hideMoveUp &amp;&amp; hideMoveDown;
 								
 								document.getElementById('zotero-creator-move-sep').setAttribute('hidden', hideMoveSep);
+								document.getElementById('zotero-creator-move-to-top').setAttribute('hidden', hideMoveToTop);
 								document.getElementById('zotero-creator-move-up').setAttribute('hidden', hideMoveUp);
 								document.getElementById('zotero-creator-move-down').setAttribute('hidden', hideMoveDown);"
 						oncommand="return async function () {
@@ -2374,8 +2394,21 @@
 							var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 							
 							if (event.explicitOriginalTarget.className == 'zotero-creator-move') {
-								var up = event.explicitOriginalTarget.id == 'zotero-creator-move-up';
-								this.moveCreator(index, up);
+								let dir;
+								switch (event.explicitOriginalTarget.id) {
+								case 'zotero-creator-move-to-top':
+									dir = 'top';
+									break;
+								
+								case 'zotero-creator-move-up':
+									dir = 'up';
+									break;
+								
+								case 'zotero-creator-move-down':
+									dir = 'down';
+									break;
+								}
+								this.moveCreator(index, dir);
 								return;
 							}
 							
