@@ -59,7 +59,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 		}
 			
 		// Ignore anything other than deletes in duplicates view
-		if (this.collectionTreeRow.isDuplicates()) {
+		if (this.collectionTreeRow && this.collectionTreeRow.isDuplicates()) {
 			switch (event) {
 				case 'delete':
 				case 'trash':
