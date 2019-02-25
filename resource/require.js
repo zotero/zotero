@@ -97,6 +97,6 @@ var require = (function() {
 		},
 		globals
 	});
-
-	return Require(loader, requirer);
+	let require = Require(loader, requirer);
+	return require
 })();
