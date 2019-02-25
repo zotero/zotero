@@ -1184,12 +1184,7 @@ var ZoteroPane = new function()
 			
 			// Clear quick search and tag selector when switching views
 			document.getElementById('zotero-tb-search').value = "";
-			
-			// XBL functions might not yet be available
-			var tagSelector = document.getElementById('zotero-tag-selector');
-			if (tagSelector.deselectAll) {
-				tagSelector.deselectAll();
-			}
+			ZoteroPane.tagSelector.clearTagSelection();
 			
 			// Not necessary with seltype="cell", which calls nsITreeView::isSelectable()
 			/*if (collectionTreeRow.isSeparator()) {
