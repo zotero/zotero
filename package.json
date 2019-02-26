@@ -41,7 +41,7 @@
     "co-mocha": "^1.2.1",
     "colors": "^1.1.2",
     "eslint": "^5.14.1",
-    "eslint-plugin-react": "^7.5.1",
+    "eslint-plugin-react": "^7.12.4",
     "fs-extra": "^3.0.1",
     "globby": "^6.1.0",
     "jspath": "^0.4.0",
