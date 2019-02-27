@@ -755,6 +755,7 @@ describe("Zotero.ItemTreeView", function() {
 			// Don't run recognize on every file
 			Zotero.Prefs.set('autoRecognizeFiles', false);
 			Zotero.Prefs.clear('autoRenameFiles');
+			Zotero.Prefs.clear('autoRenameFiles.linked');
 		});
 		
 		after(function* () {
@@ -764,6 +765,7 @@ describe("Zotero.ItemTreeView", function() {
 			
 			Zotero.Prefs.clear('autoRecognizeFiles');
 			Zotero.Prefs.clear('autoRenameFiles');
+			Zotero.Prefs.clear('autoRenameFiles.linked');
 		});
 		
 		it("should move a child item from one item to another", function* () {
@@ -1091,6 +1093,8 @@ describe("Zotero.ItemTreeView", function() {
 		});
 		
 		it("should rename a linked child attachment using parent metadata if no existing file attachments and pref enabled", async function () {
+			Zotero.Prefs.set('autoRenameFiles.linked', true);
+			
 			var view = zp.itemsView;
 			var parentTitle = Zotero.Utilities.randomString();
 			var parentItem = await createDataObject('item', { title: parentTitle });
@@ -1135,8 +1139,8 @@ describe("Zotero.ItemTreeView", function() {
 			assert.equal(OS.Path.basename(path), parentTitle + '.pdf');
 		});
 		
-		it("shouldn't rename a stored child attachment using parent metadata if pref disabled", async function () {
-			Zotero.Prefs.set('autoRenameFiles', false);
+		it("shouldn't rename a linked child attachment using parent metadata if no existing file attachments and pref disabled", async function () {
+			Zotero.Prefs.set('autoRenameFiles.linked', false);
 			
 			var view = zp.itemsView;
 			var parentTitle = Zotero.Utilities.randomString();
@@ -1146,6 +1150,48 @@ describe("Zotero.ItemTreeView", function() {
 				title: 'Example',
 				parentItemID: parentItem.id
 			});
+			var parentRow = view.getRowIndexByID(parentItem.id);
+			
+			var file = OS.Path.join(await getTempDirectory(), 'empty.pdf');
+			await OS.File.copy(
+				OS.Path.join(getTestDataDirectory().path, 'empty.pdf'),
+				file
+			);
+			file = Zotero.File.pathToFile(file);
+			
+			var promise = waitForItemEvent('add');
+			
+			itemsView.drop(parentRow, 0, {
+				dropEffect: 'link',
+				effectAllowed: 'link',
+				types: {
+					contains: function (type) {
+						return type == 'application/x-moz-file';
+					}
+				},
+				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
+			})
+			
+			var itemIDs = await promise;
+			var item = Zotero.Items.get(itemIDs[0]);
+			assert.equal(item.parentItemID, parentItem.id);
+			var title = item.getField('title');
+			var path = await item.getFilePathAsync();
+			assert.equal(title, 'empty.pdf');
+			assert.equal(OS.Path.basename(path), 'empty.pdf');
+		});
+		
+		it("shouldn't rename a stored child attachment using parent metadata if pref disabled", async function () {
+			Zotero.Prefs.set('autoRenameFiles', false);
+			
+			var view = zp.itemsView;
+			var parentTitle = Zotero.Utilities.randomString();
+			var parentItem = await createDataObject('item', { title: parentTitle });
 			var parentRow = view.getRowIndexByID(parentItem.id);
 			
 			var originalFileName = 'empty.pdf';

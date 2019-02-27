@@ -38,6 +38,7 @@
 			<preference id="pref-downloadAssociatedFiles" name="extensions.zotero.downloadAssociatedFiles" type="bool"/>
 			<preference id="pref-autoRecognizeFiles" name="extensions.zotero.autoRecognizeFiles" type="bool"/>
 			<preference id="pref-autoRenameFiles" name="extensions.zotero.autoRenameFiles" type="bool"/>
+			<preference id="pref-autoRenameFilesLinked" name="extensions.zotero.autoRenameFiles.linked" type="bool"/>
 			
 			<preference id="pref-automaticTags" name="extensions.zotero.automaticTags" type="bool"/>
 			<preference id="pref-trashAutoEmptyDays" name="extensions.zotero.trashAutoEmptyDays" type="int"/>
@@ -118,7 +119,13 @@
 				preference="pref-automaticSnapshots"/>
 			<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="pref-downloadAssociatedFiles"/>
 			<checkbox label="&zotero.preferences.autoRecognizeFiles;" preference="pref-autoRecognizeFiles"/>
-			<checkbox label="&zotero.preferences.autoRenameFiles;" preference="pref-autoRenameFiles"/>
+			<checkbox label="&zotero.preferences.autoRenameFiles;"
+					preference="pref-autoRenameFiles"
+					oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()"/>
+			<checkbox id="rename-linked-files" class="indented-pref"
+					label="&zotero.preferences.autoRenameFiles.renameLinked;"
+					preference="pref-autoRenameFilesLinked"
+					oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()"/>
 			
 			<hbox align="center">
 				<label value="&zotero.preferences.fileHandler.openPDFsUsing;" control="file-handler-pdf"/>

@@ -1913,6 +1913,17 @@ Zotero.Attachments = new function(){
 	}
 	
 	
+	this.shouldAutoRenameFile = function (isLink) {
+		if (!Zotero.Prefs.get('autoRenameFiles')) {
+			return false;
+		}
+		if (isLink) {
+			return Zotero.Prefs.get('autoRenameFiles.linked');
+		}
+		return true;
+	}
+	
+	
 	this.getRenamedFileTypes = function () {
 		try {
 			var types = Zotero.Prefs.get('autoRenameFiles.fileTypes');

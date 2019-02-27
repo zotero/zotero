@@ -19,6 +19,10 @@ radio[pane]
 	-moz-box-pack: end;
 }
 
+checkbox[disabled="true"] {
+	color: gray !important;
+}
+
 #export-citePaperJournalArticleURL
 {
 	font-size: .85em;
@@ -81,6 +85,10 @@ grid row hbox:first-child
 
 #zotero-prefpane-general .statusLine {
 	margin-left: .75em;
+}
+
+.indented-pref {
+	margin-left: 2em;
 }
 
 .fileHandler-menu .menulist-icon {

@@ -3282,7 +3282,9 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 			// This should be kept in sync with ZoteroPane.addAttachmentFromDialog().
 			let renameIfAllowedType = false;
 			let parentItem;
-			if (parentItemID && data.length == 1 && Zotero.Prefs.get('autoRenameFiles')) {
+			if (parentItemID
+					&& data.length == 1
+					&& Zotero.Attachments.shouldAutoRenameFile(dropEffect == 'link')) {
 				parentItem = Zotero.Items.get(parentItemID);
 				if (!parentItem.numNonHTMLFileAttachments()) {
 					renameIfAllowedType = true;
