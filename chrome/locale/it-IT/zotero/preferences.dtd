@@ -24,6 +24,7 @@
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Allega automaticamente file PDF o di altro tipo durante il salvataggio degli elementi">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Recupera automaticamente i metadati per i PDF">
 <!ENTITY zotero.preferences.autoRenameFiles "Rinomina automaticamente i file allegati utilizzando i metadati della citazione">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Apri i PDF utilizzando">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
 

@@ -24,6 +24,7 @@
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Joindre automatiquement les fichiers PDF associés lors de l'enregistrement d'un document">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Récupérer automatiquement les métadonnées des PDF">
 <!ENTITY zotero.preferences.autoRenameFiles "Renommer automatiquement les pièces jointes en utilisant les métadonnées parentes">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Ouvrir les PDF avec">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Par défaut">
 

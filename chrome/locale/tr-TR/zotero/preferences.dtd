@@ -24,6 +24,7 @@
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Eserleri kaydederken ilişkilendirilen PDF ve diğer dosyaları da otomatik olarak ekle">
 <!ENTITY zotero.preferences.autoRecognizeFiles "PDF'ler için otomatik olarak üstveri al ">
 <!ENTITY zotero.preferences.autoRenameFiles "Ana üstverileri kullanarak ve otomatik olarak ek dosyaları yeniden adlandır">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF'leri bu ile Aç:">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistem Varsayılanı">
 
