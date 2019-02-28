@@ -186,6 +186,7 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 				getKey: treeRow => treeRow.id,
 				getParent: treeRow => treeRow.parent,
 				getChildren: treeRow => treeRow.children,
+				getAriaLabel: treeRow => treeRow.getName(),
 				isSeparator: treeRow => treeRow.isSeparator(),
 				isExpanded: treeRow => treeRow.isOpen,
 				
@@ -238,6 +239,8 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 				autoExpandAll: false,
 				autoExpandDepth: 0,
 				ref: tree => this.ref = tree,
+
+				label: Zotero.getString('pane.collections.title')
 			}
 		);
 	}

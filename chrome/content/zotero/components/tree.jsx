@@ -199,7 +199,10 @@ class Tree extends Component {
 			
 			
 			// Added by Zotero
-			
+
+			// Provide a readable label of the item for screen-readers
+			getAriaLabel: PropTypes.func,
+
 			isSeparator: PropTypes.func,
 			
 			onDragLeave: PropTypes.func,
@@ -844,7 +847,10 @@ class Tree extends Component {
 				},
 				"aria-label": this.props.label,
 				"aria-labelledby": this.props.labelledby,
-				"aria-activedescendant": focused && this.props.getKey(focused),
+				"aria-activedescendant": focused
+					&& (this.props.getAriaLabel
+					? this.props.getAriaLabel(focused)
+					: this.props.getKey(focused)),
 				style: {
 					padding: 0,
 					margin: 0,
