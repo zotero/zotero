@@ -13,8 +13,6 @@ const dom = require('react-dom-factories');
 const PropTypes = require('prop-types');
 
 const { IconTwisty } = require('components/icons');
-//import InlineSVG from "svg-inline-react";
-//import svgArrow from "./images/arrow.svg";
 
 const AUTO_EXPAND_DEPTH = 0;
 const NUMBER_OF_OFFSCREEN_ITEMS = 10;
@@ -217,6 +215,9 @@ class Tree extends Component {
 			
 			highlighted: PropTypes.instanceOf(Set),
 			
+
+			multipleSelect: PropTypes.bool,
+
 			// End Added by Zotero
 			
 
@@ -226,7 +227,7 @@ class Tree extends Component {
 			// Handle when a new item is focused.
 			onFocus: PropTypes.func,
 
-			// Handle when item is activated with a keyboard (using Space or Enter)
+			// Handle when item is activated with a keyboard (using Enter)
 			onActivate: PropTypes.func,
 
 			// Indicates if pressing ArrowRight key should only expand expandable node
@@ -275,7 +276,14 @@ class Tree extends Component {
 			height: window.innerHeight,
 			seen: new Set(),
 			mouseDown: false,
+			selected: [],
 		};
+
+		this._lastFocused = null;
+		this.selection = {
+			pivot: null,
+			selected: new Set()
+		}
 
 		this._onExpand = oncePerAnimationFrame(this._onExpand).bind(this);
 		this._onCollapse = oncePerAnimationFrame(this._onCollapse).bind(this);
@@ -293,7 +301,7 @@ class Tree extends Component {
 		this._onResize = this._onResize.bind(this);
 		this._dfs = this._dfs.bind(this);
 		this._dfsFromRoots = this._dfsFromRoots.bind(this);
-		this._focus = this._focus.bind(this);
+		this._handleMouseDown = this._handleMouseDown.bind(this);
 		this._scrollIntoView = this._scrollIntoView.bind(this);
 		this._onDragOver = this._onDragOver.bind(this);
 		this._onBlur = this._onBlur.bind(this);
@@ -455,7 +463,8 @@ class Tree extends Component {
 	}
 
 	/**
-	 * Sets the passed in item to be the focused item.
+	 * Sets the passed in item to be the focused item or add it to selection
+	 * and update selection pivot
 	 *
 	 * @param {Number} index
 	 *        The index of the item in a full DFS traversal (ignoring collapsed
@@ -463,8 +472,14 @@ class Tree extends Component {
 	 *
 	 * @param {Object|undefined} item
 	 *        The item to be focused, or undefined to focus no item.
+	 *
+	 * @param {Boolean} selectTo
+	 * 		  If true will select from pivot up to index (does not update pivot)
+	 *
+	 * @param {Boolean} addToSelection
+	 * 		  If true will add to selection
 	 */
-	_focus(index, item) {
+	_handleMouseDown(index, item, selectTo, addToSelection) {
 		if (item !== undefined) {
 			// Modified by Zotero
 			if (this.props.isSeparator && this.props.isSeparator(item)) {
@@ -476,11 +491,27 @@ class Tree extends Component {
 		if (this.props.onFocus) {
 			this.props.onFocus(item);
 		}
+
+		if (!selectTo || !addToSelection || !this.selection.pivot) {
+			this.selection.selected = new Set([item]);
+			this.selection.pivot = item;
+			return;
+		} else if (addToSelection) {
+			this.selection.selected.add(item);
+			this.selection.pivot = item;
+		} else {
+			let traversal = this._dfsFromRoots();
+			let pivotIdx = traversal.findIndex(({ depth, item }) => item == this.selection.pivot);
+			let startIdx = Math.min(index, pivotIdx);
+			let endIdx = Math.max(index, pivotIdx);
+			this.selection.selected = new Set(traversal.slice(startIdx, endIdx)
+				.map(({ depth, item }) => item));
+		}
 	}
 
 	/**
 	 * Added by Zotero
-	 * 
+	 *
 	 * @param index {Number} index
 	 *        The index of the item in a full DFS traversal (ignoring collapsed
 	 *        nodes).
@@ -521,7 +552,7 @@ class Tree extends Component {
 	 * Sets the state to have no focused item.
 	 */
 	_onBlur() {
-		this._focus(0, undefined);
+		this._handleMouseDown(0, undefined);
 	}
 
 	/**
@@ -651,7 +682,7 @@ class Tree extends Component {
 				if (idx >= traversal.length) return;
 			}
 		}
-		this._focus(idx, traversal[idx].item);
+		this._handleMouseDown(idx, traversal[idx].item);
 		// this._focus(0, traversal[0].item);
 	}
 
@@ -665,7 +696,7 @@ class Tree extends Component {
 				if (lastIndex < 0) return;
 			}
 		}
-		this._focus(lastIndex, traversal[lastIndex].item);
+		this._handleMouseDown(lastIndex, traversal[lastIndex].item);
 	}
 
 	/**
@@ -703,7 +734,7 @@ class Tree extends Component {
 			}
 		}
 
-		this._focus(prevIndex, prev);
+		this._handleMouseDown(prevIndex, prev);
 	}
 
 	/**
@@ -734,7 +765,7 @@ class Tree extends Component {
 		}
 
 		if (i + 1 < traversal.length) {
-			this._focus(i + 1, traversal[i + 1].item);
+			this._handleMouseDown(i + 1, traversal[i + 1].item);
 		}
 	}
 
@@ -757,7 +788,7 @@ class Tree extends Component {
 			}
 		}
 
-		this._focus(parentIndex, parent);
+		this._handleMouseDown(parentIndex, parent);
 	}
 
 	render() {
@@ -769,7 +800,16 @@ class Tree extends Component {
 		// the top and bottom of the page are filled with the `NUMBER_OF_OFFSCREEN_ITEMS`
 		// previous and next items respectively, which helps the user to see fewer empty
 		// gaps when scrolling quickly.
-		const { itemHeight, focused } = this.props;
+		let { itemHeight, focused } = this.props;
+		if (focused == undefined) {
+			focused = this._lastFocused;
+		} else {
+			this.selection.pivot = focused;
+			this.selection.selected = new Set([focused]);
+		}
+		if (focused) {
+			this._lastFocused = focused;
+		}
 		const { scroll, height } = this.state;
 		const begin = Math.max(((scroll / itemHeight) | 0) - NUMBER_OF_OFFSCREEN_ITEMS, 0);
 		const end = Math.ceil((scroll + height) / itemHeight) + NUMBER_OF_OFFSCREEN_ITEMS;
@@ -805,11 +845,12 @@ class Tree extends Component {
 				id: key,
 				renderItem: this.props.renderItem,
 				focused: focused === item,
+				selected: this.selection.selected.has(item),
 				expanded: this.props.isExpanded(item),
 				hasChildren: !!this.props.getChildren(item).length,
 				onExpand: this._onExpand,
 				onCollapse: this._onCollapse,
-				onMouseDown: () => this._focus(begin + i, item),
+				onMouseDown: (e) => this._handleMouseDown(begin + i, item, e.shiftKey, e.ctrlKey || e.metaKey),
 			}));
 		}
 
@@ -845,7 +886,7 @@ class Tree extends Component {
 					// Only set default focus to the first tree node if focused node is
 					// not yet set and the focus event is not the result of a mouse
 					// interarction.
-					this._focus(begin, toRender[0].item);
+					this._handleMouseDown(begin, toRender[0].item);
 				},
 				onClick: () => {
 					if (!this.props.editing) {
@@ -926,6 +967,7 @@ class TreeNodeClass extends Component {
 		return {
 			id: PropTypes.any.isRequired,
 			focused: PropTypes.bool.isRequired,
+			selected: PropTypes.bool.isRequired,
 			item: PropTypes.any.isRequired,
 			expanded: PropTypes.bool.isRequired,
 			hasChildren: PropTypes.bool.isRequired,
@@ -986,9 +1028,10 @@ class TreeNodeClass extends Component {
 
 			this.props.renderItem(this.props.item,
 				this.props.depth,
-				this.props.focused,
+				this.props.selected,
 				arrow,
-				this.props.expanded),
+				this.props.expanded,
+				this.props.focused),
 		);
 	}
 }
