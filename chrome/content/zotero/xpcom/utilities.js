@@ -546,17 +546,9 @@ Zotero.Utilities = {
 				node.innerHTML = str;
 				return node.textContent.replace(/ {2,}/g, " ");
 			} else if(Zotero.isNode) {
-				/*var doc = require('jsdom').jsdom(str, null, {
-					"features":{
-						"FetchExternalResources":false,
-						"ProcessExternalResources":false,
-						"MutationEvents":false,
-						"QuerySelector":false
-					}
-				});
-				if(!doc.documentElement) return str;
-				return doc.documentElement.textContent;*/
-				return Zotero.Utilities.cleanTags(str);
+				let {JSDOM} = require('jsdom');
+				let document = (new JSDOM(str)).window.document;
+				return document.documentElement.textContent.replace(/ {2,}/g, " ");
 			} else {
 				if(!node) node = document.createElement("div");
 				node.innerHTML = str;
