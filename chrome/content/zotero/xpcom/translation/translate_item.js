@@ -31,6 +31,7 @@
  *         <li>libraryID - ID of library in which items should be saved</li>
  *         <li>collections - New collections to create (used during Import translation</li>
  *         <li>attachmentMode - One of Zotero.Translate.ItemSaver.ATTACHMENT_* specifying how attachments should be saved</li>
+ *         <li>linkFiles - Save attachments as linked files instead of stored files</li>
  *         <li>forceTagType - Force tags to specified tag type</li>
  *         <li>cookieSandbox - Cookie sandbox for attachment requests</li>
  *         <li>proxy - A proxy to deproxify item URLs</li>
@@ -53,6 +54,7 @@ Zotero.Translate.ItemSaver = function(options) {
 	// If group filesEditable==false, don't save attachments
 	this.attachmentMode = Zotero.Libraries.get(this._libraryID).filesEditable ? options.attachmentMode :
 	                      Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE;
+	this._linkFiles = options.linkFiles;
 	this._forceTagType = options.forceTagType;
 	this._referrer = options.referrer;
 	this._cookieSandbox = options.cookieSandbox;
@@ -605,7 +607,24 @@ Zotero.Translate.ItemSaver.prototype = {
 				title: attachment.title || undefined,
 				collections: !parentItemID ? this._collections : undefined
 			});
-		} else {
+		}
+		else if (this._linkFiles
+				// Don't link if it's a path to the current storage directory
+				&& !Zotero.File.directoryContains(Zotero.DataDirectory.getSubdirectory('storage'), file.path)) {
+			attachment.linkMode = "linked_file";
+			newItem = yield Zotero.Attachments.linkFromFile({
+				file,
+				parentItemID,
+				collections: !parentItemID ? this._collections : undefined
+			});
+			if (attachment.title) {
+				newItem.setField("title", attachment.title);
+			}
+			if (attachment.url) {
+				newItem.setNote(attachment.url);
+			}
+		}
+		else {
 			if (attachment.url) {
 				attachment.linkMode = "imported_url";
 				newItem = yield Zotero.Attachments.importSnapshotFromFile({

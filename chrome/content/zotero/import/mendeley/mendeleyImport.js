@@ -6,6 +6,7 @@ Services.scriptloader.loadSubScript("chrome://zotero/content/include.js");
 
 var Zotero_Import_Mendeley = function () {
 	this.createNewCollection = null;
+	this.linkFiles = null;
 	this.newItems = [];
 	
 	this._db;
@@ -39,7 +40,9 @@ Zotero_Import_Mendeley.prototype.getTranslators = async function () {
 
 Zotero_Import_Mendeley.prototype.setTranslator = function () {};
 
-Zotero_Import_Mendeley.prototype.translate = async function (options) {
+Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
+	this._linkFiles = options.linkFiles;
+	
 	if (true) {
 		Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleySchemaMap.js");
 	}
@@ -987,8 +990,8 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 					parentItemID,
 					file: realPath
 				};
-				// If file is in Mendeley downloads folder, import it
-				if (this._isDownloadedFile(path)) {
+				// If we're not set to link files or file is in Mendeley downloads folder, import it
+				if (!this._linkFiles || this._isDownloadedFile(path)) {
 					if (file.url) {
 						options.title = file.title;
 						options.url = file.url;

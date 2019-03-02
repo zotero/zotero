@@ -505,6 +505,87 @@ describe("Zotero.Translate", function() {
 			assert.equal(attachments[1].attachmentLinkMode, Zotero.Attachments.LINK_MODE_LINKED_URL);
 		});
 		
+		it("import translators should save linked-file attachments with linkFiles: true", async function () {
+			var testDir = getTestDataDirectory().path;
+			var file1 = OS.Path.join(testDir, 'test.pdf');
+			var file2 = OS.Path.join(testDir, 'test.html');
+			var file2URL = "http://example.com";
+			var json = [
+				{
+					itemType: "journalArticle",
+					title: "Parent Item",
+					attachments: [
+						{
+							title: "PDF",
+							mimeType: "application/pdf",
+							path: file1
+						},
+						{
+							title: "Snapshot",
+							mimeType: "text/html",
+							charset: "utf-8",
+							url: file2URL,
+							path: file2
+						}
+					]
+				}
+			];
+			
+			var newItems = itemsArrayToObject(
+				await saveItemsThroughTranslator(
+					"import",
+					json,
+					{
+						linkFiles: true
+					}
+				)
+			);
+			var attachmentIDs = newItems["Parent Item"].getAttachments();
+			assert.lengthOf(attachmentIDs, 2);
+			var attachments = await Zotero.Items.getAsync(attachmentIDs);
+			assert.equal(attachments[0].attachmentLinkMode, Zotero.Attachments.LINK_MODE_LINKED_FILE);
+			assert.equal(attachments[0].attachmentContentType, 'application/pdf');
+			assert.equal(attachments[1].attachmentLinkMode, Zotero.Attachments.LINK_MODE_LINKED_FILE);
+			assert.equal(attachments[1].attachmentContentType, 'text/html');
+			assert.equal(attachments[1].attachmentCharset, 'utf-8');
+			assert.equal(attachments[1].getNote(), file2URL);
+		});
+		
+		it("import translators shouldn't save linked-file attachment with linkFiles: true if path is within current storage directory", async function () {
+			var attachment = await importFileAttachment('test.png');
+			var path = attachment.getFilePath();
+			var json = [
+				{
+					itemType: "journalArticle",
+					title: "Parent Item",
+					attachments: [
+						{
+							title: "PDF",
+							mimeType: "application/pdf",
+							path
+						}
+					]
+				}
+			];
+			
+			var newItems = itemsArrayToObject(
+				await saveItemsThroughTranslator(
+					"import",
+					json,
+					{
+						linkFiles: true
+					}
+				)
+			);
+			var attachmentIDs = newItems["Parent Item"].getAttachments();
+			assert.lengthOf(attachmentIDs, 1);
+			var attachments = await Zotero.Items.getAsync(attachmentIDs);
+			assert.equal(attachments[0].attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_FILE);
+			var newPath = attachments[0].getFilePath();
+			assert.ok(newPath);
+			assert.notEqual(newPath, path);
+		});
+		
 		it('web translators should set accessDate to current date', function* () {
 			let myItem = {
 				"itemType":"webpage",

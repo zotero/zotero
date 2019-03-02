@@ -33,8 +33,30 @@ wizard[currentpageid="page-file-list"] .wizard-header {
 	margin-bottom: 6px;
 }
 
+#file-handling-options {
+	margin-top: 2em;
+}
+
+#file-handling-options > label {
+	font-size: 14px;
+}
+
+#file-handling-options radiogroup {
+	font-size: 13px;
+	margin-left: 1em;
+}
+
+#file-handling-options description {
+	margin-top: .6em;
+	font-size: 11px;
+}
+
 listbox, #result-description, #result-description-html {
 	font-size: 13px;
+}
+
+#result-description-html {
+	line-height: 1.5;
 }
 
 #result-description-html a {

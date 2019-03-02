@@ -1282,6 +1282,7 @@ Zotero.Translate.Base.prototype = {
 	 *																or NULL for default library;
 	 *																if FALSE, don't save items
 	 * @param 	{Boolean}				[saveAttachments=true]	Exclude attachments (e.g., snapshots) on import
+	 * @param 	{Boolean} [linkFiles=false] - Save linked files instead of stored files
 	 * @returns {Promise}                                       Promise resolved with saved items
 	 *                                                          when translation complete
 	 */
@@ -1321,6 +1322,7 @@ Zotero.Translate.Base.prototype = {
 		}
 		this._collections = options.collections;
 		this._saveAttachments = options.saveAttachments === undefined || options.saveAttachments;
+		this._linkFiles = options.linkFiles;
 		this._forceTagType = options.forceTagType;
 		this._saveOptions = options.saveOptions;
 		
@@ -2431,6 +2433,7 @@ Zotero.Translate.Import.prototype._prepareTranslation = Zotero.Promise.method(fu
 		collections: this._collections,
 		forceTagType: this._forceTagType,
 		attachmentMode: Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_FILE" : "ATTACHMENT_MODE_IGNORE")],
+		linkFiles: this._linkFiles,
 		baseURI,
 		saveOptions: Object.assign(
 			{

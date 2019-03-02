@@ -296,6 +296,7 @@ var Zotero_File_Interface = new function() {
 	 * @param {nsIFile|string|null} [options.file=null] - File to import, or none to show a filepicker
 	 * @param {Boolean} [options.addToLibraryRoot=false]
 	 * @param {Boolean} [options.createNewCollection=true] - Put items in a new collection
+	 * @param {Boolean} [options.linkFiles=false] - Link to files instead of storing them
 	 * @param {Function} [options.onBeforeImport] - Callback to receive translation object, useful
 	 *     for displaying progress in a different way. This also causes an error to be throw
 	 *     instead of shown in the main window.
@@ -315,6 +316,7 @@ var Zotero_File_Interface = new function() {
 		var file = options.file ? Zotero.File.pathToFile(options.file) : null;
 		var createNewCollection = options.createNewCollection;
 		var addToLibraryRoot = options.addToLibraryRoot;
+		var linkFiles = options.linkFiles;
 		var onBeforeImport = options.onBeforeImport;
 		
 		if (createNewCollection === undefined && !addToLibraryRoot) {
@@ -359,6 +361,7 @@ var Zotero_File_Interface = new function() {
 			translation,
 			createNewCollection,
 			addToLibraryRoot,
+			linkFiles,
 			defaultNewCollectionPrefix,
 			onBeforeImport
 		});
@@ -412,6 +415,7 @@ var Zotero_File_Interface = new function() {
 		var translation = options.translation;
 		var addToLibraryRoot = options.addToLibraryRoot;
 		var createNewCollection = options.createNewCollection;
+		var linkFiles = options.linkFiles;
 		var defaultNewCollectionPrefix = options.defaultNewCollectionPrefix;
 		var onBeforeImport = options.onBeforeImport;
 		
@@ -518,7 +522,8 @@ var Zotero_File_Interface = new function() {
 		try {
 			yield translation.translate({
 				libraryID,
-				collections: importCollection ? [importCollection.id] : null
+				collections: importCollection ? [importCollection.id] : null,
+				linkFiles
 			});
 		} catch(e) {
 			if (!showProgressWindow) {

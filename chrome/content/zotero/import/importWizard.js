@@ -31,6 +31,17 @@ var Zotero_Import_Wizard = {
 			}
 		}
 		
+		// Update labels
+		document.getElementById('file-handling-store').label = Zotero.getString(
+			'import.fileHandling.store',
+			Zotero.appName
+		);
+		document.getElementById('file-handling-link').label = Zotero.getString('import.fileHandling.link');
+		document.getElementById('file-handling-description').textContent = Zotero.getString(
+			'import.fileHandling.description',
+			Zotero.appName
+		);
+		
 		Zotero.Translators.init(); // async
 	},
 	
@@ -160,20 +171,6 @@ var Zotero_Import_Wizard = {
 	},
 	
 	
-	onImportStart: async function () {
-		if (!this._file) {
-			let index = document.getElementById('file-list').selectedIndex;
-			this._file = this._dbs[index].path;
-		}
-		this._disableCancel();
-		this._wizard.canRewind = false;
-		this._wizard.canAdvance = false;
-		await this.doImport({
-			createNewCollection: document.getElementById('create-collection-checkbox').hasAttribute('checked')
-		});
-	},
-	
-	
 	onBeforeImport: async function (translation) {
 		// Unrecognized translator
 		if (!translation) {
@@ -196,12 +193,22 @@ var Zotero_Import_Wizard = {
 	},
 	
 	
-	doImport: async function (options) {
+	onImportStart: async function () {
+		if (!this._file) {
+			let index = document.getElementById('file-list').selectedIndex;
+			this._file = this._dbs[index].path;
+		}
+		this._disableCancel();
+		this._wizard.canRewind = false;
+		this._wizard.canAdvance = false;
+		
 		try {
 			let result = await Zotero_File_Interface.importFile({
 				file: this._file,
 				onBeforeImport: this.onBeforeImport.bind(this),
-				addToLibraryRoot: !options.createNewCollection
+				addToLibraryRoot: !document.getElementById('create-collection-checkbox')
+					.hasAttribute('checked'),
+				linkFiles: document.getElementById('file-handling-radio').selectedIndex == 1
 			});
 			
 			// Cancelled by user or due to error

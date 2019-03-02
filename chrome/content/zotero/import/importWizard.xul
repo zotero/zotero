@@ -54,6 +54,16 @@
 			onpagerewound="return Zotero_Import_Wizard.goToStart()"
 			onpageadvanced="Zotero_Import_Wizard.onImportStart()">
 		<checkbox id="create-collection-checkbox" label="&zotero.import.createCollection;" checked="true" />
+		
+		<vbox id="file-handling-options">
+			<label control="file-handling-radio" value="&zotero.import.fileHandling;"/>
+			<radiogroup id="file-handling-radio">
+				<radio id="file-handling-store" selected="true"/>
+				<radio id="file-handling-link"/>
+			</radiogroup>
+			<description id="file-handling-description"/>
+		</vbox>
+		
 	</wizardpage>
 	
 	<wizardpage pageid="page-progress"
