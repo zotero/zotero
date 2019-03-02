@@ -203,6 +203,7 @@
 <!ENTITY zotero.import.lastModified "Ultima modificare">
 <!ENTITY zotero.import.size "Mărime">
 <!ENTITY zotero.import.createCollection "Pune colecțiile importate și itemii într-o colecție nouă">
+<!ENTITY zotero.import.fileHandling "File Handling">
 
 <!ENTITY zotero.exportOptions.title "Export...">
 <!ENTITY zotero.exportOptions.format.label "Formatare:">

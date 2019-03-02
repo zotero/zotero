@@ -203,6 +203,7 @@
 <!ENTITY zotero.import.lastModified "最後の更新">
 <!ENTITY zotero.import.size "サイズ">
 <!ENTITY zotero.import.createCollection "インポートされたコレクションやアイテムを新しいコレクションに格納する">
+<!ENTITY zotero.import.fileHandling "File Handling">
 
 <!ENTITY zotero.exportOptions.title "エクスポート...">
 <!ENTITY zotero.exportOptions.format.label "フォーマット:">

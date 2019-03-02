@@ -203,6 +203,7 @@
 <!ENTITY zotero.import.lastModified "Naposledy upravené">
 <!ENTITY zotero.import.size "Veľkosť">
 <!ENTITY zotero.import.createCollection "Vložte naimportované kolekcie a záznamy do novej kolekcie">
+<!ENTITY zotero.import.fileHandling "File Handling">
 
 <!ENTITY zotero.exportOptions.title "Export...">
 <!ENTITY zotero.exportOptions.format.label "Formát:">

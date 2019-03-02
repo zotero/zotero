@@ -203,6 +203,7 @@
 <!ENTITY zotero.import.lastModified "Τελευταία Τροποποίηση">
 <!ENTITY zotero.import.size "Μέγεθος">
 <!ENTITY zotero.import.createCollection "Τοποθετήστε τις εισαγόμενες συλλογές και τα αντικείμενα σε νέα συλλογή">
+<!ENTITY zotero.import.fileHandling "File Handling">
 
 <!ENTITY zotero.exportOptions.title "Export...">
 <!ENTITY zotero.exportOptions.format.label "Μορφή:">

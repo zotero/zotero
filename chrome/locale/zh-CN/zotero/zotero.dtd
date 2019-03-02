@@ -203,6 +203,7 @@
 <!ENTITY zotero.import.lastModified "上一次更改">
 <!ENTITY zotero.import.size "大小">
 <!ENTITY zotero.import.createCollection "将导入的集合和项目放入新集合中">
+<!ENTITY zotero.import.fileHandling "File Handling">
 
 <!ENTITY zotero.exportOptions.title "导出...">
 <!ENTITY zotero.exportOptions.format.label "格式:">

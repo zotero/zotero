@@ -203,6 +203,7 @@
 <!ENTITY zotero.import.lastModified "Zuletzt geändert">
 <!ENTITY zotero.import.size "Größe">
 <!ENTITY zotero.import.createCollection "Importierte Sammlungen und Einträge in neue Sammlungen einstellen">
+<!ENTITY zotero.import.fileHandling "File Handling">
 
 <!ENTITY zotero.exportOptions.title "Exportieren...">
 <!ENTITY zotero.exportOptions.format.label "Format:">

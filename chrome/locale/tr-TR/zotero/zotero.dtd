@@ -203,6 +203,7 @@
 <!ENTITY zotero.import.lastModified "Son Değiştirilmesi">
 <!ENTITY zotero.import.size "Boyut">
 <!ENTITY zotero.import.createCollection "İçeri aktarılmış dermeler ve eserleri yeni bir dermeye yerleştir">
+<!ENTITY zotero.import.fileHandling "File Handling">
 
 <!ENTITY zotero.exportOptions.title "Dışarı Aktar...">
 <!ENTITY zotero.exportOptions.format.label "Biçim">
