@@ -328,6 +328,9 @@ function makeZoteroContext(isConnector) {
 		subscriptLoader.loadSubScript("chrome://zotero/content/xpcom/" + rdfXpcomFiles[i] + ".js", zContext.Zotero.RDF);
 	}
 	
+	// Load JSON-LD library
+	subscriptLoader.loadSubScript("chrome://zotero/content/xpcom/jsonld.js", zContext);
+	
 	if(isStandalone()) {
 		// If isStandalone, load standalone.js
 		subscriptLoader.loadSubScript("chrome://zotero/content/xpcom/standalone.js", zContext);
