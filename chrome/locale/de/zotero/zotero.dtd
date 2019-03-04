@@ -92,7 +92,7 @@
 <!ENTITY zotero.items.menu.attach.fileLink "Link auf Datei anhängen...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "In der Bibliothek wiederherstellen">
-<!ENTITY zotero.items.menu.duplicateItem "Ausgewählten Eintrag duplizieren">
+<!ENTITY zotero.items.menu.duplicateItem "Duplizieren">
 <!ENTITY zotero.items.menu.mergeItems "Einträge zusammenführen...">
 <!ENTITY zotero.items.menu.unrecognize "Abgerufene Metadaten rückgängig machen">
 <!ENTITY zotero.items.menu.reportMetadata "Falsche Metadaten melden">
@@ -203,7 +203,7 @@
 <!ENTITY zotero.import.lastModified "Zuletzt geändert">
 <!ENTITY zotero.import.size "Größe">
 <!ENTITY zotero.import.createCollection "Importierte Sammlungen und Einträge in neue Sammlungen einstellen">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "Dateiverarbeitung">
 
 <!ENTITY zotero.exportOptions.title "Exportieren...">
 <!ENTITY zotero.exportOptions.format.label "Format:">
