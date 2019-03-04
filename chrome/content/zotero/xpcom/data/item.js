@@ -3686,12 +3686,13 @@ Zotero.Item.prototype.getImageSrc = function() {
 	if (itemType == 'attachment') {
 		var linkMode = this.attachmentLinkMode;
 		
-		// Quick hack to use PDF icon for imported files and URLs --
-		// extend to support other document types later
-		if ((linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE ||
-				linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) &&
-				this.attachmentContentType == 'application/pdf') {
-			itemType += '-pdf';
+		if (this.attachmentContentType == 'application/pdf') {
+			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				itemType += '-pdf-link';
+			}
+			else {
+				itemType += '-pdf';
+			}
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
 			itemType += "-file";
