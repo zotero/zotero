@@ -281,14 +281,23 @@ Zotero.Tags = new function() {
 	
 	
 	/**
+	 * @param {Integer} libraryID
+	 * @param {Integer[]} tagIDs
+	 * @param {Function} [onProgress]
+	 * @param {Integer[]} [types]
 	 * @return {Promise}
 	 */
-	this.removeFromLibrary = Zotero.Promise.coroutine(function* (libraryID, tagIDs, onProgress) {
+	this.removeFromLibrary = Zotero.Promise.coroutine(function* (libraryID, tagIDs, onProgress, types) {
 		var d = new Date();
 		
-		tagIDs = Zotero.flattenArguments(tagIDs);
+		if (!Array.isArray(tagIDs)) {
+			tagIDs = [tagIDs];
+		}
+		if (types && !Array.isArray(types)) {
+			types = [types];
+		}
 		
-		var deletedNames = [];
+		var colors = this.getColors(libraryID);
 		var done = 0;
 		
 		yield Zotero.Utilities.Internal.forEachChunkAsync(
@@ -296,89 +305,76 @@ Zotero.Tags = new function() {
 			100,
 			async function (chunk) {
 				await Zotero.DB.executeTransaction(function* () {
-					var oldItemIDs = [];
-					
-					var notifierPairs = [];
+					var rowIDs = [];
+					var itemIDs = [];
+					var uniqueTags = new Set();
+					var notifierIDs = [];
 					var notifierData = {};
-					var a = new Date();
 					
-					var sql = 'SELECT tagID, itemID FROM itemTags JOIN items USING (itemID) '
+					var sql = 'SELECT IT.ROWID AS rowID, tagID, itemID, type FROM itemTags IT '
+						+ 'JOIN items USING (itemID) '
 						+ 'WHERE libraryID=? AND tagID IN ('
 						+ Array(chunk.length).fill('?').join(', ')
-						+ ') ORDER BY tagID';
-					var chunkTagItems = yield Zotero.DB.queryAsync(sql, [libraryID, ...chunk]);
-					var i = 0;
-					
-					chunk.sort((a, b) => a - b);
-					
-					for (let tagID of chunk) {
+						+ ') ';
+					if (types) {
+						sql += 'AND type IN (' + types.join(', ') + ') ';
+					}
+					sql += 'ORDER BY tagID, type';
+					var rows = yield Zotero.DB.queryAsync(sql, [libraryID, ...chunk]);
+					for (let { rowID, tagID, itemID, type } of rows) {
+						uniqueTags.add(tagID);
+						
 						let name = this.getName(tagID);
 						if (name === false) {
 							continue;
 						}
-						deletedNames.push(name);
 						
-						// Since we're performing the DELETE query directly,
-						// get the list of items that will need their tags reloaded,
-						// and generate data for item-tag notifications
-						let itemIDs = []
-						while (i < chunkTagItems.length && chunkTagItems[i].tagID == tagID) {
-							itemIDs.push(chunkTagItems[i].itemID);
-							i++;
+						rowIDs.push(rowID);
+						itemIDs.push(itemID);
+						
+						let ids = itemID + '-' + tagID;
+						notifierIDs.push(ids);
+						notifierData[ids] = {
+							libraryID: libraryID,
+							tag: name,
+							type
+						};
+						
+						// If we're deleting the tag and not just a specific type, also clear any
+						// tag color
+						if (colors.has(name) && !types) {
+							yield this.setColor(libraryID, name, false);
 						}
-						for (let itemID of itemIDs) {
-							let pair = itemID + "-" + tagID;
-							notifierPairs.push(pair);
-							notifierData[pair] = {
-								libraryID: libraryID,
-								tag: name
-							};
-						}
-						oldItemIDs = oldItemIDs.concat(itemIDs);
 					}
-					if (oldItemIDs.length) {
-						Zotero.Notifier.queue('remove', 'item-tag', notifierPairs, notifierData);
+					if (itemIDs.length) {
+						Zotero.Notifier.queue('remove', 'item-tag', notifierIDs, notifierData);
 					}
 					
-					var sql = "DELETE FROM itemTags WHERE tagID IN ("
-						+ Array(chunk.length).fill('?').join(', ') + ") AND itemID IN "
-						+ "(SELECT itemID FROM items WHERE libraryID=?)";
-					yield Zotero.DB.queryAsync(sql, chunk.concat([libraryID]));
+					sql = "DELETE FROM itemTags WHERE ROWID IN (" + rowIDs.join(", ") + ")";
+					yield Zotero.DB.queryAsync(sql);
 					
 					yield this.purge(chunk);
 					
 					// Update internal timestamps on all items that had these tags
 					yield Zotero.Utilities.Internal.forEachChunkAsync(
-						Zotero.Utilities.arrayUnique(oldItemIDs),
+						Zotero.Utilities.arrayUnique(itemIDs),
 						Zotero.DB.MAX_BOUND_PARAMETERS - 1,
-						Zotero.Promise.coroutine(function* (chunk2) {
-							var placeholders = Array(chunk2.length).fill('?').join(',');
+						async function (chunk) {
+							var sql = 'UPDATE items SET synced=0, clientDateModified=? '
+								+ 'WHERE itemID IN (' + Array(chunk.length).fill('?').join(',') + ')';
+							await Zotero.DB.queryAsync(sql, [Zotero.DB.transactionDateTime].concat(chunk));
 							
-							sql = 'UPDATE items SET synced=0, clientDateModified=? '
-								+ 'WHERE itemID IN (' + placeholders + ')'
-							yield Zotero.DB.queryAsync(sql, [Zotero.DB.transactionDateTime].concat(chunk2));
-							
-							yield Zotero.Items.reload(oldItemIDs, ['primaryData', 'tags'], true);
-						})
+							await Zotero.Items.reload(itemIDs, ['primaryData', 'tags'], true);
+						}
 					);
 					
-					done += chunk.length;
+					if (onProgress) {
+						done += uniqueTags.size;
+						onProgress(done, tagIDs.length);
+					}
 				}.bind(this));
-				
-				if (onProgress) {
-					onProgress(done, tagIDs.length);
-				}
 			}.bind(this)
 		);
-		
-		// Also delete tag color setting
-		//
-		// Note that this isn't done in purge(), so the setting will not
-		// be removed if the tag is just removed from all items without
-		// being explicitly deleted.
-		for (let i=0; i<deletedNames.length; i++) {
-			yield this.setColor(libraryID, deletedNames[i], false);
-		}
 		
 		Zotero.debug(`Removed ${tagIDs.length} ${Zotero.Utilities.pluralize(tagIDs.length, 'tag')} `
 			+ `in ${new Date() - d} ms`);
@@ -427,6 +423,10 @@ Zotero.Tags = new function() {
 		
 		if (tagIDs) {
 			tagIDs = Zotero.flattenArguments(tagIDs);
+		}
+		
+		if (tagIDs && !tagIDs.length) {
+			return;
 		}
 		
 		Zotero.DB.requireTransaction();

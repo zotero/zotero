@@ -39,60 +39,91 @@ describe("Zotero.Tags", function () {
 	});
 	
 	describe("#removeFromLibrary()", function () {
-		it("should remove tags in given library", async function () {
+		it("should delete tags in given library", async function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			var groupLibraryID = (await getGroup()).libraryID;
 			
-			var tags = [];
-			var items = [];
-			await Zotero.DB.executeTransaction(async function () {
-				for (let i = 0; i < 10; i++) {
-					let tagName = Zotero.Utilities.randomString();
-					tags.push(tagName);
-					let item = createUnsavedDataObject('item', { tags: [tagName] });
-					await item.save();
-					items.push(item);
-				}
-			});
+			var item1 = await createDataObject('item', { tags: [{ tag: 'a' }, { tag: 'b', type: 1 }] });
+			var item2 = await createDataObject('item', { tags: [{ tag: 'b' }, { tag: 'c', type: 1 }] });
+			var item3 = await createDataObject('item', { tags: [{ tag: 'd', type: 1 }] });
+			var item4 = await createDataObject('item', { libraryID: groupLibraryID, tags: [{ tag: 'a' }, { tag: 'b', type: 1 }] });
 			
-			var groupTagName = tags[0];
-			var groupItem = await createDataObject(
-				'item',
-				{
-					libraryID: groupLibraryID,
-					tags: [groupTagName]
-				}
-			);
-			
-			var tagIDs = tags.map(tag => Zotero.Tags.getID(tag));
+			var tagIDs = ['a', 'd'].map(x => Zotero.Tags.getID(x));
 			await Zotero.Tags.removeFromLibrary(libraryID, tagIDs);
-			items.forEach(item => assert.lengthOf(item.getTags(), 0));
 			
-			// Group item should still have the tag
-			assert.sameDeepMembers(groupItem.getTags(), [{ tag: groupTagName }]);
+			assert.sameDeepMembers(item1.getTags(), [{ tag: 'b', type: 1 }]);
+			assert.sameDeepMembers(item2.getTags(), [{ tag: 'b' }, { tag: 'c', type: 1 }]);
+			assert.lengthOf(item3.getTags(), 0);
+			assert.equal(Zotero.Tags.getID('a'), tagIDs[0]);
+			assert.isFalse(Zotero.Tags.getID('d'));
+			
+			// Group item should still have all tags
+			assert.sameDeepMembers(item4.getTags(), [{ tag: 'a' }, { tag: 'b', type: 1 }]);
 			assert.equal(
 				await Zotero.DB.valueQueryAsync(
 					"SELECT COUNT(*) FROM itemTags WHERE itemID=?",
-					groupItem.id
+					item4.id
 				),
-				1
+				2
 			);
 		});
 		
 		
-		it("should reload tags of associated items", function* () {
+		it("should remove tags of a given type", async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var groupLibraryID = (await getGroup()).libraryID;
+			
+			var item1 = await createDataObject('item', { tags: [{ tag: 'a' }, { tag: 'b', type: 1 }] });
+			var item2 = await createDataObject('item', { tags: [{ tag: 'b' }, { tag: 'c', type: 1 }] });
+			var item3 = await createDataObject('item', { tags: [{ tag: 'd', type: 1 }] });
+			var item4 = await createDataObject('item', { libraryID: groupLibraryID, tags: [{ tag: 'a' }, { tag: 'b', type: 1 }] });
+			
+			var tagIDs = ['a', 'b', 'c', 'd'].map(x => Zotero.Tags.getID(x));
+			var tagType = 1;
+			await Zotero.Tags.removeFromLibrary(libraryID, tagIDs, null, tagType);
+			
+			assert.sameDeepMembers(item1.getTags(), [{ tag: 'a' }]);
+			assert.sameDeepMembers(item2.getTags(), [{ tag: 'b' }]);
+			assert.lengthOf(item3.getTags(), 0);
+			assert.isFalse(Zotero.Tags.getID('d'));
+			
+			// Group item should still have all tags
+			assert.sameDeepMembers(item4.getTags(), [{ tag: 'a' }, { tag: 'b', type: 1 }]);
+			assert.equal(
+				await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM itemTags WHERE itemID=?",
+					item4.id
+				),
+				2
+			);
+		});
+		
+		
+		it("should delete colored tag when removing tag", async function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
-			var tagName = Zotero.Utilities.randomString();
-			var item = createUnsavedDataObject('item');
-			item.addTag(tagName);
-			yield item.saveTx();
-			assert.lengthOf(item.getTags(), 1);
+			var tag = Zotero.Utilities.randomString();
+			var item = await createDataObject('item', { tags: [{ tag: tag, type: 1 }] });
+			await Zotero.Tags.setColor(libraryID, tag, '#ABCDEF', 0);
 			
-			var tagID = Zotero.Tags.getID(tagName);
-			yield Zotero.Tags.removeFromLibrary(libraryID, tagID);
+			await Zotero.Tags.removeFromLibrary(libraryID, [Zotero.Tags.getID(tag)]);
+			
 			assert.lengthOf(item.getTags(), 0);
-		})
+			assert.isFalse(Zotero.Tags.getColor(libraryID, tag));
+		});
+		
+		it("shouldn't delete colored tag when removing tag of a given type", async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			var tag = Zotero.Utilities.randomString();
+			var item = await createDataObject('item', { tags: [{ tag: tag, type: 1 }] });
+			await Zotero.Tags.setColor(libraryID, tag, '#ABCDEF', 0);
+			
+			await Zotero.Tags.removeFromLibrary(libraryID, [Zotero.Tags.getID(tag)], null, 1);
+			
+			assert.lengthOf(item.getTags(), 0);
+			assert.ok(Zotero.Tags.getColor(libraryID, tag));
+		});
 	})
 	
 	describe("#purge()", function () {
