@@ -74,17 +74,21 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 		if (type == 'item' && (event == 'trash')) {
 			return this.setState({tags: await this.getTags()});
 		}
-						
+		
 		// If a selected tag no longer exists, deselect it
-		if (type == 'item-tag') {
-			if (event == 'delete' || event == 'trash' || event == 'modify') {
-				for (let tag of this.selectedTags) {
-					if (tag == extraData[ids[0]].old.tag) {
-						this.selectedTags.delete(tag);
-					}
+		if (type == 'tag' && (event == 'modify' || event == 'delete')) {
+			let changed = false;
+			for (let id of ids) {
+				let tag = extraData[id].old.tag;
+				if (this.selectedTags.has(tag)) {
+					this.selectedTags.delete(tag);
+					changed = true;
 				}
 			}
-			return this.setState({tags: await this.getTags()});
+			if (changed && typeof(this.props.onSelection) === 'function') {
+				this.props.onSelection(this.selectedTags);
+			}
+			return;
 		}
 		
 		this.setState({tags: await this.getTags()});
