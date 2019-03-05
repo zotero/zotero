@@ -161,7 +161,12 @@
 		"always-multiline"
 	],
 	"new-parens": "off",
-	"newline-per-chained-call": "error",
+	"newline-per-chained-call": [
+		"error",
+		{
+			"ignoreChainWithDepth": 3
+		}
+	],
 	"no-alert": "off",
 	"no-array-constructor": "error",
 	"no-await-in-loop": "warn",
