@@ -533,4 +533,35 @@ describe("Tag Selector", function () {
 			assert.notInclude(getRegularTags(), tag);
 		})
 	});
+	
+	describe("#deleteAutomatic()", function() {
+		it('should delete automatic tags', async function() {
+			await selectLibrary(win);
+			var item = createUnsavedDataObject('item');
+			item.setTags([
+				{
+					tag: "automatic",
+					type: 1
+				},
+				{
+					tag: 'manual'
+				}
+			]);
+			var promise = waitForTagSelector(win);
+			await item.saveTx();
+			await promise;
+			
+			assert.include(getRegularTags(), "automatic");
+			assert.include(getRegularTags(), "manual");
+			
+			var dialogPromise = waitForDialog();
+			var tagSelectorPromise = waitForTagSelector(win);
+			tagSelector.deleteAutomatic();
+			await dialogPromise;
+			await tagSelectorPromise;
+			
+			assert.include(getRegularTags(), 'manual');
+			assert.notInclude(getRegularTags(), 'automatic');
+		});
+	});
 })

@@ -389,6 +389,43 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 			this.props.onSelection(this.selectedTags);
 		}
 	}
+	
+	async deleteAutomatic() {
+		var num = (await Zotero.Tags.getAutomaticInLibrary(this.libraryID)).length;
+		if (!num) {
+			return;
+		}
+		
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
+		var confirmed = ps.confirm(
+			window,
+			Zotero.getString('pane.tagSelector.deleteAutomatic.title'),
+			Zotero.getString(
+					'pane.tagSelector.deleteAutomatic.message',
+					new Intl.NumberFormat().format(num),
+					num
+				)
+				+ "\n\n"
+				+ Zotero.getString('general.actionCannotBeUndone')
+		);
+		if (confirmed) {
+			Zotero.showZoteroPaneProgressMeter(null, true);
+			try {
+				await Zotero.Tags.removeAutomaticFromLibrary(
+					this.libraryID,
+					(progress, progressMax) => {
+						Zotero.updateZoteroPaneProgressMeter(
+							Math.round(progress / progressMax * 100)
+						);
+					}
+				);
+			}
+			finally {
+				Zotero.hideZoteroPaneOverlays();
+			}
+		}
+	}
 
 	get label() {
 		let count = this.selectedTags.size;
