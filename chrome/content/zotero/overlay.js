@@ -83,7 +83,8 @@ var ZoteroOverlay = new function()
 			if (Zotero.skipLoading) {
 				throw new Error("Skipping loading");
 			}
-			
+
+			ZoteroPane.Containers.init();
 			ZoteroPane.init();
 			
 			// Clear old Zotero icon pref
