@@ -2196,10 +2196,21 @@
 						newIndex = index + 1;
 						break;
 					}
-					var a = this.item.getCreator(index);
-					var b = this.item.getCreator(newIndex);
-					this.item.setCreator(newIndex, a);
-					this.item.setCreator(index, b);
+					let creator = this.item.getCreator(index);
+					// When moving to top, increment index of all other creators
+					if (dir == 'top') {
+						let otherCreators = this.item.getCreators();
+						this.item.setCreator(newIndex, creator);
+						for (let i = 0; i < index; i++) {
+							this.item.setCreator(i + 1, otherCreators[i]);
+						}
+					}
+					// When moving up or down, swap places with next creator
+					else {
+						let otherCreator = this.item.getCreator(newIndex);
+						this.item.setCreator(newIndex, creator);
+						this.item.setCreator(index, otherCreator);
+					}
 					if (this.saveOnEdit) {
 						// See note in transformText()
 						yield this.blurOpenField();
