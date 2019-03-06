@@ -40,6 +40,7 @@ describe("Tag Selector", function () {
 		tagSelector.selectedTags = new Set();
 		tagSelector.handleSearch('');
 		tagSelector.onItemViewChanged({libraryID});
+		yield waitForTagSelector(win);
 	});
 	
 	after(function () {
