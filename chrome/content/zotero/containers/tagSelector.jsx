@@ -68,10 +68,10 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 				default:
 					return;
 			}
+			return this.setState({tags: await this.getTags()});
 		}
 
-		// Ignore item events other than 'trash'
-		if (type == 'item' && (event == 'trash')) {
+		if (type == 'item' || type == 'item-tag') {
 			return this.setState({tags: await this.getTags()});
 		}
 		
@@ -90,8 +90,6 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 			}
 			return;
 		}
-		
-		this.setState({tags: await this.getTags()});
 	}
 	
 	async getTags(tagsInScope, tagColors) {

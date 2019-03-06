@@ -418,8 +418,8 @@ describe("Tag Selector", function () {
 			
 			var promise = waitForTagSelector(win);
 			
-			var item1 = await createDataObject('item', { tags: [{ tag: 'A' }] });
-			var item2 = await createDataObject('item', { tags: [{ tag: 'B' }] });
+			await createDataObject('item', { tags: [{ tag: 'A' }] });
+			await createDataObject('item', { tags: [{ tag: 'B' }] });
 			await promise;
 			
 			tagSelector.handleTagSelected('A');
@@ -433,15 +433,18 @@ describe("Tag Selector", function () {
 			// Remove tag from library
 			promise = waitForTagSelector(win);
 			await Zotero.Tags.removeFromLibrary(libraryID, Zotero.Tags.getID('A'));
+			// notify item-tag remove
 			await promise;
+			// notify tag delete which triggers #onSelected, which eventually triggers #onItemViewChanged
+			await waitForTagSelector(win);
 			
 			// Deleted tag should no longer be shown or selected
 			assert.notInclude(getRegularTags(), 'A');
 			assert.notInclude(Array.from(tagSelector.getTagSelection()), 'A');
 			// Other tags should be shown again
 			assert.include(getRegularTags(), 'B');
-		})
-	})
+		});
+	});
 	
 	describe("#openRenamePrompt", function () {
 		it("should rename a tag and update the tag selector", function* () {
