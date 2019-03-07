@@ -159,7 +159,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 			onSelect={this.state.viewOnly ? () => {} : this.handleTagSelected}
 			onTagContext={this.handleTagContext}
 			onSearch={this.handleSearch}
-			onSettings={this.handleSettings}
+			onSettings={this.handleSettings.bind(this)}
 			loaded={this.state.loaded}
 		/>;
 	}

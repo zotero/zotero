@@ -41,7 +41,18 @@
 		onpopupshowing="
 			document.getElementById('show-automatic').setAttribute('checked', ZoteroPane.tagSelector.showAutomatic);
 			document.getElementById('display-all-tags').setAttribute('checked', ZoteroPane.tagSelector.displayAllTags);
-			document.getElementById('num-selected').label = ZoteroPane.tagSelector.label">
+			document.getElementById('num-selected').label = ZoteroPane.tagSelector.label;
+			(async function () {
+				var libraryID = ZoteroPane.tagSelector.libraryID;
+				var library = Zotero.Libraries.get(libraryID);
+				var enabled = false;
+				if (library.editable) {
+					if ((await Zotero.Tags.getAutomaticInLibrary(libraryID)).length) {
+						enabled = true;
+					}
+				}
+				document.getElementById('delete-automatic-tags').disabled = !enabled;
+			})();">
 		<menuitem id="num-selected" disabled="true"/>
 		<menuitem id="deselect-all" label="&zotero.tagSelector.clearAll;"
 			oncommand="ZoteroPane.tagSelector.deselectAll(); event.stopPropagation();"/>
