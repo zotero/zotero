@@ -396,11 +396,12 @@ Zotero.Tags = new function() {
 	 * Remove all automatic tags in the given library
 	 */
 	this.removeAutomaticFromLibrary = async function (libraryID, onProgress) {
+		var tagType = 1;
 		var tagIDs = await this.getAutomaticInLibrary(libraryID);
 		if (onProgress) {
 			onProgress(0, tagIDs.length);
 		}
-		return this.removeFromLibrary(libraryID, tagIDs, onProgress);
+		return this.removeFromLibrary(libraryID, tagIDs, onProgress, tagType);
 	};
 	
 	
