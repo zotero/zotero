@@ -3686,7 +3686,7 @@ Zotero.Item.prototype.getImageSrc = function() {
 	if (itemType == 'attachment') {
 		var linkMode = this.attachmentLinkMode;
 		
-		if (this.attachmentContentType == 'application/pdf') {
+		if (this.attachmentContentType == 'application/pdf' && this.isFileAttachment()) {
 			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 				itemType += '-pdf-link';
 			}
