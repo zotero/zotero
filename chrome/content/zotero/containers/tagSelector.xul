@@ -65,6 +65,7 @@
 			type="checkbox"
 			oncommand="ZoteroPane.tagSelector.toggleDisplayAllTags(); event.stopPropagation();"
 		/>
+		<menuseparator/>
 		<menuitem id="delete-automatic-tags" label="&zotero.tagSelector.deleteAutomaticInLibrary;" type="checkbox"
 									oncommand="ZoteroPane.tagSelector.deleteAutomatic();
 										this.setAttribute('checked', false);
