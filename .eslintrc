@@ -194,7 +194,6 @@
 		"no-extra-label": "error",
 		"no-extra-parens": "off",
 		"no-floating-decimal": "error",
-		"no-implicit-globals": "error",
 		"no-implied-eval": "error",
 		"no-inline-comments": "off",
 		"no-invalid-this": "off",
