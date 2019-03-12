@@ -72,6 +72,9 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 		}
 
 		if (type == 'item' || type == 'item-tag') {
+			if (event == 'redraw') {
+				return;
+			}
 			return this.setState({tags: await this.getTags()});
 		}
 		
