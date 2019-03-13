@@ -493,6 +493,11 @@ Zotero_Preferences.Sync = {
 		var usernameField = document.getElementById("storage-username");
 		var passwordField = document.getElementById("storage-password");
 		
+		// These don't get set until window close on Windows/Linux (no instantApply),
+		// so set them explicitly when verifying
+		Zotero.Prefs.set('sync.storage.url', urlField.value);
+		Zotero.Prefs.set('sync.storage.username', usernameField.value);
+		
 		verifyButton.hidden = true;
 		abortButton.hidden = false;
 		progressMeter.hidden = false;
