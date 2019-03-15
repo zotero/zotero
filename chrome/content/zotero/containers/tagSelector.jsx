@@ -68,14 +68,11 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 				default:
 					return;
 			}
-			return this.setState({tags: await this.getTags()});
 		}
-
-		if (type == 'item' || type == 'item-tag') {
-			if (event == 'redraw') {
-				return;
-			}
-			return this.setState({tags: await this.getTags()});
+		
+		// Ignore item events other than 'trash'
+		if (type == 'item' && event != 'trash') {
+			return;
 		}
 		
 		// If a selected tag no longer exists, deselect it
@@ -93,6 +90,27 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 			}
 			return;
 		}
+		
+		// TODO: Check libraryID for some events to avoid refreshing unnecessarily on sync changes?
+		
+		var newTags = await this.getTags();
+		
+		if (type == 'item-tag' && event == 'remove') {
+			let changed = false;
+			let visibleTags = newTags.map(tag => tag.tag);
+			for (let id of ids) {
+				let tag = extraData[id].tag;
+				if (this.selectedTags.has(tag) && !visibleTags.includes(tag)) {
+					this.selectedTags.delete(tag);
+					changed = true;
+				}
+			}
+			if (changed && typeof(this.props.onSelection) === 'function') {
+				this.props.onSelection(this.selectedTags);
+			}
+		}
+		
+		return this.setState({tags: newTags});
 	}
 	
 	async getTags(tagsInScope, tagColors) {

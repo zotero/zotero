@@ -413,37 +413,73 @@ describe("Tag Selector", function () {
 			assert.notInclude(getRegularTags(), "A");
 		});
 		
+		it("should deselect a tag when removed from the last item in this view", async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			await selectLibrary(win);
+			
+			var tag1 = Zotero.Utilities.randomString();
+			var tag2 = Zotero.Utilities.randomString();
+			var promise = waitForTagSelector(win);
+			var item1 = await createDataObject('item', { tags: [{ tag: tag1 }] });
+			var item2 = await createDataObject('item', { tags: [{ tag: tag2 }] });
+			await promise;
+			
+			tagSelector.handleTagSelected(tag1);
+			await waitForTagSelector(win);
+			
+			// Tag selector should show the selected tag
+			assert.include(getRegularTags(), tag1);
+			// And not the unselected one
+			assert.notInclude(getRegularTags(), tag2);
+			
+			// Remove tag from item
+			promise = waitForTagSelector(win);
+			item1.removeTag(tag1);
+			await item1.saveTx();
+			await promise;
+			// Notifier item-tag remove triggers #onSelected, which eventually triggers #onItemViewChanged
+			await waitForTagSelector(win);
+			
+			// Removed tag should no longer be shown or selected
+			assert.notInclude(getRegularTags(), tag1);
+			assert.notInclude(Array.from(tagSelector.getTagSelection()), tag1);
+			// Other tags should be shown again
+			assert.include(getRegularTags(), tag2);
+		});
+		
 		it("should deselect a tag when deleted from a library", async function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			await selectLibrary(win);
 			
 			var promise = waitForTagSelector(win);
 			
-			await createDataObject('item', { tags: [{ tag: 'A' }] });
-			await createDataObject('item', { tags: [{ tag: 'B' }] });
+			var tag1 = Zotero.Utilities.randomString();
+			var tag2 = Zotero.Utilities.randomString();
+			await createDataObject('item', { tags: [{ tag: tag1 }] });
+			await createDataObject('item', { tags: [{ tag: tag2 }] });
 			await promise;
 			
-			tagSelector.handleTagSelected('A');
+			tagSelector.handleTagSelected(tag1);
 			await waitForTagSelector(win);
 			
 			// Tag selector should show the selected tag
-			assert.include(getRegularTags(), 'A');
+			assert.include(getRegularTags(), tag1);
 			// And not the unselected one
-			assert.notInclude(getRegularTags(), 'B');
+			assert.notInclude(getRegularTags(), tag2);
 			
 			// Remove tag from library
 			promise = waitForTagSelector(win);
-			await Zotero.Tags.removeFromLibrary(libraryID, Zotero.Tags.getID('A'));
-			// notify item-tag remove
+			await Zotero.Tags.removeFromLibrary(libraryID, Zotero.Tags.getID(tag1));
+			// Notifier item-tag remove
 			await promise;
-			// notify tag delete which triggers #onSelected, which eventually triggers #onItemViewChanged
+			// Notifier tag delete triggers #onSelected, which eventually triggers #onItemViewChanged
 			await waitForTagSelector(win);
 			
 			// Deleted tag should no longer be shown or selected
-			assert.notInclude(getRegularTags(), 'A');
-			assert.notInclude(Array.from(tagSelector.getTagSelection()), 'A');
+			assert.notInclude(getRegularTags(), tag1);
+			assert.notInclude(Array.from(tagSelector.getTagSelection()), tag1);
 			// Other tags should be shown again
-			assert.include(getRegularTags(), 'B');
+			assert.include(getRegularTags(), tag2);
 		});
 	});
 	
