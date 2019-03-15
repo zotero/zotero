@@ -189,16 +189,11 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 		this.state.viewOnly != (mode == 'view') && this.setState({viewOnly: mode == 'view'});
 	}
 
-	unregister() {
+	uninit() {
 		ReactDOM.unmountComponentAtNode(this.domEl);
 		if (this._notifierID) {
 			Zotero.Notifier.unregisterObserver(this._notifierID);
 		}
-	}
-
-	uninit() {
-		this.setState({searchString: ''});
-		this.selectedTags = new Set();
 	}
 
 	handleTagContext = (tag, ev) => {

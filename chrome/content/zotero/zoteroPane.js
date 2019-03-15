@@ -1088,21 +1088,32 @@ var ZoteroPane = new function()
 	};
 	
 	
+	this.initTagSelector = function () {
+		this.tagSelector = Zotero.TagSelector.init(
+			document.getElementById('zotero-tag-selector'),
+			{
+				onSelection: this.updateTagFilter.bind(this)
+			}
+		);
+	};
+	
+	
 	this.toggleTagSelector = Zotero.Promise.coroutine(function* () {
-		var tagSelector = document.getElementById('zotero-tag-selector-container');
+		var container = document.getElementById('zotero-tag-selector-container');
 		
-		var showing = tagSelector.getAttribute('collapsed') == 'true';
-		tagSelector.setAttribute('collapsed', !showing);
+		var showing = container.getAttribute('collapsed') == 'true';
+		container.setAttribute('collapsed', !showing);
 		
 		// If showing, set scope to items in current view
 		// and focus filter textbox
 		if (showing) {
+			this.initTagSelector();
 			yield this.setTagScope();
-			ZoteroPane_Local.tagSelector.focusTextbox();
+			ZoteroPane.tagSelector.focusTextbox();
 		}
 		// If hiding, clear selection
 		else {
-			ZoteroPane_Local.tagSelector.uninit();
+			ZoteroPane.tagSelector.uninit();
 		}
 	});
 	

@@ -33,10 +33,7 @@ ZoteroPane.Containers = {
 	},
 	
 	loadPane() {
-		var tagSelector = document.getElementById('zotero-tag-selector');
-		ZoteroPane.tagSelector = Zotero.TagSelector.init(tagSelector, {
-			onSelection: ZoteroPane.updateTagFilter.bind(ZoteroPane)
-		});
+		ZoteroPane.initTagSelector();
 	},
 	
 	async initIntlStrings() {
@@ -53,7 +50,7 @@ ZoteroPane.Containers = {
 	},
 	
 	destroy() {
-		ZoteroPane.tagSelector.unregister();
+		ZoteroPane.tagSelector.uninit();
 	}
 }
 
