@@ -592,7 +592,7 @@ describe("Tag Selector", function () {
 			
 			var dialogPromise = waitForDialog();
 			var tagSelectorPromise = waitForTagSelector(win);
-			tagSelector.deleteAutomatic();
+			await tagSelector.deleteAutomatic();
 			await dialogPromise;
 			await tagSelectorPromise;
 			
