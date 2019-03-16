@@ -1203,8 +1203,6 @@ describe("Connector Server", function () {
 			
 			var ids2 = await waitForItemEvent('add');
 			var item2 = Zotero.Items.get(ids2[0]);
-			// Attachment
-			await waitForItemEvent('add');
 			
 			req = await reqPromise;
 			assert.equal(req.status, 200);
