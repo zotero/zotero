@@ -2173,6 +2173,7 @@
 				<parameter name="dir"/>
 				<body><![CDATA[
 				return Zotero.spawn(function* () {
+					yield this.blurOpenField();
 					if (index == 0 && dir == 'up') {
 						Zotero.debug("Can't move up creator 0");
 						return;
@@ -2212,8 +2213,6 @@
 						this.item.setCreator(index, otherCreator);
 					}
 					if (this.saveOnEdit) {
-						// See note in transformText()
-						yield this.blurOpenField();
 						return this.item.saveTx();
 					}
 				}, this);
