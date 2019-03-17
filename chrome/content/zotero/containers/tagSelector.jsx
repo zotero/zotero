@@ -457,7 +457,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 	static init(domEl, opts) {
 		var ref;
 		let elem = (
-			<IntlProvider locale={Zotero.locale} messages={ZoteroPane.Containers.intlMessages}>
+			<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
 				<TagSelectorContainer ref={c => ref = c } {...opts} />
 			</IntlProvider>
 		);

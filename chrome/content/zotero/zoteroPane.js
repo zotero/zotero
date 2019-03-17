@@ -143,8 +143,6 @@ var ZoteroPane = new function()
 		Zotero.hiDPI = window.devicePixelRatio > 1;
 		Zotero.hiDPISuffix = Zotero.hiDPI ? "@2x" : "";
 		
-		ZoteroPane_Local.Containers.loadPane();
-		
 		ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 		
 		// Add a default progress window
@@ -257,6 +255,16 @@ var ZoteroPane = new function()
 	}
 	
 	
+	this.initContainers = function () {
+		this.initTagSelector();
+	};
+	
+	
+	this.uninitContainers = function () {
+		this.tagSelector.uninit();
+	};
+	
+	
 	/*
 	 * Create the New Item (+) submenu with each item type
 	 */
@@ -346,7 +354,7 @@ var ZoteroPane = new function()
 			this.serializePersist();
 		}
 		
-		ZoteroPane_Local.Containers.destroy();
+		ZoteroPane_Local.Containers.uninit();
 		
 		if(this.collectionsView) this.collectionsView.unregister();
 		if(this.itemsView) this.itemsView.unregister();
@@ -389,6 +397,7 @@ var ZoteroPane = new function()
 		this.unserializePersist();
 		this.updateLayout();
 		this.updateToolbarPosition();
+		this.initContainers();
 		
 		// restore saved row selection (for tab switching)
 		// TODO: Remove now that no tab mode?
@@ -1089,18 +1098,30 @@ var ZoteroPane = new function()
 	
 	
 	this.initTagSelector = function () {
-		this.tagSelector = Zotero.TagSelector.init(
-			document.getElementById('zotero-tag-selector'),
-			{
-				onSelection: this.updateTagFilter.bind(this)
-			}
-		);
+		var container = document.getElementById('zotero-tag-selector-container');
+		if (!container.hasAttribute('collapsed') || container.getAttribute('collapsed') == 'false') {
+			this.tagSelector = Zotero.TagSelector.init(
+				document.getElementById('zotero-tag-selector'),
+				{
+					onSelection: this.updateTagFilter.bind(this)
+				}
+			);
+		}
 	};
+	
+	
+	/*
+	 * Sets the tag filter on the items view
+	 */
+	this.updateTagFilter = Zotero.Promise.coroutine(function* () {
+		if (this.itemsView) {
+			yield this.itemsView.setFilter('tags', ZoteroPane_Local.tagSelector.getTagSelection());
+		}
+	});
 	
 	
 	this.toggleTagSelector = Zotero.Promise.coroutine(function* () {
 		var container = document.getElementById('zotero-tag-selector-container');
-		
 		var showing = container.getAttribute('collapsed') == 'true';
 		container.setAttribute('collapsed', !showing);
 		
@@ -1117,21 +1138,12 @@ var ZoteroPane = new function()
 		}
 	});
 	
-	/*
-	 * Sets the tag filter on the items view
-	 */
-	this.updateTagFilter = Zotero.Promise.coroutine(function* () {
-		if (this.itemsView) {
-			yield this.itemsView.setFilter('tags', ZoteroPane_Local.tagSelector.getTagSelection());
-		}
-	});
-	
 	
 	this.tagSelectorShown = function () {
 		var collectionTreeRow = this.getCollectionTreeRow();
 		if (!collectionTreeRow) return;
-		var tagSelector = document.getElementById('zotero-tag-selector');
-		return !tagSelector.getAttribute('collapsed')
+		var tagSelector = document.getElementById('zotero-tag-selector-container');
+		return !tagSelector.hasAttribute('collapsed')
 			|| tagSelector.getAttribute('collapsed') == 'false';
 	};
 	
@@ -1195,7 +1207,9 @@ var ZoteroPane = new function()
 			
 			// Clear quick search and tag selector when switching views
 			document.getElementById('zotero-tb-search').value = "";
-			ZoteroPane.tagSelector.clearTagSelection();
+			if (ZoteroPane.tagSelector) {
+				ZoteroPane.tagSelector.clearTagSelection();
+			}
 			
 			// Not necessary with seltype="cell", which calls nsITreeView::isSelectable()
 			/*if (collectionTreeRow.isSeparator()) {
@@ -1204,7 +1218,9 @@ var ZoteroPane = new function()
 			}*/
 			
 			collectionTreeRow.setSearch('');
-			collectionTreeRow.setTags(ZoteroPane_Local.tagSelector.getTagSelection());
+			if (ZoteroPane.tagSelector) {
+				collectionTreeRow.setTags(ZoteroPane.tagSelector.getTagSelection());
+			}
 			
 			this._updateToolbarIconsForRow(collectionTreeRow);
 			

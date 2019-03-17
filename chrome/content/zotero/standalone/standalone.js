@@ -64,7 +64,6 @@ const ZoteroStandalone = new function() {
 			ZoteroStandalone.DebugOutput.init();
 			
 			Zotero.hideZoteroPaneOverlays();
-			await ZoteroPane.Containers.init();
 			ZoteroPane.init();
 			ZoteroPane.makeVisible();
 			

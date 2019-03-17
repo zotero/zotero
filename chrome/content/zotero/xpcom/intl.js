@@ -49,6 +49,17 @@ Zotero.Intl = new function () {
 		// Set the locale direction to Zotero.dir
 		Zotero.dir = Zotero.Locale.defaultScriptDirection(Zotero.locale);
 		Zotero.rtl = (Zotero.dir === 'rtl');
+		
+		this.strings = {};
+		const intlFiles = ['zotero.dtd'];
+		for (let intlFile of intlFiles) {
+			let localeXML = Zotero.File.getContentsFromURL(`chrome://zotero/locale/${intlFile}`);
+			let regexp = /<!ENTITY ([^\s]+)\s+"([^"]+)/g;
+			let regexpResult;
+			while (regexpResult = regexp.exec(localeXML)) {
+				this.strings[regexpResult[1]] = regexpResult[2];
+			}
+		}
 	};
 
 

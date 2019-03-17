@@ -29,6 +29,5 @@
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<script src="chrome://zotero/content/include.js"></script>
 	
-	<script src="containers.js"></script>
 	<script src="tagSelector.js"></script>
 </overlay>
