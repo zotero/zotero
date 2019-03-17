@@ -354,7 +354,7 @@ var ZoteroPane = new function()
 			this.serializePersist();
 		}
 		
-		ZoteroPane_Local.Containers.uninit();
+		this.uninitContainers();
 		
 		if(this.collectionsView) this.collectionsView.unregister();
 		if(this.itemsView) this.itemsView.unregister();
