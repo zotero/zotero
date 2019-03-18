@@ -419,9 +419,13 @@ describe("Tag Selector", function () {
 			
 			var tag1 = Zotero.Utilities.randomString();
 			var tag2 = Zotero.Utilities.randomString();
-			var promise = waitForTagSelector(win);
-			var item1 = await createDataObject('item', { tags: [{ tag: tag1 }] });
-			var item2 = await createDataObject('item', { tags: [{ tag: tag2 }] });
+			var item1 = createUnsavedDataObject('item', { tags: [{ tag: tag1 }] });
+			var item2 = createUnsavedDataObject('item', { tags: [{ tag: tag2 }] });
+			var promise = waitForTagSelector(win, 2);
+			await Zotero.DB.executeTransaction(async function () {
+				await item1.save();
+				await item2.save();
+			});
 			await promise;
 			
 			tagSelector.handleTagSelected(tag1);
@@ -433,12 +437,10 @@ describe("Tag Selector", function () {
 			assert.notInclude(getRegularTags(), tag2);
 			
 			// Remove tag from item
-			promise = waitForTagSelector(win);
+			promise = waitForTagSelector(win, 2);
 			item1.removeTag(tag1);
 			await item1.saveTx();
 			await promise;
-			// Notifier item-tag remove triggers #onSelected, which eventually triggers #onItemViewChanged
-			await waitForTagSelector(win);
 			
 			// Removed tag should no longer be shown or selected
 			assert.notInclude(getRegularTags(), tag1);
@@ -451,12 +453,15 @@ describe("Tag Selector", function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			await selectLibrary(win);
 			
-			var promise = waitForTagSelector(win);
-			
+			var promise = waitForTagSelector(win, 2);
 			var tag1 = Zotero.Utilities.randomString();
 			var tag2 = Zotero.Utilities.randomString();
-			await createDataObject('item', { tags: [{ tag: tag1 }] });
-			await createDataObject('item', { tags: [{ tag: tag2 }] });
+			var item1 = await createDataObject('item', { tags: [{ tag: tag1 }] });
+			var item2 = await createDataObject('item', { tags: [{ tag: tag2 }] });
+			await Zotero.DB.executeTransaction(async function () {
+				await item1.save();
+				await item2.save();
+			});
 			await promise;
 			
 			tagSelector.handleTagSelected(tag1);
@@ -468,12 +473,9 @@ describe("Tag Selector", function () {
 			assert.notInclude(getRegularTags(), tag2);
 			
 			// Remove tag from library
-			promise = waitForTagSelector(win);
+			promise = waitForTagSelector(win, 2);
 			await Zotero.Tags.removeFromLibrary(libraryID, Zotero.Tags.getID(tag1));
-			// Notifier item-tag remove
 			await promise;
-			// Notifier tag delete triggers #onSelected, which eventually triggers #onItemViewChanged
-			await waitForTagSelector(win);
 			
 			// Deleted tag should no longer be shown or selected
 			assert.notInclude(getRegularTags(), tag1);

@@ -209,15 +209,26 @@ var waitForItemsLoad = Zotero.Promise.coroutine(function* (win, collectionRowToS
 	yield zp.itemsView.waitForLoad();
 });
 
-var waitForTagSelector = function (win) {
+/**
+ * Return a promise that resolves once the tag selector has updated
+ *
+ * Some operations result in two tag selector updates, one from the notify() and another from
+ * onItemViewChanged(). Pass 2 for numUpdates to wait for both.
+ */
+var waitForTagSelector = function (win, numUpdates = 1) {
+	var updates = 0;
+	
 	var zp = win.ZoteroPane;
 	var deferred = Zotero.Promise.defer();
 	if (zp.tagSelectorShown()) {
 		let tagSelector = zp.tagSelector;
 		let componentDidUpdate = tagSelector.componentDidUpdate;
 		tagSelector.componentDidUpdate = function() {
-			deferred.resolve();
-			tagSelector.componentDidUpdate = componentDidUpdate;
+			updates++;
+			if (updates == numUpdates) {
+				deferred.resolve();
+				tagSelector.componentDidUpdate = componentDidUpdate;
+			}
 			if (typeof componentDidUpdate == 'function') {
 				componentDidUpdate.call(this, arguments);
 			}
