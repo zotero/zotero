@@ -1156,7 +1156,6 @@ var ZoteroPane = new function()
 	this.setTagScope = async function () {
 		var collectionTreeRow = self.getCollectionTreeRow();
 		if (self.tagSelectorShown()) {
-			Zotero.debug('Updating tag selector with current tags');
 			if (collectionTreeRow.editable) {
 				ZoteroPane_Local.tagSelector.setMode('edit');
 			}

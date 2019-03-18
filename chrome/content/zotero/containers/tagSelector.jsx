@@ -30,9 +30,11 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 		this.selectedTags = new Set();
 		this.state = defaults;
 	}
-
+	
 	// Update trigger #1 (triggered by ZoteroPane)
 	async onItemViewChanged({collectionTreeRow, libraryID, tagsInScope}) {
+		Zotero.debug('Updating tag selector from current view');
+		
 		this.collectionTreeRow = collectionTreeRow || this.collectionTreeRow;
 		
 		let newState = {loaded: true};
@@ -51,6 +53,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 	async notify(event, type, ids, extraData) {
 		if (type === 'setting') {
 			if (ids.some(val => val.split('/')[1] == 'tagColors')) {
+				Zotero.debug("Updating tag selector after tag color change");
 				let tagColors = Zotero.Tags.getColors(this.libraryID);
 				this.state.tagColors = tagColors;
 				this.setState({tagColors, tags: await this.getTags(null, tagColors)});
@@ -93,6 +96,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 		
 		// TODO: Check libraryID for some events to avoid refreshing unnecessarily on sync changes?
 		
+		Zotero.debug("Updating tag selector after tag change");
 		var newTags = await this.getTags();
 		
 		if (type == 'item-tag' && event == 'remove') {
