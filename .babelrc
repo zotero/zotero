@@ -3,15 +3,10 @@
   "retainLines": true,
   "presets": [],
   "ignore": [
-    "resource/require.js",
     "chrome/content/zotero/include.js",
     "chrome/content/zotero/xpcom/citeproc.js",
-    "resource/csl-validator.js",
-    "resource/jspath.js",
     "resource/react.js",
     "resource/react-dom.js",
-    "resource/bluebird.js",
-    "resource/bluebird/*.js",
     "test/resource/*.js"
   ],
   "plugins": [
