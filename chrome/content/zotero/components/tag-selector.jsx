@@ -6,6 +6,7 @@ const TagList = require('./tag-selector/tag-list');
 const Input = require('./form/input');
 const { Button } = require('./button');
 const { IconTagSelectorMenu } = require('./icons');
+const Search = require('./search');
 
 class TagSelector extends React.Component {
 	render() {
@@ -13,13 +14,11 @@ class TagSelector extends React.Component {
 			<div className="tag-selector">
 				<TagList {...this.props} />
 				<div className="tag-selector-filter-container">
-					<Input
-						type="search"
-						ref={ref => this.focusTextbox = ref && ref.focus}
+					<Search
 						value={this.props.searchString}
-						onChange={this.props.onSearch}
+						onSearch={this.props.onSearch}
+						inputRef={this.searchBoxRef}
 						className="tag-selector-filter"
-						size="1"
 					/>
 					<Button
 						icon={<IconTagSelectorMenu />}
@@ -46,8 +45,8 @@ TagSelector.propTypes = {
 		onDragExit: PropTypes.func,
 		onDrop: PropTypes.func
 	}),
+	searchBoxRef: PropTypes.object,
 	searchString: PropTypes.string,
-	shouldFocus: PropTypes.bool,
 	onSelect: PropTypes.func,
 	onTagContext: PropTypes.func,
 	onSearch: PropTypes.func,
@@ -58,7 +57,6 @@ TagSelector.propTypes = {
 TagSelector.defaultProps = {
 	tags: [],
 	searchString: '',
-	shouldFocus: false,
 	onSelect: () => Promise.resolve(),
 	onTagContext: () => Promise.resolve(),
 	onSearch: () => Promise.resolve(),

@@ -24,6 +24,13 @@
 	height: 100%;
 }
 
+.tag-selector-list {
+	list-style: none;
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+}
+
 .tag-selector-filter-container {
 	height: auto;
 	flex: 0 0 1em;
@@ -32,16 +39,9 @@
 	padding: 0.125em 0 0.125em 0.5em;
 }
 
-.tag-selector-list {
-	list-style: none;
-	display: inline-block;
-	margin: 0;
-	padding: 0;
-}
-
-.tag-selector-filter {
+.tag-selector-filter-container .search {
+	display: flex;
 	flex: 1 0;
-	min-width: 40px;
 }
 
 .tag-selector-actions {

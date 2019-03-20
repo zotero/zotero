@@ -1,0 +1,21 @@
+.search {
+	position: relative;
+}
+
+.search input {
+	-moz-appearance: searchfield;
+	flex: 1 0;
+	min-width: 40px;
+	height: 24px;
+	padding-left: 4px;
+}
+
+.search .search-cancel-button {
+	background-image: url(chrome://global/skin/icons/searchfield-cancel.svg);
+	position: absolute;
+	width: 14px;
+	height: 14px;
+	top: 6px;
+	right: 6px;
+	cursor: default;
+}

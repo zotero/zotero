@@ -29,6 +29,11 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 		this.displayAllTags = Zotero.Prefs.get('tagSelector.displayAllTags');
 		this.selectedTags = new Set();
 		this.state = defaults;
+		this.searchBoxRef = React.createRef();
+	}
+	
+	focusTextbox() {
+		this.searchBoxRef.focus();
 	}
 	
 	// Update trigger #1 (triggered by ZoteroPane)
@@ -177,9 +182,8 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 		});	
 		return <TagSelector
 			tags={tags}
-			ref={ref => this.focusTextbox = ref && ref.focusTextbox}
+			searchBoxRef={this.searchBoxRef}
 			searchString={this.state.searchString}
-			shouldFocus={this.state.shouldFocus}
 			dragObserver={this.dragObserver}
 			onSelect={this.state.viewOnly ? () => {} : this.handleTagSelected}
 			onTagContext={this.handleTagContext}
@@ -226,9 +230,9 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 		}
 	}
 
-	handleSearch = Zotero.Utilities.debounce((searchString) => {
+	handleSearch = (searchString) => {
 		this.setState({searchString});
-	})
+	}
 	
 	dragObserver = {
 		onDragOver: function(event) {
