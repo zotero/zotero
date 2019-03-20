@@ -133,7 +133,7 @@ var CSL_TYPE_MAPPINGS = {
 	'videoRecording':"motion_picture",
 	'tvBroadcast':"broadcast",
 	'radioBroadcast':"broadcast",
-	'podcast':"song",			// ??
+	'podcast':"broadcast",
 	'computerProgram':"book",		// ??
 	'document':"article",
 	'note':"article",
