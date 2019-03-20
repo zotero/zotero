@@ -170,7 +170,8 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 			tags = Array.from(new Set(tags.map(t => t.tag)));
 		}
 		if (this.state.searchString) {
-			tags = tags.filter(tag => !!tag.match(new RegExp(this.state.searchString, 'i')));
+			let lcStr = this.state.searchString.toLowerCase();
+			tags = tags.filter(tag => tag.toLowerCase().startsWith(lcStr));
 		}
 		tags = tags.map((name) => {
 			return {
