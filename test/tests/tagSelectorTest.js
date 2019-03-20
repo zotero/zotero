@@ -200,12 +200,9 @@ describe("Tag Selector", function () {
 			}
 			
 			// Add item with tag to library root
-			promise = waitForTagSelector(win);
-			var item = await createDataObject('item');
-			await promise
-			
 			var tagA = Zotero.Utilities.randomString();
 			var tagB = Zotero.Utilities.randomString();
+			var item = createUnsavedDataObject('item');
 			item.setTags([
 				{
 					tag: tagA
@@ -421,7 +418,7 @@ describe("Tag Selector", function () {
 			var tag2 = Zotero.Utilities.randomString();
 			var item1 = createUnsavedDataObject('item', { tags: [{ tag: tag1 }] });
 			var item2 = createUnsavedDataObject('item', { tags: [{ tag: tag2 }] });
-			var promise = waitForTagSelector(win, 2);
+			var promise = waitForTagSelector(win);
 			await Zotero.DB.executeTransaction(async function () {
 				await item1.save();
 				await item2.save();
