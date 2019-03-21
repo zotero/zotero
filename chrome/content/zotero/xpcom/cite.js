@@ -206,7 +206,7 @@ Zotero.Cite = {
 				}
 				// If only one field, apply hanging indent on root
 				else if (!multiField) {
-					style += "margin-left: " + hangingIndent + "em; text-indent:-" + hangingIndent + "em;";
+					style += "margin-left: 2em; text-indent:-2em;";
 				}
 			}
 			
@@ -259,7 +259,7 @@ Zotero.Cite = {
 				divStyle = "margin: 0 .4em 0 " + (secondFieldAlign ? maxOffset + rightPadding : "0") + "em;";
 				
 				if (hangingIndent) {
-					divStyle += "padding-left: " + hangingIndent + "em; text-indent:-" + hangingIndent + "em;";
+					divStyle += "padding-left: 2em; text-indent:-2em;";
 				}
 				
 				div.setAttribute("style", divStyle);
