@@ -1382,7 +1382,7 @@
 		"number": "3",
 		"shortTitle": "Short title",
 		"title": "Title",
-		"type": "song"
+		"type": "broadcast"
 	},
 	"presentation": {
 		"URL": "http://www.example.com",
