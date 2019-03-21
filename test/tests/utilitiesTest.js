@@ -400,6 +400,11 @@ describe("Zotero.Utilities", function() {
 			for (let i in data) {
 				let json = data[i];
 				
+				// TEMP: https://github.com/zotero/zotero/issues/1667
+				if (i == 'podcast') {
+					delete json['collection-title'];
+				}
+				
 				let item = new Zotero.Item();
 				Zotero.Utilities.itemFromCSLJSON(item, json);
 				yield item.saveTx();
