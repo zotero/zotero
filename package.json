@@ -18,7 +18,7 @@
     "bluebird": "^3.5.1",
     "classnames": "^2.2.6",
     "prop-types": "^15.6.2",
-    "react": "^16.6.3",
+    "react": "^16.8.4",
     "react-dom": "^16.6.3",
     "react-intl": "^2.7.2"
   },
@@ -38,7 +38,7 @@
     "browserify": "^14.5.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
-    "chokidar": "^1.7.0",
+    "chokidar": "^2.1.2",
     "co-mocha": "^1.2.1",
     "colors": "^1.1.2",
     "eslint": "^5.14.1",
