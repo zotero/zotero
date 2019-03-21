@@ -23,7 +23,7 @@ class Search extends React.PureComponent {
 		};
 	}
 	
-	handleInput = (event) => {
+	handleChange = (event) => {
 		var value = event.target.value;
 		// Update controlled value and cancel button immediately
 		this.setState({
@@ -62,7 +62,7 @@ class Search extends React.PureComponent {
 			<div className="search">
 				<input
 					type="search"
-					onInput={this.handleInput}
+					onChange={this.handleChange}
 					onKeyDown={this.handleKeyDown}
 					ref={this.inputRef}
 					value={this.state.immediateValue}
