@@ -1687,9 +1687,9 @@ Zotero.Utilities = {
 			
 			if(date) {
 				// Convert UTC timestamp to local timestamp for access date
-				if (CSL_DATE_MAPPINGS[variable] == 'accessDate') {
+				if (CSL_DATE_MAPPINGS[variable] == 'accessDate' && !Zotero.Date.isSQLDate(date)) {
 					// Accept ISO date
-					if (Zotero.Date.isISODate(date) && !Zotero.Date.isSQLDate(date)) {
+					if (Zotero.Date.isISODate(date)) {
 						let d = Zotero.Date.isoToDate(date);
 						date = Zotero.Date.dateToSQL(d, true);
 					}
