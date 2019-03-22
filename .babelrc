@@ -1,7 +1,9 @@
 {
   "compact": false,
   "retainLines": true,
-  "presets": [],
+  "presets": [
+    "@babel/preset-react"
+  ],
   "ignore": [
     "chrome/content/zotero/include.js",
     "chrome/content/zotero/xpcom/citeproc.js",
@@ -10,10 +12,8 @@
     "test/resource/*.js"
   ],
   "plugins": [
-    "syntax-jsx",
-    "transform-react-jsx",
-    "transform-react-display-name",
-    "transform-class-properties",
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-proposal-object-rest-spread",
     [
       "transform-es2015-modules-commonjs",
       {

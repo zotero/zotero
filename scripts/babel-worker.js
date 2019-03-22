@@ -3,7 +3,7 @@
 
 const fs = require('fs-extra');
 const path = require('path');
-const babel = require('babel-core');
+const babel = require('@babel/core');
 const multimatch = require('multimatch');
 const options = JSON.parse(fs.readFileSync('.babelrc'));
 const cluster = require('cluster');
@@ -12,6 +12,9 @@ const cluster = require('cluster');
 async function babelWorker(ev) {
 	const t1 = Date.now();
 	const sourcefile = ev.file;
+	const localOptions = {
+		filename: sourcefile
+	};
 	const outfile = path.join('build', sourcefile.replace('.jsx', '.js'));
 	const postError = (error) => {
 		process.send({
@@ -40,7 +43,13 @@ async function babelWorker(ev) {
 			isSkipped = true;
 		} else {
 			try {
-				transformed = babel.transform(contents, options).code;
+				({ code: transformed } = await babel.transformAsync(
+					contents,
+					Object.assign(
+						localOptions,
+						options
+					)
+				));
 			} catch (error) { return postError(`Babel error: ${error}`);}
 		}
 
