@@ -1845,7 +1845,8 @@ Zotero.ItemTreeView.prototype.selectItems = async function (ids, noRecurse) {
 				// Clear the quick search and tag selection and try again (once)
 				if (!noRecurse && this.window.ZoteroPane) {
 					let cleared1 = await this.window.ZoteroPane.clearQuicksearch();
-					let cleared2 = this.window.ZoteroPane.tagSelector.clearTagSelection();
+					let cleared2 = this.window.ZoteroPane.tagSelector
+						&& this.window.ZoteroPane.tagSelector.clearTagSelection();
 					if (cleared1 || cleared2) {
 						return this.selectItems(ids, true);
 					}
