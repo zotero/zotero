@@ -204,7 +204,7 @@ Zotero.Integration = new function() {
 			throw new Zotero.Exception.Alert("integration.error.notInstalled",
 				[], "integration.error.title");
 		}	
-	},
+	};
 	
 	/**
 	 * Executes an integration command, first checking to make sure that versions are compatible
@@ -252,49 +252,10 @@ Zotero.Integration = new function() {
 			await document.setDocumentData(session.data.serialize());
 		}
 		catch (e) {
-			if(!(e instanceof Zotero.Exception.UserCancelled)) {
-				try {
-					var displayError = null;
-					if(e instanceof Zotero.Exception.Alert) {
-						displayError = e.message;
-					} else {
-						if(e.toString().indexOf("ExceptionAlreadyDisplayed") === -1) {
-							displayError = Zotero.getString("integration.error.generic")+"\n\n"+(e.message || e.toString());
-						}
-						if(e.stack) {
-							Zotero.debug(e.stack);
-						}
-					}
-					
-					if(displayError) {
-						if (Zotero.Integration.currentSession && Zotero.Integration.currentSession.progressBar) {
-							Zotero.Promise.delay(5).then(function() {
-								Zotero.Integration.currentSession.progressBar.hide();
-							});
-						}
-						
-						var showErrorInFirefox = !document;
-						
-						if(document) {
-							try {
-								await document.activate();
-								await document.displayAlert(displayError, DIALOG_ICON_STOP, DIALOG_BUTTONS_OK);
-							} catch(e) {
-								showErrorInFirefox = true;
-							}
-						}
-						
-						if(showErrorInFirefox) {
-							Zotero.Utilities.Internal.activate();
-							Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService)
-								.alert(null, Zotero.getString("integration.error.title"), displayError);
-						}
-					}
-				} finally {
-					Zotero.logError(e);
-				}
-			} else {
+			if (!(e instanceof Zotero.Exception.UserCancelled)) {
+				Zotero.Integration._handleCommandError(document, e);
+			}
+			else {
 				// If user cancels we should still write the currently assigned session ID
 				await document.setDocumentData(session.data.serialize());
 			}
@@ -338,6 +299,60 @@ Zotero.Integration = new function() {
 			}
 			
 			Zotero.Integration.currentDoc = Zotero.Integration.currentWindow = false;
+		}
+	};
+	
+	this._handleCommandError = async function (document, e) {
+		try {
+			const supportURL = "https://www.zotero.org/support/kb/debugging_broken_documents";
+			var displayError;
+			if (e instanceof Zotero.Exception.Alert) {
+				displayError = e.message;
+			}
+			else {
+				if (e.toString().indexOf("ExceptionAlreadyDisplayed") === -1) {
+					displayError = Zotero.getString("integration.error.generic")
+						+ "\n\n" + Zotero.getString("integration.error.seeTroubleshootingInfo");
+				}
+				else {
+					return;
+				}
+				if (e.stack) {
+					Zotero.debug(e.stack);
+				}
+			}
+			
+			if (Zotero.Integration.currentSession && Zotero.Integration.currentSession.progressBar) {
+				Zotero.Promise.delay(5).then(() =>
+					Zotero.Integration.currentSession.progressBar.hide());
+			}
+			
+			
+			// display alerts in the document processor
+			if (document) {
+				try {
+					await document.activate();
+					let index = await document.displayAlert(displayError, DIALOG_ICON_STOP, DIALOG_BUTTONS_YES_NO);
+					if (index == 1) {
+						Zotero.launchURL(supportURL);
+					}
+					return;
+				}
+				catch (e) {
+					Zotero.debug("Integration: An error occurred while trying to display an alert. Falling back to Zotero");
+					Zotero.logError(e);
+				}
+			}
+			
+			Zotero.Utilities.Internal.activate();
+			let ps = Services.prompt;
+			let index = ps.confirm(null, Zotero.getString('integration.error.title'), displayError);
+			if (index == 1) {
+				Zotero.launchURL(supportURL);
+			}
+		}
+		finally {
+			Zotero.logError(e);
 		}
 	};
 	
