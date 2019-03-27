@@ -171,7 +171,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 		}
 		if (this.state.searchString) {
 			let lcStr = this.state.searchString.toLowerCase();
-			tags = tags.filter(tag => tag.toLowerCase().startsWith(lcStr));
+			tags = tags.filter(tag => tag.toLowerCase().includes(lcStr));
 		}
 		tags = tags.map((name) => {
 			return {
