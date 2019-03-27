@@ -47,6 +47,7 @@ Zotero.RecognizePDF = new function () {
 		_queue = [];
 	});
 	
+	this.recognizeStub = null;
 	
 	/**
 	 * Triggers queue processing and returns when all items in the queue are processed
@@ -287,7 +288,7 @@ Zotero.RecognizePDF = new function () {
 		var originalFilename = OS.Path.basename(path);
 		
 		// Rename attachment file to match new metadata
-		if (Zotero.Attachments.shouldAutoRenameFile(attachment.linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE)) {
+		if (Zotero.Attachments.shouldAutoRenameFile(attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE)) {
 			let ext = Zotero.File.getExtension(path);
 			let fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentItem);
 			let newName = fileBaseName + (ext ? '.' + ext : '');
@@ -406,9 +407,13 @@ Zotero.RecognizePDF = new function () {
 	/**
 	 * Retrieves metadata for a PDF and saves it as an item
 	 * @param {Zotero.Item} item
-	 * @return {Promise}
+	 * @return {Promise<Zotero.Item>} - New item
 	 */
 	async function _recognize(item) {
+		if (Zotero.RecognizePDF.recognizeStub) {
+			return Zotero.RecognizePDF.recognizeStub(item);
+		}
+		
 		let filePath = await item.getFilePath();
 		
 		if (!filePath || !await OS.File.exists(filePath)) throw new Zotero.Exception.Alert('recognizePDF.fileNotFound');

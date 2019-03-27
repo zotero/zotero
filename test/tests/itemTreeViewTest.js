@@ -1139,7 +1139,7 @@ describe("Zotero.ItemTreeView", function() {
 			assert.equal(OS.Path.basename(path), parentTitle + '.pdf');
 		});
 		
-		it("shouldn't rename a linked child attachment using parent metadata if no existing file attachments and pref disabled", async function () {
+		it("shouldn't rename a linked child attachment using parent metadata if pref disabled", async function () {
 			Zotero.Prefs.set('autoRenameFiles.linked', false);
 			
 			var view = zp.itemsView;

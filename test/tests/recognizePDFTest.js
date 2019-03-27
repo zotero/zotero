@@ -2,8 +2,6 @@ describe("PDF Recognition", function() {
 	var win;
 	
 	before(function* () {
-		if (Zotero.automatedTest) this.skip(); // TODO: Mock services
-		
 		this.timeout(60000);
 		// Load Zotero pane and install PDF tools
 		yield Zotero.Promise.all([
@@ -20,6 +18,8 @@ describe("PDF Recognition", function() {
 			win.close();
 		}
 		Zotero.ProgressQueues.get('recognize').cancel();
+		Zotero.RecognizePDF.recognizeStub = null;
+		Zotero.Prefs.clear('autoRenameFiles.linked');
 	});
 	
 	after(function() {
@@ -28,7 +28,8 @@ describe("PDF Recognition", function() {
 		}
 	});
 	
-	it("should recognize a PDF by DOI", async function () {
+	it("should recognize a PDF by DOI and rename the file", async function () {
+		if (Zotero.automatedTest) this.skip(); // TODO: Mock services
 		this.timeout(30000);
 		// Import the PDF
 		var testdir = getTestDataDirectory();
@@ -64,6 +65,7 @@ describe("PDF Recognition", function() {
 	});
 	
 	it("should recognize a PDF by arXiv ID", async function () {
+		if (Zotero.automatedTest) this.skip(); // TODO: Mock services
 		this.timeout(30000);
 		// Import the PDF
 		var testdir = getTestDataDirectory();
@@ -89,15 +91,10 @@ describe("PDF Recognition", function() {
 		while (progressWindow.document.getElementById("label").value != completeStr) {
 			await Zotero.Promise.delay(20);
 		}
-		
-		// The file should have been renamed
-		assert.equal(
-			attachment.attachmentFilename,
-			Zotero.Attachments.getFileBaseNameFromItem(item) + '.pdf'
-		);
 	});
 	
 	it("should put new item in same collection", async function () {
+		if (Zotero.automatedTest) this.skip(); // TODO: Mock services
 		this.timeout(30000);
 		// Import the PDF
 		var testdir = getTestDataDirectory();
@@ -128,6 +125,7 @@ describe("PDF Recognition", function() {
 	});
 	
 	it("should recognize PDF by arXiv ID and put new item in same collection in group library", async function () {
+		if (Zotero.automatedTest) this.skip(); // TODO: Mock services
 		this.timeout(30000);
 		var testdir = getTestDataDirectory();
 		testdir.append("recognizePDF_test_arXiv.pdf");
@@ -159,6 +157,7 @@ describe("PDF Recognition", function() {
 	});
 	
 	it.skip("should recognize PDF by ISBN and put new item in same collection in group library", async function () {
+		if (Zotero.automatedTest) this.skip(); // TODO: Mock services
 		this.timeout(30000);
 		var testdir = getTestDataDirectory();
 		testdir.append("recognizePDF_test_ISBN.pdf");
@@ -189,6 +188,7 @@ describe("PDF Recognition", function() {
 	});
 	
 	it("should recognize PDF by title and put new item in same collection in group library", async function () {
+		if (Zotero.automatedTest) this.skip(); // TODO: Mock services
 		this.timeout(30000);
 		var testdir = getTestDataDirectory();
 		testdir.append("recognizePDF_test_title.pdf");
@@ -216,5 +216,78 @@ describe("PDF Recognition", function() {
 		}
 		
 		assert.isTrue(collection.hasItem(item.id));
+	});
+	
+	it("should rename a linked file attachment using parent metadata if no existing file attachments and pref enabled", async function () {
+		Zotero.Prefs.set('autoRenameFiles.linked', true);
+		var itemTitle = Zotero.Utilities.randomString();;
+		Zotero.RecognizePDF.recognizeStub = async function () {
+			return createDataObject('item', { title: itemTitle });
+		};
+		
+		// Link to the PDF
+		var tempDir = await getTempDirectory();
+		var tempFile = OS.Path.join(tempDir, 'test.pdf');
+		await OS.File.copy(OS.Path.join(getTestDataDirectory().path, 'test.pdf'), tempFile);
+		var attachment = await Zotero.Attachments.linkFromFile({
+			file: tempFile
+		});
+		
+		win.ZoteroPane.recognizeSelected();
+		
+		var addedIDs = await waitForItemEvent("add");
+		var modifiedIDs = await waitForItemEvent("modify");
+		assert.lengthOf(addedIDs, 1);
+		var item = Zotero.Items.get(addedIDs[0]);
+		assert.equal(item.getField("title"), itemTitle);
+		assert.lengthOf(modifiedIDs, 2);
+		
+		// Wait for status to show as complete
+		var progressWindow = getWindows("chrome://zotero/content/progressQueueDialog.xul")[0];
+		var completeStr = Zotero.getString("general.finished");
+		while (progressWindow.document.getElementById("label").value != completeStr) {
+			await Zotero.Promise.delay(20);
+		}
+		
+		// The file should have been renamed
+		assert.equal(
+			attachment.attachmentFilename,
+			Zotero.Attachments.getFileBaseNameFromItem(item) + '.pdf'
+		);
+	});
+	
+	it("shouldn't rename a linked file attachment using parent metadata if pref disabled", async function () {
+		Zotero.Prefs.set('autoRenameFiles.linked', false);
+		var itemTitle = Zotero.Utilities.randomString();;
+		Zotero.RecognizePDF.recognizeStub = async function () {
+			return createDataObject('item', { title: itemTitle });
+		};
+		
+		// Link to the PDF
+		var tempDir = await getTempDirectory();
+		var tempFile = OS.Path.join(tempDir, 'test.pdf');
+		await OS.File.copy(OS.Path.join(getTestDataDirectory().path, 'test.pdf'), tempFile);
+		var attachment = await Zotero.Attachments.linkFromFile({
+			file: tempFile
+		});
+		
+		win.ZoteroPane.recognizeSelected();
+		
+		var addedIDs = await waitForItemEvent("add");
+		var modifiedIDs = await waitForItemEvent("modify");
+		assert.lengthOf(addedIDs, 1);
+		var item = Zotero.Items.get(addedIDs[0]);
+		assert.equal(item.getField("title"), itemTitle);
+		assert.lengthOf(modifiedIDs, 2);
+		
+		// Wait for status to show as complete
+		var progressWindow = getWindows("chrome://zotero/content/progressQueueDialog.xul")[0];
+		var completeStr = Zotero.getString("general.finished");
+		while (progressWindow.document.getElementById("label").value != completeStr) {
+			await Zotero.Promise.delay(20);
+		}
+		
+		// The file should not have been renamed
+		assert.equal(attachment.attachmentFilename, 'test.pdf');
 	});
 });
