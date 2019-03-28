@@ -79,7 +79,6 @@
 		"callback-return": "off",
 		"camelcase": "error",
 		"capitalized-comments": "off",
-		"class-methods-use-this": "error",
 		"comma-dangle": "off",
 		"comma-spacing": [
 			"warn",
@@ -147,7 +146,6 @@
 			"unix"
 		],
 		"lines-around-comment": "error",
-		"lines-around-directive": "error",
 		"lines-between-class-members": "error",
 		"max-depth": "off",
 		"max-len": "off",
@@ -271,7 +269,8 @@
 		"no-unused-vars": [
 			"error",
 			{
-				"argsIgnorePattern": "^_"
+				"argsIgnorePattern": "^_",
+				"varsIgnorePattern": "^_"
 			}
 		],
 		"no-use-before-define": "off",
@@ -307,7 +306,11 @@
 			"error",
 			"never"
 		],
-		"padding-line-between-statements": "error",
+		"padding-line-between-statements": [
+			"error",
+			{ blankLine: "always", prev: "directive", next: "*" },
+			{ blankLine: "any",    prev: "directive", next: "directive" }
+		],
 		"prefer-arrow-callback": "off",
 		"prefer-const": "off",
 		"prefer-destructuring": "off",
@@ -359,7 +362,6 @@
 		"space-infix-ops": "warn",
 		"space-unary-ops": "error",
 		"spaced-comment": "warn",
-		"strict": "error",
 		"switch-colon-spacing": "error",
 		"symbol-description": "error",
 		"template-curly-spacing": [
