@@ -44,6 +44,7 @@
     "mocha": "^3.5.3",
     "multimatch": "^2.1.0",
     "node-sass": "^4.11.0",
+    "react-virtualized": "^9.21.0",
     "sinon": "^4.5.0",
     "universalify": "^0.1.1"
   }

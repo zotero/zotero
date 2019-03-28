@@ -3,21 +3,30 @@
 const React = require('react');
 const PropTypes = require('prop-types');
 const TagList = require('./tag-selector/tag-list');
-const Input = require('./form/input');
 const { Button } = require('./button');
 const { IconTagSelectorMenu } = require('./icons');
 const Search = require('./search');
 
-class TagSelector extends React.Component {
+class TagSelector extends React.PureComponent {
 	render() {
 		return (
 			<div className="tag-selector">
-				<TagList {...this.props} />
+				<TagList
+					ref={this.props.tagListRef}
+					tags={this.props.tags}
+					dragObserver={this.props.dragObserver}
+					onSelect={this.props.onSelect}
+					onTagContext={this.props.onTagContext}
+					loaded={this.props.loaded}
+					width={this.props.width}
+					height={this.props.height}
+					fontSize={this.props.fontSize}
+				/>
 				<div className="tag-selector-filter-container">
 					<Search
+						ref={this.props.searchBoxRef}
 						value={this.props.searchString}
 						onSearch={this.props.onSearch}
-						inputRef={this.searchBoxRef}
 						className="tag-selector-filter"
 					/>
 					<Button
@@ -34,24 +43,34 @@ class TagSelector extends React.Component {
 }
 
 TagSelector.propTypes = {
+	// TagList
+	tagListRef: PropTypes.object,
 	tags: PropTypes.arrayOf(PropTypes.shape({
 		name: PropTypes.string,
 		selected: PropTypes.bool,
 		color: PropTypes.string,
-		disabled: PropTypes.bool
+		disabled: PropTypes.bool,
+		width: PropTypes.number
 	})),
 	dragObserver: PropTypes.shape({
 		onDragOver: PropTypes.func,
 		onDragExit: PropTypes.func,
 		onDrop: PropTypes.func
 	}),
-	searchBoxRef: PropTypes.object,
-	searchString: PropTypes.string,
 	onSelect: PropTypes.func,
 	onTagContext: PropTypes.func,
-	onSearch: PropTypes.func,
-	onSettings: PropTypes.func,
 	loaded: PropTypes.bool,
+	width: PropTypes.number.isRequired,
+	height: PropTypes.number.isRequired,
+	fontSize: PropTypes.number.isRequired,
+	
+	// Search
+	searchBoxRef: PropTypes.object,
+	searchString: PropTypes.string,
+	onSearch: PropTypes.func,
+	
+	// Button
+	onSettings: PropTypes.func,
 };
 
 TagSelector.defaultProps = {

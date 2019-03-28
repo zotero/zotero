@@ -1,7 +1,7 @@
 "use strict";
 
 describe("Tag Selector", function () {
-	var win, doc, collectionsView, tagSelectorElem, tagSelector;
+	var libraryID, win, doc, collectionsView, tagSelectorElem, tagSelector;
 	
 	var clearTagColors = Zotero.Promise.coroutine(function* (libraryID) {
 		var tagColors = Zotero.Tags.getColors(libraryID);
@@ -11,17 +11,25 @@ describe("Tag Selector", function () {
 	});
 	
 	function getColoredTags() {
-		var elems = Array.from(tagSelectorElem.querySelectorAll('.tag-selector-item.colored'));
-		return elems.map(elem => elem.textContent);
+		return [...getColoredTagElements()].map(elem => elem.textContent);
+	}
+	
+	function getColoredTagElements() {
+		return tagSelectorElem.querySelectorAll('.tag-selector-item.colored');
 	}
 	
 	function getRegularTags() {
-		var elems = Array.from(tagSelectorElem.querySelectorAll('.tag-selector-item:not(.colored)'));
-		return elems.map(elem => elem.textContent);
+		return [...getRegularTagElements()].map(elem => elem.textContent);
+	}
+	
+	function getRegularTagElements() {
+		return tagSelectorElem.querySelectorAll('.tag-selector-item:not(.colored)');
 	}
 	
 	
 	before(function* () {
+		libraryID = Zotero.Libraries.userLibraryID;
+		
 		win = yield loadZoteroPane();
 		doc = win.document;
 		collectionsView = win.ZoteroPane.collectionsView;
@@ -32,15 +40,18 @@ describe("Tag Selector", function () {
 		yield Zotero.Promise.delay(100);
 	});
 	
-	beforeEach(function* () {
-		var libraryID = Zotero.Libraries.userLibraryID;
-		yield clearTagColors(libraryID);
+	beforeEach(async function () {
+		await selectLibrary(win);
+		await clearTagColors(libraryID);
 		// Default "Display All Tags in This Library" off
 		tagSelector.displayAllTags = false;
 		tagSelector.selectedTags = new Set();
 		tagSelector.handleSearch('');
-		tagSelector.onItemViewChanged({libraryID});
-		yield waitForTagSelector(win);
+		tagSelector.onItemViewChanged({
+			collectionTreeRow: win.ZoteroPane.getCollectionTreeRow(),
+			libraryID
+		});
+		await waitForTagSelector(win);
 	});
 	
 	after(function () {
@@ -48,7 +59,6 @@ describe("Tag Selector", function () {
 	});
 	
 	it("should sort colored tags by assigned number key", async function () {
-		var libraryID = Zotero.Libraries.userLibraryID;
 		var collection = await createDataObject('collection');
 		
 		await Zotero.Tags.setColor(libraryID, "B", '#AAAAAA', 1);
@@ -156,25 +166,17 @@ describe("Tag Selector", function () {
 		it("should show all tags in library when true", function* () {
 			tagSelector.displayAllTags = true;
 			
+			var tag1 = 'A ' + Zotero.Utilities.randomString();
+			var tag2 = 'B ' + Zotero.Utilities.randomString();
+			var tag3 = 'C ' + Zotero.Utilities.randomString();
+			
 			var collection = yield createDataObject('collection');
 			var item1 = createUnsavedDataObject('item');
-			item1.setTags([
-				{
-					tag: "A"
-				}
-			]);
+			item1.setTags([tag1]);
 			var item2 = createUnsavedDataObject('item', { collections: [collection.id] });
-			item2.setTags([
-				{
-					tag: "B"
-				}
-			]);
+			item2.setTags([tag2]);
 			var item3 = createUnsavedDataObject('item', { collections: [collection.id] });
-			item3.setTags([
-				{
-					tag: "C"
-				}
-			]);
+			item3.setTags([tag3]);
 			var promise = waitForTagSelector(win);
 			yield Zotero.DB.executeTransaction(function* () {
 				yield item1.save();
@@ -184,7 +186,15 @@ describe("Tag Selector", function () {
 			yield promise;
 			
 			var tags = getRegularTags();
-			assert.sameMembers(tags, ['A', 'B', 'C']);
+			assert.includeMembers(tags, [tag1, tag2, tag3]);
+			assert.isBelow(tags.indexOf(tag1), tags.indexOf(tag2));
+			assert.isBelow(tags.indexOf(tag2), tags.indexOf(tag3));
+			
+			var elems = getRegularTagElements();
+			// Tag not associated with any items in this collection should be disabled
+			assert.isTrue(elems[tags.indexOf(tag1)].classList.contains('disabled'));
+			assert.isFalse(elems[tags.indexOf(tag2)].classList.contains('disabled'));
+			assert.isFalse(elems[tags.indexOf(tag3)].classList.contains('disabled'));
 		});
 	});
 	
@@ -199,16 +209,18 @@ describe("Tag Selector", function () {
 				await promise;
 			}
 			
-			// Add item with tag to library root
-			var tagA = Zotero.Utilities.randomString();
-			var tagB = Zotero.Utilities.randomString();
+			// Add item with tags to library root
+			var tag1 = 'A ' + Zotero.Utilities.randomString();
+			var tag2 = 'M ' + Zotero.Utilities.randomString();
+			var tag3 = 'Z ' + Zotero.Utilities.randomString();
+			
 			var item = createUnsavedDataObject('item');
 			item.setTags([
 				{
-					tag: tagA
+					tag: tag3
 				},
 				{
-					tag: tagB,
+					tag: tag1,
 					type: 1
 				}
 			]);
@@ -216,7 +228,20 @@ describe("Tag Selector", function () {
 			await item.saveTx();
 			await promise;
 			
-			assert.includeMembers(getRegularTags(), [tagA, tagB]);
+			var tags = getRegularTags();
+			assert.includeMembers(tags, [tag1, tag3]);
+			assert.isBelow(tags.indexOf(tag1), tags.indexOf(tag3));
+			
+			// Add another tag to the item, sorted between the two other tags
+			promise = waitForTagSelector(win);
+			item.addTag(tag2);
+			await item.saveTx();
+			await promise;
+			
+			var tags = getRegularTags();
+			assert.includeMembers(tags, [tag1, tag2, tag3]);
+			assert.isBelow(tags.indexOf(tag1), tags.indexOf(tag2));
+			assert.isBelow(tags.indexOf(tag2), tags.indexOf(tag3));
 		});
 		
 		it("should add a tag when an item is added in a collection", function* () {
@@ -244,7 +269,112 @@ describe("Tag Selector", function () {
 			
 			// Tag selector should show the new item's tag
 			assert.equal(getRegularTags().length, 1);
-		})
+		});
+		
+		it("should update colored tag disabled state when items are added to and removed from collection", async function () {
+			var tag1 = 'A ' + Zotero.Utilities.randomString();
+			var tag2 = 'B ' + Zotero.Utilities.randomString();
+			var tag3 = 'C ' + Zotero.Utilities.randomString();
+			
+			// Add collection
+			var promise = waitForTagSelector(win);
+			var collection = await createDataObject('collection');
+			await promise;
+			
+			var elems = getColoredTagElements();
+			assert.lengthOf(elems, 0);
+			
+			await Zotero.Tags.setColor(libraryID, tag1, '#AAAAAA', 1);
+			await Zotero.Tags.setColor(libraryID, tag2, '#BBBBBB', 2);
+			await Zotero.Tags.setColor(libraryID, tag3, '#CCCCCC', 3);
+			
+			// Colored tags should appear initially as disabled
+			elems = getColoredTagElements();
+			assert.lengthOf(elems, 3);
+			assert.isTrue(elems[0].classList.contains('disabled'));
+			assert.isTrue(elems[1].classList.contains('disabled'));
+			assert.isTrue(elems[2].classList.contains('disabled'));
+			
+			// Add items with tags to collection
+			promise = waitForTagSelector(win)
+			var item1;
+			var item2;
+			await Zotero.DB.executeTransaction(async function () {
+				item1 = createUnsavedDataObject('item', { collections: [collection.id], tags: [tag1, tag2] });
+				item2 = createUnsavedDataObject('item', { collections: [collection.id], tags: [tag2] });
+				await item1.save();
+				await item2.save();
+			});
+			await promise;
+			
+			elems = getColoredTagElements();
+			assert.lengthOf(elems, 3);
+			// Assigned tags should be enabled
+			assert.isFalse(elems[0].classList.contains('disabled'));
+			assert.isFalse(elems[1].classList.contains('disabled'));
+			// Unassigned tag should still be disabled
+			assert.isTrue(elems[2].classList.contains('disabled'));
+			
+			// Remove item from collection
+			promise = waitForTagSelector(win)
+			item1.removeFromCollection(collection.id);
+			await item1.saveTx();
+			await promise;
+			
+			// A and C should be disabled
+			elems = getColoredTagElements();
+			assert.lengthOf(elems, 3);
+			assert.isTrue(elems[0].classList.contains('disabled'));
+			assert.isFalse(elems[1].classList.contains('disabled'));
+			assert.isTrue(elems[2].classList.contains('disabled'));
+		});
+		
+		it("should update colored tag disabled state when tags are added to and removed from items", async function () {
+			var tag1 = 'A ' + Zotero.Utilities.randomString();
+			var tag2 = 'B ' + Zotero.Utilities.randomString();
+			var tag3 = 'C ' + Zotero.Utilities.randomString();
+			
+			var elems = getColoredTagElements();
+			assert.lengthOf(elems, 0);
+			
+			await Zotero.Tags.setColor(libraryID, tag1, '#AAAAAA', 1);
+			await Zotero.Tags.setColor(libraryID, tag2, '#BBBBBB', 2);
+			await Zotero.Tags.setColor(libraryID, tag3, '#CCCCCC', 3);
+			
+			// Add items to collection
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item');
+			
+			var promise = waitForTagSelector(win)
+			await Zotero.DB.executeTransaction(async function () {
+				item1.setTags([tag1, tag2]);
+				item2.setTags([tag1]);
+				await item1.save();
+				await item2.save();
+			});
+			await promise;
+			
+			elems = getColoredTagElements();
+			assert.lengthOf(elems, 3);
+			// Assigned tags should be enabled
+			assert.isFalse(elems[0].classList.contains('disabled'));
+			assert.isFalse(elems[1].classList.contains('disabled'));
+			// Unassigned tag should still be disabled
+			assert.isTrue(elems[2].classList.contains('disabled'));
+			
+			// Remove tags from one item
+			promise = waitForTagSelector(win)
+			item1.setTags([]);
+			await item1.saveTx();
+			await promise;
+			
+			// B and C should be disabled
+			elems = getColoredTagElements();
+			assert.lengthOf(elems, 3);
+			assert.isFalse(elems[0].classList.contains('disabled'));
+			assert.isTrue(elems[1].classList.contains('disabled'));
+			assert.isTrue(elems[2].classList.contains('disabled'));
+		});
 		
 		it("should add a tag when an item is added to a collection", function* () {
 			var promise, tagSelector;
@@ -264,9 +394,7 @@ describe("Tag Selector", function () {
 					tag: 'C'
 				}
 			]);
-			promise = waitForTagSelector(win)
 			yield item.saveTx();
-			yield promise;
 			
 			// Tag selector should still be empty in collection
 			assert.equal(getRegularTags().length, 0);
@@ -281,8 +409,6 @@ describe("Tag Selector", function () {
 		})
 		
 		it("should show a colored tag at the top of the list even when linked to no items", function* () {
-			var libraryID = Zotero.Libraries.userLibraryID;
-			
 			var tagElems = tagSelectorElem.querySelectorAll('.tag-selector-item');
 			var count = tagElems.length;
 
@@ -295,8 +421,6 @@ describe("Tag Selector", function () {
 		});
 		
 		it("shouldn't re-insert a new tag that matches an existing color", function* () {
-			var libraryID = Zotero.Libraries.userLibraryID;
-			
 			// Add A and B as colored tags without any items
 			yield Zotero.Tags.setColor(libraryID, "A", '#CC9933', 1);
 			yield Zotero.Tags.setColor(libraryID, "B", '#990000', 2);
@@ -383,6 +507,43 @@ describe("Tag Selector", function () {
 			assert.equal(getRegularTags().length, 0);
 		})
 		
+		it("shouldn't remove a tag when a tag is removed from an item in a collection in displayAllTags mode", async function () {
+			tagSelector.displayAllTags = true;
+			
+			var tag = Zotero.Utilities.randomString();
+			
+			// Add item with tag not in collection
+			var promise = waitForTagSelector(win);
+			var item1 = await createDataObject('item', { tags: [tag] });
+			await promise;
+			
+			promise = waitForTagSelector(win);
+			var collection = await createDataObject('collection');
+			await promise;
+			
+			// Add item with tag to collection
+			promise = waitForTagSelector(win);
+			var item2 = await createDataObject('item', { collections: [collection.id], tags: [tag] });
+			await promise;
+			
+			// Tag selector should show the new item's tag
+			var tags = getRegularTags();
+			assert.include(tags, tag);
+			var elems = getRegularTagElements();
+			assert.isFalse(elems[tags.indexOf(tag)].classList.contains('disabled'));
+			
+			item2.removeTag(tag);
+			promise = waitForTagSelector(win);
+			await item2.saveTx();
+			await promise;
+			
+			// Tag selector should still show the removed item's tag
+			tags = getRegularTags();
+			assert.include(tags, tag);
+			elems = getRegularTagElements();
+			assert.isTrue(elems[tags.indexOf(tag)].classList.contains('disabled'));
+		});
+		
 		it("should remove a tag when a tag is deleted for a library", function* () {
 			yield selectLibrary(win);
 			
@@ -411,7 +572,6 @@ describe("Tag Selector", function () {
 		});
 		
 		it("should deselect a tag when removed from the last item in this view", async function () {
-			var libraryID = Zotero.Libraries.userLibraryID;
 			await selectLibrary(win);
 			
 			var tag1 = Zotero.Utilities.randomString();
@@ -447,7 +607,6 @@ describe("Tag Selector", function () {
 		});
 		
 		it("should deselect a tag when deleted from a library", async function () {
-			var libraryID = Zotero.Libraries.userLibraryID;
 			await selectLibrary(win);
 			
 			var promise = waitForTagSelector(win, 2);
@@ -517,7 +676,6 @@ describe("Tag Selector", function () {
 			var oldTag = Zotero.Utilities.randomString();
 			var newTag = Zotero.Utilities.randomString();
 			
-			var libraryID = Zotero.Libraries.userLibraryID;
 			var promise = waitForTagSelector(win);
 			yield Zotero.Tags.setColor(libraryID, oldTag, "#F3F3F3");
 			yield promise;

@@ -9,6 +9,7 @@
     "chrome/content/zotero/xpcom/citeproc.js",
     "resource/react.js",
     "resource/react-dom.js",
+    "resource/react-virtualized.js",
     "test/resource/*.js"
   ],
   "plugins": [

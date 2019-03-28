@@ -105,7 +105,7 @@ var ZoteroPane = new function()
 			this.updateWindow();
 			this.updateToolbarPosition();
 		});
-		window.setTimeout(ZoteroPane_Local.updateToolbarPosition, 0);
+		window.setTimeout(this.updateToolbarPosition.bind(this), 0);
 		
 		Zotero.updateQuickSearchBox(document);
 		
@@ -1103,11 +1103,19 @@ var ZoteroPane = new function()
 			this.tagSelector = Zotero.TagSelector.init(
 				document.getElementById('zotero-tag-selector'),
 				{
-					onSelection: this.updateTagFilter.bind(this)
+					container: 'zotero-tag-selector-container',
+					onSelection: this.updateTagFilter.bind(this),
 				}
 			);
 		}
 	};
+	
+	
+	this.handleTagSelectorResize = Zotero.Utilities.debounce(function() {
+		if (this.tagSelectorShown()) {
+			this.tagSelector.handleResize();
+		}
+	}, 100);
 	
 	
 	/*
@@ -1120,7 +1128,7 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.toggleTagSelector = Zotero.Promise.coroutine(function* () {
+	this.toggleTagSelector = function () {
 		var container = document.getElementById('zotero-tag-selector-container');
 		var showing = container.getAttribute('collapsed') == 'true';
 		container.setAttribute('collapsed', !showing);
@@ -1129,14 +1137,15 @@ var ZoteroPane = new function()
 		// and focus filter textbox
 		if (showing) {
 			this.initTagSelector();
-			yield this.setTagScope();
 			ZoteroPane.tagSelector.focusTextbox();
+			this.setTagScope();
 		}
 		// If hiding, clear selection
 		else {
 			ZoteroPane.tagSelector.uninit();
+			ZoteroPane.tagSelector = null;
 		}
-	});
+	};
 	
 	
 	this.tagSelectorShown = function () {
@@ -1153,7 +1162,7 @@ var ZoteroPane = new function()
 	 *
 	 * Passed to the items tree to trigger on changes
 	 */
-	this.setTagScope = async function () {
+	this.setTagScope = function () {
 		var collectionTreeRow = self.getCollectionTreeRow();
 		if (self.tagSelectorShown()) {
 			if (collectionTreeRow.editable) {
@@ -1163,9 +1172,8 @@ var ZoteroPane = new function()
 				ZoteroPane_Local.tagSelector.setMode('view');
 			}
 			ZoteroPane_Local.tagSelector.onItemViewChanged({
-				collectionTreeRow,
 				libraryID: collectionTreeRow.ref.libraryID,
-				tagsInScope: await collectionTreeRow.getChildTags()
+				collectionTreeRow
 			});
 		}
 	};
@@ -4849,8 +4857,9 @@ var ZoteroPane = new function()
 		var itemToolbar = document.getElementById("zotero-item-toolbar");
 		var tagSelector = document.getElementById("zotero-tag-selector");
 		
-		collectionsToolbar.style.width = collectionsPane.boxObject.width + 'px';
-		tagSelector.style.maxWidth = collectionsPane.boxObject.width + 'px';
+		var collectionsPaneWidth = collectionsPane.boxObject.width + 'px';
+		collectionsToolbar.style.width = collectionsPaneWidth;
+		tagSelector.style.maxWidth = collectionsPaneWidth;
 		
 		if (stackedLayout || itemPane.collapsed) {
 		// The itemsToolbar and itemToolbar share the same space, and it seems best to use some flex attribute from right (because there might be other icons appearing or vanishing).
@@ -4876,6 +4885,8 @@ var ZoteroPane = new function()
 		// Allow item pane to shrink to available height in stacked mode, but don't expand to be too
 		// wide when there's no persisted width in non-stacked mode
 		itemPane.setAttribute("flex", stackedLayout ? 1 : 0);
+		
+		this.handleTagSelectorResize();
 	}
 	
 	/**

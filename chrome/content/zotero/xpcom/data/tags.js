@@ -137,39 +137,63 @@ Zotero.Tags = new function() {
 	 * Get all tags in library
 	 *
 	 * @param {Number} libraryID
-	 * @param {Array}  [types]    Tag types to fetch
+	 * @param {Number[]} [types] - Tag types to fetch
 	 * @return {Promise<Array>}   A promise for an array containing tag objects in API JSON format
 	 *                            [{ { tag: "foo" }, { tag: "bar", type: 1 }]
 	 */
-	this.getAll = Zotero.Promise.coroutine(function* (libraryID, types) {
-		var sql = "SELECT DISTINCT name AS tag, type FROM tags "
-			+ "JOIN itemTags USING (tagID) JOIN items USING (itemID) WHERE libraryID=?";
-		var params = [libraryID];
-		if (types) {
-			sql += " AND type IN (" + types.join() + ")";
-		}
-		var rows = yield Zotero.DB.queryAsync(sql, params);
-		return rows.map((row) => this.cleanData(row));
-	});
+	this.getAll = async function (libraryID, types) {
+		return this.getAllWithin({ libraryID, types });
+	};
 	
 	
 	/**
 	 * Get all tags within the items of a temporary table of search results
 	 *
-	 * @param {String} tmpTable  Temporary table with items to use
-	 * @param {Array} [types]  Array of tag types to fetch
-	 * @return {Promise<Object>}  Promise for object with tag data in API JSON format, keyed by tagID
+	 * @param {Object}
+	 * @param {Object.Number} libraryID
+	 * @param {Object.String} tmpTable - Temporary table with items to use
+	 * @param {Object.Number[]} [types] - Array of tag types to fetch
+	 * @param {Object.Number[]} [tagIDs] - Array of tagIDs to limit the result to
+	 * @return {Promise<Array[]>} - Promise for an array of tag objects in API JSON format
 	 */
-	this.getAllWithinSearchResults = Zotero.Promise.coroutine(function* (tmpTable, types) {
-		var sql = "SELECT DISTINCT name AS tag, type FROM itemTags "
-			+ "JOIN tags USING (tagID) WHERE itemID IN "
-			+ "(SELECT itemID FROM " + tmpTable + ") ";
-		if (types) {
-			sql += "AND type IN (" + types.join() + ") ";
+	this.getAllWithin = async function ({ libraryID, tmpTable, types, tagIDs }) {
+		// mozStorage/Proxy are slow, so get in a single column
+		var sql = "SELECT DISTINCT tagID || ':' || type FROM itemTags "
+			+ "JOIN tags USING (tagID) ";
+		var params = [];
+		if (libraryID) {
+			sql += "JOIN items USING (itemID) WHERE libraryID = ? ";
+			params.push(libraryID);
 		}
-		var rows = yield Zotero.DB.queryAsync(sql);
-		return rows.map((row) => this.cleanData(row));
-	});
+		else {
+			sql += "WHERE 1 ";
+		}
+		if (tmpTable) {
+			if (libraryID) {
+				throw new Error("tmpTable and libraryID are mutually exclusive");
+			}
+			sql += "AND itemID IN (SELECT itemID FROM " + tmpTable + ") ";
+		}
+		if (types && types.length) {
+			sql += "AND type IN (" + new Array(types.length).fill('?').join(', ') + ") ";
+			params.push(...types);
+		}
+		if (tagIDs) {
+			sql += "AND tagID IN (" + new Array(tagIDs.length).fill('?').join(', ') + ") ";
+			params.push(...tagIDs);
+		}
+		// Not a perfect locale sort, but speeds up the sort in the tag selector later without any
+		// discernible performance cost
+		sql += "ORDER BY name COLLATE NOCASE";
+		var rows = await Zotero.DB.columnQueryAsync(sql, params);
+		return rows.map((row) => {
+			var [tagID, type] = row.split(':');
+			return this.cleanData({
+				tag: Zotero.Tags.getName(parseInt(tagID)),
+				type: type
+			});
+		});
+	};
 	
 	
 	/**

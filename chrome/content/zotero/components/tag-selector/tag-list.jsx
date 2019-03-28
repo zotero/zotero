@@ -1,23 +1,123 @@
 const React = require('react');
-const { FormattedMessage } = require('react-intl');
 const PropTypes = require('prop-types');
-const cx = require('classnames');
+const { FormattedMessage } = require('react-intl');
+var { Collection } = require('react-virtualized');
+
+var filterBarHeight = 32;
+var tagPaddingTop = 4;
+var tagPaddingLeft = 2;
+var tagPaddingRight = 2;
+var tagPaddingBottom = 4;
+var tagSpaceBetweenX = 7;
+var tagSpaceBetweenY = 4;
+var panePaddingTop = 2;
+var panePaddingLeft = 2;
+var panePaddingRight = 25;
+//var panePaddingBottom = 2;
+var minHorizontalPadding = panePaddingLeft + tagPaddingLeft + tagPaddingRight + panePaddingRight;
 
 class TagList extends React.PureComponent {
-	renderTag(index) {
-		const { tags } = this.props;
-		const tag = index < tags.length ?
-			tags[index] : {
-				tag: "",
-			};
+	constructor(props) {
+		super(props);
+		this.collectionRef = React.createRef();
+		this.scrollToTopOnNextUpdate = false;
+		this.prevTagCount = 0;
+	}
+	
+	componentDidUpdate(prevProps) {
+		// Redraw all tags on every refresh
+		if (this.collectionRef && this.collectionRef.current) {
+			// If width or height changed, recompute positions. It seems like this should happen
+			// automatically, but it doesn't as of 9.21.0.
+			if (prevProps.height != this.props.height
+					|| prevProps.width != this.props.width
+					|| prevProps.fontSize != this.props.fontSize
+					|| prevProps.tags != this.props.tags) {
+				this.collectionRef.current.recomputeCellSizesAndPositions();
+			}
+			// If dimensions didn't change, just redraw at current positions. Without this, clicking
+			// on a tag that doesn't change the tag count (as when clicking on a second tag in an
+			// already filtered list) doesn't update the tag's selection state.
+			else {
+				this.collectionRef.current.forceUpdate();
+			}
+		}
+		
+		if (this.scrollToTopOnNextUpdate && this.collectionRef.current) {
+			this.scrollToTop();
+			this.scrollToTopOnNextUpdate = false;
+		}
+	}
+	
+	scrollToTop() {
+		if (!this.collectionRef.current) return;
+		// Scroll to the top of the view
+		document.querySelector('.tag-selector-list').scrollTop = 0;
+		// Reset internal component scroll state to force it to redraw components, since that
+		// doesn't seem to happen automatically as of 9.21.0. Without this, scrolling down and
+		// clicking on a tag blanks out the pane (presumably because it still thinks it's at an
+		// offset where no tags exist).
+		if (this.collectionRef.current._collectionView) {
+			this.collectionRef.current._collectionView._setScrollPosition({
+				scrollLeft: 0,
+				scrollTop: 0
+			});
+		}
+	}
+	
+	/**
+	 * Calculate the x,y coordinates of all tags
+	 */
+	updatePositions() {
+		var tagMaxWidth = this.props.width - minHorizontalPadding;
+		var rowHeight = tagPaddingTop + this.props.fontSize + tagPaddingBottom + tagSpaceBetweenY;
+		var positions = [];
+		var row = 0;
+		let rowX = panePaddingLeft;
+		for (let i = 0; i < this.props.tags.length; i++) {
+			let tag = this.props.tags[i];
+			let tagWidth = tagPaddingLeft + Math.min(tag.width, tagMaxWidth) + tagPaddingRight;
+			// If cell fits, add to current row
+			if ((rowX + tagWidth) < (this.props.width - panePaddingLeft - panePaddingRight)) {
+				positions[i] = [rowX, panePaddingTop + (row * rowHeight)];
+			}
+			// Otherwise, start new row
+			else {
+				row++;
+				rowX = panePaddingLeft;
+				positions[i] = [rowX, panePaddingTop + (row * rowHeight)];
+			}
+			rowX += tagWidth + tagSpaceBetweenX;
+		}
+		this.positions = positions;
+	}
+	
+	cellSizeAndPositionGetter = ({ index }) => {
+		var tagMaxWidth = this.props.width - minHorizontalPadding;
+		return {
+			width: Math.min(this.props.tags[index].width, tagMaxWidth),
+			height: this.props.fontSize,
+			x: this.positions[index][0],
+			y: this.positions[index][1]
+		};
+	}
+	
+	renderTag = ({ index, _key, style }) => {
+		var tag = this.props.tags[index];
+		
 		const { onDragOver, onDragExit, onDrop } = this.props.dragObserver;
-
-		const className = cx('tag-selector-item', 'zotero-clicky', {
-			selected: tag.selected,
-			colored: tag.color,
-			disabled: tag.disabled
-		});
-
+		
+		var className = 'tag-selector-item zotero-clicky';
+		if (tag.selected) {
+			className += ' selected';
+		}
+		if (tag.color) {
+			className += ' colored';
+		}
+		if (tag.disabled) {
+			className += ' disabled';
+		}
+		
 		let props = {
 			className,
 			onClick: ev => !tag.disabled && this.props.onSelect(tag.name, ev),
@@ -26,52 +126,89 @@ class TagList extends React.PureComponent {
 			onDragExit,
 			onDrop
 		};
-
+		
+		props.style = {
+			...style
+		};
+		
 		if (tag.color) {
-			props['style'] = {
-				color: tag.color,
-			};
+			props.style.color = tag.color;
 		}
-
-
+		
 		return (
-			<li key={index} {...props}>
+			<div key={tag.name} {...props}>
 				{tag.name}
-			</li>
+			</div>
 		);
 	}
-
+	
 	render() {
-		const totalTagCount = this.props.tags.length;
-		var tagList = (
-			<ul className="tag-selector-list">
-				{
-					[...Array(totalTagCount).keys()].map(index => this.renderTag(index))
-				}
-			</ul>
-		);
+		Zotero.debug("Rendering tag list");
+		const tagCount = this.props.tags.length;
+		
+		var tagList;
 		if (!this.props.loaded) {
 			tagList = (
 				<div className="tag-selector-message">
 					<FormattedMessage id="zotero.tagSelector.loadingTags" />
 				</div>
 			);
-		} else if (totalTagCount == 0) {
+		}
+		else if (tagCount == 0) {
 			tagList = (
 				<div className="tag-selector-message">
 					<FormattedMessage id="zotero.tagSelector.noTagsToDisplay" />
 				</div>
 			);
 		}
+		else {
+			// Scroll to top if more than one tag was removed
+			if (tagCount < this.prevTagCount - 1) {
+				this.scrollToTopOnNextUpdate = true;
+			}
+			this.prevTagCount = tagCount;
+			this.updatePositions();
+			tagList = (
+				<Collection
+					ref={this.collectionRef}
+					className="tag-selector-list"
+					cellCount={tagCount}
+					cellRenderer={this.renderTag}
+					cellSizeAndPositionGetter={this.cellSizeAndPositionGetter}
+					verticalOverscanSize={300}
+					width={this.props.width}
+					height={this.props.height - filterBarHeight}
+				/>
+			);
+		}
+		
 		return (
-			<div
-				className="tag-selector-container"
-				ref={ref => { this.container = ref }}>
+			<div className="tag-selector-list-container">
 				{tagList}
 			</div>
-		)
-
+		);
 	}
+	
+	static propTypes = {
+		tags: PropTypes.arrayOf(PropTypes.shape({
+			name: PropTypes.string,
+			selected: PropTypes.bool,
+			color: PropTypes.string,
+			disabled: PropTypes.bool,
+			width: PropTypes.number
+		})),
+		dragObserver: PropTypes.shape({
+			onDragOver: PropTypes.func,
+			onDragExit: PropTypes.func,
+			onDrop: PropTypes.func
+		}),
+		onSelect: PropTypes.func,
+		onTagContext: PropTypes.func,
+		loaded: PropTypes.bool,
+		width: PropTypes.number.isRequired,
+		height: PropTypes.number.isRequired,
+		fontSize: PropTypes.number.isRequired,
+	};
 }
 
 module.exports = TagList;

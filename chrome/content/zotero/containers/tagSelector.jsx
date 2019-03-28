@@ -1,24 +1,22 @@
 /* global Zotero: false */
 'use strict';
 
-(function() {
-
 const React = require('react');
 const ReactDOM = require('react-dom');
+const PropTypes = require('prop-types');
 const { IntlProvider } = require('react-intl');
 const TagSelector = require('components/tag-selector.js');
-const noop = Promise.resolve();
 const defaults = {
 	tagColors: new Map(),
 	tags: [],
+	scope: null,
 	showAutomatic: Zotero.Prefs.get('tagSelector.showAutomatic'),
 	searchString: '',
-	inScope: new Set(),
 	loaded: false
 };
 const { Cc, Ci } = require('chrome');
 
-Zotero.TagSelector = class TagSelectorContainer extends React.Component {
+Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this._notifierID = Zotero.Notifier.registerObserver(
@@ -26,31 +24,57 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 			['collection-item', 'item', 'item-tag', 'tag', 'setting'],
 			'tagSelector'
 		);
-		this.displayAllTags = Zotero.Prefs.get('tagSelector.displayAllTags');
-		this.selectedTags = new Set();
-		this.state = defaults;
+		Zotero.Prefs.registerObserver('fontSize', this.handleFontChange.bind(this));
+		
+		this.tagListRef = React.createRef();
 		this.searchBoxRef = React.createRef();
+		
+		this.displayAllTags = Zotero.Prefs.get('tagSelector.displayAllTags');
+		// Not stored in state to avoid an unnecessary refresh. Instead, when a tag is selected, we
+		// trigger the selection handler, which updates the visible items, which triggers
+		// onItemViewChanged(), which triggers a refresh with the new tags.
+		this.selectedTags = new Set();
+		this.widths = new Map();
+		this.widthsBold = new Map();
+		
+		this.state = {
+			...defaults,
+			...this.getContainerDimensions(),
+			...this.getFontInfo()
+		};
 	}
 	
 	focusTextbox() {
-		this.searchBoxRef.focus();
+		this.searchBoxRef.current.focus();
+	}
+	
+	componentDidUpdate(_prevProps, _prevState) {
+		Zotero.debug("Tag selector updated");
+		
+		// If we changed collections, scroll to top
+		if (this.collectionTreeRow && this.collectionTreeRow.id != this.prevTreeViewID) {
+			this.tagListRef.current.scrollToTop();
+			this.prevTreeViewID = this.collectionTreeRow.id;
+		}
 	}
 	
 	// Update trigger #1 (triggered by ZoteroPane)
-	async onItemViewChanged({collectionTreeRow, libraryID, tagsInScope}) {
+	async onItemViewChanged({ collectionTreeRow, libraryID }) {
 		Zotero.debug('Updating tag selector from current view');
 		
-		this.collectionTreeRow = collectionTreeRow || this.collectionTreeRow;
-		
-		let newState = {loaded: true};
-		
-		if (!this.state.tagColors.length && libraryID && this.libraryID != libraryID) {
-			newState.tagColors = Zotero.Tags.getColors(libraryID);
-		}
+		var prevLibraryID = this.libraryID;
+		this.collectionTreeRow = collectionTreeRow;
 		this.libraryID = libraryID;
 		
-		newState.tags = await this.getTags(tagsInScope,
-			this.state.tagColors.length ? this.state.tagColors : newState.tagColors);
+		var newState = {
+			loaded: true
+		};
+		if (prevLibraryID != libraryID) {
+			newState.tagColors = Zotero.Tags.getColors(libraryID);
+		}
+		var { tags, scope } = await this.getTagsAndScope();
+		newState.tags = tags;
+		newState.scope = scope;
 		this.setState(newState);
 	}
 	
@@ -59,13 +83,13 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 		if (type === 'setting') {
 			if (ids.some(val => val.split('/')[1] == 'tagColors')) {
 				Zotero.debug("Updating tag selector after tag color change");
-				let tagColors = Zotero.Tags.getColors(this.libraryID);
-				this.state.tagColors = tagColors;
-				this.setState({tagColors, tags: await this.getTags(null, tagColors)});
+				this.setState({
+					tagColors: Zotero.Tags.getColors(this.libraryID)
+				});
 			}
 			return;
 		}
-			
+		
 		// Ignore anything other than deletes in duplicates view
 		if (this.collectionTreeRow && this.collectionTreeRow.isDuplicates()) {
 			switch (event) {
@@ -83,107 +107,346 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 			return;
 		}
 		
-		// If a selected tag no longer exists, deselect it
-		if (type == 'tag' && (event == 'modify' || event == 'delete')) {
-			let changed = false;
-			for (let id of ids) {
-				let tag = extraData[id].old.tag;
-				if (this.selectedTags.has(tag)) {
-					this.selectedTags.delete(tag);
-					changed = true;
-				}
-			}
-			if (changed && typeof(this.props.onSelection) === 'function') {
-				this.props.onSelection(this.selectedTags);
-			}
+		// Ignore tag deletions, which are handled by 'item-tag' 'remove'
+		if (type == 'tag') {
 			return;
 		}
 		
-		// TODO: Check libraryID for some events to avoid refreshing unnecessarily on sync changes?
-		
 		Zotero.debug("Updating tag selector after tag change");
-		var newTags = await this.getTags();
 		
-		if (type == 'item-tag' && event == 'remove') {
-			let changed = false;
-			let visibleTags = newTags.map(tag => tag.tag);
+		if (type == 'item-tag' && ['add', 'remove'].includes(event)) {
+			let changedTagsInScope = [];
+			let changedTagsInView = [];
+			// Group tags by tag type for lookup
+			let tagsByType = new Map();
 			for (let id of ids) {
-				let tag = extraData[id].tag;
-				if (this.selectedTags.has(tag) && !visibleTags.includes(tag)) {
-					this.selectedTags.delete(tag);
-					changed = true;
+				let [_, tagID] = id.split('-');
+				let type = extraData[id].type;
+				let typeTags = tagsByType.get(type);
+				if (!typeTags) {
+					typeTags = [];
+					tagsByType.set(type, typeTags);
+				}
+				typeTags.push(parseInt(tagID));
+			}
+			// Check tags for each tag type to see if they're in view/scope
+			for (let [type, tagIDs] of tagsByType) {
+				changedTagsInScope.push(...await this.collectionTreeRow.getTags([type], tagIDs));
+				if (this.displayAllTags) {
+					changedTagsInView.push(
+						...await Zotero.Tags.getAllWithin({ libraryID: this.libraryID, tagIDs })
+					);
 				}
 			}
-			if (changed && typeof(this.props.onSelection) === 'function') {
-				this.props.onSelection(this.selectedTags);
+			if (!this.displayAllTags) {
+				changedTagsInView = changedTagsInScope;
+			}
+			changedTagsInScope = new Set(changedTagsInScope.map(tag => tag.tag));
+			
+			if (event == 'add') {
+				this.sortTags(changedTagsInView);
+				if (!changedTagsInView.length) {
+					return;
+				}
+				this.setState((state, _props) => {
+					// Insert sorted
+					var newTags = [...state.tags];
+					var newScope = state.scope ? new Set(state.scope) : new Set();
+					var scopeChanged = false;
+					var start = 0;
+					var collation = Zotero.getLocaleCollation();
+					for (let tag of changedTagsInView) {
+						let name = tag.tag;
+						let added = false;
+						for (let i = start; i < newTags.length; i++) {
+							start++;
+							let cmp = collation.compareString(1, newTags[i].tag, name);
+							// Skip tag if it already exists
+							if (cmp == 0) {
+								added = true;
+								break;
+							}
+							if (cmp > 0) {
+								newTags.splice(i, 0, tag);
+								added = true;
+								break;
+							}
+						}
+						if (!added) {
+							newTags.push(tag);
+						}
+						
+						if (changedTagsInScope.has(name) && !newScope.has(name)) {
+							newScope.add(name);
+							scopeChanged = true;
+						}
+					}
+					
+					var newState = {
+						tags: newTags
+					};
+					if (scopeChanged) {
+						newState.scope = newScope;
+					}
+					return newState;
+				});
+				return;
+			}
+			else if (event == 'remove') {
+				changedTagsInView = new Set(changedTagsInView.map(tag => tag.tag));
+				
+				this.setState((state, props) => {
+					var previousTags = new Set(state.tags.map(tag => tag.tag));
+					var tagsToRemove = new Set();
+					var newScope;
+					var selectionChanged = false;
+					for (let id of ids) {
+						let name = extraData[id].tag;
+						let removed = false;
+						
+						// If tag was shown previously and shouldn't be anymore, remove from view
+						if (previousTags.has(name) && !changedTagsInView.has(name)) {
+							tagsToRemove.add(name);
+							removed = true;
+						}
+						
+						// Remove from scope if there is one
+						if (state.scope && state.scope.has(name) && !changedTagsInScope.has(name)) {
+							if (!newScope) {
+								newScope = new Set(state.scope);
+							}
+							newScope.delete(name);
+							removed = true;
+						}
+						
+						// Removed from either view or scope
+						if (removed) {
+							// Deselect if selected
+							if (this.selectedTags.has(name)) {
+								this.selectedTags.delete(name);
+								selectionChanged = true;
+							}
+							
+							// If removing a tag from view, clear its cached width. It might still
+							// be in this or another library, but if so we'll just recalculate its
+							// width the next time it's needed.
+							this.widths.delete(name);
+							this.widthsBold.delete(name);
+						}
+					}
+					if (selectionChanged && typeof props.onSelection == 'function') {
+						props.onSelection(this.selectedTags);
+					}
+					var newState = {};
+					if (tagsToRemove.size) {
+						newState.tags = state.tags.filter(tag => !tagsToRemove.has(tag.tag));
+					}
+					if (newScope) {
+						newState.scope = newScope;
+					}
+					return newState;
+				});
+				return;
 			}
 		}
 		
-		return this.setState({tags: newTags});
+		this.setState(await this.getTagsAndScope());
 	}
 	
-	async getTags(tagsInScope, tagColors) {
-		if (!tagsInScope) {
-			tagsInScope = await this.collectionTreeRow.getChildTags();
-		}
-		this.inScope = new Set(tagsInScope.map(t => t.tag));
-		let tags;
+	async getTagsAndScope() {
+		var tags = await this.collectionTreeRow.getTags();
+		// The scope is all visible tags, not all tags in the library
+		var scope = new Set(tags.map(t => t.tag));
 		if (this.displayAllTags) {
-			tags = await Zotero.Tags.getAll(this.libraryID, [0, 1]);
-		} else {
-			tags = tagsInScope
+			tags = await Zotero.Tags.getAll(this.libraryID);
 		}
 		
-		tagColors = tagColors || this.state.tagColors;
-			
-		// Add colored tags that aren't already real tags
-		let regularTags = new Set(tags.map(tag => tag.tag));
-		let coloredTags = Array.from(tagColors.keys());
-
-		coloredTags.filter(ct => !regularTags.has(ct)).forEach(x =>
-			tags.push(Zotero.Tags.cleanData({ tag: x }))
-		);
-			
-		// Sort by name (except for colored tags, which sort by assigned number key)
-		tags.sort(function (a, b) {
-			let aColored = tagColors.get(a.tag);
-			let bColored = tagColors.get(b.tag);
-			if (aColored && !bColored) return -1;
-			if (!aColored && bColored) return 1;
-			if (aColored && bColored) {
-				return aColored.position - bColored.position;
+		// If tags haven't changed, return previous array without sorting again
+		if (this.state.tags.length == tags.length) {
+			let prevTags = new Set(this.state.tags.map(tag => tag.tag));
+			let same = true;
+			for (let tag of tags) {
+				if (!prevTags.has(tag.tag)) {
+					same = false;
+					break;
+				}
 			}
-			
-			return Zotero.getLocaleCollation().compareString(1, a.tag, b.tag);
-		});
+			if (same) {
+				Zotero.debug("Tags haven't changed");
+				return {
+					tags: this.state.tags,
+					scope
+				};
+			}
+		}
 		
-		return tags;
+		this.sortTags(tags);
+		return { tags, scope };
 	}
-
+	
+	sortTags(tags) {
+		var d = new Date();
+		var collation = Zotero.Intl.collation;
+		tags.sort(function (a, b) {
+			return collation.compareString(1, a.tag, b.tag);
+		});
+		Zotero.debug(`Sorted tags in ${new Date() - d} ms`);
+	}
+	
+	getContainerDimensions() {
+		var container = document.getElementById(this.props.container);
+		return {
+			width: container.clientWidth,
+			height: container.clientHeight
+		};
+	}
+	
+	handleResize() {
+		//Zotero.debug("Resizing tag selector");
+		var { width, height } = this.getContainerDimensions();
+		this.setState({ width, height });
+	}
+	
+	getFontInfo() {
+		var elem = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+		elem.className = 'tag-selector-item';
+		elem.style.position = 'absolute';
+		elem.style.opacity = 0;
+		var container = document.getElementById(this.props.container);
+		container.appendChild(elem);
+		var style = window.getComputedStyle(elem);
+		var props = {
+			fontSize: style.getPropertyValue('font-size'),
+			fontFamily: style.getPropertyValue('font-family')
+		};
+		container.removeChild(elem);
+		return props;
+	}
+	
+	/**
+	 * Recompute tag widths based on the current font settings
+	 */
+	handleFontChange() {
+		this.widths.clear();
+		this.widthsBold.clear();
+		this.setState({
+			...this.getFontInfo()
+		});
+	}
+	
+	/**
+	 * Uses canvas.measureText to compute and return the width of the given text of given font in pixels.
+	 *
+	 * @param {String} text The text to be rendered.
+	 * @param {String} font The css font descriptor that text is to be rendered with (e.g. "bold 14px verdana").
+	 *
+	 * @see https://stackoverflow.com/questions/118241/calculate-text-width-with-javascript/21015393#21015393
+	 */
+	getTextWidth(text, font) {
+		// re-use canvas object for better performance
+		var canvas = this.canvas || (this.canvas = document.createElementNS("http://www.w3.org/1999/xhtml", "canvas"));
+		var context = canvas.getContext("2d");
+		context.font = font;
+		// Add a little more to make sure we don't crop
+		var metrics = context.measureText(text);
+		return Math.ceil(metrics.width);
+	}
+	
+	getWidth(name) {
+		var num = 0;
+		var font = this.state.fontSize + ' ' + this.state.fontFamily;
+		// Colored tags are shown in bold, which results in a different width
+		var fontBold = 'bold ' + font;
+		let hasColor = this.state.tagColors.has(name);
+		let widths = hasColor ? this.widthsBold : this.widths;
+		let width = widths.get(name);
+		if (width === undefined) {
+			//Zotero.debug(`Calculating ${hasColor ? 'bold ' : ''}width for tag '${name}'`);
+			width = this.getTextWidth(name, hasColor ? fontBold : font);
+			widths.set(name, width);
+		}
+		return width;
+	}
+	
 	render() {
-		let tags = this.state.tags;
+		Zotero.debug("Rendering tag selector");
+		var tags = this.state.tags;
+		var tagColors = this.state.tagColors;
+		
 		if (!this.state.showAutomatic) {
-			tags = tags.filter(t => t.type != 1).map(t => t.tag);
+			tags = tags.filter(t => t.type != 1);
 		}
 		// Remove duplicates from auto and manual tags
 		else {
-			tags = Array.from(new Set(tags.map(t => t.tag)));
+			let seen = new Set();
+			let newTags = [];
+			for (let tag of tags) {
+				if (!seen.has(tag.tag)) {
+					newTags.push(tag);
+					seen.add(tag.tag);
+				}
+			}
+			tags = newTags;
 		}
+		
+		// Extract colored tags
+		var coloredTags = [];
+		for (let i = 0; i < tags.length; i++) {
+			if (tagColors.has(tags[i].tag)) {
+				coloredTags.push(...tags.splice(i, 1));
+				i--;
+			}
+		}
+		
+		// Add colored tags that aren't already real tags
+		var extractedColoredTags = new Set(coloredTags.map(tag => tag.tag));
+		[...tagColors.keys()]
+			.filter(tag => !extractedColoredTags.has(tag))
+			.forEach(tag => coloredTags.push(Zotero.Tags.cleanData({ tag })));
+		
+		// Sort colored tags and place at beginning
+		coloredTags.sort((a, b) => {
+			return tagColors.get(a.tag).position - tagColors.get(b.tag).position;
+		});
+		tags = coloredTags.concat(tags);
+		
+		// Filter
 		if (this.state.searchString) {
 			let lcStr = this.state.searchString.toLowerCase();
-			tags = tags.filter(tag => tag.toLowerCase().includes(lcStr));
+			tags = tags.filter(tag => tag.tag.toLowerCase().includes(lcStr));
 		}
-		tags = tags.map((name) => {
-			return {
+		
+		// Prepare tag objects for list component
+		//var d = new Date();
+		var inTagColors = true;
+		tags = tags.map((tag) => {
+			let name = tag.tag;
+			tag = {
 				name,
-				selected: this.selectedTags.has(name),
-				color: this.state.tagColors.has(name) ? this.state.tagColors.get(name).color : '',
-				disabled: !this.inScope.has(name)
+				width: tag.width
+			};
+			if (this.selectedTags.has(name)) {
+				tag.selected = true;
 			}
-		});	
+			if (inTagColors && tagColors.has(name)) {
+				tag.color = tagColors.get(name).color;
+			}
+			else {
+				inTagColors = false;
+			}
+			// If we're not displaying all tags, we only need to check the scope for colored tags,
+			// since everything else will be in scope
+			if ((this.displayAllTags || inTagColors) && !this.state.scope.has(name)) {
+				tag.disabled = true;
+			}
+			tag.width = this.getWidth(name);
+			return tag;
+		});
+		//Zotero.debug(`Prepared tags in ${new Date() - d} ms`);
 		return <TagSelector
 			tags={tags}
 			searchBoxRef={this.searchBoxRef}
+			tagListRef={this.tagListRef}
 			searchString={this.state.searchString}
 			dragObserver={this.dragObserver}
 			onSelect={this.state.viewOnly ? () => {} : this.handleTagSelected}
@@ -191,18 +454,14 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 			onSearch={this.handleSearch}
 			onSettings={this.handleSettings.bind(this)}
 			loaded={this.state.loaded}
+			width={this.state.width}
+			height={this.state.height}
+			fontSize={parseInt(this.state.fontSize.replace('px', ''))}
 		/>;
 	}
 
 	setMode(mode) {
 		this.state.viewOnly != (mode == 'view') && this.setState({viewOnly: mode == 'view'});
-	}
-
-	uninit() {
-		ReactDOM.unmountComponentAtNode(this.domEl);
-		if (this._notifierID) {
-			Zotero.Notifier.unregisterObserver(this._notifierID);
-		}
 	}
 
 	handleTagContext = (tag, ev) => {
@@ -244,7 +503,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 			var elem = event.target;
 			
 			// Ignore drops not on tags
-			if (elem.localName != 'li') {
+			if (!elem.classList.contains('tag-selector-item')) {
 				return;
 			}
 			
@@ -262,7 +521,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 			var elem = event.target;
 			
 			// Ignore drops not on tags
-			if (elem.localName != 'li') {
+			if (!elem.classList.contains('tag-selector-item')) {
 				return;
 			}
 
@@ -346,8 +605,8 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 		
 		let selectedTags = this.selectedTags;
 		if (selectedTags.has(this.contextTag.name)) {
-			var wasSelected = true;
 			selectedTags.delete(this.contextTag.name);
+			selectedTags.add(newName.value);
 		}
 		
 		if (Zotero.Tags.getID(this.contextTag.name)) {
@@ -363,11 +622,6 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 			await Zotero.Tags.setColor(this.libraryID, this.contextTag.name, false);
 			await Zotero.Tags.setColor(this.libraryID, newName.value, color.color);
 		}
-		
-		if (wasSelected) {
-			selectedTags.add(newName.value);
-		}
-		this.setState({tags: await this.getTags()})
 	}
 
 	async openDeletePrompt() {
@@ -391,15 +645,13 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 		else {
 			await Zotero.Tags.setColor(this.libraryID, this.contextTag.name, false);
 		}
-
-		this.setState({tags: await this.getTags()});
 	}
 
 	async toggleDisplayAllTags(newValue) {
 		newValue = typeof(newValue) === 'undefined' ? !this.displayAllTags : newValue;
 		Zotero.Prefs.set('tagSelector.displayAllTags', newValue);
 		this.displayAllTags = newValue;
-		this.setState({tags: await this.getTags()});
+		this.setState(await this.getTagsAndScope());
 	}
 
 	toggleShowAutomatic(newValue) {
@@ -474,5 +726,19 @@ Zotero.TagSelector = class TagSelectorContainer extends React.Component {
 		ref.domEl = domEl;
 		return ref;
 	}
-}
-})();
+	
+	uninit() {
+		ReactDOM.unmountComponentAtNode(this.domEl);
+		if (this._notifierID) {
+			Zotero.Notifier.unregisterObserver(this._notifierID);
+		}
+		if (this._prefObserverID) {
+			Zotero.Prefs.unregisterObserver('fontSize', this.handleFontChange.bind(this));
+		}
+	}
+	
+	static propTypes = {
+		container: PropTypes.string.isRequired,
+		onSelection: PropTypes.func.isRequired,
+	};
+};

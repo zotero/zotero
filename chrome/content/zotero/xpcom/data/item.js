@@ -1794,12 +1794,14 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			for (let i=0; i<toRemove.length; i++) {
 				let tag = toRemove[i];
 				let tagID = Zotero.Tags.getID(tag.tag);
+				let tagType = tag.type ? tag.type : 0;
 				let sql = "DELETE FROM itemTags WHERE itemID=? AND tagID=? AND type=?";
-				yield Zotero.DB.queryAsync(sql, [this.id, tagID, tag.type ? tag.type : 0]);
+				yield Zotero.DB.queryAsync(sql, [this.id, tagID, tagType]);
 				let notifierData = {};
 				notifierData[this.id + '-' + tagID] = {
 					libraryID: this.libraryID,
-					tag: tag.tag
+					tag: tag.tag,
+					type: tagType
 				};
 
 				if (!env.options.skipNotifier) {

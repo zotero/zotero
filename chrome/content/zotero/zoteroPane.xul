@@ -306,8 +306,12 @@
 							ondragover="return ZoteroPane_Local.collectionsView.onDragOver(event)"
 							ondrop="return ZoteroPane_Local.collectionsView.onDrop(event)"/>
 					</tree>
-					<splitter id="zotero-tags-splitter" collapse="after"
-							zotero-persist="state">
+					<splitter
+							id="zotero-tags-splitter"
+							collapse="after"
+							zotero-persist="state"
+							onmousemove="if (this.getAttribute('state') == 'dragging') { ZoteroPane.handleTagSelectorResize(); }"
+					>
 						<grippy oncommand="ZoteroPane_Local.toggleTagSelector()"/>
 					</splitter>
 					<!-- 'collapsed' is no longer necessary here due to the persisted 'state' on

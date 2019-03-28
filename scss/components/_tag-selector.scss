@@ -1,6 +1,19 @@
 //
 // Tag selector
 // --------------------------------------------------
+#zotero-tag-selector-container {
+	display: flex;
+}
+
+#zotero-tag-selector-container[collapsed=true] {
+	visibility: collapse;
+}
+
+#zotero-tag-selector {
+	min-height: 100px;
+	width: 100%;
+	display: flex;
+}
 
 .tag-selector {
 	display: flex;
@@ -9,12 +22,17 @@
 	overflow: hidden;
 }
 
-.tag-selector-container {
+.tag-selector-list-container {
 	flex: 1 1 auto;
 	justify-content: space-between;
-	overflow: auto;
+	display: flex;
+	overflow: hidden;
 	height: 100px;
 	background-color: $tag-selector-bg;
+}
+
+.tag-selector-list-container > div {
+	flex: 1 1 auto;
 }
 
 .tag-selector-message {
@@ -32,7 +50,7 @@
 }
 
 .tag-selector-filter-container {
-	height: auto;
+	height: 30px;
 	flex: 0 0 1em;
 	display: flex;
 	flex-direction: row;
@@ -53,13 +71,10 @@
 
 .tag-selector-item {
 	cursor: pointer;
-	display: inline-block;
-	margin: .15em .05em .15em .3em;
-	padding: 0 .25em 0 .25em;
-	max-width: 250px;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	white-space: nowrap;
+	white-space: pre;
+	padding: 1px 4px 3px;
 
 	&.colored {
 		font-weight: bold;
@@ -74,18 +89,4 @@
 		color: $shade-0;
 		background: $shade-6;
 	}
-}
-
-#zotero-tag-selector-container {
-	display: flex;
-}
-
-#zotero-tag-selector-container[collapsed=true] {
-	visibility: collapse;
-}
-
-#zotero-tag-selector {
-	min-height: 100px;
-	width: 100%;
-	display: flex;
 }

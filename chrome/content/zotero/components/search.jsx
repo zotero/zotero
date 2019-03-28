@@ -54,17 +54,17 @@ class Search extends React.PureComponent {
 	}
 	
 	focus() {
-		this.inputRef.focus();
+		this.inputRef.current.focus();
 	}
 	
 	render() {
 		return (
 			<div className="search">
 				<input
+					ref={this.inputRef}
 					type="search"
 					onChange={this.handleChange}
 					onKeyDown={this.handleKeyDown}
-					ref={this.inputRef}
 					value={this.state.immediateValue}
 				/>
 				{this.state.immediateValue !== ''

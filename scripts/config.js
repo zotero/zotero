@@ -31,6 +31,7 @@ const symlinkFiles = [
 	'resource/**/*',
 	'!resource/react.js',
 	'!resource/react-dom.js',
+	'!resource/react-virtualized.js',
 	'update.rdf'
 ];
 
@@ -64,6 +65,7 @@ const jsFiles = [
 	// Special handling for React -- see note above
 	'resource/react.js',
 	'resource/react-dom.js',
+	'resource/react-virtualized.js',
 ];
 
 const scssFiles = [

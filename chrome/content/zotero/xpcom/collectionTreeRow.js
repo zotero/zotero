@@ -366,13 +366,17 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	return s2;
 });
 
+Zotero.CollectionTreeRow.prototype.getChildTags = function () {
+	Zotero.warn("Zotero.CollectionTreeRow::getChildTags() is deprecated -- use getTags() instead");
+	return this.getTags();
+};
 
 /**
  * Returns all the tags used by items in the current view
  *
  * @return {Promise<Object[]>}
  */
-Zotero.CollectionTreeRow.prototype.getChildTags = Zotero.Promise.coroutine(function* () {
+Zotero.CollectionTreeRow.prototype.getTags = async function (types, tagIDs) {
 	switch (this.type) {
 		// TODO: implement?
 		case 'share':
@@ -381,9 +385,9 @@ Zotero.CollectionTreeRow.prototype.getChildTags = Zotero.Promise.coroutine(funct
 		case 'bucket':
 			return [];
 	}
-	var results = yield this.getSearchResults(true);
-	return Zotero.Tags.getAllWithinSearchResults(results);
-});
+	var results = await this.getSearchResults(true);
+	return Zotero.Tags.getAllWithin({ tmpTable: results, types, tagIDs });
+};
 
 
 Zotero.CollectionTreeRow.prototype.setSearch = function (searchText) {

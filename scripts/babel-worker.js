@@ -29,16 +29,24 @@ async function babelWorker(ev) {
 
 	try {
 		let contents = await fs.readFile(sourcefile, 'utf8');
+		// Patch react
 		if (sourcefile === 'resource/react.js') {
-			// patch react
 			transformed = contents.replace('instanceof Error', '.constructor.name == "Error"')
-		} else if (sourcefile === 'resource/react-dom.js') {
-			// and react-dom
+		}
+		// Patch react-dom
+		else if (sourcefile === 'resource/react-dom.js') {
 			transformed = contents.replace(/ ownerDocument\.createElement\((.*?)\)/gi, 'ownerDocument.createElementNS(HTML_NAMESPACE, $1)')
 				.replace('element instanceof win.HTMLIFrameElement',
 					'typeof element != "undefined" && element.tagName.toLowerCase() == "iframe"')
 				.replace("isInputEventSupported = false", 'isInputEventSupported = true');
-		} else if ('ignore' in options && options.ignore.some(ignoreGlob => multimatch(sourcefile, ignoreGlob).length)) {
+		}
+		// Patch react-virtualized
+		else if (sourcefile === 'resource/react-virtualized.js') {
+			transformed = contents.replace('scrollDiv = document.createElement("div")', 'scrollDiv = document.createElementNS("http://www.w3.org/1999/xhtml", "div")')
+				.replace('document.body.appendChild(scrollDiv)', 'document.documentElement.appendChild(scrollDiv)')
+				.replace('document.body.removeChild(scrollDiv)', 'document.documentElement.removeChild(scrollDiv)');
+		}
+		else if ('ignore' in options && options.ignore.some(ignoreGlob => multimatch(sourcefile, ignoreGlob).length)) {
 			transformed = contents;
 			isSkipped = true;
 		} else {
