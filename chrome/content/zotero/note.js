@@ -79,7 +79,12 @@ function onUnload() {
 	Zotero.Notifier.unregisterObserver(notifierUnregisterID);
 	
 	if (noteEditor.item) {
-		window.opener.ZoteroPane.onNoteWindowClosed(noteEditor.item.id, noteEditor.value);
+		// noteData will be null if noteEditor current editor instance
+		// has disabled saving, which might happen at the time of the initial sync
+		let noteData = JSON.parse(JSON.stringify(noteEditor.getNoteDataSync()));
+		if (noteData) {
+			window.opener.ZoteroPane.onNoteWindowClosed(noteEditor.item.id, noteData);
+		}
 	}
 }
 
@@ -87,9 +92,7 @@ var NotifyCallback = {
 	notify: function(action, type, ids){
 		if (noteEditor.item && ids.includes(noteEditor.item.id)) {
 			var noteTitle = noteEditor.item.getNoteTitle();
-			if (!document.title && noteTitle != '') {
-				document.title = noteTitle;
-			}
+			document.title = noteTitle;
 			
 			// Update the window name (used for focusing) in case this is a new note
 			window.name = 'zotero-note-' + noteEditor.item.id;

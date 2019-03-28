@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+
+<?xul-overlay href="chrome://zotero-platform/content/standalone/menuOverlay.xul"?>
+
+<!DOCTYPE window [
+		<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
+		<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
+		]>
+
+<window
+		windowtype="zotero:viewer"
+		orient="vertical"
+		width="1300"
+		height="800"
+		persist="screenX screenY width height"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+>
+	<!-- TODO: Localize -->
+	<menubar>
+		<menu label="File">
+			<menupopup>
+				<menuitem label="Save As" oncommand="menuCmd('export')"/>
+				<menuitem label="Print" oncommand="menuCmd('print')"/>
+			</menupopup>
+		</menu>
+		<menu label="View">
+			<menupopup>
+				<menuitem label="Switch to Presentation Mode" oncommand="menuCmd('presentationmode')"/>
+				<menuseparator/>
+				<menuitem label="Go to First Page" oncommand="menuCmd('firstpage')"/>
+				<menuitem label="Go to Last Page" oncommand="menuCmd('lastpage')"/>
+				<menuseparator/>
+				<menuitem label="Rotate Clockwise" oncommand="menuCmd('rotatecw')"/>
+				<menuitem label="Rotate Counterclockwise" oncommand="menuCmd('rotateccw')"/>
+				<menuseparator/>
+				<menuitem label="Text Selection Tool" oncommand="menuCmd('switchcursortool_select')"/>
+				<menuitem label="Hand Tool" oncommand="menuCmd('switchcursortool_hand')"/>
+				<menuseparator/>
+				<menuitem label="Vertical Scrolling" oncommand="menuCmd('switchscrollmode_vertical')"/>
+				<menuitem label="Horizontal Scrolling" oncommand="menuCmd('switchscrollmode_horizontal')"/>
+				<menuitem label="Wrapped Scrolling" oncommand="menuCmd('switchscrollmode_wrapped')"/>
+				<menuseparator/>
+				<menuitem label="No Spreads" oncommand="menuCmd('switchspreadmode_none')"/>
+				<menuitem label="Odd Spreads" oncommand="menuCmd('switchspreadmode_odd')"/>
+				<menuitem label="Even Spreads" oncommand="menuCmd('switchspreadmode_even')"/>
+			</menupopup>
+		</menu>
+		<menu label="Tools">
+			<menupopup>
+				<menuitem label="Remove password (not implemented)" oncommand="menuCmd('remove_password')"/>
+			</menupopup>
+		</menu>
+	</menubar>
+
+	<hbox flex="1">
+		<vbox id="zotero-viewer" flex="3">
+			<browser tooltip="viewerTooltip" type="content" primary="true" transparent="transparent" src="" id="viewer"
+					 flex="1"/>
+			<popupset>
+				<tooltip id="viewerTooltip" onpopupshowing="return fillTooltip(this);"/>
+				<menupopup id="tagsPopup" ignorekeys="true"
+						   style="min-width: 300px;"
+						   onpopupshown="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ this.setAttribute('showing', 'true'); }"
+						   onpopuphidden="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ this.setAttribute('showing', 'false'); }">
+					<tagsbox id="tags" flex="1" mode="edit"/>
+				</menupopup>
+				<menupopup id="annotationPopup"/>
+				<menupopup id="colorPopup"/>
+			</popupset>
+		</vbox>
+		<splitter id="zotero-viewer-splitter"
+				  hidden="true"
+				  resizebefore="closest"
+				  resizeafter="closest"
+				  collapse="after"
+				  orient="horizontal"
+				  zotero-persist="state orient" />
+		<vbox flex="0" id="zotero-viewer-note-sidebar" width="350" hidden="true">
+			<vbox id="zotero-viewer-sidebar-cover" flex="1">
+				<label>Drag a note here…</label>
+			</vbox>
+			<vbox id="zotero-viewer-sidebar-container" flex="1" style="overflow:auto;" hidden="true">
+				<zoteronoteeditor id="zotero-viewer-editor" flex="1" notitle="1"
+								   previousfocus="zotero-items-tree"
+								   onerror="/*this.mode = 'view'*/"
+				/>
+
+				<button id="zotero-view-note-button" label="Close"
+						oncommand="document.getElementById('zotero-viewer-sidebar-container').hidden = true;document.getElementById('zotero-viewer-sidebar-cover').hidden = false;"/>
+			</vbox>
+		</vbox>
+	</hbox>
+	<script src="include.js"/>
+	<script src="viewer.js"/>
+</window>

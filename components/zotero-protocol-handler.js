@@ -1038,20 +1038,19 @@ function ZoteroProtocolHandler() {
 	
 	
 	/*
-		zotero://pdf.js/web/viewer.html
+		zotero://pdf.js/viewer.html
 		zotero://pdf.js/pdf/1/ABCD5678
 	*/
 	var PDFJSExtension = {
-		loadAsChrome: false,
+		loadAsChrome: true,
 		
 		newChannel: function (uri) {
 			return new AsyncChannel(uri, function* () {
 				try {
 					uri = uri.spec;
 					// Proxy PDF.js files
-					if (uri.startsWith('zotero://pdf.js/web/')
-							|| uri.startsWith('zotero://pdf.js/build/')) {
-						uri = uri.replace(/zotero:\/\/pdf.js\//, 'resource://pdf.js/');
+					if (uri.startsWith('zotero://pdf.js/') && !uri.startsWith('zotero://pdf.js/pdf/')) {
+						uri = uri.replace(/zotero:\/\/pdf.js\//, 'resource://zotero/pdf.js/');
 						let newURI = Services.io.newURI(uri, null, null);
 						return this.getURIInputStream(newURI);
 					}
@@ -1066,7 +1065,7 @@ function ZoteroProtocolHandler() {
 					
 					var item = yield Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
 					if (!item) {
-						return self._errorChannel("Item not found");
+						return this._errorChannel("Item not found");
 					}
 					var path = yield item.getFilePathAsync();
 					if (!path) {
@@ -1260,6 +1259,16 @@ ZoteroProtocolHandler.prototype = {
 	},
 				
 	newURI: function (spec, charset, baseURI) {
+		// A temporary workaround because baseURI.resolve(spec) just returns spec
+		if (baseURI) {
+			if (!spec.includes('://') && baseURI.spec.includes('/pdf.js/')) {
+				let parts = baseURI.spec.split('/');
+				parts.pop();
+				parts.push(spec);
+				spec = parts.join('/');
+			}
+		}
+	
 		return Components.classes["@mozilla.org/network/simple-uri-mutator;1"]
 			.createInstance(Components.interfaces.nsIURIMutator)
 			.setSpec(spec)

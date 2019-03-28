@@ -2712,6 +2712,8 @@ var ZoteroPane = new function()
 			'createParent',
 			'renameAttachments',
 			'reindexItem',
+			'importAnnotations',
+			'exportAnnotations'
 		];
 		
 		var m = {};
@@ -2758,7 +2760,9 @@ var ZoteroPane = new function()
 					canIndex = true,
 					canRecognize = true,
 					canUnrecognize = true,
-					canRename = true;
+					canRename = true,
+					canImportAnnotations = true,
+					canExportAnnotations = true;
 				var canMarkRead = collectionTreeRow.isFeed();
 				var markUnread = true;
 				
@@ -2778,6 +2782,14 @@ var ZoteroPane = new function()
 					
 					if (canUnrecognize && !Zotero.RecognizePDF.canUnrecognize(item)) {
 						canUnrecognize = false;
+					}
+					
+					if (canImportAnnotations && !Zotero.PDFImport.canImport(item)) {
+						canImportAnnotations = false;
+					}
+					
+					if (canExportAnnotations && !Zotero.PDFExport.canExport(item)) {
+						canExportAnnotations = false;
 					}
 					
 					// Show rename option only if all items are child attachments
@@ -2858,6 +2870,14 @@ var ZoteroPane = new function()
 						}
 					}
 				}
+				
+				if (canImportAnnotations) {
+					show.push(m.importAnnotations);
+				}
+				
+				if (canExportAnnotations) {
+					show.push(m.exportAnnotations);
+				}
 			}
 			
 			// Single item selected
@@ -2925,6 +2945,14 @@ var ZoteroPane = new function()
 					}
 					else if (!collectionTreeRow.isPublications()) {
 						show.push(m.duplicateItem);
+					}
+					
+					if (Zotero.PDFImport.canImport(item)) {
+						show.push(m.importAnnotations);
+					}
+					
+					if (Zotero.PDFExport.canExport(item)) {
+						show.push(m.exportAnnotations);
 					}
 				}
 				
@@ -3516,10 +3544,19 @@ var ZoteroPane = new function()
 	};
 	
 	
-	this.onNoteWindowClosed = async function (itemID, noteText) {
+	this.onNoteWindowClosed = async function (itemID, noteData) {
 		var item = Zotero.Items.get(itemID);
-		item.setNote(noteText);
-		await item.saveTx();
+		
+		if (noteData) {
+			let changed = item.setNote(noteData.html);
+			if (changed) {
+				await item.saveTx({
+					notifierData: {
+						state: noteData.state
+					}
+				});
+			}
+		}
 		
 		// If note is still selected, show the editor again when the note window closes
 		var selectedItems = this.getSelectedItems(true);
@@ -4000,9 +4037,12 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		var launchFile = async function (path, contentType) {
+		var launchFile = async (path, contentType, itemID) => {
 			// Custom PDF handler
 			if (contentType === 'application/pdf') {
+				this.viewPDF(itemID);
+				// TODO: Still leave an option to use an external PDF viewer
+				return;
 				let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
 				if (pdfHandler) {
 					if (await OS.File.exists(pdfHandler)) {
@@ -4058,7 +4098,7 @@ var ZoteroPane = new function()
 				let iCloudPath = Zotero.File.getEvictedICloudPath(path);
 				if (await OS.File.exists(iCloudPath)) {
 					Zotero.debug("Triggering download of iCloud file");
-					await launchFile(iCloudPath, item.attachmentContentType);
+					await launchFile(iCloudPath, item.attachmentContentType, itemID);
 					let time = new Date();
 					let maxTime = 5000;
 					let revealed = false;
@@ -4118,7 +4158,7 @@ var ZoteroPane = new function()
 			if (fileExists && !redownload) {
 				Zotero.debug("Opening " + path);
 				Zotero.Notifier.trigger('open', 'file', item.id);
-				launchFile(path, item.attachmentContentType);
+				launchFile(path, item.attachmentContentType, item.id);
 				continue;
 			}
 			
@@ -4167,6 +4207,10 @@ var ZoteroPane = new function()
 			launchFile(path, item.attachmentContentType);
 		}
 	});
+	
+	this.viewPDF = function (itemID) {
+		Zotero.Viewer.open(itemID);
+	};
 	
 	
 	/**
@@ -4482,6 +4526,17 @@ var ZoteroPane = new function()
 		}
 	};
 	
+	this.exportAnnotationsForSelected = async function () {
+		var items = ZoteroPane.getSelectedItems();
+		Zotero.PDFExport.export(items);
+		Zotero.ProgressQueues.get('pdf-export').getDialog().open();
+	};
+	
+	this.importAnnotationsForSelected = async function () {
+		var items = ZoteroPane.getSelectedItems();
+		Zotero.PDFImport.import(items);
+		Zotero.ProgressQueues.get('pdf-import').getDialog().open();
+	};
 	
 	this.reportMetadataForSelected = async function () {
 		let items = ZoteroPane.getSelectedItems();
@@ -4563,8 +4618,8 @@ var ZoteroPane = new function()
 			}
 		}
 	};
-
-
+	
+	
 	this.createEmptyParent = async function (item) {
 		await Zotero.DB.executeTransaction(async function () {
 			// TODO: remove once there are no top-level web attachments
@@ -4585,7 +4640,27 @@ var ZoteroPane = new function()
 			await item.save();
 		});
 	};
-
+	
+	
+	this.exportPDF = async function (itemID) {
+		let item = await Zotero.Items.getAsync(itemID);
+		if (!item || !item.isAttachment()) {
+			throw new Error('Item ' + itemID + ' is not attachment');
+		}
+		let filename = item.attachmentFilename;
+		
+		var fp = new FilePicker();
+		fp.init(window, Zotero.getString('styles.editor.save'), fp.modeSave);
+		fp.appendFilter("PDF", "*.pdf");
+		fp.defaultString = filename;
+		
+		var rv = await fp.show();
+		if (rv === fp.returnOK || rv === fp.returnReplace) {
+			let outputFile = fp.file;
+			Zotero.PDFExport.exportToPath(item, outputFile, true);
+		}
+	};
+	
 	
 	this.renameSelectedAttachmentsFromParents = Zotero.Promise.coroutine(function* () {
 		// TEMP: fix

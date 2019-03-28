@@ -1936,7 +1936,7 @@ Zotero.Item.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
 
 
 Zotero.Item.prototype.isRegularItem = function() {
-	return !(this.isNote() || this.isAttachment());
+	return !(this.isNote() || this.isAttachment() || this.isAnnotation());
 }
 
 

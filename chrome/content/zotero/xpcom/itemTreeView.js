@@ -330,6 +330,8 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 		let newSearchItems = yield this.collectionTreeRow.getItems();
 		// TEMP: Hide annotations
 		newSearchItems = newSearchItems.filter(item => !item.isAnnotation());
+		// A temporary workaround to make item tree crash less often
+		newSearchItems = newSearchItems.filter(item => !(item.isAttachment() && item.attachmentLinkMode === Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE));
 		// Remove notes and attachments if necessary
 		if (this.regularOnly) {
 			newSearchItems = newSearchItems.filter(item => item.isRegularItem());

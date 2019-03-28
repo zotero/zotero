@@ -259,25 +259,25 @@ var ZoteroItemPane = new function() {
 		_selectedNoteID = item.id;
 		
 		// If an external note window is open for this item, don't show the editor
-		if (ZoteroPane.findNoteWindow(item.id)) {
-			this.showNoteWindowMessage();
-			return;
-		}
+		// if (ZoteroPane.findNoteWindow(item.id)) {
+		// 	this.showNoteWindowMessage();
+		// 	return;
+		// }
 		
 		var noteEditor = document.getElementById('zotero-note-editor');
 		
 		// If loading new or different note, disable undo while we repopulate the text field
 		// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
 		// undo content from another note into the current one.
-		var clearUndo = noteEditor.item ? noteEditor.item.id != item.id : false;
+		// var clearUndo = noteEditor.item ? noteEditor.item.id != item.id : false;
 		
 		noteEditor.mode = editable ? 'edit' : 'view';
 		noteEditor.parent = null;
 		noteEditor.item = item;
 		
-		if (clearUndo) {
-			noteEditor.clearUndo();
-		}
+		// if (clearUndo) {
+		// 	noteEditor.clearUndo();
+		// }
 		
 		document.getElementById('zotero-view-note-button').hidden = !editable;
 		document.getElementById('zotero-item-pane-content').selectedIndex = 2;
@@ -285,7 +285,7 @@ var ZoteroItemPane = new function() {
 	
 	
 	this.showNoteWindowMessage = function () {
-		ZoteroPane.setItemPaneMessage(Zotero.getString('pane.item.notes.editingInWindow'));
+		// ZoteroPane.setItemPaneMessage(Zotero.getString('pane.item.notes.editingInWindow'));
 	};
 	
 	

@@ -290,6 +290,10 @@
 					<menuitem class="menuitem-iconic zotero-menuitem-create-parent" oncommand="ZoteroPane_Local.createParentItemsFromSelected();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-rename-from-parent" oncommand="ZoteroPane_Local.renameSelectedAttachmentsFromParents()"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-reindex" oncommand="ZoteroPane_Local.reindexItem();"/>
+<!--					<menuitem class="menuitem-iconic zotero-menuitem-import-annotations" label="&zotero.items.menu.importAnnotations;" oncommand="ZoteroPane.importAnnotationsForSelected()"/>-->
+					<menuitem class="menuitem-iconic zotero-menuitem-import-annotations" label="Import annotations" oncommand="ZoteroPane.importAnnotationsForSelected()"/>
+<!--					<menuitem class="menuitem-iconic zotero-menuitem-export-annotations" label="&zotero.items.menu.exportAnnotations;" oncommand="ZoteroPane.exportAnnotationsForSelected()"/>-->
+					<menuitem class="menuitem-iconic zotero-menuitem-export-annotations" label="Export Annotations" oncommand="ZoteroPane.exportAnnotationsForSelected()"/>
 				</menupopup>
 				
 				<tooltip id="fake-tooltip"/>

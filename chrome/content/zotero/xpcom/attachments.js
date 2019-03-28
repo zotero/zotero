@@ -362,14 +362,20 @@ Zotero.Attachments = new function(){
 	 * @param {Object} [params.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>}
 	 */
-	this.importEmbeddedImage = async function ({ blob, parentItemID, saveOptions }) {
-		Zotero.debug('Importing annotation image');
+	this.importEmbeddedImage = async function ({ blob, itemKey, parentItemID, saveOptions }) {
+		Zotero.debug('Importing note or annotation image');
 		
 		var contentType = blob.type;
 		var fileExt;
 		switch (contentType) {
 			case 'image/png':
 				fileExt = 'png';
+				break;
+			case 'image/jpeg':
+				fileExt = 'jpg';
+				break;
+			case 'image/jpg':
+				fileExt = 'jpg';
 				break;
 			
 			default:
@@ -385,6 +391,11 @@ Zotero.Attachments = new function(){
 				attachmentItem = new Zotero.Item('attachment');
 				let { libraryID: parentLibraryID } = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
 				attachmentItem.libraryID = parentLibraryID;
+				if (itemKey) {
+					// Let it fail if the key already exists
+					attachmentItem.key = itemKey;
+					await attachmentItem.loadPrimaryData();
+				}
 				attachmentItem.parentID = parentItemID;
 				attachmentItem.attachmentLinkMode = this.LINK_MODE_EMBEDDED_IMAGE;
 				attachmentItem.attachmentPath = 'storage:' + filename;

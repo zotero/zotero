@@ -115,7 +115,7 @@
 				-->
 				<zoteronoteeditor id="zotero-note-editor" flex="1" notitle="1"
 					previousfocus="zotero-items-tree"
-					onerror="ZoteroPane.displayErrorMessage(); this.mode = 'view'"/>
+					onerror="return;ZoteroPane.displayErrorMessage(); /*this.mode = 'view'*/"/>
 				<button id="zotero-view-note-button"
 						label="&zotero.notes.separate;"
 						oncommand="ZoteroItemPane.openNoteWindow()"/>

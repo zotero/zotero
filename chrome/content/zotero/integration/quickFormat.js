@@ -56,6 +56,10 @@ var Zotero_QuickFormat = new function () {
 			Zotero.debug(`Quick Format received citation:`);
 			Zotero.debug(JSON.stringify(io.citation.toJSON()));
 			
+			if (io.disableClassicDialog) {
+				document.getElementById('classic-view').hidden = true;
+			}
+			
 			// Only hide chrome on Windows or Mac
 			if(Zotero.isMac) {
 				document.documentElement.setAttribute("drawintitlebar", true);
@@ -309,6 +313,10 @@ var Zotero_QuickFormat = new function () {
 					.forEach(feed => s.addCondition("libraryID", "isNot", feed.libraryID));
 				s.addCondition("quicksearch-titleCreatorYear", "contains", str);
 				s.addCondition("itemType", "isNot", "attachment");
+				if (io.filterLibraryIDs) {
+					io.filterLibraryIDs.forEach(id => s.addCondition("libraryID", "is", id));
+				}
+				
 				haveConditions = true;
 			}
 		}
