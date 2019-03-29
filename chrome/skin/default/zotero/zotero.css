@@ -1,5 +1,5 @@
 /* Font sizes */
-*[zoteroFontSize=medium] #zotero-tb-search, *[zoteroFontSize=large] #zotero-tb-search,
+*[zoteroFontSize=medium] #zotero-tb-search, *[zoteroFontSize=large] #zotero-tb-search
 {
 	font-size: 1em !important;
 }
