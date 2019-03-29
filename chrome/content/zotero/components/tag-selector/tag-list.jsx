@@ -3,6 +3,7 @@ const PropTypes = require('prop-types');
 const { FormattedMessage } = require('react-intl');
 var { Collection } = require('react-virtualized');
 
+// See also .tag-selector-item in _tag-selector.scss
 var filterBarHeight = 32;
 var tagPaddingTop = 4;
 var tagPaddingLeft = 2;

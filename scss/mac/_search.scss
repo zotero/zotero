@@ -1,0 +1,9 @@
+.search input {
+	-moz-appearance: searchfield;
+	height: 24px;
+}
+
+.search .search-cancel-button {
+	background-image: url(chrome://global/skin/icons/searchfield-cancel.svg);
+	top: 6px;
+}
