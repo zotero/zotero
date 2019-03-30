@@ -361,8 +361,11 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		let widths = hasColor ? this.widthsBold : this.widths;
 		let width = widths.get(name);
 		if (width === undefined) {
-			//Zotero.debug(`Calculating ${hasColor ? 'bold ' : ''}width for tag '${name}'`);
 			width = this.getTextWidth(name, hasColor ? fontBold : font);
+			// TEMP
+			if (Zotero.Debug.enabled) {
+				Zotero.debug(`Calculated ${hasColor ? 'bold ' : ''}width of ${width} for tag '${name}'`);
+			}
 			widths.set(name, width);
 		}
 		return width;
