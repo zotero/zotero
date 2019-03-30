@@ -1591,6 +1591,7 @@ Zotero.CollectionTreeView.prototype.onDragStart = function(event) {
 		return;
 	}
 	event.dataTransfer.setData("zotero/collection", treeRow.ref.id);
+	Zotero.debug("Dragging collection " + treeRow.id);
 }
 
 
@@ -1599,7 +1600,8 @@ Zotero.CollectionTreeView.prototype.onDragStart = function(event) {
  * which is checked in libraryTreeView.canDrop()
  */
 Zotero.CollectionTreeView.prototype.canDropCheck = function (row, orient, dataTransfer) {
-	//Zotero.debug("Row is " + row + "; orient is " + orient);
+	// TEMP
+	Zotero.debug("Row is " + row + "; orient is " + orient);
 	
 	var dragData = Zotero.DragDrop.getDataFromDataTransfer(dataTransfer);
 	if (!dragData) {
