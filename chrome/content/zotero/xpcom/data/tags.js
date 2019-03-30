@@ -290,16 +290,18 @@ Zotero.Tags = new function() {
 		}.bind(this));
 		
 		if (oldColorData) {
-			// Remove color from old tag
-			yield this.setColor(libraryID, oldName);
-			
-			// Add color to new tag
-			yield this.setColor(
-				libraryID,
-				newName,
-				oldColorData.color,
-				oldColorData.position
-			);
+			yield Zotero.DB.executeTransaction(function* () {
+				// Remove color from old tag
+				yield this.setColor(libraryID, oldName);
+				
+				// Add color to new tag
+				yield this.setColor(
+					libraryID,
+					newName,
+					oldColorData.color,
+					oldColorData.position
+				);
+			}.bind(this));
 		}
 	});
 	
