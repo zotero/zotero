@@ -132,6 +132,14 @@ class TagList extends React.PureComponent {
 			...style
 		};
 		
+		// Don't specify explicit width unless we're truncating, because for some reason the width
+		// from canvas can sometimes be slightly smaller than the actual width, resulting in an
+		// unnecessary ellipsis.
+		var tagMaxWidth = this.props.width - minHorizontalPadding;
+		if (props.style.width < tagMaxWidth) {
+			delete props.style.width;
+		}
+		
 		if (tag.color) {
 			props.style.color = tag.color;
 		}
