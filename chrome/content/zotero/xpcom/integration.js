@@ -312,7 +312,7 @@ Zotero.Integration = new function() {
 			else {
 				if (e.toString().indexOf("ExceptionAlreadyDisplayed") === -1) {
 					displayError = Zotero.getString("integration.error.generic")
-						+ "\n\n" + Zotero.getString("integration.error.seeTroubleshootingInfo");
+						+ "\n\n" + Zotero.getString("integration.error.viewTroubleshootingInfo");
 				}
 				else {
 					return;
