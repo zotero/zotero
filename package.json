@@ -28,6 +28,7 @@
     "@babel/plugin-proposal-class-properties": "^7.4.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
     "@babel/preset-react": "^7.0.0",
+    "@zotero/eslint-config": "^1.0.0",
     "babel-eslint": "^10.0.1",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "browserify": "^14.5.0",
