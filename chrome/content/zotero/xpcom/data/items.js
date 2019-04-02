@@ -759,7 +759,14 @@ Zotero.Items = function() {
 			var toSave = {};
 			toSave[item.id] = item;
 			
+			var earliestDateAdded = item.dateAdded;
+			
 			for (let otherItem of otherItems) {
+				// Use the earliest date added of all the items
+				if (otherItem.dateAdded < earliestDateAdded) {
+					earliestDateAdded = otherItem.dateAdded;
+				}
+				
 				let otherItemURI = Zotero.URI.getItemURI(otherItem);
 				
 				// Move child items to master
@@ -823,6 +830,8 @@ Zotero.Items = function() {
 				otherItem.deleted = true;
 				yield otherItem.save();
 			}
+			
+			item.setField('dateAdded', earliestDateAdded);
 			
 			for (let i in toSave) {
 				yield toSave[i].save();

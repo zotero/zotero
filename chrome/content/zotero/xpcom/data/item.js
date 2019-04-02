@@ -1250,6 +1250,11 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		env.sqlValues.push({ int: itemTypeID });
 	}
 	
+	if (isNew || (this._changed.primaryData && this._changed.primaryData.dateAdded)) {
+		env.sqlColumns.push('dateAdded');
+		env.sqlValues.push(this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime);
+	}
+	
 	// If a new item and Date Modified hasn't been provided, or an existing item and
 	// Date Modified hasn't changed from its previous value and skipDateModifiedUpdate wasn't
 	// passed, use the current timestamp
@@ -1269,9 +1274,6 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	
 	if (env.sqlColumns.length) {
 		if (isNew) {
-			env.sqlColumns.push('dateAdded');
-			env.sqlValues.push(this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime);
-			
 			env.sqlColumns.unshift('itemID');
 			env.sqlValues.unshift(parseInt(itemID));
 			

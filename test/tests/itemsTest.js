@@ -191,6 +191,15 @@ describe("Zotero.Items", function () {
 			assert.sameMembers(rels, [item2URI, item3URI]);
 		})
 		
+		it("should use the earliest Date Added", async function () {
+			var item1 = await createDataObject('item', { dateAdded: '2019-01-02 00:00:00' });
+			var item2 = await createDataObject('item', { dateAdded: '2019-01-01 00:00:00' });
+			var item3 = await createDataObject('item', { dateAdded: '2019-01-03 00:00:00' });
+			
+			await Zotero.Items.merge(item1, [item2, item3]);
+			assert.equal(item1.dateAdded, '2019-01-01 00:00:00');
+		});
+		
 		it("should merge two items when servant is linked to an item absent from cache", function* () {
 			// two group libraries
 			var groupOneInfo = yield createGroup({
