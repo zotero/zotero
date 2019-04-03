@@ -418,6 +418,23 @@ describe("Zotero.Utilities", function() {
 			}
 			
 		});
+		it("should recognize the legacy shortTitle key", function* () {
+			this.timeout(20000);
+
+			let data = loadSampleData('citeProcJSExport');
+
+			var json = data.artwork;
+			var canonicalKeys = Object.keys(json);
+			json.shortTitle = json["title-short"];
+			delete json["title-short"];
+
+			let item = new Zotero.Item();
+			Zotero.Utilities.itemFromCSLJSON(item, json);
+			yield item.saveTx();
+
+			let newJSON = Zotero.Utilities.itemToCSLJSON(item);
+			assert.hasAllKeys(newJSON, canonicalKeys);
+		});
 		it("should import exported standalone note", function* () {
 			let note = new Zotero.Item('note');
 			note.setNote('Some note longer than 50 characters, which will become the title.');
