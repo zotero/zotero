@@ -29,7 +29,7 @@ describe("Item pane", function () {
 		})
 		
 		
-		it.skip("should swap creator names", function* () {
+		it("should swap creator names", function* () {
 			var item = new Zotero.Item('book');
 			item.setCreators([
 				{
@@ -40,18 +40,24 @@ describe("Item pane", function () {
 			]);
 			yield item.saveTx();
 			
+			var evt = new MouseEvent('contextmenu', {
+				bubbles: true,
+				cancelable: true,
+				view: window,
+				buttons: 2
+			});
+
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
 			var label = doc.getAnonymousNodes(itemBox)[0].getElementsByAttribute('fieldname', 'creator-0-lastName')[0];
 			var parent = label.parentNode;
 			assert.isTrue(parent.hasAttribute('contextmenu'));
-			
+
 			var menupopup = doc.getAnonymousNodes(itemBox)[0]
 				.getElementsByAttribute('id', 'zotero-creator-transform-menu')[0];
+
 			// Fake a right-click
-			doc.popupNode = parent;
-			menupopup.openPopup(
-				parent, "after_start", 0, 0, true, false, new MouseEvent('click', { button: 2 })
-			);
+			parent.dispatchEvent(evt);
+			yield waitForDOMEvent(menupopup, "popupshown");
 			var menuitem = menupopup.getElementsByTagName('menuitem')[0];
 			menuitem.click();
 			yield waitForItemEvent('modify');
@@ -60,7 +66,6 @@ describe("Item pane", function () {
 			assert.propertyVal(creator, 'firstName', 'Last');
 			assert.propertyVal(creator, 'lastName', 'First');
 		});
-		
 		
 		it("shouldn't show Swap Names menu for single-field mode", function* () {
 			var item = new Zotero.Item('book');
