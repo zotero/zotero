@@ -82,7 +82,8 @@ var CSL_TEXT_MAPPINGS = {
 	"number":["number"],
 	"chapter-number":["session"],
 	"references":["history", "references"],
-	"shortTitle":["shortTitle"],
+	"shortTitle":["shortTitle"], /* preserved to read legacy data */
+	"title-short":["shortTitle"],
 	"journalAbbreviation":["journalAbbreviation"],
 	"status":["legalStatus"],
 	"language":["language"]
@@ -1588,6 +1589,7 @@ Zotero.Utilities = {
 		
 		// get all text variables (there must be a better way)
 		for(var variable in CSL_TEXT_MAPPINGS) {
+			if (variable === "shortTitle") continue; // read both title-short and shortTitle, but write only title-short
 			var fields = CSL_TEXT_MAPPINGS[variable];
 			for(var i=0, n=fields.length; i<n; i++) {
 				var field = fields[i],
