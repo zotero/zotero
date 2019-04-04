@@ -60,6 +60,8 @@ describe("Item pane", function () {
 			yield waitForDOMEvent(menupopup, "popupshown");
 			var menuitem = menupopup.getElementsByTagName('menuitem')[0];
 			menuitem.click();
+			menupopup.hidePopup();
+
 			yield waitForItemEvent('modify');
 			
 			var creator = item.getCreators()[0];
