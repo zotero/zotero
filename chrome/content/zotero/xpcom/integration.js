@@ -1223,7 +1223,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = async function (field) {
 		var [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this._session.getCiteprocLists();
 		if (citations.length === 0) {
 			await this._session.init(true, false)
-			this._session.reload = true;
+			this._session.reload = !this._session.data.prefs.delayCitationUpdates;
 			await this.updateSession(FORCE_CITATIONS_REGENERATE)
 			await this.updateDocument(FORCE_CITATIONS_REGENERATE, true, false);
 			[citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this._session.getCiteprocLists();
