@@ -1221,7 +1221,8 @@ Zotero.Integration.Fields.prototype.addEditCitation = async function (field) {
 		var fields = await this.get();
 
 		var [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this._session.getCiteprocLists();
-		if (citations.length === 0) {
+		if (citations.length === 0 && !this._session.citeprocInit) {
+			this._session.citeprocInit = true;
 			await this._session.init(true, false)
 			this._session.reload = !this._session.data.prefs.delayCitationUpdates;
 			await this.updateSession(FORCE_CITATIONS_REGENERATE)
@@ -1487,6 +1488,8 @@ Zotero.Integration.Session.prototype.setData = async function (data, resetStyle)
 			// We're changing the citeproc instance, so we'll have to reinsert all citations into the registry
 			this.reload = true;
 			this.styleID = data.style.styleID;
+			// To assure client/processor data reconcilitation in previewFn
+			this.citeprocInit = false;
 		} catch (e) {
 			Zotero.logError(e);
 			throw new Zotero.Exception.Alert("integration.error.invalidStyle");
