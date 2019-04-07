@@ -1220,7 +1220,15 @@ Zotero.Integration.Fields.prototype.addEditCitation = async function (field) {
 		await citationsByItemIDPromise;
 		var fields = await this.get();
 
-		var [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this._session.getCiteprocLists(true);
+		var [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this._session.getCiteprocLists();
+		if (citations.length === 0) {
+			await this._session.init(true, false)
+			this._session.reload = true;
+			await this.updateSession(FORCE_CITATIONS_REGENERATE)
+			await this.updateDocument(FORCE_CITATIONS_REGENERATE, true, false);
+			[citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this._session.getCiteprocLists();
+		}
+
 		for (var prevIdx = idx-1; prevIdx >= 0; prevIdx--) {
 			if (prevIdx in fieldToCitationIdxMapping) break;
 		}
@@ -1654,7 +1662,7 @@ Zotero.Integration.Session.prototype.getCiteprocLists = function() {
 			continue;
 		}
 		citations.push([this.citationsByIndex[idx].citationID, this.citationsByIndex[idx].properties.noteIndex]);
-		fieldToCitationIdxMapping[i] = idx;
+		fieldToCitationIdxMapping[i] = parseInt(idx, 10);
 		citationToFieldIdxMapping[idx] = i++;
 	}
 	return [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping];
