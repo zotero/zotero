@@ -1381,6 +1381,19 @@ Zotero.Integration.Session.prototype.resetRequest = function(doc) {
 	
 	this.bibliographyHasChanged = false;
 	this.bibliographyDataHasChanged = false;
+
+	// When processing citations this list will be checked for citations that are new to the document
+	// (i.e. copied from somewhere else) and marked as newIndices to be processed with citeproc if
+	// not present
+	this.oldCitations = new Set();
+	for (let i in this.citationsByIndex) {
+		// But ignore indices from this.newIndices. If any are present it means that the last
+		// call to this.updateSession() was never followed up with this.updateDocument()
+		// i.e. the operation was user cancelled
+		if (i in this.newIndices) continue;
+		this.oldCitations.add(this.citationsByIndex[i].citationID);
+	}
+	
 	// After adding fields to the session
 	// citations that are new to the document will be marked
 	// as new,  so that they are correctly loaded into and processed with citeproc
@@ -1390,15 +1403,8 @@ Zotero.Integration.Session.prototype.resetRequest = function(doc) {
 	this.updateIndices = {};
 	// Citations that require updating in the document will be marked in
 	// processIndices
+	
 	this.processIndices = {};
-
-	// When processing citations this list will be checked for citations that are new to the document
-	// (i.e. copied from somewhere else) and marked as newIndices to be processed with citeproc if
-	// not present
-	this.oldCitations = new Set();
-	for (let i in this.citationsByIndex) {
-		this.oldCitations.add(this.citationsByIndex[i].citationID);
-	}
 	this.citationsByItemID = {};
 	this.citationsByIndex = {};
 	this.documentCitationIDs = {};
