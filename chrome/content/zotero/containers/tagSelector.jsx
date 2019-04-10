@@ -1,6 +1,8 @@
 /* global Zotero: false */
 'use strict';
 
+(function () {
+
 const React = require('react');
 const ReactDOM = require('react-dom');
 const PropTypes = require('prop-types');
@@ -742,3 +744,5 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		onSelection: PropTypes.func.isRequired,
 	};
 };
+
+})();
