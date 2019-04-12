@@ -46,7 +46,7 @@
 
 <!ENTITY zotero.preferences.feeds "Flux">
 <!ENTITY zotero.preferences.feeds.sorting.label "Classement :">
-<!ENTITY zotero.preferences.feeds.sorting.newest "Les plus récents documents en premier">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Les documents les plus récents en premier">
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Les plus anciens documents en premier">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Paramètres par défaut des flux">
 
