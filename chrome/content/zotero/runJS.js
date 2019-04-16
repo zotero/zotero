@@ -25,7 +25,7 @@ async function run() {
 	}
 	catch (e) {
 		resultTextbox.classList.add('error');
-		resultTextbox.value = e;
+		resultTextbox.textContent = e;
 		return;
 	}
 	resultTextbox.classList.remove('error');
