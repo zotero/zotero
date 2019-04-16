@@ -1,0 +1,14 @@
+<!ENTITY zotero.version "version">
+<!ENTITY zotero.whatsNew "What’s new">
+<!ENTITY zotero.createdby "Created By:">
+<!ENTITY zotero.director "Director:">
+<!ENTITY zotero.directors "Directors:">
+<!ENTITY zotero.developers "Developers:">
+<!ENTITY zotero.alumni "Alumni:">
+<!ENTITY zotero.about.localizations "Localizations:">
+<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
+<!ENTITY zotero.executiveProducer "Executive Producer:">
+<!ENTITY zotero.thanks "Special Thanks:">
+<!ENTITY zotero.about.close "Close">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">

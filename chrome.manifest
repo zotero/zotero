@@ -17,6 +17,7 @@ locale	zotero	cs-CZ		chrome/locale/cs-CZ/zotero/
 locale	zotero	da-DK		chrome/locale/da-DK/zotero/
 locale	zotero	de		chrome/locale/de/zotero/
 #locale	zotero	el-GR		chrome/locale/el-GR/zotero/
+locale	zotero	en-GB		chrome/locale/en-GB/zotero/
 locale	zotero	es-ES		chrome/locale/es-ES/zotero/
 locale	zotero	et-EE		chrome/locale/et-EE/zotero/
 #locale	zotero	eu-ES		chrome/locale/eu-ES/zotero/

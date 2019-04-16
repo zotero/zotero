@@ -1,0 +1,25 @@
+<!ENTITY zotero.search.name "Name:">
+
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
+<!ENTITY zotero.search.joinMode.prefix "Match">
+<!ENTITY zotero.search.joinMode.any "any">
+<!ENTITY zotero.search.joinMode.all "all">
+<!ENTITY zotero.search.joinMode.suffix "of the following:">
+
+<!ENTITY zotero.search.recursive.label "Search subcollections">
+<!ENTITY zotero.search.noChildren "Show only top-level items">
+<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+
+<!ENTITY zotero.search.textModes.phrase "Phrase">
+<!ENTITY zotero.search.textModes.phraseBinary "Phrase (incl. binary files)">
+<!ENTITY zotero.search.textModes.regexp "Regexp">
+<!ENTITY zotero.search.textModes.regexpCS "Regexp (case-sensitive)">
+
+<!ENTITY zotero.search.date.units.days "days">
+<!ENTITY zotero.search.date.units.months "months">
+<!ENTITY zotero.search.date.units.years "years">
+
+<!ENTITY zotero.search.search "Search">
+<!ENTITY zotero.search.clear "Clear">
+<!ENTITY zotero.search.saveSearch "Save Search">
