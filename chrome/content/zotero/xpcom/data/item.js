@@ -2041,7 +2041,7 @@ Zotero.Item.prototype.getNotes = function(includeTrashed) {
 		+ 'With' + (includeTrashed ? '' : 'out') + 'Trashed';
 	
 	if (this._notes[cacheKey]) {
-		return this._notes[cacheKey];
+		return [...this._notes[cacheKey]];
 	}
 	
 	var rows = this._notes.rows.concat();
