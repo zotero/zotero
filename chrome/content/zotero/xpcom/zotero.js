@@ -1429,8 +1429,12 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			//let progressMeter = win.ZoteroPane.document.getElementById('zotero-pane-progressmeter');
 			let doc = win.ZoteroPane.document;
 			let container = doc.getElementById('zotero-pane-progressmeter-container');
-			let progressMeter = doc.createElement('progressmeter');
-			progressMeter.id = 'zotero-pane-progressmeter';
+			let id = 'zotero-pane-progressmeter';
+			let progressMeter = doc.getElementById(id);
+			if (!progressMeter) {
+				progressMeter = doc.createElement('progressmeter');
+				progressMeter.id = id;
+			}
 			progressMeter.setAttribute('mode', 'undetermined');
 			if (determinate) {
 				progressMeter.mode = 'determined';
