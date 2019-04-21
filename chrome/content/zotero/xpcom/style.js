@@ -648,6 +648,8 @@ Zotero.Style = function (style, path) {
 		Zotero.Styles.ns).replace(/(.+)T([^\+]+)\+?.*/, "$1 $2");
 	this.locale = Zotero.Utilities.xpathText(doc, '/csl:style/@default-locale',
 		Zotero.Styles.ns) || null;
+	var shortID = this.styleID.match(/\/?([^/]+)$/)[1];
+	this._isAPA = /^apa($|-)/.test(shortID);
 	this._class = doc.documentElement.getAttribute("class");
 	this._usesAbbreviation = !!Zotero.Utilities.xpath(doc,
 		'//csl:text[(@variable="container-title" and @form="short") or (@variable="container-title-short")][1]',
@@ -745,7 +747,10 @@ Zotero.Style.prototype.getCiteProc = function(locale, automaticJournalAbbreviati
 	
 	try {
 		var citeproc = new Zotero.CiteProc.CSL.Engine(
-			new Zotero.Cite.System(automaticJournalAbbreviations),
+			new Zotero.Cite.System({
+				automaticJournalAbbreviations,
+				uppercaseSubtitles: this._isAPA
+			}),
 			xml,
 			locale,
 			overrideLocale
