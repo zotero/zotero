@@ -438,7 +438,7 @@ Zotero.RecognizePDF = new function () {
 		if (!res) return null;
 		
 		if (res.arxiv) {
-			Zotero.debug('RecognizePDF: Getting metadata by arXiv');
+			Zotero.debug(`RecognizePDF: Getting metadata for arXiv ID ${res.arxiv}`);
 			let translate = new Zotero.Translate.Search();
 			translate.setIdentifier({arXiv: res.arxiv});
 			let translators = await translate.getTranslators();
@@ -461,32 +461,36 @@ Zotero.RecognizePDF = new function () {
 		}
 		
 		if (res.doi) {
-			Zotero.debug('RecognizePDF: Getting metadata by DOI');
+			Zotero.debug(`RecognizePDF: Getting metadata for DOI (${res.doi})`);
 			let translate = new Zotero.Translate.Search();
 			translate.setIdentifier({
 				DOI: res.doi
 			});
 			let translators = await translate.getTranslators();
-			translate.setTranslator(translators);
-			
-			try {
-				let newItem = await _promiseTranslate(translate, libraryID);
-				if (!newItem.abstractNote && res.abstract) {
-					newItem.setField('abstractNote', res.abstract);
+			if (translators.length) {
+				translate.setTranslator(translators);
+				try {
+					let newItem = await _promiseTranslate(translate, libraryID);
+					if (!newItem.abstractNote && res.abstract) {
+						newItem.setField('abstractNote', res.abstract);
+					}
+					if (!newItem.language && res.language) {
+						newItem.setField('language', res.language);
+					}
+					newItem.saveTx();
+					return newItem;
 				}
-				if (!newItem.language && res.language) {
-					newItem.setField('language', res.language);
+				catch (e) {
+					Zotero.debug('RecognizePDF: ' + e);
 				}
-				newItem.saveTx();
-				return newItem;
 			}
-			catch (e) {
-				Zotero.debug('RecognizePDF: ' + e);
+			else {
+				Zotero.debug("RecognizePDF: No translators found");
 			}
 		}
 		
 		if (res.isbn) {
-			Zotero.debug('RecognizePDF: Getting metadata by ISBN');
+			Zotero.debug(`RecognizePDF: Getting metadata by ISBN ${res.isbn}`);
 			let translate = new Zotero.Translate.Search();
 			translate.setSearch({'itemType': 'book', 'ISBN': res.isbn});
 			try {
