@@ -1,13 +1,19 @@
 describe("Zotero.HTTP", function () {
+	var server;
 	var httpd;
 	var port = 16213;
 	var baseURL = `http://127.0.0.1:${port}/`
 	var testURL = baseURL + 'test.html';
 	var redirectLocation = baseURL + 'test2.html';
 	
+	function setResponse(response) {
+		setHTTPResponse(server, baseURL, response, {});
+	}
+	
+	
 	before(function* () {
+		// Real HTTP server
 		Components.utils.import("resource://zotero-unit/httpd.js");
-		
 		httpd = new HttpServer();
 		httpd.start(port);
 		httpd.registerPathHandler(
@@ -41,15 +47,25 @@ describe("Zotero.HTTP", function () {
 		);
 	});
 	
+	beforeEach(function () {
+		// Fake XHR, which can be disabled per test with `Zotero.HTTP.mock = null`
+		Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
+		server = sinon.fakeServer.create();
+		server.autoRespond = true;
+	});
+	
 	after(function* () {
 		var defer = new Zotero.Promise.defer();
 		httpd.stop(() => defer.resolve());
 		yield defer.promise;
+		
+		Zotero.HTTP.mock = null;
 	});
 	
 	
 	describe("#request()", function () {
 		it("should succeed with 3xx status if followRedirects is false", async function () {
+			Zotero.HTTP.mock = null;
 			var req = await Zotero.HTTP.request(
 				'GET',
 				baseURL + 'redirect',
@@ -60,10 +76,168 @@ describe("Zotero.HTTP", function () {
 			assert.equal(req.status, 301);
 			assert.equal(req.getResponseHeader('Location'), redirectLocation);
 		});
+		
+		it("should catch an interrupted connection", async function () {
+			setResponse({
+				method: "GET",
+				url: "empty",
+				status: 0,
+				text: ""
+			})
+			var e = await getPromiseError(Zotero.HTTP.request("GET", baseURL + "empty"));
+			assert.ok(e);
+			assert.equal(e.message, Zotero.getString('sync.error.checkConnection'));
+		});
+		
+		it("should provide cancellerReceiver with a callback to cancel a request", async function () {
+			var timeoutID;
+			server.autoRespond = false;
+			server.respondWith(function (req) {
+				if (req.method == "GET" && req.url == baseURL + "slow") {
+					req.respond(
+						200,
+						{},
+						"OK"
+					);
+				}
+			});
+			
+			setTimeout(function () {
+				cancel();
+			}, 50);
+			var e = await getPromiseError(Zotero.HTTP.request(
+				"GET",
+				baseURL + "slow",
+				{
+					cancellerReceiver: function (f) {
+						cancel = f;
+					}
+				}
+			));
+			
+			assert.instanceOf(e, Zotero.HTTP.CancelledException);
+			server.respond();
+		});
+		
+		describe("Retries", function () {
+			var spy;
+			var delayStub;
+			
+			beforeEach(function () {
+				delayStub = sinon.stub(Zotero.Promise, "delay").returns(Zotero.Promise.resolve());
+			});
+			
+			afterEach(function () {
+				if (spy) {
+					spy.restore();
+				}
+				delayStub.restore();
+			});
+			
+			after(function () {
+				sinon.restore();
+			});
+			
+			
+			it("should retry on 500 error", async function () {
+				setResponse({
+					method: "GET",
+					url: "error",
+					status: 500,
+					text: ""
+				});
+				spy = sinon.spy(Zotero.HTTP, "_requestInternal");
+				var e = await getPromiseError(
+					Zotero.HTTP.request(
+						"GET",
+						baseURL + "error",
+						{
+							errorDelayIntervals: [10, 20],
+							errorDelayMax: 25
+						}
+					)
+				);
+				assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+				assert.isTrue(spy.calledTwice);
+			});
+			
+			it("should provide cancellerReceiver a callback to cancel while waiting to retry a 5xx error", async function () {
+				delayStub.restore();
+				setResponse({
+					method: "GET",
+					url: "error",
+					status: 500,
+					text: ""
+				});
+				var cancel;
+				spy = sinon.spy(Zotero.HTTP, "_requestInternal");
+				setTimeout(() => {
+					cancel();
+				}, 50);
+				var e = await getPromiseError(
+					Zotero.HTTP.request(
+						"GET",
+						baseURL + "error",
+						{
+							errorDelayIntervals: [10, 10, 100],
+							cancellerReceiver: function () {
+								cancel = arguments[0];
+							}
+						}
+					)
+				);
+				assert.instanceOf(e, Zotero.HTTP.CancelledException);
+				assert.isTrue(spy.calledTwice);
+			});
+			
+			it("should obey Retry-After for 503", function* () {
+				var called = 0;
+				server.respond(function (req) {
+					if (req.method == "GET" && req.url == baseURL + "error") {
+						if (called < 1) {
+							req.respond(
+								503,
+								{
+									"Retry-After": "5"
+								},
+								""
+							);
+						}
+						else if (called < 2) {
+							req.respond(
+								503,
+								{
+									"Retry-After": "10"
+								},
+								""
+							);
+						}
+						else {
+							req.respond(
+								200,
+								{},
+								""
+							);
+						}
+					}
+					called++;
+				});
+				spy = sinon.spy(Zotero.HTTP, "_requestInternal");
+				yield Zotero.HTTP.request("GET", baseURL + "error");
+				assert.isTrue(spy.calledThrice);
+				// DEBUG: Why are these slightly off?
+				assert.approximately(delayStub.args[0][0], 5 * 1000, 5);
+				assert.approximately(delayStub.args[1][0], 10 * 1000, 5);
+			});
+		});
 	});
 	
 	
 	describe("#processDocuments()", function () {
+		beforeEach(function () {
+			Zotero.HTTP.mock = null;
+		});
+		
 		it("should provide a document object", function* () {
 			var called = false;
 			yield Zotero.HTTP.processDocuments(

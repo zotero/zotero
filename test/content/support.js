@@ -499,8 +499,14 @@ var modifyDataObject = function (obj, params = {}, saveOptions) {
 /**
  * Return a promise for the error thrown by a promise, or false if none
  */
-function getPromiseError(promise) {
-	return promise.thenReturn(false).catch(e => e);
+async function getPromiseError(promise) {
+	try {
+		await promise;
+	}
+	catch (e) {
+		return e;
+	}
+	return false;
 }
 
 /**

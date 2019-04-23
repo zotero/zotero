@@ -38,8 +38,6 @@ Zotero.Sync.APIClient = function (options) {
 	this.caller = options.caller;
 	this.debugUploadPolicy = Zotero.Prefs.get('sync.debugUploadPolicy');
 	
-	this.failureDelayIntervals = [2500, 5000, 10000, 20000, 40000, 60000, 120000, 240000, 300000];
-	this.failureDelayMax = 60 * 60 * 1000; // 1 hour
 	this.rateDelayIntervals = [30, 60, 300];
 	this.rateDelayPosition = 0;
 }
@@ -610,7 +608,7 @@ Zotero.Sync.APIClient.prototype = {
 	getHeaders: function (headers = {}) {
 		let newHeaders = {};
 		newHeaders = Object.assign(newHeaders, headers);
-		newHeaders["Zotero-API-Version"] = this.apiVersion;
+		newHeaders["Zotero-API-Version"] = this.apiVersion.toString();
 		if (this.apiKey) {
 			newHeaders["Zotero-API-Key"] = this.apiKey;
 		}
@@ -651,7 +649,6 @@ Zotero.Sync.APIClient.prototype = {
 		}
 		
 		var tries = 0;
-		var failureDelayGenerator = null;
 		while (true) {
 			var result = yield this.caller.start(Zotero.Promise.coroutine(function* () {
 				try {
@@ -663,29 +660,8 @@ Zotero.Sync.APIClient.prototype = {
 				catch (e) {
 					tries++;
 					if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-						this._checkConnection(e.xmlhttp, e.channel);
 						if (this._check429(e.xmlhttp)) {
 							// Return false to keep retrying request
-							return false;
-						}
-						
-						if (e.is5xx()) {
-							Zotero.logError(e);
-							if (e.xmlhttp.status == 503 && this._checkRetry(e.xmlhttp)) {
-								return false;
-							}
-							
-							if (!failureDelayGenerator) {
-								// Keep trying for up to an hour
-								failureDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
-									this.failureDelayIntervals, this.failureDelayMax
-								);
-							}
-							let keepGoing = yield failureDelayGenerator.next().value;
-							if (!keepGoing) {
-								Zotero.logError("Failed too many times");
-								throw e;
-							}
 							return false;
 						}
 					}
@@ -784,37 +760,6 @@ Zotero.Sync.APIClient.prototype = {
 			throw e;
 		}
 		return json;
-	},
-	
-	
-	/**
-	 * Check connection for interruptions and empty responses and throw an appropriate error
-	 */
-	_checkConnection: function (xmlhttp, channel) {
-		if (!xmlhttp.responseText && (xmlhttp.status == 0 || xmlhttp.status == 200)) {
-			let msg = null;
-			let dialogButtonText = null;
-			let dialogButtonCallback = null;
-			
-			if (xmlhttp.status === 0) {
-				msg = Zotero.getString('sync.error.checkConnection');
-				dialogButtonText = Zotero.getString('general.moreInformation');
-				let url = 'https://www.zotero.org/support/kb/connection_error';
-				dialogButtonCallback = () => Zotero.launchURL(url);
-			}
-			else if (!msg) {
-				msg = Zotero.getString('sync.error.emptyResponseServer')
-					+ Zotero.getString('general.tryAgainLater');
-			}
-			throw new Zotero.Error(
-				msg,
-				0,
-				{
-					dialogButtonText,
-					dialogButtonCallback
-				}
-			);
-		}
 	},
 	
 	
