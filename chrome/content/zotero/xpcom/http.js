@@ -403,7 +403,7 @@ Zotero.HTTP = new function() {
 		}
 		
 		xmlhttp.onloadend = async function() {
-			var status = xmlhttp.status || redirectStatus;
+			var status = redirectStatus || xmlhttp.status;
 			
 			try {
 				if (!status) {
