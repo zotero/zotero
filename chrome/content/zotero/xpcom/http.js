@@ -384,9 +384,7 @@ Zotero.HTTP = new function() {
 		}
 
 		// Set timeout
-		if (options.timeout) {
-			xmlhttp.timeout = options.timeout;
-		}
+		xmlhttp.timeout = options.timeout || 30000;
 
 		xmlhttp.ontimeout = function() {
 			deferred.reject(new Zotero.HTTP.TimeoutException(options.timeout));
