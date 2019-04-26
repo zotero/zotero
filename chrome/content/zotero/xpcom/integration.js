@@ -332,9 +332,13 @@ Zotero.Integration = new function() {
 			if (document) {
 				try {
 					await document.activate();
-					let index = await document.displayAlert(displayError, DIALOG_ICON_STOP, DIALOG_BUTTONS_YES_NO);
-					if (index == 1) {
-						Zotero.launchURL(supportURL);
+					if (e instanceof Zotero.Exception.Alert) {
+						await document.displayAlert(displayError, DIALOG_ICON_STOP, DIALOG_BUTTONS_OK);
+					} else {
+						let index = await document.displayAlert(displayError, DIALOG_ICON_STOP, DIALOG_BUTTONS_YES_NO);
+						if (index == 1) {
+							Zotero.launchURL(supportURL);
+						}
 					}
 					return;
 				}
@@ -1435,7 +1439,7 @@ Zotero.Integration.Session.prototype.init = Zotero.Promise.coroutine(function *(
 		}
 	}
 		
-	if (require && (!haveFields && !data.prefs.fieldType)) {
+	if (require && (!haveFields && data.prefs.fieldType)) {
 		// If required but no fields and preferences exist throw an error
 		return Zotero.Promise.reject(new Zotero.Exception.Alert(
 		"integration.error.mustInsertCitation",
