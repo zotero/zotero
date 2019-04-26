@@ -387,6 +387,7 @@ Zotero.Cite = {
 			case 'title':
 			case 'title-short':
 			case 'translator':
+			case 'type':
 			case 'version':
 			case 'volume':
 			case 'year-suffix':
@@ -406,11 +407,229 @@ Zotero.Cite = {
 			case 'archive-location':
 				field = 'archive_location';
 				break;
+
+			// Accomodate other field names
+			case 'access-date':
+				field = 'accessed';
+				break;
+
+			case 'series-number':
+				field = 'collection-number';
+				break;
+			
+			case 'series':
+			case 'series-title':
+				field = 'collection-title';
+				break;
+
+			case 'series-abbr':
+			case 'series-abbreviation':
+			case 'short-series-title':
+				field = 'collection-title-short';
+				break;
+
+			case 'album-title':
+			case 'blog-title':
+			case 'book-title':
+			case 'dictionary-title':
+			case 'encyclopedia-title':
+			case 'forum-title':
+			case 'journal-title':
+			case 'proceedings-title':
+			case 'program-title':
+			case 'publication':
+			case 'publication-title':
+			case 'repository':
+			case 'session-title':
+			case 'website-title':
+				field = 'container-title';
+				break;
+
+			case 'short-album-title':
+			case 'short-blog-title':
+			case 'short-book-title':
+			case 'short-dictionary-title':
+			case 'short-encyclopedia-title':
+			case 'short-forum-title':
+			case 'short-journal-title':
+			case 'short-proceedings-title':
+			case 'short-program-title':
+			case 'short-publication-title':
+			case 'short-session-title':
+			case 'short-website-title':
+			case 'album-abbr':
+			case 'blog-abbr':
+			case 'book-abbr':
+			case 'dictionary-abbr':
+			case 'encyclopedia-abbr':
+			case 'forum-abbr':
+			case 'journal-abbr':
+			case 'proceedings-abbr':
+			case 'program-abbr':
+			case 'publication-abbr':
+			case 'repository-abbr':
+			case 'session-abbr':
+			case 'website-abbr':
+			case 'album-abbreviation':
+			case 'blog-abbreviation':
+			case 'book-abbreviation':
+			case 'dictionary-abbreviation':
+			case 'encyclopedia-abbreviation':
+			case 'forum-abbreviation':
+			case 'journal-abbreviation':
+			case 'proceedings-abbreviation':
+			case 'program-abbreviation':
+			case 'publication-abbreviation':
+			case 'repository-abbreviation':
+			case 'session-abbreviation':
+			case 'website-abbreviation':
+				field = 'container-title-short';
+				break;
+
+			case 'artwork-size':
+			case 'running-time':
+			case 'size':
+				field = 'dimensions';
+				break;
+
+			case 'manuscript-type':
+			case 'map-type':
+			case 'post-type':
+			case 'presentation-type':
+			case 'report-type':
+			case 'website-type':
+				field = 'genre';
+				break;
+
+			case 'date':
+				field = 'issued';
+				break;
+
+			case 'file-type':
+			case 'format':
+				field = 'medium';
+				break;
+
+			case 'episode-number':
+			case 'report-number':
+				field = 'number';
+				break;
+
+			case '#-of-pages':
+				field = 'number-of-pages';
+				break;
+				
+			case '#-of-volumes':
+				'number-of-volumes';
+				break;
+
+			case 'pages':
+				field = 'page';
+				break;
+
+			case 'company':
+			case 'institution':
+			case 'label':
+			case 'network':
+			case 'studio':
+			case 'university':
+				field = 'publisher';
+				break;
+
+			case 'library-catalog':
+				field = 'source';
+				break;
+
+			case 'short-title':
+				field = 'title-short';
+				break;
 			
 			// Don't change other lines
 			default:
 				field = originalField;
 			}
+
+			
+			}
+			
+			if (field == 'type') {
+				var originalValue = value;
+				var value = value.toLowerCase().replace(/ /g, '-');
+				
+				switch (value) {
+				case 'journal-article':
+					value = 'article-journal';
+					break;
+
+				case 'magazine-article':
+					value = 'article-magazine';
+					break;
+
+				case 'dictionary-article':
+				case 'dictionary-entry':
+					value = 'entry-dictionary';
+					break;
+					
+				case 'encyclopedia-article':
+				case 'encyclopedia-entry':
+					value = 'entry-encyclopedia';
+					break;
+
+				case 'journal-article':
+					value = 'article-journal';
+					break;
+
+				case 'magazine-article':
+					value = 'article-magazine';
+					break;
+					
+				case 'newspaper-article':
+					value = 'article-newspaper';
+					break;
+
+				case 'artwork':
+					value = 'graphic';
+					break;
+
+				case 'film':
+				case 'motion-picture':
+					value = "motion_picture";
+					break;
+
+				case 'musical-score':
+					value = 'musical_score';
+					break;
+
+				case 'conference-paper':
+					value = 'paper-conference';
+					break;
+
+				case 'blog-post':
+					value = 'post-weblog';
+					break;
+
+				case 'email':
+				case 'e-mail':
+				case 'instant-message':
+				case 'letter':
+				case 'personal-communication':
+					value = 'personal_communication';
+					break;
+
+				case 'book-review':
+					value = 'review-book';
+					break;
+
+				case 'audio-recording':
+					value = 'song';
+					break;
+
+				default:
+					value = originalValue; 
+
+				}
+			}
+			
 			return field + value;
 		});
 	}
