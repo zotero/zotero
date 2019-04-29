@@ -128,7 +128,7 @@
 								<textbox id="zotero-lookup-multiline-textbox" onkeypress="return Zotero_Lookup.onKeyPress(event, this)" multiline="true" rows="5" wrap="off" flex="1"/>
 								<hbox align="start" id="zotero-lookup-buttons" class="zotero-button-clear-image">
 									<button label="&zotero.lookup.button.search;" align="start" oncommand="Zotero_Lookup.accept(document.getElementById('zotero-lookup-multiline-textbox'))"/>
-									<progressmeter id="zotero-lookup-multiline-progress" mode="determined" flex="1"/>
+									<progressmeter id="zotero-lookup-multiline-progress" mode="determined" flex="1" hidden="true"/>
 								</hbox>
 							</vbox>
 						</vbox>

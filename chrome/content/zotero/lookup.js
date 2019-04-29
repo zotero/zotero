@@ -108,6 +108,13 @@ var Zotero_Lookup = new function () {
 		
 		document.getElementById("zotero-lookup-panel").style.padding = "10px";
 		this.getActivePanel().getElementsByTagName('textbox')[0].focus();
+		
+		// Resize arrow box to fit content
+		if (Zotero.isMac) {
+			let panel = document.getElementById("zotero-lookup-panel");
+			let box = panel.firstChild;
+			panel.sizeTo(box.scrollWidth, box.scrollHeight);
+		}
 	}
 	
 	
@@ -121,6 +128,9 @@ var Zotero_Lookup = new function () {
 		document.getElementById("zotero-lookup-textbox").value = "";
 		document.getElementById("zotero-lookup-multiline-textbox").value = "";
 		Zotero_Lookup.toggleProgress(false);
+		
+		// Revert to single-line when closing
+		this.toggleMultiline(false);
 	}
 	
 	
@@ -145,7 +155,7 @@ var Zotero_Lookup = new function () {
 				event.stopImmediatePropagation();
 			} else if(!multiline) {	//switch to multiline
 				var mlTextbox = Zotero_Lookup.toggleMultiline(true);
-				mlTextbox.value = mlTextbox.value + '\n';
+				mlTextbox.value = mlTextbox.value.trim() !== '' ? mlTextbox.value + '\n' : '';
 			}
 		} else if(keyCode == event.DOM_VK_ESCAPE) {
 			document.getElementById("zotero-lookup-panel").hidePopup();
@@ -185,8 +195,6 @@ var Zotero_Lookup = new function () {
 		var source = on ? slTxtBox : mlTxtBox;
 		var dest = on ? mlTxtBox : slTxtBox;
 
-		if((mlPanel.collapsed && !on) || (!mlPanel.collapsed && on)) return dest;
-
 		//copy over the value
 		dest.value = source.value;
 
@@ -194,13 +202,13 @@ var Zotero_Lookup = new function () {
 		mlPanel.setAttribute("collapsed", !on);
 		slPanel.setAttribute("collapsed", !!on);
 
-		// Resize arrow box to fit content
+		// Resize arrow box to fit content -- also done in onShowing()
 		if(Zotero.isMac) {
 			var panel = document.getElementById("zotero-lookup-panel");
 			var box = panel.firstChild;
 			panel.sizeTo(box.scrollWidth, box.scrollHeight);
 		}
-
+		
 		dest.focus();
 		return dest;
 	}
@@ -221,5 +229,6 @@ var Zotero_Lookup = new function () {
 		document.getElementById("zotero-lookup-multiline-textbox").disabled = !!on;
 		var p2 = document.getElementById("zotero-lookup-multiline-progress");
 		p2.mode = mode;
+		p2.hidden = !on;
 	}
 }

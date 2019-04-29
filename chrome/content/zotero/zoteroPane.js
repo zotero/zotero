@@ -1061,20 +1061,6 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.openLookupWindow = Zotero.Promise.coroutine(function* () {
-		if (Zotero.DB.inTransaction()) {
-			yield Zotero.DB.waitForTransaction();
-		}
-		
-		if (!this.canEdit()) {
-			this.displayCannotEditLibraryMessage();
-			return;
-		}
-		
-		window.openDialog('chrome://zotero/content/lookup.xul', 'zotero-lookup', 'chrome,modal');
-	});
-	
-	
 	this.openAdvancedSearchWindow = function () {
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator);
