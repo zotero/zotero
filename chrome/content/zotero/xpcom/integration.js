@@ -1427,10 +1427,15 @@ Zotero.Integration.Session.prototype.init = Zotero.Promise.coroutine(function *(
 	var data = this.data;
 	var haveFields = false;
 	
+	let fieldTypes = [this._app.primaryFieldType, this._app.secondaryFieldType];
+	if (data.prefs.fieldType) {
+		fieldTypes = [data.prefs.fieldType];
+	}
+	
 	// If prefs not present
-	if (require && !data.prefs.fieldType) {
+	if (require) {
 		// check to see if fields already exist
-		for (let fieldType of [this.primaryFieldType, this.secondaryFieldType]) {
+		for (let fieldType of fieldTypes) {
 			var fields = yield this._doc.getFields(fieldType);
 			if (fields.length) {
 				haveFields = true;
@@ -1439,13 +1444,13 @@ Zotero.Integration.Session.prototype.init = Zotero.Promise.coroutine(function *(
 		}
 	}
 		
-	if (require && (!haveFields && data.prefs.fieldType)) {
-		// If required but no fields and preferences exist throw an error
+	if (require && !haveFields) {
+		// If required but no fields throw an error
 		return Zotero.Promise.reject(new Zotero.Exception.Alert(
-		"integration.error.mustInsertCitation",
-		[], "integration.error.title"));
-	} else if (!data.prefs.fieldType) {
-		Zotero.debug("Integration: No document preferences found, but found "+data.prefs.fieldType+" fields");
+			"integration.error.mustInsertCitation",
+			[], "integration.error.title"));
+	}
+	if (!data.prefs.fieldType) {
 		// Unless explicitly disabled
 		if (dontRunSetDocPrefs) return false;
 
