@@ -40,11 +40,18 @@
     }
   }
   
-  .tree-item-label {
+  span.tree-node-label {
     overflow-x: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    margin-left: 4px;
+  }
+  
+  input.tree-node-label {
+    border: 1px highlight solid;
+    padding: 1px 2px;
+    margin-right: 5px;
+    width: 100%;
+    font-size: inherit;
   }
   
   .icon {

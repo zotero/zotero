@@ -204,10 +204,18 @@ class Tree extends Component {
 			getAriaLabel: PropTypes.func,
 
 			isSeparator: PropTypes.func,
+
+			isEditable: PropTypes.func,
 			
 			onDragLeave: PropTypes.func,
 			
 			onKeyDown: PropTypes.func,
+			
+			drop: PropTypes.object,
+			
+			editing: PropTypes.object,
+			
+			highlighted: PropTypes.instanceOf(Set),
 			
 			// End Added by Zotero
 			
@@ -305,7 +313,7 @@ class Tree extends Component {
 
 	shouldComponentUpdate(nextProps, nextState) {
 		const { scroll, height, seen, mouseDown } = this.state;
-		const { focused, drop, highlighted } = this.props;
+		const { focused, drop, highlighted, editing } = this.props;
 
 		return scroll !== nextState.scroll ||
 			height !== nextState.height ||
@@ -313,6 +321,7 @@ class Tree extends Component {
 			focused !== nextProps.focused ||
 			mouseDown !== nextState.mouseDown ||
 			drop !== nextProps.drop ||
+			editing !== nextProps.editing ||
 			highlighted !== nextProps.highlighted;
 	}
 
@@ -579,7 +588,7 @@ class Tree extends Component {
 		}
 		
 		// Modified by Zotero
-		this.props.onKeyDown && this.props.onKeyDown(e);
+		if (this.props.onKeyDown && this.props.onKeyDown(e) === false) return;
 
 		// Allow parent nodes to use navigation arrows with modifiers.
 		if (e.altKey || e.ctrlKey || e.shiftKey || e.metaKey) {
@@ -842,8 +851,10 @@ class Tree extends Component {
 					this._focus(begin, toRender[0].item);
 				},
 				onClick: () => {
-					// Focus should always remain on the tree container itself.
-					this.refs.tree.focus();
+					if (!this.props.editing) {
+						// Focus should always remain on the tree container itself.
+						this.refs.tree.focus();
+					}
 				},
 				"aria-label": this.props.label,
 				"aria-labelledby": this.props.labelledby,

@@ -17,7 +17,7 @@
   "dependencies": {
     "bluebird": "^3.5.1",
     "classnames": "^2.2.6",
-    "prop-types": "^15.6.2",
+    "prop-types": "^15.7.2",
     "react": "^16.8.4",
     "react-dom": "^16.6.3",
     "react-dom-factories": "^1.0.2",

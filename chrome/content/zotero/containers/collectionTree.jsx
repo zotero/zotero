@@ -96,9 +96,11 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 		this._containerState = {};
 		this._virtualCollectionLibraries = {};
 		this._trashNotEmpty = {};
-		this.refs;
 		this._selectEventsSuppressed = false;
 		this._focused = null;
+		this._editing = null;
+		this._editingInputRef = null;
+		this._dropRow = null;
 		
 		this.onLoad = this._createEventBinding('load', true, true);
 		this.onSelect = this._createEventBinding('select');
@@ -107,36 +109,84 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 	
 	componentDidUpdate() {
 		this.runListeners('refresh');
+		// We cannot have controlled input nodes, so we initialize
+		// the uncontrolled element here instead.
+		if (this._editing) {
+			this._editingInputRef.current.value = this._editing.editingName;
+			this._editingInputRef.current.select();
+			this._editingInputRef = null;
+		}
 	}
 
 	// Add a keypress listener for expand/collapse
 	handleKeyDown = (event) => {
-		// if (this.editingRow != -1) return; // In-line editing active
+		if (this._editing) {
+			if (event.key == 'Enter' || event.key == 'Escape') {
+				if (event.key != 'Esc') {
+					this.commitEditingName(this._editing);
+				}
+				this.stopEditing();
+			}
+			return false; // In-line editing active
+		}
 		
 		var libraryID = this.getSelectedLibraryID();
-		if (!libraryID) return;
+		if (!libraryID) return true;
 		
 		if (event.key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
 			this.expandLibrary(libraryID, true);
 		}
-		else if (event.key == '-' && !(event.shiftKey || event.ctrlKey ||
-				event.altKey || event.metaKey)) {
+		else if (event.key == '-' && !(event.shiftKey || event.ctrlKey
+				|| event.altKey || event.metaKey)) {
 			this.collapseLibrary(libraryID);
 		}
-		else if ((event.key == 'Backspace' && Zotero.isMac) ||
-				event.key == 'Delete') {
+		else if ((event.key == 'Backspace' && Zotero.isMac) || event.key == 'Delete') {
 			var deleteItems = event.metaKey || (!Zotero.isMac && event.shiftKey);
 			ZoteroPane.deleteSelectedCollection(deleteItems);
 			event.preventDefault();
-			return;
 		}
+		else if (event.key == "F2" && !Zotero.isMac) {
+			this.handleActivate(this._focused);
+		}
+		return true;
 	}
 	
 	handleRowFocus = (treeRow) => {
+		if (this._editing) {
+			if (this._editing == treeRow) return;
+			this.commitEditingName(this._editing);
+			this._editing = null;
+		}
 		this.focused = treeRow;
 		if (this.selectEventsSuppressed) return;
 		this.forceUpdate();
 		this.props.onFocus && this.props.onFocus();
+	}
+	
+	handleActivate = (treeRow) => {
+		if (treeRow.isCollection() && this.editable) {
+			this._editing = treeRow;
+			treeRow.editingName = treeRow.ref.name;
+			this.forceUpdate();
+		}
+	}
+	
+	handleEditingChange = (treeRow, e) => {
+		treeRow.editingName = e.target.value;
+	}
+	
+	async commitEditingName(treeRow) {
+		if (!treeRow.editingName) return;
+		treeRow.ref.name = treeRow.editingName;
+		delete treeRow.editingName;
+		await treeRow.ref.saveTx();
+	}
+	
+	stopEditing = () => {
+		this._editing = null;
+		// Returning focus to the tree container
+		this.ref.refs.tree.focus();
+		this.forceUpdate();
 	}
 
 	getRoots() {
@@ -161,7 +211,7 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 				this.forceUpdate();
 				animationId = null;
 			});
-		};	
+		};
 	}
 	
 	render() {
@@ -187,16 +237,18 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 				getParent: treeRow => treeRow.parent,
 				getChildren: treeRow => treeRow.children,
 				getAriaLabel: treeRow => treeRow.getName(),
-				isSeparator: treeRow => treeRow.isSeparator(),
+				isSeparator: treeRow => treeRow.isSeparator() || treeRow.isHeader(),
 				isExpanded: treeRow => treeRow.isOpen,
-				
-				renderItem: (treeRow, depth, isFocused, arrow, isExpanded) => {
+
+				renderItem: (treeRow, depth, isFocused, arrow) => {
 					let icon = this.getIcon(treeRow);
-					let classes = cx(['tree-node', 
-						{focused: isFocused},
-						{highlighted: this._highlightedRows.has(treeRow.id)},
-						{drop: this._dropRow == treeRow.id},
-						{unread: treeRow.ref && treeRow.ref.unreadCount}
+					let classes = cx(['tree-node',
+						{
+							focused: isFocused,
+							highlighted: this._highlightedRows.has(treeRow.id),
+							drop: this._dropRow == treeRow.id,
+							unread: treeRow.ref && treeRow.ref.unreadCount
+						}
 					]);
 					
 					let props = {
@@ -209,19 +261,34 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 							await this.handleRowFocus(treeRow);
 							this.props.onContext && this.props.onContext(e);
 						},
-						draggable: true,
+						draggable: treeRow != this._editing,
 					}
 					if (this.props.dragAndDrop) {
+						props.onDoubleClick = () => this.handleActivate(treeRow);
 						props.onDragStart = e => this.onDragStart(treeRow, e);
 						props.onDragOver = e => this.onDragOver(treeRow, e);
 						props.onDrop = e => this.onDrop(treeRow, e);
+					}
+					
+					
+					let label = <span className="tree-node-label">{treeRow.getName()}</span>;
+					if (treeRow == this._editing) {
+						this._editingInputRef = React.createRef();
+						label = <input
+							className="tree-node-label"
+							ref={this._editingInputRef}
+							autoFocus={true}
+							onInput={e => this.handleEditingChange(treeRow, e)}
+							size={5}
+							onBlur={e => this.stopEditing()}
+						/>;
 					}
 					
 					return (
 						<div {...props}>
 							{arrow}
 							{icon}
-							<span className="tree-node-label">{treeRow.getName()}</span>
+							{label}
 						</div>
 					);
 				},
@@ -229,12 +296,14 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 				focused: focused,
 				highlighted: this._highlightedRows,
 				drop: this._dropRow,
+				editing: this._editing,
 				
 				onDragLeave: (e) => this.props.dragAndDrop && this.onTreeDragLeave(e),
 				onFocus: this.handleRowFocus,
 				onExpand: toggleTreeRow,
 				onCollapse: toggleTreeRow,
 				onKeyDown: this.handleKeyDown,
+				onActivate: this.handleActivate,
 
 				autoExpandAll: false,
 				autoExpandDepth: 0,
