@@ -969,6 +969,13 @@ describe("Zotero.Sync.Data.Local", function() {
 					version: 1234,
 					itemType: "book",
 					title: "Title 1",
+					creators: [
+						{
+							firstName: "First1",
+							lastName: "Last1",
+							creatorType: "author"
+						}
+					],
 					url: "http://zotero.org/",
 					publicationTitle: "Publisher", // Remove locally
 					extra: "Extra", // Removed on both
@@ -1003,6 +1010,19 @@ describe("Zotero.Sync.Data.Local", function() {
 					version: 1234,
 					itemType: "book",
 					title: "Title 2", // Changed locally
+					creators: [
+						{
+							firstName: "First1",
+							lastName: "Last1",
+							creatorType: "author"
+						},
+						// Same new creator on local and remote
+						{
+							firstName: "First2",
+							lastName: "Last2",
+							creatorType: "editor"
+						}
+					],
 					url: "https://www.zotero.org/", // Same change on local and remote
 					place: "Place", // Added locally
 					dateModified: "2015-05-14 14:12:34", // Changed locally and remotely, but ignored
@@ -1037,6 +1057,19 @@ describe("Zotero.Sync.Data.Local", function() {
 					version: 1235,
 					itemType: "book",
 					title: "Title 1",
+					creators: [
+						{
+							firstName: "First1",
+							lastName: "Last1",
+							creatorType: "author"
+						},
+						// Same new creator on local and remote
+						{
+							firstName: "First2",
+							lastName: "Last2",
+							creatorType: "editor"
+						}
+					],
 					url: "https://www.zotero.org/",
 					publicationTitle: "Publisher",
 					date: "2015-05-15", // Added remotely
@@ -1273,8 +1306,6 @@ describe("Zotero.Sync.Data.Local", function() {
 				var result = Zotero.Sync.Data.Local._reconcileChanges(
 					'item', cacheJSON, json1, json2, ignoreFields
 				);
-				Zotero.debug('=-=-=-=');
-				Zotero.debug(result);
 				assert.lengthOf(result.changes, 0);
 				assert.sameDeepMembers(
 					result.conflicts,
@@ -1293,7 +1324,77 @@ describe("Zotero.Sync.Data.Local", function() {
 						]
 					]
 				);
-			})
+			});
+			
+			it("should return conflict when creator changes can't be automatically resolved", function () {
+				var cacheJSON = {
+					key: "AAAAAAAA",
+					version: 1234,
+					title: "Title",
+					creators: [
+						{
+							firstName: "First1",
+							lastName: "Last1",
+							creatorType: "author"
+						}
+					],
+					dateModified: "2015-05-14 12:34:56"
+				};
+				var json1 = {
+					key: "AAAAAAAA",
+					version: 1234,
+					title: "Title",
+					creators: [
+						{
+							firstName: "First2",
+							lastName: "Last2",
+							creatorType: "author"
+						}
+					],
+					dateModified: "2015-05-14 14:12:34"
+				};
+				var json2 = {
+					key: "AAAAAAAA",
+					version: 1235,
+					title: "Title",
+					creators: [
+						{
+							firstName: "First3",
+							lastName: "Last3",
+							creatorType: "author"
+						}
+					],
+					dateModified: "2015-05-14 13:45:12"
+				};
+				var ignoreFields = ['dateAdded', 'dateModified'];
+				var result = Zotero.Sync.Data.Local._reconcileChanges(
+					'item', cacheJSON, json1, json2, ignoreFields
+				);
+				assert.lengthOf(result.changes, 0);
+				assert.lengthOf(result.conflicts, 1);
+				assert.propertyVal(result.conflicts[0][0], 'field', 'creators');
+				assert.propertyVal(result.conflicts[0][0], 'op', 'modify');
+				assert.lengthOf(result.conflicts[0][0].value, 1);
+				assert.include(
+					result.conflicts[0][0].value[0],
+					{
+						firstName: 'First2',
+						lastName: 'Last2',
+						creatorType: 'author'
+					}
+				);
+				assert.propertyVal(result.conflicts[0][1], 'field', 'creators');
+				assert.propertyVal(result.conflicts[0][1], 'op', 'modify');
+				assert.lengthOf(result.conflicts[0][1].value, 1);
+				assert.include(
+					result.conflicts[0][1].value[0],
+					{
+						firstName: 'First3',
+						lastName: 'Last3',
+						creatorType: 'author'
+					}
+				);
+			});
 			
 			it("should automatically merge array/object members and generate conflicts for field changes in absence of cached version", function () {
 				var json1 = {

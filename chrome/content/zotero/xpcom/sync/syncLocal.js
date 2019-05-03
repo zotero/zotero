@@ -1493,12 +1493,6 @@ Zotero.Sync.Data.Local = {
 						}
 						break;
 					
-					case 'creators':
-						if (!Zotero.Creators.equals(c1.value, c2.value)) {
-							continue;
-						}
-						break;
-					
 					case 'tags':
 						if (!Zotero.Tags.equals(c1.value, c2.value)) {
 							// If just a type difference, treat as modify with type 0 if
@@ -1534,6 +1528,17 @@ Zotero.Sync.Data.Local = {
 				}
 				
 				// Changes are equal or in conflict
+				
+				// Creators changed the same way on both sides
+				if (c1.field == 'creators' && c1.op == 'modify' && c2.op == 'modify') {
+					let creators1 = c1.value;
+					let creators2 = c2.value;
+					if (creators1.length == creators2.length
+							&& creators1.every((c, index) => Zotero.Creators.equals(c, creators2[index]))) {
+						changeset2.splice(j--, 1);
+						continue;
+					}
+				}
 				
 				// Removed on both sides
 				if (c1.op == 'delete' && c2.op == 'delete') {
