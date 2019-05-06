@@ -1222,17 +1222,17 @@ Zotero.Integration.Fields.prototype.addEditCitation = async function (field) {
 	var previewFn = async function (citation) {
 		let idx = await fieldIndexPromise;
 		await citationsByItemIDPromise;
-		var fields = await this.get();
 
-		var [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this._session.getCiteprocLists(true);
+		var [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this._session.getCiteprocLists();
 		for (var prevIdx = idx-1; prevIdx >= 0; prevIdx--) {
 			if (prevIdx in fieldToCitationIdxMapping) break;
 		}
-		for (var nextIdx = idx; nextIdx < fields.length; nextIdx++) {
-			if (nextIdx in fieldToCitationIdxMapping) break;
+		let sliceIdx = fieldToCitationIdxMapping[prevIdx]+1;
+		if (sliceIdx == NaN) {
+			sliceIdx = 0;
 		}
-		let citationsPre = citations.slice(0, fieldToCitationIdxMapping[prevIdx]+1);
-		let citationsPost = citations.slice(fieldToCitationIdxMapping[nextIdx]);
+		let citationsPre = citations.slice(0, sliceIdx);
+		let citationsPost = citations.slice(sliceIdx);
 		let citationID = citation.citationID;
 		try {
 			var result = this._session.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
