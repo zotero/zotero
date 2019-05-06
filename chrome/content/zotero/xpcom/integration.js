@@ -557,7 +557,7 @@ Zotero.Integration.Interface.prototype.addCitation = Zotero.Promise.coroutine(fu
 	yield this._session.addCitation(idx, yield field.getNoteIndex(), citation);
 	
 	if (this._session.data.prefs.delayCitationUpdates) {
-		return this._session.writeDelayedCitation(idx, field, citation);
+		return this._session.writeDelayedCitation(field, citation);
 	} else {
 		return this._session.fields.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 	}
@@ -588,7 +588,7 @@ Zotero.Integration.Interface.prototype.addEditCitation = async function (docFiel
 	let [idx, field, citation] = await this._session.fields.addEditCitation(docField);
 	await this._session.addCitation(idx, await field.getNoteIndex(), citation);
 	if (this._session.data.prefs.delayCitationUpdates) {
-		return this._session.writeDelayedCitation(idx, field, citation);
+		return this._session.writeDelayedCitation(field, citation);
 	} else {
 		return this._session.fields.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 	}
@@ -923,6 +923,7 @@ Zotero.Integration.Fields.prototype.updateSession = Zotero.Promise.coroutine(fun
 		this._session.restoreProcessorState();
 		delete this._session.reload;
 	}
+	this._session._sessionUpToDate = true;
 });
 
 /**
@@ -1198,25 +1199,30 @@ Zotero.Integration.Fields.prototype.addEditCitation = async function (field) {
 	await citation.prepareForEditing();
 
 	// -------------------
-	// Preparing stuff to pass into CitationEditInterface
-	var fieldIndexPromise = this.get().then(async function(fields) {
-		for (var i=0, n=fields.length; i<n; i++) {
-			if (await fields[i].equals(field._field)) {
-				// This is needed, because LibreOffice integration plugin caches the field code instead of asking
-				// the document every time when calling #getCode().
-				field = new Zotero.Integration.CitationField(fields[i]);
-				return i;
-			}
-		}
-	});
+	// Preparing data to pass into CitationEditInterface
 	
-	var citationsByItemIDPromise;
-	if (this._session.data.prefs.delayCitationUpdates) {
-		citationsByItemIDPromise = Zotero.Promise.resolve(this._session.citationsByItemID);
-	} else {
+	var fieldIndexPromise, citationsByItemIDPromise;
+	if (!this._session.data.prefs.delayCitationUpdates
+		|| !Object.keys(this._session.citationsByItemID).length
+		|| this._session._sessionUpToDate) {
+		fieldIndexPromise = this.get().then(async function (fields) {
+			for (var i = 0, n = fields.length; i < n; i++) {
+				if (await fields[i].equals(field._field)) {
+					// This is needed, because LibreOffice integration plugin caches the field code instead of asking
+					// the document every time when calling #getCode().
+					field = new Zotero.Integration.CitationField(fields[i]);
+					return i;
+				}
+			}
+			return -1;
+		});
 		citationsByItemIDPromise = this.updateSession(FORCE_CITATIONS_FALSE).then(function() {
 			return this._session.citationsByItemID;
 		}.bind(this));
+	}
+	else {
+		fieldIndexPromise = Zotero.Promise.resolve(-1);
+		citationsByItemIDPromise = Zotero.Promise.resolve(this._session.citationsByItemID);
 	}
 
 	var previewFn = async function (citation) {
@@ -1371,6 +1377,7 @@ Zotero.Integration.Session = function(doc, app) {
 	this.primaryFieldType = app.primaryFieldType;
 	this.secondaryFieldType = app.secondaryFieldType;
 	this.outputFormat = app.outputFormat || 'rtf';
+	this._sessionUpToDate = false;
 	this._app = app;
 	
 	this.sessionID = Zotero.randomString();
@@ -1743,22 +1750,23 @@ Zotero.Integration.Session.prototype.restoreProcessorState = function() {
 }
 
 
-Zotero.Integration.Session.prototype.writeDelayedCitation = Zotero.Promise.coroutine(function* (idx, field, citation) {
+Zotero.Integration.Session.prototype.writeDelayedCitation = Zotero.Promise.coroutine(function* (field, citation) {
 	try {
 		var text = citation.properties.custom || this.style.previewCitationCluster(citation, [], [], this.outputFormat);
-	} catch(e) {
+	}
+	catch (e) {
 		throw e;
 	}
 	if (this.outputFormat == 'rtf') {
 		text = `${DELAYED_CITATION_RTF_STYLING}{${text}}`;
-	} else {
+	}
+	else {
 		text = `${DELAYED_CITATION_HTML_STYLING}${text}${DELAYED_CITATION_HTML_STYLING_END}`;
 	}
 	
 	// Make sure we'll prompt for manually edited citations
-	var isRich = false;
-	if(!citation.properties.dontUpdate) {
-		isRich = yield field.setText(text);
+	if (!citation.properties.dontUpdate) {
+		yield field.setText(text);
 		
 		citation.properties.formattedCitation = text;
 		citation.properties.plainCitation = yield field._field.getText();
@@ -1766,22 +1774,35 @@ Zotero.Integration.Session.prototype.writeDelayedCitation = Zotero.Promise.corou
 	
 	yield field.setCode(citation.serialize());
 	
-	// Update bibliography with a static string
-	var fields = yield this.fields.get();
-	var bibliographyField;
-	for (let i = fields.length-1; i >= 0; i--) {
-		let field = yield Zotero.Integration.Field.loadExisting(fields[i]);
-		if (field.type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
-			var interfaceType = 'tab';
-			if (['MacWord2008', 'OpenOffice'].includes(this.agent)) {
-				interfaceType = 'toolbar';
-			}
-		
-			yield field.setText(Zotero.getString(`integration.delayCitationUpdates.bibliography.${interfaceType}`), false)
-			break;
+	// Update citationsByItemID for later cited item display
+	for (var i=0; i<citation.citationItems.length; i++) {
+		var citationItem = citation.citationItems[i];
+		if (!this.citationsByItemID[citationItem.id]) {
+			this.citationsByItemID[citationItem.id] = [citation];
+		} else {
+			this.citationsByItemID[citationItem.id].push(citation);
 		}
 	}
 	
+	// Update bibliography with a static string
+	// Note: fields._fields will only contain items upon first delayed insert
+	// after a full update
+	if (this._sessionUpToDate) {
+		var fields = yield this.fields.get();
+		for (let i = fields.length - 1; i >= 0; i--) {
+			let field = yield Zotero.Integration.Field.loadExisting(fields[i]);
+			if (field.type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
+				var interfaceType = 'tab';
+				if (['MacWord2008', 'OpenOffice'].includes(this.agent)) {
+					interfaceType = 'toolbar';
+				}
+			
+				yield field.setText(Zotero.getString(`integration.delayCitationUpdates.bibliography.${interfaceType}`), false);
+				break;
+			}
+		}
+	}
+	this._sessionUpToDate = false;
 });
 
 
