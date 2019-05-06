@@ -264,9 +264,8 @@ Zotero.HTTP = new function() {
 		
 		var deferred = Zotero.Promise.defer();
 		
-		if (!this.mock) {
-			var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-				.createInstance();
+		if (!this.mock || url.startsWith('resource://') || url.startsWith('chrome://')) {
+			var xmlhttp = new XMLHttpRequest();
 		}
 		else {
 			var xmlhttp = new this.mock;
