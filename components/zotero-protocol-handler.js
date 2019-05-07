@@ -34,6 +34,8 @@ const ZOTERO_PROTOCOL_NAME = "Zotero Chrome Extension Protocol";
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://gre/modules/NetUtil.jsm");
+Components.utils.import("resource://gre/modules/osfile.jsm")
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -1035,6 +1037,72 @@ function ZoteroProtocolHandler() {
 	};
 	
 	
+	/*
+		zotero://pdf.js/web/viewer.html
+		zotero://pdf.js/pdf/1/ABCD5678
+	*/
+	var PDFJSExtension = {
+		loadAsChrome: false,
+		
+		newChannel: function (uri) {
+			return new AsyncChannel(uri, function* () {
+				try {
+					uri = uri.spec;
+					// Proxy PDF.js files
+					if (uri.startsWith('zotero://pdf.js/web/')
+							|| uri.startsWith('zotero://pdf.js/build/')) {
+						uri = uri.replace(/zotero:\/\/pdf.js\//, 'resource://pdf.js/');
+						let newURI = Services.io.newURI(uri, null, null);
+						return this.getURIInputStream(newURI);
+					}
+					
+					// Proxy attachment PDFs
+					var pdfPrefix = 'zotero://pdf.js/pdf/';
+					if (!uri.startsWith(pdfPrefix)) {
+						return this._errorChannel("File not found");
+					}
+					var [libraryID, key] = uri.substr(pdfPrefix.length).split('/');
+					libraryID = parseInt(libraryID);
+					
+					var item = yield Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
+					if (!item) {
+						return self._errorChannel("Item not found");
+					}
+					var path = yield item.getFilePathAsync();
+					if (!path) {
+						return this._errorChannel("File not found");
+					}
+					return this.getURIInputStream(OS.Path.toFileURI(path));
+				}
+				catch (e) {
+					Zotero.debug(e, 1);
+					throw e;
+				}
+			}.bind(this));
+		},
+		
+		
+		getURIInputStream: function (uri) {
+			return new Zotero.Promise((resolve, reject) => {
+				NetUtil.asyncFetch(uri, function (inputStream, result) {
+					if (!Components.isSuccessCode(result)) {
+						// TODO: Handle error
+						return;
+					}
+					resolve(inputStream);
+				});
+			});
+		},
+		
+		
+		_errorChannel: function (msg) {
+			this.status = Components.results.NS_ERROR_FAILURE;
+			this.contentType = 'text/plain';
+			return msg;
+		}
+	};
+	
+	
 	/**
 	 * Open a PDF at a given page (or try to)
 	 *
@@ -1148,6 +1216,7 @@ function ZoteroProtocolHandler() {
 	this._extensions[ZOTERO_SCHEME + "://select"] = SelectExtension;
 	this._extensions[ZOTERO_SCHEME + "://debug"] = DebugExtension;
 	this._extensions[ZOTERO_SCHEME + "://connector"] = ConnectorExtension;
+	this._extensions[ZOTERO_SCHEME + "://pdf.js"] = PDFJSExtension;
 	this._extensions[ZOTERO_SCHEME + "://open-pdf"] = OpenPDFExtension;
 }
 
