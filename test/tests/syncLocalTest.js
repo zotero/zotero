@@ -526,7 +526,43 @@ describe("Zotero.Sync.Data.Local", function() {
 			assert.equal(obj.version, 10);
 			assert.equal(obj.getField('title'), changedTitle);
 			assert.equal(obj.getField('place'), changedPlace);
-		})
+			// Item should be marked as unsynced so the local changes are uploaded
+			assert.isFalse(obj.synced);
+		});
+		
+		it("should keep local item changes while ignoring matching remote changes", async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			var type = 'item';
+			let obj = await createDataObject(type, { version: 5 });
+			let data = obj.toJSON();
+			await Zotero.Sync.Data.Local.saveCacheObjects(type, libraryID, [data]);
+			
+			// Change local title and place
+			await modifyDataObject(obj)
+			var changedTitle = obj.getField('title');
+			var changedPlace = 'New York';
+			obj.setField('place', changedPlace);
+			await obj.saveTx();
+			
+			// Create remote version without title but with changed place
+			data.key = obj.key;
+			data.version = 10;
+			data.place = changedPlace;
+			let json = {
+				key: obj.key,
+				version: 10,
+				data: data
+			};
+			await Zotero.Sync.Data.Local.processObjectsFromJSON(
+				type, libraryID, [json], { stopOnError: true }
+			);
+			assert.equal(obj.version, 10);
+			assert.equal(obj.getField('title'), changedTitle);
+			assert.equal(obj.getField('place'), changedPlace);
+			// Item should be marked as unsynced so the local changes are uploaded
+			assert.isFalse(obj.synced);
+		});
 		
 		it("should save item with overriding local conflict as unsynced", async function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
