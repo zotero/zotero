@@ -30,7 +30,7 @@ Zotero.CollectionTreeRow = function (collectionTreeView, type, ref, level, paren
 	this.type = type;
 	this.ref = ref;
 	this.level = level || 0;
-	this.isOpen = false;
+	this.isOpen = type == 'header';
 	this.onUnload = null;
 	this.children = [];
 	this.parent = parent;

@@ -250,12 +250,22 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 							unread: treeRow.ref && treeRow.ref.unreadCount
 						}
 					]);
-					
+
+					// The arrow on macOS is a full icon's width.
+					// For non-userLibrary items that are drawn under headers
+					// we do not draw the arrow and need to move all items 1 level up
+					if (Zotero.isMac && !treeRow.isHeader() && treeRow.ref
+							&& treeRow.ref.libraryID != Zotero.Libraries.userLibraryID) {
+						depth--;
+					}
+
+					let style = {
+						paddingLeft: (MARGIN_LEFT + CHILD_INDENT * depth) + 'px',
+					};
+
 					let props = {
 						className: classes,
-						style: {
-							paddingLeft: (MARGIN_LEFT + CHILD_INDENT * depth) + 'px',
-						},
+						style,
 						onContextMenu: async (e) => {
 							e.persist();
 							await this.handleRowFocus(treeRow);
@@ -282,6 +292,11 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 							size={5}
 							onBlur={e => this.stopEditing()}
 						/>;
+					}
+					
+					if (treeRow.isHeader()) {
+						let spacerWidth = Zotero.isMac ? 6 : Zotero.isWin ? 16 : 8;
+						arrow = <span style={{width: `${spacerWidth}px`}}></span>;
 					}
 					
 					return (
@@ -373,7 +388,7 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 			//
 			// Add "My Library"
 			//
-			newRows.splice(added++, 0, 
+			newRows.splice(added++, 0,
 				new Zotero.CollectionTreeRow(this, 'library', { libraryID: Zotero.Libraries.userLibraryID }));
 			newRows[0].isOpen = true;
 			added += await this._expandRow(newRows, 0);
@@ -382,16 +397,15 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 			var groups = Zotero.Groups.getAll();
 			if (groups.length) {
 				newRows.splice(added++, 0, new Zotero.CollectionTreeRow(this, 'separator', false));
-				newRows.splice(added++, 0, 
-					new Zotero.CollectionTreeRow(this, 'header', {
-						id: "group-libraries-header",
-						label: Zotero.getString('pane.collections.groupLibraries'),
-						libraryID: -1
-					}, 0)
-				);
+				let groupHeader = new Zotero.CollectionTreeRow(this, 'header', {
+					id: "group-libraries-header",
+					label: Zotero.getString('pane.collections.groupLibraries'),
+					libraryID: -1
+				});
+				newRows.splice(added++, 0, groupHeader);
 				for (let group of groups) {
-					newRows.splice(added++, 0, 
-						new Zotero.CollectionTreeRow(this, 'group', group),
+					newRows.splice(added++, 0,
+						new Zotero.CollectionTreeRow(this, 'group', group, 1, groupHeader),
 					);
 					added += await this._expandRow(newRows, added - 1);
 				}
@@ -403,24 +417,23 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 				
 				// Alphabetize
 				var collation = Zotero.getLocaleCollation();
-				feeds.sort(function(a, b) {
+				feeds.sort(function (a, b) {
 					return collation.compareString(1, a.name, b.name);
 				});
 				
 				if (feeds.length) {
-					newRows.splice(added++, 0, 
+					newRows.splice(added++, 0,
 						new Zotero.CollectionTreeRow(this, 'separator', false),
 					);
-					newRows.splice(added++, 0, 
-						new Zotero.CollectionTreeRow(this, 'header', {
-							id: "feed-libraries-header",
-							label: Zotero.getString('pane.collections.feedLibraries'),
-							libraryID: -1
-						}, 0),
-					);
+					let feedHeader = new Zotero.CollectionTreeRow(this, 'header', {
+						id: "feed-libraries-header",
+						label: Zotero.getString('pane.collections.feedLibraries'),
+						libraryID: -1
+					});
+					newRows.splice(added++, 0, feedHeader);
 					for (let feed of feeds) {
-						newRows.splice(added++, 0, 
-							new Zotero.CollectionTreeRow(this, 'feed', feed),
+						newRows.splice(added++, 0,
+							new Zotero.CollectionTreeRow(this, 'feed', feed, 1, feedHeader)
 						);
 					}
 				}

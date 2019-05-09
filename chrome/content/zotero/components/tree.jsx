@@ -313,16 +313,13 @@ class Tree extends Component {
 
 	shouldComponentUpdate(nextProps, nextState) {
 		const { scroll, height, seen, mouseDown } = this.state;
-		const { focused, drop, highlighted, editing } = this.props;
+		const { focused, drop } = this.props;
 
 		return scroll !== nextState.scroll ||
 			height !== nextState.height ||
 			seen !== nextState.seen ||
 			focused !== nextProps.focused ||
-			mouseDown !== nextState.mouseDown ||
-			drop !== nextProps.drop ||
-			editing !== nextProps.editing ||
-			highlighted !== nextProps.highlighted;
+			(!mouseDown || drop !== nextProps.drop);
 	}
 
 	componentWillUnmount() {
