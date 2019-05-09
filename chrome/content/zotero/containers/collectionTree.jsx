@@ -38,6 +38,7 @@ const noop = Promise.resolve;
 
 const MARGIN_LEFT = 3;
 const CHILD_INDENT = 20;
+const TYPING_TIMEOUT = 1000;
 
 Zotero.CollectionTree = class CollectionTree extends React.Component {
 	static init(domEl, opts) {
@@ -101,6 +102,8 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 		this._editing = null;
 		this._editingInputRef = null;
 		this._dropRow = null;
+		this._typingString = "";
+		this._typingTimeout = null;
 		
 		this.onLoad = this._createEventBinding('load', true, true);
 		this.onSelect = this._createEventBinding('select');
@@ -148,6 +151,9 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 		else if (event.key == "F2" && !Zotero.isMac) {
 			this.handleActivate(this._focused);
 		}
+		else if (event.key.length == 1) {
+			this.handleTyping(event.key);
+		}
 		return true;
 	}
 	
@@ -173,6 +179,26 @@ Zotero.CollectionTree = class CollectionTree extends React.Component {
 	
 	handleEditingChange = (treeRow, e) => {
 		treeRow.editingName = e.target.value;
+	}
+	
+	async handleTyping(char) {
+		this._typingString += char.toLowerCase();
+		for (let i = 0; i < this._rows.length; i++) {
+			let row = this._rows[i];
+			if (row.parent && row.parent.isOpen && !row.isSeparator() && !row.isHeader()) {
+				if (row.getName().toLowerCase().indexOf(this._typingString) == 0) {
+					if (this.focused != row) {
+						this.ensureRowIsVisible(i);
+						await this.selectWait(i);
+					}
+					break;
+				}
+			}
+		}
+		clearTimeout(this._typingTimeout);
+		this._typingTimeout = setTimeout(() => {
+			this._typingString = "";
+		}, TYPING_TIMEOUT);
 	}
 	
 	async commitEditingName(treeRow) {
