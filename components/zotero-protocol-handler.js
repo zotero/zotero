@@ -874,6 +874,35 @@ function ZoteroProtocolHandler() {
 				return zp.collectionsView.selectCollection(results[0].id);
 			}
 			else {
+				// Select collection first if specified
+				if (params.scopeObject == 'collections') {
+					let col;
+					if (params.scopeObjectKey) {
+						col = Zotero.Collections.getByLibraryAndKey(
+							params.libraryID, params.scopeObjectKey
+						);
+					}
+					else {
+						col = Zotero.Collections.get(params.scopeObjectID);
+					}
+					yield zp.collectionsView.selectCollection(col.id);
+				}
+				else if (params.scopeObject == 'searches') {
+					let s;
+					if (params.scopeObjectKey) {
+						s = Zotero.Searches.getByLibraryAndKey(
+							params.libraryID, params.scopeObjectKey
+						);
+					}
+					else {
+						s = Zotero.Searches.get(params.scopeObjectID);
+					}
+					yield zp.collectionsView.selectSearch(s.id);
+				}
+				// If collection not specified, select library root
+				else {
+					yield zp.collectionsView.selectLibrary(params.libraryID);
+				}
 				return zp.selectItems(results.map(x => x.id));
 			}
 		}),
