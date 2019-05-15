@@ -252,7 +252,9 @@ var Zotero_File_Interface_Bibliography = new function() {
 			+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
 		var result = ps.confirmEx(null,
 			Zotero.getString('integration.exportDocument'),
-			Zotero.getString('integration.exportDocument.description'),
+			Zotero.getString('integration.exportDocument.description1')
+				+ "\n\n"
+				+ Zotero.getString('integration.exportDocument.description2'),
 			buttonFlags,
 			Zotero.getString('general.export'),
 			null,

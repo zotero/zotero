@@ -1624,14 +1624,14 @@ Zotero.Integration.Session.prototype.importDocument = async function() {
 	const importExportWikiURL = "https://www.zotero.org/support/kb/export_import_document";
 	
 	var ps = Services.prompt;
-	var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
+	var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
 		+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
 	var result = ps.confirmEx(null,
 		Zotero.getString('integration.importDocument'),
 		Zotero.getString('integration.importDocument.description'),
 		buttonFlags,
-		null,
+		Zotero.getString('general.import'),
 		null,
 		Zotero.getString('general.moreInformation'), null, {});
 	if (result == 1) {
