@@ -1636,9 +1636,10 @@ Zotero.Integration.Session.prototype.importDocument = async function() {
 		Zotero.getString('general.moreInformation'), null, {});
 	if (result == 1) {
 		throw new Zotero.Exception.UserCancelled("the document import");
-	} else if (result == 2) {
+	}
+	if (result == 2) {
 		Zotero.launchURL(importExportWikiURL);
-		return;
+		throw new Zotero.Exception.UserCancelled("the document import");
 	}
 	Zotero.debug("Integration: Importing the document");
 	var timer = new Zotero.Integration.Timer();
