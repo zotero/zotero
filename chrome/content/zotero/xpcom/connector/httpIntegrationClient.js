@@ -59,12 +59,16 @@ Zotero.HTTPIntegrationClient.Application = function() {
 	this.secondaryFieldType = "Http";
 	this.outputFormat = 'html';
 	this.supportedNotes = ['footnotes'];
+	this.supportsImportExport = false;
+	this.processorName = "HTTP Integration";
 };
 Zotero.HTTPIntegrationClient.Application.prototype = {
 	getActiveDocument: async function() {
 		let result = await Zotero.HTTPIntegrationClient.sendCommand('Application.getActiveDocument');
 		this.outputFormat = result.outputFormat || this.outputFormat;
 		this.supportedNotes = result.supportedNotes || this.supportedNotes;
+		this.supportsImportExport = result.supportsImportExport || this.supportsImportExport;
+		this.processorName = result.processorName || this.processorName;
 		return new Zotero.HTTPIntegrationClient.Document(result.documentID);
 	}
 };
@@ -76,7 +80,7 @@ Zotero.HTTPIntegrationClient.Document = function(documentID) {
 	this._documentID = documentID;
 };
 for (let method of ["activate", "canInsertField", "displayAlert", "getDocumentData",
-	"setDocumentData", "setBibliographyStyle"]) {
+	"setDocumentData", "setBibliographyStyle", "importDocument", "exportDocument"]) {
 	Zotero.HTTPIntegrationClient.Document.prototype[method] = async function() {
 		return Zotero.HTTPIntegrationClient.sendCommand("Document."+method,
 			[this._documentID].concat(Array.prototype.slice.call(arguments)));
