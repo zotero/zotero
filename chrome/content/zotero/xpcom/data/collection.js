@@ -630,19 +630,25 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 		}.bind(this));
 	}
 	
-	var placeholders = collections.map(() => '?').join();
-	
-	// Remove item associations for all descendent collections
-	yield Zotero.DB.queryAsync('DELETE FROM collectionItems WHERE collectionID IN '
-		+ '(' + placeholders + ')', collections);
-	
-	// Remove parent definitions first for FK check
-	yield Zotero.DB.queryAsync('UPDATE collections SET parentCollectionID=NULL '
-		+ 'WHERE parentCollectionID IN (' + placeholders + ')', collections);
-	
-	// And delete all descendent collections
-	yield Zotero.DB.queryAsync ('DELETE FROM collections WHERE collectionID IN '
-		+ '(' + placeholders + ')', collections);
+	yield Zotero.Utilities.Internal.forEachChunkAsync(
+		collections,
+		Zotero.DB.MAX_BOUND_PARAMETERS,
+		async function (chunk) {
+			var placeholders = chunk.map(() => '?').join();
+			
+			// Remove item associations for all descendent collections
+			await Zotero.DB.queryAsync('DELETE FROM collectionItems WHERE collectionID IN '
+				+ '(' + placeholders + ')', chunk);
+			
+			// Remove parent definitions first for FK check
+			await Zotero.DB.queryAsync('UPDATE collections SET parentCollectionID=NULL '
+				+ 'WHERE parentCollectionID IN (' + placeholders + ')', chunk);
+			
+			// And delete all descendent collections
+			await Zotero.DB.queryAsync('DELETE FROM collections WHERE collectionID IN '
+				+ '(' + placeholders + ')', chunk);
+		}
+	);
 	
 	env.deletedObjectIDs = collections;
 	
