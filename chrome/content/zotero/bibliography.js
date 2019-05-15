@@ -244,7 +244,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 	};
 	
 	this.exportDocument = function() {
-		const importExportWikiURL = "https://www.zotero.org/support/kb/export_import_document";
+		const documentationURL = "https://www.zotero.org/support/kb/word_processor_document_export";
 		
 		var ps = Services.prompt;
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
@@ -263,7 +263,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 			_io.exportDocument = true;
 			document.documentElement.acceptDialog();
 		} else if (result == 2) {
-			Zotero.launchURL(importExportWikiURL);
+			Zotero.launchURL(documentationURL);
 		}
 	}
 	

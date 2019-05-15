@@ -1621,7 +1621,7 @@ Zotero.Integration.Session.prototype.exportDocument = async function() {
 
 
 Zotero.Integration.Session.prototype.importDocument = async function() {
-	const importExportWikiURL = "https://www.zotero.org/support/kb/export_import_document";
+	const documentationURL = "https://www.zotero.org/support/kb/word_processor_document_export";
 	
 	var ps = Services.prompt;
 	var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
@@ -1638,7 +1638,7 @@ Zotero.Integration.Session.prototype.importDocument = async function() {
 		throw new Zotero.Exception.UserCancelled("the document import");
 	}
 	if (result == 2) {
-		Zotero.launchURL(importExportWikiURL);
+		Zotero.launchURL(documentationURL);
 		throw new Zotero.Exception.UserCancelled("the document import");
 	}
 	Zotero.debug("Integration: Importing the document");
