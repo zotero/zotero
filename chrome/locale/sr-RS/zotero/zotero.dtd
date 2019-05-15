@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Цитати који чекају на ажурирање ће бити истакнути унутар документа">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Онемогућавање ажурирања може убрзати уметање цитата када радите са великим документима. Увек можете кликните на „Освежи“ како би ручно ажурурати цитате.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Користи скраћенице часописа из MEDLINE-а">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Поље „Скраћеница часописа“ ће бити занемарено.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Прикажи уређивача">
 <!ENTITY zotero.integration.classicView.label "Класични приказ">

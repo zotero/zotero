@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Ссылки, ожидающие обновления, будут выделены в документе">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Отключение обновления библиографии может ускорить вставку новых ссылок в больше документы. Нажимайте «Обновить», чтобы делать это вручную.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Использовать аббревиатуры журналов по MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Поле «Journal Abbr» будет проигнорировано.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Показать редактор">
 <!ENTITY zotero.integration.classicView.label "Классический вид">

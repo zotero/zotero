@@ -10,14 +10,14 @@
 <!ENTITY zotero.general.cancel "Annullér">
 <!ENTITY zotero.general.refresh "Opdatér">
 <!ENTITY zotero.general.saveAs "Gem som...">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "Indstillinger">
 <!ENTITY zotero.general.advancedOptions.label "Avancerede indstillinger">
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Mere">
 <!ENTITY zotero.general.loading "Indlæser...">
 <!ENTITY zotero.general.close "Luk">
 <!ENTITY zotero.general.minimize "Minimér">
-<!ENTITY zotero.general.other "Other…">
+<!ENTITY zotero.general.other "Andet...">
 
 
 <!ENTITY zotero.errorReport.title "Zotero fejlrapport">
@@ -168,7 +168,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Sæt farve:">
 <!ENTITY zotero.tagColorChooser.removeColor "Fjern farve">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
+<!ENTITY zotero.lookup.description "Indtast ISBN'er, DOI'er, PMID'er, eller arXiv ID'er som skal tilføjes til dit bibliotek:">
 <!ENTITY zotero.lookup.button.search "Søg">
 
 <!ENTITY zotero.selectitems.title "Vælg elementer">
@@ -195,15 +195,15 @@
 
 <!ENTITY zotero.progress.title "Fremdrift">
 
-<!ENTITY zotero.import "Import">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import "Importér">
+<!ENTITY zotero.import.whereToImportFrom "Hvor vil du importere fra?">
+<!ENTITY zotero.import.source.file "En fil (BibTeX, RIS, Zotero RDF osv.)">
+<!ENTITY zotero.import.importing "Importerer…">
 <!ENTITY zotero.import.database "Database">
-<!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
-<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.lastModified "Sidst ændret">
+<!ENTITY zotero.import.size "Størrelse">
+<!ENTITY zotero.import.createCollection "Placér importerede samlinger og nye elementer i den nye samling">
+<!ENTITY zotero.import.fileHandling "Filhåndtering">
 
 <!ENTITY zotero.exportOptions.title "Eksportér...">
 <!ENTITY zotero.exportOptions.format.label "Format:">
@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Referencer, som afventer opdatering, vil blive fremhævet i dokumentet.">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Ved at deaktivere opdateringer kan indsættelse af referencer i store dokumenter gøres hurtigere. Klik Opdatér for at opdatere referencer manuelt.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Brug MEDLINE's tidsskriftforkortelser">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Feltet “Journal Abbr” vil blive ignoreret.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Vis editor">
 <!ENTITY zotero.integration.classicView.label "Klassisk visning">

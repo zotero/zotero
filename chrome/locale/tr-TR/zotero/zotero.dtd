@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Bekleyen güncellemeleri olan göndermeler belgede vurgulanacaktırlar.">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Güncellemeleri devre dışı bırakmak, büyük belgelerde gönderme koymayı hızlandırabilir. Göndermeleri güncellemek için Yenile'ye tıklayınız.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "MEDLINE dergi kısaltmalarını kullan">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "“Dergi Kısaltması” alanı yok sayılacaktır.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Düzenleyiciyi Göster">
 <!ENTITY zotero.integration.classicView.label "Klasik Görünüm">

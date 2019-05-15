@@ -1,19 +1,19 @@
-<!ENTITY zotero.publications.my_publications "My Publications">
+<!ENTITY zotero.publications.my_publications "내 출판물">
 
-<!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
-<!ENTITY zotero.publications.include.checkbox.files "Include files">
-<!ENTITY zotero.publications.include.checkbox.notes "Include notes">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
+<!ENTITY zotero.publications.intro "내 출판물에 추가한 항목은 zotero.org 사이트에서 당신의 프로필 페이지에 게시됩니다. 첨부 파일을 포함하기로 결정했다면, 첨부 파일이 지정한 라이선스를 따라 공개 게시됩니다. 스스로 만든 저작물만 추가하시고, 공공 배포 권한이 있으며 그렇게 하기를 희망하는 파일만 포함해주세요.">
+<!ENTITY zotero.publications.include.checkbox.files "파일 포함">
+<!ENTITY zotero.publications.include.checkbox.notes "노트 포함">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "내 출판물 컬렉션에 무엇을 보여줄 지 어느 때든 조정하실 수 있습니다.">
 
-<!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
-<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
-<!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">
-<!ENTITY zotero.publications.sharing.cc0 "Yes, and place my work in the public domain">
-<!ENTITY zotero.publications.sharing.reserved "No, only publish my work on zotero.org">
+<!ENTITY zotero.publications.sharing.title "귀하의 저작물이 어떻게 공유될 수 있는지 선택해주세요">
+<!ENTITY zotero.publications.sharing.text "저작물에 대한 모든 권리를 보유하거나, Creative Commons 라이선스를 적용하거나, 퍼블릭 도메인으로 기증할 수 있습니다. 라이선스 선택 여부와 무관하게, 저작물은 zotero.org에서 공공 열람할 수 있게 됩니다.">
+<!ENTITY zotero.publications.sharing.prompt "당신의 저작물을 다른 사람들과 공유할 수 있도록 허락하시겠습니까?">
+<!ENTITY zotero.publications.sharing.cc "예, Creative Commons 라이선스를 적용하겠습니다.">
+<!ENTITY zotero.publications.sharing.cc0 "예, 그리고 내 저작물을 퍼블릭 도메인으로 두겠습니다.">
+<!ENTITY zotero.publications.sharing.reserved "아니오, 내 저작물을 zotero.org 사이트에 게시하기만 하겠습니다.">
 
-<!ENTITY zotero.publications.chooseLicense.title "Choose a Creative Commons license">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
-<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Allow adaptations of your work to be shared?">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Yes, as long as others share alike">
-<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Allow commercial uses of your work?">
+<!ENTITY zotero.publications.chooseLicense.title "Creative Commons 라이선스 선택">
+<!ENTITY zotero.publications.chooseLicense.text "Creative Commons 라이선스는 다음 조건에 한하여 다른 사람들이 당신의 저작물을 복제·재배포하는 일을 허락합니다: 저작자 표시, 라이선스 규정 링크 제공, 변경 사항이 있을 경우 명시. 추가 조건을 아래와 같이 지정할 수 있습니다.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "저작물을 변경하여 공유할 수 있도록 허락하시겠습니까?">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "예, 단 동일 조건으로 공유하여야 합니다.">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "당신의 저작물에 대한 영리적 목적 사용을 허락하시겠습니까?">

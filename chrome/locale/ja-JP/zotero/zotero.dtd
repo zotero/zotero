@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "更新待ちの出典表記は書類中でハイライト表示されます。">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "更新を無効化すれば大きな書類への出典表記の挿入が高速化できます。出典表記を手動で更新するためにはリフレッシュボタンをクリックしてください。">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "MEDLINEの略誌名を使用する">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "「雑誌略誌名」のフィールドは無視されます。">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "エディタを表示">
 <!ENTITY zotero.integration.classicView.label "クラシック表示">

@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Zitationen mit anstehenden Aktualisierungen werden im Dokument hervorgehoben">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Das Deaktivieren von automatischen Aktualisierungen kann das Einfügen von Zitationen in großen Dokumenten beschleunigen. Zitationen können dann manuell aktualisiert werden durch das Klicken Sie auf Aktualisieren.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abgekürzte Zeitschriftentitel von MEDLINE verwenden">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Das Feld &quot;Zeitschriften-Abkürzung&quot; wird ignoriert.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Editor anzeigen">
 <!ENTITY zotero.integration.classicView.label "Klassische Ansicht">

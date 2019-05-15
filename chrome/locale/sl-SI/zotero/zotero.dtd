@@ -203,7 +203,7 @@
 <!ENTITY zotero.import.lastModified "Nazadnje spremenjeno">
 <!ENTITY zotero.import.size "Velikost">
 <!ENTITY zotero.import.createCollection "Postavi uvožene zbirke in elemente v novo zbirko">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "Ravnanje z datotekami">
 
 <!ENTITY zotero.exportOptions.title "Izvozi ...">
 <!ENTITY zotero.exportOptions.format.label "Vrsta datoteke:">
@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Navedki s čakajočimi posodobitvami bodo v dokumentu poudarjeni">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Onemogočanje posodobitev lahko pohitri vstavljanje navedkov v večjih dokumentih. Za ročno posodobitev navedkov kliknite Osveži.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Uporabi okrajšave revij MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Polje »Journal Abbr« bo prezrto.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Pokaži urejevalnik">
 <!ENTITY zotero.integration.classicView.label "Klasični pogled">

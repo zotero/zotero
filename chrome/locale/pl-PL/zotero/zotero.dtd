@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Cytowania z oczekującymi aktualizacjami będą podświetlone w dokumencie">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Wyłączenie aktualizacji cytować może przyspieszyć wstawianie cytowań w dużych dokumentach. Wciśnij Odśwież, aby ręcznie zaktualizować cytowania.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Użyj skrótów czasopism w formacie MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Pole &quot;Skrót czasopisma&quot; będzie ignorowane.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Pokaż edytor">
 <!ENTITY zotero.integration.classicView.label "Widok klasyczny">

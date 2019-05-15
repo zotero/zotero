@@ -203,7 +203,7 @@
 <!ENTITY zotero.import.lastModified "Ultima modificare">
 <!ENTITY zotero.import.size "Mărime">
 <!ENTITY zotero.import.createCollection "Pune colecțiile importate și itemii într-o colecție nouă">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "Manipulare fișier">
 
 <!ENTITY zotero.exportOptions.title "Export...">
 <!ENTITY zotero.exportOptions.format.label "Formatare:">
@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citările cu actualizări în așteptare vor fi evidențiate în document">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Dezactivarea actualizărilor poate mări viteza de introducere a citărilor în documentele mari. Click pe Reîmprospătare pentru a actualiza citările manual.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Folosește abrevierile de reviste MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Câmpul „Abrev. revistă” va fi ignorat.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Arată editor">
 <!ENTITY zotero.integration.classicView.label "Vizualizare clasică">

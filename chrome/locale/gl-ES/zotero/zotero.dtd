@@ -203,7 +203,7 @@
 <!ENTITY zotero.import.lastModified "Última modificación">
 <!ENTITY zotero.import.size "Tamaño">
 <!ENTITY zotero.import.createCollection "Poñer as coleccións e elementos importados nunha nova colección">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "Xestión de ficheiros">
 
 <!ENTITY zotero.exportOptions.title "Exportar...">
 <!ENTITY zotero.exportOptions.format.label "Formato:">
@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Vanse marcar as citas con actualizacións pendentes no documento">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Desactivar as actualizacións pode acelerar a introdución de citas nos documentos grandes. Preme en refrescar para actualizar as citas de xeito manual.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Empregar as abreviaturas de MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "O campo «Abrv. Xornal» hase ignorar. ">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Mostrar o editor">
 <!ENTITY zotero.integration.classicView.label "Vista clásica">

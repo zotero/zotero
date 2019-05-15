@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citações com actualizações pendentes serão destacadas no documento">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Desactivar actualizações pode acelerar a inserção de citações em documentos grandes. Clique em Refrescar para actualizar as citações manualmente.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Usar abreviaturas de publicações periódicas do MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "O campo «Abreviatura da Publicação» será ignorado.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Mostrar Editor">
 <!ENTITY zotero.integration.classicView.label "Visualização Clássica">

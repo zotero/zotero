@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "سيتم تمييز الاستشهادات ذات التحديثات المعلقة في المستند">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "يمكن أن يؤدي تعطيل التحديثات إلى تسريع إدراج الاستشهادات في المستندات الكبيرة. انقر على تحديث لتحديث الاستشهادات يدويًا.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "استخدام اختصارات دورية ميدلين">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "سيتم تجاهل حقل &quot;اختصار المجلة&quot;.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "عرض المحرر">
 <!ENTITY zotero.integration.classicView.label "عرض تقليدي">

@@ -10,14 +10,14 @@
 <!ENTITY zotero.general.cancel "Cancelar">
 <!ENTITY zotero.general.refresh "Atualizar">
 <!ENTITY zotero.general.saveAs "Salvar como...">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "Opções">
 <!ENTITY zotero.general.advancedOptions.label "Opções avançadas">
 <!ENTITY zotero.general.tools "Ferramentas">
 <!ENTITY zotero.general.more "Mais">
 <!ENTITY zotero.general.loading "Carregando...">
 <!ENTITY zotero.general.close "Fechar">
 <!ENTITY zotero.general.minimize "Minimizar">
-<!ENTITY zotero.general.other "Other…">
+<!ENTITY zotero.general.other "Outro...">
 
 
 <!ENTITY zotero.errorReport.title "Relatório de erros do Zotero">
@@ -94,7 +94,7 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaurar para a biblioteca">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicar item">
 <!ENTITY zotero.items.menu.mergeItems "Mesclar itens...">
-<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.unrecognize "Desfazer a recuperação de metadados">
 <!ENTITY zotero.items.menu.reportMetadata "Denunciar metadados incorretos">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Escolha a versão do item a ser utilizada como mestre:">
@@ -195,8 +195,8 @@
 
 <!ENTITY zotero.progress.title "Progresso">
 
-<!ENTITY zotero.import "Import">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
+<!ENTITY zotero.import "Importar">
+<!ENTITY zotero.import.whereToImportFrom "De onde você deseja importar?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
 <!ENTITY zotero.import.importing "Importing…">
 <!ENTITY zotero.import.database "Database">
@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citações com atualizações pendentes serão destacadas no documento">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Desativar atualizações acelera a inserção de citação em documentos grandes. Clique em Refresh para atualizar citações manualmente.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Usar as abreviaturas de periódicos MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "O campo &quot;Abreviatura do periódico&quot; será ignorado.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Exibir o editor">
 <!ENTITY zotero.integration.classicView.label "Visão clássica">

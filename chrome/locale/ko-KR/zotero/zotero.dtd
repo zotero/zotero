@@ -203,7 +203,7 @@
 <!ENTITY zotero.import.lastModified "마지막 수정 시간">
 <!ENTITY zotero.import.size "크기">
 <!ENTITY zotero.import.createCollection "컬렉션 및 항목을 새 컬렉션으로 불러오기">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "파일 처리 방법">
 
 <!ENTITY zotero.exportOptions.title "내보내기...">
 <!ENTITY zotero.exportOptions.format.label "형식:">
@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "업데이트 대기 중인 인용 항목이 문서에서 강조 표시됩니다">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "큰 문서라면 업데이트를 중지하여 인용 삽입 속도를 높일 수 있습니다. 새로고침을 클릭하여 수동으로 인용 정보를 업데이트하세요.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "MEDLINE 저널 약자 사용">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "&quot;저널 약자&quot; 필드가 무시됩니다.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "편집자 보이기">
 <!ENTITY zotero.integration.classicView.label "클래식 뷰">

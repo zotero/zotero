@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Uitschakelen van update kan het invoegen van verwijzingen in grote documenten versnellen. Klik op Vernieuwen om verwijzingen handmatig bij te werken.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Gebruik MEDLINE tijdschriftafkortingen">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Het veld &quot;Tijdschrift-afkorting&quot; wordt genegeerd">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Bewerker tonen">
 <!ENTITY zotero.integration.classicView.label "Klassieke weergave">

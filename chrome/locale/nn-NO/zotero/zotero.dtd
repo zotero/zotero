@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Bruk MEDLINE-journalforkortingar">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Feltet «Tidsskriftforkorting» vert ignorert.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Rediger sitering">
 <!ENTITY zotero.integration.classicView.label "Klassisk framsyning">

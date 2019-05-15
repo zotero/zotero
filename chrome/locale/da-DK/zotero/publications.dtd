@@ -1,19 +1,19 @@
-<!ENTITY zotero.publications.my_publications "My Publications">
+<!ENTITY zotero.publications.my_publications "Mine publikationer">
 
-<!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
-<!ENTITY zotero.publications.include.checkbox.files "Include files">
-<!ENTITY zotero.publications.include.checkbox.notes "Include notes">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
+<!ENTITY zotero.publications.intro "Elementer, som tilføjes til Mine publikationer, vil vises på din profilside på zotero.org. Vælger du at inkludere vedhæftede filer, vil de være offentligt tilgængelige under den licens, du angiver. Tilføj kun værker, du selv har lavet, og inkludér kun filer, hvis du har rettighederne til at distribuere dem og ønsker at gøre det.">
+<!ENTITY zotero.publications.include.checkbox.files "Inkludér filer">
+<!ENTITY zotero.publications.include.checkbox.notes "Inkludér noter">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Du kan altid tilpasse, hvad der skal vises fra samlingen Mine publikationer.">
 
-<!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
-<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
-<!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">
-<!ENTITY zotero.publications.sharing.cc0 "Yes, and place my work in the public domain">
-<!ENTITY zotero.publications.sharing.reserved "No, only publish my work on zotero.org">
+<!ENTITY zotero.publications.sharing.title "Vælg, hvordan dit værk må deles">
+<!ENTITY zotero.publications.sharing.text "Du kan beholde alle rettigheder til dit værk, licensere det under en Creative Commons-licens eller gøre det frit tilgængeligt. Under alle omstændigheder vil værket være offentligt tilgængeligt på zotero.org.">
+<!ENTITY zotero.publications.sharing.prompt "Må værket deles af andre?">
+<!ENTITY zotero.publications.sharing.cc "Ja, under en Creative Commons-licens">
+<!ENTITY zotero.publications.sharing.cc0 "Ja, og gør værket frit tilgængeligt.">
+<!ENTITY zotero.publications.sharing.reserved "Nej, udgiv kun værket på zotero.org">
 
-<!ENTITY zotero.publications.chooseLicense.title "Choose a Creative Commons license">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
-<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Allow adaptations of your work to be shared?">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Yes, as long as others share alike">
-<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Allow commercial uses of your work?">
+<!ENTITY zotero.publications.chooseLicense.title "Vælg en Creative Commons-licens">
+<!ENTITY zotero.publications.chooseLicense.text "En Creative Commons-licens lader andre kopiere og redistribuere dit værk, så længe det sker med kildehenvisning, der er et link til licensen, og det angives, hvis der er foretaget ændringer. Yderligere betingelser kan angives nedenfor.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Må ændringer af dit værk deles?">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Ja, så længe andre deler på samme vis">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Tillad kommerciel brug af dit værk?">

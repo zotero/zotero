@@ -203,7 +203,7 @@
 <!ENTITY zotero.import.lastModified "Dernière modification">
 <!ENTITY zotero.import.size "Taille">
 <!ENTITY zotero.import.createCollection "Placer les collections et les documents importés dans une nouvelle collection">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "Gestion des fichiers">
 
 <!ENTITY zotero.exportOptions.title "Exporter…">
 <!ENTITY zotero.exportOptions.format.label "Format :">
@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Les citations en attente de mise à jour seront surlignées dans le document">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Désactiver les mises à jour peut accélérer l'insertion de citation dans les documents longs. Cliquez sur Actualiser pour mettre à jour les citations manuellement.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Utiliser les abréviations MEDLINE des titres de revues">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Le champ Zotero &quot;Abrév. de revue&quot; sera ignoré.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Montrer l'éditeur">
 <!ENTITY zotero.integration.classicView.label "Vue classique">

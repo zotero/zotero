@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Referenser med väntande uppdateringar markeras i dokumentet">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Slå av uppdateringar för att snabba upp infogandet av referenser i stora dokument. Klicka på Uppdatera för att manuellt uppdatera referenserna.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Använd MEDLINE:s tidskriftsförkortningar">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Tidskriftsförkortningsfältet kommer att ignoreras.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Visa redigerare">
 <!ENTITY zotero.integration.classicView.label "Klassisk vy">

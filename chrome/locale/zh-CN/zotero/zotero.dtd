@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "有待更新的引文将在文档中突出显示">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "禁用更新可以加速大文档中的引文的插入。单击刷新手动更新引文。">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "使用 MEDLINE 期刊缩写">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "“期刊缩写”字段将被忽略。">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "显示编辑器">
 <!ENTITY zotero.integration.classicView.label "经典视图">

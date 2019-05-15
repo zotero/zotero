@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Viitteet, joilla on odottavia päivityksiä, korostetaan asiakirjassa">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Käytä MEDLINEn lehtilyhenteitä">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Näytä muokkain">
 <!ENTITY zotero.integration.classicView.label "Perinteinen näkymä">

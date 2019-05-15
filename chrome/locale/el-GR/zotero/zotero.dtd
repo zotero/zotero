@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Οι αναφορές με εκκρεμείς ενημερώσεις θα επισημαίνονται στο έγγραφο">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Η απενεργοποίηση ενημερώσεων μπορεί να επιταχύνει την εισαγωγή μιας παραπομπής σε μεγάλα έγγραφα. Κάντε κλικ στην επιλογή Ανανέωση για ενημέρωση.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Εμφάνιση επεξεργαστή">
 <!ENTITY zotero.integration.classicView.label "Κλασική προβολή">

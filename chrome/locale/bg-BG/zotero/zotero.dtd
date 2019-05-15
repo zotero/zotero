@@ -243,9 +243,10 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Бележките под линия с предстоящо актуализиране ще бъдат актентирани в документа">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Изключването на автоматичното актуализиране може да ускори добавянето на бележки под линия в големи документи. Използвайте &quot;Опресняване&quot; за да ги актуализирате ръчно.">
 
-
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Използване на MEDLINE абревиатури на периодично издание">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Полето “Абревиатура на периодично издание” ще бъде игнорирано.">
+
+<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
 
 <!ENTITY zotero.integration.showEditor.label "Показване на редактора">
 <!ENTITY zotero.integration.classicView.label "Класически изглед">
