@@ -243,27 +243,18 @@ var Zotero_File_Interface_Bibliography = new function() {
 		window.sizeToContent();
 	};
 	
-	this.toggleAdvanced = function() {
-		var advancedSettings = document.querySelector("#advanced-settings");
-		advancedSettings.hidden = !advancedSettings.hidden;
-		var chevron = document.querySelector('.chevron');
-		chevron.classList.toggle('chevron-down');
-		chevron.classList.toggle('chevron-up');
-		window.sizeToContent();
-	};
-	
 	this.exportDocument = function() {
 		const importExportWikiURL = "https://www.zotero.org/support/kb/export_import_document";
 		
 		var ps = Services.prompt;
-		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
+		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
 			+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
 		var result = ps.confirmEx(null,
 			Zotero.getString('integration.exportDocument'),
 			Zotero.getString('integration.exportDocument.description'),
 			buttonFlags,
-			null,
+			Zotero.getString('general.export'),
 			null,
 			Zotero.getString('general.moreInformation'), null, {});
 		if (result == 0) {

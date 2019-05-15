@@ -26,7 +26,6 @@
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/bibliography.css"?>
-<?xml-stylesheet href="chrome://zotero-platform/content/bibliography.css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <dialog
@@ -86,13 +85,6 @@
 			<checkbox id="automaticJournalAbbreviations-checkbox" label="&zotero.integration.prefs.automaticJournalAbbeviations.label;"/>
 			<description class="radioDescription">&zotero.integration.prefs.automaticJournalAbbeviations.caption;</description>
 		</vbox>
-		
-		<!--<vbox id="advanced-separator" align="center">-->
-			<!--<hbox align="center" onclick="Zotero_File_Interface_Bibliography.toggleAdvanced()">-->
-                <!--<label>&zotero.general.advancedOptions.label;</label>-->
-				<!--<label class="chevron chevron-down">➤</label>-->
-			<!--</hbox>-->
-		<!--</vbox>	-->
 		
 		<vbox id="advanced-settings" hidden="false">
 			<vbox id="automaticCitationUpdates-vbox">

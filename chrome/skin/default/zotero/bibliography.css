@@ -29,21 +29,6 @@ radio:not(:first-child)
 	padding: 0 14px;
 }
 
-#advanced-separator * {
-	cursor: pointer;
-}
-
-.chevron {
-	color: #444;
-}
-
-.chevron.chevron-down {
-	transform: rotate(90deg);
-}
-.chevron.chevron-up {
-	transform: rotate(-90deg);
-}
-
 #advanced-settings > * {
 	margin-bottom: 10px;
 }
