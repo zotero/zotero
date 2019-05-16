@@ -262,6 +262,29 @@ describe("Zotero.Collection", function() {
 		});
 	})
 	
+	describe("#fromJSON()", function () {
+		it("should ignore unknown property in non-strict mode", function () {
+			var json = {
+				name: "Collection",
+				foo: "Bar"
+			};
+			var s = new Zotero.Collection();
+			s.fromJSON(json);
+		});
+		
+		it("should throw on unknown property in strict mode", function () {
+			var json = {
+				name: "Collection",
+				foo: "Bar"
+			};
+			var s = new Zotero.Collection();
+			var f = () => {
+				s.fromJSON(json, { strict: true });
+			};
+			assert.throws(f, /^Unknown collection property/);
+		});
+	});
+	
 	describe("#toJSON()", function () {
 		it("should set 'parentCollection' to false when cleared", function* () {
 			var col1 = yield createDataObject('collection');

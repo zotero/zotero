@@ -721,11 +721,10 @@ Zotero.Sync.Data.Local = {
 		var ObjectType = Zotero.Utilities.capitalize(objectType);
 		var libraryName = Zotero.Libraries.get(libraryID).name;
 		
-		var knownErrors = [
-			'ZoteroUnknownTypeError',
-			'ZoteroUnknownFieldError',
+		var knownErrors = new Set([
+			'ZoteroInvalidDataError',
 			'ZoteroMissingObjectError'
-		];
+		]);
 		
 		Zotero.debug("Processing " + json.length + " downloaded "
 			+ (json.length == 1 ? objectType : objectTypePlural)
@@ -1027,8 +1026,11 @@ Zotero.Sync.Data.Local = {
 					}
 				}
 				catch (e) {
+					// This allows errors handled by syncRunner to know the library in question
+					e.libraryID = libraryID;
+					
 					// Display nicer debug line for known errors
-					if (knownErrors.indexOf(e.name) != -1) {
+					if (knownErrors.has(e.name)) {
 						let desc = e.name
 							.replace(/^Zotero/, "")
 							// Convert "MissingObjectError" to "missing object error"
@@ -1407,7 +1409,7 @@ Zotero.Sync.Data.Local = {
 			json = this._checkCacheJSON(json);
 			
 			if (!options.skipData) {
-				obj.fromJSON(json.data);
+				obj.fromJSON(json.data, { strict: true });
 			}
 			if (obj.objectType == 'item' && obj.isImportedAttachment()) {
 				yield this._checkAttachmentForDownload(obj, json.data.mtime, options.isNewObject);

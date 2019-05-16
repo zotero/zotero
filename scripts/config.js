@@ -62,7 +62,11 @@ const browserifyConfigs = [
 ];
 
 // exclude mask used for js, copy, symlink and sass tasks
-const ignoreMask = ['**/#*', '**/_*.scss'];
+const ignoreMask = [
+	'**/#*',
+	'**/_*.scss',
+	'resource/schema/global/schema.json.gz'
+];
 
 const jsFiles = [
 	`{${dirs.join(',')}}/**/*.js`,

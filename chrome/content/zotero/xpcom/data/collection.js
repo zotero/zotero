@@ -699,7 +699,25 @@ Zotero.Collection.prototype.serialize = function(nested) {
  *
  * If this object is identified (has an id or library/key), loadAllData() must have been called.
  */
-Zotero.Collection.prototype.fromJSON = function (json) {
+Zotero.Collection.prototype.fromJSON = function (json, options = {}) {
+	if (options.strict) {
+		for (let prop in json) {
+			switch (prop) {
+			case 'key':
+			case 'version':
+			case 'name':
+			case 'parentCollection':
+			case 'relations':
+				break;
+			
+			default:
+				let e = new Error(`Unknown collection property '${prop}'`);
+				e.name = "ZoteroInvalidDataError";
+				throw e;
+			}
+		}
+	}
+	
 	if (!json.name) {
 		throw new Error("'name' property not provided for collection");
 	}

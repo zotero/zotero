@@ -26,121 +26,6 @@
     ***** END LICENSE BLOCK *****
 */
 
-/*
- * Mappings for names
- * Note that this is the reverse of the text variable map, since all mappings should be one to one
- * and it makes the code cleaner
- */
-var CSL_NAMES_MAPPINGS = {
-	"author":"author",
-	"editor":"editor",
-	"bookAuthor":"container-author",
-	"composer":"composer",
-	"director":"director",
-	"interviewer":"interviewer",
-	"recipient":"recipient",
-	"reviewedAuthor":"reviewed-author",
-	"seriesEditor":"collection-editor",
-	"translator":"translator"
-}
-
-/*
- * Mappings for text variables
- */
-var CSL_TEXT_MAPPINGS = {
-	"title":["title"],
-	"container-title":["publicationTitle",  "reporter", "code"], /* reporter and code should move to SQL mapping tables */
-	"collection-title":["seriesTitle", "series"],
-	"collection-number":["seriesNumber"],
-	"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
-	"publisher-place":["place"],
-	"authority":["court","legislativeBody", "issuingAuthority"],
-	"page":["pages"],
-	"volume":["volume", "codeNumber"],
-	"issue":["issue", "priorityNumbers"],
-	"number-of-volumes":["numberOfVolumes"],
-	"number-of-pages":["numPages"],	
-	"edition":["edition"],
-	"version":["versionNumber"],
-	"section":["section", "committee"],
-	"genre":["type", "programmingLanguage"],
-	"source":["libraryCatalog"],
-	"dimensions": ["artworkSize", "runningTime"],
-	"medium":["medium", "system"],
-	"scale":["scale"],
-	"archive":["archive"],
-	"archive_location":["archiveLocation"],
-	"event":["meetingName", "conferenceName"], /* these should be mapped to the same base field in SQL mapping tables */
-	"event-place":["place"],
-	"abstract":["abstractNote"],
-	"URL":["url"],
-	"DOI":["DOI"],
-	"ISBN":["ISBN"],
-	"ISSN":["ISSN"],
-	"call-number":["callNumber", "applicationNumber"],
-	"note":["extra"],
-	"number":["number"],
-	"chapter-number":["session"],
-	"references":["history", "references"],
-	"shortTitle":["shortTitle"], /* preserved to read legacy data */
-	"title-short":["shortTitle"],
-	"journalAbbreviation":["journalAbbreviation"],
-	"status":["legalStatus"],
-	"language":["language"]
-}
-
-/*
- * Mappings for dates
- */
-var CSL_DATE_MAPPINGS = {
-	"issued":"date",
-	"accessed":"accessDate",
-	"submitted":"filingDate"
-}
-
-/*
- * Mappings for types
- * Also see itemFromCSLJSON
- */
-var CSL_TYPE_MAPPINGS = {
-	'book':"book",
-	'bookSection':'chapter',
-	'journalArticle':"article-journal",
-	'magazineArticle':"article-magazine",
-	'newspaperArticle':"article-newspaper",
-	'thesis':"thesis",
-	'encyclopediaArticle':"entry-encyclopedia",
-	'dictionaryEntry':"entry-dictionary",
-	'conferencePaper':"paper-conference",
-	'letter':"personal_communication",
-	'manuscript':"manuscript",
-	'interview':"interview",
-	'film':"motion_picture",
-	'artwork':"graphic",
-	'webpage':"webpage",
-	'report':"report",
-	'bill':"bill",
-	'case':"legal_case",
-	'hearing':"bill",				// ??
-	'patent':"patent",
-	'statute':"legislation",		// ??
-	'email':"personal_communication",
-	'map':"map",
-	'blogPost':"post-weblog",
-	'instantMessage':"personal_communication",
-	'forumPost':"post",
-	'audioRecording':"song",		// ??
-	'presentation':"speech",
-	'videoRecording':"motion_picture",
-	'tvBroadcast':"broadcast",
-	'radioBroadcast':"broadcast",
-	'podcast':"broadcast",
-	'computerProgram':"book",		// ??
-	'document':"article",
-	'note':"article",
-	'attachment':"article"
-};
-
 /**
  * @class Functions for text manipulation and other miscellaneous purposes
  */
@@ -1576,7 +1461,7 @@ Zotero.Utilities = {
 			);
 		}
 		
-		var cslType = CSL_TYPE_MAPPINGS[zoteroItem.itemType];
+		var cslType = Zotero.Schema.CSL_TYPE_MAPPINGS[zoteroItem.itemType];
 		if (!cslType) {
 			throw new Error('Unexpected Zotero Item type "' + zoteroItem.itemType + '"');
 		}
@@ -1589,9 +1474,9 @@ Zotero.Utilities = {
 		};
 		
 		// get all text variables (there must be a better way)
-		for(var variable in CSL_TEXT_MAPPINGS) {
+		for(var variable in Zotero.Schema.CSL_TEXT_MAPPINGS) {
 			if (variable === "shortTitle") continue; // read both title-short and shortTitle, but write only title-short
-			var fields = CSL_TEXT_MAPPINGS[variable];
+			var fields = Zotero.Schema.CSL_TEXT_MAPPINGS[variable];
 			for(var i=0, n=fields.length; i<n; i++) {
 				var field = fields[i],
 					value = null;
@@ -1642,7 +1527,7 @@ Zotero.Utilities = {
 					creatorType = "author";
 				}
 				
-				creatorType = CSL_NAMES_MAPPINGS[creatorType];
+				creatorType = Zotero.Schema.CSL_NAME_MAPPINGS[creatorType];
 				if(!creatorType) continue;
 				
 				var nameObj;
@@ -1679,10 +1564,10 @@ Zotero.Utilities = {
 		}
 		
 		// get date variables
-		for(var variable in CSL_DATE_MAPPINGS) {
-			var date = zoteroItem[CSL_DATE_MAPPINGS[variable]];
+		for(var variable in Zotero.Schema.CSL_DATE_MAPPINGS) {
+			var date = zoteroItem[Zotero.Schema.CSL_DATE_MAPPINGS[variable]];
 			if (!date) {
-				var typeSpecificFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, CSL_DATE_MAPPINGS[variable]);
+				var typeSpecificFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, Zotero.Schema.CSL_DATE_MAPPINGS[variable]);
 				if (typeSpecificFieldID) {
 					date = zoteroItem[Zotero.ItemFields.getName(typeSpecificFieldID)];
 				}
@@ -1690,7 +1575,7 @@ Zotero.Utilities = {
 			
 			if(date) {
 				// Convert UTC timestamp to local timestamp for access date
-				if (CSL_DATE_MAPPINGS[variable] == 'accessDate' && !Zotero.Date.isSQLDate(date)) {
+				if (Zotero.Schema.CSL_DATE_MAPPINGS[variable] == 'accessDate' && !Zotero.Date.isSQLDate(date)) {
 					// Accept ISO date
 					if (Zotero.Date.isISODate(date)) {
 						let d = Zotero.Date.isoToDate(date);
@@ -1746,36 +1631,23 @@ Zotero.Utilities = {
 		// Some special cases to help us map item types correctly
 		// This ensures that we don't lose data on import. The fields
 		// we check are incompatible with the alternative item types
-		if (cslItem.type == 'book') {
-			zoteroType = 'book';
-			if (cslItem.version) {
-				zoteroType = 'computerProgram';
-			}
-		} else if (cslItem.type == 'bill') {
-			zoteroType = 'bill';
-			if (cslItem.publisher || cslItem['number-of-volumes']) {
-				zoteroType = 'hearing';
-			}
-		} else if (cslItem.type == 'song') {
-			zoteroType = 'audioRecording';
-			if (cslItem.number) {
-				zoteroType = 'podcast';
-			}
-		} else if (cslItem.type == 'motion_picture') {
-			zoteroType = 'film';
-			if (cslItem['collection-title'] || cslItem['publisher-place']
-				|| cslItem['event-place'] || cslItem.volume
-				|| cslItem['number-of-volumes'] || cslItem.ISBN
-			) {
-				zoteroType = 'videoRecording';
-			}
-		} else {
-			for(var type in CSL_TYPE_MAPPINGS) {
-				if(CSL_TYPE_MAPPINGS[type] == cslItem.type) {
-					zoteroType = type;
-					break;
-				}
-			}
+		if (cslItem.type == 'bill' && (cslItem.publisher || cslItem['number-of-volumes'])) {
+			zoteroType = 'hearing';
+		}
+		else if (cslItem.type == 'book' && cslItem.version) {
+			zoteroType = 'computerProgram';
+		}
+		else if (cslItem.type == 'song' && cslItem.number) {
+			zoteroType = 'podcast';
+		}
+		else if (cslItem.type == 'motion_picture'
+				&& (cslItem['collection-title'] || cslItem['publisher-place']
+					|| cslItem['event-place'] || cslItem.volume
+					|| cslItem['number-of-volumes'] || cslItem.ISBN)) {
+			zoteroType = 'videoRecording';
+		}
+		else {
+			zoteroType = Zotero.Schema.CSL_TYPE_MAPPINGS_REVERSE[cslItem.type];
 		}
 		
 		if(!zoteroType) zoteroType = "document";
@@ -1789,9 +1661,9 @@ Zotero.Utilities = {
 		}
 		
 		// map text fields
-		for(var variable in CSL_TEXT_MAPPINGS) {
+		for (let variable in Zotero.Schema.CSL_TEXT_MAPPINGS) {
 			if(variable in cslItem) {
-				var textMappings = CSL_TEXT_MAPPINGS[variable];
+				let textMappings = Zotero.Schema.CSL_TEXT_MAPPINGS[variable];
 				for(var i=0; i<textMappings.length; i++) {
 					var field = textMappings[i];
 					var fieldID = Zotero.ItemFields.getID(field);
@@ -1818,14 +1690,14 @@ Zotero.Utilities = {
 		}
 		
 		// separate name variables
-		for(var field in CSL_NAMES_MAPPINGS) {
-			if(CSL_NAMES_MAPPINGS[field] in cslItem) {
+		for (let field in Zotero.Schema.CSL_NAME_MAPPINGS) {
+			if (Zotero.Schema.CSL_NAME_MAPPINGS[field] in cslItem) {
 				var creatorTypeID = Zotero.CreatorTypes.getID(field);
 				if(!Zotero.CreatorTypes.isValidForItemType(creatorTypeID, itemTypeID)) {
 					creatorTypeID = Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID);
 				}
 				
-				var nameMappings = cslItem[CSL_NAMES_MAPPINGS[field]];
+				let nameMappings = cslItem[Zotero.Schema.CSL_NAME_MAPPINGS[field]];
 				for(var i in nameMappings) {
 					var cslAuthor = nameMappings[i];
 					let creator = {};
@@ -1854,12 +1726,11 @@ Zotero.Utilities = {
 		}
 		
 		// get date variables
-		for(var variable in CSL_DATE_MAPPINGS) {
+		for (let variable in Zotero.Schema.CSL_DATE_MAPPINGS) {
 			if(variable in cslItem) {
-				var field = CSL_DATE_MAPPINGS[variable],
-					fieldID = Zotero.ItemFields.getID(field),
-					cslDate = cslItem[variable];
-				var fieldID = Zotero.ItemFields.getID(field);
+				let field = Zotero.Schema.CSL_DATE_MAPPINGS[variable];
+				let fieldID = Zotero.ItemFields.getID(field);
+				let cslDate = cslItem[variable];
 				if(Zotero.ItemFields.isBaseField(fieldID)) {
 					var newFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID);
 					if(newFieldID) fieldID = newFieldID;

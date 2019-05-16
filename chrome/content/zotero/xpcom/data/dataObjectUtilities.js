@@ -129,7 +129,7 @@ Zotero.DataObjectUtilities = {
 					delete target[i];
 				}
 			}
-			// If field from base doesn't exist in new version, clear it
+			// Field from base doesn't exist in new version
 			else {
 				switch (i) {
 				// When changing an item from top-level to child, the collections property is
@@ -137,14 +137,17 @@ Zotero.DataObjectUtilities = {
 				case 'collections':
 					break;
 				
+				// Set known boolean fields to false
 				case 'deleted':
 				case 'parentItem':
 				case 'inPublications':
 					target[i] = false;
 					break;
 				
+				// Skip other fields. This prevents us from clearing fields in the pristine JSON
+				// that aren't handled here.
 				default:
-					target[i] = '';
+					delete target[i];
 				}
 			}
 		}

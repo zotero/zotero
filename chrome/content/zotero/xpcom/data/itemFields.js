@@ -42,7 +42,6 @@ Zotero.ItemFields = new function() {
 	// Privileged methods
 	this.getName = getName;
 	this.getID = getID;
-	this.getLocalizedString = getLocalizedString;
 	this.isValidForType = isValidForType;
 	this.isInteger = isInteger;
 	this.getItemTypeFields = getItemTypeFields;
@@ -77,17 +76,29 @@ Zotero.ItemFields = new function() {
 		var baseFields = yield Zotero.DB.columnQueryAsync(sql);
 		
 		for (let field of fields) {
-			_fields[field['fieldID']] = {
-				id: field['fieldID'],
+			let isBaseField = baseFields.includes(field.fieldID);
+			let label;
+			try {
+				label = field.label || Zotero.Schema.globalSchemaLocale.fields[field.fieldName];
+			}
+			// Some base fields aren't localized
+			catch (e) {
+				if (!isBaseField) {
+					throw e;
+				}
+			}
+			
+			_fields[field.fieldID] = {
+				id: field.fieldID,
 				name: field.fieldName,
-				label: field.label,
+				label,
 				custom: !!field.custom,
-				isBaseField: (baseFields.indexOf(field['fieldID']) != -1),
-				formatID: field['fieldFormatID'],
-				itemTypes: fieldItemTypes[field['fieldID']]
+				isBaseField: baseFields.includes(field.fieldID),
+				formatID: field.fieldFormatID,
+				itemTypes: fieldItemTypes[field.fieldID]
 			};
 			// Store by name as well as id
-			_fields[field['fieldName']] = _fields[field['fieldID']];
+			_fields[field.fieldName] = _fields[field.fieldID];
 			_allFields.push({
 				id: field.fieldID,
 				name: field.fieldName
@@ -133,40 +144,29 @@ Zotero.ItemFields = new function() {
 	};
 	
 	
-	function getLocalizedString(itemType, field) {
-		// unused currently
-		//var typeName = Zotero.ItemTypes.getName(itemType);
-		var fieldName = Zotero.ItemFields.getName(field);
+	this.getLocalizedString = function (field) {
+		if (arguments.length == 2) {
+			Zotero.warn("Zotero.ItemFields.getLocalizedString() no longer takes two arguments "
+				+ "-- update your code");
+			field = arguments[1];
+		}
+		
+		var fieldName = this.getName(field);
 		
 		// Fields in the items table are special cases
 		switch (field) {
 			case 'dateAdded':
 			case 'dateModified':
 			case 'itemType':
-				return Zotero.getString("itemFields." + field);
+				return Zotero.Schema.globalSchemaLocale.fields[field];
 		}
 		
 		// TODO: different labels for different item types
 		
-		_fieldCheck(field, 'getLocalizedString');
+		_fieldCheck(field);
 		
-		if (_fields[field].label) {
-			return _fields[field].label;
-		}
-		else {
-			try {
-				var loc = Zotero.getString("itemFields." + fieldName);
-			}
-			// If localized string not found, try base field
-			catch (e) {
-				Zotero.debug("Localized string not found for field '" + fieldName + "' -- trying base field");
-				var baseFieldID = this.getBaseIDFromTypeAndField(itemType, field);
-				fieldName = this.getName(baseFieldID);
-				var loc = Zotero.getString("itemFields." + fieldName);
-			}
-			return loc;
-		}
-	}
+		return _fields[field].label;
+	};
 	
 	
 	function isValidForType(fieldID, itemTypeID) {
@@ -182,15 +182,28 @@ Zotero.ItemFields = new function() {
 	
 	
 	function isInteger(fieldID) {
-		_fieldCheck(fieldID, 'isInteger');
+		_fieldCheck(fieldID);
 		
 		var ffid = _fields[fieldID]['formatID'];
 		return _fieldFormats[ffid] ? _fieldFormats[ffid]['isInteger'] : false;
 	}
 	
 	
+	this.isDate = function (field) {
+		var fieldID = this.getID(field);
+		var fieldName = this.getName(field);
+		if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date')) {
+			return true;
+		}
+		if (Zotero.Schema.globalSchemaMeta.fields[fieldName]) {
+			return Zotero.Schema.globalSchemaMeta.fields[fieldName].type == 'date'
+		}
+		return false;
+	};
+	
+	
 	this.isCustom = function (fieldID) {
-		_fieldCheck(fieldID, 'isCustom');
+		_fieldCheck(fieldID);
 		
 		return _fields[fieldID].custom;
 	}
@@ -202,7 +215,7 @@ Zotero.ItemFields = new function() {
 	function getItemTypeFields(itemTypeID) {
 		if (!itemTypeID) {
 			let e = new Error("Invalid item type id '" + itemTypeID + "'");
-			e.name = "ZoteroUnknownTypeError";
+			e.name = "ZoteroInvalidDataError";
 			throw e;
 		}
 		
@@ -219,14 +232,14 @@ Zotero.ItemFields = new function() {
 	
 	
 	function isBaseField(field) {
-		_fieldCheck(field, arguments.callee.name);
+		_fieldCheck(field);
 		
 		return _fields[field]['isBaseField'];
 	}
 	
 	
 	function isFieldOfBase(field, baseField) {
-		var fieldID = _fieldCheck(field, 'isFieldOfBase');
+		var fieldID = _fieldCheck(field);
 		
 		var baseFieldID = this.getID(baseField);
 		if (!baseFieldID) {
@@ -299,7 +312,7 @@ Zotero.ItemFields = new function() {
 			throw new Error("Invalid item type '" + itemType + "'");
 		}
 		
-		_fieldCheck(typeField, 'getBaseIDFromTypeAndField');
+		_fieldCheck(typeField);
 		
 		if (!this.isValidForType(typeFieldID, itemTypeID)) {
 			throw new Error("'" + typeField + "' is not a valid field for '" + itemType + "'");
@@ -406,11 +419,11 @@ Zotero.ItemFields = new function() {
 	* Check whether a field is valid, throwing an exception if not
 	* (since it should never actually happen)
 	**/
-	function _fieldCheck(field, func) {
+	function _fieldCheck(field) {
 		var fieldID = Zotero.ItemFields.getID(field);
 		if (!fieldID) {
 			Zotero.debug((new Error).stack, 1);
-			throw new Error("Invalid field '" + field + (func ? "' in ItemFields." + func + "()" : "'"));
+			throw new Error(`Invalid field '${field}`);
 		}
 		return fieldID;
 	}
@@ -508,8 +521,9 @@ Zotero.ItemFields = new function() {
 		var sql = 'SELECT itemTypeID, fieldID FROM itemTypeFieldsCombined ORDER BY orderIndex';
 		var rows = yield Zotero.DB.queryAsync(sql);
 		
-		_itemTypeFields = {};
-		_itemTypeFields[1] = []; // notes have no fields
+		_itemTypeFields = {
+			[Zotero.ItemTypes.getID('note')]: [] // Notes have no fields
+		};
 		
 		for (let i=0; i<rows.length; i++) {
 			let row = rows[i];

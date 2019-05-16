@@ -47,6 +47,15 @@ describe("Zotero.DataObjectUtilities", function() {
 			assert.equal(obj.conditions[0].value, 'B');
 			assert.equal(obj.conditions[1].value, 'en');
 		})
+		
+		it("should omit unknown base properties", function () {
+			var patchBase = {
+				unknownField: 'Foo'
+			};
+			var obj = {};
+			obj = Zotero.DataObjectUtilities.patch(patchBase, obj);
+			assert.notProperty(obj, 'unknownField');
+		});
 	})
 	
 	describe("#diff()", function () {

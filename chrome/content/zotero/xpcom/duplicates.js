@@ -270,6 +270,9 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 		yearCache[row.itemID] = row.year;
 	}
 	
+	var itemTypeAttachment = Zotero.ItemTypes.getID('attachment');
+	var itemTypeNote = Zotero.ItemTypes.getID('note');
+	
 	// Match on normalized title
 	var titleIDs = Zotero.ItemFields.getTypeFieldsFromBase('title');
 	titleIDs.push(Zotero.ItemFields.getID('title'));
@@ -277,7 +280,7 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 				+ "JOIN itemDataValues USING (valueID) "
 				+ "WHERE libraryID=? AND fieldID IN "
 				+ "(" + titleIDs.join(', ') + ") "
-				+ "AND itemTypeID NOT IN (1, 14) "
+				+ `AND itemTypeID NOT IN (${itemTypeAttachment}, ${itemTypeNote}) `
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
 	var rows = yield Zotero.DB.queryAsync(sql, [this._libraryID]);
 	if (rows.length) {
@@ -299,7 +302,7 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 		let sql = "SELECT itemID, lastName, firstName, fieldMode FROM items "
 			+ "JOIN itemCreators USING (itemID) "
 			+ "JOIN creators USING (creatorID) "
-			+ "WHERE libraryID=? AND itemTypeID NOT IN (1, 14) AND "
+			+ `WHERE libraryID=? AND itemTypeID NOT IN (${itemTypeAttachment}, ${itemTypeNote}) AND `
 			+ "itemID NOT IN (SELECT itemID FROM deletedItems)"
 			+ "ORDER BY itemID, orderIndex";
 		let creatorRows = yield Zotero.DB.queryAsync(sql, this._libraryID);

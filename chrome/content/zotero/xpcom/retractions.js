@@ -181,7 +181,7 @@ Zotero.Retractions = {
 				doi = json.DOI;
 			}
 			else if (json.extra) {
-				let fields = Zotero.Utilities.Internal.extractExtraFields(json.extra);
+				let { fields } = Zotero.Utilities.Internal.extractExtraFields(json.extra);
 				let extraField = fields.get('DOI');
 				if (extraField && extraField.value) {
 					doi = extraField.value;
@@ -765,7 +765,7 @@ Zotero.Retractions = {
 			+ "JOIN itemDataValues USING (valueID) WHERE fieldID=?";
 		rows = await Zotero.DB.queryAsync(sql, Zotero.ItemFields.getID('extra'));
 		for (let row of rows) {
-			let fields = Zotero.Utilities.Internal.extractExtraFields(row.value);
+			let { fields } = Zotero.Utilities.Internal.extractExtraFields(row.value);
 			let doi = fields.get('doi');
 			if (!doi || !doi.value) continue;
 			let value = Zotero.Utilities.cleanDOI(doi.value);
@@ -783,7 +783,7 @@ Zotero.Retractions = {
 		var rows = await Zotero.DB.queryAsync(sql, Zotero.ItemFields.getID('extra'));
 		for (let row of rows) {
 			/*
-			let fields = Zotero.Utilities.Internal.extractExtraFields(row.value);
+			let { fields } = Zotero.Utilities.Internal.extractExtraFields(row.value);
 			let pmid = fields.get('pmid') || fields.get('pubmedID');
 			if (!pmid || !pmid.value) continue;
 			this._addItemKeyMapping(this.TYPE_PMID, pmid.value, row.id);

@@ -171,7 +171,7 @@ Zotero.Creators = new function() {
 	},
 	
 	
-	this.cleanData = function (data) {
+	this.cleanData = function (data, options = {}) {
 		// Validate data
 		if (data.name === undefined && data.lastName === undefined) {
 			throw new Error("Creator data must contain either 'name' or 'firstName'/'lastName' properties");
@@ -227,9 +227,12 @@ Zotero.Creators = new function() {
 		if (creatorType) {
 			cleanedData.creatorTypeID = Zotero.CreatorTypes.getID(creatorType);
 			if (!cleanedData.creatorTypeID) {
-				let msg = "'" + creatorType + "' isn't a valid creator type";
-				Zotero.debug(msg, 2);
-				Components.utils.reportError(msg);
+				if (options.strict) {
+					let e = new Error(`Unknown creator type '${creatorType}'`);
+					e.name = "ZoteroInvalidDataError";
+					throw e;
+				}
+				Zotero.warn(`'${creatorType}' isn't a valid creator type`);
 			}
 		}
 		

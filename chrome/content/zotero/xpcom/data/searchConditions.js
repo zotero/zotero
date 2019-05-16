@@ -629,7 +629,7 @@ Zotero.SearchConditions = new function(){
 		
 		if (!_conditions[condition]){
 			let e = new Error("Invalid condition '" + condition + "' in hasOperator()");
-			e.name = "ZoteroUnknownFieldError";
+			e.name = "ZoteroInvalidDataError";
 			throw e;
 		}
 		
@@ -651,7 +651,7 @@ Zotero.SearchConditions = new function(){
 			return Zotero.getString('searchConditions.' + str)
 		}
 		catch (e) {
-			return Zotero.ItemFields.getLocalizedString(null, str);
+			return Zotero.ItemFields.getLocalizedString(str);
 		}
 	}
 	

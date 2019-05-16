@@ -651,7 +651,7 @@ Zotero.DBConnection.prototype.queryAsync = Zotero.Promise.coroutine(function* (s
 		}
 		else {
 			// lastInsertRowID is unreliable for async queries, so we don't bother
-			// returning it for SELECT and REPLACE queries
+			// returning it for INSERT and REPLACE queries
 			return;
 		}
 	}

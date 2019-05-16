@@ -932,64 +932,225 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
-	 * Find valid fields in Extra field text
+	 * Find valid item fields in Extra field text
 	 *
-	 * @param {String} str
-	 * @return {Map} - Map of fields to objects with 'originalField', 'field', and 'value'
+	 * There are a couple differences from citeproc-js behavior:
+	 *
+	 * 1) Key-value pairs can appear at the beginning of any line in Extra, not just the first two.
+	 * 2) For fields, the first occurrence of a valid field is used, not the last.
+	 *
+	 * @param {String} extra
+	 * @param {Zotero.Item} [item = null]
+	 * @param {String[]} [additionalFields] - Additional fields to skip other than those already
+	 *     on the provided item
+	 * @return {Object} - An object with 1) 'itemType', which may be null, 2) 'fields', a Map of
+	 *     field name to value, 3) 'creators', in API JSON syntax, and 4) 'extra', the remaining
+	 *     Extra string after removing the extracted values
 	 */
-	extractExtraFields: function (str) {
-		if (!str) {
-			return new Map();
-		}
+	extractExtraFields: function (extra, item = null, additionalFields = []) {
+		var itemTypeID = item ? item.itemTypeID : null;
+		
+		var itemType = null;
+		var fields = new Map();
+		var creators = [];
+		additionalFields = new Set(additionalFields);
 		
 		//
-		// Build a Map of normalized field names that might appear in Extra (including CSL variables)
-		// to arrays of built-in fields
+		// Build `Map`s of normalized types/fields, including CSL variables, to built-in types/fields
+		//
+		
+		// Built-in item types
+		var itemTypes = new Map(Zotero.ItemTypes.getAll().map(x => [this._normalizeExtraKey(x.name), x.name]));
+		// CSL types
+		for (let i in Zotero.Schema.CSL_TYPE_MAPPINGS) {
+			let cslType = Zotero.Schema.CSL_TYPE_MAPPINGS[i];
+			itemTypes.set(cslType.toLowerCase(), i);
+		}
+		
+		// For fields we use arrays, because there can be multiple possibilities
 		//
 		// Built-in fields
-		var fieldNames = new Map(Zotero.ItemFields.getAll().map(x => [x.name.toLowerCase(), [x.name]]));
+		var fieldNames = new Map(Zotero.ItemFields.getAll().map(x => [this._normalizeExtraKey(x.name), [x.name]]));
 		// CSL fields
-		for (let map of [CSL_TEXT_MAPPINGS, CSL_DATE_MAPPINGS]) {
+		for (let map of [Zotero.Schema.CSL_TEXT_MAPPINGS, Zotero.Schema.CSL_DATE_MAPPINGS]) {
 			for (let cslVar in map) {
-				let normalized = cslVar.toLowerCase();
+				let normalized = this._normalizeExtraKey(cslVar);
 				let existing = fieldNames.get(normalized) || [];
 				fieldNames.set(normalized, new Set([...existing, ...map[cslVar]]));
 			}
 		}
 		
-		var lines = str.split(/\n+/g);
-		var fields = new Map();
+		// Built-in creator types
+		var creatorTypes = new Map(Zotero.CreatorTypes.getAll().map(x => [this._normalizeExtraKey(x.name), x.name]));
+		// CSL types
+		for (let i in Zotero.Schema.CSL_NAME_MAPPINGS) {
+			let cslType = Zotero.Schema.CSL_NAME_MAPPINGS[i];
+			creatorTypes.set(cslType.toLowerCase(), i);
+		}
+		
+		// Process Extra lines
+		var keepLines = [];
+		var skipKeys = new Set();
+		var lines = extra.split(/\n/g);
 		for (let line of lines) {
-			let parts = line.match(/^([a-z \-]+):(.+)/i);
+			let parts = line.match(/^([a-z -_]+):(.+)/i);
+			// Old citeproc.js cheater syntax;
 			if (!parts) {
+				parts = line.match(/^{:([a-z -_]+):(.+)}/i);
+			}
+			if (!parts) {
+				keepLines.push(line);
 				continue;
 			}
 			let [_, originalField, value] = parts;
 			
-			let field = originalField.trim().toLowerCase()
-				// Strip spaces
-				.replace(/\s+/g, '')
-				// Old citeproc.js cheater syntax
-				.replace(/{:([^:]+):([^}]+)}/);
-			value = value.trim();
-			let possibleFields = fieldNames.get(field);
-			// No valid fields
-			if (!possibleFields) {
+			let key = this._normalizeExtraKey(originalField);
+			if (skipKeys.has(key)) {
+				keepLines.push(line);
 				continue;
 			}
-			// Create an entry for each possible field, since we don't know what type this is for
-			for (let possibleField of possibleFields) {
-				fields.set(
-					possibleField,
-					{
-						originalField,
-						field: possibleField,
-						value
+			value = value.trim();
+			
+			if (key == 'type') {
+				let possibleType = itemTypes.get(value);
+				if (possibleType) {
+					// Ignore item type that's the same as the item
+					if (!item || possibleType != Zotero.ItemTypes.getName(itemTypeID)) {
+						itemType = possibleType;
+						skipKeys.add(key);
+						continue;
 					}
-				);
+				}
+			}
+			
+			// Fields
+			let possibleFields = fieldNames.get(key);
+			// No valid fields
+			if (possibleFields) {
+				let added = false;
+				for (let possibleField of possibleFields) {
+					// If we have an item, skip fields that aren't valid for the type or that already
+					// have values
+					if (item) {
+						let fieldID = Zotero.ItemFields.getID(possibleField);
+						if (!Zotero.ItemFields.isValidForType(fieldID, itemTypeID)
+								|| item.getField(fieldID)
+								|| additionalFields.has(possibleField)) {
+							continue;
+						}
+					}
+					fields.set(possibleField, value);
+					added = true;
+					// If we found a valid field, don't try the other possibilities for that
+					// normalized key
+					if (item) {
+						break;
+					}
+				}
+				if (added) {
+					skipKeys.add(key);
+					continue;
+				}
+			}
+			
+			let possibleCreatorType = creatorTypes.get(key);
+			if (possibleCreatorType) {
+				let c = {
+					creatorType: possibleCreatorType
+				};
+				if (value.includes('||')) {
+					let [first, last] = value.split(/\s*\|\|\s*/);
+					c.firstName = first;
+					c.lastName = last;
+				}
+				else {
+					c.name = value;
+				}
+				if (item) {
+					let creatorTypeID = Zotero.CreatorTypes.getID(possibleCreatorType);
+					if (Zotero.CreatorTypes.isValidForItemType(creatorTypeID, itemTypeID)
+							// Ignore if there are any creators of this type on the item already,
+							// to follow citeproc-js behavior
+							&& !item.getCreators().some(x => x.creatorType == possibleCreatorType)) {
+						creators.push(c);
+						continue;
+					}
+				}
+				else {
+					creators.push(c);
+					continue;
+				}
+			}
+			
+			// We didn't find anything, so keep the line in Extra
+			keepLines.push(line);
+		}
+		
+		return {
+			itemType,
+			fields,
+			creators,
+			extra: keepLines.join('\n')
+		};
+	},
+	
+	
+	/**
+	 * @param {String} extra
+	 * @param {Map} fieldMap
+	 * @return {String}
+	 */
+	combineExtraFields: function (extra, fields) {
+		var normalizedKeyMap = new Map();
+		var normalizedFields = new Map();
+		for (let [key, value] of fields) {
+			let normalizedKey = this._normalizeExtraKey(key);
+			normalizedFields.set(normalizedKey, value);
+			normalizedKeyMap.set(normalizedKey, key);
+		}
+		var keepLines = [];
+		var lines = extra !== '' ? extra.split(/\n/g) : [];
+		for (let line of lines) {
+			let parts = line.match(/^([a-z -_]+):(.+)/i);
+			// Old citeproc.js cheater syntax;
+			if (!parts) {
+				parts = line.match(/^{:([a-z -_]+):(.+)}/i);
+			}
+			if (!parts) {
+				keepLines.push(line);
+				continue;
+			}
+			let [_, originalField, value] = parts;
+			
+			let key = this._normalizeExtraKey(originalField);
+			
+			// If we have a new value for the field, update it
+			if (normalizedFields.has(key)) {
+				keepLines.push(originalField + ": " + normalizedFields.get(key));
+				// Don't include with the other fields
+				fields.delete(normalizedKeyMap.get(key));
+			}
+			else {
+				keepLines.push(line);
 			}
 		}
-		return fields;
+		var fieldPairs = Array.from(fields.entries())
+			.map(x => x[0] + ': ' + x[1]);
+		fieldPairs.sort();
+		return fieldPairs.join('\n')
+			+ ((fieldPairs.length && keepLines.length) ? "\n" : "")
+			+ keepLines.join("\n");
+	},
+	
+	
+	_normalizeExtraKey: function (key) {
+		return key
+			.trim()
+			// Convert fooBar to foo-bar
+			.replace(/([a-z])([A-Z])/g, '$1-$2')
+			.toLowerCase()
+			// Normalize to hyphens for spaces
+			.replace(/[\s-_]/g, '-');
 	},
 	
 	

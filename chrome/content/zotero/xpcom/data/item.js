@@ -272,8 +272,7 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 	
 	if (!unformatted) {
 		// Multipart date fields
-		// TEMP - filingDate
-		if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || field == 'filingDate') {
+		if (Zotero.ItemFields.isDate(fieldID)) {
 			value = Zotero.Date.multipartToStr(value);
 		}
 	}
@@ -283,9 +282,8 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 
 
 Zotero.Item.prototype.getExtraField = function (fieldName) {
-	var fields = Zotero.Utilities.Internal.extractExtraFields(this.getField('extra'));
-	var doi = fields.get(fieldName);
-	return (doi && doi.value) ? doi.value : '';
+	var { fields } = Zotero.Utilities.Internal.extractExtraFields(this.getField('extra'));
+	return fields.get(fieldName) || '';
 };
 
 
@@ -577,7 +575,6 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
  */
 Zotero.Item.prototype.getFieldsNotInType = function (itemTypeID, allowBaseConversion) {
 	var fieldIDs = [];
-	
 	for (var field in this._itemData) {
 		if (this._itemData[field]) {
 			var fieldID = Zotero.ItemFields.getID(field);
@@ -598,32 +595,9 @@ Zotero.Item.prototype.getFieldsNotInType = function (itemTypeID, allowBaseConver
 			fieldIDs.push(fieldID);
 		}
 	}
-	/*
-	var sql = "SELECT fieldID FROM itemTypeFields WHERE itemTypeID=?1 AND "
-		+ "fieldID IN (SELECT fieldID FROM itemData WHERE itemID=?2) AND "
-		+ "fieldID NOT IN (SELECT fieldID FROM itemTypeFields WHERE itemTypeID=?3)";
-		
-	if (allowBaseConversion) {
-		// Not the type-specific field for a base field in the new type
-		sql += " AND fieldID NOT IN (SELECT fieldID FROM baseFieldMappings "
-			+ "WHERE itemTypeID=?1 AND baseFieldID IN "
-			+ "(SELECT fieldID FROM itemTypeFields WHERE itemTypeID=?3)) AND ";
-		// And not a base field with a type-specific field in the new type
-		sql += "fieldID NOT IN (SELECT baseFieldID FROM baseFieldMappings "
-			+ "WHERE itemTypeID=?3) AND ";
-		// And not the type-specific field for a base field that has
-		// a type-specific field in the new type
-		sql += "fieldID NOT IN (SELECT fieldID FROM baseFieldMappings "
-			+ "WHERE itemTypeID=?1 AND baseFieldID IN "
-			+ "(SELECT baseFieldID FROM baseFieldMappings WHERE itemTypeID=?3))";
-	}
-	
-	return Zotero.DB.columnQuery(sql, [this.itemTypeID, this.id, { int: itemTypeID }]);
-	*/
 	if (!fieldIDs.length) {
 		return false;
 	}
-	
 	return fieldIDs;
 }
 
@@ -753,7 +727,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		throw new Error('"' + field + '" is not a valid itemData field');
 	}
 	
-	if (loadIn && this.isNote() && field == 110) { // title
+	if (loadIn && this.isNote() && field == Zotero.ItemFields.getID('title')) {
 		this._noteTitle = value ? value : "";
 		return true;
 	}
@@ -798,9 +772,8 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	
 	if (!loadIn) {
 		// Save date field as multipart date
-		// TEMP - filingDate
 		if (value !== false
-				&& (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || field == 'filingDate')
+				&& (Zotero.ItemFields.isDate(fieldID))
 				&& !Zotero.Date.isMultipart(value)) {
 			value = Zotero.Date.strToMultipart(value);
 		}
@@ -867,19 +840,29 @@ Zotero.Item.prototype.updateDisplayTitle = function () {
 	var itemTypeID = this.itemTypeID;
 	var itemTypeName = Zotero.ItemTypes.getName(itemTypeID);
 	
-	if (title === "" && (itemTypeID == 8 || itemTypeID == 10)) { // 'letter' and 'interview' itemTypeIDs
+	var itemTypeLetter = Zotero.ItemTypes.getID('letter');
+	var itemTypeInterview = Zotero.ItemTypes.getID('interview');
+	var itemTypeCase = Zotero.ItemTypes.getID('case');
+	
+	var creatorTypeAuthor = Zotero.CreatorTypes.getID('author');
+	var creatorTypeRecipient = Zotero.CreatorTypes.getID('recipient');
+	var creatorTypeInterviewer = Zotero.CreatorTypes.getID('interviewer');
+	var creatorTypeInterviewee = Zotero.CreatorTypes.getID('interviewee');
+	
+	// 'letter' and 'interview'
+	if (title === "" && (itemTypeID == itemTypeLetter || itemTypeID == itemTypeInterview)) {
 		var creatorsData = this.getCreators();
 		var authors = [];
 		var participants = [];
 		for (let i=0; i<creatorsData.length; i++) {
 			let creatorData = creatorsData[i];
 			let creatorTypeID = creatorsData[i].creatorTypeID;
-			if ((itemTypeID == 8 && creatorTypeID == 16) || // 'letter'
-					(itemTypeID == 10 && creatorTypeID == 7)) { // 'interview'
+			if ((itemTypeID == itemTypeLetter && creatorTypeID == creatorTypeRecipient) ||
+					(itemTypeID == itemTypeInterview && creatorTypeID == creatorTypeInterviewer)) {
 				participants.push(creatorData);
 			}
-			else if ((itemTypeID == 8 && creatorTypeID == 1) ||   // 'letter'/'author'
-					(itemTypeID == 10 && creatorTypeID == 6)) { // 'interview'/'interviewee'
+			else if ((itemTypeID == itemTypeLetter && creatorTypeID == creatorTypeAuthor) ||
+					(itemTypeID == itemTypeInterview && creatorTypeID == creatorTypeInterviewee)) {
 				authors.push(creatorData);
 			}
 		}
@@ -919,7 +902,8 @@ Zotero.Item.prototype.updateDisplayTitle = function () {
 		
 		title = '[' + strParts.join('; ') + ']';
 	}
-	else if (itemTypeID == 17) { // 'case' itemTypeID
+	// 'case'
+	else if (itemTypeID == itemTypeCase) {
 		if (title) { // common law cases always have case names
 			var reporter = this.getField('reporter');
 			if (reporter) {
@@ -946,7 +930,7 @@ Zotero.Item.prototype.updateDisplayTitle = function () {
 			}
 			
 			var creatorData = this.getCreator(0);
-			if (creatorData && creatorData.creatorTypeID === 1) { // author
+			if (creatorData && creatorData.creatorTypeID === creatorTypeAuthor) {
 				strParts.push(creatorData.lastName);
 			}
 			
@@ -1038,8 +1022,10 @@ Zotero.Item.prototype.getCreatorsJSON = function () {
  *                     <li>'name' or 'firstName'/'lastName', or 'firstName'/'lastName'/'fieldMode'</li>
  *                     <li>'creatorType' (can be name or id) or 'creatorTypeID'</li>
  *                   </ul>
+ * @param {Object} [options]
+ * @param {Boolean} [options.strict] - Throw on invalid creator type
  */
-Zotero.Item.prototype.setCreator = function (orderIndex, data) {
+Zotero.Item.prototype.setCreator = function (orderIndex, data, options = {}) {
 	var itemTypeID = this._itemTypeID;
 	if (!itemTypeID) {
 		throw new Error('Item type must be set before setting creators');
@@ -1047,7 +1033,8 @@ Zotero.Item.prototype.setCreator = function (orderIndex, data) {
 	
 	this._requireData('creators');
 	
-	data = Zotero.Creators.cleanData(data);
+	var origCreatorType = data.creatorType;
+	data = Zotero.Creators.cleanData(data, options);
 	
 	if (data.creatorTypeID === undefined) {
 		throw new Error("Creator data must include a valid 'creatorType' or 'creatorTypeID' property");
@@ -1055,9 +1042,14 @@ Zotero.Item.prototype.setCreator = function (orderIndex, data) {
 	
 	// If creatorTypeID isn't valid for this type, use the primary type
 	if (!data.creatorTypeID || !Zotero.CreatorTypes.isValidForItemType(data.creatorTypeID, itemTypeID)) {
-		var msg = "Creator type '" + Zotero.CreatorTypes.getName(data.creatorTypeID) + "' "
-			+ "isn't valid for " + Zotero.ItemTypes.getName(itemTypeID)
-			+ " -- changing to primary creator";
+		let itemType = Zotero.ItemTypes.getName(itemTypeID);
+		if (options.strict) {
+			let e = new Error(`Invalid creator type '${origCreatorType}' for type ${itemType}`);
+			e.name = "ZoteroInvalidDataError";
+			throw e;
+		}
+		let msg = `Creator type '${origCreatorType}' isn't valid for ${itemType} -- `
+			+ "changing to primary creator";
 		Zotero.warn(msg);
 		data.creatorTypeID = Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID);
 	}
@@ -1087,7 +1079,7 @@ Zotero.Item.prototype.setCreator = function (orderIndex, data) {
 /**
  * @param {Object[]} data - An array of creator data in internal or API JSON format
  */
-Zotero.Item.prototype.setCreators = function (data) {
+Zotero.Item.prototype.setCreators = function (data, options = {}) {
 	// If empty array, clear all existing creators
 	if (!data.length) {
 		while (this.hasCreatorAt(0)) {
@@ -1097,7 +1089,7 @@ Zotero.Item.prototype.setCreators = function (data) {
 	}
 	
 	for (let i = 0; i < data.length; i++) {
-		this.setCreator(i, data[i]);
+		this.setCreator(i, data[i], options);
 	}
 }
 
@@ -4191,31 +4183,48 @@ Zotero.Item.prototype.isCollection = function() {
 
 /**
  * Populate the object's data from an API JSON data object
+ *
+ * @param {Object} json
+ * @param {Object} [options]
+ * @param {Boolean} [options.strict = false] - Throw on unknown field or invalid field for type
  */
-Zotero.Item.prototype.fromJSON = function (json) {
+Zotero.Item.prototype.fromJSON = function (json, options = {}) {
+	var strict = !!options.strict;
+	
 	if (!json.itemType && !this._itemTypeID) {
 		throw new Error("itemType property not provided");
 	}
 	
 	let itemTypeID = Zotero.ItemTypes.getID(json.itemType);
 	if (!itemTypeID) {
-		let e = new Error(`Invalid item type '${json.itemType}'`);
-		e.name = "ZoteroUnknownTypeError";
+		let e = new Error(`Unknown item type '${json.itemType}'`);
+		e.name = "ZoteroInvalidDataError";
 		throw e;
 	}
 	this.setType(itemTypeID);
 	
 	var isValidForType = {};
-	var setFields = {};
+	var setFields = new Set();
+	var { fields: extraFields, extra } = Zotero.Utilities.Internal.extractExtraFields(
+		json.extra !== undefined ? json.extra : '',
+		this,
+		Object.keys(json)
+	);
 	
-	// Primary data
+	// Transfer valid fields from Extra to regular fields
+	// Currently disabled
+	/*for (let [field, value] of extraFields) {
+		this.setField(field, value);
+		setFields.add(field);
+		extraFields.delete(field);
+	}*/
+	
 	for (let field in json) {
 		let val = json[field];
 		
 		switch (field) {
 		case 'key':
 		case 'version':
-		case 'synced':
 		case 'itemType':
 		case 'note':
 		// Use?
@@ -4226,6 +4235,7 @@ Zotero.Item.prototype.fromJSON = function (json) {
 		case 'parentItem':
 		case 'deleted':
 		case 'inPublications':
+		case 'extra':
 			break;
 		
 		case 'accessDate':
@@ -4238,7 +4248,7 @@ Zotero.Item.prototype.fromJSON = function (json) {
 				val = Zotero.Date.dateToSQL(d, true);
 			}
 			this.setField(field, val);
-			setFields[field] = true;
+			setFields.add(field);
 			break;
 		
 		case 'dateAdded':
@@ -4255,7 +4265,7 @@ Zotero.Item.prototype.fromJSON = function (json) {
 			break;
 		
 		case 'creators':
-			this.setCreators(json.creators);
+			this.setCreators(json.creators, options);
 			break;
 		
 		case 'tags':
@@ -4298,8 +4308,19 @@ Zotero.Item.prototype.fromJSON = function (json) {
 		default:
 			let fieldID = Zotero.ItemFields.getID(field);
 			if (!fieldID) {
-				Zotero.logError("Discarding unknown JSON field '" + field + "' for item "
-					+ this.libraryKey);
+				// In strict mode, fail on unknown field
+				if (strict) {
+					let e = new Error(`Unknown field '${field}'`);
+					e.name = "ZoteroInvalidDataError";
+					throw e;
+				}
+				// Otherwise store in Extra
+				if (typeof val == 'string') {
+					Zotero.warn(`Storing unknown field '${field}' in Extra for item ${this.libraryKey}`);
+					extraFields.set(field, val);
+					break;
+				}
+				Zotero.warn(`Discarding unknown JSON ${typeof val} '${field}' for item ${this.libraryKey}`);
 				continue;
 			}
 			// Convert to base-mapped field if necessary, so that setFields has the base-mapped field
@@ -4312,14 +4333,25 @@ Zotero.Item.prototype.fromJSON = function (json) {
 			}
 			isValidForType[field] = Zotero.ItemFields.isValidForType(fieldID, this.itemTypeID);
 			if (!isValidForType[field]) {
-				Zotero.logError("Discarding invalid field '" + origField + "' for type " + itemTypeID
-					+ " for item " + this.libraryKey);
+				let type = Zotero.ItemTypes.getName(itemTypeID);
+				// In strict mode, fail on invalid field for type
+				if (strict) {
+					let e = new Error(`Invalid field '${origField}' for type ${type}`);
+					e.name = "ZoteroInvalidDataError";
+					throw e;
+				}
+				// Otherwise store in Extra
+				Zotero.warn(`Storing invalid field '${origField}' for type ${type} in Extra for `
+					+ `item ${this.libraryKey}`);
+				extraFields.set(field, val);
 				continue;
 			}
 			this.setField(field, json[origField]);
-			setFields[field] = true;
+			setFields.add(field);
 		}
 	}
+	
+	this.setField('extra', Zotero.Utilities.Internal.combineExtraFields(extra, extraFields));
 	
 	if (json.collections || this._collections.length) {
 		this.setCollections(json.collections);
@@ -4328,7 +4360,7 @@ Zotero.Item.prototype.fromJSON = function (json) {
 	// Clear existing fields not specified
 	var previousFields = this.getUsedFields(true);
 	for (let field of previousFields) {
-		if (!setFields[field] && isValidForType[field] !== false) {
+		if (!setFields.has(field) && isValidForType[field] !== false && field != 'extra') {
 			this.setField(field, false);
 		}
 	}
@@ -4507,6 +4539,45 @@ Zotero.Item.prototype.toResponseJSON = function (options = {}) {
 	}
 	return json;
 };
+
+
+/**
+ * Migrate valid fields in Extra to real fields
+ *
+ * A separate save is required
+ */
+Zotero.Item.prototype.migrateExtraFields = function () {
+	var { itemType, fields, creators, extra } = Zotero.Utilities.Internal.extractExtraFields(
+		this.getField('extra'), this
+	);
+	if (itemType) {
+		this.setType(Zotero.ItemTypes.getID(itemType));
+	}
+	for (let [field, value] of fields) {
+		this.setField(field, value);
+	}
+	if (creators.length) {
+		this.setCreators([...item.getCreators(), ...creators]);
+	}
+	this.setField('extra', extra);
+	if (!this.hasChanged()) {
+		return false;
+	}
+	
+	Zotero.debug("Migrating Extra fields for item " + this.libraryKey);
+	if (itemType) {
+		Zotero.debug("Item Type: " + itemType);
+	}
+	if (fields.size) {
+		Zotero.debug(Array.from(fields.entries()));
+	}
+	if (creators.length) {
+		Zotero.debug(creators);
+	}
+	Zotero.debug(extra);
+	
+	return true;
+}
 
 
 //////////////////////////////////////////////////////////////////////////////

@@ -282,7 +282,7 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 	
 	if (!Zotero.SearchConditions.hasOperator(condition, operator)){
 		let e = new Error("Invalid operator '" + operator + "' for condition " + condition);
-		e.name = "ZoteroUnknownFieldError";
+		e.name = "ZoteroInvalidDataError";
 		throw e;
 	}
 	
@@ -425,7 +425,7 @@ Zotero.Search.prototype.updateCondition = function (searchConditionID, condition
 	
 	if (!Zotero.SearchConditions.hasOperator(condition, operator)){
 		let e = new Error("Invalid operator '" + operator + "' for condition " + condition);
-		e.name = "ZoteroUnknownFieldError";
+		e.name = "ZoteroInvalidDataError";
 		throw e;
 	}
 	
@@ -808,8 +808,29 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
  * Populate the object's data from an API JSON data object
  *
  * If this object is identified (has an id or library/key), loadAll() must have been called.
+ *
+ * @param {Object} json
+ * @param {Object} [options]
+ * @param {Boolean} [options.strict = false] - Throw on unknown property
  */
-Zotero.Search.prototype.fromJSON = function (json) {
+Zotero.Search.prototype.fromJSON = function (json, options = {}) {
+	if (options.strict) {
+		for (let prop in json) {
+			switch (prop) {
+			case 'key':
+			case 'version':
+			case 'name':
+			case 'conditions':
+				break;
+			
+			default:
+				let e = new Error(`Unknown search property '${prop}'`);
+				e.name = "ZoteroInvalidDataError";
+				throw e;
+			}
+		}
+	}
+	
 	if (json.name) {
 		this.name = json.name;
 	}

@@ -208,7 +208,7 @@ Zotero.Report.HTML = new function () {
 			}
 			
 			try {
-				var localizedFieldName = Zotero.ItemFields.getLocalizedString(obj.itemType, i);
+				var localizedFieldName = Zotero.ItemFields.getLocalizedString(i);
 			}
 			// Skip fields we don't have a localized string for
 			catch (e) {

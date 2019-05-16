@@ -711,6 +711,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.Users.init();
 			yield Zotero.Libraries.init();
 			
+			yield Zotero.ID.init();
 			yield Zotero.ItemTypes.init();
 			yield Zotero.ItemFields.init();
 			yield Zotero.CreatorTypes.init();
@@ -747,7 +748,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			
 			Zotero.Date.init();
 			Zotero.LocateManager.init();
-			yield Zotero.ID.init();
 			yield Zotero.Collections.init();
 			yield Zotero.Items.init();
 			yield Zotero.Searches.init();
@@ -756,6 +756,12 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.Groups.init();
 			yield Zotero.Relations.init();
 			yield Zotero.Retractions.init();
+			
+			// Migrate fields from Extra that can be moved to item fields after a schema update
+			//
+			// Disabled for now
+			//
+			//yield Zotero.Schema.migrateExtraFields();
 			
 			// Load all library data except for items, which are loaded when libraries are first
 			// clicked on or if otherwise necessary
@@ -769,7 +775,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					}
 				})()
 			);
-
 			
 			Zotero.Items.startEmptyTrashTimer();
 			

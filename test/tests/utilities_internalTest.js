@@ -114,32 +114,152 @@ describe("Zotero.Utilities.Internal", function () {
 	
 	
 	describe("#extractExtraFields()", function () {
+		it("should extract a CSL type", function () {
+			var str = 'type: motion_picture';
+			var { itemType, fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(itemType, 'videoRecording');
+			assert.equal(fields.size, 0);
+			assert.strictEqual(extra, '');
+		});
+		
 		it("should extract a field", function () {
 			var val = '10.1234/abcdef';
 			var str = `DOI: ${val}`;
-			var fields = Zotero.Utilities.Internal.extractExtraFields(str);
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
 			assert.equal(fields.size, 1);
-			assert.equal(fields.get('DOI').value, val);
+			assert.equal(fields.get('DOI'), val);
+			assert.strictEqual(extra, '');
+		});
+		
+		it("should extract a field for a given item", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			var val = '10.1234/abcdef';
+			var str = `DOI: ${val}`;
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
+			assert.equal(fields.size, 1);
+			assert.equal(fields.get('DOI'), val);
+			assert.strictEqual(extra, '');
+		});
+		
+		it("should extract a CSL field", function () {
+			var val = '10.1234/abcdef';
+			var str = `container-title: ${val}`;
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, Zotero.Schema.CSL_TEXT_MAPPINGS['container-title'].length);
+			assert.equal(fields.get('publicationTitle'), val);
+			assert.strictEqual(extra, '');
+		});
+		
+		it("should extract a CSL field for a given item type", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			var val = '10.1234/abcdef';
+			var str = `container-title: ${val}`;
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
+			assert.equal(fields.size, 1);
+			assert.equal(fields.get('publicationTitle'), val);
+			assert.strictEqual(extra, '');
 		});
 		
 		it("should extract a field with different case", function () {
 			var val = '10.1234/abcdef';
 			var str = `doi: ${val}`;
-			var fields = Zotero.Utilities.Internal.extractExtraFields(str);
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
 			assert.equal(fields.size, 1);
-			assert.equal(fields.get('DOI').value, val);
+			assert.equal(fields.get('DOI'), val);
+			assert.strictEqual(extra, '');
 		});
 		
 		it("should extract a field with other fields, text, and whitespace", function () {
-			var originalDateVal = '1989';
-			var doiVal = '10.1234/abcdef';
-			var str = `\nOriginal Date: ${originalDateVal}\nDOI: ${doiVal}\n\n`;
-			var fields = Zotero.Utilities.Internal.extractExtraFields(str);
+			var place = 'New York';
+			var doi = '10.1234/abcdef';
+			var str = `Line 1\nPublisher Place: ${place}\nFoo: Bar\nDOI: ${doi}\n\nLine 2`;
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 2);
+			assert.equal(fields.get('DOI'), doi);
+			assert.equal(fields.get('place'), place);
+			assert.equal(extra, 'Line 1\nFoo: Bar\n\nLine 2');
+		});
+		
+		it("should extract the first instance of a field", function () {
+			var place1 = 'New York';
+			var place2 = 'London';
+			var str = `Publisher Place: ${place1}\nPublisher Place: ${place2}`;
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
 			assert.equal(fields.size, 1);
-			assert.equal(fields.get('DOI').value, doiVal);
+			assert.equal(fields.get('place'), place1);
+			assert.equal(extra, "Publisher Place: " + place2);
+		});
+		
+		it("shouldn't extract a field that already exists on the item", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'book' });
+			item.setField('numPages', 10);
+			var str = 'number-of-pages: 11';
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
+			assert.equal(fields.size, 0);
+		});
+		
+		it("should extract a CSL name", function () {
+			var str = 'container-author: First || Last';
+			var { creators, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.lengthOf(creators, 1);
+			assert.propertyVal(creators[0], 'creatorType', 'bookAuthor');
+			assert.propertyVal(creators[0], 'firstName', 'First');
+			assert.propertyVal(creators[0], 'lastName', 'Last');
+			assert.strictEqual(extra, '');
+		});
+		
+		it("should extract a CSL name that's valid for a given item type", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'bookSection' });
+			var str = 'container-author: First || Last';
+			var { creators, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
+			assert.lengthOf(creators, 1);
+			assert.propertyVal(creators[0], 'creatorType', 'bookAuthor');
+			assert.propertyVal(creators[0], 'firstName', 'First');
+			assert.propertyVal(creators[0], 'lastName', 'Last');
+			assert.strictEqual(extra, '');
+		});
+		
+		it("shouldn't extract a CSL name that's not valid for a given item type", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			var str = 'container-author: First || Last';
+			var { creators, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
+			assert.lengthOf(creators, 0);
+			assert.strictEqual(extra, str);
 		});
 	});
 	
+	describe("#combineExtraFields", function () {
+		var originalDate = "1887";
+		var publicationPlace = "New York";
+		var doi = '10.1234/123456789';
+		var fieldMap = new Map();
+		fieldMap.set('originalDate', originalDate);
+		fieldMap.set('publicationPlace', publicationPlace);
+		fieldMap.set('DOI', doi);
+		var fieldStr = `DOI: ${doi}\noriginalDate: ${originalDate}\npublicationPlace: ${publicationPlace}`;
+		
+		it("should create 'field: value' pairs from field map", function () {
+			var extra = "";
+			var newExtra = ZUI.combineExtraFields(extra, fieldMap);
+			assert.equal(newExtra, fieldStr);
+		});
+		
+		it("should add fields above existing Extra content", function () {
+			var extra = "This is a note.";
+			var newExtra = ZUI.combineExtraFields(extra, fieldMap);
+			assert.equal(newExtra, fieldStr + '\n' + extra);
+		});
+		
+		it("should replace existing fields", function () {
+			var extra = "This is a note.\nOriginal Date: 1886\nFoo: Bar";
+			var newExtra = ZUI.combineExtraFields(extra, fieldMap);
+			assert.equal(
+				newExtra,
+				fieldStr.split(/\n/).filter(x => !x.startsWith('originalDate')).join("\n")
+					+ "\nThis is a note.\nOriginal Date: 1887\nFoo: Bar"
+			);
+		});
+	});
 	
 	describe("#extractIdentifiers()", function () {
 		it("should extract ISBN-10", async function () {
