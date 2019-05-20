@@ -27,13 +27,17 @@ Zotero.Schema = new function(){
 	this.dbInitialized = false;
 	this.goToChangeLog = false;
 	
+	this.REPO_UPDATE_PERIODIC = 0;
 	this.REPO_UPDATE_MANUAL = 1;
-	this.REPO_UPDATE_UPGRADE = 2;
+	this.REPO_UPDATE_INITIAL = 2;
 	this.REPO_UPDATE_STARTUP = 3;
 	this.REPO_UPDATE_NOTIFICATION = 4;
 	
 	var _schemaUpdateDeferred = Zotero.Promise.defer();
 	this.schemaUpdatePromise = _schemaUpdateDeferred.promise;
+	
+	const REPOSITORY_CHECK_INTERVAL = 86400;
+	const REPOSITORY_RETRY_INTERVAL = 3600;
 	
 	// If updating from this userdata version or later, don't show "Upgrading database…" and don't make
 	// DB backup first. This should be set to false when breaking compatibility or making major changes.
@@ -106,7 +110,7 @@ Zotero.Schema = new function(){
 					await this.updateBundledFiles();
 					if (Zotero.Prefs.get('automaticScraperUpdates')) {
 						try {
-							await this.updateFromRepository(this.REPO_UPDATE_UPGRADE);
+							await this.updateFromRepository(this.REPO_UPDATE_INITIAL);
 						}
 						catch (e) {
 							Zotero.logError(e);
@@ -1068,10 +1072,10 @@ Zotero.Schema = new function(){
 	/**
 	 * Send XMLHTTP request for updated translators and styles to the central repository
 	 *
-	 * @param {Integer} [force=0]	 - If non-zero, force a repository query regardless of how long it's
+	 * @param {Integer} [mode=0] - If non-zero, force a repository query regardless of how long it's
 	 *     been since the last check. Should be a REPO_UPDATE_* constant.
 	 */
-	this.updateFromRepository = Zotero.Promise.coroutine(function* (force = 0) {
+	this.updateFromRepository = Zotero.Promise.coroutine(function* (mode = 0) {
 		if (Zotero.skipBundledFiles) {
 			Zotero.debug("No bundled files -- skipping repository update");
 			return;
@@ -1082,7 +1086,7 @@ Zotero.Schema = new function(){
 			return false;
 		}
 		
-		if (!force) {
+		if (mode == this.REPO_UPDATE_PERIODIC) {
 			// Check user preference for automatic updates
 			if (!Zotero.Prefs.get('automaticScraperUpdates')) {
 				Zotero.debug('Automatic repository updating disabled -- not checking repository', 4);
@@ -1092,7 +1096,7 @@ Zotero.Schema = new function(){
 			// Determine the earliest local time that we'd query the repository again
 			let lastCheck = yield this.getDBVersion('lastcheck');
 			let nextCheck = new Date();
-			nextCheck.setTime((lastCheck + ZOTERO_CONFIG.REPOSITORY_CHECK_INTERVAL) * 1000);
+			nextCheck.setTime((lastCheck + REPOSITORY_CHECK_INTERVAL) * 1000);
 			
 			// If enough time hasn't passed, don't update
 			var now = new Date();
@@ -1143,12 +1147,12 @@ Zotero.Schema = new function(){
 				+ (lastUpdated ? 'last=' + lastUpdated + '&' : '')
 				+ 'version=' + Zotero.version;
 			
-			Zotero.debug('Checking repository for updates');
+			Zotero.debug('Checking repository for translator and style updates');
 			
 			_remoteUpdateInProgress = true;
 			
-			if (force) {
-				url += '&m=' + force;
+			if (mode) {
+				url += '&m=' + mode;
 			}
 			
 			// Send list of installed styles
@@ -1171,13 +1175,13 @@ Zotero.Schema = new function(){
 			
 			try {
 				var xmlhttp = yield Zotero.HTTP.request("POST", url, { body: body });
-				updated = yield _handleRepositoryResponse(xmlhttp, force);
+				updated = yield _handleRepositoryResponse(xmlhttp, mode);
 			}
 			catch (e) {
-				if (!force) {
+				if (mode == this.REPO_UPDATE_PERIODIC) {
 					if (e instanceof Zotero.HTTP.UnexpectedStatusException
 							|| e instanceof Zotero.HTTP.BrowserOfflineException) {
-						let msg = " -- retrying in " + ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL
+						let msg = " -- retrying in " + REPOSITORY_RETRY_INTERVAL
 						if (e instanceof Zotero.HTTP.BrowserOfflineException) {
 							Zotero.debug("Browser is offline" + msg, 2);
 						}
@@ -1188,7 +1192,7 @@ Zotero.Schema = new function(){
 							Zotero.debug("Error updating from repository " + msg, 1);
 						}
 						// TODO: instead, add an observer to start and stop timer on online state change
-						_setRepositoryTimer(ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL);
+						_setRepositoryTimer(REPOSITORY_RETRY_INTERVAL);
 						return;
 					}
 				}
@@ -1200,8 +1204,8 @@ Zotero.Schema = new function(){
 			};
 		}
 		finally {
-			if (!force) {
-				_setRepositoryTimer(ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL);
+			if (mode == this.REPO_UPDATE_PERIODIC) {
+				_setRepositoryTimer(REPOSITORY_RETRY_INTERVAL);
 			}
 			_remoteUpdateInProgress = false;
 		}
@@ -1665,7 +1669,7 @@ Zotero.Schema = new function(){
 	 *
 	 * @return {Promise:Boolean} A promise for whether the update succeeded
 	 **/
-	async function _handleRepositoryResponse(xmlhttp, force) {
+	async function _handleRepositoryResponse(xmlhttp, mode) {
 		if (!xmlhttp.responseXML){
 			try {
 				if (xmlhttp.status>1000){
@@ -1699,8 +1703,8 @@ Zotero.Schema = new function(){
 			});
 			
 			Zotero.debug('All translators and styles are up-to-date');
-			if (!force) {
-				_setRepositoryTimer(ZOTERO_CONFIG.REPOSITORY_CHECK_INTERVAL);
+			if (mode == this.REPO_UPDATE_PERIODIC) {
+				_setRepositoryTimer(REPOSITORY_CHECK_INTERVAL);
 			}
 			return true;
 		}
@@ -1716,8 +1720,9 @@ Zotero.Schema = new function(){
 			}
 			
 			// Rebuild caches
-			await Zotero.Translators.reinit({ fromSchemaUpdate: force != 1 });
-			await Zotero.Styles.reinit({ fromSchemaUpdate: force != 1 });
+			let fromSchemaUpdate = mode != this.REPO_UPDATE_MANUAL;
+			await Zotero.Translators.reinit({ fromSchemaUpdate });
+			await Zotero.Styles.reinit({ fromSchemaUpdate });
 			
 			updated = true;
 		}
