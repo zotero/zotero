@@ -1,0 +1,19 @@
+{
+	"env": {
+		"browser": true,
+		"es6": true,
+		"node": true,
+		"mocha": true
+	},
+	"globals": {
+		"assert": "readonly",
+		"createDataObject": "readonly",
+		"createGroup": "readonly",
+		"createUnsavedDataObject": "readonly",
+		"getPromiseError": "readonly",
+		"getGroup": "readonly",
+		"getTempDirectory": "readonly",
+		"getTestDataDirectory": "readonly",
+		"importFileAttachment": "readonly",
+	}
+}
