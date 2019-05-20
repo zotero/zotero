@@ -583,7 +583,7 @@ var Zotero_File_Interface = new function() {
 				'GET',
 				fileURI,
 				{
-					dontCache: true,
+					noCache: true,
 					responseType: 'text'
 				}
 			);

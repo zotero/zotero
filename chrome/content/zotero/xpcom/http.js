@@ -123,8 +123,9 @@ Zotero.HTTP = new function() {
 	 * @param {Zotero.CookieSandbox} [options.cookieSandbox] - The sandbox from which cookies should
 	 *     be taken
 	 * @param {Boolean} [options.debug] - Log response text and status code
-	 * @param {Boolean} [options.dontCache] - If set, specifies that the request should not be
+	 * @param {Boolean} [options.noCache] - If set, specifies that the request should not be
 	 *     fulfilled from the cache
+	 * @param {Boolean} [options.dontCache] - Deprecated
 	 * @param {Boolean} [options.foreground] - Make a foreground request, showing
 	 *     certificate/authentication dialogs if necessary
 	 * @param {Number} [options.logBodyLength=1024] - Length of request body to log
@@ -312,7 +313,10 @@ Zotero.HTTP = new function() {
 			}
 			
 			// Disable caching if requested
-			if (options.dontCache) {
+			if (options.noCache || options.dontCache) {
+				if (options.dontCache) {
+					Zotero.warn("HTTP.request() 'dontCache' option is deprecated -- use noCache instead");
+				}
 				channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
 			}
 			
@@ -870,7 +874,7 @@ Zotero.HTTP = new function() {
 						Zotero.debug("Proxy required for " + uri + " -- making HEAD request to trigger auth prompt");
 						yield Zotero.HTTP.request("HEAD", uri, {
 							foreground: true,
-							dontCache: true
+							noCache: true
 						})
 						.catch(function (e) {
 							// Show error icon at startup

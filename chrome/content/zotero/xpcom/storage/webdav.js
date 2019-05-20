@@ -1134,7 +1134,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					successCodes: [200, 300, 404],
 					responseType: 'text',
 					requestObserver: xmlhttp => request.setChannel(xmlhttp.channel),
-					dontCache: true,
+					noCache: true,
 					errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
 					errorDelayMax: this.ERROR_DELAY_MAX,
 					debug: true

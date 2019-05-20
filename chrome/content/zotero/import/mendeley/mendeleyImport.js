@@ -56,7 +56,7 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 			'GET',
 			fileURI,
 			{
-				dontCache: true,
+				noCache: true,
 				responseType: 'text'
 			}
 		);

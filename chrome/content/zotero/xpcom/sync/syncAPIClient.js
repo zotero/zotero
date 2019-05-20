@@ -641,7 +641,7 @@ Zotero.Sync.APIClient.prototype = {
 		let opts = {}
 		Object.assign(opts, options);
 		opts.headers = this.getHeaders(options.headers);
-		opts.dontCache = true;
+		opts.noCache = true;
 		opts.foreground = !options.background;
 		opts.responseType = options.responseType || 'text';
 		if (options.body && options.body.length >= this.MIN_GZIP_SIZE
