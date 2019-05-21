@@ -197,13 +197,13 @@
 
 <!ENTITY zotero.import "Importar">
 <!ENTITY zotero.import.whereToImportFrom "De onde você deseja importar?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
-<!ENTITY zotero.import.database "Database">
-<!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
-<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.source.file "Um arquivo (BibTeX, RIS, RDF do Zotero, etc.)">
+<!ENTITY zotero.import.importing "Importando...">
+<!ENTITY zotero.import.database "Banco de dados">
+<!ENTITY zotero.import.lastModified "Última modificação">
+<!ENTITY zotero.import.size "Tamanho">
+<!ENTITY zotero.import.createCollection "Coloque coleções importadas e itens dentro de novas coleções">
+<!ENTITY zotero.import.fileHandling "Manipulação de arquivo">
 
 <!ENTITY zotero.exportOptions.title "Exportar...">
 <!ENTITY zotero.exportOptions.format.label "Formato:">
