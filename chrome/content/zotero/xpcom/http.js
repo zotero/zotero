@@ -376,7 +376,11 @@ Zotero.HTTP = new function() {
 			}
 		}
 		for (var header in headers) {
-			xmlhttp.setRequestHeader(header, headers[header]);
+			// Convert numbers to string to make Sinon happy
+			let value = typeof headers[header] == 'number'
+				? headers[header].toString()
+				: headers[header]
+			xmlhttp.setRequestHeader(header, value);
 		}
 
 		// Set timeout

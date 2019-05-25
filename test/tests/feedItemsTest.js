@@ -100,7 +100,7 @@ describe("Zotero.FeedItems", function () {
 		});
 		
 		afterEach(function* () {
-			save.reset();
+			save.resetHistory();
 			
 			yield clearFeeds();
 		});

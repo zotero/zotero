@@ -355,7 +355,7 @@ describe("Zotero.Integration", function () {
 			});
 			
 			afterEach(function() {
-				setDocumentDataSpy.reset();
+				setDocumentDataSpy.resetHistory();
 			});
 			
 			after(function() {
@@ -385,7 +385,7 @@ describe("Zotero.Integration", function () {
 					} catch (e) {}
 					await initDoc(docID, {style});
 					displayDialogStub.resetHistory();
-					displayAlertStub.reset();
+					displayAlertStub.resetHistory();
 				});
 				
 				after(function* () {
@@ -559,7 +559,7 @@ describe("Zotero.Integration", function () {
 				assert.isTrue(getCiteprocBibliographySpy.calledOnce);
 				
 				assert.equal(getCiteprocBibliographySpy.lastCall.returnValue[0].entry_ids.length, 3);
-				getCiteprocBibliographySpy.reset();
+				getCiteprocBibliographySpy.resetHistory();
 
 				setAddEditItems(testItems[3]);
 				yield execCommand('addEditCitation', docID);
@@ -580,7 +580,7 @@ describe("Zotero.Integration", function () {
 				assert.isTrue(getCiteprocBibliographySpy.calledOnce);
 
 				assert.equal(getCiteprocBibliographySpy.lastCall.returnValue[0].entry_ids.length, 3);
-				getCiteprocBibliographySpy.reset();
+				getCiteprocBibliographySpy.resetHistory();
 
 				sinon.stub(doc, 'cursorInField').resolves(doc.fields[1]);
 				sinon.stub(doc, 'canInsertField').resolves(false);
@@ -603,7 +603,7 @@ describe("Zotero.Integration", function () {
 					displayAlertStub = sinon.stub(DocumentPluginDummy.Document.prototype, 'displayAlert').resolves(0);
 				});	
 				beforeEach(function() {
-					displayAlertStub.reset();
+					displayAlertStub.resetHistory();
 				});
 				after(function() {
 					displayAlertStub.restore();

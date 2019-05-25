@@ -147,7 +147,7 @@ describe("Zotero.ItemTreeView", function() {
 			assert.equal(selected[0], existingItemID);
 			
 			// Reset call count on spy
-			win.ZoteroPane.itemSelected.reset();
+			win.ZoteroPane.itemSelected.resetHistory();
 			
 			// Create item with skipNotifier flag
 			var item = new Zotero.Item('book');
@@ -172,7 +172,7 @@ describe("Zotero.ItemTreeView", function() {
 			assert.equal(selected[0], existingItemID);
 			
 			// Reset call count on spy
-			win.ZoteroPane.itemSelected.reset();
+			win.ZoteroPane.itemSelected.resetHistory();
 			
 			// Create item with skipSelect flag
 			var item = new Zotero.Item('book');
@@ -267,7 +267,7 @@ describe("Zotero.ItemTreeView", function() {
 			itemsView.selection.clearSelection();
 			assert.lengthOf(itemsView.getSelectedItems(), 0);
 			// Reset call count on spy
-			win.ZoteroPane.itemSelected.reset();
+			win.ZoteroPane.itemSelected.resetHistory();
 			
 			// Modify item
 			item.setField('title', 'no select on modify');
@@ -293,7 +293,7 @@ describe("Zotero.ItemTreeView", function() {
 			assert.equal(selected[0], id);
 			
 			// Reset call count on spy
-			win.ZoteroPane.itemSelected.reset();
+			win.ZoteroPane.itemSelected.resetHistory();
 			
 			// Modify item
 			item.setField('title', 'maintain selection on modify');
