@@ -509,7 +509,8 @@ Zotero.Attachments = new function(){
 			return process(contentType, Zotero.MIME.hasNativeHandler(contentType));
 		}
 		
-		return Zotero.MIME.getMIMETypeFromURL(url, cookieSandbox).spread(process);
+		var args = yield Zotero.MIME.getMIMETypeFromURL(url, cookieSandbox);
+		return process(...args);
 	});
 	
 	

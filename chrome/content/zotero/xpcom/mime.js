@@ -327,36 +327,42 @@ Zotero.MIME = new function(){
 	 * @param {Zotero.CookieSandbox} [cookieSandbox]
 	 * @return {Promise}
 	 */
-	this.getMIMETypeFromURL = function (url, cookieSandbox) {
-		return Zotero.HTTP.promise("HEAD", url, { cookieSandbox: cookieSandbox, successCodes: false })
-		.then(function (xmlhttp) {
-			if (xmlhttp.status != 200 && xmlhttp.status != 204) {
-				Zotero.debug("Attachment HEAD request returned with status code "
-					+ xmlhttp.status + " in Zotero.MIME.getMIMETypeFromURL()", 2);
-				var mimeType = '';
+	this.getMIMETypeFromURL = async function (url, cookieSandbox) {
+		var xmlhttp = await Zotero.HTTP.request(
+			"HEAD",
+			url,
+			{
+				cookieSandbox,
+				successCodes: false
 			}
-			else {
-				var mimeType = xmlhttp.channel.contentType;
-			}
-			
-			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
-				.createInstance(Components.interfaces.nsIURL);
-			nsIURL.spec = url;
-			
-			// Override MIME type to application/pdf if extension is .pdf --
-			// workaround for sites that respond to the HEAD request with an
-			// invalid MIME type (https://www.zotero.org/trac/ticket/460)
-			//
-			// Downloaded file is inspected in attachment code and deleted if actually HTML
-			if (nsIURL.fileName.match(/pdf$/) || url.match(/pdf$/)) {
-				mimeType = 'application/pdf';
-			}
-			
-			var ext = nsIURL.fileExtension;
-			var hasNativeHandler = Zotero.MIME.hasNativeHandler(mimeType, ext);
-			
-			return [mimeType, hasNativeHandler];
-		});
+		);
+		
+		if (xmlhttp.status != 200 && xmlhttp.status != 204) {
+			Zotero.debug("Attachment HEAD request returned with status code "
+				+ xmlhttp.status + " in Zotero.MIME.getMIMETypeFromURL()", 2);
+			var mimeType = '';
+		}
+		else {
+			var mimeType = xmlhttp.channel.contentType;
+		}
+		
+		var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
+			.createInstance(Components.interfaces.nsIURL);
+		nsIURL.spec = url;
+		
+		// Override MIME type to application/pdf if extension is .pdf --
+		// workaround for sites that respond to the HEAD request with an
+		// invalid MIME type (https://www.zotero.org/trac/ticket/460)
+		//
+		// Downloaded file is inspected in attachment code and deleted if actually HTML
+		if (nsIURL.fileName.match(/pdf$/) || url.match(/pdf$/)) {
+			mimeType = 'application/pdf';
+		}
+		
+		var ext = nsIURL.fileExtension;
+		var hasNativeHandler = Zotero.MIME.hasNativeHandler(mimeType, ext);
+		
+		return [mimeType, hasNativeHandler];
 	}
 	
 	
