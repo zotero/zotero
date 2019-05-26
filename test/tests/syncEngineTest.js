@@ -3853,7 +3853,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.ok(yield Zotero.Sync.Data.Local.getDateDeleted('item', libraryID, key));
 		});
 		
-		it("should handle remote move to trash and local deletion", function* () {
+		it("should delete locally trashed item on remote deletion", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			({ engine, client, caller } = yield setup());
 			var type = 'item';
