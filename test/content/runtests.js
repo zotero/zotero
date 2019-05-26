@@ -123,10 +123,10 @@ function Reporter(runner) {
 
 	runner.on('fail', function(test, err){
 		// Remove internal code references
-		err.stack = err.stack.replace(/.+(?:zotero-unit\/|\/Task\.jsm|\/bluebird\.js).+\n?/g, "");
+		err.stack = err.stack.replace(/.+(?:zotero-unit\/|\/Task\.jsm|zotero\/bluebird\/).+\n?/g, "");
 		
 		// Strip "From previous event:" block if it's all internals
-		if (err.stack.indexOf('From previous event:') != -1) {
+		if (err.stack.includes('From previous event:')) {
 			err.stack = err.stack
 				// Drop first line, because it contains the error message
 				.replace(/^.+\n/, '')
@@ -145,8 +145,8 @@ function Reporter(runner) {
 			// Trigger bell if interactive
 			+ (Zotero.automatedTest ? "" : "\x07")
 			+ " " + test.title + "\n"
-			+ indentStr + "  " + err.toString() + " at\n"
-			+ err.stack.replace(/^/gm, indentStr + "    "));
+			+ indentStr + "  " + err.message + " at\n"
+			+ err.stack.replace(/^/gm, indentStr + "    ").trim() + "\n\n");
 		
 		if (ZoteroUnit.bail) {
 			aborted = true;
