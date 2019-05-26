@@ -47,7 +47,7 @@ describe("PDF Recognition", function() {
 		assert.lengthOf(addedIDs, 1);
 		var item = Zotero.Items.get(addedIDs[0]);
 		assert.equal(item.getField("title"), "Shaping the Research Agenda");
-		assert.equal(item.getField("libraryCatalog"), "Crossref");
+		assert.equal(item.getField("libraryCatalog"), "DOI.org (Crossref)");
 		assert.lengthOf(modifiedIDs, 2);
 		
 		// Wait for status to show as complete
