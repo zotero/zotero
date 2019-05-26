@@ -64,6 +64,8 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		
 		Zotero.Sync.Storage.Local.setModeForLibrary(Zotero.Libraries.userLibraryID, 'webdav');
 		controller = new Zotero.Sync.Storage.Mode.WebDAV;
+		controller.ERROR_DELAY_INTERVALS = [1];
+		controller.ERROR_DELAY_MAX = [5];
 		Zotero.Prefs.set("sync.storage.scheme", davScheme);
 		Zotero.Prefs.set("sync.storage.url", davHostPath);
 		Zotero.Prefs.set("sync.storage.username", davUsername);
@@ -224,7 +226,10 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				Zotero.getString('sync.storage.error.webdav.requestError', [500, "GET"])
 			);
 			
-			assertRequestCount(1);
+			assert.isAbove(
+				server.requests.filter(r => r.responseHeaders["Fake-Server-Match"]).length - requestCount,
+				1
+			);
 			
 			assert.isTrue(library.storageDownloadNeeded);
 			assert.equal(library.storageVersion, 0);

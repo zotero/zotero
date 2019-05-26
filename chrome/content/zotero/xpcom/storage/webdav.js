@@ -42,6 +42,9 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	mode: "webdav",
 	name: "WebDAV",
 	
+	ERROR_DELAY_INTERVALS: [2500],
+	ERROR_DELAY_MAX: 3000,
+	
 	get verified() {
 		return Zotero.Prefs.get("sync.storage.verified");
 	},
@@ -223,7 +226,14 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		Zotero.debug("Caching WebDAV credentials");
 		
 		try {
-			var req = yield Zotero.HTTP.request("OPTIONS", this.rootURI);
+			var req = yield Zotero.HTTP.request(
+				"OPTIONS",
+				this.rootURI,
+				{
+					errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
+					errorDelayMax: this.ERROR_DELAY_MAX,
+				}
+			);
 			
 			Zotero.debug("WebDAV credentials cached");
 			this._cachedCredentials = true;
@@ -504,6 +514,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					{
 						successCodes: [200, 204, 404],
 						requestObserver: xmlhttp => request.setChannel(xmlhttp.channel),
+						errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
+						errorDelayMax: this.ERROR_DELAY_MAX,
 						debug: true
 					}
 				);
@@ -544,6 +556,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 							}
 						});
 					},
+					errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
+					errorDelayMax: this.ERROR_DELAY_MAX,
 					debug: true
 				}
 			);
@@ -607,6 +621,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 						options.onRequest(req);
 					}
 				},
+				errorDelayMax: 0,
 				debug: true
 			}
 		);
@@ -634,6 +649,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			headers: Object.assign({}, headers, contentTypeXML),
 			successCodes: [207, 404],
 			requestObserver,
+			errorDelayMax: 0,
 			debug: true
 		});
 		
@@ -649,6 +665,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 						successCodes: [404],
 						responseType: 'text',
 						requestObserver,
+						errorDelayMax: 0,
 						debug: true
 					}
 				)
@@ -669,6 +686,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				body: " ",
 				successCodes: [200, 201, 204],
 				requestObserver,
+				errorDelayMax: 0,
 				debug: true
 			});
 			
@@ -679,6 +697,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					successCodes: [200, 404],
 					responseType: 'text',
 					requestObserver,
+					errorDelayMax: 0,
 					debug: true
 				}
 			);
@@ -691,6 +710,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					{
 						successCodes: [200, 204],
 						requestObserver,
+						errorDelayMax: 0,
 						debug: true
 					}
 				);
@@ -717,7 +737,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				headers: Object.assign({}, headers, contentTypeXML),
 				body: xmlstr,
 				requestObserver,
-				successCodes: [207, 404]
+				successCodes: [207, 404],
+				errorDelayMax: 0
 			});
 			
 			if (req.status == 207) {
@@ -742,9 +763,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		var promptService =
 			Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
-		var uri = err.uri;
-		if (uri) {
-			var spec = uri.scheme + '://' + uri.hostPort + uri.path;
+		if (err.url) {
+			var spec = err.url.scheme + '://' + err.url.hostPort + err.url.path;
 		}
 		
 		var errorTitle, errorMsg;
@@ -752,7 +772,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		if (err instanceof Zotero.HTTP.UnexpectedStatusException) {
 			switch (err.status) {
 			case 0:
-				errorMsg = Zotero.getString('sync.storage.error.serverCouldNotBeReached', err.channel.URI.host);
+				errorMsg = Zotero.getString('sync.storage.error.serverCouldNotBeReached', err.url.host);
 				break;
 				
 			case 401:
@@ -985,6 +1005,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				body: xmlstr,
 				headers: Object.assign({ Depth: 1 }, contentTypeXML),
 				successCodes: [207],
+				errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
+				errorDelayMax: this.ERROR_DELAY_MAX,
 				debug: true
 			}
 		);
@@ -1113,6 +1135,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					responseType: 'text',
 					requestObserver: xmlhttp => request.setChannel(xmlhttp.channel),
 					dontCache: true,
+					errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
+					errorDelayMax: this.ERROR_DELAY_MAX,
 					debug: true
 				}
 			);
@@ -1224,6 +1248,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					},
 					body: xmlstr,
 					successCodes: [200, 201, 204],
+					errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
+					errorDelayMax: this.ERROR_DELAY_MAX,
 					debug: true
 				}
 			)
@@ -1293,7 +1319,9 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			"MKCOL",
 			this.rootURI,
 			{
-				successCodes: [201]
+				successCodes: [201],
+				errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
+				errorDelayMax: this.ERROR_DELAY_MAX,
 			}
 		);
 	},
@@ -1388,7 +1416,9 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 						"DELETE",
 						deleteURI,
 						{
-							successCodes: [200, 204, 404]
+							successCodes: [200, 204, 404],
+							errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
+							errorDelayMax: this.ERROR_DELAY_MAX,
 						}
 					);
 				}
@@ -1424,7 +1454,9 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					"DELETE",
 					deletePropURI,
 					{
-						successCodes: [200, 204, 404]
+						successCodes: [200, 204, 404],
+						errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
+						errorDelayMax: this.ERROR_DELAY_MAX,
 					}
 				);
 				switch (req.status) {
