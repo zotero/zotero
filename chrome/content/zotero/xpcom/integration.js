@@ -808,6 +808,15 @@ Zotero.Integration.Interface.prototype.setDocPrefs = Zotero.Promise.coroutine(fu
 });
 
 /**
+ * Exports the citations in the document to a format importable in other word processors
+ * @return {Promise}
+ */
+Zotero.Integration.Interface.prototype.exportDocument = async function () {
+	await this._session.init(true, false);
+	await this._session.exportDocument();
+}
+
+/**
  * An exceedingly simple nsISimpleEnumerator implementation
  */
 Zotero.Integration.JSEnumerator = function(objArray) {
