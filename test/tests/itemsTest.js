@@ -200,6 +200,32 @@ describe("Zotero.Items", function () {
 			assert.equal(item1.dateAdded, '2019-01-01 00:00:00');
 		});
 		
+		it("should keep automatic tag on non-master item as automatic", async function () {
+			var item1 = await createDataObject('item', { tags: [{ tag: 'A' }] });
+			var item2 = await createDataObject('item', { tags: [{ tag: 'B', type: 1 }] });
+			await Zotero.Items.merge(item1, [item2]);
+			var tags = item1.getTags();
+			var tag = tags.find(x => x.tag == 'B');
+			assert.propertyVal(tag, 'type', 1);
+		});
+		
+		it("should skip automatic tag on non-master item that exists as manual tag on master", async function () {
+			var item1 = await createDataObject('item', { tags: [{ tag: 'A' }, { tag: 'B' }] });
+			var item2 = await createDataObject('item', { tags: [{ tag: 'B', type: 1 }] });
+			await Zotero.Items.merge(item1, [item2]);
+			var tags = item1.getTags();
+			var tag = tags.find(x => x.tag == 'B');
+			assert.notProperty(tag, 'type');
+		});
+		
+		it("should keep automatic tag on master if it also exists on non-master item", async function () {
+			var item1 = await createDataObject('item', { tags: [{ tag: 'B', type: 1 }] });
+			var item2 = await createDataObject('item', { tags: [{ tag: 'B', type: 1 }] });
+			await Zotero.Items.merge(item1, [item2]);
+			var tags = item1.getTags();
+			assert.propertyVal(tags[0], 'type', 1);
+		});
+		
 		it("should merge two items when servant is linked to an item absent from cache", function* () {
 			// two group libraries
 			var groupOneInfo = yield createGroup({

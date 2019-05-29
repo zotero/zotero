@@ -820,7 +820,21 @@ Zotero.Items = function() {
 				// Add tags to master
 				var tags = otherItem.getTags();
 				for (let j = 0; j < tags.length; j++) {
-					item.addTag(tags[j].tag);
+					let tagName = tags[j].tag;
+					if (item.hasTag(tagName)) {
+						let type = item.getTagType(tagName);
+						// If existing manual tag, leave that
+						if (type == 0) {
+							continue;
+						}
+						// Otherwise, add the non-master item's tag, which may be manual, in which
+						// case it will remain at the end
+						item.addTag(tagName, tags[j].type);
+					}
+					// If no existing tag, add with the type from the non-master item
+					else {
+						item.addTag(tagName, tags[j].type);
+					}
 				}
 				
 				// Add relation to track merge
