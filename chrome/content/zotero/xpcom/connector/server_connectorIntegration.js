@@ -63,7 +63,12 @@ Zotero.Server.Endpoints['/connector/document/respond'].prototype = {
 			if (typeof data.stack != "string") {
 				data.stack = JSON.stringify(data.stack);
 			}
-			Zotero.HTTPIntegrationClient.deferredResponse.reject(data);
+			let error = data;
+			if (data.error == 'Alert') {
+				error = new Zotero.Exception.Alert(data.message);
+				error.stack = data.stack;
+			}
+			Zotero.HTTPIntegrationClient.deferredResponse.reject(error);
 		} else {
 			Zotero.HTTPIntegrationClient.deferredResponse.resolve(data);
 		}
