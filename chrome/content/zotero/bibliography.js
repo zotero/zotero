@@ -243,27 +243,10 @@ var Zotero_File_Interface_Bibliography = new function() {
 		window.sizeToContent();
 	};
 	
-	this.exportDocument = function() {
-		const documentationURL = "https://www.zotero.org/support/kb/word_processor_document_export";
-		
-		var ps = Services.prompt;
-		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
-			+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
-		var result = ps.confirmEx(null,
-			Zotero.getString('integration.exportDocument'),
-			Zotero.getString('integration.exportDocument.description1')
-				+ "\n\n"
-				+ Zotero.getString('integration.exportDocument.description2'),
-			buttonFlags,
-			Zotero.getString('general.export'),
-			null,
-			Zotero.getString('general.moreInformation'), null, {});
-		if (result == 0) {
+	this.exportDocument = function () {
+		if (Zotero.Integration.confirmExportDocument()) {
 			_io.exportDocument = true;
 			document.documentElement.acceptDialog();
-		} else if (result == 2) {
-			Zotero.launchURL(documentationURL);
 		}
 	}
 	
