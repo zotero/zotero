@@ -1,8 +1,17 @@
+.arrow {
+  width: 19px;
+}
+
 .arrow svg {
   fill: #888;
   width: 16px;
+  vertical-align: middle;
 }
 
 .focused:not(.highlighted) .arrow svg {
   fill: #fff;
+}
+
+.spacer-arrow {
+  min-width: 19px;
 }

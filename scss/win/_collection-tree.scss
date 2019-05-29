@@ -6,6 +6,11 @@
   
   .tree-node {
     height: 1.666em;
+
+    &.drop {
+      background-color: highlight;
+      color: highlighttext;
+    }
   }
 }
 

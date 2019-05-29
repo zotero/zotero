@@ -56,7 +56,7 @@
 	</hbox>
 	
 	<hbox flex="1">
-		<vbox id="zotero-collections-tree-container" flex="1">
+		<vbox id="zotero-collections-tree-container">
 			<html:div id="zotero-collections-tree"></html:div>
 		</vbox>
 

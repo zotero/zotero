@@ -25,22 +25,13 @@
 
 "use strict";
 
-Zotero.CollectionTreeRow = function (collectionTreeView, type, ref, level, parent, idx) {
+Zotero.CollectionTreeRow = function (collectionTreeView, type, ref, level, isOpen) {
 	this.view = collectionTreeView;
 	this.type = type;
 	this.ref = ref;
 	this.level = level || 0;
-	this.isOpen = type == 'header';
+	this.isOpen = isOpen || false;
 	this.onUnload = null;
-	this.children = [];
-	this.parent = parent;
-	if (parent && parent.children) {
-		if (idx != undefined) {
-			parent.children.splice(idx, 0, this);
-		} else {
-			parent.children.push(this);
-		}
-	}
 }
 
 Zotero.CollectionTreeRow.IDCounter = 0;

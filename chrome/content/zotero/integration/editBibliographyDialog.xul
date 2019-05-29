@@ -61,8 +61,8 @@
 						<textbox id="zotero-tb-search" type="search" timeout="250" oncommand="onSearch()" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; } return true;"/>
 					</hbox>
 					<hbox flex="1" style="margin-top: 5px">
-						<vbox id="zotero-collections-tree-container" flex="1">
-							<html:div id="zotero-collections-tree"></html:div>
+						<vbox id="zotero-collections-tree-container">
+							<html:div id="zotero-collections-tree" class="edit-bibl"></html:div>
 						</vbox>
 					
 						<deck id="zotero-items-pane-content" selectedIndex="0" flex="1">

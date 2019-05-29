@@ -2,6 +2,14 @@
   width: 16px;
 }
 
+.icon > span {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
 .icon.icon-downchevron > img {
   width: 7px;
 }

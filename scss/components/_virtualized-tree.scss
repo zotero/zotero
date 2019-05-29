@@ -1,9 +1,3 @@
-/* ---------------------- tree.css -------------------------- */
-
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 .tree {
   overflow: hidden;
   white-space: nowrap;
@@ -11,12 +5,23 @@
   user-select: none;
 }
 
+/* Fixes draggable item position not being centered to mouse in XUL */
+.tree > div > div {
+  position: relative;
+}
+
+.spacer-arrow {
+  min-width: 8px;
+}
+
+.arrow {
+  margin-right: 0 !important;
+}
+
 .arrow svg {
   fill: #444;
   transition: transform 0.125s ease;
-  width: 5px;
   transform: rotate(-90deg);
-  vertical-align: middle;
   margin-top: -3px;
 }
 

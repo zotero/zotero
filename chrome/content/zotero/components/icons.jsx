@@ -1,15 +1,16 @@
 'use strict';
 
-const React = require('react')
-const { PureComponent } = React
-const { element, string } = require('prop-types')
-const cx = require('classnames')
+const React = require('react');
+const { PureComponent } = React;
+const { element, string } = require('prop-types');
 
-const Icon = ({ children, className, name }) => (
-	<span className={cx('icon', `icon-${name}`, className)}>
-		{children}
-	</span>
-)
+const Icon = (props) => {
+	props = Object.assign({}, props);
+	props.className = `icon icon-${props.name} ${props.className || ""}`;
+	delete props.name;
+	// Pass the props forward
+	return <span {...props}></span>;
+};
 
 Icon.propTypes = {
 	children: element.isRequired,
@@ -20,29 +21,36 @@ Icon.propTypes = {
 module.exports = { Icon }
 
 
-function i(name, svgOrSrc, hasDPI=true) {
+function i(name, svgOrSrc, hasHiDPI=true) {
+	// Add a high DPI version
+	// N.B. In Electron we can use css-image-set
+	if (typeof svgOrSrc == 'string' && hasHiDPI) {
+		let parts = svgOrSrc.split('.');
+		parts[parts.length-2] = parts[parts.length-2] + '@2x';
+		i(name + '2x', parts.join('.'), false);
+	}
+	
 	const icon = class extends PureComponent {
 		render() {
-			const { className } = this.props;
+			let props = Object.assign({}, this.props);
+			props.name = name.toLowerCase();
 			
 			if (typeof svgOrSrc == 'string') {
-				let srcset = [svgOrSrc + ' 16w'];
-				let sizes = ['16px'];
-				if (hasDPI) {
-					let parts = svgOrSrc.split('.');
-					parts[parts.length-2] = parts[parts.length-2] + '@2x';
-					srcset.push(parts.join('.') + ' 32w');
-					sizes.push('(min-resolution: 1.25dppx) 32px')
-				}
+				// We use css background-image.
+				// This is a performance optimization for fast-scrolling trees.
+				// If we use img elements they are slow to render
+				// and produce pop-in when fast-scrolling.
 				return (
-					<Icon className={className} name={name.toLowerCase()}>
-						<img srcset={srcset.join(',')} sizes={sizes.join(',')}/>
+					<Icon {...props}>
+						<span style={{
+							backgroundImage: `url(${svgOrSrc})`,
+						}}/>
 					</Icon>
 				)
 			}
 
 			return (
-				<Icon className={className} name={name.toLowerCase()}>{svgOrSrc}</Icon>
+				<Icon {...props}>{svgOrSrc}</Icon>
 			)
 		}
 	}
@@ -61,7 +69,6 @@ function i(name, svgOrSrc, hasDPI=true) {
 
 i('TagSelectorMenu', "chrome://zotero/skin/tag-selector-menu.png");
 i('DownChevron', "chrome://zotero/skin/searchbar-dropmarker.png");
-i('Twisty', <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"></svg>);
 i('Twisty', (
 	/* This Source Code Form is subject to the terms of the Mozilla Public
 	 * License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -97,43 +104,43 @@ i('TreeitemJournalArticle', 'chrome://zotero/skin/treeitem-journalArticle.png');
 i('TreeitemLetter', 'chrome://zotero/skin/treeitem-letter.png');
 i('TreeitemMagazineArticle', 'chrome://zotero/skin/treeitem-magazineArticle.png');
 i('TreeitemManuscript', 'chrome://zotero/skin/treeitem-manuscript.png');
-i('TreeitemMap', 'chrome://zotero/skin/treeitem-map.png');
+i('TreeitemMap', 'chrome://zotero/skin/treeitem-map.png', false);
 i('TreeitemNewspaperArticle', 'chrome://zotero/skin/treeitem-newspaperArticle.png');
 i('TreeitemNote', 'chrome://zotero/skin/treeitem-note.png');
 i('TreeitemNoteSmall', 'chrome://zotero/skin/treeitem-note-small.png');
 i('TreeitemPatent', 'chrome://zotero/skin/treeitem-patent.png');
 i('Treeitem', 'chrome://zotero/skin/treeitem.png');
-i('TreeitemPodcast', 'chrome://zotero/skin/treeitem-podcast.png');
+i('TreeitemPodcast', 'chrome://zotero/skin/treeitem-podcast.png', false);
 i('TreeitemPresentation', 'chrome://zotero/skin/treeitem-presentation.png');
-i('TreeitemRadioBroadcast', 'chrome://zotero/skin/treeitem-radioBroadcast.png');
+i('TreeitemRadioBroadcast', 'chrome://zotero/skin/treeitem-radioBroadcast.png', false);
 i('TreeitemReport', 'chrome://zotero/skin/treeitem-report.png');
 i('TreeitemStatute', 'chrome://zotero/skin/treeitem-statute.png');
 i('TreeitemThesis', 'chrome://zotero/skin/treeitem-thesis.png');
-i('TreeitemTvBroadcast', 'chrome://zotero/skin/treeitem-tvBroadcast.png');
-i('TreeitemVideoRecording', 'chrome://zotero/skin/treeitem-videoRecording.png');
+i('TreeitemTvBroadcast', 'chrome://zotero/skin/treeitem-tvBroadcast.png', false);
+i('TreeitemVideoRecording', 'chrome://zotero/skin/treeitem-videoRecording.png', false);
 i('TreeitemWebpageGray', 'chrome://zotero/skin/treeitem-webpage-gray.png');
-i('TreeitemWebpage', 'chrome://zotero/skin/treeitem-webpage.png');
+i('TreeitemWebpage', 'chrome://zotero/skin/treeitem-webpage.png', false);
 
 // Treesource
-i('TreesourceBucket', 'chrome://zotero/skin/treesource-bucket.png');
+i('TreesourceBucket', 'chrome://zotero/skin/treesource-bucket.png', false);
 i('TreesourceCollection', 'chrome://zotero/skin/treesource-collection.png');
-i('TreesourceCommons', 'chrome://zotero/skin/treesource-commons.png');
+i('TreesourceCommons', 'chrome://zotero/skin/treesource-commons.png', false);
 i('TreesourceDuplicates', 'chrome://zotero/skin/treesource-duplicates.png');
 i('TreesourceFeedError', 'chrome://zotero/skin/treesource-feed-error.png');
 i('TreesourceFeedLibrary', 'chrome://zotero/skin/treesource-feedLibrary.png');
 i('TreesourceFeed', 'chrome://zotero/skin/treesource-feed.png');
-i('TreesourceFeedUpdating', 'chrome://zotero/skin/treesource-feed-updating.png');
+i('TreesourceFeedUpdating', 'chrome://zotero/skin/treesource-feed-updating.png', false);
 i('TreesourceGroups', 'chrome://zotero/skin/treesource-groups.png');
 i('TreesourceLibrary', 'chrome://zotero/skin/treesource-library.png');
 i('TreesourceSearch', 'chrome://zotero/skin/treesource-search.png');
-i('TreesourceShare', 'chrome://zotero/skin/treesource-share.png');
+i('TreesourceShare', 'chrome://zotero/skin/treesource-share.png', false);
 i('TreesourceTrashFull', 'chrome://zotero/skin/treesource-trash-full.png');
 i('TreesourceTrash', 'chrome://zotero/skin/treesource-trash.png');
 i('TreesourceUnfiled', 'chrome://zotero/skin/treesource-unfiled.png');
 
 if (Zotero.isMac) {
-	i('TreesourceCollection', 'chrome://zotero-platform/content/treesource-collection.png');
-	i('TreesourceSearch', 'chrome://zotero-platform/content/treesource-search.png');
+	i('TreesourceCollection', 'chrome://zotero-platform/content/treesource-collection.png', true);
+	i('TreesourceSearch', 'chrome://zotero-platform/content/treesource-search.png', true);
 	i('Twisty', (
 		/* This Source Code Form is subject to the terms of the Mozilla Public
 		 * License, v. 2.0. If a copy of the MPL was not distributed with this file,

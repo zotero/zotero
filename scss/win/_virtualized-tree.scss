@@ -1,7 +1,6 @@
 .arrow svg {
   fill: #b6b6b6;
   width: 16px;
-  margin-right: -3px;
 }
 
 .arrow.open svg {
@@ -10,4 +9,8 @@
 
 .tree-node:hover .arrow svg {
   fill: #8adbfc;
+}
+
+.spacer-arrow {
+  min-width: 16px;
 }

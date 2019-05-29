@@ -26,7 +26,6 @@
 var itemsView;
 var collectionsView;
 var io;
-var connectionSelectedDeferred;
 
 /*
  * window takes two arguments:
@@ -46,15 +45,17 @@ var doLoad = Zotero.Promise.coroutine(function* () {
 	setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 
 	var collectionsTree = document.getElementById('zotero-collections-tree');
+	var width = 200;
+	if (collectionsTree.classList.contains('edit-bibl')) {
+		width = 150;
+	}
 	collectionsView = Zotero.CollectionTree.init(collectionsTree, {
-		onFocus: () => onCollectionSelected(),
+		onSelectionChange: Zotero.Utilities.debounce(() => onCollectionSelected(), 100),
+		width,
 	});
 	collectionsView.hideSources = ['duplicates', 'trash', 'feeds'];
 	
 	yield collectionsView.waitForLoad();
-	
-	connectionSelectedDeferred = Zotero.Promise.defer();
-	yield connectionSelectedDeferred.promise;
 	
 	if (io.select) {
 		yield collectionsView.selectItem(io.select);
@@ -75,9 +76,9 @@ var onCollectionSelected = Zotero.Promise.coroutine(function* ()
 	if(itemsView)
 		itemsView.unregister();
 
-	if( collectionsView.focused)
+	if (collectionsView.selection.count >= 1)
 	{
-		var collectionTreeRow = collectionsView.focused;
+		var collectionTreeRow = collectionsView.getRow(collectionsView.selection.pivot);
 		collectionTreeRow.setSearch('');
 		Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
 		
@@ -98,7 +99,6 @@ var onCollectionSelected = Zotero.Promise.coroutine(function* ()
 		
 		clearItemsPaneMessage();
 		
-		connectionSelectedDeferred.resolve();
 		collectionsView.runListeners('select');
 	}
 });

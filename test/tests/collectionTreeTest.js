@@ -42,10 +42,10 @@ describe("Zotero.CollectionTree", function() {
 			
 			// Open group 1 and close group 2
 			if (!cv.isContainerOpen(group1Row)) {
-				cv.toggleOpenState(group1Row);
+				yield cv.toggleOpenState(group1Row);
 			}
 			if (cv.isContainerOpen(group2Row)) {
-				cv.toggleOpenState(group2Row);
+				yield cv.toggleOpenState(group2Row);
 			}
 			
 			cv._saveOpenStates();
@@ -77,22 +77,22 @@ describe("Zotero.CollectionTree", function() {
 	describe("collapse/expand", function () {
 		it("should close and open My Library repeatedly", function* () {
 			yield cv.selectLibrary(userLibraryID);
-			var row = cv.focusedIdx;
+			var row = cv.selection.pivot;
 			
 			cv.collapseLibrary(userLibraryID);
-			assert.equal(cv.focusedIdx, row);
+			assert.equal(cv.selection.pivot, row);
 			assert.isFalse(cv.isContainerOpen(row));
 			
-			cv.expandLibrary(userLibraryID);
-			assert.equal(cv.focusedIdx, row);
+			yield cv.expandLibrary(userLibraryID);
+			assert.equal(cv.selection.pivot, row);
 			assert.ok(cv.isContainerOpen(row));
 			
 			cv.collapseLibrary(userLibraryID);
-			assert.equal(cv.focusedIdx, row);
+			assert.equal(cv.selection.pivot, row);
 			assert.isFalse(cv.isContainerOpen(row));
 			
-			cv.expandLibrary(userLibraryID);
-			assert.equal(cv.focusedIdx, row);
+			yield cv.expandLibrary(userLibraryID);
+			assert.equal(cv.selection.pivot, row);
 			assert.ok(cv.isContainerOpen(row));
 		})
 	})
@@ -102,7 +102,7 @@ describe("Zotero.CollectionTree", function() {
 		
 		before(function* () {
 			yield cv.selectLibrary(userLibraryID);
-			libraryRow = cv.focusedIdx;
+			libraryRow = cv.selection.pivot;
 		});
 		
 		beforeEach(function* () {
@@ -117,14 +117,14 @@ describe("Zotero.CollectionTree", function() {
 		
 		it("should open a library and respect stored container state", function* () {
 			// Collapse B
-			cv.toggleOpenState(cv.getRowIndexByID(col2.treeViewID));
+			yield cv.toggleOpenState(cv.getRowIndexByID(col2.treeViewID));
 			cv._saveOpenStates();
 			// #_saveOpenStates is debounced
 			yield Zotero.Promise.delay(500);
 			
 			// Close and reopen library
-			cv.toggleOpenState(libraryRow);
-			cv.expandLibrary(userLibraryID);
+			yield cv.toggleOpenState(libraryRow);
+			yield cv.expandLibrary(userLibraryID);
 
 			assert.isTrue(cv.isContainerOpen(libraryRow));
 			assert.isTrue(cv.isContainerOpen(cv.getRowIndexByID(col1.treeViewID)));
@@ -132,14 +132,14 @@ describe("Zotero.CollectionTree", function() {
 		});
 		
 		it("should open a library and all subcollections in recursive mode", function* () {
-			cv.toggleOpenState(cv.getRowIndexByID(col2.treeViewID));
+			yield cv.toggleOpenState(cv.getRowIndexByID(col2.treeViewID));
 			cv._saveOpenStates();
 			// #_saveOpenStates is debounced
 			yield Zotero.Promise.delay(500);
 			
 			// Close and reopen library
-			cv.toggleOpenState(libraryRow);
-			cv.expandLibrary(userLibraryID, true);
+			yield cv.toggleOpenState(libraryRow);
+			yield cv.expandLibrary(userLibraryID, true);
 
 			assert.isTrue(cv.isContainerOpen(cv.getRowIndexByID(col1.treeViewID)));
 			assert.isTrue(cv.isContainerOpen(cv.getRowIndexByID(col2.treeViewID)));
@@ -155,20 +155,20 @@ describe("Zotero.CollectionTree", function() {
 			var col5 = yield createDataObject('collection', { libraryID, parentID: col4.id });
 			
 			// Close everything
-			[col4, col1, group].forEach(o => cv.toggleOpenState(cv.getRowIndexByID(o.treeViewID), false));
+			yield Zotero.Promise.all([col4, col1, group]
+				.map(o => cv.toggleOpenState(cv.getRowIndexByID(o.treeViewID), false)));
 			
-			cv.expandLibrary(libraryID);
+			yield cv.expandLibrary(libraryID);
 			
-			assert.isTrue(cv.isContainerOpen(cv.getRowIndexByID('L'+libraryID)));
-			assert.isFalse(cv.isContainerOpen(cv.getRowIndexByID(col1.treeViewID)));
-			assert.isFalse(cv.isContainerOpen(cv.getRowIndexByID(col2.treeViewID)));
-			assert.isFalse(cv.isContainerOpen(cv.getRowIndexByID(col3.treeViewID)));
-			assert.isFalse(cv.isContainerOpen(cv.getRowIndexByID(col4.treeViewID)));
-			assert.isFalse(cv.isContainerOpen(cv.getRowIndexByID(col5.treeViewID)));
+			assert.isNumber(cv.getRowIndexByID(col1.treeViewID));
+			assert.isNumber(cv.getRowIndexByID(col2.treeViewID));
+			assert.isNumber(cv.getRowIndexByID(col3.treeViewID));
+			assert.isFalse(cv.getRowIndexByID(col4.treeViewID));
+			assert.isFalse(cv.getRowIndexByID(col5.treeViewID));
 		});
 	});
 	
-	describe("#expandToRow()", function () {
+	describe("#expandToCollection()", function () {
 		it("should expand a collection to a subcollection", function* () {
 			var collection1 = yield createDataObject('collection');
 			var collection2 = createUnsavedDataObject('collection');
@@ -179,7 +179,7 @@ describe("Zotero.CollectionTree", function() {
 			var row = cv.getRowIndexByID("C" + collection1.id);
 			assert.isFalse(cv.isContainerOpen(row));
 			
-			cv.expandToRow("C" + collection2.id);
+			yield cv.expandToCollection(collection2.id);
 			cv.forceUpdate();
 			
 			// Make sure parent row position hasn't changed
@@ -192,7 +192,7 @@ describe("Zotero.CollectionTree", function() {
 	describe("#selectByID()", function () {
 		it("should select the trash", function* () {
 			yield cv.selectByID("T1");
-			var row = cv.focusedIdx;
+			var row = cv.selection.pivot;
 			var treeRow = cv.getRow(row);
 			assert.ok(treeRow.isTrash());
 			assert.equal(treeRow.ref.libraryID, userLibraryID);
@@ -284,14 +284,14 @@ describe("Zotero.CollectionTree", function() {
 			yield cv.selectLibrary(group.libraryID);
 			yield waitForItemsLoad(win);
 			
-			assert.isFalse(cv.focused.editable);
+			assert.isFalse(zp.getCollectionTreeRow().editable);
 			var cmd = win.document.getElementById('cmd_zotero_newStandaloneNote');
 			assert.isTrue(cmd.getAttribute('disabled') == 'true');
 			
 			group.editable = true;
 			yield group.saveTx();
 			
-			assert.isTrue(cv.focused.editable);
+			assert.isTrue(zp.getCollectionTreeRow().editable);
 			assert.isFalse(cmd.getAttribute('disabled') == 'true');
 		});
 		
@@ -371,7 +371,7 @@ describe("Zotero.CollectionTree", function() {
 			assert.isAbove(aRow, 0);
 			assert.isAbove(bRow, 0);
 			// skipSelect is implied for multiple collections, so library should still be selected
-			assert.equal(cv.focusedIdx, 0);
+			assert.equal(cv.selection.pivot, 0);
 		});
 		
 		
@@ -491,7 +491,7 @@ describe("Zotero.CollectionTree", function() {
 			var collection = await createDataObject('collection');
 			await cv.selectItem(item.id);
 			await waitForItemsLoad(win);
-			assert.equal(cv.focusedIdx, 0);
+			assert.equal(cv.selection.pivot, 0);
 			assert.sameMembers(zp.itemsView.getSelectedItems(), [item]);
 		});
 	});
@@ -503,7 +503,7 @@ describe("Zotero.CollectionTree", function() {
 			var item2 = await createDataObject('item');
 			await cv.selectItems([item1.id, item2.id]);
 			await waitForItemsLoad(win);
-			assert.equal(cv.focusedIdx, 0);
+			assert.equal(cv.selection.pivot, 0);
 			assert.sameMembers(zp.itemsView.getSelectedItems(true), [item1.id, item2.id]);
 		});
 	});
