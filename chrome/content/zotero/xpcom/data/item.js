@@ -4390,8 +4390,18 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 			
 			if (this.isImportedAttachment() && !options.skipStorageProperties) {
 				if (options.syncedStorageProperties) {
-					obj.mtime = this.attachmentSyncedModificationTime;
-					obj.md5 = this.attachmentSyncedHash;
+					let mtime = this.attachmentSyncedModificationTime;
+					// There's never a reason to include these if they're null. This can happen if
+					// we're restoring to server from a copy of the database that was never
+					// file-synced. We don't want to clear the remote file associations when that
+					// happens.
+					if (mtime !== null) {
+						obj.mtime = mtime;
+					}
+					let md5 = this.attachmentSyncedHash;
+					if (md5 !== null) {
+						obj.md5 = md5;
+					}
 				}
 				else {
 					// TEMP
@@ -4453,6 +4463,8 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 	}
 	
 	var json = this._postToJSON(env);
+	
+	// TODO: Remove once we stop clearing props from the cached JSON in patch mode
 	if (options.skipStorageProperties) {
 		delete json.md5;
 		delete json.mtime;
