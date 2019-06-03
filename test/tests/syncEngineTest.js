@@ -1227,8 +1227,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 						assert.propertyVal(itemJSON, "contentType", item.attachmentContentType);
 						assert.propertyVal(itemJSON, "charset", item.attachmentCharset);
 						assert.propertyVal(itemJSON, "filename", item.attachmentFilename);
-						assert.propertyVal(itemJSON, "mtime", null);
-						assert.propertyVal(itemJSON, "md5", null);
+						assert.notPropertyVal(itemJSON, "mtime");
+						assert.notPropertyVal(itemJSON, "md5");
 						req.respond(
 							200,
 							{
