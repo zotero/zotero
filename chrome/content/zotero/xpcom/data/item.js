@@ -1485,15 +1485,10 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 							);
 						}
 					}
-					let parentOptions = {
-						skipDateModifiedUpdate: true
-					};
-					// Apply options (e.g., skipNotifier) from outer save
-					for (let o in env.options) {
-						if (!o.startsWith('skip')) continue;
-						parentOptions[o] = env.options[o];
-					}
-					yield parentItem.save(parentOptions);
+					yield parentItem.save({
+						skipDateModifiedUpdate: true,
+						skipEditCheck: env.options.skipEditCheck
+					});
 				}
 			}
 			
@@ -1542,7 +1537,8 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 				
 				mergeItem.removeRelation(predicate, thisURI);
 				yield mergeItem.save({
-					skipDateModifiedUpdate: true
+					skipDateModifiedUpdate: true,
+					skipEditCheck: env.options.skipEditCheck
 				});
 			}
 			
@@ -4138,13 +4134,10 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 		let toDelete = yield Zotero.DB.columnQueryAsync(sql, [this.id]);
 		for (let i=0; i<toDelete.length; i++) {
 			let obj = yield this.ObjectsClass.getAsync(toDelete[i]);
-			// Copy all options other than 'tx', which would cause a deadlock
-			let options = {
-				skipParentRefresh: true
-			};
-			Object.assign(options, env.options);
-			delete options.tx;
-			yield obj.erase(options);
+			yield obj.erase({
+				skipParentRefresh: true,
+				skipEditCheck: env.options.skipEditCheck
+			});
 		}
 	}
 	
@@ -4154,7 +4147,10 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	);
 	for (let relatedItem of relatedItems) {
 		relatedItem.removeRelatedItem(this);
-		relatedItem.save();
+		relatedItem.save({
+			skipDateModifiedUpdate: true,
+			skipEditCheck: env.options.skipEditCheck
+		});
 	}
 	
 	// Clear fulltext cache
