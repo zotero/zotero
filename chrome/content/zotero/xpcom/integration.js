@@ -1660,6 +1660,15 @@ Zotero.Integration.Session.prototype.importDocument = async function() {
 	const documentationURL = "https://www.zotero.org/support/kb/word_processor_document_export";
 	
 	var ps = Services.prompt;
+
+	if (!this._app.supportsImportExport) {
+		// Technically you will only reach this part in the code if getDocumentData returns
+		// ZOTERO_EXPORTED_DOCUMENT, which is only viable for Word.
+		// Let's add a parameter this changes later.
+		ps.alert(null, Zotero.getString('integration.importDocument'),
+			Zotero.getString('integration.importDocument.notAvailable', "Word"));
+	}
+
 	var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
 		+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
