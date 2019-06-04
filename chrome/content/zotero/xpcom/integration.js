@@ -1667,6 +1667,7 @@ Zotero.Integration.Session.prototype.importDocument = async function() {
 		// Let's add a parameter this changes later.
 		ps.alert(null, Zotero.getString('integration.importDocument'),
 			Zotero.getString('integration.importDocument.notAvailable', "Word"));
+		return;
 	}
 
 	var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
