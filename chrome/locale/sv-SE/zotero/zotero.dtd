@@ -203,7 +203,7 @@
 <!ENTITY zotero.import.lastModified "Senast ändrad">
 <!ENTITY zotero.import.size "Storlek">
 <!ENTITY zotero.import.createCollection "Lägg importerade samlingar och källor i en ny samling">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "Filhantering">
 
 <!ENTITY zotero.exportOptions.title "Exportera...">
 <!ENTITY zotero.exportOptions.format.label "Format:">
@@ -246,7 +246,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Använd MEDLINE:s tidskriftsförkortningar">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Tidskriftsförkortningsfältet kommer att ignoreras.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
+<!ENTITY zotero.integration.prefs.exportDocument "Exportera dokument…">
 
 <!ENTITY zotero.integration.showEditor.label "Visa redigerare">
 <!ENTITY zotero.integration.classicView.label "Klassisk vy">

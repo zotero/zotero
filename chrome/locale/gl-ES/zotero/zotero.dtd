@@ -246,7 +246,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Empregar as abreviaturas de MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "O campo «Abrv. Xornal» hase ignorar. ">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
+<!ENTITY zotero.integration.prefs.exportDocument "Exportar o documento...">
 
 <!ENTITY zotero.integration.showEditor.label "Mostrar o editor">
 <!ENTITY zotero.integration.classicView.label "Vista clásica">

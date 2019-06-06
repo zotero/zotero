@@ -1,19 +1,19 @@
-<!ENTITY zotero.publications.my_publications "My Publications">
+<!ENTITY zotero.publications.my_publications "As miñas publicacións">
 
-<!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
-<!ENTITY zotero.publications.include.checkbox.files "Include files">
-<!ENTITY zotero.publications.include.checkbox.notes "Include notes">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
+<!ENTITY zotero.publications.intro "Os elementos que se engaden ás Miñas publicacións móstranse no teu perfil público na páxina de zotero.org. Se escolleu engadir ficheiros anexos, estes van a estar accesibles ao público baixo a licenza que especificase. Engade só aquel traballo que fixeras ti, e só aqueles ficheiros dos cales teñas permiso e queiras distribuílos.">
+<!ENTITY zotero.publications.include.checkbox.files "Incluír ficheiros">
+<!ENTITY zotero.publications.include.checkbox.notes "Incluír notas">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Podes precisar que se amosa e cando desde a colección As miñas publicacións">
 
-<!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
-<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
-<!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">
-<!ENTITY zotero.publications.sharing.cc0 "Yes, and place my work in the public domain">
-<!ENTITY zotero.publications.sharing.reserved "No, only publish my work on zotero.org">
+<!ENTITY zotero.publications.sharing.title "Escolle como se comparte a túa obra">
+<!ENTITY zotero.publications.sharing.text "Pode reservar todos os dereitos da túa obra, darlle unha licenza Creative Commons ou cedela ao dominio público. En calquera caso, a obra estará dispoñible para o público en zotero.org.">
+<!ENTITY zotero.publications.sharing.prompt "Queres permitir que a túa obra se comparta con outros?">
+<!ENTITY zotero.publications.sharing.cc "Si, baixo unha licenza Creative Commons">
+<!ENTITY zotero.publications.sharing.cc0 "Si, e que esa obra estea baixo o dominio público.">
+<!ENTITY zotero.publications.sharing.reserved "Non, só publicala en zotero.org.">
 
-<!ENTITY zotero.publications.chooseLicense.title "Choose a Creative Commons license">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
-<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Allow adaptations of your work to be shared?">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Yes, as long as others share alike">
-<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Allow commercial uses of your work?">
+<!ENTITY zotero.publications.chooseLicense.title "Escolle unha licenza Creative Commons">
+<!ENTITY zotero.publications.chooseLicense.text "Unha licenza Creative Commons permítelle aos demais facer copias de redistribuír a túa obra sempre e cando che dean crédito pola obra e fornezan dunha ligazón coa licenza, así como indicar se se fixeron máis cambios na obra. Pódense especificar máis condicións embaixo.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Permite facer adaptacións da obra e que se compartan?">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Si, sempre que os demais fagan o mesmo">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Permite un uso comercial da obra?">

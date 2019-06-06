@@ -1,19 +1,19 @@
-<!ENTITY zotero.publications.my_publications "My Publications">
+<!ENTITY zotero.publications.my_publications "Publicațiile mele">
 
-<!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
-<!ENTITY zotero.publications.include.checkbox.files "Include files">
-<!ENTITY zotero.publications.include.checkbox.notes "Include notes">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
+<!ENTITY zotero.publications.intro "Itemii pe care îi adaugi în Publicațiile mele vor fi afișați în profilul tău pe zotero.org. Dacă alegi să incluzi fișiere anexate, acestea vor fi disponibile public sub licența pe care o specifici. Adaugă doar ceea ce ai creat tu însuți și adaugă fișiere doar dacă ai drepturile de a le distribui și vrei să o faci.">
+<!ENTITY zotero.publications.include.checkbox.files "Include fișiere">
+<!ENTITY zotero.publications.include.checkbox.notes "Include note">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Poți alege oricând ce să afișezei din colecția Publicațiile mele.">
 
-<!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
-<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
-<!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">
-<!ENTITY zotero.publications.sharing.cc0 "Yes, and place my work in the public domain">
-<!ENTITY zotero.publications.sharing.reserved "No, only publish my work on zotero.org">
+<!ENTITY zotero.publications.sharing.title "Alege cum poate fi distribuite lucrările tale.">
+<!ENTITY zotero.publications.sharing.text "Poți rezerva toate drepturile pentru lucrările tale, licența este Creative Commons, sau să le oferi domeniului public. În fiecare caz, lucrările vor fi disponibile public via zotero.org.">
+<!ENTITY zotero.publications.sharing.prompt "Vrei să permiți ca alții să aibă dreptul de a distribui lucrările tale?">
+<!ENTITY zotero.publications.sharing.cc "Da, sub licența Creative Commons.">
+<!ENTITY zotero.publications.sharing.cc0 "Da și plasează lucrările mele în domeniul public">
+<!ENTITY zotero.publications.sharing.reserved "Nu, publică lucrările mele doar pe zotero.org">
 
-<!ENTITY zotero.publications.chooseLicense.title "Choose a Creative Commons license">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
-<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Allow adaptations of your work to be shared?">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Yes, as long as others share alike">
-<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Allow commercial uses of your work?">
+<!ENTITY zotero.publications.chooseLicense.title "Alege licența Creative Commons">
+<!ENTITY zotero.publications.chooseLicense.text "Licența Creative Commons permite altora să copieze și să distribuie lucrările tale, cu condiția să specifice cui aparțin, să ofere un link către licență și să indice dacă au fost făcute modificări. Mai multe condiții pot fi specificate mai jos.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Permite ca modificările la lucrările tale să fie distribuite?">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Da, cât timp și alții distribuie la fel.">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Permite folosirea comercială a lucrărilor tale?">

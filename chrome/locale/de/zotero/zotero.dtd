@@ -246,7 +246,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abgekürzte Zeitschriftentitel von MEDLINE verwenden">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Das Feld &quot;Zeitschriften-Abkürzung&quot; wird ignoriert.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
+<!ENTITY zotero.integration.prefs.exportDocument "Dokument exportieren…">
 
 <!ENTITY zotero.integration.showEditor.label "Editor anzeigen">
 <!ENTITY zotero.integration.classicView.label "Klassische Ansicht">
