@@ -3717,28 +3717,32 @@ Zotero.Item.prototype.getImageSrcWithTags = Zotero.Promise.coroutine(function* (
 	
 	var uri = this.getImageSrc();
 	
+	var retracted = Zotero.Retractions.isRetracted(this);
+	
 	var tags = this.getTags();
-	if (!tags.length) {
+	if (!tags.length && !retracted) {
 		return uri;
 	}
 	
-	var tagColors = Zotero.Tags.getColors(this.libraryID);
 	var colorData = [];
-	for (let i=0; i<tags.length; i++) {
-		let tag = tags[i];
-		let data = tagColors.get(tag.tag);
-		if (data) {
-			colorData.push(data);
+	if (tags.length) {
+		let tagColors = Zotero.Tags.getColors(this.libraryID);
+		for (let tag of tags) {
+			let data = tagColors.get(tag.tag);
+			if (data) {
+				colorData.push(data);
+			}
 		}
+		if (!colorData.length && !retracted) {
+			return uri;
+		}
+		colorData.sort(function (a, b) {
+			return a.position - b.position;
+		});
 	}
-	if (!colorData.length) {
-		return uri;
-	}
-	colorData.sort(function (a, b) {
-		return a.position - b.position;
-	});
 	var colors = colorData.map(val => val.color);
-	return Zotero.Tags.generateItemsListImage(colors, uri);
+	
+	return Zotero.Tags.generateItemsListImage(colors, uri, retracted);
 });
 
 

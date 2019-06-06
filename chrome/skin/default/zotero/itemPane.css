@@ -45,6 +45,56 @@
 	margin-left: 5px;
 }
 
+#retraction-banner {
+	padding: 1.5em 1em;
+	background: #e02a20;
+	width: 100%;
+	color: white;
+	font-weight: bold;
+}
+
+#retraction-details {
+	background: #fbf0f0;
+	padding: .5em 1.5em;
+	margin-top: 0;
+	margin-bottom: 1em;
+}
+
+#retraction-details dt {
+	font-weight: bold;
+}
+
+#retraction-details dt:not(:first-child) {
+	margin-top: .5em;
+}
+
+#retraction-details dd {
+	margin-left: 2em;
+}
+
+#retraction-details a {
+	text-decoration: underline;
+}
+
+#retraction-links ul {
+	padding-left: 0;
+}
+
+#retraction-links li {
+	list-style: none;
+}
+
+#retraction-links li:not(:first-child) {
+	margin-top: .75em;
+}
+
+#retraction-credit {
+	text-align: right;
+	margin-top: 1.5em;
+	margin-right: -.9em;
+	margin-bottom: .2em;
+}
+
 /* Buttons in trash and feed views */
 .zotero-item-pane-top-buttons {
 	-moz-appearance: toolbar;

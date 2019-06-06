@@ -28,8 +28,8 @@
 <!-- <!DOCTYPE bindings SYSTEM "chrome://zotero/locale/itembox.dtd"> -->
 
 <bindings xmlns="http://www.mozilla.org/xbl"
-		  xmlns:xbl="http://www.mozilla.org/xbl"
-		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		  xmlns:html="http://www.w3.org/1999/xhtml">
 	
 	<binding id="item-box">
 		<resources>
@@ -290,6 +290,8 @@
 						Zotero.debug('No item to refresh', 2);
 						return;
 					}
+					
+					this.updateRetracted();
 					
 					if (this.clickByItem) {
 						var itemBox = document.getAnonymousNodes(this)[0];
@@ -2374,6 +2376,125 @@
 			</method>
 			
 			
+			<method name="updateRetracted">
+				<body><![CDATA[
+					this._id('retraction-box').hidden = true;
+					
+					return (async function () {
+						var htmlNS = 'http://www.w3.org/1999/xhtml';
+						
+						var data = await Zotero.Retractions.getData(this.item);
+						if (!data) {
+							this._id('retraction-box').hidden = true;
+							return;
+						}
+						
+						this._id('retraction-box').hidden = false;
+						this._id('retraction-banner').textContent = Zotero.getString('retraction.banner');
+						
+						// Date
+						if (data.date) {
+							this._id('retraction-date').hidden = false;
+							this._id('retraction-date').textContent = Zotero.getString(
+								'retraction.date',
+								data.date.toLocaleDateString()
+							);
+						}
+						else {
+							this._id('retraction-date').hidden = true;
+						}
+						
+						// Reasons
+						if (data.reasons.length) {
+							let elem = this._id('retraction-reasons');
+							elem.hidden = false;
+							elem.textContent = '';
+							for (let reason of data.reasons) {
+								let dt = document.createElementNS(htmlNS, 'dt');
+								let dd = document.createElementNS(htmlNS, 'dd');
+								
+								dt.textContent = reason;
+								dd.textContent = Zotero.Retractions.getReasonDescription(reason);
+								
+								elem.appendChild(dt);
+								elem.appendChild(dd);
+							}
+						}
+						else {
+							this._id('retraction-reasons').hidden = true;
+						}
+						
+						// Retraction DOI or PubMed ID
+						if (data.doi || data.pmid) {
+							let div = this._id('retraction-notice');
+							div.textContent = '';
+							let a = document.createElementNS(htmlNS, 'a');
+							a.textContent = Zotero.getString('retraction.notice');
+							if (data.doi) {
+								a.href = 'https://doi.org/' + data.doi;
+							}
+							else {
+								a.href = `https://www.ncbi.nlm.nih.gov/pubmed/${data.pmid}/`;
+							}
+							div.appendChild(a);
+						}
+						else {
+							this._id('retraction-notice').hidden = true;
+						}
+						
+						// Links
+						if (data.urls.length) {
+							let div = this._id('retraction-links');
+							div.hidden = false;
+							div.textContent = '';
+							
+							let p = document.createElementNS(htmlNS, 'p');
+							p.textContent = Zotero.getString('retraction.details');
+							
+							let ul = document.createElementNS(htmlNS, 'ul');
+							for (let url of data.urls) {
+								let li = document.createElementNS(htmlNS, 'li');
+								let a = document.createElementNS(htmlNS, 'a');
+								url = url.replace(/^http:/, 'https:');
+								a.href = url;
+								a.textContent = url;
+								li.appendChild(a);
+								ul.appendChild(li);
+							}
+							
+							div.appendChild(p);
+							div.appendChild(ul);
+						}
+						else {
+							this._id('retraction-links').hidden = true;
+						}
+						
+						let creditElem = this._id('retraction-credit');
+						if (!creditElem.childNodes.length) {
+							let text = Zotero.getString(
+								'retraction.credit',
+								'<a href="https://retractionwatch.com">Retraction Watch</a>'
+							);
+							let parts = Zotero.Utilities.parseMarkup(text);
+							for (let part of parts) {
+								if (part.type == 'text') {
+									creditElem.appendChild(document.createTextNode(part.text));
+								}
+								else if (part.type == 'link') {
+									let a = document.createElementNS(htmlNS, 'a');
+									a.href = part.attributes.href;
+									a.textContent = part.text;
+									creditElem.appendChild(a);
+								}
+							}
+						}
+						
+						Zotero.Utilities.Internal.updateHTMLInXUL(this._id('retraction-box'));
+					}.bind(this))();
+				]]></body>
+			</method>
+			
+			
 			<method name="_id">
 				<parameter name="id"/>
 				<body>
@@ -2484,6 +2605,22 @@
 					</menupopup>
 					<zoteroguidancepanel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
 				</popupset>
+				<div xmlns="http://www.w3.org/1999/xhtml"
+						id="retraction-box"
+						hidden="hidden">
+					<div id="retraction-banner"/>
+					<div id="retraction-details">
+						<p id="retraction-date"/>
+						
+						<dl id="retraction-reasons"/>
+						
+						<p id="retraction-notice"/>
+						
+						<div id="retraction-links"/>
+						
+						<p id="retraction-credit"/>
+					</div>
+				</div>
 				<grid flex="1">
 					<columns>
 						<column/>

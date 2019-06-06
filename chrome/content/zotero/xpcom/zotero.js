@@ -745,6 +745,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.Creators.init();
 			yield Zotero.Groups.init();
 			yield Zotero.Relations.init();
+			yield Zotero.Retractions.init();
 			
 			// Load all library data except for items, which are loaded when libraries are first
 			// clicked on or if otherwise necessary

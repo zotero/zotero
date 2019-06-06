@@ -202,6 +202,35 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
+	 /*
+	  * Adapted from http://developer.mozilla.org/en/docs/nsICryptoHash
+	  *
+	  * @param {String} str
+	  * @return	{String}
+	  */
+	sha1: function (str) {
+		var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+			.createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+		converter.charset = "UTF-8";
+		var result = {};
+		var data = converter.convertToByteArray(str, result);
+		var ch = Components.classes["@mozilla.org/security/hash;1"]
+			.createInstance(Components.interfaces.nsICryptoHash);
+		ch.init(ch.SHA1);
+		ch.update(data, data.length);
+		var hash = ch.finish(false);
+		
+		// Return the two-digit hexadecimal code for a byte
+		function toHexString(charCode) {
+			return ("0" + charCode.toString(16)).slice(-2);
+		}
+		
+		// Convert the binary hash data to a hex string.
+		var s = Array.from(hash, (c, i) => toHexString(hash.charCodeAt(i))).join("");
+		return s;
+	},
+	
+	
 	gzip: async function (data) {
 		var deferred = Zotero.Promise.defer();
 		
@@ -590,15 +619,7 @@ Zotero.Utilities.Internal = {
 			let href = a.getAttribute('href');
 			a.setAttribute('tooltiptext', href);
 			a.onclick = function (event) {
-				try {
-					let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-					   .getService(Components.interfaces.nsIWindowMediator);
-					let win = wm.getMostRecentWindow("navigator:browser");
-					win.ZoteroPane_Local.loadURI(href, options.linkEvent || event)
-				}
-				catch (e) {
-					Zotero.logError(e);
-				}
+				Zotero.launchURL(href);
 				return false;
 			};
 		}

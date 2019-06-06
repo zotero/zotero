@@ -1127,6 +1127,8 @@ Zotero.Schema = new function(){
 			yield Zotero.DB.waitForTransaction();
 		}
 		
+		yield Zotero.Retractions.updateFromServer();
+		
 		// Get the last timestamp we got from the server
 		var lastUpdated = yield this.getDBVersion('repository');
 		var updated = false;
@@ -2504,6 +2506,10 @@ Zotero.Schema = new function(){
 						yield Zotero.DB.queryAsync("UPDATE settings SET value=? WHERE setting='account' AND key='userID'", parseInt(userID));
 					}
 				}
+			}
+			
+			else if (i == 103) {
+				yield Zotero.DB.queryAsync("CREATE TABLE retractedItems (\n	itemID INTEGER PRIMARY KEY,\n	data TEXT,\n	FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n);");
 			}
 			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom

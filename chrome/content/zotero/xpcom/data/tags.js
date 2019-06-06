@@ -37,7 +37,6 @@ Zotero.Tags = new function() {
 	var _libraryColors = {};
 	var _libraryColorsByName = {};
 	var _itemsListImagePromises = {};
-	var _itemsListExtraImagePromises = {};
 	
 	
 	this.init = Zotero.Promise.coroutine(function* () {
@@ -780,23 +779,29 @@ Zotero.Tags = new function() {
 	 * so we need to generate a composite image containing the existing item type
 	 * icon and one or more tag color swatches.
 	 *
-	 * @params {Array} colors Array of swatch colors
-	 * @params {String} extraImage Chrome URL of image to add to final image
-	 * @return {Q Promise} A Q promise for a data: URL for a PNG
+	 * @params {String[]} colors - Array of swatch colors
+	 * @params {String} extraImage - chrome:// URL of image to add to final image
+	 * @params {Boolean} [retracted = false] - If true, show an icon indicating the item was retracted
+	 * @return {Promise<String>} - A promise for a data: URL for a PNG
 	 */
-	this.generateItemsListImage = function (colors, extraImage) {
+	this.generateItemsListImage = async function (colors, extraImage, retracted) {
 		var multiplier = Zotero.hiDPI ? 2 : 1;
 		
-		var swatchWidth = 8 * multiplier;
-		var separator = 3 * multiplier;
-		var extraImageSeparator = 1 * multiplier;
+		var canvasHeight = 16 * multiplier;
 		var extraImageWidth = 16 * multiplier;
 		var extraImageHeight = 16 * multiplier;
-		var canvasHeight = 16 * multiplier;
+		var retractionImage = `chrome://zotero/skin/cross${Zotero.hiDPI ? '@1.5x' : ''}.png`;
+		var retractionImageLeftPadding = 1 * multiplier;
+		var retractionImageWidth = 16 * multiplier;
+		var retractionImageHeight = 16 * multiplier;
+		var retractionImageScaledWidth = 12 * multiplier;
+		var retractionImageScaledHeight = 12 * multiplier;
+		var tagsLeftPadding = 3 * multiplier;
+		var swatchSeparator = 3 * multiplier;
+		var swatchWidth = 8 * multiplier;
 		var swatchHeight = 8 * multiplier;
-		var prependExtraImage = true;
 		
-		var hash = colors.join("") + (extraImage ? extraImage : "");
+		var hash = colors.join("") + (extraImage ? extraImage : "") + (retracted ? "retracted" : "");
 		
 		if (_itemsListImagePromises[hash]) {
 			return _itemsListImagePromises[hash];
@@ -808,86 +813,79 @@ Zotero.Tags = new function() {
 		var doc = win.document;
 		var canvas = doc.createElementNS('http://www.w3.org/1999/xhtml', 'canvas');
 		
-		var width = colors.length * (swatchWidth + separator);
-		if (extraImage) {
-			width += (colors.length ? extraImageSeparator : 0) + extraImageWidth;
-		}
-		else if (colors.length) {
-			width -= separator;
-		}
+		var width = extraImageWidth
+			+ (retracted
+				? (retractionImageLeftPadding
+					+ ((retractionImageWidth - retractionImageScaledWidth) / 2)
+					+ retractionImageScaledWidth)
+				: 0)
+			+ (colors.length ? tagsLeftPadding : 0)
+			+ (colors.length * (swatchWidth + swatchSeparator));
+		
 		canvas.width = width;
 		canvas.height = canvasHeight;
 		var swatchTop = Math.floor((canvasHeight - swatchHeight) / 2);
 		var ctx = canvas.getContext('2d');
 		
-		var x = prependExtraImage ? extraImageWidth + separator + extraImageSeparator : 0;
-		for (let i=0, len=colors.length; i<len; i++) {
+		// If extra image hasn't started loading, start now
+		if (_itemsListImagePromises[extraImage] === undefined) {
+			let ios = Services.io;
+			let uri = ios.newURI(extraImage, null, null);
+			let img = new win.Image();
+			img.src = uri.spec;
+			_itemsListImagePromises[extraImage] = new Zotero.Promise((resolve) => {
+				img.onload = function () {
+					resolve(img);
+				};
+			});
+		}
+		
+		// If retraction image hasn't started loading, start now
+		if (_itemsListImagePromises[retractionImage] === undefined) {
+			let ios = Services.io;
+			let uri = ios.newURI(retractionImage, null, null);
+			let img = new win.Image();
+			img.src = uri.spec;
+			_itemsListImagePromises[retractionImage] = new Zotero.Promise((resolve) => {
+				img.onload = function () {
+					resolve(img);
+				};
+			});
+		}
+		
+		var x = extraImageWidth
+			+ (retracted ? retractionImageLeftPadding + retractionImageWidth: 0)
+			+ tagsLeftPadding;
+		for (let i = 0, len = colors.length; i < len; i++) {
 			ctx.fillStyle = colors[i];
-			_canvasRoundRect(ctx, x, swatchTop + 1, swatchWidth, swatchHeight, 2, true, false)
-			x += swatchWidth + separator;
+			_canvasRoundRect(ctx, x, swatchTop + 1, swatchWidth, swatchHeight, 2, true, false);
+			x += swatchWidth + swatchSeparator;
 		}
 		
-		// If there's no extra iamge, resolve a promise now
-		if (!extraImage) {
-			var dataURI = canvas.toDataURL("image/png");
-			var dataURIPromise = Zotero.Promise.resolve(dataURI);
-			_itemsListImagePromises[hash] = dataURIPromise;
-			return dataURIPromise;
-		}
-		
-		// Add an extra image to the beginning or end of the swatches
-		if (prependExtraImage) {
-			x = 0;
+		if (retracted) {
+			let [img1, img2] = await Zotero.Promise.all([
+				_itemsListImagePromises[extraImage],
+				_itemsListImagePromises[retractionImage]
+			]);
+			ctx.drawImage(img1, 0, 0, extraImageWidth, extraImageHeight);
+			ctx.drawImage(
+				img2,
+				extraImageWidth + retractionImageLeftPadding
+					+ ((retractionImageWidth - retractionImageScaledWidth) / 2),
+				(retractionImageHeight - retractionImageScaledHeight) / 2 + 1, // Lower by 1
+				retractionImageScaledWidth,
+				retractionImageScaledHeight
+			);
 		}
 		else {
-			x += extraImageSeparator;
+			let img = await _itemsListImagePromises[extraImage];
+			ctx.drawImage(img, 0, 0, extraImageWidth, extraImageHeight);
 		}
 		
-		// If extra image hasn't started loading, start now
-		if (typeof _itemsListExtraImagePromises[extraImage] == 'undefined') {
-			let ios = Components.classes['@mozilla.org/network/io-service;1']
-				.getService(Components.interfaces["nsIIOService"]);
-			let uri = ios.newURI(extraImage, null, null);
-			
-			var img = new win.Image();
-			img.src = uri.spec;
-			
-			// Mark that we've started loading
-			var deferred = Zotero.Promise.defer();
-			var extraImageDeferred = Zotero.Promise.defer();
-			_itemsListExtraImagePromises[extraImage] = extraImageDeferred.promise;
-			
-			// When extra image has loaded, draw it
-			img.onload = function () {
-				ctx.drawImage(img, x, 0, extraImageWidth, extraImageHeight);
-				
-				var dataURI = canvas.toDataURL("image/png");
-				var dataURIPromise = Zotero.Promise.resolve(dataURI);
-				_itemsListImagePromises[hash] = dataURIPromise;
-				
-				// Fulfill the promise for this call
-				deferred.resolve(dataURI);
-				
-				// And resolve the extra image's promise to fulfill
-				// other promises waiting on it
-				extraImageDeferred.resolve(img);
-			}
-			
-			return deferred.promise;
-		}
-		
-		// If extra image has already started loading, return a promise
-		// for the composite image once it's ready
-		return _itemsListExtraImagePromises[extraImage]
-		.then(function (img) {
-			ctx.drawImage(img, x, 0, extraImageWidth, extraImageHeight);
-			
-			var dataURI = canvas.toDataURL("image/png");
-			var dataURIPromise = Zotero.Promise.resolve(dataURI);
-			_itemsListImagePromises[hash] = dataURIPromise;
-			return dataURIPromise;
-		});
-	}
+		var dataURI = canvas.toDataURL("image/png");
+		_itemsListImagePromises[hash] = Zotero.Promise.resolve(dataURI);
+		return dataURI;
+	};
 	
 	
 	/**

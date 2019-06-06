@@ -593,14 +593,23 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		}
 		// If refreshing a single item, clear caches and then deselect and reselect row
 		else if (savedSelection.length == 1 && savedSelection[0] == ids[0]) {
-			let row = this._rowMap[ids[0]];
+			let id = ids[0];
+			let row = this._rowMap[id];
 			delete this._cellTextCache[row];
+			delete this._itemImages[id];
+			this._treebox.invalidateRow(row);
 			
 			this.selection.clearSelection();
 			this.rememberSelection(savedSelection);
 		}
 		else {
-			this._cellTextCache = {};
+			for (let id of ids) {
+				let row = this._rowMap[id];
+				if (row === undefined) continue;
+				delete this._cellTextCache[row];
+				delete this._itemImages[id];
+				this._treebox.invalidateRow(row);
+			}
 		}
 		
 		// For a refresh on an item in the trash, check if the item still belongs
