@@ -28,9 +28,11 @@ Zotero.Retractions = {
 	TYPE_PMID: 'p',
 	TYPE_NAMES: ['DOI', 'PMID'],
 	
+	_initialized: false,
 	_version: 1,
 	
 	_cacheFile: null,
+	_cacheVersion: null,
 	_cacheETag: null,
 	_cacheDOIPrefixLength: null,
 	_cachePMIDPrefixLength: null,
@@ -63,10 +65,12 @@ Zotero.Retractions = {
 		var itemIDs = await Zotero.DB.columnQueryAsync("SELECT itemID FROM retractedItems");
 		this._retractedItems = new Set(itemIDs);
 		
-		// TEMP
-		Zotero.Schema.schemaUpdatePromise.then(() => {
-			this.updateFromServer();
-		});
+		this._initialized = true;
+		
+		// If no cache file or it was created with a different version, download list at startup
+		if (!this._cacheETag || this._cacheVersion != this._version) {
+			Zotero.Schema.schemaUpdatePromise.then(() => this.updateFromServer());
+		}
 	},
 	
 	/**
@@ -203,7 +207,11 @@ Zotero.Retractions = {
 		}
 	}, 1000),
 	
-	updateFromServer: async function () {
+	updateFromServer: Zotero.serial(async function () {
+		if (!this._initialized) {
+			return;
+		}
+		
 		// Download list
 		var headers = {};
 		if (this._cacheETag) {
@@ -240,11 +248,11 @@ Zotero.Retractions = {
 			}
 		}
 		
-		// Get possible local matches
+		// Get all keys and compute prefixes to check for possible matches
 		var prefixStrings = new Set([
-			...Object.keys(this._keyItems[this.TYPE_DOI])
+			...Array.from(this._keyItems[this.TYPE_DOI].keys())
 				.map(x => this.TYPE_DOI + x.substr(0, doiPrefixLength)),
-			...Object.keys(this._keyItems[this.TYPE_PMID])
+			...Array.from(this._keyItems[this.TYPE_PMID].keys())
 				.map(x => this.TYPE_PMID + x.substr(0, pmidPrefixLength))
 		]);
 		var prefixesToSend = new Set();
@@ -272,8 +280,8 @@ Zotero.Retractions = {
 		// TODO: Diff list
 		
 		await this._downloadPossibleMatches([...prefixesToSend]);
-		await this._cacheList(list, etag, doiPrefixLength, pmidPrefixLength);
-	},
+		await this._saveCacheFile(list, etag, doiPrefixLength, pmidPrefixLength);
+	}),
 	
 	/**
 	 * @return {Number[]} - Array of added item ids
@@ -298,7 +306,9 @@ Zotero.Retractions = {
 				let ids = this._keyItems[this.TYPE_DOI].get(row.doi);
 				if (ids) {
 					for (let id of ids) {
-						addedItemIDs.add(id);
+						if (!this._retractedItems.has(id)) {
+							addedItemIDs.add(id);
+						}
 						await this._addEntry(id, row);
 					}
 				}
@@ -307,7 +317,9 @@ Zotero.Retractions = {
 				let ids = this._keyItems[this.TYPE_PMID].get(row.pmid.toString());
 				if (ids) {
 					for (let id of ids) {
-						addedItemIDs.add(id);
+						if (!this._retractedItems.has(id)) {
+							addedItemIDs.add(id);
+						}
 						await this._addEntry(id, row);
 					}
 				}
@@ -537,6 +549,7 @@ Zotero.Retractions = {
 	},
 	
 	_processCacheData: function (data) {
+		this._cacheVersion = data.version;
 		this._cacheETag = data.etag;
 		this._cacheDOIPrefixLength = data.doiPrefixLength;
 		this._cachePMIDPrefixLength = data.pmidPrefixLength;

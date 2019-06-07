@@ -1127,7 +1127,12 @@ Zotero.Schema = new function(){
 			yield Zotero.DB.waitForTransaction();
 		}
 		
-		yield Zotero.Retractions.updateFromServer();
+		try {
+			yield Zotero.Retractions.updateFromServer();
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 		
 		// Get the last timestamp we got from the server
 		var lastUpdated = yield this.getDBVersion('repository');

@@ -4767,6 +4767,7 @@ var ZoteroPane = new function()
 			// Pick the first item we find in the current library, or just pick one at random
 			var item = items.find(item => item.libraryID == libraryID) || items[0];
 			this.selectItem(item.id);
+			this.hideRetractionBanner();
 		}.bind(this);
 		
 		close.onclick = function () {

@@ -732,11 +732,11 @@
 #retracted-items-banner {
 	display: flex;
 	justify-content: center;
-	background: #ea3232;
-	line-height: 2.5em;
+	background: #d93425;
+	line-height: 2.2em;
 	font-weight: bold;
 	color: white;
-	font-size: 16px;
+	font-size: 13.5px;
 	text-align: center;
 	padding: 0 2em;
 	position: relative;
@@ -759,10 +759,9 @@
 #retracted-items-close {
 	position: absolute;
 	cursor: pointer;
-	top: 3px;
+	top: -2px;
 	right: 9px;
-	font-size: 28px;
-	line-height: 28px;
+	font-size: 22px;
 }
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
