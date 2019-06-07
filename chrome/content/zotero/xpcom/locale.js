@@ -5,6 +5,7 @@ Zotero.Locale = {
 	availableLocales: Object.freeze({
 		'ar': 'عربي',
 		'bg-BG': 'Български',
+		'br': 'brezhoneg',
 		'ca-AD': 'Català',
 		'cs-CZ': 'Čeština',
 		'da-DK': 'Dansk',

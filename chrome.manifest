@@ -12,6 +12,7 @@ locale	zotero	en-US		chrome/locale/en-US/zotero/
 #locale	zotero	af-ZA		chrome/locale/af-ZA/zotero/
 locale	zotero	ar		chrome/locale/ar/zotero/
 locale	zotero	bg-BG		chrome/locale/bg-BG/zotero/
+locale	zotero	br		chrome/locale/br/zotero/
 locale	zotero	ca-AD		chrome/locale/ca-AD/zotero/
 locale	zotero	cs-CZ		chrome/locale/cs-CZ/zotero/
 locale	zotero	da-DK		chrome/locale/da-DK/zotero/

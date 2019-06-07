@@ -1,0 +1,320 @@
+﻿<!ENTITY zotero.general.yes                               "Ya">
+<!ENTITY zotero.general.no                                "Ket">
+<!ENTITY zotero.general.optional							"(Diret)">
+<!ENTITY zotero.general.note								"Notenn:">
+<!ENTITY zotero.general.selectAll							"Diuzañ pep-tra">
+<!ENTITY zotero.general.deselectAll						"Diziuzañ pep-tra">
+<!ENTITY zotero.general.edit								"Aozañ">
+<!ENTITY zotero.general.delete 								"Dilemel">
+<!ENTITY zotero.general.ok								"Mat eo">
+<!ENTITY zotero.general.cancel								"Nullañ">
+<!ENTITY zotero.general.refresh								"Freskaat">
+<!ENTITY zotero.general.saveAs								"Enrollañ dindan">
+<!ENTITY zotero.general.options                            "Dibarzhioù">
+<!ENTITY zotero.general.advancedOptions.label				"Dibarzhioù araokaet">
+<!ENTITY zotero.general.tools                             "Ostilhoù">
+<!ENTITY zotero.general.more                              "Muioc'h">
+<!ENTITY zotero.general.loading "O kargañ...">
+<!ENTITY zotero.general.close                              "Serriñ">
+<!ENTITY zotero.general.minimize                           "Bihanaat">
+<!ENTITY zotero.general.other                              "Traoù all...">
+
+
+<!ENTITY zotero.errorReport.title							"Fazi danevell Zotero">
+<!ENTITY zotero.errorReport.submissionInProgress			"Gortozit e-pad ma vez kaset an danevell fazi mar plij.">
+<!ENTITY zotero.errorReport.submitted						"An danevell fazi a zo bet kaset.">
+<!ENTITY zotero.errorReport.reportID						"ID danevell:">
+<!ENTITY zotero.errorReport.postToForums					"Skrivit ur gemennadenn e-barzh foromoù Zotero (forums.zotero.org) gant an ID danevell-mañ, gant un deskrivadur eus ar gudenn hag ar pazennoù ret heuliañ evit adkaout ar gudenn-se.">
+<!ENTITY zotero.errorReport.notReviewed					"An danevelloù fazioù na vezont ket lennet keit ha ma ne vezont ket daveennet e-barzh ar foromoù.">
+
+<!ENTITY zotero.upgrade.title							"Skoazeller hizivadur Zotero">
+<!ENTITY zotero.upgrade.newVersionInstalled				"Staliet ho peus ur stumm nevez eus Zotero.">
+<!ENTITY zotero.upgrade.upgradeRequired					"Ho tiaz-roadennoù Zotero a rank bezañ hizivaet evit mont en-dro gant ar stumm nevez.">
+<!ENTITY zotero.upgrade.autoBackup							"Ho tiaz-roadennoù a-vremañ a vo em-enrollet a-raok kement cheñchamant.">
+<!ENTITY zotero.upgrade.majorUpgrade						"Un hizivadur a-bouez eo.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink				"Bezit sur da vezañ taolet ur sell ouzh">
+<!ENTITY zotero.upgrade.majorUpgradeLink					"kelennadurioù diwar-benn an hizivadurioù">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink				"a-raok kenderc'hel.">
+<!ENTITY zotero.upgrade.upgradeInProgress					"Gortozit betek fin an argerzh hizivadur mar plij. An dra-se a c'hall kemer meur a vunutenn.">
+<!ENTITY zotero.upgrade.upgradeSucceeded					"Ho tiaz-roadennoù Zotero a zo bet hizivaet gant berzh.">
+<!ENTITY zotero.upgrade.changeLogBeforeLink				"Sellit mar plij">
+<!ENTITY zotero.upgrade.changeLogLink						"renabl ar cheñchamantoù">
+<!ENTITY zotero.upgrade.changeLogAfterLink					"evit dizoloiñ ar pezh a zo nevez.">
+
+<!ENTITY zotero.tabs.info.label						"Titou">
+<!ENTITY zotero.tabs.notes.label						"Notennoù">
+<!ENTITY zotero.tabs.attachments.label					"Pezhioù-stag">
+<!ENTITY zotero.tabs.tags.label						"Balizoù">
+<!ENTITY zotero.tabs.related.label						"Kevreet">
+<!ENTITY zotero.notes.separate							"Aozit en ur prenestr distag">
+
+<!ENTITY zotero.toolbar.duplicate.label				"Diskouez an doublennoù">
+<!ENTITY zotero.collections.showUnfiledItems			"Diskouez an elfennoù amrummet">
+
+<!ENTITY zotero.items.itemType							"Doare elfenn">
+<!ENTITY zotero.items.type_column						"Doare elfenn">
+<!ENTITY zotero.items.title_column						"Titl">
+<!ENTITY zotero.items.creator_column					"Krouer">
+<!ENTITY zotero.items.date_column						"Deiziad">
+<!ENTITY zotero.items.year_column						"Bloavezh">
+<!ENTITY zotero.items.publisher_column					"Embanner">
+<!ENTITY zotero.items.publication_column				"Embannadenn">
+<!ENTITY zotero.items.journalAbbr_column				"Berradur anv kelaouenn">
+<!ENTITY zotero.items.language_column					"Yezh">
+<!ENTITY zotero.items.accessDate_column				"Gwelet d'an/ar/al">
+<!ENTITY zotero.items.libraryCatalog_column				"Dastumad levraoueg">
+<!ENTITY zotero.items.callNumber_column					"Niver-envel">
+<!ENTITY zotero.items.rights_column						"Aotreadurioù">
+<!ENTITY zotero.items.dateAdded_column					"Deiziad ouzhpennañ">
+<!ENTITY zotero.items.dateModified_column				"Deiziad kemmañ">
+<!ENTITY zotero.items.extra_column						"Traoù dibarr">
+<!ENTITY zotero.items.archive_column					"Dielloù">
+<!ENTITY zotero.items.archiveLocation_column			"Lec'hiadur en diell">
+<!ENTITY zotero.items.place_column						"Lec'h">
+<!ENTITY zotero.items.volume_column						"Levrenn">
+<!ENTITY zotero.items.edition_column					"Embannadur">
+<!ENTITY zotero.items.pages_column						"Pajennoù">
+<!ENTITY zotero.items.issue_column						"Niverenn">
+<!ENTITY zotero.items.series_column						"Dastumad">
+<!ENTITY zotero.items.seriesTitle_column				"Titl an dastumad">
+<!ENTITY zotero.items.court_column						"Lez-varn">
+<!ENTITY zotero.items.medium_column						"Media/Stumm">
+<!ENTITY zotero.items.genre_column						"Doare">
+<!ENTITY zotero.items.system_column						"Sistem">
+<!ENTITY zotero.items.moreColumns.label					"Muioc'h a vannoù">
+<!ENTITY zotero.items.restoreColumnOrder.label			"Adsevel urzh ar bannoù">
+
+<!ENTITY zotero.items.menu.showInLibrary					"Diskouez el levraoueg:">
+<!ENTITY zotero.items.menu.attach.note					"Ouzhpennañ un notenn">
+<!ENTITY zotero.items.menu.attach						"Ouzhpennañ ur pezh-stag">
+<!ENTITY zotero.items.menu.attach.link.uri				"Stagañ ul liamm betek un URI…">
+<!ENTITY zotero.items.menu.attach.file					"Stagañ un eilenn enrollet eus ur restr...">
+<!ENTITY zotero.items.menu.attach.fileLink				"Stagañ ul liamm d'ar restr...">
+
+<!ENTITY zotero.items.menu.restoreToLibrary				"Adsevel d'al levraoueg">
+<!ENTITY zotero.items.menu.duplicateItem					"Eilskrivañ an eilfenn">
+<!ENTITY zotero.items.menu.mergeItems					"Kendeuziñ an elfennoù...">
+<!ENTITY zotero.items.menu.unrecognize                "Nullañ an adpakañ metaroadennoù">
+<!ENTITY zotero.items.menu.reportMetadata             "Danevelliñ metaroadennoù direizh">
+
+<!ENTITY zotero.duplicatesMerge.versionSelect			"Dibabit stumm an elfenn da implijout evel elfenn mestr:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect				"Diuzañ ar maeziennoù da virout diwar stummoù all an elfenn:">
+
+<!ENTITY zotero.toolbar.newItem.label					"Elfenn nevez">
+<!ENTITY zotero.toolbar.moreItemTypes.label			"Muioc'h">
+<!ENTITY zotero.toolbar.lookup.label				"Ouzhpennañ (un) elfenn(où) dre e anaouader">
+<!ENTITY zotero.toolbar.removeItem.label				"Dilemel an elfenn...">
+<!ENTITY zotero.toolbar.newLibrary.label			"Levraoueg nevez">
+<!ENTITY zotero.toolbar.newCollection.label			"Dastumadeg nevez...">
+<!ENTITY zotero.toolbar.markFeedRead.label				"Merkañ ar froud evel lennet">
+<!ENTITY zotero.toolbar.newGroup						"Strollad nevez...">
+<!ENTITY zotero.toolbar.newSubcollection.label			"Is-dastumadeg nevez...">
+<!ENTITY zotero.toolbar.newSavedSearch.label			"Klask enrollet nevez...">
+<!ENTITY zotero.toolbar.emptyTrash.label				"Goullonderiñ ar pod-lastez">
+<!ENTITY zotero.toolbar.tagSelector.label			"Diskouez/Kuzhat an diuzer balizoù">
+<!ENTITY zotero.toolbar.actions.label					"Oberioù">
+<!ENTITY zotero.toolbar.import.label					"Emporzhiañ...">
+<!ENTITY zotero.toolbar.importFromClipboard			"Emporzhiañ diwar ar golver">
+<!ENTITY zotero.toolbar.export.label					"Ezporzhiañ al levraoueg...">
+<!ENTITY zotero.toolbar.rtfScan.label					"Skan RTF...">
+<!ENTITY zotero.toolbar.timeline.label				"Krouiñ ur red-amzer">
+<!ENTITY zotero.toolbar.preferences.label				"Arventennoù...">
+<!ENTITY zotero.toolbar.supportAndDocumentation		"Skoazellerezh ha titouroù">
+<!ENTITY zotero.toolbar.about.label					"Diwar-benn Zotero">
+<!ENTITY zotero.toolbar.advancedSearch				"Enklaskoù araokaet">
+<!ENTITY zotero.toolbar.openURL.label					"Lec'helaat">
+<!ENTITY zotero.toolbar.openURL.tooltip				"Klask e-barzh ho levraoueg lec'hel">
+
+<!ENTITY zotero.toolbar.feeds.new					"Froud nevez">
+<!ENTITY zotero.toolbar.feeds.new.fromURL			"Adalek an URL...">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML			"Adalek ur restr OPML...">
+<!ENTITY zotero.toolbar.feeds.refresh				"Freskaat ar froud">
+<!ENTITY zotero.toolbar.feeds.edit					"Aozañ ar froud...">
+
+<!ENTITY zotero.item.add								"Ouzhpennañ">
+<!ENTITY zotero.item.attachment.file.show				"Diskouez ar restr">
+<!ENTITY zotero.item.textTransform						"Treuzfurmiñ an destenn">
+<!ENTITY zotero.item.textTransform.titlecase			"Al lizherennoù kentañ e pennlizherennoù">
+<!ENTITY zotero.item.textTransform.sentencecase			"Lizherenn gentañ ar frazenn e pennlizherenn">
+<!ENTITY zotero.item.creatorTransform.nameSwap      	"Eilpennañ Anv-bihan/Anv-Familh">
+<!ENTITY zotero.item.viewOnline							"Diskouez enlinenn">
+<!ENTITY zotero.item.copyAsURL							"Eilañ evel URL">
+<!ENTITY zotero.item.deletePermanently                 "Dilemel da virviken...">
+
+<!ENTITY zotero.item.tags.removeAll                 "Dilemel an holl valizoù...">
+
+<!ENTITY zotero.toolbar.newNote				"Notenn nevez">
+<!ENTITY zotero.toolbar.note.standalone				"Notenn dizalc'h nevez">
+<!ENTITY zotero.toolbar.note.child					"Ouzhpennañ un notenn bugel">
+<!ENTITY zotero.toolbar.lookup						"Klask dre anaouader...">
+<!ENTITY zotero.toolbar.attachment.linked				"Liamm davet ur restr...">
+<!ENTITY zotero.toolbar.attachment.add					"Stokañ un eilenn eus ar restr...">
+<!ENTITY zotero.toolbar.attachment.weblink				"Enrollañ al liamm d'ar bajenn a-vremañ">
+<!ENTITY zotero.toolbar.attachment.snapshot			"Kemer un dapadenn-skramm eus ar bajenn a-vremañ">
+
+<!ENTITY zotero.tagSelector.noTagsToDisplay			"Baliz ebet da ziskouez">
+<!ENTITY zotero.tagSelector.loadingTags            "O kargañ ar balizoù...">
+<!ENTITY zotero.tagSelector.showAutomatic			"Diskouez en un doare emgefreek">
+<!ENTITY zotero.tagSelector.displayAllInLibrary	"Diskouez an holl valizoù el levraoueg-mañ">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Dilemel ar balizoù emgefreek el levraoueg-mañ...">
+<!ENTITY zotero.tagSelector.clearAll					"Diziuzañ pep-tra">
+<!ENTITY zotero.tagSelector.assignColor              "Dereiñ ul liv...">
+<!ENTITY zotero.tagSelector.renameTag				"Adenvel ar baliz...">
+<!ENTITY zotero.tagSelector.deleteTag				"Dilemel ar baliz...">
+
+<!ENTITY zotero.tagColorChooser.title          "Dereiñ ul liv hag ul lec'hiadur d'ar baliz">
+<!ENTITY zotero.tagColorChooser.color          "Liv:">
+<!ENTITY zotero.tagColorChooser.position       "Lec'hiadur:">
+<!ENTITY zotero.tagColorChooser.setColor       "Termeniñ al liv">
+<!ENTITY zotero.tagColorChooser.removeColor    "Dilemel al liv">
+
+<!ENTITY zotero.lookup.description				"Ebarzhiñ an anaouadurioù ISBNoù, PMIDoù, pe Xiv da ouzhpennañ d'ho levraoueg:">
+<!ENTITY zotero.lookup.button.search				"Klask">
+
+<!ENTITY zotero.selectitems.title						"Diuzañ elfennoù">
+<!ENTITY zotero.selectitems.intro.label				"Diuzañ peseurt elfennoù ho peus c'hoant ouzhpennañ d'ho levraoueg">
+<!ENTITY zotero.selectitems.cancel.label				"Nullañ">
+<!ENTITY zotero.selectitems.select.label				"Mat eo">
+
+<!ENTITY zotero.bibliography.title						"Krouiñ un arroudenn/levrlennadur">
+<!ENTITY zotero.bibliography.style.label				"Doare arroudenn:">
+<!ENTITY zotero.bibliography.manageStyles             "Merañ ar stiloù...">
+<!ENTITY zotero.bibliography.locale.label				"Yezh:">
+<!ENTITY zotero.bibliography.outputMode				"Mod ezvont:">
+<!ENTITY zotero.bibliography.bibliography				"Levrlennadur">
+<!ENTITY zotero.bibliography.outputMethod				"Hentenn ezvont:">
+<!ENTITY zotero.bibliography.saveAsRTF.label			"Enrollañ dindan ar stumm RTF">
+<!ENTITY zotero.bibliography.saveAsHTML.label			"Enrollañ dindan ar stumm HTML">
+<!ENTITY zotero.bibliography.copyToClipboard.label		"Eilañ er golver">
+<!ENTITY zotero.bibliography.print.label				"Moullañ">
+
+<!ENTITY zotero.integration.docPrefs.title				"Arventennoù an teuliad">
+<!ENTITY zotero.integration.addEditCitation.title		"Ouzhpennañ/aozañ an arroudenn">
+<!ENTITY zotero.integration.editBibliography.title		"Aozañ al levrlennadur">
+<!ENTITY zotero.integration.quickFormatDialog.title		"Prim-aozadur stumm an arroudennoù">
+
+<!ENTITY zotero.progress.title							"Araokadur">
+
+<!ENTITY zotero.import                                 "Emporzhiañ">
+<!ENTITY zotero.import.whereToImportFrom               "Deus pelec'h ho peus c'hoant emporzhiañ?">
+<!ENTITY zotero.import.source.file                     "Ur restr (BibTeX, RIS, Zotero RDF, hag all hag all...)">
+<!ENTITY zotero.import.importing                       "Oc'h emporzhiañ...">
+<!ENTITY zotero.import.database                        "Diaz-roadennoù">
+<!ENTITY zotero.import.lastModified                    "Kemm diwezhañ">
+<!ENTITY zotero.import.size                            "Ment">
+<!ENTITY zotero.import.createCollection                "Plasit an dastumadegoù hag an teuliadoù emporzhiet e-barzh un dastumadeg nevez">
+<!ENTITY zotero.import.fileHandling                    "Meradur ar restroù">
+
+<!ENTITY zotero.exportOptions.title						"Ezporzhiañ...">
+<!ENTITY zotero.exportOptions.format.label				"Stumm:">
+<!ENTITY zotero.exportOptions.translatorOptions.label	"Dibarzhioù troer">
+
+<!ENTITY zotero.charset.label							"Kodiñ an arouezioù">
+<!ENTITY zotero.moreEncodings.label						"Muioc'h a godiñ">
+
+<!ENTITY zotero.citation.keepSorted.label				"Mirout ar mammennoù rummet">
+
+<!ENTITY zotero.citation.suppressAuthor.label			"Dilemel an aozer">
+<!ENTITY zotero.citation.prefix.label					"Rakger:">
+<!ENTITY zotero.citation.suffix.label					"Lostger:">
+<!ENTITY zotero.citation.editorWarning.label  		"Kemenn-diwall: Ma aozit un arroudenn en aozer, ne vo ket gouest ken da velezouriñ ar cheñchadurioù en ho tiaz-roadennoù pe ar stil arroudenniñ.">
+
+<!ENTITY zotero.richText.italic.label					"Stouet">
+<!ENTITY zotero.richText.bold.label						"Druz">
+<!ENTITY zotero.richText.underline.label				"Islinennet">
+<!ENTITY zotero.richText.superscript.label				"Usskrid">
+<!ENTITY zotero.richText.subscript.label				"Isskrid">
+
+<!ENTITY zotero.annotate.toolbar.add.label				"Ouzhpennañ un ennotadur">
+<!ENTITY zotero.annotate.toolbar.collapse.label			"Bihanaat an holl ennotadurioù">
+<!ENTITY zotero.annotate.toolbar.expand.label			"Brasaat an holl ennotadurioù">
+<!ENTITY zotero.annotate.toolbar.highlight.label		"Usskediñ an destenn">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label		"Diusskediñ an destenn">
+
+<!ENTITY zotero.integration.prefs.displayAs.label		"Diskouez an arroudennoù evel:">
+<!ENTITY zotero.integration.prefs.footnotes.label		"notennoù traoñ">
+<!ENTITY zotero.integration.prefs.endnotes.label		"notennoù fin">
+
+<!ENTITY zotero.integration.prefs.formatUsing.label		"Stokañ an arroudennoù evel:">
+<!ENTITY zotero.integration.prefs.bookmarks.label		"Sinedoù">
+<!ENTITY zotero.integration.prefs.bookmarks.caption		"Ar sinedoù a c'hall bezañ rannet kenetre Word ha LibreOffice, gellout a reont degas fazioù padal ma vezont kemmet en ur gwallzarvoud ha n'hallint ket bezañ enlakaet evel notennoù traoñ.">
+
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label       "Em-hizivaat an arroudennoù">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip     "An arroudennoù o c'hortoz hizivadurioù a vo usskedet e-barzh an teuliad">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Lazhañ an hizivadurioù a c'hall fonnusaat an enlakaat arroudennoù e-barzh an teuliadoù hir. Klikit war Freskaat evit hizivaat an arroudennoù gant an dorn.">
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label 		"Implijout ar berradurioù kelaouennoù MEDLINE">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption	"Ar vaezienn Zotero &quot;Berradur kelaouenn&quot; a vo graet van outi.">
+
+<!ENTITY zotero.integration.prefs.exportDocument 		"Ezporzhiañ an teuliad...">
+
+<!ENTITY zotero.integration.showEditor.label			"Diskouez an aozer">
+<!ENTITY zotero.integration.classicView.label			"Gwel klasel">
+
+<!ENTITY zotero.integration.references.label			"Arroudennoù el levrlennadur">
+
+<!ENTITY zotero.sync.stop                             "Paouez ar sinkr">
+<!ENTITY zotero.sync.error							"Fazi sinkr">
+<!ENTITY zotero.sync.storage.progress				"Araokadur:">
+<!ENTITY zotero.sync.storage.downloads				"Gwech pellgarget:">
+<!ENTITY zotero.sync.storage.uploads					"Lakaet enlinenn:">
+
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong		"Ar baliz da-heul en ho levraoueg Zotero a zo re hir anezhañ da sinkr d'ar servijer:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit		"Ar balizoù sinkronelaet a rank bezañ berroc'h evit 256 arouezenn.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete			"Gellout a rit skarat ar baliz e meur a valiz, pe aozañ ar baliz gant an dorn evit berraat anezhañ, pe dilemel anezhañ.">
+<!ENTITY zotero.sync.longTagFixer.split					"Skarat">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe				"Skarat d'an/ar/al">
+<!ENTITY zotero.sync.longTagFixer.character				"arouezenn">
+<!ENTITY zotero.sync.longTagFixer.characters				"arouezioù">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved	"Ar balizoù chomet diziuzet na vint ket enrollet.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted			"Ar baliz a vo dilamet diwar an holl elfennoù.">
+
+<!ENTITY zotero.merge.title                           "Dirouestlañ an dizemglevioù">
+<!ENTITY zotero.merge.of                              "eus">
+<!ENTITY zotero.merge.deleted                         "Dilamet">
+
+<!ENTITY zotero.proxy.recognized.title					"Proksi anavezet">
+<!ENTITY zotero.proxy.recognized.warning				"Ouzhpennit proksioù daveennet dre lec'hienn ho levraoueg, skolioù pe embregerezhioù">
+<!ENTITY zotero.proxy.recognized.warning.secondary		"Ouzhpennañ proksioù all a ro an aotre da lec'hiennoù maliset da dremen evit lec'hiennoù ho peus fiziañs enno."> 
+<!ENTITY zotero.proxy.recognized.disable.label			"Chom hep em-adhenchañ rekedoù dre broksioù rakanavezet">
+<!ENTITY zotero.proxy.recognized.ignore.label			"Na ober van">
+
+<!ENTITY zotero.feedSettings.title                      "Arventennoù ar froud">
+<!ENTITY zotero.feedSettings.saveButton.label           "Enrollañ">
+<!ENTITY zotero.feedSettings.url.label                  "URL:">
+<!ENTITY zotero.feedSettings.title.label                "Titl:">
+<!ENTITY zotero.feedSettings.refresh.label1             "Hizivaat ar froudoù bep">
+<!ENTITY zotero.feedSettings.refresh.label2             "eurvezh">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1         "Dilemel froudoù elfenn chomet anlennet bep">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2         "devezh">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1         "Dilemel ar froudoù elfenn lennet bep">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2         "devezh">
+
+<!ENTITY zotero.rtfScan.title		                    "Skan RTF">
+<!ENTITY zotero.rtfScan.cancel.label					"Nullañ">
+<!ENTITY zotero.rtfScan.citation.label					"Arroudenn">
+<!ENTITY zotero.rtfScan.itemName.label					"Anv an elfenn">
+<!ENTITY zotero.rtfScan.unmappedCitations.label				"Arroudenn chomet amdreuzskrivet">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label			"Arroudennoù amduek">
+<!ENTITY zotero.rtfScan.mappedCitations.label				"Arroudennoù treuzskrivet">
+<!ENTITY zotero.rtfScan.introPage.label				"Digoradur">
+<!ENTITY zotero.rtfScan.introPage.description		"Gellout a ra Zotero em-dennañ hag em-adstummañ arroudennoù hag enlakaat ul levrlennadur er restroù RTF. An arc'hweladur skan RTF a c'hall kemer e-kont an arroudennoù e-barzh kemmoù ar stummoù da-heul:">
+<!ENTITY zotero.rtfScan.introPage.description2		"Evit stagañ ganti, diuzit ur restr RTF enmont hag ur restr ezvont dindan:">
+<!ENTITY zotero.rtfScan.scanPage.label				"Skanañ evit kavout arroudennoù">
+<!ENTITY zotero.rtfScan.scanPage.description		"Zotero a zo o skaniñ ho teuliad evit klask war-lerc'h arroudennoù. Bezit pasiant mar plij.">
+<!ENTITY zotero.rtfScan.citationsPage.label				"Gwiriañ an elfennoù arroudennet">
+<!ENTITY zotero.rtfScan.citationsPage.description		"Grit un tamm sell ouzh al listenn a arroudennoù anavezet amañ dindan evit bezañ sur ez eus bet diuzet gant Zotero en un doare reizh an elfennoù a genglot. Kemenet arroudenn chomet amdreuzskrivet pe amduek a rank bezañ dirouestlet a-raok tremen d'ar bazenn da-heul.">
+<!ENTITY zotero.rtfScan.stylePage.label				"Teuliad-aozañ">
+<!ENTITY zotero.rtfScan.formatPage.label				"Arroudenn-aozañ">
+<!ENTITY zotero.rtfScan.formatPage.description		"Zotero a dret hag a bajennaoz ho restr RTF. Bezit pasiant mar plij.">
+<!ENTITY zotero.rtfScan.completePage.label				"Skan RTF klokaet">
+<!ENTITY zotero.rtfScan.completePage.description		"Ho teuliad a zo bet skanet ha tretet bremañ. Grit e-seurt da vezañ asur eo bet stummet ez-reizh.">
+<!ENTITY zotero.rtfScan.inputFile.label			"Restr enmont">
+<!ENTITY zotero.rtfScan.outputFile.label			"Restr ezvont">
+
+<!ENTITY zotero.file.choose.label			"Diuzañ ur restr...">
+<!ENTITY zotero.file.noneSelected.label			"Restr ebet diuzet">
+
+<!ENTITY zotero.attachLink.title                     "Stagañ ul liamm betek un URI">
+<!ENTITY zotero.attachLink.label.link                "Liamm:">
+<!ENTITY zotero.attachLink.label.title               "Titl:">

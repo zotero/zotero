@@ -1,0 +1,9 @@
+<!ENTITY styles.preview		"Rakwel stiloù Zotero">
+
+<!ENTITY styles.preview.citationFormat		"Stumm arroudenn:">
+<!ENTITY styles.preview.citationFormat.all		"pep-tra">
+<!ENTITY styles.preview.citationFormat.author		"aozer">
+<!ENTITY styles.preview.citationFormat.authorDate		"aozer-deiziad">
+<!ENTITY styles.preview.citationFormat.label		"label">
+<!ENTITY styles.preview.citationFormat.note		"notenn">
+<!ENTITY styles.preview.citationFormat.numeric		"niverel">

@@ -1,0 +1,87 @@
+﻿<!--ZOTERO MENU (OS X ONLY)-->
+<!ENTITY preferencesCmdMac.label        "Arventennoù...">
+<!ENTITY preferencesCmdMac.commandkey   ",">
+<!ENTITY servicesMenuMac.label          "Servijoù">
+<!ENTITY hideThisAppCmdMac.label        "Kuzhat &amp;brandShortName;">
+<!ENTITY hideThisAppCmdMac.commandkey   "H">
+<!ENTITY hideOtherAppsCmdMac.label      "Kuzhat ar re all">
+<!ENTITY hideOtherAppsCmdMac.commandkey "H">
+<!ENTITY showAllAppsCmdMac.label        "Diskouez pep-tra">
+<!ENTITY quitApplicationCmdMac.label "Kuitaat Zotero">
+<!ENTITY quitApplicationCmdMac.key "Q">
+
+<!--FILE MENU-->
+<!ENTITY fileMenu.label "Restr">
+<!ENTITY fileMenu.accesskey "F">
+<!ENTITY saveCmd.label "Enrollañ...">
+<!ENTITY saveCmd.key "S">
+<!ENTITY saveCmd.accesskey "A">
+<!ENTITY pageSetupCmd.label "Pajenn-aozañ...">
+<!ENTITY pageSetupCmd.accesskey "U">
+<!ENTITY printCmd.label "Moullañ...">
+<!ENTITY printCmd.key "P">
+<!ENTITY printCmd.accesskey "P">
+<!ENTITY closeCmd.label "Serriñ">
+<!ENTITY closeCmd.key "W">
+<!ENTITY closeCmd.accesskey "C">
+<!ENTITY importCmd.label "Emporzhiañ...">
+<!ENTITY importCmd.key "I">
+<!ENTITY importFromClipboardCmd.label "Emporzhiañ diwar ar golver">
+<!ENTITY quitApplicationCmdWin.label "Kuitaat">
+<!ENTITY quitApplicationCmdWin.accesskey "x">
+<!ENTITY quitApplicationCmd.label "Kuitaat">
+<!ENTITY quitApplicationCmd.accesskey "Q">
+
+<!--EDIT MENU-->
+<!ENTITY copyCitationCmd.label "Eilañ an arroudenn">
+<!ENTITY copyBibliographyCmd.label "Eilañ al levrlennadur">
+
+<!ENTITY bidiSwitchPageDirectionItem.label "Eilpennañ tuadur ar bajenn">
+<!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
+<!ENTITY bidiSwitchTextDirectionItem.label "Eilpennañ tuadur an destenn">
+<!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
+<!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
+
+<!--TOOLS MENU-->
+<!ENTITY toolsMenu.label           "Ostilhoù"> 
+<!ENTITY toolsMenu.accesskey           "T"> 
+<!ENTITY installConnector.label "Staliañ ar c'hevreer Zotero er merdeer">
+<!ENTITY installConnector.accesskey "C">
+<!ENTITY addons.label				"Lugantoù">
+
+<!--WINDOW MENU-->
+<!ENTITY minimizeWindow.key       "m">
+<!ENTITY minimizeWindow.label     "Bihanaat">
+<!ENTITY bringAllToFront.label    "Degas pep-tra d'ar rak-leur">
+<!ENTITY zoomWindow.label         "Zoumiñ">
+<!ENTITY windowMenu.label         "Prenestr">
+
+<!--HELP MENU-->
+<!ENTITY helpMenu.label           "Sikour"> 
+<!ENTITY helpMenu.accesskey       "H"> 
+<!-- LOCALIZATION NOTE some localizations of Windows (ex:french, german) use "?"
+                       for the help button in the menubar but Gnome does not.   -->
+<!ENTITY helpMenuWin.label        "Sikour"> 
+<!ENTITY helpMenuWin.accesskey    "H">
+<!ENTITY helpMac.commandkey       "?">
+<!ENTITY aboutProduct.label       "Diwar-benn &amp;brandShortName;">
+<!ENTITY aboutProduct.accesskey   "A">
+<!ENTITY productHelp.label        "Skoazellerezh ha titouroù">
+<!ENTITY productHelp.accesskey    "D">
+<!ENTITY helpTroubleshootingInfo.label      "Titouroù distankañ">
+<!ENTITY helpTroubleshootingInfo.accesskey  "T">
+<!ENTITY helpFeedbackPage.label      "Foromoù Zotero">
+<!ENTITY helpFeedbackPage.accesskey  "F">
+
+<!ENTITY helpReportErrors.label      "Danevell fazioù...">
+<!ENTITY helpReportErrors.accesskey  "R">
+
+<!ENTITY debugOutputLogging.label      "Renabler ezvont diveugiñ">
+<!ENTITY debugOutputLogging.accesskey  "L">
+<!ENTITY debugOutputLogging.submit  "Kas an ezvont">
+<!ENTITY debugOutputLogging.view  "Gwelet an ezvont">
+<!ENTITY debugOutputLogging.clear  "Diverkañ an ezvont">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled  "Adloc'hañ gant ar renabler enaouet...">
+
+<!ENTITY helpCheckForUpdates.label      "Gwiriañ an hizivadurioù...">
+<!ENTITY helpCheckForUpdates.accesskey  "U">

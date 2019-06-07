@@ -1,0 +1,19 @@
+<!ENTITY zotero.publications.my_publications "Ma embannadennoù">
+
+<!ENTITY zotero.publications.intro "Elfennoù da ouzhpennañ d'am embannadennoù hag a vo diskouezet war pajenn ho profil war zotero.org. Ma tibabit enklozañ restroù-stag, lakaet e vint hegerz en un doare foran dindan al lisañs a vo termenet ganeoc'h. Ouzhpennit labourioù a zo bet krouet ganeoc'h hepken, hag enklozit ar restroù ho peus ar gwir rannañ warno hag ho peus c'hoant d'en ober.">
+<!ENTITY zotero.publications.include.checkbox.files "Enklozañ restroù">
+<!ENTITY zotero.publications.include.checkbox.notes "Enklozañ notennoù">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Gellout a rit keidañ petra diskouez forzh peur diwar Ma dastumadeg embannadennoù.">
+
+<!ENTITY zotero.publications.sharing.title "Dibabit penaos e rank bezañ rannet ho labour">
+<!ENTITY zotero.publications.sharing.text "Gellout a rit mirout kement gwir d'ho labour, lakaat anezhañ dindan ul lisañs Creative Commons, pe dediet d'an domani foran. E kement degouezh e vo lakaet hegerz en un doare foran dre zotero.org.">
+<!ENTITY zotero.publications.sharing.prompt "Ha fellout a rafe deoc'h aotren ar fet ma vefe rannet ho labour gant tud all?">
+<!ENTITY zotero.publications.sharing.cc "Ya, dindan ul lisañs Creative Commons">
+<!ENTITY zotero.publications.sharing.cc0 "Ya, ha lakait ma labour en domani foran">
+<!ENTITY zotero.publications.sharing.reserved "Ket, embann ma labour war zotero.org hepken">
+
+<!ENTITY zotero.publications.chooseLicense.title "Dibab ul lisañs Creative Commons"> 
+<!ENTITY zotero.publications.chooseLicense.text "Ul lisañs Creative Commons a ro an aotre da dud all da eilañ ha dasparzhañ ho labour keit ha ma vo roet ganto kreditoù a-zere deoc'h, pourvezet ul liamm davet al lisañs, ha termeniñ m'eo bet degaset cheñchamantoù. Termenoù ouzhpenn a c'hall bezañ termenet dindan.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Aotren rannadur azasadurioù ho labour?">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Ya, keit ha ma vez rannet gant ar re all ar memestra">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Aotren implijoù kenwerzhel ho labour?">
