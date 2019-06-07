@@ -246,7 +246,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "MEDLINE dergi kısaltmalarını kullan">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "“Dergi Kısaltması” alanı yok sayılacaktır.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
+<!ENTITY zotero.integration.prefs.exportDocument "Belgeyi Dışarı Aktar...">
 
 <!ENTITY zotero.integration.showEditor.label "Düzenleyiciyi Göster">
 <!ENTITY zotero.integration.classicView.label "Klasik Görünüm">

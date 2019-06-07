@@ -246,7 +246,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Użyj skrótów czasopism w formacie MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Pole &quot;Skrót czasopisma&quot; będzie ignorowane.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
+<!ENTITY zotero.integration.prefs.exportDocument "Eksportuj dokument...">
 
 <!ENTITY zotero.integration.showEditor.label "Pokaż edytor">
 <!ENTITY zotero.integration.classicView.label "Widok klasyczny">
