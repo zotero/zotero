@@ -45,10 +45,12 @@
 	margin-left: 5px;
 }
 
-#retraction-banner {
+#retraction-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 	padding: 1.5em 1em;
 	background: #ea3232;
-	width: 100%;
 	color: white;
 	font-weight: bold;
 }

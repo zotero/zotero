@@ -2378,8 +2378,6 @@
 			
 			<method name="updateRetracted">
 				<body><![CDATA[
-					this._id('retraction-box').hidden = true;
-					
 					return (async function () {
 						var htmlNS = 'http://www.w3.org/1999/xhtml';
 						
@@ -2390,7 +2388,22 @@
 						}
 						
 						this._id('retraction-box').hidden = false;
-						this._id('retraction-banner').textContent = Zotero.getString('retraction.banner');
+						this._id('retraction-header-text').textContent
+							= Zotero.getString('retraction.banner');
+						
+						var deleteButton = this._id('retraction-header-delete-button');
+						if (!this.item.deleted) {
+							deleteButton.hidden = false;
+							deleteButton.textContent = Zotero.getString('pane.items.trash.title');
+							deleteButton.onclick = function () {
+								this.item.deleted = true;
+								this.item.saveTx();
+							}.bind(this);
+						}
+						// Already in trash
+						else {
+							deleteButton.hidden = true;
+						}
 						
 						// Date
 						if (data.date) {
@@ -2608,7 +2621,10 @@
 				<div xmlns="http://www.w3.org/1999/xhtml"
 						id="retraction-box"
 						hidden="hidden">
-					<div id="retraction-banner"/>
+					<div id="retraction-header">
+						<div id="retraction-header-text"/>
+						<button id="retraction-header-delete-button"/>
+					</div>
 					<div id="retraction-details">
 						<p id="retraction-date"/>
 						
