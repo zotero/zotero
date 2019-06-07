@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 var Zotero_Citation_Dialog = new function () {
 	// Array value [0] is property name.
 	// Array value [1] is default value of property.
@@ -598,6 +600,28 @@ var Zotero_Citation_Dialog = new function () {
 				if(!insert) return false;
 			}
 			io.citation.properties.custom = citation;
+		}
+		
+		if (io.citation.citationItems.length) {
+			for (let item of io.citation.citationItems) {
+				if (Zotero.Retractions.isRetracted({id: parseInt(item.id)})) {
+					var ps = Services.prompt;
+					var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+					var result = ps.confirmEx(null,
+						Zotero.getString('general.warning'),
+						Zotero.getString('retraction.citeWarning.text1') + '\n\n'
+							+ Zotero.getString('retraction.citeWarning.text2'),
+						buttonFlags,
+						Zotero.getString('general.continue'),
+						null,
+						null, null, {});
+					if (result != 0) {
+						return false;
+					}
+					break;
+				}
+			}
 		}
 		
 		io.accept();

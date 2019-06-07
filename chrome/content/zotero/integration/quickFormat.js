@@ -716,10 +716,28 @@ var Zotero_QuickFormat = new function () {
 		if(!referenceBox.hasChildNodes() || !referenceBox.selectedItem) return false;
 		
 		var citationItem = {"id":referenceBox.selectedItem.getAttribute("zotero-item")};
-		if(typeof citationItem.id === "string" && citationItem.id.indexOf("/") !== -1) {
+		if (typeof citationItem.id === "string" && citationItem.id.indexOf("/") !== -1) {
 			var item = Zotero.Cite.getItem(citationItem.id);
 			citationItem.uris = item.cslURIs;
 			citationItem.itemData = item.cslItemData;
+		}
+		else if (Zotero.Retractions.isRetracted({id: parseInt(citationItem.id)})) {
+			referencePanel.hidden = true;
+			var ps = Services.prompt;
+			var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+			var result = ps.confirmEx(null,
+				Zotero.getString('general.warning'),
+				Zotero.getString('retraction.citeWarning.text1') + '\n\n'
+					+ Zotero.getString('retraction.citeWarning.text2'),
+				buttonFlags,
+				Zotero.getString('general.continue'),
+				null,
+				null, null, {});
+			referencePanel.hidden = false;
+			if (result != 0) {
+				return false;
+			}
 		}
 		
 		_updateLocator(_getEditorContent());
