@@ -1,14 +1,14 @@
-<!ENTITY zotero.version		"stumm">
+<!ENTITY zotero.version "stumm">
 <!ENTITY zotero.whatsNew "Petra nevez">
-<!ENTITY zotero.createdby		"Krouet gant:">
-<!ENTITY zotero.director		"Rener:">
-<!ENTITY zotero.directors		"Renerien:">
-<!ENTITY zotero.developers		"Diorroerien:">
-<!ENTITY zotero.alumni			"Kendaolerien gozh:">
-<!ENTITY zotero.about.localizations	"Lec'heladurioù:">
-<!ENTITY zotero.about.additionalSoftware	"Meziantoù tredeel ha standardoù:">
-<!ENTITY zotero.executiveProducer		"Produer dileuriet:">
-<!ENTITY zotero.thanks			"Trugarez vras da:">
-<!ENTITY zotero.about.close	"Serriñ">
+<!ENTITY zotero.createdby "Krouet gant:">
+<!ENTITY zotero.director "Rener:">
+<!ENTITY zotero.directors "Renerien:">
+<!ENTITY zotero.developers "Diorroerien:">
+<!ENTITY zotero.alumni "Kendaolerien gozh:">
+<!ENTITY zotero.about.localizations "Lec'heladurioù:">
+<!ENTITY zotero.about.additionalSoftware "Meziantoù tredeel ha standardoù:">
+<!ENTITY zotero.executiveProducer "Produer dileuriet:">
+<!ENTITY zotero.thanks "Trugarez vras da:">
+<!ENTITY zotero.about.close "Serriñ">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Muioc'h a greditoù &amp; trugarekadurioù">
-<!ENTITY zotero.citationProcessing	"Tretadur an arroudennoù &amp; levrlennadurioù">
+<!ENTITY zotero.citationProcessing "Tretadur an arroudennoù &amp; levrlennadurioù">

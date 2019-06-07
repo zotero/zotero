@@ -1,25 +1,25 @@
-<!ENTITY zotero.search.name				"Anv:">
+<!ENTITY zotero.search.name "Anv:">
 
 <!ENTITY zotero.search.searchInLibrary "Klask el levraoueg:">
 
-<!ENTITY zotero.search.joinMode.prefix		"Kenglotus">
-<!ENTITY zotero.search.joinMode.any		"unan">
-<!ENTITY zotero.search.joinMode.all		"pep-tra">
-<!ENTITY zotero.search.joinMode.suffix		"gant ar pezh a zo da-heul:">
+<!ENTITY zotero.search.joinMode.prefix "Kenglotus">
+<!ENTITY zotero.search.joinMode.any "unan">
+<!ENTITY zotero.search.joinMode.all "pep-tra">
+<!ENTITY zotero.search.joinMode.suffix "gant ar pezh a zo da-heul:">
 
-<!ENTITY zotero.search.recursive.label		"Klask en is-dastumadegoù">
-<!ENTITY zotero.search.noChildren			"Diskouez an elfennoù a live-pennañ">
-<!ENTITY zotero.search.includeParentsAndChildren	"Enklozañ an elfennoù kar ha bugale kenglotus">
+<!ENTITY zotero.search.recursive.label "Klask en is-dastumadegoù">
+<!ENTITY zotero.search.noChildren "Diskouez an elfennoù a live-pennañ">
+<!ENTITY zotero.search.includeParentsAndChildren "Enklozañ an elfennoù kar ha bugale kenglotus">
 
-<!ENTITY zotero.search.textModes.phrase	"Frazenn">
-<!ENTITY zotero.search.textModes.phraseBinary	"Frazenn (restroù daoueel enkl.)">
-<!ENTITY zotero.search.textModes.regexp	"Troienn reoliataet (RegExp)">
-<!ENTITY zotero.search.textModes.regexpCS	"Troienn reoliataet (kizidig ouzh ar c'hombo)">
+<!ENTITY zotero.search.textModes.phrase "Frazenn">
+<!ENTITY zotero.search.textModes.phraseBinary "Frazenn (restroù daoueel enkl.)">
+<!ENTITY zotero.search.textModes.regexp "Troienn reoliataet (RegExp)">
+<!ENTITY zotero.search.textModes.regexpCS "Troienn reoliataet (kizidig ouzh ar c'hombo)">
 
-<!ENTITY zotero.search.date.units.days		"devezhioù">
-<!ENTITY zotero.search.date.units.months	"mizioù">
-<!ENTITY zotero.search.date.units.years	"bloavezhioù">
+<!ENTITY zotero.search.date.units.days "devezhioù">
+<!ENTITY zotero.search.date.units.months "mizioù">
+<!ENTITY zotero.search.date.units.years "bloavezhioù">
 
-<!ENTITY zotero.search.search				"Klask">
-<!ENTITY zotero.search.clear					"Diverkañ">
-<!ENTITY zotero.search.saveSearch			"Enrollañ an enklask">
+<!ENTITY zotero.search.search "Klask">
+<!ENTITY zotero.search.clear "Diverkañ">
+<!ENTITY zotero.search.saveSearch "Enrollañ an enklask">

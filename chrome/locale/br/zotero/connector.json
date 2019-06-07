@@ -1,98 +1,74 @@
 {
-    "general_more": {
-        "message": "Muioc'h...",
-        "description": ""
-    },
-    "general_done": {
-        "message": "Graet",
-        "description": ""
-    },
-    "general_tryAgain": {
-        "message": "Klask en-dro",
-        "description": ""
-    },
-    "general_warning": {
-        "message": "Kemenn-diwall",
-        "description": ""
-    },
-    "general_cancel": {
-        "message": "Nullañ",
-        "description": ""
-    },
-    "progressWindow_savingTo": {
-        "message": "Enrollañ e-barzh",
-        "description": ""
-    },
-    "progressWindow_tagPlaceholder": {
-        "message": "Balizoù (skejet gant virgulennoù)",
-        "description": ""
-    },
-    "progressWindow_error_translation": {
-        "message": "Ur fazi a zo c'hoarvezet en ur enrollañ an elfenn-mañ. Sellit ouzh $1 evit kaout muioc'h a ditouroù. ",
-        "description": ""
-    },
-    "progressWindow_error_troubleshootingTranslatorIssues": {
-        "message": "Distankañ ar c'hudennoù troidigezh",
-        "description": ""
-    },
-    "progressWindow_error_fallback": {
-        "message": "Fazi c'hoarvezet en ur enrollañ gant $1. O klask enrollañ en ur implijout $2 e plas.",
-        "description": "The placeholders will contain the names of Zotero translators (e.g., JSTOR or Embedded Metadata)."
-    },
-    "progressWindow_error_upgradeClient": {
-        "message": "An arc'hweladur-mañ na vez ket hegerz gant ho stumm eus $1. Hizivait betek $2.",
-        "description": "$2 will be a link with the localized text 'latest version'."
-    },
-    "progressWindow_error_upgradeClient_latestVersion": {
-        "message": "stumm diwezhañ",
-        "description": ""
-    },
-    "appConnector": {
-        "message": "Kevreer $1",
-        "description": ""
-    },
-    "upgradeApp": {
-        "message": "Hizivaat $1",
-        "description": ""
-    },
-    "error_connection_isAppRunning": {
-        "message": "Ha digoret eo $1?",
-        "description": ""
-    },
-    "error_connection_save": {
-        "message": "$1 n'en deus ket gallet eskemm gant an arload $2. Ar c'hevreeer a c'hall enrollañ pajennoù 'zo war ho kont end-eeun $3, evit kaout disoc'hoù gwelloc'h bezit asur e vez digoret $2 a-raok klask enrollañ.",
-        "description": "$1 will contain the localized string 'Zotero Connector'. $2 will contain the app name. $3 will contain the domain name."
-    },
-    "error_connection_downloadOrTroubleshoot": {
-        "message": "Gellout a rit <a href=\"$1\">pellgargañ $2</a> pe <a href=\"$3\">Distankañ ar c'hudennoù kevreañ</a> ma vez ezhomm.",
-        "description": ""
-    },
-    "error_connection_enableSavingToOnlineLibrary": {
-        "message": "Enaouiñ an enrollañ e-barzh al levraoueg enlinenn",
-        "description": ""
-    },
-    "integration_error_clientUpgrade": {
-        "message": "An arroudennañ diwar ar Web a c'houlenn $1 pe nevesoc'h.",
-        "description": ""
-    },
-    "integration_error_connection": {
-        "message": "$1 n'eus ket gellet eskemm gant an arload burevek $2. $2 a rank bezañ digoret evit gellet enlakaat arroudennoù diwar ar web.",
-        "description": "$1 will be the localized string for the extension (e.g., Zotero Connector). $2 will be the app name (e.g., Zotero)."
-    },
-    "integration_googleDocs_unlinkBeforeSaving_warning": {
-        "message": "An teuliad-mañ a endalc'h arroudennoù Zotero oberiant hag a zeuio war-wel dindan liammoù zotero.org e-barzh un eilenn bellgarget.",
-        "description": ""
-    },
-    "integration_googleDocs_unlinkBeforeSaving_instructions": {
-        "message": "Evit genel ur stumm azasaet d'ar rannañ, diuzit <b>Ober un eilenn…</b> e-barzh al lañser Restr, diuzit <b>Diliammañ an arroudennoù</b> e-barzh lañser Zotero an teuliad nevez, ha pellgargit a-benn neuze ar stumm nann-liammet. Mirit an teuliad orin-mañ liammet en degouezh m'ho pefe da zegas cheñchamantoù ennañ.",
-        "description": ""
-    },
-    "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
-        "message": "Pellgargañ ar stumm ereet forzh penaos",
-        "description": ""
-    },
-    "general_saveTo": {
-        "message": "Enrollañ e-barzh $1",
-        "description": ""
-    }
+  "general_more": {
+    "message": "Muioc'h..."
+  },
+  "general_done": {
+    "message": "Graet"
+  },
+  "general_tryAgain": {
+    "message": "Klask en-dro"
+  },
+  "general_warning": {
+    "message": "Kemenn-diwall"
+  },
+  "general_cancel": {
+    "message": "Nullañ"
+  },
+  "progressWindow_savingTo": {
+    "message": "Enrollañ e-barzh"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Balizoù (skejet gant virgulennoù)"
+  },
+  "progressWindow_error_translation": {
+    "message": "Ur fazi a zo c'hoarvezet en ur enrollañ an elfenn-mañ. Sellit ouzh $1 evit kaout muioc'h a ditouroù. "
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Distankañ ar c'hudennoù troidigezh"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Fazi c'hoarvezet en ur enrollañ gant $1. O klask enrollañ en ur implijout $2 e plas."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "An arc'hweladur-mañ na vez ket hegerz gant ho stumm eus $1. Hizivait betek $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "stumm diwezhañ"
+  },
+  "appConnector": {
+    "message": "Kevreer $1"
+  },
+  "upgradeApp": {
+    "message": "Hizivaat $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Ha digoret eo $1?"
+  },
+  "error_connection_save": {
+    "message": "$1 n'en deus ket gallet eskemm gant an arload $2. Ar c'hevreeer a c'hall enrollañ pajennoù 'zo war ho kont end-eeun $3, evit kaout disoc'hoù gwelloc'h bezit asur e vez digoret $2 a-raok klask enrollañ."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Gellout a rit <a href=\"$1\">pellgargañ $2</a> pe <a href=\"$3\">Distankañ ar c'hudennoù kevreañ</a> ma vez ezhomm."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Enaouiñ an enrollañ e-barzh al levraoueg enlinenn"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "An arroudennañ diwar ar Web a c'houlenn $1 pe nevesoc'h."
+  },
+  "integration_error_connection": {
+    "message": "$1 n'eus ket gellet eskemm gant an arload burevek $2. $2 a rank bezañ digoret evit gellet enlakaat arroudennoù diwar ar web."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "An teuliad-mañ a endalc'h arroudennoù Zotero oberiant hag a zeuio war-wel dindan liammoù zotero.org e-barzh un eilenn bellgarget."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Evit genel ur stumm azasaet d'ar rannañ, diuzit <b>Ober un eilenn…</b> e-barzh al lañser Restr, diuzit <b>Diliammañ an arroudennoù</b> e-barzh lañser Zotero an teuliad nevez, ha pellgargit a-benn neuze ar stumm nann-liammet. Mirit an teuliad orin-mañ liammet en degouezh m'ho pefe da zegas cheñchamantoù ennañ."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Pellgargañ ar stumm ereet forzh penaos"
+  },
+  "general_saveTo": {
+    "message": "Enrollañ e-barzh $1"
+  }
 }
