@@ -191,3 +191,5 @@ pref("extensions.zotero.translators.attachSupplementary", false);
 pref("extensions.zotero.translators.supplementaryAsLink", false);
 pref("extensions.zotero.translators.RIS.import.ignoreUnknown", true);
 pref("extensions.zotero.translators.RIS.import.keepID", false);
+
+pref("extensions.zotero.retractions.recentItems", "[]");

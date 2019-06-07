@@ -729,6 +729,41 @@
 	margin-left: 3px !important;
 }
 
+#retracted-items-banner {
+	display: flex;
+	justify-content: center;
+	background: #ea3232;
+	line-height: 2.5em;
+	font-weight: bold;
+	color: white;
+	font-size: 16px;
+	text-align: center;
+	padding: 0 2em;
+	position: relative;
+}
+
+#retracted-items-message {
+	margin-right: .8em;
+}
+
+#retracted-items-link {
+	text-decoration: underline;
+	margin-left: .3em;
+	cursor: pointer;
+}
+
+#retracted-items-link:active {
+	color: #f9e8e2;
+}
+
+#retracted-items-close {
+	position: absolute;
+	cursor: pointer;
+	top: 3px;
+	right: 9px;
+	font-size: 28px;
+	line-height: 28px;
+}
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.25dppx) {

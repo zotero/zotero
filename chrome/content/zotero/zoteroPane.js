@@ -241,6 +241,10 @@ var ZoteroPane = new function()
 			}, 0);
 		}
 		
+		setTimeout(function () {
+			ZoteroPane.showRetractionBanner();
+		});
+		
 		// TEMP: Clean up extra files from Mendeley imports <5.0.51
 		setTimeout(async function () {
 			var needsCleanup = await Zotero.DB.valueQueryAsync(
@@ -4727,6 +4731,55 @@ var ZoteroPane = new function()
 			//}
 		}
 	}
+	
+	/**
+	 * Show a retraction banner if there are retracted items that we haven't warned about
+	 */
+	this.showRetractionBanner = async function (items) {
+		var items;
+		try {
+			items = JSON.parse(Zotero.Prefs.get('retractions.recentItems'));
+		}
+		catch (e) {
+			Zotero.Prefs.clear('retractions.recentItems');
+			Zotero.logError(e);
+			return;
+		}
+		if (!items.length) {
+			return;
+		}
+		items = await Zotero.Items.getAsync(items);
+		if (!items.length) {
+			return;
+		}
+		
+		document.getElementById('retracted-items-container').removeAttribute('collapsed');
+		
+		var message = document.getElementById('retracted-items-message');
+		var link = document.getElementById('retracted-items-link');
+		var close = document.getElementById('retracted-items-close');
+		
+		var suffix = items.length > 1 ? 'multiple' : 'single';
+		message.textContent = Zotero.getString('retraction.alert.' + suffix);
+		link.textContent = Zotero.getString('retraction.alert.view.' + suffix);
+		link.onclick = function () {
+			var libraryID = this.getSelectedLibraryID();
+			// Pick the first item we find in the current library, or just pick one at random
+			var item = items.find(item => item.libraryID == libraryID) || items[0];
+			this.selectItem(item.id);
+		}.bind(this);
+		
+		close.onclick = function () {
+			this.hideRetractionBanner();
+		}.bind(this);
+	};
+	
+	
+	this.hideRetractionBanner = function () {
+		document.getElementById('retracted-items-container').setAttribute('collapsed', true);
+		Zotero.Prefs.clear('retractions.recentItems');
+	};
+	
 	
 	/**
 	 * Sets the layout to either a three-vertical-pane layout and a layout where itemsPane is above itemPane
