@@ -12,6 +12,10 @@ describe("Retractions", function() {
 			win.document.getElementById('retracted-items-close').click();
 		});
 		
+		after(function () {
+			win.close();
+		});
+		
 		it("shouldn't select item in trash", async function () {
 			var item1 = await createDataObject('item', { deleted: true });
 			var item2 = await createDataObject('item');
