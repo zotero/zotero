@@ -299,6 +299,8 @@ Zotero.Retractions = {
 		Zotero.debug(`Retrieved ${results.length} possible `
 			+ Zotero.Utilities.pluralize(results.length, ['match', 'matches']));
 		
+		results.push(...this._fixedResults);
+		
 		// Look in the key mappings for local items that match and add them as retractions
 		var addedItemIDs = new Set();
 		for (let row of results) {
@@ -557,6 +559,15 @@ Zotero.Retractions = {
 		for (let row of data.data) {
 			this._cachePrefixList.add(row.split(' ')[0]);
 		}
+		// Add hard-coded prefixes
+		for (let row of this._fixedResults) {
+			if (row.doi) {
+				this._cachePrefixList.add(this.TYPE_DOI + row.doi);
+			}
+			if (row.pmid) {
+				this._cachePrefixList.add(this.TYPE_PMID + row.pmid);
+			}
+		}
 	},
 	
 	/**
@@ -684,5 +695,9 @@ Zotero.Retractions = {
 		"Updated to Retraction": "A prior notice has been changed to the status of a Retraction",
 		"Upgrade/Update of Prior Notice": "Either a change to or affirmation of a prior notice",
 		Withdrawal: "The original article is removed from access on the Journal’s publishing platform."
-	}
+	},
+	
+	_fixedResults: [
+		{ date: "1977-04-15", pmid: 993, retractionPMID: 195582, reasons: ["Results Not Reproducible"], urls: []}
+	]
 };
