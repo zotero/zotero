@@ -725,7 +725,8 @@ var Zotero_QuickFormat = new function () {
 			referencePanel.hidden = true;
 			var ps = Services.prompt;
 			var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+				+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
 			var result = ps.confirmEx(null,
 				Zotero.getString('general.warning'),
 				Zotero.getString('retraction.citeWarning.text1') + '\n\n'
@@ -733,9 +734,13 @@ var Zotero_QuickFormat = new function () {
 				buttonFlags,
 				Zotero.getString('general.continue'),
 				null,
-				null, null, {});
+				Zotero.getString('pane.items.showItemInLibrary'),
+				null, {});
 			referencePanel.hidden = false;
-			if (result != 0) {
+			if (result > 0) {
+				if (result == 2) {
+					Zotero_QuickFormat.showInLibrary(parseInt(citationItem.id));
+				}
 				return false;
 			}
 		}
@@ -1333,8 +1338,8 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Show an item in the library it came from
 	 */
-	this.showInLibrary = async function() {
-		var id = panelRefersToBubble.citationItem.id;
+	this.showInLibrary = async function (itemID) {
+		var id = itemID || parseInt(panelRefersToBubble.citationItem.id);
 		var pane = Zotero.getActiveZoteroPane();
 		// Open main window if it's not open (Mac)
 		if (!pane) {

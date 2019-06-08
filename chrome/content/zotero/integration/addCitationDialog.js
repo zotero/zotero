@@ -607,7 +607,8 @@ var Zotero_Citation_Dialog = new function () {
 				if (Zotero.Retractions.isRetracted({id: parseInt(item.id)})) {
 					var ps = Services.prompt;
 					var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+						+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+						+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
 					var result = ps.confirmEx(null,
 						Zotero.getString('general.warning'),
 						Zotero.getString('retraction.citeWarning.text1') + '\n\n'
@@ -615,8 +616,12 @@ var Zotero_Citation_Dialog = new function () {
 						buttonFlags,
 						Zotero.getString('general.continue'),
 						null,
-						null, null, {});
-					if (result != 0) {
+						Zotero.getString('pane.items.showItemInLibrary'),
+						null, {});
+					if (result > 0) {
+						if (result == 2) {
+							_showItemInLibrary(parseInt(item.id));
+						}
 						return false;
 					}
 					break;
@@ -823,5 +828,26 @@ var Zotero_Citation_Dialog = new function () {
 	 */
 	function _clearCitationList() {
 		while(_citationList.firstChild) _citationList.removeChild(_citationList.firstChild);
+	}
+	
+	async function _showItemInLibrary(id) {
+		var pane = Zotero.getActiveZoteroPane();
+		// Open main window if it's not open (Mac)
+		if (!pane) {
+			let win = Zotero.openMainWindow();
+			await new Zotero.Promise((resolve) => {
+				let onOpen = function () {
+					win.removeEventListener('load', onOpen);
+					resolve();
+				};
+				win.addEventListener('load', onOpen);
+			});
+			pane = win.ZoteroPane;
+		}
+		pane.show();
+		pane.selectItem(id);
+		
+		// Pull window to foreground
+		Zotero.Utilities.Internal.activate(pane.document.defaultView);
 	}
 }
