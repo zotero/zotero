@@ -1414,8 +1414,8 @@ Zotero.Utilities = {
 				return '' + obj;
 			}
 		}
-		else if (type == 'string') {
-			return JSON.stringify(obj);
+		else if (type == 'string' || typeof obj.toJSON == 'function') {
+			return JSON.stringify(obj, false, '    ');
 		}
 		else if (type == 'function') {
 			var funcStr = ('' + obj).trim();
