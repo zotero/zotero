@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Näytä kaksoiskappaleet">
 <!ENTITY zotero.collections.showUnfiledItems "Näytä arkistoimattomat nimikkeet">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Nimikkeen tyyppi">
 <!ENTITY zotero.items.type_column "Nimikkeen tyyppi">

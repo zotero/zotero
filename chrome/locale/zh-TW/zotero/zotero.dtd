@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "顯示重覆的項目">
 <!ENTITY zotero.collections.showUnfiledItems "顯示未歸檔的項目">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "項目類型">
 <!ENTITY zotero.items.type_column "項目類型">

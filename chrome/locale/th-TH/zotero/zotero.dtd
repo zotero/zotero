@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "แสดงรายการซ้ำ">
 <!ENTITY zotero.collections.showUnfiledItems "แสดงรายการที่ไม่ได้จัดกลุ่ม">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "ประเภทรายการ">
 <!ENTITY zotero.items.type_column "Item Type">

@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "បង្ហាញឯកសារត្រួត">
 <!ENTITY zotero.collections.showUnfiledItems "បង្ហាញឯកសារមិនទាន់បានតម្កល់ទុក">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "ប្រភេទឯកសារ">
 <!ENTITY zotero.items.type_column "Item Type">

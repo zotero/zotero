@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Pokaži dvojnike">
 <!ENTITY zotero.collections.showUnfiledItems "Pokaži nerazvrščene vnose">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Vrsta vnosa">
 <!ENTITY zotero.items.type_column "Vrsta vnosa">

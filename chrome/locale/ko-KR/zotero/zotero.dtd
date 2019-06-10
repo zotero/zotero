@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "중복 보기">
 <!ENTITY zotero.collections.showUnfiledItems "미분류 항목 보기">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "항목 형식">
 <!ENTITY zotero.items.type_column "항목 형식">

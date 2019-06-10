@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Прикажи дупликате">
 <!ENTITY zotero.collections.showUnfiledItems "Прикажи неразврстане">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Врста ставке">
 <!ENTITY zotero.items.type_column "Врста ставке">

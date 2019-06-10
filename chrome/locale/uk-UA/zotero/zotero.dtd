@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Показати дублювання">
 <!ENTITY zotero.collections.showUnfiledItems "Показати незаповненні записи">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Тип документу">
 <!ENTITY zotero.items.type_column "Тип документа">

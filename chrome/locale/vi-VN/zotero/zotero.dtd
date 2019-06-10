@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Liệt kê các mục trùng lặp">
 <!ENTITY zotero.collections.showUnfiledItems "Liệt kê các mục chưa phân loại">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Loại tham khảo">
 <!ENTITY zotero.items.type_column "Loại tham khảo">

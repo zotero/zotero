@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Visa dubletter">
 <!ENTITY zotero.collections.showUnfiledItems "Visa oregistererade källor">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Källtyp">
 <!ENTITY zotero.items.type_column "Källtyp">

@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Zobraziť duplicity">
 <!ENTITY zotero.collections.showUnfiledItems "Zobraziť nezaradené záznam">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Typ záznamu">
 <!ENTITY zotero.items.type_column "Typ záznamu">

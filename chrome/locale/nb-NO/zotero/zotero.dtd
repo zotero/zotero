@@ -15,8 +15,8 @@
 <!ENTITY zotero.general.tools "Tools">
 <!ENTITY zotero.general.more "Mer">
 <!ENTITY zotero.general.loading "Laster inn...">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Lukk">
+<!ENTITY zotero.general.minimize "Minimer">
 <!ENTITY zotero.general.other "Other…">
 
 
@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Elementtype">
 <!ENTITY zotero.items.type_column "Elementtype">
@@ -201,7 +202,7 @@
 <!ENTITY zotero.import.importing "Importing…">
 <!ENTITY zotero.import.database "Database">
 <!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.size "Størrelse">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 <!ENTITY zotero.import.fileHandling "File Handling">
 

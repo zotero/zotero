@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Duplicaten tonen">
 <!ENTITY zotero.collections.showUnfiledItems "Ongesorteerde items tonen">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Type item">
 <!ENTITY zotero.items.type_column "Item Type">

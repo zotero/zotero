@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Sýna eins færslur">
 <!ENTITY zotero.collections.showUnfiledItems "Sýna sameinaðar færslur">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Tegund færslu">
 <!ENTITY zotero.items.type_column "Tegund færslu">

@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Diskouez an doublennoù">
 <!ENTITY zotero.collections.showUnfiledItems "Diskouez an elfennoù amrummet">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Doare elfenn">
 <!ENTITY zotero.items.type_column "Doare elfenn">

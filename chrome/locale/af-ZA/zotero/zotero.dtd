@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Wys duplikate">
 <!ENTITY zotero.collections.showUnfiledItems "Wys ongeliaseerde items">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Tipe item">
 <!ENTITY zotero.items.type_column "Item Type">

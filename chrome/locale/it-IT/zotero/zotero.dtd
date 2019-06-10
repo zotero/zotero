@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Mostra i duplicati">
 <!ENTITY zotero.collections.showUnfiledItems "Mostra gli oggetti non classificati">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Tipo di oggetto">
 <!ENTITY zotero.items.type_column "Tipo elemento">

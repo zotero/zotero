@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Vis dubletter">
 <!ENTITY zotero.collections.showUnfiledItems "Vis ukategoriserede elementer">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Type">
 <!ENTITY zotero.items.type_column "Elementtype">

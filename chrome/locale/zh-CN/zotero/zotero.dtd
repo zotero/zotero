@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "显示重复条目">
 <!ENTITY zotero.collections.showUnfiledItems "显示未分类条目">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "条目类型">
 <!ENTITY zotero.items.type_column "条目类型">

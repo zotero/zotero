@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Εμφάνιση διπλότυπων">
 <!ENTITY zotero.collections.showUnfiledItems "Εμφάνιση Αταξινόμητων στοιχείων">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Τύπος στοιχείου">
 <!ENTITY zotero.items.type_column "Τύπος στοιχείου">

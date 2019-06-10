@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Rodyti besidubliuojančius">
 <!ENTITY zotero.collections.showUnfiledItems "Rodyti neužpildytus">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Įrašo tipas">
 <!ENTITY zotero.items.type_column "Įrašo tipas">

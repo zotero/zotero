@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Bikoiztuak erakutsi">
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Item mota">
 <!ENTITY zotero.items.type_column "Item Type">

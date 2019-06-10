@@ -50,6 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Duplikate anzeigen">
 <!ENTITY zotero.collections.showUnfiledItems "Einträge ohne Sammlung anzeigen">
+<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Eintragsart">
 <!ENTITY zotero.items.type_column "Eintragsart">
@@ -97,7 +98,7 @@
 <!ENTITY zotero.items.menu.unrecognize "Abgerufene Metadaten rückgängig machen">
 <!ENTITY zotero.items.menu.reportMetadata "Falsche Metadaten melden">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Wählen SIe die Version des Eintrags, die als Master-Eintrag verwendet werden soll:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Wählen Sie die Version des Eintrags, die als Master-Eintrag verwendet werden soll:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Wählen Sie die beizubehaltenden Felder aus anderen Versionen des Eintrags:">
 
 <!ENTITY zotero.toolbar.newItem.label "Neuer Eintrag">
