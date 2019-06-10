@@ -2392,7 +2392,7 @@
 							= Zotero.getString('retraction.banner');
 						
 						var deleteButton = this._id('retraction-header-delete-button');
-						if (!this.item.deleted && this.item.editable) {
+						if (!this.item.deleted && this.item.isEditable()) {
 							deleteButton.hidden = false;
 							deleteButton.textContent = Zotero.getString('pane.items.trash.title');
 							deleteButton.onclick = function () {
