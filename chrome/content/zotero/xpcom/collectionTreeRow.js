@@ -54,6 +54,9 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('id', function () {
 		case 'unfiled':
 			return 'U' + this.ref.libraryID;
 		
+		case 'retracted':
+			return 'R' + this.ref.libraryID;
+		
 		case 'publications':
 			return 'P' + this.ref.libraryID;
 			
@@ -98,6 +101,10 @@ Zotero.CollectionTreeRow.prototype.isDuplicates = function () {
 
 Zotero.CollectionTreeRow.prototype.isUnfiled = function () {
 	return this.type == 'unfiled';
+}
+
+Zotero.CollectionTreeRow.prototype.isRetracted = function () {
+	return this.type == 'retracted';
 }
 
 Zotero.CollectionTreeRow.prototype.isTrash = function()
@@ -162,7 +169,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('editable', function () {
 		return true;
 	}
 	var libraryID = this.ref.libraryID;
-	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled()) {
+	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled() || this.isRetracted()) {
 		var type = Zotero.Libraries.get(libraryID).libraryType;
 		if (type == 'group') {
 			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
@@ -185,7 +192,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('filesEditable', function ()
 	if (this.isGroup()) {
 		return this.ref.filesEditable;
 	}
-	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled()) {
+	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled() || this.isRetracted()) {
 		var type = Zotero.Libraries.get(libraryID).libraryType;
 		if (type == 'group') {
 			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);

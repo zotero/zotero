@@ -183,6 +183,8 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 	}
 	this._virtualCollectionLibraries.unfiled =
 			Zotero.Utilities.Internal.getVirtualCollectionState('unfiled')
+	this._virtualCollectionLibraries.retracted =
+			Zotero.Utilities.Internal.getVirtualCollectionState('retracted');
 	
 	var oldCount = this.rowCount || 0;
 	var newRows = [];
@@ -790,6 +792,9 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 		
 		case 'publications':
 			return "chrome://zotero/skin/treeitem-journalArticle" + suffix + ".png";
+		
+		case 'retracted':
+			return "chrome://zotero/skin/cross" + suffix + ".png";
 	}
 	
 	return "chrome://zotero/skin/treesource-" + collectionType + suffix + ".png";
@@ -823,6 +828,8 @@ Zotero.CollectionTreeView.prototype.isContainerEmpty = function(row)
 					|| this._virtualCollectionLibraries.duplicates[libraryID] === false)
 				// Unfiled Items not shown
 				&& this._virtualCollectionLibraries.unfiled[libraryID] === false
+				// Retracted Items not shown
+				&& this._virtualCollectionLibraries.retracted[libraryID] === false
 				&& this.hideSources.indexOf('trash') != -1;
 	}
 	if (treeRow.isCollection()) {
@@ -1071,6 +1078,7 @@ Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(functi
 	
 	case 'D':
 	case 'U':
+	case 'R':
 		yield this.expandLibrary(id);
 		break;
 	
@@ -1326,6 +1334,8 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 		var showDuplicates = this.hideSources.indexOf('duplicates') == -1
 				&& this._virtualCollectionLibraries.duplicates[libraryID] !== false;
 		var showUnfiled = this._virtualCollectionLibraries.unfiled[libraryID] !== false;
+		var showRetracted = this._virtualCollectionLibraries.retracted[libraryID] !== false
+			&& Zotero.Retractions.libraryHasRetractedItems(libraryID);
 		var showPublications = libraryID == Zotero.Libraries.userLibraryID;
 		var showTrash = this.hideSources.indexOf('trash') == -1;
 	}
@@ -1333,6 +1343,7 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 		var savedSearches = [];
 		var showDuplicates = false;
 		var showUnfiled = false;
+		var showRetracted = false;
 		var showPublications = false;
 		var showTrash = false;
 	}
@@ -1346,7 +1357,7 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 		return 0;
 	}
 	
-	var startOpen = !!(collections.length || savedSearches.length || showDuplicates || showUnfiled || showTrash);
+	var startOpen = !!(collections.length || savedSearches.length || showDuplicates || showUnfiled || showRetracted || showTrash);
 	
 	// If this isn't a manual open, set the initial state depending on whether
 	// there are child nodes
@@ -1425,6 +1436,21 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 		this._addRowToArray(
 			rows,
 			new Zotero.CollectionTreeRow(this, 'unfiled', s, level + 1),
+			row + 1 + newRows
+		);
+		newRows++;
+	}
+	
+	// Retracted items
+	if (showRetracted) {
+		let s = new Zotero.Search;
+		s.libraryID = libraryID;
+		s.name = Zotero.getString('pane.collections.retracted');
+		s.addCondition('libraryID', 'is', libraryID);
+		s.addCondition('retracted', 'true');
+		this._addRowToArray(
+			rows,
+			new Zotero.CollectionTreeRow(this, 'retracted', s, level + 1),
 			row + 1 + newRows
 		);
 		newRows++;

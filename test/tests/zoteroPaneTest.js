@@ -470,7 +470,7 @@ describe("ZoteroPane", function() {
 			// Show Duplicate Items
 			var id = "D" + userLibraryID;
 			assert.isFalse(cv.getRowIndexByID(id));
-			yield zp.setVirtual(userLibraryID, 'duplicates', true);
+			yield zp.setVirtual(userLibraryID, 'duplicates', true, true);
 			// Duplicate Items should be selected
 			assert.equal(cv.selectedTreeRow.id, id);
 			// Should be missing from pref
@@ -490,7 +490,7 @@ describe("ZoteroPane", function() {
 			// Show Unfiled Items
 			id = "U" + userLibraryID;
 			assert.isFalse(cv.getRowIndexByID(id));
-			yield zp.setVirtual(userLibraryID, 'unfiled', true);
+			yield zp.setVirtual(userLibraryID, 'unfiled', true, true);
 			// Unfiled Items should be selected
 			assert.equal(cv.selectedTreeRow.id, id);
 			// Should be missing from pref
@@ -510,7 +510,7 @@ describe("ZoteroPane", function() {
 			
 			// Show Duplicate Items
 			var id = "D" + userLibraryID;
-			yield zp.setVirtual(userLibraryID, 'duplicates', true);
+			yield zp.setVirtual(userLibraryID, 'duplicates', true, true);
 			
 			// Library should have been expanded and Duplicate Items selected
 			assert.ok(cv.getRowIndexByID(id));

@@ -972,6 +972,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					var unfiled = condition.operator == 'true';
 					continue;
 				
+				case 'retracted':
+					var retracted = condition.operator == 'true';
+					continue;
+				
 				case 'publications':
 					var publications = condition.operator == 'true';
 					continue;
@@ -1032,6 +1036,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 			+ ") "
 			// Exclude My Publications
 			+ "AND itemID NOT IN (SELECT itemID FROM publicationsItems)";
+	}
+	
+	if (retracted) {
+		sql += " AND (itemID IN (SELECT itemID FROM retractedItems))";
 	}
 	
 	if (publications) {

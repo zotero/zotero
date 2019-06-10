@@ -1410,6 +1410,10 @@ Zotero.Utilities.Internal = {
 				var prefKey = 'unfiledLibraries';
 				break;
 			
+			case 'retracted':
+				var prefKey = 'retractedLibraries';
+				break;
+			
 			default:
 				throw new Error("Invalid virtual collection type '" + type + "'");
 		}
@@ -1443,6 +1447,10 @@ Zotero.Utilities.Internal = {
 			
 			case 'unfiled':
 				var prefKey = 'unfiledLibraries';
+				break;
+			
+			case 'retracted':
+				var prefKey = 'retractedLibraries';
 				break;
 			
 			default:

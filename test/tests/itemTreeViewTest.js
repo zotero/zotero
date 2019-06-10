@@ -595,9 +595,8 @@ describe("Zotero.ItemTreeView", function() {
 			var userLibraryID = Zotero.Libraries.userLibraryID;
 			var collection = yield createDataObject('collection');
 			var item = yield createDataObject('item', { title: "Unfiled Item" });
-			yield zp.setVirtual(userLibraryID, 'unfiled', true);
-			var selected = yield cv.selectByID("U" + userLibraryID);
-			assert.ok(selected);
+			yield zp.setVirtual(userLibraryID, 'unfiled', true, true);
+			assert.equal(cv.selectedTreeRow.id, 'U' + userLibraryID);
 			yield waitForItemsLoad(win);
 			assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
 			yield Zotero.DB.executeTransaction(function* () {

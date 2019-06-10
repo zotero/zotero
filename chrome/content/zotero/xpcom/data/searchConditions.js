@@ -100,6 +100,14 @@ Zotero.SearchConditions = new function(){
 			},
 			
 			{
+				name: 'retracted',
+				operators: {
+					true: true,
+					false: true
+				}
+			},
+			
+			{
 				name: 'publications',
 				operators: {
 					true: true,

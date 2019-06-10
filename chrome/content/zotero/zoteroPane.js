@@ -1027,7 +1027,7 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.setVirtual = Zotero.Promise.coroutine(function* (libraryID, type, show) {
+	this.setVirtual = Zotero.Promise.coroutine(function* (libraryID, type, show, select) {
 		switch (type) {
 			case 'duplicates':
 				var treeViewID = 'D' + libraryID;
@@ -1035,6 +1035,10 @@ var ZoteroPane = new function()
 			
 			case 'unfiled':
 				var treeViewID = 'U' + libraryID;
+				break;
+			
+			case 'retracted':
+				var treeViewID = 'R' + libraryID;
 				break;
 			
 			default:
@@ -1046,13 +1050,17 @@ var ZoteroPane = new function()
 		var cv = this.collectionsView;
 		
 		var promise = cv.waitForSelect();
+		var selectedRowID = cv.selectedTreeRow.id;
 		var selectedRow = cv.selection.currentIndex;
 		
 		yield cv.refresh();
 		
-		// Select new row
+		// Select new or original row
 		if (show) {
-			yield this.collectionsView.selectByID(treeViewID);
+			yield this.collectionsView.selectByID(select ? treeViewID : selectedRowID);
+		}
+		else if (type == 'retracted') {
+			yield this.collectionsView.selectByID("L" + libraryID);
 		}
 		// Select next appropriate row after removal
 		else {
@@ -1791,7 +1799,10 @@ var ZoteroPane = new function()
 			
 			var prompt = force ? toTrash : toRemove;
 		}
-		else if (collectionTreeRow.isSearch() || collectionTreeRow.isUnfiled() || collectionTreeRow.isDuplicates()) {
+		else if (collectionTreeRow.isSearch()
+				|| collectionTreeRow.isUnfiled()
+				|| collectionTreeRow.isRetracted()
+				|| collectionTreeRow.isDuplicates()) {
 			if (!force) {
 				return;
 			}
@@ -1863,6 +1874,11 @@ var ZoteroPane = new function()
 		// Remove virtual unfiled collection
 		else if (collectionTreeRow.isUnfiled()) {
 			this.setVirtual(collectionTreeRow.ref.libraryID, 'unfiled', false);
+			return;
+		}
+		// Remove virtual retracted collection
+		else if (collectionTreeRow.isRetracted()) {
+			this.setVirtual(collectionTreeRow.ref.libraryID, 'retracted', false);
 			return;
 		}
 		
@@ -2401,13 +2417,19 @@ var ZoteroPane = new function()
 		{
 			id: "showDuplicates",
 			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryID(), 'duplicates', true);
+				this.setVirtual(this.getSelectedLibraryID(), 'duplicates', true, true);
 			}
 		},
 		{
 			id: "showUnfiled",
 			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryID(), 'unfiled', true);
+				this.setVirtual(this.getSelectedLibraryID(), 'unfiled', true, true);
+			}
+		},
+		{
+			id: "showRetracted",
+			oncommand: () => {
+				this.setVirtual(this.getSelectedLibraryID(), 'retracted', true, true);
 			}
 		},
 		{
@@ -2600,7 +2622,7 @@ var ZoteroPane = new function()
 		else if (collectionTreeRow.isTrash()) {
 			show = ['emptyTrash'];
 		}
-		else if (collectionTreeRow.isDuplicates() || collectionTreeRow.isUnfiled()) {
+		else if (collectionTreeRow.isDuplicates() || collectionTreeRow.isUnfiled() || collectionTreeRow.isRetracted()) {
 			show = ['deleteCollection'];
 			
 			m.deleteCollection.setAttribute('label', Zotero.getString('general.hide'));
@@ -2624,14 +2646,17 @@ var ZoteroPane = new function()
 					'newSavedSearch'
 				);
 			}
-			// Only show "Show Duplicates" and "Show Unfiled Items" if rows are hidden
+			// Only show "Show Duplicates", "Show Unfiled Items", and "Show Retracted" if rows are hidden
 			let duplicates = Zotero.Utilities.Internal.getVirtualCollectionStateForLibrary(
 				libraryID, 'duplicates'
 			);
 			let unfiled = Zotero.Utilities.Internal.getVirtualCollectionStateForLibrary(
 				libraryID, 'unfiled'
 			);
-			if (!duplicates || !unfiled) {
+			let retracted = Zotero.Utilities.Internal.getVirtualCollectionStateForLibrary(
+				libraryID, 'retracted'
+			);
+			if (!duplicates || !unfiled || !retracted) {
 				if (!library.archived) {
 					show.push('sep2');
 				}
@@ -2640,6 +2665,9 @@ var ZoteroPane = new function()
 				}
 				if (!unfiled) {
 					show.push('showUnfiled');
+				}
+				if (!retracted) {
+					show.push('showRetracted');
 				}
 			}
 			if (!library.archived) {
@@ -2656,7 +2684,11 @@ var ZoteroPane = new function()
 		// Disable some actions if user doesn't have write access
 		//
 		// Some actions are disabled via their commands in onCollectionSelected()
-		if (collectionTreeRow.isWithinGroup() && !collectionTreeRow.editable && !collectionTreeRow.isDuplicates() && !collectionTreeRow.isUnfiled()) {
+		if (collectionTreeRow.isWithinGroup()
+				&& !collectionTreeRow.editable
+				&& !collectionTreeRow.isDuplicates()
+				&& !collectionTreeRow.isUnfiled()
+				&& !collectionTreeRow.isRetracted()) {
 			disable.push(
 				'newSubcollection',
 				'editSelectedCollection',
@@ -3219,8 +3251,8 @@ var ZoteroPane = new function()
 				return;
 			}
 			
-			// Ignore double-clicks on Unfiled Items source row
-			if (collectionTreeRow.isUnfiled()) {
+			// Ignore double-clicks on Unfiled/Retracted Items source rows
+			if (collectionTreeRow.isUnfiled() || collectionTreeRow.isRetracted()) {
 				return;
 			}
 			
@@ -4762,12 +4794,15 @@ var ZoteroPane = new function()
 		var suffix = items.length > 1 ? 'multiple' : 'single';
 		message.textContent = Zotero.getString('retraction.alert.' + suffix);
 		link.textContent = Zotero.getString('retraction.alert.view.' + suffix);
-		link.onclick = function () {
-			var libraryID = this.getSelectedLibraryID();
-			// Pick the first item we find in the current library, or just pick one at random
-			var item = items.find(item => item.libraryID == libraryID) || items[0];
-			this.selectItem(item.id);
+		link.onclick = async function () {
 			this.hideRetractionBanner();
+			var libraryID = this.getSelectedLibraryID();
+			// Select the Retracted Items collection
+			await this.collectionsView.selectByID("R" + libraryID);
+			// Select newly detected item if only one
+			if (items.length == 1) {
+				await this.selectItem(items[0].id);
+			}
 		}.bind(this);
 		
 		close.onclick = function () {

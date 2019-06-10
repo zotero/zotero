@@ -1,34 +1,93 @@
 describe("Retractions", function() {
+	var userLibraryID;
+	var win;
+	var zp;
+	var server;
+	var checkQueueItemsStub;
+	var retractedDOI = '10.1016/S0140-6736(97)11096-0';
+	
+	before(async function () {
+		userLibraryID = Zotero.Libraries.userLibraryID;
+		win = await loadZoteroPane();
+		zp = win.ZoteroPane;
+		
+		// Remove debouncing on checkQueuedItems()
+		checkQueueItemsStub = sinon.stub(Zotero.Retractions, 'checkQueuedItems').callsFake(() => {
+			return Zotero.Retractions._checkQueuedItemsInternal();
+		});
+	});
+	
+	beforeEach(async function () {
+		var ids = await Zotero.DB.columnQueryAsync("SELECT itemID FROM retractedItems");
+		if (ids.length) {
+			await Zotero.Items.erase(ids);
+		}
+	});
+	
+	afterEach(async function () {
+		win.document.getElementById('retracted-items-close').click();
+		checkQueueItemsStub.resetHistory();
+	});
+	
+	after(async function () {
+		win.close();
+		checkQueueItemsStub.restore();
+		
+		var ids = await Zotero.DB.columnQueryAsync("SELECT itemID FROM retractedItems");
+		if (ids.length) {
+			await Zotero.Items.erase(ids);
+		}
+	});
+	
+	async function createRetractedItem(options = {}) {
+		var o = {
+			itemType: 'journalArticle'
+		};
+		Object.assign(o, options);
+		var item = createUnsavedDataObject('item', o);
+		item.setField('DOI', retractedDOI);
+		if (Zotero.DB.inTransaction) {
+			await item.save();
+		}
+		else {
+			await item.saveTx();
+		}
+		
+		while (!checkQueueItemsStub.called) {
+			await Zotero.Promise.delay(50);
+		}
+		await checkQueueItemsStub.returnValues[0];
+		checkQueueItemsStub.resetHistory();
+		
+		return item;
+	}
+	
 	describe("Notification Banner", function () {
-		var win;
-		var zp;
+		function bannerShown() {
+			var container = win.document.getElementById('retracted-items-container');
+			if (container.getAttribute('collapsed') == 'true') {
+				return false;
+			}
+			if (!container.hasAttribute('collapsed')) {
+				return true;
+			}
+			throw new Error("'collapsed' attribute not found");
+		}
 		
-		before(async function () {
-			win = await loadZoteroPane();
-			zp = win.ZoteroPane;
+		it("should show banner when retracted item is added", async function () {
+			var banner = win.document.getElementById('retracted-items-container');
+			assert.isFalse(bannerShown());
+			
+			await createRetractedItem();
+			
+			assert.isTrue(bannerShown());
 		});
 		
-		afterEach(function () {
-			win.document.getElementById('retracted-items-close').click();
-		});
-		
-		after(function () {
-			win.close();
-		});
-		
-		it("shouldn't select item in trash", async function () {
-			var item1 = await createDataObject('item', { deleted: true });
-			var item2 = await createDataObject('item');
-			var item3 = await createDataObject('item', { deleted: true });
+		it("shouldn't show banner when item in trash is added", async function () {
+			var item = await createRetractedItem({ deleted: true });
 			
-			await Zotero.Retractions._addEntry(item1.id, {});
-			await Zotero.Retractions._addEntry(item2.id, {});
-			await Zotero.Retractions._addEntry(item3.id, {});
+			assert.isFalse(bannerShown());
 			
-			await createDataObject('collection');
-			await waitForItemsLoad(win);
-			
-			await Zotero.Retractions._showAlert([item1.id, item2.id, item3.id]);
 			win.document.getElementById('retracted-items-link').click();
 			
 			while (zp.collectionsView.selectedTreeRow.id != 'L1') {
@@ -37,7 +96,66 @@ describe("Retractions", function() {
 			await waitForItemsLoad(win);
 			
 			var item = await zp.getSelectedItems()[0];
-			assert.equal(item, item2);
+			assert.equal(item, item);
+		});
+	});
+	
+	describe("virtual collection", function () {
+		it("should show/hide Retracted Items collection when a retracted item is found/erased", async function () {
+			// Create item
+			var item = await createRetractedItem();
+			assert.ok(zp.collectionsView.getRowIndexByID("R" + userLibraryID));
+			
+			// Erase item
+			var promise = waitForItemEvent('refresh');
+			await item.eraseTx();
+			await promise;
+			assert.isFalse(zp.collectionsView.getRowIndexByID("R" + userLibraryID));
+		});
+		
+		it("should unhide Retracted Items collection when retracted item is found", async function () {
+			await createRetractedItem();
+			
+			// Hide collection
+			await zp.setVirtual(userLibraryID, 'retracted', false);
+			
+			// Add another retracted item, which should unhide it
+			await createRetractedItem();
+			assert.ok(zp.collectionsView.getRowIndexByID("R" + userLibraryID));
+		});
+		
+		it("should hide Retracted Items collection when last retracted item is moved to trash", async function () {
+			var rowID = "R" + userLibraryID;
+			
+			// Create item
+			var item = await createRetractedItem();
+			assert.ok(zp.collectionsView.getRowIndexByID(rowID));
+			
+			// Select Retracted Items collection
+			await zp.collectionsView.selectByID(rowID);
+			await waitForItemsLoad(win);
+			
+			// Erase item
+			item.deleted = true;
+			await item.saveTx();
+			await Zotero.Promise.delay(50);
+			// Retracted Items should be gone
+			assert.isFalse(zp.collectionsView.getRowIndexByID(rowID));
+			// And My Library should be selected
+			assert.equal(zp.collectionsView.selectedTreeRow.id, "L" + userLibraryID);
+		});
+		
+		it("should show Retracted Items collection when retracted item is restored from trash", async function () {
+			// Create trashed item
+			var item = await createRetractedItem({ deleted: true });
+			await Zotero.Promise.delay(50);
+			assert.isFalse(zp.collectionsView.getRowIndexByID("R" + userLibraryID));
+			
+			// Restore item
+			item.deleted = false;
+			await item.saveTx();
+			await Zotero.Promise.delay(50);
+			assert.ok(zp.collectionsView.getRowIndexByID("R" + userLibraryID));
 		});
 	});
 });

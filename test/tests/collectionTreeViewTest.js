@@ -18,20 +18,24 @@ describe("Zotero.CollectionTreeView", function() {
 	});
 	
 	describe("#refresh()", function () {
-		it("should show Duplicate Items and Unfiled Items by default", function* () {
+		it("should show Duplicate Items and Unfiled Items by default and shouldn't show Retracted Items", function* () {
 			Zotero.Prefs.clear('duplicateLibraries');
 			Zotero.Prefs.clear('unfiledLibraries');
+			Zotero.Prefs.clear('retractedLibraries');
 			yield cv.refresh();
 			assert.ok(cv.getRowIndexByID("D" + userLibraryID));
 			assert.ok(cv.getRowIndexByID("U" + userLibraryID));
+			assert.isFalse(cv.getRowIndexByID("R" + userLibraryID));
 		});
 		
-		it("shouldn't show Duplicate Items and Unfiled Items if hidden", function* () {
+		it("shouldn't show virtual collections if hidden", function* () {
 			Zotero.Prefs.set('duplicateLibraries', `{"${userLibraryID}": false}`);
 			Zotero.Prefs.set('unfiledLibraries', `{"${userLibraryID}": false}`);
+			Zotero.Prefs.set('retractedLibraries', `{"${userLibraryID}": false}`);
 			yield cv.refresh();
 			assert.isFalse(cv.getRowIndexByID("D" + userLibraryID));
 			assert.isFalse(cv.getRowIndexByID("U" + userLibraryID));
+			assert.isFalse(cv.getRowIndexByID("R" + userLibraryID));
 		});
 		
 		it("should maintain open state of group", function* () {

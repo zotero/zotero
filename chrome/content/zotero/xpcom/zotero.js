@@ -71,6 +71,17 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		return win ? win.ZoteroPane : null;
 	};
 	
+	this.getZoteroPanes = function () {
+		var enumerator = Services.wm.getEnumerator("navigator:browser");
+		var zps = [];
+		while (enumerator.hasMoreElements()) {
+			let win = enumerator.getNext();
+			if (!win.ZoteroPane) continue;
+			zps.push(win.ZoteroPane);
+		}
+		return zps;
+	};
+	
 	/**
 	 * @property	{Boolean}	locked		Whether all Zotero panes are locked
 	 *										with an overlay

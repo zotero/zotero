@@ -216,7 +216,7 @@
 			</toolbar>
 			
 			<vbox id="retracted-items-container" collapsed="true">
-				<div xmlns="http://www.w3.org/1999/xhtml" id="retracted-items-banner" collapsed="true">
+				<div xmlns="http://www.w3.org/1999/xhtml" id="retracted-items-banner">
 					<div id="retracted-items-message"/>
 					<div id="retracted-items-link"/>
 					<div id="retracted-items-close">×</div>
@@ -236,6 +236,7 @@
 					<menuseparator/>
 					<menuitem class="zotero-menuitem-show-duplicates" label="&zotero.toolbar.duplicate.label;"/>
 					<menuitem class="zotero-menuitem-show-unfiled" label="&zotero.collections.showUnfiledItems;"/>
+					<menuitem class="zotero-menuitem-show-retracted" label="&zotero.collections.showRetractedItems;"/>
 					<menuitem class="zotero-menuitem-edit-collection"/>
 					<menuitem class="zotero-menuitem-duplicate-collection"/>
 					<menuitem class="zotero-menuitem-mark-read-feed" label="&zotero.toolbar.markFeedRead.label;"/>
