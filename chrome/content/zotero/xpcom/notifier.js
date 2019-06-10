@@ -236,7 +236,7 @@ Zotero.Notifier = new function(){
 	
 	/**
 	 * Get order of observer by priority, with lower numbers having higher priority.
-	 * If an observer doesn't have a priority, sort it last.
+	 * If an observer doesn't have a priority, default to 100.
 	 */
 	function _getObserverOrder(type) {
 		var order = [];
@@ -247,7 +247,7 @@ Zotero.Notifier = new function(){
 			}
 			order.push({
 				id: i,
-				priority: _observers[i].priority || false
+				priority: _observers[i].priority || 100
 			});
 		}
 		order.sort((a, b) => {

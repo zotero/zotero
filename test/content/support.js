@@ -249,6 +249,8 @@ function waitForItemEvent(event) {
 
 /**
  * Wait for a single notifier event and return a promise for the data
+ *
+ * Tests run after all other handlers (priority 101, since handlers are 100 by default)
  */
 function waitForNotifierEvent(event, type) {
 	if (!event) throw new Error("event not provided");
@@ -262,7 +264,7 @@ function waitForNotifierEvent(event, type) {
 				extraData: extraData
 			});
 		}
-	}}, [type]);
+	}}, [type], 'test', 101);
 	return deferred.promise;
 }
 
