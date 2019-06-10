@@ -429,10 +429,12 @@
 							var doi = Zotero.Utilities.cleanDOI(val);
 							if (doi) {
 								doi = "https://doi.org/"
-									// Encode some characters. '/' doesn't need to be encoded
+									// Encode some characters that are technically valid in DOIs,
+									// though generally not used. '/' doesn't need to be encoded.
 									+  doi.replace(/#/g, '%23')
 										.replace(/\?/g, '%3f')
-										.replace(/%/g, '%25');
+										.replace(/%/g, '%25')
+										.replace(/"/g, '%22');
 								label.classList.add("pointer");
 								label.setAttribute("onclick", "ZoteroPane_Local.loadURI('" + doi + "', event)");
 								label.setAttribute("tooltiptext", Zotero.getString('locate.online.tooltip'));
