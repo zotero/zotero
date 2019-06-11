@@ -2905,7 +2905,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentPath', {
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
 				linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
-			if (!val.startsWith('storage:')) {
+			if (val && !val.startsWith('storage:')) {
 				let storagePath = Zotero.Attachments.getStorageDirectory(this).path;
 				if (!val.startsWith(storagePath)) {
 					throw new Error("Imported file path must be within storage directory");
