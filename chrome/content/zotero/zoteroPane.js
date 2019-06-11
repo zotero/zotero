@@ -4071,6 +4071,10 @@ var ZoteroPane = new function()
 			
 			let isLinkedFile = !item.isImportedAttachment();
 			let path = item.getFilePath();
+			if (!path) {
+				ZoteroPane_Local.showAttachmentNotFoundDialog(item.id, true, true);
+				return;
+			}
 			let fileExists = await OS.File.exists(path);
 			
 			// If the file is an evicted iCloud Drive file, launch that to trigger a download.
