@@ -106,6 +106,120 @@ Zotero.Retractions = {
 		return this._retractedItems.has(item.id);
 	},
 	
+	getRetractionsFromJSON: Zotero.serial(async function (jsonItems) {
+		// TODO: Save as retractions-cache with etag and cache and use for other checks
+		var keyCache = this._keyCache;
+		if (!keyCache) {
+			this._keyCache = keyCache = {
+				[this.TYPE_DOI]: new Map(),
+				[this.TYPE_PMID]: new Map(),
+			};
+		}
+		
+		var matchingIndexes = new Set();
+		var valuesToCheck = [];
+		for (let i = 0; i < jsonItems.length; i++) {
+			let json = jsonItems[i];
+			
+			// DOI
+			let doi;
+			if (json.DOI) {
+				doi = json.DOI;
+			}
+			else if (json.extra) {
+				let fields = Zotero.Utilities.Internal.extractExtraFields(json.extra);
+				let extraField = fields.get('DOI');
+				if (extraField && extraField.value) {
+					doi = extraField.value;
+				}
+			}
+			if (doi) {
+				doi = Zotero.Utilities.cleanDOI(doi);
+			}
+			if (doi) {
+				valuesToCheck.push({
+					type: this.TYPE_DOI,
+					value: doi,
+					index: i
+				});
+			}
+			
+			// PMID
+			if (json.extra) {
+				let pmid = this._extractPMID(json.extra);
+				if (pmid) {
+					valuesToCheck.push({
+						type: this.TYPE_PMID,
+						value: pmid,
+						index: i
+					});
+				}
+			}
+		}
+		
+		// Check all possible values
+		var keyIndexes = new Map();
+		var prefixStringsToCheck = [];
+		for (let { type, value, index } of valuesToCheck) {
+			// See if we've already cached a result for this key
+			let key = this._valueToKey(type, value);
+			let cachedResult = keyCache[type].get(key);
+			if (cachedResult !== undefined) {
+				if (cachedResult) {
+					matchingIndexes.add(index);
+				}
+				continue;
+			}
+			
+			// Otherwise, check prefix against list
+			let prefixStr = this._getPrefixString(type, value, this._getCachedPrefixLength(type));
+			if (this._cachePrefixList.has(prefixStr)) {
+				prefixStringsToCheck.push(prefixStr);
+				
+				// Map key to array index
+				let indexes = keyIndexes.get(key);
+				if (!indexes) {
+					indexes = new Set();
+					keyIndexes.set(key, indexes);
+				}
+				indexes.add(index);
+			}
+			
+			// Set all keys to false in the cache. Any that match will be set to true below.
+			keyCache[type].set(key, false);
+		}
+		
+		if (prefixStringsToCheck.length) {
+			let possibleMatches = await this._downloadPossibleMatches(prefixStringsToCheck);
+			for (let row of possibleMatches) {
+				if (row.doi) {
+					let indexes = keyIndexes.get(row.doi);
+					if (indexes !== undefined) {
+						for (let index of indexes) {
+							matchingIndexes.add(index);
+						}
+					}
+					
+					keyCache[this.TYPE_DOI].set(row.doi, true);
+				}
+				if (row.pmid) {
+					let indexes = keyIndexes.get(row.pmid);
+					if (indexes !== undefined) {
+						for (let index of indexes) {
+							matchingIndexes.add(index);
+						}
+					}
+					
+					keyCache[this.TYPE_PMID].set(row.pmid, true);
+				}
+			}
+		}
+		
+		// TODO: Save key cache to disk with current ETag
+		
+		return [...matchingIndexes];
+	}),
+	
 	libraryHasRetractedItems: function (libraryID) {
 		return !!(this._retractedItemsByLibrary[libraryID]
 			&& this._retractedItemsByLibrary[libraryID].size);
@@ -131,9 +245,9 @@ Zotero.Retractions = {
 		// Update Retracted Items virtual collection
 		if (Zotero.Libraries.exists(libraryID)
 				// Changed
-				&& (previous != current ||
+				&& (previous != current
 					// Explicitly hidden
-					(current && !Zotero.Utilities.Internal.getVirtualCollectionStateForLibrary(libraryID, 'retracted')))) {
+					|| (current && !Zotero.Utilities.Internal.getVirtualCollectionStateForLibrary(libraryID, 'retracted')))) {
 			let promises = [];
 			for (let zp of Zotero.getZoteroPanes()) {
 				promises.push(zp.setVirtual(libraryID, 'retracted', current));
@@ -291,7 +405,8 @@ Zotero.Retractions = {
 		this._queuedPrefixStrings.clear();
 		var addedItems = [];
 		try {
-			addedItems = await this._downloadPossibleMatches(prefixStrings);
+			let possibleMatches = await this._downloadPossibleMatches(prefixStrings);
+			addedItems = await this._addPossibleMatches(possibleMatches);
 		}
 		catch (e) {
 			// Add back to queue on failure
@@ -382,7 +497,8 @@ Zotero.Retractions = {
 		if (prefixesToSend.size) {
 			// TODO: Diff list and remove existing retractions that are missing
 			
-			await this._downloadPossibleMatches([...prefixesToSend]);
+			let possibleMatches = await this._downloadPossibleMatches([...prefixesToSend]);
+			await this._addPossibleMatches(possibleMatches);
 		}
 		else {
 			Zotero.debug("No possible retractions");
@@ -391,8 +507,10 @@ Zotero.Retractions = {
 		await this._saveCacheFile(list, etag, doiPrefixLength, pmidPrefixLength);
 	}),
 	
+	
 	/**
-	 * @return {Number[]} - Array of added item ids
+	 * @param {String[]} prefixStrings
+	 * @return {Object[]} - Results from API search
 	 */
 	_downloadPossibleMatches: async function (prefixStrings) {
 		var req = await Zotero.HTTP.request(
@@ -408,10 +526,17 @@ Zotero.Retractions = {
 			+ Zotero.Utilities.pluralize(results.length, ['match', 'matches']));
 		
 		results.push(...this._fixedResults);
-		
+		return results;
+	},
+	
+	/**
+	 * @param {Object[]} - Results from API search
+	 * @return {Number[]} - Array of added item ids
+	 */
+	_addPossibleMatches: async function (possibleMatches) {
 		// Look in the key mappings for local items that match and add them as retractions
 		var addedItemIDs = new Set();
-		for (let row of results) {
+		for (let row of possibleMatches) {
 			if (row.doi) {
 				let ids = this._keyItems[this.TYPE_DOI].get(row.doi);
 				if (ids) {
@@ -506,13 +631,31 @@ Zotero.Retractions = {
 		return value;
 	},
 	
-	_getDOIPrefix: function (value, length) {
-		var hash = this._valueToKey(this.TYPE_DOI, value);
-		return hash.substr(0, length);
+	_getPrefixString: function (type, value, length) {
+		switch (type) {
+			case this.TYPE_DOI: {
+				let hash = this._valueToKey(this.TYPE_DOI, value);
+				return this.TYPE_DOI + hash.substr(0, length);
+			}
+			
+			case this.TYPE_PMID: {
+				return this.TYPE_PMID + value.substr(0, length);
+			}
+		}
+		throw new Error("Unsupported type " + type);
 	},
 	
-	_getPMIDPrefix: function (value, length) {
-		return value.substr(0, length);
+	_getCachedPrefixLength: function (type) {
+		switch (type) {
+			case this.TYPE_DOI: {
+				return this._cacheDOIPrefixLength;
+			}
+			
+			case this.TYPE_PMID: {
+				return this._cachePMIDPrefixLength;
+			}
+		}
+		throw new Error("Unsupported type " + type);
 	},
 	
 	_cacheKeyMappings: async function () {
@@ -603,7 +746,7 @@ Zotero.Retractions = {
 		let doi = this._getItemDOI(item);
 		if (doi) {
 			this._addItemKeyMapping(this.TYPE_DOI, doi, item.id);
-			let prefixStr = this.TYPE_DOI + this._getDOIPrefix(doi, this._cacheDOIPrefixLength);
+			let prefixStr = this._getPrefixString(this.TYPE_DOI, doi, this._cacheDOIPrefixLength);
 			if (this._cachePrefixList.has(prefixStr)) {
 				this._queuedPrefixStrings.add(prefixStr);
 			}
@@ -611,7 +754,7 @@ Zotero.Retractions = {
 		let pmid = this._getItemPMID(item);
 		if (pmid) {
 			this._addItemKeyMapping(this.TYPE_PMID, pmid, item.id);
-			let prefixStr = this.TYPE_PMID + this._getPMIDPrefix(pmid, this._cachePMIDPrefixLength);
+			let prefixStr = this._getPrefixString(this.TYPE_PMID, pmid, this._cachePMIDPrefixLength);
 			if (this._cachePrefixList.has(prefixStr)) {
 				this._queuedPrefixStrings.add(prefixStr);
 			}
@@ -855,6 +998,6 @@ Zotero.Retractions = {
 	},
 	
 	_fixedResults: [
-		{ date: "1977-04-15", pmid: 993, retractionPMID: 195582, reasons: ["Results Not Reproducible"], urls: []}
+		{ date: "1977-04-15", pmid: 993, retractionPMID: 195582, reasons: ["Results Not Reproducible"], urls: [] }
 	]
 };

@@ -73,6 +73,36 @@ describe("Retractions", function() {
 		throw new Error("'collapsed' attribute not found");
 	}
 	
+	
+	describe("#getRetractionsFromJSON()", function () {
+		it("should identify object with retracted DOI", async function () {
+			var spy = sinon.spy(Zotero.HTTP, 'request');
+			var json = [
+				{
+					
+				},
+				{
+					DOI: retractedDOI
+				},
+				{
+					DOI: '10.1234/abcd'
+				}
+			];
+			
+			var indexes = await Zotero.Retractions.getRetractionsFromJSON(json);
+			assert.sameMembers(indexes, [1]);
+			assert.equal(spy.callCount, 1);
+			
+			indexes = await Zotero.Retractions.getRetractionsFromJSON(json);
+			assert.sameMembers(indexes, [1]);
+			// Result should've been cached, so we should have it without another API request
+			assert.equal(spy.callCount, 1);
+			
+			spy.restore();
+		});
+	});
+	
+	
 	describe("Notification Banner", function () {
 		it("should show banner when retracted item is added", async function () {
 			var banner = win.document.getElementById('retracted-items-container');
