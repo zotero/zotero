@@ -28,28 +28,21 @@ Zotero.Retractions = {
 	TYPE_PMID: 'p',
 	TYPE_NAMES: ['DOI', 'PMID'],
 	
+	_prefObserverRegistered: false,
 	_initialized: false,
 	_version: 1,
 	
-	_cacheFile: null,
-	_cacheVersion: null,
-	_cacheETag: null,
-	_cacheDOIPrefixLength: null,
-	_cachePMIDPrefixLength: null,
-	_cachePrefixList: new Set(), // Prefix strings from server
-	
-	_queuedItems: new Set(),
-	_queuedPrefixStrings: new Set(),
-	
-	_keyItems: {},
-	_itemKeys: {},
-	
-	_retractedItems: new Set(),
-	_retractedItemsByLibrary: {},
-	_librariesWithRetractions: new Set(),
-	
 	init: async function () {
-		this._cacheFile = OS.Path.join(Zotero.Profile.dir, 'retractions.json');
+		this._resetState();
+		
+		if (!this._prefObserverRegistered) {
+			Zotero.Prefs.registerObserver('retractions.enabled', this._handlePrefChange.bind(this));
+			this._prefObserverRegistered = true;
+		}
+		
+		if (!Zotero.Prefs.get('retractions.enabled')) {
+			return;
+		}
 		
 		// Load mappings of keys (DOI hashes and PMIDs) to items and vice versa and register for
 		// item changes so they can be kept up to date in notify().
@@ -87,6 +80,22 @@ Zotero.Retractions = {
 		if (!this._cacheETag || this._cacheVersion != this._version) {
 			Zotero.Schema.schemaUpdatePromise.then(() => this.updateFromServer());
 		}
+	},
+	
+	_resetState: function () {
+		this._initialized = false;
+		this._keyItems = {};
+		this._itemKeys = {};
+		this._queuedItems = new Set();
+		this._queuedPrefixStrings = new Set();
+		this._retractedItems = new Set();
+		this._retractedItemsByLibrary = {};
+		this._librariesWithRetractions = new Set();
+		this._cacheVersion = null;
+		this._cacheETag = null;
+		this._cacheDOIPrefixLength = null;
+		this._cachePMIDPrefixLength = null;
+		this._cachePrefixList = new Set();
 	},
 	
 	/**
@@ -193,6 +202,11 @@ Zotero.Retractions = {
 	},
 	
 	notify: async function (action, type, ids, extraData) {
+		// The observer is removed when disabled but something might already be in progress
+		if (!this._initialized) {
+			return;
+		}
+		
 		// Clean up cache on group deletion
 		if (action == 'delete' && type == 'group') {
 			for (let libraryID of ids) {
@@ -646,11 +660,29 @@ Zotero.Retractions = {
 		await Zotero.Notifier.trigger('refresh', 'item', [itemID]);
 	},
 	
-	_loadCacheFile: async function () {
-		if (!await OS.File.exists(this._cacheFile)) {
+	_removeAllEntries: async function () {
+		var libraryIDs = await Zotero.DB.columnQueryAsync(
+			"SELECT libraryID FROM items WHERE itemID IN (SELECT itemID FROM retractedItems)"
+		);
+		var itemIDs = await Zotero.DB.columnQueryAsync("SELECT itemID FROM retractedItems");
+		if (!itemIDs.length) {
 			return;
 		}
-		var data = JSON.parse(await Zotero.File.getContentsAsync(this._cacheFile));
+		await Zotero.DB.queryAsync("DELETE FROM retractedItems");
+		this._retractedItems.clear();
+		this._retractedItemsByLibrary = {};
+		for (let libraryID of libraryIDs) {
+			await this._updateLibraryRetractions(libraryID);
+		}
+		await Zotero.Notifier.trigger('refresh', 'item', itemIDs);
+	},
+	
+	_loadCacheFile: async function () {
+		var cacheFile = OS.Path.join(Zotero.Profile.dir, 'retractions.json');
+		if (!await OS.File.exists(cacheFile)) {
+			return;
+		}
+		var data = JSON.parse(await Zotero.File.getContentsAsync(cacheFile));
 		if (data) {
 			this._processCacheData(data);
 		}
@@ -680,6 +712,7 @@ Zotero.Retractions = {
 	 * Cache prefix list in profile directory
 	 */
 	_saveCacheFile: async function (data, etag, doiPrefixLength, pmidPrefixLength) {
+		var cacheFile = OS.Path.join(Zotero.Profile.dir, 'retractions.json');
 		var cacheJSON = {
 			version: this._version,
 			etag,
@@ -688,7 +721,7 @@ Zotero.Retractions = {
 			data
 		};
 		try {
-			await Zotero.File.putContentsAsync(this._cacheFile, JSON.stringify(cacheJSON));
+			await Zotero.File.putContentsAsync(cacheFile, JSON.stringify(cacheJSON));
 			this._processCacheData(cacheJSON);
 		}
 		catch (e) {
@@ -703,6 +736,24 @@ Zotero.Retractions = {
 		}
 		url += 'retractions/';
 		return url;
+	},
+	
+	_handlePrefChange: async function () {
+		// Enable
+		if (Zotero.Prefs.get('retractions.enabled')) {
+			await this.init();
+		}
+		// Disable
+		else {
+			if (this._notifierID) {
+				Zotero.Notifier.unregisterObserver(this._notifierID);
+				delete this._notifierID;
+			}
+			await this._removeAllEntries();
+			this._resetState();
+			let cacheFile = OS.Path.join(Zotero.Profile.dir, 'retractions.json');
+			await OS.File.remove(cacheFile);
+		}
 	},
 	
 	// https://retractionwatch.com/retraction-watch-database-user-guide/retraction-watch-database-user-guide-appendix-b-reasons/

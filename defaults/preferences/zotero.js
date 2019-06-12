@@ -192,4 +192,6 @@ pref("extensions.zotero.translators.supplementaryAsLink", false);
 pref("extensions.zotero.translators.RIS.import.ignoreUnknown", true);
 pref("extensions.zotero.translators.RIS.import.keepID", false);
 
+// Retracted Items
+pref("extensions.zotero.retractions.enabled", true);
 pref("extensions.zotero.retractions.recentItems", "[]");

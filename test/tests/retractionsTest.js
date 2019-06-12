@@ -62,18 +62,18 @@ describe("Retractions", function() {
 		return item;
 	}
 	
-	describe("Notification Banner", function () {
-		function bannerShown() {
-			var container = win.document.getElementById('retracted-items-container');
-			if (container.getAttribute('collapsed') == 'true') {
-				return false;
-			}
-			if (!container.hasAttribute('collapsed')) {
-				return true;
-			}
-			throw new Error("'collapsed' attribute not found");
+	function bannerShown() {
+		var container = win.document.getElementById('retracted-items-container');
+		if (container.getAttribute('collapsed') == 'true') {
+			return false;
 		}
-		
+		if (!container.hasAttribute('collapsed')) {
+			return true;
+		}
+		throw new Error("'collapsed' attribute not found");
+	}
+	
+	describe("Notification Banner", function () {
 		it("should show banner when retracted item is added", async function () {
 			var banner = win.document.getElementById('retracted-items-container');
 			assert.isFalse(bannerShown());
@@ -156,6 +156,40 @@ describe("Retractions", function() {
 			await item.saveTx();
 			await Zotero.Promise.delay(50);
 			assert.ok(zp.collectionsView.getRowIndexByID("R" + userLibraryID));
+		});
+	});
+	
+	describe("retractions.enabled", function () {
+		beforeEach(function () {
+			Zotero.Prefs.clear('retractions.enabled');
+		});
+		
+		it("should hide virtual collection and banner when false", async function () {
+			var item = await createRetractedItem();
+			await Zotero.Promise.delay(50);
+			var itemRetractionBox = win.document.getElementById('retraction-box');
+			assert.isFalse(itemRetractionBox.hidden);
+			
+			var spies = [
+				sinon.spy(Zotero.Retractions, '_removeAllEntries'),
+				sinon.spy(Zotero.Retractions, 'getData')
+			];
+			Zotero.Prefs.set('retractions.enabled', false);
+			
+			while (!spies[0].called || !spies[1].called) {
+				await Zotero.Promise.delay(50);
+			}
+			await spies[0].returnValues[0];
+			await spies[1].returnValues[0]
+			spies.forEach(spy => spy.restore());
+			
+			assert.isFalse(Zotero.Retractions.isRetracted(item));
+			assert.isFalse(zp.collectionsView.getRowIndexByID("R" + userLibraryID));
+			assert.isFalse(bannerShown());
+			
+			assert.isTrue(itemRetractionBox.hidden);
+			
+			await item.eraseTx();
 		});
 	});
 });
