@@ -624,6 +624,7 @@ var Zotero_Citation_Dialog = new function () {
 						}
 						return false;
 					}
+					item.ignoreRetraction = true;
 					break;
 				}
 			}

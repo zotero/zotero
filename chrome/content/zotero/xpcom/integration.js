@@ -967,6 +967,13 @@ Zotero.Integration.Fields.prototype.updateSession = Zotero.Promise.coroutine(fun
 		this._session.regenAll = true;
 	}
 	yield this._processFields();
+	try {
+		yield this._session.handleRetractedItems();
+	}
+	catch (e) {
+		Zotero.debug('Retracted item handling failed');
+		Zotero.logError(e);
+	}
 	this._session.regenAll = false;
 
 	var updateTime = timer.stop();
@@ -1928,6 +1935,69 @@ Zotero.Integration.Session.prototype.getItems = function() {
 	return Zotero.Cite.getItem(Object.keys(this.citationsByItemID));
 }
 
+Zotero.Integration.Session.prototype.handleRetractedItems = async function () {
+	const dealWithRetracted = (citedItem, inLibrary) => {
+		let dontPromptAgain = this.promptForRetraction(citedItem, inLibrary);
+		if (dontPromptAgain) {
+			for (let citation of this.citationsByItemID[citedItem.id]) {
+				for (let item of citation.citationItems) {
+					item.ignoreRetraction = true;
+				}
+			}
+		}
+	};
+	let zoteroItems = this.getItems();
+	let embeddedZoteroItems = [];
+	for (let zoteroItem of zoteroItems) {
+		let itemID = zoteroItem.id || zoteroItem.cslItemID;
+		let citation = this.citationsByItemID[itemID][0];
+		let citationItem = citation.citationItems.find(i => i.id == itemID);
+		if (!citationItem.ignoreRetraction) {
+			if (zoteroItem.cslItemID) {
+				embeddedZoteroItems.push(zoteroItem);
+			}
+			else if (Zotero.Retractions.isRetracted(zoteroItem)) {
+				dealWithRetracted(zoteroItem, true);
+			}
+		}
+	}
+	try {
+		var retractedIndices = await Zotero.Retractions.getRetractionsFromJSON(
+			embeddedZoteroItems.map(item => item.toJSON()));
+	} catch (e) {
+		Zotero.debug("Retraction for embedded docs lookup failed");
+		Zotero.logError(e);
+	}
+	for (let index of retractedIndices) {
+		dealWithRetracted(embeddedZoteroItems[index]);
+	}
+};
+
+Zotero.Integration.Session.prototype.promptForRetraction = function (citedItem, inLibrary) {
+	let ps = Services.prompt;
+	let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK);
+	// Cannot use citedItem.firstCreator since embedded items do not have that
+	let creator = citedItem.getCreator(0);
+	let itemString = (creator ? creator.lastName + ", " : "")
+		+ citedItem.getField('year') + ", "
+		+ citedItem.getDisplayTitle();
+	let promptText = Zotero.getString('retraction.citedItemWarning')
+		+ "\n\n"
+		+ itemString;
+	if (inLibrary) {
+		promptText += "\n\n" + Zotero.getString('retraction.citeWarning.text2');
+	}
+	let checkbox = { value: false };
+	ps.confirmEx(null,
+		Zotero.getString('general.warning'),
+		promptText,
+		buttonFlags,
+		null, null, null,
+		Zotero.getString('retraction.citedItemWarning.dontWarn'), checkbox);
+	
+	return checkbox.value;
+}
+
 
 /**
  * Edits integration bibliography
@@ -2720,7 +2790,7 @@ Zotero.Integration.Citation = class {
 	toJSON() {
 		const saveProperties = ["custom", "unsorted", "formattedCitation", "plainCitation", "dontUpdate", "noteIndex"];
 		const saveCitationItemKeys = ["locator", "label", "suppress-author", "author-only", "prefix",
-			"suffix"];
+			"suffix", "ignoreRetraction"];
 		
 		var citation = {};
 		

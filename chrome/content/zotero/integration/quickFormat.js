@@ -742,6 +742,8 @@ var Zotero_QuickFormat = new function () {
 					Zotero_QuickFormat.showInLibrary(parseInt(citationItem.id));
 				}
 				return false;
+			} else {
+				citationItem.ignoreRetraction = true;
 			}
 		}
 		
