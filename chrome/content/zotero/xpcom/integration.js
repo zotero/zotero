@@ -971,7 +971,7 @@ Zotero.Integration.Fields.prototype.updateSession = Zotero.Promise.coroutine(fun
 		yield this._session.handleRetractedItems();
 	}
 	catch (e) {
-		Zotero.debug('Retracted item handling failed');
+		Zotero.debug('Retracted item handling failed', 2);
 		Zotero.logError(e);
 	}
 	this._session.regenAll = false;
@@ -1939,7 +1939,8 @@ Zotero.Integration.Session.prototype.handleRetractedItems = async function () {
 	const dealWithRetracted = (citedItem, inLibrary) => {
 		let dontPromptAgain = this.promptForRetraction(citedItem, inLibrary);
 		if (dontPromptAgain) {
-			for (let citation of this.citationsByItemID[citedItem.id]) {
+			let itemID = citedItem.id || citedItem.cslItemID;
+			for (let citation of this.citationsByItemID[itemID]) {
 				for (let item of citation.citationItems) {
 					item.ignoreRetraction = true;
 				}
@@ -1961,13 +1962,9 @@ Zotero.Integration.Session.prototype.handleRetractedItems = async function () {
 			}
 		}
 	}
-	try {
-		var retractedIndices = await Zotero.Retractions.getRetractionsFromJSON(
-			embeddedZoteroItems.map(item => item.toJSON()));
-	} catch (e) {
-		Zotero.debug("Retraction for embedded docs lookup failed");
-		Zotero.logError(e);
-	}
+	var retractedIndices = await Zotero.Retractions.getRetractionsFromJSON(
+		embeddedZoteroItems.map(item => item.toJSON())
+	);
 	for (let index of retractedIndices) {
 		dealWithRetracted(embeddedZoteroItems[index]);
 	}
@@ -1978,10 +1975,11 @@ Zotero.Integration.Session.prototype.promptForRetraction = function (citedItem, 
 	let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK);
 	// Cannot use citedItem.firstCreator since embedded items do not have that
 	let creator = citedItem.getCreator(0);
+	let year = citedItem.getField('year');
 	let itemString = (creator ? creator.lastName + ", " : "")
-		+ citedItem.getField('year') + ", "
+		+ (year ? year + ", " : "")
 		+ citedItem.getDisplayTitle();
-	let promptText = Zotero.getString('retraction.citedItemWarning')
+	let promptText = Zotero.getString('retraction.citationWarning')
 		+ "\n\n"
 		+ itemString;
 	if (inLibrary) {
@@ -1993,7 +1991,7 @@ Zotero.Integration.Session.prototype.promptForRetraction = function (citedItem, 
 		promptText,
 		buttonFlags,
 		null, null, null,
-		Zotero.getString('retraction.citedItemWarning.dontWarn'), checkbox);
+		Zotero.getString('retraction.citationWarning.dontWarn'), checkbox);
 	
 	return checkbox.value;
 }
