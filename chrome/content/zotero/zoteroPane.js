@@ -4800,12 +4800,14 @@ var ZoteroPane = new function()
 		link.textContent = Zotero.getString('retraction.alert.view.' + suffix);
 		link.onclick = async function () {
 			this.hideRetractionBanner();
-			var libraryID = this.getSelectedLibraryID();
-			// Select the Retracted Items collection
-			await this.collectionsView.selectByID("R" + libraryID);
 			// Select newly detected item if only one
 			if (items.length == 1) {
 				await this.selectItem(items[0].id);
+			}
+			// Otherwise select Retracted Items collection
+			else {
+				let libraryID = this.getSelectedLibraryID();
+				await this.collectionsView.selectByID("R" + libraryID);
 			}
 		}.bind(this);
 		
