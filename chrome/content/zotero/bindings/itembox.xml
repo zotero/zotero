@@ -2397,19 +2397,6 @@
 						this._id('retraction-header-text').textContent
 							= Zotero.getString('retraction.banner');
 						
-						var deleteButton = this._id('retraction-header-delete-button');
-						if (!this.item.deleted && this.item.isEditable()) {
-							deleteButton.hidden = false;
-							deleteButton.textContent = Zotero.getString('pane.items.trash.title');
-							deleteButton.onclick = function () {
-								this.item.deleted = true;
-								this.item.saveTx();
-							}.bind(this);
-						}
-						else {
-							deleteButton.hidden = true;
-						}
-						
 						// Date
 						if (data.date) {
 							this._id('retraction-date').hidden = false;
@@ -2628,7 +2615,6 @@
 						hidden="hidden">
 					<div id="retraction-header">
 						<div id="retraction-header-text"/>
-						<button id="retraction-header-delete-button"/>
 					</div>
 					<div id="retraction-details">
 						<p id="retraction-date"/>
