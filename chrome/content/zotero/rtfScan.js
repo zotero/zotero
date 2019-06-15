@@ -428,7 +428,7 @@ var Zotero_RTFScan = new function() {
 				var io = {singleSelection:true};
 				if(citationItemIDs[citation] && citationItemIDs[citation].length == 1) {	// mapped citation
 					// specify that item should be selected in window
-					io.select = citationItemIDs[citation];
+					io.select = citationItemIDs[citation][0];
 				}
 				
 				window.openDialog('chrome://zotero/content/selectItemsDialog.xul', '', 'chrome,modal', io);
@@ -460,7 +460,8 @@ var Zotero_RTFScan = new function() {
 	 */
 	function _refreshCanAdvance() {
 		var canAdvance = true;
-		for (let itemList of citationItemIDs) {
+		for (let i in citationItemIDs) {
+			let itemList = citationItemIDs[i];
 			if(itemList.length != 1) {
 				canAdvance = false;
 				break;
