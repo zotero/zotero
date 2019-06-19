@@ -2513,8 +2513,9 @@ Zotero.Schema = new function(){
 				}
 			}
 			
-			else if (i == 103) {
-				yield Zotero.DB.queryAsync("CREATE TABLE retractedItems (\n	itemID INTEGER PRIMARY KEY,\n	data TEXT,\n	FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n);");
+			else if (i == 104) {
+				// Didn't take for some people in 103 for some reason, so run again with IF NOT EXISTS
+				yield Zotero.DB.queryAsync("CREATE TABLE IF NOT EXISTS retractedItems (\n	itemID INTEGER PRIMARY KEY,\n	data TEXT,\n	FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n);");
 			}
 			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
