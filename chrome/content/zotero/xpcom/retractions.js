@@ -498,10 +498,11 @@ Zotero.Retractions = {
 			// TODO: Diff list and remove existing retractions that are missing
 			
 			let possibleMatches = await this._downloadPossibleMatches([...prefixesToSend]);
-			await this._addPossibleMatches(possibleMatches);
+			await this._addPossibleMatches(possibleMatches, true);
 		}
 		else {
 			Zotero.debug("No possible retractions");
+			await this._addPossibleMatches([], true);
 		}
 		
 		await this._saveCacheFile(list, etag, doiPrefixLength, pmidPrefixLength);
@@ -530,12 +531,16 @@ Zotero.Retractions = {
 	},
 	
 	/**
-	 * @param {Object[]} - Results from API search
+	 * @param {Object[]} possibleMatches - Results from API search
+	 * @param {Boolean} [removeExisting = false] - Remove retracted flag from all items that don't
+	 *     match the results. This should only be true if possibleMatches includes all possible
+	 *     matches in the database.
 	 * @return {Number[]} - Array of added item ids
 	 */
-	_addPossibleMatches: async function (possibleMatches) {
+	_addPossibleMatches: async function (possibleMatches, removeExisting) {
 		// Look in the key mappings for local items that match and add them as retractions
 		var addedItemIDs = new Set();
+		var allItemIDs = new Set();
 		for (let row of possibleMatches) {
 			if (row.doi) {
 				let ids = this._keyItems[this.TYPE_DOI].get(row.doi);
@@ -544,6 +549,7 @@ Zotero.Retractions = {
 						if (!this._retractedItems.has(id)) {
 							addedItemIDs.add(id);
 						}
+						allItemIDs.add(id);
 						await this._addEntry(id, row);
 					}
 				}
@@ -555,14 +561,31 @@ Zotero.Retractions = {
 						if (!this._retractedItems.has(id)) {
 							addedItemIDs.add(id);
 						}
+						allItemIDs.add(id);
 						await this._addEntry(id, row);
 					}
 				}
 			}
 		}
 		
-		Zotero.debug(`Found ${addedItemIDs.size} retracted `
-			+ Zotero.Utilities.pluralize(addedItemIDs.size, 'item'));
+		// Remove existing retracted items that no longer match
+		var removed = 0;
+		if (removeExisting) {
+			for (let itemID of this._retractedItems) {
+				if (!allItemIDs.has(itemID)) {
+					let item = await Zotero.Items.getAsync(itemID);
+					await this._removeEntry(itemID, item.libraryID);
+					removed++;
+				}
+			}
+		}
+		
+		var msg = `Found ${addedItemIDs.size} retracted `
+			+ Zotero.Utilities.pluralize(addedItemIDs.size, 'item');
+		if (removed) {
+			msg += " and removed " + removed;
+		}
+		Zotero.debug(msg);
 		addedItemIDs = [...addedItemIDs];
 		if (addedItemIDs.length) {
 			this._showAlert(addedItemIDs); // async

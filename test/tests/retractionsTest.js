@@ -74,6 +74,106 @@ describe("Retractions", function() {
 	}
 	
 	
+	describe("#updateFromServer()", function () {
+		var server;
+		var baseURL;
+		
+		before(function () {
+			Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
+			baseURL = ZOTERO_CONFIG.API_URL + 'retractions/';
+		});
+		
+		beforeEach(function () {
+			server = sinon.fakeServer.create();
+			server.autoRespond = true;
+		});
+		
+		after(async function () {
+			Zotero.HTTP.mock = null;
+			// Restore the real list from the server. We could just mock it as part of the suite.
+			await Zotero.Retractions.updateFromServer();
+		});
+		
+		/*it("shouldn't show banner or virtual collection for already flagged items on list update", async function () {
+			await Zotero.Retractions.updateFromServer();
+		});*/
+		
+		it("should remove retraction flag from items that no longer match prefix list", async function () {
+			var doi = '10.1234/abcde';
+			var hash = Zotero.Utilities.Internal.sha1(doi);
+			var prefix = hash.substr(0, 5);
+			var lines = [
+				Zotero.Retractions.TYPE_DOI + prefix + ' 12345\n',
+				Zotero.Retractions.TYPE_DOI + 'aaaaa 23456\n'
+			];
+			
+			var listCount = 0;
+			var searchCount = 0;
+			server.respond(function (req) {
+				if (req.method == 'GET' && req.url == baseURL + 'list') {
+					listCount++;
+					if (listCount == 1) {
+						req.respond(
+							200,
+							{
+								'Content-Type': 'text/plain',
+								'ETag': 'abcdefg'
+							},
+							lines.join('')
+						);
+					}
+					else if (listCount == 2) {
+						req.respond(
+							200,
+							{
+								'Content-Type': 'text/plain',
+								'ETag': 'bcdefgh'
+							},
+							lines[1]
+						);
+					}
+				}
+				else if (req.method == 'POST' && req.url == baseURL + 'search') {
+					searchCount++;
+					if (searchCount == 1) {
+						req.respond(
+							200,
+							{
+								'Content-Type': 'application/json'
+							},
+							JSON.stringify([
+								{
+									doi: hash,
+									retractionDOI: '10.1234/bcdef',
+									date: '2019-01-02'
+								}
+							])
+						);
+					}
+				}
+			});
+			
+			await Zotero.Retractions.updateFromServer();
+			
+			// Create item with DOI from list
+			var promise = waitForItemEvent('refresh');
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('DOI', doi);
+			await item.saveTx();
+			await promise;
+			
+			assert.isTrue(Zotero.Retractions.isRetracted(item));
+			
+			// Make a second request, with the entry removed
+			promise = waitForItemEvent('refresh');
+			await Zotero.Retractions.updateFromServer();
+			await promise;
+			
+			assert.isFalse(Zotero.Retractions.isRetracted(item));
+		});
+	});
+	
+	
 	describe("#getRetractionsFromJSON()", function () {
 		it("should identify object with retracted DOI", async function () {
 			var spy = sinon.spy(Zotero.HTTP, 'request');
