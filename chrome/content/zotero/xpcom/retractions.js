@@ -774,7 +774,7 @@ Zotero.Retractions = {
 		var sql = "REPLACE INTO retractedItems VALUES (?, ?)";
 		await Zotero.DB.queryAsync(sql, [itemID, JSON.stringify(o)]);
 		
-		var item = Zotero.Items.get(itemID);
+		var item = await Zotero.Items.getAsync(itemID);
 		var libraryID = item.libraryID;
 		this._retractedItems.add(itemID);
 		if (!item.deleted) {
