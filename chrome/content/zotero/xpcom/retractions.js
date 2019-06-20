@@ -234,6 +234,10 @@ Zotero.Retractions = {
 	},
 	
 	_removeLibraryRetractedItem: async function (libraryID, itemID) {
+		// Might not exist if retracted item was in trash at startup or when detected
+		if (!this._retractedItemsByLibrary[libraryID]) {
+			return;
+		}
 		this._retractedItemsByLibrary[libraryID].delete(itemID);
 		await this._updateLibraryRetractions(libraryID);
 	},
