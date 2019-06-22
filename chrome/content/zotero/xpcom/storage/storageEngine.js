@@ -133,6 +133,12 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	var filesEditable = Zotero.Libraries.get(libraryID).filesEditable;
 	this.requestsRemaining = 0;
 	
+	// Clear over-quota flag on manual sync
+	if (!this.background && Zotero.Sync.Storage.Local.storageRemainingForLibrary.has(libraryID)) {
+		Zotero.debug("Clearing over-quota flag for " + this.library.name);
+		Zotero.Sync.Storage.Local.storageRemainingForLibrary.delete(libraryID)
+	}
+	
 	// Check for updated files to upload
 	if (!filesEditable) {
 		Zotero.debug("No file editing access -- skipping file modification check for "

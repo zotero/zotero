@@ -11,6 +11,25 @@ Zotero.Sync.Storage.Local = {
 	
 	lastFullFileCheck: {},
 	uploadCheckFiles: [],
+	storageRemainingForLibrary: new Map(),
+	
+	init: function () {
+		Zotero.Notifier.registerObserver(this, ['group'], 'storageLocal');
+	},
+	
+	notify: async function (action, type, ids, _extraData) {
+		// Clean up cache on group deletion
+		if (action == 'delete' && type == 'group') {
+			for (let libraryID of ids) {
+				if (this.lastFullFileCheck[libraryID]) {
+					delete this.lastFullFileCheck[libraryID];
+				}
+				if (this.storageRemainingForLibrary.has(libraryID)) {
+					this.storageRemainingForLibrary.delete(libraryID);
+				}
+			}
+		}
+	},
 	
 	getEnabledForLibrary: function (libraryID) {
 		var libraryType = Zotero.Libraries.get(libraryID).libraryType;

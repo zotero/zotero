@@ -735,6 +735,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			
 			yield Zotero.Sync.Data.Local.init();
 			yield Zotero.Sync.Data.Utilities.init();
+			Zotero.Sync.Storage.Local.init();
 			Zotero.Sync.Runner = new Zotero.Sync.Runner_Module;
 			Zotero.Sync.EventListeners.init();
 			Zotero.Streamer = new Zotero.Streamer_Module;
