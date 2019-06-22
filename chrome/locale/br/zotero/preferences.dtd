@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Kendeuziñ ar roadennoù lec'hel gant ar roadennoù a-bell, ober fae ouzh ar roll-istor sinkroneladur">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Adsevel adalek al levraoueg enlinenn">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Flastrañ ar roadennoù Zotero lec'hel gant roadennoù o tont eus al levraoueg enlinenn">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Adsevel betek al levraoueg enlinenn">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Flastrañ roadennoù al levraoueg enlinenn gant roadennoù lec'hel Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Adloc'hañ roll-istor sinkroneladur ar restroù">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Keñveriañ an holl restroù kenstag gant ar servijer stokañ">
