@@ -1858,17 +1858,18 @@
 								}
 							}
 							
-							//Add the creators in lastNameArray one at a time
+							// Add the creators in lastNameArray one at a time
 							for (let tempName of nameArray) {
 								// Check for tab to determine creator name format
-								otherFields.fieldMode = (tempName.indexOf('\t') == -1) ? 1 : 0;
-								if (otherFields.fieldMode == 0) {
-									otherFields.lastName=tempName.split('\t')[0];
-									otherFields.firstName=tempName.split('\t')[1];
-								} 
-								else {
-									otherFields.lastName=tempName;
-									otherFields.firstName='';
+								if (tempName.indexOf('\t') != -1) {
+									otherFields.fieldMode = 0;
+									[otherFields.lastName, otherFields.firstName] = tempName.split('\t');
+								} else if (tempName.indexOf(',') != -1 && otherFields.fieldMode == 0) {
+									[otherFields.lastName, otherFields.firstName] = tempName.split(',');
+								} else {
+									otherFields.fieldMode = 1;
+									otherFields.lastName = tempName;
+									otherFields.firstName = '';
 								}
 								this.modifyCreator(creatorIndex, otherFields);
 								creatorIndex++;
@@ -2084,8 +2085,21 @@
 							default:
 								throw ("Invalid transform mode '" + mode + "' in zoteroitembox.textTransform()");
 						}
-						this._setFieldValue(label, newVal);
-						this._modifyField(label.getAttribute('fieldname'), newVal);
+            var currentFieldName = label.getAttribute('fieldname');
+            // Creator field (e.g., creator-2-lastName)
+            if (currentFieldName.startsWith('creator-')) {
+              let row = Zotero.getAncestorByTagName(document.popupNode, 'row');
+              let creatorIndex = parseInt(currentFieldName.split('-')[1]);
+              let fields = this.getCreatorFields(row);
+              fields[currentFieldName.split('-')[2]] = newVal;
+              this.modifyCreator(creatorIndex, fields);
+              this.item.save();
+            }
+            // Single field (e.g., title)
+            else {
+              this._setFieldValue(label, newVal);
+              this._modifyField(currentFieldName, newVal);
+            }
 						if (this.saveOnEdit) {
 							// If a field is open, blur it, which will trigger a save and cause
 							// the saveTx() to be a no-op
@@ -2603,6 +2617,8 @@
 							return !hideTransforms;">
 						<menuitem label="&zotero.item.creatorTransform.nameSwap;"
 							oncommand="document.getBindingParent(this).swapNames(event);"/>
+						<menuitem label="&zotero.item.creatorTransform.titlecase;"
+							oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'title')"/>
 					</menupopup>
 					<menupopup id="zotero-doi-menu">
 						<menuitem id="zotero-doi-menu-view-online" label="&zotero.item.viewOnline;"/>
