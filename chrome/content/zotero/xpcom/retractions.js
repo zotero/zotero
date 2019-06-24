@@ -326,9 +326,11 @@ Zotero.Retractions = {
 		}
 		
 		// Clean up cache on group deletion
-		if (action == 'delete' && type == 'group') {
-			for (let libraryID of ids) {
-				this._resetLibraryRetractions(libraryID);
+		if (type == 'group') {
+			if (action == 'delete') {
+				for (let libraryID of ids) {
+					this._resetLibraryRetractions(libraryID);
+				}
 			}
 			return;
 		}
