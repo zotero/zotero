@@ -88,7 +88,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Połącz lokalne dane ze zdalnymi, ignorując historię synchronizacji">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Przywróć dane z biblioteki zdalnej">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Nadpisz lokalne dane Zotero danymi z biblioteki zdalnej (na serwerze synchronizacji).">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Zamień zdalną bibliotekę">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Nadpisz dane w zdalnej bibliotece (na serwerze synchronizacji) lokalnymi danymi Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Wyczyść historię synchronizacji plików">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Porównaj wszystkie pliki załączników z przechowywanymi zdalnie">
@@ -196,7 +196,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Użyj katalogu profilu">
 <!ENTITY zotero.preferences.dataDir.custom "Określ katalog:">
 <!ENTITY zotero.preferences.dataDir.choose "Wybierz...">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(podany w linii poleceń)">
 <!ENTITY zotero.preferences.dataDir.reveal "Wyświetl katalog bazy danych">
 <!ENTITY zotero.preferences.dataDir.migrate "Przenieś do nowej domyślnej lokalizacji...">
 

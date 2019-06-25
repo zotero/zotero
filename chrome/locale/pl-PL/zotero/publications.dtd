@@ -7,7 +7,7 @@
 
 <!ENTITY zotero.publications.sharing.title "Wybierz sposób współdzielenia swojej pracy">
 <!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
+<!ENTITY zotero.publications.sharing.prompt "Czy chcesz zezwolić innym na wykorzystanie twojej pracy?">
 <!ENTITY zotero.publications.sharing.cc "Tak, na licencji Creative Commons">
 <!ENTITY zotero.publications.sharing.cc0 "Tak, i umieść moją pracę w domenie publicznej">
 <!ENTITY zotero.publications.sharing.reserved "Nie, tylko opublikuj moją pracę na zotero.org">
