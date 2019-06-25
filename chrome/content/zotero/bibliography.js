@@ -176,7 +176,9 @@ var Zotero_File_Interface_Bibliography = new function() {
 				document.getElementById("automaticCitationUpdates-checkbox").checked = !_io.delayCitationUpdates;
 			}
 			
-			if (_io.showImportExport) {
+			// TEMP: Disabled
+			//if (_io.showImportExport) {
+			if (false) {
 				document.querySelector('#exportImport').hidden = false;
 			}
 		}
