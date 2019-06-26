@@ -172,7 +172,7 @@ Zotero.Cite = {
 			var maxOffset = parseInt(bib[0].maxoffset);
 			var entrySpacing = parseInt(bib[0].entryspacing);
 			var lineSpacing = parseInt(bib[0].linespacing);
-			var hangingIndent = parseInt(bib[0].hangingindent);
+			var hangingIndent = bib[0].hangingindent;
 			var secondFieldAlign = bib[0]["second-field-align"];
 			
 			// Validate input
