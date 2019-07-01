@@ -42,4 +42,45 @@ describe("Zotero.Styles", function() {
 			yield Zotero.Styles.install({file: stylePath}, styleID, true);
 		})
 	});
+	
+	describe("subtitle capitalization", function () {
+		var item;
+		
+		before(async function () {
+			item = createUnsavedDataObject(
+				'item',
+				{
+					itemType: 'journalArticle',
+					title: 'Foo bar: baz qux'
+				}
+			);
+			item.setField('shortTitle', 'Foo bar');
+			item.setField('date', '2019');
+			await item.saveTx();
+		});
+		
+		it("should capitalize subtitles in APA", async function () {
+			var o = Zotero.QuickCopy.getContentFromItems(
+				[item],
+				'bibliography=http://www.zotero.org/styles/apa'
+			);
+			assert.equal(o.text, 'Foo bar: Baz qux. (2019).\n');
+		});
+		
+		it("should capitalize subtitles in AMA", async function () {
+			var o = Zotero.QuickCopy.getContentFromItems(
+				[item],
+				'bibliography=http://www.zotero.org/styles/american-medical-association'
+			);
+			assert.equal(o.text, '1. Foo bar: Baz qux. 2019.\n');
+		});
+		
+		it("shouldn't capitalize subtitles in Vancouver", async function () {
+			var o = Zotero.QuickCopy.getContentFromItems(
+				[item],
+				'bibliography=http://www.zotero.org/styles/vancouver'
+			);
+			assert.equal(o.text, '1. Foo bar: baz qux. 2019; \n');
+		});
+	});
 });
