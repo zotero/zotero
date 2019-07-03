@@ -721,28 +721,39 @@ var Zotero_QuickFormat = new function () {
 			citationItem.uris = item.cslURIs;
 			citationItem.itemData = item.cslItemData;
 		}
-		else if (Zotero.Retractions.isRetracted({id: parseInt(citationItem.id)})) {
-			referencePanel.hidden = true;
-			var ps = Services.prompt;
-			var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
-				+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
-			var result = ps.confirmEx(null,
-				Zotero.getString('general.warning'),
-				Zotero.getString('retraction.citeWarning.text1') + '\n\n'
-					+ Zotero.getString('retraction.citeWarning.text2'),
-				buttonFlags,
-				Zotero.getString('general.continue'),
-				null,
-				Zotero.getString('pane.items.showItemInLibrary'),
-				null, {});
-			referencePanel.hidden = false;
-			if (result > 0) {
-				if (result == 2) {
-					Zotero_QuickFormat.showInLibrary(parseInt(citationItem.id));
+		else if (Zotero.Retractions.isRetracted({ id: parseInt(citationItem.id) })) {
+			citationItem.id = parseInt(citationItem.id);
+			if (Zotero.Retractions.shouldShowCitationWarning(citationItem)) {
+				referencePanel.hidden = true;
+				var ps = Services.prompt;
+				var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+					+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+				var checkbox = { value: false };
+				var result = ps.confirmEx(null,
+					Zotero.getString('general.warning'),
+					Zotero.getString('retraction.citeWarning.text1') + '\n\n'
+						+ Zotero.getString('retraction.citeWarning.text2'),
+					buttonFlags,
+					Zotero.getString('general.continue'),
+					null,
+					Zotero.getString('pane.items.showItemInLibrary'),
+					Zotero.getString('retraction.citationWarning.dontWarn'), checkbox);
+				referencePanel.hidden = false;
+				if (result > 0) {
+					if (result == 2) {
+						Zotero_QuickFormat.showInLibrary(parseInt(citationItem.id));
+					}
+					return false;
 				}
-				return false;
-			} else {
+				else {
+					if (checkbox.value) {
+						Zotero.Retractions.disableCitationWarningsForItem(citationItem);
+					}
+					citationItem.ignoreRetraction = true;
+				}
+			}
+			else {
 				citationItem.ignoreRetraction = true;
 			}
 		}

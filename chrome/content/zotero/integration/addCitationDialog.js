@@ -604,28 +604,33 @@ var Zotero_Citation_Dialog = new function () {
 		
 		if (io.citation.citationItems.length) {
 			for (let item of io.citation.citationItems) {
-				if (Zotero.Retractions.isRetracted({id: parseInt(item.id)})) {
-					var ps = Services.prompt;
-					var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-						+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
-						+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
-					var result = ps.confirmEx(null,
-						Zotero.getString('general.warning'),
-						Zotero.getString('retraction.citeWarning.text1') + '\n\n'
-							+ Zotero.getString('retraction.citeWarning.text2'),
-						buttonFlags,
-						Zotero.getString('general.continue'),
-						null,
-						Zotero.getString('pane.items.showItemInLibrary'),
-						null, {});
-					if (result > 0) {
-						if (result == 2) {
-							_showItemInLibrary(parseInt(item.id));
+				if (Zotero.Retractions.isRetracted({ id: parseInt(item.id) })) {
+					if (Zotero.Retractions.shouldShowCitationWarning({ id: parseInt(item.id) })) {
+						var ps = Services.prompt;
+						var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+							+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+							+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+						var checkbox = { value: false };
+						var result = ps.confirmEx(null,
+							Zotero.getString('general.warning'),
+							Zotero.getString('retraction.citeWarning.text1') + '\n\n'
+								+ Zotero.getString('retraction.citeWarning.text2'),
+							buttonFlags,
+							Zotero.getString('general.continue'),
+							null,
+							Zotero.getString('pane.items.showItemInLibrary'),
+							Zotero.getString('retraction.citationWarning.dontWarn'), checkbox);
+						if (result > 0) {
+							if (result == 2) {
+								_showItemInLibrary(parseInt(item.id));
+							}
+							return false;
 						}
-						return false;
+						if (checkbox.value) {
+							Zotero.Retractions.disableCitationWarningsForItem({ id: parseInt(item.id) });
+						}
+						item.ignoreRetraction = true;
 					}
-					item.ignoreRetraction = true;
-					break;
 				}
 			}
 		}

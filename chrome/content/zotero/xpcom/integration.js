@@ -1145,7 +1145,7 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 			// If we're looking to reset the text even if it matches previous text (i.e. style change)
 			if (forceCitations == FORCE_CITATIONS_RESET_TEXT
 					// Or metadata has changed thus changing the formatted citation
-					|| ((citation.properties.formattedCitation !== formattedCitation
+					|| ((formattedCitation && citation.properties.formattedCitation !== formattedCitation
 					// Or plaintext has changed and user does not want to keep the change
 					|| plaintextChanged) && !citation.properties.dontUpdate)) {
 
@@ -1944,6 +1944,9 @@ Zotero.Integration.Session.prototype.handleRetractedItems = async function () {
 	const dealWithRetracted = (citedItem, inLibrary) => {
 		let dontPromptAgain = this.promptForRetraction(citedItem, inLibrary);
 		if (dontPromptAgain) {
+			if (citedItem.id) {
+				Zotero.Retractions.disableCitationWarningsForItem(citedItem);
+			}
 			let itemID = citedItem.id || citedItem.cslItemID;
 			for (let citation of this.citationsByItemID[itemID]) {
 				for (let item of citation.citationItems) {
@@ -1970,9 +1973,9 @@ Zotero.Integration.Session.prototype.handleRetractedItems = async function () {
 			}
 		}
 	}
-	var retractedIndices = await Zotero.Retractions.getRetractionsFromJSON(
+	var retractedIndices = await Promise.race(Zotero.Retractions.getRetractionsFromJSON(
 		embeddedZoteroItems.map(item => item.toJSON())
-	);
+	), Zotero.Promise.delay(1000).then(() => []));
 	for (let index of retractedIndices) {
 		dealWithRetracted(embeddedZoteroItems[index]);
 	}
