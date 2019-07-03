@@ -1,4 +1,4 @@
--- 104
+-- 105
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -289,6 +289,7 @@ CREATE TABLE publicationsItems (
 CREATE TABLE retractedItems (
 	itemID INTEGER PRIMARY KEY,
 	data TEXT,
+	flag INT DEFAULT 0,
 	FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE
 );
 

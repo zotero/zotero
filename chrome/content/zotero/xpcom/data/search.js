@@ -1039,7 +1039,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	}
 	
 	if (retracted) {
-		sql += " AND (itemID IN (SELECT itemID FROM retractedItems))";
+		sql += " AND (itemID IN (SELECT itemID FROM retractedItems WHERE flag=0))";
 	}
 	
 	if (publications) {

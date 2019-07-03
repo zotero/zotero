@@ -28,6 +28,10 @@ Zotero.Retractions = {
 	TYPE_PMID: 'p',
 	TYPE_NAMES: ['DOI', 'PMID'],
 	
+	FLAG_NORMAL: 0,
+	FLAG_HIDDEN: 1,
+	FLAG_NO_CITATION_WARNING: 2,
+	
 	_prefObserverRegistered: false,
 	_initialized: false,
 	_version: 1,
@@ -60,13 +64,13 @@ Zotero.Retractions = {
 		
 		// Load existing retracted items
 		var rows = await Zotero.DB.queryAsync(
-			"SELECT libraryID, itemID, DI.itemID IS NOT NULL AS deleted FROM items "
-				+ "JOIN retractedItems USING (itemID) "
+			"SELECT libraryID, itemID, DI.itemID IS NOT NULL AS deleted, RI.flag FROM items "
+				+ "JOIN retractedItems RI USING (itemID) "
 				+ "LEFT JOIN deletedItems DI USING (itemID)"
 		);
 		for (let row of rows) {
-			this._retractedItems.add(row.itemID);
-			if (!row.deleted) {
+			this._retractedItems.set(row.itemID, row.flag);
+			if (!row.deleted && row.flag != this.FLAG_HIDDEN) {
 				if (!this._retractedItemsByLibrary[row.libraryID]) {
 					this._retractedItemsByLibrary[row.libraryID] = new Set();
 				}
@@ -88,7 +92,7 @@ Zotero.Retractions = {
 		this._itemKeys = {};
 		this._queuedItems = new Set();
 		this._queuedPrefixStrings = new Set();
-		this._retractedItems = new Set();
+		this._retractedItems = new Map();
 		this._retractedItemsByLibrary = {};
 		this._librariesWithRetractions = new Set();
 		this._cacheVersion = null;
@@ -99,11 +103,53 @@ Zotero.Retractions = {
 	},
 	
 	/**
-	 * @param {Zotero.Item}
+	 * If item was retracted and the retraction hasn't been hidden
+	 *
+	 * @param {Zotero.Item} item
 	 * @return {Boolean}
 	 */
 	isRetracted: function (item) {
-		return this._retractedItems.has(item.id);
+		var flag = this._retractedItems.get(item.id);
+		return flag !== undefined && flag !== this.FLAG_HIDDEN;
+	},
+	
+	/**
+	 * If item was retracted and hasn't been marked to not show citation warnings
+	 *
+	 * @param {Zotero.Item}
+	 * @return {Boolean}
+	 */
+	shouldShowCitationWarning: function (item) {
+		return this._retractedItems.get(item.id) === this.FLAG_NORMAL;
+	},
+	
+	/**
+	 * Don't show any future retraction warnings for this item
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {Promise}
+	 */
+	hideRetraction: async function (item) {
+		return this._updateItemFlag(item, this.FLAG_HIDDEN);
+	},
+	
+	/**
+	 * Don't show future citation warnings for this item
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {Promise}
+	 */
+	disableCitationWarningsForItem: async function (item) {
+		return this._updateItemFlag(item, this.FLAG_NO_CITATION_WARNING);
+	},
+	
+	_updateItemFlag: async function (item, flag) {
+		this._retractedItems.set(item.id, flag);
+		await Zotero.DB.queryAsync(
+			"UPDATE retractedItems SET flag=? WHERE itemID=?",
+			[flag, item.id]
+		);
+		await Zotero.Notifier.trigger('modify', 'item', [item.id]);
 	},
 	
 	getRetractionsFromJSON: Zotero.serial(async function (jsonItems) {
@@ -369,8 +415,9 @@ Zotero.Retractions = {
 				// handled for newly detected items in _addEntry(), which gets called by
 				// _updateItem() above after a delay (such that the item won't yet be retracted
 				// here).
-				if (this._retractedItems.has(item.id)) {
-					if (item.deleted) {
+				let flag = this._retractedItems.get(item.id);
+				if (flag !== undefined) {
+					if (item.deleted || flag == this.FLAG_HIDDEN) {
 						await this._removeLibraryRetractedItem(item.libraryID, item.id);
 					}
 					else {
@@ -577,7 +624,7 @@ Zotero.Retractions = {
 		// Remove existing retracted items that no longer match
 		var removed = 0;
 		if (removeExisting) {
-			for (let itemID of this._retractedItems) {
+			for (let itemID of this._retractedItems.keys()) {
 				if (!allItemIDs.has(itemID)) {
 					let item = await Zotero.Items.getAsync(itemID);
 					await this._removeEntry(itemID, item.libraryID);
@@ -800,13 +847,17 @@ Zotero.Retractions = {
 		delete o.retractionDOI;
 		delete o.retractionPMID;
 		
-		var sql = "REPLACE INTO retractedItems VALUES (?, ?)";
+		var sql = "REPLACE INTO retractedItems (itemID, data) VALUES (?, ?)";
 		await Zotero.DB.queryAsync(sql, [itemID, JSON.stringify(o)]);
 		
 		var item = await Zotero.Items.getAsync(itemID);
 		var libraryID = item.libraryID;
-		this._retractedItems.add(itemID);
-		if (!item.deleted) {
+		// Check whether the retraction is already hidden by the user
+		var flag = this._retractedItems.get(itemID);
+		if (flag === undefined) {
+			this._retractedItems.set(itemID, this.FLAG_NORMAL);
+		}
+		if (!item.deleted && flag !== this.FLAG_HIDDEN) {
 			if (!this._retractedItemsByLibrary[libraryID]) {
 				this._retractedItemsByLibrary[libraryID] = new Set();
 			}

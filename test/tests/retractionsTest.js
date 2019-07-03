@@ -174,6 +174,23 @@ describe("Retractions", function() {
 	});
 	
 	
+	describe("#shouldShowCitationWarning()", function () {
+		it("should return false if citation warning is hidden", async function () {
+			var item = await createRetractedItem();
+			assert.isTrue(Zotero.Retractions.shouldShowCitationWarning(item));
+			await Zotero.Retractions.disableCitationWarningsForItem(item);
+			assert.isFalse(Zotero.Retractions.shouldShowCitationWarning(item));
+		});
+		
+		it("should return false if retraction is hidden", async function () {
+			var item = await createRetractedItem();
+			assert.isTrue(Zotero.Retractions.shouldShowCitationWarning(item));
+			await Zotero.Retractions.hideRetraction(item);
+			assert.isFalse(Zotero.Retractions.shouldShowCitationWarning(item));
+		});
+	});
+	
+	
 	describe("#getRetractionsFromJSON()", function () {
 		it("should identify object with retracted DOI", async function () {
 			var spy = sinon.spy(Zotero.HTTP, 'request');
@@ -273,6 +290,44 @@ describe("Retractions", function() {
 			assert.isFalse(zp.collectionsView.getRowIndexByID(rowID));
 			// And My Library should be selected
 			assert.equal(zp.collectionsView.selectedTreeRow.id, "L" + userLibraryID);
+		});
+		
+		it("should hide Retracted Items collection when last retracted item is marked as hidden", async function () {
+			var rowID = "R" + userLibraryID;
+			
+			// Create item
+			var item = await createRetractedItem();
+			assert.ok(zp.collectionsView.getRowIndexByID(rowID));
+			
+			// Select Retracted Items collection
+			await zp.collectionsView.selectByID(rowID);
+			await waitForItemsLoad(win);
+			
+			await Zotero.Retractions.hideRetraction(item);
+			
+			await Zotero.Promise.delay(50);
+			// Retracted Items should be gone
+			assert.isFalse(zp.collectionsView.getRowIndexByID(rowID));
+			// And My Library should be selected
+			assert.equal(zp.collectionsView.selectedTreeRow.id, "L" + userLibraryID);
+		});
+		
+		it("shouldn't hide Retracted Items collection when last retracted item is marked to not show a citation warning", async function () {
+			var rowID = "R" + userLibraryID;
+			
+			// Create item
+			var item = await createRetractedItem();
+			assert.ok(zp.collectionsView.getRowIndexByID(rowID));
+			
+			// Select Retracted Items collection
+			await zp.collectionsView.selectByID(rowID);
+			await waitForItemsLoad(win);
+			
+			await Zotero.Retractions.disableCitationWarningsForItem(item);
+			
+			await Zotero.Promise.delay(50);
+			// Should still be showing
+			assert.ok(zp.collectionsView.getRowIndexByID("R" + userLibraryID));
 		});
 		
 		it("should show Retracted Items collection when retracted item is restored from trash", async function () {
