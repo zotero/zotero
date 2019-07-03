@@ -746,16 +746,11 @@ var Zotero_QuickFormat = new function () {
 					}
 					return false;
 				}
-				else {
-					if (checkbox.value) {
-						Zotero.Retractions.disableCitationWarningsForItem(citationItem);
-					}
-					citationItem.ignoreRetraction = true;
+				if (checkbox.value) {
+					Zotero.Retractions.disableCitationWarningsForItem(citationItem);
 				}
 			}
-			else {
-				citationItem.ignoreRetraction = true;
-			}
+			citationItem.ignoreRetraction = true;
 		}
 		
 		_updateLocator(_getEditorContent());

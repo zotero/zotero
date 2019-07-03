@@ -629,8 +629,8 @@ var Zotero_Citation_Dialog = new function () {
 						if (checkbox.value) {
 							Zotero.Retractions.disableCitationWarningsForItem({ id: parseInt(item.id) });
 						}
-						item.ignoreRetraction = true;
 					}
+					item.ignoreRetraction = true;
 				}
 			}
 		}
