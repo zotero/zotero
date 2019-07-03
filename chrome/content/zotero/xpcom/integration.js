@@ -259,9 +259,13 @@ Zotero.Integration = new function() {
 				Zotero.Integration._handleCommandError(document, e);
 			}
 			else {
-				// If user cancels we should still write the currently assigned session ID
 				if (session) {
+					// If user cancels we should still write the currently assigned session ID
 					await document.setDocumentData(session.data.serialize());
+					// And any citations marked for processing (like retraction warning ignore flag changes)
+					if (Object.keys(session.processIndices).length) {
+						session.fields.updateDocument(FORCE_CITATIONS_FALSE, false, false);
+					}
 				}
 			}
 		}
@@ -1236,6 +1240,7 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 	for (var i=(deleteFields.length-1); i>=0; i--) {
 		this._fields[deleteFields[i]].delete();
 	}
+	this._session.processIndices = {}
 }
 
 /**
@@ -1942,7 +1947,10 @@ Zotero.Integration.Session.prototype.handleRetractedItems = async function () {
 			let itemID = citedItem.id || citedItem.cslItemID;
 			for (let citation of this.citationsByItemID[itemID]) {
 				for (let item of citation.citationItems) {
-					item.ignoreRetraction = true;
+					if (item.id == itemID || item.cslItemID == itemID) {
+						item.ignoreRetraction = true;
+						this.processIndices[this.documentCitationIDs[citation.citationID]] = true;
+					}
 				}
 			}
 		}
