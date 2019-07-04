@@ -855,7 +855,7 @@ describe("Zotero.Integration", function () {
 					await promise;
 				});
 				
-				it('should not display retraction warning when disabled for a retracted item', async function () {
+				it.only('should not display retraction warning when disabled for a retracted item', async function () {
 					var docID = this.test.fullTitle();
 					await initDoc(docID);
 					var doc = applications[docID].doc;
@@ -873,9 +873,10 @@ describe("Zotero.Integration", function () {
 			});
 		});
 		
-		describe('#addEditBibliography', function() {
+		describe.only('#addEditBibliography', function() {
 			var docID = this.fullTitle();
 			beforeEach(function* () {
+				setAddEditItems(testItems[0]);
 				yield initDoc(docID);
 				yield execCommand('addEditCitation', docID);
 			});
