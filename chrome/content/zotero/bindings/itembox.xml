@@ -2387,8 +2387,12 @@
 					return (async function () {
 						var htmlNS = 'http://www.w3.org/1999/xhtml';
 						
-						var data = await Zotero.Retractions.getData(this.item);
-						if (!data) {
+						var show = Zotero.Retractions.isRetracted(this.item);
+						var data;
+						if (show) {
+							data = await Zotero.Retractions.getData(this.item);
+						}
+						if (!show || !data) {
 							this._id('retraction-box').hidden = true;
 							return;
 						}
@@ -2410,6 +2414,7 @@
 						}
 						
 						// Reasons
+						var allowHiding = false;
 						if (data.reasons.length) {
 							let elem = this._id('retraction-reasons');
 							elem.hidden = false;
@@ -2423,6 +2428,10 @@
 								
 								elem.appendChild(dt);
 								elem.appendChild(dd);
+								
+								if (reason == 'Retract and Replace') {
+									allowHiding = true;
+								}
 							}
 						}
 						else {
@@ -2493,6 +2502,13 @@
 								}
 							}
 						}
+						
+						let hideElem = this._id('retraction-hide');
+						hideElem.firstChild.textContent = Zotero.getString('retraction.replacedItem.hide');
+						hideElem.hidden = !allowHiding;
+						hideElem.firstChild.onclick = (event) => {
+							ZoteroPane.promptToHideRetractionForReplacedItem(this.item);
+						};
 						
 						Zotero.Utilities.Internal.updateHTMLInXUL(this._id('retraction-box'));
 					}.bind(this))();
@@ -2626,6 +2642,7 @@
 						<div id="retraction-links"/>
 						
 						<p id="retraction-credit"/>
+						<div id="retraction-hide"><button/></div>
 					</div>
 				</div>
 				<grid flex="1">

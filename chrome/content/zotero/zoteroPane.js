@@ -4823,6 +4823,30 @@ var ZoteroPane = new function()
 	};
 	
 	
+	this.promptToHideRetractionForReplacedItem = function (item) {
+		var ps = Services.prompt;
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		let index = ps.confirmEx(
+			null,
+			Zotero.getString('retraction.replacedItem.title'),
+			Zotero.getString('retraction.replacedItem.text1')
+				+ "\n\n"
+				+ Zotero.getString('retraction.replacedItem.text2'),
+			buttonFlags,
+			Zotero.getString('retraction.replacedItem.button'),
+			null,
+			null,
+			null,
+			{}
+		);
+		if (index == 0) {
+			Zotero.Retractions.hideRetraction(item);
+			this.hideRetractionBanner();
+		}
+	};
+	
+	
 	/**
 	 * Sets the layout to either a three-vertical-pane layout and a layout where itemsPane is above itemPane
 	 */

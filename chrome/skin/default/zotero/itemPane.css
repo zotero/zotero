@@ -97,6 +97,23 @@
 	margin-bottom: .2em;
 }
 
+#retraction-hide {
+	text-align: right;
+	margin-top: .3em;
+	margin-right: -1.2em;
+	margin-bottom: .3em;
+}
+
+#retraction-hide button {
+	background: none;
+	margin: 0;
+	padding: 0;
+	cursor: pointer;
+	display: inline;
+	text-decoration: underline;
+	border-style: none;
+}
+
 /* Buttons in trash and feed views */
 .zotero-item-pane-top-buttons {
 	-moz-appearance: toolbar;
