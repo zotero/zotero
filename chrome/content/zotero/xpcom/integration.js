@@ -1968,14 +1968,14 @@ Zotero.Integration.Session.prototype.handleRetractedItems = async function () {
 			if (zoteroItem.cslItemID) {
 				embeddedZoteroItems.push(zoteroItem);
 			}
-			else if (Zotero.Retractions.isRetracted(zoteroItem)) {
+			else if (Zotero.Retractions.shouldShowCitationWarning(zoteroItem)) {
 				dealWithRetracted(zoteroItem, true);
 			}
 		}
 	}
-	var retractedIndices = await Promise.race(Zotero.Retractions.getRetractionsFromJSON(
+	var retractedIndices = await Promise.race([Zotero.Retractions.getRetractionsFromJSON(
 		embeddedZoteroItems.map(item => item.toJSON())
-	), Zotero.Promise.delay(1000).then(() => []));
+	), Zotero.Promise.delay(1000).then(() => [])]);
 	for (let index of retractedIndices) {
 		dealWithRetracted(embeddedZoteroItems[index]);
 	}
