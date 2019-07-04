@@ -45,6 +45,10 @@
 	margin-left: 5px;
 }
 
+#retraction-box {
+	cursor: default;
+}
+
 #retraction-header {
 	display: flex;
 	justify-content: space-between;
@@ -60,6 +64,8 @@
 	padding: .5em 1.5em;
 	margin-top: 0;
 	margin-bottom: 1em;
+	cursor: text;
+	-moz-user-select: text;
 }
 
 #retraction-details dt {
