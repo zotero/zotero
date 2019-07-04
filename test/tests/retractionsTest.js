@@ -357,7 +357,7 @@ describe("Retractions", function() {
 			
 			var spies = [
 				sinon.spy(Zotero.Retractions, '_removeAllEntries'),
-				sinon.spy(Zotero.Retractions, 'getData')
+				sinon.spy(Zotero.Retractions, 'isRetracted')
 			];
 			Zotero.Prefs.set('retractions.enabled', false);
 			
