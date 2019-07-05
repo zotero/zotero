@@ -2384,134 +2384,138 @@
 			
 			<method name="updateRetracted">
 				<body><![CDATA[
-					return (async function () {
-						var htmlNS = 'http://www.w3.org/1999/xhtml';
-						
-						var show = Zotero.Retractions.isRetracted(this.item);
-						var data;
-						if (show) {
-							data = await Zotero.Retractions.getData(this.item);
-						}
-						if (!show || !data) {
-							this._id('retraction-box').hidden = true;
-							return;
-						}
-						
-						this._id('retraction-box').hidden = false;
-						this._id('retraction-header-text').textContent
-							= Zotero.getString('retraction.banner');
-						
-						// Date
-						if (data.date) {
-							this._id('retraction-date').hidden = false;
-							this._id('retraction-date').textContent = Zotero.getString(
-								'retraction.date',
-								data.date.toLocaleDateString()
-							);
-						}
-						else {
-							this._id('retraction-date').hidden = true;
-						}
-						
-						// Reasons
-						var allowHiding = false;
-						if (data.reasons.length) {
-							let elem = this._id('retraction-reasons');
-							elem.hidden = false;
-							elem.textContent = '';
-							for (let reason of data.reasons) {
-								let dt = document.createElementNS(htmlNS, 'dt');
-								let dd = document.createElementNS(htmlNS, 'dd');
-								
-								dt.textContent = reason;
-								dd.textContent = Zotero.Retractions.getReasonDescription(reason);
-								
-								elem.appendChild(dt);
-								elem.appendChild(dd);
-								
-								if (reason == 'Retract and Replace') {
-									allowHiding = true;
-								}
+					// Create the real function here so we can use Zotero.serial(). updateRetracted()
+					// isn't awaited in refresh(), so we want to make sure successive invocations
+					// don't overlap.
+					if (!this._updateRetracted) {
+						this._updateRetracted = Zotero.serial(async function (item) {
+							var htmlNS = 'http://www.w3.org/1999/xhtml';
+							
+							var show = Zotero.Retractions.isRetracted(item);
+							if (!show) {
+								this._id('retraction-box').hidden = true;
+								return;
 							}
-						}
-						else {
-							this._id('retraction-reasons').hidden = true;
-						}
-						
-						// Retraction DOI or PubMed ID
-						if (data.doi || data.pmid) {
-							let div = this._id('retraction-notice');
-							div.textContent = '';
-							let a = document.createElementNS(htmlNS, 'a');
-							a.textContent = Zotero.getString('retraction.notice');
-							if (data.doi) {
-								a.href = 'https://doi.org/' + data.doi;
+							var data = await Zotero.Retractions.getData(item);
+							
+							this._id('retraction-box').hidden = false;
+							this._id('retraction-header-text').textContent
+								= Zotero.getString('retraction.banner');
+							
+							// Date
+							if (data.date) {
+								this._id('retraction-date').hidden = false;
+								this._id('retraction-date').textContent = Zotero.getString(
+									'retraction.date',
+									data.date.toLocaleDateString()
+								);
 							}
 							else {
-								a.href = `https://www.ncbi.nlm.nih.gov/pubmed/${data.pmid}/`;
+								this._id('retraction-date').hidden = true;
 							}
-							div.appendChild(a);
-						}
-						else {
-							this._id('retraction-notice').hidden = true;
-						}
-						
-						// Links
-						if (data.urls.length) {
-							let div = this._id('retraction-links');
-							div.hidden = false;
-							div.textContent = '';
 							
-							let p = document.createElementNS(htmlNS, 'p');
-							p.textContent = Zotero.getString('retraction.details');
+							// Reasons
+							var allowHiding = false;
+							if (data.reasons.length) {
+								let elem = this._id('retraction-reasons');
+								elem.hidden = false;
+								elem.textContent = '';
+								for (let reason of data.reasons) {
+									let dt = document.createElementNS(htmlNS, 'dt');
+									let dd = document.createElementNS(htmlNS, 'dd');
+									
+									dt.textContent = reason;
+									dd.textContent = Zotero.Retractions.getReasonDescription(reason);
+									
+									elem.appendChild(dt);
+									elem.appendChild(dd);
+									
+									if (reason == 'Retract and Replace') {
+										allowHiding = true;
+									}
+								}
+							}
+							else {
+								this._id('retraction-reasons').hidden = true;
+							}
 							
-							let ul = document.createElementNS(htmlNS, 'ul');
-							for (let url of data.urls) {
-								let li = document.createElementNS(htmlNS, 'li');
+							// Retraction DOI or PubMed ID
+							if (data.doi || data.pmid) {
+								let div = this._id('retraction-notice');
+								div.textContent = '';
 								let a = document.createElementNS(htmlNS, 'a');
-								url = url.replace(/^http:/, 'https:');
-								a.href = url;
-								a.textContent = url;
-								li.appendChild(a);
-								ul.appendChild(li);
+								a.textContent = Zotero.getString('retraction.notice');
+								if (data.doi) {
+									a.href = 'https://doi.org/' + data.doi;
+								}
+								else {
+									a.href = `https://www.ncbi.nlm.nih.gov/pubmed/${data.pmid}/`;
+								}
+								div.appendChild(a);
+							}
+							else {
+								this._id('retraction-notice').hidden = true;
 							}
 							
-							div.appendChild(p);
-							div.appendChild(ul);
-						}
-						else {
-							this._id('retraction-links').hidden = true;
-						}
-						
-						let creditElem = this._id('retraction-credit');
-						if (!creditElem.childNodes.length) {
-							let text = Zotero.getString(
-								'retraction.credit',
-								'<a href="https://retractionwatch.com">Retraction Watch</a>'
-							);
-							let parts = Zotero.Utilities.parseMarkup(text);
-							for (let part of parts) {
-								if (part.type == 'text') {
-									creditElem.appendChild(document.createTextNode(part.text));
-								}
-								else if (part.type == 'link') {
+							// Links
+							if (data.urls.length) {
+								let div = this._id('retraction-links');
+								div.hidden = false;
+								div.textContent = '';
+								
+								let p = document.createElementNS(htmlNS, 'p');
+								p.textContent = Zotero.getString('retraction.details');
+								
+								let ul = document.createElementNS(htmlNS, 'ul');
+								for (let url of data.urls) {
+									let li = document.createElementNS(htmlNS, 'li');
 									let a = document.createElementNS(htmlNS, 'a');
-									a.href = part.attributes.href;
-									a.textContent = part.text;
-									creditElem.appendChild(a);
+									url = url.replace(/^http:/, 'https:');
+									a.href = url;
+									a.textContent = url;
+									li.appendChild(a);
+									ul.appendChild(li);
+								}
+								
+								div.appendChild(p);
+								div.appendChild(ul);
+							}
+							else {
+								this._id('retraction-links').hidden = true;
+							}
+							
+							let creditElem = this._id('retraction-credit');
+							if (!creditElem.childNodes.length) {
+								let text = Zotero.getString(
+									'retraction.credit',
+									'<a href="https://retractionwatch.com">Retraction Watch</a>'
+								);
+								let parts = Zotero.Utilities.parseMarkup(text);
+								for (let part of parts) {
+									if (part.type == 'text') {
+										creditElem.appendChild(document.createTextNode(part.text));
+									}
+									else if (part.type == 'link') {
+										let a = document.createElementNS(htmlNS, 'a');
+										a.href = part.attributes.href;
+										a.textContent = part.text;
+										creditElem.appendChild(a);
+									}
 								}
 							}
-						}
-						
-						let hideElem = this._id('retraction-hide');
-						hideElem.firstChild.textContent = Zotero.getString('retraction.replacedItem.hide');
-						hideElem.hidden = !allowHiding;
-						hideElem.firstChild.onclick = (event) => {
-							ZoteroPane.promptToHideRetractionForReplacedItem(this.item);
-						};
-						
-						Zotero.Utilities.Internal.updateHTMLInXUL(this._id('retraction-box'));
-					}.bind(this))();
+							
+							let hideElem = this._id('retraction-hide');
+							hideElem.firstChild.textContent = Zotero.getString('retraction.replacedItem.hide');
+							hideElem.hidden = !allowHiding;
+							hideElem.firstChild.onclick = (event) => {
+								ZoteroPane.promptToHideRetractionForReplacedItem(item);
+							};
+							
+							Zotero.Utilities.Internal.updateHTMLInXUL(this._id('retraction-box'));
+						}.bind(this));
+					}
+					
+					return this._updateRetracted(this.item);
 				]]></body>
 			</method>
 			
