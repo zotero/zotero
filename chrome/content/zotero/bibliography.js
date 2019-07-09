@@ -41,12 +41,15 @@ var Zotero_File_Interface_Bibliography = new function() {
 		lastSelectedLocale;
 	
 	var isDocPrefs = false;
+	var isRTFScan = false;
 	
-	/*
+	/**
 	 * Initialize some variables and prepare event listeners for when chrome is done
 	 * loading
+	 *
+	 * @param {Object} [args] - Explicit arguments in place of window arguments
 	 */
-	this.init = Zotero.Promise.coroutine(function* () {
+	this.init = Zotero.Promise.coroutine(function* (args = {}) {
 		// Set font size from pref
 		// Affects bibliography.xul and integrationDocPrefs.xul
 		var bibContainer = document.getElementById("zotero-bibliography-container");
@@ -57,7 +60,11 @@ var Zotero_File_Interface_Bibliography = new function() {
 		if(window.arguments && window.arguments.length) {
 			_io = window.arguments[0];
 			if(_io.wrappedJSObject) _io = _io.wrappedJSObject;
-		} else {
+		}
+		else if (args) {
+			_io = args;
+		}
+		else {
 			_io = {};
 		}
 		
@@ -143,8 +150,10 @@ var Zotero_File_Interface_Bibliography = new function() {
 		
 		// ONLY FOR integrationDocPrefs.xul: set selected endnotes/footnotes
 		isDocPrefs = !!document.getElementById("displayAs");
-		if (isDocPrefs) {
+		isRTFScan = !document.getElementById("formatUsing");
+		if (isDocPrefs && !isRTFScan) {
 			if(_io.useEndnotes && _io.useEndnotes == 1) document.getElementById("displayAs").selectedIndex = 1;
+			
 			let dialog = document.getElementById("zotero-doc-prefs-dialog");
 			dialog.setAttribute('title', `${Zotero.clientName} - ${dialog.getAttribute('title')}`);
 			
@@ -207,7 +216,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		updateLocaleMenu(selectedStyleObj);
 		
 		//
-		// For integrationDocPrefs.xul
+		// For integrationDocPrefs.xul and rtfScan.xul
 		//
 		if (isDocPrefs) {
 			// update status of displayAs box based on style class
@@ -216,13 +225,17 @@ var Zotero_File_Interface_Bibliography = new function() {
 			document.getElementById("displayAs-groupbox").hidden = !isNote || !multipleNotesSupported;
 			
 			// update status of formatUsing box based on style class
-			if(isNote) document.getElementById("formatUsing").selectedIndex = 0;
-			document.getElementById("bookmarks").disabled = isNote;
-			document.getElementById("bookmarks-caption").disabled = isNote;
-	
+			if (document.getElementById("formatUsing")) {
+				if(isNote) document.getElementById("formatUsing").selectedIndex = 0;
+				document.getElementById("bookmarks").disabled = isNote;
+				document.getElementById("bookmarks-caption").disabled = isNote;
+			}
+			
 			// update status of displayAs box based on style class
-			document.getElementById("automaticJournalAbbreviations-vbox").hidden =
-				!selectedStyleObj.usesAbbreviation;
+			if (document.getElementById("automaticJournalAbbreviations-vbox")) {
+				document.getElementById("automaticJournalAbbreviations-vbox").hidden =
+					!selectedStyleObj.usesAbbreviation;
+			}
 		}
 		
 		//

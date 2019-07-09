@@ -95,7 +95,7 @@
 				<menulist id="locale-menu" oncommand="Zotero_File_Interface_Bibliography.localeChanged(this.value)"/>
 			</hbox>
 		</groupbox>
-		<groupbox>
+		<groupbox id="displayAs-groupbox">
 			<caption label="&zotero.integration.prefs.displayAs.label;"/>
 			<radiogroup id="displayAs" orient="horizontal">
 				<radio id="footnotes" label="&zotero.integration.prefs.footnotes.label;" selected="true"/>

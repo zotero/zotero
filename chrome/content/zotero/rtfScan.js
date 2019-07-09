@@ -477,7 +477,9 @@ var Zotero_RTFScan = new function() {
 	 * Called when style page is shown to add styles to listbox.
 	 */
 	this.stylePageShowing = function() {
-		Zotero_File_Interface_Bibliography.init();
+		Zotero_File_Interface_Bibliography.init({
+			supportedNotes: ['footnotes', 'endnotes']
+		});
 	}
 	
 	/**
