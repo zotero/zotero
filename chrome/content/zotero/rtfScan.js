@@ -505,7 +505,7 @@ var Zotero_RTFScan = new function() {
 		var locale = document.getElementById("locale-menu").value;
 		var style = zStyle.getCiteProc(locale);
 		style.setOutputFormat("rtf");
-		var isNote = style.class == "note";
+		var isNote = zStyle.class == "note";
 		
 		// create citations
 		var k = 0;
