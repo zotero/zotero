@@ -583,13 +583,14 @@ Zotero.File = new function(){
 	
 	/**
 	 * Run a generator with an OS.File.DirectoryIterator, closing the
-	 * iterator when done
+	 * iterator when done. Promises yielded by the generator are awaited.
 	 *
 	 * The DirectoryIterator is passed as the first parameter to the generator.
 	 *
 	 * Zotero.File.iterateDirectory(path, function* (iterator) {
 	 *    while (true) {
-	 *        var entry = yield iterator.next();
+	 *        let entry = yield iterator.next();
+	 *        let contents = yield Zotero.File.getContentsAsync(entry.path);
 	 *        [...]
 	 *    }
 	 * })

@@ -117,7 +117,7 @@ Zotero.Translators = new function() {
 					// Get JSON from cache if possible
 					if (memCacheJSON || dbCacheEntry) {
 						try {
-							var translator = Zotero.Translators.load(
+							var translator = this.load(
 								memCacheJSON || dbCacheEntry.metadataJSON, path
 							);
 						}
@@ -136,7 +136,7 @@ Zotero.Translators = new function() {
 					// Otherwise, load from file
 					else {
 						try {
-							var translator = yield Zotero.Translators.loadFromFile(path);
+							var translator = yield this.loadFromFile(path);
 						}
 						catch (e) {
 							Zotero.logError(e);
@@ -191,7 +191,7 @@ Zotero.Translators = new function() {
 					}
 					
 					if (!dbCacheEntry) {
-						yield Zotero.Translators.cacheInDB(
+						yield this.cacheInDB(
 							fileName,
 							translator.serialize(Zotero.Translator.TRANSLATOR_REQUIRED_PROPERTIES.
 												 concat(Zotero.Translator.TRANSLATOR_OPTIONAL_PROPERTIES)),
@@ -263,15 +263,15 @@ Zotero.Translators = new function() {
 	 *
 	 * @param {String} file - Path to translator file
 	 */
-	this.loadFromFile = function(path) {
+	this.loadFromFile = async function (path) {
 		const infoRe = /^\s*{[\S\s]*?}\s*?[\r\n]/;
-		return Zotero.File.getContentsAsync(path)
-		.then(function(source) {
-			return Zotero.Translators.load(infoRe.exec(source)[0], path, source);
-		})
-		.catch(function() {
+		try {
+			let source = await Zotero.File.getContentsAsync(path);
+			return this.load(infoRe.exec(source)[0], path, source);
+		}
+		catch (e) {
 			throw new Error("Invalid or missing translator metadata JSON object in " + OS.Path.basename(path));
-		});
+		}
 	}
 	
 	/**
@@ -403,7 +403,7 @@ Zotero.Translators = new function() {
 	 *     otherwise true
 	 */
 	this.getImportTranslatorsForLocation = function(location, callback) {	
-		return Zotero.Translators.getAllForType("import").then(function(allTranslators) {
+		return this.getAllForType("import").then(function(allTranslators) {
 			var tier1Translators = [];
 			var tier2Translators = [];
 			
@@ -437,6 +437,10 @@ Zotero.Translators = new function() {
 		}
 		return fileName;
 	}
+	
+	this.getTranslatorsDirectory = function () {
+		return Zotero.getTranslatorsDirectory().path;
+	};
 	
 	/**
 	 * @param	{String}		metadata
@@ -490,10 +494,10 @@ Zotero.Translators = new function() {
 			throw new Error("code not provided");
 		}
 		
-		var fileName = Zotero.Translators.getFileNameFromLabel(
+		var fileName = this.getFileNameFromLabel(
 			metadata.label, metadata.translatorID
 		);
-		var destFile = OS.Path.join(Zotero.getTranslatorsDirectory().path, fileName);
+		var destFile = OS.Path.join(this.getTranslatorsDirectory(), fileName);
 		
 		// JSON.stringify has the benefit of indenting JSON
 		var metadataJSON = JSON.stringify(metadata, null, "\t");
@@ -505,7 +509,7 @@ Zotero.Translators = new function() {
 			str += '\n';
 		}
 		
-		var translator = Zotero.Translators.get(metadata.translatorID);
+		var translator = this.get(metadata.translatorID);
 		var sameFile = translator && destFile == translator.path;
 		
 		var exists = yield OS.File.exists(destFile);
@@ -526,6 +530,23 @@ Zotero.Translators = new function() {
 		return Zotero.DB.queryAsync(
 			"REPLACE INTO translatorCache VALUES (?, ?, ?)",
 			[fileName, JSON.stringify(metadataJSON), lastModifiedTime]
+		);
+	}
+	
+	this.makeTranslatorProvider = function (methods) {
+		var requiredMethods = [
+			'get',
+			'getAllForType'
+		];
+		for (let method of requiredMethods) {
+			if (!(method in methods)) {
+				throw new Error(`Translator provider method ${method} not provided`);
+			}
+		}
+		return Object.assign(
+			{},
+			this,
+			methods
 		);
 	}
 }

@@ -959,6 +959,160 @@ describe("Zotero.Translate", function() {
 	});
 	
 	
+	describe("#setTranslatorProvider()", function () {
+		var url = "http://127.0.0.1:23119/test/translate/test.html";
+		var doc;
+		
+		beforeEach(function* () {
+			// This is the main processDocuments, not the translation sandbox one being tested
+			doc = (yield Zotero.HTTP.processDocuments(url, doc => doc))[0];
+		});
+		
+		it("should set a custom version of Zotero.Translators", async function () {
+			// Create a dummy translator to be returned by the stub methods
+			var info = {
+				translatorID: "e6111720-1f6c-42b0-a487-99b9fa50b8a1",
+				label: "Test",
+				creator: "Creator",
+				target: "^http:\/\/127.0.0.1:23119\/test",
+				minVersion: "5.0",
+				maxVersion: "",
+				priority: 100,
+				translatorType: 4,
+				browserSupport: "gcsibv",
+				lastUpdated: "2019-07-10 05:50:39",
+				cacheCode: true
+			};
+			info.code = JSON.stringify(info, null, '\t') + "\n\n"
+				+ "function detectWeb(doc, url) {"
+				+ "return 'journalArticle';"
+				+ "}\n"
+				+ "function doWeb(doc, url) {"
+				+ "var item = new Zotero.Item('journalArticle');"
+				+ "item.title = 'Test';"
+				+ "item.complete();"
+				+ "}\n";
+			var translator = new Zotero.Translator(info);
+			
+			var translate = new Zotero.Translate.Web();
+			var provider = Zotero.Translators.makeTranslatorProvider({
+				get: function (translatorID) {
+					if (translatorID == info.translatorID) {
+						return translator;
+					}
+					return false;
+				},
+				
+				getAllForType: async function (type) {
+					var translators = [];
+					if (type == 'web') {
+						translators.push(translator);
+					}
+					return translators;
+				}
+			});
+			translate.setTranslatorProvider(provider);
+			translate.setDocument(doc);
+			var translators = await translate.getTranslators();
+			translate.setTranslator(translators[0]);
+			var newItems = await translate.translate();
+			assert.equal(newItems.length, 1);
+			
+			var item = newItems[0];
+			assert.equal(item.getField('title'), 'Test');
+		});
+		
+		it("should set a custom version of Zotero.Translators in a child translator", async function () {
+			// Create dummy translators to be returned by the stub methods
+			var info1 = {
+				translatorID: "e6111720-1f6c-42b0-a487-99b9fa50b8a1",
+				label: "Test",
+				creator: "Creator",
+				target: "^http:\/\/127.0.0.1:23119\/test",
+				minVersion: "5.0",
+				maxVersion: "",
+				priority: 100,
+				translatorType: 4,
+				browserSupport: "gcsibv",
+				lastUpdated: "2019-07-10 05:50:39",
+				cacheCode: true
+			};
+			info1.code = JSON.stringify(info1, null, '\t') + "\n\n"
+				+ "function detectWeb(doc, url) {"
+					+ "return 'journalArticle';"
+				+ "}\n"
+				+ "function doWeb(doc, url) {"
+					+ "var translator = Zotero.loadTranslator('import');"
+					+ "translator.setTranslator('86e58f50-4e2d-4ee8-8a20-bafa225381fa');"
+					+ "translator.setString('foo\\n');"
+					+ "translator.setHandler('itemDone', function(obj, item) {"
+						+ "item.complete();"
+					+ "});"
+					+ "translator.translate();"
+				+ "}\n";
+			var translator1 = new Zotero.Translator(info1);
+			
+			var info2 = {
+				translatorID: "86e58f50-4e2d-4ee8-8a20-bafa225381fa",
+				label: "Child Test",
+				creator: "Creator",
+				target: "",
+				minVersion: "5.0",
+				maxVersion: "",
+				priority: 100,
+				translatorType: 3,
+				browserSupport: "gcsibv",
+				lastUpdated: "2019-07-19 06:22:21",
+				cacheCode: true
+			};
+			info2.code = JSON.stringify(info2, null, '\t') + "\n\n"
+				+ "function detectImport() {"
+					+ "return true;"
+				+ "}\n"
+				+ "function doImport() {"
+					+ "var item = new Zotero.Item('journalArticle');"
+					+ "item.title = 'Test';"
+					+ "item.complete();"
+				+ "}\n";
+			var translator2 = new Zotero.Translator(info2);
+			
+			var translate = new Zotero.Translate.Web();
+			var provider = Zotero.Translators.makeTranslatorProvider({
+				get: function (translatorID) {
+					switch (translatorID) {
+						case info1.translatorID:
+							return translator1;
+						
+						case info2.translatorID:
+							return translator2;
+					}
+					return false;
+				},
+				
+				getAllForType: async function (type) {
+					var translators = [];
+					if (type == 'web') {
+						translators.push(translator1);
+					}
+					if (type == 'import') {
+						translators.push(translator2);
+					}
+					return translators;
+				}
+			});
+			translate.setTranslatorProvider(provider);
+			translate.setDocument(doc);
+			var translators = await translate.getTranslators();
+			translate.setTranslator(translators[0]);
+			var newItems = await translate.translate();
+			assert.equal(newItems.length, 1);
+			
+			var item = newItems[0];
+			assert.equal(item.getField('title'), 'Test');
+		});
+	});
+	
+	
 	describe("Translators", function () {
 		it("should round-trip child attachment via BibTeX", function* () {
 			var item = yield createDataObject('item');
