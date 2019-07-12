@@ -1135,6 +1135,10 @@ Zotero.Server.Connector.Import.prototype = {
 	permitBookmarklet: false,
 	
 	init: async function (requestData) {
+		if (!('X-Zotero-Connector-API-Version' in requestData.headers)) {
+			return 400;
+		}
+		
 		let translate = new Zotero.Translate.Import();
 		translate.setString(requestData.data);
 		let translators = await translate.getTranslators();

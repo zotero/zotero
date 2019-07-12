@@ -1393,7 +1393,10 @@ describe("Connector Server", function () {
 				'POST',
 				endpoint,
 				{
-					headers: { "Content-Type": "text/plain" },
+					headers: {
+						"Content-Type": "text/plain",
+						"X-Zotero-Connector-API-Version": "2"
+					},
 					body: 'Owl'
 				}
 			));
@@ -1418,7 +1421,10 @@ describe("Connector Server", function () {
 				'POST',
 				endpoint,
 				{
-					headers: { "Content-Type": "application/x-bibtex" },
+					headers: {
+						"Content-Type": "application/x-bibtex",
+						"X-Zotero-Connector-API-Version": "2"
+					},
 					body: resource
 				}
 			);	
@@ -1451,7 +1457,10 @@ describe("Connector Server", function () {
 				'POST',
 				endpoint,
 				{
-					headers: { "Content-Type": "application/x-bibtex" },
+					headers: {
+						"Content-Type": "application/x-bibtex",
+						"X-Zotero-Connector-API-Version": "2"
+					},
 					body: resource,
 					successCodes: false
 				}
