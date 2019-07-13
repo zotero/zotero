@@ -5,7 +5,7 @@
 <!ENTITY zotero.publications.include.checkbox.notes "Vključi opombe">
 <!ENTITY zotero.publications.include.adjustAtAnyTime "Kaj naj bo prikazano, lahko prilagodite kadar koli v zbirki Moje objave.">
 
-<!ENTITY zotero.publications.sharing.title "Izberite, na kakšen način in pod kakšnimi pogoji želite dati svoje delo v skupno rabo">
+<!ENTITY zotero.publications.sharing.title "Izberite, na kakšen način in pod kakšnimi pogoji želite svoje delo deliti z drugimi">
 <!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
 <!ENTITY zotero.publications.sharing.prompt "Želite dovoliti, da drugi dajejo vaše delo v skupno rabo?">
 <!ENTITY zotero.publications.sharing.cc "Da, pod pogoji dovoljenja Creative Commons">

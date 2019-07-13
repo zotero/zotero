@@ -50,7 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Mostra i duplicati">
 <!ENTITY zotero.collections.showUnfiledItems "Mostra gli oggetti non classificati">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "Mostra elementi ritirati dalla pubblicazione">
 
 <!ENTITY zotero.items.itemType "Tipo di oggetto">
 <!ENTITY zotero.items.type_column "Tipo elemento">
@@ -204,7 +204,7 @@
 <!ENTITY zotero.import.lastModified "Ultimo File Modificato">
 <!ENTITY zotero.import.size "Dimensione">
 <!ENTITY zotero.import.createCollection "Inserisci collezioni e elementi importati in una nuovo collezione">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "Gestione dei file">
 
 <!ENTITY zotero.exportOptions.title "Esporta">
 <!ENTITY zotero.exportOptions.format.label "Formato:">
@@ -247,7 +247,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
+<!ENTITY zotero.integration.prefs.exportDocument "Esporta documento...">
 
 <!ENTITY zotero.integration.showEditor.label "Mostra l'editor">
 <!ENTITY zotero.integration.classicView.label "Vista classica">
