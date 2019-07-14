@@ -88,9 +88,9 @@
 <!ENTITY zotero.items.menu.showInLibrary					"Show in Library">
 <!ENTITY zotero.items.menu.attach.note					"Add Note">
 <!ENTITY zotero.items.menu.attach						"Add Attachment">
-<!ENTITY zotero.items.menu.attach.link.uri				"Attach Link to URI…">
+<!ENTITY zotero.items.menu.attach.link.uri				"Attach URI…">
 <!ENTITY zotero.items.menu.attach.file					"Attach Stored Copy of File…">
-<!ENTITY zotero.items.menu.attach.fileLink				"Attach Link to File…">
+<!ENTITY zotero.items.menu.attach.fileLink				"Attach File…">
 
 <!ENTITY zotero.items.menu.restoreToLibrary				"Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem					"Duplicate Item">
