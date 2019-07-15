@@ -423,6 +423,9 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 		// don't come from the connector or include Zotero-Allowed-Request
 		//
 		// [1] https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#Simple_requests
+		var whitelistedEndpoints = [
+			'/connector/ping'
+		];
 		var simpleRequestContentTypes = [
 			'application/x-www-form-urlencoded',
 			'multipart/form-data',
@@ -438,6 +441,7 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 				&& (!endpoint.supportedDataTypes
 				|| endpoint.supportedDataTypes == '*'
 				|| endpoint.supportedDataTypes.some(type => simpleRequestContentTypes.includes(type)))
+				&& !whitelistedEndpoints.includes(this.pathname)
 				// Ignore test endpoints
 				&& !this.pathname.startsWith('/test/')
 				// Ignore content types that trigger preflight requests
