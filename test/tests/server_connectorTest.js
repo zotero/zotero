@@ -1323,9 +1323,19 @@ describe("Connector Server", function () {
 	
 	describe('/connector/installStyle', function() {
 		var endpoint;
+		var style;
 		
 		before(function() {
 			endpoint = connectorServerPath + "/connector/installStyle";
+			style = `<?xml version="1.0" encoding="utf-8"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" version="1.0" default-locale="de-DE">
+  <info>
+    <title>Test1</title>
+    <id>http://www.example.com/test2</id>
+    <link href="http://www.zotero.org/styles/cell" rel="independent-parent"/>
+  </info>
+</style>
+`;
 		});
 		
 		it('should reject styles with invalid text', function* () {
@@ -1358,15 +1368,6 @@ describe("Connector Server", function () {
 				});
 			});
 			
-			var style = `<?xml version="1.0" encoding="utf-8"?>
-<style xmlns="http://purl.org/net/xbiblio/csl" version="1.0" default-locale="de-DE">
-  <info>
-    <title>Test1</title>
-    <id>http://www.example.com/test2</id>
-    <link href="http://www.zotero.org/styles/cell" rel="independent-parent"/>
-  </info>
-</style>
-`;
 			var response = yield Zotero.HTTP.request(
 				'POST',
 				endpoint,
@@ -1374,10 +1375,72 @@ describe("Connector Server", function () {
 					headers: { "Content-Type": "application/vnd.citationstyles.style+xml" },
 					body: style
 				}
-			);	
+			);
 			assert.equal(response.status, 201);
 			assert.equal(response.response, JSON.stringify({name: 'Test1'}));
 			Zotero.Styles.install.restore();
+		});
+		
+		it('should accept text/plain request with X-Zotero-Connector-API-Version or Zotero-Allowed-Request', async function () {
+			sinon.stub(Zotero.Styles, 'install').callsFake(function(style) {
+				var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+					.createInstance(Components.interfaces.nsIDOMParser),
+				doc = parser.parseFromString(style, "application/xml");
+				
+				return Zotero.Promise.resolve({
+					styleTitle: Zotero.Utilities.xpathText(
+						doc, '/csl:style/csl:info[1]/csl:title[1]', Zotero.Styles.ns
+					),
+					styleID: Zotero.Utilities.xpathText(
+						doc, '/csl:style/csl:info[1]/csl:id[1]', Zotero.Styles.ns
+					)
+				});
+			});
+			
+			// X-Zotero-Connector-API-Version
+			var response = await Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: {
+						"Content-Type": "text/plain",
+						"X-Zotero-Connector-API-Version": "2"
+					},
+					body: style
+				}
+			);
+			assert.equal(response.status, 201);
+			
+			// Zotero-Allowed-Request
+			response = await Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: {
+						"Content-Type": "text/plain",
+						"Zotero-Allowed-Request": "1"
+					},
+					body: style
+				}
+			);
+			assert.equal(response.status, 201);
+			
+			Zotero.Styles.install.restore();
+		});
+		
+		it('should reject text/plain request without X-Zotero-Connector-API-Version', async function () {
+			var req = await Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: {
+						"Content-Type": "text/plain"
+					},
+					body: style,
+					successCodes: [403]
+				}
+			);
+			assert.equal(req.status, 403);
 		});
 	});
 	
@@ -1404,6 +1467,20 @@ describe("Connector Server", function () {
 			assert.equal(error.xmlhttp.status, 400);
 		});
 		
+		it('should reject requests without X-Zotero-Connector-API-Version', async function () {
+			var req = await Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: {
+						"Content-Type": "text/plain"
+					},
+					successCodes: [403]
+				}
+			);
+			assert.equal(req.status, 403);
+		});
+		
 		it('should import resources (BibTeX) into selected collection', function* () {
 			var collection = yield createDataObject('collection');
 			yield waitForItemsLoad(win);
@@ -1427,7 +1504,7 @@ describe("Connector Server", function () {
 					},
 					body: resource
 				}
-			);	
+			);
 			assert.equal(req.status, 201);
 			assert.equal(JSON.parse(req.responseText)[0].title, 'Test1');
 			

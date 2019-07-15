@@ -31,6 +31,7 @@ Zotero.Server = new function() {
 		204:"No Content",
 		300:"Multiple Choices",
 		400:"Bad Request",
+		403:"Forbidden",
 		404:"Not Found",
 		409:"Conflict",
 		412:"Precondition Failed",
@@ -239,35 +240,44 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 	
 	Zotero.debug(this.header, 5);
 	
-	const methodRe = /^([A-Z]+) ([^ \r\n?]+)(\?[^ \r\n]+)?/;
-	const hostRe = /[\r\n]Host: *(localhost|127\.0\.0\.1)(:[0-9]+)?[\r\n]/i;
-	const contentTypeRe = /[\r\n]Content-Type: *([^ \r\n]+)/i;
-	
-	const originRe = /[\r\n]Origin: *([^ \r\n]+)/i;
-	var m = originRe.exec(this.header);
-	if (m) {
-		this.origin = m[1];
+	// Parse headers into this.headers with lowercase names
+	this.headers = {};
+	var headerLines = this.header.trim().split(/\r\n/);
+	for (let line of headerLines) {
+		line = line.trim();
+		let pos = line.indexOf(':');
+		if (pos == -1) {
+			continue;
+		}
+		let k = line.substr(0, pos).toLowerCase();
+		let v = line.substr(pos + 1).trim();
+		this.headers[k] = v;
 	}
-	else {
-		const bookmarkletRe = /[\r\n]Zotero-Bookmarklet: *([^ \r\n]+)/i;
-		var m = bookmarkletRe.exec(this.header);
-		if (m) this.origin = "https://www.zotero.org";
+	
+	if (this.headers.origin) {
+		this.origin = this.headers.origin;
+	}
+	else if (this.headers['zotero-bookmarklet']) {
+		this.origin = "https://www.zotero.org";
 	}
 	
 	if (!Zotero.isServer) {
 		// Make sure the Host header is set to localhost/127.0.0.1 to prevent DNS rebinding attacks
-		if (!hostRe.exec(this.header)) {
+		const hostRe = /^(localhost|127\.0\.0\.1)(:[0-9]+)?$/i;
+		if (!hostRe.test(this.headers.host)) {
 			this._requestFinished(this._generateResponse(400, "text/plain", "Invalid Host header\n"));
 			return;
 		}
 	}
 	
 	// get first line of request
+	const methodRe = /^([A-Z]+) ([^ \r\n?]+)(\?[^ \r\n]+)?/;
 	var method = methodRe.exec(this.header);
+	
 	// get content-type
-	var contentType = contentTypeRe.exec(this.header);
-	if(contentType) {
-		var splitContentType = contentType[1].split(/\s*;/);
+	var contentType = this.headers['content-type'];
+	if (contentType) {
+		let splitContentType = contentType.split(/\s*;/);
 		this.contentType = splitContentType[0];
 	}
 	
@@ -288,10 +298,10 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 	} else if(method[1] == "GET") {
 		this._processEndpoint("GET", null); // async
 	} else if(method[1] == "POST") {
-		const contentLengthRe = /[\r\n]Content-Length: +([0-9]+)/i;
+		const contentLengthRe = /^([0-9]+)$/;
 		
 		// parse content length
-		var m = contentLengthRe.exec(this.header);
+		var m = contentLengthRe.exec(this.headers['content-length']);
 		if(!m) {
 			this._requestFinished(this._generateResponse(400, "text/plain", "Content-length not provided\n"));
 			return;
@@ -408,13 +418,46 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 			}
 		}
 		
+		
+		// Reject browser-based requests that don't require a CORS preflight request [1] if they
+		// don't come from the connector or include Zotero-Allowed-Request
+		//
+		// Endpoints that can be triggered with a simple request can be whitelisted if they don't
+		// trigger any actions
+		//
+		// [1] https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#Simple_requests
+		var whitelistedEndpoints = [
+			'/test/translate/test.html',
+			'/test/translate/test.pdf',
+			'/test/translate/does_not_exist.html',
+		];
+		var simpleRequestContentTypes = [
+			'application/x-www-form-urlencoded',
+			'multipart/form-data',
+			'text/plain'
+		];
+		var isBrowser = this.headers['user-agent'].startsWith('Mozilla/')
+			// Origin isn't sent via fetch() for HEAD/GET, but for crazy UA strings, protecting
+			// POST requests is better than nothing
+			|| 'origin' in this.headers;
+		if (isBrowser
+				&& !this.headers['x-zotero-connector-api-version']
+				&& !this.headers['zotero-allowed-request']
+				&& (!endpoint.supportedDataTypes
+				|| endpoint.supportedDataTypes == '*'
+				|| endpoint.supportedDataTypes.some(type => simpleRequestContentTypes.includes(type)))
+				&& !whitelistedEndpoints.includes(this.pathname)
+				&& !(this.contentType && !simpleRequestContentTypes.includes(this.contentType))) {
+			this._requestFinished(this._generateResponse(403, "text/plain", "Request not allowed\n"));
+			return;
+		}
+		
 		var decodedData = null;
 		if(postData && this.contentType) {
 			// check that endpoint supports contentType
 			var supportedDataTypes = endpoint.supportedDataTypes;
 			if(supportedDataTypes && supportedDataTypes != '*' 
 				&& supportedDataTypes.indexOf(this.contentType) === -1) {
-				
 				this._requestFinished(this._generateResponse(400, "text/plain", "Endpoint does not support content-type\n"));
 				return;
 			}
