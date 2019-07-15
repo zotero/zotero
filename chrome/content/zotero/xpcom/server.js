@@ -422,15 +422,7 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 		// Reject browser-based requests that don't require a CORS preflight request [1] if they
 		// don't come from the connector or include Zotero-Allowed-Request
 		//
-		// Endpoints that can be triggered with a simple request can be whitelisted if they don't
-		// trigger any actions
-		//
 		// [1] https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#Simple_requests
-		var whitelistedEndpoints = [
-			'/test/translate/test.html',
-			'/test/translate/test.pdf',
-			'/test/translate/does_not_exist.html',
-		];
 		var simpleRequestContentTypes = [
 			'application/x-www-form-urlencoded',
 			'multipart/form-data',
@@ -446,7 +438,9 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 				&& (!endpoint.supportedDataTypes
 				|| endpoint.supportedDataTypes == '*'
 				|| endpoint.supportedDataTypes.some(type => simpleRequestContentTypes.includes(type)))
-				&& !whitelistedEndpoints.includes(this.pathname)
+				// Ignore test endpoints
+				&& !this.pathname.startsWith('/test/')
+				// Ignore content types that trigger preflight requests
 				&& !(this.contentType && !simpleRequestContentTypes.includes(this.contentType))) {
 			this._requestFinished(this._generateResponse(403, "text/plain", "Request not allowed\n"));
 			return;
