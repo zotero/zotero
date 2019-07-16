@@ -82,7 +82,8 @@ Zotero.Server.Endpoints['/connector/sendToBack'].prototype = {
 	supportedMethods: ["POST", "GET"],
 	supportedDataTypes: ["application/json"],
 	permitBookmarklet: true,
-	init: function() {
+	init: function (requestData) {
 		Zotero.Utilities.Internal.sendToBack();
+		return 200;
 	},
 };

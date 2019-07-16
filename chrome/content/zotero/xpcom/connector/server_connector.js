@@ -1067,9 +1067,9 @@ Zotero.Server.Connector.DelaySync.prototype = {
 	supportedMethods: ["POST"],
 	permitBookmarklet: true,
 	
-	init: async function (requestData) {
+	init: function (requestData) {
 		Zotero.Sync.Runner.delaySync(10000);
-		return [204];
+		return 204;
 	}
 };
 
