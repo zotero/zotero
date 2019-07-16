@@ -59,7 +59,7 @@ Copyright (c) 2009-2019 Frank Bennett
 
 var CSL = {
 
-    PROCESSOR_VERSION: "1.2.13",
+    PROCESSOR_VERSION: "1.2.17",
 
     error: function(str) { // default error function
         if ("undefined" === typeof Error) {
@@ -1140,39 +1140,8 @@ var CSL = {
     UPDATE_GROUP_CONTEXT_CONDITION: function (state, termtxt, valueTerm) {
         if (state.tmp.group_context.tip.condition) {
             if (state.tmp.group_context.tip.condition.test) {
-                var testres;
-                if (state.tmp.group_context.tip.condition.test === "empty-label") {
-                    testres = !termtxt;
-                } else if (state.tmp.group_context.tip.condition.test === "empty-label-no-decor") {
-                    testres = !termtxt || termtxt.indexOf("%s") > -1;
-                } else if (state.tmp.group_context.tip.condition.test === "comma-safe") {
-                    var empty = !termtxt;
-                    var alpha = termtxt.slice(0,1).match(CSL.ALL_ROMANESQUE_REGEXP);
-                    var num = state.tmp.just_did_number;
-                    if (empty) {
-                        testres = true;
-                    } else if (num) {
-                        if (alpha && !valueTerm) {
-                            testres = true;
-                        } else {
-                            testres = false;
-                        }
-                    } else {
-                        if (alpha && !valueTerm) {
-                            testres = true;
-                        } else {
-                            testres = false;
-                        }
-                    }
-                }
-                if (testres) {
-                    state.tmp.group_context.tip.force_suppress = false;
-                } else {
-                    state.tmp.group_context.tip.force_suppress = true;
-                }
-                if (state.tmp.group_context.tip.condition.not) {
-                    state.tmp.group_context.tip.force_suppress = !state.tmp.group_context.tip.force_suppress;
-                }
+                state.tmp.group_context.tip.condition.termtxt = termtxt;
+                state.tmp.group_context.tip.condition.valueTerm = valueTerm;
             }
         } else {
             // If not inside a conditional group, raise numeric flag
@@ -1185,6 +1154,50 @@ var CSL = {
         }
     },
 
+    EVALUATE_GROUP_CONDITION: function(state, flags) {
+        var testres;
+        if (flags.condition.test === "empty-label") {
+            testres = !flags.condition.termtxt;
+        } else if (flags.condition.test === "empty-label-no-decor") {
+            testres = !flags.condition.termtxt || flags.condition.termtxt.indexOf("%s") > -1;
+        } else if (flags.condition.test === "comma-safe") {
+            var empty = !flags.condition.termtxt;
+            var termStartAlpha = false;
+            if (flags.condition.termtxt) {
+                termStartAlpha = flags.condition.termtxt.slice(0,1).match(CSL.ALL_ROMANESQUE_REGEXP);
+            }
+            var num = state.tmp.just_did_number;
+            if (empty) {
+                // i.e. Big L. Rev. 100, 102
+                //      Little L. Rev. 102
+                //      L. Rev. for Plan 9, 102
+                if (num) {
+                    testres = true;
+                } else {
+                    testres = false;
+                }
+            } else if (flags.condition.valueTerm) {
+                // i.e. Ibid. at 102
+                testres = false;
+            } else {
+                if (termStartAlpha) {
+                    testres = true;
+                } else {
+                    testres = false;
+                }
+            }
+        }
+        if (testres) {
+            var force_suppress = false;
+        } else {
+            var force_suppress = true;
+        }
+        if (flags.condition.not) {
+            force_suppress = !force_suppress;
+        }
+        return force_suppress;
+    },
+    
     SYS_OPTIONS: [
         "prioritize_disambiguate_condition",
         "csl_reverse_lookup_support",
@@ -6963,12 +6976,14 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                 for (k = 0, klen = citations[j].sortedItems.length; k < klen; k += 1) {
                     item = citations[j].sortedItems[k];
                     var myid = item[0].id;
+                    var myxloc = item[1]["locator-extra"];
                     var mylocator = item[1].locator;
                     var mylabel = item[1].label;
                     if (item[0].legislation_id) {
                         myid = item[0].legislation_id;
                     }
                     var incitationid;
+                    var incitationxloc;
                     if (k > 0) {
                         // incitationid is only reached in the else branch
                         // following "undefined" === typeof first_ref[myid]
@@ -6977,10 +6992,12 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                             incitationid = onecitation.sortedItems[k - 1][0].legislation_id;
                         } else {
                             incitationid = onecitation.sortedItems[k - 1][1].id;
+                            incitationxloc = onecitation.sortedItems[k - 1][1]["locator-extra"];
                             //if (onecitation.sortedItems[k-1][1].parallel === "last") {
                                 for (var l=k-2; l>-1; l--) {
                                     if (onecitation.sortedItems[l][1].parallel === "first") {
                                         incitationid = onecitation.sortedItems[l][1].id;
+                                        incitationxloc = onecitation.sortedItems[l][1]["locator-extra"];
                                     }
                                 }
                             //}
@@ -7027,6 +7044,7 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                         }
                     }
                     var oldlastid;
+                    var oldlastxloc;
 
                     if ("undefined" === typeof first_ref[myid] && onecitation.properties.mode !== "author-only") {
                         first_ref[myid] = onecitation.properties.noteIndex;
@@ -7043,18 +7061,24 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                         //
                         var ibidme = false;
                         var suprame = false;
+                        var prevCitation = null;
+                        if (j > 0) {
+                            var prevCitation = citations[j-1];
+                        }
+                        var thisCitation = citations[j];
                         // XXX Ugly, but This is used in the second else-if branch condition below.
                         if (j > 0) {
                             var old_last_id_offset = 1;
-                            if (citations[j-1].properties.mode === "author-only" && j > 1) {
+                            if (prevCitation.properties.mode === "author-only" && j > 1) {
                                 old_last_id_offset = 2;
                             }
                             oldlastid =  citations[j - old_last_id_offset].sortedItems.slice(-1)[0][1].id;
-                            if (citations[j - 1].sortedItems[0].slice(-1)[0].legislation_id) {
-                                oldlastid = citations[j - 1].sortedItems[0].slice(-1)[0].legislation_id;
+                            oldlastxloc =  citations[j - old_last_id_offset].sortedItems.slice(-1)[0][1]["locator-extra"];
+                            if (prevCitation.sortedItems[0].slice(-1)[0].legislation_id) {
+                                oldlastid = prevCitation.sortedItems[0].slice(-1)[0].legislation_id;
                             }
                         }
-                        if (j > 0 && parseInt(k, 10) === 0 && citations[j - 1].properties.noteIndex !== citations[j].properties.noteIndex) {
+                        if (j > 0 && k === 0 && prevCitation.properties.noteIndex !== thisCitation.properties.noteIndex) {
                             // Case 1: source in previous onecitation
                             // (1) Threshold conditions
                             //     (a) there must be a previous onecitation with one item
@@ -7065,12 +7089,14 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                             // (this has some jiggery-pokery in it for parallels)
                             var useme = false;
                             // XXX Can oldid be equated with oldlastid, I wonder ...
-                            var oldid = citations[j - 1].sortedItems[0][0].id;
-                            if (citations[j - 1].sortedItems[0][0].legislation_id) {
-                                oldid = citations[j - 1].sortedItems[0][0].legislation_id;
+                            var oldid = prevCitation.sortedItems[0][0].id;
+                            if (prevCitation.sortedItems[0][0].legislation_id) {
+                                oldid = prevCitation.sortedItems[0][0].legislation_id;
                             }
-                            if ((oldid  == myid && citations[j - 1].properties.noteIndex >= (citations[j].properties.noteIndex - 1))) {
-                                if (citationsInNote[citations[j - 1].properties.noteIndex] === 1 || citations[j - 1].properties.noteIndex === 0) {
+                            if ((oldid  == myid && prevCitation.properties.noteIndex >= (thisCitation.properties.noteIndex - 1))) {
+                                var prevxloc = prevCitation.sortedItems[0][1]["locator-extra"];
+                                var thisxloc = thisCitation.sortedItems[0][1]["locator-extra"];
+                                if ((citationsInNote[prevCitation.properties.noteIndex] === 1 || prevCitation.properties.noteIndex === 0) && prevxloc === thisxloc) {
                                     useme = true;
                                 }
                             }
@@ -7079,15 +7105,15 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                             } else {
                                 suprame = true;
                             }
-                        } else if (k > 0 && incitationid == myid) {
+                        } else if (k > 0 && incitationid == myid && incitationxloc == myxloc) {
                             // Case 2: immediately preceding source in this onecitation
                             // (1) Threshold conditions
                             //     (a) there must be an imediately preceding reference to  the
                             //         same item in this onecitation; and
                             ibidme = true;
-                        } else if (k === 0 && j > 0 && citations[j - 1].properties.noteIndex == citations[j].properties.noteIndex
-                                   && citations[j - 1].sortedItems.length 
-                                   && oldlastid == myid) {
+                        } else if (k === 0 && j > 0 && prevCitation.properties.noteIndex == thisCitation.properties.noteIndex
+                                   && prevCitation.sortedItems.length 
+                                   && oldlastid == myid && oldlastxloc == myxloc) {
                             // ... in case there are separate citations in the same note ...
                             // Case 2 [take 2]: immediately preceding source in this onecitation
                             // (1) Threshold conditions
@@ -7496,7 +7522,6 @@ CSL.getAmbiguousCite = function (Item, disambig, visualForm, item) {
     this.tmp.suppress_decorations = true;
     this.tmp.just_looking = true;
 
-    // Do not reset shadow_numbers when running ambiguous cites
     CSL.getCite.call(this, Item, itemSupp, null, false);
     // !!!
     for (var i=0,ilen=this.output.queue.length;i<ilen;i+=1) {
@@ -9947,7 +9972,6 @@ CSL.Node.group = {
                             test: this.strings.reject,
                             not: true
                         };
-                        force_suppress = true;
                         done_vars = [];
                     } else if (this.strings.require) {
                         condition = {
@@ -10175,6 +10199,9 @@ CSL.Node.group = {
                     //    print("POP parent="+JSON.stringify(state.tmp.group_context.tip, params))
                     //    print("    flags="+JSON.stringify(flags, params));
                     //}
+                    if (flags.condition) {
+                        flags.force_suppress = CSL.EVALUATE_GROUP_CONDITION(state, flags);
+                    }
                     if (state.tmp.group_context.tip.condition) {
                         state.tmp.group_context.tip.force_suppress = flags.force_suppress;
                     }
@@ -10202,6 +10229,8 @@ CSL.Node.group = {
                         if (flags.force_suppress && !state.tmp.group_context.tip.condition) {
                             state.tmp.group_context.tip.variable_attempt = true;
                             state.tmp.group_context.tip.variable_success = flags.variable_success_parent;
+                        }
+                        if (flags.force_suppress) {
                             // 2019-04-15
                             // This is removing variables done within the group we're leaveing from global
                             // done_vars? How does that make sense?
@@ -10209,8 +10238,11 @@ CSL.Node.group = {
                             // later in the cite if desired.
                             // Currently no tests fail from removing the condition, but leaving it in.
                             for (var i=0,ilen=flags.done_vars.length;i<ilen;i++) {
-                                if (state.tmp.done_vars.indexOf(flags.done_vars[i]) > -1) {
-                                    state.tmp.done_vars = state.tmp.done_vars.slice(0, i).concat(state.tmp.done_vars.slice(i+1));
+                                var doneVar = flags.done_vars[i];
+                                for (var j=0,jlen=state.tmp.done_vars.length; j<jlen; j++) {
+                                    if (state.tmp.done_vars[j] === doneVar) {
+                                        state.tmp.done_vars = state.tmp.done_vars.slice(0, j).concat(state.tmp.done_vars.slice(j+1));
+                                    }
                                 }
                             }
                         }
@@ -14868,16 +14900,17 @@ CSL.Node.text = {
                         if (this.variables_real[0] !== "locator") {
                             state.tmp.have_collapsed = false;
                         }
-                        var parallel_variable = this.variables[0];
-                        
-                        if (parallel_variable === "title" 
-                            && (form === "short" || Item["title-short"])) { 
-                            // Only if not main_title_from_short_title
-                            parallel_variable = "title-short";
-                        }
 
                         if (!state.tmp.group_context.tip.condition && Item[this.variables[0]]) {
                             state.tmp.just_did_number = false;
+                        }
+                        var val = Item[this.variables[0]];
+                        if (val && !state.tmp.group_context.tip.condition) {
+                            if (("" + val).slice(-1).match(/[0-9]/)) {
+                                state.tmp.just_did_number = true;
+                            } else {
+                                state.tmp.just_did_number = false;
+                            }
                         }
                     };
                     this.execs.push(func);
@@ -15101,18 +15134,6 @@ CSL.Node.intext = {
 /*global CSL: true */
 
 CSL.Attributes = {};
-
-CSL.Attributes["@genre"] = function (state, arg) {
-    this.tests ? {} : this.tests = [];
-    arg = arg.replace("-", " ");
-    var func = function (Item) {
-        if (arg === Item.genre) {
-            return true;
-        }
-        return false;
-    };
-    this.tests.push(func);
-};
 
 CSL.Attributes["@disambiguate"] = function (state, arg) {
     this.tests ? {} : this.tests = [];
@@ -15688,25 +15709,6 @@ CSL.Attributes["@has-day"] = function (state, arg) {
     }
 };
 
-CSL.Attributes["@subjurisdictions"] = function (state, arg) {
-    this.tests ? {} : this.tests = [];
-    var trysubjurisdictions = parseInt(arg, 10);
-    var func = function (Item) {
-        var subjurisdictions = 0;
-        if (Item.jurisdiction) {
-            subjurisdictions = Item.jurisdiction.split(":").length;
-        }
-        if (subjurisdictions) {
-            subjurisdictions += -1;
-        }
-        if (subjurisdictions >= trysubjurisdictions) {
-            return true;
-        }
-        return false;
-    };
-    this.tests.push(func);
-};
-
 CSL.Attributes["@is-plural"] = function (state, arg) {
     this.tests ? {} : this.tests = [];
     var func = function (Item) {
@@ -15844,26 +15846,6 @@ CSL.Attributes["@locale"] = function (state, arg) {
     }
 };
 
-CSL.Attributes["@authority-residue"] = function (state, arg) {
-    this.tests ? {} : this.tests = [];
-    var maketest = function () {
-        var succeed = (arg === "true") ? true : false;
-        return function(Item) {
-            if (!Item.authority || !Item.authority[0] || !Item.authority[0].family) {
-                return !succeed;
-            }
-            var varLen = Item.authority[0].family.split("|").length;
-            var stopLast = state.tmp.authority_stop_last;
-            if ((varLen + stopLast) > 0) {
-                return succeed;
-            } else {
-                return !succeed;
-            }
-        };
-    };
-    this.tests.push(maketest());
-};
-
 CSL.Attributes["@alternative-node-internal"] = function (state) {
     this.tests ? {} : this.tests = [];
     var maketest = function () {
@@ -15967,10 +15949,6 @@ CSL.Attributes["@no-repeat"] = function (state, arg) {
     this.strings.set_no_repeat_condition = arg.split(/\s+/);
 };
 
-
-CSL.Attributes["@jurisdiction-depth"] = function (state, arg) {
-    this.strings.jurisdiction_depth = parseInt(arg, 10);
-};
 
 
 CSL.Attributes["@require"] = function (state, arg) {
@@ -16240,9 +16218,6 @@ CSL.Attributes["@publisher-delimiter"] = function (state, arg) {
 CSL.Attributes["@publisher-and"] = function (state, arg) {
     this.strings["publisher-and"] = arg;
 };
-
-CSL.Attributes["@newdate"] = function () {};
-
 
 CSL.Attributes["@givenname-disambiguation-rule"] = function (state, arg) {
     if (CSL.GIVENNAME_DISAMBIGUATION_RULES.indexOf(arg) > -1) {
@@ -16690,7 +16665,7 @@ CSL.Parallel.prototype.getRepeats = function(prev, curr) {
         if (key.match(rex)) {
             continue;
         }
-        if (typeof prev[key] === "string") {
+        if (typeof prev[key] === "string" || !prev[key]) {
             if (prev[key] && prev[key] === curr[key]) {
                 ret[key] = true;
             }
@@ -16750,6 +16725,7 @@ CSL.Parallel.prototype.StartCitation = function (sortedItems, out) {
                     sortedItems[i-1][1].parallel = "first";
                     sortedItems[i][1].parallel = "mid";
                     sortedItems[i][1].repeats = this.getRepeats(prev, curr);
+                    sortedItems[i-1][1].repeats = sortedItems[i][1].repeats;
                     if (!sortedItems[i][1].prefix) {
                         sortedItems[i][1].prefix = ", ";
                     }
@@ -16766,15 +16742,20 @@ CSL.Parallel.prototype.StartCitation = function (sortedItems, out) {
                     }
                     delete seriesRels[curr.id];
                     sortedItems[i][1].repeats = this.getRepeats(prev, curr);
+                    //sortedItems[i-1][1].repeats = sortedItems[i][1].repeats;
                     this.state.registry.registry[masterID].siblings.push(curr.id);
                 } else {
                     sortedItems[i-1][1].parallel = "last";
+                    sortedItems[i][1].repeats = this.getRepeats(prev, curr);
                     seriesRels = false;
                 }
             }
             if (i === (sortedItems.length-1)) {
                 if (sortedItems[i][1].parallel === "mid") {
                     sortedItems[i][1].parallel = "last";
+                    sortedItems[i][1].repeats = this.getRepeats(prev, curr);
+                } else if (sortedItems[i][1].parallel !== "last") {
+                    delete sortedItems[i][1].repeats;
                 }
             }
         }
@@ -16786,22 +16767,17 @@ CSL.Parallel.prototype.purgeGroupsIfParallel = function () {
     for (var i = this.parallel_conditional_blobs_list.length - 1; i > -1; i += -1) {
         var obj = this.parallel_conditional_blobs_list[i];
         if (!obj.result && !obj.repeats) {
-            //this.state.sys.print(i + " No action [render] " + obj.id);
             purgeme = false;
         } else {
             if (obj.condition) {
                 var purgeme = true;
                 if (obj.result === obj.condition) {
-                    //this.state.sys.print(i + " Position match [render] "+obj.id);
                     purgeme = false;
                 }
-                //else {
-                //    this.state.sys.print(i + " Position non-match [not-render] "+obj.id + " " + obj.condition + " " + obj.result);
-                //}
-            } else if (obj.repeats) {
+            }
+            if (purgeme && obj.norepeat && obj.repeats) {
                 purgeme = false;
                 var matches = 0;
-                //this.state.sys.print(obj.norepeat)
                 for (var j=0,jlen=obj.norepeat.length; j<jlen; j++) {
                     if (obj.repeats[obj.norepeat[j]]) {
                         matches += 1;
@@ -16812,11 +16788,6 @@ CSL.Parallel.prototype.purgeGroupsIfParallel = function () {
                 }
             }
         }
-        //if (purgeme) {
-        //    this.state.sys.print(i + " Repetition check [not-render] "+obj.id + " (" + obj.norepeat + " / " + JSON.stringify(obj.repeats) + ")");
-        //} else {
-        //    this.state.sys.print(i + " Repetition check [render] "+obj.id + " (" + obj.norepeat + " / " + JSON.stringify(obj.repeats) + ")");
-        //}
         if (purgeme) {
             var buffer = [];
             while (obj.blobs.length > obj.pos) {
@@ -19971,9 +19942,11 @@ CSL.Util.PageRangeMangler.getFunction = function (state, rangeType) {
     minimize = function (lst, minchars, isyear) {
         len = lst.length;
         for (var i = 1, ilen = lst.length; i < ilen; i += 2) {
-            lst[i][3] = minimize_internal(lst[i][1], lst[i][3], minchars, isyear);
-            if (lst[i][2].slice(1) === lst[i][0]) {
-                lst[i][2] = range_delimiter;
+            if ("object" === typeof lst[i]) {
+                lst[i][3] = minimize_internal(lst[i][1], lst[i][3], minchars, isyear);
+                if (lst[i][2].slice(1) === lst[i][0]) {
+                    lst[i][2] = range_delimiter;
+                }
             }
         }
         return stringify(lst);
