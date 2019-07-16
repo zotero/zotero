@@ -59,7 +59,7 @@ const DELAYED_CITATION_RTF_STYLING_CLEAR = "\\ulclear";
 const DELAYED_CITATION_HTML_STYLING = "<div class='delayed-zotero-citation-updates'>"
 const DELAYED_CITATION_HTML_STYLING_END = "</div>"
 
-const EXPORTED_DOCUMENT_MARKER = "ZOTERO_EXPORTED_DOCUMENT";
+const EXPORTED_DOCUMENT_MARKER = "ZOTERO_TRANSFER_DOCUMENT";
 
 
 Zotero.Integration = new function() {
@@ -545,19 +545,19 @@ Zotero.Integration = new function() {
 }
 
 Zotero.Integration.confirmExportDocument = function() {
-	const documentationURL = "https://www.zotero.org/support/kb/word_processor_document_export";
+	const documentationURL = "https://www.zotero.org/support/kb/moving_documents_between_word_processors";
 	
 	var ps = Services.prompt;
 	var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
 		+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
 	var result = ps.confirmEx(null,
-		Zotero.getString('integration.exportDocument'),
+		Zotero.getString('integration.exportDocument.title'),
 		Zotero.getString('integration.exportDocument.description1')
 			+ "\n\n"
 			+ Zotero.getString('integration.exportDocument.description2'),
 		buttonFlags,
-		Zotero.getString('general.export'),
+		Zotero.getString('general.continue'),
 		null,
 		Zotero.getString('general.moreInformation'), null, {});
 	if (result == 0) {
@@ -1675,7 +1675,7 @@ Zotero.Integration.Session.prototype.importDocument = async function() {
 
 	if (!this._app.supportsImportExport) {
 		// Technically you will only reach this part in the code if getDocumentData returns
-		// ZOTERO_EXPORTED_DOCUMENT, which is only viable for Word.
+		// ZOTERO_TRANSFER_DOCUMENT, which is only viable for Word.
 		// Let's add a parameter this changes later.
 		ps.alert(null, Zotero.getString('integration.importDocument'),
 			Zotero.getString('integration.importDocument.notAvailable', "Word"));
