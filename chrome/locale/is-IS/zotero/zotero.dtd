@@ -247,7 +247,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Nota MEDLINE skammstafanir">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Gagnasviðið “Journal Abbr” verður hunsað.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
+<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
 
 <!ENTITY zotero.integration.showEditor.label "Sýna ritil">
 <!ENTITY zotero.integration.classicView.label "Hefðbundin framsetning">

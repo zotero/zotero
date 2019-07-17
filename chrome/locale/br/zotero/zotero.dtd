@@ -247,7 +247,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Implijout ar berradurioù kelaouennoù MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Ar vaezienn Zotero &quot;Berradur kelaouenn&quot; a vo graet van outi.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Ezporzhiañ an teuliad...">
+<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
 
 <!ENTITY zotero.integration.showEditor.label "Diskouez an aozer">
 <!ENTITY zotero.integration.classicView.label "Gwel klasel">

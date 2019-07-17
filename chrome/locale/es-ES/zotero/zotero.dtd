@@ -247,7 +247,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Usar abreviaturas de la revista MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "El campo &quot;Abrev. de la revista&quot; será ignorado.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Exportar documento...">
+<!ENTITY zotero.integration.prefs.exportDocument "Cambiar a un procesador de texto diferente...">
 
 <!ENTITY zotero.integration.showEditor.label "Mostrar editor">
 <!ENTITY zotero.integration.classicView.label "Vista clásica">

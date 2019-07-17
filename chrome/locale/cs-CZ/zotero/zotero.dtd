@@ -247,7 +247,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Použít zkrácené názvy časopisů MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Pole &quot;Zkrácený název časopisu&quot; bude ignorováno">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
+<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
 
 <!ENTITY zotero.integration.showEditor.label "Zobrazit editor">
 <!ENTITY zotero.integration.classicView.label "Standardní zobrazení">

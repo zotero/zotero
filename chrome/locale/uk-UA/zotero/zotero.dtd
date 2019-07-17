@@ -247,7 +247,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Використовувати абревіатуру журналу в MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Поле &quot;Журнал скор.&quot; буде проігнороване.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
+<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
 
 <!ENTITY zotero.integration.showEditor.label "Покзати редактор">
 <!ENTITY zotero.integration.classicView.label "Класичний вигляд">

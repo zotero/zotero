@@ -247,7 +247,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Folosește abrevierile de reviste MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Câmpul „Abrev. revistă” va fi ignorat.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Exportă Document…">
+<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
 
 <!ENTITY zotero.integration.showEditor.label "Arată editor">
 <!ENTITY zotero.integration.classicView.label "Vizualizare clasică">

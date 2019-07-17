@@ -247,7 +247,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Bruk MEDLINE-journalforkortingar">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Feltet «Tidsskriftforkorting» vert ignorert.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
+<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
 
 <!ENTITY zotero.integration.showEditor.label "Rediger sitering">
 <!ENTITY zotero.integration.classicView.label "Klassisk framsyning">

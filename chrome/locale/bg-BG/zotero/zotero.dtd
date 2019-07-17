@@ -247,7 +247,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Използване на MEDLINE абревиатури на периодично издание">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Полето “Абревиатура на периодично издание” ще бъде игнорирано.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
+<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
 
 <!ENTITY zotero.integration.showEditor.label "Показване на редактора">
 <!ENTITY zotero.integration.classicView.label "Класически изглед">

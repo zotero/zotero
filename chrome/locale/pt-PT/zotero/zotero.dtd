@@ -50,7 +50,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Mostrar Duplicados">
 <!ENTITY zotero.collections.showUnfiledItems "Mostrar Itens por Arquivar">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "Mostrar Itens Retraídos">
 
 <!ENTITY zotero.items.itemType "Tipo de Item">
 <!ENTITY zotero.items.type_column "Tipo de Item">
@@ -247,7 +247,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Usar abreviaturas de publicações periódicas do MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "O campo «Abreviatura da Publicação» será ignorado.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Exportar Documento…">
+<!ENTITY zotero.integration.prefs.exportDocument "Mudar para um Processador de Texto Diferente...">
 
 <!ENTITY zotero.integration.showEditor.label "Mostrar Editor">
 <!ENTITY zotero.integration.classicView.label "Visualização Clássica">

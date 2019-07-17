@@ -247,7 +247,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Naudoti MEDLINE žurnalų santrumpas">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Ignoruosima reikšmė „žurnalo santrumpos“ laukelyje">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Export Document…">
+<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
 
 <!ENTITY zotero.integration.showEditor.label "Rodyti rengyklę">
 <!ENTITY zotero.integration.classicView.label "Klasikinis rodinys">

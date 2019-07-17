@@ -247,7 +247,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Uporabi okrajšave revij MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Polje »Journal Abbr« bo prezrto.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Izvozi dokument ...">
+<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
 
 <!ENTITY zotero.integration.showEditor.label "Pokaži urejevalnik">
 <!ENTITY zotero.integration.classicView.label "Klasični pogled">

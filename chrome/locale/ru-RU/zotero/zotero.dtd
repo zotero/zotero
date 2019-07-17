@@ -247,7 +247,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Использовать аббревиатуры журналов по MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Поле «Journal Abbr» будет проигнорировано.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Экспортировать документ…">
+<!ENTITY zotero.integration.prefs.exportDocument "Переключиться на другой текстовый редактор…">
 
 <!ENTITY zotero.integration.showEditor.label "Показать редактор">
 <!ENTITY zotero.integration.classicView.label "Классический вид">
