@@ -2513,12 +2513,12 @@ Zotero.Schema = new function(){
 				}
 			}
 			
-			else if (i == 104) {
-				// Didn't take for some people in 103 for some reason, so run again with IF NOT EXISTS
-				yield Zotero.DB.queryAsync("CREATE TABLE IF NOT EXISTS retractedItems (\n	itemID INTEGER PRIMARY KEY,\n	data TEXT,\n	FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n);");
-			}
-			
 			else if (i == 105) {
+				// This was originally in 103 and then 104, but some schema update steps are being
+				// missed for some people, so run again with IF NOT EXISTS until we figure out
+				// what's going on.
+				yield Zotero.DB.queryAsync("CREATE TABLE IF NOT EXISTS retractedItems (\n	itemID INTEGER PRIMARY KEY,\n	data TEXT,\n	FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n);");
+				
 				yield Zotero.DB.queryAsync("ALTER TABLE retractedItems ADD COLUMN flag INT DEFAULT 0");
 			}
 			
