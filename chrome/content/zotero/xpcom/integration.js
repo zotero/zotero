@@ -1669,7 +1669,7 @@ Zotero.Integration.Session.prototype.exportDocument = async function() {
 
 
 Zotero.Integration.Session.prototype.importDocument = async function() {
-	const documentationURL = "https://www.zotero.org/support/kb/word_processor_document_export";
+	const documentationURL = "https://www.zotero.org/support/kb/moving_documents_between_word_processors";
 	
 	var ps = Services.prompt;
 
@@ -1677,7 +1677,7 @@ Zotero.Integration.Session.prototype.importDocument = async function() {
 		// Technically you will only reach this part in the code if getDocumentData returns
 		// ZOTERO_TRANSFER_DOCUMENT, which is only viable for Word.
 		// Let's add a parameter this changes later.
-		ps.alert(null, Zotero.getString('integration.importDocument'),
+		ps.alert(null, Zotero.getString('integration.importDocument.title'),
 			Zotero.getString('integration.importDocument.notAvailable', "Word"));
 		return;
 	}
@@ -1686,10 +1686,10 @@ Zotero.Integration.Session.prototype.importDocument = async function() {
 		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
 		+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
 	var result = ps.confirmEx(null,
-		Zotero.getString('integration.importDocument'),
-		Zotero.getString('integration.importDocument.description'),
+		Zotero.getString('integration.importDocument.title'),
+		Zotero.getString('integration.importDocument.description', [Zotero.clientName, this._app.processorName]),
 		buttonFlags,
-		Zotero.getString('general.import'),
+		Zotero.getString('integration.importDocument.button'),
 		null,
 		Zotero.getString('general.moreInformation'), null, {});
 	if (result == 1) {
