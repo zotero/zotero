@@ -743,18 +743,22 @@ var CSL = {
                     // If short title exists and matches exactly to a split-point, use that split-point only.
                     // Otherwise if there is just one split-point, use that as main/sub split.
                     // Otherwise use all split-points ... which is handled in titleCaseSentenceOrNormal, not here.
-                    if (shortTitle && shortTitle === vals[title.title]) {
+                    if (shortTitle && shortTitle.toLowerCase() === vals[title.title].toLowerCase()) {
                         vals[title.main] = vals[title.title];
                         vals[title.subjoin] = "";
                         vals[title.sub] = "";
                     } else if (shortTitle) {
                         // check for valid match to shortTitle
-                        var checkAhead = vals[title.title].slice(shortTitle.replace(/[\?\!]+$/, "").length);
-                        var m = CSL.TITLE_SPLIT_REGEXP.matchfirst.exec(checkAhead);
-                        if (m) {
-                            vals[title.main] = shortTitle;
+                        var tail = vals[title.title].slice(shortTitle.replace(/[\?\!]+$/, "").length);
+                        var top = vals[title.title].replace(tail.replace(/^[\?\!]+/, ""), "").trim();
+                        var m = CSL.TITLE_SPLIT_REGEXP.matchfirst.exec(tail);
+                        if (m && top.toLowerCase() === shortTitle.toLowerCase()) {
+                            vals[title.main] = top;
                             vals[title.subjoin] = m[1].replace(/[\?\!]+(\s*)$/, "$1");
-                            vals[title.sub] = checkAhead.replace(CSL.TITLE_SPLIT_REGEXP.matchfirst, "");
+                            vals[title.sub] = tail.replace(CSL.TITLE_SPLIT_REGEXP.matchfirst, "");
+                            if (this.opt.development_extensions.force_short_title_casing_alignment) {
+                                vals[title["short"]] = vals[title.main];
+                            }
                         } else {
                             var splitTitle = CSL.TITLE_SPLIT(vals[title.title]);
                             if (splitTitle.length == 3) {
@@ -6176,6 +6180,7 @@ CSL.Engine.Opt = function () {
     this.development_extensions.throw_on_empty = false;
     this.development_extensions.strict_inputs = true;
     this.development_extensions.prioritize_disambiguate_condition = false;
+    this.development_extensions.force_short_title_casing_alignment = true;
 };
 
 CSL.Engine.Tmp = function () {
@@ -14983,6 +14988,12 @@ CSL.Node.text = {
                                 if (this.variables[0]) {
                                     value = state.getVariable(Item, this.variables[0], form);
                                     if (value) {
+                                        if (this.variables[0] === "URL" && form === "short") {
+                                            value = value.replace(/(.*\.[^\/]+)\/.*/, "$1");
+                                            if (value.match(/\/\/www\./)) {
+                                                value = value.replace(/https?:\/\//, "");
+                                            }
+                                        }
                                         // true is for non-suppression of periods
                                         if (state.opt.development_extensions.wrap_url_and_doi) {
                                             if (!this.decorations.length || this.decorations[0][0] !== "@" + this.variables[0]) {
