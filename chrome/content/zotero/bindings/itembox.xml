@@ -2611,14 +2611,10 @@
 							}
 						}.bind(document.getBindingParent(this))();"/>
 					<menupopup id="zotero-field-transform-menu">
-						<menu label="&zotero.item.textTransform;">
-							<menupopup>
-								<menuitem label="&zotero.item.textTransform.titlecase;" class="menuitem-non-iconic"
-									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'title')"/>
-								<menuitem label="&zotero.item.textTransform.sentencecase;" class="menuitem-non-iconic"
-									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'sentence')"/>
-							</menupopup>
-						</menu>
+						<menuitem label="&zotero.item.textTransform.titlecase;" class="menuitem-non-iconic"
+							oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'title')"/>
+						<menuitem label="&zotero.item.textTransform.sentencecase;" class="menuitem-non-iconic"
+							oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'sentence')"/>
 					</menupopup>
 					<menupopup id="zotero-creator-transform-menu"
 						onpopupshowing="var row = Zotero.getAncestorByTagName(document.popupNode, 'row');
