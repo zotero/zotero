@@ -2085,7 +2085,17 @@
 								throw ("Invalid transform mode '" + mode + "' in zoteroitembox.textTransform()");
 						}
 						this._setFieldValue(label, newVal);
-						this._modifyField(label.getAttribute('fieldname'), newVal);
+						var fieldName = label.getAttribute('fieldname');
+						this._modifyField(fieldName, newVal);
+						
+						// If this is a title field, convert the Short Title too
+						var isTitle = Zotero.ItemFields.getBaseIDFromTypeAndField(
+							this.item.itemTypeID, fieldName) == Zotero.ItemFields.getID('title');
+						var shortTitleVal = this.item.getField('shortTitle');
+						if (isTitle && newVal.toLowerCase().startsWith(shortTitleVal.toLowerCase())) {
+							this._modifyField('shortTitle', newVal.substr(0, shortTitleVal.length));
+						}
+						
 						if (this.saveOnEdit) {
 							// If a field is open, blur it, which will trigger a save and cause
 							// the saveTx() to be a no-op
