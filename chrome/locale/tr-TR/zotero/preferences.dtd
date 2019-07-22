@@ -126,7 +126,7 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Gönderme Yap">
 <!ENTITY zotero.preferences.cite.styles "Stiller">
-<!ENTITY zotero.preferences.cite.wordProcessors "Kelime İşlemcileri">
+<!ENTITY zotero.preferences.cite.wordProcessors "Sözcük İşlemcileri">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Klasik Gönderme Ekleme İletişim Kutusunu kullan">
 <!ENTITY zotero.preferences.styleEditor "Stil Düzenleyicisi">
 <!ENTITY zotero.preferences.stylePreview "Stil Önizleyicisi">

@@ -178,7 +178,7 @@
 <!ENTITY zotero.selectitems.select.label "V redu">
 
 <!ENTITY zotero.bibliography.title "Ustvari bibliografijo">
-<!ENTITY zotero.bibliography.style.label "Slog navajanja:">
+<!ENTITY zotero.bibliography.style.label "Slog citiranja:">
 <!ENTITY zotero.bibliography.manageStyles "Upravljaj s slogi ...">
 <!ENTITY zotero.bibliography.locale.label "Jezik:">
 <!ENTITY zotero.bibliography.outputMode "Izhodni način:">
@@ -190,7 +190,7 @@
 <!ENTITY zotero.bibliography.print.label "Natisni">
 
 <!ENTITY zotero.integration.docPrefs.title "Lastnosti dokumenta">
-<!ENTITY zotero.integration.addEditCitation.title "Dodaj/uredi navedek">
+<!ENTITY zotero.integration.addEditCitation.title "Dodaj/uredi citat">
 <!ENTITY zotero.integration.editBibliography.title "Uredi bibliografijo">
 <!ENTITY zotero.integration.quickFormatDialog.title "Hitro oblikovanje citata">
 
@@ -247,7 +247,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Uporabi okrajšave revij MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Polje »Journal Abbr« bo prezrto.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "Preklopi v drug urejevalnik besedil ...">
 
 <!ENTITY zotero.integration.showEditor.label "Pokaži urejevalnik">
 <!ENTITY zotero.integration.classicView.label "Klasični pogled">

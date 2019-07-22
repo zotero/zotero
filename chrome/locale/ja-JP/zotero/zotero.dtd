@@ -204,7 +204,7 @@
 <!ENTITY zotero.import.lastModified "最後の更新">
 <!ENTITY zotero.import.size "サイズ">
 <!ENTITY zotero.import.createCollection "インポートされたコレクションやアイテムを新しいコレクションに格納する">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "ファイルの取り扱い">
 
 <!ENTITY zotero.exportOptions.title "エクスポート...">
 <!ENTITY zotero.exportOptions.format.label "フォーマット:">
@@ -247,7 +247,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "MEDLINEの略誌名を使用する">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "「雑誌略誌名」のフィールドは無視されます。">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "別のワード・プロセッサに切り替える...">
 
 <!ENTITY zotero.integration.showEditor.label "エディタを表示">
 <!ENTITY zotero.integration.classicView.label "クラシック表示">

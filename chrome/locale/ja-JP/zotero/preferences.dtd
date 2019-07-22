@@ -24,7 +24,7 @@
 <!ENTITY zotero.preferences.downloadAssociatedFiles "アイテムを作成するときに自動的に関連 PDF や他のファイルを添付する">
 <!ENTITY zotero.preferences.autoRecognizeFiles "自動的にPDFのメタデータを取得する">
 <!ENTITY zotero.preferences.autoRenameFiles "親アイテムのメタデータを使って自動的に添付ファイルを改名する">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "リンクされたファイルの名前を変更">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF書類を開く">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "システムデフォルト">
 
@@ -88,8 +88,8 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "ローカルのデータをリモートのデータと統合し、同期の履歴は無視する">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "オンライン・ライブラリから復元する">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "オンライン・ライブラリを使ってローカルのZoteroデータを上書きする">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "ローカルのZoteroデータを使ってオンライン・ライブラリを上書きする">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "オンライン・ライブラリを置き換える">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "ローカルの Zotero データを使ってオンライン・ライブラリを上書きする">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "ファイル同期の履歴を削除する">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "すべての添付ファイルをストレージ・サービスと比較する">
 <!ENTITY zotero.preferences.sync.reset "リセット">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "HTMLとしてコピー">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "サイト固有の設定:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "ドメイン／パス">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(例, wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(例: wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "フォーマット">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "言語">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "アイテム数が右の値より大きい時はドラッグ時のクイックコピーを無効化する:">
