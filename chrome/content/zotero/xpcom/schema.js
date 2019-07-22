@@ -2513,6 +2513,7 @@ Zotero.Schema = new function(){
 				}
 			}
 			
+			// Duplicated in retractions.js::init() due to undiagnosed schema update bug
 			else if (i == 105) {
 				// This was originally in 103 and then 104, but some schema update steps are being
 				// missed for some people, so run again with IF NOT EXISTS until we figure out
