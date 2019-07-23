@@ -2097,7 +2097,7 @@ Zotero.Integration.BibliographyEditInterface.prototype.isAnyEdited = function() 
  * Adds an item to the bibliography
  */
 Zotero.Integration.BibliographyEditInterface.prototype.add = function(itemID) {
-	if (itemID in this.bibliography.omittedItemIDs) {
+	if (this.bibliography.omittedItemIDs.has(`${itemID}`)) {
 		this.bibliography.omittedItemIDs.delete(`${itemID}`);
 	} else {
 		this.bibliography.uncitedItemIDs.add(`${itemID}`);
@@ -2109,7 +2109,7 @@ Zotero.Integration.BibliographyEditInterface.prototype.add = function(itemID) {
  * Removes an item from the bibliography being edited
  */
 Zotero.Integration.BibliographyEditInterface.prototype.remove = function(itemID) {
-	if (itemID in this.bibliography.uncitedItemIDs) {
+	if (this.bibliography.uncitedItemIDs.has(`${itemID}`)) {
 		this.bibliography.uncitedItemIDs.delete(`${itemID}`);
 	} else {
 		this.bibliography.omittedItemIDs.add(`${itemID}`);
