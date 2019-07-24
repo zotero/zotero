@@ -193,13 +193,15 @@ var Zotero_TranslatorTesters = new function() {
  * @param {String} type The type of tests to run (web, import, export, or search)
  * @param {Function} [debugCallback] A function to call to write debug output. If not present,
  *     Zotero.debug will be used.
+ * @param {Object} [translatorProvider] Used by Scaffold to override Zotero.Translators
  */
-var Zotero_TranslatorTester = function(translator, type, debugCallback) {
+var Zotero_TranslatorTester = function(translator, type, debugCallback, translatorProvider) {
 	this.type = type;
 	this.translator = translator;
 	this.output = "";
 	this.isSupported = this.translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER;
 	this.translator.runMode = Zotero.Translator.RUN_MODE_IN_BROWSER;
+	this.translatorProvider = translatorProvider;
 	
 	this.tests = [];
 	this.pending = [];
@@ -441,7 +443,9 @@ Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback
 	
 	var me = this;
 	var translate = Zotero.Translate.newInstance(this.type);
-	
+	if (this.translatorProvider) {
+		translate.setTranslatorProvider(this.translatorProvider);
+	}
 	if(this.type === "web") {
 		translate.setDocument(doc);
 	} else if(this.type === "import") {
@@ -602,6 +606,9 @@ Zotero_TranslatorTester.prototype.newTest = function(doc, testReadyCallback) {
 	
 	var me = this;
 	var translate = Zotero.Translate.newInstance(this.type);
+	if (this.translatorProvider) {
+		translate.setTranslatorProvider(this.translatorProvider);
+	}
 	translate.setDocument(doc);
 	translate.setTranslator(this.translator);
 	translate.setHandler("debug", this._debug);
