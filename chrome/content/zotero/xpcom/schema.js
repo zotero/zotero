@@ -707,8 +707,8 @@ Zotero.Schema = new function(){
 						
 						if (mode == 'translators') {
 							// TODO: Change if the APIs change
-							let newObj = new Zotero[Mode].loadFromFile(entry.path);
-							if (deleted.indexOf(newObj[modeType + "ID"]) == -1) {
+							let newObj = yield Zotero[Mode].loadFromFile(entry.path);
+							if (!deleted.includes(newObj[modeType + "ID"])) {
 								continue;
 							}
 							toDelete.push(entry.path);
