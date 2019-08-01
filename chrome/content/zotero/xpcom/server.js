@@ -431,7 +431,7 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 			'multipart/form-data',
 			'text/plain'
 		];
-		var isBrowser = this.headers['user-agent'].startsWith('Mozilla/')
+		var isBrowser = (this.headers['user-agent'] && this.headers['user-agent'].startsWith('Mozilla/'))
 			// Origin isn't sent via fetch() for HEAD/GET, but for crazy UA strings, protecting
 			// POST requests is better than nothing
 			|| 'origin' in this.headers;
