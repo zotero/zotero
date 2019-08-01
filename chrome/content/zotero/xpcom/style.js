@@ -649,7 +649,7 @@ Zotero.Style = function (style, path) {
 	this.locale = Zotero.Utilities.xpathText(doc, '/csl:style/@default-locale',
 		Zotero.Styles.ns) || null;
 	this._uppercaseSubtitles = false;
-	var uppercaseSubtitlesRE = /^apa($|-)|^(academy-of-management|american-medical-association)/;
+	var uppercaseSubtitlesRE = /^apa($|-)|^(academy-of-management)/;
 	var shortIDMatches = this.styleID.match(/\/?([^/]+)$/);
 	this._uppercaseSubtitles = !!shortIDMatches && uppercaseSubtitlesRE.test(shortIDMatches[1]);
 	this._class = doc.documentElement.getAttribute("class");
