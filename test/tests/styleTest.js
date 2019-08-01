@@ -67,12 +67,12 @@ describe("Zotero.Styles", function() {
 			assert.equal(o.text, 'Foo bar: Baz qux. (2019).\n');
 		});
 		
-		it("should capitalize subtitles in AMA", async function () {
+		it("shouldn't capitalize subtitles in AMA", async function () {
 			var o = Zotero.QuickCopy.getContentFromItems(
 				[item],
 				'bibliography=http://www.zotero.org/styles/american-medical-association'
 			);
-			assert.equal(o.text, '1. Foo bar: Baz qux. 2019.\n');
+			assert.equal(o.text, '1. Foo bar: baz qux. 2019.\n');
 		});
 		
 		it("shouldn't capitalize subtitles in Vancouver", async function () {
