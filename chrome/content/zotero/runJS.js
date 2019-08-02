@@ -32,6 +32,10 @@ async function run() {
 	resultTextbox.textContent = typeof result == 'string' ? result : Zotero.Utilities.varDump(result);
 }
 
+function openHelp() {
+	Zotero.launchURL("https://www.zotero.org/support/dev/client_coding/javascript_api");
+}
+
 function handleInput() { // eslint-disable-line no-unused-vars
 	var checkbox = document.getElementById('run-as-async');
 	var isAsync = checkbox.checked;

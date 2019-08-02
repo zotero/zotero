@@ -13,6 +13,10 @@ button {
 	font-size: 15px;
 }
 
+#help-button {
+	margin-left: 15px;
+}
+
 #run-label {
 	margin-left: 2px;
 	font-size: 12px;
