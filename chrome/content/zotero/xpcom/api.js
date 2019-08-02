@@ -36,7 +36,7 @@ Zotero.API = {
 	
 	
 	/**
-	 * @return {(Zotero.Collection|Zotero.Item)[]}
+	 * @return {(Zotero.Collection|Zotero.Search|Zotero.Item)[]}
 	 */
 	getResultsFromParams: Zotero.Promise.coroutine(function* (params) {
 		if (!params.objectType) {
