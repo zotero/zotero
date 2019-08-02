@@ -78,8 +78,8 @@ class TagList extends React.PureComponent {
 		for (let i = 0; i < this.props.tags.length; i++) {
 			let tag = this.props.tags[i];
 			let tagWidth = tagPaddingLeft + Math.min(tag.width, tagMaxWidth) + tagPaddingRight;
-			// If cell fits, add to current row
-			if ((rowX + tagWidth) < (this.props.width - panePaddingLeft - panePaddingRight)) {
+			// If first row or cell fits, add to current row
+			if (i == 0 || ((rowX + tagWidth) < (this.props.width - panePaddingLeft - panePaddingRight))) {
 				positions[i] = [rowX, panePaddingTop + (row * rowHeight)];
 			}
 			// Otherwise, start new row
