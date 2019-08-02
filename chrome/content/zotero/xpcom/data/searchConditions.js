@@ -394,7 +394,8 @@ Zotero.SearchConditions = new function(){
 					is: true,
 					isNot: true,
 					contains: true,
-					doesNotContain: true
+					doesNotContain: true,
+					beginsWith: true
 				},
 				table: 'itemData',
 				field: 'value',
