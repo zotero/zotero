@@ -48,12 +48,8 @@ const ZoteroStandalone = new function() {
 			return Zotero.initializationPromise;
 		})
 		.then(async function () {
-			if (Zotero.Prefs.get('devtools.errorconsole.enabled', true)) {
-				document.getElementById('menu_errorConsole').hidden = false;
-			}
 			if (Zotero.Prefs.get('devtools.chrome.enabled', true)) {
-				document.getElementById('menu_errorConsole').hidden = false;
-				document.getElementById('menu_runJS').hidden = false;
+				document.getElementById('developer-menu').hidden = false;
 			}
 			
 			document.getElementById('key_copyCitation')

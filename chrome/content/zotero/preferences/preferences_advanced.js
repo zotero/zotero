@@ -32,8 +32,8 @@ Zotero_Preferences.Advanced = {
 	init: function () {
 		Zotero_Preferences.Keys.init();
 		
-		// Show Memory Info button if the Error Console menu option is enabled
-		if (Zotero.Prefs.get('devtools.errorconsole.enabled', true)) {
+		// Show Memory Info button
+		if (Zotero.Prefs.get('debug.memoryInfo')) {
 			document.getElementById('memory-info').hidden = false;
 		}
 		
@@ -62,6 +62,14 @@ Zotero_Preferences.Advanced = {
 			}
 		}
 	}),
+	
+	
+	onDeveloperToolsToggle: function () {
+		setTimeout(function () {
+			var enabled = Zotero.Prefs.get('devtools.chrome.enabled', true);
+			window.opener.document.getElementById('developer-menu').hidden = !enabled;
+		});
+	},
 	
 	
 	migrateDataDirectory: Zotero.Promise.coroutine(function* () {

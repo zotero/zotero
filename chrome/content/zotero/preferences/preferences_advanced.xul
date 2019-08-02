@@ -39,6 +39,7 @@
 		<preferences>
 			<preference id="pref-automaticScraperUpdates" name="extensions.zotero.automaticScraperUpdates" type="bool"/>
 			<preference id="pref-reportTranslationFailure" name="extensions.zotero.reportTranslationFailure" type="bool"/>
+			<preference id="pref-developerTools" name="devtools.chrome.enabled" type="bool"/>
 			
 			<preference id="pref-baseAttachmentPath" name="extensions.zotero.baseAttachmentPath" type="string"/>
 			<preference id="pref-useDataDir" name="extensions.zotero.useDataDir" type="bool"/>
@@ -134,6 +135,14 @@
 					
 					<groupbox id="zotero-prefpane-advanced-advancedConfiguration">
 						<caption label="&zotero.preferences.advanced.advancedConfiguration;"/>
+						
+						<vbox>
+							<checkbox
+								label="Show developer tools"
+								preference="pref-developerTools"
+								oncommand="Zotero_Preferences.Advanced.onDeveloperToolsToggle()"
+								tooltiptext="Adds a Developer menu to the Tools menu"/>
+						</vbox>
 						
 						<hbox id="zotero-prefpane-advanced-openbuttons" align="center" style="display: block">
 							<button id="config-editor"
