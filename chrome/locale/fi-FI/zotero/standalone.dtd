@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "Asenna selainlisäosa">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Lisäosat">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "m">

@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "Tarayıcı Bağlayıcılarını Kur...">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Eklentiler">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "m">

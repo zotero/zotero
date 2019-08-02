@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "Böngészőmodul telepítése">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Kiegészítők">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "m">

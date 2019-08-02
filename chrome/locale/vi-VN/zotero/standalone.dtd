@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "Cài bộ kết nối trình duyệt">
 <!ENTITY installConnector.accesskey "K">
 <!ENTITY addons.label "Add-ons">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "m">

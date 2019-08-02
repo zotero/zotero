@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "Εγκατάσταση Σύνδεσης με πρόγραμμα πλοήγησης">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Πρόσθετα">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "m">

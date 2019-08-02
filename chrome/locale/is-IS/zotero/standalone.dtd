@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "Setja upp vafratengingu">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Viðbætur (add-ons)">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "m">

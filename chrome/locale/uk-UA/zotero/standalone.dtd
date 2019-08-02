@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "Встановити браузерний конектор">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Надбудови">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "m">

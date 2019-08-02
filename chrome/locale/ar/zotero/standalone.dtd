@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "ثبت موصل المتصفح">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "ملحقات">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "m">

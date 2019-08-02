@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "Instalar conector para o navegador">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Engadidos">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "e">

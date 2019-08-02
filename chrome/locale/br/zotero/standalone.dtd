@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "Staliañ ar c'hevreer Zotero er merdeer">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Lugantoù">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "m">

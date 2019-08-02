@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "Nainštalovať konektor prehliadača">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Doplnky">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "m">

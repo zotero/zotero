@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "Install Browser Connector">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Priedai">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "r">

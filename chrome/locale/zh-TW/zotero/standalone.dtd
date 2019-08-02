@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "安裝瀏覽器資料庫連結器">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "附加元件">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "m">

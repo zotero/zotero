@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "Installera webbläsaranslutning">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Tillägg">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "m">

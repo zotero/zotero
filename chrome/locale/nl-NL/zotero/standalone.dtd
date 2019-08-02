@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "Browser Connector installeren">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Add-ons">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "m">

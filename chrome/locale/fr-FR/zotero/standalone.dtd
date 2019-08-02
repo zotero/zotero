@@ -47,6 +47,7 @@
 <!ENTITY installConnector.label "Installer le Connecteur Zotero dans le navigateur">
 <!ENTITY installConnector.accesskey "I">
 <!ENTITY addons.label "Extensions">
+<!ENTITY developer.label "Developer">
 
 
 <!ENTITY minimizeWindow.key "m">
