@@ -1,0 +1,76 @@
+<!ENTITY scaffold.toolbar.load.label			"Load">
+<!ENTITY scaffold.toolbar.save.label			"Save">
+<!ENTITY scaffold.toolbar.saveToZotero.label   "Save to Zotero">
+<!ENTITY scaffold.toolbar.template.label			"Add a template">
+<!ENTITY scaffold.toolbar.template.newWeb.label			"Add web translator template">
+<!ENTITY scaffold.toolbar.template.scrape.label			"Add scrape function using…">
+<!ENTITY scaffold.toolbar.export.label			"Export">
+<!ENTITY scaffold.toolbar.detectWeb.label		"Run detectWeb">
+<!ENTITY scaffold.toolbar.doWeb.label			"Run doWeb">
+<!ENTITY scaffold.toolbar.detectImport.label		"Run detectImport">
+<!ENTITY scaffold.toolbar.doImport.label		"Run doImport">
+<!ENTITY scaffold.toolbar.setTranslatorsDir.label		"Set translators directory">
+
+<!ENTITY scaffold.tabs.metadata.label			"Metadata">
+<!ENTITY scaffold.tabs.code.label			"Code">
+<!ENTITY scaffold.tabs.import.label			"Import">
+<!ENTITY scaffold.tabs.tests.label			"Tests">
+<!ENTITY scaffold.tabs.testing.label			"Testing">
+
+<!ENTITY scaffold.menu.help			"Help">
+<!ENTITY scaffold.toolbar.template.itemTypes.label			"List all item types">
+<!ENTITY scaffold.toolbar.template.newItem.label			"List all fields for item type">
+<!ENTITY scaffold.toolbar.template.more.label			"More">
+<!ENTITY scaffold.toolbar.help.shortcuts			"Keyboard Shortcuts">
+
+<!ENTITY scaffold.tabUrl.label			"URL:">
+<!ENTITY scaffold.testFrame.label			"Test Frame:">
+
+<!ENTITY scaffold.metadata.translatorID.label		"Translator ID:">
+<!ENTITY scaffold.metadata.translatorID.generate	"Generate">
+<!ENTITY scaffold.metadata.label.label			"Label:">
+<!ENTITY scaffold.metadata.creator.label		"Creator:">
+<!ENTITY scaffold.metadata.target.label			"Target:">
+<!ENTITY scaffold.metadata.target.testRegex		"Test Regex">
+<!ENTITY scaffold.metadata.configOptions.label		"Config Options:">
+<!ENTITY scaffold.metadata.displayOptions.label		"Display Options:">
+<!ENTITY scaffold.metadata.minVersion.label		"Min. Version:">
+<!ENTITY scaffold.metadata.maxVersion.label		"Max. Version:">
+<!ENTITY scaffold.metadata.priority.label		"Priority:">
+<!ENTITY scaffold.metadata.translatorType.label		"Translator Type:">
+<!ENTITY scaffold.metadata.translatorType.import	"Import">
+<!ENTITY scaffold.metadata.translatorType.export	"Export">
+<!ENTITY scaffold.metadata.translatorType.web		"Web">
+<!ENTITY scaffold.metadata.translatorType.search	"Search">
+<!ENTITY scaffold.metadata.browserSupport.label		"Browser Support:">
+<!ENTITY scaffold.metadata.browserSupport.gecko		"Gecko (Firefox)">
+<!ENTITY scaffold.metadata.browserSupport.chrome	"Chrome">
+<!ENTITY scaffold.metadata.browserSupport.safari	"Safari">
+<!ENTITY scaffold.metadata.browserSupport.ie		"Internet Explorer">
+<!ENTITY scaffold.metadata.browserSupport.bookmarklet	"Bookmarklet">
+<!ENTITY scaffold.metadata.browserSupport.server	"Server">
+<!ENTITY scaffold.metadata.targetAll.label			"Target All:">
+<!ENTITY scaffold.metadata.hiddenPrefs.label			"Hidden Preferences:">
+
+<!ENTITY scaffold.metadata.label.default		"Untitled">
+<!ENTITY scaffold.metadata.priority.default		"100">
+
+<!ENTITY scaffold.load.title				"Load Translator">
+<!ENTITY scaffold.load.label.label			"Label">
+<!ENTITY scaffold.load.creator.label			"Creator">
+
+<!ENTITY scaffold.editor.external.label			"Use external editor">
+
+<!ENTITY scaffold.testing.description			"Select a test to run">
+<!ENTITY scaffold.testing.input.label			"Input">
+<!ENTITY scaffold.testing.status.label			"Status">
+<!ENTITY scaffold.testing.populate			"Populate">
+<!ENTITY scaffold.testing.save				"Save">
+<!ENTITY scaffold.testing.delete			"Delete">
+<!ENTITY scaffold.testing.run				"Run">
+<!ENTITY scaffold.testing.update			"Update">
+<!ENTITY scaffold.testing.new				"New Web">
+<!ENTITY scaffold.testing.new.import			"New Import">
+<!ENTITY scaffold.testing.edit.import			"Edit Import">
+<!ENTITY scaffold.testing.copyToClipboard			"Copy to Clipboard">
+<!ENTITY scaffold.testing.openUrl			"Open URL">

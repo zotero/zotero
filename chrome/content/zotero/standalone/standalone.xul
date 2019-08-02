@@ -203,6 +203,7 @@
 								<menupopup>
 									<menuitem id="menu_errorConsole" label="Error Console" oncommand="toJavaScriptConsole()"/>
 									<menuitem id="menu_runJS" label="Run JavaScript" oncommand="openRunJSWindow()"/>
+									<menuitem id="scaffold-menu-item" label="Translator Editor" oncommand="openScaffold()"/>
 								</menupopup>
 							</menu>
 						</menupopup>

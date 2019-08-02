@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2011 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://scaffold/skin/scaffold.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://scaffold/locale/scaffold.dtd">
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	title="&scaffold.load.title;" width="400" height="330" buttons="cancel,accept"
+	ondialogaccept="Scaffold_Load.accept()" onload="Scaffold_Load.onLoad()"
+	id="scaffold-load">
+	
+	<script src="chrome://zotero/content/include.js"/>
+	<script src="load.js"/>
+	
+	<listbox id="listbox" flex="1">
+		<listhead>
+			<listheader label="&scaffold.load.label.label;"/>
+			<listheader label="&scaffold.load.creator.label;"/>
+		</listhead>
+		<listcols>
+			<listcol flex="1"/>
+			<listcol width="130"/>
+		</listcols>
+	</listbox>
+</dialog>

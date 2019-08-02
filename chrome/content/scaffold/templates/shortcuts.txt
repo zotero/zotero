@@ -1,0 +1,11 @@
+Keyboard Shortcuts
+=============
+
+Ctrl/Cmd  S	:	Save
+
+Ctrl/Cmd  R	:	Run doWeb/doImport
+Ctrl/Cmd  T	:	DetectWeb/detectImport
+
+Ctrl/Cmd  +	:	Increase Font Size
+Ctrl/Cmd  -	:	Decrease Font Size
+Ctrl/Cmd  0	:	Restore Font Size
