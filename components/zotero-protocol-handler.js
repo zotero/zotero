@@ -843,7 +843,14 @@ function ZoteroProtocolHandler() {
 			});
 			router.add('groups/:groupID/collections/:objectKey', function () {
 				params.objectType = 'collection'
+			});
+			// Search
+			router.add('library/searches/:objectKey', function () {
+				params.objectType = 'search'
 				params.libraryID = userLibraryID;
+			});
+			router.add('groups/:groupID/searches/:objectKey', function () {
+				params.objectType = 'search'
 			});
 			
 			router.run(path);
@@ -872,6 +879,9 @@ function ZoteroProtocolHandler() {
 			
 			if (params.objectType == 'collection') {
 				return zp.collectionsView.selectCollection(results[0].id);
+			}
+			else if (params.objectType == 'search') {
+				return zp.collectionsView.selectSearch(results[0].id);
 			}
 			else {
 				// Select collection first if specified

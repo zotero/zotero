@@ -51,6 +51,12 @@ Zotero.API = {
 				results = [col];
 			}
 		}
+		else if (params.objectType == 'search') {
+			let s = Zotero.Searches.getByLibraryAndKey(params.libraryID, params.objectKey);
+			if (s) {
+				results = [s];
+			}
+		}
 		else if (params.objectType == 'item') {
 			switch (params.scopeObject) {
 				case 'collections':
