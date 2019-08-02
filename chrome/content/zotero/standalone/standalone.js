@@ -48,10 +48,6 @@ const ZoteroStandalone = new function() {
 			return Zotero.initializationPromise;
 		})
 		.then(async function () {
-			if (Zotero.Prefs.get('devtools.chrome.enabled', true)) {
-				document.getElementById('developer-menu').hidden = false;
-			}
-			
 			document.getElementById('key_copyCitation')
 				.setAttribute('key', Zotero.Keys.getKeyForCommand('copySelectedItemCitationsToClipboard'));
 			document.getElementById('key_copyBibliography')

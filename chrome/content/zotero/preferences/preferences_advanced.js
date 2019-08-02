@@ -64,14 +64,6 @@ Zotero_Preferences.Advanced = {
 	}),
 	
 	
-	onDeveloperToolsToggle: function () {
-		setTimeout(function () {
-			var enabled = Zotero.Prefs.get('devtools.chrome.enabled', true);
-			window.opener.document.getElementById('developer-menu').hidden = !enabled;
-		});
-	},
-	
-	
 	migrateDataDirectory: Zotero.Promise.coroutine(function* () {
 		var currentDir = Zotero.DataDirectory.dir;
 		var defaultDir = Zotero.DataDirectory.defaultDir;
