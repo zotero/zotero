@@ -14,6 +14,10 @@ describe("Protocol Handler", function () {
 		zp = win.ZoteroPane;
 	});
 	
+	after(function () {
+		win.close();
+	});
+	
 	describe("zotero://select", function () {
 		async function waitForItemSelect(items) {
 			if (items instanceof Zotero.Item) {
