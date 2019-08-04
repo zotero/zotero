@@ -2354,7 +2354,7 @@ Zotero.ItemTreeView.prototype.collapseSelectedRows = function () {
 	this._treebox.beginUpdateBatch();
 	for (var i = 0, len = this.selection.getRangeCount(); i<len; i++) {
 		this.selection.getRangeAt(i, start, end);
-		for (var j = start.value; j <= end.value; j++) {
+		for (let j = end.value; j >= start.value; j--) {
 			if (this.isContainer(j)) {
 				this._closeContainer(j, true);
 			}
