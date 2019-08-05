@@ -160,7 +160,7 @@ var Scaffold = new function() {
 		var index = ps.confirmEx(null,
 			"Scaffold",
 			"To set up Scaffold, select your development directory for Zotero translators.\n\n"
-				+ "In most cases, this should be a clone of the zotero/translators GitHub repository.",
+				+ "In most cases, this should be a git clone of the zotero/translators GitHub repository.",
 			buttonFlags,
 			"Choose Directory…",
 			Zotero.getString('general.cancel'),
