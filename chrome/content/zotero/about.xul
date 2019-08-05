@@ -73,6 +73,7 @@
 				</vbox>
 				<label class="subhead" value="&zotero.about.additionalSoftware;"/>
 				<vbox class="subcontent">
+					<label class="zotero-text-link" href="https://ace.c9.io/" value="ACE Editor (translator code editor)"/>
 					<label class="zotero-text-link" href="http://bluebirdjs.com/" value="Bluebird"/>
 					<label class="zotero-text-link" href="http://p.yusukekamiyamane.com/" value="Fugue icons (by Yusuke Kamiyamane)"/>
 					<label class="zotero-text-link" href="http://www.davidashen.net/rnv.html" value="RNV (CSL validation)"/>
