@@ -27,7 +27,9 @@ var Zotero_CSL_Editor = new function() {
 	this.init = init;
 	this.handleKeyPress = handleKeyPress;
 	this.loadCSL = loadCSL;
-	function init() {
+	async function init() {
+		await Zotero.Schema.schemaUpdatePromise;
+		
 		Zotero.Styles.populateLocaleList(document.getElementById("locale-menu"));
 		
 		var cslList = document.getElementById('zotero-csl-list');

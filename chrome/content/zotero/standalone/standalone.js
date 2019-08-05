@@ -449,6 +449,10 @@ function openRunJSWindow() {
 	window.open('chrome://zotero/content/runJS.html', 'run-js', 'width=900,height=700,resizable');
 }
 
+function openStyleEditor() {
+	window.open('chrome://zotero/content/tools/csledit.xul', 'style-editor', 'width=950,height=700,resizable');
+}
+
 function openScaffold() {
 	window.open('chrome://scaffold/content/scaffold.xul', 'scaffold', 'chrome,resizable');
 }

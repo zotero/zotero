@@ -59,7 +59,9 @@
 				</menupopup>
 			</menulist>
 			<menulist id="locale-menu" oncommand="Zotero.Prefs.set('export.lastLocale', this.value); Zotero_CSL_Editor.refresh()"/>
-			<menulist id="zotero-csl-list" style="min-height: 1.6em; min-width: 100px" flex="1" oncommand="Zotero_CSL_Editor.onStyleSelected(this.value)"/>
+		</hbox>
+		<hbox align="center">
+			<menulist id="zotero-csl-list" style="margin-left: 7px; min-height: 1.6em; min-width: 100px" oncommand="Zotero_CSL_Editor.onStyleSelected(this.value)"/>
 		</hbox>
 		<textbox id="zotero-csl-editor" type="timed" timeout="250" multiline="true"
 			flex="1"
