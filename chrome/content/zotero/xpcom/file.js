@@ -915,7 +915,9 @@ Zotero.File = new function(){
 				}
 				catch (e) {
 					// On Linux, try 143, which is the max filename length with eCryptfs
-					if (e.name == "NS_ERROR_FILE_NAME_TOO_LONG" && Zotero.isLinux && uniqueFile.leafName.length > 143) {
+					if (e.name == "NS_ERROR_FILE_NAME_TOO_LONG"
+							&& Zotero.isLinux
+							&& Zotero.Utilities.Internal.byteLength(uniqueFile.leafName) > 143) {
 						Zotero.debug("Trying shorter filename in case of filesystem encryption", 2);
 						maxBytes = 143;
 						continue;
