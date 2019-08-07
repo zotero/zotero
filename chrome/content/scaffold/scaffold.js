@@ -110,7 +110,10 @@ var Scaffold = new function() {
 		
 		_editors.import.getSession().setMode(new importWin.TextMode);
 		
-		// Set font size from previous session
+		// Set font size from general pref
+		Zotero.setFontSize(document.getElementById('scaffold-pane'));
+		
+		// Set font size of code editor
 		var size = Zotero.Prefs.get("scaffold.fontSize");
 		if (size) {
 			this.setFontSize(size);
