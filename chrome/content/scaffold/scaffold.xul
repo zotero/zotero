@@ -42,6 +42,7 @@
 		<key id="detect-web" modifiers="accel" key="T" oncommand="Scaffold.run('detect')"/>
 		<key id="save" modifiers="accel" key="S" oncommand="Scaffold.save()"/>
 		<key id="increase-font-size" modifiers="accel" key="+" oncommand="Scaffold.increaseFontSize()"/>
+		<key id="increase-font-size" modifiers="accel" key="=" oncommand="Scaffold.increaseFontSize()"/>
 		<key id="decrease-font-size" modifiers="accel" key="-" oncommand="Scaffold.decreaseFontSize()"/>
 		<key id="restore-font-size" modifiers="accel" key="0" oncommand="Scaffold.setFontSize(11)"/>
 	</keyset>
