@@ -1713,6 +1713,10 @@ Zotero.Integration.Session.prototype.importDocument = async function() {
 		await this.setData(data, true);
 		await this.fields.get(true);
 		await this.fields.updateSession(FORCE_CITATIONS_RESET_TEXT);
+		// Make sure we ignore the dont update flags since we do not know what the original text was
+		for (let index in this.citationsByIndex) {
+			delete this.citationsByIndex[index].properties.dontUpdate;
+		}
 		await this.fields.updateDocument(FORCE_CITATIONS_RESET_TEXT, true, true);
 	} finally {
 		Zotero.debug(`Integration: Import finished in ${timer.stop()}`);
