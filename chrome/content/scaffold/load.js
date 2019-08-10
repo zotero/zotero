@@ -27,6 +27,14 @@ var Scaffold_Load = new function() {
 	this.onLoad = Zotero.Promise.coroutine(function* () {
 		var listitem, translator, listcell, set;
 		var listbox = document.getElementById("listbox");
+		
+		listbox.addEventListener('dblclick', () => {
+			var translatorID = document.getElementById("listbox").selectedItem.getUserData("zotero-id");
+			if (!translatorID) return;
+			this.accept();
+			window.close();
+		});
+		
 		var translators = {};		
 
 		// Get the matching translators		
