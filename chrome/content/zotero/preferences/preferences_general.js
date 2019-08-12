@@ -38,8 +38,6 @@ Zotero_Preferences.General = {
 			);
 		}
 		
-		document.getElementById('noteFontSize').value = Zotero.Prefs.get('note.fontSize');
-		
 		this.updateAutoRenameFilesUI();
 		this._updateFileHandlerUI();
 	},

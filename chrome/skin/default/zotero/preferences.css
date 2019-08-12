@@ -52,37 +52,6 @@ grid row hbox:first-child
 	-moz-box-pack: end; /* Right-justify left column */
 }
 
-#fontSize
-{
-	font-size: 3mm; /* Firefox default */
-}
-
-#fontSize1
-{
-	font-size: 1.0em;
-}
-
-#fontSize2
-{
-	font-size: 1.15em;
-}
-
-#fontSize3
-{
-	font-size: 1.3em;
-}
-
-#fontSize4
-{
-	font-size: 1.5em;
-}
-
-
-#fontSize radio
-{
-	margin-right: 20px;
-}
-
 #zotero-prefpane-general .statusLine {
 	margin-left: .75em;
 }

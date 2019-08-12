@@ -184,6 +184,64 @@
 						</menupopup>
 					</menu>
 					
+					<menu id="view-menu"
+							label="&viewMenu.label;"
+							onpopupshowing="ZoteroStandalone.onViewMenuOpen()">
+						<menupopup id="menu_viewPopup">
+							<menu id="layout-menu"
+									label="&layout.label;">
+								<menupopup oncommand="ZoteroStandalone.updateViewOption(event)">
+									<menuitem id="view-menuitem-standard" label="&standardView.label;"/>
+									<menuitem id="view-menuitem-stacked" label="&stackedView.label;"/>
+									<menuseparator/>
+									<menuitem id="view-menuitem-collections-pane" label="&collectionsPane.label;"/>
+									<menuitem id="view-menuitem-item-pane" label="&itemPane.label;"/>
+									<menuitem id="view-menuitem-tag-selector" label="&tagSelector.label;"/>
+								</menupopup>
+							</menu>
+							<menu id="font-size-menu"
+									label="&fontSize.label;">
+								<menupopup oncommand="ZoteroStandalone.updateViewOption(event)">
+									<menuitem id="view-menuitem-font-size-bigger" label="&zotero.general.bigger;"/>
+									<menuitem id="view-menuitem-font-size-smaller" label="&zotero.general.smaller;"/>
+									<menuseparator/>
+									<menuitem id="view-menuitem-font-size-reset" label="&zotero.general.reset;"/>
+								</menupopup>
+							</menu>
+							<menu id="note-font-size-menu"
+									label="&noteFontSize.label;">
+								<!-- TODO: Maybe switch to Bigger/Smaller once we can update without restarting -->
+								<!--<menupopup oncommand="ZoteroStandalone.updateViewOption(event)">
+									<menuitem id="view-menuitem-note-font-size-bigger" label="&zotero.general.bigger;"/>
+									<menuitem id="view-menuitem-note-font-size-smaller" label="&zotero.general.smaller;"/>
+									<menuseparator/>
+									<menuitem id="view-menuitem-note-font-size-reset" label="&zotero.general.reset;"/>-->
+								<menupopup oncommand="ZoteroStandalone.updateNoteFontSize(event)">
+									<menuitem label="11"/>
+									<menuitem label="12"/>
+									<menuitem label="13"/>
+									<menuitem label="14"/>
+									<menuitem label="18"/>
+									<menuitem label="24"/>
+									<menuitem label="36"/>
+									<menuitem label="48"/>
+									<menuitem label="64"/>
+									<menuitem label="72"/>
+									<menuitem label="96"/>
+									<menuitem/>
+									<menuitem
+										id="view-menuitem-note-font-size-reset"
+										label="&zotero.general.reset;"
+										oncommand="ZoteroStandalone.updateViewOption(event); event.stopPropagation();"/>
+								</menupopup>
+							</menu>
+							<menuseparator/>
+							<menuitem id="view-menuitem-recursive-collections"
+								label="&recursiveCollections.label;"
+								oncommand="ZoteroStandalone.updateViewOption(event)"/>
+						</menupopup>
+					</menu>
+					
 					<menu id="toolsMenu" label="&toolsMenu.label;" accesskey="&toolsMenu.accesskey;">
 						<menupopup id="menu_ToolsPopup">
 							<menuitem id="menu_createTimeline" label="&zotero.toolbar.timeline.label;"

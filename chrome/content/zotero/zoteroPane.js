@@ -1126,6 +1126,7 @@ var ZoteroPane = new function()
 	});
 	
 	
+	// Keep in sync with ZoteroStandalone.updateViewOption()
 	this.toggleTagSelector = function () {
 		var container = document.getElementById('zotero-tag-selector-container');
 		var showing = container.getAttribute('collapsed') == 'true';
@@ -4889,9 +4890,6 @@ var ZoteroPane = new function()
 			if(!el) return;
 			var elValues = serializedValues[id];
 			for(var attr in elValues) {
-				// TEMP: For now, ignore persisted collapsed state for collection and item pane splitters
-				if ((el.id == 'zotero-collections-splitter' || el.id == 'zotero-items-splitter')
-						&& attr == 'state') continue;
 				el.setAttribute(attr, elValues[attr]);
 			}
 		}

@@ -31,9 +31,6 @@
 			helpTopic="general">
 		
 		<preferences id="zotero-prefpane-general-preferences">
-			<preference id="pref-fontSize" name="extensions.zotero.fontSize" type="string"/>
-			<preference id="pref-layout" name="extensions.zotero.layout" type="string"/>
-			
 			<preference id="pref-automaticSnapshots" name="extensions.zotero.automaticSnapshots" type="bool"/>
 			<preference id="pref-downloadAssociatedFiles" name="extensions.zotero.downloadAssociatedFiles" type="bool"/>
 			<preference id="pref-autoRecognizeFiles" name="extensions.zotero.autoRecognizeFiles" type="bool"/>
@@ -49,67 +46,6 @@
 			<preference id="pref-groups-copyTags" name="extensions.zotero.groups.copyTags" type="bool"/>
 			
 		</preferences>
-		
-		<groupbox id="zotero-prefpane-general-groupbox">
-			<caption label="&zotero.preferences.userInterface;"/>
-			
-			<grid id="zotero-prefpane-general-grid">
-				<columns>
-					<column/>
-					<column flex="1"/>
-				</columns>
-			
-				<rows id="zotero-prefpane-general-rows">
-					<row>
-						<hbox align="center">
-							<label value="&zotero.preferences.layout;" control="layout"/>
-						</hbox>
-						<radiogroup id="layout" orient="horizontal" align="center" preference="pref-layout">
-							<radio id="horizontal" label="&zotero.preferences.layout.standard;" value="standard"/>
-							<radio id="vertical" label="&zotero.preferences.layout.stacked;" value="stacked"/>
-						</radiogroup>
-					</row>
-
-					<row>
-						<hbox align="center">
-							<label value="&zotero.preferences.fontSize;" control="fontSize"/>
-						</hbox>
-						<radiogroup id="fontSize" orient="horizontal" align="center" preference="pref-fontSize">
-							<radio id="fontSize1" label="&zotero.preferences.fontSize.small;" value="1.0"/>
-							<radio id="fontSize2" label="&zotero.preferences.fontSize.medium;" value="1.15"/>
-							<radio id="fontSize3" label="&zotero.preferences.fontSize.large;" value="1.3"/>
-							<radio id="fontSize4" label="&zotero.preferences.fontSize.xlarge;" value="1.5"/>
-						</radiogroup>
-					</row>
-					
-					<row>
-						<hbox align="center">
-							<label value="&zotero.preferences.fontSize.notes;" control="noteFontSize"/>
-						</hbox>
-						<hbox>
-							<menulist id="noteFontSize" editable="true"
-									onblur="Zotero.Prefs.set('note.fontSize', this.value); this.value = Zotero.Prefs.get('note.fontSize');">
-								<menupopup>
-									<menuitem label="11"/>
-									<menuitem label="12"/>
-									<menuitem label="13"/>
-									<menuitem label="14"/>
-									<menuitem label="18"/>
-									<menuitem label="24"/>
-									<menuitem label="36"/>
-									<menuitem label="48"/>
-									<menuitem label="64"/>
-									<menuitem label="72"/>
-									<menuitem label="96"/>
-								</menupopup>
-							</menulist>
-							
-							<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
-						</hbox>
-					</row>
-				</rows>
-			</grid>
-		</groupbox>
 		
 		<groupbox id="zotero-prefpane-file-handling-groupbox">
 			<caption label="&zotero.preferences.fileHandling;"/>
