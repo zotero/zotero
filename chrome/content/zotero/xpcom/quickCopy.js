@@ -40,7 +40,9 @@ Zotero.QuickCopy = new function() {
 		
 		if (!_initialized) {
 			// Make sure export translator code is loaded whenever the output format changes
-			Zotero.Prefs.registerObserver("export.quickCopy.setting", _loadOutputFormat);
+			this._prefObserverID = Zotero.Prefs.registerObserver(
+				"export.quickCopy.setting", _loadOutputFormat
+			);
 			_initialized = true;
 		}
 		
@@ -71,7 +73,7 @@ Zotero.QuickCopy = new function() {
 		if (_initPromise) {
 			_initPromise.cancel();
 		}
-		Zotero.Prefs.unregisterObserver("export.quickCopy.setting", _loadOutputFormat);
+		Zotero.Prefs.unregisterObserver(this._prefObserverID);
 	};
 	
 	

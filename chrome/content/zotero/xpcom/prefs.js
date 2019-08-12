@@ -274,24 +274,39 @@ Zotero.Prefs = new function(){
 	}
 	
 	var _observers = {};
-	this.registerObserver = function(name, handler) {
+	var _observersBySymbol = {};
+	
+	/**
+	 * @param {String} name - Preference name on extensions.zotero branch
+	 * @param {Function} handler
+	 * @return {Symbol} - Symbol to pass to unregisterObserver()
+	 */
+	this.registerObserver = function (name, handler) {
+		var symbol = Symbol();
 		_observers[name] = _observers[name] || [];
 		_observers[name].push(handler);
+		_observersBySymbol[symbol] = [name, handler];
+		return symbol;
 	}
 	
-	this.unregisterObserver = function(name, handler) {
-		var obs = _observers[name];
+	/**
+	 * @param {Symbol} symbol - Symbol returned from registerObserver()
+	 */
+	this.unregisterObserver = function (symbol) {
+		var obs = _observersBySymbol[symbol];
 		if (!obs) {
-			Zotero.debug("No preferences observer registered for " + name);
+			Zotero.debug("No pref observer registered for given symbol");
 			return;
 		}
 		
+		delete _observersBySymbol[symbol];
+		
+		var [name, handler] = obs;
 		var i = obs.indexOf(handler);
 		if (i == -1) {
-			Zotero.debug("Handler was not registered for preference " + name);
+			Zotero.debug("Handler was not registered for preference " + name, 2);
 			return;
 		}
-		
 		obs.splice(i, 1);
 	}
 }

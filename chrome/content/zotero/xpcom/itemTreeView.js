@@ -53,12 +53,13 @@ Zotero.ItemTreeView = function (collectionTreeRow) {
 	
 	this._refreshPromise = Zotero.Promise.resolve();
 	
-	this._unregisterID = Zotero.Notifier.registerObserver( 
+	this._notifierObserverID = Zotero.Notifier.registerObserver(
 		this,
 		['item', 'collection-item', 'item-tag', 'share-items', 'bucket', 'feedItem', 'search'],
 		'itemTreeView',
 		50
 	);
+	this._prefObserverID = Zotero.Prefs.registerObserver('recursiveCollections', this.refresh.bind(this));
 }
 
 Zotero.ItemTreeView.prototype = Object.create(Zotero.LibraryTreeView.prototype);
@@ -1019,7 +1020,8 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 
 
 Zotero.ItemTreeView.prototype.unregister = async function() {
-	Zotero.Notifier.unregisterObserver(this._unregisterID);
+	Zotero.Notifier.unregisterObserver(this._notifierObserverID);
+	Zotero.Prefs.unregisterObserver(this._prefObserverID);
 	
 	if (this.collectionTreeRow.onUnload) {
 		await this.collectionTreeRow.onUnload();

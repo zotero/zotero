@@ -26,7 +26,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			['collection-item', 'item', 'item-tag', 'tag', 'setting'],
 			'tagSelector'
 		);
-		Zotero.Prefs.registerObserver('fontSize', this.handleFontChange.bind(this));
+		this._prefObserverID = Zotero.Prefs.registerObserver('fontSize', this.handleFontChange.bind(this));
 		
 		this.tagListRef = React.createRef();
 		this.searchBoxRef = React.createRef();
@@ -731,12 +731,8 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	
 	uninit() {
 		ReactDOM.unmountComponentAtNode(this.domEl);
-		if (this._notifierID) {
-			Zotero.Notifier.unregisterObserver(this._notifierID);
-		}
-		if (this._prefObserverID) {
-			Zotero.Prefs.unregisterObserver('fontSize', this.handleFontChange.bind(this));
-		}
+		Zotero.Notifier.unregisterObserver(this._notifierID);
+		Zotero.Prefs.unregisterObserver(this._prefObserverID);
 	}
 	
 	static propTypes = {
