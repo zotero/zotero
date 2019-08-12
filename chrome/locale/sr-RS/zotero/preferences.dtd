@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Опште">
 
-<!ENTITY zotero.preferences.userInterface "Корисничко сучеље">
-<!ENTITY zotero.preferences.layout "Распоред:">
-<!ENTITY zotero.preferences.layout.standard "Уобичајени">
-<!ENTITY zotero.preferences.layout.stacked "На гомили">
-<!ENTITY zotero.preferences.fontSize "Величина фонта:">
-<!ENTITY zotero.preferences.fontSize.small "Мали">
-<!ENTITY zotero.preferences.fontSize.medium "Средњи">
-<!ENTITY zotero.preferences.fontSize.large "Велики">
-<!ENTITY zotero.preferences.fontSize.xlarge "Веома велики">
-<!ENTITY zotero.preferences.fontSize.notes "Величина фонта за белешке:">
-
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "Самостално узми снимак када се прави ставка са веб странице">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Самостално приложи повезане PDF и друге датотека када чуваш ставке">

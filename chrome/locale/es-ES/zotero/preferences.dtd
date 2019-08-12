@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "General">
 
-<!ENTITY zotero.preferences.userInterface "Interfaz de usuario">
-<!ENTITY zotero.preferences.layout "Disposición:">
-<!ENTITY zotero.preferences.layout.standard "Estándar">
-<!ENTITY zotero.preferences.layout.stacked "Apilada">
-<!ENTITY zotero.preferences.fontSize "Tamaño de fuente:">
-<!ENTITY zotero.preferences.fontSize.small "Pequeña">
-<!ENTITY zotero.preferences.fontSize.medium "Mediana">
-<!ENTITY zotero.preferences.fontSize.large "Grande">
-<!ENTITY zotero.preferences.fontSize.xlarge "Extragrande">
-<!ENTITY zotero.preferences.fontSize.notes "Tamaño de fuente en las notas:">
-
 <!ENTITY zotero.preferences.fileHandling "Gestión de archivos">
 <!ENTITY zotero.preferences.automaticSnapshots "Tomar instantáneas automáticamente al crear elementos a partir de páginas webs">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Adjuntar automáticamente los archivos PDFs y otros archivos al guardar elementos">

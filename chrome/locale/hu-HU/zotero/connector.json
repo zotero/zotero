@@ -23,6 +23,9 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "legfrissebb verzió"
   },
+  "appConnector": {
+    "message": "$1Connector"
+  },
   "upgradeApp": {
     "message": "$1frissítése"
   },

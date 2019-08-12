@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Obecné">
 
-<!ENTITY zotero.preferences.userInterface "Uživatelské rozhraní">
-<!ENTITY zotero.preferences.layout "Rozvržení:">
-<!ENTITY zotero.preferences.layout.standard "Standardní">
-<!ENTITY zotero.preferences.layout.stacked "Zaplněný">
-<!ENTITY zotero.preferences.fontSize "Velikost písma:">
-<!ENTITY zotero.preferences.fontSize.small "Malá">
-<!ENTITY zotero.preferences.fontSize.medium "Střední">
-<!ENTITY zotero.preferences.fontSize.large "Velká">
-<!ENTITY zotero.preferences.fontSize.xlarge "Extra velká">
-<!ENTITY zotero.preferences.fontSize.notes "Velikost písma poznámek:">
-
 <!ENTITY zotero.preferences.fileHandling "Nakládání se souborem">
 <!ENTITY zotero.preferences.automaticSnapshots "Automaticky udělat snímek při vytváření položky z internetových stránek">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automaticky připojit propojené PDF a ostatní soubory při ukládání položek">

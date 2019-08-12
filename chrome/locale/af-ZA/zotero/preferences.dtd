@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Algemeen">
 
-<!ENTITY zotero.preferences.userInterface "Gebruikerkoppelvlak">
-<!ENTITY zotero.preferences.layout "Layout:">
-<!ENTITY zotero.preferences.layout.standard "Standard">
-<!ENTITY zotero.preferences.layout.stacked "Stacked">
-<!ENTITY zotero.preferences.fontSize "Fontgrootte:">
-<!ENTITY zotero.preferences.fontSize.small "Klein">
-<!ENTITY zotero.preferences.fontSize.medium "Medium">
-<!ENTITY zotero.preferences.fontSize.large "Groot">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
-<!ENTITY zotero.preferences.fontSize.notes "Note font size:">
-
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "Neem outomaties kiekies wanneer items uit webbladsye geskep word">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Heg geassosieerde PDF's en ander lêers outomaties aan wanneer items gestoor word">

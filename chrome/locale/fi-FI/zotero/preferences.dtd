@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Yleistä">
 
-<!ENTITY zotero.preferences.userInterface "Käyttöliittymä">
-<!ENTITY zotero.preferences.layout "Asettelu">
-<!ENTITY zotero.preferences.layout.standard "Vakio">
-<!ENTITY zotero.preferences.layout.stacked "Pinottu">
-<!ENTITY zotero.preferences.fontSize "Kirjasinkoko:">
-<!ENTITY zotero.preferences.fontSize.small "Pieni">
-<!ENTITY zotero.preferences.fontSize.medium "Keskikokoinen">
-<!ENTITY zotero.preferences.fontSize.large "Suuri">
-<!ENTITY zotero.preferences.fontSize.xlarge "Erittäin suuri">
-<!ENTITY zotero.preferences.fontSize.notes "Muistiinpanojen kirjasinkoko:">
-
 <!ENTITY zotero.preferences.fileHandling "Tiedostojen käsittely">
 <!ENTITY zotero.preferences.automaticSnapshots "Ota tilannekuvat automaattisesti luotaessa nimikettä web-sivusta">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Liitä automaattisesti asiaankuuluvat PDF:t ja muut tiedostot">

@@ -8,23 +8,12 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Általános">
 
-<!ENTITY zotero.preferences.userInterface "Felhasználói felület">
-<!ENTITY zotero.preferences.layout "Layout:">
-<!ENTITY zotero.preferences.layout.standard "Alapértelmezett">
-<!ENTITY zotero.preferences.layout.stacked "Stacked">
-<!ENTITY zotero.preferences.fontSize "Betűméret">
-<!ENTITY zotero.preferences.fontSize.small "Kicsi">
-<!ENTITY zotero.preferences.fontSize.medium "Közepes">
-<!ENTITY zotero.preferences.fontSize.large "Nagy">
-<!ENTITY zotero.preferences.fontSize.xlarge "Óriási">
-<!ENTITY zotero.preferences.fontSize.notes "Jegyzet betűmérete:">
-
-<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.fileHandling "Fájlkezelés">
 <!ENTITY zotero.preferences.automaticSnapshots "Weboldalon alapuló elem létrehozásakor automatikus pillanatfelvétel készítése">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "A kapcsolódó PDF és más fájlok automatikus csatolása">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
+<!ENTITY zotero.preferences.autoRecognizeFiles "A metaadat automatikus visszaállítása a PDF-ek számára">
+<!ENTITY zotero.preferences.autoRenameFiles "A mellékletek automatikus átnevezése az eredeti metaadataival">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Csatolt fájlok átnevezése">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "A PDF-fájlok megnyitása">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Alapértelmezett rendszerbeállítás">
 
@@ -84,7 +73,7 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Az alábbi műveletek kizárólag ritka, egyedi esetekre valók, alkalmazásuk nem javasolt általános hibaelhárításra. A visszaállítás sok esetben további problémákat okoz. Lásd ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 " további információért.">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Az adatszinkronizációs előzmények törlése">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Helyreállítás az online könyvtáramból">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
@@ -198,7 +187,7 @@
 <!ENTITY zotero.preferences.dataDir.choose "T   History  1  allózás...">
 <!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
 <!ENTITY zotero.preferences.dataDir.reveal "Az adatkönyvtár mutatása">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
+<!ENTITY zotero.preferences.dataDir.migrate "Áttérés az új alapértelmezett helyre…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "A Zotero relatív útvonalakat használ a csatolt fájlokhoz az alap könyvtáron belül , ezzel elérhetővé teszi a fájlokat különböző számítógépeken, amennyiben a fájlszerkezet az alap könyvtárban változatlan.">

@@ -17,7 +17,10 @@
 <!ENTITY zotero.general.loading "Loading…">
 <!ENTITY zotero.general.close "Bezárás">
 <!ENTITY zotero.general.minimize "Kis méret">
-<!ENTITY zotero.general.other "Other…">
+<!ENTITY zotero.general.other "Másik…">
+<!ENTITY zotero.general.bigger "Bigger">
+<!ENTITY zotero.general.smaller "Smaller">
+<!ENTITY zotero.general.reset "Reset">
 
 
 <!ENTITY zotero.errorReport.title "Zotero hibajelentés">
@@ -50,7 +53,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Duplumok listázása">
 <!ENTITY zotero.collections.showUnfiledItems "Besorolatlan elemek mutatása">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "Visszavont elemek mutatása">
 
 <!ENTITY zotero.items.itemType "Forrás típusa">
 <!ENTITY zotero.items.type_column "Forrás típusa">
@@ -95,7 +98,7 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Visszaállítás könyvtárba">
 <!ENTITY zotero.items.menu.duplicateItem "Kiválasztott elem duplikálása">
 <!ENTITY zotero.items.menu.mergeItems "Elemek összefésülése…">
-<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.unrecognize "Beolvasott metaadatok visszavonása">
 <!ENTITY zotero.items.menu.reportMetadata "Hibás metaadatok jelentése">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Válassza ki azt az elemverziót, amit mester elemnek kíván használni: ">
@@ -203,8 +206,8 @@
 <!ENTITY zotero.import.database "Adatbázis">
 <!ENTITY zotero.import.lastModified "Utolsó módosítás">
 <!ENTITY zotero.import.size "Méret">
-<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.createCollection "Importált elemek és gyűjtemények áthelyezése új gyűjteménybe">
+<!ENTITY zotero.import.fileHandling "Fájlkezelés">
 
 <!ENTITY zotero.exportOptions.title "Exportálás...">
 <!ENTITY zotero.exportOptions.format.label "Formátum:">
@@ -241,13 +244,13 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Hivatkozások automatikus frissítése">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "A függőben lévő, frissítésekkel ellátott idézetek kiemelésre kerülnek a dokumentumban">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "A frissítések letiltása felgyorsíthatja a hivatkozások beillesztését a nagy dokumentumokba. A hivatkozások manuális frissítéséhez kattintson a Frissítés gombra.">
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "Váltson egy másik szövegszerkesztőre…">
 
 <!ENTITY zotero.integration.showEditor.label "Editor megjelenítése">
 <!ENTITY zotero.integration.classicView.label "Klasszikus nézet">

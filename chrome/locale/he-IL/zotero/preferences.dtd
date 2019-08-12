@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "כללי">
 
-<!ENTITY zotero.preferences.userInterface "ממשק משתמש">
-<!ENTITY zotero.preferences.layout "Layout:">
-<!ENTITY zotero.preferences.layout.standard "Standard">
-<!ENTITY zotero.preferences.layout.stacked "Stacked">
-<!ENTITY zotero.preferences.fontSize ":גודל גופן">
-<!ENTITY zotero.preferences.fontSize.small "קטן">
-<!ENTITY zotero.preferences.fontSize.medium "בינוני">
-<!ENTITY zotero.preferences.fontSize.large "גדול">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
-<!ENTITY zotero.preferences.fontSize.notes "Note font size:">
-
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">

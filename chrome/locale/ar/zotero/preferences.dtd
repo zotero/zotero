@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "عام">
 
-<!ENTITY zotero.preferences.userInterface "واجهة المستخدم">
-<!ENTITY zotero.preferences.layout "نسق">
-<!ENTITY zotero.preferences.layout.standard "قياسي">
-<!ENTITY zotero.preferences.layout.stacked "مرصوص">
-<!ENTITY zotero.preferences.fontSize "حجم الخط:">
-<!ENTITY zotero.preferences.fontSize.small "صغير">
-<!ENTITY zotero.preferences.fontSize.medium "متوسط">
-<!ENTITY zotero.preferences.fontSize.large "كبير">
-<!ENTITY zotero.preferences.fontSize.xlarge "كبير جدا">
-<!ENTITY zotero.preferences.fontSize.notes "حجم خط الملاحظات:">
-
 <!ENTITY zotero.preferences.fileHandling "معاملة الملف">
 <!ENTITY zotero.preferences.automaticSnapshots "أخذ لقطات تلقائية عند إنشاء العناصر من صفحات الويب">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "الارفاق التلقائي لملفات PDF والملفات الاخرى عند اضافة عنصر جديد من صفحة ويب">

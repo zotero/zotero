@@ -18,6 +18,9 @@
 <!ENTITY zotero.general.close "Κλείσιμο">
 <!ENTITY zotero.general.minimize "Ελαχιστοποίηση">
 <!ENTITY zotero.general.other "Άλλο-α ...">
+<!ENTITY zotero.general.bigger "Bigger">
+<!ENTITY zotero.general.smaller "Smaller">
+<!ENTITY zotero.general.reset "Reset">
 
 
 <!ENTITY zotero.errorReport.title "Αναφορά σφάλματος Zotero">

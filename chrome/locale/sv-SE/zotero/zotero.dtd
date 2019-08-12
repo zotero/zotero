@@ -18,6 +18,9 @@
 <!ENTITY zotero.general.close "Stäng">
 <!ENTITY zotero.general.minimize "Minimera">
 <!ENTITY zotero.general.other "Annat…">
+<!ENTITY zotero.general.bigger "Bigger">
+<!ENTITY zotero.general.smaller "Smaller">
+<!ENTITY zotero.general.reset "Reset">
 
 
 <!ENTITY zotero.errorReport.title "Zotero-felrapporting">

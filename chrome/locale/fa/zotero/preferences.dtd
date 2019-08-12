@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "عمومی">
 
-<!ENTITY zotero.preferences.userInterface "رابط کاربری">
-<!ENTITY zotero.preferences.layout "Layout:">
-<!ENTITY zotero.preferences.layout.standard "استاندارد">
-<!ENTITY zotero.preferences.layout.stacked "Stacked">
-<!ENTITY zotero.preferences.fontSize "اندازه قلم:">
-<!ENTITY zotero.preferences.fontSize.small "کوچک">
-<!ENTITY zotero.preferences.fontSize.medium "متوسط">
-<!ENTITY zotero.preferences.fontSize.large "بزرگ">
-<!ENTITY zotero.preferences.fontSize.xlarge "خیلی بزرگ">
-<!ENTITY zotero.preferences.fontSize.notes "اندازه قلم یادداشت:">
-
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "ساخت خودکار «تصویر لحظه‌ای» در زمان ذخیره صفحات وب">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "پیوست خودکار پی‌دی‌اف‌ها و سایر پرونده‌های وابسته در زمان ذخیره آیتم‌ها">

@@ -18,6 +18,9 @@
 <!ENTITY zotero.general.close "Serriñ">
 <!ENTITY zotero.general.minimize "Bihanaat">
 <!ENTITY zotero.general.other "Traoù all...">
+<!ENTITY zotero.general.bigger "Bigger">
+<!ENTITY zotero.general.smaller "Smaller">
+<!ENTITY zotero.general.reset "Reset">
 
 
 <!ENTITY zotero.errorReport.title "Fazi danevell Zotero">

@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "General">
 
-<!ENTITY zotero.preferences.userInterface "Antarmuka pengguna">
-<!ENTITY zotero.preferences.layout "Layout:">
-<!ENTITY zotero.preferences.layout.standard "Standard">
-<!ENTITY zotero.preferences.layout.stacked "Stacked">
-<!ENTITY zotero.preferences.fontSize "Ukuran font:">
-<!ENTITY zotero.preferences.fontSize.small "Kecil">
-<!ENTITY zotero.preferences.fontSize.medium "Sedang">
-<!ENTITY zotero.preferences.fontSize.large "Besar">
-<!ENTITY zotero.preferences.fontSize.xlarge "Ekstra besar">
-<!ENTITY zotero.preferences.fontSize.notes "Ukuran font catatan:">
-
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "Ambil foto secara automatis ketika menyusun item dari laman web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Lampirkan PDF dan berkas terkait lainnya secara automatis saat menyimpan item">

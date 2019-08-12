@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "일반">
 
-<!ENTITY zotero.preferences.userInterface "사용자 인터페이스">
-<!ENTITY zotero.preferences.layout "레이아웃:">
-<!ENTITY zotero.preferences.layout.standard "표준">
-<!ENTITY zotero.preferences.layout.stacked "스택">
-<!ENTITY zotero.preferences.fontSize "글꼴 크기:">
-<!ENTITY zotero.preferences.fontSize.small "작게">
-<!ENTITY zotero.preferences.fontSize.medium "중간">
-<!ENTITY zotero.preferences.fontSize.large "크게">
-<!ENTITY zotero.preferences.fontSize.xlarge "매우 크게">
-<!ENTITY zotero.preferences.fontSize.notes "노트 글꼴 크기:">
-
 <!ENTITY zotero.preferences.fileHandling "파일 관리">
 <!ENTITY zotero.preferences.automaticSnapshots "웹 페이지  항목을 생성할 때 자동으로 스냅샷 저장">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "항목 저장시 연관된 PDF 및 다른 파일을 자동으로 첨부">

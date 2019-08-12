@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Bendrosios">
 
-<!ENTITY zotero.preferences.userInterface "Naudotojo sąsaja">
-<!ENTITY zotero.preferences.layout "Išdėstymas">
-<!ENTITY zotero.preferences.layout.standard "Įprastas">
-<!ENTITY zotero.preferences.layout.stacked "Glaustas">
-<!ENTITY zotero.preferences.fontSize "Šrifto dydis:">
-<!ENTITY zotero.preferences.fontSize.small "Mažas">
-<!ENTITY zotero.preferences.fontSize.medium "Vidutinis">
-<!ENTITY zotero.preferences.fontSize.large "Didelis">
-<!ENTITY zotero.preferences.fontSize.xlarge "Ypač didelis">
-<!ENTITY zotero.preferences.fontSize.notes "Pastabų šrifto dydis:">
-
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "Kuriamiems naujiems įrašams automatiškai sukurti tinklalapių momentines kopijas">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Įrašant įrašus, automatiškai prisegti susijusius PDF dokumentus ir kitus failus">

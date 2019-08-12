@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Genel">
 
-<!ENTITY zotero.preferences.userInterface "Kullanıcı Arabirimi">
-<!ENTITY zotero.preferences.layout "Düzen:">
-<!ENTITY zotero.preferences.layout.standard "Standart">
-<!ENTITY zotero.preferences.layout.stacked "Üst üste yığılmış">
-<!ENTITY zotero.preferences.fontSize "Yazıtipi boyutu:">
-<!ENTITY zotero.preferences.fontSize.small "Küçük">
-<!ENTITY zotero.preferences.fontSize.medium "Orta">
-<!ENTITY zotero.preferences.fontSize.large "Büyük">
-<!ENTITY zotero.preferences.fontSize.xlarge "Çok büyük">
-<!ENTITY zotero.preferences.fontSize.notes "Not yazıtipi boyutu:">
-
 <!ENTITY zotero.preferences.fileHandling "Dosya Kullanımı">
 <!ENTITY zotero.preferences.automaticSnapshots "Web sayfalarından eserler yaratılırken sayfa görünümü otomatik olarak kaydet">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Eserleri kaydederken ilişkilendirilen PDF ve diğer dosyaları da otomatik olarak ekle">

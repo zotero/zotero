@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "常规">
 
-<!ENTITY zotero.preferences.userInterface "用户界面">
-<!ENTITY zotero.preferences.layout "布局:">
-<!ENTITY zotero.preferences.layout.standard "标准">
-<!ENTITY zotero.preferences.layout.stacked "堆叠">
-<!ENTITY zotero.preferences.fontSize "字体大小:">
-<!ENTITY zotero.preferences.fontSize.small "小">
-<!ENTITY zotero.preferences.fontSize.medium "中">
-<!ENTITY zotero.preferences.fontSize.large "大">
-<!ENTITY zotero.preferences.fontSize.xlarge "超大">
-<!ENTITY zotero.preferences.fontSize.notes "笔记字体大小:">
-
 <!ENTITY zotero.preferences.fileHandling "文件处理">
 <!ENTITY zotero.preferences.automaticSnapshots "从 Web 页面创建条目时自动生成快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "保存条目时自动附加相关的 PDF 文档及其它文件">

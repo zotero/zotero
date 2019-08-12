@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Hollek">
 
-<!ENTITY zotero.preferences.userInterface "Etrefas implijer">
-<!ENTITY zotero.preferences.layout "Aozadur:">
-<!ENTITY zotero.preferences.layout.standard "Standard">
-<!ENTITY zotero.preferences.layout.stacked "Berniet">
-<!ENTITY zotero.preferences.fontSize "Ment ar skritur:">
-<!ENTITY zotero.preferences.fontSize.small "Bihan">
-<!ENTITY zotero.preferences.fontSize.medium "Etre">
-<!ENTITY zotero.preferences.fontSize.large "Bras">
-<!ENTITY zotero.preferences.fontSize.xlarge "Bras-kenañ">
-<!ENTITY zotero.preferences.fontSize.notes "Ment skritur an notennoù:">
-
 <!ENTITY zotero.preferences.fileHandling "Meradur ar restroù">
 <!ENTITY zotero.preferences.automaticSnapshots "Em-dapout skeudenn ar bajenn da vare krouidigezh elfennoù diwar pajennoù Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Em-stagañ ar PDFoù kevelet da vare enrolladur elfennoù">

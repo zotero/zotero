@@ -42,12 +42,24 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
+<!ENTITY viewMenu.label "View">
+<!ENTITY layout.label "Layout">
+<!ENTITY standardView.label "Standard View">
+<!ENTITY stackedView.label "Stacked View">
+<!ENTITY collectionsPane.label "Collections Pane">
+<!ENTITY itemPane.label "Item Pane">
+<!ENTITY tagSelector.label "Tag Selector">
+<!ENTITY recursiveCollections.label "Show Items from Subcollections">
+<!ENTITY fontSize.label "Font Size">
+<!ENTITY noteFontSize.label "Note Font Size">
+
+
 <!ENTITY toolsMenu.label "Werkzeuge">
 <!ENTITY toolsMenu.accesskey "W">
 <!ENTITY installConnector.label "Browsererweiterungen installieren">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Add-ons">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Entwickler">
 
 
 <!ENTITY minimizeWindow.key "m">

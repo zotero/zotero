@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Общи">
 
-<!ENTITY zotero.preferences.userInterface "Потребителски интерфейс">
-<!ENTITY zotero.preferences.layout "Оформление:">
-<!ENTITY zotero.preferences.layout.standard "Стандартно">
-<!ENTITY zotero.preferences.layout.stacked "Групирано">
-<!ENTITY zotero.preferences.fontSize "Размер на шрифта:">
-<!ENTITY zotero.preferences.fontSize.small "Малък">
-<!ENTITY zotero.preferences.fontSize.medium "Среден">
-<!ENTITY zotero.preferences.fontSize.large "Голям">
-<!ENTITY zotero.preferences.fontSize.xlarge "По-голям">
-<!ENTITY zotero.preferences.fontSize.notes "Размер на шрифта в бележките:">
-
 <!ENTITY zotero.preferences.fileHandling "Обработка на файловете">
 <!ENTITY zotero.preferences.automaticSnapshots "Автоматична &quot;моментна снимка&quot; при направата записи от интернет страници">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматично прикачване на свързаните PDF и други файлове при съхранението на записите">

@@ -18,6 +18,9 @@
 <!ENTITY zotero.general.close "Đóng">
 <!ENTITY zotero.general.minimize "Thu nhỏ">
 <!ENTITY zotero.general.other "Other…">
+<!ENTITY zotero.general.bigger "Bigger">
+<!ENTITY zotero.general.smaller "Smaller">
+<!ENTITY zotero.general.reset "Reset">
 
 
 <!ENTITY zotero.errorReport.title "Báo cáo lỗi Zotero">

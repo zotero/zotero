@@ -18,6 +18,9 @@
 <!ENTITY zotero.general.close "Zamknij">
 <!ENTITY zotero.general.minimize "Minimalizuj">
 <!ENTITY zotero.general.other "Inne...">
+<!ENTITY zotero.general.bigger "Bigger">
+<!ENTITY zotero.general.smaller "Smaller">
+<!ENTITY zotero.general.reset "Reset">
 
 
 <!ENTITY zotero.errorReport.title "Raport błędów Zotero">

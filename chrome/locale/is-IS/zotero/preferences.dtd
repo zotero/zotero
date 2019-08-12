@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Almennt">
 
-<!ENTITY zotero.preferences.userInterface "Notendaviðmót">
-<!ENTITY zotero.preferences.layout "Framsetning:">
-<!ENTITY zotero.preferences.layout.standard "Stöðluð">
-<!ENTITY zotero.preferences.layout.stacked "Stöfluð">
-<!ENTITY zotero.preferences.fontSize "Stærð leturs:">
-<!ENTITY zotero.preferences.fontSize.small "Smátt">
-<!ENTITY zotero.preferences.fontSize.medium "Meðalstórt">
-<!ENTITY zotero.preferences.fontSize.large "Stórt">
-<!ENTITY zotero.preferences.fontSize.xlarge "Risastórt">
-<!ENTITY zotero.preferences.fontSize.notes "Gefið upp leturstærð:">
-
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "Taka sjálfkrafa mynd af skjá þegar vefsíðufærslur eru búnar til">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Hengja sjálfkrafa PDF skjöl og önnur gögn við færslur þegar þær eru vistaðar">

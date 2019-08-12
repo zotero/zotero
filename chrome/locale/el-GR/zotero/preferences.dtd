@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Γενικές">
 
-<!ENTITY zotero.preferences.userInterface "Περιβάλλον χρήστη">
-<!ENTITY zotero.preferences.layout "Διάταξη:">
-<!ENTITY zotero.preferences.layout.standard "Βασική τυποποίηση">
-<!ENTITY zotero.preferences.layout.stacked "Στοιβαγμένα">
-<!ENTITY zotero.preferences.fontSize "Μέγεθος γραμματοσειράς:">
-<!ENTITY zotero.preferences.fontSize.small "Μικρό">
-<!ENTITY zotero.preferences.fontSize.medium "Μέσο">
-<!ENTITY zotero.preferences.fontSize.large "Μεγάλο">
-<!ENTITY zotero.preferences.fontSize.xlarge "Πολύ Μεγάλο">
-<!ENTITY zotero.preferences.fontSize.notes "Μέγεθος γραμματοσειράς σημειώσεων:">
-
 <!ENTITY zotero.preferences.fileHandling "Χειρισμός Αρχείου">
 <!ENTITY zotero.preferences.automaticSnapshots "Αυτόματη λήψη φωτογραφικού στιγμιότυπου όταν δημιουργείτε στοιχεία από ιστοσελίδες">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Αυτόματη προσάρτηση των συνοδευτικών αρχείων PDF και άλλων όταν αποθηκεύετε στοιχεία">

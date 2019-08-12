@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
 
-<!ENTITY zotero.preferences.userInterface "Brugerflade">
-<!ENTITY zotero.preferences.layout "Layout:">
-<!ENTITY zotero.preferences.layout.standard "Standard">
-<!ENTITY zotero.preferences.layout.stacked "Stablet">
-<!ENTITY zotero.preferences.fontSize "Skriftstørrelse:">
-<!ENTITY zotero.preferences.fontSize.small "Lille">
-<!ENTITY zotero.preferences.fontSize.medium "Medium">
-<!ENTITY zotero.preferences.fontSize.large "Stor">
-<!ENTITY zotero.preferences.fontSize.xlarge "Ekstra stor">
-<!ENTITY zotero.preferences.fontSize.notes "Skriftstørrelse i noter:">
-
 <!ENTITY zotero.preferences.fileHandling "Filhåndtering">
 <!ENTITY zotero.preferences.automaticSnapshots "Tag automatisk et &quot;Snapshot&quot; når der oprettes Elementer for web-sider">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Vedhæft automatisk tilhørende PDF-filer og andre filer når Elementer gemmes">

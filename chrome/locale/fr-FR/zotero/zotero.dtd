@@ -18,6 +18,9 @@
 <!ENTITY zotero.general.close "Fermer">
 <!ENTITY zotero.general.minimize "Minimiser">
 <!ENTITY zotero.general.other "Autre…">
+<!ENTITY zotero.general.bigger "Bigger">
+<!ENTITY zotero.general.smaller "Smaller">
+<!ENTITY zotero.general.reset "Reset">
 
 
 <!ENTITY zotero.errorReport.title "Rapport d'erreur Zotero">

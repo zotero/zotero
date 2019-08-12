@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "ទូទៅ">
 
-<!ENTITY zotero.preferences.userInterface "ចំណុចប្រទាក់ក្រឡាអ្នកប្រើប្រាស់">
-<!ENTITY zotero.preferences.layout "Layout:">
-<!ENTITY zotero.preferences.layout.standard "Standard">
-<!ENTITY zotero.preferences.layout.stacked "Stacked">
-<!ENTITY zotero.preferences.fontSize "ទំហំអក្សរៈ">
-<!ENTITY zotero.preferences.fontSize.small "តូច">
-<!ENTITY zotero.preferences.fontSize.medium "មធ្យម">
-<!ENTITY zotero.preferences.fontSize.large "ធំ">
-<!ENTITY zotero.preferences.fontSize.xlarge "ទំហំអក្សរអ៊ិចស៏">
-<!ENTITY zotero.preferences.fontSize.notes "ទំហំអក្សរកំណត់ចំណាំៈ">
-
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "ថតយកអត្ថបទចេញពីគេហទំព័រដោយស្វ័យប្រវត្តិ">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "ភ្ជាប់មកជាមួយដោយស្វ័យប្រវត្តិនូវឯកសារភីឌីអែហ្វ និង ឯកសារដទៃទៀត ខណៈពេលទាញរក្សាឯកសារទុក">

@@ -42,12 +42,24 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
+<!ENTITY viewMenu.label "View">
+<!ENTITY layout.label "Layout">
+<!ENTITY standardView.label "Standard View">
+<!ENTITY stackedView.label "Stacked View">
+<!ENTITY collectionsPane.label "Collections Pane">
+<!ENTITY itemPane.label "Item Pane">
+<!ENTITY tagSelector.label "Tag Selector">
+<!ENTITY recursiveCollections.label "Show Items from Subcollections">
+<!ENTITY fontSize.label "Font Size">
+<!ENTITY noteFontSize.label "Note Font Size">
+
+
 <!ENTITY toolsMenu.label "Eszközök">
 <!ENTITY toolsMenu.accesskey "E">
 <!ENTITY installConnector.label "Böngészőmodul telepítése">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Kiegészítők">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Fejlesztő eszközök">
 
 
 <!ENTITY minimizeWindow.key "m">
@@ -81,7 +93,7 @@
 <!ENTITY debugOutputLogging.submit "Kimenet elküldése">
 <!ENTITY debugOutputLogging.view " Kimenet megtekintése">
 <!ENTITY debugOutputLogging.clear " Output törlése">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Indítsa újra a naplózást engedélyezve…">
 
 <!ENTITY helpCheckForUpdates.label "Frissítések keresése…">
 <!ENTITY helpCheckForUpdates.accesskey "F">

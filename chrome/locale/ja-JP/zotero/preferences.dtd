@@ -8,17 +8,6 @@
 
 <!ENTITY zotero.preferences.prefpane.general "一般">
 
-<!ENTITY zotero.preferences.userInterface "ユーザーインターフェース">
-<!ENTITY zotero.preferences.layout "レイアウト:">
-<!ENTITY zotero.preferences.layout.standard "標準">
-<!ENTITY zotero.preferences.layout.stacked "積み上げレイアウト">
-<!ENTITY zotero.preferences.fontSize "文字サイズ:">
-<!ENTITY zotero.preferences.fontSize.small "小">
-<!ENTITY zotero.preferences.fontSize.medium "中">
-<!ENTITY zotero.preferences.fontSize.large "大">
-<!ENTITY zotero.preferences.fontSize.xlarge "特大">
-<!ENTITY zotero.preferences.fontSize.notes "メモの文字サイズ:">
-
 <!ENTITY zotero.preferences.fileHandling "ファイルの取り扱い">
 <!ENTITY zotero.preferences.automaticSnapshots "ウェブページからアイテムを作成するときに自動的にスナップショットを作成する">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "アイテムを作成するときに自動的に関連 PDF や他のファイルを添付する">
