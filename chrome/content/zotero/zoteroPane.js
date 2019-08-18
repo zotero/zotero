@@ -2748,7 +2748,7 @@ var ZoteroPane = new function()
 			'reportMetadata',
 			'createParent',
 			'renameAttachments',
-			'reindexItem'
+			'reindexItem',
 		];
 		
 		var m = {};
@@ -2881,19 +2881,18 @@ var ZoteroPane = new function()
 					show.push(m.sep5);
 				}
 				
-				// Block certain actions on files if no access and at least one item
-				// is an imported attachment
+				// Block certain actions on files if no access and at least one item is a file
+				// attachment
 				if (!collectionTreeRow.filesEditable) {
-					var hasImportedAttachment = false;
-					for (var i=0; i<items.length; i++) {
-						var item = items[i];
-						if (item.isImportedAttachment()) {
-							hasImportedAttachment = true;
+					for (let item of items) {
+						if (item.isFileAttachment()) {
+							disable.push(
+								m.moveToTrash,
+								m.createParent,
+								m.renameAttachments
+							);
 							break;
 						}
-					}
-					if (hasImportedAttachment) {
-						disable.push(m.moveToTrash, m.createParent, m.renameAttachments);
 					}
 				}
 			}
@@ -2971,10 +2970,11 @@ var ZoteroPane = new function()
 				this.updateAttachmentButtonMenu(popup);
 				
 				// Block certain actions on files if no access
-				if (item.isImportedAttachment() && !collectionTreeRow.filesEditable) {
-					[m.moveToTrash, m.createParent, m.renameAttachments].forEach(function (x) {
-						disable.push(x);
-					});
+				if (item.isFileAttachment() && !collectionTreeRow.filesEditable) {
+					[m.moveToTrash, m.createParent, m.renameAttachments]
+						.forEach(function (x) {
+							disable.push(x);
+						});
 				}
 			}
 		}
@@ -4578,6 +4578,69 @@ var ZoteroPane = new function()
 		
 		return true;
 	});
+	
+	
+	this.convertLinkedFilesToStoredFiles = async function () {
+		if (!this.canEdit() || !this.canEditFiles()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+		
+		var items = this.getSelectedItems();
+		var attachments = new Set();
+		for (let item of items) {
+			// Add all child link attachments of regular items
+			if (item.isRegularItem()) {
+				for (let id of item.getAttachments()) {
+					let attachment = await Zotero.Items.getAsync(id);
+					if (attachment.isLinkedFileAttachment()) {
+						attachments.add(attachment);
+					}
+				}
+			}
+			// And all selected link attachments
+			else if (item.isLinkedFileAttachment()) {
+				attachments.add(item);
+			}
+		}
+		var num = attachments.size;
+		
+		var ps = Services.prompt;
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		var deleteOriginal = {};
+		var index = ps.confirmEx(null,
+			Zotero.getString('attachment.convertToStored.title', [num], num),
+			Zotero.getString('attachment.convertToStored.text', [num], num),
+			buttonFlags,
+			Zotero.getString('general.continue'),
+			null,
+			null,
+			Zotero.getString('attachment.convertToStored.deleteOriginal', [num], num),
+			deleteOriginal
+		);
+		if (index != 0) {
+			return;
+		}
+		for (let item of attachments) {
+			try {
+				let converted = await Zotero.Attachments.convertLinkedFileToStoredFile(
+					item,
+					{
+						move: deleteOriginal.value
+					}
+				);
+				if (!converted) {
+					// Not found
+					continue;
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
+				continue;
+			}
+		}
+	};
 	
 	
 	this.relinkAttachment = Zotero.Promise.coroutine(function* (itemID) {

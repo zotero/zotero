@@ -1074,4 +1074,71 @@ describe("Zotero.Attachments", function() {
 			assert.isTrue(yield OS.File.exists(dir));
 		});
 	});
+	
+	describe("#convertLinkedFileToStoredFile()", function () {
+		it("should copy a linked file to a stored file", async function () {
+			var item = await createDataObject('item');
+			var relatedItem = await createDataObject('item');
+			
+			var originalFile = OS.Path.join(getTestDataDirectory().path, 'test.pdf');
+			var attachment = await Zotero.Attachments.linkFromFile({
+				file: originalFile,
+				title: 'Title',
+				parentItemID: item.id
+			});
+			attachment.setNote('Note');
+			attachment.setTags([{ tag: 'Tag' }]);
+			attachment.addRelatedItem(relatedItem);
+			await attachment.saveTx();
+			relatedItem.addRelatedItem(attachment);
+			await relatedItem.saveTx();
+			// Make sure we're indexed
+			await Zotero.Fulltext.indexItems([attachment.id]);
+			
+			var newAttachment = await Zotero.Attachments.convertLinkedFileToStoredFile(attachment);
+			
+			assert.isFalse(Zotero.Items.exists(attachment.id));
+			assert.isTrue(await OS.File.exists(originalFile));
+			assert.equal(newAttachment.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_FILE);
+			assert.equal(newAttachment.attachmentContentType, 'application/pdf');
+			assert.isTrue(await newAttachment.fileExists());
+			assert.equal(newAttachment.getField('title'), 'Title');
+			assert.equal(newAttachment.getNote(), 'Note');
+			assert.sameDeepMembers(newAttachment.getTags(), [{ tag: 'Tag' }]);
+			assert.sameMembers(newAttachment.relatedItems, [relatedItem.key]);
+			assert.sameMembers(relatedItem.relatedItems, [newAttachment.key]);
+			assert.isTrue(await OS.File.exists(Zotero.Fulltext.getItemCacheFile(newAttachment).path));
+			assert.equal(
+				await Zotero.Fulltext.getIndexedState(newAttachment),
+				Zotero.Fulltext.INDEX_STATE_INDEXED
+			);
+		});
+		
+		
+		it("should move a linked file to a stored file with `move: true`", async function () {
+			var item = await createDataObject('item');
+			
+			var originalFile = OS.Path.join(Zotero.getTempDirectory().path, 'test.png');
+			await OS.File.copy(
+				OS.Path.join(getTestDataDirectory().path, 'test.png'),
+				originalFile
+			);
+			var attachment = await Zotero.Attachments.linkFromFile({
+				file: originalFile,
+				parentItemID: item.id
+			});
+			
+			var newAttachment = await Zotero.Attachments.convertLinkedFileToStoredFile(
+				attachment,
+				{
+					move: true
+				}
+			);
+			
+			assert.isFalse(Zotero.Items.exists(attachment.id));
+			assert.isFalse(await OS.File.exists(originalFile));
+			assert.equal(newAttachment.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_FILE);
+			assert.isTrue(await newAttachment.fileExists());
+		});
+	});
 })

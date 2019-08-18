@@ -2106,13 +2106,21 @@ Zotero.Item.prototype.isWebAttachment = function() {
 
 
 /**
- * @return {Promise<Boolean>}
+ * @return {Boolean}
  */
 Zotero.Item.prototype.isFileAttachment = function() {
 	if (!this.isAttachment()) {
 		return false;
 	}
 	return this.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL;
+}
+
+
+/**
+ * @return {Boolean}
+ */
+Zotero.Item.prototype.isLinkedFileAttachment = function() {
+	return this.isAttachment() && this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE;
 }
 
 

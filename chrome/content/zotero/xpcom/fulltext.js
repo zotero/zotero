@@ -1141,6 +1141,39 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	});
 	
 	
+	this.transferItemIndex = async function (fromItem, toItem) {
+		await this.clearItemWords(toItem.id);
+		
+		// Copy cache file if it exists
+		var cacheFile = this.getItemCacheFile(fromItem).path;
+		if (await OS.File.exists(cacheFile)) {
+			try {
+				await OS.File.move(cacheFile, this.getItemCacheFile(toItem).path);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				return;
+			}
+		}
+		
+		// Update database with new item id
+		await Zotero.DB.queryAsync("PRAGMA foreign_keys = false");
+		try {
+			await Zotero.DB.queryAsync(
+				"UPDATE fulltextItems SET itemID=? WHERE itemID=?",
+				[toItem.id, fromItem.id]
+			);
+			await Zotero.DB.queryAsync(
+				"UPDATE fulltextItemWords SET itemID=? WHERE itemID=?",
+				[toItem.id, fromItem.id]
+			);
+		}
+		catch (e) {
+			await Zotero.DB.queryAsync("PRAGMA foreign_keys = true");
+		}
+	};
+	
+	
 	/**
 	 * @requireTransaction
 	 */

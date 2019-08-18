@@ -120,7 +120,8 @@
 			<toolbaritem id="menubar-items" align="center">
 				<menubar id="main-menubar"
 				style="border:0px;padding:0px;margin:0px;-moz-appearance:none">
-					<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
+					<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;"
+							onpopupshowing="ZoteroStandalone.onFileMenuOpen()">
 						<menupopup id="menu_FilePopup">
 							<menu id="menu_newItem" label="&zotero.toolbar.newItem.label;">
 								<menupopup id="menu_NewItemPopup"
@@ -133,6 +134,16 @@
 							<menuseparator/>
 							<menuitem id="menu_close" label="&closeCmd.label;" key="key_close"
 									accesskey="&closeCmd.accesskey;" command="cmd_close"/>
+							<menuseparator/>
+							<menu id="manage-attachments-menu" label="&manageAttachments.label;"
+									onpopupshowing="ZoteroStandalone.onManageAttachmentsMenuOpen()"
+									oncommand="ZoteroStandalone.onManageAttachmentsMenuItemClick(event)">
+								<menupopup id="manage-attachments-menupopup">
+									<menuitem
+											id="file-menuitem-convert-to-stored"
+											label="&convertToStored.label;"/>
+								</menupopup>
+							</menu>
 							<menuseparator/>
 							<menuitem id="menu_import" label="&importCmd.label;"
 									command="cmd_zotero_import" key="key_import"/>
@@ -190,7 +201,7 @@
 						<menupopup id="menu_viewPopup">
 							<menu id="layout-menu"
 									label="&layout.label;">
-								<menupopup oncommand="ZoteroStandalone.updateViewOption(event)">
+								<menupopup oncommand="ZoteroStandalone.onViewMenuItemClick(event)">
 									<menuitem id="view-menuitem-standard" label="&standardView.label;"/>
 									<menuitem id="view-menuitem-stacked" label="&stackedView.label;"/>
 									<menuseparator/>
@@ -201,7 +212,7 @@
 							</menu>
 							<menu id="font-size-menu"
 									label="&fontSize.label;">
-								<menupopup oncommand="ZoteroStandalone.updateViewOption(event)">
+								<menupopup oncommand="ZoteroStandalone.onViewMenuItemClick(event)">
 									<menuitem id="view-menuitem-font-size-bigger" label="&zotero.general.bigger;"/>
 									<menuitem id="view-menuitem-font-size-smaller" label="&zotero.general.smaller;"/>
 									<menuseparator/>
@@ -211,7 +222,7 @@
 							<menu id="note-font-size-menu"
 									label="&noteFontSize.label;">
 								<!-- TODO: Maybe switch to Bigger/Smaller once we can update without restarting -->
-								<!--<menupopup oncommand="ZoteroStandalone.updateViewOption(event)">
+								<!--<menupopup oncommand="ZoteroStandalone.onViewMenuItemClick(event)">
 									<menuitem id="view-menuitem-note-font-size-bigger" label="&zotero.general.bigger;"/>
 									<menuitem id="view-menuitem-note-font-size-smaller" label="&zotero.general.smaller;"/>
 									<menuseparator/>
@@ -232,13 +243,13 @@
 									<menuitem
 										id="view-menuitem-note-font-size-reset"
 										label="&zotero.general.reset;"
-										oncommand="ZoteroStandalone.updateViewOption(event); event.stopPropagation();"/>
+										oncommand="ZoteroStandalone.onViewMenuItemClick(event); event.stopPropagation();"/>
 								</menupopup>
 							</menu>
 							<menuseparator/>
 							<menuitem id="view-menuitem-recursive-collections"
 								label="&recursiveCollections.label;"
-								oncommand="ZoteroStandalone.updateViewOption(event)"/>
+								oncommand="ZoteroStandalone.onViewMenuItemClick(event)"/>
 						</menupopup>
 					</menu>
 					

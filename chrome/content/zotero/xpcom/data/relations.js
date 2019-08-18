@@ -169,6 +169,35 @@ Zotero.Relations = new function () {
 	});
 	
 	
+	/**
+	 * For every relation pointing to a given object, create a relation on the subject pointing to a
+	 * new object
+	 *
+	 * @param {Zotero.DataObject} fromObject
+	 * @param {Zotero.DataObject} toObject
+	 * @return {Promise}
+	 */
+	this.copyObjectSubjectRelations = async function (fromObject, toObject) {
+		var objectType = fromObject.objectType;
+		var ObjectType = Zotero.Utilities.capitalize(objectType);
+		var fromObjectURI = Zotero.URI[`get${ObjectType}URI`](fromObject);
+		var toObjectURI = Zotero.URI[`get${ObjectType}URI`](toObject);
+		var subjectPredicates = await Zotero.Relations.getByObject(objectType, fromObjectURI);
+		for (let { subject, predicate } of subjectPredicates) {
+			if (subject.isEditable()) {
+				subject.addRelation(predicate, toObjectURI);
+				await subject.saveTx({
+					skipDateModifiedUpdate: true
+				});
+			}
+			else {
+				Zotero.debug(`Subject ${objectType} ${subject.libraryKey} is not editable `
+					+ `-- not copying ${predicate} relation`);
+			}
+		}
+	};
+	
+	
 	this.updateUser = Zotero.Promise.coroutine(function* (fromUserID, toUserID) {
 		if (!fromUserID) {
 			fromUserID = "local/" + Zotero.Users.getLocalUserKey();
