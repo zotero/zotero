@@ -23,6 +23,8 @@
 <!ENTITY closeCmd.label "Sluiten">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "S">
+<!ENTITY manageAttachments.label "Manage Attachments">
+<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
 <!ENTITY importCmd.label "Importeren...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Importeren van klembord">

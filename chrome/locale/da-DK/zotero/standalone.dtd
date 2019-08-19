@@ -23,6 +23,8 @@
 <!ENTITY closeCmd.label "Luk">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY manageAttachments.label "Manage Attachments">
+<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
 <!ENTITY importCmd.label "Importér...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Importér fra udklipsholderen">

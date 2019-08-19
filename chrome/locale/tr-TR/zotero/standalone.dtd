@@ -23,6 +23,8 @@
 <!ENTITY closeCmd.label "Kapat">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY manageAttachments.label "Manage Attachments">
+<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
 <!ENTITY importCmd.label "İçeri Aktar...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Panodan İçeri Aktar">
@@ -59,7 +61,7 @@
 <!ENTITY installConnector.label "Tarayıcı Bağlayıcılarını Kur...">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Eklentiler">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Geliştirici">
 
 
 <!ENTITY minimizeWindow.key "m">

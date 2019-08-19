@@ -23,6 +23,8 @@
 <!ENTITY closeCmd.label "Cerrar">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
+<!ENTITY manageAttachments.label "Manage Attachments">
+<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
 <!ENTITY importCmd.label "Importar...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Importar desde el portapapeles">
@@ -42,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "Ver">
+<!ENTITY layout.label "Composición">
+<!ENTITY standardView.label "Vista estándar">
+<!ENTITY stackedView.label "Vista apilada">
+<!ENTITY collectionsPane.label "Panel de colecciones">
+<!ENTITY itemPane.label "Panel de elementos">
+<!ENTITY tagSelector.label "Selector de etiquetas">
+<!ENTITY recursiveCollections.label "Mostrar elementos de subcolecciones">
+<!ENTITY fontSize.label "Tamaño de fuente">
+<!ENTITY noteFontSize.label "Tamaño de fuente de notas">
 
 
 <!ENTITY toolsMenu.label "Herramientas">

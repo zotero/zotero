@@ -23,6 +23,8 @@
 <!ENTITY closeCmd.label "إغلاق">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "ق">
+<!ENTITY manageAttachments.label "Manage Attachments">
+<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
 <!ENTITY importCmd.label "استيراد...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "استيراد من الحافظة">
