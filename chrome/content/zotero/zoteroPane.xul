@@ -284,7 +284,6 @@
 					<menuitem class="menuitem-iconic zotero-menuitem-report-metadata" label="&zotero.items.menu.reportMetadata;" oncommand="ZoteroPane.reportMetadataForSelected()"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-create-parent" oncommand="ZoteroPane_Local.createParentItemsFromSelected();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-rename-from-parent" oncommand="ZoteroPane_Local.renameSelectedAttachmentsFromParents()"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-convert-linked-to-stored" oncommand="ZoteroPane.convertLinkedFilesToStoredFiles()"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-reindex" oncommand="ZoteroPane_Local.reindexItem();"/>
 				</menupopup>
 			</popupset>
