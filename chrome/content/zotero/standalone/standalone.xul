@@ -202,12 +202,32 @@
 							<menu id="layout-menu"
 									label="&layout.label;">
 								<menupopup oncommand="ZoteroStandalone.onViewMenuItemClick(event)">
-									<menuitem id="view-menuitem-standard" label="&standardView.label;"/>
-									<menuitem id="view-menuitem-stacked" label="&stackedView.label;"/>
+									<menuitem
+										id="view-menuitem-standard"
+										label="&standardView.label;"
+										type="checkbox"
+									/>
+									<menuitem
+										id="view-menuitem-stacked"
+										label="&stackedView.label;"
+										type="checkbox"
+									/>
 									<menuseparator/>
-									<menuitem id="view-menuitem-collections-pane" label="&collectionsPane.label;"/>
-									<menuitem id="view-menuitem-item-pane" label="&itemPane.label;"/>
-									<menuitem id="view-menuitem-tag-selector" label="&tagSelector.label;"/>
+									<menuitem
+										id="view-menuitem-collections-pane"
+										label="&collectionsPane.label;"
+										type="checkbox"
+									/>
+									<menuitem
+										id="view-menuitem-item-pane"
+										label="&itemPane.label;"
+										type="checkbox"
+									/>
+									<menuitem
+										id="view-menuitem-tag-selector"
+										label="&tagSelector.label;"
+										type="checkbox"
+									/>
 								</menupopup>
 							</menu>
 							<menu id="font-size-menu"
@@ -228,17 +248,17 @@
 									<menuseparator/>
 									<menuitem id="view-menuitem-note-font-size-reset" label="&zotero.general.reset;"/>-->
 								<menupopup oncommand="ZoteroStandalone.updateNoteFontSize(event)">
-									<menuitem label="11"/>
-									<menuitem label="12"/>
-									<menuitem label="13"/>
-									<menuitem label="14"/>
-									<menuitem label="18"/>
-									<menuitem label="24"/>
-									<menuitem label="36"/>
-									<menuitem label="48"/>
-									<menuitem label="64"/>
-									<menuitem label="72"/>
-									<menuitem label="96"/>
+									<menuitem label="11" type="checkbox"/>
+									<menuitem label="12" type="checkbox"/>
+									<menuitem label="13" type="checkbox"/>
+									<menuitem label="14" type="checkbox"/>
+									<menuitem label="18" type="checkbox"/>
+									<menuitem label="24" type="checkbox"/>
+									<menuitem label="36" type="checkbox"/>
+									<menuitem label="48" type="checkbox"/>
+									<menuitem label="64" type="checkbox"/>
+									<menuitem label="72" type="checkbox"/>
+									<menuitem label="96" type="checkbox"/>
 									<menuitem/>
 									<menuitem
 										id="view-menuitem-note-font-size-reset"
@@ -249,7 +269,9 @@
 							<menuseparator/>
 							<menuitem id="view-menuitem-recursive-collections"
 								label="&recursiveCollections.label;"
-								oncommand="ZoteroStandalone.onViewMenuItemClick(event)"/>
+								oncommand="ZoteroStandalone.onViewMenuItemClick(event)"
+								type="checkbox"
+							/>
 						</menupopup>
 					</menu>
 					
