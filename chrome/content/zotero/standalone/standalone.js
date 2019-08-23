@@ -446,14 +446,11 @@ const ZoteroStandalone = new function() {
 	
 	
 	this.updateAddonsPane = function (doc) {
-		// Hide unsigned add-on verification warnings
-		//
-		// This only works for the initial load of the window. If the user switches to Appearance
-		// or Plugins and then back to Extensions, the warnings will appear again. A better way to
-		// disable this might be discoverable by studying
-		// https://dxr.mozilla.org/mozilla-central/source/toolkit/mozapps/extensions/content/extensions.js
-		var addonList = doc.getElementById('addon-list');
-		setTimeout(function () {
+		// Unsigned add-on warnings are hidden by default in extensions.css (via style rules added
+		// by fetch_xulrunner.sh), but allow other warnings
+		function updateExtensions () {
+			var addonList = doc.getElementById('addon-list');
+			
 			for (let i = 0; i < addonList.itemCount; i++) {
 				let richListItem = addonList.getItemAtIndex(i);
 				let container = doc.getAnonymousElementByAttribute(
@@ -463,13 +460,16 @@ const ZoteroStandalone = new function() {
 					let link = doc.getAnonymousElementByAttribute(
 						richListItem, 'anonid', 'warning-link'
 					);
-					if (link && link.href.indexOf('unsigned-addons') != -1) {
-						richListItem.removeAttribute('notification');
-						container.hidden = true;
+					if (link) {
+						if (!link.href.includes('unsigned-addons')) {
+							container.classList.add('allowed-warning');
+						}
 					}
 				}
 			}
-		});
+		}
+		doc.getElementById('category-extension').onclick = updateExtensions;
+		setTimeout(updateExtensions);
 	}
 	
 	/**
