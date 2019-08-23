@@ -857,15 +857,11 @@ Zotero.Attachments = new function(){
 				}
 				
 				wbp.progressListener = new Zotero.WebProgressFinishListener(() => resolve());
-					
-				var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
-					.createInstance(Components.interfaces.nsIURL);
-				nsIURL.spec = url;
 				var headers = {};
 				if (options.referrer) {
 					headers.Referer = options.referrer;
 				}
-				Zotero.Utilities.Internal.saveURI(wbp, nsIURL, path, headers);
+				Zotero.Utilities.Internal.saveURI(wbp, url, path, headers);
 			});
 			
 			if (options.isPDF) {
