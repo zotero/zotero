@@ -24,6 +24,7 @@
 */
 
 Components.utils.import("resource://gre/modules/Services.jsm");
+import FilePicker from 'zotero/filePicker';
 
 Zotero_Preferences.Advanced = {
 	_openURLResolvers: null,
@@ -554,25 +555,20 @@ Zotero_Preferences.Attachment_Base_Directory = {
 	},
 	
 	
-	choosePath: Zotero.Promise.coroutine(function* () {
+	choosePath: async function () {
 		var oldPath = this.getPath();
 		
 		//Prompt user to choose new base path
+		var fp = new FilePicker();
 		if (oldPath) {
-			var oldPathFile = Zotero.File.pathToFile(oldPath);
+			fp.displayDirectory = oldPath;
 		}
-		var nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-					.createInstance(nsIFilePicker);
-		if (oldPathFile) {
-			fp.displayDirectory = oldPathFile;
-		}
-		fp.init(window, Zotero.getString('attachmentBasePath.selectDir'), nsIFilePicker.modeGetFolder);
-		fp.appendFilters(nsIFilePicker.filterAll);
-		if (fp.show() != nsIFilePicker.returnOK) {
+		fp.init(window, Zotero.getString('attachmentBasePath.selectDir'), fp.modeGetFolder);
+		fp.appendFilters(fp.filterAll);
+		if (await fp.show() != fp.returnOK) {
 			return false;
 		}
-		var newPath = OS.Path.normalize(fp.file.path);
+		var newPath = fp.file;
 		
 		if (oldPath && oldPath == newPath) {
 			Zotero.debug("Base directory hasn't changed");
@@ -580,7 +576,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		}
 		
 		return this.changePath(newPath);
-	}),
+	},
 	
 	
 	changePath: Zotero.Promise.coroutine(function* (basePath) {

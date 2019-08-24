@@ -26,8 +26,9 @@
 /**
  * @fileOverview Tools for automatically retrieving a citation for the given PDF
  */
- 
- 
+
+import FilePicker from 'zotero/filePicker';
+
 /**
  * Front end for recognizing PDFs
  * @namespace
@@ -73,19 +74,17 @@ var Zotero_RTFScan = new function() {
 	/**
 	 * Called to select the file to be processed
 	 */
-	this.chooseInputFile = function() {
+	this.chooseInputFile = async function () {
 		// display file picker
-		const nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-				.createInstance(nsIFilePicker);
-		fp.init(window, Zotero.getString("rtfScan.openTitle"), nsIFilePicker.modeOpen);
+		var fp = new FilePicker();
+		fp.init(window, Zotero.getString("rtfScan.openTitle"), fp.modeOpen);
 		
-		fp.appendFilters(nsIFilePicker.filterAll);
+		fp.appendFilters(fp.filterAll);
 		fp.appendFilter(Zotero.getString("rtfScan.rtf"), "*.rtf");
 		
-		var rv = fp.show();
-		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
-			inputFile = fp.file;
+		var rv = await fp.show();
+		if (rv == fp.returnOK || rv == fp.returnReplace) {
+			inputFile = Zotero.File.pathToFile(fp.file);
 			_updatePath();
 		}
 	}
@@ -93,11 +92,9 @@ var Zotero_RTFScan = new function() {
 	/**
 	 * Called to select the output file
 	 */
-	this.chooseOutputFile = function() {
-		const nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-				.createInstance(nsIFilePicker);
-		fp.init(window, Zotero.getString("rtfScan.saveTitle"), nsIFilePicker.modeSave);
+	this.chooseOutputFile = async function () {
+		var fp = new FilePicker();
+		fp.init(window, Zotero.getString("rtfScan.saveTitle"), fp.modeSave);
 		fp.appendFilter(Zotero.getString("rtfScan.rtf"), "*.rtf");
 		if(inputFile) {
 			var leafName = inputFile.leafName;
@@ -110,9 +107,9 @@ var Zotero_RTFScan = new function() {
 			fp.defaultString = "Untitled.rtf";
 		}
 		
-		var rv = fp.show();
-		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {				
-			outputFile = fp.file;
+		var rv = await fp.show();
+		if (rv == fp.returnOK || rv == fp.returnReplace) {
+			outputFile = Zotero.File.pathToFile(fp.file);
 			_updatePath();
 		}
 	}

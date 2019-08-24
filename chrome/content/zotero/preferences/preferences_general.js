@@ -27,6 +27,7 @@
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm");
+import FilePicker from 'zotero/filePicker';
 
 Zotero_Preferences.General = {
 	init: function () {
@@ -51,28 +52,25 @@ Zotero_Preferences.General = {
 	//
 	// File handlers
 	//
-	chooseFileHandler: function (type) {
+	chooseFileHandler: async function (type) {
 		var pref = this._getFileHandlerPref(type);
 		var currentPath = Zotero.Prefs.get(pref);
 		
-		var nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-			.createInstance(nsIFilePicker);
+		var fp = new FilePicker();
 		if (currentPath) {
-			fp.displayDirectory = Zotero.File.pathToFile(OS.Path.dirname(currentPath));
+			fp.displayDirectory = OS.Path.dirname(currentPath);
 		}
 		fp.init(
 			window,
 			Zotero.getString('zotero.preferences.chooseApplication'),
-			nsIFilePicker.modeOpen
+			fp.modeOpen
 		);
-		fp.appendFilters(nsIFilePicker.filterApps);
-		if (fp.show() != nsIFilePicker.returnOK) {
+		fp.appendFilters(fp.filterApps);
+		if (await fp.show() != fp.returnOK) {
 			this._updateFileHandlerUI();
 			return false;
 		}
-		var newPath = OS.Path.normalize(fp.file.path);
-		this.setFileHandler(type, newPath);
+		this.setFileHandler(type, fp.file);
 	},
 	
 	setFileHandler: function (type, handler) {

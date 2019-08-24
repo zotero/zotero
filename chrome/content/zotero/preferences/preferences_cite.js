@@ -25,6 +25,8 @@
 
 "use strict";
 
+import FilePicker from 'zotero/filePicker';
+
 Zotero_Preferences.Cite = {
 	wordPluginIDs: new Set([
 		'zoteroOpenOfficeIntegration@zotero.org',
@@ -133,21 +135,27 @@ Zotero_Preferences.Cite = {
 	/**
 	 * Adds a new style to the style pane
 	 **/
-	addStyle: function () {	
-		const nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-				.createInstance(nsIFilePicker);
-		fp.init(window, Zotero.getString("zotero.preferences.styles.addStyle"), nsIFilePicker.modeOpen);
+	addStyle: async function () {
+		var fp = new FilePicker();
+		fp.init(window, Zotero.getString("zotero.preferences.styles.addStyle"), fp.modeOpen);
 		
 		fp.appendFilter("CSL Style", "*.csl");
 		
-		var rv = fp.show();
-		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
-			Zotero.Styles.install({ file: fp.file }, fp.file.path, true)
-			.catch(function (e) {
+		var rv = await fp.show();
+		if (rv == fp.returnOK || rv == fp.returnReplace) {
+			try {
+				await Zotero.Styles.install(
+					{
+						file: Zotero.File.pathToFile(fp.file)
+					},
+					fp.file,
+					true
+				);
+			}
+			catch (e) {
 				(new Zotero.Exception.Alert("styles.install.unexpectedError",
-					fp.file.path, "styles.install.title", e)).present()
-			});
+					fp.file, "styles.install.title", e)).present()
+			}
 		}
 	},
 	

@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+import FilePicker from 'zotero/filePicker';
+
 /*
  * This object contains the various functions for the interface
  */
@@ -955,16 +957,15 @@ var ZoteroPane = new function()
 		return collection.saveTx();
 	});
 	
-	this.importFeedsFromOPML = Zotero.Promise.coroutine(function* (event) {
-		var nsIFilePicker = Components.interfaces.nsIFilePicker;
+	this.importFeedsFromOPML = async function (event) {
 		while (true) {
-			var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
-			fp.init(window, Zotero.getString('fileInterface.importOPML'), nsIFilePicker.modeOpen);
+			let fp = new FilePicker();
+			fp.init(window, Zotero.getString('fileInterface.importOPML'), fp.modeOpen);
 			fp.appendFilter(Zotero.getString('fileInterface.OPMLFeedFilter'), '*.opml; *.xml');
-			fp.appendFilters(nsIFilePicker.filterAll);
-			if (fp.show() == nsIFilePicker.returnOK) {
-				var contents = yield Zotero.File.getContentsAsync(fp.file.path);
-				var success = yield Zotero.Feeds.importFromOPML(contents);
+			fp.appendFilters(fp.filterAll);
+			if (await fp.show() == fp.returnOK) {
+				var contents = await Zotero.File.getContentsAsync(fp.file.path);
+				var success = await Zotero.Feeds.importFromOPML(contents);
 				if (success) {
 					return true;
 				}
@@ -974,7 +975,7 @@ var ZoteroPane = new function()
 				return false;
 			}
 		}
-	});
+	};
 	
 	
 	this.newFeedFromURL = Zotero.Promise.coroutine(function* () {
@@ -3579,7 +3580,7 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.addAttachmentFromDialog = Zotero.Promise.coroutine(function* (link, parentItemID) {
+	this.addAttachmentFromDialog = async function (link, parentItemID) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -3609,24 +3610,15 @@ var ZoteroPane = new function()
 		
 		var libraryID = collectionTreeRow.ref.libraryID;
 		
-		var nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-        					.createInstance(nsIFilePicker);
-		fp.init(window, Zotero.getString('pane.item.attachments.select'), nsIFilePicker.modeOpenMultiple);
-		fp.appendFilters(nsIFilePicker.filterAll);
+		var fp = new FilePicker();
+		fp.init(window, Zotero.getString('pane.item.attachments.select'), fp.modeOpenMultiple);
+		fp.appendFilters(fp.filterAll);
 		
-		if (fp.show() != nsIFilePicker.returnOK) {
+		if (await fp.show() != fp.returnOK) {
 			return;
 		}
 		
-		var enumerator = fp.files;
-		var files = [];
-		while (enumerator.hasMoreElements()) {
-			let file = enumerator.getNext();
-			file.QueryInterface(Components.interfaces.nsIFile);
-			files.push(file.path);
-		}
-		
+		var files = fp.files;
 		var addedItems = [];
 		var collection;
 		var fileBaseName;
@@ -3637,7 +3629,7 @@ var ZoteroPane = new function()
 			if (files.length == 1 && Zotero.Attachments.shouldAutoRenameFile(link)) {
 				let parentItem = Zotero.Items.get(parentItemID);
 				if (!parentItem.numNonHTMLFileAttachments()) {
-					fileBaseName = yield Zotero.Attachments.getRenamedFileBaseNameIfAllowedType(
+					fileBaseName = await Zotero.Attachments.getRenamedFileBaseNameIfAllowedType(
 						parentItem, files[0]
 					);
 				}
@@ -3656,7 +3648,7 @@ var ZoteroPane = new function()
 				try {
 					if (fileBaseName) {
 						let ext = Zotero.File.getExtension(file);
-						let newName = yield Zotero.File.rename(
+						let newName = await Zotero.File.rename(
 							file,
 							fileBaseName + (ext ? '.' + ext : ''),
 							{
@@ -3671,7 +3663,7 @@ var ZoteroPane = new function()
 					Zotero.logError(e);
 				}
 				
-				item = yield Zotero.Attachments.linkFromFile({
+				item = await Zotero.Attachments.linkFromFile({
 					file,
 					parentItemID,
 					collections: collection ? [collection] : undefined
@@ -3684,7 +3676,7 @@ var ZoteroPane = new function()
 					continue;
 				}
 				
-				item = yield Zotero.Attachments.importFromFile({
+				item = await Zotero.Attachments.importFromFile({
 					file,
 					libraryID,
 					fileBaseName,
@@ -3700,7 +3692,7 @@ var ZoteroPane = new function()
 		if (!parentItemID) {
 			Zotero.RecognizePDF.autoRecognizeItems(addedItems);
 		}
-	});
+	};
 	
 	
 	this.findPDFForSelectedItems = async function () {
@@ -4643,7 +4635,7 @@ var ZoteroPane = new function()
 	};
 	
 	
-	this.relinkAttachment = Zotero.Promise.coroutine(function* (itemID) {
+	this.relinkAttachment = async function (itemID) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -4655,10 +4647,8 @@ var ZoteroPane = new function()
 		}
 		
 		while (true) {
-			var nsIFilePicker = Components.interfaces.nsIFilePicker;
-			var fp = Components.classes["@mozilla.org/filepicker;1"]
-						.createInstance(nsIFilePicker);
-			fp.init(window, Zotero.getString('pane.item.attachments.select'), nsIFilePicker.modeOpen);
+			let fp = new FilePicker();
+			fp.init(window, Zotero.getString('pane.item.attachments.select'), fp.modeOpen);
 			
 			var file = item.getFilePath();
 			if (!file) {
@@ -4666,16 +4656,15 @@ var ZoteroPane = new function()
 				break;
 			}
 			
-			var dir = yield Zotero.File.getClosestDirectory(file);
+			var dir = await Zotero.File.getClosestDirectory(file);
 			if (dir) {
-				fp.displayDirectory = Zotero.File.pathToFile(dir);
+				fp.displayDirectory = dir;
 			}
 			
-			fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
+			fp.appendFilters(fp.filterAll);
 			
-			if (fp.show() == nsIFilePicker.returnOK) {
-				let file = fp.file;
-				file.QueryInterface(Components.interfaces.nsILocalFile);
+			if (await fp.show() == fp.returnOK) {
+				let file = Zotero.File.pathToFile(fp.file);
 				
 				// Disallow hidden files
 				// TODO: Display a message
@@ -4689,13 +4678,13 @@ var ZoteroPane = new function()
 					continue;
 				}
 				
-				yield item.relinkAttachmentFile(file.path);
+				await item.relinkAttachmentFile(file.path);
 				break;
 			}
 			
 			break;
 		}
-	});
+	};
 	
 	
 	this.updateReadLabel = function () {

@@ -25,6 +25,8 @@
 
 "use strict";
 
+import FilePicker from 'zotero/filePicker';
+
 Zotero.DataDirectory = {
 	MIGRATION_MARKER: 'migrate-dir',
 	
@@ -439,7 +441,7 @@ Zotero.DataDirectory = {
 	},
 	
 	
-	choose: Zotero.Promise.coroutine(function* (forceQuitNow, useHomeDir, moreInfoCallback) {
+	choose: async function (forceQuitNow, useHomeDir, moreInfoCallback) {
 		var win = Services.wm.getMostRecentWindow('navigator:browser');
 		var ps = Services.prompt;
 		
@@ -450,17 +452,13 @@ Zotero.DataDirectory = {
 			}
 		}
 		else {
-			var nsIFilePicker = Components.interfaces.nsIFilePicker;
 			while (true) {
-				var fp = Components.classes["@mozilla.org/filepicker;1"]
-							.createInstance(nsIFilePicker);
-				fp.init(win, Zotero.getString('dataDir.selectDir'), nsIFilePicker.modeGetFolder);
-				fp.displayDirectory = Zotero.File.pathToFile(
-					this._dir ? this._dir : OS.Path.dirname(this.defaultDir)
-				);
-				fp.appendFilters(nsIFilePicker.filterAll);
-				if (fp.show() == nsIFilePicker.returnOK) {
-					var file = fp.file;
+				let fp = new FilePicker();
+				fp.init(win, Zotero.getString('dataDir.selectDir'), fp.modeGetFolder);
+				fp.displayDirectory = this._dir ? this._dir : OS.Path.dirname(this.defaultDir);
+				fp.appendFilters(fp.filterAll);
+				if (await fp.show() == fp.returnOK) {
+					let file = Zotero.File.pathToFile(fp.file);
 					let dialogText = '';
 					let dialogTitle = '';
 					
@@ -547,24 +545,22 @@ Zotero.DataDirectory = {
 		}
 		
 		return useHomeDir ? true : file;
-	}),
+	},
 	
 	
-	forceChange: function (win) {
+	forceChange: async function (win) {
 		if (!win) {
 			win = Services.wm.getMostRecentWindow('navigator:browser');
 		}
 		var ps = Services.prompt;
 		
-		var nsIFilePicker = Components.interfaces.nsIFilePicker;
 		while (true) {
-			var fp = Components.classes["@mozilla.org/filepicker;1"]
-						.createInstance(nsIFilePicker);
-			fp.init(win, Zotero.getString('dataDir.selectNewDir', Zotero.clientName), nsIFilePicker.modeGetFolder);
-			fp.displayDirectory = Zotero.File.pathToFile(this.dir);
-			fp.appendFilters(nsIFilePicker.filterAll);
-			if (fp.show() == nsIFilePicker.returnOK) {
-				var file = fp.file;
+			let fp = new FilePicker();
+			fp.init(win, Zotero.getString('dataDir.selectNewDir', Zotero.clientName), fp.modeGetFolder);
+			fp.displayDirectory = this.dir;
+			fp.appendFilters(fp.filterAll);
+			if (await fp.show() == fp.returnOK) {
+				let file = Zotero.File.pathToFile(fp.file);
 				
 				if (file.directoryEntries.hasMoreElements()) {
 					ps.alert(null,

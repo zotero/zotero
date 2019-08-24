@@ -7,12 +7,14 @@
 <p id="result"></p>
 <script src="../include.js"></script>
 <script type="text/javascript">
-	Zotero.Promise.coroutine(function* (){
+	import FilePicker from 'zotero/filePicker';
+	
+	(async function () {
 		// Create schema
 		var schema = {"itemTypes":{}, "creatorTypes":{}, "fields":{}};
 		var types = Zotero.ItemTypes.getTypes();
 
-		var fieldIDs = yield Zotero.DB.columnQueryAsync("SELECT fieldID FROM fieldsCombined");
+		var fieldIDs = await Zotero.DB.columnQueryAsync("SELECT fieldID FROM fieldsCombined");
 		var baseMappedFields = Zotero.ItemFields.getBaseMappedFields();
 		
 		for (let fieldID of fieldIDs) {
@@ -70,19 +72,20 @@
 		}
 
 		// Write to file
-		var nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-			.createInstance(nsIFilePicker);
-		fp.init(window, Zotero.getString('dataDir.selectDir'), nsIFilePicker.modeGetFolder);
+		var fp = new FilePicker();
+		fp.init(window, Zotero.getString('dataDir.selectDir'), fp.modeGetFolder);
 		
 		let resultElem = document.getElementById('result');
-		if (fp.show() != nsIFilePicker.returnOK) {
+		if (await fp.show() != fp.returnOK) {
 			result.innerHTML = '<p>Failed.</p>';
 		} else {
 			let schemaFile = fp.file;
 			schemaFile.append("connectorTypeSchemaData.js");
-			Zotero.File.putContents(schemaFile, `Zotero.Connector_Types.schema = ${JSON.stringify(schema)}`);
-			result.innerHTML = `<p>Wrote ${schemaFile.path} successfully.</p>`;
+			await Zotero.File.putContentsAsync(
+				schemaFile,
+				`Zotero.Connector_Types.schema = ${JSON.stringify(schema)}`
+			);
+			result.innerHTML = `<p>Wrote ${schemaFile} successfully.</p>`;
 		}
 	})();
 </script>
