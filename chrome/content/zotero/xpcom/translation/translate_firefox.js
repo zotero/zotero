@@ -369,7 +369,20 @@ Zotero.Translate.DOMWrapper = new function() {
 Zotero.Translate.SandboxManager = function(sandboxLocation) {
 	this.sandbox = {
 		Zotero: {},
-		XPathResult: Components.interfaces.nsIDOMXPathResult,
+		// As of Fx60, XPathResult is no longer available as nsIDOMXPathResult in XPCOM, so just
+		// shim its constants, which are all we need
+		XPathResult: {
+			ANY_TYPE: 0,
+			NUMBER_TYPE: 1,
+			STRING_TYPE: 2,
+			BOOLEAN_TYPE: 3,
+			UNORDERED_NODE_ITERATOR_TYPE: 4,
+			ORDERED_NODE_ITERATOR_TYPE: 5,
+			UNORDERED_NODE_SNAPSHOT_TYPE: 6,
+			ORDERED_NODE_SNAPSHOT_TYPE: 7,
+			ANY_UNORDERED_NODE_TYPE: 8,
+			FIRST_ORDERED_NODE_TYPE: 9
+		},
 		DOMParser: function() {
 			return Components.classes["@mozilla.org/xmlextras/domparser;1"]
 				.createInstance(Components.interfaces.nsIDOMParser);
