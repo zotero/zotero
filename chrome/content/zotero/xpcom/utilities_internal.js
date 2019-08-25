@@ -1717,9 +1717,7 @@ Zotero.Utilities.Internal.executeAppleScript = new function() {
 	
 	return function(script, block) {
 		if(_osascriptFile === undefined) {
-			_osascriptFile = Components.classes["@mozilla.org/file/local;1"].
-			createInstance(Components.interfaces.nsILocalFile);
-			_osascriptFile.initWithPath("/usr/bin/osascript");
+			_osascriptFile = Zotero.File.pathToFile('/usr/bin/osascript');
 			if(!_osascriptFile.exists()) _osascriptFile = false;
 		}
 		if(_osascriptFile) {

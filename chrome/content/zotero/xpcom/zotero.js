@@ -1010,7 +1010,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				Zotero.debug(e);
 				Zotero.debug("Launching via executable failed -- passing to loadUrl()");
 				
-				// If nsILocalFile.launch() isn't available and the fallback
+				// If nsIFile.launch() isn't available and the fallback
 				// executable doesn't exist, we just let the Firefox external
 				// helper app window handle it
 				var nsIFPH = Components.classes["@mozilla.org/network/protocol;1?name=file"]
@@ -1080,9 +1080,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			}
 			var path = Zotero.Prefs.get(pref);
 			
-			var exec = Components.classes["@mozilla.org/file/local;1"]
-						.createInstance(Components.interfaces.nsILocalFile);
-			exec.initWithPath(path);
+			let exec = Zotero.File.pathToFile(path);
 			if (!exec.exists()) {
 				throw ("Fallback executable not found -- check extensions.zotero." + pref + " in about:config");
 			}

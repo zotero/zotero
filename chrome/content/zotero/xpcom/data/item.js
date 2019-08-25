@@ -2239,7 +2239,7 @@ Zotero.Item.prototype.getFilePath = function () {
 		}
 		
 		let file = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
+			.createInstance(Components.interfaces.nsIFile);
 		try {
 			file.persistentDescriptor = path;
 		}
@@ -2345,7 +2345,7 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 	// the file couldn't be found
 	if (Zotero.isMac && path.startsWith('AAAA')) {
 		let file = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
+			.createInstance(Components.interfaces.nsIFile);
 		try {
 			file.persistentDescriptor = path;
 		}

@@ -2847,7 +2847,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 			var dirPrimitive = {};
 			var dataSize = {};
 			transferable.getTransferData("application/x-moz-file-promise-dir", dirPrimitive, dataSize);
-			var destDir = dirPrimitive.value.QueryInterface(Components.interfaces.nsILocalFile);
+			var destDir = dirPrimitive.value.QueryInterface(Components.interfaces.nsIFile);
 			
 			var draggedItems = Zotero.Items.get(this._itemIDs);
 			var items = [];
@@ -2901,7 +2901,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 					var numFiles = 0;
 					while (files.hasMoreElements()) {
 						var f = files.getNext();
-						f.QueryInterface(Components.interfaces.nsILocalFile);
+						f.QueryInterface(Components.interfaces.nsIFile);
 						if (f.leafName.indexOf('.') != 0) {
 							numFiles++;
 						}

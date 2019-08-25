@@ -51,13 +51,11 @@ var Zotero_RTFScan = new function() {
 	this.introPageShowing = function() {
 		var path = Zotero.Prefs.get("rtfScan.lastInputFile");
 		if(path) {
-			inputFile = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
-			inputFile.initWithPath(path);
+			inputFile = Zotero.File.pathToFile(path);
 		}
 		var path = Zotero.Prefs.get("rtfScan.lastOutputFile");
 		if(path) {
-			outputFile = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
-			outputFile.initWithPath(path);
+			outputFile = Zotero.File.pathToFile(path);
 		}
 		_updatePath();
 		document.getElementById("choose-input-file").focus();

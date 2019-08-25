@@ -1319,7 +1319,6 @@ Zotero.File = new function(){
 					dialogButtonText: Zotero.getString('file.accessError.showParentDir'),
 					dialogButtonCallback: function () {
 						try {
-							file.parent.QueryInterface(Components.interfaces.nsILocalFile);
 							file.parent.reveal();
 						}
 						// Unsupported on some platforms
@@ -1353,13 +1352,12 @@ Zotero.File = new function(){
 		Zotero.debug("Revealing " + file);
 		
 		var nsIFile = this.pathToFile(file);
-		nsIFile.QueryInterface(Components.interfaces.nsILocalFile);
 		try {
 			nsIFile.reveal();
 		}
 		catch (e) {
 			Zotero.logError(e);
-			// On platforms that don't support nsILocalFile.reveal() (e.g. Linux),
+			// On platforms that don't support nsIFile.reveal() (e.g. Linux),
 			// launch the directory
 			let zp = Zotero.getActiveZoteroPane();
 			if (zp) {

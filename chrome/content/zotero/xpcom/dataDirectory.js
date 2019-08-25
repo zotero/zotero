@@ -100,7 +100,7 @@ Zotero.DataDirectory = {
 				let nsIFile;
 				try {
 					nsIFile = Components.classes["@mozilla.org/file/local;1"]
-						.createInstance(Components.interfaces.nsILocalFile);
+						.createInstance(Components.interfaces.nsIFile);
 					nsIFile.persistentDescriptor = prefVal;
 				}
 				catch (e) {
@@ -265,7 +265,7 @@ Zotero.DataDirectory = {
 						let nsIFile;
 						try {
 							nsIFile = Components.classes["@mozilla.org/file/local;1"]
-								.createInstance(Components.interfaces.nsILocalFile);
+								.createInstance(Components.interfaces.nsIFile);
 							nsIFile.persistentDescriptor = prefs['extensions.zotero.dataDir'];
 						}
 						catch (e) {

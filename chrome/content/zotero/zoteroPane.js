@@ -4214,10 +4214,9 @@ var ZoteroPane = new function()
 			file.reveal();
 		}
 		catch (e) {
-			// On platforms that don't support nsILocalFile.reveal() (e.g. Linux),
+			// On platforms that don't support nsIFile.reveal() (e.g. Linux),
 			// launch the parent directory
-			var parent = file.parent.QueryInterface(Components.interfaces.nsILocalFile);
-			Zotero.launchFile(parent);
+			Zotero.launchFile(file.parent);
 		}
 		Zotero.Notifier.trigger('open', 'file', attachment.id);
 	};

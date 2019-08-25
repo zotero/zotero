@@ -1882,9 +1882,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 				getter._itemsLeft = items.slice();
 				
 				let exportDir = yield getTempDirectory();
-				getter._exportFileDirectory = Components.classes["@mozilla.org/file/local;1"]
-					.createInstance(Components.interfaces.nsILocalFile);
-				getter._exportFileDirectory.initWithPath(exportDir);
+				getter._exportFileDirectory = Zotero.File.pathToFile(exportDir);
 				
 				let legacy = getter.legacy = legacyMode[i];
 				let suffix = legacy ? ' in legacy mode' : '';
@@ -1988,9 +1986,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 					if (!linkToURL) {
 						// localPath
 						assert.isString(attachment.localPath, prefix + 'localPath is set' + suffix);
-						let attachmentFile = Components.classes["@mozilla.org/file/local;1"]
-							.createInstance(Components.interfaces.nsILocalFile);
-						attachmentFile.initWithPath(attachment.localPath);
+						let attachmentFile = Zotero.File.pathToFile(attachment.localPath);
 						assert.isTrue(attachmentFile.exists(), prefix + 'localPath points to a file' + suffix);
 						assert.isTrue(attachmentFile.equals(attachments[j].getFile()), prefix + 'localPath points to the correct file' + suffix);
 						
