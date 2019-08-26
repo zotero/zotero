@@ -26,6 +26,7 @@
 <!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
 
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/preferences.css"?>
 <?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/preferences.css"?>
 
