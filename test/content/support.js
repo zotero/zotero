@@ -58,17 +58,24 @@ function loadBrowserWindow() {
  *
  * @param {Window} [win] - Existing window to use; if not specified, a new window is opened
  */
-var loadZoteroPane = Zotero.Promise.coroutine(function* (win) {
+var loadZoteroPane = async function (win) {
 	if (!win) {
-		var win = yield loadBrowserWindow();
+		var win = await loadBrowserWindow();
 	}
 	Zotero.Prefs.clear('lastViewedFolder');
-	win.ZoteroOverlay.toggleDisplay(true);
 	
-	yield waitForItemsLoad(win, 0);
+	while (true) {
+		if (win.ZoteroPane && win.ZoteroPane.collectionsView) {
+			break;
+		}
+		Zotero.debug("Waiting for ZoteroPane initialization");
+		await Zotero.Promise.delay(50);
+	}
+	
+	await waitForItemsLoad(win, 0);
 	
 	return win;
-});
+};
 
 var loadPrefPane = Zotero.Promise.coroutine(function* (paneName) {
 	var id = 'zotero-prefpane-' + paneName;

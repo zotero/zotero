@@ -248,10 +248,6 @@ Zotero.ProgressQueueDialog = function (progressQueue) {
 			
 			let win = Services.wm.getMostRecentWindow("navigator:browser");
 			if (win) {
-				if (win.ZoteroOverlay) {
-					win.ZoteroOverlay.toggleDisplay(true);
-				}
-				
 				win.ZoteroPane.selectItem(itemID, false, true);
 				win.focus();
 			}

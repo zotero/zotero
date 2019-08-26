@@ -40,7 +40,6 @@ var ZoteroPane = new function()
 	
 	//Privileged methods
 	this.destroy = destroy;
-	this.isShowing = isShowing;
 	this.isFullScreen = isFullScreen;
 	this.handleKeyDown = handleKeyDown;
 	this.handleKeyUp = handleKeyUp;
@@ -356,10 +355,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		if(this.isShowing()) {
-			this.serializePersist();
-		}
-		
+		this.serializePersist();
 		this.uninitContainers();
 		
 		if(this.collectionsView) this.collectionsView.unregister();
@@ -519,19 +515,6 @@ var ZoteroPane = new function()
 		return true;
 	});
 	
-	/**
-	 * Function to be called before ZoteroPane_Local is hidden. Does not actually hide the Zotero pane.
-	 */
-	this.makeHidden = function() {
-		this.serializePersist();
-	}
-	
-	function isShowing() {
-		var zoteroPane = document.getElementById('zotero-pane-stack');
-		return zoteroPane
-			&& zoteroPane.getAttribute('hidden') != 'true'
-			&& zoteroPane.getAttribute('collapsed') != 'true';
-	}
 	
 	function isFullScreen() {
 		return document.getElementById('zotero-pane-stack').getAttribute('fullscreenmode') == 'true';
@@ -720,30 +703,6 @@ var ZoteroPane = new function()
 		// Errors don't seem to make it out otherwise
 		try {
 			switch (command) {
-				case 'openZotero':
-					try {
-						// Ignore Cmd-Shift-Z keystroke in text areas
-						if (Zotero.isMac && key == 'Z' &&
-								(event.originalTarget.localName == 'input'
-									|| event.originalTarget.localName == 'textarea')) {
-							try {
-								var isSearchBar = event.originalTarget.parentNode.parentNode.id == 'zotero-tb-search';
-							}
-							catch (e) {
-								Zotero.debug(e, 1);
-								Components.utils.reportError(e);
-							}
-							if (!isSearchBar) {
-								Zotero.debug('Ignoring keystroke in text field');
-								return;
-							}
-						}
-					}
-					catch (e) {
-						Zotero.debug(e);
-					}
-					if (window.ZoteroOverlay) window.ZoteroOverlay.toggleDisplay()
-					break;
 				case 'library':
 					document.getElementById('zotero-collections-tree').focus();
 					break;
@@ -2257,9 +2216,6 @@ var ZoteroPane = new function()
 		if (found) {
 			document.getElementById('zotero-items-tree').focus();
 		}
-		
-		// open Zotero pane
-		this.show();
 	};
 	
 	
@@ -4916,18 +4872,8 @@ var ZoteroPane = new function()
 
 		this.updateToolbarPosition();
 	}
-	/**
-	 * Shows the Zotero pane, making it visible if it is not and switching to the appropriate tab
-	 * if necessary.
-	 */
-	this.show = function() {
-		if(window.ZoteroOverlay) {
-			if (!this.isShowing()) {
-				ZoteroOverlay.toggleDisplay();
-			}
-		}
-	}
-		
+	
+	
 	/**
 	 * Unserializes zotero-persist elements from preferences
 	 */

@@ -41,10 +41,6 @@
 	<toolbar id="zotero-toolbar" nowindowdrag="true"/>
 	
 	<vbox id="appcontent">
-		<!-- onmouseup shouldn't be necessary but seems to help prevent tag selector from sometimes going off the screen -->
-		<splitter id="zotero-splitter" resizebefore="closest" resizeafter="closest" hidden="true"
-			onmouseup="ZoteroPane.updateTagSelectorSize()"/>
-		
-		<stack id="zotero-pane-stack" persist="savedHeight" savedHeight="300" hidden="true"/>
+		<stack id="zotero-pane-stack"/>
 	</vbox>
 </overlay>

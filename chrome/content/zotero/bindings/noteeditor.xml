@@ -511,10 +511,6 @@
 							var lastWin = window.open();
 						}
 						
-						if (lastWin.ZoteroOverlay && !lastWin.ZoteroPane.isShowing()) {
-							lastWin.ZoteroOverlay.toggleDisplay(true);
-						}
-						
 						var zp = lastWin.ZoteroPane;
 					}
 					

@@ -1407,23 +1407,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		while (enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
 			if(!win.ZoteroPane) continue;
-			if (!win.ZoteroPane.isShowing() && !modalOnly) {
-				if (win != currentWindow) {
-					continue;
-				}
-				
-				// If Zotero is closed in the top-most window, show a popup instead
-				_progressPopup = new Zotero.ProgressWindow();
-				_progressPopup.changeHeadline("Zotero");
-				if (icon) {
-					_progressPopup.addLines([msg], [icon]);
-				}
-				else {
-					_progressPopup.addDescription(msg);
-				}
-				_progressPopup.show();
-				continue;
-			}
 			
 			var label = win.ZoteroPane.document.getElementById('zotero-pane-progress-label');
 			if (!label) {
@@ -1847,10 +1830,6 @@ Zotero.Keys = new function() {
 	 */
 	function windowInit(document) {
 		var globalKeys = [
-			{
-				name: 'openZotero',
-				defaultKey: 'Z'
-			},
 			{
 				name: 'saveToZotero',
 				defaultKey: 'S'

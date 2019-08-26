@@ -211,8 +211,6 @@
 							<label id="zotero-tb-sync-last-sync"/>
 						</tooltip>
 					</toolbarbutton>
-
-					<toolbarbutton id="zotero-close-button" class="tabs-closebutton close-icon standalone-no-display" oncommand="ZoteroOverlay.toggleDisplay()"/>
 				</hbox>
 			</toolbar>
 			
