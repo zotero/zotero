@@ -10,7 +10,7 @@ env:
     global:
         secure: "NxvkbZ7/Op7BTGQRR3C4q8lLoO29f8WtyNN27NSH7AO3H0vBr1Vp5xO8gn+H2qHEug5HvM+YrZ/xAkNXaZVbOInmBmKVMxqVvdpKp9JM1Amf+gzsXWQphfySvs6iqzyP6cwU/jspdvX/WSakgU5v7PWXxtUIaKxdANt6Rw7W+Pc="
     matrix:
-        - FX_VERSION="59.0b11"
+        - FX_VERSION="60.8.0esr"
 matrix:
     fast_finish: true
     #allow_failures:
@@ -24,9 +24,7 @@ addons:
 services:
     - xvfb
 install:
-    - if [ $FX_VERSION = "59.0b11" ]; then
-        wget -O tarball "https://queue.taskcluster.net/v1/task/L9FO6qp_TnaLkGB_fFy0Sw/runs/0/artifacts/public/build/target.tar.bz2";
-      fi
+    - wget -O tarball "https://zotero-download.s3.us-east-1.amazonaws.com/dev/firefox-60.8.0esr-x86_64-modified.tar.gz";
     - tar xf tarball
 before_script:
     - npm i
@@ -51,4 +49,4 @@ before_script:
     # Fix warnings in output
     - dbus-launch
 script:
-    - test/runtests.sh -x firefox/firefox -f
+    - test/runtests.sh -x firefox-x86_64/firefox -f
