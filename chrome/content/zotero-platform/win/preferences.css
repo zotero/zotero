@@ -1,0 +1,121 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+prefwindow,
+prefwindow:root /* override :root from above */ {
+	-moz-binding: url("chrome://zotero/content/bindings/preferences-win.xml#prefwindow");
+	-moz-box-orient: vertical;
+}
+
+prefpane {
+	-moz-binding: url("chrome://zotero/content/bindings/preferences-win.xml#prefpane");
+	-moz-box-orient: vertical;
+}
+
+prefwindow > .paneDeckContainer {
+	overflow: hidden;
+}
+
+prefpane > .content-box {
+	overflow: hidden;
+}
+
+prefwindow[type="child"] > .paneDeckContainer {
+	overflow: -moz-hidden-unscrollable;
+}
+
+prefwindow[type="child"] > prefpane > .content-box {
+	-moz-box-flex: 1;
+	overflow: -moz-hidden-unscrollable;
+}
+
+preferences {
+	-moz-binding: url("chrome://zotero/content/bindings/preferences-win.xml#preferences");
+	visibility: collapse;
+}
+
+preference {
+	-moz-binding: url("chrome://zotero/content/bindings/preferences-win.xml#preference");
+	visibility: collapse;
+}
+
+radio[pane] {
+	-moz-binding: url("chrome://zotero/content/bindings/preferences-win.xml#panebutton") !important;
+	-moz-box-orient: vertical;
+	-moz-box-align: center;
+}
+
+prefwindow[chromehidden~="toolbar"] .chromeclass-toolbar {
+	display: none;
+}
+
+
+prefwindow {
+	padding: 0px;
+	
+	-moz-appearance: window;
+	background-color: -moz-Dialog;
+	color: -moz-DialogText;
+	font: message-box;
+}
+
+prefpane {
+	padding-top: 8px;
+	padding-bottom: 10px;
+	padding-inline-start: 8px;
+	padding-inline-end: 10px;
+}
+
+prefwindow[type="child"] {
+	padding-top: 8px;
+	padding-bottom: 10px;
+	padding-inline-start: 8px;
+	padding-inline-end: 10px;
+}
+
+prefwindow[type="child"] > prefpane {
+	padding: 0px;
+}
+
+.prefWindow-dlgbuttons {
+	padding-bottom: 10px;
+	padding-inline-start: 8px;
+	padding-inline-end: 10px;
+}
+
+prefwindow[type="child"] .prefWindow-dlgbuttons {
+	padding: 0px;
+}
+
+radio[pane] {
+	-moz-appearance: none;
+	margin: 0px 1px 0px 1px;
+	padding: 1px 3px 1px 3px;
+	min-width: 4.5em;
+}
+
+.paneSelector {
+	border-bottom: 2px groove ThreeDFace;
+	margin: 0px;
+	padding-inline-start: 10px;
+	background-color: -moz-Field;
+	color: -moz-FieldText;
+}
+
+.paneButtonIcon {
+	width: 32px;
+	height: 32px;
+}
+
+radio[pane]:hover {
+	background-color: #E0E8F6;
+	color: black;
+	-moz-appearance: none;
+}
+
+radio[pane][selected="true"] {
+	background-color: #C1D2EE;
+	color: black;
+	-moz-appearance: none;
+}
