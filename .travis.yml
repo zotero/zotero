@@ -30,7 +30,7 @@ before_script:
     - npm i
     - npm run build
     - if [[ $TRAVIS_REPO_SLUG = "zotero/zotero" &&
-            ($TRAVIS_BRANCH = "master" || $TRAVIS_BRANCH = *-hotfix) &&
+            ($TRAVIS_BRANCH = "master" || $TRAVIS_BRANCH = *-hotfix || $TRAVIS_BRANCH = "fx60") &&
             $TRAVIS_PULL_REQUEST = "false" ]]; then
         mkdir build-zip;
         cd build;
