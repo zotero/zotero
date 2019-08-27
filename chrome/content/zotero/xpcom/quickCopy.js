@@ -172,7 +172,7 @@ Zotero.QuickCopy = new function() {
 			// Accessing some properties may throw for URIs that do not support those
 			// parts. E.g. hostPort throws NS_ERROR_FAILURE for about:blank
 			var urlHostPort = nsIURI.hostPort;
-			var urlPath = nsIURI.path;
+			var urlPath = nsIURI.pathQueryRef;
 		}
 		catch (e) {}
 		

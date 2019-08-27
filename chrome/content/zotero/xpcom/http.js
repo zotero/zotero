@@ -134,8 +134,7 @@ Zotero.HTTP = new function() {
 			if (options.username) {
 				options.username = options.username.replace(/%2E/, '.');
 				options.password = url.password || null;
-				url = url.clone();
-				url.userPass = '';
+				url = url.mutate().setUserPass('').finalize();
 			}
 			
 			url = url.spec;

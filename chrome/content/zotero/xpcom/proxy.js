@@ -509,11 +509,11 @@ Zotero.Proxy.prototype.toProxy = function(uri) {
 		if(param == "%h") {
 			value = this.dotsToHyphens ? uri.hostPort.replace(/-/g, '.') : uri.hostPort;
 		} else if(param == "%p") {
-			value = uri.path.substr(1);
+			value = uri.pathQueryRef.substr(1);
 		} else if(param == "%d") {
-			value = uri.path.substr(0, uri.path.lastIndexOf("/"));
+			value = uri.pathQueryRef.substr(0, uri.pathQueryRef.lastIndexOf("/"));
 		} else if(param == "%f") {
-			value = uri.path.substr(uri.path.lastIndexOf("/")+1)
+			value = uri.pathQueryRef.substr(uri.pathQueryRef.lastIndexOf("/")+1)
 		}
 		
 		proxyURL = proxyURL.substr(0, this.indices[param])+value+proxyURL.substr(this.indices[param]+2);

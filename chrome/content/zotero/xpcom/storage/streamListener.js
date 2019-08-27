@@ -271,6 +271,6 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 	
 	_safeSpec: function (uri) {
 		return uri.scheme + '://' + uri.username + ':********@'
-			+ uri.hostPort + uri.path
+			+ uri.hostPort + uri.pathQueryRef
 	},
 };
