@@ -713,30 +713,43 @@ ZoteroStandalone.DebugOutput = {
 
 
 function toJavaScriptConsole() {
-	toOpenWindowByType("global:console", "chrome://global/content/console.xul");
+	openWindowByType('chrome://global/content/console.xul', 'global:console');
 }
 
 function openRunJSWindow() {
-	window.open('chrome://zotero/content/runJS.html', 'run-js', 'width=900,height=700,resizable');
+	openWindowByType(
+		'chrome://zotero/content/runJS.html',
+		'zotero:run-js',
+		'chrome,width=900,height=700,resizable,centerscreen'
+	);
 }
 
 function openStyleEditor() {
-	window.open('chrome://zotero/content/tools/csledit.xul', 'style-editor', 'width=950,height=700,resizable');
+	openWindowByType(
+		'chrome://zotero/content/tools/csledit.xul',
+		'zotero:style-editor',
+		'chrome,width=950,height=700,resizable'
+	);
 }
 
 function openScaffold() {
-	window.open('chrome://scaffold/content/scaffold.xul', 'scaffold', 'chrome,resizable');
+	openWindowByType(
+		'chrome://scaffold/content/scaffold.xul',
+		'zotero:scaffold',
+		'chrome,resizable'
+	);
 }
 
-function toOpenWindowByType(inType, uri, features)
-{
-	var topWindow = Services.wm.getMostRecentWindow(inType);
+function openWindowByType(uri, type, features) {
+	var win = Services.wm.getMostRecentWindow(type);
 	
-	if (topWindow) {
-		topWindow.focus();
-	} else if(features) {
+	if (win) {
+		win.focus();
+	}
+	else if (features) {
 		window.open(uri, "_blank", features);
-	} else {
+	}
+	else {
 		window.open(uri, "_blank", "chrome,extrachrome,menubar,resizable,scrollbars,status,toolbar");
 	}
 }
