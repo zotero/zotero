@@ -315,6 +315,7 @@
 					</tree>
 					<splitter
 							id="zotero-tags-splitter"
+							orient="vertical"
 							collapse="after"
 							zotero-persist="state"
 							onmousemove="if (this.getAttribute('state') == 'dragging') { ZoteroPane.handleTagSelectorResize(); }"
