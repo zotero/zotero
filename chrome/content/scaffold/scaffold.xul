@@ -190,7 +190,7 @@
 								</menupopup>
 							</toolbarbutton>
 						</hbox>
-						<iframe src="data:text/html,%3C!DOCTYPE%20html%20PUBLIC%20%22-//W3C//DTD%20XHTML%201.1//EN%22%20%22http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd%22%3E%3Chtml%20xmlns=%22http://www.w3.org/1999/xhtml%22%3E%3Chead%3E%3Cscript%20type=%22text/javascript%22%20src=%22chrome://scaffold/content/ace/ace.js%22%3E%3C/script%3E%3Cscript%20type=%22text/javascript%22%20src=%22chrome://scaffold/content/ace/mode-javascript.js%22%3E%3C/script%3E%3Cscript%20type=%22text/javascript%22%20src=%22chrome://scaffold/content/aceWrapper.js%22%3E%3C/script%3E%3C/head%3E%3Cbody%20id=%22body%22%3E%3C/body%3E%3C/html%3E" id="editor-code" flex="1"/>
+						<iframe src="chrome://scaffold/content/ace/ace.html" id="editor-code" flex="1"/>
 						<hbox id="editor-external-box" align="center">
 							<checkbox id="checkbox-editor-external"/>
 							<label class="label-metadata" value="&scaffold.editor.external.label;" control="checkbox-editor-external"/>
@@ -198,10 +198,10 @@
 						</vbox>
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-import">
-						<iframe src="data:text/html,%3C!DOCTYPE%20html%20PUBLIC%20%22-//W3C//DTD%20XHTML%201.1//EN%22%20%22http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd%22%3E%3Chtml%20xmlns=%22http://www.w3.org/1999/xhtml%22%3E%3Chead%3E%3Cscript%20type=%22text/javascript%22%20src=%22chrome://scaffold/content/ace/ace.js%22%3E%3C/script%3E%3Cscript%20type=%22text/javascript%22%20src=%22chrome://scaffold/content/ace/mode-javascript.js%22%3E%3C/script%3E%3Cscript%20type=%22text/javascript%22%20src=%22chrome://scaffold/content/aceWrapper.js%22%3E%3C/script%3E%3C/head%3E%3Cbody%20id=%22body%22%3E%3C/body%3E%3C/html%3E" id="editor-import" flex="1"/>
+						<iframe src="chrome://scaffold/content/ace/ace.html" id="editor-import" flex="1"/>
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-tests">
-						<iframe src="data:text/html,%3C!DOCTYPE%20html%20PUBLIC%20%22-//W3C//DTD%20XHTML%201.1//EN%22%20%22http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd%22%3E%3Chtml%20xmlns=%22http://www.w3.org/1999/xhtml%22%3E%3Chead%3E%3Cscript%20type=%22text/javascript%22%20src=%22chrome://scaffold/content/ace/ace.js%22%3E%3C/script%3E%3Cscript%20type=%22text/javascript%22%20src=%22chrome://scaffold/content/ace/mode-javascript.js%22%3E%3C/script%3E%3Cscript%20type=%22text/javascript%22%20src=%22chrome://scaffold/content/aceWrapper.js%22%3E%3C/script%3E%3C/head%3E%3Cbody%20id=%22body%22%3E%3C/body%3E%3C/html%3E" id="editor-tests" flex="1"/>
+						<iframe src="chrome://scaffold/content/ace/ace.html" id="editor-tests" flex="1"/>
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-testing">
 						<vbox flex="1"><hbox><description>&scaffold.testing.description;</description></hbox>
