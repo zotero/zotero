@@ -123,7 +123,7 @@
 							<hbox>
 								<label class="label-metadata" value="&scaffold.metadata.target.label;" control="textbox-target"/>
 								<textbox id="textbox-target" flex="1"/>
-								<button label="&scaffold.metadata.target.testRegex;" oncommand="Scaffold.testTargetRegex()"/>
+								<button label="&scaffold.metadata.target.testRegex;" oncommand="Scaffold.logTargetRegex()"/>
 							</hbox>
 							<hbox style="display:none">
 								<label class="label-metadata" value="&scaffold.metadata.targetAll.label;" control="textbox-target-all"/>

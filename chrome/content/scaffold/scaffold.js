@@ -506,13 +506,14 @@ var Scaffold = new function() {
 		if (functionToRun == "detectWeb" || functionToRun == "doWeb") {
 			var translate = new Zotero.Translate.Web();
 			var utilities = new Zotero.Utilities.Translate(translate);
-			// If this is a string, assume it's a URL
-			if (typeof input == 'string') {
-				var doc = await new Promise(r => utilities.processDocuments(input, (doc) => r(doc)));
-				translate.setDocument(doc);
-			} else { 
-				translate.setDocument(input);
+			if (!_testTargetRegex(input)) {
+				_logOutput("Target did not match " + _getDocumentURL(input));
+				if (done) {
+					done();
+				}
+				return;
 			}
+			translate.setDocument(input);
 		} else if (functionToRun == "detectImport" || functionToRun == "doImport") {
 			var translate = new Zotero.Translate.Import();
 			translate.setString(input);
@@ -586,23 +587,30 @@ var Scaffold = new function() {
 	this.generateTranslatorID = function() {
 		document.getElementById("textbox-translatorID").value = _generateGUID();
 	}
-
-	/*
-	 * test target regular expression against document URL
+	
+	/**
+	 * Test target regular expression against document URL and log the result
 	 */
-	this.testTargetRegex = function() {
-		var testDoc = _getDocument();
-		var url = Zotero.Proxies.proxyToProper(testDoc.location.href);
-
+	this.logTargetRegex = function () {
+		_logOutput(_testTargetRegex(_getDocument()));
+	};
+	
+	/**
+	 * Test target regular expression against document URL and return the result
+	 */
+	function _testTargetRegex(doc) {
+		var url = _getDocumentURL(doc);
+		
 		try {
 			var targetRe = new RegExp(document.getElementById('textbox-target').value, "i");
-		} catch(e) {
-			_logOutput("Regex parse error:\n"+JSON.stringify(e, null, "\t"));
 		}
-
-		_logOutput(targetRe.test(url));
+		catch (e) {
+			_logOutput("Regex parse error:\n" + JSON.stringify(e, null, "\t"));
+		}
+		
+		return targetRe.test(url);
 	}
-
+	
 	/*
 	 * called to select items
 	 */
@@ -1370,6 +1378,10 @@ var Scaffold = new function() {
 	 */
 	function _getDocument() {
 		return _frames[_document.getElementById("menulist-testFrame").selectedIndex];
+	}
+	
+	function _getDocumentURL(doc) {
+		return Zotero.Proxies.proxyToProper(doc.location.href);
 	}
 }
 
