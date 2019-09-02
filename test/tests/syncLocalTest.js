@@ -994,6 +994,63 @@ describe("Zotero.Sync.Data.Local", function() {
 			
 			yield promise;
 		});
+		
+		it("should switch types by showing regular item after note", async function () {
+			var note = await createDataObject('item', { itemType: 'note' });
+			var item = await createDataObject('item');
+			
+			var promise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+				var doc = dialog.document;
+				var wizard = doc.documentElement;
+				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				
+				// 1 (accept remote deletion)
+				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
+				mergeGroup.rightpane.click();
+				wizard.getButton('next').click();
+				
+				// 2 (accept remote deletion)
+				mergeGroup.rightpane.click();
+				if (Zotero.isMac) {
+					assert.isTrue(wizard.getButton('next').hidden);
+					assert.isFalse(wizard.getButton('finish').hidden);
+				}
+				else {
+					// TODO
+				}
+				wizard.getButton('finish').click();
+			});
+			
+			var mergeData = Zotero.Sync.Data.Local.showConflictResolutionWindow([
+				{
+					libraryID: note.libraryID,
+					key: note.key,
+					processed: false,
+					conflict: true,
+					left: note.toJSON(),
+					right: {
+						deleted: true,
+						dateDeleted: "2019-09-01 00:00:00"
+					}
+				},
+				{
+					libraryID: item.libraryID,
+					key: item.key,
+					processed: false,
+					conflict: true,
+					left: item.toJSON(),
+					right: {
+						deleted: true,
+						dateDeleted: "2019-09-01 01:00:00"
+					}
+				}
+			]);
+			
+			await promise;
+			
+			assert.isTrue(mergeData[0].data.deleted);
+			assert.isTrue(mergeData[1].data.deleted);
+		});
 	});
 	
 	
