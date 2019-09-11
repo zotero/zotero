@@ -2995,7 +2995,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentSyncedModificationTime',
 	},
 	set: function (val) {
 		if (!this.isAttachment()) {
-			throw ("attachmentSyncedModificationTime can only be set for attachment items");
+			throw new Error("attachmentSyncedModificationTime can only be set for attachment items");
 		}
 		
 		switch (this.attachmentLinkMode) {
@@ -3008,9 +3008,11 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentSyncedModificationTime',
 		}
 		
 		if (typeof val != 'number') {
+			Zotero.debug(val, 2);
 			throw new Error("attachmentSyncedModificationTime must be a number");
 		}
 		if (parseInt(val) != val || val < 0) {
+			Zotero.debug(val, 2);
 			throw new Error("attachmentSyncedModificationTime must be a timestamp in milliseconds");
 		}
 		if (val < 10000000000) {
