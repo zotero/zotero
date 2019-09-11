@@ -56,8 +56,12 @@ Zotero.Server.Endpoints['/connector/document/respond'].prototype = {
 	supportedDataTypes: ["application/json"],
 	permitBookmarklet: true,
 	
-	init: function(data, sendResponse) {
-		data = JSON.parse(data);
+	init: function (data, sendResponse) {
+		// Earlier version of the gdocs plugin used to double-encode the JSON data
+		try {
+			data = JSON.parse(data);
+		}
+		catch (e) {}
 		if (data && data.error) {
 			// Apps Script stack is a JSON object
 			if (typeof data.stack != "string") {
