@@ -37,6 +37,7 @@ Zotero.Sync.APIClient = function (options) {
 	this.apiKey = options.apiKey;
 	this.caller = options.caller;
 	this.debugUploadPolicy = Zotero.Prefs.get('sync.debugUploadPolicy');
+	this.cancellerReceiver = options.cancellerReceiver;
 	
 	this.rateDelayIntervals = [30, 60, 300];
 	this.rateDelayPosition = 0;
@@ -647,6 +648,7 @@ Zotero.Sync.APIClient.prototype = {
 				&& Zotero.Prefs.get('sync.server.compressData')) {
 			opts.compressBody = true;
 		}
+		opts.cancellerReceiver = this.cancellerReceiver;
 		
 		var tries = 0;
 		while (true) {
