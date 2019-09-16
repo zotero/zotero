@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "Widok">
+<!ENTITY layout.label "Układ">
+<!ENTITY standardView.label "Standardowy">
+<!ENTITY stackedView.label "Stos">
+<!ENTITY collectionsPane.label "Panel kolekcji">
+<!ENTITY itemPane.label "Panel elementów">
+<!ENTITY tagSelector.label "Wybór etykiet">
+<!ENTITY recursiveCollections.label "Pokaż elementy z subkolekcji">
+<!ENTITY fontSize.label "Rozmiar czcionki">
+<!ENTITY noteFontSize.label "Rozmiar czcionki notatek">
 
 
 <!ENTITY toolsMenu.label "Narzędzia">

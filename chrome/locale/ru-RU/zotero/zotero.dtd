@@ -18,9 +18,9 @@
 <!ENTITY zotero.general.close "Закрыть">
 <!ENTITY zotero.general.minimize "Свернуть">
 <!ENTITY zotero.general.other "Прочие…">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.bigger "Увеличить">
+<!ENTITY zotero.general.smaller "Уменьшить">
+<!ENTITY zotero.general.reset "Сбросить">
 
 
 <!ENTITY zotero.errorReport.title "Отчет об ошибке Zotero">

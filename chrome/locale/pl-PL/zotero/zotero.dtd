@@ -18,9 +18,9 @@
 <!ENTITY zotero.general.close "Zamknij">
 <!ENTITY zotero.general.minimize "Minimalizuj">
 <!ENTITY zotero.general.other "Inne...">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.bigger "Większy">
+<!ENTITY zotero.general.smaller "Mniejszy">
+<!ENTITY zotero.general.reset "Przywróć">
 
 
 <!ENTITY zotero.errorReport.title "Raport błędów Zotero">
@@ -250,7 +250,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Użyj skrótów czasopism w formacie MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Pole &quot;Skrót czasopisma&quot; będzie ignorowane.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "Przełącz na inny edytor tekstu...">
 
 <!ENTITY zotero.integration.showEditor.label "Pokaż edytor">
 <!ENTITY zotero.integration.classicView.label "Widok klasyczny">

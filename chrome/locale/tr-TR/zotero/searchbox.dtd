@@ -7,7 +7,7 @@
 <!ENTITY zotero.search.joinMode.all "hepsine">
 <!ENTITY zotero.search.joinMode.suffix "uyanları bul:">
 
-<!ENTITY zotero.search.recursive.label "Alt klasörleri araştır">
+<!ENTITY zotero.search.recursive.label "Alt dermeleri araştır">
 <!ENTITY zotero.search.noChildren "Yalnızca üst-seviye eserleri göster">
 <!ENTITY zotero.search.includeParentsAndChildren "Uyan eserlerin üst ve alt eserlerini de dahil et">
 

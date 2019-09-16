@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "Вид">
+<!ENTITY layout.label "Расположение">
+<!ENTITY standardView.label "Стандартный вид">
+<!ENTITY stackedView.label "Стопками">
+<!ENTITY collectionsPane.label "Панель коллекций">
+<!ENTITY itemPane.label "Панель записей">
+<!ENTITY tagSelector.label "Диалог выбора меток">
+<!ENTITY recursiveCollections.label "Показывать записи вложенных коллекций">
+<!ENTITY fontSize.label "Размер шрифта">
+<!ENTITY noteFontSize.label "Размер шрифта заметок">
 
 
 <!ENTITY toolsMenu.label "Инструменты">

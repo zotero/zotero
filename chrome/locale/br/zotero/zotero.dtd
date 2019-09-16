@@ -18,9 +18,9 @@
 <!ENTITY zotero.general.close "Serriñ">
 <!ENTITY zotero.general.minimize "Bihanaat">
 <!ENTITY zotero.general.other "Traoù all...">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.bigger "Brasoc'h">
+<!ENTITY zotero.general.smaller "Bihanoc'h">
+<!ENTITY zotero.general.reset "Adderaouekaat">
 
 
 <!ENTITY zotero.errorReport.title "Fazi danevell Zotero">
@@ -250,7 +250,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Implijout ar berradurioù kelaouennoù MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Ar vaezienn Zotero &quot;Berradur kelaouenn&quot; a vo graet van outi.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "Tremen d'un treter testennoù all…">
 
 <!ENTITY zotero.integration.showEditor.label "Diskouez an aozer">
 <!ENTITY zotero.integration.classicView.label "Gwel klasel">

@@ -1,4 +1,4 @@
-<!ENTITY zotero.general.yes "Yes">
+<!ENTITY zotero.general.yes "Sí">
 <!ENTITY zotero.general.no "No">
 <!ENTITY zotero.general.optional "(Opcional)">
 <!ENTITY zotero.general.note "Nota:">
@@ -10,13 +10,13 @@
 <!ENTITY zotero.general.cancel "Cancel·la">
 <!ENTITY zotero.general.refresh "Refresca">
 <!ENTITY zotero.general.saveAs "Desa com...">
-<!ENTITY zotero.general.options "Options">
-<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
-<!ENTITY zotero.general.tools "Tools">
-<!ENTITY zotero.general.more "More">
-<!ENTITY zotero.general.loading "Loading…">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.options "Opcions">
+<!ENTITY zotero.general.advancedOptions.label "Opcions avançades">
+<!ENTITY zotero.general.tools "Eines">
+<!ENTITY zotero.general.more "Més">
+<!ENTITY zotero.general.loading "S'està carregant…">
+<!ENTITY zotero.general.close "Tanca">
+<!ENTITY zotero.general.minimize "Minimitza">
 <!ENTITY zotero.general.other "Other…">
 <!ENTITY zotero.general.bigger "Bigger">
 <!ENTITY zotero.general.smaller "Smaller">
@@ -199,13 +199,13 @@
 
 <!ENTITY zotero.progress.title "Progrés">
 
-<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import "Importa">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
 <!ENTITY zotero.import.importing "Importing…">
-<!ENTITY zotero.import.database "Database">
+<!ENTITY zotero.import.database "Base de dades">
 <!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
+<!ENTITY zotero.import.size "Mida">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 <!ENTITY zotero.import.fileHandling "File Handling">
 
@@ -284,15 +284,15 @@
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignora">
 
 <!ENTITY zotero.feedSettings.title "Feed Settings">
-<!ENTITY zotero.feedSettings.saveButton.label "Save">
+<!ENTITY zotero.feedSettings.saveButton.label "Desa">
 <!ENTITY zotero.feedSettings.url.label "URL:">
-<!ENTITY zotero.feedSettings.title.label "Title:">
+<!ENTITY zotero.feedSettings.title.label "Títol:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
-<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
+<!ENTITY zotero.feedSettings.refresh.label2 "hora/es">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "dia/es">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dia/es">
 
 <!ENTITY zotero.rtfScan.title "Escaneig de l'RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Cancel·la">

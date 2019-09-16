@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "Gwel">
+<!ENTITY layout.label "Aozadur">
+<!ENTITY standardView.label "Mod-gwelet standard">
+<!ENTITY stackedView.label "Mod-gwelet berniet">
+<!ENTITY collectionsPane.label "Panell an dastumadegoù">
+<!ENTITY itemPane.label "Panell elfennoù">
+<!ENTITY tagSelector.label "Diuzer balizoù">
+<!ENTITY recursiveCollections.label "Diskouez an elfennoù diwar an is-dastumadeg">
+<!ENTITY fontSize.label "Ment skritur">
+<!ENTITY noteFontSize.label "Notenn ment skritur">
 
 
 <!ENTITY toolsMenu.label "Ostilhoù">
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "Staliañ ar c'hevreer Zotero er merdeer">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Lugantoù">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Diorren">
 
 
 <!ENTITY minimizeWindow.key "m">
