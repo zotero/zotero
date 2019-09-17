@@ -1058,6 +1058,8 @@ Zotero.Sync.Storage.Local = {
 		yield Zotero.DB.executeTransaction(function* () {
 			for (let i = 0; i < conflicts.length; i++) {
 				let conflict = conflicts[i];
+				// TEMP
+				Zotero.debug(conflict);
 				let item = Zotero.Items.getByLibraryAndKey(libraryID, conflict.left.key);
 				let mtime = io.dataOut[i].data.dateModified;
 				// Local
