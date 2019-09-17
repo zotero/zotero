@@ -61,7 +61,7 @@
 <!ENTITY zotero.items.creator_column "Créateur">
 <!ENTITY zotero.items.date_column "Date">
 <!ENTITY zotero.items.year_column "Année">
-<!ENTITY zotero.items.publisher_column "Éditeur">
+<!ENTITY zotero.items.publisher_column "Maison d'édition">
 <!ENTITY zotero.items.publication_column "Publication">
 <!ENTITY zotero.items.journalAbbr_column "Abrév. de revue">
 <!ENTITY zotero.items.language_column "Langue">
