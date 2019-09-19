@@ -24,7 +24,6 @@
 */
 Zotero.Prefs = new function(){
 	// Privileged methods
-	this.init = init;
 	this.get = get;
 	this.set = set;
 	
@@ -35,8 +34,10 @@ Zotero.Prefs = new function(){
 	// Public properties
 	this.prefBranch;
 	
-	function init(){
+	this.init = async function init() {
 		this.prefBranch = Services.prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
+		
+		await loadExtensionDefaults();
 		
 		// Register observer to handle pref changes
 		this.register();
@@ -94,18 +95,28 @@ Zotero.Prefs = new function(){
 				var branch = this.prefBranch;
 			}
 			
+			let value;
 			switch (branch.getPrefType(pref)){
 				case branch.PREF_BOOL:
-					return branch.getBoolPref(pref);
+					value = branch.getBoolPref(pref);
+					break;
+				
 				case branch.PREF_STRING:
 					// Pre-Fx59
 					if (!branch.getStringPref) {
-						return '' + branch.getComplexValue(pref, Components.interfaces.nsISupportsString);
+						value = '' + branch.getComplexValue(pref, Components.interfaces.nsISupportsString);
 					}
-					return branch.getStringPref(pref);
+					else {
+						value = branch.getStringPref(pref);
+					}
+					break;
+				
 				case branch.PREF_INT:
-					return branch.getIntPref(pref);
+					value = branch.getIntPref(pref);
+					break;
 			}
+			
+			return value;
 		}
 		catch (e) {
 			// If debug system isn't yet initialized, log proper error
@@ -332,5 +343,108 @@ Zotero.Prefs = new function(){
 			return;
 		}
 		obs.splice(i, 1);
+	}
+	
+	
+	/**
+	 * Firefox 60 no longer loads default preferences for extensions, so do it manually
+	 */
+	async function loadExtensionDefaults() {
+		var defaultBranch = Services.prefs.getDefaultBranch("");
+		
+		return new Zotero.Promise(function (resolve) {
+			Cu.import("resource://gre/modules/AddonManager.jsm");
+			
+			// Lines are in format `pref("[key]", [val]);`, so define a function to be called that
+			// sets the defaults
+			function pref(key, value) {
+				switch (typeof value) {
+					case "boolean":
+						defaultBranch.setBoolPref(key, value);
+						break;
+					case "number":
+						defaultBranch.setIntPref(key, value);
+						break;
+					case "string":
+						defaultBranch.setStringPref(key, value);
+						break;
+				}
+			}
+			
+			function readDefaults(contents) {
+				let re = /^\s*pref\s*\(\s*['"]([a-zA-Z0-9_\-.]+)['"]\s*,\s*([^\s\)]+)\s*\)\s*;\s*$/;
+				let lines = contents.split(/\n/g).filter(line => re.test(line));
+				for (let line of lines) {
+					try {
+						eval(line);
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+				}
+			}
+			
+			AddonManager.getAllAddons(async function(addons) {
+				var reusableStreamInstance = Cc['@mozilla.org/scriptableinputstream;1']
+					.createInstance(Ci.nsIScriptableInputStream);
+				
+				for (let addon of addons) {
+					if (!addon.isActive) {
+						continue;
+					}
+					
+					try {
+						let path = OS.Path.fromFileURI(addon.getResourceURI().spec);
+						
+						// Directory
+						if ((await OS.File.stat(path)).isDir) {
+							let dir = OS.Path.join(path, 'defaults', 'preferences');
+							if (await OS.File.exists(dir)) {
+								await Zotero.File.iterateDirectory(dir, async function (entry) {
+									if (!entry.name.endsWith('.js')) return;
+									readDefaults(Zotero.File.getContents(entry.path));
+								});
+							}
+						}
+						// XPI
+						else {
+							let file = Zotero.File.pathToFile(path);
+							let zipReader = Components.classes["@mozilla.org/libjar/zip-reader;1"].
+								createInstance(Components.interfaces.nsIZipReader);
+							try {
+								try {
+									zipReader.open(file);
+									zipReader.test(null);
+								}
+								catch (e) {
+									Zotero.logError(path + " is not a valid ZIP file");
+									continue;
+								}
+								
+								let entries = zipReader.findEntries('defaults/preferences/*.js');
+								while (entries.hasMore()) {
+									let entryName = entries.getNext();
+									let entry = zipReader.getEntry(entryName);
+									
+									if (!entry.isDirectory) {
+										let inputStream = zipReader.getInputStream(entryName);
+										reusableStreamInstance.init(inputStream);
+										readDefaults(reusableStreamInstance.read(entry.realSize));
+									}
+								}
+							}
+							finally {
+								zipReader.close();
+							}
+						}
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+				}
+				
+				resolve();
+			});
+		});
 	}
 }

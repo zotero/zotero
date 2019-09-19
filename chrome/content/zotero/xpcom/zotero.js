@@ -241,7 +241,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		
 		Zotero.Intl.init();
 		
-		Zotero.Prefs.init();
+		yield Zotero.Prefs.init();
 		Zotero.Debug.init(options && options.forceDebugLog);
 		
 		// Make sure that Zotero Standalone is not running as root
