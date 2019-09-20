@@ -31,12 +31,9 @@ Zotero.Prefs = new function(){
 	this.unregister = unregister;
 	this.observe = observe;
 	
-	// Public properties
-	this.prefBranch;
+	this.rootBranch = Services.prefs.getBranch("");
 	
 	this.init = async function init() {
-		this.prefBranch = Services.prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
-		
 		await loadExtensionDefaults();
 		
 		// Register observer to handle pref changes
@@ -88,12 +85,8 @@ Zotero.Prefs = new function(){
 	**/
 	function get(pref, global){
 		try {
-			if (global) {
-				var branch = Services.prefs.getBranch("");
-			}
-			else {
-				var branch = this.prefBranch;
-			}
+			pref = global ? pref : ZOTERO_CONFIG.PREF_BRANCH + pref;
+			let branch = this.rootBranch;
 			
 			let value;
 			switch (branch.getPrefType(pref)){
@@ -134,12 +127,8 @@ Zotero.Prefs = new function(){
 	**/
 	function set(pref, value, global) {
 		try {
-			if (global) {
-				var branch = Services.prefs.getBranch("");
-			}
-			else {
-				var branch = this.prefBranch;
-			}
+			pref = global ? pref : ZOTERO_CONFIG.PREF_BRANCH + pref;
+			let branch = this.rootBranch;
 			
 			switch (branch.getPrefType(pref)) {
 				case branch.PREF_BOOL:
@@ -192,25 +181,25 @@ Zotero.Prefs = new function(){
 	
 	
 	this.clear = function (pref, global) {
-		if (global) {
-			var branch = Services.prefs.getBranch("");
-		}
-		else {
-			var branch = this.prefBranch;
-		}
-		branch.clearUserPref(pref);
+		pref = global ? pref : ZOTERO_CONFIG.PREF_BRANCH + pref;
+		this.rootBranch.clearUserPref(pref);
 	}
 	
 	
-	this.resetBranch = function (exclude = []) {
-		var keys = this.prefBranch.getChildList("", {});
+	/**
+	 * @param {String[]} [exclude]
+	 * @param {String} [branch] - Name of pref branch, ending with a period
+	 */
+	this.resetBranch = function (exclude = [], branch) {
+		var branch = Services.prefs.getBranch(branch || ZOTERO_CONFIG.PREF_BRANCH);
+		var keys = branch.getChildList("", {});
 		for (let key of keys) {
-			if (this.prefBranch.prefHasUserValue(key)) {
+			if (branch.prefHasUserValue(key)) {
 				if (exclude.includes(key)) {
 					continue;
 				}
 				Zotero.debug("Clearing " + key);
-				this.prefBranch.clearUserPref(key);
+				branch.clearUserPref(key);
 			}
 		}
 	};
@@ -271,7 +260,7 @@ Zotero.Prefs = new function(){
 	// Methods to register a preferences observer
 	//
 	function register(){
-		this.prefBranch.addObserver("", this, false);
+		this.rootBranch.addObserver("", this, false);
 		
 		// Register pre-set handlers
 		for (var i=0; i<_handlers.length; i++) {
@@ -280,10 +269,10 @@ Zotero.Prefs = new function(){
 	}
 	
 	function unregister(){
-		if (!this.prefBranch){
+		if (!this.rootBranch){
 			return;
 		}
-		this.prefBranch.removeObserver("", this);
+		this.rootBranch.removeObserver("", this);
 	}
 	
 	/**
@@ -299,7 +288,7 @@ Zotero.Prefs = new function(){
 		var obs = _observers[data];
 		for (var i=0; i<obs.length; i++) {
 			try {
-				obs[i](this.get(data));
+				obs[i](this.get(data, true));
 			}
 			catch (e) {
 				Zotero.debug("Error while executing preference observer handler for " + data);
@@ -312,11 +301,14 @@ Zotero.Prefs = new function(){
 	var _observersBySymbol = {};
 	
 	/**
-	 * @param {String} name - Preference name on extensions.zotero branch
+	 * @param {String} name - Preference name; if not global, this is on the extensions.zotero branch
 	 * @param {Function} handler
+	 * @param {Boolean} [global]
 	 * @return {Symbol} - Symbol to pass to unregisterObserver()
 	 */
-	this.registerObserver = function (name, handler) {
+	this.registerObserver = function (name, handler, global) {
+		name = global ? name : ZOTERO_CONFIG.PREF_BRANCH + name;
+		
 		var symbol = Symbol();
 		_observers[name] = _observers[name] || [];
 		_observers[name].push(handler);

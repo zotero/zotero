@@ -1784,7 +1784,7 @@ Zotero.Keys = new function() {
 	 * Called by Zotero.init()
 	 */
 	function init() {
-		var cmds = Zotero.Prefs.prefBranch.getChildList('keys', {}, {});
+		var cmds = Zotero.Prefs.rootBranch.getChildList(ZOTERO_CONFIG.PREF_BRANCH + 'keys', {}, {});
 		
 		// Get the key=>command mappings from the prefs
 		for (let cmd of cmds) {
