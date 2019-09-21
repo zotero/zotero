@@ -293,21 +293,11 @@ var Zotero_Merge_Window = new function () {
 	
 	
 	function _updateResolveAllCheckbox() {
-		if (_mergeGroup.type == 'file') {
-			if (_mergeGroup.rightpane.getAttribute("selected") == 'true') {
-				var label = 'resolveAllRemote';
-			}
-			else {
-				var label = 'resolveAllLocal';
-			}
+		if (_mergeGroup.rightpane.getAttribute("selected") == 'true') {
+			var label = 'resolveAllRemote';
 		}
 		else {
-			if (_mergeGroup.rightpane.getAttribute("selected") == 'true') {
-				var label = 'resolveAllRemoteFields';
-			}
-			else {
-				var label = 'resolveAllLocalFields';
-			}
+			var label = 'resolveAllLocal';
 		}
 		_resolveAllCheckbox.label = Zotero.getString('sync.conflict.' + label);
 	}

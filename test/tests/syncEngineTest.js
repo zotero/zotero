@@ -3476,7 +3476,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
 				assert.equal(
 					resolveAll.label,
-					Zotero.getString('sync.conflict.resolveAllRemoteFields')
+					Zotero.getString('sync.conflict.resolveAllRemote')
 				);
 				wizard.getButton('next').click();
 				
@@ -3485,7 +3485,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 				mergeGroup.leftpane.click();
 				assert.equal(
 					resolveAll.label,
-					Zotero.getString('sync.conflict.resolveAllLocalFields')
+					Zotero.getString('sync.conflict.resolveAllLocal')
 				);
 				resolveAll.click();
 				
@@ -3598,7 +3598,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
 				assert.equal(
 					resolveAll.label,
-					Zotero.getString('sync.conflict.resolveAllRemoteFields')
+					Zotero.getString('sync.conflict.resolveAllRemote')
 				);
 				wizard.getButton('next').click();
 				
@@ -3606,7 +3606,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
 				assert.equal(
 					resolveAll.label,
-					Zotero.getString('sync.conflict.resolveAllRemoteFields')
+					Zotero.getString('sync.conflict.resolveAllRemote')
 				);
 				resolveAll.click();
 				
