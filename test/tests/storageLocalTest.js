@@ -671,6 +671,49 @@ describe("Zotero.Sync.Storage.Local", function () {
 			assert.equal(item3.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_DOWNLOAD);
 			assert.isNull(item3.attachmentSyncedModificationTime);
 			assert.isNull(item3.attachmentSyncedHash);
-		})
+		});
+		
+		it("should handle attachment conflicts with no remote mtime/md5", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			var item1 = yield importFileAttachment('test.png');
+			item1.version = 10;
+			yield item1.saveTx();
+			
+			var json1 = item1.toJSON();
+			yield Zotero.Sync.Data.Local.saveCacheObjects('item', libraryID, [json1]);
+			
+			item1.attachmentSyncState = "in_conflict";
+			yield item1.saveTx({ skipAll: true });
+			
+			var promise = waitForWindow('chrome://zotero/content/merge.xul', async function (dialog) {
+				var doc = dialog.document;
+				var wizard = doc.documentElement;
+				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				
+				// 1 (remote)
+				// Identical, so remote version should be selected
+				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				
+				// Select local object
+				mergeGroup.leftpane.click();
+				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
+				
+				if (Zotero.isMac) {
+					assert.isTrue(wizard.getButton('next').hidden);
+					assert.isFalse(wizard.getButton('finish').hidden);
+				}
+				else {
+					// TODO
+				}
+				wizard.getButton('finish').click();
+			});
+			yield Zotero.Sync.Storage.Local.resolveConflicts(libraryID);
+			yield promise;
+			
+			assert.equal(item1.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_UPLOAD);
+			assert.isNull(item1.attachmentSyncedModificationTime);
+			assert.isNull(item1.attachmentSyncedHash);
+		});
 	})
 })
