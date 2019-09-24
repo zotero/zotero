@@ -451,7 +451,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			tagListRef={this.tagListRef}
 			searchString={this.state.searchString}
 			dragObserver={this.dragObserver}
-			onSelect={this.state.viewOnly ? () => {} : this.handleTagSelected}
+			onSelect={this.handleTagSelected}
 			onTagContext={this.handleTagContext}
 			onSearch={this.handleSearch}
 			onSettings={this.handleSettings.bind(this)}
@@ -468,6 +468,10 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 
 	handleTagContext = (tag, ev) => {
 		let tagContextMenu = document.getElementById('tag-menu');
+		// Disable menu options in read-only mode
+		for (let i = 0; i < tagContextMenu.childNodes.length; i++) {
+			tagContextMenu.childNodes[i].disabled = this.state.viewOnly;
+		}
 		ev.preventDefault();
 		tagContextMenu.openPopup(null, null, ev.clientX+2, ev.clientY+2);
 		this.contextTag = tag;
