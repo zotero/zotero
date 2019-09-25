@@ -70,7 +70,7 @@ Zotero.SyncedSettings = (function () {
 			})
 		},
 		
-		loadAll: Zotero.Promise.coroutine(function* (libraryID) {
+		loadAll: async function (libraryID) {
 			Zotero.debug("Loading synced settings for library " + libraryID);
 			
 			if (!_cache[libraryID]) {
@@ -81,7 +81,7 @@ Zotero.SyncedSettings = (function () {
 			
 			var sql = "SELECT setting, value, synced, version FROM syncedSettings "
 				+ "WHERE libraryID=?";
-			yield Zotero.DB.queryAsync(
+			await Zotero.DB.queryAsync(
 				sql,
 				libraryID,
 				{
@@ -106,8 +106,41 @@ Zotero.SyncedSettings = (function () {
 				}
 			);
 			
-			// TODO: Delete invalid settings
-		}),
+			//
+			// Delete invalid settings
+			//
+			if (_cache[libraryID].tagColors) {
+				// Sanitize colored tags -- shouldn't be necessary, but just in case a bad value makes it
+				// into the setting
+				let fixed = false;
+				let tagColors = _cache[libraryID].tagColors.value;
+				// Not an array
+				if (!Array.isArray(tagColors)) {
+					tagColors = [];
+					fixed = true;
+				}
+				// Invalid tag
+				tagColors = tagColors.filter((color) => {
+					if (typeof color != 'object' || typeof color.name != 'string' || typeof color.color != 'string') {
+						Zotero.logError("Removing invalid colored tag: " + JSON.stringify(color));
+						tagsFixed = true;
+						return false;
+					}
+					return true;
+				});
+				// Before whitespace was trimmed in Tags.setColor() in 5.0.75
+				tagColors.forEach((tag) => {
+					let trimmed = tag.name.trim();
+					if (trimmed != tag.name) {
+						tag.name = trimmed;
+						fixed = true;
+					}
+				});
+				if (fixed) {
+					await this.set(libraryID, 'tagColors', tagColors);
+				}
+			}
+		},
 		
 		/**
 		 * Return settings object
