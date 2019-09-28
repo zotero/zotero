@@ -579,10 +579,7 @@ Zotero.Tags = new function() {
 			return _libraryColorsByName[libraryID];
 		}
 		
-		var tagColors = Zotero.SyncedSettings.get(libraryID, 'tagColors');
-		if (!tagColors) {
-			tagColors = [];
-		}
+		var tagColors = Zotero.SyncedSettings.get(libraryID, 'tagColors') || [];
 		_libraryColors[libraryID] = tagColors;
 		_libraryColorsByName[libraryID] = new Map;
 		
