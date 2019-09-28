@@ -622,13 +622,6 @@ Zotero.Schema = new function(){
 		for (let item of items) {
 			let changed = item.migrateExtraFields();
 			if (!changed) continue;
-			// Don't mark the item as changed if it's not already so that every client doesn't try
-			// to upload new data. While in theory the changes should be the same and automatically
-			// merged, it's risky and unnecessary, since server data will also be updated on schema
-			// changes. (It would also create a huge amount of write traffic.)
-			if (item.synced) {
-				item.synced = true;
-			}
 			await item.saveTx({
 				skipDateModifiedUpdate: true,
 				skipSelect: true
