@@ -72,7 +72,7 @@ describe("Zotero.Schema", function() {
 				// Existing fields shouldn't be overwritten and should be left in Extra
 				assert.equal(item.getField('numPages'), '10');
 				assert.equal(item.getField('extra'), 'number-of-pages: 11\nThis is another line.');
-				assert.isTrue(item.synced);
+				assert.isFalse(item.synced);
 			});
 		});
 	});
