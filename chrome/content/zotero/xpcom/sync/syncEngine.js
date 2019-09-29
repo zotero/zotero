@@ -854,7 +854,7 @@ Zotero.Sync.Data.Engine.prototype._downloadDeletions = Zotero.Promise.coroutine(
 				// If item is already in trash locally, just delete it
 				if (obj.deleted) {
 					Zotero.debug("Local item is in trash -- applying remote deletion");
-					obj.eraseTx({
+					yield obj.eraseTx({
 						skipDeleteLog: true
 					});
 					continue;
