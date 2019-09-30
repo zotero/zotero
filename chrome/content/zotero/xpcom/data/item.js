@@ -3282,14 +3282,15 @@ Zotero.Item.prototype.getBestAttachments = Zotero.Promise.coroutine(function* ()
 	}
 	
 	var url = this.getField('url');
+	var urlFieldID = Zotero.ItemFields.getID('url');
 	
 	var sql = "SELECT IA.itemID FROM itemAttachments IA NATURAL JOIN items I "
-		+ "LEFT JOIN itemData ID ON (IA.itemID=ID.itemID AND fieldID=1) "
+		+ `LEFT JOIN itemData ID ON (IA.itemID=ID.itemID AND fieldID=${urlFieldID}) `
 		+ "LEFT JOIN itemDataValues IDV ON (ID.valueID=IDV.valueID) "
-		+ "WHERE parentItemID=? AND linkMode NOT IN (?) "
+		+ `WHERE parentItemID=? AND linkMode NOT IN (${Zotero.Attachments.LINK_MODE_LINKED_URL}) `
 		+ "AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
 		+ "ORDER BY contentType='application/pdf' DESC, value=? DESC, dateAdded ASC";
-	var itemIDs = yield Zotero.DB.columnQueryAsync(sql, [this.id, Zotero.Attachments.LINK_MODE_LINKED_URL, url]);
+	var itemIDs = yield Zotero.DB.columnQueryAsync(sql, [this.id, url]);
 	return this.ObjectsClass.get(itemIDs);
 });
 
