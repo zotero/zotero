@@ -364,14 +364,15 @@ Zotero.Prefs = new function(){
 			}
 			
 			function readDefaults(contents) {
-				let re = /^\s*pref\s*\(\s*['"]([a-zA-Z0-9_\-.]+)['"]\s*,\s*([^\s\)]+)\s*\)\s*;\s*$/;
+				let re = /^\s*pref\s*\(\s*['"]([a-zA-Z0-9_\-.]+)['"]\s*,\s*["']?.*["']?\s*\)\s*;\s*$/;
 				let lines = contents.split(/\n/g).filter(line => re.test(line));
 				for (let line of lines) {
 					try {
 						eval(line);
 					}
 					catch (e) {
-						Zotero.logError(e);
+						dump(e + "\n\n");
+						Components.utils.reportError(e);
 					}
 				}
 			}
