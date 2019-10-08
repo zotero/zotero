@@ -1,19 +1,19 @@
-<!ENTITY zotero.publications.my_publications "My Publications">
+<!ENTITY zotero.publications.my_publications "Nuosavos publikacijos">
 
-<!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
-<!ENTITY zotero.publications.include.checkbox.files "Include files">
-<!ENTITY zotero.publications.include.checkbox.notes "Include notes">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
+<!ENTITY zotero.publications.intro "„Nuosavose publikacijose“ patalpinti įrašai rodysimi Zotero.org svetainėje jūsų profilyje. Jei pasirenkate įtraukti prisegtas rinkmenas, jos bus viešai prieinamos pagal jūsų pasirinktą licenciją. „Nuosavoms publikacijoms“ priskirkite tik tuos darbus, kuriuos patys kūrėte, o rinkmenas viešinkite tik jei turite teisę tą daryti.">
+<!ENTITY zotero.publications.include.checkbox.files "Įtraukti rinkmenas">
+<!ENTITY zotero.publications.include.checkbox.notes "Įtraukti pastabas">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Tai, ką rodyti, galėsite bet kada vėliau pasirinkti „Nuosavų publikacijų“ rinkinyje.">
 
-<!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
-<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
-<!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">
-<!ENTITY zotero.publications.sharing.cc0 "Yes, and place my work in the public domain">
-<!ENTITY zotero.publications.sharing.reserved "No, only publish my work on zotero.org">
+<!ENTITY zotero.publications.sharing.title "Nurodykite, kaip jūsų darbas gali būti platinamas">
+<!ENTITY zotero.publications.sharing.text "Galite išlaikyti visas savo teises į darbą, galite platinti pagal „Creative Commons“ (CC) licenciją arba galite jį priskirti viešai sričiai (CC0). Bet kuriuo atveju publikacija paviešinsima per zotero.org.">
+<!ENTITY zotero.publications.sharing.prompt "Ar norėtumėte, kad kiti galėtų platinti jūsų darbą?">
+<!ENTITY zotero.publications.sharing.cc "Taip, pagal „Creative Commons“ licenciją">
+<!ENTITY zotero.publications.sharing.cc0 "Taip, priskiriant mano darbą viešai sričiai (angl. „Creative Commons Public Domain“, CC0)">
+<!ENTITY zotero.publications.sharing.reserved "Ne, tik paviešinti darbą per zotero.org">
 
-<!ENTITY zotero.publications.chooseLicense.title "Choose a Creative Commons license">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
-<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Allow adaptations of your work to be shared?">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Yes, as long as others share alike">
-<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Allow commercial uses of your work?">
+<!ENTITY zotero.publications.chooseLicense.title "Pasirinkite „Creative Commons“ licenciją">
+<!ENTITY zotero.publications.chooseLicense.text "„Creative Commons“ licencija leidžia kitiems kopijuoti ir platinti jūsų darbą su sąlyga, kad jie nurodo jus kaip autorių, pateikia nuorodą į licenciją ir nurodo, ar jūsų originalus darbas buvo pakeistas. Žemiau galite pasirinkti papildomas sąlygas.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Ar leisti platinti pakeistą/perdarytą jūsų darbą?">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Taip, jeigu kiti platina tokiomis pačiomis licencijos sąlygomis">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Leisti jūsų darbus naudoti komerciniais tikslais?">

@@ -44,42 +44,42 @@
 <!ENTITY zotero.preferences.openurl.server "Diskoulmer:">
 <!ENTITY zotero.preferences.openurl.version "Stumm:">
 
-<!ENTITY zotero.preferences.prefpane.sync "Sinkroneladur">
+<!ENTITY zotero.preferences.prefpane.sync "Sinkro">
 <!ENTITY zotero.preferences.sync.username "Anv-implijer:">
 <!ENTITY zotero.preferences.sync.password "Ger-tremen:">
-<!ENTITY zotero.preferences.sync.syncServer "Sinkroneladur ar roadennoù">
-<!ENTITY zotero.preferences.sync.setUpSync "Termeniñ ar sinkroneladur">
+<!ENTITY zotero.preferences.sync.syncServer "Sinkro ar roadennoù">
+<!ENTITY zotero.preferences.sync.setUpSync "Termeniñ ar sinkro">
 <!ENTITY zotero.preferences.sync.unlinkAccount "Diliammañ ar gont">
 <!ENTITY zotero.preferences.sync.createAccount "Krouiñ ur gont">
 <!ENTITY zotero.preferences.sync.lostPassword "Ger-tremen ankouaeet?">
-<!ENTITY zotero.preferences.sync.syncAutomatically "Em-sinkronelaat">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sinkr testenn a-bezh ar stagadennoù">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero a c'hall sinkronelaat testenn a-bezh ar pezhioù-stag indekset e-barzh ho levraouegoù Zotero gant zotero.org hag, e-giz-se, gant ho trevnadoù kevreet. An dra-se a ro an aotre da glask en un doare aeset e-barzh endalc'had ho restroù ne vern e pelec'h e vefec'h. Ne vo ket rannet en un doare foran testenn a-bezh ho restroù.">
-<!ENTITY zotero.preferences.sync.about "Diwar-benn ar sinkroneladur">
-<!ENTITY zotero.preferences.sync.fileSyncing "Sinkroneladur ar restroù">
+<!ENTITY zotero.preferences.sync.syncAutomatically "Em-sinkroaat">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sinkro testenn a-bezh ar stagadennoù">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero a c'hall sinkroaat testenn a-bezh ar pezhioù-stag indekset e-barzh ho levraouegoù Zotero gant zotero.org hag, e-giz-se, gant ho trevnadoù kevreet. An dra-se a ro an aotre da glask en un doare aeset e-barzh endalc'had ho restroù ne vern e pelec'h e vefec'h. Ne vo ket rannet en un doare foran testenn a-bezh ho restroù.">
+<!ENTITY zotero.preferences.sync.about "Diwar-benn ar sinkro">
+<!ENTITY zotero.preferences.sync.fileSyncing "Sinkro ar restroù">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sinkr ar restroù stagadenn e-barzh Ma Levraoueg en ur implijout">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Sinkr ar restroù stagadenn e-barzh al levraouegoù strollad en ur implijout stokadur Zotero">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sinkro ar restroù stagadenn e-barzh Ma Levraoueg en ur implijout">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Sinkro ar restroù stagadenn e-barzh al levraouegoù strollad en ur implijout stokadur Zotero">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Pellgargañ ar restroù">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "da vare ar sinkroneladur">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "da vare ar sinkro">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "pa vez ezhomm">
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Gwiriañ ar servijer">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "En ur implijout stokadur Zotero, ec'h asantit bezañ liammet gant e">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "termoù ha koñdisionoù">
-<!ENTITY zotero.preferences.sync.librariesToSync "Levraouegoù da sinkronelaat">
+<!ENTITY zotero.preferences.sync.librariesToSync "Levraouegoù da sinkroaat">
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Dibab al levraouegoù...">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sinkroneladur">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sinkro">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Levraoueg">
 <!ENTITY zotero.preferences.sync.reset.warning1 "An oberiadurioù da-heul a zo da vezañ implijet e plegoù ral hag ispisial ha ne rankont ket bezañ implijet evit un distankañ hollek. E-barzh kalz a zegouezhioù, adloc'hañ a zegaso kudennoù ouzhpenn. Sellit ouzh">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Dibarzhioù adloc'hañ sinkroneladur">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Dibarzhioù adloc'hañ sinkro">
 <!ENTITY zotero.preferences.sync.reset.warning3 "evit muioc'h a ditouroù.">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Adloc'hañ roll-istor ar sinkroneladur roadennoù">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Kendeuziñ ar roadennoù lec'hel gant ar roadennoù a-bell, ober fae ouzh ar roll-istor sinkroneladur">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Adloc'hañ roll-istor ar sinkro roadennoù">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Kendeuziñ ar roadennoù lec'hel gant ar roadennoù a-bell, ober fae ouzh ar roll-istor sinkro">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Adsevel adalek al levraoueg enlinenn">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Flastrañ ar roadennoù Zotero lec'hel gant roadennoù o tont eus al levraoueg enlinenn">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Erlec'hiañ al levraoueg enlinenn">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Flastrañ roadennoù al levraoueg enlinenn gant roadennoù lec'hel Zotero">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Adloc'hañ roll-istor sinkroneladur ar restroù">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Adloc'hañ roll-istor sinkro ar restroù">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Keñveriañ an holl restroù kenstag gant ar servijer stokañ">
 <!ENTITY zotero.preferences.sync.reset "Adderaouekaat">
 <!ENTITY zotero.preferences.sync.reset.button "Adderaouekaat...">

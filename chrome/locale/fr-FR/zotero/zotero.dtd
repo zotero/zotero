@@ -61,7 +61,7 @@
 <!ENTITY zotero.items.creator_column "Créateur">
 <!ENTITY zotero.items.date_column "Date">
 <!ENTITY zotero.items.year_column "Année">
-<!ENTITY zotero.items.publisher_column "Éditeur">
+<!ENTITY zotero.items.publisher_column "Maison d’édition">
 <!ENTITY zotero.items.publication_column "Publication">
 <!ENTITY zotero.items.journalAbbr_column "Abrév. de revue">
 <!ENTITY zotero.items.language_column "Langue">
@@ -73,7 +73,7 @@
 <!ENTITY zotero.items.dateModified_column "Date de modification">
 <!ENTITY zotero.items.extra_column "Extra">
 <!ENTITY zotero.items.archive_column "Archive">
-<!ENTITY zotero.items.archiveLocation_column "Loc. ds l'archive">
+<!ENTITY zotero.items.archiveLocation_column "Loc. ds l’archive">
 <!ENTITY zotero.items.place_column "Lieu">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.edition_column "Édition">
@@ -86,7 +86,7 @@
 <!ENTITY zotero.items.genre_column "Genre">
 <!ENTITY zotero.items.system_column "Système">
 <!ENTITY zotero.items.moreColumns.label "Plus de colonnes">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restaurer l'ordre des colonnes">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restaurer l’ordre des colonnes">
 
 <!ENTITY zotero.items.menu.showInLibrary "Afficher dans la bibliothèque">
 <!ENTITY zotero.items.menu.attach.note "Ajouter une note">

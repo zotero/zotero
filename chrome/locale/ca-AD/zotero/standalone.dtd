@@ -25,9 +25,9 @@
 <!ENTITY closeCmd.accesskey "C">
 <!ENTITY manageAttachments.label "Manage Attachments">
 <!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.label "Importa…">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY importFromClipboardCmd.label "Importa del portaretalls">
 <!ENTITY quitApplicationCmdWin.label "Surt">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Surt">
@@ -50,18 +50,18 @@
 <!ENTITY stackedView.label "Stacked View">
 <!ENTITY collectionsPane.label "Collections Pane">
 <!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
+<!ENTITY tagSelector.label "Selector d'etiquetes">
 <!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
+<!ENTITY fontSize.label "Mida de la lletra">
 <!ENTITY noteFontSize.label "Note Font Size">
 
 
 <!ENTITY toolsMenu.label "Eines">
-<!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
-<!ENTITY installConnector.accesskey "C">
+<!ENTITY toolsMenu.accesskey "n">
+<!ENTITY installConnector.label "Instal·la el connector del navegador">
+<!ENTITY installConnector.accesskey "c">
 <!ENTITY addons.label "Complements">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Desenvolupament">
 
 
 <!ENTITY minimizeWindow.key "m">
@@ -72,7 +72,7 @@
 
 
 <!ENTITY helpMenu.label "Ajuda">
-<!ENTITY helpMenu.accesskey "H">
+<!ENTITY helpMenu.accesskey "j">
 
 
 <!ENTITY helpMenuWin.label "Ajuda">
@@ -84,10 +84,10 @@
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "Informació de resolució de problemes">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Fòrums de debat">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Informa d'errors…">
 <!ENTITY helpReportErrors.accesskey "R">
 
 <!ENTITY debugOutputLogging.label "Debug Output Logging">

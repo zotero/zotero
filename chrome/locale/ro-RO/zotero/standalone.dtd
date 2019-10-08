@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "Vizualizare">
+<!ENTITY layout.label "Machetă">
+<!ENTITY standardView.label "Vizualizare standard">
+<!ENTITY stackedView.label "Vizualizare în stivă">
+<!ENTITY collectionsPane.label "Panou pentru colecții">
+<!ENTITY itemPane.label "Panou item">
+<!ENTITY tagSelector.label "Selector etichetă">
+<!ENTITY recursiveCollections.label "Afișează itemii din subcolecții">
+<!ENTITY fontSize.label "Dimensiune font">
+<!ENTITY noteFontSize.label "Notă dimensiune font">
 
 
 <!ENTITY toolsMenu.label "Instrumente">
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "Instalează conectorul pentru browser">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Extensii">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Dezvoltator">
 
 
 <!ENTITY minimizeWindow.key "m">

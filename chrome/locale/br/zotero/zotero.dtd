@@ -257,14 +257,14 @@
 
 <!ENTITY zotero.integration.references.label "Arroudennoù el levrlennadur">
 
-<!ENTITY zotero.sync.stop "Paouez ar sinkr">
-<!ENTITY zotero.sync.error "Fazi sinkr">
+<!ENTITY zotero.sync.stop "Paouez ar sinkro">
+<!ENTITY zotero.sync.error "Fazi sinkro">
 <!ENTITY zotero.sync.storage.progress "Araokadur:">
 <!ENTITY zotero.sync.storage.downloads "Gwech pellgarget:">
 <!ENTITY zotero.sync.storage.uploads "Lakaet enlinenn:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Ar baliz da-heul en ho levraoueg Zotero a zo re hir anezhañ da sinkr d'ar servijer:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Ar balizoù sinkronelaet a rank bezañ berroc'h evit 256 arouezenn.">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Ar baliz da-heul en ho levraoueg Zotero a zo re hir anezhañ da sinkro d'ar servijer:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Ar balizoù sinkroaet a rank bezañ berroc'h evit 256 arouezenn.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Gellout a rit skarat ar baliz e meur a valiz, pe aozañ ar baliz gant an dorn evit berraat anezhañ, pe dilemel anezhañ.">
 <!ENTITY zotero.sync.longTagFixer.split "Skarat">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Skarat d'an/ar/al">

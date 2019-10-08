@@ -8,14 +8,14 @@
 
 <!ENTITY zotero.preferences.prefpane.general "General">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.fileHandling "Gestió de fitxers">
 <!ENTITY zotero.preferences.automaticSnapshots "Crea automàticament una captura quan es creïn elements des de pàgines web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Adjunta automàticament documents PDF associats i altres fitxers quan es desin els elements">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Recupera les metadades dels PDF automàticament">
+<!ENTITY zotero.preferences.autoRenameFiles "Reanomena els fitxers adjunts automàticament fent servir les metadades de l'element pare">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Reanomena els fitxers enllaçats">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Obre els PDF fent servir">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "Predeterminat del sistema">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscel·lània">
 <!ENTITY zotero.preferences.autoUpdate "Comprova automàticament si hi ha traductors o estils actualitzats">
@@ -33,10 +33,10 @@
 <!ENTITY zotero.preferences.groups.childLinks "enllaços descendents">
 <!ENTITY zotero.preferences.groups.tags "etiquetes">
 
-<!ENTITY zotero.preferences.feeds "Feeds">
-<!ENTITY zotero.preferences.feeds.sorting.label "Sorting:">
-<!ENTITY zotero.preferences.feeds.sorting.newest "Newest items first">
-<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
+<!ENTITY zotero.preferences.feeds "Canals">
+<!ENTITY zotero.preferences.feeds.sorting.label "Ordenació:">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Els elements més nous primer">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Els elements més antics primer">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
 
 <!ENTITY zotero.preferences.openurl.search "Cerca resolutors">
@@ -47,9 +47,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sincronitza">
 <!ENTITY zotero.preferences.sync.username "Nom d'usuari">
 <!ENTITY zotero.preferences.sync.password "Contrasenya">
-<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
+<!ENTITY zotero.preferences.sync.syncServer "Sincronització de dades">
 <!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Desvincula el compte…">
 <!ENTITY zotero.preferences.sync.createAccount "Crea un compte">
 <!ENTITY zotero.preferences.sync.lostPassword "Has oblidat la contrasenya?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronitza automàticament">
@@ -63,13 +63,13 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Descarrega els fitxers">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "quan es sincronitzi">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "segons sigui necessari">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verifica el servidor">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Amb l'ús de l'emmagatzematge del Zotero, accepteu quedar obligat pels">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "termes i condicions">
-<!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
+<!ENTITY zotero.preferences.sync.librariesToSync "Biblioteques per sincronitzar">
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sincronitza">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "Biblioteca">
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sincronitza les opcions de reinicialització">
 <!ENTITY zotero.preferences.sync.reset.warning3 "per obtenir més informació.">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reinicia l'historial de sincronització dels fitxers">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
 <!ENTITY zotero.preferences.sync.reset "Reinicia">
-<!ENTITY zotero.preferences.sync.reset.button "Reset…">
+<!ENTITY zotero.preferences.sync.reset.button "Reinicia…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Cerca">
@@ -104,11 +104,11 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Quan aquesta opció està deshabilitada, el Zotero inclou les URL quan se citen articles de premsa, revistes i revistes acadèmiques només si l'article no té un ran dge pàgines assignat.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Còpia ràpida">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.defaultFormat "Format per defecte:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copia com a HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Configuració específica per a llocs web:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domini/Ruta">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(p. ex., wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Llengua">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Desactiva la còpia ràpida quan arrosseguis més de">
@@ -117,7 +117,7 @@
 <!ENTITY zotero.preferences.cite.styles "Estils">
 <!ENTITY zotero.preferences.cite.wordProcessors "Processadors de textos">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Utilitza el diàleg clàssic Afegeix cita">
-<!ENTITY zotero.preferences.styleEditor "Style Editor">
+<!ENTITY zotero.preferences.styleEditor "Editor d'estils">
 <!ENTITY zotero.preferences.stylePreview "Style Preview">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Gestor d'estils">
@@ -167,7 +167,7 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Fitxers i carpetes">
 <!ENTITY zotero.preferences.advanced.keys "Dreceres de teclat">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Configuració avançada">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localitza">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestor del motor de cerca d'articles">

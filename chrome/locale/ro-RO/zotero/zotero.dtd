@@ -18,9 +18,9 @@
 <!ENTITY zotero.general.close "Închide">
 <!ENTITY zotero.general.minimize "Minimizare">
 <!ENTITY zotero.general.other "Altele...">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.bigger "Mai mare">
+<!ENTITY zotero.general.smaller "Mai mic">
+<!ENTITY zotero.general.reset "Resetare">
 
 
 <!ENTITY zotero.errorReport.title "Raportul de erori Zotero">
@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Afișează duplicatele">
 <!ENTITY zotero.collections.showUnfiledItems "Arată înregistrările neîndosariate">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "Afișează itemii retrași">
 
 <!ENTITY zotero.items.itemType "Tip înregistrare">
 <!ENTITY zotero.items.type_column "Tip de înregistrare">
@@ -250,7 +250,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Folosește abrevierile de reviste MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Câmpul „Abrev. revistă” va fi ignorat.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "Schimbă procesorul de texte…">
 
 <!ENTITY zotero.integration.showEditor.label "Arată editor">
 <!ENTITY zotero.integration.classicView.label "Vizualizare clasică">

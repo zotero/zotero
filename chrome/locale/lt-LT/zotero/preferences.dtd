@@ -4,18 +4,18 @@
 <!ENTITY zotero.preferences.items "įrašai">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Nuostatos">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "Savitas...">
 
 <!ENTITY zotero.preferences.prefpane.general "Bendrosios">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.fileHandling "Rinkmenų tvarkymas">
 <!ENTITY zotero.preferences.automaticSnapshots "Kuriamiems naujiems įrašams automatiškai sukurti tinklalapių momentines kopijas">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Įrašant įrašus, automatiškai prisegti susijusius PDF dokumentus ir kitus failus">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automatiškai gauti PDF metaduomenis">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatiškai pervadinti priedus pagal metaduomenis">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Pervadinti susietas rinkmenas">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF atverti su">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "Sistemos numatytoji">
 
 <!ENTITY zotero.preferences.miscellaneous "Įvairios">
 <!ENTITY zotero.preferences.autoUpdate "Automatiškai tikrinti, ar yra transliatorių ir stilių atnaujinimų">

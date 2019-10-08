@@ -44,24 +44,24 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
+<!ENTITY viewMenu.label "Rodymas">
+<!ENTITY layout.label "Išdėstymas">
+<!ENTITY standardView.label "Įprastas rodymas">
 <!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
+<!ENTITY collectionsPane.label "Rinkinių skydelis">
+<!ENTITY itemPane.label "Įrašo skydelis">
+<!ENTITY tagSelector.label "Gairių parinkiklis">
 <!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY fontSize.label "Šrifto dydis">
+<!ENTITY noteFontSize.label "Pastabos šrifto dydis">
 
 
 <!ENTITY toolsMenu.label "Priemonės">
 <!ENTITY toolsMenu.accesskey "P">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Įdiegti papildinį naršyklei">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Priedai">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Progarmuotojams">
 
 
 <!ENTITY minimizeWindow.key "r">
@@ -84,18 +84,18 @@
 <!ENTITY productHelp.accesskey "P">
 <!ENTITY helpTroubleshootingInfo.label "Informacija nesklandumų šalinimui">
 <!ENTITY helpTroubleshootingInfo.accesskey "I">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Diskusijų forumai">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "Pranešti apie klaidas...">
 <!ENTITY helpReportErrors.accesskey "r">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Derinimo pranešimų išvedimas">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.submit "Siųsti išvedimą">
+<!ENTITY debugOutputLogging.view "Rodyti išvedimą">
+<!ENTITY debugOutputLogging.clear "Išvalyti išvedimą">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Paleisti iš naujo įgalinus derinimo pranešimus...">
 
 <!ENTITY helpCheckForUpdates.label "Tikrinti, ar yra atnaujinimų...">
 <!ENTITY helpCheckForUpdates.accesskey "T">

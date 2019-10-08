@@ -62,7 +62,7 @@
 <!ENTITY zotero.items.date_column "Дата">
 <!ENTITY zotero.items.year_column "Год">
 <!ENTITY zotero.items.publisher_column "Издатель">
-<!ENTITY zotero.items.publication_column "Публикация">
+<!ENTITY zotero.items.publication_column "Издание">
 <!ENTITY zotero.items.journalAbbr_column "Сокращ. журнала">
 <!ENTITY zotero.items.language_column "Язык">
 <!ENTITY zotero.items.accessDate_column "Дата доступа">
