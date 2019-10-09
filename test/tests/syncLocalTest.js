@@ -2191,7 +2191,78 @@ describe("Zotero.Sync.Data.Local", function() {
 				);
 				assert.lengthOf(result.conflicts, 0);
 			})
-		})
+		});
+		
+		
+		describe("tags", function () {
+			// https://forums.zotero.org/discussion/79429/syncing-error-c1-is-undefined
+			it("should handle multiple local type 1 and remote type 0", async function () {
+				var cacheJSON = {
+					tags: []
+				};
+				var json1 = {
+					tags: [
+						{
+							tag: 'C',
+							type: 1
+						},
+						{
+							tag: 'D',
+							type: 1
+						}
+					]
+				};
+				var json2 = {
+					tags: [
+						{
+							tag: 'C'
+						},
+						{
+							tag: 'D'
+						}
+					]
+				};
+				var result = Zotero.Sync.Data.Local._reconcileChanges(
+					'tag', cacheJSON, json1, json2
+				);
+				assert.lengthOf(result.changes, 4);
+				assert.sameDeepMembers(
+					result.changes,
+					[
+						{
+							field: "tags",
+							op: "member-remove",
+							value: {
+								tag: "C",
+								type: 1
+							}
+						},
+						{
+							field: "tags",
+							op: "member-add",
+							value: {
+								tag: "C"
+							}
+						},
+						{
+							field: "tags",
+							op: "member-remove",
+							value: {
+								tag: "D",
+								type: 1
+							}
+						},
+						{
+							field: "tags",
+							op: "member-add",
+							value: {
+								tag: "D"
+							}
+						}
+					]
+				);
+			});
+		});
 	})
 	
 	

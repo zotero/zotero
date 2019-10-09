@@ -1486,6 +1486,10 @@ Zotero.Sync.Data.Local = {
 		for (let i = 0; i < changeset1.length; i++) {
 			for (let j = 0; j < changeset2.length; j++) {
 				let c1 = changeset1[i];
+				// If we've removed all local changes, keep remaining remote changes
+				if (!c1) {
+					break;
+				}
 				let c2 = changeset2[j];
 				if (c1.field != c2.field) {
 					continue;
@@ -1507,6 +1511,9 @@ Zotero.Sync.Data.Local = {
 							if (c1.op == 'member-add' && c2.op == 'member-add'
 									&& c1.value.tag === c2.value.tag) {
 								changeset1.splice(i--, 1);
+								// We're in the inner loop without an incrementor for i, so don't go
+								// below 0
+								if (i < 0) i = 0;
 								changeset2.splice(j--, 1);
 								if (c1.value.type > 0) {
 									changeset2.push({
