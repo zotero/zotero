@@ -50,8 +50,8 @@ Zotero.Sync.Data.Engine = function (options) {
 	this.libraryID = options.libraryID;
 	this.library = Zotero.Libraries.get(options.libraryID);
 	this.libraryTypeID = this.library.libraryTypeID;
-	this.uploadBatchSize = 25;
-	this.uploadDeletionBatchSize = 50;
+	this.uploadBatchSize = 10;
+	this.uploadDeletionBatchSize = 25;
 	this.maxUploadTries = 5;
 	
 	this.failed = false;
