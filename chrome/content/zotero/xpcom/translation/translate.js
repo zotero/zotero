@@ -1359,9 +1359,8 @@ Zotero.Translate.Base.prototype = {
 				// doImport can return a promise to allow for incremental saves (via promise-returning
 				// item.complete() calls)
 				if (maybePromise) {
-					maybePromise
-						.then(() => this.decrementAsyncProcesses("Zotero.Translate#translate()"))
-					return;
+					return maybePromise
+						.then(() => this.decrementAsyncProcesses("Zotero.Translate#translate()"));
 				}
 			} catch (e) {
 				this.complete(false, e);
