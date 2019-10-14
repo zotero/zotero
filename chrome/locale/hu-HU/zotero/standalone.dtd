@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
+<!ENTITY viewMenu.label "Nézet">
 <!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
+<!ENTITY standardView.label "Alapértelmezett nézet">
 <!ENTITY stackedView.label "Stacked View">
 <!ENTITY collectionsPane.label "Collections Pane">
 <!ENTITY itemPane.label "Item Pane">
 <!ENTITY tagSelector.label "Tag Selector">
 <!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY fontSize.label "Betűméret">
+<!ENTITY noteFontSize.label "Jegyzet betűmérete">
 
 
 <!ENTITY toolsMenu.label "Eszközök">

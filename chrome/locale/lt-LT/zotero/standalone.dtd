@@ -47,11 +47,11 @@
 <!ENTITY viewMenu.label "Rodymas">
 <!ENTITY layout.label "Išdėstymas">
 <!ENTITY standardView.label "Įprastas rodymas">
-<!ENTITY stackedView.label "Stacked View">
+<!ENTITY stackedView.label "Straipsnio informacija apačioje">
 <!ENTITY collectionsPane.label "Rinkinių skydelis">
 <!ENTITY itemPane.label "Įrašo skydelis">
 <!ENTITY tagSelector.label "Gairių parinkiklis">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
+<!ENTITY recursiveCollections.label "Rodyti įrašus iš poaplankių">
 <!ENTITY fontSize.label "Šrifto dydis">
 <!ENTITY noteFontSize.label "Pastabos šrifto dydis">
 

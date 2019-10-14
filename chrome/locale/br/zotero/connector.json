@@ -21,7 +21,7 @@
     "message": "Balizoù (skejet gant virgulennoù)"
   },
   "progressWindow_error_translation": {
-    "message": "Ur fazi a zo c'hoarvezet en ur enrollañ an elfenn-mañ. Sellit ouzh $1 evit kaout muioc'h a ditouroù. "
+    "message": "Ur fazi a zo c'hoarvezet en ur enrollañ an elfenn-mañ. Sellit ouzh $1 evit kaout muioc'h a ditouroù."
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Distankañ ar c'hudennoù troidigezh"
@@ -45,7 +45,7 @@
     "message": "Ha digoret eo $1?"
   },
   "error_connection_save": {
-    "message": "$1 n'en deus ket gallet eskemm gant an arload $2. Ar c'hevreeer a c'hall enrollañ pajennoù 'zo war ho kont end-eeun $3, evit kaout disoc'hoù gwelloc'h bezit asur e vez digoret $2 a-raok klask enrollañ."
+    "message": "$1 n'en deus ket gallet eskemm gant an arload $2. Ar c’hevreer a c'hall enrollañ pajennoù 'zo war ho kont end-eeun $3, evit kaout disoc'hoù gwelloc'h bezit asur e vez digoret $2 a-raok klask enrollañ."
   },
   "error_connection_downloadOrTroubleshoot": {
     "message": "Gellout a rit <a href=\"$1\">pellgargañ $2</a> pe <a href=\"$3\">Distankañ ar c'hudennoù kevreañ</a> ma vez ezhomm."

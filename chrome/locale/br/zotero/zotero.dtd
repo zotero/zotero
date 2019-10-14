@@ -9,7 +9,7 @@
 <!ENTITY zotero.general.ok "Mat eo">
 <!ENTITY zotero.general.cancel "Nullañ">
 <!ENTITY zotero.general.refresh "Freskaat">
-<!ENTITY zotero.general.saveAs "Enrollañ dindan">
+<!ENTITY zotero.general.saveAs "Enrollañ dindan...">
 <!ENTITY zotero.general.options "Dibarzhioù">
 <!ENTITY zotero.general.advancedOptions.label "Dibarzhioù araokaet">
 <!ENTITY zotero.general.tools "Ostilhoù">
@@ -158,7 +158,7 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Baliz ebet da ziskouez">
 <!ENTITY zotero.tagSelector.loadingTags "O kargañ ar balizoù...">
-<!ENTITY zotero.tagSelector.showAutomatic "Diskouez en un doare emgefreek">
+<!ENTITY zotero.tagSelector.showAutomatic "Diskouez emgefreek">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Diskouez an holl valizoù el levraoueg-mañ">
 <!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Dilemel ar balizoù emgefreek el levraoueg-mañ...">
 <!ENTITY zotero.tagSelector.clearAll "Diziuzañ pep-tra">
@@ -172,11 +172,11 @@
 <!ENTITY zotero.tagColorChooser.setColor "Termeniñ al liv">
 <!ENTITY zotero.tagColorChooser.removeColor "Dilemel al liv">
 
-<!ENTITY zotero.lookup.description "Ebarzhiñ an anaouadurioù ISBNoù, PMIDoù, pe Xiv da ouzhpennañ d'ho levraoueg:">
+<!ENTITY zotero.lookup.description "Ebarzhiñ anaouadurioù ISBN, PMID, pe arXiv da ouzhpennañ d'ho levraoueg:">
 <!ENTITY zotero.lookup.button.search "Klask">
 
 <!ENTITY zotero.selectitems.title "Diuzañ elfennoù">
-<!ENTITY zotero.selectitems.intro.label "Diuzañ peseurt elfennoù ho peus c'hoant ouzhpennañ d'ho levraoueg">
+<!ENTITY zotero.selectitems.intro.label "Diuzit peseurt elfennoù ho peus c'hoant ouzhpennañ d'ho levraoueg">
 <!ENTITY zotero.selectitems.cancel.label "Nullañ">
 <!ENTITY zotero.selectitems.select.label "Mat eo">
 
@@ -213,8 +213,8 @@
 <!ENTITY zotero.exportOptions.format.label "Stumm:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Dibarzhioù troer">
 
-<!ENTITY zotero.charset.label "Kodiñ an arouezioù">
-<!ENTITY zotero.moreEncodings.label "Muioc'h a godiñ">
+<!ENTITY zotero.charset.label "Enkodiñ an arouezioù">
+<!ENTITY zotero.moreEncodings.label "Muioc'h a engodurioù">
 
 <!ENTITY zotero.citation.keepSorted.label "Mirout ar mammennoù rummet">
 
@@ -237,7 +237,7 @@
 
 <!ENTITY zotero.integration.prefs.displayAs.label "Diskouez an arroudennoù evel:">
 <!ENTITY zotero.integration.prefs.footnotes.label "notennoù traoñ">
-<!ENTITY zotero.integration.prefs.endnotes.label "notennoù fin">
+<!ENTITY zotero.integration.prefs.endnotes.label "Notennoù fin">
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Stokañ an arroudennoù evel:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Sinedoù">

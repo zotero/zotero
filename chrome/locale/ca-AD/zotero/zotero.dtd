@@ -17,10 +17,10 @@
 <!ENTITY zotero.general.loading "S'està carregant…">
 <!ENTITY zotero.general.close "Tanca">
 <!ENTITY zotero.general.minimize "Minimitza">
-<!ENTITY zotero.general.other "Other…">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.other "Altres…">
+<!ENTITY zotero.general.bigger "Més gran">
+<!ENTITY zotero.general.smaller "Més petit">
+<!ENTITY zotero.general.reset "Reinicia">
 
 
 <!ENTITY zotero.errorReport.title "Informe d'error de Zotero">
@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Mostra els duplicats">
 <!ENTITY zotero.collections.showUnfiledItems "Mostra els elements no arxivats">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "Mostra els elements retractats">
 
 <!ENTITY zotero.items.itemType "Tipus d'element">
 <!ENTITY zotero.items.type_column "Tipus d'element">
@@ -108,9 +108,9 @@
 <!ENTITY zotero.toolbar.moreItemTypes.label "Més">
 <!ENTITY zotero.toolbar.lookup.label "Afegeix un element segons l'identificador">
 <!ENTITY zotero.toolbar.removeItem.label "Esborra l'element...">
-<!ENTITY zotero.toolbar.newLibrary.label "New Library">
+<!ENTITY zotero.toolbar.newLibrary.label "Biblioteca nova">
 <!ENTITY zotero.toolbar.newCollection.label "Col·lecció nova...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
+<!ENTITY zotero.toolbar.markFeedRead.label "Marca el canal com a llegit">
 <!ENTITY zotero.toolbar.newGroup "Grup nou...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Subcol·lecció nova...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nova cerca desada...">
@@ -129,11 +129,11 @@
 <!ENTITY zotero.toolbar.openURL.label "Localitza">
 <!ENTITY zotero.toolbar.openURL.tooltip "Cerqueu-lo a la biblioteca local">
 
-<!ENTITY zotero.toolbar.feeds.new "New Feed">
-<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
-<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
-<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+<!ENTITY zotero.toolbar.feeds.new "Canal nou">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "De l'URL…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "De l'OPML…">
+<!ENTITY zotero.toolbar.feeds.refresh "Refresca el canal">
+<!ENTITY zotero.toolbar.feeds.edit "Edita el canal…">
 
 <!ENTITY zotero.item.add "Afegeix">
 <!ENTITY zotero.item.attachment.file.show "Mostra el fitxer">
@@ -157,7 +157,7 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Captura la pàgina actual">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "No hi ha etiquetes per mostrar">
-<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
+<!ENTITY zotero.tagSelector.loadingTags "S'estan carregant les etiquetes…">
 <!ENTITY zotero.tagSelector.showAutomatic "Mostra automàtic">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Mostra totes les etiquetes a la biblioteca">
 <!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
@@ -182,7 +182,7 @@
 
 <!ENTITY zotero.bibliography.title "Crea cita / bibliografia">
 <!ENTITY zotero.bibliography.style.label "Estil de la cita:">
-<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
+<!ENTITY zotero.bibliography.manageStyles "Gestiona els estils…">
 <!ENTITY zotero.bibliography.locale.label "Llengua:">
 <!ENTITY zotero.bibliography.outputMode "Mode de sortida:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografia">
@@ -202,9 +202,9 @@
 <!ENTITY zotero.import "Importa">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.importing "S'està important…">
 <!ENTITY zotero.import.database "Base de dades">
-<!ENTITY zotero.import.lastModified "Last Modified">
+<!ENTITY zotero.import.lastModified "Darrera modificació">
 <!ENTITY zotero.import.size "Mida">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 <!ENTITY zotero.import.fileHandling "File Handling">
@@ -239,11 +239,11 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Notes al peu">
 <!ENTITY zotero.integration.prefs.endnotes.label "Notes al final">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Emmagatzema les cites com:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Adreces d&apos;interès">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Actualitza automàticament les cites">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
 
@@ -257,7 +257,7 @@
 
 <!ENTITY zotero.integration.references.label "Referències a la bibliografia">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "Atura la sincronització">
 <!ENTITY zotero.sync.error "Error de sincronització">
 <!ENTITY zotero.sync.storage.progress "Progrés:">
 <!ENTITY zotero.sync.storage.downloads "Descàrregues:">
@@ -283,11 +283,11 @@
 <!ENTITY zotero.proxy.recognized.disable.label "No redirigeixis automàticament les peticions a través de servidors intermediaris reconeguts prèviament ">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignora">
 
-<!ENTITY zotero.feedSettings.title "Feed Settings">
+<!ENTITY zotero.feedSettings.title "Paràmetres dels canals">
 <!ENTITY zotero.feedSettings.saveButton.label "Desa">
 <!ENTITY zotero.feedSettings.url.label "URL:">
 <!ENTITY zotero.feedSettings.title.label "Títol:">
-<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
+<!ENTITY zotero.feedSettings.refresh.label1 "Actualitza el canal cada">
 <!ENTITY zotero.feedSettings.refresh.label2 "hora/es">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "dia/es">

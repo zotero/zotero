@@ -49,7 +49,7 @@
 <!ENTITY zotero.preferences.sync.password "Jelszó:">
 <!ENTITY zotero.preferences.sync.syncServer "Adatok szinkronizálása">
 <!ENTITY zotero.preferences.sync.setUpSync "Szinkronizálás beállítása">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Fiók leválasztása…">
 <!ENTITY zotero.preferences.sync.createAccount "Új felhasználói fiók">
 <!ENTITY zotero.preferences.sync.lostPassword "Elveszett jelszó?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatikus szinkronizálás">
@@ -74,10 +74,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 " további információért.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Az adatszinkronizációs előzmények törlése">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "A helyi adatok összefésülése a távoli adatokkal, a szinkronizációs előzmények figyelmen kívül hagyása.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Helyreállítás az online könyvtáramból">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "A helyi adatok felülírása az online könyvtárban található adatokkal.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Az Online Könyvtár cseréje">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Az online könyvtár felülírása a helyi Zotero adatokkal">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "A szinkronizációs előzmények törlése">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">

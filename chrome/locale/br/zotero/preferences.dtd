@@ -127,7 +127,7 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Kaout stiloù all...">
 
 <!ENTITY zotero.preferences.keys.openZotero "Digeriñ/Serriñ panell Zotero">
-<!ENTITY zotero.preferences.keys.saveToZotero "Enrollañ e-barzh Zotero (ikon ar varrenn chomelec'hioù)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Enrollañ e-barzh Zotero (ikon ar varrenn chomlec'hioù)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Gwintañ d'ar mod Skramm-leun">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Fokus war banell al levraouegoù">
 <!ENTITY zotero.preferences.keys.quicksearch "Enklask prim">
@@ -197,8 +197,8 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "O terc'helaat an diaz-roadenn">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Gwiriañ anterinded an diaz-roadenn">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Adloc'hañ an droierioù hag ar stiloù...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Adloc'hañ an droerioù...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Adloc'hañ an troierioù hag ar stiloù...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Adloc'hañ an troerioù...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Adloc'hañ ar stiloù...">
 
 <!ENTITY zotero.preferences.configEditor "Aozer kefluniadur">
