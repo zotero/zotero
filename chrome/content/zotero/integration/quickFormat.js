@@ -81,6 +81,7 @@ var Zotero_QuickFormat = new function () {
 			// as titlebar+maincontent, so we have hack around that here.
 			if (Zotero.isMac && Zotero.platformMajorVersion >= 60) {
 				qfb.style.marginBottom = "-22px";
+				referencePanel.style.marginTop = "22px";
 			}
 			
 			// add labels to popup
