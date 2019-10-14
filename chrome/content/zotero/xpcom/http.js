@@ -87,7 +87,7 @@ Zotero.HTTP = new function() {
 	this.CancelledException.prototype = Object.create(Error.prototype);
 	
 	this.TimeoutException = function(ms) {
-		this.message = "XMLHttpRequest has timed out" + (ms ? ` after ${ms} ms` : "");
+		this.message = "Request timed out" + (ms ? ` after ${ms} ms` : "");
 		this.stack = new Error().stack;
 	};
 	this.TimeoutException.prototype = Object.create(Error.prototype);
