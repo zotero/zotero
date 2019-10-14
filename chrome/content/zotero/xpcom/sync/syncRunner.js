@@ -209,6 +209,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				setStatus: this.setSyncStatus.bind(this),
 				stopOnError,
 				onError: function (e) {
+					// Ignore cancelled requests
+					if (e instanceof Zotero.HTTP.CancelledException) {
+						Zotero.debug("Request was cancelled");
+						return;
+					}
 					if (options.onError) {
 						options.onError(e);
 					}

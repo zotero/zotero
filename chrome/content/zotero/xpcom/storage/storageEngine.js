@@ -229,8 +229,13 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 				succeeded++;
 			}
 			else if (!p.isPending()) {
+				let e = p.reason();
+				if (e instanceof Zotero.HTTP.CancelledException) {
+					Zotero.debug(`File ${type} sync cancelled for ${this.library.name} `
+						+ `(${succeeded} succeeded, ${failed} failed)`);
+					throw new Zotero.Sync.UserCancelledException();
+				}
 				if (this.stopOnError) {
-					let e = p.reason();
 					Zotero.debug(`File ${type} sync failed for ${this.library.name}`);
 					throw e;
 				}
