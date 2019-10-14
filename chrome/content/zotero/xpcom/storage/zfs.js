@@ -645,7 +645,8 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 						});
 					},
 					debug: true,
-					successCodes: [201]
+					successCodes: [201],
+					timeout: 0
 				}
 			);
 		}
@@ -673,30 +674,6 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 						+ "-- retrying upload"
 					Zotero.logError(msg);
 					Zotero.debug(e.xmlhttp.responseText, 1);
-					if (this._s3Backoff < this._maxS3Backoff) {
-						this._s3Backoff *= 2;
-					}
-					this._s3ConsecutiveFailures++;
-					Zotero.debug("Delaying " + item.libraryKey + " upload for "
-						+ this._s3Backoff + " seconds", 2);
-					yield Zotero.Promise.delay(this._s3Backoff * 1000);
-					return this._uploadFile(request, item, params);
-				}
-			}
-			// Alternative to the above. There was at least one report of this happening even though
-			// a timeout isn't being set, with 2152398850 (NS_BINDING_ABORTED) from the channel:
-			// https://forums.zotero.org/discussion/79286/
-			else if (e instanceof Zotero.HTTP.TimeoutException) {
-				Zotero.logError(e);
-				if (this._s3ConsecutiveFailures >= this._maxS3ConsecutiveFailures) {
-					Zotero.debug(this._s3ConsecutiveFailures
-						+ " consecutive S3 failures -- aborting", 1);
-					this._s3ConsecutiveFailures = 0;
-					let e = Zotero.getString('sync.storage.error.zfs.restart', Zotero.appName);
-					throw new Error(e);
-				}
-				else {
-					Zotero.logError("S3 timed out (" + item.libraryKey + ") -- retrying upload");
 					if (this._s3Backoff < this._maxS3Backoff) {
 						this._s3Backoff *= 2;
 					}

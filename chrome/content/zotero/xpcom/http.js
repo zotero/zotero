@@ -138,7 +138,8 @@ Zotero.HTTP = new function() {
 	 * @param {Number[]|false} [options.successCodes] - HTTP status codes that are considered
 	 *     successful, or FALSE to allow all
 	 * @param {Zotero.CookieSandbox} [options.cookieSandbox] - Cookie sandbox object
-	 * @param {Number} [options.timeout = 30000] - Request timeout specified in milliseconds
+	 * @param {Number} [options.timeout = 30000] - Request timeout specified in milliseconds, or 0
+	 *     for no timeout
 	 * @param {Number[]} [options.errorDelayIntervals] - Array of milliseconds to wait before
 	 *     retrying after 5xx error; if unspecified, a default set is used
 	 * @param {Number} [options.errorDelayMax = 3600000] - Milliseconds to wait before stopping
@@ -387,7 +388,9 @@ Zotero.HTTP = new function() {
 		}
 
 		// Set timeout
-		xmlhttp.timeout = options.timeout || 30000;
+		if (options.timeout !== 0) {
+			xmlhttp.timeout = options.timeout || 30000;
+		}
 
 		xmlhttp.ontimeout = function() {
 			deferred.reject(new Zotero.HTTP.TimeoutException(options.timeout));

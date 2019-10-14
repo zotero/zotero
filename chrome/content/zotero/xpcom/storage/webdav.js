@@ -558,6 +558,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					},
 					errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
 					errorDelayMax: this.ERROR_DELAY_MAX,
+					timeout: 0,
 					debug: true
 				}
 			);
