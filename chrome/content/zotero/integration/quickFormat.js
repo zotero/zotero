@@ -73,8 +73,11 @@ var Zotero_QuickFormat = new function () {
 			referencePanel = document.getElementById("quick-format-reference-panel");
 			referenceBox = document.getElementById("quick-format-reference-list");
 			
-			if(Zotero.isWin && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')) {
-				qfb.setAttribute("square", "true");
+			if (Zotero.isWin) {
+				referencePanel.style.marginTop = "-29px";
+				if (Zotero.Prefs.get('integration.keepAddCitationDialogRaised')) {
+					qfb.setAttribute("square", "true");
+				}
 			}
 			
 			// add labels to popup
