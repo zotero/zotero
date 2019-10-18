@@ -1799,7 +1799,7 @@ describe("Zotero.Item", function () {
 			assert.equal(item.getField('extra'), `doi: ${doi2}`);
 		});*/
 		
-		it("should store unknown field in Extra in non-strict mode", function () {
+		it.skip("should store unknown field in Extra in non-strict mode", function () {
 			var json = {
 				itemType: "journalArticle",
 				title: "Test",
@@ -1811,7 +1811,7 @@ describe("Zotero.Item", function () {
 			assert.equal(item.getField('extra'), 'foo: Bar');
 		});
 		
-		it("should replace unknown field in Extra in non-strict mode", function () {
+		it.skip("should replace unknown field in Extra in non-strict mode", function () {
 			var json = {
 				itemType: "journalArticle",
 				title: "Test",

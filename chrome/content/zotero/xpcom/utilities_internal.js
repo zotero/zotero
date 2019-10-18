@@ -993,7 +993,7 @@ Zotero.Utilities.Internal = {
 		var skipKeys = new Set();
 		var lines = extra.split(/\n/g);
 		for (let line of lines) {
-			let parts = line.match(/^([a-z -_]+):(.+)/i);
+			let parts = line.match(/^([a-z][a-z -_]+):(.+)/i);
 			// Old citeproc.js cheater syntax;
 			if (!parts) {
 				parts = line.match(/^{:([a-z -_]+):(.+)}/i);

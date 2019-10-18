@@ -190,12 +190,29 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(extra, "Publisher Place: " + place2);
 		});
 		
+		it("shouldn't extract a field from a line that begins with a whitespace", function () {
+			var str = '\n number-of-pages: 11';
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 0);
+		});
+		
 		it("shouldn't extract a field that already exists on the item", function () {
 			var item = createUnsavedDataObject('item', { itemType: 'book' });
 			item.setField('numPages', 10);
 			var str = 'number-of-pages: 11';
 			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
 			assert.equal(fields.size, 0);
+		});
+		
+		it("should extract an author and add it to existing creators", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'book' });
+			item.setCreator(0, { creatorType: 'author', name: 'Foo' });
+			var str = 'author: Bar';
+			var { fields, creators, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
+			assert.equal(fields.size, 0);
+			assert.lengthOf(creators, 1);
+			assert.equal(creators[0].creatorType, 'author');
+			assert.equal(creators[0].name, 'Bar');
 		});
 		
 		it("should extract a CSL name", function () {

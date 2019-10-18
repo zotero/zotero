@@ -4206,11 +4206,11 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 	
 	var isValidForType = {};
 	var setFields = new Set();
-	var { fields: extraFields, extra } = Zotero.Utilities.Internal.extractExtraFields(
+	/*var { fields: extraFields, creators: extraCreators, extra } = Zotero.Utilities.Internal.extractExtraFields(
 		json.extra !== undefined ? json.extra : '',
 		this,
 		Object.keys(json)
-	);
+	);*/
 	
 	// Transfer valid fields from Extra to regular fields
 	// Currently disabled
@@ -4266,6 +4266,7 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 			break;
 		
 		case 'creators':
+			//this.setCreators(json.creators.concat(extraCreators), options);
 			this.setCreators(json.creators, options);
 			break;
 		
@@ -4316,11 +4317,12 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 					throw e;
 				}
 				// Otherwise store in Extra
-				if (typeof val == 'string') {
+				// TEMP: Disabled for now, along with tests in itemTest.js
+				/*if (typeof val == 'string') {
 					Zotero.warn(`Storing unknown field '${field}' in Extra for item ${this.libraryKey}`);
 					extraFields.set(field, val);
 					break;
-				}
+				}*/
 				Zotero.warn(`Discarding unknown JSON ${typeof val} '${field}' for item ${this.libraryKey}`);
 				continue;
 			}
@@ -4342,9 +4344,12 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 					throw e;
 				}
 				// Otherwise store in Extra
-				Zotero.warn(`Storing invalid field '${origField}' for type ${type} in Extra for `
+				// TEMP: Disabled for now, since imports can assign values to multiple versions of
+				// fields
+				// https://groups.google.com/d/msg/zotero-dev/a1IPUJ2m_3s/hfmdK2P3BwAJ
+				/*Zotero.warn(`Storing invalid field '${origField}' for type ${type} in Extra for `
 					+ `item ${this.libraryKey}`);
-				extraFields.set(field, val);
+				extraFields.set(field, val);*/
 				continue;
 			}
 			this.setField(field, json[origField]);
@@ -4352,7 +4357,8 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 		}
 	}
 	
-	this.setField('extra', Zotero.Utilities.Internal.combineExtraFields(extra, extraFields));
+	//this.setField('extra', Zotero.Utilities.Internal.combineExtraFields(extra, extraFields));
+	this.setField('extra', json.extra !== undefined ? json.extra : '');
 	
 	if (json.collections || this._collections.length) {
 		this.setCollections(json.collections);
