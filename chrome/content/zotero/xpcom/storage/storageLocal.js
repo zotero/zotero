@@ -32,6 +32,12 @@ Zotero.Sync.Storage.Local = {
 	},
 	
 	getEnabledForLibrary: function (libraryID) {
+		// The user must have synced for the first time before we allow storage requests.
+		// This is relevant if an account is set up for syncing but the DB file is cleared and the
+		// user double-clicks on a missing file in download-as-needed mode.
+		if (!Zotero.Users.getCurrentUserID()) {
+			return false;
+		}
 		var libraryType = Zotero.Libraries.get(libraryID).libraryType;
 		switch (libraryType) {
 		case 'user':
