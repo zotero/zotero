@@ -18,9 +18,9 @@
 <!ENTITY zotero.general.close "Zapri">
 <!ENTITY zotero.general.minimize "Skrči">
 <!ENTITY zotero.general.other "Drugo ...">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.bigger "Večja">
+<!ENTITY zotero.general.smaller "Manjša">
+<!ENTITY zotero.general.reset "Ponastavi">
 
 
 <!ENTITY zotero.errorReport.title "Poročilo o napaki Zotero">
@@ -96,7 +96,7 @@
 <!ENTITY zotero.items.menu.attach.fileLink "Pripni povezavo do datoteke ...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Obnovi v knjižnico">
-<!ENTITY zotero.items.menu.duplicateItem "Podvoji izbrani vnos">
+<!ENTITY zotero.items.menu.duplicateItem "Podvoji vnos">
 <!ENTITY zotero.items.menu.mergeItems "Spoji vnose ...">
 <!ENTITY zotero.items.menu.unrecognize "Razveljavi pridobivanje metapodatkov">
 <!ENTITY zotero.items.menu.reportMetadata "Poročaj o nepravilnih metapodatkih">
