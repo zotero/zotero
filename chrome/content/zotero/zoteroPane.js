@@ -4073,7 +4073,15 @@ var ZoteroPane = new function()
 			let isLinkedFile = !item.isImportedAttachment();
 			let path = item.getFilePath();
 			if (!path) {
-				ZoteroPane_Local.showAttachmentNotFoundDialog(item.id, true, true);
+				ZoteroPane_Local.showAttachmentNotFoundDialog(
+					item.id,
+					path,
+					{
+						noLocate: true,
+						notOnServer: true,
+						linkedFile: isLinkedFile
+					}
+				);
 				return;
 			}
 			let fileExists = await OS.File.exists(path);
@@ -4140,7 +4148,15 @@ var ZoteroPane = new function()
 			}
 			
 			if (isLinkedFile || !Zotero.Sync.Storage.Local.getEnabledForLibrary(item.libraryID)) {
-				this.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
+				this.showAttachmentNotFoundDialog(
+					itemID,
+					path,
+					{
+						noLocate: noLocateOnMissing,
+						notOnServer: false,
+						linkedFile: isLinkedFile
+					}
+				);
 				return;
 			}
 			
@@ -4155,7 +4171,14 @@ var ZoteroPane = new function()
 			}
 			
 			if (!await item.getFilePathAsync()) {
-				ZoteroPane_Local.showAttachmentNotFoundDialog(item.id, noLocateOnMissing, true);
+				ZoteroPane_Local.showAttachmentNotFoundDialog(
+					item.id,
+					path,
+					{
+						noLocate: noLocateOnMissing,
+						notOnServer: true
+					}
+				);
 				return;
 			}
 			
@@ -4212,7 +4235,15 @@ var ZoteroPane = new function()
 		}
 		
 		if (!fileExists) {
-			this.showAttachmentNotFoundDialog(attachment.id, noLocateOnMissing);
+			this.showAttachmentNotFoundDialog(
+				attachment.id,
+				path,
+				{
+					noLocate: noLocateOnMissing,
+					notOnServer: false,
+					linkedFile: attachment.isLinkedFileAttachment()
+				}
+			);
 			return;
 		}
 		
@@ -4352,22 +4383,33 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.showAttachmentNotFoundDialog = function (itemID, noLocate, notOnServer) {
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
-				createInstance(Components.interfaces.nsIPromptService);
+	this.showAttachmentNotFoundDialog = function (itemID, path, options = {}) {
+		var { noLocate, notOnServer, linkedFile } = options;
 		
 		var title = Zotero.getString('pane.item.attachments.fileNotFound.title');
-		var text = Zotero.getString('pane.item.attachments.fileNotFound.text1') + "\n\n"
+		var text = Zotero.getString(
+				'pane.item.attachments.fileNotFound.text1' + (path ? '.path' : '')
+			)
+			+ (path ? "\n\n" + path : '')
+			+ "\n\n"
 			+ Zotero.getString(
-				'pane.item.attachments.fileNotFound.text2' + (notOnServer ? '.notOnServer' : ''),
+				'pane.item.attachments.fileNotFound.text2.'
+					+ (options.linkedFile
+						? 'linked'
+						: 'stored' + (notOnServer ? '.notOnServer' : '')
+					),
 				[ZOTERO_CONFIG.CLIENT_NAME, ZOTERO_CONFIG.DOMAIN_NAME]
 			);
-		var supportURL = Zotero.getString('pane.item.attachments.fileNotFound.supportURL');
+		var supportURL = options.linkedFile
+			? 'https://www.zotero.org/support/kb/missing_linked_file'
+			: 'https://www.zotero.org/support/kb/files_not_syncing';
+		
+		var ps = Services.prompt;
 		
 		// Don't show Locate button
 		if (noLocate) {
-			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
-				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
+			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
+				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
 			let index = ps.confirmEx(null,
 				title,
 				text,
@@ -4382,16 +4424,17 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
-			+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
 		var index = ps.confirmEx(null,
 			title,
 			text,
 			buttonFlags,
 			Zotero.getString('general.locate'),
 			null,
-			Zotero.getString('general.moreInformation'), null, {}
+			Zotero.getString('general.moreInformation')
+			, null, {}
 		);
 		
 		if (index == 0) {
