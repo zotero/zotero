@@ -674,7 +674,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			catch (e) {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
 					if (e.status >= 200 && e.status < 300) {
-						throw this.VerificationError("NONEXISTENT_FILE_NOT_MISSING", uri);
+						throw new this.VerificationError("NONEXISTENT_FILE_NOT_MISSING", uri);
 					}
 				}
 				throw e;
