@@ -656,6 +656,62 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			
 			win.close();
 		});
+		
+		it("should show an error for a 200 for a nonexistent file", async function () {
+			Zotero.HTTP.mock = null;
+			this.httpd.registerPathHandler(
+				`${davBasePath}zotero/`,
+				{
+					handle: function (request, response) {
+						// Force Basic Auth
+						if (!request.hasHeader('Authorization')) {
+							response.setStatusLine(null, 401, null);
+							response.setHeader('WWW-Authenticate', 'Basic realm="WebDAV"', false);
+							return;
+						}
+						
+						response.setHeader('DAV', '1', false);
+						if (request.method == 'PROPFIND') {
+							response.setStatusLine(null, 207, null);
+						}
+						else {
+							response.setStatusLine(null, 200, null);
+						}
+					}
+				}
+			);
+			this.httpd.registerPathHandler(
+				`${davBasePath}zotero/nonexistent.prop`,
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, null);
+					}
+				}
+			);
+			
+			// Use httpd.js instead of sinon so we get a real nsIURL with a channel
+			Zotero.Prefs.set("sync.storage.url", davHostPath);
+			
+			// Begin install procedure
+			var win = await loadPrefPane('sync');
+			var button = win.document.getElementById('storage-verify');
+			
+			var spy = sinon.spy(win.Zotero_Preferences.Sync, "verifyStorageServer");
+			var promise1 = waitForDialog(function (dialog) {
+				assert.include(
+					dialog.document.documentElement.textContent,
+					Zotero.getString('sync.storage.error.webdav.nonexistentFileNotMissing', davBasePath + 'zotero/')
+				);
+			});
+			button.click();
+			await promise1;
+			
+			var promise2 = spy.returnValues[0];
+			spy.restore();
+			await promise2;
+			
+			win.close();
+		});
 	});
 	
 	describe("#purgeDeletedStorageFiles()", function () {
