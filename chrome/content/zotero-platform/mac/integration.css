@@ -1,8 +1,6 @@
-/* Force use of Lucida on non-Retina displays for Catalina */
-@media (max-resolution: 1.0dppx) {
-	html > body {
-		font-family: Lucida Grande, Lucida Sans Unicode, Lucida Sans, Geneva, -apple-system, sans-serif !important;
-	}
+/* Force use of Lucida for Catalina */
+html > body {
+	font-family: Lucida Grande, Lucida Sans Unicode, Lucida Sans, Geneva, -apple-system, sans-serif !important;
 }
 
 body {
