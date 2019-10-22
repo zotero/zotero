@@ -1344,7 +1344,7 @@ Zotero.Translate.Base.prototype = {
 			return loadPromise.then(() => rest.apply(this, arguments))
 		}
 		
-		function rest() {
+		async function rest() {
 			Zotero.debug("Translate: Beginning translation with " + this.translator[0].label);
 
 			this.incrementAsyncProcesses("Zotero.Translate#translate()");
@@ -1359,8 +1359,9 @@ Zotero.Translate.Base.prototype = {
 				// doImport can return a promise to allow for incremental saves (via promise-returning
 				// item.complete() calls)
 				if (maybePromise) {
-					return maybePromise
+					await maybePromise
 						.then(() => this.decrementAsyncProcesses("Zotero.Translate#translate()"));
+          return;
 				}
 			} catch (e) {
 				this.complete(false, e);
