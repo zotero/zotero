@@ -47,7 +47,6 @@
 			<preference id="pref-openURL-resolver" name="extensions.zotero.openURL.resolver" type="string"/>
 			<preference id="pref-openURL-version" name="extensions.zotero.openURL.version" type="string"/>
 			
-			<preference id="pref-keys-openZotero" name="extensions.zotero.keys.openZotero" type="string"/>
 			<preference id="pref-keys-saveToZotero" name="extensions.zotero.keys.saveToZotero" type="string"/>
 			<preference id="pref-keys-library" name="extensions.zotero.keys.library" type="string"/>
 			<preference id="pref-keys-quicksearch" name="extensions.zotero.keys.quicksearch" type="string"/>
@@ -341,5 +340,5 @@
 		<separator/>
 	</prefpane>
 	
-	<script src="preferences_advanced.js" type="application/javascript;version=1.8"/>
+	<script src="preferences_advanced.js" type="application/javascript"/>
 </overlay>

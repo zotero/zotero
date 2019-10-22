@@ -36,6 +36,9 @@ Zotero.Items = function() {
 	// but otherwise it can be just a simple property
 	Zotero.defineProperty(this, "_primaryDataSQLParts", {
 		get: function () {
+			var itemTypeAttachment = Zotero.ItemTypes.getID('attachment');
+			var itemTypeNote = Zotero.ItemTypes.getID('note');
+			
 			return {
 				itemID: "O.itemID",
 				itemTypeID: "O.itemTypeID",
@@ -52,8 +55,10 @@ Zotero.Items = function() {
 				deleted: "DI.itemID IS NOT NULL AS deleted",
 				inPublications: "PI.itemID IS NOT NULL AS inPublications",
 				
-				parentID: "(CASE O.itemTypeID WHEN 14 THEN IAP.itemID WHEN 1 THEN INoP.itemID END) AS parentID",
-				parentKey: "(CASE O.itemTypeID WHEN 14 THEN IAP.key WHEN 1 THEN INoP.key END) AS parentKey",
+				parentID: `(CASE O.itemTypeID WHEN ${itemTypeAttachment} THEN IAP.itemID `
+					+ `WHEN ${itemTypeNote} THEN INoP.itemID END) AS parentID`,
+				parentKey: `(CASE O.itemTypeID WHEN ${itemTypeAttachment} THEN IAP.key `
+					+ `WHEN ${itemTypeNote} THEN INoP.key END) AS parentKey`,
 				
 				attachmentCharset: "CS.charset AS attachmentCharset",
 				attachmentLinkMode: "IA.linkMode AS attachmentLinkMode",

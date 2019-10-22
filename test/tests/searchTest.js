@@ -509,5 +509,40 @@ describe("Zotero.Search", function() {
 			assert.equal(conditions["1"].operator, 'is');
 			assert.equal(conditions["1"].value, '2016');
 		});
+		
+		it("should ignore unknown property in non-strict mode", function () {
+			var json = {
+				name: "Search",
+				conditions: [
+					{
+						condition: 'title',
+						operator: 'contains',
+						value: 'foo'
+					}
+				],
+				foo: "Bar"
+			};
+			var s = new Zotero.Search();
+			s.fromJSON(json);
+		});
+		
+		it("should throw on unknown property in strict mode", function () {
+			var json = {
+				name: "Search",
+				conditions: [
+					{
+						condition: 'title',
+						operator: 'contains',
+						value: 'foo'
+					}
+				],
+				foo: "Bar"
+			};
+			var s = new Zotero.Search();
+			var f = () => {
+				s.fromJSON(json, { strict: true });
+			};
+			assert.throws(f, /^Unknown search property/);
+		});
 	});
 });

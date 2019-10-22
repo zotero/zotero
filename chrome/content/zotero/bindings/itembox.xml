@@ -387,9 +387,7 @@
 							
 							if (fieldIsClickable
 									&& !Zotero.Items.isPrimaryField(fieldName)
-									&& (Zotero.ItemFields.isFieldOfBase(Zotero.ItemFields.getID(fieldName), 'date')
-										// TEMP - filingDate
-										|| fieldName == 'filingDate')
+									&& Zotero.ItemFields.isDate(fieldName)
 									// TEMP - NSF
 									&& fieldName != 'dateSent') {
 								this.addDateRow(fieldNames[i], this.item.getField(fieldName, true), tabindex);
@@ -414,7 +412,7 @@
 						
 						if (fieldName) {
 							label.setAttribute("value", prefix +
-								Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, fieldName));
+								Zotero.ItemFields.getLocalizedString(fieldName));
 						}
 						
 						// TEMP - NSF (homepage)
@@ -897,7 +895,7 @@
 				<body>
 				<![CDATA[
 					var label = document.createElement("label");
-					label.setAttribute("value", Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, field));
+					label.setAttribute("value", Zotero.ItemFields.getLocalizedString(field));
 					label.setAttribute("fieldname", field);
 					label.setAttribute("onclick", "this.nextSibling.firstChild.blur()");
 					
@@ -1158,7 +1156,7 @@
 						var fieldNames = "";
 						for (var i=0; i<fieldsToDelete.length; i++) {
 							fieldNames += "\n - " +
-								Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, fieldsToDelete[i]);
+								Zotero.ItemFields.getLocalizedString(fieldsToDelete[i]);
 						}
 						
 						var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
@@ -1215,7 +1213,7 @@
 					);
 					valueElement.parentNode.replaceChild(newValueElement, valueElement);
 					
-					var text = Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, 'abstractNote');
+					var text = Zotero.ItemFields.getLocalizedString('abstractNote');
 					// Add '(...)' before "Abstract" for collapsed abstracts
 					if (valueText && cur) {
 						text = '(\u2026) ' + text;

@@ -22,3 +22,6 @@
 	path = test/resource/chai-as-promised
 	url = https://github.com/domenic/chai-as-promised.git
 	branch = master
+[submodule "resource/schema/global"]
+	path = resource/schema/global
+	url = git://github.com/zotero/zotero-schema.git

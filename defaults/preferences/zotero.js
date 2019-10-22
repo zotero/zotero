@@ -76,7 +76,6 @@ pref("extensions.zotero.tagSelector.showAutomatic", true);
 pref("extensions.zotero.tagSelector.displayAllTags", false);
 
 // Keyboard shortcuts
-pref("extensions.zotero.keys.openZotero", "Z");
 pref("extensions.zotero.keys.toggleFullscreen", "F");
 pref("extensions.zotero.keys.saveToZotero", "S");
 pref("extensions.zotero.keys.newItem", "N");

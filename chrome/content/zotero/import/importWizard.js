@@ -1,3 +1,5 @@
+import FilePicker from 'zotero/filePicker';
+
 var Zotero_Import_Wizard = {
 	_wizard: null,
 	_dbs: null,
@@ -95,12 +97,10 @@ var Zotero_Import_Wizard = {
 	chooseFile: async function (translation) {
 		var translation = new Zotero.Translate.Import();
 		var translators = await translation.getTranslators();
-		const nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-				.createInstance(nsIFilePicker);
-		fp.init(window, Zotero.getString("fileInterface.import"), nsIFilePicker.modeOpen);
+		var fp = new FilePicker();
+		fp.init(window, Zotero.getString("fileInterface.import"), fp.modeOpen);
 		
-		fp.appendFilters(nsIFilePicker.filterAll);
+		fp.appendFilters(fp.filterAll);
 		
 		var collation = Zotero.getLocaleCollation();
 		
@@ -117,14 +117,14 @@ var Zotero_Import_Wizard = {
 			fp.appendFilter(filter.label, "*." + filter.target);
 		}
 		
-		var rv = fp.show();
-		if (rv !== nsIFilePicker.returnOK && rv !== nsIFilePicker.returnReplace) {
+		var rv = await fp.show();
+		if (rv !== fp.returnOK && rv !== fp.returnReplace) {
 			return false;
 		}
 		
-		Zotero.debug(`File is ${fp.file.path}`);
+		Zotero.debug(`File is ${fp.file}`);
 		
-		this._file = fp.file.path;
+		this._file = fp.file;
 		this._wizard.canAdvance = true;
 		this._wizard.goTo('page-options');
 	},
@@ -151,16 +151,14 @@ var Zotero_Import_Wizard = {
 	 */
 	chooseMendeleyDB: async function () {
 		document.getElementById('file-list').selectedIndex = -1;
-		const nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-			.createInstance(nsIFilePicker);
-		fp.init(window, Zotero.getString('fileInterface.import'), nsIFilePicker.modeOpen);
+		var fp = new FilePicker();
+		fp.init(window, Zotero.getString('fileInterface.import'), fp.modeOpen);
 		fp.appendFilter("Mendeley Database", "*.sqlite"); // TODO: Localize
-		var rv = fp.show();
-		if (rv != nsIFilePicker.returnOK) {
+		var rv = await fp.show();
+		if (rv != fp.returnOK) {
 			return false;
 		}
-		this._file = fp.file.path;
+		this._file = fp.file;
 		this._wizard.canAdvance = true;
 		this._wizard.advance();
 	},

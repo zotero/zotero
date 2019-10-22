@@ -80,6 +80,12 @@ var Zotero_QuickFormat = new function () {
 				}
 			}
 			
+			// With fx60 and drawintitlebar=true Firefox calculates the minHeight
+			// as titlebar+maincontent, so we have hack around that here.
+			if (Zotero.isMac && Zotero.platformMajorVersion >= 60) {
+				qfb.style.marginBottom = "-22px";
+			}
+			
 			// add labels to popup
 			var locators = Zotero.Cite.labels;
 			var menu = document.getElementById("locator-label");
@@ -807,11 +813,21 @@ var Zotero_QuickFormat = new function () {
 			qfs.setAttribute("multiline", true);
 			qfs.style.height = ((Zotero.isMac ? 6 : 4)+qfe.scrollHeight)+"px";
 			window.sizeToContent();
+			// the above line causes drawing artifacts to appear due to a bug with drawintitle property
+			// in fx60. this fixes the artifacting
+			if (Zotero.isMac && Zotero.platformMajorVersion >= 60) {
+				document.children[0].setAttribute('drawintitlebar', 'false');
+				document.children[0].setAttribute('drawintitlebar', 'true');
+			}
 		} else {
 			delete qfs.style.height;
 			qfe.removeAttribute("multiline");
 			qfs.removeAttribute("multiline");
 			window.sizeToContent();
+			if (Zotero.isMac && Zotero.platformMajorVersion >= 60) {
+				document.children[0].setAttribute('drawintitlebar', 'false');
+				document.children[0].setAttribute('drawintitlebar', 'true');
+			}
 		}
 		var panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
 		

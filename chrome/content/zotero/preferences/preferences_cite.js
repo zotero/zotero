@@ -25,6 +25,8 @@
 
 "use strict";
 
+import FilePicker from 'zotero/filePicker';
+
 Zotero_Preferences.Cite = {
 	wordPluginIDs: new Set([
 		'zoteroOpenOfficeIntegration@zotero.org',
@@ -123,8 +125,11 @@ Zotero_Preferences.Cite = {
 			// (The first two aren't sent to the client normally, but hide anyway in case they are.)
 			var style = doc.createElement('style');
 			style.type = 'text/css';
-			style.innerHTML = 'h1, #intro, .style-individual-link, .style-view-source { display: none !important; }';
-			Zotero.debug(doc.documentElement.innerHTML);
+			style.innerHTML = 'h1, #intro, .style-individual-link, .style-view-source { display: none !important; }'
+				// TEMP: Default UA styles that aren't being included in Firefox 60 for some reason
+				+ 'html { background: #fff; }'
+				+ 'a { color: rgb(0, 0, 238) !important; text-decoration: underline; }'
+				+ 'a:active { color: rgb(238, 0, 0) !important; }';
 			doc.getElementsByTagName('head')[0].appendChild(style);
 		});
 	},
@@ -133,21 +138,27 @@ Zotero_Preferences.Cite = {
 	/**
 	 * Adds a new style to the style pane
 	 **/
-	addStyle: function () {	
-		const nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-				.createInstance(nsIFilePicker);
-		fp.init(window, Zotero.getString("zotero.preferences.styles.addStyle"), nsIFilePicker.modeOpen);
+	addStyle: async function () {
+		var fp = new FilePicker();
+		fp.init(window, Zotero.getString("zotero.preferences.styles.addStyle"), fp.modeOpen);
 		
 		fp.appendFilter("CSL Style", "*.csl");
 		
-		var rv = fp.show();
-		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
-			Zotero.Styles.install({ file: fp.file }, fp.file.path, true)
-			.catch(function (e) {
+		var rv = await fp.show();
+		if (rv == fp.returnOK || rv == fp.returnReplace) {
+			try {
+				await Zotero.Styles.install(
+					{
+						file: Zotero.File.pathToFile(fp.file)
+					},
+					fp.file,
+					true
+				);
+			}
+			catch (e) {
 				(new Zotero.Exception.Alert("styles.install.unexpectedError",
-					fp.file.path, "styles.install.title", e)).present()
-			});
+					fp.file, "styles.install.title", e)).present()
+			}
 		}
 	},
 	

@@ -507,7 +507,7 @@ describe("Zotero.Item", function () {
 		});
 	});
 	
-	describe("#setCreators", function () {
+	describe("#setCreators()", function () {
 		it("should accept an array of creators in API JSON format", function* () {
 			var creators = [
 				{
@@ -534,13 +534,13 @@ describe("Zotero.Item", function () {
 					firstName: "First",
 					lastName: "Last",
 					fieldMode: 0,
-					creatorTypeID: 1
+					creatorTypeID: Zotero.CreatorTypes.getID('author')
 				},
 				{
 					firstName: "",
 					lastName: "Test Name",
 					fieldMode: 1,
-					creatorTypeID: 2
+					creatorTypeID: Zotero.CreatorTypes.getID('editor')
 				}
 			];
 			
@@ -558,12 +558,74 @@ describe("Zotero.Item", function () {
 					firstName: "First",
 					lastName: "Last",
 					fieldMode: 0,
-					creatorTypeID: 1
+					creatorTypeID: Zotero.CreatorTypes.getID('author')
 				}
 			]);
 			assert.lengthOf(item.getCreators(), 1);
 			item.setCreators([]);
 			assert.lengthOf(item.getCreators(), 0);
+		});
+		
+		it("should switch to primary creator type if unknown type given", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'book' });
+			item.setCreators([
+				{
+					firstName: "First",
+					lastName: "Last",
+					creatorType: "unknown"
+				}
+			]);
+			assert.equal(item.getCreators()[0].creatorTypeID, Zotero.CreatorTypes.getID('author'));
+		});
+		
+		it("should switch to primary creator type on invalid creator type for a given item type", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'book' });
+			item.setCreators([
+				{
+					firstName: "First",
+					lastName: "Last",
+					creatorType: "interviewee"
+				}
+			]);
+			assert.equal(item.getCreators()[0].creatorTypeID, Zotero.CreatorTypes.getID('author'));
+		});
+		
+		it("should throw on unknown creator type in strict mode", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'book' });
+			var f = () => {
+				item.setCreators(
+					[
+						{
+							firstName: "First",
+							lastName: "Last",
+							creatorType: "unknown"
+						}
+					],
+					{
+						strict: true
+					}
+				);
+			};
+			assert.throws(f, /^Unknown creator type/);
+		});
+		
+		it("should throw on invalid creator type for a given item type in strict mode", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'book' });
+			var f = () => {
+				item.setCreators(
+					[
+						{
+							firstName: "First",
+							lastName: "Last",
+							creatorType: "interviewee"
+						}
+					],
+					{
+						strict: true
+					}
+				);
+			}
+			assert.throws(f, /^Invalid creator type/);
 		});
 	})
 	
@@ -1692,16 +1754,150 @@ describe("Zotero.Item", function () {
 			assert.isFalse(item.inPublications);
 		});
 		
-		it("should ignore unknown fields", function* () {
+		// Not currently following this behavior
+		/*it("should move valid field in Extra to field if not set", function () {
+			var doi = '10.1234/abcd';
 			var json = {
 				itemType: "journalArticle",
 				title: "Test",
-				foo: "Invalid"
+				extra: `DOI: ${doi}`
+			};
+			var item = new Zotero.Item;
+			item.fromJSON(json);
+			assert.equal(item.getField('DOI'), doi);
+			assert.equal(item.getField('extra'), '');
+		});
+		
+		it("shouldn't move valid field in Extra to field if also present in JSON", function () {
+			var doi1 = '10.1234/abcd';
+			var doi2 = '10.2345/bcde';
+			var json = {
+				itemType: "journalArticle",
+				title: "Test",
+				DOI: doi1,
+				extra: `doi: ${doi2}`
+			};
+			var item = new Zotero.Item;
+			item.fromJSON(json);
+			assert.equal(item.getField('DOI'), doi1);
+			assert.equal(item.getField('extra'), `doi: ${doi2}`);
+		});
+		
+		it("shouldn't move valid field in Extra to field if already set", function () {
+			var doi1 = '10.1234/abcd';
+			var doi2 = '10.2345/bcde';
+			var json = {
+				itemType: "journalArticle",
+				title: "Test",
+				DOI: doi1,
+				extra: `doi: ${doi2}`
+			};
+			var item = new Zotero.Item('journalArticle');
+			item.setField('DOI', doi1);
+			item.fromJSON(json);
+			assert.equal(item.getField('DOI'), doi1);
+			assert.equal(item.getField('extra'), `doi: ${doi2}`);
+		});*/
+		
+		it.skip("should store unknown field in Extra in non-strict mode", function () {
+			var json = {
+				itemType: "journalArticle",
+				title: "Test",
+				foo: "Bar"
 			};
 			var item = new Zotero.Item;
 			item.fromJSON(json);
 			assert.equal(item.getField('title'), 'Test');
-		})
+			assert.equal(item.getField('extra'), 'foo: Bar');
+		});
+		
+		it.skip("should replace unknown field in Extra in non-strict mode", function () {
+			var json = {
+				itemType: "journalArticle",
+				title: "Test",
+				foo: "BBB",
+				extra: "Foo: AAA\nBar: CCC"
+			};
+			var item = new Zotero.Item;
+			item.fromJSON(json);
+			assert.equal(item.getField('title'), 'Test');
+			assert.equal(item.getField('extra'), 'Foo: BBB\nBar: CCC');
+		});
+		
+		it("should handle Extra in non-strict mode", function () {
+			var json = {
+				itemType: "journalArticle",
+				title: "Test",
+				extra: "Here's some extra text"
+			};
+			var item = new Zotero.Item();
+			item.fromJSON(json);
+			assert.equal(item.getField('extra'), json.extra);
+		});
+		
+		it("should throw on unknown field in strict mode", function () {
+			var json = {
+				itemType: "journalArticle",
+				title: "Test",
+				foo: "Bar"
+			};
+			var item = new Zotero.Item;
+			var f = () => {
+				item.fromJSON(json, { strict: true });
+			};
+			assert.throws(f, /^Unknown field/);
+		});
+		
+		it("should throw on invalid field for a given item type in strict mode", function () {
+			var json = {
+				itemType: "journalArticle",
+				title: "Test",
+				numPages: "123"
+			};
+			var item = new Zotero.Item;
+			var f = () => {
+				item.fromJSON(json, { strict: true });
+			};
+			assert.throws(f, /^Invalid field/);
+		});
+		
+		it("should throw on unknown creator type in strict mode", function () {
+			var json = {
+				itemType: "journalArticle",
+				title: "Test",
+				creators: [
+					{
+						firstName: "First",
+						lastName: "Last",
+						creatorType: "unknown"
+					}
+				]
+			};
+			var item = new Zotero.Item;
+			var f = () => {
+				item.fromJSON(json, { strict: true });
+			};
+			assert.throws(f, /^Unknown creator type/);
+		});
+		
+		it("should throw on invalid creator type for a given item type in strict mode", function () {
+			var json = {
+				itemType: "journalArticle",
+				title: "Test",
+				creators: [
+					{
+						firstName: "First",
+						lastName: "Last",
+						creatorType: "interviewee"
+					}
+				]
+			};
+			var item = new Zotero.Item;
+			var f = () => {
+				item.fromJSON(json, { strict: true });
+			};
+			assert.throws(f, /^Invalid creator type/);
+		});
 		
 		it("should accept ISO 8601 dates", function* () {
 			var json = {

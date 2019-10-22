@@ -91,9 +91,7 @@ Zotero.Utilities.Translate.prototype.getVersion = function() {
 Zotero.Utilities.Translate.prototype.gatherElementsOnXPath = function(doc, parentNode, xpath, nsResolver) {
 	var elmts = [];
 	
-	var iterator = doc.evaluate(xpath, parentNode, nsResolver,
-		(Zotero.isFx ? Components.interfaces.nsIDOMXPathResult.ANY_TYPE : XPathResult.ANY_TYPE),
-		null);
+	var iterator = doc.evaluate(xpath, parentNode, nsResolver, XPathResult.ANY_TYPE, null);
 	var elmt = iterator.iterateNext();
 	var i = 0;
 	while (elmt) {

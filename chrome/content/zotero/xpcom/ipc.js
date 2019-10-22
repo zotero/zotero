@@ -229,7 +229,7 @@ Zotero.IPC = new function() {
 			if(pipeDir.exists()) {
 				var dirEntries = pipeDir.directoryEntries;
 				while (dirEntries.hasMoreElements()) {
-					var pipe = dirEntries.getNext().QueryInterface(Ci.nsILocalFile);
+					var pipe = dirEntries.getNext().QueryInterface(Ci.nsIFile);
 					if(pipe.leafName[0] !== "." && (!_instancePipe || !pipe.equals(_instancePipe))) {
 						pipes.push(pipe);
 					}
@@ -461,7 +461,12 @@ Zotero.IPC.Pipe.DeferredOpen.prototype = {
 		
 		var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"].
 			createInstance(Components.interfaces.nsIInputStreamPump);
-		pump.init(fifoStream, -1, -1, 4096, 1, true);
+		try {
+			pump.init(fifoStream, 0, 0, true);
+		}
+		catch (e) {
+			pump.init(fifoStream, -1, -1, 4096, 1, true);
+		}
 		pump.asyncRead(this, null);
 		
 		this._openTime = Date.now();

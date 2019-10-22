@@ -124,7 +124,7 @@
 				</menupopup>
 			</rule>
 		</template>
-        <menupopup id="menu_windowPopup">
+        <menupopup id="windowPopup">
             <menuitem command="minimizeWindow" label="&minimizeWindow.label;" key="key_minimizeWindow"/>
             <menuitem command="zoomWindow" label="&zoomWindow.label;"/>
             <!-- decomment when "BringAllToFront" is implemented

@@ -1,4 +1,12 @@
 body {
+	background: white;
+}
+
+a {
+	text-decoration: underline;
+}
+
+body {
 	padding: 0;
 }
 

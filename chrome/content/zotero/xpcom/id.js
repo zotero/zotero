@@ -27,9 +27,12 @@ Zotero.ID_Tracker = function () {
 	var _tables = [
 		'collections',
 		'creators',
+		'creatorTypes',
 		'customFields',
 		'customItemTypes',
+		'fields',
 		'itemDataValues',
+		'itemTypes',
 		'items',
 		'libraries',
 		'proxies',
@@ -54,7 +57,7 @@ Zotero.ID_Tracker = function () {
 			throw new Error("IDs not loaded for table '" + table + "'");
 		}
 		
-		return ++_nextIDs[table];
+		return _nextIDs[table]++;
 	};
 	
 	

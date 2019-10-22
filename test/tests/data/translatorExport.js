@@ -1311,7 +1311,7 @@
 		"dateAdded": "2015-04-12T05:45:15Z",
 		"dateModified": "2015-04-12T05:45:15Z",
 		"extra": "Extra",
-		"filingDate": "2000-01-02 2000-01-02",
+		"filingDate": "2000-01-02",
 		"issueDate": "1999-12-31",
 		"issuingAuthority": "Issuing authority",
 		"itemType": "patent",

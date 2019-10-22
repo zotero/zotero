@@ -24,6 +24,7 @@
 */
 
 Components.utils.import("resource://gre/modules/Services.jsm");
+import FilePicker from 'zotero/filePicker';
 
 var Zotero = Components.classes["@zotero.org/Zotero;1"]
 				// Currently uses only nsISupports
@@ -70,7 +71,7 @@ var Scaffold = new function() {
 		'textbox-hidden-prefs':'hiddenPrefs'
 	};
 
-	this.onLoad = function (e) {
+	this.onLoad = async function (e) {
 		if(e.target !== document) return;
 		_document = document;
 		
@@ -145,7 +146,7 @@ var Scaffold = new function() {
 		}
 		
 		if (!Scaffold_Translators.getDirectory()) {
-			if (!this.promptForTranslatorsDirectory()) {
+			if (!await this.promptForTranslatorsDirectory()) {
 				window.close();
 				return;
 			}
@@ -155,7 +156,7 @@ var Scaffold = new function() {
 		_translatorProvider = Scaffold_Translators.getProvider();
 	};
 	
-	this.promptForTranslatorsDirectory = function () {
+	this.promptForTranslatorsDirectory = async function () {
 		var ps = Services.prompt;
 		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING
@@ -171,7 +172,7 @@ var Scaffold = new function() {
 		);
 		// Revert to home directory
 		if (index == 0) {
-			let dir = this.setTranslatorsDirectory();
+			let dir = await this.setTranslatorsDirectory();
 			if (dir) {
 				return true;
 			}
@@ -182,23 +183,22 @@ var Scaffold = new function() {
 		return false;
 	};
 	
-	this.setTranslatorsDirectory = function () {
-		var nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+	this.setTranslatorsDirectory = async function () {
+		var fp = new FilePicker();
 		var oldPath = Zotero.Prefs.get('scaffold.translatorsDir');
 		if (oldPath) {
-			fp.displayDirectory = Zotero.File.pathToFile(oldPath);
+			fp.displayDirectory = oldPath;
 		}
 		fp.init(
 			window,
 			"Select Translators Directory",
-			nsIFilePicker.modeGetFolder
+			fp.modeGetFolder
 		);
-		fp.appendFilters(nsIFilePicker.filterAll);
-		if (fp.show() != nsIFilePicker.returnOK) {
+		fp.appendFilters(fp.filterAll);
+		if (await fp.show() != fp.returnOK) {
 			return false;
 		}
-		var path = OS.Path.normalize(fp.file.path);
+		var path = OS.Path.normalize(fp.file);
 		if (oldPath == path) {
 			return false;
 		}

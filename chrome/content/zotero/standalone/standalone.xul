@@ -300,7 +300,12 @@
 						</menupopup>
 					</menu>
 					
-					<menu id="windowMenu" />
+					<menu id="windowMenu"
+						  label="&windowMenu.label;"
+						  onpopupshowing="macWindowMenuDidShow();"
+						  onpopuphidden="macWindowMenuDidHide();"
+						  >
+					</menu>
 					
 					<menu id="helpMenu"
 							label="&helpMenu.label;"

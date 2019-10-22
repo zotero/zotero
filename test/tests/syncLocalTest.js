@@ -80,7 +80,7 @@ describe("Zotero.Sync.Data.Local", function() {
 		
 		// extra1 functionality not used at the moment
 		it.skip("should prompt for data reset and allow to choose a new data directory", function* (){
-			sinon.stub(Zotero.DataDirectory, 'forceChange').returns(true);
+			sinon.stub(Zotero.DataDirectory, 'forceChange').returns(Zotero.Promise.resolve(true));
 			yield Zotero.Users.setCurrentUserID(1);
 			yield Zotero.Users.setCurrentUsername("A");
 			

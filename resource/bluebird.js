@@ -10,6 +10,15 @@ Promise.config({
     cancellation: true
 });
 
+// Use our own stub to avoid the Bluebird deprecation warnings
+Promise.defer = function() {
+	var deferred = {};
+	deferred.promise = new Promise(function(resolve, reject) {
+		deferred.resolve = resolve;
+		deferred.reject = reject;
+	});
+	return deferred;
+}
 // TEMP: Only turn on if debug logging enabled?
 Promise.onPossiblyUnhandledRejection((e, promise) => {
 		if (e.name == 'ZoteroPromiseInterrupt' || e.handledRejection) {

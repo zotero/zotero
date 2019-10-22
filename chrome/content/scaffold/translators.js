@@ -22,52 +22,46 @@ var Scaffold_Translators = {
 		var dir = this.getDirectory();
 		var numLoaded = 0;
 		var deletedTranslators = new Set(this._translatorFiles.keys());
-		await Zotero.File.iterateDirectory(dir, function* (iterator) {
-			while (true) {
-				let entries = yield iterator.nextBatch(50);
-				if (!entries.length) break;
-				for (let entry of entries) {
-					if (entry.isDir || entry.name.startsWith('.') || !entry.name.endsWith('.js')) {
-						continue;
-					}
-					
-					deletedTranslators.delete(entry.name);
-					
-					try {
-						let fmtime;
-						if ('winLastWriteDate' in entry) {
-							fmtime = entry.winLastWriteDate.getTime();
-						}
-						else {
-							fmtime = (yield OS.File.stat(entry.path)).lastModificationDate.getTime();
-						}
-						let translatorID = this._translatorFiles.get(entry.name);
-						let loadFile = true;
-						// If translator is already loaded, see if mtime has changed
-						if (translatorID) {
-							let mtime = this._translators.get(translatorID).mtime;
-							if (mtime == fmtime) {
-								loadFile = false;
-							}
-						}
-						if (loadFile) {
-							let translator = yield Zotero.Translators.loadFromFile(entry.path);
-							this._translators.set(
-								translator.translatorID,
-								{
-									translator,
-									filename: entry.name,
-									mtime: fmtime,
-								}
-							);
-							this._translatorFiles.set(entry.name, translator.translatorID);
-							numLoaded++;
-						}
-					}
-					catch (e) {
-						Zotero.logError(e);
+		await Zotero.File.iterateDirectory(dir, async function (entry) {
+			if (entry.isDir || entry.name.startsWith('.') || !entry.name.endsWith('.js')) {
+				return;
+			}
+			
+			deletedTranslators.delete(entry.name);
+			
+			try {
+				let fmtime;
+				if ('winLastWriteDate' in entry) {
+					fmtime = entry.winLastWriteDate.getTime();
+				}
+				else {
+					fmtime = (await OS.File.stat(entry.path)).lastModificationDate.getTime();
+				}
+				let translatorID = this._translatorFiles.get(entry.name);
+				let loadFile = true;
+				// If translator is already loaded, see if mtime has changed
+				if (translatorID) {
+					let mtime = this._translators.get(translatorID).mtime;
+					if (mtime == fmtime) {
+						loadFile = false;
 					}
 				}
+				if (loadFile) {
+					let translator = await Zotero.Translators.loadFromFile(entry.path);
+					this._translators.set(
+						translator.translatorID,
+						{
+							translator,
+							filename: entry.name,
+							mtime: fmtime,
+						}
+					);
+					this._translatorFiles.set(entry.name, translator.translatorID);
+					numLoaded++;
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
 			}
 		}.bind(this));
 		

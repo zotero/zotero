@@ -161,7 +161,7 @@ Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Components.interfaces.mozIJSSubScriptLoader)
 	.loadSubScript('resource://zotero/require.js');
 
-ZoteroContext = function() {}
+var ZoteroContext = function() {}
 ZoteroContext.prototype = {
 	require,
 	
@@ -580,8 +580,8 @@ ZoteroCommandLineHandler.prototype = {
 					if (!DebuggerServer.initialized) {
 						dump("Initializing devtools server\n");
 						DebuggerServer.init();
+						DebuggerServer.registerAllActors();
 						DebuggerServer.allowChromeProcess = true;
-						DebuggerServer.addBrowserActors();
 					}
 					
 					let listener = DebuggerServer.createListener();
@@ -612,9 +612,7 @@ ZoteroCommandLineHandler.prototype = {
 					// Wait to handle things that require the UI until after it's loaded
 					Zotero.uiReadyPromise
 					.then(function () {
-						var file = Components.classes["@mozilla.org/file/local;1"].
-							createInstance(Components.interfaces.nsILocalFile);
-						file.initWithPath(param);
+						var file = Zotero.File.pathToFile(param);
 						
 						if(file.leafName.substr(-4).toLowerCase() === ".csl"
 								|| file.leafName.substr(-8).toLowerCase() === ".csl.txt") {

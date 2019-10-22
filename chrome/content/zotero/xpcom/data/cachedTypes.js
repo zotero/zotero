@@ -239,6 +239,7 @@ Zotero.CreatorTypes = new function() {
 		var sql = "SELECT itemTypeID, creatorTypeID AS id, creatorType AS name, primaryField "
 			+ "FROM itemTypeCreatorTypes NATURAL JOIN creatorTypes";
 		var rows = yield Zotero.DB.queryAsync(sql);
+		_creatorTypesByItemType = {};
 		for (let i=0; i<rows.length; i++) {
 			let row = rows[i];
 			let itemTypeID = row.itemTypeID;
@@ -307,7 +308,8 @@ Zotero.CreatorTypes = new function() {
 	
 	
 	this.getLocalizedString = function(idOrName) {
-		return Zotero.getString("creatorTypes."+this.getName(idOrName));
+		var name = this.getName(idOrName);
+		return Zotero.Schema.globalSchemaLocale.creatorTypes[name];
 	}
 	
 	
@@ -437,7 +439,7 @@ Zotero.ItemTypes = new function() {
 			return _customLabels[id];
 		}
 		
-		return Zotero.getString("itemTypes." + typeName);
+		return Zotero.Schema.globalSchemaLocale.itemTypes[typeName];
 	}
 	
 	this.getImageSrc = function (itemType) {

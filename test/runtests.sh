@@ -17,9 +17,9 @@ function makePath {
 
 if [ -z "$FX_EXECUTABLE" ]; then
 	if [ "`uname`" == "Darwin" ]; then
-		FX_EXECUTABLE="/Applications/Firefox Unbranded.app/Contents/MacOS/firefox"
+		FX_EXECUTABLE="$( dirname "$ROOT_DIR" )/zotero-standalone-build/xulrunner/Firefox.app/Contents/MacOS/firefox"
 	else
-		FX_EXECUTABLE="firefox"
+		FX_EXECUTABLE="$( dirname "$ROOT_DIR" )/../zotero-standalone-build/xulrunner/firefox-x86_64/firefox"
 	fi
 fi
 
@@ -144,9 +144,13 @@ if [ ! -f "$PDF_TOOLS_CACHE_DIR/$PDF_TOOLS_VERSION" ]; then
 fi
 cp -R $PDF_TOOLS_CACHE_DIR $PDF_TOOLS_DIR
 
-cat <<EOF > "$PROFILE/prefs.js"
+# Add default prefs, which are apparently no longer read from extensions in Firefox 60
+cat "$ZOTERO_PATH/defaults/preferences/zotero.js" > "$PROFILE/prefs.js"
+
+cat <<EOF >> "$PROFILE/prefs.js"
 user_pref("app.update.enabled", false);
 user_pref("extensions.autoDisableScopes", 0);
+user_pref("browser.dom.window.dump.enabled", true);
 user_pref("browser.tabs.remote.autostart", false);
 user_pref("browser.tabs.remote.autostart.2", false);
 user_pref("browser.uitour.enabled", false);
@@ -165,7 +169,9 @@ user_pref("extensions.zotero.reportTranslationFailure", false);
 user_pref("extensions.zotero.httpServer.enabled", true);
 user_pref("extensions.zotero.backup.numBackups", 0);
 user_pref("extensions.zotero.sync.autoSync", false);
+user_pref("extensions.legacy.enabled", true);
 user_pref("xpinstall.signatures.required", false);
+user_pref("xpinstall.whitelist.required", false);
 user_pref("datareporting.healthreport.uploadEnabled", false);
 user_pref("datareporting.healthreport.service.enabled", false);
 user_pref("datareporting.healthreport.service.firstRun", false);

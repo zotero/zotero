@@ -226,8 +226,7 @@ Zotero.HTTP = new function() {
 			if (options.username) {
 				options.username = options.username.replace(/%2E/, '.');
 				options.password = url.password || null;
-				url = url.clone();
-				url.userPass = '';
+				url = url.mutate().setUserPass('').finalize();
 			}
 			
 			url = url.spec;
@@ -566,8 +565,7 @@ Zotero.HTTP = new function() {
 			return false;
 		}
 		
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-						.createInstance();
+		var xmlhttp = new XMLHttpRequest();
 		
 		// Prevent certificate/authentication dialogs from popping up
 		xmlhttp.mozBackgroundRequest = true;
@@ -640,8 +638,7 @@ Zotero.HTTP = new function() {
 			return false;
 		}
 		
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-					.createInstance();
+		var xmlhttp = new XMLHttpRequest();
 		// Prevent certificate/authentication dialogs from popping up
 		xmlhttp.mozBackgroundRequest = true;
 		xmlhttp.open('POST', url, true);
@@ -718,8 +715,7 @@ Zotero.HTTP = new function() {
 		
 		// Workaround for "Accept third-party cookies" being off in Firefox 3.0.1
 		// https://www.zotero.org/trac/ticket/1070
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-						.createInstance();
+		var xmlhttp = new XMLHttpRequest();
 		// Prevent certificate/authentication dialogs from popping up
 		xmlhttp.mozBackgroundRequest = true;
 		xmlhttp.open('HEAD', url, true);
@@ -766,8 +762,7 @@ Zotero.HTTP = new function() {
 			return false;
 		}
 		
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-					.createInstance();
+		var xmlhttp = new XMLHttpRequest();
 		// Prevent certificate/authentication dialogs from popping up
 		xmlhttp.mozBackgroundRequest = true;
 		xmlhttp.open('OPTIONS', uri.spec, true);

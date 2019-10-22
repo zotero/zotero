@@ -61,9 +61,6 @@ tab {
 	border-top: 1px solid hsla(0, 0%, 0%, 0.2);
 	border-right: 1px solid hsla(0, 0%, 0%, 0.2);
 	border-left: 1px solid hsla(0, 0%, 0%, 0.2);
-	-moz-border-top-colors: none;
-	-moz-border-right-colors: none;
-	-moz-border-left-colors: none;
 }
 /* Fixes misc Ubuntu 16.10 rendering issue fixes. */
 #zotero-prefs menulist dropmarker{

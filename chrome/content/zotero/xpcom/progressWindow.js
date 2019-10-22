@@ -28,7 +28,6 @@ Zotero.ProgressWindowSet = new function() {
 	this.add = add;
 	this.tile = tile;
 	this.remove = remove;
-	this.updateTimers = updateTimers;
 	
 	var _progressWindows = [];
 	
@@ -83,19 +82,6 @@ Zotero.ProgressWindowSet = new function() {
 			if (_progressWindows[i].progressWindow == progressWin) {
 				_progressWindows.splice(i, 1);
 			}
-		}
-	}
-	
-	
-	function updateTimers() {
-		if (!_progressWindows.length) {
-			return;
-		}
-		
-		for (var i=0; i<_progressWindows.length; i++) {
-			// Pass |requireMouseOver| so that the window only closes
-			// if the mouse was over it at some point
-			_progressWindows[i].instance.startCloseTimer(null, true);
 		}
 	}
 	

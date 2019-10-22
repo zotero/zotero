@@ -37,6 +37,9 @@
 ]>
 
 <window id="main-window" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type="application/javascript">
+		Components.utils.import("resource://gre/modules/Services.jsm");
+	</script>
 	<script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
 	<script>
 		// Equivalent to Zotero.openMainWindow()

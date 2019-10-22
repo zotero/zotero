@@ -10,7 +10,7 @@
  * httpd.js.
  */
 
-this.EXPORTED_SYMBOLS = [
+var EXPORTED_SYMBOLS = [
   "HTTP_400",
   "HTTP_401",
   "HTTP_402",
@@ -38,12 +38,8 @@ this.EXPORTED_SYMBOLS = [
   "HttpServer",
 ];
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
-const Cu = Components.utils;
 const CC = Components.Constructor;
 
 const PR_UINT32_MAX = Math.pow(2, 32) - 1;
@@ -54,7 +50,7 @@ var DEBUG = false; // non-const *only* so tweakable in server tests
 /** True if debugging output should be timestamped. */
 var DEBUG_TIMESTAMP = false; // non-const so tweakable in server tests
 
-var gGlobalObject = this;
+var gGlobalObject = Cu.getGlobalForObject(this);
 
 /**
  * Asserts that the given condition holds.  If it doesn't, the given message is
@@ -78,7 +74,7 @@ function NS_ASSERT(cond, msg)
 }
 
 /** Constructs an HTTP error object. */
-this.HttpError = function HttpError(code, description)
+function HttpError(code, description)
 {
   this.code = code;
   this.description = description;
@@ -94,30 +90,30 @@ HttpError.prototype =
 /**
  * Errors thrown to trigger specific HTTP server responses.
  */
-this.HTTP_400 = new HttpError(400, "Bad Request");
-this.HTTP_401 = new HttpError(401, "Unauthorized");
-this.HTTP_402 = new HttpError(402, "Payment Required");
-this.HTTP_403 = new HttpError(403, "Forbidden");
-this.HTTP_404 = new HttpError(404, "Not Found");
-this.HTTP_405 = new HttpError(405, "Method Not Allowed");
-this.HTTP_406 = new HttpError(406, "Not Acceptable");
-this.HTTP_407 = new HttpError(407, "Proxy Authentication Required");
-this.HTTP_408 = new HttpError(408, "Request Timeout");
-this.HTTP_409 = new HttpError(409, "Conflict");
-this.HTTP_410 = new HttpError(410, "Gone");
-this.HTTP_411 = new HttpError(411, "Length Required");
-this.HTTP_412 = new HttpError(412, "Precondition Failed");
-this.HTTP_413 = new HttpError(413, "Request Entity Too Large");
-this.HTTP_414 = new HttpError(414, "Request-URI Too Long");
-this.HTTP_415 = new HttpError(415, "Unsupported Media Type");
-this.HTTP_417 = new HttpError(417, "Expectation Failed");
+var HTTP_400 = new HttpError(400, "Bad Request");
+var HTTP_401 = new HttpError(401, "Unauthorized");
+var HTTP_402 = new HttpError(402, "Payment Required");
+var HTTP_403 = new HttpError(403, "Forbidden");
+var HTTP_404 = new HttpError(404, "Not Found");
+var HTTP_405 = new HttpError(405, "Method Not Allowed");
+var HTTP_406 = new HttpError(406, "Not Acceptable");
+var HTTP_407 = new HttpError(407, "Proxy Authentication Required");
+var HTTP_408 = new HttpError(408, "Request Timeout");
+var HTTP_409 = new HttpError(409, "Conflict");
+var HTTP_410 = new HttpError(410, "Gone");
+var HTTP_411 = new HttpError(411, "Length Required");
+var HTTP_412 = new HttpError(412, "Precondition Failed");
+var HTTP_413 = new HttpError(413, "Request Entity Too Large");
+var HTTP_414 = new HttpError(414, "Request-URI Too Long");
+var HTTP_415 = new HttpError(415, "Unsupported Media Type");
+var HTTP_417 = new HttpError(417, "Expectation Failed");
 
-this.HTTP_500 = new HttpError(500, "Internal Server Error");
-this.HTTP_501 = new HttpError(501, "Not Implemented");
-this.HTTP_502 = new HttpError(502, "Bad Gateway");
-this.HTTP_503 = new HttpError(503, "Service Unavailable");
-this.HTTP_504 = new HttpError(504, "Gateway Timeout");
-this.HTTP_505 = new HttpError(505, "HTTP Version Not Supported");
+var HTTP_500 = new HttpError(500, "Internal Server Error");
+var HTTP_501 = new HttpError(501, "Not Implemented");
+var HTTP_502 = new HttpError(502, "Bad Gateway");
+var HTTP_503 = new HttpError(503, "Service Unavailable");
+var HTTP_504 = new HttpError(504, "Gateway Timeout");
+var HTTP_505 = new HttpError(505, "HTTP Version Not Supported");
 
 /** Creates a hash with fields corresponding to the values in arr. */
 function array2obj(arr)
@@ -683,6 +679,11 @@ nsHttpServer.prototype =
     this._handler.registerContentType(ext, type);
   },
 
+  get connectionNumber()
+  {
+    return this._connectionGen;
+  },
+
   //
   // see nsIHttpServer.serverIdentity
   //
@@ -737,6 +738,10 @@ nsHttpServer.prototype =
   setObjectState: function(k, v)
   {
     return this._handler._setObjectState(k, v);
+  },
+
+  get wrappedJSObject() {
+    return this;
   },
 
 
@@ -834,7 +839,7 @@ nsHttpServer.prototype =
     // Bug 508125: Add a GC here else we'll use gigabytes of memory running
     // mochitests. We can't rely on xpcshell doing an automated GC, as that
     // would interfere with testing GC stuff...
-    Components.utils.forceGC();
+    Cu.forceGC();
   },
 
   /**
@@ -848,7 +853,7 @@ nsHttpServer.prototype =
   }
 };
 
-this.HttpServer = nsHttpServer;
+var HttpServer = nsHttpServer;
 
 //
 // RFC 2396 section 3.2.2:
@@ -1748,8 +1753,8 @@ RequestReader.prototype =
       {
         var uri = Cc["@mozilla.org/network/io-service;1"]
                     .getService(Ci.nsIIOService)
-                    .newURI(fullPath, null, null);
-        fullPath = uri.path;
+                    .newURI(fullPath);
+        fullPath = uri.pathQueryRef;
         scheme = uri.scheme;
         host = metadata._host = uri.asciiHost;
         port = uri.port;
@@ -2284,7 +2289,7 @@ function ServerHandler(server)
   this._server = server;
 
   /**
-   * A FileMap object containing the set of path->nsILocalFile mappings for
+   * A FileMap object containing the set of path->nsIFile mappings for
    * all directory mappings set in the server (e.g., "/" for /var/www/html/,
    * "/foo/bar/" for /local/path/, and "/foo/bar/baz/" for /local/path2).
    *
@@ -2717,7 +2722,7 @@ ServerHandler.prototype =
    *
    * @param metadata : Request
    *   the Request for which a response is being generated
-   * @param file : nsILocalFile
+   * @param file : nsIFile
    *   the file which is to be sent in the response
    * @param response : Response
    *   the response to which the file should be written
@@ -3057,7 +3062,7 @@ ServerHandler.prototype =
   },
 
   /**
-   * Returns the nsILocalFile which corresponds to the path, as determined using
+   * Returns the nsIFile which corresponds to the path, as determined using
    * all registered path->directory mappings and any paths which are explicitly
    * overridden.
    *
@@ -3067,7 +3072,7 @@ ServerHandler.prototype =
    *   when the correct action is the corresponding HTTP error (i.e., because no
    *   mapping was found for a directory in path, the referenced file doesn't
    *   exist, etc.)
-   * @returns nsILocalFile
+   * @returns nsIFile
    *   the file to be sent as the response to a request for the path
    */
   _getFileForPath: function(path)
@@ -3444,12 +3449,12 @@ FileMap.prototype =
   // PUBLIC API
 
   /**
-   * Maps key to a clone of the nsILocalFile value if value is non-null;
+   * Maps key to a clone of the nsIFile value if value is non-null;
    * otherwise, removes any extant mapping for key.
    *
    * @param key : string
    *   string to which a clone of value is mapped
-   * @param value : nsILocalFile
+   * @param value : nsIFile
    *   the file to map to key, or null to remove a mapping
    */
   put: function(key, value)
@@ -3461,12 +3466,12 @@ FileMap.prototype =
   },
 
   /**
-   * Returns a clone of the nsILocalFile mapped to key, or null if no such
+   * Returns a clone of the nsIFile mapped to key, or null if no such
    * mapping exists.
    *
    * @param key : string
    *   key to which the returned file maps
-   * @returns nsILocalFile
+   * @returns nsIFile
    *   a clone of the mapped file, or null if no mapping exists
    */
   get: function(key)
@@ -3699,6 +3704,15 @@ Response.prototype =
     this._ensureAlive();
 
     this._headers.setHeader(name, value, merge);
+  },
+
+  setHeaderNoCheck: function(name, value)
+  {
+    if (!this._headers || this._finished || this._powerSeized)
+      throw Cr.NS_ERROR_NOT_AVAILABLE;
+    this._ensureAlive();
+
+    this._headers.setHeaderNoCheck(name, value);
   },
 
   //
@@ -4967,7 +4981,7 @@ nsHttpHeaders.prototype =
 
     // The following three headers are stored as arrays because their real-world
     // syntax prevents joining individual headers into a single header using 
-    // ",".  See also <http://hg.mozilla.org/mozilla-central/diff/9b2a99adc05e/netwerk/protocol/http/src/nsHttpHeaderArray.cpp#l77>
+    // ",".  See also <https://hg.mozilla.org/mozilla-central/diff/9b2a99adc05e/netwerk/protocol/http/src/nsHttpHeaderArray.cpp#l77>
     if (merge && name in this._headers)
     {
       if (name === "www-authenticate" ||
@@ -4986,6 +5000,17 @@ nsHttpHeaders.prototype =
     else
     {
       this._headers[name] = [value];
+    }
+  },
+
+  setHeaderNoCheck: function(fieldName, fieldValue)
+  {
+    var name = headerUtils.normalizeFieldName(fieldName);
+    var value = headerUtils.normalizeFieldValue(fieldValue);
+    if (name in this._headers) {
+      this._headers[name].push(fieldValue);
+    } else {
+      this._headers[name] = [fieldValue];
     }
   },
 
@@ -5296,7 +5321,7 @@ Request.prototype =
 
 // XPCOM trappings
 
-this.NSGetFactory = XPCOMUtils.generateNSGetFactory([nsHttpServer]);
+var NSGetFactory = XPCOMUtils.generateNSGetFactory([nsHttpServer]);
 
 /**
  * Creates a new HTTP server listening for loopback traffic on the given port,
@@ -5330,7 +5355,7 @@ function server(port, basePath)
   if (basePath)
   {
     var lp = Cc["@mozilla.org/file/local;1"]
-               .createInstance(Ci.nsILocalFile);
+               .createInstance(Ci.nsIFile);
     lp.initWithPath(basePath);
   }
 

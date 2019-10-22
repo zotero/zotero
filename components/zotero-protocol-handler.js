@@ -32,23 +32,20 @@ const ZOTERO_PROTOCOL_CID = Components.ID("{9BC3D762-9038-486A-9D70-C997AF848A7C
 const ZOTERO_PROTOCOL_CONTRACTID = "@mozilla.org/network/protocol;1?name=" + ZOTERO_SCHEME;
 const ZOTERO_PROTOCOL_NAME = "Zotero Chrome Extension Protocol";
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
-
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+const ios = Services.io;
 
 // Dummy chrome URL used to obtain a valid chrome channel
-// This one was chosen at random and should be able to be substituted
-// for any other well known chrome URL in the browser installation
-const DUMMY_CHROME_URL = "chrome://mozapps/content/xpinstall/xpinstallConfirm.xul";
+const DUMMY_CHROME_URL = "chrome://zotero/content/zoteroPane.xul";
 
 var Zotero = Components.classes["@zotero.org/Zotero;1"]
 	.getService(Components.interfaces.nsISupports)
 	.wrappedJSObject;
-
-var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-	.getService(Components.interfaces.nsIIOService);
 
 function ZoteroProtocolHandler() {
 	this.wrappedJSObject = this;
@@ -94,19 +91,16 @@ function ZoteroProtocolHandler() {
 			return new AsyncChannel(uri, function* () {
 				var userLibraryID = Zotero.Libraries.userLibraryID;
 				
-				var path = uri.path;
+				var path = uri.pathQueryRef;
 				if (!path) {
 					return 'Invalid URL';
 				}
-				// Strip leading '/'
-				path = path.substr(1);
+				path = path.substr('//report/'.length);
 				
 				// Proxy CSS files
 				if (path.endsWith('.css')) {
 					var chromeURL = 'chrome://zotero/skin/report/' + path;
 					Zotero.debug(chromeURL);
-					var ios = Components.classes["@mozilla.org/network/io-service;1"]
-						.getService(Components.interfaces.nsIIOService);
 					let uri = ios.newURI(chromeURL, null, null);
 					var chromeReg = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
 						.getService(Components.interfaces.nsIChromeRegistry);
@@ -447,6 +441,7 @@ function ZoteroProtocolHandler() {
 						return Zotero.Utilities.Internal.getAsyncInputStream(
 							Zotero.Report.HTML.listGenerator(items, combineChildItems),
 							function () {
+								Zotero.logError(e);
 								return '<span style="color: red; font-weight: bold">Error generating report</span>';
 							}
 						);
@@ -477,7 +472,7 @@ function ZoteroProtocolHandler() {
 			return new AsyncChannel(uri, function* () {
 				var userLibraryID = Zotero.Libraries.userLibraryID;
 				
-				path = uri.spec.match(/zotero:\/\/[^/]+(.*)/)[1];
+				var path = uri.spec.match(/zotero:\/\/[^/]+(.*)/)[1];
 				if (!path) {
 					this.contentType = 'text/html';
 					return 'Invalid URL';
@@ -658,7 +653,7 @@ function ZoteroProtocolHandler() {
 				//
 				// Generate main HTML page
 				//
-				content = Zotero.File.getContentsFromURL('chrome://zotero/skin/timeline/timeline.html');
+				var content = Zotero.File.getContentsFromURL('chrome://zotero/skin/timeline/timeline.html');
 				this.contentType = 'text/html';
 				
 				if(!timelineDate){
@@ -717,77 +712,6 @@ function ZoteroProtocolHandler() {
 	};
 	
 	
-	/*
-		zotero://attachment/[id]/
-	*/
-	var AttachmentExtension = {
-		loadAsChrome: false,
-		
-		newChannel: function (uri) {
-			var self = this;
-			
-			return new AsyncChannel(uri, function* () {
-				try {
-					var errorMsg;
-					var [id, fileName] = uri.path.substr(1).split('/');
-					
-					if (parseInt(id) != id) {
-						// Proxy annotation icons
-						if (id.match(/^annotation.*\.(png|html|css|gif)$/)) {
-							var chromeURL = 'chrome://zotero/skin/' + id;
-							var ios = Components.classes["@mozilla.org/network/io-service;1"].
-										getService(Components.interfaces.nsIIOService);
-							let uri = ios.newURI(chromeURL, null, null);
-							var chromeReg = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
-									.getService(Components.interfaces.nsIChromeRegistry);
-							var fileURI = chromeReg.convertChromeURL(uri);
-						}
-						else {
-							return self._errorChannel("Attachment id not an integer");
-						}
-					}
-					
-					if (!fileURI) {
-						var item = yield Zotero.Items.getAsync(id);
-						if (!item) {
-							return self._errorChannel("Item not found");
-						}
-						var path = yield item.getFilePathAsync();
-						if (!path) {
-							return self._errorChannel("File not found");
-						}
-						if (fileName) {
-							Components.utils.import("resource://gre/modules/osfile.jsm");
-							path = OS.Path.join(OS.Path.dirname(path), fileName)
-							if (!(yield OS.File.exists(path))) {
-								return self._errorChannel("File not found");
-							}
-						}
-					}
-					
-					//set originalURI so that it seems like we're serving from zotero:// protocol
-					//this is necessary to allow url() links to work from within css files
-					//otherwise they try to link to files on the file:// protocol, which is not allowed
-					this.originalURI = uri;
-					
-					return Zotero.File.pathToFile(path);
-				}
-				catch (e) {
-					Zotero.debug(e);
-					throw (e);
-				}
-			});
-		},
-		
-		
-		_errorChannel: function (msg) {
-			this.status = Components.results.NS_ERROR_FAILURE;
-			this.contentType = 'text/plain';
-			return msg;
-		}
-	};
-	
-	
 	/**
 	 * zotero://select/[type]/0_ABCD1234
 	 * zotero://select/[type]/1234 (not consistent across synced machines)
@@ -798,12 +722,11 @@ function ZoteroProtocolHandler() {
 		doAction: Zotero.Promise.coroutine(function* (uri) {
 			var userLibraryID = Zotero.Libraries.userLibraryID;
 			
-			var path = uri.path;
+			var path = uri.pathQueryRef;
 			if (!path) {
 				return 'Invalid URL';
 			}
-			// Strip leading '/'
-			path = path.substr(1);
+			path = path.substr('//select/'.length);
 			var mimeType, content = '';
 			
 			var params = {
@@ -923,29 +846,6 @@ function ZoteroProtocolHandler() {
 	};
 	
 	/*
-		zotero://fullscreen
-	*/
-	var FullscreenExtension = {
-		loadAsChrome: false,
-		
-		newChannel: function (uri) {
-			return new AsyncChannel(uri, function* () {
-				try {
-					var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-						.getService(Components.interfaces.nsIWindowWatcher)
-						.openWindow(null, 'chrome://zotero/content/standalone/standalone.xul', '',
-							'chrome,centerscreen,resizable', null);
-				}
-				catch (e) {
-					Zotero.debug(e, 1);
-					throw e;
-				}
-			});
-		}
-	};
-	
-	
-	/*
 		zotero://debug/
 	*/
 	var DebugExtension = {
@@ -969,11 +869,9 @@ function ZoteroProtocolHandler() {
 	var ConnectorChannel = function(uri, data) {
 		var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
 			.getService(Components.interfaces.nsIScriptSecurityManager);
-		var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-			.getService(Components.interfaces.nsIIOService);
 		
 		this.name = uri;
-		this.URI = ioService.newURI(uri, "UTF-8", null);
+		this.URI = ios.newURI(uri, "UTF-8", null);
 		this.owner = (secMan.getCodebasePrincipal || secMan.getSimpleCodebasePrincipal)(this.URI);
 		this._isPending = true;
 		
@@ -1039,8 +937,6 @@ function ZoteroProtocolHandler() {
 		this.loadAsChrome = false;
 		
 		this.newChannel = function(uri) {
-			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-				.getService(Components.interfaces.nsIIOService);
 			var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
 				.getService(Components.interfaces.nsIScriptSecurityManager);
 			var Zotero = Components.classes["@zotero.org/Zotero;1"]
@@ -1048,8 +944,8 @@ function ZoteroProtocolHandler() {
 				.wrappedJSObject;
 			
 			try {
-				var originalURI = uri.path;
-				originalURI = decodeURIComponent(originalURI.substr(originalURI.indexOf("/")+1));
+				var originalURI = uri.pathQueryRef.substr('zotero://connector/'.length);
+				originalURI = decodeURIComponent(originalURI);
 				if(!Zotero.Server.Connector.Data[originalURI]) {
 					return null;
 				} else {
@@ -1078,12 +974,11 @@ function ZoteroProtocolHandler() {
 		doAction: async function (uri) {
 			var userLibraryID = Zotero.Libraries.userLibraryID;
 			
-			var uriPath = uri.path;
+			var uriPath = uri.pathQueryRef;
 			if (!uriPath) {
 				return 'Invalid URL';
 			}
-			// Strip leading '/'
-			uriPath = uriPath.substr(1);
+			uriPath = uriPath.substr('//open-pdf/'.length);
 			var mimeType, content = '';
 			
 			var params = {
@@ -1178,9 +1073,7 @@ function ZoteroProtocolHandler() {
 	this._extensions[ZOTERO_SCHEME + "://data"] = DataExtension;
 	this._extensions[ZOTERO_SCHEME + "://report"] = ReportExtension;
 	this._extensions[ZOTERO_SCHEME + "://timeline"] = TimelineExtension;
-	this._extensions[ZOTERO_SCHEME + "://attachment"] = AttachmentExtension;
 	this._extensions[ZOTERO_SCHEME + "://select"] = SelectExtension;
-	this._extensions[ZOTERO_SCHEME + "://fullscreen"] = FullscreenExtension;
 	this._extensions[ZOTERO_SCHEME + "://debug"] = DebugExtension;
 	this._extensions[ZOTERO_SCHEME + "://connector"] = ConnectorExtension;
 	this._extensions[ZOTERO_SCHEME + "://open-pdf"] = OpenPDFExtension;
@@ -1225,17 +1118,14 @@ ZoteroProtocolHandler.prototype = {
 		return false;
 	},
 				
-	newURI : function(spec, charset, baseURI) {
-		var newURL = Components.classes["@mozilla.org/network/standard-url;1"]
-			.createInstance(Components.interfaces.nsIStandardURL);
-		newURL.init(1, -1, spec, charset, baseURI);
-		return newURL.QueryInterface(Components.interfaces.nsIURI);
+	newURI: function (spec, charset, baseURI) {
+		return Components.classes["@mozilla.org/network/simple-uri-mutator;1"]
+			.createInstance(Components.interfaces.nsIURIMutator)
+			.setSpec(spec)
+			.finalize();
 	},
 	
 	newChannel : function(uri) {
-		var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-			.getService(Components.interfaces.nsIIOService);
-		
 		var chromeService = Components.classes["@mozilla.org/network/protocol;1?name=chrome"]
 			.getService(Components.interfaces.nsIProtocolHandler);
 		
@@ -1255,18 +1145,8 @@ ZoteroProtocolHandler.prototype = {
 				return extChannel;
 			}
 			
-			if (!this._principal) {
-				if (ext.loadAsChrome) {
-					var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
-					var chromeChannel = chromeService.newChannel(chromeURI);
-					
-					// Cache System Principal from chrome request
-					// so proxied pages load with chrome privileges
-					this._principal = chromeChannel.owner;
-					
-					var chromeRequest = chromeChannel.QueryInterface(Components.interfaces.nsIRequest);
-					chromeRequest.cancel(0x804b0002); // BINDING_ABORTED
-				}
+			if (!this._principal && ext.loadAsChrome) {
+				this._principal = Services.scriptSecurityManager.getSystemPrincipal();
 			}
 			
 			var extChannel = ext.newChannel(uri);
@@ -1367,14 +1247,7 @@ AsyncChannel.prototype = {
 		//Zotero.debug("AsyncChannel's asyncOpen called");
 		var t = new Date;
 		
-		// Proxy requests to other zotero:// URIs
-		let uri2 = this.URI.clone();
-		if (uri2.path.startsWith('/proxy/')) {
-			let re = new RegExp(uri2.scheme + '://' + uri2.host + '/proxy/([^/]+)(.*)');
-			let matches = uri2.spec.match(re);
-			uri2.spec = uri2.scheme + '://' + matches[1] + '/' + (matches[2] ? matches[2] : '');
-			var data = Zotero.File.getContentsFromURL(uri2.spec);
-		}
+		var data;
 		try {
 			if (!data) {
 				data = yield Zotero.spawn(channel._generator, channel)
@@ -1397,13 +1270,18 @@ AsyncChannel.prototype = {
 				//Zotero.debug("AsyncChannel: Got input stream from generator");
 				
 				var pump = Cc["@mozilla.org/network/input-stream-pump;1"].createInstance(Ci.nsIInputStreamPump);
-				pump.init(data, -1, -1, 0, 0, true);
+				try {
+					pump.init(data, 0, 0, true);
+				}
+				catch (e) {
+					pump.init(data, -1, -1, 0, 0, true);
+				}
 				pump.asyncRead(listenerWrapper, context);
 			}
 			else if (data instanceof Ci.nsIFile || data instanceof Ci.nsIURI) {
 				if (data instanceof Ci.nsIFile) {
 					//Zotero.debug("AsyncChannel: Got file from generator");
-					data = ioService.newFileURI(data);
+					data = ios.newFileURI(data);
 				}
 				else {
 					//Zotero.debug("AsyncChannel: Got URI from generator");

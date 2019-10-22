@@ -586,22 +586,14 @@ Zotero.DBConnection.prototype.queryAsync = Zotero.Promise.coroutine(function* (s
 		}
 		var failed = false;
 		if (options && options.onRow) {
-			// Errors in onRow don't stop the query unless StopIteration is thrown
-			onRow = function (row) {
+			// Errors in onRow don't stop the query unless the 'cancel' function is called
+			onRow = function (row, cancel) {
 				try {
-					options.onRow(row);
+					options.onRow(row, cancel);
 				}
 				catch (e) {
-					// If the onRow throws a StopIteration, stop gracefully
-					if (e instanceof StopIteration) {
-						Zotero.debug("Query cancelled", 3);
-					}
-					// Otherwise, mark the promise as rejected, which Sqlite.jsm doesn't do
-					// on a StopIteration by default
-					else {
-						failed = e;
-					}
-					throw StopIteration;
+					failed = e;
+					cancel();
 				}
 			}
 		}
@@ -659,7 +651,7 @@ Zotero.DBConnection.prototype.queryAsync = Zotero.Promise.coroutine(function* (s
 		}
 		else {
 			// lastInsertRowID is unreliable for async queries, so we don't bother
-			// returning it for SELECT and REPLACE queries
+			// returning it for INSERT and REPLACE queries
 			return;
 		}
 	}
@@ -767,7 +759,7 @@ Zotero.DBConnection.prototype.columnQueryAsync = Zotero.Promise.coroutine(functi
 Zotero.DBConnection.prototype.logQuery = function (sql, params = [], options) {
 	if (options && options.debug === false) return;
 	var msg = sql;
-	if (params.length) {
+	if (params.length && (!options || options.debugParams !== false)) {
 		msg += " [";
 		for (let i = 0; i < params.length; i++) {
 			let param = params[i];

@@ -1262,7 +1262,7 @@
 		"dateAdded": "2015-04-12T09:00:22Z",
 		"dateModified": "2015-04-12T09:00:22Z",
 		"extra": "Extra",
-		"filingDate": "2000-01-02 2000-01-02",
+		"filingDate": "2000-01-02",
 		"issueDate": "1999-12-31",
 		"issuingAuthority": "Issuing authority",
 		"itemType": "patent",

@@ -24,6 +24,7 @@
 */
 
 // Commonly used imports accessible anywhere
+Components.utils.importGlobalProperties(["XMLHttpRequest"]);
 Components.utils.import("resource://zotero/config.js");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
@@ -239,8 +240,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		Zotero.browser = "g";
 		
 		Zotero.Intl.init();
-
-		Zotero.Prefs.init();
+		
+		yield Zotero.Prefs.init();
 		Zotero.Debug.init(options && options.forceDebugLog);
 		
 		// Make sure that Zotero Standalone is not running as root
@@ -498,27 +499,24 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					let lastError;
 					// Delete all files in directory rather than removing directory, in case it's
 					// a symlink
-					yield Zotero.File.iterateDirectory(dataDir, function* (iterator) {
-						while (true) {
-							let entry = yield iterator.next();
-							// Don't delete some files
-							if (entry.name == 'pipes') {
-								continue;
+					yield Zotero.File.iterateDirectory(dataDir, async function (entry) {
+						// Don't delete some files
+						if (entry.name == 'pipes') {
+							return;
+						}
+						Zotero.debug("Deleting " + entry.path);
+						try {
+							if (entry.isDir) {
+								await OS.File.removeDir(entry.path);
 							}
-							Zotero.debug("Deleting " + entry.path);
-							try {
-								if (entry.isDir) {
-									yield OS.File.removeDir(entry.path);
-								}
-								else {
-									yield OS.File.remove(entry.path);
-								}
+							else {
+								await OS.File.remove(entry.path);
 							}
-							// Keep trying to delete as much as we can
-							catch (e) {
-								lastError = e;
-								Zotero.logError(e);
-							}
+						}
+						// Keep trying to delete as much as we can
+						catch (e) {
+							lastError = e;
+							Zotero.logError(e);
 						}
 					});
 					if (lastError) {
@@ -672,6 +670,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.Users.init();
 			yield Zotero.Libraries.init();
 			
+			yield Zotero.ID.init();
 			yield Zotero.ItemTypes.init();
 			yield Zotero.ItemFields.init();
 			yield Zotero.CreatorTypes.init();
@@ -708,7 +707,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			
 			Zotero.Date.init();
 			Zotero.LocateManager.init();
-			yield Zotero.ID.init();
 			yield Zotero.Collections.init();
 			yield Zotero.Items.init();
 			yield Zotero.Searches.init();
@@ -717,6 +715,12 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.Groups.init();
 			yield Zotero.Relations.init();
 			yield Zotero.Retractions.init();
+			
+			// Migrate fields from Extra that can be moved to item fields after a schema update
+			//
+			// Disabled for now
+			//
+			//yield Zotero.Schema.migrateExtraFields();
 			
 			// Load all library data except for items, which are loaded when libraries are first
 			// clicked on or if otherwise necessary
@@ -730,7 +734,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					}
 				})()
 			);
-
 			
 			Zotero.Items.startEmptyTrashTimer();
 			
@@ -977,7 +980,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				Zotero.debug(e);
 				Zotero.debug("Launching via executable failed -- passing to loadUrl()");
 				
-				// If nsILocalFile.launch() isn't available and the fallback
+				// If nsIFile.launch() isn't available and the fallback
 				// executable doesn't exist, we just let the Firefox external
 				// helper app window handle it
 				var nsIFPH = Components.classes["@mozilla.org/network/protocol;1?name=file"]
@@ -1047,9 +1050,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			}
 			var path = Zotero.Prefs.get(pref);
 			
-			var exec = Components.classes["@mozilla.org/file/local;1"]
-						.createInstance(Components.interfaces.nsILocalFile);
-			exec.initWithPath(path);
+			let exec = Zotero.File.pathToFile(path);
 			if (!exec.exists()) {
 				throw ("Fallback executable not found -- check extensions.zotero." + pref + " in about:config");
 			}
@@ -1376,23 +1377,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		while (enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
 			if(!win.ZoteroPane) continue;
-			if (!win.ZoteroPane.isShowing() && !modalOnly) {
-				if (win != currentWindow) {
-					continue;
-				}
-				
-				// If Zotero is closed in the top-most window, show a popup instead
-				_progressPopup = new Zotero.ProgressWindow();
-				_progressPopup.changeHeadline("Zotero");
-				if (icon) {
-					_progressPopup.addLines([msg], [icon]);
-				}
-				else {
-					_progressPopup.addDescription(msg);
-				}
-				_progressPopup.show();
-				continue;
-			}
 			
 			var label = win.ZoteroPane.document.getElementById('zotero-pane-progress-label');
 			if (!label) {
@@ -1415,8 +1399,12 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			//let progressMeter = win.ZoteroPane.document.getElementById('zotero-pane-progressmeter');
 			let doc = win.ZoteroPane.document;
 			let container = doc.getElementById('zotero-pane-progressmeter-container');
-			let progressMeter = doc.createElement('progressmeter');
-			progressMeter.id = 'zotero-pane-progressmeter';
+			let id = 'zotero-pane-progressmeter';
+			let progressMeter = doc.getElementById(id);
+			if (!progressMeter) {
+				progressMeter = doc.createElement('progressmeter');
+				progressMeter.id = id;
+			}
 			progressMeter.setAttribute('mode', 'undetermined');
 			if (determinate) {
 				progressMeter.mode = 'determined';
@@ -1796,7 +1784,7 @@ Zotero.Keys = new function() {
 	 * Called by Zotero.init()
 	 */
 	function init() {
-		var cmds = Zotero.Prefs.prefBranch.getChildList('keys', {}, {});
+		var cmds = Zotero.Prefs.rootBranch.getChildList(ZOTERO_CONFIG.PREF_BRANCH + 'keys', {}, {});
 		
 		// Get the key=>command mappings from the prefs
 		for (let cmd of cmds) {
@@ -1816,10 +1804,6 @@ Zotero.Keys = new function() {
 	 */
 	function windowInit(document) {
 		var globalKeys = [
-			{
-				name: 'openZotero',
-				defaultKey: 'Z'
-			},
 			{
 				name: 'saveToZotero',
 				defaultKey: 'S'

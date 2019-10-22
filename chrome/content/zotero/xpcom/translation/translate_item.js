@@ -681,11 +681,11 @@ Zotero.Translate.ItemSaver.prototype = {
 	},
 
 	"_parseAbsolutePath":function(path) {
-		var file = Components.classes["@mozilla.org/file/local;1"].
-			createInstance(Components.interfaces.nsILocalFile);
+		var file;
 		try {
-			file.initWithPath(path);
-		} catch(e) {
+			file = Zotero.File.pathToFile(path);
+		}
+		catch (e) {
 			Zotero.debug("Translate: Invalid absolute path: " + path);
 			return false;
 		}
@@ -994,9 +994,7 @@ Zotero.Translate.ItemGetter.prototype = {
 	
 	"exportFiles":function(dir, extension) {
 		// generate directory
-		this._exportFileDirectory = Components.classes["@mozilla.org/file/local;1"].
-		                createInstance(Components.interfaces.nsILocalFile);
-		this._exportFileDirectory.initWithFile(dir.parent);
+		this._exportFileDirectory = dir.parent.clone();
 		
 		// delete this file if it exists
 		if(dir.exists()) {
@@ -1012,9 +1010,7 @@ Zotero.Translate.ItemGetter.prototype = {
 		
 		// generate a new location for the exported file, with the appropriate
 		// extension
-		var location = Components.classes["@mozilla.org/file/local;1"].
-		                createInstance(Components.interfaces.nsILocalFile);
-		location.initWithFile(this._exportFileDirectory);
+		var location = this._exportFileDirectory.clone();
 		location.append(name+"."+extension);
 
 		return location;
@@ -1075,9 +1071,7 @@ Zotero.Translate.ItemGetter.prototype = {
 						
 						// Separate the path into a list of subdirectories and the attachment filename,
 						// and initialize the required file objects
-						var targetFile = Components.classes["@mozilla.org/file/local;1"].
-								createInstance(Components.interfaces.nsILocalFile);
-						targetFile.initWithFile(exportDir);
+						var targetFile = exportDir.clone();
 						for (let dir of attachPath.split("/")) targetFile.append(dir);
 						
 						// First, check that we have not gone lower than exportDir in the hierarchy

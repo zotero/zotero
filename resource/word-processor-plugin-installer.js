@@ -27,7 +27,7 @@
  * installable and available in the cite preferences pane.
  */
 
-EXPORTED_SYMBOLS = ["ZoteroPluginInstaller"];
+var EXPORTED_SYMBOLS = ["ZoteroPluginInstaller"];
 
 var Zotero = Components.classes["@zotero.org/Zotero;1"]
 				// Currently uses only nsISupports

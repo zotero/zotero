@@ -1,0 +1,107 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+prefwindow,
+prefwindow:root /* override :root from above */ {
+	-moz-binding: url("chrome://zotero/content/bindings/preferences-unix.xml#prefwindow");
+	-moz-box-orient: vertical;
+}
+
+prefpane {
+	-moz-binding: url("chrome://zotero/content/bindings/preferences-unix.xml#prefpane");
+	-moz-box-orient: vertical;
+}
+
+prefwindow > .paneDeckContainer {
+	overflow: hidden;
+}
+
+prefpane > .content-box {
+	overflow: hidden;
+}
+
+prefwindow[type="child"] > .paneDeckContainer {
+	overflow: -moz-hidden-unscrollable;
+}
+
+prefwindow[type="child"] > prefpane > .content-box {
+	-moz-box-flex: 1;
+	overflow: -moz-hidden-unscrollable;
+}
+
+preferences {
+	-moz-binding: url("chrome://zotero/content/bindings/preferences-unix.xml#preferences");
+	visibility: collapse;
+}
+
+preference {
+	-moz-binding: url("chrome://zotero/content/bindings/preferences-unix.xml#preference");
+	visibility: collapse;
+}
+
+radio[pane] {
+	-moz-binding: url("chrome://zotero/content/bindings/preferences-unix.xml#panebutton") !important;
+	-moz-box-orient: vertical;
+	-moz-box-align: center;
+}
+
+prefwindow[chromehidden~="toolbar"] .chromeclass-toolbar {
+	display: none;
+}
+
+
+prefwindow {
+	padding: 0px;
+	
+	-moz-appearance: window;
+	background-color: -moz-Dialog;
+	color: -moz-DialogText;
+	font: message-box;
+}
+
+prefpane {
+	padding: 8px;
+}
+
+prefwindow[type="child"] {
+	padding: 8px;
+}
+
+prefwindow[type="child"] > prefpane {
+	padding: 0px;
+}
+
+.prefWindow-dlgbuttons {
+	padding-bottom: 8px;
+	padding-inline-start: 8px;
+	padding-inline-end: 8px;
+}
+
+prefwindow[type="child"] .prefWindow-dlgbuttons {
+	padding: 0px;
+}
+
+radio[pane] {
+	-moz-appearance: none;
+	min-width: 4.5em;
+	margin: 0;
+	padding: 3px;
+	color: -moz-FieldText;
+}
+
+.paneSelector {
+	-moz-appearance: listbox;
+	margin: 8px 8px 0 8px;
+	padding: 0;
+}
+
+.paneButtonIcon {
+	width: 32px;
+	height: 32px;
+}
+
+radio[pane][selected="true"] {
+	background-color: Highlight;
+	color: HighlightText;
+}

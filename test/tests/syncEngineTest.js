@@ -1480,7 +1480,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			yield engine.start();
 		})
 		
-		it("should ignore errors when saving downloaded objects", function* () {
+		it("should add objects to sync queue if they can't be saved", function* () {
 			({ engine, client, caller } = yield setup({
 				stopOnError: false
 			}));
@@ -1560,7 +1560,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 						key: "CCCCCCCC",
 						version: 1,
 						name: "C",
-						// Unknown field -- should be ignored
+						// Unknown field -- collection should be queued
 						unknownField: 5
 					})
 				]
@@ -1622,7 +1622,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 						version: 3,
 						itemType: "book",
 						title: "G",
-						// Unknown item field -- should be ignored
+						// Unknown item field -- item should be queued
 						unknownField: "B"
 					}),
 					makeItemJSON({
@@ -1668,7 +1668,6 @@ describe("Zotero.Sync.Data.Engine", function () {
 			// Check for saved objects
 			yield assert.eventually.ok(Zotero.Collections.getByLibraryAndKeyAsync(userLibraryID, "AAAAAAAA"));
 			yield assert.eventually.ok(Zotero.Searches.getByLibraryAndKeyAsync(userLibraryID, "DDDDDDDD"));
-			yield assert.eventually.ok(Zotero.Items.getByLibraryAndKeyAsync(userLibraryID, "GGGGGGGG"));
 			
 			// Check for queued objects
 			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('collection', userLibraryID);
@@ -1678,9 +1677,13 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.sameMembers(keys, ['EEEEEEEE', 'FFFFFFFF']);
 			
 			var keys = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', userLibraryID);
-			assert.sameMembers(keys, ['HHHHHHHH', 'JJJJJJJJ']);
+			assert.sameMembers(keys, ['GGGGGGGG', 'HHHHHHHH', 'JJJJJJJJ']);
 			
-			assert.equal(spy.callCount, 3);
+			// Unknown search condition, search operator, item field, and item type
+			//
+			// Missing parent collection and item collection don't throw errors because they don't
+			// indicate a guaranteed problem with the client
+			assert.equal(spy.callCount, 4);
 		});
 		
 		it("should delay on second upload conflict", function* () {

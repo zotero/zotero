@@ -139,7 +139,7 @@
 				<body><![CDATA[
 					return Zotero.spawn(function* () {
 						if (type == 'setting') {
-							if (ids.some(function (val) val.split("/")[1] == 'tagColors') && this.item) {
+							if (ids.some(val => val.split("/")[1] == 'tagColors') && this.item) {
 								this.reload();
 								return;
 							}
@@ -227,7 +227,7 @@
 					
 					// Sort tags alphabetically
 					var collation = Zotero.getLocaleCollation();
-					tags.sort(function (a, b) collation.compareString(1, a.tag, b.tag));
+					tags.sort((a, b) => collation.compareString(1, a.tag, b.tag));
 					
 					for (let i=0; i<tags.length; i++) {
 						this.addDynamicRow(tags[i], i+1);
@@ -682,7 +682,7 @@
 							return;
 						}
 						
-						var tags = value.split(/\r\n?|\n/).map(function (val) val.trim());
+						var tags = value.split(/\r\n?|\n/).map(val => val.trim());
 						
 						// Modifying existing tag with a single new one
 						if (!isNew && tags.length < 2) {

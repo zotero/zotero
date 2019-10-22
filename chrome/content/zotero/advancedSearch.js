@@ -172,10 +172,6 @@ var ZoteroAdvancedSearch = new function() {
 					return;
 				}
 				
-				if (lastWin.ZoteroOverlay) {
-					lastWin.ZoteroOverlay.toggleDisplay(true);
-				}
-				
 				lastWin.ZoteroPane.selectItem(item.getID(), false, true);
 				lastWin.focus();
 			}

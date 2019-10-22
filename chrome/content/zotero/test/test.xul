@@ -11,7 +11,7 @@
 	style="padding:2em">
 	
 	<script src="../include.js"/>
-	<script type="application/javascript;version=1.8" src="test.js"/>
+	<script type="application/javascript" src="test.js"/>
 	
 	<hbox><label>This is a test page.</label></hbox>
 </window>

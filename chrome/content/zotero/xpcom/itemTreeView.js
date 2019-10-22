@@ -890,11 +890,14 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			else if (ids.length <= 5) {
 				var items = Zotero.Items.get(ids);
 				if (items) {
+					let itemTypeAttachment = Zotero.ItemTypes.getID('attachment');
+					let itemTypeNote = Zotero.ItemTypes.getID('note');
+					
 					var found = false;
 					for (let item of items) {
-						// Check for note and attachment type, since it's quicker
+						// Check for attachment and note types, since it's quicker
 						// than checking for parent item
-						if (item.itemTypeID == 1 || item.itemTypeID == 14) {
+						if (item.itemTypeID == itemTypeAttachment || item.itemTypeID == itemTypeNote) {
 							continue;
 						}
 						
@@ -2847,7 +2850,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 			var dirPrimitive = {};
 			var dataSize = {};
 			transferable.getTransferData("application/x-moz-file-promise-dir", dirPrimitive, dataSize);
-			var destDir = dirPrimitive.value.QueryInterface(Components.interfaces.nsILocalFile);
+			var destDir = dirPrimitive.value.QueryInterface(Components.interfaces.nsIFile);
 			
 			var draggedItems = Zotero.Items.get(this._itemIDs);
 			var items = [];
@@ -2901,7 +2904,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 					var numFiles = 0;
 					while (files.hasMoreElements()) {
 						var f = files.getNext();
-						f.QueryInterface(Components.interfaces.nsILocalFile);
+						f.QueryInterface(Components.interfaces.nsIFile);
 						if (f.leafName.indexOf('.') != 0) {
 							numFiles++;
 						}

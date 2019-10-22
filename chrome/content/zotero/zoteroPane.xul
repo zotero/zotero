@@ -40,13 +40,14 @@
 	xmlns:html="http://www.w3.org/1999/xhtml">
 	
 	<script src="include.js"/>
-	<script src="zoteroPane.js" type="application/javascript;version=1.8"/>
+	<script src="zoteroPane.js" type="application/javascript"/>
 	<script src="fileInterface.js"/>
 	<script src="reportInterface.js"/>
 	<script src="timelineInterface.js"/>
 	<script src="progressQueueDialog.js"/>
+	<script src="browser.js" type="application/javascript"/>
 	<script src="lookup.js"/>
-	<script src="locateMenu.js" type="application/javascript;version=1.8"/>
+	<script src="locateMenu.js" type="application/javascript"/>
 	
 	<commandset id="mainCommandSet">
 		<command id="cmd_zotero_reportErrors" oncommand="ZoteroPane_Local.reportErrors();"/>
@@ -210,8 +211,6 @@
 							<label id="zotero-tb-sync-last-sync"/>
 						</tooltip>
 					</toolbarbutton>
-
-					<toolbarbutton id="zotero-close-button" class="tabs-closebutton close-icon standalone-no-display" oncommand="ZoteroOverlay.toggleDisplay()"/>
 				</hbox>
 			</toolbar>
 			
@@ -316,6 +315,7 @@
 					</tree>
 					<splitter
 							id="zotero-tags-splitter"
+							orient="vertical"
 							collapse="after"
 							zotero-persist="state"
 							onmousemove="if (this.getAttribute('state') == 'dragging') { ZoteroPane.handleTagSelectorResize(); }"

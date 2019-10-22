@@ -105,10 +105,6 @@
 	border-color: #818790;
 	margin: 0;
 	padding: 0;
-	-moz-border-top-colors: none;
-	-moz-border-bottom-colors: none;
-	-moz-border-right-colors: none;
-	-moz-border-left-colors: none;
 }
 
 treechildren::-moz-tree-twisty {

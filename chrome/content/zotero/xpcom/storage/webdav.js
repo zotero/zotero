@@ -188,32 +188,23 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			throw new this.VerificationError("NO_URL");
 		}
 		
-		url = scheme + '://' + url;
-		var dir = "zotero";
 		var username = this.username;
 		var password = this.password;
-		
 		if (!username) {
 			throw new this.VerificationError("NO_USERNAME");
 		}
-		
 		if (!password) {
 			throw new this.VerificationError("NO_PASSWORD");
 		}
 		
-		var ios = Components.classes["@mozilla.org/network/io-service;1"].
-					getService(Components.interfaces.nsIIOService);
-		var uri = ios.newURI(url, null, null);
-		uri.username = encodeURIComponent(username);
-		uri.password = encodeURIComponent(password);
-		if (!uri.spec.match(/\/$/)) {
-			uri.spec += "/";
-		}
-		this._parentURI = uri;
+		url = scheme + '://'
+			+ encodeURIComponent(username) + ':' + encodeURIComponent(password) + '@'
+			+ url
+			+ (url.endsWith('/') ? '' : '/');
 		
-		var uri = uri.clone();
-		uri.spec += "zotero/";
-		this._rootURI = uri;
+		var io = Services.io;
+		this._parentURI = io.newURI(url, null, null);
+		this._rootURI = io.newURI(url + "zotero/", null, null);
 	},
 	
 	
@@ -656,8 +647,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		
 		if (req.status == 207) {
 			// Test if missing files return 404s
-			let missingFileURI = uri.clone();
-			missingFileURI.spec += "nonexistent.prop";
+			let missingFileURI = uri.mutate().setSpec(uri.spec + "nonexistent.prop").finalize();
 			try {
 				req = yield Zotero.HTTP.request(
 					"GET",
@@ -681,8 +671,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			}
 			
 			// Test if Zotero directory is writable
-			let testFileURI = uri.clone();
-			testFileURI.spec += "zotero-test-file.prop";
+			let testFileURI = uri.mutate().setSpec(uri.spec + "zotero-test-file.prop").finalize();
 			req = yield Zotero.HTTP.request("PUT", testFileURI, {
 				body: " ",
 				successCodes: [200, 201, 204],
@@ -765,7 +754,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
 		if (err.url) {
-			var spec = err.url.scheme + '://' + err.url.hostPort + err.url.path;
+			var spec = err.url.scheme + '://' + err.url.hostPort + err.url.pathQueryRef;
 		}
 		
 		var errorTitle, errorMsg;
@@ -784,7 +773,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			
 			case 403:
 				errorTitle = Zotero.getString('general.permissionDenied');
-				errorMsg = Zotero.getString('sync.storage.error.webdav.permissionDenied', err.channel.URI.path)
+				errorMsg = Zotero.getString('sync.storage.error.webdav.permissionDenied', err.channel.URI.pathQueryRef)
 					+ "\n\n" + Zotero.getString('sync.storage.error.checkFileSyncSettings');
 				break;
 			
@@ -851,7 +840,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 							if (e.status == 403) {
 								errorTitle = Zotero.getString('general.permissionDenied');
 								let rootURI = this.rootURI;
-								let rootSpec = rootURI.scheme + '://' + rootURI.hostPort + rootURI.path
+								let rootSpec = rootURI.scheme + '://' + rootURI.hostPort + rootURI.pathQueryRef
 								errorMsg = Zotero.getString('sync.storage.error.permissionDeniedAtAddress')
 									+ "\n\n" + rootSpec + "\n\n"
 									+ Zotero.getString('sync.storage.error.checkFileSyncSettings');
@@ -986,7 +975,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		Zotero.debug("Purging orphaned storage files");
 		
 		var uri = this.rootURI;
-		var path = uri.path;
+		var path = uri.pathQueryRef;
 		
 		var contentTypeXML = { "Content-Type": "text/xml; charset=utf-8" };
 		var xmlstr = "<propfind xmlns='DAV:'><prop>"
@@ -1037,7 +1026,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			if (href.match(/^https?:\/\//)) {
 				let ios = Components.classes["@mozilla.org/network/io-service;1"]
 					.getService(Components.interfaces.nsIIOService);
-				href = ios.newURI(href, null, null).path;
+				href = ios.newURI(href, null, null).pathQueryRef;
 			}
 			
 			let decodedHref = decodeURIComponent(href).normalize();
@@ -1336,9 +1325,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 * @return	{nsIURI}					URI of file on storage server
 	 */
 	_getItemURI: function (item) {
-		var uri = this.rootURI;
-		uri.spec = uri.spec + item.key + '.zip';
-		return uri;
+		return this.rootURI.mutate().setSpec(this.rootURI.spec + item.key + '.zip').finalize();
 	},
 	
 	
@@ -1350,9 +1337,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 * @return	{nsIURI}					URI of property file on storage server
 	 */
 	_getItemPropertyURI: function (item) {
-		var uri = this.rootURI;
-		uri.spec = uri.spec + item.key + '.prop';
-		return uri;
+		return this.rootURI.mutate().setSpec(this.rootURI.spec + item.key + '.prop').finalize();
 	},
 	
 	
@@ -1366,11 +1351,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		if (!uri.spec.match(/\.zip$/)) {
 			return false;
 		}
-		var propURI = uri.clone();
-		propURI.QueryInterface(Components.interfaces.nsIURL);
-		propURI.fileName = uri.fileName.replace(/\.zip$/, '.prop');
-		propURI.QueryInterface(Components.interfaces.nsIURI);
-		return propURI;
+		return uri.mutate().setFilePath(uri.filePath.replace(/\.zip$/, '.prop')).finalize();
 	},
 	
 	
@@ -1408,10 +1389,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		for (let i = 0 ; i < files.length; i++) {
 			let fileName = files[i];
 			funcs.push(Zotero.Promise.coroutine(function* () {
-				var deleteURI = this.rootURI.clone();
-				deleteURI.QueryInterface(Components.interfaces.nsIURL);
-				deleteURI.fileName = fileName;
-				deleteURI.QueryInterface(Components.interfaces.nsIURI);
+				var deleteURI = this.rootURI.mutate().setSpec(this.rootURI.spec + fileName).finalize();
 				try {
 					var req = yield Zotero.HTTP.request(
 						"DELETE",
@@ -1442,6 +1420,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				
 				// If an item file URI, get the property URI
 				var deletePropURI = this._getPropertyURIFromItemURI(deleteURI);
+				// Only nsIURL has fileName
+				deletePropURI.QueryInterface(Ci.nsIURL);
 				
 				// If we already deleted the prop file, skip it
 				if (!deletePropURI || results.deleted.has(deletePropURI.fileName)) {

@@ -90,6 +90,6 @@
 			<separator/>
 		</prefpane>
 		
-		<script src="preferences_proxies.js" type="application/javascript;version=1.8"/>
+		<script src="preferences_proxies.js" type="application/javascript"/>
 	</prefwindow>
 </overlay>

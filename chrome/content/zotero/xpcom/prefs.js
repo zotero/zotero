@@ -24,7 +24,6 @@
 */
 Zotero.Prefs = new function(){
 	// Privileged methods
-	this.init = init;
 	this.get = get;
 	this.set = set;
 	
@@ -32,11 +31,10 @@ Zotero.Prefs = new function(){
 	this.unregister = unregister;
 	this.observe = observe;
 	
-	// Public properties
-	this.prefBranch;
+	this.rootBranch = Services.prefs.getBranch("");
 	
-	function init(){
-		this.prefBranch = Services.prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
+	this.init = async function init() {
+		await loadExtensionDefaults();
 		
 		// Register observer to handle pref changes
 		this.register();
@@ -87,24 +85,39 @@ Zotero.Prefs = new function(){
 	**/
 	function get(pref, global){
 		try {
-			if (global) {
-				var branch = Services.prefs.getBranch("");
-			}
-			else {
-				var branch = this.prefBranch;
-			}
+			pref = global ? pref : ZOTERO_CONFIG.PREF_BRANCH + pref;
+			let branch = this.rootBranch;
 			
+			let value;
 			switch (branch.getPrefType(pref)){
 				case branch.PREF_BOOL:
-					return branch.getBoolPref(pref);
+					value = branch.getBoolPref(pref);
+					break;
+				
 				case branch.PREF_STRING:
-					return '' + branch.getComplexValue(pref, Components.interfaces.nsISupportsString);
+					// Pre-Fx59
+					if (!branch.getStringPref) {
+						value = '' + branch.getComplexValue(pref, Components.interfaces.nsISupportsString);
+					}
+					else {
+						value = branch.getStringPref(pref);
+					}
+					break;
+				
 				case branch.PREF_INT:
-					return branch.getIntPref(pref);
+					value = branch.getIntPref(pref);
+					break;
 			}
+			
+			return value;
 		}
-		catch (e){
-			throw new Error("Invalid preference '" + pref + "'");
+		catch (e) {
+			// If debug system isn't yet initialized, log proper error
+			if (Zotero.Debug.enabled === undefined) {
+				dump(e + "\n\n");
+			}
+			Zotero.logError(e);
+			throw new Error(`Error getting preference '${pref}'`);
 		}
 	}
 	
@@ -114,21 +127,21 @@ Zotero.Prefs = new function(){
 	**/
 	function set(pref, value, global) {
 		try {
-			if (global) {
-				var branch = Services.prefs.getBranch("");
-			}
-			else {
-				var branch = this.prefBranch;
-			}
+			pref = global ? pref : ZOTERO_CONFIG.PREF_BRANCH + pref;
+			let branch = this.rootBranch;
 			
 			switch (branch.getPrefType(pref)) {
 				case branch.PREF_BOOL:
 					return branch.setBoolPref(pref, value);
 				case branch.PREF_STRING:
-					let str = Cc["@mozilla.org/supports-string;1"]
-						.createInstance(Ci.nsISupportsString);
-					str.data = value;
-					return branch.setComplexValue(pref, Ci.nsISupportsString, str);
+					// Pre-Fx59
+					if (!branch.setStringPref) {
+						let str = Cc["@mozilla.org/supports-string;1"]
+							.createInstance(Ci.nsISupportsString);
+						str.data = value;
+						return branch.setComplexValue(pref, Ci.nsISupportsString, str);
+					}
+					return branch.setStringPref(pref, value);
 				case branch.PREF_INT:
 					return branch.setIntPref(pref, value);
 				
@@ -140,7 +153,14 @@ Zotero.Prefs = new function(){
 					}
 					if (typeof value == 'string') {
 						Zotero.debug("Creating string pref '" + pref + "'");
-						return branch.setCharPref(pref, value);
+						// Pre-Fx59
+						if (!branch.setStringPref) {
+							let str = Cc["@mozilla.org/supports-string;1"]
+								.createInstance(Ci.nsISupportsString);
+							str.data = value;
+							return branch.setComplexValue(pref, Ci.nsISupportsString, str);
+						}
+						return branch.setStringPref(pref, value);
 					}
 					if (parseInt(value) == value) {
 						Zotero.debug("Creating integer pref '" + pref + "'");
@@ -150,32 +170,36 @@ Zotero.Prefs = new function(){
 			}
 		}
 		catch (e) {
+			// If debug system isn't yet initialized, log proper error
+			if (Zotero.Debug.enabled === undefined) {
+				dump(e + "\n\n");
+			}
 			Zotero.logError(e);
-			throw new Error("Invalid preference '" + pref + "'");
+			throw new Error(`Error setting preference '${pref}'`);
 		}
 	}
 	
 	
 	this.clear = function (pref, global) {
-		if (global) {
-			var branch = Services.prefs.getBranch("");
-		}
-		else {
-			var branch = this.prefBranch;
-		}
-		branch.clearUserPref(pref);
+		pref = global ? pref : ZOTERO_CONFIG.PREF_BRANCH + pref;
+		this.rootBranch.clearUserPref(pref);
 	}
 	
 	
-	this.resetBranch = function (exclude = []) {
-		var keys = this.prefBranch.getChildList("", {});
+	/**
+	 * @param {String[]} [exclude]
+	 * @param {String} [branch] - Name of pref branch, ending with a period
+	 */
+	this.resetBranch = function (exclude = [], branch) {
+		var branch = Services.prefs.getBranch(branch || ZOTERO_CONFIG.PREF_BRANCH);
+		var keys = branch.getChildList("", {});
 		for (let key of keys) {
-			if (this.prefBranch.prefHasUserValue(key)) {
+			if (branch.prefHasUserValue(key)) {
 				if (exclude.includes(key)) {
 					continue;
 				}
 				Zotero.debug("Clearing " + key);
-				this.prefBranch.clearUserPref(key);
+				branch.clearUserPref(key);
 			}
 		}
 	};
@@ -236,7 +260,7 @@ Zotero.Prefs = new function(){
 	// Methods to register a preferences observer
 	//
 	function register(){
-		this.prefBranch.addObserver("", this, false);
+		this.rootBranch.addObserver("", this, false);
 		
 		// Register pre-set handlers
 		for (var i=0; i<_handlers.length; i++) {
@@ -245,10 +269,10 @@ Zotero.Prefs = new function(){
 	}
 	
 	function unregister(){
-		if (!this.prefBranch){
+		if (!this.rootBranch){
 			return;
 		}
-		this.prefBranch.removeObserver("", this);
+		this.rootBranch.removeObserver("", this);
 	}
 	
 	/**
@@ -264,7 +288,7 @@ Zotero.Prefs = new function(){
 		var obs = _observers[data];
 		for (var i=0; i<obs.length; i++) {
 			try {
-				obs[i](this.get(data));
+				obs[i](this.get(data, true));
 			}
 			catch (e) {
 				Zotero.debug("Error while executing preference observer handler for " + data);
@@ -277,11 +301,14 @@ Zotero.Prefs = new function(){
 	var _observersBySymbol = {};
 	
 	/**
-	 * @param {String} name - Preference name on extensions.zotero branch
+	 * @param {String} name - Preference name; if not global, this is on the extensions.zotero branch
 	 * @param {Function} handler
+	 * @param {Boolean} [global]
 	 * @return {Symbol} - Symbol to pass to unregisterObserver()
 	 */
-	this.registerObserver = function (name, handler) {
+	this.registerObserver = function (name, handler, global) {
+		name = global ? name : ZOTERO_CONFIG.PREF_BRANCH + name;
+		
 		var symbol = Symbol();
 		_observers[name] = _observers[name] || [];
 		_observers[name].push(handler);
@@ -308,5 +335,109 @@ Zotero.Prefs = new function(){
 			return;
 		}
 		obs.splice(i, 1);
+	}
+	
+	
+	/**
+	 * Firefox 60 no longer loads default preferences for extensions, so do it manually
+	 */
+	async function loadExtensionDefaults() {
+		var defaultBranch = Services.prefs.getDefaultBranch("");
+		
+		return new Zotero.Promise(function (resolve) {
+			Cu.import("resource://gre/modules/AddonManager.jsm");
+			
+			// Lines are in format `pref("[key]", [val]);`, so define a function to be called that
+			// sets the defaults
+			function pref(key, value) {
+				switch (typeof value) {
+					case "boolean":
+						defaultBranch.setBoolPref(key, value);
+						break;
+					case "number":
+						defaultBranch.setIntPref(key, value);
+						break;
+					case "string":
+						defaultBranch.setStringPref(key, value);
+						break;
+				}
+			}
+			
+			function readDefaults(contents) {
+				let re = /^\s*pref\s*\(\s*['"]([a-zA-Z0-9_\-.]+)['"]\s*,\s*["']?.*["']?\s*\)\s*;\s*$/;
+				let lines = contents.split(/\n/g).filter(line => re.test(line));
+				for (let line of lines) {
+					try {
+						eval(line);
+					}
+					catch (e) {
+						dump(e + "\n\n");
+						Components.utils.reportError(e);
+					}
+				}
+			}
+			
+			AddonManager.getAllAddons(async function(addons) {
+				var reusableStreamInstance = Cc['@mozilla.org/scriptableinputstream;1']
+					.createInstance(Ci.nsIScriptableInputStream);
+				
+				for (let addon of addons) {
+					if (!addon.isActive) {
+						continue;
+					}
+					
+					try {
+						let path = OS.Path.fromFileURI(addon.getResourceURI().spec);
+						
+						// Directory
+						if ((await OS.File.stat(path)).isDir) {
+							let dir = OS.Path.join(path, 'defaults', 'preferences');
+							if (await OS.File.exists(dir)) {
+								await Zotero.File.iterateDirectory(dir, async function (entry) {
+									if (!entry.name.endsWith('.js')) return;
+									readDefaults(Zotero.File.getContents(entry.path));
+								});
+							}
+						}
+						// XPI
+						else {
+							let file = Zotero.File.pathToFile(path);
+							let zipReader = Components.classes["@mozilla.org/libjar/zip-reader;1"].
+								createInstance(Components.interfaces.nsIZipReader);
+							try {
+								try {
+									zipReader.open(file);
+									zipReader.test(null);
+								}
+								catch (e) {
+									Zotero.logError(path + " is not a valid ZIP file");
+									continue;
+								}
+								
+								let entries = zipReader.findEntries('defaults/preferences/*.js');
+								while (entries.hasMore()) {
+									let entryName = entries.getNext();
+									let entry = zipReader.getEntry(entryName);
+									
+									if (!entry.isDirectory) {
+										let inputStream = zipReader.getInputStream(entryName);
+										reusableStreamInstance.init(inputStream);
+										readDefaults(reusableStreamInstance.read(entry.realSize));
+									}
+								}
+							}
+							finally {
+								zipReader.close();
+							}
+						}
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+				}
+				
+				resolve();
+			});
+		});
 	}
 }

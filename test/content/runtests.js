@@ -267,7 +267,7 @@ if(run && ZoteroUnit.tests) {
 
 	for(var fname of testFiles) {
 		var el = document.createElement("script");
-		el.type = "application/javascript;version=1.8";
+		el.type = "application/javascript";
 		el.src = "resource://zotero-unit-tests/"+fname;
 		el.async = false;
 		document.body.appendChild(el);

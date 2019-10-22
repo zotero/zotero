@@ -214,10 +214,11 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 	var onRow = null;
 	// If there's a result callback (e.g., for sorting), don't use a row handler
 	if (!resultsCallback) {
-		onRow = function (row) {
+		onRow = function (row, cancel) {
 			if (this._cancelled) {
 				Zotero.debug("Cancelling query");
-				throw StopIteration;
+				cancel();
+				return;
 			}
 			var result = row.getResultByIndex(0);
 			var comment = row.getResultByIndex(1);

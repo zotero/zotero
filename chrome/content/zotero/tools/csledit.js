@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+import FilePicker from 'zotero/filePicker';
+
 var Zotero_CSL_Editor = new function() {
 	this.init = init;
 	this.handleKeyPress = handleKeyPress;
@@ -83,13 +85,11 @@ var Zotero_CSL_Editor = new function() {
 		this.generateBibliography(this.loadStyleFromEditor());
 	}
 	
-	this.save = function() {
+	this.save = async function () {
 		var editor = document.getElementById('zotero-csl-editor');
 		var style = editor.value;
-		const nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-			.createInstance(nsIFilePicker);
-		fp.init(window, Zotero.getString('styles.editor.save'), nsIFilePicker.modeSave);
+		var fp = new FilePicker();
+		fp.init(window, Zotero.getString('styles.editor.save'), fp.modeSave);
 		fp.appendFilter("Citation Style Language", "*.csl");
 		//get the filename from the id; we could consider doing even more here like creating the id from filename. 
 		var parser = new DOMParser();
@@ -102,10 +102,10 @@ var Zotero_CSL_Editor = new function() {
 		else {
 			fp.defaultString = "untitled.csl";
 		}
-		var rv = fp.show();
-		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {				
-			var outputFile = fp.file;
-			Zotero.File.putContents(outputFile, style);
+		var rv = await fp.show();
+		if (rv == fp.returnOK || rv == fp.returnReplace) {
+			let outputFile = fp.file;
+			Zotero.File.putContentsAsync(outputFile, style);
 		}
 	};
 	
