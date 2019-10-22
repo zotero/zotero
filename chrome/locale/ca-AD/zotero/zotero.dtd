@@ -98,8 +98,8 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaura a la biblioteca">
 <!ENTITY zotero.items.menu.duplicateItem "Duplica l&apos;element seleccionat">
 <!ENTITY zotero.items.menu.mergeItems "Combina els elements...">
-<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
+<!ENTITY zotero.items.menu.unrecognize "Desfés les metadades recuperades">
+<!ENTITY zotero.items.menu.reportMetadata "Informa de metadades incorrectes">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Triaeu la versió de l'element com a element prinicpal:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Seleccioneu els camps que voleu mantenir de les altres versions de l'element:">
@@ -143,9 +143,9 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Intercanvia nom i cognoms">
 <!ENTITY zotero.item.viewOnline "Mira en línia">
 <!ENTITY zotero.item.copyAsURL "Copia com a URL">
-<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
+<!ENTITY zotero.item.deletePermanently "Elimina permanentment…">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "Suprimeix totes les etiquetes…">
 
 <!ENTITY zotero.toolbar.newNote "Nota nova">
 <!ENTITY zotero.toolbar.note.standalone "Nova nota independent">
@@ -160,7 +160,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "S'estan carregant les etiquetes…">
 <!ENTITY zotero.tagSelector.showAutomatic "Mostra automàtic">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Mostra totes les etiquetes a la biblioteca">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Elimina automàticament les etiquetes en aquesta biblioteca…">
 <!ENTITY zotero.tagSelector.clearAll "Desselecciona-ho tot">
 <!ENTITY zotero.tagSelector.assignColor "Assigna color...">
 <!ENTITY zotero.tagSelector.renameTag "Reanomena l'etiqueta...">
@@ -200,14 +200,14 @@
 <!ENTITY zotero.progress.title "Progrés">
 
 <!ENTITY zotero.import "Importa">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.whereToImportFrom "D'on voldríeu importar?">
+<!ENTITY zotero.import.source.file "Un fitxer (BibTex, RIS, Zotero RDF, etc.)">
 <!ENTITY zotero.import.importing "S'està important…">
 <!ENTITY zotero.import.database "Base de dades">
 <!ENTITY zotero.import.lastModified "Darrera modificació">
 <!ENTITY zotero.import.size "Mida">
-<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.createCollection "Col·loca les col·leccions importades i elements en una col·lecció nova">
+<!ENTITY zotero.import.fileHandling "Gestió de fitxers">
 
 <!ENTITY zotero.exportOptions.title "Exporta...">
 <!ENTITY zotero.exportOptions.format.label "Format:">
@@ -241,16 +241,16 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Emmagatzema les cites com:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Adreces d&apos;interès">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Les adreces d'interès poden compartir-se entre Word i LibreOffice, però poden causar errors si es modifiquen accidentalment i no poden inserir-se en les notes de peu de pàgina.">
 
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Actualitza automàticament les cites">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Les cites amb actualitzacions pendents es ressaltaran en el document">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Inhabilitar les actualitzacions pot accelerar la inserció de cites en els documents més grans. Feu clic a Refresca per a actualitzar les cites manualment.">
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Utilitza les abreviacions de revista de MEDLINE">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "S'ignorarà el camp «Journal Abbr».">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "Canvia a un processador de textos diferent…">
 
 <!ENTITY zotero.integration.showEditor.label "Mostra l'editor">
 <!ENTITY zotero.integration.classicView.label "Vista clàssica">
@@ -289,9 +289,9 @@
 <!ENTITY zotero.feedSettings.title.label "Títol:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Actualitza el canal cada">
 <!ENTITY zotero.feedSettings.refresh.label2 "hora/es">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Suprimeix els elements de canal no llegits després de">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "dia/es">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Suprimeix els elements de canal llegits després de">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "dia/es">
 
 <!ENTITY zotero.rtfScan.title "Escaneig de l'RTF">

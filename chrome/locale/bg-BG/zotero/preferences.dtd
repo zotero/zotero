@@ -126,7 +126,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Изтегляне на допълнителни стилове">
 
-<!ENTITY zotero.preferences.keys.openZotero "Отваряне/Затваряне на Панела на Зотеро">
 <!ENTITY zotero.preferences.keys.saveToZotero "Запазване в Зотеро (икона в адресната лента)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Превключване в режим на цял екран">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Фокусиране на панел Библиотеки">

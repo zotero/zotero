@@ -18,9 +18,9 @@
 <!ENTITY zotero.general.close "أغلق">
 <!ENTITY zotero.general.minimize "تصغير">
 <!ENTITY zotero.general.other "غير ذلك...">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.bigger "أكبر">
+<!ENTITY zotero.general.smaller "أصغر">
+<!ENTITY zotero.general.reset "اعادة ضبط">
 
 
 <!ENTITY zotero.errorReport.title "تقرير خطأ لزوتيرو">
@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "عرض التكرارات">
 <!ENTITY zotero.collections.showUnfiledItems "عرض العناصر غير المصنفة">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "إظهار العناصر المستردة">
 
 <!ENTITY zotero.items.itemType "نوع العنصر">
 <!ENTITY zotero.items.type_column "نوع العنصر">
@@ -207,7 +207,7 @@
 <!ENTITY zotero.import.lastModified "آخر تعديل">
 <!ENTITY zotero.import.size "حجم">
 <!ENTITY zotero.import.createCollection "ضع المجموعات المستوردة والمواد في مجموعة جديدة">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "معاملة الملف">
 
 <!ENTITY zotero.exportOptions.title "تصدير...">
 <!ENTITY zotero.exportOptions.format.label "الصياغة:">
@@ -250,7 +250,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "استخدام اختصارات دورية ميدلين">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "سيتم تجاهل حقل &quot;اختصار المجلة&quot;.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "التبديل إلى معالج نصوص آخر ...">
 
 <!ENTITY zotero.integration.showEditor.label "عرض المحرر">
 <!ENTITY zotero.integration.classicView.label "عرض تقليدي">

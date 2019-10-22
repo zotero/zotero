@@ -126,7 +126,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Meer stijlen ophalen">
 
-<!ENTITY zotero.preferences.keys.openZotero "Openen/Sluiten van Zotero-venster">
 <!ENTITY zotero.preferences.keys.saveToZotero "Sla op naar Zotero (adresbalk icoon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Volledige schermweergave">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Breng venster Bibliotheken naar voren">

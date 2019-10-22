@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.items "elements">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Configuració">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.custom "Personalitza…">
 
 <!ENTITY zotero.preferences.prefpane.general "General">
 
@@ -40,7 +40,7 @@
 <!ENTITY zotero.preferences.feeds.feedDefaults "Paràmetres per defecte dels canals">
 
 <!ENTITY zotero.preferences.openurl.search "Cerca resolutors">
-<!ENTITY zotero.preferences.openurl.custom "Custom…">
+<!ENTITY zotero.preferences.openurl.custom "Personalitza…">
 <!ENTITY zotero.preferences.openurl.server "Resolutor:">
 <!ENTITY zotero.preferences.openurl.version "Versió:">
 
@@ -54,7 +54,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Has oblidat la contrasenya?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronitza automàticament">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Sincronitza el contingut de text complet">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "El Zotero pot sincronitzar el contingut de text dels fitxers en les vostres biblioteques de Zotero amb zotero.org i altres dispositius vinculats, permetent-vos així cercar fàcilment en els vostres fitxers allà on sigueu. El contingut de text dels vostres fitxers no es compartirà públicament.">
 <!ENTITY zotero.preferences.sync.about "Quant a la sincronització">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sincronització dels fitxers">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Trieu les biblioteques…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sincronitza">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Biblioteca">
-<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Les operacions següents només s'utilitzen en situacions molt rares i específiques i no s'haurien d'emprar per a la resolució general dels problemes. En molts casos, el reinici causarà problemes addicionals. Consulteu">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sincronitza les opcions de reinicialització">
 <!ENTITY zotero.preferences.sync.reset.warning3 "per obtenir més informació.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reinicia l'historial de sincronització de dades">
@@ -126,7 +126,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Aconsegueix estils addicionals…">
 
-<!ENTITY zotero.preferences.keys.openZotero "Obre/Tanca el Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Desa al Zotero (icona de la barra d'adreces)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Commuta a pantalla completa">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Enfoca la subfinestra de les biblioteques">
@@ -174,7 +173,7 @@
 <!ENTITY zotero.preferences.locate.description "Descripció">
 <!ENTITY zotero.preferences.locate.name "Nom">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Un motor de cerca estén la capacitat del desplegable de localització en el panell d'informació. Quan habiliteu els motors de cerca a la llista, s'afegiran a la llista desplegable i es podran fer servir per localitzar els recursos de la vostra biblioteca al web.">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
+<!ENTITY zotero.preferences.locate.addDescription "Per a afegir un motor de consulta que no és a la llista, visiteu el motor de cerca desitjat al vostre navegador i seleccioneu «Afegeix» des del menú de Cerca.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restaura els valors predeterminats">
 
 <!ENTITY zotero.preferences.charset "Codificació de caràcters">
@@ -189,8 +188,8 @@
 <!ENTITY zotero.preferences.dataDir.reveal "Mostra el directori de dades">
 <!ENTITY zotero.preferences.dataDir.migrate "Migra a una nova ubicació per defecte…">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Directori base de les adjuncions enllaçades">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "El Zotero utilitzarà camins relatius per a les adjuncions de fitxer enllaçades en el directori base, permetent-vos accedir als vostres fitxers des de diferents ordinadors sempre que l'estructura de fitxers en el directori base sigui la mateixa.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Directori base:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Tria...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Reverteix a camins absoluts…">

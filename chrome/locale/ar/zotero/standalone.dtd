@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "عرض">
+<!ENTITY layout.label "تخطيط">
+<!ENTITY standardView.label "عرض قياسي">
+<!ENTITY stackedView.label "عرض مرصوص">
+<!ENTITY collectionsPane.label "جزء مجموعة العناصر">
+<!ENTITY itemPane.label "جزء عنصر">
+<!ENTITY tagSelector.label "مختار الوسوم">
+<!ENTITY recursiveCollections.label "إظهار العناصر من المجموعات الفرعية">
+<!ENTITY fontSize.label "حجم الخط">
+<!ENTITY noteFontSize.label "حجم خط الملاحظات">
 
 
 <!ENTITY toolsMenu.label "أدوات">
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "ثبت موصل المتصفح">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "ملحقات">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "المطور">
 
 
 <!ENTITY minimizeWindow.key "m">

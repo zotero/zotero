@@ -126,7 +126,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
-<!ENTITY zotero.preferences.keys.openZotero "Ireki/Itxi Zotero panela">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Pantaila osoa bai/ez">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">

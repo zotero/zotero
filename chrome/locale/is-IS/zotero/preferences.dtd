@@ -126,7 +126,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "Tilvísunarmál - CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Ná í viðbótarstíla…">
 
-<!ENTITY zotero.preferences.keys.openZotero "Opna/Loka Zotero svæði">
 <!ENTITY zotero.preferences.keys.saveToZotero "Vista í Zotero (tákn birt í vefslóðareit)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Víxla úr og í heilskjásham">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Áhersla á safnaglugga">
