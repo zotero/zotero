@@ -9,7 +9,7 @@
 <!ENTITY undoCmd.accesskey         "G">
 <!ENTITY redoCmd.label             "Yinele">
 <!ENTITY redoCmd.key               "Y">
-<!ENTITY redoCmd.accesskey         "Y">
+<!ENTITY redoCmd.accesskey         "n">
 <!ENTITY cutCmd.label              "Kes">
 <!ENTITY cutCmd.key                "X">
 <!ENTITY cutCmd.accesskey          "K">
@@ -23,7 +23,7 @@
 <!ENTITY deleteCmd.accesskey       "S">
 <!ENTITY selectAllCmd.label        "Tümünü seç">
 <!ENTITY selectAllCmd.key          "A">
-<!ENTITY selectAllCmd.accesskey    "T">
+<!ENTITY selectAllCmd.accesskey    "ü">
 <!ENTITY findCmd.label             "Bul">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "B">

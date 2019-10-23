@@ -565,16 +565,12 @@ Zotero.Schema = new function(){
 		if (!data) {
 			throw new Error("Data not provided");
 		}
-		var locale = data.locales[Zotero.locale];
-		if (!locale) {
-			Zotero.warn(`Locale ${Zotero.locale} not found in global schema locales`);
-			locale = data.locales['en-US'];
-			if (!locale) {
-				throw new Error("en-US locale not found in global schema locales");
-			}
-		}
 		Zotero.Schema.globalSchemaVersion = data.version;
-		Zotero.Schema.globalSchemaLocale = locale;
+		var locale = Zotero.Utilities.Internal.resolveLocale(
+			Zotero.locale,
+			Object.keys(data.locales)
+		);
+		Zotero.Schema.globalSchemaLocale = data.locales[locale];
 		Zotero.Schema.globalSchemaMeta = data.meta;
 		Zotero.Schema.CSL_TYPE_MAPPINGS = {};
 		Zotero.Schema.CSL_TYPE_MAPPINGS_REVERSE = {};

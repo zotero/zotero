@@ -9,7 +9,7 @@
 <!ENTITY undoCmd.accesskey         "D">
 <!ENTITY redoCmd.label             "Refazer">
 <!ENTITY redoCmd.key               "Y">
-<!ENTITY redoCmd.accesskey         "r">
+<!ENTITY redoCmd.accesskey         "R">
 <!ENTITY cutCmd.label              "Cortar">
 <!ENTITY cutCmd.key                "X">
 <!ENTITY cutCmd.accesskey          "t">

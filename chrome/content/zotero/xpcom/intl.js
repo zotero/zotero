@@ -31,6 +31,25 @@ Zotero.Intl = new function () {
 
 	// Get settings from language pack (extracted by zotero-build/locale/merge_mozilla_files)
 	this.init = function () {
+		var prevMatchOS = Zotero.Prefs.get('intl.locale.matchOS', true);
+		var prevLocale = Zotero.Prefs.get('general.useragent.locale', true);
+		
+		if (prevMatchOS !== undefined || prevLocale !== undefined) {
+			if (prevMatchOS) {
+				Services.locale.setRequestedLocales([]);
+			}
+			else if (prevLocale) {
+				try {
+					Services.locale.setRequestedLocales([prevLocale]);
+				}
+				catch (e) {
+					// Don't panic if the value is not a valid locale code
+				}
+			}
+			Zotero.Prefs.clear('intl.locale.matchOS', true);
+			Zotero.Prefs.clear('general.useragent.locale', true);
+        }
+		
 		Components.utils.import("resource://gre/modules/PluralForm.jsm");
 
 		bundle = Services.strings.createBundle('chrome://zotero/locale/zotero.properties');
@@ -39,7 +58,7 @@ Zotero.Intl = new function () {
 		[pluralFormGet, pluralFormNumForms] = PluralForm.makeGetter(parseInt(getIntlProp('pluralRule', 1)));
 		setOrClearIntlPref('intl.accept_languages', 'string');
 
-		Zotero.locale = getIntlProp('general.useragent.locale', 'en-US');
+		Zotero.locale = Services.locale.getRequestedLocale();
 
 		// Also load the brand as appName
 		Zotero.appName = Services.strings

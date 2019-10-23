@@ -1,15 +1,7 @@
-<!--
-# Translator(s):
-#
-# nicubunu <nicubunu@gmail.com>
-#
--->
-<!--
-# Reviewer(s):
-#
-# alexxed <alexxed@gmail.com>
-#
--->
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
 <!ENTITY editMenu.label            "Editare">
 <!ENTITY editMenu.accesskey        "E">
 <!ENTITY undoCmd.label             "Anulează">
@@ -34,12 +26,10 @@
 <!ENTITY selectAllCmd.accesskey    "a">
 <!ENTITY findCmd.label             "Caută">
 <!ENTITY findCmd.key               "F">
-<!ENTITY findCmd.accesskey         "C">
-<!ENTITY findAgainCmd.label        "Caută din nou">
+<!ENTITY findCmd.accesskey         "F">
+<!ENTITY findAgainCmd.label        "Găsește din nou">
 <!ENTITY findAgainCmd.key          "G">
 <!ENTITY findAgainCmd.key2         "VK_F3">
-<!ENTITY findAgainCmd.accesskey    "d">
-<!ENTITY findPreviousCmd.label     "Caută înapoi">
-<!ENTITY findPreviousCmd.accesskey "p">
-
-
+<!ENTITY findAgainCmd.accesskey    "G">
+<!ENTITY findPreviousCmd.label     "Găsește anterior">
+<!ENTITY findPreviousCmd.accesskey "n">

@@ -1,4 +1,4 @@
-﻿<!ENTITY preferencesCmd2.label       "Tùy chỉnh">
-<!ENTITY preferencesCmd2.accesskey     "y">
+﻿<!ENTITY preferencesCmd2.label       "Tùy chọn">
+<!ENTITY preferencesCmd2.accesskey     "O">
 <!ENTITY preferencesCmdUnix.label       "Tùy chỉnh">
-<!ENTITY preferencesCmdUnix.accesskey     "y"> 
+<!ENTITY preferencesCmdUnix.accesskey     "n">

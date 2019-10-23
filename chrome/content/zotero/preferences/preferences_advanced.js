@@ -470,22 +470,18 @@ Zotero_Preferences.Advanced = {
 	
 	
 	refreshLocale: function () {
-		var matchOS = Zotero.Prefs.get('intl.locale.matchOS', true);
+		var requestedLocale = Services.locale.getRequestedLocale();
 		var autoLocaleName, currentValue;
 		
 		// If matching OS, get the name of the current locale
-		if (matchOS) {
+		if (Zotero.Prefs.get('intl.regional_prefs.use_os_locales', true)) {
 			autoLocaleName = this._getAutomaticLocaleMenuLabel();
 			currentValue = 'automatic';
 		}
 		// Otherwise get the name of the locale specified in the pref
 		else {
-			let branch = Services.prefs.getBranch("");
-			let locale = branch.getComplexValue(
-				'general.useragent.locale', Components.interfaces.nsIPrefLocalizedString
-			);
 			autoLocaleName = Zotero.getString('zotero.preferences.locale.automatic');
-			currentValue = locale;
+			currentValue = requestedLocale;
 		}
 		
 		// Populate menu
@@ -503,19 +499,20 @@ Zotero_Preferences.Advanced = {
 	},
 	
 	onLocaleChange: function () {
+		var requestedLocale = Services.locale.getRequestedLocale();
 		var menu = document.getElementById('locale-menu');
 		if (menu.value == 'automatic') {
 			// Changed if not already set to automatic (unless we have the automatic locale name,
 			// meaning we just switched away to the same manual locale and back to automatic)
-			var changed = !Zotero.Prefs.get('intl.locale.matchOS', true)
-				&& menu.label != this._getAutomaticLocaleMenuLabel();
-			Zotero.Prefs.set('intl.locale.matchOS', true, true);
+			var changed = requestedLocale && menu.label != this._getAutomaticLocaleMenuLabel();
+			Services.locale.setRequestedLocales([]);
+			Zotero.Prefs.clear('intl.regional_prefs.use_os_locales', true);
 		}
 		else {
 			// Changed if moving to a locale other than the current one
 			var changed = Zotero.locale != menu.value
-			Zotero.Prefs.set('intl.locale.matchOS', false, true);
-			Zotero.Prefs.set('general.useragent.locale', menu.value, true);
+			Services.locale.setRequestedLocales([menu.value]);
+			Zotero.Prefs.set('intl.regional_prefs.use_os_locales', false, true);
 		}
 		
 		if (!changed) {

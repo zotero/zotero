@@ -28,7 +28,7 @@
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "I">
 <!ENTITY findAgainCmd.label        "Ieškoti toliau">
-<!ENTITY findAgainCmd.key          "o">
+<!ENTITY findAgainCmd.key          "G">
 <!ENTITY findAgainCmd.key2         "VK_F3">
 <!ENTITY findAgainCmd.accesskey    "o">
 <!ENTITY findPreviousCmd.label     "Ieškoti ankstesnio">

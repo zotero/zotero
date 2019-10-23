@@ -11,25 +11,25 @@
 <!ENTITY redoCmd.key               "Y">
 <!ENTITY redoCmd.accesskey         "R">
 <!ENTITY cutCmd.label              "Cortar">
-<!ENTITY cutCmd.key                "x">
+<!ENTITY cutCmd.key                "X">
 <!ENTITY cutCmd.accesskey          "t">
 <!ENTITY copyCmd.label             "Copiar">
-<!ENTITY copyCmd.key               "c">
+<!ENTITY copyCmd.key               "C">
 <!ENTITY copyCmd.accesskey         "C">
 <!ENTITY pasteCmd.label            "Colar">
-<!ENTITY pasteCmd.key              "v">
+<!ENTITY pasteCmd.key              "V">
 <!ENTITY pasteCmd.accesskey        "o">
 <!ENTITY deleteCmd.label           "Excluir">
 <!ENTITY deleteCmd.accesskey       "x">
 <!ENTITY selectAllCmd.label        "Selecionar tudo">
-<!ENTITY selectAllCmd.key          "a">
+<!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "S">
-<!ENTITY findCmd.label             "Localizar">
-<!ENTITY findCmd.key               "f">
-<!ENTITY findCmd.accesskey         "z">
-<!ENTITY findAgainCmd.label        "Localizar próxima">
-<!ENTITY findAgainCmd.key          "g">
+<!ENTITY findCmd.label             "Procurar">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "P">
+<!ENTITY findAgainCmd.label        "Procurar próximo">
+<!ENTITY findAgainCmd.key          "G">
 <!ENTITY findAgainCmd.key2         "VK_F3">
-<!ENTITY findAgainCmd.accesskey    "L">
-<!ENTITY findPreviousCmd.label     "Localizar anterior">
+<!ENTITY findAgainCmd.accesskey    "x">
+<!ENTITY findPreviousCmd.label     "Procurar anterior">
 <!ENTITY findPreviousCmd.accesskey "a">

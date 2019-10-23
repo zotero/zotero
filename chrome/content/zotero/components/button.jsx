@@ -2,7 +2,7 @@
 
 const React = require('react')
 const { PureComponent, createElement: create } = React
-const { injectIntl, intlShape } = require('react-intl')
+const { injectIntl } = require('react-intl')
 const { IconDownChevron } = require('./icons')
 const cx = require('classnames')
 const {
@@ -108,7 +108,6 @@ class Button extends PureComponent {
 	static propTypes = {
 		className: string,
 		icon: element,
-		intl: intlShape.isRequired,
 		isActive: bool,
 		isDisabled: bool,
 		isMenu: bool,

@@ -1385,6 +1385,48 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
+	resolveLocale: function (locale, locales) {
+		// If the locale exists as-is, use it
+		if (locales.includes(locale)) {
+			return locale;
+		}
+		
+		// If there's a locale with just the language, use that
+		var langCode = locale.substr(0, 2);
+		if (locales.includes(langCode)) {
+			return langCode;
+		}
+		
+		// Find locales matching language
+		var possibleLocales = locales.filter(x => x.substr(0, 2) == langCode);
+		
+		// If none, use en-US
+		if (!possibleLocales.length) {
+			if (!locales.includes('en-US')) {
+				throw new Error("Locales not available");
+			}
+			Zotero.logError(`Locale ${locale} not found`);
+			return 'en-US';
+		}
+		
+		possibleLocales.sort(function (a, b) {
+			if (a == 'en-US') return -1;
+			if (b == 'en-US') return 1;
+			
+			// Prefer canonical country (e.g., pt-PT over pt-BR)
+			if (a.substr(0, 2) == a.substr(3, 2).toLowerCase()) {
+				return -1;
+			}
+			if (b.substr(0, 2) == b.substr(3, 2).toLowerCase()) {
+				return 1;
+			}
+			
+			return a.substr(3, 2).localeCompare(b.substr(3, 2));
+		});
+		return possibleLocales[0];
+	},
+	
+	
 	/**
 	 * Get the next available numbered name that matches a base name, for use when duplicating
 	 *

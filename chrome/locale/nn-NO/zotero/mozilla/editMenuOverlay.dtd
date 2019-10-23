@@ -4,7 +4,7 @@
 
 <!ENTITY editMenu.label            "Rediger">
 <!ENTITY editMenu.accesskey        "R">
-<!ENTITY undoCmd.label             "Angra">
+<!ENTITY undoCmd.label             "Angre">
 <!ENTITY undoCmd.key               "Z">
 <!ENTITY undoCmd.accesskey         "A">
 <!ENTITY redoCmd.label             "Gjer om">
@@ -31,5 +31,5 @@
 <!ENTITY findAgainCmd.key          "G">
 <!ENTITY findAgainCmd.key2         "VK_F3">
 <!ENTITY findAgainCmd.accesskey    "i">
-<!ENTITY findPreviousCmd.label     "Søk etter førre">
+<!ENTITY findPreviousCmd.label     "Søk etter føregåande">
 <!ENTITY findPreviousCmd.accesskey "f">

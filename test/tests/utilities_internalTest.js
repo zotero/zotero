@@ -338,6 +338,54 @@ describe("Zotero.Utilities.Internal", function () {
 		});
 	});
 	
+	describe("#resolveLocale()", function () {
+		var availableLocales;
+		
+		before(function () {
+			availableLocales = Services.locale.getAvailableLocales();
+		});
+		
+		function resolve(locale) {
+			return Zotero.Utilities.Internal.resolveLocale(locale, availableLocales);
+		}
+		
+		it("should return en-US for en-US", function () {
+			assert.equal(resolve('en-US'), 'en-US');
+		});
+		
+		it("should return en-US for en", function () {
+			assert.equal(resolve('en'), 'en-US');
+		});
+		
+		it("should return fr-FR for fr-FR", function () {
+			assert.equal(resolve('fr-FR'), 'fr-FR');
+		});
+		
+		it("should return fr-FR for fr", function () {
+			assert.equal(resolve('fr'), 'fr-FR');
+		});
+		
+		it("should return ar for ar", function () {
+			assert.equal(resolve('ar'), 'ar');
+		});
+		
+		it("should return pt-PT for pt", function () {
+			assert.equal(resolve('pt'), 'pt-PT');
+		});
+		
+		it("should return zh-CN for zh-CN", function () {
+			assert.equal(resolve('zh-CN'), 'zh-CN');
+		});
+		
+		it("should return zh-TW for zh-TW", function () {
+			assert.equal(resolve('zh-TW'), 'zh-TW');
+		});
+		
+		it("should return zh-CN for zh", function () {
+			assert.equal(resolve('zh'), 'zh-CN');
+		});
+	});
+	
 	describe("#getNextName()", function () {
 		it("should get the next available numbered name", function () {
 			var existing = ['Name', 'Name 1', 'Name 3'];
