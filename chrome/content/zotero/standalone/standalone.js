@@ -299,29 +299,31 @@ const ZoteroStandalone = new function() {
 				break;
 			
 			case 'collections-pane':
+				var collectionsPane = document.getElementById('zotero-collections-pane');
 				// Show
-				if (menuitem.getAttribute('checked') != 'true') {
+				if (collectionsPane.getAttribute('collapsed') == 'true') {
 					document.getElementById('zotero-collections-splitter').setAttribute('state', 'open');
-					document.getElementById('zotero-collections-pane').setAttribute('collapsed', false);
+					collectionsPane.setAttribute('collapsed', false);
 				}
 				// Hide
 				else {
 					document.getElementById('zotero-collections-splitter').setAttribute('state', 'collapsed');
-					document.getElementById('zotero-collections-pane').setAttribute('collapsed', true);
+					collectionsPane.setAttribute('collapsed', true);
 				}
 				ZoteroPane.updateToolbarPosition();
 				break;
 			
 			case 'item-pane':
+				var itemPane = document.getElementById('zotero-item-pane');
 				// Show
-				if (menuitem.getAttribute('checked') != 'true') {
+				if (itemPane.getAttribute('collapsed') == 'true') {
 					document.getElementById('zotero-items-splitter').setAttribute('state', 'open');
-					document.getElementById('zotero-item-pane').setAttribute('collapsed', false);
+					itemPane.setAttribute('collapsed', false);
 				}
 				// Hide
 				else {
 					document.getElementById('zotero-items-splitter').setAttribute('state', 'collapsed');
-					document.getElementById('zotero-item-pane').setAttribute('collapsed', true);
+					itemPane.setAttribute('collapsed', true);
 				}
 				ZoteroPane.updateToolbarPosition();
 				break;
