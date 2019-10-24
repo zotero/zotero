@@ -1615,25 +1615,23 @@
 				<parameter name="textbox"/>
 				<parameter name="stayFocused"/>
 				<body><![CDATA[
-					var comment = false;
 					var controller = textbox.controller;
 					if (!controller.matchCount) return;
 					
-					for (var i=0; i<controller.matchCount; i++)
-					{
-						if (controller.getValueAt(i) == textbox.value)
-						{
-							comment = controller.getCommentAt(i);
+					var id = false;
+					for (let i = 0; i < controller.matchCount; i++) {
+						if (controller.getCommentAt(i) == textbox.value) {
+							id = controller.getLabelAt(i);
 							break;
 						}
 					}
 					
 					// No result selected
-					if (!comment) {
+					if (!id) {
 						return;
 					}
 					
-					var [creatorID, numFields] = comment.split('-');
+					var [creatorID, numFields] = id.split('-');
 					
 					// If result uses two fields, save both
 					if (numFields==2)

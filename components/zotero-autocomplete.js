@@ -71,7 +71,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 			break;
 		
 		case 'tag':
-			var sql = "SELECT DISTINCT name AS val, NULL AS comment FROM tags WHERE name LIKE ? ESCAPE '\\'";
+			var sql = "SELECT DISTINCT name AS val, NULL AS id FROM tags WHERE name LIKE ? ESCAPE '\\'";
 			var sqlParams = [Zotero.DB.escapeSQLExpression(searchString) + '%'];
 			if (searchParams.libraryID !== undefined) {
 				sql += " AND tagID IN (SELECT tagID FROM itemTags JOIN items USING (itemID) "
@@ -93,7 +93,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 			// 		2 == search both
 			if (searchParams.fieldMode == 2) {
 				var sql = "SELECT DISTINCT CASE fieldMode WHEN 1 THEN lastName "
-					+ "WHEN 0 THEN firstName || ' ' || lastName END AS val, NULL AS comment "
+					+ "WHEN 0 THEN firstName || ' ' || lastName END AS val, NULL AS id "
 					+ "FROM creators ";
 				if (searchParams.libraryID !== undefined) {
 					sql += "JOIN itemCreators USING (creatorID) JOIN items USING (itemID) ";
@@ -112,7 +112,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 			{
 				var sql = "SELECT DISTINCT ";
 				if (searchParams.fieldMode == 1) {
-					sql += "lastName AS val, creatorID || '-1' AS comment";
+					sql += "lastName AS val, creatorID || '-1' AS id";
 				}
 				// Retrieve the matches in the specified field
 				// as well as any full names using the name
@@ -127,7 +127,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 						+ "ELSE lastName || ', ' || firstName END AS val, "
 						+ "creatorID || '-' || CASE "
 						+ "WHEN (firstName = '' OR firstName IS NULL) THEN 1 "
-						+ "ELSE 2 END AS comment";
+						+ "ELSE 2 END AS id";
 				}
 				
 				var fromSQL = " FROM creators "
@@ -160,7 +160,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 				// as well (i.e. "Shakespeare"), and group to collapse repeats
 				if (searchParams.fieldMode != 1) {
 					sql = "SELECT * FROM (" + sql + " UNION SELECT DISTINCT "
-						+ subField + " AS val, creatorID || '-1' AS comment"
+						+ subField + " AS val, creatorID || '-1' AS id"
 						+ fromSQL + ") GROUP BY val";
 					sqlParams = sqlParams.concat(sqlParams);
 				}
@@ -171,7 +171,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 		
 		case 'dateModified':
 		case 'dateAdded':
-			var sql = "SELECT DISTINCT DATE(" + fieldName + ", 'localtime') AS val, NULL AS comment FROM items "
+			var sql = "SELECT DISTINCT DATE(" + fieldName + ", 'localtime') AS val, NULL AS id FROM items "
 				+ "WHERE " + fieldName + " LIKE ? ORDER BY " + fieldName;
 			var sqlParams = [searchString + '%'];
 			break;
@@ -179,7 +179,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 		case 'accessDate':
 			var fieldID = Zotero.ItemFields.getID('accessDate');
 			
-			var sql = "SELECT DISTINCT DATE(value, 'localtime') AS val, NULL AS comment FROM itemData "
+			var sql = "SELECT DISTINCT DATE(value, 'localtime') AS val, NULL AS id FROM itemData "
 				+ "WHERE fieldID=? AND value LIKE ? ORDER BY value";
 			var sqlParams = [fieldID, searchString + '%'];
 			break;
@@ -197,7 +197,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 			// use the user part of the multipart field
 			var valueField = fieldName == 'date' ? 'SUBSTR(value, 12, 100)' : 'value';
 			
-			var sql = "SELECT DISTINCT " + valueField + " AS val, NULL AS comment "
+			var sql = "SELECT DISTINCT " + valueField + " AS val, NULL AS id "
 				+ "FROM itemData NATURAL JOIN itemDataValues "
 				+ "WHERE fieldID=?1 AND " + valueField
 				+ " LIKE ?2 "
@@ -220,9 +220,9 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 				cancel();
 				return;
 			}
-			var result = row.getResultByIndex(0);
-			var comment = row.getResultByIndex(1);
-			this.updateResult(result, comment, true);
+			var value = row.getResultByIndex(0);
+			var id = row.getResultByIndex(1);
+			this.updateResult(value, id);
 		}.bind(this);
 	}
 	var resultCode;
@@ -233,7 +233,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 			resultsCallback(results);
 			this.updateResults(
 				Object.values(results).map(x => x.val),
-				Object.values(results).map(x => x.comment),
+				Object.values(results).map(x => x.id),
 				false
 			);
 		}
@@ -251,36 +251,36 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 });
 
 
-ZoteroAutoComplete.prototype.updateResult = function (result, comment) {
-	Zotero.debug("Appending autocomplete value '" + result + "'" + (comment ? " (" + comment + ")" : ""));
+ZoteroAutoComplete.prototype.updateResult = function (value, id) {
+	Zotero.debug(`Appending autocomplete value '${value}'` + (id ? " (" + id + ")" : ''));
 	// Add to nsIAutoCompleteResult
-	this._result.appendMatch(result, comment ? comment : null);
+	this._result.appendMatch(value, value, null, null, null, id);
 	// Add to our own list
-	this._results.push(result);
+	this._results.push(value);
 	// Only update the UI every 10 records
 	if (this._result.matchCount % 10 == 0) {
 		this._result.setSearchResult(Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING);
-		this._listener.onUpdateSearchResult(this, this._result);
+		this._listener.onSearchResult(this, this._result);
 	}
 }
 
 
-ZoteroAutoComplete.prototype.updateResults = function (results, comments, ongoing, resultCode) {
-	if (!results) {
-		results = [];
+ZoteroAutoComplete.prototype.updateResults = function (values, ids, ongoing, resultCode) {
+	if (!values) {
+		values = [];
 	}
-	if (!comments) {
-		comments = [];
+	if (!ids) {
+		ids = [];
 	}
 	
-	for (var i=0; i<results.length; i++) {
-		let result = results[i];
+	for (let i = 0; i < values.length; i++) {
+		let value = values[i];
 		
-		if (this._results.indexOf(result) == -1) {
-			comment = comments[i] ? comments[i] : null;
-			Zotero.debug("Adding autocomplete value '" + result + "'" + (comment ? " (" + comment + ")" : ""));
-			this._result.appendMatch(result, comment, null, null);
-			this._results.push(result);
+		if (!this._results.includes(value)) {
+			let id = ids[i] || null;
+			Zotero.debug("Adding autocomplete value '" + value + "'" + (id ? " (" + id + ")" : ""));
+			this._result.appendMatch(value, value, null, null, null, id);
+			this._results.push(value);
 		}
 		else {
 			//Zotero.debug("Skipping existing value '" + result + "'");

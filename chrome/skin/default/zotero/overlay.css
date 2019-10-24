@@ -758,6 +758,24 @@
 	font-size: 22px;
 }
 
+/* Missing in Fx60 */
+.autocomplete-richlistbox {
+	border: 1px solid transparent;
+	min-height: 1.8em;
+}
+
+.autocomplete-richlistitem {
+	font: message-box;
+	padding: 1px;
+	height: 1.5em;
+	min-height: 1.5em;
+}
+
+.autocomplete-richlistitem[selected] {
+	background-color: Highlight;
+	color: HighlightText;
+}
+
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.25dppx) {
