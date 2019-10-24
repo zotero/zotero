@@ -4930,6 +4930,13 @@ var ZoteroPane = new function()
 			if(!el) return;
 			var elValues = serializedValues[id];
 			for(var attr in elValues) {
+				// Ignore persisted collapsed state for collection and item pane splitters, since
+				// people close them by accident and don't know how to get them back
+				// TODO: Add a hidden pref to allow them to stay closed if people really want that?
+				if ((el.id == 'zotero-collections-splitter' || el.id == 'zotero-items-splitter')
+						&& attr == 'state') {
+					continue;
+				}
 				el.setAttribute(attr, elValues[attr]);
 			}
 		}
