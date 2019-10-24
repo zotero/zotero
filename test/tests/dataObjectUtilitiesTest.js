@@ -48,13 +48,16 @@ describe("Zotero.DataObjectUtilities", function() {
 			assert.equal(obj.conditions[1].value, 'en');
 		})
 		
-		it("should omit unknown base properties", function () {
+		it("should blank out deleted properties", function () {
 			var patchBase = {
-				unknownField: 'Foo'
+				title: 'Test',
+				place: ''
 			};
 			var obj = {};
 			obj = Zotero.DataObjectUtilities.patch(patchBase, obj);
-			assert.notProperty(obj, 'unknownField');
+			assert.propertyVal(obj, 'title', '');
+			// place was already empty, so it shouldn't be included
+			assert.notProperty(obj, 'place');
 		});
 	})
 	

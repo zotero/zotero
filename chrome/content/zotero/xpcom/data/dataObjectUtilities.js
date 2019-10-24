@@ -133,21 +133,24 @@ Zotero.DataObjectUtilities = {
 			else {
 				switch (i) {
 				// When changing an item from top-level to child, the collections property is
-				// no valid, so it doesn't need to be cleared
+				// no longer valid, so it doesn't need to be cleared
 				case 'collections':
 					break;
 				
-				// Set known boolean fields to false
+				// Set known boolean fields to false if not already
 				case 'deleted':
 				case 'parentItem':
 				case 'inPublications':
-					target[i] = false;
+					if (base[i]) {
+						target[i] = false;
+					}
 					break;
 				
-				// Skip other fields. This prevents us from clearing fields in the pristine JSON
-				// that aren't handled here.
 				default:
-					delete target[i];
+					// If base field isn't already empty, blank it out
+					if (base[i] !== '') {
+						target[i] = '';
+					}
 				}
 			}
 		}
