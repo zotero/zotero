@@ -24,7 +24,7 @@ addons:
 services:
     - xvfb
 install:
-    - wget -O tarball "https://zotero-download.s3.us-east-1.amazonaws.com/dev/firefox-60.8.0esr-x86_64-modified.tar.gz";
+    - wget -O tarball "https://zotero-download.s3.us-east-1.amazonaws.com/dev/firefox-60.9.0esr-x86_64-modified.tar.gz";
     - tar xf tarball
 before_script:
     - npm i
