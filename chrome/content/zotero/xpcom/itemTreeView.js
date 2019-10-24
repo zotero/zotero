@@ -220,31 +220,10 @@ Zotero.ItemTreeView.prototype.setTree = async function (treebox) {
 				// event comes in. I see no way this could go wrong...
 				tree.disableKeyNavigation = false;
 				self._skipKeyPress = true;
-				var nsIDWU = Components.interfaces.nsIDOMWindowUtils;
-				var domWindowUtils = event.originalTarget.ownerDocument.defaultView
-					.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-					.getInterface(nsIDWU);
-				var modifiers = 0;
-				if (event.altKey) {
-					modifiers |= nsIDWU.MODIFIER_ALT;
-				}
-				if (event.ctrlKey) {
-					modifiers |= nsIDWU.MODIFIER_CONTROL;
-				}
-				if (event.shiftKey) {
-					modifiers |= nsIDWU.MODIFIER_SHIFT;
-				}
-				if (event.metaKey) {
-					modifiers |= nsIDWU.MODIFIER_META;
-				}
-				domWindowUtils.sendKeyEvent(
-					'keypress',
-					event.keyCode,
-					event.charCode,
-					modifiers
-				);
+				var clonedEvent = new this.window.KeyboardEvent("keypress", event);
+				event.explicitOriginalTarget.dispatchEvent(clonedEvent);
 				tree.disableKeyNavigation = true;
-			})
+			}.bind(this))
 			.catch(function (e) {
 				Zotero.logError(e);
 			})
