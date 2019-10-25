@@ -579,7 +579,7 @@ Zotero.SearchConditions = new function(){
 			// Hack to use a different name for "issue" in French locale,
 			// where 'number' and 'issue' are translated the same
 			// https://forums.zotero.org/discussion/14942/
-			if (fieldID == 5 && locale.substr(0, 2).toLowerCase() == 'fr') {
+			if (Zotero.ItemFields.getName(fieldID) == 'issue' && locale.substr(0, 2) == 'fr') {
 				localized = "Num\u00E9ro (p\u00E9riodique)";
 			}
 			
