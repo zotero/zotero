@@ -624,11 +624,8 @@ var ZoteroPane = new function()
 			event.preventDefault();
 			return;
 		}
-
-		var key = String.fromCharCode(event.which);
-		if (key) {
-			var command = Zotero.Keys.getCommand(key);
-		}
+		
+		var command = Zotero.Keys.getCommand(event.key);
 		
 		if (from == 'zotero-collections-tree') {
 			if ((event.keyCode == event.DOM_VK_BACK_SPACE && Zotero.isMac) ||
@@ -686,11 +683,6 @@ var ZoteroPane = new function()
 		
 		// Ignore modifiers other than Ctrl-Shift/Cmd-Shift
 		if (!((Zotero.isMac ? event.metaKey : event.ctrlKey) && event.shiftKey)) {
-			return;
-		}
-		
-		if (!key) {
-			Zotero.debug('No key');
 			return;
 		}
 		

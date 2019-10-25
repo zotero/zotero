@@ -1788,7 +1788,7 @@ Zotero.Keys = new function() {
 		
 		// Get the key=>command mappings from the prefs
 		for (let cmd of cmds) {
-			cmd = cmd.substr(5); // strips 'keys.'
+			cmd = cmd.replace(/^extensions\.zotero\.keys\./, '');
 			// Remove old pref
 			if (cmd == 'overrideGlobal') {
 				Zotero.Prefs.clear('keys.overrideGlobal');
