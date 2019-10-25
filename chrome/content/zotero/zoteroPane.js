@@ -702,22 +702,20 @@ var ZoteroPane = new function()
 					document.getElementById('zotero-tb-search').select();
 					break;
 				case 'newItem':
-					Zotero.Promise.coroutine(function* () {
-						// Default to most recent item type from here or the
-						// New Type menu
+					(async function () {
+						// Default to most recent item type from here or the New Type menu,
+						// or fall back to 'book'
 						var mru = Zotero.Prefs.get('newItemTypeMRU');
-						// Or fall back to 'book'
-						var typeID = mru ? mru.split(',')[0] : 2;
-						yield ZoteroPane_Local.newItem(typeID);
+						var type = mru ? mru.split(',')[0] : 'book';
+						await ZoteroPane.newItem(Zotero.ItemTypes.getID(type));
 						let itemBox = document.getElementById('zotero-editpane-item-box');
 						var menu = itemBox.itemTypeMenu;
-						var self = this;
+						// If the new item's type is changed immediately, update the MRU
 						var handleTypeChange = function () {
-							self.addItemTypeToNewItemTypeMRU(this.itemTypeMenu.value);
+							this.addItemTypeToNewItemTypeMRU(Zotero.ItemTypes.getName(menu.value));
 							itemBox.removeHandler('itemtypechange', handleTypeChange);
-						};
-						// Only update the MRU when the menu is opened for the
-						// keyboard shortcut, not on subsequent opens
+						}.bind(this);
+						// Don't update the MRU on subsequent opens of the item type menu
 						var removeTypeChangeHandler = function () {
 							itemBox.removeHandler('itemtypechange', handleTypeChange);
 							itemBox.itemTypeMenu.firstChild.removeEventListener('popuphiding', removeTypeChangeHandler);
@@ -729,7 +727,7 @@ var ZoteroPane = new function()
 						
 						menu.focus();
 						document.getElementById('zotero-editpane-item-box').itemTypeMenu.menupopup.openPopup(menu, "before_start", 0, 0);
-					})();
+					}.bind(this)());
 					break;
 				case 'newNote':
 					// If a regular item is selected, use that as the parent.
@@ -836,7 +834,7 @@ var ZoteroPane = new function()
 		
 		if (manual) {
 			// Update most-recently-used list for New Item menu
-			this.addItemTypeToNewItemTypeMRU(typeID);
+			this.addItemTypeToNewItemTypeMRU(Zotero.ItemTypes.getName(typeID));
 			
 			// Focus the title field
 			document.getElementById('zotero-editpane-item-box').focusFirstField();
@@ -846,18 +844,18 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.addItemTypeToNewItemTypeMRU = function (itemTypeID) {
+	this.addItemTypeToNewItemTypeMRU = function (itemType) {
 		var mru = Zotero.Prefs.get('newItemTypeMRU');
 		if (mru) {
 			var mru = mru.split(',');
-			var pos = mru.indexOf(itemTypeID + '');
+			var pos = mru.indexOf(itemType);
 			if (pos != -1) {
 				mru.splice(pos, 1);
 			}
-			mru.unshift(itemTypeID);
+			mru.unshift(itemType);
 		}
 		else {
-			var mru = [itemTypeID + ''];
+			var mru = [itemType];
 		}
 		Zotero.Prefs.set('newItemTypeMRU', mru.slice(0, 5).join(','));
 	}

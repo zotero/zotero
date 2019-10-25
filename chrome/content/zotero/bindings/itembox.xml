@@ -1106,6 +1106,11 @@
 				<parameter name="menu"/>
 				<body><![CDATA[
 				return (async function () {
+					var functionsToRun = [];
+					if (this.eventHandlers.itemtypechange && this.eventHandlers.itemtypechange.length) {
+						functionsToRun = [...this.eventHandlers.itemtypechange];
+					}
+					
 					if (itemTypeID == this.item.itemTypeID) {
 						return true;
 					}
@@ -1178,9 +1183,7 @@
 							this.refresh();
 						}
 						
-						if (this.eventHandlers['itemtypechange'] && this.eventHandlers['itemtypechange'].length) {
-							this.eventHandlers['itemtypechange'].forEach(f => f.bind(this)());
-						}
+						functionsToRun.forEach(f => f.bind(this)());
 						
 						return true;
 					}
