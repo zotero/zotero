@@ -7,6 +7,7 @@ describe("Zotero.Cite", function () {
 				+ 'DOI: 10.0/abc\n' // certain fields are uppercase
 				+ 'Archive Location: Foo\n' // requires an underscore
 				+ 'Original Publisher Place:  London, UK\n' // extra space OK
+				+ 'Type: dataset'
 				+ '\n\n'
 				+ "Ignore other strings: they're not fields\n"
 				+ 'This is just some text.'
@@ -16,6 +17,7 @@ describe("Zotero.Cite", function () {
 				+ 'DOI: 10.0/abc\n'
 				+ 'archive_location: Foo\n'
 				+ 'original-publisher-place:  London, UK\n'
+				+ 'type: dataset'
 				+ '\n\n'
 				+ "Ignore other strings: they're not fields\n"
 				+ 'This is just some text.';
