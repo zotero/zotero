@@ -720,7 +720,7 @@ Zotero.Tags = new function() {
 	});
 	
 	
-	this.toggleItemsListTags = Zotero.Promise.coroutine(function* (libraryID, items, tagName) {
+	this.toggleItemsListTags = async function (items, tagName) {
 		if (!items.length) {
 			return;
 		}
@@ -754,7 +754,7 @@ Zotero.Tags = new function() {
 				}
 			}
 		}.bind(this));
-	});
+	};
 	
 	
 	/**

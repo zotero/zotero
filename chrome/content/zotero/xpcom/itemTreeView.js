@@ -207,7 +207,7 @@ Zotero.ItemTreeView.prototype.setTree = async function (treebox) {
 					}
 					
 					var items = self.getSelectedItems();
-					yield Zotero.Tags.toggleItemsListTags(libraryID, items, colorData.name);
+					yield Zotero.Tags.toggleItemsListTags(items, colorData.name);
 					return;
 				}
 				
