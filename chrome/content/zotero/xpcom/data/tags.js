@@ -758,6 +758,32 @@ Zotero.Tags = new function() {
 	
 	
 	/**
+	 * @param {Zotero.Item[]}
+	 * @return {Promise}
+	 */
+	this.removeColoredTagsFromItems = async function (items) {
+		return Zotero.DB.executeTransaction(async function () {
+			for (let item of items) {
+				let colors = this.getColors(item.libraryID);
+				let tags = item.getTags();
+				let changed = false;
+				for (let tag of tags) {
+					if (colors.has(tag.tag)) {
+						item.removeTag(tag.tag);
+						changed = true;
+					}
+				}
+				if (changed) {
+					await item.save({
+						skipDateModifiedUpdate: true
+					});
+				}
+			}
+		}.bind(this));
+	};
+	
+	
+	/**
 	 * A tree cell can show only one image, and (as of Fx19) it can't be an SVG,
 	 * so we need to generate a composite image containing the existing item type
 	 * icon and one or more tag color swatches.
