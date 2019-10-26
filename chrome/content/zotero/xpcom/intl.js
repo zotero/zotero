@@ -41,6 +41,7 @@ Zotero.Intl = new function () {
 			else if (prevLocale) {
 				try {
 					Services.locale.setRequestedLocales([prevLocale]);
+					Zotero.Prefs.set('intl.regional_prefs.use_os_locales', false, true);
 				}
 				catch (e) {
 					// Don't panic if the value is not a valid locale code
@@ -58,7 +59,10 @@ Zotero.Intl = new function () {
 		[pluralFormGet, pluralFormNumForms] = PluralForm.makeGetter(parseInt(getIntlProp('pluralRule', 1)));
 		setOrClearIntlPref('intl.accept_languages', 'string');
 
-		Zotero.locale = Services.locale.getRequestedLocale();
+		Zotero.locale = Zotero.Utilities.Internal.resolveLocale(
+			Services.locale.getRequestedLocale(),
+			Services.locale.getAvailableLocales()
+		);
 
 		// Also load the brand as appName
 		Zotero.appName = Services.strings

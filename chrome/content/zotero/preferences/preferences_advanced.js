@@ -470,7 +470,6 @@ Zotero_Preferences.Advanced = {
 	
 	
 	refreshLocale: function () {
-		var requestedLocale = Services.locale.getRequestedLocale();
 		var autoLocaleName, currentValue;
 		
 		// If matching OS, get the name of the current locale
@@ -481,7 +480,7 @@ Zotero_Preferences.Advanced = {
 		// Otherwise get the name of the locale specified in the pref
 		else {
 			autoLocaleName = Zotero.getString('zotero.preferences.locale.automatic');
-			currentValue = requestedLocale;
+			currentValue = Zotero.locale;
 		}
 		
 		// Populate menu
