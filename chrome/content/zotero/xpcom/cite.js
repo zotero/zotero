@@ -387,6 +387,7 @@ Zotero.Cite = {
 			case 'title':
 			case 'title-short':
 			case 'translator':
+			case 'type':
 			case 'version':
 			case 'volume':
 			case 'year-suffix':
