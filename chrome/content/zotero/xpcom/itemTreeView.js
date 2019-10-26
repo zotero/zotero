@@ -148,7 +148,7 @@ Zotero.ItemTreeView.prototype.setTree = async function (treebox) {
 		// Add a keypress listener for expand/collapse
 		var tree = this._getTreeElement();
 		var self = this;
-		var coloredTagsRE = new RegExp("^[1-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1}$");
+		var coloredTagsRE = new RegExp("^[0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1}$");
 		var listener = function(event) {
 			if (self._skipKeyPress) {
 				self._skipKeyPress = false;
@@ -199,6 +199,11 @@ Zotero.ItemTreeView.prototype.setTree = async function (treebox) {
 				if (coloredTagsRE.test(key)) {
 					let libraryID = self.collectionTreeRow.ref.libraryID;
 					let position = parseInt(key) - 1;
+					// When 0 is pressed, remove all colored tags
+					if (position == -1) {
+						let items = self.getSelectedItems();
+						return Zotero.Tags.removeColoredTagsFromItems(items);
+					}
 					let colorData = Zotero.Tags.getColorByPosition(libraryID, position);
 					// If a color isn't assigned to this number or any
 					// other numbers, allow key navigation

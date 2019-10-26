@@ -198,4 +198,28 @@ describe("Zotero.Tags", function () {
 			assert.isNull(o);
 		});
 	});
+	
+	
+	describe("#removeColoredTagsFromItems()", function () {
+		it("shouldn't remove regular tags", async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var item = await createDataObject('item', {
+				tags: [
+					{ tag: 'A' },
+					{ tag: 'B', type: 1 },
+					{ tag: 'C' },
+					{ tag: 'D', type: 1 }
+				]
+			});
+			await Zotero.Tags.setColor(libraryID, 'C', '#111111', 0);
+			await Zotero.Tags.setColor(libraryID, 'D', '#222222', 1);
+			
+			await Zotero.Tags.removeColoredTagsFromItems([item]);
+			
+			assert.sameDeepMembers(item.getTags(), [
+				{ tag: 'A' },
+				{ tag: 'B', type: 1 }
+			]);
+		});
+	});
 })
