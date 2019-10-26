@@ -725,20 +725,15 @@ Zotero.Tags = new function() {
 			return;
 		}
 		
+		// Color setting can exist without tag. If missing, we have to add the tag.
 		var tagID = this.getID(tagName);
-		
-		// If there's a color setting but no matching tag, don't throw
-		// an error (though ideally this wouldn't be possible).
-		if (!tagID) {
-			return;
-		}
 		
 		return Zotero.DB.executeTransaction(function* () {
 			// Base our action on the first item. If it has the tag,
 			// remove the tag from all items. If it doesn't, add it to all.
 			var firstItem = items[0];
 			// Remove from all items
-			if (firstItem.hasTag(tagName)) {
+			if (tagID && firstItem.hasTag(tagName)) {
 				for (let i=0; i<items.length; i++) {
 					let item = items[i];
 					item.removeTag(tagName);
