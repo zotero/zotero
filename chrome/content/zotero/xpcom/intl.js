@@ -35,9 +35,11 @@ Zotero.Intl = new function () {
 		var prevLocale = Zotero.Prefs.get('general.useragent.locale', true);
 		
 		if (prevMatchOS !== undefined || prevLocale !== undefined) {
+			let restart = false;
 			if (prevMatchOS === false && prevLocale) {
 				try {
 					Services.locale.setRequestedLocales([prevLocale]);
+					restart = true;
 				}
 				catch (e) {
 					// Don't panic if the value is not a valid locale code
@@ -45,6 +47,10 @@ Zotero.Intl = new function () {
 			}
 			Zotero.Prefs.clear('intl.locale.matchOS', true);
 			Zotero.Prefs.clear('general.useragent.locale', true);
+			if (restart) {
+				Zotero.Utilities.Internal.quitZotero(true);
+				return;
+			}
         }
 		
 		Components.utils.import("resource://gre/modules/PluralForm.jsm");

@@ -240,6 +240,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		Zotero.browser = "g";
 		
 		Zotero.Intl.init();
+		if (this.restarting) return;
 		
 		yield Zotero.Prefs.init();
 		Zotero.Debug.init(options && options.forceDebugLog);
