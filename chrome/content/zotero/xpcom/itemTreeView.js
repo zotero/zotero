@@ -1736,18 +1736,26 @@ Zotero.ItemTreeView.prototype._updateIntroText = function() {
 			html = Zotero.Utilities.htmlSpecialChars(html);
 			html = html.replace(
 				/\[([^\]]+)]/,
-				'<span class="text-link" '
-					+ `onclick="Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync')">$1</span>`
+				'<span class="text-link" data-action="open-sync-prefs">$1</span>'
 			);
 			p.innerHTML = html;
 			div.appendChild(p);
 			
 			// Activate text links
 			for (let span of div.getElementsByTagName('span')) {
-				if (span.classList.contains('text-link') && !span.hasAttribute('onclick')) {
-					span.onclick = function () {
-						doc.defaultView.ZoteroPane.loadURI(this.getAttribute('data-href'));
-					};
+				if (span.classList.contains('text-link')) {
+					if (span.hasAttribute('data-href')) {
+						span.onclick = function () {
+							doc.defaultView.ZoteroPane.loadURI(this.getAttribute('data-href'));
+						};
+					}
+					else if (span.hasAttribute('data-action')) {
+						if (span.getAttribute('data-action') == 'open-sync-prefs') {
+							span.onclick = () => {
+								Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+							};
+						}
+					}
 				}
 			}
 			
