@@ -35,13 +35,9 @@ Zotero.Intl = new function () {
 		var prevLocale = Zotero.Prefs.get('general.useragent.locale', true);
 		
 		if (prevMatchOS !== undefined || prevLocale !== undefined) {
-			if (prevMatchOS) {
-				Services.locale.setRequestedLocales([]);
-			}
-			else if (prevLocale) {
+			if (prevMatchOS === false && prevLocale) {
 				try {
 					Services.locale.setRequestedLocales([prevLocale]);
-					Zotero.Prefs.set('intl.regional_prefs.use_os_locales', false, true);
 				}
 				catch (e) {
 					// Don't panic if the value is not a valid locale code

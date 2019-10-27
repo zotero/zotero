@@ -473,7 +473,7 @@ Zotero_Preferences.Advanced = {
 		var autoLocaleName, currentValue;
 		
 		// If matching OS, get the name of the current locale
-		if (Zotero.Prefs.get('intl.regional_prefs.use_os_locales', true)) {
+		if (Zotero.Prefs.get('intl.locale.requested', true) === '') {
 			autoLocaleName = this._getAutomaticLocaleMenuLabel();
 			currentValue = 'automatic';
 		}
@@ -504,14 +504,12 @@ Zotero_Preferences.Advanced = {
 			// Changed if not already set to automatic (unless we have the automatic locale name,
 			// meaning we just switched away to the same manual locale and back to automatic)
 			var changed = requestedLocale && menu.label != this._getAutomaticLocaleMenuLabel();
-			Services.locale.setRequestedLocales([]);
-			Zotero.Prefs.clear('intl.regional_prefs.use_os_locales', true);
+			Services.locale.setRequestedLocales(null);
 		}
 		else {
 			// Changed if moving to a locale other than the current one
 			var changed = Zotero.locale != menu.value
 			Services.locale.setRequestedLocales([menu.value]);
-			Zotero.Prefs.set('intl.regional_prefs.use_os_locales', false, true);
 		}
 		
 		if (!changed) {
