@@ -325,11 +325,11 @@ Zotero.Schema = new function(){
 		var pako = {};
 		Services.scriptloader.loadSubScript("resource://zotero/pako.js", pako);
 		var data = await Zotero.DB.valueQueryAsync(
-			"SELECT value FROM settings WHERE schema='globalSchema' AND key='data'"
+			"SELECT value FROM settings WHERE setting='globalSchema' AND key='data'"
 		);
 		if (data) {
 			try {
-				data = JSON.parse(pako.inflate(data, { to: 'string' }));
+				return JSON.parse(pako.inflate(data, { to: 'string' }));
 			}
 			catch (e) {
 				Zotero.warn("Unable to extract global schema -- falling back to file: " + e);
@@ -341,9 +341,7 @@ Zotero.Schema = new function(){
 		
 		// If the data is missing or unreadable in the DB for some reason (e.g., DB corruption),
 		// fall back to the file, though it might be out of date
-		if (!data) {
-			data = await _readGlobalSchemaFromFile();
-		}
+		data = await _readGlobalSchemaFromFile();
 		
 		return data;
 	}
