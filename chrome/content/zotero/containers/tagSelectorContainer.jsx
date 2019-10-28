@@ -7,7 +7,7 @@ const React = require('react');
 const ReactDOM = require('react-dom');
 const PropTypes = require('prop-types');
 const { IntlProvider } = require('react-intl');
-const TagSelector = require('components/tag-selector.js');
+const TagSelector = require('components/tagSelector.js');
 const defaults = {
 	tagColors: new Map(),
 	tags: [],
