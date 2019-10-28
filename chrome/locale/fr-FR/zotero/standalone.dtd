@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "Fermer">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "r">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "Gérer les fichiers joints">
+<!ENTITY convertToStored.label "Convertir les fichiers liés en fichiers joints">
 <!ENTITY importCmd.label "Importer…">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Importer depuis le presse-papiers">
@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "Affichage">
+<!ENTITY layout.label "Mise en page">
+<!ENTITY standardView.label "Affichage standard">
+<!ENTITY stackedView.label "Affichage emplié">
+<!ENTITY collectionsPane.label "Panneau des collections">
+<!ENTITY itemPane.label "Panneau du document">
+<!ENTITY tagSelector.label "Sélecteur de marqueurs">
+<!ENTITY recursiveCollections.label "Afficher les éléments des sous-collections">
+<!ENTITY fontSize.label "Taille des caractères">
+<!ENTITY noteFontSize.label "Taille des caractères des notes">
 
 
 <!ENTITY toolsMenu.label "Outils">
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "Installer le Connecteur Zotero dans le navigateur">
 <!ENTITY installConnector.accesskey "I">
 <!ENTITY addons.label "Extensions">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Développeur">
 
 
 <!ENTITY minimizeWindow.key "m">

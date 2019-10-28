@@ -13,7 +13,7 @@
 <!ENTITY zotero.preferences.downloadAssociatedFiles "保存条目时自动附加相关的 PDF 文档及其它文件">
 <!ENTITY zotero.preferences.autoRecognizeFiles "自动检索 PDF 的元数据">
 <!ENTITY zotero.preferences.autoRenameFiles "使用父类元数据自动重命名附件文件">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "重命名链接的文件">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "打开 PDF 使用">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "系统默认">
 
@@ -77,7 +77,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "将本地数据与远程数据合并，忽略同步历史">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "从在线文献库恢复">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "用在线文献库中的数据覆盖本地 Zotero 数据。">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "替换在线文库">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "使用本地 Zotero 数据覆盖在线文献库">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重置文件同步历史">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "将所有附件文件与存储服务中的进行比较">

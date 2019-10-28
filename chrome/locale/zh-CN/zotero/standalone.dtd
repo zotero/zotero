@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "查看">
+<!ENTITY layout.label "布局">
+<!ENTITY standardView.label "标准视图">
+<!ENTITY stackedView.label "堆栈视图&lt;br&gt;">
+<!ENTITY collectionsPane.label "集合面板">
+<!ENTITY itemPane.label "条目面板">
+<!ENTITY tagSelector.label "标签选择器">
+<!ENTITY recursiveCollections.label "从子集合中显示条目">
+<!ENTITY fontSize.label "字体大小">
+<!ENTITY noteFontSize.label "笔记字体大小">
 
 
 <!ENTITY toolsMenu.label "工具">
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "安装浏览器插件">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "插件">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "开发者">
 
 
 <!ENTITY minimizeWindow.key "m">

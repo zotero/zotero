@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "Cerrar">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "Gestionar adjuntos">
+<!ENTITY convertToStored.label "Convertir archivos enlazados a archivos guardados...">
 <!ENTITY importCmd.label "Importar...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Importar desde el portapapeles">
