@@ -4402,7 +4402,7 @@ var ZoteroPane = new function()
 			);
 		var supportURL = options.linkedFile
 			? 'https://www.zotero.org/support/kb/missing_linked_file'
-			: 'https://www.zotero.org/support/kb/files_not_syncing';
+			: 'https://www.zotero.org/support/kb/missing_stored_file';
 		
 		var ps = Services.prompt;
 		
