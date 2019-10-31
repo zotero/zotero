@@ -1060,6 +1060,7 @@ Zotero.ItemTreeView.prototype.getCellText = function (row, column)
 	}
 	
 	var val;
+	let suffix = Zotero.hiDPISuffix;
 	
 	// Image only
 	if (column.id === "zotero-items-column-hasAttachment") {
@@ -1077,6 +1078,9 @@ Zotero.ItemTreeView.prototype.getCellText = function (row, column)
 		val = obj.numNotes();
 		if (!val) {
 			val = '';
+		}
+		else {
+			val = `chrome://zotero/skin/bullet_blue${suffix}.png`;
 		}
 	}
 	else {
