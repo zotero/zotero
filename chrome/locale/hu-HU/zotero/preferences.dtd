@@ -126,7 +126,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles " További stílusok telepítése...">
 
-<!ENTITY zotero.preferences.keys.openZotero "Zotero megnyitása/bezárása">
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.saveToZotero "Mentés Zotero-ba (adress bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Teljesképernyős üzemmód">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">

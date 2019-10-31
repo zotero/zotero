@@ -1,19 +1,19 @@
 <!ENTITY zotero.publications.my_publications "Mes publications">
 
-<!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
+<!ENTITY zotero.publications.intro "Les éléments que vous ajoutez dans Mes publications seront publiés dans votre profil sur zotero.org. Si vous choisissez d'inclure les fichiers attachés, ceux-ci seront rendus publics sous la licence que vous spécifiez. N'ajoutez que des travaux que vous avez créés vous-mêmes et n'incluez que les fichiers attachés que vous osez et voulez distribuer.">
 <!ENTITY zotero.publications.include.checkbox.files "Inclure les fichiers">
 <!ENTITY zotero.publications.include.checkbox.notes "Inclure les notes">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Vous pouvez en tout temps ajuster ce qui s'affiche dans la collection Mes publications.">
 
-<!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
-<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
-<!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">
-<!ENTITY zotero.publications.sharing.cc0 "Yes, and place my work in the public domain">
-<!ENTITY zotero.publications.sharing.reserved "No, only publish my work on zotero.org">
+<!ENTITY zotero.publications.sharing.title "Choisissez comment votre travail peut être partagé">
+<!ENTITY zotero.publications.sharing.text "Vous pouvez vous réserver tous les droits sur votre travail, le publier sous licence Creative Commons, ou le placer dans le domaine public. Dans tous les cas, le travail sera rendu public via zotero.org.">
+<!ENTITY zotero.publications.sharing.prompt "Comment votre travail peut-il être partagé par les autres ?">
+<!ENTITY zotero.publications.sharing.cc "Oui, sous licence Creative Commons">
+<!ENTITY zotero.publications.sharing.cc0 "Oui, et placer mon travail dans le domaine public">
+<!ENTITY zotero.publications.sharing.reserved "Non, ne publier mon travail que sur zotero.org">
 
-<!ENTITY zotero.publications.chooseLicense.title "Choose a Creative Commons license">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
-<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Allow adaptations of your work to be shared?">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Yes, as long as others share alike">
-<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Allow commercial uses of your work?">
+<!ENTITY zotero.publications.chooseLicense.title "Choisir une licence Creative Commons">
+<!ENTITY zotero.publications.chooseLicense.text "Une licence Creative Commons permet aux autres de copier et redistribuer votre travail pour autant qu'il vous crédite correctement, fournisse le lien de la licence et indique si des modifications ont été apportées. Des conditions supplémentaires peuvent être spécifiées plus bas.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Autoriser de modifier et partager votre travail ?">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Oui, tant que les autres le partage selon les mêmes conditions">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Autoriser une utilisation commerciale de votre travail ?">

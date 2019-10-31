@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "Serriñ">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "Merañ ar pezhioù-stag">
+<!ENTITY convertToStored.label "Emdreiñ ar restroù liammet e restroù stoket...">
 <!ENTITY importCmd.label "Emporzhiañ...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Emporzhiañ diwar ar golver">

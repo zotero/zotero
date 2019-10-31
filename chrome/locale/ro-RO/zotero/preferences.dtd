@@ -126,7 +126,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Obține stiluri adiționale...">
 
-<!ENTITY zotero.preferences.keys.openZotero "Deschide/Închide panoul Zotero">
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.saveToZotero "Salvează în Zotero (iconița din bara de adrese)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Extinde pe tot ecranul">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Panou de focalizare biblioteci">

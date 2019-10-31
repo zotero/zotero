@@ -126,7 +126,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "ស៊ីអេសអិល">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
-<!ENTITY zotero.preferences.keys.openZotero "បើក/បិទផ្ទាំងហ្ស៊ូតេរ៉ូ">
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "បើកពេញអេក្រង់">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">

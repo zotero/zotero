@@ -18,9 +18,9 @@
 <!ENTITY zotero.general.close "关闭">
 <!ENTITY zotero.general.minimize "最小化">
 <!ENTITY zotero.general.other "其他…">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.bigger "更大">
+<!ENTITY zotero.general.smaller "更小">
+<!ENTITY zotero.general.reset "重置">
 
 
 <!ENTITY zotero.errorReport.title "Zotero 错误报告">
@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "显示重复条目">
 <!ENTITY zotero.collections.showUnfiledItems "显示未分类条目">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "显示已撤稿的条目">
 
 <!ENTITY zotero.items.itemType "条目类型">
 <!ENTITY zotero.items.type_column "条目类型">
@@ -207,7 +207,7 @@
 <!ENTITY zotero.import.lastModified "上一次更改">
 <!ENTITY zotero.import.size "大小">
 <!ENTITY zotero.import.createCollection "将导入的集合和项目放入新集合中">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "处理文件">
 
 <!ENTITY zotero.exportOptions.title "导出...">
 <!ENTITY zotero.exportOptions.format.label "格式:">
@@ -250,7 +250,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "使用 MEDLINE 期刊缩写">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "“期刊缩写”字段将被忽略。">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "切换到另外一个文稿处理器...">
 
 <!ENTITY zotero.integration.showEditor.label "显示编辑器">
 <!ENTITY zotero.integration.classicView.label "经典视图">

@@ -126,7 +126,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "추가 스타일 받기...">
 
-<!ENTITY zotero.preferences.keys.openZotero "Zotero 패널 열기/닫기">
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.saveToZotero "Zotero에 저장 (주소 표시줄 아이콘)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "전체화면 끄기/켜기">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "라이브러리 창에 포커스">

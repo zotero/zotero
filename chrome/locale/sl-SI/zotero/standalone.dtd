@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "b">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "Pogled">
+<!ENTITY layout.label "Postavitev">
+<!ENTITY standardView.label "Navadni pogled">
+<!ENTITY stackedView.label "Naloženi pogled">
+<!ENTITY collectionsPane.label "Podokno zbirk">
+<!ENTITY itemPane.label "Podokno vnosa">
+<!ENTITY tagSelector.label "Izbirnik značk">
+<!ENTITY recursiveCollections.label "Pokaži vnose v podzbirkah">
+<!ENTITY fontSize.label "Velikost pisave">
+<!ENTITY noteFontSize.label "Velikost pisave opomb">
 
 
 <!ENTITY toolsMenu.label "Orodja">
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "Namesti konektor za brskalnik">
 <!ENTITY installConnector.accesskey "K">
 <!ENTITY addons.label "Dodatki">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Razvijalec">
 
 
 <!ENTITY minimizeWindow.key "k">

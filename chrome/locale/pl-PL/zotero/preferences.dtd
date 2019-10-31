@@ -126,7 +126,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Pobierz dodatkowe style...">
 
-<!ENTITY zotero.preferences.keys.openZotero "Otwórz/Zamknij okno Zotero">
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.saveToZotero "Zapisz w Zotero (ikona paska adresu)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Przełącz w tryb pełnoekranowy">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Przenieś fokus na panel bibliotek (lewy)">

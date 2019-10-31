@@ -126,7 +126,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Преузми додатке стилове…">
 
-<!ENTITY zotero.preferences.keys.openZotero "Отвори/затвори Зотеро површ">
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.saveToZotero "Сачувај у Зотеро (иконица траке за адресу)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Укључи/искључи приказ преко целог екрана">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Пребаци на површ са библиотеком">

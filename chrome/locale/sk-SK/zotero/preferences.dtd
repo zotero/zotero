@@ -126,7 +126,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Získať ďalšie štýly...">
 
-<!ENTITY zotero.preferences.keys.openZotero "Otvoriť/zatvoriť tablu Zotera">
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.saveToZotero "Uložiť do Zotera (ikona v lište pre adresu)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Prepnúť Zotero do celého okna">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Tabla knižníc Focus">

@@ -126,7 +126,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Загрузить дополнительные стили…">
 
-<!ENTITY zotero.preferences.keys.openZotero "Открыть/закрыть панель Zotero">
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.saveToZotero "Сохранить в Zotero (значок в адресной строке браузера)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Переключение полноэкранного режима">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Фокус на панели библиотек">

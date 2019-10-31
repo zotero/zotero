@@ -126,7 +126,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
-<!ENTITY zotero.preferences.keys.openZotero "Åpne/lukk Zotero-panelet">
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Fullskjerm av/på">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">

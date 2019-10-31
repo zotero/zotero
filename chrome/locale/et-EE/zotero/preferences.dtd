@@ -126,7 +126,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
-<!ENTITY zotero.preferences.keys.openZotero "Avada/Sulgeda Zotero aken">
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.saveToZotero "Salvestada Zoterosse (aadressiriba ikoon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Täisekraan režiim">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Kataloogide paan fookusesse">

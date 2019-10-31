@@ -126,7 +126,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Dobi dodatne sloge ...">
 
-<!ENTITY zotero.preferences.keys.openZotero "Odpri/zapri podokno Zotero">
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.saveToZotero "Shrani v Zotero (ikona v naslovni vrstici)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Vključi/izključi celozaslonski način">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Pozornost na podokno knjižnic">

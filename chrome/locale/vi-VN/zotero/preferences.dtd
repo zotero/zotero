@@ -126,7 +126,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Lấy các style khác...">
 
-<!ENTITY zotero.preferences.keys.openZotero "Mở/Đóng cửa sổ Zotero">
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.saveToZotero "Lưu vào Zotero (biểu tượng thanh địa chỉ)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Bật/Tắt chế độ Toàn-màn-hình">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Khung thư viện quan tâm">

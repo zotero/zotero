@@ -23,7 +23,7 @@
 <!ENTITY closeCmd.label "Zamknij">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "Z">
-<!ENTITY manageAttachments.label "Manage Attachments">
+<!ENTITY manageAttachments.label "Zarządzaj załącznikami">
 <!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
 <!ENTITY importCmd.label "Importuj...">
 <!ENTITY importCmd.key "I">
@@ -82,7 +82,7 @@
 <!ENTITY aboutProduct.accesskey "O">
 <!ENTITY productHelp.label "Wsparcie i dokumentacja">
 <!ENTITY productHelp.accesskey "D">
-<!ENTITY helpTroubleshootingInfo.label "Informacje dla pomocy technicznej">
+<!ENTITY helpTroubleshootingInfo.label "Informacje o pomocy technicznej">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "Forum dyskusyjne">
 <!ENTITY helpFeedbackPage.accesskey "F">
