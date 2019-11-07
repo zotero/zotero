@@ -46,6 +46,12 @@ var Zotero_ProgressBar = new function () {
 			}
 			
 			new WindowDraggingElement(document.getElementById("quick-format-dialog"), window);
+
+			// With fx60 and drawintitlebar=true Firefox calculates the minHeight
+			// as titlebar+maincontent, so we have hack around that here.
+			if (Zotero.isMac && Zotero.platformMajorVersion >= 60) {
+				document.getElementById("quick-format-entry").style.marginBottom = "-22px";
+			}
 		
 		}
 	};
