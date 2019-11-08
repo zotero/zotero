@@ -39,7 +39,11 @@ async function getBrowserify(signatures) {
 					bundleFs
 					.on('error', reject)
 					.on('finish', resolve);
-					browserify(f, config.config).bundle().pipe(bundleFs);
+					browserify(f, config.config)
+						.external('react')
+						.external('react-dom')
+						.bundle()
+						.pipe(bundleFs);
 				});
 
 				onProgress(f, dest, 'browserify');
