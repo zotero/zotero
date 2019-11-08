@@ -2,9 +2,9 @@
 <!--
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2018 Center for History and New Media
-                     George Mason University, Fairfax, Virginia, USA
-                     http://zotero.org
+    Copyright © 2019 Corporation for Digital Scholarship
+                     Vienna, Virginia, USA
+                     https://digitalscholar.org/
     
     This file is part of Zotero.
     
@@ -23,12 +23,16 @@
     
     ***** END LICENSE BLOCK *****
 -->
-<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
-<?xul-overlay href="chrome://zotero/content/containers/tagSelector.xul"?>
-<?xul-overlay href="chrome://zotero/content/containers/tagsBox.xul"?>
+<!DOCTYPE overlay [
+	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
+]>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<script src="chrome://zotero/content/include.js"></script>
-	
-	<script src="tagSelectorContainer.js"></script>
+	<popupset>
+		<menupopup id="tags-context-menu">
+			<menuitem id="remove-all-item-tags" label="&zotero.item.tags.removeAll;"
+				oncommand="ZoteroItemPane.removeAllTags()"/>
+		</menupopup>
+	</popupset>
 </overlay>

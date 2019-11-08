@@ -1,0 +1,83 @@
+.tag-manager {
+	margin-top: .5em;
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+	font-family: $font-family-base;
+	
+	.library-menu {
+		display: flex;
+		align-items: baseline;
+		font-size: 14px;
+		
+		select {
+			flex: 0 0 15em;
+			margin-left: .45em;
+			font-size: 14px;
+		}
+	}
+	
+	/* Tabs */
+	.tabs {
+		display: flex;
+		border-left: 1px solid rgb(218, 218, 218);
+		border-bottom: 1px solid rgb(218, 218, 218);
+		margin: 1em 0 0;
+		padding: 0;
+	}
+	
+	.tabs li {
+		flex: 0 0 auto;
+		display: flex;
+		border-top: 1px solid #ddd;
+		border-right: 1px solid #ddd;
+		background: #eee;
+	}
+	
+	.tabs li a {
+		flex: 1 1 auto;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: .7em .5em;
+		min-width: 6em;
+		color: #444;
+		height: unset;
+		font-size: 13px;
+	}
+	
+	.tabs li a:hover {
+		
+	}
+	
+	.tabs li.active {
+		background: #fff;
+		z-index: 1;
+		font-weight: bold;
+	}
+	
+	.tags-list {
+		width: 100%;
+		flex-grow: 1;
+		border: 1px rgb(218, 218, 218) solid;
+		border-top: 0;
+	}
+	
+	.tags-list > option {
+		font-size: 13px;
+		padding: .1em .4em;
+	}
+	
+	.button-bar {
+		margin-top: .7em;
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: .1em;
+	}
+	
+	button {
+		-moz-appearance: button;
+		font-family: $font-family-base;
+		font-size: 13px;
+	}
+}

@@ -1,114 +1,207 @@
-/* eslint-disable react/no-deprecated */
-'use strict';
-
-const React = require('react');
-const PropTypes = require('prop-types');
-const cx = require('classnames');
-const { noop } = () => {};
+import React from 'react';
+import PropTypes from 'prop-types';
+import cx from 'classnames';
+import { noop } from '../utils';
+import { pickKeys } from '@zotero/immutable';
+//import AutoResizer from './auto-resizer';
+import Autosuggest from 'react-autosuggest';
 
 class Input extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {
+			suggestions: [],
 			value: props.value
 		};
+		this.suggestions = React.createRef();
+		this.showSuggestions = React.createRef(false);
+		this.preSuggestionValue = React.createRef();
+		this.selectedSuggestion = React.createRef();
 	}
 
 	cancel(event = null) {
-		this.props.onCancel && this.props.onCancel(this.hasChanged, event);
+		this.props.onCancel(this.hasChanged, event);
 		this.hasBeenCancelled = true;
-		this.input.blur();
+		this.props.innerRef.current && this.props.innerRef.current.blur();
 	}
 
 	commit(event = null) {
-		this.props.onCommit && this.props.onCommit(this.state.value, this.hasChanged, event);
+		this.props.onCommit(this.state.value, this.hasChanged, event);
 		this.hasBeenCommitted = true;
 	}
 
 	focus() {
-		if(this.input != null) {
-			this.input.focus();
-			this.props.selectOnFocus && this.input.select();
+		if (this.props.innerRef.current != null) {
+			this.props.innerRef.current.focus();
+			this.props.selectOnFocus && this.props.innerRef.current.select();
 		}
 	}
 
-	componentWillReceiveProps({ value }) {
+	UNSAFE_componentWillReceiveProps({ value }) {
 		if (value !== this.props.value) {
 			this.setState({ value });
 		}
 	}
 
-	handleChange({ target }) {
-		this.setState({ value: target.value });
-		this.props.onChange && this.props.onChange(target.value);
+	handleChange({ target }, options) {
+		var newValue = options.newValue || target.value;
+		this.setState({
+			value: newValue,
+		});
+		this.props.onChange(newValue);
 	}
 
 	handleBlur(event) {
-		const shouldCancel = this.props.onBlur && this.props.onBlur(event);
+		if (this.selectedSuggestion.current) {
+			this.selectedSuggestion.current = null;
+			return;
+		}
 		if (this.hasBeenCancelled || this.hasBeenCommitted) { return; }
+		const shouldCancel = this.props.onBlur(event);
 		shouldCancel ? this.cancel(event) : this.commit(event);
 	}
 
 	handleFocus(event) {
-		this.props.selectOnFocus && event.target.select();
-		this.props.onFocus && this.props.onFocus(event);
+		!this.focused && this.props.selectOnFocus && event.target.select();
+		// Only focus the input once so that the entered text doesn't get selected when it matches
+		// a suggestion and the input gets rerendered with the suggestions drop-down
+		this.focused = true;
+		this.showSuggestions.current = false;
+		this.props.onFocus(event);
 	}
 
 	handleKeyDown(event) {
+		this.showSuggestions.current = true;
 		switch (event.key) {
 			case 'Escape':
 				this.cancel(event);
 			break;
+			
 			case 'Enter':
-				this.commit(event);
+				if (this.selectedSuggestion.current) {
+					let value = this.selectedSuggestion.current;
+					this.selectedSuggestion.current = null;
+					this.setState({ value });
+				}
+				else {
+					this.commit(event);
+				}
 			break;
-		default:
-			return;
 		}
+		this.props.onKeyDown(event);
+	}
+
+	handlePaste(event) {
+		this.props.onPaste && this.props.onPaste(event);
+	}
+
+	// Autosuggest will call this function every time you need to update suggestions.
+	// You already implemented this logic above, so just use it.
+	async handleSuggestionsFetchRequested({ value }) {
+		this.setState({
+			suggestions: await this.props.getSuggestions(value)
+		});
+	}
+	
+	// Autosuggest will call this function every time you need to clear suggestions.
+	handleSuggestionsClearRequested() {
+		this.setState({
+			suggestions: []
+		});
+	}
+	
+	getSuggestionValue(suggestion) {
+		return suggestion;
+	}
+	
+	shouldRenderSuggestions(value) {
+		return value.length && this.showSuggestions.current;
+	}
+	
+	renderSuggestion(suggestion) {
+		return <span>
+			{suggestion}
+		</span>;
+	}
+	
+	handleSuggestionSelected = (event, { suggestion, suggestionValue, suggestionIndex, sectionIndex, method }) => {
+		this.selectedSuggestion.current = suggestionValue;
+		// focusInputOnSuggestionClick in Autosuggest doesn't work with a custom renderInputComponent,
+		// so refocus the textbox manually
+		setTimeout(() => this.props.innerRef.current.focus());
+	}
+
+	get value() {
+		return this.state.value;
 	}
 
 	get hasChanged() {
 		return this.state.value !== this.props.value;
 	}
 
-	render() {
+	renderInput() {
 		this.hasBeenCancelled = false;
 		this.hasBeenCommitted = false;
-		const extraProps = Object.keys(this.props).reduce((aggr, key) => {
-			if(key.match(/^(aria-|data-).*/)) {
-				aggr[key] = this.props[key];
-			}
-			return aggr;
-		}, {});
-		const input = <input
-			autoFocus={ this.props.autoFocus }
-			className={ this.props.className }
-			disabled={ this.props.isDisabled }
-			form={ this.props.form }
-			id={ this.props.id }
-			inputMode={ this.props.inputMode }
-			max={ this.props.max }
-			maxLength={ this.props.maxLength }
-			min={ this.props.min }
-			minLength={ this.props.minLength }
-			name={ this.props.name }
-			onBlur={ this.handleBlur.bind(this) }
-			onChange={ this.handleChange.bind(this) }
-			onFocus={ this.handleFocus.bind(this) }
-			onKeyDown={ this.handleKeyDown.bind(this) }
-			placeholder={ this.props.placeholder }
-			readOnly={ this.props.isReadOnly }
-			ref={ input => this.input = input }
-			required={ this.props.isRequired }
-			size={ this.props.size }
-			spellCheck={ this.props.spellCheck }
-			step={ this.props.step }
-			tabIndex={ this.props.tabIndex }
-			type={ this.props.type }
-			value={ this.state.value }
-			{ ...extraProps }
-		/>;
+		
+		const inputProps = {
+			disabled: this.props.isDisabled,
+			onBlur: this.handleBlur.bind(this),
+			onChange: this.handleChange.bind(this),
+			onFocus: this.handleFocus.bind(this),
+			onKeyDown: this.handleKeyDown.bind(this),
+			onPaste: this.handlePaste.bind(this),
+			readOnly: this.props.isReadOnly,
+			required: this.props.isRequired,
+			value: this.state.value,
+			...pickKeys(this.props, ['autoFocus', 'className', 'form', 'id', 'inputMode', 'max',
+				'maxLength', 'min', 'minLength', 'name', 'placeholder', 'type', 'spellCheck',
+				'step', 'tabIndex']),
+			...pickKeys(this.props, key => key.match(/^(aria-|data-).*/))
+		};
+		
+		var input = this.props.autoComplete ? (
+			<Autosuggest
+				suggestions={this.state.suggestions}
+				onSuggestionsFetchRequested={this.handleSuggestionsFetchRequested.bind(this)}
+				onSuggestionsClearRequested={this.handleSuggestionsClearRequested.bind(this)}
+				onSuggestionSelected={this.handleSuggestionSelected}
+				getSuggestionValue={this.getSuggestionValue.bind(this)}
+				renderSuggestion={this.renderSuggestion.bind(this)}
+				// https://github.com/moroshko/react-autosuggest/issues/474
+				renderInputComponent={(inputProps) => <input {...inputProps} ref={this.props.innerRef} />}
+				focusInputOnSuggestionClick={false}
+				shouldRenderSuggestions={this.shouldRenderSuggestions.bind(this)}
+				inputProps={inputProps}
+			/>
+		) : (
+			<input { ...inputProps } />
+		);
+
+		if(this.props.resize) {
+			/*input = (
+				<AutoResizer
+					content={ this.state.value }
+					vertical={ this.props.resize === 'vertical' }
+				>
+					{ input }
+				</AutoResizer>
+			);*/
+		}
+
 		return input;
+	}
+
+	render() {
+		const className = cx({
+			'input-group': true,
+			'input': true,
+			'busy': this.props.isBusy
+		}, this.props.inputGroupClassName);
+		return (
+			<div className={ className }>
+				{ this.renderInput() }
+			</div>
+		);
 	}
 
 	static defaultProps = {
@@ -118,17 +211,23 @@ class Input extends React.PureComponent {
 		onChange: noop,
 		onCommit: noop,
 		onFocus: noop,
+		onKeyDown: noop,
+		onPaste: noop,
 		tabIndex: -1,
 		type: 'text',
 		value: '',
 	};
 
 	static propTypes = {
+		autoComplete: PropTypes.bool,
 		autoFocus: PropTypes.bool,
 		className: PropTypes.string,
 		form: PropTypes.string,
+		getSuggestions: PropTypes.func,
 		id: PropTypes.string,
+		inputGroupClassName: PropTypes.string,
 		inputMode: PropTypes.string,
+		isBusy: PropTypes.bool,
 		isDisabled: PropTypes.bool,
 		isReadOnly: PropTypes.bool,
 		isRequired: PropTypes.bool,
@@ -137,12 +236,15 @@ class Input extends React.PureComponent {
 		min: PropTypes.number,
 		minLength: PropTypes.number,
 		name: PropTypes.string,
-		onBlur: PropTypes.func,
-		onCancel: PropTypes.func,
-		onChange: PropTypes.func,
-		onCommit: PropTypes.func,
-		onFocus: PropTypes.func,
+		onBlur: PropTypes.func.isRequired,
+		onCancel: PropTypes.func.isRequired,
+		onChange: PropTypes.func.isRequired,
+		onCommit: PropTypes.func.isRequired,
+		onFocus: PropTypes.func.isRequired,
+		onKeyDown: PropTypes.func,
+		onPaste: PropTypes.func,
 		placeholder: PropTypes.string,
+		resize: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
 		selectOnFocus: PropTypes.bool,
 		spellCheck: PropTypes.bool,
 		step: PropTypes.number,
@@ -152,4 +254,6 @@ class Input extends React.PureComponent {
 	};
 }
 
-module.exports = Input;
+export default React.forwardRef((props, ref) => <Input
+	innerRef={ref} {...props}
+/>);

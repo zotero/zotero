@@ -39,6 +39,13 @@ const symlinkFiles = [
 // these files will be browserified during the build
 const browserifyConfigs = [
 	{
+		src: 'node_modules/react-select/dist/react-select.cjs.prod.js',
+		dest: 'resource/react-select.js',
+		config: {
+			standalone: 'react-select'
+		}
+	},
+	{
 		src: 'node_modules/url/url.js',
 		dest: 'resource/url.js',
 		config: {

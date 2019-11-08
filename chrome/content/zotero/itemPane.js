@@ -23,6 +23,10 @@
     ***** END LICENSE BLOCK *****
 */
 
+import React from 'react';
+import ReactDOM from 'react-dom';
+import TagsBoxContainer from 'containers/tagsBoxContainer';
+
 var ZoteroItemPane = new function() {
 	var _lastItem, _itemBox, _notesLabel, _notesButton, _notesList, _tagsBox, _relatedBox;
 	var _selectedNoteID;
@@ -45,7 +49,10 @@ var ZoteroItemPane = new function() {
 		_notesLabel = document.getElementById('zotero-editpane-notes-label');
 		_notesButton = document.getElementById('zotero-editpane-notes-add');
 		_notesList = document.getElementById('zotero-editpane-dynamic-notes');
-		_tagsBox = document.getElementById('zotero-editpane-tags');
+		// Fake a ref
+		_tagsBox = {
+			current: null
+		};
 		_relatedBox = document.getElementById('zotero-editpane-related');
 		
 		this._unregisterID = Zotero.Notifier.registerObserver(this, ['item'], 'itemPane');
@@ -72,10 +79,6 @@ var ZoteroItemPane = new function() {
 				var box = _itemBox;
 				break;
 			
-			case 2:
-				var box = _tagsBox;
-				break;
-			
 			case 3:
 				var box = _relatedBox;
 				break;
@@ -86,10 +89,13 @@ var ZoteroItemPane = new function() {
 		if (_lastItem && _lastItem != item) {
 			switch (index) {
 				case 0:
-				case 2:
 					yield box.blurOpenField();
 					// DEBUG: Currently broken
 					//box.scrollToTop();
+					break;
+				
+				case 2:
+					_tagsBox.current.blurOpenField();
 					break;
 			}
 		}
@@ -175,19 +181,33 @@ var ZoteroItemPane = new function() {
 			_updateNoteCount();
 			return;
 		}
+		else if (index == 2) {
+			ReactDOM.render(
+				<TagsBoxContainer
+					key={"tagsBox-" + item.id}
+					item={item}
+					editable={mode != 'view'}
+					ref={_tagsBox}
+					onResetSelection={focusItemsList}
+				/>,
+				document.getElementById('tags-box-container')
+			);
+		}
 		
-		if (mode) {
-			box.mode = mode;
-			
-			if (box.mode == 'view') {
-				box.hideEmptyFields = true;
+		if (box) {
+			if (mode) {
+				box.mode = mode;
+				
+				if (box.mode == 'view') {
+					box.hideEmptyFields = true;
+				}
 			}
+			else {
+				box.mode = 'edit';
+			}
+			
+			box.item = item;
 		}
-		else {
-			box.mode = 'edit';
-		}
-		
-		box.item = item;
 	});
 	
 	
@@ -214,13 +234,21 @@ var ZoteroItemPane = new function() {
 			break;
 			
 		case 2:
-			var box = _tagsBox;
+			var box = _tagsBox.current;
 			break;
 		}
 		if (box) {
 			yield box.blurOpenField();
 		}
 	});
+	
+	
+	function focusItemsList() {
+		var tree = document.getElementById('zotero-items-tree');
+		if (tree) {
+			tree.focus();
+		}
+	}
 	
 	
 	this.onNoteSelected = function (item, editable) {
@@ -288,6 +316,14 @@ var ZoteroItemPane = new function() {
 								.getService(Components.interfaces.nsIPromptService);
 		if (ps.confirm(null, '', Zotero.getString('pane.item.notes.delete.confirm'))) {
 			Zotero.Items.trashTx(id);
+		}
+	}
+	
+	
+	this.removeAllTags = async function () {
+		if (Services.prompt.confirm(null, "", Zotero.getString('pane.item.tags.removeAll'))) {
+			_lastItem.setTags([]);
+			await _lastItem.saveTx();
 		}
 	}
 	

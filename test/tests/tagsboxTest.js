@@ -32,14 +32,14 @@ describe("Item Tags Box", function () {
 			
 			var tabbox = doc.getElementById('zotero-view-tabbox');
 			tabbox.selectedIndex = 2;
-			var tagsbox = doc.getElementById('zotero-editpane-tags');
-			var rows = tagsbox.id('tagRows').getElementsByTagName('row');
+			var tagsbox = doc.querySelector('.tags-box');
+			var rows = tagsbox.getElementsByTagName('li');
 			assert.equal(rows.length, 1);
 			assert.equal(rows[0].textContent, tag);
 			
 			yield Zotero.Tags.rename(Zotero.Libraries.userLibraryID, tag, newTag);
 			
-			var rows = tagsbox.id('tagRows').getElementsByTagName('row');
+			var rows = tagsbox.getElementsByTagName('li');
 			assert.equal(rows.length, 1);
 			assert.equal(rows[0].textContent, newTag);
 		})
@@ -65,18 +65,18 @@ describe("Item Tags Box", function () {
 			
 			var tabbox = doc.getElementById('zotero-view-tabbox');
 			tabbox.selectedIndex = 2;
-			var tagsbox = doc.getElementById('zotero-editpane-tags');
-			var rows = tagsbox.id('tagRows').getElementsByTagName('row');
+			var tagsbox = doc.querySelector('.tags-box');
+			var rows = tagsbox.getElementsByTagName('li');
 			
 			// Colored tags aren't sorted first, for now
-			assert.notOk(rows[0].getElementsByTagName('label')[0].style.color);
-			assert.ok(rows[1].getElementsByTagName('label')[0].style.color);
+			assert.notOk(rows[0].querySelector('.editable-container').style.color);
+			assert.ok(rows[1].querySelector('.editable-container').style.color);
 			assert.equal(rows[0].textContent, "_A");
 			assert.equal(rows[1].textContent, tag);
 			
 			yield Zotero.Tags.setColor(libraryID, tag, false);
 			
-			assert.notOk(rows[1].getElementsByTagName('label')[0].style.color);
+			assert.notOk(rows[1].querySelector('.editable-container').style.color);
 		})
 		
 		it("should update when a tag is removed from the library", function* () {
@@ -95,14 +95,14 @@ describe("Item Tags Box", function () {
 			
 			var tabbox = doc.getElementById('zotero-view-tabbox');
 			tabbox.selectedIndex = 2;
-			var tagsbox = doc.getElementById('zotero-editpane-tags');
-			var rows = tagsbox.id('tagRows').getElementsByTagName('row');
+			var tagsbox = doc.querySelector('.tags-box');
+			var rows = tagsbox.getElementsByTagName('li');
 			assert.equal(rows.length, 1);
 			assert.equal(rows[0].textContent, tag);
 			
 			yield Zotero.Tags.removeFromLibrary(Zotero.Libraries.userLibraryID, Zotero.Tags.getID(tag));
 			
-			var rows = tagsbox.id('tagRows').getElementsByTagName('row');
+			var rows = tagsbox.getElementsByTagName('li');
 			assert.equal(rows.length, 0);
 		})
 	})

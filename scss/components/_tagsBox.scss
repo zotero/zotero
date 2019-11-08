@@ -1,0 +1,91 @@
+#tags-pane {
+	display: flex;
+}
+
+#tags-box-container {
+	flex-grow: 1;
+	display: flex;
+}
+
+.tags-box {
+	flex-grow: 1;
+	
+	.tags-box-header {
+		display: flex;
+		padding-left: 10px;
+		align-items: center;
+		
+		button {
+			min-width: 79px;
+			margin: 5px 6px 3px;
+			padding-top: 1px;
+			padding-bottom: 1px;
+			color: ButtonText;
+			text-shadow: none;
+		}
+	}
+	
+	.tags-box-count {
+		margin-right: 5px;
+	}
+	
+	ul.tags-box-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	
+	ul.tags-box-list > li {
+		display: flex;
+		margin: 3px 6px 3px 6px;
+		align-items: center;
+		height: 1.5em;
+		
+		button {
+			border: 0;
+			background: none;
+			padding: 0;
+			width: 20px;
+			height: 18px;
+		}
+	}
+	
+	.editable-container {
+		flex-grow: 1;
+		margin: 0 2px;
+	}
+	
+	ul.tags-box-list > li:not(.multiline) .editable-container {
+		padding: 0 1px;
+	}
+	
+	// Shift-Enter
+	ul.tags-box-list > li.multiline {
+		align-items: start;
+		height: 9em;
+		
+		.editable-container {
+			align-self: stretch;
+			display: flex;
+		}
+		
+		.editable, .input-group {
+			flex-grow: 1;
+			display: flex;
+			align-self: stretch;
+		}
+		
+		textarea.editable-control {
+			flex: 1;
+			resize: none;
+		}
+	}
+	
+	input.editable-control {
+		width: 100px; // Dummy value that somehow prevents field from going off screen at large font size
+	}
+	
+	textarea.editable-control {
+		width: 100%; // DEBUG: This still runs off the screen at large font size, though it keeps the delete button visible
+	}
+}

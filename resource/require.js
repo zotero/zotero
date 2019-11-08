@@ -93,8 +93,10 @@ var require = (function() {
 		id: 'zotero/require',
 		paths: {
 			'': 'resource://zotero/',
+			'containers/': 'chrome://zotero/content/containers/',
 			'components/': 'chrome://zotero/content/components/',
-			'zotero/': 'chrome://zotero/content/modules/'
+			'zotero/': 'chrome://zotero/content/modules/',
+			'@zotero/': 'chrome://zotero/content/modules/'
 		},
 		globals
 	});

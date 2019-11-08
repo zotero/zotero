@@ -28,9 +28,11 @@
 
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
-<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<overlay
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml">
 	<script src="include.js"/>
-	<script src="itemPane.js" type="application/javascript"/>
+	<script src="itemPane.js"></script>
 	
 	<vbox id="zotero-item-pane" zotero-persist="width height">
 		<!-- My Publications -->
@@ -95,8 +97,8 @@
 						</vbox>
 					</tabpanel>
 					
-					<tabpanel>
-						<tagsbox id="zotero-editpane-tags" flex="1"/>
+					<tabpanel id="tags-pane" orient="vertical" context="tags-context-menu">
+						<html:div id="tags-box-container"></html:div>
 					</tabpanel>
 					
 					<tabpanel>
