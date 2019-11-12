@@ -83,6 +83,7 @@
 	
 	input.editable-control {
 		width: 100px; // Dummy value that somehow prevents field from going off screen at large font size
+		font-family: inherit;
 	}
 	
 	textarea.editable-control {
