@@ -135,16 +135,6 @@
 							<menuitem id="menu_close" label="&closeCmd.label;" key="key_close"
 									accesskey="&closeCmd.accesskey;" command="cmd_close"/>
 							<menuseparator/>
-							<menu id="manage-attachments-menu" label="&manageAttachments.label;"
-									onpopupshowing="ZoteroStandalone.onManageAttachmentsMenuOpen()"
-									oncommand="ZoteroStandalone.onManageAttachmentsMenuItemClick(event)">
-								<menupopup id="manage-attachments-menupopup">
-									<menuitem
-											id="file-menuitem-convert-to-stored"
-											label="&convertToStored.label;"/>
-								</menupopup>
-							</menu>
-							<menuseparator/>
 							<menuitem id="menu_import" label="&importCmd.label;"
 									command="cmd_zotero_import" key="key_import"/>
 							<menuitem id="menu_importFromClipboard" label="&importFromClipboardCmd.label;"
@@ -295,6 +285,16 @@
 									<menuitem id="menu_runJS" label="Run JavaScript" oncommand="openRunJSWindow()"/>
 									<menuitem id="style-editor-menu-item" label="Style Editor" oncommand="openStyleEditor()"/>
 									<menuitem id="scaffold-menu-item" label="Translator Editor" oncommand="openScaffold()"/>
+								</menupopup>
+							</menu>
+							<menuseparator/>
+							<menu id="manage-attachments-menu" label="&manageAttachments.label;"
+									onpopupshowing="ZoteroStandalone.onManageAttachmentsMenuOpen()"
+									oncommand="ZoteroStandalone.onManageAttachmentsMenuItemClick(event)">
+								<menupopup id="manage-attachments-menupopup">
+									<menuitem
+											id="file-menuitem-convert-to-stored"
+											label="&convertToStored.label;"/>
 								</menupopup>
 							</menu>
 						</menupopup>
