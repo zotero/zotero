@@ -263,27 +263,14 @@ Zotero.Date = new function(){
 			order: ''
 		};
 		
+		string = Zotero.Utilities.trimInternal(string.toString());
+		
 		// skip empty things
 		if(!string) {
 			return date;
 		}
 		
 		var parts = [];
-		
-		// Parse 'yesterday'/'today'/'tomorrow'
-		var lc = (string + '').toLowerCase();
-		if (lc == 'yesterday' || (Zotero.isClient && lc === Zotero.getString('date.yesterday'))) {
-			string = Zotero.Date.dateToSQL(new Date(Date.now() - 1000*60*60*24)).substr(0, 10); // no 'this' for translator sandbox
-		}
-		else if (lc == 'today' || (Zotero.isClient && lc == Zotero.getString('date.today'))) {
-			string = Zotero.Date.dateToSQL(new Date()).substr(0, 10);
-		}
-		else if (lc == 'tomorrow' || (Zotero.isClient && lc == Zotero.getString('date.tomorrow'))) {
-			string = Zotero.Date.dateToSQL(new Date(Date.now() + 1000*60*60*24)).substr(0, 10);
-		}
-		else {
-			string = string.toString().replace(/^\s+|\s+$/g, "").replace(/\s+/, " ");
-		}
 		
 		// first, directly inspect the string
 		var m = _slashRe.exec(string);
