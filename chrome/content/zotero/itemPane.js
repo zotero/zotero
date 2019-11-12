@@ -231,14 +231,17 @@ var ZoteroItemPane = new function() {
 		switch (tabBox.selectedIndex) {
 		case 0:
 			var box = _itemBox;
+			if (box) {
+				yield box.blurOpenField();
+			}
 			break;
 			
 		case 2:
 			var box = _tagsBox.current;
+			if (box) {
+				box.blurOpenField();
+			}
 			break;
-		}
-		if (box) {
-			yield box.blurOpenField();
 		}
 	});
 	
