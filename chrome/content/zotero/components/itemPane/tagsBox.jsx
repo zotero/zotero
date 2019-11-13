@@ -269,7 +269,7 @@ const TagsBox = React.forwardRef((props, ref) => {
 	}
 	
 	function blurOpenField(event) {
-		if (textboxRef.current && event.target != textboxRef.current) {
+		if (textboxRef.current && (!event || event.target != textboxRef.current)) {
 			textboxRef.current.blur();
 		}
 	}
