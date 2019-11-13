@@ -288,6 +288,7 @@
 {
 	width: 338px;
 	min-width: 338px;
+	overflow-y: hidden;
 }
 
 #zotero-layout-switcher

@@ -551,8 +551,8 @@
 					</vbox>
 
 					<splitter id="zotero-items-splitter" resizebefore="closest" resizeafter="closest" collapse="after" orient="horizontal" zotero-persist="state orient"
-						onmousemove="ZoteroPane_Local.updateToolbarPosition()"
-						oncommand="ZoteroPane_Local.updateToolbarPosition()">
+						onmousemove="ZoteroPane.updateToolbarPosition(); ZoteroPane.updateTagsBoxSize()"
+						oncommand="ZoteroPane.updateToolbarPosition(); ZoteroPane.updateTagsBoxSize()">
 						<grippy id="zotero-items-grippy"/>
 					</splitter>
 

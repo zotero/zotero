@@ -8,7 +8,13 @@
 }
 
 .tags-box {
+	$item-pane-width: 330px;
+	$icon-width: 16px;
+	$delete-button-width: 20px;
+	$li-side-margin: 6px;
+	
 	flex-grow: 1;
+	width: 330px;
 	
 	.tags-box-header {
 		display: flex;
@@ -32,12 +38,13 @@
 	ul.tags-box-list {
 		list-style: none;
 		margin: 0;
-		padding: 0;
+		padding: 2px 0 0; // Leave space for textbox border on top tag
+		overflow-y: auto;
 	}
 	
 	ul.tags-box-list > li {
 		display: flex;
-		margin: 3px 6px 3px 6px;
+		margin: 3px $li-side-margin;
 		align-items: center;
 		height: 1.5em;
 		
@@ -45,7 +52,7 @@
 			border: 0;
 			background: none;
 			padding: 0;
-			width: 20px;
+			width: $delete-button-width;
 			height: 18px;
 		}
 	}
@@ -53,6 +60,7 @@
 	.editable-container {
 		flex-grow: 1;
 		margin: 0 2px;
+		width: $item-pane-width - $icon-width - $delete-button-width - ($li-side-margin * 2);
 	}
 	
 	ul.tags-box-list > li:not(.multiline) .editable-container {

@@ -410,13 +410,15 @@ const TagsBox = React.forwardRef((props, ref) => {
 				<div className="tags-box-count">{renderCount()}</div>
 				<div><button onClick={handleAddTag}>Add</button></div>
 			</div>
-			<ul className="tags-box-list">
-				{displayTags.map(tag => renderTagRow(tag))}
-			</ul>
-			<span
-				tabIndex="0"
-				onFocus={handleAddTag}
-			/>
+			<div className="tags-box-list-container">
+				<ul className="tags-box-list">
+					{displayTags.map(tag => renderTagRow(tag))}
+				</ul>
+				<span
+					tabIndex="0"
+					onFocus={handleAddTag}
+				/>
+			</div>
 		</div>
 	);
 });
