@@ -45,6 +45,8 @@ Zotero.Styles = new function() {
 	 * Initializes styles cache, loading metadata for styles into memory
 	 */
 	this.init = Zotero.Promise.coroutine(function* (options = {}) {
+		yield Zotero.CiteprocRs.init();
+		
 		// Wait until bundled files have been updated, except when this is called by the schema update
 		// code itself
 		if (!options.fromSchemaUpdate) {
@@ -685,6 +687,10 @@ Zotero.Style = function (style, path) {
  * @param {Boolean} automaticJournalAbbreviations Whether to automatically abbreviate titles
  */
 Zotero.Style.prototype.getCiteProc = function(locale, automaticJournalAbbreviations) {
+	if (Zotero.Prefs.get('cite.useCiteprocRs')) {
+		return this.getCiteProcRs(...arguments);
+	}
+
 	if(!locale) {
 		var locale = Zotero.locale;
 		if(!locale) {
@@ -777,6 +783,98 @@ Zotero.Style.prototype.getCiteProc = function(locale, automaticJournalAbbreviati
 		throw e;
 	}
 };
+
+Zotero.Style.prototype.getCiteProcRs = new function () {
+	/**
+	 * Get a citeproc-rs instance which mimics the citeproc-js CSL.Engine API
+	 * for drop-in replacement of citeproc-js
+	 * @param {String} locale Locale code
+	 * @param {Boolean} automaticJournalAbbreviations Whether to automatically abbreviate titles
+	 * 					(currently does nothing)
+	 */
+	return function (locale, automaticJournalAbbreviations) {
+		if (!locale) {
+			var locale = Zotero.Prefs.get('export.lastLocale') || Zotero.locale;
+			if (!locale) {
+				locale = 'en-US';
+			}
+		}
+
+		// determine version of parent style
+		var overrideLocale = false; // to force dependent style locale
+		if (this.source) {
+			var parentStyle = Zotero.Styles.get(this.source);
+			if (!parentStyle) {
+				throw new Error(
+					'Style references ' + this.source + ', but this style is not installed',
+					Zotero.Utilities.pathToFileURI(this.path)
+				);
+			}
+			var version = parentStyle._version;
+
+			// citeproc-js will not know anything about the dependent style, including
+			// the default-locale, so we need to force locale if a dependent style
+			// contains one
+			if (this.locale) {
+				overrideLocale = true;
+				locale = this.locale;
+			}
+		} else {
+			var version = this._version;
+		}
+
+		if (version === "0.8") {
+			// get XSLT processor from updateCSL.xsl file
+			if (!Zotero.Styles.xsltProcessor) {
+				let protHandler = Components.classes["@mozilla.org/network/protocol;1?name=chrome"]
+					.createInstance(Components.interfaces.nsIProtocolHandler);
+				let channel = protHandler.newChannel(protHandler.newURI("chrome://zotero/content/updateCSL.xsl", "UTF-8", null));
+				let updateXSLT = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+					.createInstance(Components.interfaces.nsIDOMParser)
+					.parseFromStream(channel.open(), "UTF-8", channel.contentLength, "application/xml");
+
+				// load XSLT file into XSLTProcessor
+				Zotero.Styles.xsltProcessor = Components.classes["@mozilla.org/document-transformer;1?type=xslt"]
+					.createInstance(Components.interfaces.nsIXSLTProcessor);
+				Zotero.Styles.xsltProcessor.importStylesheet(updateXSLT);
+			}
+
+			// read style file as DOM XML
+			let styleDOMXML = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+				.createInstance(Components.interfaces.nsIDOMParser)
+				.parseFromString(this.getXML(), "text/xml");
+
+			// apply XSLT and serialize output
+			let newDOMXML = Zotero.Styles.xsltProcessor.transformToDocument(styleDOMXML);
+			var xml = Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
+				.createInstance(Components.interfaces.nsIDOMSerializer).serializeToString(newDOMXML);
+		} else {
+			var xml = this.getXML();
+		}
+
+		try {
+			var citeproc = new Zotero.CiteprocRs.Engine(
+				new Zotero.Cite.System({
+					automaticJournalAbbreviations,
+					uppercaseSubtitles: this._uppercaseSubtitles
+				}),
+				this,
+				xml,
+				locale,
+				overrideLocale
+			);
+
+			// citeproc.opt.development_extensions.wrap_url_and_doi = true;
+			// Don't try to parse author names. We parse them in itemToCSLJSON
+			// citeproc.opt.development_extensions.parse_names = false;
+
+			return citeproc;
+		} catch(e) {
+			Zotero.logError(e);
+			throw e;
+		}
+	};
+}
 
 Zotero.Style.prototype.__defineGetter__("class",
 /**

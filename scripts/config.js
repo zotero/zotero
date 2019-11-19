@@ -53,7 +53,8 @@ const symlinkFiles = [
 	// Feed *.idl files are for documentation only
 	'!resource/feeds/*.idl',
 	'update.rdf',
-	'!chrome/skin/default/zotero/**/*.scss'
+	'!chrome/skin/default/zotero/**/*.scss',
+	'!resource/citeproc_rs_wasm.js',
 ];
 
 
@@ -108,7 +109,8 @@ const jsFiles = [
 	'resource/react.js',
 	'resource/react-dom.js',
 	'resource/react-virtualized.js',
-	'resource/SingleFile/dist/single-file.js'
+	'resource/SingleFile/dist/single-file.js',
+	'resource/citeproc_rs_wasm.js',
 ];
 
 const scssFiles = [

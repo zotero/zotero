@@ -2038,6 +2038,9 @@ Zotero.Integration.Session.prototype.getCiteprocLists = function() {
  * Updates the list of citations to be serialized to the document
  */
 Zotero.Integration.Session.prototype._updateCitations = async function () {
+	if (Zotero.Prefs.get('cite.useCiteprocRs')) {
+		return this._updateCitationsCiteprocRs();
+	}
 	Zotero.debug("Integration: Indices of new citations");
 	Zotero.debug(Object.keys(this.newIndices));
 	Zotero.debug("Integration: Indices of updated citations");
@@ -2078,6 +2081,52 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
 		[citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] =
 			this.getCiteprocLists();
 	}
+}
+
+
+/**
+ * Updates the list of citations to be serialized to the document with citeproc-rs
+ */
+Zotero.Integration.Session.prototype._updateCitationsCiteprocRs = async function () {
+	Zotero.debug("Integration: Indices of new citations");
+	Zotero.debug(Object.keys(this.newIndices));
+	Zotero.debug("Integration: Indices of updated citations");
+	Zotero.debug(Object.keys(this.updateIndices));
+
+	for (let indexList of [this.newIndices, this.updateIndices]) {
+		for (let index in indexList) {
+			if (indexList == this.newIndices) {
+				delete this.newIndices[index];
+				delete this.updateIndices[index];
+			}
+
+			var citation = this.citationsByIndex[index];
+			citation = citation.toJSON();
+
+			Zotero.debug(`Integration: citeprocRs.insertCluster(${citation.toSource()})`);
+			this.style.insertCluster(citation);
+		}
+	}
+	
+	let citationIDToIndex = {};
+	for (const key in this.citationsByIndex) {
+		citationIDToIndex[this.citationsByIndex[key].citationID] = key;
+	}
+
+	const citations = this.getCiteprocLists()[0];
+	Zotero.debug("Integration: citeprocRs.setClusterOrder()");
+	this.style.setClusterOrder(citations);
+	Zotero.debug("Integration: citeprocRs.getBatchedUpdates()");
+	const updateSummary = this.style.getBatchedUpdates();
+	Zotero.debug("Integration: got UpdateSummary from citeprocRs");
+	for (const [citationID, text] of updateSummary.clusters) {
+		const index = citationIDToIndex[citationID];
+		this.citationsByIndex[index].text = text;
+		this.processIndices[index] = true;
+	}
+
+	this.bibliographyHasChanged |= updateSummary.bibliography
+		&& Object.keys(updateSummary.bibliography.updatedEntries).length;
 }
 
 /**

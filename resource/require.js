@@ -90,7 +90,9 @@ var require = (function() {
 		setTimeout: win.setTimeout,
 		clearTimeout: win.clearTimeout,
 		requestAnimationFrame: win.setTimeout,
-		cancelAnimationFrame: win.clearTimeout
+		cancelAnimationFrame: win.clearTimeout,
+		TextEncoder: TextEncoder,
+		TextDecoder: TextDecoder,
 	};
 	Object.defineProperty(globals, 'Zotero', { get: getZotero });
 	var loader = Loader({

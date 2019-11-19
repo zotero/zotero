@@ -15,6 +15,7 @@
   },
   "license": "",
   "dependencies": {
+    "@citeproc-rs/wasm": "^0.0.0-canary-49bfd87",
     "ace-builds": "^1.4.12",
     "bluebird": "^3.5.1",
     "classnames": "^2.2.6",
