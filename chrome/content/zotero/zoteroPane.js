@@ -4926,7 +4926,8 @@ var ZoteroPane = new function()
 				// people close them by accident and don't know how to get them back
 				// TODO: Add a hidden pref to allow them to stay closed if people really want that?
 				if ((el.id == 'zotero-collections-splitter' || el.id == 'zotero-items-splitter')
-						&& attr == 'state') {
+						&& attr == 'state'
+						&& Zotero.Prefs.get('reopenPanesOnRestart')) {
 					continue;
 				}
 				el.setAttribute(attr, elValues[attr]);
