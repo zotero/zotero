@@ -466,6 +466,33 @@ describe("Zotero.Sync.Data.Local", function() {
 	})
 	
 	
+	describe("#getUnsynced()", function () {
+		it("should correct incorrectly nested collections", async function () {
+			var c1 = await createDataObject('collection');
+			var c2 = await createDataObject('collection');
+			
+			c1.parentID = c2.id;
+			await c1.saveTx();
+			
+			await Zotero.DB.queryAsync(
+				"UPDATE collections SET parentCollectionID=? WHERE collectionID=?",
+				[
+					c1.id,
+					c2.id
+				]
+			);
+			await c2.reload(['primaryData'], true);
+			
+			var ids = await Zotero.Sync.Data.Local.getUnsynced('collection', Zotero.Libraries.userLibraryID);
+			
+			// One of the items should still be the parent of the other, though which one is undefined
+			assert.isTrue(
+				(c1.parentID == c2.id && !c2.parentID) || (c2.parentID == c1.id && !c1.parentID)
+			);
+		});
+	});
+	
+	
 	describe("#processObjectsFromJSON()", function () {
 		var types = Zotero.DataObjectUtilities.getTypes();
 		

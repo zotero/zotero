@@ -179,12 +179,24 @@ Zotero.Collections = function() {
 			let tree = [ids[0]];
 			let keep = [ids[0]];
 			let id = ids.shift();
+			let seen = new Set([id]);
 			while (true) {
 				let c = Zotero.Collections.get(id);
 				let parentID = c.parentID;
 				if (!parentID) {
 					break;
 				}
+				// Avoid an infinite loop if collections are incorrectly nested within each other
+				if (seen.has(parentID)) {
+					throw new Zotero.Error(
+						"Incorrectly nested collections",
+						Zotero.Error.ERROR_INVALID_COLLECTION_NESTING,
+						{
+							collectionID: id
+						}
+					);
+				}
+				seen.add(parentID);
 				tree.push(parentID);
 				// If parent is in list, remove it
 				let pos = ids.indexOf(parentID);

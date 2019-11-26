@@ -542,7 +542,23 @@ Zotero.Sync.Data.Local = {
 		
 		// Sort descendent collections last
 		if (objectType == 'collection') {
-			ids = Zotero.Collections.sortByLevel(ids);
+			try {
+				ids = Zotero.Collections.sortByLevel(ids);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				// If collections were incorrectly nested, fix and try again
+				if (e instanceof Zotero.Error && e.error == Zotero.Error.ERROR_INVALID_COLLECTION_NESTING) {
+					let c = Zotero.Collections.get(e.collectionID);
+					Zotero.debug(`Removing parent collection ${c.parentKey} from collection ${c.key}`);
+					c.parentID = null;
+					yield c.saveTx();
+					return this.getUnsynced(...arguments);
+				}
+				else {
+					throw e;
+				}
+			}
 		}
 		
 		return ids;
