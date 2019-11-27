@@ -361,18 +361,6 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
-	 * Unicode normalization
-	 */
-	"normalize":function(str) {
-		var normalizer = Components.classes["@mozilla.org/intl/unicodenormalizer;1"]
-							.getService(Components.interfaces.nsIUnicodeNormalizer);
-		var obj = {};
-		str = normalizer.NormalizeUnicodeNFC(str, obj);
-		return obj.value;
-	},
-	
-	
-	/**
 	 * Return the byte length of a UTF-8 string
 	 *
 	 * http://stackoverflow.com/a/23329386
