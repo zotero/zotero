@@ -157,6 +157,31 @@ describe("Zotero.Date", function() {
 	})
 	
 	describe("#strToDate()", function () {
+		it("should return object without date parts for null", function () {
+			var o = Zotero.Date.strToDate(null);
+			assert.notProperty(o, 'year');
+		});
+		
+		it("should return object without date parts for undefined", function () {
+			var o = Zotero.Date.strToDate();
+			assert.notProperty(o, 'year');
+		});
+		
+		it("should return object without date parts for false", function () {
+			var o = Zotero.Date.strToDate(false);
+			assert.notProperty(o, 'year');
+		});
+		
+		it("should return object without date parts for empty string", function () {
+			var o = Zotero.Date.strToDate('');
+			assert.notProperty(o, 'year');
+		});
+		
+		it("should return object without date parts for blank string", function () {
+			var o = Zotero.Date.strToDate(' ');
+			assert.notProperty(o, 'year');
+		});
+		
 		it("should work in translator sandbox", function* () {
 			var item = createUnsavedDataObject('item');
 			item.libraryID = Zotero.Libraries.userLibraryID;
