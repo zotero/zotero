@@ -83,7 +83,7 @@
 	</keyset>
 	<keyset id="editMenuKeys"/>
 	
-	<popup id="contentAreaContextMenu">
+	<menupopup id="contentAreaContextMenu">
 		<menuitem id="context-undo"
 				label="&undoCmd.label;"
 				accesskey="&undoCmd.accesskey;"
@@ -110,7 +110,8 @@
 				label="&selectAllCmd.label;"
 				accesskey="&selectAllCmd.accesskey;"
 				command="cmd_selectAll"/>
-	</popup>
+	</menupopup>
+	
 	<toolbox id="navigator-toolbox" class="toolbox-top" mode="icons" defaultmode="icons">
 		<!-- Menu -->
 		<toolbar type="menubar" id="toolbar-menubar" class="chromeclass-menubar" customizable="true"

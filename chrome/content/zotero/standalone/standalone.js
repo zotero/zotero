@@ -780,5 +780,30 @@ function openUILinkIn(url) {
 	ZoteroPane.loadURI(url);
 }
 
+// Support context menus on HTML text boxes
+//
+// Adapted from editMenuOverlay.js in Fx68
+window.addEventListener("contextmenu", e => {
+	const HTML_NS = "http://www.w3.org/1999/xhtml";
+	let needsContextMenu =
+		e.target.ownerDocument == document &&
+		!e.defaultPrevented &&
+		e.target.parentNode.nodeName != "moz-input-box" &&
+		((["textarea", "input"].includes(e.target.localName) &&
+			e.target.namespaceURI == HTML_NS) ||
+			e.target.closest("search-textbox"));
+	
+	if (!needsContextMenu) {
+		return;
+	}
+	
+	let popup = document.getElementById("contentAreaContextMenu");
+	popup.openPopupAtScreen(e.screenX, e.screenY, true);
+	// Don't show any other context menu at the same time. There can be a
+	// context menu from an ancestor too but we only want to show this one.
+	e.preventDefault();
+});
+
+
 window.addEventListener("load", function(e) { ZoteroStandalone.onLoad(e); }, false);
 window.addEventListener("unload", function(e) { ZoteroStandalone.onUnload(e); }, false);
