@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "Zapri">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "Z">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "Upravljaj priponke">
+<!ENTITY convertToStored.label "Pretvori povezane datoteke v shranjene datoteke ...">
 <!ENTITY importCmd.label "Uvozi ...">
 <!ENTITY importCmd.key "U">
 <!ENTITY importFromClipboardCmd.label "Uvozi z odložišča">

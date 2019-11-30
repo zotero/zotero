@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "Kapat">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "Ekleri Yönet">
+<!ENTITY convertToStored.label "Bağlantılanmış Dosyaları Depolanmış Dosyalara Dönüştür">
 <!ENTITY importCmd.label "İçeri Aktar...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Panodan İçeri Aktar">

@@ -18,9 +18,9 @@
 <!ENTITY zotero.general.close "Stäng">
 <!ENTITY zotero.general.minimize "Minimera">
 <!ENTITY zotero.general.other "Annat…">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.bigger "Större">
+<!ENTITY zotero.general.smaller "Mindre">
+<!ENTITY zotero.general.reset "Återställ">
 
 
 <!ENTITY zotero.errorReport.title "Zotero-felrapporting">
@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Visa dubletter">
 <!ENTITY zotero.collections.showUnfiledItems "Visa oregistererade källor">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "Visa återtagna källor">
 
 <!ENTITY zotero.items.itemType "Källtyp">
 <!ENTITY zotero.items.type_column "Källtyp">
@@ -250,7 +250,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Använd MEDLINE:s tidskriftsförkortningar">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Tidskriftsförkortningsfältet kommer att ignoreras.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "Byt till en annan ordbehandlare…">
 
 <!ENTITY zotero.integration.showEditor.label "Visa redigerare">
 <!ENTITY zotero.integration.classicView.label "Klassisk vy">

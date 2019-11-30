@@ -23,7 +23,7 @@
 <!ENTITY closeCmd.label "Bezárás">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "B">
-<!ENTITY manageAttachments.label "Manage Attachments">
+<!ENTITY manageAttachments.label "Csatolmányok kezelése">
 <!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
 <!ENTITY importCmd.label "Importálás...">
 <!ENTITY importCmd.key "I">

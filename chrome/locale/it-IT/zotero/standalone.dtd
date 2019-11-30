@@ -23,7 +23,7 @@
 <!ENTITY closeCmd.label "Chiudi">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
+<!ENTITY manageAttachments.label "Gestisci allegati">
 <!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
 <!ENTITY importCmd.label "Importa...">
 <!ENTITY importCmd.key "I">
@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "Aspetto">
+<!ENTITY layout.label "Disposizione">
+<!ENTITY standardView.label "Aspetto standard">
+<!ENTITY stackedView.label "Aspetto a catasta">
+<!ENTITY collectionsPane.label "Pannello delle collezioni">
+<!ENTITY itemPane.label "Pannello dell'oggetto">
+<!ENTITY tagSelector.label "Selettore dei tag">
+<!ENTITY recursiveCollections.label "Mostra oggetti dalle collezioni secondarie">
+<!ENTITY fontSize.label "Dimensione caratteri">
+<!ENTITY noteFontSize.label "Dimensione caratteri delle note">
 
 
 <!ENTITY toolsMenu.label "Strumenti">
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "Installa il Connettore per il browser">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Estensioni">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Sviluppatore">
 
 
 <!ENTITY minimizeWindow.key "m">

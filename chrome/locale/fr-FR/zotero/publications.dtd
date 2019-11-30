@@ -1,6 +1,6 @@
 <!ENTITY zotero.publications.my_publications "Mes publications">
 
-<!ENTITY zotero.publications.intro "Les éléments que vous ajoutez dans Mes publications seront publiés dans votre profil sur zotero.org. Si vous choisissez d'inclure les fichiers attachés, ceux-ci seront rendus publics sous la licence que vous spécifiez. N'ajoutez que des travaux que vous avez créés vous-mêmes et n'incluez que les fichiers attachés que vous osez et voulez distribuer.">
+<!ENTITY zotero.publications.intro "Les documents que vous ajoutez dans Mes publications seront publiés dans votre profil sur zotero.org. Si vous choisissez d'inclure les fichiers attachés, ceux-ci seront rendus publics sous la licence que vous spécifiez. N'ajoutez que des travaux que vous avez créés vous-mêmes et n'incluez que les fichiers attachés que vous osez et voulez distribuer.">
 <!ENTITY zotero.publications.include.checkbox.files "Inclure les fichiers">
 <!ENTITY zotero.publications.include.checkbox.notes "Inclure les notes">
 <!ENTITY zotero.publications.include.adjustAtAnyTime "Vous pouvez en tout temps ajuster ce qui s'affiche dans la collection Mes publications.">

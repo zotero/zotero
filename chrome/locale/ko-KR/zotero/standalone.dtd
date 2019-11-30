@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "닫기">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "첨부 관리">
+<!ENTITY convertToStored.label "링크한 파일을 보관한 파일로 변환...">
 <!ENTITY importCmd.label "불러오기...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "클립보드에서 불러오기">
@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "보기">
+<!ENTITY layout.label "레이아웃">
+<!ENTITY standardView.label "표준 보기">
+<!ENTITY stackedView.label "포개어 보기">
+<!ENTITY collectionsPane.label "컬렉션 창">
+<!ENTITY itemPane.label "항목 창">
+<!ENTITY tagSelector.label "태그 선택기">
+<!ENTITY recursiveCollections.label "하위 컬렉션 항목 표시">
+<!ENTITY fontSize.label "글꼴 크기">
+<!ENTITY noteFontSize.label "노트 글꼴 크기">
 
 
 <!ENTITY toolsMenu.label "도구">
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "브라우저 중계기 설치">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "확장 기능">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "개발자">
 
 
 <!ENTITY minimizeWindow.key "m">

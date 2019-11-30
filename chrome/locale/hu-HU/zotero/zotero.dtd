@@ -58,7 +58,7 @@
 <!ENTITY zotero.items.itemType "Forrás típusa">
 <!ENTITY zotero.items.type_column "Forrás típusa">
 <!ENTITY zotero.items.title_column "Cím">
-<!ENTITY zotero.items.creator_column "Létrehozó">
+<!ENTITY zotero.items.creator_column "Szerző">
 <!ENTITY zotero.items.date_column "Dátum">
 <!ENTITY zotero.items.year_column "Év">
 <!ENTITY zotero.items.publisher_column "Kiadó">

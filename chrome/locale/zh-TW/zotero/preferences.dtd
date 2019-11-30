@@ -8,7 +8,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "一般">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
+<!ENTITY zotero.preferences.fileHandling "檔案處理">
 <!ENTITY zotero.preferences.automaticSnapshots "從網頁建立項目時自動建立快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "儲存項目時自動附加相關的 PDF 檔與其他檔">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
@@ -75,7 +75,7 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 " 以得更多資訊。">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "重設資料同步歷史">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "將本機的資料與遠端的資料合併，忽略同步歷史">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "還原從線上文獻庫">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "從線上文獻庫還原">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">

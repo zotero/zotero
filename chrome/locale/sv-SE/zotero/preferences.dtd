@@ -77,7 +77,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Sammanfoga lokala data med fjärrdata, strunta i synkroniseringshistorik">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Återställ från onlinebibliotek">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Överskriv lokal Zotero-data med data från onlinebiblioteket.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Ersätt onlinebibliotek">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Överskriv onlinebiblioteket med lokal Zotero-data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Återställ filsynkroniseringshistorik">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Jämför alla bifogade filer med lagringstjänsten">

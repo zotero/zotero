@@ -23,7 +23,7 @@
 <!ENTITY closeCmd.label "Fermer">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "r">
-<!ENTITY manageAttachments.label "Gérer les fichiers joints">
+<!ENTITY manageAttachments.label "Gérer les pièces jointes">
 <!ENTITY convertToStored.label "Convertir les fichiers liés en fichiers joints">
 <!ENTITY importCmd.label "Importer…">
 <!ENTITY importCmd.key "I">
@@ -51,7 +51,7 @@
 <!ENTITY collectionsPane.label "Panneau des collections">
 <!ENTITY itemPane.label "Panneau du document">
 <!ENTITY tagSelector.label "Sélecteur de marqueurs">
-<!ENTITY recursiveCollections.label "Afficher les éléments des sous-collections">
+<!ENTITY recursiveCollections.label "Afficher les documents des sous-collections">
 <!ENTITY fontSize.label "Taille des caractères">
 <!ENTITY noteFontSize.label "Taille des caractères des notes">
 

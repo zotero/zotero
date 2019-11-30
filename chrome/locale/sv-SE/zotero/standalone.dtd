@@ -23,7 +23,7 @@
 <!ENTITY closeCmd.label "Stäng">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
+<!ENTITY manageAttachments.label "Hantera bilagor">
 <!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
 <!ENTITY importCmd.label "Importera…">
 <!ENTITY importCmd.key "I">
@@ -46,13 +46,13 @@
 
 <!ENTITY viewMenu.label "View">
 <!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
+<!ENTITY standardView.label "Standardvy">
+<!ENTITY stackedView.label "Staplad vy">
+<!ENTITY collectionsPane.label "Samlingspanel">
+<!ENTITY itemPane.label "Källpanel">
+<!ENTITY tagSelector.label "Etikett-väljare">
 <!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
+<!ENTITY fontSize.label "Teckenstorlek">
 <!ENTITY noteFontSize.label "Note Font Size">
 
 
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "Installera webbläsaranslutning">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Tillägg">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Utvecklare">
 
 
 <!ENTITY minimizeWindow.key "m">

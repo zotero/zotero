@@ -1,19 +1,19 @@
-<!ENTITY zotero.publications.my_publications "My Publications">
+<!ENTITY zotero.publications.my_publications "Οι Δημοσιεύσεις μου">
 
-<!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
-<!ENTITY zotero.publications.include.checkbox.files "Include files">
-<!ENTITY zotero.publications.include.checkbox.notes "Include notes">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
+<!ENTITY zotero.publications.intro "Τα στοιχεία που προσθέτετε στις Δημοσιεύσεις μου θα εμφανίζονται στη σελίδα του προφίλ σας στο zotero.org. Αν επιλέξετε να συμπεριλάβετε τα συνημμένα αρχεία, θα είναι διαθέσιμα στο κοινό με την άδεια που καθορίζετε. Προσθέστε μόνο την εργασία που έχετε δημιουργήσει εσείς και συμπεριλάβετε μόνο αρχεία εάν έχετε τα δικαιώματα διανομής και θέλετε να το κάνετε.">
+<!ENTITY zotero.publications.include.checkbox.files "Συμπεριλάβετε αρχεία">
+<!ENTITY zotero.publications.include.checkbox.notes "Συμπεριλάβετε σημειώσεις">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Μπορείτε να ρυθμίσετε τι να προβάλλετε ανά πάσα στιγμή από τη συλλογή οι Δημοσιεύσεις μου.">
 
-<!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
-<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
-<!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">
-<!ENTITY zotero.publications.sharing.cc0 "Yes, and place my work in the public domain">
-<!ENTITY zotero.publications.sharing.reserved "No, only publish my work on zotero.org">
+<!ENTITY zotero.publications.sharing.title "Επιλέξτε τον τρόπο με τον οποίο μπορείτε να μοιραστείτε την εργασία σας">
+<!ENTITY zotero.publications.sharing.text "Μπορείτε να διατηρήσετε όλα τα δικαιώματα της εργασία σας, να την εκχωρήσετε με άδεια Creative Commons ή να την αφιερώσετε στον δημόσιο τομέα. Σε όλες τις περιπτώσεις, οι εργασίες θα δημοσιοποιηθούν μέσω του zotero.org.">
+<!ENTITY zotero.publications.sharing.prompt "Θέλετε να επιτρέψετε την κοινή χρήση της εργασίας σας από άλλους;">
+<!ENTITY zotero.publications.sharing.cc "Ναι, με άδεια Creative Commons">
+<!ENTITY zotero.publications.sharing.cc0 "Ναι, και τοποθετήστε την εργασία μου στον δημόσιο τομέα">
+<!ENTITY zotero.publications.sharing.reserved "Όχι, δημοσιεύστε το έργο μου μόνο στο zotero.org">
 
-<!ENTITY zotero.publications.chooseLicense.title "Choose a Creative Commons license">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
-<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Allow adaptations of your work to be shared?">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Yes, as long as others share alike">
-<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Allow commercial uses of your work?">
+<!ENTITY zotero.publications.chooseLicense.title "Επιλέξτε μια άδεια Creative Commons">
+<!ENTITY zotero.publications.chooseLicense.text "Μια άδεια Creative Commons επιτρέπει σε άλλους να αντιγράψουν και να αναδιανείμουν την εργασία σας, εφόσον παρέχουν τον κατάλληλο έπαινο, παρέχουν μια σύνδεση με την άδεια και υποδεικνύουν εάν έχουν γίνει αλλαγές. Πρόσθετες προϋποθέσεις μπορούν να καθοριστούν παρακάτω.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Να επιτρέπεται η κοινή χρήση των αναπροσαρμογών της εργασίας σας;">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Ναι, όσο οι άλλοι διαμοιράζουν ομοίως">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Επιτρέψτε την χρησημοποίηση της εργασίας σας για εμπορικές χρήσεις ;">

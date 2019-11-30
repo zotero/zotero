@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "Κλείσιμο">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "Διαχείριση Συνημμένων">
+<!ENTITY convertToStored.label "Μετατροπή Συνδεδεμένων Αρχείων σε Αποθηκευμένα Αρχεία ...">
 <!ENTITY importCmd.label "Εισαγωγή...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Εισαγωγή από το Πρόχειρο">
@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "Προβολή">
+<!ENTITY layout.label "Σχέδιο">
+<!ENTITY standardView.label "Τυπική Προβολή">
+<!ENTITY stackedView.label "Προβολή Στοιβασμένων">
+<!ENTITY collectionsPane.label "Παράθυρο Συλλογών">
+<!ENTITY itemPane.label "Παράθυρο Στοιχείου">
+<!ENTITY tagSelector.label "Επιλογέας Ετικέτας">
+<!ENTITY recursiveCollections.label "Εμφάνιση Στοιχείων από τις Υποσυλλογές">
+<!ENTITY fontSize.label "Μέγεθος Γραμματοσειράς">
+<!ENTITY noteFontSize.label "Σημείωση Μεγέθους Γραμματοσειράς">
 
 
 <!ENTITY toolsMenu.label "Εργαλεία">
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "Εγκατάσταση Σύνδεσης με πρόγραμμα πλοήγησης">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Πρόσθετα">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Προγραμματιστής">
 
 
 <!ENTITY minimizeWindow.key "m">

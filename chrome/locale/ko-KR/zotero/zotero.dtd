@@ -18,9 +18,9 @@
 <!ENTITY zotero.general.close "닫기">
 <!ENTITY zotero.general.minimize "최소화">
 <!ENTITY zotero.general.other "기타...">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.bigger "더 크게">
+<!ENTITY zotero.general.smaller "더 작게">
+<!ENTITY zotero.general.reset "재설정">
 
 
 <!ENTITY zotero.errorReport.title "Zotero 오류 보고">
@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "중복 보기">
 <!ENTITY zotero.collections.showUnfiledItems "미분류 항목 보기">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "철회된 항목 표시">
 
 <!ENTITY zotero.items.itemType "항목 형식">
 <!ENTITY zotero.items.type_column "항목 형식">
@@ -250,7 +250,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "MEDLINE 저널 약자 사용">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "&quot;저널 약자&quot; 필드가 무시됩니다.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "다른 워드 프로세서로 전환...">
 
 <!ENTITY zotero.integration.showEditor.label "편집자 보이기">
 <!ENTITY zotero.integration.classicView.label "클래식 뷰">

@@ -12,22 +12,22 @@
 <!ENTITY zotero.general.saveAs "Salva con nome...">
 <!ENTITY zotero.general.options "Opzioni">
 <!ENTITY zotero.general.advancedOptions.label "Opzioni Avanzate">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Strumenti">
 <!ENTITY zotero.general.more "Altri">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.loading "Caricamento…">
 <!ENTITY zotero.general.close "Chiudi">
 <!ENTITY zotero.general.minimize "Riduci a icona">
 <!ENTITY zotero.general.other "Altro...">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.bigger "Ingrandisci">
+<!ENTITY zotero.general.smaller "Rimpicciolisci">
+<!ENTITY zotero.general.reset "Ripristina">
 
 
 <!ENTITY zotero.errorReport.title "Resoconto di errore Zotero">
 <!ENTITY zotero.errorReport.submissionInProgress "Attendere, rapporto di errore in fase di invio.">
 <!ENTITY zotero.errorReport.submitted "Il rapporto di errore è stato inviato.">
 <!ENTITY zotero.errorReport.reportID "ID rapporto:">
-<!ENTITY zotero.errorReport.postToForums "Inviare un messaggio ai forum di Zotero (forums.zotero.org)riportando il numero ID del rapporto di errore, una descrizione del problema ed esponendo i passaggi che hanno condotto all&apos;errore.">
+<!ENTITY zotero.errorReport.postToForums "Inviare un messaggio ai forum di Zotero (forums.zotero.org) riportando il numero ID del rapporto di errore, una descrizione del problema ed esponendo i passaggi che hanno condotto all&apos;errore.">
 <!ENTITY zotero.errorReport.notReviewed "In genere, i rapporti di errore non vengono esaminati se non sono stati inviati ai forum.">
 
 <!ENTITY zotero.upgrade.title "Assistente all'aggiornamento di Zotero">
@@ -250,7 +250,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "Cambia programma di videoscrittura...">
 
 <!ENTITY zotero.integration.showEditor.label "Mostra l'editor">
 <!ENTITY zotero.integration.classicView.label "Vista classica">

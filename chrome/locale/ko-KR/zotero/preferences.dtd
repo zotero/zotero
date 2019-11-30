@@ -77,7 +77,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "로컬 데이터와 원격 데이터 병합. 기존 동기화 기록 무시">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "온라인 라이브러리에서 복원">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "로컬 Zotero 데이터를 온라인 라이브러리 데이터로 덮어씁니다">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "온라인 라이브러리 교체">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "온라인 라이브러리 데이터를 로컬 Zotero 데이터로 덮어씁니다">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "파일 동기화 기록 재설정">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "모든 첨부 파일을 저장소 서비스의 파일과 비교합니다">
