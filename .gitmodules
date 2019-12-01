@@ -25,3 +25,4 @@
 [submodule "resource/schema/global"]
 	path = resource/schema/global
 	url = git://github.com/zotero/zotero-schema.git
+	branch = master
