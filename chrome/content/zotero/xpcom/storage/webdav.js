@@ -753,9 +753,6 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		var promptService =
 			Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
-		if (err.url) {
-			var spec = err.url.scheme + '://' + err.url.hostPort + err.url.pathQueryRef;
-		}
 		
 		var errorTitle, errorMsg;
 		
@@ -791,6 +788,10 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			}
 		}
 		else if (err instanceof this.VerificationError) {
+			let spec;
+			if (err.uri) {
+				spec = err.uri.scheme + '://' + err.uri.hostPort + err.uri.pathQueryRef;
+			}
 			switch (err.error) {
 				case "NO_URL":
 					errorMsg = Zotero.getString('sync.storage.error.webdav.enterURL');
@@ -810,7 +811,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				
 				case "PARENT_DIR_NOT_FOUND":
 					errorTitle = Zotero.getString('sync.storage.error.directoryNotFound');
-					var parentSpec = spec.replace(/\/zotero\/$/, "");
+					var parentSpec = spec.replace(/zotero\/$/, "");
 					errorMsg = Zotero.getString('sync.storage.error.doesNotExist', parentSpec);
 					break;
 				

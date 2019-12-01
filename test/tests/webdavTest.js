@@ -657,6 +657,64 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			win.close();
 		});
 		
+		
+		it("should show an error for a 404 for the parent directory", function* () {
+				// Use httpd.js instead of sinon so we get a real nsIURL with a channel
+			Zotero.HTTP.mock = null;
+			Zotero.Prefs.set("sync.storage.url", davHostPath);
+			
+			this.httpd.registerPathHandler(
+				`${davBasePath}zotero/`,
+				{
+					handle: function (request, response) {
+						// Force Basic Auth
+						if (!request.hasHeader('Authorization')) {
+							response.setStatusLine(null, 401, null);
+							response.setHeader('WWW-Authenticate', 'Basic realm="WebDAV"', false);
+							return;
+						}
+						response.setHeader('DAV', '1', false);
+						response.setStatusLine(null, 404, "Not Found");
+					}
+				}
+			);
+			this.httpd.registerPathHandler(
+				`${davBasePath}`,
+				{
+					handle: function (request, response) {
+						response.setHeader('DAV', '1', false);
+						if (request.method == 'PROPFIND') {
+							response.setStatusLine(null, 404, null);
+						}
+						/*else {
+							response.setStatusLine(null, 207, null);
+						}*/
+					}
+				}
+			);
+			
+			// Begin verify procedure
+			var win = yield loadPrefPane('sync');
+			var button = win.document.getElementById('storage-verify');
+			
+			var spy = sinon.spy(win.Zotero_Preferences.Sync, "verifyStorageServer");
+			var promise1 = waitForDialog(function (dialog) {
+				assert.include(
+					dialog.document.documentElement.textContent,
+					Zotero.getString('sync.storage.error.doesNotExist', davURL)
+				);
+			});
+			button.click();
+			yield promise1;
+			
+			var promise2 = spy.returnValues[0];
+			spy.restore();
+			yield promise2;
+			
+			win.close();
+		});
+		
+		
 		it("should show an error for a 200 for a nonexistent file", async function () {
 			Zotero.HTTP.mock = null;
 			this.httpd.registerPathHandler(
