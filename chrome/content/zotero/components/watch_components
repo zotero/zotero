@@ -1,0 +1,1 @@
+fswatch -o . | xargs -n1 -I{} sh -c 'rsync -av --delete ./ ~/react-app/tmp/; find ~/react-app/tmp -name "*.jsx" -exec perl -pi -e "print \"import Zotero from \\\"zotero\\\"\; \/\/ eslint-disable-line no-unused-vars\n\" if $. == 1" \{\} \; ; rsync -av --delete ~/react-app/tmp/ ~/react-app/src/components/;' _
