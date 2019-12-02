@@ -775,14 +775,15 @@ Zotero.Schema = new function(){
 		yield Zotero.SearchConditions.init();
 		
 		// Update item type menus in every open window
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-					.getService(Components.interfaces.nsIWindowMediator);
-		var enumerator = wm.getEnumerator("navigator:browser");
-		while (enumerator.hasMoreElements()) {
-			var win = enumerator.getNext();
-			win.ZoteroPane.buildItemTypeSubMenu();
-			win.document.getElementById('zotero-editpane-item-box').buildItemTypeMenu();
-		}
+		Zotero.Schema.schemaUpdatePromise.then(function () {
+			var wm = Services.wm;
+			var enumerator = wm.getEnumerator("navigator:browser");
+			while (enumerator.hasMoreElements()) {
+				let win = enumerator.getNext();
+				win.ZoteroPane.buildItemTypeSubMenu();
+				win.document.getElementById('zotero-editpane-item-box').buildItemTypeMenu();
+			}
+		});
 	});
 	
 	
