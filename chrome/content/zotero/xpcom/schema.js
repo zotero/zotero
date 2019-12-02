@@ -2880,16 +2880,16 @@ Zotero.Schema = new function(){
 			else if (i == 106) {
 				yield _updateCompatibility(6);
 				
-				yield Zotero.DB.queryAsync("DROP TRIGGER insert_date_field");
-				yield Zotero.DB.queryAsync("DROP TRIGGER update_date_field");
-				yield Zotero.DB.queryAsync("DROP TRIGGER fki_itemAttachments");
-				yield Zotero.DB.queryAsync("DROP TRIGGER fku_itemAttachments");
-				yield Zotero.DB.queryAsync("DROP TRIGGER fki_itemNotes");
-				yield Zotero.DB.queryAsync("DROP TRIGGER fku_itemNotes");
+				yield Zotero.DB.queryAsync("DROP TRIGGER IF EXISTS insert_date_field");
+				yield Zotero.DB.queryAsync("DROP TRIGGER IF EXISTS update_date_field");
+				yield Zotero.DB.queryAsync("DROP TRIGGER IF EXISTS fki_itemAttachments");
+				yield Zotero.DB.queryAsync("DROP TRIGGER IF EXISTS fku_itemAttachments");
+				yield Zotero.DB.queryAsync("DROP TRIGGER IF EXISTS fki_itemNotes");
+				yield Zotero.DB.queryAsync("DROP TRIGGER IF EXISTS fku_itemNotes");
 				
-				yield Zotero.DB.queryAsync("DROP TABLE transactionSets");
-				yield Zotero.DB.queryAsync("DROP TABLE transactions");
-				yield Zotero.DB.queryAsync("DROP TABLE transactionLog");
+				yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS transactionSets");
+				yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS transactions");
+				yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS transactionLog");
 			}
 			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
