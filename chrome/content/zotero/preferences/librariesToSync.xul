@@ -52,7 +52,7 @@
 			onclick="Zotero_Preferences.Sync.clickLibraryToSync(event)"
 			onkeyup="if (event.keyCode == event.DOM_VK_SPACE) { Zotero_Preferences.Sync.toggleLibraryToSync(this.currentIndex); }">
 			<treecols>
-				<treecol editable="true" type="checkbox" id="libraries-to-sync-checked" label="&zotero.preferences.sync.librariesToSync.sync;"/>
+				<treecol editable="false" id="libraries-to-sync-checked" label="&zotero.preferences.sync.librariesToSync.sync;"/>
 				<treecol editable="false" id="libraries-to-sync-name" flex="1" label="&zotero.preferences.sync.librariesToSync.library;"/>
 			</treecols>
 			<treechildren id="libraries-to-sync-rows"/>
