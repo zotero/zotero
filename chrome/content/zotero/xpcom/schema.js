@@ -2892,6 +2892,13 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS transactionLog");
 			}
 			
+			else if (i == 107) {
+				if (!(yield Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM itemTypes"))) {
+					let sql = yield _getSchemaSQL('system-107');
+					yield Zotero.DB.executeSQLFile(sql);
+				}
+			}
+			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
 		
