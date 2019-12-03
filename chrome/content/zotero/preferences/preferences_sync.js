@@ -276,7 +276,7 @@ Zotero_Preferences.Sync = {
 		Zotero.Prefs.set('sync.librariesToSkip', JSON.stringify(librariesToSkip));
 		 
 		var cell = row.firstChild.firstChild;
-		var spacing = Zotero.isMac ? '   ' : '  ';
+		var spacing = Zotero.isWin ? '  ' : '   ';
 		cell.setAttribute('label', spacing + (indexOfId != -1 ? this.checkmarkChar : this.noChar));
 		cell.setAttribute('value', indexOfId != -1);
 	},
@@ -298,7 +298,7 @@ Zotero_Preferences.Sync = {
 			nameCell.setAttribute('label', libraryName);
 			nameCell.setAttribute('value', id);
 			nameCell.setAttribute('editable', false);
-			var spacing = Zotero.isMac ? '   ' : '  ';
+			var spacing = Zotero.isWin ? '  ' : '   ';
 			checkboxCell.setAttribute(
 				'label',
 				id == 'loading' ? '' : (spacing + (checked ? this.checkmarkChar : this.noChar))
