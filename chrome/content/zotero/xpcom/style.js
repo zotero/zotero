@@ -721,16 +721,16 @@ Zotero.Style.prototype.getCiteProc = function(locale, automaticJournalAbbreviati
 	if(version === "0.8") {
 		// get XSLT processor from updateCSL.xsl file
 		if(!Zotero.Styles.xsltProcessor) {
-			let protHandler = Components.classes["@mozilla.org/network/protocol;1?name=chrome"]
-				.createInstance(Components.interfaces.nsIProtocolHandler);
-			let channel = protHandler.newChannel(protHandler.newURI("chrome://zotero/content/updateCSL.xsl", "UTF-8", null));
+			let xsl = Zotero.File.getContentsFromURL("chrome://zotero/content/updateCSL.xsl");
 			let updateXSLT = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 				.createInstance(Components.interfaces.nsIDOMParser)
-				.parseFromStream(channel.open(), "UTF-8", channel.contentLength, "application/xml");
+				.parseFromString(xsl, "application/xml");
 			
+			// XSLTProcessor is no longer available in XPCOM, so get from hidden window
+			let XSLTProcessor = Cc["@mozilla.org/appshell/appShellService;1"]
+				.getService(Ci.nsIAppShellService).hiddenDOMWindow.XSLTProcessor;
 			// load XSLT file into XSLTProcessor
-			Zotero.Styles.xsltProcessor = Components.classes["@mozilla.org/document-transformer;1?type=xslt"]
-				.createInstance(Components.interfaces.nsIXSLTProcessor);
+			Zotero.Styles.xsltProcessor = new XSLTProcessor();
 			Zotero.Styles.xsltProcessor.importStylesheet(updateXSLT);
 		}
 		
