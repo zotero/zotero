@@ -218,6 +218,27 @@ describe("Zotero.Search", function() {
 				});
 			});
 			
+			describe("dateAdded", function () {
+				it("should handle 'today'", async function () {
+					var item = await createDataObject('item');
+					
+					var s = new Zotero.Search();
+					s.libraryID = item.libraryID;
+					s.name = "Test";
+					s.addCondition('dateAdded', 'is', 'today');
+					var matches = await s.search();
+					assert.includeMembers(matches, [item.id]);
+					
+					// Make sure 'yesterday' doesn't match
+					s = new Zotero.Search();
+					s.libraryID = item.libraryID;
+					s.name = "Test";
+					s.addCondition('dateAdded', 'is', 'yesterday');
+					matches = await s.search();
+					assert.lengthOf(matches, 0);
+				});
+			});
+			
 			describe("fileTypeID", function () {
 				it("should search by attachment file type", function* () {
 					let s = new Zotero.Search();
