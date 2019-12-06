@@ -53,7 +53,7 @@
         <body>
         <![CDATA[
           var href = this.href;
-          if (!href || this.disabled || aEvent.getPreventDefault())
+          if (!href || this.disabled || aEvent.defaultPrevented)
             return;
 
           var uri = null;
@@ -83,16 +83,10 @@
               return;
             }
 
-            const cID = "@mozilla.org/uriloader/external-protocol-service;1";
-            const nsIEPS = Components.interfaces.nsIExternalProtocolService;
-            var protocolSvc = Components.classes[cID].getService(nsIEPS);
-
-            // if the scheme is not an exposed protocol, then opening this link
-            // should be deferred to the system's external protocol handler
-            if (!protocolSvc.isExposedProtocol(uri.scheme)
-            	|| (window.Zotero && window.Zotero.isStandalone && ["http", "https"].indexOf(uri.scheme) !== -1)) {
-              protocolSvc.loadUrl(uri);
-              aEvent.preventDefault()
+            // Open HTTP URLs externally
+            if (window.Zotero && ["http", "https"].includes(uri.scheme)) {
+              Zotero.launchURL(uri.spec);
+              aEvent.preventDefault();
               return;
             }
 
