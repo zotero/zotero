@@ -2383,7 +2383,7 @@ Zotero.Integration.Field = class {
 	async setText(text) {
 		var isRich = false;
 		// If RTF wrap with RTF tags
-		if (text.includes("\\")) {
+		if (Zotero.Integration.currentSession.outputFormat == "rtf" && text.includes("\\")) {
 			if (text.substr(0,5) != "{\\rtf") {
 				text = "{\\rtf "+text+"}";
 			}
