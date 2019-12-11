@@ -442,7 +442,12 @@ Zotero.ItemTypes = new function() {
 			return _customLabels[id];
 		}
 		
-		return Zotero.Schema.globalSchemaLocale.itemTypes[typeName];
+		var label = Zotero.Schema.globalSchemaLocale.itemTypes[typeName];
+		if (!label) {
+			Zotero.logError(`Localized string not available for item type '${typeName}'`);
+			label = Zotero.Utilities.Internal.camelToTitleCase(typeName);
+		}
+		return label;
 	}
 	
 	this.getImageSrc = function (itemType) {

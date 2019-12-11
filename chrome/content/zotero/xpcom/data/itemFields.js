@@ -77,15 +77,12 @@ Zotero.ItemFields = new function() {
 		
 		for (let field of fields) {
 			let isBaseField = baseFields.includes(field.fieldID);
-			let label;
-			try {
-				label = field.label || Zotero.Schema.globalSchemaLocale.fields[field.fieldName];
-			}
-			// Some base fields aren't localized
-			catch (e) {
-				if (!isBaseField) {
-					throw e;
-				}
+			let label = field.label || Zotero.Schema.globalSchemaLocale.fields[field.fieldName];
+			// If string not available, use the field name, except for some base fields that aren't
+			// used in the UI and therefore aren't localized
+			if (!label && !['number', 'type', 'medium'].includes(field.fieldName)) {
+				Zotero.logError(`Localized string not available for field '${field.fieldName}'`);
+				label = Zotero.Utilities.Internal.camelToTitleCase(field.fieldName);
 			}
 			
 			_fields[field.fieldID] = {
