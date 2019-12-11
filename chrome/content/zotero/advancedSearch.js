@@ -24,6 +24,8 @@
 */
 
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 var ZoteroAdvancedSearch = new function() {
 	this.onLoad = onLoad;
 	this.search = search;
