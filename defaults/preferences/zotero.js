@@ -113,6 +113,7 @@ pref("extensions.zotero.export.lastStyle", "http://www.zotero.org/styles/chicago
 pref("extensions.zotero.export.bibliographySettings", "save-as-rtf");
 pref("extensions.zotero.export.displayCharsetOption", true);
 pref("extensions.zotero.export.citePaperJournalArticleURL", false);
+pref("extensions.zotero.export.useShortDOI", true);
 pref("extensions.zotero.cite.automaticJournalAbbreviations", true);
 pref("extensions.zotero.import.charset", "auto");
 pref("extensions.zotero.import.createNewCollection.fromFileOpenHandler", true);

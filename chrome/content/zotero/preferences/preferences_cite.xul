@@ -40,6 +40,7 @@
 		<preferences id="zotero-preferences-cite">
 			<preference id="pref-cite-useClassicAddCitationDialog" name="extensions.zotero.integration.useClassicAddCitationDialog" type="bool"/>
 			<preference id="pref-cite-citePaperJournalArticleURL" name="extensions.zotero.export.citePaperJournalArticleURL" type="bool"/>
+			<preference id="pref-cite-useShortDOI" name="extensions.zotero.export.useShortDOI" type="bool"/>
 		</preferences>
 		
 		<tabbox>
@@ -80,6 +81,7 @@
 						<label id="export-citePaperJournalArticleURL" width="45em">
 							&zotero.preferences.export.citePaperJournalArticleURL.description;
 						</label>
+						<checkbox label="&zotero.preferences.export.useShortDOI;" preference="pref-cite-useShortDOI"/>
 					</groupbox>
 					
 					<groupbox>

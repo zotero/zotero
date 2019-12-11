@@ -651,6 +651,14 @@ Zotero.Cite.System.prototype = {
 				delete cslItem.accessed;
 			}
 		}
+
+		if (!Zotero.Prefs.get("export.useShortDOI")) {
+			// substitute shortDOI for DOI if supplied
+			shorDOI = cslItem.extra.match(/^short\s?doi:\s*(.+)/mi);
+			if (shortDOI) {
+				cslItem.DOI = shortDOI[1];
+			}
+		}
 		
 		return cslItem;
 	},
