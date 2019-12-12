@@ -322,13 +322,12 @@ Zotero.Schema = new function(){
 	 * Doesn't include the .itemTypes property, which was already applied to the mapping tables
 	 */
 	async function _readGlobalSchemaFromDB() {
-		var pako = {};
-		Services.scriptloader.loadSubScript("resource://zotero/pako.js", pako);
 		var data = await Zotero.DB.valueQueryAsync(
 			"SELECT value FROM settings WHERE setting='globalSchema' AND key='data'"
 		);
 		if (data) {
 			try {
+				let pako = require('pako');
 				return JSON.parse(pako.inflate(data, { to: 'string' }));
 			}
 			catch (e) {
@@ -360,7 +359,8 @@ Zotero.Schema = new function(){
 		
 		var dbVersion = await Zotero.Schema.getDBVersion('globalSchema') || null;
 		if (dbVersion > version) {
-			Zotero.debug(`Database has newer global schema (${dbVersion} > ${version}) -- skipping update`);
+			Zotero.debug(`Database has newer global schema (${dbVersion} > ${version}) `
+				+ `-- skipping update and using schema from DB`);
 			return -1;
 		}
 		else if (dbVersion == version) {
@@ -524,9 +524,12 @@ Zotero.Schema = new function(){
 		// Don't include types and fields, which are already in the mapping tables
 		delete dbData.itemTypes;
 		await Zotero.DB.queryAsync(
-			"REPLACE INTO settings VALUES ('globalSchema', 'data', ?)",
-			pako.deflate(JSON.stringify(dbData), { to: 'string' }),
+			"REPLACE INTO settings VALUES ('globalSchema', 'data', :data)",
+			{ data: pako.deflate(JSON.stringify(dbData)) },
 			{
+				// Hack to pass named parameter to Sqlite.jsm, which in Fx60 treats an object passed
+				// as the the first parameter in a parameter array as an object of named parameters
+				noParseParams: true,
 				debugParams: false
 			}
 		);
