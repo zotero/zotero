@@ -3270,8 +3270,8 @@ var ZoteroPane = new function()
 				return;
 			}
 			
-			if(uri.match(/^https?/)) {
-				this.launchURL(uri);
+			if (uri.match(/^(chrome|resource):/)) {
+				Zotero.openInViewer(uri);
 				continue;
 			}
 			
@@ -3287,7 +3287,7 @@ var ZoteroPane = new function()
 				}
 			}
 			
-			Zotero.openInViewer(uri);
+			this.launchURL(uri);
 		}
 	}
 	

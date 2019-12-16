@@ -416,10 +416,12 @@
 						}
 						
 						// TEMP - NSF (homepage)
-						if ((fieldName == 'url' || fieldName == 'homepage') && val) {
+						if ((fieldName == 'url' || fieldName == 'homepage')
+								// Only make plausible HTTP URLs clickable
+								&& Zotero.Utilities.isHTTPURL(val, true)) {
 							label.classList.add("pointer");
 							// TODO: make getFieldValue non-private and use below instead
-							label.setAttribute("onclick", "ZoteroPane_Local.loadURI(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value, event)");
+							label.setAttribute("onclick", "Zotero.launchURL(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value)");
 							label.setAttribute("tooltiptext", Zotero.getString('locate.online.tooltip'));
 						}
 						else if (fieldName == 'DOI' && val && typeof val == 'string') {

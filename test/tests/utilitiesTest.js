@@ -34,6 +34,33 @@ describe("Zotero.Utilities", function() {
 	});
 	
 	
+	describe("#isHTTPURL()", function () {
+		it("should return true for HTTP URL", function () {
+			assert.isTrue(Zotero.Utilities.isHTTPURL('http://example.com'));
+		});
+		
+		it("should return true for HTTPS URL", function () {
+			assert.isTrue(Zotero.Utilities.isHTTPURL('https://example.com'));
+		});
+		
+		it("should return false for plausible HTTP URL if allowNoScheme not provided", function () {
+			assert.isFalse(Zotero.Utilities.isHTTPURL('example.com'));
+		});
+		
+		it("should return false for plausible HTTP URL if allowNoScheme is true", function () {
+			assert.isTrue(Zotero.Utilities.isHTTPURL('example.com', true));
+		});
+		
+		it("should return false for file URL", function () {
+			assert.isFalse(Zotero.Utilities.isHTTPURL('file:///c:/path/to/file.txt'));
+		});
+		
+		it("should return false for zotero: URL", function () {
+			assert.isFalse(Zotero.Utilities.isHTTPURL('zotero://select/library/items/AAAAAAAA'));
+		});
+	});
+	
+	
 	describe("#cleanDOI()", function () {
 		var cleanDOI = Zotero.Utilities.cleanDOI;
 		var doi = '10.1088/1748-9326/11/4/048002';

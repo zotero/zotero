@@ -183,7 +183,13 @@ Zotero.Utilities = {
 		var x = x.replace(/^[\x00-\x27\x29-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F\s]+/, "");
 		return x.replace(/[\x00-\x28\x2A-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F\s]+$/, "");
 	},
-
+	
+	isHTTPURL: function (url, allowNoScheme = false) {
+		// From https://stackoverflow.com/a/3809435
+		var noSchemeRE = /^[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+		return /^https?:\/\//.test(url) || (allowNoScheme && noSchemeRE.test(url));
+	},
+	
 	/**
 	 * Cleans a http url string
 	 * @param url {String}
