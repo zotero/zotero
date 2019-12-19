@@ -64,6 +64,8 @@ function TagsBoxContainer(props, ref) {
 	});
 	
 	async function getSuggestions(value) {
+		var i = 0;
+		
 		return new Zotero.Promise(function (resolve, reject) {
 			var results = [];
 			search.startSearch(
@@ -83,7 +85,8 @@ function TagsBoxContainer(props, ref) {
 						}
 						if (result.searchResult == result.RESULT_SUCCESS
 								|| result.searchResult == result.RESULT_SUCCESS_ONGOING) {
-							for (let i = 0; i < result.matchCount; i++) {
+							// Pick up where we left off
+							for (; i < result.matchCount; i++) {
 								results.push(result.getValueAt(i));
 							}
 						}
