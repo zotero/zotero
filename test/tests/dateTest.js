@@ -182,6 +182,40 @@ describe("Zotero.Date", function() {
 			assert.notProperty(o, 'year');
 		});
 		
+		it("should parse two- and three-digit dates with leading zeros", function () {
+			var o = Zotero.Date.strToDate('0068');
+			assert.equal(o.year, 68);
+			
+			o = Zotero.Date.strToDate('068');
+			assert.equal(o.year, 68);
+			
+			o = Zotero.Date.strToDate('0168');
+			assert.equal(o.year, 168);
+		});
+		
+		it("should parse two-digit year greater than current year as previous century", function () {
+			var o = Zotero.Date.strToDate('1/1/68');
+			assert.equal(o.year, 1968);
+		});
+		
+		it("should parse two-digit year less than or equal to current year as current century", function () {
+			var o = Zotero.Date.strToDate('1/1/19');
+			assert.equal(o.year, 2019);
+		});
+		
+		it("should parse string with just month number", function () {
+			var o = Zotero.Date.strToDate('1');
+			assert.equal(o.month, 0);
+			assert.isUndefined(o.year);
+		});
+		
+		it("should parse string with just day number", function () {
+			var o = Zotero.Date.strToDate('25');
+			assert.equal(o.day, 25);
+			assert.isUndefined(o.month);
+			assert.isUndefined(o.year);
+		});
+		
 		it("should work in translator sandbox", function* () {
 			var item = createUnsavedDataObject('item');
 			item.libraryID = Zotero.Libraries.userLibraryID;

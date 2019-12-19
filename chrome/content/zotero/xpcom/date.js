@@ -315,6 +315,7 @@ Zotero.Date = new function(){
 				date.order += 'y';
 			}
 			
+			var zeroYear = date.year && date.year.toString().startsWith('0');
 			if(date.year) date.year = parseInt(date.year, 10);
 			if(date.day) date.day = parseInt(date.day, 10);
 			if(date.month) {
@@ -333,8 +334,8 @@ Zotero.Date = new function(){
 			}
 			
 			if((!date.month || date.month <= 12) && (!date.day || date.day <= 31)) {
-				if(date.year && date.year < 100) {	// for two digit years, determine proper
-													// four digit year
+				// For two digit years, determine proper four-digit year
+				if (date.year && date.year < 100 && !zeroYear) {
 					var today = new Date();
 					var year = today.getFullYear();
 					var twoDigitYear = year % 100;
