@@ -1058,7 +1058,17 @@ Zotero.ItemTreeView.prototype.getCellText = function (row, column)
 	}
 	// Year column is just date field truncated
 	else if (column.id == "zotero-items-column-year") {
-		val = obj.getField('date', true).substr(0, 4)
+		val = obj.getField('date', true).substr(0, 4);
+		if (val) {
+			// Don't show anything for unparsed year
+			if (val === "0000") {
+				val = "";
+			}
+			// Show pre-1000 year without leading zeros
+			else if (val < 1000) {
+				val = parseInt(val);
+			}
+		}
 	}
 	else if (column.id === "zotero-items-column-numNotes") {
 		val = obj.numNotes();
