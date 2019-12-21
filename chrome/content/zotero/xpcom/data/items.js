@@ -1243,6 +1243,9 @@ Zotero.Items = function() {
 			return _firstCreatorSQL;
 		}
 		
+		var editorCreatorTypeID = Zotero.CreatorTypes.getID('editor');
+		var contributorCreatorTypeID = Zotero.CreatorTypes.getID('contributor');
+		
 		/* This whole block is to get the firstCreator */
 		var localizedAnd = Zotero.getString('general.and');
 		var localizedEtAl = Zotero.getString('general.etAl'); 
@@ -1285,50 +1288,58 @@ Zotero.Items = function() {
 			
 			// Then try editors
 			"CASE (" +
-				"SELECT COUNT(*) FROM itemCreators WHERE itemID=O.itemID AND creatorTypeID IN (3)" +
+				"SELECT COUNT(*) FROM itemCreators " +
+				`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID}` +
 			") " +
 			"WHEN 0 THEN NULL " +
 			"WHEN 1 THEN (" +
 				"SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				"WHERE itemID=O.itemID AND creatorTypeID IN (3)" +
+				`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID}` +
 			") " +
 			"WHEN 2 THEN (" +
 				"SELECT " +
 				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				"WHERE itemID=O.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1)" +
+				`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} ` +
+				"ORDER BY orderIndex LIMIT 1)" +
 				" || ' " + localizedAnd + " ' || " +
 				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				"WHERE itemID=O.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1,1) " +
+				`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} ` +
+				"ORDER BY orderIndex LIMIT 1,1) " +
 			") " +
 			"ELSE (" +
 				"SELECT " +
 				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				"WHERE itemID=O.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1)" +
+				`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} ` +
+				"ORDER BY orderIndex LIMIT 1)" +
 				" || ' " + localizedEtAl + "' " +
 			") " +
 			"END, " +
 			
 			// Then try contributors
 			"CASE (" +
-				"SELECT COUNT(*) FROM itemCreators WHERE itemID=O.itemID AND creatorTypeID IN (2)" +
+				"SELECT COUNT(*) FROM itemCreators " +
+				`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID}` +
 			") " +
 			"WHEN 0 THEN NULL " +
 			"WHEN 1 THEN (" +
 				"SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				"WHERE itemID=O.itemID AND creatorTypeID IN (2)" +
+				`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID}` +
 			") " +
 			"WHEN 2 THEN (" +
 				"SELECT " +
 				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				"WHERE itemID=O.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1)" +
+				`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} ` +
+				"ORDER BY orderIndex LIMIT 1)" +
 				" || ' " + localizedAnd + " ' || " +
 				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				"WHERE itemID=O.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1,1) " +
+				`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} ` +
+				"ORDER BY orderIndex LIMIT 1,1) " +
 			") " +
 			"ELSE (" +
 				"SELECT " +
 				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				"WHERE itemID=O.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1)" +
+				`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} ` +
+				"ORDER BY orderIndex LIMIT 1)" +
 				" || ' " + localizedEtAl + "' " + 
 			") " +
 			"END" +
