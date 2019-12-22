@@ -433,8 +433,9 @@ Zotero.Utilities.Internal = {
 	 * @param {nsIURI} uri URL
 	 * @param {nsIFile|string path} target file
 	 * @param {Object} [headers]
+	 * @param {Boolean} [isPrivate=false] - Treat as private request (e.g., don't send cookies)
 	 */
-	saveURI: function (wbp, uri, target, headers) {
+	saveURI: function (wbp, uri, target, headers, isPrivate = false) {
 		// Handle gzip encoding
 		wbp.persistFlags |= wbp.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
 		// If not explicitly using cache, skip it
@@ -452,7 +453,12 @@ Zotero.Utilities.Internal = {
 			headers = Object.keys(headers).map(x => x + ": " + headers[x]).join("\r\n") + "\r\n";
 		}
 		
-		wbp.saveURI(uri, null, null, null, null, headers, target, null);
+		if (isPrivate) {
+			wbp.savePrivacyAwareURI(uri, null, null, null, null, headers, target, true);
+		}
+		else {
+			wbp.saveURI(uri, null, null, null, null, headers, target, null);
+		}
 	},
 	
 	

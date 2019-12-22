@@ -547,6 +547,113 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assert.isFalse(item.synced);
 		})
 		
+		
+		// For compatibility with NextCloud
+		it("shouldn't send cookies", function* () {
+			// Make real requests so we can test the internal cookie-handling behavior
+			Zotero.HTTP.mock = null;
+			controller.verified = true;
+			var engine = yield setup();
+			
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 5;
+			yield library.saveTx();
+			library.storageDownloadNeeded = true;
+			
+			var fileName = "test.txt";
+			var item = new Zotero.Item("attachment");
+			item.attachmentLinkMode = 'imported_file';
+			item.attachmentPath = 'storage:' + fileName;
+			var text = Zotero.Utilities.randomString();
+			item.attachmentSyncState = "to_download";
+			yield item.saveTx();
+			
+			// Create ZIP file containing above text file
+			var tmpPath = Zotero.getTempDirectory().path;
+			var tmpID = "webdav_download_" + Zotero.Utilities.randomString();
+			var zipDirPath = OS.Path.join(tmpPath, tmpID);
+			var zipPath = OS.Path.join(tmpPath, tmpID + ".zip");
+			yield OS.File.makeDir(zipDirPath);
+			yield Zotero.File.putContentsAsync(OS.Path.join(zipDirPath, fileName), text);
+			yield Zotero.File.zipDirectory(zipDirPath, zipPath);
+			yield OS.File.removeDir(zipDirPath);
+			var zipContents = yield Zotero.File.getBinaryContentsAsync(zipPath);
+			
+			var mtime = "1441252524905";
+			var md5 = yield Zotero.Utilities.Internal.md5Async(zipPath);
+			
+			yield OS.File.remove(zipPath);
+			
+			// OPTIONS request to cache credentials
+			this.httpd.registerPathHandler(
+				`${davBasePath}zotero/`,
+				{
+					handle: function (request, response) {
+						if (request.method == 'OPTIONS') {
+							// Force Basic Auth
+							if (!request.hasHeader('Authorization')) {
+								response.setStatusLine(null, 401, null);
+								response.setHeader('WWW-Authenticate', 'Basic realm="WebDAV"', false);
+								return;
+							}
+							response.setHeader('DAV', '1', false);
+							response.setStatusLine(null, 200, "OK");
+						}
+					}
+				}
+			);
+			this.httpd.registerPathHandler(
+				`${davBasePath}zotero/${item.key}.prop`,
+				{
+					handle: function (request, response) {
+						if (request.method != 'GET') {
+							response.setStatusLine(null, 400, "Bad Request");
+							response.write("");
+							return;
+						}
+						// An XHR should already include Authorization
+						if (!request.hasHeader('Authorization')) {
+							response.setStatusLine(null, 400, null);
+							return;
+						}
+						// Set a cookie
+						response.setHeader('Set-Cookie', 'foo=bar', false);
+						response.setStatusLine(null, 200, "OK");
+						response.write('<properties version="1">'
+							+ `<mtime>${mtime}</mtime>`
+							+ `<hash>${md5}</hash>`
+							+ '</properties>');
+					}
+				}
+			);
+			this.httpd.registerPathHandler(
+				`${davBasePath}zotero/${item.key}.zip`,
+				{
+					handle: function (request, response) {
+						// Make sure the cookie isn't returned
+						if (request.hasHeader('Cookie')) {
+							response.setStatusLine(null, 503, "Service Unavailable");
+							response.write("");
+							return;
+						}
+						// Private context won't include Authorization automatically
+						if (!request.hasHeader('Authorization')) {
+							response.setStatusLine(null, 401, null);
+							response.setHeader('WWW-Authenticate', 'Basic realm="WebDAV"', false);
+							return;
+						}
+						response.setStatusLine(null, 200, "OK");
+						response.write(zipContents);
+					}
+				}
+			);
+			
+			yield engine.start();
+			
+			assert.equal(library.storageVersion, library.libraryVersion);
+		});
+		
+		
 		it("should mark item as in conflict if mod time and hash on storage server don't match synced values", function* () {
 			var engine = yield setup();
 			

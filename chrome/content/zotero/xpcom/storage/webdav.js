@@ -390,7 +390,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			.createInstance(nsIWBP);
 		wbp.persistFlags = nsIWBP.PERSIST_FLAGS_BYPASS_CACHE;
 		wbp.progressListener = listener;
-		Zotero.Utilities.Internal.saveURI(wbp, uri, destPath);
+		Zotero.Utilities.Internal.saveURI(wbp, uri, destPath, null, true);
 		
 		return deferred.promise;
 	}),
