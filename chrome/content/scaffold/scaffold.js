@@ -119,6 +119,12 @@ var Scaffold = new function() {
 		if (size) {
 			this.setFontSize(size);
 		}
+		
+		// Toggle external editor option on
+		var useExternal = Zotero.Prefs.get("scaffold.exernalEditor");
+		if (useExternal) {
+			document.getElementById('checkbox-editor-external').checked = true;
+		}
 
 		// Set resize handler
 		_document.addEventListener("resize", this.onResize, false);
@@ -129,6 +135,7 @@ var Scaffold = new function() {
 				var external = document.getElementById('checkbox-editor-external').checked;
 				_editors.code.setReadOnly(external);
 				_editors.tests.setReadOnly(external);
+				Zotero.Prefs.set("scaffold.exernalEditor", external);
 			}, true);
 
 		this.generateTranslatorID();

@@ -195,3 +195,6 @@ pref("extensions.zotero.translators.RIS.import.keepID", false);
 // Retracted Items
 pref("extensions.zotero.retractions.enabled", true);
 pref("extensions.zotero.retractions.recentItems", "[]");
+
+// Scaffold
+pref("extensions.zotero.scaffold.exernalEditor", false);
