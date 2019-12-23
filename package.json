@@ -39,7 +39,7 @@
     "chai-as-promised": "^7.1.1",
     "chokidar": "^2.1.2",
     "co-mocha": "^1.2.1",
-    "colors": "^1.1.2",
+    "colors": "^1.4.0",
     "eslint": "^5.14.1",
     "eslint-plugin-react": "^7.12.4",
     "fs-extra": "^3.0.1",
