@@ -708,6 +708,29 @@ Zotero.Date = new function(){
 	}
 	
 	
+	/**
+	 * Convert 'yesterday'/'today'/'tomorrow' to SQL date, or else return original string
+	 *
+	 * @param {String} str
+	 * @return {String}
+	 */
+	this.parseDescriptiveString = function (str) {
+		// Parse 'yesterday'/'today'/'tomorrow' and convert to dates,
+		// since it doesn't make sense for those to be actual metadata values
+		var lc = str.toLowerCase().trim();
+		if (lc == 'yesterday' || lc == Zotero.getString('date.yesterday')) {
+			str = Zotero.Date.dateToSQL(new Date(new Date().getTime() - 86400000)).substr(0, 10);
+		}
+		else if (lc == 'today' || lc == Zotero.getString('date.today')) {
+			str = Zotero.Date.dateToSQL(new Date()).substr(0, 10);
+		}
+		else if (lc == 'tomorrow' || lc == Zotero.getString('date.tomorrow')) {
+			str = Zotero.Date.dateToSQL(new Date(new Date().getTime() + 86400000)).substr(0, 10);
+		}
+		return str;
+	};
+	
+	
 	function isSQLDate(str, allowZeroes) {
 		if (allowZeroes) {
 			return _sqldateWithZeroesRE.test(str);

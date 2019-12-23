@@ -1920,6 +1920,9 @@
 						if (value != '') {
 							switch (fieldName) {
 								case 'accessDate':
+									// Parse 'yesterday'/'today'/'tomorrow'
+									value = Zotero.Date.parseDescriptiveString(value);
+									
 									// Allow "now" to use current time
 									if (value == 'now') {
 										value = Zotero.Date.dateToSQL(new Date(), true);
@@ -1964,18 +1967,8 @@
 								default:
 									// TODO: generalize to all date rows/fields
 									if (Zotero.ItemFields.isFieldOfBase(fieldName, 'date')) {
-										// Parse 'yesterday'/'today'/'tomorrow' and convert to dates,
-										// since it doesn't make sense for those to be actual metadata values
-										var lc = value.toLowerCase();
-										if (lc == 'yesterday' || lc == Zotero.getString('date.yesterday')) {
-											value = Zotero.Date.dateToSQL(new Date(new Date().getTime() - 86400000)).substr(0, 10);
-										}
-										else if (lc == 'today' || lc == Zotero.getString('date.today')) {
-											value = Zotero.Date.dateToSQL(new Date()).substr(0, 10);
-										}
-										else if (lc == 'tomorrow' || lc == Zotero.getString('date.tomorrow')) {
-											value = Zotero.Date.dateToSQL(new Date(new Date().getTime() + 86400000)).substr(0, 10);
-										}
+										// Parse 'yesterday'/'today'/'tomorrow'
+										value = Zotero.Date.parseDescriptiveString(value);
 									}
 							}
 						}
