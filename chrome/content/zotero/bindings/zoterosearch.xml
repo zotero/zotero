@@ -41,6 +41,12 @@
 		</resources>
 		
 		<implementation>
+			<constructor>
+			<![CDATA[
+				Components.utils.import("resource://gre/modules/Services.jsm");
+			]]>
+			</constructor>
+			
 			<property name="groups"/>
 			
 			<field name="searchRef"/>
