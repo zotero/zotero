@@ -211,7 +211,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 			sql += "ORDER BY value";
 	}
 	
-	sql += " LIMIT 25";
+	sql += " LIMIT 50";
 	
 	var onRow = null;
 	// If there's a result callback (e.g., for sorting), don't use a row handler
