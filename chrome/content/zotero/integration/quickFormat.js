@@ -1252,7 +1252,7 @@ var Zotero_QuickFormat = new function () {
 	function _getBubbleIndex(bubble) {
 		var nodes = qfe.childNodes, index = 0;
 		for (let node of nodes) {
-			if (node.dataset.citationItem) {
+			if (node.dataset && node.dataset.citationItem) {
 				if (node == bubble) return index;
 				index++;
 			}
@@ -1267,13 +1267,14 @@ var Zotero_QuickFormat = new function () {
 		event.preventDefault();
 		event.stopPropagation();
 
-		var range = document.createRange();
-
 		// Find old position in list
 		var oldPosition = _getBubbleIndex(dragging);
-		range.setStart(event.rangeParent, event.rangeOffset);
+		
+		// Move bubble
+		var range = document.createRange();
+		range.setStartBefore(event.rangeParent);
 		dragging.parentNode.removeChild(dragging);
-		var bubble = _insertBubble(dragging.citationItem, range);
+		var bubble = _insertBubble(JSON.parse(dragging.dataset.citationItem), range);
 
 		// If moved out of order, turn off "Keep Sources Sorted"
 		if(io.sortable && keepSorted.hasAttribute("checked") && oldPosition !== -1 &&
