@@ -6,7 +6,7 @@
 <!ENTITY zotero.publications.include.adjustAtAnyTime "A Saját publikációk gyűjteményből bármikor beállíthatja, hogy mit jelenítsen meg.">
 
 <!ENTITY zotero.publications.sharing.title "Válassza ki, hogyan szeretné a munkáit megosztani">
-<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
+<!ENTITY zotero.publications.sharing.text "Fenntarthatja a munkájához fűződő összes jogot, licencelheti a Creative Commons licenc alapján, vagy a köztulajdonnak nyilváníthatja. A munkát minden esetben nyilvánosan elérhetővé teszik a zotero.org oldalon.">
 <!ENTITY zotero.publications.sharing.prompt "Engedélyezné, hogy mások is megosszák a munkáját?">
 <!ENTITY zotero.publications.sharing.cc "Igen, Creative Commons licence szerint.">
 <!ENTITY zotero.publications.sharing.cc0 "Igen és tegye a munkám a közkincs (public domain) közé">

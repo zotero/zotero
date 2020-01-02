@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "Затвори">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "Уреди прилоге">
+<!ENTITY convertToStored.label "Претвори везе до датотека у сачуване датотеке…">
 <!ENTITY importCmd.label "Увези…">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Увези из оставе">
@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "Преглед">
+<!ENTITY layout.label "Распоред">
+<!ENTITY standardView.label "Уобичајени приказ">
+<!ENTITY stackedView.label "Приказ на гомили">
+<!ENTITY collectionsPane.label "Површ са збиркама">
+<!ENTITY itemPane.label "Површ са ставкама">
+<!ENTITY tagSelector.label "Избор ознака">
+<!ENTITY recursiveCollections.label "Прикажи ставке из подзбирки">
+<!ENTITY fontSize.label "Величина фонта">
+<!ENTITY noteFontSize.label "Величина фонта за белешке">
 
 
 <!ENTITY toolsMenu.label "Алати">
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "Инсталирај програм за повезивање са разгледачем">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Додаци">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Програмер">
 
 
 <!ENTITY minimizeWindow.key "m">

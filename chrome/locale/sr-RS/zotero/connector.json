@@ -5,6 +5,15 @@
   "general_done": {
     "message": "Готово"
   },
+  "general_tryAgain": {
+    "message": "Покушај поново"
+  },
+  "general_warning": {
+    "message": "Упозорење"
+  },
+  "general_cancel": {
+    "message": "Откажи"
+  },
   "progressWindow_savingTo": {
     "message": "Чувам у"
   },
@@ -25,6 +34,39 @@
   },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "последња верзија"
+  },
+  "appConnector": {
+    "message": "$1 повезник"
+  },
+  "upgradeApp": {
+    "message": "Надогради $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Да ли је $1 покренут?"
+  },
+  "error_connection_save": {
+    "message": "$1 не може да ступи у везу са $2 програмом за рачунар. Повезник може да сачува неке странице на ваш $3 налог, али је најбоље да проверите да ли је $2 отворен пре покушаја чувања."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Можете <a href=\"$1\">преузети $2</a> или <a href=\"$3\">потражити грешку у вези </a> уколико је неопходно."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Омогући чување у мрежну библиотеку"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Цитирање помоћу веба захтева издање $1 или новије."
+  },
+  "integration_error_connection": {
+    "message": "$1 не може да ступи у везу са $2 програмом за рачунар. $2 мора бити отворен како би користили цитирање помоћу веба."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Овај документ садржи активне Зотерове цитате који ће бити приказани као везе на zotero.org у преузетим копијама."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Да направите верзију која је погодна за дељење, изаберите <b>Направи копију…</b> из менија ставке, а затим <b>Уклони везе до цитата</b> из Зотеровог менија нове ставке и на крају преузмите копију без веза. Увек чувајте оригиналне везе до докумената у случају да вам буду потребне додатне измене."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Ипак преузми верзију са везама"
   },
   "general_saveTo": {
     "message": "Сачувај у $1"

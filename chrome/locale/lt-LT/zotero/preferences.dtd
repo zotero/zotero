@@ -63,7 +63,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Failus parsiųsti">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "sinchronizuojant">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "pagal poreikį">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Tikrinti serverį">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Naudodamiesi Zotero saugykla Jūs savaime sutinkate su jos">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "naudojimosi taisyklėmis ir sąlygomis">
 <!ENTITY zotero.preferences.sync.librariesToSync "Sinchronizuotinos bibliotekos">
@@ -75,12 +75,12 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 " puslapyje.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Perrašyti duomenų sinchronizavimo žurnalą">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Apjungti vietinius duomenis su duomenimis nuotoliniame serveryje, ignoruojant duombazės informaciją apie pakeitimus">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Atkurti iš nuotolinės saugyklos">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Vietinius Zotero duomenis pakeisti nuotolinės saugyklos duomenimis.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Pakeisti nuotolinėje saugykloje">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Nuotolinės saugyklos duomenis pakeisti vietinės saugyklos duomenimis.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Perrašyti failų sinchronizavimo žurnalą">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Palyginti visas pridėtas rinkmenas su esančiomis saugykloje">
 <!ENTITY zotero.preferences.sync.reset "Atkūrimas">
 <!ENTITY zotero.preferences.sync.reset.button "Atkurti...">
 
@@ -184,7 +184,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Naudoti profilio katalogą">
 <!ENTITY zotero.preferences.dataDir.custom "Savita:">
 <!ENTITY zotero.preferences.dataDir.choose "Pasirinkti...">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(nurodyta komandinėje eilutėje)">
 <!ENTITY zotero.preferences.dataDir.reveal "Parodyti duomenų katalogą">
 <!ENTITY zotero.preferences.dataDir.migrate "Perkelti į naują numatytąją vietą...">
 

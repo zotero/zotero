@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "Tanca">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "Gestiona les adjuncions">
+<!ENTITY convertToStored.label "Converteix els fitxers enllaçats a fitxers emmagatzemats…">
 <!ENTITY importCmd.label "Importa…">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Importa del portaretalls">
@@ -44,7 +44,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "Vista">
+<!ENTITY viewMenu.label "Visualitza">
 <!ENTITY layout.label "Disposició">
 <!ENTITY standardView.label "Vista estàndard">
 <!ENTITY stackedView.label "Vista apilada">
@@ -81,9 +81,9 @@
 <!ENTITY aboutProduct.label "Quant a &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "Assistència i documentació">
-<!ENTITY productHelp.accesskey "H">
+<!ENTITY productHelp.accesskey "d">
 <!ENTITY helpTroubleshootingInfo.label "Informació de resolució de problemes">
-<!ENTITY helpTroubleshootingInfo.accesskey "T">
+<!ENTITY helpTroubleshootingInfo.accesskey "p">
 <!ENTITY helpFeedbackPage.label "Fòrums de debat">
 <!ENTITY helpFeedbackPage.accesskey "F">
 

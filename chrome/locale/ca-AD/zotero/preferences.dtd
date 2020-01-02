@@ -61,7 +61,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sincronitza els fitxers adjunts de la biblioteca mitjançant">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Sincronitza els fitxers adjunts de les biblioteques de grup mitjançant l'emmagatzematge del Zotero">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Descarrega els fitxers">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "quan es sincronitzi">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "quan se sincronitzi">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "segons sigui necessari">
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verifica el servidor">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Amb l'ús de l'emmagatzematge del Zotero, accepteu quedar obligat pels">

@@ -10,17 +10,17 @@
 <!ENTITY zotero.general.cancel "Откажи">
 <!ENTITY zotero.general.refresh "Освежи">
 <!ENTITY zotero.general.saveAs "Сачувај као…">
-<!ENTITY zotero.general.options "Options">
+<!ENTITY zotero.general.options "Опције">
 <!ENTITY zotero.general.advancedOptions.label "Напредне опције">
 <!ENTITY zotero.general.tools "Алати">
 <!ENTITY zotero.general.more "Више">
 <!ENTITY zotero.general.loading "Учитавам…">
 <!ENTITY zotero.general.close "Затвори">
 <!ENTITY zotero.general.minimize "Умањи">
-<!ENTITY zotero.general.other "Other…">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.other "Остало…">
+<!ENTITY zotero.general.bigger "Веће">
+<!ENTITY zotero.general.smaller "Мање">
+<!ENTITY zotero.general.reset "Врати">
 
 
 <!ENTITY zotero.errorReport.title "Пријављивање грешака у Зотеру">
@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Прикажи дупликате">
 <!ENTITY zotero.collections.showUnfiledItems "Прикажи неразврстане">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "Прикажи повучене ставке">
 
 <!ENTITY zotero.items.itemType "Врста ставке">
 <!ENTITY zotero.items.type_column "Врста ставке">
@@ -172,7 +172,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Постави боју">
 <!ENTITY zotero.tagColorChooser.removeColor "Уклони боју">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
+<!ENTITY zotero.lookup.description "Унесите ИСБН, ДОИ, ПМИД или арХив идентификације за додавање у вашу библиотеку:">
 <!ENTITY zotero.lookup.button.search "Претрага">
 
 <!ENTITY zotero.selectitems.title "Изабери ставке">
@@ -189,7 +189,7 @@
 <!ENTITY zotero.bibliography.outputMethod "Начин извоза:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Сними као РТФ">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Сними као ХТМЛ">
-<!ENTITY zotero.bibliography.copyToClipboard.label "Умножи">
+<!ENTITY zotero.bibliography.copyToClipboard.label "Копирај">
 <!ENTITY zotero.bibliography.print.label "Штампај">
 
 <!ENTITY zotero.integration.docPrefs.title "Поставке документа">
@@ -199,15 +199,15 @@
 
 <!ENTITY zotero.progress.title "Напредак">
 
-<!ENTITY zotero.import "Import">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
-<!ENTITY zotero.import.database "Database">
-<!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
-<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import "Увези">
+<!ENTITY zotero.import.whereToImportFrom "Одакле желите да увезете?">
+<!ENTITY zotero.import.source.file "Из датотеке (BibTeX, RIS, Зотеров RDF…)">
+<!ENTITY zotero.import.importing "Увозим…">
+<!ENTITY zotero.import.database "База података">
+<!ENTITY zotero.import.lastModified "Последња измена">
+<!ENTITY zotero.import.size "Величина">
+<!ENTITY zotero.import.createCollection "Постави увезене збирке и ставке у нову збирку">
+<!ENTITY zotero.import.fileHandling "Рад са датотекама">
 
 <!ENTITY zotero.exportOptions.title "Извоз…">
 <!ENTITY zotero.exportOptions.format.label "Формат:">
@@ -250,7 +250,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Користи скраћенице часописа из MEDLINE-а">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Поље „Скраћеница часописа“ ће бити занемарено.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "Пребаците се на други програм за обраду текста…">
 
 <!ENTITY zotero.integration.showEditor.label "Прикажи уређивача">
 <!ENTITY zotero.integration.classicView.label "Класични приказ">

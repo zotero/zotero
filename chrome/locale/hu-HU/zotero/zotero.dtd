@@ -12,15 +12,15 @@
 <!ENTITY zotero.general.saveAs "Mentés másként…">
 <!ENTITY zotero.general.options "Beállítások">
 <!ENTITY zotero.general.advancedOptions.label "Haladó beállítások">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Eszközök">
 <!ENTITY zotero.general.more " Egyéb...">
-<!ENTITY zotero.general.loading "Loading…">
+<!ENTITY zotero.general.loading "Betöltés…">
 <!ENTITY zotero.general.close "Bezárás">
 <!ENTITY zotero.general.minimize "Kis méret">
 <!ENTITY zotero.general.other "Másik…">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.bigger "Nagyobb">
+<!ENTITY zotero.general.smaller "Kisebb">
+<!ENTITY zotero.general.reset "Visszaállítás">
 
 
 <!ENTITY zotero.errorReport.title "Zotero hibajelentés">
@@ -108,7 +108,7 @@
 <!ENTITY zotero.toolbar.moreItemTypes.label "Egyéb...">
 <!ENTITY zotero.toolbar.lookup.label "Elem hozzáadása azonosító alapján">
 <!ENTITY zotero.toolbar.removeItem.label "Elem törlése...">
-<!ENTITY zotero.toolbar.newLibrary.label "New Library">
+<!ENTITY zotero.toolbar.newLibrary.label "Könyvtár létrehozása">
 <!ENTITY zotero.toolbar.newCollection.label "Új gyűjtemény...">
 <!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "Új csoport...">
@@ -130,8 +130,8 @@
 <!ENTITY zotero.toolbar.openURL.tooltip "Hol találom a helyi könyvtárban?">
 
 <!ENTITY zotero.toolbar.feeds.new "New Feed">
-<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "URL-ből…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "OPML-ből…">
 <!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
 <!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
 
@@ -143,9 +143,9 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Keresztnév/Vezetéknév felcserélése">
 <!ENTITY zotero.item.viewOnline "Online megtekintés">
 <!ENTITY zotero.item.copyAsURL "Másolás URL-ként">
-<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
+<!ENTITY zotero.item.deletePermanently "Végleges törlés…">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "Minden címke eltávolítása…">
 
 <!ENTITY zotero.toolbar.newNote "Új jegyzet">
 <!ENTITY zotero.toolbar.note.standalone "Új önálló jegyzet">
@@ -157,10 +157,10 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Pillanatfelvétel az aktuális oldalról">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Nincsenek címkék">
-<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
+<!ENTITY zotero.tagSelector.loadingTags "Címkék betöltése…">
 <!ENTITY zotero.tagSelector.showAutomatic "Automatikus címkék megjelenítése">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Címkék automatikus törlése ebben a könyvtárban…">
 <!ENTITY zotero.tagSelector.clearAll "Összes címke kiválasztásának megszüntetése">
 <!ENTITY zotero.tagSelector.assignColor "Szín kiválasztása…">
 <!ENTITY zotero.tagSelector.renameTag "Címke átnevezése...">
@@ -257,7 +257,7 @@
 
 <!ENTITY zotero.integration.references.label "Hivatkozások a bibliográfiában">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
+<!ENTITY zotero.sync.stop "A szinkronizálás leállítása">
 <!ENTITY zotero.sync.error "Szinkronizációs hiba">
 <!ENTITY zotero.sync.storage.progress "Állapot:">
 <!ENTITY zotero.sync.storage.downloads "Letöltések:">
@@ -289,9 +289,9 @@
 <!ENTITY zotero.feedSettings.title.label "Cím:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
 <!ENTITY zotero.feedSettings.refresh.label2 "óra">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Az olvasatlan hírcsatorna elemek eltávolítása után">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "nap(ok)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Az olvasott hírcsatorna elemek eltávolítása után">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "nap(ok)">
 
 <!ENTITY zotero.rtfScan.title "RTF átvizsgálása…">

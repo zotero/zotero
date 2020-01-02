@@ -3,9 +3,9 @@
 <!ENTITY zotero.publications.intro "你添加到我的出版物的条目将在 zotero.org 上你的个人主页上显示。如果你选择加入附件，这些文件将在你指定的许可下向公众开放下载。请仅添加你自己创建的论文，并仅上传你有权并愿意分享的文件。">
 <!ENTITY zotero.publications.include.checkbox.files "包括文件">
 <!ENTITY zotero.publications.include.checkbox.notes "包括笔记">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "你可以在任何时间从“我的出版物”中调整显示的项目。">
 
-<!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
+<!ENTITY zotero.publications.sharing.title "选择你分享论文的方式">
 <!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
 <!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
 <!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">
@@ -15,5 +15,5 @@
 <!ENTITY zotero.publications.chooseLicense.title "Choose a Creative Commons license">
 <!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
 <!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Allow adaptations of your work to be shared?">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Yes, as long as others share alike">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "是的，如果其他人也分享同样的">
 <!ENTITY zotero.publications.chooseLicense.commercial.prompt "允许你的工作的商业使用吗？">

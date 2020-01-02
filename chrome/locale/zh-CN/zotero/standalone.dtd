@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "关闭">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "管理附件">
+<!ENTITY convertToStored.label "转换已链接文件为已存储文件...">
 <!ENTITY importCmd.label "导入…">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "从剪贴板导入">
