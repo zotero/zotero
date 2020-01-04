@@ -52,7 +52,6 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		Zotero.Prefs.set("sync.storage.verified", !!val)
 	},
 	
-	_initialized: false,
 	_parentURI: null,
 	_rootURI: null,	
 	_cachedCredentials: false,
@@ -205,6 +204,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		var io = Services.io;
 		this._parentURI = io.newURI(url, null, null);
 		this._rootURI = io.newURI(url + "zotero/", null, null);
+		Zotero.HTTP.CookieBlocker.addURL(this._rootURI.spec);
 	},
 	
 	
@@ -242,6 +242,10 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	
 	
 	clearCachedCredentials: function() {
+		Zotero.debug("WebDAV: Clearing cached credentials");
+		if (this._rootURI) {
+			Zotero.HTTP.CookieBlocker.removeURL(this._rootURI.spec);
+		}
 		this._rootURI = this._parentURI = undefined;
 		this._cachedCredentials = false;
 	},
@@ -390,7 +394,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			.createInstance(nsIWBP);
 		wbp.persistFlags = nsIWBP.PERSIST_FLAGS_BYPASS_CACHE;
 		wbp.progressListener = listener;
-		Zotero.Utilities.Internal.saveURI(wbp, uri, destPath, null, true);
+		Zotero.Utilities.Internal.saveURI(wbp, uri, destPath);
 		
 		return deferred.promise;
 	}),

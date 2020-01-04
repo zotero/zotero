@@ -519,7 +519,13 @@ Zotero.HTTP = new function() {
 		}.bind(this);
 		
 		if (options.cookieSandbox) {
-			options.cookieSandbox.attachToInterfaceRequestor(xmlhttp);
+			if (xmlhttp instanceof XMLHttpRequest) {
+				options.cookieSandbox.attachToInterfaceRequestor(xmlhttp);
+			}
+			// Mocked XHR in tests
+			else {
+				Zotero.debug("Not a real XMLHttpRequest -- not attaching cookie sandbox", 2);
+			}
 		}
 		
 		// Send binary data
@@ -807,6 +813,70 @@ Zotero.HTTP = new function() {
 	};
 	
 	
+	this.CookieBlocker = {
+		registered: false,
+		observeredTopics: [
+			"http-on-examine-response",
+			"http-on-modify-request",
+			//"quit-application"
+		],
+		urls: [],
+		
+		observe: function (channel, topic) {
+			channel.QueryInterface(Components.interfaces.nsIHttpChannel);
+			if (topic == "http-on-modify-request") {
+				for (let url of this.urls) {
+					if (channel.URI.spec.startsWith(url)) {
+						let dispURL = Zotero.HTTP.getDisplayURI(channel.URI).spec;
+						Zotero.debug("CookieBlocker: Ignoring cookies for " + dispURL);
+						channel.setRequestHeader("Cookie", "", false);
+					}
+				}
+			}
+			else if (topic == "http-on-examine-response") {
+				for (let url of this.urls) {
+					if (channel.URI.spec.startsWith(url)) {
+						let dispURL = Zotero.HTTP.getDisplayURI(channel.URI).spec;
+						channel.setResponseHeader("Set-Cookie", "", false);
+					}
+				}
+			}
+		},
+		
+		addURL: function (url) {
+			if (!this.registered) {
+				Zotero.debug("CookieBlocker: Registering observers");
+				for (let topic of this.observeredTopics) {
+					Services.obs.addObserver(this, topic, false);
+				}
+				this.registered = true;
+			}
+			if (!this.urls.includes(url)) {
+				let dispURL = Zotero.HTTP.getDisplayURI(NetUtil.newURI(url)).spec;
+				Zotero.debug("CookieBlocker: Adding " + dispURL + " to blocklist");
+				this.urls.push(url);
+			}
+		},
+		
+		
+		removeURL: function (url) {
+			let pos = this.urls.indexOf(url);
+			if (pos != -1) {
+				let dispURL = Zotero.HTTP.getDisplayURI(NetUtil.newURI(url)).spec;
+				Zotero.debug("CookieBlocker: Removing " + dispURL + " from blocklist");
+				this.urls.splice(pos, 1);
+			}
+			if (!this.urls.length) {
+				Zotero.debug("CookieBlocker: Removing observers");
+				for (let topic of this.observeredTopics) {
+					Services.obs.removeObserver(this, topic, false);
+				}
+				this.registered = false;
+			}
+		}
+	};
+	
+	
 	/**
 	 * Make a foreground HTTP request in order to trigger a proxy authentication dialog
 	 *
@@ -956,6 +1026,7 @@ Zotero.HTTP = new function() {
 	
 	
 	this.getDisplayURI = function (uri) {
+		if (!uri.password) return uri;
 		return uri.mutate().setPassword('********').finalize();
 	}
 	

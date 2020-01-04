@@ -548,7 +548,13 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		})
 		
 		
-		// For compatibility with NextCloud
+		// As a security measure, Nextcloud sets a regular cookie and two SameSite cookies and
+		// throws a 503 if the regular cookie gets returned without the SameSite cookies.
+		// As of Fx60 (Zotero 5.0.78), which added SameSite support, SameSite cookies don't get
+		// returned properly (because we don't have a load context?), triggering the 503. To avoid
+		// this, we just don't store or send any cookies for WebDAV requests.
+		//
+		// https://forums.zotero.org/discussion/80429/sync-error-in-5-0-80
 		it("shouldn't send cookies", function* () {
 			// Make real requests so we can test the internal cookie-handling behavior
 			Zotero.HTTP.mock = null;
@@ -596,6 +602,12 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 								response.setHeader('WWW-Authenticate', 'Basic realm="WebDAV"', false);
 								return;
 							}
+							// Cookie shouldn't be passed
+							if (request.hasHeader('Cookie')) {
+								response.setStatusLine(null, 400, null);
+								return;
+							}
+							response.setHeader('Set-Cookie', 'foo=bar', false);
 							response.setHeader('DAV', '1', false);
 							response.setStatusLine(null, 200, "OK");
 						}
@@ -608,11 +620,15 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 					handle: function (request, response) {
 						if (request.method != 'GET') {
 							response.setStatusLine(null, 400, "Bad Request");
-							response.write("");
 							return;
 						}
 						// An XHR should already include Authorization
 						if (!request.hasHeader('Authorization')) {
+							response.setStatusLine(null, 400, null);
+							return;
+						}
+						// Cookie shouldn't be passed
+						if (request.hasHeader('Cookie')) {
 							response.setStatusLine(null, 400, null);
 							return;
 						}
@@ -633,12 +649,12 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 						// Make sure the cookie isn't returned
 						if (request.hasHeader('Cookie')) {
 							response.setStatusLine(null, 503, "Service Unavailable");
-							response.write("");
 							return;
 						}
-						// Private context won't include Authorization automatically
+						// In case nsIWebBrowserPersist doesn't use the cached Authorization
 						if (!request.hasHeader('Authorization')) {
 							response.setStatusLine(null, 401, null);
+							response.setHeader('Set-Cookie', 'foo=bar', false);
 							response.setHeader('WWW-Authenticate', 'Basic realm="WebDAV"', false);
 							return;
 						}

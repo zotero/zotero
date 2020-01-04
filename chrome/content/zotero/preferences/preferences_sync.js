@@ -432,11 +432,15 @@ Zotero_Preferences.Sync = {
 		
 		if (oldProtocol == 'webdav') {
 			this.unverifyStorageServer();
+			// The controller is getting replaced anyway, but this removes the WebDAV URL from
+			// Zotero.HTTP.CookieBlocker
+			Zotero.Sync.Runner.getStorageController('webdav').clearCachedCredentials();
 			Zotero.Sync.Runner.resetStorageController(oldProtocol);
 			
 			var username = document.getElementById('storage-username').value;
 			var password = document.getElementById('storage-password').value;
 			if (username) {
+				// Get a new controller
 				Zotero.Sync.Runner.getStorageController('webdav').password = password;
 			}
 		}
