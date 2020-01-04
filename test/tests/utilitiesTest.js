@@ -55,6 +55,10 @@ describe("Zotero.Utilities", function() {
 			assert.isFalse(Zotero.Utilities.isHTTPURL('file:///c:/path/to/file.txt'));
 		});
 		
+		it("should return false for mailto URLs in allowNoScheme mode", function () {
+			assert.isFalse(Zotero.Utilities.isHTTPURL('mailto:foo@example.com', true));
+		});
+		
 		it("should return false for zotero: URL", function () {
 			assert.isFalse(Zotero.Utilities.isHTTPURL('zotero://select/library/items/AAAAAAAA'));
 		});

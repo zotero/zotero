@@ -606,24 +606,13 @@ Zotero.Attachments = new function(){
 		var title = options.title;
 		var collections = options.collections;
 		
-		/* Throw error on invalid URLs
-		 We currently accept the following protocols:
-		 PersonalBrain (brain://)
-		 DevonThink (x-devonthink-item://)
-		 Notational Velocity (nv://)
-		 MyLife Organized (mlo://)
-		 Evernote (evernote://)
-		 OneNote (onenote://)
-		 Kindle (kindle://) 
-		 Logos (logosres:) 
-		 Bear (bear://)
-		 MarginNote (marginnoteapp://)
-		 Zotero (zotero://) */
-
-		var urlRe = /^((https?|zotero|evernote|onenote|brain|nv|mlo|kindle|x-devonthink-item|bear|marginnoteapp|ftp):\/\/|logosres:)[^\s]*$/;
-		var matches = urlRe.exec(url);
+		var matches = url.match(/^([a-z]+):(\/\/)?.+/);
 		if (!matches) {
-			throw ("Invalid URL '" + url + "' in Zotero.Attachments.linkFromURL()");
+			throw new Error(`Invalid URL '${url}'`);
+		}
+		var scheme = matches[1];
+		if (['javascript', 'data', 'chrome', 'resource', 'mailto'].includes(scheme)) {
+			throw new Error(`Invalid scheme '${scheme}'`);
 		}
 		
 		// If no title provided, figure it out from the URL

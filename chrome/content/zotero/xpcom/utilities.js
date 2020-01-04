@@ -187,7 +187,8 @@ Zotero.Utilities = {
 	isHTTPURL: function (url, allowNoScheme = false) {
 		// From https://stackoverflow.com/a/3809435
 		var noSchemeRE = /^[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
-		return /^https?:\/\//.test(url) || (allowNoScheme && noSchemeRE.test(url));
+		return /^https?:\/\//.test(url)
+			|| (allowNoScheme && !url.startsWith('mailto:') && noSchemeRE.test(url));
 	},
 	
 	/**
