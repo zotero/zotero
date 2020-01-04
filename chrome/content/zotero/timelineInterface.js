@@ -47,6 +47,6 @@ var Zotero_Timeline_Interface = new function() {
 				}
 			}
 		}
-		ZoteroPane_Local.loadURI(uri);
+		Zotero.openInViewer(uri);
 	}
 }

@@ -276,7 +276,7 @@
 					<menuseparator/>
 					<menuitem class="menuitem-iconic zotero-menuitem-export" oncommand="Zotero_File_Interface.exportItems();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-create-bibliography" oncommand="Zotero_File_Interface.bibliographyFromItems();"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-create-report" oncommand="Zotero_Report_Interface.loadItemReport(event)"/>
+					<menuitem class="menuitem-iconic zotero-menuitem-create-report" oncommand="Zotero_Report_Interface.loadItemReport()"/>
 					<menuseparator/>
 					<menuitem class="menuitem-iconic zotero-menuitem-retrieve-metadata" oncommand="ZoteroPane.recognizeSelected();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-unrecognize" label="&zotero.items.menu.unrecognize;" oncommand="ZoteroPane.unrecognizeSelected()"/>
