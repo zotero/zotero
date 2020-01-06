@@ -1,7 +1,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2019 YOUR_NAME <- TODO
+	Copyright © 2020 YOUR_NAME <- TODO
 	
 	This file is part of Zotero.
 
