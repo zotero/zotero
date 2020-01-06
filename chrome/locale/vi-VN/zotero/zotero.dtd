@@ -120,7 +120,7 @@
 <!ENTITY zotero.toolbar.import.label "Nhập khẩu...">
 <!ENTITY zotero.toolbar.importFromClipboard "Nhập từ Clipboard">
 <!ENTITY zotero.toolbar.export.label "Xuất khẩu Thư viện...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
 <!ENTITY zotero.toolbar.timeline.label "Tạo Tuyến thời gian">
 <!ENTITY zotero.toolbar.preferences.label "Tùy chọn...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Hộ trợ và Tài liệu">

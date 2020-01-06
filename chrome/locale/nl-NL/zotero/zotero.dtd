@@ -120,7 +120,7 @@
 <!ENTITY zotero.toolbar.import.label "Importeren…">
 <!ENTITY zotero.toolbar.importFromClipboard "Importeer van klembord">
 <!ENTITY zotero.toolbar.export.label "Bibliotheek exporteren…">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF-scan…">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
 <!ENTITY zotero.toolbar.timeline.label "Tijdslijn maken">
 <!ENTITY zotero.toolbar.preferences.label "Voorkeuren…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Ondersteuning en documentatie">

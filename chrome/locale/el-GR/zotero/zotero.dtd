@@ -120,7 +120,7 @@
 <!ENTITY zotero.toolbar.import.label "Εισαγωγή">
 <!ENTITY zotero.toolbar.importFromClipboard "Εισαγωγή από την προσωρινή μνήμη">
 <!ENTITY zotero.toolbar.export.label "Export Library…">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan…">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
 <!ENTITY zotero.toolbar.timeline.label "Δημιουργία χρονοδιαγράμματος">
 <!ENTITY zotero.toolbar.preferences.label "Προτιμήσεις...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Υποστήριξη και Τεκμηρίωση">

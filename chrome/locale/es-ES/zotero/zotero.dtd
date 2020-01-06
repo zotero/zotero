@@ -120,7 +120,7 @@
 <!ENTITY zotero.toolbar.import.label "Importar...">
 <!ENTITY zotero.toolbar.importFromClipboard "Importar desde el portapapeles">
 <!ENTITY zotero.toolbar.export.label "Exportar biblioteca...">
-<!ENTITY zotero.toolbar.rtfScan.label "Escaneado RTF...">
+<!ENTITY zotero.toolbar.rtfScan.label "Escaneo RTF">
 <!ENTITY zotero.toolbar.timeline.label "Crear una cronografía">
 <!ENTITY zotero.toolbar.preferences.label "Preferencias...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Soporte y documentación">
