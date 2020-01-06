@@ -237,8 +237,8 @@ var Zotero_QuickFormat = new function () {
 			// add to previous cite
 			var node = _getCurrentEditorTextNode();
 			var prevNode = node.previousSibling;
-			let citationItem = JSON.parse(prevNode && prevNode.dataset.citationItem || "{}");
-			if (citationItem.locator) {
+			let citationItem = JSON.parse(prevNode && prevNode.dataset.citationItem || "null");
+			if (citationItem && citationItem.locator) {
 				citationItem.locator += str;
 				prevNode.dataset.citationItem = JSON.stringify(citationItem);
 				prevNode.textContent = _buildBubbleString(citationItem);
@@ -256,8 +256,8 @@ var Zotero_QuickFormat = new function () {
 					// add to previous cite
 					var node = _getCurrentEditorTextNode();
 					var prevNode = node.previousSibling;
-					let citationItem = JSON.parse(prevNode && prevNode.dataset.citationItem || "{}");
-					if(prevNode && prevNode.citationItem) {
+					let citationItem = JSON.parse(prevNode && prevNode.dataset.citationItem || "null");
+					if (citationItem) {
 						citationItem.locator = m[2];
 						prevNode.dataset.citationItem = JSON.stringify(citationItem);
 						prevNode.textContent = _buildBubbleString(citationItem);
