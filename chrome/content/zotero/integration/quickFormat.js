@@ -28,7 +28,7 @@ var Zotero_QuickFormat = new function () {
 	const pixelRe = /^([0-9]+)px$/
 	const specifiedLocatorRe = /^(?:,? *(p{1,2})(?:\. *| *)|:)([0-9\-]+) *$/;
 	const yearRe = /,? *([0-9]+) *(B[. ]*C[. ]*(?:E[. ]*)?|A[. ]*D[. ]*|C[. ]*E[. ]*)?$/i;
-	const locatorRe = /(?:, *(p{0,2})\.?|(\:)) *([0-9\-–]+)$/i;
+	const locatorRe = /(?:,? *(p{0,2})\.?|(\:)) *([0-9\-–]+)$/i;
 	const creatorSplitRe = /(?:,| *(?:and|\&)) +/;
 	const charRe = /[\w\u007F-\uFFFF]/;
 	const numRe = /^[0-9\-–]+$/;
@@ -271,7 +271,8 @@ var Zotero_QuickFormat = new function () {
 				currentLocator = m[2];
 				str = str.substring(0, m.index);
 			}
-			
+
+			str = _updateLocator(str);
 			// check for year and pages
 			m = yearRe.exec(str);
 			if(m) {
@@ -366,7 +367,7 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _updateLocator(str) {
 		m = locatorRe.exec(str);
-		if(m && (m[1] || m[2] || m[3].length !== 4)) {
+		if(m && (m[1] || m[2] || m[3].length !== 4) && m.index > 0) {
 			currentLocator = m[3];
 			str = str.substr(0, m.index)+str.substring(m.index+m[0].length);
 		}
