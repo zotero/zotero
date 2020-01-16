@@ -1100,6 +1100,8 @@ var Zotero_QuickFormat = new function () {
 							return node;
 						}
 					}
+				} else if (container.parentNode.dataset && container.parentNode.dataset.citationItem) {
+					return container.parentNode;
 				}
 			}
 			return null;
@@ -1195,7 +1197,22 @@ var Zotero_QuickFormat = new function () {
 				selection.removeAllRanges();
 				selection.addRange(nodeRange);
 			}
+		} else if (["Home", "End"].includes(event.key)) {
+			setTimeout(() => {
+				right = event.key == "End";
+				bubble = _getSelectedBubble(right);
+				if (bubble) {
+					event.preventDefault();
 
+					var nodeRange = qfiDocument.createRange();
+					nodeRange.selectNode(bubble);
+					nodeRange.collapse(!right);
+
+					var selection = qfiWindow.getSelection();
+					selection.removeAllRanges();
+					selection.addRange(nodeRange);
+				}
+			})
 		} else if(keyCode === event.DOM_VK_UP && referencePanel.state === "open") {
 			var selectedItem = referenceBox.selectedItem;
 
