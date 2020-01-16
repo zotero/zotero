@@ -253,7 +253,7 @@ describe("Zotero.Utilities.Internal", function () {
 		fieldMap.set('originalDate', originalDate);
 		fieldMap.set('publicationPlace', publicationPlace);
 		fieldMap.set('DOI', doi);
-		var fieldStr = `DOI: ${doi}\noriginalDate: ${originalDate}\npublicationPlace: ${publicationPlace}`;
+		var fieldStr = `DOI: ${doi}\nOriginal Date: ${originalDate}\nPublication Place: ${publicationPlace}`;
 		
 		it("should create 'field: value' pairs from field map", function () {
 			var extra = "";
@@ -272,7 +272,7 @@ describe("Zotero.Utilities.Internal", function () {
 			var newExtra = ZUI.combineExtraFields(extra, fieldMap);
 			assert.equal(
 				newExtra,
-				fieldStr.split(/\n/).filter(x => !x.startsWith('originalDate')).join("\n")
+				fieldStr.split(/\n/).filter(x => !x.startsWith('Original Date')).join("\n")
 					+ "\nThis is a note.\nOriginal Date: 1887\nFoo: Bar"
 			);
 		});
@@ -384,6 +384,21 @@ describe("Zotero.Utilities.Internal", function () {
 		it("should return zh-CN for zh", function () {
 			assert.equal(resolve('zh'), 'zh-CN');
 		});
+	});
+	
+	describe("#camelToTitleCase()", function () {
+		it("should convert 'fooBar' to 'Foo Bar'", function () {
+			assert.equal(Zotero.Utilities.Internal.camelToTitleCase('fooBar'), 'Foo Bar');
+		});
+		
+		it("should keep all-caps strings intact", function () {
+			assert.equal(Zotero.Utilities.Internal.camelToTitleCase('DOI'), 'DOI');
+		});
+		
+		it("should convert 'fooBAR' to 'Foo BAR'", function () {
+			assert.equal(Zotero.Utilities.Internal.camelToTitleCase('fooBAR'), 'Foo BAR');
+		});
+
 	});
 	
 	describe("#getNextName()", function () {

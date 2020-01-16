@@ -4208,11 +4208,11 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 	
 	var isValidForType = {};
 	var setFields = new Set();
-	/*var { fields: extraFields, creators: extraCreators, extra } = Zotero.Utilities.Internal.extractExtraFields(
+	var { fields: extraFields, creators: extraCreators, extra } = Zotero.Utilities.Internal.extractExtraFields(
 		json.extra !== undefined ? json.extra : '',
 		this,
 		Object.keys(json)
-	);*/
+	);
 	
 	// Transfer valid fields from Extra to regular fields
 	// Currently disabled
@@ -4319,12 +4319,11 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 					throw e;
 				}
 				// Otherwise store in Extra
-				// TEMP: Disabled for now, along with tests in itemTest.js
-				/*if (typeof val == 'string') {
+				if (typeof val == 'string') {
 					Zotero.warn(`Storing unknown field '${field}' in Extra for item ${this.libraryKey}`);
 					extraFields.set(field, val);
 					break;
-				}*/
+				}
 				Zotero.warn(`Discarding unknown JSON ${typeof val} '${field}' for item ${this.libraryKey}`);
 				continue;
 			}
@@ -4346,12 +4345,9 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 					throw e;
 				}
 				// Otherwise store in Extra
-				// TEMP: Disabled for now, since imports can assign values to multiple versions of
-				// fields
-				// https://groups.google.com/d/msg/zotero-dev/a1IPUJ2m_3s/hfmdK2P3BwAJ
-				/*Zotero.warn(`Storing invalid field '${origField}' for type ${type} in Extra for `
+				Zotero.warn(`Storing invalid field '${origField}' for type ${type} in Extra for `
 					+ `item ${this.libraryKey}`);
-				extraFields.set(field, val);*/
+				extraFields.set(field, val);
 				continue;
 			}
 			this.setField(field, json[origField]);
@@ -4359,8 +4355,37 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 		}
 	}
 	
-	//this.setField('extra', Zotero.Utilities.Internal.combineExtraFields(extra, extraFields));
-	this.setField('extra', json.extra !== undefined ? json.extra : '');
+	// If one of the valid fields is a base field or a base-mapped field, remove all other
+	// associated fields from Extra. This could be removed if we made sure that translators didn't
+	// try to save multiple versions of base-mapped fields, which they shouldn't need to do.
+	//
+	// https://github.com/zotero/zotero/issues/1504#issuecomment-572415083
+	if (extraFields.size) {
+		for (let field of setFields.keys()) {
+			let baseField;
+			if (Zotero.ItemFields.isBaseField(field)) {
+				baseField = field;
+			}
+			else {
+				let baseFieldID = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, field);
+				if (baseFieldID) {
+					baseField = baseFieldID;
+				}
+			}
+			if (baseField) {
+				let mappedFieldNames = Zotero.ItemFields.getTypeFieldsFromBase(baseField, true);
+				for (let mappedField of mappedFieldNames) {
+					if (extraFields.has(mappedField)) {
+						Zotero.warn(`Removing redundant Extra field '${mappedField}' for item `
+							+ this.libraryKey);
+						extraFields.delete(mappedField);
+					}
+				}
+			}
+		}
+	}
+	
+	this.setField('extra', Zotero.Utilities.Internal.combineExtraFields(extra, extraFields));
 	
 	if (json.collections || this._collections.length) {
 		this.setCollections(json.collections);

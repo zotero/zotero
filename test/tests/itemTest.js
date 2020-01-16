@@ -1754,6 +1754,18 @@ describe("Zotero.Item", function () {
 			assert.isFalse(item.inPublications);
 		});
 		
+		it("should handle Extra in non-strict mode", function () {
+			var json = {
+				itemType: "journalArticle",
+				title: "Test",
+				extra: "Here's some extra text"
+			};
+			var item = new Zotero.Item();
+			item.fromJSON(json);
+			assert.equal(item.getField('extra'), json.extra);
+		});
+		
+		
 		// Not currently following this behavior
 		/*it("should move valid field in Extra to field if not set", function () {
 			var doi = '10.1234/abcd';
@@ -1799,19 +1811,20 @@ describe("Zotero.Item", function () {
 			assert.equal(item.getField('extra'), `doi: ${doi2}`);
 		});*/
 		
-		it.skip("should store unknown field in Extra in non-strict mode", function () {
+		it("should store unknown fields in Extra in non-strict mode", function () {
 			var json = {
 				itemType: "journalArticle",
 				title: "Test",
-				foo: "Bar"
+				fooBar: "123",
+				testField: "test value"
 			};
 			var item = new Zotero.Item;
 			item.fromJSON(json);
 			assert.equal(item.getField('title'), 'Test');
-			assert.equal(item.getField('extra'), 'foo: Bar');
+			assert.equal(item.getField('extra'), 'Foo Bar: 123\nTest Field: test value');
 		});
 		
-		it.skip("should replace unknown field in Extra in non-strict mode", function () {
+		it("should replace unknown field in Extra in non-strict mode", function () {
 			var json = {
 				itemType: "journalArticle",
 				title: "Test",
@@ -1824,15 +1837,42 @@ describe("Zotero.Item", function () {
 			assert.equal(item.getField('extra'), 'Foo: BBB\nBar: CCC');
 		});
 		
-		it("should handle Extra in non-strict mode", function () {
+		it("should store invalid-for-type field in Extra in non-strict mode", function () {
 			var json = {
 				itemType: "journalArticle",
 				title: "Test",
-				extra: "Here's some extra text"
+				medium: "123"
 			};
-			var item = new Zotero.Item();
+			var item = new Zotero.Item;
 			item.fromJSON(json);
-			assert.equal(item.getField('extra'), json.extra);
+			assert.equal(item.getField('title'), 'Test');
+			assert.equal(item.getField('extra'), 'Medium: 123');
+		});
+		
+		it("should ignore invalid-for-type base-mapped field if valid-for-type base field is set in Extra in non-strict mode", function () {
+			var json = {
+				itemType: "document",
+				publisher: "Foo", // Valid for 'document'
+				company: "Bar" // Not invalid for 'document', but mapped to base field 'publisher'
+			};
+			var item = new Zotero.Item;
+			item.fromJSON(json);
+			assert.equal(item.getField('publisher'), 'Foo');
+			assert.equal(item.getField('extra'), '');
+		});
+		
+		it("shouldn't include base field or invalid base-mapped field in Extra if valid base-mapped field is set in non-strict mode", function () {
+			var json = {
+				itemType: "audioRecording",
+				publisher: "A", // Base field, which will be overwritten by the valid base-mapped field
+				label: "B", // Valid base-mapped field, which should be stored
+				company: "C", // Invalid base-mapped field, which should be ignored
+				foo: "D" // Invalid other field, which should be added to Extra
+			};
+			var item = new Zotero.Item;
+			item.fromJSON(json);
+			assert.equal(item.getField('label'), 'B');
+			assert.equal(item.getField('extra'), 'Foo: D');
 		});
 		
 		it("should throw on unknown field in strict mode", function () {
