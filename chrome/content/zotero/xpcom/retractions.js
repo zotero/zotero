@@ -90,7 +90,13 @@ Zotero.Retractions = {
 		
 		// If no cache file or it was created with a different version, download list at startup
 		if (!this._cacheETag || this._cacheVersion != this._version) {
-			Zotero.Schema.schemaUpdatePromise.then(() => this.updateFromServer());
+			Zotero.Schema.schemaUpdatePromise.then(() => {
+				if (Zotero.test) {
+					Zotero.debug("Skipping retraction list download in test mode");
+					return;
+				}
+				this.updateFromServer();
+			});
 		}
 	},
 	
