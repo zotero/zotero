@@ -262,7 +262,7 @@ var Zotero_QuickFormat = new function () {
 				if(m.index === 0) {
 					// add to previous cite
 					var node = _getCurrentEditorTextNode();
-					var prevNode = node.previousSibling;
+					var prevNode = locatorLocked ? node.previousSibling : locatorNode;
 					let citationItem = JSON.parse(prevNode && prevNode.dataset.citationItem || "null");
 					if (citationItem) {
 						citationItem.locator = m[2];
