@@ -221,7 +221,7 @@ var Zotero_QuickFormat = new function () {
 	 */
 	var _quickFormat = Zotero.Promise.coroutine(function* () {
 		var str = _getEditorContent();
-		if (str.match(/\s$/)) {
+		if (str && str.match(/\s$/)) {
 			locatorLocked = true;
 		}
 		var haveConditions = false;
