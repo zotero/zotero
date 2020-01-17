@@ -120,7 +120,7 @@
 <!ENTITY zotero.toolbar.import.label "Importer …">
 <!ENTITY zotero.toolbar.importFromClipboard "Importer frå utklippstavla">
 <!ENTITY zotero.toolbar.export.label "Eksporter bibliotek …">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF-skann …">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
 <!ENTITY zotero.toolbar.timeline.label "Lag tidslinje">
 <!ENTITY zotero.toolbar.preferences.label "Innstillingar …">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Støtte og dokumentasjon">

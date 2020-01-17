@@ -120,7 +120,7 @@
 <!ENTITY zotero.toolbar.import.label "匯入…">
 <!ENTITY zotero.toolbar.importFromClipboard "從剪貼簿匯入">
 <!ENTITY zotero.toolbar.export.label "匯出文獻庫…">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF 掃描…">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
 <!ENTITY zotero.toolbar.timeline.label "建立時序表">
 <!ENTITY zotero.toolbar.preferences.label "偏好設定…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "支援及說明文件">

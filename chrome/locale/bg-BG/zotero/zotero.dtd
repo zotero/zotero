@@ -120,7 +120,7 @@
 <!ENTITY zotero.toolbar.import.label "Внасяне...">
 <!ENTITY zotero.toolbar.importFromClipboard "Внасяне от клипборда">
 <!ENTITY zotero.toolbar.export.label "Изнасяне на библиотека...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF сканиране...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
 <!ENTITY zotero.toolbar.timeline.label "Създаване на хронология">
 <!ENTITY zotero.toolbar.preferences.label "Предпочитания...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Подръжка и документация">

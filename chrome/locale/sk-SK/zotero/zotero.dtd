@@ -120,7 +120,7 @@
 <!ENTITY zotero.toolbar.import.label "Importovať...">
 <!ENTITY zotero.toolbar.importFromClipboard "Importovať zo schránky">
 <!ENTITY zotero.toolbar.export.label "Exportovať knižnicu...">
-<!ENTITY zotero.toolbar.rtfScan.label "Spracovať RTF...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
 <!ENTITY zotero.toolbar.timeline.label "Vytvoriť časovú os">
 <!ENTITY zotero.toolbar.preferences.label "Možnosti...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Podpora a dokumentácia">

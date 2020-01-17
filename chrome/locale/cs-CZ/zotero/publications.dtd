@@ -1,19 +1,19 @@
 <!ENTITY zotero.publications.my_publications "Mé publikace">
 
-<!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
+<!ENTITY zotero.publications.intro "Položky přidané do Mých publikací budou zobrazeny na stránce vašeho profilu na zotero.org. Pokud zvolíte, že chcete zahrnout připojené soubory, budou tyto soubory veřejně dostupné pod licencí, kterou určíte. Přidávejte pouze díla, která jste sami vytvořili a zahrňte pouze ty připojené soubory, které chcete šířit a máte k tomu oprávnění.">
 <!ENTITY zotero.publications.include.checkbox.files "Zahrnout soubory">
 <!ENTITY zotero.publications.include.checkbox.notes "Zahrnout poznámky">
 <!ENTITY zotero.publications.include.adjustAtAnyTime "Můžete upřesnit, co se bude zobrazovat z kolekce Mé publikace.">
 
 <!ENTITY zotero.publications.sharing.title "Vyberte, jak ám být vaše práce sdílena">
-<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
+<!ENTITY zotero.publications.sharing.text "Můžete si vyhradit všechna práva ke svému dílu, licencovat jej pod licencí Creative Commons nebo je věnovat veřejné doméně. Ve všech případech bude dílo veřejně k dispozici prostřednictvím zotero.org">
 <!ENTITY zotero.publications.sharing.prompt "Umožníte sdílení vaší práce jinými?">
 <!ENTITY zotero.publications.sharing.cc "Ano, pod licencí Creative Commons">
 <!ENTITY zotero.publications.sharing.cc0 "Ano, a umísti mé práce do veřejného prostoru">
 <!ENTITY zotero.publications.sharing.reserved "Ne, publikovat jen na zotero.org">
 
 <!ENTITY zotero.publications.chooseLicense.title "Vyberte licenci Creative Commons">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
-<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Allow adaptations of your work to be shared?">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Yes, as long as others share alike">
+<!ENTITY zotero.publications.chooseLicense.text "Licence Creative Commons umožňuje ostatním kopírovat a šířit vaše dílo za předpokladu, že sdělí odpovídající údaje o původu díla, poskytnou odkaz na licenci a uvedou, zda byly provedeny nějaké změny. Další podmínky mohou být upřesněny  níže.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Povolit úpravy a sdílení vašeho díla?">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Ano, pokud jej ostatní budou sdílet pod srovnatelnou licencí">
 <!ENTITY zotero.publications.chooseLicense.commercial.prompt "Povolit komerční použití vaší práce?">

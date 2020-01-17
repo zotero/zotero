@@ -120,7 +120,7 @@
 <!ENTITY zotero.toolbar.import.label "นำเข้า...">
 <!ENTITY zotero.toolbar.importFromClipboard "นำเข้าจากคลิปบอร์ด">
 <!ENTITY zotero.toolbar.export.label "ส่งออกไลบรารี่...">
-<!ENTITY zotero.toolbar.rtfScan.label "กราดตรวจ RTF...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
 <!ENTITY zotero.toolbar.timeline.label "สร้างไทม์ไลน์">
 <!ENTITY zotero.toolbar.preferences.label "ค่าตั้งพึงใจ...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "การสนับสนุนและเอกสาร">

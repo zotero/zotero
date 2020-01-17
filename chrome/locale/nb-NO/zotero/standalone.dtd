@@ -23,50 +23,50 @@
 <!ENTITY closeCmd.label "Lukk">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY manageAttachments.label "Behandle vedlegg">
+<!ENTITY convertToStored.label "Konverter lenkede filer til lagrede filer…">
+<!ENTITY importCmd.label "Importer…">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY importFromClipboardCmd.label "Importer fra utklippstavle">
 <!ENTITY quitApplicationCmdWin.label "Avslutt">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Avslutt">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY copyCitationCmd.label "Kopier sitat">
+<!ENTITY copyCitationCmd.label "Kopier henvisning">
 <!ENTITY copyBibliographyCmd.label "Kopier bibliografi">
 
-<!ENTITY bidiSwitchPageDirectionItem.label "Switch Page Direction">
+<!ENTITY bidiSwitchPageDirectionItem.label "Bytt sideretning">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
-<!ENTITY bidiSwitchTextDirectionItem.label "Switch Text Direction">
+<!ENTITY bidiSwitchTextDirectionItem.label "Bytt tekstretning">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "Vis">
+<!ENTITY layout.label "Utforming">
+<!ENTITY standardView.label "Standardvisning">
+<!ENTITY stackedView.label "Overlappet visning">
+<!ENTITY collectionsPane.label "Rute for samlinger">
+<!ENTITY itemPane.label "Rute for element">
+<!ENTITY tagSelector.label "Emneordvelger">
+<!ENTITY recursiveCollections.label "Vis elementer fra under-samlinger">
+<!ENTITY fontSize.label "Skriftstørrelse">
+<!ENTITY noteFontSize.label "Skriftstørrelse for notat">
 
 
 <!ENTITY toolsMenu.label "Verktøy">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Innstaller Connector for nettleser">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Tillegg">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Utvikler">
 
 
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimer">
-<!ENTITY bringAllToFront.label "Bring All to Front">
+<!ENTITY bringAllToFront.label "Bring alle fram">
 <!ENTITY zoomWindow.label "Zoom">
 <!ENTITY windowMenu.label "Vindu">
 
@@ -80,22 +80,22 @@
 <!ENTITY helpMac.commandkey "?">
 <!ENTITY aboutProduct.label "Om &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "Support and Documentation">
+<!ENTITY productHelp.label "Støtte og dokumentasjon">
 <!ENTITY productHelp.accesskey "D">
-<!ENTITY helpTroubleshootingInfo.label "Troubleshooting Information">
+<!ENTITY helpTroubleshootingInfo.label "Informasjon for feilsøking">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Diskusjonsfora">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Rapporter feil...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Feilsøk logging av output">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.submit "Send inn output">
+<!ENTITY debugOutputLogging.view "Vis output">
+<!ENTITY debugOutputLogging.clear "Fjern output">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Start på ny med logging  aktivert…">
 
 <!ENTITY helpCheckForUpdates.label "Sjekk etter oppdateringer...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

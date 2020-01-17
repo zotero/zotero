@@ -1,19 +1,19 @@
-<!ENTITY zotero.publications.my_publications "My Publications">
+<!ENTITY zotero.publications.my_publications "Mine publikasjoner">
 
-<!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
-<!ENTITY zotero.publications.include.checkbox.files "Include files">
-<!ENTITY zotero.publications.include.checkbox.notes "Include notes">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
+<!ENTITY zotero.publications.intro "Elementer du legger til Mine publikasjoner vil bli vist på din profilside på zotero.org. Hvis du velger å inkludere vedlegg vil de bli gjort offentlig tilgjengelig under lisensen du angir. Legg kun til arbeid du selv har utført og inkluder vedlegg bare dersom du har rettighetene til å distribuere de og ønsker å gjøre det.">
+<!ENTITY zotero.publications.include.checkbox.files "Inkluder filer">
+<!ENTITY zotero.publications.include.checkbox.notes "Inkluder notater">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Du kan tilpasse hva som skal vises fra Mine publikasjoner samlingen når som helst.">
 
-<!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
-<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
-<!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">
-<!ENTITY zotero.publications.sharing.cc0 "Yes, and place my work in the public domain">
-<!ENTITY zotero.publications.sharing.reserved "No, only publish my work on zotero.org">
+<!ENTITY zotero.publications.sharing.title "Velg hvordan ditt arbeid kan bli delt">
+<!ENTITY zotero.publications.sharing.text "Du kan forbeholde deg alle rettigheter til ditt arbeid, lisensere det under en Creative Commons lisens, eller gjøre det offentlig tilgjengelig. I alle tilfeller, arbeidet vil bli gjort tilgjengelig via zotero.org.">
+<!ENTITY zotero.publications.sharing.prompt "Vil du tillate at arbeidet ditt blir delt med andre?">
+<!ENTITY zotero.publications.sharing.cc "Ja, under en Creative Commons lisens">
+<!ENTITY zotero.publications.sharing.cc0 "Ja, og gjør arbeidet mitt offentlig tilgjengelig">
+<!ENTITY zotero.publications.sharing.reserved "Nei, kun publiser mitt arbeid på zotero.org">
 
-<!ENTITY zotero.publications.chooseLicense.title "Choose a Creative Commons license">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
-<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Allow adaptations of your work to be shared?">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Yes, as long as others share alike">
-<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Allow commercial uses of your work?">
+<!ENTITY zotero.publications.chooseLicense.title "Velg en Creative Commons lisens">
+<!ENTITY zotero.publications.chooseLicense.text "En Creative Commons lisens tillater andre å kopiere og videredistribuere arbeidet ditt så lenge de gir deg passende kreditt, angir en lenke til lisensen, og gjør oppmerksom på om det er gjort endringer. Tilleggsbetingelser kan bli angitt nedenfor.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Tillat deling av bearbeidinger av ditt arbeid">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Ja, så lenge andre deler på samme vis">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Tillat kommersiell bruk av ditt arbeid?">

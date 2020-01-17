@@ -13,7 +13,7 @@
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automaticky připojit propojené PDF a ostatní soubory při ukládání položek">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Atuomaticky získat metadata pro PDF">
 <!ENTITY zotero.preferences.autoRenameFiles "Automaticky přejmenovat přiložené soubory podle rodičovských metadat">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Přejmenovat propojené soubory">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Otevřít PDF pomocí">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Systémové výchozí hodnoty">
 
@@ -77,10 +77,10 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Sloučit místní data s vzdálenými daty; historie synchronizace se bude ignorovat">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Obnovit z Online knihovny">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Přepsat lokální data Zotero daty z online knihovny.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Nahradit online knihovnu">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Přepsat online knihovnu daty z lokálního Zotera">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Resetovat historii synchronizace souborů">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Porovnat všechny připojené soubory se vzdáleným úložištěm">
 <!ENTITY zotero.preferences.sync.reset "Resetování">
 <!ENTITY zotero.preferences.sync.reset.button "Reset...">
 
