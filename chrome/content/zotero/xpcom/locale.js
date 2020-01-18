@@ -27,6 +27,7 @@ Zotero.Locale = {
 		'ko-KR': '한국어',
 		'lt-LT': 'Lietuvių',
 		'nl-NL': 'Nederlands',
+		'nb-NO': 'Norsk bokmål',
 		'pl-PL': 'Polski',
 		'pt-BR': 'Português (do Brasil)',
 		'pt-PT': 'Português (Europeu)',
