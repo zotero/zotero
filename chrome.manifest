@@ -8,6 +8,7 @@ content	zotero-platform		chrome/content/zotero-platform/unix/      os=OpenBSD
 
 resource zotero				resource/
 
+# Keep in sync with locale.js and zotero-standalone-build:assets/multilocale.txt
 locale	zotero	en-US		chrome/locale/en-US/zotero/
 #locale	zotero	af-ZA		chrome/locale/af-ZA/zotero/
 locale	zotero	ar		chrome/locale/ar/zotero/
