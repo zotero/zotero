@@ -4,11 +4,11 @@
 <!ENTITY zotero.director "Direktør">
 <!ENTITY zotero.directors "Direksjonsmedlemmer:">
 <!ENTITY zotero.developers "Utviklere:">
-<!ENTITY zotero.alumni "Alumnuser:">
+<!ENTITY zotero.alumni "Alumner:">
 <!ENTITY zotero.about.localizations "Lokaliseringer:">
-<!ENTITY zotero.about.additionalSoftware "Tredjeparts programvare og standarder:">
-<!ENTITY zotero.executiveProducer "Ledende produsent:">
+<!ENTITY zotero.about.additionalSoftware "Tredjepartsprogramvare og standarder:">
+<!ENTITY zotero.executiveProducer "Produksjonsleder:">
 <!ENTITY zotero.thanks "Spesiell takk til:">
 <!ENTITY zotero.about.close "Lukk">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Flere anerkjennelser">
-<!ENTITY zotero.citationProcessing "Sitater og bibliografibehandling">
+<!ENTITY zotero.citationProcessing "Behandling av henvisninger og bibliografier">

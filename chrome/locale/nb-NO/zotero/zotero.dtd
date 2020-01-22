@@ -58,7 +58,7 @@
 <!ENTITY zotero.items.itemType "Elementtype">
 <!ENTITY zotero.items.type_column "Elementtype">
 <!ENTITY zotero.items.title_column "Tittel">
-<!ENTITY zotero.items.creator_column "Navn">
+<!ENTITY zotero.items.creator_column "Skaper">
 <!ENTITY zotero.items.date_column "Dato">
 <!ENTITY zotero.items.year_column "År">
 <!ENTITY zotero.items.publisher_column "Utgiver">
@@ -69,7 +69,7 @@
 <!ENTITY zotero.items.libraryCatalog_column "Bibliotekskatalog">
 <!ENTITY zotero.items.callNumber_column "Plass-signatur">
 <!ENTITY zotero.items.rights_column "Rettigheter">
-<!ENTITY zotero.items.dateAdded_column "Lagt til">
+<!ENTITY zotero.items.dateAdded_column "Dato lagt til">
 <!ENTITY zotero.items.dateModified_column "Sist endret">
 <!ENTITY zotero.items.extra_column "Ekstra">
 <!ENTITY zotero.items.archive_column "Arkiv">
@@ -91,9 +91,9 @@
 <!ENTITY zotero.items.menu.showInLibrary "Vis i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Legg til notat">
 <!ENTITY zotero.items.menu.attach "Legg til vedlegg">
-<!ENTITY zotero.items.menu.attach.link.uri "Legg til lenke til URI…">
+<!ENTITY zotero.items.menu.attach.link.uri "Legg til kobling til URI…">
 <!ENTITY zotero.items.menu.attach.file "Legg til lagret kopi av fil...">
-<!ENTITY zotero.items.menu.attach.fileLink "Legg til lenke til fil...">
+<!ENTITY zotero.items.menu.attach.fileLink "Legg til kobling til fil...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Gjenopprett til bibliotek">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliser det valgte elementet">
@@ -106,7 +106,7 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Nytt element">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mer">
-<!ENTITY zotero.toolbar.lookup.label "Legg til element(er) fra indikator">
+<!ENTITY zotero.toolbar.lookup.label "Legg til element(er) ved hjelp av identifikator">
 <!ENTITY zotero.toolbar.removeItem.label "Fjern element...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nytt bibliotek">
 <!ENTITY zotero.toolbar.newCollection.label "Ny samling...">
@@ -150,11 +150,11 @@
 <!ENTITY zotero.toolbar.newNote "Nytt notat">
 <!ENTITY zotero.toolbar.note.standalone "Nytt enkeltstående notat">
 <!ENTITY zotero.toolbar.note.child "Legg til underordnet notat">
-<!ENTITY zotero.toolbar.lookup "Oppslag etter identifikator...">
-<!ENTITY zotero.toolbar.attachment.linked "Lenke til fil...">
+<!ENTITY zotero.toolbar.lookup "Oppslag ved hjelp av identifikator...">
+<!ENTITY zotero.toolbar.attachment.linked "Koble til fil...">
 <!ENTITY zotero.toolbar.attachment.add "Lagre kopi av fil...">
-<!ENTITY zotero.toolbar.attachment.weblink "Lagre lenke til gjeldende side">
-<!ENTITY zotero.toolbar.attachment.snapshot "Lag snapshot av gjeldende side">
+<!ENTITY zotero.toolbar.attachment.weblink "Lagre kobling til gjeldende side">
+<!ENTITY zotero.toolbar.attachment.snapshot "Lag øyeblikksbilde av gjeldende side">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Ingen emneord å vise">
 <!ENTITY zotero.tagSelector.loadingTags "Laster emneord…">
@@ -176,7 +176,7 @@
 <!ENTITY zotero.lookup.button.search "Søk">
 
 <!ENTITY zotero.selectitems.title "Velg elementer">
-<!ENTITY zotero.selectitems.intro.label "Velg hvilke enheter du vil legge til biblioteket ditt">
+<!ENTITY zotero.selectitems.intro.label "Velg hvilke elementer du vil legge til biblioteket ditt">
 <!ENTITY zotero.selectitems.cancel.label "Avbryt">
 <!ENTITY zotero.selectitems.select.label "OK">
 
@@ -278,7 +278,7 @@
 <!ENTITY zotero.merge.deleted "Slettet">
 
 <!ENTITY zotero.proxy.recognized.title "Mellomtjener gjenkjent">
-<!ENTITY zotero.proxy.recognized.warning "Legg kun til proxier som er lenket fra nettsted til ditt bibliotek, din skole eller bedrift">
+<!ENTITY zotero.proxy.recognized.warning "Legg kun til proxier som er koblet fra nettsted til ditt bibliotek, din skole eller bedrift">
 <!ENTITY zotero.proxy.recognized.warning.secondary "Det å legge til andre proxier tillater skadelige nettsteder å gi seg ut for å være nettsteder du stoler på.">
 <!ENTITY zotero.proxy.recognized.disable.label "Ikke automatisk omdiriger forespørsler gjennom tidligere kjente proxier">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorer">
@@ -306,7 +306,7 @@
 <!ENTITY zotero.rtfScan.introPage.description2 "For å komme i gang, velg en RTF inndata fil og en utdata fil nedenfor:">
 <!ENTITY zotero.rtfScan.scanPage.label "Skanner etter henvisninger">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero ser gjennom ditt dokumentet etter henvisninger. Vær tålmodig.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Bekreft siterte elementer">
+<!ENTITY zotero.rtfScan.citationsPage.label "Bekreft elementer henvist til">
 <!ENTITY zotero.rtfScan.citationsPage.description "Undersøk listen med gjenkjente henvisninger nedenfor for å forsikre deg om at Zotero har valgt de korresponderende elementene korrekt. Ikke kartlagte eller tvetydige henvisninger må bli løst før du går videre til neste steg.">
 <!ENTITY zotero.rtfScan.stylePage.label "Dokument formatering">
 <!ENTITY zotero.rtfScan.formatPage.label "Formaterer henvisninger">
@@ -319,6 +319,6 @@
 <!ENTITY zotero.file.choose.label "Velg fil...">
 <!ENTITY zotero.file.noneSelected.label "Ingen fil valgt">
 
-<!ENTITY zotero.attachLink.title "Legg til lenke til URI">
-<!ENTITY zotero.attachLink.label.link "Lenke:">
+<!ENTITY zotero.attachLink.title "Legg til kobling til URI">
+<!ENTITY zotero.attachLink.label.link "Kobling:">
 <!ENTITY zotero.attachLink.label.title "Tittel:">

@@ -24,7 +24,7 @@
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
 <!ENTITY manageAttachments.label "Behandle vedlegg">
-<!ENTITY convertToStored.label "Konverter lenkede filer til lagrede filer…">
+<!ENTITY convertToStored.label "Konverter koblede filer til lagrede filer…">
 <!ENTITY importCmd.label "Importer…">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Importer fra utklippstavle">
@@ -47,10 +47,10 @@
 <!ENTITY viewMenu.label "Vis">
 <!ENTITY layout.label "Utforming">
 <!ENTITY standardView.label "Standardvisning">
-<!ENTITY stackedView.label "Overlappet visning">
+<!ENTITY stackedView.label "Stablet visning">
 <!ENTITY collectionsPane.label "Rute for samlinger">
 <!ENTITY itemPane.label "Rute for element">
-<!ENTITY tagSelector.label "Emneordvelger">
+<!ENTITY tagSelector.label "Rute for emneordvelger">
 <!ENTITY recursiveCollections.label "Vis elementer fra under-samlinger">
 <!ENTITY fontSize.label "Skriftstørrelse">
 <!ENTITY noteFontSize.label "Skriftstørrelse for notat">
@@ -97,5 +97,5 @@
 <!ENTITY debugOutputLogging.clear "Fjern output">
 <!ENTITY debugOutputLogging.restartWithLoggingEnabled "Start på ny med logging  aktivert…">
 
-<!ENTITY helpCheckForUpdates.label "Sjekk etter oppdateringer...">
+<!ENTITY helpCheckForUpdates.label "Sjekk for oppdateringer...">
 <!ENTITY helpCheckForUpdates.accesskey "U">
