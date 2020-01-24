@@ -1,0 +1,74 @@
+{
+  "general_more": {
+    "message": "更多…"
+  },
+  "general_done": {
+    "message": "完成"
+  },
+  "general_tryAgain": {
+    "message": "请重试"
+  },
+  "general_warning": {
+    "message": "警告"
+  },
+  "general_cancel": {
+    "message": "取消"
+  },
+  "progressWindow_savingTo": {
+    "message": "保存到"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "标签 (用逗号分隔)"
+  },
+  "progressWindow_error_translation": {
+    "message": "保存此条目时发生错误。查看 $1 获取更多信息。"
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "排除翻译人员问题"
+  },
+  "progressWindow_error_fallback": {
+    "message": "使用 $1保存时发生错误。尝试使用 $2 保存。"
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "您的版本 $1 不支持此功能。请升级到 $2。"
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "最新版本"
+  },
+  "appConnector": {
+    "message": "$1 连接器"
+  },
+  "upgradeApp": {
+    "message": "升级 $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "$1正在运行吗？"
+  },
+  "error_connection_save": {
+    "message": "$1 无法与桌面应用程序 $2 通信。连接器可以将一些页面直接保存到您的 $3 帐户，但为了获得最佳效果，您应确保在尝试保存之前打开 $2。"
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "如有必要，您可以 <a href=\"$1\">下载 $2 </a>或 <a href=\"$3\"> 排除连接故障。</a>"
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "启用保存到在线文献库"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "基于 Web 的引用请求 $1 或稍后。"
+  },
+  "integration_error_connection": {
+    "message": "$1 无法与桌面应用程序 $2 通信。 $2 必须开放使用基于 Web 的引用。"
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "此文档包含有效的 Zotero 引文，该引文将在下载的副本中显示为 zotero.org 链接"
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "为生成易于共享的版本，从文件菜单中选择<b>复制……</b>，在新文档中从 Zotero 菜单中选择<b>未链接引文</b>，然后下载未链接版本。保留原始链接文档以防你需要进一步更改。"
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "无论何时下载已链接版本"
+  },
+  "general_saveTo": {
+    "message": "保存到 $1"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "general_more": {
+    "message": "Mai mult..."
+  },
+  "general_done": {
+    "message": "Gata"
+  },
+  "general_tryAgain": {
+    "message": "Încearcă din nou"
+  },
+  "general_warning": {
+    "message": "Avertisment"
+  },
+  "general_cancel": {
+    "message": "Renunță"
+  },
+  "progressWindow_savingTo": {
+    "message": "Se salvează în"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Etichete (separate de virgule)"
+  },
+  "progressWindow_error_translation": {
+    "message": "A apărut o eroare în timpul salvării acestui item. Vezi $1 pentru mai multe informații."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Probleme cu depanarea translatorului"
+  },
+  "progressWindow_error_fallback": {
+    "message": "A apărut o eroare la salvarea cu $1. Se încearcă în schimb salvarea folosind $2."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Această caracteristică nu este disponibilă pentru versiunea ta de $1. Te rob să actualizezi la $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "ultima versiune"
+  },
+  "appConnector": {
+    "message": "Conector $1"
+  },
+  "upgradeApp": {
+    "message": "Actualizare $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "$1 rulează?"
+  },
+  "error_connection_save": {
+    "message": "$1 nu a putut comunica cu aplicația desktop $2. Conectorul poate salva pagini direct în contul tău $3, dar pentru cele mai bune rezultate trebuie să te asiguri că $2 este deschis înainte de a încerca să salvezi."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Poți <a href=\"$1\">descărca $2</a> sau <a href=\"$3\">depana conexiunea</a> dacă este necesar."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Activează salvarea la biblioteca online"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Citarea bazată pe web are nevoie de $1 sau mai recent."
+  },
+  "integration_error_connection": {
+    "message": "$1 nu a putut comunica cu aplicația desktop $2. $2 trebuie să fie deschis pentru a folosi citarea bazată pe web."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Acest document conține citări Zotero active, care vor apărea ca linkuri zotero.org într-o copie descărcată."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Pentru a genera o versiune bună pentru partajare, selectează <b>Fă o copie…</b> din meniul Fișier, selectează <b>Dezlegare citări</b> din meniul Zotero în noul document și apoi descarcă versiunea dezlegată. Păstrează acest document cu legături originale, pentru cazul în care vei dori să faci viitoare modificări."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Descară oricum versiunea legată"
+  },
+  "general_saveTo": {
+    "message": "Salvează în $1"
+  }
+}

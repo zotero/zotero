@@ -1,0 +1,74 @@
+{
+  "general_more": {
+    "message": "Més…"
+  },
+  "general_done": {
+    "message": "Fet"
+  },
+  "general_tryAgain": {
+    "message": "Torna-ho a provar"
+  },
+  "general_warning": {
+    "message": "Avís"
+  },
+  "general_cancel": {
+    "message": "Cancel·la"
+  },
+  "progressWindow_savingTo": {
+    "message": "S'està desant a"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Etiquetes (separades per comes)"
+  },
+  "progressWindow_error_translation": {
+    "message": "S'ha produït un error desar l'element. Vegeu $1 per a més informació. "
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Resolució d'incidències dels tradutors"
+  },
+  "progressWindow_error_fallback": {
+    "message": "S'ha produït un error desant $1. Es provarà de desar-ho fent servir $2."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Aquesta funcionalitat no funciona amb la vostra versió del $1. Actualitzeu-lo a la $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "darrera versió"
+  },
+  "appConnector": {
+    "message": "Connector del $1"
+  },
+  "upgradeApp": {
+    "message": "Actualitza $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Està executant-se el $1?"
+  },
+  "error_connection_save": {
+    "message": "El $1 no s'ha pogut comunicar amb l'aplicació d'escriptori del $2. El connector pot desar algunes pàgines directament al compte de $3, però per a uns millors resultats, hauríeu d'assegurar-vos que el $2 estigui obert abans de provar de desar res."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Podeu <a href=\"$1\">baixar el $2</a> o <a href=\"$3\">comprovar la connexió</a> si fos necessari."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Habilita desar a la biblioteca en línia"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "La citació basada en web requereix la versió $1 o posterior."
+  },
+  "integration_error_connection": {
+    "message": "El $1 no s'ha pogut comunicar amb l'aplicació d'escriptori del $2. El $2 cal que sigui obert per a utilitzar la citació basada en web. "
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "El document conté cites actives de Zotero, que apareixeran com a enllaços de zotero.org en una còpia baixada."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Per a generar una versió adequada per a la compartició, seleccioneu <b>Fes una còpia…</b> del menú Fitxer, selecciona <b>Desvincula les cites</b> del menú de Zotero en el nou document, i baixeu la versió desvinculada. Conserveu el document vinculat original en cas que vulgueu fer-hi més canvis."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Baixa la versió enllaçada igualment"
+  },
+  "general_saveTo": {
+    "message": "Desa a $1"
+  }
+}

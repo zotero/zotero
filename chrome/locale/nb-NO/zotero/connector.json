@@ -1,0 +1,74 @@
+{
+  "general_more": {
+    "message": "Mer..."
+  },
+  "general_done": {
+    "message": "Ferdig"
+  },
+  "general_tryAgain": {
+    "message": "Prøv på nytt"
+  },
+  "general_warning": {
+    "message": "Advarsel"
+  },
+  "general_cancel": {
+    "message": "Avbryt"
+  },
+  "progressWindow_savingTo": {
+    "message": "Lagrer til"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Emneord (adskilt med komma)"
+  },
+  "progressWindow_error_translation": {
+    "message": "En feil oppstod mens dette elementet ble forsøkt lagret. Se $1 for mer informasjon."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Feilsøker problemer med oversetteren"
+  },
+  "progressWindow_error_fallback": {
+    "message": "En feil oppstod under lagring med $1. Forsøker å lagre med $2 i stedet."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Denne egenskapen er ikke støttet av din versjon av $1. Oppgrader til $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "siste versjon"
+  },
+  "appConnector": {
+    "message": "$1 Connector"
+  },
+  "upgradeApp": {
+    "message": "Oppgrader $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Kjører $1?"
+  },
+  "error_connection_save": {
+    "message": "$1 var ikke i stand til å kommunisere med $2 skrivebordsprogrammet. Connector kan lagre noen sider direkt til din $3 konto, men for best resultat bør du forsikre deg om at $2 er åpen før du forsøker å lagre."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Du kan <a href=\"$1\"> laste ned $2</a> eller <a href=\"$3\"> feilsøke forbindelsen </a> om nødvendig."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Aktiver Lagre til nettbibliotek"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Web-basert henvisning krever $1 eller senere."
+  },
+  "integration_error_connection": {
+    "message": "$1 var ikke i stand til å kommunisere med $2 skrivebordsprogrammet. $2 må være åpen for å benytte web-basert henvisning."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Dette dokumentet inneholder aktive Zotero henvisninger som vil vises som zotero.org koblinger i en nedlastet kopi."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "For å generere en versjon som kan deles, velg <b>Lag en kopi…</b>fra Fil menyen, velg deretter<b>Fjern kobling fra henvisninger</b> fra Zotero menyen i det nye dokumentet, og last deretter ned versjon med koblinger fjernet. Behold det opprinnelige dokumentet med koblinger i tilfelle du trenger å gjøre flere endringer."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Last uansett ned versjon med koblinger"
+  },
+  "general_saveTo": {
+    "message": "Lagre till$1"
+  }
+}

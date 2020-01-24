@@ -1,0 +1,62 @@
+{
+  "general_more": {
+    "message": "Thêm..."
+  },
+  "general_done": {
+    "message": "Hoàn thành"
+  },
+  "general_tryAgain": {
+    "message": "Thử lại"
+  },
+  "general_cancel": {
+    "message": "Hủy"
+  },
+  "progressWindow_savingTo": {
+    "message": "Lưu vào"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Các thẻ (phân cách bằng dấu phẩy)"
+  },
+  "progressWindow_error_translation": {
+    "message": "Có lỗi xảy ra khi lưu mục này. Xem $1 để có thêm thông tin."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Sửa lỗi Translator"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Có lỗi xảy ra khi lưu bằng $1. Thử lưu bằng $2."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Chức năng này không được hỗ trợ trong phiên bản $1. Nâng cấp lên $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "Phiên bản mới nhất"
+  },
+  "appConnector": {
+    "message": "$1 kết nối"
+  },
+  "upgradeApp": {
+    "message": "Nâng cấp$1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "$1 có đang chạy?"
+  },
+  "error_connection_save": {
+    "message": "$1 không thể kết nối với $2. Connector có thể lưu một số trang trực tiếp vào tài khoản $3 của bạn, nhưng tốt nhất bạn nên chắc chắn $2 đang mở trước khi lưu."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Bạn có thể <a href=\"$1\">download $2</a> hoặc <a href=\"$3\">sửa lỗi kết nối </a> nếu cần."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Cho phép lưu vào thư viện trực tuyến"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Trích dẫn trên web cần phiên bản $1 hoặc cao hơn."
+  },
+  "integration_error_connection": {
+    "message": "$1 không thể kết nối với $2. $2 phải chạy để có thể dùng trích dẫn web."
+  },
+  "general_saveTo": {
+    "message": "Lưu vào $1"
+  }
+}

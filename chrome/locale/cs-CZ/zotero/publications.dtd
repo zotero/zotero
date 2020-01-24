@@ -5,7 +5,7 @@
 <!ENTITY zotero.publications.include.checkbox.notes "Zahrnout poznámky">
 <!ENTITY zotero.publications.include.adjustAtAnyTime "Můžete upřesnit, co se bude zobrazovat z kolekce Mé publikace.">
 
-<!ENTITY zotero.publications.sharing.title "Vyberte, jak ám být vaše práce sdílena">
+<!ENTITY zotero.publications.sharing.title "Vyberte, jak má být vaše práce sdílena">
 <!ENTITY zotero.publications.sharing.text "Můžete si vyhradit všechna práva ke svému dílu, licencovat jej pod licencí Creative Commons nebo je věnovat veřejné doméně. Ve všech případech bude dílo veřejně k dispozici prostřednictvím zotero.org">
 <!ENTITY zotero.publications.sharing.prompt "Umožníte sdílení vaší práce jinými?">
 <!ENTITY zotero.publications.sharing.cc "Ano, pod licencí Creative Commons">

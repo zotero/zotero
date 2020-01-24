@@ -1,0 +1,74 @@
+{
+  "general_more": {
+    "message": "Mais…"
+  },
+  "general_done": {
+    "message": "Feito"
+  },
+  "general_tryAgain": {
+    "message": "Tentar Novamente"
+  },
+  "general_warning": {
+    "message": "Aviso"
+  },
+  "general_cancel": {
+    "message": "Cancelar"
+  },
+  "progressWindow_savingTo": {
+    "message": "Guardando para"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Etiquetas (separadas por vírgulas)"
+  },
+  "progressWindow_error_translation": {
+    "message": "Ocorreu um erro ao guardar este item. Ver $1 para mais informação."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Resolvendo Problemas com o Tradutor"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Ocorreu um erro a guardar com $1. Tentando alternativamente guardar com $2."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Esta funcionalidade não é suportada pela sua versão $1. Por favor actualize-a para a versão $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "última versão"
+  },
+  "appConnector": {
+    "message": "Conector $1"
+  },
+  "upgradeApp": {
+    "message": "Actualizar para o $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "O $1 está em Execução?"
+  },
+  "error_connection_save": {
+    "message": "O $1 não foi capaz de comunicar com a aplicação de secretária $2. O Conector pode guardar algumas páginas directamente na sua conta $3, mas, para melhores resultados, assegure-se de que o $2 está aberto antes de tentar guardar."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Pode <a href=\"$1\">descarregar o $2</a> ou <a href=\"$3\">resolver problemas com a ligação</a>, se necessário."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Activar Guardar na Biblioteca em Linha"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "A citação baseada na Web requer o $1 ou mais recente."
+  },
+  "integration_error_connection": {
+    "message": "O $1 não foi capaz de comunicar com a aplicação de secretária $2. O $2 tem de estar aberto para usar a citação baseada na Web."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Este documento contém citações ativas do Zotero que irão aparecer como hiperligações zotero.org numa cópia descarregada."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Para gerar uma versão apropriada para partilha, selecione <b>Criar uma cópia…</b> no menu Ficheiro, selecione, no novo documento, <b>Desligar Citações</b> no menu Zotero e descarregue então a versão desligada. Mantenha este documento ligado para o caso de necessitar de fazer mais alterações."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Descarregar Versão Ligada de Qualquer Modo"
+  },
+  "general_saveTo": {
+    "message": "Guardar para $1"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "general_more": {
+    "message": "Więcej..."
+  },
+  "general_done": {
+    "message": "Zrobione"
+  },
+  "general_tryAgain": {
+    "message": "Spróbuj ponownie"
+  },
+  "general_warning": {
+    "message": "Ostrzeżenie"
+  },
+  "general_cancel": {
+    "message": "Anuluj"
+  },
+  "progressWindow_savingTo": {
+    "message": "Zapisywanie do"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Znaczniki (oddzielone przecinkami)"
+  },
+  "progressWindow_error_translation": {
+    "message": "Podczas zapisu tego elementu wystąpił błąd. Aby uzyskać więcej informacji zobacz $1."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Znane błędy translacji"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Podczas zapisywania za pomocą $1 wystąpił błąd. Próba zapisu za pomocą $2."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Ta funkcja nie jest wspierana przez twoją wersję $1. Proszę zaktualizować do wersji $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "ostatnia wersja"
+  },
+  "appConnector": {
+    "message": "Łącznik $1"
+  },
+  "upgradeApp": {
+    "message": "Aktualizuj $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Czy $1 jest uruchomiony?"
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Włącz zapisywanie do zdalnej biblioteki"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Cytowanie oparte na stronach internetowych wymaga $1 lub nowszego."
+  },
+  "integration_error_connection": {
+    "message": "$1 nie mógł się połączyć z aplikacją desktop $2. $2 musi być uruchomiony, aby używać cytowania opartego na stronach internetowych."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Ten dokument zawiera aktywne cytowania Zotero, które pojawią się w pobranej kopii jako odsyłacze zotero.org."
+  },
+  "general_saveTo": {
+    "message": "Zapisz w $1"
+  }
+}

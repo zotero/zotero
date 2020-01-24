@@ -1,0 +1,35 @@
+{
+  "general_more": {
+    "message": "Lisää..."
+  },
+  "general_done": {
+    "message": "Valmis"
+  },
+  "general_tryAgain": {
+    "message": "Yritä uudelleen"
+  },
+  "general_warning": {
+    "message": "Varoitus"
+  },
+  "general_cancel": {
+    "message": "Peruuta"
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "$1-versiosi ei tue tätä toimintoa. Päivitä versioon $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "tuorein versio"
+  },
+  "upgradeApp": {
+    "message": "Päivitä $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Onko $1 käynnissä?"
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Tämä asiakirja sisältää aktiivisia Zotero-viitteitä jotka näkyvät zotero.org-linkkeinä ladatussa kopiossa."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Lataa silti linkitetty versio"
+  }
+}

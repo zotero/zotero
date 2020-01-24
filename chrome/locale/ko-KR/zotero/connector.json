@@ -1,0 +1,74 @@
+{
+  "general_more": {
+    "message": "더 보기"
+  },
+  "general_done": {
+    "message": "완료"
+  },
+  "general_tryAgain": {
+    "message": "다시 시도"
+  },
+  "general_warning": {
+    "message": "경고"
+  },
+  "general_cancel": {
+    "message": "취소"
+  },
+  "progressWindow_savingTo": {
+    "message": "저장 위치"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "태그 (콤마로 구분)"
+  },
+  "progressWindow_error_translation": {
+    "message": "항목 저장 중 오류가 발생했습니다. $1에서 자세한 정보를 확인하세요."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "중계기 문제 해결"
+  },
+  "progressWindow_error_fallback": {
+    "message": "$1 중계기를 이용하여 저장 중 오류가 발생했습니다. 대신 $2 중계기를 이용하여 저장을 시도합니다."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "이 기능은 사용중이신 $1 버전에서 지원되지 않습니다. $2  버전으로 업그레이드해주세요."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "최신 버전"
+  },
+  "appConnector": {
+    "message": "$1 중계기"
+  },
+  "upgradeApp": {
+    "message": "$1 업그레이드"
+  },
+  "error_connection_isAppRunning": {
+    "message": "$1 실행중인가요?"
+  },
+  "error_connection_save": {
+    "message": "$1 중계기가 $2 데스크톱 애플리케이션과 통신하지 못했습니다. 중계기가 당신의 $3 계정에 일부 페이지를 직접 저장할 수 있습니다. 그렇지만 더 나은 결과를 위해 저장을 시도하기 전 꼭 $2 애플리케이션을 열어두세요."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "<a href=\"$1\">$2 다운로드</a>를 진행하시거나 필요할 경우 <a href=\"$3\">연결 문제를 해결</a>하실 수 있습니다."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "온라인 라이브러리에 저장 활성화"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "웹 기반 인용을 위해 $1 또는 이후 버전이 필요합니다."
+  },
+  "integration_error_connection": {
+    "message": "$1 중계기가 $2 데스크톱 애플리케이션과 통신하지 못했습니다. 웹 기반 인용 기능을 사용하려면 반드시 $2 애플리케이션을 열어두세요."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "이 문서는 활성화된 Zotero 인용문을 담고 있으며, 다운로드된 사본에서 인용문은 \"zotero.org\" 링크로 나타납니다."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "공유하기 알맞은 판본을 생성하려면, 파일 메뉴의 <b>사본 만들기...</b>를 선택한 뒤, 새 (사본) 문서에서 Zotero 메뉴의 <b>인용 연결 해제</b>를 선택하고 나서, 인용 연결이 해제된 판본을 다운로드하세요. 인용문이 연결된 원본 문서는 향후 수정 가능성을 고려하여 남겨두어주세요."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "어쨌든 링크된 버전 다운로드"
+  },
+  "general_saveTo": {
+    "message": "저장: $1"
+  }
+}

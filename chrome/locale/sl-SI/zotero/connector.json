@@ -1,0 +1,74 @@
+{
+  "general_more": {
+    "message": "Dodatno ..."
+  },
+  "general_done": {
+    "message": "Opravljeno"
+  },
+  "general_tryAgain": {
+    "message": "Poskusi znova"
+  },
+  "general_warning": {
+    "message": "Opozorilo"
+  },
+  "general_cancel": {
+    "message": "Prekliči"
+  },
+  "progressWindow_savingTo": {
+    "message": "Shranjevanje v"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Značke (ločene z vejicami)"
+  },
+  "progressWindow_error_translation": {
+    "message": "Napaka pri shranjevanju tega vnosa. Glejte $1 za več informacij."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Reševanje težav prevajalnikov"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Prišlo je do napake pri shranjevanju z $1. Poskusite raje shraniti z $2."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Te funkcije vaša različica $1 ne podpira. Nadgradite jo na $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "najnovejša različica"
+  },
+  "appConnector": {
+    "message": "Konektor $1"
+  },
+  "upgradeApp": {
+    "message": "Posodobi $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Ali je $1 zagnan?"
+  },
+  "error_connection_save": {
+    "message": "$1 ni uspel komunicirati z namiznim programom $2. Konektor lahko shrani nekatere strani neposredno v vaš račun $3, a za najboljše rezultate zagotovite, da je $2 odprt, preden poskusite shranjevati."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "<a href=\"$1\">Prenesite $2</a> ali <a href=\"$3\">odpravite težave povezave</a>."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Omogoči shranjevanje v spletno knjižnico"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Citiranje prek spleta zahteva $1 ali novejšega."
+  },
+  "integration_error_connection": {
+    "message": "$1 ne more komunicirati z namiznim programjem $2. $2 mora biti odprt, da lahko uporabite citiranje prek spleta."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Ta dokument vsebuje aktivne citate Zotero, ki se bodo pojavili kot povezave zotero.org v preneseni kopiji."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Za tvorbo različice, primerne za skupno rabo, izberite <b>Naredi kopijo …</b> v meniju Datoteka, izberite <b>Razveži citate</b> v meniju Zotero v novem dokumentu, nato pa prenesite razvezano različico. Ohranite ta izvirni povezani dokument, če boste želeli opraviti nadaljnje spremembe."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Vseeno prenesi povezano različico"
+  },
+  "general_saveTo": {
+    "message": "Shrani v $1"
+  }
+}

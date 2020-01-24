@@ -1,0 +1,47 @@
+{
+  "general_more": {
+    "message": "Meir …"
+  },
+  "general_done": {
+    "message": "Ferdig"
+  },
+  "general_tryAgain": {
+    "message": "Prøv igjen"
+  },
+  "general_warning": {
+    "message": "Åtvaring"
+  },
+  "general_cancel": {
+    "message": "Avbryt"
+  },
+  "progressWindow_savingTo": {
+    "message": "Lagrar til"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "merke (skilde med komma)"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Ein feil oppstod under lagring med $1. Prøver å lagra med $2 i staden."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "siste versjon"
+  },
+  "appConnector": {
+    "message": "$1 Connector"
+  },
+  "upgradeApp": {
+    "message": "Oppgrader $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Køyrer $1?"
+  },
+  "error_connection_save": {
+    "message": "$1 klarte ikkje å snakka med $2-skrivebordprogrammet. Connector kan lagra nokre sider direkte til $3-kontoen din, men det er betre om du sørgjer for å starta $2 før du prøvar å lagra."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Du kan <a href=\"$1\">lasta ned $2</a> eller <a href=\"$3\">feilsøka tilkoplinga</a> viss det trengst."
+  },
+  "general_saveTo": {
+    "message": "Lagra til $1"
+  }
+}

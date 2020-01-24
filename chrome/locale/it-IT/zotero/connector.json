@@ -1,0 +1,62 @@
+{
+  "general_more": {
+    "message": "Altro..."
+  },
+  "general_done": {
+    "message": "Fatto"
+  },
+  "general_tryAgain": {
+    "message": "Prova di nuovo"
+  },
+  "general_cancel": {
+    "message": "Annulla"
+  },
+  "progressWindow_savingTo": {
+    "message": "Salva in"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Tag (separati da virgole)"
+  },
+  "progressWindow_error_translation": {
+    "message": "Si è verificato un errore durante il salvataggio dell'elemento.  Consultare $1 per ulteriori informazioni."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Risoluzione dei problemi del motore di ricerca"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Si è verificato un errore durante il salvataggio con $1. Nuovo tentativo di salvataggio con$2. "
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Questa funzione non è supportata dalla versione di $1 in uso. Aggiornare alla $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "ultima versione"
+  },
+  "appConnector": {
+    "message": "Connettore per $1 "
+  },
+  "upgradeApp": {
+    "message": "Aggiorna $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "$1 è in esecuzione?"
+  },
+  "error_connection_save": {
+    "message": "Il$1 non è stato in grado di comunicare con l'applicazione desktop $2. Il Connettore può salvare alcune pagine direttamente nel tuo account $3, ma per ottenere un risultato migliore è bene assicurarsi che $2 sia aperto prima di tentare il salvataggio."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "È possibile <a href=\"$1\">scaricare $2</a> o <a href=\"$3\">risolvere i problemi con la connessione</a> se necessario."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Abilitare il salvataggio nella Libreria online"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Le citazioni web richiedono $1 o successivo."
+  },
+  "integration_error_connection": {
+    "message": "Il$1 non è stato in grado di comunicare con l'applicazione desktop$2. $2 deve essere aperto per utilizzare le citazioni web."
+  },
+  "general_saveTo": {
+    "message": "Salva in $1"
+  }
+}

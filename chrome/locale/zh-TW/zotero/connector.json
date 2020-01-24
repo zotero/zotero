@@ -1,0 +1,32 @@
+{
+  "general_more": {
+    "message": "更多..."
+  },
+  "general_done": {
+    "message": "完成"
+  },
+  "general_tryAgain": {
+    "message": "再試一次"
+  },
+  "general_warning": {
+    "message": "警告"
+  },
+  "general_cancel": {
+    "message": "取消"
+  },
+  "progressWindow_savingTo": {
+    "message": "儲存至…"
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "找出轉譯器問題所在"
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "最新版"
+  },
+  "upgradeApp": {
+    "message": "升級 $1"
+  },
+  "general_saveTo": {
+    "message": "儲存至 $1"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "general_more": {
+    "message": "その他..."
+  },
+  "general_done": {
+    "message": "完了"
+  },
+  "general_tryAgain": {
+    "message": "もう一度試す"
+  },
+  "general_warning": {
+    "message": "警告"
+  },
+  "general_cancel": {
+    "message": "キャンセル"
+  },
+  "progressWindow_savingTo": {
+    "message": "保存先は"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "タグ（コンマで区切り）"
+  },
+  "progressWindow_error_translation": {
+    "message": "アイテムの保存中にエラーが発生しました。 さらに詳しくは $1 をご確認ください。"
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "トランスレータの不具合を解決"
+  },
+  "progressWindow_error_fallback": {
+    "message": "$1 の保存中にエラーが発生しました。代わりに $2 を使用して保存を試みてください。"
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "この機能はバージョン $1 ではサポートされていません。バージョン $2 にアップグレードしてください。"
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "最新版"
+  },
+  "appConnector": {
+    "message": "$1 コネクタ"
+  },
+  "upgradeApp": {
+    "message": "バージョン $1 にアップグレード"
+  },
+  "error_connection_isAppRunning": {
+    "message": " $1 が実行中ですか？"
+  },
+  "error_connection_save": {
+    "message": " $1 が $2 デスクトップアプリケーションと通信できません。コネクタは $3 のアカウントへ直接保存できるページもありますが、確実に結果を保存するには、保存する前に $2 を実行しておく必要があります。"
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "必要に応じて、<a href=\"$1\">ダウンロード $2</a> または <a href=\"$3\">コネクタの問題の解決</a>を実行できます。 "
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "オンライン・ライブラリへの保存を有効にする"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "ウェブベースの引用にはバージョン $1 以上が必要です。"
+  },
+  "integration_error_connection": {
+    "message": " $1 が $2 デスクトップアプリケーションとは通信できません。ウェブベース引用を利用するには $2 を起動しておく必要があります。"
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "文書には有効な Zotero の引用が含まれています。ダウンロードコピー内に zotero.org のリンクが表示されます。"
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "共有に適した版を生成するには、ファイルメニューから <b>コピーを作成…</b> を選択し、新しい文書の Zotero メニューから <b>引用リンクを解除</b> を選び、リンクを解除した版をダウンロードします。更に変更を加える必要がある場合は、オリジナルのリンク付きの文書を保存しておいてください。"
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "リンクされたバージョンを強制的にダウンロード"
+  },
+  "general_saveTo": {
+    "message": "$1 へと保存する"
+  }
+}

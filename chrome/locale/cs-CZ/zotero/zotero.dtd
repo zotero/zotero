@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Ukázat duplikáty">
 <!ENTITY zotero.collections.showUnfiledItems "Zobrazit sjednocené položky">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "Zobrazit položky s odvolaným publikováním">
 
 <!ENTITY zotero.items.itemType "Typ položky">
 <!ENTITY zotero.items.type_column "Typ položky">

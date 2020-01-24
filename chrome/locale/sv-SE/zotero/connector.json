@@ -1,0 +1,74 @@
+{
+  "general_more": {
+    "message": "Mer…"
+  },
+  "general_done": {
+    "message": "Klar"
+  },
+  "general_tryAgain": {
+    "message": "Försök igen"
+  },
+  "general_warning": {
+    "message": "Varning"
+  },
+  "general_cancel": {
+    "message": "Avbryt"
+  },
+  "progressWindow_savingTo": {
+    "message": "Spara till"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Etiketter (avdelade med kommatecken)"
+  },
+  "progressWindow_error_translation": {
+    "message": "Ett fel uppstod när källan skulle sparas.  Se $1 för mer information."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Felsök problem med källfångare"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Ett fel uppstod när informationen sparades med $1. Försöker att spara med $2 istället."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Den här funktionen stöds inte av din version av $1. Uppdatera till $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "senaste versionen"
+  },
+  "appConnector": {
+    "message": "$1 Connector"
+  },
+  "upgradeApp": {
+    "message": "Uppgradera $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Körs $1?"
+  },
+  "error_connection_save": {
+    "message": "$1 kunde inte kommunicera med $2 programmet. Connector kan spara vissa sidor direkt till ditt $3 konto, men du bör se till att $2 är startat innan du sparar för bästa resultat."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Du kan <a href=\"$1\">ladda ner $2</a> eller <a href=\"$3\">felsöka anslutningen</a> om nödvändigt."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Aktivera spara i onlinebibliotek"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Webbaserad citering kräver $1 eller senare."
+  },
+  "integration_error_connection": {
+    "message": "$1kunde inte kommunicera med $2 programmet. $2 måste vara igång för att möjliggöra webbaserad citering."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Detta dokument har aktiva Zotero-referenser som visas som zotero.org-länkar i en nedladdad kopia."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Gör att skapa en version som lämpar sig för delning, välj <b>Gör en kopia…</b> från Arkiv-menyn, välj <b>Ta bort länkar för referenser</b> ur Zotero-menyn i det nya dokumentet och ladda sedan hem versionen utan länkar. Behåll detta originaldokument med länkar om du behöver göra ändringar framöver."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Ladda hem länkad version ändå"
+  },
+  "general_saveTo": {
+    "message": "Spara till $1"
+  }
+}

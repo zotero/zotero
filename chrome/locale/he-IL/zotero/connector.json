@@ -1,0 +1,32 @@
+{
+  "general_more": {
+    "message": "עוד... "
+  },
+  "general_done": {
+    "message": "בוצע"
+  },
+  "general_cancel": {
+    "message": "ביטול"
+  },
+  "progressWindow_savingTo": {
+    "message": "שמור בשם"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "תגיות (מופרדות בפסיקים)"
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "פותר בעיית מתרגם"
+  },
+  "progressWindow_error_fallback": {
+    "message": "תקלה התרחשה בעת שמירה באמצעות $1. מנסה לשמור באמצעות $2במקום זאת."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "גרסה אחרונה"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "ציטוט מבוסס רשת דורש $1או מתקדם יותר"
+  },
+  "general_saveTo": {
+    "message": "שמור בשם $1"
+  }
+}

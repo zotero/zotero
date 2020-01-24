@@ -1,0 +1,65 @@
+{
+  "general_more": {
+    "message": "kita..."
+  },
+  "general_done": {
+    "message": "Atlikta"
+  },
+  "general_tryAgain": {
+    "message": "Bandyti iš naujo"
+  },
+  "general_warning": {
+    "message": "Įspėjimas"
+  },
+  "general_cancel": {
+    "message": "Atsisakyti"
+  },
+  "progressWindow_savingTo": {
+    "message": "Įrašoma į"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Gairės (atskirtos kableliais)"
+  },
+  "progressWindow_error_translation": {
+    "message": "Klaida įrašant. Daugiau informacijos rasite $1."
+  },
+  "progressWindow_error_fallback": {
+    "message": "Klaida įrašant su „$1“. Bandoma įrašyti su „$2“."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Ši funkcija nepalaikoma jūsų naudojamoje „$1“ versijoje. Atnaujinkite iki $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "naujausios versijos"
+  },
+  "appConnector": {
+    "message": "$1 papildinys"
+  },
+  "upgradeApp": {
+    "message": "Atnaujinti $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Ar paleista „$1“?"
+  },
+  "error_connection_save": {
+    "message": "„$1“ nepajėgia pasiekti „$2“ darbalaukio programos. Naršyklės papildinys gali įrašyti kai kuriuos puslapius tiesiai į jūsų $3 paskyrą, tačiau geriausi rezultatai būtų pirmiau atvėrus $2, o tik po to bandant įrašyti."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Įgalinti įrašymą į internetinę biblioteką"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Žiniatinklio pagrindu veikiančiam citavimui reikia $1 arba naujesnės versijos."
+  },
+  "integration_error_connection": {
+    "message": "„$1“ nepajėgia pasiekti „$2“ darbalaukio programos. Norint naudotis žiniatinklio pagrindu veikiančiu citavimu, „$2“ vis tiek turi būti atverta."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Šiame dokumente yra aktyvių Zotero citavimų, kurie parsisiųstoje kopijoje atrodys tarsi nuorodos į zotero.org."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Vis tiek parsisiųsti susietą versiją"
+  },
+  "general_saveTo": {
+    "message": "Įrašyti į „$1“"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "general_more": {
+    "message": "Mere ..."
+  },
+  "general_done": {
+    "message": "Færdig"
+  },
+  "general_tryAgain": {
+    "message": "Prøv igen"
+  },
+  "general_warning": {
+    "message": "Advarsel"
+  },
+  "general_cancel": {
+    "message": "Annullér"
+  },
+  "progressWindow_savingTo": {
+    "message": "Gemmer i"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Mærker (adskilt af komma)"
+  },
+  "progressWindow_error_translation": {
+    "message": "Der opstod en fejl, da dette element skulle gemmes.\nSe $1 for mere information."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Fejlfinding af oversættelsesproblemer"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Der opstod en fejl, da der blev gemt med $1.\nPrøver at gemme med $2 i stedet for."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Denne funktion understøttes ikke af din version af $1. Opgradér venligst til $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "seneste version"
+  },
+  "appConnector": {
+    "message": "$1-forbindelseskomponent"
+  },
+  "upgradeApp": {
+    "message": "Opgradér $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Kører $1?"
+  },
+  "error_connection_save": {
+    "message": "$1 kunne ikke kommunikere med skrivebordsprogrammet $2. Forbindelseskomponenten kan gemme nogle sider direkte i din $3-konto, men du får det bedste resultat, hvis $2 er åben, før du gemmer."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Du kan <a href=\"$1\">downloade $2</a> eller <a href=\"$3\">fejlfinde forbindelsen</a> om nødvendigt."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Aktivér at der kan gemmes i onlinebiblioteket"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Web-baseret henvisning kræver $1 eller senere."
+  },
+  "integration_error_connection": {
+    "message": "$1 kunne ikke kommunikere med skrivebordsprogrammet $2. $2 skal være åben for at bruge web-baseret henvisning."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Dette dokument indeholder aktive Zotero-referencer, der vil optræde som zotero.org-links i en downloadet kopi."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "For at oprette en version, der er egnet til deling, skal du vælge <b>Lav en kopi...</b> i filmenuen, vælge <b>Frakobl referencer</b> i Zotero-menuen i det nye dokument og derefter downloade den frakoblet version."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Download linket version alligevel"
+  },
+  "general_saveTo": {
+    "message": "Gem i $1"
+  }
+}

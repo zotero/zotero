@@ -1,0 +1,74 @@
+{
+  "general_more": {
+    "message": "Máis..."
+  },
+  "general_done": {
+    "message": "Feito"
+  },
+  "general_tryAgain": {
+    "message": "Intentar de novo"
+  },
+  "general_warning": {
+    "message": "Advertencia"
+  },
+  "general_cancel": {
+    "message": "Cancelar"
+  },
+  "progressWindow_savingTo": {
+    "message": "Gardando en"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Etiquetas (separadas por comas)"
+  },
+  "progressWindow_error_translation": {
+    "message": "Ocorreu un erro gardando este elemento. Véxase$1 para ter máis información."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Informe de erro nas traducións"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Deuse un erro ao gardar $1. Estase a intentar gardalo usando $2."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Esta función non está implementada nesta versión $1. Anóveo á versión $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "última versión"
+  },
+  "appConnector": {
+    "message": "Conector $1"
+  },
+  "upgradeApp": {
+    "message": "Anovar $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Está $1 aberto?"
+  },
+  "error_connection_save": {
+    "message": "A $1non dei conectado coa aplicación de escritorio $2. O conector pode gardar algunhas páxinas directamente na súa conta $3, mais o mellor caso é que $2 estea aberto antes de que se garda nada."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Podes <a href=\"$1\">descargar $2</a> ou <a href=\"$3\">arranxar a conexión</a> se fose preciso."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Activar o almacenamento en librerías en liña"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "As citas baseadas na web precisan da versión $1 ou seguintes."
+  },
+  "integration_error_connection": {
+    "message": "O $1 non deu conectado coa aplicación de escritorio $2. $2 ten que abrirse para poder usar a citación baseada na web."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Este documento contén citas activas de Zotero, que aparecerán como ligazóns a zotero.org cando se descargen copias."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Para xerar unha versión axeitada para compartir primeiro prema en <b>Facer unha copia...</b>do menú Ficheiro, escolla <b>Desligar citas</b>do menú de Zotero no novo documeno e logo descargue a vesión sen ligazóns. Conserva o documento orixinal coas ligazóns por se é o caso que as precisa máis adiante."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Descargar a versión con ligazóns igualmente"
+  },
+  "general_saveTo": {
+    "message": "Gardar en $1"
+  }
+}

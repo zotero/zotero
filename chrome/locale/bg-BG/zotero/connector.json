@@ -1,0 +1,62 @@
+{
+  "general_more": {
+    "message": "Още..."
+  },
+  "general_done": {
+    "message": "Готово"
+  },
+  "general_tryAgain": {
+    "message": "Опитайте отново"
+  },
+  "general_cancel": {
+    "message": "Отказ"
+  },
+  "progressWindow_savingTo": {
+    "message": "Записване в"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Маркери (отделени със запетаи)"
+  },
+  "progressWindow_error_translation": {
+    "message": "Възникна грешка при записа. Вижте $1 за повече информация."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Отстраняване на проблеми в софтуера за извличане на данни"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Възникна грешка при записване с $1. Опит за записване с $2"
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Тази възможност не се поддържа от Вашата версия на $1 . Моля, актуализирайте до версия $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "последна версия"
+  },
+  "appConnector": {
+    "message": "Добавка за браузъра $1"
+  },
+  "upgradeApp": {
+    "message": "Актуализиране $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Работи ли $1 ?"
+  },
+  "error_connection_save": {
+    "message": "$1 не успя да се свърже със софтуера $2.  Добавката за браузъра може да записва някои страници директно във Вашия $3 акаунт, но за най-добри резултати трябва да се сигурни, че $2 е стартиран преди да направите опит за запис."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Можете да <a href=\"$1\">изтеглите$2</a> или <a href=\"$3\">да отстраните неизправностите във връзката</a> при необходимост."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Активиране на запис в онлайн библиотеката"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Уеб-базираното цитиране изисква минимум версия $1."
+  },
+  "integration_error_connection": {
+    "message": "$1 не можа да се свърже с $2 програмата. $2 трябва да бъде стартиран за да се използва уеб-базирано цитиране."
+  },
+  "general_saveTo": {
+    "message": "Запиши в $1"
+  }
+}

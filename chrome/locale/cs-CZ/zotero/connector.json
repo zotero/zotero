@@ -1,0 +1,74 @@
+{
+  "general_more": {
+    "message": "Více..."
+  },
+  "general_done": {
+    "message": "Hotovo"
+  },
+  "general_tryAgain": {
+    "message": "Zkusit znovu"
+  },
+  "general_warning": {
+    "message": "Varování"
+  },
+  "general_cancel": {
+    "message": "Zrušit"
+  },
+  "progressWindow_savingTo": {
+    "message": "Ukládám do"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Štítky (oddělené mezerami)"
+  },
+  "progressWindow_error_translation": {
+    "message": "Při ukládání této položky došlo k chybě. Pro další informace otevřete  $1."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Řešení problémů s překladem"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Při ukládání pomocí $1 došlo k chybě.  Pokous o uložení pomocí $2."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Ve vaší verzi $1 není tato funkce podporována. Proveďte prosím aktualizaci na $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "Poslední verze"
+  },
+  "appConnector": {
+    "message": "$1 konektor"
+  },
+  "upgradeApp": {
+    "message": "Aktualizovat $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Je $1 spuštěný?"
+  },
+  "error_connection_save": {
+    "message": "$1 nemohl komunikovat s desktopovou aplikací $2. Konektor může uložit některé stránky přímo do vašeho účtu $3, ale k dosažení nejlepších výsledků byste měli před pokusem o uložení zkontrolovat, že  $2  je otevřený."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Můžete <a href=\"$1\">stáhnout $2 </a> nebo <a href=\"$3\"> vyřešit problémy s připojením</a>, pokud je to nutné."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Umožnit ukládání do Online knihovny"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Citování na webu vyžaduje $1 či novější."
+  },
+  "integration_error_connection": {
+    "message": "$1 nemohl komunikovat s desktopovou aplikací $2. Při používání webových citací  musí být   $2 otevřen."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Tento dokument obsahuje aktivní citaci Zotero, která se objeví ve stažené kopii jako odkaz zotero.org."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Pro generování verze vhodné pro sdílení zvolte <b> Vytvořit kopii... </b> z menu Soubor, zvolte <b> Odpojit citace </b> ze Zotero menu v novém dokumentu a poté stáhněte verzi s odpojenými citacemi. Originální dokument s propojenými citacemi uchovejte pro případ, že byste v budoucnu potřebovali provést další změny."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Přesto stáhnout propojenou verzi"
+  },
+  "general_saveTo": {
+    "message": "Uložit do $1"
+  }
+}
