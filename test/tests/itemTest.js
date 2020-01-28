@@ -1811,6 +1811,17 @@ describe("Zotero.Item", function () {
 			assert.equal(item.getField('extra'), `doi: ${doi2}`);
 		});*/
 		
+		it("should ignore creator field in Extra", async function () {
+			var json = {
+				itemType: "journalArticle",
+				extra: "Author: Name"
+			};
+			var item = new Zotero.Item();
+			item.fromJSON(json);
+			assert.lengthOf(item.getCreatorsJSON(), 0);
+			assert.equal(item.getField('extra'), json.extra);
+		});
+		
 		it("should store unknown fields in Extra in non-strict mode", function () {
 			var json = {
 				itemType: "journalArticle",

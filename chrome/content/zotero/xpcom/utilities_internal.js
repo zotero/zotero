@@ -1050,7 +1050,7 @@ Zotero.Utilities.Internal = {
 			}
 			
 			let possibleCreatorType = creatorTypes.get(key);
-			if (possibleCreatorType) {
+			if (possibleCreatorType && !additionalFields.has('creators')) {
 				let c = {
 					creatorType: possibleCreatorType
 				};

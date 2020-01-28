@@ -4212,6 +4212,8 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 		json.extra !== undefined ? json.extra : '',
 		this,
 		Object.keys(json)
+			// TEMP until we move creator lines to real creators
+			.concat('creators')
 	);
 	
 	// Transfer valid fields from Extra to regular fields
