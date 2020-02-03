@@ -726,7 +726,7 @@ describe("Zotero.Attachments", function() {
 			assert.equal(await OS.File.stat(attachment.getFilePath()).size, pdfSize);
 		});
 		
-		it("shouldn't try the redirected DOI page again if also in the URL field", async function () {
+		it("shouldn't try the URL-field URL again if it was already checked as the redirected DOI URL", async function () {
 			var doi = doi4;
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
 			item.setField('title', 'Test');
