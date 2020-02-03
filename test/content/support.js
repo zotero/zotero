@@ -4,6 +4,7 @@ chai.use(chaiAsPromised);
 var sqlDateTimeRe = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 var isoDateTimeRe = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
 var zoteroObjectKeyRe = /^[23456789ABCDEFGHIJKLMNPQRSTUVWXYZ]{8}$/; // based on Zotero.Utilities::generateObjectKey()
+var browserWindowInitialized = false;
 
 /**
  * Waits for a DOM event on the specified node. Returns a promise
@@ -49,7 +50,16 @@ function loadWindow(winurl, argument) {
 function loadBrowserWindow() {
 	var win = window.openDialog("chrome://browser/content/browser.xul", "", "all,height=700,width=1000");
 	return waitForDOMEvent(win, "load").then(function() {
-		return win;
+		return new Zotero.Promise((resolve) => {
+			if (!browserWindowInitialized) {
+				setTimeout(function () {
+					browserWindowInitialized = true;
+					resolve(win);
+				}, 1000);
+				return;
+			}
+			resolve(win);
+		});
 	});
 }
 
