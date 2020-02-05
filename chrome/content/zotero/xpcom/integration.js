@@ -70,57 +70,6 @@ Zotero.Integration = new function() {
 	this.sessions = {};
 	
 	/**
-	 * Initializes the pipe used for integration on non-Windows platforms.
-	 */
-	this.init = function() {
-		// We only use an integration pipe on OS X.
-		// On Linux, we use the alternative communication method in the OOo plug-in
-		// On Windows, we use a command line handler for integration. See
-		// components/zotero-integration-service.js for this implementation.
-		if(!Zotero.isMac) return;
-	
-		// Determine where to put the pipe
-		// on OS X, first try /Users/Shared for those who can't put pipes in their home
-		// directories
-		var pipe = null;
-		var sharedDir = Zotero.File.pathToFile('/Users/Shared');
-		
-		if(sharedDir.exists() && sharedDir.isDirectory()) {
-			var logname = Components.classes["@mozilla.org/process/environment;1"].
-				getService(Components.interfaces.nsIEnvironment).
-				get("LOGNAME");
-			var sharedPipe = sharedDir.clone();
-			sharedPipe.append(".zoteroIntegrationPipe_"+logname);
-			
-			if(sharedPipe.exists()) {
-				if(this.deletePipe(sharedPipe) && sharedDir.isWritable()) {
-					pipe = sharedPipe;
-				}
-			} else if(sharedDir.isWritable()) {
-				pipe = sharedPipe;
-			}
-		}
-		
-		if(!pipe) {
-			// on other platforms, or as a fallback, use home directory
-			pipe = Components.classes["@mozilla.org/file/directory_service;1"].
-				getService(Components.interfaces.nsIProperties).
-				get("Home", Components.interfaces.nsIFile);
-			pipe.append(".zoteroIntegrationPipe");
-		
-			// destroy old pipe, if one exists
-			if(!this.deletePipe(pipe)) return;
-		}
-		
-		// try to initialize pipe
-		try {
-			this.initPipe(pipe);
-		} catch(e) {
-			Zotero.logError(e);
-		}
-	}
-
-	/**
 	 * Begin listening for integration commands on the given pipe
 	 * @param {String} pipe The path to the pipe
 	 */
