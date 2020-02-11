@@ -1086,6 +1086,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 				var selectOpenParens = 0;
 				var condSelectSQL = '';
 				var condSQLParams = [];
+				let forceNoResults = false;
 				
 				//
 				// Special table handling
@@ -1170,7 +1171,6 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						let objKey = condition.value;
 						let objectType = condition.name == 'collection' ? 'collection' : 'search';
 						let objectTypeClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
-						let forceNoResults = false;
 						
 						// libraryID assigned on search
 						if (this.libraryID !== null) {
@@ -1217,7 +1217,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						}
 						
 						if (forceNoResults) {
-							condSQL += '0=1';
+							condSQL += 'itemID IN (0)';
 						}
 						else if (objectType == 'collection') {
 							let ids = [obj.id];
@@ -1587,39 +1587,33 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					condSQL += ')';
 				}
 				
-				if (includeParentsAndChildren || includeParents) {
-					var parentSQL = "SELECT itemID FROM items WHERE "
-						+ "itemID IN (SELECT parentItemID FROM itemAttachments "
-							+ "WHERE itemID IN (" + condSQL + ")) "
-						+ "OR itemID IN (SELECT parentItemID FROM itemNotes "
-							+ "WHERE itemID IN (" + condSQL + ")) ";
-					var parentSQLParams = condSQLParams.concat(condSQLParams);
-				}
-				
-				if (includeParentsAndChildren || includeChildren) {
-					var childrenSQL = "SELECT itemID FROM itemAttachments WHERE "
-						+ "parentItemID IN (" + condSQL + ") UNION "
-						+ "SELECT itemID FROM itemNotes "
-						+ "WHERE parentItemID IN (" + condSQL + ")";
-					var childSQLParams = condSQLParams.concat(condSQLParams);
-				}
-				
-				if (includeParentsAndChildren || includeParents) {
-					// Tweak forceNoResults expression to work with UNION
-					if (condSQL == '0=1') {
-						condSQL = 'SELECT 0=1';
+				if (!forceNoResults) {
+					if (includeParentsAndChildren || includeParents) {
+						var parentSQL = "SELECT itemID FROM items WHERE "
+							+ "itemID IN (SELECT parentItemID FROM itemAttachments "
+								+ "WHERE itemID IN (" + condSQL + ")) "
+							+ "OR itemID IN (SELECT parentItemID FROM itemNotes "
+								+ "WHERE itemID IN (" + condSQL + ")) ";
+						var parentSQLParams = condSQLParams.concat(condSQLParams);
 					}
-					condSQL += " UNION " + parentSQL;
-					condSQLParams = condSQLParams.concat(parentSQLParams);
-				}
-				
-				if (includeParentsAndChildren || includeChildren) {
-					// Tweak forceNoResults expression to work with UNION
-					if (condSQL == '0=1') {
-						condSQL = 'SELECT 0=1';
+					
+					if (includeParentsAndChildren || includeChildren) {
+						var childrenSQL = "SELECT itemID FROM itemAttachments WHERE "
+							+ "parentItemID IN (" + condSQL + ") UNION "
+							+ "SELECT itemID FROM itemNotes "
+							+ "WHERE parentItemID IN (" + condSQL + ")";
+						var childSQLParams = condSQLParams.concat(condSQLParams);
 					}
-					condSQL += " UNION " + childrenSQL;
-					condSQLParams = condSQLParams.concat(childSQLParams);
+					
+					if (includeParentsAndChildren || includeParents) {
+						condSQL += " UNION " + parentSQL;
+						condSQLParams = condSQLParams.concat(parentSQLParams);
+					}
+					
+					if (includeParentsAndChildren || includeChildren) {
+						condSQL += " UNION " + childrenSQL;
+						condSQLParams = condSQLParams.concat(childSQLParams);
+					}
 				}
 				
 				condSQL = condSelectSQL + condSQL;

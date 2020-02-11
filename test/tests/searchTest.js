@@ -420,6 +420,18 @@ describe("Zotero.Search", function() {
 					var matches = await s.search();
 					assert.lengthOf(matches, 0);
 				});
+				
+				it("should handle ANY search with two no-op conditions", async function () {
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.name = "Test";
+					s.addCondition('joinMode', 'any');
+					s.addCondition('savedSearch', 'is', Zotero.Utilities.randomString());
+					s.addCondition('savedSearch', 'is', Zotero.Utilities.randomString());
+					s.addCondition('includeParentsAndChildren', 'true');
+					var matches = await s.search();
+					assert.lengthOf(matches, 0);
+				});
 			});
 			
 			describe("key", function () {
