@@ -1181,6 +1181,10 @@ var Zotero_QuickFormat = new function () {
 			if(!(yield _bubbleizeSelected()) && !_getEditorContent()) {
 				_accept();
 			}
+		} else if (keyCode === event.DOM_VK_ESCAPE) {
+			// Handled in the event handler up, but we have to cancel it here
+			// so that we do not issue another _quickFormat call
+			return;
 		} else if(keyCode === event.DOM_VK_TAB || event.charCode === 59 /* ; */) {
 			event.preventDefault();
 			_bubbleizeSelected();
