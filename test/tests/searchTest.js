@@ -409,6 +409,19 @@ describe("Zotero.Search", function() {
 				});
 			});
 			
+			describe("includeParentsAndChildren", function () {
+				it("should handle ANY search with no-op condition", async function () {
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.name = "Test";
+					s.addCondition('joinMode', 'any');
+					s.addCondition('savedSearch', 'is', Zotero.Utilities.randomString());
+					s.addCondition('includeParentsAndChildren', 'true');
+					var matches = await s.search();
+					assert.lengthOf(matches, 0);
+				});
+			});
+			
 			describe("key", function () {
 				it("should allow more than max bound parameters", function* () {
 					let s = new Zotero.Search();

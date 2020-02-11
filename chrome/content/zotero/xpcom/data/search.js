@@ -1605,11 +1605,19 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 				}
 				
 				if (includeParentsAndChildren || includeParents) {
+					// Tweak forceNoResults expression to work with UNION
+					if (condSQL == '0=1') {
+						condSQL = 'SELECT 0=1';
+					}
 					condSQL += " UNION " + parentSQL;
 					condSQLParams = condSQLParams.concat(parentSQLParams);
 				}
 				
 				if (includeParentsAndChildren || includeChildren) {
+					// Tweak forceNoResults expression to work with UNION
+					if (condSQL == '0=1') {
+						condSQL = 'SELECT 0=1';
+					}
 					condSQL += " UNION " + childrenSQL;
 					condSQLParams = condSQLParams.concat(childSQLParams);
 				}
