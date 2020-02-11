@@ -38,7 +38,7 @@ var Zotero_QuickFormat = new function () {
 		separatorHeight = 0, currentLocator, currentLocatorLabel, currentSearchTime, dragging,
 		panel, panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator,
 		panelLibraryLink, panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false;
-	var locatorLocked = false;
+	var locatorLocked = true;
 	var locatorNode = null;
 	var _searchPromise;
 	
