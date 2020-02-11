@@ -10,7 +10,7 @@
 #zotero-pane #zotero-toolbar {
 	-moz-appearance: none !important;
 	margin-top: -3px;
-	border-bottom-color: var(--theme-border-color);
+	border: 1px solid var(--theme-border-color);
 }
 
 
