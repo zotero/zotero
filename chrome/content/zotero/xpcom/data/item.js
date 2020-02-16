@@ -4506,7 +4506,7 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 		obj.collections = this.getCollections().map(function (id) {
 			var { libraryID, key } = this.ContainerObjectsClass.getLibraryAndKeyFromID(id);
 			if (!key) {
-				throw new Error("Item collection " + id + " not found");
+				throw new Error("Collection " + id + " not found for item " + this.libraryKey);
 			}
 			return key;
 		}.bind(this));
