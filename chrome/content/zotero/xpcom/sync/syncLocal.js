@@ -1791,9 +1791,15 @@ Zotero.Sync.Data.Local = {
 	},
 	
 	
-	addObjectsToSyncQueue: Zotero.Promise.coroutine(function* (objectType, libraryID, keys) {
+	/**
+	 * @param {String} objectType
+	 * @param {Integer} libraryID
+	 * @param {String[]} keys
+	 * @param {Boolean} [tryImmediately=false] - Assign lastCheck of 0 so item is retried immediately
+	 */
+	addObjectsToSyncQueue: Zotero.Promise.coroutine(function* (objectType, libraryID, keys, tryImmediately) {
 		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
-		var now = Zotero.Date.getUnixTimestamp();
+		var now = tryImmediately ? 0 : Zotero.Date.getUnixTimestamp();
 		
 		// Default to first try
 		var keyTries = {};

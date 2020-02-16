@@ -258,6 +258,8 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 				stop = !(yield Zotero.Sync.Data.Local.hasObjectsToTryInSyncQueue(this.libraryID));
 			}
 			if (stop) {
+				Zotero.debug("Library " + this.libraryID + " hasn't been modified "
+					+ "-- skipping further object downloads");
 				break;
 			}
 		}
@@ -357,8 +359,6 @@ Zotero.Sync.Data.Engine.prototype._downloadSettings = Zotero.Promise.coroutine(f
 	// If library version hasn't changed remotely, the local library is up-to-date and we
 	// can skip all remaining downloads
 	if (results === false) {
-		Zotero.debug("Library " + this.libraryID + " hasn't been modified "
-			+ "-- skipping further object downloads");
 		return {
 			result: this.DOWNLOAD_RESULT_LIBRARY_UNMODIFIED,
 			libraryVersion: since

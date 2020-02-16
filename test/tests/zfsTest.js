@@ -986,7 +986,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.isFalse(result.remoteChanges);
 			assert.isTrue(result.syncRequired);
 			// Item should be marked for redownloading
-			var versions = yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', item.libraryID);
+			var versions = yield Zotero.Sync.Data.Local.getObjectsToTryFromSyncQueue('item', item.libraryID);
 			assert.include(versions, item.key);
 		});
 		

@@ -536,7 +536,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				// Mark object for redownloading, in case the library version is up to date and
 				// it's just the attachment item that somehow didn't get updated
 				yield Zotero.Sync.Data.Local.addObjectsToSyncQueue(
-					'item', item.libraryID, [item.key]
+					'item', item.libraryID, [item.key], true
 				);
 				return new Zotero.Sync.Storage.Result({
 					syncRequired: true
@@ -566,7 +566,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				// Mark object for redownloading, in case the library version is up to date and
 				// it's just the attachment item that somehow didn't get updated
 				yield Zotero.Sync.Data.Local.addObjectsToSyncQueue(
-					'item', item.libraryID, [item.key]
+					'item', item.libraryID, [item.key], true
 				);
 				return new Zotero.Sync.Storage.Result({
 					syncRequired: true
