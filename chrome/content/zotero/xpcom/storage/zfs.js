@@ -533,6 +533,11 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				return "ERROR_412_WITHOUT_VERSION";
 			}
 			if (version > item.version) {
+				// Mark object for redownloading, in case the library version is up to date and
+				// it's just the attachment item that somehow didn't get updated
+				yield Zotero.Sync.Data.Local.addObjectsToSyncQueue(
+					'item', item.libraryID, [item.key]
+				);
 				return new Zotero.Sync.Storage.Result({
 					syncRequired: true
 				});
@@ -558,6 +563,11 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			json = json[0];
 			
 			if (json.data.version > item.version) {
+				// Mark object for redownloading, in case the library version is up to date and
+				// it's just the attachment item that somehow didn't get updated
+				yield Zotero.Sync.Data.Local.addObjectsToSyncQueue(
+					'item', item.libraryID, [item.key]
+				);
 				return new Zotero.Sync.Storage.Result({
 					syncRequired: true
 				});
