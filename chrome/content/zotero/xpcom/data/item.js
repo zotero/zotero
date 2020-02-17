@@ -4408,27 +4408,17 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 			}
 		}
 		
-		// Special handling for Type fields, since Type isn't a base field and therefore isn't set
-		// in translators that are doing this
-		if (!extraFields.has('type')) {
-			let typeFieldNames = Zotero.ItemFields.getTypeFieldsFromBase('type', true)
-				// This is actually 'medium' but as of 2/2020 the Embedded Metadata translator
-				// assigns it along with the other 'type' fields.
-				.concat('audioFileType');
-			let typeValue = false;
-			for (let typeFieldName of typeFieldNames) {
-				let value = extraFields.get(typeFieldName);
-				if (value !== undefined) {
-					if (typeValue === false) {
-						typeValue = value;
-						extraFields.set('type', value);
-					}
-					if (typeValue == value) {
-						Zotero.warn(`Removing redundant Extra field '${typeFieldName}' for item `
-							+ this.libraryKey);
-						extraFields.delete(typeFieldName);
-					}
-				}
+		// Remove Type-mapped fields from Extra, since 'Type' is mapped to Item Type by citeproc-js
+		// and Type values mostly aren't going to be useful for item types without a Type-mapped field.
+		let typeFieldNames = Zotero.ItemFields.getTypeFieldsFromBase('type', true)
+			// This is actually 'medium' but as of 2/2020 the Embedded Metadata translator
+			// assigns it along with the other 'type' fields.
+			.concat('audioFileType');
+		for (let typeFieldName of typeFieldNames) {
+			if (extraFields.has(typeFieldName)) {
+				Zotero.warn(`Removing invalid-for-type Type field '${typeFieldName}' from Extra for item `
+					+ this.libraryKey);
+				extraFields.delete(typeFieldName);
 			}
 		}
 	}
