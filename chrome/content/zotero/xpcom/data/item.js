@@ -4362,7 +4362,7 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 	// try to save multiple versions of base-mapped fields, which they shouldn't need to do.
 	//
 	// https://github.com/zotero/zotero/issues/1504#issuecomment-572415083
-	if (extraFields.size) {
+	if (!strict && extraFields.size) {
 		for (let field of setFields.keys()) {
 			let baseField;
 			if (Zotero.ItemFields.isBaseField(field)) {
@@ -4381,6 +4381,52 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 						Zotero.warn(`Removing redundant Extra field '${mappedField}' for item `
 							+ this.libraryKey);
 						extraFields.delete(mappedField);
+					}
+				}
+			}
+		}
+		
+		//
+		// Deduplicate remaining Extra fields
+		//
+		// For each invalid-for-type base field, remove any mapped fields with the same value
+		let baseFields = [];
+		for (let field of extraFields.keys()) {
+			if (Zotero.ItemFields.getID(field) && Zotero.ItemFields.isBaseField(field)) {
+				baseFields.push(field);
+			}
+		}
+		for (let baseField of baseFields) {
+			let value = extraFields.get(baseField);
+			let mappedFieldNames = Zotero.ItemFields.getTypeFieldsFromBase(baseField, true);
+			for (let mappedField of mappedFieldNames) {
+				if (extraFields.has(mappedField) && extraFields.get(mappedField) === value) {
+					Zotero.warn(`Removing redundant Extra field '${mappedField}' for item `
+						+ this.libraryKey);
+					extraFields.delete(mappedField);
+				}
+			}
+		}
+		
+		// Special handling for Type fields, since Type isn't a base field and therefore isn't set
+		// in translators that are doing this
+		if (!extraFields.has('type')) {
+			let typeFieldNames = Zotero.ItemFields.getTypeFieldsFromBase('type', true)
+				// This is actually 'medium' but as of 2/2020 the Embedded Metadata translator
+				// assigns it along with the other 'type' fields.
+				.concat('audioFileType');
+			let typeValue = false;
+			for (let typeFieldName of typeFieldNames) {
+				let value = extraFields.get(typeFieldName);
+				if (value !== undefined) {
+					if (typeValue === false) {
+						typeValue = value;
+						extraFields.set('type', value);
+					}
+					if (typeValue == value) {
+						Zotero.warn(`Removing redundant Extra field '${typeFieldName}' for item `
+							+ this.libraryKey);
+						extraFields.delete(typeFieldName);
 					}
 				}
 			}

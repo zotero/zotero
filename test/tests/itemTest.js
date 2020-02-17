@@ -1885,6 +1885,78 @@ describe("Zotero.Item", function () {
 				assert.equal(item.getField('label'), 'B');
 				assert.equal(item.getField('extra'), 'Foo: D');
 			});
+			
+			it("should remove invalid-for-type base-mapped fields with same values and use base field if not present when storing in Extra", function () {
+				var json = {
+					itemType: "artwork",
+					publisher: "Foo", // Invalid base field
+					company: "Foo", // Invalid base-mapped field
+					label: "Foo" // Invaid base-mapped field
+				};
+				var item = new Zotero.Item;
+				item.fromJSON(json);
+				assert.equal(item.getField('extra'), 'Publisher: Foo');
+			});
+			
+			it("should deduplicate invalid-for-type base-mapped Type fields with same values and keep Type when storing in Extra", function () {
+				var json = {
+					itemType: "document",
+					type: "Foo", // Invalid base field
+					reportType: "Foo", // Invalid base-mapped field
+					websiteType: "Foo" // Invaid base-mapped field
+				};
+				// Confirm that 'type' is still invalid for 'document', in case this changes
+				assert.isFalse(Zotero.ItemFields.isValidForType(
+					Zotero.ItemFields.getID('type'),
+					Zotero.ItemTypes.getID('document')
+				));
+				var item = new Zotero.Item;
+				item.fromJSON(json);
+				assert.equal(item.getField('extra'), 'Type: Foo');
+			});
+			
+			it("should remove invalid-for-type base-mapped Type fields with same values and use Type if not present when storing in Extra", function () {
+				var json = {
+					itemType: "document",
+					reportType: "Foo", // Invalid base-mapped field
+					websiteType: "Foo" // Invaid base-mapped field
+				};
+				// Confirm that 'type' is still invalid for 'document', in case this changes
+				assert.isFalse(Zotero.ItemFields.isValidForType(
+					Zotero.ItemFields.getID('type'),
+					Zotero.ItemTypes.getID('document')
+				));
+				var item = new Zotero.Item;
+				item.fromJSON(json);
+				assert.equal(item.getField('extra'), 'Type: Foo');
+			});
+			
+			it("shouldn't deduplicate invalid-for-type base-mapped Type fields with different values when storing in Extra", function () {
+				var json = {
+					itemType: "document",
+					reportType: "Foo", // Invalid base-mapped field
+					type: "Foo", // Invalid base field
+					websiteType: "Bar" // Invaid base-mapped field with different value
+				};
+				var item = new Zotero.Item;
+				item.fromJSON(json);
+				assert.equal(item.getField('extra'), 'Type: Foo\nWebsite Type: Bar');
+			});
+			
+			it("shouldn't deduplicate invalid-for-type base-mapped Type fields with different values when storing in Extra", function () {
+				var json = {
+					itemType: "artwork",
+					publisher: "Foo", // Invalid base field
+					company: "Foo", // Invalid base-mapped field
+					label: "Bar" // Invaid base-mapped field with different value
+				};
+				var item = new Zotero.Item;
+				item.fromJSON(json);
+				var parts = item.getField('extra').split('\n');
+				assert.lengthOf(parts, 2);
+				assert.include(parts, 'Publisher: Foo');
+				assert.include(parts, 'Label: Bar');
+			});
 		});
 		
 		describe("strict mode", function () {
