@@ -154,7 +154,7 @@ function changeBand(queryString, band, intervals, selectedIndex) {
 		}
 	}
 	
-	window.location.search = queryString + 'i=' + newIntervals;
+	replaceQueryString(queryString + 'i=' + newIntervals);
 }
 
 function createOption(t, selected) {
@@ -188,7 +188,7 @@ function getFull(a) {
 }
 
 function createQueryString(theQueryValue, except, timeline) {
-	var temp = '';
+	var temp = '?';
 	for(var i in theQueryValue) {
 		if(except != i) {
 			temp += i + '=' + theQueryValue[i] + '&';
@@ -316,7 +316,7 @@ function setupOtherControls(div, timeline, queryString) {
 		select4.appendChild(createOption(options[i],(values[i] == dateType)));
 	}
 	select4.onchange = function () {
-		window.location.search = createQueryString(theQueryValue, 't', timeline) + 't=' + values[table.rows[1].cells[4].firstChild.selectedIndex];
+		replaceQueryString(createQueryString(theQueryValue, 't', timeline) + 't=' + values[table.rows[1].cells[4].firstChild.selectedIndex]);
 	};
 	td.appendChild(select4);
 	
@@ -324,11 +324,30 @@ function setupOtherControls(div, timeline, queryString) {
 	var fitToScreen = document.createElement("button");
 	fitToScreen.innerHTML = getString("general.fitToScreen");
 	Timeline.DOM.registerEvent(fitToScreen, "click", function () {
-		window.location.search = createQueryString(theQueryValue, false, timeline);
+		replaceQueryString(createQueryString(theQueryValue, false, timeline));
 	});
 	td.appendChild(fitToScreen);
 	
 	div.appendChild(table);
+}
+
+/**
+ * window.location.search no longer works in Fx60
+ */
+function getQueryString() {
+	return window.location.href.replace(/^[^?]+/, '');
+}
+
+/**
+ * Replacing window.location.search no longer works in Fx60, so replace href instead
+ */
+function replaceQueryString(queryString) {
+	// Get position of beginning of beginning of pathname, after scheme (e.g., 'zotero:')
+	var pos = window.location.href.indexOf(window.location.pathname);
+	window.location.href = window.location.href.substr(0, pos)
+		+ window.location.pathname
+		+ queryString;
+	Zotero.debug(window.location.href);
 }
 
 /*

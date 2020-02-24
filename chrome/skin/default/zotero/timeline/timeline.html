@@ -69,7 +69,7 @@
 				Timeline.loadXML("zotero://timeline/data/", function(xml, url) { eventSource.loadXML(xml, url); });
 				
 				setupFilterHighlightControls(document.getElementById("my-timeline-controls"), tl, [0,1,2], theme);
-				setupOtherControls(document.getElementById("my-other-controls"), tl, document.location.search);
+				setupOtherControls(document.getElementById("my-other-controls"), tl, getQueryString());
 			}
 			
 			function onResize() {
