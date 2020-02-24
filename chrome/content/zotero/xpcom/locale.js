@@ -10,6 +10,7 @@ Zotero.Locale = {
 		'cs-CZ': 'Čeština',
 		'da-DK': 'Dansk',
 		'de': 'Deutsch',
+		'en-CA': 'English (Canada)',
 		'en-US': 'English',
 		'en-GB': 'English (UK)',
 		'es-ES': 'Español',
