@@ -41,6 +41,15 @@
   "upgradeApp": {
     "message": "Bijwerken $1"
   },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Activeer opslaan naar online bibliotheek"
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Dit document bevat actieve Zotero citaten die worden weergegeven als Zotero.org links in de gedownloade versie."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Gelinkte versie toch downloaden"
+  },
   "general_saveTo": {
     "message": "Opslaan in $1"
   }

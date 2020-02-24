@@ -58,7 +58,7 @@
 <!ENTITY zotero.items.itemType "Elementtype">
 <!ENTITY zotero.items.type_column "Elementtype">
 <!ENTITY zotero.items.title_column "Tittel">
-<!ENTITY zotero.items.creator_column "Skaper">
+<!ENTITY zotero.items.creator_column "Opphaver">
 <!ENTITY zotero.items.date_column "Dato">
 <!ENTITY zotero.items.year_column "År">
 <!ENTITY zotero.items.publisher_column "Utgiver">
@@ -86,7 +86,7 @@
 <!ENTITY zotero.items.genre_column "Sjanger">
 <!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.moreColumns.label "Flere kolonner">
-<!ENTITY zotero.items.restoreColumnOrder.label "Gjennopprett kolonneorden">
+<!ENTITY zotero.items.restoreColumnOrder.label "Gjenopprett rekkefølge for kolonner">
 
 <!ENTITY zotero.items.menu.showInLibrary "Vis i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Legg til notat">

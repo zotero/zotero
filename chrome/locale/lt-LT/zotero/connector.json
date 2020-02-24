@@ -23,6 +23,9 @@
   "progressWindow_error_translation": {
     "message": "Klaida įrašant. Daugiau informacijos rasite $1."
   },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Transliatoriaus problemų sprendimas"
+  },
   "progressWindow_error_fallback": {
     "message": "Klaida įrašant su „$1“. Bandoma įrašyti su „$2“."
   },
@@ -43,6 +46,9 @@
   },
   "error_connection_save": {
     "message": "„$1“ nepajėgia pasiekti „$2“ darbalaukio programos. Naršyklės papildinys gali įrašyti kai kuriuos puslapius tiesiai į jūsų $3 paskyrą, tačiau geriausi rezultatai būtų pirmiau atvėrus $2, o tik po to bandant įrašyti."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Galite <a href=\"$1\">parsisiųsti  $2</a> arba <a href=\"$3\">spręsti ryšio problemas</a>, jei to reikia."
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Įgalinti įrašymą į internetinę biblioteką"

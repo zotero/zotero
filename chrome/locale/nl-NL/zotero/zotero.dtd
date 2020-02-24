@@ -18,9 +18,9 @@
 <!ENTITY zotero.general.close "Sluiten">
 <!ENTITY zotero.general.minimize "Minimaliseren">
 <!ENTITY zotero.general.other "Andere...">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.bigger "Groter">
+<!ENTITY zotero.general.smaller "Kleiner">
+<!ENTITY zotero.general.reset "Herstellen">
 
 
 <!ENTITY zotero.errorReport.title "Zotero-foutrapportage">
@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Duplicaten tonen">
 <!ENTITY zotero.collections.showUnfiledItems "Ongesorteerde items tonen">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "Teruggetrokken items tonen">
 
 <!ENTITY zotero.items.itemType "Type item">
 <!ENTITY zotero.items.type_column "Item Type">

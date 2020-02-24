@@ -79,11 +79,11 @@
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
 <!ENTITY aboutProduct.label "Om &brandShortName;">
-<!ENTITY aboutProduct.accesskey "A">
+<!ENTITY aboutProduct.accesskey "O">
 <!ENTITY productHelp.label "Støtte og dokumentasjon">
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Informasjon for feilsøking">
-<!ENTITY helpTroubleshootingInfo.accesskey "T">
+<!ENTITY helpTroubleshootingInfo.accesskey "I">
 <!ENTITY helpFeedbackPage.label "Diskusjonsfora">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
@@ -97,5 +97,5 @@
 <!ENTITY debugOutputLogging.clear "Fjern output">
 <!ENTITY debugOutputLogging.restartWithLoggingEnabled "Start på ny med logging  aktivert…">
 
-<!ENTITY helpCheckForUpdates.label "Sjekk for oppdateringer...">
-<!ENTITY helpCheckForUpdates.accesskey "U">
+<!ENTITY helpCheckForUpdates.label "Se etter oppdateringer...">
+<!ENTITY helpCheckForUpdates.accesskey "S">
