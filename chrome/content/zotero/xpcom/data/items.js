@@ -1420,6 +1420,30 @@ Zotero.Items = function() {
 				+ "SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
 				+ `WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID}`
 			+ ") "
+			+ "WHEN 2 THEN ("
+				+ "SELECT "
+				+ "(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
+				+ `WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} `
+				+ "ORDER BY orderIndex LIMIT 1)"
+				+ " || ' ' || "
+				+ "(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
+				+ `WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} `
+				+ "ORDER BY orderIndex LIMIT 1,1) "
+			+ ") "
+			+ "ELSE ("
+				+ "SELECT "
+				+ "(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
+				+ `WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} `
+				+ "ORDER BY orderIndex LIMIT 1)"
+				+ " || ' ' || "
+				+ "(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
+				+ `WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} `
+				+ "ORDER BY orderIndex LIMIT 1,1)"
+				+ " || ' ' || "
+				+ "(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
+				+ `WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} `
+				+ "ORDER BY orderIndex LIMIT 2,1)"
+			+ ") "
 			+ "END, "
 			
 			// Then try contributors
