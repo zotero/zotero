@@ -13,7 +13,7 @@
 <!ENTITY zotero.preferences.downloadAssociatedFiles "pri ukladaní záznamov automaticky priložiť prepojené PDF a ostatné súbory">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automaticky získať metadáta pre PDF">
 <!ENTITY zotero.preferences.autoRenameFiles "Automaticky premenovať súbory príloh pomocou nadradených metadát">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Premenovať prelinkované súbory">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Otvoriť PDF pomocou">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Predvolený systém">
 
@@ -77,7 +77,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Zlúčiť lokálne dáta so vzdialenými dátami bez ohľadu na predchádzajúce synchronizácie">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Obnoviť z online knižnice">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Prepísať lokálne dáta Zotera s dátami z online knižnice.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Nahradiť online knižnicu">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Prepísať online knižnicu s lokálnymi dátami Zotera">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Obnoviť históriu synchronizácie súborov">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Porovnať všetky priložené súbory so službou úschovne">

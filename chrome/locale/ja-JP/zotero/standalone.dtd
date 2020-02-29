@@ -23,7 +23,7 @@
 <!ENTITY closeCmd.label "閉じる">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
+<!ENTITY manageAttachments.label "添付ファイルを管理">
 <!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
 <!ENTITY importCmd.label "インポート...">
 <!ENTITY importCmd.key "I">
@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "表示">
+<!ENTITY layout.label "レイアウト">
+<!ENTITY standardView.label "標準ビュー">
+<!ENTITY stackedView.label "積み上げビュー">
+<!ENTITY collectionsPane.label "コレクションパネル">
+<!ENTITY itemPane.label "アイテムパネル">
+<!ENTITY tagSelector.label "タグ選択ボックス">
+<!ENTITY recursiveCollections.label "サブコレクションからアイテムを表示">
+<!ENTITY fontSize.label "フォントサイズ">
+<!ENTITY noteFontSize.label "メモのフォントサイズ">
 
 
 <!ENTITY toolsMenu.label "ツール">
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "ブラウザ・コネクタをインストールする">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "アドオン">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "開発者">
 
 
 <!ENTITY minimizeWindow.key "m">

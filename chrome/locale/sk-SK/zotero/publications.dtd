@@ -1,19 +1,19 @@
-<!ENTITY zotero.publications.my_publications "My Publications">
+<!ENTITY zotero.publications.my_publications "Moje publikácie">
 
-<!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
-<!ENTITY zotero.publications.include.checkbox.files "Include files">
-<!ENTITY zotero.publications.include.checkbox.notes "Include notes">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
+<!ENTITY zotero.publications.intro "Exempláre, ktoré pridáte do Mojich publikácií, sa zobrazia na stránke vášho profilu na adrese zotero.org. Ak sa rozhodnete zahrnúť pripojené súbory, zverejnia sa na základe licencie, ktorú určíte. Pridajte iba prácu, ktorú ste sami vytvorili, a pridajte iba také súbory, ak na ne máte právo a prajete si ich distribuovaťť.">
+<!ENTITY zotero.publications.include.checkbox.files "Zahrnúť súbory">
+<!ENTITY zotero.publications.include.checkbox.notes "Zahrnúť poznámky">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Kedykoľvek môžete upraviť to, čo sa má zobraziť v zbierke Moje publikácie.">
 
-<!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
-<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
-<!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">
-<!ENTITY zotero.publications.sharing.cc0 "Yes, and place my work in the public domain">
-<!ENTITY zotero.publications.sharing.reserved "No, only publish my work on zotero.org">
+<!ENTITY zotero.publications.sharing.title "Vyberte si spôsob zdieľania vašej práce">
+<!ENTITY zotero.publications.sharing.text "Na svoju prácu si môžete vyhradiť všetky práva, licencovať ju na základe licencie Creative Commons alebo ju venovať pre verejnú doménu. Vo všetkých prípadoch bude práca zverejnená na adrese zotero.org.">
+<!ENTITY zotero.publications.sharing.prompt "Chceli by ste dovoliť zdieľanie vašej práce ostatnými užívateľmi?">
+<!ENTITY zotero.publications.sharing.cc "Áno, pod licenciou Creative Commons">
+<!ENTITY zotero.publications.sharing.cc0 "Áno, a umiestniť moju prácu na verejnú doménu">
+<!ENTITY zotero.publications.sharing.reserved "Nie, iba zverejniť moju prácu na zotero.org">
 
-<!ENTITY zotero.publications.chooseLicense.title "Choose a Creative Commons license">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
-<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Allow adaptations of your work to be shared?">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Yes, as long as others share alike">
-<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Allow commercial uses of your work?">
+<!ENTITY zotero.publications.chooseLicense.title "Zvoľte si licenciu Creative Commons">
+<!ENTITY zotero.publications.chooseLicense.text "Licencia Creative Commons umožňuje ostatným kopírovať a ďalej šíriť vašu prácu, pokiaľ vám dajú primerané uznanie, poskytnú odkaz na licenciu a označia prípadné zmeny. Ďalšie podmienky môžu byť špecifikované nižšie.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Povoliť zdieľanie úprav vašej práce?">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Áno, pokiaľ to ostatní zdieľajú rovnako">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Povoliť komerčné využitie vašej práce?">

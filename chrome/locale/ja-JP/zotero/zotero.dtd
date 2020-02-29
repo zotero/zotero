@@ -20,7 +20,7 @@
 <!ENTITY zotero.general.other "その他...">
 <!ENTITY zotero.general.bigger "Bigger">
 <!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.reset "リセット">
 
 
 <!ENTITY zotero.errorReport.title "Zotero エラーレポート">
@@ -120,7 +120,7 @@
 <!ENTITY zotero.toolbar.import.label "インポート...">
 <!ENTITY zotero.toolbar.importFromClipboard "クリップボードからインポートする">
 <!ENTITY zotero.toolbar.export.label "ライブラリをエクスポート...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF スキャン">
 <!ENTITY zotero.toolbar.timeline.label "タイムラインを作成">
 <!ENTITY zotero.toolbar.preferences.label "環境設定...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "サポートとヘルプ">

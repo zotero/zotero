@@ -18,9 +18,9 @@
 <!ENTITY zotero.general.close "Zavrieť">
 <!ENTITY zotero.general.minimize "Minimalizovať">
 <!ENTITY zotero.general.other "Iné...">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.bigger "Väčší">
+<!ENTITY zotero.general.smaller "Menší">
+<!ENTITY zotero.general.reset "Obnoviť">
 
 
 <!ENTITY zotero.errorReport.title "Výkaz chýb Zotera">
@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Zobraziť duplicity">
 <!ENTITY zotero.collections.showUnfiledItems "Zobraziť nezaradené záznam">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "Zobraziť odobraté exempláre">
 
 <!ENTITY zotero.items.itemType "Typ záznamu">
 <!ENTITY zotero.items.type_column "Typ záznamu">
@@ -120,7 +120,7 @@
 <!ENTITY zotero.toolbar.import.label "Importovať...">
 <!ENTITY zotero.toolbar.importFromClipboard "Importovať zo schránky">
 <!ENTITY zotero.toolbar.export.label "Exportovať knižnicu...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
+<!ENTITY zotero.toolbar.rtfScan.label "Preskúmať RTF">
 <!ENTITY zotero.toolbar.timeline.label "Vytvoriť časovú os">
 <!ENTITY zotero.toolbar.preferences.label "Možnosti...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Podpora a dokumentácia">
@@ -207,7 +207,7 @@
 <!ENTITY zotero.import.lastModified "Naposledy upravené">
 <!ENTITY zotero.import.size "Veľkosť">
 <!ENTITY zotero.import.createCollection "Vložte naimportované kolekcie a záznamy do novej kolekcie">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "Spracovanie súborov">
 
 <!ENTITY zotero.exportOptions.title "Export...">
 <!ENTITY zotero.exportOptions.format.label "Formát:">
@@ -250,7 +250,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Použiť skratky časopisu MEDLINE">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Pole &quot;skratiek časopisov&quot; bude ignorované.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "Prepnúť na iný textový editor...">
 
 <!ENTITY zotero.integration.showEditor.label "Zobraziť editor">
 <!ENTITY zotero.integration.classicView.label "Štandardné zobrazenie">

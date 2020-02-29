@@ -18,7 +18,7 @@
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Standardprogram">
 
 <!ENTITY zotero.preferences.miscellaneous "Diverse">
-<!ENTITY zotero.preferences.autoUpdate "Automatisk sjekk for oppdaterte oversettere og stiler">
+<!ENTITY zotero.preferences.autoUpdate "Se automatisk etter oppdaterte oversettere og stiler">
 <!ENTITY zotero.preferences.updateNow "Oppdater nå">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapporter ødelagte oversettere for nettsteder">
 <!ENTITY zotero.preferences.parseRISRefer "Bruk Zotero for nedlastede BibTeX/RIS/Refer filer">
@@ -72,7 +72,7 @@
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Bibliotek">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Følgende innstillinger er kun for bruk i sjeldne tilfeller og skal ikke brukes for generell feilsøking. I mange tilfeller vil tilbakestilling skape flere problemer. Se ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Alternativer for tilbakestilling av synkronisering">
-<!ENTITY zotero.preferences.sync.reset.warning3 "for mer informasjon.">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for mer informasjon.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Tilbakestill synkroniseringshistorikk for data">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Slå sammen lokale data med eksterne data og ignorer synkroniseringshistorikk">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Gjenopprett fra nettbibliotek">

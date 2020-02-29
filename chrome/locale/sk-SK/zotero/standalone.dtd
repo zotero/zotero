@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "Zatvoriť">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "Spravovať prílohy">
+<!ENTITY convertToStored.label "Konvertovať prelinkované súbory na uložené súbory...">
 <!ENTITY importCmd.label "Importovať...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Importovať zo schránky">
@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "Zobraziť">
+<!ENTITY layout.label "Rozloženie">
+<!ENTITY standardView.label "Štandardné zobrazenie">
+<!ENTITY stackedView.label "Poskladané zobrazenie">
+<!ENTITY collectionsPane.label "Tabla zbierok">
+<!ENTITY itemPane.label "Tabla exemplárov">
+<!ENTITY tagSelector.label "Výber značiek">
+<!ENTITY recursiveCollections.label "Zobraziť exempláre v podadresároch">
+<!ENTITY fontSize.label "Veľkosť písma">
+<!ENTITY noteFontSize.label "Veľkosť písma v poznámkach">
 
 
 <!ENTITY toolsMenu.label "Nástroje">
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "Nainštalovať konektor prehliadača">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Doplnky">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Vývojár">
 
 
 <!ENTITY minimizeWindow.key "m">
