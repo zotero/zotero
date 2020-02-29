@@ -1190,8 +1190,17 @@ var ZoteroPane = new function()
 				Zotero.Prefs.clear('lastViewedFolder');
 				ZoteroPane_Local.displayErrorMessage();
 			};
-			this.itemsView.onRefresh.addListener(() => this.setTagScope());
-			this.itemsView.onLoad.addListener(() => Zotero.uiIsReady());
+			this.itemsView.onRefresh.addListener(() => {
+				this.setTagScope();
+			});
+			this.itemsView.onLoad.addListener(() => {
+				// Show error if items list couldn't loaded (e.g., bad search), as set in
+				// Zotero.CollectionTreeRow::getSearchResults()
+				if (Zotero.CollectionTreeCache.error) {
+					this.setItemsPaneMessage(Zotero.getString('pane.items.loadError'));
+				}
+				Zotero.uiIsReady();
+			});
 			
 			// If item data not yet loaded for library, load it now.
 			// Other data types are loaded at startup
