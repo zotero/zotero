@@ -215,6 +215,14 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(creators[0].name, 'Bar');
 		});
 		
+		it("should extract a CSL date field", function () {
+			var str = 'issued: 2000';
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 1);
+			assert.equal(fields.get('date'), 2000);
+			assert.strictEqual(extra, '');
+		});
+		
 		it("should extract a CSL name", function () {
 			var str = 'container-author: First || Last';
 			var { creators, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
@@ -242,6 +250,15 @@ describe("Zotero.Utilities.Internal", function () {
 			var { creators, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
 			assert.lengthOf(creators, 0);
 			assert.strictEqual(extra, str);
+		});
+		
+		it("should extract the citeproc-js cheater syntax", function () {
+			var issued = '{:number-of-pages:11}\n{:issued:2014}';
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(issued);
+			assert.equal(fields.size, 2);
+			assert.equal(fields.get('numPages'), 11);
+			assert.equal(fields.get('date'), 2014);
+			assert.strictEqual(extra, '');
 		});
 	});
 	

@@ -972,7 +972,9 @@ Zotero.Utilities.Internal = {
 			for (let cslVar in map) {
 				let normalized = this._normalizeExtraKey(cslVar);
 				let existing = fieldNames.get(normalized) || [];
-				fieldNames.set(normalized, new Set([...existing, ...map[cslVar]]));
+				// Text fields are one-to-many; date fields are one-to-one
+				let additional = Array.isArray(map[cslVar]) ? map[cslVar] : [map[cslVar]];
+				fieldNames.set(normalized, new Set([...existing, ...additional]));
 			}
 		}
 		
