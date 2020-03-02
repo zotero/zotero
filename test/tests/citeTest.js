@@ -23,5 +23,23 @@ describe("Zotero.Cite", function () {
 				+ 'This is just some text.';
 			assert.equal(Zotero.Cite.extraToCSL(str1), str2);
 		});
+		
+		it("should convert Zotero field names to CSL fields", function () {
+			var str1 = 'publicationTitle: My Publication';
+			var str2 = 'container-title: My Publication';
+			assert.equal(Zotero.Cite.extraToCSL(str1), str2);
+		});
+		
+		it("should convert capitalized and spaced Zotero field names to CSL fields", function () {
+			var str1 = 'Publication Title: My Publication\nDate: 1989';
+			var str2 = 'container-title: My Publication\nissued: 1989';
+			assert.equal(Zotero.Cite.extraToCSL(str1), str2);
+		});
+		
+		it("should convert lowercase 'doi' to uppercase", function () {
+			var str1 = 'doi: 10.0/abc';
+			var str2 = 'DOI: 10.0/abc';
+			assert.equal(Zotero.Cite.extraToCSL(str1), str2);
+		});
 	});
 });

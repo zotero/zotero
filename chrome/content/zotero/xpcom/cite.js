@@ -408,9 +408,21 @@ Zotero.Cite = {
 				field = 'archive_location';
 				break;
 			
-			// Don't change other lines
 			default:
-				field = originalField;
+				// See if this is a Zotero field written out (e.g., "Publication Title"), and if so
+				// convert to its associated CSL field
+				var zoteroField = originalField.replace(/ ([A-Z])/, '$1');
+				// If second character is lowercase (so not an acronym), lowercase first letter too
+				if (zoteroField[1] == zoteroField[1].toLowerCase()) {
+					zoteroField = zoteroField[0].toLowerCase() + zoteroField.substr(1);
+				}
+				if (Zotero.Schema.CSL_FIELD_MAPPINGS_REVERSE[zoteroField]) {
+					field = Zotero.Schema.CSL_FIELD_MAPPINGS_REVERSE[zoteroField];
+				}
+				// Don't change other lines
+				else {
+					field = originalField;
+				}
 			}
 			return field + value;
 		});

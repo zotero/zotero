@@ -573,6 +573,8 @@ Zotero.Schema = new function(){
 		);
 		Zotero.Schema.globalSchemaLocale = data.locales[locale];
 		Zotero.Schema.globalSchemaMeta = data.meta;
+		
+		// CSL mappings
 		Zotero.Schema.CSL_TYPE_MAPPINGS = {};
 		Zotero.Schema.CSL_TYPE_MAPPINGS_REVERSE = {};
 		for (let cslType in data.csl.types) {
@@ -584,6 +586,18 @@ Zotero.Schema = new function(){
 		Zotero.Schema.CSL_TEXT_MAPPINGS = data.csl.fields.text;
 		Zotero.Schema.CSL_DATE_MAPPINGS = data.csl.fields.date;
 		Zotero.Schema.CSL_NAME_MAPPINGS = data.csl.names;
+		
+		// Map Zotero fields to CSL fields
+		Zotero.Schema.CSL_FIELD_MAPPINGS_REVERSE = {};
+		for (let cslField in data.csl.fields.text) {
+			for (let zoteroField of data.csl.fields.text[cslField]) {
+				Zotero.Schema.CSL_FIELD_MAPPINGS_REVERSE[zoteroField] = cslField;
+			}
+		}
+		for (let cslField in data.csl.fields.date) {
+			let zoteroField = data.csl.fields.date[cslField];
+			Zotero.Schema.CSL_FIELD_MAPPINGS_REVERSE[zoteroField] = cslField;
+		}
 	}
 	
 	
