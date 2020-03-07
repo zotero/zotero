@@ -1129,8 +1129,9 @@ Zotero.Sync.Data.Local = {
 	 * Check whether an attachment's file mod time matches the given mod time, and mark the file
 	 * for download if not (or if this is a new attachment)
 	 */
-	_checkAttachmentForDownload: Zotero.Promise.coroutine(function* (item, mtime, isNewObject) {
-		var markToDownload = false;
+	_checkAttachmentForDownload: async function (item, mtime, isNewObject) {
+		var markToDownload = true;
+		var fileExists = false;
 		if (!isNewObject) {
 			// Convert previously used Unix timestamps to ms-based timestamps
 			if (mtime < 10000000000) {
@@ -1139,7 +1140,7 @@ Zotero.Sync.Data.Local = {
 			}
 			var fmtime = null;
 			try {
-				fmtime = yield item.attachmentModificationTime;
+				fmtime = await item.attachmentModificationTime;
 			}
 			catch (e) {
 				// This will probably fail later too, but ignore it for now
@@ -1147,21 +1148,20 @@ Zotero.Sync.Data.Local = {
 			}
 			if (fmtime) {
 				let state = Zotero.Sync.Storage.Local.checkFileModTime(item, fmtime, mtime);
-				if (state !== false) {
-					markToDownload = true;
+				if (state === false) {
+					markToDownload = false;
 				}
+				fileExists = true;
 			}
-			else {
-				markToDownload = true;
-			}
-		}
-		else {
-			markToDownload = true;
 		}
 		if (markToDownload) {
-			item.attachmentSyncState = "to_download";
+			// If file already exists locally, download it even in "as needed" mode. While we could
+			// just check whether a download is necessary at file open, these are files that people
+			// have previously downloaded, and avoiding opening an outdated version seems more
+			// important than avoiding a little bit of extra data transfer.
+			item.attachmentSyncState = fileExists ? "force_download" : "to_download";
 		}
-	}),
+	},
 	
 	
 	/**

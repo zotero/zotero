@@ -236,6 +236,100 @@ describe("ZoteroPane", function() {
 			yield downloadOnDemand();
 		});
 		
+		// As noted in viewAttachment(), this is only necessary for files modified before 5.0.85
+		it("should re-download a remotely modified attachment in as-needed mode", async function () {
+			await setup();
+			Zotero.Sync.Storage.Local.downloadAsNeeded(Zotero.Libraries.userLibraryID, true);
+			
+			var item = await importFileAttachment('test.txt');
+			item.attachmentSyncState = "to_download";
+			await item.saveTx();
+			
+			var text = Zotero.Utilities.randomString();
+			var mtime = "1441252524000";
+			var md5 = Zotero.Utilities.Internal.md5(text)
+			
+			var s3Path = `pretend-s3/${item.key}`;
+			httpd.registerPathHandler(
+				`/users/1/items/${item.key}/file`,
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 302, "Found");
+						response.setHeader("Zotero-File-Modification-Time", mtime, false);
+						response.setHeader("Zotero-File-MD5", md5, false);
+						response.setHeader("Zotero-File-Compressed", "No", false);
+						response.setHeader("Location", baseURL + s3Path, false);
+					}
+				}
+			);
+			httpd.registerPathHandler(
+				"/" + s3Path,
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.write(text);
+					}
+				}
+			);
+			
+			// Disable loadURI() so viewAttachment() doesn't trigger translator loading
+			var downloadSpy = sinon.spy(Zotero.Sync.Runner, "downloadFile");
+			var launchFileStub = sinon.stub(Zotero, "launchFile");
+			
+			await zp.viewAttachment(item.id);
+			
+			assert.ok(downloadSpy.calledOnce);
+			assert.ok(launchFileStub.calledOnce);
+			assert.ok(launchFileStub.calledWith(item.getFilePath()));
+			downloadSpy.restore();
+			launchFileStub.restore();
+			
+			assert.equal(await item.attachmentHash, md5);
+			assert.equal(await item.attachmentModificationTime, mtime);
+			var path = await item.getFilePathAsync();
+			assert.equal(await Zotero.File.getContentsAsync(path), text);
+		});
+		
+		it("should handle a 404 when re-downloading a remotely modified attachment in as-needed mode", async function () {
+			await setup();
+			Zotero.Sync.Storage.Local.downloadAsNeeded(Zotero.Libraries.userLibraryID, true);
+			
+			var item = await importFileAttachment('test.txt');
+			item.attachmentSyncState = "to_download";
+			await item.saveTx();
+			
+			var mtime = await item.attachmentModificationTime;
+			var md5 = await item.attachmentHash;
+			var text = await Zotero.File.getContentsAsync(item.getFilePath());
+			
+			httpd.registerPathHandler(
+				`/users/1/items/${item.key}/file`,
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 404, "Not Found");
+					}
+				}
+			);
+			
+			// Disable loadURI() so viewAttachment() doesn't trigger translator loading
+			var downloadSpy = sinon.spy(Zotero.Sync.Runner, "downloadFile");
+			var launchFileStub = sinon.stub(Zotero, "launchFile");
+			
+			await zp.viewAttachment(item.id);
+			
+			assert.ok(downloadSpy.calledOnce);
+			assert.ok(launchFileStub.calledOnce);
+			assert.ok(launchFileStub.calledWith(item.getFilePath()));
+			downloadSpy.restore();
+			launchFileStub.restore();
+			
+			// File shouldn't have changed
+			assert.equal(await item.attachmentModificationTime, mtime);
+			assert.equal(await item.attachmentHash, md5);
+			var path = await item.getFilePathAsync();
+			assert.equal(await Zotero.File.getContentsAsync(path), text);
+		});
+		
 		it("should download an attachment on-demand in at-sync-time mode", function* () {
 			yield setup();
 			Zotero.Sync.Storage.Local.downloadOnSync(Zotero.Libraries.userLibraryID, true);

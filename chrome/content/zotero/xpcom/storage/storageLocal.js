@@ -314,7 +314,7 @@ Zotero.Sync.Storage.Local = {
 	}),
 	
 	
-	_checkForUpdatedFile: Zotero.Promise.coroutine(function* (item, attachmentData, remoteModTime) {
+	_checkForUpdatedFile: Zotero.Promise.coroutine(function* (item, attachmentData) {
 		var lk = item.libraryKey;
 		Zotero.debug("Checking attachment file for item " + lk, 4);
 		
@@ -350,25 +350,7 @@ Zotero.Sync.Storage.Local = {
 			//Zotero.debug("Stored mtime is " + attachmentData.mtime);
 			//Zotero.debug("File mtime is " + fmtime);
 			
-			//BAIL AFTER DOWNLOAD MARKING MODE, OR CHECK LOCAL?
 			let mtime = attachmentData ? attachmentData.mtime : false;
-			
-			// Download-marking mode
-			if (remoteModTime) {
-				Zotero.debug(`Remote mod time for item ${lk} is ${remoteModTime}`);
-				
-				// Ignore attachments whose stored mod times haven't changed
-				mtime = mtime !== false ? mtime : item.attachmentSyncedModificationTime;
-				if (mtime == remoteModTime) {
-					Zotero.debug(`Synced mod time (${mtime}) hasn't changed for item ${lk}`);
-					return false;
-				}
-				
-				Zotero.debug(`Marking attachment ${lk} for download (stored mtime: ${mtime})`);
-				// DEBUG: Always set here, or allow further steps?
-				return this.SYNC_STATE_FORCE_DOWNLOAD;
-			}
-			
 			var same = !this.checkFileModTime(item, fmtime, mtime);
 			if (same) {
 				Zotero.debug("File has not changed");

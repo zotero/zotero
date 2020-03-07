@@ -745,7 +745,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			assert.isTrue(library.storageDownloadNeeded);
 		})
 		
-		it("should mark updated attachment items for download", function* () {
+		it("should mark remotely updated attachment item for forced download", function* () {
 			var library = Zotero.Libraries.userLibrary;
 			var libraryID = library.id;
 			Zotero.Sync.Storage.Local.setModeForLibrary(libraryID, 'zfs');
@@ -771,9 +771,42 @@ describe("Zotero.Sync.Data.Local", function() {
 				'item', libraryID, [json], { stopOnError: true }
 			);
 			
-			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD);
+			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_DOWNLOAD);
 			assert.isTrue(library.storageDownloadNeeded);
 		})
+		
+		it("should mark remotely updated attachment item with missing file for download", async function () {
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			Zotero.Sync.Storage.Local.setModeForLibrary(libraryID, 'zfs');
+			
+			var item = await importFileAttachment('test.png');
+			item.version = 5;
+			item.synced = true;
+			await item.saveTx();
+			
+			// Set file as synced
+			item.attachmentSyncedModificationTime = await item.attachmentModificationTime;
+			item.attachmentSyncedHash = await item.attachmentHash;
+			item.attachmentSyncState = "in_sync";
+			await item.saveTx({ skipAll: true });
+			
+			// Delete file
+			await OS.File.remove(item.getFilePath());
+			
+			// Simulate download of version with updated attachment
+			var json = item.toResponseJSON();
+			json.version = 10;
+			json.data.version = 10;
+			json.data.md5 = '57f8a4fda823187b91e1191487b87fe6';
+			json.data.mtime = new Date().getTime() + 10000;
+			await Zotero.Sync.Data.Local.processObjectsFromJSON(
+				'item', libraryID, [json], { stopOnError: true }
+			);
+			
+			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD);
+			assert.isTrue(library.storageDownloadNeeded);
+		});
 		
 		it("should ignore attachment metadata when resolving metadata conflict", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
@@ -806,7 +839,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			);
 			
 			assert.equal(item.getField('title'), newTitle);
-			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD);
+			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_DOWNLOAD);
 		})
 		
 		it("should roll back partial object changes on error", function* () {
