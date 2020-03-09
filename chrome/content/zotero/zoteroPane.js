@@ -1650,7 +1650,7 @@ var ZoteroPane = new function()
 			itemIDs.push(items[i].id);
 		}
 		
-		yield Zotero.Fulltext.indexItems(itemIDs, true);
+		yield Zotero.FullText.indexItems(itemIDs, { complete: true });
 		yield document.getElementById('zotero-attachment-box').updateItemIndexedState();
 	});
 	

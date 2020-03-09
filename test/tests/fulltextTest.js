@@ -189,8 +189,6 @@ describe("Zotero.Fulltext", function () {
 			var item = await importFileAttachment('test.pdf');
 			
 			var processorCacheFile = Zotero.Fulltext.getItemProcessorCacheFile(item).path;
-			var itemCacheFile = Zotero.Fulltext.getItemCacheFile(item).path;
-			await Zotero.File.putContentsAsync(itemCacheFile, "Test");
 			
 			var version = 5;
 			await Zotero.Fulltext.setItemContent(
@@ -247,6 +245,127 @@ describe("Zotero.Fulltext", function () {
 			assert.equal(indexedPages, 4);
 			assert.equal(total, 4);
 			assert.isFalse(await OS.File.exists(processorCacheFile));
+		});
+	});
+	
+	describe("#rebuildIndex()", function () {
+		afterEach(() => {
+			// Re-enable PDF indexing
+			Zotero.Prefs.clear('fulltext.pdfMaxPages');
+		});
+		
+		it("should process queued full-text content in indexedOnly mode", async function () {
+			Zotero.Prefs.set('fulltext.pdfMaxPages', 0);
+			var item = await importFileAttachment('test.pdf');
+			Zotero.Prefs.clear('fulltext.pdfMaxPages');
+			
+			var version = 5;
+			await Zotero.FullText.setItemContent(
+				item.libraryID,
+				item.key,
+				{
+					content: "Test",
+					indexedPages: 4,
+					totalPages: 4
+				},
+				version
+			);
+			
+			var processorCacheFile = Zotero.FullText.getItemProcessorCacheFile(item).path;
+			var itemCacheFile = Zotero.FullText.getItemCacheFile(item).path;
+			
+			assert.isTrue(await OS.File.exists(processorCacheFile));
+			
+			await Zotero.FullText.rebuildIndex(true);
+			
+			// .zotero-ft-unprocessed should have been deleted
+			assert.isFalse(await OS.File.exists(processorCacheFile));
+			// .zotero-ft-cache should now exist
+			assert.isTrue(await OS.File.exists(itemCacheFile));
+			
+			assert.equal(await Zotero.FullText.getItemVersion(item.id), version);
+			assert.equal(
+				await Zotero.DB.valueQueryAsync("SELECT synced FROM fulltextItems WHERE itemID=?", item.id),
+				Zotero.FullText.SYNC_STATE_IN_SYNC
+			);
+			var { indexedPages, total } = await Zotero.FullText.getPages(item.id);
+			assert.equal(indexedPages, 4);
+			assert.equal(total, 4);
+		});
+		
+		it("should ignore queued full-text content in non-indexedOnly mode", async function () {
+			Zotero.Prefs.set('fulltext.pdfMaxPages', 0);
+			var item = await importFileAttachment('test.pdf');
+			Zotero.Prefs.clear('fulltext.pdfMaxPages');
+			
+			var version = 5;
+			await Zotero.FullText.setItemContent(
+				item.libraryID,
+				item.key,
+				{
+					content: "Test",
+					indexedPages: 4,
+					totalPages: 4
+				},
+				version
+			);
+			
+			var processorCacheFile = Zotero.FullText.getItemProcessorCacheFile(item).path;
+			var itemCacheFile = Zotero.FullText.getItemCacheFile(item).path;
+			
+			assert.isTrue(await OS.File.exists(processorCacheFile));
+			
+			await Zotero.FullText.rebuildIndex();
+			
+			// .zotero-ft-unprocessed should have been deleted
+			assert.isFalse(await OS.File.exists(processorCacheFile));
+			// .zotero-ft-cache should now exist
+			assert.isTrue(await OS.File.exists(itemCacheFile));
+			
+			// Processor cache file shouldn't have been used, and full text should be marked for
+			// syncing
+			assert.equal(await Zotero.FullText.getItemVersion(item.id), 0);
+			assert.equal(
+				await Zotero.DB.valueQueryAsync(
+					"SELECT synced FROM fulltextItems WHERE itemID=?",
+					item.id
+				),
+				Zotero.FullText.SYNC_STATE_UNSYNCED
+			);
+			var { indexedPages, total } = await Zotero.FullText.getPages(item.id);
+			assert.equal(indexedPages, 1);
+			assert.equal(total, 1);
+		});
+		
+		// This shouldn't happen, but before 5.0.85 items reindexed elsewhere could clear local stats
+		it("shouldn't clear indexed items with missing file and no stats", async function () {
+			Zotero.Prefs.set('fulltext.pdfMaxPages', 1);
+			var item = await importFileAttachment('test.pdf');
+			Zotero.Prefs.clear('fulltext.pdfMaxPages');
+			
+			var itemCacheFile = Zotero.FullText.getItemCacheFile(item).path;
+			assert.isTrue(await OS.File.exists(itemCacheFile));
+			
+			var { indexedPages, total } = await Zotero.FullText.getPages(item.id);
+			assert.equal(indexedPages, 1);
+			assert.equal(total, 1);
+			await Zotero.DB.queryAsync(
+				"UPDATE fulltextItems SET indexedPages=NULL, totalPages=NULL WHERE itemID=?",
+				item.id
+			);
+			
+			await Zotero.FullText.rebuildIndex();
+			
+			// .zotero-ft-cache should still exist
+			assert.isTrue(await OS.File.exists(itemCacheFile));
+			
+			assert.equal(
+				await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM fulltextItems WHERE itemID=?",
+					item.id
+				),
+				1
+			);
 		});
 	});
 })
