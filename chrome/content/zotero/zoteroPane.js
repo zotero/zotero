@@ -914,7 +914,7 @@ var ZoteroPane = new function()
 			fp.appendFilter(Zotero.getString('fileInterface.OPMLFeedFilter'), '*.opml; *.xml');
 			fp.appendFilters(fp.filterAll);
 			if (await fp.show() == fp.returnOK) {
-				var contents = await Zotero.File.getContentsAsync(fp.file.path);
+				var contents = await Zotero.File.getContentsAsync(fp.file);
 				var success = await Zotero.Feeds.importFromOPML(contents);
 				if (success) {
 					return true;
