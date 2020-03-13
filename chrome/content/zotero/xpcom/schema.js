@@ -139,9 +139,7 @@ Zotero.Schema = new function(){
 		}
 		
 		// Check if DB is coming from the DB Repair Tool and should be checked
-		var integrityCheck = await Zotero.DB.valueQueryAsync(
-			"SELECT value FROM settings WHERE setting='db' AND key='integrityCheck'"
-		);
+		var integrityCheck = await this.integrityCheckRequired();
 		
 		// Check whether bundled global schema file is newer than DB
 		var bundledGlobalSchema = await _readGlobalSchemaFromFile();
@@ -193,12 +191,9 @@ Zotero.Schema = new function(){
 					await _updateCustomTables();
 				}
 				
-				// Auto-repair databases coming from the DB Repair Tool
+				// Auto-repair databases flagged for repair or coming from the DB Repair Tool
 				if (integrityCheck) {
 					await this.integrityCheck(true);
-					await Zotero.DB.queryAsync(
-						"DELETE FROM settings WHERE setting='db' AND key='integrityCheck'"
-					);
 				}
 				
 				updated = await _migrateUserDataSchema(userdata, options);
@@ -1664,6 +1659,25 @@ Zotero.Schema = new function(){
 	});
 	
 	
+	this.integrityCheckRequired = async function () {
+		return !!await Zotero.DB.valueQueryAsync(
+			"SELECT value FROM settings WHERE setting='db' AND key='integrityCheck'"
+		);
+	};
+	
+	
+	this.setIntegrityCheckRequired = async function (required) {
+		var sql;
+		if (required) {
+			sql = "REPLACE INTO settings VALUES ('db', 'integrityCheck', 1)";
+		}
+		else {
+			sql = "DELETE FROM settings WHERE setting='db' AND key='integrityCheck'";
+		}
+		await Zotero.DB.queryAsync(sql);
+	};
+	
+	
 	this.integrityCheck = Zotero.Promise.coroutine(function* (fix) {
 		Zotero.debug("Checking database integrity");
 		
@@ -1787,6 +1801,74 @@ Zotero.Schema = new function(){
 					let userID = await Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='account' AND key='userID'");
 					await Zotero.DB.queryAsync("UPDATE settings SET value=? WHERE setting='account' AND key='userID'", parseInt(userID.trim()));
 				}
+			],
+			// Invalid collections nesting
+			[
+				async function () {
+					let rows = await Zotero.DB.queryAsync(
+						"SELECT collectionID, parentCollectionID FROM collections"
+					);
+					let map = new Map();
+					let ids = [];
+					for (let row of rows) {
+						map.set(row.collectionID, row.parentCollectionID);
+						ids.push(row.collectionID);
+					}
+					for (let id of ids) {
+						// Keep track of collections we've seen
+						let seen = new Set([id]);
+						while (true) {
+							let parent = map.get(id);
+							if (!parent) {
+								break;
+							}
+							if (seen.has(parent)) {
+								Zotero.debug(`Collection ${id} parent ${parent} was already seen`, 2);
+								return true;
+							}
+							seen.add(parent);
+							id = parent;
+						}
+					}
+					return false;
+				},
+				async function () {
+					let fix = async function () {
+						let rows = await Zotero.DB.queryAsync(
+							"SELECT collectionID, parentCollectionID FROM collections"
+						);
+						let map = new Map();
+						let ids = [];
+						for (let row of rows) {
+							map.set(row.collectionID, row.parentCollectionID);
+							ids.push(row.collectionID);
+						}
+						for (let id of ids) {
+							let seen = new Set([id]);
+							while (true) {
+								let parent = map.get(id);
+								if (!parent) {
+									break;
+								}
+								if (seen.has(parent)) {
+									await Zotero.DB.queryAsync(
+										"UPDATE collections SET parentCollectionID = NULL "
+											+ "WHERE collectionID = ?",
+										id
+									);
+									// Restart
+									return true;
+								}
+								seen.add(parent);
+								id = parent;
+							}
+						}
+						// Done
+						return false;
+					};
+					
+					while (await fix()) {}
+				}
 			]
 		];
 		
@@ -1826,10 +1908,18 @@ Zotero.Schema = new function(){
 				}
 				catch (e) {
 					Zotero.logError(e);
+					// Clear flag on failure, to avoid showing an error on every startup if someone
+					// doesn't know how to deal with it
+					await setIntegrityCheckRequired(false);
 				}
 			}
 			
 			return false;
+		}
+		
+		// Clear flag on success
+		if (fix) {
+			await setIntegrityCheckRequired(false);
 		}
 		
 		return true;

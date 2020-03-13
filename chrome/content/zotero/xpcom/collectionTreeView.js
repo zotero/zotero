@@ -1039,7 +1039,15 @@ Zotero.CollectionTreeView.prototype.expandToCollection = Zotero.Promise.coroutin
 	}
 	var path = [];
 	var parentID;
+	var seen = new Set([col.id])
 	while (parentID = col.parentID) {
+		// Detect infinite loop due to invalid nesting in DB
+		if (seen.has(parentID)) {
+			yield Zotero.Schema.requireIntegrityCheck();
+			Zotero.crash();
+			return;
+		}
+		seen.add(parentID);
 		path.unshift(parentID);
 		col = yield Zotero.Collections.getAsync(parentID);
 	}

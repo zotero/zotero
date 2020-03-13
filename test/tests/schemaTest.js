@@ -97,5 +97,32 @@ describe("Zotero.Schema", function() {
 			yield assert.eventually.isTrue(Zotero.Schema.integrityCheck(true));
 			yield assert.eventually.isTrue(Zotero.Schema.integrityCheck());
 		})
+		
+		it("should repair invalid nesting between two collections", async function () {
+			var c1 = await createDataObject('collection');
+			var c2 = await createDataObject('collection', { parentID: c1.id });
+			await Zotero.DB.queryAsync(
+				"UPDATE collections SET parentCollectionID=? WHERE collectionID=?",
+				[c2.id, c1.id]
+			);
+			
+			await assert.isFalse(await Zotero.Schema.integrityCheck());
+			await assert.isTrue(await Zotero.Schema.integrityCheck(true));
+			await assert.isTrue(await Zotero.Schema.integrityCheck());
+		});
+		
+		it("should repair invalid nesting between three collections", async function () {
+			var c1 = await createDataObject('collection');
+			var c2 = await createDataObject('collection', { parentID: c1.id });
+			var c3 = await createDataObject('collection', { parentID: c2.id });
+			await Zotero.DB.queryAsync(
+				"UPDATE collections SET parentCollectionID=? WHERE collectionID=?",
+				[c3.id, c2.id]
+			);
+			
+			await assert.isFalse(await Zotero.Schema.integrityCheck());
+			await assert.isTrue(await Zotero.Schema.integrityCheck(true));
+			await assert.isTrue(await Zotero.Schema.integrityCheck());
+		});
 	})
 })
