@@ -55,7 +55,6 @@ var ZoteroPane = new function()
 	this.clearItemsPaneMessage = clearItemsPaneMessage;
 	this.viewSelectedAttachment = viewSelectedAttachment;
 	this.reportErrors = reportErrors;
-	this.displayErrorMessage = displayErrorMessage;
 	
 	this.document = document;
 	
@@ -154,7 +153,7 @@ var ZoteroPane = new function()
 		ZoteroPane_Local.collectionsView = new Zotero.CollectionTreeView();
 		// Handle an error in setTree()/refresh()
 		ZoteroPane_Local.collectionsView.onError = function (e) {
-			ZoteroPane_Local.displayErrorMessage();
+			Zotero.crash();
 		};
 		var collectionsTree = document.getElementById('zotero-collections-tree');
 		collectionsTree.view = ZoteroPane_Local.collectionsView;
@@ -387,7 +386,7 @@ var ZoteroPane = new function()
 		}
 		
 		// If Zotero could not be initialized, display an error message and return
-		if (!Zotero || Zotero.skipLoading) {
+		if (!Zotero || Zotero.skipLoading || Zotero.crashed) {
 			this.displayStartupError();
 			return false;
 		}
@@ -1188,7 +1187,7 @@ var ZoteroPane = new function()
 			this.itemsView.onError = function () {
 				// Don't reload last folder, in case that's the problem
 				Zotero.Prefs.clear('lastViewedFolder');
-				ZoteroPane_Local.displayErrorMessage();
+				Zotero.crash();
 			};
 			this.itemsView.onRefresh.addListener(() => {
 				this.setTagScope();
@@ -1506,7 +1505,7 @@ var ZoteroPane = new function()
 		}.bind(this))()
 		.catch(function (e) {
 			Zotero.logError(e);
-			this.displayErrorMessage();
+			Zotero.crash();
 			throw e;
 		}.bind(this))
 		.finally(function () {
@@ -4771,37 +4770,9 @@ var ZoteroPane = new function()
 					"zotero-error-report", "chrome,centerscreen,modal", io);
 	}
 	
-	/*
-	 * Display an error message saying that an error has occurred and Firefox
-	 * needs to be restarted.
-	 *
-	 * If |popup| is TRUE, display in popup progress window; otherwise, display
-	 * as items pane message
-	 */
-	function displayErrorMessage(popup) {
-		var reportErrorsStr = Zotero.getString('errorReport.reportErrors');
-		var reportInstructions =
-			Zotero.getString('errorReport.reportInstructions', reportErrorsStr)
-		
-		// Display as popup progress window
-		if (popup) {
-			var pw = new Zotero.ProgressWindow();
-			pw.changeHeadline(Zotero.getString('general.errorHasOccurred'));
-			var msg = Zotero.getString('general.pleaseRestart', Zotero.appName) + ' '
-				+ reportInstructions;
-			pw.addDescription(msg);
-			pw.show();
-			pw.startCloseTimer(8000);
-		}
-		// Display as items pane message
-		else {
-			var msg = Zotero.getString('general.errorHasOccurred') + ' '
-				+ Zotero.getString('general.pleaseRestart', Zotero.appName) + '\n\n'
-				+ reportInstructions;
-			self.setItemsPaneMessage(msg, true);
-		}
-		Zotero.debug(msg, 1);
-		Zotero.debug(new Error().stack, 1);
+	this.displayErrorMessage = function (popup) {
+		Zotero.debug("ZoteroPane.displayErrorMessage() is deprecated -- use Zotero.crash() instead");
+		Zotero.crash(popup);
 	}
 	
 	this.displayStartupError = function(asPaneMessage) {
@@ -4830,9 +4801,7 @@ var ZoteroPane = new function()
 			//if(asPaneMessage) {
 			//	ZoteroPane_Local.setItemsPaneMessage(errMsg, true);
 			//} else {
-				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
-				ps.alert(null, title, errMsg);
+				Zotero.alert(null, title, errMsg);
 			//}
 		}
 	}
