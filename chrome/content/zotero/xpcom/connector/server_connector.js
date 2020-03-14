@@ -1450,6 +1450,7 @@ Zotero.Server.Connector.Ping.prototype = {
 			var browser;
 			var message;
 			var showDownloadButton = false;
+			// Legacy Safari extension
 			if (origin && origin.startsWith('safari-extension')) {
 				browser = 'safari';
 				message = `An update is available for the ${appName} Connector for Safari.\n\n`
@@ -1466,6 +1467,10 @@ Zotero.Server.Connector.Ping.prototype = {
 				message = `An update is available for the ${appName} Connector for Firefox.\n\n`
 					+ `You can upgrade to the latest version from ${domain}.`;
 				showDownloadButton = true;
+			}
+			// Safari App Extension is always up to date
+			else if (req.headers['User-Agent'] && req.headers['User-Agent'].includes('Safari/')) {
+				return;
 			}
 			else {
 				Zotero.debug("Unknown browser");
