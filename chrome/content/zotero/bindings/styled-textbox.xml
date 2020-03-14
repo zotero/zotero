@@ -534,6 +534,12 @@
 						return ;
 					}
 					
+					// Hack to ignore incomplete editors due to rapid note creation in tests
+					if (Zotero.test && !this._editor.getContent) {
+						Zotero.logError("editor.getContent doesn't exist");
+						return;
+					}
+					
 					if (this.value == val) {
 						Zotero.debug("Textbox value hasn't changed");
 						this._changed = false;
@@ -623,6 +629,11 @@
 				<parameter name="callback"/>
 				<body><![CDATA[
 					if (this.initialized) {
+						// Hack to ignore incomplete editors due to rapid note creation in tests
+						if (Zotero.test && !this._editor.setMode) {
+							Zotero.logError("editor.setMode doesn't exist after initialization");
+							return;
+						}
 						callback(this._editor);
 					}
 					else {
@@ -741,6 +752,11 @@
 								let cb;
 								if (this._onInitCallbacks) {
 									while (cb = this._onInitCallbacks.shift()) {
+										// Hack to ignore incomplete editors due to rapid note creation in tests
+										if (Zotero.test && !this._editor.setMode) {
+											Zotero.logError("editor.setMode doesn't exist");
+											return;
+										}
 										cb(this._editor);
 									}
 								}
