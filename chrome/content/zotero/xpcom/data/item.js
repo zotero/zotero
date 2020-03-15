@@ -4631,7 +4631,7 @@ Zotero.Item.prototype.migrateExtraFields = function () {
 		this.setField(field, value);
 	}
 	if (creators.length) {
-		this.setCreators([...item.getCreators(), ...creators]);
+		this.setCreators([...this.getCreators(), ...creators]);
 	}
 	this.setField('extra', extra);
 	if (!this.hasChanged()) {

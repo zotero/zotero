@@ -224,7 +224,7 @@ describe("Zotero.Utilities.Internal", function () {
 		});
 		
 		it("should extract a CSL name", function () {
-			var str = 'container-author: First || Last';
+			var str = 'container-author: Last || First';
 			var { creators, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
 			assert.lengthOf(creators, 1);
 			assert.propertyVal(creators[0], 'creatorType', 'bookAuthor');
@@ -235,7 +235,7 @@ describe("Zotero.Utilities.Internal", function () {
 		
 		it("should extract a CSL name that's valid for a given item type", function () {
 			var item = createUnsavedDataObject('item', { itemType: 'bookSection' });
-			var str = 'container-author: First || Last';
+			var str = 'container-author: Last || First';
 			var { creators, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
 			assert.lengthOf(creators, 1);
 			assert.propertyVal(creators[0], 'creatorType', 'bookAuthor');
@@ -246,7 +246,7 @@ describe("Zotero.Utilities.Internal", function () {
 		
 		it("shouldn't extract a CSL name that's not valid for a given item type", function () {
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
-			var str = 'container-author: First || Last';
+			var str = 'container-author: Last || First';
 			var { creators, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
 			assert.lengthOf(creators, 0);
 			assert.strictEqual(extra, str);

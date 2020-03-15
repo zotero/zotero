@@ -74,6 +74,43 @@ describe("Zotero.Schema", function() {
 				assert.equal(item.getField('extra'), 'number-of-pages: 11\nThis is another line.');
 				assert.isFalse(item.synced);
 			});
+			
+			it("should migrate creator", async function () {
+				var item = await createDataObject('item', { itemType: 'book' });
+				item.setCreators([
+					{
+						firstName: 'Abc',
+						lastName: 'Def',
+						creatorType: 'author',
+						fieldMode: 0
+					}
+				]);
+				item.setField('extra', 'editor: Last || First\nFoo: Bar');
+				item.synced = true;
+				await item.saveTx();
+				
+				schema.version++;
+				schema.itemTypes.find(x => x.itemType == 'book').fields.splice(0, 1, { field: 'fooBar' })
+				var newLocales = {};
+				Object.keys(schema.locales).forEach((locale) => {
+					var o = schema.locales[locale];
+					o.fields.fooBar = 'Foo Bar';
+					newLocales[locale] = o;
+				});
+				await Zotero.Schema._updateGlobalSchemaForTest(schema);
+				await Zotero.Schema.migrateExtraFields();
+				
+				var creators = item.getCreators();
+				assert.lengthOf(creators, 2);
+				assert.propertyVal(creators[0], 'firstName', 'Abc');
+				assert.propertyVal(creators[0], 'lastName', 'Def');
+				assert.propertyVal(creators[0], 'creatorTypeID', Zotero.CreatorTypes.getID('author'));
+				assert.propertyVal(creators[1], 'firstName', 'First');
+				assert.propertyVal(creators[1], 'lastName', 'Last');
+				assert.propertyVal(creators[1], 'creatorTypeID', Zotero.CreatorTypes.getID('editor'));
+				assert.equal(item.getField('extra'), 'Foo: Bar');
+				assert.isFalse(item.synced);
+			});
 		});
 	});
 	
