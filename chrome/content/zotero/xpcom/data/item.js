@@ -4621,6 +4621,10 @@ Zotero.Item.prototype.toResponseJSON = function (options = {}) {
  * A separate save is required
  */
 Zotero.Item.prototype.migrateExtraFields = function () {
+	if (!this.isEditable()) {
+		return false;
+	}
+	
 	var { itemType, fields, creators, extra } = Zotero.Utilities.Internal.extractExtraFields(
 		this.getField('extra'), this
 	);

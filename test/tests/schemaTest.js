@@ -111,6 +111,32 @@ describe("Zotero.Schema", function() {
 				assert.equal(item.getField('extra'), 'Foo: Bar');
 				assert.isFalse(item.synced);
 			});
+			
+			it("shouldn't migrate fields in read-only library", async function () {
+				var library = await createGroup({ editable: false, filesEditable: false });
+				var item = createUnsavedDataObject('item', { libraryID: library.libraryID, itemType: 'book' });
+				item.setField('extra', 'Foo Bar: This is a value.');
+				item.synced = true;
+				await item.saveTx({
+					skipEditCheck: true
+				});
+				
+				schema.version++;
+				schema.itemTypes.find(x => x.itemType == 'book').fields.splice(0, 1, { field: 'fooBar' })
+				var newLocales = {};
+				Object.keys(schema.locales).forEach((locale) => {
+					var o = schema.locales[locale];
+					o.fields.fooBar = 'Foo Bar';
+					newLocales[locale] = o;
+				});
+				await Zotero.Schema._updateGlobalSchemaForTest(schema);
+				await Zotero.Schema.migrateExtraFields();
+				
+				assert.isNumber(Zotero.ItemFields.getID('fooBar'));
+				assert.equal(item.getField('fooBar'), '');
+				assert.equal(item.getField('extra'), 'Foo Bar: This is a value.');
+				assert.isTrue(item.synced);
+			});
 		});
 	});
 	
