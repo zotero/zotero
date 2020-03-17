@@ -499,10 +499,11 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		let creators = this.getCreators();
 		if (creators.length) {
 			let removeAll = !Zotero.CreatorTypes.itemTypeHasCreators(itemTypeID);
-			for (let i=0; i<creators.length; i++) {
+			for (let i = 0; i < this.getCreators().length; i++) {
 				// Remove all creators if new item type doesn't have any
 				if (removeAll) {
 					this.removeCreator(i);
+					i--;
 					continue;
 				}
 				
