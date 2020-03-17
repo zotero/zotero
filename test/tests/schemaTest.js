@@ -171,6 +171,48 @@ describe("Zotero.Schema", function() {
 				assert.equal(item.getField('extra'), 'Foo Bar: This is a value.');
 				assert.isTrue(item.synced);
 			});
+			
+			it("shouldn't migrate invalid item type", async function () {
+				var item = await createDataObject('item', { itemType: 'book' });
+				item.setField('numPages', 30);
+				item.setCreators(
+					[
+						{
+							firstName: 'Abc',
+							lastName: 'Def',
+							creatorType: 'author',
+							fieldMode: 0
+						},
+						{
+							firstName: 'Ghi',
+							lastName: 'Jkl',
+							creatorType: 'author',
+							fieldMode: 0
+						}
+					]
+				);
+				item.setField('extra', 'type: invalid');
+				item.synced = true;
+				await item.saveTx();
+				
+				schema.version++;
+				schema.itemTypes.find(x => x.itemType == 'book').fields.splice(0, 1, { field: 'fooBar' })
+				var newLocales = {};
+				Object.keys(schema.locales).forEach((locale) => {
+					var o = schema.locales[locale];
+					o.fields.fooBar = 'Foo Bar';
+					newLocales[locale] = o;
+				});
+				await Zotero.Schema._updateGlobalSchemaForTest(schema);
+				await Zotero.Schema.migrateExtraFields();
+				
+				assert.equal(item.getField('numPages'), 30);
+				var creators = item.getCreators();
+				assert.lengthOf(creators, 2);
+				assert.equal(item.itemTypeID, Zotero.ItemTypes.getID('book'));
+				assert.equal(item.getField('extra'), 'type: dataset');
+				assert.isTrue(item.synced);
+			});
 		});
 	});
 	
