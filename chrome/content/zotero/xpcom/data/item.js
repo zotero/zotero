@@ -4625,35 +4625,51 @@ Zotero.Item.prototype.migrateExtraFields = function () {
 		return false;
 	}
 	
-	var { itemType, fields, creators, extra } = Zotero.Utilities.Internal.extractExtraFields(
-		this.getField('extra'), this
-	);
-	if (itemType) {
-		this.setType(Zotero.ItemTypes.getID(itemType));
+	var originalExtra = this.getField('extra');
+	
+	var log = function () {
+		Zotero.debug("Original Extra:\n\n" + originalExtra);
+		if (itemType) {
+			Zotero.debug("Item Type: " + itemType);
+		}
+		if (fields.size) {
+			Zotero.debug("Fields:\n\n" + Array.from(fields.entries()).map(x => `${x[0]}: ${x[1]}`).join("\n"));
+		}
+		if (creators.length) {
+			Zotero.debug("Creators:");
+			Zotero.debug(creators);
+		}
+		if (extra) {
+			Zotero.debug("Remaining Extra:\n\n" + extra);
+		}
+	};
+	
+	try {
+		var { itemType, fields, creators, extra } = Zotero.Utilities.Internal.extractExtraFields(
+			originalExtra, this
+		);
+		if (itemType) {
+			this.setType(Zotero.ItemTypes.getID(itemType));
+		}
+		for (let [field, value] of fields) {
+			this.setField(field, value);
+		}
+		if (creators.length) {
+			this.setCreators([...this.getCreators(), ...creators]);
+		}
+		this.setField('extra', extra);
+		if (!this.hasChanged()) {
+			return false;
+		}
 	}
-	for (let [field, value] of fields) {
-		this.setField(field, value);
-	}
-	if (creators.length) {
-		this.setCreators([...this.getCreators(), ...creators]);
-	}
-	this.setField('extra', extra);
-	if (!this.hasChanged()) {
-		return false;
+	catch (e) {
+		Zotero.logError("Error migrating Extra fields for item " + this.libraryKey);
+		log();
+		throw e;
 	}
 	
 	Zotero.debug("Migrating Extra fields for item " + this.libraryKey);
-	if (itemType) {
-		Zotero.debug("Item Type: " + itemType);
-	}
-	if (fields.size) {
-		Zotero.debug("Fields:\n\n" + Array.from(fields.entries()).map(x => `${x[0]}: ${x[1]}`).join("\n"));
-	}
-	if (creators.length) {
-		Zotero.debug("Creators:");
-		Zotero.debug(creators);
-	}
-	Zotero.debug("Remaining Extra:\n\n" + extra);
+	log();
 	
 	return true;
 }
