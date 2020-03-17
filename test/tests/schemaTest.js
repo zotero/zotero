@@ -210,7 +210,7 @@ describe("Zotero.Schema", function() {
 				var creators = item.getCreators();
 				assert.lengthOf(creators, 2);
 				assert.equal(item.itemTypeID, Zotero.ItemTypes.getID('book'));
-				assert.equal(item.getField('extra'), 'type: dataset');
+				assert.equal(item.getField('extra'), 'type: invalid');
 				assert.isTrue(item.synced);
 			});
 		});
