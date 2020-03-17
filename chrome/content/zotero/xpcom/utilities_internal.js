@@ -1012,6 +1012,11 @@ Zotero.Utilities.Internal = {
 			if (key == 'type') {
 				let possibleType = itemTypes.get(value);
 				if (possibleType) {
+					// Ignore 'type: note' and 'type: attachment'
+					if (['note', 'attachment'].includes(possibleType)) {
+						keepLines.push(line);
+						continue;
+					}
 					// Ignore item type that's the same as the item
 					if (!item || possibleType != Zotero.ItemTypes.getName(itemTypeID)) {
 						itemType = possibleType;

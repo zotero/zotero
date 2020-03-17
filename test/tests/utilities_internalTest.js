@@ -114,6 +114,13 @@ describe("Zotero.Utilities.Internal", function () {
 	
 	
 	describe("#extractExtraFields()", function () {
+		it("should ignore 'type: note' and 'type: attachment'", function () {
+			var str = 'type: note';
+			var { itemType, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.isNull(itemType);
+			assert.equal(extra, 'type: note');
+		});
+		
 		it("should extract a CSL type", function () {
 			var str = 'type: motion_picture';
 			var { itemType, fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
