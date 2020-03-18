@@ -720,7 +720,10 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.Retractions.init();
 			
 			// Migrate fields from Extra that can be moved to item fields after a schema update
-			yield Zotero.Schema.migrateExtraFields();
+			//
+			// Disabled for now
+			//
+			//yield Zotero.Schema.migrateExtraFields();
 			
 			// Load all library data except for items, which are loaded when libraries are first
 			// clicked on or if otherwise necessary
