@@ -502,6 +502,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 			for (let i = 0; i < this.getCreators().length; i++) {
 				// Remove all creators if new item type doesn't have any
 				if (removeAll) {
+					throw new Error("Disabled");
 					this.removeCreator(i);
 					i--;
 					continue;
