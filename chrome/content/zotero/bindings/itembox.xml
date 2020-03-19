@@ -1814,7 +1814,7 @@
 					var tabindex = textbox.getAttribute('ztabindex');
 					
 					//var value = t.value;
-					var value = textbox.value;
+					var value = textbox.value.trim();
 					
 					var elem;
 					var [field, creatorIndex, creatorField] = fieldName.split('-');
@@ -1828,9 +1828,9 @@
 						otherFields[creatorField] = value;
 						var lastName = otherFields.lastName.trim();
 						
-						//Handle \n\r and \n delimited entries
+						//Handle \n\r and \n delimited entries and a single line containing a tab
 						var rawNameArray = lastName.split(/\r\n?|\n/);
-						if (rawNameArray.length > 1) {
+						if (rawNameArray.length > 1 || rawNameArray[0].includes('\t')) {
 							//Save tab direction and add creator flags since they are reset in the 
 							//process of adding multiple authors
 							var tabDirectionBuffer = this._tabDirection;
