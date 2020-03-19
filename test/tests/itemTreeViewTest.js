@@ -2,6 +2,7 @@
 
 describe("Zotero.ItemTreeView", function() {
 	var win, zp, cv, itemsView;
+	var userLibraryID;
 	var existingItemID;
 	var existingItemID2;
 	
@@ -11,6 +12,7 @@ describe("Zotero.ItemTreeView", function() {
 		zp = win.ZoteroPane;
 		cv = zp.collectionsView;
 		
+		userLibraryID = Zotero.Libraries.userLibraryID;
 		var item1 = yield createDataObject('item', { setTitle: true });
 		existingItemID = item1.id;
 		var item2 = yield createDataObject('item');
@@ -240,6 +242,56 @@ describe("Zotero.ItemTreeView", function() {
 			quicksearch.value = "";
 			quicksearch.doCommand();
 			yield itemsView._refreshPromise;
+		});
+		
+		it.skip("shouldn't clear quicksearch in Unfiled Items when adding selected item to collection", async function () {
+			var spy = sinon.spy(win.ZoteroPane, 'search');
+			
+			var collection = await createDataObject('collection');
+			var title1 = Zotero.Utilities.randomString();
+			var title2 = Zotero.Utilities.randomString();
+			var item1 = await createDataObject('item', { title: title1 });
+			var item2 = await createDataObject('item', { title: title1 });
+			var item3 = await createDataObject('item', { title: title2 });
+			
+			await zp.setVirtual(userLibraryID, 'unfiled', true, true);
+			itemsView = zp.itemsView;
+			assert.equal(cv.selectedTreeRow.id, 'U' + userLibraryID);
+			
+			var searchString = title1;
+			var quicksearch = win.document.getElementById('zotero-tb-search');
+			quicksearch.value = searchString;
+			quicksearch.doCommand();
+			while (!spy.called) {
+				Zotero.debug("Waiting for search");
+				await Zotero.Promise.delay(50);
+			}
+			await spy.returnValues[0];
+			spy.resetHistory();
+			
+			assert.equal(itemsView.rowCount, 2);
+			
+			await itemsView.selectItem(item1.id);
+			
+			// Move item1 to collection
+			item1.setCollections([collection.id]);
+			await item1.saveTx({
+				skipSelect: true
+			});
+			
+			assert.equal(itemsView.rowCount, 1);
+			assert.equal(quicksearch.value, searchString);
+			
+			// Clear search
+			quicksearch.value = "";
+			quicksearch.doCommand();
+			while (!spy.called) {
+				Zotero.debug("Waiting for search");
+				await Zotero.Promise.delay(50);
+			}
+			await spy.returnValues[0];
+			
+			spy.restore();
 		});
 		
 		it("shouldn't change selection outside of trash if new trashed item is created with skipSelect", function* () {
