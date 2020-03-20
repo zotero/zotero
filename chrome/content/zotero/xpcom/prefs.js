@@ -389,6 +389,23 @@ Zotero.Prefs = new function(){
 					try {
 						let path = OS.Path.fromFileURI(addon.getResourceURI().spec);
 						
+						// Hack to delete extensions.json for Mac users who first ran Zotero from the
+						// disk image and ended up with invalid integration plugin paths in
+						// extensions.json
+						try {
+							if (Zotero.isMac && path.includes('AppTranslocation')) {
+								await OS.File.remove(
+									OS.Path.join(Zotero.Profile.dir, 'extensions.json'),
+									{
+										ignoreAbsent: true
+									}
+								);
+							}
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
+						
 						// Directory
 						if ((await OS.File.stat(path)).isDir) {
 							let dir = OS.Path.join(path, 'defaults', 'preferences');

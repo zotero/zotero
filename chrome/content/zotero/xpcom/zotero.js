@@ -1816,6 +1816,21 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				Zotero.getString('general.quitApp', Zotero.clientName),
 				null, null, null, {}
 			);
+			
+			// If the integration plugins were installed from the AppTranslocation path, delete
+			// extensions.json
+			try {
+				let file = OS.Path.join(Zotero.Profile.dir, 'extensions.json');
+				let json = JSON.parse(Zotero.File.getContents(file));
+				if (json.addons.some(x => x.path.includes('AppTranslocation'))) {
+					file = Zotero.File.pathToFile(file);
+					file.remove(null);
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			
 			Zotero.Utilities.Internal.quit();
 			return false;
 		}
