@@ -1806,7 +1806,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		if (Zotero.isMac && OS.Constants.Path.libDir.includes('AppTranslocation')) {
 			let ps = Services.prompt;
 			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING;
-			let index = ps.confirmEx(
+			ps.confirmEx(
 				null,
 				Zotero.getString('general.error'),
 				Zotero.getString('startupError.startedFromDiskImage1', Zotero.clientName)
@@ -1816,21 +1816,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				Zotero.getString('general.quitApp', Zotero.clientName),
 				null, null, null, {}
 			);
-			
-			// If the integration plugins were installed from the AppTranslocation path, delete
-			// extensions.json
-			try {
-				let file = OS.Path.join(Zotero.Profile.dir, 'extensions.json');
-				let json = JSON.parse(Zotero.File.getContents(file));
-				if (json.addons.some(x => x.path.includes('AppTranslocation'))) {
-					file = Zotero.File.pathToFile(file);
-					file.remove(null);
-				}
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
-			
 			Zotero.Utilities.Internal.quit();
 			return false;
 		}
