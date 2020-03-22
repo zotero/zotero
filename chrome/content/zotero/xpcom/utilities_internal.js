@@ -955,14 +955,6 @@ Zotero.Utilities.Internal = {
 		// Build `Map`s of normalized types/fields, including CSL variables, to built-in types/fields
 		//
 		
-		// Built-in item types
-		var itemTypes = new Map(Zotero.ItemTypes.getAll().map(x => [this._normalizeExtraKey(x.name), x.name]));
-		// CSL types
-		for (let i in Zotero.Schema.CSL_TYPE_MAPPINGS) {
-			let cslType = Zotero.Schema.CSL_TYPE_MAPPINGS[i];
-			itemTypes.set(cslType.toLowerCase(), i);
-		}
-		
 		// For fields we use arrays, because there can be multiple possibilities
 		//
 		// Built-in fields
@@ -990,40 +982,65 @@ Zotero.Utilities.Internal = {
 		var keepLines = [];
 		var skipKeys = new Set();
 		var lines = extra.split(/\n/g);
-		for (let line of lines) {
+		
+		var getKeyAndValue = (line) => {
 			let parts = line.match(/^([a-z][a-z -_]+):(.+)/i);
 			// Old citeproc.js cheater syntax;
 			if (!parts) {
 				parts = line.match(/^{:([a-z -_]+):(.+)}/i);
 			}
 			if (!parts) {
-				keepLines.push(line);
-				continue;
+				return [null, null];
 			}
 			let [_, originalField, value] = parts;
-			
 			let key = this._normalizeExtraKey(originalField);
-			if (skipKeys.has(key)) {
-				keepLines.push(line);
-				continue;
-			}
 			value = value.trim();
+			return [key, value];
+		};
+		
+		// Extract item type from 'type:' lines
+		lines = lines.filter((line) => {
+			let [key, value] = getKeyAndValue(line);
 			
-			if (key == 'type') {
-				let possibleType = itemTypes.get(value);
-				if (possibleType) {
+			if (!key
+					|| key != 'type'
+					|| skipKeys.has(key)
 					// Ignore 'type: note' and 'type: attachment'
-					if (['note', 'attachment'].includes(possibleType)) {
-						keepLines.push(line);
-						continue;
-					}
-					// Ignore item type that's the same as the item
-					if (!item || possibleType != Zotero.ItemTypes.getName(itemTypeID)) {
-						itemType = possibleType;
-						skipKeys.add(key);
-						continue;
+					|| ['note', 'attachment'].includes(value)) {
+				return true;
+			}
+			
+			// See if it's a Zotero type
+			let possibleType = Zotero.ItemTypes.getName(value);
+			
+			// If not, see if it's a CSL type
+			if (!possibleType && Zotero.Schema.CSL_TYPE_MAPPINGS_REVERSE[value]) {
+				if (item) {
+					let currentType = Zotero.ItemTypes.getName(itemTypeID);
+					// If the current item type is valid for the given CSL type, remove the line
+					if (Zotero.Schema.CSL_TYPE_MAPPINGS_REVERSE[value].includes(currentType)) {
+						return false;
 					}
 				}
+				// Use first mapped Zotero type for CSL type
+				possibleType = Zotero.Schema.CSL_TYPE_MAPPINGS_REVERSE[value][0];
+			}
+			
+			if (possibleType) {
+				itemType = possibleType;
+				itemTypeID = Zotero.ItemTypes.getID(itemType);
+				skipKeys.add(key);
+				return false;
+			}
+			
+			return true;
+		});
+		
+		lines = lines.filter((line) => {
+			let [key, value] = getKeyAndValue(line);
+			
+			if (!key || skipKeys.has(key)) {
+				return true;
 			}
 			
 			// Fields
@@ -1039,7 +1056,7 @@ Zotero.Utilities.Internal = {
 						if (!Zotero.ItemFields.isValidForType(fieldID, itemTypeID)
 								|| item.getField(fieldID)
 								|| additionalFields.has(possibleField)) {
-							continue;
+							return true;
 						}
 					}
 					fields.set(possibleField, value);
@@ -1052,7 +1069,7 @@ Zotero.Utilities.Internal = {
 				}
 				if (added) {
 					skipKeys.add(key);
-					continue;
+					return false;
 				}
 			}
 			
@@ -1076,24 +1093,24 @@ Zotero.Utilities.Internal = {
 							// to follow citeproc-js behavior
 							&& !item.getCreators().some(x => x.creatorType == possibleCreatorType)) {
 						creators.push(c);
-						continue;
+						return false;
 					}
 				}
 				else {
 					creators.push(c);
-					continue;
+					return false;
 				}
 			}
 			
 			// We didn't find anything, so keep the line in Extra
-			keepLines.push(line);
-		}
+			return true;
+		});
 		
 		return {
 			itemType,
 			fields,
 			creators,
-			extra: keepLines.join('\n')
+			extra: lines.join('\n')
 		};
 	},
 	

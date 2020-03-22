@@ -149,6 +149,61 @@ describe("Zotero.Schema", function() {
 				assert.isTrue(item.synced);
 			});
 			
+			it("should change item type if 'type:' is defined", async function () {
+				var item = await createDataObject('item', { itemType: 'document' });
+				item.setField('extra', 'type: personal_communication');
+				item.synced = true;
+				await item.saveTx();
+				
+				await migrate();
+				
+				assert.equal(item.itemTypeID, Zotero.ItemTypes.getID('letter'));
+				assert.equal(item.getField('extra'), '');
+				assert.isFalse(item.synced);
+			});
+			
+			it("should remove 'type:' line for CSL type if item is the first mapped Zotero type", async function () {
+				var item = await createDataObject('item', { itemType: 'letter' });
+				item.setField('extra', 'type: personal_communication');
+				item.synced = true;
+				await item.saveTx();
+				
+				await migrate();
+				
+				assert.equal(item.itemTypeID, Zotero.ItemTypes.getID('letter'));
+				assert.equal(item.getField('extra'), '');
+				assert.isFalse(item.synced);
+			});
+			
+			it("should remove 'type:' line for CSL type if item is a non-primary mapped Zotero type", async function () {
+				var item = await createDataObject('item', { itemType: 'instantMessage' });
+				item.setField('extra', 'type: personal_communication');
+				item.synced = true;
+				await item.saveTx();
+				
+				await migrate();
+				
+				assert.equal(item.itemTypeID, Zotero.ItemTypes.getID('instantMessage'));
+				assert.equal(item.getField('extra'), '');
+				assert.isFalse(item.synced);
+			});
+			
+			it("should move existing fields that would be invalid in the new 'type:' type to Extra", async function () {
+				var item = await createDataObject('item', { itemType: 'book' });
+				item.setField('numPages', '123');
+				item.setField('extra', 'type: article-journal\nJournal Abbreviation: abc.\nnumPages: 234');
+				item.synced = true;
+				await item.saveTx();
+				
+				await migrate();
+				
+				assert.equal(item.itemTypeID, Zotero.ItemTypes.getID('journalArticle'));
+				assert.equal(item.getField('journalAbbreviation'), 'abc.');
+				// Migrated real field should be placed at beginning, followed by unused line from Extra
+				assert.equal(item.getField('extra'), 'Num Pages: 123\nnumPages: 234');
+				assert.isFalse(item.synced);
+			});
+			
 			it("shouldn't migrate invalid item type", async function () {
 				var item = await createDataObject('item', { itemType: 'book' });
 				item.setField('numPages', 30);

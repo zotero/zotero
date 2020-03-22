@@ -576,7 +576,8 @@ Zotero.Schema = new function(){
 			for (let zoteroType of data.csl.types[cslType]) {
 				Zotero.Schema.CSL_TYPE_MAPPINGS[zoteroType] = cslType;
 			}
-			Zotero.Schema.CSL_TYPE_MAPPINGS_REVERSE[cslType] = data.csl.types[cslType][0];
+			// Add the first mapped Zotero type
+			Zotero.Schema.CSL_TYPE_MAPPINGS_REVERSE[cslType] = [...data.csl.types[cslType]];
 		}
 		Zotero.Schema.CSL_TEXT_MAPPINGS = data.csl.fields.text;
 		Zotero.Schema.CSL_DATE_MAPPINGS = data.csl.fields.date;

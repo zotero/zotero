@@ -129,6 +129,12 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.strictEqual(extra, '');
 		});
 		
+		it("should use the first mapped Zotero type for a CSL type", function () {
+			var str = 'type: personal_communication';
+			var { itemType, fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(itemType, 'letter');
+		});
+		
 		it("should extract a field", function () {
 			var val = '10.1234/abcdef';
 			var str = `DOI: ${val}`;
