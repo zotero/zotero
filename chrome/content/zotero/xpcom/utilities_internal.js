@@ -1039,7 +1039,7 @@ Zotero.Utilities.Internal = {
 		lines = lines.filter((line) => {
 			let [key, value] = getKeyAndValue(line);
 			
-			if (!key || skipKeys.has(key)) {
+			if (!key || skipKeys.has(key) || key == 'type') {
 				return true;
 			}
 			
