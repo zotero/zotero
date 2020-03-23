@@ -1641,6 +1641,16 @@ Zotero.Utilities = {
 		if (cslItem.type == 'bill' && (cslItem.publisher || cslItem['number-of-volumes'])) {
 			zoteroType = 'hearing';
 		}
+		else if (cslItem.type == 'broadcast'
+				&& (cslItem['archive']
+					|| cslItem['archive_location']
+					|| cslItem['container-title']
+					|| cslItem['event-place']
+					|| cslItem['publisher']
+					|| cslItem['publisher-place']
+					|| cslItem['source'])) {
+			zoteroType = 'tvBroadcast';
+		}
 		else if (cslItem.type == 'book' && cslItem.version) {
 			zoteroType = 'computerProgram';
 		}
