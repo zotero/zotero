@@ -11,7 +11,7 @@
 
 
 <!ENTITY fileMenu.label "ملف">
-<!ENTITY fileMenu.accesskey "م">
+<!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "حفظ...">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
@@ -22,25 +22,25 @@
 <!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "إغلاق">
 <!ENTITY closeCmd.key "W">
-<!ENTITY closeCmd.accesskey "ق">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY closeCmd.accesskey "C">
+<!ENTITY manageAttachments.label "إدارة المرفقات">
+<!ENTITY convertToStored.label "تحويل الملفات المرتبطة إلى ملفات مخزنة...">
 <!ENTITY importCmd.label "استيراد...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "استيراد من الحافظة">
 <!ENTITY quitApplicationCmdWin.label "خروج">
-<!ENTITY quitApplicationCmdWin.accesskey "خ">
+<!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "إنهاء">
-<!ENTITY quitApplicationCmd.accesskey "ن">
+<!ENTITY quitApplicationCmd.accesskey "Q">
 
 
 <!ENTITY copyCitationCmd.label "نسخ الاقتباس">
 <!ENTITY copyBibliographyCmd.label "نسخ قائمة المراجع">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "تغيير اتجاه الصفحة">
-<!ENTITY bidiSwitchPageDirectionItem.accesskey "ه">
+<!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "تغيير اتجاه النص">
-<!ENTITY bidiSwitchTextDirectionItem.accesskey "ج">
+<!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
@@ -83,19 +83,19 @@
 <!ENTITY productHelp.label "مساعدة ووثائق">
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "معلومات المساعدة والتنويه">
-<!ENTITY helpTroubleshootingInfo.accesskey "م">
+<!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "منتديات المناقشة">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "الإبلاغ عن أخطاء...">
-<!ENTITY helpReportErrors.accesskey "ب">
+<!ENTITY helpReportErrors.accesskey "R">
 
 <!ENTITY debugOutputLogging.label "سجل تصويب المخرجات">
 <!ENTITY debugOutputLogging.accesskey "L">
 <!ENTITY debugOutputLogging.submit "إرسال المخرجات">
 <!ENTITY debugOutputLogging.view "عرض المخرجات">
-<!ENTITY debugOutputLogging.clear "مسح المخرجات">
+<!ENTITY debugOutputLogging.clear "تفريغ المخرجات">
 <!ENTITY debugOutputLogging.restartWithLoggingEnabled "أعاده التشغيل مع تمكين التسجيل...">
 
 <!ENTITY helpCheckForUpdates.label "تحقق من التحديثات">
-<!ENTITY helpCheckForUpdates.accesskey "ت">
+<!ENTITY helpCheckForUpdates.accesskey "U">

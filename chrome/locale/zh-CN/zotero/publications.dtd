@@ -6,14 +6,14 @@
 <!ENTITY zotero.publications.include.adjustAtAnyTime "你可以在任何时间从“我的出版物”中调整显示的项目。">
 
 <!ENTITY zotero.publications.sharing.title "选择你分享论文的方式">
-<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
-<!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">
-<!ENTITY zotero.publications.sharing.cc0 "Yes, and place my work in the public domain">
-<!ENTITY zotero.publications.sharing.reserved "No, only publish my work on zotero.org">
+<!ENTITY zotero.publications.sharing.text "您可以保留您作品的所有权利，可以在知识共享许可下获得许可，也可以将其专用于公共领域。 在所有情况下，这些作品都可以通过zotero.org公开获得。">
+<!ENTITY zotero.publications.sharing.prompt "您想允许他人共享您的作品吗？">
+<!ENTITY zotero.publications.sharing.cc "是的，根据知识共享许可">
+<!ENTITY zotero.publications.sharing.cc0 "是的，将我的工作放在公共领域">
+<!ENTITY zotero.publications.sharing.reserved "不，仅在zotero.org上发布我的作品">
 
-<!ENTITY zotero.publications.chooseLicense.title "Choose a Creative Commons license">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
-<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Allow adaptations of your work to be shared?">
+<!ENTITY zotero.publications.chooseLicense.title "选择一个知识共享许可">
+<!ENTITY zotero.publications.chooseLicense.text "创用CC许可允许其他人复制并重新分发您的作品，只要他们提供适当的信誉，提供许可的链接并指出是否进行了更改。 可以在下面指定其他条件。">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "是否允许分享您的改编作品？">
 <!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "是的，如果其他人也分享同样的">
 <!ENTITY zotero.publications.chooseLicense.commercial.prompt "允许你的工作的商业使用吗？">

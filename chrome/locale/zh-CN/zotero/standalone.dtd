@@ -47,7 +47,7 @@
 <!ENTITY viewMenu.label "查看">
 <!ENTITY layout.label "布局">
 <!ENTITY standardView.label "标准视图">
-<!ENTITY stackedView.label "堆栈视图&lt;br&gt;">
+<!ENTITY stackedView.label "堆栈视图">
 <!ENTITY collectionsPane.label "集合面板">
 <!ENTITY itemPane.label "条目面板">
 <!ENTITY tagSelector.label "标签选择器">

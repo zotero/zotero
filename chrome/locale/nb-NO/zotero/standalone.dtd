@@ -95,7 +95,7 @@
 <!ENTITY debugOutputLogging.submit "Send inn output">
 <!ENTITY debugOutputLogging.view "Vis output">
 <!ENTITY debugOutputLogging.clear "Fjern output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Start på ny med logging aktivert…">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Start på nytt med logging aktivert…">
 
 <!ENTITY helpCheckForUpdates.label "Se etter oppdateringer...">
 <!ENTITY helpCheckForUpdates.accesskey "S">

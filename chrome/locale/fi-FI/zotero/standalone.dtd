@@ -23,7 +23,7 @@
 <!ENTITY closeCmd.label "Sulje">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
+<!ENTITY manageAttachments.label "Hallitse liitteitä">
 <!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
 <!ENTITY importCmd.label "Tuo...">
 <!ENTITY importCmd.key "I">
@@ -44,15 +44,15 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
+<!ENTITY viewMenu.label "Näytä">
+<!ENTITY layout.label "Asettelu">
+<!ENTITY standardView.label "Vakionäkymä">
+<!ENTITY stackedView.label "Pinottu näkymä">
 <!ENTITY collectionsPane.label "Collections Pane">
 <!ENTITY itemPane.label "Item Pane">
 <!ENTITY tagSelector.label "Tag Selector">
 <!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
+<!ENTITY fontSize.label "Fonttikoko">
 <!ENTITY noteFontSize.label "Note Font Size">
 
 

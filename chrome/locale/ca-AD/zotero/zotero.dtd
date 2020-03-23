@@ -91,7 +91,7 @@
 <!ENTITY zotero.items.menu.showInLibrary "Mostra a la biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Afegeix una nota">
 <!ENTITY zotero.items.menu.attach "Afegeix un adjunt">
-<!ENTITY zotero.items.menu.attach.link.uri "Adjunta un enllaç a l'identificador uniforme de recursos...">
+<!ENTITY zotero.items.menu.attach.link.uri "Adjunta un enllaç a l'URI...">
 <!ENTITY zotero.items.menu.attach.file "Adjunta la còpia emmagatzemada del fitxer...">
 <!ENTITY zotero.items.menu.attach.fileLink "Adjunta un enllaç al fitxer...">
 
@@ -120,7 +120,7 @@
 <!ENTITY zotero.toolbar.import.label "Importa...">
 <!ENTITY zotero.toolbar.importFromClipboard "Importa del porta-retalls">
 <!ENTITY zotero.toolbar.export.label "Exporta la biblioteca...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
+<!ENTITY zotero.toolbar.rtfScan.label "Escaneig de l'RTF">
 <!ENTITY zotero.toolbar.timeline.label "Crea línia del temps">
 <!ENTITY zotero.toolbar.preferences.label "Preferències...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Assistència i documentació">
