@@ -121,14 +121,6 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(extra, 'type: note');
 		});
 		
-		it("should extract a CSL type", function () {
-			var str = 'type: motion_picture';
-			var { itemType, fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
-			assert.equal(itemType, 'videoRecording');
-			assert.equal(fields.size, 0);
-			assert.strictEqual(extra, '');
-		});
-		
 		it("should use the first mapped Zotero type for a CSL type", function () {
 			var str = 'type: personal_communication';
 			var { itemType, fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
