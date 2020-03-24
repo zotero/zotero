@@ -4421,7 +4421,7 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 		for (let typeFieldName of typeFieldNames) {
 			if (extraFields.has(typeFieldName)) {
 				extraFields.delete(typeFieldName);
-				invalidFieldLogLines.delete(mappedField);
+				invalidFieldLogLines.delete(typeFieldName);
 			}
 		}
 		
