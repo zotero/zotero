@@ -53,10 +53,10 @@ describe("Zotero_File_Interface", function() {
 		);
 		
 		var promise = waitForItemEvent('add');
-		Zotero.debug(yield Zotero.File.getContentsAsync(rdfFile));
 		yield win.Zotero_File_Interface.importFile(Zotero.File.pathToFile(rdfFile))
 		var ids = yield promise;
-		assert.lengthOf(ids, 1);
+		// Notifications are batched
+		assert.lengthOf(ids, 2);
 		
 		// Check book
 		var item = Zotero.Items.get(ids[0]);
