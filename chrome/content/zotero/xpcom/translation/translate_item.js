@@ -551,7 +551,8 @@ Zotero.Translate.ItemSaver.prototype = {
 					title: attachment.title,
 					contentType: attachment.mimeType,
 					parentItemID,
-					collections: !parentItemID ? this._collections : undefined
+					collections: !parentItemID ? this._collections : undefined,
+					saveOptions: this._saveOptions,
 				});
 			}
 			
@@ -605,7 +606,8 @@ Zotero.Translate.ItemSaver.prototype = {
 				parentItemID,
 				contentType: attachment.mimeType || undefined,
 				title: attachment.title || undefined,
-				collections: !parentItemID ? this._collections : undefined
+				collections: !parentItemID ? this._collections : undefined,
+				saveOptions: this._saveOptions,
 			});
 		}
 		else if (this._linkFiles
@@ -615,7 +617,8 @@ Zotero.Translate.ItemSaver.prototype = {
 			newItem = yield Zotero.Attachments.linkFromFile({
 				file,
 				parentItemID,
-				collections: !parentItemID ? this._collections : undefined
+				collections: !parentItemID ? this._collections : undefined,
+				saveOptions: this._saveOptions,
 			});
 			if (attachment.title) {
 				newItem.setField("title", attachment.title);
@@ -634,7 +637,8 @@ Zotero.Translate.ItemSaver.prototype = {
 					contentType: attachment.mimeType,
 					charset: attachment.charset,
 					parentItemID,
-					collections: !parentItemID ? this._collections : undefined
+					collections: !parentItemID ? this._collections : undefined,
+					saveOptions: this._saveOptions,
 				});
 			}
 			else {
@@ -642,7 +646,8 @@ Zotero.Translate.ItemSaver.prototype = {
 				newItem = yield Zotero.Attachments.importFromFile({
 					file: file,
 					parentItemID,
-					collections: !parentItemID ? this._collections : undefined
+					collections: !parentItemID ? this._collections : undefined,
+					saveOptions: this._saveOptions,
 				});
 				if (attachment.title) newItem.setField("title", attachment.title);
 			}
@@ -830,7 +835,8 @@ Zotero.Translate.ItemSaver.prototype = {
 				parentItemID,
 				contentType: mimeType,
 				title,
-				collections: !parentItemID ? this._collections : undefined
+				collections: !parentItemID ? this._collections : undefined,
+				saveOptions: this._saveOptions,
 			});
 		}
 		
@@ -846,7 +852,8 @@ Zotero.Translate.ItemSaver.prototype = {
 				document: attachment.document,
 				parentItemID,
 				title,
-				collections: !parentItemID ? this._collections : undefined
+				collections: !parentItemID ? this._collections : undefined,
+				saveOptions: this._saveOptions,
 			});
 		}
 		
@@ -872,7 +879,8 @@ Zotero.Translate.ItemSaver.prototype = {
 			contentType: mimeType,
 			referrer: this._referrer,
 			cookieSandbox: this._cookieSandbox,
-			collections: !parentItemID ? this._collections : undefined
+			collections: !parentItemID ? this._collections : undefined,
+			saveOptions: this._saveOptions,
 		});
 	}),
 	
