@@ -178,8 +178,7 @@ Zotero.Tags = new function() {
 			params.push(...types);
 		}
 		if (tagIDs) {
-			sql += "AND tagID IN (" + new Array(tagIDs.length).fill('?').join(', ') + ") ";
-			params.push(...tagIDs);
+			sql += "AND tagID IN (" + tagIDs.map(x => parseInt(x)).join(', ') + ") ";
 		}
 		// Not a perfect locale sort, but speeds up the sort in the tag selector later without any
 		// discernible performance cost
