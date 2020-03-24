@@ -4424,6 +4424,14 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 				invalidFieldLogLines.delete(mappedField);
 			}
 		}
+		
+		// Remove "Version Number" if "Edition" is set, since as of 3/2020 the RDF translator
+		// assigns it
+		if (extraFields.has('versionNumber') && setFields.has('edition')
+				&& extraFields.get('versionNumber') == this.getField('edition')) {
+			extraFields.delete('versionNumber');
+			invalidFieldLogLines.delete('versionNumber');
+		}
 	}
 	
 	for (let line of invalidFieldLogLines.values()) {

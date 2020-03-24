@@ -1913,6 +1913,18 @@ describe("Zotero.Item", function () {
 				item.fromJSON(json);
 				assert.equal(item.getField('extra'), '');
 			});
+			
+			it("should ignore versionNumber for books", async function () {
+				var json = {
+					itemType: "book",
+					edition: "1",
+					versionNumber: "1"
+				};
+				var item = new Zotero.Item;
+				item.fromJSON(json);
+				assert.equal(item.getField('edition'), "1");
+				assert.equal(item.getField('extra'), '');
+			});
 		});
 		
 		describe("strict mode", function () {
