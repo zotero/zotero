@@ -4217,6 +4217,7 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 			// TEMP until we move creator lines to real creators
 			.concat('creators')
 	);
+	var invalidFieldLogLines = new Map();
 	
 	// Transfer valid fields from Extra to regular fields
 	// Currently disabled
@@ -4349,9 +4350,12 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 					throw e;
 				}
 				// Otherwise store in Extra
-				Zotero.warn(`Storing invalid field '${origField}' for type ${type} in Extra for `
-					+ `item ${this.libraryKey}`);
 				extraFields.set(field, val);
+				
+				let msg = `Storing invalid field '${origField}' for type ${type} in Extra for `
+					+ `item ${this.libraryKey}`;
+				invalidFieldLogLines.set(field, msg);
+				
 				continue;
 			}
 			this.setField(field, json[origField]);
@@ -4380,9 +4384,8 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 				let mappedFieldNames = Zotero.ItemFields.getTypeFieldsFromBase(baseField, true);
 				for (let mappedField of mappedFieldNames) {
 					if (extraFields.has(mappedField)) {
-						Zotero.warn(`Removing redundant Extra field '${mappedField}' for item `
-							+ this.libraryKey);
 						extraFields.delete(mappedField);
+						invalidFieldLogLines.delete(mappedField);
 					}
 				}
 			}
@@ -4403,9 +4406,8 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 			let mappedFieldNames = Zotero.ItemFields.getTypeFieldsFromBase(baseField, true);
 			for (let mappedField of mappedFieldNames) {
 				if (extraFields.has(mappedField) && extraFields.get(mappedField) === value) {
-					Zotero.warn(`Removing redundant Extra field '${mappedField}' for item `
-						+ this.libraryKey);
 					extraFields.delete(mappedField);
+					invalidFieldLogLines.delete(mappedField);
 				}
 			}
 		}
@@ -4418,11 +4420,14 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 			.concat('audioFileType');
 		for (let typeFieldName of typeFieldNames) {
 			if (extraFields.has(typeFieldName)) {
-				Zotero.warn(`Removing invalid-for-type Type field '${typeFieldName}' from Extra for item `
-					+ this.libraryKey);
 				extraFields.delete(typeFieldName);
+				invalidFieldLogLines.delete(mappedField);
 			}
 		}
+	}
+	
+	for (let line of invalidFieldLogLines.values()) {
+		Zotero.warn(line);
 	}
 	
 	if (extra || extraFields.size || this.getField('extra')) {
