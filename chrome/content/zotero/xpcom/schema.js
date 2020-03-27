@@ -629,7 +629,7 @@ Zotero.Schema = new function(){
 		}
 		
 		var items = await Zotero.Items.getAsync(itemIDs);
-		await Zotero.Items.loadDataTypes(items, ['itemData', 'creator']);
+		await Zotero.Items.loadDataTypes(items);
 		for (let item of items) {
 			let changed = item.migrateExtraFields();
 			if (!changed) continue;
