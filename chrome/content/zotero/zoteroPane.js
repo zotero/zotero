@@ -1061,6 +1061,11 @@ var ZoteroPane = new function()
 	
 	this.handleTagSelectorResize = Zotero.Utilities.debounce(function() {
 		if (this.tagSelectorShown()) {
+			// Initialize if dragging open after startup
+			if (!this.tagSelector) {
+				this.initTagSelector();
+				this.setTagScope();
+			}
 			this.tagSelector.handleResize();
 		}
 	}, 100);
