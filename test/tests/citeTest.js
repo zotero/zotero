@@ -41,5 +41,10 @@ describe("Zotero.Cite", function () {
 			var str2 = 'DOI: 10.0/abc';
 			assert.equal(Zotero.Cite.extraToCSL(str1), str2);
 		});
+		
+		it("should handle a single-character field name", function () {
+			var str = 'a: ';
+			assert.equal(Zotero.Cite.extraToCSL(str), str);
+		});
 	});
 });

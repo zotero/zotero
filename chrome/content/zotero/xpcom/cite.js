@@ -413,7 +413,7 @@ Zotero.Cite = {
 				// convert to its associated CSL field
 				var zoteroField = originalField.replace(/ ([A-Z])/, '$1');
 				// If second character is lowercase (so not an acronym), lowercase first letter too
-				if (zoteroField[1] == zoteroField[1].toLowerCase()) {
+				if (zoteroField[1] && zoteroField[1] == zoteroField[1].toLowerCase()) {
 					zoteroField = zoteroField[0].toLowerCase() + zoteroField.substr(1);
 				}
 				if (Zotero.Schema.CSL_FIELD_MAPPINGS_REVERSE[zoteroField]) {
