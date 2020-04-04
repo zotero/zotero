@@ -4425,12 +4425,35 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 			}
 		}
 		
-		// Remove "Version Number" if "Edition" is set, since as of 3/2020 the RDF translator
-		// assigns it
-		if (extraFields.has('versionNumber') && setFields.has('edition')
-				&& extraFields.get('versionNumber') == this.getField('edition')) {
-			extraFields.delete('versionNumber');
-			invalidFieldLogLines.delete('versionNumber');
+		// Remove Extra lines created by double assignments in the RDF translator for fields that
+		// aren't base-field mappings (which are deduped above). These should probably just become
+		// base-field mappings, at which point this could be removed.
+		var temporaryRDFFixes = [
+			['versionNumber', 'edition'],
+			
+			['conferenceName', 'meetingName'],
+			
+			['publicationTitle', 'reporter'],
+			['bookTitle', 'reporter'],
+			['blogTitle', 'reporter'],
+			['dictionaryTitle', 'reporter'],
+			['encyclopediaTitle', 'reporter'],
+			['forumTitle', 'reporter'],
+			['proceedingsTitle', 'reporter'],
+			['programTitle', 'reporter'],
+			['websiteTitle', 'reporter'],
+		];
+		for (let x of temporaryRDFFixes) {
+			if (extraFields.has(x[0]) && setFields.has(x[1])
+					&& extraFields.get(x[0]) == this.getField(x[1])) {
+				extraFields.delete(x[0]);
+				invalidFieldLogLines.delete(x[0]);
+			}
+			if (extraFields.has(x[1]) && setFields.has(x[0])
+					&& extraFields.get(x[1]) == this.getField(x[0])) {
+				extraFields.delete(x[1]);
+				invalidFieldLogLines.delete(x[1]);
+			}
 		}
 	}
 	
