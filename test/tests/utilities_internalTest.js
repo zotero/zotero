@@ -175,24 +175,24 @@ describe("Zotero.Utilities.Internal", function () {
 		});
 		
 		it("should extract a field with other fields, text, and whitespace", function () {
-			var place = 'New York';
+			var date = '2020-04-01';
 			var doi = '10.1234/abcdef';
-			var str = `Line 1\nPublisher Place: ${place}\nFoo: Bar\nDOI: ${doi}\n\nLine 2`;
+			var str = `Line 1\nDate: ${date}\nFoo: Bar\nDOI: ${doi}\n\nLine 2`;
 			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
 			assert.equal(fields.size, 2);
+			assert.equal(fields.get('date'), date);
 			assert.equal(fields.get('DOI'), doi);
-			assert.equal(fields.get('place'), place);
 			assert.equal(extra, 'Line 1\nFoo: Bar\n\nLine 2');
 		});
 		
 		it("should extract the first instance of a field", function () {
-			var place1 = 'New York';
-			var place2 = 'London';
-			var str = `Publisher Place: ${place1}\nPublisher Place: ${place2}`;
+			var date1 = '2020-04-01';
+			var date2 = '2020-04-02';
+			var str = `Date: ${date1}\nDate: ${date2}`;
 			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
 			assert.equal(fields.size, 1);
-			assert.equal(fields.get('place'), place1);
-			assert.equal(extra, "Publisher Place: " + place2);
+			assert.equal(fields.get('date'), date1);
+			assert.equal(extra, "Date: " + date2);
 		});
 		
 		it("shouldn't extract a field from a line that begins with a whitespace", function () {
@@ -264,6 +264,14 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(fields.get('numPages'), 11);
 			assert.equal(fields.get('date'), 2014);
 			assert.strictEqual(extra, '');
+		});
+		
+		it("should ignore both Event Place and Publisher Place (temporary)", function () {
+			var str = "Event Place: Foo\nPublisher Place: Bar";
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			Zotero.debug([...fields.entries()]);
+			assert.equal(fields.size, 0);
+			assert.equal(extra, "Event Place: Foo\nPublisher Place: Bar");
 		});
 	});
 	
