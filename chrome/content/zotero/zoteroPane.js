@@ -3300,7 +3300,12 @@ var ZoteroPane = new function()
 				}
 			}
 			
-			Zotero.launchURL(uri);
+			try {
+				Zotero.launchURL(uri);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
 	}
 	
