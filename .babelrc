@@ -7,6 +7,8 @@
   "ignore": [
     "chrome/content/zotero/include.js",
     "chrome/content/zotero/xpcom/citeproc.js",
+    "chrome/content/scaffold/ace/*",
+    "chrome/content/scaffold/templates/*",
     "resource/react.js",
     "resource/react-dom.js",
     "resource/react-virtualized.js",
