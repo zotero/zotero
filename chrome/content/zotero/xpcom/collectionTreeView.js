@@ -1043,7 +1043,7 @@ Zotero.CollectionTreeView.prototype.expandToCollection = Zotero.Promise.coroutin
 	while (parentID = col.parentID) {
 		// Detect infinite loop due to invalid nesting in DB
 		if (seen.has(parentID)) {
-			yield Zotero.Schema.requireIntegrityCheck();
+			yield Zotero.Schema.setIntegrityCheckRequired(true);
 			Zotero.crash();
 			return;
 		}
