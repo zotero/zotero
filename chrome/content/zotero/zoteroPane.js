@@ -4923,9 +4923,28 @@ var ZoteroPane = new function()
 		var serializedValues = Zotero.Prefs.get("pane.persist");
 		if(!serializedValues) return;
 		serializedValues = JSON.parse(serializedValues);
+		
+		// Somehow all the columns can end up non-hidden, so fix that if it happens
+		var maxColumns = 30; // 31 as of 4/2020
+		var numColumns = Object.keys(serializedValues)
+			.filter(id => id.startsWith('zotero-items-column-') && serializedValues[id].hidden != "true")
+			.length;
+		var fixColumns = numColumns > maxColumns;
+		if (fixColumns) {
+			Zotero.logError("Repairing corrupted pane.persist");
+		}
+		
 		for(var id in serializedValues) {
 			var el = document.getElementById(id);
 			if(!el) return;
+			
+			// In one case where this happened, all zotero-items-column- elements were present
+			// with just "ordinal" (and no "hidden"), and "zotero-items-tree" was set to
+			// {"current-view-group":"default"}. Clearing only the columns didn't work for some reason.
+			if (fixColumns && (id.startsWith('zotero-items-column-') || id == 'zotero-items-tree')) {
+				continue;
+			}
+			
 			var elValues = serializedValues[id];
 			for(var attr in elValues) {
 				// Ignore persisted collapsed state for collection and item pane splitters, since
