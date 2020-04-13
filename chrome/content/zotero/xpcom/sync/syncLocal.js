@@ -944,6 +944,13 @@ Zotero.Sync.Data.Local = {
 								Zotero.debug(`Applying remote changes to ${objectType} `
 									+ obj.libraryKey);
 								Zotero.debug(result.changes);
+								// If there were local changes as well, keep object as unsynced and
+								// save the remote version to the sync cache rather than the merged
+								// version
+								if (result.localChanged) {
+									saveOptions.saveAsUnsynced = true;
+									saveOptions.cacheObject = jsonObject.data;
+								}
 								Zotero.DataObjectUtilities.applyChanges(
 									jsonDataLocal, result.changes
 								);
@@ -955,10 +962,6 @@ Zotero.Sync.Data.Local = {
 									jsonDataLocal[x] = jsonData[x];
 								})
 								jsonObject.data = jsonDataLocal;
-								// If there were additional local changes, keep as unsynced
-								if (result.localChanged) {
-									saveOptions.saveAsUnsynced = true;
-								}
 							}
 						}
 						// Object doesn't exist locally
