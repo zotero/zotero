@@ -801,6 +801,56 @@ describe("Zotero.Sync.Data.Engine", function () {
 		});
 		
 		
+		it("shouldn't update existing cache object after upload on 'unchanged' response", async function () {
+			({ engine, client, caller } = await setup());
+			
+			var library = Zotero.Libraries.userLibrary;
+			var lastLibraryVersion = 5;
+			library.libraryVersion = lastLibraryVersion;
+			await library.saveTx();
+			
+			var item = await createDataObject('item', { version: 1, title: "A" });
+			var json = item.toJSON();
+			// Save current version to cache so the patch object is empty, as if the item had been
+			// added to a collection and removed from it (such that even dateModified didn't change)
+			await Zotero.Sync.Data.Local.saveCacheObjects('item', library.id, [json]);
+			
+			server.respond(function (req) {
+				if (req.method == "POST" && req.url == baseURL + "users/1/items") {
+					let json = JSON.parse(req.requestBody);
+					req.respond(
+						200,
+						{
+							"Content-Type": "application/json",
+							"Last-Modified-Version": ++lastLibraryVersion
+						},
+						JSON.stringify({
+							successful: {},
+							unchanged: {
+								"0": item.key
+							},
+							failed: {}
+						})
+					);
+					return;
+				}
+			});
+			
+			await engine.start();
+			
+			// Check data in cache
+			var version = await Zotero.Sync.Data.Local.getLatestCacheObjectVersion(
+				'item', library.id, item.key
+			);
+			assert.equal(version, 1);
+			json = await Zotero.Sync.Data.Local.getCacheObject(
+				'item', library.id, item.key, 1
+			);
+			assert.propertyVal(json.data, 'itemType', 'book');
+			assert.propertyVal(json.data, 'title', 'A');
+		});
+		
+		
 		it("should upload child collection after parent collection", function* () {
 			({ engine, client, caller } = yield setup());
 			

@@ -1240,6 +1240,7 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 						}
 					}
 					
+					// Successful
 					if (state == 'successful') {
 						// Update local object with saved data if necessary, as long as it hasn't
 						// changed locally since the upload
@@ -1253,14 +1254,24 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 						}
 						toCache.push(current);
 					}
+					// Unchanged
 					else {
-						// This won't necessarily reflect the actual version of the object on the server,
-						// since objects are uploaded in batches and we only get the final version, but it
-						// will guarantee that the item won't be redownloaded unnecessarily in the case of
-						// a full sync, because the version will be higher than whatever version is on the
-						// server.
-						jsonBatch[index].version = libraryVersion;
-						toCache.push(jsonBatch[index]);
+						// If a cache object exists, there shouldn't be any need to update it, since
+						// nothing was changed on the server, including the version.
+						//
+						// If there's no cache object, we can save the uploaded object, which we know
+						// matches what's on the server. The version number won't necessarily reflect
+						// the actual version of the object on the server, since objects are uploaded
+						// in batches and we only get the final version, but it will guarantee that
+						// the object won't be redownloaded unnecessarily in the case of a full sync,
+						// because the version will be higher than whatever version is on the server.
+						let hasCacheObject = !!Zotero.Sync.Data.Local.getCacheObject(
+							objectType, obj.libraryID, obj.key, obj.version
+						);
+						if (!hasCacheObject) {
+							jsonBatch[index].version = libraryVersion;
+							toCache.push(jsonBatch[index]);
+						}
 					}
 					
 					numSuccessful++;
