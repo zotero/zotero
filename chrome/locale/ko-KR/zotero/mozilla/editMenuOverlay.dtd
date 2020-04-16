@@ -7,7 +7,7 @@
 <!ENTITY undoCmd.label             "실행 취소">
 <!ENTITY undoCmd.key               "Z">
 <!ENTITY undoCmd.accesskey         "u">
-<!ENTITY redoCmd.label             "재실행">
+<!ENTITY redoCmd.label             "다시 실행">
 <!ENTITY redoCmd.key               "Y">
 <!ENTITY redoCmd.accesskey         "r">
 <!ENTITY cutCmd.label              "잘라내기">

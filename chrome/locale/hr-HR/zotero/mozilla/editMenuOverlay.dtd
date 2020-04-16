@@ -24,10 +24,11 @@
 <!ENTITY selectAllCmd.label        "Označi sve">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "a">
+
 <!ENTITY findCmd.label             "Traži">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "T">
-<!ENTITY findAgainCmd.label        "Ponovno pronađi">
+<!ENTITY findAgainCmd.label        "Ponovo pronađi">
 <!ENTITY findAgainCmd.key          "G">
 <!ENTITY findAgainCmd.key2         "VK_F3">
 <!ENTITY findAgainCmd.accesskey    "P">
