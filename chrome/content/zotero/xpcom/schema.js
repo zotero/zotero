@@ -1527,7 +1527,15 @@ Zotero.Schema = new function(){
 			var body = 'styles=' + encodeURIComponent(JSON.stringify(styleTimestamps));
 			
 			try {
-				var xmlhttp = yield Zotero.HTTP.request("POST", url, { body: body });
+				var xmlhttp = yield Zotero.HTTP.request(
+					"POST",
+					url,
+					{
+						body,
+						errorDelayMax: 5000,
+						errorDelayIntervals: [5000]
+					}
+				);
 				updated = yield _handleRepositoryResponse(xmlhttp, mode);
 			}
 			catch (e) {
