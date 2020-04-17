@@ -96,7 +96,8 @@
 				</hbox>
 				
 				<hbox id="zotero-items-toolbar" align="center">
-					<toolbarbutton id="zotero-tb-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItem.label;" type="menu">
+					<toolbarbutton id="zotero-tb-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItem.label;" type="menu"
+							onmousedown="if (this.disabled) { event.preventDefault(); return; }">
 						<menupopup onpopupshowing="ZoteroPane_Local.updateNewItemTypes()">
 							<menuseparator/>
 							<menuitem label="&zotero.toolbar.attachment.linked;" oncommand="ZoteroPane_Local.addAttachmentFromDialog(true);" tooltiptext=""/>
@@ -109,7 +110,7 @@
 					</toolbarbutton>
 					
 					<toolbarbutton id="zotero-tb-lookup" class="zotero-tb-button" tooltiptext="&zotero.toolbar.lookup.label;" type="panel"
-							onmousedown="Zotero_Lookup.showPanel(this)"/>
+							onmousedown="if (this.disabled) { event.preventDefault(); return; } Zotero_Lookup.showPanel(this)"/>
 					
 					<panel id="zotero-lookup-panel" type="arrow" onpopupshown="Zotero_Lookup.onShowing(event)"
 							onpopuphidden="Zotero_Lookup.onHidden(event)">
@@ -136,13 +137,15 @@
 					</panel>
 					
 					<!--<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>-->
-					<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;" type="menu">
+					<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;" type="menu"
+							onmousedown="if (this.disabled) { event.preventDefault(); return; }">
 						<menupopup onpopupshowing="ZoteroPane_Local.updateNoteButtonMenu()">
 							<menuitem label="&zotero.toolbar.note.standalone;" command="cmd_zotero_newStandaloneNote"/>
 							<menuitem label="&zotero.toolbar.note.child;" command="cmd_zotero_newChildNote"/>
 						</menupopup>
 					</toolbarbutton>
-					<toolbarbutton id="zotero-tb-attachment-add" class="zotero-tb-button" tooltiptext="&zotero.items.menu.attach;" type="menu">
+					<toolbarbutton id="zotero-tb-attachment-add" class="zotero-tb-button" tooltiptext="&zotero.items.menu.attach;" type="menu"
+							onmousedown="if (this.disabled) { event.preventDefault(); return; }">
 						<menupopup onpopupshowing="ZoteroPane_Local.updateAttachmentButtonMenu(this)">
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="&zotero.items.menu.attach.file;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
