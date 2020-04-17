@@ -41,7 +41,7 @@ Zotero.Schema = new function(){
 	
 	// If updating from this userdata version or later, don't show "Upgrading database…" and don't make
 	// DB backup first. This should be set to false when breaking compatibility or making major changes.
-	const minorUpdateFrom = false;
+	const minorUpdateFrom = 107;
 	
 	var _dbVersions = [];
 	var _schemaVersions = [];
@@ -3013,6 +3013,10 @@ Zotero.Schema = new function(){
 					let sql = yield _getSchemaSQL('system-107');
 					yield Zotero.DB.executeSQLFile(sql);
 				}
+			}
+			
+			else if (i == 108) {
+				yield Zotero.DB.queryAsync(`DELETE FROM itemRelations WHERE predicateID=(SELECT predicateID FROM relationPredicates WHERE predicate='owl:sameAs') AND object LIKE ?`, 'http://zotero.org/users/local/%');
 			}
 			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
