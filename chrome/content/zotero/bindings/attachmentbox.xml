@@ -482,7 +482,7 @@
 									nsIPS.alert(
 										window,
 										Zotero.getString('pane.item.attachments.fileNotFound.title'),
-										Zotero.getString('pane.item.attachments.fileNotFound.text')
+										Zotero.getString('pane.item.attachments.fileNotFound.text1')
 									);
 								}
 							}
