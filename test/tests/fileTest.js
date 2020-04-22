@@ -132,6 +132,17 @@ describe("Zotero.File", function () {
 			assert.isTrue(await OS.File.exists(destFile));
 		});
 		
+		// Only relevant on a case-insensitive filesystem
+		it("should rename a file with a case-only change (Mac)", async function () {
+			var tmpDir = await getTempDirectory();
+			var sourceFile = OS.Path.join(tmpDir, 'a');
+			var destFile = OS.Path.join(tmpDir, 'A');
+			await Zotero.File.putContentsAsync(sourceFile, 'foo');
+			var newFilename = await Zotero.File.rename(sourceFile, 'A');
+			assert.equal(newFilename, 'A');
+			assert.equal(await Zotero.File.getContentsAsync(destFile), 'foo');
+		});
+		
 		it("should overwrite an existing file if `overwrite` is true", async function () {
 			var tmpDir = await getTempDirectory();
 			var sourceFile = OS.Path.join(tmpDir, 'a');

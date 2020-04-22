@@ -985,7 +985,22 @@ describe("Zotero.Item", function () {
 			// DEBUG: Is this necessary?
 			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD);
 			assert.isNull(item.attachmentSyncedHash);
-		})
+		});
+		
+		// Only relevant on a case-insensitive filesystem
+		it("should rename an attached file with a case-only change (Mac)", async function () {
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var item = await Zotero.Attachments.importFromFile({
+				file: file
+			});
+			var newName = 'Test.png';
+			await item.renameAttachmentFile(newName);
+			assert.equal(item.attachmentFilename, newName);
+			var path = await item.getFilePathAsync();
+			assert.equal(OS.Path.basename(path), newName)
+			await OS.File.exists(path);
+		});
 		
 		it("should rename a linked file", function* () {
 			var filename = 'test.png';
