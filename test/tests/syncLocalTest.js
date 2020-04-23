@@ -674,6 +674,37 @@ describe("Zotero.Sync.Data.Local", function() {
 			}
 		});
 		
+		it("should automatically resolve collection name conflict", async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			var type = 'collection';
+			let obj = await createDataObject(type, { version: 5 });
+			let data = obj.toJSON();
+			await Zotero.Sync.Data.Local.saveCacheObjects(type, libraryID, [data]);
+			
+			// Change local name
+			await modifyDataObject(obj);
+			var changedName = Zotero.Utilities.randomString();
+			
+			// Create remote version with changed name
+			data.version = 10;
+			data.name = changedName;
+			let json = {
+				key: obj.key,
+				version: 10,
+				data
+			};
+			await Zotero.Sync.Data.Local.processObjectsFromJSON(
+				type, libraryID, [json], { stopOnError: true }
+			);
+			assert.equal(obj.version, 10);
+			assert.equal(obj.name, changedName);
+			assert.isTrue(obj.synced);
+			// Sync cache should match remote
+			var cacheJSON = await Zotero.Sync.Data.Local.getCacheObject(type, libraryID, data.key, data.version);
+			assert.propertyVal(cacheJSON.data, "name", changedName);
+		});
+		
 		it("should delete older versions in sync cache after processing", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
