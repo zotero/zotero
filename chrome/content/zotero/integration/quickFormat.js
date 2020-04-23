@@ -52,6 +52,9 @@ var Zotero_QuickFormat = new function () {
 		if(event.target === document) {
 			initialized = true;
 			io = window.arguments[0].wrappedJSObject;
+
+			Zotero.debug(`Quick Format received citation:`);
+			Zotero.debug(JSON.stringify(io.citation.toJSON()));
 			
 			// Only hide chrome on Windows or Mac
 			if(Zotero.isMac) {
