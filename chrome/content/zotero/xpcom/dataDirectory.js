@@ -462,9 +462,33 @@ Zotero.DataDirectory = {
 					let dialogText = '';
 					let dialogTitle = '';
 					
+					// If set to 'storage', offer to use the parent directory
+					if (await this.isStorageDirectory(file.path)) {
+						let buttonFlags = ps.STD_YES_NO_BUTTONS;
+						let parentPath = OS.Path.dirname(file.path);
+						let index = ps.confirmEx(
+							null,
+							Zotero.getString('general.error'),
+							Zotero.getString('dataDir.cannotBeSetWithAlternative', [parentPath]),
+							buttonFlags,
+							null, null, null, null, {}
+						);
+						if (index == 1) {
+							continue;
+						}
+						file = Zotero.File.pathToFile(parentPath)
+					}
+					
 					if (file.path == (Zotero.Prefs.get('lastDataDir') || Zotero.Prefs.get('dataDir'))) {
 						Zotero.debug("Data directory hasn't changed");
 						return false;
+					}
+					
+					if (this.isLinkedAttachmentBaseDirectory(file.path)) {
+						let dialogTitle = Zotero.getString('general.error');
+						let dialogText = Zotero.getString('dataDir.cannotBeLinkedAttachmentBaseDirectory');
+						ps.alert(null, dialogTitle, dialogText);
+						continue;
 					}
 					
 					// In dropbox folder
@@ -646,6 +670,31 @@ Zotero.DataDirectory = {
 		yield OS.File.remove(testPath);
 		return false;
 	}),
+	
+	
+	isStorageDirectory: async function (dir) {
+		if (OS.Path.basename(dir) != 'storage') {
+			return false;
+		}
+		let sqlitePath = OS.Path.join(OS.Path.dirname(dir), 'zotero.sqlite');
+		return OS.File.exists(sqlitePath);
+	},
+	
+	
+	isLinkedAttachmentBaseDirectory: function (dir) {
+		var oldPath = Zotero.Prefs.get('baseAttachmentPath');
+		if (!oldPath) return false;
+		
+		try {
+			oldPath = OS.Path.normalize(oldPath);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return false;
+		}
+		
+		return oldPath === OS.Path.normalize(dir);
+	},
 	
 	
 	// TODO: Remove after 5.0 upgrades
