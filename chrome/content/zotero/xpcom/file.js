@@ -1346,8 +1346,25 @@ Zotero.File = new function(){
 	};
 	
 	
+	this.isCloudStorageFolder = function (path) {
+		return this.isDropboxDirectory(path)
+			|| this.isGoogleDriveDirectory(path)
+			|| this.isOneDriveDirectory(path);
+	};
+	
+	
 	this.isDropboxDirectory = function(path) {
-		return path.toLowerCase().indexOf('dropbox') != -1;
+		return path.toLowerCase().includes('dropbox');
+	}
+	
+	
+	this.isGoogleDriveDirectory = function(path) {
+		return path.includes('Google Drive');
+	}
+	
+	
+	this.isOneDriveDirectory = function(path) {
+		return path.toLowerCase().includes('onedrive');
 	}
 	
 	
