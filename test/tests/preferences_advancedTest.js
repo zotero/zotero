@@ -161,8 +161,9 @@ describe("Advanced Preferences", function () {
 					Zotero.Attachments.BASE_PATH_PLACEHOLDER + 'test.png'
 				);
 				
-				var basePath = Zotero.getTempDirectory().path;
-				yield setBaseDirectory(basePath);
+				// Choose a nonexistent directory for the base path
+				var otherPath = OS.Path.join(OS.Path.dirname(basePath), 'foobar');
+				yield setBaseDirectory(otherPath);
 				
 				assert.equal(attachment.attachmentPath, file.path);
 			})
