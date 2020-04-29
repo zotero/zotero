@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Comprobar automáticamente si hay traductores y estilos actualizados ">
 <!ENTITY zotero.preferences.updateNow "Actualizar ahora">
 <!ENTITY zotero.preferences.reportTranslationFailure "Informar de fallos en los traductores de página">
-<!ENTITY zotero.preferences.parseRISRefer "Utilizar Zotero para los archivos descargados en formato BibTeX/RIS/Refer">
+<!ENTITY zotero.preferences.parseRISRefer "Usar Zotero para los archivos descargados en formato BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "Etiquetar elementos automáticamente con palabras claves y encabezados de materia">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Eliminar automáticamente elementos en la papelera eliminados hace más de ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "hace días">

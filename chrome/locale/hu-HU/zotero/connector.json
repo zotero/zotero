@@ -50,6 +50,9 @@
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Mindenképpen töltse le a hivatkozott verziót"
   },
+  "integration_googleDocs_updating": {
+    "message": "$1 frissíti az ön dokumentumát"
+  },
   "general_saveTo": {
     "message": "Mentés $1-ba(n)"
   }

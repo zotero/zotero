@@ -24,7 +24,7 @@
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
 <!ENTITY manageAttachments.label "Behandle vedlegg">
-<!ENTITY convertToStored.label "Konverter koblede filer til lagrede filer…">
+<!ENTITY convertToStored.label "Konverter lenkede filer til lagrede filer…">
 <!ENTITY importCmd.label "Importer…">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Importer fra utklippstavle">

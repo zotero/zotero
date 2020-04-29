@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "Zrušiť"
   },
+  "general_pleaseWait": {
+    "message": "Počkajte, prosím..."
+  },
   "progressWindow_savingTo": {
     "message": "Ukladá sa do"
   },
@@ -67,6 +70,12 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Každopádne stiahnuť prepojenú verziu"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 aktualizuje váš dokument."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "Integrácia $1 nie je dostupná pri úprave súborov .docx od Microsoft Word  priamo v Google Docs. Zvoľte Súbor → Uložiť ako Google Docs pre zapnutie tejto funkcie.<br/><br/>Ak chcete preniesť dokument Word s citáciami $1 do Google Docs, pozrite na <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Presun dokumentov medzi textovými editormi</a>."
   },
   "general_saveTo": {
     "message": "Uložiť do $1"

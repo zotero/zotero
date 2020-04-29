@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "İptal Et"
   },
+  "general_pleaseWait": {
+    "message": "Lütfen bekleyin..."
+  },
   "progressWindow_savingTo": {
     "message": "Buraya Kaydediyor"
   },
@@ -67,6 +70,12 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Yine de Bağlantılı Versiyonu İndir"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 belgenizi güncelliyor."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "$1 ile birleştirme, Microsoft Word .docx dosyalarını Google Docs içinde düzenlerken kullanılamamaktadır. Dosya Seçiniz → Google Docs dosyası olarak kaydediniz seçenekleri ile bu fonksiyonu etkinleştirebilirsiniz.<br/><br/> $1 göndermesi içeren bir Word belgesini Google Docs uygulamasına aktarmak için, <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Moving Documents Between Word Processors</a> sayfasına bakınız."
   },
   "general_saveTo": {
     "message": "$1'ya Kaydet"

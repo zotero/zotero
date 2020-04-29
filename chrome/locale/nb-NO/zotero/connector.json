@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "Avbryt"
   },
+  "general_pleaseWait": {
+    "message": "Vennligst vent…"
+  },
   "progressWindow_savingTo": {
     "message": "Lagrer til"
   },
@@ -67,6 +70,12 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Last uansett ned versjon med koblinger"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 oppdaterer ditt dokument."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "$1 integrasjon er ikke tilgjengelig når du redigerer Microsoft Word .docx filer direkte i Google Docs. Velg Fil → Lagres som Google Docs for å aktivere denne funksjonaliteten..<br/><br/>Hvis du ønsker å flytte et Word dokument med $1 henvisninger til Google Docs, se <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Flytte dokumenter mellom tekstbehandlere</a>."
   },
   "general_saveTo": {
     "message": "Lagre till$1"

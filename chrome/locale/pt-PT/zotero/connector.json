@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "Cancelar"
   },
+  "general_pleaseWait": {
+    "message": "Por favor aguarde…"
+  },
   "progressWindow_savingTo": {
     "message": "Guardando para"
   },
@@ -67,6 +70,12 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Descarregar Versão Ligada de Qualquer Modo"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 está a actualizar o seu documento."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "A integração $1 não está disponível quando se edita directamente no Google Docs ficheiros .docx do Microsoft Word. Escolha Ficheiro → Guardar como Google Docs para activar esta funcionalidade.<br/><br/>Se quiser transferir para o Google Docs um documento Word com citações $1, veja <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Movendo Documentos Entre Processadores de Texto</a>."
   },
   "general_saveTo": {
     "message": "Guardar para $1"

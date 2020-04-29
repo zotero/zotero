@@ -8,12 +8,12 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Gerais">
 
-<!ENTITY zotero.preferences.fileHandling "Manuseio de Ficheiros">
+<!ENTITY zotero.preferences.fileHandling "Manipulação de Ficheiros">
 <!ENTITY zotero.preferences.automaticSnapshots "Capturar automaticamente ao criar itens a partir de páginas Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Anexar automaticamente arquivos PDF e de outros tipos associados a um item quando este é guardado">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Obter automaticamente metadados dos PDF">
-<!ENTITY zotero.preferences.autoRenameFiles "Renomear automaticamente ficheiros anexos utilizando os metadados parentes">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Renomear ficheiros ligados">
+<!ENTITY zotero.preferences.autoRenameFiles "Renomear automaticamente arquivos anexos utilizando os metadados do ascendente">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Renomear arquivos ligados">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Abrir PDF utilizando">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Predefinição do Sistema">
 

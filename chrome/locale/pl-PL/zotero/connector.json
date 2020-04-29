@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "Anuluj"
   },
+  "general_pleaseWait": {
+    "message": "Proszę czekać..."
+  },
   "progressWindow_savingTo": {
     "message": "Zapisywanie do"
   },
@@ -44,6 +47,12 @@
   "error_connection_isAppRunning": {
     "message": "Czy $1 jest uruchomiony?"
   },
+  "error_connection_save": {
+    "message": "$1  nie mógł połączyć się z aplikacją desktop $2. Łącznik może zapisywać niektóre strony bezpośrednio do twojego konta $3, ale dla lepszej integracji powinieneś upewnić się, że $2 jest otwarty przed próbą zapisania."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Możesz <a href=\"$1\">pobrać $2</a> lub <a href=\"$3\">rozwiązać problem z połączeniem</a>, jeśli to konieczne."
+  },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Włącz zapisywanie do zdalnej biblioteki"
   },
@@ -55,6 +64,9 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_warning": {
     "message": "Ten dokument zawiera aktywne cytowania Zotero, które pojawią się w pobranej kopii jako odsyłacze zotero.org."
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 uaktualnia twój dokument."
   },
   "general_saveTo": {
     "message": "Zapisz w $1"

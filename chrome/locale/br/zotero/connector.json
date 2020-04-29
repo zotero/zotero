@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "Nullañ"
   },
+  "general_pleaseWait": {
+    "message": "Gortozit mar plij..."
+  },
   "progressWindow_savingTo": {
     "message": "Enrollañ e-barzh"
   },
@@ -67,6 +70,12 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Pellgargañ ar stumm ereet forzh penaos"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 a zo oc'h hizivaat ho teuliad."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "Neket hegerz enkorfadur $1 pa vez aozet restroù .docx Microsoft Word war-eeun e-barzh Google Docs. Dibabit Restroù → Enrollañ evel Google Docs evit enaouiñ an arc'hweladur-mañ. <br/><br/>M'ho peus c'hoant da dreuzkas ur restr Word gant arroudennoù $1 e-barzh Google Docs, kit da welet <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Fiñval teuliadoù etre treterioù gerioù</a>."
   },
   "general_saveTo": {
     "message": "Enrollañ e-barzh $1"

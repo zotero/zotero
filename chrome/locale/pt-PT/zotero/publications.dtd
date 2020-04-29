@@ -1,9 +1,9 @@
 <!ENTITY zotero.publications.my_publications "As Minhas Publicações">
 
-<!ENTITY zotero.publications.intro "Os itens que adiciona a As Minhas Publicações serão mostrados na sua página de perfil no zotero.org. Se escolher incluir ficheiros anexos, eles serão disponibilizados publicamente sob o licenciamento que especificar. Adicione apenar trabalho criado por si e inclua apenas ficheiros se tiver o direito de os distribuir e se o desejar fazer.">
-<!ENTITY zotero.publications.include.checkbox.files "Incluir ficheiros">
+<!ENTITY zotero.publications.intro "Os itens que adiciona a As Minhas Publicações serão mostrados na sua página de perfil no zotero.org. Se escolher incluir ficheiros anexos, eles serão disponibilizados publicamente sob o licenciamento que especificar. Adicione apenas trabalho criado por si e inclua apenas ficheiros se tiver o direito de os distribuir e se o desejar fazer.">
+<!ENTITY zotero.publications.include.checkbox.files "Incluir arquivos">
 <!ENTITY zotero.publications.include.checkbox.notes "Incluir notas">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "Pode a qualquer momento ajustar o que mostrar da colecção As Minhas Publicações">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Pode a qualquer momento ajustar o que é mostrado da colecção As Minhas Publicações">
 
 <!ENTITY zotero.publications.sharing.title "Escolha a forma de partilha do seu trabalho">
 <!ENTITY zotero.publications.sharing.text "Pode reservar todos os direitos do seu trabalho, licenciá-lo sob uma licença Creative Commons ou colocá-lo no domínio público. Em qualquer dos casos, o trabalho será disponibilizado publicamente através de zotero.org.">

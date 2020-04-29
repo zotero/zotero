@@ -151,7 +151,7 @@
 <!ENTITY zotero.toolbar.note.standalone "Nytt enkeltstående notat">
 <!ENTITY zotero.toolbar.note.child "Legg til underordnet notat">
 <!ENTITY zotero.toolbar.lookup "Oppslag ved hjelp av identifikator...">
-<!ENTITY zotero.toolbar.attachment.linked "Koble til fil...">
+<!ENTITY zotero.toolbar.attachment.linked "Lenke til fil...">
 <!ENTITY zotero.toolbar.attachment.add "Lagre kopi av fil...">
 <!ENTITY zotero.toolbar.attachment.weblink "Lagre kobling til gjeldende side">
 <!ENTITY zotero.toolbar.attachment.snapshot "Lag øyeblikksbilde av gjeldende side">
@@ -245,7 +245,7 @@
 
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatisk oppdater henvisninger">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Henvisninger som venter på å bli oppdatert er markert i dokumentet">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Det å slå av oppdateringer kan gjøre innseting av henvisninger raskere i store dokumenter. Klipp på Oppdater for å oppdatere henvisninger manuelt.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Ved å slå av oppdateringer kan du gjøre innsetting av henvisninger raskere i store dokumenter. Klikk på Oppdater for å oppdatere henvisninger manuelt.">
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Bruk MEDLINE forkortelser for tidsskrift">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Feltet &quot;Tidsskriftsforkortelse&quot; vil bli ignorert.">
@@ -278,7 +278,7 @@
 <!ENTITY zotero.merge.deleted "Slettet">
 
 <!ENTITY zotero.proxy.recognized.title "Mellomtjener gjenkjent">
-<!ENTITY zotero.proxy.recognized.warning "Legg kun til proxier som er koblet fra nettsted til ditt bibliotek, din skole eller bedrift">
+<!ENTITY zotero.proxy.recognized.warning "Legg kun til proxier som er lenket fra nettsted til ditt bibliotek, din skole eller bedrift">
 <!ENTITY zotero.proxy.recognized.warning.secondary "Det å legge til andre proxier tillater skadelige nettsteder å gi seg ut for å være nettsteder du stoler på.">
 <!ENTITY zotero.proxy.recognized.disable.label "Ikke automatisk omdiriger forespørsler gjennom tidligere kjente proxier">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorer">

@@ -18,9 +18,9 @@
 <!ENTITY zotero.general.close "Fechar">
 <!ENTITY zotero.general.minimize "Minimizar">
 <!ENTITY zotero.general.other "Outros...">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.bigger "Maior">
+<!ENTITY zotero.general.smaller "Menor">
+<!ENTITY zotero.general.reset "Repor">
 
 
 <!ENTITY zotero.errorReport.title "Relatório de Erros do Zotero">
@@ -98,7 +98,7 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaurar para a Biblioteca">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicar o Item Seleccionado">
 <!ENTITY zotero.items.menu.mergeItems "Fundir itens...">
-<!ENTITY zotero.items.menu.unrecognize "Anular Obtenção de Metadados">
+<!ENTITY zotero.items.menu.unrecognize "Desfazer Obtenção de Metadados">
 <!ENTITY zotero.items.menu.reportMetadata "Reportar Metadados Incorretos">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Escolha a versão do item a usar como item principal:">
@@ -120,7 +120,7 @@
 <!ENTITY zotero.toolbar.import.label "Importar...">
 <!ENTITY zotero.toolbar.importFromClipboard "Importar dos Recortes">
 <!ENTITY zotero.toolbar.export.label "Exportar Biblioteca...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
+<!ENTITY zotero.toolbar.rtfScan.label "Processar RTF">
 <!ENTITY zotero.toolbar.timeline.label "Criar Linha do Tempo">
 <!ENTITY zotero.toolbar.preferences.label "Preferências...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Suporte e Documentação">
@@ -172,7 +172,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Estabelecer Cor">
 <!ENTITY zotero.tagColorChooser.removeColor "Remover Cor">
 
-<!ENTITY zotero.lookup.description "Introduzir ISBN, DOI, PMID ou arXiv ID para adicionar à biblioteca:">
+<!ENTITY zotero.lookup.description "Introduzir ISBN, DOI, PMID ou ID arXiv para adicionar à biblioteca:">
 <!ENTITY zotero.lookup.button.search "Procurar">
 
 <!ENTITY zotero.selectitems.title "Seleccionar Itens">
@@ -201,12 +201,12 @@
 
 <!ENTITY zotero.import "Importar">
 <!ENTITY zotero.import.whereToImportFrom "A partir de onde deseja importar?">
-<!ENTITY zotero.import.source.file "Um ficheiro (BibTeX, RIS, Zotero RDF, etc...)">
+<!ENTITY zotero.import.source.file "Um arquivo (BibTeX, RIS, Zotero RDF, etc.)">
 <!ENTITY zotero.import.importing "A importar...">
 <!ENTITY zotero.import.database "Base de dados">
 <!ENTITY zotero.import.lastModified "Última Modificação">
 <!ENTITY zotero.import.size "Tamanho">
-<!ENTITY zotero.import.createCollection "Colocar as coleções e itens importados numa nova coleção">
+<!ENTITY zotero.import.createCollection "Colocar as colecções e itens importados numa nova colecção">
 <!ENTITY zotero.import.fileHandling "Manipulação de Ficheiros">
 
 <!ENTITY zotero.exportOptions.title "Exportar...">
