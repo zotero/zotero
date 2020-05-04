@@ -336,6 +336,7 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 		// Library root
 		if (this.isLibrary(true)) {
 			s.addCondition('noChildren', 'true');
+			// Allow tag selector to match child items in "Title, Creator, Year" mode
 			includeScopeChildren = true;
 		}
 		else if (this.isCollection()) {
@@ -344,6 +345,7 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 			if (Zotero.Prefs.get('recursiveCollections')) {
 				s.addCondition('recursive', 'true');
 			}
+			// Allow tag selector to match child items in "Title, Creator, Year" mode
 			includeScopeChildren = true;
 		}
 		else if (this.isPublications()) {
@@ -363,10 +365,6 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	
 	if (this.isTrash()) {
 		s2.addCondition('deleted', 'true');
-	}
-	// Don't search child items in "Title, Creator, Year" mode
-	if (Zotero.Prefs.get('search.quicksearch-mode') == 'titleCreatorYear') {
-		includeScopeChildren = false;
 	}
 	s2.setScope(s, includeScopeChildren);
 	
