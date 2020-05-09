@@ -72,7 +72,7 @@ describe("Zotero.Styles", function() {
 				[item],
 				'bibliography=http://www.zotero.org/styles/american-medical-association'
 			);
-			assert.equal(o.text, '1. Foo bar: baz qux. 2019.\n');
+			assert.equal(o.text, '1. Foo bar: baz qux. Published online 2019.\n');
 		});
 		
 		it("shouldn't capitalize subtitles in Vancouver", async function () {
