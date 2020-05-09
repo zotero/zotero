@@ -15,8 +15,6 @@ matrix:
     fast_finish: true
     #allow_failures:
     #    - env: FX_CHANNEL="beta"
-notifications:
-    email: false
 addons:
   apt:
     packages:
