@@ -303,6 +303,11 @@ label.zotero-text-link {
 	margin: 3px 0;
 }
 
+/* Constrain 2x collection/search icons */
+#zotero-advanced-search-dialog .menulist-icon {
+	height: 16px;
+}
+
 #zotero-attach-uri-container
 {
 	width: 30em;
