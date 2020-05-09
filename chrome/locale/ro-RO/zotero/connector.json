@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "Renunță"
   },
+  "general_pleaseWait": {
+    "message": "Te rog să aștepți…"
+  },
   "progressWindow_savingTo": {
     "message": "Se salvează în"
   },
@@ -67,6 +70,12 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Descară oricum versiunea legată"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 îți actualizează documentul."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "Integrarea $1 nu este valabilă la editarea fișierelor Microsoft Word .docx direct în Google Docs. Alege Fișier → Salvare ca Google Docs pentru a activa această funcționalitate.<br/><br/>Dacă vrei să transferi un document Word cu $1 citări în Google Docs, vezi <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Mutarea documentelor între procesoarele de text</a>."
   },
   "general_saveTo": {
     "message": "Salvează în $1"

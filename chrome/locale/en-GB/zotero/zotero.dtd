@@ -16,7 +16,7 @@
 <!ENTITY zotero.general.more "More">
 <!ENTITY zotero.general.loading "Loading…">
 <!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.minimize "Minimise">
 <!ENTITY zotero.general.other "Other…">
 <!ENTITY zotero.general.bigger "Bigger">
 <!ENTITY zotero.general.smaller "Smaller">
@@ -114,7 +114,7 @@
 <!ENTITY zotero.toolbar.newGroup "New Group…">
 <!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "New Saved Search…">
-<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Bin">
 <!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
 <!ENTITY zotero.toolbar.actions.label "Actions">
 <!ENTITY zotero.toolbar.import.label "Import…">

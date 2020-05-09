@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "Prekliči"
   },
+  "general_pleaseWait": {
+    "message": "Počakajte trenutek ..."
+  },
   "progressWindow_savingTo": {
     "message": "Shranjevanje v"
   },
@@ -67,6 +70,9 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Vseeno prenesi povezano različico"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 posodablja vaš dokument."
   },
   "general_saveTo": {
     "message": "Shrani v $1"

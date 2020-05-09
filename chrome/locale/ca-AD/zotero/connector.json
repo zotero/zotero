@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "Cancel·la"
   },
+  "general_pleaseWait": {
+    "message": "Si us plau, espereu..."
+  },
   "progressWindow_savingTo": {
     "message": "S'està desant a"
   },
@@ -67,6 +70,9 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Baixa la versió enllaçada igualment"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 està actualitzant el vostre document."
   },
   "general_saveTo": {
     "message": "Desa a $1"

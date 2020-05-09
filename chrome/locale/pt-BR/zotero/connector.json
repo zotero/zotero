@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "Cancelar"
   },
+  "general_pleaseWait": {
+    "message": "Por favor, espere..."
+  },
   "progressWindow_savingTo": {
     "message": "Salvando em"
   },
@@ -67,6 +70,12 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Baixar a versão conectada mesmo assim"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 está atualizando seu documento."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "$1 integração não está disponível quando editando arquivos .docx do Micorsoft Word diretamente no Google Docs. Escolha Arquivo → Salve como Google Docs para habilitar esta funcionalidade. <br/> <br/> se você deseja transferir um documento Word com $1 citações para o Google Docs, veja <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\"> Movendo documentos entre Processadores de Texto</a>."
   },
   "general_saveTo": {
     "message": "Salvar para $1"
