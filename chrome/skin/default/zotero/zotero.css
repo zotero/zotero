@@ -304,7 +304,7 @@ label.zotero-text-link {
 }
 
 /* Constrain 2x collection/search icons */
-#zotero-advanced-search-dialog .menulist-icon {
+zoterosearch .menulist-icon {
 	height: 16px;
 }
 
