@@ -266,6 +266,13 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.strictEqual(extra, '');
 		});
 		
+		it("should ignore empty creator in citeproc-js cheater syntax", function () {
+			var str = '{:author: }\n';
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 0);
+			assert.strictEqual(extra, str);
+		});
+		
 		it("should ignore both Event Place and Publisher Place (temporary)", function () {
 			var str = "Event Place: Foo\nPublisher Place: Bar";
 			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
