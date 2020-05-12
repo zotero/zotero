@@ -11,9 +11,9 @@
 <!ENTITY zotero.preferences.fileHandling "檔案處理">
 <!ENTITY zotero.preferences.automaticSnapshots "從網頁建立項目時自動建立快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "儲存項目時自動附加相關的 PDF 檔與其他檔">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
+<!ENTITY zotero.preferences.autoRecognizeFiles "自動為 PDF 檔取得屬性資料">
 <!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "重新命名連結的檔案">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "開啟 PDFs 使用">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "系統預設">
 
@@ -76,9 +76,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "重設資料同步歷史">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "將本機的資料與遠端的資料合併，忽略同步歷史">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "從線上文獻庫還原">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "以線上文獻庫的資料覆蓋本地端 Zotero 資料。">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "取代線上文獻庫">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "以本地端 Zotero 資料覆蓋線上文獻庫的資料。">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重設檔案同步歷史">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
 <!ENTITY zotero.preferences.sync.reset "回復預設值">

@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "關閉 (C)">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "管理附件檔">
+<!ENTITY convertToStored.label "將連結檔轉成儲存檔…">
 <!ENTITY importCmd.label "匯入…">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "從剪貼簿匯入">
@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "檢視">
+<!ENTITY layout.label "版面">
+<!ENTITY standardView.label "標準檢視">
+<!ENTITY stackedView.label "堆放檢視">
+<!ENTITY collectionsPane.label "文獻庫窗格">
+<!ENTITY itemPane.label "項目窗格">
+<!ENTITY tagSelector.label "標籤選擇器">
+<!ENTITY recursiveCollections.label "顯示子文獻庫的項目">
+<!ENTITY fontSize.label "字型大小">
+<!ENTITY noteFontSize.label "筆記字型大小">
 
 
 <!ENTITY toolsMenu.label "工具 (T)">
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "安裝瀏覽器資料庫連結器">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "附加元件">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "開發者">
 
 
 <!ENTITY minimizeWindow.key "m">
