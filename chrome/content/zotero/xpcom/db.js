@@ -662,7 +662,13 @@ Zotero.DBConnection.prototype.queryAsync = Zotero.Promise.coroutine(function* (s
 			var eStr = e + "";
 			eStr = eStr.indexOf("Error: ") == 0 ? eStr.substr(7): e;
 			throw new Error(eStr + ' [QUERY: ' + sql + '] '
-				+ (params ? '[PARAMS: ' + params.join(', ') + '] ' : '')
+				+ (params
+					? '[PARAMS: '
+						+ (Array.isArray(params)
+							? params.map(x => JSON.stringify(x)).join(', ')
+							: JSON.stringify(params)
+						) + '] '
+					: '')
 				+ '[ERROR: ' + e.errors[0].message + ']');
 		}
 		else {
