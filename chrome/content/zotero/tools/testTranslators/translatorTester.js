@@ -242,7 +242,7 @@ var Zotero_TranslatorTester = function(translator, type, debugCallback, translat
 	}
 };
 
-Zotero_TranslatorTester.DEFER_DELAY = 20000; // Delay for deferred tests
+Zotero_TranslatorTester.DEFER_DELAY = 5000; // Delay for deferred tests
 
 /**
  * Removes document objects, which contain cyclic references, and other fields to be ignored from items
