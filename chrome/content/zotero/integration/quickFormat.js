@@ -143,43 +143,48 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Initialize add citation dialog
 	 */
-	this.onLoad = function(event) {
-		if (event.target !== document) return;
-		// make sure we are visible
-		window.setTimeout(function() {
-			window.resizeTo(window.outerWidth, qfb.clientHeight);
-			var screenX = window.screenX;
-			var screenY = window.screenY;
-			var xRange = [window.screen.availLeft, window.screen.width-window.outerWidth];
-			var yRange = [window.screen.availTop, window.screen.height-window.outerHeight];
-			if(screenX < xRange[0] || screenX > xRange[1] || screenY < yRange[0] || screenY > yRange[1]) {
-				var targetX = Math.max(Math.min(screenX, xRange[1]), xRange[0]);
-				var targetY = Math.max(Math.min(screenY, yRange[1]), yRange[0]);
-				Zotero.debug("Moving window to "+targetX+", "+targetY);
-				window.moveTo(targetX, targetY);
-			}
-			qfGuidance = document.getElementById('quick-format-guidance');
-			qfGuidance.show();
-			_refocusQfe();
-		}, 0);
-		
-		window.focus();
-		qfe.focus();
-		
-		// load citation data
-		if(io.citation.citationItems.length) {
-			// hack to get spacing right
-			var evt = qfiDocument.createEvent("KeyboardEvent");
-			evt.initKeyEvent("keypress", true, true, qfiWindow,
-				0, 0, 0, 0,
-				0, " ".charCodeAt(0))
-			qfe.dispatchEvent(evt);
-			window.setTimeout(function() {				
+	this.onLoad = async function (event) {
+		try {
+			if (event.target !== document) return;
+			// make sure we are visible
+			let resizePromise = (async function () {
+				await Zotero.Promise.delay();
+				window.resizeTo(window.outerWidth, qfb.clientHeight);
+				var screenX = window.screenX;
+				var screenY = window.screenY;
+				var xRange = [window.screen.availLeft, window.screen.width - window.outerWidth];
+				var yRange = [window.screen.availTop, window.screen.height - window.outerHeight];
+				if (screenX < xRange[0] || screenX > xRange[1] || screenY < yRange[0] || screenY > yRange[1]) {
+					var targetX = Math.max(Math.min(screenX, xRange[1]), xRange[0]);
+					var targetY = Math.max(Math.min(screenY, yRange[1]), yRange[0]);
+					Zotero.debug(`Moving window to ${targetX}, ${targetY}`);
+					window.moveTo(targetX, targetY);
+				}
+				qfGuidance = document.getElementById('quick-format-guidance');
+				qfGuidance.show();
+				_refocusQfe();
+			})();
+			
+			window.focus();
+			qfe.focus();
+			
+			// load citation data
+			if (io.citation.citationItems.length) {
+				// hack to get spacing right
+				var evt = qfiDocument.createEvent("KeyboardEvent");
+				evt.initKeyEvent("keypress", true, true, qfiWindow,
+					0, 0, 0, 0,
+					0, " ".charCodeAt(0));
+				qfe.dispatchEvent(evt);
+				await resizePromise;
 				var node = qfe.firstChild;
 				node.nodeValue = "";
 				_showCitation(node);
 				_resize();
-			}, 1);
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
 		}
 	};
 	
