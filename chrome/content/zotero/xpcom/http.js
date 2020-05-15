@@ -1255,8 +1255,13 @@ Zotero.HTTP = new function() {
 		var hiddenBrowsers = [],
 			currentURL = 0;
 		for(var i=0; i<urls.length; i++) {
-			var hiddenBrowser = Zotero.Browser.createHiddenBrowser();
-			if(cookieSandbox) cookieSandbox.attachToBrowser(hiddenBrowser);
+			let hiddenBrowser = Zotero.Browser.createHiddenBrowser();
+			if (cookieSandbox) {
+				cookieSandbox.attachToBrowser(hiddenBrowser);
+			}
+			else {
+				new Zotero.CookieSandbox(hiddenBrowser, urls[i], "", "");
+			}
 			hiddenBrowser.addEventListener("load", onLoad, true);
 			hiddenBrowsers[i] = hiddenBrowser;
 		}
