@@ -367,7 +367,7 @@ Zotero_Preferences.Advanced = {
 		yield Zotero.DataDirectory.choose(
 			true,
 			!newUseDataDir,
-			() => Zotero_Preferences.openURL('https://zotero.org/support/zotero_data')
+			() => Zotero_Preferences.openURL('https://www.zotero.org/support/zotero_data')
 		);
 		radiogroup.selectedIndex = this._usingDefaultDataDir() ? 0 : 1;
 	}),
