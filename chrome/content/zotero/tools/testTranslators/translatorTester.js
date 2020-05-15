@@ -413,6 +413,33 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
  * @param {Function} testDoneCallback - A callback to be executed when test is complete
  */
 Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function (test, testDoneCallback) {
+	// Scaffold
+	if (Zotero.isFx) {
+		let browser = Zotero.HTTP.loadDocuments(
+			test.url,
+			(doc) => {
+				if (test.defer) {
+					Zotero.debug("Waiting " + (Zotero_TranslatorTester.DEFER_DELAY / 1000)
+						+ " second(s) for page content to settle");
+				}
+				setTimeout(() => {
+					this.runTest(test, doc, function (obj, test, status, message) {
+						Zotero.Browser.deleteHiddenBrowser(browser);
+						testDoneCallback(obj, test, status, message);
+					});
+				}, test.defer ? Zotero_TranslatorTester.DEFER_DELAY : 0);
+			},
+			null,
+			(e) => {
+				Zotero.Browser.deleteHiddenBrowser(browser);
+				testDoneCallback(this, test, "failed", "Translation failed to initialize: " + e);
+			},
+			true
+		);
+		browser.docShell.allowMetaRedirects = true;
+		return
+	}
+	
 	if (typeof process === 'object' && process + '' === '[object process]'){
 		this._cookieSandbox = require('request').jar();
 	}
