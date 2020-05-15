@@ -763,7 +763,7 @@ var Scaffold = new function() {
 				_writeTests(JSON.stringify(testObject, null, "\t")); // Don't modify current tests
 				return testObject;
 			} catch (e) {
-				_logOutput("Exception parsing JSON");
+				_logOutput("Exception parsing test JSON:\n\n" + e);
 				return false;
 			}
 		} else {
