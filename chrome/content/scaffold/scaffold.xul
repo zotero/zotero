@@ -258,4 +258,8 @@
 		</hbox>
 
 	</vbox>
+	
+	<keyset>
+		<key id="key_close" key="W" modifiers="accel" oncommand="window.close()"/>
+	</keyset>
 </window>
