@@ -2093,7 +2093,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 							var collectionID = yield newCollection.save();
 							
 							// Record link
-							yield c.addLinkedCollection(newCollection);
+							yield newCollection.addLinkedCollection(c);
 							
 							// Recursively copy subcollections
 							if (desc.children.length) {
