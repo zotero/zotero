@@ -1270,6 +1270,7 @@ var ZoteroPane = new function()
 				Zotero.debug(e);
 			}
 			
+			Zotero.Notifier.trigger('select', 'collectionTreeRow', collectionTreeRow.id);
 			Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
 		}, this)
 		.finally(function () {
@@ -1514,6 +1515,7 @@ var ZoteroPane = new function()
 			throw e;
 		}.bind(this))
 		.finally(function () {
+			Zotero.Notifier.trigger('select', 'item', _lastSelectedItems);
 			return this.itemsView.runListeners('select');
 		}.bind(this));
 	}

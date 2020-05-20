@@ -482,6 +482,11 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	Zotero.debug("Yielding for refresh promise"); // TEMP
 	yield this._refreshPromise;
 	
+	// Don't trigger an infinite loop (nothing to do here either)
+	if (action == 'select') {
+		return;
+	}
+	
 	if (!this._treebox || !this._treebox.treeBody) {
 		Zotero.debug("Treebox didn't exist in itemTreeView.notify()");
 		return;

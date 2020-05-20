@@ -290,10 +290,16 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 		this._requestFinished(this._generateResponse(400, "text/plain", "Invalid method specified\n"));
 		return;
 	}
-	if(!Zotero.Server.Endpoints[method[2]]) {
-		this._requestFinished(this._generateResponse(404, "text/plain", "No endpoint found\n"));
-		return;
+	if (method[2] in Zotero.Server.Endpoints) {
+		return this._handleHTTPEndpoint(method);
 	}
+	else if (method[2] in Zotero.Server.SSE.Endpoints) {
+		return this._handleSSEEndpoint(method);
+	}
+	return this._requestFinished(this._generateResponse(404, "text/plain", "No endpoint found\n"));
+}
+
+Zotero.Server.DataListener.prototype._handleHTTPEndpoint = function(method) {
 	this.pathname = method[2];
 	this.endpoint = Zotero.Server.Endpoints[method[2]];
 	this.query = method[3];
@@ -319,6 +325,49 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 		return;
 	}
 }
+
+Zotero.Server.DataListener.prototype._handleSSEEndpoint = function(method) {
+	this.pathname = method[2];
+	this.endpoint = Zotero.Server.SSE.Endpoints[method[2]];
+	this.query = method[3];
+
+	var intlStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
+		.createInstance(Components.interfaces.nsIConverterOutputStream);
+	intlStream.init(this.oStream, "UTF-8", 1024, "?".charCodeAt(0));
+	
+	var headers = "HTTP/1.0 "+200+" "+Zotero.Server.responseCodes[200]+"\r\n";
+	headers += "X-Zotero-Version: "+Zotero.version+"\r\n";
+	headers += "X-Zotero-Connector-API-Version: "+CONNECTOR_API_VERSION+"\r\n";
+	headers += "Content-Type: text/event-stream\n\n";
+	
+	try {
+		intlStream.writeString(headers);
+		intlStream.flush();
+	} catch (e) {
+		this._responseSent = true;
+		try { this.iStream.close(); } catch (e) {}
+		try { intlStream.close(); } catch (e) {}
+	}
+
+	function writeCallback(str) {
+		if(this._responseSent) {
+			let e = new Zotero.Server.ClosedStreamError();
+			Zotero.logError(e);
+			throw e;
+		}
+		
+		try {
+			intlStream.writeString(str);
+			intlStream.flush();
+		} catch (e) {
+			this._responseSent = true;
+			try { this.iStream.close(); } catch (e) {}
+			try { intlStream.close(); } catch (e) {}
+			throw e;
+		}
+	}
+	this.endpoint(writeCallback);
+};
 
 /*
  * checks to see if Content-Length bytes of body have been read and, if so, processes the body
@@ -652,4 +701,22 @@ Zotero.Server.DataListener.prototype._decodeMultipartData = function(data, bound
  *
  * See connector/server_connector.js for examples
  */
-Zotero.Server.Endpoints = {}
+Zotero.Server.Endpoints = {};
+
+/**
+ * SSE Endpoints
+ * 
+ * An object of functions that receive a writeCallback(String str) as an argument
+ * 
+ * writeCallback() takes a String as a parameter to write to the SSE stream. Note that
+ * newlines are significant in SSE and writeCallback will not insert any newline characters
+ * writeCallback() will throw upon write when client has disconnected
+ */
+Zotero.Server.SSE = {Endpoints: {}};
+
+Zotero.Server.ClosedStreamError = function() {
+	this.message = "Attempting to write to a closed stream";
+	this.stack = new Error().stack;
+
+}
+Zotero.Server.ClosedStreamError.protype = Object.create(Error.prototype);

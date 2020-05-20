@@ -686,8 +686,11 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			Zotero.locked = false;
 			
 			// Initialize various services
-			if(Zotero.Prefs.get("httpServer.enabled")) {
+			Zotero.ConnectorNotifier.init();
+			
+			if (Zotero.Prefs.get("httpServer.enabled")) {
 				Zotero.Server.init();
+				Zotero.Server.SSE.Connector.init();
 			}
 			
 			yield Zotero.Fulltext.init();
