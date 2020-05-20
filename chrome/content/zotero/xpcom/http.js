@@ -990,7 +990,7 @@ Zotero.HTTP = new function() {
 	 * through the error log and doing a fragile string comparison.
 	 */
 	_pacInstalled = function () {
-		return Zotero.getErrors(true).some(val => val.indexOf("PAC file installed") == 0)
+		return Zotero.Errors.getErrors(true).some(val => val.indexOf("PAC file installed") == 0)
 	}
 	
 	

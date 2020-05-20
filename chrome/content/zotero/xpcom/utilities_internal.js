@@ -398,9 +398,8 @@ Zotero.Utilities.Internal = {
 		if (typeof buttonText == 'undefined') {
 			buttonText = Zotero.getString('errorReport.reportError');
 			buttonCallback = function () {
-				var zp = Zotero.getActiveZoteroPane();
 				// TODO: Open main window if closed
-				if (zp) zp.reportErrors();
+				Zotero.Errors.showReportDialog();
 			}
 		}
 		// If secondary button is explicitly null, just use an alert

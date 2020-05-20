@@ -38,7 +38,7 @@ function updateErrors() {
 	.then(function (sysInfo) {
 		if (stopping) return;
 		
-		var errors = Zotero.getErrors(true);
+		var errors = Zotero.Errors.getErrors(true);
 		var errorStr = errors.length ? errors.join('\n\n') + '\n\n' : '';
 		
 		document.getElementById('errors').textContent = errorStr + sysInfo;

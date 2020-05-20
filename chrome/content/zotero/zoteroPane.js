@@ -54,7 +54,6 @@ var ZoteroPane = new function()
 	this.setItemsPaneMessage = setItemsPaneMessage;
 	this.clearItemsPaneMessage = clearItemsPaneMessage;
 	this.viewSelectedAttachment = viewSelectedAttachment;
-	this.reportErrors = reportErrors;
 	
 	this.document = document;
 	
@@ -4441,7 +4440,7 @@ var ZoteroPane = new function()
 			if (!buttonText) {
 				buttonText = Zotero.getString('errorReport.reportError');
 				buttonCallback = function () {
-					ZoteroPane.reportErrors();
+					ZoteroPane.Errors.showReportDialog();
 				};
 			}
 			
@@ -4766,20 +4765,6 @@ var ZoteroPane = new function()
 			}
 			Zotero.logError(e);
 		});
-	}
-	
-	
-	function reportErrors() {
-		var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-				   .getService(Components.interfaces.nsIWindowWatcher);
-		var data = {
-			msg: Zotero.getString('errorReport.followingReportWillBeSubmitted'),
-			errorData: Zotero.getErrors(true),
-			askForSteps: true
-		};
-		var io = { wrappedJSObject: { Zotero: Zotero, data:  data } };
-		var win = ww.openWindow(null, "chrome://zotero/content/errorReport.xul",
-					"zotero-error-report", "chrome,centerscreen,modal", io);
 	}
 	
 	this.displayErrorMessage = function (popup) {

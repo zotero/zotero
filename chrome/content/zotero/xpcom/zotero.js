@@ -149,12 +149,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	var _runningTimers = new Map();
 	
 	var _startupTime = new Date();
-	// Errors that were in the console at startup
-	var _startupErrors = [];
-	// Number of errors to maintain in the recent errors buffer
-	const ERROR_BUFFER_SIZE = 25;
-	// A rolling buffer of the last ERROR_BUFFER_SIZE errors
-	var _recentErrors = [];
 	
 	/**
 	 * Initialize the extension
@@ -248,6 +242,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		
 		yield Zotero.Prefs.init();
 		Zotero.Debug.init(options && options.forceDebugLog);
+		Zotero.Errors.init();
 		
 		// Make sure that Zotero Standalone is not running as root
 		if(Zotero.isStandalone && !Zotero.isWin) _checkRoot();
@@ -376,6 +371,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		// Register shutdown handler to call Zotero.shutdown()
 		var _shutdownObserver = {observe:function() { Zotero.shutdown().done() }};
 		Services.obs.addObserver(_shutdownObserver, "quit-application", false);
+		Zotero.addShutdownListener(function() {
+			Services.obs.removeObserver(_shutdownObserver, "quit-application", false);
+		});
 		
 		try {
 			Zotero.IPC.init();
@@ -386,24 +384,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			}
 			throw (e);
 		}
-		
-		// Get startup errors
-		try {
-			var messages = {};
-			Services.console.getMessageArray(messages, {});
-			_startupErrors = Object.keys(messages.value).map(i => messages[i])
-				.filter(msg => _shouldKeepError(msg));
-		} catch(e) {
-			Zotero.logError(e);
-		}
-		// Register error observer
-		Services.console.registerListener(ConsoleListener);
-		
-		// Add shutdown listener to remove quit-application observer and console listener
-		this.addShutdownListener(function() {
-			Services.obs.removeObserver(_shutdownObserver, "quit-application", false);
-			Services.console.unregisterListener(ConsoleListener);
-		});
 		
 		return _initFull()
 		.then(function (success) {
@@ -1259,32 +1239,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 	};
 	
-	
-	this.getErrors = function (asStrings) {
-		var errors = [];
-		
-		for (let msg of _startupErrors.concat(_recentErrors)) {
-			let altMessage;
-			// Remove password in malformed XML errors
-			if (msg.category == 'malformed-xml') {
-				try {
-					// msg.message is read-only, so store separately
-					altMessage = msg.message.replace(/(https?:\/\/[^:]+:)([^@]+)(@[^"]+)/, "$1****$3");
-				}
-				catch (e) {}
-			}
-			
-			if (asStrings) {
-				errors.push(altMessage || msg.message)
-			}
-			else {
-				errors.push(msg);
-			}
-		}
-		return errors;
-	}
-	
-	
 	/**
 	 * Get versions, platform, etc.
 	 */
@@ -1301,12 +1255,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		var extensions = yield Zotero.getInstalledExtensions();
 		info.extensions = extensions.join(', ');
 		
-		var str = '';
-		for (var key in info) {
-			str += key + ' => ' + info[key] + ', ';
-		}
-		str = str.substr(0, str.length - 2);
-		return str;
+		return JSON.stringify(info, null, '  ');
 	});
 	
 	
@@ -1716,60 +1665,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
 		handler.launchWithURI(uri, null);
 	}
-	
-	/**
-	 * Determines whether to keep an error message so that it can (potentially) be reported later
-	 */
-	function _shouldKeepError(msg) {
-		const skip = ['CSS Parser', 'content javascript'];
-		
-		//Zotero.debug(msg);
-		try {
-			msg.QueryInterface(Components.interfaces.nsIScriptError);
-			//Zotero.debug(msg);
-			if (skip.indexOf(msg.category) != -1 || msg.flags & msg.warningFlag) {
-				return false;
-			}
-		}
-		catch (e) { }
-		
-		const blacklist = [
-			"No chrome package registered for chrome://communicator",
-			'[JavaScript Error: "Components is not defined" {file: "chrome://nightly/content/talkback/talkback.js',
-			'[JavaScript Error: "document.getElementById("sanitizeItem")',
-			'No chrome package registered for chrome://piggy-bank',
-			'[JavaScript Error: "[Exception... "\'Component is not available\' when calling method: [nsIHandlerService::getTypeFromExtension',
-			'[JavaScript Error: "this._uiElement is null',
-			'Error: a._updateVisibleText is not a function',
-			'[JavaScript Error: "Warning: unrecognized command line flag ',
-			'LibX:',
-			'function skype_',
-			'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]',
-			'CVE-2009-3555',
-			'OpenGL',
-			'trying to re-register CID',
-			'Services.HealthReport',
-			'[JavaScript Error: "this.docShell is null"',
-			'[JavaScript Error: "downloadable font:',
-			'[JavaScript Error: "Image corrupt or truncated:',
-			'[JavaScript Error: "The character encoding of the',
-			'nsLivemarkService.js',
-			'Sync.Engine.Tabs',
-			'content-sessionStore.js',
-			'org.mozilla.appSessions',
-			'bad script XDR magic number',
-			'did not contain an updates property',
-		];
-		
-		for (var i=0; i<blacklist.length; i++) {
-			if (msg.message.indexOf(blacklist[i]) != -1) {
-				//Zotero.debug("Skipping blacklisted error: " + msg.message);
-				return false;
-			}
-		}
-		
-		return true;
-	}
 
 	/**
 	 * Warn if Zotero Standalone is running as root and clobber the cache directory if it is
@@ -1822,20 +1717,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		
 		return true;
 	}
-	
-	/**
-	 * Observer for console messages
-	 * @namespace
-	 */
-	var ConsoleListener = {
-		"QueryInterface":XPCOMUtils.generateQI([Components.interfaces.nsIConsoleMessage,
-			Components.interfaces.nsISupports]),
-		"observe":function(msg) {
-			if(!_shouldKeepError(msg)) return;
-			if(_recentErrors.length === ERROR_BUFFER_SIZE) _recentErrors.shift();
-			_recentErrors.push(msg);
-		}
-	};
 }).call(Zotero);
 
 

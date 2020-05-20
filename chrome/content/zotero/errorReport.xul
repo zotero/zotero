@@ -18,8 +18,6 @@
 			var Zotero = obj.Zotero;
 			var data = obj.data;
 			var msg = data.msg;
-			var errorData = data.errorData;
-			var extraData = data.extraData ? data.extraData : '';
 			var diagnosticInfo = false;
 			
 			
@@ -27,15 +25,9 @@
 				var wizard = document.getElementById('zotero-error-report');
 				var continueButton = wizard.getButton('next');
 				continueButton.disabled = true;
+
 				
-				diagnosticInfo = yield Zotero.getSystemInfo();
-				var errorDataText = errorData.length
-					? data.errorData.join('\n\n')
-					: Zotero.getString('errorReport.noErrorsLogged', Zotero.appName);
-				
-				var logText = errorDataText + '\n\n'
-					+ (extraData !== '' ? extraData + '\n\n' : '')
-					+ diagnosticInfo;
+				logText = yield Zotero.Errors.generateReport();
 				
 				if (document.getElementById('zotero-failure-message').hasChildNodes()) {
 					var textNode = document.getElementById('zotero-failure-message').firstChild;
@@ -57,89 +49,22 @@
 				var wizard = document.getElementById('zotero-error-report');
 				var continueButton = wizard.getButton('next');
 				continueButton.disabled = true;
-				
-				var parts = {
-					error: "true",
-					errorData: errorData.join('\n'),
-					extraData: extraData,
-					diagnostic: diagnosticInfo
-				};
-				
-				var body = '';
-				for (var key in parts) {
-					body += key + '=' + encodeURIComponent(parts[key]) + '&';
-				}
-				body = body.substr(0, body.length - 1);
-				var req = yield Zotero.HTTP.request(
-					"POST",
-					ZOTERO_CONFIG.REPOSITORY_URL + "report",
-					{
-						body,
-						successCodes: false,
-						foreground: true
-					}
-				);
-				_sendErrorReportCallback(req);
-			});
 			
-			
-			function _sendErrorReportCallback(xmlhttp) {
-				var wizard = document.getElementById('zotero-error-report');
-				if (!wizard) {
-					return;
-				}
-				
-				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-					.getService(Components.interfaces.nsIPromptService);
-				
-				if (!xmlhttp.responseXML){
-					try {
-						if (xmlhttp.status>1000){
-							ps.alert(
-								null,
-								Zotero.getString('general.error'),
-								Zotero.getString('errorReport.noNetworkConnection')
-							);
-						}
-						else {
-							ps.alert(
-								null,
-								Zotero.getString('general.error'),
-								Zotero.getString('errorReport.invalidResponseRepository')
-							);
-						}
-					}
-					catch (e){
-						ps.alert(
-							null,
-							Zotero.getString('general.error'),
-							Zotero.getString('errorReport.repoCannotBeContacted')
-						);
-					}
-					
-					wizard.rewind();
-					return;
-				}
-				
-				
-				var reported = xmlhttp.responseXML.getElementsByTagName('reported');
-				if (reported.length != 1) {
-					ps.alert(
-						null,
-						Zotero.getString('general.error'),
-						Zotero.getString('errorReport.invalidResponseRepository')
-					);
+				var reportID;
+				try {
+					reportID = yield Zotero.Errors.submitToZotero();
+				} catch (e) {
+					ps.alert(null, Zotero.getString('general.error'), e.message);
 					wizard.rewind();
 					return;
 				}
 				
 				wizard.advance();
-				wizard.getButton('cancel').disabled = true;;
+				wizard.getButton('cancel').disabled = true;
 				wizard.canRewind = false;
-				var reportID = reported[0].getAttribute('reportID');
 				document.getElementById('zotero-report-id').setAttribute('value', reportID);
 				document.getElementById('zotero-report-result').hidden = false;
-			}
+			});
 		}
 	]]>
 	</script>

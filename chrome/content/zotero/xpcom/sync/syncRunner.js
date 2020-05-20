@@ -1476,7 +1476,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				if (e.dialogButtonText === undefined) {
 					var buttonText = Zotero.getString('errorReport.reportError');
 					var buttonCallback = function () {
-						doc.defaultView.ZoteroPane.reportErrors();
+						Zotero.Errors.showReportDialog();
 					};
 				}
 				else {

@@ -23,6 +23,228 @@
     ***** END LICENSE BLOCK *****
 */
 
+Zotero.Errors = new function () {
+	// Errors that were in the console at startup
+	var _startupErrors = [];
+	// Number of errors to maintain in the recent errors buffer
+	const ERROR_BUFFER_SIZE = 25;
+	// A rolling buffer of the last ERROR_BUFFER_SIZE errors
+	var _recentErrors = [];
+	
+	/**
+	 * Determines whether to keep an error message so that it can (potentially) be reported later
+	 */
+	function _shouldKeepError(msg) {
+		const skip = ['CSS Parser', 'content javascript'];
+		
+		//Zotero.debug(msg);
+		try {
+			msg.QueryInterface(Components.interfaces.nsIScriptError);
+			//Zotero.debug(msg);
+			if (skip.indexOf(msg.category) != -1 || msg.flags & msg.warningFlag) {
+				return false;
+			}
+		}
+		catch (e) { }
+		
+		const blacklist = [
+			"No chrome package registered for chrome://communicator",
+			'[JavaScript Error: "Components is not defined" {file: "chrome://nightly/content/talkback/talkback.js',
+			'[JavaScript Error: "document.getElementById("sanitizeItem")',
+			'No chrome package registered for chrome://piggy-bank',
+			'[JavaScript Error: "[Exception... "\'Component is not available\' when calling method: [nsIHandlerService::getTypeFromExtension',
+			'[JavaScript Error: "this._uiElement is null',
+			'Error: a._updateVisibleText is not a function',
+			'[JavaScript Error: "Warning: unrecognized command line flag ',
+			'LibX:',
+			'function skype_',
+			'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]',
+			'CVE-2009-3555',
+			'OpenGL',
+			'trying to re-register CID',
+			'Services.HealthReport',
+			'[JavaScript Error: "this.docShell is null"',
+			'[JavaScript Error: "downloadable font:',
+			'[JavaScript Error: "Image corrupt or truncated:',
+			'[JavaScript Error: "The character encoding of the',
+			'nsLivemarkService.js',
+			'Sync.Engine.Tabs',
+			'content-sessionStore.js',
+			'org.mozilla.appSessions',
+			'bad script XDR magic number',
+			'did not contain an updates property',
+		];
+		
+		for (var i=0; i<blacklist.length; i++) {
+			if (msg.message.indexOf(blacklist[i]) != -1) {
+				//Zotero.debug("Skipping blacklisted error: " + msg.message);
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	this.init = function () {
+		// Get startup errors
+		try {
+			var messages = {};
+			Services.console.getMessageArray(messages, {});
+			_startupErrors = Object.keys(messages.value).map(i => messages[i])
+				.filter(msg => _shouldKeepError(msg));
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+
+		/**
+		 * Observer for console messages
+		 * @namespace
+		 */
+		var ConsoleListener = {
+			"QueryInterface":XPCOMUtils.generateQI([Components.interfaces.nsIConsoleMessage,
+				Components.interfaces.nsISupports]),
+			"observe":function(msg) {
+				if(!_shouldKeepError(msg)) return;
+				if(_recentErrors.length === ERROR_BUFFER_SIZE) _recentErrors.shift();
+				_recentErrors.push(msg);
+			}
+		};
+
+		// Register error observer
+		Services.console.registerListener(ConsoleListener);
+		
+		// Add shutdown listener to remove quit-application observer and console listener
+		Zotero.addShutdownListener(function() {
+			Services.console.unregisterListener(ConsoleListener);
+		});
+	};
+	
+	this.getErrors = function (asStrings) {
+		var errors = [];
+
+		for (let msg of _startupErrors.concat(_recentErrors)) {
+			let altMessage;
+			// Remove password in malformed XML errors
+			if (msg.category == 'malformed-xml') {
+				try {
+					// msg.message is read-only, so store separately
+					altMessage = msg.message.replace(/(https?:\/\/[^:]+:)([^@]+)(@[^"]+)/, "$1****$3");
+				}
+				catch (e) {}
+			}
+
+			if (asStrings) {
+				errors.push(altMessage || msg.message);
+			}
+			else {
+				errors.push(msg);
+			}
+		}
+		return errors;
+	};
+	
+	this.showReportDialog = function () {
+		var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+				   .getService(Components.interfaces.nsIWindowWatcher);
+		var data = {
+			msg: Zotero.getString('errorReport.followingReportWillBeSubmitted'),
+		};
+		var io = { wrappedJSObject: { Zotero: Zotero, data: data } };
+		var win = ww.openWindow(null, "chrome://zotero/content/errorReport.xul",
+					"zotero-error-report", "chrome,centerscreen,modal", io);
+	};
+	
+	
+	this.generateReport = async function () {
+		let sysInfo = await Zotero.getSystemInfo();
+		let errors = await this.getErrors();
+		errors = errors.length ? "\n\n" + errors.join('\n\n') : "";
+		return sysInfo + errors;
+	};
+
+	this.submitToZotero = async function (debug) {
+		var headers = { 'Content-Type': 'text/plain' };
+		var url;
+		var body;
+		if (debug) {
+			url = ZOTERO_CONFIG.REPOSITORY_URL + "report?debug=1";
+			body = await Zotero.Debug.get(
+				Zotero.Prefs.get('debug.store.submitSize'),
+				Zotero.Prefs.get('debug.store.submitLineLength')
+			);
+		}
+		else {
+			// TODO: change to non-debug URL once that is supported
+			url = ZOTERO_CONFIG.REPOSITORY_URL + "report?debug=1";
+			body = await this.generateReport();
+		}
+		
+		try {
+			var xmlhttp = await Zotero.HTTP.request(
+				"POST",
+				url,
+				{
+					compressBody: true,
+					body,
+					headers,
+					logBodyLength: 30,
+					timeout: 15000,
+					requestObserver: function (req) {
+						// Don't fail during tests, with fake XHR
+						if (!req.channel) {
+							return;
+						}
+						req.channel.notificationCallbacks = {
+							onProgress: function (request, context, progress, progressMax) {},
+							
+							// nsIInterfaceRequestor
+							getInterface: function (iid) {
+								try {
+									return this.QueryInterface(iid);
+								}
+								catch (e) {
+									throw Components.results.NS_NOINTERFACE;
+								}
+							},
+							
+							QueryInterface: function (iid) {
+								if (iid.equals(Components.interfaces.nsISupports) ||
+										iid.equals(Components.interfaces.nsIInterfaceRequestor) ||
+										iid.equals(Components.interfaces.nsIProgressEventSink)) {
+									return this;
+								}
+								throw Components.results.NS_NOINTERFACE;
+							},
+						};
+					}
+				}
+			);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+				throw new Error(Zotero.getString('general.browserIsOffline', Zotero.appName));
+			}
+			throw new Error(Zotero.getString('general.invalidResponseServer'));
+		}
+		
+		Zotero.debug(xmlhttp.responseText);
+		
+		var reported = xmlhttp.responseXML.getElementsByTagName('reported');
+		if (reported.length != 1) {
+			throw new Error(Zotero.getString('errorReport.invalidResponseServer'));
+		}
+		
+		var reportID = reported[0].getAttribute('reportID');
+		
+		if (debug) {
+			return 'D' + reportID;
+		}
+		// TODO: remove the D once endpoint is updated for reports
+		return 'D' + reportID;
+	};
+};
 
 Zotero.Debug = new function () {
 	var _console, _stackTrace, _store, _level, _lastTime, _output = [];
@@ -80,7 +302,7 @@ Zotero.Debug = new function () {
 				}, 1000);
 			}
 		}
-	}
+	};
 	
 	this.log = function (message, level, maxDepth, stack) {
 		if (!this.enabled) {
@@ -115,7 +337,7 @@ Zotero.Debug = new function () {
 			slowSuffix = "\x1b[0m";
 		}
 		
-		delta = ("" + delta).padStart(7, "0")
+		delta = ("" + delta).padStart(7, "0");
 		
 		deltaStr = "(" + slowPrefix + "+" + delta + slowSuffix + ")";
 		if (_store) {
@@ -125,16 +347,19 @@ Zotero.Debug = new function () {
 		if (stack === true) {
 			// Display stack starting from where this was called
 			stack = Components.stack.caller;
-		} else if (stack >= 0) {
+		}
+		else if (stack >= 0) {
 			let i = stack;
 			stack = Components.stack.caller;
-			while(stack && i--) {
+			while (stack && i--) {
 				stack = stack.caller;
 			}
-		} else if (_stackTrace) {
+		}
+		else if (_stackTrace) {
 			// Stack trace enabled globally
 			stack = Components.stack.caller;
-		} else {
+		}
+		else {
 			stack = undefined;
 		}
 		
@@ -167,7 +392,8 @@ Zotero.Debug = new function () {
 						_consoleViewerQueue.push(output);
 					}
 				}
-			} else if(window.console) {
+			}
+			else if (window.console) {
 				window.console.log(output);
 			}
 		}
@@ -181,16 +407,11 @@ Zotero.Debug = new function () {
 			}
 			_output.push('(' + level + ')' + deltaStrStore + ': ' + message);
 		}
-	}
+	};
 	
 	
-	this.get = Zotero.Promise.method(function(maxChars, maxLineLength) {
+	this.get = async function (maxChars, maxLineLength) {
 		var output = _output;
-		var total = output.length;
-		
-		if (total == 0) {
-			return "";
-		}
 		
 		if (maxLineLength) {
 			for (var i=0, len=output.length; i<len; i++) {
@@ -211,30 +432,18 @@ Zotero.Debug = new function () {
 			}
 		}
 
-		return Zotero.getSystemInfo().then(function(sysInfo) {
-			if (Zotero.isConnector) {
-				return Zotero.Errors.getErrors().then(function(errors) {
-					return errors.join('\n\n') +
-						"\n\n" + sysInfo + "\n\n" +
-						"=========================================================\n\n" +
-						output;	
-				});
-			}
-			else {
-				return Zotero.getErrors(true).join('\n\n') +
-					"\n\n" + sysInfo + "\n\n" +
-					"=========================================================\n\n" +
-					output;
-			}
-		});
-	});
+		let errors = await Zotero.Errors.generateReport();
+		return [errors,
+			"---------------------------------------------------------",
+			output].join("\n\n");
+	};
 	
 	
 	this.getConsoleViewerOutput = function () {
 		var queue = _output.concat(_consoleViewerQueue);
 		_consoleViewerQueue = [];
 		return queue;
-	}
+	};
 	
 	
 	this.addConsoleViewerListener = function (listener) {
@@ -258,7 +467,7 @@ Zotero.Debug = new function () {
 		_store = enable;
 		this.updateEnabled();
 		this.storing = _store;
-	}
+	};
 	
 	
 	this.updateEnabled = function () {
@@ -268,12 +477,12 @@ Zotero.Debug = new function () {
 	
 	this.count = function () {
 		return _output.length;
-	}
+	};
 	
 	
 	this.clear = function () {
 		_output = [];
-	}
+	};
 	
 	/**
 	 * Format a stack trace for output in the same way that Error.stack does
@@ -283,7 +492,7 @@ Zotero.Debug = new function () {
 	this.stackToString = function (stack, lines) {
 		if (!lines) lines = 5;
 		var str = '';
-		while(stack && lines--) {
+		while (stack && lines--) {
 			str += '\n  ' + (stack.name || '') + '@' + stack.filename
 				+ ':' + stack.lineNumber;
 			stack = stack.caller;
@@ -299,5 +508,14 @@ Zotero.Debug = new function () {
 	 */
 	this.filterStack = function (stack) {
 		return stack.split(/\n/).filter(line => line.indexOf('zotero/bluebird') == -1).join('\n');
-	}
-}
+	};
+	
+	this.submitToZotero = async function () {
+		Zotero.debug("Submitting debug output");
+
+		Zotero.Debug.setStore(false);
+		let debugID = await Zotero.Errors.submitToZotero(true);
+		Zotero.Debug.clear(true);
+		return debugID;
+	};
+};

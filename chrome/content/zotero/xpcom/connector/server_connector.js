@@ -295,6 +295,47 @@ Zotero.Server.Connector.SaveSession.prototype.update = async function (targetID,
 	}
 };
 
+
+Zotero.Server.Connector.Reports = function() {};
+Zotero.Server.Connector.Reports.reports = [];
+Zotero.Server.Endpoints["/connector/reports"] = Zotero.Server.Connector.Reports;
+Zotero.Server.Connector.Reports.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["application/json"],
+	permitBookmarklet: true,
+	
+	/**
+	 * An endpoint to manage error/debug logging and reporting
+	 */
+	init: async function(options) {
+		let data = options.data;
+		if ('errors' in data && 'get' in data.errors) {
+			let sysInfo = await Zotero.getSystemInfo();
+			let errors = Zotero.Errors.getErrors();
+			return [200, "text/plain", `${sysInfo}\n\n${errors.join('\n\n')}`]
+		}
+		else if ('debug' in data) {
+			if ('get' in data.debug) {
+				let debug = await Zotero.Debug.get();
+				return [200, "text/plain", debug]
+			}
+			else if ('store' in data.debug) {
+				Zotero.Debug.setStore(data.debug.store);
+			}
+			else if ('clear' in data.debug) {
+				Zotero.Debug.clear(false);
+			}
+			return 200;
+		} else if ('report' in data) {
+			Zotero.Server.Connector.Reports.reports.push(data.report);
+			return 200;
+		}
+
+		return 400;
+	}
+};
+
+
 /**
  * Update the passed items with the current target and tags
  */
