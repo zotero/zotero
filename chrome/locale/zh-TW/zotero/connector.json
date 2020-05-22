@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "取消"
   },
+  "general_pleaseWait": {
+    "message": "請等待…"
+  },
   "progressWindow_savingTo": {
     "message": "儲存至…"
   },
@@ -25,6 +28,12 @@
   },
   "upgradeApp": {
     "message": "升級 $1"
+  },
+  "error_connection_isAppRunning": {
+    "message": "$1 正在執行？"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1正在更新您的文件。"
   },
   "general_saveTo": {
     "message": "儲存至 $1"

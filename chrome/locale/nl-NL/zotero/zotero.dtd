@@ -12,7 +12,7 @@
 <!ENTITY zotero.general.saveAs "Opslaan als...">
 <!ENTITY zotero.general.options "Opties">
 <!ENTITY zotero.general.advancedOptions.label "Geavanceerde opties">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Opties">
 <!ENTITY zotero.general.more "Meer">
 <!ENTITY zotero.general.loading "Laden…">
 <!ENTITY zotero.general.close "Sluiten">
@@ -207,7 +207,7 @@
 <!ENTITY zotero.import.lastModified "Laatst gewijzigd">
 <!ENTITY zotero.import.size "Grootte">
 <!ENTITY zotero.import.createCollection "Geïmporteerde verzamelingen en items in een nieuwe verzameling plaatsen">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "Verwerking van bestanden">
 
 <!ENTITY zotero.exportOptions.title "Exporteren…">
 <!ENTITY zotero.exportOptions.format.label "Formaat:">

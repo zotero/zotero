@@ -77,7 +77,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Lokale Zotero-gegevens samenvoegen met de gegevens op de Zotero Server (houdt geen rekening met synchronisatiegeschiedenis).">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Herstellen vanuit online-bibliotheek">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Lokale Zoterogegevens overschrijven met data uit de online-bibliotheek">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Online Bibliotheek Vervangen">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Alle gegevens op de server wissen en vervangen door de lokale Zotero-gegevens.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Wis bestandssynchronisatiegeschiedenis">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Controleren of alle lokale bestanden op de server aanwezig zijn.">

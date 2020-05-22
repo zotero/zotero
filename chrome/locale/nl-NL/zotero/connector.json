@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "Annuleren"
   },
+  "general_pleaseWait": {
+    "message": "Wachten a.u.b."
+  },
   "progressWindow_savingTo": {
     "message": "Opslaan in"
   },
@@ -49,6 +52,9 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Gelinkte versie toch downloaden"
+  },
+  "integration_googleDocs_updating": {
+    "message": "1$1 is uw document aan het bijwerken."
   },
   "general_saveTo": {
     "message": "Opslaan in $1"

@@ -1,19 +1,19 @@
-<!ENTITY zotero.publications.my_publications "My Publications">
+<!ENTITY zotero.publications.my_publications "我的著作">
 
 <!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
 <!ENTITY zotero.publications.include.checkbox.files "包括檔案">
-<!ENTITY zotero.publications.include.checkbox.notes "Include notes">
+<!ENTITY zotero.publications.include.checkbox.notes "包括筆記">
 <!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
 
 <!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
 <!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
 <!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
-<!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">
-<!ENTITY zotero.publications.sharing.cc0 "Yes, and place my work in the public domain">
-<!ENTITY zotero.publications.sharing.reserved "No, only publish my work on zotero.org">
+<!ENTITY zotero.publications.sharing.cc "是的，以創用 CC 授權證">
+<!ENTITY zotero.publications.sharing.cc0 "是的，並將我的作品放在公眾所有之領域 (public domain)">
+<!ENTITY zotero.publications.sharing.reserved "不，只在 zotero.org 出版我的作品">
 
-<!ENTITY zotero.publications.chooseLicense.title "Choose a Creative Commons license">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
+<!ENTITY zotero.publications.chooseLicense.title "選擇創用 CC 授權證">
+<!ENTITY zotero.publications.chooseLicense.text "創用 CC 授權證允許他人複製與散布您的著作，只要他們適當地表明原始貢獻者，提供連結到證書，並且指出是否做過異動。附帶條件可如下指定。">
 <!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Allow adaptations of your work to be shared?">
 <!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Yes, as long as others share alike">
-<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Allow commercial uses of your work?">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "允許您的著作的商業使用嗎？">
