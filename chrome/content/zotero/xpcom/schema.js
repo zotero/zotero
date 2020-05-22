@@ -263,6 +263,12 @@ Zotero.Schema = new function(){
 					_schemaUpdateDeferred.resolve(true);
 				}
 				catch (e) {
+					// DB corruption already shows an alert
+					if (Zotero.DB.isCorruptionError(e)) {
+						_schemaUpdateDeferred.reject(e);
+						return;
+					}
+					
 					let kbURL = 'https://www.zotero.org/support/kb/unable_to_load_translators_and_styles';
 					let msg = Zotero.getString('startupError.bundledFileUpdateError', Zotero.clientName);
 					
