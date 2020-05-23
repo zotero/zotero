@@ -28,6 +28,7 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://global/content/commonDialog.css" type="text/css"?>
 <?xml-stylesheet href="chrome://global/skin/commonDialog.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/hardConfirmationDialog.css" type="text/css"?>
 
 <!DOCTYPE overlay [ <!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD; ]>
 
@@ -36,7 +37,8 @@
 	id="zotero-hardConfirmationDialog"
 	onload="Zotero.HardConfirmationDialog.init(); sizeToContent();"
 	ondialogaccept="Zotero.HardConfirmationDialog.onAccept();"
-	ondialogextra1="Zotero.HardConfirmationDialog.onExtra1();">
+	ondialogextra1="Zotero.HardConfirmationDialog.onExtra1();"
+	ondialogextra2="Zotero.HardConfirmationDialog.onExtra2();">
 	
 	<script src="chrome://zotero/content/include.js"/>
 	<script src="hardConfirmationDialog.js"/>
@@ -50,6 +52,9 @@
 			<row>
 				<hbox id="iconContainer" align="start"><image id="info.icon" class="spaced alert-icon"/></hbox>
 				<vbox id="infoContainer">
+					<description id="infoTitle" hidden="true"/>
+					<description id="infoBody"/>
+					
 					<separator class="thin"/>
 
 					<checkbox id="zotero-hardConfirmationDialog-checkbox" hidden="true" oncommand="Zotero.HardConfirmationDialog.onCheckbox(event)"/>

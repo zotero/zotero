@@ -126,13 +126,21 @@ Zotero.Sync.Data.Local = {
 				+ `last username '${lastUsername}', current username '${username}'`, 2);
 			var io = {
 				title: Zotero.getString('general.warning'),
-				text: [Zotero.getString('account.lastSyncWithDifferentAccount', [ZOTERO_CONFIG.CLIENT_NAME, lastUsername, username])],
-				checkboxLabel: Zotero.getString('account.confirmDelete'),
-				acceptLabel: Zotero.getString('account.confirmDelete.button')
+				text: Zotero.getString(
+						'account.lastSyncWithDifferentAccount',
+						[Zotero.appName, lastUsername, username]
+					) + '\n\n'
+					+ Zotero.getString(
+						'account.lastSyncWithDifferentAccount.beforeContinuing',
+						[lastUsername, Zotero.appName]
+					),
+				checkboxLabel: Zotero.getString('account.confirmDelete', lastUsername),
+				acceptLabel: Zotero.getString('account.confirmDelete.button'),
+				extra2Label: Zotero.getString('general.moreInformation')
 			};
 			win.openDialog("chrome://zotero/content/hardConfirmationDialog.xul", "",
-				"chrome, dialog, modal, centerscreen", io);
-					
+				"chrome,dialog,modal,centerscreen", io);
+			
 			if (io.accept) {
 				var resetDataDirFile = OS.Path.join(Zotero.DataDirectory.dir, 'reset-data-directory');
 				yield Zotero.File.putContentsAsync(resetDataDirFile, '');
@@ -149,6 +157,9 @@ Zotero.Sync.Data.Local = {
 				Zotero.Utilities.Internal.quitZotero(true);
 				
 				return true;
+			}
+			else if (io.extra2) {
+				Zotero.launchURL("https://www.zotero.org/support/kb/switching_accounts");
 			}
 			
 			return false;

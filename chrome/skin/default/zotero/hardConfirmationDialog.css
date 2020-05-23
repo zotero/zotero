@@ -1,0 +1,11 @@
+#zotero-hardConfirmationDialog {
+	max-width: 500px;
+}
+
+#zotero-hardConfirmationDialog-checkbox {
+	font: menu;
+}
+
+#infoContainer {
+	margin-bottom: 6px;
+}

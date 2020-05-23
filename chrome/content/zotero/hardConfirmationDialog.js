@@ -25,16 +25,24 @@
 
 Zotero.HardConfirmationDialog = {
 	init: function() {
-		var label, content;
 		this.io = window.arguments[0];
+		
+		Zotero.setFontSize(document.getElementById('zotero-hardConfirmationDialog'));
 		
 		var vbox = document.getElementById('infoContainer');
 		var sep = vbox.firstChild;
-		for (let text of this.io.text) {
-			label = document.createElement('label');
-			content = document.createTextNode(text);
-			label.appendChild(content);
-			vbox.insertBefore(label, sep);
+		
+		document.getElementById('infoBody').textContent = this.io.text;
+		
+		if (this.io.title) {
+			document.documentElement.setAttribute('title', this.io.title);
+			
+			if (Zotero.isMac) {
+				let elem = document.getElementById('infoTitle');
+				elem.textContent = this.io.title;
+				elem.style.marginBottom = '12px';
+				elem.hidden = false;
+			}
 		}
 		if (this.io.checkboxLabel) {
 			var checkbox = document.getElementById('zotero-hardConfirmationDialog-checkbox');
@@ -47,14 +55,17 @@ Zotero.HardConfirmationDialog = {
 			this.onKeyUp();
 		}
 		
+		if (this.io.acceptLabel) {
+			document.documentElement.getButton('accept').label = this.io.acceptLabel
+		}
 		if (this.io.extra1Label) {
 			document.documentElement.buttons = document.documentElement.buttons + ',extra1';
 			document.documentElement.getButton('extra1').label = this.io.extra1Label
-		} if (this.io.acceptLabel) {
-			document.documentElement.getButton('accept').label = this.io.acceptLabel
 		}
-		
-		document.documentElement.setAttribute('title', this.io.title);
+		if (this.io.extra2Label) {
+			document.documentElement.buttons = document.documentElement.buttons + ',extra2';
+			document.documentElement.getButton('extra2').label = this.io.extra2Label
+		}
 	},
 	
 	onCheckbox: function(event) {
@@ -73,6 +84,11 @@ Zotero.HardConfirmationDialog = {
 	
 	onExtra1: function() {
 		this.io.extra1 = true;
+		document.documentElement.cancelDialog();
+	},
+	
+	onExtra2: function() {
+		this.io.extra2 = true;
 		document.documentElement.cancelDialog();
 	}
 };
