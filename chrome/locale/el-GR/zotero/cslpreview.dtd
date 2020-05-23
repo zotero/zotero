@@ -1,9 +1,9 @@
-<!ENTITY styles.preview "Προεπισκόπιση Μορφής Zotero">
+<!ENTITY styles.preview "Προεπισκόπηση στυλ του Zotero">
 
-<!ENTITY styles.preview.citationFormat "Μορφή Αναφοράς:">
+<!ENTITY styles.preview.citationFormat "Μορφή παραπομπής:">
 <!ENTITY styles.preview.citationFormat.all "όλα">
 <!ENTITY styles.preview.citationFormat.author "συγγραφέας">
 <!ENTITY styles.preview.citationFormat.authorDate "συγγραφέας-ημερομηνία">
 <!ENTITY styles.preview.citationFormat.label "ετικέτα">
-<!ENTITY styles.preview.citationFormat.note "σημέιωση">
+<!ENTITY styles.preview.citationFormat.note "σημείωση">
 <!ENTITY styles.preview.citationFormat.numeric "αριθμητικό">
