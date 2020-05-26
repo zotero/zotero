@@ -1302,6 +1302,20 @@ describe("Zotero.Item", function () {
 				0
 			);
 		});
+		
+		it("should remove an item in a collection in a read-only library", async function () {
+			var group = await createGroup();
+			var libraryID = group.libraryID;
+			var collection = await createDataObject('collection', { libraryID });
+			var item = await createDataObject('item', { libraryID, collections: [collection.id] });
+			
+			group.editable = false;
+			await group.save();
+			
+			await item.eraseTx({
+				skipEditCheck: true
+			});
+		});
 	});
 	
 	

@@ -413,8 +413,8 @@ Zotero.Collection.prototype.addItems = Zotero.Promise.coroutine(function* (itemI
  *
  * @return {Promise}
  */
-Zotero.Collection.prototype.removeItem = function (itemID) {
-	return this.removeItems([itemID]);
+Zotero.Collection.prototype.removeItem = function (itemID, options = {}) {
+	return this.removeItems([itemID], options);
 }
 
 
@@ -424,7 +424,7 @@ Zotero.Collection.prototype.removeItem = function (itemID) {
  *
  * Does not require a separate save()
  */
-Zotero.Collection.prototype.removeItems = Zotero.Promise.coroutine(function* (itemIDs) {
+Zotero.Collection.prototype.removeItems = Zotero.Promise.coroutine(function* (itemIDs, options = {}) {
 	if (!itemIDs || !itemIDs.length) {
 		return;
 	}
@@ -443,7 +443,8 @@ Zotero.Collection.prototype.removeItems = Zotero.Promise.coroutine(function* (it
 		let item = yield this.ChildObjects.getAsync(itemID);
 		item.removeFromCollection(this.id);
 		yield item.save({
-			skipDateModifiedUpdate: true
+			skipDateModifiedUpdate: true,
+			skipEditCheck: options.skipEditCheck
 		})
 	}
 });
