@@ -11,6 +11,8 @@ describe("Retractions", function() {
 		win = await loadZoteroPane();
 		zp = win.ZoteroPane;
 		
+		await Zotero.Retractions.updateFromServer();
+		
 		// Remove debouncing on checkQueuedItems()
 		checkQueueItemsStub = sinon.stub(Zotero.Retractions, 'checkQueuedItems').callsFake(() => {
 			return Zotero.Retractions._checkQueuedItemsInternal();
