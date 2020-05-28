@@ -207,6 +207,7 @@ describe("Zotero.Date", function() {
 			var o = Zotero.Date.strToDate('1');
 			assert.equal(o.month, 0);
 			assert.isUndefined(o.year);
+			assert.equal(o.order, 'm');
 		});
 		
 		it("should parse string with just day number", function () {
@@ -214,6 +215,7 @@ describe("Zotero.Date", function() {
 			assert.equal(o.day, 25);
 			assert.isUndefined(o.month);
 			assert.isUndefined(o.year);
+			assert.equal(o.order, 'd');
 		});
 		
 		it("should work in translator sandbox", function* () {
