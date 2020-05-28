@@ -88,7 +88,13 @@ var Zotero_File_Interface_Bibliography = new function() {
 		for (let i=0; i < styles.length; i++) {
 			var itemNode = document.createElement("listitem");
 			itemNode.setAttribute("value", styles[i].styleID);
-			itemNode.setAttribute("label", styles[i].title);
+			let title = styles[i].title;
+			// Add acronyms to APA and ASA to avoid confusion
+			// https://forums.zotero.org/discussion/comment/357135/#Comment_357135
+			title = title
+				.replace(/^American Psychological Association/, "American Psychological Association (APA)")
+				.replace(/^American Sociological Association/, "American Sociological Association (ASA)");
+			itemNode.setAttribute("label", title);
 			listbox.appendChild(itemNode);
 			
 			if(styles[i].styleID == _io.style) {
