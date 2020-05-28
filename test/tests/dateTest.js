@@ -214,6 +214,20 @@ describe("Zotero.Date", function() {
 			assert.equal(o.year, 2019);
 		});
 		
+		it("should parse one-digit month and four-digit year", function () {
+			var o = Zotero.Date.strToDate('8/2020');
+			assert.equal(o.month, 7);
+			assert.isUndefined(o.day);
+			assert.equal(o.year, 2020);
+		});
+		
+		it("should parse two-digit month with leading zero and four-digit year", function () {
+			var o = Zotero.Date.strToDate('08/2020');
+			assert.equal(o.month, 7);
+			assert.isUndefined(o.day);
+			assert.equal(o.year, 2020);
+		});
+		
 		it("should parse string with just month number", function () {
 			var o = Zotero.Date.strToDate('1');
 			assert.equal(o.month, 0);
