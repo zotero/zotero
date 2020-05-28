@@ -317,7 +317,9 @@ Zotero.Date = new function(){
 				}
 			}
 			
-			var zeroYear = date.year && date.year.toString().startsWith('0');
+			// Parse pre-1000 years with leading zeroes (001, 0001, 012, 0012, 0123, but not 08)
+			var zeroYear = date.year
+				&& /^(0{2,3}[1-9]|0{1,2}[1-9][0-9]|0[1-9][0-9]{2})$/.test(date.year.toString());
 			if(date.year) date.year = parseInt(date.year, 10);
 			if(date.day) date.day = parseInt(date.day, 10);
 			if(date.month) {

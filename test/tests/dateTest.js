@@ -183,14 +183,25 @@ describe("Zotero.Date", function() {
 		});
 		
 		it("should parse two- and three-digit dates with leading zeros", function () {
-			var o = Zotero.Date.strToDate('0068');
-			assert.equal(o.year, 68);
+			var o;
 			
-			o = Zotero.Date.strToDate('068');
-			assert.equal(o.year, 68);
+			o = Zotero.Date.strToDate('001');
+			assert.equal(o.year, 1);
 			
-			o = Zotero.Date.strToDate('0168');
-			assert.equal(o.year, 168);
+			o = Zotero.Date.strToDate('0001');
+			assert.equal(o.year, 1);
+			
+			o = Zotero.Date.strToDate('012');
+			assert.equal(o.year, 12);
+			
+			o = Zotero.Date.strToDate('0012');
+			assert.equal(o.year, 12);
+			
+			o = Zotero.Date.strToDate('0123');
+			assert.equal(o.year, 123);
+			
+			o = Zotero.Date.strToDate('01/01/08');
+			assert.equal(o.year, 2008);
 		});
 		
 		it("should parse two-digit year greater than current year as previous century", function () {
