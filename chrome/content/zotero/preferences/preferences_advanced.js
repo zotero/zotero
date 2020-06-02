@@ -535,27 +535,117 @@ Zotero_Preferences.Advanced = {
 
 
 Zotero_Preferences.Attachment_Base_Directory = {
-	getPath: function () {
-		var oldPath = Zotero.Prefs.get('baseAttachmentPath');
-		if (oldPath) {
-			try {
-				return OS.Path.normalize(oldPath);
+
+
+	manageBaseDirs: function () {
+		var io = {};
+		window.openDialog('chrome://zotero/content/preferences/libraryAttachmentBaseDirs.xul',
+			"zotero-preferences-libraryAttachmentBaseDirsDialog", "chrome,modal,centerscreen", io);
+	},
+
+
+	dblClickLibraryAttachmentBaseDir: async function (event) {
+		var tree = document.getElementById("library-attachment-base-dirs-tree");
+		var row = {}, col = {}, child = {};
+		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, child);
+
+		// Below the list
+		if (!col.value) {
+			return;
+		}
+		var index = row.value;
+
+		var treechildren = document.getElementById("library-attachment-base-dirs-rows");
+		if (index >= treechildren.childNodes.length) {
+			return;
+		}
+
+		var treeRow = treechildren.childNodes[index];
+
+		var libraryID = treeRow.firstChild.childNodes[1].getAttribute("value");
+		if (!libraryID) {
+			return;
+		}
+		libraryID = parseInt(libraryID);
+
+		var checkboxCell = treeRow.firstChild.childNodes[0];
+		var pathCell = treeRow.firstChild.childNodes[2];
+		var oldPath = pathCell.getAttribute("value");
+
+		var newPath = await this.getNewBaseDir(oldPath);
+		if (!newPath) {
+			return;
+		}
+
+		if (await this.changeBaseDirByLibrary(libraryID, newPath)) {
+			checkboxCell.setAttribute("value", true);
+			pathCell.setAttribute("label", newPath);
+			pathCell.setAttribute("value", newPath);
+		}
+	},
+
+
+	clickLibraryAttachmentBaseDir: function (event) {
+		var tree = document.getElementById("library-attachment-base-dirs-tree");
+		var row = {}, col = {}, child = {};
+		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, child);
+
+		// Below the list or not on checkmark column
+		if (!col.value || col.value.element.id != "library-attachment-base-dirs-checked") {
+			return;
+		}
+
+		this.toggleLibraryAttachmentBaseDir(row.value);
+	},
+
+
+	toggleLibraryAttachmentBaseDir: async function (index) {
+		var treechildren = document.getElementById("library-attachment-base-dirs-rows");
+		if (index >= treechildren.childNodes.length) {
+			return;
+		}
+
+		var row = treechildren.childNodes[index];
+		var libraryID = row.firstChild.childNodes[1].getAttribute("value");
+		if (!libraryID) {
+			return;
+		}
+		libraryID = parseInt(libraryID);
+		var checkboxCell = row.firstChild.childNodes[0];
+		var checked = checkboxCell.getAttribute("value") === "true";
+		var pathCell = row.firstChild.childNodes[2];
+		var oldPath = pathCell.getAttribute("value");
+
+		if (checked) {
+			var newPath = await this.getNewBaseDir(oldPath);
+			if (!newPath) {
+				checkboxCell.setAttribute("value", false);
+				return;
 			}
-			catch (e) {
-				Zotero.logError(e);
-				return false;
+			var changed = await this.changeBaseDirByLibrary(libraryID, newPath)
+			checkboxCell.setAttribute("value", changed);
+			if (changed) {
+				pathCell.setAttribute("label", newPath);
+				pathCell.setAttribute("value", newPath);
+			}
+		} else {
+			var cleared = await this.clearBaseDirByLibrary(libraryID)
+			checkboxCell.setAttribute("value", !cleared);
+			if (cleared) {
+				pathCell.setAttribute("label", "");
+				pathCell.setAttribute("value", "");
 			}
 		}
 	},
-	
-	
-	choosePath: async function () {
-		var oldPath = this.getPath();
-		
-		//Prompt user to choose new base path
+
+	getNewBaseDir: async function (oldBaseDir) {
+		// Prompt user to choose new base directory
+		if (oldBaseDir) {
+			var oldPathFile = Zotero.File.pathToFile(oldBaseDir);
+		}
 		var fp = new FilePicker();
-		if (oldPath) {
-			fp.displayDirectory = oldPath;
+		if (oldPathFile) {
+			fp.displayDirectory = oldPathFile;
 		}
 		fp.init(window, Zotero.getString('attachmentBasePath.selectDir'), fp.modeGetFolder);
 		fp.appendFilters(fp.filterAll);
@@ -564,25 +654,78 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		}
 		var newPath = fp.file;
 		
-		if (oldPath && oldPath == newPath) {
-			Zotero.debug("Base directory hasn't changed");
+		if (oldBaseDir && oldBaseDir == newPath) {
 			return false;
 		}
-		
-		try {
-			return await this.changePath(newPath);
+
+		return newPath;
+	},
+
+
+	initLibraryAttachmentBaseDirs: function () {
+		var tree = document.getElementById('library-attachment-base-dirs-tree');
+		var treechildren = document.getElementById('library-attachment-base-dirs-rows');
+		while (treechildren.hasChildNodes()) {
+			treechildren.removeChild(treechildren.firstChild);
 		}
-		catch (e) {
-			Zotero.logError(e);
-			Zotero.alert(null, Zotero.getString('general.error'), e.message);
+
+		// Add library rows
+		var libraries = Zotero.Libraries.getAll()
+			.filter(l => l.libraryType === "user" || l.libraryType === "group");
+
+		for (let library of libraries) {
+			var libraryName = library.name;
+			var libraryID = parseInt(library.libraryID);
+			var checked = Zotero.Attachments.getSaveRelativePathByLibrary(libraryID);
+			var attachmentBaseDir = Zotero.Attachments.getBaseDirByLibrary(libraryID);
+
+			var treeitem = document.createElement('treeitem');
+			var treerow = document.createElement('treerow');
+			var checkboxCell = document.createElement('treecell');
+			var nameCell = document.createElement('treecell');
+			var pathCell = document.createElement('treecell');
+
+			checkboxCell.setAttribute('value', checked);
+			checkboxCell.setAttribute('editable', true);
+			nameCell.setAttribute('label', libraryName);
+			nameCell.setAttribute('value', libraryID);
+			nameCell.setAttribute('editable', false);
+			if (attachmentBaseDir) {
+				pathCell.setAttribute('label', attachmentBaseDir);
+				pathCell.setAttribute('value', attachmentBaseDir);
+			}
+			pathCell.setAttribute('editable', false);
+
+			treerow.appendChild(checkboxCell);
+			treerow.appendChild(nameCell);
+			treerow.appendChild(pathCell);
+			treeitem.appendChild(treerow);
+			treechildren.appendChild(treeitem);
 		}
+
+		// Prune preferences of any libraries that no longer exist
+		var existentLibraryIDs = libraries.map(l => parseInt(l.libraryID));
+		var savedLibraryIDs =
+			Object.keys(
+				JSON.parse(
+					Zotero.Prefs.get("librarySaveRelativeAttachmentPaths") || "{}"
+				)
+			).map(id => parseInt(id));
+
+		savedLibraryIDs.forEach(function (libraryID) {
+			if (existentLibraryIDs.indexOf(libraryID) == -1) {
+				Zotero.debug(`Pruning attachment base directory preferences for non-existent library '${libraryID}'`);
+				Zotero.Attachments.setSaveRelativePathByLibrary(libraryID, false);
+				Zotero.Attachments.setBaseDirByLibrary(libraryID, false);
+			}
+		});
 	},
 	
 	
-	changePath: Zotero.Promise.coroutine(function* (basePath) {
-		Zotero.debug(`New base directory is ${basePath}`);
+	changeBaseDirByLibrary: Zotero.Promise.coroutine(function* (libraryID, baseDir) {
+		Zotero.debug(`Setting new attachment base directory for '${libraryID}': '${baseDir}'`);
 		
-		if (Zotero.File.directoryContains(Zotero.DataDirectory.dir, basePath)) {
+		if (Zotero.File.directoryContains(Zotero.DataDirectory.dir, baseDir)) {
 			throw new Error(
 				Zotero.getString(
 					'zotero.preferences.advanced.baseDirectory.withinDataDir',
@@ -599,23 +742,28 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		];
 		var oldRelativeAttachmentIDs = yield Zotero.DB.columnQueryAsync(sql, params);
 		
-		//Find all attachments on the new base path
+		// Find all attachments on the new base directory
 		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=?";
 		var params = [Zotero.Attachments.LINK_MODE_LINKED_FILE];
-		var allAttachments = yield Zotero.DB.columnQueryAsync(sql, params);
+		var allAttachmentIDs = yield Zotero.DB.columnQueryAsync(sql, params);
+		var isLibraryBaseDirSet = Zotero.Attachments.getBaseDirByLibrary(libraryID);
 		var newAttachmentPaths = {};
 		var numNewAttachments = 0;
 		var numOldAttachments = 0;
-		for (let i=0; i<allAttachments.length; i++) {
-			let attachmentID = allAttachments[i];
+		for (let i=0; i<allAttachmentIDs.length; i++) {
+			let attachmentID = allAttachmentIDs[i];
 			let attachmentPath;
-			let relPath = false
+			let relPath = false;
 			
 			try {
 				let attachment = yield Zotero.Items.getAsync(attachmentID);
 				// This will return FALSE for relative paths if base directory
 				// isn't currently set
 				attachmentPath = attachment.getFilePath();
+				// Make sure we only change paths for the specified library
+				if (attachment.libraryID !== libraryID) {
+					continue;
+				}
 				// Get existing relative path
 				let storedPath = attachment.attachmentPath;
 				if (storedPath.startsWith(Zotero.Attachments.BASE_PATH_PLACEHOLDER)) {
@@ -631,7 +779,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 			// If a file with the same relative path exists within the new base directory,
 			// don't touch the attachment, since it will continue to work
 			if (relPath) {
-				if (yield OS.File.exists(OS.Path.join(basePath, relPath))) {
+				if (yield OS.File.exists(OS.Path.join(baseDir, relPath))) {
 					numNewAttachments++;
 					continue;
 				}
@@ -640,62 +788,76 @@ Zotero_Preferences.Attachment_Base_Directory = {
 			// Files within the new base directory need to be updated to use
 			// relative paths (or, if the new base directory is an ancestor or
 			// descendant of the old one, new relative paths)
-			if (attachmentPath && Zotero.File.directoryContains(basePath, attachmentPath)) {
-				Zotero.debug(`Converting ${attachmentPath} to relative path`);
+			if (attachmentPath && Zotero.File.directoryContains(baseDir, attachmentPath)) {
+				Zotero.debug(`Will convert '${attachmentPath}' to relative path`);
 				newAttachmentPaths[attachmentID] = relPath ? attachmentPath : null;
 				numNewAttachments++;
 			}
 			// Existing relative attachments not within the new base directory
 			// will be converted to absolute paths
-			else if (relPath && this.getPath()) {
-				Zotero.debug(`Converting ${relPath} to absolute path`);
+			else if (relPath && isLibraryBaseDirSet) {
+				Zotero.debug(`Will convert '${relPath}' to absolute path`);
 				newAttachmentPaths[attachmentID] = attachmentPath;
 				numOldAttachments++;
 			}
 			else {
-				Zotero.debug(`${attachmentPath} is not within the base directory`);
+				Zotero.debug(`'${attachmentPath}' is not within the base directory for library '${libraryID}': '${baseDir}'`);
 			}
 		}
 		
-		//Confirm change of the base path
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
-		
+		// Confirm change of the base directory
 		var chooseStrPrefix = 'attachmentBasePath.chooseNewPath.';
 		var clearStrPrefix = 'attachmentBasePath.clearBasePath.';
 		var title = Zotero.getString(chooseStrPrefix + 'title');
-		var msg1 = Zotero.getString(chooseStrPrefix + 'message') + "\n\n", msg2 = "", msg3 = "";
+		var messages = [];
 		switch (numNewAttachments) {
 			case 0:
 				break;
-			
+
 			case 1:
-				msg2 += Zotero.getString(chooseStrPrefix + 'existingAttachments.singular') + " ";
+				messages.push(
+					Zotero.getString(chooseStrPrefix + 'existingAttachments.singular')
+				);
 				break;
-			
+
 			default:
-				msg2 += Zotero.getString(chooseStrPrefix + 'existingAttachments.plural', numNewAttachments) + " ";
+				messages.push(
+					Zotero.getString(
+						chooseStrPrefix + 'existingAttachments.plural',
+						numNewAttachments
+					)
+				);
 		}
 		
 		switch (numOldAttachments) {
 			case 0:
 				break;
-			
+
 			case 1:
-				msg3 += Zotero.getString(clearStrPrefix + 'existingAttachments.singular');
+				messages.push(
+					Zotero.getString(clearStrPrefix + 'existingAttachments.singular')
+				);
 				break;
-			
+
 			default:
-				msg3 += Zotero.getString(clearStrPrefix + 'existingAttachments.plural', numOldAttachments);
+				messages.push(
+					Zotero.getString(
+						clearStrPrefix + 'existingAttachments.plural',
+						numOldAttachments
+					)
+				)
 		}
 		
-		
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 		var index = ps.confirmEx(
 			null,
 			title,
-			(msg1 + msg2 + msg3).trim(),
+			messages.length ?
+				Zotero.getString(chooseStrPrefix + 'message') + "\n\n" + messages.join(" ") :
+				Zotero.getString(chooseStrPrefix + 'message'),
 			buttonFlags,
 			Zotero.getString(chooseStrPrefix + 'button'),
 			null,
@@ -709,10 +871,10 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		}
 		
 		// Set new base directory
-		Zotero.debug("Setting base directory to " + basePath);
-		Zotero.Prefs.set('baseAttachmentPath', basePath);
-		Zotero.Prefs.set('saveRelativeAttachmentPath', true);
-		// Resave all attachments on base path (so that their paths become relative)
+		Zotero.Attachments.setBaseDirByLibrary(libraryID, baseDir);
+		Zotero.Attachments.setSaveRelativePathByLibrary(libraryID, true);
+
+		// Resave all attachments on base directory (so that their paths become relative)
 		// and all other relative attachments (so that their paths become absolute)
 		yield Zotero.Utilities.Internal.forEachChunkAsync(
 			Object.keys(newAttachmentPaths),
@@ -721,12 +883,8 @@ Zotero_Preferences.Attachment_Base_Directory = {
 				return Zotero.DB.executeTransaction(function* () {
 					for (let id of chunk) {
 						let attachment = Zotero.Items.get(id);
-						if (newAttachmentPaths[id]) {
-							attachment.attachmentPath = newAttachmentPaths[id];
-						}
-						else {
-							attachment.attachmentPath = attachment.getFilePath();
-						}
+						attachment.attachmentPath =
+							newAttachmentPaths[id] || attachment.getFilePath();
 						yield attachment.save({
 							skipDateModifiedUpdate: true
 						});
@@ -739,7 +897,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 	}),
 	
 	
-	clearPath: Zotero.Promise.coroutine(function* () {
+	clearBaseDirByLibrary: Zotero.Promise.coroutine(function* (libraryID) {
 		// Find all current attachments with relative paths
 		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=? AND path LIKE ?";
 		var params = [
@@ -754,18 +912,24 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		
 		var strPrefix = 'attachmentBasePath.clearBasePath.';
 		var title = Zotero.getString(strPrefix + 'title');
-		var msg = Zotero.getString(strPrefix + 'message');
+		var messages = [Zotero.getString(strPrefix + 'message')];
 		switch (relativeAttachmentIDs.length) {
 			case 0:
 				break;
 			
 			case 1:
-				msg += "\n\n" + Zotero.getString(strPrefix + 'existingAttachments.singular');
+				messages.push(
+					Zotero.getString(strPrefix + 'existingAttachments.singular')
+				);
 				break;
 			
 			default:
-				msg += "\n\n" + Zotero.getString(strPrefix + 'existingAttachments.plural',
-					relativeAttachmentIDs.length);
+				messages.push(
+					Zotero.getString(
+						strPrefix + 'existingAttachments.plural',
+						relativeAttachmentIDs.length
+					)
+				);
 		}
 		
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
@@ -773,7 +937,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		var index = ps.confirmEx(
 			window,
 			title,
-			msg,
+			messages.join("\n\n"),
 			buttonFlags,
 			Zotero.getString(strPrefix + 'button'),
 			null,
@@ -788,8 +952,8 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		
 		// Disable relative path saving and then resave all relative
 		// attachments so that their absolute paths are stored
-		Zotero.debug('Clearing base directory');
-		Zotero.Prefs.set('saveRelativeAttachmentPath', false);
+		Zotero.debug(`Clearing base directory from library ${libraryID}`);
+		Zotero.Attachments.setSaveRelativePathByLibrary(libraryID, false);
 		
 		yield Zotero.Utilities.Internal.forEachChunkAsync(
 			relativeAttachmentIDs,
@@ -798,6 +962,9 @@ Zotero_Preferences.Attachment_Base_Directory = {
 				return Zotero.DB.executeTransaction(function* () {
 					for (let id of chunk) {
 						let attachment = yield Zotero.Items.getAsync(id);
+						if (attachment.libraryID !== libraryID) {
+							continue;
+						}
 						attachment.attachmentPath = attachment.getFilePath();
 						yield attachment.save({
 							skipDateModifiedUpdate: true
@@ -807,23 +974,10 @@ Zotero_Preferences.Attachment_Base_Directory = {
 			}.bind(this)
 		);
 		
-		Zotero.Prefs.set('baseAttachmentPath', '');
+		Zotero.Attachments.setBaseDirByLibrary(libraryID, null);
+
+		return true;
 	}),
-	
-	
-	updateUI: Zotero.Promise.coroutine(function* () {
-		var filefield = document.getElementById('baseAttachmentPath');
-		var path = Zotero.Prefs.get('baseAttachmentPath');
-		Components.utils.import("resource://gre/modules/osfile.jsm");
-		if (yield OS.File.exists(path)) {
-			filefield.file = Zotero.File.pathToFile(path);
-			filefield.label = path;
-		}
-		else {
-			filefield.label = '';
-		}
-		document.getElementById('resetBasePath').disabled = !path;
-	})
 };
 
 

@@ -40,7 +40,6 @@
 			<preference id="pref-automaticScraperUpdates" name="extensions.zotero.automaticScraperUpdates" type="bool"/>
 			<preference id="pref-reportTranslationFailure" name="extensions.zotero.reportTranslationFailure" type="bool"/>
 			
-			<preference id="pref-baseAttachmentPath" name="extensions.zotero.baseAttachmentPath" type="string"/>
 			<preference id="pref-useDataDir" name="extensions.zotero.useDataDir" type="bool"/>
 			<preference id="pref-dataDir" name="extensions.zotero.dataDir" type="string"/>
 			<preference id="pref-debug-output-enableAfterRestart" name="extensions.zotero.debug.store" type="bool"/>
@@ -156,23 +155,9 @@
 						</vbox>
 						
 						<hbox align="center">
-							<label value="&zotero.preferences.attachmentBaseDir.basePath;"/>
-							<filefield id="baseAttachmentPath"
-								preference="pref-baseAttachmentPath"
-								onsyncfrompreference="Zotero_Preferences.Attachment_Base_Directory.updateUI()"
-								preference-editable="true"
-								readonly="true"
-								flex="1"
-								tabindex="-1"/>
-							<button id="baseAttachmentPathButton"
+							<button id="attachmentBaseDirButton"
 								label="&zotero.preferences.attachmentBaseDir.selectBasePath;"
-								oncommand="Zotero_Preferences.Attachment_Base_Directory.choosePath()"/>
-						</hbox>
-						
-						<hbox>
-							<button id="resetBasePath"
-								label="&zotero.preferences.attachmentBaseDir.resetBasePath;"
-								oncommand="Zotero_Preferences.Attachment_Base_Directory.clearPath()"/>
+								oncommand="Zotero_Preferences.Attachment_Base_Directory.manageBaseDirs()"/>
 						</hbox>
 						
 					</groupbox>

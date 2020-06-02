@@ -2196,6 +2196,7 @@ Zotero.Item.prototype.getFilePath = function () {
 			this._updateAttachmentStates(false);
 			return false;
 		}
+
 		// Strip "storage:"
 		path = path.substr(8);
 		
@@ -2213,7 +2214,8 @@ Zotero.Item.prototype.getFilePath = function () {
 	// Linked file with relative path
 	if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE &&
 			path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0) {
-		path = Zotero.Attachments.resolveRelativePath(path);
+		// At this point, item is guaranteed to have a libraryID because it has been saved (._identified)
+		path = Zotero.Attachments.resolveRelativePath(this.libraryID, path);
 		if (!path) {
 			this._updateAttachmentStates(false);
 		}
@@ -2318,7 +2320,7 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 	// Linked file with relative path
 	if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE &&
 			path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0) {
-		path = Zotero.Attachments.resolveRelativePath(path);
+		path = Zotero.Attachments.resolveRelativePath(this.libraryID, path);
 		if (!path) {
 			this._updateAttachmentStates(false);
 			return false;
@@ -2889,20 +2891,24 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentPath', {
 		}
 		
 		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-			if (this._libraryID) {
-				let libraryType = Zotero.Libraries.get(this._libraryID).libraryType;
+			let libraryID = this._libraryID;
+			if (libraryID) {
+				let libraryType = Zotero.Libraries.get(libraryID).libraryType;
 				if (libraryType != 'user') {
 					throw new Error("Linked files can only be added to user library");
 				}
+			} else {
+				Zotero.debug(`'this._libraryID' has not been set, defaulting to 'userLibraryID'`);
+				libraryID = Zotero.Libraries.userLibraryID;
 			}
-			
+
 			// If base directory is enabled, save attachment within as relative path
-			if (Zotero.Prefs.get('saveRelativeAttachmentPath')) {
-				val = Zotero.Attachments.getBaseDirectoryRelativePath(val);
+			if (Zotero.Attachments.getSaveRelativePathByLibrary(libraryID)) {
+				val = Zotero.Attachments.getBaseDirectoryRelativePath(libraryID, val);
 			}
 			// Otherwise, convert relative path to absolute if possible
 			else {
-				val = Zotero.Attachments.resolveRelativePath(val) || val;
+				val = Zotero.Attachments.resolveRelativePath(libraryID, val) || val;
 			}
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
