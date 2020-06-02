@@ -971,6 +971,14 @@ describe("Zotero.Attachments", function() {
 		});
 	});
 	
+	describe("#getFileBaseNameFromItem()", function () {
+		it("should strip HTML tags from title", async function () {
+			var item = createUnsavedDataObject('item', { title: 'Foo <i>Bar</i> Foo<br><br/><br />Bar' });
+			var str = Zotero.Attachments.getFileBaseNameFromItem(item);
+			assert.equal(str, 'Foo Bar Foo Bar');
+		});
+	});
+	
 	describe("#getBaseDirectoryRelativePath()", function () {
 		it("should handle base directory at Windows drive root", function () {
 			Zotero.Prefs.set('baseAttachmentPath', "C:\\");
