@@ -229,6 +229,9 @@ Zotero.Debug = new function () {
 		});
 	});
 	
+	this._setLevel = function(level) {
+		_level = level;
+	}
 	
 	this.getConsoleViewerOutput = function () {
 		var queue = _output.concat(_consoleViewerQueue);

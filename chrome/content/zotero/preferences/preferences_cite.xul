@@ -31,6 +31,7 @@
 ]>
 
 <overlay id="zotero-prefpane-cite-overlay"
+		xmlns:html="http://www.w3.org/1999/xhtml"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<prefpane id="zotero-prefpane-cite"
@@ -52,15 +53,9 @@
 					<groupbox flex="1">
 						<caption label="&zotero.preferences.cite.styles.styleManager;"/>
 						
-						<tree flex="1" id="styleManager" hidecolumnpicker="true" rows="6"
-								onselect="document.getElementById('styleManager-delete').disabled = undefined"
-								onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { Zotero_Preferences.Cite.deleteSelectedStyle(); }">
-							<treecols>
-								<treecol id="styleManager-title" label="&zotero.preferences.cite.styles.styleManager.title;" flex="1"/>
-								<treecol id="styleManager-updated" label="&zotero.preferences.cite.styles.styleManager.updated;"/>
-							</treecols>
-							<treechildren id="styleManager-rows"/>
-						</tree>
+						<hbox class="virtualized-table-container" flex="1" height="300px">
+							<html:div id="styleManager"/>
+						</hbox>
 						<separator class="thin"/>
 						<hbox align="center" flex="1" height="40">
 							<label class="zotero-text-link"

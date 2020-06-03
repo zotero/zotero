@@ -1164,7 +1164,7 @@ Zotero.Annotation.prototype._startDrag = function(e) {
 		me.document.removeEventListener("mousemove", handleDrag, false);
 		me.iframeDoc.removeEventListener("mouseup", endDrag, false);
 		me.document.removeEventListener("mouseup", endDrag, false);
-		me.dragging = false;
+		me.resizing = false;
 	}
 	this.iframeDoc.addEventListener("mouseup", endDrag, false);
 	this.document.addEventListener("mouseup", endDrag, false);

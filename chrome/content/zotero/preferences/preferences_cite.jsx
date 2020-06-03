@@ -27,6 +27,12 @@
 
 import FilePicker from 'zotero/filePicker';
 
+var React = require('react');
+var ReactDom = require('react-dom');
+var VirtualizedTable = require('components/virtualized-table');
+var { IntlProvider } = require('react-intl');
+var { makeRowRenderer } = VirtualizedTable;
+
 Zotero_Preferences.Cite = {
 	wordPluginIDs: new Set([
 		'zoteroOpenOfficeIntegration@zotero.org',
@@ -78,44 +84,59 @@ Zotero_Preferences.Cite = {
 	 * @param {String} cslID Style to select
 	 * @return {Promise}
 	 */
-	refreshStylesList: Zotero.Promise.coroutine(function* (cslID) {
+	refreshStylesList: async function (cslID) {
 		Zotero.debug("Refreshing styles list");
 		
-		var treechildren = document.getElementById('styleManager-rows');
-		while (treechildren.hasChildNodes()) {
-			treechildren.removeChild(treechildren.firstChild);
-		}
+		await Zotero.Styles.init();
 		
-		yield Zotero.Styles.init();
-		var styles = Zotero.Styles.getVisible();
-		var selectIndex = false;
-		styles.forEach(function (style, i) {
-			var treeitem = document.createElement('treeitem');
-			var treerow = document.createElement('treerow');
-			var titleCell = document.createElement('treecell');
-			var updatedCell = document.createElement('treecell');
-			
-			if (style.updated) {
-				var updatedDate = Zotero.Date.formatDate(Zotero.Date.strToDate(style.updated), true);
+		if (!this._tree) {
+			const columns = [
+				{
+					dataKey: "title",
+					label: "zotero.preferences.cite.styles.styleManager.title",
+				},
+				{
+					dataKey: "updated",
+					label: "zotero.preferences.cite.styles.styleManager.updated",
+					fixedWidth: true,
+					width: 150
+				}
+			];
+			var handleKeyDown = (event) => {
+				if (event.key == 'Delete' || Zotero.isMac && event.key == 'Backspace') {
+					Zotero_Preferences.Cite.deleteStyle();
+					return false;
+				}
+			};
+			let elem = (
+				<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
+					<VirtualizedTable
+						getRowCount={() => Zotero.Styles.getVisible().length}
+						id="styleManager-table"
+						ref={ref => this._tree = ref}
+						renderItem={makeRowRenderer(index => Zotero.Styles.getVisible()[index])}
+						showHeader={true}
+						multiSelect={true}
+						columns={columns}
+						staticColumns={true}
+						onSelectionChange={() => document.getElementById('styleManager-delete').disabled = undefined}
+						onKeyDown={handleKeyDown}
+					/>
+				</IntlProvider>
+			);
+			await new Promise(resolve => ReactDom.render(elem, document.getElementById("styleManager"), resolve));
+		}
+		else {
+			this._tree.invalidate();
+		}
+		if (cslID) {
+			var styles = Zotero.Styles.getVisible();
+			var index = styles.findIndex(style => style.styleID == cslID);
+			if (index != -1) {
+				this._tree.selection.select(index);
 			}
-			else {
-				var updatedDate = '';
-			}
-			
-			treeitem.setAttribute('id', 'zotero-csl-' + style.styleID);
-			titleCell.setAttribute('label', style.title);
-			updatedCell.setAttribute('label', updatedDate);
-			
-			treerow.appendChild(titleCell);
-			treerow.appendChild(updatedCell);
-			treeitem.appendChild(treerow);
-			treechildren.appendChild(treeitem);
-			
-			if (cslID == style.styleID) {
-				document.getElementById('styleManager').view.selection.select(i);
-			}
-		});
-	}),
+		}
+	},
 	
 	
 	openStylesPage: function () {
@@ -168,17 +189,10 @@ Zotero_Preferences.Cite = {
 	 **/
 	deleteStyle: Zotero.Promise.coroutine(function* () {
 		// get selected cslIDs
-		var tree = document.getElementById('styleManager');
-		var treeItems = tree.lastChild.childNodes;
+		var styles = Zotero.Styles.getVisible();
 		var cslIDs = [];
-		var start = {};
-		var end = {};
-		var nRanges = tree.view.selection.getRangeCount();
-		for(var i=0; i<nRanges; i++) {
-			tree.view.selection.getRangeAt(i, start, end);
-			for(var j=start.value; j<=end.value; j++) {
-				cslIDs.push(treeItems[j].getAttribute('id').substr(11));
-			}
+		for (let index of this._tree.selection.selected.keys()) {
+			cslIDs.push(styles[index].styleID);
 		}
 		
 		if(cslIDs.length == 0) {

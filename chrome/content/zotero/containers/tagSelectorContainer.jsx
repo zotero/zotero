@@ -29,7 +29,7 @@
 (function () {
 
 const React = require('react');
-const ReactDOM = require('react-dom');
+const ReactDom = require('react-dom');
 const PropTypes = require('prop-types');
 const { IntlProvider } = require('react-intl');
 const TagSelector = require('components/tagSelector.js');
@@ -73,6 +73,16 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	
 	focusTextbox() {
 		this.searchBoxRef.current.focus();
+	}
+
+	componentDidCatch(error, info) {
+		// Async operations might attempt to update the react components
+		// after window close in tests, which will cause unnecessary crashing.
+		if (this._uninitialized) return;
+		Zotero.debug("TagSelectorContainer: React threw an error");
+		Zotero.logError(error);
+		Zotero.debug(info);
+		Zotero.crash();
 	}
 	
 	componentDidUpdate(_prevProps, _prevState) {
@@ -756,13 +766,14 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 				<TagSelectorContainer ref={c => ref = c } {...opts} />
 			</IntlProvider>
 		);
-		ReactDOM.render(elem, domEl);
+		ReactDom.render(elem, domEl);
 		ref.domEl = domEl;
 		return ref;
 	}
 	
 	uninit() {
-		ReactDOM.unmountComponentAtNode(this.domEl);
+		this._uninitialized = true;
+		ReactDom.unmountComponentAtNode(this.domEl);
 		Zotero.Notifier.unregisterObserver(this._notifierID);
 		Zotero.Prefs.unregisterObserver(this._prefObserverID);
 	}

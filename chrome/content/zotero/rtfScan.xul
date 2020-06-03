@@ -2,10 +2,13 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/upgrade.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/bibliography.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <wizard xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 	title="&zotero.rtfScan.title;" width="700" height="550"
+	onload="Zotero_RTFScan._initCitationTree()"
 	id="zotero-rtfScan">
 	
 	<script src="include.js"/>
@@ -52,34 +55,10 @@
 	onpageshow="Zotero_RTFScan.citationsPageShowing()"
 	onpagerewound="return Zotero_RTFScan.citationsPageRewound();">
 		<description width="700">&zotero.rtfScan.citationsPage.description;</description>
-		<tree flex="1" id="tree" hidecolumnpicker="true" onclick="Zotero_RTFScan.treeClick(event)">
-			<treecols>
-				<treecol label="&zotero.rtfScan.citation.label;" id="pdf-col" flex="1" primary="true"/>
-				<splitter class="tree-splitter"/>
-				<treecol label="&zotero.rtfScan.itemName.label;" id="item-col" flex="2"/>
-				<treecol id="action-col" style="width:40px"/>
-			</treecols>
-			<treechildren id="treechildren">
-				<treeitem id="unmapped-citations-item" container="true" open="true" hidden="true">
-					<treerow>
-						<treecell label="&zotero.rtfScan.unmappedCitations.label;"/>
-					</treerow>
-					<treechildren id="unmapped-citations-children"/> 
-				</treeitem>
-				<treeitem id="ambiguous-citations-item" container="true" open="true" hidden="true">
-					<treerow>
-						<treecell label="&zotero.rtfScan.ambiguousCitations.label;"/>
-					</treerow>
-					<treechildren id="ambiguous-citations-children"/>
-				</treeitem>
-				<treeitem id="mapped-citations-item" container="true" open="true" hidden="true">
-					<treerow>
-						<treecell label="&zotero.rtfScan.mappedCitations.label;"/>
-					</treerow>
-					<treechildren id="mapped-citations-children"/>
-				</treeitem>
-			</treechildren>
-		</tree>
+		
+		<hbox class="virtualized-table-container" flex="1" height="500">
+			<html:div id="tree"/>
+		</hbox>
 	</wizardpage>
 	
 	<wizardpage id="style-page" label="&zotero.rtfScan.stylePage.label;"

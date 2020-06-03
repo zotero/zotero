@@ -28,6 +28,11 @@
  */
 
 import FilePicker from 'zotero/filePicker';
+import React from 'react';
+import ReactDom from 'react-dom';
+import VirtualizedTable from 'components/virtualized-table';
+import { IntlProvider } from 'react-intl';
+import { getDomElement } from 'components/icons';
 
 /**
  * Front end for recognizing PDFs
@@ -37,11 +42,24 @@ var Zotero_RTFScan = new function() {
 	const ACCEPT_ICON =  "chrome://zotero/skin/rtfscan-accept.png";
 	const LINK_ICON = "chrome://zotero/skin/rtfscan-link.png";
 	const BIBLIOGRAPHY_PLACEHOLDER = "\\{Bibliography\\}";
-	
+
+	const columns = [
+		{ dataKey: 'rtf', label: "zotero.rtfScan.citation.label", primary: true, flex: 4 },
+		{ dataKey: 'item', label: "zotero.rtfScan.itemName.label", flex: 5 },
+		{ dataKey: 'action', label: "", fixedWidth: true, width: "26px" },
+	];
+	var ids = 0;
+	var tree;
+	this._rows = [
+		{ id: 'unmapped', rtf: Zotero.Intl.strings['zotero.rtfScan.unmappedCitations.label'], collapsed: false },
+		{ id: 'ambiguous', rtf: Zotero.Intl.strings['zotero.rtfScan.ambiguousCitations.label'], collapsed: false },
+		{ id: 'mapped', rtf: Zotero.Intl.strings['zotero.rtfScan.mappedCitations.label'], collapsed: false },
+	];
+	this._rowMap = {};
+	this._rows.forEach((row, index) => this._rowMap[row.id] = index);
+
 	var inputFile = null, outputFile = null;
-	var unmappedCitationsItem, ambiguousCitationsItem, mappedCitationsItem;
-	var unmappedCitationsChildren, ambiguousCitationsChildren, mappedCitationsChildren;
-	var citations, citationItemIDs, allCitedItemIDs, contents;
+	var citations, citationItemIDs, contents;
 	
 	/** INTRO PAGE UI **/
 	
@@ -127,28 +145,31 @@ var Zotero_RTFScan = new function() {
 	/**
 	 * Called when second page is shown.
 	 */
-	this.scanPageShowing = function() {
+	this.scanPageShowing = async function () {
 		// can't advance
 		document.documentElement.canAdvance = false;
 		
 		// wait a ms so that UI thread gets updated
-		window.setTimeout(function() { _scanRTF() }, 1);
-	}
+		try {
+			await this._scanRTF();
+		}
+		catch (e) {
+			Zotero.logError(e);
+			Zotero.debug(e);
+		}
+	};
 	
 	/**
 	 * Scans file for citations, then proceeds to next wizard page.
 	 */
-	var _scanRTF = Zotero.Promise.coroutine(function* () {
+	this._scanRTF = async () => {
 		// set up globals
 		citations = [];
 		citationItemIDs = {};
 	
-		unmappedCitationsItem = document.getElementById("unmapped-citations-item");
-		ambiguousCitationsItem = document.getElementById("ambiguous-citations-item");
-		mappedCitationsItem = document.getElementById("mapped-citations-item");
-		unmappedCitationsChildren = document.getElementById("unmapped-citations-children");
-		ambiguousCitationsChildren = document.getElementById("ambiguous-citations-children");
-		mappedCitationsChildren = document.getElementById("mapped-citations-children");
+		let unmappedRow = this._rows[this._rowMap['unmapped']];
+		let ambiguousRow = this._rows[this._rowMap['ambiguous']];
+		let mappedRow = this._rows[this._rowMap['mapped']];
 		
 		// set up regular expressions
 		// this assumes that names are >=2 chars or only capital initials and that there are no
@@ -165,57 +186,60 @@ var Zotero_RTFScan = new function() {
 		contents = Zotero.File.getContents(inputFile).replace(/([^\\\r])\r?\n/, "$1 ").replace("\\'92", "'", "g").replace("\\rquote ", "’");
 		var m;
 		var lastCitation = false;
-		while((m = citationRe.exec(contents))) {
+		while ((m = citationRe.exec(contents))) {
 			// determine whether suppressed or standard regular expression was used
-			if(m[2]) {	// standard parenthetical
+			if (m[2]) {	// standard parenthetical
 				var citationString = m[2];
 				var creators = m[3];
 				var etAl = !!m[4];
 				var title = m[5];
 				var date = m[6];
 				var pages = m[7];
-				var start = citationRe.lastIndex-m[0].length;
-				var end = citationRe.lastIndex+2;
-			} else {	// suppressed
-				var citationString = m[8];
-				var creators = m[9];
-				var etAl = !!m[10];
-				var title = false;
-				var date = m[12];
-				var pages = false;
-				var start = citationRe.lastIndex-m[11].length;
-				var end = citationRe.lastIndex;
+				var start = citationRe.lastIndex - m[0].length;
+				var end = citationRe.lastIndex + 2;
+			}
+			else {	// suppressed
+				citationString = m[8];
+				creators = m[9];
+				etAl = !!m[10];
+				title = false;
+				date = m[12];
+				pages = false;
+				start = citationRe.lastIndex - m[11].length;
+				end = citationRe.lastIndex;
 			}
 			citationString = citationString.replace("\\{", "{", "g").replace("\\}", "}", "g");
 			var suppressAuthor = !m[2];
 			
-			if(lastCitation && lastCitation.end >= start) {
+			if (lastCitation && lastCitation.end >= start) {
 				// if this citation is just an extension of the last, add items to it
 				lastCitation.citationStrings.push(citationString);
 				lastCitation.pages.push(pages);
 				lastCitation.end = end;
-			} else {
+			}
+			else {
 				// otherwise, add another citation
-				var lastCitation = {"citationStrings":[citationString], "pages":[pages], "start":start,
-					"end":end, "suppressAuthor":suppressAuthor};
+				lastCitation = { citationStrings: [citationString], pages: [pages],
+					start, end, suppressAuthor };
 				citations.push(lastCitation);
 			}
 			
 			// only add each citation once
-			if(citationItemIDs[citationString]) continue;
-			Zotero.debug("Found citation "+citationString);
+			if (citationItemIDs[citationString]) continue;
+			Zotero.debug("Found citation " + citationString);
 			
 			// for each individual match, look for an item in the database
 			var s = new Zotero.Search;
-			creators = creators.replace(".", "");			
+			creators = creators.replace(".", "");
 			// TODO: localize "et al." term
 			creators = creators.split(creatorSplitRe);
 			
-			for(var i=0; i<creators.length; i++) {
-				if(!creators[i]) {
-					if(i == creators.length-1) {
+			for (let i = 0; i < creators.length; i++) {
+				if (!creators[i]) {
+					if (i == creators.length - 1) {
 						break;
-					} else {
+					}
+					else {
 						creators.splice(i, 1);
 					}
 				}
@@ -224,73 +248,66 @@ var Zotero_RTFScan = new function() {
 				var lastName = spaceIndex == -1 ? creators[i] : creators[i].substr(spaceIndex+1);
 				s.addCondition("lastName", "contains", lastName);
 			}
-			if(title) s.addCondition("title", "contains", title);
+			if (title) s.addCondition("title", "contains", title);
 			s.addCondition("date", "is", date);
-			var ids = yield s.search();
-			Zotero.debug("Mapped to "+ids);
+			var ids = await s.search();
+			Zotero.debug("Mapped to " + ids);
 			citationItemIDs[citationString] = ids;
 			
-			if(!ids) {	// no mapping found
-				unmappedCitationsChildren.appendChild(_generateItem(citationString, ""));
-				unmappedCitationsItem.hidden = undefined;
-			} else {	// some mapping found
-				var items = yield Zotero.Items.getAsync(ids);
-				if(items.length > 1) {
+			if (!ids) {	// no mapping found
+				let row = _generateItem(citationString, "");
+				row.parent = unmappedRow;
+				this._insertRows(row, this._rowMap.ambiguous);
+			}
+			else {	// some mapping found
+				var items = await Zotero.Items.getAsync(ids);
+				if (items.length > 1) {
 					// check to see how well the author list matches the citation
 					var matchedItems = [];
-					for(var i=0; i<items.length; i++) {
-						yield items[i].loadDataType('creators');
-						if(_matchesItemCreators(creators, items[i])) matchedItems.push(items[i]);
+					for (let item of items) {
+						await item.loadAllData();
+						if (_matchesItemCreators(creators, item)) matchedItems.push(item);
 					}
 					
-					if(matchedItems.length != 0) items = matchedItems;
+					if (matchedItems.length != 0) items = matchedItems;
 				}
 				
-				if(items.length == 1) {	// only one mapping					
-					mappedCitationsChildren.appendChild(_generateItem(citationString, items[0].getField("title")));
+				if (items.length == 1) {	// only one mapping
+					await items[0].loadAllData();
+					let row = _generateItem(citationString, items[0].getField("title"));
+					row.parent = mappedRow;
+					this._insertRows(row, this._rows.length);
 					citationItemIDs[citationString] = [items[0].id];
-					mappedCitationsItem.hidden = undefined;
-				} else {				// ambiguous mapping
-					var treeitem = _generateItem(citationString, "");
+				}
+				else {				// ambiguous mapping
+					let row = _generateItem(citationString, "");
+					row.parent = ambiguousRow;
+					this._insertRows(row, this._rowMap.mapped);
 					
 					// generate child items
-					var treeitemChildren = document.createElement('treechildren');
-					treeitem.appendChild(treeitemChildren);
-					for(var i=0; i<items.length; i++) {
-						treeitemChildren.appendChild(_generateItem("", items[i].getField("title"), true));
+					let children = [];
+					for (let item of items) {
+						let childRow = _generateItem("", item.getField("title"), true);
+						childRow.parent = row;
+						children.push(childRow);
 					}
-					
-					treeitem.setAttribute("container", "true");
-					treeitem.setAttribute("open", "true");
-					ambiguousCitationsChildren.appendChild(treeitem);
-					ambiguousCitationsItem.hidden = undefined;
+					this._insertRows(children, this._rowMap[row.id] + 1);
 				}
 			}
 		}
+		tree.invalidate();
 		
 		// when scanning is complete, go to citations page
 		document.documentElement.canAdvance = true;
 		document.documentElement.advance();
-	});
+	};
 	
-	function _generateItem(citationString, itemName, accept) {
-		var treeitem = document.createElement('treeitem');
-		var treerow = document.createElement('treerow');
-		
-		var treecell = document.createElement('treecell');
-		treecell.setAttribute("label", citationString);
-		treerow.appendChild(treecell);
-		
-		var treecell = document.createElement('treecell');
-		treecell.setAttribute("label", itemName);
-		treerow.appendChild(treecell);
-		
-		var treecell = document.createElement('treecell');
-		treecell.setAttribute("src", accept ? ACCEPT_ICON : LINK_ICON);
-		treerow.appendChild(treecell);
-		
-		treeitem.appendChild(treerow);		
-		return treeitem;
+	function _generateItem(citationString, itemName, action) {
+		return {
+			rtf: citationString,
+			item: itemName,
+			action
+		};
 	}
 	
 	function _matchesItemCreators(creators, item, etAl) {
@@ -366,28 +383,23 @@ var Zotero_RTFScan = new function() {
 	 * Called when the citations page is rewound. Removes all citations from the list, clears
 	 * globals, and returns to intro page.
 	 */
-	this.citationsPageRewound = function() {
+	this.citationsPageRewound = function () {
 		// skip back to intro page
 		document.documentElement.currentPage = document.getElementById('intro-page');
 		
-		// remove children from tree
-		while(unmappedCitationsChildren.hasChildNodes()) {
-			unmappedCitationsChildren.removeChild(unmappedCitationsChildren.firstChild);
-		}
-		while(ambiguousCitationsChildren.hasChildNodes()) {
-			ambiguousCitationsChildren.removeChild(ambiguousCitationsChildren.firstChild);
-		}
-		while(mappedCitationsChildren.hasChildNodes()) {
-			mappedCitationsChildren.removeChild(mappedCitationsChildren.firstChild);
-		}
-		// hide headings
-		unmappedCitationsItem.hidden = ambiguousCitationsItem.hidden = mappedCitationsItem.hidden = true;
+		this._rows = [
+			{ id: 'unmapped', rtf: Zotero.Intl.strings['zotero.rtfScan.unmappedCitations.label'], collapsed: false },
+			{ id: 'ambiguous', rtf: Zotero.Intl.strings['zotero.rtfScan.ambiguousCitations.label'], collapsed: false },
+			{ id: 'mapped', rtf: Zotero.Intl.strings['zotero.rtfScan.mappedCitations.label'], collapsed: false },
+		];
+		this._rowMap = {};
+		this._rows.forEach((row, index) => this._rowMap[row.id] = index);
 		
 		return false;
 	}
 	
 	/**
-	 * Called when a tree item is clicked to remap a citation, or accept a suggestion for an 
+	 * Called when a tree item is clicked to remap a citation, or accept a suggestion for an
 	 * ambiguous citation
 	 */
 	this.treeClick = function(event) {
@@ -400,53 +412,7 @@ var Zotero_RTFScan = new function() {
 		// figure out which item this corresponds to
 		row = row.value;
 		var level = tree.view.getLevel(row);
-		if(col.value.index == 2 && level > 0) {
-			var iconColumn = col.value;
-			var itemNameColumn = iconColumn.getPrevious();
-			var citationColumn = itemNameColumn.getPrevious();
-			
-			if(level == 2) {		// ambiguous citation item
-				// get relevant information
-				var parentIndex = tree.view.getParentIndex(row);
-				var citation = tree.view.getCellText(parentIndex, citationColumn);
-				var itemName = tree.view.getCellText(row, itemNameColumn);
-				
-				// update item name on parent and delete children
-				tree.view.setCellText(parentIndex, itemNameColumn, itemName);
-				var treeitem = tree.view.getItemAtIndex(row);
-				treeitem.parentNode.parentNode.removeChild(treeitem.parentNode);
-				
-				// update array
-				citationItemIDs[citation] = [citationItemIDs[citation][row-parentIndex-1]];
-			} else {				// mapped or unmapped citation, or ambiguous citation parent
-				var citation = tree.view.getCellText(row, citationColumn);
-				var io = {singleSelection:true};
-				if(citationItemIDs[citation] && citationItemIDs[citation].length == 1) {	// mapped citation
-					// specify that item should be selected in window
-					io.select = citationItemIDs[citation][0];
-				}
-				
-				window.openDialog('chrome://zotero/content/selectItemsDialog.xul', '', 'chrome,modal', io);
-				
-				if(io.dataOut && io.dataOut.length) {
-					var selectedItemID = io.dataOut[0];
-					var selectedItem = Zotero.Items.get(selectedItemID);
-					
-					var treeitem = tree.view.getItemAtIndex(row);
-					
-					// remove any children (if ambiguous)
-					var children = treeitem.getElementsByTagName("treechildren");
-					if(children.length) treeitem.removeChild(children[0]);
-					
-					// update item name
-					tree.view.setCellText(row, itemNameColumn, selectedItem.getField("title"));
-					
-					// update array
-					citationItemIDs[citation] = [selectedItemID];
-				}
-			}
-		}
-		_refreshCanAdvance();
+		
 	}
 	
 	/**
@@ -471,7 +437,8 @@ var Zotero_RTFScan = new function() {
 	/**
 	 * Called when style page is shown to add styles to listbox.
 	 */
-	this.stylePageShowing = function() {
+	this.stylePageShowing = async function() {
+		await Zotero.Styles.init();
 		Zotero_File_Interface_Bibliography.init({
 			supportedNotes: ['footnotes', 'endnotes']
 		});
@@ -607,4 +574,210 @@ var Zotero_RTFScan = new function() {
 		document.documentElement.canAdvance = true;
 		document.documentElement.advance();
 	}
+	
+	this._onTwistyMouseUp = (event, index) => {
+		const row = this._rows[index];
+		if (!row.collapsed) {
+			// Store children rows on the parent when collapsing
+			row.children = [];
+			const depth = this._getRowLevel(index);
+			for (let childIndex = index + 1; childIndex < this._rows.length && this._getRowLevel(this._rows[childIndex]) > depth; childIndex++) {
+				row.children.push(this._rows[childIndex]);
+			}
+			// And then remove them
+			this._removeRows(row.children.map((_, childIndex) => index + 1 + childIndex));
+		}
+		else {
+			// Insert children rows from the ones stored on the parent
+			this._insertRows(row.children, index + 1);
+			delete row.children;
+		}
+		row.collapsed = !row.collapsed;
+		tree.invalidate();
+	};
+	
+	this._onActionMouseUp = (event, index) => {
+		let row = this._rows[index];
+		if (!row.parent) return;
+		let level = this._getRowLevel(row);
+		if (level == 2) {		// ambiguous citation item
+			let parentIndex = this._rowMap[row.parent.id];
+			// Update parent item
+			row.parent.item = row.item;
+			
+			// Remove children
+			let children = [];
+			for (let childIndex = parentIndex + 1; childIndex < this._rows.length && this._getRowLevel(this._rows[childIndex]) >= level; childIndex++) {
+				children.push(this._rows[childIndex]);
+			}
+			this._removeRows(children.map((_, childIndex) => parentIndex + 1 + childIndex));
+
+			// Move citation to mapped rows
+			row.parent.parent = this._rows[this._rowMap.mapped];
+			this._removeRows(parentIndex);
+			this._insertRows(row.parent, this._rows.length);
+
+			// update array
+			citationItemIDs[row.parent.rtf] = [citationItemIDs[row.parent.rtf][index-parentIndex-1]];
+		}
+		else {				// mapped or unmapped citation, or ambiguous citation parent
+			var citation = row.rtf;
+			var io = { singleSelection: true };
+			if (citationItemIDs[citation] && citationItemIDs[citation].length == 1) {	// mapped citation
+				// specify that item should be selected in window
+				io.select = citationItemIDs[citation][0];
+			}
+
+			window.openDialog('chrome://zotero/content/selectItemsDialog.xul', '', 'chrome,modal', io);
+
+			if (io.dataOut && io.dataOut.length) {
+				var selectedItemID = io.dataOut[0];
+				var selectedItem = Zotero.Items.get(selectedItemID);
+				// update item name
+				row.item = selectedItem.getField("title");
+
+				// Remove children
+				let children = [];
+				for (let childIndex = index + 1; childIndex < this._rows.length && this._getRowLevel(this._rows[childIndex]) > level; childIndex++) {
+					children.push(this._rows[childIndex]);
+				}
+				this._removeRows(children.map((_, childIndex) => index + 1 + childIndex));
+				
+				if (row.parent.id != 'mapped') {
+					// Move citation to mapped rows
+					row.parent = this._rows[this._rowMap.mapped];
+					this._removeRows(index);
+					this._insertRows(row, this._rows.length);
+				}
+
+				// update array
+				citationItemIDs[citation] = [selectedItemID];
+			}
+		}
+		tree.invalidate();
+		_refreshCanAdvance();
+	};
+	
+	this._insertRows = (rows, beforeRow) => {
+		if (!Array.isArray(rows)) {
+			rows = [rows];
+		}
+		this._rows.splice(beforeRow, 0, ...rows);
+		rows.forEach(row => row.id = ids++);
+		for (let row of rows) {
+			row.id = ids++;
+		}
+		// Refresh the row map
+		this._rowMap = {};
+		this._rows.forEach((row, index) => this._rowMap[row.id] = index);
+	};
+	
+	this._removeRows = (indices) => {
+		if (!Array.isArray(indices)) {
+			indices = [indices];
+		}
+		// Reverse sort so we can safely splice out the entries from the rows array
+		indices.sort((a, b) => b - a);
+		for (const index of indices) {
+			this._rows.splice(index, 1);
+		}
+		// Refresh the row map
+		this._rowMap = {};
+		this._rows.forEach((row, index) => this._rowMap[row.id] = index);
+	};
+	
+	this._getRowLevel = (row, depth=0) => {
+		if (typeof row == 'number') {
+			row = this._rows[row];
+		}
+		if (!row.parent) {
+			return depth;
+		}
+		return this._getRowLevel(row.parent, depth+1);
+	}
+	
+	this._renderItem = (index, selection, oldDiv=null, columns) => {
+		const row = this._rows[index];
+		let div;
+		if (oldDiv) {
+			div = oldDiv;
+			div.innerHTML = "";
+		}
+		else {
+			div = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
+			div.className = "row";
+		}
+
+		for (const column of columns) {
+			if (column.primary) {
+				let twisty;
+				if (row.children || (this._rows[index + 1] && this._rows[index + 1].parent == row)) {
+					twisty = getDomElement("IconTwisty");
+					twisty.classList.add('twisty');
+					if (!row.collapsed) {
+						twisty.classList.add('open');
+					}
+					twisty.style.pointerEvents = 'auto';
+					twisty.addEventListener('mousedown', event => event.stopPropagation());
+					twisty.addEventListener('mouseup', event => this._onTwistyMouseUp(event, index),
+						{ passive: true });
+				}
+				else {
+					twisty = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+					twisty.classList.add("spacer-twisty");
+				}
+				
+				let textSpan = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+				textSpan.className = "cell-text";
+				textSpan.innerText = row[column.dataKey] || "";
+				
+				let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+				span.className = `cell primary ${column.className}`;
+				span.appendChild(twisty);
+				span.appendChild(textSpan);
+				span.style.paddingLeft = (5 + 20 * this._getRowLevel(row)) + 'px';
+				div.appendChild(span);
+			}
+			else if (column.dataKey == 'action') {
+				let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+				span.className = `cell action ${column.className}`;
+				if (row.parent) {
+					if (row.action) {
+						span.appendChild(getDomElement('IconRTFScanAccept'));
+					}
+					else {
+						span.appendChild(getDomElement('IconRTFScanLink'));
+					}
+					span.addEventListener('mouseup', e => this._onActionMouseUp(e, index), { passive: true });
+					span.style.pointerEvents = 'auto';
+				}
+				
+				div.appendChild(span);
+			}
+			else {
+				let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+				span.className = `cell ${column.className}`;
+				span.innerText = row[column.dataKey] || "";
+				div.appendChild(span);
+			}
+		}
+		return div;
+	};
+	
+	this._initCitationTree = function () {
+		const domEl = document.querySelector('#tree');
+		const elem = (
+			<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
+				<VirtualizedTable
+					getRowCount={() => this._rows.length}
+					id="rtfScan-table"
+					ref={ref => tree = ref}
+					renderItem={this._renderItem}
+					showHeader={true}
+					columns={columns}
+				/>
+			</IntlProvider>
+		);
+		return new Promise(resolve => ReactDom.render(elem, domEl, resolve));
+	};
 }

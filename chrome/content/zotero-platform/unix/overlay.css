@@ -1,22 +1,3 @@
-/*
- Override selected, unfocused tree row highlight color, which is too similar to the alternating
- row color by default
-*/
-#zotero-collections-tree treechildren::-moz-tree-row(selected),
-#zotero-items-tree treechildren::-moz-tree-row(selected) {
-	background-color: #D4D4D4;
-}
-
-#zotero-collections-tree treechildren::-moz-tree-row(selected, focus),
-#zotero-items-tree treechildren::-moz-tree-row(selected, focus) {
-	background-color: Highlight;
-}
-
-#zotero-collections-tree treechildren::-moz-tree-row {
-	height: 1.3em;
-}
-
-
 @media (min-resolution: 1.25dppx) {
 	#zotero-pane .toolbarbutton-icon {
 		width: 16px;

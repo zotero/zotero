@@ -4,81 +4,10 @@
 	overflow: hidden;
 }
 
-/* Why is this necessary? */
-#zotero-collections-tree treechildren::-moz-tree-image,
-#zotero-items-tree treechildren::-moz-tree-image {
-	margin-right: 5px;
-}
-
 #zotero-collections-pane
 {
 	min-width: 150px;
 	width: 250px;
-}
-
-#zotero-collections-tree {
-	min-height: 5.2em;
-}
-
-#zotero-collections-tree treechildren::-moz-tree-row {
-	height: 1.7em;
-}
-
-/* As of Fx37, the tree doesn't scale HiDPI images properly on Windows and Linux */
-#zotero-collections-tree treechildren::-moz-tree-image,
-#zotero-items-tree treechildren::-moz-tree-image {
-	height: 16px;
-}
-
-#zotero-collections-tree treechildren::-moz-tree-image(primary)
-{
-	margin-right: 5px;
-}
-
-#zotero-collections-tree treechildren::-moz-tree-separator {
-	border: none;
-}
-
-#zotero-collections-tree treechildren::-moz-tree-twisty(notwisty),
-#zotero-collections-tree treechildren::-moz-tree-twisty(header) {
-	width: 0;
-}
-
-/* Set by setHighlightedRows() and getRowProperties() in collectionTreeView.js) */
-#zotero-collections-tree treechildren::-moz-tree-row(highlighted)
-{
-	background: #FFFF99 !important;
-}
-
-#zotero-items-column-hasAttachment, #zotero-items-column-numNotes {
-	min-width: 21px;
-}
-
-#zotero-items-column-hasAttachment {
-	list-style-image: url(chrome://zotero/skin/attach-small.png);
-}
-
-#zotero-items-column-hasAttachment .treecol-icon {
-	width: 13px;
-}
-
-#zotero-items-column-numNotes {
-	list-style-image: url(chrome://zotero/skin/treeitem-note-small.png);
-}
-
-#zotero-items-column-numNotes .treecol-icon {
-	width: 12px;
-}
-
-@media (min-resolution: 1.25dppx) {
-	.tree-columnpicker-icon {
-		list-style-image: url(chrome://zotero/skin/firefox/columnpicker@2x.gif);
-		width: 14px;
-	}
-}
-
-#zotero-items-column-numNotes {
-	text-align: center;
 }
 
 #zotero-items-tree treechildren::-moz-tree-image(hasAttachment, pie)
@@ -219,75 +148,37 @@
 #zotero-items-tree treechildren::-moz-tree-image(selected, hasAttachment, pie63) { -moz-image-region: rect(32px, 2016px, 64px, 1984px); }
 #zotero-items-tree treechildren::-moz-tree-image(selected, hasAttachment, pie64) { -moz-image-region: rect(32px, 2048px, 64px, 2016px); }
 
-/* Style search results, display non-matches in gray */
-#zotero-items-tree treechildren::-moz-tree-cell-text(contextRow) {
-	color: gray;
-}
-
-#zotero-items-tree treechildren::-moz-tree-cell-text(contextRow, selected, focus) {
-	/* This is the default color, not the (platform-specific) highlight color, but at least it
-	   helps to differentiate when clicking on a context row. */
-	color: inherit;
-}
-
-/* Style unread items/collections in bold */
-#zotero-items-tree treechildren::-moz-tree-cell-text(unread),
-#zotero-collections-tree treechildren::-moz-tree-cell-text(unread) {
-	font-weight: bold;
-}
-
-#zotero-items-pane
-{
-	min-width: 290px;
-	min-height: 150px;
-}
-
-/* Used for intro text */
-#zotero-items-pane-message-box {
-	overflow-y: auto;
-	cursor: default;
-}
-
-#zotero-items-pane-message-box div {
+.items-tree-message div {
 	padding: 0 35px;
 }
 
-#zotero-items-pane-message-box p {
+.items-tree-message p {
 	max-width: 800px;
 	font-size: 1.45em;
 	line-height: 1.7em;
 	text-align: left;
 }
 
-#zotero-items-pane-message-box div.publications p {
+.items-tree-message div.publications p {
 	font-size: 1.2em;
 }
 
 /* Increase size when window is wider */
-#zotero-pane.width-1000 #zotero-items-pane-message-box div.publications p {
+#zotero-pane.width-1000 .items-tree-message div.publications p {
 	font-size: 1.35em;
 }
 
-#zotero-items-pane-message-box span.text-link {
+.items-tree-message span.text-link {
 	color: rgb(0, 149, 221);
 	cursor: pointer;
 	text-decoration: underline;
-}
-
-#zotero-items-pane-message-box {
-	-moz-appearance: listbox;
-	text-align: center;
-	padding: 20px;
-}
-
-#zotero-items-pane-message-box description:not(:first-child) {
-	margin-top: .75em;
 }
 
 #zotero-item-pane
 {
 	width: 338px;
 	min-width: 338px;
+	min-height: 200px;
 	overflow-y: hidden;
 }
 

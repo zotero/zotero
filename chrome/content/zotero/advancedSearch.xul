@@ -3,6 +3,7 @@
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 
 <!DOCTYPE window [
 	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd">
@@ -17,8 +18,9 @@
 	orient="vertical"
 	persist="screenX screenY width height"
 	onload="ZoteroAdvancedSearch.onLoad()"
-	onunload="ZoteroAdvancedSearch.onUnload()"
+	onunload="ZoteroAdvancedSearch.onUnload();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 	windowtype="zotero:search">
 	
 	<script src="include.js"/>
@@ -34,24 +36,9 @@
 				<button id="zotero-search-save" label="&zotero.search.saveSearch;" oncommand="ZoteroAdvancedSearch.save()"/>
 			</hbox>
 		</vbox>
-		
-		<tree id="zotero-items-tree" flex="1" hidecolumnpicker="true" seltype="multiple"
-				ondblclick="ZoteroAdvancedSearch.onDblClick(event, this)"
-				ondragstart="if (event.target.localName == 'treechildren') { ZoteroAdvancedSearch.itemsView.onDragStart(event); }">
-			<treecols>
-				<treecol
-					id="zotero-items-column-title" primary="true"
-					label="&zotero.items.title_column;"
-					flex="4" persist="width ordinal hidden sortActive sortDirection"/>
-				<splitter class="tree-splitter"/>
-				<treecol
-					id="zotero-items-column-firstCreator"
-					label="&zotero.items.creator_column;"
-					flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-				<splitter class="tree-splitter"/>
-			</treecols>
-			<treechildren alternatingbackground="true"/>
-		</tree>
+		<hbox class="virtualized-table-container" flex="1">
+			<html:div id="zotero-items-tree"/>
+		</hbox>
 	</vbox>
 	
 	<keyset>

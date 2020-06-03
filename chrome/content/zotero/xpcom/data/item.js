@@ -3725,38 +3725,20 @@ Zotero.Item.prototype.getImageSrc = function() {
 }
 
 
-Zotero.Item.prototype.getImageSrcWithTags = Zotero.Promise.coroutine(function* () {
-	//Zotero.debug("Generating tree image for item " + this.id);
-	
-	var uri = this.getImageSrc();
-	
-	var retracted = Zotero.Retractions.isRetracted(this);
-	
+Zotero.Item.prototype.getTagColors = function () {
 	var tags = this.getTags();
-	if (!tags.length && !retracted) {
-		return uri;
-	}
+	if (!tags.length) return [];
 	
-	var colorData = [];
-	if (tags.length) {
-		let tagColors = Zotero.Tags.getColors(this.libraryID);
-		for (let tag of tags) {
-			let data = tagColors.get(tag.tag);
-			if (data) {
-				colorData.push(data);
-			}
+	let colorData = [];
+	let tagColors = Zotero.Tags.getColors(this.libraryID);
+	for (let tag of tags) {
+		let data = tagColors.get(tag.tag);
+		if (data) {
+			colorData.push(data);
 		}
-		if (!colorData.length && !retracted) {
-			return uri;
-		}
-		colorData.sort(function (a, b) {
-			return a.position - b.position;
-		});
 	}
-	var colors = colorData.map(val => val.color);
-	
-	return Zotero.Tags.generateItemsListImage(colors, uri, retracted);
-});
+	return colorData.sort((a, b) => a.position - b.position).map(val => val.color);
+};
 
 
 

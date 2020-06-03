@@ -306,37 +306,6 @@ input {
 	background-color:transparent;
 }
 
-#zotero-items-tree
-{
-	-moz-appearance: none;
-	border: none;
-	margin: 0;
-	padding: 0;
-}
-
-#zotero-items-tree treechildren::-moz-tree-cell,
-#zotero-items-tree treechildren::-moz-tree-column {
-  border-right: 1px solid #d7dad7;
-}
-
-treechildren::-moz-tree-twisty {
-	-moz-appearance: none;
-	width: 16px;
-	height: 16px;
-	list-style-image: url("chrome://zotero/skin/mac/twisty.svg");
-	-moz-padding-start: 5px;
-	-moz-padding-end: 6px;
-}
-
-treechildren::-moz-tree-twisty(open) {
-	-moz-appearance: none;
-	width: 16px;
-	height: 16px;
-	list-style-image: url("chrome://zotero/skin/mac/twisty-open.svg");
-	-moz-padding-start: 4px;
-	-moz-padding-end: 7px;
-}
-
 /* How to get active twisty?
 treechildren::-moz-tree-twisty(active) {
 	-moz-appearance: none;

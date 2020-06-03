@@ -60,7 +60,7 @@ var Zotero_LocateMenu = new function() {
 		}
 					
 		// add separator at end if necessary
-		if(locateMenu.lastChild.tagName !== "menuseparator") {
+		if(locateMenu.lastChild && locateMenu.lastChild.tagName !== "menuseparator") {
 			locateMenu.appendChild(document.createElement("menuseparator"));
 		}
 		
