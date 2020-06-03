@@ -827,6 +827,12 @@ class VirtualizedTable extends React.Component {
 		this._jsWindow.destroy();
 	}
 	
+	componentDidUpdate(prevProps) {
+		if (this.props.id !== prevProps.id) {
+			this._columns = new Columns(this);
+		}
+	}
+	
 	_setAlternatingRows() {
 		if (this.props.alternatingRowColors) {
 			this._jsWindow.innerElem.style.background = `

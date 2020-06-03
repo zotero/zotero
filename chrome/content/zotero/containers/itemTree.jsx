@@ -2736,13 +2736,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		
 		const visibilityGroup = this.collectionTreeRow.visibilityGroup;
-		const prefKey = this.id + "-" + visibilityGroup;
+		const prefKey = this.id;
 		if (this._columnsId == prefKey) {
 			return this._columns;
 		}
 		
 		this._columnsId = prefKey;
 		this._columns = [];
+		this._columnPrefs = null;
 		
 		let columnsSettings = this._getColumnPrefs();
 
