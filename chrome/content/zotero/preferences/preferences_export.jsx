@@ -25,6 +25,12 @@
 
 "use strict";
 
+var React = require('react');
+var ReactDom = require('react-dom');
+var VirtualizedTable = require('components/virtualized-table');
+var { IntlProvider } = require('react-intl');
+var { makeRowRenderer } = VirtualizedTable;
+
 Zotero_Preferences.Export = {
 	init: Zotero.Promise.coroutine(function* () {
 		this.updateQuickCopyInstructions();
@@ -191,29 +197,28 @@ Zotero_Preferences.Export = {
 		document.getElementById('quickCopy-delete').disabled = false;
 	},
 	
-	showQuickCopySiteEditor: Zotero.Promise.coroutine(function* (index) {
-		var treechildren = document.getElementById('quickCopy-siteSettings-rows');
-		
-		var formattedName = document.getElementById('zotero-quickCopy-menu').label; 
+	showQuickCopySiteEditor: async function () {
+		const index = this._tree.selection.focused;
+		var formattedName = document.getElementById('zotero-quickCopy-menu').label;
 		var locale = this._lastSelectedLocale;
 		var asHTML = document.getElementById('zotero-quickCopy-copyAsHTML').checked;
 		
-		if (index !== undefined && index > -1 && index < treechildren.childNodes.length) {
-			var treerow = treechildren.childNodes[index].firstChild;
-			var domain = treerow.childNodes[0].getAttribute('label');
-			formattedName = treerow.childNodes[1].getAttribute('label');
-			locale = treerow.childNodes[2].getAttribute('label');
-			asHTML = treerow.childNodes[3].getAttribute('label') !== '';
+		if (index !== undefined && index > -1 && index < this._rows.length) {
+			var row = this._rows[index];
+			var domain = row.domain;
+			formattedName = row.format;
+			locale = row.locale;
+			asHTML = row.copyAsHTML;
 		}
 		
-		var format = yield Zotero.QuickCopy.getSettingFromFormattedName(formattedName);
+		var format = await Zotero.QuickCopy.getSettingFromFormattedName(formattedName);
 		if (asHTML) {
 			format = format.replace('bibliography=', 'bibliography/html=');
 		}
 		
 		var styles = Zotero.Styles.getVisible();
 		var translation = new Zotero.Translate("export");
-		var translators = yield translation.getTranslators();
+		var translators = await translation.getTranslators();
 		
 		var io = { domain, format, locale, asHTML, ok: false, styles, translators };
 		window.openDialog('chrome://zotero/content/preferences/quickCopySiteEditor.xul',
@@ -224,63 +229,95 @@ Zotero_Preferences.Export = {
 		}
 		
 		if (domain && domain != io.domain) {
-			yield Zotero.DB.queryAsync("DELETE FROM settings WHERE setting='quickCopySite' AND key=?", [domain]);
+			await Zotero.DB.queryAsync("DELETE FROM settings WHERE setting='quickCopySite' AND key=?", [domain]);
 		}
 		
 		var quickCopysetting = Zotero.QuickCopy.unserializeSetting(io.format);
 		quickCopysetting.locale = io.locale;
 		
-		yield Zotero.DB.queryAsync("REPLACE INTO settings VALUES ('quickCopySite', ?, ?)", [io.domain, JSON.stringify(quickCopysetting)]);
+		await Zotero.DB.queryAsync("REPLACE INTO settings VALUES ('quickCopySite', ?, ?)", [io.domain, JSON.stringify(quickCopysetting)]);
 		
-		yield Zotero.QuickCopy.loadSiteSettings();
+		await Zotero.QuickCopy.loadSiteSettings();
 		
-		yield this.refreshQuickCopySiteList();
-	}),
+		await this.refreshQuickCopySiteList();
+	},
 	
 	
-	refreshQuickCopySiteList: Zotero.Promise.coroutine(function* () {
-		var treechildren = document.getElementById('quickCopy-siteSettings-rows');
-		while (treechildren.hasChildNodes()) {
-			treechildren.removeChild(treechildren.firstChild);
-		}
-		
+	refreshQuickCopySiteList: async function () {
 		var sql = "SELECT key AS domainPath, value AS format FROM settings "
 			+ "WHERE setting='quickCopySite' ORDER BY domainPath COLLATE NOCASE";
-		var siteData = yield Zotero.DB.queryAsync(sql);
+		var siteData = await Zotero.DB.queryAsync(sql);
 		
-		for (var i=0; i<siteData.length; i++) {
-			var treeitem = document.createElement('treeitem');
-			var treerow = document.createElement('treerow');
-			var domainCell = document.createElement('treecell');
-			var formatCell = document.createElement('treecell');
-			var localeCell = document.createElement('treecell');
-			var htmlCell = document.createElement('treecell');
-			
-			domainCell.setAttribute('label', siteData[i].domainPath);
-			
-			var formattedName = yield Zotero.QuickCopy.getFormattedNameFromSetting(siteData[i].format);
-			formatCell.setAttribute('label', formattedName);
-			
-			var format = Zotero.QuickCopy.unserializeSetting(siteData[i].format);
-			localeCell.setAttribute('label', format.locale);
-			htmlCell.setAttribute('label', format.contentType == 'html' ? '   ✓   ' : '');
-			
-			treerow.appendChild(domainCell);
-			treerow.appendChild(formatCell);
-			treerow.appendChild(localeCell);
-			treerow.appendChild(htmlCell);
-			treeitem.appendChild(treerow);
-			treechildren.appendChild(treeitem);
+		this._rows = [];
+
+		for (let row of siteData) {
+			var formattedName = await Zotero.QuickCopy.getFormattedNameFromSetting(row.format);
+			var format = Zotero.QuickCopy.unserializeSetting(row.format);
+			this._rows.push({
+				domain: row.domainPath,
+				format: formattedName,
+				locale: format.locale,
+				copyAsHTML: format.contentType == 'html',
+			});
 		}
-		
+
+		if (!this._tree) {
+			const columns = [
+				{
+					dataKey: "domain",
+					label: "zotero.preferences.quickCopy.siteEditor.domainPath",
+					flex: 2
+				},
+				{
+					dataKey: "format",
+					label: "zotero.preferences.quickCopy.siteEditor.format",
+					flex: 4
+				},
+				{
+					dataKey: "locale",
+					label: "zotero.preferences.quickCopy.siteEditor.locale",
+					flex: 1
+				},
+				{
+					dataKey: "copyAsHTML",
+					label: "HTML",
+					type: 'checkbox',
+					fixedWidth: true,
+					width: 55,
+				}
+			];
+			var handleKeyDown = (event) => {
+				if (event.key == 'Delete' || Zotero.isMac && event.key == 'Backspace') {
+					Zotero_Preferences.Export.deleteSelectedQuickCopySite();
+				}
+			};
+			let elem = (
+				<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
+					<VirtualizedTable
+						getRowCount={() => this._rows.length}
+						id="quickCopy-siteSettings-table"
+						ref={ref => this._tree = ref}
+						renderItem={makeRowRenderer(index => this._rows[index])}
+						showHeader={true}
+						columns={columns}
+						staticColumns={true}
+						onSelectionChange={() => Zotero_Preferences.Export.enableQuickCopySiteButtons()}
+						onKeyDown={handleKeyDown}
+						onActivate={(event, indices) => Zotero_Preferences.Export.showQuickCopySiteEditor()}
+					/>
+				</IntlProvider>
+			);
+			await new Promise(resolve => ReactDom.render(elem, document.getElementById("quickCopy-siteSettings"), resolve));
+		} else {
+			this._tree.invalidate();
+		}
+
 		this.disableQuickCopySiteButtons();
-	}),
+	},
 	
 	
 	deleteSelectedQuickCopySite: Zotero.Promise.coroutine(function* () {
-		var tree = document.getElementById('quickCopy-siteSettings');
-		var treeitem = tree.lastChild.childNodes[tree.currentIndex];
-		var domainPath = treeitem.firstChild.firstChild.getAttribute('label');
+		var domainPath = this._rows[this._tree.selection.focused].domain;
 		yield Zotero.DB.queryAsync("DELETE FROM settings WHERE setting='quickCopySite' AND key=?", [domainPath]);
 		yield Zotero.QuickCopy.loadSiteSettings();
 		yield this.refreshQuickCopySiteList();

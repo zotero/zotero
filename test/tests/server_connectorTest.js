@@ -1678,6 +1678,7 @@ describe("Connector Server", function () {
 		});
 		
 		it("should move item saved via /saveItems to another library", async function () {
+			let addItemsSpy = sinon.spy(Zotero.Server.Connector.SaveSession.prototype, 'addItems');
 			var group = await createGroup({ editable: true, filesEditable: false });
 			await selectLibrary(win);
 			await waitForItemsLoad(win);
@@ -1726,6 +1727,16 @@ describe("Connector Server", function () {
 			var item1 = Zotero.Items.get(ids1[0]);
 			// Attachment
 			await waitForItemEvent('add');
+			
+			// There's an additional addItems call in saveItems that is not async returned and runs
+			// after attachment notifier add event callbacks are run, so we have to do some
+			// hacky waiting here, otherwise we get some crazy race-conditions due to
+			// collection changing being debounced
+			let callCount = addItemsSpy.callCount;
+			while (addItemsSpy.callCount <= callCount) {
+				await Zotero.Promise.delay(50);
+			}
+			await addItemsSpy.lastCall.returnValue;
 			
 			var req = await reqPromise;
 			assert.equal(req.status, 201);
@@ -1779,6 +1790,8 @@ describe("Connector Server", function () {
 			assert.isFalse(Zotero.Items.exists(item2.id));
 			assert.equal(item3.libraryID, Zotero.Libraries.userLibraryID);
 			assert.equal(item3.numAttachments(), 1);
+			
+			addItemsSpy.restore();
 		});
 		
 		it("should move item saved via /saveSnapshot to another library", async function () {

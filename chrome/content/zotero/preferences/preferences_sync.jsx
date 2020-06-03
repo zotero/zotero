@@ -28,6 +28,13 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.utils.import("resource://zotero/config.js");
 
+var React = require('react');
+var ReactDom = require('react-dom');
+var VirtualizedTable = require('components/virtualized-table');
+var { getDomElement } = require('components/icons');
+var { IntlProvider } = require('react-intl');
+var { renderCell } = VirtualizedTable;
+
 Zotero_Preferences.Sync = {
 	checkmarkChar: '\u2705',
 	noChar: '\uD83D\uDEAB',
@@ -227,102 +234,106 @@ Zotero_Preferences.Sync = {
 	},
 	
 	
-	dblClickLibraryToSync: function (event) {
-		var tree = document.getElementById("libraries-to-sync-tree");
-		var row = {}, col = {}, child = {};
-		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, child);
-		
-		// Below the list or on checkmark column
-		if (!col.value || col.value.element.id == 'libraries-to-sync-checked') {
-			return;
-		}
-		// if dblclicked anywhere but the checkbox update pref
-		return this.toggleLibraryToSync(row.value);
-	},
-
-
-	clickLibraryToSync: function (event) {
-		var tree = document.getElementById("libraries-to-sync-tree");
-		var row = {}, col = {}, child = {};
-		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, child);
-		
-		// Below the list or not on checkmark column
-		if (!col.value || col.value.element.id != 'libraries-to-sync-checked') {
-			return;
-		}
-		// if clicked on checkbox update pref
-		return this.toggleLibraryToSync(row.value);
-	},
-	
-	
-	toggleLibraryToSync: function (index) {
-		var treechildren = document.getElementById('libraries-to-sync-rows');
-		if (index >= treechildren.childNodes.length) {
-			return;
-		}
-		var row = treechildren.childNodes[index];
-		var val = row.firstChild.childNodes[1].getAttribute('value');
-		if (!val) {
-			return
-		}
+	toggleLibraryToSync: function () {
+		const index = this._tree.selection.focused;
+		if (index == -1 || !this._rows[index].editable) return;
+		const row = this._rows[index];
+		this._rows[index].checked = !this._rows[index].checked;
+		this._tree.invalidateRow(index);
 		
 		var librariesToSkip = JSON.parse(Zotero.Prefs.get('sync.librariesToSkip') || '[]');
-		var indexOfId = librariesToSkip.indexOf(val);
+		var indexOfId = librariesToSkip.indexOf(row.id);
 		if (indexOfId == -1) {
-			librariesToSkip.push(val);
-		} else {
+			librariesToSkip.push(row.id);
+		}
+		else {
 			librariesToSkip.splice(indexOfId, 1);
 		}
 		Zotero.Prefs.set('sync.librariesToSkip', JSON.stringify(librariesToSkip));
-		 
-		var cell = row.firstChild.firstChild;
-		var spacing = Zotero.isWin ? '  ' : '   ';
-		cell.setAttribute('label', spacing + (indexOfId != -1 ? this.checkmarkChar : this.noChar));
-		cell.setAttribute('value', indexOfId != -1);
 	},
 	
 	
-	initLibrariesToSync: Zotero.Promise.coroutine(function* () {
-		var tree = document.getElementById("libraries-to-sync-tree");
-		var treechildren = document.getElementById('libraries-to-sync-rows');
-		while (treechildren.hasChildNodes()) {
-			treechildren.removeChild(treechildren.firstChild);
+	initLibrariesToSync: async function () {
+		const columns = [
+			{
+				dataKey: "checked",
+				label: "zotero.preferences.sync.librariesToSync.sync",
+				fixedWidth: true,
+				width: '60'
+			},
+			{
+				dataKey: "name",
+				label: "zotero.preferences.sync.librariesToSync.library"
+			}
+		];
+		this._rows = [];
+		function renderItem(index, selection, oldDiv=null, columns) {
+			const row = this._rows[index];
+			let div;
+			if (oldDiv) {
+				div = oldDiv;
+				div.innerHTML = "";
+			}
+			else {
+				div = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
+				div.className = "row";
+			}
+			div.classList.toggle('selected', selection.isSelected(index));
+
+			for (let column of columns) {
+				if (column.dataKey === 'checked') {
+					let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+					span.className = `cell ${column.className}`;
+					if (row.id != 'loading') {
+						span.innerText = row.checked ? this.checkmarkChar : this.noChar;
+						span.style.textAlign = 'center';
+					}
+					div.appendChild(span);
+				}
+				else {
+					div.appendChild(renderCell(index, row[column.dataKey], column));
+				}
+			}
+			return div;
 		}
+		let elem = (
+			<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
+				<VirtualizedTable
+					getRowCount={() => this._rows.length}
+					id="librariesToSync-table"
+					ref={ref => this._tree = ref}
+					renderItem={renderItem.bind(this)}
+					showHeader={true}
+					columns={columns}
+					staticColumns={true}
+					onActivate={Zotero_Preferences.Sync.toggleLibraryToSync.bind(this)}
+				/>
+			</IntlProvider>
+		);
+		
+		ReactDom.render(elem, document.getElementById("libraries-to-sync-tree"));
 		
 		var addRow = function (libraryName, id, checked=false, editable=true) {
-			var treeitem = document.createElement('treeitem');
-			var treerow = document.createElement('treerow');
-			var checkboxCell = document.createElement('treecell');
-			var nameCell = document.createElement('treecell');
-			
-			nameCell.setAttribute('label', libraryName);
-			nameCell.setAttribute('value', id);
-			nameCell.setAttribute('editable', false);
-			var spacing = Zotero.isWin ? '  ' : '   ';
-			checkboxCell.setAttribute(
-				'label',
-				id == 'loading' ? '' : (spacing + (checked ? this.checkmarkChar : this.noChar))
-			);
-			checkboxCell.setAttribute('value', checked);
-			checkboxCell.setAttribute('editable', false);
-			
-			treerow.appendChild(checkboxCell);
-			treerow.appendChild(nameCell);
-			treeitem.appendChild(treerow);
-			treechildren.appendChild(treeitem);
+			this._rows.push({
+				name: libraryName,
+				id,
+				checked,
+				editable
+			});
+			this._tree.invalidate();
 		}.bind(this);
 		
 		// Add loading row while we're loading a group list
 		var loadingLabel = Zotero.getString("zotero.preferences.sync.librariesToSync.loadingLibraries");
 		addRow(loadingLabel, "loading", false, false);
 
-		var apiKey = yield Zotero.Sync.Data.Local.getAPIKey();
-		var client = Zotero.Sync.Runner.getAPIClient({apiKey});
+		var apiKey = await Zotero.Sync.Data.Local.getAPIKey();
+		var client = Zotero.Sync.Runner.getAPIClient({ apiKey });
 		var groups = [];
 		try {
 			// Load up remote groups
-			var keyInfo = yield Zotero.Sync.Runner.checkAccess(client, {timeout: 5000});
-			groups = yield client.getGroups(keyInfo.userID);
+			var keyInfo = await Zotero.Sync.Runner.checkAccess(client, {timeout: 5000});
+			groups = await client.getGroups(keyInfo.userID);
 		}
 		catch (e) {
 			// Connection problems
@@ -342,11 +353,12 @@ Zotero_Preferences.Sync = {
 		}
 
 		// Remove the loading row
-		treechildren.removeChild(treechildren.firstChild);
+		this._rows = [];
+		this._tree.invalidate();
 
 		var librariesToSkip = JSON.parse(Zotero.Prefs.get('sync.librariesToSkip') || '[]');
 		// Add default rows
-		addRow(Zotero.getString("pane.collections.libraryAndFeeds"), "L" + Zotero.Libraries.userLibraryID, 
+		addRow(Zotero.getString("pane.collections.libraryAndFeeds"), "L" + Zotero.Libraries.userLibraryID,
 			librariesToSkip.indexOf("L" + Zotero.Libraries.userLibraryID) == -1);
 		
 		// Sort groups
@@ -356,8 +368,7 @@ Zotero_Preferences.Sync = {
 		for (let group of groups) {
 			addRow(group.data.name, "G" + group.id, librariesToSkip.indexOf("G" + group.id) == -1);
 		}
-	}),
-
+	},
 
 	updateStorageSettingsUI: Zotero.Promise.coroutine(function* () {
 		this.unverifyStorageServer();

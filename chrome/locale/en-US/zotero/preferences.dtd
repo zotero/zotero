@@ -83,6 +83,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc  "Compare all attachment files with the storage service">
 <!ENTITY zotero.preferences.sync.reset								"Reset">
 <!ENTITY zotero.preferences.sync.reset.button						"Reset…">
+<!ENTITY zotero.preferences.sync.toggle							"Toggle">
 
 
 <!ENTITY zotero.preferences.prefpane.search				"Search">

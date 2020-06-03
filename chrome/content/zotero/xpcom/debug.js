@@ -238,6 +238,9 @@ Zotero.Debug = new function () {
 		});
 	});
 	
+	this._setLevel = function(level) {
+		_level = level;
+	}
 	
 	this.addListener = function (listener) {
 		this.enabled = true;

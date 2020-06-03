@@ -227,6 +227,8 @@ Zotero.Prefs = new function(){
 			Zotero.setFontSize(
 				Zotero.getActiveZoteroPane().document.getElementById('zotero-pane')
 			);
+			Zotero.getActiveZoteroPane().collectionsView && Zotero.getActiveZoteroPane().collectionsView.updateFontSize();
+			Zotero.getActiveZoteroPane().itemsView && Zotero.getActiveZoteroPane().itemsView.updateFontSize();
 		}],
 		[ "layout", function(val) {
 			Zotero.getActiveZoteroPane().updateLayout();
@@ -466,4 +468,59 @@ Zotero.Prefs = new function(){
 			});
 		});
 	}
+	
+	this.getVirtualCollectionState = function (type) {
+		const prefKeys = {
+			duplicates: 'duplicateLibraries',
+			unfiled: 'unfiledLibraries',
+			retracted: 'retractedLibraries'
+		};
+		let prefKey = prefKeys[type];
+		if (!prefKey) {
+			throw new Error("Invalid virtual collection type '" + type + "'");
+		}
+		
+		var libraries;
+		try {
+			libraries = JSON.parse(Zotero.Prefs.get(prefKey) || '{}');
+			if (typeof libraries != 'object') {
+				throw true;
+			}
+		}
+		// Ignore old/incorrect formats
+		catch (e) {
+			Zotero.Prefs.clear(prefKey);
+			libraries = {};
+		}
+		
+		return libraries;
+	};
+	
+	
+	this.getVirtualCollectionStateForLibrary = function (libraryID, type) {
+		return this.getVirtualCollectionState(type)[libraryID] !== false;
+	};
+	
+	
+	this.setVirtualCollectionStateForLibrary = function (libraryID, type, show) {
+		const prefKeys = {
+			duplicates: 'duplicateLibraries',
+			unfiled: 'unfiledLibraries',
+			retracted: 'retractedLibraries'
+		};
+		let prefKey = prefKeys[type];
+		if (!prefKey) {
+			throw new Error("Invalid virtual collection type '" + type + "'");
+		}
+		
+		var libraries = this.getVirtualCollectionState(type);
+		
+		// Update current library
+		libraries[libraryID] = !!show;
+		// Remove libraries that don't exist or that are set to true
+		for (let id of Object.keys(libraries).filter(id => libraries[id] || !Zotero.Libraries.exists(id))) {
+			delete libraries[id];
+		}
+		Zotero.Prefs.set(prefKey, JSON.stringify(libraries));
+	};
 }

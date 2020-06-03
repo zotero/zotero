@@ -24,11 +24,11 @@
 */
 
 const React = require('react');
-const ReactDOM = require('react-dom');
+const ReactDom = require('react-dom');
 
 function init() {
 	let div = document.querySelector('div');
-	ReactDOM.render(<DataGeneratorForm/>, div);
+	ReactDom.render(<DataGeneratorForm/>, div);
 }
 
 class DataGeneratorForm extends React.Component {

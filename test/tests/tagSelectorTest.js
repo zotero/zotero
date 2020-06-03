@@ -66,7 +66,6 @@ describe("Tag Selector", function () {
 		await Zotero.Tags.setColor(libraryID, "C", '#CCCCCC', 3);
 		
 		var item = createUnsavedDataObject('item', { collections: [collection.id] });
-		var item = createUnsavedDataObject('item');
 		await item.setTags(["A", "B"]);
 		var promise = waitForTagSelector(win);
 		await item.saveTx();
@@ -203,7 +202,7 @@ describe("Tag Selector", function () {
 		it("should add a tag when added to an item in the library root", async function () {
 			var promise;
 			
-			if (collectionsView.selection.currentIndex != 0) {
+			if (collectionsView.selection.pivot != 0) {
 				promise = waitForTagSelector(win);
 				await collectionsView.selectLibrary();
 				await promise;

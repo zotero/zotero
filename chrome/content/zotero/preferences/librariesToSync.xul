@@ -26,6 +26,7 @@
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/preferences.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 
 
 <!DOCTYPE window [
@@ -36,6 +37,7 @@
 ]>
 
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 	title="" buttons="accept"
 	id="zotero-librariesToSync"
 	onload="Zotero_Preferences.Sync.initLibrariesToSync(); sizeToContent()" >
@@ -46,17 +48,17 @@
 	
 	<groupbox>
 		<caption label="&zotero.preferences.sync.librariesToSync;"/>
-		
-		<tree id="libraries-to-sync-tree" flex="1" width="415" hidecolumnpicker="true" rows="10" seltype="single" editable="true"
-			ondblclick="Zotero_Preferences.Sync.dblClickLibraryToSync(event);"
-			onclick="Zotero_Preferences.Sync.clickLibraryToSync(event)"
-			onkeyup="if (event.keyCode == event.DOM_VK_SPACE) { Zotero_Preferences.Sync.toggleLibraryToSync(this.currentIndex); }">
-			<treecols>
-				<treecol editable="false" id="libraries-to-sync-checked" label="&zotero.preferences.sync.librariesToSync.sync;"/>
-				<treecol editable="false" id="libraries-to-sync-name" flex="1" label="&zotero.preferences.sync.librariesToSync.library;"/>
-			</treecols>
-			<treechildren id="libraries-to-sync-rows"/>
-		</tree>
+
+		<hbox class="virtualized-table-container" flex="1" height="200" width="600">
+			<html:div id="libraries-to-sync-tree"/>
+		</hbox>
+		<separator class="thin"/>
+
+		<hbox align="center">
+			<hbox pack="start" flex="1">
+				<button label="&zotero.preferences.sync.toggle;" onclick="Zotero_Preferences.Sync.toggleLibraryToSync()"/>
+			</hbox>
+		</hbox>
 	</groupbox>
 	
 	<script>

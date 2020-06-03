@@ -2,10 +2,10 @@
 /* eslint-disable no-unused-vars */
 
 var Zotero = Components.classes['@zotero.org/Zotero;1']
-				// Currently uses only nsISupports
-				//.getService(Components.interfaces.chnmIZoteroService).
-				.getService(Components.interfaces.nsISupports)
-				.wrappedJSObject;
+	// Currently uses only nsISupports
+	//.getService(Components.interfaces.chnmIZoteroService).
+	.getService(Components.interfaces.nsISupports)
+	.wrappedJSObject;
 
 // Components.utils.import('resource://zotero/require.js');
 // Not using Cu.import here since we don't want the require module to be cached
