@@ -24,8 +24,8 @@
 */
 
 import React from 'react';
-const ReactDOM = require('react-dom');
-const { IntlProvider } = require('react-intl');
+import ReactDOM from 'react-dom';
+import { IntlProvider } from 'react-intl';
 import DiffTable from 'components/diffTable/table';
 
 Zotero.DiffTable = {
