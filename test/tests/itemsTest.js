@@ -291,6 +291,27 @@ describe("Zotero.Items", function () {
 			assert.sameMembers(rels, [item2URI, item3URI]);
 		})
 		
+		// Same as test in itemPaneTest, but without the UI
+		it("should transfer merge-tracking relations when merging two pairs into one item", async function () {
+			var item1 = await createDataObject('item', { title: 'A' });
+			var item2 = await createDataObject('item', { title: 'B' });
+			var item3 = await createDataObject('item', { title: 'C' });
+			var item4 = await createDataObject('item', { title: 'D' });
+			
+			var uris = [item2, item3, item4].map(item => Zotero.URI.getItemURI(item));
+			
+			await Zotero.Items.merge(item1, [item2]);
+			await Zotero.Items.merge(item3, [item4]);
+			
+			await Zotero.Items.merge(item1, [item3]);
+			
+			// Remaining item should include all other URIs
+			assert.sameMembers(
+				item1.getRelations()[Zotero.Relations.replacedItemPredicate],
+				uris
+			);
+		});
+		
 		it("should update relations pointing to replaced item to point to master", function* () {
 			var item1 = yield createDataObject('item');
 			var item1URI = Zotero.URI.getItemURI(item1);

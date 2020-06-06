@@ -4624,7 +4624,7 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 	}
 	
 	// Relations
-	obj.relations = this.getRelations()
+	obj.relations = this.getRelations();
 	
 	if (obj.accessDate) obj.accessDate = Zotero.Date.sqlToISO8601(obj.accessDate);
 	

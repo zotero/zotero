@@ -316,4 +316,53 @@ describe("Item pane", function () {
 			});
 		});
 	});
+	
+	describe("Duplicates Merge pane", function () {
+		// Same as test in itemsTest, but via UI, which makes a copy via toJSON()/fromJSON()
+		it("should transfer merge-tracking relations when merging two pairs into one item", async function () {
+			var item1 = await createDataObject('item', { title: 'A' });
+			var item2 = await createDataObject('item', { title: 'B' });
+			var item3 = await createDataObject('item', { title: 'C' });
+			var item4 = await createDataObject('item', { title: 'D' });
+			
+			var uris = [item2, item3, item4].map(item => Zotero.URI.getItemURI(item));
+			
+			var p;
+			
+			var zp = win.ZoteroPane;
+			await zp.selectItems([item1.id, item2.id]);
+			zp.mergeSelectedItems();
+			p = waitForItemEvent('modify');
+			doc.getElementById('zotero-duplicates-merge-button').click();
+			await p;
+			
+			assert.sameMembers(
+				item1.getRelations()[Zotero.Relations.replacedItemPredicate],
+				[uris[0]]
+			);
+			
+			await zp.selectItems([item3.id, item4.id]);
+			zp.mergeSelectedItems();
+			p = waitForItemEvent('modify');
+			doc.getElementById('zotero-duplicates-merge-button').click();
+			await p;
+			
+			assert.sameMembers(
+				item3.getRelations()[Zotero.Relations.replacedItemPredicate],
+				[uris[2]]
+			);
+			
+			await zp.selectItems([item1.id, item3.id]);
+			zp.mergeSelectedItems();
+			p = waitForItemEvent('modify');
+			doc.getElementById('zotero-duplicates-merge-button').click();
+			await p;
+			
+			// Remaining item should include all other URIs
+			assert.sameMembers(
+				item1.getRelations()[Zotero.Relations.replacedItemPredicate],
+				uris
+			);
+		});
+	});
 })
