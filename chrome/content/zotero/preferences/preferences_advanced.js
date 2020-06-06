@@ -24,6 +24,7 @@
 */
 
 Components.utils.import("resource://gre/modules/Services.jsm");
+Components.utils.import("resource://gre/modules/osfile.jsm");
 import FilePicker from 'zotero/filePicker';
 
 Zotero_Preferences.Advanced = {
