@@ -517,11 +517,6 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			yield item.saveTx();
 			var mtime = yield item.attachmentModificationTime;
 			var hash = yield item.attachmentHash;
-			var path = item.getFilePath();
-			var filename = 'test.png';
-			var size = (yield OS.File.stat(path)).size;
-			var contentType = 'image/png';
-			var fileContents = yield Zotero.File.getContentsAsync(path);
 			
 			setResponse({
 				method: "GET",
@@ -537,15 +532,61 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			
 			assertRequestCount(1);
 			
-			assert.isFalse(result.localChanges);
+			assert.isTrue(result.localChanges);
 			assert.isFalse(result.remoteChanges);
-			assert.isFalse(result.syncRequired);
+			assert.isTrue(result.syncRequired);
 			
 			// Check local object
 			assert.equal(item.attachmentSyncedModificationTime, mtime);
 			assert.equal(item.attachmentSyncedHash, hash);
 			assert.isFalse(item.synced);
-		})
+		});
+		
+		it("should skip upload and update mtimes if synced mtime doesn't match WebDAV mtime but file hash does", async function () {
+			var engine = await setup();
+			
+			var file = OS.Path.join(getTestDataDirectory().path, 'test.png');
+			var item = await Zotero.Attachments.importFromFile({ file });
+			await item.saveTx();
+			var fmtime = await item.attachmentModificationTime;
+			var hash = await item.attachmentHash;
+			
+			var mtime = 123456789000;
+			var mtime2 = 123456799000;
+			item.attachmentSyncedModificationTime = mtime;
+			item.attachmentSyncedHash = hash;
+			item.attachmentSyncState = 'to_upload';
+			item.synced = true;
+			await item.saveTx();
+			
+			setResponse({
+				method: "GET",
+				url: `zotero/${item.key}.prop`,
+				status: 200,
+				text: '<properties version="1">'
+					+ `<mtime>${mtime2}</mtime>`
+					+ `<hash>${hash}</hash>`
+					+ '</properties>'
+			});
+			setResponse({
+				method: "PUT",
+				url: `zotero/${item.key}.prop`,
+				status: 204
+			});
+			
+			var result = await engine.start();
+			
+			assertRequestCount(2);
+			
+			assert.isTrue(result.localChanges);
+			assert.isFalse(result.remoteChanges);
+			assert.isTrue(result.syncRequired);
+			
+			// Check local object
+			assert.equal(item.attachmentSyncedModificationTime, fmtime);
+			assert.equal(item.attachmentSyncedHash, hash);
+			assert.isFalse(item.synced);
+		});
 		
 		
 		// As a security measure, Nextcloud sets a regular cookie and two SameSite cookies and
