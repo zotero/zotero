@@ -20,26 +20,26 @@
 <!ENTITY zotero.general.other "Otros...">
 <!ENTITY zotero.general.bigger "Más grande">
 <!ENTITY zotero.general.smaller "Más pequeño">
-<!ENTITY zotero.general.reset "Reiniciar">
+<!ENTITY zotero.general.reset "Restablecer">
 
 
 <!ENTITY zotero.errorReport.title "Informe de errores de Zotero">
 <!ENTITY zotero.errorReport.submissionInProgress "Por favor, espera mientras se envía el informe de error.">
-<!ENTITY zotero.errorReport.submitted "Tu informe de error ha sido enviado.">
-<!ENTITY zotero.errorReport.reportID "ID de informe:">
-<!ENTITY zotero.errorReport.postToForums "Por favor, publica un mensaje en los foros de Zotero (forums.zotero.org) con este ID del informe, una descripción del problema y los pasos necesarios para reproducirlo.">
+<!ENTITY zotero.errorReport.submitted "Su informe de errores ha sido enviado.">
+<!ENTITY zotero.errorReport.reportID "ID del informe:">
+<!ENTITY zotero.errorReport.postToForums "Por favor, publique un mensaje en los foros de Zotero (forums.zotero.org) con este ID del informe, una descripción del problema y los pasos necesarios para reproducirlo.">
 <!ENTITY zotero.errorReport.notReviewed "Los informes de errores no se revisan a menos que se mencionen en los foros.">
 
 <!ENTITY zotero.upgrade.title "Asistente de actualización de Zotero">
 <!ENTITY zotero.upgrade.newVersionInstalled "Has instalado una nueva versión de Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Tu base de datos de Zotero debe actualizarse para funcionar con la nueva versión.">
-<!ENTITY zotero.upgrade.autoBackup "Se realizará una copia de seguridad automática de tu base de datos existente antes de realizar cualquier cambio.">
+<!ENTITY zotero.upgrade.upgradeRequired "Su base de datos de Zotero debe actualizarse para funcionar con la nueva versión.">
+<!ENTITY zotero.upgrade.autoBackup "Se realizará una copia de seguridad automática de su base de datos existente antes de realizar cualquier cambio.">
 <!ENTITY zotero.upgrade.majorUpgrade "Ésta es una actualización importante.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Asegúrate de haber revisado las">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Asegúrese de haber revisado las">
 <!ENTITY zotero.upgrade.majorUpgradeLink "instrucciones de actualización">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "antes de continuar.">
-<!ENTITY zotero.upgrade.upgradeInProgress "Por favor, espera a que finalice el proceso de actualización. Puede tardar algunos minutos.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Tu base de datos Zotero se ha actualizado con éxito.">
+<!ENTITY zotero.upgrade.upgradeInProgress "Por favor, espere a que finalice el proceso de actualización. Puede tardar algunos minutos.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Su base de datos de Zotero se ha actualizado con éxito.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Por favor, véase">
 <!ENTITY zotero.upgrade.changeLogLink "el informe de cambios">
 <!ENTITY zotero.upgrade.changeLogAfterLink "para saber qué hay de nuevo.">
@@ -101,7 +101,7 @@
 <!ENTITY zotero.items.menu.unrecognize "Deshacer recuperar metadatos">
 <!ENTITY zotero.items.menu.reportMetadata "Informar sobre metadatos incorrectos">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Elige la versión del elemento a usar como  elemento maestro:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Elija la versión del elemento a usar como  elemento maestro:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Selecciona los campos a conservar de otras versiones del elemento:">
 
 <!ENTITY zotero.toolbar.newItem.label "Nuevo elemento">
@@ -126,8 +126,8 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Soporte y documentación">
 <!ENTITY zotero.toolbar.about.label "Acerca de Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Búsqueda avanzada">
-<!ENTITY zotero.toolbar.openURL.label "Localizar">
-<!ENTITY zotero.toolbar.openURL.tooltip "Encontrar a través de tu biblioteca local">
+<!ENTITY zotero.toolbar.openURL.label "Buscar">
+<!ENTITY zotero.toolbar.openURL.tooltip "Encontrar a través de su biblioteca local">
 
 <!ENTITY zotero.toolbar.feeds.new "Nuevo canal">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Desde URL...">
@@ -149,7 +149,7 @@
 
 <!ENTITY zotero.toolbar.newNote "Nueva nota">
 <!ENTITY zotero.toolbar.note.standalone "Nueva nota independiente">
-<!ENTITY zotero.toolbar.note.child "Agregar nota subordinada">
+<!ENTITY zotero.toolbar.note.child "Añadir nota subordinada">
 <!ENTITY zotero.toolbar.lookup "Buscar por identificador...">
 <!ENTITY zotero.toolbar.attachment.linked "Enlazar al archivo...">
 <!ENTITY zotero.toolbar.attachment.add "Guardar copia del archivo...">
@@ -172,11 +172,11 @@
 <!ENTITY zotero.tagColorChooser.setColor "Establecer color">
 <!ENTITY zotero.tagColorChooser.removeColor "Borrar color">
 
-<!ENTITY zotero.lookup.description "Introduce los ISBNs, DOIs, PMIDs o arXiv IDs a añadir a tu biblioteca:">
+<!ENTITY zotero.lookup.description "Introduzca los ISBNs, DOIs, PMIDs o arXiv IDs a añadir a su biblioteca:">
 <!ENTITY zotero.lookup.button.search "Buscar">
 
 <!ENTITY zotero.selectitems.title "Seleccionar elementos">
-<!ENTITY zotero.selectitems.intro.label "Selecciona los elementos que deseas agregar a tu biblioteca">
+<!ENTITY zotero.selectitems.intro.label "Seleccione los elementos que desea añadir a su biblioteca">
 <!ENTITY zotero.selectitems.cancel.label "Cancelar">
 <!ENTITY zotero.selectitems.select.label "OK">
 
@@ -221,7 +221,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Omitir autor">
 <!ENTITY zotero.citation.prefix.label "Prefijo:">
 <!ENTITY zotero.citation.suffix.label "Sufijo:">
-<!ENTITY zotero.citation.editorWarning.label "Advertencia: si editas una cita en el editor, ya no se actualizará más para reflejar los cambios en tu base de datos o en el estilo de la cita.">
+<!ENTITY zotero.citation.editorWarning.label "Advertencia: si edita una cita en el editor, ya no se actualizará más para reflejar los cambios en su base de datos o en el estilo de la cita.">
 
 <!ENTITY zotero.richText.italic.label "Cursiva">
 <!ENTITY zotero.richText.bold.label "Negrita">
@@ -245,10 +245,10 @@
 
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Actualizar citas automáticamente">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Las citas pendientes de actualización se resaltarán en el documento">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "La desactivación de actualizaciones puede acelerar la inserción de citas en documentos grandes. Haz clic en Actualizar para actualizar las citas manualmente.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "La desactivación de actualizaciones puede acelerar la inserción de citas en documentos grandes. Haga clic en Actualizar para actualizar las citas manualmente.">
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Usar abreviaturas de la revista MEDLINE">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "El campo &quot;Abrev. de la revista&quot; será ignorado.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "El campo «Abrev. de la revista» será ignorado.">
 
 <!ENTITY zotero.integration.prefs.exportDocument "Cambiar a un procesador de texto diferente...">
 
@@ -263,9 +263,9 @@
 <!ENTITY zotero.sync.storage.downloads "Descargas:">
 <!ENTITY zotero.sync.storage.uploads "Subidas:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "La siguiente etiqueta en tu biblioteca Zotero es demasiado larga para sincronizarse con el servidor:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "La siguiente etiqueta en su biblioteca Zotero es demasiado larga para sincronizarse con el servidor:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Las etiquetas sincronizadas deben tener menos de 256 caracteres.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Puedes dividir la etiqueta en varias etiquetas, editarla manualmente para acortarla o eliminarla.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Puede dividir la etiqueta en varias etiquetas, editarla manualmente para acortarla o borrarla.">
 <!ENTITY zotero.sync.longTagFixer.split "Dividir">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Dividir a ">
 <!ENTITY zotero.sync.longTagFixer.character "carácter">
@@ -278,7 +278,7 @@
 <!ENTITY zotero.merge.deleted "Eliminado">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy reconocido">
-<!ENTITY zotero.proxy.recognized.warning "Agrega solo proxies vinculados de tu biblioteca, escuela o sitio web corporativo">
+<!ENTITY zotero.proxy.recognized.warning "Añade solo proxies vinculados de su biblioteca, escuela o sitio web corporativo">
 <!ENTITY zotero.proxy.recognized.warning.secondary "Añadir otros proxies permite que sitios maliciosos se hagan pasar por sitios en los que confías.">
 <!ENTITY zotero.proxy.recognized.disable.label "No redirigir automáticamente las solicitudes a través de proxies previamente reconocidos">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorar">
@@ -303,16 +303,16 @@
 <!ENTITY zotero.rtfScan.mappedCitations.label "Citas mapeadas">
 <!ENTITY zotero.rtfScan.introPage.label "Introducción">
 <!ENTITY zotero.rtfScan.introPage.description "Zotero puede extraer y reformatear citas e insertar una bibliografía en ficheros RTF. La función de escaneado RTF actualmente soporta citas en los siguientes tipos de formato:">
-<!ENTITY zotero.rtfScan.introPage.description2 "Para comenzar, selecciona a continuación un archivo de entrada RTF y un archivo de salida:">
+<!ENTITY zotero.rtfScan.introPage.description2 "Para comenzar, seleccione a continuación un archivo de entrada RTF y un archivo de salida:">
 <!ENTITY zotero.rtfScan.scanPage.label "Escaneando por citas">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero está escaneando tu documento por citas. Por favor, sé paciente.">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero está escaneando su documento por citas. Por favor, sea paciente.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Verificar elementos citados">
-<!ENTITY zotero.rtfScan.citationsPage.description "Por favor, revisa la siguiente lista de citas reconocidas para asegurarte de que Zotero ha seleccionado los elementos correspondientes de forma correcta. Cualquier cita ambigua o no referenciada debe ser corregida antes de proceder con el siguiente paso.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Por favor, revise la siguiente lista de citas reconocidas para asegurarse de que Zotero ha seleccionado los elementos correspondientes de forma correcta. Cualquier cita ambigua o no referenciada debe ser corregida antes de proceder con el siguiente paso.">
 <!ENTITY zotero.rtfScan.stylePage.label "Formato de documento">
 <!ENTITY zotero.rtfScan.formatPage.label "Formato de citas">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero está procesando y dando formato a tu archivo RTF. Por favor, sé paciente.">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero está procesando y dando formato a su archivo RTF. Por favor, sea paciente.">
 <!ENTITY zotero.rtfScan.completePage.label "Escaneado RTF completado">
-<!ENTITY zotero.rtfScan.completePage.description "Tu documento ha sido escaneado y procesado. Por favor, asegúrate de que esté formateado correctamente.">
+<!ENTITY zotero.rtfScan.completePage.description "Su documento ha sido escaneado y procesado. Por favor, asegúrese de que esté formateado correctamente.">
 <!ENTITY zotero.rtfScan.inputFile.label "Archivo de entrada">
 <!ENTITY zotero.rtfScan.outputFile.label "Archivo de salida">
 

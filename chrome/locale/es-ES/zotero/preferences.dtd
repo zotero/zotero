@@ -54,7 +54,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "¿Contraseña perdida?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronizar automáticamente">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Sincronizar contenido de texto completo">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero puede sincronizar el contenido de texto completo de archivos en tus bibliotecas de Zotero con zotero.org y otros dispositivos vinculados, lo que te permite buscar fácilmente tus archivos dondequiera que estés. El contenido de texto completo de tus archivos no se compartirá públicamente.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero puede sincronizar el contenido de texto completo de archivos en sus bibliotecas de Zotero con zotero.org y otros dispositivos vinculados, lo que le permite buscar fácilmente sus archivos dondequiera que esté. El contenido de texto completo de sus archivos no se compartirá públicamente.">
 <!ENTITY zotero.preferences.sync.about "Acerca de la sincronización">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sincronización de archivos">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -64,7 +64,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "en el momento de sincronizar">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "según sea necesario">
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verificar servidor">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Al utilizar el almacenamiento de Zotero, aceptas estar obligado por su">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Al utilizar el almacenamiento de Zotero, acepta estar obligado por sus">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "términos y condiciones">
 <!ENTITY zotero.preferences.sync.librariesToSync "Bibliotecas a sincronizar">
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Escoger bibliotecas...">
@@ -108,7 +108,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copiar como HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Ajustes específicos del sitio:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Dominio/ruta">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(p. e., wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(p. ej., wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "Formato">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Idioma">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Deshabilitar Copia rápida cuando arrastre más de">
@@ -116,7 +116,7 @@
 <!ENTITY zotero.preferences.prefpane.cite "Citar">
 <!ENTITY zotero.preferences.cite.styles "Estilos">
 <!ENTITY zotero.preferences.cite.wordProcessors "Procesadores de texto">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Utilizar el cuadro de diálogo clásico Agregar cita">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Usar el cuadro de diálogo clásico Añadir cita">
 <!ENTITY zotero.preferences.styleEditor "Editor de estilos">
 <!ENTITY zotero.preferences.stylePreview "Vista previa de estilos">
 
@@ -155,7 +155,7 @@
 
 <!ENTITY zotero.preferences.proxies.multiSite "Multisitio">
 <!ENTITY zotero.preferences.proxies.autoAssociate "Automáticamente asociar nuevos alojamientos">
-<!ENTITY zotero.preferences.proxies.variables "Puedes usar las siguientes variables en tu esquema proxy:">
+<!ENTITY zotero.preferences.proxies.variables "Puede usar las siguientes variables en su esquema proxy:">
 <!ENTITY zotero.preferences.proxies.h_variable "&#37;h - El nombre del alojamiento del sitio proxy (p. e.: www.zotero.org)">
 <!ENTITY zotero.preferences.proxies.p_variable "&#37;p - La ruta de la página proxy excluyendo la barra invertida (p. e.: acerca/index.html)">
 <!ENTITY zotero.preferences.proxies.d_variable "&#37;d - La ruta del directorio (p. e., acerca/)">
@@ -172,8 +172,8 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestor de motores de búsqueda de artículos">
 <!ENTITY zotero.preferences.locate.description "Descripción">
 <!ENTITY zotero.preferences.locate.name "Nombre">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Un motor de búsqueda amplía la capacidad del menú desplegable Localizar en el panel de información. Al habilitar dichos motores de búsqueda en la lista de abajo, éstos se agregarán a la lista desplegable y se podrán utilizar para localizar recursos a partir de tu biblioteca en la web.">
-<!ENTITY zotero.preferences.locate.addDescription "Para agregar un motor de búsqueda que no esté en la lista, visita el motor de búsqueda deseado en tu navegador y selecciona &quot;Agregar&quot; desde el menú Búsqueda de Zotero.">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "Un motor de búsqueda amplía la capacidad del menú desplegable Buscar en el panel de información. Al habilitar dichos motores de búsqueda en la lista de abajo, éstos se añadirán a la lista desplegable y se podrán utilizar para localizar recursos a partir de su biblioteca en la web.">
+<!ENTITY zotero.preferences.locate.addDescription "Para añadir un motor de búsqueda que no esté en la lista, visite el motor de búsqueda deseado en su navegador y seleccione &quot;Añadir&quot; desde el menú Búsqueda de Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restaurar predeterminados">
 
 <!ENTITY zotero.preferences.charset "Codificación de caracteres">
@@ -189,7 +189,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Migrar a una nueva ubicación predeterminada...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Directorio base de adjuntos enlazados">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero usará rutas relativas para los archivos adjuntos enlazados dentro del directorio base, permitiéndote acceder a los archivos desde diferentes ordenadores, siempre que la estructura de archivos dentro del directorio base se mantenga igual.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero usará rutas relativas para los archivos adjuntos enlazados dentro del directorio base, permitiéndole acceder a los archivos desde diferentes ordenadores, siempre que la estructura de archivos dentro del directorio base se mantenga igual.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Directorio base:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Elegir...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revertir a rutas absolutas...">

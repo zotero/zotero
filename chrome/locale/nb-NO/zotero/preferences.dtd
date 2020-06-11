@@ -113,7 +113,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Språk">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Deaktiver hurtigkopi når du drar mer enn">
 
-<!ENTITY zotero.preferences.prefpane.cite "Henvisning">
+<!ENTITY zotero.preferences.prefpane.cite "Henvis">
 <!ENTITY zotero.preferences.cite.styles "Stiler">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstbehandlere">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Bruk klassisk dialogboks for Legg til henvisninger ">
@@ -134,7 +134,7 @@
 <!ENTITY zotero.preferences.keys.newNote "Opprett et nytt notat">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Merk alle nyhetsstrømelementene som lest/ikke lest">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Slå emneord av/på">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopier de valgte element-henvisningene til utklippstavla">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopier de valgte henvisningene til utklippstavla">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopier de valgte elementene til utklippstavla">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importer fra utklippstavle">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Endringer trer i kraft etter omstart">

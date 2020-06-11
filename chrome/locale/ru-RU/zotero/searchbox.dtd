@@ -8,8 +8,8 @@
 <!ENTITY zotero.search.joinMode.suffix "из нижеследующего:">
 
 <!ENTITY zotero.search.recursive.label "Искать в подпапках">
-<!ENTITY zotero.search.noChildren "Показывать документы только верхнего уровня">
-<!ENTITY zotero.search.includeParentsAndChildren "Включать родительские и дочерние документы совпадающие с искомым">
+<!ENTITY zotero.search.noChildren "Показывать записи только верхнего уровня">
+<!ENTITY zotero.search.includeParentsAndChildren "Включать родительские и дочерние записи совпадений">
 
 <!ENTITY zotero.search.textModes.phrase "Фраза">
 <!ENTITY zotero.search.textModes.phraseBinary "Фраза (вкл. двоичные файлы)">

@@ -121,7 +121,7 @@
 <!ENTITY zotero.toolbar.importFromClipboard "Importer fra utklippstavle">
 <!ENTITY zotero.toolbar.export.label "Eksporter bibliotek...">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF skann">
-<!ENTITY zotero.toolbar.timeline.label "Lag tidslinje">
+<!ENTITY zotero.toolbar.timeline.label "Opprett tidslinje">
 <!ENTITY zotero.toolbar.preferences.label "Innstillinger...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Støtte og dokumentasjon">
 <!ENTITY zotero.toolbar.about.label "Om Zotero">
@@ -180,8 +180,8 @@
 <!ENTITY zotero.selectitems.cancel.label "Avbryt">
 <!ENTITY zotero.selectitems.select.label "OK">
 
-<!ENTITY zotero.bibliography.title "Lag henvisning/bibliografi">
-<!ENTITY zotero.bibliography.style.label "Siteringsstil:">
+<!ENTITY zotero.bibliography.title "Opprett henvisning/bibliografi">
+<!ENTITY zotero.bibliography.style.label "Henvisningsstil:">
 <!ENTITY zotero.bibliography.manageStyles "Behandle stiler…">
 <!ENTITY zotero.bibliography.locale.label "Språk:">
 <!ENTITY zotero.bibliography.outputMode "Utdata modus:">
@@ -221,7 +221,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Utelat forfatter">
 <!ENTITY zotero.citation.prefix.label "Prefiks:">
 <!ENTITY zotero.citation.suffix.label "Suffiks:">
-<!ENTITY zotero.citation.editorWarning.label "Advarsel: Hvis du redigerer en henvisning i redigeringsprogrammet vil den ikke lenger oppdateres og vise endringer i din database eller siteringsstil.">
+<!ENTITY zotero.citation.editorWarning.label "Advarsel: Hvis du redigerer en henvisning i redigeringsprogrammet vil den ikke lenger oppdateres og vise endringer i din database eller henvisningsstil.">
 
 <!ENTITY zotero.richText.italic.label "Kursiv">
 <!ENTITY zotero.richText.bold.label "Fet">

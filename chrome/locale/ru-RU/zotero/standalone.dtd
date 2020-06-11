@@ -5,7 +5,7 @@
 <!ENTITY hideThisAppCmdMac.commandkey "H">
 <!ENTITY hideOtherAppsCmdMac.label "Скрыть другие">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "Показать все">
+<!ENTITY showAllAppsCmdMac.label "Показать всё">
 <!ENTITY quitApplicationCmdMac.label "Выход из Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "Закрыть">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Управления приложенными материалами">
-<!ENTITY convertToStored.label "Преобразовать сылки на файлы в локальные копиии…">
+<!ENTITY manageAttachments.label "Управление вложениями">
+<!ENTITY convertToStored.label "Преобразовать связанные файлы в сохраненные файлы…">
 <!ENTITY importCmd.label "Импорт…">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Импортировать из буфера обмена">
@@ -50,15 +50,15 @@
 <!ENTITY stackedView.label "Стопками">
 <!ENTITY collectionsPane.label "Панель коллекций">
 <!ENTITY itemPane.label "Панель записей">
-<!ENTITY tagSelector.label "Диалог выбора меток">
-<!ENTITY recursiveCollections.label "Показывать записи вложенных коллекций">
+<!ENTITY tagSelector.label "Панель выбора тегов">
+<!ENTITY recursiveCollections.label "Показывать записи из вложенных коллекций">
 <!ENTITY fontSize.label "Размер шрифта">
 <!ENTITY noteFontSize.label "Размер шрифта заметок">
 
 
 <!ENTITY toolsMenu.label "Инструменты">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Установить адаптер в браузер">
+<!ENTITY installConnector.label "Установить плагин для браузера">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Дополнения">
 <!ENTITY developer.label "Разработчик">
@@ -66,7 +66,7 @@
 
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Свернуть">
-<!ENTITY bringAllToFront.label "Переместить все вперед">
+<!ENTITY bringAllToFront.label "Переместить всё вперед">
 <!ENTITY zoomWindow.label "Масштаб">
 <!ENTITY windowMenu.label "Окно">
 
@@ -95,7 +95,7 @@
 <!ENTITY debugOutputLogging.submit "Отправить вывод">
 <!ENTITY debugOutputLogging.view "Просмотреть вывод">
 <!ENTITY debugOutputLogging.clear "Очистить вывод">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Перезапустить с включенной записью журнала…">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Перезапустить с включенным журналом отладки…">
 
 <!ENTITY helpCheckForUpdates.label "Поиск обновлений...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

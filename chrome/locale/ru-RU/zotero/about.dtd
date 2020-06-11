@@ -1,5 +1,5 @@
 <!ENTITY zotero.version "версия">
-<!ENTITY zotero.whatsNew "Новое">
+<!ENTITY zotero.whatsNew "Что нового">
 <!ENTITY zotero.createdby "Авторы:">
 <!ENTITY zotero.director "Директор:">
 <!ENTITY zotero.directors "Руководители:">
@@ -11,4 +11,4 @@
 <!ENTITY zotero.thanks "Особая благодарность:">
 <!ENTITY zotero.about.close "Закрыть">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Дополнительные сведения об участниках и источниках">
-<!ENTITY zotero.citationProcessing "Обработка цитат &amp; библиографии">
+<!ENTITY zotero.citationProcessing "Обработка цитат и библиографии">

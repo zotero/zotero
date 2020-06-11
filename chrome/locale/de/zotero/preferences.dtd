@@ -189,7 +189,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Nach neuem Standardverzeichnis migrieren...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Basisverzeichnis für verknüpfte Dateianhänge">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero verwendet relative Pfade für verknüpfte Dateine innerhalb des Basisverzeichnisses, so dass Sie auf verschiedenen Computern Zugang auf die Datein haben, solange die Ordnerstruktur im Basisverzeichnis die gleiche ist.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero verwendet relative Pfade für verknüpfte Dateien innerhalb des Basisverzeichnisses, so dass Sie auf verschiedenen Computern Zugang auf die Dateien haben, solange die Ordnerstruktur im Basisverzeichnis die gleiche ist.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Basisverzeichnis:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Auswählen...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Auf Absolute Dateipfade zurücksetzen">

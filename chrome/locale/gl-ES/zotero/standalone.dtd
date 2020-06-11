@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "Pechar">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "Xestionar anexos">
+<!ENTITY convertToStored.label "Converter as ligazóns a ficheiros a ficheiros almacenados....">
 <!ENTITY importCmd.label "Importar...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Importar do portaretallos">
@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "Ver">
+<!ENTITY layout.label "Interface">
+<!ENTITY standardView.label "Interface estándar">
+<!ENTITY stackedView.label "Interface agrupada">
+<!ENTITY collectionsPane.label "Panel de colecións">
+<!ENTITY itemPane.label "Panel de elementos">
+<!ENTITY tagSelector.label "Selector de etiquetas">
+<!ENTITY recursiveCollections.label "Amosar os elementos das subcolecións">
+<!ENTITY fontSize.label "Tamaño da tipografía:">
+<!ENTITY noteFontSize.label "Tamaño tipográfico das notas">
 
 
 <!ENTITY toolsMenu.label "Ferramentas">
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "Instalar conector para o navegador">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Engadidos">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Desenvolvedor">
 
 
 <!ENTITY minimizeWindow.key "e">

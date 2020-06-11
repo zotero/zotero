@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "Abbrechen"
   },
+  "general_pleaseWait": {
+    "message": "Bitte warten Sie..."
+  },
   "progressWindow_savingTo": {
     "message": "Speichern nach"
   },
@@ -67,6 +70,12 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Verlinkte Version trotzdem herunterladen"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 aktualisiert Ihr Dokument."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "$1 Integration ist nicht verfügbar, wenn Sie direkt eine Microsoft-Word- Datei (.docx) in Google Docs bearbeiten. Wählen Sie Datei → Speichern als Google Doc um diese Funktionalität zu aktivieren.<br/><br/>Wenn Sie ein Word Dokument mit $1 Zitationen in Google Docs überführen möchten, vgl. <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Moving Documents Between Word Processors</a>."
   },
   "general_saveTo": {
     "message": "Speichern nach $1"

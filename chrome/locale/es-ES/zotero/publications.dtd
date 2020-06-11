@@ -1,19 +1,19 @@
 <!ENTITY zotero.publications.my_publications "Mis publicaciones">
 
-<!ENTITY zotero.publications.intro "Los elementos que agregues a Mis publicaciones se mostrarán en tu página de perfil en zotero.org. Si eliges incluir los archivos adjuntos, se pondrán a disposición del público bajo la licencia que especifiques. Añade únicamente trabajos que tú mismo hayas creado e incluye archivos solo si tienes los derechos para distribuirlos y deseas hacerlo.">
+<!ENTITY zotero.publications.intro "Los elementos que añada a Mis publicaciones se mostrarán en su página de perfil en zotero.org. Si elige incluir los archivos adjuntos, se pondrán a disposición del público bajo la licencia que especifique. Añada únicamente trabajos que usted mismo haya creado e incluya archivos solo si tiene los derechos para distribuirlos y desea hacerlo.">
 <!ENTITY zotero.publications.include.checkbox.files "Incluir archivos">
 <!ENTITY zotero.publications.include.checkbox.notes "Incluir notas">
 <!ENTITY zotero.publications.include.adjustAtAnyTime "Puedes ajustar lo que se mostrará en cualquier momento desde la colección Mis publicaciones.">
 
-<!ENTITY zotero.publications.sharing.title "Escoge cómo se puede compartir tu trabajo">
+<!ENTITY zotero.publications.sharing.title "Elija cómo se puede compartir su trabajo">
 <!ENTITY zotero.publications.sharing.text "Puedes reservarte todos los derechos de tu trabajo, licenciarlo bajo una licencia Creative Commons o publicarlo en dominio público. En todos los casos, el trabajo se pondrá a disposición del público a través de zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "¿Te gustaría permitir que otros compartan tu trabajo?">
+<!ENTITY zotero.publications.sharing.prompt "¿Le gustaría permitir que otros compartan su trabajo?">
 <!ENTITY zotero.publications.sharing.cc "Sí, bajo una licencia Creative Commons">
 <!ENTITY zotero.publications.sharing.cc0 "Sí, y colocar mi trabajo en el dominio público">
 <!ENTITY zotero.publications.sharing.reserved "No, publicar mi trabajo únicamente en zotero.org.">
 
-<!ENTITY zotero.publications.chooseLicense.title "Escoger una licencia Creative Commons">
-<!ENTITY zotero.publications.chooseLicense.text "Una licencia Creative Commons permite que otros copien y redistribuyan tu trabajo siempre que proporcionen el crédito apropiado, proporcionen un enlace a la licencia e indiquen si se realizaron cambios. Las condiciones adicionales se pueden especificar a continuación.">
-<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "¿Permitir compartir adaptaciones de tu trabajo?">
+<!ENTITY zotero.publications.chooseLicense.title "Elija una licencia Creative Commons">
+<!ENTITY zotero.publications.chooseLicense.text "Una licencia Creative Commons permite que otros copien y redistribuyan su trabajo siempre que proporcionen el crédito apropiado, proporcionen un enlace a la licencia e indiquen si se realizaron cambios. Las condiciones adicionales se pueden especificar a continuación.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "¿Permitir compartir adaptaciones de su trabajo?">
 <!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Sí, siempre que se comparta bajo la misma licencia">
-<!ENTITY zotero.publications.chooseLicense.commercial.prompt "¿Permitir el uso comercial de tu trabajo?">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "¿Permitir el uso comercial de su trabajo?">

@@ -1,6 +1,6 @@
-<!ENTITY styles.preview "Просмотр образцов оформления">
+<!ENTITY styles.preview "Просмотр стилей оформления">
 
-<!ENTITY styles.preview.citationFormat "Формат ссылки:">
+<!ENTITY styles.preview.citationFormat "Формат цитирования:">
 <!ENTITY styles.preview.citationFormat.all "все">
 <!ENTITY styles.preview.citationFormat.author "автор">
 <!ENTITY styles.preview.citationFormat.authorDate "в виде автора и  даты">

@@ -1,6 +1,6 @@
 <!ENTITY zotero.publications.my_publications "Mine publikasjoner">
 
-<!ENTITY zotero.publications.intro "Elementer du legger til Mine publikasjoner vil bli vist på din profilside på zotero.org. Hvis du velger å inkludere vedlegg vil de bli gjort offentlig tilgjengelig under lisensen du angir. Legg kun til arbeid du selv har utført og inkluder vedlegg bare dersom du har rettighetene til å distribuere de og ønsker å gjøre det.">
+<!ENTITY zotero.publications.intro "Elementer du legger til Mine publikasjoner vil bli vist på din profilside på zotero.org. Hvis du velger å inkludere vedlegg vil de bli gjort offentlig tilgjengelig under lisensen du angir. Legg kun til arbeid du selv har opprettet og inkluder vedlegg kun dersom du har rettighetene til å distribuere de og ønsker å gjøre det.">
 <!ENTITY zotero.publications.include.checkbox.files "Inkluder filer">
 <!ENTITY zotero.publications.include.checkbox.notes "Inkluder notater">
 <!ENTITY zotero.publications.include.adjustAtAnyTime "Du kan tilpasse hva som skal vises fra Mine publikasjoner samlingen når som helst.">
