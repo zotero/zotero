@@ -37,7 +37,7 @@ const MAX_DIFF_SEGMENT_LENGTH = 60;
 
 const Field = (props) => {
 	const { itemID, field, onToggle } = props;
-	const { fieldName, fieldLabel, oldLabel, newLabel, isAccepted } = field;
+	const { fieldName, fieldLabel, oldLabel, newLabel, isDisabled } = field;
 
 	function cut(str, index) {
 		if (index < 0) {
@@ -62,7 +62,7 @@ const Field = (props) => {
 
 	function shrink(str, pos) {
 		if (pos === 'start' && str.length > MAX_DIFF_SEGMENT_LENGTH / 2) {
-			return '…' + str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1));
+			return '…' + str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1)).trim();
 		}
 		else if (pos === 'middle' && str.length > MAX_DIFF_SEGMENT_LENGTH) {
 			return str.slice(cut(str, MAX_DIFF_SEGMENT_LENGTH / 2 - 1)) + '[…]' + str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1));
@@ -78,7 +78,7 @@ const Field = (props) => {
 	}
 
 	function handleClick() {
-		onToggle(itemID, fieldName, !isAccepted);
+		onToggle(itemID, fieldName, !isDisabled);
 	}
 
 	function getDiff(oldValue, newValue) {
@@ -107,7 +107,7 @@ const Field = (props) => {
 			let className = part[0] === 1 ? 'added' : part[0] === -1 ? 'removed' : '';
 			let value = part[1];
 			value = shrink(value, diffs.length === 1 && 'single' || index === 0 && 'start' || index === diffs.length - 1 && 'end' || 'middle');
-			return <span key={index} className={className}>{value}</span>
+			return <span key={index} className={className}>{value}</span>;
 		});
 	}
 
@@ -115,14 +115,14 @@ const Field = (props) => {
 
 	return (
 		<div
-			className={cx('diff-table-field', { accepted: isAccepted })}
+			className={cx('diff-table-field', { disabled: isDisabled })}
 			onClick={handleClick}
 		>
 			<div className="name">{newLabel ? fieldLabel + ':' : <s>{fieldLabel}:</s>}</div>
 			<div className="value">{diff}</div>
 		</div>
 	);
-}
+};
 
 Field.propTypes = {
 	itemID: PropTypes.number.isRequired,

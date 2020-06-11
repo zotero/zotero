@@ -1,4 +1,3 @@
-
 .diff-table-field {
 	display: flex;
 	padding-bottom: 2px;
@@ -19,28 +18,27 @@
 	}
 
 	.value {
+		-moz-user-select: text;
+
 		.removed {
-			background-color: #d0d0d0;
+			background-color: #ff8989;
 			text-decoration: line-through;
 		}
 
 		.added {
-			background-color: #eeeeee;
+			background-color: #a9edae;
 		}
 	}
 
-
-	&.accepted {
+	&.disabled {
 		.value {
-			color: initial;
-
 			.removed {
-				background-color: #ff8989;
+				background-color: #d0d0d0;
 				text-decoration: line-through;
 			}
 
 			.added {
-				background-color: #a9edae;
+				background-color: #eeeeee;
 			}
 		}
 	}
@@ -93,7 +91,6 @@
 				text-align: right;
 				padding: 5px 0 10px;
 			}
-
 		}
 	}
 }

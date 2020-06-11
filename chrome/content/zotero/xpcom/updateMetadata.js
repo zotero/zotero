@@ -39,12 +39,12 @@ Zotero.UpdateMetadata = new function () {
 			if (row) {
 				// Toggle all if no field is passed or item type is changed
 				if (!fieldName || _isItemTypeChanged(row)) {
-					let hasAcceptedFields = row.fields.find(field => field.isAccepted);
-					row.fields.forEach(field => field.isAccepted = !hasAcceptedFields);
+					let hasDisabledFields = row.fields.find(field => field.isDisabled);
+					row.fields.forEach(field => field.isDisabled = !hasDisabledFields);
 				}
 				else {
 					let field = row.fields.find(x => x.fieldName === fieldName);
-					field.isAccepted = !field.isAccepted;
+					field.isDisabled = !field.isDisabled;
 				}
 			}
 			_update();
@@ -70,10 +70,9 @@ Zotero.UpdateMetadata = new function () {
 		onPressEscape() {
 			// Clear and close if all rows are processed and no conflicts,
 			// otherwise just close
-			if (_rows.find(row => row.fields.length ||
-				![Zotero.UpdateMetadata.ROW_SUCCEEDED,
-					Zotero.UpdateMetadata.ROW_FAILED
-				].includes(row.status)
+			if (_rows.find(row => row.fields.length
+				|| ![Zotero.UpdateMetadata.ROW_SUCCEEDED,
+					Zotero.UpdateMetadata.ROW_FAILED].includes(row.status)
 			)) {
 				_dialog.close();
 				return;
@@ -84,6 +83,11 @@ Zotero.UpdateMetadata = new function () {
 			_update();
 		}
 	});
+
+	// Expose for tests
+	this.isMetadataDisabled = _isMetadataDisabled;
+	this.isFieldDisabled = _isFieldDisabled;
+	this.isFieldIgnored = _isFieldIgnored;
 
 	/**
 	 * Add listener
@@ -120,7 +124,7 @@ Zotero.UpdateMetadata = new function () {
 					// If item type changes it's safer to un-accept all fields,
 					// when the current item is modified (i.e. in the item pane)
 					if (_isItemTypeChanged(row)) {
-						row.fields.forEach(field => field.isAccepted = false);
+						row.fields.forEach(field => field.isDisabled = true);
 					}
 				}
 				updated = true;
@@ -130,7 +134,7 @@ Zotero.UpdateMetadata = new function () {
 		if (updated) {
 			_update();
 		}
-	}
+	};
 
 	/**
 	 * Return rows count
@@ -138,14 +142,14 @@ Zotero.UpdateMetadata = new function () {
 	 */
 	this.getRowsCount = function () {
 		return _rows.length;
-	}
+	};
 
 	/**
 	 * Open dialog
 	 */
 	this.openDialog = function () {
 		_dialog.open();
-	}
+	};
 
 	/**
 	 * Check whether a given item could theoretically be updated
@@ -159,6 +163,7 @@ Zotero.UpdateMetadata = new function () {
 	/**
 	 * Add items to the queue, trigger processing and open dialog
 	 * @param {Zotero.Item[]} items
+	 * @returns {Promise}
 	 */
 	this.updateItems = async function (items) {
 		for (let item of items) {
@@ -222,17 +227,17 @@ Zotero.UpdateMetadata = new function () {
 			_update();
 
 			try {
-				let item = await Zotero.Items.getAsync(row.itemID);
-				if (!item) {
+				let oldItem = await Zotero.Items.getAsync(row.itemID);
+				if (!oldItem) {
 					throw new Error();
 				}
 
-				let newItem = await Zotero.Utilities.Internal.getUpdatedMetadata(item);
+				let newItem = await Zotero.Utilities.Internal.getUpdatedMetadata(oldItem);
 				if (newItem) {
-					_setRowFields(row, item, newItem);
+					_setRowFields(row, oldItem, newItem);
+					row.newItem = newItem;
 				}
 
-				row.newItem = newItem || oldItem;
 				row.status = Zotero.UpdateMetadata.ROW_SUCCEEDED;
 				row.message = '';
 			}
@@ -250,9 +255,9 @@ Zotero.UpdateMetadata = new function () {
 	}
 
 	/**
-	 * Check if item type changed
-	 * @param row
-	 * @returns {boolean}
+	 * Check if item type is changed
+	 * @param {Object} row
+	 * @returns {Boolean}
 	 * @private
 	 */
 	function _isItemTypeChanged(row) {
@@ -260,14 +265,14 @@ Zotero.UpdateMetadata = new function () {
 	}
 
 	/**
-	 * Format creators
-	 * @param creators
-	 * @param insertType
+	 * Format creators array to string
+	 * @param {Zotero.Creators[]} creators
+	 * @param {Boolean} insertType - Append creator type after each creator
 	 * @returns {String}
 	 * @private
 	 */
 	function _formatCreators(creators, insertType) {
-		return creators.map(c => {
+		return creators.map((c) => {
 			let name = c.lastName && c.firstName && (c.firstName + ' ' + c.lastName)
 				|| c.lastName || c.firstName || '';
 
@@ -280,71 +285,159 @@ Zotero.UpdateMetadata = new function () {
 	}
 
 	/**
-	 * Check if field is accepted
-	 * @param row
-	 * @param fieldName
+	 * Check if field is currently disabled
+	 * @param {Object} row
+	 * @param {String} fieldName
+	 * @param {Boolean} isDisabledByDefault
 	 * @returns {Boolean}
 	 * @private
 	 */
-	function _isFieldAccepted(row, fieldName, isRisky) {
+	function _isFieldCurrentlyDisabled(row, fieldName, isDisabledByDefault) {
 		// If field already exists use its `accept` state
 		let field = row.fields.find(field => field.fieldName === fieldName);
 		if (field) {
-			return field.isAccepted;
+			return field.isDisabled;
 		}
 
 		// If the field change is risky or the row is already processed and succeeded,
 		// all new field differences (i.e. when the existing item was modified in
 		// the item pane) are unaccepted by default
-		return !isRisky && row.status !== Zotero.UpdateMetadata.ROW_SUCCEEDED;
+		return isDisabledByDefault || row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED;
 	}
 
-	function _fieldsEqual(fieldName, oldField, newField) {
-		// Return true if the new field is only upper-cased or title-cased
-		if (oldField.toLowerCase() === newField.toLowerCase()
-			&& (Zotero.Utilities.capitalizeTitle(oldField, true) === oldField
-				|| oldField.toUpperCase() === newField)) {
-			return true;
+	/**
+	 * Compare Levenshtein distance to make sure the titles are similar enough.
+	 * Basically half of the longer title should be the same.
+	 *
+	 * Notice: It's common for some metadata sources to concatenate
+	 * subtitle into title
+	 *
+	 * @param {String} oldValue
+	 * @param {String} newValue
+	 * @returns {Boolean}
+	 * @private
+	 */
+	function _isTitleSimilar(oldValue, newValue) {
+		let distance = Zotero.Utilities.levenshtein(oldValue, newValue);
+		let threshold = Math.max(oldValue.length, newValue.length) / 2;
+		return distance < threshold;
+	}
+
+	/**
+	 * A set of rules to check whether there is something
+	 * potentially bad with the whole metadata
+	 * @param {Zotero.Item} oldItem
+	 * @param {Zotero.Item} newItem
+	 * @returns {Boolean}
+	 * @private
+	 */
+	function _isMetadataDisabled(oldItem, newItem) {
+		return (
+			// Title is not similar
+			!_isTitleSimilar(oldItem.getField('title', true, true), newItem.getField('title', true, true))
+
+			// Item type changes to `webpage`, since it might be a redirected page
+			|| oldItem.itemTypeID !== newItem.itemTypeID && newItem.itemTypeID === 13
+		);
+	}
+
+	/**
+	 * A set of rules to check whether a field should be disabled by default
+	 * @param {String} fieldName
+	 * @param {String} oldValue
+	 * @param {String} newValue
+	 * @returns {Boolean}
+	 * @private
+	 */
+	function _isFieldDisabled(fieldName, oldValue, newValue) {
+		return (
+			// Field disappears (is emptied or disappears because of the item type change)
+			!newValue
+
+			// Call Number
+			|| fieldName === 'callNumber'
+		);
+	}
+
+	/**
+	 * A set of rules to check whether a field should be ignored when
+	 * generating `DiffTable` view
+	 * @param {String} fieldName
+	 * @param {String} oldValue
+	 * @param {String} newValue
+	 * @returns {Boolean}
+	 * @private
+	 */
+	function _isFieldIgnored(fieldName, oldValue, newValue) {
+		return (
+			// Field is not changed
+			oldValue === newValue
+
+			// `abstract` disappears (typical for Crossref)
+			|| fieldName === 'abstract' && !newValue
+
+			// It's an `accessDate`
+			|| fieldName === 'accessDate'
+
+			// Field was just title-cased
+			|| Zotero.Utilities.capitalizeTitle(oldValue, true) === newValue
+
+			// Field was just upper-cased
+			|| oldValue.toUpperCase() === newValue
+		);
+	}
+
+	/**
+	 * Combine extra fields
+	 * @param {String} oldValue
+	 * @param {String} newValue
+	 * @returns {String}
+	 * @private
+	 */
+	function _combineExtra(oldValue, newValue) {
+		if (newValue.includes(oldValue)) {
+			return newValue;
 		}
-		return oldField === newField;
+
+		if (oldValue.includes(newValue)) {
+			return oldValue;
+		}
+
+		return oldValue.length ? oldValue + '\n' + newValue : newValue;
 	}
 
 	/**
 	 * Compare old and new item and set row fields that are different
-	 * @param row
-	 * @param oldItem
-	 * @param newItem
+	 * @param {Object} row
+	 * @param {Zotero.Item} oldItem - The existing item
+	 * @param {Object} newItem - Item metadata in translator format
 	 * @private
 	 */
 	function _setRowFields(row, oldItem, newItem) {
-		let combinedFields = [];
-		let isMetadataRisky = false;
-
-		let item = new Zotero.Item;
-		item.fromJSON(newItem);
-		newItem = item;
 		let oldItemTypeID = oldItem.itemTypeID;
-		oldItem = oldItem.clone();
-		oldItem.setType(newItem.itemTypeID);
+		let combinedFields = [];
 
-		// Append extra
+		// Convert `newItem` to Zotero.Item
+		let tmpItem = new Zotero.Item;
+		tmpItem.fromJSON(newItem);
+		newItem = tmpItem;
+
+		// Check if metadata is not potentially bad
+		let isMetadataDisabled = _isMetadataDisabled(oldItem, newItem);
+
+		// Combine `extra` fields and set for `newItem`
 		let oldExtra = oldItem.getField('extra');
 		let newExtra = newItem.getField('extra');
-		if (oldExtra && newExtra && oldExtra !== newExtra &&
-			!oldExtra.includes(newExtra)) {
-			newItem.setField('extra', oldExtra + '\n' + newExtra);
+		if (oldExtra && newExtra && oldExtra !== newExtra) {
+			newItem.setField('extra', _combineExtra(oldExtra, newExtra));
 		}
 
-		// When item type changes some fields disappear as well
-		if (oldItemTypeID !== newItem.itemTypeID) {
-			let oldItemType = Zotero.ItemTypes.getName(oldItemTypeID);
+		// If item type changes
+		if (oldItem.itemTypeID !== newItem.itemTypeID) {
+			let oldItemType = Zotero.ItemTypes.getName(oldItem.itemTypeID);
 			let newItemType = Zotero.ItemTypes.getName(newItem.itemTypeID);
-			let oldItemTypeLocalized = Zotero.ItemTypes.getLocalizedString(oldItemTypeID);
+			let oldItemTypeLocalized = Zotero.ItemTypes.getLocalizedString(oldItem.itemTypeID);
 			let newItemTypeLocalized = Zotero.ItemTypes.getLocalizedString(newItem.itemTypeID);
-
-			if (newItemType === 'webpage') {
-				isMetadataRisky = true;
-			}
 
 			combinedFields.push({
 				fieldName: 'itemType',
@@ -353,26 +446,28 @@ Zotero.UpdateMetadata = new function () {
 				oldLabel: oldItemTypeLocalized,
 				newValue: newItemType,
 				newLabel: newItemTypeLocalized,
-				isAccepted: _isFieldAccepted(row, 'itemType', isMetadataRisky)
+				isDisabled: _isFieldCurrentlyDisabled(row, 'itemType', isMetadataDisabled)
 			});
+
+			// Clone the old item and change its type to simplify field comparision later
+			oldItem = oldItem.clone();
+			oldItem.setType(newItem.itemTypeID);
 		}
 
-		let allFields = Zotero.ItemFields.getItemTypeFields(oldItemTypeID);
-		allFields = allFields.concat(Zotero.ItemFields.getItemTypeFields(newItem.itemTypeID));
+		// Compare fields that exist in `newItem` item type, and also
+		// include the fields that disappeared on item type change
+		// and can't be base-converted
+		let allFields = Zotero.ItemFields.getItemTypeFields(newItem.itemTypeID);
+		allFields = allFields.concat(newItem.getFieldsNotInType(oldItemTypeID, true));
 		allFields = allFields.map(x => Zotero.ItemFields.getName(x));
 		for (let fieldName of allFields) {
 			let oldValue = oldItem.getField(fieldName) || '';
 			let newValue = newItem.getField(fieldName) || '';
-			if (['accessDate'].includes(fieldName)
-				|| _fieldsEqual(fieldName, oldValue, newValue)
-				|| combinedFields.find(x => x.fieldName === fieldName)) {
+			if (_isFieldIgnored(fieldName, oldValue, newValue)) {
 				continue;
 			}
 
-			let isNewLonger = newValue.length > oldValue.length;
-			let isNewEmpty = !newValue;
-			let isFieldRisky = isMetadataRisky || isNewEmpty || !isNewLonger;
-
+			let isFieldDisabled = isMetadataDisabled || _isFieldDisabled(fieldName, oldValue, newValue);
 			combinedFields.push({
 				fieldName: fieldName,
 				fieldLabel: Zotero.ItemFields.getLocalizedString(fieldName),
@@ -380,10 +475,11 @@ Zotero.UpdateMetadata = new function () {
 				oldLabel: oldValue,
 				newValue,
 				newLabel: newValue,
-				isAccepted: _isFieldAccepted(row, fieldName, isFieldRisky)
+				isDisabled: _isFieldCurrentlyDisabled(row, fieldName, isFieldDisabled)
 			});
 		}
 
+		// Compare creators
 		let includeCreatorType = false;
 		let oldCreators = oldItem.getCreators();
 		let newCreators = newItem.getCreators();
@@ -404,15 +500,15 @@ Zotero.UpdateMetadata = new function () {
 				oldLabel: oldCreatorsFormatted,
 				newValue: newCreators,
 				newLabel: newCreatorsFormatted,
-				isAccepted: _isFieldAccepted(row, 'creators', isMetadataRisky)
+				isDisabled: _isFieldCurrentlyDisabled(row, 'creators', isMetadataDisabled)
 			};
 
-			let index = combinedFields.findIndex(field =>
-				Zotero.ItemFields.getBaseIDFromTypeAndField(newItem.itemType, field.fieldName) === 110
+			// Find title index to insert creators after
+			let titleIndex = combinedFields.findIndex(
+				field => Zotero.ItemFields.getBaseIDFromTypeAndField(newItem.itemType, field.fieldName) === 110
 			);
-
-			index = index >= 0 && index + 1 || 0;
-			combinedFields.splice(index, 0, creators);
+			titleIndex = titleIndex >= 0 && titleIndex + 1 || 0;
+			combinedFields.splice(titleIndex, 0, creators);
 		}
 
 		row.fields = combinedFields;
@@ -430,12 +526,12 @@ Zotero.UpdateMetadata = new function () {
 			}
 			let item = await Zotero.Items.getAsync(row.itemID);
 			let itemTypeField = row.fields.find(field => field.fieldName === 'itemType');
-			if (itemTypeField && itemTypeField.isAccepted) {
+			if (itemTypeField && !itemTypeField.isDisabled) {
 				item.setType(Zotero.ItemTypes.getID(itemTypeField.newValue));
 			}
 
 			let creatorsField = row.fields.find(field => field.fieldName === 'creators');
-			if (creatorsField && creatorsField.isAccepted) {
+			if (creatorsField && !creatorsField.isDisabled) {
 				// Clear creators, since `setCreators` doesn't do that by itself, TODO: Fix
 				item.setCreators([]);
 				item.setCreators(creatorsField.newValue);
@@ -445,14 +541,14 @@ Zotero.UpdateMetadata = new function () {
 			supportedFieldNames = supportedFieldNames.map(x => Zotero.ItemFields.getName(x));
 
 			for (let field of row.fields) {
-				if (field.isAccepted && supportedFieldNames.includes(field.fieldName)) {
+				if (!field.isDisabled && supportedFieldNames.includes(field.fieldName)) {
 					item.setField(field.fieldName, field.newValue);
 				}
 			}
 			await item.saveTx();
 		}
 	}
-}
+};
 
 Zotero.UpdateMetadata.ROW_QUEUED = 1;
 Zotero.UpdateMetadata.ROW_SCHEDULED = 2;

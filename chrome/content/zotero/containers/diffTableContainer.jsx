@@ -43,4 +43,4 @@ Zotero.DiffTable = {
 			callback(ref);
 		});
 	}
-}
+};

@@ -48,8 +48,15 @@ const Table = React.forwardRef((props, ref) => {
 		props.onToggle(itemID, fieldName);
 	}
 
+	function handleMouseDown(event) {
+		if (!event.target.closest('.value')) {
+			let win = event.target.ownerDocument.defaultView;
+			win.getSelection().removeAllRanges();
+		}
+	}
+
 	return (
-		<div className="diff-table">
+		<div className="diff-table" onMouseDown={handleMouseDown}>
 			<div className="body">
 				{rows.map(row => (
 					<div key={row.itemID} className="row">
@@ -64,9 +71,9 @@ const Table = React.forwardRef((props, ref) => {
 							</div>
 							{row.message && <div className="message">{row.message}</div>}
 							<div className="fields">
-								{row.fields.map(field =>
+								{row.fields.map(field => (
 									<Field key={field.fieldName} itemID={row.itemID} field={field} onToggle={handleFieldToggle}/>
-								)}
+								))}
 							</div>
 							{row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && row.fields.length > 0 && (
 								<div className="footer">
@@ -74,8 +81,7 @@ const Table = React.forwardRef((props, ref) => {
 										className="toggle-button"
 										onClick={() => props.onToggle(row.itemID)}>
 										<FormattedMessage
-											id={row.fields.find(field => field.isAccepted) ?
-												'zotero.general.deselectAll' : 'zotero.general.selectAll'}
+											id={row.fields.find(field => field.isDisabled) ? 'zotero.general.deselectAll' : 'zotero.general.selectAll'}
 										/>
 									</button>
 									<button className="apply-button" onClick={() => props.onApply(row.itemID)}>
@@ -92,6 +98,7 @@ const Table = React.forwardRef((props, ref) => {
 
 Table.propTypes = {
 	onToggle: PropTypes.func,
+	onApply: PropTypes.func,
 	onDoubleClick: PropTypes.func
 };
 

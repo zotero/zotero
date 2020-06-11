@@ -29,6 +29,9 @@ Zotero.UpdateMetadataDialog = function (options) {
 	let _showMinimize = true;
 	let _diffTable;
 
+	/**
+	 * Open dialog
+	 */
 	this.open = function () {
 		if (_progressWindow) {
 			_progressWindow.focus();
@@ -48,10 +51,17 @@ Zotero.UpdateMetadataDialog = function (options) {
 		_progressWindow.addEventListener('pageshow', _onWindowLoaded.bind(this), false);
 	};
 
+	/**
+	 * Check if dialog is open
+	 * @returns {Boolean}
+	 */
 	this.isOpen = function () {
 		return !!_progressWindow;
 	};
 
+	/**
+	 * Close dialog
+	 */
 	this.close = function () {
 		// In case close() is called before open()
 		if (!_progressWindow) {
@@ -60,6 +70,11 @@ Zotero.UpdateMetadataDialog = function (options) {
 		_progressWindow.close();
 	};
 
+	/**
+	 * All dialog updates are set here. Updates XUL components
+	 * and React `diffTable`
+	 * @param rows
+	 */
 	this.setRows = function (rows) {
 		if (!_diffTable) {
 			return;
@@ -69,8 +84,12 @@ Zotero.UpdateMetadataDialog = function (options) {
 		let processed = rows.filter(row => [Zotero.UpdateMetadata.ROW_SUCCEEDED,
 			Zotero.UpdateMetadata.ROW_FAILED].includes(row.status)).length;
 		_updateProgress(total, processed);
-	}
+	};
 
+	/**
+	 * Attach even listeners and `diffTable`
+	 * @private
+	 */
 	function _onWindowLoaded() {
 		_progressWindow.document.title = Zotero.getString('updateMetadata.title');
 		_progressIndicator = _progressWindow.document.getElementById('progress-indicator');
@@ -110,6 +129,7 @@ Zotero.UpdateMetadataDialog = function (options) {
 			_diffTable = null;
 		});
 
+		// Init React diffTable component
 		let diffTableContainer = _progressWindow.document.getElementById('diff-table-container');
 		Zotero.DiffTable.init(
 			diffTableContainer,
@@ -125,6 +145,12 @@ Zotero.UpdateMetadataDialog = function (options) {
 		);
 	}
 
+	/**
+	 * Update XUL dialog elements on progress change
+	 * @param {Number} total
+	 * @param {Number} processed
+	 * @private
+	 */
 	function _updateProgress(total, processed) {
 		if (!_progressWindow) return;
 		_progressIndicator.value = processed * 100 / total;
@@ -141,4 +167,4 @@ Zotero.UpdateMetadataDialog = function (options) {
 			_progressWindow.document.getElementById('label').value = Zotero.getString('general.processing');
 		}
 	}
-}
+};
