@@ -1601,9 +1601,13 @@ Zotero.Utilities.Internal = {
 			}
 		}
 
-		// If both items are translated, add all item2 (Publisher) fields
-		// that don't exist in item1 (API)
-		if (item1 && item2) {
+		// If both items are translated and item2 is not a random `webpage` item
+		// translated with `Embedded Metadata` translator, use
+		// item2 (publisher item) to fill the missing fields in item1 (API item)
+		if (item1 && item2
+			&& item2.itemType !== 'webpage'
+			&& item1.DOI === item2.DOI
+		) {
 			for (let key in item2) {
 				if (Zotero.Utilities.fieldIsValidForType(key, item1.itemType)) {
 					if (!item1[key] && item2[key]) {
@@ -1611,7 +1615,7 @@ Zotero.Utilities.Internal = {
 					}
 				}
 			}
-			
+
 			if ((!item1.creators || !item1.creators.length) && item2.creators) {
 				item1.creators = item2.creators;
 			}

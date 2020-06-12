@@ -204,7 +204,7 @@ Zotero.UpdateMetadata = new function () {
 	}
 
 	/**
-	 * Triggers queue processing and returns when all items in the queue are processed
+	 * Triggers rows processing and returns when all rows are processed
 	 * @return {Promise}
 	 * @private
 	 */
