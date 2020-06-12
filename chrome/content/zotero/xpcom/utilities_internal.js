@@ -1545,8 +1545,7 @@ Zotero.Utilities.Internal = {
 	 * Translate URL
 	 *
 	 * @param {String} url
-	 * @return {Promise<Object|null>} Item metadata in translator format,
-	 * or null if nothing was translated
+	 * @return {Promise<Object|null>} Item metadata in translator format
 	 */
 	translateURL: async function (url) {
 		let doc = (await Zotero.HTTP.processDocuments(url, doc => doc))[0];
@@ -1565,7 +1564,6 @@ Zotero.Utilities.Internal = {
 	 *
 	 * @param {Object} identifier
 	 * @return {Promise<Object|null>} Item metadata in translator format
-	 * or null if translation fails
 	 */
 	translateIdentifier: async function (identifier) {
 		let translate = new Zotero.Translate.Search();
@@ -1593,6 +1591,7 @@ Zotero.Utilities.Internal = {
 		let item1 = newItems[0];
 		let item2 = null;
 
+		// Try to resolve and translate publisher's URL
 		if (identifier.DOI) {
 			try {
 				item2 = await this.translateURL('https://doi.org/' + encodeURIComponent(identifier.DOI));
@@ -1602,26 +1601,23 @@ Zotero.Utilities.Internal = {
 			}
 		}
 
-		// If both items are translated
+		// If both items are translated, add all item2 (Publisher) fields
+		// that don't exist in item1 (API)
 		if (item1 && item2) {
-			// Combine item1 and item2
 			for (let key in item2) {
 				if (Zotero.Utilities.fieldIsValidForType(key, item1.itemType)) {
-					// Add all item2 fields that doesn't exist in item1
 					if (!item1[key] && item2[key]) {
 						item1[key] = item2[key];
 					}
 				}
 			}
-
-			// If item1 doesn't have creators, take them from item2
+			
 			if ((!item1.creators || !item1.creators.length) && item2.creators) {
 				item1.creators = item2.creators;
 			}
 
 			newItem = item1;
 		}
-		// If at least one item was translated
 		else {
 			newItem = item1 || item2;
 		}
@@ -1636,13 +1632,12 @@ Zotero.Utilities.Internal = {
 	 * new metadata. Resolves identifiers if doesn't exist.
 	 * Evaluates metadata and picks the best source. Some fields
 	 * (i.e. `Abstract`) might be combined from different sources.
-	 * This doesn't combine the existing item metadata with the new one,
-	 * but may use some fields when evaluating metadata.
+	 * This doesn't affect the existing item
 	 *
 	 * @param {Zotero.Item} item
-	 * @return {Promise<object>} JSON Item
+	 * @return {Promise<Object|null>} Item metadata in translator format
 	 */
-	getUpdatedMetadata: async function (item) {
+	getUpdatedItemMetadata: async function (item) {
 		let newItem;
 		// Get identifiers from the existing item
 		let itemIdentifiers = this.getItemIdentifiers(item);
@@ -1693,7 +1688,7 @@ Zotero.Utilities.Internal = {
 			}
 		}
 
-		return false;
+		return null;
 	},
 	
 	

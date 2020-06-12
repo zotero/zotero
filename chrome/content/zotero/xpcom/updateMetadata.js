@@ -232,7 +232,7 @@ Zotero.UpdateMetadata = new function () {
 					throw new Error();
 				}
 
-				let newItem = await Zotero.Utilities.Internal.getUpdatedMetadata(oldItem);
+				let newItem = await Zotero.Utilities.Internal.getUpdatedItemMetadata(oldItem);
 				if (newItem) {
 					_setRowFields(row, oldItem, newItem);
 					row.newItem = newItem;

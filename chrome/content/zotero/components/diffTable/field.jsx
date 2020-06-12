@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 
@@ -33,8 +33,6 @@ const dmp = new DMP();
 
 const MAX_DIFF_SEGMENT_LENGTH = 60;
 
-// TODO: Improve performance by reducing re-renders
-
 const Field = (props) => {
 	const { itemID, field, onToggle } = props;
 	const { fieldName, fieldLabel, oldLabel, newLabel, isDisabled } = field;
@@ -43,7 +41,7 @@ const Field = (props) => {
 		if (index < 0) {
 			return 0;
 		}
-		
+
 		let cutIndex = null;
 
 		let idx = -1;
@@ -93,16 +91,30 @@ const Field = (props) => {
 
 		if (!diffs) return [];
 
+		// Common characters number
 		let commonNum = diffs.reduce((acc, value) => acc + (value[0] === 0 ? value[1].length : 0), 0);
+		// Changed characters number
 		let changedNum = diffs.reduce((acc, value) => acc + (value[0] !== 0 ? value[1].length : 0), 0);
-		
-		if (commonNum > 0 && changedNum / commonNum > 3 || diffs.length === 2 && diffs[0][0] === -1 && diffs[1][0] === 1 && diffs[0][1].length + diffs[1][1].length > 60) {
+
+		// Return removed and added content in separate lines
+		// if there are common characters and the changed to common ratio is 3:1 (TODO: tweak it)
+		if (commonNum > 0 && changedNum / commonNum > 3
+			// or if there are only two diffs where one completely removes
+			// content and another adds, and the total length of removed and
+			// added content is > 60
+			|| (diffs.length === 2
+				&& diffs[0][0] === -1
+				&& diffs[1][0] === 1
+				&& diffs[0][1].length + diffs[1][1].length > 60
+			)) {
 			return [
-				<span className="removed">{shrink(oldLabel, 'single')}</span>, <br/>,
-				<span className="added">{shrink(newLabel, 'single')}</span>
+				<span key={0} className="removed">{shrink(oldLabel, 'single')}</span>,
+				<br key={1}/>,
+				<span key={2} className="added">{shrink(newLabel, 'single')}</span>
 			];
 		}
 
+		// Otherwise return many fragments of common, removed or added content
 		return diffs.map((part, index) => {
 			let className = part[0] === 1 ? 'added' : part[0] === -1 ? 'removed' : '';
 			let value = part[1];
@@ -111,7 +123,7 @@ const Field = (props) => {
 		});
 	}
 
-	let diff = getDiff(oldLabel, newLabel);
+	let diff = useMemo(() => getDiff(oldLabel, newLabel), [oldLabel, newLabel]);
 
 	return (
 		<div
