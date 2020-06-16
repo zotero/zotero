@@ -71,6 +71,7 @@ var ZoteroPane = new function()
 		
 		// Set key down handler
 		document.getElementById('appcontent').addEventListener('keydown', ZoteroPane_Local.handleKeyDown, true);
+		document.addEventListener('blur', ZoteroPane.handleBlur);
 		
 		// Init toolbar buttons for all progress queues
 		let progressQueueButtons = document.getElementById('zotero-pq-buttons');
@@ -532,9 +533,17 @@ var ZoteroPane = new function()
 		}
 	}
 	
+	this.handleBlur = (event) => {
+		if (this.highlightTimer) {
+			this.highlightTimer.cancel();
+			this.highlightTimer = null;
+		}
+		ZoteroPane_Local.collectionsView.setHighlightedRows();
+	}
+	
 	function handleKeyUp(event) {
 		var from = event.originalTarget.id;
-		if (from == 'zotero-items-tree') {
+		if (ZoteroPane.itemsView && from == ZoteroPane.itemsView.id) {
 			if ((Zotero.isWin && event.keyCode == 17) ||
 					(!Zotero.isWin && event.keyCode == 18)) {
 				if (this.highlightTimer) {
@@ -582,7 +591,7 @@ var ZoteroPane = new function()
 			return;
 		}
 
-		if (from == this.itemsView.id) {
+		if (this.itemsView && from == this.itemsView.id) {
 			// Focus TinyMCE explicitly on tab key, since the normal focusing doesn't work right
 			if (!event.shiftKey && event.keyCode == event.DOM_VK_TAB) {
 				var deck = document.getElementById('zotero-item-pane-content');
