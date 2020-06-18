@@ -1121,6 +1121,7 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 	
 	// update bibliographies
 	if (this._session.bibliography	 				// if bibliography exists
+			&& Object.keys(this._session.citationsByIndex).length // and doc has citations
 			&& (this._session.bibliographyHasChanged	// and bibliography changed
 			|| forceBibliography)) {					// or if we should generate regardless of
 														// changes
