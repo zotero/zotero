@@ -735,11 +735,26 @@ Zotero.DataObject.prototype._markAllDataTypeLoadStates = function (loaded) {
 	}
 }
 
+Zotero.DataObject.prototype._hasFieldChanged = function (field) {
+	return field in this._changedData;
+};
+
+Zotero.DataObject.prototype._getChangedField = function (field) {
+	return this._changedData[field];
+};
+
 /**
  * Get either the unsaved value of a field or the saved value if unchanged since the last save
  */
 Zotero.DataObject.prototype._getLatestField = function (field) {
-        return this._changedData[field] !== undefined ? this._changedData[field] : this['_' + field];
+	return this._changedData[field] || this['_' + field];
+};
+
+/**
+ * Get either the unsaved value of a field or the saved value if unchanged since the last save
+ */
+Zotero.DataObject.prototype._getLatestField = function (field) {
+	return this._changedData[field] !== undefined ? this._changedData[field] : this['_' + field];
 };
 
 /**
@@ -752,6 +767,9 @@ Zotero.DataObject.prototype._markFieldChange = function (field, value) {
 	if (['deleted', 'tags'].includes(field)) {
 		if (Array.isArray(value)) {
 			this._changedData[field] = [...value];
+		}
+		else if (typeof value === 'object' && value !== null) {
+			this._changedData[field] = Object.assign({}, value);
 		}
 		else {
 			this._changedData[field] = value;

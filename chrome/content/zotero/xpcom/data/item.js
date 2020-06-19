@@ -1758,9 +1758,9 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	}
 	
 	// Tags
-	if (this._changedData.tags) {
+	if (this._hasFieldChanged('tags')) {
 		let oldTags = this._tags;
-		let newTags = this._changedData.tags;
+		let newTags = this._getChangedField('tags');
 		this._clearChanged('tags');
 		this._markForReload('tags');
 		
@@ -3355,7 +3355,7 @@ Zotero.Item.prototype.clearBestAttachmentState = function () {
 Zotero.Item.prototype.getTags = function () {
 	this._requireData('tags');
 	// BETTER DEEP COPY?
-	return JSON.parse(JSON.stringify(this._changedData.tags || this._tags));
+	return JSON.parse(JSON.stringify(this._getLatestField('tags')));
 };
 
 
@@ -3367,7 +3367,7 @@ Zotero.Item.prototype.getTags = function () {
  */
 Zotero.Item.prototype.hasTag = function (tagName) {
 	this._requireData('tags');
-	var tags = this._changedData.tags || this._tags;
+	var tags = this._getLatestField('tags');
 	return tags.some(tagData => tagData.tag == tagName);
 }
 
@@ -3377,7 +3377,7 @@ Zotero.Item.prototype.hasTag = function (tagName) {
  */
 Zotero.Item.prototype.getTagType = function (tagName) {
 	this._requireData('tags');
-	var tags = this._changedData.tags || this._tags;
+	var tags = this._getLatestField('tags');
 	for (let tag of tags) {
 		if (tag.tag === tagName) {
 			return tag.type ? tag.type : 0;
@@ -3397,7 +3397,7 @@ Zotero.Item.prototype.getTagType = function (tagName) {
  */
 Zotero.Item.prototype.setTags = function (tags) {
 	this._requireData('tags');
-	var oldTags = this._changedData.tags || this._tags;
+	var oldTags = this._getLatestField('tags');
 	var newTags = tags.concat()
 		// Allow array of strings
 		.map(tag => typeof tag == 'string' ? { tag } : tag);
@@ -3505,7 +3505,7 @@ Zotero.Item.prototype.replaceTag = function (oldTag, newTag) {
  */
 Zotero.Item.prototype.removeTag = function(tagName) {
 	this._requireData('tags');
-	var oldTags = this._changedData.tags || this._tags;
+	var oldTags = this._getLatestField('tags');
 	var newTags = oldTags.filter(tagData => tagData.tag !== tagName);
 	if (newTags.length == oldTags.length) {
 		Zotero.debug('Cannot remove missing tag ' + tagName + ' from item ' + this.libraryKey);
