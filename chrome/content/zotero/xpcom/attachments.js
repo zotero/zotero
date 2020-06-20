@@ -24,11 +24,13 @@
 */
 
 Zotero.Attachments = new function(){
-	// Keep in sync with Zotero.Schema.integrityCheck()
+	// Keep in sync with Zotero.Schema.integrityCheck() and this.linkModeToName()
 	this.LINK_MODE_IMPORTED_FILE = 0;
 	this.LINK_MODE_IMPORTED_URL = 1;
 	this.LINK_MODE_LINKED_FILE = 2;
 	this.LINK_MODE_LINKED_URL = 3;
+	this.LINK_MODE_EMBEDDED_IMAGE = 4;
+	
 	this.BASE_PATH_PLACEHOLDER = 'attachments:';
 	
 	var _findPDFQueue = [];
@@ -351,6 +353,71 @@ Zotero.Attachments = new function(){
 	});
 
 
+	/**
+	 * Saves an image for a parent note or area annotation
+	 *
+	 * @param {Object} params
+	 * @param {Blob} params.blob - Image to save
+	 * @param {Integer} params.parentItemID - Annotation item to add item to
+	 * @param {Object} [params.saveOptions] - Options to pass to Zotero.Item::save()
+	 * @return {Promise<Zotero.Item>}
+	 */
+	this.importEmbeddedImage = async function ({ blob, parentItemID, saveOptions }) {
+		Zotero.debug('Importing annotation image');
+		
+		var contentType = blob.type;
+		var fileExt;
+		switch (contentType) {
+			case 'image/png':
+				fileExt = 'png';
+				break;
+			
+			default:
+				throw new Error(`Unsupported embedded image content type '${contentType}`);
+		}
+		var filename = 'image.' + fileExt;
+		
+		var attachmentItem;
+		var destDir;
+		try {
+			await Zotero.DB.executeTransaction(async function () {
+				// Create a new attachment
+				attachmentItem = new Zotero.Item('attachment');
+				let { libraryID: parentLibraryID } = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+				attachmentItem.libraryID = parentLibraryID;
+				attachmentItem.parentID = parentItemID;
+				attachmentItem.attachmentLinkMode = this.LINK_MODE_EMBEDDED_IMAGE;
+				attachmentItem.attachmentPath = 'storage:' + filename;
+				attachmentItem.attachmentContentType = contentType;
+				await attachmentItem.save(saveOptions);
+				
+				// Write blob to file in attachment directory
+				destDir = await this.createDirectoryForItem(attachmentItem);
+				let file = OS.Path.join(destDir, filename);
+				await Zotero.File.putContentsAsync(file, blob);
+				await Zotero.File.setNormalFilePermissions(file);
+			}.bind(this));
+		}
+		catch (e) {
+			Zotero.logError("Failed importing image:\n\n" + e);
+			
+			// Clean up
+			try {
+				if (destDir) {
+					await OS.File.removeDir(destDir, { ignoreAbsent: true });
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			
+			throw e;
+		}
+		
+		return attachmentItem;
+	};
+	
+	
 	/**
 	 * @param {Object} options
 	 * @param {Integer} options.libraryID
@@ -2102,6 +2169,9 @@ Zotero.Attachments = new function(){
 		if (!(item instanceof Zotero.Item)) {
 			throw new Error("'item' must be a Zotero.Item");
 		}
+		if (!item.key) {
+			throw new Error("Item key must be set");
+		}
 		return this.getStorageDirectoryByLibraryAndKey(item.libraryID, item.key);
 	}
 	
@@ -2787,6 +2857,8 @@ Zotero.Attachments = new function(){
 			return 'linked_file';
 		case this.LINK_MODE_LINKED_URL:
 			return 'linked_url';
+		case this.LINK_MODE_EMBEDDED_IMAGE:
+			return 'embedded_image';
 		default:
 			throw new Error(`Invalid link mode ${linkMode}`);
 		}

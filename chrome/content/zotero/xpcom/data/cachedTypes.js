@@ -354,6 +354,8 @@ Zotero.ItemTypes = new function() {
 	var _primaryTypeNames = ['book', 'bookSection', 'journalArticle', 'newspaperArticle', 'document'];
 	var _primaryTypes;
 	var _secondaryTypes;
+	// Item types hidden from New Item menu
+	var _hiddenTypeNames = ['webpage', 'attachment', 'note', 'annotation'];
 	var _hiddenTypes;
 	
 	var _numPrimary = 5;
@@ -371,12 +373,13 @@ Zotero.ItemTypes = new function() {
 		
 		// Secondary types
 		_secondaryTypes = yield this._getTypesFromDB(
-			`WHERE display != 0 AND display NOT IN ('${_primaryTypeNames.join("', '")}')`
-			+ " AND name != 'webpage'"
+			`WHERE typeName NOT IN ('${_primaryTypeNames.concat(_hiddenTypeNames).join("', '")}')`
 		);
 		
 		// Hidden types
-		_hiddenTypes = yield this._getTypesFromDB('WHERE display=0')
+		_hiddenTypes = yield this._getTypesFromDB(
+			`WHERE typeName IN ('${_hiddenTypeNames.join("', '")}')`
+		);
 		
 		// Custom labels and icons
 		var sql = "SELECT customItemTypeID AS id, label, icon FROM customItemTypes";
@@ -402,8 +405,8 @@ Zotero.ItemTypes = new function() {
 				mru.split(',')
 				.slice(0, _numPrimary)
 				.map(name => this.getName(name))
-				// Ignore 'webpage' item type
-				.filter(name => name && name != 'webpage')
+				// Ignore hidden item types and 'webpage'
+				.filter(name => name && !_hiddenTypeNames.concat('webpage').includes(name))
 			);
 			
 			// Add types from defaults until we reach our limit

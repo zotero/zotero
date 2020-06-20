@@ -64,6 +64,16 @@ Zotero.Item = function(itemTypeOrID) {
 	this._attachments = null;
 	this._notes = null;
 	
+	// loadAnnotation
+	this._annotationType = null;
+	this._annotationText = null;
+	this._annotationImage = null;
+	this._annotationComment = null;
+	this._annotationColor = null;
+	this._annotationPageLabel = null;
+	this._annotationSortIndex = null;
+	this._annotationPosition = null;
+	
 	this._tags = [];
 	this._collections = [];
 	
@@ -91,6 +101,8 @@ Zotero.Item.prototype._dataTypes = Zotero.Item._super.prototype._dataTypes.conca
 	'creators',
 	'itemData',
 	'note',
+	'annotation',
+	'annotationDeferred',
 	'childItems',
 //	'relatedItems', // TODO: remove
 	'tags',
@@ -121,6 +133,9 @@ for (let name of ['libraryID', 'key', 'dateAdded', 'dateModified', 'version', 's
 
 Zotero.defineProperty(Zotero.Item.prototype, 'itemTypeID', {
 	get: function() { return this._itemTypeID; }
+});
+Zotero.defineProperty(Zotero.Item.prototype, 'itemType', {
+	get: function() { return Zotero.ItemTypes.getName(this._itemTypeID); }
 });
 
 // .parentKey and .parentID defined in dataObject.js, but create aliases
@@ -177,8 +192,8 @@ Zotero.Item.prototype._set = function () {
 }
 
 Zotero.Item.prototype._setParentKey = function() {
-	if (!this.isNote() && !this.isAttachment()) {
-		throw new Error("_setParentKey() can only be called on items of type 'note' or 'attachment'");
+	if (!this.isNote() && !this.isAttachment() && !this.isAnnotation()) {
+		throw new Error("_setParentKey() can only be called on items of type 'note', 'attachment', or 'annotation'");
 	}
 	
 	Zotero.Item._super.prototype._setParentKey.apply(this, arguments);
@@ -1426,6 +1441,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			switch (Zotero.ItemTypes.getName(itemTypeID)) {
 				case 'note':
 				case 'attachment':
+				case 'annotation':
 					reloadParentChildItems[parentItemID] = true;
 					break;
 			}
@@ -1741,6 +1757,62 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		}
 	}
 	
+	//
+	// Annotation
+	//
+	if (this._changed.annotation || this._changed.annotationDeferred) {
+		if (!parentItemID) {
+			throw new Error("Annotation item must have a parent item");
+		}
+		let parentItem = Zotero.Items.get(parentItemID);
+		if (!parentItem.isAttachment()) {
+			throw new Error("Annotation parent must be an attachment item");
+		}
+		if (!parentItem.isFileAttachment()) {
+			throw new Error("Annotation parent must be a file attachment");
+		}
+		if (parentItem.attachmentContentType != 'application/pdf') {
+			throw new Error("Annotation parent must be a PDF");
+		}
+		let type = this._getLatestField('annotationType');
+		let typeID = Zotero.Annotations[`ANNOTATION_TYPE_${type.toUpperCase()}`];
+		if (!typeID) {
+			throw new Error(`Invalid annotation type '${type}'`);
+		}
+		
+		let text = this._getLatestField('annotationText');
+		let comment = this._getLatestField('annotationComment');
+		let color = this._getLatestField('annotationColor');
+		let pageLabel = this._getLatestField('annotationPageLabel');
+		let sortIndex = this._getLatestField('annotationSortIndex');
+		let position = this._getLatestField('annotationPosition');
+		// This gets stringified, so make sure it's not null
+		if (!position) {
+			throw new Error("Annotation position not set");
+		}
+		
+		let sql = "REPLACE INTO itemAnnotations "
+			+ "(itemID, parentItemID, type, text, comment, color, pageLabel, sortIndex, position) "
+			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		yield Zotero.DB.queryAsync(
+			sql,
+			[
+				itemID,
+				parentItemID,
+				typeID,
+				text || null,
+				comment || null,
+				color || null,
+				pageLabel || null,
+				sortIndex,
+				JSON.stringify(position)
+			]
+		);
+		
+		// Clear cached child items of the parent attachment
+		reloadParentChildItems[parentItemID] = true;
+	}
+	
 	// Add to new collections
 	if (env.collectionsAdded) {
 		let toAdd = env.collectionsAdded;
@@ -1895,7 +1967,9 @@ Zotero.Item.prototype.setSourceKey = function(sourceItemKey) {
 
 ////////////////////////////////////////////////////////
 //
-// Methods dealing with note items
+//
+// Note methods
+//
 //
 ////////////////////////////////////////////////////////
 /**
@@ -2083,9 +2157,11 @@ Zotero.Item.prototype.getNotes = function(includeTrashed) {
 
 ////////////////////////////////////////////////////////
 //
-// Methods dealing with attachments
+//
+// Attachment methods
 //
 // save() is not required for attachment functions
+//
 //
 ///////////////////////////////////////////////////////
 /**
@@ -2104,8 +2180,11 @@ Zotero.Item.prototype.isImportedAttachment = function() {
 		return false;
 	}
 	var linkMode = this.attachmentLinkMode;
-	if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE || linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
-		return true;
+	switch (linkMode) {
+		case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
+		case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
+		case Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE:
+			return true;
 	}
 	return false;
 }
@@ -2310,8 +2389,7 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 	}
 	
 	// Imported file with relative path
-	if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
-			linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
+	if (this.isImportedAttachment()) {
 		if (!path.includes("storage:")) {
 			Zotero.logError("Invalid attachment path '" + path + "'");
 			this._updateAttachmentStates(false);
@@ -2731,6 +2809,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentLinkMode', {
 			case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
 			case Zotero.Attachments.LINK_MODE_LINKED_FILE:
 			case Zotero.Attachments.LINK_MODE_LINKED_URL:
+			case Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE:
 				break;
 			
 			default:
@@ -3358,6 +3437,180 @@ Zotero.Item.prototype.getBestAttachmentStateCached = function () {
 Zotero.Item.prototype.clearBestAttachmentState = function () {
 	this._bestAttachmentState = null;
 }
+
+
+////////////////////////////////////////////////////////
+//
+//
+// Annotation methods
+//
+//
+////////////////////////////////////////////////////////
+
+// Main annotation properties (required for items list display)
+for (let name of ['type', 'text', 'comment', 'color', 'pageLabel', 'sortIndex']) {
+	let field = 'annotation' + name[0].toUpperCase() + name.substr(1);
+	Zotero.defineProperty(Zotero.Item.prototype, field, {
+		get: function () {
+			this._requireData('annotation');
+			return this._getLatestField(field);
+		},
+		set: function (value) {
+			this._requireData('annotation');
+			
+			if (this._getLatestField(field) === value) {
+				return;
+			}
+			
+			switch (name) {
+				case 'type': {
+					let currentType = this._getLatestField('annotationType');
+					if (currentType && currentType != value) {
+						throw new Error("Cannot change annotation type");
+					}
+					if (!['highlight', 'note', 'area'].includes(value)) {
+						throw new Error(`Invalid annotation type '${value}'`);
+					}
+					break;
+				}
+				case 'text':
+					if (this._getLatestField('annotationType') != 'highlight') {
+						throw new Error("'annotationText' can only be set for highlight annotations");
+					}
+					break;
+				
+				case 'sortIndex':
+					if (!/^\d{6}\|\d{7}\|\d{6}\.\d{3}$/.test(value)) {
+						throw new Error(`Invalid sortIndex '${value}`);
+					}
+					break;
+			}
+			
+			this._markFieldChange(field, value);
+			this._changed.annotation = true;
+		}
+	});
+}
+
+
+// Deferred annotation properties (not necessary until viewed)
+for (let name of ['position']) {
+	let field = 'annotation' + name[0].toUpperCase() + name.substr(1);
+	Zotero.defineProperty(Zotero.Item.prototype, field, {
+		get: function () {
+			this._requireData('annotationDeferred');
+			return this._getLatestField(field);
+		},
+		set: function (value) {
+			this._requireData('annotationDeferred');
+			if (this._getLatestField(field) === value) {
+				return;
+			}
+			this._markFieldChange(field, value);
+			this._changed.annotationDeferred = true;
+		}
+	});
+}
+
+
+/**
+ * @property {Zotero.Item} annotationImageAttachment
+ */
+Zotero.defineProperty(Zotero.Item.prototype, 'annotationImageAttachment', {
+	get: function () {
+		if (!this.isAreaAnnotation()) {
+			throw new Error("'annotationImageAttachment' is only valid for area annotations");
+		}
+		var attachments = this.getAttachments();
+		if (!attachments.length) {
+			throw new Error("No attachments found for area annotation");
+		}
+		return Zotero.Items.get(attachments[0]);
+	}
+});
+
+
+/**
+ * @property {String} annotationImageURL
+ */
+Zotero.defineProperty(Zotero.Item.prototype, 'annotationImageURL', {
+	get: function () {
+		if (!this.isAreaAnnotation()) {
+			throw new Error("'annotationImageURL' is only valid for area annotations");
+		}
+		var attachments = this.getAttachments();
+		if (!attachments.length) {
+			throw new Error("No attachments found for area annotation");
+		}
+		
+		var { libraryID, key } = Zotero.Items.getLibraryAndKeyFromID(attachments[0]);
+		var url = 'zotero://attachment/';
+		if (libraryID == Zotero.Libraries.userLibraryID) {
+			url += 'library';
+		}
+		else {
+			url += Zotero.URI.getLibraryPath(libraryID);
+		}
+		url += '/items/' + key;
+		
+		return url;
+	}
+});
+
+
+/**
+ * Determine if an item is an annotation
+ *
+ * @return {Boolean}
+ **/
+Zotero.Item.prototype.isAnnotation = function() {
+	return Zotero.ItemTypes.getName(this.itemTypeID) == 'annotation';
+}
+
+
+/**
+ * Determine if an item is an annotation
+ *
+ * @return {Boolean}
+ **/
+Zotero.Item.prototype.isAreaAnnotation = function() {
+	return this.isAnnotation() && this._getLatestField('annotationType') == 'area';
+}
+
+
+/**
+ * Returns child annotations for an attachment item
+ *
+ * @param {Boolean} [includeTrashed=false] - Include annotations in trash
+ * @return {Zotero.Item[]}
+ */
+Zotero.Item.prototype.getAnnotations = function (includeTrashed) {
+	if (!this.isAttachment()) {
+		throw new Error("getAnnotations() can only be called on attachment items");
+	}
+	
+	this._requireData('childItems');
+	
+	if (!this._annotations) {
+		return [];
+	}
+	
+	var cacheKey = 'with' + (includeTrashed ? '' : 'out') + 'Trashed';
+	
+	if (this._annotations[cacheKey]) {
+		return [...this._annotations[cacheKey]];
+	}
+	
+	var rows = this._annotations.rows.concat();
+	// Remove trashed items if necessary
+	if (!includeTrashed) {
+		rows = rows.filter(row => !row.trashed);
+	}
+	var ids = rows.map(row => row.itemID);
+	this._annotations[cacheKey] = ids;
+	return ids;
+};
+
 
 
 //

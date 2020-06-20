@@ -518,7 +518,9 @@ Zotero.ItemFields = new function() {
 		var rows = yield Zotero.DB.queryAsync(sql);
 		
 		_itemTypeFields = {
-			[Zotero.ItemTypes.getID('note')]: [] // Notes have no fields
+			// Notes and annotations have no fields
+			[Zotero.ItemTypes.getID('note')]: [],
+			[Zotero.ItemTypes.getID('annotation')]: []
 		};
 		
 		for (let i=0; i<rows.length; i++) {

@@ -41,7 +41,7 @@ Zotero.Schema = new function(){
 	
 	// If updating from this userdata version or later, don't show "Upgrading database…" and don't make
 	// DB backup first. This should be set to false when breaking compatibility or making major changes.
-	const minorUpdateFrom = 107;
+	const minorUpdateFrom = false;
 	
 	var _dbVersions = [];
 	var _schemaVersions = [];
@@ -344,9 +344,18 @@ Zotero.Schema = new function(){
 	 * @return {Object}
 	 */
 	async function _readGlobalSchemaFromFile() {
-		return JSON.parse(
+		var data = JSON.parse(
 			await Zotero.File.getResourceAsync('resource://zotero/schema/global/schema.json')
 		);
+		// TEMP: Add annotation to schema
+		// TODO: Move to schema.json
+		data.itemTypes.push({
+			itemType: "annotation",
+			fields: [],
+			creatorTypes: []
+		});
+		data.locales['en-US'].itemTypes.annotation = 'Annotation';
+		return data;
 	}
 	
 	
@@ -1944,8 +1953,8 @@ Zotero.Schema = new function(){
 			],
 			// Invalid link mode -- set to imported url
 			[
-				"SELECT COUNT(*) > 0 FROM itemAttachments WHERE linkMode NOT IN (0,1,2,3)",
-				"UPDATE itemAttachments SET linkMode=1 WHERE linkMode NOT IN (0,1,2,3)"
+				"SELECT COUNT(*) > 0 FROM itemAttachments WHERE linkMode NOT IN (0,1,2,3,4)",
+				"UPDATE itemAttachments SET linkMode=1 WHERE linkMode NOT IN (0,1,2,3,4)"
 			],
 			// Creators with first name can't be fieldMode 1
 			[
@@ -3224,6 +3233,9 @@ Zotero.Schema = new function(){
 				
 				yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS users");
 				yield Zotero.DB.queryAsync("CREATE TABLE users (\n    userID INTEGER PRIMARY KEY,\n    name TEXT NOT NULL\n)");
+				
+				yield Zotero.DB.queryAsync("CREATE TABLE itemAnnotations (\n    itemID INTEGER PRIMARY KEY,\n    parentItemID INT NOT NULL,\n    type INTEGER NOT NULL,\n    text TEXT,\n    comment TEXT,\n    color TEXT,\n    pageLabel TEXT,\n    sortIndex TEXT NOT NULL,\n    position TEXT NOT NULL,\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,\n    FOREIGN KEY (parentItemID) REFERENCES itemAttachments(itemID) ON DELETE CASCADE\n)");
+				yield Zotero.DB.queryAsync("CREATE INDEX itemAnnotations_parentItemID ON itemAnnotations(parentItemID)");
 			}
 			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom

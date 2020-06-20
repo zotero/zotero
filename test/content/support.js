@@ -689,7 +689,7 @@ function generateAllTypesAndFieldsData() {
 	};
 	
 	// Item types that should not be included in sample data
-	let excludeItemTypes = ['note', 'attachment'];
+	let excludeItemTypes = ['note', 'attachment', 'annotation'];
 	
 	for (let i = 0; i < itemTypes.length; i++) {
 		if (excludeItemTypes.indexOf(itemTypes[i].name) != -1) continue;
@@ -918,6 +918,28 @@ function importTextAttachment() {
 
 function importHTMLAttachment() {
 	return importFileAttachment('test.html', { contentType: 'text/html', charset: 'utf-8' });
+}
+
+
+async function createAnnotation(type, parentItem) {
+	var annotation = new Zotero.Item('annotation');
+	annotation.parentID = parentItem.id;
+	annotation.annotationType = type;
+	if (type == 'highlight') {
+		annotation.annotationText = Zotero.Utilities.randomString();
+	}
+	annotation.annotationComment = Zotero.Utilities.randomString();
+	var page = Zotero.Utilities.rand(1, 100).toString().padStart(6, '0');
+	var pos = Zotero.Utilities.rand(1, 10000).toString().padStart(7, '0');
+	annotation.annotationSortIndex = `${page}|${pos}|000000.000`;
+	annotation.annotationPosition = {
+		pageIndex: 123,
+		rects: [
+			[314.4, 412.8, 556.2, 609.6]
+		]
+	};
+	await annotation.saveTx();
+	return annotation;
 }
 
 

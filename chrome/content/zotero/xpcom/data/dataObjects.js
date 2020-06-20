@@ -486,9 +486,14 @@ Zotero.DataObjects.prototype.loadDataTypes = Zotero.Promise.coroutine(function* 
  * @param {Integer[]} [ids]
  */
 Zotero.DataObjects.prototype._loadDataTypeInLibrary = Zotero.Promise.coroutine(function* (dataType, libraryID, ids) {
-	var funcName = "_load" + dataType[0].toUpperCase() + dataType.substr(1)
+	// note → loadNotes
+	// itemData → loadItemData
+	// annotationDeferred → loadAnnotationsDeferred
+	var baseDataType = dataType.replace('Deferred', '');
+	var funcName = "_load" + dataType[0].toUpperCase() + baseDataType.substr(1)
 		// Single data types need an 's' (e.g., 'note' -> 'loadNotes()')
-		+ ((dataType.endsWith('s') || dataType.endsWith('Data') ? '' : 's'));
+		+ ((baseDataType.endsWith('s') || baseDataType.endsWith('Data') ? '' : 's'))
+		+ (dataType.endsWith('Deferred') ? 'Deferred' : '');
 	if (!this[funcName]) {
 		throw new Error(`Zotero.${this._ZDO_Objects}.${funcName} is not a function`);
 	}

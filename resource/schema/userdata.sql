@@ -113,6 +113,21 @@ CREATE INDEX itemAttachments_charsetID ON itemAttachments(charsetID);
 CREATE INDEX itemAttachments_contentType ON itemAttachments(contentType);
 CREATE INDEX itemAttachments_syncState ON itemAttachments(syncState);
 
+CREATE TABLE itemAnnotations (
+    itemID INTEGER PRIMARY KEY,
+    parentItemID INT NOT NULL,
+    type INTEGER NOT NULL,
+    text TEXT,
+    comment TEXT,
+    color TEXT,
+    pageLabel TEXT,
+    sortIndex TEXT NOT NULL,
+    position TEXT NOT NULL,
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
+    FOREIGN KEY (parentItemID) REFERENCES itemAttachments(itemID) ON DELETE CASCADE
+);
+CREATE INDEX itemAnnotations_parentItemID ON itemAnnotations(parentItemID);
+
 CREATE TABLE tags (
     tagID INTEGER PRIMARY KEY,
     name TEXT NOT NULL UNIQUE

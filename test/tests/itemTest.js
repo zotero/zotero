@@ -709,6 +709,27 @@ describe("Zotero.Item", function () {
 			assert.equal(attachments[0], attachment.id);
 		})
 		
+		it("should update after an attachment is moved to the trash", async function () {
+			var item = await createDataObject('item');
+			var attachment = new Zotero.Item("attachment");
+			attachment.parentID = item.id;
+			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+			await attachment.saveTx();
+			
+			// Attachment should show up initially
+			var attachments = item.getAttachments();
+			assert.lengthOf(attachments, 1);
+			assert.equal(attachments[0], attachment.id);
+			
+			// Move attachment to trash
+			attachment.deleted = true;
+			await attachment.saveTx();
+			
+			// Attachment should not show up without includeTrashed=true
+			attachments = item.getAttachments();
+			assert.lengthOf(attachments, 0);
+		});
+		
 		it("#should return an empty array for an item with no attachments", function* () {
 			var item = yield createDataObject('item');
 			assert.lengthOf(item.getAttachments(), 0);
@@ -1134,6 +1155,146 @@ describe("Zotero.Item", function () {
 			assert.isFalse(yield item.fileExists());
 			yield item.relinkAttachmentFile(newPath);
 			assert.isTrue(yield item.fileExists());
+		});
+	});
+	
+	
+	describe("Annotations", function () {
+		var item;
+		var attachment;
+		
+		before(async function () {
+			item = await createDataObject('item');
+			attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+		});
+		
+		describe("#annotationText", function () {
+			it("should not be changeable", async function () {
+				var a = new Zotero.Item('annotation');
+				a.annotationType = 'highlight';
+				assert.doesNotThrow(() => a.annotationType = 'highlight');
+				assert.throws(() => a.annotationType = 'note');
+			});
+		});
+		
+		describe("#annotationText", function () {
+			it("should only be allowed for highlights", async function () {
+				var a = new Zotero.Item('annotation');
+				a.annotationType = 'highlight';
+				assert.doesNotThrow(() => a.annotationText = "This is highlighted text.");
+				
+				a = new Zotero.Item('annotation');
+				a.annotationType = 'note';
+				assert.throws(() => a.annotationText = "This is highlighted text.");
+				
+				a = new Zotero.Item('annotation');
+				a.annotationType = 'area';
+				assert.throws(() => a.annotationText = "This is highlighted text.");
+			});
+		});
+		
+		describe("#saveTx()", function () {
+			it("should save a highlight annotation", async function () {
+				var annotation = new Zotero.Item('annotation');
+				annotation.parentID = attachment.id;
+				annotation.annotationType = 'highlight';
+				annotation.annotationText = "This is highlighted text.";
+				annotation.annotationSortIndex = '000015|0002431|000000.000';
+				annotation.annotationPosition = {
+					pageIndex: 123,
+					rects: [
+						[314.4, 412.8, 556.2, 609.6]
+					]
+				};
+				await annotation.saveTx();
+			});
+			
+			it("should save a note annotation", async function () {
+				var annotation = new Zotero.Item('annotation');
+				annotation.parentID = attachment.id;
+				annotation.annotationType = 'note';
+				annotation.annotationComment = "This is a comment.";
+				annotation.annotationSortIndex = '000015|0002431|000000.000';
+				annotation.annotationPosition = {
+					pageIndex: 123,
+					rects: [
+						[314.4, 412.8, 556.2, 609.6]
+					]
+				};
+				await annotation.saveTx();
+			});
+			
+			it("should save an area annotation", async function () {
+				// Create a Blob from a PNG
+				var path = OS.Path.join(getTestDataDirectory().path, 'test.png');
+				var imageData = await Zotero.File.getBinaryContentsAsync(path);
+				var array = new Uint8Array(imageData.length);
+				for (let i = 0; i < imageData.length; i++) {
+					array[i] = imageData.charCodeAt(i);
+				}
+				
+				var annotation = new Zotero.Item('annotation');
+				annotation.parentID = attachment.id;
+				annotation.annotationType = 'area';
+				annotation.annotationSortIndex = '000015|0002431|000000.000';
+				annotation.annotationPosition = {
+					pageIndex: 123,
+					rects: [
+						[314.4, 412.8, 556.2, 609.6]
+					],
+					width: 1,
+					height: 1
+				};
+				await annotation.saveTx();
+				
+				await Zotero.Attachments.importEmbeddedImage({
+					blob: new Blob([array], { type: 'image/png' }),
+					parentItemID: annotation.id
+				});
+				
+				var attachments = annotation.getAttachments();
+				assert.lengthOf(attachments, 1);
+				var imageAttachment = Zotero.Items.get(attachments[0]);
+				var imagePath = await imageAttachment.getFilePathAsync();
+				assert.ok(imagePath);
+				assert.equal(OS.Path.basename(imagePath), 'image.png');
+				assert.equal(
+					await Zotero.File.getBinaryContentsAsync(imagePath),
+					imageData
+				);
+				assert.equal(imageAttachment.attachmentContentType, 'image/png');
+				
+				assert.equal(
+					annotation.annotationImageURL,
+					`zotero://attachment/library/items/${imageAttachment.key}`
+				);
+			});
+		});
+		
+		describe("#getAnnotations()", function () {
+			var item;
+			var attachment;
+			var annotation1;
+			var annotation2;
+			
+			before(async function () {
+				item = await createDataObject('item');
+				attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				annotation1 = await createAnnotation('highlight', attachment);
+				annotation2 = await createAnnotation('highlight', attachment);
+				annotation2.deleted = true;
+				await annotation2.saveTx();
+			});
+			
+			it("should return ids of annotations not in trash", async function () {
+				var ids = attachment.getAnnotations();
+				assert.sameMembers(ids, [annotation1.id]);
+			});
+			
+			it("should return ids of annotations in trash if includeTrashed=true", async function () {
+				var ids = attachment.getAnnotations(true);
+				assert.sameMembers(ids, [annotation1.id, annotation2.id]);
+			});
 		});
 	});
 	
