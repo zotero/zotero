@@ -139,9 +139,6 @@ pref("extensions.zotero.httpServer.port", 23119);	// ascii "ZO"
 // Zeroconf
 pref("extensions.zotero.zeroconf.server.enabled", false);
 
-// Annotation settings
-pref("extensions.zotero.annotations.warnOnClose", true);
-
 // Streaming server
 pref("extensions.zotero.streaming.enabled", true);
 

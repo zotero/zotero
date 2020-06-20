@@ -374,37 +374,6 @@ CREATE TABLE storageDeleteLog (
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
 
-CREATE TABLE annotations (
-    annotationID INTEGER PRIMARY KEY,
-    itemID INT NOT NULL,
-    parent TEXT,
-    textNode INT,
-    offset INT,
-    x INT,
-    y INT,
-    cols INT,
-    rows INT,
-    text TEXT,
-    collapsed BOOL,
-    dateModified DATE,
-    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID) ON DELETE CASCADE
-);
-CREATE INDEX annotations_itemID ON annotations(itemID);
-
-CREATE TABLE highlights (
-    highlightID INTEGER PRIMARY KEY,
-    itemID INT NOT NULL,
-    startParent TEXT,
-    startTextNode INT,
-    startOffset INT,
-    endParent TEXT,
-    endTextNode INT,
-    endOffset INT,
-    dateModified DATE,
-    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID) ON DELETE CASCADE
-);
-CREATE INDEX highlights_itemID ON highlights(itemID);
-
 CREATE TABLE proxies (
     proxyID INTEGER PRIMARY KEY,
     multiHost INT,

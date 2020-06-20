@@ -3219,6 +3219,9 @@ Zotero.Schema = new function(){
 			}
 			
 			else if (i == 112) {
+				yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS annotations");
+				yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS highlights");
+				
 				yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS users");
 				yield Zotero.DB.queryAsync("CREATE TABLE users (\n    userID INTEGER PRIMARY KEY,\n    name TEXT NOT NULL\n)");
 			}
