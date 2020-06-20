@@ -49,6 +49,9 @@ Zotero.Items = function() {
 				version: "O.version",
 				synced: "O.synced",
 				
+				createdByUserID: "createdByUserID",
+				lastModifiedByUserID: "lastModifiedByUserID",
+				
 				firstCreator: _getFirstCreatorSQL(),
 				sortCreator: _getSortCreatorSQL(),
 				
@@ -79,7 +82,8 @@ Zotero.Items = function() {
 		+ "LEFT JOIN items INoP ON (INo.parentItemID=INoP.itemID) "
 		+ "LEFT JOIN deletedItems DI ON (O.itemID=DI.itemID) "
 		+ "LEFT JOIN publicationsItems PI ON (O.itemID=PI.itemID) "
-		+ "LEFT JOIN charsets CS ON (IA.charsetID=CS.charsetID)";
+		+ "LEFT JOIN charsets CS ON (IA.charsetID=CS.charsetID)"
+		+ "LEFT JOIN groupItems GI ON (O.itemID=GI.itemID)";
 	
 	this._relationsTable = "itemRelations";
 	

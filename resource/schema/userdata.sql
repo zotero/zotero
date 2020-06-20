@@ -1,4 +1,4 @@
--- 111
+-- 112
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -275,7 +275,7 @@ CREATE TABLE libraries (
 
 CREATE TABLE users (
     userID INTEGER PRIMARY KEY,
-    username TEXT NOT NULL
+    name TEXT NOT NULL
 );
 
 CREATE TABLE groups (

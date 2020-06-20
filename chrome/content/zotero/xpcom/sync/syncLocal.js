@@ -1459,8 +1459,23 @@ Zotero.Sync.Data.Local = {
 			if (!options.skipData) {
 				obj.fromJSON(json.data, { strict: true });
 			}
-			if (obj.objectType == 'item' && obj.isImportedAttachment()) {
-				yield this._checkAttachmentForDownload(obj, json.data.mtime, options.isNewObject);
+			if (obj.objectType == 'item') {
+				// Update createdByUserID and lastModifiedByUserID
+				for (let p of ['createdByUser', 'lastModifiedByUser']) {
+					if (json.meta && json.meta[p]) {
+						let { id: userID, username, name } = json.meta[p];
+						obj[p + 'ID'] = userID;
+						name = name !== '' ? name : username;
+						// Update stored name if it changed
+						if (Zotero.Users.getName(userID) != name) {
+							yield Zotero.Users.setName(userID, name);
+						}
+					}
+				}
+				
+				if (obj.isImportedAttachment()) {
+					yield this._checkAttachmentForDownload(obj, json.data.mtime, options.isNewObject);
+				}
 			}
 			obj.version = json.data.version;
 			if (!options.saveAsUnsynced) {

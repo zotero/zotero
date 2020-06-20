@@ -28,10 +28,11 @@ Zotero.Users = new function () {
 	var _libraryID;
 	var _username;
 	var _localUserKey;
+	var _users = {};
 	
-	this.init = Zotero.Promise.coroutine(function* () {
+	this.init = async function () {
 		let sql = "SELECT key, value FROM settings WHERE setting='account'";
-		let rows = yield Zotero.DB.queryAsync(sql);
+		let rows = await Zotero.DB.queryAsync(sql);
 		
 		let settings = {};
 		for (let i=0; i<rows.length; i++) {
@@ -56,11 +57,16 @@ Zotero.Users = new function () {
 			let key = Zotero.randomString(8);
 			
 			sql = "INSERT INTO settings VALUES ('account', 'localUserKey', ?)";
-			yield Zotero.DB.queryAsync(sql, key);
+			await Zotero.DB.queryAsync(sql, key);
 			
 			_localUserKey = key;
 		}
-	});
+		
+		rows = await Zotero.DB.queryAsync("SELECT userID, name FROM users");
+		for (let row of rows) {
+			_users[row.userID] = row.name;
+		}
+	};
 	
 	
 	this.getCurrentUserID = function() { return _userID };
@@ -87,4 +93,18 @@ Zotero.Users = new function () {
 	this.getLocalUserKey = function () {
 		return _localUserKey;
 	};
+	
+	
+	this.getName = function (userID) {
+		return _users[userID] || '';
+	};
+	
+	
+	this.setName = async function (userID, name) {
+		if (this.getName(userID) == name) {
+			return;
+		}
+		await Zotero.DB.queryAsync("REPLACE INTO users VALUES (?, ?)", [userID, name]);
+		_users[userID] = name;
+	}
 };

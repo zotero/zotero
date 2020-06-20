@@ -930,6 +930,69 @@ describe("Zotero.Sync.Data.Local", function() {
 				"SELECT COUNT(*) FROM items WHERE libraryID=? AND key=?", [libraryID, key2]
 			), 0);
 		});
+		
+		it("should update createdByUser and lastModifiedBy when saving group item", async function () {
+			var { libraryID } = await getGroup();
+			let item = await createDataObject('item', { libraryID });
+			let data = item.toJSON();
+			data.key = item.key;
+			data.version = 10;
+			let json = {
+				key: item.key,
+				version: 10,
+				meta: {
+					createdByUser: {
+						id: 12345,
+						username: 'foo',
+						name: 'Foo Foo'
+					},
+					lastModifiedByUser: {
+						id: 23456,
+						username: 'bar',
+						name: 'Bar Bar'
+					}
+				},
+				data
+			};
+			await Zotero.Sync.Data.Local.processObjectsFromJSON(
+				'item', libraryID, [json], { stopOnError: true }
+			);
+			let localItem = Zotero.Items.getByLibraryAndKey(libraryID, item.key);
+			assert.isTrue(localItem.synced);
+			
+			assert.equal(localItem.createdByUserID, 12345);
+			assert.equal(localItem.lastModifiedByUserID, 23456);
+			assert.equal(Zotero.Users.getName(12345), 'Foo Foo');
+			assert.equal(Zotero.Users.getName(23456), 'Bar Bar');
+		});
+		
+		it("should use username if empty name for createdByUser when saving group item", async function () {
+			var { libraryID } = await getGroup();
+			let item = await createDataObject('item', { libraryID });
+			let data = item.toJSON();
+			data.key = item.key;
+			data.version = 10;
+			let json = {
+				key: item.key,
+				version: 10,
+				meta: {
+					createdByUser: {
+						id: 12345,
+						username: 'foo',
+						name: ''
+					},
+				},
+				data
+			};
+			await Zotero.Sync.Data.Local.processObjectsFromJSON(
+				'item', libraryID, [json], { stopOnError: true }
+			);
+			let localItem = Zotero.Items.getByLibraryAndKey(libraryID, item.key);
+			assert.isTrue(localItem.synced);
+			
+			assert.equal(localItem.createdByUserID, 12345);
+			assert.equal(Zotero.Users.getName(12345), 'foo');
+		});
 	})
 	
 	describe("Sync Queue", function () {

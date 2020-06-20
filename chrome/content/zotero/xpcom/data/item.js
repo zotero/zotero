@@ -38,6 +38,8 @@ Zotero.Item = function(itemTypeOrID) {
 	
 	// loadPrimaryData (additional properties in dataObject.js)
 	this._itemTypeID = null;
+	this._createdByUserID = null;
+	this._lastModifiedByUserID = null;
 	this._firstCreator = null;
 	this._sortCreator = null;
 	this._attachmentCharset = null;
@@ -107,32 +109,18 @@ Zotero.defineProperty(Zotero.Item.prototype, 'itemID', {
 	},
 	enumerable: false
 });
-Zotero.defineProperty(Zotero.Item.prototype, 'libraryID', {
-	get: function() { return this._libraryID; },
-	set: function(val) { return this.setField('libraryID', val); }
-});
-Zotero.defineProperty(Zotero.Item.prototype, 'key', {
-	get: function() { return this._key; },
-	set: function(val) { return this.setField('key', val); }
-});
+
+for (let name of ['libraryID', 'key', 'dateAdded', 'dateModified', 'version', 'synced',
+		'createdByUserID', 'lastModifiedByUserID']) {
+	let prop = '_' + name;
+	Zotero.defineProperty(Zotero.Item.prototype, name, {
+		get: function () { return this[prop]; },
+		set: function (val) { return this.setField(name, val); }
+	});
+}
+
 Zotero.defineProperty(Zotero.Item.prototype, 'itemTypeID', {
 	get: function() { return this._itemTypeID; }
-});
-Zotero.defineProperty(Zotero.Item.prototype, 'dateAdded', {
-	get: function() { return this._dateAdded; },
-	set: function(val) { return this.setField('dateAdded', val); }
-});
-Zotero.defineProperty(Zotero.Item.prototype, 'dateModified', {
-	get: function() { return this._dateModified; },
-	set: function(val) { return this.setField('dateModified', val); }
-});
-Zotero.defineProperty(Zotero.Item.prototype, 'version', {
-	get: function() { return this._version; },
-	set: function(val) { return this.setField('version', val); }
-});
-Zotero.defineProperty(Zotero.Item.prototype, 'synced', {
-	get: function() { return this._synced; },
-	set: function(val) { return this.setField('synced', val); }
 });
 
 // .parentKey and .parentID defined in dataObject.js, but create aliases
@@ -335,6 +323,8 @@ Zotero.Item.prototype._parseRowData = function(row) {
 			case 'attachmentSyncState':
 			case 'attachmentSyncedHash':
 			case 'attachmentSyncedModificationTime':
+			case 'createdByUserID':
+			case 'lastModifiedByUserID':
 				break;
 			
 			case 'itemID':
@@ -666,6 +656,19 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 					throw new Error(`${field} must be a boolean`);
 				}
 				value = !!value;
+				break;
+			
+			case 'createdByUserID':
+			case 'lastModifiedByUserID':
+				if (typeof value != 'number' || value != parseInt(value)) {
+					throw new Error(`${field} must be a number`);
+				}
+				if (!this._libraryID) {
+					throw new Error(`libraryID must be set before setting ${field}`);
+				}
+				if (Zotero.Libraries.get(this._libraryID).libraryType != 'group') {
+					throw new Error(`${field} is only valid for group library items`);
+				}
 				break;
 			
 			default:
@@ -1295,6 +1298,12 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 				Zotero.Notifier.queue('modify', 'item', itemID, env.notifierData, env.options.notifierQueue);
 			}
 		}
+	}
+	
+	if (this._changed.primaryData
+			&& (this._changed.primaryData.createdByUserID || this._changed.primaryData.lastModifiedByUserID)) {
+		let sql = "REPLACE INTO groupItems VALUES (?, ?, ?)";
+		yield Zotero.DB.queryAsync(sql, [itemID, this._createdByUserID || null, this._lastModifiedByUserID || null]);
 	}
 	
 	//
@@ -4783,13 +4792,6 @@ Zotero.Item.prototype.migrateExtraFields = function () {
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
-//
-// Asynchronous load methods
-//
-//////////////////////////////////////////////////////////////////////////////
-
-
 /**
  * Return an item in the specified library equivalent to this item
  *
@@ -4814,6 +4816,34 @@ Zotero.Item.prototype.getLinkedItem = async function (libraryID, bidirectional) 
 Zotero.Item.prototype.addLinkedItem = Zotero.Promise.coroutine(function* (item) {
 	return this._addLinkedObject(item);
 });
+
+
+
+/**
+ * Update createdByUserID/lastModifiedByUserID, efficiently
+ *
+ * Used by sync code
+ */
+Zotero.Item.prototype.updateCreatedByUser = async function (createdByUserID, lastModifiedByUserID) {
+	this._createdByUserID = createdByUserID || null;
+	this._lastModifiedByUserID = lastModifiedByUserID || null;
+	
+	var sql = "REPLACE INTO groupItems VALUES (?, ?, ?)";
+	await Zotero.DB.queryAsync(sql, [this.id, this._createdByUserID, this._lastModifiedByUserID]);
+	
+	if (this._changed.primaryData) {
+		for (let x of ['createdByUserID', 'lastModifiedByUserID']) {
+			if (this._changed.primaryData[x]) {
+				if (Objects.keys(this._changed.primaryData).length == 1) {
+					delete this._changed.primaryData;
+				}
+				else {
+					delete this._changed.primaryData[x];
+				}
+			}
+		}
+	}
+};
 
 
 //////////////////////////////////////////////////////////////////////////////

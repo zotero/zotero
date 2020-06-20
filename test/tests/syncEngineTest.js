@@ -4046,6 +4046,85 @@ describe("Zotero.Sync.Data.Engine", function () {
 	});
 	
 	
+	describe("#_updateGroupItemUsers()", function () {
+		it("should update createdByUserID and lastModifiedByUserID", async function () {
+			var { id: groupID, libraryID } = await createGroup();
+			({ engine, client, caller } = await setup({ libraryID }));
+			
+			var item1 = await createDataObject('item', { libraryID });
+			var item1DateModified = item1.dateModified;
+			var item2 = await createDataObject('item', { libraryID });
+			var responseJSON = [
+				item1.toResponseJSON(),
+				item2.toResponseJSON()
+			];
+			responseJSON[0].meta.createdByUser = {
+				id: 152315,
+				username: "user152315",
+				name: "User 152315"
+			};
+			responseJSON[0].meta.lastModifiedByUser = {
+				id: 352352,
+				username: "user352352",
+				name: "User 352352"
+			};
+			responseJSON[1].meta.createdByUser = {
+				id: 346534,
+				username: "user346534",
+				name: "User 346534"
+			};
+			
+			setResponse({
+				method: "GET",
+				url: `groups/${groupID}/items?itemKey=${item1.key}%2C${item2.key}&includeTrashed=1`,
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 5
+				},
+				json: responseJSON
+			});
+			
+			await engine._updateGroupItemUsers();
+			
+			assert.equal(item1.createdByUserID, 152315);
+			assert.equal(item1.lastModifiedByUserID, 352352);
+			assert.equal(item1.dateModified, item1DateModified);
+			assert.equal(item2.createdByUserID, 346534);
+		});
+		
+		
+		it("should use username if no name", async function () {
+			var { id: groupID, libraryID } = await createGroup();
+			({ engine, client, caller } = await setup({ libraryID }));
+			
+			var item = await createDataObject('item', { libraryID });
+			var responseJSON = [
+				item.toResponseJSON()
+			];
+			responseJSON[0].meta.createdByUser = {
+				id: 235235,
+				username: "user235235",
+				name: ""
+			};
+			
+			setResponse({
+				method: "GET",
+				url: `groups/${groupID}/items?itemKey=${item.key}&includeTrashed=1`,
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 6
+				},
+				json: responseJSON
+			});
+			
+			await engine._updateGroupItemUsers();
+			
+			assert.equal(item.createdByUserID, 235235);
+			assert.equal(Zotero.Users.getName(235235), 'user235235');
+		});
+	});
+	
+	
 	describe("#_upgradeCheck()", function () {
 		it("should upgrade a library last synced with the classic sync architecture", function* () {
 			var userLibraryID = Zotero.Libraries.userLibraryID;
