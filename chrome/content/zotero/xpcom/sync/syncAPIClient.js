@@ -298,7 +298,6 @@ Zotero.Sync.APIClient.prototype = {
 			target: objectTypePlural,
 			libraryType: libraryType,
 			libraryTypeID: libraryTypeID,
-			format: 'json'
 		};
 		params[objectType + "Key"] = objectKeys.join(",");
 		if (objectType == 'item') {

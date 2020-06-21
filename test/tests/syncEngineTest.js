@@ -244,7 +244,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "users/1/collections?format=json&collectionKey=AAAAAAAA",
+				url: "users/1/collections?collectionKey=AAAAAAAA",
 				status: 200,
 				headers: headers,
 				json: [
@@ -257,7 +257,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "users/1/searches?format=json&searchKey=AAAAAAAA",
+				url: "users/1/searches?searchKey=AAAAAAAA",
 				status: 200,
 				headers: headers,
 				json: [
@@ -270,7 +270,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "users/1/items?format=json&itemKey=AAAAAAAA&includeTrashed=1",
+				url: "users/1/items?itemKey=AAAAAAAA&includeTrashed=1",
 				status: 200,
 				headers: headers,
 				json: [
@@ -284,7 +284,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "users/1/items?format=json&itemKey=BBBBBBBB&includeTrashed=1",
+				url: "users/1/items?itemKey=BBBBBBBB&includeTrashed=1",
 				status: 200,
 				headers: headers,
 				json: [
@@ -418,7 +418,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: `groups/${group.id}/collections?format=json&collectionKey=AAAAAAAA`,
+				url: `groups/${group.id}/collections?collectionKey=AAAAAAAA`,
 				status: 200,
 				headers: headers,
 				json: [
@@ -431,7 +431,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: `groups/${group.id}/searches?format=json&searchKey=AAAAAAAA`,
+				url: `groups/${group.id}/searches?searchKey=AAAAAAAA`,
 				status: 200,
 				headers: headers,
 				json: [
@@ -444,7 +444,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: `groups/${group.id}/items?format=json&itemKey=AAAAAAAA&includeTrashed=1`,
+				url: `groups/${group.id}/items?itemKey=AAAAAAAA&includeTrashed=1`,
 				status: 200,
 				headers: headers,
 				json: [
@@ -458,7 +458,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: `groups/${group.id}/items?format=json&itemKey=BBBBBBBB&includeTrashed=1`,
+				url: `groups/${group.id}/items?itemKey=BBBBBBBB&includeTrashed=1`,
 				status: 200,
 				headers: headers,
 				json: [
@@ -1124,7 +1124,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			setResponse({
 				method: "GET",
-				url: `${target}/items?format=json&itemKey=${item.key}&includeTrashed=1`,
+				url: `${target}/items?itemKey=${item.key}&includeTrashed=1`,
 				status: 200,
 				headers,
 				json: [itemResponseJSON]
@@ -1590,7 +1590,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "users/1/collections?format=json&collectionKey=AAAAAAAA%2CBBBBBBBB%2CCCCCCCCC",
+				url: "users/1/collections?collectionKey=AAAAAAAA%2CBBBBBBBB%2CCCCCCCCC",
 				status: 200,
 				headers: headers,
 				json: [
@@ -1617,7 +1617,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "users/1/searches?format=json&searchKey=DDDDDDDD%2CEEEEEEEE%2CFFFFFFFF",
+				url: "users/1/searches?searchKey=DDDDDDDD%2CEEEEEEEE%2CFFFFFFFF",
 				status: 200,
 				headers: headers,
 				json: [
@@ -1663,7 +1663,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "users/1/items?format=json&itemKey=GGGGGGGG%2CHHHHHHHH&includeTrashed=1",
+				url: "users/1/items?itemKey=GGGGGGGG%2CHHHHHHHH&includeTrashed=1",
 				status: 200,
 				headers: headers,
 				json: [
@@ -1686,7 +1686,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "users/1/items?format=json&itemKey=JJJJJJJJ&includeTrashed=1",
+				url: "users/1/items?itemKey=JJJJJJJJ&includeTrashed=1",
 				status: 200,
 				headers: headers,
 				json: [
@@ -2301,7 +2301,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=${itemKey}&includeTrashed=1`,
+				url: `users/1/items?itemKey=${itemKey}&includeTrashed=1`,
 				status: 200,
 				headers,
 				json: [
@@ -2356,7 +2356,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=${itemKey}&includeTrashed=1`,
+				url: `users/1/items?itemKey=${itemKey}&includeTrashed=1`,
 				status: 200,
 				headers,
 				json: [
@@ -2420,7 +2420,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=${itemKey}&includeTrashed=1`,
+				url: `users/1/items?itemKey=${itemKey}&includeTrashed=1`,
 				status: 200,
 				headers,
 				json: [itemResponseJSON]
@@ -2480,7 +2480,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=AAAAAAAA%2C${itemKey}&includeTrashed=1`,
+				url: `users/1/items?itemKey=AAAAAAAA%2C${itemKey}&includeTrashed=1`,
 				status: 200,
 				headers: headers,
 				json: [
@@ -2754,7 +2754,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			};
 			setResponse({
 				method: "GET",
-				url: "users/1/collections?format=json&collectionKey=AAAAAAAA%2CBBBBBBBB%2CCCCCCCCC",
+				url: "users/1/collections?collectionKey=AAAAAAAA%2CBBBBBBBB%2CCCCCCCCC",
 				status: 200,
 				headers,
 				json: [
@@ -2795,7 +2795,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			};
 			setResponse({
 				method: "GET",
-				url: `users/1/collections?format=json&collectionKey=${collectionKey}`,
+				url: `users/1/collections?collectionKey=${collectionKey}`,
 				status: 200,
 				headers,
 				json: [
@@ -2839,7 +2839,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			};
 			setResponse({
 				method: "GET",
-				url: `users/1/collections?format=json&collectionKey=${collectionKey}`,
+				url: `users/1/collections?collectionKey=${collectionKey}`,
 				status: 200,
 				headers,
 				json: [
@@ -3386,7 +3386,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=${objects.map(o => o.key).join('%2C')}`
+				url: `users/1/items?itemKey=${objects.map(o => o.key).join('%2C')}`
 					+ `&includeTrashed=1`,
 				status: 200,
 				headers: {
@@ -3493,7 +3493,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=${objects.map(o => o.key).join('%2C')}`
+				url: `users/1/items?itemKey=${objects.map(o => o.key).join('%2C')}`
 					+ `&includeTrashed=1`,
 				status: 200,
 				headers: {
@@ -3609,7 +3609,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=${objects.map(o => o.key).join('%2C')}`
+				url: `users/1/items?itemKey=${objects.map(o => o.key).join('%2C')}`
 					+ `&includeTrashed=1`,
 				status: 200,
 				headers: {
@@ -3731,7 +3731,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=${objects.map(o => o.key).join('%2C')}`
+				url: `users/1/items?itemKey=${objects.map(o => o.key).join('%2C')}`
 					+ `&includeTrashed=1`,
 				status: 200,
 				headers: {
@@ -3817,7 +3817,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=${obj.key}&includeTrashed=1`,
+				url: `users/1/items?itemKey=${obj.key}&includeTrashed=1`,
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 15
@@ -3877,7 +3877,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=${obj.key}&includeTrashed=1`,
+				url: `users/1/items?itemKey=${obj.key}&includeTrashed=1`,
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 15
@@ -3932,7 +3932,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=${key}&includeTrashed=1`,
+				url: `users/1/items?itemKey=${key}&includeTrashed=1`,
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 15
@@ -3987,7 +3987,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=${key}&includeTrashed=1`,
+				url: `users/1/items?itemKey=${key}&includeTrashed=1`,
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 15
@@ -4241,8 +4241,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 				setResponse({
 					method: "GET",
 					url: "users/1/" + plural
-						+ "?format=json"
-						+ "&" + type + "Key=" + objectJSON[type][0].key + "%2C" + objectJSON[type][1].key
+						+ "?" + type + "Key=" + objectJSON[type][0].key + "%2C" + objectJSON[type][1].key
 						+ suffix,
 					status: 200,
 					headers: headers,
