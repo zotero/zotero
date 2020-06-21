@@ -141,7 +141,7 @@ describe("Zotero.DataObject", function() {
 				var obj = createUnsavedDataObject(type);
 				var id = yield obj.saveTx();
 				
-				obj.synced = 1;
+				obj.synced = true;
 				yield obj.saveTx();
 				
 				if (type == 'item') {

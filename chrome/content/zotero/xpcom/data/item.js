@@ -615,17 +615,6 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		throw new Error(`'${field}' value cannot be undefined`);
 	}
 	
-	// Normalize values
-	if (typeof value == 'number') {
-		value = "" + value;
-	}
-	else if (typeof value == 'string') {
-		value = value.trim().normalize();
-	}
-	if (value === "" || value === null || value === false) {
-		value = false;
-	}
-	
 	//Zotero.debug("Setting field '" + field + "' to '" + value + "' (loadIn: " + (loadIn ? 'true' : 'false') + ") for item " + this.id + " ");
 	
 	if (!field) {
@@ -646,6 +635,9 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		
 		switch (field) {
 			case 'itemTypeID':
+				if (typeof value != 'number' || value != parseInt(value)) {
+					throw new Error(`${field} must be a number`);
+				}
 				break;
 			
 			case 'dateAdded':
@@ -664,10 +656,15 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 				break;
 			
 			case 'version':
-				value = parseInt(value);
+				if (typeof value != 'number' || value != parseInt(value)) {
+					throw new Error(`${field} must be a number`);
+				}
 				break;
 			
 			case 'synced':
+				if (typeof value != 'boolean') {
+					throw new Error(`${field} must be a boolean`);
+				}
 				value = !!value;
 				break;
 			
@@ -712,6 +709,17 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 			this._changed.primaryData[field] = true;
 		}
 		return true;
+	}
+	
+	// Normalize values
+	if (typeof value == 'number') {
+		value = "" + value;
+	}
+	else if (typeof value == 'string') {
+		value = value.trim().normalize();
+	}
+	if (value === "" || value === null || value === false) {
+		value = false;
 	}
 	
 	if (!loadIn) {
