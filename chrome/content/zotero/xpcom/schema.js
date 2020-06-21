@@ -1514,6 +1514,18 @@ Zotero.Schema = new function(){
 				url += '&m=' + mode;
 			}
 			
+			// TEMP: DB diagnostics
+			let exists = yield Zotero.DB.tableExists('transactionSets');
+			url += "&ts=" + (exists ? "1" : "0");
+			if (exists) {
+				Zotero.logError("DB table 'transactionSets' still exists");
+			}
+			exists = yield Zotero.DB.tableExists('dbDebug1');
+			url += "&db1=" + (exists ? "1" : "0");
+			if (!exists) {
+				Zotero.logError("DB table 'dbDebug1' does not exist");
+			}
+			
 			// Send list of installed styles
 			var styles = Zotero.Styles.getAll();
 			var styleTimestamps = [];
@@ -3023,6 +3035,10 @@ Zotero.Schema = new function(){
 			
 			else if (i == 108) {
 				yield Zotero.DB.queryAsync(`DELETE FROM itemRelations WHERE predicateID=(SELECT predicateID FROM relationPredicates WHERE predicate='owl:sameAs') AND object LIKE ?`, 'http://zotero.org/users/local/%');
+			}
+			
+			else if (i == 109) {
+				yield Zotero.DB.queryAsync("CREATE TABLE dbDebug1 (\n    a INTEGER PRIMARY KEY\n)");
 			}
 			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom

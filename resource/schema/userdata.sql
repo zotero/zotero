@@ -1,4 +1,4 @@
--- 108
+-- 109
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -456,4 +456,8 @@ CREATE TABLE translatorCache (
     fileName TEXT PRIMARY KEY,
     metadataJSON TEXT,
     lastModifiedTime INT
+);
+
+CREATE TABLE dbDebug1 (
+    a INTEGER PRIMARY KEY
 );
