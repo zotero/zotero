@@ -301,6 +301,7 @@ var Zotero_QuickFormat = new function () {
 			
 			var s = new Zotero.Search();
 			str = str.replace(/ (?:&|and) /g, " ", "g");
+			str = str.replace(/^,/, '');
 			if(charRe.test(str)) {
 				Zotero.debug("QuickFormat: QuickSearch: "+str);
 				// Exclude feeds
