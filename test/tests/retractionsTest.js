@@ -170,7 +170,11 @@ describe("Retractions", function() {
 								{
 									doi: hash,
 									retractionDOI: '10.1234/bcdef',
-									date: '2019-01-02'
+									date: '2019-01-02',
+									reasons: [
+										"Error in Data"
+									],
+									urls: []
 								}
 							])
 						);
