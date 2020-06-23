@@ -210,7 +210,16 @@ describe("Zotero.DataObject", function() {
 				yield obj.loadPrimaryData();
 				assert.equal(obj.version, objs[type].version);
 			}
-		})
+		});
+		
+		it("shouldn't overwrite item type set in constructor", async function () {
+			var item = new Zotero.Item('book');
+			item.libraryID = Zotero.Libraries.userLibraryID;
+			item.key = Zotero.DataObjectUtilities.generateKey();
+			await item.loadPrimaryData();
+			var saved = await item.saveTx();
+			assert.ok(saved);
+		});
 	})
 	
 	describe("#loadAllData()", function () {

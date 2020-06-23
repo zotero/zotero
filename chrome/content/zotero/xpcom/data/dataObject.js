@@ -639,7 +639,6 @@ Zotero.DataObject.prototype.loadPrimaryData = Zotero.Promise.coroutine(function*
 			throw new Error(this._ObjectType + " " + (id ? id : libraryID + "/" + key)
 				+ " not found in Zotero." + this._ObjectType + ".loadPrimaryData()");
 		}
-		this._clearChanged('primaryData');
 		
 		// If object doesn't exist, mark all data types as loaded
 		this._markAllDataTypeLoadStates(true);
