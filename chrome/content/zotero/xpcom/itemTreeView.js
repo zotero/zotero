@@ -328,6 +328,8 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 		Zotero.CollectionTreeCache.clear();
 		// Get the full set of items we want to show
 		let newSearchItems = yield this.collectionTreeRow.getItems();
+		// TEMP: Hide annotations
+		newSearchItems = newSearchItems.filter(item => !item.isAnnotation());
 		// Remove notes and attachments if necessary
 		if (this.regularOnly) {
 			newSearchItems = newSearchItems.filter(item => item.isRegularItem());
