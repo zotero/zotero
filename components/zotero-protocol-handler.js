@@ -1298,7 +1298,7 @@ AsyncChannel.prototype = {
 				}
 				
 				Components.utils.import("resource://gre/modules/NetUtil.jsm");
-				NetUtil.asyncFetch(data, function (inputStream, status) {
+				NetUtil.asyncFetch({ uri: data, loadUsingSystemPrincipal: true }, function (inputStream, status) {
 					if (!Components.isSuccessCode(status)) {
 						reject();
 						return;
