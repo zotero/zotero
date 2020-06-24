@@ -53,6 +53,75 @@ function ZoteroProtocolHandler() {
 	this._extensions = {};
 	
 	
+	
+	/**
+	 * zotero://attachment/library/[itemKey]
+	 * zotero://attachment/groups/[groupID]/[itemKey]
+	 */
+	var AttachmentExtension = {
+		loadAsChrome: false,
+		
+		newChannel: function (uri) {
+			return new AsyncChannel(uri, function* () {
+				try {
+					var uriPath = uri.pathQueryRef;
+					if (!uriPath) {
+						return this._errorChannel('Invalid URL');
+					}
+					uriPath = uriPath.substr('//attachment/'.length);
+					
+					var params = {};
+					var router = new Zotero.Router(params);
+					router.add('library/items/:itemKey', function () {
+						params.libraryID = Zotero.Libraries.userLibraryID;
+					});
+					router.add('groups/:groupID/items/:itemKey');
+					router.run(uriPath);
+					
+					if (params.groupID) {
+						params.libraryID = Zotero.Groups.getLibraryIDFromGroupID(params.groupID);
+					}
+					if (!params.itemKey) {
+						return this._errorChannel("Item key not provided");
+					}
+					var item = yield Zotero.Items.getByLibraryAndKeyAsync(params.libraryID, params.itemKey);
+					
+					if (!item) {
+						return this._errorChannel(`No item found for ${uriPath}`);
+					}
+					if (!item.isFileAttachment()) {
+						return this._errorChannel(`Item for ${uriPath} is not a file attachment`);
+					}
+					
+					var path = yield item.getFilePathAsync();
+					if (!path) {
+						return this._errorChannel(`${path} not found`);
+					}
+					
+					// Set originalURI so that it seems like we're serving from zotero:// protocol.
+					// This is necessary to allow url() links to work from within CSS files.
+					// Otherwise they try to link to files on the file:// protocol, which isn't allowed.
+					this.originalURI = uri;
+					
+					return Zotero.File.pathToFile(path);
+				}
+				catch (e) {
+					return this._errorChannel(e.message);
+				}
+			}.bind(this));
+		},
+		
+		
+		_errorChannel: function (msg) {
+			Zotero.logError(msg);
+			this.status = Components.results.NS_ERROR_FAILURE;
+			this.contentType = 'text/plain';
+			return msg;
+		}
+	};
+	
+	
+	
 	/**
 	 * zotero://data/library/collection/ABCD1234/items?sort=itemType&direction=desc
 	 * zotero://data/groups/12345/collection/ABCD1234/items?sort=title&direction=asc
@@ -1072,6 +1141,7 @@ function ZoteroProtocolHandler() {
 		}
 	};
 	
+	this._extensions[ZOTERO_SCHEME + "://attachment"] = AttachmentExtension;
 	this._extensions[ZOTERO_SCHEME + "://data"] = DataExtension;
 	this._extensions[ZOTERO_SCHEME + "://report"] = ReportExtension;
 	this._extensions[ZOTERO_SCHEME + "://timeline"] = TimelineExtension;
