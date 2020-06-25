@@ -189,8 +189,8 @@ Zotero.Retractions = {
 			else if (json.extra) {
 				let { fields } = Zotero.Utilities.Internal.extractExtraFields(json.extra);
 				let extraField = fields.get('DOI');
-				if (extraField && extraField.value) {
-					doi = extraField.value;
+				if (extraField) {
+					doi = extraField;
 				}
 			}
 			if (doi) {
@@ -675,7 +675,7 @@ Zotero.Retractions = {
 	},
 	
 	_getItemDOI: function (item) {
-		var itemDOI = item.getField('DOI') || item.getExtraField('doi');
+		var itemDOI = item.getField('DOI') || item.getExtraField('DOI');
 		if (itemDOI) {
 			itemDOI = Zotero.Utilities.cleanDOI(itemDOI);
 		}
@@ -772,9 +772,9 @@ Zotero.Retractions = {
 		rows = await Zotero.DB.queryAsync(sql, Zotero.ItemFields.getID('extra'));
 		for (let row of rows) {
 			let { fields } = Zotero.Utilities.Internal.extractExtraFields(row.value);
-			let doi = fields.get('doi');
-			if (!doi || !doi.value) continue;
-			let value = Zotero.Utilities.cleanDOI(doi.value);
+			let doi = fields.get('DOI');
+			if (!doi) continue;
+			let value = Zotero.Utilities.cleanDOI(doi);
 			if (!value) continue;
 			this._addItemKeyMapping(this.TYPE_DOI, value, row.id);
 		}
@@ -791,8 +791,8 @@ Zotero.Retractions = {
 			/*
 			let { fields } = Zotero.Utilities.Internal.extractExtraFields(row.value);
 			let pmid = fields.get('pmid') || fields.get('pubmedID');
-			if (!pmid || !pmid.value) continue;
-			this._addItemKeyMapping(this.TYPE_PMID, pmid.value, row.id);
+			if (!pmid) continue;
+			this._addItemKeyMapping(this.TYPE_PMID, pmid, row.id);
 			*/
 			let pmid = this._extractPMID(row.value);
 			if (!pmid) continue;
