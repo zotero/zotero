@@ -959,6 +959,7 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
 			if (this.ignoreEmptyBibliography && (yield field.getText()).trim() === "") {
 				this._removeCodeFields[i] = true;
 			} else {
+				field.index = i;
 				this._bibliographyFields.push(field);
 			}
 		}
@@ -1041,8 +1042,46 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 		}
 	}
 	
+	// We will be updating the document in reverse order below.
+	//
+	// While technically we should live in a pure heavenly place
+	// where field update order wouldn't matter and integration
+	// plugins would know how to update any field without breaking other
+	// field access, in practice this doesn't actually work.
+	// It doesn't work at least with MacWord, because (un)fortunately
+	// it allows nested field codes, and creating an automatic index
+	// on author names produces exactly the sorts of nested field codes
+	// in styles like full footnote chicago. Upon text update on such citation
+	// Zotero removes the automatically added index fields, effectively changing
+	// the order of appearance of all following fields, and since
+	// fields are hard-tied to their index in the document for MacWord subsequent
+	// field updates start failing.
+	//
+	// There's also an unfortunate side-effect to this to the end user, which
+	// is maybe not entirely a big deal:
+	// When refreshing the document, and there is a need to prompt for multiple
+	// modified citations, these prompts will appear in reverse-document order too.
+	// Although at least for macword you don't get to interact with the document
+	// while a prompt is being displayed, so the order of these prompts is to a large
+	// degree a minor issue.
+	var indicesToUpdate = Object.keys(this._session.processIndices);
+	
+	// Add bibliography indices to the above indices
+	if (this._session.bibliography	 				// if bibliography exists
+			&& Object.keys(this._session.citationsByIndex).length // and doc has citations
+			&& (this._session.bibliographyHasChanged	// and bibliography changed
+			|| forceBibliography)) {					// or if we should generate regardless of
+														// changes
+		for (let field of this._bibliographyFields) {
+			indicesToUpdate.push(field.index);
+		}
+	}
+	
+	// Descending order sort
+	indicesToUpdate = indicesToUpdate.sort((a, b) => b - a);
+	
 	var nUpdated=0;
-	for(var i in this._session.processIndices) {
+	for(var i of indicesToUpdate) {
 		if(this.progressCallback && nUpdated % 10 == 0) {
 			try {
 				this.progressCallback(75+(nUpdated/nFieldUpdates)*25);
@@ -1054,115 +1093,118 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 		await Zotero.Promise.delay();
 		
 		var citation = this._session.citationsByIndex[i];
-		let citationField = citation._field;
-		
-		var isRich = false;
-		if (!citation.properties.dontUpdate) {
-			var formattedCitation = citation.properties.custom
-				? citation.properties.custom : citation.text;
-			var plainCitation = citation.properties.plainCitation && await citationField.getText();
-			var plaintextChanged = citation.properties.plainCitation 
-					&& plainCitation !== citation.properties.plainCitation;
-								
-			if (!ignoreCitationChanges && plaintextChanged) {
-				// Citation manually modified; ask user if they want to save changes
-				Zotero.debug("[_updateDocument] Attempting to update manually modified citation.\n"
-					+ "Original: " + citation.properties.plainCitation + "\n"
-					+ "Current:  " + plainCitation
-				);
-				await citationField.select();
-				var result = await this._session.displayAlert(
-					Zotero.getString("integration.citationChanged")+"\n\n"
-						+ Zotero.getString("integration.citationChanged.description")+"\n\n"
-						+ Zotero.getString("integration.citationChanged.original", citation.properties.plainCitation)+"\n"
-						+ Zotero.getString("integration.citationChanged.modified", plainCitation)+"\n", 
-					DIALOG_ICON_CAUTION, DIALOG_BUTTONS_YES_NO);
-				if (result) {
-					citation.properties.dontUpdate = true;
-					// Sigh. This hurts. setCode in LO forces a text reset. If the formattedText is rtf
-					// it is reinserted, however that breaks what properties.dontUpdate should do
-					if (this._session.primaryFieldType == "ReferenceMark"
-						&& citation.properties.formattedCitation.includes('\\')) {
-						citation.properties.formattedCitation = citation.properties.plainCitation;
+		if (citation) {
+			let citationField = citation._field;
+			
+			var isRich = false;
+			if (!citation.properties.dontUpdate) {
+				var formattedCitation = citation.properties.custom
+					? citation.properties.custom : citation.text;
+				var plainCitation = citation.properties.plainCitation && await citationField.getText();
+				var plaintextChanged = citation.properties.plainCitation 
+						&& plainCitation !== citation.properties.plainCitation;
+									
+				if (!ignoreCitationChanges && plaintextChanged) {
+					// Citation manually modified; ask user if they want to save changes
+					Zotero.debug("[_updateDocument] Attempting to update manually modified citation.\n"
+						+ "Original: " + citation.properties.plainCitation + "\n"
+						+ "Current:  " + plainCitation
+					);
+					await citationField.select();
+					var result = await this._session.displayAlert(
+						Zotero.getString("integration.citationChanged")+"\n\n"
+							+ Zotero.getString("integration.citationChanged.description")+"\n\n"
+							+ Zotero.getString("integration.citationChanged.original", citation.properties.plainCitation)+"\n"
+							+ Zotero.getString("integration.citationChanged.modified", plainCitation)+"\n", 
+						DIALOG_ICON_CAUTION, DIALOG_BUTTONS_YES_NO);
+					if (result) {
+						citation.properties.dontUpdate = true;
+						// Sigh. This hurts. setCode in LO forces a text reset. If the formattedText is rtf
+						// it is reinserted, however that breaks what properties.dontUpdate should do
+						if (this._session.primaryFieldType == "ReferenceMark"
+							&& citation.properties.formattedCitation.includes('\\')) {
+							citation.properties.formattedCitation = citation.properties.plainCitation;
+						}
 					}
 				}
+				
+				// Update citation text:
+				// If we're looking to reset the text even if it matches previous text (i.e. style change)
+				if (forceCitations == FORCE_CITATIONS_RESET_TEXT
+						// Or metadata has changed thus changing the formatted citation
+						|| ((formattedCitation && citation.properties.formattedCitation !== formattedCitation
+						// Or plaintext has changed and user does not want to keep the change
+						|| plaintextChanged) && !citation.properties.dontUpdate)) {
+
+					
+					// Word will preserve previous text styling, so we need to force remove it
+					// for citations that were inserted with delay styling
+					var wasDelayed = citation.properties.formattedCitation
+						&& citation.properties.formattedCitation.includes(DELAYED_CITATION_RTF_STYLING);
+					if (this._session.outputFormat == 'rtf' && wasDelayed) {
+						isRich = await citationField.setText(`${DELAYED_CITATION_RTF_STYLING_CLEAR}{${formattedCitation}}`);
+					} else {
+						isRich = await citationField.setText(formattedCitation);
+					}
+					
+					citation.properties.formattedCitation = formattedCitation;
+					citation.properties.plainCitation = await citationField.getText();
+				}
 			}
 			
-			// Update citation text:
-			// If we're looking to reset the text even if it matches previous text (i.e. style change)
-			if (forceCitations == FORCE_CITATIONS_RESET_TEXT
-					// Or metadata has changed thus changing the formatted citation
-					|| ((formattedCitation && citation.properties.formattedCitation !== formattedCitation
-					// Or plaintext has changed and user does not want to keep the change
-					|| plaintextChanged) && !citation.properties.dontUpdate)) {
-
-				
-				// Word will preserve previous text styling, so we need to force remove it
-				// for citations that were inserted with delay styling
-				var wasDelayed = citation.properties.formattedCitation
-					&& citation.properties.formattedCitation.includes(DELAYED_CITATION_RTF_STYLING);
-				if (this._session.outputFormat == 'rtf' && wasDelayed) {
-					isRich = await citationField.setText(`${DELAYED_CITATION_RTF_STYLING_CLEAR}{${formattedCitation}}`);
+			var serializedCitation = citation.serialize();
+			if (serializedCitation != citation.properties.field) {
+				await citationField.setCode(serializedCitation);
+			}
+			nUpdated++;
+		}
+		else {
+			let bibliographyField;
+			for (let f of this._bibliographyFields) {
+				if (f.index == i) {
+					bibliographyField = f;
+					break;
+				}
+			}
+			if (!bibliographyField) {
+				throw new Error(`Attempting to update field ${i} which does not exist`);
+			}
+			
+			if (forceBibliography || this._session.bibliographyDataHasChanged) {
+				let code = this._session.bibliography.serialize();
+				await bibliographyField.setCode(code);
+			}
+			
+			// get bibliography and format as RTF
+			var bib = this._session.bibliography.getCiteprocBibliography(this._session.style);
+			
+			var bibliographyText = "";
+			if (bib) {
+				if (this._session.outputFormat == 'rtf') {
+					bibliographyText = bib[0].bibstart+bib[1].join("\\\r\n")+"\\\r\n"+bib[0].bibend;
 				} else {
-					isRich = await citationField.setText(formattedCitation);
+					bibliographyText = bib[0].bibstart+bib[1].join("")+bib[0].bibend;
 				}
 				
-				citation.properties.formattedCitation = formattedCitation;
-				citation.properties.plainCitation = await citationField.getText();
-			}
-		}
-		
-		var serializedCitation = citation.serialize();
-		if (serializedCitation != citation.properties.field) {
-			await citationField.setCode(serializedCitation);
-		}
-		nUpdated++;
-	}
-	
-	// update bibliographies
-	if (this._session.bibliography	 				// if bibliography exists
-			&& Object.keys(this._session.citationsByIndex).length // and doc has citations
-			&& (this._session.bibliographyHasChanged	// and bibliography changed
-			|| forceBibliography)) {					// or if we should generate regardless of
-														// changes
-		
-		if (forceBibliography || this._session.bibliographyDataHasChanged) {
-			let code = this._session.bibliography.serialize();
-			for (let field of this._bibliographyFields) {
-				await field.setCode(code);
-			}
-		}
-		
-		// get bibliography and format as RTF
-		var bib = this._session.bibliography.getCiteprocBibliography(this._session.style);
-		
-		var bibliographyText = "";
-		if (bib) {
-			if (this._session.outputFormat == 'rtf') {
-				bibliographyText = bib[0].bibstart+bib[1].join("\\\r\n")+"\\\r\n"+bib[0].bibend;
-			} else {
-				bibliographyText = bib[0].bibstart+bib[1].join("")+bib[0].bibend;
+				// if bibliography style not set, set it
+				if(!this._session.data.style.bibliographyStyleHasBeenSet) {
+					var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
+					
+					// set bibliography style
+					await this._doc.setBibliographyStyle(bibStyle.firstLineIndent, bibStyle.indent,
+						bibStyle.lineSpacing, bibStyle.entrySpacing, bibStyle.tabStops, bibStyle.tabStops.length);
+					
+					// set bibliographyStyleHasBeenSet parameter to prevent further changes	
+					this._session.data.style.bibliographyStyleHasBeenSet = true;
+				}
 			}
 			
-			// if bibliography style not set, set it
-			if(!this._session.data.style.bibliographyStyleHasBeenSet) {
-				var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
-				
-				// set bibliography style
-				await this._doc.setBibliographyStyle(bibStyle.firstLineIndent, bibStyle.indent,
-					bibStyle.lineSpacing, bibStyle.entrySpacing, bibStyle.tabStops, bibStyle.tabStops.length);
-				
-				// set bibliographyStyleHasBeenSet parameter to prevent further changes	
-				this._session.data.style.bibliographyStyleHasBeenSet = true;
-			}
-		}
-		
-		// set bibliography text
-		for (let field of this._bibliographyFields) {
+			// set bibliography text
 			if(this.progressCallback) {
 				try {
 					this.progressCallback(75+(nUpdated/nFieldUpdates)*25);
-				} catch(e) {
+				}
+				catch (e) {
 					Zotero.logError(e);
 				}
 			}
@@ -1170,9 +1212,10 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 			await Zotero.Promise.delay();
 			
 			if (bibliographyText) {
-				await field.setText(bibliographyText);
-			} else {
-				await field.setText("{Bibliography}");
+				await bibliographyField.setText(bibliographyText);
+			}
+			else {
+				await bibliographyField.setText("{Bibliography}");
 			}
 			nUpdated += 5;
 		}
