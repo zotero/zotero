@@ -356,9 +356,9 @@ ZoteroAutoComplete.prototype.stopSearch = function(){
 ZoteroAutoComplete.prototype.classDescription = ZOTERO_AC_CLASSNAME;
 ZoteroAutoComplete.prototype.classID = ZOTERO_AC_CID;
 ZoteroAutoComplete.prototype.contractID = ZOTERO_AC_CONTRACTID;
-ZoteroAutoComplete.prototype.QueryInterface = XPCOMUtils.generateQI([
+ZoteroAutoComplete.prototype.QueryInterface = ChromeUtils.generateQI([
 	Components.interfaces.nsIAutoCompleteSearch,
-	Components.interfaces.nsIAutoCompleteObserver,
-	Components.interfaces.nsISupports]);
+	Components.interfaces.nsIAutoCompleteObserver
+]);
 
 var NSGetFactory = XPCOMUtils.generateNSGetFactory([ZoteroAutoComplete]);

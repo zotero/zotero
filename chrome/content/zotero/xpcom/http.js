@@ -323,8 +323,8 @@ Zotero.HTTP = new function() {
 			// Don't follow redirects
 			if (options.followRedirects === false) {
 				channel.notificationCallbacks = {
-					QueryInterface: XPCOMUtils.generateQI([Ci.nsIInterfaceRequestor, Ci.nsIChannelEventSync]),
-					getInterface: XPCOMUtils.generateQI([Ci.nsIChannelEventSink]),
+					QueryInterface: ChromeUtils.generateQI([Ci.nsIInterfaceRequestor, Ci.nsIChannelEventSync]),
+					getInterface: ChromeUtils.generateQI([Ci.nsIChannelEventSink]),
 					asyncOnChannelRedirect: function (oldChannel, newChannel, flags, callback) {
 						redirectStatus = (flags & Ci.nsIChannelEventSink.REDIRECT_PERMANENT) ? 301 : 302;
 						redirectLocation = newChannel.URI.spec;

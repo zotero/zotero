@@ -438,13 +438,11 @@ function ZoteroService() {
 		throw e;
 	}
 }
-
 ZoteroService.prototype = {
 	contractID: '@zotero.org/Zotero;1',
 	classDescription: 'Zotero',
 	classID: Components.ID('{e4c61080-ec2d-11da-8ad9-0800200c9a66}'),
-	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsISupports,
-			Components.interfaces.nsIProtocolHandler])
+	QueryInterface: ChromeUtils.generateQI([])
 }
 
 function addInitCallback(callback) {
@@ -657,8 +655,7 @@ ZoteroCommandLineHandler.prototype = {
 	classID: Components.ID("{531828f8-a16c-46be-b9aa-14845c3b010f}"),
 	service: true,
 	_xpcom_categories: [{category:"command-line-handler", entry:"m-zotero"}],
-	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsICommandLineHandler,
-	                                       Components.interfaces.nsISupports])
+	QueryInterface: ChromeUtils.generateQI([Components.interfaces.nsICommandLineHandler])
 };
 
 var NSGetFactory = XPCOMUtils.generateNSGetFactory([ZoteroService, ZoteroCommandLineHandler]);

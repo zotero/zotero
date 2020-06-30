@@ -281,7 +281,7 @@ const urlCache = {
     }
   }),
 
-  QueryInterface: XPCOMUtils.generateQI([Ci.nsISupportsWeakReference]),
+  QueryInterface: ChromeUtils.generateQI([Ci.nsISupportsWeakReference]),
 
   observe() {
     // Clear any module resolution caches when the startup cache is flushed,

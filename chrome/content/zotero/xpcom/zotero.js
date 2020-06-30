@@ -1826,7 +1826,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 * @namespace
 	 */
 	var ConsoleListener = {
-		"QueryInterface":XPCOMUtils.generateQI([Components.interfaces.nsIConsoleMessage,
+		"QueryInterface":ChromeUtils.generateQI([Components.interfaces.nsIConsoleMessage,
 			Components.interfaces.nsISupports]),
 		"observe":function(msg) {
 			if(!_shouldKeepError(msg)) return;

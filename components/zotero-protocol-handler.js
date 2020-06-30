@@ -1330,8 +1330,7 @@ ZoteroProtocolHandler.prototype = {
 	contractID: ZOTERO_PROTOCOL_CONTRACTID,
 	classDescription: ZOTERO_PROTOCOL_NAME,
 	classID: ZOTERO_PROTOCOL_CID,
-	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsISupports,
-	                                       Components.interfaces.nsIProtocolHandler])
+	QueryInterface: ChromeUtils.generateQI([Components.interfaces.nsIProtocolHandler])
 };
 
 

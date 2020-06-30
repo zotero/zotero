@@ -52,8 +52,7 @@ ZoteroUnit.prototype = {
 	classID: Components.ID("{b8570031-be5e-46e8-9785-38cd50a5d911}"),
 	service: true,
 	_xpcom_categories: [{category:"command-line-handler", entry:"m-zotero-unit"}],
-	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsICommandLineHandler,
-	                                       Components.interfaces.nsISupports])
+	QueryInterface: ChromeUtils.generateQI([Components.interfaces.nsICommandLineHandler])
 };
 
 

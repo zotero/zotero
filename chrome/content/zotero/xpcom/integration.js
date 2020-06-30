@@ -3483,7 +3483,7 @@ Zotero.Integration.LegacyPluginWrapper.wrapDocument = function wrapDocument(doc)
 					deferred.reject(data);
 					deferred = null;
 				}
-			}, QueryInterface:XPCOMUtils.generateQI([Components.interfaces.nsIObserver, Components.interfaces.nsISupports])});
+			}, QueryInterface:ChromeUtils.generateQI([Components.interfaces.nsIObserver])});
 			return promise;
 		} else {
 			var result = doc.getFields.apply(doc, arguments);
